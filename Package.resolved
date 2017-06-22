@@ -1,0 +1,25 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "DateGenerator",
+        "repositoryURL": "/Users/daniel/Documents/Solar/DateGenerator",
+        "state": {
+          "branch": null,
+          "revision": "582398c27843f031a420b049e92014f770a2ccb6",
+          "version": "1.2.0"
+        }
+      },
+      {
+        "package": "SolarPosition",
+        "repositoryURL": "/Users/daniel/Documents/Solar/SolarPosition",
+        "state": {
+          "branch": null,
+          "revision": "173d52a73aab50fec10401cc3ec86ac9fe743fad",
+          "version": "1.2.0"
+        }
+      }
+    ]
+  },
+  "version": 1
+}
