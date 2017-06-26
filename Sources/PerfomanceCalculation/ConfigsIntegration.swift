@@ -19,6 +19,7 @@ extension JsonConfigFileHandler {
     configFileHandler.findFilesInDirectory(atPath: path)
     
     let decoder = JSONDecoder()
+    decoder.dateDecodingStrategy = .iso8601
     
     for pathExtensions in FileName.all {
       
@@ -90,6 +91,7 @@ extension JsonConfigFileHandler {
     let directoryURL = URL(fileURLWithPath: path, isDirectory: true)
     let encoder = JSONEncoder()
     encoder.outputFormatting = .prettyPrinted
+    encoder.dateEncodingStrategy = .iso8601
     
     for name in FileName.all {
       
