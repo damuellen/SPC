@@ -132,18 +132,14 @@ public struct FluidProperties: Codable {
     d += "c0:" >< "\(heatCapacity[0])"
     d += "c1:" >< "\(heatCapacity[1])"
     d += "Calculate with Enthalpy: \(withEnthalpy.description)"
-    d += "Enthalpy as function on Temperature"
-    d += "c0:" >< "\(h_T[0])"
-    d += "c1:" >< "\(h_T[1])"
-    d += "c2:" >< "\(h_T[2])"
-    d += "c3:" >< "\(h_T[3])"
-    d += "c4:" >< "\(h_T[4])"
-    d += "Temperature as function on Enthalpy"
-    d += "c0:" >< "\(T_h[0])"
-    d += "c1:" >< "\(T_h[1])"
-    d += "c2:" >< "\(T_h[2])"
-    d += "c3:" >< "\(T_h[3])"
-    d += "c4:" >< "\(T_h[4])"
+    if !h_T.isEmpty {
+      d += "Enthalpy as function on Temperature"
+      for (i, c) in h_T.enumerated() { d += "c\(i):" >< "\(c)" }
+    }
+    if !T_h.isEmpty {
+      d += "Temperature as function on Enthalpy"
+      for (i, c) in T_h.enumerated() { d += "c\(i):" >< "\(c)" }
+    }
     d += "Density as a Function of Temperature; roh(T) = c0+c1*T+c1*T^2"
     d += "c0:" >< "\(dens[0])"
     d += "c1:" >< "\(dens[1])"
