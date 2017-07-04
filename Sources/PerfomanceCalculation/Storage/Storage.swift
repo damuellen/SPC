@@ -18,7 +18,7 @@ public struct Storage: Model {
   
   final class Instance {
     // A singleton class holding the state of the storage
-    static let shared = Instance()
+    fileprivate static let shared = Instance()
     var parameter: Storage.Parameter!
     var workingConditions: (previous: PerformanceData?, current: PerformanceData)
     
@@ -445,7 +445,7 @@ public struct Storage: Model {
           heatFlow.dump = heatFlow.dump + heatFlow.production
             - heatFlow.demand + status.heatFlow
         }
-        SolarField.status.massFlow = PowerBlock.status.massFlow + status.massFlow
+        SolarField.status.htf.massFlow = PowerBlock.status.massFlow + status.massFlow
         // reduce HTF massflow in SF
         heatFlow.solar = SolarField.status.massFlow * htf.heatTransfered(
           SolarField.status.temperature.outlet, SolarField.status.temperature.inlet) / 1_000

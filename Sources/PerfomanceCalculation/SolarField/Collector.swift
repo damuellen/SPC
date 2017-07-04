@@ -27,7 +27,7 @@ public enum Collector: Model {
   
   final class Instance {
     // A singleton class holding the state of the collector
-    static let shared = Instance()
+    fileprivate static let shared = Instance()
     var parameter: Collector.Parameter!
     var workingConditions: (previous: PerformanceData?, current: PerformanceData)
     
@@ -168,10 +168,9 @@ public enum Collector: Model {
     return shadingSCA * shadingHCE * IAM * edge * k_torsion
   }
 
-  public static func tracking(_ sun: SolarPosition.OutputValues) {
-    var collector = status
-    defer { status = collector }
-    
+  public static func tracking(_ collector: inout Collector.PerformanceData,
+                              sun: SolarPosition.OutputValues) {
+
     let cosDeclination = cos(sun.declination.toRadians)
     let sinDeclination = sin(sun.declination.toRadians)
     

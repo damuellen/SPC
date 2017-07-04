@@ -18,7 +18,7 @@ public enum HeatExchanger: Model {
   
   final class Instance {
     // A singleton class holding the state of the heat exchanger
-    static let shared = Instance()
+    fileprivate static let shared = Instance()
     var parameter: HeatExchanger.Parameter!
     var workingConditions: (previous: PerformanceData?, current: PerformanceData)
     

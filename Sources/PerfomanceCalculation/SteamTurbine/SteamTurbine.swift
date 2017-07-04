@@ -33,7 +33,7 @@ public enum SteamTurbine: Model {
   
   final class Instance {
     // A singleton class holding the state of the steam turbine
-    static let shared = Instance()
+    fileprivate static let shared = Instance()
     var parameter: SteamTurbine.Parameter!
     var workingConditions: (previous: PerformanceData?, current: PerformanceData)
     

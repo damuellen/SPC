@@ -18,7 +18,7 @@ public enum Boiler: Model {
   
   final class Instance {
     // A singleton class holding the state of the boiler
-    static let shared = Instance()
+    fileprivate static let shared = Instance()
     var parameter: Boiler.Parameter!
     var workingConditions: (previous: PerformanceData?, current: PerformanceData)
     
@@ -93,13 +93,12 @@ public enum Boiler: Model {
       : 0.0
   }
   
-  public static func operate(heatFlow: Double,
+  public static func operate(_ boiler: inout Boiler.PerformanceData,
+                             heatFlow: Double,
                              Qsf_load: Double,
                              availableFuel: inout Double,
                              fuelFlow: inout Double) -> Double {
-    var boiler = status
-    defer { status = boiler }
-    
+
     if case .noOperation = boiler.operationMode { /* || heat >= 0 */
       if boiler.isMaintained {
         boiler.operationMode = .scheduledMaintenance

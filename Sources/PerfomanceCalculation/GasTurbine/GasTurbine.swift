@@ -18,7 +18,7 @@ public enum GasTurbine: Model {
   
   final class Instance {
     // A singleton class holding the state of the gas turbine
-    static let shared = Instance()
+    fileprivate static let shared = Instance()
     var parameter: GasTurbine.Parameter!
     var workingConditions: (previous: PerformanceData?, current: PerformanceData)
     

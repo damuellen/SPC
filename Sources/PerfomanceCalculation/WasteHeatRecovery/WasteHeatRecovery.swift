@@ -18,7 +18,7 @@ public enum WasteHeatRecovery: Model {
   
   final class Instance {
     // A singleton class holding the state of the waste heat recovery
-    static let shared = Instance()
+    fileprivate static let shared = Instance()
     var parameter: WasteHeatRecovery.Parameter!
     var workingConditions: (previous: PerformanceData?, current: PerformanceData)
     

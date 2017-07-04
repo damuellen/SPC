@@ -18,7 +18,7 @@ public enum Heater: Model {
   
   final class Instance {
     // A singleton class holding the state of the heater
-    static let shared = Instance()
+    fileprivate static let shared = Instance()
     var parameter: Heater.Parameter!
     var workingConditions: (previous: PerformanceData?, current: PerformanceData)
     
@@ -85,12 +85,11 @@ public enum Heater: Model {
     heater.massFlow = 0.0
   }
   
-  public static func operate(demand heat: Double,
+  public static func operate(_ heater: inout Heater.PerformanceData,
+                             demand heat: Double,
                              availableFuel: Double,
                              fuelFlow: inout Double) -> Double {
     // Freeze protection is always possible: massFlow fixed
-    var heater = status
-    defer { status = heater }
     if case .charge = heater.operationMode {
       // Fossil charge of storage
 
@@ -162,7 +161,7 @@ public enum Heater: Model {
       if heater.isMaintained {
         heater.operationMode = .maintenance
       }
-      heater.temperature.outlet = SolarField.status.temperature.outlet
+      heater.temperature.outlet = SolarField.status.htf.temperature.outlet
       return 0
     } else if heater.isMaintained {
       // operation is requested

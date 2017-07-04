@@ -19,7 +19,7 @@ public enum PowerBlock: Model {
   
   final class Instance {
     // A singleton class holding the state of the power block
-    static let shared = Instance()
+    fileprivate static let shared = Instance()
     var parameter: PowerBlock.Parameter!
     var indexLocation = 0
     var workingConditions: (previous: PerformanceData?, current: PerformanceData)
