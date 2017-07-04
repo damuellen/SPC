@@ -40,11 +40,16 @@ public struct TextConfigFile {
     return values[idx].trimmingCharacters(in: .whitespaces)
   }
   
-  public func double(row: Int)throws -> Double {
-    guard let line = self[row: row], line.count > 0 else {
+  public func extractString(from row: Int)throws -> String {
+    guard let string = self[row: row], string.count > 0 else {
       throw ReadError.missingValueInRow(row, path)
     }
-    if let value = Double(line) {
+    return string
+  }
+  
+  public func double(row: Int)throws -> Double {
+    let value = try extractString(from: row)
+    if let value = Double(value) {
       return value
     } else {
       throw ReadError.invalidValueInRow(row, path)
@@ -53,10 +58,8 @@ public struct TextConfigFile {
   
   public func doubles(rows: Int...)throws -> [Double] {
     return try rows.map { row -> Double in
-      guard let line = self[row: row], line.count > 0 else {
-        throw ReadError.missingValueInRow(row, path)
-      }
-      if let value = Double(line) {
+      let value = try extractString(from: row)
+      if let value = Double(value) {
         return value
       } else {
         throw ReadError.invalidValueInRow(row, path)
@@ -65,10 +68,8 @@ public struct TextConfigFile {
   }
   
   public func integer(row: Int)throws -> Int {
-    guard let line = self[row: row], line.count > 0 else {
-      throw ReadError.missingValueInRow(row, path)
-    }
-    if let value = Int(line) {
+    let value = try extractString(from: row)
+    if let value = Int(value) {
       return value
     } else {
       throw ReadError.invalidValueInRow(row, path)
