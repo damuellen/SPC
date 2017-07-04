@@ -152,7 +152,7 @@ extension SolarField.Parameter: TextConfigInitializable {
     self.elev = try row(28)
     self.pumpParasticsFullLoad = try row(34)
     self.antiFreezeParastics = try row(37)
-    self.pumpParastics = .init(try file.doubles(rows: 40, 43, 46, 82, 83, 84))
+    self.pumpParastics = .init(try file.doubles(rows: 40, 43, 46))
     self.massFlow = (try row(49), try row(52))
     self.antiFreezeFlow = try row(55)
     self.HTFmass = try row(58)
