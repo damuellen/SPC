@@ -22,4 +22,3 @@ struct TariffSeason {
   let v1PfD, v1PlD, v2PfD, v2PlD: Int
   let weekday, saturday, holyday: [Int]
 }
-

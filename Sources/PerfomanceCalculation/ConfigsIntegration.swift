@@ -26,7 +26,7 @@ extension JsonConfigFileHandler {
       guard let url = configFileHandler.searchConfig(with: pathExtensions),
         let data = JsonConfigFileHandler.readConfig(url: url)
         else {
-          print("Missing config file \(pathExtensions.rawValue)")
+          print("Config file \(pathExtensions.rawValue) not found.")
           continue
       }
       

@@ -65,5 +65,3 @@ extension Layout: TextConfigInitializable {
     }
   }
 }
-
-

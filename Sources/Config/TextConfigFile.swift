@@ -8,6 +8,10 @@
 //  distributed other than under the conditions noted above.
 //
 
+public protocol TextConfigInitializable {
+  init(file: TextConfigFile)throws
+}
+
 public struct TextConfigFile {
   
   public var values: [String]

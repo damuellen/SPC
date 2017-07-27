@@ -14,14 +14,21 @@ import PerfomanceCalculation
 
 print("Program started")
 
-let timeBegin = CFAbsoluteTimeGetCurrent()
+let start = CFAbsoluteTimeGetCurrent()
 
-let path = FileManager.default.currentDirectoryPath
+let path = CommandLine.arguments.count > 1
+  ? CommandLine.arguments[1]
+  : FileManager.default.currentDirectoryPath
+
+let meteoFilePath = CommandLine.arguments.count > 1
+  ? CommandLine.arguments[2]
+  : FileManager.default.currentDirectoryPath
 
 PerfomanceCalculator.loadConfigurations(atPath: path, format: .json)
-//PerfomanceCalculator.meteoFilePath = "/Blythe.mto"
+//PerfomanceCalculator.saveConfigurations(toPath: path)
+PerfomanceCalculator.meteoFilePath = meteoFilePath
 PerfomanceCalculator.run()
 
-let timeEnd = CFAbsoluteTimeGetCurrent()
+let end = CFAbsoluteTimeGetCurrent()
 
-print("Duration:", String(format:"%.2f sec", timeEnd - timeBegin))
+print("Duration:", String(format:"%.2f sec", end - start))

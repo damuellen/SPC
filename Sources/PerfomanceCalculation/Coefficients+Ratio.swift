@@ -21,6 +21,10 @@ public struct Coefficients: Codable {
     self.coefficients = array
   }
   
+  var indices: CountableRange<Int> {
+    return coefficients.indices
+  }
+  
   var isEmpty: Bool {
     return coefficients.isEmpty
   }

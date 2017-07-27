@@ -13,7 +13,7 @@ import Config
 
 /*
  The Heat Transfer Fluid is characterized through maximum operating temperature, freeze temperature,
- specif ic heat capacity, viscosity, thermal conductivity and density as a function of temperature.
+ specific heat capacity, viscosity, thermal conductivity and density as a function of temperature.
  */
 
 var htf = FluidProperties(

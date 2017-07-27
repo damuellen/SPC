@@ -72,3 +72,14 @@ public extension Date {
     return calendar.component(.minute, from: self)
   }
 }
+
+extension Progress {
+  func tracking(date: Date) {
+    let month = Int64(date.month)
+    if month > self.completedUnitCount {
+      self.completedUnitCount = month
+      print("Month", self.localizedAdditionalDescription,
+            "is currently being calculated.")
+    }
+  }
+}
