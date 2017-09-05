@@ -73,9 +73,8 @@ public enum PowerBlock: Component {
   }
   
   /// Calculates the parasitics of the gas turbine which only depends on the current load
-  private static func parasitics(at _: Ratio) -> Double { // Calc. parasitic power in PB: -
+  private static func parasitics(at _: Ratio, heat: Double) -> Double { // Calc. parasitic power in PB: -
     var electricalParasitics = 0.0
-    var heat = 0.0
     
     let parameter = PowerBlock.parameter
     if SteamTurbine.status.load.value >= 0.01 {
@@ -140,11 +139,8 @@ public enum PowerBlock: Component {
                              steamTurbine: inout SteamTurbine.PerformanceData,
                              Qsto: Double, meteo: MeteoData) -> Double {
     
-    var timeold = 0
     let minutes = 0 // date.minutes
-    var lastavgins = 0.0
-    var timeold_b = 0
-    
+    var lastavgins = 0.0   
     // Calculates the Electric gross, Parasitic
     
     let parameter = SteamTurbine.parameter
@@ -165,11 +161,11 @@ public enum PowerBlock: Component {
       simBegin = false
       // added and variable declared global, still to be checked!!
       
-      // if date.minutes != timeold {
+      // if currentDate.minutes! != timeold {
       turbineStandStillTime = turbineStandStillTime + hourFraction * 60 // 5 minutes steps usually
       // }
       
-      timeold = minutes
+      // timeold = minutes
       steamTurbine.load = 0.0
       return 0
     } else {
@@ -199,7 +195,7 @@ public enum PowerBlock: Component {
         if Heater.status.massFlow > 0 {
           qneu = heat
         }
-        // if dateminutes != timeold_b { // added to sum startup time only when time changes,
+        // if time.minute != timeold_b { // added to sum startup time only when time changes,
         // effect: reduction of approx. 3% net output! turbineStartUpTime
         // must be reduced to about the half for projects older than this version
         turbineStartUpTime = turbineStartUpTime + hourFraction * 60
@@ -208,11 +204,11 @@ public enum PowerBlock: Component {
         // 1% net output! turbineStartUpEnergy must be reduced to about the
         // half for projects older than this version to obtain similar results
         // }
-        timeold_b = minutes
+        // timeold_b = minutes
         // turbineStartUpTime = turbineStartUpTime + hourFraction * 60
         // commented and replaced as shown above
         // turbineStartUpEnergy = turbineStartUpEnergy + qneu * hourFraction
-        // qneu stat heat,commented and placed above after comparing date.minutes to avoid summing up inside an iteration
+        // qneu stat heat,commented and placed above after comparing time.minutes! to avoid summing up inside an iteration
       }
       return heat 
     }

@@ -31,7 +31,7 @@ public struct Layout: Codable {
   var boiler = 0.0
   var gasTurbine = 0.0
   var powerBlock = 100.0
-  var storage = 0.0
+  var storage = 200.0
   var storage_cap = 0.0
   var storage_ton = 0.0
 }

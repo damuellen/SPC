@@ -29,37 +29,36 @@ public struct Availability: Codable {
       storage: Ratio
   }
   
+  var values: Values {
+    return data[0]
+  }
+  
   static func withDefaults() -> Availability {
     return Availability(data:
       Array(repeatElement(Availability.defaults, count: 13))
     )
   }
   
-  subscript(month: Int) -> Values {
-    return data[month]
+  subscript(dateTime: DateTime) -> Values {
+    return data[dateTime.month]
   }
-}
-
-public struct TimeStep {
-  var date: Date
-  var length: Double
 }
 
 extension Availability {
   public init(file: TextConfigFile)throws {
-    let row: (Int)throws -> Double = { try file.double(row: $0) }
+    let row: (Int)throws -> Double = { try file.parseDouble(row: $0) }
     var data = [Values]()
     for n in 0 ..< 12 {
       let offset = 3 * n
-      data.append(Values(
-        solarField: Ratio(percent: try row(38 + offset)),
-        breakHCE: Ratio(percent: try row(78 + offset)),
-        airHCE: Ratio(percent: try row(118 + offset)),
-        fluorHCE: Ratio(percent: try row(158 + offset)),
-        reflMirror: Ratio(percent: try row(198 + offset)),
-        missingMirros: Ratio(percent: try row(238 + offset)),
-        powerBlock: Ratio(percent: try row(278 + offset)),
-        storage: Ratio(percent: try row(318 + offset)))
+      try data.append(Values(
+        solarField: Ratio(percent: row(38 + offset)),
+        breakHCE: Ratio(percent: row(78 + offset)),
+        airHCE: Ratio(percent: row(118 + offset)),
+        fluorHCE: Ratio(percent: row(158 + offset)),
+        reflMirror: Ratio(percent: row(198 + offset)),
+        missingMirros: Ratio(percent: row(238 + offset)),
+        powerBlock: Ratio(percent: row(278 + offset)),
+        storage: Ratio(percent: row(318 + offset)))
       )
     }
     self.data = data

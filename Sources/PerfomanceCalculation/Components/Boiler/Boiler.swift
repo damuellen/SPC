@@ -134,7 +134,7 @@ public enum Boiler: Component {
     var heatAvailable: Double
     
     if Boiler.parameter.booster {
-      heatAvailable = min(-heatFlow, Design.layout.boiler) // * Plant.availability[date.month].boiler
+      heatAvailable = min(-heatFlow, Design.layout.boiler) // * Plant.availability[dateTime].boiler
     } else {
       // ≈
       heatAvailable = min(Qsf_load * Design.layout.boiler, Design.layout.boiler)
@@ -170,13 +170,13 @@ public enum Boiler: Component {
     }
     
     if Fuelmode == "predefined" {
-      // FIXME	if date.minutes = 55 {
+      // FIXME	if time.minutes! = 55 {
       // FIXME		var availableFuelold = availableFuel
       // FIXME	}
     }
     
     if availableFuel < totalFuelNeed { // Check if sufficient fuel avail.
-      getLoad(availableFuel: &availableFuel, fuelFlow: &fuelFlow, boiler: &boiler)
+      getLoad(boiler: &boiler, availableFuel: &availableFuel, fuelFlow: &fuelFlow)
       if boiler.load.value < parameter.minLoad {
         ////report = "BO operation requested but insufficient fuel.\n"
         noOperation(&fuelFlow, availableFuel, &boiler)
@@ -196,9 +196,9 @@ public enum Boiler: Component {
     }
   }
   
-  private static func getLoad(availableFuel: inout Double,
-                              fuelFlow: inout Double,
-                              boiler: inout PerformanceData) {
+  private static func getLoad(boiler: inout PerformanceData,
+                              availableFuel: inout Double,
+                              fuelFlow: inout Double) {
     switch (boiler.operationMode, boiler.isMaintained) {
     case (.noOperation(let hours), false):
       boiler.operationMode = .noOperation(hours: hours + hourFraction)

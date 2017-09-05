@@ -51,7 +51,7 @@ public struct TextConfigFile {
     return string
   }
   
-  public func double(row: Int)throws -> Double {
+  public func parseDouble(row: Int)throws -> Double {
     let value = try extractString(from: row)
     if let value = Double(value) {
       return value
@@ -59,19 +59,8 @@ public struct TextConfigFile {
       throw ReadError.invalidValueInRow(row, path)
     }
   }
-  
-  public func doubles(rows: Int...)throws -> [Double] {
-    return try rows.map { row -> Double in
-      let value = try extractString(from: row)
-      if let value = Double(value) {
-        return value
-      } else {
-        throw ReadError.invalidValueInRow(row, path)
-      }
-    }
-  }
-  
-  public func integer(row: Int)throws -> Int {
+   
+  public func parseInteger(row: Int)throws -> Int {
     let value = try extractString(from: row)
     if let value = Int(value) {
       return value

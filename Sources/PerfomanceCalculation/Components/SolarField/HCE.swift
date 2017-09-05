@@ -42,7 +42,7 @@ enum HCE {
   
   public static func calculation(_ hce: inout SolarField.HTFstatus,
                                  mode: Collector.PerformanceData.OperationMode,
-                                 date: Date, meteo: MeteoData) {
+                                 meteo: MeteoData) {
     
     let ICosTheta = Double(meteo.dni) * cos(Collector.theta)
     
@@ -57,7 +57,7 @@ enum HCE {
       if meteo.windSpeed > SolarField.parameter.maxWind {
         SolarField.status.inFocus = 0.0
       }
-      mode1(&hce, mode: mode, date: date, meteo: meteo)
+      mode1(&hce, mode: mode, meteo: meteo)
 
     case .variable, .freezeProtection:
 
@@ -65,11 +65,11 @@ enum HCE {
         || ICosTheta * Collector.efficiency(meteo: meteo, direction: 0) < Simulation.parameter.minInsolation {
         freezeProtectionCheck(solarField: &SolarField.status) // on first call
       } else {
-        mode1(&hce, mode: mode, date: date, meteo: meteo)
+        mode1(&hce, mode: mode, meteo: meteo)
       }
 
     case .fixed:
-      mode2(&hce, mode: mode, date: date, meteo: meteo)
+      mode2(&hce, mode: mode, meteo: meteo)
     }
   }
 
@@ -92,13 +92,12 @@ enum HCE {
   // Radiation losses per m2 Aperture; now with the new losses that take into
   // account the percentage of HCE that are broken, lost vacuum and fluorescent
   public static func radiationLosses(_ temperature: (Double, Double),
-                                     date: Date,
                                      meteo: MeteoData) -> Double {
     let collector = Collector.parameter
-    let month = date.month
-    let BreakHCE = Plant.availability[month].breakHCE.value // Percent /100 in LoadAvlMaintnc
-    let AirHCE = Plant.availability[month].airHCE.value // Percent /100 in LoadAvlMaintnc
-    let FluorHCE = Plant.availability[month].fluorHCE.value // Percent /100 in LoadAvlMaintnc
+    let dateTime = PerformanceCalculator.dateTime!
+    let BreakHCE = Plant.availability[dateTime].breakHCE.value // Percent /100 in LoadAvlMaintnc
+    let AirHCE = Plant.availability[dateTime].airHCE.value // Percent /100 in LoadAvlMaintnc
+    let FluorHCE = Plant.availability[dateTime].fluorHCE.value // Percent /100 in LoadAvlMaintnc
     
     let deltaTemperature: Double
     if !collector.newFunction {
@@ -115,13 +114,13 @@ enum HCE {
     let sigma = 0.00000005667
 
     if !collector.newFunction {
-      if collector.name.contains("LS2") {
+      if collector.name.hasPrefix("LS2") {
         vacuumHeatLoss = 0.081 - 0.04752 * deltaTemperature + 0.0006787
           * deltaTemperature ** 2 + 0.0007403 * insulation
         vacuumHeatLoss += 0.00003582 * deltaTemperature * insulation
           + 0.00000014125 * deltaTemperature ** 2 * insulation
         endLossFactor = 1.3 // added in order to differenciate with LS2 collector
-      } else if collector.name.contains("SKAL-ET") {
+      } else if collector.name.hasPrefix("SKAL-ET") {
         // temperature.0+10 considers that average loop temperature is higher than (T_in + T_out)/2
         vacuumHeatLoss = sigma * 2 * .pi * collector.rabsOut
           * (temperature.0 ** 4 - temperature.1 ** 4)
@@ -131,7 +130,7 @@ enum HCE {
           * (temperature.0 - temperature.1) / collector.aperture
         vacuumHeatLoss = vacuumHeatLoss + al // added here and not for LS2 collector
         endLossFactor = 1 // added in order to differenciate with LS2 collector
-      } else if collector.name.contains("PCT_validation") { // test
+      } else if collector.name.hasPrefix("PCT_validation") { // test
         vacuumHeatLoss = sigma * 2 * .pi * collector.rabsOut
           * (temperature.0 ** 4 - temperature.1 ** 4)
         vacuumHeatLoss *= (collector.emissionHCE[0] + collector.emissionHCE[1]
@@ -210,7 +209,6 @@ enum HCE {
 
     let AddHLBare = 0.416 * deltaTemperature - 0.000056
       * deltaTemperature ** 2 + 0.0666 * deltaTemperature // * windSpeed
-
     return (vacuumHeatLoss + AddHLAir * (AirHCE + FluorHCE)
       + AddHLBare * BreakHCE) * endLossFactor
     // * 1.3
@@ -221,7 +219,7 @@ enum HCE {
   public static func mode1(
     _ hce: inout SolarField.HTFstatus,
     mode: Collector.PerformanceData.OperationMode,
-    date: Date, meteo: MeteoData) {
+    meteo: MeteoData) {
     
     var solarField = SolarField.status
     defer { SolarField.status = solarField }
@@ -231,21 +229,21 @@ enum HCE {
     // Delta heat in HCE[W/m2]
     let heatin = Collector.theta
       * Collector.efficiency(meteo: meteo, direction: 0)
-      * Plant.availability[date.month].solarField.value
+      * Plant.availability[PerformanceCalculator.dateTime].solarField.value
     // Delta heat in HCE[W/m2] // added to calculate Q_dump
     let heatin_now = cos(Collector.theta)
       * Collector.efficiency(meteo: meteo, direction: 0)
-      * Plant.availability[date.month].solarField.value
+      * Plant.availability[PerformanceCalculator.dateTime].solarField.value
 
     if Collector.parameter.IntradiationLosses {
       solarField.heatLossHCE = HCE.radiationLosses(
         (averageTemperture + 10, Double(meteo.temperature) + 30),
-        date: date, meteo: meteo)
+        meteo: meteo)
         * Simulation.parameter.adjustmentFactor.heatLossHCE
     } else { // 120126: new formula added
       solarField.heatLossHCE = HCE.radiationLosses(
         (htf.maxTemperature + 10, hce.temperature.inlet + 10),
-        date: date, meteo: meteo)
+        meteo: meteo)
         * Simulation.parameter.adjustmentFactor.heatLossHCE
     }
 
@@ -310,11 +308,11 @@ enum HCE {
       } else if case .normal = Heater.status.operationMode {
         solarField.inFocus = 1.0
         hce.massFlow = SolarField.parameter.massFlow.max * 0.05
-        mode2(&hce, mode: mode, date: date, meteo: meteo)
+        mode2(&hce, mode: mode, meteo: meteo)
       } else {
         solarField.inFocus = 1.0
         hce.massFlow = SolarField.parameter.massFlow.min
-        mode2(&hce, mode: mode, date: date, meteo: meteo)
+        mode2(&hce, mode: mode, meteo: meteo)
       }
     // defocus SCAs to prevent overheating
     case let massFlow where massFlow > SolarField.parameter.massFlow.max:
@@ -368,7 +366,7 @@ enum HCE {
   public static func mode2(
     _ hce: inout SolarField.HTFstatus,
     mode: Collector.PerformanceData.OperationMode,
-    date: Date, meteo: MeteoData) {
+    meteo: MeteoData) {
     
     var solarField = SolarField.status
     defer { SolarField.status = solarField }
@@ -383,7 +381,7 @@ enum HCE {
     var temperatureNow = hce.temperature.inlet
     var temperatureLast = hce.temperature.outlet
     
-    outerIteration: for outer in 1 ... 3 {
+    outerIteration: for _ in 1 ... 3 {
       
       temperatureNow = hce.temperature.inlet
       var inFocusLoop = 0.0
@@ -396,7 +394,7 @@ enum HCE {
         // Calculate time HTF needs to pass through HCE loop
         if hce.massFlow == 0 {
 
-          if Collector.parameter.name.contains("PCT_validation") {
+          if Collector.parameter.name.hasPrefix("PCT_validation") {
             timePast = period // meteo.period * Zoom // as it was on validated version 2.2
           } else {
             timePast = period // was wrong before imet.period * Zoom / [sec] HTF is in HCE for Actime minutes
@@ -433,7 +431,7 @@ enum HCE {
         }
 
         let heatin = ICosTheta * Collector.efficiency(meteo: meteo, direction: 0)
-          * inFocusLoop * Plant.availability[date.month].solarField.value
+          * inFocusLoop * Plant.availability[PerformanceCalculator.dateTime].solarField.value
         // Net dheat (+)=in or (-)=out HCE
 
         if heatin > 0 {
@@ -441,10 +439,10 @@ enum HCE {
           solarField.heatLossHCE = Collector.parameter.IntradiationLosses
             ? HCE.radiationLosses(
               (temperatureNow + 10, hce.temperature.inlet + 10),
-              date: date, meteo: meteo)
+              meteo: meteo)
             : HCE.radiationLosses(
               (averageTemperture + 10, Double(meteo.temperature) + 30),
-              date: date, meteo: meteo)
+              meteo: meteo)
           
           solarField.heatLossHCE *= Simulation.parameter.adjustmentFactor.heatLossHCE
           
@@ -499,11 +497,11 @@ enum HCE {
           solarField.heatLossHCE = Collector.parameter.IntradiationLosses
             ? HCE.radiationLosses(
               (averageTemperture, Double(meteo.temperature) + 20),
-              date: date, meteo: meteo)
+              meteo: meteo)
               * Simulation.parameter.adjustmentFactor.heatLossHCE
             : HCE.radiationLosses(
               (temperatureNow + 10, hce.temperature.inlet + 10),
-              date: date, meteo: meteo)
+              meteo: meteo)
           solarField.heatLossHCE *= Simulation.parameter.adjustmentFactor.heatLossHCE
           
           solarField.HL = solarField.heatLossHCE
@@ -519,10 +517,10 @@ enum HCE {
           solarField.loopEta -= Collector.parameter.IntradiationLosses
             ? HCE.radiationLosses(
               (averageTemperture + 10.0, Double(meteo.temperature) + 30),
-              date: date, meteo: meteo)
+              meteo: meteo)
             : HCE.radiationLosses(
               (temperatureNow + 10.0, hce.temperature.inlet + 10),
-              date: date, meteo: meteo)
+              meteo: meteo)
           solarField.loopEta *= Simulation.parameter.adjustmentFactor.heatLossHCE / ICosTheta
           solarField.ETA = Collector.efficiency(meteo: meteo, direction: 0)
             - solarField.HL / ICosTheta
@@ -549,10 +547,10 @@ enum HCE {
         case 0:
           temperatureNow = temperatureLast
         default:
-          let Qperkg = htf.heatTransfered(hce.temperature.inlet,
-                                          Double(meteo.temperature))
-          temperatureNow = htf.temperature(Qperkg + dQperkg,
-                                           Double(meteo.temperature))
+          let Qperkg = htf.heatTransfered(
+            hce.temperature.inlet, Double(meteo.temperature))
+          temperatureNow = htf.temperature(
+            Qperkg + dQperkg, Double(meteo.temperature))
         }
 
         // Flow is to low, dumping required

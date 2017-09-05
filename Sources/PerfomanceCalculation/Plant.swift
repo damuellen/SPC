@@ -12,8 +12,6 @@ import Foundation
 import Meteo
 import Config
 
-let hourFraction = PerfomanceCalculator.interval.fraction
-
 enum Plant {
 
   static var location: Location!
@@ -33,7 +31,7 @@ enum Plant {
                       heater: inout Heater.PerformanceData,
                       heatExchanger: inout HeatExchanger.PerformanceData,
                       storage: inout Storage.PerformanceData,
-                      date: Date, meteo: MeteoData) {
+                      meteo: MeteoData) {
     
     ambientTemperature = Double(meteo.temperature)
 
@@ -104,12 +102,13 @@ enum Plant {
         steamTurbine.load = 0.0
         electricEnergy.demand = 0
         heatFlow.demand = 0
-      } else if steamTurbine.load.value > Plant.availability[date.month].powerBlock.value { // - TB Load > Availability -
-        steamTurbine.load = Plant.availability[date.month].powerBlock
+      } else if steamTurbine.load > Plant.availability[PerformanceCalculator.dateTime].powerBlock { // - TB Load > Availability -
+        steamTurbine.load = Plant.availability[PerformanceCalculator.dateTime].powerBlock
         heatFlow.demand = min(
           HeatExchanger.parameter.SCCHTFheat,
           SteamTurbine.parameter.power.max
-            * Plant.availability[date.month].powerBlock.value / SteamTurbine.efficiency)
+            * Plant.availability[PerformanceCalculator.dateTime].powerBlock.value
+            / SteamTurbine.efficiency)
         // comparison with HX cap. written to restrict HX capacity
       }
       
@@ -264,14 +263,12 @@ enum Plant {
                         solarField: &solarField,
                         availableFuel: &availableFuel,
                         fuel: &fuel,
-                        heatFlow: &heatFlow,
-                        date: date)
+                        heatFlow: &heatFlow)
         
         
         var supplyGasTurbine = 0.0
         if Design.hasGasTurbine {
           supplyGasTurbine = GasTurbine.operate(
-            at: date,
             availableFuel: &availableFuel,
             fuel: &fuel,
             electricEnergy: &electricEnergy,
@@ -319,7 +316,7 @@ enum Plant {
                 storage.heatrel > Storage.parameter.dischargeToHeater {
                 // Direct Discharging to SteamTurbine and heatdiff > 0 (Energy Surplus) see above
                 if availableFuel > 0 { // Fuel available, Storage for Pre-Heating
-                  Storage.operate(&storage, mode: .ph, date: date, heatFlow: &heatFlow)
+                  Storage.operate(&storage, mode: .ph, heatFlow: &heatFlow)
                   //Storage.operate(mode: .ph, heatdiff, powerBlock.massFlow, hourFraction, heatFlow.storage)
                   heater.temperature.inlet = storage.temperature.outlet
                   heater.operationMode = .unknown
@@ -333,7 +330,7 @@ enum Plant {
                     outlet: solarField, with: heater)
                   powerBlock.massFlow = solarField.header.massFlow + heater.massFlow
                 } else { // NO Fuel Available -> Discharge directly with reduced TB load!
-                  Storage.operate(&storage,mode: .discharge, date: date, heatFlow: &heatFlow)
+                  Storage.operate(&storage,mode: .discharge, heatFlow: &heatFlow)
                   //Storage.operate(mode: .discharge, heatdiff, powerBlock.massFlow, hourFraction, heatFlow.storage)
                   powerBlock.temperature.inlet = htf.mixing(
                     outlet: solarField, with: storage)

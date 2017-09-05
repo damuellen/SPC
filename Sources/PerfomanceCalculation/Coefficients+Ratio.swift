@@ -83,6 +83,18 @@ extension Ratio: ExpressibleByFloatLiteral {
   }
 }
 
+extension Ratio: Equatable {
+  public static func ==(lhs: Ratio, rhs: Ratio) -> Bool {
+    return lhs.value == rhs.value
+  }
+}
+
+extension Ratio: Comparable {
+  public static func <(lhs: Ratio, rhs: Ratio) -> Bool {
+    return lhs.value < rhs.value
+  }
+}
+
 public struct Demand {
   
 }

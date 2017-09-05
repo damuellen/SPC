@@ -119,12 +119,12 @@ public struct Storage: Component {
   }
   
   /// Calculates the parasitics of the gas turbine which only depends on the current load
-  private static func parasitics(at status: inout PerformanceData, date: Date, hourFraction: Double) -> Double {
+  private static func parasitics(at status: inout PerformanceData) -> Double {
     
     var parasitics = 0.0
     var timeminutessum = 0
     var timeminutesold = 0
-    
+    let time = PerformanceCalculator.dateTime!
     
     var DesAuxIN = 0.0
     var DesAuxEX = 0.0
@@ -152,11 +152,11 @@ public struct Storage: Component {
         parasitics = parasitics * parameter.DischrgParFac // added as user input, by no input stoc.DischrgParFac = 2
         timeminutessum = 0
       } else if case .no = status.operationMode {
-        if date.minutes != timeminutesold { // formula changed
-          if date.minutes == 0 { // new hour
-            timeminutessum += 60 + date.minutes - timeminutesold // timeminutessum + 5
+        if time.minute != timeminutesold { // formula changed
+          if time.minute == 0 { // new hour
+            timeminutessum += 60 + time.minute - timeminutesold // timeminutessum + 5
           } else {
-            timeminutessum += date.minutes - timeminutesold
+            timeminutessum += time.minute - timeminutesold
           }
         }
         for (time, power) in zip(parameter.heatTracingTime, parameter.heatTracingPower) {
@@ -168,7 +168,7 @@ public struct Storage: Component {
         // parasitics = parasitics // Indien 1.5
         timeminutessum = 0
       }
-      timeminutesold = date.minutes
+      timeminutesold = time.minute
     } else { // new model
       // all this shall be done only one time
       // definedBy internal parameters
@@ -235,11 +235,11 @@ public struct Storage: Component {
       } else if case .noOperation = status.operationMode {
         parasitics = 0
         let timeminutessum = 0.0
-        if date.minutes != timeminutesold {
-          if date.minutes == 0 { // new hour
-            // FIXME timeminutessum = timeminutessum + 60 + date.minutes - timeminutesold // timeminutessum + 5
+        if time.minute != timeminutesold {
+          if time.minute == 0 { // new hour
+            // FIXME timeminutessum = timeminutessum + 60 + time.minutes! - timeminutesold // timeminutessum + 5
           } else {
-            // FIXME  timeminutessum = timeminutessum + date.minutes - timeminutesold
+            // FIXME  timeminutessum = timeminutessum + time.minutes! - timeminutesold
           }
         }
         // new heat tracing defined by user:
@@ -249,7 +249,7 @@ public struct Storage: Component {
           }
         }
       }
-      timeminutesold = date.minutes
+      timeminutesold = time.minute
     }
     
     return parasitics
@@ -350,7 +350,7 @@ public struct Storage: Component {
   // PowerBlock.status.massFlow = is !!!!!!!!!!!REDUCED!!!!!!!!!!!! while charging
   public static func operate(_ storage: inout Storage.PerformanceData,
                              mode _: PerformanceData.OperationMode,
-                             date: Date, heatFlow: inout HeatFlow) {
+                             heatFlow: inout HeatFlow) {
     
     var SSetTime = 0
     var i = 0.0
@@ -365,10 +365,10 @@ public struct Storage: Component {
     var QoutLoad = 0.0
     var jT = 0.0
     var kT = 0.0
-    
+    let time = PerformanceCalculator.dateTime!
     /*
      //calculate sunrise time for status day
-     if date.hour = 16 && date.minutes = 0 && parameter.isVariable {
+     if date.hour = 16 && currentDate.minutes! = 0 && parameter.isVariable {
      // restricted in order to calculate times only once per day
      EvalDay = date.Day + 1
      SEval = "SR"
@@ -402,7 +402,7 @@ public struct Storage: Component {
       // the PowerBlock.status.massFlow is only an ideal value, for maximal dT, isnt it wrong?
       status.massFlow = SolarField.status.massFlow - PowerBlock.status.massFlow
       status.massFlow *= parameter.heatExchangerEfficiency
-      // * Plant.availability[date.month].storage taken out of the formula and included in TES capacity calculation
+      // * Plant.availability[dateTime].storage taken out of the formula and included in TES capacity calculation
       
       if parameter.tempInCst[1] > 0 { // usually = 0
         if status.heatrel < 0.5 {
@@ -494,7 +494,7 @@ public struct Storage: Component {
       
     case .ex: // heat can be released
       // calculate discharge rate only once per day, directly after sunset
-      if date.hour >= SSetTime && date.hour < (SSetTime + 1) && parameter.isVariable {
+      if time.hour >= SSetTime && time.hour < (SSetTime + 1) && parameter.isVariable {
         switch parameter.definedBy {
         case .hours:
           status.heatStored = status.heatrel * Design.layout.storage
@@ -758,7 +758,7 @@ public struct Storage: Component {
     status.temperature.outlet = StoFit // independent from massFlow !!!
   }
   
-  static func prepareStorage(date: Date, hourFraction: Double) {
+  static func prepareStorage() {
     if Design.hasStorage { // keep track of the filling of the storage
       
       let ColdTankQverl = parameter.heatLoss.cold
@@ -776,20 +776,20 @@ public struct Storage: Component {
       
       switch parameter.definedBy {
       case .hours:
-        // Plant.availability[date.month].storage added here to apply TES availability on capacity and not on charge load
+        // Plant.availability[currentDate.month].storage added here to apply TES availability on capacity and not on charge load
         status.massSalt = Design.layout.storage
-          * Plant.availability[date.month].storage.value
+          * Plant.availability[PerformanceCalculator.dateTime].storage.value
           * (1 + parameter.dischargeToTurbine)
         status.massSalt *= HeatExchanger.parameter.SCCHTFheat * 1_000 * 3_600
           / (status.hSalt.hot - status.hSalt.cold)
       case .cap:
         status.massSalt = Design.layout.storage_cap
-          * Plant.availability[date.month].storage.value
+          * Plant.availability[PerformanceCalculator.dateTime].storage.value
           * (1 + parameter.dischargeToTurbine)
         status.massSalt *= 1_000 * 3_600 / (status.hSalt.hot - status.hSalt.cold)
       case .ton:
         status.massSalt = Design.layout.storage_ton
-          * Plant.availability[date.month].storage.value
+          * Plant.availability[PerformanceCalculator.dateTime].storage.value
         status.massSalt *= 1_000 * (1 + parameter.dischargeToTurbine)
       }
       
@@ -1023,11 +1023,10 @@ public struct Storage: Component {
                       solarField: inout SolarField.PerformanceData,
                       availableFuel: inout Double,
                       fuel: inout FuelConsumption,
-                      heatFlow: inout HeatFlow,
-                      date: Date) {
+                      heatFlow: inout HeatFlow) {
     
     var heatdiff = 0.0
-    
+    let time = PerformanceCalculator.dateTime!
     if Design.hasGasTurbine {
       powerBlock.massFlow = HeatExchanger.parameter.SCCHTFheat /
         (htf.heatTransfered(
@@ -1051,18 +1050,18 @@ public struct Storage: Component {
         heatdiff = heatFlow.production - heatFlow.demand // [MW]
         if Storage.parameter.heatExchangerRestrictedMin {
           // added to avoid input to storage lower than minimal HX// s capacity
-          heatFlow.toSTOmin = Storage.parameter.heatExchangerMinCapacity
+          heatFlow.toStorageMin = Storage.parameter.heatExchangerMinCapacity
             * HeatExchanger.parameter.SCCHTFheat
             * (1 - Storage.parameter.massFlow / SolarField.parameter.massFlow.max)
             / (Storage.parameter.massFlow / SolarField.parameter.massFlow.max)
           
-          if heatdiff > 0 && heatdiff < heatFlow.toSTOmin {
-            heatFlow.demand = heatFlow.demand - (heatFlow.toSTOmin - heatdiff)
+          if heatdiff > 0 && heatdiff < heatFlow.toStorageMin {
+            heatFlow.demand = heatFlow.demand - (heatFlow.toStorageMin - heatdiff)
             powerBlock.massFlow = heatFlow.demand
               / htf.temperature(
                 HeatExchanger.parameter.temperature.htf.inlet.max,
                 HeatExchanger.parameter.temperature.htf.outlet.max) / 1_000
-            heatdiff = heatFlow.toSTOmin
+            heatdiff = heatFlow.toStorageMin
           }
         }
       }
@@ -1081,26 +1080,25 @@ public struct Storage: Component {
           // changed back as heatFlow.production - HeatExchanger.parameter.SCCHTFheat// heatFlow.demand     // [MW]
           if Storage.parameter.heatExchangerRestrictedMin {
             // added to avoid input to storage lower than minimal HX// s capacity
-            heatFlow.toSTOmin = HeatExchanger.parameter.SCCHTFheat
+            heatFlow.toStorageMin = HeatExchanger.parameter.SCCHTFheat
               * (1 - Storage.parameter.massFlow / SolarField.parameter.massFlow.max)
               / (Storage.parameter.massFlow / SolarField.parameter.massFlow.max)
             
-            if heatdiff > 0 && heatdiff < heatFlow.toSTOmin {
+            if heatdiff > 0 && heatdiff < heatFlow.toStorageMin {
               powerBlock.massFlow = (HeatExchanger.parameter.SCCHTFheat
-                - (heatFlow.toSTOmin - heatdiff))
+                - (heatFlow.toStorageMin - heatdiff))
                 / (htf.heatTransfered(
                   HeatExchanger.parameter.temperature.htf.inlet.max,
                   HeatExchanger.parameter.temperature.htf.outlet.max) / 1_000)
-              heatdiff = heatFlow.toSTOmin
+              heatdiff = heatFlow.toStorageMin
             }
           }
         }
       }
-      
-      
+
       if case .shifter = Storage.parameter.strategy { // Storage.parameter.strategy = "Ful" // Booster or Shifter
         // new calculation of shifter, old kept and commented below this:
-        if date.month < Storage.parameter.startexcep || date.month > Storage.parameter.endexcep {
+        if time.month < Storage.parameter.startexcep || time.month > Storage.parameter.endexcep {
           storage.heatProductionLoad = Storage.parameter.heatProductionLoadWinter
           if DNIdaysum > Storage.parameter.badDNIwinter * 1_000 {
             // sunny day, TES can be fully charged also by running TB at full load
@@ -1118,7 +1116,7 @@ public struct Storage: Component {
           
           if heatFlow.production < heatFlow.demand,
             storage.heatrel < Storage.parameter.chargeTo,
-            date.hour < 17 {
+            time.hour < 17 {
             // Qsol not enough for POB demand load (e.g. at the beginning of the day)
             powerBlock.massFlow = min(
               storage.heatProductionLoad * heatFlow.demand,
@@ -1203,7 +1201,7 @@ public struct Storage: Component {
             }
             if i == -1 {
               heatFlow.demand = SteamTurbine.parameter.power.max
-                * Plant.availability[date.month].powerBlock.value / SteamTurbine.efficiency // limit HX capacity?
+                * Plant.availability[time].powerBlock.value / SteamTurbine.efficiency // limit HX capacity?
               var heatdiff = heatFlow.production - heatFlow.demand // [MW]
               // power to charge TES rest after operation POB at full load commented
               //  heatdiff = max(heatFlow.production, heatFlow.demand) // maximal power to TES desing POB thermal input (just to check how it works)
@@ -1229,15 +1227,13 @@ public struct Storage: Component {
       // Energy surplus
       if storage.heatrel < Storage.parameter.chargeTo,
         solarField.header.massFlow >= powerBlock.massFlow {
-        Storage.operate(&storage, mode: .charging,
-                        date: date,
-                        heatFlow: &heatFlow)
-        Storage.operate(&storage, mode: .charging, date: date, heatFlow: &heatFlow)
+
+        Storage.operate(&storage, mode: .charging, heatFlow: &heatFlow)
         //Storage.operate(mode: .charging, Storage.parameter.heatExchanger * heatdiff, powerBlock.massFlow, hourFraction, heatFlow.storage, electricalParasitics.storage, storage.mass.hot, storage.temperatureTank.cold, storage.mass.cold, XZ)
         powerBlock.temperature.inlet = solarField.header.temperature.outlet
         // FIXME powerBlock.massFlow = powerBlock.massFlow
       } else { // heat cannot be stored
-        Storage.operate(&storage, mode: .noOperation, date: date, heatFlow: &heatFlow)
+        Storage.operate(&storage, mode: .noOperation, heatFlow: &heatFlow)
         //Storage.operate(mode: .noOperation, heatdiff, powerBlock.massFlow, heatFlow.storage, electricalParasitics.storage, storage.mass.hot, storage.temperatureTank.cold, storage.mass.cold, XZ)
         powerBlock.temperature.inlet = solarField.header.temperature.outlet
       }
@@ -1246,10 +1242,10 @@ public struct Storage: Component {
       var peakTariff: Bool
       // check when to discharge TES
       if case .shifter = Storage.parameter.strategy { // only for Shifter
-        if date.month < Storage.parameter.startexcep || date.month > Storage.parameter.endexcep { // Oct to March
-          peakTariff = date.hour >= Storage.parameter.dischrgWinter
+        if time.month < Storage.parameter.startexcep || time.month > Storage.parameter.endexcep { // Oct to March
+          peakTariff = time.hour >= Storage.parameter.dischrgWinter
         } else { // April to Sept
-          peakTariff = date.hour >= Storage.parameter.dischrgSummer
+          peakTariff = time.hour >= Storage.parameter.dischrgSummer
         }
       } else { // not shifter
         peakTariff = true // dont care about time to discharge
@@ -1265,7 +1261,7 @@ public struct Storage: Component {
         // if storage.heatrel > Storage.parameter.dischargeToTurbine && storage.operationMode != .freezeProtection && heatdiff < -1 * Storage.parameter.heatdiff * heatFlow.demand { // Discharge directly!! // 04.07.0 -0.25&& heatdiff < -0.25 * heatFlow.dem
         if powerBlock.massFlow < solarField.header.massFlow { // there are cases, during cloudy days when OpMode is "EX" although massflow in SOF is higher that in PB.
         }
-        Storage.operate(&storage, mode: .ex, date: date, heatFlow: &heatFlow)
+        Storage.operate(&storage, mode: .ex, heatFlow: &heatFlow)
         //Storage.operate(mode: .ex, heatdiff, powerBlock.massFlow, heatFlow.storage, heatLossStorage, electricalParasitics.storage, storage.mass.hot, storage.temperatureTank.cold, storage.mass.cold, XZ)
         if case .freezeProtection = solarField.operationMode {
           powerBlock.temperature.inlet = htf.mixing(
@@ -1285,23 +1281,23 @@ public struct Storage: Component {
         }
         
       } else { // heat can only be provided with heater on
-        
+        let time = PerformanceCalculator.dateTime!
         if (Storage.parameter.FC == 0 && Collector.status.parabolicElevation < 0.011
           && storage.heatrel < Storage.parameter.chargeTo
           && !(powerBlock.temperature.inlet > 665)
           && SteamTurbine.status.isMaintained
-          && (date.month < Storage.parameter.FCstopM
-            || (date.month == Storage.parameter.FCstopM
-            && date.day < Storage.parameter.FCstopD)
-            || ((date.month == Storage.parameter.FCstartM
-              && date.day > Storage.parameter.FCstartD)
-              || date.month > Storage.parameter.FCstartM)
-            && (date.month < Storage.parameter.FCstopM2
-              || (date.month == Storage.parameter.FCstopM2
-              && date.day < Storage.parameter.FCstopD2)
-              || (date.month > Storage.parameter.FCstartM2
-                || (date.month == Storage.parameter.FCstartM2
-                && date.day > Storage.parameter.FCstartD2))))
+          && (time.month <= Storage.parameter.FCstopM
+            || (time.month == Storage.parameter.FCstopM
+              && time.day < Storage.parameter.FCstopD)
+            || ((time.month == Storage.parameter.FCstartM
+              && time.day > Storage.parameter.FCstartD)
+              || time.month > Storage.parameter.FCstartM)
+            && (time.month < Storage.parameter.FCstopM2
+              || (time.month == Storage.parameter.FCstopM2
+                && time.day < Storage.parameter.FCstopD2)
+              || (time.month > Storage.parameter.FCstartM2
+                || (time.month == Storage.parameter.FCstartM2
+                  && time.day > Storage.parameter.FCstartD2))))
           && Fuelmode != "predefined") || (Fuelmode == "predefined" && availableFuel > 0) {
           Heater.status.operationMode = .freezeProtection
           if Fuelmode != "predefined" {
@@ -1311,7 +1307,7 @@ public struct Storage: Component {
                                              fuelFlow: &fuel.heater)
             Plant.electricalParasitics.heater = Heater.parasitics
             powerBlock.massFlow = Heater.status.massFlow
-            Storage.operate(&storage, mode: .freezeProtection, date: date, heatFlow: &heatFlow)
+            Storage.operate(&storage, mode: .freezeProtection, heatFlow: &heatFlow)
             // FIXME powerBlock.massFlow = powerBlock.massFlow
             powerBlock.temperature.inlet = storage.temperature.outlet
             // check why to circulate HTF in SF
@@ -1319,10 +1315,10 @@ public struct Storage: Component {
           } else if case .freezeProtection = solarField.operationMode,
             storage.heatrel > -0.35 && Storage.parameter.FP == 0 {
             
-            Storage.operate(&storage, mode: .freezeProtection, date: date, heatFlow: &heatFlow)
+            Storage.operate(&storage, mode: .freezeProtection, heatFlow: &heatFlow)
             //Storage.operate(mode: .freezeProtection, date: heatdiff, heatFlow: powerBlock.massFlow, status: heatFlow.storage)
           } else {
-            Storage.operate(&storage, mode: .noOperation, date: date, heatFlow: &heatFlow)
+            Storage.operate(&storage, mode: .noOperation, heatFlow: &heatFlow)
             //Storage.operate(mode: .noOperation, date: heatdiff, heatFlow: powerBlock.massFlow, status: heatFlow.storage)
           }
         }

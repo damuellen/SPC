@@ -29,12 +29,13 @@ extension JsonConfigFileHandler {
           print("Config file \(pathExtensions.rawValue) not found.")
           continue
       }
-      
+
       switch pathExtensions {
       case .FOS: break
       case .OPR: break
       case .DEM: break
-      case .TAR: break
+      case .TAR:
+        Simulation.tariff = try decoder.decode(Tariff.self, from: data)
       case .SIM:
         Simulation.parameter = try decoder.decode(
           Simulation.Parameter.self, from: data)
@@ -89,10 +90,12 @@ extension JsonConfigFileHandler {
   static func saveConfigurations(toPath path: String) throws {
     
     let directoryURL = URL(fileURLWithPath: path, isDirectory: true)
-    let encoder = JSONEncoder()
-    encoder.outputFormatting = .prettyPrinted
-    encoder.dateEncodingStrategy = .iso8601
+   let encoder = JSONEncoder()
     
+  
+   encoder.outputFormatting = .prettyPrinted
+   encoder.dateEncodingStrategy = .iso8601
+
     for name in FileName.all {
       
       let url = URL(fileURLWithPath: name.rawValue + ".json",

@@ -49,7 +49,7 @@ extension Heater.Parameter: CustomStringConvertible {
 
 extension Heater.Parameter: TextConfigInitializable {
   public init(file: TextConfigFile)throws {
-    let row: (Int)throws -> Double = { try file.double(row: $0) }
+    let row: (Int)throws -> Double = { try file.parseDouble(row: $0) }
     self.name = file.name
     self.efficiency = try row(10)
     self.antiFreezeTemperature = try row(16)

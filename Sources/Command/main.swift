@@ -24,10 +24,11 @@ let meteoFilePath = CommandLine.arguments.count > 1
   ? CommandLine.arguments[2]
   : FileManager.default.currentDirectoryPath
 
-PerfomanceCalculator.loadConfigurations(atPath: path, format: .json)
-//PerfomanceCalculator.saveConfigurations(toPath: path)
-PerfomanceCalculator.meteoFilePath = meteoFilePath
-PerfomanceCalculator.run()
+PerformanceCalculator.loadConfigurations(atPath: path, format: .json)
+PerformanceCalculator.saveConfigurations(toPath: path)
+PerformanceCalculator.meteoFilePath = meteoFilePath
+
+PerformanceCalculator.run()
 
 let end = CFAbsoluteTimeGetCurrent()
 

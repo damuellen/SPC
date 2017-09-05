@@ -45,40 +45,18 @@ public extension Temperature {
   var toKelvin: Double { return self + 273.15 }
 }
 
-let calendar = { calendar -> Calendar  in
+let calendar = { calendar -> Calendar in
   var calendar = calendar
   calendar.timeZone = TimeZone(secondsFromGMT: 0)!
   return calendar
 }(Calendar(identifier: .gregorian))
 
-public extension Date {
-  var day: Int {
-    return calendar.component(.day, from: self)
-  }
-
-  var hour: Int {
-    return calendar.component(.hour, from: self)
-  }
-
-  var month: Int {
-    return calendar.component(.month, from: self)
-  }
-  
-  var year: Int {
-    return calendar.component(.year, from: self)
-  }
-
-  var minutes: Int {
-    return calendar.component(.minute, from: self)
-  }
-}
-
 extension Progress {
-  func tracking(date: Date) {
-    let month = Int64(date.month)
+  func tracking(month: Int) {
+    let month = Int64(month)
     if month > self.completedUnitCount {
       self.completedUnitCount = month
-      print("Month", self.localizedAdditionalDescription,
+      print("Month", self.completedUnitCount,
             "is currently being calculated.")
     }
   }

@@ -98,7 +98,6 @@ public enum SteamTurbine: Component {
     guard load.value > 0 else { return 0.0 }
 
     var load = load
-    var Lmax = Lmax.value
     var parameter = SteamTurbine.parameter
     
     var maxEfficiency: Double
@@ -148,9 +147,8 @@ public enum SteamTurbine: Component {
 
       let (DCFactor, MaxDCLoad) = DryCooling.operate(
         Tamb: Plant.ambientTemperature, steamTurbine: &status)
-      Lmax = MaxDCLoad.value
 
-      if load.value > MaxDCLoad.value {
+      if load > MaxDCLoad {
         load = MaxDCLoad
       }
     }

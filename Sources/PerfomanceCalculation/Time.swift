@@ -24,7 +24,7 @@ extension Time: TextConfigInitializable {
   
   public init(file: TextConfigFile)throws {
     
-    let row: (Int)throws -> Double = { try file.double(row: $0) }
+    let row: (Int)throws -> Double = { try file.parseDouble(row: $0) }
     
     let getDate: (String) -> Date? = { dateString in
       let components = dateString.split(
@@ -67,7 +67,6 @@ extension Time: TextConfigInitializable {
     self.holidays = dates
   }
 }
-
 
 extension Time: Codable {
   

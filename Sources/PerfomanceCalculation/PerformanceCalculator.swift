@@ -13,19 +13,49 @@ import Meteo
 import DateGenerator
 import SolarPosition
 import Config
-var Fuelmode = ""
 
+let hourFraction = PerformanceCalculator.interval.fraction
+let queqe = DispatchQueue(label: "myQueue")
+var Fuelmode = ""
 var DNIdaysum = 0.0
 
 let fm = FileManager.default
 
-public enum PerfomanceCalculator {
+public enum PerformanceCalculator {
+  
+  public static var dateTime: DateTime!
   
   public static var progress = Progress(totalUnitCount: 12)
   
   public static var interval: DateGenerator.Interval = .every5minutes
   
   public static var meteoFilePath = fm.currentDirectoryPath
+  
+  public static var meteoData: MeteoDataSource = {
+    do {
+      if let url = URL(string: meteoFilePath), url.isFileURL {
+        return try MeteoDataFileHandler(forReadingAtPath: meteoFilePath)
+          .readContentOfFile()
+      } else if let path = try fm.subpathsOfDirectory(atPath: meteoFilePath)
+        .first { $0.hasSuffix(".mto") } {
+        print("Meteo file found in current working directory.")
+        return try MeteoDataFileHandler(forReadingAtPath: path)
+          .readContentOfFile()
+      } else {
+        print("Meteo file not found in current working directory.")
+        fatalError("Meteo file is mandatory for calculation.")
+      }
+    } catch {
+      print(error)
+      fatalError("Meteo file is mandatory for calculation.")
+    }
+  }()
+  
+  public static func setTime(_ date: Date) {
+    let dateComponents = calendar.dateComponents(
+      [.month,.day,.hour,.minute], from: date)
+    dateTime = DateTime(dateComponents: dateComponents)
+  }
   
   public static func loadConfigurations(atPath path: String,
                                         format: Config.Formats) {
@@ -52,43 +82,23 @@ public enum PerfomanceCalculator {
 
   public static func run() {
     
-    let meteoDateSource: MeteoDataSource
-    do {
-      if let url = URL(string: meteoFilePath), url.isFileURL {
-        meteoDateSource = try MeteoDataFileHandler(
-          forReadingAtPath: meteoFilePath).readContentOfFile()
-      } else if let path = try fm.subpathsOfDirectory(atPath: meteoFilePath)
-        .first { $0.hasSuffix(".mto") } {
-        meteoDateSource = try MeteoDataFileHandler(
-          forReadingAtPath: path).readContentOfFile()
-        print("Meteo file found in current working directory.")
-      } else {
-        print("Meteo file not found in current working directory.")
-        fatalError("Meteo file is mandatory for calculation.")
-      }
-      
-    } catch {
-      print(error)
-      fatalError("Meteo file is mandatory for calculation.")
-    }
+    let meteo = MeteoDataGenerator(
+      from: meteoData, interval: interval)
     
-    let meteoData = MeteoDataGenerator(
-      from: meteoDateSource, interval: interval)
-    
-    let year = meteoDateSource.year ?? 2017
-    let timeZone = meteoDateSource.timeZone ?? 0
+    let year = meteoData.year ?? 2017
+    let timeZone = meteoData.timeZone ?? 0
     
     let dates: DateGenerator
     if let start = Simulation.time.firstDateOfOperation,
       let end = Simulation.time.lastDateOfOperation {
       let range = DateInterval(start: start, end: end).align(with: interval)
-      meteoData.setRange(to: range)
+      meteo.setRange(to: range)
       dates = DateGenerator(range: range, interval: interval)
     } else {
       dates = DateGenerator(year: year, interval: interval)
     }
     
-    Plant.location = meteoDateSource.location
+    Plant.location = meteoData.location
     let locationTuple = (Plant.location.longitude,
                          Plant.location.latitude,
                          Plant.location.elevation)
@@ -96,40 +106,45 @@ public enum PerfomanceCalculator {
     let solarPosition = SolarPosition(
       location: locationTuple, year: year,
       timezone: timeZone, valuesPerHour: interval)
-    
-    var demand: Ratio = 1.0
+
+    var demand: Ratio = 0.9
     var availableFuel = Double.greatestFiniteMagnitude
-    
-    let outputStream = OutputStream(
-      toFileAtPath: "HourlyResults.csv", append: false)!
-    
+
     let results = PerfomanceData()
     
+    let hourlyOutputStream = OutputStream(
+      toFileAtPath: "HourlyResults.csv", append: false)!
+    let dailyOutputStream = OutputStream(
+      toFileAtPath: "DailyResults.csv", append: false)!
     results.dateFormatter = DateFormatter()
-    results.outputStream = outputStream
-    
+    results.hourlyOutputStream = hourlyOutputStream
+    results.dailyOutputStream = dailyOutputStream
     defer {
       try! Report.description.write(
         toFile: "Report.txt", atomically: true, encoding: .utf8)
-      outputStream.close()
+      hourlyOutputStream.close()
+      dailyOutputStream.close()
     }
     
-    prepareModels()
     progress.becomeCurrent(withPendingUnitCount: 12)
     defer { progress.resignCurrent() }
     
-    for (meteo, date) in zip(meteoData, dates) {
-      progress.tracking(date: date)
+    prepareComponents()
+
+    for (meteo, date) in zip(meteo, dates) {
+      
+      setTime(date)
+      progress.tracking(month: dateTime.month)
+      
       if let sun = solarPosition[date] {
         Collector.tracking(&Collector.status, sun: sun)
       }
+      
       var timeRemain = 600.0
       solarField(&SolarField.status,
                  demand: demand,
-                 date: date,
                  timeRemain: timeRemain,
                  meteo: meteo)
-      
       
       while timeRemain > 0 { // "" 2.loop inside Perf. Loop: Time changes """""
         /* var nexttic = TimeToNTic(time)  // [s] define time to next calculation step
@@ -190,26 +205,19 @@ public enum PerfomanceCalculator {
          availableFuel = OperationRestriction(Date.Month, time.Tariff) // added, check
          }*/
         
-        Plant.operate(demand: demand.value,
-                      availableFuel: &availableFuel,
-                      boiler:  &Boiler.status,
-                      powerBlock: &PowerBlock.status,
-                      solarField: &SolarField.status,
-                      steamTurbine: &SteamTurbine.status,
-                      heater: &Heater.status,
-                      heatExchanger: &HeatExchanger.status,
-                      storage: &Storage.status,
-                      date: date, meteo: meteo)
+        Plant.operate(
+          demand: demand.value, availableFuel: &availableFuel,
+          boiler:  &Boiler.status, powerBlock: &PowerBlock.status,
+          solarField: &SolarField.status, steamTurbine: &SteamTurbine.status,
+          heater: &Heater.status, heatExchanger: &HeatExchanger.status,
+          storage: &Storage.status, meteo: meteo)
         
-        
-        results.add(date: date, meteo: meteo,
-                    electricEnergy: Plant.electricEnergy,
-                    electricalParasitics: Plant.electricalParasitics,
-                    heatFlow: Plant.heatFlow,
-                    fuelConsumption: Plant.fuel,
-                    solarfield: SolarField.status,
-                    collector: Collector.status)
-        
+        queqe.async { results.sumUp(
+          date: date, meteo: meteo, electricEnergy: Plant.electricEnergy,
+          electricalParasitics: Plant.electricalParasitics,
+          heatFlow: Plant.heatFlow, fuelConsumption: Plant.fuel,
+          solarfield: SolarField.status, collector: Collector.status)
+        }
         /*
          if CalcTime / 3_600 = 1 / 6 {
          i = i
@@ -234,6 +242,7 @@ public enum PerfomanceCalculator {
         timeRemain -= 600
       }
     }
+    dump(results.annuallyResults)
   }
   
   private static func checkForScheduleMaintenace(at date: Date) {
@@ -263,7 +272,7 @@ public enum PerfomanceCalculator {
   
   private static func solarField(
     _ solarField: inout SolarField.PerformanceData,
-    demand: Ratio, date: Date, timeRemain: Double, meteo: MeteoData) {
+    demand: Ratio, timeRemain: Double, meteo: MeteoData) {
     
     if Design.hasStorage {
       switch Storage.status.operationMode {
@@ -317,7 +326,7 @@ public enum PerfomanceCalculator {
       }
     }
     
-    SolarField.calculate(date: date, meteo: meteo, timeRemain: timeRemain,
+    SolarField.calculate(meteo: meteo, timeRemain: timeRemain,
                          solarField: &solarField)
     
     // the next is added to determine temperature drop in hot header
@@ -378,7 +387,7 @@ public enum PerfomanceCalculator {
       / (SteamTurbine.parameter.power.max - HeatExchanger.parameter.SCCHTFheat)
   }
   
-  private static func prepareModels() {
+  private static func prepareComponents() {
     // Turbine Gross Power is no longer an input parameter.
     // It is now calculated from Design.layout.powerBlock plus parasitics
     // old TB files can still be used. From now 0 is put in as Gross Power in the TB files

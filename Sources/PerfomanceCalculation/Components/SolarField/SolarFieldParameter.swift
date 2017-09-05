@@ -172,7 +172,7 @@ extension SolarField.Parameter: CustomStringConvertible {
 
 extension SolarField.Parameter: TextConfigInitializable {
   public init(file: TextConfigFile)throws {
-    let row: (Int)throws -> Double = { try file.double(row: $0) }
+    let row: (Int)throws -> Double = { try file.parseDouble(row: $0) }
     self.name = file.name
     self.maxWind = Float(try row(10))
     self.numberOfSCAsInRow = Int(try row(13))
@@ -183,17 +183,17 @@ extension SolarField.Parameter: TextConfigInitializable {
     self.elev = try row(28)
     self.pumpParasticsFullLoad = try row(34)
     self.antiFreezeParastics = try row(37)
-    self.pumpParastics = .init(try file.doubles(rows: 40, 43, 46))
+    self.pumpParastics = try [row(40), row(43), row(46)]
     self.massFlow = (try row(49), try row(52))
     self.antiFreezeFlow = try row(55)
     self.HTFmass = try row(58)
-    self.imbalanceDesign = (try row(72), try row(73), try row(74))
-    self.imbalanceMin = (try row(75), try row(76), try row(77))
-    self.windCoefficients = .init(try file.doubles(rows: 79, 80, 81, 82, 83, 84))
+    self.imbalanceDesign = try (row(72), row(73), row(74))
+    self.imbalanceMin = try (row(75), row(76), row(77))
+    self.windCoefficients = try [row(79), row(80), row(81), row(82), row(83), row(84)]
     self.useReferenceAmbientTemperature = try row(86) > 0 ? true : false
     self.referenceAmbientTemperature = try row(87)
     self.designTemperature = (try row(89), try row(90))
-    self.heatlosses = .init(try file.doubles(rows: 93, 96, 99, 102, 105))
+    self.heatlosses = try [row(93), row(96), row(99), row(102), row(105)]
   }
 }
 

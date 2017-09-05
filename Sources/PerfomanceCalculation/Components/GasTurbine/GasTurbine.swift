@@ -155,8 +155,7 @@ public enum GasTurbine: Component {
     return 0.0 // electricEnergy.GasTurbinegross - electricEnergy.parasiticsGasTurbine // net GasTurbine Power Produced
   }
 
-  public static func operate(at date: Date,
-                             availableFuel: inout Double,
+  public static func operate(availableFuel: inout Double,
                              fuel: inout FuelConsumption,
                              electricEnergy: inout ElectricEnergy,
                              heatFlow: inout HeatFlow,
@@ -170,7 +169,7 @@ public enum GasTurbine: Component {
         * SteamTurbine.parameter.efficiencySCC, SteamTurbine.parameter.power.max)
     // ***********************************************************************
     // 1. Free (OpRCCmode = "f"), plant produces as much electricity as possible
-    // 2. Load (OpRCCmode = "l"), plant follows a specif ic demand profile, specified
+    // +, plant follows a specif ic demand profile, specified
     //                           in DEM-File: if plant produces more than defined
     //                           the GasTurbine will be throttled
     // OpRCCmode = "P" and "I" are only used for old cases and files
@@ -187,14 +186,18 @@ public enum GasTurbine: Component {
             (electricEnergy.demand - electricEnergy.gasTurbineGross)
             / SteamTurbine.parameter.power.max)
           let efficiency = SteamTurbine.efficiency
-          if GasTurbine.efficiency != 0 {
+          if GasTurbine.efficiency > 0 {
             demand /= (1 + efficiency * WasteHeatRecovery.parameter.efficiencyPure
               * (1 / GasTurbine.efficiency - 1)) // 1.135 *
             if abs(electricEnergy.gasTurbineGross - demand)
-              < Simulation.parameter.heatTolerance { break }
+              < Simulation.parameter.heatTolerance {
+              break
+            }
           } else {
             if demand > electricEnergy.gasTurbineGross {
-              if GasTurbine.status.load.value >= GasTurbineLmax { break }
+              if GasTurbine.status.load.value >= GasTurbineLmax {
+                break
+              }
               demand -= (demand - electricEnergy.gasTurbineGross) / 2
             } else {
               demand += (electricEnergy.gasTurbineGross - demand) / 2
@@ -282,7 +285,7 @@ public enum GasTurbine: Component {
                                 fuelFlow: &fuel) // GasTurbineLmax
       
       steamTurbine.load = Ratio(
-        min(Plant.availability[date.month].powerBlock.value,
+        min(Plant.availability[PerformanceCalculator.dateTime].powerBlock.value,
             (electricEnergy.demand - electricEnergy.gasTurbineGross)
               / SteamTurbine.parameter.power.max)
       )

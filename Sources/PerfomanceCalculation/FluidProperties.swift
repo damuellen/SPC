@@ -11,11 +11,6 @@
 import Foundation
 import Config
 
-/*
- The Heat Transfer Fluid is characterized through maximum operating temperature, freeze temperature,
- specific heat capacity, viscosity, thermal conductivity and density as a function of temperature.
- */
-
 var htf = FluidProperties(
   name: "Therminol",
   freezeTemperature: 12 + 0,
@@ -37,8 +32,12 @@ var salt = FluidProperties(
   thermCon: [0.44152, 0.00019, 0],
   maxTemperature: 400, h_T: [], T_h: [], withEnthalpy: false)
 
-
-public struct FluidProperties: Codable {
+/*
+ The Heat Transfer Fluid is characterized through maximum operating temperature,
+ freeze temperature, specific heat capacity, viscosity, thermal conductivity
+ and density as a function of temperature.
+ */
+public struct FluidProperties {
   let name: String
   let freezeTemperature: Double
   let heatCapacity: [Double]
@@ -49,7 +48,34 @@ public struct FluidProperties: Codable {
   var h_T: [Double]
   var T_h: [Double]
   
-  var withEnthalpy = false
+  var withEnthalpy = true
+
+  lazy var heatTransfered: (Double, Double) -> Double = enthalpyChange
+  lazy var temperature: (Double, Double) -> Double = fromEnthalpy
+  
+  public init(name: String, freezeTemperature: Double, heatCapacity: [Double],
+              dens: [Double], visco: [Double], thermCon: [Double],
+              maxTemperature: Double, h_T: [Double], T_h: [Double], withEnthalpy: Bool) {
+    self.name = name
+    self.freezeTemperature = freezeTemperature
+    self.heatCapacity = heatCapacity
+    self.dens = dens
+    self.visco = visco
+    self.thermCon = thermCon
+    self.maxTemperature = maxTemperature
+    self.h_T = h_T
+    self.T_h = T_h
+    if !withEnthalpy {
+      self.withEnthalpy = false
+      self.heatTransfered = specificHeat
+      self.temperature = fromHeatCapacity
+    }
+  }
+  
+  func density(_ temperature: Double) -> Double {
+    return dens[0] + dens[1] * (temperature.toCelsius)
+      + dens[2] * (temperature.toCelsius) ** 2
+  }
   
   func mixing(outlet m1: MassFlow, with m2: MassFlow) -> Temperature {
     let (t1, t2) = (m1.temperature.outlet, m2.temperature.outlet)
@@ -68,23 +94,18 @@ public struct FluidProperties: Codable {
     let cap2 = heatCapacity[0] + heatCapacity[1] * t2
     return (m1 * cap1 * t1 + m2 * cap2 * t2) / (m1 * cap1 + m2 * cap2)
   }
-  
-  func temperature(_ heatFlow: Double, _ temperature: Double) -> Double {
-    return withEnthalpy ? fromEnthalpy(heatFlow, temperature)
-      : fromHeatCapacity(heatFlow, temperature)
-  }
-  
+
   private func fromHeatCapacity(_ heatFlow: Double, _ temperature: Double) -> Temperature {
     let kelvin = temperature.toCelsius
-    guard heatCapacity.count == 2 else { return 0 }
     let cp = heatCapacity
-    return cp[1] > 0
-      ? sqrt((2 * heatFlow + 2 * cp[0] * kelvin) / cp[1] + kelvin ** 2
+    if cp[1] > 0 {
+      return sqrt((2 * heatFlow + 2 * cp[0] * kelvin) / cp[1] + kelvin ** 2
         + (cp[0] / cp[1]) ** 2) - cp[0] / cp[1].toKelvin
-      : -sqrt((2 * heatFlow + 2 * cp[0] * kelvin) / cp[1] + kelvin ** 2
-        + (cp[0] / cp[1]) ** 2) - cp[0] / cp[1].toKelvin
+    } else {
+      return -sqrt((2 * heatFlow + 2 * cp[0] * kelvin) / cp[1] + kelvin ** 2
+        + (cp[0] / cp[1]) ** 2) - cp[0] / cp[1].toKelvin}
   }
-  
+
   private func fromEnthalpy(_ heatFlow: Double, _ temperature: Double) -> Double {
     let kelvin = temperature.toCelsius
     let h1 = h_T[0] + h_T[1] * kelvin + h_T[2] * kelvin ** 2
@@ -93,12 +114,7 @@ public struct FluidProperties: Codable {
     return (T_h[0] + T_h[1] * h2 + T_h[2] * h2 ** 2
       + T_h[3] * h2 ** 3 + T_h[4] * h2 ** 4).toKelvin
   }
-  
-  func heatTransfered(_ high: Double, _ low: Double) -> Double {
-    return withEnthalpy ? enthalpyChange(from: high, to: low)
-      : specificHeat(from: high, to: low)
-  }
-  
+
   private func enthalpyChange(from high: Double, to low: Double) -> Double {
     var h1 = 0.0
     for (i, v) in h_T.enumerated() {
@@ -116,11 +132,6 @@ public struct FluidProperties: Codable {
     var q = heatCapacity[0] * (high - low)
     q += heatCapacity[1] / 2 * (pow((high - 263.1), 2) - pow((low - 263.1), 2))
     return q
-  }
-  
-  func density(_ temperature: Double) -> Double {
-    return dens[0] + dens[1] * (temperature.toCelsius)
-      + dens[2] * (temperature.toCelsius) ** 2
   }
   
   public var description: String {
@@ -164,10 +175,56 @@ public enum StorageFluid: String {
   case solarSalt = "SolarSalt"
 }
 
-extension FluidProperties {
+extension FluidProperties: Codable {
+  enum CodingKeys: String, CodingKey {
+    case name
+    case freezeTemperature
+    case heatCapacity
+    case dens
+    case visco
+    case thermCon
+    case maxTemperature
+    case h_T, T_h
+    case withEnthalpy
+  }
   
+  public init(from decoder: Decoder) throws {
+    let values = try decoder.container(keyedBy: CodingKeys.self)
+    self.name = try values.decode(String.self, forKey: .name)
+    self.freezeTemperature = try values.decode(Double.self, forKey: .freezeTemperature)
+    self.heatCapacity = try values.decode(Array<Double>.self, forKey: .heatCapacity)
+    self.dens = try values.decode(Array<Double>.self, forKey: .dens)
+    self.visco = try values.decode(Array<Double>.self, forKey: .visco)
+    self.thermCon = try values.decode(Array<Double>.self, forKey: .thermCon)
+    self.maxTemperature = try values.decode(Double.self, forKey: .maxTemperature)
+    self.h_T = try values.decode(Array<Double>.self, forKey: .h_T)
+    self.T_h = try values.decode(Array<Double>.self, forKey: .T_h)
+    self.withEnthalpy = try values.decode(Bool.self, forKey: .withEnthalpy)
+    if !withEnthalpy {
+      self.withEnthalpy = false
+      self.heatTransfered = specificHeat
+      self.temperature = fromHeatCapacity
+    }
+  }
+  
+  public func encode(to encoder: Encoder) throws {
+    var container = encoder.container(keyedBy: CodingKeys.self)
+    try container.encode(name, forKey: .name)
+    try container.encode(freezeTemperature, forKey: .freezeTemperature)
+    try container.encode(heatCapacity, forKey: .heatCapacity)
+    try container.encode(dens, forKey: .dens)
+    try container.encode(visco, forKey: .visco)
+    try container.encode(thermCon, forKey: .thermCon)
+    try container.encode(maxTemperature, forKey: .maxTemperature)
+    try container.encode(h_T, forKey: .h_T)
+    try container.encode(T_h, forKey: .T_h)
+    try container.encode(withEnthalpy, forKey: .withEnthalpy)
+  }
+}
+
+extension FluidProperties {
   public init(file: TextConfigFile, includesEnthalpy: Bool)throws {
-    let row: (Int)throws -> Double = { try file.double(row: $0) }
+    let row: (Int)throws -> Double = { try file.parseDouble(row: $0) }
     self.name = file.name
     self.freezeTemperature = try row(10)
     self.heatCapacity = [try row(13), try row(15)]
@@ -176,16 +233,21 @@ extension FluidProperties {
     self.thermCon = [try row(36), try row(39), try row(42)]
     self.maxTemperature = try row(45).toKelvin
     if includesEnthalpy {
-    self.h_T = [
-      try row(47), try row(48), try row(49), try row(50), try row(51)
-    ]
-    self.T_h = [
-      try row(53), try row(54), try row(55), try row(56), try row(57)
-    ]
-    self.withEnthalpy = try row(59) > 0 ? true : false
+      self.h_T = [
+        try row(47), try row(48), try row(49), try row(50), try row(51)
+      ]
+      self.T_h = [
+        try row(53), try row(54), try row(55), try row(56), try row(57)
+      ]
+      self.withEnthalpy = try row(59) > 0 ? true : false
     } else {
       self.h_T = []
       self.T_h = []
+    }
+    if !includesEnthalpy {
+      self.withEnthalpy = false
+      self.heatTransfered = specificHeat
+      self.temperature = fromHeatCapacity
     }
   }
 }

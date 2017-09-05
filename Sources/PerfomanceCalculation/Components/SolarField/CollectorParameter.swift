@@ -67,7 +67,7 @@ extension Collector.Parameter: CustomStringConvertible {
 
 extension Collector.Parameter: TextConfigInitializable {
   public init(file: TextConfigFile)throws {
-    let row: (Int)throws -> Double = { try file.double(row: $0) }
+    let row: (Int)throws -> Double = { try file.parseDouble(row: $0) }
     self.name = file.name
     self.aperture = try row(10)
     self.lengthSCA = try row(13)
@@ -79,10 +79,9 @@ extension Collector.Parameter: TextConfigInitializable {
     self.rglas = try row(31)
     self.glassEmission = try row(71)
     self.opticalEfficiency = try row(34)
-    self.emissionHCE = [try row(37), try row(40)]
-    self.shadingHCE = [try row(43), try row(46), try row(49), try row(52)]
-    self.IAMfac = [
-      try row(55), try row(58), try row(61), try row(64), try row(67)]
+    self.emissionHCE = try [row(37), row(40)]
+    self.shadingHCE = try [row(43), row(46), row(49), row(52)]
+    self.IAMfac = try [row(55), row(58), row(61), row(64), row(67)]
     self.absorber = .schott
     self.IntradiationLosses = try row(73) > 0 ? true : false
   }

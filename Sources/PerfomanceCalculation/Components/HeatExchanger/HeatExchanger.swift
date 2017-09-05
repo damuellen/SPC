@@ -77,7 +77,7 @@ public enum HeatExchanger: Component {
   
   public static func operate(_ hx: inout HeatExchanger.PerformanceData) {
     
-    if parameter.name.contains("Heat Exchanger HTF-H2O - BK") {
+    if parameter.name.hasPrefix("Heat Exchanger HTF-H2O - BK") {
       hx.temperature.outlet = parameter.temperature.htf.outlet.max
         - (120 - 169 * SteamTurbine.status.load.value
           + 49 * SteamTurbine.status.load.value ** 2)

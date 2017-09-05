@@ -20,7 +20,7 @@ public struct FuelParameter: Codable {
 extension FuelParameter {
   
   public init(file: TextConfigFile)throws {
-    let row: (Int)throws -> Double = { try file.double(row: $0) }
+    let row: (Int)throws -> Double = { try file.parseDouble(row: $0) }
     self.name = file.name
     self.measurementUnit = file.values[9]
     self.LHV = try row(13)

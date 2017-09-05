@@ -114,19 +114,19 @@ extension HeatExchanger.Parameter: CustomStringConvertible {
 
 extension HeatExchanger.Parameter: TextConfigInitializable {
   public init(file: TextConfigFile)throws {
-    let row: (Int)throws -> Double = { try file.double(row: $0) }
+    let row: (Int)throws -> Double = { try file.parseDouble(row: $0) }
     self.name = file.name
     self.efficiency = try row(10)
-    self.temperature = Temperatures(
-      htf: (inlet: (max: try row(13), min: try row(16)),
-            outlet: (max: try row(19), min: try row(22))),
-      h2o: (inlet: (max: try row(25), min: try row(28)),
-            outlet: (max: try row(31), min: try row(34))))
-    self.scc = Temperatures(
-      htf: (inlet: (max: try row(47), min: try row(50)),
-            outlet: (max: try row(53), min: try row(56))),
-      h2o: (inlet: (max: try row(59), min: try row(62)),
-            outlet: (max: try row(65), min: try row(68))))
+    self.temperature = try Temperatures(
+      htf: (inlet: (max: row(13), min: row(16)),
+            outlet: (max: row(19), min: row(22))),
+      h2o: (inlet: (max: row(25), min: row(28)),
+            outlet: (max: row(31), min: row(34))))
+    self.scc = try Temperatures(
+      htf: (inlet: (max: row(47), min: row(50)),
+            outlet: (max: row(53), min: row(56))),
+      h2o: (inlet: (max: row(59), min: row(62)),
+            outlet: (max: row(65), min: row(68))))
     
     self.SCCEff = try row(44)
     self.SCCHTFmassFlow = try row(71)
