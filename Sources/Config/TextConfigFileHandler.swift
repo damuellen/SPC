@@ -21,7 +21,7 @@ public class TextConfigFileHandler {
       .COL, .STO, .HR, .HTF, .STF, .HX, .BO, .WHR, .GT, .TB, .PB, .PFC,
       ]
   }
-  var urlsWithValidExtension: [URL] = [URL]()
+  var urlsWithValidExtension: [URL] = []
   
   public init() {}
   

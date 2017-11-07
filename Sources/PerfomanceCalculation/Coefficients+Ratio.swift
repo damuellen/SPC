@@ -29,7 +29,7 @@ public struct Coefficients: Codable {
     return coefficients.isEmpty
   }
   
-  func solved(with value: Double) -> Double {
+  func apply(_ value: Double) -> Double {
     var result = 0.0
     for (i, c) in coefficients.enumerated() {
       result += c * pow(value, Double(i))
@@ -37,12 +37,16 @@ public struct Coefficients: Codable {
     return result
   }
   
+  subscript(temperature: Temperature) -> Double {
+    return apply(temperature.value)
+  }
+  
   subscript(value: Double) -> Double {
-    return solved(with: value)
+    return apply(value)
   }
   
   subscript(ratio: Ratio) -> Double {
-    return solved(with: ratio.value)
+    return apply(ratio.value)
   }
   
   subscript(index: Int) -> Double {

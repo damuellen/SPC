@@ -13,17 +13,19 @@ import Config
 extension HeatExchanger {
   public struct Parameter: ComponentParameter {
     public struct Temperatures {
-      let htf: (inlet: (max: Double, min: Double),
-      outlet: (max: Double, min: Double))
-      var h2o: (inlet: (max: Double, min: Double),
-      outlet: (max: Double, min: Double))
+      let htf: (inlet: (max: Temperature, min: Temperature),
+      outlet: (max: Temperature, min: Temperature))
+      var h2o: (inlet: (max: Temperature, min: Temperature),
+      outlet: (max: Temperature, min: Temperature))
       
-      public init(htf: (inlet: (max: Double, min: Double),
-        outlet: (max: Double, min: Double)),
-                  h2o: (inlet: (max: Double, min: Double),
-        outlet: (max: Double, min: Double))) {
-        self.htf = htf
-        self.h2o = h2o
+      public init(
+        htf: (inlet: (max: Double, min: Double), outlet: (max: Double, min: Double)),
+        h2o: (inlet: (max: Double, min: Double), outlet: (max: Double, min: Double))) {
+        
+        self.htf = ((Temperature(htf.inlet.max), Temperature(htf.inlet.min)),
+                    (Temperature(htf.outlet.max), Temperature(htf.outlet.min)))
+        self.h2o = ((Temperature(h2o.inlet.max), Temperature(h2o.inlet.min)),
+                    (Temperature(h2o.outlet.max), Temperature(h2o.outlet.min)))
       }
     }
     
@@ -33,7 +35,7 @@ extension HeatExchanger {
     var temperature: Temperatures
     let scc: Temperatures
     let SCCHTFmassFlow: Double
-    var SCCHTFheat: Double
+    var SCCHTFheatFlow: Double
     var ToutMassFlow: Coefficients?
     var ToutTin: Coefficients?
     var ToutTinMassFlow: Coefficients?
@@ -49,13 +51,13 @@ extension HeatExchanger.Parameter: CustomStringConvertible {
     d += "Efficiency [%]:"
       >< "\(efficiency)"
     d += "Maximum Inlet Temperature  [°C]:"
-      >< "\(temperature.htf.inlet.max)"
+      >< "\(temperature.htf.inlet.max.toCelsius)"
     d += "Maximum Outlet Temperature [°C]:"
-      >< "\(temperature.htf.outlet.max)"
+      >< "\(temperature.htf.outlet.max.toCelsius)"
     d += "Minimum Inlet Temperature  [°C]:"
-      >< "\(temperature.htf.inlet.min)"
+      >< "\(temperature.htf.inlet.min.toCelsius)"
     d += "Minimum Outlet Temperature [°C]:"
-      >< "\(temperature.htf.outlet.min)"
+      >< "\(temperature.htf.outlet.min.toCelsius)"
     d += "Calculate Outlet Temp. as function of HTF Massflow:"
       >< (Tout_f_Mfl ? "YES" : "NO ")
     if Tout_f_Mfl, ToutMassFlow != nil  {
@@ -107,7 +109,7 @@ extension HeatExchanger.Parameter: CustomStringConvertible {
     d += "Nominal HTF Mass Flow [kg/s]:"
       >< "\(SCCHTFmassFlow)"
     d += "Nominal Capacity [MW]:"
-      >< "\(SCCHTFheat)"
+      >< "\(SCCHTFheatFlow)"
     return d
   }
 }
@@ -118,19 +120,19 @@ extension HeatExchanger.Parameter: TextConfigInitializable {
     self.name = file.name
     self.efficiency = try row(10)
     self.temperature = try Temperatures(
-      htf: (inlet: (max: row(13), min: row(16)),
-            outlet: (max: row(19), min: row(22))),
-      h2o: (inlet: (max: row(25), min: row(28)),
-            outlet: (max: row(31), min: row(34))))
+      htf: (inlet: (max: row(13).toKelvin, min: row(16).toKelvin),
+            outlet: (max: row(19).toKelvin, min: row(22).toKelvin)),
+      h2o: (inlet: (max: row(25).toKelvin, min: row(28).toKelvin),
+            outlet: (max: row(31).toKelvin, min: row(34).toKelvin)))
     self.scc = try Temperatures(
-      htf: (inlet: (max: row(47), min: row(50)),
-            outlet: (max: row(53), min: row(56))),
-      h2o: (inlet: (max: row(59), min: row(62)),
-            outlet: (max: row(65), min: row(68))))
+      htf: (inlet: (max: row(47).toKelvin, min: row(50).toKelvin),
+            outlet: (max: row(53).toKelvin, min: row(56).toKelvin)),
+      h2o: (inlet: (max: row(59).toKelvin, min: row(62).toKelvin),
+            outlet: (max: row(65).toKelvin, min: row(68).toKelvin)))
     
     self.SCCEff = try row(44)
     self.SCCHTFmassFlow = try row(71)
-    self.SCCHTFheat = try row(74)
+    self.SCCHTFheatFlow = try row(74)
     self.useAndsolFunction = false
     self.Tout_f_Mfl = false
     self.Tout_f_Tin = false
@@ -146,7 +148,7 @@ extension HeatExchanger.Parameter: Codable {
     case scc
     case SCCEff
     case SCCHTFmassFlow
-    case SCCHTFheat
+    case SCCHTFheatFlow
     case useAndsolFunction
     case Tout_f_Mfl
     case Tout_f_Tin
@@ -159,19 +161,19 @@ extension HeatExchanger.Parameter: Codable {
     self.efficiency = try values.decode(Double.self, forKey: .efficiency)
     var temperatures = try values.decode(Array<Double>.self, forKey: .temperature)
     self.temperature = Temperatures(
-      htf: (inlet: (max: temperatures[0], min: temperatures[1]),
-            outlet: (max: temperatures[2], min: temperatures[3])),
-      h2o: (inlet: (max: temperatures[4], min: temperatures[5]),
-            outlet: (max: temperatures[6], min: temperatures[7])))
+      htf: (inlet: (max: temperatures[0].toKelvin, min: temperatures[1].toKelvin),
+            outlet: (max: temperatures[2].toKelvin, min: temperatures[3].toKelvin)),
+      h2o: (inlet: (max: temperatures[4].toKelvin, min: temperatures[5].toKelvin),
+            outlet: (max: temperatures[6].toKelvin, min: temperatures[7].toKelvin)))
     temperatures = try values.decode(Array<Double>.self, forKey: .scc)
     self.scc = Temperatures(
-      htf: (inlet: (max: temperatures[0], min: temperatures[1]),
-            outlet: (max: temperatures[2], min: temperatures[3])),
-      h2o: (inlet: (max: temperatures[4], min: temperatures[5]),
-            outlet: (max: temperatures[6], min: temperatures[7])))
+      htf: (inlet: (max: temperatures[0].toKelvin, min: temperatures[1].toKelvin),
+            outlet: (max: temperatures[2].toKelvin, min: temperatures[3].toKelvin)),
+      h2o: (inlet: (max: temperatures[4].toKelvin, min: temperatures[5].toKelvin),
+            outlet: (max: temperatures[6].toKelvin, min: temperatures[7].toKelvin)))
     self.SCCEff = try values.decode(Double.self, forKey: .SCCEff)
     self.SCCHTFmassFlow = try values.decode(Double.self, forKey: .SCCHTFmassFlow)
-    self.SCCHTFheat = try values.decode(Double.self, forKey: .SCCHTFheat)
+    self.SCCHTFheatFlow = try values.decode(Double.self, forKey: .SCCHTFheatFlow)
     self.useAndsolFunction = try values.decode(Bool.self, forKey: .useAndsolFunction)
     self.Tout_f_Mfl = try values.decode(Bool.self, forKey: .Tout_f_Mfl)
     self.Tout_f_Tin = try values.decode(Bool.self, forKey: .Tout_f_Tin)
@@ -183,20 +185,20 @@ extension HeatExchanger.Parameter: Codable {
     try container.encode(name, forKey: .name)
     try container.encode(efficiency, forKey: .efficiency)
     let temperatures = [
-      temperature.htf.inlet.max, temperature.htf.inlet.min,
-      temperature.htf.outlet.max, temperature.htf.outlet.min,
-      temperature.h2o.inlet.max, temperature.h2o.inlet.min,
-      temperature.h2o.outlet.max, temperature.h2o.outlet.min]
+      temperature.htf.inlet.max.toCelsius, temperature.htf.inlet.min.toCelsius,
+      temperature.htf.outlet.max.toCelsius, temperature.htf.outlet.min.toCelsius,
+      temperature.h2o.inlet.max.toCelsius, temperature.h2o.inlet.min.toCelsius,
+      temperature.h2o.outlet.max.toCelsius, temperature.h2o.outlet.min.toCelsius]
     try container.encode(temperatures, forKey: .temperature)
     let sccTemperatures = [
-      scc.htf.inlet.max, scc.htf.inlet.min,
-      scc.htf.outlet.max, scc.htf.outlet.min,
-      scc.h2o.inlet.max, scc.h2o.inlet.min,
-      scc.h2o.outlet.max, scc.h2o.outlet.min]
+      scc.htf.inlet.max.toCelsius, scc.htf.inlet.min.toCelsius,
+      scc.htf.outlet.max.toCelsius, scc.htf.outlet.min.toCelsius,
+      scc.h2o.inlet.max.toCelsius, scc.h2o.inlet.min.toCelsius,
+      scc.h2o.outlet.max.toCelsius, scc.h2o.outlet.min.toCelsius]
     try container.encode(sccTemperatures, forKey: .scc)
     try container.encode(SCCEff, forKey: .SCCEff)
     try container.encode(SCCHTFmassFlow, forKey: .SCCHTFmassFlow)
-    try container.encode(SCCHTFheat, forKey: .SCCHTFheat)
+    try container.encode(SCCHTFheatFlow, forKey: .SCCHTFheatFlow)
     try container.encode(useAndsolFunction, forKey: .useAndsolFunction)
     try container.encode(Tout_f_Mfl, forKey: .Tout_f_Mfl)
     try container.encode(Tout_f_Tin, forKey: .Tout_f_Tin)

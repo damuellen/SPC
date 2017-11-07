@@ -28,16 +28,32 @@ public enum Heater: Component {
   }
 
   /// a struct for operation-relevant data of the heater
-  public struct PerformanceData: MassFlow, WorkingConditions {
+  public struct PerformanceData: Equatable, MassFlow, WorkingConditions {
     var operationMode: OperationMode
     var isMaintained: Bool
     var load: Ratio
     var heatFlow: Double
-    var temperature: (inlet: Double, outlet: Double)
+    var temperature: (inlet: Temperature, outlet: Temperature)
     var massFlow, totalMassFlow, hin: Double
 
-    public enum OperationMode {
-      case normal, charge, reheat, freezeProtection, noOperation, maintenance, unknown
+    public enum OperationMode: String, CustomStringConvertible {
+      case normal, charge, reheat, freezeProtection,
+      noOperation, maintenance, unknown
+      
+      public var description: String {
+        return self.rawValue
+      }
+    }
+    
+    public static func ==(lhs: PerformanceData, rhs: PerformanceData) -> Bool {
+      return lhs.operationMode == rhs.operationMode
+        && lhs.isMaintained == rhs.isMaintained
+        && lhs.load == rhs.load
+        && lhs.heatFlow == rhs.heatFlow
+        && lhs.temperature == rhs.temperature
+        && lhs.massFlow == rhs.massFlow
+        && lhs.totalMassFlow == rhs.totalMassFlow
+        && lhs.hin == rhs.hin
     }
   }
 
@@ -47,17 +63,24 @@ public enum Heater: Component {
     isMaintained: false,
     load: 0.0,
     heatFlow: 0.0,
-    temperature: (200, 200),
+    temperature: (200.0, 200.0),
     massFlow: 0.0,
     totalMassFlow: 0.0,
-    hin: 0.0)
+    hin: 0.0
+  )
 
   /// Returns the current working conditions of the heater
   public static var status: PerformanceData {
     get { return Instance.shared.workingConditions.current }
     set {
-      Instance.shared.workingConditions =
-       (Instance.shared.workingConditions.current, newValue) 
+      if Instance.shared.workingConditions.current != newValue {
+        #if DEBUG
+        print("Heater status changed at \(PerformanceCalculator.dateTime):")
+        print(Instance.shared.workingConditions.current)
+        #endif
+        Instance.shared.workingConditions =
+          (Instance.shared.workingConditions.current, newValue)
+      }
     }
   }
 
@@ -76,7 +99,8 @@ public enum Heater: Component {
   /// Calculates the parasitics of the heater which only depends on the current load
   private static func parasitics(at load: Ratio) -> Double {
     return parameter.nominalElectricalParasitics *
-      (parameter.electricalParasitics[0] + parameter.electricalParasitics[1] * load.value)
+      (parameter.electricalParasitics[0]
+        + parameter.electricalParasitics[1] * load.value)
   }
 
   fileprivate static func noOperation(_ heater: inout Heater.PerformanceData) {
@@ -92,7 +116,6 @@ public enum Heater: Component {
     // Freeze protection is always possible: massFlow fixed
     if case .charge = heater.operationMode {
       // Fossil charge of storage
-
       if Fuelmode == "predefined" {
         // fuel consumption is predefined
         fuelFlow = availableFuel / hourFraction / 2
@@ -106,7 +129,6 @@ public enum Heater: Component {
           noOperation(&heater)
           return 0
         }
-
         // Normal operation possible -
         
         heater.operationMode = .normal
@@ -124,9 +146,8 @@ public enum Heater: Component {
         }
       } else {
         if PowerBlock.status.temperature.inlet == parameter.nomTemperatureOut {
-          PowerBlock.status.temperature.inlet = -1 // FIXME
+          PowerBlock.status.temperature.inlet = -1.0 // FIXME
         }
-
         heater.massFlow = Design.layout.heater
           / htf.heatTransfered(parameter.nomTemperatureOut,
                                PowerBlock.status.temperature.inlet)
@@ -134,7 +155,6 @@ public enum Heater: Component {
         fuelFlow = Design.layout.heater / parameter.efficiency
         heater.load = 1.0
         // Parasitic power [MW]
-
         heater.heatFlow = Design.layout.heater
         // return
       }
@@ -144,7 +164,7 @@ public enum Heater: Component {
 
       if heater.heatFlow > Design.layout.heater {
         heater.heatFlow = Design.layout.heater
-        heater.temperature.outlet = htf.temperature(
+        heater.temperature.outlet = htf.temperatureDelta(
           heater.heatFlow * 1_000 / heater.massFlow, heater.temperature.inlet)
       } else {
         heater.temperature.outlet = parameter.antiFreezeTemperature
@@ -152,9 +172,7 @@ public enum Heater: Component {
       // [MW]=[kg/sec]*[kJ/kg]/1000
       fuelFlow = heater.heatFlow / parameter.efficiency
       heater.load = Ratio(heater.heatFlow / Design.layout.heater)
-
       // return
-
       // No operation requested or QProd > QNeed
     } else if case .noOperation = heater.operationMode { /* || heat >= 0 */
       noOperation(&heater)
@@ -187,9 +205,8 @@ public enum Heater: Component {
         fuelFlow = heater.heatFlow / parameter.efficiency
       }
       // }
-
       guard heater.load.value > parameter.minLoad else {
-        // ////report = "HR operation requested but not performed because of HR underload.\n"
+        // report = "HR operation requested but not performed because of HR underload.\n"
         noOperation(&heater)
         return 0
       }

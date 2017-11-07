@@ -13,9 +13,8 @@ import Config
 extension Heater {
   public struct Parameter: ComponentParameter, Codable {
     let name: String
-    let efficiency, antiFreezeTemperature,
-    nomTemperatureOut, maxMassFlow, minLoad,
-    nominalElectricalParasitics: Double
+    let efficiency, maxMassFlow, minLoad, nominalElectricalParasitics: Double
+    let antiFreezeTemperature, nomTemperatureOut: Temperature
     let electricalParasitics: [Double]
     let onlyWithSolarField: Bool
   }
@@ -52,8 +51,8 @@ extension Heater.Parameter: TextConfigInitializable {
     let row: (Int)throws -> Double = { try file.parseDouble(row: $0) }
     self.name = file.name
     self.efficiency = try row(10)
-    self.antiFreezeTemperature = try row(16)
-    self.nomTemperatureOut = try row(19)
+    self.antiFreezeTemperature = try Temperature( row(16))
+    self.nomTemperatureOut = try Temperature( row(19))
     self.maxMassFlow = try row(22)
     self.minLoad = try row(25)
     self.nominalElectricalParasitics = try row(28)

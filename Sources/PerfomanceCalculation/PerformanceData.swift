@@ -225,11 +225,11 @@ final class PerfomanceData {
              fuelConsumption: FuelConsumption,
              solarfield: SolarField.PerformanceData,
              collector: Collector.PerformanceData) {
-
+    
+    defer { intervalCount += 1 }
     if intervalCount == 0, let dateFormatter = dateFormatter {
       dateString = dateFormatter.string(from: date)
     }
-    defer { intervalCount += 1 }
     let fraction = interval.fraction
     hourlyResults.heatFlow.accumulate(heatFlow, fraction: fraction)
     hourlyResults.energy.accumulate(electricEnergy, fraction: fraction)

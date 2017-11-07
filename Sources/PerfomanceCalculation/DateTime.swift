@@ -10,11 +10,22 @@
 
 import Foundation
 
-public struct DateTime {
+public struct DateTime: Codable, CustomStringConvertible {
   public let month: Int
   public let day: Int
   public let hour: Int
   public let minute: Int
+  
+  public var description: String {
+    return "\(hour):\(minute) on \(day).\(month)"
+  }
+  
+  static var zero: DateTime {
+    return DateTime.init(month: 0, day: 0, hour: 0, minute: 0)
+  }
+}
+
+extension DateTime {
   
   init?(dateComponents: DateComponents) {
     guard let month = dateComponents.month,

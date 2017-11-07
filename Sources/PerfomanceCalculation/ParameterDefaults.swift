@@ -11,30 +11,30 @@
 public enum ParameterDefaults {
   
   public static func assign() {
-    HeatExchanger.assign(parameter: hx)
-    GasTurbine.assign(parameter: gt)
-    SolarField.assign(parameter: sf)
-    Storage.assign(parameter: st)
-    Collector.assign(parameter: LS3)
-    SteamTurbine.assign(parameter: tb)
-    PowerBlock.assign(parameter: pb)
-    WasteHeatRecovery.assign(parameter: whr)
-    Heater.assign(parameter: hr)
-    Boiler.assign(parameter: bo)
+    HeatExchanger.update(parameter: hx)
+    GasTurbine.update(parameter: gt)
+    SolarField.update(parameter: sf)
+    Storage.update(parameter: st)
+    Collector.update(parameter: LS3)
+    SteamTurbine.update(parameter: tb)
+    PowerBlock.update(parameter: pb)
+    WasteHeatRecovery.update(parameter: whr)
+    Heater.update(parameter: hr)
+    Boiler.update(parameter: bo)
   }
   
   static let hx = HeatExchanger.Parameter(
     name: "",
-    efficiency: 99,
+    efficiency: 1,
     SCCEff: 99,
     temperature: HeatExchanger.Parameter.Temperatures(
-      htf: (inlet: (max: 390, min: 260), outlet: (max: 292, min: 198)),
+      htf: (inlet: (max: 666.15, min: 260), outlet: (max: 569.2977, min: 198)),
       h2o: (inlet: (max: 344, min: 255), outlet: (max: 154, min: 128))),
     scc: HeatExchanger.Parameter.Temperatures(
       htf: (inlet: (max: 390, min: 370), outlet: (max: 295, min: 258)),
       h2o: (inlet: (max: 344, min: 255), outlet: (max: 154, min: 100))),
     SCCHTFmassFlow: 1080,
-    SCCHTFheat: 200,
+    SCCHTFheatFlow: 200,
     ToutMassFlow: nil,
     ToutTin: nil,
     ToutTinMassFlow: nil,
@@ -54,7 +54,6 @@ public enum ParameterDefaults {
     parasiticsLc: [79, 82, 85, 88, 91],
     designTemperature: 200)
   
-  
   static let sf = SolarField.Parameter(
     imbalanceDesign: (1.0,1.0,1.0),
     imbalanceMin: (1.0,1.025,1.0),
@@ -66,7 +65,7 @@ public enum ParameterDefaults {
     name: "",
     maxWind: Float(14.5),
     numberOfSCAsInRow: 2,
-    rowDistance: 17.2,
+    rowDistance: 18.0,
     distanceSCA: 1.5,
     pipeHL: 13.0,
     azim: 0.0,
@@ -78,7 +77,7 @@ public enum ParameterDefaults {
     antiFreezeFlow: 12.0,
     HTFmass: 1_796_359.0,
     collector: LS3,
-    EdgeFac: [0.0,0.0])
+    edgeFactor: [])
   
   static let st = Storage.Parameter(
     name: "2-Tank Molten Salt",
@@ -95,7 +94,7 @@ public enum ParameterDefaults {
     pumpEfficiency: 0.82,
     pressureLoss: 776000,
     massFlow: 50,
-    startTemperature: (cold: 288, hot: 288),
+    startTemperature: (cold: 288.0, hot: 288.0),
     startLoad: (cold: 1, hot: 0),
     strategy: .demand, PrefChargeto: 0.83,
     startexcep: 4, endexcep: 8,
@@ -105,8 +104,8 @@ public enum ParameterDefaults {
     fixedLoadDischarge: 0,
     heatTracingTime: [1,1], heatTracingPower: [1,1],
     DischrgParFac: 1, definedBy: .cap,
-    deltaTemperature: (300,400),
-    designTemperature: (300,400),
+    deltaTemperature: (300.0, 400.0),
+    designTemperature: (300.0, 400.0),
     heatLoss: (1,1), FCstartD2: 1,
     FCstartM2: 0, FCstopD2: 0, FCstopM2: 0,
     heatExchangerEfficiency: 0,
@@ -120,25 +119,24 @@ public enum ParameterDefaults {
     badDNIwinter: 0, badDNIsummer: 0)
  
   static let LS3 = Collector.Parameter(
-    name: "LS-3+ SKAL-ET", absorber: .rio,
+    name: "SKAL-ET", absorber: .rio,
     aperture: 5.73, lengthSCA: 142.8,
     areaSCAnet: 817.5, extensionHCE: 0,
     avgFocus: 2.12, rabsOut: 0.035,
     rabsInner: 0.033, rglas: 0.0625,
-    glassEmission: 0.0, opticalEfficiency: 0.78,
-    emissionHCE: [ -0.0619, 0.0003],
-    shadingHCE: [0.954, 0.953, 0.93, 0.925],
+    glassEmission: 0.0, opticalEfficiency: 0.7933452,
+    emissionHCE: [ 0.033, 0.0001],
+    shadingHCE: [0.962, 0.961, 0.938, 0.933],
     IAMfac: [1, 0, -0.0817, 0.1689, -0.2639],
     IntradiationLosses: false)
   
   static let hr = Heater.Parameter(
     name: "",
     efficiency: 0,
-    antiFreezeTemperature: 0,
-    nomTemperatureOut: 0,
     maxMassFlow: 0,
-    minLoad: 0,
-    nominalElectricalParasitics: 0,
+    minLoad: 0, nominalElectricalParasitics: 0,
+    antiFreezeTemperature: 0.0,
+    nomTemperatureOut: 0.0,
     electricalParasitics: [0,0],
     onlyWithSolarField: false)
   

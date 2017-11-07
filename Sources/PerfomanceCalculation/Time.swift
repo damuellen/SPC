@@ -27,9 +27,9 @@ extension Time: TextConfigInitializable {
     let row: (Int)throws -> Double = { try file.parseDouble(row: $0) }
     
     let getDate: (String) -> Date? = { dateString in
-      let components = dateString.split(
+      let components: [Int] = dateString.split(
         separator: ".", maxSplits: 2, omittingEmptySubsequences: true)
-        .map(String.init).map({Int($0)})
+        .map(String.init).flatMap(Int.init)
       guard components.count == 2 else { return nil }
       let dateComponents = DateComponents(
         year: 2010, month: components[0], day: components[1])

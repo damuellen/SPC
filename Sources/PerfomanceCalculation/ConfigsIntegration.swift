@@ -50,34 +50,34 @@ extension JsonConfigFileHandler {
       case .LAY:
         Design.layout = try decoder.decode(Layout.self, from: data)
       case .SF:
-        SolarField.assign(parameter:
+        SolarField.update(parameter:
           try decoder.decode(SolarField.Parameter.self, from: data))
       case .COL:
-        Collector.assign(parameter:
+        Collector.update(parameter:
           try decoder.decode(Collector.Parameter.self, from: data))
        case .STO: break
       case .HR:
-        Heater.assign(parameter:
+        Heater.update(parameter:
           try decoder.decode(Heater.Parameter.self, from: data))
       case .HTF:
         htf = try decoder.decode(FluidProperties.self, from: data)
       case .HX:
-        HeatExchanger.assign(parameter:
+        HeatExchanger.update(parameter:
           try decoder.decode(HeatExchanger.Parameter.self, from: data))
       case .BO:
-        Boiler.assign(parameter:
+        Boiler.update(parameter:
           try decoder.decode(Boiler.Parameter.self, from: data))
       case .WHR:
-        WasteHeatRecovery.assign(parameter:
+        WasteHeatRecovery.update(parameter:
           try decoder.decode(WasteHeatRecovery.Parameter.self, from: data))
       case .GT:
-        GasTurbine.assign(parameter:
+        GasTurbine.update(parameter:
           try decoder.decode(GasTurbine.Parameter.self, from: data))
       case .TB:
-        SteamTurbine.assign(parameter:
+        SteamTurbine.update(parameter:
           try decoder.decode(SteamTurbine.Parameter.self, from: data))
       case .PB:
-        PowerBlock.assign(parameter:
+        PowerBlock.update(parameter:
           try decoder.decode(PowerBlock.Parameter.self, from: data))
       case .PFC:
         break
@@ -90,8 +90,7 @@ extension JsonConfigFileHandler {
   static func saveConfigurations(toPath path: String) throws {
     
     let directoryURL = URL(fileURLWithPath: path, isDirectory: true)
-   let encoder = JSONEncoder()
-    
+   let encoder = JSONEncoder()    
   
    encoder.outputFormatting = .prettyPrinted
    encoder.dateEncodingStrategy = .iso8601
@@ -125,7 +124,6 @@ extension JsonConfigFileHandler {
       case .PB: try encoder.encode(PowerBlock.parameter).write(to: url)
       case .PFC: break
       case .STF: try encoder.encode(salt).write(to: url)
-        
       }
     }
   }
@@ -157,18 +155,18 @@ extension TextConfigFileHandler {
       case .DES: break
       case .AVL: break
       case .LAY: Design.layout = try .init(file: configFile)
-      case .SF: SolarField.assign(parameter: try .init(file: configFile))
-      case .COL: Collector.assign(parameter: try .init(file: configFile))
+      case .SF: SolarField.update(parameter: try .init(file: configFile))
+      case .COL: Collector.update(parameter: try .init(file: configFile))
       case .STO: break
-      case .HR: Heater.assign(parameter: try .init(file: configFile))
+      case .HR: Heater.update(parameter: try .init(file: configFile))
       case .HTF:
         htf = try FluidProperties(file: configFile, includesEnthalpy: true)
-      case .HX: HeatExchanger.assign(parameter: try .init(file: configFile))
-      case .BO: Boiler.assign(parameter: try .init(file: configFile))
-      case .WHR: WasteHeatRecovery.assign(parameter: try .init(file: configFile))
-      case .GT: GasTurbine.assign(parameter: try .init(file: configFile))
-      case .TB: SteamTurbine.assign(parameter: try .init(file: configFile))
-      case .PB: PowerBlock.assign(parameter: try .init(file: configFile))
+      case .HX: HeatExchanger.update(parameter: try .init(file: configFile))
+      case .BO: Boiler.update(parameter: try .init(file: configFile))
+      case .WHR: WasteHeatRecovery.update(parameter: try .init(file: configFile))
+      case .GT: GasTurbine.update(parameter: try .init(file: configFile))
+      case .TB: SteamTurbine.update(parameter: try .init(file: configFile))
+      case .PB: PowerBlock.update(parameter: try .init(file: configFile))
       case .PFC:
         break
       case .STF:

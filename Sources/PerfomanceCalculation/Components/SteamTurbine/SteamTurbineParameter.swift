@@ -92,7 +92,7 @@ extension SteamTurbine.Parameter: TextConfigInitializable {
   public init(file: TextConfigFile)throws {
     let row: (Int)throws -> Double = { try file.parseDouble(row: $0) }
     self.name = file.name
-    self.power = .init(range: try row(10)...(try row(13)))
+    self.power = try .init(range: row(10) ... row(13))
     self.efficiencyNominal = try row(32)
     self.efficiencyBoiler = try row(35)
     self.efficiencySCC = try row(38)

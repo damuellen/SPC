@@ -10,7 +10,7 @@
 
 import Foundation
 
-public struct MeteoData {
+public struct MeteoData: CustomStringConvertible {
   
   public let temperature, dni, windSpeed: Float
   public let wetBulbTemperature: Float? = nil
@@ -35,6 +35,12 @@ public struct MeteoData {
     self.dni = dni
     self.temperature = temperature
     self.windSpeed = windSpeed
+  }
+  
+  public var description: String {
+    return String(format:"Temp: %.1f ", temperature)
+      + String(format:"DNI: %.1f ", dni)
+      + String(format:"WS: %.1f", windSpeed)
   }
 }
 // meteo-data interpolation:

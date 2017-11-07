@@ -16,16 +16,14 @@ extension SteamTurbine.Instance: CustomDebugStringConvertible {
   }
 }
 
-extension SteamTurbine.PerformanceData: CustomDebugStringConvertible {
-  public var debugDescription: String {
-    var d: String = ""
-    d += "Operation mode:" >< "\(operationMode)"
-    d += "Load:" >< "\(load)"
-    d += "Is maintained:" >< "\(isMaintained)"
-    d += "Back pressure:" >< "\(backPressure)"
-    d += "Op:" >< "\(Op)"
-    d += "PminfT:" >< "\(PminfT)"
-    return d
+extension SteamTurbine.PerformanceData: CustomStringConvertible {
+  public var description: String {
+    return "Mode: \(operationMode) "
+      + String(format:"Load: %.2f ", load.value)
+      + "Is maintained: \(isMaintained) "
+      + String(format:"Back pressure: %.2f ", backPressure)
+      + String(format:"Op: %.2f ", Op)
+      + String(format:"PminfT: %.2f", PminfT)
   }
 }
 
@@ -43,15 +41,34 @@ public enum SteamTurbine: Component {
   }
 
   /// a struct for operation-relevant data of the steam turbine
-  public struct PerformanceData: WorkingConditions {
+  public struct PerformanceData: Equatable, WorkingConditions {
     var operationMode: OperationMode
     var load: Ratio
     var isMaintained: Bool
     var backPressure: Double
     var Op: Double
     var PminfT: Double
-    public enum OperationMode {
+    
+    public enum OperationMode: Equatable {
       case noOperation(hours: Double), SM
+      
+      public static func ==(lhs: OperationMode, rhs: OperationMode) -> Bool {
+        switch (lhs, rhs) {
+        case (.noOperation(let lhs), .noOperation(let rhs)): return lhs == rhs
+        case (.noOperation(_), .SM): return false
+        case (.SM, .noOperation(_)): return false
+        case (.SM, .SM): return true
+        }
+      }
+    }
+    
+    public static func ==(lhs: PerformanceData, rhs: PerformanceData) -> Bool {
+      return lhs.operationMode == rhs.operationMode
+        && lhs.load == rhs.load
+        && lhs.isMaintained == rhs.isMaintained
+        && lhs.backPressure == rhs.backPressure
+        && lhs.Op == rhs.Op
+        && lhs.PminfT == rhs.PminfT
     }
   }
 
@@ -61,14 +78,21 @@ public enum SteamTurbine: Component {
     isMaintained: false,
     backPressure: 0,
     Op: 0,
-    PminfT: 0)
+    PminfT: 0
+  )
 
   /// Returns the current working conditions of the steam turbine
   public static var status: PerformanceData {
     get { return Instance.shared.workingConditions.current }
     set {
-      Instance.shared.workingConditions =
-       (Instance.shared.workingConditions.current, newValue) 
+      if Instance.shared.workingConditions.current != newValue {
+        #if DEBUG
+          print("Steamturbine status changed at \(PerformanceCalculator.dateTime):")
+          print(Instance.shared.workingConditions.current)
+        #endif
+        Instance.shared.workingConditions =
+          (Instance.shared.workingConditions.current, newValue)
+      }
     }
   }
 
@@ -116,8 +140,8 @@ public enum SteamTurbine: Component {
     } else if case .ic = GasTurbine.status.operationMode {
       maxEfficiency = parameter.efficiencySCC
     } else {
-      if HeatExchanger.status.temperature.inlet == 0 {
-        HeatExchanger.status.temperature.inlet = 274
+      if HeatExchanger.status.temperature.inlet == Temperature.zero {
+        HeatExchanger.status.temperature.inlet = 274.0
       }
 
       if parameter.efficiencytempIn_A == 0

@@ -9,40 +9,23 @@
 //
 
 import Foundation
-import Config
 
-infix operator **: MultiplicationPrecedence
-
-func ** (num: Double, power: Double) -> Double {
-  return pow(num, power)
-}
-
-infix operator ><
-
-func >< (lhs: String, rhs: String) -> String {
-  let count = 80 - lhs.utf16.count - rhs.utf16.count
-  return lhs + String(repeating: " ", count: count) + rhs + "\n"
-}
-
-public extension Array {
-  public static func += (lhs: inout Array, rhs: Element) {
-    lhs.append(rhs)
-  }
-}
- 
-public typealias Temperature = Double
+public typealias Heat = Double
 public typealias Pressure = Double
 public typealias Angle = Double
 
-
-public extension Angle {
-  var toRadians: Double { return self * .pi / 180 }
-  var toDegress: Double { return self *  180 / .pi}
-}
-
-public extension Temperature {
+public extension Double {
   var toCelsius: Double { return self - 273.15 }
   var toKelvin: Double { return self + 273.15 }
+}
+
+public extension Float {
+  var toKelvin: Float { return self + 273.15 }
+}
+
+public extension Angle {
+  var radians: Double { return self * .pi / 180 }
+  var degrees: Double { return self *  180 / .pi}
 }
 
 let calendar = { calendar -> Calendar in

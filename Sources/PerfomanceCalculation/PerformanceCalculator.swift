@@ -19,11 +19,12 @@ let queqe = DispatchQueue(label: "myQueue")
 var Fuelmode = ""
 var DNIdaysum = 0.0
 
+
 let fm = FileManager.default
 
 public enum PerformanceCalculator {
   
-  public static var dateTime: DateTime!
+  public static var dateTime: DateTime = .zero
   
   public static var progress = Progress(totalUnitCount: 12)
   
@@ -54,7 +55,7 @@ public enum PerformanceCalculator {
   public static func setTime(_ date: Date) {
     let dateComponents = calendar.dateComponents(
       [.month,.day,.hour,.minute], from: date)
-    dateTime = DateTime(dateComponents: dateComponents)
+    dateTime = DateTime(dateComponents: dateComponents) ?? .zero
   }
   
   public static func loadConfigurations(atPath path: String,
@@ -79,7 +80,7 @@ public enum PerformanceCalculator {
       print(error)
     }
   }
-
+  
   public static func run() {
     
     let meteo = MeteoDataGenerator(
@@ -106,10 +107,11 @@ public enum PerformanceCalculator {
     let solarPosition = SolarPosition(
       location: locationTuple, year: year,
       timezone: timeZone, valuesPerHour: interval)
-
-    var demand: Ratio = 0.9
+    
+    var demand: Ratio = 1.0
     var availableFuel = Double.greatestFiniteMagnitude
-
+    Maintenance.atDefaultTimeRange(for: year)
+    
     let results = PerfomanceData()
     
     let hourlyOutputStream = OutputStream(
@@ -130,94 +132,104 @@ public enum PerformanceCalculator {
     defer { progress.resignCurrent() }
     
     prepareComponents()
-
+    
     for (meteo, date) in zip(meteo, dates) {
       
       setTime(date)
       progress.tracking(month: dateTime.month)
       
-      if let sun = solarPosition[date] {
-        Collector.tracking(&Collector.status, sun: sun)
+      let toService = Maintenance.isScheduled(at: date)
+      SteamTurbine.status.isMaintained = toService
+      SolarField.status.isMaintained = toService
+      Heater.status.isMaintained = toService
+      Boiler.status.isMaintained = toService
+      GasTurbine.status.isMaintained = toService
+      
+      if let altitude = solarPosition[date] {
+        Collector.tracking(&Collector.status, sun: altitude)
+        // print(date, meteo, Collector.status)
+        Collector.status.efficiency = Collector.efficiency(meteo: meteo)
       }
-      
+
       var timeRemain = 600.0
-      solarField(&SolarField.status,
-                 demand: demand,
-                 timeRemain: timeRemain,
-                 meteo: meteo)
+      SolarField.operate(demand: demand, timeRemain: timeRemain, meteo: meteo)
       
-      while timeRemain > 0 { // "" 2.loop inside Perf. Loop: Time changes """""
-        /* var nexttic = TimeToNTic(time)  // [s] define time to next calculation step
-         var CalcTime = min(timeRemain, nexttic)   // -^-the only call -
-         if date.day != Ltime.Day { checkForScheduleMaintenace(date: Date) }
-         switch Control.whichOptimization { // set demand and fuel depending on calc. Mode
-         case .solarOnly:
-         availableFuel = 0  // Fuel for freeze protection only
-         demand = 1  // Set demand to 100% nom. plant-capacity
-         case .baseLoad:
-         availableFuel = .greatestFiniteMagnitude
-         demand = 1
-         case .demand:
-         availableFuel = .greatestFiniteMagnitude
-         demand = Demand(time.WEHoli, month, date.hour)
-         case .demand_fuel: // Dem & FuelRes
-         
-         // demand is defined in .DEM, Available fuel in .OPR month/tariff 12xNTariffs
-         if date.day == 13 && date.hour == 0 && time.minutes == 0 {
-         i = 1
-         }
-         // predefined fuel consumption in *.pfc-file
-         if Fuelmode ==  "predefined" {
-         if time.minutes == 0 {
-         if date.hour == 0 {
-         if date.day == 1 {
-         availableFuel = FuelConsumption(time.Day, date.hour, time.minutes)
-         } else {
-         availableFuel = FuelConsumption(time.Day - 1, 23, 50)
-         }
-         } else {
-         availableFuel = FuelConsumption(time.Day, date.hour - 1, 50)
-         }
-         } else if time.minutes == 5 {
-         
-         if date.hour == 0 {
-         
-         if date.day == 1 {
-         availableFuel = FuelConsumption(time.Day, date.hour, time.minutes - 5)
-         } else {
-         availableFuel = FuelConsumption(time.Day - 1, 23, 50)
-         }
-         
-         } else {
-         availableFuel = FuelConsumption(time.Day, date.hour - 1, 50)
-         }
-         } else if time.minutes == 15 || time.minutes == 25
-         || time.minutes == 35 || time.minutes == 45 || time.minutes == 55 {
-         availableFuel = FuelConsumption(time.Day, date.hour, time.minutes - 5 - 10)
-         } else {
-         availableFuel = FuelConsumption(time.Day, date.hour, time.minutes - 10)
-         }
-         } else {
-         availableFuel = OperationRestriction(month, time.Tariff)
-         }
-         demand = Demand(time.WEHoli, month, date.hour)
-         case .fuel:
-         availableFuel = OperationRestriction(Date.Month, time.Tariff) // added, check
-         }*/
-        
-        Plant.operate(
-          demand: demand.value, availableFuel: &availableFuel,
-          boiler:  &Boiler.status, powerBlock: &PowerBlock.status,
-          solarField: &SolarField.status, steamTurbine: &SteamTurbine.status,
-          heater: &Heater.status, heatExchanger: &HeatExchanger.status,
-          storage: &Storage.status, meteo: meteo)
-        
-        queqe.async { results.sumUp(
-          date: date, meteo: meteo, electricEnergy: Plant.electricEnergy,
-          electricalParasitics: Plant.electricalParasitics,
-          heatFlow: Plant.heatFlow, fuelConsumption: Plant.fuel,
-          solarfield: SolarField.status, collector: Collector.status)
-        }
+      // 2.loop inside Perf. Loop: Time changes
+      /* var nexttic = TimeToNTic(time)  // [s] define time to next calculation step
+       var CalcTime = min(timeRemain, nexttic)   // -^-the only call -
+       if date.day != Ltime.Day { checkForScheduleMaintenace(date: Date) }
+       switch Control.whichOptimization { // set demand and fuel depending on calc. Mode
+       case .solarOnly:
+       availableFuel = 0  // Fuel for freeze protection only
+       demand = 1  // Set demand to 100% nom. plant-capacity
+       case .baseLoad:
+       availableFuel = .greatestFiniteMagnitude
+       demand = 1
+       case .demand:
+       availableFuel = .greatestFiniteMagnitude
+       demand = Demand(time.WEHoli, month, date.hour)
+       case .demand_fuel: // Dem & FuelRes
+       
+       // demand is defined in .DEM, Available fuel in .OPR month/tariff 12xNTariffs
+       if date.day == 13 && date.hour == 0 && time.minutes == 0 {
+       i = 1
+       }
+       // predefined fuel consumption in *.pfc-file
+       if Fuelmode ==  "predefined" {
+       if time.minutes == 0 {
+       if date.hour == 0 {
+       if date.day == 1 {
+       availableFuel = FuelConsumption(time.Day, date.hour, time.minutes)
+       } else {
+       availableFuel = FuelConsumption(time.Day - 1, 23, 50)
+       }
+       } else {
+       availableFuel = FuelConsumption(time.Day, date.hour - 1, 50)
+       }
+       } else if time.minutes == 5 {
+       
+       if date.hour == 0 {
+       
+       if date.day == 1 {
+       availableFuel = FuelConsumption(time.Day, date.hour, time.minutes - 5)
+       } else {
+       availableFuel = FuelConsumption(time.Day - 1, 23, 50)
+       }
+       
+       } else {
+       availableFuel = FuelConsumption(time.Day, date.hour - 1, 50)
+       }
+       } else if time.minutes == 15 || time.minutes == 25
+       || time.minutes == 35 || time.minutes == 45 || time.minutes == 55 {
+       availableFuel = FuelConsumption(time.Day, date.hour, time.minutes - 5 - 10)
+       } else {
+       availableFuel = FuelConsumption(time.Day, date.hour, time.minutes - 10)
+       }
+       } else {
+       availableFuel = OperationRestriction(month, time.Tariff)
+       }
+       demand = Demand(time.WEHoli, month, date.hour)
+       case .fuel:
+       availableFuel = OperationRestriction(Date.Month, time.Tariff) // added, check
+       }*/
+       Plant.operate(
+        demand: demand.value, availableFuel: &availableFuel, meteo: meteo,
+        boiler: &Boiler.status, powerBlock: &PowerBlock.status,
+        solarField: &SolarField.status, steamTurbine: &SteamTurbine.status,
+        heater: &Heater.status, heatExchanger: &HeatExchanger.status,
+        storage: &Storage.status)
+      
+      let (electricEnergy, electricalParasitics, heatFlow,
+        fuelConsumption, solarfield, collector) = (
+          Plant.electricEnergy, Plant.electricalParasitics,
+          Plant.heatFlow, Plant.fuel, SolarField.status, Collector.status)
+      
+      queqe.async {
+        results.sumUp(
+          date: date, meteo: meteo, electricEnergy: electricEnergy,
+          electricalParasitics: electricalParasitics,
+          heatFlow: heatFlow, fuelConsumption: fuelConsumption,
+          solarfield: solarfield, collector: collector)
         /*
          if CalcTime / 3_600 = 1 / 6 {
          i = i
@@ -245,146 +257,16 @@ public enum PerformanceCalculator {
     dump(results.annuallyResults)
   }
   
-  private static func checkForScheduleMaintenace(at date: Date) {
-    /*
-     CurrDate = month + monthDay / 100
-     for i in 1 ... 6 {// 6 Different Maintenance Periods
-     steamTurbine.isMaintained = (Maintnc(i).Lowlim <= CurrDate && CurrDate <= Maintnc(i).Uplim)
-     }
-     if !steamTurbine.isMaintained {      // Check up to 25 excluded days:
-     if ExclDays(1) != 0 {
-     for i in 1 ... 25 {
-     steamTurbine.isMaintained = (CurrDate = ExclDays(i))
-     if steamTurbine.isMaintained {
-     }
-     
-     }  // ExclDays(1) != 0 THEN
-     }
-     
-     }  // NOT steamTurbine.isMaintained THEN
-     // new: - Because Heat Production only does not make sense
-     SolarField.status.isMaintained = steamTurbine.isMaintained
-     Heater.status.isMaintained = steamTurbine.isMaintained
-     Boiler.status.isMaintained = steamTurbine.isMaintained
-     GasTurbine.status.isMaintained = steamTurbine.isMaintained
-     */
-  }
-  
-  private static func solarField(
-    _ solarField: inout SolarField.PerformanceData,
-    demand: Ratio, timeRemain: Double, meteo: MeteoData) {
-    
-    if Design.hasStorage {
-      switch Storage.status.operationMode {
-      case .freezeProtection:
-        if Storage.parameter.tempInCst[1] > 0 {
-          solarField.header.temperature.inlet = solarField.header.temperature.outlet
-        } else {
-          solarField.header.temperature.inlet = Storage.status.StoTcoldTout
-        }
-      case .sc:
-        solarField.header.temperature.inlet = Storage.status.temperatureTank.cold
-      case .charging where Plant.heatFlow.production == 0:
-        solarField.header.temperature.inlet = solarField.header.temperature.outlet
-      default:
-        solarField.header.temperature.inlet = PowerBlock.status.temperature.outlet
-      }
-    } else {
-      solarField.header.temperature.inlet = PowerBlock.status.temperature.outlet
-    }
-    
-    Plant.heatFlow.dump = 0
-    
-    solarField.header.massFlow = SolarField.parameter.massFlow.max
-    
-    if demand.value < 1 { // added to reduced SOF massflow with electrical demand
-      
-      solarField.header.massFlow = demand.value * (SteamTurbine.parameter.power.max
-        / SteamTurbine.parameter.efficiencyNominal
-        / HeatExchanger.parameter.efficiency)
-        / (htf.heatTransfered(
-          HeatExchanger.parameter.temperature.htf.inlet.max,
-          HeatExchanger.parameter.temperature.htf.outlet.max) / 1_000)
-      
-      solarField.header.massFlow = max(
-        1180, solarField.header.massFlow + Storage.parameter.massFlow)
-    }
-    
-    if Design.hasStorage,
-      Storage.status.heatrel >= Storage.parameter.chargeTo {
-      if Design.hasGasTurbine {
-        solarField.header.massFlow = HeatExchanger.parameter.SCCHTFmassFlow
-      } else {
-        // changed to reduced SOF massflow with electrical demand
-        solarField.header.massFlow = demand.value
-          * (SteamTurbine.parameter.power.max
-            / SteamTurbine.parameter.efficiencyNominal
-            / HeatExchanger.parameter.efficiency)
-          / (htf.heatTransfered(
-            HeatExchanger.parameter.temperature.htf.inlet.max,
-            HeatExchanger.parameter.temperature.htf.outlet.max) / 1_000)
-      }
-    }
-    
-    SolarField.calculate(meteo: meteo, timeRemain: timeRemain,
-                         solarField: &solarField)
-    
-    // the next is added to determine temperature drop in hot header
-    var temperatureNow = solarField.header.temperature.outlet
-    var temperatureLast = 0.0
-    
-    for _ in 1 ... 10 {
-      
-      solarField.heatLossHeader *= SolarField.parameter.heatLossHeader[0]
-      // FIXME  + SolarField.parameter.heatLossHeader
-      // FIXME  * (temperatureNow - meteo.temperature) // [MWt]
-      solarField.heatLossHeader *= 1_000_000
-        / (Design.layout.solarField * Double(SolarField.parameter.numberOfSCAsInRow)
-          * 2 * Collector.parameter.areaSCAnet)
-      // for hourly results and night cooldown [W/m2 ap.]
-      let temp = temperatureLast
-      temperatureLast = temperatureNow
-      temperatureNow = temp
-      
-      if solarField.header.massFlow > 0 {
-        
-        let dQHL = solarField.heatLossHeader * 1_000 / solarField.header.massFlow // [kJ/kg]
-        temperatureNow = htf.temperature(-dQHL, solarField.header.temperature.outlet)
-        
-      } else {
-        
-        let averageTemperature = (temperatureNow + solarField.header.temperature.outlet) / 2
-        // Calculate average Temp. and Areadens
-        let areadens = htf.density(averageTemperature) * .pi
-          * Collector.parameter.rabsInner ** 2 / Collector.parameter.aperture // kg/m2
-        let dQperSqm = solarField.heatLossHeader  // FIXME * dtime / 1_000
-        // Heat collected or lost during the flow through a whole loop [kJ/sqm]
-        let dQperkg = dQperSqm / areadens // Change kJ/sqm to kJ/kg:
-        let Qperkg = htf.heatTransfered(
-          solarField.header.temperature.outlet, Double(meteo.temperature))
-        temperatureNow = htf.temperature(Qperkg - dQperkg, Double(meteo.temperature))
-      }
-      
-      temperatureNow = min(htf.maxTemperature, temperatureNow)
-      temperatureLast = min(htf.maxTemperature, temperatureLast)
-      let temperatureDifference = abs(temperatureNow - temperatureLast)
-      if temperatureDifference < Simulation.parameter.HLtempTolerance {
-        break
-      }
-    }
-    solarField.header.temperature.outlet = temperatureNow
-  }
-  
   private static func prepareGasTurbine() {
-    HeatExchanger.parameter.SCCHTFheat = Design.layout.heatExchanger
+    HeatExchanger.parameter.SCCHTFheatFlow = Design.layout.heatExchanger
       / SteamTurbine.parameter.efficiencySCC / HeatExchanger.parameter.SCCEff
     
-    SolarField.parameter.massFlow.max = HeatExchanger.parameter.SCCHTFheat * 1_000
+    SolarField.parameter.massFlow.max = HeatExchanger.parameter.SCCHTFheatFlow * 1_000
       / htf.heatTransfered(HeatExchanger.parameter.scc.htf.outlet.max,
                            HeatExchanger.parameter.scc.htf.inlet.max)
     
-    WasteHeatRecovery.parameter.ratioHTF = HeatExchanger.parameter.SCCHTFheat
-      / (SteamTurbine.parameter.power.max - HeatExchanger.parameter.SCCHTFheat)
+    WasteHeatRecovery.parameter.ratioHTF = HeatExchanger.parameter.SCCHTFheatFlow
+      / (SteamTurbine.parameter.power.max - HeatExchanger.parameter.SCCHTFheatFlow)
   }
   
   private static func prepareComponents() {
@@ -402,26 +284,26 @@ public enum PerformanceCalculator {
       prepareGasTurbine()
     } else {
       if Design.layout.heatExchanger != Design.layout.powerBlock {
-        HeatExchanger.parameter.SCCHTFheat = Design.layout.heatExchanger
+        HeatExchanger.parameter.SCCHTFheatFlow = Design.layout.heatExchanger
           / SteamTurbine.parameter.efficiencyNominal
           / HeatExchanger.parameter.efficiency
       } else {
-        HeatExchanger.parameter.SCCHTFheat = SteamTurbine.parameter.power.max
+        HeatExchanger.parameter.SCCHTFheatFlow = SteamTurbine.parameter.power.max
           / SteamTurbine.parameter.efficiencyNominal
           / HeatExchanger.parameter.efficiency
       }
-      SolarField.parameter.massFlow.max = HeatExchanger.parameter.SCCHTFheat * 1_000
+      SolarField.parameter.massFlow.max = HeatExchanger.parameter.SCCHTFheatFlow * 1_000
         / htf.heatTransfered(HeatExchanger.parameter.temperature.htf.inlet.max,
                              HeatExchanger.parameter.temperature.htf.outlet.max)
     }
     
     if Design.hasSolarField {
-      SolarField.parameter.EdgeFac += SolarField.parameter.distanceSCA / 2
-        * (1 - 1 / Double(SolarField.parameter.numberOfSCAsInRow)
-          / Collector.parameter.lengthSCA) // Constants
-      SolarField.parameter.EdgeFac += (1.0 + 1.0
+      SolarField.parameter.edgeFactor += [SolarField.parameter.distanceSCA / 2
+        * (1 - 1 / Double(SolarField.parameter.numberOfSCAsInRow))
+        / Collector.parameter.lengthSCA] // Constants
+      SolarField.parameter.edgeFactor += [(1.0 + 1.0
         / Double(SolarField.parameter.numberOfSCAsInRow))
-        / Collector.parameter.lengthSCA / 2
+        / Collector.parameter.lengthSCA / 2]
     }
   }
 }

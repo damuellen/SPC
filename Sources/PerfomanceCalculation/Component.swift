@@ -18,16 +18,16 @@ public protocol Component {
   associatedtype Data: WorkingConditions
   static var parameter: Parameter { get set }
   static var status: Data { get }
-  static func assign(parameter: Parameter)
+  static func update(parameter: Parameter)
 }
 
 extension Component {
-  public static func assign(parameter: Parameter) {
+  public static func update(parameter: Parameter) {
     self.parameter = parameter
   }
 }
 
 protocol MassFlow {
   var massFlow: Double { get }
-  var temperature: (inlet: Double, outlet: Double) { get }
+  var temperature: (inlet: Temperature, outlet: Temperature) { get }
 }

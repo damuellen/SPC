@@ -14,8 +14,8 @@ import Config
 extension Simulation {
   public struct Parameter: Codable  {
     let dfreezeTemperaturePump, dfreezeTemperatureHeat,
-    minTemperatureRaiseStartUp, minInsolationRaiseStartUp,
-    heatTolerance, tempTolerance, timeTolerance, massTolerance,
+    minTemperatureRaiseStartUp, tempTolerance: Temperature
+    let minInsolationRaiseStartUp, heatTolerance, timeTolerance, massTolerance,
     minInsolation, maxToPowerBlock, minInsolationForBoiler,
     electricalTolerance, electricalParasitics, HLtempTolerance: Double
     let adjustmentFactor: AdjustmentFactor
@@ -90,12 +90,12 @@ extension Simulation.Parameter: TextConfigInitializable {
       electricalParasitics: try row(61) / 100)
 
     self = Simulation.Parameter(
-      dfreezeTemperaturePump: try row(6),
-      dfreezeTemperatureHeat: try row(9),
-      minTemperatureRaiseStartUp: try row(12),
+      dfreezeTemperaturePump: try Temperature(row(6)),
+      dfreezeTemperatureHeat: try Temperature(row(9)),
+      minTemperatureRaiseStartUp: try Temperature(row(12)),
+      tempTolerance: try Temperature(row(21)),
       minInsolationRaiseStartUp: try row(16),
-      heatTolerance: try row(18),
-      tempTolerance: try row(21),
+      heatTolerance: try row(18),      
       timeTolerance: try row(24),
       massTolerance: try row(27),
       minInsolation: try row(31),

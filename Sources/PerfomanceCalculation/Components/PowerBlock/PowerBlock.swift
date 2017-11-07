@@ -30,10 +30,11 @@ public enum PowerBlock: Component {
   }
   
   /// a struct for operation-relevant data of the gas turbine
-  public struct PerformanceData: Equatable, MassFlow, WorkingConditions {
+  public struct PerformanceData: Equatable, MassFlow, WorkingConditions,
+  CustomStringConvertible {
     var operationMode: OperationMode
     var load: Double
-    var temperature: (inlet: Double, outlet: Double)
+    var temperature: (inlet: Temperature, outlet: Temperature)
     var massFlow, totalMassFlow, hin: Double
     
     public enum OperationMode {
@@ -43,22 +44,37 @@ public enum PowerBlock: Component {
     public static func ==(lhs: PerformanceData, rhs: PerformanceData) -> Bool {
       return lhs.operationMode == rhs.operationMode && lhs.load == rhs.load
     }
+    
+    public var description: String {
+      return "Mode: \(operationMode) "
+        + String(format:"Load: %.1f ", load)
+        + String(format:"Mass Flow: %.1f ", massFlow)
+        + String(format:"Inlet: %.1f ", temperature.inlet.value)
+        + String(format:"Outlet: %.1f", temperature.outlet.value)
+    }
   }
   
   fileprivate static let initialState = PerformanceData(
     operationMode: .SM,
     load: 1.0,
-    temperature: (200, 200),
+    temperature: (437.15, 437.15),
     massFlow: 0,
     totalMassFlow: 0,
-    hin: 0)
+    hin: 0
+  )
   
   /// Returns the current working conditions of the power block
   public static var status: PerformanceData {
     get { return Instance.shared.workingConditions.current }
     set {
-      Instance.shared.workingConditions =
-        (Instance.shared.workingConditions.current, newValue)
+      if Instance.shared.workingConditions.current != newValue {
+        #if DEBUG
+        print("Powerblock status changed at \(PerformanceCalculator.dateTime):")
+        print(Instance.shared.workingConditions.current)
+        #endif
+        Instance.shared.workingConditions =
+          (Instance.shared.workingConditions.current, newValue)
+      }
     }
   }
   
@@ -114,16 +130,16 @@ public enum PowerBlock: Component {
           * (SteamTurbine.status.load.value ** Double(i)))
       }
       if !parameter.electricalParasiticsACCTamb.coefficients.isEmpty {
-        var electricalParasiticsACCkor = 0.0
+        var adjustmentACC = 0.0
         for i in 0 ... 4 {
-          electricalParasiticsACCkor += (parameter.electricalParasiticsACCTamb[i]
-            * Plant.ambientTemperature ** Double(i))
+          adjustmentACC += (parameter.electricalParasiticsACCTamb[i]
+            * Plant.ambientTemperature.value ** Double(i))
         }
         // ambient temp is larger than design, ACC max. consumption fixed to nominal
-        if electricalParasiticsACCkor > 1 {
-          electricalParasiticsACCkor = 1
+        if adjustmentACC > 1 {
+          adjustmentACC = 1
         }
-        electricalParasiticsACC = electricalParasiticsACC * electricalParasiticsACCkor
+        electricalParasiticsACC = electricalParasiticsACC * adjustmentACC
       }
     }
     
@@ -135,7 +151,7 @@ public enum PowerBlock: Component {
   }
   
   public static func operate(heat: inout Double,
-                             electricalParasitics _: inout Double,
+                             electricalParasitics: inout Double,
                              steamTurbine: inout SteamTurbine.PerformanceData,
                              Qsto: Double, meteo: MeteoData) -> Double {
     
@@ -184,7 +200,7 @@ public enum PowerBlock: Component {
       } else {
         // Start Up sequence: Energy is lost / Dumped
         steamTurbine.load = 0.0
-        let startUpeff = cos(Collector.theta) * Collector.efficiency(meteo: meteo, direction: 0)
+        let startUpeff = cos(Collector.theta) * Collector.efficiency
         qneu = (lastavgins * startUpeff - SolarField.status.HL)
           * Design.layout.solarField * Double(SolarField.parameter.numberOfSCAsInRow)
           * 2 * Collector.parameter.areaSCAnet / 1_000_000

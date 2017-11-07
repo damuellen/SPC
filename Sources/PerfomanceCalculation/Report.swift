@@ -21,18 +21,20 @@ public enum Report {
   }(DateFormatter())
   
   public static var description: String {
-    var d = "PROJECT:"
+    var d: String = """
+    PROJECT:
     
-    d += " BlaBla\n"
-    d += "\n"
-    d += "Location: \(Plant.location.longitude) \(Plant.location.latitude)"
-    d += "Simulation Ref:\n"//ProjectFilePath(0)"
-    d += "Performance Run:\n"//(NSDate())"
-    d += "Program-Version:\n"//t0.1\n"
+    BlaBla\
+
+    Location: \(Plant.location.longitude) \(Plant.location.latitude)
+    Simulation Ref:
+    Performance Run:
+    Program-Version:
+    """//t0.1\n"
     // if let SolarField.status = SolarField.status {
     d += "SOLAR FIELD\n"
     d += "  No of Loops:" >< "\(Design.layout.solarField)"
-    d += "  Collector Type:" >< "\(Collector.parameter.name))"
+    d += "  Collector Type:" >< "\(Collector.parameter.name)"
     let aperture = Design.layout.solarField * 2 * Collector.parameter.areaSCAnet
       * Double(SolarField.parameter.numberOfSCAsInRow)
     d += "  Aperture [m²]:" >< "\(aperture)"
@@ -144,7 +146,7 @@ public enum Report {
     d += "HTF Temperature in Collector [°C]:"
       >< "\(Simulation.initialValues.temperatureOfHTFinHCE.toCelsius)"
     d += "Mass Flow in Solar Field [kg/s]:"
-      >< "\(Simulation.initialValues.massflowInSolarField.toCelsius)"
+      >< "\(Simulation.initialValues.massFlowInSolarField.toCelsius)"
     d += "Delta T for Start-Up of Anti-Freeze Pumping:"
       >< "\(Simulation.parameter.dfreezeTemperaturePump)"
     d += "Delta T for Start-Up of Anti-Freeze Heater:"
@@ -184,12 +186,14 @@ public enum Report {
     d += "\n\n"
     d += "    Input Files"
     d += "\n\n"
+    d += "HEAT TRANSFER FLUID\n\n"
+    d += "\(htf.description)"
+    d += "\n\n"
     //Jn = InStrRev(Filespec.MTO, "\")
     //Bname = Mid(Filespec.MTO, Jn + 1, 40)
     //Bname = Trim(Bname)
     d += "METEODATA Bname\n"
-    
-    
+
     d += "Meteodata of a leap year"
       >< "\(Simulation.time.isLeapYear ? "YES" : "NO")"    /*
      d += "Position of Wet Bulb Temp. in mto-file [row]:" >< "\(Simulation.parameter.WBTpos)"

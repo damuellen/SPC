@@ -23,7 +23,7 @@ extension Storage {
     var tempExCst, tempExC0to1, tempInCst, tempInC0to1: [Double]
     var heatlossCst, heatlossC0to1: [Double]
     var pumpEfficiency, pressureLoss: Double, massFlow: Double
-    let startTemperature: (cold: Double, hot: Double) //TurbTL(0) TurbTL(1)
+    let startTemperature: (cold: Temperature, hot: Temperature) //TurbTL(0) TurbTL(1)
     let startLoad: (cold: Double, hot: Double) //TurbTL(2) TurbTL(3)
     public enum Strategy: String {
       case always, demand, shifter
@@ -48,8 +48,8 @@ extension Storage {
     
     var definedBy: Definition = .hours
     
-    let deltaTemperature: (charging: Double, discharging: Double)
-    let designTemperature: (hot: Double, cold: Double)
+    let deltaTemperature: (charging: Temperature, discharging: Temperature)
+    let designTemperature: (hot: Temperature, cold: Temperature)
     let heatLoss: (hot: Double, cold: Double)
     let FCstartD2: Int // Second Start fossil charging at Day
     let FCstartM2: Int // Second Start fossil charging at Month
@@ -77,6 +77,7 @@ extension Storage {
     
   }
 }
+
 extension Storage.Parameter: CustomStringConvertible {
   public var description: String {
     var d: String = ""

@@ -23,15 +23,14 @@ public enum Simulation {
   static var initialValues = InitValues(
     temperatureOfHTFinPipes: 100.0.toKelvin,
     temperatureOfHTFinHCE: 50.0.toKelvin,
-    massflowInSolarField: 0)
+    massFlowInSolarField: 0)
   
   static var tariff = Tariff(
     name: "",
     abbreviation: "",
     energyPayment: 1,
     energieCost: 1,
-    capacityPaymentPercent:
-    1,
+    capacityPaymentPercent: 1,
     capacityPayment: 1,
     bonusPaymentPercent: 1,
     bonusPayment: 1,
@@ -45,12 +44,12 @@ public enum Simulation {
     steps: .every5minutes)
   
   static var parameter = Simulation.Parameter(
-    dfreezeTemperaturePump: 151,
-    dfreezeTemperatureHeat: 40,
-    minTemperatureRaiseStartUp: 0,
+    dfreezeTemperaturePump: 151.0,
+    dfreezeTemperatureHeat: 40.0,
+    minTemperatureRaiseStartUp: 0.0,
+    tempTolerance: 1.0,
     minInsolationRaiseStartUp: 0,
     heatTolerance: 4,
-    tempTolerance: 1,
     timeTolerance: 1,
     massTolerance: 0.5,
     minInsolation: 250,
@@ -65,7 +64,7 @@ public enum Simulation {
 public struct InitValues: Codable {
   let temperatureOfHTFinPipes,
   temperatureOfHTFinHCE,
-  massflowInSolarField: Double
+  massFlowInSolarField: Double
 }
 
 public extension InitValues {
@@ -73,7 +72,7 @@ public extension InitValues {
     let row: (Int)throws -> Double = { try file.parseDouble(row: $0) }
     self.temperatureOfHTFinPipes = try row(6)
     self.temperatureOfHTFinHCE = try row(9)
-    self.massflowInSolarField = try row(12)
+    self.massFlowInSolarField = try row(12)
   }
 }
 

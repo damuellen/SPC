@@ -25,24 +25,26 @@ public enum Design {
 
 public struct Layout: Codable {
   
-  var solarField = 100.0
-  var heater = 20.0
-  var heatExchanger = 100.0
-  var boiler = 0.0
+  var solarField = 120.0
+  var heater = -10.0
+  var heatExchanger = 50.0
+  var boiler = 1.0
   var gasTurbine = 0.0
-  var powerBlock = 100.0
-  var storage = 200.0
+  var powerBlock = 42.5
+  var storage = 0.0
   var storage_cap = 0.0
   var storage_ton = 0.0
 }
 
 extension Layout: TextConfigInitializable {
   public init(file: TextConfigFile)throws {
-    let values = file.values.filter { !$0.isEmpty }
-      .flatMap { $0.split(separator: " ").first }
-      .map({String($0).trimmingCharacters(in: .whitespaces)})
+    let values: [String] = file.values.filter { !$0.isEmpty }
+    let firstParts = values.flatMap { $0.split(separator: " ").first }
+    let trimmedValues = firstParts.map {
+      String($0).trimmingCharacters(in: .whitespaces)
+    }
     
-    for (count, value) in zip(1..., values) {
+    for (count, value) in zip(1..., trimmedValues) {
       if count == 9, let definition = Storage.Definition(rawValue: value) {
         Storage.parameter.definedBy = definition
       }

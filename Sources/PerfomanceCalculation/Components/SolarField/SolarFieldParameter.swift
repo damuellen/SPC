@@ -37,18 +37,18 @@ extension SolarField {
     var pumpParasticsFullLoad, antiFreezeFlow: Double
     var HTFmass: Double
     var collector: Collector.Parameter! = nil
-    var EdgeFac: [Double] = []
+    var edgeFactor: [Double] = []
   }
 }
 
 extension SolarField.Parameter {
   
   var distRatio: Double {
-    return SolarField.parameter.pipeWay / (2 * SolarField.parameter.nearWay)
+    return pipeWay / (2 * nearWay)
   }
   
   var pipeWay: Double {
-    return SolarField.parameter.nearWay + 2 * SolarField.parameter.avgWay
+    return nearWay + 2 * avgWay
   }
   
   var loopWay: Double {
@@ -57,43 +57,26 @@ extension SolarField.Parameter {
   }
   
   var nearWay: Double {
-    return Double(numberOfSCAsInRow)
-      * (Collector.parameter.lengthSCA + distanceSCA) * 2 + rowDistance + 0.5
+    let nearWay = Double(numberOfSCAsInRow)
+      * (Collector.parameter.lengthSCA + distanceSCA)
+    return layout == "I"
+      ? nearWay
+      : nearWay * 2 + rowDistance + 0.5
   }
   
   var avgWay: Double {
-    return Design.layout.solarField / 4 * SolarField.parameter.rowDistance / 2 + 0.5
+    let avgWay = Design.layout.solarField / 4 * rowDistance / 2
+    return layout == "I"
+      ? avgWay + 0.5
+      : avgWay + nearWay
     
   }
-  var farWay: Double { return 0.0 }
-  /*
-   
-   if SolarField.parameter.layout == "I" {
-   // no change
-   } else {
-   // SolarField.parameter.nearWay = Int(1 * (Double(SolarField.parameter.numberOfSCAsInRow) * (lengthSCA + distanceSCA)))
-   // SolarField.parameter.avgWay = Int(1 * (Design.layout.solarField / 4 * SolarField.parameter.Rowdist / 2)) + SolarField.parameter.nearWay
-   }
-   if SolarField.parameter.layout == "I" {
-   // SolarField.parameter.farWay = Int(2 * (Design.layout.solarField / 4 * SolarField.parameter.Rowdist / 2))
-   // MH No2: + SolarField.parameter.nearWay
-   } else {
-   // SolarField.parameter.farWay = Int(2 * (Design.layout.solarField / 4 * SolarField.parameter.Rowdist / 2)) + SolarField.parameter.nearWay
-   }
-   // SolarField.parameter.PipeWay = SolarField.parameter.nearWay + 2 * SolarField.parameter.avgWay
-   
-   
-   If SFc.Layout = "I" Then
-   'no change
-   Else
-   var nearWay: Double = Int(1 * (SFc.NSCAsInRow * (SFc.SCAlen + SFc.SCAdist)))
-   var avgWay = Int(1# * (Design.layout.solarField. / 4 * SFc.Rowdist / 2)) + SFc.nearWay
-   End If
-   If SFc.Layout = "I" Then
-   var farWay: Double = Int(2# * (Design.layout.solarField. / 4 * SFc.Rowdist / 2)) ' MH No2: + SFc.nearWay
-   Else
-   var farWay = Int(2# * (Design.layout.solarField. / 4 * SFc.Rowdist / 2)) + SFc.nearWay
-   End If */
+  var farWay: Double {
+    let farWay: Double = (2 * (Design.layout.solarField / 4 * rowDistance / 2))
+    return layout == "I"
+      ? farWay
+      : farWay + nearWay
+  }
 }
 
 extension SolarField.Parameter: CustomStringConvertible {

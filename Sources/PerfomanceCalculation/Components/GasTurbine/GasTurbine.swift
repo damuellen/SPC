@@ -256,18 +256,18 @@ public enum GasTurbine: Component {
           if case .integrated = WasteHeatRecovery.parameter.operation,
             heatFlow.production * HeatExchanger.parameter.efficiency > HTFshare {
             demand = 0
-            ////report = " Excess solar heat: Gas Turbine not operating\n"
+            // report = " Excess solar heat: Gas Turbine not operating\n"
           } else if GasTurbine.efficiency > 0 ,
             heatFlow.production * HeatExchanger.parameter.efficiency > HTFshare {
             // WasteHeatRecovery.parameter.Operation = "Pure"posbl
-            ////report = " Excess Q-solar: Gas Turbine operating at lower load\n"
+            // report = " Excess Q-solar: Gas Turbine operating at lower load\n"
             demand = (electricEnergy.demand - SteamTurbine.parameter.efficiencySCC
               * heatFlow.solar * HeatExchanger.parameter.efficiency) /
               (1 + SteamTurbine.parameter.efficiencySCC
                 * WasteHeatRecovery.parameter.efficiencyNominal
                 * (1 / GasTurbine.efficiency - 1))
-            
-          } else if HTFshare > heatFlow.demand { // Lower GasTurbine-demand, avoid production>demand
+            // Lower GasTurbine-demand, avoid production>demand
+          } else if HTFshare > heatFlow.demand {
             demand *= heatFlow.demand / HTFshare
           }
 
