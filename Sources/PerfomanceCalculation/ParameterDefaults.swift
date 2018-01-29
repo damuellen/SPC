@@ -1,11 +1,11 @@
 //
-//  Copyright (c) 2017 Daniel Müllenborn. All rights reserved.
-//  Distributed under the The Non-Profit Open Software License version 3.0
-//  http://opensource.org/licenses/NPOSL-3.0
+//  Copyright 2017 Daniel Müllenborn
 //
-//  This project is NOT free software. It is open source, you are allowed to
-//  modify it (if you keep the license), but it may not be commercially
-//  distributed other than under the conditions noted above.
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//  http://www.apache.org/licenses/LICENSE-2.0
 //
 
 public enum ParameterDefaults {
@@ -28,17 +28,17 @@ public enum ParameterDefaults {
     efficiency: 1,
     SCCEff: 99,
     temperature: HeatExchanger.Parameter.Temperatures(
-      htf: (inlet: (max: 666.15, min: 260), outlet: (max: 569.2977, min: 198)),
-      h2o: (inlet: (max: 344, min: 255), outlet: (max: 154, min: 128))),
+      htf: (inlet: (max: 393, min: 296), outlet: (max: 296, min: 0)),
+      h2o: (inlet: (max: 0, min: 263), outlet: (max: 300, min: 300))),
     scc: HeatExchanger.Parameter.Temperatures(
-      htf: (inlet: (max: 390, min: 370), outlet: (max: 295, min: 258)),
-      h2o: (inlet: (max: 344, min: 255), outlet: (max: 154, min: 100))),
-    SCCHTFmassFlow: 1080,
-    SCCHTFheatFlow: 200,
+      htf: (inlet: (max: 390, min: 260), outlet: (max: 292, min: 198)),
+      h2o: (inlet: (max: 374, min: 255), outlet: (max: 234, min: 128))),
+    SCCHTFmassFlow: 1500.0,
+    SCCHTFheatFlow: 265,
     ToutMassFlow: nil,
     ToutTin: nil,
     ToutTinMassFlow: nil,
-    useAndsolFunction: false,
+    useAndsolFunction: true,
     Tout_f_Mfl: false,
     Tout_f_Tin: false,
     Tout_exp_Tin_Mfl: false)
@@ -93,8 +93,9 @@ public enum ParameterDefaults {
     heatlossC0to1: [],
     pumpEfficiency: 0.82,
     pressureLoss: 776000,
-    massFlow: 50,
-    startTemperature: (cold: 288.0, hot: 288.0),
+    massFlow: 50.0,
+    startTemperature: (Temperature(celsius: 288.0),
+                       Temperature(celsius: 288.0)),
     startLoad: (cold: 1, hot: 0),
     strategy: .demand, PrefChargeto: 0.83,
     startexcep: 4, endexcep: 8,
@@ -104,10 +105,12 @@ public enum ParameterDefaults {
     fixedLoadDischarge: 0,
     heatTracingTime: [1,1], heatTracingPower: [1,1],
     DischrgParFac: 1, definedBy: .cap,
-    deltaTemperature: (300.0, 400.0),
-    designTemperature: (300.0, 400.0),
-    heatLoss: (1,1), FCstartD2: 1,
-    FCstartM2: 0, FCstopD2: 0, FCstopM2: 0,
+    deltaTemperature: (Temperature(celsius: 293.0),
+                       Temperature(celsius: 390.0)),
+    designTemperature: (Temperature(celsius: 293.0),
+                        Temperature(celsius: 390.0)),
+    heatLoss: (1,1),
+    FCstartD2: 1,  FCstartM2: 0, FCstopD2: 0, FCstopM2: 0,
     heatExchangerEfficiency: 0,
     heatExchangerCapacity: 0,
     heatExchangerMinCapacity: 0,
@@ -136,7 +139,7 @@ public enum ParameterDefaults {
     maxMassFlow: 0,
     minLoad: 0, nominalElectricalParasitics: 0,
     antiFreezeTemperature: 0.0,
-    nomTemperatureOut: 0.0,
+    nominalTemperatureOut: 0.0,
     electricalParasitics: [0,0],
     onlyWithSolarField: false)
   

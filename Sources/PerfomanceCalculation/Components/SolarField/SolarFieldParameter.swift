@@ -1,11 +1,11 @@
 //
-//  Copyright (c) 2017 Daniel Müllenborn. All rights reserved.
-//  Distributed under the The Non-Profit Open Software License version 3.0
-//  http://opensource.org/licenses/NPOSL-3.0
+//  Copyright 2017 Daniel Müllenborn
 //
-//  This project is NOT free software. It is open source, you are allowed to
-//  modify it (if you keep the license), but it may not be commercially
-//  distributed other than under the conditions noted above.
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//  http://www.apache.org/licenses/LICENSE-2.0
 //
 
 import Config
@@ -33,8 +33,9 @@ extension SolarField {
     let rowDistance, distanceSCA, pipeHL, azim, elev: Double
     let antiFreezeParastics: Double
     let pumpParastics: Coefficients
-    var massFlow: (max: Double, min: Double)
-    var pumpParasticsFullLoad, antiFreezeFlow: Double
+    var massFlow: (max: MassFlow, min: MassFlow)
+    var pumpParasticsFullLoad: Double
+    var antiFreezeFlow: MassFlow
     var HTFmass: Double
     var collector: Collector.Parameter! = nil
     var edgeFactor: [Double] = []
@@ -101,11 +102,11 @@ extension SolarField.Parameter: CustomStringConvertible {
     d += "Azimuth angle of Solar Field Orientation [°]:"
       >< "\(azim)"
     d += "Mass Flow in Solar Field at Full Load [kg/s]:"
-      >< "\(massFlow.max)"
+      >< massFlow.max.description
     d += "Minimum allowable Mass Flow [%]:"
-      >< "\(massFlow.min)"
+      >< "\(massFlow.min.rate)"
     d += "Anti-Freeze Mass Flow [%]:"
-      >< "\(antiFreezeFlow)"
+      >< "\(antiFreezeFlow.rate)"
     d += "Total Mass of HTF in System [kg]:"
       >< "\(HTFmass)"
     d += "Consider HL of ANY Dump. Collectors:"
@@ -167,8 +168,8 @@ extension SolarField.Parameter: TextConfigInitializable {
     self.pumpParasticsFullLoad = try row(34)
     self.antiFreezeParastics = try row(37)
     self.pumpParastics = try [row(40), row(43), row(46)]
-    self.massFlow = (try row(49), try row(52))
-    self.antiFreezeFlow = try row(55)
+    self.massFlow = try (MassFlow(row(49)), MassFlow(row(52)))
+    self.antiFreezeFlow = try MassFlow(row(55))
     self.HTFmass = try row(58)
     self.imbalanceDesign = try (row(72), row(73), row(74))
     self.imbalanceMin = try (row(75), row(76), row(77))
@@ -220,9 +221,9 @@ extension SolarField.Parameter: Codable {
     self.pumpParastics = try values.decode(
       Coefficients.self, forKey: .pumpParastics)
     self.massFlow = (
-      try values.decode(Double.self, forKey: .maxMassFlow),
-      try values.decode(Double.self, forKey: .minMassFlow))
-    self.antiFreezeFlow = try values.decode(Double.self, forKey: .antiFreezeFlow)
+      try values.decode(MassFlow.self, forKey: .maxMassFlow),
+      try values.decode(MassFlow.self, forKey: .minMassFlow))
+    self.antiFreezeFlow = try values.decode(MassFlow.self, forKey: .antiFreezeFlow)
     self.HTFmass = try values.decode(Double.self, forKey: .HTFmass)
     self.imbalanceDesign = (
       try values.decode(Double.self, forKey: .imbalanceDesignNear),

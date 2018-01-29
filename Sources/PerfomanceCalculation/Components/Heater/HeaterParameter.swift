@@ -1,11 +1,11 @@
 //
-//  Copyright (c) 2017 Daniel Müllenborn. All rights reserved.
-//  Distributed under the The Non-Profit Open Software License version 3.0
-//  http://opensource.org/licenses/NPOSL-3.0
+//  Copyright 2017 Daniel Müllenborn
 //
-//  This project is NOT free software. It is open source, you are allowed to
-//  modify it (if you keep the license), but it may not be commercially
-//  distributed other than under the conditions noted above.
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//  http://www.apache.org/licenses/LICENSE-2.0
 //
 
 import Config
@@ -14,7 +14,7 @@ extension Heater {
   public struct Parameter: ComponentParameter, Codable {
     let name: String
     let efficiency, maxMassFlow, minLoad, nominalElectricalParasitics: Double
-    let antiFreezeTemperature, nomTemperatureOut: Temperature
+    let antiFreezeTemperature, nominalTemperatureOut: Temperature
     let electricalParasitics: [Double]
     let onlyWithSolarField: Bool
   }
@@ -24,13 +24,14 @@ extension Heater.Parameter: CustomStringConvertible {
   public var description: String {
     var d: String = ""
     d += "Description:\t\(name)\n"
-    d += "Capacity of HTF-Heater [MW]: \t\(Design.layout.heater)"
+    d += "Capacity of HTF-Heater [MW]:"
+      >< "\(Design.layout.heater)"
     d += "Efficiency [%]:"
       >< "\(efficiency)"
-    d += "Outlet Temperature for Freeze Protection [°]:"
-      >< "\(antiFreezeTemperature)"
-    d += "Nominal Outlet Temperature [°]:"
-      >< "\(nomTemperatureOut)"
+    d += "Outlet Temperature for Freeze Protection [°C]:"
+      >< "\(antiFreezeTemperature.celsius)"
+    d += "Nominal Outlet Temperature [°C]:"
+      >< "\(nominalTemperatureOut.celsius)"
     d += "Maximum Mass Flow [kg/s]:"
       >< "\(maxMassFlow)"
     d += "Minimum Load [%]:"
@@ -52,7 +53,7 @@ extension Heater.Parameter: TextConfigInitializable {
     self.name = file.name
     self.efficiency = try row(10)
     self.antiFreezeTemperature = try Temperature( row(16))
-    self.nomTemperatureOut = try Temperature( row(19))
+    self.nominalTemperatureOut = try Temperature( row(19))
     self.maxMassFlow = try row(22)
     self.minLoad = try row(25)
     self.nominalElectricalParasitics = try row(28)

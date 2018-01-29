@@ -1,11 +1,11 @@
 //
-//  Copyright (c) 2017 Daniel Müllenborn. All rights reserved.
-//  Distributed under the The Non-Profit Open Software License version 3.0
-//  http://opensource.org/licenses/NPOSL-3.0
+//  Copyright 2017 Daniel Müllenborn
 //
-//  This project is NOT free software. It is open source, you are allowed to
-//  modify it (if you keep the license), but it may not be commercially
-//  distributed other than under the conditions noted above.
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//  http://www.apache.org/licenses/LICENSE-2.0
 //
 
 import Config
@@ -51,11 +51,9 @@ extension Boiler.Parameter: CustomStringConvertible {
     d += "c0:" >< "\(electricalParasitics[0])"
     d += "c1:" >< "\(electricalParasitics[1])"
     d += "Efficiency; Efficiency(Load) = c0+c1*load+c2*load^2+c3*load^3+c4*load^4)"
-    d += "c0:" >< "\(efficiency[0])"
-    d += "c1:" >< "\(efficiency[1])"
-    d += "c2:" >< "\(efficiency[2])"
-    d += "c3:" >< "\(efficiency[3])"
-    d += "c4:" >< "\(efficiency[4])"
+    for (i, c) in efficiency.coefficients.enumerated() {
+      d += "c\(i):" >< String(format:"%.6E", c)
+    }
     d += "Booster Superheater (if NO regular boiler selected):"
       >< (booster ? "YES" : "NO")
     return d

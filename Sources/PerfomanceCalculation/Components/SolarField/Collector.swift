@@ -1,11 +1,11 @@
 //
-//  Copyright (c) 2017 Daniel Müllenborn. All rights reserved.
-//  Distributed under the The Non-Profit Open Software License version 3.0
-//  http://opensource.org/licenses/NPOSL-3.0
+//  Copyright 2017 Daniel Müllenborn
 //
-//  This project is NOT free software. It is open source, you are allowed to
-//  modify it (if you keep the license), but it may not be commercially
-//  distributed other than under the conditions noted above.
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//  http://www.apache.org/licenses/LICENSE-2.0
 //
 
 import Foundation
@@ -119,10 +119,7 @@ public enum Collector: Component {
         * SolarField.parameter.edgeFactor[1]
     }
 
-    var IAM = 0.0
-    for i in parameter.IAMfac.indices {
-      IAM += parameter.IAMfac[i] * theta ** Double(i)
-    }
+    let IAM = parameter.IAMfac[theta]
 
     var shadingSCA = abs(sin(.pi / 2.0 + status.parabolicElevation))
       * SolarField.parameter.rowDistance / parameter.aperture
@@ -230,3 +227,28 @@ public enum Collector: Component {
     collector.theta = atan(sqrt(1 - pow(cosTheta, 2)) / cosTheta)
   }
 }
+
+extension SolarField.PerformanceData.OperationMode {
+  
+  var collector: Collector.OperationMode {
+    switch self {
+    case .fixed:
+      return .fixed
+    case .startUp:
+      return .operating
+    case .freezeProtection:
+      return .freezeProtection
+    case .operating:
+      return .operating
+    case .noOperation:
+      return .noOperation
+    case .scheduledMaintenance:
+      return .noOperation
+    case .unknown:
+      return .variable
+    case .ph:
+      return .variable
+    }
+  }
+}
+

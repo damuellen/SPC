@@ -1,11 +1,11 @@
 //
-//  Copyright (c) 2017 Daniel Müllenborn. All rights reserved.
-//  Distributed under the The Non-Profit Open Software License version 3.0
-//  http://opensource.org/licenses/NPOSL-3.0
+//  Copyright 2017 Daniel Müllenborn
 //
-//  This project is NOT free software. It is open source, you are allowed to
-//  modify it (if you keep the license), but it may not be commercially
-//  distributed other than under the conditions noted above.
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//  http://www.apache.org/licenses/LICENSE-2.0
 //
 
 import Foundation
@@ -16,16 +16,16 @@ public struct MeteoData: CustomStringConvertible {
   public let wetBulbTemperature: Float? = nil
   
   /// Linear interpolation function for meteo data values
-  static func interpolate(from fromData: MeteoData,
-                          to toData: MeteoData, with lerp: Float) -> MeteoData {
+  static func interpolate(_ startValue: MeteoData,
+                          to endValue: MeteoData, progress: Float) -> MeteoData {
     
-    if lerp >= 1 { return toData }
+    if progress >= 1 { return endValue }
     
-    let dni = fromData.dni + (lerp * (toData.dni - fromData.dni)),
-    temperature = fromData.temperature
-      + (lerp * (toData.temperature - fromData.temperature)),
-    windSpeed = fromData.windSpeed
-      + (lerp * (toData.windSpeed - fromData.windSpeed))
+    let dni = startValue.dni + (progress * (endValue.dni - startValue.dni)),
+    temperature = startValue.temperature
+      + (progress * (endValue.temperature - startValue.temperature)),
+    windSpeed = startValue.windSpeed
+      + (progress * (endValue.windSpeed - startValue.windSpeed))
     
     return MeteoData(
       dni: dni, temperature: temperature, windSpeed: windSpeed)
@@ -37,12 +37,48 @@ public struct MeteoData: CustomStringConvertible {
     self.windSpeed = windSpeed
   }
   
+  public init(_ values: [Float]) {
+    self.dni = values[0]
+    self.temperature = values[1]
+    self.windSpeed = values[2]
+  }
+  
   public var description: String {
     return String(format:"Temp: %.1f ", temperature)
       + String(format:"DNI: %.1f ", dni)
       + String(format:"WS: %.1f", windSpeed)
   }
 }
+
+public class MeteoDataSource {
+  
+  public let data: [MeteoData]
+  public let name: String
+  public let location: Location
+  public let year: Int?
+  public let timeZone: Int?
+  
+  init(name: String, data: [MeteoData], location: Location, year: Int?, timeZone: Int?) {
+    self.name = name
+    self.data = data
+    self.location = location
+    self.year = year
+    self.timeZone = timeZone
+  }
+}
+
+public struct Location {
+  public let longitude: Double
+  public let latitude: Double
+  public let elevation: Double
+  
+  public init(longitude: Double, latitude: Double, elevation: Double) {
+    self.longitude = longitude
+    self.latitude = latitude
+    self.elevation = elevation
+  }
+}
+
 // meteo-data interpolation:
 /*
 do {
@@ -114,33 +150,7 @@ do {
   K = K - 1
 }
 */
-public class MeteoDataSource {
-  
-  public let data: [MeteoData]
-  
-  public let location: Location
-  public let year: Int?
-  public let timeZone: Int?
-  
-  init(data: [MeteoData], location: Location, year: Int?, timeZone: Int?) {
-    self.data = data
-    self.location = location
-    self.year = year
-    self.timeZone = timeZone
-  }
-}
 
-public struct Location {
-  public let longitude: Double
-  public let latitude: Double
-  public let elevation: Double
-  
-  public init(longitude: Double, latitude: Double, elevation: Double) {
-    self.longitude = longitude
-    self.latitude = latitude
-    self.elevation = elevation
-  }
-}
 
 /*
  period        : Integer      'Validity period [sec]

@@ -1,11 +1,11 @@
 //
-//  Copyright (c) 2017 Daniel Müllenborn. All rights reserved.
-//  Distributed under the The Non-Profit Open Software License version 3.0
-//  http://opensource.org/licenses/NPOSL-3.0
+//  Copyright 2017 Daniel Müllenborn
 //
-//  This project is NOT free software. It is open source, you are allowed to
-//  modify it (if you keep the license), but it may not be commercially
-//  distributed other than under the conditions noted above.
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//  http://www.apache.org/licenses/LICENSE-2.0
 //
 
 import Foundation
@@ -15,12 +15,11 @@ public typealias Pressure = Double
 public typealias Angle = Double
 
 public extension Double {
-  var toCelsius: Double { return self - 273.15 }
-  var toKelvin: Double { return self + 273.15 }
+  var toKelvin: Double { return self - Temperature.absoluteZeroCelsius }
 }
 
 public extension Float {
-  var toKelvin: Float { return self + 273.15 }
+  var toKelvin: Float { return self - Float(Temperature.absoluteZeroCelsius) }
 }
 
 public extension Angle {
@@ -31,16 +30,19 @@ public extension Angle {
 let calendar = { calendar -> Calendar in
   var calendar = calendar
   calendar.timeZone = TimeZone(secondsFromGMT: 0)!
+  calendar.locale = Locale(identifier: "en_US")
   return calendar
 }(Calendar(identifier: .gregorian))
 
+let monthSymbols = calendar.monthSymbols
+
 extension Progress {
-  func tracking(month: Int) {
+  func tracking(of month: Int) {
+    let monthSymbol = monthSymbols[month - 1]
     let month = Int64(month)
-    if month > self.completedUnitCount {
+    if month > completedUnitCount {
       self.completedUnitCount = month
-      print("Month", self.completedUnitCount,
-            "is currently being calculated.")
+      Log.infoMessage("The calculations for \(monthSymbol) are in progress.")
     }
   }
 }

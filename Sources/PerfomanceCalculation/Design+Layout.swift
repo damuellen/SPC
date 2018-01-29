@@ -1,21 +1,21 @@
 //
-//  Copyright (c) 2017 Daniel Müllenborn. All rights reserved.
-//  Distributed under the The Non-Profit Open Software License version 3.0
-//  http://opensource.org/licenses/NPOSL-3.0
+//  Copyright 2017 Daniel Müllenborn
 //
-//  This project is NOT free software. It is open source, you are allowed to
-//  modify it (if you keep the license), but it may not be commercially
-//  distributed other than under the conditions noted above.
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//  http://www.apache.org/licenses/LICENSE-2.0
 //
 
 import Config
 
 public enum Design {
   
-  static var layout: Layout = Layout()
+  public static var layout: Layout = Layout()
   
   static let hasSolarField = layout.solarField > 0
-  static let hasHeater = layout.heater > 0
+  static let hasHeater = layout.heater < 0
   static let hasHeatExchanger = layout.heatExchanger > 0
   static let hasBoiler = layout.boiler > 0
   static let hasGasTurbine = layout.gasTurbine > 0
@@ -25,10 +25,10 @@ public enum Design {
 
 public struct Layout: Codable {
   
-  var solarField = 120.0
+  public var solarField = 120.0
   var heater = -10.0
   var heatExchanger = 50.0
-  var boiler = 1.0
+  var boiler = 0.0
   var gasTurbine = 0.0
   var powerBlock = 42.5
   var storage = 0.0

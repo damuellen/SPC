@@ -1,12 +1,13 @@
 //
-//  Copyright (c) 2017 Daniel Müllenborn. All rights reserved.
-//  Distributed under the The Non-Profit Open Software License version 3.0
-//  http://opensource.org/licenses/NPOSL-3.0
+//  Copyright 2017 Daniel Müllenborn
 //
-//  This project is NOT free software. It is open source, you are allowed to
-//  modify it (if you keep the license), but it may not be commercially
-//  distributed other than under the conditions noted above.
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
 //
+//  http://www.apache.org/licenses/LICENSE-2.0
+//
+
 import Foundation
 import Config
 
@@ -19,13 +20,19 @@ extension HeatExchanger {
       outlet: (max: Temperature, min: Temperature))
       
       public init(
-        htf: (inlet: (max: Double, min: Double), outlet: (max: Double, min: Double)),
-        h2o: (inlet: (max: Double, min: Double), outlet: (max: Double, min: Double))) {
+        htf: (inlet: (max: Double, min: Double),
+        outlet: (max: Double, min: Double)),
+        h2o: (inlet: (max: Double, min: Double),
+        outlet: (max: Double, min: Double))) {
         
-        self.htf = ((Temperature(htf.inlet.max), Temperature(htf.inlet.min)),
-                    (Temperature(htf.outlet.max), Temperature(htf.outlet.min)))
-        self.h2o = ((Temperature(h2o.inlet.max), Temperature(h2o.inlet.min)),
-                    (Temperature(h2o.outlet.max), Temperature(h2o.outlet.min)))
+        self.htf = ((Temperature(celsius: htf.inlet.max),
+                     Temperature(celsius: htf.inlet.min)),
+                    (Temperature(celsius: htf.outlet.max),
+                     Temperature(celsius: htf.outlet.min)))
+        self.h2o = ((Temperature(celsius: h2o.inlet.max),
+                     Temperature(celsius: h2o.inlet.min)),
+                    (Temperature(celsius: h2o.outlet.max),
+                     Temperature(celsius: h2o.outlet.min)))
       }
     }
     
@@ -34,7 +41,7 @@ extension HeatExchanger {
     let SCCEff: Double
     var temperature: Temperatures
     let scc: Temperatures
-    let SCCHTFmassFlow: Double
+    let SCCHTFmassFlow: MassFlow
     var SCCHTFheatFlow: Double
     var ToutMassFlow: Coefficients?
     var ToutTin: Coefficients?
@@ -51,41 +58,35 @@ extension HeatExchanger.Parameter: CustomStringConvertible {
     d += "Efficiency [%]:"
       >< "\(efficiency)"
     d += "Maximum Inlet Temperature  [°C]:"
-      >< "\(temperature.htf.inlet.max.toCelsius)"
+      >< "\(temperature.htf.inlet.max.celsius)"
     d += "Maximum Outlet Temperature [°C]:"
-      >< "\(temperature.htf.outlet.max.toCelsius)"
+      >< "\(temperature.htf.outlet.max.celsius)"
     d += "Minimum Inlet Temperature  [°C]:"
-      >< "\(temperature.htf.inlet.min.toCelsius)"
+      >< "\(temperature.htf.inlet.min.celsius)"
     d += "Minimum Outlet Temperature [°C]:"
-      >< "\(temperature.htf.outlet.min.toCelsius)"
+      >< "\(temperature.htf.outlet.min.celsius)"
     d += "Calculate Outlet Temp. as function of HTF Massflow:"
       >< (Tout_f_Mfl ? "YES" : "NO ")
     if Tout_f_Mfl, ToutMassFlow != nil  {
-      d += "c0:" >< "\(ToutMassFlow![0])"
-      d += "c1:" >< "\(ToutMassFlow![1])"
-      d += "c2:" >< "\(ToutMassFlow![2])"
-      d += "c3:" >< "\(ToutMassFlow![3])"
-      d += "c4:" >< "\(ToutMassFlow![4])"
+      for (i, c) in ToutMassFlow!.coefficients.enumerated() {
+        d += "c\(i):" >< String(format:"%.4E", c)
+      }
     }
     d += "Calculate Outlet Temp. as function of HTF Inlet Temp.:"
       >< (Tout_f_Tin ? "YES" : "NO ")
     if Tout_f_Tin, ToutTin != nil {
-      d += "c0:" >< "\(ToutTin![0])"
-      d += "c1:" >< "\(ToutTin![1])"
-      d += "c2:" >< "\(ToutTin![2])"
-      d += "c3:" >< "\(ToutTin![3])"
-      d += "c4:" >< "\(ToutTin![4])"
+      for (i, c) in ToutTin!.coefficients.enumerated() {
+        d += "c\(i):" >< String(format:"%.4E", c)
+      }
     }
     d += "Calculate Outlet Temp. as Andasol-3 Function.:"
       >< (useAndsolFunction ? "YES" : "NO ")
     d += "Calculate Outlet Temp. as f(Tin,Mfl):"
       >< (Tout_exp_Tin_Mfl ? "YES" : "NO ")
     if Tout_exp_Tin_Mfl, ToutTinMassFlow != nil {
-      d += "c0:" >< "\(ToutTinMassFlow![0])"
-      d += "c1:" >< "\(ToutTinMassFlow![1])"
-      d += "c2:" >< "\(ToutTinMassFlow![2])"
-      d += "c3:" >< "\(ToutTinMassFlow![3])"
-      d += "c4:" >< "\(ToutTinMassFlow![4])"
+      for (i, c) in ToutTinMassFlow!.coefficients.enumerated() {
+        d += "c\(i):" >< String(format:"%.4E", c)
+      }
     }
     // d += "not used:" HXc.H2OinTmax
     // d += "not used:" HXc.H2OinTmin
@@ -95,21 +96,21 @@ extension HeatExchanger.Parameter: CustomStringConvertible {
     d += "Efficiency [%]:"
       >< "\(SCCEff * 100)"
     d += "Maximum Inlet Temperature [°C]:"
-      >< "\(scc.htf.inlet.max)"
+      >< "\(scc.htf.inlet.max.celsius)"
     d += "Maximum Outlet Temperature [°C]:"
-      >< "\(scc.htf.outlet.max)"
+      >< "\(scc.htf.outlet.max.celsius)"
     d += "Minimum Inlet Temperature [°C]:"
-      >< "\(scc.htf.inlet.min)"
+      >< "\(scc.htf.inlet.min.celsius)"
     d += "Minimum Outlet Temperature [°C]:"
-      >< "\(scc.htf.outlet.min)"
+      >< "\(scc.htf.outlet.min.celsius)"
     // d += "not used:" HXc.SCCH2OinTmax - TK0
     // d += "not used:" HXc.SCCH2OinTmin - TK0
     // d += "not used:" HXc.SCCH2OoutTmax - TK0
     // d += "not used:" HXc.SCCH2OoutTmin - TK0
     d += "Nominal HTF Mass Flow [kg/s]:"
-      >< "\(SCCHTFmassFlow)"
+      >< "\(SCCHTFmassFlow.rate)"
     d += "Nominal Capacity [MW]:"
-      >< "\(SCCHTFheatFlow)"
+      >< String(format:"%.3f", SCCHTFheatFlow)
     return d
   }
 }
@@ -131,7 +132,7 @@ extension HeatExchanger.Parameter: TextConfigInitializable {
             outlet: (max: row(65).toKelvin, min: row(68).toKelvin)))
     
     self.SCCEff = try row(44)
-    self.SCCHTFmassFlow = try row(71)
+    self.SCCHTFmassFlow = try MassFlow(row(71))
     self.SCCHTFheatFlow = try row(74)
     self.useAndsolFunction = false
     self.Tout_f_Mfl = false
@@ -172,7 +173,7 @@ extension HeatExchanger.Parameter: Codable {
       h2o: (inlet: (max: temperatures[4].toKelvin, min: temperatures[5].toKelvin),
             outlet: (max: temperatures[6].toKelvin, min: temperatures[7].toKelvin)))
     self.SCCEff = try values.decode(Double.self, forKey: .SCCEff)
-    self.SCCHTFmassFlow = try values.decode(Double.self, forKey: .SCCHTFmassFlow)
+    self.SCCHTFmassFlow = try values.decode(MassFlow.self, forKey: .SCCHTFmassFlow)
     self.SCCHTFheatFlow = try values.decode(Double.self, forKey: .SCCHTFheatFlow)
     self.useAndsolFunction = try values.decode(Bool.self, forKey: .useAndsolFunction)
     self.Tout_f_Mfl = try values.decode(Bool.self, forKey: .Tout_f_Mfl)
@@ -185,16 +186,16 @@ extension HeatExchanger.Parameter: Codable {
     try container.encode(name, forKey: .name)
     try container.encode(efficiency, forKey: .efficiency)
     let temperatures = [
-      temperature.htf.inlet.max.toCelsius, temperature.htf.inlet.min.toCelsius,
-      temperature.htf.outlet.max.toCelsius, temperature.htf.outlet.min.toCelsius,
-      temperature.h2o.inlet.max.toCelsius, temperature.h2o.inlet.min.toCelsius,
-      temperature.h2o.outlet.max.toCelsius, temperature.h2o.outlet.min.toCelsius]
+      temperature.htf.inlet.max.celsius, temperature.htf.inlet.min.celsius,
+      temperature.htf.outlet.max.celsius, temperature.htf.outlet.min.celsius,
+      temperature.h2o.inlet.max.celsius, temperature.h2o.inlet.min.celsius,
+      temperature.h2o.outlet.max.celsius, temperature.h2o.outlet.min.celsius]
     try container.encode(temperatures, forKey: .temperature)
     let sccTemperatures = [
-      scc.htf.inlet.max.toCelsius, scc.htf.inlet.min.toCelsius,
-      scc.htf.outlet.max.toCelsius, scc.htf.outlet.min.toCelsius,
-      scc.h2o.inlet.max.toCelsius, scc.h2o.inlet.min.toCelsius,
-      scc.h2o.outlet.max.toCelsius, scc.h2o.outlet.min.toCelsius]
+      scc.htf.inlet.max.celsius, scc.htf.inlet.min.celsius,
+      scc.htf.outlet.max.celsius, scc.htf.outlet.min.celsius,
+      scc.h2o.inlet.max.celsius, scc.h2o.inlet.min.celsius,
+      scc.h2o.outlet.max.celsius, scc.h2o.outlet.min.celsius]
     try container.encode(sccTemperatures, forKey: .scc)
     try container.encode(SCCEff, forKey: .SCCEff)
     try container.encode(SCCHTFmassFlow, forKey: .SCCHTFmassFlow)

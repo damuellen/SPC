@@ -1,97 +1,111 @@
 //
-//  Copyright (c) 2017 Daniel Müllenborn. All rights reserved.
-//  Distributed under the The Non-Profit Open Software License version 3.0
-//  http://opensource.org/licenses/NPOSL-3.0
+//  Copyright 2017 Daniel Müllenborn
 //
-//  This project is NOT free software. It is open source, you are allowed to
-//  modify it (if you keep the license), but it may not be commercially
-//  distributed other than under the conditions noted above.
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//  http://www.apache.org/licenses/LICENSE-2.0
 //
 
 import Foundation
 
+/// A temperature value in Kelvin.
 public struct Temperature {
-  
-  var value: Double
-  
-  var toCelsius: Double { return value - 273.15 }
-  var toKelvin: Double { return value + 273.15 }
-  
-  static var zero: Temperature { return Temperature(0.0 as Double) }
-  
-  public init(_ value: Double) {
-    self.value = value
-  }
-  
-  public init(_ value: Float) {
-    self.value = Double(value)
-  }
 
+  var kelvin: Double {
+    willSet { assert(newValue > 0) }
+  }
+  
+  static var absoluteZeroCelsius = -273.15
+  
+  var celsius: Double { return kelvin + Temperature.absoluteZeroCelsius }
+  
+  public init() {
+    self.kelvin = Temperature.absoluteZeroCelsius
+  }
+  
+  public init(_ kelvin: Double) {
+    assert(kelvin >= 0)
+    self.kelvin = kelvin
+  }
+  
+  /// Creates a new instance initialized to the given value converted to Kelvin.
+  public init(celsius: Double) {
+    assert(celsius > Temperature.absoluteZeroCelsius)
+    self.kelvin = celsius.toKelvin
+  }
+  
+  public init(celsius: Float) {
+    assert(celsius > Float(Temperature.absoluteZeroCelsius))
+    self.kelvin = Double(celsius).toKelvin
+  }
+  
   mutating func adjust(with ratio: Ratio) {
-    value *= ratio.value
+    kelvin *= ratio.ratio
   }
   
   func adjusted(with ratio: Ratio) -> Temperature {
-    return Temperature(value * ratio.value)
+    return Temperature(kelvin * ratio.ratio)
   }
   
   mutating func adjust(with factor: Double) {
-    value *= factor
+    kelvin *= factor
   }
   
   func adjusted(with factor: Double) -> Temperature {
-    return Temperature(value * factor)
+    return Temperature(kelvin * factor)
   }
   
   func raised(by degree: Double) -> Temperature {
-    return Temperature(value + degree)
+    return Temperature(kelvin + degree)
   }
   
   func lowered(by degree: Double) -> Temperature {
-    return Temperature(value - degree)
+    return Temperature(kelvin - degree)
   }
   
   func isHigher(than degree: Double) -> Bool {
-    return value > degree
+    return kelvin > degree
   }
   
   func isLower(than degree: Double) -> Bool {
-    return value < degree
+    return kelvin < degree
   }
   
   static func + (lhs: Temperature, rhs: Temperature) -> Temperature {
-    return Temperature(lhs.value + rhs.value)
+    return Temperature(lhs.kelvin + rhs.kelvin)
   }
   
   static func - (lhs: Temperature, rhs: Temperature) -> Temperature {
-    return Temperature(lhs.value - rhs.value)
+    return Temperature(lhs.kelvin - rhs.kelvin)
   }
 }
 
 extension Temperature: Codable {
   public init(from decoder: Decoder) throws {
     let container = try decoder.singleValueContainer()
-    self.value = try container.decode(Double.self)
+    self.kelvin = try container.decode(Double.self)
   }
   
   public func encode(to encoder: Encoder) throws {
     var container = encoder.singleValueContainer()
-    try container.encode(self.value)
+    try container.encode(self.kelvin)
   }
 }
 
 extension Temperature: ExpressibleByFloatLiteral {
-  public init(floatLiteral value: Double) {
-    self.value = value
+  public init(floatLiteral kelvin: Double) {
+    self.kelvin = kelvin
   }
 }
 
 extension Temperature: Comparable {
   public static func < (lhs: Temperature, rhs: Temperature) -> Bool {
-    return lhs.value < rhs.value
+    return lhs.kelvin < rhs.kelvin
   }
   
   public static func == (lhs: Temperature, rhs: Temperature) -> Bool {
-    return Int(lhs.value * 1000) == Int(rhs.value * 1000)
+    return fdim(lhs.kelvin, rhs.kelvin) < 1e-4
   }
 }

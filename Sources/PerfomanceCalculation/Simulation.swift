@@ -1,11 +1,11 @@
 //
-//  Copyright (c) 2017 Daniel Müllenborn. All rights reserved.
-//  Distributed under the The Non-Profit Open Software License version 3.0
-//  http://opensource.org/licenses/NPOSL-3.0
+//  Copyright 2017 Daniel Müllenborn
 //
-//  This project is NOT free software. It is open source, you are allowed to
-//  modify it (if you keep the license), but it may not be commercially
-//  distributed other than under the conditions noted above.
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//  http://www.apache.org/licenses/LICENSE-2.0
 //
 
 import Foundation
@@ -20,10 +20,12 @@ let adjustmentFactor = Simulation.AdjustmentFactor(
 
 public enum Simulation {
   
+  static var isStart = true
+  
   static var initialValues = InitValues(
-    temperatureOfHTFinPipes: 100.0.toKelvin,
-    temperatureOfHTFinHCE: 50.0.toKelvin,
-    massFlowInSolarField: 0)
+    temperatureOfHTFinPipes: Temperature(celsius: 100.0),
+    temperatureOfHTFinHCE: Temperature(celsius: 50.0),
+    massFlowInSolarField: 0.0)
   
   static var tariff = Tariff(
     name: "",
@@ -63,16 +65,16 @@ public enum Simulation {
 
 public struct InitValues: Codable {
   let temperatureOfHTFinPipes,
-  temperatureOfHTFinHCE,
-  massFlowInSolarField: Double
+  temperatureOfHTFinHCE: Temperature
+  let massFlowInSolarField: MassFlow
 }
 
 public extension InitValues {
   public init(file: TextConfigFile)throws {
     let row: (Int)throws -> Double = { try file.parseDouble(row: $0) }
-    self.temperatureOfHTFinPipes = try row(6)
-    self.temperatureOfHTFinHCE = try row(9)
-    self.massFlowInSolarField = try row(12)
+    self.temperatureOfHTFinPipes = try Temperature(row(6))
+    self.temperatureOfHTFinHCE = try Temperature(row(9))
+    self.massFlowInSolarField = try MassFlow(row(12))
   }
 }
 

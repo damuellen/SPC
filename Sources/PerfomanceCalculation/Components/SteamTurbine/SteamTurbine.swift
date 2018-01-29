@@ -1,11 +1,11 @@
 //
-//  Copyright (c) 2017 Daniel Müllenborn. All rights reserved.
-//  Distributed under the The Non-Profit Open Software License version 3.0
-//  http://opensource.org/licenses/NPOSL-3.0
+//  Copyright 2017 Daniel Müllenborn
 //
-//  This project is NOT free software. It is open source, you are allowed to
-//  modify it (if you keep the license), but it may not be commercially
-//  distributed other than under the conditions noted above.
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//  http://www.apache.org/licenses/LICENSE-2.0
 //
 
 import Foundation
@@ -16,10 +16,10 @@ extension SteamTurbine.Instance: CustomDebugStringConvertible {
   }
 }
 
-extension SteamTurbine.PerformanceData: CustomStringConvertible {
-  public var description: String {
+extension SteamTurbine.PerformanceData: CustomDebugStringConvertible {
+  public var debugDescription: String {
     return "Mode: \(operationMode) "
-      + String(format:"Load: %.2f ", load.value)
+      + String(format:"Load: %.2f ", load.ratio)
       + "Is maintained: \(isMaintained) "
       + String(format:"Back pressure: %.2f ", backPressure)
       + String(format:"Op: %.2f ", Op)
@@ -50,14 +50,14 @@ public enum SteamTurbine: Component {
     var PminfT: Double
     
     public enum OperationMode: Equatable {
-      case noOperation(hours: Double), SM
+      case noOperation(hours: Double), scheduledMaintenance
       
       public static func ==(lhs: OperationMode, rhs: OperationMode) -> Bool {
         switch (lhs, rhs) {
         case (.noOperation(let lhs), .noOperation(let rhs)): return lhs == rhs
-        case (.noOperation(_), .SM): return false
-        case (.SM, .noOperation(_)): return false
-        case (.SM, .SM): return true
+        case (.noOperation(_), .scheduledMaintenance): return false
+        case (.scheduledMaintenance, .noOperation(_)): return false
+        case (.scheduledMaintenance, .scheduledMaintenance): return true
         }
       }
     }
@@ -74,7 +74,7 @@ public enum SteamTurbine: Component {
 
   static let initialState = PerformanceData(
     operationMode: .noOperation(hours: 6),
-    load: 0.0,
+    load: 1.0,
     isMaintained: false,
     backPressure: 0,
     Op: 0,
@@ -86,10 +86,7 @@ public enum SteamTurbine: Component {
     get { return Instance.shared.workingConditions.current }
     set {
       if Instance.shared.workingConditions.current != newValue {
-        #if DEBUG
-          print("Steamturbine status changed at \(PerformanceCalculator.dateTime):")
-          print(Instance.shared.workingConditions.current)
-        #endif
+        Log.debugMessage("SteamTurbine \(Instance.shared.workingConditions.current)")
         Instance.shared.workingConditions =
           (Instance.shared.workingConditions.current, newValue)
       }
@@ -106,44 +103,31 @@ public enum SteamTurbine: Component {
     set { Instance.shared.parameter = newValue }
   }
 
-  /// Current load of the steam turbine
-  public static var load: Ratio {
-    get { return status.load }
-    set { status.load = newValue }
-  }
-
-  /// Returns the efficiency of the steam turbine based on her working conditions
-  /// - SeeAlso: `SteamTurbine.efficiency(load:Lmax:)`
-  public static var efficiency: Double {
-    return SteamTurbine.efficiencyFor(load: load, Lmax: load)
-  }
-
-  static func efficiencyFor(load: Ratio, Lmax: Ratio) -> Double {
-    guard load.value > 0 else { return 0.0 }
+  static func efficiency(at load: Ratio, Lmax: Ratio,
+                         boiler: Boiler.PerformanceData,
+                         gasTurbine: GasTurbine.PerformanceData,
+                         heatExchanger: HeatExchanger.PerformanceData) -> Double {
+    guard load.ratio > 0 else { return 0.0 }
 
     var load = load
     var parameter = SteamTurbine.parameter
     
     var maxEfficiency: Double
 
-    if case .operating = Boiler.status.operationMode {
+    if case .operating = boiler.operationMode {
       // this restriction was planned to simulate an specific case, not correct for every case with Boiler
-
-      if Boiler.status.heatFlow > 50 || SolarField.status.heatFlow == 0 {
+      
+      if Plant.heatFlow.boiler > 50 || Plant.heatFlow.solar == 0 {
         maxEfficiency = parameter.efficiencyBoiler
       } else {
-        maxEfficiency = (Boiler.status.heatFlow * parameter.efficiencyBoiler
-          + 4 * HeatExchanger.status.heatFlow * parameter.efficiencyNominal)
-          / (Boiler.status.heatFlow + 4 * HeatExchanger.status.heatFlow)
+        maxEfficiency = (Plant.heatFlow.boiler * parameter.efficiencyBoiler
+          + 4 * Plant.heatFlow.heatExchanger * parameter.efficiencyNominal)
+          / (Plant.heatFlow.boiler + 4 * Plant.heatFlow.heatExchanger)
         // maxEfficiency = parameter.effnom
       }
-    } else if case .ic = GasTurbine.status.operationMode {
+    } else if case .ic = gasTurbine.operationMode {
       maxEfficiency = parameter.efficiencySCC
     } else {
-      if HeatExchanger.status.temperature.inlet == Temperature.zero {
-        HeatExchanger.status.temperature.inlet = 274.0
-      }
-
       if parameter.efficiencytempIn_A == 0
         && parameter.efficiencytempIn_B == 0 {
         parameter.efficiencytempIn_A = 0.2383
@@ -157,12 +141,12 @@ public enum SteamTurbine: Component {
 
       maxEfficiency = parameter.efficiencyNominal
         * (parameter.efficiencytempIn_A
-          * pow((HeatExchanger.status.temperature.inlet.toCelsius),
+          * pow((heatExchanger.temperature.inlet.celsius),
                 parameter.efficiencytempIn_B))
         * parameter.efficiencytempIn_cf
     }
 
-    if case .pc = GasTurbine.status.operationMode {
+    if case .pc = gasTurbine.operationMode {
       maxEfficiency = parameter.efficiencySCC
     }
 
@@ -178,7 +162,7 @@ public enum SteamTurbine: Component {
     }
     // Dependency of Heat Rate on Ambient Temperature  - DRY COOLING -
     // now a polynom offourth degree -
-    var efficiency = parameter.efficiency[load.value]
+    var efficiency = parameter.efficiency[load.ratio]
 
     if !parameter.efficiencyTemperature.coefficients.isEmpty {
       efficiency *= parameter.efficiencyTemperature[Plant.ambientTemperature]

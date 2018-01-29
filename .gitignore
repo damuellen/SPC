@@ -3,3 +3,6 @@
 /.build
 /Packages
 /*.xcodeproj
+/Build
+/DerivedData
+/Index

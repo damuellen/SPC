@@ -1,13 +1,12 @@
 //
-//  Copyright (c) 2017 Daniel Müllenborn. All rights reserved.
-//  Distributed under the The Non-Profit Open Software License version 3.0
-//  http://opensource.org/licenses/NPOSL-3.0
+//  Copyright 2017 Daniel Müllenborn
 //
-//  This project is NOT free software. It is open source, you are allowed to
-//  modify it (if you keep the license), but it may not be commercially
-//  distributed other than under the conditions noted above.
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
 //
-
+//  http://www.apache.org/licenses/LICENSE-2.0
+//
 import Foundation
 import Dispatch
 import Config
@@ -38,14 +37,15 @@ public enum Report {
     let aperture = Design.layout.solarField * 2 * Collector.parameter.areaSCAnet
       * Double(SolarField.parameter.numberOfSCAsInRow)
     d += "  Aperture [m²]:" >< "\(aperture)"
-    d += "  Massflow [kg/s]:" >< "\(SolarField.parameter.massFlow.max)"
-    d += "  Elevation [ø]:" + "\(SolarField.parameter.elev) Azimut [ø]:\t"
+    d += "  Massflow [kg/s]:" >< SolarField.parameter.massFlow.max.rate.description
+    d += "  Elevation [ø]:  " + "\(SolarField.parameter.elev)\t Azimut [ø]:  "
       + "\(SolarField.parameter.azim)"
     // }
     // let storage = Storage.parameter
     d += "\n"
     d += "STORAGE\n"
-    d += "  Capacity [MWH,th]:" >< "\(Design.layout.storage * SteamTurbine.parameter.power.max / SteamTurbine.parameter.efficiencyNominal)"
+    d += "  Capacity [MWH,th]:" 
+      >< "\(Design.layout.storage * SteamTurbine.parameter.power.max / SteamTurbine.parameter.efficiencyNominal)"
     
     d += "\n"
     d += "STEAM TURBINE\n"
@@ -59,7 +59,7 @@ public enum Report {
     d += "WHR- SYSTEM\n"
     d += "  Therm Output [MW]:"
       >< "\(Design.layout.gasTurbine * (1 / GasTurbine.parameter.efficiencyISO - 1)); \(WasteHeatRecovery.parameter.efficiencyNominal)"
-    d += "  Efficiency [%]:\t\t WasteHeatRecovery.parameter.effnom\n"
+    d += "  Efficiency [%]:" >< "\(WasteHeatRecovery.parameter.efficiencyNominal)"
     d += "\n"
     
     // if let _ = Boiler.parameter.first {
@@ -89,13 +89,13 @@ public enum Report {
     d += "Annual direct solar insolation [kWh/m²a]:\n"//  Format(YTarS(0).NDI,)"
     d += "Total heat from solar field [MWh_el/a]:\n"// Format(YTarS(0).heatsol,)"
     d += "________________________________________________________________________________\n"
-    d += "\n\n\n"
+    d += "\n\n"
     d += "    Input Files\n"
     d += "   -\n"
     d += "\n\n"
-    d += "METEODATA  Filespec.MTO\n"
+    d += "METEODATA  \(PerformanceCalculator.meteoDataSource.name)\n"
     d += "GAS CONSUMPTION Filespec.PFC\n"
-    d += "\n\n\n"
+    d += "\n\n"
     d += "    Variable Input Parameter\n"
     d += "   \n"
     d += "\n\n"
@@ -109,21 +109,16 @@ public enum Report {
     // }
     
     d += "\n"
-    // if let heater = Heater.shared.parameter.first {
     d += "HEATER\n\n"
-    //   d += heater.description
+    d += Heater.parameter.description
     d += "\n\n"
-    // }
-    //   if Design.heatExchanger {
     d += "HEAT EXCHANGER\n\n"
-    //   d += heatExchanger.description
+    d += HeatExchanger.parameter.description
     d += "\n"
-    // }
-    // if let turbine = SteamTurbine.shared.parameter.first {
     d += "STEAM TURBINE\n\n"
-    //     d += turbine.description
+    d += SteamTurbine.parameter.description
     d += "\n"
-    // }
+
     //    d += "Power Block Availability [%]:" >< "\(Plant.availability[0).powerBlock * 100)"
     //      d += "Transmission Losses [%]:" >< "\(Simulation.parameter.TransLoss * 100)"
     d += "\n\n"
@@ -142,15 +137,15 @@ public enum Report {
       d += "12.31  23:59\n"
     }
     d += "HTF Temperature in Header [°C]:"
-      >< "\(Simulation.initialValues.temperatureOfHTFinPipes.toCelsius)"
+      >< "\(Simulation.initialValues.temperatureOfHTFinPipes.celsius)"
     d += "HTF Temperature in Collector [°C]:"
-      >< "\(Simulation.initialValues.temperatureOfHTFinHCE.toCelsius)"
+      >< "\(Simulation.initialValues.temperatureOfHTFinHCE.celsius)"
     d += "Mass Flow in Solar Field [kg/s]:"
-      >< "\(Simulation.initialValues.massFlowInSolarField.toCelsius)"
+      >< "\(Simulation.initialValues.massFlowInSolarField.rate)"
     d += "Delta T for Start-Up of Anti-Freeze Pumping:"
-      >< "\(Simulation.parameter.dfreezeTemperaturePump)"
+      >< "\(Simulation.parameter.dfreezeTemperaturePump.celsius)"
     d += "Delta T for Start-Up of Anti-Freeze Heater:"
-      >< "\(Simulation.parameter.dfreezeTemperatureHeat)"
+      >< "\(Simulation.parameter.dfreezeTemperatureHeat.celsius)"
     d += "Minimum Insolation for Start-Up [W/m²]:"
       >< "\(Simulation.parameter.minInsolation)"
     d += "Fuel strategy (0=predefined, 1=strategy) :\tFuelmodeI\n"
@@ -183,8 +178,6 @@ public enum Report {
     
     d += "COLLECTOR\n\n"
     d += "\(Collector.parameter.description)"
-    d += "\n\n"
-    d += "    Input Files"
     d += "\n\n"
     d += "HEAT TRANSFER FLUID\n\n"
     d += "\(htf.description)"

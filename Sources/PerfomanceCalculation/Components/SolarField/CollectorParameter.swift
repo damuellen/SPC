@@ -1,11 +1,11 @@
 //
-//  Copyright (c) 2017 Daniel Müllenborn. All rights reserved.
-//  Distributed under the The Non-Profit Open Software License version 3.0
-//  http://opensource.org/licenses/NPOSL-3.0
+//  Copyright 2017 Daniel Müllenborn
 //
-//  This project is NOT free software. It is open source, you are allowed to
-//  modify it (if you keep the license), but it may not be commercially
-//  distributed other than under the conditions noted above.
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//  http://www.apache.org/licenses/LICENSE-2.0
 //
 
 import Config
@@ -20,7 +20,8 @@ extension Collector {
     let absorber: Absorber
     let aperture, lengthSCA, areaSCAnet, extensionHCE, avgFocus,
     rabsOut, rabsInner, rglas, glassEmission, opticalEfficiency: Double
-    let emissionHCE, shadingHCE, IAMfac: [Double]
+    let emissionHCE, shadingHCE: [Double]
+    let IAMfac: Coefficients
     let IntradiationLosses: Bool
   }
 }
@@ -46,7 +47,7 @@ extension Collector.Parameter: CustomStringConvertible {
     d += "Glas Tube Radius [m]:"
       >< "\(rglas)"
     d += "Optical Efficiency [%]:"
-      >< "\(opticalEfficiency)"
+      >< "\(opticalEfficiency * 100)"
     d += "Absorber emittance; Emittance(T) = c0 + c1*T\n"
     d += "c0:" >< "\(emissionHCE[0])"
     d += "c1:" >< "\(emissionHCE[1])"
@@ -56,11 +57,9 @@ extension Collector.Parameter: CustomStringConvertible {
     d += "for incident angle 5 - 14°:"  >< "\(shadingHCE[2])"
     d += "for incident angle >14°:"     >< "\(shadingHCE[3])"
     d += "Incident Angle Modifier; IAM(theta) = c0+c1*theta+c2*theta^2+c3*theta^3+c4*theta^4\n"
-    d += "c0:" >< "\(IAMfac[0])"
-    d += "c1:" >< "\(IAMfac[1])"
-    d += "c2:" >< "\(IAMfac[2])"
-    d += "c3:" >< "\(IAMfac[3])"
-    d += "c4:" >< "\(IAMfac[4])"
+    for (i, c) in IAMfac.coefficients.enumerated() {
+      d += "c\(i):" >< String(format:"%.4E", c)
+    }
     return d
   }
 }

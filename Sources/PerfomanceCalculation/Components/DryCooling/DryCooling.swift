@@ -1,11 +1,11 @@
 //
-//  Copyright (c) 2017 Daniel Müllenborn. All rights reserved.
-//  Distributed under the The Non-Profit Open Software License version 3.0
-//  http://opensource.org/licenses/NPOSL-3.0
+//  Copyright 2017 Daniel Müllenborn
 //
-//  This project is NOT free software. It is open source, you are allowed to
-//  modify it (if you keep the license), but it may not be commercially
-//  distributed other than under the conditions noted above.
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//  http://www.apache.org/licenses/LICENSE-2.0
 //
 
 import Foundation
@@ -20,7 +20,7 @@ public enum DryCooling {
 
     let coefficients = [
       10.4592, -0.00404897, -0.000041752,
-      0.00000036851, -0.0000000010152, 8.6531e-13,
+      3.6851e-07, -1.0152e-09, 8.6531e-13,
       9.03668e-16, -1.9969e-18, 7.79287e-22,
       1.91482e-25, -3968.06, 39.5735,
     ]
@@ -28,24 +28,24 @@ public enum DryCooling {
     var fit = 0.0
 
     for i in 0 ... 9 {
-      fit += coefficients[i] * temperature.toKelvin ** Double(i)
+      fit += coefficients[i] * temperature.kelvin ** Double(i)
     }
 
-    let logpsat = fit + coefficients[10] / (temperature.toKelvin - coefficients[11])
+    let logpsat = fit + coefficients[10] / (temperature.kelvin - coefficients[11])
 
     return exp(logpsat)
   }
 
   public static func operate(Tamb: Temperature, steamTurbine: inout SteamTurbine.PerformanceData)
     -> (DCFactor: Ratio, MaxDCLoad: Ratio) {
-    let coefficientHR = [92.13, 28.73, 18.62, -15.42]
+      let coefficientHR: Coefficients = [92.13, 28.73, 18.62, -15.42]
     let PCondMin = 0.179, PCondMax = 0.421 // [bar]
     let HRFmin = 98.0, HRFmax = 106.8 // [%] of design
     let TambMin = 42.2 // [øC]
     let aLoad = 2.25, cLoad = -0.03
     let InTempDiff = 32.778 // [øC]  (=59øF)
 
-    let TCond = Temperature(steamTurbine.load.value ** 0.91 * InTempDiff + Tamb.value)
+    let TCond = Temperature(steamTurbine.load.ratio ** 0.91 * InTempDiff + Tamb.kelvin)
     let Pcond = Psat(TCond) * 10
 
     var DCFactor = 0.0
@@ -57,17 +57,13 @@ public enum DryCooling {
     } else if Pcond >= PCondMax {
       DCFactor = HRFmax / 100
     } else {
-      DCFactor = 0.0
-      for i in 0 ... 3 {
-        DCFactor = DCFactor + coefficientHR[i] * pow(Pcond, Double(i))
-      }
-      DCFactor = DCFactor / 100
+      DCFactor = coefficientHR[Pcond] / 100
     }
 
-    if Tamb.value < TambMin {
+    if Tamb.kelvin < TambMin {
       MaxDCLoad = 1.0
     } else {
-      MaxDCLoad = aLoad + cLoad * Tamb.value
+      MaxDCLoad = aLoad + cLoad * Tamb.kelvin
     }
     return (Ratio(DCFactor), Ratio(MaxDCLoad))
   }

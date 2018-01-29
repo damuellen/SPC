@@ -1,11 +1,11 @@
 //
-//  Copyright (c) 2017 Daniel Müllenborn. All rights reserved.
-//  Distributed under the The Non-Profit Open Software License version 3.0
-//  http://opensource.org/licenses/NPOSL-3.0
+//  Copyright 2017 Daniel Müllenborn
 //
-//  This project is NOT free software. It is open source, you are allowed to
-//  modify it (if you keep the license), but it may not be commercially
-//  distributed other than under the conditions noted above.
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//  http://www.apache.org/licenses/LICENSE-2.0
 //
 
 import Config
@@ -26,23 +26,17 @@ extension GasTurbine.Parameter: CustomStringConvertible {
     d += "Efficiency:"   >< "\(efficiencyISO * 100)"
     d += "Altitude [m]:" >< "\(altitude)"
     d += "Efficiency; Efficiency(Load) = c0+c1*load+c2*load^2+c3*load^3+c4*load^4)"
-    d += "c0:" >< "\(EfofLc[0])"
-    d += "c1:" >< "\(EfofLc[1])"
-    d += "c2:" >< "\(EfofLc[2])"
-    d += "c3:" >< "\(EfofLc[3])"
-    d += "c4:" >< "\(EfofLc[4])"
+    for (i, c) in EfofLc.coefficients.enumerated() {
+      d += "c\(i):" >< String(format:"%.4E", c)
+    }
     d += "Maximum Power as a func of Temperature; Power(T) = GrossPower*(c0+c1*T+c2*T^2+c3*T^3+c4*T^4)"
-    d += "c0:" >< "\(loadmaxTc[0])"
-    d += "c1:" >< "\(loadmaxTc[1])"
-    d += "c2:" >< "\(loadmaxTc[2])"
-    d += "c3:" >< "\(loadmaxTc[3])"
-    d += "c4:" >< "\(loadmaxTc[4])"
+    for (i, c) in loadmaxTc.coefficients.enumerated() {
+      d += "c\(i):" >< String(format:"%.4E", c)
+    }
     d += "Parasitic ; Parasitics(Load) = Parasitcs(100%)*(c0+c1*load+c2*load^2+c3*load^3+c4*load^4)"
-    d += "c0:" >< "\(parasiticsLc[0])"
-    d += "c1:" >< "\(parasiticsLc[1])"
-    d += "c2:" >< "\(parasiticsLc[2])"
-    d += "c3:" >< "\(parasiticsLc[3])"
-    d += "c4:" >< "\(parasiticsLc[4])"
+    for (i, c) in parasiticsLc.coefficients.enumerated() {
+      d += "c\(i):" >< String(format:"%.4E", c)
+    }
     return d
   }
 }

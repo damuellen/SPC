@@ -1,11 +1,11 @@
 //
-//  Copyright (c) 2017 Daniel Müllenborn. All rights reserved.
-//  Distributed under the The Non-Profit Open Software License version 3.0
-//  http://opensource.org/licenses/NPOSL-3.0
+//  Copyright 2017 Daniel Müllenborn
 //
-//  This project is NOT free software. It is open source, you are allowed to
-//  modify it (if you keep the license), but it may not be commercially
-//  distributed other than under the conditions noted above.
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//  http://www.apache.org/licenses/LICENSE-2.0
 //
 
 import Foundation
@@ -29,16 +29,17 @@ public struct Coefficients: Codable {
     return coefficients.isEmpty
   }
   
-  func apply(_ value: Double) -> Double {
+  @inline(__always) func apply(_ value: Double) -> Double {
+    // Use Horner’s Method for solving
     var result = 0.0
-    for (i, c) in coefficients.enumerated() {
-      result += c * pow(value, Double(i))
+    for coefficient in coefficients.reversed() {
+      result = fma(result, value, coefficient) // result * value + coefficient
     }
     return result
   }
   
   subscript(temperature: Temperature) -> Double {
-    return apply(temperature.value)
+    return apply(temperature.kelvin)
   }
   
   subscript(value: Double) -> Double {
@@ -46,7 +47,7 @@ public struct Coefficients: Codable {
   }
   
   subscript(ratio: Ratio) -> Double {
-    return apply(ratio.value)
+    return apply(ratio.ratio)
   }
   
   subscript(index: Int) -> Double {
@@ -62,20 +63,20 @@ extension Coefficients: ExpressibleByArrayLiteral {
 
 public struct Ratio: CustomStringConvertible, Codable {
   
-  let value: Double
+  let ratio: Double
   
-  var isZero: Bool { return value == 0 }
+  var isZero: Bool { return ratio == 0 }
   
-  var percentage: Float { return Float(value) * 100.0 }
+  var percentage: Float { return Float(ratio) * 100.0 }
   
   public var description: String { return "\(percentage)%" }
   
   public init(percent: Double) {
-    self.value = percent / 100
+    self.ratio = percent / 100
   }
   
   public init(_ value: Double) {
-    self.value = value < 0
+    self.ratio = value < 0
       ? 0 : value > 1
       ? 1 : value
   }
@@ -83,19 +84,19 @@ public struct Ratio: CustomStringConvertible, Codable {
 
 extension Ratio: ExpressibleByFloatLiteral {
   public init(floatLiteral value: Double) {
-    self.value = value
+    self.ratio = value
   }
 }
 
 extension Ratio: Equatable {
   public static func ==(lhs: Ratio, rhs: Ratio) -> Bool {
-    return lhs.value == rhs.value
+    return lhs.ratio == rhs.ratio
   }
 }
 
 extension Ratio: Comparable {
   public static func <(lhs: Ratio, rhs: Ratio) -> Bool {
-    return lhs.value < rhs.value
+    return lhs.ratio < rhs.ratio
   }
 }
 

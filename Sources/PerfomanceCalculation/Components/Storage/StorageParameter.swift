@@ -1,11 +1,11 @@
 //
-//  Copyright (c) 2017 Daniel Müllenborn. All rights reserved.
-//  Distributed under the The Non-Profit Open Software License version 3.0
-//  http://opensource.org/licenses/NPOSL-3.0
+//  Copyright 2017 Daniel Müllenborn
 //
-//  This project is NOT free software. It is open source, you are allowed to
-//  modify it (if you keep the license), but it may not be commercially
-//  distributed other than under the conditions noted above.
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//  http://www.apache.org/licenses/LICENSE-2.0
 //
 
 import Foundation
@@ -22,7 +22,8 @@ extension Storage {
     TturbIterate, heatStoredrel: Double
     var tempExCst, tempExC0to1, tempInCst, tempInC0to1: [Double]
     var heatlossCst, heatlossC0to1: [Double]
-    var pumpEfficiency, pressureLoss: Double, massFlow: Double
+    var pumpEfficiency, pressureLoss: Double
+    var massFlow: MassFlow
     let startTemperature: (cold: Temperature, hot: Temperature) //TurbTL(0) TurbTL(1)
     let startLoad: (cold: Double, hot: Double) //TurbTL(2) TurbTL(3)
     public enum Strategy: String {
@@ -37,6 +38,7 @@ extension Storage {
     let PrefChargeto: Double
     let startexcep, endexcep: Int
     let HTF: StorageFluid
+
     let FCstopD, FCstopM, FCstartD, FCstartM: Int
     let FP, FC, heatdiff, dSRise, MinDis, fixedLoadDischarge: Double
     let heatTracingTime, heatTracingPower: [Double]

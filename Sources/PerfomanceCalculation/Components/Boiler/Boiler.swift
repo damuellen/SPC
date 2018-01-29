@@ -1,11 +1,11 @@
 //
-//  Copyright (c) 2017 Daniel Müllenborn. All rights reserved.
-//  Distributed under the The Non-Profit Open Software License version 3.0
-//  http://opensource.org/licenses/NPOSL-3.0
+//  Copyright 2017 Daniel Müllenborn
 //
-//  This project is NOT free software. It is open source, you are allowed to
-//  modify it (if you keep the license), but it may not be commercially
-//  distributed other than under the conditions noted above.
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//  http://www.apache.org/licenses/LICENSE-2.0
 //
 
 import Foundation
@@ -32,14 +32,13 @@ public enum Boiler: Component {
     var operationMode: OperationMode
     var isMaintained: Bool
     var load: Ratio
-    var heatFlow: Double
     var startEnergy: Double
     //var startEnergyOld: Double
     
     public enum OperationMode {
       case noOperation(hours: Double)
       case SI, NI, startUp, scheduledMaintenance,
-      coldStartUp, warmStartUp, operating
+      coldStartUp, warmStartUp, operating, unknown
     }
   }
   
@@ -47,7 +46,6 @@ public enum Boiler: Component {
     operationMode: .noOperation(hours: 0),
     isMaintained: false,
     load: 0.0,
-    heatFlow: 0.0,
     startEnergy: 0.0)
    // startEnergyOld: 0.0)
   
@@ -72,8 +70,8 @@ public enum Boiler: Component {
   
   /// Returns the parasitics of the gas turbine based on her working conditions
   /// - SeeAlso: `Boiler.parasitics(load:)`
-  public static var parasitics: Double {
-    return Boiler.parasitics(at: status.load)
+  public static func parasitics(boiler: Boiler.PerformanceData) -> Double {
+    return Boiler.parasitics(at: boiler.load)
   }
   
   /// Calculates the efficiency of the boiler which only depends on his current load
@@ -86,11 +84,10 @@ public enum Boiler: Component {
   
   /// Calculates the parasitics of the gas turbine which only depends on the current load
   private static func parasitics(at load: Ratio) -> Double {
-    return load.value > 0.0
-      ? Boiler.parameter.nominalElectricalParasitics *
-        (Boiler.parameter.electricalParasitics[0] +
-          Boiler.parameter.electricalParasitics[1] * load.value)
-      : 0.0
+    return load.ratio.isZero ? 0 :
+      Boiler.parameter.nominalElectricalParasitics *
+      (Boiler.parameter.electricalParasitics[0] +
+        Boiler.parameter.electricalParasitics[1] * load.ratio)
   }
   
   public static func operate(_ boiler: inout Boiler.PerformanceData,
@@ -134,7 +131,7 @@ public enum Boiler: Component {
     var heatAvailable: Double
     
     if Boiler.parameter.booster {
-      heatAvailable = min(-heatFlow, Design.layout.boiler) // * Plant.availability[dateTime].boiler
+      heatAvailable = min(-heatFlow, Design.layout.boiler) // * Plant.availability[calendar].boiler
     } else {
       // ≈
       heatAvailable = min(Qsf_load * Design.layout.boiler, Design.layout.boiler)
@@ -176,8 +173,8 @@ public enum Boiler: Component {
     }
     
     if availableFuel < totalFuelNeed { // Check if sufficient fuel avail.
-      getLoad(boiler: &boiler, availableFuel: &availableFuel, fuelFlow: &fuelFlow)
-      if boiler.load.value < parameter.minLoad {
+      loadOf(boiler: &boiler, availableFuel: &availableFuel, fuelFlow: &fuelFlow)
+      if boiler.load.ratio < parameter.minLoad {
         ////report = "BO operation requested but insufficient fuel.\n"
         noOperation(&fuelFlow, availableFuel, &boiler)
         return 0.0
@@ -196,9 +193,10 @@ public enum Boiler: Component {
     }
   }
   
-  private static func getLoad(boiler: inout PerformanceData,
-                              availableFuel: inout Double,
-                              fuelFlow: inout Double) {
+  private static func loadOf(boiler: inout PerformanceData,
+                             availableFuel: inout Double,
+                             fuelFlow: inout Double) {
+    
     switch (boiler.operationMode, boiler.isMaintained) {
     case (.noOperation(let hours), false):
       boiler.operationMode = .noOperation(hours: hours + hourFraction)
@@ -222,7 +220,7 @@ public enum Boiler: Component {
         availableFuel = 0.5 * availableFuel
         boiler.startEnergy -= availableFuel
       } else {
-        availableFuel -= Boiler.status.startEnergy
+        availableFuel -= boiler.startEnergy
         boiler.startEnergy = 0
         boiler.operationMode = .operating
       }
@@ -232,7 +230,7 @@ public enum Boiler: Component {
       boiler.startEnergy = -availableFuel
       boiler.load = 0.0
       // electricalParasitics = 0
-      boiler.heatFlow = 0
+      //  boiler.heatFlow = 0
       return
     }
     
@@ -247,18 +245,18 @@ public enum Boiler: Component {
         boiler.load = Ratio(availableFuel
           * Boiler.efficiency(load: Ratio(load)) / Design.layout.boiler)
       }
-    } while abs(load - boiler.load.value) < 0.01 // < 2% points difference
+    } while abs(load - boiler.load.ratio) < 0.01
   }
   
   private static func noOperation(_ fuelFlow: inout Double,
                                   _ availableFuel: Double,
-                                  _ status: inout Boiler.PerformanceData) {
-    if case .startUp = status.operationMode {
+                                  _ boiler: inout Boiler.PerformanceData) {
+    if case .startUp = boiler.operationMode {
       fuelFlow = availableFuel
     } else {
-      status.operationMode = .noOperation(hours: hourFraction)
+      boiler.operationMode = .noOperation(hours: hourFraction)
       fuelFlow = 0
-      status.load = Ratio(0)
+      boiler.load = Ratio(0)
       // FIXME H2Ov.massFlow = 0
     }
   }

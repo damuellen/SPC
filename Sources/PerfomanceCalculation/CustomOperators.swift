@@ -1,19 +1,32 @@
 //
-//  Copyright (c) 2017 Daniel Müllenborn. All rights reserved.
-//  Distributed under the The Non-Profit Open Software License version 3.0
-//  http://opensource.org/licenses/NPOSL-3.0
+//  Copyright 2017 Daniel Müllenborn
 //
-//  This project is NOT free software. It is open source, you are allowed to
-//  modify it (if you keep the license), but it may not be commercially
-//  distributed other than under the conditions noted above.
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//  http://www.apache.org/licenses/LICENSE-2.0
 //
 
 import Darwin
 
-infix operator ** : MultiplicationPrecedence
+precedencegroup ExponentiationPrecedence {
+  associativity: right
+  higherThan: MultiplicationPrecedence
+}
 
-func ** (num: Double, power: Double) -> Double {
-  return pow(num, power)
+infix operator ** : ExponentiationPrecedence
+infix operator **= : AssignmentPrecedence
+
+extension Double {
+  
+  static func ** (lhs: Double, rhs: Double) -> Double {
+    return pow(lhs, rhs)
+  }
+  
+  static func **= (lhs: inout Double, rhs: Double) {
+    lhs = lhs ** rhs
+  }
 }
 
 infix operator ><
@@ -22,5 +35,3 @@ func >< (lhs: String, rhs: String) -> String {
   let count = 80 - lhs.count - rhs.count
   return lhs + String(repeating: " ", count: count) + rhs + "\n"
 }
-
-

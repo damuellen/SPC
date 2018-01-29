@@ -12,23 +12,24 @@ import Foundation
 import Config
 import PerfomanceCalculation
 
-print("Program started")
-
 let start = CFAbsoluteTimeGetCurrent()
 
 let path = CommandLine.arguments.count > 1
   ? CommandLine.arguments[1]
   : FileManager.default.currentDirectoryPath
 
-let meteoFilePath = CommandLine.arguments.count > 1
+let meteoFilePath = CommandLine.arguments.count > 2
   ? CommandLine.arguments[2]
   : FileManager.default.currentDirectoryPath
 
 PerformanceCalculator.loadConfigurations(atPath: path, format: .json)
-PerformanceCalculator.saveConfigurations(toPath: path)
+//PerformanceCalculator.saveConfigurations(toPath: path)
 PerformanceCalculator.meteoFilePath = meteoFilePath
 
-PerformanceCalculator.run()
+for i in 1...2 {
+  PerformanceCalculator.run(i)
+ // Design.layout.solarField += 2
+}
 
 let end = CFAbsoluteTimeGetCurrent()
 

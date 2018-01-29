@@ -1,11 +1,11 @@
 //
-//  Copyright (c) 2017 Daniel Müllenborn. All rights reserved.
-//  Distributed under the The Non-Profit Open Software License version 3.0
-//  http://opensource.org/licenses/NPOSL-3.0
+//  Copyright 2017 Daniel Müllenborn
 //
-//  This project is NOT free software. It is open source, you are allowed to
-//  modify it (if you keep the license), but it may not be commercially
-//  distributed other than under the conditions noted above.
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//  http://www.apache.org/licenses/LICENSE-2.0
 //
 
 import Foundation
@@ -26,7 +26,7 @@ extension JsonConfigFileHandler {
       guard let url = configFileHandler.searchConfig(with: pathExtensions),
         let data = JsonConfigFileHandler.readConfig(url: url)
         else {
-          print("Config file \(pathExtensions.rawValue) not found.")
+          Log.errorMessage("Config file \(pathExtensions.rawValue) not found.")
           continue
       }
 
@@ -60,7 +60,7 @@ extension JsonConfigFileHandler {
         Heater.update(parameter:
           try decoder.decode(Heater.Parameter.self, from: data))
       case .HTF:
-        htf = try decoder.decode(FluidProperties.self, from: data)
+        htf = try decoder.decode(HeatTransferFluid.self, from: data)
       case .HX:
         HeatExchanger.update(parameter:
           try decoder.decode(HeatExchanger.Parameter.self, from: data))
@@ -82,7 +82,7 @@ extension JsonConfigFileHandler {
       case .PFC:
         break
       case .STF:
-        salt = try decoder.decode(FluidProperties.self, from: data)
+        salt = try decoder.decode(HeatTransferFluid.self, from: data)
       }
     }
   }
@@ -160,7 +160,7 @@ extension TextConfigFileHandler {
       case .STO: break
       case .HR: Heater.update(parameter: try .init(file: configFile))
       case .HTF:
-        htf = try FluidProperties(file: configFile, includesEnthalpy: true)
+        htf = try HeatTransferFluid(file: configFile, includesEnthalpy: true)
       case .HX: HeatExchanger.update(parameter: try .init(file: configFile))
       case .BO: Boiler.update(parameter: try .init(file: configFile))
       case .WHR: WasteHeatRecovery.update(parameter: try .init(file: configFile))
@@ -170,7 +170,7 @@ extension TextConfigFileHandler {
       case .PFC:
         break
       case .STF:
-        salt = try FluidProperties(file: configFile, includesEnthalpy: false)
+        salt = try HeatTransferFluid(file: configFile, includesEnthalpy: false)
       }
     }
   }

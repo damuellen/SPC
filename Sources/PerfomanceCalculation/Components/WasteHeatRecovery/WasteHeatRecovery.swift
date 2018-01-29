@@ -1,11 +1,11 @@
 //
-//  Copyright (c) 2017 Daniel Müllenborn. All rights reserved.
-//  Distributed under the The Non-Profit Open Software License version 3.0
-//  http://opensource.org/licenses/NPOSL-3.0
+//  Copyright 2017 Daniel Müllenborn
 //
-//  This project is NOT free software. It is open source, you are allowed to
-//  modify it (if you keep the license), but it may not be commercially
-//  distributed other than under the conditions noted above.
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//  http://www.apache.org/licenses/LICENSE-2.0
 //
 
 import Foundation
@@ -54,14 +54,14 @@ public enum WasteHeatRecovery: Component {
   }
 
   /// Returns the efficiency of the waste heat recovery based on working conditions of the gas turbine
-  public static var efficiency: Double {
+  public static func efficiency(gasTurbineLoad: Ratio) -> Double {
     var efficiency = WasteHeatRecovery.parameter.efficiencyNominal
     efficiency *= WasteHeatRecovery.parameter.efficiencySolar[
       Plant.heatFlow.solar / Design.layout.heatExchanger
         * SteamTurbine.parameter.efficiencySCC]
     efficiency *= WasteHeatRecovery.parameter.efficiencyGasTurbine[
       Plant.electricEnergy.gasTurbineGross / GasTurbine.parameter.Pgross]
-    efficiency *=  (1 / GasTurbine.efficiency - 1)
+    efficiency *=  (1 / GasTurbine.efficiency(at: gasTurbineLoad) - 1)
 
     debugPrint("waste heat recovery efficiency at \(efficiency * 100)%")
     precondition(efficiency > 1, "waste heat recovery efficiency at over 100%")

@@ -1,11 +1,11 @@
 //
-//  Copyright (c) 2017 Daniel Müllenborn. All rights reserved.
-//  Distributed under the The Non-Profit Open Software License version 3.0
-//  http://opensource.org/licenses/NPOSL-3.0
+//  Copyright 2017 Daniel Müllenborn
 //
-//  This project is NOT free software. It is open source, you are allowed to
-//  modify it (if you keep the license), but it may not be commercially
-//  distributed other than under the conditions noted above.
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//  http://www.apache.org/licenses/LICENSE-2.0
 //
 
 import Config
@@ -49,17 +49,13 @@ extension PowerBlock.Parameter: CustomStringConvertible {
     d += "Nominal Parasitics of ACC [MW]:"
       >< "\(nominalElectricalParasiticsACC)"
     d += "ACC Parasitic f(Load) = ParasiticsACC(100%)*(c0+c1*load+c2*load^2+...)"
-    d += "c0:" >< "\(electricalParasiticsACC[0])"
-    d += "c1:" >< "\(electricalParasiticsACC[1])"
-    d += "c2:" >< "\(electricalParasiticsACC[2])"
-    d += "c3:" >< "\(electricalParasiticsACC[3])"
-    d += "c4:" >< "\(electricalParasiticsACC[4])"
+    for (i, c) in electricalParasiticsACC.coefficients.enumerated() {
+      d += "c\(i):" >< String(format:"%.4E", c)
+    }
     d += "ACC Parasitic f(Tamb) = ParasiticsACC(100%)*(c0+c1*Tamb+c2*Tamb^2+...)"
-    d += "c0:" >< "\(electricalParasiticsACCTamb[0])"
-    d += "c1:" >< "\(electricalParasiticsACCTamb[1])"
-    d += "c2:" >< "\(electricalParasiticsACCTamb[2])"
-    d += "c3:" >< "\(electricalParasiticsACCTamb[3])"
-    d += "c4:" >< "\(electricalParasiticsACCTamb[4])"
+    for (i, c) in electricalParasiticsACCTamb.coefficients.enumerated() {
+      d += "c\(i):" >< String(format:"%.4E", c)
+    }
     return d
   }
 }

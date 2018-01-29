@@ -1,11 +1,11 @@
 //
-//  Copyright (c) 2017 Daniel Müllenborn. All rights reserved.
-//  Distributed under the The Non-Profit Open Software License version 3.0
-//  http://opensource.org/licenses/NPOSL-3.0
+//  Copyright 2017 Daniel Müllenborn
 //
-//  This project is NOT free software. It is open source, you are allowed to
-//  modify it (if you keep the license), but it may not be commercially
-//  distributed other than under the conditions noted above.
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//  http://www.apache.org/licenses/LICENSE-2.0
 //
 
 import Config
@@ -35,17 +35,13 @@ extension WasteHeatRecovery.Parameter: CustomStringConvertible {
     d += "Efficiency in CC Mode:" >< "\(efficiencyPure * 100)"
     d += "Ratio Fossil/Solar Thermal Contribution :" >< "\(ratioHTF)"
     d += "Efficiency(Solar-Load) = c0+c1*load+c2*load^2+c3*load^3+c4*load^4)\n"
-    d += "c0:" >< "\(efficiencySolar[0])"
-    d += "c1:" >< "\(efficiencySolar[1])"
-    d += "c2:" >< "\(efficiencySolar[2])"
-    d += "c3:" >< "\(efficiencySolar[3])"
-    d += "c4:" >< "\(efficiencySolar[4])"
+    for (i, c) in efficiencySolar.coefficients.enumerated() {
+      d += "c\(i):" >< String(format:"%.4E", c)
+    }
     d += "Efficiency(GT-Load) = c0+c1*load+c2*load^2+c3*load^3+c4*load^4)\n"
-    d += "c0:" >< "\(efficiencyGasTurbine[0])"
-    d += "c1:" >< "\(efficiencyGasTurbine[1])"
-    d += "c2:" >< "\(efficiencyGasTurbine[2])"
-    d += "c3:" >< "\(efficiencyGasTurbine[3])"
-    d += "c4:" >< "\(efficiencyGasTurbine[4])"
+    for (i, c) in efficiencyGasTurbine.coefficients.enumerated() {
+      d += "c\(i):" >< String(format:"%.4E", c)
+    }
     return d
   }
 }

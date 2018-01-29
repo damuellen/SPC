@@ -9,6 +9,7 @@ let package = Package(
     // Dependencies declare other packages that this package depends on.
     .package(url: "../DateGenerator", .branch("master")),
     .package(url: "../SolarPosition", .branch("master")),
+    .package(url: "https://github.com/Nike-Inc/Willow.git", from: "5.0.0")
     ],
   targets: [
     // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -18,7 +19,7 @@ let package = Package(
       dependencies: []),
     .target(
       name: "PerfomanceCalculation",
-      dependencies: ["Config", "Meteo", "SolarPosition"]),
+      dependencies: ["Config", "Meteo", "SolarPosition", "Willow"]),
     .target(
       name: "Meteo",
       dependencies: ["DateGenerator"]),

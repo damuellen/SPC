@@ -1,11 +1,11 @@
 //
-//  Copyright (c) 2017 Daniel Müllenborn. All rights reserved.
-//  Distributed under the The Non-Profit Open Software License version 3.0
-//  http://opensource.org/licenses/NPOSL-3.0
+//  Copyright 2017 Daniel Müllenborn
 //
-//  This project is NOT free software. It is open source, you are allowed to
-//  modify it (if you keep the license), but it may not be commercially
-//  distributed other than under the conditions noted above.
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//  http://www.apache.org/licenses/LICENSE-2.0
 //
 
 import Foundation
@@ -21,7 +21,7 @@ public struct MeteoDataFileHandler {
     self.filePath = path
   }
   
-  public func readContentOfFile()throws -> MeteoDataSource {
+  public func makeDataSource()throws -> MeteoDataSource {
     
     let string = try String(contentsOfFile: filePath, encoding: .ascii)
     let file = MeteoDataFile(string: string)
@@ -30,7 +30,9 @@ public struct MeteoDataFileHandler {
     let location = try file.readContentForLocation()
     let timeZone = file.readContentForTimeZone()
     
+    
     return MeteoDataSource(
+      name: String(filePath.split(separator: "/").last!),
       data: data,
       location: location,
       year: Int(file.content[1]),
@@ -89,23 +91,22 @@ private struct MeteoDataFile {
       else { throw MeteoDataFileError.unexpectedRowCount }
     
     return try content[dataRange].flatMap { line in
-      let strings = line.split(separator: separator)[3...]
+      let stringValues = line.split(separator: separator)[3...]
       
-      let values = strings.map(String.init)
+      let floatValues = stringValues.map(String.init)
         .map({ $0.whitespacesTrimmed })
         .flatMap(Float.init)
       
-      guard values.count == strings.count
+      guard stringValues.count == floatValues.count
         else { throw MeteoDataFileError.rowNotReadable(line) }
       
-      return MeteoData(
-        dni: values[0], temperature: values[1], windSpeed: values[2])
+      return MeteoData(floatValues)
     }
   }
 }
 
 extension MeteoDataFileError: LocalizedError {
-  var errorDescription: String {
+  private var errorDescription: String {
     switch self {
     case .unexpectedRowCount:
       return "Meteofile is not in hourly periods."

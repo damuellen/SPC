@@ -1,11 +1,11 @@
 //
-//  Copyright (c) 2017 Daniel Müllenborn. All rights reserved.
-//  Distributed under the The Non-Profit Open Software License version 3.0
-//  http://opensource.org/licenses/NPOSL-3.0
+//  Copyright 2017 Daniel Müllenborn
 //
-//  This project is NOT free software. It is open source, you are allowed to
-//  modify it (if you keep the license), but it may not be commercially
-//  distributed other than under the conditions noted above.
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//  http://www.apache.org/licenses/LICENSE-2.0
 //
 
 import Foundation
@@ -79,30 +79,30 @@ extension Simulation.Parameter: TextConfigInitializable {
   
   public init(file: TextConfigFile)throws {
     let row: (Int)throws -> Double = { try file.parseDouble(row: $0) }
-    let adjustmentFactor = Simulation.AdjustmentFactor(
-      efficiencySolarField: try row(34),
-      efficiencyTurbine: try row(46),
-      efficiencyHeater: try row(52),
-      efficiencyBoiler: try row(55),
-      heatLossHCE: try row(61),
-      heatLossHTF: try row(40),
-      heatLossH2O: try row(43),
-      electricalParasitics: try row(61) / 100)
+    let adjustmentFactor = try Simulation.AdjustmentFactor(
+      efficiencySolarField: row(34),
+      efficiencyTurbine: row(46),
+      efficiencyHeater: row(52),
+      efficiencyBoiler: row(55),
+      heatLossHCE: row(61),
+      heatLossHTF: row(40),
+      heatLossH2O: row(43),
+      electricalParasitics: row(61) / 100)
 
-    self = Simulation.Parameter(
-      dfreezeTemperaturePump: try Temperature(row(6)),
-      dfreezeTemperatureHeat: try Temperature(row(9)),
-      minTemperatureRaiseStartUp: try Temperature(row(12)),
-      tempTolerance: try Temperature(row(21)),
-      minInsolationRaiseStartUp: try row(16),
-      heatTolerance: try row(18),      
-      timeTolerance: try row(24),
-      massTolerance: try row(27),
-      minInsolation: try row(31),
-      maxToPowerBlock: try row(15),
-      minInsolationForBoiler: try row(16),
-      electricalTolerance: try row(58),
-      electricalParasitics: try row(18),
+    self = try Simulation.Parameter(
+      dfreezeTemperaturePump: Temperature(row(6)),
+      dfreezeTemperatureHeat: Temperature(row(9)),
+      minTemperatureRaiseStartUp: Temperature(row(12)),
+      tempTolerance: Temperature(row(21)),
+      minInsolationRaiseStartUp: row(16),
+      heatTolerance: row(18),
+      timeTolerance: row(24),
+      massTolerance: row(27),
+      minInsolation: row(31),
+      maxToPowerBlock: row(15),
+      minInsolationForBoiler: row(16),
+      electricalTolerance: row(58),
+      electricalParasitics: row(18),
       HLtempTolerance: 0.1,
       adjustmentFactor: adjustmentFactor)
   }
