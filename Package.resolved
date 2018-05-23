@@ -3,20 +3,29 @@
     "pins": [
       {
         "package": "DateGenerator",
-        "repositoryURL": "/Users/daniel/Documents/Solar/DateGenerator",
+        "repositoryURL": "/Users/daniel/Development/Solar/DateGenerator",
         "state": {
-          "branch": null,
+          "branch": "master",
           "revision": "582398c27843f031a420b049e92014f770a2ccb6",
-          "version": "1.2.0"
+          "version": null
         }
       },
       {
         "package": "SolarPosition",
-        "repositoryURL": "/Users/daniel/Documents/Solar/SolarPosition",
+        "repositoryURL": "/Users/daniel/Development/Solar/SolarPosition",
+        "state": {
+          "branch": "master",
+          "revision": "e2ac5549dcca77198449d290b95a9cc25c644bdf",
+          "version": null
+        }
+      },
+      {
+        "package": "Willow",
+        "repositoryURL": "https://github.com/Nike-Inc/Willow.git",
         "state": {
           "branch": null,
-          "revision": "173d52a73aab50fec10401cc3ec86ac9fe743fad",
-          "version": "1.2.0"
+          "revision": "bee75d06f0e94a7053a790f0327220d53f075758",
+          "version": "5.0.2"
         }
       }
     ]

@@ -12,27 +12,39 @@ import Foundation
 
 public struct MeteoData: CustomStringConvertible {
   
-  public let temperature, dni, windSpeed: Float
+  public var temperature, dni, ghi, dhi, windSpeed: Float
   public let wetBulbTemperature: Float? = nil
   
   /// Linear interpolation function for meteo data values
-  static func interpolate(_ startValue: MeteoData,
-                          to endValue: MeteoData, progress: Float) -> MeteoData {
+  static func lerp(_ value: Float, from startValue: MeteoData,
+                   to endValue: MeteoData) -> MeteoData {
     
-    if progress >= 1 { return endValue }
+    if value >= 1 { return endValue }
     
-    let dni = startValue.dni + (progress * (endValue.dni - startValue.dni)),
+    let dni = startValue.dni + (value * (endValue.dni - startValue.dni)),
+    ghi = startValue.ghi + (value * (endValue.ghi - startValue.ghi)),
+    dhi = startValue.dhi + (value * (endValue.dhi - startValue.dhi)),
     temperature = startValue.temperature
-      + (progress * (endValue.temperature - startValue.temperature)),
+      + (value * (endValue.temperature - startValue.temperature)),
     windSpeed = startValue.windSpeed
-      + (progress * (endValue.windSpeed - startValue.windSpeed))
+      + (value * (endValue.windSpeed - startValue.windSpeed))
     
     return MeteoData(
-      dni: dni, temperature: temperature, windSpeed: windSpeed)
+      dni: dni, ghi: ghi, dhi: dhi, temperature: temperature, windSpeed: windSpeed)
   }
   
-  public init(dni: Float, temperature: Float, windSpeed: Float) {
+  public init() {
+    self.dni = 0
+    self.ghi = 0
+    self.dhi = 0
+    self.temperature = 0
+    self.windSpeed = 0
+  }
+  
+  public init(dni: Float, ghi: Float, dhi: Float, temperature: Float, windSpeed: Float) {
     self.dni = dni
+    self.ghi = ghi
+    self.dhi = dhi
     self.temperature = temperature
     self.windSpeed = windSpeed
   }
@@ -41,11 +53,15 @@ public struct MeteoData: CustomStringConvertible {
     self.dni = values[0]
     self.temperature = values[1]
     self.windSpeed = values[2]
+    self.ghi = values.count > 4 ? values[4] : 0
+    self.dhi = values.count > 5 ? values[5] : 0
   }
   
   public var description: String {
     return String(format:"Temp: %.1f ", temperature)
       + String(format:"DNI: %.1f ", dni)
+      + String(format:"GHI: %.1f ", ghi)
+      + String(format:"DHI: %.1f ", dhi)
       + String(format:"WS: %.1f", windSpeed)
   }
 }

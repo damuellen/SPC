@@ -47,7 +47,7 @@ public class MeteoDataGenerator: Sequence {
   
   private var DNI_perDaySums: [Double] = []
   
-  public func DNI_sum(of day: Int) -> Double {
+  public func DNI_sum(ofDay day: Int) -> Double {
     let idx = day - 1
     if DNI_perDaySums.endIndex > idx { return DNI_perDaySums[idx] }
     
@@ -68,10 +68,12 @@ public class MeteoDataGenerator: Sequence {
   private var lastStep = 0
 
   public func makeIterator() -> AnyIterator<MeteoData> {
-    var lastIndex = self.lastIndex
+    let lastIndex = self.lastIndex
+    let lastStep = self.lastStep
+    
     var index = self.index
     var step = self.step
-    var lastStep = self.lastStep
+    
     return AnyIterator<MeteoData> {
       defer { step += 1 }
       let data = self.dataSource.data
@@ -86,12 +88,12 @@ public class MeteoDataGenerator: Sequence {
       if index == lastIndex && step > lastStep { return nil }
       
       if index < data.endIndex - 1 {
-        return MeteoData.interpolate(
-          data[index], to: data[index + 1], progress: progress)
+        return MeteoData.lerp(progress,
+          from: data[index], to: data[index + 1])
       } else if index == data.endIndex - 1 {
         // For the last hour, the start value is reused for the interpolation.
-        return MeteoData.interpolate(
-          data[index], to: data[0], progress: progress)
+        return MeteoData.lerp(progress,
+          from: data[index], to: data[0])
       } else {
         return nil
       }

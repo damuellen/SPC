@@ -4,7 +4,10 @@
 import PackageDescription
 
 let package = Package(
-  name: "SwiftySPC",
+  name: "SPC",
+  products: [
+    .executable(name: "SolarPerformanceCalc", targets: ["Run"]),
+    ],
   dependencies: [
     // Dependencies declare other packages that this package depends on.
     .package(url: "../DateGenerator", .branch("master")),
@@ -18,13 +21,19 @@ let package = Package(
       name: "Config",
       dependencies: []),
     .target(
-      name: "PerfomanceCalculation",
+      name: "BlackBoxModel",
       dependencies: ["Config", "Meteo", "SolarPosition", "Willow"]),
     .target(
       name: "Meteo",
       dependencies: ["DateGenerator"]),
     .target(
-      name: "Command",
-      dependencies: ["PerfomanceCalculation"]),
+      name: "Run",
+      dependencies: ["Config", "BlackBoxModel"]),
+    .testTarget(
+      name: "MeteoTests",
+      dependencies: ["DateGenerator"]),
+    .testTarget(
+      name: "BlackBoxModelTests",
+      dependencies: ["Config", "Meteo", "BlackBoxModel"]),
     ]
 )

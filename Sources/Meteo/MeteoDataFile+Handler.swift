@@ -90,12 +90,12 @@ private struct MeteoDataFile {
     guard dataRange.count == 8760 || dataRange.count == 8784
       else { throw MeteoDataFileError.unexpectedRowCount }
     
-    return try content[dataRange].flatMap { line in
+    return try content[dataRange].compactMap { line in
       let stringValues = line.split(separator: separator)[3...]
       
       let floatValues = stringValues.map(String.init)
         .map({ $0.whitespacesTrimmed })
-        .flatMap(Float.init)
+        .compactMap(Float.init)
       
       guard stringValues.count == floatValues.count
         else { throw MeteoDataFileError.rowNotReadable(line) }

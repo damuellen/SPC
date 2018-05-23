@@ -4,7 +4,7 @@ import Foundation
 import DateGenerator
 @testable import Meteo
 
-class MeteoDataTests: XCTestCase {
+class MeteoTests: XCTestCase {
   
   func testsGenerator() {
     let location = Location(longitude: 0, latitude: 0, elevation: 0)
@@ -22,20 +22,20 @@ class MeteoDataTests: XCTestCase {
     
     let meteoData = Array(repeatElement(meteoDataDay, count: 365).joined())
     
-    let datasource = MeteoDataSource(
+    let datasource = MeteoDataSource(name: "test",
       data: meteoData, location: location, year: 2017, timeZone: 8)
     let interval: DateGenerator.Interval = .every5minutes
     let generator = MeteoDataGenerator(from: datasource, interval: interval)
     
     let range = DateGenerator.getMonth(3, year: 2017)
-    generator.setRange(to: range)
+    generator.setRange(range)
     
     var counter = 0
     var idx = 0
     
     for meteo in generator {
       if counter % interval.rawValue == 0 {
-        XCTAssertEqualWithAccuracy(meteo.dni, valuesDay[idx].dni, accuracy: 0.01)
+        XCTAssertEqual(meteo.dni, valuesDay[idx].dni, accuracy: 0.01)
         idx += 1
         if idx == valuesDay.endIndex { idx = 0 }
       }
@@ -49,7 +49,7 @@ class MeteoDataTests: XCTestCase {
     XCTAssert(counter == dateCounter)
   }
   
-  static var allTests: [(String, (MeteoDataTests) -> () throws -> Void)] {
+  static var allTests: [(String, (MeteoTests) -> () throws -> Void)] {
     return [
       ("testsGenerator", testsGenerator),
     ]
