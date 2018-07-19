@@ -51,10 +51,10 @@ extension SolarField.Parameter {
   
   var loopWays: [Double] {
     let designWay = Double(numberOfSCAsInRow)
-      * (Collector.parameter.lengthSCA + distanceSCA) * 2.0 + rowDistance
+      * (collector.lengthSCA + distanceSCA) * 2.0 + rowDistance
 
     var nearWay = Double(numberOfSCAsInRow)
-      * (Collector.parameter.lengthSCA + distanceSCA)
+      * (collector.lengthSCA + distanceSCA)
     nearWay = layout == "I"
       ? nearWay
       : nearWay * 2 + rowDistance + 0.5

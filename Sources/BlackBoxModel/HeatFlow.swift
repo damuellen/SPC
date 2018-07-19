@@ -10,22 +10,38 @@
 
 import Foundation
 
-protocol HeatFlow {
+protocol HeatCycle {
+  var name: String { get }
   var massFlow: MassFlow { get }
   var temperature: (inlet: Temperature, outlet: Temperature) { get }
 }
 
-extension HeatFlow {
+extension HeatCycle {
   var averageTemperature: Temperature {
     return temperature.inlet.median(temperature.outlet)
   }
   
-  func thermal(fluid: HeatTransferFluid) -> Double {
+  func heatTransfered(with fluid: HeatTransferFluid) -> Double {
     return massFlow.rate * abs(fluid.heatDelta(temperature.inlet, temperature.outlet))
+  }
+  
+  var values: [String] {
+    return [
+      String(format:"%.1f", massFlow.rate),
+      String(format:"%.1f", temperature.inlet.celsius),
+      String(format:"%.1f", temperature.outlet.celsius),
+     ]
+  }
+  
+  var columns: [(String, String)]  {
+    return [
+      ("\(name)|Massflow", "kg/s"),("\(name)|Tin", "degree"), ("\(name)|Tout", "degree"),
+    ]
   }
 }
 
-public struct ThermalFlow: HeatFlow, Equatable, CustomStringConvertible {
+public struct HeatFlow: HeatCycle, Equatable, CustomStringConvertible {
+  var name = ""
   var massFlow: MassFlow
   var temperature: (inlet: Temperature, outlet: Temperature)
   
@@ -41,7 +57,11 @@ public struct ThermalFlow: HeatFlow, Equatable, CustomStringConvertible {
       + String(format:"Out: %.1f°C)", temperature.outlet.celsius)
   }
   
-  public static func ==(lhs: ThermalFlow, rhs: ThermalFlow) -> Bool {
+  public mutating func constantTemperature() {
+    temperature.inlet = temperature.outlet
+  }
+  
+  public static func ==(lhs: HeatFlow, rhs: HeatFlow) -> Bool {
     return lhs.massFlow == rhs.massFlow
       && lhs.temperature.inlet == rhs.temperature.inlet
       && lhs.temperature.outlet == rhs.temperature.outlet

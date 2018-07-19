@@ -17,7 +17,7 @@ class MeteoTests: XCTestCase {
     ]
     
     let meteoDataDay = valuesDay.map {
-      return MeteoData(dni: $0.dni, temperature: $0.temp, windSpeed: $0.ws)
+      return MeteoData(dni: $0.dni, ghi: 0, dhi: 0, temperature: $0.temp, windSpeed: $0.ws)
     }
     
     let meteoData = Array(repeatElement(meteoDataDay, count: 365).joined())

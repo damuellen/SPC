@@ -33,8 +33,7 @@ public struct MassFlow: CustomStringConvertible {
   
   func share(of max: MassFlow) -> Ratio {
     let rate = abs(self.rate)
-    assert((rate - max.rate) <= 0.0001)
-    return Ratio(rate / max.rate)
+    return (rate - max.rate) <= 0.0001 ? Ratio(rate / max.rate) : Ratio(1)
   }
 
   mutating func adjust(with ratio: Double) {
@@ -69,6 +68,14 @@ public struct MassFlow: CustomStringConvertible {
     return self.rate < rate
   }
   */
+  static func += (lhs: inout MassFlow, rhs: MassFlow) {
+    lhs = MassFlow(lhs.rate + rhs.rate)
+  }
+  
+  static func -= (lhs: inout MassFlow, rhs: MassFlow) {
+    lhs = MassFlow(lhs.rate - rhs.rate)
+  }
+  
   static func + (lhs: MassFlow, rhs: MassFlow) -> MassFlow {
     return MassFlow(lhs.rate + rhs.rate)
   }

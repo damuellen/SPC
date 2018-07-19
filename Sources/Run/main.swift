@@ -27,13 +27,14 @@ let meteoFilePath = CommandLine.arguments.count > 2
 //PerformanceCalculator.loadConfigurations(atPath: path, format: .text)
 //PerformanceCalculator.saveConfigurations(toPath: path)
 PerformanceCalculator.meteoFilePath = meteoFilePath
-PerformanceCalculator.interval = .every10minutes
+PerformanceCalculator.interval = .every5minutes
+let n = Int.random(in: 10000..<100000)
+PerformanceCalculator.runModel(109)
 
-for i in 1...1 {
-  PerformanceCalculator.run(i)
-}
 
 let end = CFAbsoluteTimeGetCurrent()
 
 print("Duration:", String(format:"%.2f sec", end - start))
+
+//foo()
 

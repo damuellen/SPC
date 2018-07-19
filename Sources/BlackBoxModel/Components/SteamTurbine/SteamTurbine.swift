@@ -69,7 +69,7 @@ public enum SteamTurbine: Component {
   static func efficiency(_ status: inout Plant.PerformanceData, Lmax: Ratio) -> Double {
     guard status.steamTurbine.load.ratio > 0 else { return 1 }
   //  return 0.9 // FIXME
-    var parameter = SteamTurbine.parameter
+    var parameter = steamTurbine
     
     var maxEfficiency: Double = 1
 
@@ -146,7 +146,7 @@ public enum SteamTurbine: Component {
         }
       }
     }
-    let adjustmentFactor = Simulation.parameter.adjustmentFactor.efficiencyTurbine
+    let adjustmentFactor = Simulation.adjustmentFactor.efficiencyTurbine
     if parameter.efficiencyTemperature[1] >= 1 {
       efficiency *= maxEfficiency * adjustmentFactor //  / DCFactor
     } else {

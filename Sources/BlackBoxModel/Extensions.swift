@@ -23,8 +23,8 @@ public extension Float {
 }
 
 public extension Angle {
-  var radian: Double { return self * .pi / 180 }
-  var degree: Double { return self * (180 / .pi) }
+  var toRadian: Double { return self * .pi / 180 }
+  var toDegree: Double { return self * (180 / .pi) }
 }
 
 let calendar = { calendar -> Calendar in
@@ -47,3 +47,13 @@ extension Progress {
   }
 }
 
+func debug(_ value: Any...) {
+  value.forEach { (value) in
+    print(value, terminator: "\n\n")
+  }
+  let _ = readLine()
+}
+
+extension String {
+  static var lineBreak: String { return "\n" }
+}

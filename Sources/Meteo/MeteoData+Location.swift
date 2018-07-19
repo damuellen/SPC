@@ -16,18 +16,83 @@ public struct MeteoData: CustomStringConvertible {
   public let wetBulbTemperature: Float? = nil
   
   /// Linear interpolation function for meteo data values
-  static func lerp(_ value: Float, from startValue: MeteoData,
-                   to endValue: MeteoData) -> MeteoData {
+  static func lerp(start: MeteoData, end: MeteoData,
+                   _ value: Float) -> MeteoData {
     
-    if value >= 1 { return endValue }
+    if value >= 1 { return end }
     
-    let dni = startValue.dni + (value * (endValue.dni - startValue.dni)),
-    ghi = startValue.ghi + (value * (endValue.ghi - startValue.ghi)),
-    dhi = startValue.dhi + (value * (endValue.dhi - startValue.dhi)),
+    let dni = start.dni + (value * (end.dni - start.dni)),
+    ghi = start.ghi + (value * (end.ghi - start.ghi)),
+    dhi = start.dhi + (value * (end.dhi - start.dhi)),
+    temperature = start.temperature
+      + (value * (end.temperature - start.temperature)),
+    windSpeed = start.windSpeed
+      + (value * (end.windSpeed - start.windSpeed))
+    
+    return MeteoData(
+      dni: dni, ghi: ghi, dhi: dhi, temperature: temperature, windSpeed: windSpeed)
+  }
+  
+  static func cosineInterpolation(start: MeteoData, end: MeteoData,
+                                  _ progress: Float) -> MeteoData {
+    func cosineInterpolate(y1: Float, y2: Float, mu: Float) -> Float {
+      let mu2 = (1 - cos(mu * .pi)) / 2
+      return (y1 * (1 - mu2) + y2 * mu2)
+    }
+    
+    if progress >= 1 { return end }
+    let dni = cosineInterpolate(y1: start.dni, y2: end.dni, mu: progress)
+    let ghi = cosineInterpolate(y1: start.ghi, y2: end.ghi, mu: progress)
+    let dhi = cosineInterpolate(y1: start.dhi, y2: end.dhi, mu: progress)
+    let temperature = cosineInterpolate(y1: start.temperature,
+                                        y2: end.temperature,
+                                        mu: progress)
+    let windSpeed = cosineInterpolate(y1: start.windSpeed,
+                                      y2: end.windSpeed,
+                                      mu: progress)
+    
+    return MeteoData(
+      dni: Float(dni), ghi: Float(ghi), dhi: Float(dhi),
+      temperature: Float(temperature), windSpeed: Float(windSpeed))
+  }
+  
+  public mutating func noInsolation() {
+    self.dni = 0
+    self.ghi = 0
+    self.dhi = 0
+  }
+  
+  /// Interpolation function for meteo data values
+  static func interpolation(prev: MeteoData, current: MeteoData, next: MeteoData, progess: Float) -> MeteoData {
+    let startValue = current
+    let endValue = next
+    
+    func interpolation(_ prev: Float, _ current: Float, _ next: Float, _ progess: Float) -> Float {
+      let a = (current - prev) / 2 + prev
+      let b = (next - current) / 2 + current
+      var m = (b - a)
+      var aPrime = (2 * current - m) / 2
+      var bPrime = aPrime + m
+      if aPrime < 0 {
+        bPrime = bPrime + aPrime
+        aPrime = 0
+        m = bPrime - aPrime
+      }
+      if bPrime < 0 {
+        aPrime = aPrime + bPrime
+        bPrime = 0
+        m = bPrime - aPrime
+      }
+      return m * progess + aPrime
+    }
+    
+    let dni = interpolation(prev.dni, current.dni, next.dni, progess),
+    ghi = interpolation(prev.ghi, current.ghi, next.ghi, progess),
+    dhi = interpolation(prev.dhi, current.dhi, next.dhi, progess),
     temperature = startValue.temperature
-      + (value * (endValue.temperature - startValue.temperature)),
+      + (progess * (endValue.temperature - startValue.temperature)),
     windSpeed = startValue.windSpeed
-      + (value * (endValue.windSpeed - startValue.windSpeed))
+      + (progess * (endValue.windSpeed - startValue.windSpeed))
     
     return MeteoData(
       dni: dni, ghi: ghi, dhi: dhi, temperature: temperature, windSpeed: windSpeed)
@@ -73,6 +138,7 @@ public class MeteoDataSource {
   public let location: Location
   public let year: Int?
   public let timeZone: Int?
+  public var interval = 1.0
   
   init(name: String, data: [MeteoData], location: Location, year: Int?, timeZone: Int?) {
     self.name = name
@@ -80,98 +146,33 @@ public class MeteoDataSource {
     self.location = location
     self.year = year
     self.timeZone = timeZone
+    self.interval = 8760 / Double(data.count)
   }
 }
 
 public struct Location {
-  public let longitude: Double
-  public let latitude: Double
-  public let elevation: Double
+  public let longitude: Float
+  public let latitude: Float
+  public let elevation: Float
   
-  public init(longitude: Double, latitude: Double, elevation: Double) {
+  public var doubles: (Double, Double, Double) {
+    return (Double(longitude), Double(latitude), Double(elevation))
+  }
+  
+  public init(longitude: Float, latitude: Float, elevation: Float) {
     self.longitude = longitude
     self.latitude = latitude
     self.elevation = elevation
   }
 }
 
-// meteo-data interpolation:
-/*
-do {
-  var K = 8760
-  var N = 0
-  var intJ = 0
-  
-  for intN in 1 ... K {
-    if intN = 1 {  //first data
-      let a_dni = Meteo(intN).dni
-      let b_dni = (Meteo(intN + 1).dni - Meteo(intN).dni) / 2 + Meteo(intN).dni
-      let m_dni = (b_dni - a_dni)
-      let Aprime_dni = (2 * Meteo(intN).dni - m_dni) / 2
-      
-      var IntMin = 0
-      for intX in 1 ... 6 {//SIM.MTOperiod = 6 for 10 minutes interval interpolation
-        intJ = intJ + 1
-        IntMin = IntMin + 1
-        IntMeteo(intJ).dni = m_dni * intX / 6 + Aprime_dni
-        
-        IntAtime(intJ).day = Atime(intN).day
-        IntAtime(intJ).Hour = Atime(intN).Hour
-        IntAtime(intJ).minutes = (IntMin - 1) * 10
-      }
-    } else { //rest of the data
-      var a_dni = (Meteo(intN).dni - Meteo(intN - 1).dni) / 2 + Meteo(intN - 1).dni
-      var b_dni = (Meteo(intN + 1).dni - Meteo(intN).dni) / 2 + Meteo(intN).dni
-      if a_dni <= 0 || b_dni <= 0 {
-        a_dni = 0
-        b_dni = 0
-      }
-      var m_dni = (b_dni - a_dni)
-      var Aprime_dni = (2 * Meteo(intN).dni - m_dni) / 2
-      var Bprime_dni = Aprime_dni + m_dni
-      if Aprime_dni < 0 {
-        Bprime_dni = Bprime_dni + Aprime_dni
-        Aprime_dni = 0
-        m_dni = Bprime_dni - Aprime_dni
-      }
-      if Bprime_dni < 0 {
-        Aprime_dni = Aprime_dni + Bprime_dni
-        Bprime_dni = 0
-        m_dni = Bprime_dni - Aprime_dni
-      }
-      
-      var IntMin = 0
-      for intX in 1 ... 6 {//SIM.MTOperiod = 6 for 10 minutes interval interpolation
-        intJ = intJ + 1
-        IntMin = IntMin + 1
-        if Aprime_dni >= 0 {
-          IntMeteo(intJ).dni = m_dni * (intX * 2 - 1) / 12 + Aprime_dni
-        } else {
-          IntMeteo(intJ).dni = m_dni * intX / 6
-        }
-        
-        IntAtime(intJ).day = Atime(intN).day
-        IntAtime(intJ).Hour = Atime(intN).Hour
-        IntAtime(intJ).minutes = (IntMin - 1) * 10
-      }
-    }
-  }
-  for K in 1 ... intJ {
-    //Meteo(K).dni = format(IntMeteo(K).dni, "0.####")
-    
-    //Atime(K).day = IntAtime(K).day
-    //Atime(K).Hour = IntAtime(K).Hour
-    //Atime(K).minutes = IntAtime(K).minutes
-  }
-  K = K - 1
-}
-*/
+
 
 
 /*
  period        : Integer      'Validity period [sec]
  dni           : Single       'Normal Direct Insolation
- ICosTheta     : Single       'I * COS(Theta)
+ irradianceCosTheta     : Single       'I * COS(Theta)
  theta         : Single       'Incident angle [rad]
  SinPE         : Single       'SIN(PE)
  PE            : Single       'Tracking Angle

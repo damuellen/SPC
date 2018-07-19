@@ -46,7 +46,8 @@ public enum HeatExchanger: Component {
   }
 
   /// a struct for operation-relevant data of the heat exchanger
-  public struct PerformanceData: Equatable, HeatFlow, CustomStringConvertible {
+  public struct PerformanceData: Equatable, HeatCycle, CustomStringConvertible {
+    var name = ""
     var operationMode: OperationMode
     var temperature: (inlet: Temperature, outlet: Temperature)
     var massFlow: MassFlow
@@ -83,6 +84,7 @@ public enum HeatExchanger: Component {
 
   /// working conditions of the heat exchanger at start
   static let initialState = PerformanceData(
+    name: "",
     operationMode: .SI,
     temperature: (inlet: Temperature(celsius: 30.0),
                   outlet: Temperature(celsius: 30.0)),
@@ -116,7 +118,7 @@ public enum HeatExchanger: Component {
       }
     } else {
       if parameter.useAndsolFunction {
-        let massFlowLoad = hx.massFlow.share(of: SolarField.parameter.massFlow.max)
+        let massFlowLoad = hx.massFlow.share(of: solarField.massFlow.max)
        // assert(massFlowLoad > 1) // check how big massflow load can be (5% more than design?)
 
         // power function based on MAN-Turbo and OHL data with  pinch point tool
@@ -138,7 +140,7 @@ public enum HeatExchanger: Component {
 
         case let (ToutMassFlow?, ToutTin?, .none):
 
-          let massFlowLoad = hx.massFlow.share(of: SolarField.parameter.massFlow.max)
+          let massFlowLoad = hx.massFlow.share(of: solarField.massFlow.max)
 
           var temperatureFactor = ToutMassFlow[massFlowLoad]
           temperatureFactor *= ToutTin[hx.temperature.inlet]
@@ -153,7 +155,7 @@ public enum HeatExchanger: Component {
             * (hx.temperature.inlet - temp.htf.inlet.min).kelvin
             / (temp.htf.inlet.max - temp.htf.inlet.min).kelvin)
 
-          let massFlowLoad = hx.massFlow.share(of: SolarField.parameter.massFlow.max)
+          let massFlowLoad = hx.massFlow.share(of: solarField.massFlow.max)
 
           let temperatureFactor = ToutMassFlow[massFlowLoad]
 
@@ -161,7 +163,7 @@ public enum HeatExchanger: Component {
             limit(temperatureFactor))
         case let (_, _, ToutTinMassFlow?):
           let temp = parameter.temperature
-          let massFlowLoad = hx.massFlow.share(of: SolarField.parameter.massFlow.max)
+          let massFlowLoad = hx.massFlow.share(of: solarField.massFlow.max)
 
           // power function based on MAN-Turbo and OHL data with  pinch point tool
           let temperatureFactor = ((ToutTinMassFlow[0]
@@ -191,7 +193,7 @@ public enum HeatExchanger: Component {
         }
       }
     }
-
+    
     if case .discharge = storage.operationMode,
       hx.temperature.outlet.kelvin < (261.toKelvin) {
       // added to simulate a bypass on the PB-HX if the expected outlet temp is so low that the salt to TES could freeze
@@ -202,18 +204,18 @@ public enum HeatExchanger: Component {
       for i in 0 ..< 100 where hx.heatToTES > h_261 {
         // reduce massflow to PB in 5% every step until enthalpy is
         hx.massFlow = MassFlow(totalMassFlow.rate * (1 - (Double(i) / 20)))
-        let massFlowLoad = hx.massFlow.share(of: SolarField.parameter.massFlow.max)
+        let massFlowLoad = hx.massFlow.share(of: solarField.massFlow.max)
 
         if let ToutMassFlow = parameter.ToutMassFlow,
           let ToutTin = parameter.ToutTin,
-          !parameter.useAndsolFunction {
+          parameter.useAndsolFunction == false {
           var temperatureFactor = ToutMassFlow[massFlowLoad]
           temperatureFactor *= ToutTin[hx.temperature.inlet]
 
           hx.temperature.outlet = parameter.temperature.htf.outlet.max.adjusted(
             with: temperatureFactor)
         } else if let ToutMassFlow = parameter.ToutMassFlow,
-          !parameter.useAndsolFunction {
+          parameter.useAndsolFunction == false {
           // if Tout is dependant on massflow, recalculate Tout
           let temperatureFactor = ToutMassFlow[massFlowLoad]
 
@@ -260,16 +262,16 @@ public enum HeatExchanger: Component {
         * hx.heatToTES + 0.58315).toKelvin)
     }
     
-    return hx.thermal(fluid: htf) / 1_000 * parameter.efficiency
+    return hx.heatTransfered(with: htf) / 1_000 * parameter.efficiency
   }
   
   static func update(powerBlock: inout PowerBlock.PerformanceData,
                      heatExchanger: HeatExchanger.PerformanceData) {
 
-    if !parameter.Tout_f_Mfl,
-      !parameter.Tout_f_Tin,
-      !parameter.useAndsolFunction,
-      !parameter.Tout_exp_Tin_Mfl { // old method
+    if parameter.Tout_f_Mfl == false,
+      parameter.Tout_f_Tin == false,
+      parameter.useAndsolFunction == false,
+      parameter.Tout_exp_Tin_Mfl == false { // old method
       powerBlock.temperature.outlet = Temperature(
         parameter.temperature.htf.outlet.min.kelvin
         + (parameter.temperature.htf.outlet.max
@@ -281,7 +283,7 @@ public enum HeatExchanger: Component {
       // CHECK: the value of HTFoutTmax should be dependent on storage charging but only on PB HX!
       
     } else if parameter.Tout_exp_Tin_Mfl,
-      !parameter.Tout_f_Tin,
+      parameter.Tout_f_Tin == false,
       let ToutMassFlow = parameter.ToutMassFlow {
       
       powerBlock.temperature.outlet = Temperature(
@@ -293,7 +295,7 @@ public enum HeatExchanger: Component {
         / (parameter.temperature.htf.inlet.max
           - parameter.temperature.htf.inlet.min).kelvin)
       
-      let massFlowLoad = powerBlock.massFlow.share(of: SolarField.parameter.massFlow.max)
+      let massFlowLoad = powerBlock.massFlow.share(of: solarField.massFlow.max)
       
       let temperaturFactor = Ratio(ToutMassFlow[massFlowLoad.ratio])
       
@@ -303,7 +305,7 @@ public enum HeatExchanger: Component {
       let ToutMassFlow = parameter.ToutMassFlow,
       let ToutTin = parameter.ToutTin {
       
-      let massFlowLoad = powerBlock.massFlow.share(of: SolarField.parameter.massFlow.max)
+      let massFlowLoad = powerBlock.massFlow.share(of: solarField.massFlow.max)
       
       var temperaturFactor = ToutMassFlow[massFlowLoad.ratio]
       temperaturFactor *= ToutTin[heatExchanger.temperature.inlet]
@@ -313,7 +315,7 @@ public enum HeatExchanger: Component {
       
     } else if parameter.useAndsolFunction {
       
-      let massFlowLoad = powerBlock.massFlow.share(of: SolarField.parameter.massFlow.max)
+      let massFlowLoad = powerBlock.massFlow.share(of: solarField.massFlow.max)
       
       let temperaturFactor = ((0.0007592419869
         * (powerBlock.temperature.inlet.kelvin
@@ -331,7 +333,7 @@ public enum HeatExchanger: Component {
     } else if parameter.Tout_exp_Tin_Mfl,
       let coefficients = parameter.ToutTinMassFlow {
       
-      let massFlowLoad = powerBlock.massFlow.share(of: SolarField.parameter.massFlow.max)
+      let massFlowLoad = powerBlock.massFlow.share(of: solarField.massFlow.max)
       
       let temperaturFactor = ((coefficients[0]
         * (powerBlock.temperature.inlet.kelvin / parameter.temperature.htf.inlet.max.kelvin)

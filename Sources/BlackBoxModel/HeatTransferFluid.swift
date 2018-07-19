@@ -43,12 +43,12 @@ public struct HeatTransferFluid {
   let name: String
   let freezeTemperature: Temperature
   let heatCapacity: [Double]
-  let dens: [Double]
-  let visco: [Double]
+  let density: [Double]
+  let viscosity: [Double]
   let thermCon: [Double]
   let maxTemperature: Temperature
-  let enthaplyFromTemperatureCoeffiencts: [Double]
-  let temperatureFromEnthalpyCoeffiencts: [Double]
+  let enthaplyFromTemperature: [Double]
+  let temperatureFromEnthalpy: [Double]
   let useEnthalpy: Bool
   let heatDelta: (Temperature, Temperature) -> Heat
   let temperatureDelta: (Double, Temperature) -> Temperature
@@ -61,12 +61,12 @@ public struct HeatTransferFluid {
     self.name = name
     self.freezeTemperature = Temperature(celsius: freezeTemperature)
     self.heatCapacity = heatCapacity
-    self.dens = dens
-    self.visco = visco
+    self.density = dens
+    self.viscosity = visco
     self.thermCon = thermCon
     self.maxTemperature = Temperature(celsius: maxTemperature)
-    self.enthaplyFromTemperatureCoeffiencts = h_T
-    self.temperatureFromEnthalpyCoeffiencts = T_h
+    self.enthaplyFromTemperature = h_T
+    self.temperatureFromEnthalpy = T_h
     
     if useEnthalpy, !h_T.isEmpty, !T_h.isEmpty {
       self.useEnthalpy = true
@@ -96,23 +96,23 @@ public struct HeatTransferFluid {
   
   func density(_ temperature: Temperature) -> Double {
     assert(temperature.kelvin > freezeTemperature.kelvin)
-    return dens[0] + dens[1] * temperature.celsius
-      + dens[2] * temperature.celsius * temperature.celsius
+    return density[0] + density[1] * temperature.celsius
+      + density[2] * temperature.celsius * temperature.celsius
   }
   
   func mixingTemperature(
-    outlet m1: HeatFlow, with m2: HeatFlow) -> Temperature {
-    let (t1, t2) = (m1.temperature.outlet.kelvin, m2.temperature.outlet.kelvin)
+    outlet f1: HeatCycle, with f2: HeatCycle) -> Temperature {
+    let (t1, t2) = (f1.temperature.outlet.kelvin, f2.temperature.outlet.kelvin)
     assert(min(t1, t2) > freezeTemperature.kelvin)
-    let (m1, m2) = (m1.massFlow.rate, m2.massFlow.rate)
-    guard m1 + m2 > 0 else { return Temperature((t1 + t2) / 2) }
+    let (mf1, mf2) = (f1.massFlow.rate, f2.massFlow.rate)
+    guard mf1 + mf2 > 0 else { return Temperature((t1 + t2) / 2) }
     let cap1 = fma(heatCapacity[1], t1, heatCapacity[0])
     let cap2 = fma(heatCapacity[1], t2, heatCapacity[0])
-    return Temperature((m1 * cap1 * t1 + m2 * cap2 * t2) / (m1 * cap1 + m2 * cap2))
+    return Temperature((mf1 * cap1 * t1 + mf2 * cap2 * t2) / (mf1 * cap1 + mf2 * cap2))
   }
   
   func mixingTemperature(
-    inlet m1: HeatFlow, with m2: HeatFlow) -> Temperature {
+    inlet m1: HeatCycle, with m2: HeatCycle) -> Temperature {
     let (t1, t2) = (m1.temperature.inlet.kelvin, m2.temperature.outlet.kelvin)
     assert(min(t1, t2) > freezeTemperature.kelvin)
     let (m1, m2) = (m1.massFlow.rate, m2.massFlow.rate)
@@ -179,24 +179,24 @@ public struct HeatTransferFluid {
     d += "c0:" >< "\(heatCapacity[0])"
     d += "c1:" >< "\(heatCapacity[1])"
     d += "Calculate with Enthalpy: \(useEnthalpy.description)"
-    if !enthaplyFromTemperatureCoeffiencts.isEmpty {
+    if !enthaplyFromTemperature.isEmpty {
       d += "Enthalpy as function on Temperature\n"
-      for (i, c) in enthaplyFromTemperatureCoeffiencts.enumerated() {
+      for (i, c) in enthaplyFromTemperature.enumerated() {
         d += "c\(i):" >< String(format:"%.6E", c)
       }
     }
-    if !temperatureFromEnthalpyCoeffiencts.isEmpty {
+    if !temperatureFromEnthalpy.isEmpty {
       d += "Temperature as function on Enthalpy\n"
-      for (i, c) in temperatureFromEnthalpyCoeffiencts.enumerated() {
+      for (i, c) in temperatureFromEnthalpy.enumerated() {
         d += "c\(i):" >< String(format:"%.6E", c)
       }
     }
     d += "Density as a Function of Temperature; roh(T) = c0+c1*T+c1*T^2\n"
-    for (i, c) in dens.enumerated() {
+    for (i, c) in density.enumerated() {
       d += "c\(i):" >< String(format:"%.6E", c)
     }
     d += "Viscosity as a Function of Temperature; eta(T) = c0+c1*T+c1*T^2\n"
-    for (i, c) in visco.enumerated() {
+    for (i, c) in viscosity.enumerated() {
       d += "c\(i):" >< String(format:"%.6E", c)
     }
     d += "Conductivity as a Function of Temperature; lamda(T) = c0+c1*T+c1*T^2\n"
@@ -234,14 +234,14 @@ extension HeatTransferFluid: Codable {
     self.freezeTemperature = try values.decode(Temperature.self, forKey: .freezeTemperature)
     let heatCapacity = try values.decode(Array<Double>.self, forKey: .heatCapacity)
     self.heatCapacity = heatCapacity
-    self.dens = try values.decode(Array<Double>.self, forKey: .dens)
-    self.visco = try values.decode(Array<Double>.self, forKey: .visco)
+    self.density = try values.decode(Array<Double>.self, forKey: .dens)
+    self.viscosity = try values.decode(Array<Double>.self, forKey: .visco)
     self.thermCon = try values.decode(Array<Double>.self, forKey: .thermCon)
     self.maxTemperature = try values.decode(Temperature.self, forKey: .maxTemperature)
     let h_T = try values.decode(Array<Double>.self, forKey: .h_T)
-    self.enthaplyFromTemperatureCoeffiencts = h_T
+    self.enthaplyFromTemperature = h_T
     let T_h = try values.decode(Array<Double>.self, forKey: .T_h)
-    self.temperatureFromEnthalpyCoeffiencts = T_h
+    self.temperatureFromEnthalpy = T_h
     self.useEnthalpy = try values.decode(Bool.self, forKey: .withEnthalpy)
     
     if useEnthalpy, !h_T.isEmpty, !T_h.isEmpty {
@@ -273,12 +273,12 @@ extension HeatTransferFluid: Codable {
     try container.encode(name, forKey: .name)
     try container.encode(freezeTemperature, forKey: .freezeTemperature)
     try container.encode(heatCapacity, forKey: .heatCapacity)
-    try container.encode(dens, forKey: .dens)
-    try container.encode(visco, forKey: .visco)
+    try container.encode(density, forKey: .dens)
+    try container.encode(viscosity, forKey: .visco)
     try container.encode(thermCon, forKey: .thermCon)
     try container.encode(maxTemperature, forKey: .maxTemperature)
-    try container.encode(enthaplyFromTemperatureCoeffiencts, forKey: .h_T)
-    try container.encode(temperatureFromEnthalpyCoeffiencts, forKey: .T_h)
+    try container.encode(enthaplyFromTemperature, forKey: .h_T)
+    try container.encode(temperatureFromEnthalpy, forKey: .T_h)
     try container.encode(useEnthalpy, forKey: .withEnthalpy)
   }
 }
@@ -290,15 +290,15 @@ extension HeatTransferFluid {
     self.freezeTemperature = try Temperature(row(10))
     let heatCapacity = try [row(13), row(15)]
     self.heatCapacity = heatCapacity
-    self.dens = try [try row(18), try row(21), row(24)]
-    self.visco = try [row(27), row(30), row(33)]
+    self.density = try [try row(18), try row(21), row(24)]
+    self.viscosity = try [row(27), row(30), row(33)]
     self.thermCon = try [row(36), row(39), row(42)]
     self.maxTemperature = try Temperature(row(45)) //.toKelvin
     if includesEnthalpy {
       let h_T = try [row(47), row(48), row(49), row(50), row(51)]
-      self.enthaplyFromTemperatureCoeffiencts = h_T
+      self.enthaplyFromTemperature = h_T
       let T_h = try [row(53), row(54), row(55), row(56), row(57)]
-      self.temperatureFromEnthalpyCoeffiencts = T_h
+      self.temperatureFromEnthalpy = T_h
       self.useEnthalpy = try row(59) > 0 ? true : false
       self.heatDelta = { (high: Temperature, low: Temperature) -> Heat in
         HeatTransferFluid.heatTransfer(
@@ -311,8 +311,8 @@ extension HeatTransferFluid {
       }
     } else {
       self.useEnthalpy = false
-      self.enthaplyFromTemperatureCoeffiencts = []
-      self.temperatureFromEnthalpyCoeffiencts = []
+      self.enthaplyFromTemperature = []
+      self.temperatureFromEnthalpy = []
       self.heatDelta = { (high: Temperature, low: Temperature) -> Heat in
         HeatTransferFluid.heatTransfer(
           from: high.celsius, to: low.celsius, coefficients: heatCapacity)

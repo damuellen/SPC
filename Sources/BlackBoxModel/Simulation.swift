@@ -12,11 +12,6 @@ import Foundation
 import Meteo
 import Config
 
-let adjustmentFactor = Simulation.AdjustmentFactor(
-  efficiencySolarField: 1, efficiencyTurbine: 1,
-  efficiencyHeater: 1, efficiencyBoiler: 1,
-  heatLossHCE: 1, heatLossHTF: 1, heatLossH2O: 1,
-  electricalParasitics: 1)
 
 public enum Simulation {
   
@@ -61,6 +56,12 @@ public enum Simulation {
     electricalParasitics: 8.5 / 100,
     HLtempTolerance: 0.1,
     adjustmentFactor: adjustmentFactor)
+  
+  static var adjustmentFactor = Simulation.AdjustmentFactor(
+    efficiencySolarField: 1, efficiencyTurbine: 1,
+    efficiencyHeater: 1, efficiencyBoiler: 1,
+    heatLossHCE: 1, heatLossHTF: 1, heatLossH2O: 1,
+    electricalParasitics: 1)
 }
 
 public struct InitValues: Codable {
@@ -72,9 +73,9 @@ public struct InitValues: Codable {
 public extension InitValues {
   public init(file: TextConfigFile)throws {
     let row: (Int)throws -> Double = { try file.parseDouble(row: $0) }
-    self.temperatureOfHTFinPipes = try Temperature(row(6))
-    self.temperatureOfHTFinHCE = try Temperature(row(9))
-    self.massFlowInSolarField = try MassFlow(row(12))
+    self.temperatureOfHTFinPipes = try Temperature(row(7))
+    self.temperatureOfHTFinHCE = try Temperature(row(10))
+    self.massFlowInSolarField = try MassFlow(row(13))
   }
 }
 

@@ -30,14 +30,15 @@ class HeatTransferFluidTests: XCTestCase {
   }
   
   func testsHydronic() {
-    var tf = ThermalFlow()
+    var tf = HeatFlow()
+
     tf.massFlow = 500.0
     tf.temperature.inlet = Temperature(celsius: 293.0)
     tf.temperature.outlet = Temperature(celsius: 393.0)
-    let e1 = tf.thermal(fluid: htf)
+    let e1 = tf.heatTransfered(with: htf)
     tf.temperature.inlet = Temperature(celsius: 393.0)
     tf.temperature.outlet = Temperature(celsius: 293.0)
-    let e2 = tf.thermal(fluid: htf)
+    let e2 = tf.heatTransfered(with: htf)
     XCTAssertEqual(e1-e2, 0, accuracy: 0.01)
   }
   

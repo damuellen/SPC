@@ -24,7 +24,8 @@ extension Heater.PerformanceData: CustomStringConvertible {
 public enum Heater: Component {
   
   /// a struct for operation-relevant data of the heater
-  public struct PerformanceData: Equatable, HeatFlow {
+  public struct PerformanceData: Equatable, HeatCycle {
+    var name = ""
     var operationMode: OperationMode
     var isMaintained: Bool
     var load: Ratio
@@ -54,6 +55,7 @@ public enum Heater: Component {
   
   /// working conditions of the heater at start
   static let initialState = PerformanceData(
+    name: "",
     operationMode: .noOperation,
     isMaintained: false,
     load: 0.0,
@@ -92,7 +94,7 @@ public enum Heater: Component {
         fuelFlow = availableFuel / hourFraction / 2
         // The fuelfl avl. [MW]
         thermal.heater = fuelFlow * parameter.efficiency
-          * Simulation.parameter.adjustmentFactor.efficiencyHeater
+          * Simulation.adjustmentFactor.efficiencyHeater
         // net thermal power avail [MW]
         status.heater.load = Ratio(thermal.heater / Design.layout.heater) // load avail.
         
@@ -166,13 +168,13 @@ public enum Heater: Component {
     } else {
       // Normal operation requested  The fuel flow needed [MW]
       fuelFlow = min(-heat, Design.layout.heater) / parameter.efficiency
-        / Simulation.parameter.adjustmentFactor.efficiencyHeater
+        / Simulation.adjustmentFactor.efficiencyHeater
       // The fuelfl avl. [MW]
       fuelFlow = min(availableFuel, fuelFlow * hourFraction) / hourFraction
      // fuelFlow = max(fuelFlow, 0)
       // net thermal power avail [MW]
       thermal.heater = fuelFlow * parameter.efficiency
-        * Simulation.parameter.adjustmentFactor.efficiencyHeater
+        * Simulation.adjustmentFactor.efficiencyHeater
       
       status.heater.load = Ratio(thermal.heater / Design.layout.heater) // load avail.
       
@@ -204,7 +206,7 @@ public enum Heater: Component {
                           status.heater.temperature.inlet))
       }
     }
-    noOperation(&status.heater)
-    thermal.heater = 0
+   // noOperation(&status.heater)
+   // thermal.heater = 0
   }
 }

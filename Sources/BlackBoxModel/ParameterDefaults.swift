@@ -33,7 +33,7 @@ public enum ParameterDefaults {
     scc: HeatExchanger.Parameter.Temperatures(
       htf: (inlet: (max: 390, min: 260), outlet: (max: 292, min: 198)),
       h2o: (inlet: (max: 374, min: 255), outlet: (max: 234, min: 128))),
-    SCCHTFmassFlow: 1500.0,
+    SCCHTFmassFlow: 1000.0,
     SCCHTFthermal: 265,
     ToutMassFlow: nil,
     ToutTin: nil,
@@ -71,7 +71,7 @@ public enum ParameterDefaults {
     elev: 0.0,
     antiFreezeParastics: 0.5,
     pumpParastics: [0.15, -0.293, 1.257],
-    massFlow: (1500.0, 0.0),
+    massFlow: (1000.0, 0.0),
     pumpParasticsFullLoad: 3.607,
     antiFreezeFlow: 10.0,
     HTFmass: 796_359.0,

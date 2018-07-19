@@ -13,17 +13,18 @@ import CoreFoundation
 
 struct TimeStep: Codable, CustomStringConvertible {
   
-  let month: Int
-  let day: Int
-  let hour: Int
-  let minute: Int
+  var yearDay: Int = 0
+  var month: Int
+  var day: Int
+  var hour: Int
+  var minute: Int
   
   public var description: String {
     return "\(hour):\(minute) \(day).\(month)."
   }
   
   static var zero: TimeStep {
-    return TimeStep(month: 0, day: 0, hour: 0, minute: 0)
+    return TimeStep(yearDay: 0, month: 0, day: 0, hour: 0, minute: 0)
   }
   
   static var cfCalendar: CFCalendar = {
@@ -59,7 +60,12 @@ extension TimeStep {
       CFCalendarUnit(rawValue: CFCalendarUnit.month.rawValue),
       CFCalendarUnit(rawValue: CFCalendarUnit.year.rawValue),
       date.timeIntervalSinceReferenceDate)
-    self = TimeStep(month: month, day: day, hour: hour, minute: minute)
+    let yearDay = 0 /*CFCalendarGetOrdinalityOfUnit(
+      TimeStep.cfCalendar,
+      CFCalendarUnit(rawValue: CFCalendarUnit.day.rawValue),
+      CFCalendarUnit(rawValue: CFCalendarUnit.year.rawValue),
+      date.timeIntervalSinceReferenceDate)*/
+    self = TimeStep(yearDay: yearDay, month: month, day: day, hour: hour, minute: minute)
     Log.debugMessage("\n\(date)")
   }
 }

@@ -33,32 +33,32 @@ public enum Report {
 
     d += "SOLAR FIELD\n"
     d += "  No of Loops:" >< "\(Design.layout.solarField)"
-    d += "  Collector Type:" >< "\(Collector.parameter.name)"
-    let aperture = Design.layout.solarField * 2 * Collector.parameter.areaSCAnet
-      * Double(SolarField.parameter.numberOfSCAsInRow)
+    d += "  Collector Type:" >< "\(collector.name)"
+    let aperture = Design.layout.solarField * 2 * collector.areaSCAnet
+      * Double(solarField.numberOfSCAsInRow)
     d += "  Aperture [m²]:" >< "\(aperture)"
-    d += "  Massflow [kg/s]:" >< SolarField.parameter.massFlow.max.rate.description
-    d += "  Elevation [ø]:  " + "\(SolarField.parameter.elev)\t Azimut [ø]:  "
-      + "\(SolarField.parameter.azim)"
+    d += "  Massflow [kg/s]:" >< solarField.massFlow.max.rate.description
+    d += "  Elevation [ø]:  " + "\(solarField.elev)\t Azimut [ø]:  "
+      + "\(solarField.azim)"
 
-    // let storage = Storage.parameter
+    // let storage = storage
     d += "\n"
     d += "STORAGE\n"
     d += "  Capacity [MWH,th]:" 
-      >< "\(Design.layout.storage * SteamTurbine.parameter.power.max / SteamTurbine.parameter.efficiencyNominal)"
+      >< "\(Design.layout.storage * steamTurbine.power.max / steamTurbine.efficiencyNominal)"
     
     d += "\n"
     d += "STEAM TURBINE\n"
-    d += "  Gross Output [MW]:" >< "\(SteamTurbine.parameter.power.max)"
-    d += "  Efficiency [%] :" >< "\(SteamTurbine.parameter.efficiencyNominal * 100)"
+    d += "  Gross Output [MW]:" >< "\(steamTurbine.power.max)"
+    d += "  Efficiency [%] :" >< "\(steamTurbine.efficiencyNominal * 100)"
     d += "\n"
     
     d += "GAS TURBINE\n"
     d += "  Gross Output [MW]:" >< "\(Design.layout.gasTurbine)"
-    d += "  Efficiency [%]:" >< "\(GasTurbine.parameter.efficiencyISO * 100)"
+    d += "  Efficiency [%]:" >< "\(gasTurbine.efficiencyISO * 100)"
     d += "WHR- SYSTEM\n"
     d += "  Therm Output [MW]:"
-      >< "\(Design.layout.gasTurbine * (1 / GasTurbine.parameter.efficiencyISO - 1)); \(WasteHeatRecovery.parameter.efficiencyNominal)"
+      >< "\(Design.layout.gasTurbine * (1 / gasTurbine.efficiencyISO - 1)); \(WasteHeatRecovery.parameter.efficiencyNominal)"
     d += "  Efficiency [%]:" >< "\(WasteHeatRecovery.parameter.efficiencyNominal)"
     d += "\n"
     
@@ -101,11 +101,11 @@ public enum Report {
     d += "\n\n"
     d += "STORAGE"
     
-    // if Storage.parameter.tempInCst0(1) = 0 {
-    // Storage.parameter.TexC0to1(0) = Storage.parameter.heatLossConstants0(2) - Storage.parameter.TexC0to1(0)
-    // Storage.parameter.TexCst0(0) = Storage.parameter.TexC0to1(0)
-    // Storage.parameter.tempInC0to1(0) = Storage.parameter.heatLossConstants0(1) - Storage.parameter.tempInC0to1(0)
-    // Storage.parameter.tempInCst0(0) = Storage.parameter.tempInC0to1(0)
+    // if storage.tempInCst0(1) = 0 {
+    // storage.TexC0to1(0) = storage.heatLossConstants0(2) - storage.TexC0to1(0)
+    // storage.TexCst0(0) = storage.TexC0to1(0)
+    // storage.tempInC0to1(0) = storage.heatLossConstants0(1) - storage.tempInC0to1(0)
+    // storage.tempInCst0(0) = storage.tempInC0to1(0)
     // }
     
     d += "\n"
@@ -113,10 +113,10 @@ public enum Report {
     d += Heater.parameter.description
     d += "\n\n"
     d += "HEAT EXCHANGER\n\n"
-    d += HeatExchanger.parameter.description
+    d += heatExchanger.description
     d += "\n"
     d += "STEAM TURBINE\n\n"
-    d += SteamTurbine.parameter.description
+    d += steamTurbine.description
     d += "\n"
 
     //    d += "Power Block Availability [%]:" >< "\(Plant.availability[0).powerBlock * 100)"
@@ -126,13 +126,13 @@ public enum Report {
     d += "\n"
     d += "First Date of Operation [MM.dd  HH:mm]:                             "
     if let firstDateOfOperation = Simulation.time.firstDateOfOperation {
-      d += dateFormatter.string(from: firstDateOfOperation) + "\n"
+      d += dateFormatter.string(from: firstDateOfOperation) + .lineBreak
     } else {
       d += "01.01  00:00\n"
     }
     d += "Last Date of Operation [MM.dd  HH:mm]:                              "
     if let lastDateOfOperation = Simulation.time.lastDateOfOperation {
-      d += dateFormatter.string(from: lastDateOfOperation) + "\n"
+      d += dateFormatter.string(from: lastDateOfOperation) + .lineBreak
     } else {
       d += "12.31  23:59\n"
     }
@@ -173,11 +173,11 @@ public enum Report {
     d += "\n\n"
     
     d += "SOLAR FIELD\n\n"
-    d += SolarField.parameter.description
+    d += solarField.description
     d += "\n"
     
     d += "COLLECTOR\n\n"
-    d += "\(Collector.parameter.description)"
+    d += "\(collector.description)"
     d += "\n\n"
     d += "HEAT TRANSFER FLUID\n\n"
     d += "\(htf.description)"
@@ -215,7 +215,7 @@ public enum Report {
     d += "\n"
     d += "Turbine is Op. at Program Start [1: YES, 0: NO]: SteamTurbine.status.Op\n"
     d += "\n"
-    // if Storage.parameter.Strategy = "Ful" {
+    // if storage.Strategy = "Ful" {
     d += "Storage Strategy [1: Shifter, 0: demand] : 1\n"
     // } else {
     //  d += "Storage Strategy: [1: Shifter, 0: demand] : 0

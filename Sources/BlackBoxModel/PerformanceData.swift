@@ -9,265 +9,226 @@
 //
 
 import Foundation
-import DateGenerator
-import Meteo
 
-final class PerfomanceData {
+extension Collector.PerformanceData {
   
-  final class Result {
-    // Thermal: [MWHth] = [MWth] * [Hr]
-    var thermal = ThermalEnergy()
-    
-    var fuelConsumption = FuelConsumption()
-    
-    // Electric: [MWHe] = [MWe] * [Hr]
-    var parasitics = Parasitics()
-    var energy = ElectricEnergy()
-    
-    var throughput = Throughput()
-    
-    // Meteodata: [WHr/sqm]
-    var dni: Double = 0
-    var ghi: Double = 0
-    var dhi: Double = 0
-    var ico: Double = 0
-
-    // SolarField
-    var ITA: Double = 0
-    var HL: Double = 0
-    var heatLossHeader: Double = 0
-    var heatLossHCE: Double = 0
-    
-    var numbers: [String] {
-      return [
-        String(format:"%.0f", dni),
-        String(format:"%.0f", ghi),
-        String(format:"%.0f", dhi),
-        String(format:"%.0f", ico),
-        String(format:"%.0f", ITA),
-        String(format:"%.1f", HL),
-        String(format:"%.1f", heatLossHeader),
-        String(format:"%.1f", heatLossHCE),
-      ]
-    }
-    
-    static var titles: [(String, String)]  {
-      return [
-        ("Meteo|DNI", "Wh/m2"), ("Meteo|GHI", "Wh/m2"), ("Meteo|DHI", "Wh/m2"),
-        ("SolarField|ICO", "Wh/m2"), ("SolarField|ITA", "_"), ("SolarField|HL", "_"),
-        ("SolarField|heatLossHeader", "_"), ("SolarField|heatLossHCE", "_"),
-      ]
-    }
-
-    fileprivate func add(solarfield: SolarField.PerformanceData, fraction: Double) {
-      ITA += solarfield.ITA * fraction
-      HL += solarfield.HL * fraction
-      heatLossHeader += solarfield.heatLossHeader * fraction
-      heatLossHCE += solarfield.heatLossHCE * fraction
-    }
-    
-    fileprivate func accumulate(_ result: Result, fraction: Double) {
-      thermal.accumulate(result.thermal, fraction: fraction)
-      fuelConsumption.accumulate(result.fuelConsumption, fraction: fraction)
-      parasitics.accumulate(result.parasitics, fraction: fraction)
-      energy.accumulate(result.energy, fraction: fraction)
-      dni += result.dni * fraction
-      ghi += result.ghi * fraction
-      dhi += result.dhi * fraction
-      ico += result.ico * fraction
-      
-      ITA += result.ITA * fraction
-      HL += result.HL * fraction
-      heatLossHeader += result.heatLossHeader * fraction
-      heatLossHCE += result.heatLossHCE * fraction
-    }
-    
-    fileprivate func reset() {
-      thermal = ThermalEnergy()
-      fuelConsumption = FuelConsumption()
-      parasitics = Parasitics()
-      energy = ElectricEnergy()
-      dni = 0; ghi = 0; dhi = 0; ico = 0; ITA = 0; HL = 0
-      heatLossHeader = 0; heatLossHCE = 0
-    }
+  var values: [String] {
+    return [
+      String(format:"%.1f", theta),
+      String(format:"%.2f", cosTheta),
+      String(format:"%.2f", efficiency),
+      String(format:"%.1f", parabolicElevation),
+    ]
   }
   
-  var dateString: String = ""
-  let interval = PerformanceCalculator.interval
-  
-  var intervalResults: Result? = nil
-  var collectorResults = Collector.initialState
-  let hourlyResults = Result()
-  let dailyResults = Result()
-  let annuallyResults = Result()
-
-  init() { }
-  
-  func append(date: Date, meteo: MeteoData,
-              electricEnergy: ElectricEnergy,
-              electricalParasitics: Parasitics,
-              thermal: ThermalEnergy,
-              fuelConsumption: FuelConsumption,
-              status: Plant.PerformanceData) {
-    
-    if intervalResults != nil {
-      intervalResults!.thermal = thermal
-      intervalResults!.energy = electricEnergy
-      intervalResults!.fuelConsumption = fuelConsumption
-      intervalResults!.parasitics = electricalParasitics
-      intervalResults!.dni = Double(meteo.dni)
-      intervalResults!.ghi = Double(meteo.ghi)
-      intervalResults!.dhi = Double(meteo.dhi)
-      intervalResults!.ico = Double(meteo.dni) * status.collector.cosTheta
-      collectorResults = status.collector
-      intervalResults!.throughput.solar = status.solarField.header
-      intervalResults!.add(solarfield: status.solarField, fraction: 1)
-      writeIntervalResults(date: date)
-    }
-    
-    defer { intervalCounter += 1 }
-    
-    if intervalCounter == 0, let dateFormatter = dateFormatter {
-      dateString = dateFormatter.string(from: date)
-    }
-    
-    let fraction = interval.fraction
-    hourlyResults.thermal.accumulate(thermal, fraction: fraction)
-    hourlyResults.energy.accumulate(electricEnergy, fraction: fraction)
-    hourlyResults.fuelConsumption.accumulate(fuelConsumption, fraction: fraction)
-    hourlyResults.parasitics.accumulate(electricalParasitics, fraction: fraction)
-    
-    hourlyResults.dni += Double(meteo.dni) * fraction
-    hourlyResults.ghi += Double(meteo.ghi) * fraction
-    hourlyResults.dhi += Double(meteo.dhi) * fraction
-    hourlyResults.ico += Double(meteo.dni) * status.collector.cosTheta * fraction
-
-    hourlyResults.add(solarfield: status.solarField, fraction: fraction)
+  var csv: String {
+    return String(format:"%.1f, %.1f, %.1f, %.1f",
+                  theta, cosTheta, efficiency, parabolicElevation)
   }
   
-  private var intervalCounter: Int = 0 {
-    didSet {
-      if intervalCounter == interval.rawValue {
-        writeHourlyResults()
-        intervalCounter = 0
-      }
-    }
-  }
-  
-  private var hourCounter: Int = 0 {
-    didSet {
-      if hourCounter == 24 {
-        writeDailyResults()
-        hourCounter = 0
-      }
-    }
-  }
-
-  var intervalOutputStream: OutputStream? {
-    didSet {
-      intervalResults = Result()
-      intervalOutputStream?.open()
-      var data = [UInt8](("wxDVFileHeaderVer.1\n").utf8)
-      let titles = [PerfomanceData.Result.titles, ThermalEnergy.titles,
-                    ElectricEnergy.titles, Parasitics.titles,
-                    FuelConsumption.titles, Collector.PerformanceData.titles,
-                    Throughput.titles].joined()
-      let names = titles.map { $0.0 }.joined(separator: ",")
-      let units = titles.map { $0.1 }.joined(separator: ",")
-      data += [UInt8]((names + "\n").utf8)
-      data += [UInt8]((repeatElement("0", count: names.count)
-        .joined(separator: ", ") + "\n").utf8)
-      data += [UInt8]((repeatElement("\(interval.fraction)", count: names.count)
-        .joined(separator: ", ") + "\n").utf8)
-      data += [UInt8]((units + "\n").utf8)
-      intervalOutputStream?.write(data, maxLength: data.count)
-    }
-  }
-  
-  var hourlyOutputStream: OutputStream? {
-    didSet {
-      hourlyOutputStream?.open()
-      let data = [UInt8]((headersHourly.name + "\n").utf8)
-        + [UInt8]((headersHourly.unit + "\n").utf8)
-      hourlyOutputStream?.write(data, maxLength: data.count)
-    }
-  }
-  
-  var dailyOutputStream: OutputStream? {
-    didSet {
-      dailyOutputStream?.open()
-      let data = [UInt8]((headersDaily.name + "\n").utf8)
-        + [UInt8]((headersDaily.unit + "\n").utf8)
-      dailyOutputStream?.write(data, maxLength: data.count)
-    }
-  }
-  
-  var dateFormatter: DateFormatter? {
-    didSet {
-      dateFormatter?.timeZone = TimeZone(secondsFromGMT: 0)
-      dateFormatter?.dateFormat = "MM, dd, HH, "
-    }
-  }
-  
-  private var headersDaily: (name: String, unit: String) {
-    let titles = [PerfomanceData.Result.titles, ThermalEnergy.titles,
-                  ElectricEnergy.titles, Parasitics.titles,
-                  FuelConsumption.titles].joined()
-    let names = titles.map { $0.0 }.joined(separator: ",")
-    let units = titles.map { $0.1 }.joined(separator: ",")
-    if dateFormatter != nil {
-      return ("Date,Date," + names, "Month,Day," + units)
-    }
-    return (names, units)
-  }
-  
-  private var headersHourly: (name: String, unit: String) {
-    let titles = [PerfomanceData.Result.titles, ThermalEnergy.titles,
-                  ElectricEnergy.titles, Parasitics.titles,
-                  FuelConsumption.titles].joined()
-    let names = titles.map { $0.0 }.joined(separator: ",")
-    let units = titles.map { $0.1 }.joined(separator: ",")
-    if dateFormatter != nil {
-      return ("Date,Date,Date," + names, "Month,Day,Hour," + units)
-    }
-    return (names, units)
-  }
-  
-  private func writeIntervalResults(date: Date) {
-    guard let stream = intervalOutputStream else { return }
-    let csv = [
-      intervalResults!.numbers, intervalResults!.thermal.numbers,
-      intervalResults!.energy.numbers, intervalResults!.parasitics.numbers,
-      intervalResults!.fuelConsumption.numbers, collectorResults.numbers,
-      intervalResults!.throughput.numbers]
-      .joined().joined(separator: ",")
-    let data = [UInt8]((csv + "\n").utf8)
-    stream.write(data, maxLength: data.count)
-    intervalResults!.reset()
-  }
-  
-  private func writeHourlyResults() {
-    let csv = dateString + [
-      hourlyResults.numbers, hourlyResults.thermal.numbers,
-      hourlyResults.energy.numbers, hourlyResults.parasitics.numbers,
-      hourlyResults.fuelConsumption.numbers, hourlyResults.throughput.numbers]
-      .joined().joined(separator: ", ")
-    let data = [UInt8]((csv + "\n").utf8)
-    hourlyOutputStream?.write(data, maxLength: data.count)
-    dailyResults.accumulate(hourlyResults, fraction: 1)
-    hourCounter += 1
-    hourlyResults.reset()
-  }
-  
-  private func writeDailyResults() {
-    let csv = dateString.dropLast(4) + [
-      dailyResults.numbers, dailyResults.thermal.numbers,
-      dailyResults.energy.numbers, dailyResults.parasitics.numbers,
-      dailyResults.fuelConsumption.numbers, dailyResults.throughput.numbers]
-      .joined().joined(separator: ",")
-    let data = [UInt8]((csv + "\n").utf8)
-    dailyOutputStream?.write(data, maxLength: data.count)
-    annuallyResults.accumulate(dailyResults, fraction: 1)
-    dailyResults.reset()
+  static var columns: [(String, String)]  {
+    return [
+      ("Collector|theta", "degree"), ("Collector|cosTheta", "Ratio"),
+      ("Collector|Eff", "%"), ("Collector|Position", "degree"),
+    ]
   }
 }
+
+public struct ElectricEnergy: Encodable, CustomStringConvertible {
+  var demand = 0.0, gross = 0.0, shared = 0.0, solarField = 0.0, powerBlock = 0.0,
+  storage = 0.0, gasTurbine = 0.0, steamTurbineGross = 0.0, gasTurbineGross = 0.0,
+  backupGross = 0.0, parasitics = 0.0, net = 0.0, consum = 0.0
+  
+  var values:[String] {
+    return [
+      String(format:"%.1f", steamTurbineGross),
+      String(format:"%.1f", gasTurbineGross),
+      String(format:"%.1f", backupGross),
+      String(format:"%.1f", parasitics),
+      String(format:"%.1f", net),
+      String(format:"%.1f", consum),
+    ]
+  }
+  
+  var csv: String {
+    return String(format:"%.1f, %.1f, %.1f, %.1f, %.1f, %.1f, ",
+                  steamTurbineGross, gasTurbineGross, backupGross, parasitics, net, consum)
+  }
+  
+  static var columns: [(String, String)]  {
+    return [
+      ("Electric|SteamTurbineGross", "MWh"),
+      ("Electric|GasTurbineGross", "MWh"),
+      ("Electric|BackupGross", "MWh"), ("Electric|Parasitics", "MWh"),
+      ("Electric|Net", "MWh"), ("Electric|Consum", "MWh"),
+    ]
+  }
+  
+  public var description: String {
+    return zip(values, ElectricEnergy.columns).reduce("\n") { head, append in
+      let text = append.1.0 >< (append.0 + " " + append.1.1)
+      return head + text
+    }
+  }
+  
+  mutating func accumulate(_ electricEnergy: ElectricEnergy, fraction: Double) {
+    steamTurbineGross += electricEnergy.steamTurbineGross * fraction
+    gasTurbineGross += electricEnergy.gasTurbineGross * fraction
+    //backupGross +=
+    parasitics += electricEnergy.parasitics * fraction
+    net += electricEnergy.net * fraction
+    consum += electricEnergy.consum * fraction
+  }
+}
+
+public struct Parasitics: Encodable, CustomStringConvertible {
+  var boiler = 0.0, gasTurbine = 0.0, heater = 0.0, powerBlock = 0.0,
+  shared = 0.0, solarField = 0.0, storage = 0.0
+  
+  var values: [String] {
+    return [
+      String(format:"%.2f", solarField),
+      String(format:"%.2f", powerBlock),
+      String(format:"%.2f", storage),
+      String(format:"%.2f", shared),
+      String(format:"%.2f", 0),
+      String(format:"%.2f", gasTurbine),
+    ]
+  }
+  
+  var csv: String {
+    return String(format:"%.1f, %.1f, %.1f, %.1f, %.1f, %.1f, ",
+                  solarField, powerBlock, storage, shared, 0, gasTurbine)
+  }
+  
+  static var columns: [(String, String)]  {
+    return [
+      ("Parasitics|SolarField", "MWh"), ("Parasitics|PowerBlock", "MWh"),
+      ("Parasitics|Storage", "MWh"), ("Parasitics|Shared", "MWh"),
+      ("Parasitics|Backup", "MWh"), ("Parasitics|GasTurbine", "MWh"),
+    ]
+  }
+  
+  public var description: String {
+    return zip(values, Parasitics.columns).reduce("\n") { ininsolationAbsorberl, append in
+      let text = append.1.0 >< (append.0 + " " + append.1.1)
+      return ininsolationAbsorberl + text
+    }
+  }
+  
+  mutating func accumulate(_ electricalParasitics: Parasitics, fraction: Double) {
+    solarField += electricalParasitics.solarField * fraction
+    powerBlock += electricalParasitics.powerBlock * fraction
+    storage += electricalParasitics.storage * fraction
+    shared += electricalParasitics.shared * fraction
+    //parasiticsBackup += electricalParasitics
+    gasTurbine += electricalParasitics.gasTurbine * fraction
+  }
+}
+
+public struct ThermalEnergy: Encodable, CustomStringConvertible {
+  var solar = 0.0, toStorage = 0.0, toStorageMin = 0.0, storage = 0.0,
+  heater = 0.0, boiler = 0.0, wasteHeatRecovery = 0.0, heatExchanger = 0.0,
+  production = 0.0, demand = 0.0, dump = 0.0, overtemp_dump = 0.0
+  
+  var values: [String] {
+    return [
+      String(format:"%.1f", solar),
+      String(format:"%.1f", dump),
+      String(format:"%.1f", toStorage),
+      String(format:"%.1f", storage),
+      String(format:"%.1f", heater),
+      String(format:"%.1f", heatExchanger),
+      String(format:"%.1f", wasteHeatRecovery),
+      String(format:"%.1f", boiler),
+      String(format:"%.1f", production),
+    ]
+  }
+  
+  var csv: String {
+    return String(format:"%.1f, %.1f, %.1f, %.1f, %.1f, %.1f, %.1f, %.1f, %.1f, ",
+                  solar, dump, toStorage, storage, heater, heatExchanger,
+                  wasteHeatRecovery, boiler, production)
+  }
+  
+  public var description: String {
+    return zip(values, ThermalEnergy.columns).reduce("\n") { ininsolationAbsorberl, append in
+      let text = append.1.0 >< (append.0 + " " + append.1.1)
+      return ininsolationAbsorberl + text
+    }
+  }
+  
+  static var columns: [(String, String)]  {
+    return [
+      ("Thermal|Solar", "MWh"), ("Thermal|Dump", "MWh"),
+      ("Thermal|ToStorage", "MWh"), ("Thermal|Storage", "MWh"),
+      ("Thermal|Heater", "MWh"), ("Thermal|HeatExchanger", "MWh"),
+      ("Thermal|WasteHeatRecovery", "MWh"), ("Thermal|Boiler", "MWh"),
+      ("Thermal|Production", "MWh"),
+    ]
+  }
+  
+  mutating func accumulate(_ thermal: ThermalEnergy, fraction: Double) {
+    solar += thermal.solar * fraction
+    toStorage += thermal.toStorage * fraction
+    storage += thermal.storage * fraction
+    heater += thermal.heater * fraction
+    heatExchanger += thermal.heatExchanger * fraction
+    wasteHeatRecovery += thermal.wasteHeatRecovery * fraction
+    boiler += thermal.boiler * fraction
+    dump += thermal.dump * fraction
+    production += thermal.production * fraction
+  }
+}
+
+public struct FuelConsumption: Encodable, CustomStringConvertible {
+  var backup = 0.0,
+   boiler = 0.0,
+   heater = 0.0,
+   gasTurbine = 0.0
+  
+  var combined: Double {
+    return boiler + heater
+  }
+  
+  var total: Double {
+    return boiler + heater + gasTurbine
+  }
+  
+  var values: [String] {
+    return [
+      String(format:"%.1f", backup),
+      String(format:"%.1f", boiler),
+      String(format:"%.1f", heater),
+      String(format:"%.1f", gasTurbine),
+      String(format:"%.1f", combined),
+    ]
+  }
+  
+  var csv: String {
+    return String(format:"%.1f, %.1f, %.1f, %.1f, %.1f, ",
+                  backup, boiler, heater, gasTurbine, combined)
+  }
+  
+  static var columns: [(String, String)]  {
+    return [
+      ("Fuel|Backup", " "), ("Fuel|Boiler", " "), ("Fuel|Heater", " "),
+      ("Fuel|GasTurbine", " "), ("Fuel|Combined", " "),
+    ]
+  }
+  
+  public var description: String {
+    return zip(values, FuelConsumption.columns).reduce("\n") { ininsolationAbsorberl, append in
+      let text = append.1.0 >< (append.0 + " " + append.1.1)
+      return ininsolationAbsorberl + text
+    }
+  }
+  
+  mutating func accumulate(_ fuelConsumption: FuelConsumption, fraction: Double) {
+    backup += fuelConsumption.backup * fraction
+    boiler += fuelConsumption.boiler * fraction
+    heater += fuelConsumption.heater * fraction
+    gasTurbine += fuelConsumption.gasTurbine * fraction
+  }
+}
+

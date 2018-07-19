@@ -20,11 +20,24 @@ public class MeteoDataGenerator: Sequence {
   private(set) var intermediateSteps: DateGenerator.Interval
   private(set) var dateInterval: DateInterval?
   private let dataSource: MeteoDataSource
+  private let sunHoursPerDay: [DateInterval]
 
   public init(from source: MeteoDataSource, interval: DateGenerator.Interval) {
     self.dataSource = source
     self.intermediateSteps = interval
-    self.lastIndex = source.data.endIndex
+    self.range = source.data.startIndex..<source.data.endIndex
+    self.sunHoursPerDay = []
+  }
+  
+  public init(from source: MeteoDataSource, sunHoursPerDay: [DateInterval], interval: DateGenerator.Interval) {
+    self.dataSource = source
+    self.intermediateSteps = interval
+    
+    self.range = source.data.startIndex..<source.data.endIndex
+    self.sunHoursPerDay = sunHoursPerDay
+    let d = sunHoursPerDay.first!.start
+    let x = calendar.date(bySettingHour: 0, minute: 0, second: 0, of: d, options: [])
+    self.dateInterval = DateInterval(start: x!, duration: 0)
   }
   
   public func setRange(_ dateInterval: DateInterval) {
@@ -33,70 +46,90 @@ public class MeteoDataGenerator: Sequence {
     let endDate = self.dateInterval!.end
     
     let startHour = calendar.ordinality(of: .hour, in: .year, for: startDate)
-    self.index = startHour - 1
+    let startIndex = startHour - 1
     
     let startMinute = calendar.ordinality(of: .minute, in: .hour, for: startDate)
     self.step = startMinute / (60 / intermediateSteps.rawValue)
     
     let endHour = calendar.ordinality(of: .hour, in: .year, for: endDate)
-    self.lastIndex = endHour - 1
-    
+    let lastIndex = endHour - 1
+    self.range = startIndex..<lastIndex
     let endMinute = calendar.ordinality(of: .minute, in: .hour, for: endDate)
     self.lastStep = endMinute / (60 / intermediateSteps.rawValue)
   }
   
-  private var DNI_perDaySums: [Double] = []
+  private var perDaySumsDNI: [Double] = []
   
-  public func DNI_sum(ofDay day: Int) -> Double {
+  public func sumDNI(ofDay day: Int) -> Double {
     let idx = day - 1
-    if DNI_perDaySums.endIndex > idx { return DNI_perDaySums[idx] }
+    if perDaySumsDNI.endIndex > idx { return perDaySumsDNI[idx] }
     
     let start = (day * 24) - 24
     let end = (day * 24)
     
     var sum: Float = 0.0
     for value in dataSource.data[start..<end] {
-      sum += value.dni
+      sum += value.dni //* Float(dataSource.interval)
     }
-    DNI_perDaySums.append(Double(sum))
+    perDaySumsDNI.append(Double(sum))
     return Double(sum)
   }
   
-  private var lastIndex: Int
-  private var index = 0
+  private var range: Range<Int>
+
   private var step = 0
   private var lastStep = 0
 
   public func makeIterator() -> AnyIterator<MeteoData> {
-    let lastIndex = self.lastIndex
+    let data = self.dataSource.data
+    let lastIndex = self.range.endIndex
     let lastStep = self.lastStep
+    let sunHoursPerDay = self.sunHoursPerDay
+    let steps = self.dataSource.interval < 1
+      ? Int(self.dataSource.interval / intermediateSteps.fraction)
+      : intermediateSteps.rawValue
     
-    var index = self.index
-    var step = self.step
+    let stride = (1 / Float(steps))
     
+    var step = 1
+    var index = self.range.startIndex
+    //var date = self.dateInterval?.start ?? Date()
+    let period = self.intermediateSteps.fraction * 3600
+    
+
+    var dict = [Int:(Int,Float)]()
+    sunHoursPerDay.forEach { day in
+      let startIndex = calendar.ordinality(of: .hour, in: .year, for: day.start) - 1
+      let startStep = calendar.ordinality(of: .second, in: .hour, for: day.start) / Int(period)
+      let startFraction = 1 / (startStep < steps ? (Float(steps) - Float(startStep)) / Float(steps) : 1)
+      dict[startIndex] = (startStep, startFraction)
+      let endIndex = calendar.ordinality(of: .hour, in: .year, for: day.end) - 1
+      let endStep = calendar.ordinality(of: .second, in: .hour, for: day.end) / Int(period)
+      let endFraction = endStep > 1 ? 1 / Float(endStep) / Float(steps) : 1
+      dict[endIndex] = (endStep, endFraction)
+    }
+
     return AnyIterator<MeteoData> {
       defer { step += 1 }
-      let data = self.dataSource.data
-      let steps = self.intermediateSteps.rawValue
-      // First value, no interpolation is needed.
-      if step == 0 { return data[index] }
       // When step count is reached move index to the next hourly value.
       if step > steps { step = 1; index += 1 }
-      
-      let progress = Float(step) * (1 / Float(steps))
       // Check whether the end of the range has already been reached.
       if index == lastIndex && step > lastStep { return nil }
       
-      if index < data.endIndex - 1 {
-        return MeteoData.lerp(progress,
-          from: data[index], to: data[index + 1])
-      } else if index == data.endIndex - 1 {
-        // For the last hour, the start value is reused for the interpolation.
-        return MeteoData.lerp(progress,
-          from: data[index], to: data[0])
-      } else {
-        return nil
-      }
+      if steps == 1 { return data[index] }
+      
+      let prev = index > 0 ? data[index - 1] : data[data.endIndex - 1]
+      let current = data[index]
+      // For the last hour, the start value is reused for the interpolation.
+      let next = index < data.endIndex - 1 ? data[index + 1] : data[0]
+      // let day = calendar.ordinality(of: .day, in: .year, for: date) - 1
+
+      let start = MeteoData.lerp(start: prev, end: current, 0.5)
+      let end = MeteoData.lerp(start: current, end: next, 0.5)
+      let meteoData = MeteoData.lerp(start: start, end: end, Float(step - 1) * stride)
+     // let meteoData = MeteoData.interpolation(prev: prev, current: current, next: next, progess: Float(step) * stride)
+
+      return meteoData
     }
   }
 }

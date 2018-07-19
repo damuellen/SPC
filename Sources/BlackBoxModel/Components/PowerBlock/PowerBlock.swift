@@ -14,8 +14,9 @@ import Meteo
 public enum PowerBlock: Component {
 
   /// a struct for operation-relevant data of the gas turbine
-  public struct PerformanceData: Equatable, HeatFlow,
+  public struct PerformanceData: Equatable, HeatCycle,
   CustomStringConvertible {
+    var name = ""
     var operationMode: OperationMode
     var load: Ratio
     var massFlow: MassFlow
@@ -40,8 +41,9 @@ public enum PowerBlock: Component {
   }
   
   static let initialState = PerformanceData(
+    name: "",
     operationMode: .scheduledMaintenance,
-    load: 1.0,
+    load: 0.0,
     massFlow: 0.0,
     temperature: (inlet: Simulation.initialValues.temperatureOfHTFinPipes,
                   outlet: Simulation.initialValues.temperatureOfHTFinPipes),    
@@ -56,8 +58,7 @@ public enum PowerBlock: Component {
     at load: Ratio, heat: Double,
     steamTurbine: SteamTurbine.PerformanceData) -> Double { // Calc. parasitic power in PB: -
     var electricalParasitics = 0.0
-    
-    let parameter = PowerBlock.parameter
+
     if steamTurbine.load.ratio >= 0.01 {
       electricalParasitics = parameter.fixelectricalParasitics
       electricalParasitics += parameter.nominalElectricalParasitics
@@ -72,7 +73,8 @@ public enum PowerBlock: Component {
     }
     
     // if Heater.parameter.operationMode {
-    //if variable exist, then project Shams-1 is calculated. commented, same for shams as for any project. check!
+    // if variable exist, then project Shams-1 is calculated. commented,
+    // same for shams as for any project. check!
     switch steamTurbine.load.ratio { // Step function for Cooling Towers -
     case 0.5 ... 1:
       electricalParasitics += parameter.electricalParasiticsStep[1]
@@ -119,7 +121,7 @@ public enum PowerBlock: Component {
     
     // Calculates the Electric gross, Parasitic
     
-    let parameter = SteamTurbine.parameter
+    let parameter = steamTurbine
     var turbineStandStillTime = 0.0
     if parameter.hotStartUpTime == 0 {
       // parameter.hotStartUpTime = 75 // default value
@@ -129,7 +131,8 @@ public enum PowerBlock: Component {
     var qneu = 0.0
     // new startup is only necessary, if turbine is out of operation for more than 20 minutes
     if heat <= 0 || (status.steamTurbine.Op == 0 && Simulation.isStart) {
-      // no heat to turbine !!! // || (steamTurbine.Op = 0 && SimBegin) added for BL1 black box model
+      // no heat to turbine !!!
+      // || (steamTurbine.Op = 0 && SimBegin) added for BL1 black box model
       if case .noOperation = status.steamTurbine.operationMode, Simulation.isStart {
         turbineStandStillTime = parameter.hotStartUpTime + 5
       }
@@ -161,8 +164,8 @@ public enum PowerBlock: Component {
         status.steamTurbine.load = 0.0
         let startUpeff = cos(status.collector.theta) * status.collector.efficiency
         qneu = (Double(meteo.dni) * startUpeff - status.solarField.HL)
-          * Design.layout.solarField * Double(SolarField.parameter.numberOfSCAsInRow)
-          * 2 * Collector.parameter.areaSCAnet / 1_000_000
+          * Design.layout.solarField * Double(solarField.numberOfSCAsInRow)
+          * 2 * collector.areaSCAnet / 1_000_000
         
         if Qsto > 0 {
           qneu = qneu + Qsto

@@ -28,7 +28,7 @@ public struct Temperature: CustomStringConvertible {
   }
   
   public init(_ kelvin: Double) {
-    assert(222..<850 ~= kelvin)
+    assert(0..<850 ~= kelvin)
     self.kelvin = kelvin
   }
   

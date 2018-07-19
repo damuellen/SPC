@@ -90,19 +90,19 @@ extension Simulation.Parameter: TextConfigInitializable {
       electricalParasitics: row(61) / 100)
 
     self = try Simulation.Parameter(
-      dfreezeTemperaturePump: Temperature(row(6)),
-      dfreezeTemperatureHeat: Temperature(row(9)),
-      minTemperatureRaiseStartUp: Temperature(row(12)),
-      tempTolerance: Temperature(row(21)),
+      dfreezeTemperaturePump: Temperature(celsius: row(7)),
+      dfreezeTemperatureHeat: Temperature(celsius: row(10)),
+      minTemperatureRaiseStartUp: Temperature(celsius: row(13)),
+      tempTolerance: Temperature(row(22)),
       minInsolationRaiseStartUp: row(16),
-      heatTolerance: row(18),
-      timeTolerance: row(24),
-      massTolerance: row(27),
+      heatTolerance: row(19),
+      timeTolerance: row(25),
+      massTolerance: row(28),
       minInsolation: row(31),
-      maxToPowerBlock: row(15),
+      maxToPowerBlock: row(16),
       minInsolationForBoiler: row(16),
       electricalTolerance: row(58),
-      electricalParasitics: row(18),
+      electricalParasitics: row(19),
       HLtempTolerance: 0.1,
       adjustmentFactor: adjustmentFactor)
   }

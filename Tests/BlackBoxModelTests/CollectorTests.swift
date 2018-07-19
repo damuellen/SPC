@@ -10,29 +10,21 @@ class CollectorTests: XCTestCase {
 
     var status = Plant.initialState
     status.collector.parabolicElevation = 20
-    
-    var efficiency = Collector.efficiency(
-      status.collector, meteo: MeteoData(
-      dni: 555, temperature: 22, windSpeed: 11))
-    XCTAssertEqual(efficiency, 0.95, accuracy: 0.01)
+    let meteo =  MeteoData(
+      dni: 555, ghi: 0, dhi: 0, temperature: 22, windSpeed: 11
+    )
+    Collector.update(&status.collector, meteo: meteo)
+    XCTAssertEqual(status.collector.efficiency, 0.95, accuracy: 0.01)
     
     status.collector.parabolicElevation = 70
-    efficiency = Collector.efficiency(
-      status.collector, meteo: MeteoData(
-      dni: 555, temperature: 22, windSpeed: 11))
-    XCTAssertEqual(efficiency, 0.95, accuracy: 0.01)
+    Collector.update(&status.collector, meteo: meteo)
+    XCTAssertEqual(status.collector.efficiency, 0.95, accuracy: 0.01)
     
     var results = [Double]()
     for n in [99, 121, 124, 149, 168, 171] {
       status.collector.parabolicElevation = Double(n)
-      results.append(
-        Collector.efficiency(
-          status.collector,
-          meteo: MeteoData(
-            dni: 555, temperature: 22, windSpeed: 11
-          )
-        )
-      )
+      Collector.update(&status.collector, meteo: meteo)
+      results.append(status.collector.efficiency)
     }
   }
   

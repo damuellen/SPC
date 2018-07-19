@@ -10,33 +10,34 @@
 
 import Foundation
 import Meteo
-// +==========================================================================+
-// HCE  Heat Collecting Element
-// +==========================================================================+
-// TASK: if operationMode="?": Calculate the right mass-flow to get maximum allowed
-//      HTF-outlet temp. of the HCE-loop, and the time of HTF being in the
-//      HCE-loop. defocus automatically not to overheat HCEs.
-//      if operationMode="!": Mass-flow is fixed outside. Calculate the HTF-outlet
-//      temp. of the HCE-loop and the time of HTF being in the HCE-loop. If
-//      mass-flow is set to 0, calculate by heat losses the HTF-temp. in the
-//      HCE after Actime minutes.
-// ++
-// INPUT: Actime: [minutes]
-//       if operationMode="?" then Actime has no meaning. if operationMode="!" and
-//       Fluid.parameter.massFlow=0 { SF calculates Actime the heat losses in the HCEs.
-//       if Actime<0 then HCE calculates the time of HTF being in HCEs
-//       minus abs(Actime)
-// ++
-// OUTPUT: Actime: [sec]
-//        if Fluid.parameter.massFlow>0 then Actime is the time the HTF was in the HCEs.
-//        if operationMode="!" and Fluid.parameter.massFlow=0 then Actime is the time the losses
-//        were calculated. Not necessary equal to Actime from input, cause
-//        calculation stops when Fluid.parameter.temperature.outlet  goes under freezeTemperature+Sim.deltaTemperaturefrzPump
-// ++
+/*
+# HCE  Heat Collecting Element
+
+- TASK:
+ if operationMode="?": Calculate the right mass-flow to get maximum allowed
+ HTF-outlet temp. of the HCE-loop, and the time of HTF being in the
+ HCE-loop. defocus automatically not to overheat HCEs.
+ if operationMode="!": Mass-flow is fixed outside. Calculate the HTF-outlet
+ temp. of the HCE-loop and the time of HTF being in the HCE-loop. If
+ mass-flow is set to 0, calculate by heat losses the HTF-temp. in the
+ HCE after Actime minutes.
+
+- INPUT: Actime: [minutes]
+ if operationMode="?" then Actime has no meaning. if operationMode="!" and
+ Fluid.parameter.massFlow == 0 SF calculates Actime the heat losses in the HCEs.
+ if Actime<0 then HCE calculates the time of HTF being in HCEs minus abs(Actime)
+
+- OUTPUT: Actime: [sec]
+ if Fluid.parameter.massFlow>0 then Actime is the time the HTF was in the HCEs.
+ if operationMode="!" and Fluid.parameter.massFlow=0 then Actime is the time
+ the losses were calculated. Not necessary equal to Actime from input, cause
+ calculation stops when Fluid.parameter.temperature.outlet goes under
+ freezeTemperature + Sim.deltaTemperaturefrzPump
+*/
 
 var Actime = 0
 var period = 300
-var dheat_now = 0.0
+var deltaHeat_now = 0.0
 
 enum HCE {
   
@@ -45,27 +46,28 @@ enum HCE {
                                  mode: Collector.OperationMode,
                                  meteo: MeteoData) {
     
-    let ICosTheta = Double(meteo.dni) * status.collector.cosTheta
-    status.solarField.ITA = 0
+    let irradianceCosTheta = Double(meteo.dni) * status.collector.cosTheta
+    status.solarField.insolationAbsorber = 0
 
     switch mode {
       
     case .noOperation:
       period = 300
-      freezeProtectionCheck(&status.solarField)
-      
+      freezeProtectionCheck(of: &status.solarField)
+      mode2(&status, loop: loop, mode: mode, meteo: meteo)
     case .operating:
       period = 300
-      if meteo.windSpeed > SolarField.parameter.maxWind {
+      if meteo.windSpeed > solarField.maxWind {
         status.solarField.inFocus = 0.0
       }
       mode1(&status, loop: loop, mode: mode, meteo: meteo)
       
     case .variable, .freezeProtection:
       
-      if meteo.windSpeed > SolarField.parameter.maxWind
-        || ICosTheta * status.collector.efficiency < Simulation.parameter.minInsolation {
-        freezeProtectionCheck(&status.solarField) // on first call
+      if meteo.windSpeed > solarField.maxWind
+        || irradianceCosTheta * status.collector.efficiency < Simulation.parameter.minInsolation {
+        freezeProtectionCheck(of: &status.solarField) // on first call
+        mode2(&status, loop: loop, mode: mode, meteo: meteo)
       } else {
         mode1(&status, loop: loop, mode: mode, meteo: meteo)
       }
@@ -75,14 +77,14 @@ enum HCE {
     }
   }
   
-  public static func freezeProtectionCheck(_ solarField: inout SolarField.PerformanceData) {
-    solarField.inFocus = 1.0
-    
-    let TempFP = htf.freezeTemperature
+  public static func freezeProtectionCheck(of solarField: inout SolarField.PerformanceData) {
+
+    let freezingTemperature = htf.freezeTemperature
       + Simulation.parameter.dfreezeTemperaturePump
       + Simulation.parameter.tempTolerance
-    if solarField.header.temperature.inlet < TempFP
-      || solarField.header.temperature.outlet < TempFP {
+    
+    if solarField.header.temperature.inlet < freezingTemperature
+      || solarField.header.temperature.outlet < freezingTemperature {
       solarField.header.massFlow = SolarField.parameter.antiFreezeFlow
       solarField.operationMode = .freezeProtection
     } else {
@@ -90,32 +92,33 @@ enum HCE {
       // status = LastHTF
       solarField.header.massFlow = 0.0
     }
+    
+    solarField.inFocus = 0.0
   }
   
   // Radiation losses per m2 Aperture; now with the new losses that take into
   // account the percentage of HCE that are broken, lost vacuum and fluorescent
-  public static func radiationLosses(_ status: Plant.PerformanceData,
-                                     temperature: (Temperature, Temperature),
+  public static func radiationLosses(for status: Collector.PerformanceData,
+                                     at temperatures: (Temperature, Temperature),
                                      meteo: MeteoData) -> Double {
-    let collector = Collector.parameter
 
-    let breakHCE = Plant.availability.value.breakHCE.ratio // Percent /100 in LoadAvlMaintnc
-    let airHCE = Plant.availability.value.airHCE.ratio // Percent /100 in LoadAvlMaintnc
-    let fluorHCE = Plant.availability.value.fluorHCE.ratio // Percent /100 in LoadAvlMaintnc
+    let breakHCE = Plant.availability.value.breakHCE.ratio
+    let airHCE = Plant.availability.value.airHCE.ratio
+    let fluorHCE = Plant.availability.value.fluorHCE.ratio
     
-    let (t1, t2) = (temperature.0.kelvin, temperature.1.kelvin)
+    let (t1, t2) = (temperatures.0.kelvin, temperatures.1.kelvin)
     let deltaT: Double
     if !collector.newFunction {
       deltaT = (t1 - t2 + Temperature(10.0).kelvin)
     } else {
-      deltaT = (temperature.0).median(temperature.1).kelvin
+      deltaT = (temperatures.0).median(temperatures.1).kelvin
          - (Double(meteo.temperature) + 30.0) + 10.0
     }
     
     var vacuumHeatLoss: Double
     let endLossFactor: Double
-    let ICosTheta = Double(meteo.dni) * status.collector.cosTheta
-    let insulation = ICosTheta * status.collector.efficiency  // Insulation to Absorber!
+    let irradianceCosTheta = Double(meteo.dni) * status.cosTheta
+    let insulation = irradianceCosTheta * status.efficiency  // Insulation to Absorber!
     let sigma = 0.00000005667
     
     if !collector.newFunction {
@@ -168,36 +171,36 @@ enum HCE {
       // changed to use new radiation loss formula
       // E_a = 0.0000002: E_b = -0.0001: E_c = 0.0769
       let Ebs_HCE: Double
-      if temperature.1 != temperature.0 { // check what if temperature.1 < temperature.0?!
+      if temperatures.1 != temperatures.0 { // check what if temperature.1 < temperature.0?!
         Ebs_HCE = (1 / 3 * collector.emissionHCE[1]
           * (t1 ** 3 - t2 ** 3) + 1 / 2
           * collector.emissionHCE[1] * (t1 ** 2 - t2 ** 2)
           + collector.emissionHCE[0] * (t1 - t2))
-          / (temperature.0 - temperature.1).kelvin
+          / (temperatures.0 - temperatures.1).kelvin
       } else { // during FP?
         // check, resulting emissivity too low without c2!
         Ebs_HCE = collector.emissionHCE[0]
           + collector.emissionHCE[1] * t1
       }
       
-      if temperature.1 != temperature.0 {
+      if temperatures.1 != temperatures.0 {
         // check what if temperature.1 < temperature.0!
         vacuumHeatLoss = sigma / (1 / Ebs_HCE + collector.rabsOut
           / collector.rglas * (1 / collector.glassEmission - 1))
           * 2 * .pi * collector.rabsOut / collector.aperture
           * (1 / 5 * (t1 ** 5 - t2 ** 5)
             + (Double(meteo.temperature) + 30) ** 4
-            * (temperature.1 - temperature.0).kelvin)
-          / (temperature.0 - temperature.1).kelvin
+            * (temperatures.1 - temperatures.0).kelvin)
+          / (temperatures.0 - temperatures.1).kelvin
       } else {
         vacuumHeatLoss = sigma * 2 * .pi * collector.rabsOut
-        vacuumHeatLoss *= (((temperature.1 + temperature.0).kelvin / 2) ** 4
+        vacuumHeatLoss *= (((temperatures.1 + temperatures.0).kelvin / 2) ** 4
           - (Double(meteo.temperature) + 30) ** 4)
         vacuumHeatLoss *= (collector.emissionHCE[0]
           + collector.emissionHCE[1] * t2) / collector.aperture
       }
       var al = 0.7 * 2 * .pi * collector.rabsOut
-      al *= ((temperature.1 + temperature.0).kelvin / 2
+      al *= ((temperatures.1 + temperatures.0).kelvin / 2
         - (Double(meteo.temperature) + 30)) / collector.aperture
       vacuumHeatLoss += al
       endLossFactor = 1
@@ -223,20 +226,20 @@ enum HCE {
   }
   
   /// Vary mass-flow to maintain optimum HTF-temp.
-  public static func mode1(
-    _ status: inout Plant.PerformanceData,
-    loop: SolarField.Loop, mode: Collector.OperationMode,
-    meteo: MeteoData) {
+  public static func mode1(_ status: inout Plant.PerformanceData,
+                           loop: SolarField.Loop,
+                           mode: Collector.OperationMode,
+                           meteo: MeteoData) {
     
     var hce = status.solarField.loops[loop.rawValue]
     defer { status.solarField.loops[loop.rawValue] = hce }
     
     let ambientTemperature = Temperature(celsius: meteo.temperature)
     // Average HTF temp. in loop [K]
-    var averageTemperture = Temperature(
-      (htf.maxTemperature.kelvin + hce.temperature.inlet.kelvin) / 2)
+    var averageTemperature = htf.maxTemperature.median(hce.temperature.inlet)
+
     // Delta heat in HCE[W/m2]
-    let heatin = Double(meteo.dni) * status.collector.cosTheta
+    let heatIn = Double(meteo.dni) * status.collector.cosTheta
       * status.collector.efficiency
       * Plant.availability.value.solarField.ratio
     // Delta heat in HCE[W/m2] // added to calculate Q_dump
@@ -244,29 +247,31 @@ enum HCE {
       * status.collector.efficiency
       * Plant.availability.value.solarField.ratio
     
-    if Collector.parameter.IntradiationLosses {
-      status.solarField.heatLossHCE = HCE.radiationLosses(status, temperature:
-        (averageTemperture + 10.0,ambientTemperature + 30.0),
-        meteo: meteo) * Simulation.parameter.adjustmentFactor.heatLossHCE
+    if collector.IntradiationLosses {
+      status.solarField.heatLossHCE = HCE.radiationLosses(for: status.collector, at:
+        (averageTemperature + 10.0,ambientTemperature + 30.0),
+        meteo: meteo) * Simulation.adjustmentFactor.heatLossHCE
     } else {
-      status.solarField.heatLossHCE = HCE.radiationLosses(status, temperature:
+      status.solarField.heatLossHCE = HCE.radiationLosses(for: status.collector, at:
         (htf.maxTemperature + 10.0, hce.temperature.inlet + 10.0),
-        meteo: meteo) * Simulation.parameter.adjustmentFactor.heatLossHCE
+        meteo: meteo) * Simulation.adjustmentFactor.heatLossHCE
     }
     
     status.solarField.HL = status.solarField.heatLossHCE
-      + SolarField.pipeHeatLoss(averageTemperture, ambient: ambientTemperature)
+      + SolarField.pipeHeatLoss(averageTemperature, ambient: ambientTemperature)
     
-    status.solarField.HL *= Simulation.parameter.adjustmentFactor.heatLossHTF
+    status.solarField.HL *= Simulation.adjustmentFactor.heatLossHTF
     
-    status.solarField.ITA = Double(meteo.dni) * status.collector.cosTheta * status.collector.efficiency
-
-    let dheat = heatin - status.solarField.HL
-    let dheat_now = heatin_now - status.solarField.HL
+    status.solarField.insolationAbsorber = Double(meteo.dni)
+    status.solarField.insolationAbsorber *= status.collector.cosTheta
+    status.solarField.insolationAbsorber *= status.collector.efficiency
+    
+    let deltaHeat = heatIn - status.solarField.HL
+    deltaHeat_now = heatin_now - status.solarField.HL
     /*
-     if ICosThetaMax > 0 {
-     var LoopEta = Collector.efficiency - solarField.heatLossHCE / ICosThetaMax
-     var SFEta = Collector.efficiency - HL / ICosThetaMax
+     if irradianceCosThetaMax > 0 {
+     var LoopEta = Collector.efficiency - solarField.heatLossHCE / irradianceCosThetaMax
+     var SFEta = Collector.efficiency - HL / irradianceCosThetaMax
      } else {
      var LoopEta = 0
      var SFEta = 0
@@ -274,28 +279,28 @@ enum HCE {
      */
     // Calculate appropriate mass-flow [kg/(sec sqm)]
     
-    hce.massFlow = MassFlow(abs(dheat) / 1_000 / htf.heatDelta(
-      htf.maxTemperature, hce.temperature.inlet))
+    let massFlow = abs(deltaHeat) / 1_000 / htf.heatDelta(
+      htf.maxTemperature, hce.temperature.inlet)
     // [kg/(sec sqm)] = [J/(sec sqm)/1000] / [kJ/kg]
-    hce.massFlow = MassFlow(hce.massFlow.rate * Design.layout.solarField
-      * Double(SolarField.parameter.numberOfSCAsInRow) * 2
-      * Collector.parameter.areaSCAnet) // - [kg/s] -
+    hce.massFlow = MassFlow(massFlow * Design.layout.solarField
+      * Double(solarField.numberOfSCAsInRow) * 2
+      * collector.areaSCAnet) // - [kg/s] -
     
     switch hce.massFlow { // Check if mass-flow is within acceptable limits
       
-    case let massFlow where massFlow > SolarField.parameter.massFlow.max:
+    case let massFlow where massFlow > solarField.massFlow.max:
       // Damped heat: The HL have to be added because they are independent from
       // the SCAs in focus. HL must be subtracted afterwards again.
-      status.solarField.inFocus = Ratio(SolarField.parameter.massFlow.max.rate / massFlow.rate)
+      status.solarField.inFocus = Ratio(solarField.massFlow.max.rate / massFlow.rate)
       // [MW] added to calculate Q_dump with instantaneous irradiation
-      Plant.thermal.dump = dheat_now * Design.layout.solarField
-        * Double(SolarField.parameter.numberOfSCAsInRow) * 2
-        * Collector.parameter.areaSCAnet
+      Plant.thermal.dump = deltaHeat_now * Design.layout.solarField
+        * Double(solarField.numberOfSCAsInRow) * 2
+        * collector.areaSCAnet
         * (1 - status.solarField.inFocus.ratio) / 1_000_000
       
       Plant.thermal.overtemp_dump = 0
       
-      hce.massFlow = SolarField.parameter.massFlow.max
+      hce.massFlow = solarField.massFlow.max
       // changed to htf.maxTemperature to reach max temp possible
       hce.temperature.outlet = htf.maxTemperature
       //mode = .operating
@@ -303,47 +308,42 @@ enum HCE {
       // (1)  Dens(T)[kg/cubm] * 1m *  .pi * Rabsout[m]^2 =: M[kg]   and
       // (2)  M[kg] / (Aperture[m] * 1m) =: Area-density[Kg/sqm]    ==>
       
-      averageTemperture = Temperature((hce.temperature.outlet
-        + hce.temperature.inlet).kelvin / 2)
+      let areaDensity = htf.density(hce.averageTemperature) * .pi
+        * collector.rabsOut ** 2 / collector.aperture
       
-      let areadens = htf.density(averageTemperture) * .pi
-        * Collector.parameter.rabsOut ** 2 / Collector.parameter.aperture
-      
-      Actime = Int(areadens * Design.layout.solarField
-        * Double(SolarField.parameter.numberOfSCAsInRow)
-        * 2 * Collector.parameter.areaSCAnet / hce.massFlow.rate)
-      // [sec] calculation of Actime below commented, not needed ince is set to abd in next step
-      
+      Actime = Int(areaDensity * Design.layout.solarField
+        * Double(solarField.numberOfSCAsInRow)
+        * 2 * collector.areaSCAnet / hce.massFlow.rate)
+
       Actime = period
       
-    case let massFlow where massFlow > SolarField.parameter.massFlow.min:
+    case let massFlow where massFlow < solarField.massFlow.min:
       Plant.thermal.dump = 0
       Plant.thermal.overtemp_dump = 0
       if case .normal = status.heater.operationMode,
-        massFlow.rate > SolarField.parameter.massFlow.max.rate * 0.05 {
+        massFlow.rate > solarField.massFlow.max.rate * 0.05 {
         // pumps are working over massFlow.min
         status.solarField.inFocus = 1.0
         hce.massFlow = massFlow
         hce.temperature.outlet = htf.maxTemperature
         // changed to htf.maxTemperature to reach max temp possible
-        averageTemperture = Temperature((hce.temperature.outlet
-          + hce.temperature.inlet).kelvin / 2.0)
+        averageTemperature = hce.averageTemperature
         
-        let areadens = htf.density(averageTemperture) * .pi
-          * Collector.parameter.rabsOut ** 2 / Collector.parameter.aperture
+        let areaDensity = htf.density(averageTemperature) * .pi
+          * collector.rabsOut ** 2 / collector.aperture
         
-        Actime = Int(areadens * Design.layout.solarField
-          * Double(SolarField.parameter.numberOfSCAsInRow) * 2
-          * Collector.parameter.areaSCAnet / hce.massFlow.rate) // [sec]
+        Actime = Int(areaDensity * Design.layout.solarField
+          * Double(solarField.numberOfSCAsInRow) * 2
+          * collector.areaSCAnet / hce.massFlow.rate) // [sec]
         
         Actime = period
       } else if case .normal = status.heater.operationMode {
         status.solarField.inFocus = 1.0
-        hce.massFlow = MassFlow(SolarField.parameter.massFlow.max.rate * 0.05)
+        hce.massFlow = solarField.massFlow.max.adjusted(with: 0.05)
         mode2(&status, loop: loop, mode: mode, meteo: meteo)
       } else {
         status.solarField.inFocus = 1.0
-        hce.massFlow = SolarField.parameter.massFlow.min
+        hce.massFlow = solarField.massFlow.min
         mode2(&status, loop: loop, mode: mode, meteo: meteo)
       }
     // defocus SCAs to prevent overheating
@@ -352,41 +352,41 @@ enum HCE {
       Plant.thermal.dump = 0
       Plant.thermal.overtemp_dump = 0
       if case .freezeProtection = status.heater.operationMode {
-        hce.massFlow = SolarField.parameter.massFlow.min
+        hce.massFlow = solarField.massFlow.min
         mode2(&status, loop: loop, mode: mode, meteo: meteo)
       } else {
         // status = LastHTF
-        freezeProtectionCheck(&status.solarField)
+        freezeProtectionCheck(of: &status.solarField)
+        mode2(&status, loop: loop, mode: mode, meteo: meteo)
       }
       
-    default: // massFlow is witheatIn acceptable limits and Tout is as required
+    default: // MassFlow is within acceptable limits and Tout is as required
       
       status.solarField.inFocus = 1.0
       // FIXME  status.massFlow = massFlow
       // changed to htf.maxTemperature to reach max temp possible
       hce.temperature.outlet = htf.maxTemperature
+      averageTemperature = hce.averageTemperature
       Plant.thermal.dump = 0
       Plant.thermal.overtemp_dump = 0
       //mode = .operating
-      averageTemperture = Temperature((hce.temperature.outlet
-        + hce.temperature.inlet).kelvin / 2)
-      
-      let areadens = htf.density(averageTemperture) * .pi
-        * Collector.parameter.rabsOut ** 2 / Collector.parameter.aperture
-      
-      Actime = Int(areadens * Design.layout.solarField
-        * Double(SolarField.parameter.numberOfSCAsInRow) * 2
-        * Collector.parameter.areaSCAnet / hce.massFlow.rate) // [sec]
+
+      let areaDensity = htf.density(averageTemperature) * .pi
+        * collector.rabsOut ** 2 / collector.aperture
+      // Residence time [sec]
+      Actime = Int(areaDensity * Design.layout.solarField
+        * Double(solarField.numberOfSCAsInRow) * 2
+        * collector.areaSCAnet / hce.massFlow.rate)
     }
   }
   
   /// HTF-temp. dependent on constant mass-flow
-  public static func mode2(
-    _ status: inout Plant.PerformanceData,
-    loop: SolarField.Loop, mode: Collector.OperationMode,
-    meteo: MeteoData) {
+  public static func mode2(_ status: inout Plant.PerformanceData,
+                           loop: SolarField.Loop,
+                           mode: Collector.OperationMode,
+                           meteo: MeteoData) {
     
-    let ICosTheta = Double(meteo.dni) * status.collector.cosTheta
+    let irradianceCosTheta = Double(meteo.dni) * status.collector.cosTheta
     let ambientTemperature = Temperature(celsius: meteo.temperature)
 
     var Interval = 1
@@ -396,8 +396,8 @@ enum HCE {
     
     var hce = status.solarField.loops[loop.rawValue]
     defer { status.solarField.loops[loop.rawValue] = hce }
-    var temperatureNow = hce.temperature.inlet
-    var temperatureLast = hce.temperature.outlet
+    var temperatureNow = Temperature()
+    var temperatureLast = Temperature()
     
     outerIteration: for _ in 1 ... 4 {
       
@@ -408,8 +408,8 @@ enum HCE {
         let averageTemperture =
           temperatureNow.median(hce.temperature.inlet)
         
-        let areadens = htf.density(averageTemperture) * .pi
-          * Collector.parameter.rabsInner ** 2 / Collector.parameter.aperture
+        let areaDensity = htf.density(averageTemperture) * .pi
+          * collector.rabsInner ** 2 / collector.aperture
         
         // Calculate time HTF needs to pass through HCE loop
         if hce.massFlow.isNearZero {
@@ -417,9 +417,9 @@ enum HCE {
           timePast = period
         } else {
           
-          timePast = Int(areadens * Design.layout.solarField
-            * Double(SolarField.parameter.numberOfSCAsInRow) * 2
-            * Collector.parameter.areaSCAnet / hce.massFlow.rate) // [sec]
+          timePast = Int(areaDensity * Design.layout.solarField
+            * Double(solarField.numberOfSCAsInRow) * 2
+            * collector.areaSCAnet / hce.massFlow.rate) // [sec]
           
           if Actime < 0 { timePast += Actime }
         }
@@ -435,68 +435,69 @@ enum HCE {
           
           inFocusLoop = Ratio(min(1, inFocusLoop * 1.01)).ratio
           // reduce dumping in 1%  limit it to 1
-          Plant.thermal.dump = dheat_now * Design.layout.solarField
-            * Double(SolarField.parameter.numberOfSCAsInRow) * 2
-            * Collector.parameter.areaSCAnet
+          Plant.thermal.dump = deltaHeat_now * Design.layout.solarField
+            * Double(solarField.numberOfSCAsInRow) * 2
+            * collector.areaSCAnet
             * (1 - inFocusLoop) / 1_000_000 // [MW]
         }
         
-        let heatin = ICosTheta * status.collector.efficiency
+        let heatin = irradianceCosTheta * status.collector.efficiency
           * inFocusLoop * Plant.availability.value.solarField.ratio
-        // Net dheat (+)=in or (-)=out HCE
+        // Net deltaHeat (+)=in or (-)=out HCE
         
         if heatin > 0 {
           
-          status.solarField.heatLossHCE = Collector.parameter.IntradiationLosses
-            ? HCE.radiationLosses(status, temperature:
+          status.solarField.heatLossHCE = collector.IntradiationLosses
+            ? HCE.radiationLosses(for: status.collector, at:
               (temperatureNow + 10.0, hce.temperature.inlet + 10.0),
               meteo: meteo)
-            : HCE.radiationLosses(status, temperature:
+            : HCE.radiationLosses(for: status.collector, at:
               (averageTemperture + 10.0, ambientTemperature + 30.0),
               meteo: meteo)
           
-          status.solarField.heatLossHCE *= Simulation.parameter.adjustmentFactor.heatLossHCE
+          status.solarField.heatLossHCE *= Simulation.adjustmentFactor.heatLossHCE
           
           status.solarField.HL = status.solarField.heatLossHCE + SolarField.pipeHeatLoss(
             averageTemperture, ambient: ambientTemperature)
           
-          if !SolarField.parameter.HLDump && !SolarField.parameter.HLDumpQuad {
-            status.solarField.HL *= Simulation.parameter.adjustmentFactor.heatLossHTF // FIXME * solarField.InFocus
+          if !solarField.HLDump && !solarField.HLDumpQuad {
+            status.solarField.HL *= Simulation.adjustmentFactor.heatLossHTF
+            // FIXME * solarField.InFocus
           } else {
-            /* FIXME if !SolarField.parameter.HLDumpQuad {
-             solarField.HL *= Simulation.parameter.adjustmentFactor.heatLossHTF
+            /* FIXME if !solarField.HLDumpQuad {
+             solarField.HL *= Simulation.adjustmentFactor.heatLossHTF
              // solarField.InFocus not considered as on validated version (2.2) if selected by user
-             } else if SolarField.parameter.layout == "H"
-             && SolarField.parameter.HLDumpQuad
+             } else if solarField.layout == "H"
+             && solarField.HLDumpQuad
              && solarField.InFocus > 0.75 {
-             solarField.HL *= Simulation.parameter.adjustmentFactor.heatLossHTF
-             } else if SolarField.parameter.layout == "H"
-             && SolarField.parameter.HLDumpQuad
+             solarField.HL *= Simulation.adjustmentFactor.heatLossHTF
+             } else if solarField.layout == "H"
+             && solarField.HLDumpQuad
              && solarField.InFocus > 0.5 {
              // between 50% and 75% dumping
-             solarField.HL *= Simulation.parameter.adjustmentFactor.heatLossHTF * 0.75
+             solarField.HL *= Simulation.adjustmentFactor.heatLossHTF * 0.75
              // 25% of the heat losses can be reduced -> 1 quadrant not in operation
-             } else if SolarField.parameter.layout == "H"
-             && SolarField.parameter.HLDumpQuad
+             } else if solarField.layout == "H"
+             && solarField.HLDumpQuad
              && solarField.InFocus > 0.25 {
              // between 25% and 50% dumping
-             solarField.HL *= Simulation.parameter.adjustmentFactor.heatLossHTF * 0.5
+             solarField.HL *= Simulation.adjustmentFactor.heatLossHTF * 0.5
              // 50% of the heat losses can be reduced -> 1 quadrant not in operation
-             } else if SolarField.parameter.layout == "H"
-             && SolarField.parameter.HLDumpQuad
+             } else if solarField.layout == "H"
+             && solarField.HLDumpQuad
              && solarField.InFocus > 0 {
              // between 100% and 75% dumping
-             solarField.HL *= Simulation.parameter.adjustmentFactor.heatLossHTF * 0.25
+             solarField.HL *= Simulation.adjustmentFactor.heatLossHTF * 0.25
              // 75% of the heat losses can be reduced -> 1 quadrant not in operation
-             } else if SolarField.parameter.layout == "I"
-             && SolarField.parameter.HLDumpQuad
+             } else if solarField.layout == "I"
+             && solarField.HLDumpQuad
              && solarField.InFocus > 0.5 {
-             solarField.HL *= Simulation.parameter.adjustmentFactor.heatLossHTF
-             } else if SolarField.parameter.layout == "I"
-             && SolarField.parameter.HLDumpQuad
+             solarField.HL *= Simulation.adjustmentFactor.heatLossHTF
+             } else if solarField.layout == "I"
+             && solarField.HLDumpQuad
              && solarField.InFocus > 0 {
              // between 0% and 50% dumping
-             solarField.HL *= Simulation.parameter.adjustmentFactor.heatLossHTF * 0.5
+             solarField.HL *= Simulation.adjustmentFactor.heatLossHTF * 0.5
              // 50% of the heat losses can be reduced -> 1/2 SF not in operation
              } else {
              fatalError("dumping case not defined")
@@ -505,51 +506,49 @@ enum HCE {
           }
         } else { // No Massflow
           
-          status.solarField.heatLossHCE = Collector.parameter.IntradiationLosses
-            ? HCE.radiationLosses(status, temperature:
-              (averageTemperture, ambientTemperature + 20.0),
-              meteo: meteo)
-              * Simulation.parameter.adjustmentFactor.heatLossHCE
-            : HCE.radiationLosses(status, temperature:
-              (temperatureNow + 10.0, hce.temperature.inlet + 10.0),
-              meteo: meteo)
-          status.solarField.heatLossHCE *= Simulation.parameter.adjustmentFactor.heatLossHCE
+          status.solarField.heatLossHCE = collector.IntradiationLosses
+            ? HCE.radiationLosses(for: status.collector, at:
+              (averageTemperture, ambientTemperature + 20.0), meteo: meteo)
+              * Simulation.adjustmentFactor.heatLossHCE
+            : HCE.radiationLosses(for: status.collector, at:
+              (temperatureNow + 10.0, hce.temperature.inlet + 10.0), meteo: meteo)
+          status.solarField.heatLossHCE *= Simulation.adjustmentFactor.heatLossHCE
           
           status.solarField.HL = status.solarField.heatLossHCE
           status.solarField.HL += SolarField.pipeHeatLoss(
             averageTemperture, ambient: ambientTemperature)
-            * Simulation.parameter.adjustmentFactor.heatLossHTF
+            * Simulation.adjustmentFactor.heatLossHTF
         }
         
-        status.solarField.ITA = Double(meteo.dni)
+        status.solarField.insolationAbsorber = Double(meteo.dni)
           * status.collector.cosTheta * status.collector.efficiency
 
-        let dheat = heatin - status.solarField.HL
+        let deltaHeat = heatin - status.solarField.HL
         
         if status.collector.cosTheta > 0 {
           status.solarField.loopEta = status.collector.efficiency
           
-          status.solarField.loopEta -= Collector.parameter.IntradiationLosses
-            ? HCE.radiationLosses(status, temperature:
+          status.solarField.loopEta -= collector.IntradiationLosses
+            ? HCE.radiationLosses(for: status.collector, at:
               (averageTemperture + 10.0, ambientTemperature + 30.0),
               meteo: meteo)
-            : HCE.radiationLosses(status, temperature:
+            : HCE.radiationLosses(for: status.collector, at:
               (temperatureNow + 10.0, hce.temperature.inlet + 10.0),
               meteo: meteo)
           
-          status.solarField.loopEta *= Simulation.parameter.adjustmentFactor.heatLossHCE / ICosTheta
+          status.solarField.loopEta *= Simulation.adjustmentFactor.heatLossHCE / irradianceCosTheta
           
           status.solarField.ETA = status.collector.efficiency
-            - status.solarField.HL / ICosTheta
+            - status.solarField.HL / irradianceCosTheta
         } else {
           status.solarField.loopEta = 0
           status.solarField.ETA = 0
         }
 
-        let dQperSqm = dheat * hourFraction / 1_000
+        let deltaHeatPerSqm = deltaHeat * hourFraction / 1_000
         // Heat collected or lost during the flow through a whole loop [kJ/sqm]
-        let dQperkg = dQperSqm / areadens // Change kJ/sqm to kJ/kg:
-        // Inaccuracy: The Areadens has changed caused by higher Temp., but we must
+        let deltaHeatPerKg = deltaHeatPerSqm / areaDensity // Change kJ/sqm to kJ/kg:
+        // Inaccuracy: The areaDensity has changed caused by higher Temp., but we must
         // take the old in order to calculate the new => iteration
         
         // SWAP Last, now
@@ -557,18 +556,18 @@ enum HCE {
         temperatureLast = temperatureNow
         temperatureNow = temp
         
-        switch dQperkg {
+        switch deltaHeatPerKg {
         // Calc. new Temp.
         case let q where q > 0:
-          temperatureNow = htf.temperatureDelta(dQperkg, hce.temperature.inlet)
+          temperatureNow = htf.temperatureDelta(deltaHeatPerKg, hce.temperature.inlet)
         case 0:
           temperatureNow = temperatureLast
         default:
-          let Qperkg = htf.heatDelta(
+          let heatPerKg = htf.heatDelta(
             hce.temperature.inlet, Temperature(celsius: meteo.temperature))
           
           temperatureNow = htf.temperatureDelta(
-            Qperkg + dQperkg, Temperature(celsius: meteo.temperature))
+            heatPerKg + deltaHeatPerKg, Temperature(celsius: meteo.temperature))
         }
         
         // Flow is to low, dumping required
@@ -596,8 +595,8 @@ enum HCE {
       }
       
       if temperatureNow < htf.freezeTemperature + Simulation.parameter.dfreezeTemperaturePump {
-        if (htf.freezeTemperature.kelvin + Simulation.parameter.dfreezeTemperaturePump.kelvin
-          - temperatureNow.kelvin) < Simulation.parameter.tempTolerance.kelvin * 100 { break }
+        if (htf.freezeTemperature + Simulation.parameter.dfreezeTemperaturePump
+          - temperatureNow).kelvin < Simulation.parameter.tempTolerance.kelvin * 100 { break }
         Interval = Interval / 2
         Zoom = Zoom - Interval
         // Shorten interval
@@ -606,7 +605,7 @@ enum HCE {
         Zoom = Zoom + Interval // Elongate interval
       }
     }
-    
+
     hce.temperature.outlet = temperatureNow
 
     Plant.thermal.dump += Plant.thermal.overtemp_dump

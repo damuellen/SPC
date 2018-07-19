@@ -62,11 +62,11 @@ private struct MeteoDataFile {
   
   func readContentForLocation()throws -> Location {
     let values = Array(content[2...3])
-    guard let longitude = Double(values[0].whitespacesTrimmed),
-      let latitude = Double(values[1].whitespacesTrimmed)
+    guard let longitude = Float(values[0].whitespacesTrimmed),
+      let latitude = Float(values[1].whitespacesTrimmed)
       else { throw MeteoDataFileError.unknownLocation }
     return Location(
-      longitude: longitude, latitude: latitude, elevation: 0)
+      longitude: -longitude, latitude: latitude, elevation: 0)
   }
   
   func readContentForData()throws -> [MeteoData] {
@@ -88,6 +88,7 @@ private struct MeteoDataFile {
     let dataRange = startIndex ..< content.endIndex
     // Check whether the dataRange matches one year of hourly values.
     guard dataRange.count == 8760 || dataRange.count == 8784
+      || dataRange.count == 8760 * 4 || dataRange.count == 8784
       else { throw MeteoDataFileError.unexpectedRowCount }
     
     return try content[dataRange].compactMap { line in
