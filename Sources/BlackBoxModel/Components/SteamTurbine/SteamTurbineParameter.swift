@@ -17,9 +17,8 @@ extension SteamTurbine {
     let efficiencyNominal, efficiencyBoiler, efficiencySCC: Double
     let efficiency, efficiencyTemperature: Coefficients
     let startUpTime, startUpEnergy: Double
-    let PminT: Coefficients
-    //let PminfT: Double
-    let PminLim, hotStartUpTime: Double
+    let minPowerFromTemp: Coefficients
+    let hotStartUpTime: Double
     let efficiencyWetBulb: Coefficients
     let WetBulbTstep: Double
     var efficiencytempIn_A: Double
@@ -35,26 +34,26 @@ extension SteamTurbine.Parameter: CustomStringConvertible {
     d += "Maximum Electrical Power [MW]:"
       >< "\(power.max)"
     d += "Minimum Electrical Power (nominal) [MW]:"
-      >< "\(power.min)"
+      >< "\(power.nominal)"
     d += "Minimum Electrical Power (lower limit) [MW] :"
-      >< "\(PminLim)"
+      >< "\(power.min)"
     d += "Min. Power; Power(Tamb) = PowerNom*(c0+c1*Tamb+c2*Tamb^2+c3*Tamb^3+c4*Tamb^4)\n"
-    for (i, c) in PminT.coefficients.enumerated() {
-      d += "c\(i):" >< String(format:"%.6E", c)
+    for (i, c) in minPowerFromTemp.coefficients.enumerated() {
+      d += "c\(i):" >< String(format: "%.6E", c)
     }
     d += "Efficiency in Solar Mode:"
       >< "\(efficiencyNominal * 100)"
     d += "Efficiency in Boiler Mode:"
       >< "\(efficiencyBoiler * 100)"
-    d += "Efficiency in ISCCS Mode:"
+    d += "Efficiency in IsccS Mode:"
       >< "\(efficiencySCC * 100)"
     d += "Efficiency; Efficiency(Load) = c0+c1*load+c2*load^2+c3*load^3+c4*load^4\n"
     for (i, c) in efficiency.coefficients.enumerated() {
-      d += "c\(i):" >< String(format:"%.6E", c)
+      d += "c\(i):" >< String(format: "%.6E", c)
     }
     d += "Efficiency; Efficiency(Temperature) = c0+c1*T+c2*T^2+c3*T^3+c4*T^4\n"
     for (i, c) in efficiencyTemperature.coefficients.enumerated() {
-      d += "c\(i):" >< String(format:"%.6E", c)
+      d += "c\(i):" >< String(format: "%.6E", c)
     }
     d += "Efficiency; Efficiency(Wet Bulb Temp.) = c0+c1*T+c2*T^2\n"
     d += "Below Wet Bulb Temperature: (°C)"
@@ -83,24 +82,23 @@ extension SteamTurbine.Parameter: CustomStringConvertible {
 }
 
 extension SteamTurbine.Parameter: TextConfigInitializable {
-  public init(file: TextConfigFile)throws {
-    let row: (Int)throws -> Double = { try file.parseDouble(row: $0) }
-    self.name = file.name
-    self.power = try .init(range: row(10) ... row(13))
-    self.efficiencyNominal = try row(32)
-    self.efficiencyBoiler = try row(35)
-    self.efficiencySCC = try row(38)
-    self.efficiency = try [row(45), row(48), row(51), row(54), row(57)]
-    self.efficiencyTemperature = try [row(64), row(67), row(70), row(73), row(76)]
-    self.startUpTime = try row(83)
-    self.startUpEnergy = try row(86)
-    self.PminT = [0, 0, 0, 0, 0]
-    self.PminLim = 0
-    self.hotStartUpTime = 0
-    self.efficiencyWetBulb = .init(values: 0, 0, 0, 0, 0, 0)
-    self.WetBulbTstep = 0
-    self.efficiencytempIn_A = 0
-    self.efficiencytempIn_B = 0
-    self.efficiencytempIn_cf = 0
+  public init(file: TextConfigFile) throws {
+    let row: (Int) throws -> Double = { try file.parseDouble(row: $0) }
+    name = file.name
+    power = try .init(range: row(10) ... row(13), nom: 0)
+    efficiencyNominal = try row(32)
+    efficiencyBoiler = try row(35)
+    efficiencySCC = try row(38)
+    efficiency = try [row(45), row(48), row(51), row(54), row(57)]
+    efficiencyTemperature = try [row(64), row(67), row(70), row(73), row(76)]
+    startUpTime = try row(83)
+    startUpEnergy = try row(86)
+    minPowerFromTemp = [0, 0, 0, 0, 0]
+    hotStartUpTime = 0
+    efficiencyWetBulb = .init(values: 0, 0, 0, 0, 0, 0)
+    WetBulbTstep = 0
+    efficiencytempIn_A = 0
+    efficiencytempIn_B = 0
+    efficiencytempIn_cf = 0
   }
 }

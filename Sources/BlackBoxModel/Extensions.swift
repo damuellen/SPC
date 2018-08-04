@@ -18,10 +18,6 @@ public extension Double {
   var toKelvin: Double { return self - Temperature.absoluteZeroCelsius }
 }
 
-public extension Float {
-  var toKelvin: Float { return self - Float(Temperature.absoluteZeroCelsius) }
-}
-
 public extension Angle {
   var toRadian: Double { return self * .pi / 180 }
   var toDegree: Double { return self * (180 / .pi) }
@@ -41,17 +37,17 @@ extension Progress {
     let monthSymbol = monthSymbols[month - 1]
     let month = Int64(month)
     if month > completedUnitCount {
-      self.completedUnitCount = month
+      completedUnitCount = month
       Log.infoMessage("The calculations for \(monthSymbol) are in progress.")
     }
   }
 }
 
 func debug(_ value: Any...) {
-  value.forEach { (value) in
+  value.forEach { value in
     print(value, terminator: "\n\n")
   }
-  let _ = readLine()
+  _ = readLine()
 }
 
 extension String {

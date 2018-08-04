@@ -13,45 +13,38 @@ import Foundation
 extension SteamTurbine.PerformanceData: CustomDebugStringConvertible {
   public var debugDescription: String {
     return "\(operationMode), "
-      + String(format:"Load: %.2f ", load.ratio)
+      + String(format: "Load: %.2f ", load.ratio)
       + "Maintenance: \(isMaintained ? "Yes" : "No"), "
-      + String(format:"Back pressure: %.2f, ", backPressure)
-      + String(format:"Op: %.2f, ", Op)
-      + String(format:"PminfT: %.2f", PminfT)
+      + String(format: "Back pressure: %.2f, ", backPressure)
   }
 }
 
 public enum SteamTurbine: Component {
-
   /// a struct for operation-relevant data of the steam turbine
   public struct PerformanceData: Equatable {
     var operationMode: OperationMode
     var load: Ratio
     var isMaintained: Bool
     var backPressure: Double
-    var Op: Double
-    var PminfT: Double
-    
+
     public enum OperationMode: Equatable {
       case noOperation(hours: Double), scheduledMaintenance
-      
-      public static func ==(lhs: OperationMode, rhs: OperationMode) -> Bool {
+
+      public static func == (lhs: OperationMode, rhs: OperationMode) -> Bool {
         switch (lhs, rhs) {
-        case (.noOperation(let lhs), .noOperation(let rhs)): return lhs == rhs
+        case let (.noOperation(lhs), .noOperation(rhs)): return lhs == rhs
         case (.noOperation(_), .scheduledMaintenance): return false
         case (.scheduledMaintenance, .noOperation(_)): return false
         case (.scheduledMaintenance, .scheduledMaintenance): return true
         }
       }
     }
-    
-    public static func ==(lhs: PerformanceData, rhs: PerformanceData) -> Bool {
+
+    public static func == (lhs: PerformanceData, rhs: PerformanceData) -> Bool {
       return lhs.operationMode == rhs.operationMode
         && lhs.load == rhs.load
         && lhs.isMaintained == rhs.isMaintained
         && lhs.backPressure == rhs.backPressure
-        && lhs.Op == rhs.Op
-        && lhs.PminfT == rhs.PminfT
     }
   }
 
@@ -59,23 +52,21 @@ public enum SteamTurbine: Component {
     operationMode: .noOperation(hours: 6),
     load: 1.0,
     isMaintained: false,
-    backPressure: 0,
-    Op: 0,
-    PminfT: 0
+    backPressure: 0
   )
 
   static var parameter: Parameter = ParameterDefaults.tb
 
-  static func efficiency(_ status: inout Plant.PerformanceData, Lmax: Ratio) -> Double {
+  static func efficiency(_ status: inout Plant.PerformanceData, maxLoad: inout Ratio) -> Double {
     guard status.steamTurbine.load.ratio > 0 else { return 1 }
-  //  return 0.9 // FIXME
+
     var parameter = steamTurbine
-    
+
     var maxEfficiency: Double = 1
 
     if case .operating = status.boiler.operationMode {
       // this restriction was planned to simulate an specific case, not correct for every case with Boiler
-      
+
       if Plant.thermal.boiler > 50 || Plant.thermal.solar == 0 {
         maxEfficiency = parameter.efficiencyBoiler
       } else {
@@ -111,10 +102,10 @@ public enum SteamTurbine: Component {
 
     // Dependency of Heat Rate on Ambient Temperature  - DRY COOLING -
     if parameter.efficiencyTemperature[1] >= 1 {
-
       let (_, MaxDCLoad) = DryCooling.update(
-        Tamb: Plant.ambientTemperature, steamTurbine: &status.steamTurbine)
-
+        Tamb: Plant.ambientTemperature, steamTurbine: &status.steamTurbine
+      )
+      maxLoad = MaxDCLoad
       if status.steamTurbine.load > MaxDCLoad {
         status.steamTurbine.load = MaxDCLoad
       }
@@ -127,7 +118,7 @@ public enum SteamTurbine: Component {
       correcture += parameter.efficiencyTemperature[Plant.ambientTemperature.celsius]
     }
     efficiency *= correcture
-    
+
     let wetBulbTemperature = 1.1
     var correctionWetBulbTemperature = 1.0
     // wet bulb temperature effect

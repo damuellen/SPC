@@ -8,10 +8,10 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
-import Foundation
 import DateGenerator
-import SolarPosition
+import Foundation
 import Meteo
+import SolarPosition
 /*
  The collector model contains the following: net collector surface area, length,
  parabola aperture, average distance from focus, optical efficiency,
@@ -21,31 +21,30 @@ import Meteo
  as a function of incident angle (incident angle modifier).
  */
 public enum Collector: Component {
-  
   public enum OperationMode {
     case variable, freezeProtection, noOperation, operating, fixed
   }
-  
+
   /// a struct for operation-relevant data of the collector
-  public struct PerformanceData: Encodable, CustomStringConvertible  {
+  public struct PerformanceData: Encodable, CustomStringConvertible {
     var parabolicElevation, theta, cosTheta, efficiency: Double
-    
+
     static var headers: String {
       return "Parabolic Elevation, elevation, azimuth, theta, efficiency"
     }
-    
+
     public var commaSeparatedValues: String {
-      return String(format:", %.1f", parabolicElevation)
-        + String(format:", %.2f", theta)
-        + String(format:", %.2f ", theta)
-        + String(format:", %.2f", efficiency)
+      return String(format: ", %.1f", self.parabolicElevation)
+        + String(format: ", %.2f", self.theta)
+        + String(format: ", %.2f ", self.theta)
+        + String(format: ", %.2f", self.efficiency)
     }
-    
+
     public var description: String {
-      return String(format:"PE: %.1f°, ", parabolicElevation)
-        + String(format:"θ: %.2f°, ", theta)
-        + String(format:"cos(θ): %.2f, ", cosTheta)
-        + String(format:"η: %.1f", efficiency * 100) + "%"
+      return String(format: "PE: %.1f°, ", self.parabolicElevation)
+        + String(format: "θ: %.2f°, ", self.theta)
+        + String(format: "cos(θ): %.2f, ", self.cosTheta)
+        + String(format: "η: %.1f", self.efficiency * 100) + "%"
     }
   }
 
@@ -65,13 +64,13 @@ public enum Collector: Component {
       return shadingHCE[0]
     case 0 ... 0.09:
       let x = (cosTheta - 0.03) / 0.06
-    return x * shadingHCE[1] + (1 - x) * shadingHCE[0]
+      return x * shadingHCE[1] + (1 - x) * shadingHCE[0]
     case 0 ... 0.24:
       let x = (cosTheta - 0.09) / 0.15
-    return x * shadingHCE[2] + (1 - x) * shadingHCE[1]
+      return x * shadingHCE[2] + (1 - x) * shadingHCE[1]
     case 0 ... 0.33:
       let x = (cosTheta - 0.24) / 0.09
-    return x * shadingHCE[3] + (1 - x) * shadingHCE[2]
+      return x * shadingHCE[3] + (1 - x) * shadingHCE[2]
     default:
       return shadingHCE[3]
     }
@@ -82,19 +81,18 @@ public enum Collector: Component {
   /// of parabolic trough, edge factors of the solarfield and the optical efficiency
   public static func update(_ status: inout Collector.PerformanceData,
                             meteo: MeteoData, direction: Float = 0) {
-
     let shadlength = parameter.avgFocus * tan(status.theta.toRadian)
 
     let edge: Double
 
     switch shadlength {
-    case _ where shadlength <= parameter.extensionHCE:
+    case _ where shadlength <= self.parameter.extensionHCE:
       edge = 1
     case _ where shadlength <= solarField.distanceSCA:
-      edge = 1 - (shadlength - parameter.extensionHCE) / parameter.lengthSCA
+      edge = 1 - (shadlength - self.parameter.extensionHCE) / self.parameter.lengthSCA
     default:
       edge = 1 - solarField.edgeFactor[0]
-        - (shadlength - parameter.extensionHCE)
+        - (shadlength - self.parameter.extensionHCE)
         * solarField.edgeFactor[1]
     }
 
@@ -106,7 +104,7 @@ public enum Collector: Component {
     if shadingSCA < 0.01 {
       shadingSCA = 1
     }
-
+    /// Angle of wind attack
     let AW: Double
 
     if direction < 180 { AW = status.parabolicElevation }
@@ -115,36 +113,37 @@ public enum Collector: Component {
     var T_14: Double
 
     if AW < 15 {
-      T_14 = (197_441e-9 * parameter.lengthSCA ** 2
-        + 197_441e-9 * parameter.lengthSCA)
+      T_14 = (197_441e-9 * self.parameter.lengthSCA ** 2
+        + 197_441e-9 * self.parameter.lengthSCA)
     } else if AW < 45 {
-      T_14 = -(264_485e-9 * parameter.lengthSCA ** 2
-        + 264_485e-9 * parameter.lengthSCA)
+      T_14 = -(264_485e-9 * self.parameter.lengthSCA ** 2
+        + 264_485e-9 * self.parameter.lengthSCA)
     } else if AW < 75 {
-      T_14 = (388_307e-9 * parameter.lengthSCA ** 2
-        + 388_307e-9 * parameter.lengthSCA)
+      T_14 = (388_307e-9 * self.parameter.lengthSCA ** 2
+        + 388_307e-9 * self.parameter.lengthSCA)
     } else if AW < 105 {
-      T_14 = (709_175e-9 * parameter.lengthSCA ** 2
-        + 709_175e-9 * parameter.lengthSCA)
+      T_14 = (709_175e-9 * self.parameter.lengthSCA ** 2
+        + 709_175e-9 * self.parameter.lengthSCA)
     } else if AW < 135 {
-      T_14 = (591_045e-9 * parameter.lengthSCA ** 2
-        + 591_045e-9 * parameter.lengthSCA)
+      T_14 = (591_045e-9 * self.parameter.lengthSCA ** 2
+        + 591_045e-9 * self.parameter.lengthSCA)
     } else if AW < 165 {
-      T_14 = (517_083e-9 * parameter.lengthSCA ** 2
-        + 517_083e-9 * parameter.lengthSCA)
+      T_14 = (517_083e-9 * self.parameter.lengthSCA ** 2
+        + 517_083e-9 * self.parameter.lengthSCA)
     } else {
-      T_14 = (354_672e-9 * parameter.lengthSCA ** 2
-        + 354_672e-9 * parameter.lengthSCA)
+      T_14 = (354_672e-9 * self.parameter.lengthSCA ** 2
+        + 354_672e-9 * self.parameter.lengthSCA)
     }
     if direction > 180 { T_14 = -T_14 }
-
+    /// Effective wind speed
     let v_wind_eff = Double(meteo.windSpeed)
       * abs(sin(Double(direction) * .pi / 180))
     // Torsion due to bearing friction
     let T_R = -(939_549e-10 * parameter.lengthSCA ** 2
       + 939_549e-10 * parameter.lengthSCA)
+    /// Torsion due to wind and friction
     let torsion = abs(T_14 * (v_wind_eff / 14) ** 2 + T_R)
-
+    /// Correction factor due to torsion
     let k_torsion = max(0.2, (-0.0041 * pow(torsion, 3) - 0.0605
         * pow(torsion, 2) - 0.0354 * torsion + 99.997) / 100)
     let shadingHCE = self.shadingHCE(cosTheta: status.cosTheta)
@@ -155,18 +154,18 @@ public enum Collector: Component {
   public static func tracking(sun: SolarPosition.OutputValues) -> Collector.PerformanceData {
     var collector = Collector.initialState
     guard sun.zenith < 90 else { return collector }
-    
+
     collector.parabolicElevation = 90 - (atan(tan(sun.zenith.toRadian)
-      * cos(((sun.azimuth > 0 ? 90.0 : -90.0) - sun.azimuth).toRadian))).toDegree
-    
+        * cos(((sun.azimuth > 0 ? 90.0 : -90.0) - sun.azimuth).toRadian))).toDegree
+
     let az = sun.azimuth.toRadian,
-     el = sun.elevation.toRadian,
-     beta = 0.0,
-     sfaz = 0.0
-    
+      el = sun.elevation.toRadian,
+      beta = 0.0,
+      sfaz = 0.0
+
     let theta = (cos(az - sfaz) / abs(cos(az - sfaz)) * 180 / .pi
       * acos(sqrt(1 - (cos(el - beta) - cos(beta) * cos(el)
-        * (1 - cos(az - sfaz))) ** 2))) * (-1)
+          * (1 - cos(az - sfaz))) ** 2))) * (-1)
 
     collector.theta = theta
     collector.cosTheta = cos(theta.toRadian)
@@ -175,7 +174,6 @@ public enum Collector: Component {
 }
 
 extension SolarField.PerformanceData.OperationMode {
-  
   var collector: Collector.OperationMode {
     switch self {
     case .fixed:

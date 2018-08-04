@@ -11,108 +11,107 @@
 import Foundation
 
 extension Heater.PerformanceData: CustomStringConvertible {
-  
   public var description: String {
     return "\(operationMode), "
       + "Maintenance: \(isMaintained ? "Yes" : "No"), "
-      + String(format:"Load: %.1f%, ", load.percentage)
-      + String(format:"Mfl: %.1f, ", totalMassFlow)
-      + String(format:"Heat In: %.1f", heatIn)
+      + String(format: "Load: %.1f, ", load.percentage)
+      + String(format: "Mfl: %.1fkg/s, ", massFlow.rate)
+      + String(format: "In: %.1f°C, ", temperature.inlet.celsius)
+      + String(format: "Out: %.1f°C", temperature.outlet.celsius)
   }
 }
 
 public enum Heater: Component {
-  
   /// a struct for operation-relevant data of the heater
   public struct PerformanceData: Equatable, HeatCycle {
-    var name = ""
     var operationMode: OperationMode
     var isMaintained: Bool
     var load: Ratio
     var temperature: (inlet: Temperature, outlet: Temperature)
     var massFlow: MassFlow
-    var totalMassFlow, heatIn: Double
-    
+    var totalMassFlow: Double
+
     public enum OperationMode: String, CustomStringConvertible {
       case normal, charge, reheat, freezeProtection,
-      noOperation, maintenance, unknown
-      
+        noOperation, maintenance, unknown
+
       public var description: String {
-        return self.rawValue
+        return rawValue
+      }
+
+      var isFreezeProtection: Bool {
+        return self ~= .freezeProtection
       }
     }
-    
-    public static func ==(lhs: PerformanceData, rhs: PerformanceData) -> Bool {
+
+    public static func == (lhs: PerformanceData, rhs: PerformanceData) -> Bool {
       return lhs.operationMode == rhs.operationMode
         && lhs.isMaintained == rhs.isMaintained
         && lhs.load == rhs.load
         && lhs.temperature == rhs.temperature
         && lhs.massFlow == rhs.massFlow
         && lhs.totalMassFlow == rhs.totalMassFlow
-        && lhs.heatIn == rhs.heatIn
     }
   }
-  
+
   /// working conditions of the heater at start
   static let initialState = PerformanceData(
-    name: "",
-    operationMode: .noOperation,
+    operationMode: .normal,
     isMaintained: false,
     load: 0.0,
     temperature: (inlet: Simulation.initialValues.temperatureOfHTFinPipes,
                   outlet: Simulation.initialValues.temperatureOfHTFinPipes),
     massFlow: 0.0,
-    totalMassFlow: 0.0,
-    heatIn: 0.0
+    totalMassFlow: 0.0
   )
-  
+
   static var parameter: Parameter = ParameterDefaults.hr
-  
+
   /// Calculates the parasitics of the heater which only depends on the current load
   static func parasitics(at load: Ratio) -> Double {
-    return parameter.nominalElectricalParasitics *
-      (parameter.electricalParasitics[0]
-        + parameter.electricalParasitics[1] * load.ratio)
+    return self.parameter.nominalElectricalParasitics *
+      (self.parameter.electricalParasitics[0]
+        + self.parameter.electricalParasitics[1] * load.ratio)
   }
-  
+
   fileprivate static func noOperation(_ heater: inout Heater.PerformanceData) {
     heater.operationMode = .noOperation
     heater.load = 0.0
     heater.massFlow = 0.0
   }
-  
+
   static func update(_ status: inout Plant.PerformanceData,
                      demand heat: Double,
-                     availableFuel: Double,
+                     fuel: Double,
                      thermal: inout ThermalEnergy,
                      fuelFlow: inout Double) {
     // Freeze protection is always possible: massFlow fixed
     if case .charge = status.heater.operationMode {
       // Fossil charge of storage
-      if Fuelmode == "predefined" {
+      if Fuelmode.isPredefined {
         // fuel consumption is predefined
-        fuelFlow = availableFuel / hourFraction / 2
+        fuelFlow = fuel / hourFraction / 2
         // The fuelfl avl. [MW]
         thermal.heater = fuelFlow * parameter.efficiency
           * Simulation.adjustmentFactor.efficiencyHeater
         // net thermal power avail [MW]
         status.heater.load = Ratio(thermal.heater / Design.layout.heater) // load avail.
-        
+
         guard status.heater.load.ratio > parameter.minLoad else {
-          ////report = "HR operation requested but not performed because of HR underload.\n"
+          print(TimeStep.current, "HR operation requested but not performed because of HR underload.")
           noOperation(&status.heater)
           thermal.heater = 0
           return
         }
         // Normal operation possible -
-        
+
         status.heater.operationMode = .normal
         // if Reheating, then do not change displayed operating status / mode
         status.heater.temperature.outlet = parameter.nominalTemperatureOut
-        
+
         // Calc. mass flow that can be achieved [kg/sec] = [MJ/sec] * 1000 / [kJ/kg]
-        
-        if Design.hasStorage, case .ph = status.storage.operationMode {
+
+        if Design.hasStorage, case .preheat = status.storage.operationMode {
           status.heater.massFlow = status.storage.massFlow
         } else {
           status.heater.massFlow = MassFlow(thermal.heater * 1_000
@@ -121,12 +120,12 @@ public enum Heater: Component {
         }
       } else {
         if status.powerBlock.temperature.inlet == parameter.nominalTemperatureOut {
-          status.powerBlock.temperature.inlet = -1.0 // FIXME
+          status.powerBlock.temperature.inlet = -1.0 // FIXME:
         }
         status.heater.massFlow = MassFlow(Design.layout.heater
           / htf.heatDelta(parameter.nominalTemperatureOut,
-                           status.powerBlock.temperature.inlet))
-        
+                          status.powerBlock.temperature.inlet))
+
         fuelFlow = Design.layout.heater / parameter.efficiency
         status.heater.load = 1.0
         // Parasitic power [MW]
@@ -135,22 +134,22 @@ public enum Heater: Component {
       }
     } else if case .freezeProtection = status.heater.operationMode {
       thermal.heater = status.heater.massFlow.rate * htf.heatDelta(
-        parameter.antiFreezeTemperature, status.heater.temperature.inlet) / 1_000
-      
+        parameter.antiFreezeTemperature, status.heater.temperature.inlet
+      ) / 1_000
+
       if thermal.heater > Design.layout.heater {
         thermal.heater = Design.layout.heater
         if status.heater.massFlow.rate > 0 {
           status.heater.temperature.outlet = htf.temperatureDelta(
             thermal.heater * 1_000 / status.heater.massFlow.rate,
-            status.heater.temperature.inlet)
+            status.heater.temperature.inlet
+          )
         }
       } else {
         status.heater.temperature.outlet = parameter.antiFreezeTemperature
       }
-      // [MW]=[kg/sec]*[kJ/kg]/1000
       fuelFlow = thermal.heater / parameter.efficiency
       status.heater.load = Ratio(thermal.heater / Design.layout.heater)
-      // return
       // No operation requested or QProd > QNeed
     } else if case .noOperation = status.heater.operationMode { /* || heat >= 0 */
       noOperation(&status.heater)
@@ -161,52 +160,47 @@ public enum Heater: Component {
       thermal.heater = 0
     } else if status.heater.isMaintained {
       // operation is requested
-      ////report = "Sched. maintnc. of HR disables requested operation.\n"
-      noOperation(&status.heater)
+      print(TimeStep.current, "Sched. maintnc. of HR disables requested operation.")
+      self.noOperation(&status.heater)
       status.heater.operationMode = .maintenance
       thermal.heater = 0
     } else {
       // Normal operation requested  The fuel flow needed [MW]
-      fuelFlow = min(-heat, Design.layout.heater) / parameter.efficiency
+      let heat = heat < Design.layout.heater ? heat : -Design.layout.heater
+      fuelFlow = heat / parameter.efficiency
         / Simulation.adjustmentFactor.efficiencyHeater
       // The fuelfl avl. [MW]
-      fuelFlow = min(availableFuel, fuelFlow * hourFraction) / hourFraction
-     // fuelFlow = max(fuelFlow, 0)
+      fuelFlow = min(fuel, fuelFlow * hourFraction) / hourFraction
+
+      fuelFlow = max(fuelFlow, Design.layout.heater)
       // net thermal power avail [MW]
       thermal.heater = fuelFlow * parameter.efficiency
         * Simulation.adjustmentFactor.efficiencyHeater
-      
-      status.heater.load = Ratio(thermal.heater / Design.layout.heater) // load avail.
-      
-      // if heateroperationMode { // added, shams-1
-      if status.heater.load.ratio < parameter.minLoad {
-        status.heater.load = Ratio(parameter.minLoad)
+
+      status.heater.load = Ratio(abs(thermal.heater / Design.layout.heater)) // load avail.
+
+      if status.heater.load.ratio < self.parameter.minLoad {
+        status.heater.load = Ratio(self.parameter.minLoad)
         thermal.heater = status.heater.load.ratio * Design.layout.heater
-        fuelFlow = thermal.heater / parameter.efficiency
+        fuelFlow = thermal.heater / self.parameter.efficiency
       }
-      // }
-      guard status.heater.load.ratio > parameter.minLoad else {
-        // report = "HR operation requested but not performed because of HR underload.\n"
-        noOperation(&status.heater)
-        thermal.heater = 0
-        return
-      }
+
       // Normal operation possible
       if case .reheat = status.heater.operationMode {
         status.heater.operationMode = .normal
       }
       // if Reheating, then do not change displayed operating status / mode
-     status.heater.temperature.outlet = parameter.nominalTemperatureOut
+      status.heater.temperature.outlet = self.parameter.nominalTemperatureOut
       // Calc. mass flow that can be achieved [kg/sec] = [MJ/sec] * 1000 / [kJ/kg]
-      if Design.hasStorage, case .ph = status.storage.operationMode {
+      if Design.hasStorage, case .preheat = status.storage.operationMode {
         status.heater.massFlow = status.storage.massFlow
       } else {
-        status.heater.massFlow = MassFlow(thermal.heater * 1_000
-          / htf.heatDelta(status.heater.temperature.outlet,
-                          status.heater.temperature.inlet))
+        status.heater.massFlow = MassFlow((thermal.heater * 1_000
+            / htf.heatDelta(status.heater.temperature.outlet,
+                            status.heater.temperature.inlet)))
       }
     }
-   // noOperation(&status.heater)
-   // thermal.heater = 0
+    // print(TimeStep.current, fuelFlow, thermal.heater, status.heater)
+    self.noOperation(&status.heater)
   }
 }

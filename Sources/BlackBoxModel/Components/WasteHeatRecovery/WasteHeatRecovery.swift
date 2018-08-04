@@ -11,7 +11,6 @@
 import Foundation
 
 public enum WasteHeatRecovery: Component {
-  
   /// a struct for operation-relevant data of the waste heat recovery
   public struct PerformanceData {
     var maintained: Bool
@@ -20,16 +19,18 @@ public enum WasteHeatRecovery: Component {
   static let initialState = PerformanceData(maintained: true)
 
   public static var parameter: Parameter = ParameterDefaults.whr
-  
+
   /// Returns the efficiency of the waste heat recovery based on working conditions of the gas turbine
   public static func efficiency(gasTurbineLoad: Ratio) -> Double {
     var efficiency = parameter.efficiencyNominal
     efficiency *= parameter.efficiencySolar[
       Plant.thermal.solar / Design.layout.heatExchanger
-        * steamTurbine.efficiencySCC]
+        * steamTurbine.efficiencySCC
+    ]
     efficiency *= parameter.efficiencyGasTurbine[
-      Plant.electricEnergy.gasTurbineGross / gasTurbine.Pgross]
-    efficiency *=  (1 / GasTurbine.efficiency(at: gasTurbineLoad) - 1)
+      Plant.electricEnergy.gasTurbineGross / gasTurbine.powerGross
+    ]
+    efficiency *= (1 / GasTurbine.efficiency(at: gasTurbineLoad) - 1)
 
     debugPrint("waste heat recovery efficiency at \(efficiency * 100)%")
     assert(efficiency > 1, "waste heat recovery efficiency at over 100%")

@@ -12,27 +12,23 @@ import Foundation
 
 public class TextConfigFileHandler {
   /// List of path extension for needed config files.
-  public enum ValidPathExtensions: String {
+  public enum ValidPathExtensions: String, CaseIterable {
     case FOS, OPR, DEM, TAR, SIM, INI, TIM, DES, AVL,
-    LAY, SF, COL, STO, HR, HTF, STF, HX, BO, WHR, GT, TB, PB, PFC
-    
-    public static var all: [ValidPathExtensions] = [
-      .FOS, .OPR, .DEM, .TAR, .SIM, .INI, .TIM, .DES, .AVL, .LAY, .SF,
-      .COL, .STO, .HR, .HTF, .STF, .HX, .BO, .WHR, .GT, .TB, .PB, .PFC,
-      ]
+      LAY, SF, COL, STO, HR, HTF, STF, HX, BO, WHR, GT, TB, PB, PFC
   }
+
   var urlsWithValidExtension: [URL] = []
-  
+
   public init() {}
-  
+
   public func findFilesInDirectory(atPath path: String) {
     do {
       guard let pathUrl = URL(string: path)
-        else { preconditionFailure("Invalid string for path") }
-      
+      else { preconditionFailure("Invalid string for path") }
+
       let files = try FileManager.default.subpathsOfDirectory(atPath: path)
       let urls = files.map { file in pathUrl.appendingPathComponent(file) }
-      
+
       urlsWithValidExtension = urls.filter {
         ValidPathExtensions(rawValue: $0.pathExtension.uppercased()) != nil
       }
@@ -40,13 +36,13 @@ public class TextConfigFileHandler {
       print(error)
     }
   }
-  
+
   // Returns an array of URLs, each of which is the path of a config file with the given path extension.
   public func searchConfig(with pathExtension: ValidPathExtensions) -> URL? {
-    return urlsWithValidExtension.lazy
+    return self.urlsWithValidExtension.lazy
       .first(where: { $0.pathExtension.uppercased() == pathExtension.rawValue })
   }
-  
+
   // Returns a String, which contains the content of needed config file.
   public static func readConfig(url: URL) -> TextConfigFile? {
     let path = url.absoluteString

@@ -14,7 +14,7 @@ public struct Tariff: Codable {
   let name: String
   let abbreviation: String
   let energyPayment, energieCost, capacityPaymentPercent, capacityPayment,
-  bonusPaymentPercent, bonusPayment, asAvailableCapacity: Double
+    bonusPaymentPercent, bonusPayment, asAvailableCapacity: Double
 }
 
 struct TariffSeason {

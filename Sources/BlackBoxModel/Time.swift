@@ -8,55 +8,56 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
-import Foundation
 import Config
 import DateGenerator
+import Foundation
 
 public struct Time {
   var isLeapYear = false
-  var firstDateOfOperation: Date? = nil
-  var lastDateOfOperation: Date? = nil
+  var firstDateOfOperation: Date?
+  var lastDateOfOperation: Date?
   let holidays: [Date]
   let steps: DateGenerator.Interval
 }
 
 extension Time: TextConfigInitializable {
-  
-  public init(file: TextConfigFile)throws {
-    
-    let row: (Int)throws -> Double = { try file.parseDouble(row: $0) }
-    
+  public init(file: TextConfigFile) throws {
+    let row: (Int) throws -> Double = { try file.parseDouble(row: $0) }
+
     let getDate: (String) -> Date? = { dateString in
       let components: [Int] = dateString.split(
-        separator: ".", maxSplits: 2, omittingEmptySubsequences: true)
-        .map(String.init).compactMap(Int.init)
+        separator: ".", maxSplits: 2, omittingEmptySubsequences: true
+      )
+      .map(String.init).compactMap(Int.init)
       guard components.count == 2 else { return nil }
       let dateComponents = DateComponents(
-        year: 2010, month: components[0], day: components[1])
+        year: 2010, month: components[0], day: components[1]
+      )
       guard let date = calendar.date(from: dateComponents)
-        else { return nil }
+      else { return nil }
       return date
     }
-    
+
     if let firstDayOfOperation = getDate(file.values[12]) {
       let hours = try row(14) * 3600
       let minutes = try row(15) * 60
       let timeInterval = hours + minutes
       let date = firstDayOfOperation.addingTimeInterval(timeInterval)
-      self.firstDateOfOperation = date
+      firstDateOfOperation = date
     }
-    
+
     if let lastDayOfOperation = getDate(file.values[15]) {
       let hours = try row(17) * 3600
       let minutes = try row(18) * 60
       let timeInterval = hours + minutes
       let date = lastDayOfOperation.addingTimeInterval(timeInterval)
-      self.lastDateOfOperation = date
+      lastDateOfOperation = date
     }
-    
+
     self.steps = try DateGenerator.Interval(
-      rawValue: Int(row(12))) ?? .every5minutes
-    
+      rawValue: Int(row(12))
+    ) ?? .every5minutes
+
     var dates = [Date]()
     for row in stride(from: 38, through: 95, by: 3) {
       let idx = row - 1
@@ -69,31 +70,34 @@ extension Time: TextConfigInitializable {
 }
 
 extension Time: Codable {
-  
   enum CodingKeys: String, CodingKey {
     case firstDateOfOperation
     case lastDateOfOperation
     case holidays
     case steps
   }
-  
+
   public init(from decoder: Decoder) throws {
     let values = try decoder.container(keyedBy: CodingKeys.self)
-    self.firstDateOfOperation = try values.decodeIfPresent(
-      Date.self, forKey: .firstDateOfOperation)
-    self.lastDateOfOperation = try values.decodeIfPresent(
-      Date.self, forKey: .lastDateOfOperation)
-    self.holidays = try values.decode(Array<Date>.self, forKey: .holidays)
+    firstDateOfOperation = try values.decodeIfPresent(
+      Date.self, forKey: .firstDateOfOperation
+    )
+    lastDateOfOperation = try values.decodeIfPresent(
+      Date.self, forKey: .lastDateOfOperation
+    )
+    holidays = try values.decode(Array<Date>.self, forKey: .holidays)
     let steps = try values.decode(Int.self, forKey: .steps)
     self.steps = DateGenerator.Interval(rawValue: steps)!
   }
-  
+
   public func encode(to encoder: Encoder) throws {
     var container = encoder.container(keyedBy: CodingKeys.self)
     try container.encodeIfPresent(
-      firstDateOfOperation, forKey: .firstDateOfOperation)
+      firstDateOfOperation, forKey: .firstDateOfOperation
+    )
     try container.encodeIfPresent(
-      lastDateOfOperation, forKey: .lastDateOfOperation)
+      lastDateOfOperation, forKey: .lastDateOfOperation
+    )
     try container.encode(holidays, forKey: .holidays)
     try container.encode(steps.rawValue, forKey: .steps)
   }

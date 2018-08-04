@@ -14,15 +14,16 @@ extension Boiler {
   public struct Parameter: ComponentParameter, Codable {
     let name: String
     let nominalTemperatureOut, minLoad, nominalElectricalParasitics: Double
-    
+
     public struct StartParameter: Codable {
       public struct Values: Codable {
         let cold, warm: Double
       }
+
       let hours: Values
       let energy: Values
     }
-    
+
     let start: StartParameter
     let electricalParasitics, efficiency: Coefficients
     let booster = true
@@ -51,7 +52,7 @@ extension Boiler.Parameter: CustomStringConvertible {
     d += "c1:" >< "\(electricalParasitics[1])"
     d += "Efficiency; Efficiency(Load) = c0+c1*load+c2*load^2+c3*load^3+c4*load^4)"
     for (i, c) in efficiency.coefficients.enumerated() {
-      d += "c\(i):" >< String(format:"%.6E", c)
+      d += "c\(i):" >< String(format: "%.6E", c)
     }
     d += "Booster Superheater (if NO regular boiler selected):"
       >< (booster ? "YES" : "NO")
@@ -60,15 +61,15 @@ extension Boiler.Parameter: CustomStringConvertible {
 }
 
 extension Boiler.Parameter: TextConfigInitializable {
-  public init(file: TextConfigFile)throws {
-    let row: (Int)throws -> Double = { try file.parseDouble(row: $0) }
-    self.name = file.name
-    self.nominalTemperatureOut = try row(10)
-    self.minLoad = try row(13)
-    self.start = try .init(hours: .init(cold: row(16), warm: row(25)),
-                           energy: .init(cold: row(22), warm: row(31)))
-    self.nominalElectricalParasitics = try row(34)
-    self.electricalParasitics = try [row(37), row(40)]
-    self.efficiency = try [row(50), row(53), row(56), row(59), row(62)]
+  public init(file: TextConfigFile) throws {
+    let row: (Int) throws -> Double = { try file.parseDouble(row: $0) }
+    name = file.name
+    nominalTemperatureOut = try row(10)
+    minLoad = try row(13)
+    start = try .init(hours: .init(cold: row(16), warm: row(25)),
+                      energy: .init(cold: row(22), warm: row(31)))
+    nominalElectricalParasitics = try row(34)
+    electricalParasitics = try [row(37), row(40)]
+    efficiency = try [row(50), row(53), row(56), row(59), row(62)]
   }
 }

@@ -19,10 +19,11 @@ extension PowerBlock {
     let startUpelectricalParasitics: Double
     let nominalElectricalParasiticsACC: Double
     let electricalParasiticsShared, electricalParasiticsStep,
-    electricalParasitics, electricalParasiticsACC,
-    electricalParasiticsACCTamb: Coefficients
+      electricalParasitics, electricalParasiticsACC,
+      electricalParasiticsACCTamb: Coefficients
   }
 }
+
 extension PowerBlock.Parameter: CustomStringConvertible {
   public var description: String {
     var d: String = ""
@@ -50,29 +51,29 @@ extension PowerBlock.Parameter: CustomStringConvertible {
       >< "\(nominalElectricalParasiticsACC)"
     d += "ACC Parasitic f(Load) = ParasiticsACC(100%)*(c0+c1*load+c2*load^2+...)"
     for (i, c) in electricalParasiticsACC.coefficients.enumerated() {
-      d += "c\(i):" >< String(format:"%.4E", c)
+      d += "c\(i):" >< String(format: "%.4E", c)
     }
     d += "ACC Parasitic f(Tamb) = ParasiticsACC(100%)*(c0+c1*Tamb+c2*Tamb^2+...)"
     for (i, c) in electricalParasiticsACCTamb.coefficients.enumerated() {
-      d += "c\(i):" >< String(format:"%.4E", c)
+      d += "c\(i):" >< String(format: "%.4E", c)
     }
     return d
   }
 }
 
 extension PowerBlock.Parameter: TextConfigInitializable {
-  public init(file: TextConfigFile)throws {
-    let row: (Int)throws -> Double = { try file.parseDouble(row: $0) }
-    self.name = file.name
-    self.fixelectricalParasitics = try row(10)
-    self.nominalElectricalParasitics = try row(13)
-    self.electricalParasitics = try [row(16), row(19)]
-    self.electricalParasiticsStep = try [row(22), row(25)]
-    self.fixElectricalParasitics0 = try row(28)
-    self.startUpelectricalParasitics = try row(31)
-    self.nominalElectricalParasiticsACC = try row(39)
-    self.electricalParasiticsShared = try [row(34), row(37)]
-    self.electricalParasiticsACC = try [row(41), row(43), row(45), row(47)]
-    self.electricalParasiticsACCTamb = try [row(49), row(51), row(53), row(55)]    
+  public init(file: TextConfigFile) throws {
+    let row: (Int) throws -> Double = { try file.parseDouble(row: $0) }
+    name = file.name
+    fixelectricalParasitics = try row(10)
+    nominalElectricalParasitics = try row(13)
+    electricalParasitics = try [row(16), row(19)]
+    electricalParasiticsStep = try [row(22), row(25)]
+    fixElectricalParasitics0 = try row(28)
+    startUpelectricalParasitics = try row(31)
+    nominalElectricalParasiticsACC = try row(39)
+    electricalParasiticsShared = try [row(34), row(37)]
+    electricalParasiticsACC = try [row(41), row(43), row(45), row(47)]
+    electricalParasiticsACCTamb = try [row(49), row(51), row(53), row(55)]
   }
 }

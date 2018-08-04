@@ -9,63 +9,63 @@
 //
 
 public protocol TextConfigInitializable {
-  init(file: TextConfigFile)throws
+  init(file: TextConfigFile) throws
 }
 
 public struct TextConfigFile {
-  
   public var values: [String]
-  
+
   public var name: String {
-    return values.indices.contains(6) ? values[6] : ""
+    return self.values.indices.contains(6) ? self.values[6] : ""
   }
-  
+
   private let path: String
-  
+
   init(content: String, path: String) {
     self.path = path
     let separator: Character = content.contains("\r\n") ? "\r\n" : "\n"
-    self.values = content.split(
-      separator: separator, omittingEmptySubsequences: false).map(String.init)
+    values = content.split(
+      separator: separator, omittingEmptySubsequences: false
+    ).map(String.init)
   }
-  
+
   public enum ReadError: Error {
     case missingRowInFile(Int, String)
     case missingValueInRow(Int, String)
     case invalidValueInRow(Int, String)
     case unexpectedValueCount
   }
-  
+
   public subscript(row row: Int) -> String? {
     let idx = row - 1
-    guard values.indices.contains(idx) else {
+    guard self.values.indices.contains(idx) else {
       return nil
     }
-    return values[idx].trimmingCharacters(in: .whitespaces)
+    return self.values[idx].trimmingCharacters(in: .whitespaces)
   }
-  
-  public func extractString(from row: Int)throws -> String {
+
+  public func extractString(from row: Int) throws -> String {
     guard let string = self[row: row], string.count > 0 else {
-      throw ReadError.missingValueInRow(row, path)
+      throw ReadError.missingValueInRow(row, self.path)
     }
     return string
   }
-  
-  public func parseDouble(row: Int)throws -> Double {
+
+  public func parseDouble(row: Int) throws -> Double {
     let value = try extractString(from: row)
     if let value = Double(value) {
       return value
     } else {
-      throw ReadError.invalidValueInRow(row, path)
+      throw ReadError.invalidValueInRow(row, self.path)
     }
   }
-   
-  public func parseInteger(row: Int)throws -> Int {
+
+  public func parseInteger(row: Int) throws -> Int {
     let value = try extractString(from: row)
     if let value = Int(value) {
       return value
     } else {
-      throw ReadError.invalidValueInRow(row, path)
+      throw ReadError.invalidValueInRow(row, self.path)
     }
   }
 }
@@ -73,14 +73,14 @@ public struct TextConfigFile {
 extension TextConfigFile.ReadError {
   var errorDescription: String {
     switch self {
-    case .invalidValueInRow(let row, let path):
+    case let .invalidValueInRow(row, path):
       return "\(path) - Invalid value in row \(row)."
-    case .missingRowInFile(let row, let path):
+    case let .missingRowInFile(row, path):
       return "\(path) - File has less then \(row) rows."
-    case .missingValueInRow(let row, let path):
+    case let .missingValueInRow(row, path):
       return "\(path) - Missing value in row \(row)."
     case .unexpectedValueCount:
-      return "Layout file has unexpected format."      
+      return "Layout file has unexpected format."
     }
   }
 }

@@ -12,7 +12,7 @@ import Foundation
 
 extension HeatExchanger.PerformanceData.OperationMode: RawRepresentable {
   public typealias RawValue = String
-  
+
   public init?(rawValue: RawValue) {
     switch rawValue {
     case "No Operation for 0 hours": self = .noOperation(hours: 0)
@@ -24,10 +24,10 @@ extension HeatExchanger.PerformanceData.OperationMode: RawRepresentable {
     default: return nil
     }
   }
-  
+
   public var rawValue: RawValue {
     switch self {
-    case .noOperation(let hours): return "No Operation for \(hours) hours"
+    case let .noOperation(hours): return "No Operation for \(hours) hours"
     case .SI: return "SI"
     case .startUp: return "StartUp"
     case .scheduledMaintenance: return "Scheduled Maintenance"
@@ -38,16 +38,8 @@ extension HeatExchanger.PerformanceData.OperationMode: RawRepresentable {
 }
 
 public enum HeatExchanger: Component {
-  
-  final class Instance {
-    // A singleton class holding the state of the heat exchanger
-    fileprivate static let shared = Instance()
-    var parameter: HeatExchanger.Parameter!
-  }
-
   /// a struct for operation-relevant data of the heat exchanger
-  public struct PerformanceData: Equatable, HeatCycle, CustomStringConvertible {
-    var name = ""
+  public struct PerformanceData: HeatCycle, CustomStringConvertible {
     var operationMode: OperationMode
     var temperature: (inlet: Temperature, outlet: Temperature)
     var massFlow: MassFlow
@@ -55,36 +47,25 @@ public enum HeatExchanger: Component {
 
     public enum OperationMode: Equatable {
       case noOperation(hours: Double), SI, startUp, scheduledMaintenance, coldStartUp, warmStartUp
-      
-      public static func ==(lhs: OperationMode, rhs: OperationMode) -> Bool {
+
+      public static func == (lhs: OperationMode, rhs: OperationMode) -> Bool {
         switch (lhs, rhs) {
-          case (.noOperation(let lhs), noOperation(let rhs)): return lhs == rhs
+        case let (.noOperation(lhs), noOperation(rhs)): return lhs == rhs
         default: return lhs.rawValue == rhs.rawValue
         }
       }
     }
-    
+
     public var description: String {
-      return "\(operationMode), "
-        + String(format:"Mfl: %.1fkg/s, ", massFlow.rate)
-        + String(format:"In: %.1f°C, ", temperature.inlet.celsius)
-        + String(format:"Out: %.1f°C", temperature.outlet.celsius)
-    }
-    
-    public static func ==(lhs: PerformanceData, rhs: PerformanceData) -> Bool {
-      return lhs.operationMode == rhs.operationMode
-        && lhs.temperature == rhs.temperature
-        && lhs.massFlow == rhs.massFlow
-        && lhs.totalMassFlow == rhs.totalMassFlow
-        && lhs.heatIn == rhs.heatIn
-        && lhs.heatOut == rhs.heatOut
-        && lhs.heatToTES == rhs.heatToTES
+      return "\(self.operationMode), "
+        + String(format: "Mfl: %.1fkg/s, ", self.massFlow.rate)
+        + String(format: "In: %.1f°C, ", self.temperature.inlet.celsius)
+        + String(format: "Out: %.1f°C", self.temperature.outlet.celsius)
     }
   }
 
   /// working conditions of the heat exchanger at start
   static let initialState = PerformanceData(
-    name: "",
     operationMode: .SI,
     temperature: (inlet: Temperature(celsius: 30.0),
                   outlet: Temperature(celsius: 30.0)),
@@ -92,38 +73,39 @@ public enum HeatExchanger: Component {
     totalMassFlow: 0.0,
     heatIn: 0.0,
     heatOut: 0.0,
-    heatToTES: 0.0)
+    heatToTES: 0.0
+  )
 
   static var parameter: Parameter = ParameterDefaults.hx
-  
+
   static func limit(_ temperatureFactor: Double) -> Double {
     var temperatureFactor = temperatureFactor
     if temperatureFactor > 1.1 { temperatureFactor = 1.1 }
     if temperatureFactor < 0 { temperatureFactor = 0 }
     return temperatureFactor
   }
-  
+
   public static func update(_ hx: inout HeatExchanger.PerformanceData,
                             steamTurbine: SteamTurbine.PerformanceData,
                             storage: Storage.PerformanceData) -> Double {
-    
-    if parameter.name.hasPrefix("Heat Exchanger HTF-H2O - BK") {
+    if self.parameter.name.hasPrefix("Heat Exchanger HTF-H2O - BK") {
       hx.temperature.outlet = Temperature(
-        parameter.temperature.htf.outlet.max.kelvin
-        - (120 - 169 * steamTurbine.load.ratio
-          + 49 * steamTurbine.load.ratio ** 2))
+        self.parameter.temperature.htf.outlet.max.kelvin
+          - (120 - 169 * steamTurbine.load.ratio
+            + 49 * steamTurbine.load.ratio ** 2)
+      )
 
-      if hx.temperature.outlet < parameter.temperature.htf.outlet.min {
-        hx.temperature.outlet = parameter.temperature.htf.outlet.min
+      if hx.temperature.outlet < self.parameter.temperature.htf.outlet.min {
+        hx.temperature.outlet = self.parameter.temperature.htf.outlet.min
       }
     } else {
-      if parameter.useAndsolFunction {
+      if self.parameter.useAndsolFunction {
         let massFlowLoad = hx.massFlow.share(of: solarField.massFlow.max)
-       // assert(massFlowLoad > 1) // check how big massflow load can be (5% more than design?)
+        // assert(massFlowLoad > 1) // check how big massflow load can be (5% more than design?)
 
         // power function based on MAN-Turbo and OHL data with  pinch point tool
         var temperatureFactor = ((0.0007592419869
-          * hx.temperature.inlet.kelvin + 0.4943825893223)
+            * hx.temperature.inlet.kelvin + 0.4943825893223)
           * massFlowLoad.ratio ** (0.0001400823882
             * hx.temperature.inlet.kelvin - 0.0110227028559)) - 0.000151639
 
@@ -136,8 +118,7 @@ public enum HeatExchanger: Component {
         hx.temperature.outlet = Temperature(limit(temperatureFactor) *
           parameter.temperature.htf.outlet.max.kelvin)
       } else {
-        switch (parameter.ToutMassFlow, parameter.ToutTin, parameter.ToutTinMassFlow) {
-
+        switch (self.parameter.ToutMassFlow, self.parameter.ToutTin, self.parameter.ToutTinMassFlow) {
         case let (ToutMassFlow?, ToutTin?, .none):
 
           let massFlowLoad = hx.massFlow.share(of: solarField.massFlow.max)
@@ -170,8 +151,8 @@ public enum HeatExchanger: Component {
               * (hx.temperature.inlet.kelvin / temp.htf.inlet.max.kelvin)
               * 666 + ToutTinMassFlow[1])
             * massFlowLoad.ratio ** (ToutTinMassFlow[2]
-            * (hx.temperature.inlet.kelvin / temp.htf.inlet.max.kelvin)
-            * 666 + ToutTinMassFlow[3])) + ToutTinMassFlow[4]
+              * (hx.temperature.inlet.kelvin / temp.htf.inlet.max.kelvin)
+              * 666 + ToutTinMassFlow[3])) + ToutTinMassFlow[4]
 
           hx.temperature.outlet = temp.htf.outlet.max
             .adjusted(with: limit(temperatureFactor))
@@ -193,7 +174,7 @@ public enum HeatExchanger: Component {
         }
       }
     }
-    
+
     if case .discharge = storage.operationMode,
       hx.temperature.outlet.kelvin < (261.toKelvin) {
       // added to simulate a bypass on the PB-HX if the expected outlet temp is so low that the salt to TES could freeze
@@ -213,7 +194,8 @@ public enum HeatExchanger: Component {
           temperatureFactor *= ToutTin[hx.temperature.inlet]
 
           hx.temperature.outlet = parameter.temperature.htf.outlet.max.adjusted(
-            with: temperatureFactor)
+            with: temperatureFactor
+          )
         } else if let ToutMassFlow = parameter.ToutMassFlow,
           parameter.useAndsolFunction == false {
           // if Tout is dependant on massflow, recalculate Tout
@@ -229,17 +211,19 @@ public enum HeatExchanger: Component {
             * 666 - 0.0110227028559)) - 0.000151639
 
           hx.temperature.outlet = parameter.temperature.htf.outlet.max.adjusted(
-            with: limit(temperatureFactor))
+            with: limit(temperatureFactor)
+          )
         } else if let ToutTinMassFlow = parameter.ToutTinMassFlow {
           // power function based on MAN-Turbo and OHL data with pinch point tool
           let temperatureFactor = ((ToutTinMassFlow[0]
-            * hx.temperature.inlet.kelvin + ToutTinMassFlow[1])
+              * hx.temperature.inlet.kelvin + ToutTinMassFlow[1])
             * massFlowLoad.ratio ** (ToutTinMassFlow[2]
               * hx.temperature.inlet.kelvin + ToutTinMassFlow[3]))
             + ToutTinMassFlow[4]
 
           hx.temperature.outlet = Temperature(
-            parameter.temperature.htf.outlet.max.kelvin * limit(temperatureFactor))
+            parameter.temperature.htf.outlet.max.kelvin * limit(temperatureFactor)
+          )
         }
 
         hx.heatOut = 1.51129 * (hx.temperature.outlet.celsius)
@@ -256,100 +240,92 @@ public enum HeatExchanger: Component {
       }
 
       hx.temperature.outlet = Temperature((-0.000000000061133
-        * hx.heatToTES ** 4 + 0.00000019425
-        * hx.heatToTES ** 3 - 0.00032293
-        * hx.heatToTES ** 2 + 0.65556
-        * hx.heatToTES + 0.58315).toKelvin)
+          * hx.heatToTES ** 4 + 0.00000019425
+          * hx.heatToTES ** 3 - 0.00032293
+          * hx.heatToTES ** 2 + 0.65556
+          * hx.heatToTES + 0.58315).toKelvin)
     }
-    
-    return hx.heatTransfered(with: htf) / 1_000 * parameter.efficiency
+
+    return hx.heatTransfered(with: htf) / 1_000 * self.parameter.efficiency
   }
-  
+
   static func update(powerBlock: inout PowerBlock.PerformanceData,
                      heatExchanger: HeatExchanger.PerformanceData) {
-
-    if parameter.Tout_f_Mfl == false,
-      parameter.Tout_f_Tin == false,
-      parameter.useAndsolFunction == false,
-      parameter.Tout_exp_Tin_Mfl == false { // old method
+    if self.parameter.Tout_f_Mfl == false,
+      self.parameter.Tout_f_Tin == false,
+      self.parameter.useAndsolFunction == false,
+      self.parameter.Tout_exp_Tin_Mfl == false { // old method
       powerBlock.temperature.outlet = Temperature(
-        parameter.temperature.htf.outlet.min.kelvin
-        + (parameter.temperature.htf.outlet.max
-          - parameter.temperature.htf.outlet.min).kelvin
-        * (powerBlock.temperature.inlet
-          - parameter.temperature.htf.inlet.min).kelvin
-        / (parameter.temperature.htf.inlet.max
-          - parameter.temperature.htf.inlet.min).kelvin)
+        self.parameter.temperature.htf.outlet.min.kelvin
+          + (self.parameter.temperature.htf.outlet.max
+            - self.parameter.temperature.htf.outlet.min).kelvin
+          * (powerBlock.temperature.inlet
+            - self.parameter.temperature.htf.inlet.min).kelvin
+          / (self.parameter.temperature.htf.inlet.max
+            - self.parameter.temperature.htf.inlet.min).kelvin
+      )
       // CHECK: the value of HTFoutTmax should be dependent on storage charging but only on PB HX!
-      
-    } else if parameter.Tout_exp_Tin_Mfl,
-      parameter.Tout_f_Tin == false,
+    } else if self.parameter.Tout_exp_Tin_Mfl,
+      self.parameter.Tout_f_Tin == false,
       let ToutMassFlow = parameter.ToutMassFlow {
-      
       powerBlock.temperature.outlet = Temperature(
-        parameter.temperature.htf.outlet.min.kelvin
-        + (parameter.temperature.htf.outlet.max
-          - parameter.temperature.htf.outlet.min).kelvin
-        * (powerBlock.temperature.inlet
-          - parameter.temperature.htf.inlet.min).kelvin
-        / (parameter.temperature.htf.inlet.max
-          - parameter.temperature.htf.inlet.min).kelvin)
-      
+        self.parameter.temperature.htf.outlet.min.kelvin
+          + (self.parameter.temperature.htf.outlet.max
+            - self.parameter.temperature.htf.outlet.min).kelvin
+          * (powerBlock.temperature.inlet
+            - self.parameter.temperature.htf.inlet.min).kelvin
+          / (self.parameter.temperature.htf.inlet.max
+            - self.parameter.temperature.htf.inlet.min).kelvin
+      )
+
       let massFlowLoad = powerBlock.massFlow.share(of: solarField.massFlow.max)
-      
+
       let temperaturFactor = Ratio(ToutMassFlow[massFlowLoad.ratio])
-      
+
       powerBlock.temperature.outlet.adjust(with: temperaturFactor)
-      
-    } else if parameter.Tout_f_Mfl && parameter.Tout_f_Tin,
+    } else if self.parameter.Tout_f_Mfl && self.parameter.Tout_f_Tin,
       let ToutMassFlow = parameter.ToutMassFlow,
       let ToutTin = parameter.ToutTin {
-      
       let massFlowLoad = powerBlock.massFlow.share(of: solarField.massFlow.max)
-      
+
       var temperaturFactor = ToutMassFlow[massFlowLoad.ratio]
       temperaturFactor *= ToutTin[heatExchanger.temperature.inlet]
-      
+
       powerBlock.temperature.outlet =
         parameter.temperature.htf.outlet.max.adjusted(with: temperaturFactor)
-      
-    } else if parameter.useAndsolFunction {
-      
+    } else if self.parameter.useAndsolFunction {
       let massFlowLoad = powerBlock.massFlow.share(of: solarField.massFlow.max)
-      
+
       let temperaturFactor = ((0.0007592419869
-        * (powerBlock.temperature.inlet.kelvin
-          / parameter.temperature.htf.inlet.max.kelvin)
-        * 666 + 0.4943825893223)
+          * (powerBlock.temperature.inlet.kelvin
+            / parameter.temperature.htf.inlet.max.kelvin)
+          * 666 + 0.4943825893223)
         * massFlowLoad.ratio ** (0.0001400823882
           * (powerBlock.temperature.inlet.kelvin
             / parameter.temperature.htf.inlet.max.kelvin)
           * 666 - 0.0110227028559)) - 0.000151639
       // temperature.inlet changed to (Fluid.parameter.temperature.inlet / parameter.temperature.htf.inlet.max) * 666 because function is based on 393°C temperature.inlet
-      
+
       powerBlock.temperature.outlet = parameter.temperature.htf.outlet.max
         .adjusted(with: limit(temperaturFactor))
-      
-    } else if parameter.Tout_exp_Tin_Mfl,
+    } else if self.parameter.Tout_exp_Tin_Mfl,
       let coefficients = parameter.ToutTinMassFlow {
-      
       let massFlowLoad = powerBlock.massFlow.share(of: solarField.massFlow.max)
-      
+
       let temperaturFactor = ((coefficients[0]
-        * (powerBlock.temperature.inlet.kelvin / parameter.temperature.htf.inlet.max.kelvin)
-        * 666 + coefficients[1]) * massFlowLoad.ratio
+          * (powerBlock.temperature.inlet.kelvin / parameter.temperature.htf.inlet.max.kelvin)
+          * 666 + coefficients[1]) * massFlowLoad.ratio
         ** (coefficients[2] * (powerBlock.temperature.inlet.kelvin
-          / parameter.temperature.htf.inlet.max.kelvin)
+            / parameter.temperature.htf.inlet.max.kelvin)
           * 666 + coefficients[3]))
         + coefficients[4]
       // temperature.inlet changed to (Fluid.parameter.temperature.inlet / parameter.temperature.htf.inlet.max) * 666 because function is based on 393°C temperature.inlet
-      
+
       powerBlock.temperature.outlet = parameter.temperature.htf.outlet.max
         .adjusted(with: limit(temperaturFactor))
     } else if let ToutTin = parameter.ToutTin {
-      
       let temperaturFactor = Ratio(ToutTin[heatExchanger.temperature.inlet])
-      powerBlock.temperature.outlet = Temperature( temperaturFactor.ratio *
+      powerBlock.temperature.outlet = Temperature(temperaturFactor.ratio *
         parameter.temperature.htf.outlet.max.kelvin)
     }
   }

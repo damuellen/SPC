@@ -14,11 +14,11 @@ extension WasteHeatRecovery {
   public struct Parameter: ComponentParameter, Codable {
     let name: String
     let operation: Operation
-    
+
     public enum Operation: String, Codable {
       case pure, integrated
     }
-    
+
     let efficiencyNominal: Double
     let efficiencyPure: Double
     var ratioHTF: Double
@@ -36,25 +36,25 @@ extension WasteHeatRecovery.Parameter: CustomStringConvertible {
     d += "Ratio Fossil/Solar Thermal Contribution :" >< "\(ratioHTF)"
     d += "Efficiency(Solar-Load) = c0+c1*load+c2*load^2+c3*load^3+c4*load^4)\n"
     for (i, c) in efficiencySolar.coefficients.enumerated() {
-      d += "c\(i):" >< String(format:"%.4E", c)
+      d += "c\(i):" >< String(format: "%.4E", c)
     }
     d += "Efficiency(GT-Load) = c0+c1*load+c2*load^2+c3*load^3+c4*load^4)\n"
     for (i, c) in efficiencyGasTurbine.coefficients.enumerated() {
-      d += "c\(i):" >< String(format:"%.4E", c)
+      d += "c\(i):" >< String(format: "%.4E", c)
     }
     return d
   }
 }
 
 extension WasteHeatRecovery.Parameter: TextConfigInitializable {
-  public init(file: TextConfigFile)throws {
-    let row: (Int)throws -> Double = { try file.parseDouble(row: $0) }
-    self.name = file.name
-    self.operation = .integrated
-    self.efficiencyNominal = try row(13)
-    self.efficiencyPure = try row(16)
-    self.ratioHTF = try row(19)
-    self.efficiencySolar = try [row(32), row(35), row(38), row(41), row(44)]
-    self.efficiencyGasTurbine = try [row(47), row(50), row(53), row(56), row(59)]
+  public init(file: TextConfigFile) throws {
+    let row: (Int) throws -> Double = { try file.parseDouble(row: $0) }
+    name = file.name
+    operation = .integrated
+    efficiencyNominal = try row(13)
+    efficiencyPure = try row(16)
+    ratioHTF = try row(19)
+    efficiencySolar = try [row(32), row(35), row(38), row(41), row(44)]
+    efficiencyGasTurbine = try [row(47), row(50), row(53), row(56), row(59)]
   }
 }

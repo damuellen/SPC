@@ -10,39 +10,49 @@
 
 public struct PowerRange {
   var range: ClosedRange<Double>
-  var min: Double { return range.lowerBound }
+  var min: Double { return self.range.lowerBound }
+  var nominal: Double = 0
   var max: Double {
-    get { return range.upperBound }
-    set { range = self.range.lowerBound...newValue }
+    get { return self.range.upperBound }
+    set { self.range = self.range.lowerBound ... newValue }
+  }
+
+  init(range: ClosedRange<Double>, nom: Double) {
+    self.range = range
+    self.nominal = nom
   }
 }
 
 extension PowerRange: Codable {
   enum CodingKeys: String, CodingKey {
     case min
+    case nom
     case max
   }
-  
+
   public init(from decoder: Decoder) throws {
     let values = try decoder.container(keyedBy: CodingKeys.self)
     let min = try values.decode(Double.self, forKey: .min)
+    let nom = try values.decode(Double.self, forKey: .nom)
     let max = try values.decode(Double.self, forKey: .max)
-    self.range = min...max
+    nominal = nom
+    range = min ... max
   }
-  
+
   public func encode(to encoder: Encoder) throws {
     var container = encoder.container(keyedBy: CodingKeys.self)
     try container.encode(min, forKey: .min)
+    try container.encode(nominal, forKey: .nom)
     try container.encode(max, forKey: .max)
   }
 }
 
 public struct TemperatureRange {
   var range: ClosedRange<Double>
-  var cold: Double { return range.lowerBound }
+  var cold: Double { return self.range.lowerBound }
   var hot: Double {
-    get { return range.upperBound }
-    set { range = self.range.lowerBound...newValue }
+    get { return self.range.upperBound }
+    set { self.range = self.range.lowerBound ... newValue }
   }
 }
 
@@ -51,14 +61,14 @@ extension TemperatureRange: Codable {
     case cold
     case hot
   }
-  
+
   public init(from decoder: Decoder) throws {
     let values = try decoder.container(keyedBy: CodingKeys.self)
     let cold = try values.decode(Double.self, forKey: .cold)
     let hot = try values.decode(Double.self, forKey: .hot)
-    self.range = cold...hot
+    range = cold ... hot
   }
-  
+
   public func encode(to encoder: Encoder) throws {
     var container = encoder.container(keyedBy: CodingKeys.self)
     try container.encode(cold, forKey: .cold)

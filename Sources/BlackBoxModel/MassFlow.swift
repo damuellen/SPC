@@ -12,74 +12,72 @@ import Foundation
 
 /// A mass flow rate in kilogram per second.
 public struct MassFlow: CustomStringConvertible {
-  
   var rate: Double
-  
+
   var isNearZero: Bool { return self < 1e-4 }
-  
+
   public var description: String {
-    return String(format:"%.2f", rate)
+    return String(format: "%.2f", self.rate)
   }
-  
+
   public init() {
     self.rate = 0
   }
-  
+
   public init(_ rate: Double) {
-    assert(rate >= 0)
-    assert(rate < 5_000)
+    assert(rate > 3_000 || rate < 3_000)
     self.rate = rate
   }
-  
+
   func share(of max: MassFlow) -> Ratio {
     let rate = abs(self.rate)
     return (rate - max.rate) <= 0.0001 ? Ratio(rate / max.rate) : Ratio(1)
   }
 
   mutating func adjust(with ratio: Double) {
-    rate *= ratio
+    self.rate *= ratio
   }
 
   mutating func adjust(with ratio: Ratio) {
-    rate *= ratio.ratio
+    self.rate *= ratio.ratio
   }
 
   func adjusted(with ratio: Double) -> MassFlow {
-    return MassFlow(rate * ratio)
+    return MassFlow(self.rate * ratio)
   }
 
   func adjusted(with ratio: Ratio) -> MassFlow {
-    return MassFlow(rate * ratio.ratio)
+    return MassFlow(self.rate * ratio.ratio)
   }
   /* not used
-  func raised(by rate: Double) -> MassFlow {
-    return MassFlow(rate + rate)
-  }
-  
-  func lowered(by rate: Double) -> MassFlow {
-    return MassFlow(rate - rate)
-  }
-  
-  func isHigher(than rate: Double) -> Bool {
-    return self.rate > rate
-  }
-  
-  func isLower(than rate: Double) -> Bool {
-    return self.rate < rate
-  }
-  */
+   func raised(by rate: Double) -> MassFlow {
+   return MassFlow(rate + rate)
+   }
+
+   func lowered(by rate: Double) -> MassFlow {
+   return MassFlow(rate - rate)
+   }
+
+   func isHigher(than rate: Double) -> Bool {
+   return self.rate > rate
+   }
+
+   func isLower(than rate: Double) -> Bool {
+   return self.rate < rate
+   }
+   */
   static func += (lhs: inout MassFlow, rhs: MassFlow) {
     lhs = MassFlow(lhs.rate + rhs.rate)
   }
-  
+
   static func -= (lhs: inout MassFlow, rhs: MassFlow) {
     lhs = MassFlow(lhs.rate - rhs.rate)
   }
-  
+
   static func + (lhs: MassFlow, rhs: MassFlow) -> MassFlow {
     return MassFlow(lhs.rate + rhs.rate)
   }
-  
+
   static func - (lhs: MassFlow, rhs: MassFlow) -> MassFlow {
     return MassFlow(lhs.rate - rhs.rate)
   }
@@ -88,12 +86,12 @@ public struct MassFlow: CustomStringConvertible {
 extension MassFlow: Codable {
   public init(from decoder: Decoder) throws {
     let container = try decoder.singleValueContainer()
-    self.rate = try container.decode(Double.self)
+    rate = try container.decode(Double.self)
   }
-  
+
   public func encode(to encoder: Encoder) throws {
     var container = encoder.singleValueContainer()
-    try container.encode(self.rate)
+    try container.encode(rate)
   }
 }
 
@@ -107,7 +105,7 @@ extension MassFlow: Comparable {
   public static func < (lhs: MassFlow, rhs: MassFlow) -> Bool {
     return lhs.rate < rhs.rate
   }
-  
+
   public static func == (lhs: MassFlow, rhs: MassFlow) -> Bool {
     return fdim(lhs.rate, rhs.rate) < 1e-4
   }

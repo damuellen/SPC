@@ -8,8 +8,8 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
-import Foundation
 import Config
+import Foundation
 
 public struct FuelParameter: Codable {
   let name: String
@@ -18,9 +18,8 @@ public struct FuelParameter: Codable {
 }
 
 extension FuelParameter {
-  
-  public init(file: TextConfigFile)throws {
-    let row: (Int)throws -> Double = { try file.parseDouble(row: $0) }
+  public init(file: TextConfigFile) throws {
+    let row: (Int) throws -> Double = { try file.parseDouble(row: $0) }
     self.name = file.name
     self.measurementUnit = file.values[9]
     self.LHV = try row(13)

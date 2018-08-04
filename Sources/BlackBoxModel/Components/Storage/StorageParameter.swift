@@ -8,32 +8,34 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
-import Foundation
 import Config
+import Foundation
 
 extension Storage {
   public enum Definition: String {
     case hours = "hrs", cap, ton
   }
-  
+
   public struct Parameter: ComponentParameter {
     let name: String
     let chargeTo, dischargeToTurbine, dischargeToHeater,
-    TturbIterate, heatStoredrel: Double
-    var tempExCst, tempExC0to1, tempInCst, tempInC0to1: [Double]
-    var heatlossCst, heatlossC0to1: [Double]
+      stepSizeIteration, heatStoredrel: Double
+    var temperatureDischarge, temperatureDischarge2, temperatureCharge, temperatureCharge2: Coefficients
+    var heatlossCst, heatlossC0to1: Coefficients
     var pumpEfficiency, pressureLoss: Double
     var massFlow: MassFlow
-    let startTemperature: (cold: Temperature, hot: Temperature) //TurbTL(0) TurbTL(1)
-    let startLoad: (cold: Double, hot: Double) //TurbTL(2) TurbTL(3)
+    let startTemperature: (cold: Temperature, hot: Temperature) // TurbTL(0) TurbTL(1)
+    let startLoad: (cold: Double, hot: Double) // TurbTL(2) TurbTL(3)
+
     public enum Strategy: String {
       case always, demand, shifter
-      
+
       init?(string: String) {
         let string = string.trimmingCharacters(in: .whitespaces).lowercased()
         self.init(rawValue: string)
       }
     }
+
     let strategy: Strategy
     let PrefChargeto: Double
     let startexcep, endexcep: Int
@@ -47,9 +49,9 @@ extension Storage {
     let heatExchangerRestrictedMin = false
     let auxConsCurve = false
     let heatExchangerRestrictedMax = false
-    
+
     var definedBy: Definition = .hours
-    
+
     let deltaTemperature: (charging: Temperature, discharging: Temperature)
     let designTemperature: (hot: Temperature, cold: Temperature)
     let heatLoss: (hot: Double, cold: Double)
@@ -66,9 +68,9 @@ extension Storage {
     let DesAuxEX: Double // c0 coeff. for aux. consumption
     // AuxCons1     : Double       //Dummy
     // AuxCons2     : Double       //Dummy
-    
+
     // variables added to calculate TES aux. consumption :
-    
+
     var heatProductionLoad: Double // added for shifter
     let heatProductionLoadWinter: Double // added for shifter
     let heatProductionLoadSummer: Double // added for shifter
@@ -76,7 +78,6 @@ extension Storage {
     let dischrgSummer: Int
     let badDNIwinter: Double
     let badDNIsummer: Double
-    
   }
 }
 
@@ -92,9 +93,9 @@ extension Storage.Parameter: CustomStringConvertible {
     d += "Design Temperature of Hot Storage Tank [°C]:"
       >< "\(designTemperature.hot)"
     d += "DeltaT in Heat Exchanger during discharging [°C]:"
-      >< "\(tempExC0to1[0])"
+      >< "\(temperatureDischarge2[0])"
     d += "DeltaT in Heat Exchanger during charging [°C]:"
-      >< "\(tempInC0to1[0])"
+      >< "\(temperatureCharge2[0])"
     d += "Heat Loss of Cold Storage Tank [kW]:"
       >< "\(heatlossC0to1[0])"
     d += "Heat Loss of Hot Storage Tank [kW]:"
@@ -110,9 +111,9 @@ extension Storage.Parameter: CustomStringConvertible {
     d += "Load of Hot Tank at Program Start [%]:"
       >< "\(startLoad.hot * 100)"
     d += "Charging of Storage during Night by HTF-heater (0=YES; -1=NO): \(FC)"
-    d += "Stop charging strategy at day:"    >< "\(FCstopD)"
-    d += "Stop charging strategy at month:"  >< "\(FCstopM)"
-    d += "Start charging strategy at day:"   >< "\(FCstartD)"
+    d += "Stop charging strategy at day:" >< "\(FCstopD)"
+    d += "Stop charging strategy at month:" >< "\(FCstopM)"
+    d += "Start charging strategy at day:" >< "\(FCstartD)"
     d += "Start charging strategy at month:" >< "\(FCstartM)"
     d += "Charge Storage up to relative Load before Start-up of Turbine:"
       >< "\(PrefChargeto)"
@@ -129,66 +130,66 @@ extension Storage.Parameter: CustomStringConvertible {
     return d
   }
 }
-/*
-extension Storage.Parameter: TextConfigInitializable {
-  public init(file: TextConfigFile)throws {
-    let row: (Int)throws -> Double = { try file.double(row: $0) }
-    let int: (Int)throws -> Int = { try file.integer(row: $0) }
-    self.name = file.name
-    self.chargeTo = try row(10)
-    self.dischargeToTurbine = try row(13)
-    self.dischargeToHeater = try row(16)
-    self.TturbIterate = try row(19)
-    self.heatStoredrel = try row(22)
-    self.tempExCst = [try row(47), try row(50), try row(53), try row(56)]
-    self.tempExC0to1 = [try row(62), try row(65), try row(68), try row(71)]
-    self.tempInCst = [try row(81), try row(84), try row(87), try row(90)]
-    self.tempInC0to1 = [try row(96), try row(99), try row(102), try row(105)]
-    self.heatlossCst = [try row(115), try row(118), try row(121), try row(124)]
-    self.heatlossC0to1 = [try row(130), try row(133), try row(136), try row(139)]
-    self.pumpEfficiency = try row(146)
-    self.pressureLoss = try row(149)
-    self.massFlow = try row(152)
-    self.startTemperature = (cold: try row(162), hot: try row(165))
-    self.startLoad = (cold: try row(168), hot: try row(171))
-    self.heatExchangerEfficiency = try row(172)
-    if let value = file[row: 173], let strategy = Strategy(rawValue: value) {
-      self.strategy = strategy
-    } else {
-      self.strategy = .demand
-    }
-    self.PrefChargeto = try row(174)
-    self.startexcep = Int(file[row: 175] ?? "0") ?? 0
-    self.endexcep = Int(file[row: 176] ?? "0") ?? 0
-    if let value = file[row: 173], let htf = StorageFluid(rawValue: value) {
-      self.HTF = htf
-    } else {
-      self.HTF = .solarSalt
-    }
-    self.FP = try row(178)
-    self.FC = try row(179)
-    self.FCstopD = try int(180)
-    self.FCstopM = try int(181)
-    self.FCstartD = try int(182)
-    self.FCstartM = try int(183)
-  }
-}
 
- 
-  Double       // stepwidth of Qdemand to iterate MinTurbTemp
+/*
+ extension Storage.Parameter: TextConfigInitializable {
+ public init(file: TextConfigFile)throws {
+ let row: (Int)throws -> Double = { try file.double(row: $0) }
+ let int: (Int)throws -> Int = { try file.integer(row: $0) }
+ self.name = file.name
+ self.chargeTo = try row(10)
+ self.dischargeToTurbine = try row(13)
+ self.dischargeToHeater = try row(16)
+ self.TturbIterate = try row(19)
+ self.heatStoredrel = try row(22)
+ self.tempExCst = [try row(47), try row(50), try row(53), try row(56)]
+ self.tempExC0to1 = [try row(62), try row(65), try row(68), try row(71)]
+ self.tempInCst = [try row(81), try row(84), try row(87), try row(90)]
+ self.tempInC0to1 = [try row(96), try row(99), try row(102), try row(105)]
+ self.heatlossCst = [try row(115), try row(118), try row(121), try row(124)]
+ self.heatlossC0to1 = [try row(130), try row(133), try row(136), try row(139)]
+ self.pumpEfficiency = try row(146)
+ self.pressureLoss = try row(149)
+ self.massFlow = try row(152)
+ self.startTemperature = (cold: try row(162), hot: try row(165))
+ self.startLoad = (cold: try row(168), hot: try row(171))
+ self.heatExchangerEfficiency = try row(172)
+ if let value = file[row: 173], let strategy = Strategy(rawValue: value) {
+ self.strategy = strategy
+ } else {
+ self.strategy = .demand
+ }
+ self.PrefChargeto = try row(174)
+ self.startexcep = Int(file[row: 175] ?? "0") ?? 0
+ self.endexcep = Int(file[row: 176] ?? "0") ?? 0
+ if let value = file[row: 173], let htf = StorageFluid(rawValue: value) {
+ self.HTF = htf
+ } else {
+ self.HTF = .solarSalt
+ }
+ self.FP = try row(178)
+ self.FC = try row(179)
+ self.FCstopD = try int(180)
+ self.FCstopM = try int(181)
+ self.FCstartD = try int(182)
+ self.FCstartM = try int(183)
+ }
+ }
+
+ Double       // stepwidth of Qdemand to iterate MinTurbTemp
  pumpEfficiency      : Double       // efficiency of pump
  pressureLoss  : Double       // pressure loss during discharge at design pnt
  massFlow        : Double  // massflow at DP design point
- 
+
  heatLossConstants0(3) : Double       // heatLosses, cubic            smaller than 0
  heatLossC0to1(3): Double       // polynomfit       Estorel is greater than 0
- 
+
  tempInCst0(3)   : Double       //outlet temperature of HTF    smaller than 0
  tempInC0to1(3)  : Double       // during charging  Estorel is greater than 0
- 
+
  TexCst0(3)   : Double       // outlet temperature of HTF    smaller than 0
  TexC0to1(3)  : Double       // during discharging, Estorel greater than 0
- 
+
  startLoad.hot    : Double     // fit Temp(Load) of turbine inøC
  Strategy     : String     // Operation Strategy
  PrefChargeto : Double     // Preference to Charging of Storage up to load
@@ -210,7 +211,7 @@ extension Storage.Parameter: TextConfigInitializable {
  heatExchangerRestrictedMax   : Bool     // check box to restrict the max. capacity of HX
  HXmin        : Double       // HX minimum capacity in %
  HXresMin  : Int     // check box to restrict HX//s minimum load
- 
+
  HTa_time     : Double  // time for heat tracing A begin
  HTa_pow      : Double  // power for heat tracing A
  HTb_time     : Double  // time for heat tracing B begin
@@ -221,24 +222,23 @@ extension Storage.Parameter: TextConfigInitializable {
  HTd_pow      : Double  // power for heat tracing D
  HTe_time     : Double  // time for heat tracing E begin
  HTe_pow      : Double  // power for heat tracing E
- 
+
  heatdiff       : Double       //(Qsol-Qdemand)/Qdemand in % to discharge STO
- 
+
  isVariable       : Double      //check box to discharge the storage at variable load or (at usual by 97%)constant load
  MinDis       : Double       //minimum load during storage discharge in %
  dSRise       : Double       //number of hours before (-) or after (+) sunrise for variable load calculation
  fixedLoadDischarge       : Double       //dicharge with fixed load, as usual. Now given as user input
  DischrgParFac: Double       //factor to multiply parasitics during discharge to consider HTF pumps
- 
+
  definedBy           : String * 3      //how the TES size is defined (hours, MWh, Ton)
- 
+
  AuxConsCurve  : Integer       //select if auxiliary consumption is to be calculated as quadratic polynom
  DesAuxIN      : Double       //nominal auxiliary electrical consumption
  DesAuxEX     : Double       //c0 coeff. for aux. consumption
  // AuxCons1     : Double       //Dummy
  // AuxCons2     : Double       //Dummy
- 
- 
+
  AuxModel: Bool
  Expn: Single
  level          : Double
@@ -249,7 +249,7 @@ extension Storage.Parameter: TextConfigInitializable {
  DesINmassSalt     : Double
  QexDes         : Double
  DesEXmassSalt     : Double
- 
+
  QprodLoad: Double// 111130: added for shif ter
  QprodLoadWinter: Double// 111203: added for shif ter
  QprodLoadSummer: Double// 111203: added for shif ter
@@ -257,10 +257,10 @@ extension Storage.Parameter: TextConfigInitializable {
  dischrgSummer: Double
  badDNIwinter: Double
  badDNIsummer: Double
- 
+
  TypeDir        : String   // 120130: added
- 
+
  OU1_PeakHours : Double  // 120208: added
  }
- 
+
  */

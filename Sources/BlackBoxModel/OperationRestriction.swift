@@ -9,6 +9,11 @@
 //
 
 public struct OperationRestriction {
-  
-}
+  enum FuelStrategy {
+    case predefined, strategy
 
+    var isPredefined: Bool {
+      return self ~= .predefined
+    }
+  }
+}

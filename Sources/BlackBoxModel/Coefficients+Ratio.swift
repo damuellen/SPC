@@ -12,46 +12,46 @@ import Foundation
 
 public struct Coefficients: Codable {
   let coefficients: [Double]
-  
+
   init(values: Double...) {
     self.coefficients = values
   }
-  
+
   init(_ array: [Double]) {
     self.coefficients = array
   }
-  
+
   var indices: CountableRange<Int> {
-    return coefficients.indices
+    return self.coefficients.indices
   }
-  
+
   var isEmpty: Bool {
-    return coefficients.isEmpty
+    return self.coefficients.isEmpty
   }
-  
+
   @inline(__always) func apply(_ value: Double) -> Double {
     // Use Horner’s Method for solving
     var result = 0.0
-    for coefficient in coefficients.reversed() {
+    for coefficient in self.coefficients.reversed() {
       result = fma(result, value, coefficient) // result * value + coefficient
     }
     return result
   }
-  
+
   subscript(temperature: Temperature) -> Double {
-    return apply(temperature.kelvin)
+    return self.apply(temperature.kelvin)
   }
-  
+
   subscript(value: Double) -> Double {
-    return apply(value)
+    return self.apply(value)
   }
-  
+
   subscript(ratio: Ratio) -> Double {
-    return apply(ratio.ratio)
+    return self.apply(ratio.ratio)
   }
-  
+
   subscript(index: Int) -> Double {
-    return coefficients[index]
+    return self.coefficients[index]
   }
 }
 
@@ -62,21 +62,20 @@ extension Coefficients: ExpressibleByArrayLiteral {
 }
 
 public struct Ratio: CustomStringConvertible, Codable {
-  
   let ratio: Double
-  
-  var isZero: Bool { return ratio == 0 }
-  
-  var percentage: Float { return Float(ratio) * 100.0 }
-  
-  public var description: String { return "\(percentage)%" }
-  
+
+  var isZero: Bool { return self.ratio == 0 }
+
+  var percentage: Float { return Float(self.ratio) * 100.0 }
+
+  public var description: String { return "\(self.percentage)%" }
+
   public init(percent: Double) {
     self.ratio = percent / 100
   }
-  
+
   public init(_ value: Double) {
-    assert(0...1 ~= Int(value), "Ratio out of range.")
+    assert(0 ... 1 ~= Int(value), "Ratio out of range.")
     self.ratio = value > 1 ? 1 : value
   }
 }
@@ -88,17 +87,16 @@ extension Ratio: ExpressibleByFloatLiteral {
 }
 
 extension Ratio: Equatable {
-  public static func ==(lhs: Ratio, rhs: Ratio) -> Bool {
+  public static func == (lhs: Ratio, rhs: Ratio) -> Bool {
     return lhs.ratio == rhs.ratio
   }
 }
 
 extension Ratio: Comparable {
-  public static func <(lhs: Ratio, rhs: Ratio) -> Bool {
+  public static func < (lhs: Ratio, rhs: Ratio) -> Bool {
     return lhs.ratio < rhs.ratio
   }
 }
 
 public struct Demand {
-  
 }

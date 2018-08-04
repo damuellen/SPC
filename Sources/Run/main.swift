@@ -8,15 +8,14 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
-import Foundation
-import Config
-import Meteo
 import BlackBoxModel
-
+import Config
+import Foundation
+import Meteo
 
 let start = CFAbsoluteTimeGetCurrent()
 
-let path = CommandLine.arguments.count > 1
+let configPath = CommandLine.arguments.count > 1
   ? CommandLine.arguments[1]
   : FileManager.default.currentDirectoryPath
 
@@ -24,17 +23,13 @@ let meteoFilePath = CommandLine.arguments.count > 2
   ? CommandLine.arguments[2]
   : FileManager.default.currentDirectoryPath
 
-//PerformanceCalculator.loadConfigurations(atPath: path, format: .text)
-//PerformanceCalculator.saveConfigurations(toPath: path)
+// PerformanceCalculator.loadConfigurations(atPath: path, format: .text)
+// PerformanceCalculator.saveConfigurations(toPath: path)
 PerformanceCalculator.meteoFilePath = meteoFilePath
-PerformanceCalculator.interval = .every5minutes
-let n = Int.random(in: 10000..<100000)
-PerformanceCalculator.runModel(109)
+PerformanceCalculator.interval = .every15minutes
 
+PerformanceCalculator.runModel(129, output: .brief)
 
 let end = CFAbsoluteTimeGetCurrent()
 
-print("Duration:", String(format:"%.2f sec", end - start))
-
-//foo()
-
+print("Duration:", String(format: "%.2f sec", end - start))

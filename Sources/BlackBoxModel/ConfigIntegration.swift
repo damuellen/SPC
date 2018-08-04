@@ -8,26 +8,23 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
-import Foundation
 import Config
+import Foundation
 
 extension JsonConfigFileHandler {
-  
-  static func loadConfigurations(atPath path: String)throws {
-    
+  static func loadConfigurations(atPath path: String) throws {
     let configFileHandler = JsonConfigFileHandler()
     configFileHandler.findFilesInDirectory(atPath: path)
-    
+
     let decoder = JSONDecoder()
     decoder.dateDecodingStrategy = .iso8601
-    
-    for pathExtensions in FileName.all {
-      
+
+    for pathExtensions in FileName.allCases {
       guard let url = configFileHandler.searchConfig(with: pathExtensions),
         let data = JsonConfigFileHandler.readConfig(url: url)
-        else {
-          Log.errorMessage("Config file \(pathExtensions.rawValue) not found.")
-          continue
+      else {
+        Log.errorMessage("Config file \(pathExtensions.rawValue) not found.")
+        continue
       }
 
       switch pathExtensions {
@@ -38,12 +35,14 @@ extension JsonConfigFileHandler {
         Simulation.tariff = try decoder.decode(Tariff.self, from: data)
       case .SIM:
         Simulation.parameter = try decoder.decode(
-          Simulation.Parameter.self, from: data)
+          Simulation.Parameter.self, from: data
+        )
       case .INI:
         Simulation.initialValues = try decoder.decode(
-          InitValues.self, from: data)
+          InitValues.self, from: data
+        )
       case .TIM: break
-    //    Simulation.time = try decoder.decode(Time.self, from: data)
+      //    Simulation.time = try decoder.decode(Time.self, from: data)
       case .DES: break
       case .AVL:
         Plant.availability = try decoder.decode(Availability.self, from: data)
@@ -55,7 +54,7 @@ extension JsonConfigFileHandler {
       case .COL:
         Collector.update(parameter:
           try decoder.decode(Collector.Parameter.self, from: data))
-       case .STO: break
+      case .STO: break
       case .HR:
         Heater.update(parameter:
           try decoder.decode(Heater.Parameter.self, from: data))
@@ -86,20 +85,18 @@ extension JsonConfigFileHandler {
       }
     }
   }
-  
-  static func saveConfigurations(toPath path: String) throws {
-    
-    let directoryURL = URL(fileURLWithPath: path, isDirectory: true)
-   let encoder = JSONEncoder()    
-  
-   encoder.outputFormatting = .prettyPrinted
-   encoder.dateEncodingStrategy = .iso8601
 
-    for name in FileName.all {
-      
+  static func saveConfigurations(toPath path: String) throws {
+    let directoryURL = URL(fileURLWithPath: path, isDirectory: true)
+    let encoder = JSONEncoder()
+
+    encoder.outputFormatting = .prettyPrinted
+    encoder.dateEncodingStrategy = .iso8601
+
+    for name in FileName.allCases {
       let url = URL(fileURLWithPath: name.rawValue + ".json",
                     isDirectory: false, relativeTo: directoryURL)
-      
+
       switch name {
       case .FOS: break
       case .OPR: break
@@ -130,19 +127,16 @@ extension JsonConfigFileHandler {
 }
 
 extension TextConfigFileHandler {
-  
-  static func loadConfigurations(atPath path: String)throws {
-    
+  static func loadConfigurations(atPath path: String) throws {
     let configFileHandler = TextConfigFileHandler()
     configFileHandler.findFilesInDirectory(atPath: path)
-    
-    for pathExtensions in ValidPathExtensions.all {
-      
+
+    for pathExtensions in ValidPathExtensions.allCases {
       guard let url = configFileHandler.searchConfig(with: pathExtensions),
         let configFile = TextConfigFileHandler.readConfig(url: url)
-        else {
-          print("Missing config file with extension .\(pathExtensions.rawValue)")
-          continue
+      else {
+        print("Missing config file with extension .\(pathExtensions.rawValue)")
+        continue
       }
       switch pathExtensions {
       case .FOS: break

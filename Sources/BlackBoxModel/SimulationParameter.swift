@@ -8,23 +8,23 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
-import Foundation
 import Config
+import Foundation
 
 extension Simulation {
-  public struct Parameter: Codable  {
+  public struct Parameter: Codable {
     let dfreezeTemperaturePump, dfreezeTemperatureHeat,
-    minTemperatureRaiseStartUp, tempTolerance: Temperature
+      minTemperatureRaiseStartUp, tempTolerance: Temperature
     let minInsolationRaiseStartUp, heatTolerance, timeTolerance, massTolerance,
-    minInsolation, maxToPowerBlock, minInsolationForBoiler,
-    electricalTolerance, electricalParasitics, HLtempTolerance: Double
+      minInsolation, maxToPowerBlock, minInsolationForBoiler,
+      electricalTolerance, electricalParasitics, HLtempTolerance: Double
     let adjustmentFactor: AdjustmentFactor
   }
-  
+
   public struct AdjustmentFactor: Codable {
     let efficiencySolarField, efficiencyTurbine, efficiencyHeater,
-    efficiencyBoiler, heatLossHCE, heatLossHTF, heatLossH2O,
-    electricalParasitics: Double
+      efficiencyBoiler, heatLossHCE, heatLossHTF, heatLossH2O,
+      electricalParasitics: Double
   }
 }
 
@@ -76,9 +76,8 @@ extension Simulation.Parameter: CustomStringConvertible {
 }
 
 extension Simulation.Parameter: TextConfigInitializable {
-  
-  public init(file: TextConfigFile)throws {
-    let row: (Int)throws -> Double = { try file.parseDouble(row: $0) }
+  public init(file: TextConfigFile) throws {
+    let row: (Int) throws -> Double = { try file.parseDouble(row: $0) }
     let adjustmentFactor = try Simulation.AdjustmentFactor(
       efficiencySolarField: row(34),
       efficiencyTurbine: row(46),
@@ -87,7 +86,8 @@ extension Simulation.Parameter: TextConfigInitializable {
       heatLossHCE: row(61),
       heatLossHTF: row(40),
       heatLossH2O: row(43),
-      electricalParasitics: row(61) / 100)
+      electricalParasitics: row(61) / 100
+    )
 
     self = try Simulation.Parameter(
       dfreezeTemperaturePump: Temperature(celsius: row(7)),
@@ -104,7 +104,7 @@ extension Simulation.Parameter: TextConfigInitializable {
       electricalTolerance: row(58),
       electricalParasitics: row(19),
       HLtempTolerance: 0.1,
-      adjustmentFactor: adjustmentFactor)
+      adjustmentFactor: adjustmentFactor
+    )
   }
 }
-

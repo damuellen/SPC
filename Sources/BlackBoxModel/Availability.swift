@@ -8,20 +8,22 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
-import Foundation
 import Config
+import Foundation
 
 public class Availability: Codable {
+  static var fuel: Double = .greatestFiniteMagnitude
   let data: [Values]
   var index = 0
   private static let defaults: Availability.Values = .init(
     solarField: 0.99, breakHCE: 0.1, airHCE: 0.0, fluorHCE: 0.0,
-    reflMirror: 0.93, missingMirros: 0.0005, powerBlock: 1.0, storage: 0.98)
-  
+    reflMirror: 0.93, missingMirros: 0.0005, powerBlock: 1.0, storage: 0.98
+  )
+
   init(data: [Values]) {
     self.data = data
   }
-  
+
   public struct Values: Codable {
     var solarField,
       breakHCE,
@@ -32,29 +34,28 @@ public class Availability: Codable {
       powerBlock,
       storage: Ratio
   }
-  
+
   var value: Values {
-    return data[index]
+    return self.data[index]
   }
-  
+
   var values: Values {
-    return data[0]
+    return self.data[0]
   }
-  
+
   static func withDefaults() -> Availability {
     return Availability(data:
-      Array(repeatElement(Availability.defaults, count: 13))
-    )
+      Array(repeatElement(Availability.defaults, count: 13)))
   }
-  
+
   func set(calendar: TimeStep) {
-    index = calendar.month
+    self.index = calendar.month
   }
 }
 
 extension Availability {
-  public convenience init(file: TextConfigFile)throws {
-    let row: (Int)throws -> Double = { try file.parseDouble(row: $0) }
+  public convenience init(file: TextConfigFile) throws {
+    let row: (Int) throws -> Double = { try file.parseDouble(row: $0) }
     var data = [Values]()
     for n in 0 ..< 12 {
       let offset = 3 * n
@@ -66,8 +67,8 @@ extension Availability {
         reflMirror: Ratio(percent: row(198 + offset)),
         missingMirros: Ratio(percent: row(238 + offset)),
         powerBlock: Ratio(percent: row(278 + offset)),
-        storage: Ratio(percent: row(318 + offset)))
-      )
+        storage: Ratio(percent: row(318 + offset))
+      ))
     }
     self.init(data: data)
   }
