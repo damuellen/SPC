@@ -17,7 +17,7 @@ public struct MassFlow: CustomStringConvertible {
   var isNearZero: Bool { return self < 1e-4 }
 
   public var description: String {
-    return String(format: "%.2f", self.rate)
+    return String(format: "%.2f", rate)
   }
 
   public init() {
@@ -43,11 +43,11 @@ public struct MassFlow: CustomStringConvertible {
   }
 
   func adjusted(with ratio: Double) -> MassFlow {
-    return MassFlow(self.rate * ratio)
+    return MassFlow(rate * ratio)
   }
 
   func adjusted(with ratio: Ratio) -> MassFlow {
-    return MassFlow(self.rate * ratio.ratio)
+    return MassFlow(rate * ratio.ratio)
   }
   /* not used
    func raised(by rate: Double) -> MassFlow {

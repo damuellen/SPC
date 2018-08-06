@@ -16,14 +16,14 @@ public struct Temperature: CustomStringConvertible {
 
   static var absoluteZeroCelsius = -273.15
 
-  var celsius: Double { return self.kelvin + Temperature.absoluteZeroCelsius }
+  var celsius: Double { return kelvin + Temperature.absoluteZeroCelsius }
 
   public var description: String {
-    return String(format: "%.1f°C", self.celsius)
+    return String(format: "%.1f°C", celsius)
   }
 
   public init() {
-    self.kelvin = Temperature.absoluteZeroCelsius
+    kelvin = -Temperature.absoluteZeroCelsius
   }
 
   public init(_ kelvin: Double) {
@@ -50,7 +50,7 @@ public struct Temperature: CustomStringConvertible {
   }
 
   func adjusted(with ratio: Ratio) -> Temperature {
-    return Temperature(self.kelvin * ratio.ratio)
+    return Temperature(kelvin * ratio.ratio)
   }
 
   mutating func adjust(with factor: Double) {
@@ -58,7 +58,7 @@ public struct Temperature: CustomStringConvertible {
   }
 
   func adjusted(with factor: Double) -> Temperature {
-    return Temperature(self.kelvin * factor)
+    return Temperature(kelvin * factor)
   }
 
   func isHigher(than degree: Temperature) -> Bool {

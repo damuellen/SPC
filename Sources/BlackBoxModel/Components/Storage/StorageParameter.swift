@@ -20,7 +20,8 @@ extension Storage {
     let name: String
     let chargeTo, dischargeToTurbine, dischargeToHeater,
       stepSizeIteration, heatStoredrel: Double
-    var temperatureDischarge, temperatureDischarge2, temperatureCharge, temperatureCharge2: Coefficients
+    var temperatureDischarge, temperatureDischarge2: Coefficients
+    var temperatureCharge, temperatureCharge2: Coefficients
     var heatlossCst, heatlossC0to1: Coefficients
     var pumpEfficiency, pressureLoss: Double
     var massFlow: MassFlow

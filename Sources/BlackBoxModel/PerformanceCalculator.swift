@@ -32,13 +32,14 @@ public enum PerformanceCalculator {
   public static var interval: DateGenerator.Interval = .every5minutes
 
   static let year = 2019 // meteoDataSource.year ?? 2017
-  static let timeZone = meteoDataSource.timeZone ?? 0
+  static let timeZone = -(meteoDataSource.timeZone ?? 0)
 
   public static var meteoFilePath = fm.currentDirectoryPath
 
   static var meteoDataSource: MeteoDataSource = {
     do {
-      if let url = URL(string: meteoFilePath), url.isFileURL {
+      let url = URL(fileURLWithPath: meteoFilePath)
+      if !url.hasDirectoryPath {
         return try MeteoDataFileHandler(forReadingAtPath: meteoFilePath)
           .makeDataSource()
       } else if let path = try fm.subpathsOfDirectory(atPath: meteoFilePath)
@@ -62,7 +63,7 @@ public enum PerformanceCalculator {
 
     let 🌞 = SolarPosition(
       location: meteoDataSource.location.doubles,
-      year: year, timezone: -meteoDataSource.timeZone!, valuesPerHour: interval
+      year: year, timezone: timeZone, valuesPerHour: interval
     )
 
     let meteoDataGenerator = MeteoDataGenerator(
@@ -97,10 +98,12 @@ public enum PerformanceCalculator {
     results.dateFormatter = DateFormatter()
 
     defer {
-      try! Report.description.write(
-        toFile: "Report_Run\(count).txt",
-        atomically: true, encoding: .utf8
-      )
+      if case .full = output {
+        try! Report.description.write(
+          toFile: "Report_Run\(count).txt",
+          atomically: true, encoding: .utf8
+        )
+      }
     }
 
     Plant.updateComponentsParameter()
@@ -133,7 +136,7 @@ public enum PerformanceCalculator {
       // debug(date, meteo, status)
 
       let (electricEnergy, electricalParasitics, thermal, fuelConsumption) =
-        (Plant.electricEnergy, Plant.electricalParasitics, Plant.thermal, Plant.fuelFlow)
+        (Plant.electricEnergy, Plant.electricalParasitics, Plant.thermal, Plant.fuel)
 
       backgroundQueue.async {
         [date, meteo, status, electricEnergy, electricalParasitics, thermal, fuelConsumption] in
@@ -146,8 +149,7 @@ public enum PerformanceCalculator {
     }
 
     backgroundQueue.sync {
-      print("\nAnnually results:\n")
-      print(results.annuallyResults)
+      results.printResult()
     }
   }
 

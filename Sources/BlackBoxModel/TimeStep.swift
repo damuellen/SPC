@@ -19,7 +19,7 @@ struct TimeStep: Codable, CustomStringConvertible {
   var minute: Int = 0
 
   public var description: String {
-    return "\(self.hour - 1):\(self.minute - 1) \(self.day).\(self.month)."
+    return "\(hour - 1):\(minute - 1) \(day).\(month)."
   }
 
   static var current = TimeStep()

@@ -25,13 +25,3 @@ extension Component {
     self.parameter = parameter
   }
 }
-
-var solarField = SolarField.parameter
-var heater = Heater.parameter
-var heatExchanger = HeatExchanger.parameter
-var boiler = Boiler.parameter
-var gasTurbine = GasTurbine.parameter
-var steamTurbine = SteamTurbine.parameter
-var powerBlock = PowerBlock.parameter
-var storage = Storage.parameter
-var collector = Collector.parameter

@@ -57,9 +57,7 @@ public struct MeteoData: CustomStringConvertible {
   }
 
   public mutating func noInsolation() {
-    self.dni = 0
-    self.ghi = 0
-    self.dhi = 0
+    dni = 0; ghi = 0; dhi = 0
   }
 
   /// Interpolation function for meteo data values
@@ -132,11 +130,11 @@ public struct MeteoData: CustomStringConvertible {
   }
 
   public var description: String {
-    return String(format: "Temp: %.1f ", self.temperature)
-      + String(format: "DNI: %.1f ", self.dni)
-      + String(format: "GHI: %.1f ", self.ghi)
-      + String(format: "DHI: %.1f ", self.dhi)
-      + String(format: "WS: %.1f", self.windSpeed)
+    return String(format: "Temp: %.1f ", temperature)
+      + String(format: "DNI: %.1f ", dni)
+      + String(format: "GHI: %.1f ", ghi)
+      + String(format: "DHI: %.1f ", dhi)
+      + String(format: "WS: %.1f", windSpeed)
   }
 
   var values: [String] {
@@ -173,7 +171,7 @@ public struct Location {
   public let elevation: Float
 
   public var doubles: (Double, Double, Double) {
-    return (Double(self.longitude), Double(self.latitude), Double(self.elevation))
+    return (Double(longitude), Double(latitude), Double(elevation))
   }
 
   public init(longitude: Float, latitude: Float, elevation: Float) {

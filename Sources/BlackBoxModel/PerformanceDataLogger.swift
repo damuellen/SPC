@@ -12,16 +12,16 @@ import DateGenerator
 import Foundation
 import Meteo
 
-public enum PerformanceDataLoggerMode { case full, brief }
+public enum PerformanceDataLoggerMode { case full, brief, none }
 
 final class PerformanceDataLogger {
   var dateString: String = ""
 
   var dateFormatter: DateFormatter? {
     didSet {
-      self.dateFormatter?.timeZone = TimeZone(secondsFromGMT: 0)
-      self.dateFormatter?.dateStyle = .short
-      self.dateFormatter?.timeStyle = .short
+      dateFormatter?.timeZone = TimeZone(secondsFromGMT: 0)
+      dateFormatter?.dateStyle = .short
+      dateFormatter?.timeStyle = .short
     }
   }
 
@@ -55,9 +55,9 @@ final class PerformanceDataLogger {
     if case .full = mode {
       let header = "wxDVFileHeaderVer.1\n"
       let startTime = repeatElement("0", count: 40)
-        .joined(separator: ", ") + .lineBreak
+        .joined(separator: .separator) + .lineBreak
       let intervalTime = repeatElement("\(interval.fraction)", count: 40)
-        .joined(separator: ", ") + .lineBreak
+        .joined(separator: .separator) + .lineBreak
 
       allResultsStream = OutputStream(
         toFileAtPath: "AllResults_\(fileNameSuffix).csv", append: false
@@ -85,13 +85,20 @@ final class PerformanceDataLogger {
     allResultsStream2?.close()
   }
 
+  func printResult() {
+    print("")
+    print("---------------------------+=[  Annual results  ]=+-----------------------------")
+    print(annuallyResults)
+    print("________________________________________________________________________________")
+  }
+
   func append(date: Date, meteo: MeteoData,
               electricEnergy: ElectricEnergy,
               electricalParasitics: Parasitics,
               thermal: ThermalEnergy,
               fuelConsumption: FuelConsumption,
               status: Plant.PerformanceData) {
-    if case .full = self.mode {
+    if case .full = mode {
       let results = Results()
       results.thermal = thermal
       results.energy = electricEnergy
@@ -204,7 +211,7 @@ final class PerformanceDataLogger {
   // MARK: Write Results
 
   private func writeDailyResults() {
-    let csv = dateString.dropLast(4) + ", " + [
+    let csv = dateString.dropLast(4) + .separator + [
       dailyResults.values, dailyResults.thermal.values,
       dailyResults.energy.values, dailyResults.parasitics.values,
       dailyResults.fuelConsumption.values,
@@ -216,12 +223,12 @@ final class PerformanceDataLogger {
   }
 
   private func writeHourlyResults() {
-    let csv = dateString + ", " + [
+    let csv = dateString + .separator + [
       hourlyResults.values, hourlyResults.thermal.values,
       hourlyResults.energy.values, hourlyResults.parasitics.values,
       hourlyResults.fuelConsumption.values,
     ]
-    .joined().joined(separator: ", ") + .lineBreak
+    .joined().joined(separator: .separator) + .lineBreak
     hourlyResultsStream?.write(csv)
     dailyResults.accumulate(hourlyResults, fraction: 1 / 24)
     hourCounter += 1
@@ -232,11 +239,11 @@ final class PerformanceDataLogger {
     guard let stream = allResultsStream,
       let stream2 = allResultsStream2 else { return }
     let dateString = dateFormatter?.string(from: date) ?? ""
-    let csv1 = dateString + ", "
+    let csv1 = dateString + .separator
       + results.csv + results.thermal.csv + results.energy.csv
       + results.parasitics.csv + results.fuelConsumption.csv
       + results.status!.collector.csv + .lineBreak
-    let csv2 = dateString + ", " + results.csv2 + .lineBreak
+    let csv2 = dateString + .separator + results.csv2 + .lineBreak
     stream.write(csv1)
     stream2.write(csv2)
   }
@@ -244,12 +251,8 @@ final class PerformanceDataLogger {
 
 extension PerformanceDataLogger {
   final class Results: CustomStringConvertible {
-    // Thermal: [MWHth] = [MWth] * [Hr]
     var thermal = ThermalEnergy()
-
     var fuelConsumption = FuelConsumption()
-
-    // Electric: [MWHe] = [MWe] * [Hr]
     var parasitics = Parasitics()
     var energy = ElectricEnergy()
 
@@ -276,8 +279,8 @@ extension PerformanceDataLogger {
         String(format: "%.1f", dhi),
         String(format: "%.1f", temp),
         String(format: "%.1f", ws),
-        String(format: "%.0f", ico),
-        String(format: "%.0f", insolationAbsorber),
+        String(format: "%.1f", ico),
+        String(format: "%.1f", insolationAbsorber),
         String(format: "%.1f", heatLossSolarField),
         String(format: "%.1f", heatLossHeader),
         String(format: "%.1f", heatLossHCE),
@@ -286,8 +289,8 @@ extension PerformanceDataLogger {
 
     var csv: String {
       return String(format: "%.1f, %.1f, %.1f, %.1f, %.1f, %.0f, %.0f, %.0f, %.0f, %.0f, ",
-                    self.dni, self.ghi, self.dhi, self.temp, self.ws, self.ico, self.insolationAbsorber,
-                    self.heatLossSolarField, self.heatLossHeader, self.heatLossHCE)
+                    dni, ghi, dhi, temp, ws, ico, insolationAbsorber,
+                    heatLossSolarField, heatLossHeader, heatLossHCE)
     }
 
     static var columns: [(String, String)] {
@@ -304,7 +307,7 @@ extension PerformanceDataLogger {
       let values = status!.storage.values + status!.heater.values
         + status!.powerBlock.values + status!.heatExchanger.values
         + status!.solarField.values + status!.solarField.loops[0].values
-      return values.joined(separator: ", ")
+      return values.joined(separator: .separator)
     }
 
     static var columns2: [(String, String)] {
@@ -316,9 +319,9 @@ extension PerformanceDataLogger {
     }
 
     public var description: String {
-      return self.thermal.description + self.fuelConsumption.description
-        + self.parasitics.description + self.energy.description
-        + zip(self.values, Results.columns).reduce("\n") { result, next in
+      return thermal.description + fuelConsumption.description
+        + parasitics.description + energy.description
+        + zip(values, Results.columns).reduce("\n") { result, next in
           let text = next.1.0 >< (next.0 + " " + next.1.1)
           return result + text
         }

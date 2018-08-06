@@ -28,7 +28,7 @@ let meteoFilePath = CommandLine.arguments.count > 2
 PerformanceCalculator.meteoFilePath = meteoFilePath
 PerformanceCalculator.interval = .every15minutes
 
-PerformanceCalculator.runModel(129, output: .brief)
+PerformanceCalculator.runModel(129, output: .full)
 
 let end = CFAbsoluteTimeGetCurrent()
 

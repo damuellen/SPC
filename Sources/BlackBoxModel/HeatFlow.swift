@@ -30,13 +30,13 @@ public struct HeatFlow: HeatCycle, Equatable, CustomStringConvertible {
   }
 
   public var description: String {
-    return String(format: "\(self.name) (Mfl: %.1fkg/s, ", self.massFlow.rate)
-      + String(format: "In: %.1f°C, ", self.temperature.inlet.celsius)
-      + String(format: "Out: %.1f°C)", self.temperature.outlet.celsius)
+    return String(format: "\(name) (Mfl: %.1fkg/s, ", massFlow.rate)
+      + String(format: "In: %.1f°C, ", temperature.inlet.celsius)
+      + String(format: "Out: %.1f°C)", temperature.outlet.celsius)
   }
 
   public mutating func constantTemperature() {
-    self.temperature.inlet = self.temperature.outlet
+    temperature.inlet = temperature.outlet
   }
 
   public static func == (lhs: HeatFlow, rhs: HeatFlow) -> Bool {

@@ -108,16 +108,16 @@ extension JsonConfigFileHandler {
       case .DES: break
       case .AVL: try encoder.encode(Plant.availability).write(to: url)
       case .LAY: try encoder.encode(Design.layout).write(to: url)
-      case .SF: try encoder.encode(solarField).write(to: url)
-      case .COL: try encoder.encode(collector).write(to: url)
+      case .SF: try encoder.encode(SolarField.parameter).write(to: url)
+      case .COL: try encoder.encode(Collector.parameter).write(to: url)
       case .STO: break
       case .HR: try encoder.encode(Heater.parameter).write(to: url)
       case .HTF: try encoder.encode(htf).write(to: url)
-      case .HX: try encoder.encode(heatExchanger).write(to: url)
+      case .HX: try encoder.encode(HeatExchanger.parameter).write(to: url)
       case .BO: try encoder.encode(Boiler.parameter).write(to: url)
       case .WHR: try encoder.encode(WasteHeatRecovery.parameter).write(to: url)
-      case .GT: try encoder.encode(gasTurbine).write(to: url)
-      case .TB: try encoder.encode(steamTurbine).write(to: url)
+      case .GT: try encoder.encode(GasTurbine.parameter).write(to: url)
+      case .TB: try encoder.encode(SteamTurbine.parameter).write(to: url)
       case .PB: try encoder.encode(PowerBlock.parameter).write(to: url)
       case .PFC: break
       case .STF: try encoder.encode(salt).write(to: url)

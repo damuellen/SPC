@@ -65,7 +65,7 @@ public struct ElectricEnergy: Encodable, PerformanceData {
 
   var csv: String {
     return String(format: "%.1f, %.1f, %.1f, %.1f, %.1f, %.1f, ",
-                  self.steamTurbineGross, self.gasTurbineGross, self.backupGross, self.parasitics, self.net, self.consum)
+                  steamTurbineGross, gasTurbineGross, backupGross, parasitics, net, consum)
   }
 
   static var columns: [(name: String, unit: String)] {
@@ -104,7 +104,7 @@ public struct Parasitics: Encodable, PerformanceData {
 
   var csv: String {
     return String(format: "%.1f, %.1f, %.1f, %.1f, %.1f, %.1f, ",
-                  self.solarField, self.powerBlock, self.storage, self.shared, 0, self.gasTurbine)
+                  solarField, powerBlock, storage, shared, 0, gasTurbine)
   }
 
   static var columns: [(name: String, unit: String)] {
@@ -146,8 +146,8 @@ public struct ThermalEnergy: Encodable, PerformanceData {
 
   var csv: String {
     return String(format: "%.1f, %.1f, %.1f, %.1f, %.1f, %.1f, %.1f, %.1f, %.1f, ",
-                  self.solar, self.dump, self.toStorage, self.storage, self.heater, self.heatExchanger,
-                  self.wasteHeatRecovery, self.boiler, self.production)
+                  solar, dump, toStorage, storage, heater, heatExchanger,
+                  wasteHeatRecovery, boiler, production)
   }
 
   static var columns: [(name: String, unit: String)] {
@@ -168,15 +168,15 @@ public struct ThermalEnergy: Encodable, PerformanceData {
   }
 
   mutating func accumulate(_ thermal: ThermalEnergy, fraction: Double) {
-    self.solar += thermal.solar * fraction
-    self.toStorage += thermal.toStorage * fraction
-    self.storage += thermal.storage * fraction
-    self.heater += thermal.heater * fraction
-    self.heatExchanger += thermal.heatExchanger * fraction
-    self.wasteHeatRecovery += thermal.wasteHeatRecovery * fraction
-    self.boiler += thermal.boiler * fraction
-    self.dump += thermal.dump * fraction
-    self.production += thermal.production * fraction
+    solar += thermal.solar * fraction
+    toStorage += thermal.toStorage * fraction
+    storage += thermal.storage * fraction
+    heater += thermal.heater * fraction
+    heatExchanger += thermal.heatExchanger * fraction
+    wasteHeatRecovery += thermal.wasteHeatRecovery * fraction
+    boiler += thermal.boiler * fraction
+    dump += thermal.dump * fraction
+    production += thermal.production * fraction
   }
 }
 
@@ -187,11 +187,11 @@ public struct FuelConsumption: Encodable, PerformanceData {
     gasTurbine = 0.0
 
   var combined: Double {
-    return self.boiler + self.heater
+    return boiler + heater
   }
 
   var total: Double {
-    return self.boiler + self.heater + self.gasTurbine
+    return boiler + heater + gasTurbine
   }
 
   var values: [String] {
@@ -206,7 +206,7 @@ public struct FuelConsumption: Encodable, PerformanceData {
 
   var csv: String {
     return String(format: "%.1f, %.1f, %.1f, %.1f, %.1f, ",
-                  self.backup, self.boiler, self.heater, self.gasTurbine, self.combined)
+                  backup, boiler, heater, gasTurbine, combined)
   }
 
   static var columns: [(name: String, unit: String)] {
@@ -218,9 +218,9 @@ public struct FuelConsumption: Encodable, PerformanceData {
   }
 
   mutating func accumulate(_ fuelConsumption: FuelConsumption, fraction: Double) {
-    self.backup += fuelConsumption.backup * fraction
-    self.boiler += fuelConsumption.boiler * fraction
-    self.heater += fuelConsumption.heater * fraction
-    self.gasTurbine += fuelConsumption.gasTurbine * fraction
+    backup += fuelConsumption.backup * fraction
+    boiler += fuelConsumption.boiler * fraction
+    heater += fuelConsumption.heater * fraction
+    gasTurbine += fuelConsumption.gasTurbine * fraction
   }
 }

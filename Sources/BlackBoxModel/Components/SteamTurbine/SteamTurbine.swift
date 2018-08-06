@@ -60,8 +60,6 @@ public enum SteamTurbine: Component {
   static func efficiency(_ status: inout Plant.PerformanceData, maxLoad: inout Ratio) -> Double {
     guard status.steamTurbine.load.ratio > 0 else { return 1 }
 
-    var parameter = steamTurbine
-
     var maxEfficiency: Double = 1
 
     if case .operating = status.boiler.operationMode {

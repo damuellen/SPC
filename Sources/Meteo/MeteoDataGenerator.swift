@@ -93,7 +93,6 @@ public class MeteoDataGenerator: Sequence {
 
     var step = 1
     var index = range.lowerBound
-    // var date = self.dateInterval?.start ?? Date()
     let period = intermediateSteps.fraction * 3600
 
     var dict = [Int: (Int, Float)]()

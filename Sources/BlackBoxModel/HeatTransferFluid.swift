@@ -100,9 +100,9 @@ public struct HeatTransferFluid {
   }
 
   func density(_ temperature: Temperature) -> Double {
-    assert(temperature.kelvin > self.freezeTemperature.kelvin)
-    return self.density[0] + self.density[1] * temperature.celsius
-      + self.density[2] * temperature.celsius * temperature.celsius
+    assert(temperature.kelvin > freezeTemperature.kelvin)
+    return density[0] + density[1] * temperature.celsius
+      + density[2] * temperature.celsius * temperature.celsius
   }
 
   func mixingTemperature(
@@ -189,28 +189,28 @@ public struct HeatTransferFluid {
     d += "c0:" >< "\(heatCapacity[0])"
     d += "c1:" >< "\(heatCapacity[1])"
     d += "Calculate with Enthalpy: \(useEnthalpy.description)"
-    if !self.enthaplyFromTemperature.isEmpty {
+    if !enthaplyFromTemperature.isEmpty {
       d += "Enthalpy as function on Temperature\n"
-      for (i, c) in self.enthaplyFromTemperature.enumerated() {
+      for (i, c) in enthaplyFromTemperature.enumerated() {
         d += "c\(i):" >< String(format: "%.6E", c)
       }
     }
-    if !self.temperatureFromEnthalpy.isEmpty {
+    if !temperatureFromEnthalpy.isEmpty {
       d += "Temperature as function on Enthalpy\n"
-      for (i, c) in self.temperatureFromEnthalpy.enumerated() {
+      for (i, c) in temperatureFromEnthalpy.enumerated() {
         d += "c\(i):" >< String(format: "%.6E", c)
       }
     }
     d += "Density as a Function of Temperature; roh(T) = c0+c1*T+c1*T^2\n"
-    for (i, c) in self.density.enumerated() {
+    for (i, c) in density.enumerated() {
       d += "c\(i):" >< String(format: "%.6E", c)
     }
     d += "Viscosity as a Function of Temperature; eta(T) = c0+c1*T+c1*T^2\n"
-    for (i, c) in self.viscosity.enumerated() {
+    for (i, c) in viscosity.enumerated() {
       d += "c\(i):" >< String(format: "%.6E", c)
     }
     d += "Conductivity as a Function of Temperature; lamda(T) = c0+c1*T+c1*T^2\n"
-    for (i, c) in self.thermCon.enumerated() {
+    for (i, c) in thermCon.enumerated() {
       d += "c\(i):" >< String(format: "%.6E", c)
     }
     d += "Maximum Operating Temperature [°C]:" >< "\(self.maxTemperature.celsius)"

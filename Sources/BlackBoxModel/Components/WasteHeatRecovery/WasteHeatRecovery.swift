@@ -25,10 +25,10 @@ public enum WasteHeatRecovery: Component {
     var efficiency = parameter.efficiencyNominal
     efficiency *= parameter.efficiencySolar[
       Plant.thermal.solar / Design.layout.heatExchanger
-        * steamTurbine.efficiencySCC
+        * SteamTurbine.parameter.efficiencySCC
     ]
     efficiency *= parameter.efficiencyGasTurbine[
-      Plant.electricEnergy.gasTurbineGross / gasTurbine.powerGross
+      Plant.electricEnergy.gasTurbineGross / GasTurbine.parameter.powerGross
     ]
     efficiency *= (1 / GasTurbine.efficiency(at: gasTurbineLoad) - 1)
 

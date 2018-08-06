@@ -19,6 +19,12 @@ public enum Report {
   }(DateFormatter())
 
   public static var description: String {
+    let solarField = SolarField.parameter
+    let heatExchanger = HeatExchanger.parameter
+    let gasTurbine = GasTurbine.parameter
+    let steamTurbine = SteamTurbine.parameter
+    let collector = Collector.parameter
+    
     var d: String = ""
     d += "Location: \(Plant.location.longitude) \(Plant.location.latitude)"
     d += "\n"
@@ -32,7 +38,6 @@ public enum Report {
     d += "  Elevation [ø]:  " + "\(solarField.elevation)\t Azimut [ø]:  "
       + "\(solarField.azimut)"
 
-    // let storage = storage
     d += "\n"
     d += "STORAGE\n"
     d += "  Capacity [MWH,th]:"
@@ -47,6 +52,8 @@ public enum Report {
     d += "GAS TURBINE\n"
     d += "  Gross Output [MW]:" >< "\(Design.layout.gasTurbine)"
     d += "  Efficiency [%]:" >< "\(gasTurbine.efficiencyISO * 100)"
+    d += "\n"
+
     d += "WHR- SYSTEM\n"
     d += "  Therm Output [MW]:"
       >< "\(Design.layout.gasTurbine * (1 / gasTurbine.efficiencyISO - 1)); \(WasteHeatRecovery.parameter.efficiencyNominal)"
@@ -71,9 +78,9 @@ public enum Report {
     d += "    Annual Results \n"
     d += "\n"
     d += "\n"
-    d += "Gross electricty prodcution [MWh_el/a]:\n" //  Format((YTarS(0).EgrsST + YTarS(0).EgrsGasTurbine) * (1 - Simulation.parameter.UnSchedMain) * (1 - Simulation.parameter.TransLoss), )"
+    d += "Gross electricty producution [MWh_el/a]:\n" //  Format((YTarS(0).EgrsST + YTarS(0).EgrsGasTurbine) * (1 - Simulation.parameter.UnSchedMain) * (1 - Simulation.parameter.TransLoss), )"
     d += "Parasitic consumption [MWh_el/a]:\n" // Format(YTarS(0).electricalParasitics * (1 - Simulation.parameter.UnSchedMain) * (1 - Simulation.parameter.TransLoss), )"
-    d += "Net electricty prodcution [MWh_el/a]:\n" // Format(YTarS(0).Enet * (1 - Simulation.parameter.UnSchedMain) * (1 - Simulation.parameter.TransLoss), )"
+    d += "Net electricty producution [MWh_el/a]:\n" // Format(YTarS(0).Enet * (1 - Simulation.parameter.UnSchedMain) * (1 - Simulation.parameter.TransLoss), )"
     d += "Gas consumption [MWh_el/a]:\n" // Format(YTarS(0).heatfuel, )"
     d += "Solar share [%]:" // Format(SolShare * 100, )"
     d += "Annual direct solar insolation [kWh/m²a]:\n" //  Format(YTarS(0).NDI,)"

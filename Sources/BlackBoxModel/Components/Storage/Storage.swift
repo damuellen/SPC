@@ -59,44 +59,44 @@ public struct Storage: Component {
 
   static var parameter: Parameter = ParameterDefaults.st
 
-  public static func minmass(storage: Storage.PerformanceData) -> Double {
-    switch self.parameter.definedBy {
+  public static func minmass(status: Storage.PerformanceData) -> Double {
+    switch Storage.parameter.definedBy {
     case .hours:
       let minmass = Design.layout.storage * parameter.dischargeToTurbine
-        * heatExchanger.sccHTFthermal * 1_000 * 3_600
-        / (storage.heatSalt.hot - storage.heatSalt.cold)
-      heatExchanger.temperature.h2o.inlet.max = Temperature(
+        * HeatExchanger.parameter.sccHTFthermal * 1_000 * 3_600
+        / (status.heatSalt.hot - status.heatSalt.cold)
+      HeatExchanger.parameter.temperature.h2o.inlet.max = Temperature(
         parameter.startLoad.hot * Design.layout.storage
-          * heatExchanger.sccHTFthermal * 1_000 * 3_600
-          / (storage.heatSalt.hot - storage.heatSalt.cold) + minmass
+          * HeatExchanger.parameter.sccHTFthermal * 1_000 * 3_600
+          / (status.heatSalt.hot - status.heatSalt.cold) + minmass
       ) // Factor 1.1
-      heatExchanger.temperature.h2o.inlet.min = Temperature(
+      HeatExchanger.parameter.temperature.h2o.inlet.min = Temperature(
         parameter.startLoad.cold * Design.layout.storage
-          * heatExchanger.sccHTFthermal * 1_000 * 3_600
-          / (storage.heatSalt.hot - storage.heatSalt.cold) + minmass
+          * HeatExchanger.parameter.sccHTFthermal * 1_000 * 3_600
+          / (status.heatSalt.hot - status.heatSalt.cold) + minmass
       )
       return minmass
 
     case .cap:
       let minmass = Design.layout.storage_cap
         * parameter.dischargeToTurbine * 1_000 * 3_600
-        / (storage.heatSalt.hot - storage.heatSalt.cold)
-      heatExchanger.temperature.h2o.inlet.max = Temperature(
+        / (status.heatSalt.hot - status.heatSalt.cold)
+      HeatExchanger.parameter.temperature.h2o.inlet.max = Temperature(
         parameter.startLoad.hot * Design.layout.storage_cap * 1_000 * 3_600
-          / (storage.heatSalt.hot - storage.heatSalt.cold) + minmass
+          / (status.heatSalt.hot - status.heatSalt.cold) + minmass
       ) // Factor 1.1
-      heatExchanger.temperature.h2o.inlet.min = Temperature(
+      HeatExchanger.parameter.temperature.h2o.inlet.min = Temperature(
         parameter.startLoad.cold * Design.layout.storage_cap * 1_000 * 3_600
-          / (storage.heatSalt.hot - storage.heatSalt.cold) + minmass
+          / (status.heatSalt.hot - status.heatSalt.cold) + minmass
       )
       return minmass
 
     case .ton:
       let minmass = Design.layout.storage_ton * parameter.dischargeToTurbine * 1_000
-      heatExchanger.temperature.h2o.inlet.max = Temperature(
+      HeatExchanger.parameter.temperature.h2o.inlet.max = Temperature(
         parameter.startLoad.hot * Design.layout.storage_ton * 1_000 + minmass
       )
-      heatExchanger.temperature.h2o.inlet.min = Temperature(
+      HeatExchanger.parameter.temperature.h2o.inlet.min = Temperature(
         parameter.startLoad.cold * Design.layout.storage_ton * 1_000 + minmass
       )
       return minmass
@@ -104,27 +104,30 @@ public struct Storage: Component {
   }
 
   /// Calculates the parasitics of the gas turbine which only depends on the current load
-  private static func parasitics(_ storage: inout PerformanceData) -> Double {
+  private static func parasitics(_ status: inout PerformanceData) -> Double {
     var parasitics = 0.0
     var timeminutessum = 0
     var timeminutesold = 0
+    let solarField = SolarField.parameter
+    let heatExchanger = HeatExchanger.parameter
+    let storage = Storage.parameter
 
     let time = TimeStep.current
-    if self.parameter.auxConsCurve {
+    if storage.auxConsCurve {
       // old model:
-      let rohMean = htf.density(storage.averageTemperature)
+      let rohMean = htf.density(status.averageTemperature)
       let rohDP = htf.density(Temperature(
         (heatExchanger.temperature.htf.inlet.max
           + heatExchanger.temperature.htf.outlet.max).kelvin / 2
       ))
       let PrL = parameter.pressureLoss * rohDP / rohMean
-        * (storage.massFlow.share(of: parameter.massFlow).ratio) ** 2
-      parasitics = PrL * storage.massFlow.rate / rohMean / parameter.pumpEfficiency / 10e6
+        * (status.massFlow.share(of: parameter.massFlow).ratio) ** 2
+      parasitics = PrL * status.massFlow.rate / rohMean / parameter.pumpEfficiency / 10e6
 
-      if case .discharge = storage.operationMode {
+      if case .discharge = status.operationMode {
         parasitics = parasitics * parameter.DischrgParFac // added as user input, by no input stoc.DischrgParFac = 2
         timeminutessum = 0
-      } else if case .noOperation = storage.operationMode {
+      } else if case .noOperation = status.operationMode {
         if time.minute != timeminutesold { // formula changed
           if time.minute == 0 { // new hour
             timeminutessum += 60 + time.minute - timeminutesold // timeminutessum + 5
@@ -161,18 +164,18 @@ public struct Storage: Component {
       let designAuxIN = 0.57
 
       // calculate design salt massflows:
-      storage.heatSalt.hot = salt.enthalpy(parameter.designTemperature.hot)
+      status.heatSalt.hot = salt.enthalpy(parameter.designTemperature.hot)
 
-      storage.heatSalt.cold = salt.enthalpy(parameter.designTemperature.cold)
+      status.heatSalt.cold = salt.enthalpy(parameter.designTemperature.cold)
       // charge:
       let designChargingThermal = (parameter.massFlow.rate * htf.heatDelta(
-        parameter.designTemperature.hot + storage.dTHTF_HotSalt,
-        parameter.designTemperature.cold + storage.dTHTF_ColdSalt
+        parameter.designTemperature.hot + status.dTHTF_HotSalt,
+        parameter.designTemperature.cold + status.dTHTF_ColdSalt
       ) / 1_000)
         * parameter.heatExchangerEfficiency
 
       var designChargingmassSalt = designChargingThermal
-        / (storage.heatSalt.hot - storage.heatSalt.cold) * 1_000 // kg/s
+        / (status.heatSalt.hot - status.heatSalt.cold) * 1_000 // kg/s
       designChargingmassSalt *= hourFraction * 3_600 // kg in time step (5 minutes)
       // discharge:
       let QoutLoad = parameter.fixedLoadDischarge == 0
@@ -182,40 +185,40 @@ public struct Storage: Component {
       let heatexDes = (((solarField.massFlow.max - parameter.massFlow)
           .adjusted(with: QoutLoad).rate
           / parameter.heatExchangerEfficiency) * htf.heatDelta(
-        parameter.designTemperature.hot - storage.dTHTF_HotSalt,
-            parameter.designTemperature.cold - storage.dTHTF_ColdSalt
+        parameter.designTemperature.hot - status.dTHTF_HotSalt,
+            parameter.designTemperature.cold - status.dTHTF_ColdSalt
       ) / 1_000)
         * parameter.heatExchangerEfficiency // design charging power
 
-      var designEXmassSalt = heatexDes / (storage.heatSalt.hot - storage.heatSalt.cold) // kg/s
+      var designEXmassSalt = heatexDes / (status.heatSalt.hot - status.heatSalt.cold) // kg/s
       designEXmassSalt *= hourFraction * 3_600 * 1_000 // kg in time step (5 minutes)
       // all this shall be done only one time_____________________________________________________
 
-      if case .discharge = storage.operationMode {
-        storage.massSaltRatio = (storage.massSalt / designEXmassSalt)
+      if case .discharge = status.operationMode {
+        status.massSaltRatio = (status.massSalt / designEXmassSalt)
         // if storage.massSaltRatio > 1, case .charging = previous?.operationMode {
         // storage.massSaltRatio = 1
         // has to be check in detail how to determine salt mass flow if it's the first discharge after charging!!
         // }
         parasitics = ((1 - lowDc) * designAuxEX
-          * storage.massSaltRatio ** Expn + lowDc * designAuxEX)
-          * (1 - level * storage.heatRelease)
-          * ((1 - level2) + level2 * storage.massSaltRatio)
+          * status.massSaltRatio ** Expn + lowDc * designAuxEX)
+          * (1 - level * status.heatRelease)
+          * ((1 - level2) + level2 * status.massSaltRatio)
         timeminutessum = 0
-      } else if case .charging = storage.operationMode {
-        storage.massSaltRatio = (storage.massSalt / designChargingmassSalt)
+      } else if case .charging = status.operationMode {
+        status.massSaltRatio = (status.massSalt / designChargingmassSalt)
         // has to be check in detail how to determine salt mass flow if it's the first charge after discharging!!
         // if let previousMode = Storage.previous?.operationMode,
         //  case .ex = previousMode {
         //  storage.massSaltRatio = 1
         // }
         parasitics = ((1 - lowCh) * designAuxIN
-          * storage.massSaltRatio ** Expn + lowCh * designAuxIN)
-          * ((1 - level) + level * storage.heatRelease)
-          * ((1 - level2) + level2 * storage.massSaltRatio)
+          * status.massSaltRatio ** Expn + lowCh * designAuxIN)
+          * ((1 - level) + level * status.heatRelease)
+          * ((1 - level2) + level2 * status.massSaltRatio)
         timeminutessum = 0
         // FIXME: storage.OldOpMode = .in
-      } else if case .noOperation = storage.operationMode {
+      } else if case .noOperation = status.operationMode {
         parasitics = 0
         let timeminutessum = 0.0
         if time.minute != timeminutesold {
@@ -241,6 +244,16 @@ public struct Storage: Component {
   static func update(_ status: inout Plant.PerformanceData,
                      mode _: PerformanceData.OperationMode,
                      thermal: inout ThermalEnergy) {
+    let solarField = SolarField.parameter
+    let heater = Heater.parameter
+    let heatExchanger = HeatExchanger.parameter
+    let boiler = Boiler.parameter
+    let gasTurbine = GasTurbine.parameter
+    let steamTurbine = SteamTurbine.parameter
+    let powerBlock = PowerBlock.parameter
+    let storage = Storage.parameter
+    let collector = Collector.parameter
+    
     enum Properties {
       static var SSetTime = 0
       //    static var StoFit = 0.0
@@ -254,23 +267,23 @@ public struct Storage: Component {
       static var QoutLoad = 0.0
     }
 
-    func outletTemperature(_ storage: Storage.PerformanceData) -> Temperature {
+    func outletTemperature(_ status: Storage.PerformanceData) -> Temperature {
       var StoFit = 0.0
-      if self.parameter.temperatureDischarge2[1] > 0 {
-        StoFit = status.storage.heatRelease > 0.5
-          ? 1 : self.parameter.temperatureDischarge2[status.storage.heatRelease]
-        StoFit *= self.parameter.designTemperature.hot.kelvin
-          - self.parameter.temperatureDischarge[1]
+      if storage.temperatureDischarge2[1] > 0 {
+        StoFit = status.heatRelease > 0.5
+          ? 1 : storage.temperatureDischarge2[status.heatRelease]
+        StoFit *= storage.designTemperature.hot.kelvin
+          - storage.temperatureDischarge[1]
       } else {
         StoFit = -Temperature.absoluteZeroCelsius
-        if storage.heatRelease < 0 {
-          StoFit += self.parameter.temperatureDischarge[0]
-            - (self.parameter.designTemperature.hot.kelvin
-              - storage.temperatureTanks.hot.kelvin)
+        if status.heatRelease < 0 {
+          StoFit += storage.temperatureDischarge[0]
+            - (storage.designTemperature.hot.kelvin
+              - status.temperatureTanks.hot.kelvin)
         } else {
-          StoFit += self.parameter.temperatureCharge[0]
-            - (self.parameter.designTemperature.hot.kelvin
-              - storage.temperatureTanks.hot.kelvin)
+          StoFit += storage.temperatureCharge[0]
+            - (storage.designTemperature.hot.kelvin
+              - status.temperatureTanks.hot.kelvin)
           // adjust of HTF outlet temp. with status hot tank temp.
         }
       }
@@ -293,18 +306,18 @@ public struct Storage: Component {
       status.storage.temperature.inlet = status.solarField.temperature.outlet
       // the powerBlock.massFlow is only an ideal value, for maximal dT, isnt it wrong?
       status.storage.massFlow = status.solarField.massFlow - status.powerBlock.massFlow
-      status.storage.massFlow.adjust(with: self.parameter.heatExchangerEfficiency)
+      status.storage.massFlow.adjust(with: storage.heatExchangerEfficiency)
       // * Plant.availability[calendar].storage taken out of the formula and included in TES capacity calculation
       var StoFit = 0.0
-      if self.parameter.temperatureCharge.coefficients[1] > 0 { // usually = 0
+      if storage.temperatureCharge.coefficients[1] > 0 { // usually = 0
         StoFit = status.storage.heatRelease < 0.5
-          ? 1 : self.parameter.temperatureCharge2[status.storage.heatRelease]
-        StoFit *= self.parameter.designTemperature.cold.kelvin
-          - self.parameter.temperatureCharge.coefficients[2]
+          ? 1 : storage.temperatureCharge2[status.storage.heatRelease]
+        StoFit *= storage.designTemperature.cold.kelvin
+          - storage.temperatureCharge.coefficients[2]
       } else {
         StoFit = -Temperature.absoluteZeroCelsius
-        StoFit += self.parameter.temperatureCharge.coefficients[0]
-          - (self.parameter.designTemperature.cold
+        StoFit += storage.temperatureCharge.coefficients[0]
+          - (storage.designTemperature.cold
             - status.storage.temperatureTanks.cold).kelvin
       }
       status.storage.temperature.outlet = Temperature(StoFit)
@@ -313,15 +326,15 @@ public struct Storage: Component {
         * htf.heatDelta(status.storage.temperature.outlet,
                         status.storage.temperature.inlet) / 1_000
 
-      if self.parameter.heatExchangerRestrictedMax,
-        abs(thermal.storage) > self.parameter.heatExchangerCapacity {
-        thermal.storage *= self.parameter.heatExchangerCapacity
+      if storage.heatExchangerRestrictedMax,
+        abs(thermal.storage) > storage.heatExchangerCapacity {
+        thermal.storage *= storage.heatExchangerCapacity
         status.storage.massFlow = MassFlow(thermal.storage / htf.heatDelta(
           status.storage.temperature.outlet, status.storage.temperature.inlet
         ) * 1_000)
         // FIXME: powerBlock.massFlow = powerBlock.massFlow
         // added to avoid increase in PB massFlow
-        if case .demand = self.parameter.strategy { // (always)
+        if case .demand = storage.strategy { // (always)
           // too much power from sun, dump
           thermal.dump += thermal.production
             - heatExchanger.sccHTFthermal + thermal.storage
@@ -343,24 +356,24 @@ public struct Storage: Component {
       status.storage.massFlow = status.powerBlock.massFlow
 
       var StoFit = 0.0
-      if self.parameter.temperatureCharge.coefficients[1] > 0 { // usually = 0
+      if storage.temperatureCharge.coefficients[1] > 0 { // usually = 0
         StoFit = status.storage.heatRelease < 0.5
-          ? 1 : self.parameter.temperatureCharge2[status.storage.heatRelease]
-        StoFit *= self.parameter.designTemperature.cold.kelvin
-          - self.parameter.temperatureCharge.coefficients[2]
+          ? 1 : storage.temperatureCharge2[status.storage.heatRelease]
+        StoFit *= storage.designTemperature.cold.kelvin
+          - storage.temperatureCharge.coefficients[2]
       } else {
         StoFit = -Temperature.absoluteZeroCelsius
-        StoFit += self.parameter.temperatureCharge.coefficients[0]
-          - (self.parameter.designTemperature.cold
+        StoFit += storage.temperatureCharge.coefficients[0]
+          - (storage.designTemperature.cold
             - status.storage.temperatureTanks.cold).kelvin
       }
       status.storage.temperature.outlet = Temperature(StoFit)
 
       thermal.storage = -status.storage.heatTransfered(with: htf) // [MW]
       // limit the size of the salt-oil heat exchanger
-      if self.parameter.heatExchangerRestrictedMax,
-        abs(thermal.storage) > self.parameter.heatExchangerCapacity {
-        thermal.storage *= self.parameter.heatExchangerCapacity
+      if storage.heatExchangerRestrictedMax,
+        abs(thermal.storage) > storage.heatExchangerCapacity {
+        thermal.storage *= storage.heatExchangerCapacity
 
         status.storage.massFlow = MassFlow(thermal.storage / htf.heatDelta(
           status.storage.temperature.outlet, status.storage.temperature.inlet
@@ -375,21 +388,21 @@ public struct Storage: Component {
       var time = TimeStep.current
       // calculate discharge rate only once per day, directly after sunset
       if time.hour >= Properties.SSetTime
-        && time.hour < (Properties.SSetTime + 1) && self.parameter.isVariable {
-        switch self.parameter.definedBy {
+        && time.hour < (Properties.SSetTime + 1) && storage.isVariable {
+        switch storage.definedBy {
         case .hours:
           status.storage.heatStored = status.storage.heatRelease * Design.layout.storage
             * steamTurbine.power.max / steamTurbine.efficiencyNominal
         case .cap:
           status.storage.heatStored = status.storage.heatRelease * Design.layout.storage_cap
         case .ton:
-          status.storage.heatSalt.hot = salt.enthalpy(self.parameter.designTemperature.hot)
+          status.storage.heatSalt.hot = salt.enthalpy(storage.designTemperature.hot)
 
-          status.storage.heatSalt.cold = salt.enthalpy(self.parameter.designTemperature.cold)
+          status.storage.heatSalt.cold = salt.enthalpy(storage.designTemperature.cold)
 
           status.storage.heatStored = status.storage.heatRelease * Design.layout.storage_ton
             * (status.storage.heatSalt.hot - status.storage.heatSalt.cold)
-            * (self.parameter.designTemperature.hot - self.parameter.designTemperature.cold).kelvin / 3_600
+            * (storage.designTemperature.hot - storage.designTemperature.cold).kelvin / 3_600
         }
 
         // QoutLoad controls the load of the TES during discharge. Before was fixed to 0.97
@@ -397,15 +410,15 @@ public struct Storage: Component {
           / (steamTurbine.power.max
             / steamTurbine.efficiencyNominal)
 
-        if Properties.QoutLoad < self.parameter.MinDis {
-          Properties.QoutLoad = self.parameter.MinDis
+        if Properties.QoutLoad < storage.MinDis {
+          Properties.QoutLoad = storage.MinDis
         } else if Properties.QoutLoad > 1 {
           Properties.QoutLoad = 1
         }
       }
       // if no previous calculation has been done and TES must be discharged
-      if Properties.QoutLoad == 0 && self.parameter.isVariable {
-        switch self.parameter.definedBy {
+      if Properties.QoutLoad == 0 && storage.isVariable {
+        switch storage.definedBy {
         case .hours:
           status.storage.heatStored = status.storage.heatRelease * Design.layout.storage
             * steamTurbine.power.max
@@ -413,42 +426,42 @@ public struct Storage: Component {
         case .cap:
           status.storage.heatStored = status.storage.heatRelease * Design.layout.storage_cap
         case .ton:
-          status.storage.heatSalt.hot = salt.enthalpy(self.parameter.designTemperature.hot)
+          status.storage.heatSalt.hot = salt.enthalpy(storage.designTemperature.hot)
 
-          status.storage.heatSalt.cold = salt.enthalpy(self.parameter.designTemperature.cold)
+          status.storage.heatSalt.cold = salt.enthalpy(storage.designTemperature.cold)
 
           status.storage.heatStored = status.storage.heatRelease * Design.layout.storage_ton
             * (status.storage.heatSalt.hot - status.storage.heatSalt.cold)
-            * (self.parameter.designTemperature.hot
-              - self.parameter.designTemperature.cold).kelvin / 3_600
+            * (storage.designTemperature.hot
+              - storage.designTemperature.cold).kelvin / 3_600
         }
 
         // QoutLoad controls the load of the TES during discharge.
         Properties.QoutLoad = status.storage.heatStored / nightHour / (steamTurbine.power.max
           / steamTurbine.efficiencyNominal)
 
-        if Properties.QoutLoad < self.parameter.MinDis {
-          Properties.QoutLoad = self.parameter.MinDis
+        if Properties.QoutLoad < storage.MinDis {
+          Properties.QoutLoad = storage.MinDis
         } else if Properties.QoutLoad > 1 {
           Properties.QoutLoad = 1
         }
       }
       // fixed discharge
-      if !self.parameter.isVariable {
+      if !storage.isVariable {
         // avoid user error by no input
-        Properties.QoutLoad = self.parameter.fixedLoadDischarge == 0
-          ? 0.97 : self.parameter.fixedLoadDischarge
+        Properties.QoutLoad = storage.fixedLoadDischarge == 0
+          ? 0.97 : storage.fixedLoadDischarge
       }
 
       switch status.solarField.operationMode {
       case .freezeProtection:
         status.storage.massFlow = MassFlow(Properties.QoutLoad
-          * status.powerBlock.massFlow.rate / self.parameter.heatExchangerEfficiency)
+          * status.powerBlock.massFlow.rate / storage.heatExchangerEfficiency)
 
       case .operating where status.solarField.massFlow.rate > 0:
         // Mass flow is correctd by parameter.Hx this factor is new
         status.storage.massFlow = MassFlow(status.powerBlock.massFlow.rate
-          / self.parameter.heatExchangerEfficiency - status.solarField.massFlow.rate)
+          / storage.heatExchangerEfficiency - status.solarField.massFlow.rate)
       // * 0.97 deleted after separating combined from storage only operation
       default:
         // if demand < 1 { // only for OU1!?
@@ -458,7 +471,7 @@ public struct Storage: Component {
         // } else {
         // added to control TES discharge during night
         status.storage.massFlow = MassFlow(Properties.QoutLoad
-          * status.powerBlock.massFlow.rate / self.parameter.heatExchangerEfficiency)
+          * status.powerBlock.massFlow.rate / storage.heatExchangerEfficiency)
         // }
       }
 
@@ -473,9 +486,9 @@ public struct Storage: Component {
           * htf.heatDelta(status.storage.temperature.outlet,
                           status.storage.temperature.inlet) / 1_000
 
-        if self.parameter.heatExchangerRestrictedMax,
-          abs(thermal.storage) > self.parameter.heatExchangerCapacity {
-          thermal.storage = thermal.storage * self.parameter.heatExchangerCapacity
+        if storage.heatExchangerRestrictedMax,
+          abs(thermal.storage) > storage.heatExchangerCapacity {
+          thermal.storage = thermal.storage * storage.heatExchangerCapacity
           status.storage.massFlow = MassFlow(thermal.storage /
             htf.temperatureDelta(status.storage.temperature.outlet.kelvin,
                                  status.storage.temperature.inlet).kelvin * 1_000)
@@ -487,7 +500,7 @@ public struct Storage: Component {
             // Mass flow is correctd by new factor
             status.powerBlock.massFlow = MassFlow(
               (status.storage.massFlow + status.solarField.massFlow).rate
-                * self.parameter.heatExchangerEfficiency / 0.97
+                * storage.heatExchangerEfficiency / 0.97
             )
           }
         }
@@ -524,9 +537,9 @@ public struct Storage: Component {
         * htf.heatDelta(status.storage.temperature.outlet,
                         status.storage.temperature.inlet) / 1_000
       // limit the size of the salt-oil heat exchanger
-      if self.parameter.heatExchangerRestrictedMax,
-        abs(thermal.storage) > self.parameter.heatExchangerCapacity {
-        thermal.storage = thermal.storage * self.parameter.heatExchangerCapacity
+      if storage.heatExchangerRestrictedMax,
+        abs(thermal.storage) > storage.heatExchangerCapacity {
+        thermal.storage = thermal.storage * storage.heatExchangerCapacity
         status.storage.massFlow = MassFlow(thermal.storage
           / htf.heatDelta(status.storage.temperature.outlet,
                           status.storage.temperature.inlet) * 1_000)
@@ -544,14 +557,14 @@ public struct Storage: Component {
       // used for parasitics
       status.storage.temperature.inlet = status.powerBlock.temperature.outlet
       var StoFit = 0.0
-      if self.parameter.temperatureCharge[1] > 0 {
-        if self.parameter.temperatureDischarge.indices.contains(2) {
+      if storage.temperatureCharge[1] > 0 {
+        if storage.temperatureDischarge.indices.contains(2) {
           status.storage.temperature.outlet = status.storage.temperature.inlet
         } else {
           StoFit = status.storage.heatRelease > 0.5
-            ? 1 : self.parameter.temperatureCharge2[status.storage.heatRelease]
+            ? 1 : storage.temperatureCharge2[status.storage.heatRelease]
           status.storage.temperature.outlet = Temperature(
-            StoFit * self.parameter.designTemperature.hot.kelvin
+            StoFit * storage.designTemperature.hot.kelvin
           )
         }
         status.storage.temperature.outlet = Temperature(
@@ -574,9 +587,9 @@ public struct Storage: Component {
     }
 
     // Storage Heat Losses: Check calculation
-    if self.parameter.temperatureCharge.coefficients[1] > 0 {
+    if storage.temperatureCharge.coefficients[1] > 0 {
       // it does not get in here usually.
-      if self.parameter.temperatureCharge.coefficients[2] > 0 {
+      if storage.temperatureCharge.coefficients[2] > 0 {
         let StoFit = status.storage.heatRelease <= 0
           ? parameter.heatlossCst[status.storage.heatRelease]
           : parameter.heatlossC0to1[status.storage.heatRelease]
@@ -584,220 +597,223 @@ public struct Storage: Component {
         status.storage.heatLossStorage = StoFit
           * 3_600 * 0.0000001 * Design.layout.storage // [MW]
       } else {
-        status.storage.heatLossStorage = self.parameter.heatlossCst[0] / 1_000
-          * (status.storage.heatRelease * (self.parameter.designTemperature.hot
-              - self.parameter.designTemperature.cold).kelvin
-            + self.parameter.designTemperature.cold.kelvin)
-          / self.parameter.designTemperature.hot.kelvin
+        status.storage.heatLossStorage = storage.heatlossCst[0] / 1_000
+          * (status.storage.heatRelease * (storage.designTemperature.hot
+              - storage.designTemperature.cold).kelvin
+            + storage.designTemperature.cold.kelvin)
+          / storage.designTemperature.hot.kelvin
       }
     } else {
       status.storage.heatLossStorage = 0
     }
   }
 
-  static func calculate(storage: inout Storage.PerformanceData,
+  static func calculate(status: inout Storage.PerformanceData,
                         powerBlock: inout PowerBlock.PerformanceData,
                         steamTurbine: SteamTurbine.PerformanceData) {
+    let solarField = SolarField.parameter
+    let heatExchanger = HeatExchanger.parameter
+
     let coldTankHeatLoss = parameter.heatLoss.cold
-      * (storage.temperatureTanks.cold.kelvin)
+      * (status.temperatureTanks.cold.kelvin)
       / (parameter.designTemperature.cold.kelvin - 27)
 
     let hotTankHeatLoss = parameter.heatLoss.hot
-      * (storage.temperatureTanks.hot.kelvin)
+      * (status.temperatureTanks.hot.kelvin)
       / (parameter.designTemperature.hot.kelvin - 27)
 
-    storage.heatSalt.cold = salt.enthalpy(parameter.designTemperature.cold)
-    storage.heatSalt.hot = salt.enthalpy(parameter.designTemperature.hot)
+    status.heatSalt.cold = salt.enthalpy(parameter.designTemperature.cold)
+    status.heatSalt.hot = salt.enthalpy(parameter.designTemperature.hot)
 
-    switch self.parameter.definedBy {
+    switch parameter.definedBy {
     case .hours:
       // Plant.availability[currentDate.month].storage added here to apply TES availability on capacity and not on charge load
-      storage.massSalt = Design.layout.storage
+      status.massSalt = Design.layout.storage
         * Plant.availability.value.storage.ratio
-        * (1 + self.parameter.dischargeToTurbine)
-      storage.massSalt *= heatExchanger.sccHTFthermal * 3_600 * 1_000
-        / (storage.heatSalt.hot - storage.heatSalt.cold)
+        * (1 + parameter.dischargeToTurbine)
+      status.massSalt *= heatExchanger.sccHTFthermal * 3_600 * 1_000
+        / (status.heatSalt.hot - status.heatSalt.cold)
     case .cap:
-      storage.massSalt = Design.layout.storage_cap
+      status.massSalt = Design.layout.storage_cap
         * Plant.availability.value.storage.ratio
-        * (1 + self.parameter.dischargeToTurbine)
-      storage.massSalt *= 1_000 * 3_600
-        / (storage.heatSalt.hot - storage.heatSalt.cold)
+        * (1 + parameter.dischargeToTurbine)
+      status.massSalt *= 1_000 * 3_600
+        / (status.heatSalt.hot - status.heatSalt.cold)
     case .ton:
-      storage.massSalt = Design.layout.storage_ton
+      status.massSalt = Design.layout.storage_ton
         * Plant.availability.value.storage.ratio
-      storage.massSalt *= 1_000 * (1 + self.parameter.dischargeToTurbine)
+      status.massSalt *= 1_000 * (1 + parameter.dischargeToTurbine)
     }
 
     //   Saltmass = parameter.heatLossConstants0[3]
 
-    if self.parameter.temperatureCharge[1] > 0 { // it doesnt get in here usually, therefore not updated yet
-      storage.heatStored = storage.heatStored - storage.heatLossStorage
+    if parameter.temperatureCharge[1] > 0 { // it doesnt get in here usually, therefore not updated yet
+      status.heatStored = status.heatStored - status.heatLossStorage
         * hourFraction - Plant.thermal.storage * hourFraction
-      storage.heatRelease = storage.heatStored
+      status.heatRelease = status.heatStored
         / (Design.layout.storage * heatExchanger.sccHTFthermal)
     } else {
-      switch storage.operationMode {
+      switch status.operationMode {
       case .charging:
         // Hot salt is storage.temperature.inlet - dTHTF_HotSalt
-        storage.heatSalt.hot = salt.enthalpy(storage.temperature.inlet - storage.dTHTF_HotSalt)
+        status.heatSalt.hot = salt.enthalpy(status.temperature.inlet - status.dTHTF_HotSalt)
 
-        storage.heatSalt.cold = salt.enthalpy(storage.temperatureTanks.cold)
+        status.heatSalt.cold = salt.enthalpy(status.temperatureTanks.cold)
 
-        storage.massSalt = -Plant.thermal.storage
-          / (storage.heatSalt.hot - storage.heatSalt.cold)
+        status.massSalt = -Plant.thermal.storage
+          / (status.heatSalt.hot - status.heatSalt.cold)
           * hourFraction * 3_600 * 1_000
 
-        storage.mass.cold = storage.mass.cold - storage.massSalt
-        storage.minMass = self.minmass(storage: storage)
+        status.mass.cold = status.mass.cold - status.massSalt
+        status.minMass = self.minmass(status: status)
         // added to avoid negative or too low mass and therefore no heat losses.
-        if storage.mass.cold < storage.minMass {
-          storage.massSalt -= storage.minMass - storage.mass.cold
+        if status.mass.cold < status.minMass {
+          status.massSalt -= status.minMass - status.mass.cold
         }
 
-        if storage.massSalt < 10 {
-          storage.massSalt = 0
-          storage.mass.cold = self.minmass(storage: storage)
-          storage.mass.hot = storage.massSalt + storage.mass.hot
-          storage.heatRelease = self.parameter.chargeTo
+        if status.massSalt < 10 {
+          status.massSalt = 0
+          status.mass.cold = self.minmass(status: status)
+          status.mass.hot = status.massSalt + status.mass.hot
+          status.heatRelease = parameter.chargeTo
         } else {
-          storage.mass.hot = storage.massSalt + storage.mass.hot
-          storage.heatRelease = storage.mass.hot * (self.parameter.designTemperature.hot
-            - self.parameter.designTemperature.cold).kelvin
-            / (storage.massSalt * (self.parameter.designTemperature.hot
-                - self.parameter.designTemperature.cold).kelvin)
+          status.mass.hot = status.massSalt + status.mass.hot
+          status.heatRelease = status.mass.hot * (parameter.designTemperature.hot
+            - parameter.designTemperature.cold).kelvin
+            / (status.massSalt * (parameter.designTemperature.hot
+                - parameter.designTemperature.cold).kelvin)
         }
-        if storage.mass.hot > 0 {
-          storage.temperatureTanks.hot = Temperature((storage.massSalt
-              * (storage.temperature.inlet - storage.dTHTF_HotSalt).kelvin
-              + storage.mass.hot * storage.temperatureTanks.hot.kelvin)
-            / (storage.massSalt + storage.mass.hot))
+        if status.mass.hot > 0 {
+          status.temperatureTanks.hot = Temperature((status.massSalt
+              * (status.temperature.inlet - status.dTHTF_HotSalt).kelvin
+              + status.mass.hot * status.temperatureTanks.hot.kelvin)
+            / (status.massSalt + status.mass.hot))
         } else {
-          storage.temperatureTanks.hot = storage.temperatureTanks.hot
+          status.temperatureTanks.hot = status.temperatureTanks.hot
         }
 
       case .fossilCharge:
         // check if changes have to be done related to salt temperature
-        storage.heatSalt.hot = salt.enthalpy(self.parameter.designTemperature.hot)
+        status.heatSalt.hot = salt.enthalpy(parameter.designTemperature.hot)
 
-        storage.heatSalt.cold = salt.enthalpy(storage.temperatureTanks.cold)
+        status.heatSalt.cold = salt.enthalpy(status.temperatureTanks.cold)
 
-        storage.massSalt = -Plant.thermal.storage
-          / (storage.heatSalt.hot - storage.heatSalt.cold)
+        status.massSalt = -Plant.thermal.storage
+          / (status.heatSalt.hot - status.heatSalt.cold)
           * hourFraction * 3_600 * 1_000
 
-        storage.mass.cold = storage.mass.cold - storage.massSalt
+        status.mass.cold = status.mass.cold - status.massSalt
 
-        storage.mass.hot = storage.massSalt + storage.mass.hot
+        status.mass.hot = status.massSalt + status.mass.hot
 
-        storage.heatRelease = storage.mass.hot * (self.parameter.designTemperature.hot
-          - self.parameter.designTemperature.cold).kelvin
-          / (storage.massSalt * (self.parameter.designTemperature.hot
-              - self.parameter.designTemperature.cold).kelvin)
+        status.heatRelease = status.mass.hot * (parameter.designTemperature.hot
+          - parameter.designTemperature.cold).kelvin
+          / (status.massSalt * (parameter.designTemperature.hot
+              - parameter.designTemperature.cold).kelvin)
 
-        if storage.mass.hot > 0 {
-          storage.temperatureTanks.hot = Temperature((storage.massSalt
-              * self.parameter.designTemperature.hot.kelvin
-              + storage.mass.hot * storage.temperatureTanks.hot.kelvin)
-            / (storage.massSalt + storage.mass.hot))
+        if status.mass.hot > 0 {
+          status.temperatureTanks.hot = Temperature((status.massSalt
+              * parameter.designTemperature.hot.kelvin
+              + status.mass.hot * status.temperatureTanks.hot.kelvin)
+            / (status.massSalt + status.mass.hot))
         } else {
-          storage.temperatureTanks.hot = storage.temperatureTanks.hot
+          status.temperatureTanks.hot = status.temperatureTanks.hot
         }
 
       case .discharge:
-        storage.heatSalt.hot = salt.enthalpy(storage.temperatureTanks.hot)
+        status.heatSalt.hot = salt.enthalpy(status.temperatureTanks.hot)
 
-        storage.heatSalt.cold = salt.enthalpy(
-          storage.temperature.inlet + storage.dTHTF_ColdSalt
+        status.heatSalt.cold = salt.enthalpy(
+          status.temperature.inlet + status.dTHTF_ColdSalt
         )
 
-        storage.massSalt = Plant.thermal.storage
-          / (storage.heatSalt.hot - storage.heatSalt.cold)
+        status.massSalt = Plant.thermal.storage
+          / (status.heatSalt.hot - status.heatSalt.cold)
           * hourFraction * 3_600 * 1_000
 
-        storage.mass.hot = -storage.massSalt + storage.mass.hot
-        storage.minMass = self.minmass(storage: storage)
+        status.mass.hot = -status.massSalt + status.mass.hot
+        status.minMass = self.minmass(status: status)
         // added to avoid negative or too low mass and therefore no heat losses
-        if storage.mass.hot < storage.minMass {
-          storage.massSalt -= (storage.minMass - storage.mass.hot)
+        if status.mass.hot < status.minMass {
+          status.massSalt -= (status.minMass - status.mass.hot)
 
-          if storage.massSalt < 10 {
-            storage.massSalt = 0
+          if status.massSalt < 10 {
+            status.massSalt = 0
           }
-          Plant.thermal.storage = storage.massSalt
-            * (storage.heatSalt.hot - storage.heatSalt.cold)
+          Plant.thermal.storage = status.massSalt
+            * (status.heatSalt.hot - status.heatSalt.cold)
             / hourFraction / 3_600 / 1_000
-          storage.mass.hot = storage.minMass
-          storage.mass.cold = storage.mass.cold + storage.massSalt
-          storage.heatRelease = self.parameter.dischargeToTurbine
+          status.mass.hot = status.minMass
+          status.mass.cold = status.mass.cold + status.massSalt
+          status.heatRelease = parameter.dischargeToTurbine
         } else {
-          storage.mass.cold = storage.mass.cold + storage.massSalt
-          storage.heatRelease = storage.mass.hot * (self.parameter.designTemperature.hot
-            - self.parameter.designTemperature.cold).kelvin / (storage.massSalt *
-            (self.parameter.designTemperature.hot
-              - self.parameter.designTemperature.cold).kelvin)
+          status.mass.cold = status.mass.cold + status.massSalt
+          status.heatRelease = status.mass.hot * (parameter.designTemperature.hot
+            - parameter.designTemperature.cold).kelvin / (status.massSalt *
+            (parameter.designTemperature.hot
+              - parameter.designTemperature.cold).kelvin)
         }
-        if storage.mass.cold > 0 {
+        if status.mass.cold > 0 {
           // cold salt is storage.temperature.inlet + dTHTF_ColdSalt
-          storage.temperatureTanks.cold = Temperature((storage.massSalt
-              * (storage.temperature.inlet + storage.dTHTF_ColdSalt).kelvin
-              + storage.mass.cold * storage.temperatureTanks.cold.kelvin)
-            / (storage.massSalt + storage.mass.cold))
+          status.temperatureTanks.cold = Temperature((status.massSalt
+              * (status.temperature.inlet + status.dTHTF_ColdSalt).kelvin
+              + status.mass.cold * status.temperatureTanks.cold.kelvin)
+            / (status.massSalt + status.mass.cold))
         }
       case .preheat:
-        storage.heatSalt.hot = salt.enthalpy(storage.temperatureTanks.hot)
+        status.heatSalt.hot = salt.enthalpy(status.temperatureTanks.hot)
 
-        storage.heatSalt.cold = salt.enthalpy(self.parameter.designTemperature.cold)
+        status.heatSalt.cold = salt.enthalpy(parameter.designTemperature.cold)
 
-        storage.massSalt = Plant.thermal.storage
-          / (storage.heatSalt.hot - storage.heatSalt.cold)
+        status.massSalt = Plant.thermal.storage
+          / (status.heatSalt.hot - status.heatSalt.cold)
           * hourFraction * 3_600 * 1_000
 
-        storage.mass.hot = -storage.massSalt + storage.mass.hot
+        status.mass.hot = -status.massSalt + status.mass.hot
 
-        storage.mass.cold = storage.mass.cold + storage.massSalt
+        status.mass.cold = status.mass.cold + status.massSalt
 
-        storage.heatRelease = storage.mass.hot * (self.parameter.designTemperature.hot
-          - self.parameter.designTemperature.cold).kelvin
-          / (storage.massSalt * (self.parameter.designTemperature.hot
-              - self.parameter.designTemperature.cold).kelvin)
+        status.heatRelease = status.mass.hot * (parameter.designTemperature.hot
+          - parameter.designTemperature.cold).kelvin
+          / (status.massSalt * (parameter.designTemperature.hot
+              - parameter.designTemperature.cold).kelvin)
 
-        storage.temperatureTanks.cold = Temperature(
-          (storage.massSalt * self.parameter.designTemperature.cold.kelvin
-            + storage.mass.cold * storage.temperatureTanks.cold.kelvin)
-            / (storage.massSalt + storage.mass.cold)
+        status.temperatureTanks.cold = Temperature(
+          (status.massSalt * parameter.designTemperature.cold.kelvin
+            + status.mass.cold * status.temperatureTanks.cold.kelvin)
+            / (status.massSalt + status.mass.cold)
         )
 
       case .freezeProtection:
         let splitfactor = parameter.HTF == .hiXL ? 0.4 : 1
 
-        storage.massSalt = solarField.antiFreezeFlow.rate * hourFraction * 3_600
+        status.massSalt = solarField.antiFreezeFlow.rate * hourFraction * 3_600
 
-        storage.temperatureTanks.cold = Temperature(
-          (splitfactor * storage.massSalt
+        status.temperatureTanks.cold = Temperature(
+          (splitfactor * status.massSalt
             * powerBlock.temperature.outlet.kelvin
-            + storage.mass.cold * storage.temperatureTanks.cold.kelvin)
-            / (splitfactor * storage.massSalt + storage.mass.cold)
+            + status.mass.cold * status.temperatureTanks.cold.kelvin)
+            / (splitfactor * status.massSalt + status.mass.cold)
         )
 
-        storage.tempertureColdOut = splitfactor * storage.temperatureTanks.cold.kelvin
+        status.tempertureColdOut = splitfactor * status.temperatureTanks.cold.kelvin
           + (1 - splitfactor) * powerBlock.temperature.outlet.kelvin
         // powerBlock.temperature.outlet = storage.temperatureTank.cold
 
       case .noOperation:
-        if self.parameter.stepSizeIteration < -90,
-          storage.temperatureTanks.cold < self.parameter.designTemperature.cold,
-          powerBlock.temperature.outlet > storage.temperatureTanks.cold,
-          storage.mass.cold > 0 {
-          storage.massSalt = powerBlock.massFlow.rate * hourFraction * 3_600
+        if parameter.stepSizeIteration < -90,
+          status.temperatureTanks.cold < parameter.designTemperature.cold,
+          powerBlock.temperature.outlet > status.temperatureTanks.cold,
+          status.mass.cold > 0 {
+          status.massSalt = powerBlock.massFlow.rate * hourFraction * 3_600
 
-          storage.temperatureTanks.cold = Temperature(
-            (storage.massSalt * powerBlock.temperature.outlet.kelvin
-              + storage.mass.cold * storage.temperatureTanks.cold.kelvin)
-              / (storage.massSalt + storage.mass.cold)
+          status.temperatureTanks.cold = Temperature(
+            (status.massSalt * powerBlock.temperature.outlet.kelvin
+              + status.mass.cold * status.temperatureTanks.cold.kelvin)
+              / (status.massSalt + status.mass.cold)
           )
 
-          storage.operationMode = .sc
+          status.operationMode = .sc
         }
       default: break
       }
@@ -805,43 +821,43 @@ public struct Storage: Component {
       // Storage Heat Losses:
       if steamTurbine.isMaintained {
       } else {
-        if storage.mass.hot > 0 {
+        if status.mass.hot > 0 {
           // parameter.dischargeToTurbine * Saltmass {
           // enthalpy before cooling down
-          storage.heatSalt.hot = salt.enthalpy(storage.temperatureTanks.hot)
+          status.heatSalt.hot = salt.enthalpy(status.temperatureTanks.hot)
           // enthalpy after cooling down
-          storage.heatSalt.hot = storage.heatSalt.hot - hotTankHeatLoss
-            * Double(period) / storage.mass.hot
+          status.heatSalt.hot = status.heatSalt.hot - hotTankHeatLoss
+            * Double(period) / status.mass.hot
           // temp after cool down
-          storage.temperatureTanks.hot = Temperature(celsius:
+          status.temperatureTanks.hot = Temperature(celsius:
             (-salt.heatCapacity[0] + (salt.heatCapacity[0] ** 2
                 - 4 * (salt.heatCapacity[1] * 0.5)
-                * (-350.5536 - storage.heatSalt.hot)) ** 0.5)
+                * (-350.5536 - status.heatSalt.hot)) ** 0.5)
               / (2 * salt.heatCapacity[1] * 0.5))
         }
-        if storage.mass.cold > self.parameter.dischargeToTurbine * storage.massSalt {
+        if status.mass.cold > parameter.dischargeToTurbine * status.massSalt {
           // enthalpy before cooling down
-          storage.heatSalt.cold = salt.enthalpy(storage.temperatureTanks.cold)
+          status.heatSalt.cold = salt.enthalpy(status.temperatureTanks.cold)
           // enthalpy after cooling down
-          storage.heatSalt.cold = storage.heatSalt.cold - coldTankHeatLoss
-            * Double(period) / storage.mass.cold
+          status.heatSalt.cold = status.heatSalt.cold - coldTankHeatLoss
+            * Double(period) / status.mass.cold
           // temp after cool down
-          storage.temperatureTanks.cold = Temperature(celsius:
+          status.temperatureTanks.cold = Temperature(celsius:
             (-salt.heatCapacity[0] + (salt.heatCapacity[0] ** 2
                 - 4 * (salt.heatCapacity[1] * 0.5)
-                * (-350.5536 - storage.heatSalt.cold)) ** 0.5)
+                * (-350.5536 - status.heatSalt.cold)) ** 0.5)
               / (2 * salt.heatCapacity[1] * 0.5))
         }
       }
     }
 
     if Plant.thermal.storage < 0 {
-      if case .freezeProtection = storage.operationMode {
+      if case .freezeProtection = status.operationMode {
         // FIXME: powerBlock.temperature.outlet // = powerBlock.temperature.outlet
-      } else if case .charging = storage.operationMode {
+      } else if case .charging = status.operationMode {
         // if storage.operationMode = "IN" added to avoid Tmix during TES discharge (valid for indirect storage), check!
         powerBlock.temperature.outlet = htf.mixingTemperature(
-          outlet: powerBlock, with: storage
+          outlet: powerBlock, with: status
         )
       }
     }
@@ -855,6 +871,10 @@ public struct Storage: Component {
                      fuel: inout Double,
                      fuelConsumption: inout FuelConsumption,
                      thermal: inout ThermalEnergy) {
+    let solarField = SolarField.parameter
+    let heatExchanger = HeatExchanger.parameter
+    let steamTurbine = SteamTurbine.parameter
+    
     var thermalDiff = 0.0
     var maxLoad = Ratio(0)
 
@@ -867,7 +887,7 @@ public struct Storage: Component {
       )
       thermalDiff = thermal.production - heatExchanger.sccHTFthermal
     } else {
-      if case .always = self.parameter.strategy {
+      if case .always = parameter.strategy {
         // if demand is selected, variable is called Alw but calculation is done as demand, error comes from older version // "Dem"
         status.powerBlock.massFlow = MassFlow(thermal.demand
           / (htf.heatDelta(
@@ -881,12 +901,12 @@ public struct Storage: Component {
         }
       } else {
         thermalDiff = thermal.production - thermal.demand // [MW]
-        if self.parameter.heatExchangerRestrictedMin {
+        if parameter.heatExchangerRestrictedMin {
           // added to avoid input to storage lower than minimal HX// s capacity
-          thermal.toStorageMin = self.parameter.heatExchangerMinCapacity
+          thermal.toStorageMin = parameter.heatExchangerMinCapacity
             * heatExchanger.sccHTFthermal
-            * (1 - self.parameter.massFlow.rate / solarField.massFlow.max.rate)
-            / (self.parameter.massFlow.rate / solarField.massFlow.max.rate)
+            * (1 - parameter.massFlow.rate / solarField.massFlow.max.rate)
+            / (parameter.massFlow.rate / solarField.massFlow.max.rate)
 
           if thermalDiff > 0 && thermalDiff < thermal.toStorageMin {
             thermal.demand = thermal.demand - (thermal.toStorageMin - thermalDiff)
@@ -900,7 +920,7 @@ public struct Storage: Component {
           }
         }
       }
-      if case .demand = self.parameter.strategy {
+      if case .demand = parameter.strategy {
         // if Always is selected, variable is called "Dem" but calculation is done as "Always", error comes from older version // "Alw" {
         status.powerBlock.massFlow = MassFlow(heatExchanger.sccHTFthermal
           / (htf.heatDelta(
@@ -932,7 +952,7 @@ public struct Storage: Component {
         }
       }
       // parameter.strategy = "Ful" // Booster or Shifter
-      if case .shifter = self.parameter.strategy {
+      if case .shifter = parameter.strategy {
         // new calculation of shifter, old kept and commented below this:
         let time = TimeStep.current
         if time.month < parameter.startexcep
@@ -1066,7 +1086,7 @@ public struct Storage: Component {
       }
     }
     if thermalDiff > 0 { // Energy surplus
-      if status.storage.heatRelease < self.parameter.chargeTo,
+      if status.storage.heatRelease < parameter.chargeTo,
         status.solarField.header.massFlow >= status.powerBlock.massFlow {
         Storage.update(&status, mode: .charging, thermal: &thermal)
         status.powerBlock.temperature.inlet = status.solarField.header.temperature.outlet
@@ -1078,7 +1098,7 @@ public struct Storage: Component {
       var peakTariff: Bool
       let time = TimeStep.current
       // check when to discharge TES
-      if case .shifter = self.parameter.strategy { // only for Shifter
+      if case .shifter = parameter.strategy { // only for Shifter
         if time.month < parameter.startexcep || time.month > parameter.endexcep { // Oct to March
           peakTariff = time.hour >= parameter.dischrgWinter
         } else { // April to Sept
@@ -1089,8 +1109,8 @@ public struct Storage: Component {
       }
 
       if peakTariff, status.storage.operationMode.isFreezeProtection == false,
-        status.storage.heatRelease > self.parameter.dischargeToTurbine,
-        thermalDiff < -1 * self.parameter.heatdiff * thermal.demand { // added dicharge only after peak hours
+        status.storage.heatRelease > parameter.dischargeToTurbine,
+        thermalDiff < -1 * parameter.heatdiff * thermal.demand { // added dicharge only after peak hours
         // previous discharge condition commented:
         // if storage.heatrel > parameter.dischargeToTurbine && storage.operationMode != .freezeProtection && heatdiff < -1 * parameter.heatdiff * thermal.demand {
         // Discharge directly!! // 04.07.0 -0.25&& heatdiff < -0.25 * thermal.dem
@@ -1120,24 +1140,23 @@ public struct Storage: Component {
 
           status.powerBlock.massFlow = status.storage.massFlow
 
-          status.powerBlock.massFlow.adjust(with: self.parameter.heatExchangerEfficiency)
+          status.powerBlock.massFlow.adjust(with: parameter.heatExchangerEfficiency)
         } else {
           status.powerBlock.massFlow = MassFlow()
         }
       } else { // heat can only be provided with heater on
-        if (self.parameter.FC == 0 && status.collector.parabolicElevation < 0.011
-          && status.storage.heatRelease < self.parameter.chargeTo
+        if (parameter.FC == 0 && status.collector.parabolicElevation < 0.011
+          && status.storage.heatRelease < parameter.chargeTo
           && !(status.powerBlock.temperature.inlet.kelvin > 665)
           && status.steamTurbine.isMaintained
-          && self.isFossilChargingAllowed(at: time)
+          && Storage.isFossilChargingAllowed(at: time)
           && Fuelmode.isPredefined == false) || (Fuelmode.isPredefined && fuel > 0) {
           status.heater.operationMode = .freezeProtection
 
           if Fuelmode.isPredefined == false {
             let fuel = Double.greatestFiniteMagnitude
 
-            Heater.update(&status, demand: 0, fuel: fuel,
-                          thermal: &thermal, fuelFlow: &fuelConsumption.heater)
+            Heater.update(&status, demand: 0, fuel: fuel)
 
             Plant.electricalParasitics.heater = Heater.parasitics(at: status.heater.load)
 
@@ -1149,7 +1168,7 @@ public struct Storage: Component {
             // check why to circulate HTF in SF
             Plant.electricalParasitics.solarField = solarField.antiFreezeParastics
           } else if case .freezeProtection = status.solarField.operationMode,
-            status.storage.heatRelease > -0.35 && self.parameter.FP == 0 {
+            status.storage.heatRelease > -0.35 && parameter.FP == 0 {
             Storage.update(&status, mode: .freezeProtection, thermal: &thermal)
           } else {
             Storage.update(&status, mode: .noOperation, thermal: &thermal)
@@ -1212,7 +1231,7 @@ public struct Storage: Component {
       }
 
       if thermalDiff > 0 { // Energy surplus
-        if status.storage.heatRelease < self.parameter.chargeTo,
+        if status.storage.heatRelease < parameter.chargeTo,
           status.solarField.header.massFlow >= status.powerBlock.massFlow { // 1.1
           thermal.production = thermal.solar + thermal.storage
         } else { // heat cannot be stored
@@ -1225,12 +1244,12 @@ public struct Storage: Component {
   }
 
   static func isFossilChargingAllowed(at time: TimeStep) -> Bool {
-    return (time.month < self.parameter.FCstopM || (time.month == self.parameter.FCstopM
-        && time.day < self.parameter.FCstopD) || ((time.month == self.parameter.FCstartM
-        && time.day > self.parameter.FCstartD) || time.month > self.parameter.FCstartM)
-      && (time.month < self.parameter.FCstopM2 || (time.month == self.parameter.FCstopM2
-          && time.day < self.parameter.FCstopD2) || (time.month > self.parameter.FCstartM2
-        || (time.month == self.parameter.FCstartM2 && time.day > self.parameter.FCstartD2))))
+    return (time.month < parameter.FCstopM || (time.month == parameter.FCstopM
+        && time.day < parameter.FCstopD) || ((time.month == parameter.FCstartM
+        && time.day > parameter.FCstartD) || time.month > parameter.FCstartM)
+      && (time.month < parameter.FCstopM2 || (time.month == parameter.FCstopM2
+          && time.day < parameter.FCstopD2) || (time.month > parameter.FCstartM2
+        || (time.month == parameter.FCstartM2 && time.day > parameter.FCstartD2))))
   }
 }
 
@@ -1261,32 +1280,32 @@ extension Storage.PerformanceData {
     self.massSalt = massSalt
     self.heatLossStorage = heatLossStorage
     self.heatProductionLoad = heatProductionLoad
-
+    let storage = Storage.parameter
+    let solarField = SolarField.parameter
     /// Initial state of storage
     if Design.hasStorage {
       heatStored = Design.layout.storage * storage.heatStoredrel
-
-      solarField.massFlow.max = MassFlow(
+      SolarField.parameter.massFlow.max = MassFlow(
         100 / storage.massFlow.rate * solarField.massFlow.max.rate
       )
 
-      storage.massFlow = MassFlow(
+      Storage.parameter.massFlow = MassFlow(
         (1 - storage.massFlow.rate / 100) * solarField.massFlow.max.rate
       )
     }
     heatStored = 0
-    solarField.massFlow.min = MassFlow(
-      solarField.massFlow.min.rate / 100 * solarField.massFlow.max.rate
-    )
+    // solarField.massFlow.min = MassFlow(
+    //   solarField.massFlow.min.rate / 100 * solarField.massFlow.max.rate
+    // )
 
-    solarField.antiFreezeFlow = MassFlow(
-      solarField.antiFreezeFlow.rate / 100 * solarField.massFlow.max.rate
-    )
+    // solarField.antiFreezeFlow = MassFlow(
+    //   solarField.antiFreezeFlow.rate / 100 * solarField.massFlow.max.rate
+    // )
 
     if solarField.pumpParastics.isEmpty {
       if solarField.massFlow.max.rate < 900 {
         // calculation of solar field parasitics with empirical correlation derived from solar field model
-        solarField.pumpParasticsFullLoad = (
+        SolarField.parameter.pumpParasticsFullLoad = (
           0.000000047327 * Design.layout.solarField ** 4
             - 0.000020044 * Design.layout.solarField ** 3
             + 0.0032862 * Design.layout.solarField ** 2
@@ -1296,7 +1315,7 @@ extension Storage.PerformanceData {
             - 0.8236 * (solarField.massFlow.max.rate / 597) ** 2
             + 1.464 * (solarField.massFlow.max.rate / 597) - 0.3508)
       } else {
-        solarField.pumpParasticsFullLoad = (
+        SolarField.parameter.pumpParasticsFullLoad = (
           0.0000055 * solarField.massFlow.max.rate ** 2
             - 0.0074 * solarField.massFlow.max.rate + 4.4
         )
@@ -1304,7 +1323,7 @@ extension Storage.PerformanceData {
             * Design.layout.solarField ** 2 - 0.1322
             * Design.layout.solarField + 8.428)
       }
-      solarField.HTFmass = (93300 + 11328 * Design.layout.solarField)
+      SolarField.parameter.HTFmass = (93300 + 11328 * Design.layout.solarField)
         * (0.63 * (solarField.massFlow.max.rate / 597) + 0.38)
     }
     // check if it should be left so or changed to the real achieved temp. ( < 393 °C)
@@ -1320,10 +1339,10 @@ extension Storage.PerformanceData {
       heatSalt.hot = salt.enthalpy(storage.designTemperature.hot)
       heatSalt.cold = salt.enthalpy(storage.designTemperature.cold)
 
-      heatExchanger.temperature.h2o.inlet.max = Temperature(
+      HeatExchanger.parameter.temperature.h2o.inlet.max = Temperature(
         storage.startTemperature.hot.kelvin
       )
-      heatExchanger.temperature.h2o.inlet.min = Temperature(
+      HeatExchanger.parameter.temperature.h2o.inlet.min = Temperature(
         storage.startTemperature.cold.kelvin
       )
 

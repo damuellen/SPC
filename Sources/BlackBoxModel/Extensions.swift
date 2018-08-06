@@ -52,4 +52,5 @@ func debug(_ value: Any...) {
 
 extension String {
   static var lineBreak: String { return "\n" }
+  static var separator: String { return ", " }
 }

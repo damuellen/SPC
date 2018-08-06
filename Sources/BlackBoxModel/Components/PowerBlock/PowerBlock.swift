@@ -30,11 +30,11 @@ public enum PowerBlock: Component {
     }
 
     public var description: String {
-      return "\(self.operationMode), "
-        + "Load: \(self.load), "
-        + String(format: "Mfl: %.1fkg/s, ", self.massFlow.rate)
-        + String(format: "In: %.1f°C ", self.temperature.inlet.celsius)
-        + String(format: "Out: %.1f°C", self.temperature.outlet.celsius)
+      return "\(operationMode), "
+        + "Load: \(load), "
+        + String(format: "Mfl: %.1fkg/s, ", massFlow.rate)
+        + String(format: "In: %.1f°C ", temperature.inlet.celsius)
+        + String(format: "Out: %.1f°C", temperature.outlet.celsius)
     }
   }
 
@@ -55,18 +55,19 @@ public enum PowerBlock: Component {
     at load: Ratio, heat: Double,
     steamTurbine: SteamTurbine.PerformanceData
   ) -> Double { // Calc. parasitic power in PB: -
+
     var electricalParasitics = 0.0
 
     if steamTurbine.load.ratio >= 0.01 {
-      electricalParasitics = self.parameter.fixelectricalParasitics
-      electricalParasitics += self.parameter.nominalElectricalParasitics
-        * self.parameter.electricalParasitics[load]
+      electricalParasitics = parameter.fixelectricalParasitics
+      electricalParasitics += parameter.nominalElectricalParasitics
+        * parameter.electricalParasitics[load]
     } else if heat > 0, load.isZero {
       // parasitics during start-up sequence
       // Strange effect of this function over gross output!!
       // "strange effect" is due to interation "Abs(electricalParasiticsAssumed
       // - electricEnergy.parasitics) < Simulation.parameter.electricalTolerance"
-      electricalParasitics = self.parameter.startUpelectricalParasitics
+      electricalParasitics = parameter.startUpelectricalParasitics
     }
 
     // if Heater.parameter.operationMode {
@@ -74,14 +75,14 @@ public enum PowerBlock: Component {
     // same for shams as for any project. check!
     switch steamTurbine.load.ratio { // Step function for Cooling Towers -
     case 0.5 ... 1:
-      electricalParasitics += self.parameter.electricalParasiticsStep[1]
+      electricalParasitics += parameter.electricalParasiticsStep[1]
     case 0 ... 0.5:
-      electricalParasitics += self.parameter.electricalParasiticsStep[0]
+      electricalParasitics += parameter.electricalParasiticsStep[0]
     case 0:
       if steamTurbine.isMaintained {
         electricalParasitics = 0 // add sched. maint. parasitics as a parameter
       } else if heat == 0 { // night TEST
-        electricalParasitics = self.parameter.fixElectricalParasitics0
+        electricalParasitics = parameter.fixElectricalParasitics0
       }
     default: break
     }
@@ -91,7 +92,7 @@ public enum PowerBlock: Component {
       // only during operation
       var electricalParasiticsACC = parameter.electricalParasiticsACC[load]
 
-      if !self.parameter.electricalParasiticsACCTamb.coefficients.isEmpty {
+      if !parameter.electricalParasiticsACCTamb.coefficients.isEmpty {
         var adjustmentACC = parameter.electricalParasiticsACCTamb
           .apply(Plant.ambientTemperature.celsius)
         // ambient temp is larger than design, ACC max. consumption fixed to nominal
@@ -102,7 +103,7 @@ public enum PowerBlock: Component {
       }
     }
 
-    electricalParasitics += self.parameter.nominalElectricalParasiticsACC
+    electricalParasitics += parameter.nominalElectricalParasiticsACC
     return electricalParasitics // + 0.005 * steamTurbine.load * parameter.power.max
 
     // return parameter.fixelectricalParasitics
@@ -117,9 +118,9 @@ public enum PowerBlock: Component {
                      Qsto: Double, meteo: MeteoData) -> Double {
     // Calculates the Electric gross, Parasitic
 
-    let parameter = steamTurbine
+    let steamTurbine = SteamTurbine.parameter
     var turbineStandStillTime = 0.0
-    if parameter.hotStartUpTime == 0 {
+    if steamTurbine.hotStartUpTime == 0 {
       // parameter.hotStartUpTime = 75 // default value
     }
     var turbineStartUpTime = 0.0
@@ -131,7 +132,7 @@ public enum PowerBlock: Component {
       // no heat to turbine !!!
       // || (steamTurbine.Op = 0 && SimBegin) added for BL1 black box model
       if case .noOperation = status.steamTurbine.operationMode, Simulation.isStart {
-        turbineStandStillTime = parameter.hotStartUpTime + 5
+        turbineStandStillTime = steamTurbine.hotStartUpTime + 5
       }
       Simulation.isStart = false
       // added and variable declared global, still to be checked!!
@@ -145,27 +146,27 @@ public enum PowerBlock: Component {
       return 0
     } else {
       // Energy is coming to the Turbine
-      if (turbineStartUpTime >= parameter.startUpTime
-        && turbineStartUpEnergy >= parameter.startUpEnergy)
-        || turbineStandStillTime < parameter.hotStartUpTime
+      if (turbineStartUpTime >= steamTurbine.startUpTime
+        && turbineStartUpEnergy >= steamTurbine.startUpEnergy)
+        || turbineStandStillTime < steamTurbine.hotStartUpTime
         || Simulation.isStart {
         Simulation.isStart = false // added for  black box model
         // modification due to turbine degradation
         status.steamTurbine.load = Ratio(
-          heat / (parameter.power.max / parameter.efficiencyNominal)
+          heat / (steamTurbine.power.max / steamTurbine.efficiencyNominal)
         )
 
         status.steamTurbine.load = Ratio(
           heat * SteamTurbine.efficiency(&status, maxLoad: &maxLoad)
-            / parameter.power.max
+            / steamTurbine.power.max
         )
       } else {
         // Start Up sequence: Energy is lost / Dumped
         status.steamTurbine.load = 0.0
         let startUpeff = cos(status.collector.theta) * status.collector.efficiency
         qneu = (Double(meteo.dni) * startUpeff - status.solarField.heatLosses)
-          * Design.layout.solarField * Double(solarField.numberOfSCAsInRow)
-          * 2 * collector.areaSCAnet / 1_000_000
+          * Design.layout.solarField * Double(SolarField.parameter.numberOfSCAsInRow)
+          * 2 * Collector.parameter.areaSCAnet / 1_000_000
 
         if Qsto > 0 {
           qneu = qneu + Qsto

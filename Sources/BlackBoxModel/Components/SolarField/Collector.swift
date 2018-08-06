@@ -34,17 +34,17 @@ public enum Collector: Component {
     }
 
     public var commaSeparatedValues: String {
-      return String(format: ", %.1f", self.parabolicElevation)
-        + String(format: ", %.2f", self.theta)
-        + String(format: ", %.2f ", self.theta)
-        + String(format: ", %.2f", self.efficiency)
+      return String(format: ", %.1f", parabolicElevation)
+        + String(format: ", %.2f", theta)
+        + String(format: ", %.2f ", theta)
+        + String(format: ", %.2f", efficiency)
     }
 
     public var description: String {
-      return String(format: "PE: %.1f°, ", self.parabolicElevation)
-        + String(format: "θ: %.2f°, ", self.theta)
-        + String(format: "cos(θ): %.2f, ", self.cosTheta)
-        + String(format: "η: %.1f", self.efficiency * 100) + "%"
+      return String(format: "PE: %.1f°, ", parabolicElevation)
+        + String(format: "θ: %.2f°, ", theta)
+        + String(format: "cos(θ): %.2f, ", cosTheta)
+        + String(format: "η: %.1f", efficiency * 100) + "%"
     }
   }
 
@@ -58,7 +58,7 @@ public enum Collector: Component {
   static var parameter: Parameter = ParameterDefaults.LS3
 
   static func shadingHCE(cosTheta: Double) -> Double {
-    let shadingHCE = collector.shadingHCE
+    let shadingHCE = parameter.shadingHCE
     switch cosTheta {
     case 0 ... 0.03:
       return shadingHCE[0]
@@ -81,18 +81,20 @@ public enum Collector: Component {
   /// of parabolic trough, edge factors of the solarfield and the optical efficiency
   public static func update(_ status: inout Collector.PerformanceData,
                             meteo: MeteoData, direction: Float = 0) {
+    let solarField = SolarField.parameter
+
     let shadlength = parameter.avgFocus * tan(status.theta.toRadian)
 
     let edge: Double
 
     switch shadlength {
-    case _ where shadlength <= self.parameter.extensionHCE:
+    case _ where shadlength <= parameter.extensionHCE:
       edge = 1
     case _ where shadlength <= solarField.distanceSCA:
-      edge = 1 - (shadlength - self.parameter.extensionHCE) / self.parameter.lengthSCA
+      edge = 1 - (shadlength - parameter.extensionHCE) / parameter.lengthSCA
     default:
       edge = 1 - solarField.edgeFactor[0]
-        - (shadlength - self.parameter.extensionHCE)
+        - (shadlength - parameter.extensionHCE)
         * solarField.edgeFactor[1]
     }
 
@@ -113,26 +115,26 @@ public enum Collector: Component {
     var T_14: Double
 
     if AW < 15 {
-      T_14 = (197_441e-9 * self.parameter.lengthSCA ** 2
-        + 197_441e-9 * self.parameter.lengthSCA)
+      T_14 = (197_441e-9 * parameter.lengthSCA ** 2
+        + 197_441e-9 * parameter.lengthSCA)
     } else if AW < 45 {
-      T_14 = -(264_485e-9 * self.parameter.lengthSCA ** 2
-        + 264_485e-9 * self.parameter.lengthSCA)
+      T_14 = -(264_485e-9 * parameter.lengthSCA ** 2
+        + 264_485e-9 * parameter.lengthSCA)
     } else if AW < 75 {
-      T_14 = (388_307e-9 * self.parameter.lengthSCA ** 2
-        + 388_307e-9 * self.parameter.lengthSCA)
+      T_14 = (388_307e-9 * parameter.lengthSCA ** 2
+        + 388_307e-9 * parameter.lengthSCA)
     } else if AW < 105 {
-      T_14 = (709_175e-9 * self.parameter.lengthSCA ** 2
-        + 709_175e-9 * self.parameter.lengthSCA)
+      T_14 = (709_175e-9 * parameter.lengthSCA ** 2
+        + 709_175e-9 * parameter.lengthSCA)
     } else if AW < 135 {
-      T_14 = (591_045e-9 * self.parameter.lengthSCA ** 2
-        + 591_045e-9 * self.parameter.lengthSCA)
+      T_14 = (591_045e-9 * parameter.lengthSCA ** 2
+        + 591_045e-9 * parameter.lengthSCA)
     } else if AW < 165 {
-      T_14 = (517_083e-9 * self.parameter.lengthSCA ** 2
-        + 517_083e-9 * self.parameter.lengthSCA)
+      T_14 = (517_083e-9 * parameter.lengthSCA ** 2
+        + 517_083e-9 * parameter.lengthSCA)
     } else {
-      T_14 = (354_672e-9 * self.parameter.lengthSCA ** 2
-        + 354_672e-9 * self.parameter.lengthSCA)
+      T_14 = (354_672e-9 * parameter.lengthSCA ** 2
+        + 354_672e-9 * parameter.lengthSCA)
     }
     if direction > 180 { T_14 = -T_14 }
     /// Effective wind speed

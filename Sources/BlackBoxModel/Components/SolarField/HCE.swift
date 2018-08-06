@@ -50,35 +50,35 @@ enum HCE {
     switch mode {
     case .noOperation:
       period = 300
-      self.freezeProtectionCheck(of: &status.solarField)
-      self.mode2(&status, loop: loop, mode: mode, meteo: meteo)
+      HCE.freezeProtectionCheck(of: &status.solarField)
+      HCE.mode2(&status, loop: loop, mode: mode, meteo: meteo)
     case .operating:
       period = 300
-      if meteo.windSpeed > solarField.maxWind {
+      if meteo.windSpeed > SolarField.parameter.maxWind {
         status.solarField.inFocus = 0.0
       }
-      self.mode1(&status, loop: loop, mode: mode, meteo: meteo)
+      HCE.mode1(&status, loop: loop, mode: mode, meteo: meteo)
 
     case .freezeProtection:
 
-      if meteo.windSpeed > solarField.maxWind
+      if meteo.windSpeed > SolarField.parameter.maxWind
         || irradianceCosTheta * status.collector.efficiency < Simulation.parameter.minInsolation {
-        self.mode2(&status, loop: loop, mode: mode, meteo: meteo)
+        HCE.mode2(&status, loop: loop, mode: mode, meteo: meteo)
       } else {
-        self.mode1(&status, loop: loop, mode: mode, meteo: meteo)
+        HCE.mode1(&status, loop: loop, mode: mode, meteo: meteo)
       }
     case .variable:
 
-      if meteo.windSpeed > solarField.maxWind
+      if meteo.windSpeed > SolarField.parameter.maxWind
         || irradianceCosTheta * status.collector.efficiency < Simulation.parameter.minInsolation {
-        self.freezeProtectionCheck(of: &status.solarField)
-        self.mode2(&status, loop: loop, mode: mode, meteo: meteo)
+        HCE.freezeProtectionCheck(of: &status.solarField)
+        HCE.mode2(&status, loop: loop, mode: mode, meteo: meteo)
       } else {
-        self.mode1(&status, loop: loop, mode: mode, meteo: meteo)
+        HCE.mode1(&status, loop: loop, mode: mode, meteo: meteo)
       }
 
     case .fixed:
-      self.mode2(&status, loop: loop, mode: mode, meteo: meteo)
+      HCE.mode2(&status, loop: loop, mode: mode, meteo: meteo)
     }
   }
 
@@ -100,9 +100,11 @@ enum HCE {
 
   // Radiation losses per m2 Aperture; now with the new losses that take into
   // account the percentage of HCE that are broken, lost vacuum and fluorescent
-  public static func radiationLosses(for status: Collector.PerformanceData,
-                                     at temperatures: (Temperature, Temperature),
+  public static func radiationLosses(_ status: Collector.PerformanceData,
+                                     temperatures: (Temperature, Temperature),
                                      meteo: MeteoData) -> Double {
+    let collector = Collector.parameter
+
     let breakHCE = Plant.availability.value.breakHCE.ratio
     let airHCE = Plant.availability.value.airHCE.ratio
     let fluorHCE = Plant.availability.value.fluorHCE.ratio
@@ -231,6 +233,9 @@ enum HCE {
                            loop: SolarField.Loop,
                            mode: Collector.OperationMode,
                            meteo: MeteoData) {
+    let solarField = SolarField.parameter
+    let collector = Collector.parameter
+
     var hce = status.solarField.loops[loop.rawValue]
     defer { status.solarField.loops[loop.rawValue] = hce }
 
@@ -250,13 +255,13 @@ enum HCE {
       * Plant.availability.value.solarField.ratio
 
     if collector.IntradiationLosses {
-      status.solarField.heatLossHCE = HCE.radiationLosses(for: status.collector, at:
-        (averageTemperature + 10.0, ambientTemperature + 30.0),
-                                                          meteo: meteo) * Simulation.adjustmentFactor.heatLossHCE
+      status.solarField.heatLossHCE = HCE.radiationLosses(status.collector,
+        temperatures: (averageTemperature + 10.0, ambientTemperature + 30.0),
+        meteo: meteo) * Simulation.adjustmentFactor.heatLossHCE
     } else {
-      status.solarField.heatLossHCE = HCE.radiationLosses(for: status.collector, at:
-        (htf.maxTemperature + 10.0, hce.temperature.inlet + 10.0),
-                                                          meteo: meteo) * Simulation.adjustmentFactor.heatLossHCE
+      status.solarField.heatLossHCE = HCE.radiationLosses(status.collector,
+        temperatures: (htf.maxTemperature + 10.0, hce.temperature.inlet + 10.0),
+        meteo: meteo) * Simulation.adjustmentFactor.heatLossHCE
     }
 
     status.solarField.heatLosses = status.solarField.heatLossHCE
@@ -295,11 +300,11 @@ enum HCE {
       Plant.thermal.overtemp_dump = 0
       if case .freezeProtection = status.heater.operationMode {
         hce.massFlow = solarField.massFlow.min
-        mode2(&status, loop: loop, mode: mode, meteo: meteo)
+        HCE.mode2(&status, loop: loop, mode: mode, meteo: meteo)
       } else {
         // status = LastHTF
-        self.freezeProtectionCheck(of: &status.solarField)
-        self.mode2(&status, loop: loop, mode: mode, meteo: meteo)
+        HCE.freezeProtectionCheck(of: &status.solarField)
+        HCE.mode2(&status, loop: loop, mode: mode, meteo: meteo)
       }
 
     case let massFlow where massFlow > solarField.massFlow.max:
@@ -354,11 +359,11 @@ enum HCE {
       } else if case .normal = status.heater.operationMode {
         status.solarField.inFocus = 1.0
         hce.massFlow = solarField.massFlow.max.adjusted(with: 0.05)
-        mode2(&status, loop: loop, mode: mode, meteo: meteo)
+        HCE.mode2(&status, loop: loop, mode: mode, meteo: meteo)
       } else {
         status.solarField.inFocus = 1.0
         hce.massFlow = solarField.massFlow.min
-        self.mode2(&status, loop: loop, mode: mode, meteo: meteo)
+        HCE.mode2(&status, loop: loop, mode: mode, meteo: meteo)
       }
 
     default: // MassFlow is within acceptable limits and Tout is as required
@@ -388,6 +393,9 @@ enum HCE {
                            loop: SolarField.Loop,
                            mode _: Collector.OperationMode,
                            meteo: MeteoData) {
+    let solarField = SolarField.parameter
+    let collector = Collector.parameter
+    
     let irradianceCosTheta = Double(meteo.dni) * status.collector.cosTheta
     let ambientTemperature = Temperature(celsius: meteo.temperature)
 
@@ -446,12 +454,12 @@ enum HCE {
 
         if heatInput > 0 {
           status.solarField.heatLossHCE = collector.IntradiationLosses
-            ? HCE.radiationLosses(for: status.collector, at:
-              (self.temperatureNow + 10.0, hce.temperature.inlet + 10.0),
-                                  meteo: meteo)
-            : HCE.radiationLosses(for: status.collector, at:
-              (averageTemperture + 10.0, ambientTemperature + 30.0),
-                                  meteo: meteo)
+            ? HCE.radiationLosses(status.collector,
+              temperatures: (self.temperatureNow + 10.0, hce.temperature.inlet + 10.0),
+              meteo: meteo)
+            : HCE.radiationLosses(status.collector,
+              temperatures: (averageTemperture + 10.0, ambientTemperature + 30.0),
+              meteo: meteo)
 
           status.solarField.heatLossHCE *= Simulation.adjustmentFactor.heatLossHCE
 
@@ -505,11 +513,13 @@ enum HCE {
           }
         } else { // No Massflow
           status.solarField.heatLossHCE = collector.IntradiationLosses
-            ? HCE.radiationLosses(for: status.collector, at:
-              (averageTemperture, ambientTemperature + 20.0), meteo: meteo)
+            ? HCE.radiationLosses(status.collector,
+              temperatures: (averageTemperture, ambientTemperature + 20.0),
+              meteo: meteo)
             * Simulation.adjustmentFactor.heatLossHCE
-            : HCE.radiationLosses(for: status.collector, at:
-              (self.temperatureNow + 10.0, hce.temperature.inlet + 10.0), meteo: meteo)
+            : HCE.radiationLosses(status.collector,
+              temperatures: (self.temperatureNow + 10.0, hce.temperature.inlet + 10.0),
+              meteo: meteo)
           status.solarField.heatLossHCE *= Simulation.adjustmentFactor.heatLossHCE
 
           status.solarField.heatLosses = status.solarField.heatLossHCE
@@ -528,12 +538,12 @@ enum HCE {
           status.solarField.loopEta = status.collector.efficiency
 
           status.solarField.loopEta -= collector.IntradiationLosses
-            ? HCE.radiationLosses(for: status.collector, at:
-              (averageTemperture + 10.0, ambientTemperature + 30.0),
-                                  meteo: meteo)
-            : HCE.radiationLosses(for: status.collector, at:
-              (self.temperatureNow + 10.0, hce.temperature.inlet + 10.0),
-                                  meteo: meteo)
+            ? HCE.radiationLosses(status.collector,
+               temperatures: (averageTemperture + 10.0, ambientTemperature + 30.0),
+               meteo: meteo)
+            : HCE.radiationLosses(status.collector,
+               temperatures: (self.temperatureNow + 10.0, hce.temperature.inlet + 10.0),
+               meteo: meteo)
 
           status.solarField.loopEta *= Simulation.adjustmentFactor.heatLossHCE / irradianceCosTheta
 
