@@ -17,7 +17,15 @@ protocol HeatCycle {
 
 extension HeatCycle {
   var averageTemperature: Temperature {
-    return Temperature.median((temperature.inlet, temperature.outlet))
+    return Temperature.average(temperature.inlet, temperature.outlet)
+  }
+
+  var inletTemperature: Double {
+    return temperature.inlet.kelvin
+  }
+
+  var outletTemperature: Double {
+    return temperature.outlet.kelvin
   }
 
   func heatTransfered(with fluid: HeatTransferFluid) -> Double {

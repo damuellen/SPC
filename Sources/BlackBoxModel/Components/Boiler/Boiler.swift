@@ -11,7 +11,7 @@
 import Foundation
 
 public enum Boiler: Component {
-  /// a struct for operation-relevant data of the boiler
+  /// Contains all data needed to simulate the operation of the boiler
   public struct PerformanceData {
     var operationMode: OperationMode
     var isMaintained: Bool
@@ -34,11 +34,11 @@ public enum Boiler: Component {
   )
   // startEnergyOld: 0.0)
 
-  static var parameter: Parameter = ParameterDefaults.bo
+  public static var parameter: Parameter = ParameterDefaults.bo
 
-  /// Returns the parasitics of the gas turbine based on her working conditions
+  /// Returns the parasitics of the boiler based on his working conditions
   /// - SeeAlso: `Boiler.parasitics(load:)`
-  public static func parasitics(boiler: Boiler.PerformanceData) -> Double {
+  public static func parasitics(estimate boiler: Boiler.PerformanceData) -> Double {
     return Boiler.parasitics(at: boiler.load)
   }
 
@@ -50,7 +50,7 @@ public enum Boiler: Component {
     return efficiency
   }
 
-  /// Calculates the parasitics of the gas turbine which only depends on the current load
+  /// Calculates the parasitics of the boiler which only depends on the current load
   private static func parasitics(at load: Ratio) -> Double {
     return load.ratio.isZero ? 0 :
       Boiler.parameter.nominalElectricalParasitics *
@@ -59,15 +59,16 @@ public enum Boiler: Component {
   }
 
   public static func update(_ status: inout Boiler.PerformanceData,
+                            fuel: inout Double,
                             heatFlow: Double,
                             Qsf_load: Double,
-                            fuel: inout Double) -> Double {
+                            fuelAvailable: Double) -> Double {
     if case .noOperation = status.operationMode { /* || heat >= 0 */
       if status.isMaintained {
         status.operationMode = .scheduledMaintenance
         return 0.0
       }
-      Boiler.noOperation(&status, fuel)
+      Boiler.noOperation(&status, fuel: &fuel, fuelAvailable: fuelAvailable)
       return 0.0
     }
 
@@ -81,15 +82,15 @@ public enum Boiler: Component {
     }
 
     if status.isMaintained { // From here: operation is requested:
-      Log.infoMessage("Scheduled maintenance of BO disables requested operation. \(TimeStep.current)")
+      💬.infoMessage("Scheduled maintenance of BO disables requested operation. \(TimeStep.current)")
       status.operationMode = .scheduledMaintenance
-      Boiler.noOperation(&status, fuel)
+      Boiler.noOperation(&status, fuel: &fuel, fuelAvailable: fuelAvailable)
       return 0.0
     }
 
-    if -heatFlow / Design.layout.boiler < parameter.minLoad || fuel == 0 { // Check if underload
-      Log.infoMessage("BO operation requested but not performed because of BO underload. \(TimeStep.current)")
-      Boiler.noOperation(&status, fuel)
+    if -heatFlow / Design.layout.boiler < parameter.minLoad || fuelAvailable == 0 { // Check if underload
+      💬.infoMessage("BO operation requested but not performed because of BO underload. \(TimeStep.current)")
+      Boiler.noOperation(&status, fuel: &fuel, fuelAvailable: fuelAvailable)
       return 0.0
     }
 
@@ -110,16 +111,13 @@ public enum Boiler: Component {
 
     switch status.operationMode {
     // The total fuel:  production and startup [MWh]
-    case let .noOperation(hours)
-      where hours >= parameter.start.hours.cold:
+    case let .noOperation(hours) where hours >= parameter.start.hours.cold:
       status.operationMode = .coldStartUp
       totalFuelNeed = fuelNeed + parameter.start.energy.cold
-    case let .noOperation(hours)
-      where hours >= parameter.start.hours.warm:
+    case let .noOperation(hours) where hours >= parameter.start.hours.warm:
       status.operationMode = .warmStartUp
       totalFuelNeed = fuelNeed + parameter.start.energy.warm
-    case let .noOperation(hours)
-      where hours >= 0:
+    case let .noOperation(hours)  where hours >= 0:
       status.operationMode = .operating
       totalFuelNeed = fuelNeed // no additional fuel needed.
     default:
@@ -138,11 +136,11 @@ public enum Boiler: Component {
       // FIXME	}
     }
 
-    if fuel < totalFuelNeed { // Check if sufficient fuel avail.
-      Boiler.load(&status, fuel: &fuel)
+    if fuelAvailable < totalFuelNeed { // Check if sufficient fuel avail.
+      Boiler.load(&status, fuel: &fuel, fuelAvailable: fuelAvailable)
       if status.load.ratio < parameter.minLoad {
-        Log.infoMessage("BO operation requested but insufficient fuel. \(TimeStep.current)")
-        Boiler.noOperation(&status, fuel)
+        💬.infoMessage("BO operation requested but insufficient fuel. \(TimeStep.current)")
+        Boiler.noOperation(&status, fuel: &fuel, fuelAvailable: fuelAvailable)
         return 0.0
       }
     }
@@ -151,16 +149,18 @@ public enum Boiler: Component {
 
     // FIXME: H2Ov.temperature.outlet  = Boiler.parameter.nomTout
     if Fuelmode.isPredefined { // predefined fuel consumption in *.pfc-file
-      Plant.fuel.boiler = fuel / hourFraction // Fuel flow [MW] in this hour fraction
-      return Plant.fuel.boiler * Boiler.efficiency(at: status.load) // net thermal power [MW]
+      fuel = fuelAvailable / hourFraction // Fuel flow [MW] in this hour fraction
+      return Plant.fuelConsumption.boiler
+        * Boiler.efficiency(at: status.load) // net thermal power [MW]
     } else {
-      Plant.fuel.boiler = totalFuelNeed / hourFraction // Fuel flow [MW] in this hour fraction
-      return Plant.fuel.boiler / hourFraction * Boiler.efficiency(at: status.load) // net thermal power [MW]
+      fuel = totalFuelNeed / hourFraction // Fuel flow [MW] in this hour fraction
+      return Plant.fuelConsumption.boiler
+        / hourFraction * Boiler.efficiency(at: status.load) // net thermal power [MW]
     }
   }
 
   private static func load(_ status: inout PerformanceData,
-                           fuel: inout Double) {
+                           fuel: inout Double, fuelAvailable: Double) {
     switch (status.operationMode, status.isMaintained) {
     case (let .noOperation(hours), false):
       status.operationMode = .noOperation(hours: hours + hourFraction)
@@ -172,14 +172,12 @@ public enum Boiler: Component {
 
     // Calc. the fuel avail. for production only:
     switch status.operationMode {
-    case let .noOperation(hours)
-      where hours >= Boiler.parameter.start.hours.cold:
+    case let .noOperation(hours) where hours >= Boiler.parameter.start.hours.cold:
       fuel -= Boiler.parameter.start.energy.cold
-    case let .noOperation(hours)
-      where hours >= Boiler.parameter.start.hours.warm:
+    case let .noOperation(hours) where hours >= Boiler.parameter.start.hours.warm:
       fuel -= Boiler.parameter.start.energy.warm
     default:
-      Plant.fuel.boiler = fuel
+      fuel = fuelAvailable
       if 0.5 * fuel < status.startEnergy {
         fuel = 0.5 * fuel
         status.startEnergy -= fuel
@@ -213,12 +211,13 @@ public enum Boiler: Component {
   }
 
   private static func noOperation(_ boiler: inout Boiler.PerformanceData,
-                                  _ fuel: Double) {
+                                  fuel: inout Double,
+                                  fuelAvailable: Double) {
     if case .startUp = boiler.operationMode {
-      Plant.fuel.boiler = fuel
+      fuel = fuelAvailable
     } else {
       boiler.operationMode = .noOperation(hours: hourFraction)
-      Plant.fuel.boiler = 0
+      fuel = 0
       boiler.load = Ratio(0)
       // FIXME: H2Ov.massFlow = 0
     }
@@ -234,7 +233,7 @@ extension Boiler.PerformanceData: CustomStringConvertible {
   }
 }
 
-extension Boiler.PerformanceData.OperationMode: RawRepresentable, CustomStringConvertible {
+extension Boiler.PerformanceData.OperationMode: RawRepresentable {
   public typealias RawValue = String
 
   public init?(rawValue: RawValue) {
@@ -252,10 +251,6 @@ extension Boiler.PerformanceData.OperationMode: RawRepresentable, CustomStringCo
     }
   }
 
-  public var description: String {
-    return self.rawValue
-  }
-
   public var rawValue: RawValue {
     switch self {
     case let .noOperation(hours): return "No Operation for \(hours) hours"
@@ -268,5 +263,11 @@ extension Boiler.PerformanceData.OperationMode: RawRepresentable, CustomStringCo
     case .operating: return "operating"
     case .unknown: return "unknown"
     }
+  }
+}
+
+extension Boiler.PerformanceData.OperationMode: CustomStringConvertible {
+  public var description: String {
+    return self.rawValue
   }
 }

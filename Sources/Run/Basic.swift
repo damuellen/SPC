@@ -4,7 +4,27 @@
 //
 //  Created by Daniel Müllenborn on 17.04.18.
 //
+import BlackBoxModel
 
+extension Substring.SubSequence {
+  var integerValue: Int? { return Int(self) }
+}
+
+public func goalSeek(
+  _ keyPath: KeyPath<PerformanceResults, Double>,
+  greaterThen: Double,
+  block: ()->()
+  ) -> PerformanceLog {
+  var results = PerformanceCalculator.runModel()
+  while results.annually[keyPath: keyPath] < greaterThen {
+    block()
+    results = PerformanceCalculator.runModel()
+    print(results.annually[keyPath: keyPath])
+  }
+  return results
+}
+
+/*
 import BlackBoxModel
 import Config
 import DateGenerator
@@ -26,7 +46,7 @@ func foo() {
   // let mg = MeteoDataGenerator(from: data, interval: .every15minutes)
   var sumDNI: [Int: Double] = [:]
 
-  let solarPosition = SolarPosition(location: (-4.73, 32.68, 1500), year: 2018, timezone: 0, valuesPerHour: .every15minutes)
+  let solarPosition = SolarPosition(location: (-4.73, 32.68, 1500), year: 2018, timezone: 0, frequence: .every15minutes)
 
   for date in dg {
     let c = calendar.dateComponents([.month, .hour, .minute], from: date)
@@ -87,3 +107,4 @@ func foo() {
       print("0, 0,")
   } }
 }
+*/

@@ -14,7 +14,7 @@ public struct MeteoDataFileHandler {
   private var filePath: String
 
   public init(forReadingAtPath path: String) throws {
-    if !FileManager.default.fileExists(atPath: path) {
+    if FileManager.default.fileExists(atPath: path) == false {
       throw MeteoDataFileError.fileNotFound(path)
     }
     self.filePath = path
@@ -30,10 +30,10 @@ public struct MeteoDataFileHandler {
       file = MET(string)
     }
 
-    let data = try file.readContentForData()
-    let location = try file.readContentForLocation()
-    let year = file.readContentForYear()
-    let timeZone = file.readContentForTimeZone()
+    let data = try file.fetchData()
+    let location = try file.fetchLocation()
+    let year = file.fetchYear()
+    let timeZone = file.fetchTimeZone()
 
     return MeteoDataSource(
       name: String(self.filePath.split(separator: "/").last!),
@@ -52,10 +52,10 @@ enum MeteoDataFileError: Error {
 }
 
 protocol MeteoDataFile {
-  func readContentForLocation() throws -> Location
-  func readContentForData() throws -> [MeteoData]
-  func readContentForYear() -> Int
-  func readContentForTimeZone() -> Int
+  func fetchLocation() throws -> Location
+  func fetchData() throws -> [MeteoData]
+  func fetchYear() -> Int
+  func fetchTimeZone() -> Int
 }
 
 private struct MET: MeteoDataFile {
@@ -66,26 +66,28 @@ private struct MET: MeteoDataFile {
     content = string.split(separator: separator).map(String.init)
   }
 
-  func readContentForTimeZone() -> Int {
+  func fetchTimeZone() -> Int {
     guard let longitude = Int(content[4].whitespacesTrimmed) else { return 0 }
     return longitude / 15
   }
 
-  func readContentForLocation() throws -> Location {
+  func fetchLocation() throws -> Location {
     let values = Array(content[2 ... 3])
+    
     guard let longitude = Float(values[0].whitespacesTrimmed),
       let latitude = Float(values[1].whitespacesTrimmed)
     else { throw MeteoDataFileError.unknownLocation }
+
     return Location(
       longitude: -longitude, latitude: latitude, elevation: 0
     )
   }
 
-  func readContentForYear() -> Int {
+  func fetchYear() -> Int {
     return Int(self.content[1]) ?? 1970
   }
 
-  func readContentForData() throws -> [MeteoData] {
+  func fetchData() throws -> [MeteoData] {
     guard let endOfFile = content.last
     else { throw MeteoDataFileError.empty }
 
@@ -163,7 +165,7 @@ private struct TMY: MeteoDataFile {
     content = string.split(separator: separator).map(String.init)
   }
 
-  func readContentForLocation() throws -> Location {
+  func fetchLocation() throws -> Location {
     let values = Array(content[..<3])
     guard let longitude = Float(values[1].split(separator: " ").last),
       let latitude = Float(values[0].split(separator: " ").last),
@@ -174,16 +176,17 @@ private struct TMY: MeteoDataFile {
     )
   }
 
-  func readContentForTimeZone() -> Int {
-    guard let longitude = Float(content[1].split(separator: " ").last) else { return 0 }
+  func fetchTimeZone() -> Int {
+    guard let longitude = Float(content[1].split(separator: " ").last)
+      else { return 0 }
     return Int(longitude / 15)
   }
 
-  func readContentForYear() -> Int {
+  func fetchYear() -> Int {
     return 1970
   }
 
-  func readContentForData() throws -> [MeteoData] {
+  func fetchData() throws -> [MeteoData] {
     guard let endOfFile = content.last
     else { throw MeteoDataFileError.empty }
 

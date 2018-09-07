@@ -12,22 +12,15 @@ import DateGenerator
 import Foundation
 import Meteo
 import SolarPosition
-/*
- The collector model contains the following: net collector surface area, length,
- parabola aperture, average distance from focus, optical efficiency,
- absorber extension beyond collector, absorber tube outer radius, inner radius
- and coating emittance coefficient as a function of temperature,
- radius of glass cover tube, bellow shadowing, and optical efficiency
- as a function of incident angle (incident angle modifier).
- */
+
 public enum Collector: Component {
   public enum OperationMode {
     case variable, freezeProtection, noOperation, operating, fixed
   }
 
-  /// a struct for operation-relevant data of the collector
+  /// Contains all data needed to simulate the operation of the collector
   public struct PerformanceData: Encodable, CustomStringConvertible {
-    var parabolicElevation, theta, cosTheta, efficiency: Double
+    public var parabolicElevation, theta, cosTheta, efficiency: Double
 
     static var headers: String {
       return "Parabolic Elevation, elevation, azimuth, theta, efficiency"
@@ -55,7 +48,7 @@ public enum Collector: Component {
     efficiency: 0
   )
 
-  static var parameter: Parameter = ParameterDefaults.LS3
+  public static var parameter: Parameter = ParameterDefaults.LS3
 
   static func shadingHCE(cosTheta: Double) -> Double {
     let shadingHCE = parameter.shadingHCE
@@ -83,7 +76,7 @@ public enum Collector: Component {
                             meteo: MeteoData, direction: Float = 0) {
     let solarField = SolarField.parameter
 
-    let shadlength = parameter.avgFocus * tan(status.theta.toRadian)
+    let shadlength = parameter.avgFocus * tan(status.theta.toRadians)
 
     let edge: Double
 
@@ -98,9 +91,9 @@ public enum Collector: Component {
         * solarField.edgeFactor[1]
     }
 
-    let IAM = parameter.IAMfac[status.theta.toRadian]
+    let IAM = parameter.IAMfac[status.theta.toRadians]
 
-    var shadingSCA = abs(sin(status.parabolicElevation.toRadian))
+    var shadingSCA = abs(sin(status.parabolicElevation.toRadians))
       * solarField.rowDistance / parameter.aperture
     shadingSCA = min(1, shadingSCA)
     if shadingSCA < 0.01 {
@@ -150,27 +143,27 @@ public enum Collector: Component {
         * pow(torsion, 2) - 0.0354 * torsion + 99.997) / 100)
     let shadingHCE = self.shadingHCE(cosTheta: status.cosTheta)
     let eff = shadingSCA * shadingHCE * IAM * edge * k_torsion
-    status.efficiency = eff
+    status.efficiency = eff * Simulation.adjustmentFactor.efficiencySolarField
   }
 
   public static func tracking(sun: SolarPosition.OutputValues) -> Collector.PerformanceData {
     var collector = Collector.initialState
     guard sun.zenith < 90 else { return collector }
 
-    collector.parabolicElevation = 90 - (atan(tan(sun.zenith.toRadian)
-        * cos(((sun.azimuth > 0 ? 90.0 : -90.0) - sun.azimuth).toRadian))).toDegree
+    collector.parabolicElevation = 90 - (atan(tan(sun.zenith.toRadians)
+        * cos(((sun.azimuth > 0 ? 90.0 : -90.0) - sun.azimuth).toRadians))).toDegrees
 
-    let az = sun.azimuth.toRadian,
-      el = sun.elevation.toRadian,
-      beta = 0.0,
-      sfaz = 0.0
+    let az = sun.azimuth.toRadians,
+      el = sun.elevation.toRadians,
+      beta = SolarField.parameter.elevation.toRadians,
+      sfaz = SolarField.parameter.azimut.toRadians
 
     let theta = (cos(az - sfaz) / abs(cos(az - sfaz)) * 180 / .pi
       * acos(sqrt(1 - (cos(el - beta) - cos(beta) * cos(el)
           * (1 - cos(az - sfaz))) ** 2))) * (-1)
 
     collector.theta = theta
-    collector.cosTheta = cos(theta.toRadian)
+    collector.cosTheta = cos(theta.toRadians)
     return collector
   }
 }
@@ -194,6 +187,8 @@ extension SolarField.PerformanceData.OperationMode {
       return .variable
     case .ph:
       return .variable
+    case .normal:
+      return .operating
     }
   }
 }

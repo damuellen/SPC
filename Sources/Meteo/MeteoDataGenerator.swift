@@ -17,31 +17,33 @@ let calendar = { calendar -> NSCalendar in
 }(NSCalendar(identifier: .gregorian)!)
 
 public class MeteoDataGenerator: Sequence {
-  private(set) var intermediateSteps: DateGenerator.Interval
+  private(set) var frequence: DateGenerator.Interval
   private(set) var dateInterval: DateInterval?
   private let dataSource: MeteoDataSource
   private let sunHoursPerDay: [DateInterval]
 
-  public init(from source: MeteoDataSource, interval: DateGenerator.Interval) {
+  public init(_ source: MeteoDataSource, frequence: DateGenerator.Interval) {
     self.dataSource = source
-    self.intermediateSteps = interval
+    self.frequence = frequence
     self.range = source.data.startIndex ..< source.data.endIndex
     self.sunHoursPerDay = []
   }
 
-  public init(from source: MeteoDataSource, sunHoursPerDay: [DateInterval], interval: DateGenerator.Interval) {
+  public init(from source: MeteoDataSource, sunHoursPerDay: [DateInterval],
+              frequence: DateGenerator.Interval) {
     self.dataSource = source
-    self.intermediateSteps = interval
+    self.frequence = frequence
 
     self.range = source.data.startIndex ..< source.data.endIndex
     self.sunHoursPerDay = sunHoursPerDay
-    let d = sunHoursPerDay.first!.start
-    let x = calendar.date(bySettingHour: 0, minute: 0, second: 0, of: d, options: [])
-    dateInterval = DateInterval(start: x!, duration: 0)
+    let daybreak = sunHoursPerDay.first!.start
+    let start = calendar.date(bySettingHour: 0, minute: 0, second: 0,
+                              of: daybreak, options: [])!
+    dateInterval = DateInterval(start: start, duration: 0)
   }
 
   public func setRange(_ dateInterval: DateInterval) {
-    self.dateInterval = dateInterval.align(with: self.intermediateSteps)
+    self.dateInterval = dateInterval.align(with: self.frequence)
     let startDate = self.dateInterval!.start
     let endDate = self.dateInterval!.end
 
@@ -49,13 +51,13 @@ public class MeteoDataGenerator: Sequence {
     let startIndex = startHour - 1
 
     let startMinute = calendar.ordinality(of: .minute, in: .hour, for: startDate)
-    step = startMinute / (60 / intermediateSteps.rawValue)
+    step = startMinute / (60 / frequence.rawValue)
 
     let endHour = calendar.ordinality(of: .hour, in: .year, for: endDate)
     let lastIndex = endHour - 1
     range = startIndex ..< lastIndex
     let endMinute = calendar.ordinality(of: .minute, in: .hour, for: endDate)
-    lastStep = endMinute / (60 / intermediateSteps.rawValue)
+    lastStep = endMinute / (60 / frequence.rawValue)
   }
 
   private var perDaySumsDNI: [Double] = []
@@ -85,16 +87,17 @@ public class MeteoDataGenerator: Sequence {
     let lastIndex = range.upperBound
     let lastStep = self.lastStep
     let sunHoursPerDay = self.sunHoursPerDay
+    
     let steps = dataSource.interval < 1
-      ? Int(dataSource.interval / intermediateSteps.fraction)
-      : intermediateSteps.rawValue
+      ? Int(dataSource.interval / frequence.fraction)
+      : frequence.rawValue
 
     let stride = (1 / Float(steps))
 
     var step = 1
     var index = range.lowerBound
-    let period = intermediateSteps.fraction * 3600
-
+    let period = frequence.fraction * 3600
+/*
     var dict = [Int: (Int, Float)]()
     sunHoursPerDay.forEach { day in
       let startIndex = calendar.ordinality(of: .hour, in: .year, for: day.start) - 1
@@ -106,7 +109,7 @@ public class MeteoDataGenerator: Sequence {
       let endFraction = endStep > 1 ? 1 / Float(endStep) / Float(steps) : 1
       dict[endIndex] = (endStep, endFraction)
     }
-
+*/
     return AnyIterator<MeteoData> {
       defer { step += 1 }
       // When step count is reached move index to the next hourly value.

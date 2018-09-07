@@ -21,7 +21,7 @@ public class TextConfigFileHandler {
 
   public init() {}
 
-  public func findFilesInDirectory(atPath path: String) {
+  public func fileSearch(atPath path: String) {
     do {
       guard let pathUrl = URL(string: path)
       else { preconditionFailure("Invalid string for path") }

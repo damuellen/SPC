@@ -11,7 +11,7 @@
 import Config
 import Foundation
 
-var htf = HeatTransferFluid(
+let htf = HeatTransferFluid(
   name: "Therminol",
   freezeTemperature: 12,
   heatCapacity: [1.4856, 0.0028],
@@ -23,8 +23,10 @@ var htf = HeatTransferFluid(
   T_h: [0.58315, 0.65556, -0.00032293, 1.9425e-07, -6.1133e-11],
   useEnthalpy: true
 )
+let h_261 = 1.51129 * 261 + 1.2941 / 1_000 * 261 ** 2
+  + 1.23697 / 10 ** 7 * 261 ** 3 - 0.62677 // kJ/kg
 
-var salt = HeatTransferFluid(
+let salt = HeatTransferFluid(
   name: "Solar Salt",
   freezeTemperature: 240.0,
   heatCapacity: [1.44657, 0.000171715],
@@ -49,8 +51,8 @@ public struct HeatTransferFluid {
   let viscosity: [Double]
   let thermCon: [Double]
   let maxTemperature: Temperature
-  let enthaplyFromTemperature: [Double]
-  let temperatureFromEnthalpy: [Double]
+  let enthaplyFromTemperature: Coefficients
+  let temperatureFromEnthalpy: Coefficients
   let useEnthalpy: Bool
   let heatDelta: (Temperature, Temperature) -> Heat
   let temperatureDelta: (Double, Temperature) -> Temperature
@@ -58,7 +60,7 @@ public struct HeatTransferFluid {
   public init(name: String, freezeTemperature: Double,
               heatCapacity: [Double], dens: [Double],
               visco: [Double], thermCon: [Double], maxTemperature: Double,
-              h_T: [Double], T_h: [Double], useEnthalpy: Bool) {
+              h_T: [Double], T_h: [Double], useEnthalpy: Bool = true) {
     self.name = name
     self.freezeTemperature = Temperature(celsius: freezeTemperature)
     self.heatCapacity = heatCapacity
@@ -66,8 +68,8 @@ public struct HeatTransferFluid {
     self.viscosity = visco
     self.thermCon = thermCon
     self.maxTemperature = Temperature(celsius: maxTemperature)
-    self.enthaplyFromTemperature = h_T
-    self.temperatureFromEnthalpy = T_h
+    self.enthaplyFromTemperature = Coefficients(h_T)
+    self.temperatureFromEnthalpy = Coefficients(T_h)
 
     if useEnthalpy, !h_T.isEmpty, !T_h.isEmpty {
       self.useEnthalpy = true
@@ -79,8 +81,8 @@ public struct HeatTransferFluid {
       self.temperatureDelta = {
         (thermal: Double, temperature: Temperature) -> Temperature in
         Temperature(celsius: HeatTransferFluid.temperatureFromEnthalpy(
-          thermal, temperature.celsius, coefficients: (h_T, T_h)
-        ))
+          thermal, temperature.celsius, coefficients: (h_T, T_h))
+        )
       }
     } else {
       assert(!heatCapacity.isEmpty)
@@ -93,8 +95,8 @@ public struct HeatTransferFluid {
       self.temperatureDelta = {
         (specificHeat: Double, temperature: Temperature) -> Temperature in
         Temperature(celsius: HeatTransferFluid.temperatureFromHeatCapacity(
-          specificHeat, temperature.celsius, coefficients: heatCapacity
-        ))
+          specificHeat, temperature.celsius, coefficients: heatCapacity)
+        )
       }
     }
   }
@@ -105,10 +107,19 @@ public struct HeatTransferFluid {
       + density[2] * temperature.celsius * temperature.celsius
   }
 
+  public func enthalpyFrom(_ temperature: Temperature) -> Double {
+    assert(temperature.kelvin > freezeTemperature.kelvin)
+    return enthaplyFromTemperature[temperature.celsius]
+  }
+
+  public func temperatureFrom(_ enthalpy: Double) -> Temperature {
+    return Temperature(celsius: temperatureFromEnthalpy[enthalpy])
+  }
+
   func mixingTemperature(
     outlet f1: HeatCycle, with f2: HeatCycle
   ) -> Temperature {
-    let (t1, t2) = (f1.temperature.outlet.kelvin, f2.temperature.outlet.kelvin)
+    let (t1, t2) = (f1.outletTemperature, f2.outletTemperature)
     assert(min(t1, t2) > freezeTemperature.kelvin)
     let (mf1, mf2) = (f1.massFlow.rate, f2.massFlow.rate)
     guard mf1 + mf2 > 0 else { return Temperature((t1 + t2) / 2) }
@@ -120,7 +131,7 @@ public struct HeatTransferFluid {
   func mixingTemperature(
     inlet m1: HeatCycle, with m2: HeatCycle
   ) -> Temperature {
-    let (t1, t2) = (m1.temperature.inlet.kelvin, m2.temperature.outlet.kelvin)
+    let (t1, t2) = (m1.inletTemperature, m2.outletTemperature)
     assert(min(t1, t2) > freezeTemperature.kelvin)
     let (m1, m2) = (m1.massFlow.rate, m2.massFlow.rate)
     guard m1 + m2 > 0 else { return Temperature((t1 + t2) / 2) }
@@ -188,16 +199,16 @@ public struct HeatTransferFluid {
     d += "Specific Heat as a Function of Temperature; cp(T) = c0+c1*T\n"
     d += "c0:" >< "\(heatCapacity[0])"
     d += "c1:" >< "\(heatCapacity[1])"
-    d += "Calculate with Enthalpy: \(useEnthalpy.description)"
-    if !enthaplyFromTemperature.isEmpty {
+    d += "Calculate with Enthalpy:" >< "\(useEnthalpy ? "YES" : "NO")"
+    if enthaplyFromTemperature.isEmpty == false {
       d += "Enthalpy as function on Temperature\n"
-      for (i, c) in enthaplyFromTemperature.enumerated() {
+      for (i, c) in enthaplyFromTemperature.coefficients.enumerated() {
         d += "c\(i):" >< String(format: "%.6E", c)
       }
     }
-    if !temperatureFromEnthalpy.isEmpty {
+    if temperatureFromEnthalpy.isEmpty == false {
       d += "Temperature as function on Enthalpy\n"
-      for (i, c) in temperatureFromEnthalpy.enumerated() {
+      for (i, c) in temperatureFromEnthalpy.coefficients.enumerated() {
         d += "c\(i):" >< String(format: "%.6E", c)
       }
     }
@@ -249,9 +260,9 @@ extension HeatTransferFluid: Codable {
     thermCon = try values.decode(Array<Double>.self, forKey: .thermCon)
     maxTemperature = try values.decode(Temperature.self, forKey: .maxTemperature)
     let h_T = try values.decode(Array<Double>.self, forKey: .h_T)
-    enthaplyFromTemperature = h_T
+    enthaplyFromTemperature = Coefficients(h_T)
     let T_h = try values.decode(Array<Double>.self, forKey: .T_h)
-    temperatureFromEnthalpy = T_h
+    temperatureFromEnthalpy = Coefficients(T_h)
     useEnthalpy = try values.decode(Bool.self, forKey: .withEnthalpy)
 
     if self.useEnthalpy, !h_T.isEmpty, !T_h.isEmpty {
@@ -263,8 +274,8 @@ extension HeatTransferFluid: Codable {
       self.temperatureDelta = {
         (enthalpy: Double, temperature: Temperature) -> Temperature in
         Temperature(HeatTransferFluid.temperatureFromEnthalpy(
-          enthalpy, temperature.kelvin, coefficients: (h_T, T_h)
-        ))
+          enthalpy, temperature.kelvin, coefficients: (h_T, T_h))
+        )
       }
     } else {
       assert(!heatCapacity.isEmpty)
@@ -276,8 +287,8 @@ extension HeatTransferFluid: Codable {
       self.temperatureDelta = {
         (specificHeat: Double, temperature: Temperature) -> Temperature in
         Temperature(HeatTransferFluid.temperatureFromHeatCapacity(
-          specificHeat, temperature.kelvin, coefficients: heatCapacity
-        ))
+          specificHeat, temperature.kelvin, coefficients: heatCapacity)
+        )
       }
     }
   }
@@ -310,9 +321,9 @@ extension HeatTransferFluid {
     maxTemperature = try Temperature(row(45)) // .toKelvin
     if includesEnthalpy {
       let h_T = try [row(47), row(48), row(49), row(50), row(51)]
-      enthaplyFromTemperature = h_T
+      enthaplyFromTemperature = Coefficients(h_T)
       let T_h = try [row(53), row(54), row(55), row(56), row(57)]
-      temperatureFromEnthalpy = T_h
+      temperatureFromEnthalpy = Coefficients(T_h)
       useEnthalpy = try row(59) > 0 ? true : false
       heatDelta = { (high: Temperature, low: Temperature) -> Heat in
         HeatTransferFluid.heatTransfer(
@@ -322,8 +333,8 @@ extension HeatTransferFluid {
       temperatureDelta = {
         (enthalpy: Double, temperature: Temperature) -> Temperature in
         Temperature(celsius: HeatTransferFluid.temperatureFromEnthalpy(
-          enthalpy, temperature.celsius, coefficients: (h_T, T_h)
-        ))
+          enthalpy, temperature.celsius, coefficients: (h_T, T_h))
+        )
       }
     } else {
       self.useEnthalpy = false
@@ -337,8 +348,8 @@ extension HeatTransferFluid {
       self.temperatureDelta = {
         (specificHeat: Double, temperature: Temperature) -> Temperature in
         Temperature(celsius: HeatTransferFluid.temperatureFromHeatCapacity(
-          specificHeat, temperature.celsius, coefficients: heatCapacity
-        ))
+          specificHeat, temperature.celsius, coefficients: heatCapacity)
+        )
       }
     }
   }

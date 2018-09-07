@@ -22,78 +22,79 @@ public struct MeteoData: CustomStringConvertible {
     let dni = start.dni + (value * (end.dni - start.dni)),
       ghi = start.ghi + (value * (end.ghi - start.ghi)),
       dhi = start.dhi + (value * (end.dhi - start.dhi)),
-      temperature = start.temperature
+      t = start.temperature
       + (value * (end.temperature - start.temperature)),
-      windSpeed = start.windSpeed
+      ws = start.windSpeed
       + (value * (end.windSpeed - start.windSpeed))
 
     return MeteoData(
-      dni: dni, ghi: ghi, dhi: dhi, temperature: temperature, windSpeed: windSpeed
+      dni: dni, ghi: ghi, dhi: dhi, temperature: t, windSpeed: ws
     )
   }
 
   static func cosineInterpolation(start: MeteoData, end: MeteoData,
                                   _ progress: Float) -> MeteoData {
-    func cosineInterpolate(y1: Float, y2: Float, mu: Float) -> Float {
+    func cosine(y1: Float, y2: Float, mu: Float) -> Float {
       let mu2 = (1 - cos(mu * .pi)) / 2
       return (y1 * (1 - mu2) + y2 * mu2)
     }
 
     if progress >= 1 { return end }
-    let dni = cosineInterpolate(y1: start.dni, y2: end.dni, mu: progress)
-    let ghi = cosineInterpolate(y1: start.ghi, y2: end.ghi, mu: progress)
-    let dhi = cosineInterpolate(y1: start.dhi, y2: end.dhi, mu: progress)
-    let temperature = cosineInterpolate(y1: start.temperature,
-                                        y2: end.temperature,
-                                        mu: progress)
-    let windSpeed = cosineInterpolate(y1: start.windSpeed,
-                                      y2: end.windSpeed,
-                                      mu: progress)
+
+    let dni = cosine(y1: start.dni, y2: end.dni, mu: progress),
+      ghi = cosine(y1: start.ghi, y2: end.ghi, mu: progress),
+      dhi = cosine(y1: start.dhi, y2: end.dhi, mu: progress),
+      t = cosine(y1: start.temperature, y2: end.temperature, mu: progress),
+      ws = cosine(y1: start.windSpeed, y2: end.windSpeed, mu: progress)
 
     return MeteoData(
-      dni: Float(dni), ghi: Float(ghi), dhi: Float(dhi),
-      temperature: Float(temperature), windSpeed: Float(windSpeed)
+      dni: dni, ghi: ghi, dhi: dhi, temperature: t, windSpeed: ws
     )
   }
 
-  public mutating func noInsolation() {
+  public mutating func zeroInsolation() {
     dni = 0; ghi = 0; dhi = 0
   }
 
   /// Interpolation function for meteo data values
-  static func interpolation(prev: MeteoData, current: MeteoData, next: MeteoData, progess: Float) -> MeteoData {
+  static func interpolation(prev: MeteoData, current: MeteoData,
+                            next: MeteoData, progess: Float) -> MeteoData {
     let startValue = current
     let endValue = next
 
-    func interpolation(_ prev: Float, _ current: Float, _ next: Float, _ progess: Float) -> Float {
+    func interpolation(_ prev: Float, _ current: Float,
+                       _ next: Float, _ progess: Float) -> Float {
       let a = (current - prev) / 2 + prev
       let b = (next - current) / 2 + current
       var m = (b - a)
       var aPrime = (2 * current - m) / 2
       var bPrime = aPrime + m
+
       if aPrime < 0 {
         bPrime = bPrime + aPrime
         aPrime = 0
         m = bPrime - aPrime
       }
+
       if bPrime < 0 {
         aPrime = aPrime + bPrime
         bPrime = 0
         m = bPrime - aPrime
       }
+      
       return m * progess + aPrime
     }
 
     let dni = interpolation(prev.dni, current.dni, next.dni, progess),
       ghi = interpolation(prev.ghi, current.ghi, next.ghi, progess),
       dhi = interpolation(prev.dhi, current.dhi, next.dhi, progess),
-      temperature = startValue.temperature
+      t = startValue.temperature
       + (progess * (endValue.temperature - startValue.temperature)),
-      windSpeed = startValue.windSpeed
+      ws = startValue.windSpeed
       + (progess * (endValue.windSpeed - startValue.windSpeed))
 
     return MeteoData(
-      dni: dni, ghi: ghi, dhi: dhi, temperature: temperature, windSpeed: windSpeed
+      dni: dni, ghi: ghi, dhi: dhi, temperature: t, windSpeed: ws
     )
   }
 
@@ -105,7 +106,8 @@ public struct MeteoData: CustomStringConvertible {
     self.windSpeed = 0
   }
 
-  public init(dni: Float, ghi: Float, dhi: Float, temperature: Float, windSpeed: Float) {
+  public init(dni: Float, ghi: Float, dhi: Float,
+              temperature: Float, windSpeed: Float) {
     self.dni = dni
     self.ghi = ghi
     self.dhi = dhi
@@ -155,7 +157,8 @@ public class MeteoDataSource {
   public let timeZone: Int?
   public var interval = 1.0
 
-  init(name: String, data: [MeteoData], location: Location, year: Int?, timeZone: Int?) {
+  init(name: String, data: [MeteoData],
+       location: Location, year: Int?, timeZone: Int?) {
     self.name = name
     self.data = data
     self.location = location

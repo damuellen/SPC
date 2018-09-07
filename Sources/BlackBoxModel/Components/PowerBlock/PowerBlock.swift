@@ -12,14 +12,15 @@ import Foundation
 import Meteo
 
 public enum PowerBlock: Component {
-  /// a struct for operation-relevant data of the gas turbine
+  /// Contains all data needed to simulate the operation of the power block
   public struct PerformanceData: Equatable, HeatCycle,
     CustomStringConvertible {
     var operationMode: OperationMode
     var load: Ratio
     var massFlow: MassFlow
     var temperature: (inlet: Temperature, outlet: Temperature)
-    var totalMassFlow, heatIn: Double
+    var totalMassFlow: MassFlow
+    var heatIn: Double
 
     public enum OperationMode {
       case scheduledMaintenance
@@ -44,11 +45,11 @@ public enum PowerBlock: Component {
     massFlow: 0.0,
     temperature: (inlet: Simulation.initialValues.temperatureOfHTFinPipes,
                   outlet: Simulation.initialValues.temperatureOfHTFinPipes),
-    totalMassFlow: 0,
+    totalMassFlow: 0.0,
     heatIn: 0
   )
 
-  static var parameter: Parameter = ParameterDefaults.pb
+  public static var parameter: Parameter = ParameterDefaults.pb
 
   /// Calculates the parasitics of the gas turbine which only depends on the current load
   private static func parasitics(
@@ -92,7 +93,7 @@ public enum PowerBlock: Component {
       // only during operation
       var electricalParasiticsACC = parameter.electricalParasiticsACC[load]
 
-      if !parameter.electricalParasiticsACCTamb.coefficients.isEmpty {
+      if parameter.electricalParasiticsACCTamb.coefficients.isEmpty == false {
         var adjustmentACC = parameter.electricalParasiticsACCTamb
           .apply(Plant.ambientTemperature.celsius)
         // ambient temp is larger than design, ACC max. consumption fixed to nominal
@@ -111,12 +112,11 @@ public enum PowerBlock: Component {
     // * (parameter.electricalParasitics[0] + parameter.electricalParasitics[1]
     // * steamTurbine.load + parameter.electricalParasitics[2] * steamTurbine.load ** 2)
   }
-
+  /// Calculates the Electric gross, Parasitic
   static func update(_ status: inout Plant.PerformanceData,
                      heat: inout Double,
                      electricalParasitics _: inout Double,
                      Qsto: Double, meteo: MeteoData) -> Double {
-    // Calculates the Electric gross, Parasitic
 
     let steamTurbine = SteamTurbine.parameter
     var turbineStandStillTime = 0.0
@@ -149,7 +149,8 @@ public enum PowerBlock: Component {
       if (turbineStartUpTime >= steamTurbine.startUpTime
         && turbineStartUpEnergy >= steamTurbine.startUpEnergy)
         || turbineStandStillTime < steamTurbine.hotStartUpTime
-        || Simulation.isStart {
+        || Simulation.isStart
+      {
         Simulation.isStart = false // added for  black box model
         // modification due to turbine degradation
         status.steamTurbine.load = Ratio(
@@ -157,7 +158,7 @@ public enum PowerBlock: Component {
         )
 
         status.steamTurbine.load = Ratio(
-          heat * SteamTurbine.efficiency(&status, maxLoad: &maxLoad)
+          heat * SteamTurbine.efficiency(status, maxLoad: &maxLoad)
             / steamTurbine.power.max
         )
       } else {
@@ -194,5 +195,89 @@ public enum PowerBlock: Component {
       }
       return heat
     }
+  }
+
+  static func heatExchangerBypass(_ status: inout Plant.PerformanceData) {
+    let heatExchanger = HeatExchanger.parameter
+
+    // added to simulate a bypass on the PB-HX if the expected outlet temp is so low that the salt to TES could freeze
+    status.powerBlock.totalMassFlow = status.powerBlock.massFlow
+    let maxTemperature = heatExchanger.temperature.htf.inlet.max.kelvin
+
+    repeat {
+
+      let massFlowLoad = status.powerBlock.massFlow.share(
+        of: SolarField.parameter.massFlow.max
+      )
+
+      if heatExchanger.Tout_exp_Tin_Mfl,
+        let ToutTinMassFlow = heatExchanger.ToutTinMassFlow
+      {
+        var temperaturFactor = (ToutTinMassFlow[0]
+          * (status.powerBlock.inletTemperature
+            / maxTemperature)
+          * 666 + ToutTinMassFlow[1])
+          * massFlowLoad.ratio ** (ToutTinMassFlow[2]
+            * (status.powerBlock.inletTemperature
+              / maxTemperature)
+            * 666 + ToutTinMassFlow[3]) + ToutTinMassFlow[4]
+
+        temperaturFactor = HeatExchanger.limit(temperaturFactor)
+
+        status.powerBlock.temperature.outlet =
+          heatExchanger.temperature.htf.outlet.max
+            .adjusted(with: temperaturFactor)
+
+      } else if heatExchanger.useAndsolFunction {
+        var temperaturFactor = HeatExchanger.temperatureFactor(
+          temperature: status.powerBlock.temperature.inlet, load: massFlowLoad,
+          maxTemperature: heatExchanger.temperature.htf.inlet.max)
+
+        temperaturFactor = HeatExchanger.limit(temperaturFactor)
+
+        status.powerBlock.temperature.outlet =
+          heatExchanger.temperature.htf.outlet.max
+            .adjusted(with: temperaturFactor)
+
+      } else if heatExchanger.Tout_f_Tin == false,
+        heatExchanger.Tout_f_Mfl,
+        let ToutMassFlow = heatExchanger.ToutMassFlow
+      {
+        // if temperature.outlet is dependant on massflow, recalculate temperature.outlet
+        var temperaturFactor = ToutMassFlow[massFlowLoad]
+
+        if temperaturFactor > 1 { temperaturFactor = 1 }
+
+        status.powerBlock.temperature.outlet =
+          heatExchanger.temperature.htf.outlet.max
+            .adjusted(with: temperaturFactor)
+
+      } else if heatExchanger.Tout_f_Mfl,
+        heatExchanger.Tout_f_Tin,
+        let ToutMassFlow = heatExchanger.ToutMassFlow,
+        let ToutTin = heatExchanger.ToutTin
+      {
+        var temperaturFactor = ToutMassFlow[massFlowLoad]
+
+        temperaturFactor *= ToutTin[status.powerBlock.temperature.inlet]
+
+        status.powerBlock.temperature.outlet =
+          heatExchanger.temperature.htf.outlet.max
+            .adjusted(with: temperaturFactor)
+      }
+
+      status.heatExchanger.heatOut = htf.enthalpyFrom(status.powerBlock.temperature.outlet)
+
+      let bypassMassFlow = status.powerBlock.totalMassFlow - status.powerBlock.massFlow
+      let Bypass_h = htf.enthalpyFrom(status.powerBlock.temperature.inlet)
+
+      status.heatExchanger.heatToTES = (bypassMassFlow.rate * Bypass_h
+        + status.powerBlock.massFlow.rate * status.heatExchanger.heatOut)
+        / (bypassMassFlow + status.powerBlock.massFlow).rate
+
+    } while status.heatExchanger.heatToTES > h_261
+
+    status.powerBlock.temperature.outlet =
+      htf.temperatureFrom(status.heatExchanger.heatToTES)
   }
 }

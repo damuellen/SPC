@@ -37,9 +37,9 @@ public enum DryCooling {
   }
 
   public static func update(
-    Tamb: Temperature, steamTurbine: inout SteamTurbine.PerformanceData
+    Tamb: Temperature, steamTurbine: SteamTurbine.PerformanceData
   )
-    -> (DCFactor: Ratio, MaxDCLoad: Ratio) {
+    -> (DCFactor: Ratio, MaxDCLoad: Ratio, backPressure: Double) {
     let coefficientHR: Coefficients = [92.13, 28.73, 18.62, -15.42]
     let PCondMin = 0.179, PCondMax = 0.421 // [bar]
     let HRFmin = 98.0, HRFmax = 106.8 // [%] of design
@@ -52,7 +52,6 @@ public enum DryCooling {
 
     var DCFactor = 0.0
     var MaxDCLoad = 0.0
-    steamTurbine.backPressure = Pcond
 
     if Pcond <= PCondMin {
       DCFactor = HRFmin / 100
@@ -67,6 +66,6 @@ public enum DryCooling {
     } else {
       MaxDCLoad = aLoad + cLoad * Tamb.kelvin
     }
-    return (Ratio(DCFactor), Ratio(MaxDCLoad))
+    return (Ratio(DCFactor), Ratio(MaxDCLoad), Pcond)
   }
 }

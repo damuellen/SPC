@@ -31,8 +31,13 @@ public struct Temperature: CustomStringConvertible {
     self.kelvin = kelvin
   }
 
-  public static func median(_ pair: (Temperature, Temperature)) -> Temperature {
-    return Temperature((pair.0.kelvin + pair.1.kelvin) / 2)
+  public static func average(_ t: Temperature...) -> Temperature {
+    if t.count == 2 {
+      return Temperature((t[0].kelvin + t[1].kelvin) / 2)
+    }
+    return Temperature(t.reduce(0) { result, temp in
+      result + temp.kelvin } / Double(t.count)
+    )
   }
 
   public init(celsius: Double) {

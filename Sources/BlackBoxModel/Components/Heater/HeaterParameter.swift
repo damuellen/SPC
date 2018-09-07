@@ -38,7 +38,7 @@ extension Heater.Parameter: CustomStringConvertible {
       >< "\(minLoad)"
     d += "Parasitics at Full Load [MW]:"
       >< "\(nominalElectricalParasitics)"
-    d += "Parasitic Energy Coefficients; Parasitics(Load) = Parasitics(100%)*(c0+c1*load)\n"
+    d += "Parasitic Energy Coefficients;\nParasitics(Load) = Parasitics(100%)*(c0+c1*load)\n"
     d += "c0:" >< "\(electricalParasitics[0])"
     d += "c1:" >< "\(electricalParasitics[1])"
     d += "Use Heater in Parallel to SF:"

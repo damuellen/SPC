@@ -13,6 +13,8 @@ import Config
 import Foundation
 import Meteo
 
+typealias PC = PerformanceCalculator
+
 let start = CFAbsoluteTimeGetCurrent()
 
 let configPath = CommandLine.arguments.count > 1
@@ -23,13 +25,30 @@ let meteoFilePath = CommandLine.arguments.count > 2
   ? CommandLine.arguments[2]
   : FileManager.default.currentDirectoryPath
 
-// PerformanceCalculator.loadConfigurations(atPath: path, format: .text)
-// PerformanceCalculator.saveConfigurations(toPath: path)
-PerformanceCalculator.meteoFilePath = meteoFilePath
-PerformanceCalculator.interval = .every15minutes
+let contents = try? FileManager.default
+  .contentsOfDirectory(atPath: configPath)
+let csv = contents?.filter { $0.hasSuffix("csv") }
+let runs = csv?.compactMap { filename in
+  return filename.split(separator: ".").first?
+    .split(separator:"_").last?.integerValue
+}
+let lastRun = runs?.max() ?? 99
 
-PerformanceCalculator.runModel(129, output: .full)
+// PC.loadConfigurations(atPath: path, format: .text)
+// PC.saveConfigurations(toPath: path)
+PC.meteoFilePath = meteoFilePath
+PC.interval = .every5minutes
+
+var log = PC.runModel(lastRun + 1, output: .brief)
+print(log.description)
+/*
+log = goalSeek(\.thermal.production, greaterThen: 164000) {
+ Design.layout.solarField += 1
+}*/
 
 let end = CFAbsoluteTimeGetCurrent()
 
 print("Duration:", String(format: "%.2f sec", end - start))
+
+
+

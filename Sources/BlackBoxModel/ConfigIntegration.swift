@@ -14,7 +14,7 @@ import Foundation
 extension JsonConfigFileHandler {
   static func loadConfigurations(atPath path: String) throws {
     let configFileHandler = JsonConfigFileHandler()
-    configFileHandler.findFilesInDirectory(atPath: path)
+    configFileHandler.fileSearch(atPath: path)
 
     let decoder = JSONDecoder()
     decoder.dateDecodingStrategy = .iso8601
@@ -23,7 +23,7 @@ extension JsonConfigFileHandler {
       guard let url = configFileHandler.searchConfig(with: pathExtensions),
         let data = JsonConfigFileHandler.readConfig(url: url)
       else {
-        Log.errorMessage("Config file \(pathExtensions.rawValue) not found.")
+        💬.errorMessage("Config file \(pathExtensions.rawValue) not found.")
         continue
       }
 
@@ -58,8 +58,8 @@ extension JsonConfigFileHandler {
       case .HR:
         Heater.update(parameter:
           try decoder.decode(Heater.Parameter.self, from: data))
-      case .HTF:
-        htf = try decoder.decode(HeatTransferFluid.self, from: data)
+      case .HTF: break
+       // htf = try decoder.decode(HeatTransferFluid.self, from: data)
       case .HX:
         HeatExchanger.update(parameter:
           try decoder.decode(HeatExchanger.Parameter.self, from: data))
@@ -80,8 +80,8 @@ extension JsonConfigFileHandler {
           try decoder.decode(PowerBlock.Parameter.self, from: data))
       case .PFC:
         break
-      case .STF:
-        salt = try decoder.decode(HeatTransferFluid.self, from: data)
+      case .STF: break
+      //  salt = try decoder.decode(HeatTransferFluid.self, from: data)
       }
     }
   }
@@ -129,13 +129,13 @@ extension JsonConfigFileHandler {
 extension TextConfigFileHandler {
   static func loadConfigurations(atPath path: String) throws {
     let configFileHandler = TextConfigFileHandler()
-    configFileHandler.findFilesInDirectory(atPath: path)
+    configFileHandler.fileSearch(atPath: path)
 
     for pathExtensions in ValidPathExtensions.allCases {
       guard let url = configFileHandler.searchConfig(with: pathExtensions),
         let configFile = TextConfigFileHandler.readConfig(url: url)
       else {
-        print("Missing config file with extension .\(pathExtensions.rawValue)")
+        💬.errorMessage("Missing config file with extension .\(pathExtensions.rawValue)")
         continue
       }
       switch pathExtensions {
@@ -153,8 +153,8 @@ extension TextConfigFileHandler {
       case .COL: Collector.update(parameter: try .init(file: configFile))
       case .STO: break
       case .HR: Heater.update(parameter: try .init(file: configFile))
-      case .HTF:
-        htf = try HeatTransferFluid(file: configFile, includesEnthalpy: true)
+      case .HTF: break
+      //  htf = try HeatTransferFluid(file: configFile, includesEnthalpy: true)
       case .HX: HeatExchanger.update(parameter: try .init(file: configFile))
       case .BO: Boiler.update(parameter: try .init(file: configFile))
       case .WHR: WasteHeatRecovery.update(parameter: try .init(file: configFile))
@@ -163,8 +163,8 @@ extension TextConfigFileHandler {
       case .PB: PowerBlock.update(parameter: try .init(file: configFile))
       case .PFC:
         break
-      case .STF:
-        salt = try HeatTransferFluid(file: configFile, includesEnthalpy: false)
+      case .STF: break
+      //  salt = try HeatTransferFluid(file: configFile, includesEnthalpy: false)
       }
     }
   }

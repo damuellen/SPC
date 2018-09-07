@@ -11,7 +11,7 @@
 import Foundation
 
 public enum WasteHeatRecovery: Component {
-  /// a struct for operation-relevant data of the waste heat recovery
+  /// Contains all data needed to simulate the operation of the waste heat recovery
   public struct PerformanceData {
     var maintained: Bool
   }
@@ -28,12 +28,12 @@ public enum WasteHeatRecovery: Component {
         * SteamTurbine.parameter.efficiencySCC
     ]
     efficiency *= parameter.efficiencyGasTurbine[
-      Plant.electricEnergy.gasTurbineGross / GasTurbine.parameter.powerGross
+      Plant.electric.gasTurbineGross / GasTurbine.parameter.powerGross
     ]
     efficiency *= (1 / GasTurbine.efficiency(at: gasTurbineLoad) - 1)
 
-    debugPrint("waste heat recovery efficiency at \(efficiency * 100)%")
-    assert(efficiency > 1, "waste heat recovery efficiency at over 100%")
+    debugPrint("Waste heat recovery efficiency at \(efficiency * 100)%")
+    assert(efficiency > 1, "Waste heat recovery efficiency at over 100%")
     return efficiency
   }
 }

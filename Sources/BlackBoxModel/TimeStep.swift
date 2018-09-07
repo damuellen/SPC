@@ -11,7 +11,9 @@
 import CoreFoundation
 import Foundation
 
-struct TimeStep: Codable, CustomStringConvertible {
+struct TimeStep: CustomStringConvertible {
+
+  var isAtNight: Bool = false
   var yearDay: Int = 0
   var month: Int = 0
   var day: Int = 0
@@ -37,7 +39,7 @@ struct TimeStep: Codable, CustomStringConvertible {
 }
 
 extension TimeStep {
-  init(_ date: Date) {
+  init(_ date: Date, night: Bool = false) {
     let minute = CFCalendarGetOrdinalityOfUnit(
       TimeStep.cfCalendar,
       CFCalendarUnit(rawValue: CFCalendarUnit.minute.rawValue),
@@ -67,7 +69,9 @@ extension TimeStep {
      CFCalendarUnit(rawValue: CFCalendarUnit.day.rawValue),
      CFCalendarUnit(rawValue: CFCalendarUnit.year.rawValue),
      date.timeIntervalSinceReferenceDate) */
-    self = TimeStep(yearDay: yearDay, month: month, day: day, hour: hour, minute: minute)
-    Log.debugMessage("\n\(date)")
+    self = TimeStep(
+      isAtNight: night, yearDay: yearDay,
+      month: month, day: day, hour: hour, minute: minute)
+    💬.debugMessage("Current simulation time: \n\(date)")
   }
 }

@@ -12,46 +12,63 @@ import DateGenerator
 import Foundation
 import Meteo
 
-public enum PerformanceDataLoggerMode { case full, brief, none }
+public enum PerformanceLogMode {
+  case full, brief, playground, none
 
-final class PerformanceDataLogger {
+  var writeResults: Bool {
+    if case .none = self {
+      return false
+    }
+    return true
+  }
+}
+
+public final class PerformanceDataLogger {
   var dateString: String = ""
 
-  var dateFormatter: DateFormatter? {
-    didSet {
-      dateFormatter?.timeZone = TimeZone(secondsFromGMT: 0)
-      dateFormatter?.dateStyle = .short
-      dateFormatter?.timeStyle = .short
-    }
+  let dateFormatter: DateFormatter = { dateFormatter in
+    dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
+    dateFormatter.dateStyle = .short
+    dateFormatter.timeStyle = .short
+    return dateFormatter
+  }(DateFormatter())
+
+  public var log: PerformanceLog {
+    return PerformanceLog(annually: annually, history: history, results: results)
+  }
+  private var annually = PerformanceResults()
+  private var daily = PerformanceResults()
+  private var hourly = PerformanceResults()
+  private var history: [Plant.PerformanceData] = []
+  private var results: [PerformanceResults] = []
+  private let interval = PerformanceCalculator.interval
+  private let mode: PerformanceLogMode
+
+  public init() {
+    self.mode = .playground
   }
 
-  let interval = PerformanceCalculator.interval
-
-  let annuallyResults = Results()
-  let dailyResults = Results()
-  let hourlyResults = Results()
-
-  let mode: PerformanceDataLoggerMode
-
-  init(fileNameSuffix: String, mode: PerformanceDataLoggerMode = .full) {
+  init(fileNameSuffix: String, mode: PerformanceLogMode = .full) {
     self.mode = mode
+    if mode.writeResults {
+      self.dailyResultsStream = OutputStream(
+        toFileAtPath: "DailyResults_\(fileNameSuffix).csv", append: false
+      )
+      self.dailyResultsStream?.open()
+      self.dailyResultsStream?.write(
+        self.headersDaily.name + .lineBreak
+          + self.headersDaily.unit + .lineBreak
+      )
 
-    self.dailyResultsStream = OutputStream(
-      toFileAtPath: "DailyResults_\(fileNameSuffix).csv", append: false
-    )
-    self.dailyResultsStream?.open()
-    self.dailyResultsStream?.write(
-      self.headersDaily.name + .lineBreak + self.headersDaily.unit + .lineBreak
-    )
-
-    self.hourlyResultsStream = OutputStream(
-      toFileAtPath: "HourlyResults_\(fileNameSuffix).csv", append: false
-    )
-    self.hourlyResultsStream?.open()
-    self.hourlyResultsStream?.write(
-      self.headersHourly.name + .lineBreak + self.headersHourly.unit + .lineBreak
-    )
-
+      self.hourlyResultsStream = OutputStream(
+        toFileAtPath: "HourlyResults_\(fileNameSuffix).csv", append: false
+      )
+      self.hourlyResultsStream?.open()
+      self.hourlyResultsStream?.write(
+        self.headersHourly.name + .lineBreak
+          + self.headersHourly.unit + .lineBreak
+      )
+    }
     if case .full = mode {
       let header = "wxDVFileHeaderVer.1\n"
       let startTime = repeatElement("0", count: 40)
@@ -65,7 +82,8 @@ final class PerformanceDataLogger {
 
       allResultsStream?.open()
       allResultsStream?.write(
-        header + headersInterval.name + startTime + intervalTime + headersInterval.unit
+        header + headersInterval.name + startTime
+          + intervalTime + headersInterval.unit
       )
 
       allResultsStream2 = OutputStream(
@@ -73,7 +91,8 @@ final class PerformanceDataLogger {
       )
       allResultsStream2?.open()
       allResultsStream2?.write(
-        header + headersInterval2.name + startTime + intervalTime + headersInterval2.unit
+        header + headersInterval2.name + startTime
+          + intervalTime + headersInterval2.unit
       )
     }
   }
@@ -85,10 +104,18 @@ final class PerformanceDataLogger {
     allResultsStream2?.close()
   }
 
+  func reset() {
+    annually.reset()
+    daily.reset()
+    hourly.reset()
+    history.removeAll(keepingCapacity: true)
+    results.removeAll(keepingCapacity: true)
+  }
+
   func printResult() {
     print("")
     print("---------------------------+=[  Annual results  ]=+-----------------------------")
-    print(annuallyResults)
+    print(annually.description)
     print("________________________________________________________________________________")
   }
 
@@ -98,46 +125,64 @@ final class PerformanceDataLogger {
               thermal: ThermalEnergy,
               fuelConsumption: FuelConsumption,
               status: Plant.PerformanceData) {
-    if case .full = mode {
-      let results = Results()
-      results.thermal = thermal
-      results.energy = electricEnergy
-      results.fuelConsumption = fuelConsumption
-      results.parasitics = electricalParasitics
-      results.dni = Double(meteo.dni)
-      results.ghi = Double(meteo.ghi)
-      results.dhi = Double(meteo.dhi)
-      results.temp = Double(meteo.temperature)
-      results.ws = Double(meteo.windSpeed)
-      results.ico = Double(meteo.dni) * status.collector.cosTheta
-      results.insolationAbsorber = status.solarField.insolationAbsorber
-      results.status = status
-      results.heatLossSolarField = status.solarField.heatLosses
-      results.heatLossHeader = status.solarField.heatLossHeader
-      results.heatLossHCE = status.solarField.heatLossHCE
-      writeAll(results: results, date: date)
-    }
-    // The counter triggers the writing of the file when it is set.
-    defer { intervalCounter += 1 }
 
-    if self.intervalCounter == 0, let dateFormatter = dateFormatter {
-      self.dateString = dateFormatter.string(from: date)
+    var results = PerformanceResults()
+    results.thermal = thermal
+    results.electric = electricEnergy
+    results.fuel = fuelConsumption
+    results.parasitics = electricalParasitics
+    results.dni = Double(meteo.dni)
+    results.ghi = Double(meteo.ghi)
+    results.dhi = Double(meteo.dhi)
+    results.temp = Double(meteo.temperature)
+    results.ws = Double(meteo.windSpeed)
+    results.ico = Double(meteo.dni) * status.collector.cosTheta
+    results.insolationAbsorber = status.solarField.insolationAbsorber
+    results.heatLossSolarField = status.solarField.heatLosses
+    results.heatLossHeader = status.solarField.heatLossHeader
+    results.heatLossHCE = status.solarField.heatLossHCE
+
+    if case .full = mode {
+      writeAll(results: results, status: status, date: date)
+    }
+
+    if case .playground = mode {
+      self.history.append(status)
+      self.results.append(results)
     }
 
     let fraction = interval.fraction
-    hourlyResults.thermal.accumulate(thermal, fraction: fraction)
-    hourlyResults.energy.accumulate(electricEnergy, fraction: fraction)
-    hourlyResults.fuelConsumption.accumulate(fuelConsumption, fraction: fraction)
-    hourlyResults.parasitics.accumulate(electricalParasitics, fraction: fraction)
+    if mode.writeResults {
+      // The hourly, daily and annual totals are calculated.
+      defer { intervalCounter += 1 }
 
-    hourlyResults.dni += Double(meteo.dni) * fraction
-    hourlyResults.ghi += Double(meteo.ghi) * fraction
-    hourlyResults.dhi += Double(meteo.dhi) * fraction
-    hourlyResults.temp = Double(meteo.temperature)
-    hourlyResults.ws = Double(meteo.windSpeed)
-    hourlyResults.ico += Double(meteo.dni) * status.collector.cosTheta * fraction
+      if self.intervalCounter == 0 {
+        self.dateString = dateFormatter.string(from: date)
+      }
 
-    hourlyResults.add(solarfield: status.solarField, fraction: fraction)
+      hourly.thermal.accumulate(thermal, fraction: fraction)
+      hourly.electric.accumulate(electricEnergy, fraction: fraction)
+      hourly.fuel.accumulate(fuelConsumption, fraction: fraction)
+      hourly.parasitics.accumulate(electricalParasitics, fraction: fraction)
+
+      hourly.dni += Double(meteo.dni) * fraction
+      hourly.ghi += Double(meteo.ghi) * fraction
+      hourly.dhi += Double(meteo.dhi) * fraction
+      hourly.ico += Double(meteo.dni) * status.collector.cosTheta * fraction
+      hourly.add(solarfield: status.solarField, fraction: fraction)
+    } else {
+      // Only the annual sums are calculated.
+      annually.thermal.accumulate(thermal, fraction: fraction)
+      annually.electric.accumulate(electricEnergy, fraction: fraction)
+      annually.fuel.accumulate(fuelConsumption, fraction: fraction)
+      annually.parasitics.accumulate(electricalParasitics, fraction: fraction)
+
+      annually.dni += Double(meteo.dni) * fraction
+      annually.ghi += Double(meteo.ghi) * fraction
+      annually.dhi += Double(meteo.dhi) * fraction
+      annually.ico += Double(meteo.dni) * status.collector.cosTheta * fraction
+      annually.add(solarfield: status.solarField, fraction: fraction)
+    }
   }
 
   private var hourCounter: Int = 0 {
@@ -160,17 +205,17 @@ final class PerformanceDataLogger {
 
   // MARK: Output Streams
 
-  var dailyResultsStream: OutputStream?
-  var hourlyResultsStream: OutputStream?
-  var allResultsStream: OutputStream?
-  var allResultsStream2: OutputStream?
+  private var dailyResultsStream: OutputStream?
+  private var hourlyResultsStream: OutputStream?
+  private var allResultsStream: OutputStream?
+  private var allResultsStream2: OutputStream?
 
   // MARK: Table headers
 
   private var headersDaily: (name: String, unit: String) {
-    let columns = [PerformanceDataLogger.Results.columns, ThermalEnergy.columns,
-                   ElectricEnergy.columns, Parasitics.columns,
-                   FuelConsumption.columns].joined()
+    let columns = [PerformanceResults.columns,
+                   ThermalEnergy.columns, ElectricEnergy.columns,
+                   Parasitics.columns, FuelConsumption.columns].joined()
     let names = columns.map { $0.0 }.joined(separator: ",")
     let units = columns.map { $0.1 }.joined(separator: ",")
     // if dateFormatter != nil {
@@ -180,7 +225,7 @@ final class PerformanceDataLogger {
   }
 
   private var headersHourly: (name: String, unit: String) {
-    let columns = [PerformanceDataLogger.Results.columns, ThermalEnergy.columns,
+    let columns = [PerformanceResults.columns, ThermalEnergy.columns,
                    ElectricEnergy.columns, Parasitics.columns,
                    FuelConsumption.columns].joined()
     let names = columns.map { $0.0 }.joined(separator: ",")
@@ -192,17 +237,17 @@ final class PerformanceDataLogger {
   }
 
   private var headersInterval: (name: String, unit: String) {
-    let columns = [PerformanceDataLogger.Results.columns, ThermalEnergy.columns,
+    let columns = [PerformanceResults.columns, ThermalEnergy.columns,
                    ElectricEnergy.columns, Parasitics.columns,
-                   FuelConsumption.columns,
-                   Collector.PerformanceData.columns].joined()
+                   FuelConsumption.columns, Collector.PerformanceData.columns]
+      .joined()
     let names = columns.map { $0.0 }.joined(separator: ",") + .lineBreak
     let units = columns.map { $0.1 }.joined(separator: ",") + .lineBreak
     return ("Date,Time," + names, "_,_," + units)
   }
 
   private var headersInterval2: (name: String, unit: String) {
-    let columns = PerformanceDataLogger.Results.columns2
+    let columns = Plant.PerformanceData.columns
     let names = columns.map { $0.0 }.joined(separator: ",") + .lineBreak
     let units = columns.map { $0.1 }.joined(separator: ",") + .lineBreak
     return ("Date,Time," + names, "_,_," + units)
@@ -212,154 +257,41 @@ final class PerformanceDataLogger {
 
   private func writeDailyResults() {
     let csv = dateString.dropLast(4) + .separator + [
-      dailyResults.values, dailyResults.thermal.values,
-      dailyResults.energy.values, dailyResults.parasitics.values,
-      dailyResults.fuelConsumption.values,
-    ]
-    .joined().joined(separator: ",") + .lineBreak
+      daily.values, daily.thermal.values,
+      daily.electric.values, daily.parasitics.values,
+      daily.fuel.values,
+      ]
+      .joined().joined(separator: ",") + .lineBreak
     dailyResultsStream?.write(csv)
-    annuallyResults.accumulate(dailyResults, fraction: 24)
-    dailyResults.reset()
+    annually.accumulate(daily, fraction: 24)
+    daily.reset()
   }
 
   private func writeHourlyResults() {
     let csv = dateString + .separator + [
-      hourlyResults.values, hourlyResults.thermal.values,
-      hourlyResults.energy.values, hourlyResults.parasitics.values,
-      hourlyResults.fuelConsumption.values,
-    ]
-    .joined().joined(separator: .separator) + .lineBreak
+      hourly.values, hourly.thermal.values,
+      hourly.electric.values, hourly.parasitics.values,
+      hourly.fuel.values,
+      ]
+      .joined().joined(separator: .separator) + .lineBreak
     hourlyResultsStream?.write(csv)
-    dailyResults.accumulate(hourlyResults, fraction: 1 / 24)
+    daily.accumulate(hourly, fraction: 1 / 24)
     hourCounter += 1
-    hourlyResults.reset()
+    hourly.reset()
   }
 
-  private func writeAll(results: Results, date: Date) {
+  private func writeAll(results: PerformanceResults,
+                        status: Plant.PerformanceData, date: Date) {
     guard let stream = allResultsStream,
       let stream2 = allResultsStream2 else { return }
-    let dateString = dateFormatter?.string(from: date) ?? ""
+    let dateString = dateFormatter.string(from: date)
     let csv1 = dateString + .separator
-      + results.csv + results.thermal.csv + results.energy.csv
-      + results.parasitics.csv + results.fuelConsumption.csv
-      + results.status!.collector.csv + .lineBreak
-    let csv2 = dateString + .separator + results.csv2 + .lineBreak
+      + results.csv + results.thermal.csv + results.electric.csv
+      + results.parasitics.csv + results.fuel.csv
+      + status.collector.csv + .lineBreak
+    let csv2 = dateString + .separator + status.csv + .lineBreak
     stream.write(csv1)
     stream2.write(csv2)
-  }
-}
-
-extension PerformanceDataLogger {
-  final class Results: CustomStringConvertible {
-    var thermal = ThermalEnergy()
-    var fuelConsumption = FuelConsumption()
-    var parasitics = Parasitics()
-    var energy = ElectricEnergy()
-
-    // Meteodata: [WHr/sqm]
-    var dni: Double = 0
-    var ghi: Double = 0
-    var dhi: Double = 0
-    var ico: Double = 0
-    var temp: Double = 0
-    var ws: Double = 0
-
-    // SolarField
-    var insolationAbsorber: Double = 0
-    var heatLossSolarField: Double = 0
-    var heatLossHeader: Double = 0
-    var heatLossHCE: Double = 0
-
-    var status: Plant.PerformanceData?
-
-    var values: [String] {
-      return [
-        String(format: "%.1f", dni),
-        String(format: "%.1f", ghi),
-        String(format: "%.1f", dhi),
-        String(format: "%.1f", temp),
-        String(format: "%.1f", ws),
-        String(format: "%.1f", ico),
-        String(format: "%.1f", insolationAbsorber),
-        String(format: "%.1f", heatLossSolarField),
-        String(format: "%.1f", heatLossHeader),
-        String(format: "%.1f", heatLossHCE),
-      ]
-    }
-
-    var csv: String {
-      return String(format: "%.1f, %.1f, %.1f, %.1f, %.1f, %.0f, %.0f, %.0f, %.0f, %.0f, ",
-                    dni, ghi, dhi, temp, ws, ico, insolationAbsorber,
-                    heatLossSolarField, heatLossHeader, heatLossHCE)
-    }
-
-    static var columns: [(String, String)] {
-      return [
-        ("Meteo|DNI", "W/m2"), ("Meteo|GHI", "W/m2"), ("Meteo|DHI", "W/m2"),
-        ("Meteo|Temperature", "degC"), ("Meteo|Windspeed", "m/s"),
-        ("SolarField|ICO", "W/m2"), ("SolarField|InsolationAbsorber", "W/m2"),
-        ("SolarField|HeatLosses", "MWh"), ("SolarField|HeatLossHeader", "MWh"),
-        ("SolarField|HeatLossHCE", "MWh"),
-      ]
-    }
-
-    var csv2: String {
-      let values = status!.storage.values + status!.heater.values
-        + status!.powerBlock.values + status!.heatExchanger.values
-        + status!.solarField.values + status!.solarField.loops[0].values
-      return values.joined(separator: .separator)
-    }
-
-    static var columns2: [(String, String)] {
-      let values: [(name: String, unit: String)] =
-        [("|Massflow", "kg/s"), ("|Tin", "degC"), ("|Tout", "degC")]
-      return ["Storage", "Heater", "PowerBlock", "HeatExchanger", "SolarField", "Loop"]
-        .flatMap { name in values.map { value in (name + value.name, value.unit) }
-        }
-    }
-
-    public var description: String {
-      return thermal.description + fuelConsumption.description
-        + parasitics.description + energy.description
-        + zip(values, Results.columns).reduce("\n") { result, next in
-          let text = next.1.0 >< (next.0 + " " + next.1.1)
-          return result + text
-        }
-    }
-
-    fileprivate func add(solarfield: SolarField.PerformanceData, fraction: Double) {
-      self.insolationAbsorber += solarfield.insolationAbsorber * fraction
-      self.heatLossSolarField += solarfield.heatLosses * fraction
-      self.heatLossHeader += solarfield.heatLossHeader * fraction
-      self.heatLossHCE += solarfield.heatLossHCE * fraction
-    }
-
-    fileprivate func accumulate(_ result: Results, fraction: Double) {
-      self.thermal.accumulate(result.thermal, fraction: fraction)
-      self.fuelConsumption.accumulate(result.fuelConsumption, fraction: fraction)
-      self.parasitics.accumulate(result.parasitics, fraction: fraction)
-      self.energy.accumulate(result.energy, fraction: fraction)
-      self.dni += result.dni * fraction
-      self.ghi += result.ghi * fraction
-      self.dhi += result.dhi * fraction
-      self.ico += result.ico * fraction
-
-      self.insolationAbsorber += result.insolationAbsorber * fraction
-      self.heatLossSolarField += result.heatLossSolarField * fraction
-      self.heatLossHeader += result.heatLossHeader * fraction
-      self.heatLossHCE += result.heatLossHCE * fraction
-    }
-
-    fileprivate func reset() {
-      self.thermal = ThermalEnergy()
-      self.fuelConsumption = FuelConsumption()
-      self.parasitics = Parasitics()
-      self.energy = ElectricEnergy()
-      self.dni = 0; self.ghi = 0; self.dhi = 0; self.ico = 0
-      self.temp = 0; self.ws = 0
-      self.insolationAbsorber = 0; self.heatLossSolarField = 0
-      self.heatLossHeader = 0; self.heatLossHCE = 0
-    }
   }
 }
 

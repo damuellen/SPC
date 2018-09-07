@@ -15,6 +15,19 @@ extension SolarField {
     case I, H
   }
 
+  /**
+   ## The solar field is specified by:
+   - the total number of loops
+   - number of collectors per loop
+   - distance between collectors in a row
+   - distance between rows
+   - azimuth angle and elevation angle of solar field
+   - heat losses in piping
+   - maximum wind speed for tracking
+   - nominal HTF flow
+   - “freeze protection” HTF flow and minimal HTF flow
+   - parasitic power as a function of HTF flow
+   */
   public struct Parameter: ComponentParameter {
     let HLDump = false
     let layout = SolarField.Layout.I
@@ -34,7 +47,7 @@ extension SolarField {
     let maxWind: Float
     let numberOfSCAsInRow: Int
     let rowDistance, distanceSCA, pipeHeatLosses: Double
-    let azimut, elevation: Double
+    public var azimut, elevation: Double
     let antiFreezeParastics: Double
     let pumpParastics: Coefficients
     var massFlow: (max: MassFlow, min: MassFlow)
@@ -112,8 +125,8 @@ extension SolarField.Parameter: CustomStringConvertible {
       >< (HLDumpQuad ? "YES" : "NO ")
     d += "Consider SKAL-ET DemoLoop Effect of Wind Speed.:"
       >< (EtaWind ? "YES" : "NO ")
-    if !windCoefficients.isEmpty {
-      d += "Collector efficiency from Wind Speed = c0+c1*WS+c2*WS^2+c3*WS^3+c4*WS^4+c5*WS^5\n"
+    if windCoefficients.isEmpty == false {
+      d += "Collector efficiency vs Wind Speed c0+c1*WS+c2*WS^2+c3*WS^3+c4*WS^4+c5*WS^5\n"
       for idx in windCoefficients.indices {
         d += "c\(idx):" >< "\(windCoefficients[idx])"
       }
@@ -122,8 +135,8 @@ extension SolarField.Parameter: CustomStringConvertible {
       >< "\(Design.layout.solarField)"
     d += "Heat Losses in Hot Header [MW]:"
       >< "\(heatLossHeader)"
-    if !heatlosses.isEmpty {
-      d += "Heat Losses in Hot Header Coefficients; HL(Tout - Tamb) = HL(design)*(c0+c1*dT)\n"
+    if heatlosses.isEmpty == false {
+      d += "Heat Losses in Hot Header Coefficients;\nHL(Tout - Tamb) = HL(design)*(c0+c1*dT)\n"
       for idx in heatlosses.indices {
         d += "c\(idx):" >< "\(heatlosses[idx])"
       }

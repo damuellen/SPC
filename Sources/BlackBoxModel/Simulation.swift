@@ -15,9 +15,9 @@ import Meteo
 public enum Simulation {
   static var isStart = true
 
-  static var initialValues = InitValues(
-    temperatureOfHTFinPipes: Temperature(celsius: 100.0),
-    temperatureOfHTFinHCE: Temperature(celsius: 60.0),
+  public static var initialValues = InitValues(
+    temperatureOfHTFinPipes: Temperature(celsius: 200.0),
+    temperatureOfHTFinHCE: Temperature(celsius: 150.0),
     massFlowInSolarField: 0.0
   )
 
@@ -41,7 +41,7 @@ public enum Simulation {
     steps: .every5minutes
   )
 
-  static var parameter = Simulation.Parameter(
+  public static var parameter = Simulation.Parameter(
     dfreezeTemperaturePump: 151.0,
     dfreezeTemperatureHeat: 40.0,
     minTemperatureRaiseStartUp: 1.0,
@@ -59,7 +59,7 @@ public enum Simulation {
     adjustmentFactor: adjustmentFactor
   )
 
-  static var adjustmentFactor = Simulation.AdjustmentFactor(
+  public static var adjustmentFactor = Simulation.AdjustmentFactor(
     efficiencySolarField: 1, efficiencyTurbine: 1,
     efficiencyHeater: 1, efficiencyBoiler: 1,
     heatLossHCE: 1, heatLossHTF: 1, heatLossH2O: 1,

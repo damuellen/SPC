@@ -14,24 +14,24 @@ public enum Design {
   public static var layout: Layout = Layout()
 
   static let hasSolarField = layout.solarField > 0
-  static let hasHeater = layout.heater < 0
+  static let hasHeater = false // layout.heater < 0
   static let hasHeatExchanger = layout.heatExchanger > 0
   static let hasBoiler = layout.boiler > 0
   static let hasGasTurbine = layout.gasTurbine > 0
   static let hasPowerBlock = layout.powerBlock > 0
-  static let hasStorage = layout.storage > 0
+  static let hasStorage = false // layout.storage > 0
 }
 
 public struct Layout: Codable {
   public var solarField = 100.0
-  var heater = -10.0
-  var heatExchanger = 75.0
-  var boiler = 0.0
-  var gasTurbine = 0.0
-  var powerBlock = 80.0
-  var storage = 20.0
-  var storage_cap = 200.0
-  var storage_ton = 0.0
+  public var heater = -10.0
+  public var heatExchanger = 75.0
+  public var boiler = 0.0
+  public var gasTurbine = 0.0
+  public var powerBlock = 80.0
+  public var storage = 20.0
+  public var storage_cap = 200.0
+  public var storage_ton = 0.0
 }
 
 extension Layout: TextConfigInitializable {

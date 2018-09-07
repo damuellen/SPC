@@ -19,8 +19,8 @@ public extension Double {
 }
 
 public extension Angle {
-  var toRadian: Double { return self * .pi / 180 }
-  var toDegree: Double { return self * (180 / .pi) }
+  var toRadians: Double { return self * .pi / 180 }
+  var toDegrees: Double { return self * (180 / .pi) }
 }
 
 let calendar = { calendar -> Calendar in
@@ -30,7 +30,7 @@ let calendar = { calendar -> Calendar in
   return calendar
 }(Calendar(identifier: .gregorian))
 
-let monthSymbols = calendar.monthSymbols
+private let monthSymbols = calendar.monthSymbols
 
 extension Progress {
   func tracking(of month: Int) {
@@ -38,7 +38,7 @@ extension Progress {
     let month = Int64(month)
     if month > completedUnitCount {
       completedUnitCount = month
-      Log.infoMessage("The calculations for \(monthSymbol) are in progress.")
+      💬.infoMessage("The calculations for \(monthSymbol) are in progress.")
     }
   }
 }

@@ -30,8 +30,8 @@ extension WasteHeatRecovery {
 extension WasteHeatRecovery.Parameter: CustomStringConvertible {
   public var description: String {
     var d = ""
-    d += "Operation Mode :" >< operation.rawValue
-    d += "Efficiency in Hybrid Mode :" >< "\(efficiencyNominal * 100)"
+    d += "Operation Mode:" >< operation.rawValue
+    d += "Efficiency in Hybrid Mode:" >< "\(efficiencyNominal * 100)"
     d += "Efficiency in CC Mode:" >< "\(efficiencyPure * 100)"
     d += "Ratio Fossil/Solar Thermal Contribution :" >< "\(ratioHTF)"
     d += "Efficiency(Solar-Load) = c0+c1*load+c2*load^2+c3*load^3+c4*load^4)\n"

@@ -14,9 +14,9 @@ protocol ComponentParameter {}
 
 protocol Component {
   associatedtype Parameter: ComponentParameter
-  // associatedtype Data: WorkingConditions
+
   static var parameter: Parameter { get set }
-  // static var status: Data { get }
+
   static func update(parameter: Parameter)
 }
 

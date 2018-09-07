@@ -42,7 +42,7 @@ extension HeatExchanger {
     var temperature: Temperatures
     let scc: Temperatures
     let sccHTFmassFlow: MassFlow
-    var sccHTFthermal: Double
+    var sccHTFheat: Double
     var ToutMassFlow: Coefficients?
     var ToutTin: Coefficients?
     var ToutTinMassFlow: Coefficients?
@@ -92,7 +92,7 @@ extension HeatExchanger.Parameter: CustomStringConvertible {
     // d += "not used:" HXc.H2OinTmin
     // d += "not used:" HXc.H2OoutTmax - TK0
     // d += "not used:" HXc.H2OoutTmin - TK0
-    d += "Parameter for IsccS Cycle\n"
+    d += "Parameter for ISCCS Cycle\n"
     d += "Efficiency [%]:"
       >< "\(sccEff)"
     d += "Maximum Inlet Temperature [°C]:"
@@ -110,7 +110,7 @@ extension HeatExchanger.Parameter: CustomStringConvertible {
     d += "Nominal HTF Mass Flow [kg/s]:"
       >< "\(sccHTFmassFlow.rate)"
     d += "Nominal Capacity [MW]:"
-      >< String(format: "%.3f", sccHTFthermal)
+      >< String(format: "%.3f", sccHTFheat)
     return d
   }
 }
@@ -135,7 +135,7 @@ extension HeatExchanger.Parameter: TextConfigInitializable {
 
     sccEff = try row(44)
     sccHTFmassFlow = try MassFlow(row(71))
-    sccHTFthermal = try row(74)
+    sccHTFheat = try row(74)
     useAndsolFunction = false
     Tout_f_Mfl = false
     Tout_f_Tin = false
@@ -178,7 +178,7 @@ extension HeatExchanger.Parameter: Codable {
     )
     sccEff = try values.decode(Double.self, forKey: .sccEff)
     sccHTFmassFlow = try values.decode(MassFlow.self, forKey: .sccHTFmassFlow)
-    sccHTFthermal = try values.decode(Double.self, forKey: .sccHTFthermal)
+    sccHTFheat = try values.decode(Double.self, forKey: .sccHTFthermal)
     useAndsolFunction = try values.decode(Bool.self, forKey: .useAndsolFunction)
     Tout_f_Mfl = try values.decode(Bool.self, forKey: .Tout_f_Mfl)
     Tout_f_Tin = try values.decode(Bool.self, forKey: .Tout_f_Tin)
@@ -205,7 +205,7 @@ extension HeatExchanger.Parameter: Codable {
     try container.encode(sccTemperatures, forKey: .scc)
     try container.encode(sccEff, forKey: .sccEff)
     try container.encode(sccHTFmassFlow, forKey: .sccHTFmassFlow)
-    try container.encode(sccHTFthermal, forKey: .sccHTFthermal)
+    try container.encode(sccHTFheat, forKey: .sccHTFthermal)
     try container.encode(useAndsolFunction, forKey: .useAndsolFunction)
     try container.encode(Tout_f_Mfl, forKey: .Tout_f_Mfl)
     try container.encode(Tout_f_Tin, forKey: .Tout_f_Tin)

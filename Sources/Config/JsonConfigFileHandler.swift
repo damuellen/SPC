@@ -42,7 +42,7 @@ public class JsonConfigFileHandler {
 
   public init() {}
 
-  public func findFilesInDirectory(atPath path: String) {
+  public func fileSearch(atPath path: String) {
     do {
       guard let pathUrl = URL(string: path)
       else { preconditionFailure("Invalid path") }

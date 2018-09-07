@@ -18,11 +18,11 @@ extension Simulation {
     let minInsolationRaiseStartUp, heatTolerance, timeTolerance, massTolerance,
       minInsolation, maxToPowerBlock, minInsolationForBoiler,
       electricalTolerance, electricalParasitics, HLtempTolerance: Double
-    let adjustmentFactor: AdjustmentFactor
+    public var adjustmentFactor: AdjustmentFactor
   }
 
   public struct AdjustmentFactor: Codable {
-    let efficiencySolarField, efficiencyTurbine, efficiencyHeater,
+    public var efficiencySolarField, efficiencyTurbine, efficiencyHeater,
       efficiencyBoiler, heatLossHCE, heatLossHTF, heatLossH2O,
       electricalParasitics: Double
   }

@@ -11,6 +11,20 @@
 import Config
 
 extension Collector {
+  /**
+   ## The collector model contains the following:
+     - net collector surface area
+     - length
+     - parabola aperture
+     - average distance from focus
+     - optical efficiency
+     - absorber extension beyond collector
+     - absorber tube outer radius- inner radius
+     - coating emittance coefficient as a function of temperature
+     - radius of glass cover tube
+     - bellow shadowing
+     - optical efficiency as a function of incident angle (incident angle modifier).
+   */
   public struct Parameter: ComponentParameter, Codable {
     let name: String
     public enum Absorber: String, Codable {
@@ -19,11 +33,11 @@ extension Collector {
 
     let newFunction: Bool = false
     let absorber: Absorber
-    let aperture, lengthSCA, areaSCAnet, extensionHCE, avgFocus,
+    public let aperture, lengthSCA, areaSCAnet, extensionHCE, avgFocus,
       rabsOut, rabsInner, rglas, glassEmission, opticalEfficiency: Double
-    let emissionHCE, shadingHCE: [Double]
-    let IAMfac: Coefficients
-    let IntradiationLosses: Bool
+    public let emissionHCE, shadingHCE: [Double]
+    public let IAMfac: Coefficients
+    public let IntradiationLosses: Bool
   }
 }
 
@@ -57,7 +71,7 @@ extension Collector.Parameter: CustomStringConvertible {
     d += "for incident angle 1.5 - 5°:" >< "\(shadingHCE[1])"
     d += "for incident angle 5 - 14°:" >< "\(shadingHCE[2])"
     d += "for incident angle >14°:" >< "\(shadingHCE[3])"
-    d += "Incident Angle Modifier; IAM(theta) = c0+c1*theta+c2*theta^2+c3*theta^3+c4*theta^4\n"
+    d += "Incident Angle Modifier;\nIAM(theta) = c0+c1*theta+c2*theta^2+c3*theta^3+c4*theta^4\n"
     for (i, c) in IAMfac.coefficients.enumerated() {
       d += "c\(i):" >< String(format: "%.4E", c)
     }

@@ -13,7 +13,7 @@ import Foundation
 public struct Coefficients: Codable {
   let coefficients: [Double]
 
-  init(values: Double...) {
+  public init(values: Double...) {
     self.coefficients = values
   }
 
@@ -98,5 +98,4 @@ extension Ratio: Comparable {
   }
 }
 
-public struct Demand {
-}
+public struct Demand { }

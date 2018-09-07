@@ -37,7 +37,7 @@ extension SteamTurbine.Parameter: CustomStringConvertible {
       >< "\(power.nominal)"
     d += "Minimum Electrical Power (lower limit) [MW] :"
       >< "\(power.min)"
-    d += "Min. Power; Power(Tamb) = PowerNom*(c0+c1*Tamb+c2*Tamb^2+c3*Tamb^3+c4*Tamb^4)\n"
+    d += "Min. Power;\nPower(Tamb) = PowerNom*(c0+c1*Tamb+c2*Tamb^2+c3*Tamb^3+c4*Tamb^4)\n"
     for (i, c) in minPowerFromTemp.coefficients.enumerated() {
       d += "c\(i):" >< String(format: "%.6E", c)
     }
@@ -47,15 +47,15 @@ extension SteamTurbine.Parameter: CustomStringConvertible {
       >< "\(efficiencyBoiler * 100)"
     d += "Efficiency in IsccS Mode:"
       >< "\(efficiencySCC * 100)"
-    d += "Efficiency; Efficiency(Load) = c0+c1*load+c2*load^2+c3*load^3+c4*load^4\n"
+    d += "Efficiency;\nEfficiency(Load) = c0+c1*load+c2*load^2+c3*load^3+c4*load^4\n"
     for (i, c) in efficiency.coefficients.enumerated() {
       d += "c\(i):" >< String(format: "%.6E", c)
     }
-    d += "Efficiency; Efficiency(Temperature) = c0+c1*T+c2*T^2+c3*T^3+c4*T^4\n"
+    d += "Efficiency;\nEfficiency(Temperature) = c0+c1*T+c2*T^2+c3*T^3+c4*T^4\n"
     for (i, c) in efficiencyTemperature.coefficients.enumerated() {
       d += "c\(i):" >< String(format: "%.6E", c)
     }
-    d += "Efficiency; Efficiency(Wet Bulb Temp.) = c0+c1*T+c2*T^2\n"
+    d += "Efficiency;\nEfficiency(Wet Bulb Temp.) = c0+c1*T+c2*T^2\n"
     d += "Below Wet Bulb Temperature: (°C)"
       >< "(WetBulbTstep)"
     d += "c0:" >< "\(efficiencyWetBulb[0])"
@@ -66,7 +66,7 @@ extension SteamTurbine.Parameter: CustomStringConvertible {
     d += "c0:" >< "\(efficiencyWetBulb[3])"
     d += "c1:" >< "\(efficiencyWetBulb[4])"
     d += "c2:" >< "\(efficiencyWetBulb[5])"
-    d += "Efficiency; Efficiency(HTF_Tin) = A * HTF_Tin ( °C ) ^ B * corrFactor\n"
+    d += "Efficiency;\nEfficiency(HTF_Tin) = A * HTF_Tin ( °C ) ^ B * corrFactor\n"
     d += "A" >< "\(efficiencytempIn_A)"
     d += "B" >< "\(efficiencytempIn_B)"
     d += "corr factor:"

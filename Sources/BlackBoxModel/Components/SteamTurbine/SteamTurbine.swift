@@ -20,7 +20,7 @@ extension SteamTurbine.PerformanceData: CustomDebugStringConvertible {
 }
 
 public enum SteamTurbine: Component {
-  /// a struct for operation-relevant data of the steam turbine
+  /// Contains all data needed to simulate the operation of the steam turbine
   public struct PerformanceData: Equatable {
     var operationMode: OperationMode
     var load: Ratio
@@ -55,9 +55,9 @@ public enum SteamTurbine: Component {
     backPressure: 0
   )
 
-  static var parameter: Parameter = ParameterDefaults.tb
+  public static var parameter: Parameter = ParameterDefaults.tb
 
-  static func efficiency(_ status: inout Plant.PerformanceData, maxLoad: inout Ratio) -> Double {
+  static func efficiency(_ status: Plant.PerformanceData, maxLoad: inout Ratio) -> Double {
     guard status.steamTurbine.load.ratio > 0 else { return 1 }
 
     var maxEfficiency: Double = 1
@@ -97,22 +97,19 @@ public enum SteamTurbine: Component {
     if case .pc = status.gasTurbine.operationMode {
       maxEfficiency = parameter.efficiencySCC
     }
-
+    
     // Dependency of Heat Rate on Ambient Temperature  - DRY COOLING -
+    #warning("The implementation here differs from PCT")
     if parameter.efficiencyTemperature[1] >= 1 {
-      let (_, MaxDCLoad) = DryCooling.update(
-        Tamb: Plant.ambientTemperature, steamTurbine: &status.steamTurbine
+      let (_, load, backPressure) = DryCooling.update(
+        Tamb: Plant.ambientTemperature, steamTurbine: status.steamTurbine
       )
-      maxLoad = MaxDCLoad
-      if status.steamTurbine.load > MaxDCLoad {
-        status.steamTurbine.load = MaxDCLoad
-      }
     }
     // Dependency of Heat Rate on Ambient Temperature  - DRY COOLING -
     // now a polynom offourth degree -
     var efficiency = parameter.efficiency[status.steamTurbine.load]
     var correcture = 0.0
-    if !parameter.efficiencyTemperature.coefficients.isEmpty {
+    if parameter.efficiencyTemperature.coefficients.isEmpty == false {
       correcture += parameter.efficiencyTemperature[Plant.ambientTemperature.celsius]
     }
     efficiency *= correcture

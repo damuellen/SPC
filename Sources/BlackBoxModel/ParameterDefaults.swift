@@ -9,18 +9,6 @@
 //
 
 public enum ParameterDefaults {
-  public static func assign() {
-    HeatExchanger.update(parameter: self.hx)
-    GasTurbine.update(parameter: self.gt)
-    SolarField.update(parameter: self.sf)
-    Storage.update(parameter: self.st)
-    Collector.update(parameter: self.LS3)
-    SteamTurbine.update(parameter: self.tb)
-    PowerBlock.update(parameter: self.pb)
-    WasteHeatRecovery.update(parameter: self.whr)
-    Heater.update(parameter: self.hr)
-    Boiler.update(parameter: self.bo)
-  }
 
   static let hx = HeatExchanger.Parameter(
     name: "",
@@ -35,7 +23,7 @@ public enum ParameterDefaults {
       h2o: (inlet: (max: 374, min: 255), outlet: (max: 234, min: 128))
     ),
     sccHTFmassFlow: 600.0,
-    sccHTFthermal: 65,
+    sccHTFheat: 65,
     ToutMassFlow: nil,
     ToutTin: nil,
     ToutTinMassFlow: nil,
@@ -100,7 +88,7 @@ public enum ParameterDefaults {
     startTemperature: (Temperature(celsius: 288.0),
                        Temperature(celsius: 288.0)),
     startLoad: (cold: 1, hot: 0),
-    strategy: .demand, PrefChargeto: 0.83,
+    strategy: .always, PrefChargeto: 0.83,
     startexcep: 4, endexcep: 8,
     HTF: .solarSalt, FCstopD: 20, FCstopM: 6,
     FCstartD: 18, FCstartM: 9, FP: -1, FC: 0,
@@ -143,10 +131,10 @@ public enum ParameterDefaults {
     efficiency: 1,
     maxMassFlow: 10,
     minLoad: 0, nominalElectricalParasitics: 1,
-    antiFreezeTemperature: Temperature(celsius: 30.0),
-    nominalTemperatureOut: Temperature(celsius: 200.0),
+    antiFreezeTemperature: .init(celsius: 100.0),
+    nominalTemperatureOut: .init(celsius: 200.0),
     electricalParasitics: [10, 0],
-    onlyWithSolarField: true
+    onlyWithSolarField: false
   )
 
   static let tb = SteamTurbine.Parameter(
@@ -156,10 +144,9 @@ public enum ParameterDefaults {
     efficiencyBoiler: 0.4101728,
     efficiencySCC: 0.4101728,
     efficiency: [0.6526, 1.1839, -1.8611, 1.5008, -0.4761],
-    efficiencyTemperature: [
-      0.99976, -0.00011537, 0.000035579, -0.0000016357, 0,
-    ],
-    startUpTime: 40, startUpEnergy: 250, minPowerFromTemp: [1, 0, 0, 0, 0],
+    efficiencyTemperature: [0.99976, -0.00011537, 3.5579e-05, -1.6357e-06, 0],
+    startUpTime: 40, startUpEnergy: 250,
+    minPowerFromTemp: [1, 0, 0, 0, 0],
     hotStartUpTime: 120,
     efficiencyWetBulb: [0, 0, 0, 0, 0, 0],
     WetBulbTstep: 0, efficiencytempIn_A: 0.2383,
