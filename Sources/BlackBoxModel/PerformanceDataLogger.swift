@@ -34,8 +34,11 @@ public final class PerformanceDataLogger {
   }(DateFormatter())
 
   public var log: PerformanceLog {
+    var annually = self.annually
+    annually.temp /= 8760 * 12
     return PerformanceLog(annually: annually, history: history, results: results)
   }
+  
   private var annually = PerformanceResults()
   private var daily = PerformanceResults()
   private var hourly = PerformanceResults()
@@ -115,7 +118,7 @@ public final class PerformanceDataLogger {
   func printResult() {
     print("")
     print("---------------------------+=[  Annual results  ]=+-----------------------------")
-    print(annually.description)
+    print(annually)
     print("________________________________________________________________________________")
   }
 
@@ -176,7 +179,8 @@ public final class PerformanceDataLogger {
       annually.electric.accumulate(electricEnergy, fraction: fraction)
       annually.fuel.accumulate(fuelConsumption, fraction: fraction)
       annually.parasitics.accumulate(electricalParasitics, fraction: fraction)
-
+      annually.ws += Double(meteo.windSpeed)
+      annually.temp += Double(meteo.temperature)
       annually.dni += Double(meteo.dni) * fraction
       annually.ghi += Double(meteo.ghi) * fraction
       annually.dhi += Double(meteo.dhi) * fraction

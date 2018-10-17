@@ -34,7 +34,7 @@ extension SolarField {
     let EtaWind = false
     /// Pipe heat losses in tested area [W/sqm]
     let SSFHL: Double = 0.0
-    let heatLossHeader: [Double] = [20]
+    let heatLossHeader: [Double] = [0, 0.475, 0.0014]
     let HLDumpQuad = false
     var imbalanceDesign: [Double] = [1.0, 1.0, 1.0]
     var imbalanceMin: [Double] = [0.0, 1.025, 1.05]
@@ -54,12 +54,14 @@ extension SolarField {
     var pumpParasticsFullLoad: Double
     var antiFreezeFlow: MassFlow
     var HTFmass: Double
+    var HTF: HeatTransferFluid
     var collector: Collector.Parameter!
     var edgeFactor: [Double] = []
   }
 }
 
 extension SolarField.Parameter {
+
   var distRatio: Double {
     return self.pipeWay / (2 * self.loopWays[1])
   }
@@ -180,6 +182,7 @@ extension SolarField.Parameter: TextConfigInitializable {
     massFlow = try (MassFlow(row(49)), MassFlow(row(52)))
     antiFreezeFlow = try MassFlow(row(55))
     HTFmass = try row(58)
+    HTF = ParameterDefaults.HTF
     imbalanceDesign = try [row(72), row(73), row(74)]
     imbalanceMin = try [row(75), row(76), row(77)]
     windCoefficients = try [row(79), row(80), row(81), row(82), row(83), row(84)]
@@ -238,6 +241,7 @@ extension SolarField.Parameter: Codable {
     )
     antiFreezeFlow = try values.decode(MassFlow.self, forKey: .antiFreezeFlow)
     HTFmass = try values.decode(Double.self, forKey: .HTFmass)
+    HTF = ParameterDefaults.HTF
     imbalanceDesign = [
       try values.decode(Double.self, forKey: .imbalanceDesignNear),
       try values.decode(Double.self, forKey: .imbalanceDesignAverage),

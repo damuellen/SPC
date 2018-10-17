@@ -51,19 +51,21 @@ extension Plant {
     }
 
     var csv: String {
-      let values = storage.values + heater.values
-        + powerBlock.values + heatExchanger.values
-        + solarField.values + solarField.loops[0].values
+      let values = storage.values + heater.values + powerBlock.values
+        + heatExchanger.values + solarField.values
+        + solarField.loops[0].values + solarField.loops[1].values
+        + solarField.loops[2].values + solarField.loops[3].values
       return values.joined(separator: .separator)
     }
 
     static var columns: [(String, String)] {
       let values: [(name: String, unit: String)] =
         [("|Massflow", "kg/s"), ("|Tin", "degC"), ("|Tout", "degC")]
-      return ["Storage", "Heater", "PowerBlock", "HeatExchanger", "SolarField", "Loop"]
-        .flatMap { name in values.map { value in (name + value.name, value.unit) } }
+      return [
+        "Storage", "Heater", "PowerBlock", "HeatExchanger", "SolarField",
+        "DesignLoop", "NearLoop", "AvgLoop", "FarLoop"].flatMap { name in
+          values.map { value in (name + value.name, value.unit) } }
     }
-
   }
 }
 
@@ -108,8 +110,9 @@ public struct ElectricEnergy: Encodable, PerformanceData {
   }
 
   var csv: String {
-    return String(format: "%.1f, %.1f, %.1f, %.1f, %.1f, %.1f, ",
-                  steamTurbineGross, gasTurbineGross, backupGross, parasitics, net, consum)
+    return String(
+      format: "%.1f, %.1f, %.1f, %.1f, %.1f, %.1f, ",
+      steamTurbineGross, gasTurbineGross, backupGross, parasitics, net, consum)
   }
 
   static var columns: [(name: String, unit: String)] {
@@ -170,29 +173,34 @@ public struct Parasitics: Encodable, PerformanceData {
 }
 
 public struct ThermalEnergy: Encodable, PerformanceData {
-  internal(set) public var solar = 0.0, toStorage = 0.0, toStorageMin = 0.0,
-    storage = 0.0, heater = 0.0, boiler = 0.0, wasteHeatRecovery = 0.0,
-    heatExchanger = 0.0, production = 0.0, demand = 0.0, dump = 0.0,
-    overtemp_dump = 0.0
+  internal(set) public var solar: Power = 0.0, toStorage: Power = 0.0,
+  toStorageMin: Power = 0.0, storage: Power = 0.0, heater: Power = 0.0,
+  boiler: Power = 0.0, wasteHeatRecovery: Power = 0.0,
+  heatExchanger: Power = 0.0, production: Power = 0.0, demand: Power = 0.0,
+  dump: Power = 0.0, overtemp_dump: Power = 0.0, startUp: Power = 0.0
 
   var values: [String] {
     return [
-      String(format: "%.1f", solar),
-      String(format: "%.1f", dump),
-      String(format: "%.1f", toStorage),
-      String(format: "%.1f", storage),
-      String(format: "%.1f", heater),
-      String(format: "%.1f", heatExchanger),
-      String(format: "%.1f", wasteHeatRecovery),
-      String(format: "%.1f", boiler),
-      String(format: "%.1f", production),
+      String(format: "%.1f", solar.megaWatt),
+      String(format: "%.1f", dump.megaWatt),
+      String(format: "%.1f", toStorage.megaWatt),
+      String(format: "%.1f", storage.megaWatt),
+      String(format: "%.1f", heater.megaWatt),
+      String(format: "%.1f", heatExchanger.megaWatt),
+      String(format: "%.1f", startUp.megaWatt),
+      String(format: "%.1f", wasteHeatRecovery.megaWatt),
+      String(format: "%.1f", boiler.megaWatt),
+      String(format: "%.1f", production.megaWatt),
     ]
   }
 
   var csv: String {
-    return String(format: "%.1f, %.1f, %.1f, %.1f, %.1f, %.1f, %.1f, %.1f, %.1f, ",
-                  solar, dump, toStorage, storage, heater, heatExchanger,
-                  wasteHeatRecovery, boiler, production)
+    return String(
+      format: "%.1f, %.1f, %.1f, %.1f, %.1f, %.1f, %.1f, %.1f, %.1f, %.1f, ",
+      solar.megaWatt, dump.megaWatt, toStorage.megaWatt, storage.megaWatt,
+      heater.megaWatt, heatExchanger.megaWatt, startUp.megaWatt,
+      wasteHeatRecovery.megaWatt, boiler.megaWatt, production.megaWatt
+    )
   }
 
   static var columns: [(name: String, unit: String)] {
@@ -200,7 +208,9 @@ public struct ThermalEnergy: Encodable, PerformanceData {
       ("Thermal|Solar", "MWh th"), ("Thermal|Dump", "MWh th"),
       ("Thermal|ToStorage", "MWh th"), ("Thermal|Storage", "MWh th"),
       ("Thermal|Heater", "MWh th"), ("Thermal|HeatExchanger", "MWh th"),
-      ("Thermal|WasteHeatRecovery", "MWh th"), ("Thermal|Boiler", "MWh th"),
+      ("Thermal|Startup", "MWh th"),
+      ("Thermal|WasteHeatRecovery", "MWh th"),
+      ("Thermal|Boiler", "MWh th"),
       ("Thermal|Production", "MWh th"),
     ]
   }
@@ -214,13 +224,14 @@ public struct ThermalEnergy: Encodable, PerformanceData {
 
   mutating func accumulate(_ thermal: ThermalEnergy, fraction: Double) {
     solar += thermal.solar * fraction
-    if thermal.storage < 0 {
+    if thermal.storage.watt < 0 {
       toStorage += thermal.storage * fraction
     } else {
       storage += thermal.storage * fraction
     }
     heater += thermal.heater * fraction
     heatExchanger += thermal.heatExchanger * fraction
+    startUp += thermal.startUp * fraction
     wasteHeatRecovery += thermal.wasteHeatRecovery * fraction
     boiler += thermal.boiler * fraction
     dump += thermal.dump * fraction
@@ -230,9 +241,7 @@ public struct ThermalEnergy: Encodable, PerformanceData {
 
 public struct FuelConsumption: Encodable, PerformanceData {
   internal(set) public var backup = 0.0,
-    boiler = 0.0,
-    heater = 0.0,
-    gasTurbine = 0.0
+  boiler = 0.0, heater = 0.0, gasTurbine = 0.0
 
   var combined: Double {
     return boiler + heater
@@ -259,9 +268,9 @@ public struct FuelConsumption: Encodable, PerformanceData {
 
   static var columns: [(name: String, unit: String)] {
     return [
-      ("FuelConsumption|Backup", " "), ("FuelConsumption|Boiler", " "),
-      ("FuelConsumption|Heater", " "), ("FuelConsumption|GasTurbine", " "),
-      ("FuelConsumption|Combined", " "),
+      ("FuelConsumption|Backup", "MWh"), ("FuelConsumption|Boiler", "MWh"),
+      ("FuelConsumption|Heater", "MWh"), ("FuelConsumption|GasTurbine", "MWh"),
+      ("FuelConsumption|Combined", "MWh"),
     ]
   }
 

@@ -37,7 +37,7 @@ extension Collector {
       rabsOut, rabsInner, rglas, glassEmission, opticalEfficiency: Double
     public let emissionHCE, shadingHCE: [Double]
     public let IAMfac: Coefficients
-    public let IntradiationLosses: Bool
+    public let useIntegralRadialoss: Bool
   }
 }
 
@@ -66,6 +66,8 @@ extension Collector.Parameter: CustomStringConvertible {
     d += "Absorber emittance; Emittance(T) = c0 + c1*T\n"
     d += "c0:" >< "\(emissionHCE[0])"
     d += "c1:" >< "\(emissionHCE[1])"
+    d += "Calc. Radialoss as Integral of dT:"
+      >< "\(useIntegralRadialoss ? "YES" : "NO")"
     d += "Bellow Shadowing Factors\n"
     d += "for incident angle 0 - 1.5°:" >< "\(shadingHCE[0])"
     d += "for incident angle 1.5 - 5°:" >< "\(shadingHCE[1])"
@@ -97,6 +99,6 @@ extension Collector.Parameter: TextConfigInitializable {
     shadingHCE = try [row(43), row(46), row(49), row(52)]
     IAMfac = try [row(55), row(58), row(61), row(64), row(67)]
     absorber = .schott
-    IntradiationLosses = try row(73) > 0 ? true : false
+    useIntegralRadialoss = try row(73) > 0 ? true : false
   }
 }

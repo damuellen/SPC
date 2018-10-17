@@ -9,6 +9,7 @@
 //
 
 import Foundation
+import Meteo
 
 public enum DryCooling {
   // here Tamb is in [øC], whereas in Psat it is in [K] !!    Psat is in [MPa]
@@ -31,41 +32,41 @@ public enum DryCooling {
       fit += coefficients[i] * temperature.kelvin ** Double(i)
     }
 
-    let logpsat = fit + coefficients[10] / (temperature.kelvin - coefficients[11])
+    let logpsat = fit + coefficients[10]
+      / (temperature.kelvin - coefficients[11])
 
     return exp(logpsat)
   }
 
-  public static func update(
-    Tamb: Temperature, steamTurbine: SteamTurbine.PerformanceData
-  )
-    -> (DCFactor: Ratio, MaxDCLoad: Ratio, backPressure: Double) {
+  static func update(
+    steamTurbineLoad: Double, temperature: Temperature
+  ) -> (DCFactor: Ratio, MaxDCLoad: Ratio, backPressure: Double) {
     let coefficientHR: Coefficients = [92.13, 28.73, 18.62, -15.42]
-    let PCondMin = 0.179, PCondMax = 0.421 // [bar]
+    let pressureCondMin = 0.179, pressureCondMax = 0.421 // [bar]
     let HRFmin = 98.0, HRFmax = 106.8 // [%] of design
     let TambMin = 42.2 // [øC]
     let aLoad = 2.25, cLoad = -0.03
-    let InTempDiff = 32.778 // [øC]  (=59øF)
-
-    let TCond = Temperature(steamTurbine.load.ratio ** 0.91 * InTempDiff + Tamb.kelvin)
+    let inTempDiff = 32.778 // [øC]  (=59øF)
+    let Tamb = temperature.kelvin
+    let TCond = Temperature(steamTurbineLoad ** 0.91 * inTempDiff + Tamb)
     let Pcond = Psat(TCond) * 10
 
-    var DCFactor = 0.0
-    var MaxDCLoad = 0.0
+    var dcFactor = 0.0
+    var maxDCLoad = 0.0
 
-    if Pcond <= PCondMin {
-      DCFactor = HRFmin / 100
-    } else if Pcond >= PCondMax {
-      DCFactor = HRFmax / 100
+    if Pcond <= pressureCondMin {
+      dcFactor = HRFmin / 100
+    } else if Pcond >= pressureCondMax {
+      dcFactor = HRFmax / 100
     } else {
-      DCFactor = coefficientHR[Pcond] / 100
+      dcFactor = coefficientHR[Pcond] / 100
     }
 
-    if Tamb.kelvin < TambMin {
-      MaxDCLoad = 1.0
+    if Tamb < TambMin {
+      maxDCLoad = 1.0
     } else {
-      MaxDCLoad = aLoad + cLoad * Tamb.kelvin
+      maxDCLoad = aLoad + cLoad * Tamb
     }
-    return (Ratio(DCFactor), Ratio(MaxDCLoad), Pcond)
+    return (Ratio(dcFactor), Ratio(maxDCLoad), Pcond)
   }
 }

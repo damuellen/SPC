@@ -12,7 +12,7 @@ import Config
 import Foundation
 
 public class Availability: Codable {
-  static var fuel: Double = .greatestFiniteMagnitude
+  static var fuel: Double = 5
   let data: [Values]
   var index = 0
   private static let defaults: Availability.Values = .init(
@@ -48,8 +48,8 @@ public class Availability: Codable {
       Array(repeatElement(Availability.defaults, count: 13)))
   }
 
-  func set(calendar: TimeStep) {
-    self.index = calendar.month
+  func set(_ current: TimeStep) {
+    self.index = current.month
   }
 }
 

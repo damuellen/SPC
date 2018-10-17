@@ -30,8 +30,6 @@ public struct PerformanceResults: CustomStringConvertible {
   public var heatLossHeader: Double = 0
   public var heatLossHCE: Double = 0
 
-  //public var status: Plant.PerformanceData?
-
   var values: [String] {
     return [
       String(format: "%.1f", dni),
@@ -67,7 +65,7 @@ public struct PerformanceResults: CustomStringConvertible {
 
   public var description: String {
     return thermal.description + fuel.description
-      + parasitics.description + electric.description
+      + parasitics.description + electric.description + .lineBreak
       + zip(values, PerformanceResults.columns).reduce("") { result, next in
         let text = next.1.0 >< (next.0 + " " + next.1.1)
         return result + text

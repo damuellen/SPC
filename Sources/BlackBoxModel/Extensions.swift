@@ -33,7 +33,7 @@ let calendar = { calendar -> Calendar in
 private let monthSymbols = calendar.monthSymbols
 
 extension Progress {
-  func tracking(of month: Int) {
+  func tracking(month: Int) {
     let monthSymbol = monthSymbols[month - 1]
     let month = Int64(month)
     if month > completedUnitCount {
@@ -53,4 +53,19 @@ func debug(_ value: Any...) {
 extension String {
   static var lineBreak: String { return "\n" }
   static var separator: String { return ", " }
+}
+
+struct Cache {
+  var hash: Int = 0
+  var result: Double = 0
+  
+  func lookupResult(for hash: Int) -> Double? {
+    if self.hash == hash { return result }
+    return nil
+  }
+  
+  mutating func update(hash: Int, result: Double) {
+    self.hash = hash
+    self.result = result
+  }
 }

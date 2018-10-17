@@ -24,6 +24,10 @@ struct TimeStep: CustomStringConvertible {
     return "\(hour - 1):\(minute - 1) \(day).\(month)."
   }
 
+  static func set(current date: Date) {
+    current = .init(date)
+  }
+
   static var current = TimeStep()
 
   fileprivate static var cfCalendar: CFCalendar = {

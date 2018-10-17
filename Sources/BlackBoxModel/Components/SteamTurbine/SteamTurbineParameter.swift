@@ -16,14 +16,15 @@ extension SteamTurbine {
     var power: PowerRange
     let efficiencyNominal, efficiencyBoiler, efficiencySCC: Double
     let efficiency, efficiencyTemperature: Coefficients
-    let startUpTime, startUpEnergy: Double
+    let startUpTime: Int
+    let startUpEnergy: Double
     let minPowerFromTemp: Coefficients
-    let hotStartUpTime: Double
+    var hotStartUpTime: Int = 75
     let efficiencyWetBulb: Coefficients
     let WetBulbTstep: Double
-    var efficiencytempIn_A: Double
-    var efficiencytempIn_B: Double
-    var efficiencytempIn_cf: Double
+    var efficiencyTempIn_A: Double
+    var efficiencyTempIn_B: Double
+    var efficiencyTempIn_cf: Double
   }
 }
 
@@ -67,10 +68,10 @@ extension SteamTurbine.Parameter: CustomStringConvertible {
     d += "c1:" >< "\(efficiencyWetBulb[4])"
     d += "c2:" >< "\(efficiencyWetBulb[5])"
     d += "Efficiency;\nEfficiency(HTF_Tin) = A * HTF_Tin ( °C ) ^ B * corrFactor\n"
-    d += "A" >< "\(efficiencytempIn_A)"
-    d += "B" >< "\(efficiencytempIn_B)"
+    d += "A" >< "\(efficiencyTempIn_A)"
+    d += "B" >< "\(efficiencyTempIn_B)"
     d += "corr factor:"
-      >< "\(efficiencytempIn_cf)"
+      >< "\(efficiencyTempIn_cf)"
     d += "Time for Start-Up [min]:"
       >< "\(startUpTime)"
     d += "Energy for Start-Up [MWh]:"
@@ -91,14 +92,14 @@ extension SteamTurbine.Parameter: TextConfigInitializable {
     efficiencySCC = try row(38)
     efficiency = try [row(45), row(48), row(51), row(54), row(57)]
     efficiencyTemperature = try [row(64), row(67), row(70), row(73), row(76)]
-    startUpTime = try row(83)
+    startUpTime = try Int(row(83))
     startUpEnergy = try row(86)
     minPowerFromTemp = [0, 0, 0, 0, 0]
-    hotStartUpTime = 0
+    hotStartUpTime = 75
     efficiencyWetBulb = .init(values: 0, 0, 0, 0, 0, 0)
     WetBulbTstep = 0
-    efficiencytempIn_A = 0
-    efficiencytempIn_B = 0
-    efficiencytempIn_cf = 0
+    efficiencyTempIn_A = 0
+    efficiencyTempIn_B = 0
+    efficiencyTempIn_cf = 0
   }
 }

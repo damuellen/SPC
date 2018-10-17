@@ -15,7 +15,8 @@ public struct MassFlow: CustomStringConvertible {
   var rate: Double
 
   var isNearZero: Bool { return self < 1e-4 }
-
+  static var zero: MassFlow = MassFlow()
+  
   public var description: String {
     return String(format: "%.2f", rate)
   }
@@ -29,6 +30,15 @@ public struct MassFlow: CustomStringConvertible {
     self.rate = rate
   }
 
+  public static func average(_ mfl: MassFlow...) -> MassFlow {
+    if mfl.count == 2 {
+      return MassFlow((mfl[0].rate + mfl[1].rate) / 2)
+    }
+    return MassFlow(mfl.reduce(0) { rate, mfl in
+      rate + mfl.rate } / Double(mfl.count)
+    )
+  }
+  
   func share(of max: MassFlow) -> Ratio {
     let rate = abs(self.rate)
     return (rate - max.rate) <= 0.0001 ? Ratio(rate / max.rate) : Ratio(1)
@@ -80,6 +90,10 @@ public struct MassFlow: CustomStringConvertible {
 
   static func - (lhs: MassFlow, rhs: MassFlow) -> MassFlow {
     return MassFlow(lhs.rate - rhs.rate)
+  }
+  
+  static prefix func - (rhs: MassFlow) -> MassFlow {
+    return MassFlow(-rhs.rate)
   }
 }
 

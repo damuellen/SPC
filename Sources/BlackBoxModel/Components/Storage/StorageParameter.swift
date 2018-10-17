@@ -40,26 +40,29 @@ extension Storage {
     let strategy: Strategy
     let PrefChargeto: Double
     let startexcep, endexcep: Int
-    let HTF: StorageFluid
+    let HTF: StorageMedium
 
     let FCstopD, FCstopM, FCstartD, FCstartM: Int
-    let FP, FC, heatdiff, dSRise, MinDis, fixedLoadDischarge: Double
+    let FP, FC, heatdiff, dSRise, minDischargeLoad, fixedDischargeLoad: Double
     let heatTracingTime, heatTracingPower: [Double]
     let DischrgParFac: Double
-    let isVariable = false
+    let isVariable = true
     let heatExchangerRestrictedMin = false
-    let auxConsCurve = false
+    let auxConsumptionCurve = false
     let heatExchangerRestrictedMax = false
 
     var definedBy: Definition = .hours
 
-    let deltaTemperature: (charging: Temperature, discharging: Temperature)
-    let designTemperature: (hot: Temperature, cold: Temperature)
+  /*  let deltaTemperature: (design: Temperature,
+    charging: Temperature, discharging: Temperature)*/
+    let designTemperature: (cold: Temperature, hot: Temperature)
+    
     let heatLoss: (hot: Double, cold: Double)
     let FCstartD2: Int // Second Start fossil charging at Day
     let FCstartM2: Int // Second Start fossil charging at Month
     let FCstopD2: Int // second Stop fossil charing at Day
     let FCstopM2: Int // Second Stop fossil charing at Month
+    
     let heatExchangerEfficiency: Double
     let heatExchangerCapacity: Double // (oil to salt) in MWt
     let heatExchangerMinCapacity: Double // HX minimum capacity in %
@@ -227,9 +230,9 @@ extension Storage.Parameter: CustomStringConvertible {
  heatdiff       : Double       //(Qsol-Qdemand)/Qdemand in % to discharge STO
 
  isVariable       : Double      //check box to discharge the storage at variable load or (at usual by 97%)constant load
- MinDis       : Double       //minimum load during storage discharge in %
+ minDischargeLoad       : Double       //minimum load during storage discharge in %
  dSRise       : Double       //number of hours before (-) or after (+) sunrise for variable load calculation
- fixedLoadDischarge       : Double       //dicharge with fixed load, as usual. Now given as user input
+ fixedDischargeLoad       : Double       //dicharge with fixed load, as usual. Now given as user input
  DischrgParFac: Double       //factor to multiply parasitics during discharge to consider HTF pumps
 
  definedBy           : String * 3      //how the TES size is defined (hours, MWh, Ton)

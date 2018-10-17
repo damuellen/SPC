@@ -52,10 +52,6 @@ public struct MeteoData: CustomStringConvertible {
     )
   }
 
-  public mutating func zeroInsolation() {
-    dni = 0; ghi = 0; dhi = 0
-  }
-
   /// Interpolation function for meteo data values
   static func interpolation(prev: MeteoData, current: MeteoData,
                             next: MeteoData, progess: Float) -> MeteoData {
@@ -173,7 +169,7 @@ public struct Location {
   public let latitude: Float
   public let elevation: Float
 
-  public var doubles: (Double, Double, Double) {
+  public var coordinates: (Double, Double, Double) {
     return (Double(longitude), Double(latitude), Double(elevation))
   }
 
@@ -183,21 +179,3 @@ public struct Location {
     self.elevation = elevation
   }
 }
-
-/*
- period        : Integer      'Validity period [sec]
- dni           : Single       'Normal Direct Insolation
- irradianceCosTheta     : Single       'I * COS(Theta)
- theta         : Single       'Incident angle [rad]
- SinPE         : Single       'SIN(PE)
- PE            : Single       'Tracking Angle
- Tamb          : Single       'ambient Temperature [øC]
- WS            : Single       'Wind speed [m/sec]
- WD            : Single       'Wind direction 0° is north
- V1            : Single       'elevation
- V2            : Single       'azimuth
- soltime       : Single
- WBT           : Single       'wet bulb temperature
- phi           : Double       'Integration of Fresnel
- GHI           : Single       'for OU1 PV
- */

@@ -29,7 +29,7 @@ public struct Coefficients: Codable {
     return self.coefficients.isEmpty
   }
 
-  @inline(__always) func apply(_ value: Double) -> Double {
+  @_transparent func apply(_ value: Double) -> Double {
     // Use Horner’s Method for solving
     var result = 0.0
     for coefficient in self.coefficients.reversed() {
@@ -42,7 +42,7 @@ public struct Coefficients: Codable {
     return self.apply(temperature.kelvin)
   }
 
-  subscript(value: Double) -> Double {
+  public subscript(value: Double) -> Double {
     return self.apply(value)
   }
 
@@ -62,11 +62,11 @@ extension Coefficients: ExpressibleByArrayLiteral {
 }
 
 public struct Ratio: CustomStringConvertible, Codable {
-  let ratio: Double
+  var ratio: Double
 
   var isZero: Bool { return self.ratio == 0 }
 
-  var percentage: Float { return Float(self.ratio) * 100.0 }
+  public var percentage: Double { return self.ratio * 100.0 }
 
   public var description: String { return "\(self.percentage)%" }
 
@@ -75,7 +75,7 @@ public struct Ratio: CustomStringConvertible, Codable {
   }
 
   public init(_ value: Double) {
-    assert(0 ... 1 ~= Int(value), "Ratio out of range.")
+    precondition(0 ... 1 ~= Int(value), "Ratio out of range.")
     self.ratio = value > 1 ? 1 : value
   }
 }

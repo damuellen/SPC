@@ -19,21 +19,25 @@ extension HeatExchanger {
       var h2o: (inlet: (max: Temperature, min: Temperature),
                 outlet: (max: Temperature, min: Temperature))
 
+      var designDelta: (inlet: Temperature, outlet:Temperature)
+      
       public init(
         htf: (inlet: (max: Double, min: Double),
               outlet: (max: Double, min: Double)),
         h2o: (inlet: (max: Double, min: Double),
               outlet: (max: Double, min: Double))
       ) {
-        self.htf = ((Temperature(celsius: htf.inlet.max),
-                     Temperature(celsius: htf.inlet.min)),
-                    (Temperature(celsius: htf.outlet.max),
-                     Temperature(celsius: htf.outlet.min)))
-        self.h2o = ((Temperature(celsius: h2o.inlet.max),
-                     Temperature(celsius: h2o.inlet.min)),
-                    (Temperature(celsius: h2o.outlet.max),
-                     Temperature(celsius: h2o.outlet.min)))
+        typealias T = Temperature
+        self.htf = ((T(celsius: htf.inlet.max), T(celsius: htf.inlet.min)),
+                    (T(celsius: htf.outlet.max),T(celsius: htf.outlet.min)))
+        self.h2o = ((T(celsius: h2o.inlet.max), T(celsius: h2o.inlet.min)),
+                    (T(celsius: h2o.outlet.max),T(celsius: h2o.outlet.min)))
+        self.designDelta = (
+          inlet: Temperature(htf.inlet.max - htf.inlet.min),
+          outlet: Temperature(htf.outlet.max - htf.outlet.min)
+        )
       }
+
     }
 
     let name: String
@@ -162,19 +166,19 @@ extension HeatExchanger.Parameter: Codable {
     let values = try decoder.container(keyedBy: CodingKeys.self)
     name = try values.decode(String.self, forKey: .name)
     efficiency = try values.decode(Double.self, forKey: .efficiency)
-    var temperatures = try values.decode(Array<Double>.self, forKey: .temperature)
+    var temps = try values.decode(Array<Double>.self, forKey: .temperature)
     temperature = Temperatures(
-      htf: (inlet: (max: temperatures[0].toKelvin, min: temperatures[1].toKelvin),
-            outlet: (max: temperatures[2].toKelvin, min: temperatures[3].toKelvin)),
-      h2o: (inlet: (max: temperatures[4].toKelvin, min: temperatures[5].toKelvin),
-            outlet: (max: temperatures[6].toKelvin, min: temperatures[7].toKelvin))
+      htf: (inlet: (max: temps[0].toKelvin, min: temps[1].toKelvin),
+            outlet: (max: temps[2].toKelvin, min: temps[3].toKelvin)),
+      h2o: (inlet: (max: temps[4].toKelvin, min: temps[5].toKelvin),
+            outlet: (max: temps[6].toKelvin, min: temps[7].toKelvin))
     )
-    temperatures = try values.decode(Array<Double>.self, forKey: .scc)
+    temps = try values.decode(Array<Double>.self, forKey: .scc)
     scc = Temperatures(
-      htf: (inlet: (max: temperatures[0].toKelvin, min: temperatures[1].toKelvin),
-            outlet: (max: temperatures[2].toKelvin, min: temperatures[3].toKelvin)),
-      h2o: (inlet: (max: temperatures[4].toKelvin, min: temperatures[5].toKelvin),
-            outlet: (max: temperatures[6].toKelvin, min: temperatures[7].toKelvin))
+      htf: (inlet: (max: temps[0].toKelvin, min: temps[1].toKelvin),
+            outlet: (max: temps[2].toKelvin, min: temps[3].toKelvin)),
+      h2o: (inlet: (max: temps[4].toKelvin, min: temps[5].toKelvin),
+            outlet: (max: temps[6].toKelvin, min: temps[7].toKelvin))
     )
     sccEff = try values.decode(Double.self, forKey: .sccEff)
     sccHTFmassFlow = try values.decode(MassFlow.self, forKey: .sccHTFmassFlow)

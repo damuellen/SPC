@@ -10,6 +10,7 @@ let package = Package(
     ],
   dependencies: [
     // Dependencies declare other packages that this package depends on.
+  //  .package(url: "../SwiftPV", .branch("master")),
     .package(url: "../DateGenerator", .branch("master")),
     .package(url: "../SolarPosition", .branch("master")),
     .package(url: "https://github.com/Nike-Inc/Willow.git", from: "5.0.0")

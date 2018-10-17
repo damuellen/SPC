@@ -112,7 +112,7 @@ extension JsonConfigFileHandler {
       case .COL: try encoder.encode(Collector.parameter).write(to: url)
       case .STO: break
       case .HR: try encoder.encode(Heater.parameter).write(to: url)
-      case .HTF: try encoder.encode(htf).write(to: url)
+      case .HTF: break // try encoder.encode(htf).write(to: url)
       case .HX: try encoder.encode(HeatExchanger.parameter).write(to: url)
       case .BO: try encoder.encode(Boiler.parameter).write(to: url)
       case .WHR: try encoder.encode(WasteHeatRecovery.parameter).write(to: url)
@@ -120,7 +120,7 @@ extension JsonConfigFileHandler {
       case .TB: try encoder.encode(SteamTurbine.parameter).write(to: url)
       case .PB: try encoder.encode(PowerBlock.parameter).write(to: url)
       case .PFC: break
-      case .STF: try encoder.encode(salt).write(to: url)
+      case .STF: break // try encoder.encode(salt).write(to: url)
       }
     }
   }

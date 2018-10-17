@@ -11,8 +11,8 @@
 import Foundation
 
 protocol HeatCycle {
-  var massFlow: MassFlow { get }
-  var temperature: (inlet: Temperature, outlet: Temperature) { get }
+  var massFlow: MassFlow { get set }
+  var temperature: (inlet: Temperature, outlet: Temperature) { get set }
 }
 
 extension HeatCycle {
@@ -28,10 +28,6 @@ extension HeatCycle {
     return temperature.outlet.kelvin
   }
 
-  func heatTransfered(with fluid: HeatTransferFluid) -> Double {
-    return massFlow.rate * abs(fluid.heatDelta(temperature.inlet, temperature.outlet))
-  }
-
   var values: [String] {
     return [
       String(format: "%.1f", massFlow.rate),
@@ -40,7 +36,35 @@ extension HeatCycle {
     ]
   }
 
-  func columns(name: String) -> [(String, String)] {
+  mutating func merge(massFlows: HeatCycle...) {
+    self.massFlow.rate = massFlows.reduce(0) { $0 + $1.massFlow.rate }
+  }
+
+  mutating func adjust(massFlow: Double) {
+    self.massFlow = MassFlow(massFlow)
+  }
+
+  mutating func setTemperaturOutletEqualToInlet() {
+    temperature.outlet = temperature.inlet
+  }
+  
+  mutating func setTemperature(inlet: Temperature) {
+    temperature.inlet = inlet
+  }
+
+  mutating func setTemperature(outlet: Temperature) {
+    temperature.outlet = outlet
+  }
+
+  mutating func setInletTemperature(kelvin: Double) {
+    temperature.inlet = Temperature(kelvin)
+  }
+
+  mutating func setOutletTemperature(kelvin: Double) {
+    temperature.outlet = Temperature(kelvin)
+  }
+
+  static func columns(name: String) -> [(String, String)] {
     return [
       ("\(name)|Massflow", "kg/s"), ("\(name)|Tin", "°C"), ("\(name)|Tout", "°C"),
     ]

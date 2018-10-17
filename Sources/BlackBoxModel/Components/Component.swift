@@ -14,7 +14,7 @@ protocol ComponentParameter {}
 
 protocol Component {
   associatedtype Parameter: ComponentParameter
-
+  
   static var parameter: Parameter { get set }
 
   static func update(parameter: Parameter)
@@ -25,3 +25,7 @@ extension Component {
     self.parameter = parameter
   }
 }
+
+typealias Status<T> = (
+  supply: Double, demand: Double, parasitics: Double, fuel: Double, status: T
+)

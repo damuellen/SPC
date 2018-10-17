@@ -23,7 +23,6 @@ let hourFraction = PerformanceCalculator.interval.fraction
 let Fuelmode = OperationRestriction.FuelStrategy.predefined
 
 var dniDay = 0.0
-var timeRemain = 600.0
 
 public enum PerformanceCalculator {
   public static var logger: PerformanceDataLogger?
@@ -71,7 +70,7 @@ public enum PerformanceCalculator {
     )
 
     if case .none = sun {
-      sun = SolarPosition(location: meteoDataSource.location.doubles,
+      sun = SolarPosition(location: Plant.location.coordinates,
                           year: year, timezone: timeZone, frequence: interval)
     }
     guard let 🌞 = sun else { preconditionFailure("We need the sun.") }
@@ -117,28 +116,32 @@ public enum PerformanceCalculator {
     Maintenance.setDefaultSchedule(for: year)
 
     var status = Plant.initialState
+    status.steamTurbine.operationMode = .noOperation(
+      time: SteamTurbine.parameter.hotStartUpTime
+    )
 
     for (🌦, 📅) in zip(meteoDataGenerator, dates) {
 
-      TimeStep.current = .init(📅)
+      TimeStep.set(current: 📅)
       Maintenance.checkSchedule(📅)
-      Plant.availability.set(calendar: TimeStep.current)
+      Plant.availability.set(TimeStep.current)
 
-      runProgress.tracking(of: TimeStep.current.month)
+      runProgress.tracking(month: TimeStep.current.month)
 
       dniDay = meteoDataGenerator.sumDNI(ofDay: TimeStep.current.day)
 
       if let position = 🌞[📅] {
         status.collector = Collector.tracking(sun: position)
-        Collector.update(&status.collector, meteo: 🌦)
+        Collector.efficiency(&status.collector, meteo: 🌦)
       } else {
         TimeStep.current.isAtNight = true
       }
+      var timeRemain = 600.0
+      status.solarField = SolarField.update(
+        status, timeRemain: &timeRemain, meteo: 🌦
+      )
 
-      Plant.electricalParasitics.solarField =
-        SolarField.update(&status, timeRemain: timeRemain, meteo: 🌦)
-
-      Plant.update(&status, fuel: Availability.fuel, meteo: 🌦)
+      Plant.update(&status, meteo: 🌦)
       // debug(date, meteo, status)
 
       let (electricEnergy, parasitics, thermal, fuel) =
@@ -159,7 +162,9 @@ public enum PerformanceCalculator {
     return logger!.log
   }
 
-  public static func loadConfigurations(atPath path: String, format: Config.Formats) {
+  public static func loadConfigurations(
+    atPath path: String, format: Config.Formats)
+  {
     do {
       switch format {
       case .json:

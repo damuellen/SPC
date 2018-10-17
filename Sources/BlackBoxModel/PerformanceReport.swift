@@ -22,6 +22,7 @@ extension PerformanceLog {
 
   public var report: String {
     let solarField = SolarField.parameter
+    let heater = Heater.parameter
     let heatExchanger = HeatExchanger.parameter
     let gasTurbine = GasTurbine.parameter
     let steamTurbine = SteamTurbine.parameter
@@ -96,7 +97,7 @@ extension PerformanceLog {
     d += "Annual direct solar insolation [kWh/m²a]:" //  Format(YTarS(0).NDI,)"
       >< "\(PerformanceLog.number.string(from: NSNumber(value: annually.dni))!)"
     d += "Total heat from solar field [MWh_el/a]:" // Format(YTarS(0).heatsol,)"
-    >< "\(PerformanceLog.number.string(from: NSNumber(value: annually.thermal.solar))!)"
+    >< "\(PerformanceLog.number.string(from: NSNumber(value: annually.thermal.solar.megaWatt))!)"
     d += "________________________________________________________________________________\n"
     d += "\n"
     d += "AVAILABILITIES\n"
@@ -200,22 +201,22 @@ extension PerformanceLog {
     d += " Fixed Parameter\n"
     d += "\n\n"
     d += "HEATER\n\n"
-    d += Heater.parameter.description
+    d += String(describing: heater)
     d += "\n"
     d += "HEAT EXCHANGER\n\n"
-    d += heatExchanger.description
+    d += String(describing: heatExchanger)
     d += "\n"
     d += "STEAM TURBINE\n\n"
-    d += steamTurbine.description
+    d += String(describing: steamTurbine)
     d += "\n"
     d += "SOLAR FIELD\n\n"
-    d += solarField.description
+    d += String(describing: solarField)
     d += "\n"
     d += "COLLECTOR\n\n"
-    d += "\(collector.description)"
+    d += String(describing: collector)
     d += "\n"
     d += "HEAT TRANSFER FLUID\n\n"
-    d += "\(htf.description)"
+    d += String(describing: solarField.HTF)
     d += "\n\n"
     return d
   }

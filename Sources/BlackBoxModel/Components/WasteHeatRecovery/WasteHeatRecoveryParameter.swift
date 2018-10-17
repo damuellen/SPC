@@ -13,9 +13,9 @@ import Config
 extension WasteHeatRecovery {
   public struct Parameter: ComponentParameter, Codable {
     let name: String
-    let operation: Operation
+    let operation: OperationMode
 
-    public enum Operation: String, Codable {
+    public enum OperationMode: String, Codable {
       case pure, integrated
     }
 

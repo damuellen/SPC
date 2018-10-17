@@ -22,8 +22,8 @@ public enum ParameterDefaults {
       htf: (inlet: (max: 390, min: 260), outlet: (max: 292, min: 198)),
       h2o: (inlet: (max: 374, min: 255), outlet: (max: 234, min: 128))
     ),
-    sccHTFmassFlow: 600.0,
-    sccHTFheat: 65,
+    sccHTFmassFlow: 1000.0,
+    sccHTFheat: 90,
     ToutMassFlow: nil,
     ToutTin: nil,
     ToutTinMassFlow: nil,
@@ -64,42 +64,53 @@ public enum ParameterDefaults {
     pumpParastics: [0.15, -0.293, 1.257],
     massFlow: (600.0, 5.0),
     pumpParasticsFullLoad: 3.607,
-    antiFreezeFlow: 10.0,
+    antiFreezeFlow: 50.0,
     HTFmass: 396_359.0,
+    HTF: HTF,
     collector: LS3,
     edgeFactor: []
   )
 
+  static let HTF = HeatTransferFluid(
+    name: "Therminol",
+    freezeTemperature: 12,
+    heatCapacity: [1.4856, 0.0028],
+    dens: [1074.964, -0.6740513, -0.000650017],
+    visco: [-0.000201537, 0.1273247, -0.7167957],
+    thermCon: [0.1378081, -8.41485e-05, -1.788e-07],
+    maxTemperature: 393.0,
+    h_T: [-0.62677, 1.51129, 0.0012941, 1.23697e-07, 0],
+    T_h: [0.58315, 0.65556, -0.00032293, 1.9425e-07, -6.1133e-11],
+    useEnthalpy: true
+  )
+  
   static let st = Storage.Parameter(
     name: "2-Tank Molten Salt",
     chargeTo: 1,
-    dischargeToTurbine: 0.01, dischargeToHeater: 0.01,
+    dischargeToTurbine: 0.04441213, dischargeToHeater: 0.04441213,
     stepSizeIteration: -99.99,
     heatStoredrel: 0,
-    temperatureDischarge: [293, 0, 0, 0],
+    temperatureDischarge: [7, 0, 0, 0],
     temperatureDischarge2: [7, 0, 0, 0],
-    temperatureCharge: [293, 0, 0, 0],
-    temperatureCharge2: [],
-    heatlossCst: [],
-    heatlossC0to1: [],
-    pumpEfficiency: 0.82,
+    temperatureCharge: [307, 0, 0, 0],
+    temperatureCharge2: [-1, 0, 0, 0],
+    heatlossCst: [1.953704, 301.1, 546.6, 2630000],
+    heatlossC0to1: [21700148, 362.77, 0, 0],
+    pumpEfficiency: 0.73,
     pressureLoss: 776000,
-    massFlow: 50.0,
-    startTemperature: (Temperature(celsius: 288.0),
-                       Temperature(celsius: 288.0)),
+    massFlow: 100.0,
+    startTemperature: (.init(celsius: 288.0), .init(celsius: 288.0)),
     startLoad: (cold: 1, hot: 0),
-    strategy: .always, PrefChargeto: 0.83,
+    strategy: .shifter, PrefChargeto: 0.83,
     startexcep: 4, endexcep: 8,
     HTF: .solarSalt, FCstopD: 20, FCstopM: 6,
     FCstartD: 18, FCstartM: 9, FP: -1, FC: 0,
-    heatdiff: 0.25, dSRise: 1, MinDis: 0,
-    fixedLoadDischarge: 0,
+    heatdiff: 0.25, dSRise: 1, minDischargeLoad: 0,
+    fixedDischargeLoad: 0.97,
     heatTracingTime: [1, 1], heatTracingPower: [1, 1],
-    DischrgParFac: 1, definedBy: .cap,
-    deltaTemperature: (Temperature(celsius: 293.0),
-                       Temperature(celsius: 390.0)),
-    designTemperature: (Temperature(celsius: 293.0),
-                        Temperature(celsius: 390.0)),
+    DischrgParFac: 1, definedBy: .hours,
+  //  deltaTemperature: (.init(celsius: 293.0), .init(celsius: 390.0)),
+    designTemperature: (.init(celsius: 293.0), .init(celsius: 390.0)),
     heatLoss: (1, 1),
     FCstartD2: 1, FCstartM2: 0, FCstopD2: 0, FCstopM2: 0,
     heatExchangerEfficiency: 1,
@@ -123,7 +134,7 @@ public enum ParameterDefaults {
     emissionHCE: [0.033, 0.0001],
     shadingHCE: [0.962, 0.961, 0.938, 0.933],
     IAMfac: [1, 0, -0.0817, 0.1689, -0.2639],
-    IntradiationLosses: true
+    useIntegralRadialoss: true
   )
 
   static let hr = Heater.Parameter(
@@ -139,7 +150,7 @@ public enum ParameterDefaults {
 
   static let tb = SteamTurbine.Parameter(
     name: "",
-    power: PowerRange(range: 13 ... 50, nom: 25),
+    power: PowerRange(range: 33 ... 102, nom: 100),
     efficiencyNominal: 0.4101728,
     efficiencyBoiler: 0.4101728,
     efficiencySCC: 0.4101728,
@@ -149,8 +160,8 @@ public enum ParameterDefaults {
     minPowerFromTemp: [1, 0, 0, 0, 0],
     hotStartUpTime: 120,
     efficiencyWetBulb: [0, 0, 0, 0, 0, 0],
-    WetBulbTstep: 0, efficiencytempIn_A: 0.2383,
-    efficiencytempIn_B: 0.2404, efficiencytempIn_cf: 0
+    WetBulbTstep: 0, efficiencyTempIn_A: 0.2383,
+    efficiencyTempIn_B: 0.2404, efficiencyTempIn_cf: 0
   )
 
   static let pb = PowerBlock.Parameter(
