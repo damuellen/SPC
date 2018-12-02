@@ -13,8 +13,6 @@ import Config
 import Foundation
 import Meteo
 
-typealias PC = PerformanceCalculator
-
 let start = CFAbsoluteTimeGetCurrent()
 
 let configPath = CommandLine.arguments.count > 1
@@ -36,11 +34,11 @@ let lastRun = runs?.max() ?? 99
 
 // PC.loadConfigurations(atPath: path, format: .text)
 // PC.saveConfigurations(toPath: path)
-PC.meteoFilePath = meteoFilePath
-PC.interval = .every5minutes
+BlackBoxModel.meteoFilePath = meteoFilePath
+BlackBoxModel.interval = .every5minutes
 
-var log = PC.runModel(lastRun + 1, output: .brief)
-print(log.description)
+let logger = BlackBoxModel.runModel(lastRun + 1, output: .full)
+print(logger.log)
 /*
 log = goalSeek(\.thermal.production, greaterThen: 164000) {
  Design.layout.solarField += 1

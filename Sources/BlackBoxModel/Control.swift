@@ -9,7 +9,7 @@
 //
 
 enum Control {
-  static var whichOptimization: OptimizationMode = .fuel
+  static var whichOptimization: OptimizationMode = .demand
 
   enum OptimizationMode {
     case solarOnly, baseLoad, demand, demand_fuel, fuel

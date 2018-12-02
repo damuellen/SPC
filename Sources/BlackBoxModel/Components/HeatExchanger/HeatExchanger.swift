@@ -13,9 +13,13 @@ import Foundation
 public enum HeatExchanger: Component {
   /// Contains all data needed to simulate the operation of the heat exchanger
   public struct PerformanceData: HeatCycle, CustomStringConvertible {
+    
     var operationMode: OperationMode
+    
     var temperature: (inlet: Temperature, outlet: Temperature)
+    
     var massFlow: MassFlow
+    
     var totalMassFlow, maxDeltaHeat, heatOut, heatToTES: Double
 
     public enum OperationMode: Equatable {
@@ -71,13 +75,13 @@ public enum HeatExchanger: Component {
   }
   
   /// Update HeatExchanger.temperature.outlet
-  public static func update(_ hx: inout HeatExchanger.PerformanceData,
-                            steamTurbine: SteamTurbine.PerformanceData,
-                            storage: Storage.PerformanceData) -> Double {
+  public static func perform(_ hx: inout PerformanceData,
+                             steamTurbine: SteamTurbine.PerformanceData,
+                             storage: Storage.PerformanceData) -> Double {
     let solarField = SolarField.parameter
     let htf = solarField.HTF
     if parameter.name.hasPrefix("Heat Exchanger HTF-H2O - BK") {
-      hx.setOutletTemperature(kelvin:
+      hx.outletTemperature(kelvin:
         parameter.temperature.htf.outlet.max.kelvin
           - (120 - 169 * steamTurbine.load.ratio
             + 49 * steamTurbine.load.ratio ** 2)
@@ -110,7 +114,7 @@ public enum HeatExchanger: Component {
             parameter.temperature.htf.outlet.max.adjusted(with: clamp(factor))
           )
         case let (ToutMassFlow?, .none, .none):
-          hx.setOutletTemperature(kelvin:
+          hx.outletTemperature(kelvin:
             temp.htf.outlet.min.kelvin + temp.designDelta.outlet.kelvin
             * (hx.temperature.inlet - temp.htf.inlet.min).kelvin
             / temp.designDelta.inlet.kelvin)
@@ -119,7 +123,7 @@ public enum HeatExchanger: Component {
 
           let factor = ToutMassFlow[massFlowLoad]
 
-          hx.setOutletTemperature(kelvin: clamp(factor) * hx.outletTemperature)
+          hx.outletTemperature(kelvin: clamp(factor) * hx.outletTemperature)
         case let (_, _, ToutTinMassFlow?):
           let massFlowLoad = hx.massFlow.share(of: solarField.massFlow.max)
 
@@ -142,7 +146,7 @@ public enum HeatExchanger: Component {
           )
         default:
 // CHECK: the value of HTFoutTmax should be dependent on storage charging but only on PB HX
-          hx.setOutletTemperature(kelvin:
+          hx.outletTemperature(kelvin:
             temp.htf.outlet.min.kelvin + temp.designDelta.outlet.kelvin
             * (hx.inletTemperature - temp.htf.inlet.min.kelvin)
             / temp.designDelta.inlet.kelvin)
@@ -160,7 +164,7 @@ public enum HeatExchanger: Component {
 
       for i in 1...  where hx.heatToTES > h_261 {
         // reduce massflow to PB in 5% every step until enthalpy is
-        hx.adjust(massFlow: totalMassFlow.rate * (1 - (Double(i) / 20)))
+        hx.massFlow(rate: totalMassFlow.rate * (1 - (Double(i) / 20)))
         let massFlowLoad = hx.massFlow.share(of: solarField.massFlow.max)
 
         if parameter.useAndsolFunction {
@@ -209,7 +213,7 @@ public enum HeatExchanger: Component {
 
       hx.setTemperature(outlet: htf.temperatureFrom(hx.heatToTES))
     }
-    let heat = hx.massFlow.rate * SolarField.parameter.HTF.heatAdded(
+    let heat = hx.massFlow.rate * SolarField.parameter.HTF.addedHeat(
        hx.temperature.outlet, hx.temperature.inlet) / 1_000
     return -heat * parameter.efficiency
   }
@@ -241,7 +245,9 @@ public enum HeatExchanger: Component {
         let massFlowLoad = pb.massFlow.share(of: solarField.massFlow.max)
         
         let factor = Ratio(ToutMassFlow[massFlowLoad.ratio])
+        
         let temp = parameter.temperature
+
         return Temperature(
           (temp.htf.outlet.min.kelvin + temp.designDelta.outlet.kelvin
             * (pb.temperature.inlet - temp.htf.inlet.min).kelvin

@@ -12,17 +12,6 @@ import DateGenerator
 import Foundation
 import Meteo
 
-public enum PerformanceLogMode {
-  case full, brief, playground, none
-
-  var writeResults: Bool {
-    if case .none = self {
-      return false
-    }
-    return true
-  }
-}
-
 public final class PerformanceDataLogger {
   var dateString: String = ""
 
@@ -34,24 +23,35 @@ public final class PerformanceDataLogger {
   }(DateFormatter())
 
   public var log: PerformanceLog {
-    var annually = self.annually
-    annually.temp /= 8760 * 12
-    return PerformanceLog(annually: annually, history: history, results: results)
+    var annual = self.annual
+    annual.temp /= 8760 * 12
+    return PerformanceLog(annual: annual, history: history, results: results)
   }
   
-  private var annually = PerformanceResults()
-  private var daily = PerformanceResults()
-  private var hourly = PerformanceResults()
+  private var annual = PerformanceLog.Results()
+  private var daily = PerformanceLog.Results()
+  private var hourly = PerformanceLog.Results()
   private var history: [Plant.PerformanceData] = []
-  private var results: [PerformanceResults] = []
-  private let interval = PerformanceCalculator.interval
-  private let mode: PerformanceLogMode
+  private var results: [PerformanceLog.Results] = []
+  private let interval = BlackBoxModel.interval
+  private let mode: Mode
 
+  public enum Mode {
+    case full, brief, playground, none
+    
+    var writeResults: Bool {
+      if case .none = self {
+        return false
+      }
+      return true
+    }
+  }
+  
   public init() {
     self.mode = .playground
   }
 
-  init(fileNameSuffix: String, mode: PerformanceLogMode = .full) {
+  init(fileNameSuffix: String, mode: Mode = .full) {
     self.mode = mode
     if mode.writeResults {
       self.dailyResultsStream = OutputStream(
@@ -108,7 +108,7 @@ public final class PerformanceDataLogger {
   }
 
   func reset() {
-    annually.reset()
+    annual.reset()
     daily.reset()
     hourly.reset()
     history.removeAll(keepingCapacity: true)
@@ -118,20 +118,20 @@ public final class PerformanceDataLogger {
   func printResult() {
     print("")
     print("---------------------------+=[  Annual results  ]=+-----------------------------")
-    print(annually)
+    print(annual)
     print("________________________________________________________________________________")
   }
 
   func append(date: Date, meteo: MeteoData,
-              electricEnergy: ElectricEnergy,
+              status: Plant.PerformanceData,
+              electricalEnergy: ElectricPower,
               electricalParasitics: Parasitics,
-              thermal: ThermalEnergy,
-              fuelConsumption: FuelConsumption,
-              status: Plant.PerformanceData) {
-
-    var results = PerformanceResults()
-    results.thermal = thermal
-    results.electric = electricEnergy
+              thermalEnergy: ThermalEnergy,
+              fuelConsumption: FuelConsumption)
+  {
+    var results = PerformanceLog.Results()
+    results.thermal = thermalEnergy
+    results.electric = electricalEnergy
     results.fuel = fuelConsumption
     results.parasitics = electricalParasitics
     results.dni = Double(meteo.dni)
@@ -163,10 +163,10 @@ public final class PerformanceDataLogger {
         self.dateString = dateFormatter.string(from: date)
       }
 
-      hourly.thermal.accumulate(thermal, fraction: fraction)
-      hourly.electric.accumulate(electricEnergy, fraction: fraction)
-      hourly.fuel.accumulate(fuelConsumption, fraction: fraction)
-      hourly.parasitics.accumulate(electricalParasitics, fraction: fraction)
+      hourly.thermal.totalize(thermalEnergy, fraction: fraction)
+      hourly.electric.totalize(electricalEnergy, fraction: fraction)
+      hourly.fuel.totalize(fuelConsumption, fraction: fraction)
+      hourly.parasitics.totalize(electricalParasitics, fraction: fraction)
 
       hourly.dni += Double(meteo.dni) * fraction
       hourly.ghi += Double(meteo.ghi) * fraction
@@ -175,17 +175,17 @@ public final class PerformanceDataLogger {
       hourly.add(solarfield: status.solarField, fraction: fraction)
     } else {
       // Only the annual sums are calculated.
-      annually.thermal.accumulate(thermal, fraction: fraction)
-      annually.electric.accumulate(electricEnergy, fraction: fraction)
-      annually.fuel.accumulate(fuelConsumption, fraction: fraction)
-      annually.parasitics.accumulate(electricalParasitics, fraction: fraction)
-      annually.ws += Double(meteo.windSpeed)
-      annually.temp += Double(meteo.temperature)
-      annually.dni += Double(meteo.dni) * fraction
-      annually.ghi += Double(meteo.ghi) * fraction
-      annually.dhi += Double(meteo.dhi) * fraction
-      annually.ico += Double(meteo.dni) * status.collector.cosTheta * fraction
-      annually.add(solarfield: status.solarField, fraction: fraction)
+      annual.thermal.totalize(thermalEnergy, fraction: fraction)
+      annual.electric.totalize(electricalEnergy, fraction: fraction)
+      annual.fuel.totalize(fuelConsumption, fraction: fraction)
+      annual.parasitics.totalize(electricalParasitics, fraction: fraction)
+      annual.ws += Double(meteo.windSpeed)
+      annual.temp += Double(meteo.temperature)
+      annual.dni += Double(meteo.dni) * fraction
+      annual.ghi += Double(meteo.ghi) * fraction
+      annual.dhi += Double(meteo.dhi) * fraction
+      annual.ico += Double(meteo.dni) * status.collector.cosTheta * fraction
+      annual.add(solarfield: status.solarField, fraction: fraction)
     }
   }
 
@@ -217,8 +217,8 @@ public final class PerformanceDataLogger {
   // MARK: Table headers
 
   private var headersDaily: (name: String, unit: String) {
-    let columns = [PerformanceResults.columns,
-                   ThermalEnergy.columns, ElectricEnergy.columns,
+    let columns = [PerformanceLog.Results.columns,
+                   ThermalEnergy.columns, ElectricPower.columns,
                    Parasitics.columns, FuelConsumption.columns].joined()
     let names = columns.map { $0.0 }.joined(separator: ",")
     let units = columns.map { $0.1 }.joined(separator: ",")
@@ -229,8 +229,8 @@ public final class PerformanceDataLogger {
   }
 
   private var headersHourly: (name: String, unit: String) {
-    let columns = [PerformanceResults.columns, ThermalEnergy.columns,
-                   ElectricEnergy.columns, Parasitics.columns,
+    let columns = [PerformanceLog.Results.columns, ThermalEnergy.columns,
+                   ElectricPower.columns, Parasitics.columns,
                    FuelConsumption.columns].joined()
     let names = columns.map { $0.0 }.joined(separator: ",")
     let units = columns.map { $0.1 }.joined(separator: ",")
@@ -241,8 +241,8 @@ public final class PerformanceDataLogger {
   }
 
   private var headersInterval: (name: String, unit: String) {
-    let columns = [PerformanceResults.columns, ThermalEnergy.columns,
-                   ElectricEnergy.columns, Parasitics.columns,
+    let columns = [PerformanceLog.Results.columns, ThermalEnergy.columns,
+                   ElectricPower.columns, Parasitics.columns,
                    FuelConsumption.columns, Collector.PerformanceData.columns]
       .joined()
     let names = columns.map { $0.0 }.joined(separator: ",") + .lineBreak
@@ -267,7 +267,7 @@ public final class PerformanceDataLogger {
       ]
       .joined().joined(separator: ",") + .lineBreak
     dailyResultsStream?.write(csv)
-    annually.accumulate(daily, fraction: 24)
+    annual.totalize(daily, fraction: 24)
     daily.reset()
   }
 
@@ -279,12 +279,12 @@ public final class PerformanceDataLogger {
       ]
       .joined().joined(separator: .separator) + .lineBreak
     hourlyResultsStream?.write(csv)
-    daily.accumulate(hourly, fraction: 1 / 24)
+    daily.totalize(hourly, fraction: 1 / 24)
     hourCounter += 1
     hourly.reset()
   }
 
-  private func writeAll(results: PerformanceResults,
+  private func writeAll(results: PerformanceLog.Results,
                         status: Plant.PerformanceData, date: Date) {
     guard let stream = allResultsStream,
       let stream2 = allResultsStream2 else { return }

@@ -36,12 +36,8 @@ extension HeatCycle {
     ]
   }
 
-  mutating func merge(massFlows: HeatCycle...) {
-    self.massFlow.rate = massFlows.reduce(0) { $0 + $1.massFlow.rate }
-  }
-
-  mutating func adjust(massFlow: Double) {
-    self.massFlow = MassFlow(massFlow)
+  mutating func massFlow(rate: Double) {
+    self.massFlow = MassFlow(rate)
   }
 
   mutating func setTemperaturOutletEqualToInlet() {
@@ -56,11 +52,11 @@ extension HeatCycle {
     temperature.outlet = outlet
   }
 
-  mutating func setInletTemperature(kelvin: Double) {
+  mutating func inletTemperature(kelvin: Double) {
     temperature.inlet = Temperature(kelvin)
   }
 
-  mutating func setOutletTemperature(kelvin: Double) {
+  mutating func outletTemperature(kelvin: Double) {
     temperature.outlet = Temperature(kelvin)
   }
 

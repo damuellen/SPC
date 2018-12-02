@@ -16,7 +16,7 @@ import Foundation
  freeze temperature, specific heat capacity, viscosity, thermal conductivity,
  enthalpy, and density as a function of temperature.
  */
-public struct HeatTransferFluid {
+public struct HeatTransferFluid: CustomStringConvertible {
   let name: String
   let freezeTemperature: Temperature
   let heatCapacity: [Double]
@@ -27,8 +27,6 @@ public struct HeatTransferFluid {
   let enthaplyFromTemperature: Coefficients
   let temperatureFromEnthalpy: Coefficients
   let useEnthalpy: Bool
-  let heatAdded: (Temperature, Temperature) -> Heat
-  let temperatureDelta: (Heat, Temperature) -> Temperature
 
   public init(name: String, freezeTemperature: Double,
               heatCapacity: [Double], dens: [Double],
@@ -46,34 +44,39 @@ public struct HeatTransferFluid {
 
     if useEnthalpy, !h_T.isEmpty, !T_h.isEmpty {
       self.useEnthalpy = true
-      self.heatAdded = { (high: Temperature, low: Temperature) -> Double in
-        HeatTransferFluid.heatTransfer(
-          from: high.celsius, to: low.celsius, coefficients: h_T
-        )
-      }
-      self.temperatureDelta = {
-        (thermal: Double, temperature: Temperature) -> Temperature in
-        Temperature(celsius: HeatTransferFluid.temperatureFromEnthalpy(
-          thermal, temperature.celsius, coefficients: (h_T, T_h))
-        )
-      }
     } else {
       assert(!heatCapacity.isEmpty)
       self.useEnthalpy = false
-      self.heatAdded = { (high: Temperature, low: Temperature) -> Double in
-        HeatTransferFluid.heatTransfer(
-          from: high.celsius, to: low.celsius, heatCapacity: heatCapacity
-        )
-      }
-      self.temperatureDelta = {
-        (specificHeat: Double, temperature: Temperature) -> Temperature in
-        Temperature(celsius: HeatTransferFluid.temperatureFromHeatCapacity(
-          specificHeat, temperature.celsius, coefficients: heatCapacity)
-        )
-      }
     }
   }
 
+  @inline(__always)
+  func addedHeat(_ t1: Temperature, _ t2: Temperature) -> Heat {
+    if useEnthalpy {
+      return HeatTransferFluid.heatExchanged(
+        from: t1.celsius, to: t2.celsius,
+        coefficients: enthaplyFromTemperature.coefficients
+      )
+    }
+    return HeatTransferFluid.heatExchanged(
+      from: t1.celsius, to: t2.celsius, heatCapacity: heatCapacity
+    )
+  }
+  
+  @inline(__always)
+  func resultingTemperature(_ heat: Heat, _ t: Temperature) -> Temperature {
+    if useEnthalpy {
+      return Temperature(celsius: HeatTransferFluid.temperatureFromEnthalpy(
+        heat, t.celsius,
+        coefficients: (enthaplyFromTemperature.coefficients,
+                       temperatureFromEnthalpy.coefficients))
+      )
+    }
+    return Temperature(celsius: HeatTransferFluid.temperatureFromHeatCapacity(
+      heat, t.celsius, coefficients: heatCapacity)
+    )
+  }
+  
   func density(_ temperature: Temperature) -> Double {
     precondition(temperature.kelvin > freezeTemperature.kelvin)
     return density[0] + density[1] * temperature.celsius
@@ -148,7 +151,7 @@ public struct HeatTransferFluid {
     return temperature
   }
 
-  @_transparent private static func heatTransfer(
+  @_transparent private static func heatExchanged(
     from high: Double, to low: Double, heatCapacity: [Double]
   ) -> Double {
     var q = heatCapacity[0] * (high - low)
@@ -156,7 +159,7 @@ public struct HeatTransferFluid {
     return q
   }
 
-  @_transparent private static func heatTransfer(
+  @_transparent private static func heatExchanged(
     from high: Double, to low: Double, coefficients: [Double]
   ) -> Double {
     var (h1, h2) = (0.0, 0.0)
@@ -169,9 +172,8 @@ public struct HeatTransferFluid {
 
   public var description: String {
     var d = ""
-    d += "Description:\t\(name)\n"
-    d += "Freezing Point [°C]:"
-      >< "\(freezeTemperature.celsius)"
+    d += "Description:" >< name
+    d += "Freezing Point [°C]:" >< "\(freezeTemperature.celsius)"
     d += "Specific Heat as a Function of Temperature; cp(T) = c0+c1*T\n"
     d += "c0:" >< "\(heatCapacity[0])"
     d += "c1:" >< "\(heatCapacity[1])"
@@ -262,31 +264,9 @@ extension HeatTransferFluid: Codable {
     useEnthalpy = try values.decode(Bool.self, forKey: .withEnthalpy)
 
     if self.useEnthalpy, !h_T.isEmpty, !T_h.isEmpty {
-      self.heatAdded = { (high: Temperature, low: Temperature) -> Double in
-        HeatTransferFluid.heatTransfer(
-          from: high.kelvin, to: low.kelvin, coefficients: h_T
-        )
-      }
-      self.temperatureDelta = {
-        (enthalpy: Double, temperature: Temperature) -> Temperature in
-        Temperature(HeatTransferFluid.temperatureFromEnthalpy(
-          enthalpy, temperature.kelvin, coefficients: (h_T, T_h))
-        )
-      }
     } else {
       let cp = heatCapacity
       assert(!cp.isEmpty)
-      self.heatAdded = { (high: Temperature, low: Temperature) -> Double in
-        HeatTransferFluid.heatTransfer(
-          from: high.kelvin, to: low.kelvin, heatCapacity: cp
-        )
-      }
-      self.temperatureDelta = {
-        (specificHeat: Double, temperature: Temperature) -> Temperature in
-        Temperature(HeatTransferFluid.temperatureFromHeatCapacity(
-          specificHeat, temperature.kelvin, coefficients: cp)
-        )
-      }
     }
   }
 
@@ -322,32 +302,11 @@ extension HeatTransferFluid {
       let T_h = try [row(53), row(54), row(55), row(56), row(57)]
       temperatureFromEnthalpy = Coefficients(T_h)
       useEnthalpy = try row(59) > 0 ? true : false
-      heatAdded = { (high: Temperature, low: Temperature) -> Heat in
-        HeatTransferFluid.heatTransfer(
-          from: high.celsius, to: low.celsius, coefficients: h_T
-        )
-      }
-      temperatureDelta = {
-        (enthalpy: Double, temperature: Temperature) -> Temperature in
-        Temperature(celsius: HeatTransferFluid.temperatureFromEnthalpy(
-          enthalpy, temperature.celsius, coefficients: (h_T, T_h))
-        )
-      }
+
     } else {
       self.useEnthalpy = false
       self.enthaplyFromTemperature = []
       self.temperatureFromEnthalpy = []
-      self.heatAdded = { (high: Temperature, low: Temperature) -> Heat in
-        HeatTransferFluid.heatTransfer(
-          from: high.celsius, to: low.celsius, coefficients: heatCapacity
-        )
-      }
-      self.temperatureDelta = {
-        (specificHeat: Double, temperature: Temperature) -> Temperature in
-        Temperature(celsius: HeatTransferFluid.temperatureFromHeatCapacity(
-          specificHeat, temperature.celsius, coefficients: heatCapacity)
-        )
-      }
     }
   }
 }

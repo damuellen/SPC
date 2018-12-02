@@ -23,9 +23,13 @@ extension SteamTurbine.PerformanceData: CustomDebugStringConvertible {
 public enum SteamTurbine: Component {
   /// Contains all data needed to simulate the operation of the steam turbine
   public struct PerformanceData: Equatable {
+
     var operationMode: OperationMode
+    
     var load: Ratio
+
     var efficiency: Double
+
     var backPressure: Double
 
     public enum OperationMode: Equatable {
@@ -59,19 +63,18 @@ public enum SteamTurbine: Component {
 
   /// Used to sum time only when time step has changed
   static private var oldMinute = 0
+
   typealias Status = (gross: Double, status: PerformanceData)
   /// Calculates the Electric gross,
   static func update(_ status: Plant.PerformanceData,
-                     heat: Double, meteo: MeteoData,
-                     result: (SteamTurbine.Status) -> ()) {
+                     heat: Double, result: (SteamTurbine.Status) -> ()) {
     var steamTurbine = status.steamTurbine
-    let parameter = SteamTurbine.parameter
     
     defer { oldMinute = TimeStep.current.minute }
     steamTurbine.load = 0.0
     
     if heat <= 0 {
-      Plant.thermal.startUp = 0.0
+      Plant.heat.startUp = 0.0
       // Avoid summing up inside an iteration
       if TimeStep.current.minute != oldMinute {
         
@@ -107,14 +110,18 @@ public enum SteamTurbine: Component {
       case .operating: break
       }
       
-      if status.steamTurbine.operationMode == .operating  {
-        Plant.thermal.startUp = 0.0
-
-        let (maxLoad, st) = SteamTurbine.calculate(status)
-        steamTurbine = st
-        let eff = st.efficiency
-        steamTurbine.load.ratio = min(heat * eff / parameter.power.max,
-                                      maxLoad)
+      if steamTurbine.operationMode == .operating  {
+        Plant.heat.startUp = 0.0
+        let maxLoad: Double
+        (maxLoad, steamTurbine.efficiency) = SteamTurbine.perform(
+          steamTurbine: steamTurbine,
+          boiler: status.boiler,
+          gasTurbine: status.gasTurbine,
+          heatExchanger: status.heatExchanger
+        )
+        let eff = status.steamTurbine.efficiency
+        steamTurbine.load.ratio = (heat * eff / parameter.power.max)
+          .limited(by: maxLoad)
         let gross = status.steamTurbine.load.ratio * parameter.power.max * eff
         result((gross, steamTurbine))
       } else { // Start Up sequence: Energy is lost / Dumped
@@ -123,11 +130,15 @@ public enum SteamTurbine: Component {
           if case .startUp(let startUpTime, let startUpEnergy)
             = steamTurbine.operationMode
           {
-            var energy = Plant.thermal.production.megaWatt
-            Plant.thermal.production = 0.0
-            energy += Plant.thermal.storage.megaWatt
-              + Plant.thermal.boiler.megaWatt
-            Plant.thermal.startUp.megaWatt = energy
+            var energy = Plant.heat.production.megaWatt
+            
+            Plant.heat.production = 0.0
+            
+            energy += Plant.heat.storage.megaWatt
+              + Plant.heat.boiler.megaWatt
+            
+            Plant.heat.startUp.megaWatt = energy
+            
             if status.heater.massFlow.rate > 0 { energy = heat }
             
             steamTurbine.operationMode = .startUp(
@@ -141,32 +152,38 @@ public enum SteamTurbine: Component {
     }
   }
   
-  static func calculate(
-    _ status: Plant.PerformanceData
-    ) -> (Double, SteamTurbine.PerformanceData)
+  static func perform(
+    steamTurbine: PerformanceData,
+    boiler: Boiler.PerformanceData,
+    gasTurbine: GasTurbine.PerformanceData,
+    heatExchanger: HeatExchanger.PerformanceData
+    ) -> (Double, Double)
   {
-    guard status.steamTurbine.load.ratio > 0 else {
-      return (0, status.steamTurbine)
+    guard steamTurbine.load.ratio > 0 else {
+      return (0, 0)
     }
+    var steamTurbine = steamTurbine
+
     var maxLoad: Double = 1
+
     var maxEfficiency: Double = 1
 
-    if case .operating = status.boiler.operationMode {
+    if case .operating = boiler.operationMode {
       // this restriction was planned to simulate an specific case,
       // not correct for every case with Boiler
 
-      if Plant.thermal.boiler.megaWatt > 50 || Plant.thermal.solar.watt == 0 {
+      if Plant.heat.boiler.megaWatt > 50 || Plant.heat.solar.watt == 0 {
         maxEfficiency = parameter.efficiencyBoiler
       } else {
-        maxEfficiency = (Plant.thermal.boiler.megaWatt
+        maxEfficiency = (Plant.heat.boiler.megaWatt
           * parameter.efficiencyBoiler + 4.0
-          * Plant.thermal.heatExchanger.megaWatt
+          * Plant.heat.heatExchanger.megaWatt
           * parameter.efficiencyNominal)
-          / (Plant.thermal.boiler.megaWatt + 4.0
-            * Plant.thermal.heatExchanger.megaWatt)
+          / (Plant.heat.boiler.megaWatt + 4.0
+            * Plant.heat.heatExchanger.megaWatt)
         // maxEfficiency = parameter.effnom
       }
-    } else if case .integrated = status.gasTurbine.operationMode {
+    } else if case .integrated = gasTurbine.operationMode {
       maxEfficiency = parameter.efficiencySCC
     } else {
       if parameter.efficiencyTempIn_A == 0
@@ -182,35 +199,40 @@ public enum SteamTurbine: Component {
 
       maxEfficiency = parameter.efficiencyNominal
         * (parameter.efficiencyTempIn_A
-          * pow((status.heatExchanger.temperature.inlet.celsius),
+          * pow((heatExchanger.temperature.inlet.celsius),
                 parameter.efficiencyTempIn_B))
         * parameter.efficiencyTempIn_cf
     }
 
-    if case .pure = status.gasTurbine.operationMode {
+    if case .pure = gasTurbine.operationMode {
       maxEfficiency = parameter.efficiencySCC
     }
-    var steamTurbine = status.steamTurbine
+
+    var dcFactor = 1.0
     // Dependency of Heat Rate on Ambient Temperature  - DRY COOLING -
     #warning("The implementation here differs from PCT")
     if parameter.efficiencyTemperature[1] >= 1 {
-      let (_, maxDCLoad, backPressure) = DryCooling.update(
+      let (factor, load, backPressure) = DryCooling.update(
         steamTurbineLoad: steamTurbine.load.ratio,
         temperature: Plant.ambientTemperature
       )
       steamTurbine.backPressure = backPressure
-      maxLoad = maxDCLoad.ratio
+      maxLoad = load.ratio
+      dcFactor = factor.ratio
     }
     // Dependency of Heat Rate on Ambient Temperature  - DRY COOLING -
     // now a polynom of fourth degree -
-    var efficiency = parameter.efficiency[status.steamTurbine.load]
+    var efficiency = parameter.efficiency[steamTurbine.load]
+
     var correcture = 0.0
+
     if parameter.efficiencyTemperature.coefficients.isEmpty == false {
       correcture += parameter.efficiencyTemperature[Plant.ambientTemperature.celsius]
     }
     efficiency *= correcture
 
     let wetBulbTemperature = 1.1
+
     var correctionWetBulbTemperature = 1.0
     // wet bulb temperature effect
     if parameter.efficiencyWetBulb.coefficients.isEmpty {
@@ -230,12 +252,11 @@ public enum SteamTurbine: Component {
     }
     let adjustmentFactor = Simulation.adjustmentFactor.efficiencyTurbine
     if parameter.efficiencyTemperature[1] >= 1 {
-      efficiency *= maxEfficiency * adjustmentFactor //  / DCFactor
+      efficiency *= maxEfficiency * adjustmentFactor / dcFactor
     } else {
       efficiency *= maxEfficiency * adjustmentFactor
         * correctionWetBulbTemperature
     }
-    steamTurbine.efficiency = efficiency
-    return (maxLoad, steamTurbine)
+    return (maxLoad, efficiency)
   }
 }

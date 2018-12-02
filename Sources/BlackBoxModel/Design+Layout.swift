@@ -14,7 +14,7 @@ public enum Design {
   public static var layout: Layout = Layout()
 
   static let hasSolarField = layout.solarField > 0
-  static let hasHeater = false // layout.heater < 0
+  static let hasHeater = layout.heater < 0
   static let hasHeatExchanger = layout.heatExchanger > 0
   static let hasBoiler = layout.boiler > 0
   static let hasGasTurbine = layout.gasTurbine > 0

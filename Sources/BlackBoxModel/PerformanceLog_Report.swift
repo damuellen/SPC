@@ -10,7 +10,8 @@
 import Foundation
 
 extension PerformanceLog {
-  static let formatter = { dateFormatter -> DateFormatter in
+  
+  static let date = { dateFormatter -> DateFormatter in
     dateFormatter.calendar = calendar
     dateFormatter.dateFormat = "MM-dd  HH:mm"
     return dateFormatter
@@ -84,20 +85,20 @@ extension PerformanceLog {
     d += "\n"
     d += "\n"
     d += "Gross electricty producution [MWh_el/a]:"
-      >< "\(PerformanceLog.number.string(from: NSNumber(value: annually.electric.gross))!)"
+      >< "\(PerformanceLog.number.string(from: NSNumber(value: annual.electric.gross))!)"
     //  Format((YTarS(0).EgrsST + YTarS(0).EgrsGasTurbine) * (1 - Simulation.parameter.UnSchedMain) * (1 - Simulation.parameter.TransLoss), )"
     d += "Parasitic consumption [MWh_el/a]:"
-      >< "\(PerformanceLog.number.string(from: NSNumber(value: annually.parasitics.shared))!)"
+      >< "\(PerformanceLog.number.string(from: NSNumber(value: annual.parasitics.shared))!)"
     // Format(YTarS(0).electricalParasitics * (1 - Simulation.parameter.UnSchedMain) * (1 - Simulation.parameter.TransLoss), )"
     d += "Net electricty producution [MWh_el/a]:"
-      >< "\(PerformanceLog.number.string(from: NSNumber(value: annually.electric.net))!)"
+      >< "\(PerformanceLog.number.string(from: NSNumber(value: annual.electric.net))!)"
     // Format(YTarS(0).Enet * (1 - Simulation.parameter.UnSchedMain) * (1 - Simulation.parameter.TransLoss), )"
     d += "Gas consumption [MWh_el/a]:\n" // Format(YTarS(0).heatfuel, )"
     d += "Solar share [%]:\n" // Format(SolShare * 100, )"
     d += "Annual direct solar insolation [kWh/m²a]:" //  Format(YTarS(0).NDI,)"
-      >< "\(PerformanceLog.number.string(from: NSNumber(value: annually.dni))!)"
+      >< "\(PerformanceLog.number.string(from: NSNumber(value: annual.dni / 1_000))!)"
     d += "Total heat from solar field [MWh_el/a]:" // Format(YTarS(0).heatsol,)"
-    >< "\(PerformanceLog.number.string(from: NSNumber(value: annually.thermal.solar.megaWatt))!)"
+    >< "\(PerformanceLog.number.string(from: NSNumber(value: annual.thermal.solar.megaWatt))!)"
     d += "________________________________________________________________________________\n"
     d += "\n"
     d += "AVAILABILITIES\n"
@@ -108,7 +109,7 @@ extension PerformanceLog {
     d += "\n\n"
     d += " Input Files\n"
     d += "\n"
-    d += "METEODATA  \(PerformanceCalculator.meteoDataSource.name)\n"
+    d += "METEODATA  \(BlackBoxModel.meteoDataSource.name)\n"
     d += "Meteodata of a leap year"
       >< "\(Simulation.time.isLeapYear ? "YES" : "NO")" /*
      d += "Position of Wet Bulb Temp. in mto-file [row]:" >< "\(Simulation.parameter.WBTpos)"
@@ -149,20 +150,20 @@ extension PerformanceLog {
     // storage.tempInC0to1(0) = storage.heatLossConstants0(1) - storage.tempInC0to1(0)
     // storage.tempInCst0(0) = storage.tempInC0to1(0)
     // }
-    //    d += "Power Block Availability [%]:" >< "\(Plant.availability[0).powerBlock * 100)"
+    //    d += "Power Block Availability [%]:" >< "\(Availability.current[0).powerBlock * 100)"
     //      d += "Transmission Losses [%]:" >< "\(Simulation.parameter.TransLoss * 100)"
     d += "\n\n"
     d += "OPERATION\n"
     d += "\n"
     d += "First Date of Operation [MM.dd  HH:mm]:                             "
     if let firstDateOfOperation = Simulation.time.firstDateOfOperation {
-      d += PerformanceLog.formatter.string(from: firstDateOfOperation) + .lineBreak
+      d += PerformanceLog.date.string(from: firstDateOfOperation) + .lineBreak
     } else {
       d += "01.01  00:00\n"
     }
     d += "Last Date of Operation [MM.dd  HH:mm]:                              "
     if let lastDateOfOperation = Simulation.time.lastDateOfOperation {
-      d += PerformanceLog.formatter.string(from: lastDateOfOperation) + .lineBreak
+      d += PerformanceLog.date.string(from: lastDateOfOperation) + .lineBreak
     } else {
       d += "12.31  23:59\n"
     }
@@ -173,9 +174,9 @@ extension PerformanceLog {
     d += "Mass Flow in Solar Field [kg/s]:"
       >< "\(Simulation.initialValues.massFlowInSolarField.rate)"
     d += "Delta T for Start-Up of Anti-Freeze Pumping:"
-      >< "\(Simulation.parameter.dfreezeTemperaturePump.celsius)"
+      >< "\(Simulation.parameter.dfreezeTemperaturePump.kelvin)"
     d += "Delta T for Start-Up of Anti-Freeze Heater:"
-      >< "\(Simulation.parameter.dfreezeTemperatureHeat.celsius)"
+      >< "\(Simulation.parameter.dfreezeTemperatureHeat.kelvin)"
     d += "Minimum Insolation for Start-Up [W/m²]:"
       >< "\(Simulation.parameter.minInsolation)"
     d += "Fuel strategy:\t\(Fuelmode)I\n"
@@ -183,17 +184,17 @@ extension PerformanceLog {
     d += "AVAILABILITIES\n"
     d += "\n"
     d += "Annual Average Solar Field Availability [%]:"
-      >< "\(Plant.availability.values.solarField.percentage)"
+      >< "\(Availability.current.values.solarField.percentage)"
     d += "Average Percentage of Broken HCE [%]:"
-      >< "\(Plant.availability.values.breakHCE.percentage)"
+      >< "\(Availability.current.values.breakHCE.percentage)"
     d += "Average Percentage of HCE with Lost Vacuum [%]:"
-      >< "\(Plant.availability.values.airHCE.percentage)"
+      >< "\(Availability.current.values.airHCE.percentage)"
     d += "Average Percentage of Flourescent HCE [%]:"
-      >< "\(Plant.availability.values.fluorHCE.percentage)"
+      >< "\(Availability.current.values.fluorHCE.percentage)"
     d += "Average Mirror Reflectivity [%]:"
-      >< "\(Plant.availability.values.reflMirror.percentage)"
+      >< "\(Availability.current.values.reflMirror.percentage)"
     d += "Broken Mirrors [%]:"
-      >< "\(Plant.availability.values.missingMirros.percentage)"
+      >< "\(Availability.current.values.missingMirros.percentage)"
     d += "Periods for Scheduled Maintenance [MM.DD]:\n" // Maintnc(1).Lowlim, ) to Format(Maintnc(1).Uplim, )"
     d += "Unscheduled Maintenance [%]:\n" // >< "\(Simulation.parameter.UnSchedMain * 100)"
     d += "________________________________________________________________________________\n"

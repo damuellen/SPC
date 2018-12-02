@@ -10,20 +10,23 @@
 
 public struct PerformanceLog: CustomStringConvertible {
 
-  public let annually: PerformanceResults
-  let history: [Plant.PerformanceData]
-  let results: [PerformanceResults]
-  private let interval = PerformanceCalculator.interval
+  public let annual: Results
   
-  init(annually: PerformanceResults,
+  let history: [Plant.PerformanceData]
+  
+  let results: [Results]
+  
+  private let interval = BlackBoxModel.interval
+  
+  init(annual: Results,
        history: [Plant.PerformanceData],
-       results: [PerformanceResults]) {
-    self.annually = annually
+       results: [Results]) {
+    self.annual = annual
     self.history = history
     self.results = results
   }
 
-  public subscript(keyPath: KeyPath<PerformanceResults, Double>, day day:Int)
+  public subscript(keyPath: KeyPath<Results, Double>, day day: Int)
     -> [Double] {
     let count = interval.rawValue * 24
     let rangeStart = (day - 1) * count
@@ -31,7 +34,7 @@ public struct PerformanceLog: CustomStringConvertible {
     return results[rangeStart..<rangeEnd].map { $0[keyPath: keyPath] }
   }
 
-  public subscript(keyPath: KeyPath<Plant.PerformanceData, Double>, day day:Int)
+  public subscript(keyPath: KeyPath<Plant.PerformanceData, Double>, day day: Int)
     -> [Double] {
     let count = interval.rawValue * 24
     let rangeStart = (day - 1) * count
@@ -39,7 +42,7 @@ public struct PerformanceLog: CustomStringConvertible {
     return history[rangeStart..<rangeEnd].map { $0[keyPath: keyPath] }
   }
 
-  subscript(forDay day:Int) -> [PerformanceResults] {
+  subscript(forDay day:Int) -> [Results] {
     let count = interval.rawValue * 24
     let rangeStart = (day - 1) * count
     let rangeEnd = day * count
@@ -47,6 +50,6 @@ public struct PerformanceLog: CustomStringConvertible {
   }
 
   public var description: String {
-    return annually.description
+    return annual.description
   }
 }

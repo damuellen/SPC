@@ -34,18 +34,3 @@ public struct Maintenance: Codable {
     return inMaintenance
   }
 }
-
-/*
- CurrDate = month + monthDay / 100
- for i in 1 ... 6 {// 6 Different Maintenance Periods
- steamTurbine.isMaintained = (Maintnc(i).Lowlim <= CurrDate && CurrDate <= Maintnc(i).Uplim)
- }
- if steamTurbine.isMaintained == false {      // Check up to 25 excluded days:
- if ExclDays(1) != 0 {
- for i in 1 ... 25 {
- steamTurbine.isMaintained = (CurrDate = ExclDays(i))
- if steamTurbine.isMaintained {
- }
-
- }  // ExclDays(1) != 0 THEN
- */

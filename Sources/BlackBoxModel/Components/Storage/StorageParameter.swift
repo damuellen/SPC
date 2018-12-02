@@ -91,7 +91,7 @@ extension Storage.Parameter: CustomStringConvertible {
     d += "Description:" + name
     d += "Capacity of Thermal Energy Storage [h]:" // Design.layout.storage)"
     d += "Storage Availability [%]:"
-      >< "\(Plant.availability.values.storage.percentage)"
+      >< "\(Availability.current.values.storage.percentage)"
     d += "Design Temperature of Cold Storage Tank [°C]:"
       >< "\(designTemperature.cold))"
     d += "Design Temperature of Hot Storage Tank [°C]:"

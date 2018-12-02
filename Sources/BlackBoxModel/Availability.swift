@@ -11,10 +11,16 @@
 import Config
 import Foundation
 
-public class Availability: Codable {
+struct Availability: Codable {
+  
+  static var current = withDefaults()
+
   static var fuel: Double = 5
-  let data: [Values]
-  var index = 0
+
+  private var index: Int { return TimeStep.current.month }
+  
+  private let data: [Values]
+  
   private static let defaults: Availability.Values = .init(
     solarField: 0.99, breakHCE: 0.1, airHCE: 0.0, fluorHCE: 0.0,
     reflMirror: 0.93, missingMirros: 0.0005, powerBlock: 1.0, storage: 0.98
@@ -47,14 +53,10 @@ public class Availability: Codable {
     return Availability(data:
       Array(repeatElement(Availability.defaults, count: 13)))
   }
-
-  func set(_ current: TimeStep) {
-    self.index = current.month
-  }
 }
 
 extension Availability {
-  public convenience init(file: TextConfigFile) throws {
+  public init(file: TextConfigFile) throws {
     let row: (Int) throws -> Double = { try file.parseDouble(row: $0) }
     var data = [Values]()
     for n in 0 ..< 12 {

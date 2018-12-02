@@ -12,9 +12,13 @@ import Foundation
 
 /// A mass flow rate in kilogram per second.
 public struct MassFlow: CustomStringConvertible {
-  var rate: Double
+  
+  var rate: Double  {
+    willSet { assert(newValue.isFinite) }
+  }
 
   var isNearZero: Bool { return self < 1e-4 }
+  
   static var zero: MassFlow = MassFlow()
   
   public var description: String {
@@ -44,19 +48,19 @@ public struct MassFlow: CustomStringConvertible {
     return (rate - max.rate) <= 0.0001 ? Ratio(rate / max.rate) : Ratio(1)
   }
 
-  mutating func adjust(with ratio: Double) {
+  mutating func adjust(withFactor ratio: Double) {
     self.rate *= ratio
   }
 
-  mutating func adjust(with ratio: Ratio) {
+  mutating func adjust(withFactor ratio: Ratio) {
     self.rate *= ratio.ratio
   }
 
-  func adjusted(with ratio: Double) -> MassFlow {
+  func adjusted(withFactor ratio: Double) -> MassFlow {
     return MassFlow(rate * ratio)
   }
 
-  func adjusted(with ratio: Ratio) -> MassFlow {
+  func adjusted(withFactor ratio: Ratio) -> MassFlow {
     return MassFlow(rate * ratio.ratio)
   }
   /* not used

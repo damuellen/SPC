@@ -9,6 +9,11 @@
 //
 
 import Foundation
+import Willow
+
+let backgroundQueue = DispatchQueue(label: "serial.queue")
+let 💬 = Logger(logLevels: [.info, .error], writers: [ConsoleWriter()],
+                  executionMethod: .asynchronous(queue: backgroundQueue))
 
 public typealias Heat = Double
 public typealias Pressure = Double
@@ -16,6 +21,10 @@ public typealias Angle = Double
 
 public extension Double {
   var toKelvin: Double { return self - Temperature.absoluteZeroCelsius }
+  
+  func limited(by value: Double) -> Double {
+    return min(value, self)
+  }
 }
 
 public extension Angle {
@@ -43,8 +52,8 @@ extension Progress {
   }
 }
 
-func debug(_ value: Any...) {
-  value.forEach { value in
+func readout(_ values: Any...) {
+  values.forEach { value in
     print(value, terminator: "\n\n")
   }
   _ = readLine()
@@ -55,17 +64,20 @@ extension String {
   static var separator: String { return ", " }
 }
 
-struct Cache {
-  var hash: Int = 0
-  var result: Double = 0
+final class Cache<T: Hashable> {
+  var cachedValues: [Int:T] = [:]
   
-  func lookupResult(for hash: Int) -> Double? {
-    if self.hash == hash { return result }
-    return nil
+  func lookupResult(for hash: Int) -> T? {
+    return cachedValues[hash]
   }
   
-  mutating func update(hash: Int, result: Double) {
-    self.hash = hash
-    self.result = result
+  func update(hash: Int, result: T) {
+    cachedValues[hash] = result
   }
+}
+
+func swap<T>(_ lhs: inout T, _ rhs: inout T) {
+  let temp = lhs
+  lhs = rhs
+  rhs = temp
 }

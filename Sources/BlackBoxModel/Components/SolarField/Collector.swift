@@ -14,6 +14,7 @@ import Meteo
 import SolarPosition
 
 public enum Collector: Component {
+  
   public enum OperationMode {
     case variable, freezeProtection, noOperation, operating, fixed
   }
@@ -187,5 +188,28 @@ extension SolarField.PerformanceData.OperationMode {
     case .normal:
       return .operating
     }
+  }
+}
+
+extension Collector.PerformanceData: PerformanceData {
+  var values: [String] {
+    return [
+      String(format: "%.1f", theta),
+      String(format: "%.2f", cosTheta),
+      String(format: "%.2f", efficiency),
+      String(format: "%.1f", parabolicElevation),
+    ]
+  }
+  
+  var csv: String {
+    return String(format: "%.1f, %.1f, %.1f, %.1f",
+                  theta, cosTheta, efficiency, parabolicElevation)
+  }
+  
+  static var columns: [(name: String, unit: String)] {
+    return [
+      ("Collector|theta", "degree"), ("Collector|cosTheta", "Ratio"),
+      ("Collector|Eff", "%"), ("Collector|Position", "degree"),
+    ]
   }
 }

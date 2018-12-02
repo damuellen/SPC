@@ -64,7 +64,9 @@ public class MeteoDataGenerator: Sequence {
 
   public func sumDNI(ofDay day: Int) -> Double {
     let idx = day - 1
-    if self.perDaySumsDNI.endIndex > idx { return self.perDaySumsDNI[idx] }
+    if self.perDaySumsDNI.endIndex > idx {
+      return self.perDaySumsDNI[idx]
+    }
 
     let start = (day * 24) - 24
     let end = (day * 24)
@@ -73,7 +75,9 @@ public class MeteoDataGenerator: Sequence {
     for value in self.dataSource.data[start ..< end] {
       sum += value.dni // * Float(dataSource.interval)
     }
-    self.perDaySumsDNI.append(Double(sum))
+    if self.perDaySumsDNI.endIndex == idx {
+      self.perDaySumsDNI.append(Double(sum))
+    }
     return Double(sum)
   }
 

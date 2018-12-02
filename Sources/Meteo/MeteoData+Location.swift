@@ -85,9 +85,9 @@ public struct MeteoData: CustomStringConvertible {
       ghi = interpolation(prev.ghi, current.ghi, next.ghi, progess),
       dhi = interpolation(prev.dhi, current.dhi, next.dhi, progess),
       t = startValue.temperature
-      + (progess * (endValue.temperature - startValue.temperature)),
+        + (progess * (endValue.temperature - startValue.temperature)),
       ws = startValue.windSpeed
-      + (progess * (endValue.windSpeed - startValue.windSpeed))
+        + (progess * (endValue.windSpeed - startValue.windSpeed))
 
     return MeteoData(
       dni: dni, ghi: ghi, dhi: dhi, temperature: t, windSpeed: ws
@@ -148,13 +148,13 @@ public struct MeteoData: CustomStringConvertible {
 public class MeteoDataSource {
   public let data: [MeteoData]
   public let name: String
-  public let location: Location
+  public let location: Position
   public let year: Int?
   public let timeZone: Int?
   public var interval = 1.0
 
   init(name: String, data: [MeteoData],
-       location: Location, year: Int?, timeZone: Int?) {
+       location: Position, year: Int?, timeZone: Int?) {
     self.name = name
     self.data = data
     self.location = location
@@ -164,7 +164,7 @@ public class MeteoDataSource {
   }
 }
 
-public struct Location {
+public struct Position {
   public let longitude: Float
   public let latitude: Float
   public let elevation: Float
@@ -173,6 +173,10 @@ public struct Location {
     return (Double(longitude), Double(latitude), Double(elevation))
   }
 
+  public static var primeMeridian = Position(
+    longitude: 0, latitude: 0, elevation: 102
+  )
+  
   public init(longitude: Float, latitude: Float, elevation: Float) {
     self.longitude = longitude
     self.latitude = latitude

@@ -52,7 +52,7 @@ enum MeteoDataFileError: Error {
 }
 
 protocol MeteoDataFile {
-  func fetchLocation() throws -> Location
+  func fetchLocation() throws -> Position
   func fetchData() throws -> [MeteoData]
   func fetchYear() -> Int
   func fetchTimeZone() -> Int
@@ -67,18 +67,18 @@ private struct MET: MeteoDataFile {
   }
 
   func fetchTimeZone() -> Int {
-    guard let longitude = Int(content[4].whitespacesTrimmed) else { return 0 }
+    guard let longitude = Int(content[4].withoutWhitespaces) else { return 0 }
     return longitude / 15
   }
 
-  func fetchLocation() throws -> Location {
+  func fetchLocation() throws -> Position {
     let values = Array(content[2 ... 3])
     
-    guard let longitude = Float(values[0].whitespacesTrimmed),
-      let latitude = Float(values[1].whitespacesTrimmed)
+    guard let longitude = Float(values[0].withoutWhitespaces),
+      let latitude = Float(values[1].withoutWhitespaces)
     else { throw MeteoDataFileError.unknownLocation }
 
-    return Location(
+    return Position(
       longitude: -longitude, latitude: latitude, elevation: 0
     )
   }
@@ -112,7 +112,7 @@ private struct MET: MeteoDataFile {
       let stringValues = line.split(separator: separator)[3...]
 
       let floatValues = stringValues.map(String.init)
-        .map({ $0.whitespacesTrimmed })
+        .map({ $0.withoutWhitespaces })
         .compactMap(Float.init)
 
       guard stringValues.count == floatValues.count
@@ -145,7 +145,7 @@ extension MeteoDataFileError: LocalizedError {
 }
 
 extension String {
-  var whitespacesTrimmed: String {
+  var withoutWhitespaces: String {
     return trimmingCharacters(in: .whitespaces)
   }
 }
@@ -165,13 +165,13 @@ private struct TMY: MeteoDataFile {
     content = string.split(separator: separator).map(String.init)
   }
 
-  func fetchLocation() throws -> Location {
+  func fetchLocation() throws -> Position {
     let values = Array(content[..<3])
     guard let longitude = Float(values[1].split(separator: " ").last),
       let latitude = Float(values[0].split(separator: " ").last),
       let elevation = Float(values[2].split(separator: " ").last)
     else { throw MeteoDataFileError.unknownLocation }
-    return Location(
+    return Position(
       longitude: longitude, latitude: latitude, elevation: elevation
     )
   }
@@ -206,7 +206,7 @@ private struct TMY: MeteoDataFile {
       let stringValues = line.split(separator: separator)[1...]
 
       let floatValues = stringValues.map(String.init)
-        .map({ $0.whitespacesTrimmed })
+        .map({ $0.withoutWhitespaces })
         .compactMap(Float.init)
 
       guard stringValues.count == floatValues.count

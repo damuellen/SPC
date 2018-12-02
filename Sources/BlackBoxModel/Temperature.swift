@@ -12,7 +12,10 @@ import Foundation
 
 /// A temperature value in Kelvin.
 public struct Temperature: CustomStringConvertible {
-  var kelvin: Double
+  
+  var kelvin: Double {
+    willSet { assert(newValue.isFinite) }
+  }
 
   static var absoluteZeroCelsius = -273.15
 
@@ -35,7 +38,7 @@ public struct Temperature: CustomStringConvertible {
   }
   
   public init(_ kelvin: Double) {
- //   precondition(0 ..< 850 ~= kelvin)
+    assert(kelvin.isFinite)
     self.kelvin = kelvin
   }
 
@@ -49,11 +52,13 @@ public struct Temperature: CustomStringConvertible {
   }
 
   public init(celsius: Double) {
+    assert(celsius.isFinite)
     assert(celsius > Temperature.absoluteZeroCelsius)
     self.kelvin = celsius.toKelvin
   }
 
   public init(celsius: Float) {
+    assert(celsius.isFinite)
     assert(celsius > Float(Temperature.absoluteZeroCelsius))
     self.kelvin = Double(celsius).toKelvin
   }
@@ -82,6 +87,10 @@ public struct Temperature: CustomStringConvertible {
     return self.kelvin < degree.kelvin
   }
 
+  func limited(by max: Temperature) -> Temperature {
+    return Temperature(min(max.kelvin, self.kelvin))
+  }
+  
   static func + (lhs: Temperature, rhs: Temperature) -> Temperature {
     return Temperature(lhs.kelvin + rhs.kelvin)
   }

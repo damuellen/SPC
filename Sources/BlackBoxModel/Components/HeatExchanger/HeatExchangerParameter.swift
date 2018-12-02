@@ -37,7 +37,6 @@ extension HeatExchanger {
           outlet: Temperature(htf.outlet.max - htf.outlet.min)
         )
       }
-
     }
 
     let name: String

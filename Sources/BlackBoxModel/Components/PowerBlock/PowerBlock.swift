@@ -15,11 +15,17 @@ public enum PowerBlock: Component {
   /// Contains all data needed to simulate the operation of the power block
   public struct PerformanceData: Equatable, HeatCycle,
   CustomStringConvertible {
+
     var operationMode: OperationMode
+
     var load: Ratio
+
     var massFlow: MassFlow
+
     var temperature: (inlet: Temperature, outlet: Temperature)
+
     var totalMassFlow: MassFlow
+
     var heatIn: Double
     
     public enum OperationMode {
@@ -57,6 +63,7 @@ public enum PowerBlock: Component {
     var electricalParasitics = 0.0
     
     if steamTurbine.load.ratio >= 0.01 {
+
       electricalParasitics = parameter.fixelectricalParasitics
       electricalParasitics += parameter.nominalElectricalParasitics
         * parameter.electricalParasitics[steamTurbine.load]
@@ -86,7 +93,7 @@ public enum PowerBlock: Component {
     }
     
     // parasitics for ACC:
-    if steamTurbine.load.ratio >= 0.01 {
+    if steamTurbine.load.ratio > 0 {
       // only during operation
       var electricalParasiticsACC = parameter.electricalParasiticsACC[steamTurbine.load]
       
@@ -112,11 +119,16 @@ public enum PowerBlock: Component {
   
   static func heatExchangerBypass(
     _ status: Plant.PerformanceData
-    ) -> (heatOut: Double, heatToTES: Double, powerBlock: PowerBlock.PerformanceData) {
+    ) -> (heatOut: Double, heatToTES: Double, powerBlock: PowerBlock.PerformanceData)
+    {
     let heatExchanger = HeatExchanger.parameter
+
     let htf = SolarField.parameter.HTF
+
     var powerBlock = status.powerBlock
+
     var heatOut = 0.0
+    
     var heatToTES = 0.0
     
     // added to simulate a bypass on the PB-HX if the expected
@@ -140,9 +152,7 @@ public enum PowerBlock: Component {
       
     } while heatToTES > h_261
     
-    powerBlock.setTemperature(outlet:
-      htf.temperatureFrom(heatToTES)
-    )    
+    powerBlock.setTemperature(outlet: htf.temperatureFrom(heatToTES))
     return (heatOut, heatToTES, powerBlock)
   }
 }

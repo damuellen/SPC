@@ -11,15 +11,15 @@ extension Substring.SubSequence {
 }
 
 public func goalSeek(
-  _ keyPath: KeyPath<PerformanceResults, Double>,
+  _ keyPath: KeyPath<PerformanceLog.Results, Double>,
   greaterThen: Double,
   block: ()->()
   ) -> PerformanceLog {
-  var results = PerformanceCalculator.runModel()
-  while results.annually[keyPath: keyPath] < greaterThen {
+  var results = BlackBoxModel.runModel().log
+  while results.annual[keyPath: keyPath] < greaterThen {
     block()
-    results = PerformanceCalculator.runModel()
-    print(results.annually[keyPath: keyPath])
+    results = BlackBoxModel.runModel().log
+    print(results.annual[keyPath: keyPath])
   }
   return results
 }

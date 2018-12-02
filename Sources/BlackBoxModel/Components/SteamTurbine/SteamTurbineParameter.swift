@@ -94,7 +94,7 @@ extension SteamTurbine.Parameter: TextConfigInitializable {
     efficiencyTemperature = try [row(64), row(67), row(70), row(73), row(76)]
     startUpTime = try Int(row(83))
     startUpEnergy = try row(86)
-    minPowerFromTemp = [0, 0, 0, 0, 0]
+    minPowerFromTemp = [0]
     hotStartUpTime = 75
     efficiencyWetBulb = .init(values: 0, 0, 0, 0, 0, 0)
     WetBulbTstep = 0

@@ -45,7 +45,7 @@ extension JsonConfigFileHandler {
       //    Simulation.time = try decoder.decode(Time.self, from: data)
       case .DES: break
       case .AVL:
-        Plant.availability = try decoder.decode(Availability.self, from: data)
+        Availability.current = try decoder.decode(Availability.self, from: data)
       case .LAY:
         Design.layout = try decoder.decode(Layout.self, from: data)
       case .SF:
@@ -106,7 +106,7 @@ extension JsonConfigFileHandler {
       case .INI: try encoder.encode(Simulation.initialValues).write(to: url)
       case .TIM: try encoder.encode(Simulation.time).write(to: url)
       case .DES: break
-      case .AVL: try encoder.encode(Plant.availability).write(to: url)
+      case .AVL: try encoder.encode(Availability.current).write(to: url)
       case .LAY: try encoder.encode(Design.layout).write(to: url)
       case .SF: try encoder.encode(SolarField.parameter).write(to: url)
       case .COL: try encoder.encode(Collector.parameter).write(to: url)

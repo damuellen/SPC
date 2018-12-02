@@ -11,9 +11,16 @@
 import CoreFoundation
 import Foundation
 
+/**
+ TimeStep is used to easily make the calendar data
+ of the current time step available during a run.
+
+  - Attention: Needed by `Availability` and `GridDemand` both use `current`,
+  also used in `SteamTurbine` and `Storage`.
+*/
 struct TimeStep: CustomStringConvertible {
 
-  var isAtNight: Bool = false
+  var isDayTime: Bool = true
   var yearDay: Int = 0
   var month: Int = 0
   var day: Int = 0
@@ -21,16 +28,20 @@ struct TimeStep: CustomStringConvertible {
   var minute: Int = 0
 
   public var description: String {
-    return "\(hour - 1):\(minute - 1) \(day).\(month)."
+    let hr = (hour - 1) < 10 ? " \(hour - 1)" : "\(hour - 1)"
+    let min = (minute - 1) < 10 ? "0\(minute - 1)" : "\(minute - 1)"
+    let d = day < 10 ? " \(day)" : "\(day)"
+    let mon = month < 10 ? " \(month). " : "\(month). "
+    return hr + ":" + min + "  " + d + "." + mon
   }
-
-  static func set(current date: Date) {
+  
+  static func setCurrent(date: Date) {
     current = .init(date)
   }
 
   static var current = TimeStep()
 
-  fileprivate static var cfCalendar: CFCalendar = {
+  private static var cfCalendar: CFCalendar = {
     let c = CFCalendarCreateWithIdentifier(
       kCFAllocatorDefault, CFCalendarIdentifier.gregorianCalendar
     )
@@ -43,7 +54,7 @@ struct TimeStep: CustomStringConvertible {
 }
 
 extension TimeStep {
-  init(_ date: Date, night: Bool = false) {
+  init(_ date: Date) {
     let minute = CFCalendarGetOrdinalityOfUnit(
       TimeStep.cfCalendar,
       CFCalendarUnit(rawValue: CFCalendarUnit.minute.rawValue),
@@ -74,7 +85,7 @@ extension TimeStep {
      CFCalendarUnit(rawValue: CFCalendarUnit.year.rawValue),
      date.timeIntervalSinceReferenceDate) */
     self = TimeStep(
-      isAtNight: night, yearDay: yearDay,
+      isDayTime: true, yearDay: yearDay,
       month: month, day: day, hour: hour, minute: minute)
     💬.debugMessage("Current simulation time: \n\(date)")
   }

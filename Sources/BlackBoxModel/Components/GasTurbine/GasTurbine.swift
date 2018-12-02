@@ -11,8 +11,11 @@
 public enum GasTurbine: Component {
   /// Contains all data needed to simulate the operation of the gas turbine
   public struct PerformanceData: Codable {
+
     var operationMode: OperationMode
+
     var isMaintained: Bool
+
     var load: Ratio
 
     public enum OperationMode: String, Codable, CustomStringConvertible {
@@ -32,6 +35,7 @@ public enum GasTurbine: Component {
 
   /// Calculates the efficiency of the gas turbine which only depends on its own load
   static func efficiency(at load: Ratio) -> Double {
+
     let efficiency = parameter.efficiencyFromLoad[load]
       * parameter.efficiencyISO
 
@@ -46,7 +50,7 @@ public enum GasTurbine: Component {
   }
 
   /// Calculates the maximal load of the gas turbine which only depends on the ambient temperature
-  static func getMaximumLoad(by temperature: Temperature) -> Double {
+  static func maxLoad(at temperature: Temperature) -> Double {
     var maximumLoad = parameter.loadMaxFromTemperature[temperature]
     // correction for altitude effect
     maximumLoad *= ((101.3 - 9.81 * 1.2 / 1_000 * parameter.altitude) / 101.3)
@@ -54,8 +58,8 @@ public enum GasTurbine: Component {
     return maximumLoad
   }
 
-  static func power(gt: inout GasTurbine.PerformanceData,
-                    demand: Double, fuelAvailable: Double) -> Double {
+  static func perform(gt: inout GasTurbine.PerformanceData,
+                      demand: Double, fuelAvailable: Double) -> Double {
     // if status.isMaintained {
     /*
      gasTurbine.operationMode = .scheduledMaintenance
@@ -100,15 +104,20 @@ public enum GasTurbine: Component {
   static func update(_ status: inout Plant.PerformanceData,
                      fuel: Double) -> Double {
     let heatExchanger = HeatExchanger.parameter
+
     let steamTurbine = SteamTurbine.parameter
 
     var supply = 0.0
+
     let GasTurbineLmax = 0.0
 
-    var demand = Plant.electric.demand - min(
-      Plant.thermal.production.megaWatt * heatExchanger.efficiency
-        * steamTurbine.efficiencySCC, steamTurbine.power.max
-    )
+    var demand = Plant.electricalEnergy.demand
+
+    demand -= Plant.heat.production.megaWatt
+      * heatExchanger.efficiency
+      * steamTurbine.efficiencySCC
+
+    demand = demand.limited(by: steamTurbine.power.max)
     // ***********************************************************************
     // 1. Free (OpRCCmode = "f"), plant produces as much electricity as possible
     // +, plant follows a specif ic demand profile, specified
@@ -121,29 +130,36 @@ public enum GasTurbine: Component {
         //      Nothinng else
       } else {
         while true { // just to estimate amount of WHR
-          supply = GasTurbine.power(gt: &status.gasTurbine, demand: demand,
-                                    fuelAvailable: fuel)
+          supply = GasTurbine.perform(gt: &status.gasTurbine, demand: demand,
+                                      fuelAvailable: fuel)
           status.steamTurbine.load.ratio = 
-            (Plant.electric.demand - Plant.electric.gasTurbineGross)
+            (Plant.electricalEnergy.demand - Plant.electricalEnergy.gasTurbineGross)
               / steamTurbine.power.max
-          let (maxLoad, st) = SteamTurbine.calculate(status)
-          status.steamTurbine = st
-          let eff = st.efficiency
+
+          (_, status.steamTurbine.efficiency) = SteamTurbine.perform(
+            steamTurbine: status.steamTurbine,
+            boiler: status.boiler,
+            gasTurbine: status.gasTurbine,
+            heatExchanger: status.heatExchanger
+          )
+          
+          let eff = status.steamTurbine.efficiency
+          
           if GasTurbine.efficiency(at: status.gasTurbine.load) > 0 {
-            demand /= (1 + eff * WasteHeatRecovery.parameter.efficiencyPure
-              * (1 / GasTurbine.efficiency(at: status.gasTurbine.load) - 1)) // 1.135 *
-            if abs(Plant.electric.gasTurbineGross - demand)
+            demand /= 1 + eff * WasteHeatRecovery.parameter.efficiencyPure
+              * (1 / GasTurbine.efficiency(at: status.gasTurbine.load) - 1) // 1.135 *
+            if abs(Plant.electricalEnergy.gasTurbineGross - demand)
               < Simulation.parameter.heatTolerance {
               break
             }
           } else {
-            if demand > Plant.electric.gasTurbineGross {
+            if demand > Plant.electricalEnergy.gasTurbineGross {
               if status.gasTurbine.load.ratio >= GasTurbineLmax {
                 break
               }
-              demand -= (demand - Plant.electric.gasTurbineGross) / 2
+              demand -= (demand - Plant.electricalEnergy.gasTurbineGross) / 2
             } else {
-              demand += (Plant.electric.gasTurbineGross - demand) / 2
+              demand += (Plant.electricalEnergy.gasTurbineGross - demand) / 2
             }
           }
         }
@@ -153,30 +169,37 @@ public enum GasTurbine: Component {
         // Ucase$(OpRCCmode(month, time.Tariff)) = "P" {
         // Pure CC is possible and desired: all heat can be used (Qsol!)
         while true { // just to estimate amount of WHR
-          supply = GasTurbine.power(gt: &status.gasTurbine, demand: demand,
-                                    fuelAvailable: fuel)
+          supply = GasTurbine.perform(
+            gt: &status.gasTurbine, demand: demand, fuelAvailable: fuel
+          )
 
           status.steamTurbine.load.ratio = 
-            (Plant.electric.demand - Plant.electric.gasTurbineGross)
+            (Plant.electricalEnergy.demand - Plant.electricalEnergy.gasTurbineGross)
               / steamTurbine.power.max
           
           if GasTurbine.efficiency(at: status.gasTurbine.load) > 0 {
-            let (maxLoad, st) = SteamTurbine.calculate(status)
-            status.steamTurbine = st
-            let eff = st.efficiency
-            demand = demand /
-              (1 + eff * WasteHeatRecovery.parameter.efficiencyPure
-                * (1 / GasTurbine.efficiency(at: status.gasTurbine.load) - 1)) // 1.135 *
+
+            (_, status.steamTurbine.efficiency) = SteamTurbine.perform(
+              steamTurbine: status.steamTurbine,
+              boiler: status.boiler,
+              gasTurbine: status.gasTurbine,
+              heatExchanger: status.heatExchanger
+            )
+
+            let eff = status.steamTurbine.efficiency
+            
+            demand /= 1 + eff * WasteHeatRecovery.parameter.efficiencyPure
+              * (1 / GasTurbine.efficiency(at: status.gasTurbine.load) - 1) // 1.135 *
             // for RH !!
             // Change of iteration procedure
-            if abs(Plant.electric.gasTurbineGross - demand)
+            if abs(Plant.electricalEnergy.gasTurbineGross - demand)
               < Simulation.parameter.heatTolerance { break }
           } else {
-            if demand > Plant.electric.gasTurbineGross {
+            if demand > Plant.electricalEnergy.gasTurbineGross {
               if status.gasTurbine.load.ratio >= GasTurbineLmax { break }
-              demand -= (demand - Plant.electric.gasTurbineGross) / 2
+              demand -= (demand - Plant.electricalEnergy.gasTurbineGross) / 2
             } else {
-              demand += (Plant.electric.gasTurbineGross - demand) / 2
+              demand += (Plant.electricalEnergy.gasTurbineGross - demand) / 2
             }
           }
         }
@@ -185,11 +208,11 @@ public enum GasTurbine: Component {
         // WasteHeatRecovery.parameter.Operation = "Intg" or gasTurbine.operationMode = "IC"
         if demand < Design.layout.gasTurbine {
           demand = Design.layout.gasTurbine
-          supply = GasTurbine.power(gt: &status.gasTurbine, demand: demand,
-                                    fuelAvailable: fuel) // GasTurbineLmax
+          supply = GasTurbine.perform(gt: &status.gasTurbine, demand: demand,
+                                      fuelAvailable: fuel) // GasTurbineLmax
 
           status.steamTurbine.load.ratio = 
-            (Plant.electric.demand - Plant.electric.gasTurbineGross)
+            (Plant.electricalEnergy.demand - Plant.electricalEnergy.gasTurbineGross)
               / steamTurbine.power.max
           
           // to correctDC
@@ -197,54 +220,66 @@ public enum GasTurbine: Component {
             * WasteHeatRecovery.parameter.efficiencyNominal
             / WasteHeatRecovery.parameter.ratioHTF
           // if only Intg Mode possible GasTurbine should not be fired to avoid dumping Q-solar
-
+          let production = Plant.heat.production.megaWatt
           if case .integrated = WasteHeatRecovery.parameter.operation,
-            Plant.thermal.production.megaWatt * heatExchanger.efficiency > htfShare {
+             production * heatExchanger.efficiency > htfShare {
+
             demand = 0.0
             💬.infoMessage("""
               \(TimeStep.current)
               Excess solar heat: Gas Turbine not operating.
               """)
           } else if GasTurbine.efficiency(at: status.gasTurbine.load) > 0,
-            Plant.thermal.production.megaWatt * heatExchanger.efficiency > htfShare {
+            production * heatExchanger.efficiency > htfShare {
             // WasteHeatRecovery.parameter.Operation = "Pure"posbl
             💬.infoMessage("""
               \(TimeStep.current)
               Excess Q-solar: Gas Turbine operating at lower load.
               """)
-            demand = (Plant.electric.demand - steamTurbine.efficiencySCC
-              * Plant.thermal.solar.megaWatt * heatExchanger.efficiency) /
+
+            demand = (Plant.electricalEnergy.demand - steamTurbine.efficiencySCC
+              * Plant.heat.solar.megaWatt * heatExchanger.efficiency) /
               (1 + steamTurbine.efficiencySCC
                 * WasteHeatRecovery.parameter.efficiencyNominal
                 * (1 / GasTurbine.efficiency(at: status.gasTurbine.load) - 1))
             // Lower GasTurbine-demand, avoid production>demand
-          } else if htfShare > Plant.thermal.demand.watt {
-            demand *= Plant.thermal.demand.megaWatt / htfShare
+          } else if htfShare > Plant.heat.demand.watt {
+
+            demand *= Plant.heat.demand.megaWatt / htfShare
           }
 
-          if (Plant.electric.demand - demand) > steamTurbine.power.max {
-            demand = (steamTurbine.power.max
-              / steamTurbine.efficiencySCC
-              - Plant.thermal.solar.megaWatt * heatExchanger.efficiency)
+          if (Plant.electricalEnergy.demand - demand) > steamTurbine.power.max {
+            
+            demand = (steamTurbine.power.max / steamTurbine.efficiencySCC
+              - Plant.heat.solar.megaWatt * heatExchanger.efficiency)
               / (WasteHeatRecovery.parameter.efficiencyNominal
                 * (1 / parameter.efficiencyISO - 1))
           }
         } // WasteHeatRecovery.parameter.Operation
       }
-      supply = GasTurbine.power(gt: &status.gasTurbine, demand: demand,
-                                fuelAvailable: fuel) // GasTurbineLmax
+      supply = GasTurbine.perform(
+        gt: &status.gasTurbine, demand: demand, fuelAvailable: fuel
+      ) // GasTurbineLmax
 
-      status.steamTurbine.load.ratio = 
-        min(Plant.availability.value.powerBlock.ratio,
-            (Plant.electric.demand - Plant.electric.gasTurbineGross)
-              / steamTurbine.power.max)     
-      let (maxLoad, st) = SteamTurbine.calculate(status)
-      status.steamTurbine = st
-      Plant.thermal.demand.megaWatt = status.steamTurbine.load.ratio
-        * steamTurbine.power.max / st.efficiency
+      status.steamTurbine.load.ratio =
+        (Plant.electricalEnergy.demand - Plant.electricalEnergy.gasTurbineGross)
+        / steamTurbine.power.max
+      
+      status.steamTurbine.load.ratio = status.steamTurbine.load.ratio
+        .limited(by: Availability.current.value.powerBlock.ratio)
+      
+      (_, status.steamTurbine.efficiency) = SteamTurbine.perform(
+        steamTurbine: status.steamTurbine,
+        boiler: status.boiler,
+        gasTurbine: status.gasTurbine,
+        heatExchanger: status.heatExchanger
+      )
+      
+      Plant.heat.demand.megaWatt = status.steamTurbine.load.ratio
+        * steamTurbine.power.max / status.steamTurbine.efficiency
       // FIXME: thermal.wasteHeatRecovery = WasteHeatRecovery(electricEnergy.gasTurbineGross, hourFraction)
 
-      if Plant.thermal.wasteHeatRecovery.watt < 0 {
+      if Plant.heat.wasteHeatRecovery.watt < 0 {
         //	i = 0
       }
       // FIXME: SwitchTemp(gasTurbine.operationMode) // Change Temperatures according to Mode

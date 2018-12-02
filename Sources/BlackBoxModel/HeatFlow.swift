@@ -11,8 +11,11 @@
 import Foundation
 
 public struct HeatFlow: HeatCycle, Equatable, CustomStringConvertible {
+
   var name = ""
+  
   var massFlow: MassFlow
+
   var temperature: (inlet: Temperature, outlet: Temperature)
 
   init(name: String) {

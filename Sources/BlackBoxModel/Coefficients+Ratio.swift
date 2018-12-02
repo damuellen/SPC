@@ -29,6 +29,10 @@ public struct Coefficients: Codable {
     return self.coefficients.isEmpty
   }
 
+  var isInapplicable: Bool {
+    return self.coefficients.count < 2
+  }
+  
   @_transparent func apply(_ value: Double) -> Double {
     // Use Horner’s Method for solving
     var result = 0.0
@@ -37,17 +41,17 @@ public struct Coefficients: Codable {
     }
     return result
   }
-
+  
   subscript(temperature: Temperature) -> Double {
-    return self.apply(temperature.kelvin)
+    @inline(__always) get { return self.apply(temperature.kelvin) }
   }
 
-  public subscript(value: Double) -> Double {
-    return self.apply(value)
+  subscript(value: Double) -> Double {
+    @inline(__always) get { return self.apply(value) }
   }
 
   subscript(ratio: Ratio) -> Double {
-    return self.apply(ratio.ratio)
+    @inline(__always) get { return self.apply(ratio.ratio) }
   }
 
   subscript(index: Int) -> Double {

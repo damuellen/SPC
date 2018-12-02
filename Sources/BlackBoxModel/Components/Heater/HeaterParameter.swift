@@ -13,7 +13,7 @@ import Config
 extension Heater {
   public struct Parameter: ComponentParameter, Codable {
     let name: String
-    let efficiency, maxMassFlow, minLoad, nominalElectricalParasitics: Double
+    let efficiency, maximumMassFlow, minLoad, nominalElectricalParasitics: Double
     let antiFreezeTemperature, nominalTemperatureOut: Temperature
     let electricalParasitics: [Double]
     let onlyWithSolarField: Bool
@@ -33,7 +33,7 @@ extension Heater.Parameter: CustomStringConvertible {
     d += "Nominal Outlet Temperature [°C]:"
       >< "\(nominalTemperatureOut.celsius)"
     d += "Maximum Mass Flow [kg/s]:"
-      >< "\(maxMassFlow)"
+      >< "\(maximumMassFlow)"
     d += "Minimum Load [%]:"
       >< "\(minLoad)"
     d += "Parasitics at Full Load [MW]:"
@@ -54,7 +54,7 @@ extension Heater.Parameter: TextConfigInitializable {
     efficiency = try row(10)
     antiFreezeTemperature = try Temperature(row(16))
     nominalTemperatureOut = try Temperature(row(19))
-    maxMassFlow = try row(22)
+    maximumMassFlow = try row(22)
     minLoad = try row(25)
     nominalElectricalParasitics = try row(28)
     electricalParasitics = [try row(31), try row(34)]
