@@ -17,7 +17,7 @@ public struct MassFlow: CustomStringConvertible {
     willSet { assert(newValue.isFinite) }
   }
 
-  var isNearZero: Bool { return self < 1e-4 }
+  var isNearZero: Bool { return self < 1.0 }
   
   static var zero: MassFlow = MassFlow()
   

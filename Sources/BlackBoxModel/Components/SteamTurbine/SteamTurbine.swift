@@ -14,8 +14,8 @@ import Meteo
 extension SteamTurbine.PerformanceData: CustomDebugStringConvertible {
   public var debugDescription: String {
     return "\(operationMode), "
-      + String(format: "Load: %.2f ", load.ratio)
-      + String(format: "Efficiency: %.2f %", efficiency * 100)
+      + String(format: "Load: %.2f, ", load.ratio)
+      + String(format: "Efficiency: %.2f %, ", efficiency * 100)
       + String(format: "Back pressure: %.2f, ", backPressure)
   }
 }
@@ -114,10 +114,8 @@ public enum SteamTurbine: Component {
         Plant.heat.startUp = 0.0
         let maxLoad: Double
         (maxLoad, steamTurbine.efficiency) = SteamTurbine.perform(
-          steamTurbine: steamTurbine,
-          boiler: status.boiler,
-          gasTurbine: status.gasTurbine,
-          heatExchanger: status.heatExchanger
+          steamTurbine: steamTurbine, boiler: status.boiler,
+          gasTurbine: status.gasTurbine, heatExchanger: status.heatExchanger
         )
         let eff = status.steamTurbine.efficiency
         steamTurbine.load.ratio = (heat * eff / parameter.power.max)

@@ -6,12 +6,12 @@ import Meteo
 
 class CollectorTests: XCTestCase {
   func testsEfficiency() {
-    var status = Plant.initialState
+   /* var status = Plant.initialState
     status.collector.parabolicElevation = 20
     let meteo = MeteoData(
       dni: 555, ghi: 0, dhi: 0, temperature: 22, windSpeed: 11
     )
-   /* Collector.update(&status.collector, meteo: meteo)
+    Collector.update(&status.collector, meteo: meteo)
     XCTAssertEqual(status.collector.efficiency, 0.95, accuracy: 0.01)
 
     status.collector.parabolicElevation = 70
@@ -27,10 +27,10 @@ class CollectorTests: XCTestCase {
   }
 
   func testsTracking() {
-    Plant.setLocation(Meteo.Location(
+   /* Plant.setLocation(Meteo.Location(
       longitude: -14.19, latitude: 37.090000000000003, elevation: 0.0
     ))
-    /*
+    
      let januaryAM = SolarPosition.OutputValues(
      zenith: 63.715965270996094, azimuth: 156.85934448242188,
      elevation: 26.284036636352539, hourAngle: -22.517242431640625,

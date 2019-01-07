@@ -121,7 +121,11 @@ public enum SolarField: Component {
         sum + loop.massFlow.rate } / 3
     )
 
-    if solarField.header.massFlow.isNearZero == false {
+    if solarField.header.massFlow.isNearZero {
+      solarField.loops.dropFirst().indices.forEach { n in
+        solarField.loops[n].constantTemperature()
+      }
+    } else {
       let designFlowVelocity: Double = 2.7
 
       if timeRemain < parameter.loopWays[0] / (designFlowVelocity
@@ -195,10 +199,6 @@ public enum SolarField: Component {
         temps[2].0 * solarField.inletTemperature
           + temps[2].1 * solarField.loops[3].inletTemperature
       )
-    } else {
-      solarField.loops.dropFirst().indices.forEach { n in
-        solarField.loops[n].constantTemperature()
-      }
     }
   }
 
@@ -219,8 +219,9 @@ public enum SolarField: Component {
       if solarField.header.massFlow.rate > 0 {
         let deltaHeatPerKg = solarField.heatLossHeader * 1_000
           / solarField.header.massFlow.rate // [kJ/kg]
-        newTemp = parameter.HTF.resultingTemperature(
-          -deltaHeatPerKg, solarField.header.temperature.outlet)
+        newTemp = parameter.HTF.temperature(
+          -deltaHeatPerKg, solarField.header.temperature.outlet
+        )
       } else {
         let averageTemperature = Temperature.average(
           newTemp, solarField.header.temperature.outlet
@@ -236,10 +237,10 @@ public enum SolarField: Component {
         /// Change kJ/sqm to kJ/kg:
         let deltaHeatPerKg = deltaHeatPerSqm / areaDensity
         
-        let heatPerKg = parameter.HTF.addedHeat(
+        let heatPerKg = parameter.HTF.deltaHeat(
           solarField.header.temperature.outlet, ambientTemperature
         )
-        newTemp = parameter.HTF.resultingTemperature(
+        newTemp = parameter.HTF.temperature(
           heatPerKg - deltaHeatPerKg, ambientTemperature
         )
       }
@@ -292,7 +293,7 @@ public enum SolarField: Component {
       solarField.massFlow(rate: GridDemand.current.ratio
         * (steamTurbine.power.max / steamTurbine.efficiencyNominal
           / heatExchanger.efficiency) * 1_000
-        / parameter.HTF.addedHeat(heatExchanger.temperature.htf.inlet.max,
+        / parameter.HTF.deltaHeat(heatExchanger.temperature.htf.inlet.max,
                                   heatExchanger.temperature.htf.outlet.max)
       )
       
@@ -418,6 +419,6 @@ extension SolarField.PerformanceData: CustomStringConvertible {
       + String(format: "HL HCE: %.1f, ", heatLossHCE)
       + "Focus: \(inFocus), "
       + String(format: "Loop Eta: %.1f, \n", loopEta)
-      + "Loops: \(loops)"
+      + "Loops: \n\(loops[0])\n\(loops[1])\n\(loops[2])\n\(loops[3])"
   }
 }

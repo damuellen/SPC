@@ -81,3 +81,8 @@ func swap<T>(_ lhs: inout T, _ rhs: inout T) {
   lhs = rhs
   rhs = temp
 }
+
+@inline(__always)
+public func unreachable() -> Never {
+  return unsafeBitCast((), to: Never.self)
+}

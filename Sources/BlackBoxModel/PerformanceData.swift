@@ -48,6 +48,15 @@ public struct ElectricPower: Encodable, PerformanceData {
     self.net += electricEnergy.net * fraction
     self.consum += electricEnergy.consum * fraction
   }
+  
+  mutating func reset() {
+    self.steamTurbineGross = 0
+    self.gasTurbineGross = 0
+    // backupGross +=
+    self.parasitics = 0
+    self.net = 0
+    self.consum = 0
+  }
 }
 
 public struct Parasitics: Encodable, PerformanceData {
@@ -85,6 +94,15 @@ public struct Parasitics: Encodable, PerformanceData {
     self.shared += electricalParasitics.shared * fraction
     // parasiticsBackup += electricalParasitics
     self.gasTurbine += electricalParasitics.gasTurbine * fraction
+  }
+  
+  mutating func reset() {
+    self.solarField = 0
+    self.powerBlock = 0
+    self.storage = 0
+    self.shared = 0
+    // parasiticsBackup += electricalParasitics
+    self.gasTurbine = 0
   }
 }
 
@@ -146,6 +164,19 @@ public struct ThermalEnergy: Encodable, PerformanceData {
     dumping += thermal.dumping * fraction
     production += thermal.production * fraction
   }
+  
+  mutating func reset() {
+    solar = 0.0
+    toStorage = 0.0
+    storage = 0.0
+    heater = 0.0
+    heatExchanger = 0.0
+    startUp = 0.0
+    wasteHeatRecovery = 0.0
+    boiler = 0.0
+    dumping = 0.0
+    production = 0.0
+  }
 }
 
 public struct FuelConsumption: Encodable, PerformanceData {
@@ -188,5 +219,12 @@ public struct FuelConsumption: Encodable, PerformanceData {
     boiler += fuel.boiler * fraction
     heater += fuel.heater * fraction
     gasTurbine += fuel.gasTurbine * fraction
+  }
+  
+  mutating func reset() {
+    backup = 0
+    boiler = 0
+    heater = 0
+    gasTurbine = 0
   }
 }

@@ -37,7 +37,7 @@ let lastRun = runs?.max() ?? 99
 BlackBoxModel.meteoFilePath = meteoFilePath
 BlackBoxModel.interval = .every5minutes
 
-let logger = BlackBoxModel.runModel(lastRun + 1, output: .full)
+let logger = BlackBoxModel.runModel(lastRun + 1, output: .brief)
 print(logger.log)
 /*
 log = goalSeek(\.thermal.production, greaterThen: 164000) {

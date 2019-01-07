@@ -13,10 +13,13 @@ import Meteo
 
 public enum PowerBlock: Component {
   /// Contains all data needed to simulate the operation of the power block
-  public struct PerformanceData: Equatable, HeatCycle,
-  CustomStringConvertible {
+  public struct PerformanceData: Equatable, HeatCycle, CustomStringConvertible {
+    
+    public static func == (lhs: PerformanceData, rhs: PerformanceData) -> Bool {
+      return lhs.load == rhs.load
+    }
 
-    var operationMode: OperationMode
+    //var operationMode: OperationMode
 
     var load: Ratio
 
@@ -32,21 +35,16 @@ public enum PowerBlock: Component {
       case scheduledMaintenance
     }
     
-    public static func == (lhs: PerformanceData, rhs: PerformanceData) -> Bool {
-      return lhs.operationMode == rhs.operationMode && lhs.load == rhs.load
-    }
-    
     public var description: String {
-      return "\(operationMode), "
-        + "Load: \(load), "
+      return "Load: \(load), "
         + String(format: "Mfl: %.1fkg/s, ", massFlow.rate)
-        + String(format: "In: %.1f°C ", temperature.inlet.celsius)
-        + String(format: "Out: %.1f°C", temperature.outlet.celsius)
+        + String(format: "Tin: %.1f°C ", temperature.inlet.celsius)
+        + String(format: "Tout: %.1f°C", temperature.outlet.celsius)
     }
   }
   
   static let initialState = PerformanceData(
-    operationMode: .scheduledMaintenance,
+    //operationMode: .scheduledMaintenance,
     load: 0.0,
     massFlow: 0.0,
     temperature: (inlet: Simulation.initialValues.temperatureOfHTFinPipes,
@@ -118,14 +116,12 @@ public enum PowerBlock: Component {
   }
   
   static func heatExchangerBypass(
-    _ status: Plant.PerformanceData
+    _ powerBlock: PowerBlock.PerformanceData
     ) -> (heatOut: Double, heatToTES: Double, powerBlock: PowerBlock.PerformanceData)
     {
-    let heatExchanger = HeatExchanger.parameter
-
     let htf = SolarField.parameter.HTF
 
-    var powerBlock = status.powerBlock
+    var powerBlock = powerBlock
 
     var heatOut = 0.0
     

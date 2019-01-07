@@ -285,7 +285,7 @@ enum HCE {
     }
     
     /// Calculate appropriate mass-flow [kg/(sec sqm)]
-    let ratio = abs(deltaHeat) / 1_000 / htf.addedHeat(
+    let ratio = abs(deltaHeat) / 1_000 / htf.deltaHeat(
       htf.maxTemperature, hce.temperature.inlet
     )
 
@@ -388,7 +388,7 @@ enum HCE {
     var newTemp = hce.temperature.inlet
     var oldTemp = newTemp
     
-    outerIteration: for outerIteration in 1...5 {
+    outerIteration: for _ in 1...5 {
       swap(&oldTemp, &newTemp)
       var inFocusLoop = 0.0
      // print("O", outerIteration, newTemp, oldTemp)
@@ -523,24 +523,24 @@ enum HCE {
         switch deltaHeatPerKg {
         // Calc. new Temp.
         case let q where q > 0:
-          newTemp = htf.resultingTemperature(
+          newTemp = htf.temperature(
             deltaHeatPerKg, hce.temperature.inlet
           )
         case 0:
           newTemp = oldTemp
         default:
-          let heatPerKg = htf.addedHeat(
+          let heatPerKg = htf.deltaHeat(
             hce.temperature.inlet, Plant.ambientTemperature
           )
           
-          newTemp = htf.resultingTemperature(
+          newTemp = htf.temperature(
             heatPerKg + deltaHeatPerKg, Plant.ambientTemperature
           )
         }
         let maxTemp = htf.maxTemperature
         // Flow is to low, dumping required
         dumping = newTemp > maxTemp
-          ? (hce.massFlow.rate / 3 * htf.addedHeat(newTemp, maxTemp) * 1_000)
+          ? (hce.massFlow.rate / 3 * htf.deltaHeat(newTemp, maxTemp) * 1_000)
           : 0.0 // MWt
 
         newTemp = newTemp.limited(by: maxTemp)

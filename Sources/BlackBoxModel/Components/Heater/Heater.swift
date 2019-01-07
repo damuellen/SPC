@@ -10,20 +10,9 @@
 
 import Foundation
 
-extension Heater.PerformanceData: CustomStringConvertible {
-  public var description: String {
-    return "\(operationMode), "
-      + "Maintenance: \(isMaintained ? "Yes" : "No"), "
-      + String(format: "Load: %.1f, ", load.percentage)
-      + String(format: "Mfl: %.1fkg/s, ", massFlow.rate)
-      + String(format: "In: %.1f°C, ", temperature.inlet.celsius)
-      + String(format: "Out: %.1f°C", temperature.outlet.celsius)
-  }
-}
-
 public enum Heater: Component {
   /// Contains all data needed to simulate the operation of the heater
-  public struct PerformanceData: Equatable, HeatCycle {
+  public struct PerformanceData: Equatable, HeatCycle, CustomStringConvertible {
 
     var operationMode: OperationMode
 
@@ -54,6 +43,15 @@ public enum Heater: Component {
         && lhs.load == rhs.load
         && lhs.temperature == rhs.temperature
         && lhs.massFlow == rhs.massFlow
+    }
+    
+    public var description: String {
+      return "\(operationMode), "
+        + "Maintenance: \(isMaintained ? "Yes" : "No"), "
+        + String(format: "Load: %.1f, ", load.percentage)
+        + String(format: "Mfl: %.1fkg/s, ", massFlow.rate)
+        + String(format: "Tin: %.1f°C, ", temperature.inlet.celsius)
+        + String(format: "Tout: %.1f°C", temperature.outlet.celsius)
     }
   }
 
@@ -87,21 +85,14 @@ public enum Heater: Component {
                      fuelAvailable: Double,
                      result: (Status<PerformanceData>) -> ())
   {
-    let htf = SolarField.parameter.HTF
-
-    let powerBlock = status.powerBlock
-
-    let storage = status.storage
-
-    let solarField = status.solarField
+    let htf = SolarField.parameter.HTF,
+    powerBlock = status.powerBlock,
+    storage = status.storage,
+    solarField = status.solarField
 
     var heater = status.heater
     
-    var fuel = 0.0
-
-    var thermalPower = 0.0
-
-    var parasitics = 0.0
+    var fuel = 0.0, thermalPower = 0.0, parasitics = 0.0
 
     heater.massFlow.rate = heater.massFlow.rate
       .limited(by: parameter.maximumMassFlow)
@@ -137,14 +128,14 @@ public enum Heater: Component {
         if Design.hasStorage, case .preheat = storage.operationMode {
           heater.massFlow = storage.massFlow
         } else {
-          heater.massFlow(rate: thermalPower * 1_000 / htf.addedHeat(
+          heater.massFlow(rate: thermalPower * 1_000 / htf.deltaHeat(
               heater.temperature.outlet, powerBlock.temperature.inlet
             )
           )
         }
       } else {
         heater.massFlow(rate:
-          Design.layout.heater / htf.addedHeat(
+          Design.layout.heater / htf.deltaHeat(
             parameter.nominalTemperatureOut,
             powerBlock.temperature.inlet
           )
@@ -156,14 +147,14 @@ public enum Heater: Component {
         // return
       }
     } else if case .freezeProtection = heater.operationMode {
-      thermalPower = heater.massFlow.rate * htf.addedHeat(
+      thermalPower = heater.massFlow.rate * htf.deltaHeat(
         parameter.antiFreezeTemperature, heater.temperature.inlet
       ) / 1_000
 
       if thermalPower > Design.layout.heater {
         thermalPower = Design.layout.heater
         if heater.massFlow.rate > 0 {
-          heater.temperature.outlet = htf.resultingTemperature(
+          heater.temperature.outlet = htf.temperature(
             abs(thermalPower) * 1_000 / heater.massFlow.rate,
             heater.temperature.inlet
           )
@@ -224,7 +215,7 @@ public enum Heater: Component {
         heater.massFlow = storage.massFlow
       } else {
         heater.massFlow(rate: thermalPower * 1_000 
-          / htf.addedHeat(heater.temperature.outlet, heater.temperature.inlet)
+          / htf.deltaHeat(heater.temperature.outlet, heater.temperature.inlet)
         )
       }
     }

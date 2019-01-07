@@ -6,11 +6,11 @@ import Meteo
 
 class HCETests: XCTestCase {
   func testsRadiationLosses() {
-    var status = Plant.initialState
+  /*   var status = Plant.initialState
     let meteo = MeteoData(
       dni: 555, ghi: 0, dhi: 0, temperature: 22, windSpeed: 11
     )
-   /* var radiationLosses = HCE.radiationLosses(
+   var radiationLosses = HCE.radiationLosses(
       temperatures: (300.0, 22.0), collector: status.collector, meteo: meteo)
     status.collector.theta = 0.4
     status.collector.efficiency = 0.90
@@ -30,14 +30,14 @@ class HCETests: XCTestCase {
   }
 
   func testsMode2() {
-    var status = Plant.initialState
+  /*  var status = Plant.initialState
     status.collector.theta = 0.4
     status.collector.efficiency = 0.90
     status.solarField.loops[0].massFlow = 10.0
-    let meteo = MeteoData(
+     let meteo = MeteoData(
       dni: 333, ghi: 0, dhi: 0, temperature: 22, windSpeed: 10
     )
-   /* HCE.mode2(&status.solarField, collector: status.collector,
+    HCE.mode2(&status.solarField, collector: status.collector,
               loop: .design, meteo: meteo)*/
   }
 

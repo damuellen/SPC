@@ -37,8 +37,8 @@ public enum HeatExchanger: Component {
     public var description: String {
       return "\(operationMode), "
         + String(format: "Mfl: %.1fkg/s, ", massFlow.rate)
-        + String(format: "In: %.1f°C, ", temperature.inlet.celsius)
-        + String(format: "Out: %.1f°C", temperature.outlet.celsius)
+        + String(format: "Tin: %.1f°C, ", temperature.inlet.celsius)
+        + String(format: "Tout: %.1f°C", temperature.outlet.celsius)
     }
   }
 
@@ -64,7 +64,7 @@ public enum HeatExchanger: Component {
   }
 
   /// power function based on MAN-Turbo and OHL data with pinch point tool
-  static func temperatureFactor(temperature: Temperature,
+  private static func temperatureFactor(temperature: Temperature,
                                 load: Ratio,
                                 maxTemperature: Temperature) -> Double {
     return clamp(((0.0007592419869
@@ -75,9 +75,9 @@ public enum HeatExchanger: Component {
   }
   
   /// Update HeatExchanger.temperature.outlet
-  public static func perform(_ hx: inout PerformanceData,
-                             steamTurbine: SteamTurbine.PerformanceData,
-                             storage: Storage.PerformanceData) -> Double {
+  static func perform(_ hx: inout PerformanceData,
+                      steamTurbine: SteamTurbine.PerformanceData,
+                      storage: Storage.PerformanceData) -> Double {
     let solarField = SolarField.parameter
     let htf = solarField.HTF
     if parameter.name.hasPrefix("Heat Exchanger HTF-H2O - BK") {
@@ -213,7 +213,7 @@ public enum HeatExchanger: Component {
 
       hx.setTemperature(outlet: htf.temperatureFrom(hx.heatToTES))
     }
-    let heat = hx.massFlow.rate * SolarField.parameter.HTF.addedHeat(
+    let heat = hx.massFlow.rate * SolarField.parameter.HTF.deltaHeat(
        hx.temperature.outlet, hx.temperature.inlet) / 1_000
     return -heat * parameter.efficiency
   }

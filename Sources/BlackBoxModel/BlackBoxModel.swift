@@ -115,8 +115,8 @@ public enum BlackBoxModel {
     Maintenance.setDefaultSchedule(for: year)
     
     Plant.setLocation(meteoDataSource.location)
-
-    Plant.setupComponentParameters()
+    
+    Plant.initializeComponents()
     
     if case .none = sun {
       sun = SolarPosition(location: Plant.location.coordinates,

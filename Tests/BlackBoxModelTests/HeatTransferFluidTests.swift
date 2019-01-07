@@ -24,7 +24,7 @@ class HeatTransferFluidTests: XCTestCase {
     density = htf.density(Temperature(celsius: 400.0))
     XCTAssertEqual(density, 701.34, accuracy: 0.01)
 
-    let temperature = htf.temperatureDelta(300, Temperature(celsius: 400.0))
+    let temperature = htf.temperature(300, Temperature(celsius: 400.0))
     XCTAssertEqual(temperature.kelvin, 779.22, accuracy: 0.01)
   }
 

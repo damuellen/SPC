@@ -51,7 +51,7 @@ public struct HeatTransferFluid: CustomStringConvertible {
   }
 
   @inline(__always)
-  func addedHeat(_ t1: Temperature, _ t2: Temperature) -> Heat {
+  func deltaHeat(_ t1: Temperature, _ t2: Temperature) -> Heat {
     if useEnthalpy {
       return HeatTransferFluid.heatExchanged(
         from: t1.celsius, to: t2.celsius,
@@ -64,7 +64,7 @@ public struct HeatTransferFluid: CustomStringConvertible {
   }
   
   @inline(__always)
-  func resultingTemperature(_ heat: Heat, _ t: Temperature) -> Temperature {
+  func temperature(_ heat: Heat, _ t: Temperature) -> Temperature {
     if useEnthalpy {
       return Temperature(celsius: HeatTransferFluid.temperatureFromEnthalpy(
         heat, t.celsius,

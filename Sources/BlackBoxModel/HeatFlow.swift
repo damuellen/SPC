@@ -33,9 +33,9 @@ public struct HeatFlow: HeatCycle, Equatable, CustomStringConvertible {
   }
 
   public var description: String {
-    return String(format: "\(name) (Mfl: %.1fkg/s, ", massFlow.rate)
-      + String(format: "In: %.1f°C, ", temperature.inlet.celsius)
-      + String(format: "Out: %.1f°C)", temperature.outlet.celsius)
+    return String(format: "\(name): Mfl: %.1fkg/s, ", massFlow.rate)
+      + String(format: "Tin: %.1f°C, ", temperature.inlet.celsius)
+      + String(format: "Tout: %.1f°C", temperature.outlet.celsius)
   }
 
   public mutating func constantTemperature() {
