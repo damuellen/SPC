@@ -81,7 +81,7 @@ public enum ParameterDefaults {
     maxTemperature: 393.0,
     h_T: [-0.62677, 1.51129, 0.0012941, 1.23697e-07, 0],
     T_h: [0.58315, 0.65556, -0.00032293, 1.9425e-07, -6.1133e-11],
-    useEnthalpy: true
+    useEnthalpy: false
   )
   
   static let st = Storage.Parameter(

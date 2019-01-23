@@ -47,7 +47,10 @@ extension Progress {
     let month = Int64(month)
     if month > completedUnitCount {
       completedUnitCount = month
-      💬.infoMessage("The calculations for \(monthSymbol) are in progress.")
+      print("The calculations for \(monthSymbol) are in progress.     ",
+        terminator: "\r"
+      )
+      fflush(stdout)
     }
   }
 }

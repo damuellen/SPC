@@ -30,8 +30,8 @@ extension PerformanceLog {
     let collector = Collector.parameter
     
     var d: String = ""
-    d += "\n"
-    d += "Location: \(Plant.location.longitude) \(Plant.location.latitude)"
+    d += "PLANT\n"
+    d += "  Location: \(Plant.location.longitude) \(Plant.location.latitude)"
     d += "\n\n"
     d += "SOLAR FIELD\n"
     d += "  No of Loops:" >< "\(Design.layout.solarField)"
@@ -43,7 +43,7 @@ extension PerformanceLog {
     d += "  Elevation [ø]:  " + "\(solarField.elevation)\t Azimut [ø]:  "
       + "\(solarField.azimut)"
 
-    d += "\n"
+    d += "\n\n"
     d += "STORAGE\n"
     d += "  Capacity [MWH,th]:"
       >< "\(Design.layout.storage * steamTurbine.power.max / steamTurbine.efficiencyNominal)"
@@ -81,8 +81,7 @@ extension PerformanceLog {
     d += "\n"
     d += "________________________________________________________________________________\n"
      d += "\n"
-    d += " Annual Results \n"
-    d += "\n"
+    d += "Annual Results \n"
     d += "\n"
     d += "Gross electricty producution [MWh_el/a]:"
       >< "\(PerformanceLog.number.string(from: NSNumber(value: annual.electric.gross))!)"
@@ -103,7 +102,7 @@ extension PerformanceLog {
     d += "\n"
     d += "AVAILABILITIES\n"
     d += "\n"
-    d += "Plant Availability [%]:" // >< "\(Simulation.parameter.PlantAvail * 100, )"
+    d += "Plant Availability [%]:\n" // >< "\(Simulation.parameter.PlantAvail * 100, )"
     d += "Plant Degradation [%]:" // >< "\(Simulation.parameter.PlantDegrad,)"
     d += "\n"
     d += "\n\n"

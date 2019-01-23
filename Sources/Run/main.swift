@@ -38,7 +38,7 @@ BlackBoxModel.meteoFilePath = meteoFilePath
 BlackBoxModel.interval = .every5minutes
 
 let logger = BlackBoxModel.runModel(lastRun + 1, output: .brief)
-print(logger.log)
+
 /*
 log = goalSeek(\.thermal.production, greaterThen: 164000) {
  Design.layout.solarField += 1
@@ -46,7 +46,8 @@ log = goalSeek(\.thermal.production, greaterThen: 164000) {
 
 let end = CFAbsoluteTimeGetCurrent()
 
-print("Duration:", String(format: "%.2f sec", end - start))
+print("\rDuration:", String(format: "%.2f sec", end - start),
+      "                           ")
 
 
 

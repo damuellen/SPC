@@ -117,8 +117,8 @@ public enum SolarField: Component {
     }
 
     solarField.header.massFlow(rate:
-      solarField.loops.dropFirst().reduce(0) { sum, loop in
-        sum + loop.massFlow.rate } / 3
+      solarField.loops.dropFirst().reduce(0.0) { sum, loop in
+        sum + loop.massFlow.rate } / 3.0
     )
 
     if solarField.header.massFlow.isNearZero {
@@ -135,7 +135,7 @@ public enum SolarField: Component {
           / (designFlowVelocity * solarField.header.massFlow.rate
             / parameter.massFlow.max.rate))
         // Correct the loop outlet temperatures
-        let oneMinusTR = 1 - timeRatio
+        let oneMinusTR = 1.0 - timeRatio
 
         for n in solarField.loops.indices.dropFirst() {
           solarField.loops[n].outletTemperature(kelvin:
@@ -152,11 +152,11 @@ public enum SolarField: Component {
           
           let oneMinusTR: Double
 
-          if timeRatio > 1 {
-            timeRatio = 1
-            oneMinusTR = 0
+          if timeRatio > 1.0 {
+            timeRatio = 1.0
+            oneMinusTR = 0.0
           } else {
-            oneMinusTR = 1 - timeRatio
+            oneMinusTR = 1.0 - timeRatio
           }
 
           let temp = timeRatio * solarField.loops[n].outletTemperature
@@ -169,11 +169,11 @@ public enum SolarField: Component {
         (temps[0].2 * solarField.loops[1].massFlow.rate
           + temps[1].2 * solarField.loops[2].massFlow.rate
           + temps[2].2 * solarField.loops[3].massFlow.rate)
-          / (3 * solarField.header.massFlow.rate)
+          / (3.0 * solarField.header.massFlow.rate)
       )
 
       // Now calc. the linear inlet temperature gradient:
-      let wayRatio = parameter.loopWays[2] / parameter.pipeWay
+      let wayRatio: Double = parameter.loopWays[2] / parameter.pipeWay
 
       solarField.loops[2].temperature.inlet = Temperature(celsius:
         solarField.loops[3].temperature.inlet.celsius + wayRatio

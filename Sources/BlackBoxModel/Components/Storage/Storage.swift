@@ -248,11 +248,11 @@ public enum Storage: Component {
 // FIXME: timeminutessum = timeminutessum + time.minutes! - timeminutesold
           }
         }
-        // new heat tracing defined by user:
+
         let ht = zip(parameter.heatTracingTime, parameter.heatTracingPower)
-        for (time, pow) in ht {
+        for (time, power) in ht {
           if timeminutessum > time * 60 {
-            parasitics += pow / 1_000
+            parasitics += power / 1_000
           }
         }
         return parasitics

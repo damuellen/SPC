@@ -1,36 +1,24 @@
-import Foundation
 import PlaygroundSupport
-import BlackBoxModel
 import AppKit
 
-extension PerformanceLog: CustomPlaygroundDisplayConvertible {
-
-  public var playgroundDescription: Any {
-    let attributes: [NSAttributedString.Key : Any] = [
-      .font: NSFont(name: "Menlo", size: 12.0)!,
-      .foregroundColor: NSColor.white
-    ]
-    return NSAttributedString(string: description, attributes: attributes)
-  }
-}
-
+/*
 public func goalSeek(
-  _ keyPath: KeyPath<PerformanceResults, Double>,
+  _ keyPath: KeyPath<PerformanceLog.Results, Double>,
   greaterThen: Double,
   block: ()->()
   ) -> PerformanceLog {
-  var results = PerformanceCalculator.runModel()
+  var result = BlackBoxModel.runModel()
   var count = 1
-  while results.annual[keyPath: keyPath] < greaterThen {
+  while result.annual[keyPath: keyPath] < greaterThen {
     block()
     count += 1
-    results = PerformanceCalculator.runModel(count)
-    print(results.annual[keyPath: keyPath])
+    result = BlackBoxModel.runModel(count)
+    print(result.annual[keyPath: keyPath])
   }
-  return results
+  return result
 }
-
-class View : NSView {
+*/
+public class View : NSView {
   
   var values: [CGFloat]
   
@@ -39,11 +27,9 @@ class View : NSView {
     super.init(frame: frameRect)
   }
   
-  required init?(coder decoder: NSCoder) {
-    fatalError()
-  }
+  required init?(coder decoder: NSCoder) { fatalError() }
   
-  override func draw(_ dirtyRect: NSRect) {
+  override public func draw(_ dirtyRect: NSRect) {
     
     let everest = values.max()!
     let scale = (bounds.height - 50) / everest
@@ -72,6 +58,7 @@ class View : NSView {
       step.draw(with: CGRect(x: ((bounds.width / 24) * CGFloat(n)), y: 3, width: 30, height: 20),
                 options: .usesLineFragmentOrigin, attributes: attrs, context: nil)
     }
+    
     let interval = 50 as CGFloat
     var n = 0
     

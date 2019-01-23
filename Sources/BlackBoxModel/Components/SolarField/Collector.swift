@@ -145,18 +145,18 @@ public enum Collector: Component {
 
   public static func tracking(sun: SolarPosition.OutputValues) -> PerformanceData {
     var collector = Collector.initialState
-    guard sun.zenith < 90 else { return collector }
+    guard sun.zenith < 90.0 else { return collector }
 
     collector.parabolicElevation = 90 - (atan(tan(sun.zenith.toRadians)
-        * cos(((sun.azimuth > 0 ? 90.0 : -90.0)
+        * cos(((sun.azimuth > 0.0 ? 90.0 : -90.0)
           - sun.azimuth).toRadians))).toDegrees
 
-    let az = sun.azimuth.toRadians,
-      el = sun.elevation.toRadians,
-      beta = SolarField.parameter.elevation.toRadians,
-      sfaz = SolarField.parameter.azimut.toRadians
+    let az: Double = sun.azimuth.toRadians
+    let el: Double = sun.elevation.toRadians
+    let beta: Double = SolarField.parameter.elevation.toRadians
+    let sfaz: Double = SolarField.parameter.azimut.toRadians
 
-    let theta = (cos(az - sfaz) / abs(cos(az - sfaz)) * 180 / .pi
+    let theta: Double = (cos(az - sfaz) / abs(cos(az - sfaz)) * 180 / Double.pi
       * acos(sqrt(1 - (cos(el - beta) - cos(beta) * cos(el)
           * (1 - cos(az - sfaz))) ** 2))) * (-1)
 

@@ -220,8 +220,8 @@ public final class PerformanceDataLogger {
     let columns = [PerformanceLog.Results.columns,
                    ThermalEnergy.columns, ElectricPower.columns,
                    Parasitics.columns, FuelConsumption.columns].joined()
-    let names = columns.map { $0.0 }.joined(separator: ",")
-    let units = columns.map { $0.1 }.joined(separator: ",")
+    let names: String = columns.map { $0.0 }.joined(separator: ",")
+    let units: String = columns.map { $0.1 }.joined(separator: ",")
     // if dateFormatter != nil {
     return ("Date,Time," + names, "_,_," + units)
     // }
@@ -264,8 +264,7 @@ public final class PerformanceDataLogger {
       daily.values, daily.thermal.values,
       daily.electric.values, daily.parasitics.values,
       daily.fuel.values,
-      ]
-      .joined().joined(separator: ",") + .lineBreak
+      ].joined().joined(separator: ",") + .lineBreak
     dailyResultsStream?.write(csv)
     annual.totalize(daily, fraction: 24)
     daily.reset()
@@ -276,8 +275,7 @@ public final class PerformanceDataLogger {
       hourly.values, hourly.thermal.values,
       hourly.electric.values, hourly.parasitics.values,
       hourly.fuel.values,
-      ]
-      .joined().joined(separator: .separator) + .lineBreak
+      ].joined().joined(separator: .separator) + .lineBreak
     hourlyResultsStream?.write(csv)
     daily.totalize(hourly, fraction: 1 / 24)
     hourCounter += 1

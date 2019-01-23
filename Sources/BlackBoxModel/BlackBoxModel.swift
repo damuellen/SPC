@@ -42,11 +42,11 @@ public enum BlackBoxModel {
       } else if let path = try FileManager.default
         .subpathsOfDirectory(atPath: meteoFilePath)
         .first { $0.hasSuffix("mto") } {
-        💬.infoMessage("Meteo file found in current working directory.")
+        💬.infoMessage("Meteo file found in current working directory.\n")
         return try MeteoDataFileHandler(forReadingAtPath: path)
           .makeDataSource()
       } else {
-        💬.errorMessage("Meteo file not found in current working directory.")
+        💬.errorMessage("Meteo file not found in current working directory.\n")
         fatalError("Meteo file is mandatory for calculation.")
       }
     } catch {
@@ -83,7 +83,7 @@ public enum BlackBoxModel {
   @discardableResult
   public static func runModel(
     _ count: Int = 1, output: PerformanceDataLogger.Mode = .brief
-    ) -> PerformanceDataLogger
+    ) -> PerformanceLog
   {
     let progress = Progress(
       totalUnitCount: 12, parent: self.progress, pendingUnitCount: 1
@@ -132,7 +132,7 @@ public enum BlackBoxModel {
     
     backgroundQueue.sync { } // wait for background queue
     
-    return logger!
+    return logger!.log
   }
 
   private static func makeGenerators() -> (MeteoDataGenerator, DateGenerator) {

@@ -15,13 +15,13 @@ public func goalSeek(
   greaterThen: Double,
   block: ()->()
   ) -> PerformanceLog {
-  var results = BlackBoxModel.runModel().log
-  while results.annual[keyPath: keyPath] < greaterThen {
+  var result = BlackBoxModel.runModel()
+  while result.annual[keyPath: keyPath] < greaterThen {
     block()
-    results = BlackBoxModel.runModel().log
-    print(results.annual[keyPath: keyPath])
+    result = BlackBoxModel.runModel()
+    print(result.annual[keyPath: keyPath])
   }
-  return results
+  return result
 }
 
 /*
