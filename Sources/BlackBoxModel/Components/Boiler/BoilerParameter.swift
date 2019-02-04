@@ -11,12 +11,12 @@
 import Config
 
 extension Boiler {
-  public struct Parameter: ComponentParameter, Codable {
+  public struct Parameter: ComponentParameter, Codable, Equatable {
     let name: String
     let nominalTemperatureOut, minLoad, nominalElectricalParasitics: Double
 
-    public struct StartParameter: Codable {
-      public struct Values: Codable {
+    public struct StartParameter: Codable, Equatable {
+      public struct Values: Codable, Equatable {
         let cold, warm: Double
       }
       let hours: Values

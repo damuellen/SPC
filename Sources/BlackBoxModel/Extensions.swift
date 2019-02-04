@@ -13,7 +13,7 @@ import Willow
 
 let backgroundQueue = DispatchQueue(label: "serial.queue")
 let 💬 = Logger(logLevels: [.info, .error], writers: [ConsoleWriter()],
-                  executionMethod: .asynchronous(queue: backgroundQueue))
+                executionMethod: .asynchronous(queue: backgroundQueue))
 
 public typealias Heat = Double
 public typealias Pressure = Double
@@ -47,7 +47,8 @@ extension Progress {
     let month = Int64(month)
     if month > completedUnitCount {
       completedUnitCount = month
-      print("The calculations for \(monthSymbol) are in progress.     ",
+      let count = month < 10 ? "[ \(month)/12]" : "[\(month)/12]"
+      print("\(count) Calculations for \(monthSymbol) in progress.      ",
         terminator: "\r"
       )
       fflush(stdout)
@@ -89,3 +90,4 @@ func swap<T>(_ lhs: inout T, _ rhs: inout T) {
 public func unreachable() -> Never {
   return unsafeBitCast((), to: Never.self)
 }
+

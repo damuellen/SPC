@@ -12,7 +12,7 @@ import Foundation
 
 public enum Heater: Component {
   /// Contains all data needed to simulate the operation of the heater
-  public struct PerformanceData: Equatable, HeatCycle, CustomStringConvertible {
+  public struct PerformanceData: HeatCycle {
 
     var operationMode: OperationMode
 
@@ -35,24 +35,7 @@ public enum Heater: Component {
       var isFreezeProtection: Bool {
         return self ~= .freezeProtection
       }
-    }
-
-    public static func == (lhs: PerformanceData, rhs: PerformanceData) -> Bool {
-      return lhs.operationMode == rhs.operationMode
-        && lhs.isMaintained == rhs.isMaintained
-        && lhs.load == rhs.load
-        && lhs.temperature == rhs.temperature
-        && lhs.massFlow == rhs.massFlow
-    }
-    
-    public var description: String {
-      return "\(operationMode), "
-        + "Maintenance: \(isMaintained ? "Yes" : "No"), "
-        + String(format: "Load: %.1f, ", load.percentage)
-        + String(format: "Mfl: %.1fkg/s, ", massFlow.rate)
-        + String(format: "Tin: %.1f°C, ", temperature.inlet.celsius)
-        + String(format: "Tout: %.1f°C", temperature.outlet.celsius)
-    }
+    }    
   }
 
   /// working conditions of the heater at start
@@ -128,13 +111,13 @@ public enum Heater: Component {
         if Design.hasStorage, case .preheat = storage.operationMode {
           heater.massFlow = storage.massFlow
         } else {
-          heater.massFlow(rate: thermalPower * 1_000 / htf.deltaHeat(
+          heater.setMassFlow(rate: thermalPower * 1_000 / htf.deltaHeat(
               heater.temperature.outlet, powerBlock.temperature.inlet
             )
           )
         }
       } else {
-        heater.massFlow(rate:
+        heater.setMassFlow(rate:
           Design.layout.heater / htf.deltaHeat(
             parameter.nominalTemperatureOut,
             powerBlock.temperature.inlet
@@ -214,7 +197,7 @@ public enum Heater: Component {
       if Design.hasStorage, case .preheat = storage.operationMode {
         heater.massFlow = storage.massFlow
       } else {
-        heater.massFlow(rate: thermalPower * 1_000 
+        heater.setMassFlow(rate: thermalPower * 1_000 
           / htf.deltaHeat(heater.temperature.outlet, heater.temperature.inlet)
         )
       }

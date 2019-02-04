@@ -10,7 +10,7 @@
 
 import Foundation
 
-public struct Coefficients: Codable {
+public struct Coefficients: Codable, Equatable {
   let coefficients: [Double]
 
   public init(values: Double...) {

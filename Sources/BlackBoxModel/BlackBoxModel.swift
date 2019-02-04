@@ -90,11 +90,11 @@ public enum BlackBoxModel {
     )
     
     progress.becomeCurrent(withPendingUnitCount: 12)
-    💬.infoMessage("\nThe calculation run \(count) started.\n")
+    print("\nThe calculation run \(count) started.\n")
     
     defer {
       progress.resignCurrent()
-      💬.infoMessage("\nThe calculations have been completed.\n")
+      print("The calculations have been completed.              ")
     }
     
     if let logger = logger {
@@ -127,8 +127,6 @@ public enum BlackBoxModel {
     let (🌦, 📅) = makeGenerators()
     
     Plant.run(progress: progress, dates: 📅, meteoData: 🌦, sun: 🌞)
-    
-    Plant.reset()
     
     backgroundQueue.sync { } // wait for background queue
     

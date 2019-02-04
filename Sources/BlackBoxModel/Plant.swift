@@ -138,14 +138,12 @@ public enum Plant {
         status.collector = Collector.tracking(sun: position)
         Collector.efficiency(&status.collector, meteo: meteo)
       } else {
+        status.collector = Collector.initialState
         TimeStep.current.isDayTime = false
       }
 
       updateSolarField(&status, meteo: meteo)
-      if TimeStep.current.hour == 16, TimeStep.current.minute == 56,
-        TimeStep.current.day == 27 {
-      
-      }
+
       updatePowerBlock(&status)
 
       netElectricalEnergy()
@@ -473,12 +471,12 @@ public enum Plant {
       }
     }
 
-    func bypassHeatExchanger() -> Bool {
+    func mustBypassHeatExchanger() -> Bool {
 
       if status.powerBlock.temperature.inlet
         < HeatExchanger.parameter.temperature.htf.inlet.min
       //  || status.powerBlock.massFlow.rate == 0
-        || status.storage.operationMode.isFreezeProtection
+      //  || status.storage.operationMode.isFreezeProtection
         || status.solarField.operationMode.isFreezeProtection
       {
         if status.heater.operationMode.isFreezeProtection == false {
@@ -517,11 +515,11 @@ public enum Plant {
     outletTemperature(&status.heatExchanger, &status.powerBlock, status.storage)
     // Iteration: Find the right temperature for inlet and outlet of powerblock
 
+    let fuel = Availability.fuel
+    
     Iteration: while(true) {
-
-      if Design.hasSolarField { updateSolarField(&status) }
-
-      let fuel = Availability.fuel
+      // Calculation of the heat supplied by the solar field
+      if Design.hasSolarField { availabilitySolarField(&status) }
 
       if Design.hasStorage { updateStorage(&status, fuel) }
 
@@ -529,13 +527,13 @@ public enum Plant {
         electricalEnergy.gasTurbineGross = GasTurbine.update(&status, fuel: fuel)
       }
 
-      guard Design.hasHeater && !Design.hasBoiler else { return }
-
-      updateHeater(&status, electricalEnergy.gasTurbineGross, &heatDiff, fuel)
-
+      if Design.hasHeater && !Design.hasBoiler {
+        updateHeater(&status, electricalEnergy.gasTurbineGross, &heatDiff, fuel)
+      }
+      
       checkForFreezeProtection(&status, heatDiff, fuel)
 
-      if bypassHeatExchanger() {
+      if mustBypassHeatExchanger() {
         heat.production = 0.0
         heat.heatExchanger = 0.0
         status.heatExchanger.massFlow = 0.0
@@ -558,8 +556,8 @@ public enum Plant {
     }
     // FIXME: H2OinPB = H2OinHX
   }
-
-  private static func updateSolarField(_ status: inout PerformanceData) {
+  /// Calculation of the heat supplied by the solar field
+  private static func availabilitySolarField(_ status: inout PerformanceData) {
     if status.solarField.insolationAbsorber > 0 {
 
       heat.solar.kiloWatt = status.solarField.massFlow.rate *
@@ -571,8 +569,9 @@ public enum Plant {
       heat.solar = 0.0
     }
 
-    status.powerBlock.massFlow = status.solarField.header.massFlow
-
+    status.powerBlock.massFlow = status.solarField.massFlow
+    // powerblock mass flow can change when heater is running
+    
     if heat.solar.watt > 0 {
       if case .startUp = status.steamTurbine.operationMode {
         heat.production = 0.0
@@ -586,7 +585,7 @@ public enum Plant {
       heat.solar = 0.0
       heat.production = 0.0
       status.powerBlock.massFlow = 0.0
-      status.solarField.header.massFlow = 0.0
+      status.solarField.massFlow = 0.0
     }
   }
 
@@ -610,12 +609,12 @@ public enum Plant {
        \(TimeStep.current)
        Overloading TB: \(heat) MWH,th
        """)*/
-    } else if heatDiff > 2 * Simulation.parameter.heatTolerance {
+    } /*else if heatDiff > 2 * Simulation.parameter.heatTolerance {
       💬.infoMessage("""
         \(TimeStep.current)
         Production > demand: \(diff) MWH,th
         """)
-    }
+    }*/
     
     let steamTurbine = SteamTurbine.parameter
     
@@ -787,8 +786,8 @@ public enum Plant {
           outlet: status.solarField, with: status.storage
         )
 
-        status.powerBlock.massFlow = status.storage.massFlow
-        status.powerBlock.massFlow += status.solarField.massFlow
+        status.powerBlock.massFlow = status.solarField.massFlow
+        status.powerBlock.massFlow += status.storage.massFlow
       } // STORAGE: dischargeToHeater < Qrel < dischargeToTurbine; Fuel/NoFuel
 
       heat.storage.megaWatt = supply

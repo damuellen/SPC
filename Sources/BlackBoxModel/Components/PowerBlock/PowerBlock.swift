@@ -13,44 +13,21 @@ import Meteo
 
 public enum PowerBlock: Component {
   /// Contains all data needed to simulate the operation of the power block
-  public struct PerformanceData: Equatable, HeatCycle, CustomStringConvertible {
+  public struct PerformanceData: HeatCycle {
     
-    public static func == (lhs: PerformanceData, rhs: PerformanceData) -> Bool {
-      return lhs.load == rhs.load
-    }
-
-    //var operationMode: OperationMode
-
-    var load: Ratio
-
     var massFlow: MassFlow
 
     var temperature: (inlet: Temperature, outlet: Temperature)
 
-    var totalMassFlow: MassFlow
-
-    var heatIn: Double
-    
     public enum OperationMode {
       case scheduledMaintenance
-    }
-    
-    public var description: String {
-      return "Load: \(load), "
-        + String(format: "Mfl: %.1fkg/s, ", massFlow.rate)
-        + String(format: "Tin: %.1f°C ", temperature.inlet.celsius)
-        + String(format: "Tout: %.1f°C", temperature.outlet.celsius)
     }
   }
   
   static let initialState = PerformanceData(
-    //operationMode: .scheduledMaintenance,
-    load: 0.0,
-    massFlow: 0.0,
-    temperature: (inlet: Simulation.initialValues.temperatureOfHTFinPipes,
-                  outlet: Simulation.initialValues.temperatureOfHTFinPipes),
-    totalMassFlow: 0.0,
-    heatIn: 0
+    massFlow: 0.0, temperature:
+    (inlet: Simulation.initialValues.temperatureOfHTFinPipes,
+     outlet: Simulation.initialValues.temperatureOfHTFinPipes)
   )
   
   public static var parameter: Parameter = ParameterDefaults.pb
@@ -129,7 +106,7 @@ public enum PowerBlock: Component {
     
     // added to simulate a bypass on the PB-HX if the expected
     // outlet temperature is so low that the salt to TES could freeze
-    powerBlock.totalMassFlow = powerBlock.massFlow
+    var totalMassFlow = powerBlock.massFlow
   
     repeat {
       
@@ -138,8 +115,7 @@ public enum PowerBlock: Component {
       )
       heatOut = htf.enthalpyFrom(powerBlock.temperature.outlet)
       
-      let bypassMassFlow = powerBlock.totalMassFlow
-        - powerBlock.massFlow
+      let bypassMassFlow = totalMassFlow - powerBlock.massFlow
       let Bypass_h = htf.enthalpyFrom(powerBlock.temperature.inlet)
       
       heatToTES = (bypassMassFlow.rate * Bypass_h

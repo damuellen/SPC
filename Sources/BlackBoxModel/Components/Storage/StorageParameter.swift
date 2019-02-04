@@ -16,6 +16,10 @@ extension Storage {
     case hours = "hrs", cap, ton
   }
 
+  public enum TypeDir: String {
+    case indirect, direct
+  }
+  
   public struct Parameter: ComponentParameter {
     let name: String
     let chargeTo, dischargeToTurbine, dischargeToHeater,
@@ -37,15 +41,19 @@ extension Storage {
       }
     }
 
+    let type: TypeDir = .indirect
     let strategy: Strategy
     let PrefChargeto: Double
     let startexcep, endexcep: Int
     let HTF: StorageMedium
-
-    let FCstopD, FCstopM, FCstartD, FCstartM: Int
-    let FP, FC, heatdiff, dSRise, minDischargeLoad, fixedDischargeLoad: Double
+    
+    let FP, FC, heatdiff, dSRise: Double
+    
+    let minDischargeLoad, fixedDischargeLoad: Ratio
+    
     let heatTracingTime, heatTracingPower: [Double]
     let DischrgParFac: Double
+    
     let isVariable = true
     let heatExchangerRestrictedMin = false
     let auxConsumptionCurve = false
@@ -58,10 +66,9 @@ extension Storage {
     let designTemperature: (cold: Temperature, hot: Temperature)
     
     let heatLoss: (hot: Double, cold: Double)
-    let FCstartD2: Int // Second Start fossil charging at Day
-    let FCstartM2: Int // Second Start fossil charging at Month
-    let FCstopD2: Int // second Stop fossil charing at Day
-    let FCstopM2: Int // Second Stop fossil charing at Month
+    
+    let startFossilCharging, stopFossilCharging: (day: Int, month: Int)
+    let startFossilCharging2, stopFossilCharging2: (day: Int, month: Int)
     
     let heatExchangerEfficiency: Double
     let heatExchangerCapacity: Double // (oil to salt) in MWt
@@ -76,8 +83,8 @@ extension Storage {
     // variables added to calculate TES aux. consumption :
 
     var heatProductionLoad: Double // added for shifter
-    let heatProductionLoadWinter: Double // added for shifter
-    let heatProductionLoadSummer: Double // added for shifter
+    let heatProductionLoadWinter: Ratio // added for shifter
+    let heatProductionLoadSummer: Ratio // added for shifter
     let dischrgWinter: Int
     let dischrgSummer: Int
     let badDNIwinter: Double
@@ -115,10 +122,10 @@ extension Storage.Parameter: CustomStringConvertible {
     d += "Load of Hot Tank at Program Start [%]:"
       >< "\(startLoad.hot * 100)"
     d += "Charging of Storage during Night by HTF-heater (0=YES; -1=NO): \(FC)"
-    d += "Stop charging strategy at day:" >< "\(FCstopD)"
-    d += "Stop charging strategy at month:" >< "\(FCstopM)"
-    d += "Start charging strategy at day:" >< "\(FCstartD)"
-    d += "Start charging strategy at month:" >< "\(FCstartM)"
+    d += "Stop charging strategy at day:" >< "\(stopFossilCharging.day)"
+    d += "Stop charging strategy at month:" >< "\(stopFossilCharging.month)"
+    d += "Start charging strategy at day:" >< "\(startFossilCharging.day)"
+    d += "Start charging strategy at month:" >< "\(startFossilCharging.month)"
     d += "Charge Storage up to relative Load before Start-up of Turbine:"
       >< "\(PrefChargeto)"
     d += "Definition of Summer from Month:" >< "\(startexcep)"
@@ -126,9 +133,9 @@ extension Storage.Parameter: CustomStringConvertible {
     d += "DNI for Bad Days Winter [kWh/m2]:" >< "\(badDNIwinter)"
     d += "DNI for Bad Days Summer [kWh/m2]:" >< "\(badDNIsummer)"
     d += "Massflow to POB during Charge in Bad Days Winter [%]:"
-      >< "\(heatProductionLoadWinter * 100)"
+      >< "\(heatProductionLoadWinter.percentage )"
     d += "Massflow to POB during Charge in Bad Days Summer [%]:"
-      >< "\(heatProductionLoadSummer * 100)"
+      >< "\(heatProductionLoadSummer.percentage)"
     d += "Time to begin TES Discharge in Winter [hr]:" >< "\(dischrgWinter)"
     d += "Time to begin TES Discharge in Summer [hr]:" >< "\(dischrgSummer)"
     return d
@@ -173,10 +180,10 @@ extension Storage.Parameter: CustomStringConvertible {
  }
  self.FP = try row(178)
  self.FC = try row(179)
- self.FCstopD = try int(180)
- self.FCstopM = try int(181)
- self.FCstartD = try int(182)
- self.FCstartM = try int(183)
+ self.endDayFossilCharging = try int(180)
+ self.endMonthFossilCharging = try int(181)
+ self.startDayFossilCharging = try int(182)
+ self.startMonthFossilCharging = try int(183)
  }
  }
 
@@ -202,14 +209,14 @@ extension Storage.Parameter: CustomStringConvertible {
  HTF       : String  // Storage Fluid
  FP        : Int  // Activation of Freeze Protection of solar field by storage
  FC        : Int  // Activation offossil storage charging
- FCstartD  : Int  // Start fossil charging at Day
- FCstartM  : Int  // Start fossil charging at Month
- FCstopD   : Int  // Stop fossil charging at Day
- FCstopM   : Int  // Stop fossil charging at Month
- FCstartD2 : Int  // Second Start fossil charging at Day   091211: added, to be used for sites in regions like Austria
- FCstartM2 : Int  // Second Start fossil charging at Month 091211: added, to be used for sites in regions like Austria
- FCstopD2  : Int  // second Stop fossil charing at Day    091211: added, to be used for sites in regions like Austria
- FCstopM2  : Int  // Second Stop fossil charing at Month  091211: added, to be used for sites in regions like Austria
+ startDayFossilCharging  : Int  // Start fossil charging at Day
+ startMonthFossilCharging  : Int  // Start fossil charging at Month
+ endDayFossilCharging   : Int  // Stop fossil charging at Day
+ endMonthFossilCharging   : Int  // Stop fossil charging at Month
+ startDayFossilCharging2 : Int  // Second Start fossil charging at Day   091211: added, to be used for sites in regions like Austria
+ startMonthFossilCharging2 : Int  // Second Start fossil charging at Month 091211: added, to be used for sites in regions like Austria
+ endDayFossilCharging2  : Int  // second Stop fossil charing at Day    091211: added, to be used for sites in regions like Austria
+ endMonthFossilCharging2  : Int  // Second Stop fossil charing at Month  091211: added, to be used for sites in regions like Austria
  HX           : Double       // HX Efficiency
  HXcap        : Double       // HX capacity (oil to salt) in MWt
  heatExchangerRestrictedMax   : Bool     // check box to restrict the max. capacity of HX

@@ -12,7 +12,7 @@ import Config
 import Foundation
 
 extension HeatExchanger {
-  public struct Parameter: ComponentParameter {
+  public struct Parameter: ComponentParameter, Equatable {
     public struct Temperatures {
       let htf: (inlet: (max: Temperature, min: Temperature),
                 outlet: (max: Temperature, min: Temperature))
@@ -215,3 +215,19 @@ extension HeatExchanger.Parameter: Codable {
     try container.encode(Tout_exp_Tin_Mfl, forKey: .Tout_exp_Tin_Mfl)
   }
 }
+
+extension HeatExchanger.Parameter.Temperatures: Equatable {
+  public static func == (lhs: Self, rhs: Self) -> Bool {
+    return lhs.designDelta.inlet == rhs.designDelta.inlet
+      && lhs.designDelta.outlet == rhs.designDelta.outlet
+      && lhs.htf.inlet.max == rhs.htf.inlet.max
+      && lhs.htf.inlet.min == rhs.htf.inlet.min
+      && lhs.htf.outlet.max == rhs.htf.outlet.max
+      && lhs.htf.outlet.min == rhs.htf.outlet.min
+      && lhs.h2o.inlet.max == rhs.h2o.inlet.max
+      && lhs.h2o.inlet.min == rhs.h2o.inlet.min
+      && lhs.h2o.outlet.max == rhs.h2o.outlet.max
+      && lhs.h2o.outlet.min == rhs.h2o.outlet.min
+  }
+}
+

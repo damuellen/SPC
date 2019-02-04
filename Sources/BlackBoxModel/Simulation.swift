@@ -74,7 +74,7 @@ public struct InitValues: Codable {
 }
 
 public extension InitValues {
-  public init(file: TextConfigFile) throws {
+  init(file: TextConfigFile) throws {
     let row: (Int) throws -> Double = { try file.parseDouble(row: $0) }
     self.temperatureOfHTFinPipes = try Temperature(row(7))
     self.temperatureOfHTFinHCE = try Temperature(row(10))

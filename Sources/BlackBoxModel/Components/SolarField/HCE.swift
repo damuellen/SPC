@@ -90,7 +90,7 @@ enum HCE {
     solarField.inFocus = 0.0
   }
   /// Memory to speed up the calculation
-  static private let memorizedRadiationLosses = Cache<Double>()
+  // static private let memorizedRadiationLosses = Cache<Double>()
 
   // Radiation losses per m2 Aperture; now with the new losses that take into
   // account the percentage of HCE that are broken, lost vacuum and fluorescent
@@ -180,7 +180,6 @@ enum HCE {
         endLossFactor = 1
       }
     } else {
-      // new formula from Jan Felinks.
       // IMPORTANT: definition of temperature.0 and temperature.1
       // changed to use new radiation loss formula
       // E_a = 0.0000002: E_b = -0.0001: E_c = 0.0769
@@ -289,7 +288,7 @@ enum HCE {
       htf.maxTemperature, hce.temperature.inlet
     )
 
-    hce.massFlow(rate: ratio * solarField.area)
+    hce.setMassFlow(rate: ratio * solarField.area)
 
     switch hce.massFlow { // Check if mass-flow is within acceptable limits
     case let massFlow where massFlow.rate <= 0: // HCE loses heat
@@ -400,18 +399,18 @@ enum HCE {
 
         let areaDensity = htf.density(averageTemperature) * .pi
           * col.rabsInner ** 2 / col.aperture
-
+        
         // Calculate time HTF needs to pass through HCE loop
         //if hce.massFlow <= sof.massFlow.min {
-          if hce.massFlow.isNearZero {
+        if hce.massFlow.isNearZero {
           // mass flow is reduced to almost zero due to no demand and full storage
-        //  time = period
+          //  time = period
         } else {
           time = (areaDensity * solarField.area / hce.massFlow.rate)
           //timePast = period
           if time < 0 { time += time }
         }
-
+        
         if innerIteration == 1 {
           inFocusLoop = solarField.inFocus.ratio
           // Reduce dumping in order to reach design temperature.
@@ -522,7 +521,7 @@ enum HCE {
         swap(&oldTemp, &newTemp)
         switch deltaHeatPerKg {
         // Calc. new Temp.
-        case let q where q > 0:
+        case let Q where Q > 0:
           newTemp = htf.temperature(
             deltaHeatPerKg, hce.temperature.inlet
           )

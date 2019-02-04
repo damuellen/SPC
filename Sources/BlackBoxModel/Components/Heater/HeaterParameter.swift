@@ -11,7 +11,7 @@
 import Config
 
 extension Heater {
-  public struct Parameter: ComponentParameter, Codable {
+  public struct Parameter: ComponentParameter, Codable, Equatable {
     let name: String
     let efficiency, maximumMassFlow, minLoad, nominalElectricalParasitics: Double
     let antiFreezeTemperature, nominalTemperatureOut: Temperature

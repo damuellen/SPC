@@ -16,7 +16,7 @@ import Foundation
  freeze temperature, specific heat capacity, viscosity, thermal conductivity,
  enthalpy, and density as a function of temperature.
  */
-public struct HeatTransferFluid: CustomStringConvertible {
+public struct HeatTransferFluid: CustomStringConvertible, Equatable {
   let name: String
   let freezeTemperature: Temperature
   let heatCapacity: [Double]

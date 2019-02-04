@@ -11,7 +11,7 @@
 import Config
 
 extension SolarField {
-  enum Layout {
+  enum Layout: String, Equatable {
     case I, H
   }
 
@@ -298,5 +298,43 @@ extension SolarField.Parameter: Codable {
     try container.encode(designTemperature.inlet, forKey: .inletDesignTemperature)
     try container.encode(designTemperature.outlet, forKey: .outletDesignTemperature)
     try container.encode(heatlosses, forKey: .heatlosses)
+  }
+}
+
+extension SolarField.Parameter: Equatable {
+  public static func ==(lhs: Self, rhs: Self) -> Bool {
+    return lhs.HLDump == rhs.HLDump
+      && lhs.layout == rhs.layout
+      && lhs.EtaWind == rhs.EtaWind
+      /// Pipe heat losses in tested area [W/sqm]
+      && lhs.SSFHL == rhs.SSFHL
+      && lhs.heatLossHeader == rhs.heatLossHeader
+      && lhs.HLDumpQuad == rhs.HLDumpQuad
+      && lhs.imbalanceDesign == rhs.imbalanceDesign
+      && lhs.imbalanceMin == rhs.imbalanceMin
+      && lhs.windCoefficients == rhs.windCoefficients
+      && lhs.useReferenceAmbientTemperature == rhs.useReferenceAmbientTemperature
+      && lhs.referenceAmbientTemperature == rhs.referenceAmbientTemperature
+      && lhs.heatlosses == rhs.heatlosses
+      && lhs.designTemperature.inlet == rhs.designTemperature.inlet
+      && lhs.designTemperature.outlet == rhs.designTemperature.outlet
+      /// Maximum windspeed for operation [m/sec]
+      && lhs.maxWind == rhs.maxWind
+      && lhs.numberOfSCAsInRow == rhs.numberOfSCAsInRow
+      && lhs.rowDistance == rhs.rowDistance
+      && lhs.distanceSCA == rhs.distanceSCA
+      && lhs.pipeHeatLosses == rhs.pipeHeatLosses
+      && lhs.azimut == rhs.azimut
+      && rhs.elevation == rhs.elevation
+      && lhs.antiFreezeParastics == rhs.antiFreezeParastics
+      && lhs.pumpParastics == rhs.pumpParastics
+      && lhs.massFlow.max == rhs.massFlow.max
+      && lhs.massFlow.min == rhs.massFlow.min
+      && lhs.pumpParasticsFullLoad == rhs.pumpParasticsFullLoad
+      && lhs.antiFreezeFlow == rhs.antiFreezeFlow
+      && lhs.HTFmass == rhs.HTFmass
+      && lhs.HTF == rhs.HTF
+      && lhs.collector == rhs.collector
+      && lhs.edgeFactor == rhs.edgeFactor
   }
 }

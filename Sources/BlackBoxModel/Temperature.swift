@@ -11,7 +11,7 @@
 import Foundation
 
 /// A temperature value in Kelvin.
-public struct Temperature: CustomStringConvertible {
+public struct Temperature: CustomStringConvertible, Equatable {
   
   var kelvin: Double {
     willSet { assert(newValue.isFinite) }

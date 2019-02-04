@@ -54,6 +54,7 @@ extension JsonConfigFileHandler {
       case .COL:
         Collector.update(parameter:
           try decoder.decode(Collector.Parameter.self, from: data))
+        SolarField.parameter.collector = Collector.parameter
       case .STO: break
       case .HR:
         Heater.update(parameter:

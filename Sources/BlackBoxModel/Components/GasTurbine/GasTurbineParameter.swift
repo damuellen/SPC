@@ -11,7 +11,7 @@
 import Config
 
 extension GasTurbine {
-  public struct Parameter: ComponentParameter, Codable {    
+  public struct Parameter: ComponentParameter, Codable, Equatable {    
     let name: String
     let powerGross, efficiencyISO, loadMin, altitude: Double
     let efficiencyFromLoad, loadMaxFromTemperature,

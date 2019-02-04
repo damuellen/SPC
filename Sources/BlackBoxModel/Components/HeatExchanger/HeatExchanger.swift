@@ -12,7 +12,7 @@ import Foundation
 
 public enum HeatExchanger: Component {
   /// Contains all data needed to simulate the operation of the heat exchanger
-  public struct PerformanceData: HeatCycle, CustomStringConvertible {
+  public struct PerformanceData: HeatCycle {
     
     var operationMode: OperationMode
     
@@ -20,8 +20,8 @@ public enum HeatExchanger: Component {
     
     var massFlow: MassFlow
     
-    var totalMassFlow, maxDeltaHeat, heatOut, heatToTES: Double
-
+    var heatOut, heatToTES: Double
+    
     public enum OperationMode: Equatable {
       case noOperation(hours: Double), SI, startUp,
       scheduledMaintenance, coldStartUp, warmStartUp
@@ -33,13 +33,6 @@ public enum HeatExchanger: Component {
         }
       }
     }
-
-    public var description: String {
-      return "\(operationMode), "
-        + String(format: "Mfl: %.1fkg/s, ", massFlow.rate)
-        + String(format: "Tin: %.1f°C, ", temperature.inlet.celsius)
-        + String(format: "Tout: %.1f°C", temperature.outlet.celsius)
-    }
   }
 
   /// working conditions of the heat exchanger at start
@@ -48,8 +41,6 @@ public enum HeatExchanger: Component {
     temperature: (inlet: Temperature(celsius: 30.0),
                   outlet: Temperature(celsius: 30.0)),
     massFlow: 0.0,
-    totalMassFlow: 0.0,
-    maxDeltaHeat: 0.0,
     heatOut: 0.0,
     heatToTES: 0.0
   )
@@ -164,7 +155,7 @@ public enum HeatExchanger: Component {
 
       for i in 1...  where hx.heatToTES > h_261 {
         // reduce massflow to PB in 5% every step until enthalpy is
-        hx.massFlow(rate: totalMassFlow.rate * (1 - (Double(i) / 20)))
+        hx.setMassFlow(rate: totalMassFlow.rate * (1 - (Double(i) / 20)))
         let massFlowLoad = hx.massFlow.share(of: solarField.massFlow.max)
 
         if parameter.useAndsolFunction {

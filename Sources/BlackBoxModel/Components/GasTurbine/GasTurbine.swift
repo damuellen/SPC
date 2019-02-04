@@ -283,11 +283,3 @@ public enum GasTurbine: Component {
     return supply
   }
 }
-
-extension GasTurbine.PerformanceData: CustomStringConvertible {
-  public var description: String {
-    return "\(operationMode), "
-      + "Maintenance: \(isMaintained ? "Yes" : "No"), "
-      + "Load: \(load)"
-  }
-}

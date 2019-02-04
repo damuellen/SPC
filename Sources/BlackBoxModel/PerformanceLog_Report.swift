@@ -29,40 +29,41 @@ extension PerformanceLog {
     let steamTurbine = SteamTurbine.parameter
     let collector = Collector.parameter
     
-    var d: String = ""
-    d += "PLANT\n"
-    d += "  Location: \(Plant.location.longitude) \(Plant.location.latitude)"
+    var d: String = "\n"
+    d += "PERFORMANCE RUN\n"
+    d += "    Date: \(PerformanceLog.date.string(from: Date()))\n"
+    d += "    Location: \(Plant.location.longitude) \(Plant.location.latitude)"
     d += "\n\n"
     d += "SOLAR FIELD\n"
-    d += "  No of Loops:" >< "\(Design.layout.solarField)"
-    d += "  Collector Type:" >< "\(collector.name)"
+    d += "    No of Loops:" >< "\(Design.layout.solarField)"
+    d += "    Collector Type:" >< "\(collector.name)"
     let aperture = Design.layout.solarField * 2 * collector.areaSCAnet
       * Double(solarField.numberOfSCAsInRow)
-    d += "  Aperture [m²]:" >< "\(aperture)"
-    d += "  Massflow [kg/s]:" >< solarField.massFlow.max.rate.description
-    d += "  Elevation [ø]:  " + "\(solarField.elevation)\t Azimut [ø]:  "
+    d += "    Aperture [m²]:" >< "\(aperture)"
+    d += "    Massflow [kg/s]:" >< solarField.massFlow.max.rate.description
+    d += "    Elevation [ø]:  " + "\(solarField.elevation)\t Azimut [ø]:  "
       + "\(solarField.azimut)"
 
     d += "\n\n"
     d += "STORAGE\n"
-    d += "  Capacity [MWH,th]:"
+    d += "    Capacity [MWH,th]:"
       >< "\(Design.layout.storage * steamTurbine.power.max / steamTurbine.efficiencyNominal)"
 
     d += "\n"
     d += "STEAM TURBINE\n"
-    d += "  Gross Output [MW]:" >< "\(steamTurbine.power.max)"
-    d += "  Efficiency [%] :" >< "\(steamTurbine.efficiencyNominal * 100)"
+    d += "    Gross Output [MW]:" >< "\(steamTurbine.power.max)"
+    d += "    Efficiency [%] :" >< "\(steamTurbine.efficiencyNominal * 100)"
     d += "\n"
 
     d += "GAS TURBINE\n"
-    d += "  Gross Output [MW]:" >< "\(Design.layout.gasTurbine)"
-    d += "  Efficiency [%]:" >< "\(gasTurbine.efficiencyISO * 100)"
+    d += "    Gross Output [MW]:" >< "\(Design.layout.gasTurbine)"
+    d += "    Efficiency [%]:" >< "\(gasTurbine.efficiencyISO * 100)"
     d += "\n"
 
     d += "WHR-SYSTEM\n"
-    d += "  Therm Output [MW]:"
+    d += "    Therm Output [MW]:"
       >< "\(Design.layout.gasTurbine * (1 / gasTurbine.efficiencyISO - 1)); \(WasteHeatRecovery.parameter.efficiencyNominal)"
-    d += "  Efficiency [%]:" >< "\(WasteHeatRecovery.parameter.efficiencyNominal)"
+    d += "    Efficiency [%]:" >< "\(WasteHeatRecovery.parameter.efficiencyNominal)"
     d += "\n"
 
     // if let _ = Boiler.parameter.first {
@@ -73,15 +74,14 @@ extension PerformanceLog {
     // Power = Design.layout.heater: Efficiency = heater.parameter.efficiency * 100
 
     d += "BACKUP SYSTEM\n"
-    d += "  Therm.Output [MW]:\n"
-    d += "  Efficiency [%]:\n"
+    d += "    Therm.Output [MW]:\n"
+    d += "    Efficiency [%]:\n"
     d += " * "
     d += "FOSSIL FUEL:\n"
-    d += "  LHV [kWH/kg]: Fuel.LHV\n"
-    d += "\n"
-    d += "________________________________________________________________________________\n"
-     d += "\n"
-    d += "Annual Results \n"
+    d += "    LHV [kWH/kg]: Fuel.LHV\n"
+    d += "\n\n"
+    d += "    Annual Results\n"
+    d += "   ----------------\n"
     d += "\n"
     d += "Gross electricty producution [MWh_el/a]:"
       >< "\(PerformanceLog.number.string(from: NSNumber(value: annual.electric.gross))!)"
@@ -106,7 +106,7 @@ extension PerformanceLog {
     d += "Plant Degradation [%]:" // >< "\(Simulation.parameter.PlantDegrad,)"
     d += "\n"
     d += "\n\n"
-    d += " Input Files\n"
+    d += "    Files and Parameter\n"
     d += "\n"
     d += "METEODATA  \(BlackBoxModel.meteoDataSource.name)\n"
     d += "Meteodata of a leap year"

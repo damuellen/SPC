@@ -16,10 +16,12 @@ import Foundation
  of the current time step available during a run.
 
   - Attention: Needed by `Availability` and `GridDemand` both use `current`,
-  also used in `SteamTurbine` and `Storage`.
+  also used in `SteamTurbine` and `Storage` routines.
 */
 struct TimeStep: CustomStringConvertible {
 
+  static var current = TimeStep()
+  
   var isDayTime: Bool = true
   var yearDay: Int = 0
   var month: Int = 0
@@ -39,8 +41,30 @@ struct TimeStep: CustomStringConvertible {
     current = .init(date)
   }
 
-  static var current = TimeStep()
+  typealias MonthDay = (day: Int, month: Int)
+  
+  func isWithin(start: MonthDay, stop: MonthDay) -> Bool {
+    assert(start.month <= stop.month)
+    var result = false
+    if start.month ... stop.month ~= month {
+      // month has been checked
+      if start.month == stop.month { // both days must checked
+        assert(start.day < stop.day - 1)
+        if start.day + 1 ..< stop.day ~= day { result = true }
+      } else if month == start.month { // start day must checked
+        if day > start.day { result = true }
+      } else if month == stop.month { // stop day must checked
+        if day < stop.day { result = true }
+      } else { // No day check necessary
+        result = true
+      }
+    }
+    return result
+  }
+}
 
+extension TimeStep {
+  
   private static var cfCalendar: CFCalendar = {
     let c = CFCalendarCreateWithIdentifier(
       kCFAllocatorDefault, CFCalendarIdentifier.gregorianCalendar
@@ -51,39 +75,31 @@ struct TimeStep: CustomStringConvertible {
     CFCalendarSetTimeZone(c, tz)
     return c!
   }()
-}
-
-extension TimeStep {
+  
   init(_ date: Date) {
+    typealias CFCU = CFCalendarUnit
+    let minutes = CFCU(rawValue: CFCU.minute.rawValue),
+    hours = CFCU(rawValue: CFCU.hour.rawValue),
+    days = CFCU(rawValue: CFCU.day.rawValue),
+    months = CFCU(rawValue: CFCU.month.rawValue),
+    year = CFCU(rawValue: CFCU.year.rawValue),
+    refDate =  date.timeIntervalSinceReferenceDate
+    
     let minute = CFCalendarGetOrdinalityOfUnit(
-      TimeStep.cfCalendar,
-      CFCalendarUnit(rawValue: CFCalendarUnit.minute.rawValue),
-      CFCalendarUnit(rawValue: CFCalendarUnit.hour.rawValue),
-      date.timeIntervalSinceReferenceDate
+      TimeStep.cfCalendar, minutes, hours, refDate
     )
     let hour = CFCalendarGetOrdinalityOfUnit(
-      TimeStep.cfCalendar,
-      CFCalendarUnit(rawValue: CFCalendarUnit.hour.rawValue),
-      CFCalendarUnit(rawValue: CFCalendarUnit.day.rawValue),
-      date.timeIntervalSinceReferenceDate
+      TimeStep.cfCalendar, hours, days, refDate
     )
     let day = CFCalendarGetOrdinalityOfUnit(
-      TimeStep.cfCalendar,
-      CFCalendarUnit(rawValue: CFCalendarUnit.day.rawValue),
-      CFCalendarUnit(rawValue: CFCalendarUnit.month.rawValue),
-      date.timeIntervalSinceReferenceDate
+      TimeStep.cfCalendar, days, months, refDate
     )
     let month = CFCalendarGetOrdinalityOfUnit(
-      TimeStep.cfCalendar,
-      CFCalendarUnit(rawValue: CFCalendarUnit.month.rawValue),
-      CFCalendarUnit(rawValue: CFCalendarUnit.year.rawValue),
-      date.timeIntervalSinceReferenceDate
+      TimeStep.cfCalendar, months, year,refDate
     )
-    let yearDay = 0 /* CFCalendarGetOrdinalityOfUnit(
-     TimeStep.cfCalendar,
-     CFCalendarUnit(rawValue: CFCalendarUnit.day.rawValue),
-     CFCalendarUnit(rawValue: CFCalendarUnit.year.rawValue),
-     date.timeIntervalSinceReferenceDate) */
+    let yearDay = 0 // CFCalendarGetOrdinalityOfUnit(
+    // TimeStep.cfCalendar, days, year, refDate)
+
     self = TimeStep(
       isDayTime: true, yearDay: yearDay,
       month: month, day: day, hour: hour, minute: minute)

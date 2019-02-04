@@ -36,7 +36,11 @@ extension HeatCycle {
     ]
   }
 
-  mutating func massFlow(rate: Double) {
+  func subtractingMassFlow(_ other: HeatCycle) -> MassFlow {
+    return self.massFlow - other.massFlow
+  }
+  
+  mutating func setMassFlow(rate: Double) {
     self.massFlow = MassFlow(rate)
   }
 

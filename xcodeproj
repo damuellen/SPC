@@ -1,0 +1,4 @@
+#!/bin/bash
+
+swift package generate-xcodeproj --xcconfig-overrides overrides.xcconfig
+open ./SPC.xcodeproj

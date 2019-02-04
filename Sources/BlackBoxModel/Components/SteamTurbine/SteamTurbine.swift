@@ -11,18 +11,9 @@
 import Foundation
 import Meteo
 
-extension SteamTurbine.PerformanceData: CustomDebugStringConvertible {
-  public var debugDescription: String {
-    return "\(operationMode), "
-      + String(format: "Load: %.2f, ", load.ratio)
-      + String(format: "Efficiency: %.2f %, ", efficiency * 100)
-      + String(format: "Back pressure: %.2f, ", backPressure)
-  }
-}
-
 public enum SteamTurbine: Component {
   /// Contains all data needed to simulate the operation of the steam turbine
-  public struct PerformanceData: Equatable {
+  public struct PerformanceData {
 
     var operationMode: OperationMode
     
@@ -45,12 +36,6 @@ public enum SteamTurbine: Component {
         default: return false
         }
       }
-    }
-
-    public static func == (lhs: PerformanceData, rhs: PerformanceData) -> Bool {
-      return lhs.operationMode == rhs.operationMode
-        && lhs.load == rhs.load
-        && lhs.backPressure == rhs.backPressure
     }
   }
 

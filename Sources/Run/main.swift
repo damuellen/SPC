@@ -15,13 +15,17 @@ import Meteo
 
 let start = CFAbsoluteTimeGetCurrent()
 
+print("Solar Performance Calculator (build: \(dateString))")
+
+let currentDirectoryPath = FileManager.default.currentDirectoryPath
+
 let configPath = CommandLine.arguments.count > 1
   ? CommandLine.arguments[1]
-  : FileManager.default.currentDirectoryPath
+  : currentDirectoryPath
 
 let meteoFilePath = CommandLine.arguments.count > 2
   ? CommandLine.arguments[2]
-  : FileManager.default.currentDirectoryPath
+  : currentDirectoryPath
 
 let contents = try? FileManager.default
   .contentsOfDirectory(atPath: configPath)
@@ -32,12 +36,12 @@ let runs = csv?.compactMap { filename in
 }
 let lastRun = runs?.max() ?? 99
 
-// PC.loadConfigurations(atPath: path, format: .text)
-// PC.saveConfigurations(toPath: path)
+// BlackBoxModel.loadConfigurations(atPath: configPath, format: .json)
+// BlackBoxModel.saveConfigurations(toPath: configPath)
 BlackBoxModel.meteoFilePath = meteoFilePath
 BlackBoxModel.interval = .every5minutes
 
-let logger = BlackBoxModel.runModel(lastRun + 1, output: .brief)
+let result = BlackBoxModel.runModel(lastRun + 1, output: .brief)
 
 /*
 log = goalSeek(\.thermal.production, greaterThen: 164000) {
@@ -46,8 +50,7 @@ log = goalSeek(\.thermal.production, greaterThen: 164000) {
 
 let end = CFAbsoluteTimeGetCurrent()
 
-print("\rDuration:", String(format: "%.2f sec", end - start),
-      "                           ")
+print("Duration:", String(format: "%.2f sec", end - start))
 
 
-
+print(result)

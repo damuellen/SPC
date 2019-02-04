@@ -1,0 +1,3 @@
+//:completeSettings = some
+SWIFT_INCLUDE_PATHS = $SRCROOT/SPC.xcodeproj/GeneratedModuleMap/CSOLPOS $SRCROOT/SPC.xcodeproj/GeneratedModuleMap/CSPA
+MACOSX_DEPLOYMENT_TARGET = 10.12

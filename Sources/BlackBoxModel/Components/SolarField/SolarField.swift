@@ -69,10 +69,9 @@ public enum SolarField: Component {
     inFocus: 0.0,
     loops: Loop.names.map { name in HeatFlow(loop: name) },
     loopEta: 0,
-    area: {
-      return Design.layout.solarField
-        * Double(SolarField.parameter.numberOfSCAsInRow)
-        * 2 * Collector.parameter.areaSCAnet }()
+    area: { return Design.layout.solarField
+      * Double(SolarField.parameter.numberOfSCAsInRow)
+      * 2 * Collector.parameter.areaSCAnet } ()
   )
 
   public static var parameter: Parameter = ParameterDefaults.sf
@@ -96,7 +95,7 @@ public enum SolarField: Component {
     return ((temperature - ambient).kelvin / 333) ** 1 * parameter.pipeHeatLosses
   }
 
-  /// Calc. loop-outlet temp. gradient / Near loop was already calculated.
+  /// Calc. loop-outlet temp. gradient
   private static func outletTemperature(
     _ solarField: inout SolarField.PerformanceData,
     _ collector: Collector.PerformanceData,
@@ -105,7 +104,7 @@ public enum SolarField: Component {
     HCE.freezeProtectionCheck(&solarField)
     last = solarField.loops
     for (n, loop) in zip(0..., [Loop.near, .average, .far]) {
-      solarField.loops[loop.rawValue].massFlow(rate:
+      solarField.loops[loop.rawValue].setMassFlow(rate:
         solarField.header.massFlow.rate
           * ((solarField.header.massFlow - parameter.massFlow.min).rate
             * (parameter.imbalanceDesign[n] - parameter.imbalanceMin[n])
@@ -116,7 +115,7 @@ public enum SolarField: Component {
                       mode: .variable, meteo: meteo)
     }
 
-    solarField.header.massFlow(rate:
+    solarField.header.setMassFlow(rate:
       solarField.loops.dropFirst().reduce(0.0) { sum, loop in
         sum + loop.massFlow.rate } / 3.0
     )
@@ -203,14 +202,17 @@ public enum SolarField: Component {
   }
 
   private static func heatLossesHotHeader(
-    _ solarField: inout SolarField.PerformanceData, _ meteo: MeteoData) {
-    var newTemp = solarField.header.temperature.outlet
-    defer { solarField.header.temperature.outlet = newTemp }
-    var oldTemp = newTemp
-    let ambientTemperature = Temperature(celsius: meteo.temperature)
+    _ solarField: PerformanceData, _ meteo: MeteoData) -> Temperature
+  {
+    var solarField = solarField
+    var oldTemp, newTemp: Temperature
+    
+    newTemp = solarField.header.temperature.outlet
 
+    let ambientTemperature = Temperature(celsius: meteo.temperature)
+    
     repeat {      
-      swap(&newTemp, &oldTemp)
+      oldTemp = newTemp
       
       solarField.heatLossHeader = parameter.heatLossHeader[0]
         * (parameter.heatLossHeader[1] + parameter.heatLossHeader[2]
@@ -247,6 +249,7 @@ public enum SolarField: Component {
       newTemp = newTemp.limited(by: parameter.HTF.maxTemperature)
     } while abs(newTemp.kelvin - oldTemp.kelvin)
       > Simulation.parameter.HLtempTolerance
+    return newTemp
   }
   
   static func update(
@@ -256,18 +259,13 @@ public enum SolarField: Component {
     meteo: MeteoData
     ) -> PerformanceData
   {
-    let heatExchanger = HeatExchanger.parameter,
-    steamTurbine = SteamTurbine.parameter
-    
-    let storage = status.storage
-    
     var solarField = status.solarField
-    
-    solarField.insolationAbsorber = Double(meteo.dni)
+
+    solarField.insolationAbsorber = Double(meteo.dni) // Value is only set here
       * status.collector.cosTheta
       * status.collector.efficiency
     
-    solarField.header.temperature.inlet =
+    solarField.temperature.inlet =
       status.powerBlock.temperature.outlet
 
     if Design.hasStorage {
@@ -282,22 +280,26 @@ public enum SolarField: Component {
       case .preheat:
         solarField.temperature.inlet = status.storage.temperatureTank.cold
       case .charging where Plant.heat.production.watt == 0:
-        solarField.header.temperature.inlet =
-          solarField.header.temperature.outlet
+        solarField.temperature.inlet =
+          solarField.temperature.outlet
       default: break
       }
     }
-
+    //  No more changes to solarfield inlet temperature
+    
+    let heatExchanger = HeatExchanger.parameter,
+    steamTurbine = SteamTurbine.parameter
+    
     if GridDemand.current.ratio < 1 {
       // added to reduced SOF massflow with electrical demand
-      solarField.massFlow(rate: GridDemand.current.ratio
+      solarField.setMassFlow(rate: GridDemand.current.ratio
         * (steamTurbine.power.max / steamTurbine.efficiencyNominal
           / heatExchanger.efficiency) * 1_000
         / parameter.HTF.deltaHeat(heatExchanger.temperature.htf.inlet.max,
                                   heatExchanger.temperature.htf.outlet.max)
       )
       
-      solarField.massFlow.rate = (solarField.massFlow + storage.massFlow).rate
+      solarField.massFlow.rate = (solarField.massFlow + status.storage.massFlow).rate
         .limited(by: parameter.massFlow.max.rate)
     } else {
       solarField.massFlow = parameter.massFlow.max
@@ -309,11 +311,11 @@ public enum SolarField: Component {
         solarField.massFlow = heatExchanger.sccHTFmassFlow
       }
     }
-    
+
     solarField = calculate(solarField, collector: status.collector,
                            time: &timeRemain, dumping: &dumping, meteo: meteo)
-    heatLossesHotHeader(&solarField, meteo)
-
+    solarField.temperature.outlet = heatLossesHotHeader(solarField, meteo)
+    // outlet temperature will not change again
     return solarField
   }
 
@@ -407,18 +409,3 @@ public enum SolarField: Component {
   static var lastDNI = 0.0
 }
 
-extension SolarField.PerformanceData: CustomStringConvertible {
-  public var description: String {
-    return "\(operationMode), "
-      + "Maintenance: \(isMaintained ? "Yes" : "No"), "
-      + "Header: \(header),\n"
-      + String(format: "insolationAbsorber: %.1f, ", insolationAbsorber)
-      + String(format: "ETA: %.1f, ", ETA)
-      + String(format: "HL: %.1f, ", heatLosses)
-      + String(format: "HL Header: %.1f, ", heatLossHeader)
-      + String(format: "HL HCE: %.1f, ", heatLossHCE)
-      + "Focus: \(inFocus), "
-      + String(format: "Loop Eta: %.1f, \n", loopEta)
-      + "Loops: \n\(loops[0])\n\(loops[1])\n\(loops[2])\n\(loops[3])"
-  }
-}
