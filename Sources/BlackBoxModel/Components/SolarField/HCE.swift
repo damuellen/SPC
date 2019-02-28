@@ -89,8 +89,6 @@ enum HCE {
     }
     solarField.inFocus = 0.0
   }
-  /// Memory to speed up the calculation
-  // static private let memorizedRadiationLosses = Cache<Double>()
 
   // Radiation losses per m2 Aperture; now with the new losses that take into
   // account the percentage of HCE that are broken, lost vacuum and fluorescent
@@ -102,17 +100,6 @@ enum HCE {
     let irradianceCosTheta = Double(meteo.dni) * collector.cosTheta
     /// Insolation to Absorber!
     let insolation = irradianceCosTheta * collector.efficiency
-/*
-    var hasher = Hasher()
-    hasher.combine(meteo.temperature)
-    hasher.combine(temperature1.kelvin)
-    hasher.combine(temperature2.kelvin)
-    hasher.combine(insolation)
-    let hash = hasher.finalize()
-    
-    if let result = memorizedRadiationLosses.lookupResult(for: hash) {
-      return result
-    }*/
 
     let (t1, t2) = (temperature1.kelvin, temperature2.kelvin)
     let col = Collector.parameter
@@ -245,6 +232,9 @@ enum HCE {
                             _ meteo: MeteoData) -> (Double, Double)
   {
     let sof = SolarField.parameter
+    let area = Design.layout.solarField
+      * Double(sof.numberOfSCAsInRow)
+      * 2 * Collector.parameter.areaSCAnet
     let htf = sof.HTF
     let col = Collector.parameter
     var time = 0.0
@@ -288,7 +278,7 @@ enum HCE {
       htf.maxTemperature, hce.temperature.inlet
     )
 
-    hce.setMassFlow(rate: ratio * solarField.area)
+    hce.setMassFlow(rate: ratio * area)
 
     switch hce.massFlow { // Check if mass-flow is within acceptable limits
     case let massFlow where massFlow.rate <= 0: // HCE loses heat
@@ -308,7 +298,7 @@ enum HCE {
       solarField.inFocus = Ratio(sof.massFlow.max.rate / massFlow.rate)
       // [MW] added to calculate Q_dump with instantaneous irradiation
 
-      dumping = deltaHeat * solarField.area * (1 - solarField.inFocus.ratio)
+      dumping = deltaHeat * area * (1 - solarField.inFocus.ratio)
 
       hce.massFlow = sof.massFlow.max
       hce.temperature.outlet = htf.maxTemperature
@@ -316,7 +306,7 @@ enum HCE {
       let areaDensity = htf.density(hce.averageTemperature)
         * .pi * col.rabsOut ** 2 / col.aperture
 
-      time = (areaDensity * solarField.area / hce.massFlow.rate)
+      time = (areaDensity * area / hce.massFlow.rate)
 
      // time = period
 
@@ -334,7 +324,7 @@ enum HCE {
         let areaDensity = htf.density(averageTemperature)
           * .pi * col.rabsOut ** 2 / col.aperture
 
-        time = (areaDensity * solarField.area / hce.massFlow.rate) // [sec]
+        time = (areaDensity * area / hce.massFlow.rate) // [sec]
 
       //  time = period
       } else if case .normal = solarField.operationMode {
@@ -358,7 +348,7 @@ enum HCE {
 
       let areaDensity = htf.density(averageTemperature)
         * .pi * col.rabsOut ** 2 / col.aperture
-      time = (areaDensity * solarField.area / hce.massFlow.rate)
+      time = (areaDensity * area / hce.massFlow.rate)
     }
     /// Residence time [sec]
     return (time, dumping)
@@ -371,6 +361,9 @@ enum HCE {
                             _ meteo: MeteoData) -> (Double, Double)
   {
     let sof = SolarField.parameter
+    let area = Design.layout.solarField
+      * Double(sof.numberOfSCAsInRow)
+      * 2 * Collector.parameter.areaSCAnet
     let htf = sof.HTF
     let col = Collector.parameter
     var time = 0.0
@@ -406,7 +399,7 @@ enum HCE {
           // mass flow is reduced to almost zero due to no demand and full storage
           //  time = period
         } else {
-          time = (areaDensity * solarField.area / hce.massFlow.rate)
+          time = (areaDensity * area / hce.massFlow.rate)
           //timePast = period
           if time < 0 { time += time }
         }
@@ -425,7 +418,7 @@ enum HCE {
           var deltaHeat = solarField.insolationAbsorber
           deltaHeat *= availability
           deltaHeat -= solarField.heatLosses
-          deltaHeat *= solarField.area
+          deltaHeat *= area
             * (1 - inFocusLoop)
           dumping = deltaHeat > 0 ? deltaHeat : 0.0
         }

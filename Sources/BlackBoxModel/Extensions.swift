@@ -11,7 +11,29 @@
 import Foundation
 import Willow
 
+extension DefaultStringInterpolation {
+
+  mutating func appendInterpolation<T>(csv values: T...) where T : Numeric {
+    values.forEach { value in
+      self.appendInterpolation(
+        numberFormatter.string(from: value as! NSNumber)!
+      )
+      self.appendInterpolation(", ")
+    }
+  }
+}
+
+private let numberFormatter: NumberFormatter = {
+  let numberFormatter = NumberFormatter()
+  numberFormatter.minimumIntegerDigits = 1
+  numberFormatter.maximumFractionDigits = 3
+  numberFormatter.minimumFractionDigits = 0
+  numberFormatter.decimalSeparator = "."
+  return numberFormatter
+}()
+
 let backgroundQueue = DispatchQueue(label: "serial.queue")
+let backgroundQueue2 = DispatchQueue(label: "serial.queue2")
 let 💬 = Logger(logLevels: [.info, .error], writers: [ConsoleWriter()],
                 executionMethod: .asynchronous(queue: backgroundQueue))
 

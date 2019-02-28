@@ -21,8 +21,6 @@ var dniDay = 0.0
 
 public enum BlackBoxModel {
   
-  public static var logger: PerformanceDataLogger?
-  
   public static var sun: SolarPosition?
   
   public static var interval: DateGenerator.Interval = .every5minutes
@@ -55,8 +53,6 @@ public enum BlackBoxModel {
     }
   }()
 
-  static var progress = Progress(totalUnitCount: 1)
-
   public static func loadConfigurations(
     atPath path: String, format: Config.Formats)
   {
@@ -82,55 +78,70 @@ public enum BlackBoxModel {
   
   @discardableResult
   public static func runModel(
-    _ count: Int = 1, output: PerformanceDataLogger.Mode = .brief
+    with recorder: PerformanceDataRecorder,
+    progress: Progress? = nil
     ) -> PerformanceLog
   {
-    let progress = Progress(
-      totalUnitCount: 12, parent: self.progress, pendingUnitCount: 1
-    )
-    
-    progress.becomeCurrent(withPendingUnitCount: 12)
-    print("\nThe calculation run \(count) started.\n")
-    
-    defer {
-      progress.resignCurrent()
-      print("The calculations have been completed.              ")
-    }
-    
-    if let logger = logger {
-      logger.reset()
-    } else {
-      logger = PerformanceDataLogger(
-        fileNameSuffix: "Run_\(count)", mode: output
-      )
+    if progress != nil {
+      progress!.becomeCurrent(withPendingUnitCount: 12)
     }
     
     defer {
-      if case .full = output {
-        try? logger!.log.report.write(toFile:
-          "Report_Run\(count).txt", atomically: true, encoding: .utf8)
+      progress?.resignCurrent()
+      if progress != nil {
+        print("The calculations have been completed.              ")
       }
     }
-    
     Maintenance.setDefaultSchedule(for: year)
     
     Plant.setLocation(meteoDataSource.location)
-    
-    Plant.initializeComponents()
-    
+
     if case .none = sun {
       sun = SolarPosition(location: Plant.location.coordinates,
                           year: year, timezone: timeZone, frequence: interval)
     }
     guard let 🌞 = sun else { preconditionFailure("We need the sun.") }
+
+    Plant.setupComponentParameters()
+    
+    var status = Plant.initialState
     
     let (🌦, 📅) = makeGenerators()
     
-    Plant.run(progress: progress, dates: 📅, meteoData: 🌦, sun: 🌞)
+    for (meteo, date) in zip(🌦, 📅) {
+      
+      TimeStep.setCurrent(date: date)
+      
+      Maintenance.checkSchedule(date)
+      
+      progress?.tracking(month: TimeStep.current.month)
+      
+      dniDay = 🌦.sumDNI(ofDay: TimeStep.current.day)
+      
+      Plant.setAmbientTemperature(meteo.temperature)
+      
+      if let position = 🌞[date] {
+        status.collector = Collector.tracking(sun: position)
+        Collector.efficiency(&status.collector, meteo: meteo)
+      } else {
+        status.collector = Collector.initialState
+        TimeStep.current.isDayTime = false
+      }
+      
+      Plant.updateSolarField(&status, meteo: meteo)
+      
+      Plant.updatePowerBlock(&status)
+      
+      let energy = Plant.energyFeed()
+      
+      backgroundQueue.async { [status] in
+        recorder.add(date, meteo: meteo, status: status, energy: energy)
+      }
+    }
     
     backgroundQueue.sync { } // wait for background queue
     
-    return logger!.log
+    return recorder.log
   }
 
   private static func makeGenerators() -> (MeteoDataGenerator, DateGenerator) {

@@ -30,7 +30,7 @@ extension SolarField {
    */
   public struct Parameter: ComponentParameter {
     let HLDump = false
-    let layout = SolarField.Layout.I
+    let layout = SolarField.Layout.H
     let EtaWind = false
     /// Pipe heat losses in tested area [W/sqm]
     let SSFHL: Double = 0.0
@@ -46,11 +46,11 @@ extension SolarField {
     /// Maximum windspeed for operation [m/sec]
     let maxWind: Float
     let numberOfSCAsInRow: Int
-    let rowDistance, distanceSCA, pipeHeatLosses: Double
+    public var rowDistance, distanceSCA, pipeHeatLosses: Double
     public var azimut, elevation: Double
     let antiFreezeParastics: Double
     let pumpParastics: Coefficients
-    var massFlow: (max: MassFlow, min: MassFlow)
+    public var massFlow: (max: MassFlow, min: MassFlow)
     var pumpParasticsFullLoad: Double
     var antiFreezeFlow: MassFlow
     var HTFmass: Double
@@ -302,7 +302,7 @@ extension SolarField.Parameter: Codable {
 }
 
 extension SolarField.Parameter: Equatable {
-  public static func ==(lhs: Self, rhs: Self) -> Bool {
+  public static func ==(lhs: SolarField.Parameter, rhs: SolarField.Parameter) -> Bool {
     return lhs.HLDump == rhs.HLDump
       && lhs.layout == rhs.layout
       && lhs.EtaWind == rhs.EtaWind

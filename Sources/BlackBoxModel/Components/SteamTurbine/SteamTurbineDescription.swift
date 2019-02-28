@@ -13,6 +13,5 @@ extension SteamTurbine.PerformanceData: CustomStringConvertible {
     return "\(operationMode), "
       + String(format: "Load: %.2f, ", load.ratio)
       + String(format: "Efficiency: %.2f %, ", efficiency * 100)
-      + String(format: "Back pressure: %.2f, ", backPressure)
   }
 }

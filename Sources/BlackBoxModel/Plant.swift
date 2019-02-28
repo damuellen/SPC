@@ -28,153 +28,20 @@ public enum Plant {
 
   static var electricalParasitics = Parasitics()
 
-  private static let initialState = PerformanceData()
-
-  private static var componentsNeedUpdate = true
-
-  static func initializeComponents() {
-    guard componentsNeedUpdate else { return }
-    componentsNeedUpdate = false
-    let steamTurbine = SteamTurbine.parameter
-    let powerBlock = PowerBlock.parameter
-
-    if steamTurbine.power.max == 0 {
-      SteamTurbine.parameter.power.max = Design.layout.powerBlock
-        + powerBlock.fixelectricalParasitics
-        + powerBlock.nominalElectricalParasitics
-        + powerBlock.electricalParasiticsStep[1]
-    }
-
-    let solarField = SolarField.parameter
-
-    if Design.hasGasTurbine {
-
-      HeatExchanger.parameter.sccHTFheat = Design.layout.heatExchanger
-        / steamTurbine.efficiencySCC / HeatExchanger.parameter.sccEff
-
-      let designHeatExchanger = solarField.HTF.deltaHeat(
-        HeatExchanger.parameter.scc.htf.outlet.max,
-        HeatExchanger.parameter.scc.htf.inlet.max
-      )
-
-      let heatExchanger = HeatExchanger.parameter
-      SolarField.parameter.massFlow.max = MassFlow(
-        heatExchanger.sccHTFheat * 1_000 / designHeatExchanger
-      )
-
-      WasteHeatRecovery.parameter.ratioHTF = heatExchanger.sccHTFheat
-        / (steamTurbine.power.max - heatExchanger.sccHTFheat)
-
-    } else {
-
-      if Design.layout.heatExchanger != Design.layout.powerBlock {
-
-        HeatExchanger.parameter.sccHTFheat = Design.layout.heatExchanger
-          / steamTurbine.efficiencyNominal
-          / HeatExchanger.parameter.efficiency
-
-      } else {
-
-        HeatExchanger.parameter.sccHTFheat = steamTurbine.power.max
-          / steamTurbine.efficiencyNominal
-          / HeatExchanger.parameter.efficiency
-      }
-
-      let designHeatExchanger = solarField.HTF.deltaHeat(
-        HeatExchanger.parameter.temperature.htf.inlet.max,
-        HeatExchanger.parameter.temperature.htf.outlet.max
-      )
-
-      SolarField.parameter.massFlow.max = MassFlow(
-        HeatExchanger.parameter.sccHTFheat * 1_000 / designHeatExchanger
-      )
-    }
-
-    if Design.hasSolarField {
-      let numberOfSCAsInRow = Double(solarField.numberOfSCAsInRow)
-      let edgeFactor1 = solarField.distanceSCA / 2
-        * (1 - 1 / numberOfSCAsInRow)
-        / Collector.parameter.lengthSCA
-      let edgeFactor2 = (1 + 1 / numberOfSCAsInRow)
-        / Collector.parameter.lengthSCA / 2
-      SolarField.parameter.edgeFactor = [edgeFactor1, edgeFactor2]
-    }
-  }
+  static let initialState = PerformanceData()
+  
+  /// used for Plant.setupComponentParameters()
+  static var componentsNeedUpdate = true
 
   static func setLocation(_ location: Position) {
     self.location = location
   }
 
-  static func reset() {
-    heat.reset()
-    fuelConsumption.reset()
-    electricalParasitics.reset()
-    electricalEnergy.reset()
+  static func setAmbientTemperature(_ celsius: Float) {
+    self.ambientTemperature = Temperature(celsius: celsius)
   }
 
-  static func run(
-    progress: Progress,
-    dates: DateGenerator,
-    meteoData: MeteoDataGenerator,
-    sun: SolarPosition)
-  {
-    var status = initialState
-    SolarField.last = SolarField.initialState.loops
-    SolarField.lastDNI = 0.0
-
-    for (meteo, date) in zip(meteoData, dates) {
-
-      TimeStep.setCurrent(date: date)
-
-      // if Maintenance.checkSchedule(date) { continue }
-
-      progress.tracking(month: TimeStep.current.month)
-
-      dniDay = meteoData.sumDNI(ofDay: TimeStep.current.day)
-
-      ambientTemperature = Temperature(celsius: meteo.temperature)
-
-      if let position = sun[date] {
-        status.collector = Collector.tracking(sun: position)
-        Collector.efficiency(&status.collector, meteo: meteo)
-      } else {
-        status.collector = Collector.initialState
-        TimeStep.current.isDayTime = false
-      }
-
-      updateSolarField(&status, meteo: meteo)
-
-      updatePowerBlock(&status)
-
-      netElectricalEnergy()
-      
-      record(status: status, meteo: meteo, date: date)
-      
-      reset()
-    }
-  }
-
-  private static func record(    
-    status: PerformanceData,
-    meteo: MeteoData,
-    date: DateGenerator.Element)
-  {
-    guard let logger = BlackBoxModel.logger else { return }
-    backgroundQueue.async {
-      [electricalEnergy, electricalParasitics, heat, fuelConsumption] in
-
-      logger.append(
-        date: date, meteo: meteo, status: status,
-        electricalEnergy: electricalEnergy,
-        electricalParasitics: electricalParasitics,
-        thermalEnergy: heat,
-        fuelConsumption: fuelConsumption
-      )
-    }
-  }
-
-  private static func netElectricalEnergy() {
-    
+  static func energyFeed() -> Energy {
     electricalEnergy.net = electricalEnergy.gross - electricalEnergy.parasitics
     
     if electricalEnergy.net < 0 {
@@ -183,21 +50,29 @@ public enum Plant {
     } else {
       electricalEnergy.consum = 0
     }
+    
+    return Energy(
+      thermal: heat, electric: electricalEnergy,
+      fuel: fuelConsumption, parasitics: electricalParasitics
+    )
   }
 
-  private static func updateSolarField(
+  static func updateSolarField(
     _ status: inout PerformanceData, meteo: MeteoData)
   {
     var timeRemain = 600.0
     var dumping = heat.dumping.watt
+
     status.solarField = SolarField.update(
       status, timeRemain: &timeRemain, dumping: &dumping, meteo: meteo
     )
+    
     heat.dumping.watt = dumping
+    
     electricalParasitics.solarField = SolarField.parasitics(status.solarField)
   }
 
-  private static func updatePowerBlock(_ status: inout PerformanceData) {
+  static func updatePowerBlock(_ status: inout PerformanceData) {
 
     @discardableResult func estimateElectricalEnergyDemand() -> Double {
       var estimate = 0.0
@@ -232,9 +107,9 @@ public enum Plant {
       if steamTurbine.load > Availability.current.value.powerBlock {
         
         steamTurbine.load = Availability.current.value.powerBlock
-        
+        // The turbine load has changed recalculation of efficiency
         (_, steamTurbine.efficiency) = SteamTurbine.perform(
-          steamTurbine: steamTurbine, boiler: status.boiler,
+          with: steamTurbine.load, boiler: status.boiler,
           gasTurbine: status.gasTurbine, heatExchanger: status.heatExchanger
         )
         
@@ -293,15 +168,16 @@ public enum Plant {
       factor = Double(step / 10) + 1
       estimateElectricalEnergyDemand()
 
-      status.steamTurbine.load.ratio =
-        (electricalEnergy.demand + Design.layout.gasTurbine)
+      let load = (electricalEnergy.demand + Design.layout.gasTurbine)
         / SteamTurbine.parameter.power.max
-
-      (_, status.steamTurbine.efficiency) = SteamTurbine.perform(
-        steamTurbine: status.steamTurbine, boiler: status.boiler,
-        gasTurbine: status.gasTurbine, heatExchanger: status.heatExchanger
-      )
-
+  //    if status.steamTurbine.load.ratio != load {
+        status.steamTurbine.load.ratio = load
+        // The turbine load has changed recalculation of efficiency        
+        (_, status.steamTurbine.efficiency) = SteamTurbine.perform(
+          with: status.steamTurbine.load, boiler: status.boiler,
+          gasTurbine: status.gasTurbine, heatExchanger: status.heatExchanger
+        )
+    //  }
       let demand = demandStrategyStorage()
 
       heat.demand.megaWatt = (demand / status.steamTurbine.efficiency)
@@ -352,6 +228,7 @@ public enum Plant {
     assert(step < 31, "Too many iterations")
     
     if Design.hasStorage {
+      // Calculate the operating state of the salt
       heat.storage.megaWatt = Storage.operate(
         storage: &status.storage, powerBlock: &status.powerBlock,
         steamTurbine: status.steamTurbine, thermal: heat.storage.megaWatt
@@ -471,7 +348,7 @@ public enum Plant {
       }
     }
 
-    func mustBypassHeatExchanger() -> Bool {
+    func isHeatExchangerBypassed() -> Bool {
 
       if status.powerBlock.temperature.inlet
         < HeatExchanger.parameter.temperature.htf.inlet.min
@@ -533,7 +410,7 @@ public enum Plant {
       
       checkForFreezeProtection(&status, heatDiff, fuel)
 
-      if mustBypassHeatExchanger() {
+      if isHeatExchangerBypassed() {
         heat.production = 0.0
         heat.heatExchanger = 0.0
         status.heatExchanger.massFlow = 0.0
@@ -593,7 +470,7 @@ public enum Plant {
     _ status: inout Plant.PerformanceData, _ heatDiff: inout Double)
   {
     (_, status.steamTurbine.efficiency) = SteamTurbine.perform(
-      steamTurbine: status.steamTurbine, boiler: status.boiler,
+      with: status.steamTurbine.load, boiler: status.boiler,
       gasTurbine: status.gasTurbine, heatExchanger: status.heatExchanger
     )
     
@@ -636,7 +513,7 @@ public enum Plant {
                      steamTurbine.power.min)
       
       (_, status.steamTurbine.efficiency) = SteamTurbine.perform(
-        steamTurbine: status.steamTurbine, boiler: status.boiler,
+        with: status.steamTurbine.load, boiler: status.boiler,
         gasTurbine: status.gasTurbine, heatExchanger: status.heatExchanger
       )
       
@@ -705,8 +582,8 @@ public enum Plant {
     
     Boiler.update(
       status.boiler, heatFlow: heatDiff,
-      Qsf_load: Qsf_load, fuelAvailable: Availability.fuel
-    ) { result in
+      Qsf_load: Qsf_load, fuelAvailable: Availability.fuel)
+    { result in
       status.boiler = result.status
       heat.boiler.megaWatt = result.supply
       fuelConsumption.boiler = result.fuel
@@ -967,8 +844,8 @@ public enum Plant {
     }
 
     Boiler.update(
-      boiler, heatFlow: heatDiff, Qsf_load: Qsf_load, fuelAvailable: 0
-    ) { result in
+      boiler, heatFlow: heatDiff, Qsf_load: Qsf_load, fuelAvailable: 0)
+    { result in
       boiler = result.status
       heat.boiler.megaWatt = result.supply
     }

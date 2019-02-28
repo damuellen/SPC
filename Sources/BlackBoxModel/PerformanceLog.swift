@@ -8,48 +8,82 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
-public struct PerformanceLog: CustomStringConvertible {
+import Meteo
 
-  public let annual: Results
+public struct PerformanceLog: CustomStringConvertible, Comparable {
+
+  public let report: String
   
-  let history: [Plant.PerformanceData]
+  let energy: Energy
   
-  let results: [Results]
+  let radiation: SolarRadiation
   
+  let energyHistory: [Energy]
+  
+  let performanceHistory: [Plant.PerformanceData]
+  
+  public let layout: Layout
+  
+  public var thermal: ThermalEnergy {
+    return energy.thermal
+  }
+  
+  public var electric: ElectricPower {
+    return energy.electric
+  }
+  
+  public var fitness: Double {
+    return layout.solarField / electric.net
+  }
+  
+  public static func < (lhs: PerformanceLog, rhs: PerformanceLog) -> Bool {
+    return lhs.fitness < rhs.fitness
+  }
+  
+  public static func ==(lhs: PerformanceLog, rhs: PerformanceLog) -> Bool {
+    return lhs.fitness == rhs.fitness
+  }
+    
   private let interval = BlackBoxModel.interval
   
-  init(annual: Results,
-       history: [Plant.PerformanceData],
-       results: [Results]) {
-    self.annual = annual
-    self.history = history
-    self.results = results
+  init(energy: Energy,
+       radiation: SolarRadiation,
+       energyHistory: [Energy] = [],
+       performanceHistory: [Plant.PerformanceData] = [])
+  {
+    self.energy = energy
+    self.radiation = radiation
+    self.energyHistory = energyHistory
+    self.performanceHistory = performanceHistory
+    self.layout = Design.layout
+    self.report = PerformanceLog.makeReport(
+      layout: Design.layout, energy: energy, radiation: radiation
+    )
   }
-
-  public subscript(keyPath: KeyPath<Results, Double>, day day: Int)
-    -> [Double] {
+  
+  public subscript(
+    keyPath: KeyPath<Energy, Double>, day day: Int) -> [Double]
+  {
+    if energyHistory.isEmpty { return [] }
     let count = interval.rawValue * 24
     let rangeStart = (day - 1) * count
     let rangeEnd = day * count
-    return results[rangeStart..<rangeEnd].map { $0[keyPath: keyPath] }
+    return energyHistory[rangeStart..<rangeEnd].map { $0[keyPath: keyPath] }
   }
-
-  public subscript(keyPath: KeyPath<Plant.PerformanceData, Double>, day day: Int)
-    -> [Double] {
+  
+  public subscript(
+    keyPath: KeyPath<Plant.PerformanceData, Double>, day day: Int) -> [Double]
+  {
+    if performanceHistory.isEmpty { return [] }
     let count = interval.rawValue * 24
     let rangeStart = (day - 1) * count
     let rangeEnd = day * count
-    return history[rangeStart..<rangeEnd].map { $0[keyPath: keyPath] }
+    return performanceHistory[rangeStart..<rangeEnd].map { $0[keyPath: keyPath] }
   }
-
-  subscript(forDay day:Int) -> [Results] {
-    let count = interval.rawValue * 24
-    let rangeStart = (day - 1) * count
-    let rangeEnd = day * count
-    return Array(results[rangeStart..<rangeEnd])
-  }
-
+  
   public var description: String {
-    return annual.description
+    return layout.description + radiation.description
+      + energy.thermal.description + energy.parasitics.description
+      + energy.electric.description + energy.fuel.description
   }
 }

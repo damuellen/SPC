@@ -15,7 +15,7 @@ public enum DryCooling {
 
   static func update(
     steamTurbineLoad: Double, temperature: Temperature
-  ) -> (DCFactor: Ratio, maxDCLoad: Ratio, backPressure: Double) {
+  ) -> (DCFactor: Ratio, maxDCLoad: Ratio) {
 
     let coefficientHR: Coefficients = [92.13, 28.73, 18.62, -15.42]
 
@@ -73,6 +73,6 @@ public enum DryCooling {
       let aLoad = 2.25, cLoad = -0.03
       maxDCLoad = aLoad + cLoad * Tamb
     }
-    return (Ratio(dcFactor), Ratio(maxDCLoad), backPressure)
+    return (Ratio(dcFactor), Ratio(maxDCLoad))
   }
 }

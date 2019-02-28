@@ -19,19 +19,31 @@ public enum Design {
   static let hasBoiler = layout.boiler > 0
   static let hasGasTurbine = layout.gasTurbine > 0
   static let hasPowerBlock = layout.powerBlock > 0
-  static let hasStorage = false // layout.storage > 0
+  static let hasStorage = false //layout.storage > 0
 }
 
-public struct Layout: Codable {
-  public var solarField = 100.0
+public struct Layout: Codable, Equatable, Hashable, CustomStringConvertible {
+  public var solarField = 148.0
   public var heater = -10.0
   public var heatExchanger = 75.0
   public var boiler = 0.0
   public var gasTurbine = 0.0
   public var powerBlock = 80.0
-  public var storage = 20.0
+  public var storage = 5.0
   public var storage_cap = 200.0
   public var storage_ton = 0.0
+  
+  public var description: String {
+    return ("Layout|SolarField " >< "\(Int(solarField)) loops")
+   //   + ("Layout|Heater " >< "\(Int(-heater)) MW")
+      + ("Layout|HeatExchanger " >< "\(Int(heatExchanger)) MW")
+   //   + ("Layout|Boiler " >< "\(Int(boiler)) MW")
+   //   + ("Layout|GasTurbine " >< "\(Int(gasTurbine)) MW")
+      + ("Layout|PowerBlock " >< "\(Int(powerBlock)) MW")
+  //    + ("Layout|Storage " >< "\(Int(storage)) MWh")
+  //    + ("Layout|Storage_cap " >< "\(Int(storage_cap))")
+  //    + ("Layout|Storage_ton " >< "\(Int(storage_ton))")
+  }
 }
 
 extension Layout: TextConfigInitializable {

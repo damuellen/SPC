@@ -8,6 +8,40 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
+public struct Energy {
+  
+  internal(set) public var thermal: ThermalEnergy
+  
+  internal(set) public var electric: ElectricPower
+  
+  internal(set) public var fuel: FuelConsumption
+  
+  internal(set) public var parasitics: Parasitics
+  
+  mutating func reset() {
+    self.thermal = ThermalEnergy()
+    self.fuel = FuelConsumption()
+    self.parasitics = Parasitics()
+    self.electric = ElectricPower()
+  }
+  
+  mutating func totalize(_ energy: Energy, fraction: Double) {
+    self.thermal.totalize(energy.thermal, fraction: fraction)
+    self.fuel.totalize(energy.fuel, fraction: fraction)
+    self.parasitics.totalize(energy.parasitics, fraction: fraction)
+    self.electric.totalize(energy.electric, fraction: fraction)
+  }
+}
+
+extension Energy {
+  init() {
+    self.thermal = ThermalEnergy()
+    self.electric = ElectricPower()
+    self.fuel = FuelConsumption()
+    self.parasitics = Parasitics()
+  }
+}
+
 public struct ElectricPower: Encodable, PerformanceData {
   internal(set) public var demand = 0.0, gross = 0.0, shared = 0.0,
   solarField = 0.0, powerBlock = 0.0, storage = 0.0, gasTurbine = 0.0,
@@ -26,9 +60,7 @@ public struct ElectricPower: Encodable, PerformanceData {
   }
   
   var csv: String {
-    return String(
-      format: "%.1f, %.1f, %.1f, %.1f, %.1f, %.1f, ",
-      steamTurbineGross, gasTurbineGross, backupGross, parasitics, net, consum)
+    return "\(csv: steamTurbineGross, gasTurbineGross, backupGross, parasitics, net, consum)"
   }
   
   static var columns: [(name: String, unit: String)] {
@@ -75,8 +107,7 @@ public struct Parasitics: Encodable, PerformanceData {
   }
   
   var csv: String {
-    return String(format: "%.1f, %.1f, %.1f, %.1f, %.1f, %.1f, ",
-                  solarField, powerBlock, storage, shared, 0, gasTurbine)
+    return "\(csv: solarField, powerBlock, storage, shared, 0, gasTurbine)"
   }
   
   static var columns: [(name: String, unit: String)] {
@@ -129,12 +160,11 @@ public struct ThermalEnergy: Encodable, PerformanceData {
   }
   
   var csv: String {
-    return String(
-      format: "%.1f, %.1f, %.1f, %.1f, %.1f, %.1f, %.1f, %.1f, %.1f, %.1f, ",
-      solar.megaWatt, dumping.megaWatt, toStorage.megaWatt, storage.megaWatt,
-      heater.megaWatt, heatExchanger.megaWatt, startUp.megaWatt,
-      wasteHeatRecovery.megaWatt, boiler.megaWatt, production.megaWatt
-    )
+    return """
+    \(csv: solar.megaWatt, dumping.megaWatt, toStorage.megaWatt, storage.megaWatt,
+    heater.megaWatt, heatExchanger.megaWatt, startUp.megaWatt,
+    wasteHeatRecovery.megaWatt, boiler.megaWatt, production.megaWatt)
+    """
   }
   
   static var columns: [(name: String, unit: String)] {
@@ -202,8 +232,7 @@ public struct FuelConsumption: Encodable, PerformanceData {
   }
   
   var csv: String {
-    return String(format: "%.1f, %.1f, %.1f, %.1f, %.1f, ",
-                  backup, boiler, heater, gasTurbine, combined)
+    return "\(csv: backup, boiler, heater, gasTurbine, combined)"
   }
   
   static var columns: [(name: String, unit: String)] {

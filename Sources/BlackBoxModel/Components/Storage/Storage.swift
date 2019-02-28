@@ -551,26 +551,26 @@ public enum Storage: Component {
     case .charging:
       switch parameter.type {
       case .indirect:
-        indirectCharging(storage: &storage, thermal: thermalPower)
+        indirectCharging(&storage, thermal: thermalPower)
       case .direct:
-        directCharging(storage: &storage, thermal: thermalPower)
+        directCharging(&storage, thermal: thermalPower)
       }
     case .fossilCharge:
-      fossilCharging(storage: &storage, thermal: thermalPower)
+      fossilCharging(&storage, thermal: thermalPower)
     case .discharge:
       switch parameter.type {
       case .indirect:
-        thermalPower = indirectDischarging(storage: &storage, thermal: thermalPower)
+        thermalPower = indirectDischarging(&storage, thermal: thermalPower)
       case .direct:
-        thermalPower = directDischarging(storage: &storage, thermal: thermalPower)
+        thermalPower = directDischarging(&storage, thermal: thermalPower)
       }      
     case .preheat:
-      preheating(storage: &storage, thermal: thermalPower)
+      preheating(&storage, thermal: thermalPower)
     case .freezeProtection:
-      freezeProtection(storage: &storage, powerBlock)
+      freezeProtection(&storage, powerBlock: powerBlock)
     // powerBlock.temperature.outlet = storage.temperatureTank.cold
     case .noOperation:
-      noOperation(storage: &storage, powerBlock)
+      noOperation(&storage, powerBlock: powerBlock)
     }
     heatlosses(storage: &storage)
     
@@ -593,7 +593,7 @@ public enum Storage: Component {
   }
   
   private static func indirectCharging(
-    storage: inout Storage.PerformanceData, thermal: Double)
+    _ storage: inout Storage.PerformanceData, thermal: Double)
   {
     storage.salt.calculateMassFlow(
       cold: storage.temperatureTank.cold,
@@ -639,14 +639,13 @@ public enum Storage: Component {
   }
   
   private static func directCharging(
-    storage: inout Storage.PerformanceData, thermal: Double)
+    _ storage: inout Storage.PerformanceData, thermal: Double)
   {
     
   }
   
   private static func fossilCharging(
-    storage: inout Storage.PerformanceData,
-    thermal: Double)
+    _ storage: inout Storage.PerformanceData, thermal: Double)
   {
     storage.salt.calculateMassFlow(
       cold: storage.temperatureTank.cold,
@@ -675,7 +674,7 @@ public enum Storage: Component {
   }
   
   private static func indirectDischarging(
-    storage: inout Storage.PerformanceData, thermal: Double) -> Double
+    _ storage: inout Storage.PerformanceData, thermal: Double) -> Double
   {
     var thermalPower = thermal
     
@@ -726,13 +725,13 @@ public enum Storage: Component {
   }
   
   private static func directDischarging(
-    storage: inout Storage.PerformanceData, thermal: Double) -> Double
+    _ storage: inout Storage.PerformanceData, thermal: Double) -> Double
   {
     return 0
   }
   
   private static func preheating(
-    storage: inout Storage.PerformanceData, thermal: Double)
+    _ storage: inout Storage.PerformanceData, thermal: Double)
   {
     storage.salt.calculateMassFlow(
       cold: parameter.designTemperature.cold,
@@ -758,8 +757,8 @@ public enum Storage: Component {
   }
   
   private static func freezeProtection(
-    storage: inout Storage.PerformanceData,
-    _ powerBlock: PowerBlock.PerformanceData)
+    _ storage: inout Storage.PerformanceData,
+    powerBlock: PowerBlock.PerformanceData)
   {
     let splitfactor = parameter.HTF == .hiXL ? 0.4 : 1
 
@@ -784,8 +783,8 @@ public enum Storage: Component {
   }
   
   private static func noOperation(
-    storage: inout Storage.PerformanceData,
-    _ powerBlock: PowerBlock.PerformanceData)
+    _ storage: inout Storage.PerformanceData,
+    powerBlock: PowerBlock.PerformanceData)
   {
     if parameter.stepSizeIteration < -90,
       storage.temperatureTank.cold < parameter.designTemperature.cold,

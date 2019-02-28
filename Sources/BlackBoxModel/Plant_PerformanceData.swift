@@ -11,7 +11,7 @@
 extension Plant {
   
   public struct PerformanceData: CustomStringConvertible {
-    
+
     public var collector = Collector.initialState,
     boiler = Boiler.initialState,
     powerBlock = PowerBlock.initialState,

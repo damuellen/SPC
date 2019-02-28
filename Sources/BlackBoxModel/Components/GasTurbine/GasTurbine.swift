@@ -133,14 +133,18 @@ public enum GasTurbine: Component {
           supply = GasTurbine.perform(
             &status.gasTurbine, demand: demand, fuelAvailable: fuel
           )
-          status.steamTurbine.load.ratio = 
+          let load =
             (Plant.electricalEnergy.demand - Plant.electricalEnergy.gasTurbineGross)
               / steamTurbine.power.max
 
-          (_, status.steamTurbine.efficiency) = SteamTurbine.perform(
-            steamTurbine: status.steamTurbine, boiler: status.boiler,
-            gasTurbine: status.gasTurbine, heatExchanger: status.heatExchanger
-          )
+        //  if status.steamTurbine.load.ratio != load {
+            status.steamTurbine.load.ratio = load
+            // The turbine load has changed recalculation of efficiency
+            (_, status.steamTurbine.efficiency) = SteamTurbine.perform(
+              with: status.steamTurbine.load, boiler: status.boiler,
+              gasTurbine: status.gasTurbine, heatExchanger: status.heatExchanger
+            )
+        //  }
           
           let eff = status.steamTurbine.efficiency
           
@@ -172,16 +176,20 @@ public enum GasTurbine: Component {
             &status.gasTurbine, demand: demand, fuelAvailable: fuel
           )
 
-          status.steamTurbine.load.ratio = 
+          let load =
             (Plant.electricalEnergy.demand - Plant.electricalEnergy.gasTurbineGross)
               / steamTurbine.power.max
           
           if GasTurbine.efficiency(at: status.gasTurbine.load) > 0 {
 
-            (_, status.steamTurbine.efficiency) = SteamTurbine.perform(
-              steamTurbine: status.steamTurbine, boiler: status.boiler,
-              gasTurbine: status.gasTurbine, heatExchanger: status.heatExchanger
-            )
+          //  if status.steamTurbine.load.ratio != load {
+              status.steamTurbine.load.ratio = load
+              // The turbine load has changed recalculation of efficiency
+              (_, status.steamTurbine.efficiency) = SteamTurbine.perform(
+                with: status.steamTurbine.load, boiler: status.boiler,
+                gasTurbine: status.gasTurbine, heatExchanger: status.heatExchanger
+              )
+          //  }
 
             let eff = status.steamTurbine.efficiency
             
@@ -263,13 +271,17 @@ public enum GasTurbine: Component {
         (Plant.electricalEnergy.demand - Plant.electricalEnergy.gasTurbineGross)
         / steamTurbine.power.max
       
-      status.steamTurbine.load.ratio = status.steamTurbine.load.ratio
+      let load = status.steamTurbine.load.ratio
         .limited(by: Availability.current.value.powerBlock.ratio)
       
-      (_, status.steamTurbine.efficiency) = SteamTurbine.perform(
-        steamTurbine: status.steamTurbine, boiler: status.boiler,
-        gasTurbine: status.gasTurbine, heatExchanger: status.heatExchanger
-      )
+    //  if status.steamTurbine.load.ratio != load {
+        // The turbine load has changed recalculation of efficiency
+        status.steamTurbine.load.ratio = load
+        (_, status.steamTurbine.efficiency) = SteamTurbine.perform(
+          with: status.steamTurbine.load, boiler: status.boiler,
+          gasTurbine: status.gasTurbine, heatExchanger: status.heatExchanger
+        )
+    //  }
       
       Plant.heat.demand.megaWatt = status.steamTurbine.load.ratio
         * steamTurbine.power.max / status.steamTurbine.efficiency

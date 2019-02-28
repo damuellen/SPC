@@ -21,7 +21,9 @@ extension PerformanceLog {
      return numberFormatter
   }(NumberFormatter())
 
-  public var report: String {
+  static func makeReport(
+    layout: Layout, energy: Energy, radiation: SolarRadiation)
+    -> String {
     let solarField = SolarField.parameter
     let heater = Heater.parameter
     let heatExchanger = HeatExchanger.parameter
@@ -32,12 +34,11 @@ extension PerformanceLog {
     var d: String = "\n"
     d += "PERFORMANCE RUN\n"
     d += "    Date: \(PerformanceLog.date.string(from: Date()))\n"
-    d += "    Location: \(Plant.location.longitude) \(Plant.location.latitude)"
-    d += "\n\n"
+    d += "\n"
     d += "SOLAR FIELD\n"
-    d += "    No of Loops:" >< "\(Design.layout.solarField)"
+    d += "    No of Loops:" >< "\(layout.solarField)"
     d += "    Collector Type:" >< "\(collector.name)"
-    let aperture = Design.layout.solarField * 2 * collector.areaSCAnet
+    let aperture = layout.solarField * 2 * collector.areaSCAnet
       * Double(solarField.numberOfSCAsInRow)
     d += "    Aperture [m²]:" >< "\(aperture)"
     d += "    Massflow [kg/s]:" >< solarField.massFlow.max.rate.description
@@ -47,7 +48,7 @@ extension PerformanceLog {
     d += "\n\n"
     d += "STORAGE\n"
     d += "    Capacity [MWH,th]:"
-      >< "\(Design.layout.storage * steamTurbine.power.max / steamTurbine.efficiencyNominal)"
+      >< "\(layout.storage * steamTurbine.power.max / steamTurbine.efficiencyNominal)"
 
     d += "\n"
     d += "STEAM TURBINE\n"
@@ -56,13 +57,13 @@ extension PerformanceLog {
     d += "\n"
 
     d += "GAS TURBINE\n"
-    d += "    Gross Output [MW]:" >< "\(Design.layout.gasTurbine)"
+    d += "    Gross Output [MW]:" >< "\(layout.gasTurbine)"
     d += "    Efficiency [%]:" >< "\(gasTurbine.efficiencyISO * 100)"
     d += "\n"
 
     d += "WHR-SYSTEM\n"
     d += "    Therm Output [MW]:"
-      >< "\(Design.layout.gasTurbine * (1 / gasTurbine.efficiencyISO - 1)); \(WasteHeatRecovery.parameter.efficiencyNominal)"
+      >< "\(layout.gasTurbine * (1 / gasTurbine.efficiencyISO - 1)); \(WasteHeatRecovery.parameter.efficiencyNominal)"
     d += "    Efficiency [%]:" >< "\(WasteHeatRecovery.parameter.efficiencyNominal)"
     d += "\n"
 
@@ -80,24 +81,24 @@ extension PerformanceLog {
     d += "FOSSIL FUEL:\n"
     d += "    LHV [kWH/kg]: Fuel.LHV\n"
     d += "\n\n"
-    d += "    Annual Results\n"
-    d += "   ----------------\n"
+    d += "  Annual Results\n"
+    d += "  --------------\n"
     d += "\n"
     d += "Gross electricty producution [MWh_el/a]:"
-      >< "\(PerformanceLog.number.string(from: NSNumber(value: annual.electric.gross))!)"
+      >< "\(PerformanceLog.number.string(from: NSNumber(value: energy.electric.gross))!)"
     //  Format((YTarS(0).EgrsST + YTarS(0).EgrsGasTurbine) * (1 - Simulation.parameter.UnSchedMain) * (1 - Simulation.parameter.TransLoss), )"
     d += "Parasitic consumption [MWh_el/a]:"
-      >< "\(PerformanceLog.number.string(from: NSNumber(value: annual.parasitics.shared))!)"
+      >< "\(PerformanceLog.number.string(from: NSNumber(value: energy.parasitics.shared))!)"
     // Format(YTarS(0).electricalParasitics * (1 - Simulation.parameter.UnSchedMain) * (1 - Simulation.parameter.TransLoss), )"
     d += "Net electricty producution [MWh_el/a]:"
-      >< "\(PerformanceLog.number.string(from: NSNumber(value: annual.electric.net))!)"
+      >< "\(PerformanceLog.number.string(from: NSNumber(value: energy.electric.net))!)"
     // Format(YTarS(0).Enet * (1 - Simulation.parameter.UnSchedMain) * (1 - Simulation.parameter.TransLoss), )"
     d += "Gas consumption [MWh_el/a]:\n" // Format(YTarS(0).heatfuel, )"
     d += "Solar share [%]:\n" // Format(SolShare * 100, )"
     d += "Annual direct solar insolation [kWh/m²a]:" //  Format(YTarS(0).NDI,)"
-      >< "\(PerformanceLog.number.string(from: NSNumber(value: annual.dni / 1_000))!)"
+      >< "\(PerformanceLog.number.string(from: NSNumber(value: radiation.dni / 1_000))!)"
     d += "Total heat from solar field [MWh_el/a]:" // Format(YTarS(0).heatsol,)"
-    >< "\(PerformanceLog.number.string(from: NSNumber(value: annual.thermal.solar.megaWatt))!)"
+    >< "\(PerformanceLog.number.string(from: NSNumber(value: energy.thermal.solar.megaWatt))!)"
     d += "________________________________________________________________________________\n"
     d += "\n"
     d += "AVAILABILITIES\n"
@@ -109,8 +110,8 @@ extension PerformanceLog {
     d += "    Files and Parameter\n"
     d += "\n"
     d += "METEODATA  \(BlackBoxModel.meteoDataSource.name)\n"
-    d += "Meteodata of a leap year"
-      >< "\(Simulation.time.isLeapYear ? "YES" : "NO")" /*
+    d += "Meteodata of a leap year" >< "\(Simulation.time.isLeapYear ? "YES" : "NO")"
+    d += "Location: \(Plant.location.longitude) \(Plant.location.latitude)"/*
      d += "Position of Wet Bulb Temp. in mto-file [row]:" >< "\(Simulation.parameter.WBTpos)"
      d += "Position of Wind Direction in mto-file [row]:" >< "\(Simulation.parameter.WDpos)"
      d += "Pos. of Global Direct Irr. in mto-file [row]:""\(Simulation.parameter.GHI)"
@@ -178,7 +179,7 @@ extension PerformanceLog {
       >< "\(Simulation.parameter.dfreezeTemperatureHeat.kelvin)"
     d += "Minimum Insolation for Start-Up [W/m²]:"
       >< "\(Simulation.parameter.minInsolation)"
-    d += "Fuel strategy:\t\(Fuelmode)I\n"
+    d += "Fuel strategy:" >< "\(Fuelmode)"
     d += "\n\n"
     d += "AVAILABILITIES\n"
     d += "\n"
@@ -198,7 +199,8 @@ extension PerformanceLog {
     d += "Unscheduled Maintenance [%]:\n" // >< "\(Simulation.parameter.UnSchedMain * 100)"
     d += "________________________________________________________________________________\n"
     d += "\n\n"
-    d += " Fixed Parameter\n"
+    d += "  Fixed Parameter\n"
+    d += "  ---------------\n"
     d += "\n\n"
     d += "HEATER\n\n"
     d += String(describing: heater)

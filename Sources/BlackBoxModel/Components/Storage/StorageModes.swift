@@ -310,7 +310,7 @@ extension Storage {
       }
       let maxLoad: Double
       (maxLoad, steamTurbine.efficiency) = SteamTurbine.perform(
-        steamTurbine: steamTurbine, boiler: status.boiler,
+        with: steamTurbine.load, boiler: status.boiler,
         gasTurbine: status.gasTurbine, heatExchanger: status.heatExchanger
       )
       

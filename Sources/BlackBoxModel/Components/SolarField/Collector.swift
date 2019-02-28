@@ -27,13 +27,6 @@ public enum Collector: Component {
       return "Parabolic Elevation, elevation, azimuth, theta, efficiency"
     }
 
-    public var commaSeparatedValues: String {
-      return String(format: ", %.1f", parabolicElevation)
-        + String(format: ", %.2f", theta)
-        + String(format: ", %.2f ", cosTheta)
-        + String(format: ", %.2f", efficiency)
-    }
-
     public var description: String {
       return String(format: "PE: %.1f°, ", parabolicElevation)
         + String(format: "θ: %.2f°, ", theta)
@@ -54,15 +47,15 @@ public enum Collector: Component {
   static func shadingHCE(cosTheta: Double) -> Double {
     let shadingHCE = parameter.shadingHCE
     switch cosTheta {
-    case 0 ... 0.03:
+    case ...0.03:
       return shadingHCE[0]
-    case 0 ... 0.09:
+    case ...0.09:
       let x = (cosTheta - 0.03) / 0.06
       return x * shadingHCE[1] + (1 - x) * shadingHCE[0]
-    case 0 ... 0.24:
+    case ...0.24:
       let x = (cosTheta - 0.09) / 0.15
       return x * shadingHCE[2] + (1 - x) * shadingHCE[1]
-    case 0 ... 0.33:
+    case ...0.33:
       let x = (cosTheta - 0.24) / 0.09
       return x * shadingHCE[3] + (1 - x) * shadingHCE[2]
     default:
@@ -75,6 +68,10 @@ public enum Collector: Component {
   /// of parabolic trough, edge factors of the solarfield and the optical efficiency
   public static func efficiency(_ collector: inout PerformanceData,
                                 meteo: MeteoData) {
+    guard case 1...179 = collector.parabolicElevation else { return }
+    
+    let IAM = parameter.IAMfac[collector.theta.toRadians]
+    
     let solarField = SolarField.parameter
     
     let shadlength = parameter.avgFocus * tan(collector.theta.toRadians)
@@ -91,8 +88,6 @@ public enum Collector: Component {
         - (shadlength - parameter.extensionHCE)
         * solarField.edgeFactor[1]
     }
-
-    let IAM = parameter.IAMfac[collector.theta.toRadians]
 
     var shadingSCA = abs(sin(collector.parabolicElevation.toRadians))
       * solarField.rowDistance / parameter.aperture
@@ -137,7 +132,9 @@ public enum Collector: Component {
     /// Correction factor due to torsion
     let k_torsion = max(0.2, (-0.0041 * pow(torsion, 3) - 0.0605
         * pow(torsion, 2) - 0.0354 * torsion + 99.997) / 100)
+    
     let shadingHCE = self.shadingHCE(cosTheta: collector.cosTheta)
+    
     let eff = shadingSCA * shadingHCE * IAM * edge * k_torsion
       * Simulation.adjustmentFactor.efficiencySolarField
     collector.efficiency = eff
@@ -202,8 +199,7 @@ extension Collector.PerformanceData: PerformanceData {
   }
   
   var csv: String {
-    return String(format: "%.1f, %.1f, %.1f, %.1f",
-                  theta, cosTheta, efficiency, parabolicElevation)
+    return "\(csv: theta, cosTheta, efficiency, parabolicElevation)"
   }
   
   static var columns: [(name: String, unit: String)] {

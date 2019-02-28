@@ -26,15 +26,14 @@ public enum SolarField: Component {
     var operationMode: OperationMode
     var isMaintained: Bool
     var header: HeatFlow
-    var insolationAbsorber: Double
+    public var insolationAbsorber: Double
     var ETA: Double
-    var heatLosses: Double
-    var heatLossHeader: Double
-    var heatLossHCE: Double
+    public var heatLosses: Double
+    public var heatLossHeader: Double
+    public var heatLossHCE: Double
     public var inFocus: Ratio
     var loops: [HeatFlow]
     var loopEta: Double
-    var area: Double
     
     public var massFlow: MassFlow {
       get { return self.header.massFlow }
@@ -68,10 +67,7 @@ public enum SolarField: Component {
     heatLosses: 0, heatLossHeader: 0, heatLossHCE: 0,
     inFocus: 0.0,
     loops: Loop.names.map { name in HeatFlow(loop: name) },
-    loopEta: 0,
-    area: { return Design.layout.solarField
-      * Double(SolarField.parameter.numberOfSCAsInRow)
-      * 2 * Collector.parameter.areaSCAnet } ()
+    loopEta: 0
   )
 
   public static var parameter: Parameter = ParameterDefaults.sf
@@ -204,6 +200,9 @@ public enum SolarField: Component {
   private static func heatLossesHotHeader(
     _ solarField: PerformanceData, _ meteo: MeteoData) -> Temperature
   {
+    let area = Design.layout.solarField
+      * Double(SolarField.parameter.numberOfSCAsInRow)
+      * 2 * Collector.parameter.areaSCAnet
     var solarField = solarField
     var oldTemp, newTemp: Temperature
     
@@ -235,7 +234,7 @@ public enum SolarField: Component {
 
         /// Heat collected or lost during the flow through a whole loop [kJ/sqm]
         let deltaHeatPerSqm = solarField.heatLossHeader * 1_000_000 // [MW]
-          / solarField.area * 300 / 1_000
+          / area * 300 / 1_000
         /// Change kJ/sqm to kJ/kg:
         let deltaHeatPerKg = deltaHeatPerSqm / areaDensity
         

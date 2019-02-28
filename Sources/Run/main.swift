@@ -40,17 +40,28 @@ let lastRun = runs?.max() ?? 99
 // BlackBoxModel.saveConfigurations(toPath: configPath)
 BlackBoxModel.meteoFilePath = meteoFilePath
 BlackBoxModel.interval = .every5minutes
+/*
+SolarField.parameter.massFlow.max = 2500.0
+Design.layout.powerBlock = 73
+Design.layout.solarField = 98
+Design.layout.heatExchanger = 98
+*/
 
-let result = BlackBoxModel.runModel(lastRun + 1, output: .brief)
+let log = PerformanceDataRecorder(
+  customNaming: "Run_\(lastRun + Int(1))", mode: .brief
+)
+
+let result1 = BlackBoxModel.runModel(with: log, progress: Progress())
+
+print(result1)
 
 /*
-log = goalSeek(\.thermal.production, greaterThen: 164000) {
- Design.layout.solarField += 1
-}*/
+let gp = GeneticParameters(populationSize: 8, numberOfGenerations: 8, mutationRate: 0.5)
 
+let ga = GeneticAlgorithm(parameters: gp)
+
+ga.simulateNGenerations()
+*/
 let end = CFAbsoluteTimeGetCurrent()
 
 print("Duration:", String(format: "%.2f sec", end - start))
-
-
-print(result)

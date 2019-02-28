@@ -21,8 +21,6 @@ public enum SteamTurbine: Component {
 
     var efficiency: Double
 
-    var backPressure: Double
-
     public enum OperationMode: Equatable {
       case noOperation(time: Int), startUp(time: Int, energy: Double),
       scheduledMaintenance, operating
@@ -41,7 +39,7 @@ public enum SteamTurbine: Component {
 
   static let initialState = PerformanceData(
     operationMode: .noOperation(time: 5),
-    load: 1.0, efficiency: 1.0, backPressure: 0
+    load: 1.0, efficiency: 1.0
   )
 
   public static var parameter: Parameter = ParameterDefaults.tb
@@ -99,9 +97,10 @@ public enum SteamTurbine: Component {
         Plant.heat.startUp = 0.0
         let maxLoad: Double
         (maxLoad, steamTurbine.efficiency) = SteamTurbine.perform(
-          steamTurbine: steamTurbine, boiler: status.boiler,
+          with: steamTurbine.load, boiler: status.boiler,
           gasTurbine: status.gasTurbine, heatExchanger: status.heatExchanger
         )
+        #warning("Check this again")
         let eff = status.steamTurbine.efficiency
         steamTurbine.load.ratio = (heat * eff / parameter.power.max)
           .limited(by: maxLoad)
@@ -136,16 +135,15 @@ public enum SteamTurbine: Component {
   }
   
   static func perform(
-    steamTurbine: PerformanceData,
+    with load: Ratio,
     boiler: Boiler.PerformanceData,
     gasTurbine: GasTurbine.PerformanceData,
     heatExchanger: HeatExchanger.PerformanceData
     ) -> (Double, Double)
   {
-    guard steamTurbine.load.ratio > 0 else {
+    guard load.ratio > 0 else {
       return (0, 0)
     }
-    var steamTurbine = steamTurbine
 
     var maxLoad: Double = 1
 
@@ -195,17 +193,17 @@ public enum SteamTurbine: Component {
     // Dependency of Heat Rate on Ambient Temperature  - DRY COOLING -
     #warning("The implementation here differs from PCT")
     if parameter.efficiencyTemperature[1] >= 1 {
-      let (factor, load, backPressure) = DryCooling.update(
-        steamTurbineLoad: steamTurbine.load.ratio,
+      let (factor, loadMax) = DryCooling.update(
+        steamTurbineLoad: load.ratio,
         temperature: Plant.ambientTemperature
       )
-      steamTurbine.backPressure = backPressure
-      maxLoad = load.ratio
+
+      maxLoad = loadMax.ratio
       dcFactor = factor.ratio
     }
     // Dependency of Heat Rate on Ambient Temperature  - DRY COOLING -
     // now a polynom of fourth degree -
-    var efficiency = parameter.efficiency[steamTurbine.load]
+    var efficiency = parameter.efficiency[load]
 
     var correcture = 0.0
 
