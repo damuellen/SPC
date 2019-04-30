@@ -132,7 +132,7 @@ public struct MeteoData: CustomStringConvertible {
       + String(format: "DNI: %.1f ", dni)
       + String(format: "GHI: %.1f ", ghi)
       + String(format: "DHI: %.1f ", dhi)
-      + String(format: "WS: %.1f", windSpeed)
+      + String(format: "WS: %.1f\n", windSpeed)
   }
 
   var values: [String] {
@@ -146,13 +146,17 @@ public struct MeteoData: CustomStringConvertible {
 }
 
 public class MeteoDataSource {
-  public let data: [MeteoData]
-  public let name: String
+  
   public let location: Position
-  public let year: Int?
   public let timeZone: Int?
-  public var interval = 1.0
+  public let name: String
+  
+  let data: [MeteoData]  
+  let year: Int?
+  let hourFraction: Double
 
+  private let valuesPerDay: Int
+  
   init(name: String, data: [MeteoData],
        location: Position, year: Int?, timeZone: Int?) {
     self.name = name
@@ -160,8 +164,62 @@ public class MeteoDataSource {
     self.location = location
     self.year = year
     self.timeZone = timeZone
-    self.interval = 8760 / Double(data.count)
+    self.hourFraction = 8760 / Double(data.count)
+    self.valuesPerDay = Int(24 / hourFraction)
+    
+    self.classificationOfDays.reserveCapacity(365)
+    
+    for day in 1...365 {
+      classification(ofDay: day)
+    }
   }
+  
+  public subscript(ofDay day: Int) -> Classification {
+    return classificationOfDays[day - 1]
+  }
+  
+  public typealias Classification =
+    (peaks: Int, hours: Double, sum: Double, avg: Double, max: Double, ratio: Double)
+  
+  private var classificationOfDays: [Classification] = []
+  
+  private func classification(ofDay day: Int) {
+    let end = (day * valuesPerDay)
+    let start = end - valuesPerDay
+    
+    let day = data[start ..< end]
+    
+    let classification = analyse(day: day)
+    
+    classificationOfDays.append(classification)
+  }
+  
+  private func analyse(day: ArraySlice<MeteoData>) -> Classification {
+    var isPeak = false
+    var peaks = 0
+    var hours = 0.0
+    var sum = 0.0
+    var max = 0.0
+    for i in day.indices.dropFirst() {
+      let prev = Double(day[i - 1].dni)
+      let curr = Double(day[i].dni)
+      if curr > max { max = curr }
+      if curr > 0 { hours += hourFraction; sum += curr * hourFraction }
+      if isPeak {
+        if prev < curr { isPeak = false }
+      } else {
+        if prev > curr { isPeak = true; peaks += 1 }
+      }
+    }
+    
+    if hours > 0 {
+      let avg =  sum / hours
+      let ratio = avg / max
+      return (peaks, hours, sum, avg, max, ratio)
+    }
+    return (0, 0, 0, 0, 0, 0)
+  }
+  
 }
 
 public struct Position {

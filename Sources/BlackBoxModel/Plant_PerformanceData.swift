@@ -13,27 +13,27 @@ extension Plant {
   public struct PerformanceData: CustomStringConvertible {
 
     public var collector = Collector.initialState,
-    boiler = Boiler.initialState,
-    powerBlock = PowerBlock.initialState,
     solarField = SolarField.initialState,
+    heatExchanger = HeatExchanger.initialState,
+    powerBlock = PowerBlock.initialState,
     steamTurbine = SteamTurbine.initialState,
     heater = Heater.initialState,
-    heatExchanger = HeatExchanger.initialState,
+    boiler = Boiler.initialState,
     gasTurbine = GasTurbine.initialState,
     storage = Storage.initialState
     
     public init() {}
     
     public var description: String {
-      return "Collector:\n\(collector)\n\n"
-        + "Boiler:\n\(boiler)\n\n"
-        + "Power Block:\n\(powerBlock)\n\n"
-        + "Solar Field:\n\(solarField)\n\n"
-        + "Steam Turbine:\n\(steamTurbine)\n\n"
-        + "Heater:\n\(heater)\n\n"
+      return "\nCollector:\n\(collector)\n\n"
+        + (Design.hasSolarField ? "Solar Field:\n\(solarField)\n\n" : "")
         + "Heat Exchanger:\n\(heatExchanger)\n\n"
-        + "Gas Turbine:\n\(gasTurbine)\n\n"
-        + "Storage:\n\(storage)\n"
+        + (Design.hasPowerBlock ? "Power Block:\n\(powerBlock)\n\n" : "")
+        + "Steam Turbine:\n\(steamTurbine)\n\n"
+        + (Design.hasHeater ? "Heater:\n\(heater)\n\n" : "")
+        + (Design.hasBoiler ? "Boiler:\n\(boiler)\n\n" : "")
+        + (Design.hasGasTurbine ? "Gas Turbine:\n\(gasTurbine)\n\n" : "")
+        + (Design.hasStorage ? "Storage:\n\(storage)\n" : "")
     }
     
     var csv: String {

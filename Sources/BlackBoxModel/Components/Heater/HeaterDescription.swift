@@ -11,9 +11,8 @@
 extension Heater.PerformanceData: CustomStringConvertible {  
   public var description: String {
     return "\(operationMode), "
-      + "Maintenance: \(isMaintained ? "Yes" : "No"), "
-      + String(format: "Load: %.1f, ", load.percentage)
-      + String(format: "Mfl: %.1fkg/s, ", massFlow.rate)
+      + String(format: "Load: %.1f\n", load.percentage)
+      + String(format: "\tMfl: %.1fkg/s, ", massFlow.rate)
       + String(format: "Tin: %.1f°C, ", temperature.inlet.celsius)
       + String(format: "Tout: %.1f°C", temperature.outlet.celsius)
   }

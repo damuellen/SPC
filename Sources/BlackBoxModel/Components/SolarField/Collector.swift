@@ -31,7 +31,7 @@ public enum Collector: Component {
       return String(format: "PE: %.1f°, ", parabolicElevation)
         + String(format: "θ: %.2f°, ", theta)
         + String(format: "cos(θ): %.2f, ", cosTheta)
-        + String(format: "η: %.1f", efficiency * 100) + "%"
+        + String(format: "η: %.2f", efficiency * 100) + "%"
     }
   }
 

@@ -27,12 +27,14 @@ extension Time: TextConfigInitializable {
     let getDate: (String) -> Date? = { dateString in
       let components: [Int] = dateString.split(
         separator: ".", maxSplits: 2, omittingEmptySubsequences: true
-      )
-      .map(String.init).compactMap(Int.init)
+      ).map(String.init).compactMap(Int.init)
+      
       guard components.count == 2 else { return nil }
+      
       let dateComponents = DateComponents(
         year: 2010, month: components[0], day: components[1]
       )
+      
       guard let date = calendar.date(from: dateComponents)
       else { return nil }
       return date

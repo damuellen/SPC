@@ -41,7 +41,8 @@ enum HCE {
   @discardableResult
   static func calculation(_ solarField: inout SolarField.PerformanceData,
                           collector: Collector.PerformanceData,
-                          loop: SolarField.Loop, mode: Collector.OperationMode,
+                          loop: SolarField.Loop,
+                          mode: Collector.OperationMode,
                           meteo: MeteoData) -> (Double, Double)
   {
     switch mode {
@@ -102,9 +103,12 @@ enum HCE {
     let insolation = irradianceCosTheta * collector.efficiency
 
     let (t1, t2) = (temperature1.kelvin, temperature2.kelvin)
+     let averageTemperature = (t1 + t2) / 2
+    
     let col = Collector.parameter
+    
     let ambientTemperature = Double(meteo.temperature)
-    let averageTemperature = (t1 + t2) / 2
+    
     let availability = Availability.current.value
     let breakHCE = availability.breakHCE.ratio
     let airHCE = availability.airHCE.ratio
@@ -232,13 +236,19 @@ enum HCE {
                             _ meteo: MeteoData) -> (Double, Double)
   {
     let sof = SolarField.parameter
+    
     let area = Design.layout.solarField
       * Double(sof.numberOfSCAsInRow)
       * 2 * Collector.parameter.areaSCAnet
+    
     let htf = sof.HTF
+    
     let col = Collector.parameter
+    
     var time = 0.0
+    
     var dumping = 0.0
+    
     var hce = solarField.loops[loop.rawValue]
     defer { solarField.loops[loop.rawValue] = hce }
 
@@ -254,6 +264,7 @@ enum HCE {
                         collector: collector, meteo: meteo)
     
     solarField.heatLossHCE *= Simulation.adjustmentFactor.heatLossHCE
+    
     solarField.heatLosses = solarField.heatLossHCE
       + SolarField.pipeHeatLoss(pipe: averageTemperature,
                                 ambient: ambientTemperature)
@@ -262,7 +273,9 @@ enum HCE {
     var deltaHeat = solarField.insolationAbsorber
     deltaHeat *= Availability.current.value.solarField.ratio
     deltaHeat -= solarField.heatLosses
+    
     let irradianceCosTheta = collector.cosTheta * Double(meteo.dni)
+    
     if irradianceCosTheta > 0 {
       solarField.loopEta = collector.efficiency - solarField.heatLossHCE
         / irradianceCosTheta
@@ -307,7 +320,6 @@ enum HCE {
         * .pi * col.rabsOut ** 2 / col.aperture
 
       time = (areaDensity * area / hce.massFlow.rate)
-
      // time = period
 
     case let massFlow where massFlow < sof.massFlow.min:
@@ -348,6 +360,7 @@ enum HCE {
 
       let areaDensity = htf.density(averageTemperature)
         * .pi * col.rabsOut ** 2 / col.aperture
+      
       time = (areaDensity * area / hce.massFlow.rate)
     }
     /// Residence time [sec]
@@ -361,29 +374,40 @@ enum HCE {
                             _ meteo: MeteoData) -> (Double, Double)
   {
     let sof = SolarField.parameter
+    
     let area = Design.layout.solarField
       * Double(sof.numberOfSCAsInRow)
       * 2 * Collector.parameter.areaSCAnet
+    
     let htf = sof.HTF
+    
     let col = Collector.parameter
+    
     var time = 0.0
+    
     var dumping = 0.0
     
     let availability = Availability.current.value.solarField.ratio
+    
     let minTemp = htf.freezeTemperature
       + Simulation.parameter.dfreezeTemperaturePump
+    
+    let ambient = Plant.ambientTemperature
+    
     var interval = 1
+    
     var zoom = 1
 
     var hce = solarField.loops[loop.rawValue]
     defer { solarField.loops[loop.rawValue] = hce }
+    
     var newTemp = hce.temperature.inlet
     var oldTemp = newTemp
     
-    outerIteration: for _ in 1...5 {
+    outerIteration: for o in 1...5 {
       swap(&oldTemp, &newTemp)
       var inFocusLoop = 0.0
-     // print("O", outerIteration, newTemp, oldTemp)
+     // print("O", o, newTemp, oldTemp)
       innerIteration: for innerIteration in 1...10 {
       //  print("I", innerIteration)
         let averageTemperature = Temperature.average(
@@ -420,14 +444,13 @@ enum HCE {
           deltaHeat -= solarField.heatLosses
           deltaHeat *= area
             * (1 - inFocusLoop)
+          
           dumping = deltaHeat > 0 ? deltaHeat : 0.0
         }
 
         let heatInput = solarField.insolationAbsorber
           * inFocusLoop * availability
         // Net deltaHeat (+)=in or (-)=out HCE
-        
-        let ambient = Plant.ambientTemperature
         
         if heatInput > 0 {
           
@@ -479,6 +502,7 @@ enum HCE {
                               collector: collector, meteo: meteo)
           
           solarField.heatLossHCE *= Simulation.adjustmentFactor.heatLossHCE
+          
           solarField.heatLosses = solarField.heatLossHCE
           solarField.heatLosses += SolarField.pipeHeatLoss(
             pipe: averageTemperature, ambient: ambient
@@ -489,6 +513,7 @@ enum HCE {
         let deltaHeat = heatInput - solarField.heatLosses
         
         let irradianceCosTheta = collector.cosTheta * Double(meteo.dni)
+        
         if irradianceCosTheta > 0 {
           solarField.loopEta = collector.efficiency
 
@@ -497,6 +522,7 @@ enum HCE {
                               collector: collector, meteo: meteo)
             : radiationLosses(newTemp + 10.0, hce.temperature.inlet + 10.0,
                               collector: collector, meteo: meteo)
+          
           solarField.loopEta *= Simulation.adjustmentFactor.heatLossHCE
             / irradianceCosTheta
 
@@ -511,7 +537,9 @@ enum HCE {
         let deltaHeatPerSqm = deltaHeat * Double(time) / 1_000
         /// Change kJ/sqm to kJ/kg:
         let deltaHeatPerKg = deltaHeatPerSqm / areaDensity
+        
         swap(&oldTemp, &newTemp)
+        
         switch deltaHeatPerKg {
         // Calc. new Temp.
         case let Q where Q > 0:
@@ -521,14 +549,11 @@ enum HCE {
         case 0:
           newTemp = oldTemp
         default:
-          let heatPerKg = htf.deltaHeat(
-            hce.temperature.inlet, Plant.ambientTemperature
-          )
+          let heatPerKg = htf.deltaHeat(hce.temperature.inlet, ambient)
           
-          newTemp = htf.temperature(
-            heatPerKg + deltaHeatPerKg, Plant.ambientTemperature
-          )
+          newTemp = htf.temperature(heatPerKg + deltaHeatPerKg, ambient)
         }
+        
         let maxTemp = htf.maxTemperature
         // Flow is to low, dumping required
         dumping = newTemp > maxTemp
@@ -559,8 +584,9 @@ enum HCE {
         interval /= 2
         zoom += interval // Elongate interval
       }
+      #warning("The implementation here differs from PCT")
+      if newTemp == oldTemp { break }
     }
-
     hce.temperature.outlet = newTemp
 
     return (time, dumping)

@@ -22,8 +22,8 @@ extension WasteHeatRecovery {
     let efficiencyNominal: Double
     let efficiencyPure: Double
     var ratioHTF: Double
-    let efficiencySolar: Coefficients
-    let efficiencyGasTurbine: Coefficients
+    let efficiencySolar: Polynomial
+    let efficiencyGasTurbine: Polynomial
   }
 }
 

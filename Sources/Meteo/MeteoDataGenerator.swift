@@ -37,8 +37,9 @@ public class MeteoDataGenerator: Sequence {
     self.range = source.data.startIndex ..< source.data.endIndex
     self.sunHoursPerDay = sunHoursPerDay
     let daybreak = sunHoursPerDay.first!.start
-    let start = calendar.date(bySettingHour: 0, minute: 0, second: 0,
-                              of: daybreak, options: [])!
+    let start = calendar.date(
+      bySettingHour: 0, minute: 0, second: 0, of: daybreak, options: []
+      )!
     dateInterval = DateInterval(start: start, duration: 0)
   }
 
@@ -59,28 +60,7 @@ public class MeteoDataGenerator: Sequence {
     let endMinute = calendar.ordinality(of: .minute, in: .hour, for: endDate)
     lastStep = endMinute / (60 / frequence.rawValue)
   }
-
-  private var perDaySumsDNI: [Double] = []
-
-  public func sumDNI(ofDay day: Int) -> Double {
-    let idx = day - 1
-    if self.perDaySumsDNI.endIndex > idx {
-      return self.perDaySumsDNI[idx]
-    }
-
-    let start = (day * 24) - 24
-    let end = (day * 24)
-
-    var sum: Float = 0.0
-    for value in self.dataSource.data[start ..< end] {
-      sum += value.dni // * Float(dataSource.interval)
-    }
-    if self.perDaySumsDNI.endIndex == idx {
-      self.perDaySumsDNI.append(Double(sum))
-    }
-    return Double(sum)
-  }
-
+  
   private var range: Range<Int>
 
   private var step = 0
@@ -92,8 +72,8 @@ public class MeteoDataGenerator: Sequence {
     let lastStep = self.lastStep
     let sunHoursPerDay = self.sunHoursPerDay
     
-    let steps = dataSource.interval < 1
-      ? Int(dataSource.interval / frequence.fraction)
+    let steps = dataSource.hourFraction < 1
+      ? Int(dataSource.hourFraction / frequence.fraction)
       : frequence.rawValue
 
     let stride = (1 / Float(steps))

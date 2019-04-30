@@ -38,10 +38,10 @@ extension SolarField {
     let HLDumpQuad = false
     var imbalanceDesign: [Double] = [1.0, 1.0, 1.0]
     var imbalanceMin: [Double] = [0.0, 1.025, 1.05]
-    var windCoefficients: Coefficients = [0.0]
+    var windCoefficients: Polynomial = [0.0]
     var useReferenceAmbientTemperature = false
     var referenceAmbientTemperature: Double = 0.0
-    var heatlosses: Coefficients = [0.0]
+    var heatlosses: Polynomial = [0.0]
     var designTemperature: (inlet: Double, outlet: Double) = (0.0, 0.0)
     /// Maximum windspeed for operation [m/sec]
     let maxWind: Float
@@ -49,7 +49,7 @@ extension SolarField {
     public var rowDistance, distanceSCA, pipeHeatLosses: Double
     public var azimut, elevation: Double
     let antiFreezeParastics: Double
-    let pumpParastics: Coefficients
+    let pumpParastics: Polynomial
     public var massFlow: (max: MassFlow, min: MassFlow)
     var pumpParasticsFullLoad: Double
     var antiFreezeFlow: MassFlow
@@ -233,7 +233,7 @@ extension SolarField.Parameter: Codable {
       Double.self, forKey: .antiFreezeParastics
     )
     pumpParastics = try values.decode(
-      Coefficients.self, forKey: .pumpParastics
+      Polynomial.self, forKey: .pumpParastics
     )
     massFlow = (
       try values.decode(MassFlow.self, forKey: .maxMassFlow),
@@ -253,7 +253,7 @@ extension SolarField.Parameter: Codable {
       try values.decode(Double.self, forKey: .imbalanceMinFar),
     ]
     windCoefficients = try values.decode(
-      Coefficients.self, forKey: .windCoefficients
+      Polynomial.self, forKey: .windCoefficients
     )
     useReferenceAmbientTemperature = try values.decode(
       Bool.self, forKey: .useReferenceAmbientTemperature
@@ -265,7 +265,7 @@ extension SolarField.Parameter: Codable {
       try values.decode(Double.self, forKey: .inletDesignTemperature),
       try values.decode(Double.self, forKey: .outletDesignTemperature)
     )
-    heatlosses = try values.decode(Coefficients.self, forKey: .heatlosses)
+    heatlosses = try values.decode(Polynomial.self, forKey: .heatlosses)
   }
 
   public func encode(to encoder: Encoder) throws {

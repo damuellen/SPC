@@ -153,8 +153,7 @@ extension Storage {
   {
     let heatExchanger = HeatExchanger.parameter,
     htf = SolarField.parameter.HTF
-    
-    storage.temperature.inlet = solarField.temperature.outlet
+    storage.inletTemperature(outlet: solarField)
     
     storage.massFlow = solarField.massFlow - powerBlock.massFlow
     storage.massFlow.adjust(withFactor: parameter.heatExchangerEfficiency)
@@ -272,7 +271,7 @@ extension Storage {
     }
     
     // used for parasitics
-    storage.temperature.inlet = powerBlock.temperature.outlet
+    storage.inletTemperature(outlet: powerBlock)
     
     storage.temperature.outlet = outletTemperature(storage)
     
@@ -318,7 +317,7 @@ extension Storage {
         / (SteamTurbine.parameter.power.max / steamTurbine.efficiency)
       steamTurbine.load.ratio = steamTurbine.load.ratio.limited(by: maxLoad)
       
-      let mixTemp = htf.mixingTemperature(outlet: solarField, with: storage)
+      let mixTemp = htf.mixingTemperature(solarField, storage)
       
       let minTemp = Temperature(celsius: 310.0)
       
@@ -355,7 +354,7 @@ extension Storage {
     
     storage.massFlow = powerBlock.subtractingMassFlow(solarField)
     
-    storage.temperature.inlet = powerBlock.temperature.outlet
+    storage.inletTemperature(outlet: powerBlock)
     
     storage.temperature.outlet = outletTemperature(storage)
     
@@ -391,7 +390,7 @@ extension Storage {
     
     status.solarField.header.massFlow = solarField.antiFreezeFlow
     // used for parasitics
-    status.storage.temperature.inlet = status.powerBlock.temperature.outlet
+    status.storage.inletTemperature(outlet: status.powerBlock)
     
     var fittedTemperature = 0.0
     if storage.temperatureCharge[1] > 0 {

@@ -39,7 +39,7 @@ extension HeatCycle {
   func subtractingMassFlow(_ other: HeatCycle) -> MassFlow {
     return self.massFlow - other.massFlow
   }
-  
+
   mutating func setMassFlow(rate: Double) {
     self.massFlow = MassFlow(rate)
   }
@@ -47,7 +47,7 @@ extension HeatCycle {
   mutating func setTemperaturOutletEqualToInlet() {
     temperature.outlet = temperature.inlet
   }
-  
+
   mutating func setTemperature(inlet: Temperature) {
     temperature.inlet = inlet
   }
@@ -64,6 +64,18 @@ extension HeatCycle {
     temperature.outlet = Temperature(kelvin)
   }
 
+  mutating func inletTemperature(inlet other: HeatCycle) {
+    temperature.inlet = other.temperature.inlet
+  }
+
+  mutating func inletTemperature(outlet other: HeatCycle) {
+    temperature.inlet = other.temperature.outlet
+  }
+
+  mutating func outletTemperature(outlet other: HeatCycle) {
+    temperature.outlet = other.temperature.outlet
+  }
+  
   static func columns(name: String) -> [(String, String)] {
     return [
       ("\(name)|Massflow", "kg/s"), ("\(name)|Tin", "°C"), ("\(name)|Tout", "°C"),

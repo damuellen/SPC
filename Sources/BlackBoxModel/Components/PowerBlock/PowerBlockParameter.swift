@@ -13,14 +13,14 @@ import Config
 extension PowerBlock {
   public struct Parameter: ComponentParameter, Codable, Equatable {
     let name: String
-    let fixelectricalParasitics: Double
+    let fixElectricalParasitics: Double
     let nominalElectricalParasitics: Double
     let fixElectricalParasitics0: Double
-    let startUpelectricalParasitics: Double
+    let startUpElectricalParasitics: Double
     let nominalElectricalParasiticsACC: Double
     let electricalParasiticsShared, electricalParasiticsStep,
       electricalParasitics, electricalParasiticsACC,
-      electricalParasiticsACCTamb: Coefficients
+      electricalParasiticsACCTamb: Polynomial
   }
 }
 
@@ -30,9 +30,9 @@ extension PowerBlock.Parameter: CustomStringConvertible {
     d += "Fixed Parasitics for Load = 0 [MW]:"
       >< "\(fixElectricalParasitics0)"
     d += "Parasitics during PB Start-Up [MW]:"
-      >< "\(startUpelectricalParasitics)"
+      >< "\(startUpElectricalParasitics)"
     d += "Fixed Parasitics (Load > 0) [MW]:"
-      >< "\(fixelectricalParasitics)"
+      >< "\(fixElectricalParasitics)"
     d += "Nominal Parasitics (Load = 1)[MW]:"
       >< "\(nominalElectricalParasiticsACC)"
     d += "Parasitic ; Parasitics(Load) = Parasitics(100%)*(c0+c1*load)"
@@ -65,12 +65,12 @@ extension PowerBlock.Parameter: TextConfigInitializable {
   public init(file: TextConfigFile) throws {
     let row: (Int) throws -> Double = { try file.parseDouble(row: $0) }
     name = file.name
-    fixelectricalParasitics = try row(10)
+    fixElectricalParasitics = try row(10)
     nominalElectricalParasitics = try row(13)
     electricalParasitics = try [row(16), row(19)]
     electricalParasiticsStep = try [row(22), row(25)]
     fixElectricalParasitics0 = try row(28)
-    startUpelectricalParasitics = try row(31)
+    startUpElectricalParasitics = try row(31)
     nominalElectricalParasiticsACC = try row(39)
     electricalParasiticsShared = try [row(34), row(37)]
     electricalParasiticsACC = try [row(41), row(43), row(45), row(47)]

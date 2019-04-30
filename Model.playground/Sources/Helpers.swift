@@ -2,22 +2,22 @@ import PlaygroundSupport
 import AppKit
 
 /*
-public func goalSeek(
-  _ keyPath: KeyPath<PerformanceLog.Results, Double>,
-  greaterThen: Double,
-  block: ()->()
-  ) -> PerformanceLog {
-  var result = BlackBoxModel.runModel()
-  var count = 1
-  while result.annual[keyPath: keyPath] < greaterThen {
-    block()
-    count += 1
-    result = BlackBoxModel.runModel(count)
-    print(result.annual[keyPath: keyPath])
-  }
-  return result
-}
-*/
+ public func goalSeek(
+ _ keyPath: KeyPath<PerformanceLog.Results, Double>,
+ greaterThen: Double,
+ block: ()->()
+ ) -> PerformanceLog {
+ var result = BlackBoxModel.runModel()
+ var count = 1
+ while result.annual[keyPath: keyPath] < greaterThen {
+ block()
+ count += 1
+ result = BlackBoxModel.runModel(count)
+ print(result.annual[keyPath: keyPath])
+ }
+ return result
+ }
+ */
 public class View : NSView {
   
   var values: [CGFloat]
@@ -82,7 +82,7 @@ public class View : NSView {
     
     let path = NSBezierPath()
     var x = 0 as CGFloat
-
+    
     path.move(to: NSPoint(x: x + 0.5, y: 25 + 0.5))
     for value in values {
       path.line(to: NSPoint(x: x + 0.5, y: 25 + 0.5 + (scale * value)))
@@ -102,7 +102,11 @@ public class View : NSView {
 extension Array: CustomPlaygroundDisplayConvertible {
   public var playgroundDescription: Any {
     if self.isEmpty { return "[]" }
-    return View(frame: NSRect(x: 0, y: 0, width: 1300, height: 500),
-                values: self.map { return CGFloat($0 as! Double) } )
+    if self.first is Double {
+      return View(frame: NSRect(x: 0, y: 0, width: 1300, height: 500),
+                  values: self.map { return CGFloat($0 as! Double) } )
+    } else {
+      return ""
+    }
   }
 }

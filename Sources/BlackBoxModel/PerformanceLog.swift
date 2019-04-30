@@ -62,7 +62,7 @@ public struct PerformanceLog: CustomStringConvertible, Comparable {
   }
   
   public subscript(
-    keyPath: KeyPath<Energy, Double>, day day: Int) -> [Double]
+    keyPath: KeyPath<Energy, Double>, ofDay day: Int) -> [Double]
   {
     if energyHistory.isEmpty { return [] }
     let count = interval.rawValue * 24
@@ -72,7 +72,7 @@ public struct PerformanceLog: CustomStringConvertible, Comparable {
   }
   
   public subscript(
-    keyPath: KeyPath<Plant.PerformanceData, Double>, day day: Int) -> [Double]
+    keyPath: KeyPath<Plant.PerformanceData, Double>, ofDay day: Int) -> [Double]
   {
     if performanceHistory.isEmpty { return [] }
     let count = interval.rawValue * 24

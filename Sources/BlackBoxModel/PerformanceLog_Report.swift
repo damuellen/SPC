@@ -109,7 +109,7 @@ extension PerformanceLog {
     d += "\n\n"
     d += "    Files and Parameter\n"
     d += "\n"
-    d += "METEODATA  \(BlackBoxModel.meteoDataSource.name)\n"
+    d += "METEODATA  \(BlackBoxModel.meteoData.name)\n"
     d += "Meteodata of a leap year" >< "\(Simulation.time.isLeapYear ? "YES" : "NO")"
     d += "Location: \(Plant.location.longitude) \(Plant.location.latitude)"/*
      d += "Position of Wet Bulb Temp. in mto-file [row]:" >< "\(Simulation.parameter.WBTpos)"

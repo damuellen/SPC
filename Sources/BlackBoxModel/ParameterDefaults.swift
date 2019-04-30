@@ -166,10 +166,10 @@ public enum ParameterDefaults {
 
   static let pb = PowerBlock.Parameter(
     name: "",
-    fixelectricalParasitics: 0.3218,
+    fixElectricalParasitics: 0.3218,
     nominalElectricalParasitics: 0.5378732,
     fixElectricalParasitics0: 0.2497,
-    startUpelectricalParasitics: 0.4945,
+    startUpElectricalParasitics: 0.4945,
     nominalElectricalParasiticsACC: 0.5378732,
     electricalParasiticsShared: [0.2137136, 0.2137136],
     electricalParasiticsStep: [0, 0],

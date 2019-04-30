@@ -11,6 +11,15 @@
 import Foundation
 import Willow
 
+extension Optional {
+  var isNone: Bool {
+    switch self {
+    case .some: return false
+    case .none: return true
+    }
+  }
+}
+
 extension DefaultStringInterpolation {
 
   mutating func appendInterpolation<T>(csv values: T...) where T : Numeric {
@@ -20,6 +29,22 @@ extension DefaultStringInterpolation {
       )
       self.appendInterpolation(", ")
     }
+  }
+  
+  mutating func appendInterpolation<T>(format values: T...) where T : Numeric {
+    values.forEach { value in
+      self.appendInterpolation(
+        numberFormatter.string(from: value as! NSNumber)!
+      )
+    }
+  }
+}
+
+extension NumberFormatter {
+  static func string(precision: Int, _ array: [Double]) -> [String] {
+    numberFormatter.maximumFractionDigits = precision
+    defer { numberFormatter.maximumFractionDigits = 3 }
+    return array.map { numberFormatter.string(from: $0 as NSNumber)! }
   }
 }
 
@@ -33,7 +58,7 @@ private let numberFormatter: NumberFormatter = {
 }()
 
 let backgroundQueue = DispatchQueue(label: "serial.queue")
-let backgroundQueue2 = DispatchQueue(label: "serial.queue2")
+
 let 💬 = Logger(logLevels: [.info, .error], writers: [ConsoleWriter()],
                 executionMethod: .asynchronous(queue: backgroundQueue))
 
@@ -70,7 +95,8 @@ extension Progress {
     if month > completedUnitCount {
       completedUnitCount = month
       let count = month < 10 ? "[ \(month)/12]" : "[\(month)/12]"
-      print("\(count) Calculations for \(monthSymbol) in progress.      ",
+      print(
+        "\(count) Calculations for \(monthSymbol) in progress.       ",
         terminator: "\r"
       )
       fflush(stdout)
@@ -112,4 +138,3 @@ func swap<T>(_ lhs: inout T, _ rhs: inout T) {
 public func unreachable() -> Never {
   return unsafeBitCast((), to: Never.self)
 }
-

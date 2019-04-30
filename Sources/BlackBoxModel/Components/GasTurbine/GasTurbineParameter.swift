@@ -15,7 +15,7 @@ extension GasTurbine {
     let name: String
     let powerGross, efficiencyISO, loadMin, altitude: Double
     let efficiencyFromLoad, loadMaxFromTemperature,
-      parasiticsFromLoad: Coefficients
+      parasiticsFromLoad: Polynomial
     let designTemperature: Double
   }
 }

@@ -14,10 +14,9 @@ import Foundation
 import Meteo
 import SolarPosition
 
-let hourFraction = BlackBoxModel.interval.fraction
+let HourFraction = BlackBoxModel.interval.fraction
 let Fuelmode = OperationRestriction.FuelStrategy.predefined
-
-var dniDay = 0.0
+let currentDirectoryPath = FileManager.default.currentDirectoryPath
 
 public enum BlackBoxModel {
   
@@ -27,34 +26,44 @@ public enum BlackBoxModel {
 
   static let year = 2005 // meteoDataSource.year ?? 2005
   
-  static let timeZone = -(meteoDataSource.timeZone ?? 0)
-
-  public static var meteoFilePath = FileManager.default.currentDirectoryPath
-
-  static var meteoDataSource: MeteoDataSource = {
-    do {
-      let url = URL(fileURLWithPath: meteoFilePath)
-      if url.hasDirectoryPath == false {
-        return try MeteoDataFileHandler(forReadingAtPath: meteoFilePath)
-          .makeDataSource()
-      } else if let path = try FileManager.default
-        .subpathsOfDirectory(atPath: meteoFilePath)
-        .first { $0.hasSuffix("mto") } {
-        💬.infoMessage("Meteo file found in current working directory.\n")
-        return try MeteoDataFileHandler(forReadingAtPath: path)
-          .makeDataSource()
-      } else {
-        💬.errorMessage("Meteo file not found in current working directory.\n")
+  public static var meteoFilePath: String = currentDirectoryPath {
+    didSet { _meteoData = nil }
+  }
+  
+  private static var _meteoData: MeteoDataSource?
+  
+  static var meteoData: MeteoDataSource {
+    if _meteoData == nil {
+      do { _meteoData = try makeMeteoDataSource() } catch {
+        print(error)
         fatalError("Meteo file is mandatory for calculation.")
       }
-    } catch {
-      print(error)
-      fatalError("Meteo file is mandatory for calculation.")
     }
-  }()
+    return _meteoData!
+  }
+  
+  private static func makeMeteoDataSource() throws -> MeteoDataSource {
+    let url = URL(fileURLWithPath: meteoFilePath)
+    if url.hasDirectoryPath == false {
+      let filePath = url.path
+      return try MeteoDataFileHandler(forReadingAtPath: filePath)
+        .makeDataSource()
+    }
+    else if let fileName = try FileManager.default
+      .contentsOfDirectory(atPath: meteoFilePath).first { item in
+        item.hasSuffix("mto") || item.hasPrefix("TMY")
+      }
+    {
+      let filePath = url.appendingPathComponent(fileName).path
+      return try MeteoDataFileHandler(forReadingAtPath: filePath)
+        .makeDataSource()
+    } else {
+      throw MeteoDataFileError.fileNotFound(meteoFilePath)
+    }
+  }
 
   public static func loadConfigurations(
-    atPath path: String, format: Config.Formats)
+    atPath path: String, format: Config.Formats = .json)
   {
     do {
       switch format {
@@ -79,35 +88,30 @@ public enum BlackBoxModel {
   @discardableResult
   public static func runModel(
     with recorder: PerformanceDataRecorder,
-    progress: Progress? = nil
-    ) -> PerformanceLog
+    progress: Progress? = nil)
+    -> PerformanceLog
   {
-    if progress != nil {
-      progress!.becomeCurrent(withPendingUnitCount: 12)
-    }
+    progress?.becomeCurrent(withPendingUnitCount: 12)
     
-    defer {
-      progress?.resignCurrent()
-      if progress != nil {
-        print("The calculations have been completed.              ")
-      }
-    }
-    Maintenance.setDefaultSchedule(for: year)
+    defer { progress?.resignCurrent() }
     
-    Plant.setLocation(meteoDataSource.location)
-
+    Plant.setLocation(meteoData.location)
+    
+    Plant.setupComponentParameters()
+    
     if case .none = sun {
-      sun = SolarPosition(location: Plant.location.coordinates,
-                          year: year, timezone: timeZone, frequence: interval)
+      sun = SolarPosition(
+        location: Plant.location.coordinates, year: year,
+        timezone: -(meteoData.timeZone ?? 0), frequence: interval)
     }
     guard let 🌞 = sun else { preconditionFailure("We need the sun.") }
 
-    Plant.setupComponentParameters()
+    Maintenance.setDefaultSchedule(for: year)
     
     var status = Plant.initialState
     
-    let (🌦, 📅) = makeGenerators()
-    
+    let (🌦, 📅) = makeGenerators(dataSource: meteoData)
+
     for (meteo, date) in zip(🌦, 📅) {
       
       TimeStep.setCurrent(date: date)
@@ -116,10 +120,8 @@ public enum BlackBoxModel {
       
       progress?.tracking(month: TimeStep.current.month)
       
-      dniDay = 🌦.sumDNI(ofDay: TimeStep.current.day)
-      
       Plant.setAmbientTemperature(meteo.temperature)
-      
+
       if let position = 🌞[date] {
         status.collector = Collector.tracking(sun: position)
         Collector.efficiency(&status.collector, meteo: meteo)
@@ -129,7 +131,7 @@ public enum BlackBoxModel {
       }
       
       Plant.updateSolarField(&status, meteo: meteo)
-      
+
       Plant.updatePowerBlock(&status)
       
       let energy = Plant.energyFeed()
@@ -144,9 +146,11 @@ public enum BlackBoxModel {
     return recorder.log
   }
 
-  private static func makeGenerators() -> (MeteoDataGenerator, DateGenerator) {
+  private static func makeGenerators(dataSource: MeteoDataSource)
+    -> (MeteoDataGenerator, DateGenerator)
+  {
     let meteoDataGenerator = MeteoDataGenerator(
-      meteoDataSource, frequence: interval
+      dataSource, frequence: interval
     )
     
     let dateGenerator: DateGenerator

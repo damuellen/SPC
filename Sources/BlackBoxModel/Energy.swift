@@ -8,7 +8,9 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
-public struct Energy {
+import Foundation
+
+public struct Energy: CustomStringConvertible {
   
   internal(set) public var thermal: ThermalEnergy
   
@@ -17,6 +19,13 @@ public struct Energy {
   internal(set) public var fuel: FuelConsumption
   
   internal(set) public var parasitics: Parasitics
+  
+  public var description: String {
+    return "\n" + (thermal.description + parasitics.description
+      + electric.description + fuel.description).split(
+        separator: "\n", maxSplits: .max, omittingEmptySubsequences: true
+        ).joined(separator: "\n") + "\n"
+  }
   
   mutating func reset() {
     self.thermal = ThermalEnergy()
@@ -49,14 +58,10 @@ public struct ElectricPower: Encodable, PerformanceData {
   parasitics = 0.0, net = 0.0, consum = 0.0
   
   var values: [String] {
-    return [
-      String(format: "%.1f", steamTurbineGross),
-      String(format: "%.1f", gasTurbineGross),
-      String(format: "%.1f", backupGross),
-      String(format: "%.1f", parasitics),
-      String(format: "%.1f", net),
-      String(format: "%.1f", consum),
-    ]
+    return NumberFormatter.string(precision: 1, [
+      steamTurbineGross, gasTurbineGross, backupGross,
+      parasitics, net, consum,
+    ])
   }
   
   var csv: String {
@@ -96,14 +101,10 @@ public struct Parasitics: Encodable, PerformanceData {
   powerBlock = 0.0, shared = 0.0, solarField = 0.0, storage = 0.0
   
   var values: [String] {
-    return [
-      String(format: "%.2f", solarField),
-      String(format: "%.2f", powerBlock),
-      String(format: "%.2f", storage),
-      String(format: "%.2f", shared),
-      String(format: "%.2f", 0),
-      String(format: "%.2f", gasTurbine),
-    ]
+    return NumberFormatter.string(precision: 3, [
+      solarField, powerBlock, storage,
+      shared, 0, gasTurbine,
+    ])
   }
   
   var csv: String {
@@ -145,18 +146,13 @@ public struct ThermalEnergy: Encodable, PerformanceData {
   dumping: Power = 0.0, overtemp_dump: Power = 0.0, startUp: Power = 0.0
   
   var values: [String] {
-    return [
-      String(format: "%.1f", solar.megaWatt),
-      String(format: "%.1f", dumping.megaWatt),
-      String(format: "%.1f", toStorage.megaWatt),
-      String(format: "%.1f", storage.megaWatt),
-      String(format: "%.1f", heater.megaWatt),
-      String(format: "%.1f", heatExchanger.megaWatt),
-      String(format: "%.1f", startUp.megaWatt),
-      String(format: "%.1f", wasteHeatRecovery.megaWatt),
-      String(format: "%.1f", boiler.megaWatt),
-      String(format: "%.1f", production.megaWatt),
-    ]
+    return NumberFormatter.string(precision: 1, [
+      solar.megaWatt, dumping.megaWatt,
+      toStorage.megaWatt, storage.megaWatt,
+      heater.megaWatt, heatExchanger.megaWatt,
+      startUp.megaWatt, wasteHeatRecovery.megaWatt,
+      boiler.megaWatt, production.megaWatt,
+    ])
   }
   
   var csv: String {
@@ -222,13 +218,9 @@ public struct FuelConsumption: Encodable, PerformanceData {
   }
   
   var values: [String] {
-    return [
-      String(format: "%.1f", backup),
-      String(format: "%.1f", boiler),
-      String(format: "%.1f", heater),
-      String(format: "%.1f", gasTurbine),
-      String(format: "%.1f", combined),
-    ]
+    return NumberFormatter.string(precision: 1, [
+      backup, boiler, heater, gasTurbine, combined,
+    ])
   }
   
   var csv: String {

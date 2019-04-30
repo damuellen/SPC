@@ -36,7 +36,7 @@ extension Collector {
     public let aperture, lengthSCA, areaSCAnet, extensionHCE, avgFocus,
       rabsOut, rabsInner, rglas, glassEmission, opticalEfficiency: Double
     public let emissionHCE, shadingHCE: [Double]
-    public let IAMfac: Coefficients
+    public let IAMfac: Polynomial
     public let useIntegralRadialoss: Bool
   }
 }

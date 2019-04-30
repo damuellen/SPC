@@ -38,8 +38,9 @@ let lastRun = runs?.max() ?? 99
 
 // BlackBoxModel.loadConfigurations(atPath: configPath, format: .json)
 // BlackBoxModel.saveConfigurations(toPath: configPath)
-BlackBoxModel.meteoFilePath = meteoFilePath
-BlackBoxModel.interval = .every5minutes
+BlackBoxModel.meteoFilePath = "/Users/Daniel/"
+
+// BlackBoxModel.interval = .every5minutes
 /*
 SolarField.parameter.massFlow.max = 2500.0
 Design.layout.powerBlock = 73

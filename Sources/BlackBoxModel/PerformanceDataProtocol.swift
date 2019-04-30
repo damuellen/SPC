@@ -19,8 +19,8 @@ extension PerformanceData {
   var description: String {
     return zip(values, Self.columns).reduce("\n") { result, pair in
       let (value, desc) = pair
-      if value.hasPrefix("0.0") { return result }
+      if value.hasPrefix("0") { return result }
       return result + (desc.name >< (value + " " + desc.unit))
-    }
+    }    
   }
 }

@@ -11,15 +11,13 @@
 extension SolarField.PerformanceData: CustomStringConvertible {
   public var description: String {
     return "\(operationMode), "
-      + "Maintenance: \(isMaintained ? "Yes" : "No"), "
-      + "Header: \(header),\n"
-      + String(format: "insolationAbsorber: %.1f, ", insolationAbsorber)
+      + String(format: "Focus: %.1f%, ", inFocus.percentage)
+      + String(format: "insolationAbsorber: %.1f,\n", insolationAbsorber)
       + String(format: "ETA: %.1f, ", ETA)
       + String(format: "HL: %.1f, ", heatLosses)
       + String(format: "HL Header: %.1f, ", heatLossHeader)
-      + String(format: "HL HCE: %.1f, ", heatLossHCE)
-      + "Focus: \(inFocus), "
-      + String(format: "Loop Eta: %.1f, \n", loopEta)
-      + "Loops: \n\(loops[0])\n\(loops[1])\n\(loops[2])\n\(loops[3])"
+      + String(format: "HL HCE: %.1f", heatLossHCE)
+      + "\n\t\(header)\n"      
+      + "Loops: \n\t\(loops[0])\n\t\(loops[1])\n\t\(loops[2])\n\t\(loops[3])"
   }
 }

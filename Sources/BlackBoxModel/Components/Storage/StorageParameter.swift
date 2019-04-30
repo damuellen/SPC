@@ -24,9 +24,9 @@ extension Storage {
     let name: String
     let chargeTo, dischargeToTurbine, dischargeToHeater,
       stepSizeIteration, heatStoredrel: Double
-    var temperatureDischarge, temperatureDischarge2: Coefficients
-    var temperatureCharge, temperatureCharge2: Coefficients
-    var heatlossCst, heatlossC0to1: Coefficients
+    var temperatureDischarge, temperatureDischarge2: Polynomial
+    var temperatureCharge, temperatureCharge2: Polynomial
+    var heatlossCst, heatlossC0to1: Polynomial
     var pumpEfficiency, pressureLoss: Double
     var massFlow: MassFlow
     let startTemperature: (cold: Temperature, hot: Temperature) // TurbTL(0) TurbTL(1)
@@ -143,6 +143,23 @@ extension Storage.Parameter: CustomStringConvertible {
 }
 
 /*
+ Storage.Parameter.init(name: <#T##String#>, chargeTo: <#T##Double#>, dischargeToTurbine: <#T##Double#>, dischargeToHeater: <#T##Double#>,
+ stepSizeIteration: <#T##Double#>, heatStoredrel: <#T##Double#>, temperatureDischarge: <#T##Coefficients#>,
+ temperatureDischarge2: <#T##Coefficients#>, temperatureCharge: <#T##Coefficients#>, temperatureCharge2: <#T##Coefficients#>,
+ heatlossCst: <#T##Coefficients#>, heatlossC0to1: <#T##Coefficients#>, pumpEfficiency: <#T##Double#>,
+ pressureLoss: <#T##Double#>, massFlow: <#T##MassFlow#>, startTemperature: <#T##(cold: Temperature, hot: Temperature)#>,
+ startLoad: <#T##(cold: Double, hot: Double)#>, strategy: <#T##Storage.Parameter.Strategy#>, PrefChargeto: <#T##Double#>,
+ startexcep: <#T##Int#>, endexcep: <#T##Int#>, HTF: <#T##StorageMedium#>, FP: <#T##Double#>, FC: <#T##Double#>, heatdiff: <#T##Double#>,
+ dSRise: <#T##Double#>, minDischargeLoad: <#T##Ratio#>, fixedDischargeLoad: <#T##Ratio#>, heatTracingTime: <#T##[Double]#>,
+ heatTracingPower: <#T##[Double]#>, DischrgParFac: <#T##Double#>, definedBy: <#T##Storage.Definition#>,
+ designTemperature: <#T##(cold: Temperature, hot: Temperature)#>, heatLoss: <#T##(hot: Double, cold: Double)#>,
+ startFossilCharging: <#T##(day: Int, month: Int)#>, stopFossilCharging: <#T##(day: Int, month: Int)#>,
+ startFossilCharging2: <#T##(day: Int, month: Int)#>, stopFossilCharging2: <#T##(day: Int, month: Int)#>,
+ heatExchangerEfficiency: <#T##Double#>, heatExchangerCapacity: <#T##Double#>, heatExchangerMinCapacity: <#T##Double#>,
+ HXresMin: <#T##Bool#>, DesAuxIN: <#T##Double#>, DesAuxEX: <#T##Double#>, heatProductionLoad: <#T##Double#>,
+ heatProductionLoadWinter: <#T##Ratio#>, heatProductionLoadSummer: <#T##Ratio#>,
+ dischrgWinter: <#T##Int#>, dischrgSummer: <#T##Int#>, badDNIwinter: <#T##Double#>, badDNIsummer: <#T##Double#>)
+ 
  extension Storage.Parameter: TextConfigInitializable {
  public init(file: TextConfigFile)throws {
  let row: (Int)throws -> Double = { try file.double(row: $0) }

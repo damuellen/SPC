@@ -54,7 +54,7 @@ public enum SteamTurbine: Component {
     var steamTurbine = status.steamTurbine
     
     defer { oldMinute = TimeStep.current.minute }
-    steamTurbine.load = 0.0
+    //steamTurbine.load = 0.0
     
     if heat <= 0 {
       Plant.heat.startUp = 0.0
@@ -65,10 +65,10 @@ public enum SteamTurbine: Component {
           = steamTurbine.operationMode
         {
           steamTurbine.operationMode =
-            .noOperation(time: standStillTime + Int(hourFraction * 60))
+            .noOperation(time: standStillTime + Int(HourFraction * 60))
         } else {
           steamTurbine.operationMode =
-            .noOperation(time: Int(hourFraction * 60))
+            .noOperation(time: Int(HourFraction * 60))
         }
       }
       result((0, steamTurbine))
@@ -124,8 +124,8 @@ public enum SteamTurbine: Component {
             if status.heater.massFlow.rate > 0 { energy = heat }
             
             steamTurbine.operationMode = .startUp(
-              time: startUpTime + Int(hourFraction * 60),
-              energy: startUpEnergy + energy * hourFraction
+              time: startUpTime + Int(HourFraction * 60),
+              energy: startUpEnergy + energy * HourFraction
             )
           }
         }

@@ -66,7 +66,7 @@ public enum Heater: Component {
   static func update(_ status: Plant.PerformanceData,
                      demand: Double,
                      fuelAvailable: Double,
-                     result: (Status<PerformanceData>) -> ())
+                     result: (Status<ComponentState, PerformanceData>) -> ())
   {
     let htf = SolarField.parameter.HTF,
     powerBlock = status.powerBlock,
@@ -84,7 +84,7 @@ public enum Heater: Component {
       // Fossil charge of storage
       if Fuelmode.isPredefined {
         // fuel consumption is predefined
-        fuel = fuelAvailable / hourFraction / 2
+        fuel = fuelAvailable / HourFraction / 2
         // The fuelfl avl. [MW]
         thermalPower = fuel * parameter.efficiency
           * Simulation.adjustmentFactor.efficiencyHeater
@@ -98,7 +98,10 @@ public enum Heater: Component {
             """)
           noOperation(&heater)
           thermalPower = 0
-          result((thermalPower, demand, parasitics, fuel, heater))
+          let energy = ComponentState(
+            supply: thermalPower, demand: demand, parasitics: parasitics, fuel: fuel
+          )
+          result((energy, heater))
           return
         }
         // Normal operation possible -
@@ -154,9 +157,8 @@ public enum Heater: Component {
       if heater.isMaintained {
         heater.operationMode = .maintenance
       }
-      heater.setTemperature(outlet:
-        solarField.header.temperature.outlet
-      )
+      heater.outletTemperature(outlet: solarField)
+
       thermalPower = 0
     } else if heater.isMaintained {
       // operation is requested
@@ -172,7 +174,7 @@ public enum Heater: Component {
       fuel = max(-demand, Design.layout.heater) / parameter.efficiency
         / Simulation.adjustmentFactor.efficiencyHeater
       // The fuelfl avl. [MW]
-      fuel = (fuel * hourFraction).limited(by: fuelAvailable) / hourFraction
+      fuel = (fuel * HourFraction).limited(by: fuelAvailable) / HourFraction
 
       /// net thermal power avail [MW]
       thermalPower = fuel * parameter.efficiency
@@ -203,7 +205,9 @@ public enum Heater: Component {
       }
     }
     parasitics = self.parasitics(estimateFrom: heater.load)
-    
-    result((thermalPower, demand, parasitics, fuel, heater))
+    let energy = ComponentState(
+      supply: thermalPower, demand: demand, parasitics: parasitics, fuel: fuel
+    )
+    result((energy, heater))
   }
 }

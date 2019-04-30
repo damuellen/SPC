@@ -26,6 +26,11 @@ extension Component {
   }
 }
 
-typealias Status<T> = (
-  supply: Double, demand: Double, parasitics: Double, fuel: Double, status: T
-)
+struct ComponentState {
+  var supply: Double
+  var demand: Double
+  var parasitics: Double
+  var fuel: Double
+}
+
+typealias Status<U,V> = (energy: U, status: V)

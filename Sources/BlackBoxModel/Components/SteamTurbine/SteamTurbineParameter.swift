@@ -15,12 +15,12 @@ extension SteamTurbine {
     let name: String
     var power: PowerRange
     let efficiencyNominal, efficiencyBoiler, efficiencySCC: Double
-    let efficiency, efficiencyTemperature: Coefficients
+    let efficiency, efficiencyTemperature: Polynomial
     let startUpTime: Int
     let startUpEnergy: Double
-    let minPowerFromTemp: Coefficients
+    let minPowerFromTemp: Polynomial
     var hotStartUpTime: Int = 75
-    let efficiencyWetBulb: Coefficients
+    let efficiencyWetBulb: Polynomial
     let WetBulbTstep: Double
     var efficiencyTempIn_A: Double
     var efficiencyTempIn_B: Double

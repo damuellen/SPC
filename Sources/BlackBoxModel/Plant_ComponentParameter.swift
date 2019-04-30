@@ -17,7 +17,7 @@ extension Plant {
     
     if steamTurbine.power.max == 0 {
       SteamTurbine.parameter.power.max = Design.layout.powerBlock
-        + powerBlock.fixelectricalParasitics
+        + powerBlock.fixElectricalParasitics
         + powerBlock.nominalElectricalParasitics
         + powerBlock.electricalParasiticsStep[1]
     }

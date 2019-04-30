@@ -11,32 +11,30 @@
 import Foundation
 
 public struct MeteoDataFileHandler {
-  private var filePath: String
-
+  private var file: MeteoDataFile
+  
   public init(forReadingAtPath path: String) throws {
-    if FileManager.default.fileExists(atPath: path) == false {
+    if FileManager.default.fileExists(atPath: path) {
+      print("Meteo file found: \(path)\n")
+    } else {
       throw MeteoDataFileError.fileNotFound(path)
     }
-    self.filePath = path
+    
+    if path.hasSuffix("csv") {
+      self.file = try TMY(URL(fileURLWithPath: path))
+    } else {
+      self.file = try MET(URL(fileURLWithPath: path))
+    }
   }
 
   public func makeDataSource() throws -> MeteoDataSource {
-    let string = try String(contentsOfFile: filePath, encoding: .ascii)
-    let file: MeteoDataFile
-
-    if self.filePath.hasSuffix("csv") {
-      file = TMY(string)
-    } else {
-      file = MET(string)
-    }
-
     let data = try file.fetchData()
     let location = try file.fetchLocation()
     let year = file.fetchYear()
     let timeZone = file.fetchTimeZone()
 
     return MeteoDataSource(
-      name: String(self.filePath.split(separator: "/").last!),
+      name: file.name,
       data: data,
       location: location,
       year: year,
@@ -45,13 +43,14 @@ public struct MeteoDataFileHandler {
   }
 }
 
-enum MeteoDataFileError: Error {
-  case fileNotFound(String), rowNotReadable(String)
-  case unexpectedRowCount, startOfYearNotFound,
-    unknownLocation, unknownDelimeter, empty
+public enum MeteoDataFileError: Error {
+  case fileNotFound(String), lineNotReadable(Int)
+  case unexpectedRowCount, empty, startNotFound,
+  unknownLocation, unknownDelimeter
 }
 
 protocol MeteoDataFile {
+  var name: String { get }
   func fetchLocation() throws -> Position
   func fetchData() throws -> [MeteoData]
   func fetchYear() -> Int
@@ -59,87 +58,106 @@ protocol MeteoDataFile {
 }
 
 private struct MET: MeteoDataFile {
-  let content: [String]
+  let name: String
+  let content: [[String]]
+  
+  init(_ url: URL) throws {
+    let rawData = try Data(contentsOf: url)
+    self.name = url.lastPathComponent
+    
+    let newLine = UInt8(ascii: "\n")
+    let cr = UInt8(ascii: "\r")
+    let separator = UInt8(ascii: ",")
+    
+    guard let firstNewLine = rawData.firstIndex(of: newLine) else {
+      throw MeteoDataFileError.empty
+    }
+    
+    guard let _ = rawData.firstIndex(of: separator) else {
+      throw MeteoDataFileError.unknownDelimeter
+    }
 
-  init(_ string: String) {
-    let separator: Character = string.contains("\r\n") ? "\r\n" : "\n"
-    content = string.split(separator: separator).map(String.init)
+    if rawData[rawData.index(before: firstNewLine)] == cr {
+      self.content = rawData.withUnsafeBytes { content in
+        return content.split(separator: newLine).map { line in
+          line.dropLast().split(separator: separator).map { part in
+            String(decoding: UnsafeRawBufferPointer(rebasing: part),
+                   as: UTF8.self)
+          }
+        }
+      }
+    } else {
+      self.content = rawData.withUnsafeBytes { content in
+        return content.split(separator: newLine).map { line in
+          line.split(separator: separator).map { part in
+            String(decoding: UnsafeRawBufferPointer(rebasing: part),
+                   as: UTF8.self)
+          }
+        }
+      }
+    }
   }
 
   func fetchTimeZone() -> Int {
-    guard let longitude = Int(content[4].withoutWhitespaces) else { return 0 }
+    guard let longitude = Int(content[4][0]) else { return 0 }
     return longitude / 15
   }
 
   func fetchLocation() throws -> Position {
     let values = Array(content[2 ... 3])
-    
-    guard let longitude = Float(values[0].withoutWhitespaces),
-      let latitude = Float(values[1].withoutWhitespaces)
-    else { throw MeteoDataFileError.unknownLocation }
-
+    guard let longitude = Float(values[0][0]),
+      let latitude = Float(values[1][0])
+      else { throw MeteoDataFileError.unknownLocation }
     return Position(
       longitude: -longitude, latitude: latitude, elevation: 0
     )
   }
 
   func fetchYear() -> Int {
-    return Int(self.content[1]) ?? 1970
+    return Int(self.content[1][0]) ?? 1990
   }
 
   func fetchData() throws -> [MeteoData] {
-    guard let endOfFile = content.last
-    else { throw MeteoDataFileError.empty }
+    let prefix = "1"
 
-    let separator: Character
-
-    if endOfFile.contains("\t") { separator = "\t" }
-    else if endOfFile.contains(",") { separator = "," }
-    else { throw MeteoDataFileError.unknownDelimeter }
-
-    let prefix = ["1", "0", "0"].joined(separator: String(separator))
-
-    guard let startIndex = content.index(where: { $0.hasPrefix(prefix) })
-    else { throw MeteoDataFileError.startOfYearNotFound }
+    guard let startIndex = content.firstIndex(where: { $0[0].hasPrefix(prefix) })
+    else { throw MeteoDataFileError.startNotFound }
 
     let dataRange = startIndex ..< content.endIndex
-    // Check whether the dataRange matches one year of hourly values.
-    guard dataRange.count == 8760 || dataRange.count == 8784
-      || dataRange.count == 8760 * 4 || dataRange.count == 8784
+    // Check whether the dataRange matches one year of values.
+    guard dataRange.count.isMultiple(of: 8760)
+    //  || dataRange.count.isMultiple(of: 8764)
     else { throw MeteoDataFileError.unexpectedRowCount }
+    var line = 11
+    return try content[dataRange].indices.map { idx in
+      let strings = content[idx][3...]
+      let numbers = strings.compactMap(Float.init)
 
-    return try self.content[dataRange].compactMap { line in
-      let stringValues = line.split(separator: separator)[3...]
-
-      let floatValues = stringValues.map(String.init)
-        .map({ $0.withoutWhitespaces })
-        .compactMap(Float.init)
-
-      guard stringValues.count == floatValues.count
-      else { throw MeteoDataFileError.rowNotReadable(line) }
-
-      return MeteoData(floatValues)
+      guard strings.count == numbers.count
+      else { throw MeteoDataFileError.lineNotReadable(line) }
+      line += 1
+      return MeteoData(numbers)
     }
   }
 }
 
-extension MeteoDataFileError: LocalizedError {
-  private var errorDescription: String {
+extension MeteoDataFileError: CustomStringConvertible {
+  public var description: String {
     switch self {
     case .unexpectedRowCount:
-      return "Meteofile is not in hourly periods."
-    case let .rowNotReadable(row):
-      return "Meteofile format of line is wrong: \(row)"
+      return "Meteo file does not have enough values for one year."
+    case let .lineNotReadable(row):
+      return "Meteo file error. Format in line \(row) is invalid."
     case let .fileNotFound(path):
-      return "Meteofile not found at \(path)"
+      return "Meteo file not found at: \(path)"
     case .unknownLocation:
-      return "Meteofile does not contain any location."
-    case .startOfYearNotFound:
-      return "Meteofile format is unknown."
+      return "Meteo file does not contain a location."
+    case .startNotFound:
+      return "Meteo file format is unknown."
     case .unknownDelimeter:
-      return "Meteofile unknown delimeter for values."
+      return "Meteo file unknown delimeter for values."
     case .empty:
-      return "Meteofile is empty."
+      return "Meteo file is empty."
     }
   }
 }
@@ -158,11 +176,17 @@ extension Float {
 }
 
 private struct TMY: MeteoDataFile {
+  let name: String
   let content: [String]
-
-  init(_ string: String) {
-    let separator: Character = string.contains("\r\n") ? "\r\n" : "\n"
-    content = string.split(separator: separator).map(String.init)
+  
+  init(_ url: URL) throws {
+    let data = try Data(contentsOf: url)
+    self.name = url.lastPathComponent
+    self.content = data.withUnsafeBytes {
+      return $0.split(separator: UInt8(ascii: "\n")).map {
+        String(decoding: UnsafeRawBufferPointer(rebasing: $0), as: UTF8.self)
+      }
+    }
   }
 
   func fetchLocation() throws -> Position {
@@ -183,7 +207,7 @@ private struct TMY: MeteoDataFile {
   }
 
   func fetchYear() -> Int {
-    return 1970
+    return 1990
   }
 
   func fetchData() throws -> [MeteoData] {
@@ -197,22 +221,19 @@ private struct TMY: MeteoDataFile {
     else { throw MeteoDataFileError.unknownDelimeter }
 
     let dataRange = 17 ..< content.endIndex
-    // Check whether the dataRange matches one year of hourly values.
-    guard dataRange.count == 8760 || dataRange.count == 8784
-      || dataRange.count == 8760 * 4 || dataRange.count == 8784
+    // Check whether the dataRange matches one year of values.
+    guard dataRange.count.isMultiple(of: 8760)
+    //  || dataRange.count.isMultiple(of: 8764)
     else { throw MeteoDataFileError.unexpectedRowCount }
-
+    var no = 1
     return try self.content[dataRange].compactMap { line in
-      let stringValues = line.split(separator: separator)[1...]
+      let substrings = line.split(separator: separator)[1...]
+      let floats = substrings.compactMap(Float.init)
 
-      let floatValues = stringValues.map(String.init)
-        .map({ $0.withoutWhitespaces })
-        .compactMap(Float.init)
-
-      guard stringValues.count == floatValues.count
-      else { throw MeteoDataFileError.rowNotReadable(line) }
-
-      return MeteoData(tmy: floatValues)
+      guard substrings.count == floats.count
+      else { throw MeteoDataFileError.lineNotReadable(no) }
+      no += 1
+      return MeteoData(tmy: floats)
     }
   }
 }

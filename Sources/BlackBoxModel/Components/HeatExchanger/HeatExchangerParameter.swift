@@ -46,9 +46,9 @@ extension HeatExchanger {
     let scc: Temperatures
     let sccHTFmassFlow: MassFlow
     var sccHTFheat: Double
-    var ToutMassFlow: Coefficients?
-    var ToutTin: Coefficients?
-    var ToutTinMassFlow: Coefficients?
+    var ToutMassFlow: Polynomial?
+    var ToutTin: Polynomial?
+    var ToutTinMassFlow: Polynomial?
     var useAndsolFunction, Tout_f_Mfl, Tout_f_Tin, Tout_exp_Tin_Mfl: Bool
   }
 }

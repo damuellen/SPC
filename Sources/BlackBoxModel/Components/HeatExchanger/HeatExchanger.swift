@@ -194,15 +194,15 @@ public enum HeatExchanger: Component {
           )
         }
 
-        hx.heatOut = htf.enthalpyFrom(hx.temperature.outlet)
+        hx.heatOut = htf.enthalpy(hx.temperature.outlet)
         let bypassMassFlow = totalMassFlow - hx.massFlow
-        let bypass_h = htf.enthalpyFrom(hx.temperature.inlet)
+        let bypass_h = htf.enthalpy(hx.temperature.inlet)
         hx.heatToTES = (bypassMassFlow.rate * bypass_h
           + hx.massFlow.rate * hx.heatOut)
           / (bypassMassFlow + hx.massFlow).rate
       }
 
-      hx.setTemperature(outlet: htf.temperatureFrom(hx.heatToTES))
+      hx.setTemperature(outlet: htf.temperature(hx.heatToTES))
     }
     let heat = hx.massFlow.rate * SolarField.parameter.HTF.deltaHeat(
        hx.temperature.outlet, hx.temperature.inlet) / 1_000

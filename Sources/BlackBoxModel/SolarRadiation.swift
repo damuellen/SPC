@@ -8,6 +8,7 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
+import Foundation
 import Meteo
 
 struct SolarRadiation: PerformanceData {
@@ -33,12 +34,9 @@ struct SolarRadiation: PerformanceData {
   }
   
   public var values: [String] {
-    return [
-      String(format: "%.1f", dni),
-      String(format: "%.1f", ghi),
-      String(format: "%.1f", dhi),
-      String(format: "%.1f", ico)
-    ]
+    return NumberFormatter.string(precision: 1,
+      [dni, ghi, dhi, ico]
+    )
   }
   
   static var columns: [(name: String, unit: String)] {

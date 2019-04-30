@@ -10,7 +10,7 @@
 
 import Foundation
 
-public struct Coefficients: Codable, Equatable {
+public struct Polynomial: Codable, Equatable {
   let coefficients: [Double]
 
   public init(values: Double...) {
@@ -33,7 +33,7 @@ public struct Coefficients: Codable, Equatable {
     return self.coefficients.count < 2
   }
   
-  @_transparent func apply(_ value: Double) -> Double {
+  @_transparent func evaluated(_ value: Double) -> Double {
     // Use Horner’s Method for solving
     var result = 0.0
     for coefficient in self.coefficients.reversed() {
@@ -43,15 +43,15 @@ public struct Coefficients: Codable, Equatable {
   }
   
   subscript(temperature: Temperature) -> Double {
-    @inline(__always) get { return self.apply(temperature.kelvin) }
+    @inline(__always) get { return self.evaluated(temperature.kelvin) }
   }
 
   subscript(value: Double) -> Double {
-    @inline(__always) get { return self.apply(value) }
+    @inline(__always) get { return self.evaluated(value) }
   }
 
   subscript(ratio: Ratio) -> Double {
-    @inline(__always) get { return self.apply(ratio.ratio) }
+    @inline(__always) get { return self.evaluated(ratio.ratio) }
   }
 
   subscript(index: Int) -> Double {
@@ -59,7 +59,7 @@ public struct Coefficients: Codable, Equatable {
   }
 }
 
-extension Coefficients: ExpressibleByArrayLiteral {
+extension Polynomial: ExpressibleByArrayLiteral {
   public init(arrayLiteral elements: Double...) {
     self.coefficients = elements
   }

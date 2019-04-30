@@ -57,7 +57,7 @@ public enum Storage: Component {
         heat.hot = parameter.HTF.properties.specificHeat(hot)
         
         massFlow.calculated.rate = thermal
-          / heat.available * hourFraction * 3_600 * 1_000
+          / heat.available * HourFraction * 3_600 * 1_000
       }
     }
     
@@ -80,7 +80,8 @@ public enum Storage: Component {
     
     mutating func calculateMassFlow(
       from thermalPower: Double,
-      htf: HeatTransferFluid = SolarField.parameter.HTF) {
+      htf: HeatTransferFluid = SolarField.parameter.HTF)
+    {
       setMassFlow(rate: thermalPower / htf.deltaHeat(
         temperature.outlet, temperature.inlet) * 1_000)
     }
@@ -102,7 +103,7 @@ public enum Storage: Component {
   
   static func update(_ status: inout Plant.PerformanceData,
                      demand: Double, fuelAvailable: Double,
-                     result: (Status<PerformanceData>) -> ())
+                     result: (Status<ComponentState, PerformanceData>) -> ())
   {
     // Demand for operation of the storage and adjustment of the powerblock mass flow
     let demand = demandStrategy(&status, demand: demand)
@@ -114,16 +115,17 @@ public enum Storage: Component {
       var parasitics: Double
 
       if status.storage.charge.ratio < parameter.chargeTo,
-      status.solarField.massFlow.rate >= status.powerBlock.massFlow.rate
+        status.solarField.massFlow.rate >= status.powerBlock.massFlow.rate
       {
         (supply, parasitics) = Storage.perform(&status, mode: .charging)
       } else { // heat cannot be stored
         (supply, parasitics) = Storage.perform(&status, mode: .noOperation)
       }
-      status.powerBlock.setTemperature(inlet:
-        status.solarField.temperature.outlet
+      status.powerBlock.inletTemperature(outlet: status.solarField)
+      let energy = ComponentState(
+        supply: supply, demand: demand, parasitics: parasitics, fuel: 0
       )
-      result((supply, demand, parasitics, 0, status.storage))
+      result((energy, status.storage))
       return
     }
     
@@ -167,7 +169,7 @@ public enum Storage: Component {
       {
         status.powerBlock.temperature.inlet =
           SolarField.parameter.HTF.mixingTemperature(
-            outlet: status.solarField, with: status.storage
+            status.solarField, status.storage
         )
 
         status.powerBlock.massFlow = status.solarField.massFlow
@@ -177,10 +179,8 @@ public enum Storage: Component {
         )
         
       } else if status.storage.massFlow.isNearZero == false {
-
-        status.powerBlock.setTemperature(inlet:
-          status.storage.temperature.outlet
-        )
+        
+        status.powerBlock.inletTemperature(outlet: status.storage)
 
         status.powerBlock.massFlow = status.storage.massFlow
         status.powerBlock.massFlow.adjust(withFactor:
@@ -189,7 +189,10 @@ public enum Storage: Component {
       } else {
         status.powerBlock.massFlow = .init() // set to zero
       }
-      result((supply, demand, parasitics, 0, status.storage))
+      let energy = ComponentState(
+        supply: supply, demand: demand, parasitics: parasitics, fuel: 0
+      )
+      result((energy, status.storage))
       return
     }
 
@@ -214,18 +217,17 @@ public enum Storage: Component {
         Heater.update(status, demand: demand, fuelAvailable: fuelAvailable)
         { result in
           status.heater = result.status
-          fuel = result.fuel
-          Plant.heat.heater.megaWatt = result.supply
-          Plant.electricalParasitics.heater = result.parasitics
+          fuel = result.energy.fuel
+          Plant.heat.heater.megaWatt = result.energy.supply
+          Plant.electricalParasitics.heater = result.energy.parasitics
         }
         
         status.powerBlock.massFlow = status.heater.massFlow
         
         (supply, parasitics) = Storage.perform(&status, mode: .freezeProtection)
         
-        status.powerBlock.setTemperature(inlet:
-          status.storage.temperature.outlet
-        )
+        status.powerBlock.inletTemperature(outlet: status.storage)
+
         // check why to circulate HTF in SF
         #warning("Storage.parasitics")
         Plant.electricalParasitics.solarField =
@@ -237,10 +239,16 @@ public enum Storage: Component {
       } else {
         (supply, parasitics) = Storage.perform(&status, mode: .noOperation)
       }
-      result((supply, demand, parasitics, fuel, status.storage))
+      let energy = ComponentState(
+        supply: supply, demand: demand, parasitics: parasitics, fuel: fuel
+      )
+      result((energy, status.storage))
       return
     }
-    result((0, demand, 0, 0, status.storage))
+    let energy = ComponentState(
+      supply: 0, demand: demand, parasitics: 0, fuel: 0
+    )
+    result((energy, status.storage))
     unreachable()
   }
   
@@ -365,6 +373,8 @@ public enum Storage: Component {
       heatExchanger.temperature.htf.outlet.max) / 1_000
 
     let time = TimeStep.current
+    let dniDay = BlackBoxModel.meteoData[ofDay: TimeStep.current.day].sum
+    
     if time.month < parameter.startexcep || time.month > parameter.endexcep {
       storage.heatProductionLoad = parameter.heatProductionLoadWinter
       if dniDay > parameter.badDNIwinter * 1_000 {
@@ -502,7 +512,7 @@ public enum Storage: Component {
         }
         // recalculate thermal power given by TES
         thermal = (storage.salt.massFlow.calculated.rate
-          * storage.salt.heat.available / hourFraction / 3_600) / 1_000
+          * storage.salt.heat.available / HourFraction / 3_600) / 1_000
       }
     }
     
@@ -523,7 +533,7 @@ public enum Storage: Component {
         }
         // recalculate thermal power given by TES
         thermal = (-storage.salt.massFlow.calculated.rate
-          * storage.salt.heat.available / hourFraction / 3_600) / 1_000
+          * storage.salt.heat.available / HourFraction / 3_600) / 1_000
       }
     }
     return (thermal, storage)
@@ -581,7 +591,7 @@ public enum Storage: Component {
         // added to avoid Tmix during TES discharge (valid for indirect storage), check!
         let htf = SolarField.parameter.HTF
         powerBlock.temperature.outlet = htf.mixingTemperature(
-          outlet: powerBlock, with: storage
+          powerBlock, storage
         )
       }
     }
@@ -695,7 +705,7 @@ public enum Storage: Component {
         storage.salt.massFlow.calculated.rate = 0
       }
       thermalPower = storage.salt.massFlow.calculated.rate
-        * storage.salt.heat.available / hourFraction / 3_600 / 1_000
+        * storage.salt.heat.available / HourFraction / 3_600 / 1_000
       
       storage.salt.massFlow.hot = storage.salt.massFlow.minimum
       
@@ -765,7 +775,7 @@ public enum Storage: Component {
     let solarField =  SolarField.parameter
 
     storage.salt.massFlow.calculated.rate =
-      solarField.antiFreezeFlow.rate * hourFraction * 3_600
+      solarField.antiFreezeFlow.rate * HourFraction * 3_600
 
     let massFlow = storage.salt.massFlow.calculated
       .adjusted(withFactor: splitfactor)
@@ -792,7 +802,7 @@ public enum Storage: Component {
       storage.salt.massFlow.cold.rate > 0
     {
       storage.salt.massFlow.calculated.rate = powerBlock.massFlow.rate
-        * hourFraction * 3_600
+        * HourFraction * 3_600
       
       storage.temperatureTank.cold = Temperature.calculate(
         massFlow1: storage.salt.massFlow.calculated,
@@ -924,7 +934,7 @@ public enum Storage: Component {
           * parameter.heatExchangerEfficiency // design charging power
         
         let massFlowDischarging = designDischarge
-          / status.salt.heat.available * hourFraction * 3_600 * 1_000
+          / status.salt.heat.available * HourFraction * 3_600 * 1_000
         
         let saltFlowRatio = status.salt.massFlow.calculated.rate
           / massFlowDischarging
@@ -944,7 +954,7 @@ public enum Storage: Component {
           * parameter.heatExchangerEfficiency
         
         let massFlowCharging = designCharge
-          / status.salt.heat.available * hourFraction * 3_600 * 1_000
+          / status.salt.heat.available * HourFraction * 3_600 * 1_000
         
         let saltFlowRatio = status.salt.massFlow.calculated.rate
           / massFlowCharging

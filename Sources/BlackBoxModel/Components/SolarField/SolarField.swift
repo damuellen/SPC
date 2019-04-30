@@ -180,17 +180,17 @@ public enum SolarField: Component {
           * (solarField.temperature.inlet.celsius
             - solarField.loops[3].temperature.inlet.celsius))
 
-      solarField.loops[1].temperature.inlet = Temperature(
+      solarField.loops[1].inletTemperature(kelvin:
         temps[0].0 * solarField.inletTemperature
           + temps[0].1 * solarField.loops[1].inletTemperature
       )
 
-      solarField.loops[2].temperature.inlet = Temperature(
+      solarField.loops[2].inletTemperature(kelvin:
         temps[1].0 * solarField.inletTemperature
           + temps[1].1 * solarField.loops[2].inletTemperature
       )
 
-      solarField.loops[3].temperature.inlet = Temperature(
+      solarField.loops[3].inletTemperature(kelvin:
         temps[2].0 * solarField.inletTemperature
           + temps[2].1 * solarField.loops[3].inletTemperature
       )
@@ -337,7 +337,7 @@ public enum SolarField: Component {
     if case .freezeProtection = solarField.operationMode {
       solarField.loops = solarField.loops.map { loop in
         var loop = loop
-        loop.temperature.inlet = solarField.header.temperature.inlet
+        loop.inletTemperature(inlet: solarField)
         return loop
       }
     }
@@ -363,9 +363,7 @@ public enum SolarField: Component {
     }
 
     switch solarField.operationMode { // Check HCE and decide what to do
-    case .operating:
-      outletTemperature(&solarField, collector, meteo: meteo, timeRemain: time)
-    case .freezeProtection:
+    case .operating, .freezeProtection:
       outletTemperature(&solarField, collector, meteo: meteo, timeRemain: time)
     case .noOperation: // does not neccessary mean no operation, see:
       if solarField.header.temperature.outlet

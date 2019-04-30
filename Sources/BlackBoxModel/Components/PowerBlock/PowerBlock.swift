@@ -39,7 +39,7 @@ public enum PowerBlock: Component {
     
     if steamTurbine.load.ratio >= 0.01 {
 
-      electricalParasitics = parameter.fixelectricalParasitics
+      electricalParasitics = parameter.fixElectricalParasitics
       electricalParasitics += parameter.nominalElectricalParasitics
         * parameter.electricalParasitics[steamTurbine.load]
     } else if heat > 0, steamTurbine.load.isZero {
@@ -47,7 +47,7 @@ public enum PowerBlock: Component {
       // Strange effect of this function over gross output!!
       // "strange effect" is due to interation "Abs(electricalParasiticsAssumed
       // - electricEnergy.parasitics) < Simulation.parameter.electricalTolerance"
-      electricalParasitics = parameter.startUpelectricalParasitics
+      electricalParasitics = parameter.startUpElectricalParasitics
     }
     
     // if Heater.parameter.operationMode {
@@ -74,7 +74,7 @@ public enum PowerBlock: Component {
       
       if parameter.electricalParasiticsACCTamb.coefficients.isEmpty == false {
         var adjustmentACC = parameter.electricalParasiticsACCTamb
-          .apply(Plant.ambientTemperature.celsius)
+          .evaluated(Plant.ambientTemperature.celsius)
         // ambient temp is larger than design, ACC max. consumption fixed to nominal
         if adjustmentACC > 1 {
           adjustmentACC = 1
@@ -86,7 +86,7 @@ public enum PowerBlock: Component {
     electricalParasitics += parameter.nominalElectricalParasiticsACC
     return electricalParasitics // + 0.005 * steamTurbine.load * parameter.power.max
     
-    // return parameter.fixelectricalParasitics
+    // return parameter.fixElectricalParasitics
     // electricalParasitics += parameter.nominalElectricalParasitics
     // * (parameter.electricalParasitics[0] + parameter.electricalParasitics[1]
     // * steamTurbine.load + parameter.electricalParasitics[2] * steamTurbine.load ** 2)
@@ -109,14 +109,14 @@ public enum PowerBlock: Component {
     var totalMassFlow = powerBlock.massFlow
   
     repeat {
-      
-      powerBlock.setTemperature(outlet:
-        HeatExchanger.outletTemperature(powerBlock, powerBlock)
-      )
-      heatOut = htf.enthalpyFrom(powerBlock.temperature.outlet)
+      #warning("Check this")
+      powerBlock.temperature.outlet = HeatExchanger
+        .outletTemperature(powerBlock, powerBlock)
+
+      heatOut = htf.enthalpy(powerBlock.temperature.outlet)
       
       let bypassMassFlow = totalMassFlow - powerBlock.massFlow
-      let Bypass_h = htf.enthalpyFrom(powerBlock.temperature.inlet)
+      let Bypass_h = htf.enthalpy(powerBlock.temperature.inlet)
       
       heatToTES = (bypassMassFlow.rate * Bypass_h
         + powerBlock.massFlow.rate * heatOut)
@@ -124,10 +124,12 @@ public enum PowerBlock: Component {
       
     } while heatToTES > h_261
     
-    powerBlock.setTemperature(outlet: htf.temperatureFrom(heatToTES))
+    powerBlock.setTemperature(outlet: htf.temperature(heatToTES))
     return (heatOut, heatToTES, powerBlock)
   }
 }
 
-let h_261 = 1.51129 * 261 + 1.2941 / 1_000 * 261 ** 2
-  + 1.23697 / 10 ** 7 * 261 ** 3 - 0.62677 // kJ/kg
+let h_261: Double = 484.17458693
+// 1.51129 * 261.0 + 1.2941 / 1_000 * 261.0 ** 2.0
+// + 1.23697 / 10.0 ** 7.0 * 261.0 ** 3.0 - 0.62677 // kJ/kg
+
