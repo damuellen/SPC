@@ -36,36 +36,36 @@ public struct TextConfigFile {
     case unexpectedValueCount
   }
 
-  public subscript(row row: Int) -> String? {
-    let idx = row - 1
+  public subscript(line line: Int) -> String? {
+    let idx = line - 1
     guard self.values.indices.contains(idx) else {
       return nil
     }
     return self.values[idx].trimmingCharacters(in: .whitespaces)
   }
 
-  public func extractString(from row: Int) throws -> String {
-    guard let string = self[row: row], string.count > 0 else {
-      throw ReadError.missingValueInRow(row, self.path)
+  public func extractString(from line: Int) throws -> String {
+    guard let string = self[line: line], string.count > 0 else {
+      throw ReadError.missingValueInRow(line, self.path)
     }
     return string
   }
 
-  public func parseDouble(row: Int) throws -> Double {
-    let value = try extractString(from: row)
+  public func parseDouble(line: Int) throws -> Double {
+    let value = try extractString(from: line)
     if let value = Double(value) {
       return value
     } else {
-      throw ReadError.invalidValueInRow(row, self.path)
+      throw ReadError.invalidValueInRow(line, self.path)
     }
   }
 
-  public func parseInteger(row: Int) throws -> Int {
-    let value = try extractString(from: row)
+  public func parseInteger(line: Int) throws -> Int {
+    let value = try extractString(from: line)
     if let value = Int(value) {
       return value
     } else {
-      throw ReadError.invalidValueInRow(row, self.path)
+      throw ReadError.invalidValueInRow(line, self.path)
     }
   }
 }
@@ -73,12 +73,12 @@ public struct TextConfigFile {
 extension TextConfigFile.ReadError {
   var errorDescription: String {
     switch self {
-    case let .invalidValueInRow(row, path):
-      return "\(path) - Invalid value in row \(row)."
-    case let .missingRowInFile(row, path):
-      return "\(path) - File has less then \(row) rows."
+    case let .invalidValueInRow(line, path):
+      return "\(path) - Invalid value in line \(line)."
+    case let .missingRowInFile(line, path):
+      return "\(path) - File has less then \(line) lines."
     case let .missingValueInRow(row, path):
-      return "\(path) - Missing value in row \(row)."
+      return "\(path) - Missing value in line \(row)."
     case .unexpectedValueCount:
       return "Layout file has unexpected format."
     }

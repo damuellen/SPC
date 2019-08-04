@@ -22,7 +22,8 @@ public enum Collector: Component {
   /// Contains all data needed to simulate the operation of the collector
   public struct PerformanceData: Encodable, CustomStringConvertible {
     public var parabolicElevation, theta, cosTheta, efficiency: Double
-
+    public var insolationAbsorber: Double
+    
     static var headers: String {
       return "Parabolic Elevation, elevation, azimuth, theta, efficiency"
     }
@@ -31,15 +32,14 @@ public enum Collector: Component {
       return String(format: "PE: %.1f°, ", parabolicElevation)
         + String(format: "θ: %.2f°, ", theta)
         + String(format: "cos(θ): %.2f, ", cosTheta)
-        + String(format: "η: %.2f", efficiency * 100) + "%"
+        + String(format: "η: %.2f", efficiency * 100) + "% "
+        + String(format: "insolationAbsorber: %.1f", insolationAbsorber)
     }
   }
 
   static let initialState = PerformanceData(
-    parabolicElevation: 0,
-    theta: 0,
-    cosTheta: 0,
-    efficiency: 0
+    parabolicElevation: 0, theta: 0, cosTheta: 0,
+    efficiency: 0, insolationAbsorber: 0
   )
 
   public static var parameter: Parameter = ParameterDefaults.LS3
@@ -66,8 +66,7 @@ public enum Collector: Component {
   /// This function calculates the efficiency of the Collector in the
   /// solar field which is depending on: incidence angle (theta), elevation angle
   /// of parabolic trough, edge factors of the solarfield and the optical efficiency
-  public static func efficiency(_ collector: inout PerformanceData,
-                                meteo: MeteoData) {
+  public static func efficiency(_ collector: inout PerformanceData, ws: Float) {
     guard case 1...179 = collector.parabolicElevation else { return }
     
     let IAM = parameter.IAMfac[collector.theta.toRadians]
@@ -122,8 +121,7 @@ public enum Collector: Component {
     
     if direction > 180 { T_14 = -T_14 }
     /// Effective wind speed
-    let v_wind_eff = Double(meteo.windSpeed)
-      * abs(sin(Double(direction) * .pi / 180))
+    let v_wind_eff = Double(ws) * abs(sin(Double(direction) * .pi / 180))
     // Torsion due to bearing friction
     let T_R = -(939_549e-10 * parameter.lengthSCA ** 2
       + 939_549e-10 * parameter.lengthSCA)
@@ -152,13 +150,14 @@ public enum Collector: Component {
     let el: Double = sun.elevation.toRadians
     let beta: Double = SolarField.parameter.elevation.toRadians
     let sfaz: Double = SolarField.parameter.azimut.toRadians
-
-    let theta: Double = (cos(az - sfaz) / abs(cos(az - sfaz)) * 180 / Double.pi
-      * acos(sqrt(1 - (cos(el - beta) - cos(beta) * cos(el)
-          * (1 - cos(az - sfaz))) ** 2))) * (-1)
+ 
+    let theta: Double = (cos(az - sfaz) / abs(cos(az - sfaz)) * 180
+      / .pi * acos(sqrt(1 - (cos(el - beta) - cos(beta) * cos(el)
+        * (1 - cos(az - sfaz))) ** 2))) * (-1)
 
     collector.theta = theta
     collector.cosTheta = cos(theta.toRadians)
+   
     return collector
   }
 }
@@ -166,24 +165,15 @@ public enum Collector: Component {
 extension SolarField.PerformanceData.OperationMode {
   var collector: Collector.OperationMode {
     switch self {
-    case .fixed:
-      return .fixed
-    case .startUp:
-      return .operating
-    case .freezeProtection:
-      return .freezeProtection
-    case .operating:
-      return .operating
-    case .noOperation:
-      return .noOperation
-    case .scheduledMaintenance:
-      return .noOperation
-    case .unknown:
-      return .variable
-    case .ph:
-      return .variable
-    case .normal:
-      return .operating
+    case .fixed: return .fixed
+    case .startUp: return .operating
+    case .freezeProtection: return .freezeProtection
+    case .operating: return .operating
+    case .noOperation: return .noOperation
+    case .scheduledMaintenance: return .noOperation
+    case .unknown: return .variable
+    case .ph: return .variable
+    case .normal: return .operating
     }
   }
 }

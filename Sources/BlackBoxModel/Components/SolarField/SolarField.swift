@@ -13,7 +13,7 @@ import Meteo
 
 public enum SolarField: Component {
 
-  enum Loop: Int {
+  public enum Loop: Int {
     case design = 0, near, average, far
 
     static var names: [String] {
@@ -26,7 +26,6 @@ public enum SolarField: Component {
     var operationMode: OperationMode
     var isMaintained: Bool
     var header: HeatFlow
-    public var insolationAbsorber: Double
     var ETA: Double
     public var heatLosses: Double
     public var heatLossHeader: Double
@@ -63,7 +62,7 @@ public enum SolarField: Component {
     operationMode: .scheduledMaintenance,
     isMaintained: false,
     header: HeatFlow(name: "Header"),
-    insolationAbsorber: 0, ETA: 0,
+    ETA: 0,
     heatLosses: 0, heatLossHeader: 0, heatLossHCE: 0,
     inFocus: 0.0,
     loops: Loop.names.map { name in HeatFlow(loop: name) },
@@ -72,7 +71,7 @@ public enum SolarField: Component {
 
   public static var parameter: Parameter = ParameterDefaults.sf
   static var last: [HeatFlow] = initialState.loops
-
+  
   /// Calculates the parasitics
   static func parasitics(_ status: PerformanceData) -> Double {
     if status.operationMode == .freezeProtection {
@@ -86,36 +85,37 @@ public enum SolarField: Component {
       : 0
   }
 
-  static func pipeHeatLoss(
-    pipe temperature: Temperature, ambient: Temperature) -> Double {
-    return ((temperature - ambient).kelvin / 333) ** 1 * parameter.pipeHeatLosses
+  static func pipeHeatLoss(pipe: Temperature, ambient: Temperature) -> Double {
+    return ((pipe - ambient).kelvin / 333) ** 1 * parameter.pipeHeatLosses
   }
 
   /// Calc. loop-outlet temp. gradient
   private static func outletTemperature(
     _ solarField: inout SolarField.PerformanceData,
     _ collector: Collector.PerformanceData,
-    meteo: MeteoData, timeRemain: Double)
+    _ ambient: Temperature,
+    _ timeRemain: Double)
   {
     HCE.freezeProtectionCheck(&solarField)
     last = solarField.loops
     for (n, loop) in zip(0..., [Loop.near, .average, .far]) {
-      solarField.loops[loop.rawValue].setMassFlow(rate:
-        solarField.header.massFlow.rate
-          * ((solarField.header.massFlow - parameter.massFlow.min).rate
-            * (parameter.imbalanceDesign[n] - parameter.imbalanceMin[n])
-            / (parameter.massFlow.max - parameter.massFlow.min).rate
-            + parameter.imbalanceMin[n]))
+      let massFlow = solarField.header.massFlow.rate == 0
+        ? 0 : solarField.header.massFlow.rate
+        * ( (solarField.header.massFlow - parameter.massFlow.min).rate
+          * (parameter.imbalanceDesign[n] - parameter.imbalanceMin[n])
+          / (parameter.massFlow.max - parameter.massFlow.min).rate
+          + parameter.imbalanceMin[n] )
+      solarField.loops[loop.rawValue].setMassFlow(rate: massFlow)
 
       HCE.calculation(&solarField, collector: collector, loop: loop,
-                      mode: .variable, meteo: meteo)
+                      mode: .variable, ambient: ambient)
     }
-
+    
     solarField.header.setMassFlow(rate:
       solarField.loops.dropFirst().reduce(0.0) { sum, loop in
         sum + loop.massFlow.rate } / 3.0
     )
-
+    
     if solarField.header.massFlow.isNearZero {
       solarField.loops.dropFirst().indices.forEach { n in
         solarField.loops[n].constantTemperature()
@@ -139,26 +139,25 @@ public enum SolarField: Component {
         }
       }
 
-      let temps: [(Double, Double, Double)] =
-        solarField.loops.indices.dropFirst().map { n in
-          var timeRatio = timeRemain / (parameter.loopWays[n]
-            / (designFlowVelocity * solarField.loops[n].massFlow.rate
-              / parameter.massFlow.max.rate))
-          
-          let oneMinusTR: Double
-
-          if timeRatio > 1.0 {
-            timeRatio = 1.0
-            oneMinusTR = 0.0
-          } else {
-            oneMinusTR = 1.0 - timeRatio
-          }
-
-          let temp = timeRatio * solarField.loops[n].outletTemperature
-            + oneMinusTR * last[n].outletTemperature
-
-          return (timeRatio, oneMinusTR, temp)
+      let temps = solarField.loops.indices.dropFirst().map {
+        n -> (Double, Double, Double) in
+        var timeRatio = timeRemain / (parameter.loopWays[n]
+          / (designFlowVelocity * solarField.loops[n].massFlow.rate
+            / parameter.massFlow.max.rate))
+        
+        let oneMinusTR: Double
+        if timeRatio > 1.0 {
+          timeRatio = 1.0
+          oneMinusTR = 0.0
+        } else {
+          oneMinusTR = 1.0 - timeRatio
         }
+        
+        let temp = timeRatio * solarField.loops[n].outletTemperature
+          + oneMinusTR * last[n].outletTemperature
+        
+        return (timeRatio, oneMinusTR, temp)
+      }
 
       solarField.header.outletTemperature(kelvin:
         (temps[0].2 * solarField.loops[1].massFlow.rate
@@ -197,8 +196,8 @@ public enum SolarField: Component {
     }
   }
 
-  private static func heatLossesHotHeader(
-    _ solarField: PerformanceData, _ meteo: MeteoData) -> Temperature
+  static func heatLossesHotHeader(
+    _ solarField: PerformanceData, ambient: Temperature) -> Temperature
   {
     let area = Design.layout.solarField
       * Double(SolarField.parameter.numberOfSCAsInRow)
@@ -208,14 +207,12 @@ public enum SolarField: Component {
     
     newTemp = solarField.header.temperature.outlet
 
-    let ambientTemperature = Temperature(celsius: meteo.temperature)
-    
     repeat {      
       oldTemp = newTemp
       
       solarField.heatLossHeader = parameter.heatLossHeader[0]
         * (parameter.heatLossHeader[1] + parameter.heatLossHeader[2]
-          * (newTemp - ambientTemperature).kelvin) // [MWt]
+          * (newTemp - ambient).kelvin) // [MWt]
       
       if solarField.header.massFlow.rate > 0 {
         let deltaHeatPerKg = solarField.heatLossHeader * 1_000
@@ -239,10 +236,10 @@ public enum SolarField: Component {
         let deltaHeatPerKg = deltaHeatPerSqm / areaDensity
         
         let heatPerKg = parameter.HTF.deltaHeat(
-          solarField.header.temperature.outlet, ambientTemperature
+          solarField.header.temperature.outlet, ambient
         )
         newTemp = parameter.HTF.temperature(
-          heatPerKg - deltaHeatPerKg, ambientTemperature
+          heatPerKg - deltaHeatPerKg, ambient
         )
       }
       newTemp = newTemp.limited(by: parameter.HTF.maxTemperature)
@@ -250,85 +247,19 @@ public enum SolarField: Component {
       > Simulation.parameter.HLtempTolerance
     return newTemp
   }
-  
-  static func update(
-    _ status: Plant.PerformanceData,
-    timeRemain: inout Double,
+
+  static func calculate(
+    _ solarField: inout PerformanceData,
+    collector: Collector.PerformanceData,
+    time: inout Double,
     dumping: inout Double,
-    meteo: MeteoData
-    ) -> PerformanceData
-  {
-    var solarField = status.solarField
-
-    solarField.insolationAbsorber = Double(meteo.dni) // Value is only set here
-      * status.collector.cosTheta
-      * status.collector.efficiency
-    
-    solarField.temperature.inlet =
-      status.powerBlock.temperature.outlet
-
-    if Design.hasStorage {
-      switch status.storage.operationMode {
-      case .freezeProtection:
-        if Storage.parameter.temperatureCharge[1] > 0 {
-          solarField.temperature.inlet = status.storage.temperature.outlet
-        } else {
-          solarField.inletTemperature(kelvin:
-            status.storage.antiFreezeTemperature)
-        }
-      case .preheat:
-        solarField.temperature.inlet = status.storage.temperatureTank.cold
-      case .charging where Plant.heat.production.watt == 0:
-        solarField.temperature.inlet =
-          solarField.temperature.outlet
-      default: break
-      }
-    }
-    //  No more changes to solarfield inlet temperature
-    
-    let heatExchanger = HeatExchanger.parameter,
-    steamTurbine = SteamTurbine.parameter
-    
-    if GridDemand.current.ratio < 1 {
-      // added to reduced SOF massflow with electrical demand
-      solarField.setMassFlow(rate: GridDemand.current.ratio
-        * (steamTurbine.power.max / steamTurbine.efficiencyNominal
-          / heatExchanger.efficiency) * 1_000
-        / parameter.HTF.deltaHeat(heatExchanger.temperature.htf.inlet.max,
-                                  heatExchanger.temperature.htf.outlet.max)
-      )
-      
-      solarField.massFlow.rate = (solarField.massFlow + status.storage.massFlow).rate
-        .limited(by: parameter.massFlow.max.rate)
-    } else {
-      solarField.massFlow = parameter.massFlow.max
-    }
-    
-    if Design.hasStorage,
-      status.storage.charge.ratio >= Storage.parameter.chargeTo {
-      if Design.hasGasTurbine {
-        solarField.massFlow = heatExchanger.sccHTFmassFlow
-      }
-    }
-
-    solarField = calculate(solarField, collector: status.collector,
-                           time: &timeRemain, dumping: &dumping, meteo: meteo)
-    solarField.temperature.outlet = heatLossesHotHeader(solarField, meteo)
-    // outlet temperature will not change again
-    return solarField
-  }
-
-  private static func calculate(
-    _ solarField: PerformanceData, collector: Collector.PerformanceData,
-    time: inout Double, dumping: inout Double, meteo: MeteoData
-    ) -> PerformanceData
+    ambient: Temperature)
   {
     let heatExchanger = HeatExchanger.parameter
-    var solarField = solarField
     
     if solarField.isMaintained {
       if case .scheduledMaintenance = solarField.operationMode {
-        return solarField
+        return
       }
       // First Day of Maintenance
       solarField = SolarField.initialState
@@ -349,8 +280,8 @@ public enum SolarField: Component {
       solarField.loops[1].temperature.inlet
     )
     (time, dumping) = HCE.calculation(
-      &solarField, collector: collector,
-      loop: .design, mode: solarField.operationMode.collector, meteo: meteo
+      &solarField, collector: collector, loop: .design,
+      mode: solarField.operationMode.collector, ambient: ambient
     )
 
     solarField.header.massFlow = solarField.loops[0].massFlow
@@ -364,7 +295,7 @@ public enum SolarField: Component {
 
     switch solarField.operationMode { // Check HCE and decide what to do
     case .operating, .freezeProtection:
-      outletTemperature(&solarField, collector, meteo: meteo, timeRemain: time)
+      outletTemperature(&solarField, collector, ambient, time)
     case .noOperation: // does not neccessary mean no operation, see:
       if solarField.header.temperature.outlet
         > max(heatExchanger.temperature.htf.inlet.min,
@@ -372,7 +303,7 @@ public enum SolarField: Component {
       {
         solarField.operationMode = .operating
       }
-      outletTemperature(&solarField, collector, meteo: meteo, timeRemain: time)
+      outletTemperature(&solarField, collector, ambient, time)
 
     default: // HCE returns with solarField.OPmode = unknown
       // if solarField.htf.temperature.outlet > heatExchanger.temperature.htf.inlet.min
@@ -383,13 +314,13 @@ public enum SolarField: Component {
         // Boiler wurde hier rausgenommen, wegen nachrechenen von SEGS VI
         solarField.operationMode = .operating // Operation at minimum mass flow
         
-      } else if Double(meteo.dni)
-        > self.lastDNI + Simulation.parameter.minInsolationRaiseStartUp,
+      } else if collector.insolationAbsorber
+        > self.oldInsolation + Simulation.parameter.minInsolationRaiseStartUp,
         solarField.header.temperature.outlet
           > solarField.header.temperature.inlet
           + Simulation.parameter.minTemperatureRaiseStartUp
       {
-        self.lastDNI = Double(meteo.dni)
+        self.oldInsolation = collector.insolationAbsorber
         solarField.operationMode = .startUp
       } else {
         // Force No Operation: Calc. the heat losses in HCEs for the rest of IMet.period
@@ -398,11 +329,10 @@ public enum SolarField: Component {
         // NOTE: dtime after next calculation might be shorter than oldTime,
         // if HTFinHCE,Tout drops beyond freeze protection Temp. during that period.
       } // solarField.htf.temperature.outlet > heatExchanger.HTFinTmin
-      outletTemperature(&solarField, collector, meteo: meteo, timeRemain: time)
+      outletTemperature(&solarField, collector, ambient, time)
     }
-    return solarField
   }
 
-  static var lastDNI = 0.0
+  static private var oldInsolation = 0.0
 }
 

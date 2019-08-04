@@ -8,17 +8,9 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
-import Config
-import DateGenerator
 import Foundation
-import Meteo
-import SolarPosition
-
+/// A namespace for the main routines of the simulation.
 public enum Plant {
-
-  private(set) static var location: Position = .primeMeridian
-
-  private(set) static var ambientTemperature = Temperature()
 
   static var heat = ThermalEnergy()
 
@@ -33,15 +25,7 @@ public enum Plant {
   /// used for Plant.setupComponentParameters()
   static var componentsNeedUpdate = true
 
-  static func setLocation(_ location: Position) {
-    self.location = location
-  }
-
-  static func setAmbientTemperature(_ celsius: Float) {
-    self.ambientTemperature = Temperature(celsius: celsius)
-  }
-
-  static func energyFeed() -> Energy {
+  static func energyBalance() -> Energy {
     electricalEnergy.net = electricalEnergy.gross
     electricalEnergy.net -= electricalEnergy.parasitics
     
@@ -54,27 +38,89 @@ public enum Plant {
     
     return Energy(
       thermal: heat, electric: electricalEnergy,
-      fuel: fuelConsumption, parasitics: electricalParasitics
-    )
+      fuel: fuelConsumption, parasitics: electricalParasitics)
   }
 
-  static func updateSolarField(
-    _ status: inout PerformanceData, meteo: MeteoData)
+  // MARK: - SolarField
+  
+  static func update(
+    solarField: inout SolarField.PerformanceData,
+    storage: Storage.PerformanceData)
+  {
+    if Design.hasStorage {
+      switch storage.operationMode {
+      case .freezeProtection:
+        if Storage.parameter.temperatureCharge[1] > 0 {
+          solarField.temperature.inlet = storage.temperature.outlet
+        } else {
+          solarField.inletTemperature(kelvin: storage.antiFreezeTemperature)
+        }
+      case .preheat:
+        solarField.temperature.inlet = storage.temperatureTank.cold
+      case .charging where Plant.heat.production.watt == 0:
+        solarField.temperature.inlet = solarField.temperature.outlet
+      default: break
+      }
+    }
+ 
+    let parameter = SolarField.parameter,
+    heatExchanger = HeatExchanger.parameter,
+    steamTurbine = SteamTurbine.parameter
+    
+    if GridDemand.current.ratio < 1 {
+      // added to reduced SOF massflow with electrical demand
+      solarField.setMassFlow(rate: GridDemand.current.ratio
+        * (steamTurbine.power.max / steamTurbine.efficiencyNominal
+          / heatExchanger.efficiency) * 1_000 / parameter.HTF.deltaHeat(
+            heatExchanger.temperature.htf.inlet.max,
+            heatExchanger.temperature.htf.outlet.max)
+      )
+      
+      solarField.massFlow.rate =
+        (solarField.massFlow + storage.massFlow).rate
+          .limited(by: parameter.massFlow.max.rate)
+    } else {
+      solarField.massFlow = parameter.massFlow.max
+    }
+    
+    if Design.hasStorage, storage.charge.ratio >= Storage.parameter.chargeTo {
+      if Design.hasGasTurbine {
+        solarField.massFlow = heatExchanger.sccHTFmassFlow
+      }
+    }
+  }
+  
+  static func update(
+    solarField: inout SolarField.PerformanceData,
+    collector: Collector.PerformanceData,
+    ambient: Temperature)
   {
     var timeRemain = 600.0
-    var dumping = heat.dumping.watt
 
-    status.solarField = SolarField.update(
-      status, timeRemain: &timeRemain, dumping: &dumping, meteo: meteo
-    )
+    SolarField.calculate(
+      &solarField, collector: collector, time: &timeRemain,
+      dumping: &heat.dumping.watt, ambient: ambient)
     
-    heat.dumping.watt = dumping
+    solarField.temperature.outlet =
+      SolarField.heatLossesHotHeader(solarField, ambient: ambient)
     
-    electricalParasitics.solarField = SolarField.parasitics(status.solarField)
+    electricalParasitics.solarField = SolarField.parasitics(solarField)
   }
 
-  static func updatePowerBlock(_ status: inout PerformanceData) {
+  // MARK: - PowerBlock
 
+  static func update(
+    solarField: inout SolarField.PerformanceData,
+    collector: Collector.PerformanceData,
+    storage: inout Storage.PerformanceData,
+    powerBlock: inout PowerBlock.PerformanceData,
+    boiler: inout Boiler.PerformanceData,
+    gasTurbine: inout GasTurbine.PerformanceData,
+    heater: inout Heater.PerformanceData,
+    heatExchanger: inout HeatExchanger.PerformanceData,
+    steamTurbine: inout SteamTurbine.PerformanceData,
+    ambient: Temperature)
+  {
     @discardableResult func estimateElectricalEnergyDemand() -> Double {
       var estimate = 0.0
       if Design.hasGasTurbine {
@@ -111,9 +157,11 @@ public enum Plant {
         steamTurbine.load = Availability.current.value.powerBlock
         // The turbine load has changed recalculation of efficiency
         (_, steamTurbine.efficiency) = SteamTurbine.perform(
-          with: steamTurbine.load, boiler: status.boiler,
-          gasTurbine: status.gasTurbine, heatExchanger: status.heatExchanger
-        )
+          steamTurbine: steamTurbine.load,
+          boiler: boiler.operationMode,
+          gasTurbine: gasTurbine.operationMode,
+          heatExchanger: heatExchanger.temperature.inlet,
+          ambient: ambient)
         
         return (SteamTurbine.parameter.power.max
           * steamTurbine.load.ratio / steamTurbine.efficiency)
@@ -124,10 +172,10 @@ public enum Plant {
     
     func electricalParasiticsPowerBlock() {
       let energy = heat.production.megaWatt - SteamTurbine.parameter.power.max
-        / status.steamTurbine.efficiency
+        / steamTurbine.efficiency
       
       electricalParasitics.powerBlock = PowerBlock.parasitics(
-        heat: energy, steamTurbine: status.steamTurbine
+        heat: energy, steamTurbine: steamTurbine, temperature: ambient
       )
       
       if heat.production.watt == 0 {
@@ -172,25 +220,37 @@ public enum Plant {
 
       let load = (electricalEnergy.demand + Design.layout.gasTurbine)
         / SteamTurbine.parameter.power.max
-  //    if status.steamTurbine.load.ratio != load {
-        status.steamTurbine.load.ratio = load
-        // The turbine load has changed recalculation of efficiency        
-        (_, status.steamTurbine.efficiency) = SteamTurbine.perform(
-          with: status.steamTurbine.load, boiler: status.boiler,
-          gasTurbine: status.gasTurbine, heatExchanger: status.heatExchanger
-        )
-    //  }
+
+      steamTurbine.load.ratio = load
+      // The turbine load has changed recalculation of efficiency
+      (_, steamTurbine.efficiency) = SteamTurbine.perform(
+        steamTurbine: steamTurbine.load,
+        boiler: boiler.operationMode,
+        gasTurbine: gasTurbine.operationMode,
+        heatExchanger: heatExchanger.temperature.inlet,
+        ambient: ambient)
+
       let demand = demandStrategyStorage()
 
-      heat.demand.megaWatt = (demand / status.steamTurbine.efficiency)
+      heat.demand.megaWatt = (demand / steamTurbine.efficiency)
         .limited(by: HeatExchanger.parameter.sccHTFheat)
 
       heat.demand.megaWatt =
-        (availability(&status.steamTurbine) ?? heat.demand.megaWatt
+        (availability(&steamTurbine) ?? heat.demand.megaWatt
         / Simulation.adjustmentFactor.heatLossH2O)
         / HeatExchanger.parameter.efficiency
 
-      var heatDiff = temperaturesPowerBlock(&status)
+      var heatDiff = temperaturesPowerBlock(
+        solarField: &solarField,
+        collector: collector,
+        powerBlock: &powerBlock,
+        heater: &heater,
+        heatExchanger: &heatExchanger,
+        steamTurbine: &steamTurbine,
+        boiler: &boiler,
+        gasTurbine: &gasTurbine,
+        storage: &storage,
+        ambient: ambient)
 
       heat.production = heat.heatExchanger + heat.wasteHeatRecovery
       /// Therm heat demand is lower after HX
@@ -198,9 +258,16 @@ public enum Plant {
       /// Unavoidable losses in Power Block
       heat.production.watt *= Simulation.adjustmentFactor.heatLossH2O
       
-      if Design.hasBoiler { updateBoiler(&status.boiler, &heatDiff) }
+      if Design.hasBoiler { updateBoiler(&boiler, &heatDiff) }
 
-      updateSteamTurbine(&status, &heatDiff)
+      updateSteamTurbine(
+        steamTurbine: &steamTurbine,
+        boiler: &boiler,
+        gasTurbine: &gasTurbine,
+        heater: &heater,
+        heatExchanger: &heatExchanger,
+        heatDiff: &heatDiff,
+        ambient: ambient)
       
       electricalEnergy.gross = electricalEnergy.steamTurbineGross
       electricalEnergy.gross += electricalEnergy.gasTurbineGross
@@ -209,15 +276,15 @@ public enum Plant {
 
       totalizeElectricalParasitics()
 
-      if case .startUp = status.steamTurbine.operationMode {
+      if case .startUp = steamTurbine.operationMode {
         heat.production = 0.0
       }
 
       if Design.hasBoiler {
-        if case .startUp = status.boiler.operationMode {
-          status.boiler.operationMode = .SI
-        } else if case .noOperation = status.boiler.operationMode {
-          status.boiler.operationMode = .NI
+        if case .startUp = boiler.operationMode {
+          boiler.operationMode = .SI
+        } else if case .noOperation = boiler.operationMode {
+          boiler.operationMode = .NI
         }
       }
 
@@ -226,113 +293,131 @@ public enum Plant {
 
     } while deviation > Simulation.parameter.electricalTolerance * factor
     assert(step < 31, "Too many iterations")
-    
+  }
+
+  static func update(
+    storage: inout Storage.PerformanceData,
+    powerBlock: inout PowerBlock.PerformanceData,
+    steamTurbine: SteamTurbine.PerformanceData)
+  {
     if Design.hasStorage {
       // Calculate the operating state of the salt
       heat.storage.megaWatt = Storage.operate(
-        storage: &status.storage, powerBlock: &status.powerBlock,
-        steamTurbine: status.steamTurbine, thermal: heat.storage.megaWatt
+        storage: &storage,
+        powerBlock: &powerBlock,
+        steamTurbine: steamTurbine,
+        thermal: heat.storage.megaWatt
       )
     }
   }
-
+  
   private static func checkForFreezeProtection(
-    _ status: inout PerformanceData, _ heatDiff: Double, _ fuel: Double)
+    heater: inout Heater.PerformanceData,
+    powerBlock: inout PowerBlock.PerformanceData,
+    storage: Storage.PerformanceData,
+    solarField: SolarField.PerformanceData,
+    _ heatDiff: Double, _ fuel: Double)
   {
-    if [.normal, .reheat].contains(status.heater.operationMode) { return }
+    if [.normal, .reheat].contains(heater.operationMode) { return }
 
-    let solarField = SolarField.parameter
+    let freezeTemperature = SolarField.parameter.HTF.freezeTemperature
 
-    let freezeTemperature = solarField.HTF.freezeTemperature
-
-    if status.solarField.header.temperature.outlet <
+    if solarField.header.temperature.outlet <
       freezeTemperature + Simulation.parameter.dfreezeTemperatureHeat,
-      status.storage.massFlow.isNearZero
+      storage.massFlow.isNearZero
     { // No freeze protection heater use anymore if storage is in operation
-      status.heater.inletTemperature(inlet: status.powerBlock)
+      heater.inletTemperature(inlet: powerBlock)
 
-      status.heater.massFlow = status.powerBlock.massFlow
+      heater.massFlow = powerBlock.massFlow
 
-      status.heater.operationMode = .freezeProtection
+      heater.operationMode = .freezeProtection
 
-      Heater.update(status, demand: 1, fuelAvailable: fuel)
-      { result in
-        status.heater = result.status
-        heat.heater.megaWatt = result.energy.supply
-        electricalParasitics.heater = result.energy.parasitics
-        fuelConsumption.heater = result.energy.fuel
-      }
+      let energy = Heater.update(
+        heater: &heater,
+        powerBlock: powerBlock,
+        storage: storage,
+        solarField: solarField,
+        demand: 1,
+        fuelAvailable: fuel)
+      fuelConsumption.heater = energy.fuel
+      heat.heater.megaWatt = energy.heat
+      electricalParasitics.heater = energy.electric
     }
 
-    if case .freezeProtection = status.heater.operationMode {
-      status.powerBlock.outletTemperature(outlet: status.heater)
+    if case .freezeProtection = heater.operationMode {
+      powerBlock.outletTemperature(outlet: heater)
     } else {
-      if status.solarField.header.outletTemperature
+      if solarField.header.outletTemperature
         > freezeTemperature.kelvin
         + Simulation.parameter.dfreezeTemperatureHeat.kelvin
       {
-        status.heater.operationMode = .noOperation
+        heater.operationMode = .noOperation
 
-        Heater.update(status, demand: heatDiff, fuelAvailable: fuel)
-        { result in
-          status.heater = result.status
-          heat.heater.megaWatt = result.energy.supply
-          electricalParasitics.heater = result.energy.parasitics
-          fuelConsumption.heater = result.energy.fuel
-        }
+        let energy = Heater.update(
+          heater: &heater,
+          powerBlock: powerBlock,
+          storage: storage,
+          solarField: solarField,
+          demand: heatDiff,
+          fuelAvailable: fuel)
+        fuelConsumption.heater = energy.fuel
+        heat.heater.megaWatt = energy.heat
+        electricalParasitics.heater = energy.electric
       }
     }
   }
 
   private static func temperatureLossPowerBlock(
-    _ status: inout PerformanceData)
+    _ powerBlock: inout PowerBlock.PerformanceData,
+    solarField: SolarField.PerformanceData,
+    storage: Storage.PerformanceData)
   {
     if Design.hasGasTurbine {
-      status.powerBlock.setTemperaturOutletEqualToInlet()
+      powerBlock.setTemperaturOutletEqualToInlet()
     } else {
       let tlpb = 0.0
 // 0.38 * (TpowerBlock.status - meteo.temperature) / 100 * (30 / Design.layout.powerBlock) ** 0.5 // 0.38
 
       let massFlow = max(0.1,
-        (status.solarField.massFlow + status.powerBlock.massFlow).rate)
-
-      status.powerBlock.inletTemperature(kelvin:
-        (status.solarField.massFlow.rate
-          * status.solarField.outletTemperature
-          + status.powerBlock.massFlow.rate
-          * status.storage.outletTemperature) / massFlow
-      )
+        (solarField.massFlow + powerBlock.massFlow).rate)
+      let inlet = (solarField.massFlow.rate * solarField.outletTemperature
+        + powerBlock.massFlow.rate * storage.outletTemperature) / massFlow
+      powerBlock.inletTemperature(kelvin: inlet)
       #warning("The implementation here differs from PCT")
       // FIXME: Was ist Tstatus ?????????
-
-      status.powerBlock.outletTemperature(kelvin:
-        (status.powerBlock.massFlow.rate
-          * Double(period) * status.powerBlock.inletTemperature
-          + status.powerBlock.outletTemperature
-          * (SolarField.parameter.HTFmass
-            - status.powerBlock.massFlow.rate * Double(period)))
-          / SolarField.parameter.HTFmass - tlpb
-      )
+      let sec = Double(period)
+      let outlet = (powerBlock.massFlow.rate * sec
+        * powerBlock.inletTemperature + powerBlock.outletTemperature
+        * (SolarField.parameter.HTFmass - powerBlock.massFlow.rate * sec))
+        / SolarField.parameter.HTFmass - tlpb
+      powerBlock.outletTemperature(kelvin: outlet)
     }
   }
 
   private static func temperaturesPowerBlock(
-    _ status: inout PerformanceData) -> Double
+    solarField: inout SolarField.PerformanceData,
+    collector: Collector.PerformanceData,
+    powerBlock: inout PowerBlock.PerformanceData,
+    heater: inout Heater.PerformanceData,
+    heatExchanger: inout HeatExchanger.PerformanceData,
+    steamTurbine: inout SteamTurbine.PerformanceData,
+    boiler: inout Boiler.PerformanceData,
+    gasTurbine: inout GasTurbine.PerformanceData,
+    storage: inout Storage.PerformanceData,
+    ambient: Temperature)
+    -> Double
   {
     func operateHeatExchanger() {
-      status.heatExchanger.massFlow = status.powerBlock.massFlow
+      heatExchanger.massFlow = powerBlock.massFlow
 
-      status.heatExchanger.setTemperature(inlet:
-        status.powerBlock.temperature.inlet
-      )
+      heatExchanger.setTemperature(inlet: powerBlock.temperature.inlet)
 
       heat.heatExchanger.megaWatt = HeatExchanger.perform(
-        &status.heatExchanger,
-        steamTurbine: status.steamTurbine,
-        storage: status.storage
-      )
+        &heatExchanger,
+        steamTurbine: steamTurbine,
+        storage: storage)
 
-      status.powerBlock.outletTemperature(outlet: status.heatExchanger)
+      powerBlock.outletTemperature(outlet: heatExchanger)
       
       if Design.hasGasTurbine, Design.hasStorage,
         heat.heatExchanger.megaWatt > HeatExchanger.parameter.sccHTFheat
@@ -346,14 +431,16 @@ public enum Plant {
 
     func isHeatExchangerBypassed() -> Bool {
 
-      if status.powerBlock.temperature.inlet
+      if powerBlock.temperature.inlet
         < HeatExchanger.parameter.temperature.htf.inlet.min
       //  || status.powerBlock.massFlow.rate == 0
       //  || status.storage.operationMode.isFreezeProtection
-        || status.solarField.operationMode.isFreezeProtection
+      //  || status.solarField.operationMode.isFreezeProtection
       {
-        if status.heater.operationMode.isFreezeProtection == false {
-          temperatureLossPowerBlock(&status)
+        if heater.operationMode.isFreezeProtection == false {
+          temperatureLossPowerBlock(
+            &powerBlock, solarField: solarField, storage: storage
+          )
         }
         return true
       }
@@ -361,9 +448,9 @@ public enum Plant {
     }
     
     func outletTemperature(
-      _ heatExchanger: inout HeatExchanger.PerformanceData,
-      _ powerBlock: inout PowerBlock.PerformanceData,
-      _ storage: Storage.PerformanceData)
+      powerBlock: inout PowerBlock.PerformanceData,
+      heatExchanger: inout HeatExchanger.PerformanceData,
+      storage: Storage.PerformanceData)
     {
       if powerBlock.massFlow.isNearZero == false,
         powerBlock.temperature.inlet
@@ -383,9 +470,12 @@ public enum Plant {
       }
     }
     
-    status.powerBlock.inletTemperature(outlet: status.solarField)
+    powerBlock.inletTemperature(outlet: solarField)
     
-    outletTemperature(&status.heatExchanger, &status.powerBlock, status.storage)
+    outletTemperature(
+      powerBlock: &powerBlock,
+      heatExchanger: &heatExchanger,
+      storage: storage)
     // Iteration: Find the right temperature for inlet and outlet of powerblock
 
     let fuel = Availability.fuel
@@ -393,87 +483,123 @@ public enum Plant {
     
     Iteration: while(true) {
       // Calculation of the heat supplied by the solar field
-      if Design.hasSolarField { solarField(&status) }
+      if Design.hasSolarField {
+        powerBlock.massFlow = updateSolarField(
+          &solarField, collector: collector, steamTurbine: steamTurbine)
+      }
 
-      if Design.hasStorage { updateStorage(&status, fuel) }
+      if Design.hasStorage {
+        updateStorage(
+          storage: &storage,
+          solarField: &solarField,
+          powerBlock: &powerBlock,
+          heater: &heater,
+          steamTurbine: &steamTurbine,
+          fuelAvailable: fuel)
+      }
 
       if Design.hasGasTurbine {
-        electricalEnergy.gasTurbineGross = GasTurbine.update(&status, fuel: fuel)
+        electricalEnergy.gasTurbineGross = GasTurbine.update(
+          storage: &storage,
+          powerBlock: &powerBlock,
+          boiler: boiler.operationMode,
+          gasTurbine: &gasTurbine,
+          heatExchanger: &heatExchanger,
+          steamTurbine: &steamTurbine,
+          temperature: ambient, fuel: fuel)
       }
 
       if Design.hasHeater && !Design.hasBoiler {
-        updateHeater(&status, electricalEnergy.gasTurbineGross, &heatDiff, fuel)
+        updateHeater(
+          heater: &heater,
+          solarField: &solarField,
+          powerBlock: &powerBlock,
+          gasTurbine: gasTurbine,
+          steamTurbine: &steamTurbine,
+          storage: &storage,
+          &heatDiff, fuel)
       }
-      
-      checkForFreezeProtection(&status, heatDiff, fuel)
+      checkForFreezeProtection(
+        heater: &heater,
+        powerBlock: &powerBlock,
+        storage: storage,
+        solarField: solarField,
+        heatDiff, fuel)
 
       if isHeatExchangerBypassed() {
         heat.production = 0.0
         heat.heatExchanger = 0.0
-        status.heatExchanger.massFlow = 0.0
+        heatExchanger.massFlow = 0.0
 
         break Iteration
       }
 
       operateHeatExchanger()
 
-      if abs(status.powerBlock.outletTemperature
-        - status.heatExchanger.outletTemperature)
+      if abs(powerBlock.outletTemperature - heatExchanger.outletTemperature)
         < Simulation.parameter.tempTolerance.kelvin
       {
         break Iteration
       }
 
-      status.powerBlock.outletTemperature(outlet: status.heatExchanger)
+      powerBlock.outletTemperature(outlet: heatExchanger)
     }
     return heatDiff
     // FIXME: H2OinPB = H2OinHX
   }
   /// Calculation of the heat supplied by the solar field
-  private static func solarField(_ status: inout PerformanceData) {
-    if status.solarField.insolationAbsorber > 0 {
-
-      heat.solar.kiloWatt = SolarField.parameter.HTF.deltaHeat(
-          status.solarField.temperature.outlet,
-          status.solarField.temperature.inlet)
-        * status.solarField.massFlow.rate
+  private static func updateSolarField(
+    _ solarField: inout SolarField.PerformanceData,
+    collector: Collector.PerformanceData,
+    steamTurbine: SteamTurbine.PerformanceData)
+    -> MassFlow
+  {
+    if collector.insolationAbsorber > 0 {
+      heat.solar.kiloWatt = solarField.massFlow.rate
+        * SolarField.parameter.HTF.deltaHeat(solarField)
     } else {
       // added to avoid solar > 0 during some night and freeze protection time
       heat.solar = 0.0
     }
-
-    status.powerBlock.massFlow = status.solarField.massFlow
     // powerblock mass flow can change when heater is running
-    
     if heat.solar.watt > 0 {
-      if case .startUp = status.steamTurbine.operationMode {
+      if case .startUp = steamTurbine.operationMode {
         heat.production = 0.0
       } else {
         heat.production = heat.solar
       }
-    } else if case .freezeProtection = status.solarField.operationMode {
+    } else if case .freezeProtection = solarField.operationMode {
       heat.solar = 0.0
       heat.production = 0.0
     } else {
       heat.solar = 0.0
       heat.production = 0.0
-      status.powerBlock.massFlow = 0.0
-      status.solarField.massFlow = 0.0
+      solarField.massFlow = 0.0
+      return 0.0      
     }
+    return solarField.massFlow
   }
 
+  // MARK: - SteamTurbine
+  
   private static func updateSteamTurbine(
-    _ status: inout Plant.PerformanceData, _ heatDiff: inout Double)
+    steamTurbine: inout SteamTurbine.PerformanceData,
+    boiler: inout Boiler.PerformanceData,
+    gasTurbine: inout GasTurbine.PerformanceData,
+    heater: inout Heater.PerformanceData,
+    heatExchanger: inout HeatExchanger.PerformanceData,
+    heatDiff: inout Double,
+    ambient: Temperature)
   {
-    (_, status.steamTurbine.efficiency) = SteamTurbine.perform(
-      with: status.steamTurbine.load, boiler: status.boiler,
-      gasTurbine: status.gasTurbine, heatExchanger: status.heatExchanger
-    )
-    
-    let efficiency = status.steamTurbine.efficiency
-    
+    (_, steamTurbine.efficiency) = SteamTurbine.perform(
+      steamTurbine: steamTurbine.load,
+      boiler: boiler.operationMode,
+      gasTurbine: gasTurbine.operationMode,
+      heatExchanger: heatExchanger.temperature.inlet,
+      ambient: ambient)
+
     let energy = heat.production.megaWatt
-      - SteamTurbine.parameter.power.max / efficiency
+      - SteamTurbine.parameter.power.max / steamTurbine.efficiency
     
     let excessHeat = heat.production.megaWatt - heat.demand.megaWatt
     
@@ -488,33 +614,34 @@ public enum Plant {
         Production > demand: \(diff) MWH,th
         """)
     }*/
-    
-    let steamTurbine = SteamTurbine.parameter
-    
+
     let minLoad: Double
-    if steamTurbine.minPowerFromTemp.isInapplicable {
+    if SteamTurbine.parameter.minPowerFromTemp.isInapplicable {
       #warning("The implementation here differs from PCT")
-      minLoad = steamTurbine.power.min / steamTurbine.power.max
+      minLoad = SteamTurbine.parameter.power.min
+        / SteamTurbine.parameter.power.max
     } else {
-      minLoad = steamTurbine.minPowerFromTemp[ambientTemperature]
-        / steamTurbine.power.max
+      minLoad = SteamTurbine.parameter.minPowerFromTemp[ambient]
+        / SteamTurbine.parameter.power.max
     }
     var minPower: Double
-    if steamTurbine.minPowerFromTemp.isInapplicable {
-      minPower = steamTurbine.power.min / steamTurbine.efficiencyNominal
+    if SteamTurbine.parameter.minPowerFromTemp.isInapplicable {
+      minPower = SteamTurbine.parameter.power.min
+        / SteamTurbine.parameter.efficiencyNominal
     } else {
-      minPower = steamTurbine.minPowerFromTemp[ambientTemperature]
+      minPower = SteamTurbine.parameter.minPowerFromTemp[ambient]
       
-      minPower = max(steamTurbine.power.nominal * minPower,
-                     steamTurbine.power.min)
+      minPower = max(SteamTurbine.parameter.power.nominal * minPower,
+                     SteamTurbine.parameter.power.min)
       
-      (_, status.steamTurbine.efficiency) = SteamTurbine.perform(
-        with: status.steamTurbine.load, boiler: status.boiler,
-        gasTurbine: status.gasTurbine, heatExchanger: status.heatExchanger
-      )
-      
-      let efficiency = status.steamTurbine.efficiency
-      minPower /= efficiency
+      (_, steamTurbine.efficiency) = SteamTurbine.perform(
+        steamTurbine: steamTurbine.load,
+        boiler: boiler.operationMode,
+        gasTurbine: gasTurbine.operationMode,
+        heatExchanger: heatExchanger.temperature.inlet,
+        ambient: ambient)
+
+      minPower /= steamTurbine.efficiency
     }
     if heat.production.watt > 0, heat.production.megaWatt < minPower {
       heat.production = 0.0
@@ -524,13 +651,12 @@ public enum Plant {
        """)*/
     }
     
-    SteamTurbine.update(status, heat: heat.production.megaWatt)
-    { result in
-      status.steamTurbine = result.status
-      electricalEnergy.steamTurbineGross = result.gross
-    }
+    electricalEnergy.steamTurbineGross = SteamTurbine.update(
+      &steamTurbine, boiler: boiler, heater: heater,
+      gasTurbine: gasTurbine, heatExchanger: heatExchanger,
+      heat: heat.production.megaWatt, temperature: ambient)
     
-    if Fuelmode.isPredefined {
+    if OperationRestriction.fuelStrategy.isPredefined {
       let steamTurbine = SteamTurbine.parameter.power.max
       if fuelConsumption.combined > 0 && electricalEnergy.steamTurbineGross
         > steamTurbine + 1 {
@@ -551,16 +677,28 @@ public enum Plant {
         electricalEnergy.steamTurbineGross = electricalEnergy.demand
       }
     } else { /* if Heater.parameter.operationMode */ // following uncomment for Shams-1.
-      if electricalEnergy.steamTurbineGross > electricalEnergy.demand {
-        
-        adjustLoadSteamTurbine(&status, &heatDiff)
+      if electricalEnergy.steamTurbineGross > electricalEnergy.demand
+      {
+        adjustLoadSteamTurbine(
+          steamTurbine: &steamTurbine,
+          boiler: &boiler,
+          heater: heater,
+          gasTurbine: gasTurbine,
+          heatExchanger: heatExchanger,
+          heatDiff: &heatDiff,
+          ambient: ambient)
       }
     }
   }
 
   private static func adjustLoadSteamTurbine(
-    _ status: inout PerformanceData,
-    _ heatDiff: inout Double)
+    steamTurbine: inout SteamTurbine.PerformanceData,
+    boiler: inout Boiler.PerformanceData,
+    heater: Heater.PerformanceData,
+    gasTurbine: GasTurbine.PerformanceData,
+    heatExchanger: HeatExchanger.PerformanceData,
+    heatDiff: inout Double,
+    ambient: Temperature)
   {
     let electricEnergyFactor = electricalEnergy.demand
       / electricalEnergy.steamTurbineGross
@@ -576,46 +714,65 @@ public enum Plant {
     var Qsf_load = 0.0
     Qsf_load *= electricEnergyFactor
     
-    Boiler.update(status.boiler, demand: heatDiff,
-                  Qsf_load: Qsf_load, fuelAvailable: Availability.fuel)
-    { result in
-      status.boiler = result.status
-      heat.boiler.megaWatt = result.energy.supply
-      fuelConsumption.boiler = result.energy.fuel
-      electricalParasitics.boiler = result.energy.parasitics
-    }
+    let fuel = Availability.fuel
     
-    SteamTurbine.update(status, heat: heat.production.megaWatt)
-    { result in
-      status.steamTurbine = result.status
-      electricalEnergy.steamTurbineGross = result.gross
-    }
+    let energy = Boiler.update(
+      &boiler, demand: heatDiff, Qsf_load: Qsf_load, fuelAvailable: fuel
+    )
+    heat.boiler.megaWatt = energy.heat
+    fuelConsumption.boiler = energy.fuel
+    electricalParasitics.boiler = energy.electric
+    
+    electricalEnergy.steamTurbineGross = SteamTurbine.update(
+      &steamTurbine, boiler: boiler, heater: heater,
+      gasTurbine: gasTurbine, heatExchanger: heatExchanger,
+      heat: heat.production.megaWatt, temperature: ambient)
   }
+  // MARK: - Storage
   
   private static func updateStorage(
-    _ status: inout PerformanceData, _ fuel: Double)
+    storage: inout Storage.PerformanceData,
+    solarField: inout SolarField.PerformanceData,
+    powerBlock: inout PowerBlock.PerformanceData,
+    heater: inout Heater.PerformanceData,
+    steamTurbine: inout SteamTurbine.PerformanceData,
+    fuelAvailable fuel: Double)
   {
-    Storage.update(&status, demand: heat.demand.megaWatt, fuelAvailable: fuel)
-    { result in
-      heat.storage.megaWatt = result.energy.supply
-      heat.demand.megaWatt = result.energy.demand
-      fuelConsumption.heater = result.energy.fuel
-      electricalParasitics.storage = result.energy.parasitics
-    }
+    // Demand for operation of the storage and adjustment of the powerblock mass flow
+    Storage.demandStrategy(
+      storage: &storage,
+      powerBlock: &powerBlock,
+      solarField: solarField)
+    
+    let energy = Storage.update(
+      storage: &storage,
+      solarField: &solarField,
+      steamTurbine: &steamTurbine,
+      powerBlock: &powerBlock,
+      heater: &heater,
+      demand: heat.demand.megaWatt,
+      fuelAvailable: fuel
+    )
+    heat.storage.megaWatt = energy.heat
+    fuelConsumption.heater = energy.fuel
+    electricalParasitics.storage = energy.electric
 
-    let (thermalPower, sto) = Storage.calculate(status.storage)
-    status.storage = sto
+    var thermal = storage.massFlow.rate
+      * SolarField.parameter.HTF.deltaHeat(storage) / 1_000
+    
+    let (thermalPower, salt) = Storage.calculate(thermal, storage: storage)
+    storage.salt = salt
     heat.storage.megaWatt = thermalPower
 
-    if status.storage.heat > 0 { // Energy surplus
-      if status.storage.charge.ratio < Storage.parameter.chargeTo,
-        status.solarField.massFlow >= status.powerBlock.massFlow
+    if storage.heat > 0 { // Energy surplus
+      if storage.charge.ratio < Storage.parameter.chargeTo,
+        solarField.massFlow >= powerBlock.massFlow
       { // 1.1
         heat.production = heat.solar
         heat.production += heat.storage
       } else { // heat cannot be stored
         heat.production = heat.solar
-        heat.production.megaWatt -= status.storage.heat
+        heat.production.megaWatt -= storage.heat
       }
     } else { // Energy deficit
       heat.production = heat.solar
@@ -623,43 +780,64 @@ public enum Plant {
     }
   }
 
+  // MARK: - Heater
+  
   private static func heatingStorage(
-    _ status: inout PerformanceData,
-    _ heatDiff: inout Double,
-    _ fuel: Double)
+    storage: inout Storage.PerformanceData,
+    solarField: inout SolarField.PerformanceData,
+    powerBlock: inout PowerBlock.PerformanceData,
+    heater: inout Heater.PerformanceData,
+    steamTurbine: inout SteamTurbine.PerformanceData,
+    heatDiff: inout Double,
+    fuel: Double)
   {
     if heatDiff < 0,
-      status.storage.charge.ratio < Storage.parameter.dischargeToTurbine,
-      status.storage.charge.ratio > Storage.parameter.dischargeToHeater
+      storage.charge.ratio < Storage.parameter.dischargeToTurbine,
+      storage.charge.ratio > Storage.parameter.dischargeToHeater
     {
       // Direct Discharging to SteamTurbine
       var supply, parasitics: Double
       if fuel > 0 { // Fuel available, Storage for Pre-Heating
 
-        (supply, parasitics) = Storage.perform(&status, mode: .preheat)
+        (supply, parasitics) = Storage.perform(
+          storage: &storage,
+          solarField: &solarField,
+          steamTurbine: &steamTurbine,
+          powerBlock: &powerBlock,
+          mode: .preheat)
 
-        status.heater.inletTemperature(outlet: status.storage)
+        heater.inletTemperature(outlet: storage)
 
-        status.heater.operationMode = .unknown
+        heater.operationMode = .unknown
 
         heatDiff = heat.production.megaWatt
           + heat.storage.megaWatt - heat.demand.megaWatt
 
-        heatingSolarField(&status, heatDiff, fuel)
-
-        status.heater.massFlow = status.storage.massFlow
+        heatingSolarField(
+          heater: &heater,
+          powerBlock: &powerBlock,
+          solarField: solarField,
+          storage: storage,
+          heatdiff: heatDiff,
+          fuel: fuel)
+        
+        heater.massFlow = storage.massFlow
       } else {  // No Fuel Available -> Discharge directly with reduced TB load
 
-        (supply, parasitics) = Storage.perform(&status, mode: .discharge)
+        (supply, parasitics) = Storage.perform(
+          storage: &storage,
+          solarField: &solarField,
+          steamTurbine: &steamTurbine,
+          powerBlock: &powerBlock,
+          mode: .discharge)
 
         let htf = SolarField.parameter.HTF
 
-        status.powerBlock.temperature.inlet = htf.mixingTemperature(
-          status.solarField, status.storage
-        )
+        powerBlock.temperature.inlet =
+          htf.mixingTemperature(solarField, storage)
 
-        status.powerBlock.massFlow = status.solarField.massFlow
-        status.powerBlock.massFlow += status.storage.massFlow
+        powerBlock.massFlow = solarField.massFlow
+        powerBlock.massFlow += storage.massFlow
       } // STORAGE: dischargeToHeater < Qrel < dischargeToTurbine; Fuel/NoFuel
 
       heat.storage.megaWatt = supply
@@ -667,8 +845,8 @@ public enum Plant {
       electricalParasitics.storage = parasitics
 
     } else if heatDiff < 0,
-      status.storage.charge.ratio < Storage.parameter.dischargeToHeater,
-      status.heater.operationMode != .freezeProtection
+      storage.charge.ratio < Storage.parameter.dischargeToHeater,
+      heater.operationMode != .freezeProtection
     {
       heatDiff = (heat.production + heat.wasteHeatRecovery).megaWatt
         / HeatExchanger.parameter.efficiency
@@ -681,114 +859,149 @@ public enum Plant {
         heatDiff = 0
       }
 
-      status.heater.inletTemperature(outlet: status.powerBlock)
-
-      heatingSolarField(&status, heatDiff, fuel)
+      heater.inletTemperature(outlet: powerBlock)
+      heatingSolarField(
+        heater: &heater,
+        powerBlock: &powerBlock,
+        solarField: solarField,
+        storage: storage,
+        heatdiff: heatDiff,
+        fuel: fuel)
     }
   }
 
   private static func heatingSolarField(
-    _ status: inout PerformanceData,
-    _ heatdiff: Double,
-    _ fuel: Double)
+    heater: inout Heater.PerformanceData,
+    powerBlock: inout PowerBlock.PerformanceData,
+    solarField: SolarField.PerformanceData,
+    storage: Storage.PerformanceData,
+    heatdiff: Double,
+    fuel: Double)
   {
-    Heater.update(status, demand: heatdiff, fuelAvailable: fuel)
-    { result in
-      status.heater = result.status
-      heat.heater.megaWatt = result.energy.supply
-      electricalParasitics.heater = result.energy.parasitics
-      fuelConsumption.heater = result.energy.fuel
-    }
+    let energy = Heater.update(
+      heater: &heater, powerBlock: powerBlock,
+      storage: storage, solarField: solarField,
+      demand: heatdiff, fuelAvailable: fuel)
+    fuelConsumption.heater = energy.fuel
+    heat.heater.megaWatt = energy.heat
+    electricalParasitics.heater = energy.electric
+
     let htf = SolarField.parameter.HTF
 
-    status.powerBlock.temperature.inlet = htf.mixingTemperature(
-      status.solarField, status.heater
-    )
+    powerBlock.temperature.inlet = htf.mixingTemperature(solarField, heater)
 
-    status.powerBlock.massFlow = status.solarField.massFlow
-    status.powerBlock.massFlow += status.heater.massFlow
+    powerBlock.massFlow = solarField.massFlow
+    powerBlock.massFlow += heater.massFlow
   }
 
   private static func heatingPowerBlock(
-    _ status: inout PerformanceData,
-    _ heatdiff: Double,
-    _ fuel: Double)
+    heater: inout Heater.PerformanceData,
+    powerBlock: inout PowerBlock.PerformanceData,
+    storage: Storage.PerformanceData,
+    solarField: SolarField.PerformanceData,
+    heatdiff: Double,
+    fuel: Double)
   {
-    Heater.update(status, demand: heatdiff, fuelAvailable: fuel)
-    { result in
-      status.heater = result.status
-      heat.heater.megaWatt = result.energy.supply
-      electricalParasitics.heater = result.energy.parasitics
-      fuelConsumption.heater = result.energy.fuel
-    }
+    let energy = Heater.update(
+      heater: &heater,
+      powerBlock: powerBlock,
+      storage: storage,
+      solarField: solarField,
+      demand: heatdiff,
+      fuelAvailable: fuel)
+    fuelConsumption.heater = energy.fuel
+    heat.heater.megaWatt = energy.heat
+    electricalParasitics.heater = energy.electric
 
     let htf = SolarField.parameter.HTF
 
-    status.powerBlock.temperature.inlet = htf.mixingTemperature(
-      inlet: status.powerBlock, with: status.heater
-    )
+    powerBlock.temperature.inlet =
+      htf.mixingTemperature(inlet: powerBlock, with: heater)
 
-    status.powerBlock.massFlow += status.heater.massFlow
+    powerBlock.massFlow += heater.massFlow
   }
 
   private static func updateHeater(
-    _ status: inout PerformanceData,
-    _ supplyGasTurbine: Double,
+    heater: inout Heater.PerformanceData,
+    solarField: inout SolarField.PerformanceData,
+    powerBlock: inout PowerBlock.PerformanceData,
+    gasTurbine: GasTurbine.PerformanceData,
+    steamTurbine: inout SteamTurbine.PerformanceData,
+    storage: inout Storage.PerformanceData,
     _ heatDiff: inout Double,
     _ fuel: Double)
   {
     // restart variable to avoid errors due to Boiler.  added for Shams-1
-    if case .pure = status.gasTurbine.operationMode {
+    if case .pure = gasTurbine.operationMode {
       // Plant updates in Pure CC Mode now again without RH!!
       // demand * WasteHeatRecovery.parameter.effPure * (1 / gasTurbine.efficiency- 1))
       // heat supplied by the WHR system
       
-    } else if case .integrated = status.gasTurbine.operationMode {
+    } else if case .integrated = gasTurbine.operationMode {
       // Plant does not update in Pure CC Mode
-      let energy = supplyGasTurbine * (1
-        / GasTurbine.efficiency(at: status.gasTurbine.load) - 1)
+      let energy = electricalEnergy.gasTurbineGross * (1
+        / GasTurbine.efficiency(at: gasTurbine.load) - 1)
         * WasteHeatRecovery.parameter.efficiencyNominal
         / WasteHeatRecovery.parameter.ratioHTF
       /// necessary HTF share
       heatDiff = heat.production.megaWatt - energy
       
-      status.heater.inletTemperature(outlet: status.powerBlock)
-      
-      heatingPowerBlock(&status, heatDiff, fuel)
-      
-    } else if case .noOperation = status.gasTurbine.operationMode {
+      heater.inletTemperature(outlet: powerBlock)
+
+      heatingPowerBlock(
+        heater: &heater,
+        powerBlock: &powerBlock,
+        storage: storage,
+        solarField: solarField,
+        heatdiff: heatDiff,
+        fuel: fuel)
+    } else if case .noOperation = gasTurbine.operationMode {
       // GasTurbine does not update at all (Load<Min?)
-      heatingSolarField(&status, heatDiff, fuel)
+      heatingSolarField(
+        heater: &heater,
+        powerBlock: &powerBlock,
+        solarField: solarField,
+        storage: storage,
+        heatdiff: heatDiff,
+        fuel: fuel)
     }
 
     if Design.hasStorage {
-      heatingStorage(&status, &heatDiff, fuel)
-      return
+      heatingStorage(
+        storage: &storage,
+        solarField: &solarField,
+        powerBlock: &powerBlock,
+        heater: &heater,
+        steamTurbine: &steamTurbine,
+        heatDiff: &heatDiff,
+        fuel: fuel)
     } else {
       heatDiff = (heat.production + heat.wasteHeatRecovery).megaWatt
         / HeatExchanger.parameter.efficiency - heat.demand.megaWatt
 
       if heat.production.watt == 0 {
         // use heater only in parallel with solar field and not as stand alone.
-        if Heater.parameter.onlyWithSolarField {
-          heatDiff = 0
-        }
+        if Heater.parameter.onlyWithSolarField { heatDiff = 0 }
       }
 
-      status.heater.inletTemperature(outlet: status.powerBlock)
-
-      heatingSolarField(&status, heatDiff, fuel)
+      heater.inletTemperature(outlet: powerBlock)
+      heatingSolarField(
+        heater: &heater,
+        powerBlock: &powerBlock,
+        solarField: solarField,
+        storage: storage,
+        heatdiff: heatDiff,
+        fuel: fuel)
     }
     
-    if status.heater.massFlow.isNearZero == false {
-      
-      heat.production.kiloWatt = status.powerBlock.massFlow.rate
-        * SolarField.parameter.HTF.deltaHeat(
-          status.powerBlock.temperature.outlet,
-          status.powerBlock.temperature.inlet)
+    if heater.massFlow.isNearZero == false {
+      heat.production.kiloWatt = powerBlock.massFlow.rate
+        * SolarField.parameter.HTF.deltaHeat(powerBlock)
     }
   }
 
+  // MARK: - Boiler
+  
   private static func updateBoiler(
     _ boiler: inout Boiler.PerformanceData,
     _ heatDiff: inout Double)
@@ -818,7 +1031,6 @@ public enum Plant {
             // no time to find a nice formula. sorry!
             Qsf_load = 0.769
           } else {
-
             Qsf_load = heat.production.megaWatt
               / (Design.layout.heatExchanger / efficiency)
           }
@@ -838,14 +1050,15 @@ public enum Plant {
         (Design.layout.heatExchanger / efficiency)
     }
 
-    Boiler.update(boiler, demand: heatDiff,
-                  Qsf_load: Qsf_load, fuelAvailable: 0)
-    { result in
-      boiler = result.status
-      heat.boiler.megaWatt = result.energy.supply
-    }
-
-    if Fuelmode.isPredefined { // predefined fuel consumption in *.pfc-file
+    let energy = Boiler.update(
+      &boiler, demand: heatDiff, Qsf_load: Qsf_load, fuelAvailable: 0
+    )
+    heat.boiler.megaWatt = energy.heat
+    fuelConsumption.boiler = energy.fuel
+    electricalParasitics.boiler = energy.electric
+    
+    // predefined fuel consumption in *.pfc-file
+    if OperationRestriction.fuelStrategy.isPredefined {
       if (heat.heatExchanger.megaWatt + heat.boiler.megaWatt) > 110 {
         heat.boiler.megaWatt = 105 - heat.heatExchanger.megaWatt
       }

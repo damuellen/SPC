@@ -21,11 +21,10 @@ extension Optional {
 }
 
 extension DefaultStringInterpolation {
-
   mutating func appendInterpolation<T>(csv values: T...) where T : Numeric {
     values.forEach { value in
       self.appendInterpolation(
-        numberFormatter.string(from: value as! NSNumber)!
+       numberFormatter.string(from: value as! NSNumber)!
       )
       self.appendInterpolation(", ")
     }
@@ -41,7 +40,7 @@ extension DefaultStringInterpolation {
 }
 
 extension NumberFormatter {
-  static func string(precision: Int, _ array: [Double]) -> [String] {
+  static func strings(_ array: [Double], precision: Int) -> [String] {
     numberFormatter.maximumFractionDigits = precision
     defer { numberFormatter.maximumFractionDigits = 3 }
     return array.map { numberFormatter.string(from: $0 as NSNumber)! }
@@ -86,34 +85,9 @@ let calendar = { calendar -> Calendar in
   return calendar
 }(Calendar(identifier: .gregorian))
 
-private let monthSymbols = calendar.monthSymbols
-
-extension Progress {
-  func tracking(month: Int) {
-    let monthSymbol = monthSymbols[month - 1]
-    let month = Int64(month)
-    if month > completedUnitCount {
-      completedUnitCount = month
-      let count = month < 10 ? "[ \(month)/12]" : "[\(month)/12]"
-      print(
-        "\(count) Calculations for \(monthSymbol) in progress.       ",
-        terminator: "\r"
-      )
-      fflush(stdout)
-    }
-  }
-}
-
-func readout(_ values: Any...) {
-  values.forEach { value in
-    print(value, terminator: "\n\n")
-  }
-  _ = readLine()
-}
-
 extension String {
   static var lineBreak: String { return "\n" }
-  static var separator: String { return ", " }
+  static var separator: String { return ", " } 
 }
 
 final class Cache<T: Hashable> {
@@ -137,4 +111,38 @@ func swap<T>(_ lhs: inout T, _ rhs: inout T) {
 @inline(__always)
 public func unreachable() -> Never {
   return unsafeBitCast((), to: Never.self)
+}
+
+extension Array where Element: AdditiveArithmetic {
+  public func sum() -> Element {
+    reduce(.zero, +)
+  }
+}
+
+extension Array where Element: BinaryFloatingPoint {
+  public func mean() -> Element {
+    reduce(.zero, +) / .init(count)
+  }
+}
+
+extension Array where Element: Comparable {
+  public func minMax() -> (min: Element, max: Element)? {
+    guard var minimum = first else { return nil }
+    var maximum = minimum    
+    // if 'vector' has an odd number of items,
+    // let 'minimum' or 'maximum' deal with the leftover
+    let start = count % 2 // 1 if odd, skipping the first element
+    for i in stride(from: start, to: count, by: 2) {
+      let (first, second) = (self[i], self[i+1])
+      
+      if first > second {
+        if first > maximum { maximum = first }
+        if second < minimum { minimum = second }
+      } else {
+        if second > maximum { maximum = second }
+        if first < minimum { minimum = first }
+      }
+    }
+    return (minimum, maximum)
+  }
 }

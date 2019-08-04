@@ -30,7 +30,7 @@ public struct MassFlow: CustomStringConvertible {
   }
 
   public init(_ rate: Double) {
-    assert(rate > 3_000 || rate < 3_000)
+  //  assert(rate > 3_000 || rate < 3_000)
     self.rate = rate
   }
 

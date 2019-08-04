@@ -44,7 +44,7 @@ public struct PerformanceLog: CustomStringConvertible, Comparable {
     return lhs.fitness == rhs.fitness
   }
     
-  private let interval = BlackBoxModel.interval
+  private let interval = Simulation.time.steps
   
   init(energy: Energy,
        radiation: SolarRadiation,
@@ -56,9 +56,7 @@ public struct PerformanceLog: CustomStringConvertible, Comparable {
     self.energyHistory = energyHistory
     self.performanceHistory = performanceHistory
     self.layout = Design.layout
-    self.report = PerformanceLog.makeReport(
-      layout: Design.layout, energy: energy, radiation: radiation
-    )
+    self.report = PerformanceLog.makeReport(energy: energy, radiation: radiation)
   }
   
   public subscript(

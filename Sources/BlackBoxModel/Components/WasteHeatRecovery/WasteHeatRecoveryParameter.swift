@@ -48,13 +48,13 @@ extension WasteHeatRecovery.Parameter: CustomStringConvertible {
 
 extension WasteHeatRecovery.Parameter: TextConfigInitializable {
   public init(file: TextConfigFile) throws {
-    let row: (Int) throws -> Double = { try file.parseDouble(row: $0) }
+    let line: (Int) throws -> Double = { try file.parseDouble(line: $0) }
     name = file.name
     operation = .integrated
-    efficiencyNominal = try row(13)
-    efficiencyPure = try row(16)
-    ratioHTF = try row(19)
-    efficiencySolar = try [row(32), row(35), row(38), row(41), row(44)]
-    efficiencyGasTurbine = try [row(47), row(50), row(53), row(56), row(59)]
+    efficiencyNominal = try line(13)
+    efficiencyPure = try line(16)
+    ratioHTF = try line(19)
+    efficiencySolar = try [line(32), line(35), line(38), line(41), line(44)]
+    efficiencyGasTurbine = try [line(47), line(50), line(53), line(56), line(59)]
   }
 }

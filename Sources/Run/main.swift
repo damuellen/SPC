@@ -17,30 +17,34 @@ let start = CFAbsoluteTimeGetCurrent()
 
 print("Solar Performance Calculator (build: \(dateString))")
 
-let currentDirectoryPath = FileManager.default.currentDirectoryPath
-
 let configPath = CommandLine.arguments.count > 1
   ? CommandLine.arguments[1]
-  : currentDirectoryPath
+  : FileManager.default.currentDirectoryPath
 
 let meteoFilePath = CommandLine.arguments.count > 2
   ? CommandLine.arguments[2]
-  : currentDirectoryPath
+  : FileManager.default.currentDirectoryPath
 
 let contents = try? FileManager.default
   .contentsOfDirectory(atPath: configPath)
+
 let csv = contents?.filter { $0.hasSuffix("csv") }
+
 let runs = csv?.compactMap { filename in
   return filename.split(separator: ".").first?
     .split(separator:"_").last?.integerValue
 }
+
 let lastRun = runs?.max() ?? 99
 
 // BlackBoxModel.loadConfigurations(atPath: configPath, format: .json)
 // BlackBoxModel.saveConfigurations(toPath: configPath)
-BlackBoxModel.meteoFilePath = "/Users/Daniel/"
 
-// BlackBoxModel.interval = .every5minutes
+Simulation.time.steps = .every5minutes
+let location = Position(longitude: 47.73, latitude: 29, elevation: 0)
+//BlackBoxModel.configure(location: location, year: 2005, timeZone: 2)
+BlackBoxModel.configure(meteoFilePath: "/Users/Daniel/")
+
 /*
 SolarField.parameter.massFlow.max = 2500.0
 Design.layout.powerBlock = 73
@@ -48,13 +52,21 @@ Design.layout.solarField = 98
 Design.layout.heatExchanger = 98
 */
 
+let df = DateFormatter()
+df.timeZone = TimeZone(secondsFromGMT: 0)
+df.dateFormat = "dd.MM.yyyy"
+//Simulation.time.firstDateOfOperation = df.date(from: "02.01.2005")!
+//Simulation.time.lastDateOfOperation = df.date(from: "04.01.2005")!
+
+/*
 let log = PerformanceDataRecorder(
-  customNaming: "Run_\(lastRun + Int(1))", mode: .brief
+  customNaming: "Result_\(lastRun + Int(1))"
 )
+*/
+let log = PerformanceDataRecorder(mode: .none)
+let result = BlackBoxModel.runModel(with: log)
 
-let result1 = BlackBoxModel.runModel(with: log, progress: Progress())
-
-print(result1)
+print(result)
 
 /*
 let gp = GeneticParameters(populationSize: 8, numberOfGenerations: 8, mutationRate: 0.5)

@@ -26,11 +26,6 @@ extension Component {
   }
 }
 
-struct ComponentState {
-  var supply: Double
-  var demand: Double
-  var parasitics: Double
-  var fuel: Double
+struct EnergyTransfer {
+  var heat, electric, fuel: Double
 }
-
-typealias Status<U,V> = (energy: U, status: V)

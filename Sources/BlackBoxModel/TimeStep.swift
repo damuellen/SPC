@@ -18,12 +18,12 @@ import Foundation
   - Attention: Needed by `Availability` and `GridDemand` both use `current`,
   also used in `SteamTurbine` and `Storage` routines.
 */
-struct TimeStep: CustomStringConvertible {
+public struct TimeStep: CustomStringConvertible {
 
-  static var current = TimeStep()
+  public static var current = TimeStep()
   
-  var isDayTime: Bool = true
-  var yearDay: Int = 0
+  var isDaytime: Bool = true
+  public var yearDay: Int = 0
   var month: Int = 0
   var day: Int = 0
   var hour: Int = 0
@@ -78,13 +78,20 @@ extension TimeStep {
   
   init(_ date: Date) {
     typealias CFCU = CFCalendarUnit
+#if os(macOS) || os(iOS)
     let minutes = CFCU(rawValue: CFCU.minute.rawValue),
     hours = CFCU(rawValue: CFCU.hour.rawValue),
     days = CFCU(rawValue: CFCU.day.rawValue),
     months = CFCU(rawValue: CFCU.month.rawValue),
-    year = CFCU(rawValue: CFCU.year.rawValue),
-    refDate =  date.timeIntervalSinceReferenceDate
-    
+    year = CFCU(rawValue: CFCU.year.rawValue)
+#else
+    let minutes = CFCU(kCFCalendarUnitMinute),
+    hours = CFCU(kCFCalendarUnitHour),
+    days = CFCU(kCFCalendarUnitDay),
+    months = CFCU(kCFCalendarUnitMonth),
+    year = CFCU(kCFCalendarUnitYear)
+#endif
+    let refDate =  date.timeIntervalSinceReferenceDate
     let minute = CFCalendarGetOrdinalityOfUnit(
       TimeStep.cfCalendar, minutes, hours, refDate
     )
@@ -97,11 +104,12 @@ extension TimeStep {
     let month = CFCalendarGetOrdinalityOfUnit(
       TimeStep.cfCalendar, months, year,refDate
     )
-    let yearDay = 0 // CFCalendarGetOrdinalityOfUnit(
-    // TimeStep.cfCalendar, days, year, refDate)
-
+    let yearDay = CFCalendarGetOrdinalityOfUnit(
+      TimeStep.cfCalendar, days, year, refDate
+    )
+    
     self = TimeStep(
-      isDayTime: true, yearDay: yearDay,
+      isDaytime: true, yearDay: yearDay,
       month: month, day: day, hour: hour, minute: minute)
     💬.debugMessage("Current simulation time: \n\(date)")
   }

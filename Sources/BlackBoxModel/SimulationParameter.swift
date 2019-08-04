@@ -77,32 +77,32 @@ extension Simulation.Parameter: CustomStringConvertible {
 
 extension Simulation.Parameter: TextConfigInitializable {
   public init(file: TextConfigFile) throws {
-    let row: (Int) throws -> Double = { try file.parseDouble(row: $0) }
+    let line: (Int) throws -> Double = { try file.parseDouble(line: $0) }
     let adjustmentFactor = try Simulation.AdjustmentFactor(
-      efficiencySolarField: row(34),
-      efficiencyTurbine: row(46),
-      efficiencyHeater: row(52),
-      efficiencyBoiler: row(55),
-      heatLossHCE: row(61),
-      heatLossHTF: row(40),
-      heatLossH2O: row(43),
-      electricalParasitics: row(61) / 100
+      efficiencySolarField: line(34),
+      efficiencyTurbine: line(46),
+      efficiencyHeater: line(52),
+      efficiencyBoiler: line(55),
+      heatLossHCE: line(61),
+      heatLossHTF: line(40),
+      heatLossH2O: line(43),
+      electricalParasitics: line(61) / 100
     )
 
     self = try Simulation.Parameter(
-      dfreezeTemperaturePump: Temperature(celsius: row(7)),
-      dfreezeTemperatureHeat: Temperature(celsius: row(10)),
-      minTemperatureRaiseStartUp: Temperature(celsius: row(13)),
-      tempTolerance: Temperature(row(22)),
-      minInsolationRaiseStartUp: row(16),
-      heatTolerance: row(19),
-      timeTolerance: row(25),
-      massTolerance: row(28),
-      minInsolation: row(31),
-      maxToPowerBlock: row(16),
-      minInsolationForBoiler: row(16),
-      electricalTolerance: row(58),
-      electricalParasitics: row(19),
+      dfreezeTemperaturePump: Temperature(celsius: line(7)),
+      dfreezeTemperatureHeat: Temperature(celsius: line(10)),
+      minTemperatureRaiseStartUp: Temperature(celsius: line(13)),
+      tempTolerance: Temperature(line(22)),
+      minInsolationRaiseStartUp: line(16),
+      heatTolerance: line(19),
+      timeTolerance: line(25),
+      massTolerance: line(28),
+      minInsolation: line(31),
+      maxToPowerBlock: line(16),
+      minInsolationForBoiler: line(16),
+      electricalTolerance: line(58),
+      electricalParasitics: line(19),
       HLtempTolerance: 0.1,
       adjustmentFactor: adjustmentFactor
     )

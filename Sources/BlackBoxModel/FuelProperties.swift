@@ -19,15 +19,15 @@ public struct FuelParameter: Codable {
 
 extension FuelParameter {
   public init(file: TextConfigFile) throws {
-    let row: (Int) throws -> Double = { try file.parseDouble(row: $0) }
+    let line: (Int) throws -> Double = { try file.parseDouble(line: $0) }
     self.name = file.name
     self.measurementUnit = file.values[9]
-    self.LHV = try row(13)
-    self.price = try row(16)
-    self.density = try row(19)
-    self.part = try row(22)
-    self.FERCeff = try row(25)
-    self.usedAmount = try row(28)
-    self.Qsol = try row(31)
+    self.LHV = try line(13)
+    self.price = try line(16)
+    self.density = try line(19)
+    self.part = try line(22)
+    self.FERCeff = try line(25)
+    self.usedAmount = try line(28)
+    self.Qsol = try line(31)
   }
 }

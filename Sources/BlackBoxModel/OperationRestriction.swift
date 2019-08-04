@@ -9,6 +9,7 @@
 //
 
 public struct OperationRestriction {
+  static var fuelStrategy: FuelStrategy = .predefined
   enum FuelStrategy {
     case predefined, strategy
 

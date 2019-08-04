@@ -11,110 +11,104 @@
 import DateGenerator
 import Foundation
 
-let calendar = { calendar -> NSCalendar in
-  calendar.timeZone = TimeZone(secondsFromGMT: 0)!
-  return calendar
-}(NSCalendar(identifier: .gregorian)!)
-
 public class MeteoDataGenerator: Sequence {
+  
   private(set) var frequence: DateGenerator.Interval
+  
   private(set) var dateInterval: DateInterval?
+  
   private let dataSource: MeteoDataSource
-  private let sunHoursPerDay: [DateInterval]
 
-  public init(_ source: MeteoDataSource, frequence: DateGenerator.Interval) {
-    self.dataSource = source
-    self.frequence = frequence
-    self.range = source.data.startIndex ..< source.data.endIndex
-    self.sunHoursPerDay = []
+  public enum Method {
+    case linear, gradient
   }
-
-  public init(from source: MeteoDataSource, sunHoursPerDay: [DateInterval],
-              frequence: DateGenerator.Interval) {
+  
+  private let method: Method
+    
+  public init(_ source: MeteoDataSource,
+              frequence: DateGenerator.Interval,
+              method: Method = .gradient)
+  {
+    precondition(frequence.fraction <= source.hourFraction,
+                 "The interval must be shorter or the same as in the source.")
     self.dataSource = source
     self.frequence = frequence
-
     self.range = source.data.startIndex ..< source.data.endIndex
-    self.sunHoursPerDay = sunHoursPerDay
-    let daybreak = sunHoursPerDay.first!.start
-    let start = calendar.date(
-      bySettingHour: 0, minute: 0, second: 0, of: daybreak, options: []
-      )!
-    dateInterval = DateInterval(start: start, duration: 0)
+    self.method = method
   }
 
   public func setRange(_ dateInterval: DateInterval) {
     self.dateInterval = dateInterval.align(with: self.frequence)
-    let startDate = self.dateInterval!.start
-    let endDate = self.dateInterval!.end
+    
+    let start = self.dateInterval!.start
+    let end = self.dateInterval!.end
+    let fraction = Int(1 / dataSource.hourFraction)
+    
+    let calendar = NSCalendar(identifier: .gregorian)!
+    calendar.timeZone = TimeZone(secondsFromGMT: 0)!
+    
+    let startHour = calendar.ordinality(of: .hour, in: .year, for: start)
+    let startIndex = (startHour - 1) * fraction
 
-    let startHour = calendar.ordinality(of: .hour, in: .year, for: startDate)
-    let startIndex = startHour - 1
+    let startMinute = calendar.ordinality(of: .minute, in: .hour, for: start)
+    firstStep += startMinute / (60 / frequence.rawValue) / fraction
 
-    let startMinute = calendar.ordinality(of: .minute, in: .hour, for: startDate)
-    step = startMinute / (60 / frequence.rawValue)
-
-    let endHour = calendar.ordinality(of: .hour, in: .year, for: endDate)
-    let lastIndex = endHour - 1
+    let endHour = calendar.ordinality(of: .hour, in: .year, for: end)
+    let lastIndex = (endHour - 1) * fraction
+    
     range = startIndex ..< lastIndex
-    let endMinute = calendar.ordinality(of: .minute, in: .hour, for: endDate)
-    lastStep = endMinute / (60 / frequence.rawValue)
+    
+    let endMinute = calendar.ordinality(of: .minute, in: .hour, for: end)
+    lastStep = endMinute / (60 / frequence.rawValue) / fraction
   }
   
   private var range: Range<Int>
 
-  private var step = 0
+  private var firstStep = 1
   private var lastStep = 0
-
+  
   public func makeIterator() -> AnyIterator<MeteoData> {
     let data = dataSource.data
-    let lastIndex = range.upperBound
-    let lastStep = self.lastStep
-    let sunHoursPerDay = self.sunHoursPerDay
-    
+    let method = self.method
     let steps = dataSource.hourFraction < 1
       ? Int(dataSource.hourFraction / frequence.fraction)
       : frequence.rawValue
 
     let stride = (1 / Float(steps))
 
-    var step = 1
+    var step = self.firstStep
     var index = range.lowerBound
+    
+    let lastStep = self.lastStep
+    let lastIndex = range.upperBound
+
     let period = frequence.fraction * 3600
-/*
-    var dict = [Int: (Int, Float)]()
-    sunHoursPerDay.forEach { day in
-      let startIndex = calendar.ordinality(of: .hour, in: .year, for: day.start) - 1
-      let startStep = calendar.ordinality(of: .second, in: .hour, for: day.start) / Int(period)
-      let startFraction = 1 / (startStep < steps ? (Float(steps) - Float(startStep)) / Float(steps) : 1)
-      dict[startIndex] = (startStep, startFraction)
-      let endIndex = calendar.ordinality(of: .hour, in: .year, for: day.end) - 1
-      let endStep = calendar.ordinality(of: .second, in: .hour, for: day.end) / Int(period)
-      let endFraction = endStep > 1 ? 1 / Float(endStep) / Float(steps) : 1
-      dict[endIndex] = (endStep, endFraction)
-    }
-*/
+
     return AnyIterator<MeteoData> {
       defer { step += 1 }
-      // When step count is reached move index to the next hourly value.
+      // When step count is reached move index to the next value.
       if step > steps { step = 1; index += 1 }
-      // Check whether the end of the range has already been reached.
+      // Check whether the end of the range has been reached.
       if index == lastIndex && step > lastStep { return nil }
 
       if steps == 1 { return data[index] }
-
+      // The first values of the year are interpolated with the last,
+      // otherwise always with the previous.
       let prev = index > 0 ? data[index - 1] : data[data.endIndex - 1]
+
       let current = data[index]
-      // For the last hour, the start value is reused for the interpolation.
-      let next = index < data.endIndex - 1 ? data[index + 1] : data[0]
-      // let day = calendar.ordinality(of: .day, in: .year, for: date) - 1
 
-      let start = MeteoData.lerp(start: prev, end: current, 0.5)
-      let end = MeteoData.lerp(start: current, end: next, 0.5)
-      let meteoData = MeteoData.lerp(start: start, end: end, Float(step - 1) * stride)
-      // let meteoData = MeteoData.interpolation(prev: prev, current: current, next: next, progess: Float(step) * stride)
-
-      return meteoData
+      switch method {
+      case .linear:
+        return MeteoData.lerp(start: prev, end: current, Float(step) * stride)
+      case .gradient:
+        // The last values of the year are interpolated with the first,
+        // otherwise always with the next.
+        let next = index < data.endIndex - 1 ? data[index + 1] : data[0]
+        return MeteoData.interpolation(
+          prev: prev, current: current, next: next, progess: Float(step) * stride
+        )
+      }
     }
   }
 }

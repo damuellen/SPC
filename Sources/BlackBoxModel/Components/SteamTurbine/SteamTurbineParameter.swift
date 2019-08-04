@@ -84,16 +84,16 @@ extension SteamTurbine.Parameter: CustomStringConvertible {
 
 extension SteamTurbine.Parameter: TextConfigInitializable {
   public init(file: TextConfigFile) throws {
-    let row: (Int) throws -> Double = { try file.parseDouble(row: $0) }
+    let line: (Int) throws -> Double = { try file.parseDouble(line: $0) }
     name = file.name
-    power = try .init(range: row(10) ... row(13), nom: 0)
-    efficiencyNominal = try row(32)
-    efficiencyBoiler = try row(35)
-    efficiencySCC = try row(38)
-    efficiency = try [row(45), row(48), row(51), row(54), row(57)]
-    efficiencyTemperature = try [row(64), row(67), row(70), row(73), row(76)]
-    startUpTime = try Int(row(83))
-    startUpEnergy = try row(86)
+    power = try .init(range: line(10) ... line(13), nom: 0)
+    efficiencyNominal = try line(32)
+    efficiencyBoiler = try line(35)
+    efficiencySCC = try line(38)
+    efficiency = try [line(45), line(48), line(51), line(54), line(57)]
+    efficiencyTemperature = try [line(64), line(67), line(70), line(73), line(76)]
+    startUpTime = try Int(line(83))
+    startUpEnergy = try line(86)
     minPowerFromTemp = [0]
     hotStartUpTime = 75
     efficiencyWetBulb = .init(values: 0, 0, 0, 0, 0, 0)

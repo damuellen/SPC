@@ -33,7 +33,7 @@ public enum WasteHeatRecovery: Component {
     efficiency *= (1 / GasTurbine.efficiency(at: gasTurbineLoad) - 1)
 
     debugPrint("Waste heat recovery efficiency at \(efficiency * 100)%")
-    assert(efficiency > 1, "Waste heat recovery efficiency at over 100%")
+    assert(efficiency >= 1, "Waste heat recovery efficiency at over 100%")
     return efficiency
   }
 }

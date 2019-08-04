@@ -26,16 +26,16 @@ let package = Package(
       dependencies: ["Config", "Meteo", "SolarPosition", "Willow"]),
     .target(
       name: "Meteo",
-      dependencies: ["DateGenerator"]),
+      dependencies: ["DateGenerator", "SolarPosition"]),
     .target(
       name: "Run",
       dependencies: ["Config", "BlackBoxModel"]),
     .testTarget(
       name: "MeteoTests",
-      dependencies: ["DateGenerator"]),
+      dependencies: ["DateGenerator", "SolarPosition"]),
     .testTarget(
       name: "BlackBoxModelTests",
-      dependencies: ["Config", "Meteo", "BlackBoxModel"]),
+      dependencies: ["Config", "Meteo", "SolarPosition", "BlackBoxModel"]),
     ],
   swiftLanguageVersions: [.v5]
 )

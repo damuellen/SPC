@@ -30,6 +30,8 @@ public enum Storage: Component {
     
     var charge: Ratio = 0.0
 
+    var salt: Salt = Salt()
+    
     struct Salt { // salt side of storage
       
       var massFlow: MassFlows = .init()
@@ -55,13 +57,11 @@ public enum Storage: Component {
       {
         heat.cold = parameter.HTF.properties.specificHeat(cold)
         heat.hot = parameter.HTF.properties.specificHeat(hot)
-        
-        massFlow.calculated.rate = thermal
-          / heat.available * HourFraction * 3_600 * 1_000
+        let rate = thermal / heat.available
+          * Simulation.time.steps.fraction * 3600 * 1_000
+        massFlow.calculated.rate = rate
       }
     }
-    
-    fileprivate var salt: Salt = Salt()
 
     fileprivate var storedHeat: Double = 0.0
 
@@ -78,8 +78,8 @@ public enum Storage: Component {
       case preheat, charging, fossilCharge, freezeProtection
     }
     
-    mutating func calculateMassFlow(
-      from thermalPower: Double,
+    mutating func adjustMassFlow(
+      to thermalPower: Double,
       htf: HeatTransferFluid = SolarField.parameter.HTF)
     {
       setMassFlow(rate: thermalPower / htf.deltaHeat(
@@ -101,32 +101,43 @@ public enum Storage: Component {
   
   public static var parameter: Parameter = ParameterDefaults.st
   
-  static func update(_ status: inout Plant.PerformanceData,
-                     demand: Double, fuelAvailable: Double,
-                     result: (Status<ComponentState, PerformanceData>) -> ())
-  {
-    // Demand for operation of the storage and adjustment of the powerblock mass flow
-    let demand = demandStrategy(&status, demand: demand)
+  static func update(
+    storage: inout PerformanceData,
+    solarField: inout SolarField.PerformanceData,
+    steamTurbine: inout SteamTurbine.PerformanceData,
+    powerBlock: inout PowerBlock.PerformanceData,
+    heater: inout Heater.PerformanceData,
+    demand: Double, fuelAvailable: Double)
+    -> EnergyTransfer
+  {    
     // **************************  Energy surplus  *****************************
-    if status.storage.heat > 0 {
+    if storage.heat > 0 {
 
       var supply: Double
 
       var parasitics: Double
 
-      if status.storage.charge.ratio < parameter.chargeTo,
-        status.solarField.massFlow.rate >= status.powerBlock.massFlow.rate
+      if storage.charge.ratio < parameter.chargeTo,
+        solarField.massFlow.rate >= powerBlock.massFlow.rate
       {
-        (supply, parasitics) = Storage.perform(&status, mode: .charging)
+        (supply, parasitics) = Storage.perform(
+          storage: &storage,
+          solarField: &solarField,
+          steamTurbine: &steamTurbine,
+          powerBlock: &powerBlock,
+          mode: .charging
+        )
       } else { // heat cannot be stored
-        (supply, parasitics) = Storage.perform(&status, mode: .noOperation)
+        (supply, parasitics) = Storage.perform(
+          storage: &storage,
+          solarField: &solarField,
+          steamTurbine: &steamTurbine,
+          powerBlock: &powerBlock,
+          mode: .noOperation
+        )
       }
-      status.powerBlock.inletTemperature(outlet: status.solarField)
-      let energy = ComponentState(
-        supply: supply, demand: demand, parasitics: parasitics, fuel: 0
-      )
-      result((energy, status.storage))
-      return
+      powerBlock.inletTemperature(outlet: solarField)
+      return EnergyTransfer(heat: supply, electric: parasitics, fuel: 0)
     }
     
     // **************************  Energy deficit  *****************************
@@ -146,15 +157,15 @@ public enum Storage: Component {
     }
     #warning("The implementation here differs from PCT")
     if peakTariff,// status.storage.operationMode = .freezeProtection,
-      status.storage.charge.ratio > parameter.dischargeToTurbine,
-      status.storage.heat < 1 * parameter.heatdiff * demand
+      storage.charge.ratio > parameter.dischargeToTurbine,
+      storage.heat < 1 * parameter.heatdiff * demand
     { // added dicharge only after peak hours
       // previous discharge condition commented:
       // if storage.heatrel > parameter.dischargeToTurbine
       // && storage.operationMode != .freezeProtection
       // && heatdiff < -1 * parameter.heatdiff * thermal.demand {
       // Discharge directly!! // 04.07.0 -0.25&& heatdiff < -0.25 * thermal.dem
-      if status.powerBlock.massFlow < status.solarField.massFlow {
+      if powerBlock.massFlow < solarField.massFlow {
         // there are cases, during cloudy days when mode .discharge although
         // massflow in SOF is higher that in PB.
       }
@@ -162,125 +173,138 @@ public enum Storage: Component {
 
       var parasitics: Double
 
-      (supply, parasitics) = Storage.perform(&status, mode: .discharge)
+      (supply, parasitics) = Storage.perform(
+        storage: &storage,
+        solarField: &solarField,
+        steamTurbine: &steamTurbine,
+        powerBlock: &powerBlock,
+        mode: .discharge
+      )
       
       if [.operating, .freezeProtection]
-        .contains(status.solarField.operationMode)
+        .contains(solarField.operationMode)
       {
-        status.powerBlock.temperature.inlet =
+        powerBlock.temperature.inlet =
           SolarField.parameter.HTF.mixingTemperature(
-            status.solarField, status.storage
+            solarField, storage
         )
 
-        status.powerBlock.massFlow = status.solarField.massFlow
-        status.powerBlock.massFlow += status.storage.massFlow
-        status.powerBlock.massFlow.adjust(withFactor:
+        powerBlock.massFlow = solarField.massFlow
+        powerBlock.massFlow += storage.massFlow
+        powerBlock.massFlow.adjust(withFactor:
           parameter.heatExchangerEfficiency
         )
         
-      } else if status.storage.massFlow.isNearZero == false {
+      } else if storage.massFlow.isNearZero == false {
         
-        status.powerBlock.inletTemperature(outlet: status.storage)
+        powerBlock.inletTemperature(outlet: storage)
 
-        status.powerBlock.massFlow = status.storage.massFlow
-        status.powerBlock.massFlow.adjust(withFactor:
+        powerBlock.massFlow = storage.massFlow
+        powerBlock.massFlow.adjust(withFactor:
           parameter.heatExchangerEfficiency
         )
       } else {
-        status.powerBlock.massFlow = .init() // set to zero
+        powerBlock.massFlow = .init() // set to zero
       }
-      let energy = ComponentState(
-        supply: supply, demand: demand, parasitics: parasitics, fuel: 0
-      )
-      result((energy, status.storage))
-      return
+      return EnergyTransfer(heat: supply, electric: parasitics, fuel: 0)
     }
 
     // heat can only be provided with heater on
-    if (parameter.FC == 0 && status.collector.parabolicElevation < 0.011
-      && status.storage.charge.ratio < parameter.chargeTo
-      && status.powerBlock.inletTemperature > 665
+    if (parameter.FC == 0// && collector.parabolicElevation < 0.011
+      && storage.charge.ratio < parameter.chargeTo
+      && powerBlock.inletTemperature > 665
       && Storage.isFossilChargingAllowed(at: time)
-      && Fuelmode.isPredefined == false)
-      || (Fuelmode.isPredefined && fuelAvailable > 0)
+      && OperationRestriction.fuelStrategy.isPredefined == false)
+      || (OperationRestriction.fuelStrategy.isPredefined && fuelAvailable > 0)
     {
       #warning("Check this")
-      status.heater.operationMode = .freezeProtection
+      heater.operationMode = .freezeProtection
       var supply: Double
 
       var parasitics: Double
 
       var fuel = 0.0
 
-      if Fuelmode.isPredefined == false {
+      if OperationRestriction.fuelStrategy.isPredefined == false {
+
+        let energy = Heater.update(
+          heater: &heater, powerBlock: powerBlock,
+          storage: storage, solarField: solarField,
+          demand: demand, fuelAvailable: fuelAvailable
+        )
+        fuel = energy.fuel
+        Plant.heat.heater.megaWatt = energy.heat
+        Plant.electricalParasitics.heater = energy.electric
         
-        Heater.update(status, demand: demand, fuelAvailable: fuelAvailable)
-        { result in
-          status.heater = result.status
-          fuel = result.energy.fuel
-          Plant.heat.heater.megaWatt = result.energy.supply
-          Plant.electricalParasitics.heater = result.energy.parasitics
-        }
+        powerBlock.massFlow = heater.massFlow
         
-        status.powerBlock.massFlow = status.heater.massFlow
+        (supply, parasitics) = Storage.perform(
+          storage: &storage,
+          solarField: &solarField,
+          steamTurbine: &steamTurbine,
+          powerBlock: &powerBlock,
+          mode: .freezeProtection
+        )
         
-        (supply, parasitics) = Storage.perform(&status, mode: .freezeProtection)
-        
-        status.powerBlock.inletTemperature(outlet: status.storage)
+        powerBlock.inletTemperature(outlet: storage)
 
         // check why to circulate HTF in SF
         #warning("Storage.parasitics")
         Plant.electricalParasitics.solarField =
           SolarField.parameter.antiFreezeParastics
-      } else if case .freezeProtection = status.solarField.operationMode,
-        status.storage.charge > -0.35 && parameter.FP == 0
+      } else if case .freezeProtection = solarField.operationMode,
+        storage.charge > -0.35 && parameter.FP == 0
       {
-        (supply, parasitics) = Storage.perform(&status, mode: .freezeProtection)
+        (supply, parasitics) = Storage.perform(
+          storage: &storage,
+          solarField: &solarField,
+          steamTurbine: &steamTurbine,
+          powerBlock: &powerBlock,
+          mode: .freezeProtection
+        )
       } else {
-        (supply, parasitics) = Storage.perform(&status, mode: .noOperation)
+        (supply, parasitics) = Storage.perform(
+          storage: &storage,
+          solarField: &solarField,
+          steamTurbine: &steamTurbine,
+          powerBlock: &powerBlock,
+          mode: .noOperation
+        )
       }
-      let energy = ComponentState(
-        supply: supply, demand: demand, parasitics: parasitics, fuel: fuel
-      )
-      result((energy, status.storage))
-      return
+      return EnergyTransfer(heat: supply, electric: parasitics, fuel: fuel)
     }
-    let energy = ComponentState(
-      supply: 0, demand: demand, parasitics: 0, fuel: 0
-    )
-    result((energy, status.storage))
-    unreachable()
+    return EnergyTransfer(heat: 0, electric: 0, fuel: 0)
   }
   
-  private static func demandStrategy(
-    _ status: inout Plant.PerformanceData,
-    demand: Double) -> Double
+  static func demandStrategy(
+    storage: inout Storage.PerformanceData,
+    powerBlock: inout PowerBlock.PerformanceData,
+    solarField: SolarField.PerformanceData)
   {
-    var demand = TimeStep.current.isDayTime ? 0.5 : demand
+    var demand = TimeStep.current.isDaytime ? 0.5 : Plant.heat.demand.megaWatt
     
     let production = Plant.heat.solar.megaWatt
     
     switch parameter.strategy {
-    case .always:
-      strategyAlways(&status.storage, &status.powerBlock,
-                     solarFieldMassFlow: status.solarField.massFlow,
-                     production: production, demand: &demand)
-    case .demand :
-      strategyDemand(&status.storage, &status.powerBlock,
-                     massFlowSolarField: status.solarField.massFlow,
-                     production: production)
+    case .always: strategyAlways(
+      storage: &storage, powerBlock: &powerBlock,
+      solarFieldMassFlow: solarField.massFlow,
+      production: production, demand: &demand)
+    case .demand : strategyDemand(
+      storage: &storage, powerBlock: &powerBlock,
+      massFlowSolarField: solarField.massFlow,
+      production: production)
     // parameter.strategy = "Ful" // Booster or Shifter
-    case .shifter:
-      strategyShifter(&status.storage, &status.powerBlock,
-                      massFlowSolarField: status.solarField.massFlow,
-                      production: production, demand: &demand)
+    case .shifter: strategyShifter(
+      storage: &storage, powerBlock: &powerBlock,
+      massFlowSolarField: solarField.massFlow,
+      production: production, demand: &demand)
     }
-    return demand
   }
   
   private static func strategyAlways(
-    _ storage: inout PerformanceData,
-    _ powerBlock: inout PowerBlock.PerformanceData,
+    storage: inout PerformanceData,
+    powerBlock: inout PowerBlock.PerformanceData,
     solarFieldMassFlow: MassFlow,
     production: Double,
     demand: inout Double)
@@ -319,8 +343,8 @@ public enum Storage: Component {
   }
   
   private static func strategyDemand(
-    _ storage: inout PerformanceData,
-    _ powerBlock: inout PowerBlock.PerformanceData,
+    storage: inout PerformanceData,
+    powerBlock: inout PowerBlock.PerformanceData,
     massFlowSolarField: MassFlow,
     production: Double)
   {
@@ -358,8 +382,8 @@ public enum Storage: Component {
   }
   
   private static func strategyShifter(
-    _ storage: inout PerformanceData,
-    _ powerBlock: inout PowerBlock.PerformanceData,
+    storage: inout PerformanceData,
+    powerBlock: inout PowerBlock.PerformanceData,
     massFlowSolarField: MassFlow,
     production: Double,
     demand: inout Double)
@@ -373,7 +397,7 @@ public enum Storage: Component {
       heatExchanger.temperature.htf.outlet.max) / 1_000
 
     let time = TimeStep.current
-    let dniDay = BlackBoxModel.meteoData[ofDay: TimeStep.current.day].sum
+    let dniDay = BlackBoxModel.meteoData![ofDay: TimeStep.current.day].sum
     
     if time.month < parameter.startexcep || time.month > parameter.endexcep {
       storage.heatProductionLoad = parameter.heatProductionLoadWinter
@@ -484,66 +508,56 @@ public enum Storage: Component {
   }
   
   /// Calculate thermal power given by TES
-  static func calculate(_ tes: PerformanceData) -> (Double, PerformanceData) {
-
-    var storage = tes
-
-    var thermal = storage.massFlow.rate * SolarField.parameter.HTF.deltaHeat(
-        storage.temperature.outlet, storage.temperature.inlet) / 1_000
-    
-    // Check if the required heat is contained in TES, if not recalculate
+  static func calculate(
+    _ thermal: Double,
+    storage: Storage.PerformanceData)
+    -> (Double, Storage.PerformanceData.Salt)
+  {
+    var salt = storage.salt
+    var thermal = thermal
+    var saltMassFlow = MassFlow()
     
     if case .discharge = storage.operationMode {
-      storage.salt.calculateMassFlow(
+      salt.calculateMassFlow(
         cold: storage.temperature.inlet + storage.dT_HTFsalt.cold,
         hot: storage.temperatureTank.hot,
         thermal: thermal
       )
-
-      if (storage.salt.massFlow.hot - storage.salt.massFlow.calculated)
-        < storage.salt.massFlow.minimum
-      {
-        // added to avoid negative or too low salt mass
-        storage.salt.massFlow.calculated -= storage.salt.massFlow.hot
-          - storage.salt.massFlow.minimum
-        
-        if storage.salt.massFlow.calculated.rate < 10 {
-          storage.salt.massFlow.calculated.rate = 0
-        }
-        // recalculate thermal power given by TES
-        thermal = (storage.salt.massFlow.calculated.rate
-          * storage.salt.heat.available / HourFraction / 3_600) / 1_000
-      }
+      saltMassFlow = salt.massFlow.hot
     }
     
     if case .charging = storage.operationMode {
-      storage.salt.calculateMassFlow(
+      salt.calculateMassFlow(
         cold: storage.temperatureTank.cold,
         hot: storage.temperature.inlet - storage.dT_HTFsalt.hot,
-        thermal: -thermal)
-      
-      if (storage.salt.massFlow.cold - storage.salt.massFlow.calculated)
-        < storage.salt.massFlow.minimum
-      {
-        storage.salt.massFlow.calculated = storage.salt.massFlow.calculated
-          - (-storage.salt.massFlow.minimum + storage.salt.massFlow.cold)
-        
-        if storage.salt.massFlow.calculated.rate < 10 {
-          storage.salt.massFlow.calculated.rate = 0
-        }
-        // recalculate thermal power given by TES
-        thermal = (-storage.salt.massFlow.calculated.rate
-          * storage.salt.heat.available / HourFraction / 3_600) / 1_000
-      }
+        thermal: -thermal
+      )
+      saltMassFlow = salt.massFlow.cold
     }
-    return (thermal, storage)
+    
+    if (saltMassFlow - salt.massFlow.calculated)
+      < salt.massFlow.minimum
+    {
+      salt.massFlow.calculated = salt.massFlow.calculated
+        - (-salt.massFlow.minimum + salt.massFlow.cold)
+      
+      if salt.massFlow.calculated.rate < 10 {
+        salt.massFlow.calculated.rate = 0
+      }
+      // recalculate thermal power given by TES
+      thermal = (-salt.massFlow.calculated.rate * salt.heat.available
+        / Simulation.time.steps.fraction / 3_600) / 1_000
+    }
+    
+    return (thermal, salt)
   }
 
   static func operate(
     storage: inout Storage.PerformanceData,
     powerBlock: inout PowerBlock.PerformanceData,
     steamTurbine: SteamTurbine.PerformanceData,
-    thermal: Double) -> Double
+    thermal: Double)
+    -> Double
   {
     var thermalPower = thermal
     
@@ -705,7 +719,8 @@ public enum Storage: Component {
         storage.salt.massFlow.calculated.rate = 0
       }
       thermalPower = storage.salt.massFlow.calculated.rate
-        * storage.salt.heat.available / HourFraction / 3_600 / 1_000
+        * storage.salt.heat.available
+        / Simulation.time.steps.fraction / 3_600 / 1_000
       
       storage.salt.massFlow.hot = storage.salt.massFlow.minimum
       
@@ -775,7 +790,7 @@ public enum Storage: Component {
     let solarField =  SolarField.parameter
 
     storage.salt.massFlow.calculated.rate =
-      solarField.antiFreezeFlow.rate * HourFraction * 3_600
+      solarField.antiFreezeFlow.rate * Simulation.time.steps.duration
 
     let massFlow = storage.salt.massFlow.calculated
       .adjusted(withFactor: splitfactor)
@@ -802,7 +817,7 @@ public enum Storage: Component {
       storage.salt.massFlow.cold.rate > 0
     {
       storage.salt.massFlow.calculated.rate = powerBlock.massFlow.rate
-        * HourFraction * 3_600
+        * Simulation.time.steps.duration
       
       storage.temperatureTank.cold = Temperature.calculate(
         massFlow1: storage.salt.massFlow.calculated,
@@ -921,20 +936,20 @@ public enum Storage: Component {
       
       if case .discharge = status.operationMode {
         
-        let dischargeLoad = parameter.fixedDischargeLoad.isZero
+        let load = parameter.fixedDischargeLoad.isZero
           ? 0.97 : parameter.fixedDischargeLoad
         
         let htf = SolarField.parameter.HTF
         
         let designDischarge = (((
-          (solarField.massFlow.max - parameter.massFlow).rate * dischargeLoad.ratio)
+          (solarField.massFlow.max - parameter.massFlow).rate * load.ratio)
           / parameter.heatExchangerEfficiency) * htf.deltaHeat(
             parameter.designTemperature.hot - status.dT_HTFsalt.hot,
             parameter.designTemperature.cold - status.dT_HTFsalt.cold) / 1_000)
           * parameter.heatExchangerEfficiency // design charging power
         
         let massFlowDischarging = designDischarge
-          / status.salt.heat.available * HourFraction * 3_600 * 1_000
+          / status.salt.heat.available * Simulation.time.steps.duration * 1_000
         
         let saltFlowRatio = status.salt.massFlow.calculated.rate
           / massFlowDischarging
@@ -954,7 +969,7 @@ public enum Storage: Component {
           * parameter.heatExchangerEfficiency
         
         let massFlowCharging = designCharge
-          / status.salt.heat.available * HourFraction * 3_600 * 1_000
+          / status.salt.heat.available * Simulation.time.steps.duration * 1_000
         
         let saltFlowRatio = status.salt.massFlow.calculated.rate
           / massFlowCharging
@@ -972,9 +987,8 @@ public enum Storage: Component {
     }
   }
   
-  private static func minMassFlow(
-    _ storage: Storage.PerformanceData
-    ) -> MassFlow {
+  static func minMassFlow(_ storage: Storage.PerformanceData) -> MassFlow
+  {
     switch Storage.parameter.definedBy {
     case .hours:
       let minMassFlow = Design.layout.storage * parameter.dischargeToTurbine
@@ -1026,7 +1040,7 @@ public enum Storage: Component {
     }
   }
   
-  private static func tankTemperature(_ specificHeat: Double) -> Temperature {
+  static func tankTemperature(_ specificHeat: Double) -> Temperature {
     return Temperature((-parameter.HTF.properties.heatCapacity[0]
       + (parameter.HTF.properties.heatCapacity[0] ** 2
         - 4 * (parameter.HTF.properties.heatCapacity[1] * 0.5)
@@ -1034,7 +1048,7 @@ public enum Storage: Component {
       / (2 * parameter.HTF.properties.heatCapacity[1] * 0.5))
   }
   
-  private static func heatlosses(storage: inout Storage.PerformanceData) {
+  static func heatlosses(storage: inout Storage.PerformanceData) {
     
     if storage.salt.massFlow.cold.rate
       > abs(parameter.dischargeToTurbine * storage.salt.massFlow.calculated.rate)
@@ -1069,11 +1083,11 @@ public enum Storage: Component {
         / storage.salt.massFlow.hot.rate
       // temp after cool down
       storage.temperatureTank.hot = tankTemperature(storage.salt.heat.hot)
-      print(storage.temperatureTank.hot)
+      //print(storage.temperatureTank.hot)
     }
   }
   
-  private static func saltMass(_ storage: PerformanceData) -> Double {
+  static func saltMass(_ storage: PerformanceData) -> Double {
     switch parameter.definedBy {
     case .hours:
       return Design.layout.storage
@@ -1093,8 +1107,7 @@ public enum Storage: Component {
     }
   }
   
-  private static func defindedByTonnage(
-    _ storage: inout Storage.PerformanceData)
+  static func defindedByTonnage(_ storage: inout Storage.PerformanceData)
   {
     storage.salt.heat.cold = parameter.HTF.properties.specificHeat(
       parameter.designTemperature.cold
@@ -1119,7 +1132,7 @@ public enum Storage: Component {
     // calculate discharge rate only once per day, directly after sunset
     var dischargeLoad = 0.0
     
-    if TimeStep.current.isDayTime && parameter.isVariable
+    if TimeStep.current.isDaytime && parameter.isVariable
     {
       switch parameter.definedBy {
       case .hours:
@@ -1203,19 +1216,7 @@ extension Storage.PerformanceData {
     
     let storage = Storage.parameter
     let solarField = SolarField.parameter
-    /// Initial state of storage
-    if Design.hasStorage {
-      storedHeat = Design.layout.storage * storage.heatStoredrel
-      
-      SolarField.parameter.massFlow.max = MassFlow(
-        100 / storage.massFlow.rate * solarField.massFlow.max.rate
-      )
-      
-      Storage.parameter.massFlow = MassFlow(
-        (1 - storage.massFlow.rate / 100) * solarField.massFlow.max.rate
-      )
-    }
-    storedHeat = 0
+
     // solarField.massFlow.min = MassFlow(
     //   solarField.massFlow.min.rate / 100 * solarField.massFlow.max.rate
     // )

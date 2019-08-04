@@ -61,14 +61,14 @@ extension Boiler.Parameter: CustomStringConvertible {
 
 extension Boiler.Parameter: TextConfigInitializable {
   public init(file: TextConfigFile) throws {
-    let row: (Int) throws -> Double = { try file.parseDouble(row: $0) }
+    let line: (Int) throws -> Double = { try file.parseDouble(line: $0) }
     name = file.name
-    nominalTemperatureOut = try row(10)
-    minLoad = try row(13)
-    start = try .init(hours: .init(cold: row(16), warm: row(25)),
-                      energy: .init(cold: row(22), warm: row(31)))
-    nominalElectricalParasitics = try row(34)
-    electricalParasitics = try [row(37), row(40)]
-    efficiency = try [row(50), row(53), row(56), row(59), row(62)]
+    nominalTemperatureOut = try line(10)
+    minLoad = try line(13)
+    start = try .init(hours: .init(cold: line(16), warm: line(25)),
+                      energy: .init(cold: line(22), warm: line(31)))
+    nominalElectricalParasitics = try line(34)
+    electricalParasitics = try [line(37), line(40)]
+    efficiency = try [line(50), line(53), line(56), line(59), line(62)]
   }
 }

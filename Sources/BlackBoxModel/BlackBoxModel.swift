@@ -14,54 +14,45 @@ import Foundation
 import Meteo
 import SolarPosition
 
-let HourFraction = BlackBoxModel.interval.fraction
-let Fuelmode = OperationRestriction.FuelStrategy.predefined
-let currentDirectoryPath = FileManager.default.currentDirectoryPath
-
 public enum BlackBoxModel {
   
-  public static var sun: SolarPosition?
+  public private(set) static var yearOfSimulation = 2005
+  /// The apparent solar position based on date, time, and location.
+  public private(set) static var sun: SolarPosition?
+  /// Solar radiation and meteorological elements for a 1-year period.
+  public private(set) static var meteoData: MeteoDataSource?
   
-  public static var interval: DateGenerator.Interval = .every5minutes
-
-  static let year = 2005 // meteoDataSource.year ?? 2005
-  
-  public static var meteoFilePath: String = currentDirectoryPath {
-    didSet { _meteoData = nil }
+  public static func configure(location: Position, year: Int, timeZone: Int)
+  {
+    yearOfSimulation = year
+    
+    sun = SolarPosition(
+      position: location.coordinates, year: yearOfSimulation,
+      timezone: timeZone, frequence: Simulation.time.steps
+    )
+    
+    meteoData = MeteoDataSource.generatedFrom(sun!)
   }
   
-  private static var _meteoData: MeteoDataSource?
-  
-  static var meteoData: MeteoDataSource {
-    if _meteoData == nil {
-      do { _meteoData = try makeMeteoDataSource() } catch {
-        print(error)
-        fatalError("Meteo file is mandatory for calculation.")
-      }
+  public static func configure(meteoFilePath: String? = nil)
+  {
+    let path = meteoFilePath ?? FileManager.default.currentDirectoryPath
+    
+    do {
+      let handler = try MeteoDataFileHandler(forReadingAtPath: path)
+      meteoData = try handler.makeDataSource()
+    } catch {
+      fatalError("\(error) Meteo data is mandatory for calculation.")
     }
-    return _meteoData!
+    
+    yearOfSimulation = meteoData!.year ?? yearOfSimulation
+    
+    sun = SolarPosition(
+      position: meteoData!.location.coordinates, year: yearOfSimulation,
+      timezone: -(meteoData!.timeZone ?? 0), frequence: Simulation.time.steps
+    )
   }
   
-  private static func makeMeteoDataSource() throws -> MeteoDataSource {
-    let url = URL(fileURLWithPath: meteoFilePath)
-    if url.hasDirectoryPath == false {
-      let filePath = url.path
-      return try MeteoDataFileHandler(forReadingAtPath: filePath)
-        .makeDataSource()
-    }
-    else if let fileName = try FileManager.default
-      .contentsOfDirectory(atPath: meteoFilePath).first { item in
-        item.hasSuffix("mto") || item.hasPrefix("TMY")
-      }
-    {
-      let filePath = url.appendingPathComponent(fileName).path
-      return try MeteoDataFileHandler(forReadingAtPath: filePath)
-        .makeDataSource()
-    } else {
-      throw MeteoDataFileError.fileNotFound(meteoFilePath)
-    }
-  }
-
   public static func loadConfigurations(
     atPath path: String, format: Config.Formats = .json)
   {
@@ -77,7 +68,8 @@ public enum BlackBoxModel {
     }
   }
   
-  public static func saveConfigurations(toPath path: String) {
+  public static func saveConfigurations(toPath path: String)
+  {
     do {
       try JsonConfigFileHandler.saveConfigurations(toPath: path)
     } catch {
@@ -85,60 +77,75 @@ public enum BlackBoxModel {
     }
   }
   
+  /// - Parameter recorder: Creates the log and write results to file.
+  /// - Returns: The operating data collected by the recorder.
+  /// - Attention: `configure()` must called before this.
   @discardableResult
-  public static func runModel(
-    with recorder: PerformanceDataRecorder,
-    progress: Progress? = nil)
+  public static func runModel(with recorder: PerformanceDataRecorder)
     -> PerformanceLog
   {
-    progress?.becomeCurrent(withPendingUnitCount: 12)
-    
-    defer { progress?.resignCurrent() }
-    
-    Plant.setLocation(meteoData.location)
+    guard let 🌞 = sun, let 🌤 = meteoData else {
+      print("We need the sun."); exit(1)
+    }
     
     Plant.setupComponentParameters()
     
-    if case .none = sun {
-      sun = SolarPosition(
-        location: Plant.location.coordinates, year: year,
-        timezone: -(meteoData.timeZone ?? 0), frequence: interval)
-    }
-    guard let 🌞 = sun else { preconditionFailure("We need the sun.") }
-
-    Maintenance.setDefaultSchedule(for: year)
+    Maintenance.setDefaultSchedule(for: yearOfSimulation)
     
     var status = Plant.initialState
-    
-    let (🌦, 📅) = makeGenerators(dataSource: meteoData)
+
+    let (🌦, 📅) = makeGenerators(dataSource: 🌤)
 
     for (meteo, date) in zip(🌦, 📅) {
-      
+ 
       TimeStep.setCurrent(date: date)
       
       Maintenance.checkSchedule(date)
-      
-      progress?.tracking(month: TimeStep.current.month)
-      
-      Plant.setAmbientTemperature(meteo.temperature)
 
       if let position = 🌞[date] {
         status.collector = Collector.tracking(sun: position)
-        Collector.efficiency(&status.collector, meteo: meteo)
+        
+        Collector.efficiency(&status.collector, ws: meteo.windSpeed)
+
+        status.collector.insolationAbsorber = Double(meteo.dni)
+          * status.collector.cosTheta
+          * status.collector.efficiency
       } else {
         status.collector = Collector.initialState
-        TimeStep.current.isDayTime = false
+        TimeStep.current.isDaytime = false
       }
-      
-      Plant.updateSolarField(&status, meteo: meteo)
 
-      Plant.updatePowerBlock(&status)
+      let temperature = Temperature(celsius: meteo.temperature)
       
-      let energy = Plant.energyFeed()
+      status.solarField.inletTemperature(outlet: status.powerBlock)
+
+      Plant.update(solarField: &status.solarField,
+                   storage: status.storage)
+
+      Plant.update(solarField: &status.solarField,
+                   collector: status.collector,
+                   ambient: temperature)
+ 
+      Plant.update(solarField: &status.solarField,
+                   collector: status.collector,
+                   storage: &status.storage,
+                   powerBlock: &status.powerBlock,
+                   boiler: &status.boiler,
+                   gasTurbine: &status.gasTurbine,
+                   heater: &status.heater,
+                   heatExchanger: &status.heatExchanger,
+                   steamTurbine: &status.steamTurbine,
+                   ambient: temperature)
+
+      Plant.update(storage: &status.storage,
+                   powerBlock: &status.powerBlock,
+                   steamTurbine: status.steamTurbine)
       
+      let energy = Plant.energyBalance()
+
       backgroundQueue.async { [status] in
         recorder.add(date, meteo: meteo, status: status, energy: energy)
-      }
+      }      
     }
     
     backgroundQueue.sync { } // wait for background queue
@@ -149,11 +156,14 @@ public enum BlackBoxModel {
   private static func makeGenerators(dataSource: MeteoDataSource)
     -> (MeteoDataGenerator, DateGenerator)
   {
+    let interval = Simulation.time.steps
+    
     let meteoDataGenerator = MeteoDataGenerator(
       dataSource, frequence: interval
     )
     
     let dateGenerator: DateGenerator
+    
     if let start = Simulation.time.firstDateOfOperation,
       let end = Simulation.time.lastDateOfOperation
     {
@@ -161,7 +171,7 @@ public enum BlackBoxModel {
       meteoDataGenerator.setRange(range)
       dateGenerator = DateGenerator(range: range, interval: interval)
     } else {
-      dateGenerator = DateGenerator(year: year, interval: interval)
+      dateGenerator = DateGenerator(year: yearOfSimulation, interval: interval)
     }
     return (meteoDataGenerator, dateGenerator)
   }

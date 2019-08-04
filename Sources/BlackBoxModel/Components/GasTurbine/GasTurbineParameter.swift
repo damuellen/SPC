@@ -45,15 +45,15 @@ extension GasTurbine.Parameter: CustomStringConvertible {
 
 extension GasTurbine.Parameter: TextConfigInitializable {
   public init(file: TextConfigFile) throws {
-    let row: (Int) throws -> Double = { try file.parseDouble(row: $0) }
+    let line: (Int) throws -> Double = { try file.parseDouble(line: $0) }
     name = file.name
-    powerGross = try row(10)
-    efficiencyISO = try row(13)
-    loadMin = try row(16)
-    altitude = try row(19)
-    efficiencyFromLoad = try [row(41), row(44), row(47), row(50), row(53)]
-    loadMaxFromTemperature = try [row(60), row(63), row(66), row(69), row(72)]
-    parasiticsFromLoad = try [row(79), row(82), row(85), row(88), row(91)]
-    designTemperature = try row(28)
+    powerGross = try line(10)
+    efficiencyISO = try line(13)
+    loadMin = try line(16)
+    altitude = try line(19)
+    efficiencyFromLoad = try [line(41), line(44), line(47), line(50), line(53)]
+    loadMaxFromTemperature = try [line(60), line(63), line(66), line(69), line(72)]
+    parasiticsFromLoad = try [line(79), line(82), line(85), line(88), line(91)]
+    designTemperature = try line(28)
   }
 }

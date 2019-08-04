@@ -168,28 +168,29 @@ extension SolarField.Parameter: CustomStringConvertible {
 
 extension SolarField.Parameter: TextConfigInitializable {
   public init(file: TextConfigFile) throws {
-    let row: (Int) throws -> Double = { try file.parseDouble(row: $0) }
-    maxWind = Float(try row(10))
-    numberOfSCAsInRow = Int(try row(13))
-    rowDistance = try row(16)
-    distanceSCA = try row(19)
-    pipeHeatLosses = try row(22)
-    azimut = try row(25)
-    elevation = try row(28)
-    pumpParasticsFullLoad = try row(34)
-    antiFreezeParastics = try row(37)
-    pumpParastics = try [row(40), row(43), row(46)]
-    massFlow = try (MassFlow(row(49)), MassFlow(row(52)))
-    antiFreezeFlow = try MassFlow(row(55))
-    HTFmass = try row(58)
+    let line: (Int) throws -> Double = { try file.parseDouble(line: $0) }
+    maxWind = Float(try line(10))
+    numberOfSCAsInRow = Int(try line(13))
+    rowDistance = try line(16)
+    distanceSCA = try line(19)
+    pipeHeatLosses = try line(22)
+    azimut = try line(25)
+    elevation = try line(28)
+    pumpParasticsFullLoad = try line(34)
+    antiFreezeParastics = try line(37)
+    pumpParastics = try [line(40), line(43), line(46)]
+    massFlow = try (MassFlow(line(49)), MassFlow(line(52)))
+    antiFreezeFlow = try MassFlow(line(55))
+    HTFmass = try line(58)
     HTF = ParameterDefaults.HTF
-    imbalanceDesign = try [row(72), row(73), row(74)]
-    imbalanceMin = try [row(75), row(76), row(77)]
-    windCoefficients = try [row(79), row(80), row(81), row(82), row(83), row(84)]
-    useReferenceAmbientTemperature = try row(86) > 0 ? true : false
-    referenceAmbientTemperature = try row(87)
-    designTemperature = (try row(89), try row(90))
-    heatlosses = try [row(93), row(96), row(99), row(102), row(105)]
+    imbalanceDesign = try [line(72), line(73), line(74)]
+    imbalanceMin = try [line(75), line(76), line(77)]
+    windCoefficients =
+      try [line(79), line(80), line(81), line(82), line(83), line(84)]
+    useReferenceAmbientTemperature = try line(86) > 0 ? true : false
+    referenceAmbientTemperature = try line(87)
+    designTemperature = (try line(89), try line(90))
+    heatlosses = try [line(93), line(96), line(99), line(102), line(105)]
   }
 }
 

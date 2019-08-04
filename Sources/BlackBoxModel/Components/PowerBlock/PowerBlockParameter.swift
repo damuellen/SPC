@@ -63,17 +63,17 @@ extension PowerBlock.Parameter: CustomStringConvertible {
 
 extension PowerBlock.Parameter: TextConfigInitializable {
   public init(file: TextConfigFile) throws {
-    let row: (Int) throws -> Double = { try file.parseDouble(row: $0) }
+    let line: (Int) throws -> Double = { try file.parseDouble(line: $0) }
     name = file.name
-    fixElectricalParasitics = try row(10)
-    nominalElectricalParasitics = try row(13)
-    electricalParasitics = try [row(16), row(19)]
-    electricalParasiticsStep = try [row(22), row(25)]
-    fixElectricalParasitics0 = try row(28)
-    startUpElectricalParasitics = try row(31)
-    nominalElectricalParasiticsACC = try row(39)
-    electricalParasiticsShared = try [row(34), row(37)]
-    electricalParasiticsACC = try [row(41), row(43), row(45), row(47)]
-    electricalParasiticsACCTamb = try [row(49), row(51), row(53), row(55)]
+    fixElectricalParasitics = try line(10)
+    nominalElectricalParasitics = try line(13)
+    electricalParasitics = try [line(16), line(19)]
+    electricalParasiticsStep = try [line(22), line(25)]
+    fixElectricalParasitics0 = try line(28)
+    startUpElectricalParasitics = try line(31)
+    nominalElectricalParasiticsACC = try line(39)
+    electricalParasiticsShared = try [line(34), line(37)]
+    electricalParasiticsACC = try [line(41), line(43), line(45), line(47)]
+    electricalParasiticsACCTamb = try [line(49), line(51), line(53), line(55)]
   }
 }

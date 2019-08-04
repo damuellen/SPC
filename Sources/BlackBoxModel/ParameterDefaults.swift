@@ -23,7 +23,7 @@ public enum ParameterDefaults {
       h2o: (inlet: (max: 374, min: 255), outlet: (max: 234, min: 128))
     ),
     sccHTFmassFlow: 1000.0,
-    sccHTFheat: 70,
+    sccHTFheat: 90,
     ToutMassFlow: nil,
     ToutTin: nil,
     ToutTinMassFlow: nil,
@@ -62,7 +62,7 @@ public enum ParameterDefaults {
     elevation: 0.0,
     antiFreezeParastics: 0.5,
     pumpParastics: [0.15, -0.293, 1.257],
-    massFlow: (1800.0, 5.0),
+    massFlow: (1800.0, 50.0),
     pumpParasticsFullLoad: 3.607,
     antiFreezeFlow: 50.0,
     HTFmass: 396_359.0,
@@ -111,8 +111,8 @@ public enum ParameterDefaults {
   //  resultingTemperature: (.init(celsius: 293.0), .init(celsius: 390.0)),
     designTemperature: (.init(celsius: 293.0), .init(celsius: 390.0)),
     heatLoss: (1, 1),
-    startFossilCharging: (1, 1), stopFossilCharging: (0, 1),
-    startFossilCharging2: (1, 1), stopFossilCharging2: (0, 1),
+    startFossilCharging: (1, 1), stopFossilCharging: (1, 2),
+    startFossilCharging2: (1, 1), stopFossilCharging2: (1, 2),
     heatExchangerEfficiency: 1,
     heatExchangerCapacity: 70,
     heatExchangerMinCapacity: 10,
@@ -150,7 +150,7 @@ public enum ParameterDefaults {
 
   static let tb = SteamTurbine.Parameter(
     name: "",
-    power: PowerRange(range: 33 ... 102, nom: 100),
+    power: PowerRange(range: 33 ... 77, nom: 75),
     efficiencyNominal: 0.4101728,
     efficiencyBoiler: 0.4101728,
     efficiencySCC: 0.4101728,

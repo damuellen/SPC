@@ -14,15 +14,15 @@ import Foundation
 
 public struct Time {
   var isLeapYear = false
-  var firstDateOfOperation: Date?
-  var lastDateOfOperation: Date?
+  public var firstDateOfOperation: Date?
+  public var lastDateOfOperation: Date?
   let holidays: [Date]
-  let steps: DateGenerator.Interval
+  public var steps: DateGenerator.Interval
 }
 
 extension Time: TextConfigInitializable {
   public init(file: TextConfigFile) throws {
-    let row: (Int) throws -> Double = { try file.parseDouble(row: $0) }
+    let line: (Int) throws -> Double = { try file.parseDouble(line: $0) }
 
     let getDate: (String) -> Date? = { dateString in
       let components: [Int] = dateString.split(
@@ -32,7 +32,8 @@ extension Time: TextConfigInitializable {
       guard components.count == 2 else { return nil }
       
       let dateComponents = DateComponents(
-        year: 2010, month: components[0], day: components[1]
+        year: BlackBoxModel.yearOfSimulation,
+        month: components[0], day: components[1]
       )
       
       guard let date = calendar.date(from: dateComponents)
@@ -41,23 +42,23 @@ extension Time: TextConfigInitializable {
     }
 
     if let firstDayOfOperation = getDate(file.values[12]) {
-      let hours = try row(14) * 3600
-      let minutes = try row(15) * 60
+      let hours = try line(14) * 3600
+      let minutes = try line(15) * 60
       let timeInterval = hours + minutes
       let date = firstDayOfOperation.addingTimeInterval(timeInterval)
       firstDateOfOperation = date
     }
 
     if let lastDayOfOperation = getDate(file.values[15]) {
-      let hours = try row(17) * 3600
-      let minutes = try row(18) * 60
+      let hours = try line(17) * 3600
+      let minutes = try line(18) * 60
       let timeInterval = hours + minutes
       let date = lastDayOfOperation.addingTimeInterval(timeInterval)
       lastDateOfOperation = date
     }
 
     self.steps = try DateGenerator.Interval(
-      rawValue: Int(row(12))
+      rawValue: Int(line(12))
     ) ?? .every5minutes
 
     var dates = [Date]()

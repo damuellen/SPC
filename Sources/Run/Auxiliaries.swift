@@ -16,30 +16,14 @@ let dateString: String = {
 extension Substring.SubSequence {
   var integerValue: Int? { return Int(self) }
 }
-/*
-public func goalSeek(
-  _ keyPath: KeyPath<PerformanceLog.Results, Double>,
-  greaterThen: Double,
-  block: ()->()
-  ) -> PerformanceLog {
-  var result = BlackBoxModel.runModel(with: PerformanceDataLogger())
-  while result.annual[keyPath: keyPath] < greaterThen {
-    block()
-    result = BlackBoxModel.runModel(with: PerformanceDataLogger())
-    print(result.annual[keyPath: keyPath])
-  }
-  return result
-}
-*/
+
 extension PerformanceLog {
-  var fitness: Double {
-    return (electric.net / layout.solarField) / 1000
-  }
+  var fitness: Double { return (electric.net / layout.solarField) / 1_000  }
 }
 
-public class Population {
+class Population {
   
-  public var individuals = [PerformanceLog]()
+  var individuals = [PerformanceLog]()
   
   var softMax: [Double] {
     let z = individuals.map { $0.fitness }
@@ -49,7 +33,7 @@ public class Population {
     return softmax
   }
   
-  public init(size: Int) {
+  init(size: Int) {
     let layouts = generateRandomLayouts(size: size)
 
     let recorder = PerformanceDataRecorder(noHistory: true)
@@ -61,11 +45,11 @@ public class Population {
     }
   }
   
-  public init(logs: [PerformanceLog]) {
+  init(logs: [PerformanceLog]) {
     self.individuals = logs
   }
   
-  public init(layouts: [Layout], cache: [PerformanceLog]) {
+  init(layouts: [Layout], cache: [PerformanceLog]) {
     let oldLayouts = cache.map { $0.layout }
     
     let recorder = PerformanceDataRecorder(noHistory: true)
@@ -81,7 +65,7 @@ public class Population {
     }
   }
   
-  public func generateRandomLayouts(size: Int) -> [Layout] {
+  func generateRandomLayouts(size: Int) -> [Layout] {
     var layouts = [Layout]()
     for _ in (0 ..< size) {
       layouts.append(Layout.random())
@@ -89,13 +73,13 @@ public class Population {
     return layouts
   }
   
-  public func fittest() -> PerformanceLog {
+  func fittest() -> PerformanceLog {
     individuals.sort(by: { $0.fitness > $1.fitness })
     return individuals[0]
   }
 }
 
-public class GeneticAlgorithm {
+class GeneticAlgorithm {
   
   var oldPopulations = [Population]()
   var currentPopulation: Population
@@ -103,7 +87,7 @@ public class GeneticAlgorithm {
   var mutationRate: Double
   var numberOfGenerations: Int
   
-  public init(parameters: GeneticParameters) {
+  init(parameters: GeneticParameters) {
     self.populationSize = parameters.populationSize
     self.mutationRate = parameters.mutationRate
     self.numberOfGenerations = parameters.numberOfGenerations
@@ -113,7 +97,7 @@ public class GeneticAlgorithm {
   }
   
   // Simulate the evolution of 'n' generations
-  public func simulateNGenerations() -> PerformanceLog? {
+  func simulateNGenerations() -> PerformanceLog? {
     let halfSize = populationSize / 2
     let fittest = currentPopulation.fittest()
     
@@ -160,12 +144,12 @@ public class GeneticAlgorithm {
   }
 }
 
-public struct GeneticParameters {
+struct GeneticParameters {
   var populationSize: Int
   var numberOfGenerations: Int
   var mutationRate: Double
   
-  public init(populationSize: Int, numberOfGenerations: Int, mutationRate: Double) {
+  init(populationSize: Int, numberOfGenerations: Int, mutationRate: Double) {
     self.populationSize = populationSize
     self.numberOfGenerations = numberOfGenerations
     self.mutationRate = mutationRate

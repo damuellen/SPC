@@ -8,6 +8,7 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 import Foundation
+import DateGenerator
 
 extension PerformanceLog {
   
@@ -22,7 +23,7 @@ extension PerformanceLog {
   }(NumberFormatter())
 
   static func makeReport(
-    layout: Layout, energy: Energy, radiation: SolarRadiation)
+    energy: Energy, radiation: SolarRadiation)
     -> String {
     let solarField = SolarField.parameter
     let heater = Heater.parameter
@@ -30,7 +31,8 @@ extension PerformanceLog {
     let gasTurbine = GasTurbine.parameter
     let steamTurbine = SteamTurbine.parameter
     let collector = Collector.parameter
-    
+    let layout = Design.layout
+      
     var d: String = "\n"
     d += "PERFORMANCE RUN\n"
     d += "    Date: \(PerformanceLog.date.string(from: Date()))\n"
@@ -109,9 +111,9 @@ extension PerformanceLog {
     d += "\n\n"
     d += "    Files and Parameter\n"
     d += "\n"
-    d += "METEODATA  \(BlackBoxModel.meteoData.name)\n"
+    d += "METEODATA  \(BlackBoxModel.meteoData!.name)\n"
     d += "Meteodata of a leap year" >< "\(Simulation.time.isLeapYear ? "YES" : "NO")"
-    d += "Location: \(Plant.location.longitude) \(Plant.location.latitude)"/*
+    d += "Location: \(BlackBoxModel.meteoData!.location.longitude) \(BlackBoxModel.meteoData!.location.latitude)"/*
      d += "Position of Wet Bulb Temp. in mto-file [row]:" >< "\(Simulation.parameter.WBTpos)"
      d += "Position of Wind Direction in mto-file [row]:" >< "\(Simulation.parameter.WDpos)"
      d += "Pos. of Global Direct Irr. in mto-file [row]:""\(Simulation.parameter.GHI)"
@@ -179,7 +181,7 @@ extension PerformanceLog {
       >< "\(Simulation.parameter.dfreezeTemperatureHeat.kelvin)"
     d += "Minimum Insolation for Start-Up [W/m²]:"
       >< "\(Simulation.parameter.minInsolation)"
-    d += "Fuel strategy:" >< "\(Fuelmode)"
+    d += "Fuel strategy:" >< "\(OperationRestriction.fuelStrategy)"
     d += "\n\n"
     d += "AVAILABILITIES\n"
     d += "\n"

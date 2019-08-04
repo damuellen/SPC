@@ -49,7 +49,10 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
       self.useEnthalpy = false
     }
   }
-
+  func deltaHeat(_ flow: HeatCycle) -> Heat {
+    deltaHeat(flow.temperature.outlet, flow.temperature.inlet)
+  }
+  
   @inline(__always)
   func deltaHeat(_ t1: Temperature, _ t2: Temperature) -> Heat {
     if useEnthalpy {
@@ -92,9 +95,9 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
     return Temperature(celsius: temperatureFromEnthalpy[enthalpy])
   }
   
-  @_transparent func mixingTemperature(
-    _ f1: HeatCycle, _ f2: HeatCycle
-  ) -> Temperature {
+  @_transparent func mixingTemperature(_ f1: HeatCycle, _ f2: HeatCycle)
+    -> Temperature
+  {
     let (t1, t2) = (f1.outletTemperature, f2.outletTemperature)
     precondition(min(t1, t2) > freezeTemperature.kelvin)
     let (mf1, mf2) = (f1.massFlow.rate, f2.massFlow.rate)
@@ -106,9 +109,9 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
     )
   }
   
-  @_transparent func mixingTemperature(
-    inlet f1: HeatCycle, with f2: HeatCycle
-  ) -> Temperature {
+  @_transparent func mixingTemperature(inlet f1: HeatCycle, with f2: HeatCycle)
+    -> Temperature
+  {
     let (t1, t2) = (f1.inletTemperature, f2.outletTemperature)
     precondition(min(t1, t2) > freezeTemperature.kelvin)
     let (mf1, mf2) = (f1.massFlow.rate, f2.massFlow.rate)
@@ -121,8 +124,9 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
   }
   
   @_transparent private static func temperatureFromHeatCapacity(
-    _ specificHeat: Double, _ temperature: Double, coefficients: [Double]
-  ) -> Double {
+    _ specificHeat: Double, _ temperature: Double, coefficients: [Double])
+    -> Double
+  {
     let t = temperature
     let cp = coefficients
     if cp[1] > 0 {
@@ -136,8 +140,9 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
   
   @_transparent private static func temperatureFromEnthalpy(
     _ enthalpy: Double, _ temperature: Double,
-    coefficients: ([Double], [Double])
-  ) -> Double {
+    coefficients: ([Double], [Double]))
+    -> Double
+  {
     let (h_T, T_h) = coefficients
     var h1 = 0.0
     for coefficient in h_T.reversed() {
@@ -152,16 +157,18 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
   }
 
   @_transparent private static func heatExchanged(
-    from high: Double, to low: Double, heatCapacity: [Double]
-  ) -> Double {
+    from high: Double, to low: Double, heatCapacity: [Double])
+    -> Double
+  {
     var q = heatCapacity[0] * (high - low)
     q += heatCapacity[1] / 2 * (pow(high, 2) - pow(low, 2))
     return q
   }
 
   @_transparent private static func heatExchanged(
-    from high: Double, to low: Double, coefficients: [Double]
-  ) -> Double {
+    from high: Double, to low: Double, coefficients: [Double])
+    -> Double
+  {
     var (h1, h2) = (0.0, 0.0)
     for (i, c) in coefficients.enumerated() {
       h1 += c * pow(low, Double(i))
@@ -287,21 +294,21 @@ extension HeatTransferFluid: Codable {
 
 extension HeatTransferFluid {
   public init(file: TextConfigFile, includesEnthalpy: Bool) throws {
-    let row: (Int) throws -> Double = { try file.parseDouble(row: $0) }
+    let line: (Int) throws -> Double = { try file.parseDouble(line: $0) }
     self.name = file.name
-    self.freezeTemperature = try Temperature(row(10))
-    let heatCapacity = try [row(13), row(15)]
+    self.freezeTemperature = try Temperature(line(10))
+    let heatCapacity = try [line(13), line(15)]
     self.heatCapacity = heatCapacity
-    density = try [try row(18), try row(21), row(24)]
-    viscosity = try [row(27), row(30), row(33)]
-    thermCon = try [row(36), row(39), row(42)]
-    maxTemperature = try Temperature(row(45)) // .toKelvin
+    density = try [try line(18), try line(21), line(24)]
+    viscosity = try [line(27), line(30), line(33)]
+    thermCon = try [line(36), line(39), line(42)]
+    maxTemperature = try Temperature(line(45)) // .toKelvin
     if includesEnthalpy {
-      let h_T = try [row(47), row(48), row(49), row(50), row(51)]
+      let h_T = try [line(47), line(48), line(49), line(50), line(51)]
       enthaplyFromTemperature = Polynomial(h_T)
-      let T_h = try [row(53), row(54), row(55), row(56), row(57)]
+      let T_h = try [line(53), line(54), line(55), line(56), line(57)]
       temperatureFromEnthalpy = Polynomial(T_h)
-      useEnthalpy = try row(59) > 0 ? true : false
+      useEnthalpy = try line(59) > 0 ? true : false
 
     } else {
       self.useEnthalpy = false

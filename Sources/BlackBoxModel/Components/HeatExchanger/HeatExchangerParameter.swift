@@ -120,25 +120,25 @@ extension HeatExchanger.Parameter: CustomStringConvertible {
 
 extension HeatExchanger.Parameter: TextConfigInitializable {
   public init(file: TextConfigFile) throws {
-    let row: (Int) throws -> Double = { try file.parseDouble(row: $0) }
+    let line: (Int) throws -> Double = { try file.parseDouble(line: $0) }
     name = file.name
-    efficiency = try row(10)
+    efficiency = try line(10)
     temperature = try Temperatures(
-      htf: (inlet: (max: row(13).toKelvin, min: row(16).toKelvin),
-            outlet: (max: row(19).toKelvin, min: row(22).toKelvin)),
-      h2o: (inlet: (max: row(25).toKelvin, min: row(28).toKelvin),
-            outlet: (max: row(31).toKelvin, min: row(34).toKelvin))
+      htf: (inlet: (max: line(13).toKelvin, min: line(16).toKelvin),
+            outlet: (max: line(19).toKelvin, min: line(22).toKelvin)),
+      h2o: (inlet: (max: line(25).toKelvin, min: line(28).toKelvin),
+            outlet: (max: line(31).toKelvin, min: line(34).toKelvin))
     )
     scc = try Temperatures(
-      htf: (inlet: (max: row(47).toKelvin, min: row(50).toKelvin),
-            outlet: (max: row(53).toKelvin, min: row(56).toKelvin)),
-      h2o: (inlet: (max: row(59).toKelvin, min: row(62).toKelvin),
-            outlet: (max: row(65).toKelvin, min: row(68).toKelvin))
+      htf: (inlet: (max: line(47).toKelvin, min: line(50).toKelvin),
+            outlet: (max: line(53).toKelvin, min: line(56).toKelvin)),
+      h2o: (inlet: (max: line(59).toKelvin, min: line(62).toKelvin),
+            outlet: (max: line(65).toKelvin, min: line(68).toKelvin))
     )
 
-    sccEff = try row(44)
-    sccHTFmassFlow = try MassFlow(row(71))
-    sccHTFheat = try row(74)
+    sccEff = try line(44)
+    sccHTFmassFlow = try MassFlow(line(71))
+    sccHTFheat = try line(74)
     useAndsolFunction = false
     Tout_f_Mfl = false
     Tout_f_Tin = false

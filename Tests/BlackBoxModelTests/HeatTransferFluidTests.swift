@@ -1,8 +1,6 @@
 import XCTest
 
 @testable import BlackBoxModel
-import Meteo
-@testable import SolarPosition
 
 class HeatTransferFluidTests: XCTestCase {
   let htf = HeatTransferFluid(
@@ -20,9 +18,9 @@ class HeatTransferFluidTests: XCTestCase {
 
   func testsTherminol() {
     var density = htf.density(Temperature(celsius: 300.0))
-    XCTAssertEqual(density, 814.24, accuracy: 0.01)
+    XCTAssertEqual(density, 814.24, accuracy: 0.01, "density 300")
     density = htf.density(Temperature(celsius: 400.0))
-    XCTAssertEqual(density, 701.34, accuracy: 0.01)
+    XCTAssertEqual(density, 701.34, accuracy: 0.01, "density 400")
 
     let temperature = htf.temperature(300, Temperature(celsius: 400.0))
     XCTAssertEqual(temperature.kelvin, 779.22, accuracy: 0.01)
@@ -37,7 +35,6 @@ class HeatTransferFluidTests: XCTestCase {
 
     tf.temperature.inlet = Temperature(celsius: 393.0)
     tf.temperature.outlet = Temperature(celsius: 293.0)
-
   }
 
   static var allTests: [(String, (HeatTransferFluidTests) -> () throws -> Void)] {

@@ -49,15 +49,15 @@ extension Heater.Parameter: CustomStringConvertible {
 
 extension Heater.Parameter: TextConfigInitializable {
   public init(file: TextConfigFile) throws {
-    let row: (Int) throws -> Double = { try file.parseDouble(row: $0) }
+    let line: (Int) throws -> Double = { try file.parseDouble(line: $0) }
     name = file.name
-    efficiency = try row(10)
-    antiFreezeTemperature = try Temperature(row(16))
-    nominalTemperatureOut = try Temperature(row(19))
-    maximumMassFlow = try row(22)
-    minLoad = try row(25)
-    nominalElectricalParasitics = try row(28)
-    electricalParasitics = [try row(31), try row(34)]
+    efficiency = try line(10)
+    antiFreezeTemperature = try Temperature(line(16))
+    nominalTemperatureOut = try Temperature(line(19))
+    maximumMassFlow = try line(22)
+    minLoad = try line(25)
+    nominalElectricalParasitics = try line(28)
+    electricalParasitics = [try line(31), try line(34)]
     onlyWithSolarField = true
   }
 }

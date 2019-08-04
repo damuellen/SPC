@@ -34,9 +34,8 @@ struct SolarRadiation: PerformanceData {
   }
   
   public var values: [String] {
-    return NumberFormatter.string(precision: 1,
-      [dni, ghi, dhi, ico]
-    )
+    return NumberFormatter.strings(
+      [dni, ghi, dhi, ico], precision: 1)
   }
   
   static var columns: [(name: String, unit: String)] {

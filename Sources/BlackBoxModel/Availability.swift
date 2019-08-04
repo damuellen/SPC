@@ -41,13 +41,9 @@ struct Availability: Codable {
       storage: Ratio
   }
 
-  var value: Values {
-    return self.data[index]
-  }
+  var value: Values { return self.data[index] }
 
-  var values: Values {
-    return self.data[0]
-  }
+  var values: Values { return self.data[0] }
 
   static func withDefaults() -> Availability {
     return Availability(data:
@@ -57,19 +53,19 @@ struct Availability: Codable {
 
 extension Availability {
   public init(file: TextConfigFile) throws {
-    let row: (Int) throws -> Double = { try file.parseDouble(row: $0) }
+    let line: (Int) throws -> Double = { try file.parseDouble(line: $0) }
     var data = [Values]()
     for n in 0 ..< 12 {
       let offset = 3 * n
       try data.append(Values(
-        solarField: Ratio(percent: row(38 + offset)),
-        breakHCE: Ratio(percent: row(78 + offset)),
-        airHCE: Ratio(percent: row(118 + offset)),
-        fluorHCE: Ratio(percent: row(158 + offset)),
-        reflMirror: Ratio(percent: row(198 + offset)),
-        missingMirros: Ratio(percent: row(238 + offset)),
-        powerBlock: Ratio(percent: row(278 + offset)),
-        storage: Ratio(percent: row(318 + offset))
+        solarField: Ratio(percent: line(38 + offset)),
+        breakHCE: Ratio(percent: line(78 + offset)),
+        airHCE: Ratio(percent: line(118 + offset)),
+        fluorHCE: Ratio(percent: line(158 + offset)),
+        reflMirror: Ratio(percent: line(198 + offset)),
+        missingMirros: Ratio(percent: line(238 + offset)),
+        powerBlock: Ratio(percent: line(278 + offset)),
+        storage: Ratio(percent: line(318 + offset))
       ))
     }
     self.init(data: data)

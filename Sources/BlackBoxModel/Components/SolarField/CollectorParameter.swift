@@ -83,22 +83,22 @@ extension Collector.Parameter: CustomStringConvertible {
 
 extension Collector.Parameter: TextConfigInitializable {
   public init(file: TextConfigFile) throws {
-    let row: (Int) throws -> Double = { try file.parseDouble(row: $0) }
+    let line: (Int) throws -> Double = { try file.parseDouble(line: $0) }
     name = file.name
-    aperture = try row(10)
-    lengthSCA = try row(13)
-    areaSCAnet = try row(16)
-    extensionHCE = try row(19)
-    avgFocus = try row(22)
-    rabsOut = try row(25)
-    rabsInner = try row(28)
-    rglas = try row(31)
-    glassEmission = try row(71)
-    opticalEfficiency = try row(34)
-    emissionHCE = try [row(37), row(40)]
-    shadingHCE = try [row(43), row(46), row(49), row(52)]
-    IAMfac = try [row(55), row(58), row(61), row(64), row(67)]
+    aperture = try line(10)
+    lengthSCA = try line(13)
+    areaSCAnet = try line(16)
+    extensionHCE = try line(19)
+    avgFocus = try line(22)
+    rabsOut = try line(25)
+    rabsInner = try line(28)
+    rglas = try line(31)
+    glassEmission = try line(71)
+    opticalEfficiency = try line(34)
+    emissionHCE = try [line(37), line(40)]
+    shadingHCE = try [line(43), line(46), line(49), line(52)]
+    IAMfac = try [line(55), line(58), line(61), line(64), line(67)]
     absorber = .schott
-    useIntegralRadialoss = try row(73) > 0 ? true : false
+    useIntegralRadialoss = try line(73) > 0 ? true : false
   }
 }

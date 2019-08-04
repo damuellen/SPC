@@ -9,31 +9,32 @@
 //
 
 import Foundation
+import SolarPosition
 
 public struct MeteoData: CustomStringConvertible {
   public var temperature, dni, ghi, dhi, windSpeed: Float
-  public let wetBulbTemperature: Float? = nil
+  let wetBulbTemperature: Float? = nil
 
   /// Linear interpolation function for meteo data values
-  static func lerp(start: MeteoData, end: MeteoData,
-                   _ value: Float) -> MeteoData {
+  static func lerp(start: MeteoData, end: MeteoData, _ value: Float)
+    -> MeteoData
+  {
     if value >= 1 { return end }
 
     let dni = start.dni + (value * (end.dni - start.dni)),
       ghi = start.ghi + (value * (end.ghi - start.ghi)),
       dhi = start.dhi + (value * (end.dhi - start.dhi)),
-      t = start.temperature
-      + (value * (end.temperature - start.temperature)),
-      ws = start.windSpeed
-      + (value * (end.windSpeed - start.windSpeed))
+      t = start.temperature + (value * (end.temperature - start.temperature)),
+      ws = start.windSpeed + (value * (end.windSpeed - start.windSpeed))
 
     return MeteoData(
       dni: dni, ghi: ghi, dhi: dhi, temperature: t, windSpeed: ws
     )
   }
 
-  static func cosineInterpolation(start: MeteoData, end: MeteoData,
-                                  _ progress: Float) -> MeteoData {
+  static func cosineInterpolation(
+    start: MeteoData, end: MeteoData, _ progress: Float) -> MeteoData
+  {
     func cosine(y1: Float, y2: Float, mu: Float) -> Float {
       let mu2 = (1 - cos(mu * .pi)) / 2
       return (y1 * (1 - mu2) + y2 * mu2)
@@ -53,8 +54,10 @@ public struct MeteoData: CustomStringConvertible {
   }
 
   /// Interpolation function for meteo data values
-  static func interpolation(prev: MeteoData, current: MeteoData,
-                            next: MeteoData, progess: Float) -> MeteoData {
+  static func interpolation(
+    prev: MeteoData, current: MeteoData, next: MeteoData, progess: Float)
+    -> MeteoData
+  {
     let startValue = current
     let endValue = next
 
@@ -94,16 +97,8 @@ public struct MeteoData: CustomStringConvertible {
     )
   }
 
-  public init() {
-    self.dni = 0
-    self.ghi = 0
-    self.dhi = 0
-    self.temperature = 0
-    self.windSpeed = 0
-  }
-
-  public init(dni: Float, ghi: Float, dhi: Float,
-              temperature: Float, windSpeed: Float) {
+  public init(dni: Float = 0, ghi: Float = 0, dhi: Float = 0,
+              temperature: Float = 0, windSpeed: Float = 0) {
     self.dni = dni
     self.ghi = ghi
     self.dhi = dhi
@@ -127,6 +122,14 @@ public struct MeteoData: CustomStringConvertible {
     self.dhi = values[4]
   }
 
+  public init(tmy values: [Float], order: [Int]) {
+    self.dni = values[order[0]]
+    self.temperature = values[order[1]]
+    self.windSpeed = values[order[2]]
+    self.ghi = values[order[3]]
+    self.dhi = values[order[4]]
+  }
+  
   public var description: String {
     return String(format: "Temp: %.1f ", temperature)
       + String(format: "DNI: %.1f ", dni)
@@ -143,83 +146,6 @@ public struct MeteoData: CustomStringConvertible {
       String(format: "%.1f", windSpeed),
     ]
   }
-}
-
-public class MeteoDataSource {
-  
-  public let location: Position
-  public let timeZone: Int?
-  public let name: String
-  
-  let data: [MeteoData]  
-  let year: Int?
-  let hourFraction: Double
-
-  private let valuesPerDay: Int
-  
-  init(name: String, data: [MeteoData],
-       location: Position, year: Int?, timeZone: Int?) {
-    self.name = name
-    self.data = data
-    self.location = location
-    self.year = year
-    self.timeZone = timeZone
-    self.hourFraction = 8760 / Double(data.count)
-    self.valuesPerDay = Int(24 / hourFraction)
-    
-    self.classificationOfDays.reserveCapacity(365)
-    
-    for day in 1...365 {
-      classification(ofDay: day)
-    }
-  }
-  
-  public subscript(ofDay day: Int) -> Classification {
-    return classificationOfDays[day - 1]
-  }
-  
-  public typealias Classification =
-    (peaks: Int, hours: Double, sum: Double, avg: Double, max: Double, ratio: Double)
-  
-  private var classificationOfDays: [Classification] = []
-  
-  private func classification(ofDay day: Int) {
-    let end = (day * valuesPerDay)
-    let start = end - valuesPerDay
-    
-    let day = data[start ..< end]
-    
-    let classification = analyse(day: day)
-    
-    classificationOfDays.append(classification)
-  }
-  
-  private func analyse(day: ArraySlice<MeteoData>) -> Classification {
-    var isPeak = false
-    var peaks = 0
-    var hours = 0.0
-    var sum = 0.0
-    var max = 0.0
-    for i in day.indices.dropFirst() {
-      let prev = Double(day[i - 1].dni)
-      let curr = Double(day[i].dni)
-      if curr > max { max = curr }
-      if curr > 0 { hours += hourFraction; sum += curr * hourFraction }
-      if isPeak {
-        if prev < curr { isPeak = false }
-      } else {
-        if prev > curr { isPeak = true; peaks += 1 }
-      }
-    }
-    
-    if hours > 0 {
-      let avg =  sum / hours
-      let ratio = avg / max
-      return (peaks, hours, sum, avg, max, ratio)
-    }
-    return (0, 0, 0, 0, 0, 0)
-  }
-  
 }
 
 public struct Position {
@@ -239,5 +165,11 @@ public struct Position {
     self.longitude = longitude
     self.latitude = latitude
     self.elevation = elevation
+  }
+  
+  public init(location: Location) {
+    self.longitude = Float(location.longitude)
+    self.latitude = Float(location.latitude)
+    self.elevation = Float(location.elevation)
   }
 }

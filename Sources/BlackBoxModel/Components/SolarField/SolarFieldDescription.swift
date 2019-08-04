@@ -12,7 +12,6 @@ extension SolarField.PerformanceData: CustomStringConvertible {
   public var description: String {
     return "\(operationMode), "
       + String(format: "Focus: %.1f%, ", inFocus.percentage)
-      + String(format: "insolationAbsorber: %.1f,\n", insolationAbsorber)
       + String(format: "ETA: %.1f, ", ETA)
       + String(format: "HL: %.1f, ", heatLosses)
       + String(format: "HL Header: %.1f, ", heatLossHeader)

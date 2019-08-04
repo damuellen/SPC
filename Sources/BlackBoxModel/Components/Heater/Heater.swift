@@ -63,17 +63,16 @@ public enum Heater: Component {
     heater.massFlow = 0.0
   }
   /// Calculates the thermal power and fuel consumption
-  static func update(_ status: Plant.PerformanceData,
-                     demand: Double,
-                     fuelAvailable: Double,
-                     result: (Status<ComponentState, PerformanceData>) -> ())
+  static func update(
+    heater: inout Heater.PerformanceData,
+    powerBlock: PowerBlock.PerformanceData,
+    storage: Storage.PerformanceData,
+    solarField: SolarField.PerformanceData,
+    demand: Double,
+    fuelAvailable: Double)
+    -> EnergyTransfer
   {
-    let htf = SolarField.parameter.HTF,
-    powerBlock = status.powerBlock,
-    storage = status.storage,
-    solarField = status.solarField
-
-    var heater = status.heater
+    let htf = SolarField.parameter.HTF
     
     var fuel = 0.0, thermalPower = 0.0, parasitics = 0.0
 
@@ -82,9 +81,9 @@ public enum Heater: Component {
     // Freeze protection is always possible: massFlow fixed
     if case .charge = heater.operationMode {
       // Fossil charge of storage
-      if Fuelmode.isPredefined {
+      if OperationRestriction.fuelStrategy.isPredefined {
         // fuel consumption is predefined
-        fuel = fuelAvailable / HourFraction / 2
+        fuel = fuelAvailable / Simulation.time.steps.fraction / 2
         // The fuelfl avl. [MW]
         thermalPower = fuel * parameter.efficiency
           * Simulation.adjustmentFactor.efficiencyHeater
@@ -98,11 +97,10 @@ public enum Heater: Component {
             """)
           noOperation(&heater)
           thermalPower = 0
-          let energy = ComponentState(
-            supply: thermalPower, demand: demand, parasitics: parasitics, fuel: fuel
+          let energy = EnergyTransfer(
+            heat: thermalPower, electric: parasitics, fuel: fuel
           )
-          result((energy, heater))
-          return
+          return energy
         }
         // Normal operation possible -
         heater.operationMode = .normal
@@ -120,11 +118,8 @@ public enum Heater: Component {
           )
         }
       } else {
-        heater.setMassFlow(rate:
-          Design.layout.heater / htf.deltaHeat(
-            parameter.nominalTemperatureOut,
-            powerBlock.temperature.inlet
-          )
+        heater.setMassFlow(rate: Design.layout.heater / htf.deltaHeat(
+          parameter.nominalTemperatureOut, powerBlock.temperature.inlet)
         )
         fuel = Design.layout.heater / parameter.efficiency
         heater.load = 1.0
@@ -174,7 +169,8 @@ public enum Heater: Component {
       fuel = max(-demand, Design.layout.heater) / parameter.efficiency
         / Simulation.adjustmentFactor.efficiencyHeater
       // The fuelfl avl. [MW]
-      fuel = (fuel * HourFraction).limited(by: fuelAvailable) / HourFraction
+      fuel = (fuel * Simulation.time.steps.fraction).limited(by: fuelAvailable)
+        / Simulation.time.steps.fraction
 
       /// net thermal power avail [MW]
       thermalPower = fuel * parameter.efficiency
@@ -200,14 +196,14 @@ public enum Heater: Component {
         heater.massFlow = storage.massFlow
       } else {
         heater.setMassFlow(rate: thermalPower * 1_000 
-          / htf.deltaHeat(heater.temperature.outlet, heater.temperature.inlet)
+          / htf.deltaHeat(heater)
         )
       }
     }
     parasitics = self.parasitics(estimateFrom: heater.load)
-    let energy = ComponentState(
-      supply: thermalPower, demand: demand, parasitics: parasitics, fuel: fuel
+    let energy = EnergyTransfer(
+      heat: thermalPower, electric: parasitics, fuel: fuel
     )
-    result((energy, heater))
+    return energy
   }
 }

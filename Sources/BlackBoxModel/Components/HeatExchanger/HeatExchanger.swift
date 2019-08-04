@@ -38,8 +38,8 @@ public enum HeatExchanger: Component {
   /// working conditions of the heat exchanger at start
   static let initialState = PerformanceData(
     operationMode: .SI,
-    temperature: (inlet: Temperature(celsius: 30.0),
-                  outlet: Temperature(celsius: 30.0)),
+    temperature: (inlet: .init(celsius: 30.0),
+                  outlet: .init(celsius: 30.0)),
     massFlow: 0.0,
     heatOut: 0.0,
     heatToTES: 0.0
@@ -55,20 +55,21 @@ public enum HeatExchanger: Component {
   }
 
   /// power function based on MAN-Turbo and OHL data with pinch point tool
-  private static func temperatureFactor(temperature: Temperature,
-                                load: Ratio,
-                                maxTemperature: Temperature) -> Double {
-    return clamp(((0.0007592419869
-      * (temperature.kelvin / maxTemperature.kelvin)
+  static func temperatureFactor(
+    temperature: Temperature, load: Ratio, max: Temperature) -> Double
+  {
+    return clamp(((0.0007592419869 * (temperature.kelvin / max.kelvin)
       * 666 + 0.4943825893223) * load.ratio ** (0.0001400823882
-        * (temperature.kelvin / maxTemperature.kelvin)
+        * (temperature.kelvin / max.kelvin)
         * 666 - 0.0110227028559)) - 0.000151639) // function is based on 393°C
   }
   
   /// Update HeatExchanger.temperature.outlet
-  static func perform(_ hx: inout PerformanceData,
-                      steamTurbine: SteamTurbine.PerformanceData,
-                      storage: Storage.PerformanceData) -> Double {
+  static func perform(
+    _ hx: inout PerformanceData,
+    steamTurbine: SteamTurbine.PerformanceData,
+    storage: Storage.PerformanceData) -> Double
+  {
     let solarField = SolarField.parameter
     let htf = solarField.HTF
     if parameter.name.hasPrefix("Heat Exchanger HTF-H2O - BK") {
@@ -86,7 +87,7 @@ public enum HeatExchanger: Component {
 
         let factor = temperatureFactor(
           temperature: hx.temperature.inlet, load: massFlowLoad,
-          maxTemperature: parameter.temperature.htf.inlet.max)
+          max: parameter.temperature.htf.inlet.max)
 
         hx.setTemperature(outlet:
            parameter.temperature.htf.outlet.max.adjusted(with: factor)
@@ -146,7 +147,6 @@ public enum HeatExchanger: Component {
     }
 
     // Update HeatExchanger.temperature.outlet and massFlow
-
     if case .discharge = storage.operationMode,
       hx.outletTemperature < (261.toKelvin) {
       // added to simulate a bypass on the PB-HX if the expected
@@ -162,7 +162,7 @@ public enum HeatExchanger: Component {
           // check how big massflow load can be (5% more than design?)
           let factor = temperatureFactor(
             temperature: hx.temperature.inlet, load: massFlowLoad,
-            maxTemperature: parameter.temperature.htf.inlet.max)
+            max: parameter.temperature.htf.inlet.max)
 
           hx.setTemperature(outlet:
             parameter.temperature.htf.outlet.max.adjusted(with: factor)
@@ -204,8 +204,7 @@ public enum HeatExchanger: Component {
 
       hx.setTemperature(outlet: htf.temperature(hx.heatToTES))
     }
-    let heat = hx.massFlow.rate * SolarField.parameter.HTF.deltaHeat(
-       hx.temperature.outlet, hx.temperature.inlet) / 1_000
+    let heat = hx.massFlow.rate * SolarField.parameter.HTF.deltaHeat(hx) / 1_000
     return -heat * parameter.efficiency
   }
   /// Calculates the outlet temperature of the power block
@@ -222,7 +221,7 @@ public enum HeatExchanger: Component {
         let massFlowLoad = pb.massFlow.share(of: solarField.massFlow.max)
         let factor = temperatureFactor(
           temperature: pb.temperature.inlet, load: massFlowLoad,
-          maxTemperature: parameter.temperature.htf.inlet.max)
+          max: parameter.temperature.htf.inlet.max)
         
         return parameter.temperature.htf.outlet.max
           .adjusted(with: factor)

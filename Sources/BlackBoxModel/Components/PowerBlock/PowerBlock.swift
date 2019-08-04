@@ -34,7 +34,11 @@ public enum PowerBlock: Component {
   
   /// Calculate parasitic power in PB
   static func parasitics(
-    heat: Double, steamTurbine: SteamTurbine.PerformanceData) -> Double {
+    heat: Double,
+    steamTurbine: SteamTurbine.PerformanceData,
+    temperature: Temperature)
+    -> Double
+  {
     var electricalParasitics = 0.0
     
     if steamTurbine.load.ratio >= 0.01 {
@@ -74,7 +78,7 @@ public enum PowerBlock: Component {
       
       if parameter.electricalParasiticsACCTamb.coefficients.isEmpty == false {
         var adjustmentACC = parameter.electricalParasiticsACCTamb
-          .evaluated(Plant.ambientTemperature.celsius)
+          .evaluated(temperature.celsius)
         // ambient temp is larger than design, ACC max. consumption fixed to nominal
         if adjustmentACC > 1 {
           adjustmentACC = 1
@@ -92,10 +96,9 @@ public enum PowerBlock: Component {
     // * steamTurbine.load + parameter.electricalParasitics[2] * steamTurbine.load ** 2)
   }
   
-  static func heatExchangerBypass(
-    _ powerBlock: PowerBlock.PerformanceData
-    ) -> (heatOut: Double, heatToTES: Double, powerBlock: PowerBlock.PerformanceData)
-    {
+  static func heatExchangerBypass(_ powerBlock: PerformanceData)
+    -> (heatOut: Double, heatToTES: Double, powerBlock: PerformanceData)
+  {
     let htf = SolarField.parameter.HTF
 
     var powerBlock = powerBlock

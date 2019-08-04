@@ -14,12 +14,12 @@ import Meteo
 
 public final class PerformanceDataRecorder {
   
-  let interval = { BlackBoxModel.interval }()
+  let interval = Simulation.time.steps
   
   let mode: Mode
   
   public enum Mode {
-    case full, brief, playground, none
+    case all, brief, playground, none
     
     var hasFileOutput: Bool {
       if case .none = self {
@@ -66,7 +66,7 @@ public final class PerformanceDataRecorder {
     self.mode = noHistory ? .none : .playground
   }
 
-  public init(customNaming: String? = nil, mode: Mode = .full) {
+  public init(customNaming: String? = nil, mode: Mode = .none) {
     self.mode = mode
     let fileNameSuffix = customNaming ?? dateFormatter.string(from: Date())
     
@@ -89,7 +89,7 @@ public final class PerformanceDataRecorder {
           + self.headersHourly.unit + .lineBreak
       )
     }
-    if case .full = mode {
+    if case .all = mode {
       let header = "wxDVFileHeaderVer.1\n"
       let startTime = repeatElement("0", count: 40)
         .joined(separator: .separator) + .lineBreak
@@ -156,7 +156,7 @@ public final class PerformanceDataRecorder {
       meteo: meteo, cosTheta: status.collector.cosTheta
     )
     
-    if case .full = mode {
+    if case .all = mode {
         self.writeIntermediateResults(
           status: status, energy: energy, solar: solar, date: date
         )

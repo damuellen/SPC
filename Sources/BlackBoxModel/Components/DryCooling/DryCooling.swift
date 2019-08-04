@@ -13,10 +13,9 @@ import Meteo
 
 public enum DryCooling {
 
-  static func update(
-    steamTurbineLoad: Double, temperature: Temperature
-  ) -> (DCFactor: Ratio, maxDCLoad: Ratio) {
-
+  static func update(steamTurbineLoad: Double, temperature: Temperature)
+    -> (DCFactor: Ratio, maxDCLoad: Ratio)
+  {
     let coefficientHR: Polynomial = [92.13, 28.73, 18.62, -15.42]
 
     let pressureCondMin = 0.179, pressureCondMax = 0.421 // [bar]

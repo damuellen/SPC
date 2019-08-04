@@ -31,8 +31,9 @@ public struct Temperature: CustomStringConvertible, Equatable {
 
   static func calculate(
     massFlow1: MassFlow, massFlow2: MassFlow,
-    temperature1: Temperature, temperature2: Temperature
-    ) -> Temperature {
+    temperature1: Temperature, temperature2: Temperature)
+    -> Temperature
+  {
     return Temperature((massFlow1.rate * temperature1.kelvin
       + massFlow2.rate * temperature2.kelvin) / (massFlow1 + massFlow2).rate)
   }

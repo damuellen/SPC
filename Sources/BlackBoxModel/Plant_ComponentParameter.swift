@@ -23,7 +23,7 @@ extension Plant {
     }
     
     let solarField = SolarField.parameter
-    
+
     if Design.hasGasTurbine {
       
       HeatExchanger.parameter.sccHTFheat = Design.layout.heatExchanger
@@ -32,15 +32,15 @@ extension Plant {
       let designHeatExchanger = solarField.HTF.deltaHeat(
         HeatExchanger.parameter.scc.htf.outlet.max,
         HeatExchanger.parameter.scc.htf.inlet.max
-      )
+      ) / 1_000
       
-      let heatExchanger = HeatExchanger.parameter
+      let sccHTFheat = HeatExchanger.parameter.sccHTFheat
       SolarField.parameter.massFlow.max = MassFlow(
-        heatExchanger.sccHTFheat * 1_000 / designHeatExchanger
+        sccHTFheat / designHeatExchanger
       )
       
-      WasteHeatRecovery.parameter.ratioHTF = heatExchanger.sccHTFheat
-        / (steamTurbine.power.max - heatExchanger.sccHTFheat)
+      WasteHeatRecovery.parameter.ratioHTF = sccHTFheat
+        / (steamTurbine.power.max - sccHTFheat)
       
     } else {
       
@@ -60,10 +60,10 @@ extension Plant {
       let designHeatExchanger = solarField.HTF.deltaHeat(
         HeatExchanger.parameter.temperature.htf.inlet.max,
         HeatExchanger.parameter.temperature.htf.outlet.max
-      )
+      ) / 1_000
       
       SolarField.parameter.massFlow.max = MassFlow(
-        HeatExchanger.parameter.sccHTFheat * 1_000 / designHeatExchanger
+        HeatExchanger.parameter.sccHTFheat / designHeatExchanger
       )
     }
 
@@ -75,6 +75,17 @@ extension Plant {
       let edgeFactor2 = (1 + 1 / numberOfSCAsInRow)
         / Collector.parameter.lengthSCA / 2
       SolarField.parameter.edgeFactor = [edgeFactor1, edgeFactor2]
+
+      if Design.hasStorage {
+        SolarField.parameter.massFlow.max = MassFlow(100
+          / Storage.parameter.massFlow.rate
+          * SolarField.parameter.massFlow.max.rate
+        )
+        Storage.parameter.massFlow = MassFlow(
+          (1 - Storage.parameter.massFlow.rate / 100)
+            * SolarField.parameter.massFlow.max.rate
+        )
+      }
     }
   }
 }

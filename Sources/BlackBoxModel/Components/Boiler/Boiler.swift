@@ -59,48 +59,41 @@ public enum Boiler: Component {
   }
 
   static func update(
-    _ status: PerformanceData, demand: Double,
-    Qsf_load: Double, fuelAvailable: Double,
-    result: (Status<ComponentState, PerformanceData>) ->())
+    _ boiler: inout PerformanceData, demand: Double,
+    Qsf_load: Double, fuelAvailable: Double) -> EnergyTransfer
   {
-    var boiler = status
-
     var thermalPower = 0.0
 
     var fuel = 0.0
 
     var parasitics = 0.0
 
-    if case .noOperation = status.operationMode { /* || heat >= 0 */
+    if case .noOperation = boiler.operationMode { /* || heat >= 0 */
 
       if boiler.isMaintained {
 
         boiler.operationMode = .scheduledMaintenance
-        let energy = ComponentState(
-          supply: thermalPower, demand: 0, parasitics: parasitics, fuel: fuel
+        return EnergyTransfer(
+          heat: thermalPower, electric: parasitics, fuel: fuel
         )
-        result((energy, boiler))
-        return
       }
 
       let fuel = noOperation(&boiler, fuelAvailable: fuelAvailable)
-      let energy = ComponentState(
-        supply: thermalPower, demand: 0, parasitics: parasitics, fuel: fuel
+      return EnergyTransfer(
+        heat: thermalPower, electric: parasitics, fuel: fuel
       )
-      result((energy, boiler))
-      return
     }
 
-    if case .SI = status.operationMode {
+    if case .SI = boiler.operationMode {
       boiler.operationMode = .startUp
       // if let startEnergyOld = boiler.startEnergy {
       //   boiler.startEnergy = startEnergyOld
       // }
-    } else if case .NI = status.operationMode {
-      boiler.operationMode = .noOperation(hours: HourFraction)
+    } else if case .NI = boiler.operationMode {
+      boiler.operationMode = .noOperation(hours: Simulation.time.steps.fraction)
     }
 
-    if status.isMaintained { // From here: operation is requested:
+    if boiler.isMaintained { // From here: operation is requested:
       💬.infoMessage("""
         \(TimeStep.current)
         Scheduled maintenance of Boiler disables requested operation.
@@ -110,11 +103,9 @@ public enum Boiler: Component {
 
       let fuel = noOperation(&boiler, fuelAvailable: fuelAvailable)
 
-      let energy = ComponentState(
-        supply: thermalPower, demand: 0, parasitics: parasitics, fuel: fuel
+      return EnergyTransfer(
+        heat: thermalPower, electric: parasitics, fuel: fuel
       )
-      result((energy, boiler))
-      return
     }
 
     if -demand / Design.layout.boiler < parameter.minLoad
@@ -127,11 +118,9 @@ public enum Boiler: Component {
         
       let fuel = noOperation(&boiler, fuelAvailable: fuelAvailable)
 
-      let energy = ComponentState(
-        supply: thermalPower, demand: 0, parasitics: parasitics, fuel: fuel
+      return EnergyTransfer(
+        heat: thermalPower, electric: parasitics, fuel: fuel
       )
-      result((energy, boiler))
-      return
     }
 
     // Normal operation requested:
@@ -146,7 +135,8 @@ public enum Boiler: Component {
 
     boiler.load.ratio = heatAvailable / Design.layout.boiler
     // The fuel needed
-    let fuelNeed = heatAvailable / efficiency(at: status.load) * HourFraction
+    let fuelNeed = heatAvailable / efficiency(at: boiler.load)
+      * Simulation.time.steps.fraction
 
     let totalFuelNeed: Double
 
@@ -177,11 +167,11 @@ public enum Boiler: Component {
         
         boiler.operationMode = .startUp
 
-        totalFuelNeed = fuelNeed + status.startEnergy
+        totalFuelNeed = fuelNeed + boiler.startEnergy
       }
     }
 
-    if Fuelmode.isPredefined {
+    if OperationRestriction.fuelStrategy.isPredefined {
       // FIXME	if time.minutes! = 55 {
       // FIXME		var fuelold = fuel
       // FIXME	}
@@ -196,41 +186,41 @@ public enum Boiler: Component {
           """)
         let fuel = noOperation(&boiler, fuelAvailable: fuelAvailable)
 
-        let energy = ComponentState(
-          supply: thermalPower, demand: 0, parasitics: parasitics, fuel: fuel
+        return EnergyTransfer(
+          heat: thermalPower, electric: parasitics, fuel: fuel
         )
-        result((energy, boiler))
-        return
       }
     }
 
     // Normal operation possible:
 
     // FIXME: H2Ov.temperature.outlet  = Boiler.parameter.nomTout
-    if Fuelmode.isPredefined { // predefined fuel consumption in *.pfc-file
-      fuel = fuelAvailable / HourFraction // Fuel flow [MW] in this hour fraction
+    if OperationRestriction.fuelStrategy.isPredefined { // predefined fuel consumption in *.pfc-file
+      // Fuel flow [MW] in this hour fraction
+      fuel = fuelAvailable / Simulation.time.steps.fraction
+      
       thermalPower = Plant.fuelConsumption.boiler
-        * efficiency(at: status.load) // net thermal power [MW]
+        * efficiency(at: boiler.load) // net thermal power [MW]
     } else {
-      fuel = totalFuelNeed / HourFraction // Fuel flow [MW] in this hour fraction
+      fuel = totalFuelNeed / Simulation.time.steps.fraction // Fuel flow [MW] in this hour fraction
       thermalPower = Plant.fuelConsumption.boiler
-        / HourFraction * efficiency(at: status.load) // net thermal power [MW]
+        / Simulation.time.steps.fraction * efficiency(at: boiler.load) // net thermal power [MW]
     }
     
     parasitics = self.parasitics(estimateFrom: boiler.load)
 
-    let energy = ComponentState(
-      supply: thermalPower, demand: 0, parasitics: parasitics, fuel: fuel
+    return EnergyTransfer(
+      heat: thermalPower, electric: parasitics, fuel: fuel
     )
-    result((energy, boiler))
-    return
   }
 
-  private static func load(_ status: inout PerformanceData,
-                           fuel: inout Double, fuelAvailable: Double) {
+  private static func load(
+    _ status: inout PerformanceData, fuel: inout Double, fuelAvailable: Double)
+  {
     switch (status.operationMode, status.isMaintained) {
     case (let .noOperation(hours), false):
-      status.operationMode = .noOperation(hours: hours + HourFraction)
+      let hourFraction = hours + Simulation.time.steps.fraction
+      status.operationMode = .noOperation(hours: hourFraction)
     case (_, true):
       status.operationMode = .scheduledMaintenance
     default:
@@ -274,10 +264,11 @@ public enum Boiler: Component {
     // Iteration to get possible load with the fuel avail. for production:
     var load = 0.0
     repeat {
-      if Fuelmode.isPredefined { // predefined fuel consumption in *.pfc-file
-        load = fuel / (Design.layout.boiler * HourFraction)
+      if OperationRestriction.fuelStrategy.isPredefined { // predefined fuel consumption in *.pfc-file
+        load = fuel / (Design.layout.boiler * Simulation.time.steps.fraction)
 
-        status.load.ratio = fuel / (Design.layout.boiler * HourFraction)
+        status.load.ratio =
+          fuel / (Design.layout.boiler * Simulation.time.steps.fraction)
 
       } else {
 
@@ -297,7 +288,7 @@ public enum Boiler: Component {
     if case .startUp = boiler.operationMode {
       fuel = fuelAvailable
     } else {
-      boiler.operationMode = .noOperation(hours: HourFraction)
+      boiler.operationMode = .noOperation(hours: Simulation.time.steps.fraction)
       fuel = 0
       boiler.load.ratio = 0
       // FIXME: H2Ov.massFlow = 0

@@ -33,7 +33,7 @@ public enum Simulation {
     asAvailableCapacity: 1
   )
 
-  static var time = Time(
+  public static var time = Time(
     isLeapYear: false,
     firstDateOfOperation: nil,
     lastDateOfOperation: nil,
@@ -75,9 +75,9 @@ public struct InitValues: Codable {
 
 public extension InitValues {
   init(file: TextConfigFile) throws {
-    let row: (Int) throws -> Double = { try file.parseDouble(row: $0) }
-    self.temperatureOfHTFinPipes = try Temperature(row(7))
-    self.temperatureOfHTFinHCE = try Temperature(row(10))
-    self.massFlowInSolarField = try MassFlow(row(13))
+    let line: (Int) throws -> Double = { try file.parseDouble(line: $0) }
+    self.temperatureOfHTFinPipes = try Temperature(line(7))
+    self.temperatureOfHTFinHCE = try Temperature(line(10))
+    self.massFlowInSolarField = try MassFlow(line(13))
   }
 }

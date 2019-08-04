@@ -1,8 +1,6 @@
 import XCTest
 
 @testable import BlackBoxModel
-import Meteo
-@testable import SolarPosition
 
 class SolarFieldTests: XCTestCase {
   func testsOutletTemperature() {

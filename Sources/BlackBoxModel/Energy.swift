@@ -22,9 +22,8 @@ public struct Energy: CustomStringConvertible {
   
   public var description: String {
     return "\n" + (thermal.description + parasitics.description
-      + electric.description + fuel.description).split(
-        separator: "\n", maxSplits: .max, omittingEmptySubsequences: true
-        ).joined(separator: "\n") + "\n"
+      + electric.description + fuel.description)
+      .split(separator: "\n").joined(separator: "\n") + "\n"
   }
   
   mutating func reset() {
@@ -58,10 +57,10 @@ public struct ElectricPower: Encodable, PerformanceData {
   parasitics = 0.0, net = 0.0, consum = 0.0
   
   var values: [String] {
-    return NumberFormatter.string(precision: 1, [
+    return NumberFormatter.strings([
       steamTurbineGross, gasTurbineGross, backupGross,
       parasitics, net, consum,
-    ])
+    ], precision: 1)
   }
   
   var csv: String {
@@ -101,10 +100,10 @@ public struct Parasitics: Encodable, PerformanceData {
   powerBlock = 0.0, shared = 0.0, solarField = 0.0, storage = 0.0
   
   var values: [String] {
-    return NumberFormatter.string(precision: 3, [
-      solarField, powerBlock, storage,
-      shared, 0, gasTurbine,
-    ])
+    return NumberFormatter.strings(
+      [solarField, powerBlock, storage,
+       shared, 0, gasTurbine,
+      ], precision: 1)
   }
   
   var csv: String {
@@ -146,13 +145,13 @@ public struct ThermalEnergy: Encodable, PerformanceData {
   dumping: Power = 0.0, overtemp_dump: Power = 0.0, startUp: Power = 0.0
   
   var values: [String] {
-    return NumberFormatter.string(precision: 1, [
-      solar.megaWatt, dumping.megaWatt,
-      toStorage.megaWatt, storage.megaWatt,
-      heater.megaWatt, heatExchanger.megaWatt,
-      startUp.megaWatt, wasteHeatRecovery.megaWatt,
-      boiler.megaWatt, production.megaWatt,
-    ])
+    return NumberFormatter.strings(
+      [solar.megaWatt, dumping.megaWatt,
+       toStorage.megaWatt, storage.megaWatt,
+       heater.megaWatt, heatExchanger.megaWatt,
+       startUp.megaWatt, wasteHeatRecovery.megaWatt,
+       boiler.megaWatt, production.megaWatt,
+      ], precision: 1)
   }
   
   var csv: String {
@@ -218,9 +217,8 @@ public struct FuelConsumption: Encodable, PerformanceData {
   }
   
   var values: [String] {
-    return NumberFormatter.string(precision: 1, [
-      backup, boiler, heater, gasTurbine, combined,
-    ])
+    return NumberFormatter.strings(
+      [backup, boiler, heater, gasTurbine, combined], precision: 1)
   }
   
   var csv: String {
