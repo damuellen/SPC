@@ -172,7 +172,6 @@ extension SolarField.PerformanceData.OperationMode {
     case .noOperation: return .noOperation
     case .scheduledMaintenance: return .noOperation
     case .unknown: return .variable
-    case .ph: return .variable
     case .normal: return .operating
     }
   }

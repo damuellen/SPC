@@ -75,8 +75,7 @@ extension Storage {
       parasitics = Storage.parasitics(&storage)
     case .discharge:
       let load = dischargeLoad(&storage, nightHour)
-      massFlowStorage(
-        storage: &storage,
+      massFlowStorage(&storage,
         powerBlock: powerBlock,
         solarField: solarField,
         dischargeLoad: load
@@ -133,38 +132,26 @@ extension Storage {
   }
   
   private static func massFlowStorage(
-    storage: inout PerformanceData,
-    powerBlock: PowerBlock.PerformanceData,
+    _ storage: inout PerformanceData,
+    powerBlock: HeatCycle,
     solarField: SolarField.PerformanceData,
     dischargeLoad: Ratio)
   {
     switch solarField.operationMode {
-    case .freezeProtection:
-      storage.setMassFlow(rate: dischargeLoad.ratio
-        * powerBlock.massFlow.rate / parameter.heatExchangerEfficiency)
-      
     case .operating where solarField.massFlow.rate > 0:
-      // Mass flow is correctd by parameter.Hx this factor is new
       storage.setMassFlow(rate: powerBlock.massFlow.rate
         / parameter.heatExchangerEfficiency - solarField.massFlow.rate)
     // * 0.97 deleted after separating combined from storage only operation
     default:
-      // if demand < 1 { // only for OU1!?
-      //  storage.massFlow = powerBlock.massFlow * 1.3
-      //    / parameter.heatExchangerEfficiency
-      // for OU1 adjust to demand file and not TES design parameter
-      // } else {
-      // added to control TES discharge during night
       storage.setMassFlow(rate: dischargeLoad.ratio
         * powerBlock.massFlow.rate / parameter.heatExchangerEfficiency)
-      // }
     }
   }
 
   private static func storageCharging(
     storage: inout PerformanceData,
     solarField: inout SolarField.PerformanceData,
-    powerBlock: PowerBlock.PerformanceData)
+    powerBlock: HeatCycle)
     -> Double
   {
     let heatExchanger = HeatExchanger.parameter,

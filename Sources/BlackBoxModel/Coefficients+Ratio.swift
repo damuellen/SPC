@@ -41,7 +41,7 @@ public struct Polynomial: Codable, Equatable {
     }
     return result
   }
-  
+
   subscript(temperature: Temperature) -> Double {
     @inline(__always) get { return self.evaluated(temperature.kelvin) }
   }

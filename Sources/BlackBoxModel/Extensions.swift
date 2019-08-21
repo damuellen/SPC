@@ -102,12 +102,6 @@ final class Cache<T: Hashable> {
   }
 }
 
-func swap<T>(_ lhs: inout T, _ rhs: inout T) {
-  let temp = lhs
-  lhs = rhs
-  rhs = temp
-}
-
 @inline(__always)
 public func unreachable() -> Never {
   return unsafeBitCast((), to: Never.self)

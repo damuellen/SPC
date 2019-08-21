@@ -45,8 +45,14 @@ public enum SolarField: Component {
     }
 
     public enum OperationMode: String, CustomStringConvertible {
-      case startUp, freezeProtection, operating,
-        noOperation, scheduledMaintenance, unknown, ph, fixed, normal
+      case startUp
+      case freezeProtection
+      case operating
+      case noOperation
+      case scheduledMaintenance
+      case unknown
+      case fixed
+      case normal
 
       public var description: String {
         return rawValue
@@ -303,6 +309,7 @@ public enum SolarField: Component {
       {
         solarField.operationMode = .operating
       }
+      //GoSub CalcNearLoop
       outletTemperature(&solarField, collector, ambient, time)
 
     default: // HCE returns with solarField.OPmode = unknown

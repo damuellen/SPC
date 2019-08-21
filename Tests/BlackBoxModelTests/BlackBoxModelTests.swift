@@ -43,7 +43,7 @@ class BlackBoxModelTests: XCTestCase {
     XCTAssertEqual(result.thermal.solar.megaWatt, 1185.2, accuracy: 0.1)
     XCTAssertEqual(result.thermal.startUp.megaWatt, 243.5, accuracy: 0.1)
     XCTAssertEqual(result.thermal.production.megaWatt, 793.8, accuracy: 0.1)
-    XCTAssertEqual(result.thermal.heatExchanger.megaWatt, 1063.2, accuracy: 0.1)
+    XCTAssertEqual(result.thermal.heatExchanger.megaWatt, 1063.0, accuracy: 0.1)
   }
 
   static var allTests: [(String, (BlackBoxModelTests) -> () throws -> Void)] {

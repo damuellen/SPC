@@ -108,34 +108,27 @@ public enum Storage: Component {
     powerBlock: inout PowerBlock.PerformanceData,
     heater: inout Heater.PerformanceData,
     demand: Double, fuelAvailable: Double)
-    -> EnergyTransfer
+    -> EnergyTransfer<Storage>
   {    
     // **************************  Energy surplus  *****************************
     if storage.heat > 0 {
-
       var supply: Double
-
       var parasitics: Double
-
+      let mode: PerformanceData.OperationMode
       if storage.charge.ratio < parameter.chargeTo,
         solarField.massFlow.rate >= powerBlock.massFlow.rate
       {
-        (supply, parasitics) = Storage.perform(
-          storage: &storage,
-          solarField: &solarField,
-          steamTurbine: &steamTurbine,
-          powerBlock: &powerBlock,
-          mode: .charging
-        )
+        mode = .charging
       } else { // heat cannot be stored
-        (supply, parasitics) = Storage.perform(
-          storage: &storage,
-          solarField: &solarField,
-          steamTurbine: &steamTurbine,
-          powerBlock: &powerBlock,
-          mode: .noOperation
-        )
+        mode = .noOperation
       }
+      (supply, parasitics) = Storage.perform(
+        storage: &storage,
+        solarField: &solarField,
+        steamTurbine: &steamTurbine,
+        powerBlock: &powerBlock,
+        mode: mode
+      )
       powerBlock.inletTemperature(outlet: solarField)
       return EnergyTransfer(heat: supply, electric: parasitics, fuel: 0)
     }
@@ -170,7 +163,6 @@ public enum Storage: Component {
         // massflow in SOF is higher that in PB.
       }
       var supply: Double
-
       var parasitics: Double
 
       (supply, parasitics) = Storage.perform(
@@ -191,9 +183,7 @@ public enum Storage: Component {
 
         powerBlock.massFlow = solarField.massFlow
         powerBlock.massFlow += storage.massFlow
-        powerBlock.massFlow.adjust(withFactor:
-          parameter.heatExchangerEfficiency
-        )
+        powerBlock.massFlow.adjust(withFactor: parameter.heatExchangerEfficiency)
         
       } else if storage.massFlow.isNearZero == false {
         
@@ -220,11 +210,10 @@ public enum Storage: Component {
       #warning("Check this")
       heater.operationMode = .freezeProtection
       var supply: Double
-
       var parasitics: Double
 
       var fuel = 0.0
-
+      let mode: PerformanceData.OperationMode
       if OperationRestriction.fuelStrategy.isPredefined == false {
 
         let energy = Heater.update(
@@ -237,40 +226,31 @@ public enum Storage: Component {
         Plant.electricalParasitics.heater = energy.electric
         
         powerBlock.massFlow = heater.massFlow
-        
-        (supply, parasitics) = Storage.perform(
-          storage: &storage,
-          solarField: &solarField,
-          steamTurbine: &steamTurbine,
-          powerBlock: &powerBlock,
-          mode: .freezeProtection
-        )
-        
-        powerBlock.inletTemperature(outlet: storage)
 
-        // check why to circulate HTF in SF
-        #warning("Storage.parasitics")
-        Plant.electricalParasitics.solarField =
-          SolarField.parameter.antiFreezeParastics
+        mode = .freezeProtection
       } else if case .freezeProtection = solarField.operationMode,
         storage.charge > -0.35 && parameter.FP == 0
       {
-        (supply, parasitics) = Storage.perform(
-          storage: &storage,
-          solarField: &solarField,
-          steamTurbine: &steamTurbine,
-          powerBlock: &powerBlock,
-          mode: .freezeProtection
-        )
+        mode = .freezeProtection
       } else {
-        (supply, parasitics) = Storage.perform(
-          storage: &storage,
-          solarField: &solarField,
-          steamTurbine: &steamTurbine,
-          powerBlock: &powerBlock,
-          mode: .noOperation
-        )
+        mode = .noOperation
       }
+      
+      (supply, parasitics) = Storage.perform(
+        storage: &storage,
+        solarField: &solarField,
+        steamTurbine: &steamTurbine,
+        powerBlock: &powerBlock,
+        mode: mode
+      )
+      
+      powerBlock.inletTemperature(outlet: storage)
+
+      // check why to circulate HTF in SF
+      #warning("Storage.parasitics")
+      Plant.electricalParasitics.solarField =
+        SolarField.parameter.antiFreezeParastics
+      
       return EnergyTransfer(heat: supply, electric: parasitics, fuel: fuel)
     }
     return EnergyTransfer(heat: 0, electric: 0, fuel: 0)

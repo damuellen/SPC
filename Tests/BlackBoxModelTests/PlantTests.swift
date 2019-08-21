@@ -13,33 +13,27 @@ class PlantTests: XCTestCase {
     Plant.setupComponentParameters()
     
     var status = Plant.initialState
-    let temperature = Temperature(celsius: 20.0)
+    let ambientTemperature = Temperature(celsius: 20.0)
     
     status.solarField.inletTemperature(outlet: status.powerBlock)
     
-    Plant.update(solarField: &status.solarField,
-                 storage: status.storage)
+    Plant.refresh(solarField: &status.solarField, status.storage)
     XCTAssertEqual(status.solarField.massFlow.rate, 854.82, accuracy: 0.1)
-    
-    Plant.update(solarField: &status.solarField,
-                 collector: status.collector,
-                 ambient: temperature)
+    Plant.refresh(solarField: &status.solarField, status.collector,
+                  ambientTemperature)
     XCTAssertEqual(status.solarField.outletTemperature, 467.13, accuracy: 0.1)
-    Plant.update(solarField: &status.solarField,
-                 collector: status.collector,
-                 storage: &status.storage,
-                 powerBlock: &status.powerBlock,
-                 boiler: &status.boiler,
-                 gasTurbine: &status.gasTurbine,
-                 heater: &status.heater,
-                 heatExchanger: &status.heatExchanger,
-                 steamTurbine: &status.steamTurbine,
-                 ambient: temperature)
-    
-    Plant.update(storage: &status.storage,
-                 powerBlock: &status.powerBlock,
-                 steamTurbine: status.steamTurbine)
-    
+    Plant.refresh(powerBlock: &status.powerBlock,
+                  solarField: &status.solarField, status.collector,
+                  storage: &status.storage,
+                  heater: &status.heater,
+                  heatExchanger: &status.heatExchanger,
+                  boiler: &status.boiler,
+                  gasTurbine: &status.gasTurbine,
+                  steamTurbine: &status.steamTurbine,
+                  ambientTemperature)
+
+    Plant.refresh(storage: &status.storage, powerBlock: &status.powerBlock,
+                  status.steamTurbine)
   }
   
   

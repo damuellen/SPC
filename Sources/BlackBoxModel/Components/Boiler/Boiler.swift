@@ -60,7 +60,7 @@ public enum Boiler: Component {
 
   static func update(
     _ boiler: inout PerformanceData, demand: Double,
-    Qsf_load: Double, fuelAvailable: Double) -> EnergyTransfer
+    Qsf_load: Double, fuelAvailable: Double) -> EnergyTransfer<Boiler>
   {
     var thermalPower = 0.0
 

@@ -102,12 +102,8 @@ public enum SteamTurbine: Component {
         Plant.heat.startUp = 0.0
         let maxLoad: Double
         (maxLoad, steamTurbine.efficiency) = SteamTurbine.perform(
-          steamTurbine: steamTurbine.load,
-          boiler: boiler.operationMode,
-          gasTurbine: gasTurbine.operationMode,
-          heatExchanger: heatExchanger.temperature.inlet,
-          ambient: temperature
-        )
+          steamTurbine.load, boiler.operationMode, gasTurbine.operationMode,
+          heatExchanger.temperature.inlet, temperature)
         #warning("Check this again")
         let eff = steamTurbine.efficiency
         steamTurbine.load.ratio = (heat * eff / parameter.power.max)
@@ -144,11 +140,11 @@ public enum SteamTurbine: Component {
   }
   
   static func perform(
-    steamTurbine load: Ratio,
-    boiler: Boiler.PerformanceData.OperationMode,
-    gasTurbine: GasTurbine.PerformanceData.OperationMode,
-    heatExchanger: Temperature,
-    ambient: Temperature)
+    _ load: Ratio,
+    _ boiler: Boiler.PerformanceData.OperationMode,
+    _ gasTurbine: GasTurbine.PerformanceData.OperationMode,
+    _ heatExchanger: Temperature,
+    _ ambient: Temperature)
     -> (maxLoad: Double, maxEfficiency: Double)
   {
     guard load.ratio > 0 else { return (0, 0) }

@@ -74,11 +74,11 @@ class HCETests: XCTestCase {
   func testsMode2() {
     var solarField = Plant.initialState.solarField
     var collector = Plant.initialState.collector
-    var amb = Temperature(celsius: 20.0)
+    let amb = Temperature(celsius: 20.0)
     collector.insolationAbsorber = 500.0
     collector.efficiency = 80.0
-    var (_,dumping) = HCE.mode2(&solarField, collector, .design, amb)
-    var hce = solarField.loops[0]
+    let (_,dumping) = HCE.mode2(&solarField, collector, .design, amb)
+    let hce = solarField.loops[0]
     XCTAssertEqual(hce.massFlow.rate, 0, accuracy: 0.1)
     XCTAssertEqual(hce.temperature.outlet.celsius, 200.0, accuracy: 0.1) // FIXME
     XCTAssertEqual(dumping.isZero, true)

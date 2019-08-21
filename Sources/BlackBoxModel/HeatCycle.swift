@@ -11,6 +11,7 @@
 import Foundation
 
 protocol HeatCycle {
+  
   var massFlow: MassFlow { get set }
   var temperature: (inlet: Temperature, outlet: Temperature) { get set }
 }

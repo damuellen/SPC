@@ -70,7 +70,7 @@ public enum Heater: Component {
     solarField: SolarField.PerformanceData,
     demand: Double,
     fuelAvailable: Double)
-    -> EnergyTransfer
+    -> EnergyTransfer<Heater>
   {
     let htf = SolarField.parameter.HTF
     
@@ -97,7 +97,7 @@ public enum Heater: Component {
             """)
           noOperation(&heater)
           thermalPower = 0
-          let energy = EnergyTransfer(
+          let energy = EnergyTransfer<Heater>(
             heat: thermalPower, electric: parasitics, fuel: fuel
           )
           return energy
@@ -201,7 +201,7 @@ public enum Heater: Component {
       }
     }
     parasitics = self.parasitics(estimateFrom: heater.load)
-    let energy = EnergyTransfer(
+    let energy = EnergyTransfer<Heater>(
       heat: thermalPower, electric: parasitics, fuel: fuel
     )
     return energy

@@ -26,6 +26,6 @@ extension Component {
   }
 }
 
-struct EnergyTransfer {
+struct EnergyTransfer<Component> {
   var heat, electric, fuel: Double
 }

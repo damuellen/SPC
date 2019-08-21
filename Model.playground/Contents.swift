@@ -26,7 +26,7 @@ extension PerformanceLog: CustomPlaygroundDisplayConvertible {
 
 let 🌦 = Bundle.main.path(forResource: "AlAbdaliyah", ofType: "mto")!
 let recorder = PerformanceDataRecorder()
-
+let recorder2 = PerformanceDataRecorder()
 BlackBoxModel.configure(meteoFilePath: 🌦)
 Simulation.time.steps = .every5minutes
 
@@ -36,6 +36,7 @@ SolarField.parameter.massFlow.max = MassFlow(2500)
 Design.layout.solarField = 140
 
 let result1 = BlackBoxModel.runModel(with: recorder)
+
 result1[\.collector.insolationAbsorber, ofDay: 188].sum()
 let a = Array(result1[\.collector.insolationAbsorber, ofDay: 200]).filter {$0 > 0}
 a.mean()

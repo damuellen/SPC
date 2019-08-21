@@ -146,12 +146,8 @@ public enum GasTurbine: Component {
             steamTurbine.load.ratio = load
             // The turbine load has changed recalculation of efficiency
             (_, steamTurbine.efficiency) = SteamTurbine.perform(
-              steamTurbine: steamTurbine.load,
-              boiler: boiler,
-              gasTurbine: gasTurbine.operationMode,
-              heatExchanger: heatExchanger.temperature.inlet,
-              ambient: temperature
-            )
+              steamTurbine.load, boiler, gasTurbine.operationMode,
+              heatExchanger.temperature.inlet, temperature)
         //  }
           
           let eff = steamTurbine.efficiency
@@ -194,12 +190,8 @@ public enum GasTurbine: Component {
               steamTurbine.load.ratio = load
               // The turbine load has changed recalculation of efficiency
               (_, steamTurbine.efficiency) = SteamTurbine.perform(
-                steamTurbine: steamTurbine.load,
-                boiler: boiler,
-                gasTurbine: gasTurbine.operationMode,
-                heatExchanger: heatExchanger.temperature.inlet,
-                ambient: temperature
-              )
+              steamTurbine.load, boiler, gasTurbine.operationMode,
+              heatExchanger.temperature.inlet, temperature)
           //  }
 
             let eff = steamTurbine.efficiency
@@ -289,11 +281,8 @@ public enum GasTurbine: Component {
         // The turbine load has changed recalculation of efficiency
         steamTurbine.load.ratio = load
         (_, steamTurbine.efficiency) = SteamTurbine.perform(
-          steamTurbine: steamTurbine.load,
-          boiler: boiler,
-          gasTurbine: gasTurbine.operationMode,
-          heatExchanger: heatExchanger.temperature.inlet,
-          ambient: temperature)
+        steamTurbine.load, boiler, gasTurbine.operationMode,
+        heatExchanger.temperature.inlet, temperature)
     //  }
       
       Plant.heat.demand.megaWatt = steamTurbine.load.ratio

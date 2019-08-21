@@ -575,7 +575,7 @@ enum HCE {
         interval /= 2
         zoom -= interval // Shorten interval
       } else {
-      //  if outerIteration == 1 { break }
+        if o == 1 { break }
         interval /= 2
         zoom += interval // Elongate interval
       }
