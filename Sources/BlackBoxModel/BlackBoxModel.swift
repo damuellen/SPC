@@ -27,7 +27,7 @@ public enum BlackBoxModel {
     yearOfSimulation = year
     
     sun = SolarPosition(
-      position: location.coordinates, year: yearOfSimulation,
+      location: location.coordinates, year: yearOfSimulation,
       timezone: timeZone, frequence: Simulation.time.steps
     )
     
@@ -48,7 +48,7 @@ public enum BlackBoxModel {
     yearOfSimulation = meteoData!.year ?? yearOfSimulation
     
     sun = SolarPosition(
-      position: meteoData!.location.coordinates, year: yearOfSimulation,
+      location: meteoData!.location.coordinates, year: yearOfSimulation,
       timezone: -(meteoData!.timeZone ?? 0), frequence: Simulation.time.steps
     )
   }
@@ -118,24 +118,53 @@ public enum BlackBoxModel {
       let ambientTemperature = Temperature(celsius: meteo.temperature)
       
       status.solarField.inletTemperature(outlet: status.powerBlock)
+      
+      status.solarField.massFlow = SolarField.parameter.massFlow.max
 
-      Plant.refresh(solarField: &status.solarField, status.storage)
+      if GridDemand.current.ratio < 1 {
+        Plant.adjustMassFlow(solarField: &status.solarField)
+      }
+      
+      if Design.hasStorage {
+        
+        Plant.inletTemperature(solarField: &status.solarField, storage: status.storage)
+        
+        if status.storage.charge.ratio < Storage.parameter.chargeTo {
+          status.solarField.massFlow += status.storage.massFlow
+        } else if Design.hasGasTurbine {
+          status.solarField.massFlow = HeatExchanger.parameter.sccHTFmassFlow
+        }
+        if status.solarField.massFlow > SolarField.parameter.massFlow.max {
+          status.solarField.massFlow = SolarField.parameter.massFlow.max
+        }
+      }
+      
+      var timeRemain = 600.0
 
-      Plant.refresh(solarField: &status.solarField, status.collector,
-                    ambientTemperature)
-
-      Plant.refresh(powerBlock: &status.powerBlock,
-                    solarField: &status.solarField, status.collector,
-                    storage: &status.storage,
-                    heater: &status.heater,
-                    heatExchanger: &status.heatExchanger,
-                    boiler: &status.boiler,
-                    gasTurbine: &status.gasTurbine,
-                    steamTurbine: &status.steamTurbine,
-                    ambientTemperature)
-
-      Plant.refresh(storage: &status.storage, powerBlock: &status.powerBlock,
-                    status.steamTurbine)
+      SolarField.calculate(
+        &status.solarField,
+        collector: status.collector,
+        time: &timeRemain,
+        dumping: &Plant.heat.dumping.watt,
+        ambient: ambientTemperature
+      )
+      
+      status.solarField.temperature.outlet =
+        SolarField.heatLossesHotHeader(status.solarField, ambient: ambientTemperature)
+      
+      Plant.electricalParasitics.solarField = SolarField.parasitics(status.solarField)
+      
+      Plant.calculate(&status, ambientTemperature: ambientTemperature)
+      
+      if Design.hasStorage {
+        // Calculate the operating state of the salt
+        Plant.heat.storage.megaWatt = Storage.operate(
+          storage: &status.storage,
+          powerBlock: &status.powerBlock,
+          steamTurbine: status.steamTurbine,
+          thermal: Plant.heat.storage.megaWatt
+        )
+      }
       
       let energy = Plant.energyBalance()
 

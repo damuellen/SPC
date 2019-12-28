@@ -8,7 +8,7 @@ import SolarPosition
 class MeteoTests: XCTestCase {
   func testsGenerator() {
     let location = Position(longitude: 47, latitude: 29, elevation: 0)
-    let sun = SolarPosition(position: (47, 29, 0), year: 2017,
+    let sun = SolarPosition(location: (47, 29, 0), year: 2017,
                             timezone: 4, frequence: .every5minutes)
     
     let dg = DateGenerator(year: 2017, interval: .every5minutes)
@@ -63,34 +63,6 @@ class MeteoTests: XCTestCase {
     let datasource = MeteoDataSource(
       name: "", data: meteoData, location: location,year: 2017, timeZone: 8
     )
-
-    let generatorA = MeteoDataGenerator(datasource, frequence: .every5minutes)
-
-    let range = DateGenerator.dateInterval(day: 1, year: 2017)
-    generatorA.setRange(range)
-
-    var counter = -1
-    var idx = 0
-    
-    for meteo in generatorA {
-      if counter % 2 != 0 {
-        XCTAssertEqual(meteo.dni, valuesDay[idx].dni, accuracy: 0.01)
-        idx += 1
-        if idx == valuesDay.endIndex { idx = 0 }
-      }
-      counter += 1
-    }
-    
-    let generatorB = MeteoDataGenerator(datasource, frequence: .every10minutes)
-
-    generatorB.setRange(range)
-
-    idx = 0
-    
-    for meteo in generatorB {
-      XCTAssertEqual(meteo.dni, valuesDay[idx].dni, accuracy: 0.01)
-      idx += 1
-    }
   }
 
   static var allTests: [(String, (MeteoTests) -> () throws -> Void)] {

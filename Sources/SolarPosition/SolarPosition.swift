@@ -1,0 +1,212 @@
+import Foundation
+import CSPA
+import CSOLPOS
+import DateGenerator
+
+typealias FractionalTime = Double
+typealias Algorithm = (SolarPosition.InputValues) -> SolarPosition.OutputValues
+
+let calendar = { calendar -> NSCalendar in
+  calendar.timeZone = TimeZone(secondsFromGMT: 0)!
+  return calendar
+}(NSCalendar(identifier: .gregorian)!)
+
+/// A table only containing values where the sun is above the horizon.
+/// To access values in the table use a date as a subscript.
+public struct SolarPosition {
+
+  private static var algorithm: Algorithm = SolarPosition.solpos
+
+  internal let precalculatedValues: [Date: OutputValues]
+
+  public struct InputValues {
+    var year, month, day, hour, minute, second: Int
+    var timezone: Double
+    var delta_t: Double
+    var longitude,latitude, elevation: Double
+    var pressure, temperature: Double
+    var slope: Double
+    var azm_rotation: Double
+    var atmos_refract: Double
+  }
+
+  public struct OutputValues: Equatable {
+    public var zenith, azimuth, elevation: Double
+    public var hourAngle: Double
+    public var declination: Double
+    public var incidence: Double
+    public var cosIncidence: Double
+    var sunrise: FractionalTime
+    var sunset: FractionalTime
+  }
+
+  static func estimateDelta_T(date: Date) -> Double {
+    var ΔT = 62.92 + 0.32217 * (Double(date.get(component: .year)) - 2000)
+    ΔT += 0.005589 * pow((Double(date.get(component: .year)) - 2000), 2)
+    return ΔT
+  }
+  public var year: Int
+  public var location: Location
+  public var timeZone: Int
+  
+  public var frequence: DateGenerator.Interval
+  /// Returns a table initialized with precalculated sun position
+  /// for the given location and year at the predetermined times.
+  ///
+  /// - parameter location: longitude, latitude, elevation
+  /// - parameter year: 4-digit year
+  /// - parameter timezone: Time zone, east (west negative)
+  /// - parameter frequence: Time interval for the calculations
+  public init(location: (Double, Double, Double),
+              year: Int, timezone: Int, frequence: DateGenerator.Interval) {
+    self.year = year
+    self.frequence = frequence
+    self.timeZone = timezone
+    self.location = Location(longitude: location.0,
+                            latitude: location.1,
+                            elevation: location.2)
+
+    let sunHoursPerDay = SolarPosition.sunHoursPerDay(
+      year: year, location: self.location, timezone: timezone)
+
+    precalculatedValues = SolarPosition.calculateSunPositions(
+      sunHours: sunHoursPerDay, location: self.location,
+      timezone: timezone, valuesPerHour: frequence)
+  }
+
+  /// Accesses the values associated with the given date.
+  public subscript(date: Date) -> OutputValues? {
+    return precalculatedValues[date]
+  }
+
+  static func compute(date: Date, location: Location, timezone: Int,
+                      with algorithm: Algorithm) -> OutputValues {
+
+    let timeZone = Double(timezone)  // Should correspond to location
+    let ΔT = estimateDelta_T(date: date)
+    let components = date.getComponents()
+
+    return algorithm(InputValues(
+      year: components.year!, month: components.month!, day: components.day!,
+      hour: components.hour!, minute: components.minute!, second: 0,
+      timezone: timeZone, delta_t: ΔT, longitude: location.longitude,
+      latitude: location.latitude, elevation: location.elevation,
+      pressure: 1023, temperature: 15, slope: 0, azm_rotation: 0,
+      atmos_refract: 0.5667))
+  }
+
+  static func calculateSunPositions(
+    sunHours: [DateInterval],
+    location: Location, timezone: Int,
+    valuesPerHour: DateGenerator.Interval) -> [Date: OutputValues] {
+
+    var result: [Date: SolarPosition.OutputValues] = [:]
+
+    let sunHoursOfDay = sunHours.map { $0.align(with: valuesPerHour) }
+    let dates = sunHoursOfDay.flatMap {
+      DateGenerator(range: $0, interval: valuesPerHour)
+    }
+
+    for date in dates {
+      autoreleasepool {
+        result[date] = SolarPosition.compute(
+          date: date, location: location, timezone: timezone, with: algorithm)
+      }
+    }
+    return result
+  }
+
+  private static func sunHoursPerDay(
+    year: Int, location: Location, timezone: Int) -> [DateInterval] {
+
+    var components = DateComponents()
+    components.timeZone = calendar.timeZone
+    components.year = year
+    components.hour = 12 + timezone
+
+    let isLeapYear = year % 4 == 0 && year % 100 != 0 || year % 400 == 0
+
+    return (1 ... (isLeapYear ? 366 : 365)).map { day in
+
+      components.day = day
+      let date = calendar.date(from: components)!
+      let output = SolarPosition.compute(
+        date: date, location: location, timezone: timezone, with: spa)
+      assert(output.sunrise < output.sunset,
+             "sunset before sunrise check location and time zone")
+
+      if let sunrise = date.set(time: output.sunrise),
+        let sunset = date.set(time: output.sunset) {
+        return DateInterval(start: sunrise, end: sunset)
+      }
+      fatalError("No sun hours. Day: \(day)")
+    }
+  }
+
+  static func spa(input: InputValues) -> OutputValues {
+
+    enum Output: Int32 {
+      case ZA, ZA_INC, ZA_RTS, ALL
+    }
+
+    var data = spa_data()
+    data.year          = Int32(input.year)
+    data.month         = Int32(input.month)
+    data.day           = Int32(input.day)
+    data.hour          = Int32(input.hour)
+    data.minute        = Int32(input.minute)
+    data.second        = Int32(input.second)
+    data.timezone      = input.timezone
+    data.delta_t       = input.delta_t
+    data.longitude     = input.longitude
+    data.latitude      = input.latitude
+    data.elevation     = input.elevation
+    data.pressure      = input.pressure
+    data.temperature   = input.temperature
+    data.slope         = input.slope
+    data.azm_rotation  = input.azm_rotation
+    data.atmos_refract = input.atmos_refract
+    data.function      = Output.ALL.rawValue
+
+    let _ = spa_calculate(&data)
+    return OutputValues(
+      zenith: data.zenith, azimuth: data.azimuth, elevation: data.e,
+      hourAngle: Double(data.h_prime), declination: data.delta,
+      incidence: data.incidence, cosIncidence: cos(data.incidence * .pi / 180),
+      sunrise: data.sunrise, sunset: data.sunset)
+  }
+
+  static func solpos(input: InputValues) -> OutputValues {
+
+    var data = posdata()
+    data.day       = Int32(input.day)    // Day of month (May 27 = 27, etc.)
+    data.hour      = Int32(input.hour)   // Hour of day, 0 - 23
+    data.minute    = Int32(input.minute) // Minute of hour, 0 - 59
+    data.month     = Int32(input.month)  // Month number (Jan = 1, Feb = 2, etc.)
+    data.second    = Int32(input.second) // Second of minute, 0 - 59
+    data.year      = Int32(input.year)   // 4-digit year
+    data.daynum    =      1
+    data.interval  =      0  // iTantaneous measurement interval
+    data.aspect    =  180.0  // Azimuth of panel surface (direction it  faces) N=0, E=90, S=180, W=270
+    data.latitude  = Float(input.latitude)   // Latitude, degrees north (south negative)
+    data.longitude = Float(input.longitude)  // Longitude, degrees east (west negative)
+    data.press     = Float(input.pressure)   // Surface pressure, millibars
+    data.solcon    = 1367.0  // Solar coTant, 1367 W/sq m
+    data.temp      =   15.0  // Ambient dry-bulb temperature, degrees C
+    data.tilt      =    0.0  // Degrees tilt from horizontal of panel
+    data.timezone  = Float(input.timezone)   // Time zone, east (west negative).
+    data.sbwid     =    7.6  // Eppley shadow band width
+    data.sbrad     =   31.7  // Eppley shadow band radius
+    data.sbsky     =   0.04  // Drummond factor for partly cloudy skies
+    data.function  =  S_ALL  // compute all parameters
+
+    let _ = S_solpos(&data)
+    return OutputValues(
+      zenith: Double(data.zenref), azimuth: Double(data.azim),
+      elevation: Double(data.elevref), hourAngle: Double(data.hrang),
+      declination: Double(data.declin),
+      incidence: acos(Double(data.cosinc)) *  180 / .pi,
+      cosIncidence: Double(data.cosinc),
+      sunrise: Double(data.sretr), sunset: Double(data.ssetr))
+  }
+}

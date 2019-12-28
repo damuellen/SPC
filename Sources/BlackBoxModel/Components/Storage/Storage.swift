@@ -770,7 +770,7 @@ public enum Storage: Component {
     let solarField =  SolarField.parameter
 
     storage.salt.massFlow.calculated.rate =
-      solarField.antiFreezeFlow.rate * Simulation.time.steps.duration
+      solarField.antiFreezeFlow.rate * Simulation.time.steps.interval
 
     let massFlow = storage.salt.massFlow.calculated
       .adjusted(withFactor: splitfactor)
@@ -797,7 +797,7 @@ public enum Storage: Component {
       storage.salt.massFlow.cold.rate > 0
     {
       storage.salt.massFlow.calculated.rate = powerBlock.massFlow.rate
-        * Simulation.time.steps.duration
+        * Simulation.time.steps.fraction
       
       storage.temperatureTank.cold = Temperature.calculate(
         massFlow1: storage.salt.massFlow.calculated,
@@ -929,7 +929,7 @@ public enum Storage: Component {
           * parameter.heatExchangerEfficiency // design charging power
         
         let massFlowDischarging = designDischarge
-          / status.salt.heat.available * Simulation.time.steps.duration * 1_000
+          / status.salt.heat.available * Simulation.time.steps.fraction * 1_000
         
         let saltFlowRatio = status.salt.massFlow.calculated.rate
           / massFlowDischarging
@@ -949,7 +949,7 @@ public enum Storage: Component {
           * parameter.heatExchangerEfficiency
         
         let massFlowCharging = designCharge
-          / status.salt.heat.available * Simulation.time.steps.duration * 1_000
+          / status.salt.heat.available * Simulation.time.steps.fraction * 1_000
         
         let saltFlowRatio = status.salt.massFlow.calculated.rate
           / massFlowCharging

@@ -63,7 +63,7 @@ let log = PerformanceDataRecorder(
   customNaming: "Result_\(lastRun + Int(1))"
 )
 */
-let log = PerformanceDataRecorder(mode: .none)
+let log = PerformanceDataRecorder(mode: .brief)
 let result = BlackBoxModel.runModel(with: log)
 
 print(result)

@@ -17,23 +17,6 @@ class PlantTests: XCTestCase {
     
     status.solarField.inletTemperature(outlet: status.powerBlock)
     
-    Plant.refresh(solarField: &status.solarField, status.storage)
-    XCTAssertEqual(status.solarField.massFlow.rate, 854.82, accuracy: 0.1)
-    Plant.refresh(solarField: &status.solarField, status.collector,
-                  ambientTemperature)
-    XCTAssertEqual(status.solarField.outletTemperature, 467.13, accuracy: 0.1)
-    Plant.refresh(powerBlock: &status.powerBlock,
-                  solarField: &status.solarField, status.collector,
-                  storage: &status.storage,
-                  heater: &status.heater,
-                  heatExchanger: &status.heatExchanger,
-                  boiler: &status.boiler,
-                  gasTurbine: &status.gasTurbine,
-                  steamTurbine: &status.steamTurbine,
-                  ambientTemperature)
-
-    Plant.refresh(storage: &status.storage, powerBlock: &status.powerBlock,
-                  status.steamTurbine)
   }
   
   

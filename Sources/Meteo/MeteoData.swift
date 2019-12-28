@@ -70,13 +70,13 @@ public struct MeteoData: CustomStringConvertible {
       var bPrime = aPrime + m
 
       if aPrime < 0 {
-        bPrime = bPrime + aPrime
+        bPrime += aPrime
         aPrime = 0
         m = bPrime - aPrime
       }
 
       if bPrime < 0 {
-        aPrime = aPrime + bPrime
+        aPrime += bPrime
         bPrime = 0
         m = bPrime - aPrime
       }
