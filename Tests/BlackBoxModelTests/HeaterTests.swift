@@ -6,13 +6,13 @@ class HeaterTests: XCTestCase {
   func testsHeater() {
     let status = Plant.initialState
     var heater = status.heater
-    let energy = Heater.update(
-      heater: &heater,
-      powerBlock: status.powerBlock,
-      storage: status.storage,
-      solarField: status.solarField,
-      demand: 1,
-      fuelAvailable: 10)
+    let energy = heater(
+      temperatureSolarField: status.solarField.temperature.outlet,
+      temperaturePowerBlock: status.powerBlock.temperature.inlet,
+      massFlowStorage: status.storage.massFlow,
+      modeStorage: status.storage.operationMode, 
+      demand: 1, fuelAvailable: 10
+    )
     XCTAssertEqual(energy.heat, 0.0, accuracy: 0.01, "heat")
     XCTAssertEqual(energy.electric, 10.0, accuracy: 0.01, "electric")
     XCTAssertEqual(energy.fuel, 0.0, accuracy: 0.01, "fuel")

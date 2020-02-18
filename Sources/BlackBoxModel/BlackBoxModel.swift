@@ -40,7 +40,7 @@ public enum BlackBoxModel {
     
     do {
       let handler = try MeteoDataFileHandler(forReadingAtPath: path)
-      meteoData = try handler.makeDataSource()
+      meteoData = try handler()
     } catch {
       fatalError("\(error) Meteo data is mandatory for calculation.")
     }
@@ -117,7 +117,7 @@ public enum BlackBoxModel {
 
       let ambientTemperature = Temperature(celsius: meteo.temperature)
       
-      status.solarField.inletTemperature(outlet: status.powerBlock)
+      status.solarField.setInletTemperature(equalToOutlet: status.powerBlock)
       
       status.solarField.massFlow = SolarField.parameter.massFlow.max
 

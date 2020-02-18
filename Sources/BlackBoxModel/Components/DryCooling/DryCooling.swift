@@ -63,7 +63,7 @@ public enum DryCooling {
     } else if backPressure >= pressureCondMax {
       dcFactor = HRFmax / 100
     } else {
-      dcFactor = coefficientHR[backPressure] / 100
+      dcFactor = coefficientHR(backPressure) / 100
     }
 
     if Tamb < TambMin {

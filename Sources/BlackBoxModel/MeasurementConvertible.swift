@@ -10,12 +10,12 @@
 
 import Foundation
 
-protocol PerformanceData {
+protocol MeasurementsConvertible {
   static var columns: [(name: String, unit: String)] { get }
   var values: [String] { get }
 }
 
-extension PerformanceData {
+extension MeasurementsConvertible {
   var description: String {
     return zip(values, Self.columns).reduce("\n") { result, pair in
       let (value, desc) = pair

@@ -13,31 +13,29 @@ import Foundation
 import Meteo
 import SolarPosition
 
-public enum Collector: Component {
+public struct Collector: Component, CustomStringConvertible {
   
   public enum OperationMode {
     case variable, freezeProtection, noOperation, operating, fixed
   }
 
   /// Contains all data needed to simulate the operation of the collector
-  public struct PerformanceData: Encodable, CustomStringConvertible {
-    public var parabolicElevation, theta, cosTheta, efficiency: Double
-    public var insolationAbsorber: Double
-    
-    static var headers: String {
-      return "Parabolic Elevation, elevation, azimuth, theta, efficiency"
-    }
-
-    public var description: String {
-      return String(format: "PE: %.1f°, ", parabolicElevation)
-        + String(format: "θ: %.2f°, ", theta)
-        + String(format: "cos(θ): %.2f, ", cosTheta)
-        + String(format: "η: %.2f", efficiency * 100) + "% "
-        + String(format: "insolationAbsorber: %.1f", insolationAbsorber)
-    }
+  public var parabolicElevation, theta, cosTheta, efficiency: Double
+  public var insolationAbsorber: Double
+  
+  static var headers: String {
+    return "Parabolic Elevation, elevation, azimuth, theta, efficiency"
   }
 
-  static let initialState = PerformanceData(
+  public var description: String {
+    return String(format: "PE: %.1f°, ", parabolicElevation)
+      + String(format: "θ: %.2f°, ", theta)
+      + String(format: "cos(θ): %.2f, ", cosTheta)
+      + String(format: "η: %.2f", efficiency * 100) + "% "
+      + String(format: "insolationAbsorber: %.1f", insolationAbsorber)
+  }
+
+  static let initialState = Collector(
     parabolicElevation: 0, theta: 0, cosTheta: 0,
     efficiency: 0, insolationAbsorber: 0
   )
@@ -63,13 +61,13 @@ public enum Collector: Component {
     }
   }
 
-  /// This function calculates the efficiency of the Collector in the
-  /// solar field which is depending on: incidence angle (theta), elevation angle
-  /// of parabolic trough, edge factors of the solarfield and the optical efficiency
-  public static func efficiency(_ collector: inout PerformanceData, ws: Float) {
+  /// This function calculates the efficiency of the parabolic trough
+  /// which is depending on: incidence angle (theta), elevation angle,
+  /// edge factors of the solarfield and the optical efficiency
+  public static func efficiency(_ collector: inout Collector, ws: Float) {
     guard case 1...179 = collector.parabolicElevation else { return }
     
-    let IAM = parameter.IAMfac[collector.theta.toRadians]
+    let IAM = parameter.IAMfac(collector.theta.toRadians)
     
     let solarField = SolarField.parameter
     
@@ -138,7 +136,7 @@ public enum Collector: Component {
     collector.efficiency = eff
   }
 
-  public static func tracking(sun: SolarPosition.OutputValues) -> PerformanceData {
+  public static func tracking(sun: SolarPosition.OutputValues) -> Collector {
     var collector = Collector.initialState
     guard sun.zenith < 90.0 else { return collector }
 
@@ -162,7 +160,7 @@ public enum Collector: Component {
   }
 }
 
-extension SolarField.PerformanceData.OperationMode {
+extension SolarField.OperationMode {
   var collector: Collector.OperationMode {
     switch self {
     case .fixed: return .fixed
@@ -177,7 +175,7 @@ extension SolarField.PerformanceData.OperationMode {
   }
 }
 
-extension Collector.PerformanceData: PerformanceData {
+extension Collector: MeasurementsConvertible {
   var values: [String] {
     return [
       String(format: "%.1f", theta),

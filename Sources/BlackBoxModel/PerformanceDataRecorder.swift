@@ -58,7 +58,7 @@ public final class PerformanceDataRecorder {
   private var dailyEnergy = Energy()
   private var dailyRadiation = SolarRadiation()
   /// All past states of the plant
-  private var performanceHistory: [Plant.PerformanceData] = []
+  private var performanceHistory: [PerformanceData] = []
   private var energyHistory: [Energy] = []
   private var meteo: [MeteoData] = []
 
@@ -144,7 +144,7 @@ public final class PerformanceDataRecorder {
   }
 
   func add(
-    _ date: Date, meteo: MeteoData, status: Plant.PerformanceData, energy: Energy)
+    _ date: Date, meteo: MeteoData, status: PerformanceData, energy: Energy)
   {
     if case .playground = mode {
       self.meteo.append(meteo)
@@ -235,7 +235,7 @@ public final class PerformanceDataRecorder {
   private var headersInterval: (name: String, unit: String) {
     let columns = [SolarRadiation.columns, ThermalEnergy.columns,
                    ElectricPower.columns, Parasitics.columns,
-                   FuelConsumption.columns, Collector.PerformanceData.columns]
+                   FuelConsumption.columns, Collector.columns]
       .joined()
     let names = columns.map { $0.0 }.joined(separator: ",") + .lineBreak
     let units = columns.map { $0.1 }.joined(separator: ",") + .lineBreak
@@ -243,7 +243,7 @@ public final class PerformanceDataRecorder {
   }
 
   private var headersInterval2: (name: String, unit: String) {
-    let columns = Plant.PerformanceData.columns
+    let columns = PerformanceData.columns
     let names = columns.map { $0.0 }.joined(separator: ",") + .lineBreak
     let units = columns.map { $0.1 }.joined(separator: ",") + .lineBreak
     return ("Date,Time," + names, "_,_," + units)
@@ -279,7 +279,7 @@ public final class PerformanceDataRecorder {
   }
 
   private func writeIntermediateResults(
-    status: Plant.PerformanceData, energy: Energy,
+    status: PerformanceData, energy: Energy,
     solar: SolarRadiation, date: Date)
   {
     guard let stream = allResultsStream,
@@ -299,6 +299,6 @@ public final class PerformanceDataRecorder {
 extension OutputStream {
   func write(_ string: String) {
     let bytes = [UInt8](string.utf8)
-    write(bytes, maxLength: bytes.count)
+    let _ = write(bytes, maxLength: bytes.count)
   }
 }

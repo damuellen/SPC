@@ -42,16 +42,16 @@ public struct Polynomial: Codable, Equatable {
     return result
   }
 
-  subscript(temperature: Temperature) -> Double {
-    @inline(__always) get { return self.evaluated(temperature.kelvin) }
+  func callAsFunction(_ temperature: Temperature) -> Double {
+    evaluated(temperature.kelvin)
   }
 
-  subscript(value: Double) -> Double {
-    @inline(__always) get { return self.evaluated(value) }
+  func callAsFunction(_ value: Double) -> Double {
+    evaluated(value)
   }
 
-  subscript(ratio: Ratio) -> Double {
-    @inline(__always) get { return self.evaluated(ratio.ratio) }
+  func callAsFunction(_ ratio: Ratio) -> Double {
+    evaluated(ratio.ratio)
   }
 
   subscript(index: Int) -> Double {

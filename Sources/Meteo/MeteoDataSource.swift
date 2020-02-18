@@ -13,23 +13,23 @@ import DateGenerator
 import SolarPosition
 
 public class MeteoDataSource {
-  public let year: Int?
-  public let location: Position
-  public let timeZone: Int?
   public let name: String
-  
+  public let year: Int?
+  public let timeZone: Int?
+  public let location: Position
+   
   let data: [MeteoData]
   let hourFraction: Double
   
   private let valuesPerDay: Int
   
   public init(name: String, data: [MeteoData],
-       location: Position, year: Int?, timeZone: Int?)
+       _ meta: (year: Int, tz: Int, location: Position))
   {
     self.data = data
-    self.location = location
-    self.year = year
-    self.timeZone = timeZone
+    self.location = meta.location
+    self.year =  meta.year
+    self.timeZone =  meta.tz
     self.name = name
     self.hourFraction = 8760 / Double(data.count)
     self.valuesPerDay = Int(24 / hourFraction)
@@ -118,7 +118,7 @@ public class MeteoDataSource {
     let tz = sun.timeZone
     
     return MeteoDataSource(
-      name: "Fake", data: data, location: location, year: sun.year, timeZone: tz
+      name: "Fake", data: data, (sun.year, tz, location)
     )
   }
 }

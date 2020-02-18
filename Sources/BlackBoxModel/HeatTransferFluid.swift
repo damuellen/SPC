@@ -97,11 +97,11 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
 
   func enthalpy(_ temperature: Temperature) -> Double {
     precondition(temperature.kelvin > freezeTemperature.kelvin)
-    return enthaplyFromTemperature[temperature.celsius]
+    return enthaplyFromTemperature(temperature.celsius)
   }
 
   func temperature(_ enthalpy: Double) -> Temperature {
-    return Temperature(celsius: temperatureFromEnthalpy[enthalpy])
+    return Temperature(celsius: temperatureFromEnthalpy(enthalpy))
   }
   
   @_transparent func mixingTemperature(_ f1: HeatCycle, _ f2: HeatCycle)

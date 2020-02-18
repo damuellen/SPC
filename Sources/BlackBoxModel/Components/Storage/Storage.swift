@@ -10,90 +10,88 @@
 
 import Foundation
 
-public enum Storage: Component {
+public struct Storage: Component, HeatCycle {
   /// Contains all data needed to simulate the operation of the storage
-  public struct PerformanceData: HeatCycle {
+  var operationMode: OperationMode
 
-    var operationMode: OperationMode
+  var dT_HTFsalt: (cold: Double, hot: Double)
+  
+  var temperatureTank: (cold: Temperature, hot: Temperature)
+  
+  var temperature: (inlet: Temperature, outlet: Temperature)
+  
+  var massFlow: MassFlow
 
-    var dT_HTFsalt: (cold: Double, hot: Double)
+  var antiFreezeTemperature: Double = 0.0
+  
+  var heat: Double = 0.0
+  
+  var charge: Ratio = 0.0
+
+  var salt: Salt = Salt()
+  
+  struct Salt { // salt side of storage
     
-    var temperatureTank: (cold: Temperature, hot: Temperature)
+    var massFlow: MassFlows = .init()
+    var heat: Heat = .init()
     
-    var temperature: (inlet: Temperature, outlet: Temperature)
-    
-    var massFlow: MassFlow
-
-    var antiFreezeTemperature: Double = 0.0
-    
-    var heat: Double = 0.0
-    
-    var charge: Ratio = 0.0
-
-    var salt: Salt = Salt()
-    
-    struct Salt { // salt side of storage
-      
-      var massFlow: MassFlows = .init()
-      var heat: Heat = .init()
-      
-      struct MassFlows { // [kg/s]
-        var calculated: MassFlow = .zero
-        var minimum: MassFlow = .zero
-        var cold: MassFlow = .zero
-        var hot: MassFlow = .zero
-      }
-      
-      struct Heat { // [kJ/kg]
-        var cold: Double = 0
-        var hot: Double = 0
-        var available: Double {
-          return hot - cold
-        }
-      }
-      
-      fileprivate mutating func calculateMassFlow(
-        cold: Temperature, hot: Temperature, thermal: Double)
-      {
-        heat.cold = parameter.HTF.properties.specificHeat(cold)
-        heat.hot = parameter.HTF.properties.specificHeat(hot)
-        let rate = thermal / heat.available
-          * Simulation.time.steps.fraction * 3600 * 1_000
-        massFlow.calculated.rate = rate
-      }
-    }
-
-    fileprivate var storedHeat: Double = 0.0
-
-    fileprivate var heatLossStorage: Double = 0.0
-
-    fileprivate var heatProductionLoad: Ratio = 0.0
-
-   // var dischargeLoad: Ratio = 0.0
-
-    fileprivate var saltMass: Double = 0.0
-    
-    public enum OperationMode  {
-      case noOperation, discharge
-      case preheat, charging, fossilCharge, freezeProtection
+    struct MassFlows { // [kg/s]
+      var calculated: MassFlow = .zero
+      var minimum: MassFlow = .zero
+      var cold: MassFlow = .zero
+      var hot: MassFlow = .zero
     }
     
-    mutating func adjustMassFlow(
-      to thermalPower: Double,
-      htf: HeatTransferFluid = SolarField.parameter.HTF)
+    struct Heat { // [kJ/kg]
+      var cold: Double = 0
+      var hot: Double = 0
+      var available: Double {
+        return hot - cold
+      }
+    }
+    
+    fileprivate mutating func calculateMassFlow(
+      cold: Temperature, hot: Temperature, thermal: Double)
     {
-      setMassFlow(rate: thermalPower / htf.deltaHeat(
-        temperature.outlet, temperature.inlet) * 1_000)
+      heat.cold = parameter.HTF.properties.specificHeat(cold)
+      heat.hot = parameter.HTF.properties.specificHeat(hot)
+      let rate = thermal / heat.available
+        * Simulation.time.steps.fraction * 3600 * 1_000
+      massFlow.calculated.rate = rate
     }
   }
+
+  fileprivate var storedHeat: Double = 0.0
+
+  fileprivate var heatLossStorage: Double = 0.0
+
+  fileprivate var heatProductionLoad: Ratio = 0.0
+
+ // var dischargeLoad: Ratio = 0.0
+
+  fileprivate var saltMass: Double = 0.0
   
-  static let initialState = Storage.PerformanceData(
+  
+  mutating func adjustMassFlow(
+    to thermalPower: Double,
+    htf: HeatTransferFluid = SolarField.parameter.HTF)
+  {
+    setMassFlow(rate: thermalPower / htf.deltaHeat(
+      temperature.outlet, temperature.inlet) * 1_000)
+  }
+
+  public enum OperationMode  {
+    case noOperation, discharge
+    case preheat, charging, fossilCharge, freezeProtection
+  }
+
+  static let initialState = Storage(
     operationMode: .noOperation,
     dT_HTFsalt: (0, 0), temperatureTank: (566.0, 666.0),
     temperature: (Simulation.initialValues.temperatureOfHTFinPipes,
                   Simulation.initialValues.temperatureOfHTFinPipes),
     massFlow: 0.0, antiFreezeTemperature: 550.0, heat: 0.0, charge: 0.0,
-    salt: Storage.PerformanceData.Salt(),
+    salt: Storage.Salt(),
     storedHeat: 0.0, heatLossStorage: 0.0, heatProductionLoad: 0.0,
   //  dischargeLoad: 0.0,
     saltMass: 0.0
@@ -102,11 +100,11 @@ public enum Storage: Component {
   public static var parameter: Parameter = ParameterDefaults.st
   
   static func update(
-    storage: inout PerformanceData,
-    solarField: inout SolarField.PerformanceData,
-    steamTurbine: inout SteamTurbine.PerformanceData,
-    powerBlock: inout PowerBlock.PerformanceData,
-    heater: inout Heater.PerformanceData,
+    storage: inout Storage,
+    solarField: inout SolarField,
+    steamTurbine: inout SteamTurbine,
+    powerBlock: inout PowerBlock,
+    heater: inout Heater,
     demand: Double, fuelAvailable: Double)
     -> EnergyTransfer<Storage>
   {    
@@ -114,7 +112,7 @@ public enum Storage: Component {
     if storage.heat > 0 {
       var supply: Double
       var parasitics: Double
-      let mode: PerformanceData.OperationMode
+      let mode: Storage.OperationMode
       if storage.charge.ratio < parameter.chargeTo,
         solarField.massFlow.rate >= powerBlock.massFlow.rate
       {
@@ -129,7 +127,7 @@ public enum Storage: Component {
         powerBlock: &powerBlock,
         mode: mode
       )
-      powerBlock.inletTemperature(outlet: solarField)
+      powerBlock.setInletTemperature(equalToOutlet: solarField)
       return EnergyTransfer(heat: supply, electric: parasitics, fuel: 0)
     }
     
@@ -187,7 +185,7 @@ public enum Storage: Component {
         
       } else if storage.massFlow.isNearZero == false {
         
-        powerBlock.inletTemperature(outlet: storage)
+        powerBlock.setInletTemperature(equalToOutlet: storage)
 
         powerBlock.massFlow = storage.massFlow
         powerBlock.massFlow.adjust(withFactor:
@@ -213,12 +211,14 @@ public enum Storage: Component {
       var parasitics: Double
 
       var fuel = 0.0
-      let mode: PerformanceData.OperationMode
+      let mode: Storage.OperationMode
       if OperationRestriction.fuelStrategy.isPredefined == false {
 
-        let energy = Heater.update(
-          heater: &heater, powerBlock: powerBlock,
-          storage: storage, solarField: solarField,
+        let energy = heater(
+          temperatureSolarField: solarField.temperature.outlet,
+          temperaturePowerBlock: powerBlock.temperature.inlet,
+          massFlowStorage: storage.massFlow,
+          modeStorage: storage.operationMode, 
           demand: demand, fuelAvailable: fuelAvailable
         )
         fuel = energy.fuel
@@ -244,7 +244,7 @@ public enum Storage: Component {
         mode: mode
       )
       
-      powerBlock.inletTemperature(outlet: storage)
+      powerBlock.setInletTemperature(equalToOutlet: storage)
 
       // check why to circulate HTF in SF
       #warning("Storage.parasitics")
@@ -257,9 +257,9 @@ public enum Storage: Component {
   }
   
   static func demandStrategy(
-    storage: inout Storage.PerformanceData,
-    powerBlock: inout PowerBlock.PerformanceData,
-    solarField: SolarField.PerformanceData)
+    storage: inout Storage,
+    powerBlock: inout PowerBlock,
+    solarField: SolarField)
   {
     var demand = TimeStep.current.isDaytime ? 0.5 : Plant.heat.demand.megaWatt
     
@@ -283,8 +283,8 @@ public enum Storage: Component {
   }
   
   private static func strategyAlways(
-    storage: inout PerformanceData,
-    powerBlock: inout PowerBlock.PerformanceData,
+    storage: inout Storage,
+    powerBlock: inout PowerBlock,
     solarFieldMassFlow: MassFlow,
     production: Double,
     demand: inout Double)
@@ -323,8 +323,8 @@ public enum Storage: Component {
   }
   
   private static func strategyDemand(
-    storage: inout PerformanceData,
-    powerBlock: inout PowerBlock.PerformanceData,
+    storage: inout Storage,
+    powerBlock: inout PowerBlock,
     massFlowSolarField: MassFlow,
     production: Double)
   {
@@ -362,8 +362,8 @@ public enum Storage: Component {
   }
   
   private static func strategyShifter(
-    storage: inout PerformanceData,
-    powerBlock: inout PowerBlock.PerformanceData,
+    storage: inout Storage,
+    powerBlock: inout PowerBlock,
     massFlowSolarField: MassFlow,
     production: Double,
     demand: inout Double)
@@ -488,10 +488,7 @@ public enum Storage: Component {
   }
   
   /// Calculate thermal power given by TES
-  static func calculate(
-    _ thermal: Double,
-    storage: Storage.PerformanceData)
-    -> (Double, Storage.PerformanceData.Salt)
+  static func calculate(_ thermal: Double, storage: Storage) -> (Double, Storage.Salt)
   {
     var salt = storage.salt
     var thermal = thermal
@@ -533,9 +530,9 @@ public enum Storage: Component {
   }
 
   static func operate(
-    storage: inout Storage.PerformanceData,
-    powerBlock: inout PowerBlock.PerformanceData,
-    steamTurbine: SteamTurbine.PerformanceData,
+    storage: inout Storage,
+    powerBlock: inout PowerBlock,
+    steamTurbine: SteamTurbine,
     thermal: Double)
     -> Double
   {
@@ -597,7 +594,7 @@ public enum Storage: Component {
   }
   
   private static func indirectCharging(
-    _ storage: inout Storage.PerformanceData, thermal: Double)
+    _ storage: inout Storage, thermal: Double)
   {
     storage.salt.calculateMassFlow(
       cold: storage.temperatureTank.cold,
@@ -642,14 +639,12 @@ public enum Storage: Component {
     }
   }
   
-  private static func directCharging(
-    _ storage: inout Storage.PerformanceData, thermal: Double)
+  private static func directCharging(_ storage: inout Storage, thermal: Double)
   {
     
   }
   
-  private static func fossilCharging(
-    _ storage: inout Storage.PerformanceData, thermal: Double)
+  private static func fossilCharging(_ storage: inout Storage, thermal: Double)
   {
     storage.salt.calculateMassFlow(
       cold: storage.temperatureTank.cold,
@@ -678,7 +673,7 @@ public enum Storage: Component {
   }
   
   private static func indirectDischarging(
-    _ storage: inout Storage.PerformanceData, thermal: Double) -> Double
+    _ storage: inout Storage, thermal: Double) -> Double
   {
     var thermalPower = thermal
     
@@ -730,13 +725,13 @@ public enum Storage: Component {
   }
   
   private static func directDischarging(
-    _ storage: inout Storage.PerformanceData, thermal: Double) -> Double
+    _ storage: inout Storage, thermal: Double) -> Double
   {
     return 0
   }
   
   private static func preheating(
-    _ storage: inout Storage.PerformanceData, thermal: Double)
+    _ storage: inout Storage, thermal: Double)
   {
     storage.salt.calculateMassFlow(
       cold: parameter.designTemperature.cold,
@@ -762,8 +757,8 @@ public enum Storage: Component {
   }
   
   private static func freezeProtection(
-    _ storage: inout Storage.PerformanceData,
-    powerBlock: PowerBlock.PerformanceData)
+    _ storage: inout Storage,
+    powerBlock: PowerBlock)
   {
     let splitfactor = parameter.HTF == .hiXL ? 0.4 : 1
 
@@ -788,8 +783,8 @@ public enum Storage: Component {
   }
   
   private static func noOperation(
-    _ storage: inout Storage.PerformanceData,
-    powerBlock: PowerBlock.PerformanceData)
+    _ storage: inout Storage,
+    powerBlock: PowerBlock)
   {
     if parameter.stepSizeIteration < -90,
       storage.temperatureTank.cold < parameter.designTemperature.cold,
@@ -812,7 +807,7 @@ public enum Storage: Component {
   private static var sumMinute = 0
   private static var oldMinute = 0
   /// Calculates the parasitics of the TES
-  static func parasitics(_ status: inout PerformanceData) -> Double {
+  static func parasitics(_ status: inout Storage) -> Double {
     
     var parasitics = 0.0
     
@@ -967,7 +962,7 @@ public enum Storage: Component {
     }
   }
   
-  static func minMassFlow(_ storage: Storage.PerformanceData) -> MassFlow
+  static func minMassFlow(_ storage: Storage) -> MassFlow
   {
     switch Storage.parameter.definedBy {
     case .hours:
@@ -1028,7 +1023,7 @@ public enum Storage: Component {
       / (2 * parameter.HTF.properties.heatCapacity[1] * 0.5))
   }
   
-  static func heatlosses(storage: inout Storage.PerformanceData) {
+  static func heatlosses(storage: inout Storage) {
     
     if storage.salt.massFlow.cold.rate
       > abs(parameter.dischargeToTurbine * storage.salt.massFlow.calculated.rate)
@@ -1067,7 +1062,7 @@ public enum Storage: Component {
     }
   }
   
-  static func saltMass(_ storage: PerformanceData) -> Double {
+  static func saltMass(_ storage: Storage) -> Double {
     switch parameter.definedBy {
     case .hours:
       return Design.layout.storage
@@ -1087,7 +1082,7 @@ public enum Storage: Component {
     }
   }
   
-  static func defindedByTonnage(_ storage: inout Storage.PerformanceData)
+  static func defindedByTonnage(_ storage: inout Storage)
   {
     storage.salt.heat.cold = parameter.HTF.properties.specificHeat(
       parameter.designTemperature.cold
@@ -1106,7 +1101,7 @@ public enum Storage: Component {
   }
   
   static func dischargeLoad(
-    _ storage: inout Storage.PerformanceData,
+    _ storage: inout Storage,
     _ nightHour: Double) -> Ratio
   {
     // calculate discharge rate only once per day, directly after sunset
@@ -1173,8 +1168,8 @@ extension HeatTransferFluid {
   }
 }
 
-extension Storage.PerformanceData {
-  init(operationMode: OperationMode,
+extension Storage {
+  init(operationMode: Storage.OperationMode,
        temperature: (inlet: Temperature, outlet: Temperature),
        temperatureTanks: (cold: Temperature, hot: Temperature),
        massFlow: MassFlow, minMassFlow: MassFlow, heatRelease: Double,

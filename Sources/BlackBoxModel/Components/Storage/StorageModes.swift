@@ -10,27 +10,27 @@ import Foundation
 extension Storage {
   /// Calculation of thermal power and parasitics
   static func perform(
-    storage: inout PerformanceData,
-    solarField: inout SolarField.PerformanceData,
-    steamTurbine: inout SteamTurbine.PerformanceData,
-    powerBlock: inout PowerBlock.PerformanceData,
-    mode: PerformanceData.OperationMode,
+    storage: inout Storage,
+    solarField: inout SolarField,
+    steamTurbine: inout SteamTurbine,
+    powerBlock: inout PowerBlock,
+    mode: Storage.OperationMode,
     nightHour: Double = 12.0)
     -> (Double, Double)
   {
     if storage.operationMode != mode {
       let oldMode = storage.operationMode
-      💬.infoMessage("""
+      debugPrint("""
         \(TimeStep.current) Storage mode change \(oldMode) -> \(mode)
         """)
     }
     storage.operationMode = mode
     
-    func outletTemperature(_ status: Storage.PerformanceData) -> Temperature {
+    func outletTemperature(_ status: Storage) -> Temperature {
       var temp: Double
       if parameter.temperatureDischarge2[1] > 0 {
         temp = status.charge > 0.5
-          ? 1 : parameter.temperatureDischarge2[status.charge]
+          ? 1 : parameter.temperatureDischarge2(status.charge)
         temp *= parameter.designTemperature.hot.kelvin
           - parameter.temperatureDischarge[1]
       } else {
@@ -132,9 +132,9 @@ extension Storage {
   }
   
   private static func massFlowStorage(
-    _ storage: inout PerformanceData,
+    _ storage: inout Storage,
     powerBlock: HeatCycle,
-    solarField: SolarField.PerformanceData,
+    solarField: SolarField,
     dischargeLoad: Ratio)
   {
     switch solarField.operationMode {
@@ -149,14 +149,14 @@ extension Storage {
   }
 
   private static func storageCharging(
-    storage: inout PerformanceData,
-    solarField: inout SolarField.PerformanceData,
+    storage: inout Storage,
+    solarField: inout SolarField,
     powerBlock: HeatCycle)
     -> Double
   {
     let heatExchanger = HeatExchanger.parameter,
     htf = SolarField.parameter.HTF
-    storage.inletTemperature(outlet: solarField)
+    storage.setInletTemperature(equalToOutlet: solarField)
     
     storage.massFlow = solarField.massFlow - powerBlock.massFlow
     storage.massFlow.adjust(withFactor: parameter.heatExchangerEfficiency)
@@ -165,7 +165,7 @@ extension Storage {
     
     if parameter.temperatureCharge.coefficients[1] > 0 { // usually = 0
       fittedTemperature = storage.charge < 0.5
-        ? 1 : parameter.temperatureCharge2[storage.charge]
+        ? 1 : parameter.temperatureCharge2(storage.charge)
       fittedTemperature *= parameter.designTemperature.cold.kelvin
         - parameter.temperatureCharge.coefficients[2]
     } else {
@@ -179,7 +179,7 @@ extension Storage {
       }
     }
     
-    storage.outletTemperature(kelvin: fittedTemperature)
+    storage.setOutletTemperature(inKelvin: fittedTemperature)
     
     var thermalPower = storage.massFlow.rate * htf.deltaHeat(storage) / 1_000
     
@@ -214,9 +214,8 @@ extension Storage {
   }
  
   private static func storageFossilCharge(
-    storage: inout PerformanceData,
-    powerBlock: inout PowerBlock.PerformanceData)
-    -> Double
+    storage: inout Storage, powerBlock: inout PowerBlock
+    ) -> Double
   {
     var thermalPower = 0.0
     // heat can be stored
@@ -227,7 +226,7 @@ extension Storage {
     var fittedTemperature: Double
     if parameter.temperatureCharge.coefficients[1] > 0 { // usually = 0
       fittedTemperature = storage.charge < 0.5
-        ? 1 : parameter.temperatureCharge2[storage.charge]
+        ? 1 : parameter.temperatureCharge2(storage.charge)
       fittedTemperature *= parameter.designTemperature.cold.kelvin
         - parameter.temperatureCharge.coefficients[2]
     } else {
@@ -236,7 +235,7 @@ extension Storage {
         - (parameter.designTemperature.cold
           - storage.temperatureTank.cold).kelvin
     }
-    storage.outletTemperature(kelvin: fittedTemperature)
+    storage.setOutletTemperature(inKelvin: fittedTemperature)
     
     thermalPower = -storage.massFlow.rate
       * SolarField.parameter.HTF.deltaHeat(storage) / 1_000
@@ -254,15 +253,15 @@ extension Storage {
   }
   
   private static func storageDischarge(
-    storage: inout Storage.PerformanceData,
-    powerBlock: inout PowerBlock.PerformanceData,
-    steamTurbine: inout SteamTurbine.PerformanceData,
-    solarField: SolarField.PerformanceData,
-    _ outletTemperature: (PerformanceData) -> Temperature)
+    storage: inout Storage,
+    powerBlock: inout PowerBlock,
+    steamTurbine: inout SteamTurbine,
+    solarField: SolarField,
+    _ outletTemperature: (Storage) -> Temperature)
     -> (Double, Double)
   {
     // used for parasitics
-    storage.inletTemperature(outlet: powerBlock)
+    storage.setInletTemperature(equalToOutlet: powerBlock)
     
     storage.temperature.outlet = outletTemperature(storage)
     
@@ -333,10 +332,10 @@ extension Storage {
   }
   
   private static func storagePreheat(
-    storage: inout PerformanceData,
-    powerBlock: PowerBlock.PerformanceData,
-    solarField: SolarField.PerformanceData,
-    _ outletTemperature: (Storage.PerformanceData) -> Temperature)
+    storage: inout Storage,
+    powerBlock: PowerBlock,
+    solarField: SolarField,
+    _ outletTemperature: (Storage) -> Temperature)
     -> (Double, Double)
   {
     let htf = SolarField.parameter.HTF
@@ -345,7 +344,7 @@ extension Storage {
     
     storage.massFlow = powerBlock.subtractingMassFlow(solarField)
     
-    storage.inletTemperature(outlet: powerBlock)
+    storage.setInletTemperature(equalToOutlet: powerBlock)
     
     storage.temperature.outlet = outletTemperature(storage)
     
@@ -366,9 +365,9 @@ extension Storage {
   }
   
   private static func storageFreezeProtection(
-    storage: inout Storage.PerformanceData,
-    solarField: inout SolarField.PerformanceData,
-    powerBlock: PowerBlock.PerformanceData)
+    storage: inout Storage,
+    solarField: inout SolarField,
+    powerBlock: PowerBlock)
   {
     let antiFreezeFlow = SolarField.parameter.antiFreezeFlow
 
@@ -378,21 +377,21 @@ extension Storage {
     
     solarField.header.massFlow = antiFreezeFlow
     // used for parasitics
-    storage.inletTemperature(outlet: powerBlock)
+    storage.setInletTemperature(equalToOutlet: powerBlock)
     
     var fittedTemperature = 0.0
     if Storage.parameter.temperatureCharge[1] > 0 {
       if Storage.parameter.temperatureDischarge.indices.contains(2) {
-        storage.setTemperaturOutletEqualToInlet()
+        storage.setTemperaturOutletEqualToOwnInlet()
       } else {
         fittedTemperature = storage.charge > 0.5
-          ? 1 : Storage.parameter.temperatureCharge2[storage.charge]
+          ? 1 : Storage.parameter.temperatureCharge2(storage.charge)
         
-        storage.outletTemperature(kelvin: fittedTemperature
+        storage.setOutletTemperature(inKelvin: fittedTemperature
           * Storage.parameter.designTemperature.hot.kelvin
         )
       }
-      storage.outletTemperature(kelvin:
+      storage.setOutletTemperature(inKelvin:
         splitfactor.ratio * storage.outletTemperature
           + (1 - splitfactor.ratio) * storage.inletTemperature
       )

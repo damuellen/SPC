@@ -10,29 +10,27 @@
 
 import Foundation
 
-public enum Boiler: Component {
+public struct Boiler: Component {
   /// Contains all data needed to simulate the operation of the boiler
-  public struct PerformanceData {
 
-    var operationMode: OperationMode
+  var operationMode: OperationMode
 
-    var isMaintained: Bool
+  var isMaintained: Bool
 
-    var load: Ratio
+  var load: Ratio
 
-    var startEnergy: Double
-    // var startEnergyOld: Double
+  var startEnergy: Double
+  // var startEnergyOld: Double
 
-    public enum OperationMode {
+  public enum OperationMode {
 
-      case noOperation(hours: Double)
+    case noOperation(hours: Double)
 
-      case SI, NI, startUp, scheduledMaintenance,
-        coldStartUp, warmStartUp, operating, unknown
-    }
+    case SI, NI, startUp, scheduledMaintenance,
+      coldStartUp, warmStartUp, operating, unknown
   }
 
-  static let initialState = PerformanceData(
+  static let initialState = Boiler(
     operationMode: .noOperation(hours: 0),
     isMaintained: false,
     load: 0.0,
@@ -44,7 +42,7 @@ public enum Boiler: Component {
 
   /// Calculates the efficiency of the boiler which only depends on his current load
   private static func efficiency(at load: Ratio) -> Double {
-    let efficiency = Boiler.parameter.efficiency[load]
+    let efficiency = Boiler.parameter.efficiency(load)
     // debugPrint("boiler efficiency at \(efficiency)")
     precondition(efficiency < 1, "Perpetuum mobile boiler efficiency at over 100%")
     return efficiency
@@ -58,50 +56,51 @@ public enum Boiler: Component {
         parameter.electricalParasitics[1] * load.ratio)
   }
 
-  static func update(
-    _ boiler: inout PerformanceData, demand: Double,
+  mutating func callAsFunction(demand: Double,
     Qsf_load: Double, fuelAvailable: Double) -> EnergyTransfer<Boiler>
   {
+    let parameter = Boiler.parameter
+
     var thermalPower = 0.0
 
     var fuel = 0.0
 
     var parasitics = 0.0
 
-    if case .noOperation = boiler.operationMode { /* || heat >= 0 */
+    if case .noOperation = operationMode { /* || heat >= 0 */
 
-      if boiler.isMaintained {
+      if isMaintained {
 
-        boiler.operationMode = .scheduledMaintenance
+        operationMode = .scheduledMaintenance
         return EnergyTransfer(
           heat: thermalPower, electric: parasitics, fuel: fuel
         )
       }
 
-      let fuel = noOperation(&boiler, fuelAvailable: fuelAvailable)
+      let fuel = Boiler.noOperation(&self, fuelAvailable: fuelAvailable)
       return EnergyTransfer(
         heat: thermalPower, electric: parasitics, fuel: fuel
       )
     }
 
-    if case .SI = boiler.operationMode {
-      boiler.operationMode = .startUp
+    if case .SI = operationMode {
+      operationMode = .startUp
       // if let startEnergyOld = boiler.startEnergy {
       //   boiler.startEnergy = startEnergyOld
       // }
-    } else if case .NI = boiler.operationMode {
-      boiler.operationMode = .noOperation(hours: Simulation.time.steps.fraction)
+    } else if case .NI = operationMode {
+      operationMode = .noOperation(hours: Simulation.time.steps.fraction)
     }
 
-    if boiler.isMaintained { // From here: operation is requested:
-      💬.infoMessage("""
+    if isMaintained { // From here: operation is requested:
+      debugPrint("""
         \(TimeStep.current)
         Scheduled maintenance of Boiler disables requested operation.
         """)
 
-      boiler.operationMode = .scheduledMaintenance
+      operationMode = .scheduledMaintenance
 
-      let fuel = noOperation(&boiler, fuelAvailable: fuelAvailable)
+      let fuel = Boiler.noOperation(&self, fuelAvailable: fuelAvailable)
 
       return EnergyTransfer(
         heat: thermalPower, electric: parasitics, fuel: fuel
@@ -111,12 +110,12 @@ public enum Boiler: Component {
     if -demand / Design.layout.boiler < parameter.minLoad
       || fuelAvailable == 0
     { // Check if underload
-      💬.infoMessage("""
+      debugPrint("""
         \(TimeStep.current)
         Boiler operation requested but not performed because of underload.
         """)
         
-      let fuel = noOperation(&boiler, fuelAvailable: fuelAvailable)
+      let fuel = Boiler.noOperation(&self, fuelAvailable: fuelAvailable)
 
       return EnergyTransfer(
         heat: thermalPower, electric: parasitics, fuel: fuel
@@ -133,41 +132,41 @@ public enum Boiler: Component {
     }
     heatAvailable = heatAvailable.limited(by: Design.layout.boiler)
 
-    boiler.load.ratio = heatAvailable / Design.layout.boiler
+    load.ratio = heatAvailable / Design.layout.boiler
     // The fuel needed
-    let fuelNeed = heatAvailable / efficiency(at: boiler.load)
+    let fuelNeed = heatAvailable / Boiler.efficiency(at: load)
       * Simulation.time.steps.fraction
 
     let totalFuelNeed: Double
 
-    switch boiler.operationMode {
+    switch operationMode {
     // The total fuel:  production and startup [MWh]
     case let .noOperation(hours) where hours >= parameter.start.hours.cold:
-      boiler.operationMode = .coldStartUp
+      operationMode = .coldStartUp
 
-      totalFuelNeed = fuelNeed + parameter.start.energy.cold
+      totalFuelNeed = fuelNeed + Boiler.parameter.start.energy.cold
 
     case let .noOperation(hours) where hours >= parameter.start.hours.warm:
-      boiler.operationMode = .warmStartUp
+      operationMode = .warmStartUp
 
       totalFuelNeed = fuelNeed + parameter.start.energy.warm
 
     case let .noOperation(hours)  where hours >= 0:
-      boiler.operationMode = .operating
+      operationMode = .operating
 
       totalFuelNeed = fuelNeed // no additional fuel needed.
 
     default:
-      if boiler.startEnergy == 0 {
+      if startEnergy == 0 {
 
-        boiler.operationMode = .operating
+        operationMode = .operating
 
         totalFuelNeed = fuelNeed // no additional fuel needed.
       } else {
         
-        boiler.operationMode = .startUp
+        operationMode = .startUp
 
-        totalFuelNeed = fuelNeed + boiler.startEnergy
+        totalFuelNeed = fuelNeed + startEnergy
       }
     }
 
@@ -178,13 +177,13 @@ public enum Boiler: Component {
     }
 
     if fuelAvailable < totalFuelNeed { // Check if sufficient fuel avail.
-      Boiler.load(&boiler, fuel: &fuel, fuelAvailable: fuelAvailable)
-      if boiler.load.ratio < parameter.minLoad {
-        💬.infoMessage("""
+      Boiler.load(&self, fuel: &fuel, fuelAvailable: fuelAvailable)
+      if load.ratio < parameter.minLoad {
+        debugPrint("""
           \(TimeStep.current)
           BO operation requested but insufficient fuel.
           """)
-        let fuel = noOperation(&boiler, fuelAvailable: fuelAvailable)
+        let fuel = Boiler.noOperation(&self, fuelAvailable: fuelAvailable)
 
         return EnergyTransfer(
           heat: thermalPower, electric: parasitics, fuel: fuel
@@ -200,14 +199,14 @@ public enum Boiler: Component {
       fuel = fuelAvailable / Simulation.time.steps.fraction
       
       thermalPower = Plant.fuelConsumption.boiler
-        * efficiency(at: boiler.load) // net thermal power [MW]
+        * Boiler.efficiency(at: load) // net thermal power [MW]
     } else {
       fuel = totalFuelNeed / Simulation.time.steps.fraction // Fuel flow [MW] in this hour fraction
       thermalPower = Plant.fuelConsumption.boiler
-        / Simulation.time.steps.fraction * efficiency(at: boiler.load) // net thermal power [MW]
+        / Simulation.time.steps.fraction * Boiler.efficiency(at: load) // net thermal power [MW]
     }
     
-    parasitics = self.parasitics(estimateFrom: boiler.load)
+    parasitics = Boiler.parasitics(estimateFrom: load)
 
     return EnergyTransfer(
       heat: thermalPower, electric: parasitics, fuel: fuel
@@ -215,7 +214,7 @@ public enum Boiler: Component {
   }
 
   private static func load(
-    _ status: inout PerformanceData, fuel: inout Double, fuelAvailable: Double)
+    _ status: inout Boiler, fuel: inout Double, fuelAvailable: Double)
   {
     switch (status.operationMode, status.isMaintained) {
     case (let .noOperation(hours), false):
@@ -281,7 +280,7 @@ public enum Boiler: Component {
   }
 
   private static func noOperation(
-    _ boiler: inout Boiler.PerformanceData, fuelAvailable: Double
+    _ boiler: inout Boiler, fuelAvailable: Double
     ) -> Double
   {
     var fuel = 0.0
@@ -297,7 +296,7 @@ public enum Boiler: Component {
   }
 }
 
-extension Boiler.PerformanceData: CustomStringConvertible {
+extension Boiler: CustomStringConvertible {
   public var description: String {
     return "\(operationMode), "
       + "Maintenance: \(isMaintained ? "Yes" : "No"), "
@@ -306,7 +305,7 @@ extension Boiler.PerformanceData: CustomStringConvertible {
   }
 }
 
-extension Boiler.PerformanceData.OperationMode: RawRepresentable {
+extension Boiler.OperationMode: RawRepresentable {
   public typealias RawValue = String
 
   public init?(rawValue: RawValue) {
@@ -339,7 +338,7 @@ extension Boiler.PerformanceData.OperationMode: RawRepresentable {
   }
 }
 
-extension Boiler.PerformanceData.OperationMode: CustomStringConvertible {
+extension Boiler.OperationMode: CustomStringConvertible {
   public var description: String {
     return self.rawValue
   }

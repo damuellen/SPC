@@ -8,7 +8,7 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
-import Darwin
+import Foundation
 
 precedencegroup ExponentiationPrecedence {
   associativity: right
@@ -33,4 +33,10 @@ infix operator ><
 func >< (lhs: String, rhs: String) -> String {
   let count = 80 - lhs.count - rhs.count
   return lhs + String(repeating: " ", count: count) + rhs + "\n"
+}
+
+infix operator |>
+
+func |> <T, U>(value: T, function: ((T)-> U)) -> U {
+    return function(value)
 }

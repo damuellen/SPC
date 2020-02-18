@@ -11,20 +11,17 @@
 import Foundation
 import Meteo
 
-public enum PowerBlock: Component {
-  /// Contains all data needed to simulate the operation of the power block
-  public struct PerformanceData: HeatCycle {
-    
-    var massFlow: MassFlow
+public struct PowerBlock: Component, HeatCycle {
+  /// Contains all data needed to simulate the operation of the power block    
+  var massFlow: MassFlow
 
-    var temperature: (inlet: Temperature, outlet: Temperature)
+  var temperature: (inlet: Temperature, outlet: Temperature)
 
-    public enum OperationMode {
-      case scheduledMaintenance
-    }
+  public enum OperationMode {
+    case scheduledMaintenance
   }
   
-  static let initialState = PerformanceData(
+  static let initialState = PowerBlock(
     massFlow: 0.0, temperature:
     (inlet: Simulation.initialValues.temperatureOfHTFinPipes,
      outlet: Simulation.initialValues.temperatureOfHTFinPipes)
@@ -35,7 +32,7 @@ public enum PowerBlock: Component {
   /// Calculate parasitic power in PB
   static func parasitics(
     heat: Double,
-    steamTurbine: SteamTurbine.PerformanceData,
+    steamTurbine: SteamTurbine,
     temperature: Temperature)
     -> Double
   {
@@ -45,7 +42,7 @@ public enum PowerBlock: Component {
 
       electricalParasitics = parameter.fixElectricalParasitics
       electricalParasitics += parameter.nominalElectricalParasitics
-        * parameter.electricalParasitics[steamTurbine.load]
+        * parameter.electricalParasitics(steamTurbine.load)
     } else if heat > 0, steamTurbine.load.isZero {
       // parasitics during start-up sequence
       // Strange effect of this function over gross output!!
@@ -74,7 +71,7 @@ public enum PowerBlock: Component {
     // parasitics for ACC:
     if steamTurbine.load.ratio > 0 {
       // only during operation
-      var electricalParasiticsACC = parameter.electricalParasiticsACC[steamTurbine.load]
+      var electricalParasiticsACC = parameter.electricalParasiticsACC(steamTurbine.load)
       
       if parameter.electricalParasiticsACCTamb.coefficients.isEmpty == false {
         var adjustmentACC = parameter.electricalParasiticsACCTamb
@@ -96,8 +93,8 @@ public enum PowerBlock: Component {
     // * steamTurbine.load + parameter.electricalParasitics[2] * steamTurbine.load ** 2)
   }
   
-  static func heatExchangerBypass(_ powerBlock: PerformanceData)
-    -> (heatOut: Double, heatToTES: Double, powerBlock: PerformanceData)
+  static func heatExchangerBypass(_ powerBlock: PowerBlock)
+    -> (heatOut: Double, heatToTES: Double, powerBlock: PowerBlock)
   {
     let htf = SolarField.parameter.HTF
 

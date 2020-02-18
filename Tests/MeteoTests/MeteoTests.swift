@@ -61,7 +61,7 @@ class MeteoTests: XCTestCase {
     let meteoData = Array(repeatElement(meteoDataDay, count: 365).joined())
 
     let datasource = MeteoDataSource(
-      name: "", data: meteoData, location: location,year: 2017, timeZone: 8
+      name: "", data: meteoData, (2017, 8, location)
     )
   }
 

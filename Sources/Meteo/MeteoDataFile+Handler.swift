@@ -11,6 +11,7 @@
 import Foundation
 
 public struct MeteoDataFileHandler {
+
   private var file: MeteoDataFile
 
   public init(forReadingAtPath path: String) throws {
@@ -23,8 +24,8 @@ public struct MeteoDataFileHandler {
     var url = URL(fileURLWithPath: path)
     
     if url.hasDirectoryPath {
-      if let fileName = try fm.contentsOfDirectory(atPath: path).first
-        { item in item.hasSuffix("mto") || item.hasPrefix("TMY") }
+      if let fileName = try fm.contentsOfDirectory(atPath: path).first(where:
+        { item in item.hasSuffix("mto") || item.hasPrefix("TMY") } )
       {
         url.appendPathComponent(fileName)
       } else {
@@ -35,14 +36,10 @@ public struct MeteoDataFileHandler {
     self.file = try url.pathExtension == "mto" ? MET(url) : TMY(url)
   }
 
-  public func makeDataSource() throws -> MeteoDataSource {
-    return try MeteoDataSource(
-      name: file.name,
-      data: file.fetchData(),
-      location: file.fetchLocation(),
-      year: file.fetchYear(),
-      timeZone: file.fetchTimeZone()
-    )
+  public func callAsFunction() throws -> MeteoDataSource {
+    let metaData = try file.fetchInfo()
+    let data = try file.fetchData()
+    return MeteoDataSource(name: file.name, data: data, metaData)
   }
 }
 
@@ -54,10 +51,8 @@ public enum MeteoDataFileError: Error {
 
 protocol MeteoDataFile {
   var name: String { get }
-  func fetchLocation() throws -> Position
+  func fetchInfo() throws -> (year: Int, tz: Int, location: Position)
   func fetchData() throws -> [MeteoData]
-  func fetchYear() -> Int
-  func fetchTimeZone() -> Int
 }
 
 private struct MET: MeteoDataFile {
@@ -82,17 +77,21 @@ private struct MET: MeteoDataFile {
     
     if rawData[rawData.index(before: firstNewLine)] == cr {
       self.content = rawData.withUnsafeBytes { content in
+        // Outter array
         return content.split(separator: newLine).map { line in
-          line.dropLast().split(separator: separator).map { slice in
+          // Inner array
+          return line.dropLast().split(separator: separator).map { slice in
             return String(decoding: UnsafeRawBufferPointer(rebasing: slice),
                           as: UTF8.self)
-          }
+          }          
         }
       }
     } else {
       self.content = rawData.withUnsafeBytes { content in
+        // Outter array
         return content.split(separator: newLine).map { line in
-          line.split(separator: separator).map { slice in
+          // Inner array
+          return line.split(separator: separator).map { slice in
             return String(decoding: UnsafeRawBufferPointer(rebasing: slice),
                           as: UTF8.self)
           }
@@ -101,29 +100,36 @@ private struct MET: MeteoDataFile {
     }
   }
 
-  func fetchTimeZone() -> Int {
-    guard let longitude = Int(content[4][0]) else { return 0 }
-    return longitude / 15
+  func identifyTimezone(_ location: Position) -> Int {
+    return Int(-location.longitude) / 15
   }
 
-  func fetchLocation() throws -> Position {
-    let values = Array(content[2 ... 3])
-    guard let longitude = Float(values[0][0]),
-      let latitude = Float(values[1][0])
+  func fetchInfo() throws -> (year: Int, tz: Int, location: Position) {
+    var metaData = content.dropFirst().prefix(4)
+
+    guard let y = metaData.popFirst()?.first, let year = Int(y)
+      else { throw MeteoDataFileError.empty }
+
+    guard let long = metaData.popFirst()?.first,
+      let lat = metaData.popFirst()?.first,
+      let longitude = Float(long), let latitude = Float(lat)
       else { throw MeteoDataFileError.unknownLocation }
-    return Position(
+
+    let position = Position(
       longitude: -longitude, latitude: latitude, elevation: 0
     )
-  }
 
-  func fetchYear() -> Int {
-    return Int(self.content[1][0]) ?? 1990
+    let tz = identifyTimezone(position)
+
+    return (year, tz, position)
   }
 
   func fetchData() throws -> [MeteoData] {
     let prefix = "1"
 
-    guard let startIndex = content.firstIndex(where: { $0[0].hasPrefix(prefix) })
+    guard let startIndex = content.firstIndex(where: 
+      { $0.first?.hasPrefix(prefix) ?? false }
+    )
     else { throw MeteoDataFileError.startNotFound }
 
     let dataRange = startIndex ..< content.endIndex
@@ -131,15 +137,15 @@ private struct MET: MeteoDataFile {
     guard dataRange.count.isMultiple(of: 8760)
     //  || dataRange.count.isMultiple(of: 8764)
     else { throw MeteoDataFileError.unexpectedRowCount }
-    var line = 11
+    var line = startIndex + 1
+    
     return try content[dataRange].indices.map { idx in
-      let strings = content[idx][3...]
-      let numbers = strings.compactMap(Float.init)
+      let values = content[idx].dropFirst(3).compactMap(Float.init)
 
-      guard strings.count == numbers.count
+      guard values.count > 2
       else { throw MeteoDataFileError.lineMissingValue(line) }
       line += 1
-      return MeteoData(numbers)
+      return MeteoData(values)
     }
   }
 }
@@ -162,19 +168,6 @@ extension MeteoDataFileError: CustomStringConvertible {
     case .empty:
       return "Meteo file is empty."
     }
-  }
-}
-
-extension String {
-  var withoutWhitespaces: String {
-    return trimmingCharacters(in: .whitespaces)
-  }
-}
-
-extension Float {
-  init?<S: StringProtocol>(_ optionalDecimalValue: S?) {
-    guard let string = optionalDecimalValue else { return nil }
-    self.init(string)
   }
 }
 
@@ -238,8 +231,10 @@ private struct TMY: MeteoDataFile {
     return Int(-tz)
   }
 
-  func fetchYear() -> Int {
-    return 1990
+  func fetchYear() -> Int { 2011 }
+
+  func fetchInfo() throws -> (year: Int, tz: Int, location: Position) {
+    return (fetchYear(), fetchTimeZone(), try fetchLocation())
   }
 
   func fetchData() throws -> [MeteoData] {

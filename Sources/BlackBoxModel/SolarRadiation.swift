@@ -11,7 +11,7 @@
 import Foundation
 import Meteo
 
-struct SolarRadiation: PerformanceData {
+struct SolarRadiation: MeasurementsConvertible {
   
   var dni, ghi, dhi, ico: Double
   

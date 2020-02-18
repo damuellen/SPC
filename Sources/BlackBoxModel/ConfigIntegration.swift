@@ -23,7 +23,7 @@ extension JsonConfigFileHandler {
       guard let url = configFileHandler.searchConfig(with: pathExtensions),
         let data = JsonConfigFileHandler.readConfig(url: url)
       else {
-        💬.errorMessage("Config file \(pathExtensions.rawValue) not found.")
+        print("Config file \(pathExtensions.rawValue) not found.")
         continue
       }
 
@@ -136,7 +136,7 @@ extension TextConfigFileHandler {
       guard let url = configFileHandler.searchConfig(with: pathExtensions),
         let configFile = TextConfigFileHandler.readConfig(url: url)
       else {
-        💬.errorMessage("Missing config file with extension .\(pathExtensions.rawValue)")
+        print("Missing config file with extension .\(pathExtensions.rawValue)")
         continue
       }
       switch pathExtensions {

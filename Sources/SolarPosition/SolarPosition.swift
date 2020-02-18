@@ -108,10 +108,10 @@ public struct SolarPosition {
     }
 
     for date in dates {
-      autoreleasepool {
+   //   autoreleasepool {
         result[date] = SolarPosition.compute(
           date: date, location: location, timezone: timezone, with: algorithm)
-      }
+   //   }
     }
     return result
   }

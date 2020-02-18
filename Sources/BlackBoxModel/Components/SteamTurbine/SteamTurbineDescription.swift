@@ -8,7 +8,7 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
-extension SteamTurbine.PerformanceData: CustomStringConvertible {  
+extension SteamTurbine: CustomStringConvertible {  
   public var description: String {
     return "\(operationMode), "
       + String(format: "Load: %.1f%, ", load.percentage)

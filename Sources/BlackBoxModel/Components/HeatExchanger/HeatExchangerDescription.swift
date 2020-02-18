@@ -5,7 +5,7 @@
 //  Created by Daniel Müllenborn on 04.02.19.
 //
 
-extension HeatExchanger.PerformanceData: CustomStringConvertible {
+extension HeatExchanger: CustomStringConvertible {
     public var description: String {
       return "\(operationMode), "
         + String(format: "Mfl: %.1fkg/s, ", massFlow.rate)

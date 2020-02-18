@@ -8,7 +8,7 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
-extension GasTurbine.PerformanceData: CustomStringConvertible {
+extension GasTurbine: CustomStringConvertible {
   public var description: String {
     return "\(operationMode), "
       + "Maintenance: \(isMaintained ? "Yes" : "No"), "

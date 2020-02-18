@@ -13,7 +13,7 @@ let package = Package(
 
   dependencies: [
   //  .package(url: "../SwiftPV", .branch("master")),
-    .package(url: "https://github.com/Nike-Inc/Willow.git", from: "5.0.0")
+  //  .package(url: "https://github.com/Nike-Inc/Willow.git", from: "5.0.0")
     ],
   targets: [
     .target(
@@ -33,7 +33,7 @@ let package = Package(
     dependencies: ["DateGenerator", "CSOLPOS", "CSPA"]),
     .target(
       name: "BlackBoxModel",
-      dependencies: ["Config", "Meteo", "SolarPosition", "Willow"]),
+      dependencies: ["Config", "Meteo", "SolarPosition"]),
     .target(
       name: "Meteo",
       dependencies: ["DateGenerator", "SolarPosition"]),

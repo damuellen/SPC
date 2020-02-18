@@ -8,7 +8,7 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
-extension SolarField.PerformanceData: CustomStringConvertible {
+extension SolarField: CustomStringConvertible {
   public var description: String {
     return "\(operationMode), "
       + String(format: "Focus: %.1f%, ", inFocus.percentage)

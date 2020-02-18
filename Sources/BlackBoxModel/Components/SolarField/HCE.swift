@@ -39,8 +39,8 @@ let period = 300
  */
 enum HCE {
   @discardableResult
-  static func calculation(_ solarField: inout SolarField.PerformanceData,
-                          collector: Collector.PerformanceData,
+  static func calculation(_ solarField: inout SolarField,
+                          collector: Collector,
                           loop: SolarField.Loop,
                           mode: Collector.OperationMode,
                           ambient: Temperature) -> (Double, Double)
@@ -73,7 +73,7 @@ enum HCE {
   }
 
   @inline(__always) static func freezeProtectionCheck(
-    _ solarField: inout SolarField.PerformanceData) {
+    _ solarField: inout SolarField) {
     let freezingTemperature = SolarField.parameter.HTF.freezeTemperature
       + Simulation.parameter.dfreezeTemperaturePump
       + Simulation.parameter.tempTolerance
@@ -225,8 +225,8 @@ enum HCE {
   
   //  MARK: - Mode 1
   /// Vary mass-flow to maintain optimum HTF-temp.
-  static func mode1(_ solarField: inout SolarField.PerformanceData,
-                    _ collector: Collector.PerformanceData,
+  static func mode1(_ solarField: inout SolarField,
+                    _ collector: Collector,
                     _ loop: SolarField.Loop,
                     _ ambient: Temperature) -> (Double, Double)
   {
@@ -361,8 +361,8 @@ enum HCE {
   
   //  MARK: - Mode 2
   /// HTF-temp. dependent on constant mass-flow
-  static func mode2(_ solarField: inout SolarField.PerformanceData,
-                    _ collector: Collector.PerformanceData,
+  static func mode2(_ solarField: inout SolarField,
+                    _ collector: Collector,
                     _ loop: SolarField.Loop,
                     _ ambient: Temperature) -> (Double, Double)
   {

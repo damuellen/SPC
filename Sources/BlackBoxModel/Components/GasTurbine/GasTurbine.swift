@@ -8,26 +8,23 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
-public enum GasTurbine: Component {
+public struct GasTurbine: Component {
   /// Contains all data needed to simulate the operation of the gas turbine
-  public struct PerformanceData: Codable {
+  var operationMode: OperationMode
 
-    var operationMode: OperationMode
+  var isMaintained: Bool
 
-    var isMaintained: Bool
+  var load: Ratio
 
-    var load: Ratio
+  public enum OperationMode: String, Codable, CustomStringConvertible {
+    case free, load, integrated, pure, noOperation, scheduledMaintenance
 
-    public enum OperationMode: String, Codable, CustomStringConvertible {
-      case free, load, integrated, pure, noOperation, scheduledMaintenance
-
-      public var description: String {
-        return rawValue
-      }
+    public var description: String {
+      return rawValue
     }
   }
 
-  static let initialState = PerformanceData(
+  static let initialState = GasTurbine(
     operationMode: .free, isMaintained: false, load: 0.0
   )
 
@@ -36,7 +33,7 @@ public enum GasTurbine: Component {
   /// Calculates the efficiency of the gas turbine which only depends on its own load
   static func efficiency(at load: Ratio) -> Double {
 
-    let efficiency = parameter.efficiencyFromLoad[load]
+    let efficiency = parameter.efficiencyFromLoad(load)
       * parameter.efficiencyISO
 
     //	debugPrint("gas turbine efficiency at \(efficiency * 100.0)%")
@@ -46,19 +43,19 @@ public enum GasTurbine: Component {
 
   /// Calculates the parasitics of the gas turbine which only depends on its current load
   static func parasitics(estimateFrom load: Ratio) -> Double {
-    return parameter.parasiticsFromLoad[load] * parameter.powerGross
+    return parameter.parasiticsFromLoad(load) * parameter.powerGross
   }
 
   /// Calculates the maximal load of the gas turbine which only depends on the ambient temperature
   static func maxLoad(at temperature: Temperature) -> Double {
-    var maximumLoad = parameter.loadMaxFromTemperature[temperature]
+    var maximumLoad = parameter.loadMaxFromTemperature(temperature)
     // correction for altitude effect
     maximumLoad *= ((101.3 - 9.81 * 1.2 / 1_000 * parameter.altitude) / 101.3)
     // GasTurbine.load.ratio = maximumLoad)
     return maximumLoad
   }
 
-  static func perform(_ gt: inout GasTurbine.PerformanceData,
+  static func perform(_ gt: inout GasTurbine,
                       demand: Double, fuelAvailable: Double) -> Double {
     // if status.isMaintained {
     /*
@@ -81,7 +78,7 @@ public enum GasTurbine: Component {
      //"N" means NO GasTurbine operation desired !!!
      if GasTurbine.status.load < parameter.load min || Ucase$(OpRCCmode(month, time.Tariff)) = "N" || FuelAvlGasTurbine <= 0 {
      if GasTurbine.status.load > 0 {
-     💬.infoMessage("\(TimeStep.current) Gas Turbine Load Below minimum.")
+     debugPrint("\(TimeStep.current) Gas Turbine Load Below minimum.")
      gasTurbine.load = 0
      gasTurbine.operationMode = .noOperation
      gasTurbine = 0
@@ -102,12 +99,12 @@ public enum GasTurbine: Component {
   }
 
   static func update(
-    storage: inout Storage.PerformanceData,
-    powerBlock: inout PowerBlock.PerformanceData,
-    boiler: Boiler.PerformanceData.OperationMode,
-    gasTurbine: inout GasTurbine.PerformanceData,
-    heatExchanger: inout HeatExchanger.PerformanceData,
-    steamTurbine: inout SteamTurbine.PerformanceData,
+  //  storage: inout Storage,
+  //  powerBlock: inout PowerBlock,
+    boiler: Boiler.OperationMode,
+    gasTurbine: inout GasTurbine,
+    heatExchanger: HeatExchanger,
+    steamTurbine: inout SteamTurbine,
     temperature: Temperature,
     fuel: Double)
     -> Double
@@ -234,14 +231,14 @@ public enum GasTurbine: Component {
              production * HeatExchanger.parameter.efficiency > htfShare {
 
             demand = 0.0
-            💬.infoMessage("""
+            debugPrint("""
               \(TimeStep.current)
               Excess solar heat: Gas Turbine not operating.
               """)
           } else if GasTurbine.efficiency(at: gasTurbine.load) > 0,
             production * HeatExchanger.parameter.efficiency > htfShare {
             // WasteHeatRecovery.parameter.Operation = "Pure"posbl
-            💬.infoMessage("""
+            debugPrint("""
               \(TimeStep.current)
               Excess Q-solar: Gas Turbine operating at lower load.
               """)

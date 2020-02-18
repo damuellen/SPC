@@ -50,7 +50,7 @@ extension Energy {
   }
 }
 
-public struct ElectricPower: Encodable, PerformanceData {
+public struct ElectricPower: Encodable, MeasurementsConvertible {
   internal(set) public var demand = 0.0, gross = 0.0, shared = 0.0,
   solarField = 0.0, powerBlock = 0.0, storage = 0.0, gasTurbine = 0.0,
   steamTurbineGross = 0.0, gasTurbineGross = 0.0, backupGross = 0.0,
@@ -95,7 +95,7 @@ public struct ElectricPower: Encodable, PerformanceData {
   }
 }
 
-public struct Parasitics: Encodable, PerformanceData {
+public struct Parasitics: Encodable, MeasurementsConvertible {
   internal(set) public var boiler = 0.0, gasTurbine = 0.0, heater = 0.0,
   powerBlock = 0.0, shared = 0.0, solarField = 0.0, storage = 0.0
   
@@ -137,7 +137,7 @@ public struct Parasitics: Encodable, PerformanceData {
   }
 }
 
-public struct ThermalEnergy: Encodable, PerformanceData {
+public struct ThermalEnergy: Encodable, MeasurementsConvertible {
   internal(set) public var solar: Power = 0.0, toStorage: Power = 0.0,
   toStorageMin: Power = 0.0, storage: Power = 0.0, heater: Power = 0.0,
   boiler: Power = 0.0, wasteHeatRecovery: Power = 0.0,
@@ -204,7 +204,7 @@ public struct ThermalEnergy: Encodable, PerformanceData {
   }
 }
 
-public struct FuelConsumption: Encodable, PerformanceData {
+public struct FuelConsumption: Encodable, MeasurementsConvertible {
   internal(set) public var backup = 0.0,
   boiler = 0.0, heater = 0.0, gasTurbine = 0.0
   

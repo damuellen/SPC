@@ -1,8 +1,8 @@
-@testable import CalculationTests
-@testable import ModelsTests
+@testable import BlackBoxModelTests
+@testable import MeteoTests
 import XCTest
 
 XCTMain([
-  testCase(ModelsTests.allTests),
-  testCase(CalculationTests.allTests),
+  testCase(MeteoTests.allTests),
+  testCase(BlackBoxModelTests.allTests),
 ])

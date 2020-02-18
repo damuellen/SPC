@@ -20,7 +20,7 @@ public struct PerformanceLog: CustomStringConvertible, Comparable {
   
   let energyHistory: [Energy]
   
-  let performanceHistory: [Plant.PerformanceData]
+  let performanceHistory: [PerformanceData]
   
   public let layout: Layout
   
@@ -49,7 +49,7 @@ public struct PerformanceLog: CustomStringConvertible, Comparable {
   init(energy: Energy,
        radiation: SolarRadiation,
        energyHistory: [Energy] = [],
-       performanceHistory: [Plant.PerformanceData] = [])
+       performanceHistory: [PerformanceData] = [])
   {
     self.energy = energy
     self.radiation = radiation
@@ -70,7 +70,7 @@ public struct PerformanceLog: CustomStringConvertible, Comparable {
   }
   
   public subscript(
-    keyPath: KeyPath<Plant.PerformanceData, Double>, ofDay day: Int) -> [Double]
+    keyPath: KeyPath<PerformanceData, Double>, ofDay day: Int) -> [Double]
   {
     if performanceHistory.isEmpty { return [] }
     let count = interval.rawValue * 24

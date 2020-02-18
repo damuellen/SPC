@@ -13,8 +13,6 @@ import Config
 import Foundation
 import Meteo
 
-let start = CFAbsoluteTimeGetCurrent()
-
 print("Solar Performance Calculator (build: \(dateString))")
 
 let configPath = CommandLine.arguments.count > 1
@@ -43,7 +41,7 @@ let lastRun = runs?.max() ?? 99
 Simulation.time.steps = .every5minutes
 let location = Position(longitude: 47.73, latitude: 29, elevation: 0)
 //BlackBoxModel.configure(location: location, year: 2005, timeZone: 2)
-BlackBoxModel.configure(meteoFilePath: "/Users/Daniel/")
+BlackBoxModel.configure(meteoFilePath: "/home/daniel/")
 
 /*
 SolarField.parameter.massFlow.max = 2500.0
@@ -63,7 +61,7 @@ let log = PerformanceDataRecorder(
   customNaming: "Result_\(lastRun + Int(1))"
 )
 */
-let log = PerformanceDataRecorder(mode: .brief)
+let log = PerformanceDataRecorder(mode: .none)
 let result = BlackBoxModel.runModel(with: log)
 
 print(result)
@@ -75,6 +73,3 @@ let ga = GeneticAlgorithm(parameters: gp)
 
 ga.simulateNGenerations()
 */
-let end = CFAbsoluteTimeGetCurrent()
-
-print("Duration:", String(format: "%.2f sec", end - start))

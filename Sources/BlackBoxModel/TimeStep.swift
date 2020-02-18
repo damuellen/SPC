@@ -23,6 +23,11 @@ public struct TimeStep: CustomStringConvertible {
   public static var current = TimeStep()
   
   var isDaytime: Bool = true
+
+  var isNighttime: Bool {
+    return !isDaytime
+  }
+  
   public var yearDay: Int = 0
   var month: Int = 0
   var day: Int = 0
@@ -67,7 +72,7 @@ extension TimeStep {
   
   private static var cfCalendar: CFCalendar = {
     let c = CFCalendarCreateWithIdentifier(
-      kCFAllocatorDefault, CFCalendarIdentifier.gregorianCalendar
+      kCFAllocatorDefault, kCFGregorianCalendar
     )
     let tz = CFTimeZoneCreateWithTimeIntervalFromGMT(
       kCFAllocatorDefault, 0
@@ -111,6 +116,6 @@ extension TimeStep {
     self = TimeStep(
       isDaytime: true, yearDay: yearDay,
       month: month, day: day, hour: hour, minute: minute)
-    💬.debugMessage("Current simulation time: \n\(date)")
+  //  debugPrint("Current simulation time: \n\(date)")
   }
 }

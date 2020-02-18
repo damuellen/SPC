@@ -21,13 +21,9 @@ extension HeatCycle {
     return Temperature.average(temperature.inlet, temperature.outlet)
   }
 
-  var inletTemperature: Double {
-    return temperature.inlet.kelvin
-  }
+  var inletTemperature: Double { temperature.inlet.kelvin }
 
-  var outletTemperature: Double {
-    return temperature.outlet.kelvin
-  }
+  var outletTemperature: Double { temperature.outlet.kelvin }
 
   var values: [String] {
     return [
@@ -38,14 +34,14 @@ extension HeatCycle {
   }
 
   func subtractingMassFlow(_ other: HeatCycle) -> MassFlow {
-    return self.massFlow - other.massFlow
+    massFlow - other.massFlow
   }
 
   mutating func setMassFlow(rate: Double) {
-    self.massFlow = MassFlow(rate)
+    massFlow = MassFlow(rate)
   }
 
-  mutating func setTemperaturOutletEqualToInlet() {
+  mutating func setTemperaturOutletEqualToOwnInlet() {
     temperature.outlet = temperature.inlet
   }
 
@@ -57,29 +53,27 @@ extension HeatCycle {
     temperature.outlet = outlet
   }
 
-  mutating func inletTemperature(kelvin: Double) {
-    temperature.inlet = Temperature(kelvin)
+  mutating func setInletTemperature(inKelvin: Double) {
+    temperature.inlet = Temperature(inKelvin)
   }
 
-  mutating func outletTemperature(kelvin: Double) {
-    temperature.outlet = Temperature(kelvin)
+  mutating func setOutletTemperature(inKelvin: Double) {
+    temperature.outlet = Temperature(inKelvin)
   }
 
-  mutating func inletTemperature(inlet other: HeatCycle) {
+  mutating func setInletTemperature(equalToInlet other: HeatCycle) {
     temperature.inlet = other.temperature.inlet
   }
 
-  mutating func inletTemperature(outlet other: HeatCycle) {
+  mutating func setInletTemperature(equalToOutlet other: HeatCycle) {
     temperature.inlet = other.temperature.outlet
   }
 
-  mutating func outletTemperature(outlet other: HeatCycle) {
+  mutating func setOutletTemperature(equalToOutlet other: HeatCycle) {
     temperature.outlet = other.temperature.outlet
   }
   
   static func columns(name: String) -> [(String, String)] {
-    return [
-      ("\(name)|Massflow", "kg/s"), ("\(name)|Tin", "°C"), ("\(name)|Tout", "°C"),
-    ]
+    [("\(name)|Massflow", "kg/s"), ("\(name)|Tin", "°C"), ("\(name)|Tout", "°C")]
   }
 }

@@ -11,33 +11,28 @@
 import Foundation
 import Meteo
 
-public enum SteamTurbine: Component {
+public struct SteamTurbine: Component {
   /// Contains all data needed to simulate the operation of the steam turbine
-  public struct PerformanceData {
 
-    var operationMode: OperationMode
-    
-    var load: Ratio
+  var operationMode: OperationMode
+  
+  var load: Ratio
 
-    var efficiency: Double
+  var efficiency: Double
 
-    public enum OperationMode: Equatable {
-      case noOperation(time: Int), startUp(time: Int, energy: Double),
-      scheduledMaintenance, operating
+  public enum OperationMode {
+    case noOperation(time: Int), startUp(time: Int, energy: Double),
+    scheduledMaintenance, operating
+  }
 
-      public static func == (lhs: OperationMode, rhs: OperationMode) -> Bool {
-        switch (lhs, rhs) {
-        case let (.noOperation(lhs), .noOperation(rhs)): return lhs == rhs
-        case let (.startUp(lhs), .startUp(rhs)): return lhs == rhs
-        case (.scheduledMaintenance, .scheduledMaintenance): return true
-        case (.operating, .operating): return true
-        default: return false
-        }
-      }
+  var isOperating: Bool { 
+    switch operationMode {
+      case .operating: return true
+      default: return false
     }
   }
 
-  static let initialState = PerformanceData(
+  static let initialState = SteamTurbine(
     operationMode: .noOperation(time: 5),
     load: 1.0, efficiency: 1.0
   )
@@ -48,31 +43,31 @@ public enum SteamTurbine: Component {
   static private var oldMinute = 0
 
     /// Calculates the Electric gross
-  static func update(
-    _ steamTurbine: inout SteamTurbine.PerformanceData,
-    boiler: Boiler.PerformanceData,
-    heater: Heater.PerformanceData,
-    gasTurbine: GasTurbine.PerformanceData,
-    heatExchanger: HeatExchanger.PerformanceData,
+  mutating func callAsFunction(
+    heater: Heater,
+    modeBoiler: Boiler.OperationMode,
+    modeGasTurbine: GasTurbine.OperationMode,
+    heatExchanger: HeatExchanger,
     heat: Double,
     temperature: Temperature)
     -> Double
   {
-    defer { oldMinute = TimeStep.current.minute }
-    //steamTurbine.load = 0.0
+    let parameter = SteamTurbine.parameter
+    defer { SteamTurbine.oldMinute = TimeStep.current.minute }
+    //load = 0.0
     let minutes = Int(Simulation.time.steps.fraction * 60)
     if heat <= 0 {
       Plant.heat.startUp = 0.0
       // Avoid summing up inside an iteration
-      if TimeStep.current.minute != oldMinute {
+      if TimeStep.current.minute != SteamTurbine.oldMinute {
         
         if case .noOperation(let standStillTime)
-          = steamTurbine.operationMode
+          = operationMode
         {
-          steamTurbine.operationMode =
+          operationMode =
             .noOperation(time: standStillTime + minutes)
         } else {
-          steamTurbine.operationMode =
+          operationMode =
             .noOperation(time: minutes)
         }
       }
@@ -80,42 +75,41 @@ public enum SteamTurbine: Component {
       
     } else { // Energy is coming to the turbine
       
-      switch steamTurbine.operationMode {
+      switch operationMode {
       case .noOperation(let standStillTime):
         if standStillTime < parameter.hotStartUpTime {
-          steamTurbine.operationMode = .operating
+          operationMode = .operating
         } else {
-          steamTurbine.operationMode = .startUp(time: 0, energy: 0)
+          operationMode = .startUp(time: 0, energy: 0)
         }
       case .startUp(let startUpTime, let startUpEnergy):
         if startUpTime >= parameter.startUpTime,
           startUpEnergy >= parameter.startUpEnergy
         {
-          steamTurbine.operationMode = .operating
+          operationMode = .operating
           
         }
       case .scheduledMaintenance: return 0
       case .operating: break
       }
       
-      if steamTurbine.operationMode == .operating  {
+      if isOperating  {
         Plant.heat.startUp = 0.0
         let maxLoad: Double
-        (maxLoad, steamTurbine.efficiency) = SteamTurbine.perform(
-          steamTurbine.load, boiler.operationMode, gasTurbine.operationMode,
+        (maxLoad, efficiency) = SteamTurbine.perform(
+          load, modeBoiler, modeGasTurbine,
           heatExchanger.temperature.inlet, temperature)
         #warning("Check this again")
-        let eff = steamTurbine.efficiency
-        steamTurbine.load.ratio = (heat * eff / parameter.power.max)
+
+        load.ratio = (heat * efficiency / parameter.power.max)
           .limited(by: maxLoad)
-        let gross = steamTurbine.load.ratio *
-          SteamTurbine.parameter.power.max * eff
+        let gross = load.ratio * parameter.power.max * efficiency
         return gross
       } else { // Start Up sequence: Energy is lost / Dumped
         // Avoid summing up inside an iteration
-        if TimeStep.current.minute != oldMinute {
+        if TimeStep.current.minute != SteamTurbine.oldMinute {
           if case .startUp(let startUpTime, let startUpEnergy)
-            = steamTurbine.operationMode
+            = operationMode
           {
             var energy = Plant.heat.production.megaWatt
             
@@ -128,7 +122,7 @@ public enum SteamTurbine: Component {
             
             if heater.massFlow.rate > 0 { energy = heat }
             
-            steamTurbine.operationMode = .startUp(
+            operationMode = .startUp(
               time: startUpTime + minutes,
               energy: startUpEnergy + energy * Simulation.time.steps.fraction
             )
@@ -141,8 +135,8 @@ public enum SteamTurbine: Component {
   
   static func perform(
     _ load: Ratio,
-    _ boiler: Boiler.PerformanceData.OperationMode,
-    _ gasTurbine: GasTurbine.PerformanceData.OperationMode,
+    _ boiler: Boiler.OperationMode,
+    _ gasTurbine: GasTurbine.OperationMode,
     _ heatExchanger: Temperature,
     _ ambient: Temperature)
     -> (maxLoad: Double, maxEfficiency: Double)
@@ -207,12 +201,12 @@ public enum SteamTurbine: Component {
       dcFactor = dc.ratio
     }
     // Dependency of Heat Rate on Ambient Temperature  - DRY COOLING -
-    var efficiency = parameter.efficiency[load]
+    var efficiency = parameter.efficiency(load)
 
     var correcture = 0.0
 
     if parameter.efficiencyTemperature.coefficients.isEmpty == false {
-      correcture += parameter.efficiencyTemperature[ambient.celsius]
+      correcture += parameter.efficiencyTemperature(ambient.celsius)
     }
     efficiency *= correcture
 

@@ -23,13 +23,13 @@ public enum WasteHeatRecovery: Component {
   /// Returns the efficiency of the waste heat recovery based on working conditions of the gas turbine
   static func efficiencyFor(gasTurbineLoad: Ratio) -> Double {
     var efficiency = parameter.efficiencyNominal
-    efficiency *= parameter.efficiencySolar[
+    efficiency *= parameter.efficiencySolar(
       Plant.heat.solar.megaWatt / Design.layout.heatExchanger
         * SteamTurbine.parameter.efficiencySCC
-    ]
-    efficiency *= parameter.efficiencyGasTurbine[
+    )
+    efficiency *= parameter.efficiencyGasTurbine(
       Plant.electricalEnergy.gasTurbineGross / GasTurbine.parameter.powerGross
-    ]
+    )
     efficiency *= (1 / GasTurbine.efficiency(at: gasTurbineLoad) - 1)
 
     debugPrint("Waste heat recovery efficiency at \(efficiency * 100)%")

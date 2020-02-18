@@ -11,7 +11,7 @@
 import Foundation
 import Meteo
 
-public enum SolarField: Component {
+public struct SolarField: Component, Equatable, HeatCycle {
 
   public enum Loop: Int {
     case design = 0, near, average, far
@@ -22,49 +22,47 @@ public enum SolarField: Component {
   }
 
   /// Contains all data needed to simulate the operation of the solar field
-  public struct PerformanceData: Equatable, HeatCycle {
-    var operationMode: OperationMode
-    var isMaintained: Bool
-    var header: HeatFlow
-    var ETA: Double
-    public var heatLosses: Double
-    public var heatLossHeader: Double
-    public var heatLossHCE: Double
-    public var inFocus: Ratio
-    var loops: [HeatFlow]
-    var loopEta: Double
-    
-    public var massFlow: MassFlow {
-      get { return self.header.massFlow }
-      set { self.header.massFlow = newValue }
+  var operationMode: OperationMode
+  var isMaintained: Bool
+  var header: HeatFlow
+  var ETA: Double
+  public var heatLosses: Double
+  public var heatLossHeader: Double
+  public var heatLossHCE: Double
+  public var inFocus: Ratio
+  var loops: [HeatFlow]
+  var loopEta: Double
+  
+  public var massFlow: MassFlow {
+    get { return self.header.massFlow }
+    set { self.header.massFlow = newValue }
+  }
+
+  public var temperature: (inlet: Temperature, outlet: Temperature) {
+    get { return self.header.temperature }
+    set { self.header.temperature = newValue }
+  }
+
+  public enum OperationMode: String, CustomStringConvertible {
+    case startUp
+    case freezeProtection
+    case operating
+    case noOperation
+    case scheduledMaintenance
+    case unknown
+    case fixed
+    case normal
+
+    public var description: String {
+      return rawValue
     }
 
-    public var temperature: (inlet: Temperature, outlet: Temperature) {
-      get { return self.header.temperature }
-      set { self.header.temperature = newValue }
-    }
-
-    public enum OperationMode: String, CustomStringConvertible {
-      case startUp
-      case freezeProtection
-      case operating
-      case noOperation
-      case scheduledMaintenance
-      case unknown
-      case fixed
-      case normal
-
-      public var description: String {
-        return rawValue
-      }
-
-      var isFreezeProtection: Bool {
-        return self ~= .freezeProtection
-      }
+    var isFreezeProtection: Bool {
+      return self ~= .freezeProtection
     }
   }
 
-  static let initialState = PerformanceData(
+  static let initialState = SolarField(
     operationMode: .scheduledMaintenance,
     isMaintained: false,
     header: HeatFlow(name: "Header"),
@@ -79,7 +77,7 @@ public enum SolarField: Component {
   static var last: [HeatFlow] = initialState.loops
   
   /// Calculates the parasitics
-  static func parasitics(_ status: PerformanceData) -> Double {
+  static func parasitics(_ status: SolarField) -> Double {
     if status.operationMode == .freezeProtection {
       return parameter.antiFreezeParastics
     }
@@ -97,8 +95,8 @@ public enum SolarField: Component {
 
   /// Calc. loop-outlet temp. gradient
   private static func outletTemperature(
-    _ solarField: inout SolarField.PerformanceData,
-    _ collector: Collector.PerformanceData,
+    _ solarField: inout SolarField,
+    _ collector: Collector,
     _ ambient: Temperature,
     _ timeRemain: Double)
   {
@@ -139,7 +137,7 @@ public enum SolarField: Component {
         let oneMinusTR = 1.0 - timeRatio
 
         for n in solarField.loops.indices.dropFirst() {
-          solarField.loops[n].outletTemperature(kelvin:
+          solarField.loops[n].setOutletTemperature(inKelvin:
             timeRatio * solarField.loops[n].outletTemperature
             + oneMinusTR * last[n].outletTemperature)
         }
@@ -165,7 +163,7 @@ public enum SolarField: Component {
         return (timeRatio, oneMinusTR, temp)
       }
 
-      solarField.header.outletTemperature(kelvin:
+      solarField.header.setOutletTemperature(inKelvin:
         (temps[0].2 * solarField.loops[1].massFlow.rate
           + temps[1].2 * solarField.loops[2].massFlow.rate
           + temps[2].2 * solarField.loops[3].massFlow.rate)
@@ -185,17 +183,17 @@ public enum SolarField: Component {
           * (solarField.temperature.inlet.celsius
             - solarField.loops[3].temperature.inlet.celsius))
 
-      solarField.loops[1].inletTemperature(kelvin:
+      solarField.loops[1].setInletTemperature(inKelvin:
         temps[0].0 * solarField.inletTemperature
           + temps[0].1 * solarField.loops[1].inletTemperature
       )
 
-      solarField.loops[2].inletTemperature(kelvin:
+      solarField.loops[2].setInletTemperature(inKelvin:
         temps[1].0 * solarField.inletTemperature
           + temps[1].1 * solarField.loops[2].inletTemperature
       )
 
-      solarField.loops[3].inletTemperature(kelvin:
+      solarField.loops[3].setInletTemperature(inKelvin:
         temps[2].0 * solarField.inletTemperature
           + temps[2].1 * solarField.loops[3].inletTemperature
       )
@@ -203,7 +201,7 @@ public enum SolarField: Component {
   }
 
   static func heatLossesHotHeader(
-    _ solarField: PerformanceData, ambient: Temperature) -> Temperature
+    _ solarField: SolarField, ambient: Temperature) -> Temperature
   {
     let area = Design.layout.solarField
       * Double(SolarField.parameter.numberOfSCAsInRow)
@@ -255,8 +253,8 @@ public enum SolarField: Component {
   }
 
   static func calculate(
-    _ solarField: inout PerformanceData,
-    collector: Collector.PerformanceData,
+    _ solarField: inout SolarField,
+    collector: Collector,
     time: inout Double,
     dumping: inout Double,
     ambient: Temperature)
@@ -274,7 +272,7 @@ public enum SolarField: Component {
     if case .freezeProtection = solarField.operationMode {
       solarField.loops = solarField.loops.map { loop in
         var loop = loop
-        loop.inletTemperature(inlet: solarField)
+        loop.setInletTemperature(equalToInlet: solarField)
         return loop
       }
     }

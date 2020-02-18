@@ -9,7 +9,7 @@
 //
 
 import Foundation
-import Willow
+
 
 extension Optional {
   var isNone: Bool {
@@ -57,9 +57,6 @@ private let numberFormatter: NumberFormatter = {
 }()
 
 let backgroundQueue = DispatchQueue(label: "serial.queue")
-
-let 💬 = Logger(logLevels: [.info, .error], writers: [ConsoleWriter()],
-                executionMethod: .asynchronous(queue: backgroundQueue))
 
 public typealias Heat = Double
 public typealias Pressure = Double
