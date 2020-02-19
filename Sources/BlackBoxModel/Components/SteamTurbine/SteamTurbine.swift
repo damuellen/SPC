@@ -48,16 +48,15 @@ public struct SteamTurbine: Component {
     modeBoiler: Boiler.OperationMode,
     modeGasTurbine: GasTurbine.OperationMode,
     heatExchanger: HeatExchanger,
-    heat: Double,
-    temperature: Temperature)
+    temperature: Temperature, 
+    heat: ThermalEnergy)
     -> Double
   {
     let parameter = SteamTurbine.parameter
     defer { SteamTurbine.oldMinute = TimeStep.current.minute }
     //load = 0.0
     let minutes = Int(Simulation.time.steps.fraction * 60)
-    if heat <= 0 {
-      Plant.heat.startUp = 0.0
+    if heat.production.megaWatt <= 0 {
       // Avoid summing up inside an iteration
       if TimeStep.current.minute != SteamTurbine.oldMinute {
         
@@ -94,14 +93,14 @@ public struct SteamTurbine: Component {
       }
       
       if isOperating  {
-        Plant.heat.startUp = 0.0
         let maxLoad: Double
         (maxLoad, efficiency) = SteamTurbine.perform(
-          load, modeBoiler, modeGasTurbine,
+          load, heat, modeBoiler, modeGasTurbine, 
           heatExchanger.temperature.inlet, temperature)
         #warning("Check this again")
 
-        load.ratio = (heat * efficiency / parameter.power.max)
+        load.ratio = (heat.production.megaWatt 
+          * efficiency / parameter.power.max)
           .limited(by: maxLoad)
         let gross = load.ratio * parameter.power.max * efficiency
         return gross
@@ -111,16 +110,16 @@ public struct SteamTurbine: Component {
           if case .startUp(let startUpTime, let startUpEnergy)
             = operationMode
           {
-            var energy = Plant.heat.production.megaWatt
+            var energy = heat.production.megaWatt
             
-            Plant.heat.production = 0.0
+            //Plant.heat.production = 0.0
             
-            energy += Plant.heat.storage.megaWatt
-              + Plant.heat.boiler.megaWatt
+            energy += heat.storage.megaWatt
+              + heat.boiler.megaWatt
             
-            Plant.heat.startUp.megaWatt = energy
+        // FIXME    Plant.heat.startUp.megaWatt = energy
             
-            if heater.massFlow.rate > 0 { energy = heat }
+            if heater.massFlow.rate > 0 { energy = heat.production.megaWatt }
             
             operationMode = .startUp(
               time: startUpTime + minutes,
@@ -134,7 +133,7 @@ public struct SteamTurbine: Component {
   }
   
   static func perform(
-    _ load: Ratio,
+    _ load: Ratio, _ heat: ThermalEnergy,
     _ boiler: Boiler.OperationMode,
     _ gasTurbine: GasTurbine.OperationMode,
     _ heatExchanger: Temperature,
@@ -151,15 +150,15 @@ public struct SteamTurbine: Component {
       // this restriction was planned to simulate an specific case,
       // not correct for every case with Boiler
 
-      if Plant.heat.boiler.megaWatt > 50 || Plant.heat.solar.watt == 0 {
+      if heat.boiler.megaWatt > 50 || heat.solar.watt == 0 {
         maxEfficiency = parameter.efficiencyBoiler
       } else {
-        maxEfficiency = (Plant.heat.boiler.megaWatt
+        maxEfficiency = (heat.boiler.megaWatt
           * parameter.efficiencyBoiler + 4.0
-          * Plant.heat.heatExchanger.megaWatt
+          * heat.heatExchanger.megaWatt
           * parameter.efficiencyNominal)
-          / (Plant.heat.boiler.megaWatt + 4.0
-            * Plant.heat.heatExchanger.megaWatt)
+          / (heat.boiler.megaWatt + 4.0
+            * heat.heatExchanger.megaWatt)
         // maxEfficiency = parameter.effnom
       }
     } else if case .integrated = gasTurbine {

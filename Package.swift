@@ -42,7 +42,7 @@ let package = Package(
       dependencies: ["Config", "BlackBoxModel"]),
     .testTarget(
       name: "MeteoTests",
-      dependencies: ["DateGenerator", "SolarPosition"]),
+      dependencies: ["DateGenerator", "SolarPosition", "Meteo"]),
     .testTarget(
       name: "BlackBoxModelTests",
       dependencies: ["Config", "Meteo", "SolarPosition", "BlackBoxModel"]),

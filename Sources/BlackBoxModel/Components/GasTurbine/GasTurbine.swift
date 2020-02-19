@@ -106,16 +106,17 @@ public struct GasTurbine: Component {
     heatExchanger: HeatExchanger,
     steamTurbine: inout SteamTurbine,
     temperature: Temperature,
-    fuel: Double)
+    fuel: Double,
+    plant: inout Plant)
     -> Double
   {
     var supply = 0.0
 
     let GasTurbineLmax = 0.0
 
-    var demand = Plant.electricalEnergy.demand
+    var demand = plant.electricalEnergy.demand
 
-    demand -= Plant.heat.production.megaWatt
+    demand -= plant.heat.production.megaWatt
       * HeatExchanger.parameter.efficiency
       * SteamTurbine.parameter.efficiencySCC
 
@@ -136,14 +137,14 @@ public struct GasTurbine: Component {
             &gasTurbine, demand: demand, fuelAvailable: fuel
           )
           let load =
-            (Plant.electricalEnergy.demand - Plant.electricalEnergy.gasTurbineGross)
+            (plant.electricalEnergy.demand - plant.electricalEnergy.gasTurbineGross)
               / SteamTurbine.parameter.power.max
 
         //  if status.steamTurbine.load.ratio != load {
             steamTurbine.load.ratio = load
             // The turbine load has changed recalculation of efficiency
             (_, steamTurbine.efficiency) = SteamTurbine.perform(
-              steamTurbine.load, boiler, gasTurbine.operationMode,
+              steamTurbine.load, plant.heat, boiler, gasTurbine.operationMode,
               heatExchanger.temperature.inlet, temperature)
         //  }
           
@@ -152,18 +153,18 @@ public struct GasTurbine: Component {
           if GasTurbine.efficiency(at: gasTurbine.load) > 0 {
             demand /= 1 + eff * WasteHeatRecovery.parameter.efficiencyPure
               * (1 / GasTurbine.efficiency(at: gasTurbine.load) - 1) // 1.135 *
-            if abs(Plant.electricalEnergy.gasTurbineGross - demand)
+            if abs(plant.electricalEnergy.gasTurbineGross - demand)
               < Simulation.parameter.heatTolerance {
               break
             }
           } else {
-            if demand > Plant.electricalEnergy.gasTurbineGross {
+            if demand > plant.electricalEnergy.gasTurbineGross {
               if gasTurbine.load.ratio >= GasTurbineLmax {
                 break
               }
-              demand -= (demand - Plant.electricalEnergy.gasTurbineGross) / 2
+              demand -= (demand - plant.electricalEnergy.gasTurbineGross) / 2
             } else {
-              demand += (Plant.electricalEnergy.gasTurbineGross - demand) / 2
+              demand += (plant.electricalEnergy.gasTurbineGross - demand) / 2
             }
           }
         }
@@ -178,7 +179,7 @@ public struct GasTurbine: Component {
           )
 
           let load =
-            (Plant.electricalEnergy.demand - Plant.electricalEnergy.gasTurbineGross)
+            (plant.electricalEnergy.demand - plant.electricalEnergy.gasTurbineGross)
               / SteamTurbine.parameter.power.max
           
           if GasTurbine.efficiency(at: gasTurbine.load) > 0 {
@@ -187,7 +188,7 @@ public struct GasTurbine: Component {
               steamTurbine.load.ratio = load
               // The turbine load has changed recalculation of efficiency
               (_, steamTurbine.efficiency) = SteamTurbine.perform(
-              steamTurbine.load, boiler, gasTurbine.operationMode,
+              steamTurbine.load, plant.heat, boiler, gasTurbine.operationMode,
               heatExchanger.temperature.inlet, temperature)
           //  }
 
@@ -197,14 +198,14 @@ public struct GasTurbine: Component {
               * (1 / GasTurbine.efficiency(at: gasTurbine.load) - 1) // 1.135 *
             // for RH !!
             // Change of iteration procedure
-            if abs(Plant.electricalEnergy.gasTurbineGross - demand)
+            if abs(plant.electricalEnergy.gasTurbineGross - demand)
               < Simulation.parameter.heatTolerance { break }
           } else {
-            if demand > Plant.electricalEnergy.gasTurbineGross {
+            if demand > plant.electricalEnergy.gasTurbineGross {
               if gasTurbine.load.ratio >= GasTurbineLmax { break }
-              demand -= (demand - Plant.electricalEnergy.gasTurbineGross) / 2
+              demand -= (demand - plant.electricalEnergy.gasTurbineGross) / 2
             } else {
-              demand += (Plant.electricalEnergy.gasTurbineGross - demand) / 2
+              demand += (plant.electricalEnergy.gasTurbineGross - demand) / 2
             }
           }
         }
@@ -218,7 +219,7 @@ public struct GasTurbine: Component {
           ) // GasTurbineLmax
 
           steamTurbine.load.ratio =
-            (Plant.electricalEnergy.demand - Plant.electricalEnergy.gasTurbineGross)
+            (plant.electricalEnergy.demand - plant.electricalEnergy.gasTurbineGross)
               / SteamTurbine.parameter.power.max
           
           // to correctDC
@@ -226,7 +227,7 @@ public struct GasTurbine: Component {
             * WasteHeatRecovery.parameter.efficiencyNominal
             / WasteHeatRecovery.parameter.ratioHTF
           // if only Intg Mode possible GasTurbine should not be fired to avoid dumping Q-solar
-          let production = Plant.heat.production.megaWatt
+          let production = plant.heat.production.megaWatt
           if case .integrated = WasteHeatRecovery.parameter.operation,
              production * HeatExchanger.parameter.efficiency > htfShare {
 
@@ -243,21 +244,21 @@ public struct GasTurbine: Component {
               Excess Q-solar: Gas Turbine operating at lower load.
               """)
 
-            demand = (Plant.electricalEnergy.demand - SteamTurbine.parameter.efficiencySCC
-              * Plant.heat.solar.megaWatt * HeatExchanger.parameter.efficiency) /
+            demand = (plant.electricalEnergy.demand - SteamTurbine.parameter.efficiencySCC
+              * plant.heat.solar.megaWatt * HeatExchanger.parameter.efficiency) /
               (1 + SteamTurbine.parameter.efficiencySCC
                 * WasteHeatRecovery.parameter.efficiencyNominal
                 * (1 / GasTurbine.efficiency(at: gasTurbine.load) - 1))
             // Lower GasTurbine-demand, avoid production>demand
-          } else if htfShare > Plant.heat.demand.watt {
+          } else if htfShare > plant.heat.demand.watt {
 
-            demand *= Plant.heat.demand.megaWatt / htfShare
+            demand *= plant.heat.demand.megaWatt / htfShare
           }
 
-          if (Plant.electricalEnergy.demand - demand) > SteamTurbine.parameter.power.max {
+          if (plant.electricalEnergy.demand - demand) > SteamTurbine.parameter.power.max {
             
             demand = (SteamTurbine.parameter.power.max / SteamTurbine.parameter.efficiencySCC
-              - Plant.heat.solar.megaWatt * HeatExchanger.parameter.efficiency)
+              - plant.heat.solar.megaWatt * HeatExchanger.parameter.efficiency)
               / (WasteHeatRecovery.parameter.efficiencyNominal
                 * (1 / parameter.efficiencyISO - 1))
           }
@@ -268,7 +269,7 @@ public struct GasTurbine: Component {
       ) // GasTurbineLmax
 
       steamTurbine.load.ratio =
-        (Plant.electricalEnergy.demand - Plant.electricalEnergy.gasTurbineGross)
+        (plant.electricalEnergy.demand - plant.electricalEnergy.gasTurbineGross)
         / SteamTurbine.parameter.power.max
       
       let load = steamTurbine.load.ratio
@@ -278,15 +279,15 @@ public struct GasTurbine: Component {
         // The turbine load has changed recalculation of efficiency
         steamTurbine.load.ratio = load
         (_, steamTurbine.efficiency) = SteamTurbine.perform(
-        steamTurbine.load, boiler, gasTurbine.operationMode,
+        steamTurbine.load, plant.heat, boiler, gasTurbine.operationMode,
         heatExchanger.temperature.inlet, temperature)
     //  }
       
-      Plant.heat.demand.megaWatt = steamTurbine.load.ratio
+      plant.heat.demand.megaWatt = steamTurbine.load.ratio
         * SteamTurbine.parameter.power.max / steamTurbine.efficiency
       // FIXME: thermal.wasteHeatRecovery = WasteHeatRecovery(electricEnergy.gasTurbineGross, hourFraction)
 
-      if Plant.heat.wasteHeatRecovery.watt < 0 {
+      if plant.heat.wasteHeatRecovery.watt < 0 {
         //	i = 0
       }
       // FIXME: SwitchTemp(gasTurbine.operationMode) // Change Temperatures according to Mode

@@ -35,11 +35,12 @@ public struct TimeStep: CustomStringConvertible {
   var minute: Int = 0
 
   public var description: String {
+    let symbol = isDaytime ? " 🌞 " : " 🌃 "
     let hr = (hour - 1) < 10 ? " \(hour - 1)" : "\(hour - 1)"
     let min = (minute - 1) < 10 ? "0\(minute - 1)" : "\(minute - 1)"
     let d = day < 10 ? " \(day)" : "\(day)"
     let mon = month < 10 ? " \(month). " : "\(month). "
-    return hr + ":" + min + "  " + d + "." + mon
+    return  symbol + hr + ":" + min + "  " + d + "." + mon + "\n"
   }
   
   static func setCurrent(date: Date) {

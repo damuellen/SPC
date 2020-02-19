@@ -15,7 +15,8 @@ extension Storage {
     steamTurbine: inout SteamTurbine,
     powerBlock: inout PowerBlock,
     mode: Storage.OperationMode,
-    nightHour: Double = 12.0)
+    nightHour: Double = 12.0,
+    heat: inout ThermalEnergy)
     -> (Double, Double)
   {
     if storage.operationMode != mode {
@@ -64,7 +65,8 @@ extension Storage {
       thermalPower = storageCharging(
         storage: &storage,
         solarField: &solarField,
-        powerBlock: powerBlock
+        powerBlock: powerBlock,
+        heat: &heat
       )
       parasitics = Storage.parasitics(&storage)
     case .fossilCharge:
@@ -86,6 +88,7 @@ extension Storage {
         powerBlock: &powerBlock,
         steamTurbine: &steamTurbine,
         solarField: solarField,
+        heatSolar: heat.solar.megaWatt,
         outletTemperature
       )
     case .preheat:
@@ -151,7 +154,7 @@ extension Storage {
   private static func storageCharging(
     storage: inout Storage,
     solarField: inout SolarField,
-    powerBlock: HeatCycle)
+    powerBlock: HeatCycle, heat: inout ThermalEnergy)
     -> Double
   {
     let heatExchanger = HeatExchanger.parameter,
@@ -195,20 +198,20 @@ extension Storage {
       // added to avoid increase in PB massFlow
       if case .demand = parameter.strategy {
         // too much power from sun, dump
-        Plant.heat.dumping.megaWatt += Plant.heat.production.megaWatt
+        heat.dumping.megaWatt += heat.production.megaWatt
           - heatExchanger.sccHTFheat + thermalPower
       } else {
-        Plant.heat.dumping.megaWatt += Plant.heat.production.megaWatt
-          - Plant.heat.demand.megaWatt + thermalPower
+        heat.dumping.megaWatt += heat.production.megaWatt
+          - heat.demand.megaWatt + thermalPower
       }
       
       // reduce HTF massflow in solarfield
       solarField.massFlow = powerBlock.massFlow + storage.massFlow
       
-      Plant.heat.solar.kiloWatt = solarField.massFlow.rate
+      heat.solar.kiloWatt = solarField.massFlow.rate
         * SolarField.parameter.HTF.deltaHeat(solarField)
       
-      Plant.heat.production = Plant.heat.solar
+      heat.production = heat.solar
     }
     return thermalPower
   }
@@ -257,6 +260,7 @@ extension Storage {
     powerBlock: inout PowerBlock,
     steamTurbine: inout SteamTurbine,
     solarField: SolarField,
+    heatSolar: Double,
     _ outletTemperature: (Storage) -> Temperature)
     -> (Double, Double)
   {
@@ -303,7 +307,7 @@ extension Storage {
         heatExchanger: status.heatExchanger
       )*/
       
-      steamTurbine.load.ratio = (Plant.heat.solar.megaWatt + thermalPower)
+      steamTurbine.load.ratio = (heatSolar + thermalPower)
         / (SteamTurbine.parameter.power.max / steamTurbine.efficiency)
       steamTurbine.load.ratio = steamTurbine.load.ratio.limited(by: maxLoad)
       

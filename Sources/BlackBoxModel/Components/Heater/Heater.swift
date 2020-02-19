@@ -62,7 +62,8 @@ public struct Heater: Component, HeatCycle {
     massFlowStorage: MassFlow,
     modeStorage: Storage.OperationMode,    
     demand: Double, 
-    fuelAvailable: Double)
+    fuelAvailable: Double,
+    heat: ThermalEnergy)
     -> EnergyTransfer<Heater>
   {
     let htf = SolarField.parameter.HTF
@@ -81,7 +82,7 @@ public struct Heater: Component, HeatCycle {
         thermalPower = fuel * parameter.efficiency
           * Simulation.adjustmentFactor.efficiencyHeater
         // net thermal power avail [MW]
-       load.ratio = Plant.heat.heater.megaWatt / Design.layout.heater
+       load.ratio = heat.heater.megaWatt / Design.layout.heater
 
         guard load.ratio > parameter.minLoad else {
           debugPrint("""
@@ -105,13 +106,13 @@ public struct Heater: Component, HeatCycle {
         if Design.hasStorage, case .preheat = modeStorage {
           massFlow = massFlowStorage
         } else {
-          self.setMassFlow(rate: thermalPower * 1_000 / htf.deltaHeat(
+          setMassFlow(rate: thermalPower * 1_000 / htf.deltaHeat(
               temperature.outlet, temperaturePowerBlock
             )
           )
         }
       } else {
-        self.setMassFlow(rate: Design.layout.heater / htf.deltaHeat(
+        setMassFlow(rate: Design.layout.heater / htf.deltaHeat(
           parameter.nominalTemperatureOut, temperaturePowerBlock)
         )
         fuel = Design.layout.heater / parameter.efficiency
@@ -136,19 +137,19 @@ public struct Heater: Component, HeatCycle {
       } else {
         temperature.outlet = parameter.antiFreezeTemperature
       }
-      thermalPower = Plant.heat.heater.megaWatt / parameter.efficiency
+      thermalPower = heat.heater.megaWatt / parameter.efficiency
 
-      load.ratio = Plant.heat.heater.megaWatt / Design.layout.heater
+      load.ratio = heat.heater.megaWatt / Design.layout.heater
       // No operation requested or QProd > QNeed
     } else if case .noOperation = operationMode { /* || heat >= 0 */
       load = 0.0; massFlow = 0.0
-      if self.isMaintained {
+      if isMaintained {
         operationMode = .maintenance
       }
       temperature.outlet = temperatureSolarField
 
       thermalPower = 0
-    } else if self.isMaintained {
+    } else if isMaintained {
       // operation is requested
       debugPrint("""
         \(TimeStep.current)
@@ -183,12 +184,12 @@ public struct Heater: Component, HeatCycle {
         operationMode = .normal
       }
       // if Reheating, then do not change displayed operating status / mode
-      self.setTemperature(outlet: parameter.nominalTemperatureOut)
+      setTemperature(outlet: parameter.nominalTemperatureOut)
       // Calc. mass flow that can be achieved [kg/sec] = [MJ/sec] * 1000 / [kJ/kg]
       if Design.hasStorage, case .preheat = modeStorage {
         massFlow = massFlowStorage
       } else {
-        self.setMassFlow(rate: thermalPower * 1_000 
+        setMassFlow(rate: thermalPower * 1_000 
           / htf.deltaHeat(self)
         )
       }

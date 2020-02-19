@@ -105,7 +105,9 @@ public struct Storage: Component, HeatCycle {
     steamTurbine: inout SteamTurbine,
     powerBlock: inout PowerBlock,
     heater: inout Heater,
-    demand: Double, fuelAvailable: Double)
+    demand: Double,
+    fuelAvailable: Double,
+    heat: inout ThermalEnergy)
     -> EnergyTransfer<Storage>
   {    
     // **************************  Energy surplus  *****************************
@@ -125,7 +127,7 @@ public struct Storage: Component, HeatCycle {
         solarField: &solarField,
         steamTurbine: &steamTurbine,
         powerBlock: &powerBlock,
-        mode: mode
+        mode: mode, heat: &heat
       )
       powerBlock.setInletTemperature(equalToOutlet: solarField)
       return EnergyTransfer(heat: supply, electric: parasitics, fuel: 0)
@@ -168,7 +170,7 @@ public struct Storage: Component, HeatCycle {
         solarField: &solarField,
         steamTurbine: &steamTurbine,
         powerBlock: &powerBlock,
-        mode: .discharge
+        mode: .discharge, heat: &heat
       )
       
       if [.operating, .freezeProtection]
@@ -219,11 +221,11 @@ public struct Storage: Component, HeatCycle {
           temperaturePowerBlock: powerBlock.temperature.inlet,
           massFlowStorage: storage.massFlow,
           modeStorage: storage.operationMode, 
-          demand: demand, fuelAvailable: fuelAvailable
+          demand: demand, fuelAvailable: fuelAvailable, heat: heat
         )
         fuel = energy.fuel
-        Plant.heat.heater.megaWatt = energy.heat
-        Plant.electricalParasitics.heater = energy.electric
+        heat.heater.megaWatt = energy.heat
+     // FIXME   plant.electricalParasitics.heater = energy.electric
         
         powerBlock.massFlow = heater.massFlow
 
@@ -241,15 +243,14 @@ public struct Storage: Component, HeatCycle {
         solarField: &solarField,
         steamTurbine: &steamTurbine,
         powerBlock: &powerBlock,
-        mode: mode
+        mode: mode, heat: &heat
       )
       
       powerBlock.setInletTemperature(equalToOutlet: storage)
 
       // check why to circulate HTF in SF
       #warning("Storage.parasitics")
-      Plant.electricalParasitics.solarField =
-        SolarField.parameter.antiFreezeParastics
+    // FIXME  plant.electricalParasitics.solarField = SolarField.parameter.antiFreezeParastics
       
       return EnergyTransfer(heat: supply, electric: parasitics, fuel: fuel)
     }
@@ -259,11 +260,11 @@ public struct Storage: Component, HeatCycle {
   static func demandStrategy(
     storage: inout Storage,
     powerBlock: inout PowerBlock,
-    solarField: SolarField)
+    solarField: SolarField, heat: ThermalEnergy)
   {
-    var demand = TimeStep.current.isDaytime ? 0.5 : Plant.heat.demand.megaWatt
+    var demand = TimeStep.current.isDaytime ? 0.5 : heat.demand.megaWatt
     
-    let production = Plant.heat.solar.megaWatt
+    let production = heat.solar.megaWatt
     
     switch parameter.strategy {
     case .always: strategyAlways(

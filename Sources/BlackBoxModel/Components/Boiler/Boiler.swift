@@ -56,8 +56,9 @@ public struct Boiler: Component {
         parameter.electricalParasitics[1] * load.ratio)
   }
 
-  mutating func callAsFunction(demand: Double,
-    Qsf_load: Double, fuelAvailable: Double) -> EnergyTransfer<Boiler>
+  mutating func callAsFunction(
+    demand: Double, Qsf_load: Double, fuelAvailable: Double)
+    -> EnergyTransfer<Boiler>
   {
     let parameter = Boiler.parameter
 
@@ -198,11 +199,11 @@ public struct Boiler: Component {
       // Fuel flow [MW] in this hour fraction
       fuel = fuelAvailable / Simulation.time.steps.fraction
       
-      thermalPower = Plant.fuelConsumption.boiler
+      thermalPower = fuel // FIXME Plant.fuelConsumption.boiler
         * Boiler.efficiency(at: load) // net thermal power [MW]
     } else {
       fuel = totalFuelNeed / Simulation.time.steps.fraction // Fuel flow [MW] in this hour fraction
-      thermalPower = Plant.fuelConsumption.boiler
+      thermalPower = fuel // FIXME Plant.fuelConsumption.boiler
         / Simulation.time.steps.fraction * Boiler.efficiency(at: load) // net thermal power [MW]
     }
     

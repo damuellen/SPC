@@ -88,11 +88,11 @@ public enum BlackBoxModel {
       print("We need the sun."); exit(1)
     }
     
-    Plant.setupComponentParameters()
-    
     Maintenance.setDefaultSchedule(for: yearOfSimulation)
     
     var status = Plant.initialState
+
+    var plant = Plant.setup()
 
     let (🌦, 📅) = makeGenerators(dataSource: 🌤)
 
@@ -127,7 +127,9 @@ public enum BlackBoxModel {
       
       if Design.hasStorage {
         
-        Plant.inletTemperature(solarField: &status.solarField, storage: status.storage)
+        status.solarField.inletTemperature(
+          storage: status.storage, heat: plant.heat
+        )
         
         if status.storage.charge.ratio < Storage.parameter.chargeTo {
           status.solarField.massFlow += status.storage.massFlow
@@ -141,33 +143,32 @@ public enum BlackBoxModel {
       
       var timeRemain = 600.0
 
-      SolarField.calculate(
-        &status.solarField,
+      status.solarField.calculate(
         collector: status.collector,
         time: &timeRemain,
-        dumping: &Plant.heat.dumping.watt,
+        dumping: &plant.heat.dumping.watt,
         ambient: ambientTemperature
       )
       
       status.solarField.temperature.outlet =
-        SolarField.heatLossesHotHeader(status.solarField, ambient: ambientTemperature)
+        status.solarField.heatLossesHotHeader(ambient: ambientTemperature)
       
-      Plant.electricalParasitics.solarField = SolarField.parasitics(status.solarField)
-      
-      Plant.calculate(&status, ambientTemperature: ambientTemperature)
-      
+      plant.electricalParasitics.solarField = status.solarField.parasitics()
+
+      plant.calculate(&status, ambientTemperature: ambientTemperature)
+
       if Design.hasStorage {
         // Calculate the operating state of the salt
-        Plant.heat.storage.megaWatt = Storage.operate(
+        plant.heat.storage.megaWatt = Storage.operate(
           storage: &status.storage,
           powerBlock: &status.powerBlock,
           steamTurbine: status.steamTurbine,
-          thermal: Plant.heat.storage.megaWatt
+          thermal: plant.heat.storage.megaWatt
         )
       }
       
-      let energy = Plant.energyBalance()
-
+      let energy = plant.energyBalance()
+      // print(TimeStep.current, status, energy)
       backgroundQueue.async { [status] in
         recorder.add(date, meteo: meteo, status: status, energy: energy)
       }      

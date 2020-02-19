@@ -9,9 +9,7 @@
 //
 
 extension Plant {
-  static func setupComponentParameters() {
-    guard componentsNeedUpdate else { return }
-    //componentsNeedUpdate = false
+  static func setup() -> Plant {
     let steamTurbine = SteamTurbine.parameter
     let powerBlock = PowerBlock.parameter
     
@@ -87,5 +85,6 @@ extension Plant {
         )
       }
     }
+    return Plant()
   }
 }

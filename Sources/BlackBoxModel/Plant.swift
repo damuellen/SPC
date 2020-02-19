@@ -10,22 +10,19 @@
 
 import Foundation
 /// A namespace for the main routines of the simulation.
-public enum Plant {
+public struct Plant {
 
-  static var heat = ThermalEnergy()
+  var heat = ThermalEnergy()
 
-  private(set) static var electricalEnergy = ElectricPower()
+  var electricalEnergy = ElectricPower()
 
-  private(set) static var fuelConsumption = FuelConsumption()
+  var fuelConsumption = FuelConsumption()
 
-  static var electricalParasitics = Parasitics()
+  var electricalParasitics = Parasitics()
 
   static let initialState = PerformanceData()
   
-  /// used for Plant.setupComponentParameters()
-  static var componentsNeedUpdate = true
-
-  static func energyBalance() -> Energy {
+  mutating func energyBalance() -> Energy {
     electricalEnergy.net = electricalEnergy.gross
     electricalEnergy.net -= electricalEnergy.parasitics
     
@@ -42,31 +39,11 @@ public enum Plant {
   }
 
   // MARK: - SolarField
-  /// Determines the inlet temperature of the solar field
-  /// depending on the operating mode of the storage
-  static func inletTemperature(
-    solarField: inout SolarField,
-    storage: Storage)
-  {
-    switch storage.operationMode {
-    case .freezeProtection:
-      if Storage.parameter.temperatureCharge[1] > 0 {
-        solarField.temperature.inlet = storage.temperature.outlet
-      } else {
-        solarField.setInletTemperature(inKelvin: storage.antiFreezeTemperature)
-      }
-    case .preheat:
-      solarField.temperature.inlet = storage.temperatureTank.cold
-    case .charging where Plant.heat.production.watt == 0:
-      solarField.temperature.inlet = solarField.temperature.outlet
-    default: break
-    }
-  }
+
   /// Reduces the mass flow of the solar field
   /// when there is less demand from the grid
-  static func adjustMassFlow(
-     solarField: inout SolarField)
-   {
+  static func adjustMassFlow(solarField: inout SolarField)
+  {
     let parameter = SolarField.parameter,
     heatExchanger = HeatExchanger.parameter,
     steamTurbine = SteamTurbine.parameter
@@ -80,7 +57,7 @@ public enum Plant {
   }
 
   /// Calculation of the heat supplied by the solar field
-  private static func update(
+  private mutating func update(
     _ solarField: SolarField,
     _ collector: Collector,
     _ steamTurbine: SteamTurbine)
@@ -113,7 +90,7 @@ public enum Plant {
 
   // MARK: - PowerBlock
 
-  static func calculate(_ status: inout PerformanceData,
+  mutating func calculate(_ status: inout PerformanceData,
     ambientTemperature: Temperature)
   {
     let collector = status.collector
@@ -172,7 +149,7 @@ public enum Plant {
         steamTurbine.load = Availability.current.value.powerBlock
         // The turbine load has changed recalculation of efficiency
         (_, steamTurbine.efficiency) = SteamTurbine.perform(
-          status.steamTurbine.load, status.boiler.operationMode, status.gasTurbine.operationMode,
+          status.steamTurbine.load, heat, status.boiler.operationMode, status.gasTurbine.operationMode,
           status.heatExchanger.temperature.inlet, ambientTemperature)
         
         return (SteamTurbine.parameter.power.max
@@ -234,7 +211,7 @@ public enum Plant {
       steamTurbine.load.ratio = load
       // The turbine load has changed recalculation of efficiency
       (_, steamTurbine.efficiency) = SteamTurbine.perform(
-        steamTurbine.load, boiler.operationMode, gasTurbine.operationMode,
+        steamTurbine.load, heat, boiler.operationMode, gasTurbine.operationMode,
         heatExchanger.temperature.inlet, ambientTemperature)
 
       let demand = demandStrategyStorage()
@@ -298,7 +275,7 @@ var st = status.steamTurbine
     assert(step < 11, "Too many iterations")
   }
 
-  private static func checkForFreezeProtection(
+  private mutating func checkForFreezeProtection(
     heater: inout Heater,
     powerBlock: inout PowerBlock,
     storage: Storage,
@@ -324,7 +301,7 @@ var st = status.steamTurbine
         temperaturePowerBlock: powerBlock.temperature.inlet,      
         massFlowStorage: storage.massFlow,
         modeStorage: storage.operationMode, 
-        demand: heatDiff, fuelAvailable: fuel
+        demand: heatDiff, fuelAvailable: fuel, heat: heat
       )
       fuelConsumption.heater = energy.fuel
       heat.heater.megaWatt = energy.heat
@@ -345,7 +322,7 @@ var st = status.steamTurbine
           temperaturePowerBlock: powerBlock.temperature.inlet,      
           massFlowStorage: storage.massFlow,
           modeStorage: storage.operationMode, 
-          demand: heatDiff, fuelAvailable: fuel
+          demand: heatDiff, fuelAvailable: fuel, heat: heat
         )
         fuelConsumption.heater = energy.fuel
         heat.heater.megaWatt = energy.heat
@@ -386,7 +363,7 @@ var st = status.steamTurbine
     }
   }
 
-  private static func temperaturesPowerBlock(
+  private mutating func temperaturesPowerBlock(
     solarField: inout SolarField,
     collector: Collector,
     powerBlock: inout PowerBlock,
@@ -429,7 +406,7 @@ var st = status.steamTurbine
       //  || status.solarField.operationMode.isFreezeProtection
       {
         if heater.operationMode.isFreezeProtection == false {
-          temperatureLossPowerBlock(&powerBlock, solarField, storage)
+          Plant.temperatureLossPowerBlock(&powerBlock, solarField, storage)
         }
         return true
       }
@@ -463,10 +440,7 @@ var st = status.steamTurbine
     
     powerBlock.setInletTemperature(equalToOutlet: solarField)
     
-    outletTemperature(
-      powerBlock: &powerBlock,
-      heatExchanger: &heatExchanger,
-      storage)
+    outletTemperature(powerBlock: &powerBlock, heatExchanger: &heatExchanger, storage)
     // Iteration: Find the right temperature for inlet and outlet of powerblock
 
     let fuel = Availability.fuel
@@ -497,7 +471,7 @@ var st = status.steamTurbine
           gasTurbine: &gasTurbine,
           heatExchanger: heatExchanger,
           steamTurbine: &steamTurbine,
-          temperature: ambient, fuel: fuel
+          temperature: ambient, fuel: fuel, plant: &self
         )
       }
 
@@ -542,7 +516,7 @@ var st = status.steamTurbine
   
   // MARK: - SteamTurbine
   
-  private static func updateSteamTurbine(
+  private mutating func updateSteamTurbine(
     _ steamTurbine: inout SteamTurbine,
     boiler: inout Boiler,
     heatDiff: inout Double,
@@ -552,7 +526,7 @@ var st = status.steamTurbine
     _ ambient: Temperature)
   {
     (_, steamTurbine.efficiency) = SteamTurbine.perform(
-      steamTurbine.load, boiler.operationMode, modeGasTurbine,
+      steamTurbine.load, heat, boiler.operationMode, modeGasTurbine,
       heatExchanger.temperature.inlet, ambient
     )
 
@@ -593,8 +567,9 @@ var st = status.steamTurbine
                      SteamTurbine.parameter.power.min)
       
       (_, steamTurbine.efficiency) = SteamTurbine.perform(
-        steamTurbine.load, boiler.operationMode, modeGasTurbine,
-        heatExchanger.temperature.inlet, ambient)
+        steamTurbine.load, heat, boiler.operationMode, modeGasTurbine,
+        heatExchanger.temperature.inlet, ambient
+      )
 
       minPower /= steamTurbine.efficiency
     }
@@ -609,7 +584,7 @@ var st = status.steamTurbine
     electricalEnergy.steamTurbineGross = steamTurbine(
       heater: heater, modeBoiler: boiler.operationMode,
       modeGasTurbine: modeGasTurbine, heatExchanger: heatExchanger,
-      heat: heat.production.megaWatt, temperature: ambient
+      temperature: ambient, heat: heat
     )
     
     if OperationRestriction.fuelStrategy.isPredefined {
@@ -648,7 +623,7 @@ var st = status.steamTurbine
     }
   }
 
-  private static func adjustLoadSteamTurbine(
+  private mutating func adjustLoadSteamTurbine(
     steamTurbine: inout SteamTurbine,
     boiler: inout Boiler,
     heater: Heater,
@@ -683,12 +658,13 @@ var st = status.steamTurbine
     electricalEnergy.steamTurbineGross = steamTurbine(
       heater: heater, modeBoiler: boiler.operationMode,
       modeGasTurbine: modeGasTurbine, heatExchanger: heatExchanger,
-      heat: heat.production.megaWatt, temperature: ambient)
+      temperature: ambient, heat: heat
+    )
   }
   
   // MARK: - Storage
   
-  private static func updateStorage(
+  private mutating func updateStorage(
     _ storage: inout Storage,
     solarField: inout SolarField,
     powerBlock: inout PowerBlock,
@@ -700,7 +676,8 @@ var st = status.steamTurbine
     Storage.demandStrategy(
       storage: &storage,
       powerBlock: &powerBlock,
-      solarField: solarField
+      solarField: solarField,
+      heat: heat
     )
     
     let energy = Storage.update(
@@ -710,7 +687,8 @@ var st = status.steamTurbine
       powerBlock: &powerBlock,
       heater: &heater,
       demand: heat.demand.megaWatt,
-      fuelAvailable: fuel
+      fuelAvailable: fuel,
+      heat: &heat
     )
 
     heat.storage.megaWatt = energy.heat
@@ -742,7 +720,7 @@ var st = status.steamTurbine
 
   // MARK: - Heater
   
-  private static func heating(
+  private mutating func heating(
     storage: inout Storage,
     solarField: inout SolarField,
     powerBlock: inout PowerBlock,
@@ -764,7 +742,7 @@ var st = status.steamTurbine
           solarField: &solarField,
           steamTurbine: &steamTurbine,
           powerBlock: &powerBlock,
-          mode: .preheat
+          mode: .preheat, heat: &heat
         )
 
         heater.setInletTemperature(equalToOutlet: storage)
@@ -791,7 +769,7 @@ var st = status.steamTurbine
           solarField: &solarField,
           steamTurbine: &steamTurbine,
           powerBlock: &powerBlock,
-          mode: .discharge
+          mode: .discharge, heat: &heat
         )
 
         let htf = SolarField.parameter.HTF
@@ -830,11 +808,12 @@ var st = status.steamTurbine
         powerBlock: &powerBlock,
         storage: storage,
         heatDiff: heatDiff,
-        fuel: fuel)
+        fuel: fuel
+      )
     }
   }
 
-  private static func heating(
+  private mutating func heating(
     solarField: SolarField,
     heater: inout Heater,
     powerBlock: inout PowerBlock,
@@ -847,7 +826,7 @@ var st = status.steamTurbine
       temperaturePowerBlock: powerBlock.temperature.inlet,      
       massFlowStorage: storage.massFlow,
       modeStorage: storage.operationMode, 
-      demand: heatDiff, fuelAvailable: fuel
+      demand: heatDiff, fuelAvailable: fuel, heat: heat
     )
     fuelConsumption.heater = energy.fuel
     heat.heater.megaWatt = energy.heat
@@ -861,7 +840,7 @@ var st = status.steamTurbine
     powerBlock.massFlow += heater.massFlow
   }
 
-  private static func heating(
+  private mutating func heating(
     powerBlock: inout PowerBlock,
     heater: inout Heater,
     storage: Storage,
@@ -874,7 +853,7 @@ var st = status.steamTurbine
       temperaturePowerBlock: powerBlock.temperature.inlet,      
       massFlowStorage: storage.massFlow,
       modeStorage: storage.operationMode, 
-      demand: heatDiff, fuelAvailable: fuel
+      demand: heatDiff, fuelAvailable: fuel, heat: heat
     )
     fuelConsumption.heater = energy.fuel
     heat.heater.megaWatt = energy.heat
@@ -887,7 +866,7 @@ var st = status.steamTurbine
     powerBlock.massFlow += heater.massFlow
   }
 
-  private static func updateHeater(
+  private mutating func updateHeater(
     _ heater: inout Heater,
     solarField: inout SolarField,
     powerBlock: inout PowerBlock,
@@ -971,7 +950,7 @@ var st = status.steamTurbine
 
   // MARK: - Boiler
   
-  private static func updateBoiler(
+  private mutating func updateBoiler(
     _ boiler: inout Boiler, _ heatDiff: inout Double)
   {
     var Qsf_load: Double

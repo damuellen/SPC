@@ -20,8 +20,6 @@ public struct PerformanceData: CustomStringConvertible {
   gasTurbine = GasTurbine.initialState,
   storage = Storage.initialState
   
-  public init() {}
-  
   public var description: String {
     return "\nCollector:\n\(collector)\n\n"
       + (Design.hasSolarField ? "Solar Field:\n\(solarField)\n\n" : "")
