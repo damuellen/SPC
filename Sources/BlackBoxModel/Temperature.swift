@@ -53,17 +53,17 @@ public struct Temperature: CustomStringConvertible, Equatable {
   }
 
   public init(celsius: Double) {
-    assert(celsius.isFinite)
+    assert(celsius.isFinite, "\(celsius), \(TimeStep.current)")
     assert(celsius > Temperature.absoluteZeroCelsius)
     self.kelvin = celsius.toKelvin
   }
-
+/*
   public init(celsius: Float) {
     assert(celsius.isFinite)
     assert(celsius > Float(Temperature.absoluteZeroCelsius))
     self.kelvin = Double(celsius).toKelvin
   }
-
+*/
   mutating func adjust(with ratio: Ratio) {
     self.kelvin *= ratio.ratio
   }

@@ -3,13 +3,13 @@ import XCTest
 import DateGenerator
 import Foundation
 import SolarPosition
-@testable import Meteo
+import Meteo
 
 class MeteoTests: XCTestCase {
   func testsGenerator() {
-    let location = Position(longitude: 47, latitude: 29, elevation: 0)
-    let sun = SolarPosition(location: (47, 29, 0), year: 2017,
-                            timezone: 4, frequence: .every5minutes)
+    let location = Location(longitude: 47, latitude: 29, elevation: 0)
+    let sun = SolarPosition(coords: (47, 29, 0), tz: 4, year: 2017,
+                            frequence: .every5minutes)
     
     let dg = DateGenerator(year: 2017, interval: .every5minutes)
     
@@ -61,7 +61,7 @@ class MeteoTests: XCTestCase {
     let meteoData = Array(repeatElement(meteoDataDay, count: 365).joined())
 
     let datasource = MeteoDataSource(
-      name: "", data: meteoData, (2017, 8, location)
+      name: "", data: meteoData, (2017, location)
     )
   }
 

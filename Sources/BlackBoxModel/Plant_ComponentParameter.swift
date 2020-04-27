@@ -19,7 +19,7 @@ extension Plant {
         + powerBlock.nominalElectricalParasitics
         + powerBlock.electricalParasiticsStep[1]
     }
-    
+    SolarField.parameter.wayLength()
     let solarField = SolarField.parameter
 
     if Design.hasGasTurbine {
@@ -66,6 +66,11 @@ extension Plant {
     }
 
     if Design.hasSolarField {
+  /*    let name = Collector.parameter.name
+      if name.hasPrefix("SKAL-ET") {
+        Collector.parameter = .sklalet
+      }*/
+
       let numberOfSCAsInRow = Double(solarField.numberOfSCAsInRow)
       let edgeFactor1 = solarField.distanceSCA / 2
         * (1 - 1 / numberOfSCAsInRow)

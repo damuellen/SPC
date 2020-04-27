@@ -122,13 +122,13 @@ public struct SolarField: Component, Equatable, HeatCycle {
     let parameter = SolarField.parameter
     HCE.freezeProtectionCheck(&self)
     SolarField.last = loops
+    let m1 = (header.massFlow - parameter.massFlow.min).rate
+    let m2 = (parameter.massFlow.max - parameter.massFlow.min).rate
     for (n, loop) in zip(0..., [Loop.near, .average, .far]) {
       let massFlow = header.massFlow.rate == 0
         ? 0 : header.massFlow.rate
-        * ( (header.massFlow - parameter.massFlow.min).rate
-          * (parameter.imbalanceDesign[n] - parameter.imbalanceMin[n])
-          / (parameter.massFlow.max - parameter.massFlow.min).rate
-          + parameter.imbalanceMin[n] )
+        * ( m1 * (parameter.imbalanceDesign[n] - parameter.imbalanceMin[n])
+          / m2 + parameter.imbalanceMin[n] )
       loops[loop.rawValue].setMassFlow(rate: massFlow)
 
       HCE.calculation(&self, collector: collector, loop: loop,
@@ -250,6 +250,10 @@ public struct SolarField: Component, Equatable, HeatCycle {
         )
         /// Calculate average Temp. and areaDensity
         let collector = Collector.parameter
+        if averageTemperature.celsius < 20 { 
+        print("Temperature too low.")
+        break
+      }
         let areaDensity = parameter.HTF.density(averageTemperature) * .pi
           * collector.rabsInner ** 2 / collector.aperture // kg/m2
 

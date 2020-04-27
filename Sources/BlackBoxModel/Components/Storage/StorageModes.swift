@@ -25,6 +25,7 @@ extension Storage {
         \(TimeStep.current) Storage mode change \(oldMode) -> \(mode)
         """)
     }
+  
     storage.operationMode = mode
     
     func outletTemperature(_ status: Storage) -> Temperature {

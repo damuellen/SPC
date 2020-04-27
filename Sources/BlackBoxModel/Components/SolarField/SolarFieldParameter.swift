@@ -57,20 +57,16 @@ extension SolarField {
     var HTF: HeatTransferFluid
     var collector: Collector.Parameter!
     var edgeFactor: [Double] = []
+
+    var distRatio: Double = 0
+    var pipeWay: Double  = 0
+    var loopWays: [Double] = []
   }
 }
 
 extension SolarField.Parameter {
 
-  var distRatio: Double {
-    return self.pipeWay / (2 * self.loopWays[1])
-  }
-
-  var pipeWay: Double {
-    return self.loopWays[1] + 2 * self.loopWays[2]
-  }
-
-  var loopWays: [Double] {
+  mutating func wayLength() {
     let designWay = Double(numberOfSCAsInRow)
       * (collector.lengthSCA + distanceSCA) * 2.0 + rowDistance
 
@@ -90,7 +86,9 @@ extension SolarField.Parameter {
       ? farWay
       : farWay + nearWay
 
-    return [designWay, nearWay, avgWay, farWay]
+    self.loopWays = [designWay, nearWay, avgWay, farWay]
+    self.distRatio = pipeWay / (2 * loopWays[1])
+    self.pipeWay = loopWays[1] + 2 * loopWays[2]
   }
 }
 

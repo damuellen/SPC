@@ -22,16 +22,24 @@ public enum BlackBoxModel {
   /// Solar radiation and meteorological elements for a 1-year period.
   public private(set) static var meteoData: MeteoDataSource?
   
-  public static func configure(location: Position, year: Int, timeZone: Int)
+  public static func configure(year: Int)
   {
-    yearOfSimulation = year
-    
+    yearOfSimulation = year    
+  }
+
+  public static func configure(location: Location)
+  { 
+    if let sun = sun, sun.location.coords == location.coordinates {
+      return
+    }   
     sun = SolarPosition(
-      location: location.coordinates, year: yearOfSimulation,
-      timezone: timeZone, frequence: Simulation.time.steps
+      coords: location.coordinates, tz: location.timezone,
+      year: yearOfSimulation, frequence: Simulation.time.steps
     )
-    
-    meteoData = MeteoDataSource.generatedFrom(sun!)
+
+    if meteoData == nil {     
+      meteoData = MeteoDataSource.generatedFrom(sun!)
+    }
   }
   
   public static func configure(meteoFilePath: String? = nil)
@@ -43,25 +51,28 @@ public enum BlackBoxModel {
       meteoData = try handler()
     } catch {
       fatalError("\(error) Meteo data is mandatory for calculation.")
-    }
-    
+    }    
     yearOfSimulation = meteoData!.year ?? yearOfSimulation
-    
+    if let sun = sun, let coords = meteoData?.location.coordinates,
+    coords == sun.location.coords {
+      return
+    }
     sun = SolarPosition(
-      location: meteoData!.location.coordinates, year: yearOfSimulation,
-      timezone: -(meteoData!.timeZone ?? 0), frequence: Simulation.time.steps
+      coords: meteoData!.location.coordinates, tz: meteoData!.location.timezone,
+      year: yearOfSimulation, frequence: Simulation.time.steps
     )
-  }
-  
+  } 
+
   public static func loadConfigurations(
     atPath path: String, format: Config.Formats = .json)
   {
     do {
       switch format {
       case .json:
-        try JsonConfigFileHandler.loadConfigurations(atPath: path)
+        let urls = JSONConfig.fileSearch(atPath: path)
+        try JSONConfig.loadConfigurations(urls)
       case .text:
-        try TextConfigFileHandler.loadConfigurations(atPath: path)
+        try TextConfig.loadConfigurations(atPath: path)
       }
     } catch {
       print(error)
@@ -71,7 +82,7 @@ public enum BlackBoxModel {
   public static func saveConfigurations(toPath path: String)
   {
     do {
-      try JsonConfigFileHandler.saveConfigurations(toPath: path)
+    //  try JsonConfigFileHandler.saveConfigurations(toPath: path)
     } catch {
       print(error)
     }
@@ -80,10 +91,8 @@ public enum BlackBoxModel {
   /// - Parameter recorder: Creates the log and write results to file.
   /// - Returns: The operating data collected by the recorder.
   /// - Attention: `configure()` must called before this.
-  @discardableResult
-  public static func runModel(with recorder: PerformanceDataRecorder)
-    -> PerformanceLog
-  {
+  public static func runModel(with recorder: PerformanceDataRecorder) {
+
     guard let 🌞 = sun, let 🌤 = meteoData else {
       print("We need the sun."); exit(1)
     }
@@ -115,7 +124,7 @@ public enum BlackBoxModel {
         TimeStep.current.isDaytime = false
       }
 
-      let ambientTemperature = Temperature(celsius: meteo.temperature)
+      let ambientTemperature = Temperature(celsius: Double(meteo.temperature))
       
       status.solarField.setInletTemperature(equalToOutlet: status.powerBlock)
       
@@ -168,15 +177,15 @@ public enum BlackBoxModel {
       }
       
       let energy = plant.energyBalance()
-      // print(TimeStep.current, status, energy)
+      let ts = TimeStep.current
+    //  print(TimeStep.current, date, status, energy)
       backgroundQueue.async { [status] in
-        recorder.add(date, meteo: meteo, status: status, energy: energy)
+        recorder.add(ts, meteo: meteo, status: status, energy: energy)
       }      
     }
-    
+
     backgroundQueue.sync { } // wait for background queue
-    
-    return recorder.log
+    recorder.complete()
   }
 
   private static func makeGenerators(dataSource: MeteoDataSource)

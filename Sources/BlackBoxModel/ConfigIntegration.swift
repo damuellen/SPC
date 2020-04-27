@@ -11,135 +11,139 @@
 import Config
 import Foundation
 
-extension JsonConfigFileHandler {
-  static func loadConfigurations(atPath path: String) throws {
-    let configFileHandler = JsonConfigFileHandler()
-    configFileHandler.fileSearch(atPath: path)
+extension JSONConfig {
 
+  static func loadConfigurations(_ urls: [URL]) throws {
+    for url in urls {
+      if let data = FileManager.default.contents(atPath: url.absoluteString) {
+        try loadConfiguration(.INI, data: data)      
+      } else {
+      //  print("Config file \(name.rawValue) not found.")
+        continue
+      }
+    }
+  }
+
+  public static func loadConfiguration(_ type: JSONConfig.Name, data: Data) throws {
     let decoder = JSONDecoder()
     decoder.dateDecodingStrategy = .iso8601
 
-    for pathExtensions in FileName.allCases {
-      guard let url = configFileHandler.searchConfig(with: pathExtensions),
-        let data = JsonConfigFileHandler.readConfig(url: url)
-      else {
-        print("Config file \(pathExtensions.rawValue) not found.")
-        continue
-      }
-
-      switch pathExtensions {
-      case .FOS: break
-      case .OPR: break
-      case .DEM: break
-      case .TAR:
-        Simulation.tariff = try decoder.decode(Tariff.self, from: data)
-      case .SIM:
-        Simulation.parameter = try decoder.decode(
-          Simulation.Parameter.self, from: data
-        )
-      case .INI:
-        Simulation.initialValues = try decoder.decode(
-          InitValues.self, from: data
-        )
-      case .TIM: break
-      //    Simulation.time = try decoder.decode(Time.self, from: data)
-      case .DES: break
-      case .AVL:
-        Availability.current = try decoder.decode(Availability.self, from: data)
-      case .LAY:
-        Design.layout = try decoder.decode(Layout.self, from: data)
-      case .SF:
-        SolarField.update(parameter:
-          try decoder.decode(SolarField.Parameter.self, from: data))
-      case .COL:
-        Collector.update(parameter:
-          try decoder.decode(Collector.Parameter.self, from: data))
-        SolarField.parameter.collector = Collector.parameter
-      case .STO: break
-      case .HR:
-        Heater.update(parameter:
-          try decoder.decode(Heater.Parameter.self, from: data))
-      case .HTF: break
-       // htf = try decoder.decode(HeatTransferFluid.self, from: data)
-      case .HX:
-        HeatExchanger.update(parameter:
-          try decoder.decode(HeatExchanger.Parameter.self, from: data))
-      case .BO:
-        Boiler.update(parameter:
-          try decoder.decode(Boiler.Parameter.self, from: data))
-      case .WHR:
-        WasteHeatRecovery.update(parameter:
-          try decoder.decode(WasteHeatRecovery.Parameter.self, from: data))
-      case .GT:
-        GasTurbine.update(parameter:
-          try decoder.decode(GasTurbine.Parameter.self, from: data))
-      case .TB:
-        SteamTurbine.update(parameter:
-          try decoder.decode(SteamTurbine.Parameter.self, from: data))
-      case .PB:
-        PowerBlock.update(parameter:
-          try decoder.decode(PowerBlock.Parameter.self, from: data))
-      case .PFC:
-        break
-      case .STF: break
-      //  salt = try decoder.decode(HeatTransferFluid.self, from: data)
-      }
+    switch type {
+    case .FOS: break
+    case .OPR: break
+    case .DEM: break
+    case .TAR:
+      Simulation.tariff = try decoder.decode(Tariff.self, from: data)
+    case .SIM:
+      Simulation.parameter = try decoder.decode(
+        Simulation.Parameter.self, from: data
+      )
+    case .INI:
+      Simulation.initialValues = try decoder.decode(
+        InitValues.self, from: data
+      )
+    case .TIM: break
+    //    Simulation.time = try decoder.decode(Time.self, from: data)
+    case .DES: break
+    case .AVL:
+      Availability.current = try decoder.decode(Availability.self, from: data)
+    case .LAY:
+      Design.layout = try decoder.decode(Layout.self, from: data)
+    case .SF:
+      SolarField.update(parameter:
+        try decoder.decode(SolarField.Parameter.self, from: data))
+    case .COL:
+      Collector.update(parameter:
+        try decoder.decode(Collector.Parameter.self, from: data))
+      SolarField.parameter.collector = Collector.parameter
+    case .STO: break
+    case .HR:
+      Heater.update(parameter:
+        try decoder.decode(Heater.Parameter.self, from: data))
+    case .HTF: break
+     // htf = try decoder.decode(HeatTransferFluid.self, from: data)
+    case .HX:
+      HeatExchanger.update(parameter:
+        try decoder.decode(HeatExchanger.Parameter.self, from: data))
+    case .BO:
+      Boiler.update(parameter:
+        try decoder.decode(Boiler.Parameter.self, from: data))
+    case .WHR:
+      WasteHeatRecovery.update(parameter:
+        try decoder.decode(WasteHeatRecovery.Parameter.self, from: data))
+    case .GT:
+      GasTurbine.update(parameter:
+        try decoder.decode(GasTurbine.Parameter.self, from: data))
+    case .TB:
+      SteamTurbine.update(parameter:
+        try decoder.decode(SteamTurbine.Parameter.self, from: data))
+    case .PB:
+      PowerBlock.update(parameter:
+        try decoder.decode(PowerBlock.Parameter.self, from: data))
+    case .PFC:
+      break
+    case .STF: break
+    //  salt = try decoder.decode(HeatTransferFluid.self, from: data)
     }
   }
 
   static func saveConfigurations(toPath path: String) throws {
     let directoryURL = URL(fileURLWithPath: path, isDirectory: true)
+    let cases = JSONConfig.Name.allCases
+    let json = try cases.map(generateJSON)
+
+    for (key, value) in zip(cases, json) {
+      let url = URL(fileURLWithPath: key.rawValue + ".json",
+                    isDirectory: false, relativeTo: directoryURL)
+      try value.write(to: url)
+    }
+  }
+
+  public static func generateJSON(type: JSONConfig.Name) throws -> Data {
     let encoder = JSONEncoder()
 
     encoder.outputFormatting = .prettyPrinted
     encoder.dateEncodingStrategy = .iso8601
 
-    for name in FileName.allCases {
-      let url = URL(fileURLWithPath: name.rawValue + ".json",
-                    isDirectory: false, relativeTo: directoryURL)
-
-      switch name {
-      case .FOS: break
-      case .OPR: break
-      case .DEM: break
-      case .TAR: try encoder.encode(Simulation.tariff).write(to: url)
-      case .SIM: try encoder.encode(Simulation.parameter).write(to: url)
-      case .INI: try encoder.encode(Simulation.initialValues).write(to: url)
-      case .TIM: try encoder.encode(Simulation.time).write(to: url)
-      case .DES: break
-      case .AVL: try encoder.encode(Availability.current).write(to: url)
-      case .LAY: try encoder.encode(Design.layout).write(to: url)
-      case .SF: try encoder.encode(SolarField.parameter).write(to: url)
-      case .COL: try encoder.encode(Collector.parameter).write(to: url)
-      case .STO: break
-      case .HR: try encoder.encode(Heater.parameter).write(to: url)
-      case .HTF: break // try encoder.encode(htf).write(to: url)
-      case .HX: try encoder.encode(HeatExchanger.parameter).write(to: url)
-      case .BO: try encoder.encode(Boiler.parameter).write(to: url)
-      case .WHR: try encoder.encode(WasteHeatRecovery.parameter).write(to: url)
-      case .GT: try encoder.encode(GasTurbine.parameter).write(to: url)
-      case .TB: try encoder.encode(SteamTurbine.parameter).write(to: url)
-      case .PB: try encoder.encode(PowerBlock.parameter).write(to: url)
-      case .PFC: break
-      case .STF: break // try encoder.encode(salt).write(to: url)
-      }
+    switch type {
+    case .FOS: break
+    case .OPR: break
+    case .DEM: break
+    case .TAR: return try encoder.encode(Simulation.tariff)
+    case .SIM: return try encoder.encode(Simulation.parameter)
+    case .INI: return try encoder.encode(Simulation.initialValues)
+    case .TIM: return try encoder.encode(Simulation.time)
+    case .DES: break
+    case .AVL: return try encoder.encode(Availability.current)
+    case .LAY: return try encoder.encode(Design.layout)
+    case .SF: return try encoder.encode(SolarField.parameter)
+    case .COL: return try encoder.encode(Collector.parameter)
+    case .STO: break
+    case .HR: return try encoder.encode(Heater.parameter)
+    case .HTF: break // try encoder.encode(htf)
+    case .HX: return try encoder.encode(HeatExchanger.parameter)
+    case .BO: return try encoder.encode(Boiler.parameter)
+    case .WHR: return try encoder.encode(WasteHeatRecovery.parameter)
+    case .GT: return try encoder.encode(GasTurbine.parameter)
+    case .TB: return try encoder.encode(SteamTurbine.parameter)
+    case .PB: return try encoder.encode(PowerBlock.parameter)
+    case .PFC: break
+    case .STF: break // try encoder.encode(salt).write(to: url)
     }
+  
+    return Data()
   }
 }
 
-extension TextConfigFileHandler {
+extension TextConfig {
   static func loadConfigurations(atPath path: String) throws {
-    let configFileHandler = TextConfigFileHandler()
-    configFileHandler.fileSearch(atPath: path)
+    let urls = TextConfig.fileSearch(atPath: path)
 
-    for pathExtensions in ValidPathExtensions.allCases {
-      guard let url = configFileHandler.searchConfig(with: pathExtensions),
-        let configFile = TextConfigFileHandler.readConfig(url: url)
-      else {
-        print("Missing config file with extension .\(pathExtensions.rawValue)")
-        continue
-      }
-      switch pathExtensions {
+    for url in urls {
+      guard let e = Extension(rawValue: url.pathExtension.uppercased()),
+        let configFile = TextConfig.read(url: url)
+      else { continue }
+      switch e {
       case .FOS: break
       case .OPR: break
       case .DEM: break
@@ -168,5 +172,51 @@ extension TextConfigFileHandler {
       //  salt = try HeatTransferFluid(file: configFile, includesEnthalpy: false)
       }
     }
+  }
+}
+
+extension JSONConfig.Name {
+  public var description: String {
+    switch self {
+    case .FOS: break
+    case .OPR: break
+    case .DEM: break
+    case .TAR:
+      return ""//Simulation.tariff.description
+    case .SIM:
+      return Simulation.parameter.description
+    case .INI:
+      return ""//Simulation.initialValues.description
+    case .TIM: break
+    case .DES: break
+    case .AVL:
+      return ""//Availability.current.description
+    case .LAY:
+      return Design.layout.description
+    case .SF:
+      return SolarField.parameter.description
+    case .COL:
+      return Collector.parameter.description
+    case .STO: break
+    case .HR:
+      return Heater.parameter.description
+    case .HTF: break
+    case .HX:
+      return HeatExchanger.parameter.description
+    case .BO:
+      return Boiler.parameter.description
+    case .WHR:
+      return WasteHeatRecovery.parameter.description
+    case .GT:
+      return GasTurbine.parameter.description
+    case .TB:
+      return SteamTurbine.parameter.description
+    case .PB:
+      return PowerBlock.parameter.description
+    case .PFC:
+      break
+    case .STF: break
+    }
+    return ""
   }
 }

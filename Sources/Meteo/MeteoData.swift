@@ -147,29 +147,3 @@ public struct MeteoData: CustomStringConvertible {
     ]
   }
 }
-
-public struct Position {
-  public let longitude: Float
-  public let latitude: Float
-  public let elevation: Float
-
-  public var coordinates: (Double, Double, Double) {
-    return (Double(longitude), Double(latitude), Double(elevation))
-  }
-
-  public static var primeMeridian = Position(
-    longitude: 0, latitude: 0, elevation: 102
-  )
-  
-  public init(longitude: Float, latitude: Float, elevation: Float) {
-    self.longitude = longitude
-    self.latitude = latitude
-    self.elevation = elevation
-  }
-  
-  public init(location: Location) {
-    self.longitude = Float(location.longitude)
-    self.latitude = Float(location.latitude)
-    self.elevation = Float(location.elevation)
-  }
-}

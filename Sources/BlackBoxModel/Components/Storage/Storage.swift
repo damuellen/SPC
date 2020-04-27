@@ -148,6 +148,7 @@ public struct Storage: Component, HeatCycle {
     } else { // not shifter
       peakTariff = false // dont care about time to discharge
     }
+
     #warning("The implementation here differs from PCT")
     if peakTariff,// status.storage.operationMode = .freezeProtection,
       storage.charge.ratio > parameter.dischargeToTurbine,
@@ -200,12 +201,12 @@ public struct Storage: Component, HeatCycle {
     }
 
     // heat can only be provided with heater on
-    if (parameter.FC == 0// && collector.parabolicElevation < 0.011
+    if (parameter.FC == 0 && TimeStep.current.isNighttime
       && storage.charge.ratio < parameter.chargeTo
       && powerBlock.inletTemperature > 665
       && Storage.isFossilChargingAllowed(at: time)
       && OperationRestriction.fuelStrategy.isPredefined == false)
-      || (OperationRestriction.fuelStrategy.isPredefined && fuelAvailable > 0)
+ //     || (OperationRestriction.fuelStrategy.isPredefined && fuelAvailable > 0)
     {
       #warning("Check this")
       heater.operationMode = .freezeProtection
@@ -262,8 +263,8 @@ public struct Storage: Component, HeatCycle {
     powerBlock: inout PowerBlock,
     solarField: SolarField, heat: ThermalEnergy)
   {
-    var demand = TimeStep.current.isDaytime ? 0.5 : heat.demand.megaWatt
-    
+   // var demand = TimeStep.current.isDaytime ? 0.5 : heat.demand.megaWatt
+    var demand = heat.demand.megaWatt
     let production = heat.solar.megaWatt
     
     switch parameter.strategy {
@@ -526,7 +527,7 @@ public struct Storage: Component, HeatCycle {
       thermal = (-salt.massFlow.calculated.rate * salt.heat.available
         / Simulation.time.steps.fraction / 3_600) / 1_000
     }
-    
+
     return (thermal, salt)
   }
 
@@ -604,6 +605,7 @@ public struct Storage: Component, HeatCycle {
     
     storage.salt.massFlow.cold = storage.salt.massFlow.calculated
     storage.salt.massFlow.minimum = minMassFlow(storage)
+
     // avoids negative or too low mass and therefore no heat losses.
     if storage.salt.massFlow.cold < storage.salt.massFlow.minimum {
       storage.salt.massFlow.calculated -=
@@ -822,11 +824,19 @@ public struct Storage: Component, HeatCycle {
     
     if storage.auxConsumptionCurve {
       // old model:
+      if status.averageTemperature.celsius < 50 { 
+        print("Temperature too low.")
+        return 0
+      }
       let rohMean = solarField.HTF.density(status.averageTemperature)
-      let rohDP = solarField.HTF.density(
-        Temperature.average(heatExchanger.temperature.htf.inlet.max,
+      let avgTempHX = Temperature.average(heatExchanger.temperature.htf.inlet.max,
                             heatExchanger.temperature.htf.outlet.max)
-      )
+      if avgTempHX.celsius < 50 { 
+        print("Temperature too low.")
+        return 0
+      }
+      let rohDP = solarField.HTF.density(avgTempHX)
+
       let pressureLoss = parameter.pressureLoss * rohDP / rohMean
         * (status.massFlow.share(of: parameter.massFlow).ratio) ** 2
       

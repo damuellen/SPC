@@ -57,7 +57,7 @@ public struct ElectricPower: Encodable, MeasurementsConvertible {
   parasitics = 0.0, net = 0.0, consum = 0.0
   
   var values: [String] {
-    return NumberFormatter.strings([
+    return strings([
       steamTurbineGross, gasTurbineGross, backupGross,
       parasitics, net, consum,
     ], precision: 1)
@@ -65,6 +65,10 @@ public struct ElectricPower: Encodable, MeasurementsConvertible {
   
   var csv: String {
     return "\(csv: steamTurbineGross, gasTurbineGross, backupGross, parasitics, net, consum)"
+  }
+
+  public var dict: [String: String] {
+    return Dictionary(uniqueKeysWithValues: zip(Self.columns.map(\.name), values))
   }
   
   static var columns: [(name: String, unit: String)] {
@@ -100,7 +104,7 @@ public struct Parasitics: Encodable, MeasurementsConvertible {
   powerBlock = 0.0, shared = 0.0, solarField = 0.0, storage = 0.0
   
   var values: [String] {
-    return NumberFormatter.strings(
+    return strings(
       [solarField, powerBlock, storage,
        shared, 0, gasTurbine,
       ], precision: 1)
@@ -145,7 +149,7 @@ public struct ThermalEnergy: Encodable, MeasurementsConvertible {
   dumping: Power = 0.0, overtemp_dump: Power = 0.0, startUp: Power = 0.0
   
   var values: [String] {
-    return NumberFormatter.strings(
+    return strings(
       [solar.megaWatt, dumping.megaWatt,
        toStorage.megaWatt, storage.megaWatt,
        heater.megaWatt, heatExchanger.megaWatt,
@@ -217,7 +221,7 @@ public struct FuelConsumption: Encodable, MeasurementsConvertible {
   }
   
   var values: [String] {
-    return NumberFormatter.strings(
+    return strings(
       [backup, boiler, heater, gasTurbine, combined], precision: 1)
   }
   

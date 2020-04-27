@@ -21,40 +21,28 @@ extension Optional {
 }
 
 extension DefaultStringInterpolation {
-  mutating func appendInterpolation<T>(csv values: T...) where T : Numeric {
+  mutating func appendInterpolation(csv values: Double...)  {
     values.forEach { value in
-      self.appendInterpolation(
-       numberFormatter.string(from: value as! NSNumber)!
-      )
+      self.appendInterpolation(value.description)
       self.appendInterpolation(", ")
     }
   }
   
-  mutating func appendInterpolation<T>(format values: T...) where T : Numeric {
+  mutating func appendInterpolation(format values: Double...){
     values.forEach { value in
-      self.appendInterpolation(
-        numberFormatter.string(from: value as! NSNumber)!
-      )
+      self.appendInterpolation(string(value))
     }
   }
 }
 
-extension NumberFormatter {
-  static func strings(_ array: [Double], precision: Int) -> [String] {
-    numberFormatter.maximumFractionDigits = precision
-    defer { numberFormatter.maximumFractionDigits = 3 }
-    return array.map { numberFormatter.string(from: $0 as NSNumber)! }
-  }
+func strings(_ array: [Double], precision: Int) -> [String] {
+  array.map { String(format: "%.\(precision)f", $0) }
 }
 
-private let numberFormatter: NumberFormatter = {
-  let numberFormatter = NumberFormatter()
-  numberFormatter.minimumIntegerDigits = 1
-  numberFormatter.maximumFractionDigits = 3
-  numberFormatter.minimumFractionDigits = 0
-  numberFormatter.decimalSeparator = "."
-  return numberFormatter
-}()
+func string(_ value: Double, precision: Int = 2) -> String {
+  String(format: "%.\(precision)f", value)
+}
+
 
 let backgroundQueue = DispatchQueue(label: "serial.queue")
 

@@ -90,7 +90,8 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
   }
   
   func density(_ temperature: Temperature) -> Double {
-    precondition(temperature.kelvin > freezeTemperature.kelvin)
+    precondition(temperature.kelvin > freezeTemperature.kelvin,
+     "\(temperature) is below freezing point of the htf")
     return density[0] + density[1] * temperature.celsius
       + density[2] * temperature.celsius * temperature.celsius
   }
@@ -108,28 +109,26 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
     -> Temperature
   {
     let (t1, t2) = (f1.outletTemperature, f2.outletTemperature)
-    precondition(min(t1, t2) > freezeTemperature.kelvin)
     let (mf1, mf2) = (f1.massFlow.rate, f2.massFlow.rate)
     guard mf1 + mf2 > 0 else { return Temperature((t1 + t2) / 2) }
     let cap1 = fma(heatCapacity[1], t1, heatCapacity[0])
     let cap2 = fma(heatCapacity[1], t2, heatCapacity[0])
-    return Temperature(
-      (mf1 * cap1 * t1 + mf2 * cap2 * t2) / (mf1 * cap1 + mf2 * cap2)
-    )
+    let t = (mf1 * cap1 * t1 + mf2 * cap2 * t2) / (mf1 * cap1 + mf2 * cap2)
+    precondition(t > freezeTemperature.kelvin, "Fell below freezing point.\n")
+    return Temperature(t)
   }
   
   @_transparent func mixingTemperature(inlet f1: HeatCycle, with f2: HeatCycle)
     -> Temperature
   {
-    let (t1, t2) = (f1.inletTemperature, f2.outletTemperature)
-    precondition(min(t1, t2) > freezeTemperature.kelvin)
+    let (t1, t2) = (f1.inletTemperature, f2.outletTemperature)    
     let (mf1, mf2) = (f1.massFlow.rate, f2.massFlow.rate)
     guard mf1 + mf2 > 0 else { return Temperature((t1 + t2) / 2) }
     let cap1 = fma(heatCapacity[1], t1, heatCapacity[0])
     let cap2 = fma(heatCapacity[1], t2, heatCapacity[0])
-    return Temperature(
-      (mf1 * cap1 * t1 + mf2 * cap2 * t2) / (mf1 * cap1 + mf2 * cap2)
-    )
+    let t = (mf1 * cap1 * t1 + mf2 * cap2 * t2) / (mf1 * cap1 + mf2 * cap2)
+    precondition(t > freezeTemperature.kelvin, "Fell below freezing point.\n")
+    return Temperature(t)
   }
   
   @_transparent private static func temperatureFromHeatCapacity(

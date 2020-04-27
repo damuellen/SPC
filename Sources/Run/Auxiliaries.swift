@@ -1,7 +1,7 @@
 
 import Foundation
 import BlackBoxModel
-
+/*
 let dateString: String = {
   let infoPath = Bundle.main.executablePath!
   let infoAttr = try! FileManager.default.attributesOfItem(atPath: infoPath)
@@ -12,6 +12,7 @@ let dateString: String = {
   df.timeStyle = .short
   return df.string(from: infoDate)
 }()
+*/
 
 extension Substring.SubSequence {
   var integerValue: Int? { return Int(self) }
@@ -40,8 +41,9 @@ class Population {
     
     for layout in layouts {
       Design.layout = layout
-      
-      individuals.append(BlackBoxModel.runModel(with: recorder))
+      print(layout)
+      BlackBoxModel.runModel(with: recorder)
+      individuals.append(recorder.log!)
     }
   }
   
@@ -60,7 +62,8 @@ class Population {
       } else {
         SolarField.parameter.massFlow.max = MassFlow(2000)
         Design.layout = layout
-        individuals.append(BlackBoxModel.runModel(with: recorder))
+        BlackBoxModel.runModel(with: recorder)
+        individuals.append(recorder.log!)
       }
     }
   }
@@ -115,8 +118,9 @@ class GeneticAlgorithm {
         
         let layout = Layout.crossover(first: parentOne, second: parentTwo)
         let child = Layout.mutate(layout, mutationRate: mutationRate)
-        
+        print(layout)
         nextGeneration.append(child)
+
       }
       let oldLogs = oldPopulations.flatMap { $0.individuals }
       // Establish new population

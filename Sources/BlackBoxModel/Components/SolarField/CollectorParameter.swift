@@ -30,7 +30,7 @@ extension Collector {
     public enum Absorber: String, Codable {
       case schott, rio
     }
-
+  //  let kind: Kind = .sklalet
     let newFunction: Bool = false
     let absorber: Absorber
     public let aperture, lengthSCA, areaSCAnet, extensionHCE, avgFocus,
@@ -39,6 +39,10 @@ extension Collector {
     public let IAMfac: Polynomial
     public let useIntegralRadialoss: Bool
   }
+/*
+  enum Kind: Int, Encodable {
+    case sklatet = 0, ls2, validation
+  }*/
 }
 
 extension Collector.Parameter: CustomStringConvertible {

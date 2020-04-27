@@ -82,8 +82,6 @@ public class MeteoDataGenerator: Sequence {
     let lastStep = self.lastStep
     let lastIndex = range.upperBound
 
-    let period = frequence.fraction * 3600
-
     return AnyIterator<MeteoData> {
       defer { step += 1 }
       // When step count is reached move index to the next value.

@@ -12,12 +12,14 @@ import Config
 import DateGenerator
 import Foundation
 
+public typealias Interval = DateGenerator.Interval
+
 public struct Time {
   var isLeapYear = false
   public var firstDateOfOperation: Date?
   public var lastDateOfOperation: Date?
   let holidays: [Date]
-  public var steps: DateGenerator.Interval
+  public var steps: Interval
 }
 
 extension Time: TextConfigInitializable {

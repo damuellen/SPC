@@ -34,7 +34,7 @@ struct SolarRadiation: MeasurementsConvertible {
   }
   
   public var values: [String] {
-    return NumberFormatter.strings(
+    return strings(
       [dni, ghi, dhi, ico], precision: 1)
   }
   

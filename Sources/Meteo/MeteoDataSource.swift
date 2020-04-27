@@ -15,8 +15,7 @@ import SolarPosition
 public class MeteoDataSource {
   public let name: String
   public let year: Int?
-  public let timeZone: Int?
-  public let location: Position
+  public let location: Location
    
   let data: [MeteoData]
   let hourFraction: Double
@@ -24,12 +23,11 @@ public class MeteoDataSource {
   private let valuesPerDay: Int
   
   public init(name: String, data: [MeteoData],
-       _ meta: (year: Int, tz: Int, location: Position))
+       _ meta: (year: Int, location: Location))
   {
     self.data = data
     self.location = meta.location
     self.year =  meta.year
-    self.timeZone =  meta.tz
     self.name = name
     self.hourFraction = 8760 / Double(data.count)
     self.valuesPerDay = Int(24 / hourFraction)
@@ -114,11 +112,10 @@ public class MeteoDataSource {
       }
     }
     
-    let location = Position(location: sun.location)
-    let tz = sun.timeZone
+    let location = Location(sun.location.coords)
     
     return MeteoDataSource(
-      name: "Fake", data: data, (sun.year, tz, location)
+      name: "Fake", data: data, (sun.year, location)
     )
   }
 }

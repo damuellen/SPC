@@ -10,10 +10,12 @@ class BlackBoxModelTests: XCTestCase {
     df.dateFormat = "dd.MM.yyyy"
     Simulation.time.firstDateOfOperation = df.date(from: "02.07.2005")!
     Simulation.time.lastDateOfOperation = df.date(from: "03.07.2005")!
-    let location = Position(longitude: 47.73, latitude: 29, elevation: 0)
-    BlackBoxModel.configure(location: location, year: 2005, timeZone: 2)
+    var location = Location(longitude: 47.73, latitude: 29, elevation: 0)
+    location.timezone = 2
+    BlackBoxModel.configure(location: location)
     let log = PerformanceDataRecorder(mode: .none)
-    let result = BlackBoxModel.runModel(with: log)
+    BlackBoxModel.runModel(with: log)
+    let result = log.log
 
     XCTAssertEqual(result.electric.net, 250.3, accuracy: 0.1)
     XCTAssertEqual(result.electric.consum, 27.7, accuracy: 0.1)
@@ -31,11 +33,14 @@ class BlackBoxModelTests: XCTestCase {
     df.dateFormat = "dd.MM.yyyy"
     Simulation.time.firstDateOfOperation = df.date(from: "02.01.2005")!
     Simulation.time.lastDateOfOperation = df.date(from: "03.01.2005")!
-    let location = Position(longitude: 47.73, latitude: 29, elevation: 0)
-    BlackBoxModel.configure(location: location, year: 2005, timeZone: 2)
+    var location = Location(longitude: 47.73, latitude: 29, elevation: 0)
+    location.timezone = 2
+    BlackBoxModel.configure(location: location)
     let log = PerformanceDataRecorder(mode: .none)
-    let result = BlackBoxModel.runModel(with: log)
+    BlackBoxModel.runModel(with: log)
+    let result = log.log
     
+
     XCTAssertEqual(result.electric.net, 111.5, accuracy: 0.1)
     XCTAssertEqual(result.electric.consum, 33.5, accuracy: 0.1)
     XCTAssertEqual(result.electric.parasitics, 55.7, accuracy: 0.1)

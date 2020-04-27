@@ -1,3 +1,4 @@
+import CoreFoundation
 import Foundation
 import CSPA
 import CSOLPOS
@@ -14,8 +15,6 @@ let calendar = { calendar -> NSCalendar in
 /// A table only containing values where the sun is above the horizon.
 /// To access values in the table use a date as a subscript.
 public struct SolarPosition {
-
-  private static var algorithm: Algorithm = SolarPosition.solpos
 
   internal let precalculatedValues: [Date: OutputValues]
 
@@ -40,16 +39,30 @@ public struct SolarPosition {
     var sunset: FractionalTime
   }
 
-  static func estimateDelta_T(date: Date) -> Double {
-    var ΔT = 62.92 + 0.32217 * (Double(date.get(component: .year)) - 2000)
-    ΔT += 0.005589 * pow((Double(date.get(component: .year)) - 2000), 2)
-    return ΔT
+  public struct Location {
+  
+    var longitude: Double
+    var latitude: Double  
+    var elevation: Double
+    var timezone: Int
+
+    public var coords: (longitude: Double, latitude: Double, elevation: Double) {
+      return (longitude, latitude, elevation)
+    }
+
+    init(_ coords: (Double, Double, Double), tz: Int) {
+      self.longitude = coords.0
+      self.latitude = coords.1
+      self.elevation = coords.2
+      self.timezone = tz
+    }
   }
+
   public var year: Int
   public var location: Location
-  public var timeZone: Int
   
   public var frequence: DateGenerator.Interval
+
   /// Returns a table initialized with precalculated sun position
   /// for the given location and year at the predetermined times.
   ///
@@ -57,21 +70,23 @@ public struct SolarPosition {
   /// - parameter year: 4-digit year
   /// - parameter timezone: Time zone, east (west negative)
   /// - parameter frequence: Time interval for the calculations
-  public init(location: (Double, Double, Double),
-              year: Int, timezone: Int, frequence: DateGenerator.Interval) {
+  public init(coords: (Double, Double, Double), tz: Int,
+              year: Int, frequence: DateGenerator.Interval)
+  {
+    SolarPosition.estimatedDelta_T = SolarPosition.estimateDelta_T(year: year)
+    SolarPosition.frequence = frequence
+    let location = Location(coords, tz: tz)
+
     self.year = year
     self.frequence = frequence
-    self.timeZone = timezone
-    self.location = Location(longitude: location.0,
-                            latitude: location.1,
-                            elevation: location.2)
+    self.location = location
 
-    let sunHoursPerDay = SolarPosition.sunHoursPerDay(
-      year: year, location: self.location, timezone: timezone)
-
+    let sunHours = SolarPosition.sunHoursPeriod(
+      location: location, year: year
+    )
     precalculatedValues = SolarPosition.calculateSunPositions(
-      sunHours: sunHoursPerDay, location: self.location,
-      timezone: timezone, valuesPerHour: frequence)
+      sunHours: sunHours, location: location
+    )
   }
 
   /// Accesses the values associated with the given date.
@@ -79,50 +94,54 @@ public struct SolarPosition {
     return precalculatedValues[date]
   }
 
-  static func compute(date: Date, location: Location, timezone: Int,
-                      with algorithm: Algorithm) -> OutputValues {
+  private static func compute(
+    date: Date, location: Location, with algorithm: Algorithm
+  ) -> OutputValues 
+  {
+    let ΔT = SolarPosition.estimatedDelta_T
 
-    let timeZone = Double(timezone)  // Should correspond to location
-    let ΔT = estimateDelta_T(date: date)
-    let components = date.getComponents()
+    let refDate =  date.timeIntervalSinceReferenceDate
+    let gDate = CFAbsoluteTimeGetGregorianDate(refDate, nil)
 
     return algorithm(InputValues(
-      year: components.year!, month: components.month!, day: components.day!,
-      hour: components.hour!, minute: components.minute!, second: 0,
-      timezone: timeZone, delta_t: ΔT, longitude: location.longitude,
-      latitude: location.latitude, elevation: location.elevation,
-      pressure: 1023, temperature: 15, slope: 0, azm_rotation: 0,
-      atmos_refract: 0.5667))
+      year: Int(gDate.year), month: Int(gDate.month), day: Int(gDate.day),
+      hour: Int(gDate.hour), minute: Int(gDate.minute), second: 0,
+      timezone: Double(location.timezone), delta_t: ΔT,
+      longitude: location.longitude, latitude: location.latitude,
+      elevation: location.elevation, pressure: 1023, temperature: 15, 
+      slope: 0, azm_rotation: 0, atmos_refract: 0.5667))
   }
 
-  static func calculateSunPositions(
-    sunHours: [DateInterval],
-    location: Location, timezone: Int,
-    valuesPerHour: DateGenerator.Interval) -> [Date: OutputValues] {
+  private static func calculateSunPositions(
+    sunHours: [DateInterval], location: Location
+  ) -> [Date: OutputValues] {
 
     var result: [Date: SolarPosition.OutputValues] = [:]
 
-    let sunHoursOfDay = sunHours.map { $0.align(with: valuesPerHour) }
-    let dates = sunHoursOfDay.flatMap {
-      DateGenerator(range: $0, interval: valuesPerHour)
+    let sunHoursPeriod = sunHours.map { 
+      $0.align(with: SolarPosition.frequence) 
+    }
+
+    let dates = sunHoursPeriod.flatMap { 
+      DateGenerator(range: $0, interval: SolarPosition.frequence)
     }
 
     for date in dates {
-   //   autoreleasepool {
-        result[date] = SolarPosition.compute(
-          date: date, location: location, timezone: timezone, with: algorithm)
-   //   }
+      result[date] = SolarPosition.compute(
+        date: date, location: location, with: SolarPosition.solpos
+      )
     }
     return result
   }
 
-  private static func sunHoursPerDay(
-    year: Int, location: Location, timezone: Int) -> [DateInterval] {
+  private static func sunHoursPeriod(
+    location: Location, year: Int
+  ) -> [DateInterval] {
 
     var components = DateComponents()
     components.timeZone = calendar.timeZone
     components.year = year
-    components.hour = 12 + timezone
+    components.hour = 12 + location.timezone
 
     let isLeapYear = year % 4 == 0 && year % 100 != 0 || year % 400 == 0
 
@@ -131,7 +150,8 @@ public struct SolarPosition {
       components.day = day
       let date = calendar.date(from: components)!
       let output = SolarPosition.compute(
-        date: date, location: location, timezone: timezone, with: spa)
+        date: date, location: location, with: SolarPosition.spa
+      )
       assert(output.sunrise < output.sunset,
              "sunset before sunrise check location and time zone")
 
@@ -142,6 +162,15 @@ public struct SolarPosition {
       fatalError("No sun hours. Day: \(day)")
     }
   }
+
+  private static func estimateDelta_T(year: Int) -> Double {
+    var ΔT = 62.92 + 0.32217 * (Double(year) - 2000)
+    ΔT += 0.005589 * pow((Double(year) - 2000), 2)
+    return ΔT
+  }
+
+  private static var estimatedDelta_T: Double = 0
+  private static var frequence: DateGenerator.Interval = .every60minutes
 
   static func spa(input: InputValues) -> OutputValues {
 

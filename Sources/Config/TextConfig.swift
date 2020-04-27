@@ -10,18 +10,22 @@
 
 import Foundation
 
-public class TextConfigFileHandler {
+public enum TextConfig {
   /// List of path extension for needed config files.
-  public enum ValidPathExtensions: String, CaseIterable {
+  public enum Extension: String, CaseIterable {
     case FOS, OPR, DEM, TAR, SIM, INI, TIM, DES, AVL,
       LAY, SF, COL, STO, HR, HTF, STF, HX, BO, WHR, GT, TB, PB, PFC
+
+      static func isValid(url: URL) -> Bool {
+        if let _ = Extension(rawValue: url.pathExtension.uppercased()) {
+          return true
+        } else { 
+          return false
+        }
+      }
   }
 
-  var urlsWithValidExtension: [URL] = []
-
-  public init() {}
-
-  public func fileSearch(atPath path: String) {
+  public static func fileSearch(atPath path: String) -> [URL] {
     do {
       guard let pathUrl = URL(string: path)
       else { preconditionFailure("Invalid string for path") }
@@ -29,22 +33,15 @@ public class TextConfigFileHandler {
       let files = try FileManager.default.subpathsOfDirectory(atPath: path)
       let urls = files.map { file in pathUrl.appendingPathComponent(file) }
 
-      urlsWithValidExtension = urls.filter {
-        ValidPathExtensions(rawValue: $0.pathExtension.uppercased()) != nil
-      }
+      return urls.filter(Extension.isValid)
     } catch let error {
       print(error)
+      return []
     }
   }
 
-  // Returns an array of URLs, each of which is the path of a config file with the given path extension.
-  public func searchConfig(with pathExtension: ValidPathExtensions) -> URL? {
-    return self.urlsWithValidExtension.lazy
-      .first(where: { $0.pathExtension.uppercased() == pathExtension.rawValue })
-  }
-
   // Returns a String, which contains the content of needed config file.
-  public static func readConfig(url: URL) -> TextConfigFile? {
+  public static func read(url: URL) -> TextConfigFile? {
     let path = url.absoluteString
     guard let data = FileManager.default.contents(atPath: path),
       let content = String(data: data, encoding: .ascii) else { return nil }

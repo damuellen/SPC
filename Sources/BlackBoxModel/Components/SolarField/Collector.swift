@@ -102,19 +102,19 @@ public struct Collector: Component, CustomStringConvertible {
 
     let lengthSCA = parameter.lengthSCA
     if AW < 15 {
-      T_14 = (197_441e-9 * lengthSCA ** 2 + 197_441e-9 * lengthSCA)
+      T_14 = (197_441e-9 * lengthSCA * lengthSCA + 197_441e-9 * lengthSCA)
     } else if AW < 45 {
-      T_14 = -(264_485e-9 * lengthSCA ** 2 + 264_485e-9 * lengthSCA)
+      T_14 = -(264_485e-9 * lengthSCA * lengthSCA + 264_485e-9 * lengthSCA)
     } else if AW < 75 {
-      T_14 = (388_307e-9 * lengthSCA ** 2 + 388_307e-9 * lengthSCA)
+      T_14 = (388_307e-9 * lengthSCA * lengthSCA + 388_307e-9 * lengthSCA)
     } else if AW < 105 {
-      T_14 = (709_175e-9 * lengthSCA ** 2 + 709_175e-9 * lengthSCA)
+      T_14 = (709_175e-9 * lengthSCA * lengthSCA  + 709_175e-9 * lengthSCA)
     } else if AW < 135 {
-      T_14 = (591_045e-9 * lengthSCA ** 2 + 591_045e-9 * lengthSCA)
+      T_14 = (591_045e-9 * lengthSCA * lengthSCA  + 591_045e-9 * lengthSCA)
     } else if AW < 165 {
-      T_14 = (517_083e-9 * lengthSCA ** 2 + 517_083e-9 * lengthSCA)
+      T_14 = (517_083e-9 * lengthSCA * lengthSCA + 517_083e-9 * lengthSCA)
     } else {
-      T_14 = (354_672e-9 * lengthSCA ** 2 + 354_672e-9 * lengthSCA)
+      T_14 = (354_672e-9 * lengthSCA * lengthSCA + 354_672e-9 * lengthSCA)
     }
     
     if direction > 180 { T_14 = -T_14 }

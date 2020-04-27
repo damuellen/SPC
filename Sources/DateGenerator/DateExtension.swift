@@ -8,7 +8,7 @@ public extension Date {
     return calendar.component(component, from: self)
   }
 
-  public func getComponents() -> DateComponents {
+  func getComponents() -> DateComponents {
     return calendar.components(
       [.day, .month, .year, .weekday, .hour, .minute, .second], from: self)
   }

@@ -15,16 +15,16 @@ public struct MeteoDataFileHandler {
   private var file: MeteoDataFile
 
   public init(forReadingAtPath path: String) throws {
-    let fm = FileManager.default
+    let 💾 = FileManager.default
     
-    if !fm.fileExists(atPath: path) {
+    if !💾.fileExists(atPath: path) {
       throw MeteoDataFileError.fileNotFound(path)
     }
 
     var url = URL(fileURLWithPath: path)
     
     if url.hasDirectoryPath {
-      if let fileName = try fm.contentsOfDirectory(atPath: path).first(where:
+      if let fileName = try 💾.contentsOfDirectory(atPath: path).first(where:
         { item in item.hasSuffix("mto") || item.hasPrefix("TMY") } )
       {
         url.appendPathComponent(fileName)
@@ -32,7 +32,7 @@ public struct MeteoDataFileHandler {
         throw MeteoDataFileError.fileNotFound(path)
       }
     }
-    print("Meteo file found: \(url.path)\n")
+    print("Meteo file in use: \(url.path)\n")
     self.file = try url.pathExtension == "mto" ? MET(url) : TMY(url)
   }
 
@@ -51,7 +51,7 @@ public enum MeteoDataFileError: Error {
 
 protocol MeteoDataFile {
   var name: String { get }
-  func fetchInfo() throws -> (year: Int, tz: Int, location: Position)
+  func fetchInfo() throws -> (year: Int, location: Location)
   func fetchData() throws -> [MeteoData]
 }
 
@@ -100,11 +100,7 @@ private struct MET: MeteoDataFile {
     }
   }
 
-  func identifyTimezone(_ location: Position) -> Int {
-    return Int(-location.longitude) / 15
-  }
-
-  func fetchInfo() throws -> (year: Int, tz: Int, location: Position) {
+  func fetchInfo() throws -> (year: Int, location: Location) {
     var metaData = content.dropFirst().prefix(4)
 
     guard let y = metaData.popFirst()?.first, let year = Int(y)
@@ -115,13 +111,11 @@ private struct MET: MeteoDataFile {
       let longitude = Float(long), let latitude = Float(lat)
       else { throw MeteoDataFileError.unknownLocation }
 
-    let position = Position(
+    let location = Location(
       longitude: -longitude, latitude: latitude, elevation: 0
     )
 
-    let tz = identifyTimezone(position)
-
-    return (year, tz, position)
+    return (year, location)
   }
 
   func fetchData() throws -> [MeteoData] {
@@ -214,14 +208,14 @@ private struct TMY: MeteoDataFile {
     }
   }
 
-  func fetchLocation() throws -> Position {
+  func fetchLocation() throws -> Location {
     let values = content.headers1
     guard values.endIndex > 3
       else { throw MeteoDataFileError.unknownLocation }
     let longitude = values[2]
     let latitude = values[1]
     let elevation = values[3]
-    return Position(
+    return Location(
       longitude: longitude, latitude: latitude, elevation: elevation
     )
   }
@@ -233,8 +227,10 @@ private struct TMY: MeteoDataFile {
 
   func fetchYear() -> Int { 2011 }
 
-  func fetchInfo() throws -> (year: Int, tz: Int, location: Position) {
-    return (fetchYear(), fetchTimeZone(), try fetchLocation())
+  func fetchInfo() throws -> (year: Int, location: Location) {
+    var location = try fetchLocation()
+    location.timezone = fetchTimeZone()
+    return (fetchYear(), location)
   }
 
   func fetchData() throws -> [MeteoData] {
