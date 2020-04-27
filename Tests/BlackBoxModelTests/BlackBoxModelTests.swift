@@ -15,7 +15,7 @@ class BlackBoxModelTests: XCTestCase {
     BlackBoxModel.configure(location: location)
     let log = PerformanceDataRecorder(mode: .none)
     BlackBoxModel.runModel(with: log)
-    let result = log.log
+    let result = log.log!
 
     XCTAssertEqual(result.electric.net, 250.3, accuracy: 0.1)
     XCTAssertEqual(result.electric.consum, 27.7, accuracy: 0.1)
@@ -38,7 +38,7 @@ class BlackBoxModelTests: XCTestCase {
     BlackBoxModel.configure(location: location)
     let log = PerformanceDataRecorder(mode: .none)
     BlackBoxModel.runModel(with: log)
-    let result = log.log
+    let result = log.log!
     
 
     XCTAssertEqual(result.electric.net, 111.5, accuracy: 0.1)
