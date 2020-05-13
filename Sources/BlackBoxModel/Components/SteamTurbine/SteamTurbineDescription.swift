@@ -11,7 +11,6 @@
 extension SteamTurbine: CustomStringConvertible {  
   public var description: String {
     return "\(operationMode), "
-      + String(format: "Load: %.1f%, ", load.percentage)
-      + String(format: "Efficiency: %.2f% ", efficiency * 100)
+      + String(format: "Load: %.1f%, ", (load ?? .zero).percentage)
   }
 }

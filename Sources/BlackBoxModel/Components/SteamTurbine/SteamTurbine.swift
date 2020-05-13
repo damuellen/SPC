@@ -16,13 +16,23 @@ public struct SteamTurbine: Component {
 
   var operationMode: OperationMode
   
-  var load: Ratio
+  var load: Ratio {
+    get {
+      if case .operating(let load) = operationMode
+      { return load } else { return .zero }
+    }
+    set {
+      if case .operating(_) = operationMode {
+        operationMode = .operating(newValue)
+      }
+    }
+  }
 
-  var efficiency: Double
+ // var efficiency: Double
 
   public enum OperationMode {
     case noOperation(time: Int), startUp(time: Int, energy: Double),
-    scheduledMaintenance, operating
+    scheduledMaintenance, operating(Ratio)
   }
 
   var isOperating: Bool { 
@@ -33,8 +43,7 @@ public struct SteamTurbine: Component {
   }
 
   static let initialState = SteamTurbine(
-    operationMode: .noOperation(time: 5),
-    load: 1.0, efficiency: 1.0
+    operationMode: .noOperation(time: 5)
   )
 
   public static var parameter: Parameter = ParameterDefaults.tb
@@ -63,11 +72,9 @@ public struct SteamTurbine: Component {
         if case .noOperation(let standStillTime)
           = operationMode
         {
-          operationMode =
-            .noOperation(time: standStillTime + minutes)
+          operationMode = .noOperation(time: standStillTime + minutes)
         } else {
-          operationMode =
-            .noOperation(time: minutes)
+          operationMode = .noOperation(time: minutes)
         }
       }
       return 0
@@ -77,7 +84,7 @@ public struct SteamTurbine: Component {
       switch operationMode {
       case .noOperation(let standStillTime):
         if standStillTime < parameter.hotStartUpTime {
-          operationMode = .operating
+          operationMode = .operating(Ratio(1))
         } else {
           operationMode = .startUp(time: 0, energy: 0)
         }
@@ -85,7 +92,7 @@ public struct SteamTurbine: Component {
         if startUpTime >= parameter.startUpTime,
           startUpEnergy >= parameter.startUpEnergy
         {
-          operationMode = .operating
+          operationMode = .operating(Ratio(1))
           
         }
       case .scheduledMaintenance: return 0
@@ -93,15 +100,13 @@ public struct SteamTurbine: Component {
       }
       
       if isOperating  {
-        let maxLoad: Double
-        (maxLoad, efficiency) = SteamTurbine.perform(
-          load, heat, modeBoiler, modeGasTurbine, 
+        let (maxLoad, efficiency) = SteamTurbine.perform(
+          load, heat, modeBoiler, modeGasTurbine,
           heatExchanger.temperature.inlet, temperature)
         #warning("Check this again")
-
-        load.ratio = (heat.production.megaWatt 
-          * efficiency / parameter.power.max)
-          .limited(by: maxLoad)
+        let ratio = heat.production.megaWatt * efficiency / parameter.power.max
+        load = Ratio(ratio, cap: maxLoad)
+          
         let gross = load.ratio * parameter.power.max * efficiency
         return gross
       } else { // Start Up sequence: Energy is lost / Dumped
@@ -111,11 +116,7 @@ public struct SteamTurbine: Component {
             = operationMode
           {
             var energy = heat.production.megaWatt
-            
-            //Plant.heat.production = 0.0
-            
-            energy += heat.storage.megaWatt
-              + heat.boiler.megaWatt
+            + heat.storage.megaWatt + heat.boiler.megaWatt
             
         // FIXME    Plant.heat.startUp.megaWatt = energy
             

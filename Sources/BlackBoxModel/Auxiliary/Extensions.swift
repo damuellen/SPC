@@ -35,7 +35,7 @@ extension DefaultStringInterpolation {
   }
 }
 
-func strings(_ array: [Double], precision: Int) -> [String] {
+func strings(_ array: [Double], precision: Int = 1) -> [String] {
   array.map { String(format: "%.\(precision)f", $0) }
 }
 
@@ -43,20 +43,11 @@ func string(_ value: Double, precision: Int = 2) -> String {
   String(format: "%.\(precision)f", value)
 }
 
-
 let backgroundQueue = DispatchQueue(label: "serial.queue")
 
 public typealias Heat = Double
 public typealias Pressure = Double
 public typealias Angle = Double
-
-public extension Double {
-  var toKelvin: Double { return self - Temperature.absoluteZeroCelsius }
-  
-  func limited(by value: Double) -> Double {
-    return min(value, self)
-  }
-}
 
 public extension Angle {
   var toRadians: Double { return self * .pi / 180 }

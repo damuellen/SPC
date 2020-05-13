@@ -10,30 +10,40 @@
 
 import Foundation
 
+
 protocol HeatCycle {
-  
-  var massFlow: MassFlow { get set }
-  var temperature: (inlet: Temperature, outlet: Temperature) { get set }
+  var cycle: HeatTransfer { get set }
 }
 
 extension HeatCycle {
+
+  var medium: HeatTransferFluid {
+    SolarField.parameter.HTF
+  }
+  
+  var temperature: (inlet: Temperature, outlet: Temperature) {
+    get { cycle.temperature }
+    set { cycle.temperature = newValue }
+  }
+  
+  var massFlow: MassFlow {
+    get { cycle.massFlow }
+    set { cycle.massFlow = newValue }
+  }
+
   var averageTemperature: Temperature {
     return Temperature.average(temperature.inlet, temperature.outlet)
   }
-
+  
   var inletTemperature: Double { temperature.inlet.kelvin }
 
   var outletTemperature: Double { temperature.outlet.kelvin }
-
-  var values: [String] {
-    return [
-      String(format: "%.1f", massFlow.rate),
-      String(format: "%.1f", temperature.inlet.celsius),
-      String(format: "%.1f", temperature.outlet.celsius),
-    ]
+ 
+  var deltaHeat: Heat {
+    medium.deltaHeat(temperature.outlet, temperature.inlet)
   }
-
-  func subtractingMassFlow(_ other: HeatCycle) -> MassFlow {
+  
+  func massFlow(subtracted other: HeatCycle) -> MassFlow {
     massFlow - other.massFlow
   }
 
@@ -41,39 +51,49 @@ extension HeatCycle {
     massFlow = MassFlow(rate)
   }
 
-  mutating func setTemperaturOutletEqualToOwnInlet() {
+  mutating func merge(_ c1: HeatCycle, _ c2: HeatCycle) {
+    temperature.inlet = medium.mixingTemperature(c1, c2)
+    massFlow = c1.massFlow + c2.massFlow
+  }
+  
+  mutating func add(_ c1: HeatCycle) {
+    temperature.inlet = medium.mixingTemperature(self, c1)
+    massFlow += c1.massFlow
+  }
+    
+  mutating func outletTemperatureInlet() {
     temperature.outlet = temperature.inlet
   }
 
+  mutating func inletTemperatureOutlet() {
+    temperature.inlet = temperature.outlet
+  }
+  
   mutating func setTemperature(inlet: Temperature) {
-    temperature.inlet = inlet
+   temperature.inlet = inlet
   }
 
   mutating func setTemperature(outlet: Temperature) {
     temperature.outlet = outlet
   }
 
-  mutating func setInletTemperature(inKelvin: Double) {
-    temperature.inlet = Temperature(inKelvin)
+  mutating func inletTemperature(kelvin: Double) {
+    temperature.inlet = Temperature(kelvin)
   }
 
-  mutating func setOutletTemperature(inKelvin: Double) {
-    temperature.outlet = Temperature(inKelvin)
+  mutating func outletTemperature(kelvin: Double) {
+    temperature.outlet = Temperature(kelvin)
   }
 
-  mutating func setInletTemperature(equalToInlet other: HeatCycle) {
+  mutating func inletTemperature(_ other: HeatCycle) {
     temperature.inlet = other.temperature.inlet
   }
 
-  mutating func setInletTemperature(equalToOutlet other: HeatCycle) {
+  mutating func inletTemperature(outlet other: HeatCycle) {
     temperature.inlet = other.temperature.outlet
   }
 
-  mutating func setOutletTemperature(equalToOutlet other: HeatCycle) {
+  mutating func outletTemperature(_ other: HeatCycle) {
     temperature.outlet = other.temperature.outlet
-  }
-  
-  static func columns(name: String) -> [(String, String)] {
-    [("\(name)|Massflow", "kg/s"), ("\(name)|Tin", "°C"), ("\(name)|Tout", "°C")]
   }
 }

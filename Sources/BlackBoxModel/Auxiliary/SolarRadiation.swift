@@ -29,20 +29,13 @@ struct SolarRadiation: MeasurementsConvertible {
     self.ico = Double(meteo.dni) * cosTheta
   }
   
-  var csv: String {
-    return "\(csv: dni, ghi, dhi, ico)"
-  }
+  var csv: String { "\(csv: dni, ghi, dhi, ico)" }
   
-  public var values: [String] {
-    return strings(
-      [dni, ghi, dhi, ico], precision: 1)
-  }
+  public var values: [String] { strings([dni, ghi, dhi, ico]) }
   
   static var columns: [(name: String, unit: String)] {
-    return [
-      ("Solar|DNI", "Wh/m2"), ("Solar|GHI", "Wh/m2"),
-      ("Solar|DHI", "Wh/m2"), ("Solar|ICO", "Wh/m2")
-    ]
+    [("Solar|DNI", "Wh/m2"), ("Solar|GHI", "Wh/m2"),
+     ("Solar|DHI", "Wh/m2"), ("Solar|ICO", "Wh/m2")]
   }
   
   mutating func totalize(_ radiation: SolarRadiation, fraction: Double) {
@@ -52,7 +45,7 @@ struct SolarRadiation: MeasurementsConvertible {
     ico += radiation.ico * fraction
   }
   
-  mutating func reset() {
+  mutating func zero() {
     dni = 0.0
     ghi = 0.0
     dhi = 0.0

@@ -15,7 +15,7 @@ class PlantTests: XCTestCase {
     var status = Plant.initialState
     let ambientTemperature = Temperature(celsius: 20.0)
     
-    status.solarField.setInletTemperature(equalToOutlet: status.powerBlock)
+  //  status.solarField.setInletTemperature(equalToOutlet: status.powerBlock)
     
   }
   

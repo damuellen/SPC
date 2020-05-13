@@ -50,7 +50,7 @@ public enum BlackBoxModel {
       let handler = try MeteoDataFileHandler(forReadingAtPath: path)
       meteoData = try handler()
     } catch {
-      fatalError("\(error) Meteo data is mandatory for calculation.")
+      fatalError("Meteo data is mandatory for calculation.")
     }    
     yearOfSimulation = meteoData!.year ?? yearOfSimulation
     if let sun = sun, let coords = meteoData?.location.coordinates,
@@ -79,17 +79,7 @@ public enum BlackBoxModel {
     }
   }
   
-  public static func saveConfigurations(toPath path: String)
-  {
-    do {
-    //  try JsonConfigFileHandler.saveConfigurations(toPath: path)
-    } catch {
-      print(error)
-    }
-  }
-  
   /// - Parameter recorder: Creates the log and write results to file.
-  /// - Returns: The operating data collected by the recorder.
   /// - Attention: `configure()` must called before this.
   public static func runModel(with recorder: PerformanceDataRecorder) {
 
@@ -100,7 +90,7 @@ public enum BlackBoxModel {
     Maintenance.setDefaultSchedule(for: yearOfSimulation)
     
     var status = Plant.initialState
-
+    
     var plant = Plant.setup()
 
     let (🌦, 📅) = makeGenerators(dataSource: 🌤)
@@ -112,7 +102,7 @@ public enum BlackBoxModel {
       Maintenance.checkSchedule(date)
 
       if let position = 🌞[date] {
-        status.collector = Collector.tracking(sun: position)
+        status.collector = Collector.tracking(sun: position) // cosTheta
         
         Collector.efficiency(&status.collector, ws: meteo.windSpeed)
 
@@ -124,14 +114,14 @@ public enum BlackBoxModel {
         TimeStep.current.isDaytime = false
       }
 
-      let ambientTemperature = Temperature(celsius: Double(meteo.temperature))
+      let temperature = Temperature(meteo: meteo)
       
-      status.solarField.setInletTemperature(equalToOutlet: status.powerBlock)
+      status.solarField.inletTemperature(outlet: status.powerBlock)
       
       status.solarField.massFlow = SolarField.parameter.massFlow.max
 
       if GridDemand.current.ratio < 1 {
-        Plant.adjustMassFlow(solarField: &status.solarField)
+        Plant.adjustMassFlow(&status.solarField)
       }
       
       if Design.hasStorage {
@@ -149,31 +139,36 @@ public enum BlackBoxModel {
           status.solarField.massFlow = SolarField.parameter.massFlow.max
         }
       }
-      
-      var timeRemain = 600.0
 
-      status.solarField.calculate(
-        collector: status.collector,
-        time: &timeRemain,
-        dumping: &plant.heat.dumping.watt,
-        ambient: ambientTemperature
-      )
+      status.solarField.calculate(dumping: &plant.heat.dumping.watt,
+                                  collector: status.collector,
+                                  ambient: temperature)
       
       status.solarField.temperature.outlet =
-        status.solarField.heatLossesHotHeader(ambient: ambientTemperature)
+        status.solarField.heatLossesHotHeader(ambient: temperature)
       
       plant.electricalParasitics.solarField = status.solarField.parasitics()
 
-      plant.calculate(&status, ambientTemperature: ambientTemperature)
+      plant.calculate(&status, ambient: temperature)
 
       if Design.hasStorage {
+        var salt = status.storage.salt
         // Calculate the operating state of the salt
-        plant.heat.storage.megaWatt = Storage.operate(
-          storage: &status.storage,
-          powerBlock: &status.powerBlock,
-          steamTurbine: status.steamTurbine,
-          thermal: plant.heat.storage.megaWatt
-        )
+        salt.calculate(thermal: &plant.heat.storage.megaWatt,
+                       storage: &status.storage, status.powerBlock)
+        salt.heatlosses(storage: &status.storage)
+
+        if plant.heat.storage.megaWatt < 0 {
+          if case .freezeProtection = status.storage.operationMode {
+            // FIXME: powerBlock.temperature.outlet // = powerBlock.temperature.outlet
+          } else if case .charging = status.storage.operationMode {
+            // added to avoid Tmix during TES discharge (valid for indirect storage), check!
+            let htf = SolarField.parameter.HTF
+            status.powerBlock.temperature.outlet = htf.mixingTemperature(
+              status.powerBlock, status.storage
+            )
+          }
+        }
       }
       
       let energy = plant.energyBalance()

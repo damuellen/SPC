@@ -13,19 +13,13 @@ import Meteo
 
 public struct PowerBlock: Component, HeatCycle {
   /// Contains all data needed to simulate the operation of the power block    
-  var massFlow: MassFlow
-
-  var temperature: (inlet: Temperature, outlet: Temperature)
-
+  var cycle: HeatTransfer = .init(name: PowerBlock.parameter.name)
+  
   public enum OperationMode {
     case scheduledMaintenance
   }
   
-  static let initialState = PowerBlock(
-    massFlow: 0.0, temperature:
-    (inlet: Simulation.initialValues.temperatureOfHTFinPipes,
-     outlet: Simulation.initialValues.temperatureOfHTFinPipes)
-  )
+  static let initialState = PowerBlock()
   
   public static var parameter: Parameter = ParameterDefaults.pb
   
@@ -37,13 +31,13 @@ public struct PowerBlock: Component, HeatCycle {
     -> Double
   {
     var electricalParasitics = 0.0
-    
-    if steamTurbine.load.ratio >= 0.01 {
+    let load = steamTurbine.load ?? .zero
+    if load.ratio >= 0.01 {
 
       electricalParasitics = parameter.fixElectricalParasitics
       electricalParasitics += parameter.nominalElectricalParasitics
-        * parameter.electricalParasitics(steamTurbine.load)
-    } else if heat > 0, steamTurbine.load.isZero {
+        * parameter.electricalParasitics(load)
+    } else if heat > 0, load.isZero {
       // parasitics during start-up sequence
       // Strange effect of this function over gross output!!
       // "strange effect" is due to interation "Abs(electricalParasiticsAssumed
@@ -54,7 +48,7 @@ public struct PowerBlock: Component, HeatCycle {
     // if Heater.parameter.operationMode {
     // if variable exist, then project Shams-1 is calculated. commented,
     // same for shams as for any project. check!
-    switch steamTurbine.load.ratio { // Step function for Cooling Towers -
+    switch load.ratio { // Step function for Cooling Towers -
     case 0:
       if case .scheduledMaintenance = steamTurbine.operationMode {
         electricalParasitics = 0 // add sched. maint. parasitics as a parameter
@@ -69,9 +63,9 @@ public struct PowerBlock: Component, HeatCycle {
     }
     
     // parasitics for ACC:
-    if steamTurbine.load.ratio > 0 {
+    if load.ratio > 0 {
       // only during operation
-      var electricalParasiticsACC = parameter.electricalParasiticsACC(steamTurbine.load)
+      var electricalParasiticsACC = parameter.electricalParasiticsACC(load)
       
       if parameter.electricalParasiticsACCTamb.coefficients.isEmpty == false {
         var adjustmentACC = parameter.electricalParasiticsACCTamb

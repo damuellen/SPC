@@ -8,10 +8,11 @@ let calendar = { calendar -> NSCalendar in
 public final class DateGenerator: Sequence, IteratorProtocol {
   
   public enum Interval: Int {
-    case every60minutes = 1
-    case every30minutes = 2
-    case every20minutes = 3
-    case every15minutes = 4
+    case hourly = 1
+    case half_hourly = 2
+    case everyThirdHour = 3
+    case quarter_hourly = 4
+    case every12minutes = 5
     case every10minutes = 6
     case every6minutes = 10
     case every5minutes = 12
@@ -25,6 +26,13 @@ public final class DateGenerator: Sequence, IteratorProtocol {
 
     public var interval: Double {
       return 3600 * fraction
+    }
+    
+    public static subscript(value: Int) -> Interval {
+      if 0 == 60 % value {
+        return Interval(rawValue: value)!
+      }
+      return Interval(rawValue: 1)!
     }
   }
 

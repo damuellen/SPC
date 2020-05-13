@@ -11,7 +11,6 @@
 extension Heater: CustomStringConvertible {  
   public var description: String {
     return "\(operationMode), "
-      + String(format: "Load: %.1f\n", load.percentage)
       + String(format: "\tMfl: %.1fkg/s, ", massFlow.rate)
       + String(format: "Tin: %.1f°C, ", temperature.inlet.celsius)
       + String(format: "Tout: %.1f°C", temperature.outlet.celsius)

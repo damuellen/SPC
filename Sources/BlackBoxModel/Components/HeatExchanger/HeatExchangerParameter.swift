@@ -19,8 +19,8 @@ extension HeatExchanger {
       var h2o: (inlet: (max: Temperature, min: Temperature),
                 outlet: (max: Temperature, min: Temperature))
 
-      var designDelta: (inlet: Temperature, outlet:Temperature)
-      
+      let range: (inlet: Temperature, outlet:Temperature)
+
       public init(
         htf: (inlet: (max: Double, min: Double),
               outlet: (max: Double, min: Double)),
@@ -32,13 +32,17 @@ extension HeatExchanger {
                     (T(celsius: htf.outlet.max),T(celsius: htf.outlet.min)))
         self.h2o = ((T(celsius: h2o.inlet.max), T(celsius: h2o.inlet.min)),
                     (T(celsius: h2o.outlet.max),T(celsius: h2o.outlet.min)))
-        self.designDelta = (
+        self.range = (
           inlet: Temperature(htf.inlet.max - htf.inlet.min),
           outlet: Temperature(htf.outlet.max - htf.outlet.min)
         )
       }
     }
 
+    var heatDesign: Heat {
+      SolarField.parameter.HTF.deltaHeat(temperature.htf.outlet.max, temperature.htf.inlet.max)
+    }
+    
     let name: String
     let efficiency: Double
     let sccEff: Double
@@ -124,16 +128,16 @@ extension HeatExchanger.Parameter: TextConfigInitializable {
     name = file.name
     efficiency = try line(10)
     temperature = try Temperatures(
-      htf: (inlet: (max: line(13).toKelvin, min: line(16).toKelvin),
-            outlet: (max: line(19).toKelvin, min: line(22).toKelvin)),
-      h2o: (inlet: (max: line(25).toKelvin, min: line(28).toKelvin),
-            outlet: (max: line(31).toKelvin, min: line(34).toKelvin))
+      htf: (inlet: (max: line(13), min: line(16)),
+            outlet: (max: line(19), min: line(22))),
+      h2o: (inlet: (max: line(25), min: line(28)),
+            outlet: (max: line(31), min: line(34)))
     )
     scc = try Temperatures(
-      htf: (inlet: (max: line(47).toKelvin, min: line(50).toKelvin),
-            outlet: (max: line(53).toKelvin, min: line(56).toKelvin)),
-      h2o: (inlet: (max: line(59).toKelvin, min: line(62).toKelvin),
-            outlet: (max: line(65).toKelvin, min: line(68).toKelvin))
+      htf: (inlet: (max: line(47), min: line(50)),
+            outlet: (max: line(53), min: line(56))),
+      h2o: (inlet: (max: line(59), min: line(62)),
+            outlet: (max: line(65), min: line(68)))
     )
 
     sccEff = try line(44)
@@ -167,17 +171,17 @@ extension HeatExchanger.Parameter: Codable {
     efficiency = try values.decode(Double.self, forKey: .efficiency)
     var temps = try values.decode(Array<Double>.self, forKey: .temperature)
     temperature = Temperatures(
-      htf: (inlet: (max: temps[0].toKelvin, min: temps[1].toKelvin),
-            outlet: (max: temps[2].toKelvin, min: temps[3].toKelvin)),
-      h2o: (inlet: (max: temps[4].toKelvin, min: temps[5].toKelvin),
-            outlet: (max: temps[6].toKelvin, min: temps[7].toKelvin))
+      htf: (inlet: (max: temps[0], min: temps[1]),
+            outlet: (max: temps[2], min: temps[3])),
+      h2o: (inlet: (max: temps[4], min: temps[5]),
+            outlet: (max: temps[6], min: temps[7]))
     )
     temps = try values.decode(Array<Double>.self, forKey: .scc)
     scc = Temperatures(
-      htf: (inlet: (max: temps[0].toKelvin, min: temps[1].toKelvin),
-            outlet: (max: temps[2].toKelvin, min: temps[3].toKelvin)),
-      h2o: (inlet: (max: temps[4].toKelvin, min: temps[5].toKelvin),
-            outlet: (max: temps[6].toKelvin, min: temps[7].toKelvin))
+      htf: (inlet: (max: temps[0], min: temps[1]),
+            outlet: (max: temps[2], min: temps[3])),
+      h2o: (inlet: (max: temps[4], min: temps[5]),
+            outlet: (max: temps[6], min: temps[7]))
     )
     sccEff = try values.decode(Double.self, forKey: .sccEff)
     sccHTFmassFlow = try values.decode(MassFlow.self, forKey: .sccHTFmassFlow)
@@ -220,8 +224,8 @@ public typealias Temperatures = HeatExchanger.Parameter.Temperatures
 
 extension HeatExchanger.Parameter.Temperatures: Equatable {
   public static func == (lhs: Temperatures, rhs: Temperatures) -> Bool {
-    return lhs.designDelta.inlet == rhs.designDelta.inlet
-      && lhs.designDelta.outlet == rhs.designDelta.outlet
+    return lhs.range.inlet == rhs.range.inlet
+      && lhs.range.outlet == rhs.range.outlet
       && lhs.htf.inlet.max == rhs.htf.inlet.max
       && lhs.htf.inlet.min == rhs.htf.inlet.min
       && lhs.htf.outlet.max == rhs.htf.outlet.max

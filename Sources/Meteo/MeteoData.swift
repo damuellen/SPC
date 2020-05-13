@@ -139,11 +139,9 @@ public struct MeteoData: CustomStringConvertible {
   }
 
   var values: [String] {
-    return [
-      String(format: "%.1f", temperature),
-      String(format: "%.1f", ghi),
-      String(format: "%.1f", dhi),
-      String(format: "%.1f", windSpeed),
-    ]
+    [temperature.description,
+     ghi.description,
+     dhi.description,
+     windSpeed.description]
   }
 }

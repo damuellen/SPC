@@ -287,7 +287,7 @@ enum HCE {
       htf.maxTemperature, hce.temperature.inlet
     )
 
-    hce.setMassFlow(rate: ratio * area)
+    hce.massFlow.rate = ratio * area
 
     func calculateTime() -> Double {
       if hce.averageTemperature.celsius < 20 { 
@@ -411,7 +411,8 @@ enum HCE {
         )
         let areaDensity: Double
         if avgT.celsius < 20 {
-          print(o, innerIteration, newTemp, hce, solarField, "Temperature too low. \(TimeStep.current)")
+          print(o, innerIteration, newTemp, hce, solarField,
+                "Temperature too low. \(TimeStep.current)")
           areaDensity = 1
         } else {
           areaDensity = htf.density(avgT) * .pi
@@ -566,8 +567,8 @@ enum HCE {
           ? (hce.massFlow.rate / 3 * htf.deltaHeat(newTemp, maxTemp) * 1_000)
           : 0.0 // MWt
 
-        newTemp = newTemp.limited(by: maxTemp)
-        oldTemp = oldTemp.limited(by: maxTemp)
+        newTemp.limited(to: maxTemp)
+        oldTemp.limited(to: maxTemp)
 
         if abs(newTemp.kelvin - oldTemp.kelvin)
           < Simulation.parameter.tempTolerance.kelvin,

@@ -49,14 +49,6 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
       self.useEnthalpy = false
     }
   }
-  typealias DesignTemperatures = (
-    inlet: (max: Temperature, min: Temperature),
-    outlet: (max: Temperature, min: Temperature)
-  )
-  
-  func deltaHeat(design: DesignTemperatures) -> Heat {
-    deltaHeat(design.outlet.max, design.inlet.max)
-  }
   
   func deltaHeat(_ flow: HeatCycle) -> Heat {
     deltaHeat(flow.temperature.outlet, flow.temperature.inlet)

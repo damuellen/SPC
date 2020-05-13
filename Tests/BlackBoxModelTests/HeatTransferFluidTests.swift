@@ -27,7 +27,7 @@ class HeatTransferFluidTests: XCTestCase {
   }
 
   func testsHydronic() {
-    var tf = HeatFlow(name: "")
+    var tf = HeatTransfer(name: "")
 
     tf.massFlow = 500.0
     tf.temperature.inlet = Temperature(celsius: 293.0)

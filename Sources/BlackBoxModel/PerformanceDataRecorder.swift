@@ -144,12 +144,12 @@ public final class PerformanceDataRecorder {
   }
   
   public func clearResults() {
-    annualEnergy.reset()
-    annualRadiation.reset()
-    dailyEnergy.reset()
-    dailyRadiation.reset()
-    hourlyEnergy.reset()
-    hourlyRadiation.reset()
+    annualEnergy.zero()
+    annualRadiation.zero()
+    dailyEnergy.zero()
+    dailyRadiation.zero()
+    hourlyEnergy.zero()
+    hourlyRadiation.zero()
     energyHistory.removeAll(keepingCapacity: true)
     performanceHistory.removeAll(keepingCapacity: true)
   }
@@ -232,8 +232,8 @@ public final class PerformanceDataRecorder {
 
         let csv = generateDailyValues()
         dailyResultsStream?.write(csv)
-        dailyEnergy.reset()
-        dailyRadiation.reset()
+        dailyEnergy.zero()
+        dailyRadiation.zero()
         hourCounter = 0
       }
     }
@@ -248,8 +248,8 @@ public final class PerformanceDataRecorder {
         let csv = generateHourlyValues()
         hourlyResultsStream?.write(csv)
         
-        hourlyEnergy.reset()
-        hourlyRadiation.reset()
+        hourlyEnergy.zero()
+        hourlyRadiation.zero()
 
         hourCounter += 1
         intervalCounter = 0

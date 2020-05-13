@@ -109,7 +109,7 @@ public enum ParameterDefaults {
     heatTracingTime: [1, 1], heatTracingPower: [1, 1],
     DischrgParFac: 1, definedBy: .cap,
   //  resultingTemperature: (.init(celsius: 293.0), .init(celsius: 390.0)),
-    designTemperature: (.init(celsius: 293.0), .init(celsius: 390.0)),
+    designTemperature: (566.15, 663.15),
     heatLoss: (1, 1),
     startFossilCharging: (1, 1), stopFossilCharging: (1, 2),
     startFossilCharging2: (1, 1), stopFossilCharging2: (1, 2),

@@ -64,7 +64,7 @@ struct SolarPerformanceCalculator: ParsableCommand {
     // BlackBoxModel.loadConfigurations(atPath: configPath, format: .json)
     // BlackBoxModel.saveConfigurations(toPath: configPath)
     if let steps = interval {
-      Simulation.time.steps = Interval(rawValue: steps) ?? .every5minutes
+      Simulation.time.steps = Interval[steps]
     } else {
       Simulation.time.steps = .every5minutes
     }   

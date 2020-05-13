@@ -9,7 +9,7 @@
 //
 
 import Foundation
-
+import Meteo
 /// A temperature value in Kelvin.
 public struct Temperature: CustomStringConvertible, Equatable {
   
@@ -29,13 +29,9 @@ public struct Temperature: CustomStringConvertible, Equatable {
     kelvin = -Temperature.absoluteZeroCelsius
   }
 
-  static func calculate(
-    massFlow1: MassFlow, massFlow2: MassFlow,
-    temperature1: Temperature, temperature2: Temperature)
-    -> Temperature
-  {
-    return Temperature((massFlow1.rate * temperature1.kelvin
-      + massFlow2.rate * temperature2.kelvin) / (massFlow1 + massFlow2).rate)
+  static func mixture(
+    m1: MassFlow, m2: MassFlow, t1: Temperature, t2: Temperature) -> Temperature {
+    .init((m1.rate * t1.kelvin + m2.rate * t2.kelvin) / (m1 + m2).rate)
   }
   
   public init(_ kelvin: Double) {
@@ -55,57 +51,53 @@ public struct Temperature: CustomStringConvertible, Equatable {
   public init(celsius: Double) {
     assert(celsius.isFinite, "\(celsius), \(TimeStep.current)")
     assert(celsius > Temperature.absoluteZeroCelsius)
-    self.kelvin = celsius.toKelvin
+    self.kelvin = celsius - Temperature.absoluteZeroCelsius
   }
-/*
-  public init(celsius: Float) {
-    assert(celsius.isFinite)
-    assert(celsius > Float(Temperature.absoluteZeroCelsius))
-    self.kelvin = Double(celsius).toKelvin
+
+  public init(meteo: MeteoData) {
+    assert(meteo.temperature > -30)
+    assert(meteo.temperature < 70)
+    self = .init(celsius: Double(meteo.temperature))
   }
-*/
+
   mutating func adjust(with ratio: Ratio) {
     self.kelvin *= ratio.ratio
   }
 
-  func adjusted(with ratio: Ratio) -> Temperature {
-    return Temperature(kelvin * ratio.ratio)
+  func adjusted(_ ratio: Ratio) -> Temperature {
+    Temperature(kelvin * ratio.ratio)
   }
 
   mutating func adjust(withFactor factor: Double) {
-    self.kelvin *= factor
+    kelvin *= factor
   }
 
-  func adjusted(with factor: Double) -> Temperature {
-    return Temperature(kelvin * factor)
+  mutating func limited(to max: Temperature) {
+    kelvin = min(max.kelvin, self.kelvin)
   }
-
-  func isHigher(than degree: Temperature) -> Bool {
-    return self.kelvin > degree.kelvin
+  
+  func adjusted(_ factor: Double) -> Temperature {
+    Temperature(kelvin * factor)
   }
 
   func isLower(than degree: Temperature) -> Bool {
-    return self.kelvin < degree.kelvin
-  }
-
-  func limited(by max: Temperature) -> Temperature {
-    return Temperature(min(max.kelvin, self.kelvin))
+    kelvin < degree.kelvin
   }
   
   static func + (lhs: Temperature, rhs: Temperature) -> Temperature {
-    return Temperature(lhs.kelvin + rhs.kelvin)
+    Temperature(lhs.kelvin + rhs.kelvin)
   }
 
   static func - (lhs: Temperature, rhs: Temperature) -> Temperature {
-    return Temperature(lhs.kelvin - rhs.kelvin)
+    Temperature(lhs.kelvin - rhs.kelvin)
   }
   
   static func + (lhs: Temperature, rhs: Double) -> Temperature {
-    return Temperature(lhs.kelvin + rhs)
+    Temperature(lhs.kelvin + rhs)
   }
   
   static func - (lhs: Temperature, rhs: Double) -> Temperature {
-    return Temperature(lhs.kelvin - rhs)
+    Temperature(lhs.kelvin - rhs)
   }
 }
 /*

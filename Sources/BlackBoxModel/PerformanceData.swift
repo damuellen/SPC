@@ -33,8 +33,9 @@ public struct PerformanceData: CustomStringConvertible {
   }
   
   var csv: String {
-    let values = storage.values + heater.values + powerBlock.values
-      + heatExchanger.values + solarField.values
+    let values = storage.cycle.values + heater.cycle.values
+      + powerBlock.cycle.values + heatExchanger.cycle.values
+      + solarField.header.values
       + solarField.loops[0].values + solarField.loops[1].values
       + solarField.loops[2].values + solarField.loops[3].values
     return values.joined(separator: .separator)

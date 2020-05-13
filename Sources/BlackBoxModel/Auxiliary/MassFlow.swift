@@ -48,20 +48,20 @@ public struct MassFlow: CustomStringConvertible {
     return (rate - max.rate) <= 0.0001 ? Ratio(rate / max.rate) : Ratio(1)
   }
 
-  mutating func adjust(withFactor ratio: Double) {
-    self.rate *= ratio
+  mutating func adjust(factor ratio: Double) {
+    rate *= ratio
   }
 
   mutating func adjust(withFactor ratio: Ratio) {
-    self.rate *= ratio.ratio
+    rate *= ratio.ratio
   }
 
   func adjusted(withFactor ratio: Double) -> MassFlow {
-    return MassFlow(rate * ratio)
+    MassFlow(rate * ratio)
   }
 
   func adjusted(withFactor ratio: Ratio) -> MassFlow {
-    return MassFlow(rate * ratio.ratio)
+    MassFlow(rate * ratio.ratio)
   }
   /* not used
    func raised(by rate: Double) -> MassFlow {
@@ -121,10 +121,10 @@ extension MassFlow: ExpressibleByFloatLiteral {
 
 extension MassFlow: Comparable {
   public static func < (lhs: MassFlow, rhs: MassFlow) -> Bool {
-    return lhs.rate < rhs.rate
+    lhs.rate < rhs.rate
   }
 
   public static func == (lhs: MassFlow, rhs: MassFlow) -> Bool {
-    return fdim(lhs.rate, rhs.rate) < 1e-4
+    fdim(lhs.rate, rhs.rate) < 1e-4
   }
 }

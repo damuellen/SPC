@@ -10,7 +10,7 @@
 
 import Foundation
 
-public struct HeatFlow: HeatCycle, Equatable, CustomStringConvertible {
+public struct HeatTransfer: CustomStringConvertible {
 
   var name = ""
   
@@ -18,6 +18,14 @@ public struct HeatFlow: HeatCycle, Equatable, CustomStringConvertible {
 
   var temperature: (inlet: Temperature, outlet: Temperature)
 
+  var averageTemperature: Temperature {
+    return Temperature.average(temperature.inlet, temperature.outlet)
+  }
+
+  var inletTemperature: Double { temperature.inlet.kelvin }
+
+  var outletTemperature: Double { temperature.outlet.kelvin }
+    
   init(name: String) {
     self.name = name
     self.massFlow = 0.0
@@ -33,18 +41,18 @@ public struct HeatFlow: HeatCycle, Equatable, CustomStringConvertible {
   }
 
   public var description: String {
-    return String(format: "\(name): Mfl: %.1fkg/s, ", massFlow.rate)
+    String(format: "\(name): Mfl: %.1fkg/s, ", massFlow.rate)
       + String(format: "Tin: %.1f°C, ", temperature.inlet.celsius)
       + String(format: "Tout: %.1f°C", temperature.outlet.celsius)
+  }
+  
+  var values: [String] {
+    [massFlow.rate.description,
+     temperature.inlet.celsius.description,
+     temperature.outlet.celsius.description]
   }
 
   public mutating func constantTemperature() {
     temperature.inlet = temperature.outlet
-  }
-
-  public static func == (lhs: HeatFlow, rhs: HeatFlow) -> Bool {
-    return lhs.massFlow == rhs.massFlow
-      && lhs.temperature.inlet == rhs.temperature.inlet
-      && lhs.temperature.outlet == rhs.temperature.outlet
   }
 }

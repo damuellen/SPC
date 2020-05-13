@@ -22,15 +22,15 @@ public struct Polynomial: Codable, Equatable {
   }
 
   var indices: CountableRange<Int> {
-    return self.coefficients.indices
+    coefficients.indices
   }
 
   var isEmpty: Bool {
-    return self.coefficients.isEmpty
+    coefficients.isEmpty
   }
 
   var isInapplicable: Bool {
-    return self.coefficients.count < 2
+    coefficients.count < 2
   }
   
   @_transparent func evaluated(_ value: Double) -> Double {
@@ -55,7 +55,7 @@ public struct Polynomial: Codable, Equatable {
   }
 
   subscript(index: Int) -> Double {
-    return self.coefficients[index]
+    coefficients[index]
   }
 }
 
@@ -70,6 +70,8 @@ public struct Ratio: CustomStringConvertible, Codable {
 
   var isZero: Bool { return self.ratio == 0 }
 
+  public static var zero: Ratio { return Ratio(0) }
+  
   public var percentage: Double { return self.ratio * 100.0 }
 
   public var description: String { return "\(self.percentage)%" }
@@ -81,6 +83,15 @@ public struct Ratio: CustomStringConvertible, Codable {
   public init(_ value: Double) {
     precondition(0 ... 1 ~= value, "Ratio out of range.")
     self.ratio = value > 1 ? 1 : value
+  }
+  
+  public init(_ value: Double, cap: Double) {
+    precondition(0 <= value, "Ratio out of range.")
+    self.ratio = min(value, cap)
+  }
+  
+  mutating func limited(to max: Ratio) {
+    self.ratio = min(max.ratio, ratio)
   }
 }
 

@@ -26,7 +26,7 @@ public struct Energy: CustomStringConvertible {
       .split(separator: "\n").joined(separator: "\n") + "\n"
   }
   
-  mutating func reset() {
+  mutating func zero() {
     self.thermal = ThermalEnergy()
     self.fuel = FuelConsumption()
     self.parasitics = Parasitics()
@@ -57,27 +57,22 @@ public struct ElectricPower: Encodable, MeasurementsConvertible {
   parasitics = 0.0, net = 0.0, consum = 0.0
   
   var values: [String] {
-    return strings([
-      steamTurbineGross, gasTurbineGross, backupGross,
-      parasitics, net, consum,
-    ], precision: 1)
+    strings([steamTurbineGross, gasTurbineGross, backupGross,parasitics, net, consum])
   }
   
   var csv: String {
-    return "\(csv: steamTurbineGross, gasTurbineGross, backupGross, parasitics, net, consum)"
+    "\(csv: steamTurbineGross, gasTurbineGross, backupGross, parasitics, net, consum)"
   }
 
   public var dict: [String: String] {
-    return Dictionary(uniqueKeysWithValues: zip(Self.columns.map(\.name), values))
+    Dictionary(uniqueKeysWithValues: zip(Self.columns.map(\.name), values))
   }
   
   static var columns: [(name: String, unit: String)] {
-    return [
-      ("Electric|SteamTurbineGross", "MWh e"),
+     [("Electric|SteamTurbineGross", "MWh e"),
       ("Electric|GasTurbineGross", "MWh e"),
       ("Electric|BackupGross", "MWh e"), ("Electric|Parasitics", "MWh e"),
-      ("Electric|Net", "MWh e"), ("Electric|Consum", "MWh e"),
-    ]
+      ("Electric|Net", "MWh e"), ("Electric|Consum", "MWh e")]
   }
   
   mutating func totalize(_ electricEnergy: ElectricPower, fraction: Double) {
@@ -88,15 +83,6 @@ public struct ElectricPower: Encodable, MeasurementsConvertible {
     self.net += electricEnergy.net * fraction
     self.consum += electricEnergy.consum * fraction
   }
-  
-  mutating func reset() {
-    self.steamTurbineGross = 0
-    self.gasTurbineGross = 0
-    // backupGross +=
-    self.parasitics = 0
-    self.net = 0
-    self.consum = 0
-  }
 }
 
 public struct Parasitics: Encodable, MeasurementsConvertible {
@@ -104,22 +90,17 @@ public struct Parasitics: Encodable, MeasurementsConvertible {
   powerBlock = 0.0, shared = 0.0, solarField = 0.0, storage = 0.0
   
   var values: [String] {
-    return strings(
-      [solarField, powerBlock, storage,
-       shared, 0, gasTurbine,
-      ], precision: 1)
+    strings([solarField, powerBlock, storage,shared, 0, gasTurbine,])
   }
   
   var csv: String {
-    return "\(csv: solarField, powerBlock, storage, shared, 0, gasTurbine)"
+    "\(csv: solarField, powerBlock, storage, shared, 0, gasTurbine)"
   }
   
   static var columns: [(name: String, unit: String)] {
-    return [
-      ("Parasitics|SolarField", "MWh"), ("Parasitics|PowerBlock", "MWh"),
-      ("Parasitics|Storage", "MWh"), ("Parasitics|Shared", "MWh"),
-      ("Parasitics|Backup", "MWh"), ("Parasitics|GasTurbine", "MWh"),
-    ]
+    [("Parasitics|SolarField", "MWh"), ("Parasitics|PowerBlock", "MWh"),
+     ("Parasitics|Storage", "MWh"), ("Parasitics|Shared", "MWh"),
+     ("Parasitics|Backup", "MWh"), ("Parasitics|GasTurbine", "MWh")]
   }
   
   mutating func totalize(_ electricalParasitics: Parasitics, fraction: Double) {
@@ -130,15 +111,6 @@ public struct Parasitics: Encodable, MeasurementsConvertible {
     // parasiticsBackup += electricalParasitics
     self.gasTurbine += electricalParasitics.gasTurbine * fraction
   }
-  
-  mutating func reset() {
-    self.solarField = 0
-    self.powerBlock = 0
-    self.storage = 0
-    self.shared = 0
-    // parasiticsBackup += electricalParasitics
-    self.gasTurbine = 0
-  }
 }
 
 public struct ThermalEnergy: Encodable, MeasurementsConvertible {
@@ -148,18 +120,19 @@ public struct ThermalEnergy: Encodable, MeasurementsConvertible {
   heatExchanger: Power = 0.0, production: Power = 0.0, demand: Power = 0.0,
   dumping: Power = 0.0, overtemp_dump: Power = 0.0, startUp: Power = 0.0
   
+  var excess: Power { production - demand }
+  
   var values: [String] {
-    return strings(
+    strings(
       [solar.megaWatt, dumping.megaWatt,
        toStorage.megaWatt, storage.megaWatt,
        heater.megaWatt, heatExchanger.megaWatt,
        startUp.megaWatt, wasteHeatRecovery.megaWatt,
-       boiler.megaWatt, production.megaWatt,
-      ], precision: 1)
+       boiler.megaWatt, production.megaWatt])
   }
   
   var csv: String {
-    return """
+    """
     \(csv: solar.megaWatt, dumping.megaWatt, toStorage.megaWatt, storage.megaWatt,
     heater.megaWatt, heatExchanger.megaWatt, startUp.megaWatt,
     wasteHeatRecovery.megaWatt, boiler.megaWatt, production.megaWatt)
@@ -167,15 +140,13 @@ public struct ThermalEnergy: Encodable, MeasurementsConvertible {
   }
   
   static var columns: [(name: String, unit: String)] {
-    return [
-      ("Thermal|Solar", "MWh th"), ("Thermal|Dumping", "MWh th"),
-      ("Thermal|ToStorage", "MWh th"), ("Thermal|Storage", "MWh th"),
-      ("Thermal|Heater", "MWh th"), ("Thermal|HeatExchanger", "MWh th"),
-      ("Thermal|Startup", "MWh th"),
-      ("Thermal|WasteHeatRecovery", "MWh th"),
-      ("Thermal|Boiler", "MWh th"),
-      ("Thermal|Production", "MWh th"),
-    ]
+    [("Thermal|Solar", "MWh th"), ("Thermal|Dumping", "MWh th"),
+     ("Thermal|ToStorage", "MWh th"), ("Thermal|Storage", "MWh th"),
+     ("Thermal|Heater", "MWh th"), ("Thermal|HeatExchanger", "MWh th"),
+     ("Thermal|Startup", "MWh th"),
+     ("Thermal|WasteHeatRecovery", "MWh th"),
+     ("Thermal|Boiler", "MWh th"),
+     ("Thermal|Production", "MWh th")]
   }
   
   mutating func totalize(_ thermal: ThermalEnergy, fraction: Double) {
@@ -193,19 +164,6 @@ public struct ThermalEnergy: Encodable, MeasurementsConvertible {
     dumping += thermal.dumping * fraction
     production += thermal.production * fraction
   }
-  
-  mutating func reset() {
-    solar = 0.0
-    toStorage = 0.0
-    storage = 0.0
-    heater = 0.0
-    heatExchanger = 0.0
-    startUp = 0.0
-    wasteHeatRecovery = 0.0
-    boiler = 0.0
-    dumping = 0.0
-    production = 0.0
-  }
 }
 
 public struct FuelConsumption: Encodable, MeasurementsConvertible {
@@ -221,20 +179,17 @@ public struct FuelConsumption: Encodable, MeasurementsConvertible {
   }
   
   var values: [String] {
-    return strings(
-      [backup, boiler, heater, gasTurbine, combined], precision: 1)
+    strings([backup, boiler, heater, gasTurbine, combined])
   }
   
   var csv: String {
-    return "\(csv: backup, boiler, heater, gasTurbine, combined)"
+    "\(csv: backup, boiler, heater, gasTurbine, combined)"
   }
   
   static var columns: [(name: String, unit: String)] {
-    return [
-      ("FuelConsumption|Backup", "MWh"), ("FuelConsumption|Boiler", "MWh"),
+     [("FuelConsumption|Backup", "MWh"), ("FuelConsumption|Boiler", "MWh"),
       ("FuelConsumption|Heater", "MWh"), ("FuelConsumption|GasTurbine", "MWh"),
-      ("FuelConsumption|Combined", "MWh"),
-    ]
+      ("FuelConsumption|Combined", "MWh")]
   }
   
   mutating func totalize(_ fuel: FuelConsumption, fraction: Double) {
@@ -242,12 +197,5 @@ public struct FuelConsumption: Encodable, MeasurementsConvertible {
     boiler += fuel.boiler * fraction
     heater += fuel.heater * fraction
     gasTurbine += fuel.gasTurbine * fraction
-  }
-  
-  mutating func reset() {
-    backup = 0
-    boiler = 0
-    heater = 0
-    gasTurbine = 0
   }
 }

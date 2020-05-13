@@ -24,9 +24,7 @@ public struct TimeStep: CustomStringConvertible {
 
   var isDaytime: Bool = true
 
-  var isNighttime: Bool {
-    return !isDaytime
-  }
+  var isNighttime: Bool { !isDaytime }
 
   var year: Int = 0
   var month: Int = 0

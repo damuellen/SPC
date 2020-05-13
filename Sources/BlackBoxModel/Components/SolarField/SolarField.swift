@@ -11,7 +11,7 @@
 import Foundation
 import Meteo
 
-public struct SolarField: Component, Equatable, HeatCycle {
+public struct SolarField: Component, HeatCycle {
 
   public enum Loop: Int {
     case design = 0, near, average, far
@@ -24,23 +24,18 @@ public struct SolarField: Component, Equatable, HeatCycle {
   /// Contains all data needed to simulate the operation of the solar field
   var operationMode: OperationMode
   var isMaintained: Bool
-  var header: HeatFlow
+  var header: HeatTransfer
   var ETA: Double
   public var heatLosses: Double
   public var heatLossHeader: Double
   public var heatLossHCE: Double
   public var inFocus: Ratio
-  var loops: [HeatFlow]
+  var loops: [HeatTransfer]
   var loopEta: Double
   
-  public var massFlow: MassFlow {
-    get { return self.header.massFlow }
-    set { self.header.massFlow = newValue }
-  }
-
-  public var temperature: (inlet: Temperature, outlet: Temperature) {
-    get { return self.header.temperature }
-    set { self.header.temperature = newValue }
+  var cycle: HeatTransfer {
+    get { header }
+    set { header = newValue }
   }
 
   public enum OperationMode: String, CustomStringConvertible {
@@ -65,16 +60,16 @@ public struct SolarField: Component, Equatable, HeatCycle {
   static let initialState = SolarField(
     operationMode: .scheduledMaintenance,
     isMaintained: false,
-    header: HeatFlow(name: "Header"),
+    header: HeatTransfer(name: "Header"),
     ETA: 0,
     heatLosses: 0, heatLossHeader: 0, heatLossHCE: 0,
     inFocus: 0.0,
-    loops: Loop.names.map { name in HeatFlow(loop: name) },
+    loops: Loop.names.map { name in HeatTransfer(loop: name) },
     loopEta: 0
   )
 
   public static var parameter: Parameter = ParameterDefaults.sf
-  static var last: [HeatFlow] = initialState.loops
+  static var last: [HeatTransfer] = initialState.loops
   
   static func pipeHeatLoss(pipe: Temperature, ambient: Temperature) -> Double {
     return ((pipe - ambient).kelvin / 333) ** 1 * parameter.pipeHeatLosses
@@ -101,14 +96,14 @@ public struct SolarField: Component, Equatable, HeatCycle {
     switch storage.operationMode {
     case .freezeProtection:
       if Storage.parameter.temperatureCharge[1] > 0 {
-        temperature.inlet = storage.temperature.outlet
+        inletTemperature(outlet: storage)
       } else {
-        setInletTemperature(inKelvin: storage.antiFreezeTemperature)
+        inletTemperature(kelvin: storage.antiFreezeTemperature)
       }
     case .preheat:
       temperature.inlet = storage.temperatureTank.cold
     case .charging where heat.production.watt == 0:
-      temperature.inlet = temperature.outlet
+      inletTemperatureOutlet()
     default: break
     }
   }
@@ -129,16 +124,16 @@ public struct SolarField: Component, Equatable, HeatCycle {
         ? 0 : header.massFlow.rate
         * ( m1 * (parameter.imbalanceDesign[n] - parameter.imbalanceMin[n])
           / m2 + parameter.imbalanceMin[n] )
-      loops[loop.rawValue].setMassFlow(rate: massFlow)
+      loops[loop.rawValue].massFlow.rate = massFlow
 
       HCE.calculation(&self, collector: collector, loop: loop,
                       mode: .variable, ambient: ambient)
     }
     
-    header.setMassFlow(rate:
+    header.massFlow.rate =
       loops.dropFirst().reduce(0.0) { sum, loop in
         sum + loop.massFlow.rate } / 3.0
-    )
+    
     
     if header.massFlow.isNearZero {
       loops.dropFirst().indices.forEach { n in
@@ -157,9 +152,9 @@ public struct SolarField: Component, Equatable, HeatCycle {
         let oneMinusTR = 1.0 - timeRatio
 
         for n in loops.indices.dropFirst() {
-          loops[n].setOutletTemperature(inKelvin:
+          loops[n].temperature.outlet.kelvin =
             timeRatio * loops[n].outletTemperature
-            + oneMinusTR * SolarField.last[n].outletTemperature)
+            + oneMinusTR * SolarField.last[n].outletTemperature
         }
       }
 
@@ -183,46 +178,42 @@ public struct SolarField: Component, Equatable, HeatCycle {
         return (timeRatio, oneMinusTR, temp)
       }
 
-      header.setOutletTemperature(inKelvin:
+      header.temperature.outlet.kelvin =
         (temps[0].2 * loops[1].massFlow.rate
           + temps[1].2 * loops[2].massFlow.rate
           + temps[2].2 * loops[3].massFlow.rate)
-          / (3.0 * header.massFlow.rate)
-      )
+          / (3.0 * header.massFlow.rate)      
 
       // Now calc. the linear inlet temperature gradient:
       let wayRatio: Double = parameter.loopWays[2] / parameter.pipeWay
 
       loops[2].temperature.inlet = Temperature(celsius:
         loops[3].temperature.inlet.celsius + wayRatio
-          * (temperature.inlet.celsius
-            - loops[3].temperature.inlet.celsius))
+          * (temperature.inlet.celsius - loops[3].temperature.inlet.celsius))
 
       loops[1].temperature.inlet = Temperature(celsius:
         loops[3].temperature.inlet.celsius + 2 * wayRatio
           * (temperature.inlet.celsius - loops[3].temperature.inlet.celsius))
 
-      loops[1].setInletTemperature(inKelvin:
+      loops[1].temperature.inlet.kelvin =
         temps[0].0 * inletTemperature
           + temps[0].1 * loops[1].inletTemperature
-      )
-
-      loops[2].setInletTemperature(inKelvin:
+      
+      loops[2].temperature.inlet.kelvin =
         temps[1].0 * inletTemperature
           + temps[1].1 * loops[2].inletTemperature
-      )
-
-      loops[3].setInletTemperature(inKelvin:
+      
+      loops[3].temperature.inlet.kelvin =
         temps[2].0 * inletTemperature
           + temps[2].1 * loops[3].inletTemperature
-      )
-    }
+      }
   }
 
   mutating func heatLossesHotHeader(ambient: Temperature) -> Temperature
   {
     let parameter = SolarField.parameter
-
+    let heatLoss = parameter.heatLossHeader
+    let htf = parameter.HTF
     let area = Design.layout.solarField
       * Double(parameter.numberOfSCAsInRow)
       * 2 * Collector.parameter.areaSCAnet
@@ -234,16 +225,13 @@ public struct SolarField: Component, Equatable, HeatCycle {
     repeat {      
       oldTemp = newTemp
       
-      heatLossHeader = parameter.heatLossHeader[0]
-        * (parameter.heatLossHeader[1] + parameter.heatLossHeader[2]
-          * (newTemp - ambient).kelvin) // [MWt]
+      heatLossHeader = heatLoss[0] * (heatLoss[1]
+        + heatLoss[2] * (newTemp - ambient).kelvin) // [MWt]
       
       if header.massFlow.rate > 0 {
         let deltaHeatPerKg = heatLossHeader * 1_000
           / header.massFlow.rate // [kJ/kg]
-        newTemp = parameter.HTF.temperature(
-          -deltaHeatPerKg, header.temperature.outlet
-        )
+        newTemp = htf.temperature(-deltaHeatPerKg, header.temperature.outlet)
       } else {
         let averageTemperature = Temperature.average(
           newTemp, header.temperature.outlet
@@ -254,7 +242,7 @@ public struct SolarField: Component, Equatable, HeatCycle {
         print("Temperature too low.")
         break
       }
-        let areaDensity = parameter.HTF.density(averageTemperature) * .pi
+        let areaDensity = htf.density(averageTemperature) * .pi
           * collector.rabsInner ** 2 / collector.aperture // kg/m2
 
         /// Heat collected or lost during the flow through a whole loop [kJ/sqm]
@@ -263,27 +251,22 @@ public struct SolarField: Component, Equatable, HeatCycle {
         /// Change kJ/sqm to kJ/kg:
         let deltaHeatPerKg = deltaHeatPerSqm / areaDensity
         
-        let heatPerKg = parameter.HTF.deltaHeat(
-          header.temperature.outlet, ambient
-        )
-        newTemp = parameter.HTF.temperature(
-          heatPerKg - deltaHeatPerKg, ambient
-        )
+        let heatPerKg = htf.deltaHeat(header.temperature.outlet, ambient)
+        newTemp = htf.temperature(heatPerKg - deltaHeatPerKg, ambient)
       }
-      newTemp = newTemp.limited(by: parameter.HTF.maxTemperature)
+      newTemp.limited(to: parameter.HTF.maxTemperature)
     } while abs(newTemp.kelvin - oldTemp.kelvin)
       > Simulation.parameter.HLtempTolerance
     return newTemp
   }
 
   mutating func calculate(
-    collector: Collector,
-    time: inout Double,
     dumping: inout Double,
+    collector: Collector,
     ambient: Temperature)
   {
     let heatExchanger = HeatExchanger.parameter
-    
+    var time = 0.0
     if isMaintained {
       if case .scheduledMaintenance = operationMode {
         return
@@ -295,7 +278,7 @@ public struct SolarField: Component, Equatable, HeatCycle {
     if case .freezeProtection = operationMode {
       loops = loops.map { loop in
         var loop = loop
-        loop.setInletTemperature(equalToInlet: self)
+        loop.temperature.inlet = temperature.inlet
         return loop
       }
     }
@@ -303,7 +286,7 @@ public struct SolarField: Component, Equatable, HeatCycle {
     operationMode = .unknown
     #warning("The implementation here differs from PCT")
     loops[0].massFlow = header.massFlow
-    loops[0].setTemperature(inlet: loops[1].temperature.inlet)
+    loops[0].temperature.inlet = loops[1].temperature.inlet
 
     (time, dumping) = HCE.calculation(
       &self, collector: collector, loop: .design,
@@ -311,7 +294,7 @@ public struct SolarField: Component, Equatable, HeatCycle {
     )
 
     header.massFlow = loops[0].massFlow
-    header.setTemperature(outlet: loops[0].temperature.outlet)
+    header.temperature.outlet = loops[0].temperature.outlet
 
     if loops[0].massFlow.isNearZero {
       loops[0].constantTemperature()
@@ -333,8 +316,7 @@ public struct SolarField: Component, Equatable, HeatCycle {
     default: // HCE returns with solarField.OPmode = unknown
       // if solarField.htf.temperature.outlet > heatExchanger.temperature.htf.inlet.min
       // && Not (Heater.solarField.operationMode = "OP" || Boiler.solarField.operationMode = "OP") {
-      if header.temperature.outlet
-        > heatExchanger.temperature.htf.inlet.min
+      if header.temperature.outlet > heatExchanger.temperature.htf.inlet.min
       {
         // Boiler wurde hier rausgenommen, wegen nachrechenen von SEGS VI
         operationMode = .operating // Operation at minimum mass flow

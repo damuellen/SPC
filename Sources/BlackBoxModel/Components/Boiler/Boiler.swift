@@ -131,9 +131,9 @@ public struct Boiler: Component {
     } else {
       heatAvailable = Qsf_load * Design.layout.boiler
     }
-    heatAvailable = heatAvailable.limited(by: Design.layout.boiler)
+    //heatAvailable = heatAvailable.limited(by: Design.layout.boiler)
 
-    load.ratio = heatAvailable / Design.layout.boiler
+    load = Ratio(heatAvailable / Design.layout.boiler)
     // The fuel needed
     let fuelNeed = heatAvailable / Boiler.efficiency(at: load)
       * Simulation.time.steps.fraction
@@ -178,7 +178,7 @@ public struct Boiler: Component {
     }
 
     if fuelAvailable < totalFuelNeed { // Check if sufficient fuel avail.
-      Boiler.load(&self, fuel: &fuel, fuelAvailable: fuelAvailable)
+      load(fuel: &fuel, fuelAvailable: fuelAvailable)
       if load.ratio < parameter.minLoad {
         debugPrint("""
           \(TimeStep.current)
@@ -214,70 +214,63 @@ public struct Boiler: Component {
     )
   }
 
-  private static func load(
-    _ status: inout Boiler, fuel: inout Double, fuelAvailable: Double)
+  private mutating func load(fuel: inout Double, fuelAvailable: Double)
   {
-    switch (status.operationMode, status.isMaintained) {
+    let parameter = Boiler.parameter
+    switch (operationMode, isMaintained) {
     case (let .noOperation(hours), false):
       let hourFraction = hours + Simulation.time.steps.fraction
-      status.operationMode = .noOperation(hours: hourFraction)
+      operationMode = .noOperation(hours: hourFraction)
     case (_, true):
-      status.operationMode = .scheduledMaintenance
+      operationMode = .scheduledMaintenance
     default:
       break
     }
 
     // Calc. the fuel avail. for production only:
-    switch status.operationMode {
+    switch operationMode {
     case let .noOperation(hours) where hours >= parameter.start.hours.cold:
       fuel -= parameter.start.energy.cold
     case let .noOperation(hours) where hours >= parameter.start.hours.warm:
       fuel -= parameter.start.energy.warm
     default:
       fuel = fuelAvailable
-      if 0.5 * fuel < status.startEnergy {
+      if 0.5 * fuel < startEnergy {
 
         fuel = 0.5 * fuel
 
-        status.startEnergy -= fuel
+        startEnergy -= fuel
 
       } else {
 
-        fuel -= status.startEnergy
+        fuel -= startEnergy
 
-        status.startEnergy = 0
+        startEnergy = 0
 
-        status.operationMode = .operating
+        operationMode = .operating
       }
     }
 
     if fuel == 0 {
+      startEnergy = -fuel
 
-      status.startEnergy = -fuel
-
-      status.load = 0.0
+      load = 0.0
       // electricalParasitics = 0
       // boiler.thermal = 0
       return
     }
 
+    if OperationRestriction.fuelStrategy.isPredefined { // predefined fuel consumption in *.pfc-file
+      load = Ratio(fuel / (Design.layout.boiler * Simulation.time.steps.fraction))
+      return
+    }
+    
     // Iteration to get possible load with the fuel avail. for production:
-    var load = 0.0
+    var newLoad = Ratio(0)
     repeat {
-      if OperationRestriction.fuelStrategy.isPredefined { // predefined fuel consumption in *.pfc-file
-        load = fuel / (Design.layout.boiler * Simulation.time.steps.fraction)
-
-        status.load.ratio =
-          fuel / (Design.layout.boiler * Simulation.time.steps.fraction)
-
-      } else {
-
-        load = fuel * Boiler.efficiency(at: status.load) / Design.layout.boiler
-
-        status.load.ratio = fuel * Boiler.efficiency(at: Ratio(load))
-          / Design.layout.boiler
-      }
-    } while abs(load - status.load.ratio) < 0.01
+        newLoad = Ratio(fuel * Boiler.efficiency(at: load) / Design.layout.boiler)
+        load = Ratio(fuel * Boiler.efficiency(at: newLoad) / Design.layout.boiler)
+    } while abs(newLoad.ratio - load.ratio) < 0.01
   }
 
   private static func noOperation(
