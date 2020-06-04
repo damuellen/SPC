@@ -18,10 +18,10 @@ extension Simulation {
     let minInsolationRaiseStartUp, heatTolerance, timeTolerance, massTolerance,
       minInsolation, maxToPowerBlock, minInsolationForBoiler,
       electricalTolerance, electricalParasitics, HLtempTolerance: Double
-    public var adjustmentFactor: AdjustmentFactor
+    public var adjustmentFactor: AdjustmentFactors
   }
 
-  public struct AdjustmentFactor: Codable {
+  public struct AdjustmentFactors: Codable {
     public var efficiencySolarField, efficiencyTurbine, efficiencyHeater,
       efficiencyBoiler, heatLossHCE, heatLossHTF, heatLossH2O,
       electricalParasitics: Double
@@ -78,7 +78,7 @@ extension Simulation.Parameter: CustomStringConvertible {
 extension Simulation.Parameter: TextConfigInitializable {
   public init(file: TextConfigFile) throws {
     let line: (Int) throws -> Double = { try file.parseDouble(line: $0) }
-    let adjustmentFactor = try Simulation.AdjustmentFactor(
+    let adjustmentFactor = try Simulation.AdjustmentFactors(
       efficiencySolarField: line(34),
       efficiencyTurbine: line(46),
       efficiencyHeater: line(52),

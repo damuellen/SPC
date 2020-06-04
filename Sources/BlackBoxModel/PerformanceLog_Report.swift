@@ -10,7 +10,7 @@
 import Foundation
 import DateGenerator
 
-extension PerformanceLog {
+enum PerformanceReport {
   
   static let date = { dateFormatter -> DateFormatter in
     dateFormatter.calendar = calendar
@@ -22,7 +22,7 @@ extension PerformanceLog {
      return numberFormatter
   }(NumberFormatter())
 
-  static func makeReport(
+  static func create(
     energy: Energy, radiation: SolarRadiation)
     -> String {
     let solarField = SolarField.parameter
@@ -35,7 +35,7 @@ extension PerformanceLog {
       
     var d: String = "\n"
     d += "PERFORMANCE RUN\n"
-    d += "    Date: \(PerformanceLog.date.string(from: Date()))\n"
+    d += "    Date: \(PerformanceReport.date.string(from: Date()))\n"
     d += "\n"
     d += "SOLAR FIELD\n"
     d += "    No of Loops:" >< "\(layout.solarField)"
@@ -87,20 +87,20 @@ extension PerformanceLog {
     d += "  --------------\n"
     d += "\n"
     d += "Gross electricty producution [MWh_el/a]:"
-      >< "\(PerformanceLog.number.string(from: NSNumber(value: energy.electric.gross))!)"
+      >< "\(PerformanceReport.number.string(from: NSNumber(value: energy.electric.gross))!)"
     //  Format((YTarS(0).EgrsST + YTarS(0).EgrsGasTurbine) * (1 - Simulation.parameter.UnSchedMain) * (1 - Simulation.parameter.TransLoss), )"
     d += "Parasitic consumption [MWh_el/a]:"
-      >< "\(PerformanceLog.number.string(from: NSNumber(value: energy.parasitics.shared))!)"
+      >< "\(PerformanceReport.number.string(from: NSNumber(value: energy.parasitics.shared))!)"
     // Format(YTarS(0).electricalParasitics * (1 - Simulation.parameter.UnSchedMain) * (1 - Simulation.parameter.TransLoss), )"
     d += "Net electricty producution [MWh_el/a]:"
-      >< "\(PerformanceLog.number.string(from: NSNumber(value: energy.electric.net))!)"
+      >< "\(PerformanceReport.number.string(from: NSNumber(value: energy.electric.net))!)"
     // Format(YTarS(0).Enet * (1 - Simulation.parameter.UnSchedMain) * (1 - Simulation.parameter.TransLoss), )"
     d += "Gas consumption [MWh_el/a]:\n" // Format(YTarS(0).heatfuel, )"
     d += "Solar share [%]:\n" // Format(SolShare * 100, )"
     d += "Annual direct solar insolation [kWh/m²a]:" //  Format(YTarS(0).NDI,)"
-      >< "\(PerformanceLog.number.string(from: NSNumber(value: radiation.dni / 1_000))!)"
+      >< "\(PerformanceReport.number.string(from: NSNumber(value: radiation.dni / 1_000))!)"
     d += "Total heat from solar field [MWh_el/a]:" // Format(YTarS(0).heatsol,)"
-    >< "\(PerformanceLog.number.string(from: NSNumber(value: energy.thermal.solar.megaWatt))!)"
+    >< "\(PerformanceReport.number.string(from: NSNumber(value: energy.thermal.solar.megaWatt))!)"
     d += "________________________________________________________________________________\n"
     d += "\n"
     d += "AVAILABILITIES\n"
@@ -159,13 +159,13 @@ extension PerformanceLog {
     d += "\n"
     d += "First Date of Operation [MM.dd  HH:mm]:                             "
     if let firstDateOfOperation = Simulation.time.firstDateOfOperation {
-      d += PerformanceLog.date.string(from: firstDateOfOperation) + .lineBreak
+      d += PerformanceReport.date.string(from: firstDateOfOperation) + .lineBreak
     } else {
       d += "01.01  00:00\n"
     }
     d += "Last Date of Operation [MM.dd  HH:mm]:                              "
     if let lastDateOfOperation = Simulation.time.lastDateOfOperation {
-      d += PerformanceLog.date.string(from: lastDateOfOperation) + .lineBreak
+      d += PerformanceReport.date.string(from: lastDateOfOperation) + .lineBreak
     } else {
       d += "12.31  23:59\n"
     }

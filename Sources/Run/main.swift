@@ -54,8 +54,10 @@ struct SolarPerformanceCalculator: ParsableCommand {
   var year: Int
   @OptionGroup()
   var location: LocationInfo 
-  @Option(name: .shortAndLong, default: 12, help: "Steps per hour.")
-  var interval: Int?
+  @Option(name: .shortAndLong, default: nil, help: "Calculation steps per hour.")
+  var stepsCalculation: Int?
+  @Option(name: .shortAndLong, default: nil, help: "Values per hour output file.")
+  var outputValues: Int?
   @Flag(help: "All results are output to file.")
   var full: Bool
 
@@ -63,7 +65,7 @@ struct SolarPerformanceCalculator: ParsableCommand {
     print("──────────────────────┤  Solar Performance Calculator   ├───────────────────────\n") 
     // BlackBoxModel.loadConfigurations(atPath: configPath, format: .json)
     // BlackBoxModel.saveConfigurations(toPath: configPath)
-    if let steps = interval {
+    if let steps = stepsCalculation {
       Simulation.time.steps = Interval[steps]
     } else {
       Simulation.time.steps = .every5minutes
@@ -80,16 +82,23 @@ struct SolarPerformanceCalculator: ParsableCommand {
       BlackBoxModel.configure(location: loc)
     }       
 
-    BlackBoxModel.configure(meteoFilePath: meteofilePath)
+    BlackBoxModel.configure(meteoFilePath: "/Users/Daniel/Development/spc")
 
    // let mode: PerformanceDataRecorder.Mode = full ? .all : .brief
-    let log = PerformanceDataRecorder(name: nameResults, path: resultsPath, mode: .all)
+    let mode: PerformanceDataRecorder.Mode
+    if let steps = outputValues {
+      mode = .custom(interval: Interval[steps])
+    } else {
+      mode = .brief
+    }
+    let log = PerformanceDataRecorder(name: nameResults, path: resultsPath, output: mode)
 
     BlackBoxModel.runModel(with: log)
+    
     SolarPerformanceCalculator.result = log.log
     
     log.printResult()  
-
+/*
     let semaphore = DispatchSemaphore(value: 0)
 	do {
 	  try server.start(9080, forceIPv4: true)
@@ -99,7 +108,7 @@ struct SolarPerformanceCalculator: ParsableCommand {
 	} catch {
 	  print("Server start error: \(error)")
 	  semaphore.signal()
-	}
+	}*/
   }
 
   static var configuration = CommandConfiguration(
@@ -107,7 +116,7 @@ struct SolarPerformanceCalculator: ParsableCommand {
     abstract: "Simulates the performance of entire solar thermal power plants."
   )
 }
-
+/*
 let server = HttpServer()
 let encoder = JSONEncoder()
 let cases = JSONConfig.Name.allCases
@@ -145,9 +154,8 @@ server["/day/:day.json"] = { request in
     }
 
 }
-SolarPerformanceCalculator.main()
 
-/*
+
 
 SolarField.parameter.massFlow.max = 2500.0
 Design.layout.powerBlock = 73
@@ -172,6 +180,4 @@ let log = PerformanceDataRecorder(
 )
 */
 
-
-
-
+SolarPerformanceCalculator.main()

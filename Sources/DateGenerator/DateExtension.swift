@@ -4,7 +4,7 @@ public typealias FractionalTime = Double
 
 public extension Date {
 
-  public func get(component: NSCalendar.Unit) -> Int {
+  func get(component: NSCalendar.Unit) -> Int {
     return calendar.component(component, from: self)
   }
 
@@ -13,7 +13,7 @@ public extension Date {
       [.day, .month, .year, .weekday, .hour, .minute, .second], from: self)
   }
 
-  public func set(time fractionalTime: FractionalTime) -> Date? {
+  func set(time fractionalTime: FractionalTime) -> Date? {
     let min = 60 * (fractionalTime - Double(Int(fractionalTime)))
     let sec = 60 * (min - Double(Int(min)))
     var components = self.getComponents()
@@ -26,7 +26,7 @@ public extension Date {
 
 public extension DateInterval {
 
-   public func align(with valuesPerHour: DateGenerator.Interval) -> DateInterval {
+   func align(with valuesPerHour: DateGenerator.Interval) -> DateInterval {
      var start = self.start.getComponents(), end = self.end.getComponents()
 
      start.second = 0

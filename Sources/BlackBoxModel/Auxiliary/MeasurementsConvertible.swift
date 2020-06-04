@@ -12,15 +12,19 @@ import Foundation
 
 protocol MeasurementsConvertible {
   static var columns: [(name: String, unit: String)] { get }
-  var values: [String] { get }
+  var numericalForm: [Double] { get }
+  var prettyDescription: String { get }
 }
 
 extension MeasurementsConvertible {
-  var description: String {
-    return zip(values, Self.columns).reduce("\n") { result, pair in
+  var values: [String] { strings(numericalForm) }
+  
+  var prettyDescription: String {
+    return zip(values, Self.columns) .reduce("\n") { result, pair in
       let (value, desc) = pair
       if value.hasPrefix("0") { return result }
       return result + (desc.name >< (value + " " + desc.unit))
-    }    
+    }
   }
 }
+

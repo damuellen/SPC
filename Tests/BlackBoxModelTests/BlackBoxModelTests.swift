@@ -13,7 +13,7 @@ class BlackBoxModelTests: XCTestCase {
     var location = Location(longitude: 47.73, latitude: 29, elevation: 0)
     location.timezone = 2
     BlackBoxModel.configure(location: location)
-    let log = PerformanceDataRecorder(mode: .none)
+    let log = PerformanceDataRecorder(output: .none)
     BlackBoxModel.runModel(with: log)
     let result = log.log!
 
@@ -36,7 +36,7 @@ class BlackBoxModelTests: XCTestCase {
     var location = Location(longitude: 47.73, latitude: 29, elevation: 0)
     location.timezone = 2
     BlackBoxModel.configure(location: location)
-    let log = PerformanceDataRecorder(mode: .none)
+    let log = PerformanceDataRecorder(output: .none)
     BlackBoxModel.runModel(with: log)
     let result = log.log!
     

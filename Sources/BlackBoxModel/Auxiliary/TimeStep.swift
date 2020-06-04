@@ -34,7 +34,7 @@ public struct TimeStep: CustomStringConvertible {
   private var second: Int = 0
 
   public var description: String {
-    let ds = String(format: "%04d-%02d-%02d  %02d:%02d:%02d",
+    let ds = String(format: "%04d-%02d-%02d--%02d:%02d:%02d",
                     year, month, day, hour, minute, second)
     let symbol = isDaytime ? " 🌞 " : " 🌃 "
     return symbol + ds

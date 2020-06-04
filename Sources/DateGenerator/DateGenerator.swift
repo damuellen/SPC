@@ -7,10 +7,10 @@ let calendar = { calendar -> NSCalendar in
 
 public final class DateGenerator: Sequence, IteratorProtocol {
   
-  public enum Interval: Int {
+  public enum Interval: Int, CaseIterable, CustomStringConvertible {
     case hourly = 1
     case half_hourly = 2
-    case everyThirdHour = 3
+    case thirdOfHour = 3
     case quarter_hourly = 4
     case every12minutes = 5
     case every10minutes = 6
@@ -26,6 +26,22 @@ public final class DateGenerator: Sequence, IteratorProtocol {
 
     public var interval: Double {
       return 3600 * fraction
+    }
+    
+    public var denominators: [Int] {
+      var result = [Int]()
+      for i in 2...6 {
+        if rawValue % i == 0 {
+          result.append(i)
+        }
+      }
+      return result
+    }
+    
+    public var description: String { "\(60 / rawValue)min" }
+    
+    public func isMultiple(of other: Interval) -> Bool {
+      other.denominators.contains(rawValue)
     }
     
     public static subscript(value: Int) -> Interval {

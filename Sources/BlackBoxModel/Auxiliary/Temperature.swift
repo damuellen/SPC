@@ -72,7 +72,7 @@ public struct Temperature: CustomStringConvertible, Equatable {
     kelvin *= factor
   }
 
-  mutating func limited(to max: Temperature) {
+  mutating func limit(to max: Temperature) {
     kelvin = min(max.kelvin, self.kelvin)
   }
   

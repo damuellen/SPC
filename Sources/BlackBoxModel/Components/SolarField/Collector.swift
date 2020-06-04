@@ -176,15 +176,9 @@ extension SolarField.OperationMode {
 }
 
 extension Collector: MeasurementsConvertible {
-  var values: [String] {
-    [String(format: "%.1f", theta),
-     String(format: "%.2f", cosTheta),
-     String(format: "%.2f", efficiency),
-     String(format: "%.1f", parabolicElevation)]
-  }
   
-  var csv: String {
-    "\(csv: theta, cosTheta, efficiency, parabolicElevation)"
+  var numericalForm: [Double] {
+    [theta, cosTheta, efficiency, parabolicElevation]
   }
   
   static var columns: [(name: String, unit: String)] {

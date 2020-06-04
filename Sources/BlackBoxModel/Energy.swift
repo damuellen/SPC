@@ -10,7 +10,7 @@
 
 import Foundation
 
-public struct Energy: CustomStringConvertible {
+public struct Energy: MeasurementsConvertible {
   
   internal(set) public var thermal: ThermalEnergy
   
@@ -19,13 +19,7 @@ public struct Energy: CustomStringConvertible {
   internal(set) public var fuel: FuelConsumption
   
   internal(set) public var parasitics: Parasitics
-  
-  public var description: String {
-    return "\n" + (thermal.description + parasitics.description
-      + electric.description + fuel.description)
-      .split(separator: "\n").joined(separator: "\n") + "\n"
-  }
-  
+
   mutating func zero() {
     self.thermal = ThermalEnergy()
     self.fuel = FuelConsumption()
@@ -38,6 +32,16 @@ public struct Energy: CustomStringConvertible {
     self.fuel.totalize(energy.fuel, fraction: fraction)
     self.parasitics.totalize(energy.parasitics, fraction: fraction)
     self.electric.totalize(energy.electric, fraction: fraction)
+  }
+  
+  var numericalForm: [Double] {
+    return thermal.numericalForm + fuel.numericalForm
+    + parasitics.numericalForm + electric.numericalForm
+  }
+    
+  static var columns: [(name: String, unit: String)] {
+    return ThermalEnergy.columns + FuelConsumption.columns
+      + Parasitics.columns + ElectricPower.columns
   }
 }
 
@@ -56,16 +60,8 @@ public struct ElectricPower: Encodable, MeasurementsConvertible {
   steamTurbineGross = 0.0, gasTurbineGross = 0.0, backupGross = 0.0,
   parasitics = 0.0, net = 0.0, consum = 0.0
   
-  var values: [String] {
-    strings([steamTurbineGross, gasTurbineGross, backupGross,parasitics, net, consum])
-  }
-  
-  var csv: String {
-    "\(csv: steamTurbineGross, gasTurbineGross, backupGross, parasitics, net, consum)"
-  }
-
-  public var dict: [String: String] {
-    Dictionary(uniqueKeysWithValues: zip(Self.columns.map(\.name), values))
+  var numericalForm: [Double] {
+    [steamTurbineGross, gasTurbineGross, backupGross, parasitics, net, consum]
   }
   
   static var columns: [(name: String, unit: String)] {
@@ -88,13 +84,9 @@ public struct ElectricPower: Encodable, MeasurementsConvertible {
 public struct Parasitics: Encodable, MeasurementsConvertible {
   internal(set) public var boiler = 0.0, gasTurbine = 0.0, heater = 0.0,
   powerBlock = 0.0, shared = 0.0, solarField = 0.0, storage = 0.0
-  
-  var values: [String] {
-    strings([solarField, powerBlock, storage,shared, 0, gasTurbine,])
-  }
-  
-  var csv: String {
-    "\(csv: solarField, powerBlock, storage, shared, 0, gasTurbine)"
+
+  var numericalForm: [Double] {
+    [solarField, powerBlock, storage,shared, 0, gasTurbine,]
   }
   
   static var columns: [(name: String, unit: String)] {
@@ -122,23 +114,14 @@ public struct ThermalEnergy: Encodable, MeasurementsConvertible {
   
   var excess: Power { production - demand }
   
-  var values: [String] {
-    strings(
-      [solar.megaWatt, dumping.megaWatt,
-       toStorage.megaWatt, storage.megaWatt,
-       heater.megaWatt, heatExchanger.megaWatt,
-       startUp.megaWatt, wasteHeatRecovery.megaWatt,
-       boiler.megaWatt, production.megaWatt])
+  var numericalForm: [Double] {
+    [solar.megaWatt, dumping.megaWatt,
+    toStorage.megaWatt, storage.megaWatt,
+    heater.megaWatt, heatExchanger.megaWatt,
+    startUp.megaWatt, wasteHeatRecovery.megaWatt,
+    boiler.megaWatt, production.megaWatt]
   }
-  
-  var csv: String {
-    """
-    \(csv: solar.megaWatt, dumping.megaWatt, toStorage.megaWatt, storage.megaWatt,
-    heater.megaWatt, heatExchanger.megaWatt, startUp.megaWatt,
-    wasteHeatRecovery.megaWatt, boiler.megaWatt, production.megaWatt)
-    """
-  }
-  
+
   static var columns: [(name: String, unit: String)] {
     [("Thermal|Solar", "MWh th"), ("Thermal|Dumping", "MWh th"),
      ("Thermal|ToStorage", "MWh th"), ("Thermal|Storage", "MWh th"),
@@ -178,14 +161,10 @@ public struct FuelConsumption: Encodable, MeasurementsConvertible {
     return boiler + heater + gasTurbine
   }
   
-  var values: [String] {
-    strings([backup, boiler, heater, gasTurbine, combined])
+  var numericalForm: [Double] {
+    [backup, boiler, heater, gasTurbine, combined]
   }
-  
-  var csv: String {
-    "\(csv: backup, boiler, heater, gasTurbine, combined)"
-  }
-  
+
   static var columns: [(name: String, unit: String)] {
      [("FuelConsumption|Backup", "MWh"), ("FuelConsumption|Boiler", "MWh"),
       ("FuelConsumption|Heater", "MWh"), ("FuelConsumption|GasTurbine", "MWh"),

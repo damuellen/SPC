@@ -13,6 +13,7 @@ import TSCUtility
 import DateGenerator
 import Foundation
 import Meteo
+import SQLite
 
 public final class PerformanceDataRecorder {
 
@@ -21,22 +22,29 @@ public final class PerformanceDataRecorder {
 #endif 
 
   let interval = Simulation.time.steps   
-
+  let stride: Int
   let mode: Mode
   
   public enum Mode {
-    case all, brief, playground, none
+    case persistent, brief, memory, none,
+    custom(interval: DateGenerator.Interval)
     
     var hasFileOutput: Bool {
-      if case .none = self {
-        return false
-      }
+      if case .none = self { return false }
+      if case .memory = self { return false }
       return true
+    }
+    
+    var hasHistory: Bool {
+      if case .persistent = self { return true }
+      if case .memory = self { return true }
+      return false
     }
   }
 
   private var dateString: String = ""
-
+  private var dateString2: String = ""
+  
   private let dateFormatter: DateFormatter = { dateFormatter in
     dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
     dateFormatter.dateStyle = .short
@@ -44,8 +52,9 @@ public final class PerformanceDataRecorder {
     return dateFormatter
   }(DateFormatter())
 
-  public var log: PerformanceLog? 
+  public var log: PerformanceLog?
   
+  private var db: Connection? = nil
   /// Totals
   private var annualEnergy = Energy()
   private var annualRadiation = SolarRadiation()
@@ -55,22 +64,35 @@ public final class PerformanceDataRecorder {
   /// Sum of hourly values
   private var dailyEnergy = Energy()
   private var dailyRadiation = SolarRadiation()
+  
+  private var transientEnergy = Energy()
+  private var transientRadiation = SolarRadiation()
+  
   /// All past states of the plant
   private var performanceHistory: [PerformanceData] = []
   private var energyHistory: [Energy] = []
 
   public init(noHistory: Bool = false) {
-    self.mode = noHistory ? .none : .playground
+    self.mode = noHistory ? .none : .memory
+    self.stride = 1
   }
 
-  public init(name: String? = nil, path: String? = nil, mode: Mode = .none) { 
-    self.mode = mode
+  public init(name: String? = nil, path: String? = nil, output: Mode = .none) {
+    
     let 💾 = FileManager.default    
     let suffix: String
     
+    if case .custom(let i) = output, i.isMultiple(of: interval) {
+      self.stride = interval.rawValue / i.rawValue
+      self.mode = output
+    } else {
+      self.mode = output
+      self.stride = 1
+    }
+    
     let url = URL(fileURLWithPath: path ?? 💾.currentDirectoryPath)
     
-    if mode.hasFileOutput, !url.hasDirectoryPath { 
+    if output.hasFileOutput, !url.hasDirectoryPath { 
       print("Invalid path for results: \(url.path)\n")
       print("There will be no output files.\n")
       return
@@ -81,7 +103,7 @@ public final class PerformanceDataRecorder {
     } else {
       let contents = try? 💾.contentsOfDirectory(atPath: url.path)
 
-      let oldResults = contents?.filter { $0.hasSuffix("csv") }
+      let oldResults = contents?.filter { $0.hasSuffix("ly.csv") }
 
       let numbers = oldResults?.compactMap { filename in
         return Int(filename.filter(\.isWholeNumber))
@@ -89,49 +111,45 @@ public final class PerformanceDataRecorder {
       let n = (numbers?.max() ?? 0) + 1
       suffix = String(format: "%03d", n)
     }
-    let tab = "\t"
-    if mode.hasFileOutput {   
-        
+    
+    if case .persistent = output {
+      self.db = try! Connection("Results_\(suffix).sqlite3")
+    }
+
+    if output.hasFileOutput {   
+      let tableHeader = headers.name + .lineBreak + headers.unit + .lineBreak
       let dailyResultsURL = url.appendingPathComponent("Results_\(suffix)_daily.csv")
-      self.dailyResultsStream = OutputStream(url: dailyResultsURL, append: false)
-      self.dailyResultsStream?.open()
-      self.dailyResultsStream?.write(
-        self.headersDaily.name + .lineBreak + self.headersDaily.unit + .lineBreak
-      )
       let hourlyResultsURL = url.appendingPathComponent("Results_\(suffix)_hourly.csv")
-      
+      self.dailyResultsStream = OutputStream(url: dailyResultsURL, append: false)
       self.hourlyResultsStream = OutputStream(url: hourlyResultsURL, append: false)
-      self.hourlyResultsStream?.open()      
-      self.hourlyResultsStream?.write(
-        self.headersHourly.name + .lineBreak + self.headersHourly.unit + .lineBreak
-      )
+      self.dailyResultsStream?.open()
+      self.hourlyResultsStream?.open()
+      self.dailyResultsStream?.write(tableHeader)
+      self.hourlyResultsStream?.write(tableHeader)
+
       var urls = [dailyResultsURL, hourlyResultsURL]
-
-      if case .all = mode {
-        let header = "wxDVFileHeaderVer.1\n"
-        let startTime = repeatElement("0", count: 40)
-          .joined(separator: .separator) + .lineBreak
-        let intervalTime = repeatElement("\(interval.fraction)", count: 40)
-          .joined(separator: .separator) + .lineBreak
-        let allResults1URL = url.appendingPathComponent("Results_\(suffix)_all.csv")
-        allResultsStream = OutputStream(url: allResults1URL, append: false)
-
-        allResultsStream?.open()
-        allResultsStream?.write(
-          header + headersInterval.name + startTime + intervalTime + headersInterval.unit
-        )
-        let allResults2URL = url.appendingPathComponent("Results_\(suffix)_status.csv")
-        print(tab, "\(allResults1URL.lastPathComponent)\t", "\(allResults2URL.lastPathComponent)\n")
-        allResultsStream2 = OutputStream(url: allResults2URL, append: false)
-        allResultsStream2?.open()
-        allResultsStream2?.write(
-          header + headersInterval2.name + startTime + intervalTime + headersInterval2.unit
-        )
-        urls += [allResults1URL, allResults2URL]
-      }
       
+      if case .custom(let i) = mode {
+        let startTime = repeatElement("0", count: 40)
+          .joined(separator: .separator)
+        let intervalTime = repeatElement("\(i.fraction)", count: 40)
+          .joined(separator: .separator)
+        let tableHeader = "wxDVFileHeaderVer.1" + .lineBreak
+          + headers.name + startTime + .lineBreak
+          + intervalTime + .lineBreak
+          + headers.unit + .lineBreak
+        let resultsURL = url.appendingPathComponent("Results_\(suffix)_\(i).csv")
+        
+        transientStream = OutputStream(url: resultsURL, append: false)
+
+        transientStream?.open()
+        transientStream?.write(tableHeader)
+        urls.append(resultsURL)
+      }
+ 
       print("Results: \(url.path)/")
-      urls.map(\.lastPathComponent).enumerated().forEach { print("  \($0.offset+1).\t", $0.element) }
+      urls.map(\.lastPathComponent).enumerated()
+        .forEach { print("  \($0.offset+1).\t", $0.element) }
       print()
     }
   }
@@ -139,8 +157,6 @@ public final class PerformanceDataRecorder {
   deinit {
     dailyResultsStream?.close()
     hourlyResultsStream?.close()
-    allResultsStream?.close()
-    allResultsStream2?.close()    
   }
   
   public func clearResults() {
@@ -157,12 +173,54 @@ public final class PerformanceDataRecorder {
   public func printResult() {
     print("")
     print("─────────────────────────────┤   Annual results   ├─────────────────────────────")
-    print(annualEnergy)
+    print(annualRadiation.prettyDescription)
+    print(annualEnergy.prettyDescription)
   }
-
-  func add(
+  
+  func callAsFunction(
     _ ts: TimeStep, meteo: MeteoData, status: PerformanceData, energy: Energy)
   {
+    if mode.hasHistory {
+      self.performanceHistory.append(status)
+      self.energyHistory.append(energy)
+    }   
+    
+    let solar = SolarRadiation(
+      meteo: meteo, cosTheta: status.collector.cosTheta
+    )   
+
+    if mode.hasFileOutput {
+
+      defer { intervalCounter += 1 }
+
+      if intervalCounter == 1 {
+        dateString = ts.description // dateFormatter.string(from: date)
+      }
+
+      if case .custom(_) = mode {
+        if stride == 1 || intervalCounter % stride == 1 {
+          dateString2 = ts.description
+        }
+        let fraction = 1 / Double(stride)
+        transientRadiation.totalize(solar, fraction: fraction)
+        transientEnergy.totalize(energy, fraction: fraction)
+
+        if stride == 1 || intervalCounter % stride == 0 {
+          let csv = generateValues()
+          transientStream?.write(csv)
+          transientRadiation.zero()
+          transientEnergy.zero()
+        }
+      }
+      
+      hourlyRadiation.totalize(solar ,fraction: interval.fraction)
+      hourlyEnergy.totalize(energy, fraction: interval.fraction)
+      // Daily and annual sum calculations see counters
+    } else {
+      // Only the annual sums are calculated.
+      annualRadiation.totalize(solar, fraction: interval.fraction)
+      annualEnergy.totalize(energy, fraction: interval.fraction)
+    }
 #if DEBUG
     if progress != ts.month {
       progress = ts.month
@@ -172,41 +230,7 @@ public final class PerformanceDataRecorder {
         text: "currently simulated month."
       )
     }
-#endif 
-    if case .playground = mode {
-      self.performanceHistory.append(status)
-      self.energyHistory.append(energy)
-    }   
-    
-    let solar = SolarRadiation(
-      meteo: meteo, cosTheta: status.collector.cosTheta
-    )   
-
-    let fraction = interval.fraction
-    if mode.hasFileOutput {
-      
-      if case .all = mode {
-        let (csv1, csv2) = generateValues(
-          status: status, energy: energy, solar: solar, ts: ts
-        )
-        allResultsStream?.write(csv1)
-        allResultsStream2?.write(csv2)      
-      }
-
-      defer { intervalCounter += 1 }
-
-      if intervalCounter == 0 {
-        dateString = ts.description // dateFormatter.string(from: date)
-      }
-      hourlyRadiation.totalize(solar ,fraction: fraction)
-      hourlyEnergy.totalize(energy, fraction: fraction)
-      // Daily and annual sums are also calculated in
-      // writeHourlyResults() and writeDailyResults()
-    } else {
-      // Only the annual sums are calculated.
-      annualRadiation.totalize(solar, fraction: fraction)
-      annualEnergy.totalize(energy, fraction: fraction)
-    }
+#endif
   }
 
   func complete() {
@@ -216,6 +240,10 @@ public final class PerformanceDataRecorder {
       energyHistory: energyHistory,
       performanceHistory: performanceHistory
     )
+    
+    if case .persistent = mode {
+      storeInDB()
+    }
 
 #if DEBUG
     animation.clear()
@@ -224,26 +252,28 @@ public final class PerformanceDataRecorder {
 #if DEBUG
   private var progress: Int = 0
 #endif 
-  private var hourCounter: Int = 0 {
+  private var hourCounter: Int = 1 {
     didSet {
-      if hourCounter == 24 {
-        annualEnergy.totalize(dailyEnergy, fraction: 24)
-        annualRadiation.totalize(dailyRadiation, fraction: 24)
-
+      if hourCounter > 24 {
+        annualEnergy.totalize(dailyEnergy, fraction: 1)
+        annualRadiation.totalize(dailyRadiation, fraction: 1)
+        
         let csv = generateDailyValues()
         dailyResultsStream?.write(csv)
+        
         dailyEnergy.zero()
         dailyRadiation.zero()
-        hourCounter = 0
+        
+        hourCounter = 1
       }
     }
   }
 
-  private var intervalCounter: Int = 0 {
+  private var intervalCounter: Int = 1 {
     didSet {
-      if intervalCounter == interval.rawValue {        
-        dailyEnergy.totalize(hourlyEnergy, fraction: 1 / 24)
-        dailyRadiation.totalize(hourlyRadiation, fraction: 1 / 24)
+      if intervalCounter > interval.rawValue {
+        dailyEnergy.totalize(hourlyEnergy, fraction: 1)
+        dailyRadiation.totalize(hourlyRadiation, fraction: 1)
 
         let csv = generateHourlyValues()
         hourlyResultsStream?.write(csv)
@@ -252,24 +282,53 @@ public final class PerformanceDataRecorder {
         hourlyRadiation.zero()
 
         hourCounter += 1
-        intervalCounter = 0
+        intervalCounter = 1
       }
+    }
+  }
+  
+  // MARK: Output database
+  
+  public func storeInDB() {
+    guard let db = db else { return }
+    
+    func createTable(name: String, columns: [String]) {
+      let table = Table(name)
+      let expressions = columns.map {Expression<Double>($0)}
+      try! db.run(table.create { t in
+        expressions.forEach { t.column($0) }
+      })
+    }
+    
+    let performanceData = PerformanceData.columns.map(\.0)
+    let energy = Energy.columns.map(\.0)
+    createTable(name: "PerformanceData", columns: performanceData)
+    createTable(name: "Energy", columns: energy )
+
+    let p1 = repeatElement("?", count: performanceData.count).joined(separator: ",")
+    try! db.transaction {
+      let stmt = try! db.prepare("INSERT INTO PerformanceData VALUES (\(p1))")
+      for entry in performanceHistory { try! stmt.run(entry.numericalForm) }
+    }
+    
+    let p2 = repeatElement("?", count: energy.count).joined(separator: ",")
+    try! db.transaction {
+      let stmt = try! db.prepare("INSERT INTO Energy VALUES (\(p2))")
+      for entry in energyHistory { try! stmt.run(entry.numericalForm) }
     }
   }
 
   // MARK: Output Streams
 
+  private var transientStream: OutputStream?
+  
   private var dailyResultsStream: OutputStream?
   private var hourlyResultsStream: OutputStream?
-  private var allResultsStream: OutputStream?
-  private var allResultsStream2: OutputStream?
 
   // MARK: Table headers
 
-  private var headersDaily: (name: String, unit: String) {
-    let columns = [SolarRadiation.columns, ThermalEnergy.columns,
-                   ElectricPower.columns, Parasitics.columns,
-                   FuelConsumption.columns].joined()
+  private var headers: (name: String, unit: String) {
+    let columns = [SolarRadiation.columns, Energy.columns].joined()
     let names: String = columns.map { $0.0 }.joined(separator: ",")
     let units: String = columns.map { $0.1 }.joined(separator: ",")
     // if dateFormatter != nil {
@@ -278,67 +337,24 @@ public final class PerformanceDataRecorder {
     // return (names, units)
   }
 
-  private var headersHourly: (name: String, unit: String) {
-    let columns = [SolarRadiation.columns, ThermalEnergy.columns,
-                   ElectricPower.columns, Parasitics.columns,
-                   FuelConsumption.columns].joined()
-    let names = columns.map { $0.0 }.joined(separator: ",")
-    let units = columns.map { $0.1 }.joined(separator: ",")
-    // if dateFormatter != nil {
-    return ("DateTime," + names, "_," + units)
-    // }
-    // return (names, units)
-  }
-
-  private var headersInterval: (name: String, unit: String) {
-    let columns = [SolarRadiation.columns, ThermalEnergy.columns,
-                   ElectricPower.columns, Parasitics.columns,
-                   FuelConsumption.columns, Collector.columns]
-      .joined()
-    let names = columns.map { $0.0 }.joined(separator: ",") + .lineBreak
-    let units = columns.map { $0.1 }.joined(separator: ",") + .lineBreak
-    return ("DateTime," + names, "_," + units)
-  }
-
-  private var headersInterval2: (name: String, unit: String) {
-    let columns = PerformanceData.columns
-    let names = columns.map { $0.0 }.joined(separator: ",") + .lineBreak
-    let units = columns.map { $0.1 }.joined(separator: ",") + .lineBreak
-    return ("DateTime," + names, "_," + units)
-  }
-
   // MARK: Write Results
 
   private func generateDailyValues() -> String {
-    return dateString.dropFirst(3).prefix(10) + .separator + [
-      dailyRadiation.values, dailyEnergy.thermal.values,
-      dailyEnergy.electric.values, dailyEnergy.parasitics.values,
-      dailyEnergy.fuel.values].joined()
-      .joined(separator: ",") + .lineBreak
+    return dateString.dropFirst(3).prefix(10) + .separator
+      + [dailyRadiation.values, dailyEnergy.values]
+        .joined().joined(separator: ",") + .lineBreak
   }
 
   private func generateHourlyValues() -> String {
-    return dateString.dropFirst(3) + .separator + [
-      hourlyRadiation.values, hourlyEnergy.thermal.values,
-      hourlyEnergy.electric.values, hourlyEnergy.parasitics.values,
-      hourlyEnergy.fuel.values].joined()
-      .joined(separator: .separator) + .lineBreak
+    return dateString.dropFirst(3) + .separator
+      + [hourlyRadiation.values, hourlyEnergy.values]
+        .joined().joined(separator: .separator) + .lineBreak
   }
-
-  private func generateValues(
-    status: PerformanceData, energy: Energy,
-    solar: SolarRadiation, ts: TimeStep)
-    -> (String, String)
-  {
-    let dateString = ts.description   //dateFormatter.string(from: date)
- 
-    let csv1 = dateString + .separator + solar.csv
-      + energy.thermal.csv + energy.electric.csv
-      + energy.parasitics.csv + energy.fuel.csv
-      + status.collector.csv + .lineBreak
-    let csv2 = dateString + .separator + status.csv + .lineBreak
-
-    return (csv1, csv2)  
+  
+  private func generateValues() -> String {
+    return dateString2.dropFirst(3) + .separator
+      + [transientRadiation.values, transientEnergy.values]
+        .joined().joined(separator: .separator) + .lineBreak
   }
 }
 

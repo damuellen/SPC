@@ -8,7 +8,7 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
   
-public struct PerformanceData: CustomStringConvertible {
+public struct PerformanceData: CustomStringConvertible, MeasurementsConvertible {
 
   public var collector = Collector.initialState,
   solarField = SolarField.initialState,
@@ -32,16 +32,15 @@ public struct PerformanceData: CustomStringConvertible {
       + (Design.hasStorage ? "Storage:\n\(storage)\n" : "")
   }
   
-  var csv: String {
-    let values = storage.cycle.values + heater.cycle.values
-      + powerBlock.cycle.values + heatExchanger.cycle.values
-      + solarField.header.values
-      + solarField.loops[0].values + solarField.loops[1].values
-      + solarField.loops[2].values + solarField.loops[3].values
-    return values.joined(separator: .separator)
+  var numericalForm: [Double] {
+    return storage.cycle.numericalForm + heater.cycle.numericalForm
+      + powerBlock.cycle.numericalForm + heatExchanger.cycle.numericalForm
+      + solarField.header.numericalForm
+      + solarField.loops[0].numericalForm + solarField.loops[1].numericalForm
+      + solarField.loops[2].numericalForm + solarField.loops[3].numericalForm
   }
   
-  static var columns: [(String, String)] {
+  static var columns: [(name: String, unit: String)] {
     let values: [(name: String, unit: String)] =
       [("|Massflow", "kg/s"), ("|Tin", "degC"), ("|Tout", "degC")]
     return [
@@ -50,4 +49,3 @@ public struct PerformanceData: CustomStringConvertible {
         values.map { value in (name + value.name, value.unit) } }
   }
 }
-

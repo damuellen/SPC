@@ -39,12 +39,13 @@ let period = 300
  */
 enum HCE {
   @discardableResult
-  static func calculation(_ solarField: inout SolarField,
-                          collector: Collector,
-                          loop: SolarField.Loop,
-                          mode: Collector.OperationMode,
-                          ambient: Temperature) -> (Double, Double)
-  {
+  static func calculation(
+    _ solarField: inout SolarField,
+    collector: Collector,
+    loop: SolarField.Loop,
+    mode: Collector.OperationMode,
+    ambient: Temperature
+  ) -> (Double, Double) {
     switch mode {
     case .fixed:
       return mode2(&solarField, collector, loop, ambient)
@@ -102,7 +103,8 @@ enum HCE {
     let (t1, t2) = (temperature1.kelvin, temperature2.kelvin)
     let avgT = (t1 + t2) / 2
     let col = Collector.parameter
-    
+    let aperture = Collector.parameter.aperture
+    let emissionHCE = Collector.parameter.emissionHCE
     let availability = Availability.current.value
     let breakHCE = availability.breakHCE.ratio
     let airHCE = availability.airHCE.ratio
@@ -128,10 +130,9 @@ enum HCE {
         // temperature.0+10 considers that average loop temperature is higher than (T_in + T_out)/2
         vacuumHeatLoss = sigma * circumference
           * (t1 * t1 * t1 * t1 - t2 * t2 * t2 * t2)
-        vacuumHeatLoss *= (col.emissionHCE[0]
-          + col.emissionHCE[1] * t1) / col.aperture
+        vacuumHeatLoss *= (emissionHCE[0] + emissionHCE[1] * t1) / aperture
         let al = 0.7 * circumference
-          * (t1 - t1) / col.aperture
+          * (t1 - t1) / aperture
         vacuumHeatLoss = vacuumHeatLoss + al // added here and not for LS2 collector
         endLossFactor = 1 // added in order to differenciate with LS2 collector
       } else if col.name.hasPrefix("LS2") {
@@ -143,8 +144,7 @@ enum HCE {
       } else if col.name.hasPrefix("PCT_validation") { // test
         vacuumHeatLoss = sigma * circumference
           * (t1 * t1 * t1 * t1 - t2 * t2 * t2 * t2)
-        vacuumHeatLoss *= (col.emissionHCE[0] + col.emissionHCE[1]
-          * (t1 + 10)) / col.aperture
+        vacuumHeatLoss *= (emissionHCE[0] + emissionHCE[1] * (t1 + 10)) / aperture
         endLossFactor = 1.3 // added in order to differenciate with LS2 collector
       } else {
         // other types than LS-2!!
@@ -154,12 +154,11 @@ enum HCE {
         case .schott:
           vacuumHeatLoss = sigma * circumference
             * (t1 ** 4 - t2 * t2 * t2 * t2)
-          vacuumHeatLoss *= (col.emissionHCE[0]
-            + col.emissionHCE[1] * (t1 + 10)) / col.aperture
+          vacuumHeatLoss *= (emissionHCE[0] + emissionHCE[1] * (t1 + 10)) / aperture
         case .rio:
           vacuumHeatLoss = (0.00001242 * t1 * t1 * t1 - 0.01864091
             * t1 * t1 + 9.76467705 * t1 - 1714.03)
-          vacuumHeatLoss *= circumference / col.aperture
+          vacuumHeatLoss *= circumference / aperture
         }
         // these losses were somehow lower than vacuumHeatLoss used below, but only about 10%
         let al = 0.7 * circumference * (t1 - t2) / col.aperture
@@ -174,31 +173,29 @@ enum HCE {
       let Ebs_HCE: Double
       if temperature1 != temperature2 {
         // check what if temperature.1 < temperature.0?!
-        Ebs_HCE = (1 / 3 * col.emissionHCE[1]
+        Ebs_HCE = (1 / 3 * emissionHCE[1]
           * (t1 * t1 * t1 - t2 * t2 * t2) + 1 / 2
-          * col.emissionHCE[1] * (t1 * t1 - t2 * t2)
-          + col.emissionHCE[0] * (t1 - t2)) / (t1 - t2)
+          * emissionHCE[1] * (t1 * t1 - t2 * t2)
+          + emissionHCE[0] * (t1 - t2)) / (t1 - t2)
       } else { // during FP?
         // check, resulting emissivity too low without c2!
-        Ebs_HCE = col.emissionHCE[0]
-          + col.emissionHCE[1] * t1
+        Ebs_HCE = emissionHCE[0] + emissionHCE[1] * t1
       }
 
       if temperature1 != temperature2 {
         vacuumHeatLoss = sigma / (1 / Ebs_HCE + col.rabsOut
           / col.rglas * (1 / col.glassEmission - 1))
-          * circumference / col.aperture * (1 / 5 
+          * circumference / aperture * (1 / 5
             * (t1 * t1 * t1 * t1 * t1 - t2 * t2 * t2 * t2 * t2)
            + (ambient + 30) ** 4 * (t2 - t1)) / (t1 - t2)
       } else {
         let t = (ambient + 30)
         vacuumHeatLoss = sigma * circumference
         vacuumHeatLoss *= avgT * avgT * avgT * avgT - t * t * t * t
-        vacuumHeatLoss *= (col.emissionHCE[0]
-          + col.emissionHCE[1] * t2) / col.aperture
+        vacuumHeatLoss *= (emissionHCE[0] + emissionHCE[1] * t2) / aperture
       }
       var al = 0.7 * circumference
-      al *= (avgT - (ambient + 30)) / col.aperture
+      al *= (avgT - (ambient + 30)) / aperture
       vacuumHeatLoss += al
       endLossFactor = 1
     }    
@@ -226,11 +223,12 @@ enum HCE {
   
   //  MARK: - Mode 1
   /// Vary mass-flow to maintain optimum HTF-temp.
-  static func mode1(_ solarField: inout SolarField,
-                    _ collector: Collector,
-                    _ loop: SolarField.Loop,
-                    _ ambient: Temperature) -> (Double, Double)
-  {
+  static func mode1(
+    _ solarField: inout SolarField,
+    _ collector: Collector,
+    _ loop: SolarField.Loop,
+    _ ambient: Temperature
+  ) -> (Double, Double) {
     let sof = SolarField.parameter
     
     let area = Design.layout.solarField
@@ -366,11 +364,12 @@ enum HCE {
   
   //  MARK: - Mode 2
   /// HTF-temp. dependent on constant mass-flow
-  static func mode2(_ solarField: inout SolarField,
-                    _ collector: Collector,
-                    _ loop: SolarField.Loop,
-                    _ ambient: Temperature) -> (Double, Double)
-  {
+  static func mode2(
+    _ solarField: inout SolarField,
+    _ collector: Collector,
+    _ loop: SolarField.Loop,
+    _ ambient: Temperature
+  ) -> (Double, Double) {
     let sof = SolarField.parameter
     
     let area = Design.layout.solarField
@@ -567,8 +566,8 @@ enum HCE {
           ? (hce.massFlow.rate / 3 * htf.deltaHeat(newTemp, maxTemp) * 1_000)
           : 0.0 // MWt
 
-        newTemp.limited(to: maxTemp)
-        oldTemp.limited(to: maxTemp)
+        newTemp.limit(to: maxTemp)
+        oldTemp.limit(to: maxTemp)
 
         if abs(newTemp.kelvin - oldTemp.kelvin)
           < Simulation.parameter.tempTolerance.kelvin,

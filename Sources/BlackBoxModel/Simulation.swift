@@ -59,7 +59,7 @@ public enum Simulation {
     adjustmentFactor: adjustmentFactor
   )
 
-  public static var adjustmentFactor = Simulation.AdjustmentFactor(
+  public static var adjustmentFactor = Simulation.AdjustmentFactors(
     efficiencySolarField: 1, efficiencyTurbine: 1,
     efficiencyHeater: 1, efficiencyBoiler: 1,
     heatLossHCE: 1, heatLossHTF: 1, heatLossH2O: 1,

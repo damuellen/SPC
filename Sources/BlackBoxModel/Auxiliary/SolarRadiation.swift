@@ -28,11 +28,9 @@ struct SolarRadiation: MeasurementsConvertible {
     self.dhi = Double(meteo.dhi)
     self.ico = Double(meteo.dni) * cosTheta
   }
-  
-  var csv: String { "\(csv: dni, ghi, dhi, ico)" }
-  
-  public var values: [String] { strings([dni, ghi, dhi, ico]) }
-  
+
+  var numericalForm: [Double] { [dni, ghi, dhi, ico] }
+
   static var columns: [(name: String, unit: String)] {
     [("Solar|DNI", "Wh/m2"), ("Solar|GHI", "Wh/m2"),
      ("Solar|DHI", "Wh/m2"), ("Solar|ICO", "Wh/m2")]

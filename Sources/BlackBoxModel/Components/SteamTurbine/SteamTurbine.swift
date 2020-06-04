@@ -93,7 +93,6 @@ public struct SteamTurbine: Component {
           startUpEnergy >= parameter.startUpEnergy
         {
           operationMode = .operating(Ratio(1))
-          
         }
       case .scheduledMaintenance: return 0
       case .operating: break
@@ -179,9 +178,9 @@ public struct SteamTurbine: Component {
 
       maxEfficiency = parameter.efficiencyNominal
         * (parameter.efficiencyTempIn_A
-          * pow((heatExchanger.celsius),
-                parameter.efficiencyTempIn_B))
-        * parameter.efficiencyTempIn_cf
+          * pow(heatExchanger.celsius,
+                parameter.efficiencyTempIn_B)
+        ) * parameter.efficiencyTempIn_cf
     }
 
     if case .pure = gasTurbine {

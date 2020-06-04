@@ -9,12 +9,13 @@
 //
 
 import Meteo
+import Foundation
 
 public struct PerformanceLog: CustomStringConvertible, Comparable {
 
   public let report: String
   
-  let energy: Energy
+  let energyTotal: Energy
   
   let radiation: SolarRadiation
   
@@ -24,17 +25,11 @@ public struct PerformanceLog: CustomStringConvertible, Comparable {
   
   public let layout: Layout
   
-  public var thermal: ThermalEnergy {
-    return energy.thermal
-  }
+  public var thermal: ThermalEnergy { energyTotal.thermal }
   
-  public var electric: ElectricPower {
-    return energy.electric
-  }
+  public var electric: ElectricPower { energyTotal.electric }
   
-  public var fitness: Double {
-    return layout.solarField / electric.net
-  }
+  public var fitness: Double { return layout.solarField / electric.net }
   
   public static func < (lhs: PerformanceLog, rhs: PerformanceLog) -> Bool {
     return lhs.fitness < rhs.fitness
@@ -51,12 +46,12 @@ public struct PerformanceLog: CustomStringConvertible, Comparable {
        energyHistory: [Energy] = [],
        performanceHistory: [PerformanceData] = [])
   {
-    self.energy = energy
+    self.energyTotal = energy
     self.radiation = radiation
     self.energyHistory = energyHistory
     self.performanceHistory = performanceHistory
     self.layout = Design.layout
-    self.report = PerformanceLog.makeReport(energy: energy, radiation: radiation)
+    self.report = PerformanceReport.create(energy: energy, radiation: radiation)
   }
   
   public subscript(
@@ -64,9 +59,9 @@ public struct PerformanceLog: CustomStringConvertible, Comparable {
   {
     if energyHistory.isEmpty { return [] }
     let count = interval.rawValue * 24
-    let rangeStart = (day - 1) * count
-    let rangeEnd = day * count
-    return energyHistory[rangeStart..<rangeEnd].map { $0[keyPath: keyPath] }
+    let start = (day - 1) * count
+    let end = day * count
+    return energyHistory[start..<end].map { $0[keyPath: keyPath] }
   }
   
   public subscript(
@@ -74,14 +69,12 @@ public struct PerformanceLog: CustomStringConvertible, Comparable {
   {
     if performanceHistory.isEmpty { return [] }
     let count = interval.rawValue * 24
-    let rangeStart = (day - 1) * count
-    let rangeEnd = day * count
-    return performanceHistory[rangeStart..<rangeEnd].map { $0[keyPath: keyPath] }
+    let start = (day - 1) * count
+    let end = day * count
+    return performanceHistory[start..<end].map { $0[keyPath: keyPath] }
   }
   
   public var description: String {
-    return layout.description + radiation.description
-      + energy.thermal.description + energy.parasitics.description
-      + energy.electric.description + energy.fuel.description
+    return report
   }
 }

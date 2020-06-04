@@ -51,8 +51,18 @@ public struct HeatTransfer: CustomStringConvertible {
      temperature.inlet.celsius.description,
      temperature.outlet.celsius.description]
   }
-
+  
+  var numericalForm: [Double] {
+    [massFlow.rate, temperature.inlet.celsius, temperature.outlet.celsius]
+  }
+  
   public mutating func constantTemperature() {
     temperature.inlet = temperature.outlet
+  }
+}
+
+extension Collection where Element == HeatTransfer {
+  var values: [String] {
+    reduce(into: []) { $0.append(contentsOf: $1.values) }
   }
 }

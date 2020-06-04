@@ -1,11 +1,39 @@
 import Foundation
 
+func bar() -> (Double, Double, Double, Double, Double, Double, Double) {
+  let liveSteamMassflow: Double = 67.95
+  let liveSteamPressureAtTurbineInlet: Double = 102.85
+  let pressureDropBetw_Sg_Sh: Double = 0.2
+  let superheaterPressureDrop: Double = 0.5
+  let pressureDropBetwSh_OutAndTurbine_In = 1.5
+  let steamgeneratorPressureDrop: Double = 0.1
+  let steamgeneratorSteamQualityOutlet: Double = 1.0
+  let steamgeneratorTemperatureDifferenceBetweenEvaporationTemperatureAndSgHtfOutletTemperature: Double = 3.0
+  
+  let pressure = liveSteamPressureAtTurbineInlet + pressureDropBetw_Sg_Sh + superheaterPressureDrop + pressureDropBetwSh_OutAndTurbine_In
+  let steamgeneratorPressure = steamgeneratorPressureDrop + pressure
+  
+  let enthalpyAfterEvaporation = WaterSteam.enthalpyVapor(p: pressure)
+  let enthalpyBeforeEvaporation = WaterSteam.enthalpyLiquid(p: pressure)
+  let steamQuality = steamgeneratorSteamQualityOutlet
+  let enthalpy = steamQuality * (enthalpyAfterEvaporation - enthalpyBeforeEvaporation) + enthalpyBeforeEvaporation
+  //let steamgeneratorWaterTemperatureOutlet = WaterSteam.temperature(p: steamgeneratorSteamOutletPressure, h: steamgeneratorSteamEnthalpyOutlet)
+  let saturatedSteamTemperature = WaterSteam.temperature(p: pressure)
+  let enthalpyChangeDueToEvaporation = enthalpyAfterEvaporation - enthalpyBeforeEvaporation
+  let evaporationPower = enthalpyChangeDueToEvaporation * liveSteamMassflow / 1_000
+  let enthalpyChangeDueToSuperHeating = enthalpy - enthalpyAfterEvaporation
+  let superHeatingPower = enthalpyChangeDueToSuperHeating * liveSteamMassflow / 1_000
+  let temperatureHTF = saturatedSteamTemperature + steamgeneratorTemperatureDifferenceBetweenEvaporationTemperatureAndSgHtfOutletTemperature
+  let steamgeneratorHtfEnthalpyOutlet = SolarField.parameter.HTF.enthalpy(temperatureHTF)
+  return (enthalpy, steamgeneratorPressure,saturatedSteamTemperature.celsius, evaporationPower, enthalpyBeforeEvaporation, superHeatingPower, temperatureHTF.celsius)
+}
+
 public func foo() -> Double {
 
 	let economizerInletFeedwaterTemperature: Double = 249.6
+	
 	let liveSteamMassflow: Double = 67.95
 	let liveSteamTemperatureAtTurbineInlet: Double = 383.0
-	let liveSteamPressureAtTurbineInlet: Double = 102.85
 	let blowDownOfInputMassFlow: Double = 1.0
 
 	let reheatInletSteamTemperature: Double = 214.4
@@ -16,35 +44,18 @@ public func foo() -> Double {
 
 	//let HexCase = 2
 	let upperHtfTemperature: Double = 393.0
-	let steamgeneratorTemperatureDifferenceBetweenEvaporationTemperatureAndSgHtfOutletTemperature: Double = 3.0
+	
 	let steamgeneratorTemperatureDifferenceBetweenEvaporationTemperatureAndSgWaterInletTemperature: Double = 3.0
 	let reheatOil_Outlet_SteamInletTemperatureDifference: Double = 35.1286
 	let economizerPressureDrop: Double = 1.2
 	let pressureDropBetw_Ec_Sg: Double = 6.0
-	let steamgeneratorPressureDrop: Double = 0.1
-	let pressureDropBetw_Sg_Sh: Double = 0.2
-	let superheaterPressureDrop: Double = 0.5
-	let pressureDropBetwSh_OutAndTurbine_In = 1.5
-	let steamgeneratorSteamQualityOutlet: Double = 1.0
+	
+  
+    let liveSteamPressureAtTurbineInlet: Double = 102.85
+    let (enthalpy, steamgeneratorPressure,saturatedSteamTemperature, evaporationPower, enthalpyBeforeEvaporation, superHeatingPower, temperatureHTF) = bar()
 
 
-	let steamgeneratorSteamOutletPressure = liveSteamPressureAtTurbineInlet + pressureDropBetw_Sg_Sh + superheaterPressureDrop + pressureDropBetwSh_OutAndTurbine_In
-	let steamgeneratorWaterPressureInlet = steamgeneratorPressureDrop + steamgeneratorSteamOutletPressure
-	let steamQuality = steamgeneratorSteamQualityOutlet
-	let steamgeneratorSteamEnthalpyAfterEvaporation = WaterSteam.enthalpyVapor(p: steamgeneratorSteamOutletPressure)
-	let steamgeneratorWaterEnthalpyBeforeEvaporation = WaterSteam.enthalpyLiquid(p: steamgeneratorSteamOutletPressure)
-	let steamgeneratorSteamEnthalpyOutlet = steamQuality * (steamgeneratorSteamEnthalpyAfterEvaporation - steamgeneratorWaterEnthalpyBeforeEvaporation) + steamgeneratorWaterEnthalpyBeforeEvaporation
-	//let steamgeneratorWaterTemperatureOutlet = WaterSteam.temperature(p: steamgeneratorSteamOutletPressure, h: steamgeneratorSteamEnthalpyOutlet)
-	let steamgeneratorSaturatedSteamTemperature = WaterSteam.temperature(p: steamgeneratorSteamOutletPressure)
-	let steamgeneratorWaterEnthalpyChangeDueToEvaporation = steamgeneratorSteamEnthalpyAfterEvaporation - steamgeneratorWaterEnthalpyBeforeEvaporation
-	let steamgeneratorEvaporationPower = steamgeneratorWaterEnthalpyChangeDueToEvaporation * liveSteamMassflow / 1_000
-	let steamgeneratorWaterEnthalpyChangeDueToSuperHeating = steamgeneratorSteamEnthalpyOutlet - steamgeneratorSteamEnthalpyAfterEvaporation
-	let steamgeneratorSuperHeatingPower = steamgeneratorWaterEnthalpyChangeDueToSuperHeating * liveSteamMassflow / 1_000
-	let steamgeneratorHtfTemperatureAtOutlet = steamgeneratorSaturatedSteamTemperature + steamgeneratorTemperatureDifferenceBetweenEvaporationTemperatureAndSgHtfOutletTemperature
-	let steamgeneratorHtfEnthalpyOutlet = SolarField.parameter.HTF.enthalpy(steamgeneratorHtfTemperatureAtOutlet)
-
-
-	let economizerWaterPressureOutlet = steamgeneratorWaterPressureInlet + pressureDropBetw_Ec_Sg
+	let economizerWaterPressureOutlet = steamgeneratorPressure + pressureDropBetw_Ec_Sg
 	let economizerInletFeedwaterPressure = economizerWaterPressureOutlet + economizerPressureDrop
 	let economizerInletFeedwaterEnthalpy = WaterSteam.enthalpy(p: economizerInletFeedwaterPressure, t: Temperature(celsius: economizerInletFeedwaterTemperature))
 	let economizerFeedwaterMassflow = liveSteamMassflow / (1 - blowDownOfInputMassFlow / 100)
@@ -57,38 +68,38 @@ public func foo() -> Double {
 
 	let steamgeneratorWaterMassFlowInlet = economizerFeedwaterMassflow
 
-	let steamgeneratorWaterTemperatureInlet = steamgeneratorSaturatedSteamTemperature - steamgeneratorTemperatureDifferenceBetweenEvaporationTemperatureAndSgWaterInletTemperature
-	let steamgeneratorWaterEnthalpyInlet = WaterSteam.enthalpy(p: steamgeneratorWaterPressureInlet, t: steamgeneratorWaterTemperatureInlet)
-	let steamgeneratorWaterEnthalpyChangeDueToPreheating = steamgeneratorWaterEnthalpyBeforeEvaporation - steamgeneratorWaterEnthalpyInlet
+	let steamgeneratorWaterTemperatureInlet = saturatedSteamTemperature - steamgeneratorTemperatureDifferenceBetweenEvaporationTemperatureAndSgWaterInletTemperature
+	let steamgeneratorWaterEnthalpyInlet = WaterSteam.enthalpy(p: steamgeneratorPressure, t: Temperature(celsius: steamgeneratorWaterTemperatureInlet))
+	let steamgeneratorWaterEnthalpyChangeDueToPreheating = enthalpyBeforeEvaporation - steamgeneratorWaterEnthalpyInlet
 	let steamgeneratorPowerForWaterHeatingInsideSg = steamgeneratorWaterEnthalpyChangeDueToPreheating * steamgeneratorWaterMassFlowInlet / 1_000
 	//let steamgeneratorBoilingWaterMassFlowBlowDown = blowDownMassFlow
 	//let steamgeneratorPowerOfBlowDownStream = steamgeneratorBoilingWaterMassFlowBlowDown * (steamgeneratorWaterEnthalpyBeforeEvaporation - economizerInletFeedwaterEnthalpy) / 1_000
 
 
-	let superheaterEnthalpyChangeDueToSuperheatingSteam = superheaterLiveSteamEnthalpy - steamgeneratorSteamEnthalpyOutlet
+	let superheaterEnthalpyChangeDueToSuperheatingSteam = superheaterLiveSteamEnthalpy - enthalpy
 	let superheaterPower = superheaterEnthalpyChangeDueToSuperheatingSteam * liveSteamMassflow / 1_000
 	//let superheaterSaturatedSteamEnthalpyOutletVirtual = WaterSteam.enthalpyVapor(p: liveSteamPressureAtTurbineInlet + pressureDropBetwSh_OutAndTurbine_In)
 	//let superheaterWaterEnthalpyOutletVirtual = WaterSteam.enthalpyLiquid(p: liveSteamPressureAtTurbineInlet + pressureDropBetwSh_OutAndTurbine_In)
 	//let superheaterSteamQualityOutlet = (superheaterLiveSteamEnthalpy - superheaterWaterEnthalpyOutletVirtual) / (superheaterSaturatedSteamEnthalpyOutletVirtual - superheaterWaterEnthalpyOutletVirtual)
 	let superheaterHtfEnthalpyAtTrainInlet = SolarField.parameter.HTF.enthalpy(Temperature(celsius: upperHtfTemperature))
 
-	let steamgeneratorPower = steamgeneratorEvaporationPower + steamgeneratorPowerForWaterHeatingInsideSg + steamgeneratorSuperHeatingPower
+	let steamgeneratorPower = evaporationPower + steamgeneratorPowerForWaterHeatingInsideSg + superHeatingPower
 	let steamgeneratorShPower = steamgeneratorPower + superheaterPower
 
 	//let PowerEvaporationAndSuperheating = superheaterPower + steamgeneratorEvaporationPower
 
-	let HtfEnthalpyChangeInSgAndSh = superheaterHtfEnthalpyAtTrainInlet - steamgeneratorHtfEnthalpyOutlet
+	let HtfEnthalpyChangeInSgAndSh = superheaterHtfEnthalpyAtTrainInlet - SolarField.parameter.HTF.enthalpy(Temperature(celsius:temperatureHTF))
 	let HtfMassFlowEc_Sg_ShTrain = steamgeneratorShPower * 1_000 / HtfEnthalpyChangeInSgAndSh
 
 	let waterTemperatureEcOutlet = steamgeneratorWaterTemperatureInlet
 	let economizerWaterMassFlow = economizerFeedwaterMassflow
 
-	let economizerWaterEnthalpyOutlet = WaterSteam.enthalpy(p: economizerWaterPressureOutlet, t: waterTemperatureEcOutlet)
+	let economizerWaterEnthalpyOutlet = WaterSteam.enthalpy(p: economizerWaterPressureOutlet, t: Temperature(celsius:waterTemperatureEcOutlet))
 	let economizerWaterEnthalpyInlet = economizerInletFeedwaterEnthalpy
 	let economizerWaterEnthalpyChange = economizerWaterEnthalpyOutlet - economizerWaterEnthalpyInlet
 	let economizerPower = economizerWaterEnthalpyChange * economizerWaterMassFlow / 1_000
-	let economizerHtfTemperatureInlet = steamgeneratorHtfTemperatureAtOutlet
-	let economizerHtfEnthalpyInlet = SolarField.parameter.HTF.enthalpy(economizerHtfTemperatureInlet)
+	let economizerHtfTemperatureInlet = temperatureHTF
+	let economizerHtfEnthalpyInlet = SolarField.parameter.HTF.enthalpy(Temperature(celsius: economizerHtfTemperatureInlet))
 	let economizerRequiredHtfEnthalpyChange = economizerPower / HtfMassFlowEc_Sg_ShTrain * 1_000
 	let economizerRequiredHtfEnthalpyOutlet = economizerHtfEnthalpyInlet - economizerRequiredHtfEnthalpyChange
 	let economizerHtfMassflow = HtfMassFlowEc_Sg_ShTrain

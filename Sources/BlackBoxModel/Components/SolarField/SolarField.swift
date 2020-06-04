@@ -254,7 +254,7 @@ public struct SolarField: Component, HeatCycle {
         let heatPerKg = htf.deltaHeat(header.temperature.outlet, ambient)
         newTemp = htf.temperature(heatPerKg - deltaHeatPerKg, ambient)
       }
-      newTemp.limited(to: parameter.HTF.maxTemperature)
+      newTemp.limit(to: parameter.HTF.maxTemperature)
     } while abs(newTemp.kelvin - oldTemp.kelvin)
       > Simulation.parameter.HLtempTolerance
     return newTemp

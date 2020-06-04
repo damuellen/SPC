@@ -31,7 +31,7 @@ public struct PowerBlock: Component, HeatCycle {
     -> Double
   {
     var electricalParasitics = 0.0
-    let load = steamTurbine.load ?? .zero
+    let load = Ratio(1) //steamTurbine.load
     if load.ratio >= 0.01 {
 
       electricalParasitics = parameter.fixElectricalParasitics
@@ -87,12 +87,9 @@ public struct PowerBlock: Component, HeatCycle {
     // * steamTurbine.load + parameter.electricalParasitics[2] * steamTurbine.load ** 2)
   }
   
-  static func heatExchangerBypass(_ powerBlock: PowerBlock)
-    -> (heatOut: Double, heatToTES: Double, powerBlock: PowerBlock)
+  mutating func heatExchangerBypass() -> (heatOut: Double, heatToTES: Double)
   {
     let htf = SolarField.parameter.HTF
-
-    var powerBlock = powerBlock
 
     var heatOut = 0.0
     
@@ -100,26 +97,53 @@ public struct PowerBlock: Component, HeatCycle {
     
     // added to simulate a bypass on the PB-HX if the expected
     // outlet temperature is so low that the salt to TES could freeze
-    var totalMassFlow = powerBlock.massFlow
+    var totalMassFlow = massFlow
   
     repeat {
       #warning("Check this")
-      powerBlock.temperature.outlet = HeatExchanger
-        .outletTemperature(powerBlock, powerBlock)
+      temperature.outlet = HeatExchanger.outletTemperature(self, self)
 
-      heatOut = htf.enthalpy(powerBlock.temperature.outlet)
+      heatOut = htf.enthalpy(temperature.outlet)
       
-      let bypassMassFlow = totalMassFlow - powerBlock.massFlow
-      let Bypass_h = htf.enthalpy(powerBlock.temperature.inlet)
+      let bypassMassFlow = totalMassFlow - massFlow
+      let Bypass_h = htf.enthalpy(temperature.inlet)
       
-      heatToTES = (bypassMassFlow.rate * Bypass_h
-        + powerBlock.massFlow.rate * heatOut)
-        / (bypassMassFlow + powerBlock.massFlow).rate
+      heatToTES = (bypassMassFlow.rate * Bypass_h + massFlow.rate * heatOut)
+        / (bypassMassFlow + massFlow).rate
       
     } while heatToTES > h_261
     
-    powerBlock.setTemperature(outlet: htf.temperature(heatToTES))
-    return (heatOut, heatToTES, powerBlock)
+    setTemperature(outlet: htf.temperature(heatToTES))
+    return (heatOut, heatToTES)
+  }
+
+  mutating func temperatureLoss(wrt solarField: SolarField, _ storage: Storage)
+  {
+    if Design.hasGasTurbine {
+      outletTemperatureInlet()
+    } else {
+      let tlpb = 0.0
+      // 0.38 * (TpowerBlock.status - meteo.temperature) / 100 * (30 / Design.layout.powerBlock) ** 0.5 // 0.38
+      
+      let mf = max(0.1, (solarField.massFlow + massFlow).rate)
+      let inlet = (solarField.massFlow.rate * solarField.outletTemperature
+        + massFlow.rate * storage.outletTemperature) / mf
+      if inlet > 0 {
+        inletTemperature(kelvin: inlet)
+      }
+      #warning("The implementation here differs from PCT")
+      // FIXME: Was ist Tstatus ?????????
+      let sec = Double(period)
+      let outlet = (massFlow.rate * sec
+        * inletTemperature + outletTemperature
+        * (SolarField.parameter.HTFmass - massFlow.rate * sec))
+        / SolarField.parameter.HTFmass - tlpb
+      
+      outletTemperature(kelvin: outlet)
+      if inlet > 0 {
+        outletTemperature(kelvin: inlet)
+      }
+    }
   }
 }
 

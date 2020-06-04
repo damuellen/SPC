@@ -21,17 +21,11 @@ public struct Polynomial: Codable, Equatable {
     self.coefficients = array
   }
 
-  var indices: CountableRange<Int> {
-    coefficients.indices
-  }
+  var indices: CountableRange<Int> { coefficients.indices }
 
-  var isEmpty: Bool {
-    coefficients.isEmpty
-  }
+  var isEmpty: Bool { coefficients.isEmpty }
 
-  var isInapplicable: Bool {
-    coefficients.count < 2
-  }
+  var isInapplicable: Bool { coefficients.count < 2 }
   
   @_transparent func evaluated(_ value: Double) -> Double {
     // Use Horner’s Method for solving

@@ -32,9 +32,7 @@ public struct HeatExchanger: Component, HeatCycle {
 
   /// working conditions of the heat exchanger at start
   static let initialState = HeatExchanger(
-    operationMode: .SI,
-    heatOut: 0.0,
-    heatToTES: 0.0
+    operationMode: .SI, heatOut: 0.0, heatToTES: 0.0
   )
 
   public static var parameter: Parameter = ParameterDefaults.hx

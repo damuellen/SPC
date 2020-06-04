@@ -175,7 +175,7 @@ public enum BlackBoxModel {
       let ts = TimeStep.current
     //  print(TimeStep.current, date, status, energy)
       backgroundQueue.async { [status] in
-        recorder.add(ts, meteo: meteo, status: status, energy: energy)
+        recorder(ts, meteo: meteo, status: status, energy: energy)
       }      
     }
 
