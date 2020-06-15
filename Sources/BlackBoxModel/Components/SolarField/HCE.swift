@@ -10,6 +10,7 @@
 
 import Foundation
 import Meteo
+import DateGenerator
 
 let period = 300
 /**
@@ -411,7 +412,7 @@ enum HCE {
         let areaDensity: Double
         if avgT.celsius < 20 {
           print(o, innerIteration, newTemp, hce, solarField,
-                "Temperature too low. \(TimeStep.current)")
+                "Temperature too low. \(DateTime.current)")
           areaDensity = 1
         } else {
           areaDensity = htf.density(avgT) * .pi

@@ -10,6 +10,7 @@
 
 import Foundation
 import Meteo
+import DateGenerator
 /// A temperature value in Kelvin.
 public struct Temperature: CustomStringConvertible, Equatable {
   
@@ -49,7 +50,7 @@ public struct Temperature: CustomStringConvertible, Equatable {
   }
 
   public init(celsius: Double) {
-    assert(celsius.isFinite, "\(celsius), \(TimeStep.current)")
+    assert(celsius.isFinite, "\(celsius), \(DateTime.current)")
     assert(celsius > Temperature.absoluteZeroCelsius)
     self.kelvin = celsius - Temperature.absoluteZeroCelsius
   }

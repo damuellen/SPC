@@ -8,6 +8,8 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
+import DateGenerator
+
 public struct GasTurbine: Component {
   /// Contains all data needed to simulate the operation of the gas turbine
   var operationMode: OperationMode
@@ -76,7 +78,7 @@ public struct GasTurbine: Component {
      //"N" means NO GasTurbine operation desired !!!
      if GasTurbine.status.load < parameter.load min || Ucase$(OpRCCmode(month, time.Tariff)) = "N" || FuelAvlGasTurbine <= 0 {
      if GasTurbine.status.load > 0 {
-     debugPrint("\(TimeStep.current) Gas Turbine Load Below minimum.")
+     debugPrint("\(DateTime.current) Gas Turbine Load Below minimum.")
      gasTurbine.load = 0
      gasTurbine.operationMode = .noOperation
      gasTurbine = 0
@@ -224,14 +226,14 @@ public struct GasTurbine: Component {
 
             demand = 0.0
             debugPrint("""
-              \(TimeStep.current)
+              \(DateTime.current)
               Excess solar heat: Gas Turbine not operating.
               """)
           } else if GasTurbine.efficiency(at: gasTurbine.load) > 0,
             production * HeatExchanger.parameter.efficiency > htfShare {
             // WasteHeatRecovery.parameter.Operation = "Pure"posbl
             debugPrint("""
-              \(TimeStep.current)
+              \(DateTime.current)
               Excess Q-solar: Gas Turbine operating at lower load.
               """)
 

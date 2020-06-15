@@ -264,12 +264,12 @@ public struct Plant {
 
       if energy > Simulation.parameter.heatTolerance { // TB.Overload
         /*  debugPrint("""
-         \(TimeStep.current)
+         \(DateTime.current)
          Overloading TB: \(heat) MWH,th
          """)*/
       } /*else if heatDiff > 2 * Simulation.parameter.heatTolerance {
         debugPrint("""
-          \(TimeStep.current)
+          \(DateTime.current)
           Production > demand: \(diff) MWH,th
           """)
       }*/
@@ -304,7 +304,7 @@ public struct Plant {
       if heat.production.watt > 0, heat.production.megaWatt < minPower {
         heat.production = 0.0
         /*  debugPrint("""
-         \(TimeStep.current)
+         \(DateTime.current)
          "Damping (SteamTurbine underload): \(heat.production.megaWatt) MWH,th.
          """)*/
       }

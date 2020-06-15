@@ -96,8 +96,8 @@ public enum BlackBoxModel {
     let (🌦, 📅) = makeGenerators(dataSource: 🌤)
 
     for (meteo, date) in zip(🌦, 📅) {
- 
-      TimeStep.setCurrent(date: date)
+      
+      DateTime.setCurrent(date: date)
       
       Maintenance.checkSchedule(date)
 
@@ -111,9 +111,12 @@ public enum BlackBoxModel {
           * status.collector.efficiency
       } else {
         status.collector = Collector.initialState
-        TimeStep.current.isDaytime = false
+        DateTime.setNight()           
       }
 
+      //if DateTime.isSunRise { print(DateTime.current) }
+      //if DateTime.isSunSet { print(DateTime.current) }
+      
       let temperature = Temperature(meteo: meteo)
       
       status.solarField.inletTemperature(outlet: status.powerBlock)
@@ -172,10 +175,10 @@ public enum BlackBoxModel {
       }
       
       let energy = plant.energyBalance()
-      let ts = TimeStep.current
-    //  print(TimeStep.current, date, status, energy)
+      let dt = DateTime.current
+    //  print(DateTime.current, date, status, energy)
       backgroundQueue.async { [status] in
-        recorder(ts, meteo: meteo, status: status, energy: energy)
+        recorder(dt, meteo: meteo, status: status, energy: energy)
       }      
     }
 

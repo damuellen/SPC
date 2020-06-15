@@ -10,6 +10,7 @@
 
 import Foundation
 import Meteo
+import DateGenerator
 
 public struct SteamTurbine: Component {
   /// Contains all data needed to simulate the operation of the steam turbine
@@ -62,12 +63,12 @@ public struct SteamTurbine: Component {
     -> Double
   {
     let parameter = SteamTurbine.parameter
-    defer { SteamTurbine.oldMinute = TimeStep.current.minute }
+    defer { SteamTurbine.oldMinute = DateTime.current.minute }
     //load = 0.0
     let minutes = Int(Simulation.time.steps.fraction * 60)
     if heat.production.megaWatt <= 0 {
       // Avoid summing up inside an iteration
-      if TimeStep.current.minute != SteamTurbine.oldMinute {
+      if DateTime.current.minute != SteamTurbine.oldMinute {
         
         if case .noOperation(let standStillTime)
           = operationMode
@@ -110,7 +111,7 @@ public struct SteamTurbine: Component {
         return gross
       } else { // Start Up sequence: Energy is lost / Dumped
         // Avoid summing up inside an iteration
-        if TimeStep.current.minute != SteamTurbine.oldMinute {
+        if DateTime.current.minute != SteamTurbine.oldMinute {
           if case .startUp(let startUpTime, let startUpEnergy)
             = operationMode
           {

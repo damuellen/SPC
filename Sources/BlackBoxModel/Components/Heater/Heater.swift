@@ -9,6 +9,7 @@
 //
 
 import Foundation
+import DateGenerator
 
 public struct Heater: Component, HeatCycle {
   /// Contains all data needed to simulate the operation of the heater
@@ -77,7 +78,7 @@ public struct Heater: Component, HeatCycle {
 
         guard load > parameter.minLoad else {
           debugPrint("""
-            \(TimeStep.current)
+            \(DateTime.current)
             HR operation requested but not performed because of HR underload.
             """)
           operationMode = .noOperation; massFlow = 0.0
@@ -144,7 +145,7 @@ public struct Heater: Component, HeatCycle {
     } else if case .maintenance = operationMode {
       // operation is requested
       debugPrint("""
-        \(TimeStep.current)
+        \(DateTime.current)
         Sched. maintnc. of HR disables requested operation.
         """)
       operationMode = .noOperation

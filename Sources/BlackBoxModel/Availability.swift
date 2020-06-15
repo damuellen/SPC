@@ -10,6 +10,7 @@
 
 import Config
 import Foundation
+import DateGenerator
 
 struct Availability: Codable {
   
@@ -17,7 +18,7 @@ struct Availability: Codable {
 
   static var fuel: Double = 5
 
-  private var index: Int { return TimeStep.current.month }
+  private var index: Int { return DateTime.current.month }
   
   private let data: [Values]
   

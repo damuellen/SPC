@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import DateGenerator
 
 extension Storage {
   
@@ -22,7 +23,7 @@ extension Storage {
     
     let storage = Storage.parameter
     
-    let time = TimeStep.current
+    let time = DateTime.current
     
     if storage.auxConsumptionCurve {
       // old model:
@@ -202,7 +203,7 @@ extension Storage {
     
     let steamTurbine = SteamTurbine.parameter
     
-    if TimeStep.current.isDaytime && parameter.isVariable
+    if DateTime.isDaytime && parameter.isVariable
     {
       switch parameter.definedBy {
       case .hours:
@@ -246,7 +247,7 @@ extension Storage {
     return Ratio(dischargeLoad)
   }
   
-  static func isFossilChargingAllowed(at time: TimeStep) -> Bool {
+  static func isFossilChargingAllowed(at time: DateTime) -> Bool {
     return time.isWithin(start: parameter.startFossilCharging,
                          stop: parameter.stopFossilCharging)
         || time.isWithin(start: parameter.startFossilCharging2,

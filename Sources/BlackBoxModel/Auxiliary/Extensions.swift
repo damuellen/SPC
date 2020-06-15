@@ -9,7 +9,7 @@
 //
 
 import Foundation
-
+import TSCBasic
 
 extension Optional {
   var isNone: Bool {
@@ -35,10 +35,19 @@ extension DefaultStringInterpolation {
   }
 }
 
+public func decorated(_ title: String) -> String {
+  let width = TerminalController.terminalWidth() ?? 80
+  let half = (width - title.count - 8) / 2
+  let line = String(repeating: "─", count: half)
+  return line + "┤   " + title + "   ├" + line
+}
+
+@inline(__always)
 func strings(_ array: [Double], precision: Int = 1) -> [String] {
   array.map { String(format: "%.\(precision)f", $0) }
 }
 
+@inline(__always)
 func string(_ value: Double, precision: Int = 2) -> String {
   String(format: "%.\(precision)f", value)
 }

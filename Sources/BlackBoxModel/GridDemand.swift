@@ -10,12 +10,13 @@
 
 import Config
 import Foundation
+import DateGenerator
 
 struct GridDemand: Codable {
   
   static var current = withDefaults()
   
-  private var index: Int { return TimeStep.current.month - 1 }
+  private var index: Int { return DateTime.indexMonth }
   
   private let data: [Ratio]
   

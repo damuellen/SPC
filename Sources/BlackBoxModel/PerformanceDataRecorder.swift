@@ -130,12 +130,13 @@ public final class PerformanceDataRecorder {
       var urls = [dailyResultsURL, hourlyResultsURL]
       
       if case .custom(let i) = mode {
-        let startTime = repeatElement("0", count: 40)
+        let startTime = repeatElement("0", count: headers.count)
           .joined(separator: .separator)
-        let intervalTime = repeatElement("\(i.fraction)", count: 40)
+        let intervalTime = repeatElement("\(i.fraction)", count: headers.count)        
           .joined(separator: .separator)
         let tableHeader = "wxDVFileHeaderVer.1" + .lineBreak
-          + headers.name + startTime + .lineBreak
+          + headers.name + .lineBreak 
+          + startTime + .lineBreak
           + intervalTime + .lineBreak
           + headers.unit + .lineBreak
         let resultsURL = url.appendingPathComponent("Results_\(suffix)_\(i).csv")
@@ -170,15 +171,15 @@ public final class PerformanceDataRecorder {
     performanceHistory.removeAll(keepingCapacity: true)
   }
 
-  public func printResult() {
+  public func printResult() {   
     print("")
-    print("─────────────────────────────┤   Annual results   ├─────────────────────────────")
+    print(decorated("Annual results"))
     print(annualRadiation.prettyDescription)
     print(annualEnergy.prettyDescription)
   }
   
   func callAsFunction(
-    _ ts: TimeStep, meteo: MeteoData, status: PerformanceData, energy: Energy)
+    _ ts: DateTime, meteo: MeteoData, status: PerformanceData, energy: Energy)
   {
     if mode.hasHistory {
       self.performanceHistory.append(status)
@@ -327,12 +328,12 @@ public final class PerformanceDataRecorder {
 
   // MARK: Table headers
 
-  private var headers: (name: String, unit: String) {
+  private var headers: (name: String, unit: String, count: Int) {
     let columns = [SolarRadiation.columns, Energy.columns].joined()
     let names: String = columns.map { $0.0 }.joined(separator: ",")
     let units: String = columns.map { $0.1 }.joined(separator: ",")
     // if dateFormatter != nil {
-    return ("DateTime," + names, "_," + units)
+    return ("DateTime," + names, "_," + units, columns.count)
     // }
     // return (names, units)
   }

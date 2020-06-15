@@ -9,6 +9,7 @@
 //
 
 import Foundation
+import DateGenerator
 
 public struct Storage: Component, HeatCycle {
   /// Contains all data needed to simulate the operation of the storage
@@ -113,7 +114,7 @@ public struct Storage: Component, HeatCycle {
     
     // **************************  Energy deficit  *****************************
     var peakTariff: Bool
-    let time = TimeStep.current
+    let time = DateTime.current
     // check when to discharge TES
     if case .shifter = parameter.strategy { // only for Shifter
       if time.month < parameter.startexcep
@@ -177,7 +178,7 @@ public struct Storage: Component, HeatCycle {
     }
 
     // heat can only be provided with heater on
-    if (parameter.FC == 0 && TimeStep.current.isNighttime
+    if (parameter.FC == 0 && DateTime.current.isNighttime
       && storage.charge.ratio < parameter.chargeTo
       && powerBlock.inletTemperature > 665
       && Storage.isFossilChargingAllowed(at: time)
@@ -239,7 +240,7 @@ public struct Storage: Component, HeatCycle {
     powerBlock: inout PowerBlock,
     solarField: SolarField, heat: ThermalEnergy)
   {
-   // var demand = TimeStep.current.isDaytime ? 0.5 : heat.demand.megaWatt
+   // var demand = DateTime.current.isDaytime ? 0.5 : heat.demand.megaWatt
     var demand = heat.demand.megaWatt
     let production = heat.solar.megaWatt
     
@@ -354,8 +355,8 @@ public struct Storage: Component, HeatCycle {
       heatExchanger.temperature.htf.inlet.max,
       heatExchanger.temperature.htf.outlet.max) / 1_000
 
-    let time = TimeStep.current
-    let dniDay = BlackBoxModel.meteoData![ofDay: TimeStep.current.day].sum
+    let time = DateTime.current
+    let dniDay = BlackBoxModel.meteoData!.currentDay.sum
     
     if time.month < parameter.startexcep || time.month > parameter.endexcep {
       storage.heatProductionLoad = parameter.heatProductionLoadWinter

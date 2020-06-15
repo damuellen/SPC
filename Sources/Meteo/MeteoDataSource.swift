@@ -37,11 +37,10 @@ public class MeteoDataSource {
     for day in 1...365 { classification(ofDay: day) }
   }
     
-  public subscript(ofDay day: Int) -> Classification {
-    precondition(day <= classificationOfDays.endIndex)
-    return classificationOfDays[day - 1]
-  }
-  
+  public var currentDay: Classification {    
+    return classificationOfDays[DateTime.indexDay]
+  }  
+
   public typealias Classification =
     (peaks: Int, hours: Double, sum: Double, avg: Double, max: Double, ratio: Double)
   

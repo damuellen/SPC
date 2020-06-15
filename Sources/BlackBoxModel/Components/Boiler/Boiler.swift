@@ -9,6 +9,7 @@
 //
 
 import Foundation
+import DateGenerator
 
 public struct Boiler: Component {
   /// Contains all data needed to simulate the operation of the boiler
@@ -95,7 +96,7 @@ public struct Boiler: Component {
 
     if isMaintained { // From here: operation is requested:
       debugPrint("""
-        \(TimeStep.current)
+        \(DateTime.current)
         Scheduled maintenance of Boiler disables requested operation.
         """)
 
@@ -112,7 +113,7 @@ public struct Boiler: Component {
       || fuelAvailable == 0
     { // Check if underload
       debugPrint("""
-        \(TimeStep.current)
+        \(DateTime.current)
         Boiler operation requested but not performed because of underload.
         """)
         
@@ -181,7 +182,7 @@ public struct Boiler: Component {
       load(fuel: &fuel, fuelAvailable: fuelAvailable)
       if load.ratio < parameter.minLoad {
         debugPrint("""
-          \(TimeStep.current)
+          \(DateTime.current)
           BO operation requested but insufficient fuel.
           """)
         let fuel = Boiler.noOperation(&self, fuelAvailable: fuelAvailable)

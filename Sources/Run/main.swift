@@ -62,7 +62,7 @@ struct SolarPerformanceCalculator: ParsableCommand {
   var full: Bool
 
   func run() throws {  
-    print("──────────────────────┤  Solar Performance Calculator   ├───────────────────────\n") 
+    print(decorated("Solar Performance Calculator"),"")
     // BlackBoxModel.loadConfigurations(atPath: configPath, format: .json)
     // BlackBoxModel.saveConfigurations(toPath: configPath)
     if let steps = stepsCalculation {
@@ -82,7 +82,7 @@ struct SolarPerformanceCalculator: ParsableCommand {
       BlackBoxModel.configure(location: loc)
     }       
 
-    BlackBoxModel.configure(meteoFilePath: "/Users/Daniel/Development/spc")
+    BlackBoxModel.configure(meteoFilePath: ".")
 
    // let mode: PerformanceDataRecorder.Mode = full ? .all : .brief
     let mode: PerformanceDataRecorder.Mode

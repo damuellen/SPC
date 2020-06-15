@@ -12,41 +12,60 @@ import CoreFoundation
 import Foundation
 
 /**
- TimeStep is used to easily make the calendar data
+ DateTime is used to easily make the calendar data
  of the current time step available during a run.
 
   - Attention: Needed by `Availability` and `GridDemand` both use `current`,
   also used in `SteamTurbine` and `Storage` routines.
 */
-public struct TimeStep: CustomStringConvertible {
+public struct DateTime: CustomStringConvertible {
 
-  public static var current = TimeStep()
+  private(set) public static var current = DateTime()
+  private(set) static var nightfall = false
+  
+  private(set) var isDaytime: Bool = false
+  private(set) var isSunRise: Bool = false
+  private(set) var isSunSet: Bool = false
 
-  var isDaytime: Bool = true
+  public var isNighttime: Bool { !isDaytime }
+  /// The meteorological data suitable for today are identified with this property. `MeteoDataSource.currentDay`
+  public static var indexDay: Int { current.yearDay - 1 }
+  public static var indexMonth: Int { current.month - 1 }
+  public static var isDaytime: Bool { current.isDaytime }
+  public static var isSunRise: Bool { current.isSunRise }
+  public static var isSunSet: Bool { current.isSunSet }
 
-  var isNighttime: Bool { !isDaytime }
-
-  var year: Int = 0
-  var month: Int = 0
-  var day: Int = 0
-  var hour: Int = 0
-  var minute: Int = 0
-  private var second: Int = 0
+  public let year: Int
+  public let month: Int
+  public let day: Int
+  public let hour: Int
+  public let minute: Int
+  public let yearDay: Int
+  private let second: Int
 
   public var description: String {
-    let ds = String(format: "%04d-%02d-%02d--%02d:%02d:%02d",
+    let ds = String(format: "%04d-%02d-%02d %02d:%02d:%02d",
                     year, month, day, hour, minute, second)
     let symbol = isDaytime ? " 🌞 " : " 🌃 "
     return symbol + ds
   }
 
-  static func setCurrent(date: Date) {
+  public static func setCurrent(date: Date) {
+    nightfall = current.isDaytime
     current = .init(date)
+    if !nightfall { current.isSunRise = true }
   }
 
-  typealias MonthDay = (day: Int, month: Int)
+  public static func setNight() {
+    current.isDaytime = false
+    current.isSunRise = false
+    current.isSunSet = nightfall
+    nightfall = false
+  }
 
-  func isWithin(start: MonthDay, stop: MonthDay) -> Bool {
+  public typealias MonthDay = (day: Int, month: Int)
+
+  public func isWithin(start: MonthDay, stop: MonthDay) -> Bool {
     assert(start.month <= stop.month)
     var result = false
     if start.month ... stop.month ~= month {
@@ -66,9 +85,19 @@ public struct TimeStep: CustomStringConvertible {
   }
 }
 
-extension TimeStep {
+extension DateTime {
 
-  init(_ date: Date) {
+  init() {
+    self.year = 0
+    self.month = 0
+    self.day = 0
+    self.hour = 0
+    self.minute = 0
+    self.yearDay = 0
+    self.second = 0
+  }
+
+  public init(_ date: Date) {
     let ref = date.timeIntervalSinceReferenceDate
     var absolute = Int(floor(ref / 86400.0))
 
@@ -122,6 +151,7 @@ extension TimeStep {
     self.year =  year + 2001
     self.month = month
     self.day = day
+    self.yearDay = Int(absolute) + 1
     self.hour = doubleModToInt(floor(ref / 3600.0), 24)
     self.minute = doubleModToInt(floor(ref / 60.0), 60)
     self.second = doubleModToInt(ref, 60)

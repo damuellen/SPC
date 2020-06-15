@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import DateGenerator
 
 extension Storage {
   /// Calculation of thermal power and parasitics
@@ -22,7 +23,7 @@ extension Storage {
     if storage.operationMode != mode {
       let oldMode = storage.operationMode
       debugPrint("""
-        \(TimeStep.current) Storage mode change \(oldMode) -> \(mode)
+        \(DateTime.current) Storage mode change \(oldMode) -> \(mode)
         """)
     }
   
