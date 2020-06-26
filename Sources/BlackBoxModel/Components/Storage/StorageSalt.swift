@@ -10,7 +10,17 @@
 
 import Foundation
 
-extension Storage.Salt {
+extension Storage.Salt: MeasurementsConvertible {
+
+  static var columns: [(name: String, unit: String)] {
+     [("Storage|ColdHeat", "kJ/kg"),("Storage|HotHeat", "kJ/kg"),     
+     ("Storage|ColdFlow", "kg/s"),("Storage|HotFlow", "kg/s")]
+  }
+
+  var numericalForm: [Double] {
+    [heat.cold, heat.hot, massFlow.cold.rate, massFlow.hot.rate]
+  }
+
   fileprivate mutating func calculateMassFlow(
     cold: Temperature, hot: Temperature, thermal: Double)
   {

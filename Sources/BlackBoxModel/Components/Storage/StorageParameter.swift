@@ -73,7 +73,7 @@ extension Storage {
     let heatExchangerEfficiency: Double
     let heatExchangerCapacity: Double // (oil to salt) in MWt
     let heatExchangerMinCapacity: Double // HX minimum capacity in %
-    let HXresMin: Bool // check box to restrict HX//s minimum load
+    
     // select if auxiliary consumption is to be calculated as quadratic polynom
     let DesAuxIN: Double // nominal auxiliary electrical consumption
     let DesAuxEX: Double // c0 coeff. for aux. consumption
@@ -142,153 +142,67 @@ extension Storage.Parameter: CustomStringConvertible {
   }
 }
 
-/*
- Storage.Parameter.init(name: <#T##String#>, chargeTo: <#T##Double#>, dischargeToTurbine: <#T##Double#>, dischargeToHeater: <#T##Double#>,
- stepSizeIteration: <#T##Double#>, heatStoredrel: <#T##Double#>, temperatureDischarge: <#T##Coefficients#>,
- temperatureDischarge2: <#T##Coefficients#>, temperatureCharge: <#T##Coefficients#>, temperatureCharge2: <#T##Coefficients#>,
- heatlossCst: <#T##Coefficients#>, heatlossC0to1: <#T##Coefficients#>, pumpEfficiency: <#T##Double#>,
- pressureLoss: <#T##Double#>, massFlow: <#T##MassFlow#>, startTemperature: <#T##(cold: Temperature, hot: Temperature)#>,
- startLoad: <#T##(cold: Double, hot: Double)#>, strategy: <#T##Storage.Parameter.Strategy#>, PrefChargeto: <#T##Double#>,
- startexcep: <#T##Int#>, endexcep: <#T##Int#>, HTF: <#T##StorageMedium#>, FP: <#T##Double#>, FC: <#T##Double#>, heatdiff: <#T##Double#>,
- dSRise: <#T##Double#>, minDischargeLoad: <#T##Ratio#>, fixedDischargeLoad: <#T##Ratio#>, heatTracingTime: <#T##[Double]#>,
- heatTracingPower: <#T##[Double]#>, DischrgParFac: <#T##Double#>, definedBy: <#T##Storage.Definition#>,
- designTemperature: <#T##(cold: Temperature, hot: Temperature)#>, heatLoss: <#T##(hot: Double, cold: Double)#>,
- startFossilCharging: <#T##(day: Int, month: Int)#>, stopFossilCharging: <#T##(day: Int, month: Int)#>,
- startFossilCharging2: <#T##(day: Int, month: Int)#>, stopFossilCharging2: <#T##(day: Int, month: Int)#>,
- heatExchangerEfficiency: <#T##Double#>, heatExchangerCapacity: <#T##Double#>, heatExchangerMinCapacity: <#T##Double#>,
- HXresMin: <#T##Bool#>, DesAuxIN: <#T##Double#>, DesAuxEX: <#T##Double#>, heatProductionLoad: <#T##Double#>,
- heatProductionLoadWinter: <#T##Ratio#>, heatProductionLoadSummer: <#T##Ratio#>,
- dischrgWinter: <#T##Int#>, dischrgSummer: <#T##Int#>, badDNIwinter: <#T##Double#>, badDNIsummer: <#T##Double#>)
- 
- extension Storage.Parameter: TextConfigInitializable {
- public init(file: TextConfigFile)throws {
- let row: (Int)throws -> Double = { try file.double(row: $0) }
- let int: (Int)throws -> Int = { try file.integer(row: $0) }
- self.name = file.name
- self.chargeTo = try row(10)
- self.dischargeToTurbine = try row(13)
- self.dischargeToHeater = try row(16)
- self.TturbIterate = try row(19)
- self.heatStoredrel = try row(22)
- self.tempExCst = [try row(47), try row(50), try row(53), try row(56)]
- self.tempExC0to1 = [try row(62), try row(65), try row(68), try row(71)]
- self.tempInCst = [try row(81), try row(84), try row(87), try row(90)]
- self.tempInC0to1 = [try row(96), try row(99), try row(102), try row(105)]
- self.heatlossCst = [try row(115), try row(118), try row(121), try row(124)]
- self.heatlossC0to1 = [try row(130), try row(133), try row(136), try row(139)]
- self.pumpEfficiency = try row(146)
- self.pressureLoss = try row(149)
- self.massFlow = try row(152)
- self.startTemperature = (cold: try row(162), hot: try row(165))
- self.startLoad = (cold: try row(168), hot: try row(171))
- self.heatExchangerEfficiency = try row(172)
- if let value = file[row: 173], let strategy = Strategy(rawValue: value) {
- self.strategy = strategy
- } else {
- self.strategy = .demand
- }
- self.PrefChargeto = try row(174)
- self.startexcep = Int(file[row: 175] ?? "0") ?? 0
- self.endexcep = Int(file[row: 176] ?? "0") ?? 0
- if let value = file[row: 173], let htf = StorageFluid(rawValue: value) {
- self.HTF = htf
- } else {
- self.HTF = .solarSalt
- }
- self.FP = try row(178)
- self.FC = try row(179)
- self.endDayFossilCharging = try int(180)
- self.endMonthFossilCharging = try int(181)
- self.startDayFossilCharging = try int(182)
- self.startMonthFossilCharging = try int(183)
- }
- }
-
- Double       // stepwidth of Qdemand to iterate MinTurbTemp
- pumpEfficiency      : Double       // efficiency of pump
- pressureLoss  : Double       // pressure loss during discharge at design pnt
- massFlow        : Double  // massflow at DP design point
-
- heatLossConstants0(3) : Double       // heatLosses, cubic            smaller than 0
- heatLossC0to1(3): Double       // polynomfit       Estorel is greater than 0
-
- tempInCst0(3)   : Double       //outlet temperature of HTF    smaller than 0
- tempInC0to1(3)  : Double       // during charging  Estorel is greater than 0
-
- TexCst0(3)   : Double       // outlet temperature of HTF    smaller than 0
- TexC0to1(3)  : Double       // during discharging, Estorel greater than 0
-
- startLoad.hot    : Double     // fit Temp(Load) of turbine inøC
- Strategy     : String     // Operation Strategy
- PrefChargeto : Double     // Preference to Charging of Storage up to load
- startexcep: Int     // Start of Exception of storage preference
- endexcep  : Int     // End of Exception of storage preference
- HTF       : String  // Storage Fluid
- FP        : Int  // Activation of Freeze Protection of solar field by storage
- FC        : Int  // Activation offossil storage charging
- startDayFossilCharging  : Int  // Start fossil charging at Day
- startMonthFossilCharging  : Int  // Start fossil charging at Month
- endDayFossilCharging   : Int  // Stop fossil charging at Day
- endMonthFossilCharging   : Int  // Stop fossil charging at Month
- startDayFossilCharging2 : Int  // Second Start fossil charging at Day   091211: added, to be used for sites in regions like Austria
- startMonthFossilCharging2 : Int  // Second Start fossil charging at Month 091211: added, to be used for sites in regions like Austria
- endDayFossilCharging2  : Int  // second Stop fossil charing at Day    091211: added, to be used for sites in regions like Austria
- endMonthFossilCharging2  : Int  // Second Stop fossil charing at Month  091211: added, to be used for sites in regions like Austria
- HX           : Double       // HX Efficiency
- HXcap        : Double       // HX capacity (oil to salt) in MWt
- heatExchangerRestrictedMax   : Bool     // check box to restrict the max. capacity of HX
- HXmin        : Double       // HX minimum capacity in %
- HXresMin  : Int     // check box to restrict HX//s minimum load
-
- HTa_time     : Double  // time for heat tracing A begin
- HTa_pow      : Double  // power for heat tracing A
- HTb_time     : Double  // time for heat tracing B begin
- HTb_pow      : Double  // power for heat tracing B
- HTc_time     : Double  // time for heat tracing C begin
- HTc_pow      : Double  // power for heat tracing C
- HTd_time     : Double  // time for heat tracing D begin
- HTd_pow      : Double  // power for heat tracing D
- HTe_time     : Double  // time for heat tracing E begin
- HTe_pow      : Double  // power for heat tracing E
-
- heatdiff       : Double       //(Qsol-Qdemand)/Qdemand in % to discharge STO
-
- isVariable       : Double      //check box to discharge the storage at variable load or (at usual by 97%)constant load
- minDischargeLoad       : Double       //minimum load during storage discharge in %
- dSRise       : Double       //number of hours before (-) or after (+) sunrise for variable load calculation
- fixedDischargeLoad       : Double       //dicharge with fixed load, as usual. Now given as user input
- DischrgParFac: Double       //factor to multiply parasitics during discharge to consider HTF pumps
-
- definedBy           : String * 3      //how the TES size is defined (hours, MWh, Ton)
-
- AuxConsCurve  : Integer       //select if auxiliary consumption is to be calculated as quadratic polynom
- DesAuxIN      : Double       //nominal auxiliary electrical consumption
- DesAuxEX     : Double       //c0 coeff. for aux. consumption
- // AuxCons1     : Double       //Dummy
- // AuxCons2     : Double       //Dummy
-
- AuxModel: Bool
- Expn: Single
- level          : Double
- level2         : Double
- lowCh          : Double
- lowDc          : Double
- QinDES         : Double
- DesINmassSalt     : Double
- QexDes         : Double
- DesEXmassSalt     : Double
-
- QprodLoad: Double// 111130: added for shif ter
- QprodLoadWinter: Double// 111203: added for shif ter
- QprodLoadSummer: Double// 111203: added for shif ter
- dischrgWinter: Double
- dischrgSummer: Double
- badDNIwinter: Double
- badDNIsummer: Double
-
- TypeDir        : String   // 120130: added
-
- OU1_PeakHours : Double  // 120208: added
- }
-
- */
+extension Storage.Parameter: TextConfigInitializable {
+  public init(file: TextConfigFile)throws {
+    let line: (Int) throws -> Double = { try file.parseDouble(line: $0) }
+    let line2: (Int) throws -> Int = { try file.parseInteger(line: $0) }
+    name = file.name
+    chargeTo = try line(10)
+    dischargeToTurbine = try line(13)
+    dischargeToHeater = try line(16)
+    stepSizeIteration = try line(19)
+    heatStoredrel = try line(22)
+    temperatureDischarge = try [line(47), line(50), line(53), line(56)]
+    temperatureDischarge2 = try [line(62), line(65), line(68), line(71)]
+    temperatureCharge = try [line(81), line(84), line(87), line(90)]
+    temperatureCharge2 = try [line(96), line(99), line(102), line(105)]
+    heatlossCst = try [line(114), line(118), line(121), line(124)]
+    heatlossC0to1 = try [line(130), line(133), line(136), line(139)]
+    pumpEfficiency = try line(73) / 100
+    pressureLoss = try line(149)
+    massFlow = try .init(line(152))
+    startTemperature = try (line(162), line(165))
+    startLoad = try (line(168), line(171))
+    HX = try line(172) //bool
+    strategy = .always//try line(173) 
+    PrefChargeto = try line(174)
+    startexcep = try line2(175)
+    endexcep = try line2(176)
+    HTF = .solarSalt //try line(177)
+    FP = try line(178)
+    FC = try line(179)
+    stopFossilCharging = try (line2(180), line2(181))
+    startFossilCharging = try (line2(182), line2(183))
+    heatExchangerRestrictedMax = try line2(186) == 1 ? true:false
+    heatExchangerCapacity = try line(189)
+    Qfldif = try line(192)
+    isVariable = try line2(194) == 1 ? true:false
+    dSRise = try line(196)
+    MinDis = try line(198)
+    FixDis = try line(200)
+    heatTracingTime = try [line(202), line(205),  try line(208)]
+    heatTracingPower = try [line(203), line(206), line(209)]
+ //   HTb_time = try line(205)
+ //   HTb_pow = try line(206)
+ //   HTc_time = try line(208)
+ //   HTc_pow = try line(209)
+    TempHeatTracing = try line(211)
+    HTc_Temp = try line(_)
+    HTe_pow = try line(_ )
+    heatExchangerRestrictedMin = try line2(217) == 1 ? true:false
+    heatExchangerMinCapacity = try line(218)
+    DischrgParFac = try line(220)
+    stopFossilCharging2 = try (line2(222), line2(223))
+    startFossilCharging2 = try (line2(224),line2(225))
+    auxConsumptionCurve = try line2(227) == 1 ? true:false
+    DesAuxIN = try line(228)
+    DesAuxEX = try line(229)
+    heatProductionLoadWinter = try Ratio(line(233))
+    heatProductionLoadSummer = try Ratio(line(234))
+    dischrgWinter = try line2(235)
+    dischrgSummer = try line2(236)
+    badDNIwinter = try line(238)
+    badDNIsummer = try line(239)
+    type = .indirect // try line(241)
+  }  
+}
