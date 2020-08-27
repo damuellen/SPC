@@ -36,7 +36,8 @@ extension DefaultStringInterpolation {
 }
 
 public func decorated(_ title: String) -> String {
-  let width = TerminalController.terminalWidth() ?? 80
+  var width = TerminalController.terminalWidth() ?? 80
+  if width == 0 { width = 80 }
   let half = (width - title.count - 8) / 2
   let line = String(repeating: "─", count: half)
   return line + "┤   " + title + "   ├" + line

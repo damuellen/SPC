@@ -13,7 +13,9 @@ import Meteo
 
 public struct SolarField: Component, HeatCycle {
 
-  public enum Loop: Int {
+  typealias Loop = HeatTransfer
+
+  enum Loops: Int, CaseIterable {
     case design = 0, near, average, far
 
     static var names: [String] {
@@ -30,7 +32,7 @@ public struct SolarField: Component, HeatCycle {
   public var heatLossHeader: Double
   public var heatLossHCE: Double
   public var inFocus: Ratio
-  var loops: [HeatTransfer]
+  var loops: [Loop]
   var loopEta: Double
   
   var cycle: HeatTransfer {
@@ -38,6 +40,11 @@ public struct SolarField: Component, HeatCycle {
     set { header = newValue }
   }
 
+  subscript(loop index: SolarField.Loops) -> Loop {
+    get { loops[index.rawValue] }
+    set { loops[index.rawValue] = newValue }
+  }
+  
   public enum OperationMode: String, CustomStringConvertible {
     case startUp
     case freezeProtection
@@ -64,7 +71,7 @@ public struct SolarField: Component, HeatCycle {
     ETA: 0,
     heatLosses: 0, heatLossHeader: 0, heatLossHCE: 0,
     inFocus: 0.0,
-    loops: Loop.names.map { name in HeatTransfer(loop: name) },
+    loops: Loops.names.map { name in Loop(loop: name) },
     loopEta: 0
   )
 
@@ -117,24 +124,32 @@ public struct SolarField: Component, HeatCycle {
     let parameter = SolarField.parameter
     HCE.freezeProtectionCheck(&self)
     SolarField.last = loops
+    
+    if header.massFlow.isNearZero {
+      
+      self[loop: .near].massFlow.rate = 0
+      HCE.calculation(
+        &self, loop: .near, collector: collector, mode: .variable, ambient: ambient
+           )
+      self[loop: .average] = self[loop: .near]
+      self[loop: .far] = self[loop: .near]
+    } else {
     let m1 = (header.massFlow - parameter.massFlow.min).rate
     let m2 = (parameter.massFlow.max - parameter.massFlow.min).rate
-    for (n, loop) in zip(0..., [Loop.near, .average, .far]) {
-      let massFlow = header.massFlow.rate == 0
-        ? 0 : header.massFlow.rate
-        * ( m1 * (parameter.imbalanceDesign[n] - parameter.imbalanceMin[n])
+    for (n, loop) in zip(0..., [Loops.near, .average, .far]) {
+      self[loop: loop].massFlow.rate = header.massFlow.rate *
+          ( m1 * (parameter.imbalanceDesign[n] - parameter.imbalanceMin[n])
           / m2 + parameter.imbalanceMin[n] )
-      loops[loop.rawValue].massFlow.rate = massFlow
 
-      HCE.calculation(&self, collector: collector, loop: loop,
-                      mode: .variable, ambient: ambient)
+      HCE.calculation(
+        &self, loop: loop, collector: collector, mode: .variable, ambient: ambient
+      )
     }
-    
+      
     header.massFlow.rate =
       loops.dropFirst().reduce(0.0) { sum, loop in
         sum + loop.massFlow.rate } / 3.0
-    
-    
+    }
     if header.massFlow.isNearZero {
       loops.dropFirst().indices.forEach { n in
         loops[n].constantTemperature()
@@ -179,33 +194,33 @@ public struct SolarField: Component, HeatCycle {
       }
 
       header.temperature.outlet.kelvin =
-        (temps[0].2 * loops[1].massFlow.rate
-          + temps[1].2 * loops[2].massFlow.rate
-          + temps[2].2 * loops[3].massFlow.rate)
+        (temps[0].2 * self[loop: .near].massFlow.rate
+          + temps[1].2 * self[loop: .average].massFlow.rate
+          + temps[2].2 * self[loop: .far].massFlow.rate)
           / (3.0 * header.massFlow.rate)      
 
       // Now calc. the linear inlet temperature gradient:
       let wayRatio: Double = parameter.loopWays[2] / parameter.pipeWay
 
-      loops[2].temperature.inlet = Temperature(celsius:
-        loops[3].temperature.inlet.celsius + wayRatio
-          * (temperature.inlet.celsius - loops[3].temperature.inlet.celsius))
+      self[loop: .average].temperature.inlet = Temperature(celsius:
+        self[loop: .far].temperature.inlet.celsius + wayRatio
+          * (temperature.inlet.celsius - self[loop: .far].temperature.inlet.celsius))
 
-      loops[1].temperature.inlet = Temperature(celsius:
-        loops[3].temperature.inlet.celsius + 2 * wayRatio
-          * (temperature.inlet.celsius - loops[3].temperature.inlet.celsius))
+      self[loop: .near].temperature.inlet = Temperature(celsius:
+        self[loop: .far].temperature.inlet.celsius + 2 * wayRatio
+          * (temperature.inlet.celsius - self[loop: .far].temperature.inlet.celsius))
 
-      loops[1].temperature.inlet.kelvin =
+      self[loop: .near].temperature.inlet.kelvin =
         temps[0].0 * inletTemperature
-          + temps[0].1 * loops[1].inletTemperature
+        + temps[0].1 * self[loop: .near].inletTemperature
       
-      loops[2].temperature.inlet.kelvin =
+      self[loop: .average].temperature.inlet.kelvin =
         temps[1].0 * inletTemperature
-          + temps[1].1 * loops[2].inletTemperature
+        + temps[1].1 * self[loop: .average].inletTemperature
       
-      loops[3].temperature.inlet.kelvin =
+      self[loop: .far].temperature.inlet.kelvin =
         temps[2].0 * inletTemperature
-          + temps[2].1 * loops[3].inletTemperature
+          + temps[2].1 * self[loop: .far].inletTemperature
       }
   }
 
@@ -285,19 +300,19 @@ public struct SolarField: Component, HeatCycle {
 
     operationMode = .unknown
     #warning("The implementation here differs from PCT")
-    loops[0].massFlow = header.massFlow
-    loops[0].temperature.inlet = loops[1].temperature.inlet
+    self[loop: .design].massFlow = header.massFlow
+    self[loop: .design].temperature.inlet = self[loop: .near].temperature.inlet
 
     (time, dumping) = HCE.calculation(
-      &self, collector: collector, loop: .design,
+      &self, loop: .design, collector: collector,
       mode: operationMode.collector, ambient: ambient
     )
 
-    header.massFlow = loops[0].massFlow
-    header.temperature.outlet = loops[0].temperature.outlet
+    header.massFlow = self[loop: .design].massFlow
+    header.temperature.outlet = self[loop: .design].temperature.outlet
 
-    if loops[0].massFlow.isNearZero {
-      loops[0].constantTemperature()
+    if self[loop: .design].massFlow.isNearZero {
+      self[loop: .design].constantTemperature()
     }
 
     switch operationMode { // Check HCE and decide what to do

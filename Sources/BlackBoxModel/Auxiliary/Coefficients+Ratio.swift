@@ -29,11 +29,9 @@ public struct Polynomial: Codable, Equatable {
   
   @_transparent func evaluated(_ value: Double) -> Double {
     // Use Horner’s Method for solving
-    var result = 0.0
-    for coefficient in self.coefficients.reversed() {
-      result = fma(result, value, coefficient) // result * value + coefficient
+    coefficients.reversed().reduce(into: 0.0) { result, coefficient in
+      result = coefficient.addingProduct(result, value)
     }
-    return result
   }
 
   func callAsFunction(_ temperature: Temperature) -> Double {

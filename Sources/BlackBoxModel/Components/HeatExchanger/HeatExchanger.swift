@@ -61,7 +61,7 @@ public struct HeatExchanger: Component, HeatCycle {
   {
     let parameter = HeatExchanger.parameter
     let solarField = SolarField.parameter
-    let load = steamTurbine.load ?? .zero
+    let load = steamTurbine.load
     let htf = solarField.HTF
     if parameter.name.hasPrefix("Heat Exchanger HTF-H2O - BK") {
       self.outletTemperature(kelvin:

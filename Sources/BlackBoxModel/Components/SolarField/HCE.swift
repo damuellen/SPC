@@ -42,8 +42,8 @@ enum HCE {
   @discardableResult
   static func calculation(
     _ solarField: inout SolarField,
-    collector: Collector,
-    loop: SolarField.Loop,
+    loop: SolarField.Loops,
+    collector: Collector,    
     mode: Collector.OperationMode,
     ambient: Temperature
   ) -> (Double, Double) {
@@ -227,7 +227,7 @@ enum HCE {
   static func mode1(
     _ solarField: inout SolarField,
     _ collector: Collector,
-    _ loop: SolarField.Loop,
+    _ loop: SolarField.Loops,
     _ ambient: Temperature
   ) -> (Double, Double) {
     let sof = SolarField.parameter
@@ -244,8 +244,8 @@ enum HCE {
     
     var dumping = 0.0
     
-    var hce = solarField.loops[loop.rawValue]
-    defer { solarField.loops[loop.rawValue] = hce }
+    var hce = solarField[loop: loop]
+    defer { solarField[loop:loop] = hce }
     
     // Average HTF temp. in loop [K]
     var avgT = Temperature.average(
@@ -368,7 +368,7 @@ enum HCE {
   static func mode2(
     _ solarField: inout SolarField,
     _ collector: Collector,
-    _ loop: SolarField.Loop,
+    _ loop: SolarField.Loops,
     _ ambient: Temperature
   ) -> (Double, Double) {
     let sof = SolarField.parameter
@@ -394,8 +394,8 @@ enum HCE {
     
     var zoom = 1
 
-    var hce = solarField.loops[loop.rawValue]
-    defer { solarField.loops[loop.rawValue] = hce }
+    var hce = solarField[loop: loop]
+    defer { solarField[loop: loop] = hce }
     
     var newTemp = hce.temperature.inlet
     var oldTemp = newTemp
@@ -424,7 +424,7 @@ enum HCE {
         //if hce.massFlow <= sof.massFlow.min {
         if hce.massFlow.isNearZero {
           // mass flow is reduced to almost zero due to no demand and full storage
-          //  time = period
+          time = Double(period)
         } else {
           time = (areaDensity * area / hce.massFlow.rate)
           //timePast = period

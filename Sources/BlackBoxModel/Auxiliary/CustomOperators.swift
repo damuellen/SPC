@@ -32,8 +32,8 @@ extension Double {
 infix operator ><
 
 func >< (lhs: String, rhs: String) -> String {
-  let width = TerminalController.terminalWidth() ?? 80
-
+  var width = TerminalController.terminalWidth() ?? 80
+  if width == 0 { width = 80 }
   let count = width - lhs.count - rhs.count
   return lhs + String(repeating: " ", count: count) + rhs + "\n"
 }

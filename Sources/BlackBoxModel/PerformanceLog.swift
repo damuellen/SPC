@@ -11,9 +11,7 @@
 import Meteo
 import Foundation
 
-public struct PerformanceLog: CustomStringConvertible, Comparable {
-
-  public let report: String
+public struct PerformanceLog: Comparable {
   
   let energyTotal: Energy
   
@@ -51,30 +49,29 @@ public struct PerformanceLog: CustomStringConvertible, Comparable {
     self.energyHistory = energyHistory
     self.performanceHistory = performanceHistory
     self.layout = Design.layout
-    self.report = PerformanceReport.create(energy: energy, radiation: radiation)
+  }
+  
+  private func range(of interval: DateInterval) -> Range<Int> {
+    var start = calendar.ordinality(of: .hour, in: .year, for: interval.start)! - 1
+    var end = calendar.ordinality(of: .hour, in: .year, for: interval.end)! - 1
+    start *= self.interval.rawValue
+    end *= self.interval.rawValue
+    return start..<end
   }
   
   public subscript(
-    keyPath: KeyPath<Energy, Double>, ofDay day: Int) -> [Double]
+    keyPath: KeyPath<Energy, Double>, interval: DateInterval) -> [Double]
   {
     if energyHistory.isEmpty { return [] }
-    let count = interval.rawValue * 24
-    let start = (day - 1) * count
-    let end = day * count
-    return energyHistory[start..<end].map { $0[keyPath: keyPath] }
+    let r = range(of: interval).clamped(to: energyHistory.indices)
+    return energyHistory[r].map { $0[keyPath: keyPath] }
   }
   
   public subscript(
-    keyPath: KeyPath<PerformanceData, Double>, ofDay day: Int) -> [Double]
+    keyPath: KeyPath<PerformanceData, Double>, interval: DateInterval) -> [Double]
   {
     if performanceHistory.isEmpty { return [] }
-    let count = interval.rawValue * 24
-    let start = (day - 1) * count
-    let end = day * count
-    return performanceHistory[start..<end].map { $0[keyPath: keyPath] }
-  }
-  
-  public var description: String {
-    return report
+    let r = range(of: interval).clamped(to: performanceHistory.indices)
+    return performanceHistory[r].map { $0[keyPath: keyPath] }
   }
 }
