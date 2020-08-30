@@ -93,43 +93,54 @@ public final class DateGenerator: Sequence, IteratorProtocol {
 
     return currentDate
   }
-  
-  public static func getMonth(_ month: Int, year: Int) -> DateInterval {
+}
+
+extension DateInterval {
+  public init(ofMonth month: Int, in year: Int) {
     var dateComponents = DateComponents()
     dateComponents.timeZone = calendar.timeZone
     dateComponents.day = 1
     dateComponents.month = month
     dateComponents.year = year
-    let first = calendar.date(from: dateComponents)!
-    dateComponents = DateComponents()
-    dateComponents.timeZone = calendar.timeZone
-    dateComponents.day = 1
-    dateComponents.month = month + 1
-    dateComponents.year = year
-    let last = calendar.date(from: dateComponents)!
-    return DateInterval(start: first, end: last)
+    let start = calendar.date(from: dateComponents)!
+    dateComponents.month! += 1
+    dump(dateComponents)
+    let end = calendar.date(from: dateComponents)! - 1
+    self = .init(start: start, end: end)
   }
 
-  public static func getWeek(_ week: Int, year: Int) -> DateInterval {
+  public init(ofWeek week: Int, in year: Int) {
     var dateComponents = DateComponents()
     dateComponents.timeZone = calendar.timeZone
-    dateComponents.weekOfYear = week
+    
+    if week > 1 {
+      dateComponents.weekOfYear = week
+    }
+    
     dateComponents.year = year
-    let first = calendar.date(from: dateComponents)!
-    dateComponents.weekOfYear = week + 1
-    let last = calendar.date(from: dateComponents)!
-    return DateInterval(start: first, end: last)
+    dateComponents.weekday = 2
+    let start = calendar.date(from: dateComponents)!
+    
+    if week < 53 {
+      dateComponents.weekOfYear = week + 1
+    } else {
+      dateComponents.year = year + 1
+      dateComponents.weekday = nil
+    }
+
+    let end = calendar.date(from: dateComponents)! - 1
+    self = .init(start: start, end: end)
   }
 
-  public static func getDay(_ day: Int, year: Int) -> DateInterval {
+  public init(ofDay day: Int, in year: Int) {
     var dateComponents = DateComponents()
     dateComponents.timeZone = calendar.timeZone
     dateComponents.day = day
     dateComponents.year = year
-    let first = calendar.date(from: dateComponents)!
-    dateComponents.day = day + 1
-    let last = calendar.date(from: dateComponents)!
-    return DateInterval(start: first, end: last)
+    let start = calendar.date(from: dateComponents)!
+    dateComponents.day! += 1
+    let end = calendar.date(from: dateComponents)! - 1
+    self = .init(start: start, end: end)
   }
 }
 
