@@ -41,7 +41,7 @@ extension Storage {
       }
     }
 
-    let type: TypeDir = .indirect
+    var type: TypeDir = .indirect
     let strategy: Strategy
     let PrefChargeto: Double
     let startexcep, endexcep: Int
@@ -54,10 +54,10 @@ extension Storage {
     let heatTracingTime, heatTracingPower: [Double]
     let DischrgParFac: Double
     
-    let isVariable = true
-    let heatExchangerRestrictedMin = false
-    let auxConsumptionCurve = false
-    let heatExchangerRestrictedMax = false
+    var isVariable = true
+    var heatExchangerRestrictedMin = false
+    var auxConsumptionCurve = false
+    var heatExchangerRestrictedMax = false
 
     var definedBy: Definition = .hours
 
@@ -143,7 +143,8 @@ extension Storage.Parameter: CustomStringConvertible {
 }
 
 extension Storage.Parameter: TextConfigInitializable {
-  public init(file: TextConfigFile)throws {
+  public init(file: TextConfigFile) throws {
+    typealias T = Temperature
     let line: (Int) throws -> Double = { try file.parseDouble(line: $0) }
     let line2: (Int) throws -> Int = { try file.parseInteger(line: $0) }
     name = file.name
@@ -161,9 +162,9 @@ extension Storage.Parameter: TextConfigInitializable {
     pumpEfficiency = try line(73) / 100
     pressureLoss = try line(149)
     massFlow = try .init(line(152))
-    startTemperature = try (line(162), line(165))
+    startTemperature = try (T(line(162)), T(line(165)))
     startLoad = try (line(168), line(171))
-    HX = try line(172) //bool
+  //  HX = try line(172) //bool
     strategy = .always//try line(173) 
     PrefChargeto = try line(174)
     startexcep = try line2(175)
@@ -175,20 +176,20 @@ extension Storage.Parameter: TextConfigInitializable {
     startFossilCharging = try (line2(182), line2(183))
     heatExchangerRestrictedMax = try line2(186) == 1 ? true:false
     heatExchangerCapacity = try line(189)
-    Qfldif = try line(192)
+  //  Qfldif = try line(192)
     isVariable = try line2(194) == 1 ? true:false
     dSRise = try line(196)
-    MinDis = try line(198)
-    FixDis = try line(200)
+    minDischargeLoad = try Ratio(line(198))
+    fixedDischargeLoad = try Ratio(line(200))
     heatTracingTime = try [line(202), line(205),  try line(208)]
     heatTracingPower = try [line(203), line(206), line(209)]
  //   HTb_time = try line(205)
  //   HTb_pow = try line(206)
  //   HTc_time = try line(208)
  //   HTc_pow = try line(209)
-    TempHeatTracing = try line(211)
-    HTc_Temp = try line(_)
-    HTe_pow = try line(_ )
+   // TempHeatTracing = try line(211)
+  //  HTc_Temp = try line(_)
+  //  HTe_pow = try line(_ )
     heatExchangerRestrictedMin = try line2(217) == 1 ? true:false
     heatExchangerMinCapacity = try line(218)
     DischrgParFac = try line(220)
@@ -204,5 +205,10 @@ extension Storage.Parameter: TextConfigInitializable {
     badDNIwinter = try line(238)
     badDNIsummer = try line(239)
     type = .indirect // try line(241)
+    designTemperature = (T(0), T(0))
+    heatdiff = 0
+    heatLoss = (0,0)
+    heatExchangerEfficiency = 0
+    heatProductionLoad = 0
   }  
 }

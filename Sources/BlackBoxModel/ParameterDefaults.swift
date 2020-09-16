@@ -116,7 +116,7 @@ public enum ParameterDefaults {
     heatExchangerEfficiency: 1,
     heatExchangerCapacity: 70,
     heatExchangerMinCapacity: 10,
-    HXresMin: false, DesAuxIN: 0, DesAuxEX: 1,
+    DesAuxIN: 0, DesAuxEX: 1,
     heatProductionLoad: 0.0,
     heatProductionLoadWinter: 0.0,
     heatProductionLoadSummer: 0.0,
