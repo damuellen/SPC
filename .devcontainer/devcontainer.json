@@ -21,8 +21,8 @@
 		"terminal.integrated.shell.linux": "/bin/bash",
 		"lldb.adapterType": "bundled",
 		"lldb.executable": "/usr/bin/lldb",
-		"sde.languageservermode": "sourcekite",
-		"swift.path.sourcekite": "/usr/local/bin/sourcekite"
+		"sde.languageservermode": "sourcekit-lsp",
+		"sourcekit-lsp.serverPath": "/usr/bin/sourcekit-lsp"
 	},
 
 	// Add the IDs of extensions you want installed when the container is created.
