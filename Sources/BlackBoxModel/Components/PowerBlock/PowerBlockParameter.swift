@@ -75,9 +75,9 @@ extension PowerBlock.Parameter: TextConfigInitializable {
     fixElectricalParasitics0 = try parse()
     startUpElectricalParasitics = try parse()
     electricalParasiticsShared = try [parse(), parse()]
-    spacing = 2
+    line = 39; spacing = 2
     nominalElectricalParasiticsACC = try parse()
-    electricalParasiticsACC = try [parse(), parse(), parse(), parse()]
-    electricalParasiticsACCTamb = try [parse(), parse(), parse(), parse()]
+    electricalParasiticsACC = try [parse(), parse(), parse(), parse(), parse()]
+    electricalParasiticsACCTamb = try [parse(), parse(), parse(), parse(), parse()]
   }
 }
