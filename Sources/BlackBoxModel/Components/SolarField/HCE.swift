@@ -10,7 +10,6 @@
 
 import Foundation
 import Meteo
-import DateGenerator
 
 let period = 300
 /**
@@ -42,8 +41,8 @@ enum HCE {
   @discardableResult
   static func calculation(
     _ solarField: inout SolarField,
-    loop: SolarField.Loops,
-    collector: Collector,    
+    collector: Collector,
+    loop: SolarField.Loop,
     mode: Collector.OperationMode,
     ambient: Temperature
   ) -> (Double, Double) {
@@ -227,7 +226,7 @@ enum HCE {
   static func mode1(
     _ solarField: inout SolarField,
     _ collector: Collector,
-    _ loop: SolarField.Loops,
+    _ loop: SolarField.Loop,
     _ ambient: Temperature
   ) -> (Double, Double) {
     let sof = SolarField.parameter
@@ -244,8 +243,8 @@ enum HCE {
     
     var dumping = 0.0
     
-    var hce = solarField[loop: loop]
-    defer { solarField[loop:loop] = hce }
+    var hce = solarField.loops[loop.rawValue]
+    defer { solarField.loops[loop.rawValue] = hce }
     
     // Average HTF temp. in loop [K]
     var avgT = Temperature.average(
@@ -368,7 +367,7 @@ enum HCE {
   static func mode2(
     _ solarField: inout SolarField,
     _ collector: Collector,
-    _ loop: SolarField.Loops,
+    _ loop: SolarField.Loop,
     _ ambient: Temperature
   ) -> (Double, Double) {
     let sof = SolarField.parameter
@@ -394,8 +393,8 @@ enum HCE {
     
     var zoom = 1
 
-    var hce = solarField[loop: loop]
-    defer { solarField[loop: loop] = hce }
+    var hce = solarField.loops[loop.rawValue]
+    defer { solarField.loops[loop.rawValue] = hce }
     
     var newTemp = hce.temperature.inlet
     var oldTemp = newTemp
@@ -412,7 +411,7 @@ enum HCE {
         let areaDensity: Double
         if avgT.celsius < 20 {
           print(o, innerIteration, newTemp, hce, solarField,
-                "Temperature too low. \(DateTime.current)")
+                "Temperature too low.")
           areaDensity = 1
         } else {
           areaDensity = htf.density(avgT) * .pi
@@ -424,7 +423,7 @@ enum HCE {
         //if hce.massFlow <= sof.massFlow.min {
         if hce.massFlow.isNearZero {
           // mass flow is reduced to almost zero due to no demand and full storage
-          time = Double(period)
+          //  time = period
         } else {
           time = (areaDensity * area / hce.massFlow.rate)
           //timePast = period

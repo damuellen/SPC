@@ -14,7 +14,6 @@ import Foundation
 import Meteo
 import ArgumentParser
 
-import Swifter
 import Dispatch
 
 struct LocationInfo: ParsableArguments {
@@ -70,7 +69,7 @@ struct SolarPerformanceCalculator: ParsableCommand {
     } else {
       Simulation.time.steps = .every5minutes
     }   
-
+    let start = DispatchTime.now().uptimeNanoseconds
     BlackBoxModel.configure(year: year)
 
      if let coords = location.coords {
@@ -81,8 +80,8 @@ struct SolarPerformanceCalculator: ParsableCommand {
       }
       BlackBoxModel.configure(location: loc)
     }       
-
-    BlackBoxModel.configure(meteoFilePath: ".")
+    
+    BlackBoxModel.configure(meteoFilePath: "./Model.playground/Resources/AlAbdaliyah.mto")
 
    // let mode: PerformanceDataRecorder.Mode = full ? .all : .brief
     let mode: PerformanceDataRecorder.Mode
@@ -96,19 +95,9 @@ struct SolarPerformanceCalculator: ParsableCommand {
     BlackBoxModel.runModel(with: log)
     
     SolarPerformanceCalculator.result = log.log
-    
+    let end = DispatchTime.now().uptimeNanoseconds
+    print((end - start) / 1_000_000, "ms")
     log.printResult()  
-/*
-    let semaphore = DispatchSemaphore(value: 0)
-	do {
-	  try server.start(9080, forceIPv4: true)
-	  print("Server has started ( port = \(try server.port()) ). Try to connect now...")
-	//  system("x-www-browser http://localhost:9080")
-	  semaphore.wait()
-	} catch {
-	  print("Server start error: \(error)")
-	  semaphore.signal()
-	}*/
   }
 
   static var configuration = CommandConfiguration(
@@ -117,45 +106,6 @@ struct SolarPerformanceCalculator: ParsableCommand {
   )
 }
 /*
-let server = HttpServer()
-let encoder = JSONEncoder()
-let cases = JSONConfig.Name.allCases
-let json = try cases.map(JSONConfig.generateJSON)
-
-for (c, d) in zip(cases, json) {
-  server["/json/\(c.rawValue)"] = { request in
-    return HttpResponse.ok(.data(d))
-  }
-  server["/text/\(c.rawValue)"] = { request in
-    return HttpResponse.ok(.text(c.description))
-  }
-
-  server.POST["/json/\(c.rawValue)"] = { request in
-    do {
-      try JSONConfig.loadConfiguration(c, data: Data(request.body))
-      return HttpResponse.ok(.text(c.description))
-    } catch {
-      return HttpResponse.internalServerError
-    }
-  }
-}
-
-server["/text/BlackBoxModel"] = { request in
-    return HttpResponse.ok(.text(SolarPerformanceCalculator.result.report))
-  }
-
-
-server["/day/:day.json"] = { request in
-  if let day = Int(request.params.first!.value), 1...365 ~= day {    
-    let array = SolarPerformanceCalculator.result[\.collector.insolationAbsorber, ofDay: day]
-    return HttpResponse.ok(.json(["values":array]))
-    } else {
-      return HttpResponse.internalServerError
-    }
-
-}
-
-
 
 SolarField.parameter.massFlow.max = 2500.0
 Design.layout.powerBlock = 73

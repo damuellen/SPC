@@ -17,9 +17,9 @@ class BlackBoxModelTests: XCTestCase {
     BlackBoxModel.runModel(with: log)
     let result = log.log!
 
-    XCTAssertEqual(result.electric.net, 250.3, accuracy: 0.1)
+    XCTAssertEqual(result.electric.net, 250.16, accuracy: 0.1)
     XCTAssertEqual(result.electric.consum, 27.7, accuracy: 0.1)
-    XCTAssertEqual(result.electric.parasitics, 83.4, accuracy: 0.1)
+    XCTAssertEqual(result.electric.parasitics, 83.55, accuracy: 0.1)
     XCTAssertEqual(result.electric.steamTurbineGross, 305.9, accuracy: 0.1)
     XCTAssertEqual(result.thermal.solar.megaWatt, 2314.4, accuracy: 0.1)
    // XCTAssertEqual(result.thermal.startUp.megaWatt, 242.7, accuracy: 0.1)
@@ -41,9 +41,9 @@ class BlackBoxModelTests: XCTestCase {
     let result = log.log!
     
 
-    XCTAssertEqual(result.electric.net, 111.5, accuracy: 0.1)
+    XCTAssertEqual(result.electric.net, 111.02, accuracy: 0.1)
     XCTAssertEqual(result.electric.consum, 33.5, accuracy: 0.1)
-    XCTAssertEqual(result.electric.parasitics, 55.7, accuracy: 0.1)
+    XCTAssertEqual(result.electric.parasitics, 56.26, accuracy: 0.1)
     XCTAssertEqual(result.electric.steamTurbineGross, 133.7, accuracy: 0.1)
     XCTAssertEqual(result.thermal.solar.megaWatt, 1185.2, accuracy: 0.1)
     //XCTAssertEqual(result.thermal.startUp.megaWatt, 243.5, accuracy: 0.1)

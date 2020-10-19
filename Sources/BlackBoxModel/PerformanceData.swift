@@ -36,10 +36,8 @@ public struct PerformanceData: CustomStringConvertible, MeasurementsConvertible 
     return storage.cycle.numericalForm + heater.cycle.numericalForm
       + powerBlock.cycle.numericalForm + heatExchanger.cycle.numericalForm
       + solarField.header.numericalForm
-      + solarField[loop: .design].numericalForm
-      + solarField[loop: .near].numericalForm
-      + solarField[loop: .average].numericalForm
-      + solarField[loop: .far].numericalForm
+      + solarField.loops[0].numericalForm + solarField.loops[1].numericalForm
+      + solarField.loops[2].numericalForm + solarField.loops[3].numericalForm
   }
   
   static var columns: [(name: String, unit: String)] {

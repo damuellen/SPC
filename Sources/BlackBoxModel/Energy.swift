@@ -90,9 +90,9 @@ public struct Parasitics: Encodable, MeasurementsConvertible {
   }
   
   static var columns: [(name: String, unit: String)] {
-    [("Parasitics|SolarField", "MWh"), ("Parasitics|PowerBlock", "MWh"),
-     ("Parasitics|Storage", "MWh"), ("Parasitics|Shared", "MWh"),
-     ("Parasitics|Backup", "MWh"), ("Parasitics|GasTurbine", "MWh")]
+    [("Parasitics|SolarField", "MWh e"), ("Parasitics|PowerBlock", "MWh e"),
+     ("Parasitics|Storage", "MWh e"), ("Parasitics|Shared", "MWh e"),
+     ("Parasitics|Backup", "MWh e"), ("Parasitics|GasTurbine", "MWh e")]
   }
   
   mutating func totalize(_ electricalParasitics: Parasitics, fraction: Double) {

@@ -13,9 +13,7 @@ import Foundation
 /// A mass flow rate in kilogram per second.
 public struct MassFlow: CustomStringConvertible {
   
-  var rate: Double  {
-    willSet { assert(newValue.isFinite) }
-  }
+  var rate: Double
 
   var isNearZero: Bool { return self < 1.0 }
   

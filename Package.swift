@@ -17,8 +17,7 @@ let package = Package(
 
   dependencies: [
   //  .package(url: "../SwiftPV", .branch("master")),
-    .package(url: "https://github.com/httpswift/Swifter.git", from: "1.4.7"),
-  //  .package(url: "https://github.com/vojtamolda/Plotly.swift.git", .upToNextMinor(from: "0.3.0")),
+   //  .package(url: "https://github.com/vojtamolda/Plotly.swift.git", .upToNextMinor(from: "0.3.0")),
     .package(url: "https://github.com/apple/swift-argument-parser.git", .upToNextMinor(from: "0.0.5")),
     .package(url: "https://github.com/apple/swift-tools-support-core.git", .upToNextMinor(from: "0.1.1")),
     .package(url: "https://github.com/stephencelis/SQLite.swift.git", from: "0.12.0")
@@ -57,7 +56,7 @@ let package = Package(
     .target(
       name: "Run",
       dependencies: [
-        "Config", "BlackBoxModel", "ArgumentParser", "Swifter"],
+        "Config", "BlackBoxModel", "ArgumentParser"],
       swiftSettings: swiftSettings),
     .testTarget(
       name: "MeteoTests",
