@@ -17,9 +17,11 @@ jobs:
       - name: Install Swift (Swift Toolchain)
         run: |
           Install-Binary -Url "https://swift.org/builds/development/windows10/swift-DEVELOPMENT-SNAPSHOT-2020-09-22-a/swift-DEVELOPMENT-SNAPSHOT-2020-09-22-a-windows10.exe" -Name "installer.exe" -ArgumentList ("-q")
-          echo "::set-env name=SDKROOT::C:\Library\Developer\Platforms\Windows.platform\Developer\SDKs\Windows.sdk"
-          echo "::set-env name=DEVELOPER_DIR::C:\Library\Developer"
-          echo "::add-path::C:\Library\Developer\Toolchains\unknown-Asserts-development.xctoolchain\usr\bin;C:\Library\Swift-development\bin;C:\Library\icu-67\usr\bin"
+          echo "SDKROOT=C:\Library\Developer\Platforms\Windows.platform\Developer\SDKs\Windows.sdk" >> $GITHUB_ENV
+          echo "DEVELOPER_DIR=C:\Library\Developer" >> $GITHUB_ENV
+          echo "C:\Library\Developer\Toolchains\unknown-Asserts-development.xctoolchain\usr\bin" >> $GITHUB_PATH
+          echo "C:\Library\Swift-development\bin" >> $GITHUB_PATH
+          echo "C:\Library\icu-67\usr\bin" >> $GITHUB_PATH        
       - name: Install Swift (Windows SDK)
         shell: cmd
         run: |
