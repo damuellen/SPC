@@ -100,15 +100,14 @@ public struct SolarPosition {
   {
     let ΔT = SolarPosition.estimatedDelta_T
 
-    let refDate =  date.timeIntervalSinceReferenceDate
-    let gDate = CFAbsoluteTimeGetGregorianDate(refDate, nil)
+    let dt = DateTime(date)
 
     return algorithm(InputValues(
-      year: Int(gDate.year), month: Int(gDate.month), day: Int(gDate.day),
-      hour: Int(gDate.hour), minute: Int(gDate.minute), second: 0,
+      year: dt.year, month: dt.month, day: dt.day,
+      hour: dt.hour, minute: dt.minute, second: 0,
       timezone: Double(location.timezone), delta_t: ΔT,
       longitude: location.longitude, latitude: location.latitude,
-      elevation: location.elevation, pressure: 1023, temperature: 15, 
+      elevation: location.elevation, pressure: 1023, temperature: 15,
       slope: 0, azm_rotation: 0, atmos_refract: 0.5667))
   }
 
