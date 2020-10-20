@@ -32,5 +32,7 @@ jobs:
       - name: "Install SQLite"
         shell: cmd
         run: .github/install-sqlite.bat
-      - name: Build
-        run: swift build -c release --enable-test-discovery -Xlinker /INCREMENTAL:NO -Xswiftc -IC:\sqlite -Xswiftc -LC:\sqlite
+      - name: Build Release
+        run: swift build -v -c release --enable-test-discovery -Xlinker /INCREMENTAL:NO -Xswiftc -LC:\sqlite
+      - name: Test
+        run: swift test -v --enable-test-discovery -Xlinker /INCREMENTAL:NO -Xswiftc -LC:\sqlite
