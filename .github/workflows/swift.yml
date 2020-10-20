@@ -1,15 +1,17 @@
-name: Swift
+name: Continuous Integration – Ubuntu
 
 on: [push]
 
 jobs:
-  build:
+  continuous-integration:
 
     runs-on: [ubuntu-18.04]
 
     steps:
     - uses: actions/checkout@v1
+      
     - name: Build
       run: swift build -v
+      
     - name: Run tests
       run: swift test -v
