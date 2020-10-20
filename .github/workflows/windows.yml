@@ -32,19 +32,14 @@ jobs:
       - name: "Install SQLite"
         shell: cmd
         run: .github/install-sqlite.bat
-      - name: Build Release
+      - name: Build Release Mode
         run: swift build -v -c release --enable-test-discovery -Xlinker /INCREMENTAL:NO -Xswiftc -LC:\sqlite
       - name: Zip
         shell: powershell
         run: |
           compress-archive -path "D:\a\SPC\SPC\.build\x86_64-unknown-windows-msvc\release\SolarPerformanceCalc.exe", "D:\a\SPC\SPC\.build\x86_64-unknown-windows-msvc\release\SwiftToolsSupport.dll" -destinationpath ".\release\SPC-win32-x64.zip" -compressionlevel optimal
-      - name: Release
-        uses: softprops/action-gh-release@v0.1.5
+      - uses: actions/upload-artifact@v2
         with:
-          tag_name: ${{ github.ref }}
-          draft: false
-          prereleas: false
-          files: |
-            release/SPC-win32-x64.zip
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          name: SPC-win32-x64
+          path: |
+            .\release\SPC-win32-x64.zip
