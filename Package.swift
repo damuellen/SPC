@@ -16,10 +16,8 @@ let package = Package(
     ],
 
   dependencies: [
-  //  .package(url: "../SwiftPV", .branch("master")),
-   //  .package(url: "https://github.com/vojtamolda/Plotly.swift.git", .upToNextMinor(from: "0.3.0")),
     .package(url: "https://github.com/apple/swift-argument-parser.git", .upToNextMinor(from: "0.0.5")),
-    .package(url: "https://github.com/apple/swift-tools-support-core.git", .upToNextMinor(from: "0.1.1")),
+    .package(url: "https://github.com/damuellen/swift-tools-support-core.git",  .branch("master")),
     .package(url: "https://github.com/damuellen/SQLite.swift.git", .branch("master"))
     ],
   targets: [
