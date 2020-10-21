@@ -81,9 +81,9 @@ struct SolarPerformanceCalculator: ParsableCommand {
       BlackBoxModel.configure(location: loc)
     }       
     
-    BlackBoxModel.configure(meteoFilePath: "./Model.playground/Resources/AlAbdaliyah.mto")
-
-   // let mode: PerformanceDataRecorder.Mode = full ? .all : .brief
+    // BlackBoxModel.configure(meteoFilePath: "./Model.playground/Resources/AlAbdaliyah.mto")
+    BlackBoxModel.configure(meteoFilePath: meteofilePath)
+    // let mode: PerformanceDataRecorder.Mode = full ? .all : .brief
     let mode: PerformanceDataRecorder.Mode
     if let steps = outputValues {
       mode = .custom(interval: Interval[steps])
