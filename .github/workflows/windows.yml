@@ -43,4 +43,3 @@ jobs:
           path: |
             D:\a\SPC\SPC\.build\x86_64-unknown-windows-msvc\release\SolarPerformanceCalc.exe
             D:\a\SPC\SPC\.build\x86_64-unknown-windows-msvc\release\SwiftToolsSupport.dll
-            C:\sqlite\sqlite3.dll
