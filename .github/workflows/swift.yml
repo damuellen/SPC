@@ -1,4 +1,4 @@
-name: Continuous Integration – Ubuntu
+name: CI – Ubuntu
 
 on: [push]
 
@@ -9,9 +9,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
-      
+
     - name: Build
       run: swift build -v
-      
+
     - name: Run tests
       run: swift test -v

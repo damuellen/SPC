@@ -1,4 +1,3 @@
-import CoreFoundation
 import Foundation
 import CSPA
 import CSOLPOS
@@ -40,9 +39,9 @@ public struct SolarPosition {
   }
 
   public struct Location {
-  
+
     var longitude: Double
-    var latitude: Double  
+    var latitude: Double
     var elevation: Double
     var timezone: Int
 
@@ -60,7 +59,7 @@ public struct SolarPosition {
 
   public var year: Int
   public var location: Location
-  
+
   public var frequence: DateGenerator.Interval
 
   /// Returns a table initialized with precalculated sun position
@@ -96,7 +95,7 @@ public struct SolarPosition {
 
   private static func compute(
     date: Date, location: Location, with algorithm: Algorithm
-  ) -> OutputValues 
+  ) -> OutputValues
   {
     let ΔT = SolarPosition.estimatedDelta_T
 
@@ -117,11 +116,11 @@ public struct SolarPosition {
 
     var result: [Date: SolarPosition.OutputValues] = [:]
 
-    let sunHoursPeriod = sunHours.map { 
-      $0.align(with: SolarPosition.frequence) 
+    let sunHoursPeriod = sunHours.map {
+      $0.align(with: SolarPosition.frequence)
     }
 
-    let dates = sunHoursPeriod.flatMap { 
+    let dates = sunHoursPeriod.flatMap {
       DateGenerator(range: $0, interval: SolarPosition.frequence)
     }
 

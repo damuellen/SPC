@@ -8,7 +8,6 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
-import CoreFoundation
 import Foundation
 
 /**
@@ -22,7 +21,7 @@ public struct DateTime: CustomStringConvertible {
 
   private(set) public static var current = DateTime()
   private(set) static var nightfall = false
-  
+
   private(set) var isDaytime: Bool = false
   private(set) var isSunRise: Bool = false
   private(set) var isSunSet: Bool = false

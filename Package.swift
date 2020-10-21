@@ -16,7 +16,7 @@ let package = Package(
     ],
 
   dependencies: [
-    .package(url: "https://github.com/apple/swift-argument-parser.git", .upToNextMinor(from: "0.0.5")),
+    .package(url: "https://github.com/apple/swift-argument-parser.git", .upToNextMinor(from: "0.3.1")),
     .package(url: "https://github.com/damuellen/swift-tools-support-core.git",  .branch("main")),
     .package(url: "https://github.com/damuellen/SQLite.swift.git", .branch("master"))
     ],

@@ -1,7 +1,9 @@
 .DS_Store
-.vscode
+/*.csv
 /.build
+/.swiftpm
 /Packages
+/Package.resolved
 /*.xcodeproj
 /Build
 /DerivedData

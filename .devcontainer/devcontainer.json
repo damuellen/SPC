@@ -3,7 +3,7 @@
 	"build": {
 		"dockerfile": "Dockerfile",
 		"args": {
-			// Update the VARIANT arg to pick a Swift version 
+			// Update the VARIANT arg to pick a Swift version
 			"VARIANT": "5.3",
 			// Options
 			"INSTALL_NODE": "false",
@@ -21,14 +21,18 @@
 		"terminal.integrated.shell.linux": "/bin/bash",
 		"lldb.adapterType": "bundled",
 		"lldb.executable": "/usr/bin/lldb",
+		"lldb.launch.expressions": "native",
+		"swift.path.swift_driver_bin": "/usr/bin/swift",
 		"sde.languageservermode": "sourcekit-lsp",
+		"sourcekit-lsp.toolchainPath": "/usr/bin/",
 		"sourcekit-lsp.serverPath": "/usr/bin/sourcekit-lsp"
 	},
 
 	// Add the IDs of extensions you want installed when the container is created.
 	"extensions": [
 		"vknabel.vscode-swift-development-environment",
-		"vadimcn.vscode-lldb"
+		"vadimcn.vscode-lldb",
+		"vknabel.swift-coverage"
 	]
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
