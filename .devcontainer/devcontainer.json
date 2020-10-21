@@ -19,8 +19,7 @@
 	// Set *default* container specific settings.json values on container create.
 	"settings": {
 		"terminal.integrated.shell.linux": "/bin/bash",
-		"lldb.adapterType": "bundled",
-		"lldb.executable": "/usr/bin/lldb",
+		"lldb.library": "/usr/lib/liblldb.so",
 		"lldb.launch.expressions": "native",
 		"swift.path.swift_driver_bin": "/usr/bin/swift",
 		"sde.languageservermode": "sourcekit-lsp",
