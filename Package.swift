@@ -1,7 +1,7 @@
 // swift-tools-version:5.0
 import PackageDescription
 
-let condition =  BuildSettingCondition.when(platforms: [.linux], configuration: .release)
+let condition =  BuildSettingCondition.when(configuration: .release)
 let cSettings = [CSetting.unsafeFlags(["-ffast-math", "-O3",  "-fomit-frame-pointer", "-march=core2", "-funroll-loops"])]
 var swiftSettings = [SwiftSetting.unsafeFlags(["-Ounchecked", "-enforce-exclusivity=unchecked", "-DRELEASE"], condition)]
 swiftSettings.append(.define("DEBUG", .when(configuration: .debug)))
@@ -17,7 +17,7 @@ let package = Package(
 
   dependencies: [
     .package(url: "https://github.com/apple/swift-argument-parser.git", .upToNextMinor(from: "0.3.1")),
-    .package(url: "https://github.com/damuellen/swift-tools-support-core.git",  .branch("main")),
+    .package(url: "https://github.com/damuellen/swift-tools-support-core.git", .branch("main")),
     .package(url: "https://github.com/damuellen/SQLite.swift.git", .branch("master"))
     ],
   targets: [

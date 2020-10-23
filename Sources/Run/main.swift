@@ -41,24 +41,24 @@ struct SolarPerformanceCalculator: ParsableCommand {
 
   static let cwd = FileManager.default.currentDirectoryPath
 
-  @Option(name: .shortAndLong, default: cwd, help: "The search path for meteofile.")
-  var meteofilePath: String
-  @Option(name: .shortAndLong, default: cwd, help: "The search path for config files.")
-  var configPath: String
-  @Option(name: .shortAndLong, default: cwd, help: "Destination path for result files.")
-  var resultsPath: String
+  @Option(name: .shortAndLong, help: "The search path for meteofile.")
+  var meteofilePath: String = cwd
+  @Option(name: .shortAndLong, help: "The search path for config files.")
+  var configPath: String = cwd
+  @Option(name: .shortAndLong, help: "Destination path for result files.")
+  var resultsPath: String = cwd
   @Option(name: .shortAndLong, help: "Custom name, otherwise they are numbered with 3 digits.")
   var nameResults: String?
-  @Option(name: .shortAndLong, default: 2019, help: "Year of simulation.")
-  var year: Int
+  @Option(name: .shortAndLong, help: "Year of simulation.")
+  var year: Int = 2019
   @OptionGroup()
   var location: LocationInfo 
-  @Option(name: .shortAndLong, default: nil, help: "Calculation steps per hour.")
+  @Option(name: .shortAndLong, help: "Calculation steps per hour.")
   var stepsCalculation: Int?
-  @Option(name: .shortAndLong, default: nil, help: "Values per hour output file.")
+  @Option(name: .shortAndLong, help: "Values per hour output file.")
   var outputValues: Int?
   @Flag(help: "All results are output to file.")
-  var full: Bool
+  var full: Bool = false
 
   func run() throws {  
     print(decorated("Solar Performance Calculator"),"")
@@ -90,13 +90,14 @@ struct SolarPerformanceCalculator: ParsableCommand {
     } else {
       mode = .brief
     }
-    let log = PerformanceDataRecorder(name: nameResults, path: resultsPath, output: mode)
+    let log = PerformanceDataRecorder(name: nameResults, path: resultsPath, output: .memory)
 
     BlackBoxModel.runModel(with: log)
     
     SolarPerformanceCalculator.result = log.log
+
     let end = DispatchTime.now().uptimeNanoseconds
-    print((end - start) / 1_000_000, "ms")
+    print("elapsed time:", (end - start) / 1_000_000, "ms")
     log.printResult()  
   }
 

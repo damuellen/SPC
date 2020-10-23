@@ -228,7 +228,7 @@ public final class PerformanceDataRecorder {
       animation.update(
         step: progress,
         total: 12,
-        text: "currently simulated month."
+        text: "recording month."
       )
     }
 #endif

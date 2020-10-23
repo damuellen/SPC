@@ -56,7 +56,7 @@ public struct PerformanceLog: CustomStringConvertible, Comparable {
 
   private func range(of interval: DateInterval) -> Range<Int> {
     var start = calendar.ordinality(of: .hour, in: .year, for: interval.start)! - 1
-    var end = calendar.ordinality(of: .hour, in: .year, for: interval.end)! - 1
+    var end = calendar.ordinality(of: .hour, in: .year, for: interval.end)!
     start *= self.interval.rawValue
     end *= self.interval.rawValue
     return start..<end

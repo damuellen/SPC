@@ -104,7 +104,6 @@ extension DateInterval {
     dateComponents.year = year
     let start = calendar.date(from: dateComponents)!
     dateComponents.month! += 1
-    dump(dateComponents)
     let end = calendar.date(from: dateComponents)! - 1
     self = .init(start: start, end: end)
   }
