@@ -4,9 +4,10 @@ mkdir C:\sqlite
 CD /D C:\sqlite
 
 echo [ Downloading sqlite3.zip ]
-powershell.exe -Command "Invoke-WebRequest -OutFile sqlite3.zip https://sqlite.org/2017/sqlite-dll-win64-x64-3160200.zip"
-
+powershell.exe -Command "Invoke-WebRequest -OutFile sqlite3dll.zip https://www.sqlite.org/2020/sqlite-dll-win64-x64-3330000.zip"
+powershell.exe -Command "Invoke-WebRequest -OutFile sqlite3.zip https://www.sqlite.org/2020/sqlite-amalgamation-3330000.zip"
 echo [ Extracting sqlite3.zip ]
+powershell.exe -Command "Expand-Archive -Force 'C:\sqlite\sqlite3dll.zip' 'C:\sqlite'"
 powershell.exe -Command "Expand-Archive -Force 'C:\sqlite\sqlite3.zip' 'C:\sqlite'"
 
 REM Prepared for GitHub Actions ( @see https://github.com/actions/virtual-environments/blob/master/images/win/Windows2019-Readme.md )
