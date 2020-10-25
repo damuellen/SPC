@@ -35,7 +35,7 @@ jobs:
         run: .github/install-sqlite.bat
 
       - name: Build Release Mode
-        run: swift build -v -c release --enable-test-discovery -Xlinker /INCREMENTAL:NO -Xswiftc -LC:\sqlite
+        run: swift build -v -c release -Xlinker /INCREMENTAL:NO -Xswiftc -IC:\sqlite -Xswiftc -LC:\sqlite
 
       - uses: actions/upload-artifact@v2
         with:
