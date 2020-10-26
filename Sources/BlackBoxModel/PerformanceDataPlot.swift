@@ -10,7 +10,6 @@
 
 import Foundation
 
-
 public class PerformanceDataPlot {
 
   public enum Style: String {
@@ -36,8 +35,7 @@ public class PerformanceDataPlot {
   public var y1Label: String = ""
   public var y2Label: String = ""
 
-  public init(y1: [[Double]], y2: [[Double]] = [], range: DateInterval, style: Style = .lines)
-  {
+  public init(y1: [[Double]], y2: [[Double]] = [], range: DateInterval, style: Style = .lines) {
     self.y1 = y1
     self.y2 = y2
     self.range = range
@@ -57,8 +55,7 @@ public class PerformanceDataPlot {
     }
   }
 
-  func plot(code: String) throws
-  {
+  func plot(code: String) throws {
     let inputPipe = Pipe()
     let inputFile = inputPipe.fileHandleForWriting
     let gnuplot = Process()
@@ -69,11 +66,10 @@ public class PerformanceDataPlot {
     inputFile.write(plotData.data(using: .utf8)!)
   }
 
-  public func callAsFunction(toFile: String? = nil) throws
-  {
+  public func callAsFunction(toFile: String? = nil) throws {
     var code: String = ""
     if let file = toFile {
-        code = """
+      code = """
         set terminal pdf size 36,20 enhanced color font 'Helvetica,14' lw 1;
         set output \"\(file).pdf\";
         set title '\(file)';
@@ -89,47 +85,54 @@ public class PerformanceDataPlot {
   private let style: Style
 
   var setCommands: String {
-    ["grid",
-     "ylabel '\(y1Label)'",
-     "y2label '\(y2Label)'",
-     "xlabel '\(x.label)'",
-     "style textbox opaque margins 1.0, 1.0 fc bgnd border lt -1 lw 1.0",
-     "xdata time",
-     "timefmt '%s'",
-     "format x \(x.format)",
-     "xrange [\(xr.start):\(xr.end)]",
-     "xtics \(x.tics)",
-     "xtics rotate",
-     "autoscale",
-     "autoscale y2",
-     "ytics nomirror 50",
-     "y2tics;",
+    [
+      "grid",
+      "ylabel '\(y1Label)'",
+      "y2label '\(y2Label)'",
+      "xlabel '\(x.label)'",
+      "style textbox opaque margins 1.0, 1.0 fc bgnd border lt -1 lw 1.0",
+      "xdata time",
+      "timefmt '%s'",
+      "format x \(x.format)",
+      "xrange [\(xr.start):\(xr.end)]",
+      "xtics \(x.tics)",
+      "xtics rotate",
+      "autoscale",
+      "autoscale y2",
+      "ytics nomirror 50",
+      "y2tics;",
     ].map { "set " + $0 }.joined(separator: ";")
   }
 
   var plotCommands: String {
     let plotCommands: [String]
     switch style {
-      case .lines:
-      plotCommands = ["plot '-' using ($0*\(freq)+\(xr.start)):1 t '\(y1Titles.first!)' axes x1y1 w l lw 2"]
-      + y1.indices.dropFirst().map { i in
-      "'' using ($0*\(freq)+\(xr.start)):1 t '\(y1Titles[i])' axes x1y1 with l lw 4" }
-      + y2.indices.map { i in
-      "'' using ($0*\(freq)+\(xr.start)):1 t '\(y2Titles[i])' axes x1y2 with l lw 4" }
-      case .impulses:
-      plotCommands = ["plot '-' using ($0*\(freq)+\(xr.start)):1 t '\(y1Titles.first!)' axes x1y1 w i lw 2"]
-      + y1.indices.dropFirst().map { i in
-      "'' using ($0*\(freq)+\(xr.start + (freq / Double(y1.count)) * Double(i))):1 t '\(y1Titles[i])' axes x1y1 w i lw 2" }
-      + y2.indices.map { i in
-      "'' using ($0*\(freq)+\(xr.start)):1 t '\(y2Titles[i])' axes x1y2 w l lw 2" }
+    case .lines:
+      plotCommands =
+        ["plot '-' using ($0*\(freq)+\(xr.start)):1 t '\(y1Titles.first!)' axes x1y1 w l lw 2"]
+        + y1.indices.dropFirst().map { i in
+          "'' using ($0*\(freq)+\(xr.start)):1 t '\(y1Titles[i])' axes x1y1 with l lw 4"
+        }
+        + y2.indices.map { i in
+          "'' using ($0*\(freq)+\(xr.start)):1 t '\(y2Titles[i])' axes x1y2 with l lw 4"
+        }
+    case .impulses:
+      plotCommands =
+        ["plot '-' using ($0*\(freq)+\(xr.start)):1 t '\(y1Titles.first!)' axes x1y1 w i lw 2"]
+        + y1.indices.dropFirst().map { i in
+          "'' using ($0*\(freq)+\(xr.start + (freq / Double(y1.count)) * Double(i))):1 t '\(y1Titles[i])' axes x1y1 w i lw 2"
+        }
+        + y2.indices.map { i in
+          "'' using ($0*\(freq)+\(xr.start)):1 t '\(y2Titles[i])' axes x1y2 w l lw 2"
+        }
     }
     return plotCommands.joined(separator: ",")
   }
 
   var plotData: String {
     y1.map { $0.map(\.description).joined(separator: "\n") }
-     .joined(separator: "\ne\n") + "\ne\n" +
-    y2.map { $0.map(\.description).joined(separator: "\n") }
-     .joined(separator: "\ne\n") + "\ne\n"
+      .joined(separator: "\ne\n") + "\ne\n"
+      + y2.map { $0.map(\.description).joined(separator: "\n") }
+      .joined(separator: "\ne\n") + "\ne\n"
   }
 }

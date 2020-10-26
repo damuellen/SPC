@@ -21,7 +21,9 @@ public enum WasteHeatRecovery: Component {
   public static var parameter: Parameter = ParameterDefaults.whr
 
   /// Returns the efficiency of the waste heat recovery based on working conditions of the gas turbine
-  static func efficiencyFor(gasTurbineLoad: Ratio, heatSolar: Double, gasTurbineGross: Double) -> Double {
+  static func efficiencyFor(gasTurbineLoad: Ratio, heatSolar: Double, gasTurbineGross: Double)
+    -> Double
+  {
     var efficiency = parameter.efficiencyNominal
     efficiency *= parameter.efficiencySolar(
       heatSolar / Design.layout.heatExchanger

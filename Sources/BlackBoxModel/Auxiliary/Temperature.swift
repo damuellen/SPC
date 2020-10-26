@@ -8,12 +8,13 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
+import DateGenerator
 import Foundation
 import Meteo
-import DateGenerator
+
 /// A temperature value in Kelvin.
 public struct Temperature: CustomStringConvertible, Equatable {
-  
+
   var kelvin: Double {
     willSet { assert(newValue.isFinite) }
   }
@@ -31,10 +32,11 @@ public struct Temperature: CustomStringConvertible, Equatable {
   }
 
   static func mixture(
-    m1: MassFlow, m2: MassFlow, t1: Temperature, t2: Temperature) -> Temperature {
+    m1: MassFlow, m2: MassFlow, t1: Temperature, t2: Temperature
+  ) -> Temperature {
     .init((m1.rate * t1.kelvin + m2.rate * t2.kelvin) / (m1 + m2).rate)
   }
-  
+
   public init(_ kelvin: Double) {
     assert(kelvin.isFinite)
     self.kelvin = kelvin
@@ -44,8 +46,10 @@ public struct Temperature: CustomStringConvertible, Equatable {
     if t.count == 2 {
       return Temperature((t[0].kelvin + t[1].kelvin) / 2)
     }
-    return Temperature(t.reduce(0) { result, temp in
-      result + temp.kelvin } / Double(t.count)
+    return Temperature(
+      t.reduce(0) { result, temp in
+        result + temp.kelvin
+      } / Double(t.count)
     )
   }
 
@@ -76,7 +80,7 @@ public struct Temperature: CustomStringConvertible, Equatable {
   mutating func limit(to max: Temperature) {
     kelvin = min(max.kelvin, self.kelvin)
   }
-  
+
   func adjusted(_ factor: Double) -> Temperature {
     Temperature(kelvin * factor)
   }
@@ -84,7 +88,7 @@ public struct Temperature: CustomStringConvertible, Equatable {
   func isLower(than degree: Temperature) -> Bool {
     kelvin < degree.kelvin
   }
-  
+
   static func + (lhs: Temperature, rhs: Temperature) -> Temperature {
     Temperature(lhs.kelvin + rhs.kelvin)
   }
@@ -92,11 +96,11 @@ public struct Temperature: CustomStringConvertible, Equatable {
   static func - (lhs: Temperature, rhs: Temperature) -> Temperature {
     Temperature(lhs.kelvin - rhs.kelvin)
   }
-  
+
   static func + (lhs: Temperature, rhs: Double) -> Temperature {
     Temperature(lhs.kelvin + rhs)
   }
-  
+
   static func - (lhs: Temperature, rhs: Double) -> Temperature {
     Temperature(lhs.kelvin - rhs)
   }

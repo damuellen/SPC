@@ -16,13 +16,13 @@ public enum TextConfig {
     case FOS, OPR, DEM, TAR, SIM, INI, TIM, DES, AVL,
       LAY, SF, COL, STO, HR, HTF, STF, HX, BO, WHR, GT, TB, PB, PFC
 
-      static func isValid(url: URL) -> Bool {
-        if let _ = Extension(rawValue: url.pathExtension.uppercased()) {
-          return true
-        } else { 
-          return false
-        }
+    static func isValid(url: URL) -> Bool {
+      if let _ = Extension(rawValue: url.pathExtension.uppercased()) {
+        return true
+      } else {
+        return false
       }
+    }
   }
 
   public static func fileSearch(atPath path: String) -> [URL] {
@@ -44,7 +44,8 @@ public enum TextConfig {
   public static func read(url: URL) -> TextConfigFile? {
     let path = url.absoluteString
     guard let data = FileManager.default.contents(atPath: path),
-      let content = String(data: data, encoding: .ascii) else { return nil }
+      let content = String(data: data, encoding: .ascii)
+    else { return nil }
     return TextConfigFile(content: content, path: path)
   }
 }

@@ -9,17 +9,17 @@
 //
 
 import Config
-import Foundation
 import DateGenerator
+import Foundation
 
 struct GridDemand: Codable {
-  
+
   static var current = withDefaults()
-  
+
   private var index: Int { return DateTime.indexMonth }
-  
+
   private let data: [Ratio]
-  
+
   init(data: [Ratio]) {
     self.data = data
   }
@@ -28,9 +28,10 @@ struct GridDemand: Codable {
     if index < 0 { return self.data[0].ratio }
     return self.data[index].ratio
   }
-  
+
   static func withDefaults() -> GridDemand {
-    return GridDemand(data:
-      Array(repeatElement(Ratio(1), count: 12)))
-  }  
+    return GridDemand(
+      data:
+        Array(repeatElement(Ratio(1), count: 12)))
+  }
 }

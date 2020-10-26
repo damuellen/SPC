@@ -1,3 +1,4 @@
+import DateGenerator
 //
 //  Copyright 2017 Daniel Müllenborn
 //
@@ -8,10 +9,9 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 import Foundation
-import DateGenerator
 
 enum PerformanceReport {
-  
+
   static let date = { dateFormatter -> DateFormatter in
     dateFormatter.calendar = calendar
     dateFormatter.dateFormat = "MM-dd  HH:mm"
@@ -19,12 +19,14 @@ enum PerformanceReport {
   }(DateFormatter())
 
   static let number = { numberFormatter -> NumberFormatter in
-     return numberFormatter
+    return numberFormatter
   }(NumberFormatter())
 
   static func create(
-    energy: Energy, radiation: SolarRadiation)
-    -> String {
+    energy: Energy, radiation: SolarRadiation
+  )
+    -> String
+  {
     let solarField = SolarField.parameter
     let heater = Heater.parameter
     let heatExchanger = HeatExchanger.parameter
@@ -32,7 +34,7 @@ enum PerformanceReport {
     let steamTurbine = SteamTurbine.parameter
     let collector = Collector.parameter
     let layout = Design.layout
-      
+
     var d: String = "\n"
     d += "PERFORMANCE RUN\n"
     d += "    Date: \(PerformanceReport.date.string(from: Date()))\n"
@@ -40,11 +42,13 @@ enum PerformanceReport {
     d += "SOLAR FIELD\n"
     d += "    No of Loops:" >< "\(layout.solarField)"
     d += "    Collector Type:" >< "\(collector.name)"
-    let aperture = layout.solarField * 2 * collector.areaSCAnet
+    let aperture =
+      layout.solarField * 2 * collector.areaSCAnet
       * Double(solarField.numberOfSCAsInRow)
     d += "    Aperture [m²]:" >< "\(aperture)"
     d += "    Massflow [kg/s]:" >< solarField.massFlow.max.rate.description
-    d += "    Elevation [ø]:  " + "\(solarField.elevation)\t Azimut [ø]:  "
+    d +=
+      "    Elevation [ø]:  " + "\(solarField.elevation)\t Azimut [ø]:  "
       + "\(solarField.azimut)"
 
     d += "\n\n"
@@ -95,25 +99,26 @@ enum PerformanceReport {
     d += "Net electricty producution [MWh_el/a]:"
       >< "\(PerformanceReport.number.string(from: NSNumber(value: energy.electric.net))!)"
     // Format(YTarS(0).Enet * (1 - Simulation.parameter.UnSchedMain) * (1 - Simulation.parameter.TransLoss), )"
-    d += "Gas consumption [MWh_el/a]:\n" // Format(YTarS(0).heatfuel, )"
-    d += "Solar share [%]:\n" // Format(SolShare * 100, )"
-    d += "Annual direct solar insolation [kWh/m²a]:" //  Format(YTarS(0).NDI,)"
+    d += "Gas consumption [MWh_el/a]:\n"  // Format(YTarS(0).heatfuel, )"
+    d += "Solar share [%]:\n"  // Format(SolShare * 100, )"
+    d += "Annual direct solar insolation [kWh/m²a]:"  //  Format(YTarS(0).NDI,)"
       >< "\(PerformanceReport.number.string(from: NSNumber(value: radiation.dni / 1_000))!)"
-    d += "Total heat from solar field [MWh_el/a]:" // Format(YTarS(0).heatsol,)"
-    >< "\(PerformanceReport.number.string(from: NSNumber(value: energy.thermal.solar.megaWatt))!)"
+    d += "Total heat from solar field [MWh_el/a]:"  // Format(YTarS(0).heatsol,)"
+      >< "\(PerformanceReport.number.string(from: NSNumber(value: energy.thermal.solar.megaWatt))!)"
     d += "________________________________________________________________________________\n"
     d += "\n"
     d += "AVAILABILITIES\n"
     d += "\n"
-    d += "Plant Availability [%]:\n" // >< "\(Simulation.parameter.PlantAvail * 100, )"
-    d += "Plant Degradation [%]:" // >< "\(Simulation.parameter.PlantDegrad,)"
+    d += "Plant Availability [%]:\n"  // >< "\(Simulation.parameter.PlantAvail * 100, )"
+    d += "Plant Degradation [%]:"  // >< "\(Simulation.parameter.PlantDegrad,)"
     d += "\n"
     d += "\n\n"
     d += "    Files and Parameter\n"
     d += "\n"
     d += "METEODATA  \(BlackBoxModel.meteoData!.name)\n"
     d += "Meteodata of a leap year" >< "\(Simulation.time.isLeapYear ? "YES" : "NO")"
-    d += "Location: \(BlackBoxModel.meteoData!.location.longitude) \(BlackBoxModel.meteoData!.location.latitude)"/*
+    d +=
+      "Location: \(BlackBoxModel.meteoData!.location.longitude) \(BlackBoxModel.meteoData!.location.latitude)" /*
      d += "Position of Wet Bulb Temp. in mto-file [row]:" >< "\(Simulation.parameter.WBTpos)"
      d += "Position of Wind Direction in mto-file [row]:" >< "\(Simulation.parameter.WDpos)"
      d += "Pos. of Global Direct Irr. in mto-file [row]:""\(Simulation.parameter.GHI)"
@@ -144,7 +149,7 @@ enum PerformanceReport {
     d += "\n"
     d += "GAS CONSUMPTION Filespec.PFC\n"
 
- //   d += "STORAGE"
+    //   d += "STORAGE"
 
     // if storage.tempInCst0(1) = 0 {
     // storage.TexC0to1(0) = storage.heatLossConstants0(2) - storage.TexC0to1(0)
@@ -197,8 +202,8 @@ enum PerformanceReport {
       >< "\(Availability.current.values.reflMirror.percentage)"
     d += "Broken Mirrors [%]:"
       >< "\(Availability.current.values.missingMirros.percentage)"
-    d += "Periods for Scheduled Maintenance [MM.DD]:\n" // Maintnc(1).Lowlim, ) to Format(Maintnc(1).Uplim, )"
-    d += "Unscheduled Maintenance [%]:\n" // >< "\(Simulation.parameter.UnSchedMain * 100)"
+    d += "Periods for Scheduled Maintenance [MM.DD]:\n"  // Maintnc(1).Lowlim, ) to Format(Maintnc(1).Uplim, )"
+    d += "Unscheduled Maintenance [%]:\n"  // >< "\(Simulation.parameter.UnSchedMain * 100)"
     d += "________________________________________________________________________________\n"
     d += "\n\n"
     d += "  Fixed Parameter\n"

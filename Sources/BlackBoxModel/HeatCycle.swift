@@ -10,7 +10,6 @@
 
 import Foundation
 
-
 protocol HeatCycle {
   var cycle: HeatTransfer { get set }
 }
@@ -20,12 +19,12 @@ extension HeatCycle {
   var medium: HeatTransferFluid {
     SolarField.parameter.HTF
   }
-  
+
   var temperature: (inlet: Temperature, outlet: Temperature) {
     get { cycle.temperature }
     set { cycle.temperature = newValue }
   }
-  
+
   var massFlow: MassFlow {
     get { cycle.massFlow }
     set { cycle.massFlow = newValue }
@@ -34,15 +33,15 @@ extension HeatCycle {
   var averageTemperature: Temperature {
     return Temperature.average(temperature.inlet, temperature.outlet)
   }
-  
+
   var inletTemperature: Double { temperature.inlet.kelvin }
 
   var outletTemperature: Double { temperature.outlet.kelvin }
- 
+
   var deltaHeat: Heat {
     medium.deltaHeat(temperature.outlet, temperature.inlet)
   }
-  
+
   func massFlow(subtracted other: HeatCycle) -> MassFlow {
     massFlow - other.massFlow
   }
@@ -55,12 +54,12 @@ extension HeatCycle {
     temperature.inlet = medium.mixingTemperature(c1, c2)
     massFlow = c1.massFlow + c2.massFlow
   }
-  
+
   mutating func add(_ c1: HeatCycle) {
     temperature.inlet = medium.mixingTemperature(self, c1)
     massFlow += c1.massFlow
   }
-    
+
   mutating func outletTemperatureInlet() {
     temperature.outlet = temperature.inlet
   }
@@ -68,9 +67,9 @@ extension HeatCycle {
   mutating func inletTemperatureOutlet() {
     temperature.inlet = temperature.outlet
   }
-  
+
   mutating func setTemperature(inlet: Temperature) {
-   temperature.inlet = inlet
+    temperature.inlet = inlet
   }
 
   mutating func setTemperature(outlet: Temperature) {

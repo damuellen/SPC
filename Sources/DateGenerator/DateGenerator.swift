@@ -6,7 +6,7 @@ let calendar = { calendar -> NSCalendar in
 }(NSCalendar(identifier: .gregorian)!)
 
 public final class DateGenerator: Sequence, IteratorProtocol {
-  
+
   public enum Interval: Int, CaseIterable, CustomStringConvertible {
     case hourly = 1
     case half_hourly = 2
@@ -27,7 +27,7 @@ public final class DateGenerator: Sequence, IteratorProtocol {
     public var interval: Double {
       return 3600 * fraction
     }
-    
+
     public var denominators: [Int] {
       var result = [Int]()
       for i in 2...6 {
@@ -37,13 +37,13 @@ public final class DateGenerator: Sequence, IteratorProtocol {
       }
       return result
     }
-    
+
     public var description: String { "\(60 / rawValue)min" }
-    
+
     public func isMultiple(of other: Interval) -> Bool {
       other.denominators.contains(rawValue)
     }
-    
+
     public static subscript(value: Int) -> Interval {
       if 0 == 60 % value {
         return Interval(rawValue: value)!
@@ -60,14 +60,15 @@ public final class DateGenerator: Sequence, IteratorProtocol {
 
   public init(year: Int, interval: Interval) {
 
-    precondition(year > 1950 && year < 2050,
-                 "year out of valid range or wrong format")
-    
+    precondition(
+      year > 1950 && year < 2050,
+      "year out of valid range or wrong format")
+
     var dateComponents = DateComponents()
     dateComponents.timeZone = calendar.timeZone
     dateComponents.year = year
     dateComponents.month = 1
-    
+
     self.startDate = calendar.date(from: dateComponents)!
     self.valuesPerHour = interval.rawValue
     self.currentDate = self.startDate
@@ -85,11 +86,11 @@ public final class DateGenerator: Sequence, IteratorProtocol {
   /// Returns date until the end date is reached; otherwise nil
   public func next() -> Date? {
 
-    let interval = 1.hours / TimeInterval (valuesPerHour)
+    let interval = 1.hours / TimeInterval(valuesPerHour)
 
     defer { currentDate += interval }
 
-    if currentDate.timeIntervalSince (endDate) > 0 { return nil }
+    if currentDate.timeIntervalSince(endDate) > 0 { return nil }
 
     return currentDate
   }
@@ -111,15 +112,15 @@ extension DateInterval {
   public init(ofWeek week: Int, in year: Int) {
     var dateComponents = DateComponents()
     dateComponents.timeZone = calendar.timeZone
-    
+
     if week > 1 {
       dateComponents.weekOfYear = week
     }
-    
+
     dateComponents.year = year
     dateComponents.weekday = 2
     let start = calendar.date(from: dateComponents)!
-    
+
     if week < 53 {
       dateComponents.weekOfYear = week + 1
     } else {

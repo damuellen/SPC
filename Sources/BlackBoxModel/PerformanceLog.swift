@@ -8,8 +8,8 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
-import Meteo
 import Foundation
+import Meteo
 
 public struct PerformanceLog: CustomStringConvertible, Comparable {
 
@@ -35,17 +35,18 @@ public struct PerformanceLog: CustomStringConvertible, Comparable {
     return lhs.fitness < rhs.fitness
   }
 
-  public static func ==(lhs: PerformanceLog, rhs: PerformanceLog) -> Bool {
+  public static func == (lhs: PerformanceLog, rhs: PerformanceLog) -> Bool {
     return lhs.fitness == rhs.fitness
   }
 
   private let interval = Simulation.time.steps
 
-  init(energy: Energy,
-       radiation: SolarRadiation,
-       energyHistory: [Energy] = [],
-       performanceHistory: [PerformanceData] = [])
-  {
+  init(
+    energy: Energy,
+    radiation: SolarRadiation,
+    energyHistory: [Energy] = [],
+    performanceHistory: [PerformanceData] = []
+  ) {
     self.energyTotal = energy
     self.radiation = radiation
     self.energyHistory = energyHistory
@@ -63,51 +64,53 @@ public struct PerformanceLog: CustomStringConvertible, Comparable {
   }
 
   public subscript(
-    keyPath: KeyPath<Energy, Double>, interval: DateInterval) -> [Double]
-  {
+    keyPath: KeyPath<Energy, Double>, interval: DateInterval
+  ) -> [Double] {
     if energyHistory.isEmpty { return [] }
     let r = range(of: interval).clamped(to: energyHistory.indices)
     return energyHistory[r].map { $0[keyPath: keyPath] }
   }
 
   public subscript(
-    keyPath: KeyPath<PerformanceData, Double>, interval: DateInterval) -> [Double]
-  {
+    keyPath: KeyPath<PerformanceData, Double>, interval: DateInterval
+  ) -> [Double] {
     if performanceHistory.isEmpty { return [] }
     let r = range(of: interval).clamped(to: performanceHistory.indices)
     return performanceHistory[r].map { $0[keyPath: keyPath] }
   }
 
-    public subscript(
-    keyPath: KeyPath<PerformanceData, HeatTransfer>, interval: DateInterval) -> [[Double]]
-  {
+  public subscript(
+    keyPath: KeyPath<PerformanceData, HeatTransfer>, interval: DateInterval
+  ) -> [[Double]] {
     if performanceHistory.isEmpty { return [] }
     let r = range(of: interval).clamped(to: performanceHistory.indices)
     return performanceHistory[r].map { $0[keyPath: keyPath].numericalForm }
   }
 
   public subscript(_ keyPaths: KeyPath<Energy, Double>...,
-    range range: DateInterval) -> [[Double]]
-  {
+    range range: DateInterval
+  ) -> [[Double]] {
     keyPaths.map { kp in self[kp, range] }
   }
 
   public subscript(_ keyPaths: KeyPath<PerformanceData, Double>...,
-    range range: DateInterval) -> [[Double]]
-  {
+    range range: DateInterval
+  ) -> [[Double]] {
     keyPaths.map { kp in self[kp, range] }
   }
 
   public subscript(_ keyPath: KeyPath<PerformanceData, HeatTransfer>,
-    range range: DateInterval) -> ([[Double]], [[Double]])
-  {
-    let (m, i, o) = self[keyPath, range].reduce(into: ([Double](), [Double](), [Double]()))
-       { $0.0.append($1[0]); $0.1.append($1[1]); $0.2.append($1[2]) }
-    return ([m], [i,o])
+    range range: DateInterval
+  ) -> ([[Double]], [[Double]]) {
+    let (m, i, o) = self[keyPath, range].reduce(into: ([Double](), [Double](), [Double]())) {
+      $0.0.append($1[0])
+      $0.1.append($1[1])
+      $0.2.append($1[2])
+    }
+    return ([m], [i, o])
   }
 
   public var description: String {
     return report
   }
 }
-

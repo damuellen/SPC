@@ -30,14 +30,14 @@ extension Time: TextConfigInitializable {
       let components: [Int] = dateString.split(
         separator: ".", maxSplits: 2, omittingEmptySubsequences: true
       ).map(String.init).compactMap(Int.init)
-      
+
       guard components.count == 2 else { return nil }
-      
+
       let dateComponents = DateComponents(
         year: BlackBoxModel.yearOfSimulation,
         month: components[0], day: components[1]
       )
-      
+
       guard let date = calendar.date(from: dateComponents)
       else { return nil }
       return date
@@ -59,9 +59,10 @@ extension Time: TextConfigInitializable {
       lastDateOfOperation = date
     }
 
-    self.steps = try DateGenerator.Interval(
-      rawValue: Int(line(12))
-    ) ?? .every5minutes
+    self.steps =
+      try DateGenerator.Interval(
+        rawValue: Int(line(12))
+      ) ?? .every5minutes
 
     var dates = [Date]()
     for row in stride(from: 38, through: 95, by: 3) {

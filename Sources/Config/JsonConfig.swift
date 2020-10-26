@@ -13,36 +13,37 @@ import Foundation
 public enum JSONConfig {
 
   public enum Name: String, CaseIterable {
-  case FOS = "Fuel"
-  case OPR = "Fuel_Operation_Strategy"
-  case DEM = "Demand"
-  case TAR = "Tariff"
-  case SIM = "Simulation"
-  case INI = "Initialize"
-  case TIM = "Time"
-  case DES = "Design"
-  case AVL = "Availability"
-  case LAY = "Layout"
-  case SF = "Solar_Field"
-  case COL = "Collector"
-  case STO = "Storage"
-  case HR = "Heater"
-  case HTF
-  case STF = "Salt"
-  case HX = "Heat_Exchanger"
-  case BO = "Boiler"
-  case WHR = "Waste_Heat_Recovery"
-  case GT = "Gas_Turbine"
-  case TB = "Steam_Turbine"
-  case PB = "PowerBlock"
-  case PFC = "Predefined_Fuel_Consumption"
+    case FOS = "Fuel"
+    case OPR = "Fuel_Operation_Strategy"
+    case DEM = "Demand"
+    case TAR = "Tariff"
+    case SIM = "Simulation"
+    case INI = "Initialize"
+    case TIM = "Time"
+    case DES = "Design"
+    case AVL = "Availability"
+    case LAY = "Layout"
+    case SF = "Solar_Field"
+    case COL = "Collector"
+    case STO = "Storage"
+    case HR = "Heater"
+    case HTF
+    case STF = "Salt"
+    case HX = "Heat_Exchanger"
+    case BO = "Boiler"
+    case WHR = "Waste_Heat_Recovery"
+    case GT = "Gas_Turbine"
+    case TB = "Steam_Turbine"
+    case PB = "PowerBlock"
+    case PFC = "Predefined_Fuel_Consumption"
   }
-  
+
   static func matchName(url: URL) -> Bool {
     if url.lastPathComponent.hasSuffix(".json"),
-      let _ = Name(rawValue: url.deletingPathExtension().lastPathComponent) {
+      let _ = Name(rawValue: url.deletingPathExtension().lastPathComponent)
+    {
       return true
-    } else { 
+    } else {
       return false
     }
   }
@@ -55,11 +56,10 @@ public enum JSONConfig {
       let files = try FileManager.default.subpathsOfDirectory(atPath: path)
       let urls = files.map { file in pathUrl.appendingPathComponent(file) }
 
-      return urls.filter(matchName)      
+      return urls.filter(matchName)
     } catch let error {
       print(error)
       return []
     }
-  }  
+  }
 }
-

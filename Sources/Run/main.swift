@@ -8,18 +8,19 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
+import ArgumentParser
 import BlackBoxModel
 import Config
+import Dispatch
 import Foundation
 import Meteo
-import ArgumentParser
-
-import Dispatch
 
 struct LocationInfo: ParsableArguments {
   @Option(name: [.customShort("z"), .long], help: "Time zone")
   var timezone: Int?
-  @Option(name: [.customLong("long")], help: "Longitude (decimal degrees, negative west of Greenwich meridion)")
+  @Option(
+    name: [.customLong("long")],
+    help: "Longitude (decimal degrees, negative west of Greenwich meridion)")
   var longitude: Double?
   @Option(name: [.customLong("lat")], help: "Latitude (decimal degrees)")
   var latitude: Double?
@@ -52,7 +53,7 @@ struct SolarPerformanceCalculator: ParsableCommand {
   @Option(name: .shortAndLong, help: "Year of simulation.")
   var year: Int = 2019
   @OptionGroup()
-  var location: LocationInfo 
+  var location: LocationInfo
   @Option(name: .shortAndLong, help: "Calculation steps per hour.")
   var stepsCalculation: Int?
   @Option(name: .shortAndLong, help: "Values per hour output file.")
@@ -60,27 +61,27 @@ struct SolarPerformanceCalculator: ParsableCommand {
   @Flag(help: "All results are output to file.")
   var full: Bool = false
 
-  func run() throws {  
-    print(decorated("Solar Performance Calculator"),"")
+  func run() throws {
+    print(decorated("Solar Performance Calculator"), "")
     // BlackBoxModel.loadConfigurations(atPath: configPath, format: .json)
     // BlackBoxModel.saveConfigurations(toPath: configPath)
     if let steps = stepsCalculation {
       Simulation.time.steps = Interval[steps]
     } else {
       Simulation.time.steps = .every5minutes
-    }   
+    }
     let start = DispatchTime.now().uptimeNanoseconds
     BlackBoxModel.configure(year: year)
 
-     if let coords = location.coords {
+    if let coords = location.coords {
       var loc = Location(coords)
       if let tz = location.timezone {
         loc.timezone = tz
         print(loc)
       }
       BlackBoxModel.configure(location: loc)
-    }       
-    
+    }
+
     // BlackBoxModel.configure(meteoFilePath: "./Model.playground/Resources/AlAbdaliyah.mto")
     BlackBoxModel.configure(meteoFilePath: meteofilePath)
     // let mode: PerformanceDataRecorder.Mode = full ? .all : .brief
@@ -93,12 +94,12 @@ struct SolarPerformanceCalculator: ParsableCommand {
     let log = PerformanceDataRecorder(name: nameResults, path: resultsPath, output: .memory)
 
     BlackBoxModel.runModel(with: log)
-    
+
     SolarPerformanceCalculator.result = log.log
 
     let end = DispatchTime.now().uptimeNanoseconds
     print("elapsed time:", (end - start) / 1_000_000, "ms")
-    log.printResult()  
+    log.printResult()
   }
 
   static var configuration = CommandConfiguration(

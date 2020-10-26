@@ -12,41 +12,43 @@ import DateGenerator
 import Foundation
 
 public class MeteoDataGenerator: Sequence {
-  
+
   private(set) var frequence: DateGenerator.Interval
-  
+
   private(set) var dateInterval: DateInterval?
-  
+
   private let dataSource: MeteoDataSource
 
   public enum Method {
     case linear, gradient
   }
-  
+
   private let method: Method
-    
-  public init(_ source: MeteoDataSource,
-              frequence: DateGenerator.Interval,
-              method: Method = .gradient)
-  {
-    precondition(frequence.fraction <= source.hourFraction,
-                 "The interval must be shorter or the same as in the source.")
+
+  public init(
+    _ source: MeteoDataSource,
+    frequence: DateGenerator.Interval,
+    method: Method = .gradient
+  ) {
+    precondition(
+      frequence.fraction <= source.hourFraction,
+      "The interval must be shorter or the same as in the source.")
     self.dataSource = source
     self.frequence = frequence
-    self.range = source.data.startIndex ..< source.data.endIndex
+    self.range = source.data.startIndex..<source.data.endIndex
     self.method = method
   }
 
   public func setRange(_ dateInterval: DateInterval) {
     self.dateInterval = dateInterval.align(with: self.frequence)
-    
+
     let start = self.dateInterval!.start
     let end = self.dateInterval!.end
     let fraction = Int(1 / dataSource.hourFraction)
-    
+
     let calendar = NSCalendar(identifier: .gregorian)!
     calendar.timeZone = TimeZone(secondsFromGMT: 0)!
-    
+
     let startHour = calendar.ordinality(of: .hour, in: .year, for: start)
     let startIndex = (startHour - 1) * fraction
 
@@ -55,22 +57,23 @@ public class MeteoDataGenerator: Sequence {
 
     let endHour = calendar.ordinality(of: .hour, in: .year, for: end)
     let lastIndex = (endHour - 1) * fraction
-    
-    range = startIndex ..< lastIndex
-    
+
+    range = startIndex..<lastIndex
+
     let endMinute = calendar.ordinality(of: .minute, in: .hour, for: end)
     lastStep = endMinute / (60 / frequence.rawValue) / fraction
   }
-  
+
   private var range: Range<Int>
 
   private var firstStep = 1
   private var lastStep = 0
-  
+
   public func makeIterator() -> AnyIterator<MeteoData> {
     let data = dataSource.data
     let method = self.method
-    let steps = dataSource.hourFraction < 1
+    let steps =
+      dataSource.hourFraction < 1
       ? Int(dataSource.hourFraction / frequence.fraction)
       : frequence.rawValue
 
@@ -78,14 +81,17 @@ public class MeteoDataGenerator: Sequence {
 
     var step = self.firstStep
     var index = range.lowerBound
-    
+
     let lastStep = self.lastStep
     let lastIndex = range.upperBound
 
     return AnyIterator<MeteoData> {
       defer { step += 1 }
       // When step count is reached move index to the next value.
-      if step > steps { step = 1; index += 1 }
+      if step > steps {
+        step = 1
+        index += 1
+      }
       // Check whether the end of the range has been reached.
       if index == lastIndex && step > lastStep { return nil }
 

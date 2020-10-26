@@ -10,13 +10,11 @@
 
 import Foundation
 
-/**
- DateTime is used to easily make the calendar data
- of the current time step available during a run.
-
-  - Attention: Needed by `Availability` and `GridDemand` both use `current`,
-  also used in `SteamTurbine` and `Storage` routines.
-*/
+/// DateTime is used to easily make the calendar data
+/// of the current time step available during a run.
+///
+///  - Attention: Needed by `Availability` and `GridDemand` both use `current`,
+///  also used in `SteamTurbine` and `Storage` routines.
 public struct DateTime: CustomStringConvertible {
 
   private(set) public static var current = DateTime()
@@ -43,8 +41,9 @@ public struct DateTime: CustomStringConvertible {
   private let second: Int
 
   public var description: String {
-    let ds = String(format: "%04d-%02d-%02d %02d:%02d:%02d",
-                    year, month, day, hour, minute, second)
+    let ds = String(
+      format: "%04d-%02d-%02d %02d:%02d:%02d",
+      year, month, day, hour, minute, second)
     let symbol = isDaytime ? " 🌞 " : " 🌃 "
     return symbol + ds
   }
@@ -67,16 +66,16 @@ public struct DateTime: CustomStringConvertible {
   public func isWithin(start: MonthDay, stop: MonthDay) -> Bool {
     assert(start.month <= stop.month)
     var result = false
-    if start.month ... stop.month ~= month {
+    if start.month...stop.month ~= month {
       // month has been checked
-      if start.month == stop.month { // both days must checked
+      if start.month == stop.month {  // both days must checked
         assert(start.day < stop.day - 1)
-        if start.day + 1 ..< stop.day ~= day { result = true }
-      } else if month == start.month { // start day must checked
+        if start.day + 1..<stop.day ~= day { result = true }
+      } else if month == start.month {  // start day must checked
         if day > start.day { result = true }
-      } else if month == stop.month { // stop day must checked
+      } else if month == stop.month {  // stop day must checked
         if day < stop.day { result = true }
-      } else { // No day check necessary
+      } else {  // No day check necessary
         result = true
       }
     }
@@ -111,24 +110,25 @@ extension DateTime {
     }
 
     func isleap(_ year: Int) -> Bool {
-      var y = (year + 1) % 400  /* correct to nearest multiple-of-400 year, then find the remainder */
+      var y =
+        (year + 1) % 400 /* correct to nearest multiple-of-400 year, then find the remainder */
       if y < 0 { y = -y }
-      return (0 == (y & 3) && 100 != y && 200 != y && 300 != y);
+      return (0 == (y & 3) && 100 != y && 200 != y && 300 != y)
     }
 
-    let b = absolute / 146097 // take care of as many multiples of 400 years as possible
+    let b = absolute / 146097  // take care of as many multiples of 400 years as possible
     var y = b * 400
     var ydays = 0
-    absolute -= b * 146097;
-    while (absolute < 0) {
+    absolute -= b * 146097
+    while absolute < 0 {
       y -= 1
       absolute += daysAfterMonth(0, y, isleap(y))
     }
     /* Now absolute is non-negative days to add to year */
     ydays = daysAfterMonth(0, y, isleap(y))
     while ydays <= absolute {
-      y += 1;
-      absolute -= ydays;
+      y += 1
+      absolute -= ydays
       ydays = daysAfterMonth(0, y, isleap(y))
     }
 
@@ -147,7 +147,7 @@ extension DateTime {
     }
 
     self.isDaytime = true
-    self.year =  year + 2001
+    self.year = year + 2001
     self.month = month
     self.day = day
     self.yearDay = Int(absolute) + 1

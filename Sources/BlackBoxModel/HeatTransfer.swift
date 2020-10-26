@@ -13,7 +13,7 @@ import Foundation
 public struct HeatTransfer: CustomStringConvertible {
 
   var name = ""
-  
+
   var massFlow: MassFlow
 
   var temperature: (inlet: Temperature, outlet: Temperature)
@@ -25,7 +25,7 @@ public struct HeatTransfer: CustomStringConvertible {
   var inletTemperature: Double { temperature.inlet.kelvin }
 
   var outletTemperature: Double { temperature.outlet.kelvin }
-    
+
   init(name: String) {
     self.name = name
     self.massFlow = 0.0
@@ -45,17 +45,19 @@ public struct HeatTransfer: CustomStringConvertible {
       + String(format: "Tin: %.1f°C, ", temperature.inlet.celsius)
       + String(format: "Tout: %.1f°C", temperature.outlet.celsius)
   }
-  
+
   var values: [String] {
-    [massFlow.rate.description,
-     temperature.inlet.celsius.description,
-     temperature.outlet.celsius.description]
+    [
+      massFlow.rate.description,
+      temperature.inlet.celsius.description,
+      temperature.outlet.celsius.description,
+    ]
   }
-  
+
   var numericalForm: [Double] {
     [massFlow.rate, temperature.inlet.celsius, temperature.outlet.celsius]
   }
-  
+
   public mutating func constantTemperature() {
     temperature.inlet = temperature.outlet
   }

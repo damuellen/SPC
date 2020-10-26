@@ -8,7 +8,7 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
-extension PowerBlock:  CustomStringConvertible {  
+extension PowerBlock: CustomStringConvertible {
   public var description: String {
     String(format: "Mfl: %.1fkg/s, ", massFlow.rate)
       + String(format: "Tin: %.1f°C ", temperature.inlet.celsius)

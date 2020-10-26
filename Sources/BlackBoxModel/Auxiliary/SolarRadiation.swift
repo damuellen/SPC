@@ -12,16 +12,16 @@ import Foundation
 import Meteo
 
 struct SolarRadiation: MeasurementsConvertible {
-  
+
   var dni, ghi, dhi, ico: Double
-  
+
   init() {
     self.dni = 0.0
     self.ghi = 0.0
     self.dhi = 0.0
     self.ico = 0.0
   }
-  
+
   init(meteo: MeteoData, cosTheta: Double) {
     self.dni = Double(meteo.dni)
     self.ghi = Double(meteo.ghi)
@@ -32,17 +32,19 @@ struct SolarRadiation: MeasurementsConvertible {
   var numericalForm: [Double] { [dni, ghi, dhi, ico] }
 
   static var columns: [(name: String, unit: String)] {
-    [("Solar|DNI", "Wh/m2"), ("Solar|GHI", "Wh/m2"),
-     ("Solar|DHI", "Wh/m2"), ("Solar|ICO", "Wh/m2")]
+    [
+      ("Solar|DNI", "Wh/m2"), ("Solar|GHI", "Wh/m2"),
+      ("Solar|DHI", "Wh/m2"), ("Solar|ICO", "Wh/m2"),
+    ]
   }
-  
+
   mutating func totalize(_ radiation: SolarRadiation, fraction: Double) {
     dni += radiation.dni * fraction
     ghi += radiation.ghi * fraction
     dhi += radiation.dhi * fraction
     ico += radiation.ico * fraction
   }
-  
+
   mutating func zero() {
     dni = 0.0
     ghi = 0.0

@@ -21,14 +21,14 @@ extension Optional {
 }
 
 extension DefaultStringInterpolation {
-  mutating func appendInterpolation(csv values: Double...)  {
+  mutating func appendInterpolation(csv values: Double...) {
     values.forEach { value in
       self.appendInterpolation(value.description)
       self.appendInterpolation(", ")
     }
   }
-  
-  mutating func appendInterpolation(format values: Double...){
+
+  mutating func appendInterpolation(format values: Double...) {
     values.forEach { value in
       self.appendInterpolation(string(value))
     }
@@ -59,9 +59,9 @@ public typealias Heat = Double
 public typealias Pressure = Double
 public typealias Angle = Double
 
-public extension Angle {
-  var toRadians: Double { return self * .pi / 180 }
-  var toDegrees: Double { return self * (180 / .pi) }
+extension Angle {
+  public var toRadians: Double { return self * .pi / 180 }
+  public var toDegrees: Double { return self * (180 / .pi) }
 }
 
 let calendar = { calendar -> Calendar in
@@ -73,16 +73,16 @@ let calendar = { calendar -> Calendar in
 
 extension String {
   static var lineBreak: String { return "\n" }
-  static var separator: String { return ", " } 
+  static var separator: String { return ", " }
 }
 
 final class Cache<T: Hashable> {
-  var cachedValues: [Int:T] = [:]
-  
+  var cachedValues: [Int: T] = [:]
+
   func lookupResult(for hash: Int) -> T? {
     return cachedValues[hash]
   }
-  
+
   func update(hash: Int, result: T) {
     cachedValues[hash] = result
   }
@@ -108,13 +108,13 @@ extension Array where Element: BinaryFloatingPoint {
 extension Array where Element: Comparable {
   public func minMax() -> (min: Element, max: Element)? {
     guard var minimum = first else { return nil }
-    var maximum = minimum    
+    var maximum = minimum
     // if 'vector' has an odd number of items,
     // let 'minimum' or 'maximum' deal with the leftover
-    let start = count % 2 // 1 if odd, skipping the first element
+    let start = count % 2  // 1 if odd, skipping the first element
     for i in stride(from: start, to: count, by: 2) {
-      let (first, second) = (self[i], self[i+1])
-      
+      let (first, second) = (self[i], self[i + 1])
+
       if first > second {
         if first > maximum { maximum = first }
         if second < minimum { minimum = second }

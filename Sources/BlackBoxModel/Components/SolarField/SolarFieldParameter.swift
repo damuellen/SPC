@@ -59,7 +59,7 @@ extension SolarField {
     var edgeFactor: [Double] = []
 
     var distRatio: Double = 0
-    var pipeWay: Double  = 0
+    var pipeWay: Double = 0
     var loopWays: [Double] = []
   }
 }
@@ -67,22 +67,27 @@ extension SolarField {
 extension SolarField.Parameter {
 
   mutating func wayLength() {
-    let designWay = Double(numberOfSCAsInRow)
+    let designWay =
+      Double(numberOfSCAsInRow)
       * (collector.lengthSCA + distanceSCA) * 2.0 + rowDistance
 
-    var nearWay = Double(numberOfSCAsInRow)
+    var nearWay =
+      Double(numberOfSCAsInRow)
       * (collector.lengthSCA + distanceSCA)
-    nearWay = layout ~= .I
+    nearWay =
+      layout ~= .I
       ? nearWay
       : nearWay * 2 + rowDistance + 0.5
 
     var avgWay = Design.layout.solarField / 4 * rowDistance / 2
-    avgWay = layout ~= .I
+    avgWay =
+      layout ~= .I
       ? avgWay + 0.5
       : avgWay + nearWay
 
     var farWay: Double = (2 * (Design.layout.solarField / 4 * rowDistance / 2))
-    farWay = layout ~= .I
+    farWay =
+      layout ~= .I
       ? farWay
       : farWay + nearWay
 
@@ -290,10 +295,12 @@ extension SolarField.Parameter: Codable {
     try container.encode(imbalanceMin[1], forKey: .imbalanceMinAverage)
     try container.encode(imbalanceMin[2], forKey: .imbalanceMinFar)
     try container.encode(windCoefficients, forKey: .windCoefficients)
-    try container.encode(useReferenceAmbientTemperature,
-                         forKey: .useReferenceAmbientTemperature)
-    try container.encode(referenceAmbientTemperature,
-                         forKey: .referenceAmbientTemperature)
+    try container.encode(
+      useReferenceAmbientTemperature,
+      forKey: .useReferenceAmbientTemperature)
+    try container.encode(
+      referenceAmbientTemperature,
+      forKey: .referenceAmbientTemperature)
     try container.encode(designTemperature.inlet, forKey: .inletDesignTemperature)
     try container.encode(designTemperature.outlet, forKey: .outletDesignTemperature)
     try container.encode(heatlosses, forKey: .heatlosses)
@@ -301,7 +308,7 @@ extension SolarField.Parameter: Codable {
 }
 
 extension SolarField.Parameter: Equatable {
-  public static func ==(lhs: SolarField.Parameter, rhs: SolarField.Parameter) -> Bool {
+  public static func == (lhs: SolarField.Parameter, rhs: SolarField.Parameter) -> Bool {
     return lhs.HLDump == rhs.HLDump
       && lhs.layout == rhs.layout
       && lhs.EtaWind == rhs.EtaWind

@@ -7,19 +7,19 @@
 //
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
-  
+
 public struct PerformanceData: CustomStringConvertible, MeasurementsConvertible {
 
   public var collector = Collector.initialState,
-  solarField = SolarField.initialState,
-  heatExchanger = HeatExchanger.initialState,
-  powerBlock = PowerBlock.initialState,
-  steamTurbine = SteamTurbine.initialState,
-  heater = Heater.initialState,
-  boiler = Boiler.initialState,
-  gasTurbine = GasTurbine.initialState,
-  storage = Storage.initialState
-  
+    solarField = SolarField.initialState,
+    heatExchanger = HeatExchanger.initialState,
+    powerBlock = PowerBlock.initialState,
+    steamTurbine = SteamTurbine.initialState,
+    heater = Heater.initialState,
+    boiler = Boiler.initialState,
+    gasTurbine = GasTurbine.initialState,
+    storage = Storage.initialState
+
   public var description: String {
     return "\nCollector:\n\(collector)\n\n"
       + (Design.hasSolarField ? "Solar Field:\n\(solarField)\n\n" : "")
@@ -31,7 +31,7 @@ public struct PerformanceData: CustomStringConvertible, MeasurementsConvertible 
       + (Design.hasGasTurbine ? "Gas Turbine:\n\(gasTurbine)\n\n" : "")
       + (Design.hasStorage ? "Storage:\n\(storage)\n" : "")
   }
-  
+
   var numericalForm: [Double] {
     return storage.cycle.numericalForm + heater.cycle.numericalForm
       + powerBlock.cycle.numericalForm + heatExchanger.cycle.numericalForm
@@ -39,13 +39,15 @@ public struct PerformanceData: CustomStringConvertible, MeasurementsConvertible 
       + solarField.loops[0].numericalForm + solarField.loops[1].numericalForm
       + solarField.loops[2].numericalForm + solarField.loops[3].numericalForm
   }
-  
+
   static var columns: [(name: String, unit: String)] {
     let values: [(name: String, unit: String)] =
       [("|Massflow", "kg/s"), ("|Tin", "degC"), ("|Tout", "degC")]
     return [
       "Storage", "Heater", "PowerBlock", "HeatExchanger", "SolarField",
-      "DesignLoop", "NearLoop", "AvgLoop", "FarLoop"].flatMap { name in
-        values.map { value in (name + value.name, value.unit) } }
+      "DesignLoop", "NearLoop", "AvgLoop", "FarLoop",
+    ].flatMap { name in
+      values.map { value in (name + value.name, value.unit) }
+    }
   }
 }

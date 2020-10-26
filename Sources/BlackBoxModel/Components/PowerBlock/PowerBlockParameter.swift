@@ -63,9 +63,11 @@ extension PowerBlock.Parameter: CustomStringConvertible {
 
 extension PowerBlock.Parameter: TextConfigInitializable {
   public init(file: TextConfigFile) throws {
-    var line = 10, spacing = 3
-    func parse()throws -> Double {
-      defer { line += spacing }; return try file.parseDouble(line: line)
+    var line = 10
+    var spacing = 3
+    func parse() throws -> Double {
+      defer { line += spacing }
+      return try file.parseDouble(line: line)
     }
     name = file.name
     fixElectricalParasitics = try parse()
@@ -75,7 +77,8 @@ extension PowerBlock.Parameter: TextConfigInitializable {
     fixElectricalParasitics0 = try parse()
     startUpElectricalParasitics = try parse()
     electricalParasiticsShared = try [parse(), parse()]
-    line = 39; spacing = 2
+    line = 39
+    spacing = 2
     nominalElectricalParasiticsACC = try parse()
     electricalParasiticsACC = try [parse(), parse(), parse(), parse(), parse()]
     electricalParasiticsACCTamb = try [parse(), parse(), parse(), parse(), parse()]

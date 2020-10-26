@@ -83,20 +83,20 @@ public enum ParameterDefaults {
     T_h: [0.58315, 0.65556, -0.00032293, 1.9425e-07, -6.1133e-11],
     useEnthalpy: false
   )
-  
+
   static let st = Storage.Parameter(
     name: "2-Tank Molten Salt",
     chargeTo: 1,
     dischargeToTurbine: 0.199278169307103,
-    dischargeToHeater: 0.199278169307103 ,
+    dischargeToHeater: 0.199278169307103,
     stepSizeIteration: -99.99,
     heatStoredrel: 0,
     temperatureDischarge: [7, 0, 0, 0],
     temperatureDischarge2: [7, 0, 0, 0],
     temperatureCharge: [307, 0, 0, 0],
     temperatureCharge2: [-1, 0, 0, 0],
-    heatlossCst: [1.953704, 301.1, 546.6, 2630000],
-    heatlossC0to1: [21700148, 362.77, 0, 0],
+    heatlossCst: [1.953704, 301.1, 546.6, 2_630_000],
+    heatlossC0to1: [21_700_148, 362.77, 0, 0],
     pumpEfficiency: 0.73,
     pressureLoss: 776000,
     massFlow: 70.0,
@@ -104,11 +104,11 @@ public enum ParameterDefaults {
     startLoad: (cold: 1, hot: 0),
     strategy: .shifter, PrefChargeto: 0.83,
     startexcep: 4, endexcep: 8,
-    HTF: .solarSalt,  FP: -1, FC: 0, heatdiff: 0.25, dSRise: 1,
+    HTF: .solarSalt, FP: -1, FC: 0, heatdiff: 0.25, dSRise: 1,
     minDischargeLoad: Ratio(0), fixedDischargeLoad: Ratio(0.97),
     heatTracingTime: [1, 1], heatTracingPower: [1, 1],
     DischrgParFac: 1, definedBy: .cap,
-  //  resultingTemperature: (.init(celsius: 293.0), .init(celsius: 390.0)),
+    //  resultingTemperature: (.init(celsius: 293.0), .init(celsius: 390.0)),
     designTemperature: (566.15, 663.15),
     heatLoss: (1, 1),
     startFossilCharging: (1, 1), stopFossilCharging: (1, 2),
@@ -150,7 +150,7 @@ public enum ParameterDefaults {
 
   static let tb = SteamTurbine.Parameter(
     name: "",
-    power: PowerRange(range: 33 ... 77, nom: 75),
+    power: PowerRange(range: 33...77, nom: 75),
     efficiencyNominal: 0.4101728,
     efficiencyBoiler: 0.4101728,
     efficiencySCC: 0.4101728,
@@ -183,8 +183,9 @@ public enum ParameterDefaults {
     nominalTemperatureOut: 1,
     minLoad: 0,
     nominalElectricalParasitics: 1,
-    start: .init(hours: .init(cold: 0, warm: 0),
-                 energy: .init(cold: 0, warm: 0)),
+    start: .init(
+      hours: .init(cold: 0, warm: 0),
+      energy: .init(cold: 0, warm: 0)),
     electricalParasitics: .init(values: 0),
     efficiency: .init(values: 0)
   )

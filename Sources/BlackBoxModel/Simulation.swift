@@ -73,8 +73,8 @@ public struct InitValues: Codable {
   let massFlowInSolarField: MassFlow
 }
 
-public extension InitValues {
-  init(file: TextConfigFile) throws {
+extension InitValues {
+  public init(file: TextConfigFile) throws {
     let line: (Int) throws -> Double = { try file.parseDouble(line: $0) }
     self.temperatureOfHTFinPipes = try Temperature(line(7))
     self.temperatureOfHTFinHCE = try Temperature(line(10))

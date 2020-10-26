@@ -11,11 +11,9 @@
 import Config
 import Foundation
 
-/**
- The Heat Transfer Fluid is characterized through maximum operating temperature,
- freeze temperature, specific heat capacity, viscosity, thermal conductivity,
- enthalpy, and density as a function of temperature.
- */
+/// The Heat Transfer Fluid is characterized through maximum operating temperature,
+/// freeze temperature, specific heat capacity, viscosity, thermal conductivity,
+/// enthalpy, and density as a function of temperature.
 public struct HeatTransferFluid: CustomStringConvertible, Equatable {
   let name: String
   let freezeTemperature: Temperature
@@ -28,10 +26,12 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
   let temperatureFromEnthalpy: Polynomial
   let useEnthalpy: Bool
 
-  public init(name: String, freezeTemperature: Double,
-              heatCapacity: [Double], dens: [Double],
-              visco: [Double], thermCon: [Double], maxTemperature: Double,
-              h_T: [Double], T_h: [Double], useEnthalpy: Bool = true) {
+  public init(
+    name: String, freezeTemperature: Double,
+    heatCapacity: [Double], dens: [Double],
+    visco: [Double], thermCon: [Double], maxTemperature: Double,
+    h_T: [Double], T_h: [Double], useEnthalpy: Bool = true
+  ) {
     self.name = name
     self.freezeTemperature = Temperature(celsius: freezeTemperature)
     self.heatCapacity = heatCapacity
@@ -49,11 +49,11 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
       self.useEnthalpy = false
     }
   }
-  
+
   func deltaHeat(_ flow: HeatCycle) -> Heat {
     deltaHeat(flow.temperature.outlet, flow.temperature.inlet)
   }
-  
+
   @inline(__always)
   func deltaHeat(_ t1: Temperature, _ t2: Temperature) -> Heat {
     if useEnthalpy {
@@ -66,24 +66,29 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
       from: t1.celsius, to: t2.celsius, heatCapacity: heatCapacity
     )
   }
-  
+
   @inline(__always)
   func temperature(_ heat: Heat, _ t: Temperature) -> Temperature {
     if useEnthalpy {
-      return Temperature(celsius: HeatTransferFluid.temperatureFromEnthalpy(
-        heat, t.celsius,
-        coefficients: (enthaplyFromTemperature.coefficients,
-                       temperatureFromEnthalpy.coefficients))
+      return Temperature(
+        celsius: HeatTransferFluid.temperatureFromEnthalpy(
+          heat, t.celsius,
+          coefficients: (
+            enthaplyFromTemperature.coefficients,
+            temperatureFromEnthalpy.coefficients
+          ))
       )
     }
-    return Temperature(celsius: HeatTransferFluid.temperatureFromHeatCapacity(
-      heat, t.celsius, coefficients: heatCapacity)
+    return Temperature(
+      celsius: HeatTransferFluid.temperatureFromHeatCapacity(
+        heat, t.celsius, coefficients: heatCapacity)
     )
   }
-  
+
   func density(_ temperature: Temperature) -> Double {
-    precondition(temperature.kelvin > freezeTemperature.kelvin,
-     "\(temperature) is below freezing point of the htf")
+    precondition(
+      temperature.kelvin > freezeTemperature.kelvin,
+      "\(temperature) is below freezing point of the htf")
     return density[0] + density[1] * temperature.celsius
       + density[2] * temperature.celsius * temperature.celsius
   }
@@ -96,7 +101,7 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
   func temperature(_ enthalpy: Double) -> Temperature {
     return Temperature(celsius: temperatureFromEnthalpy(enthalpy))
   }
-  
+
   @_transparent func mixingTemperature(_ f1: HeatCycle, _ f2: HeatCycle)
     -> Temperature
   {
@@ -109,11 +114,11 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
     precondition(t > freezeTemperature.kelvin, "Fell below freezing point.\n")
     return Temperature(t)
   }
-  
+
   @_transparent func mixingTemperature(inlet f1: HeatCycle, with f2: HeatCycle)
     -> Temperature
   {
-    let (t1, t2) = (f1.inletTemperature, f2.outletTemperature)    
+    let (t1, t2) = (f1.inletTemperature, f2.outletTemperature)
     let (mf1, mf2) = (f1.massFlow.rate, f2.massFlow.rate)
     guard mf1 + mf2 > 0 else { return Temperature((t1 + t2) / 2) }
     let cap1 = fma(heatCapacity[1], t1, heatCapacity[0])
@@ -122,25 +127,29 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
     precondition(t > freezeTemperature.kelvin, "Fell below freezing point.\n")
     return Temperature(t)
   }
-  
+
   @_transparent private static func temperatureFromHeatCapacity(
-    _ specificHeat: Double, _ temperature: Double, coefficients: [Double])
+    _ specificHeat: Double, _ temperature: Double, coefficients: [Double]
+  )
     -> Double
   {
     let t = temperature
     let cp = coefficients
     if cp[1] > 0 {
-      return sqrt((2 * specificHeat + 2 * cp[0] * t) / cp[1] + t ** 2
-        + (cp[0] / cp[1]) ** 2) - cp[0] / cp[1]
+      return sqrt(
+        (2 * specificHeat + 2 * cp[0] * t) / cp[1] + t ** 2
+          + (cp[0] / cp[1]) ** 2) - cp[0] / cp[1]
     } else {
-      return -sqrt((2 * specificHeat + 2 * cp[0] * t) / cp[1] + t ** 2
-        + (cp[0] / cp[1]) ** 2) - cp[0] / cp[1]
+      return -sqrt(
+        (2 * specificHeat + 2 * cp[0] * t) / cp[1] + t ** 2
+          + (cp[0] / cp[1]) ** 2) - cp[0] / cp[1]
     }
   }
-  
+
   @_transparent private static func temperatureFromEnthalpy(
     _ enthalpy: Double, _ temperature: Double,
-    coefficients: ([Double], [Double]))
+    coefficients: ([Double], [Double])
+  )
     -> Double
   {
     let (h_T, T_h) = coefficients
@@ -157,7 +166,8 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
   }
 
   @_transparent private static func heatExchanged(
-    from high: Double, to low: Double, heatCapacity: [Double])
+    from high: Double, to low: Double, heatCapacity: [Double]
+  )
     -> Double
   {
     var q = heatCapacity[0] * (high - low)
@@ -166,7 +176,8 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
   }
 
   @_transparent private static func heatExchanged(
-    from high: Double, to low: Double, coefficients: [Double])
+    from high: Double, to low: Double, coefficients: [Double]
+  )
     -> Double
   {
     var (h1, h2) = (0.0, 0.0)
@@ -219,7 +230,7 @@ public enum StorageMedium: String {
   case xlt600 = "XLT600"
   case th66 = "TH66"
   case solarSalt = "SolarSalt"
-  
+
   var properties: HeatTransferFluid {
     switch self {
     case .solarSalt:
@@ -262,8 +273,9 @@ extension HeatTransferFluid: Codable {
     density = try values.decode(Array<Double>.self, forKey: .dens)
     viscosity = try values.decode(Array<Double>.self, forKey: .visco)
     thermCon = try values.decode(Array<Double>.self, forKey: .thermCon)
-    maxTemperature = try values.decode(Temperature.self,
-                                       forKey: .maxTemperature)
+    maxTemperature = try values.decode(
+      Temperature.self,
+      forKey: .maxTemperature)
     let h_T = try values.decode(Array<Double>.self, forKey: .h_T)
     enthaplyFromTemperature = Polynomial(h_T)
     let T_h = try values.decode(Array<Double>.self, forKey: .T_h)
@@ -302,7 +314,7 @@ extension HeatTransferFluid {
     density = try [try line(18), try line(21), line(24)]
     viscosity = try [line(27), line(30), line(33)]
     thermCon = try [line(36), line(39), line(42)]
-    maxTemperature = try Temperature(line(45)) // .toKelvin
+    maxTemperature = try Temperature(line(45))  // .toKelvin
     if includesEnthalpy {
       let h_T = try [line(47), line(48), line(49), line(50), line(51)]
       enthaplyFromTemperature = Polynomial(h_T)

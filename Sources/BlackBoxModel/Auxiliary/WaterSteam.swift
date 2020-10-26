@@ -1,4 +1,5 @@
 import CIAPWSIF97
+
 /// IAPWS formulations of the thermodynamic properties of water and steam.
 public enum WaterSteam {
 
@@ -14,7 +15,7 @@ public enum WaterSteam {
     let t = Ts_p(p)
     return h_pT(p, t, 1)
   }
-  
+
   /// specific enthalpy [kJ/kg] on the dew point curve.
   public static func enthalpyVapor(p pressure: Double) -> Double {
     let p = pressure / 10
@@ -33,5 +34,5 @@ public enum WaterSteam {
     let p = pressure / 10
     let h = enthalpy
     return Temperature(T_ph(p, h))
-  }    
+  }
 }

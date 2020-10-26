@@ -15,10 +15,10 @@ public struct PowerRange {
   var min: Double { return self.range.lowerBound }
 
   var nominal: Double = 0
-  
+
   var max: Double {
     get { return self.range.upperBound }
-    set { self.range = self.range.lowerBound ... newValue }
+    set { self.range = self.range.lowerBound...newValue }
   }
 
   init(range: ClosedRange<Double>, nom: Double) {
@@ -40,7 +40,7 @@ extension PowerRange: Codable {
     let nom = try values.decode(Double.self, forKey: .nom)
     let max = try values.decode(Double.self, forKey: .max)
     nominal = nom
-    range = min ... max
+    range = min...max
   }
 
   public func encode(to encoder: Encoder) throws {
@@ -56,7 +56,7 @@ public struct TemperatureRange {
   var cold: Double { return self.range.lowerBound }
   var hot: Double {
     get { return self.range.upperBound }
-    set { self.range = self.range.lowerBound ... newValue }
+    set { self.range = self.range.lowerBound...newValue }
   }
 }
 
@@ -70,7 +70,7 @@ extension TemperatureRange: Codable {
     let values = try decoder.container(keyedBy: CodingKeys.self)
     let cold = try values.decode(Double.self, forKey: .cold)
     let hot = try values.decode(Double.self, forKey: .hot)
-    range = cold ... hot
+    range = cold...hot
   }
 
   public func encode(to encoder: Encoder) throws {
