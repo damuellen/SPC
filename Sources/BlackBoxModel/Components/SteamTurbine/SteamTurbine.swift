@@ -9,7 +9,6 @@
 //
 
 import DateGenerator
-import Foundation
 import Meteo
 
 public struct SteamTurbine: Component {
@@ -181,9 +180,8 @@ public struct SteamTurbine: Component {
       maxEfficiency =
         parameter.efficiencyNominal
         * (parameter.efficiencyTempIn_A
-          * pow(
-            heatExchanger.celsius,
-            parameter.efficiencyTempIn_B)) * parameter.efficiencyTempIn_cf
+          * heatExchanger.celsius ** parameter.efficiencyTempIn_B)
+          * parameter.efficiencyTempIn_cf
     }
 
     if case .pure = gasTurbine {
@@ -223,13 +221,13 @@ public struct SteamTurbine: Component {
         for i in 0...2 {
           correctionWetBulbTemperature +=
             parameter.efficiencyWetBulb[i]
-            * pow(wetBulbTemperature, Double(i))
+            * wetBulbTemperature ** Double(i)
         }
       } else {
         for i in 3...5 {
           correctionWetBulbTemperature +=
             parameter.efficiencyWetBulb[i]
-            * pow(wetBulbTemperature, Double(i - 3))
+            * wetBulbTemperature ** Double(i - 3)
         }
       }
     }

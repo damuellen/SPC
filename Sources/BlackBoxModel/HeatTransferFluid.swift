@@ -9,7 +9,6 @@
 //
 
 import Config
-import Foundation
 
 /// The Heat Transfer Fluid is characterized through maximum operating temperature,
 /// freeze temperature, specific heat capacity, viscosity, thermal conductivity,
@@ -102,27 +101,27 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
     return Temperature(celsius: temperatureFromEnthalpy(enthalpy))
   }
 
-  @_transparent func mixingTemperature(_ f1: HeatCycle, _ f2: HeatCycle)
+  func mixingTemperature(_ f1: HeatCycle, _ f2: HeatCycle)
     -> Temperature
   {
     let (t1, t2) = (f1.outletTemperature, f2.outletTemperature)
     let (mf1, mf2) = (f1.massFlow.rate, f2.massFlow.rate)
     guard mf1 + mf2 > 0 else { return Temperature((t1 + t2) / 2) }
-    let cap1 = fma(heatCapacity[1], t1, heatCapacity[0])
-    let cap2 = fma(heatCapacity[1], t2, heatCapacity[0])
+    let cap1 = heatCapacity[0].addingProduct(heatCapacity[1], t1)
+    let cap2 = heatCapacity[0].addingProduct(heatCapacity[1], t2)
     let t = (mf1 * cap1 * t1 + mf2 * cap2 * t2) / (mf1 * cap1 + mf2 * cap2)
     precondition(t > freezeTemperature.kelvin, "Fell below freezing point.\n")
     return Temperature(t)
   }
 
-  @_transparent func mixingTemperature(inlet f1: HeatCycle, with f2: HeatCycle)
+  func mixingTemperature(inlet f1: HeatCycle, with f2: HeatCycle)
     -> Temperature
   {
     let (t1, t2) = (f1.inletTemperature, f2.outletTemperature)
     let (mf1, mf2) = (f1.massFlow.rate, f2.massFlow.rate)
     guard mf1 + mf2 > 0 else { return Temperature((t1 + t2) / 2) }
-    let cap1 = fma(heatCapacity[1], t1, heatCapacity[0])
-    let cap2 = fma(heatCapacity[1], t2, heatCapacity[0])
+    let cap1 = heatCapacity[0].addingProduct(heatCapacity[1], t1)
+    let cap2 = heatCapacity[0].addingProduct(heatCapacity[1], t2)
     let t = (mf1 * cap1 * t1 + mf2 * cap2 * t2) / (mf1 * cap1 + mf2 * cap2)
     precondition(t > freezeTemperature.kelvin, "Fell below freezing point.\n")
     return Temperature(t)
@@ -136,17 +135,17 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
     let t = temperature
     let cp = coefficients
     if cp[1] > 0 {
-      return sqrt(
+      return (
         (2 * specificHeat + 2 * cp[0] * t) / cp[1] + t ** 2
-          + (cp[0] / cp[1]) ** 2) - cp[0] / cp[1]
+          + (cp[0] / cp[1]) ** 2).squareRoot() - cp[0] / cp[1]
     } else {
-      return -sqrt(
+      return -(
         (2 * specificHeat + 2 * cp[0] * t) / cp[1] + t ** 2
-          + (cp[0] / cp[1]) ** 2) - cp[0] / cp[1]
+          + (cp[0] / cp[1]) ** 2).squareRoot() - cp[0] / cp[1]
     }
   }
 
-  @_transparent private static func temperatureFromEnthalpy(
+  private static func temperatureFromEnthalpy(
     _ enthalpy: Double, _ temperature: Double,
     coefficients: ([Double], [Double])
   )
@@ -155,35 +154,35 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
     let (h_T, T_h) = coefficients
     var h1 = 0.0
     for coefficient in h_T.reversed() {
-      h1 = fma(h1, temperature, coefficient)
+      h1 = coefficient.addingProduct(h1, temperature)
     }
     let h2 = enthalpy + h1
     var temperature = 0.0
     for coefficient in T_h.reversed() {
-      temperature = fma(temperature, h2, coefficient)
+      temperature = coefficient.addingProduct(h2, temperature)
     }
     return temperature
   }
 
-  @_transparent private static func heatExchanged(
+  private static func heatExchanged(
     from high: Double, to low: Double, heatCapacity: [Double]
   )
     -> Double
   {
     var q = heatCapacity[0] * (high - low)
-    q += heatCapacity[1] / 2 * (pow(high, 2) - pow(low, 2))
+    q += heatCapacity[1] / 2 * (high * high - low * low)
     return q
   }
 
-  @_transparent private static func heatExchanged(
+  private static func heatExchanged(
     from high: Double, to low: Double, coefficients: [Double]
   )
     -> Double
   {
     var (h1, h2) = (0.0, 0.0)
     for (i, c) in coefficients.enumerated() {
-      h1 += c * pow(low, Double(i))
-      h2 += c * pow(high, Double(i))
+      h1 += c * (low ** Double(i))
+      h2 += c * (high ** Double(i))
     }
     return h2 - h1
   }

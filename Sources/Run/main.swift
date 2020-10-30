@@ -91,7 +91,7 @@ struct SolarPerformanceCalculator: ParsableCommand {
     } else {
       mode = .brief
     }
-    let log = PerformanceDataRecorder(name: nameResults, path: resultsPath, output: .memory)
+    let log = PerformanceDataRecorder(name: nameResults, path: resultsPath, output: mode)
 
     BlackBoxModel.runModel(with: log)
 

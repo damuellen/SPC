@@ -126,8 +126,8 @@ public struct Collector: Component, CustomStringConvertible {
     /// Torsion due to wind and friction
     let torsion = abs(T_14 * (v_wind_eff / 14) ** 2 + T_R)
     /// Correction factor due to torsion
-    let k_torsion = max(0.2, (-0.0041 * pow(torsion, 3) - 0.0605
-        * pow(torsion, 2) - 0.0354 * torsion + 99.997) / 100)
+    let k_torsion = max(0.2, (-0.0041 * torsion ** 3 - 0.0605
+        * torsion ** 2 - 0.0354 * torsion + 99.997) / 100)
     
     let shadingHCE = self.shadingHCE(cosTheta: collector.cosTheta)
     
