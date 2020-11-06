@@ -9,7 +9,7 @@
 //
 
 import Foundation
-import TSCBasic
+import Utility
 
 precedencegroup ExponentiationPrecedence {
   associativity: right

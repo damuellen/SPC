@@ -715,9 +715,7 @@ public struct Plant {
           mode: .discharge, heat: &heat
         )
 
-        let htf = SolarField.parameter.HTF
-
-        powerBlock.merge(solarField, storage)
+        powerBlock.formJoint(solarField, storage)
       }  // STORAGE: dischargeToHeater < Qrel < dischargeToTurbine; Fuel/NoFuel
 
       heat.storage.megaWatt = supply
@@ -771,9 +769,7 @@ public struct Plant {
     heat.heater.megaWatt = energy.heat
     electricalParasitics.heater = energy.electric
 
-    let htf = SolarField.parameter.HTF
-
-    powerBlock.merge(solarField, heater)
+    powerBlock.formJoint(solarField, heater)
   }
 
   private mutating func heating(
@@ -795,8 +791,6 @@ public struct Plant {
     fuelConsumption.heater = energy.fuel
     heat.heater.megaWatt = energy.heat
     electricalParasitics.heater = energy.electric
-
-    let htf = SolarField.parameter.HTF
 
     powerBlock.add(heater)
   }

@@ -9,7 +9,7 @@
 //
 
 import Foundation
-import TSCBasic
+import Utility
 
 extension Optional {
   var isNone: Bool {

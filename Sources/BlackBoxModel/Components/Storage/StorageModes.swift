@@ -159,8 +159,8 @@ extension Storage {
     powerBlock: HeatCycle, heat: inout ThermalEnergy)
     -> Double
   {
-    let heatExchanger = HeatExchanger.parameter,
-    htf = SolarField.parameter.HTF
+    let heatExchanger = HeatExchanger.parameter
+    
     storage.inletTemperature(outlet: solarField)
     
     storage.massFlow = solarField.massFlow - powerBlock.massFlow

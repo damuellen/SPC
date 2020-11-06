@@ -12,16 +12,24 @@ let package = Package(
   ],
   products: [
     .executable(name: "SolarPerformanceCalc", targets: ["Run"]),
-    .library(name: "BlackBoxModel", targets: ["BlackBoxModel"]),
+    .library(name: "BlackBoxModel", type: .dynamic, targets: ["BlackBoxModel"]),
+    .library(name: "Utility", type: .dynamic, targets: ["Utility"])
     ],
 
   dependencies: [
     .package(url: "https://github.com/apple/swift-argument-parser.git",
              .revision("8492882b030ad1c8e0bb4ca9d9ce06b07a8150b2")),
-    .package(url: "https://github.com/damuellen/swift-tools-support-core.git", .branch("main")),
+  //  .package(url: "https://github.com/damuellen/swift-tools-support-core.git", .branch("main")),
     .package(url: "https://github.com/damuellen/SQLite.swift.git", .branch("master"))
     ],
   targets: [
+	.target(
+	    name: "Libc",
+	    dependencies: []),
+	.target(
+	    name: "Utility",
+	    dependencies: ["Libc"]),
+
     .target(
       name: "Config",
       dependencies: [],
@@ -46,7 +54,7 @@ let package = Package(
       swiftSettings: swiftSettings),
     .target(
       name: "BlackBoxModel",
-      dependencies: ["Config", "Meteo", "SolarPosition", "CIAPWSIF97", "SwiftToolsSupport", "SQLite"],
+      dependencies: ["Config", "Meteo", "SolarPosition", "CIAPWSIF97", "Utility", "SQLite"],
       swiftSettings: swiftSettings),
     .target(
       name: "Meteo",

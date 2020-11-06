@@ -50,7 +50,7 @@ extension HeatCycle {
     massFlow = MassFlow(rate)
   }
 
-  mutating func merge(_ c1: HeatCycle, _ c2: HeatCycle) {
+  mutating func formJoint(_ c1: HeatCycle, _ c2: HeatCycle) {
     temperature.inlet = medium.mixingTemperature(c1, c2)
     massFlow = c1.massFlow + c2.massFlow
   }

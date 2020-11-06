@@ -174,7 +174,7 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
     return q
   }
 
-  private static func heatExchanged(
+  @_transparent private static func heatExchanged(
     from high: Double, to low: Double, coefficients: [Double]
   )
     -> Double

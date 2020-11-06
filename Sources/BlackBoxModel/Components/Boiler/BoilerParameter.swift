@@ -25,7 +25,7 @@ extension Boiler {
 
     let start: StartParameter
     let electricalParasitics, efficiency: Polynomial
-    let booster = true
+    var booster = true
   }
 }
 
