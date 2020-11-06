@@ -9,6 +9,7 @@
 */
 
 import Foundation
+import Libc
 
 /// Provides functionality related a process's enviorment.
 public enum ProcessEnv {
