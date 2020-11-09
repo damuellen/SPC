@@ -82,7 +82,7 @@ public enum ProcessEnv {
             throw SystemError.chdir(Int32(GetLastError()), path)
         }
       #else
-        guard chdir(path) == 0 else {
+        guard Libc.chdir(path) == 0 else {
             throw SystemError.chdir(errno, path)
         }
       #endif
