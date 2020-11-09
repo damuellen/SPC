@@ -5,6 +5,7 @@ import XCTest
 
 class BlackBoxModelTests: XCTestCase {
   func testsSummer() {
+     
     let df = DateFormatter()
     df.timeZone = TimeZone(secondsFromGMT: 0)
     df.dateFormat = "dd.MM.yyyy"
@@ -12,9 +13,14 @@ class BlackBoxModelTests: XCTestCase {
     Simulation.time.lastDateOfOperation = df.date(from: "03.07.2005")!
     var location = Location(longitude: 47.73, latitude: 29, elevation: 0)
     location.timezone = 2
+
+    BlackBoxModel.configure(year: 2005)
     BlackBoxModel.configure(location: location)
-    let log = PerformanceDataRecorder(output: .none)
+
+    let log = PerformanceDataRecorder()
+
     BlackBoxModel.runModel(with: log)
+
     let result = log.log!
 
     XCTAssertEqual(result.electric.net, 250.16, accuracy: 0.1)
@@ -35,9 +41,13 @@ class BlackBoxModelTests: XCTestCase {
     Simulation.time.lastDateOfOperation = df.date(from: "03.01.2005")!
     var location = Location(longitude: 47.73, latitude: 29, elevation: 0)
     location.timezone = 2
+    BlackBoxModel.configure(year: 2005)
     BlackBoxModel.configure(location: location)
-    let log = PerformanceDataRecorder(output: .none)
+
+    let log = PerformanceDataRecorder()
+
     BlackBoxModel.runModel(with: log)
+
     let result = log.log!
     
 

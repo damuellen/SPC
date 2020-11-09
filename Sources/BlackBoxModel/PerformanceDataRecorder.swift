@@ -151,7 +151,7 @@ public final class PerformanceDataRecorder {
       customIntervalStream?.write(tableHeader)
       urls = [resultsURL]
     }
-
+    if case .inMemory = output { return } 
     print("Results: \(urlDir.path)/")
     urls.map(\.lastPathComponent).enumerated()
       .forEach { print("  \($0.offset+1).\t", $0.element) }
@@ -221,7 +221,11 @@ public final class PerformanceDataRecorder {
       hourlyRadiation.totalize(solar, fraction: interval.fraction)
       hourlyEnergy.totalize(energy, fraction: interval.fraction)
       // Daily and annual sum calculations see counters
-    } 
+    } else {
+      // Only the annual sums are calculated.
+      annualRadiation.totalize(solar, fraction: interval.fraction)
+      annualEnergy.totalize(energy, fraction: interval.fraction)
+    }
 
     #if DEBUG && !os(Windows)
       if progress != ts.month {
