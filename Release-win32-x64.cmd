@@ -1,9 +1,5 @@
 @echo off
 
-SET SDKROOT=C:\Library\Developer\Platforms\Windows.platform\Developer\SDKs\Windows.sdk
-
-SET SWIFTFLAGS=-sdk %SDKROOT% -I %SDKROOT%/usr/lib/swift -L %SDKROOT%/usr/lib/swift/windows
-
 SET SQLITE=C:\Library\sqlite3
 
 SET RUNTIME=C:\Library\Swift-development\bin
@@ -12,7 +8,7 @@ SET ICU=C:\Library\icu-67\usr\bin
 
 @call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" x64 %*
 
-swift build -c release -Xlinker /INCREMENTAL:NO -Xlinker /IGNORE:4217,4286 -Xswiftc -I%SQLITE% -Xswiftc -L%SQLITE%
+swift build -c release
 
 MKDIR %LOCALAPPDATA%\SPC
 

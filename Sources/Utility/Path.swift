@@ -9,7 +9,7 @@
 */
 
 import Foundation
-
+import Libc
 #if os(Windows)
 import WinSDK
 #endif

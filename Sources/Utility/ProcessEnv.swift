@@ -71,7 +71,7 @@ public enum ProcessEnv {
     public static var cwd: AbsolutePath? {
         return localFileSystem.currentWorkingDirectory
     }
-/*
+
     /// Change the current working directory of the process.
     public static func chdir(_ path: AbsolutePath) throws {
         let path = path.pathString
@@ -86,5 +86,5 @@ public enum ProcessEnv {
             throw SystemError.chdir(errno, path)
         }
       #endif
-    }*/
+    }
 }
