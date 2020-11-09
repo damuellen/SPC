@@ -16,9 +16,9 @@ import Utility
 
 public final class PerformanceDataRecorder {
 
-  #if DEBUG && !os(Windows)
-    let animation = NinjaProgressAnimation(stream: stdoutStream)
-  #endif
+#if DEBUG && !os(Windows)
+  let animation = NinjaProgressAnimation(stream: stdoutStream)
+#endif
 
   let interval = Simulation.time.steps
   let stride: Int
@@ -217,7 +217,9 @@ public final class PerformanceDataRecorder {
           customIntervalEnergy.zero()
         }
       }
+    }
 
+    if case .csv = mode {
       hourlyRadiation.totalize(solar, fraction: interval.fraction)
       hourlyEnergy.totalize(energy, fraction: interval.fraction)
       // Daily and annual sum calculations see counters
@@ -227,16 +229,16 @@ public final class PerformanceDataRecorder {
       annualEnergy.totalize(energy, fraction: interval.fraction)
     }
 
-    #if DEBUG && !os(Windows)
-      if progress != ts.month {
-        progress = ts.month
-        animation.update(
-          step: progress,
-          total: 12,
-          text: "recording month."
-        )
-      }
-    #endif
+#if DEBUG && !os(Windows)
+    if progress != ts.month {
+      progress = ts.month
+      animation.update(
+        step: progress,
+        total: 12,
+        text: "recording month."
+      )
+    }
+#endif
   }
 
   public func complete() {
@@ -256,13 +258,14 @@ public final class PerformanceDataRecorder {
       storeInDB()
     }
 
-    #if DEBUG && !os(Windows)
-      animation.clear()
-    #endif
-  }
   #if DEBUG && !os(Windows)
-    private var progress: Int = 0
+    animation.clear()
   #endif
+  }
+
+#if DEBUG && !os(Windows)
+  private var progress: Int = 0
+#endif
 
   private var hourCounter: Int = 1 {
     didSet {
@@ -290,11 +293,9 @@ public final class PerformanceDataRecorder {
         dailyEnergy.totalize(hourlyEnergy, fraction: 1)
         dailyRadiation.totalize(hourlyRadiation, fraction: 1)
 
-
         let csv = generateHourlyValues()
         // Will be written together with the daily results
         stringBuffer.append(contentsOf: csv)        
-
 
         hourlyEnergy.zero()
         hourlyRadiation.zero()
