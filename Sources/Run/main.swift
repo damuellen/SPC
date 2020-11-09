@@ -15,6 +15,13 @@ import Dispatch
 import Foundation
 import Meteo
 
+let start = DispatchTime.now().uptimeNanoseconds
+
+SolarPerformanceCalculator.main()
+
+let end = DispatchTime.now().uptimeNanoseconds
+print("elapsed time:", (end - start) / 1_000_000, "ms")
+
 struct LocationInfo: ParsableArguments {
   @Option(name: [.customShort("z"), .long], help: "Time zone")
   var timezone: Int?
@@ -58,8 +65,8 @@ struct SolarPerformanceCalculator: ParsableCommand {
   var stepsCalculation: Int?
   @Option(name: .shortAndLong, help: "Values per hour output file.")
   var outputValues: Int?
-  @Flag(help: "All results are output to file.")
-  var full: Bool = false
+  @Flag(help: "Output performance data to sqlite.")
+  var database: Bool = false
 
   func run() throws {
     print(decorated("Solar Performance Calculator"), "")
@@ -70,7 +77,7 @@ struct SolarPerformanceCalculator: ParsableCommand {
     } else {
       Simulation.time.steps = .every5minutes
     }
-    let start = DispatchTime.now().uptimeNanoseconds
+    
     BlackBoxModel.configure(year: year)
 
     if let coords = location.coords {
@@ -82,23 +89,23 @@ struct SolarPerformanceCalculator: ParsableCommand {
       BlackBoxModel.configure(location: loc)
     }
 
-    // BlackBoxModel.configure(meteoFilePath: "./Model.playground/Resources/AlAbdaliyah.mto")
     BlackBoxModel.configure(meteoFilePath: meteofilePath)
-    // let mode: PerformanceDataRecorder.Mode = full ? .all : .brief
+
     let mode: PerformanceDataRecorder.Mode
     if let steps = outputValues {
       mode = .custom(interval: Interval[steps])
+    } else if database {
+      mode = .database
     } else {
-      mode = .brief
+      mode = .csv
     }
+
     let log = PerformanceDataRecorder(name: nameResults, path: resultsPath, output: mode)
 
     BlackBoxModel.runModel(with: log)
 
     SolarPerformanceCalculator.result = log.log
 
-    let end = DispatchTime.now().uptimeNanoseconds
-    print("elapsed time:", (end - start) / 1_000_000, "ms")
     log.printResult()
   }
 
@@ -131,5 +138,3 @@ let log = PerformanceDataRecorder(
   customNaming: "Result_\(lastRun + Int(1))"
 )
 */
-
-SolarPerformanceCalculator.main()

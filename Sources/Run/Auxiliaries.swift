@@ -37,7 +37,7 @@ class Population {
   init(size: Int) {
     let layouts = generateRandomLayouts(size: size)
 
-    let recorder = PerformanceDataRecorder(noHistory: true)
+    let recorder = PerformanceDataRecorder()
 
     for layout in layouts {
       Design.layout = layout
@@ -54,7 +54,7 @@ class Population {
   init(layouts: [Layout], cache: [PerformanceLog]) {
     let oldLayouts = cache.map { $0.layout }
 
-    let recorder = PerformanceDataRecorder(noHistory: true)
+    let recorder = PerformanceDataRecorder()
 
     for layout in layouts {
       if let idx = oldLayouts.firstIndex(of: layout) {

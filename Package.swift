@@ -18,7 +18,7 @@ let package = Package(
 
   dependencies: [
     .package(url: "https://github.com/apple/swift-argument-parser.git",
-             .revision("8492882b030ad1c8e0bb4ca9d9ce06b07a8150b2")),
+             .revision("53555a04503c175eaffcf587e4b8c380a7c41a5c")),
     .package(url: "https://github.com/damuellen/SQLite.swift.git", .branch("master"))
     ],
   targets: [

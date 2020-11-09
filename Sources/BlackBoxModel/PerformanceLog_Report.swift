@@ -18,10 +18,6 @@ enum PerformanceReport {
     return dateFormatter
   }(DateFormatter())
 
-  static let number = { numberFormatter -> NumberFormatter in
-    return numberFormatter
-  }(NumberFormatter())
-
   static func create(
     energy: Energy, radiation: SolarRadiation
   )
@@ -91,20 +87,20 @@ enum PerformanceReport {
     d += "  --------------\n"
     d += "\n"
     d += "Gross electricty producution [MWh_el/a]:"
-      >< "\(PerformanceReport.number.string(from: NSNumber(value: energy.electric.gross))!)"
+      >< String(format: "%G", energy.electric.gross)
     //  Format((YTarS(0).EgrsST + YTarS(0).EgrsGasTurbine) * (1 - Simulation.parameter.UnSchedMain) * (1 - Simulation.parameter.TransLoss), )"
     d += "Parasitic consumption [MWh_el/a]:"
-      >< "\(PerformanceReport.number.string(from: NSNumber(value: energy.parasitics.shared))!)"
+      >< String(format: "%G", energy.parasitics.shared)
     // Format(YTarS(0).electricalParasitics * (1 - Simulation.parameter.UnSchedMain) * (1 - Simulation.parameter.TransLoss), )"
     d += "Net electricty producution [MWh_el/a]:"
-      >< "\(PerformanceReport.number.string(from: NSNumber(value: energy.electric.net))!)"
+      >< String(format: "%G", energy.electric.net)
     // Format(YTarS(0).Enet * (1 - Simulation.parameter.UnSchedMain) * (1 - Simulation.parameter.TransLoss), )"
     d += "Gas consumption [MWh_el/a]:\n"  // Format(YTarS(0).heatfuel, )"
     d += "Solar share [%]:\n"  // Format(SolShare * 100, )"
     d += "Annual direct solar insolation [kWh/m²a]:"  //  Format(YTarS(0).NDI,)"
-      >< "\(PerformanceReport.number.string(from: NSNumber(value: radiation.dni / 1_000))!)"
+      >< String(format: "%G", radiation.dni / 1_000)
     d += "Total heat from solar field [MWh_el/a]:"  // Format(YTarS(0).heatsol,)"
-      >< "\(PerformanceReport.number.string(from: NSNumber(value: energy.thermal.solar.megaWatt))!)"
+      >< String(format: "%G", energy.thermal.solar.megaWatt)
     d += "________________________________________________________________________________\n"
     d += "\n"
     d += "AVAILABILITIES\n"

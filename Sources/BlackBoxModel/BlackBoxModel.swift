@@ -16,7 +16,7 @@ import SolarPosition
 
 public enum BlackBoxModel {
 
-  public private(set) static var yearOfSimulation = 2005
+  public private(set) static var yearOfSimulation = 0
   /// The apparent solar position based on date, time, and location.
   public private(set) static var sun: SolarPosition?
   /// Solar radiation and meteorological elements for a 1-year period.
@@ -184,7 +184,7 @@ public enum BlackBoxModel {
       }
     }
 
-    backgroundQueue.sync {}  // wait for background queue
+    backgroundQueue.sync {}  // wait for background queue   
     recorder.complete()
   }
 
