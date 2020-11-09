@@ -26,9 +26,7 @@ let package = Package(
       dependencies: []),
     .target(
       name: "Utility",
-      dependencies: ["Libc"],
-      cxxSettings: [.define("_CRT_SECURE_NO_WARNINGS", .when(platforms: [.windows]))],
-      linkerSettings: [.linkedLibrary("Pathcch", .when(platforms: [.windows]))]),
+      dependencies: ["Libc"]),
     .target(
       name: "Config",
       dependencies: [],
@@ -56,10 +54,7 @@ let package = Package(
       dependencies: [
         "Config", "Meteo", "SolarPosition", "CIAPWSIF97", "Utility",
         .product(name: "SQLite", package: "SQLite.swift")],
-      swiftSettings: swiftSettings,
-      linkerSettings: [
-        .linkedLibrary("C:/Library/sqlite3/sqlite3.lib", .when(platforms: [.windows])),
-        .unsafeFlags(["-Xlinker", "/INCREMENTAL:NO", "-Xlinker", "/IGNORE:4217,4286"], .when(platforms: [.windows]))]),
+      swiftSettings: swiftSettings),
     .target(
       name: "Meteo",
       dependencies: ["DateGenerator", "SolarPosition"],
@@ -79,3 +74,24 @@ let package = Package(
     ],
   swiftLanguageVersions: [.v5]
 )
+
+
+// FIXME: conditionalise these flags since SwiftPM 5.3 and earlier will crash
+// for platforms they don't know about.
+#if os(Windows)
+if let Utility = package.targets.first(where: { $0.name == "Utility" }) {
+  Utility.cxxSettings = [
+    .define("_CRT_SECURE_NO_WARNINGS", .when(platforms: [.windows])),
+  ]
+  Utility.linkerSettings = [
+    .linkedLibrary("Pathcch", .when(platforms: [.windows])),
+  ]
+}
+
+if let BlackBoxModel = package.targets.first(where: { $0.name == "BlackBoxModel" }) {
+  BlackBoxModel.linkerSettings = [
+    .linkedLibrary("C:/Library/sqlite3/sqlite3.lib", .when(platforms: [.windows])),
+    .unsafeFlags(["-Xlinker", "/INCREMENTAL:NO", "-Xlinker", "/IGNORE:4217,4286"], .when(platforms: [.windows]))
+  ]
+}
+#endif
