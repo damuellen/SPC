@@ -80,18 +80,21 @@ let package = Package(
 // for platforms they don't know about.
 #if os(Windows)
 if let Utility = package.targets.first(where: { $0.name == "Utility" }) {
-  Utility.cxxSettings = [
-    .define("_CRT_SECURE_NO_WARNINGS", .when(platforms: [.windows])),
-  ]
-  Utility.linkerSettings = [
-    .linkedLibrary("Pathcch", .when(platforms: [.windows])),
-  ]
+  Utility.cxxSettings = [.define("_CRT_SECURE_NO_WARNINGS")]
+  Utility.linkerSettings = [.linkedLibrary("Pathcch")]
 }
 
 if let BlackBoxModel = package.targets.first(where: { $0.name == "BlackBoxModel" }) {
   BlackBoxModel.linkerSettings = [
-    .linkedLibrary("C:/Library/sqlite3/sqlite3.lib", .when(platforms: [.windows])),
-    .unsafeFlags(["-Xlinker", "/INCREMENTAL:NO", "-Xlinker", "/IGNORE:4217,4286"], .when(platforms: [.windows]))
+    .linkedLibrary("C:/Library/sqlite3/sqlite3.lib"),
+    .unsafeFlags(["-Xlinker", "/INCREMENTAL:NO", "-Xlinker", "/IGNORE:4217,4286"])
+  ]
+}
+
+if let Run = package.targets.first(where: { $0.name == "Run" }) {
+  Run.linkerSettings = [
+    .linkedLibrary("User32", .when(platforms: [.windows])),
+    .unsafeFlags(["-Xlinker", "/INCREMENTAL:NO", "-Xlinker", "/IGNORE:4217,4286"])
   ]
 }
 #endif

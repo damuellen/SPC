@@ -69,7 +69,8 @@ struct SolarPerformanceCalculator: ParsableCommand {
   var database: Bool = false
 
   func run() throws {
-    print(decorated("Solar Performance Calculator"), "")
+    let name = "Solar Performance Calculator"
+    print(decorated(name), "")
     // BlackBoxModel.loadConfigurations(atPath: configPath, format: .json)
     // BlackBoxModel.saveConfigurations(toPath: configPath)
     if let steps = stepsCalculation {
@@ -77,7 +78,7 @@ struct SolarPerformanceCalculator: ParsableCommand {
     } else {
       Simulation.time.steps = .every5minutes
     }
-    
+
     BlackBoxModel.configure(year: year)
 
     if let coords = location.coords {
@@ -89,7 +90,15 @@ struct SolarPerformanceCalculator: ParsableCommand {
       BlackBoxModel.configure(location: loc)
     }
 
-    BlackBoxModel.configure(meteoFilePath: meteofilePath)
+    do {
+      try BlackBoxModel.configure(meteoFilePath: meteofilePath)
+    } catch {
+#if os(Windows)
+      MessageBox(text: "Meteo file not found.", caption: name)
+#else
+      fatalError("Meteo file not found.")
+#endif
+    }
 
     let mode: PerformanceDataRecorder.Mode
     if let steps = outputValues {

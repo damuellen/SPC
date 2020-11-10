@@ -40,15 +40,12 @@ public enum BlackBoxModel {
     }
   }
 
-  public static func configure(meteoFilePath: String? = nil) {
+  public static func configure(meteoFilePath: String? = nil) throws {
     let path = meteoFilePath ?? FileManager.default.currentDirectoryPath
 
-    do {
-      let handler = try MeteoDataFileHandler(forReadingAtPath: path)
-      meteoData = try handler()
-    } catch {
-      fatalError("Meteo data is mandatory for calculation.")
-    }
+    let handler = try MeteoDataFileHandler(forReadingAtPath: path)
+    meteoData = try handler()
+
     yearOfSimulation = meteoData!.year ?? yearOfSimulation
     if let sun = sun, let coords = meteoData?.location.coordinates,
       coords == sun.location.coords
@@ -184,7 +181,7 @@ public enum BlackBoxModel {
       }
     }
 
-    backgroundQueue.sync {}  // wait for background queue   
+    backgroundQueue.sync {}  // wait for background queue
     recorder.complete()
   }
 
