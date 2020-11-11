@@ -1,28 +1,37 @@
 @echo off
+@call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" x64 %*
 
-SET SQLITE=C:\Library\sqlite3
+echo Set environment variables
+
+set SQLITE3=C:\Library\sqlite3
+
+set LIBSQLITE3=C:\Library\sqlite3\sqlite3.lib
 
 SET RUNTIME=C:\Library\Swift-development\bin
 
 SET ICU=C:\Library\icu-67\usr\bin
 
-@call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" x64 %*
+echo Build release mode
 
 swift build -c release
 
-MKDIR %LOCALAPPDATA%\SPC
+echo Strip debug info
 
-COPY %cd%\.build\x86_64-unknown-windows-msvc\release\SolarPerformanceCalc.exe %LOCALAPPDATA%\SPC\SPC.exe
+llvm-strip -S %cd%\.build\x86_64-unknown-windows-msvc\release\SolarPerformanceCalc.exe
 
-COPY %cd%\.build\x86_64-unknown-windows-msvc\release\SwiftToolsSupport.dll %LOCALAPPDATA%\SPC
+echo Create program folder
 
-COPY %SQLITE%\sqlite3.dll %LOCALAPPDATA%\SPC
+MKDIR %LOCALAPPDATA%\SPC 2>NUL
 
-COPY %RUNTIME%\*.dll %LOCALAPPDATA%\SPC
+echo Copy executable to program folder
 
-COPY %ICU%\*.dll %LOCALAPPDATA%\SPC
+COPY %cd%\.build\x86_64-unknown-windows-msvc\release\SolarPerformanceCalc.exe %LOCALAPPDATA%\SPC\SPC.exe >NUL
 
-SET PATH=%PATH%;%LOCALAPPDATA%\SPC
+echo Add path environment variable
+
+SET PATH=%PATH%;%ICU%;%RUNTIME%;%SQLITE3%;%LOCALAPPDATA%\SPC
+
+PAUSE
 
 CLS
 

@@ -79,22 +79,57 @@ let package = Package(
 // FIXME: conditionalise these flags since SwiftPM 5.3 and earlier will crash
 // for platforms they don't know about.
 #if os(Windows)
-if let Utility = package.targets.first(where: { $0.name == "Utility" }) {
-  Utility.cxxSettings = [.define("_CRT_SECURE_NO_WARNINGS")]
-  Utility.linkerSettings = [.linkedLibrary("Pathcch")]
+
+import CRT
+import WinSDK
+
+extension Array where Element == WCHAR {
+  init(from string: String) {
+    self = string.withCString(encodedAs: UTF16.self) { buffer in
+      Array<WCHAR>(unsafeUninitializedCapacity: string.utf16.count + 1) {
+        wcscpy_s($0.baseAddress, $0.count, buffer)
+        $1 = $0.count
+      }
+    }
+  }
+}
+extension String {
+  var wide: [WCHAR] {
+    return Array<WCHAR>(from: self)
+  }
+  init(wide: [WCHAR]) {
+    self = wide.withUnsafeBufferPointer {
+      String(decodingCString: $0.baseAddress!, as: UTF16.self)
+    }
+  }
+}
+
+func GetEnvironmentVariable(_ name: String)-> String? {
+  let dwLength: DWORD = GetEnvironmentVariableW(name.wide, nil, 0)
+  guard dwLength > 0 else { return nil }
+  let buffer = Array<WCHAR>(unsafeUninitializedCapacity: Int(dwLength)) {
+    let dwResult = GetEnvironmentVariableW(name.wide, $0.baseAddress, DWORD($0.count))
+    $1 = Int(dwResult)
+  }
+  return String(wide: buffer)
 }
 
 if let BlackBoxModel = package.targets.first(where: { $0.name == "BlackBoxModel" }) {
   BlackBoxModel.linkerSettings = [
-    .linkedLibrary("C:/Library/sqlite3/sqlite3.lib"),
+    .linkedLibrary(GetEnvironmentVariable("LIBSQLITE3")!),
     .unsafeFlags(["-Xlinker", "/INCREMENTAL:NO", "-Xlinker", "/IGNORE:4217,4286"])
   ]
 }
 
 if let Run = package.targets.first(where: { $0.name == "Run" }) {
   Run.linkerSettings = [
-    .linkedLibrary("User32", .when(platforms: [.windows])),
+    .linkedLibrary("User32"),
     .unsafeFlags(["-Xlinker", "/INCREMENTAL:NO", "-Xlinker", "/IGNORE:4217,4286"])
   ]
+}
+
+if let Utility = package.targets.first(where: { $0.name == "Utility" }) {
+  Utility.cxxSettings = [.define("_CRT_SECURE_NO_WARNINGS")]
+  Utility.linkerSettings = [.linkedLibrary("Pathcch")]
 }
 #endif

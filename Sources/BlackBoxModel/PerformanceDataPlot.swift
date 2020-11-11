@@ -59,7 +59,11 @@ public class PerformanceDataPlot {
     let inputPipe = Pipe()
     let inputFile = inputPipe.fileHandleForWriting
     let gnuplot = Process()
+#if os(Windows)
+    gnuplot.executableURL = .init(fileURLWithPath: "gnuplot.exe")
+#else
     gnuplot.executableURL = .init(fileURLWithPath: "/usr/bin/gnuplot")
+#endif
     gnuplot.arguments = ["-p", "-e", code]
     gnuplot.standardInput = inputPipe
     try gnuplot.run()
