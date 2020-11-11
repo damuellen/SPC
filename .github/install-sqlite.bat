@@ -13,4 +13,3 @@ call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliar
 
 echo [ Creating sqlite3.lib ]
 lib /machine:x64 /def:sqlite3.def /out:sqlite3.lib
-set LIBSQLITE3=C:\Library\sqlite3\sqlite3.lib
