@@ -10,6 +10,6 @@
 
 extension Storage.Salt {
   public var description: String {
-      return "massFlow: \(massFlow.calculated), min: \(massFlow.minimum), cold: \(massFlow.cold), hot: \(massFlow.hot), heat: \(heat.available) "
+      return "massFlow: \(massFlow.calculated), min: \(massFlow.minimum), cold: \(massFlow.cold), hot: \(massFlow.hot), heat: \(heat) "
   }
 }

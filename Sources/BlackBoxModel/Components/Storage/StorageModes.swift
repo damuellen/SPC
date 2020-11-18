@@ -20,12 +20,12 @@ extension Storage {
     heat: inout ThermalEnergy)
     -> (Double, Double)
   {
-    if storage.operationMode != mode {
+  /*  if storage.operationMode != mode {
       let oldMode = storage.operationMode
       debugPrint("""
         \(DateTime.current) Storage mode change \(oldMode) -> \(mode)
         """)
-    }
+    }*/
   
     storage.operationMode = mode
     
@@ -183,7 +183,7 @@ extension Storage {
         fittedTemperature = storage.temperatureTank.cold.kelvin
       }
     }
-    
+
     storage.outletTemperature(kelvin: fittedTemperature)
     
     var thermalPower = storage.massFlow.rate * storage.deltaHeat / 1_000

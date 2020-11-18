@@ -29,7 +29,7 @@ public struct Storage: Component, HeatCycle {
 
   var salt: Salt = Salt()
   
-  struct Salt { // salt side of storage
+  struct Salt: CustomStringConvertible { // salt side of storage
     
     var massFlow: MassFlows = .init()
     var heat: Heat = .init()
@@ -67,13 +67,8 @@ public struct Storage: Component, HeatCycle {
 
   static let initialState = Storage(
     operationMode: .noOperation,
-    dT_HTFsalt: (0, 0), temperatureTank: (566.0, 666.0),
-    antiFreezeTemperature: 550.0, heat: 0.0, charge: 0.0,
-    salt: Storage.Salt(),
-  //  storedHeat: 0.0, heatLossStorage: 0.0,
-    heatProductionLoad: 0.0,
-  //  dischargeLoad: 0.0,
-    saltMass: 0.0
+    temperature: (566.0, 666.0),
+    temperatureTanks: (566.0, 666.0)
   )
   
   public static var parameter: Parameter = ParameterDefaults.st
@@ -157,9 +152,7 @@ public struct Storage: Component, HeatCycle {
         .contains(solarField.operationMode)
       {
         powerBlock.temperature.inlet =
-          SolarField.parameter.HTF.mixingTemperature(
-            solarField, storage
-        )
+          SolarField.parameter.HTF.mixingTemperature(solarField, storage)
 
         powerBlock.massFlow = solarField.massFlow
         powerBlock.massFlow += storage.massFlow

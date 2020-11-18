@@ -260,22 +260,23 @@ extension Storage {
 extension Storage {
   init(operationMode: Storage.OperationMode,
        temperature: (inlet: Temperature, outlet: Temperature),
-       temperatureTanks: (cold: Temperature, hot: Temperature),
-       massFlow: MassFlow, minMassFlow: MassFlow, heatRelease: Double,
-       tempertureColdOut: Double,  massFlowSalt: Double,
-       heatLossStorage: Double, heatProductionLoad: Double)
-  {
+       temperatureTanks: (cold: Temperature, hot: Temperature)
+  ) {
     self.operationMode = operationMode
     self.temperatureTank = temperatureTanks
-    self.charge.ratio = heatRelease
-//    self.dischargeLoad = Ratio(0)
+    self.charge.ratio = 0
+//  self.dischargeLoad = Ratio(0)
     self.heat = 0
     
-    // self.tempertureColdOut = tempertureColdOut
-    self.salt.massFlow.minimum = minMassFlow
-   // self.heatLossStorage = heatLossStorage
-    self.heatProductionLoad.ratio = heatProductionLoad
+//  self.tempertureColdOut = tempertureColdOut
+    self.salt.massFlow.minimum.rate = 0//Storage.minMassFlow()
+//  self.heatLossStorage = heatLossStorage
+    self.heatProductionLoad.ratio = 0
     
+   //self.massFlow.rate = 0
+
+    self.heatProductionLoad = Ratio(0)
+
     let storage = Storage.parameter
     let solarField = SolarField.parameter
 
@@ -328,7 +329,7 @@ extension Storage {
       HeatExchanger.parameter.temperature.h2o.inlet.min = storage.startTemperature.cold
             
       if storage.temperatureCharge[1] == 0 {
-        /* status.tempertureOffset.hot = Temperature(celsius: storage.temperatureCharge[0])
+      /* status.tempertureOffset.hot = Temperature(celsius: storage.temperatureCharge[0])
          status.tempertureOffset.cold = Temperature(celsius: storage.temperatureCharge[0])
          storage.temperatureCharge.coefficients[0] = storage.designTemperature.hot.kelvin
          - storage.temperatureCharge.coefficients[0]
@@ -343,10 +344,9 @@ extension Storage {
   }
   
   static func tankTemperature(_ specificHeat: Double) -> Temperature {
-    let htf = Storage.parameter.HTF.properties
-    return Temperature((-htf.heatCapacity[0]
-      + (htf.heatCapacity[0] ** 2 - 4 * (htf.heatCapacity[1] * 0.5)
-        * (-350.5536 - specificHeat)) ** 0.5) / (2 * htf.heatCapacity[1] * 0.5))
+    let hcap = Storage.parameter.HTF.properties.heatCapacity
+    return Temperature((-hcap[0] + (hcap[0] ** 2 - 4 * (hcap[1] * 0.5)
+        * (-350.5536 - specificHeat)) ** 0.5) / (2 * hcap[1] * 0.5))
   }
   
   
@@ -400,26 +400,6 @@ extension Storage {
       )
       
       return MassFlow(minMassFlow / 1000)
-    }
-  }
-  
-  static func saltMass(_ storage: Storage) -> Double {
-    switch parameter.definedBy {
-    case .hours:
-      return Design.layout.storage
-        * Availability.current.value.storage.ratio
-        * (1 + parameter.dischargeToTurbine)
-        * HeatExchanger.parameter.sccHTFheat * 1_000 * 3_600
-        / storage.salt.heat.available
-    case .cap:
-      return Design.layout.storage_cap
-        * Availability.current.value.storage.ratio
-        * (1 + parameter.dischargeToTurbine) * 1_000 * 3_600
-        / storage.salt.heat.available
-    case .ton:
-      return Design.layout.storage_ton
-        * Availability.current.value.storage.ratio
-        * (1 + parameter.dischargeToTurbine) * 1_000
     }
   }
 }

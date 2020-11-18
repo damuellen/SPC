@@ -181,7 +181,7 @@ extension Storage.Parameter: TextConfigInitializable {
     dSRise = try line(196)
     minDischargeLoad = try Ratio(line(198))
     fixedDischargeLoad = try Ratio(line(200))
-    heatTracingTime = try [line(202), line(205),  try line(208)]
+    heatTracingTime = try [line(202), line(205), line(208)]
     heatTracingPower = try [line(203), line(206), line(209)]
  //   HTb_time = try line(205)
  //   HTb_pow = try line(206)
