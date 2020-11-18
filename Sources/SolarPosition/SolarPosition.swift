@@ -15,7 +15,7 @@ let calendar = { calendar -> NSCalendar in
 /// To access values in the table use a date as a subscript.
 public struct SolarPosition {
 
-  internal let precalculatedValues: [Date: OutputValues]
+  internal var precalculatedValues = [Date: OutputValues]()
 
   public struct InputValues {
     var year, month, day, hour, minute, second: Int
@@ -84,7 +84,7 @@ public struct SolarPosition {
     let sunHours = SolarPosition.sunHoursPeriod(
       location: location, year: year
     )
-    precalculatedValues = SolarPosition.calculateSunPositions(
+    precalculatedValues = calculateSunPositions(
       sunHours: sunHours, location: location
     )
   }
@@ -111,7 +111,7 @@ public struct SolarPosition {
         slope: 0, azm_rotation: 0, atmos_refract: 0.5667))
   }
 
-  private static func calculateSunPositions(
+  private func calculateSunPositions(
     sunHours: [DateInterval], location: Location
   ) -> [Date: OutputValues] {
 
@@ -124,10 +124,10 @@ public struct SolarPosition {
     let dates = sunHoursPeriod.flatMap {
       DateGenerator(range: $0, interval: SolarPosition.frequence)
     }
-
+    let offset = frequence.interval / 2
     for date in dates {
       result[date] = SolarPosition.compute(
-        date: date, location: location, with: SolarPosition.solpos
+        date: date + offset, location: location, with: SolarPosition.solpos
       )
     }
     return result

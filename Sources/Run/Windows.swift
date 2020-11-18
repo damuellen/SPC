@@ -19,4 +19,12 @@ func MessageBox(text: String, caption: String) {
   MessageBoxW(nil, text.LPCWSTR, caption.LPCWSTR, UINT(MB_OK))
 }
 
+func currentDirectoryPath() -> String {
+  let dwLength: DWORD = GetCurrentDirectoryW(0, nil)
+  var szDirectory: [WCHAR] = Array<WCHAR>(repeating: 0, count: Int(dwLength + 1))
+
+  GetCurrentDirectoryW(dwLength, &szDirectory)
+  return String(decodingCString: &szDirectory, as: UTF16.self)
+}
+
 #endif

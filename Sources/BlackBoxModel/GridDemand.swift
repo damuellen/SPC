@@ -14,13 +14,13 @@ import Foundation
 
 struct GridDemand: Codable {
 
-  static var current = withDefaults()
+  static var current = GridDemand()
 
   private var index: Int { return DateTime.indexMonth }
 
   private let data: [Ratio]
 
-  init(data: [Ratio]) {
+  init(_ data: [Ratio]) {
     self.data = data
   }
 
@@ -29,9 +29,7 @@ struct GridDemand: Codable {
     return self.data[index].ratio
   }
 
-  static func withDefaults() -> GridDemand {
-    return GridDemand(
-      data:
-        Array(repeatElement(Ratio(1), count: 12)))
+  private init() {
+    self = GridDemand(Array(repeatElement(Ratio(1), count: 12)))
   }
 }

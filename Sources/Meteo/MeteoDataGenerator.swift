@@ -28,7 +28,7 @@ public class MeteoDataGenerator: Sequence {
   public init(
     _ source: MeteoDataSource,
     frequence: DateGenerator.Interval,
-    method: Method = .gradient
+    method: Method = .linear
   ) {
     precondition(
       frequence.fraction <= source.hourFraction,
@@ -96,9 +96,9 @@ public class MeteoDataGenerator: Sequence {
       if index == lastIndex && step > lastStep { return nil }
 
       if steps == 1 { return data[index] }
-      // The first values of the year are interpolated with the last,
+      // The first values of the year are interpolated with it self,
       // otherwise always with the previous.
-      let prev = index > 0 ? data[index - 1] : data[data.endIndex - 1]
+      let prev = index > 0 ? data[index - 1] : data[0]
 
       let current = data[index]
 
@@ -106,9 +106,9 @@ public class MeteoDataGenerator: Sequence {
       case .linear:
         return MeteoData.lerp(start: prev, end: current, Float(step) * stride)
       case .gradient:
-        // The last values of the year are interpolated with the first,
+        // The last values of the year are interpolated with it self,
         // otherwise always with the next.
-        let next = index < data.endIndex - 1 ? data[index + 1] : data[0]
+        let next = index < data.endIndex - 1 ? data[index + 1] : data[index]
         return MeteoData.interpolation(
           prev: prev, current: current, next: next, progess: Float(step) * stride
         )
