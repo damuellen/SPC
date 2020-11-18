@@ -9,7 +9,6 @@
 //
 
 import Config
-import Foundation
 
 extension HeatExchanger {
   public struct Parameter: ComponentParameter, Equatable {

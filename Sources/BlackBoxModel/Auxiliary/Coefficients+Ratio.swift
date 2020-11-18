@@ -8,8 +8,6 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
-import Foundation
-
 public struct Polynomial: Codable, Equatable {
   let coefficients: [Double]
 

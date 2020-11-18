@@ -8,8 +8,6 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
-import Foundation
-
 protocol HeatCycle {
   var cycle: HeatTransfer { get set }
 }
@@ -29,7 +27,7 @@ extension HeatCycle {
     get { cycle.massFlow }
     set { cycle.massFlow = newValue }
   }
-
+  // NOTE: The property is currently not used.
   var averageTemperature: Temperature {
     return Temperature.average(temperature.inlet, temperature.outlet)
   }
@@ -41,11 +39,11 @@ extension HeatCycle {
   var deltaHeat: Heat {
     medium.deltaHeat(temperature.outlet, temperature.inlet)
   }
-
+  // NOTE: The function is currently not used.
   func massFlow(subtracted other: HeatCycle) -> MassFlow {
     massFlow - other.massFlow
   }
-
+  // NOTE: The function is currently not used.
   mutating func setMassFlow(rate: Double) {
     massFlow = MassFlow(rate)
   }
@@ -54,7 +52,7 @@ extension HeatCycle {
     temperature.inlet = medium.mixingTemperature(c1, c2)
     massFlow = c1.massFlow + c2.massFlow
   }
-
+  // NOTE: The function is currently not used.
   mutating func add(_ c1: HeatCycle) {
     temperature.inlet = medium.mixingTemperature(self, c1)
     massFlow += c1.massFlow
@@ -63,7 +61,7 @@ extension HeatCycle {
   mutating func outletTemperatureInlet() {
     temperature.outlet = temperature.inlet
   }
-
+  // NOTE: The function is currently not used.
   mutating func inletTemperatureOutlet() {
     temperature.inlet = temperature.outlet
   }
@@ -71,11 +69,11 @@ extension HeatCycle {
   mutating func setTemperature(inlet: Temperature) {
     temperature.inlet = inlet
   }
-
+  // NOTE: The function is currently not used.
   mutating func setTemperature(outlet: Temperature) {
     temperature.outlet = outlet
   }
-
+  // NOTE: The function is currently not used.
   mutating func inletTemperature(kelvin: Double) {
     temperature.inlet = Temperature(kelvin)
   }
@@ -83,7 +81,7 @@ extension HeatCycle {
   mutating func outletTemperature(kelvin: Double) {
     temperature.outlet = Temperature(kelvin)
   }
-
+  // NOTE: The function is currently not used.
   mutating func inletTemperature(_ other: HeatCycle) {
     temperature.inlet = other.temperature.inlet
   }

@@ -9,7 +9,6 @@
 //
 
 import Config
-import Foundation
 
 extension Storage {
   public enum Definition: String {

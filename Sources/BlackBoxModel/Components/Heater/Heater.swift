@@ -9,7 +9,6 @@
 //
 
 import DateGenerator
-import Foundation
 
 public struct Heater: Component, HeatCycle {
   /// Contains all data needed to simulate the operation of the heater

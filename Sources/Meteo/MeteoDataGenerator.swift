@@ -46,21 +46,20 @@ public class MeteoDataGenerator: Sequence {
     let end = self.dateInterval!.end
     let fraction = Int(1 / dataSource.hourFraction)
 
-    let calendar = NSCalendar(identifier: .gregorian)!
-    calendar.timeZone = TimeZone(secondsFromGMT: 0)!
+    let calendar = Calendar(identifier: .gregorian)
 
-    let startHour = calendar.ordinality(of: .hour, in: .year, for: start)
+    let startHour = calendar.ordinality(of: .hour, in: .year, for: start)!
     let startIndex = (startHour - 1) * fraction
 
-    let startMinute = calendar.ordinality(of: .minute, in: .hour, for: start)
+    let startMinute = calendar.ordinality(of: .minute, in: .hour, for: start)!
     firstStep += startMinute / (60 / frequence.rawValue) / fraction
 
-    let endHour = calendar.ordinality(of: .hour, in: .year, for: end)
+    let endHour = calendar.ordinality(of: .hour, in: .year, for: end)!
     let lastIndex = (endHour - 1) * fraction
 
     range = startIndex..<lastIndex
 
-    let endMinute = calendar.ordinality(of: .minute, in: .hour, for: end)
+    let endMinute = calendar.ordinality(of: .minute, in: .hour, for: end)!
     lastStep = endMinute / (60 / frequence.rawValue) / fraction
   }
 

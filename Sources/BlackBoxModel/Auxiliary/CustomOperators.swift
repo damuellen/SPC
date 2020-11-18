@@ -8,7 +8,7 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
-import Foundation
+import Libc
 import Utility
 
 precedencegroup ExponentiationPrecedence {

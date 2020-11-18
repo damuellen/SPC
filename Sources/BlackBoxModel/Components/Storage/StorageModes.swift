@@ -5,9 +5,6 @@
 //  Created by Daniel Müllenborn on 04.02.19.
 //
 
-import Foundation
-import DateGenerator
-
 extension Storage {
   /// Calculation of thermal power and parasitics
   static func perform(

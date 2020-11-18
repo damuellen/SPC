@@ -8,8 +8,6 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
-import Foundation
-
 protocol MeasurementsConvertible {
   static var columns: [(name: String, unit: String)] { get }
   var numericalForm: [Double] { get }

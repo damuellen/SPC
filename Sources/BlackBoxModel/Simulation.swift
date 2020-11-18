@@ -9,7 +9,6 @@
 //
 
 import Config
-import Foundation
 import Meteo
 
 public enum Simulation {

@@ -1,4 +1,3 @@
-import Foundation
 
 func bar() -> (Double, Double, Double, Double, Double, Double, Double) {
   let liveSteamMassflow: Double = 67.95

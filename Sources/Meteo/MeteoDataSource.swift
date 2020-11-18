@@ -9,7 +9,7 @@
 //
 
 import DateGenerator
-import Foundation
+import Libc
 import SolarPosition
 
 public class MeteoDataSource {

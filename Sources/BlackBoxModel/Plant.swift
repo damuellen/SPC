@@ -8,8 +8,6 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
-import Foundation
-
 /// A namespace for the main routines of the simulation.
 public struct Plant {
 

@@ -8,8 +8,6 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
-import Foundation
-
 public enum WasteHeatRecovery: Component {
   /// Contains all data needed to simulate the operation of the waste heat recovery
   public struct PerformanceData {

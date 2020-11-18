@@ -10,7 +10,6 @@
 
 import Config
 import DateGenerator
-import Foundation
 
 struct Availability: Codable {
 

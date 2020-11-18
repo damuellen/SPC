@@ -8,7 +8,8 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
-import Foundation
+import DateGenerator
+import Dispatch
 import Utility
 
 extension Optional {
@@ -63,13 +64,6 @@ extension Angle {
   public var toRadians: Double { return self * .pi / 180 }
   public var toDegrees: Double { return self * (180 / .pi) }
 }
-
-let calendar = { calendar -> Calendar in
-  var calendar = calendar
-  calendar.timeZone = TimeZone(secondsFromGMT: 0)!
-  calendar.locale = Locale(identifier: "en_US")
-  return calendar
-}(Calendar(identifier: .gregorian))
 
 extension String {
   static var lineBreak: String { return "\n" }

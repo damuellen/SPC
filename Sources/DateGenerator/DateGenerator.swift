@@ -1,6 +1,6 @@
 import Foundation
 
-let calendar = { calendar -> NSCalendar in
+public let calendar = { calendar -> NSCalendar in
   calendar.timeZone = TimeZone(secondsFromGMT: 0)!
   return calendar
 }(NSCalendar(identifier: .gregorian)!)
@@ -145,12 +145,6 @@ extension DateInterval {
 }
 
 extension TimeInterval {
-
-  var minutes: TimeInterval {
-    return self * 60.0
-  }
-
-  var hours: TimeInterval {
-    return self * 3600.0
-  }
+  var minutes: TimeInterval { self * 60.0 }
+  var hours: TimeInterval { self * 3600.0 }
 }

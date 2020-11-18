@@ -1,4 +1,3 @@
-import DateGenerator
 //
 //  Copyright 2017 Daniel Müllenborn
 //
@@ -8,20 +7,12 @@ import DateGenerator
 //
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
-import Foundation
+
+import struct Foundation.Date
 
 enum PerformanceReport {
 
-  static let date = { dateFormatter -> DateFormatter in
-    dateFormatter.calendar = calendar
-    dateFormatter.dateFormat = "MM-dd  HH:mm"
-    return dateFormatter
-  }(DateFormatter())
-
-  static func create(
-    energy: Energy, radiation: SolarRadiation
-  )
-    -> String
+  static func create(energy: Energy, radiation: SolarRadiation) -> String
   {
     let solarField = SolarField.parameter
     let heater = Heater.parameter
@@ -33,7 +24,7 @@ enum PerformanceReport {
 
     var d: String = "\n"
     d += "PERFORMANCE RUN\n"
-    d += "    Date: \(PerformanceReport.date.string(from: Date()))\n"
+    d += "    Date: \(Date())\n"
     d += "\n"
     d += "SOLAR FIELD\n"
     d += "    No of Loops:" >< "\(layout.solarField)"
@@ -160,13 +151,13 @@ enum PerformanceReport {
     d += "\n"
     d += "First Date of Operation [MM.dd  HH:mm]:                             "
     if let firstDateOfOperation = Simulation.time.firstDateOfOperation {
-      d += PerformanceReport.date.string(from: firstDateOfOperation) + .lineBreak
+      d += String(describing: firstDateOfOperation) + .lineBreak
     } else {
       d += "01.01  00:00\n"
     }
     d += "Last Date of Operation [MM.dd  HH:mm]:                              "
     if let lastDateOfOperation = Simulation.time.lastDateOfOperation {
-      d += PerformanceReport.date.string(from: lastDateOfOperation) + .lineBreak
+      d += String(describing: lastDateOfOperation) + .lineBreak
     } else {
       d += "12.31  23:59\n"
     }

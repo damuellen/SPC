@@ -4,13 +4,8 @@ public typealias FractionalTime = Double
 
 extension Date {
 
-  public func get(component: NSCalendar.Unit) -> Int {
-    return calendar.component(component, from: self)
-  }
-
   public func getComponents() -> DateComponents {
-    return calendar.components(
-      [.day, .month, .year, .weekday, .hour, .minute, .second], from: self)
+    calendar.components([.day, .month, .year, .weekday, .hour, .minute, .second], from: self)
   }
 
   public func set(time fractionalTime: FractionalTime) -> Date? {

@@ -9,7 +9,7 @@
 //
 
 import DateGenerator
-import Foundation
+import Libc
 import Meteo
 
 /// A temperature value in Kelvin.
@@ -39,6 +39,8 @@ public struct Temperature: CustomStringConvertible, Equatable {
 
   public init(_ kelvin: Double) {
     assert(kelvin.isFinite)
+    assert(kelvin.isNormal)
+    assert(kelvin.sign == .plus)
     self.kelvin = kelvin
   }
 
@@ -156,6 +158,6 @@ extension Temperature: Comparable {
   }
 
   public static func == (lhs: Temperature, rhs: Temperature) -> Bool {
-    return fdim(lhs.kelvin, rhs.kelvin) < 1e-4
+    return abs(lhs.kelvin - rhs.kelvin) < 1e-4
   }
 }

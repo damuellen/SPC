@@ -8,10 +8,10 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
-import Foundation
+import Libc
 
 /// A mass flow rate in kilogram per second.
-public struct MassFlow: CustomStringConvertible {
+public struct MassFlow: CustomStringConvertible, Equatable {
   
   var rate: Double
 

@@ -9,7 +9,6 @@
 //
 
 import Config
-import Foundation
 
 extension Simulation {
   public struct Parameter: Codable {

@@ -8,8 +8,6 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
-import Foundation
-
 public struct HeatExchanger: Component, HeatCycle {
   /// Contains all data needed to simulate the operation of the heat exchanger
   var operationMode: OperationMode

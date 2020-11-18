@@ -41,6 +41,8 @@ public struct PerformanceLog: CustomStringConvertible, Comparable {
 
   private let interval = Simulation.time.steps
 
+  private let calendar = Calendar(identifier: .gregorian)
+  
   init(
     energy: Energy,
     radiation: SolarRadiation,
