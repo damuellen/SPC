@@ -20,7 +20,12 @@ let start = DispatchTime.now().uptimeNanoseconds
 SolarPerformanceCalculator.main()
 
 let end = DispatchTime.now().uptimeNanoseconds
-print("elapsed time:", (end - start) / 1_000_000, "ms")
+let time = String((end - start) / 1_000_000) +  " ms"
+print("elapsed time:", time)
+
+#if os(Windows)
+  MessageBox(text: time, caption: "")
+#endif
 
 struct LocationInfo: ParsableArguments {
   @Option(name: [.customShort("z"), .long], help: "Time zone")
@@ -95,9 +100,8 @@ struct SolarPerformanceCalculator: ParsableCommand {
     } catch {
 #if os(Windows)
       MessageBox(text: "Meteo file not found.", caption: name)
-#else
-      fatalError("Meteo file not found.")
 #endif
+      fatalError("Meteo file not found.")
     }
 
     let mode: PerformanceDataRecorder.Mode
