@@ -50,32 +50,3 @@ extension PowerRange: Codable {
     try container.encode(max, forKey: .max)
   }
 }
-
-public struct TemperatureRange {
-  var range: ClosedRange<Double>
-  var cold: Double { return self.range.lowerBound }
-  var hot: Double {
-    get { return self.range.upperBound }
-    set { self.range = self.range.lowerBound...newValue }
-  }
-}
-
-extension TemperatureRange: Codable {
-  enum CodingKeys: String, CodingKey {
-    case cold
-    case hot
-  }
-
-  public init(from decoder: Decoder) throws {
-    let values = try decoder.container(keyedBy: CodingKeys.self)
-    let cold = try values.decode(Double.self, forKey: .cold)
-    let hot = try values.decode(Double.self, forKey: .hot)
-    range = cold...hot
-  }
-
-  public func encode(to encoder: Encoder) throws {
-    var container = encoder.container(keyedBy: CodingKeys.self)
-    try container.encode(cold, forKey: .cold)
-    try container.encode(hot, forKey: .hot)
-  }
-}

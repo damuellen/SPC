@@ -219,10 +219,10 @@ extension HeatExchanger.Parameter: Codable {
   }
 }
 
-public typealias Temperatures = HeatExchanger.Parameter.Temperatures
+public typealias HXTemps = HeatExchanger.Parameter.Temperatures
 
-extension HeatExchanger.Parameter.Temperatures: Equatable {
-  public static func == (lhs: Temperatures, rhs: Temperatures) -> Bool {
+extension HXTemps: Equatable {
+  public static func == (lhs: HXTemps, rhs: HXTemps) -> Bool {
     return lhs.range.inlet == rhs.range.inlet
       && lhs.range.outlet == rhs.range.outlet
       && lhs.htf.inlet.max == rhs.htf.inlet.max

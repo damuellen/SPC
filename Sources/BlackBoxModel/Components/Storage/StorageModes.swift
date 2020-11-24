@@ -303,7 +303,7 @@ extension Storage {
         gasTurbine: status.gasTurbine,
         heatExchanger: status.heatExchanger
       )*/
-      let ratio = (heatSolar + thermalPower) / (SteamTurbine.parameter.power.max / 1) //steamTurbine.efficiency)
+      let ratio = (heatSolar + abs(thermalPower)) / (SteamTurbine.parameter.power.max / 1) //steamTurbine.efficiency)
       steamTurbine.load = Ratio(ratio, cap: maxLoad)
       
       let mixTemp = htf.mixingTemperature(solarField, storage)

@@ -114,11 +114,11 @@ extension Storage {
       }
       
       // calculate design salt massflows:
-      status.salt.heat.cold = parameter.HTF.properties.specificHeat(
+      status.heatInSalt.cold = parameter.HTF.properties.specificHeat(
         parameter.designTemperature.cold
       )
       
-      status.salt.heat.hot = parameter.HTF.properties.specificHeat(
+      status.heatInSalt.hot = parameter.HTF.properties.specificHeat(
         parameter.designTemperature.hot
       )
       
@@ -137,9 +137,9 @@ extension Storage {
           * parameter.heatExchangerEfficiency // design charging power
         
         let massFlowDischarging = designDischarge
-          / status.salt.heat.available * Simulation.time.steps.fraction * 1_000
+          / status.heatInSalt.available * Simulation.time.steps.fraction * 1_000
         
-        let saltFlowRatio = status.salt.massFlow.calculated.rate
+        let saltFlowRatio = status.massFlows.need.rate
           / massFlowDischarging
         
         parasitics = ((1 - lowDc) * designAuxEX
@@ -157,9 +157,9 @@ extension Storage {
           * parameter.heatExchangerEfficiency
         
         let massFlowCharging = designCharge
-          / status.salt.heat.available * Simulation.time.steps.fraction * 1_000
+          / status.heatInSalt.available * Simulation.time.steps.fraction * 1_000
         
-        let saltFlowRatio = status.salt.massFlow.calculated.rate
+        let saltFlowRatio = status.massFlows.need.rate
           / massFlowCharging
         
         parasitics = ((1 - lowCh) * designAuxIN
@@ -177,11 +177,11 @@ extension Storage {
     
   static func defindedByTonnage(_ storage: inout Storage)
   {
-    storage.salt.heat.cold = parameter.HTF.properties.specificHeat(
+    storage.heatInSalt.cold = parameter.HTF.properties.specificHeat(
       parameter.designTemperature.cold
     )
     
-    storage.salt.heat.hot = parameter.HTF.properties.specificHeat(
+    storage.heatInSalt.hot = parameter.HTF.properties.specificHeat(
       parameter.designTemperature.hot
     )
     
@@ -189,7 +189,7 @@ extension Storage {
       - parameter.designTemperature.cold).kelvin
     
     storage.storedHeat = storage.charge.ratio
-      * Design.layout.storage_ton * storage.salt.heat.available
+      * Design.layout.storage_ton * storage.heatInSalt.available
       * designDeltaT / 3_600
   }
   
@@ -262,13 +262,14 @@ extension Storage {
        temperatureTanks: (cold: Temperature, hot: Temperature)
   ) {
     self.operationMode = operationMode
-    self.temperatureTank = temperatureTanks
+    self.temperatureTank =
+      .init(cold: temperatureTanks.cold, hot: temperatureTanks.hot)
     self.charge.ratio = 0
 //  self.dischargeLoad = Ratio(0)
     self.heat = 0
     
 //  self.tempertureColdOut = tempertureColdOut
-    self.salt.massFlow.minimum.rate = 0//Storage.minMassFlow()
+    self.massFlows.minimum.rate = 0//Storage.minMassFlow()
 //  self.heatLossStorage = heatLossStorage
     self.heatProductionLoad.ratio = 0
     
@@ -316,10 +317,10 @@ extension Storage {
     self.dT_HTFsalt.hot = 1.0
     
     if storage.stepSizeIteration == -99.99 {
-      salt.heat.cold = Storage.parameter.HTF.properties.specificHeat(
+      heatInSalt.cold = Storage.parameter.HTF.properties.specificHeat(
         storage.designTemperature.cold
       )
-      salt.heat.hot = Storage.parameter.HTF.properties.specificHeat(
+      heatInSalt.hot = Storage.parameter.HTF.properties.specificHeat(
         storage.designTemperature.hot
       )
       
@@ -355,18 +356,18 @@ extension Storage {
     case .hours:
       let minMassFlow = Design.layout.storage * parameter.dischargeToTurbine
         * HeatExchanger.parameter.sccHTFheat * 1_000 * 3_600
-        / storage.salt.heat.available
+        / storage.heatInSalt.available
       
       HeatExchanger.parameter.temperature.h2o.inlet.max = Temperature(
         parameter.startLoad.hot * Design.layout.storage
           * HeatExchanger.parameter.sccHTFheat * 1_000 * 3_600
-          / storage.salt.heat.available + minMassFlow
+          / storage.heatInSalt.available + minMassFlow
       ) // Factor 1.1
       
       HeatExchanger.parameter.temperature.h2o.inlet.min = Temperature(
         parameter.startLoad.cold * Design.layout.storage
           * HeatExchanger.parameter.sccHTFheat * 1_000 * 3_600
-          / storage.salt.heat.available + minMassFlow
+          / storage.heatInSalt.available + minMassFlow
       )
       
       return MassFlow(minMassFlow / 1000)
@@ -374,16 +375,16 @@ extension Storage {
     case .cap:
       let minMassFlow = Design.layout.storage_cap
         * parameter.dischargeToTurbine * 1_000 * 3_600
-        / storage.salt.heat.available
+        / storage.heatInSalt.available
       
       HeatExchanger.parameter.temperature.h2o.inlet.max = Temperature(
         parameter.startLoad.hot * Design.layout.storage_cap * 1_000 * 3_600
-          / storage.salt.heat.available + minMassFlow
+          / storage.heatInSalt.available + minMassFlow
       ) // Factor 1.1
       
       HeatExchanger.parameter.temperature.h2o.inlet.min = Temperature(
         parameter.startLoad.cold * Design.layout.storage_cap * 1_000 * 3_600
-          / storage.salt.heat.available + minMassFlow
+          / storage.heatInSalt.available + minMassFlow
       )
       
       return MassFlow(minMassFlow / 1000)

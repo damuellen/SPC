@@ -639,8 +639,7 @@ public struct Plant {
 
     let thermal = -storage.massFlow.rate * storage.deltaHeat / 1_000
 
-    let thermalPower = storage.salt.calculate(thermal, storage: storage)
-    heat.storage.megaWatt = thermalPower
+    heat.storage.megaWatt = storage.calculate(thermal)
 
     if storage.heat > 0 {  // Energy surplus
       if storage.charge.ratio < Storage.parameter.chargeTo,

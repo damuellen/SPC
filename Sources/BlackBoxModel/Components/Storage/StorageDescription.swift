@@ -8,8 +8,8 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
-extension Storage.Salt {
+extension Storage {
   public var description: String {
-      return "massFlow: \(massFlow.calculated), min: \(massFlow.minimum), cold: \(massFlow.cold), hot: \(massFlow.hot), heat: \(heat) "
+      "massFlow: \(massFlows.need), min: \(massFlows.minimum), cold: \(massFlows.cold), hot: \(massFlows.hot), heat: \(heatInSalt) "
   }
 }

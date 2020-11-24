@@ -2,7 +2,7 @@
 import PackageDescription
 
 let condition = BuildSettingCondition.when(configuration: .release)
-let cSettings = [CSetting.unsafeFlags(["-ffast-math", "-O3",  "-fomit-frame-pointer", "-march=core2", "-funroll-loops"])]
+let cSettings = [CSetting.unsafeFlags(["-ffast-math", "-O3",  "-fomit-frame-pointer", "-funroll-loops"])]
 var swiftSettings = [SwiftSetting.unsafeFlags(["-Ounchecked", "-enforce-exclusivity=unchecked", "-DRELEASE"], condition)]
 swiftSettings.append(.define("DEBUG", .when(configuration: .debug)))
 let package = Package(
@@ -64,13 +64,7 @@ let package = Package(
       dependencies: [
         "Config", "BlackBoxModel",
         .product(name: "ArgumentParser", package: "swift-argument-parser")],
-      swiftSettings: swiftSettings),
-    .testTarget(
-      name: "MeteoTests",
-      dependencies: ["DateGenerator", "SolarPosition", "Meteo"]),
-    .testTarget(
-      name: "BlackBoxModelTests",
-      dependencies: ["Config", "Meteo", "SolarPosition", "BlackBoxModel"]),
+      swiftSettings: swiftSettings)  
     ],
   swiftLanguageVersions: [.v5]
 )

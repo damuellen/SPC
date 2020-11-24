@@ -12,6 +12,11 @@ import DateGenerator
 import Libc
 import Meteo
 
+public struct Temperatures {
+  var cold: Temperature
+  var hot: Temperature
+}
+
 /// A temperature value in Kelvin.
 public struct Temperature: CustomStringConvertible, Equatable {
 

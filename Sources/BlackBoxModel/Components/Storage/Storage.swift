@@ -16,36 +16,31 @@ public struct Storage: Component, HeatCycle {
 
   var dT_HTFsalt: (cold: Double, hot: Double)
   
-  var temperatureTank: (cold: Temperature, hot: Temperature)
+  var temperatureTank: Temperatures
   
   var cycle: HeatTransfer = .init(name: Storage.parameter.name)
 
-  var antiFreezeTemperature: Double = 0.0
+  var antiFreezeTemperature: Double = 270.0
   
   var heat: Double = 0.0
   
   var charge: Ratio = 0.0
 
-  var salt: Salt = Salt()
+  var massFlows: MassFlows = .init(
+    need: .init(), minimum: .init(), cold: .init(), hot: .init()
+  )
   
-  struct Salt: CustomStringConvertible { // salt side of storage
-    
-    var massFlow: MassFlows = .init()
-    var heat: Heat = .init()
-    
-    struct MassFlows { // [kg/s]
-      var calculated: MassFlow = .zero
-      var minimum: MassFlow = .zero
-      var cold: MassFlow = .zero
-      var hot: MassFlow = .zero
-    }
-    
-    struct Heat { // [kJ/kg]
-      var cold: Double = 0
-      var hot: Double = 0
-      var available: Double {
-        return hot - cold
-      }
+  struct MassFlows { // [kg/s]
+    var need, minimum, cold, hot: MassFlow
+  }
+  
+  var heatInSalt: Heat = .init(cold: 0, hot: 0)
+  
+  struct Heat { // [kJ/kg]
+    var cold: Double
+    var hot: Double
+    var available: Double {
+      return hot - cold
     }
   }
 
@@ -57,7 +52,7 @@ public struct Storage: Component, HeatCycle {
 
  // var dischargeLoad: Ratio = 0.0
 
-  var saltMass: Double = 0.0
+  var massOfSalt: Double = 0.0
   
   public enum OperationMode  {
     case noOperation, discharge
