@@ -153,14 +153,12 @@ public enum BlackBoxModel {
       plant.calculate(&status, ambient: temperature)
 
       if Design.hasStorage {        
-        var salt = status.storage.salt
         // Calculate the operating state of the salt
-        salt.calculate(
+        status.storage.calculate(
           thermal: &plant.heat.storage.megaWatt,
-          storage: &status.storage, status.powerBlock)
-        salt.heatlosses(storage: &status.storage)
+          status.powerBlock)
+        status.storage.heatlosses()
 
-        status.storage.salt = salt
         if plant.heat.storage.megaWatt < 0 {
           if case .freezeProtection = status.storage.operationMode {
             // FIXME: powerBlock.temperature.outlet // = powerBlock.temperature.outlet
