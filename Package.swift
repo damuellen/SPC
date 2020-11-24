@@ -64,7 +64,13 @@ let package = Package(
       dependencies: [
         "Config", "BlackBoxModel",
         .product(name: "ArgumentParser", package: "swift-argument-parser")],
-      swiftSettings: swiftSettings)  
+      swiftSettings: swiftSettings)
+    .testTarget(		
+      name: "MeteoTests",		
+      dependencies: ["DateGenerator", "SolarPosition", "Meteo"]),		
+    .testTarget(		
+      name: "BlackBoxModelTests",		
+      dependencies: ["Config", "Meteo", "SolarPosition", "BlackBoxModel"]) 
     ],
   swiftLanguageVersions: [.v5]
 )
