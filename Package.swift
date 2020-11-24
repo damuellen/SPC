@@ -12,6 +12,7 @@ let package = Package(
   ],
   products: [
     .executable(name: "SolarPerformanceCalc", targets: ["Run"]),
+    .executable(name: "SolarFieldCalc", targets: ["SolarFieldCalc"]),
    // .library(name: "BlackBoxModel", type: .dynamic, targets: ["BlackBoxModel"]),
    // .library(name: "Utility", type: .dynamic, targets: ["Utility"])
     ],
@@ -55,6 +56,16 @@ let package = Package(
         "Config", "Meteo", "SolarPosition", "CIAPWSIF97", "Utility",
         .product(name: "SQLite", package: "SQLite.swift")],
       swiftSettings: swiftSettings),
+     .target(
+      name: "SolarFieldModel",
+      dependencies: ["Libc"],
+      swiftSettings: swiftSettings),
+    .target(
+      name: "SolarFieldCalc",
+      dependencies: [
+        "SolarFieldModel",
+        .product(name: "ArgumentParser", package: "swift-argument-parser")],
+      swiftSettings: swiftSettings),
     .target(
       name: "Meteo",
       dependencies: ["DateGenerator", "SolarPosition"],
@@ -65,12 +76,12 @@ let package = Package(
         "Config", "BlackBoxModel",
         .product(name: "ArgumentParser", package: "swift-argument-parser")],
       swiftSettings: swiftSettings),
-    .testTarget(		
-      name: "MeteoTests",		
-      dependencies: ["DateGenerator", "SolarPosition", "Meteo"]),		
-    .testTarget(		
-      name: "BlackBoxModelTests",		
-      dependencies: ["Config", "Meteo", "SolarPosition", "BlackBoxModel"]) 
+    .testTarget(
+      name: "MeteoTests",
+      dependencies: ["DateGenerator", "SolarPosition", "Meteo"]),
+    .testTarget(
+      name: "BlackBoxModelTests",
+      dependencies: ["Config", "Meteo", "SolarPosition", "BlackBoxModel"])
     ],
   swiftLanguageVersions: [.v5]
 )
@@ -89,6 +100,12 @@ if let BlackBoxModel = package.targets.first(where: { $0.name == "BlackBoxModel"
 if let Run = package.targets.first(where: { $0.name == "Run" }) {
   Run.linkerSettings = [
     .linkedLibrary("User32"),
+    .unsafeFlags(["-Xlinker", "/INCREMENTAL:NO", "-Xlinker", "/IGNORE:4217,4286"])
+  ]
+}
+
+if let SolarField = package.targets.first(where: { $0.name == "SolarFieldCalc" }) {
+  SolarField.linkerSettings = [
     .unsafeFlags(["-Xlinker", "/INCREMENTAL:NO", "-Xlinker", "/IGNORE:4217,4286"])
   ]
 }
