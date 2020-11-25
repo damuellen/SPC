@@ -11,7 +11,7 @@ let package = Package(
     .macOS(.v10_13), .iOS(.v12),
   ],
   products: [
-    .executable(name: "SolarPerformanceCalc", targets: ["Run"]),
+    .executable(name: "SolarPerformanceCalc", targets: ["SolarPerformanceCalc"]),
     .executable(name: "SolarFieldCalc", targets: ["SolarFieldCalc"]),
    // .library(name: "BlackBoxModel", type: .dynamic, targets: ["BlackBoxModel"]),
    // .library(name: "Utility", type: .dynamic, targets: ["Utility"])
@@ -71,7 +71,7 @@ let package = Package(
       dependencies: ["DateGenerator", "SolarPosition"],
       swiftSettings: swiftSettings),
     .target(
-      name: "Run",
+      name: "SolarPerformanceCalc",
       dependencies: [
         "Config", "BlackBoxModel",
         .product(name: "ArgumentParser", package: "swift-argument-parser")],

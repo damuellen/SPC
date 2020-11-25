@@ -2,9 +2,14 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "swift-build",
+            "label": "swift-build-sfc",
             "type": "shell",
-            "command": "swift build"
+            "command": "swift build --target SolarFieldCalc"
+        },
+        {
+            "label": "swift-build-spc",
+            "type": "shell",
+            "command": "swift build --target SolarPerformanceCalc"
         }
     ]
 }
