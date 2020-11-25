@@ -97,8 +97,8 @@ if let BlackBoxModel = package.targets.first(where: { $0.name == "BlackBoxModel"
   ]
 }
 
-if let Run = package.targets.first(where: { $0.name == "Run" }) {
-  Run.linkerSettings = [
+if let SolarPerformance = package.targets.first(where: { $0.name == "SolarPerformanceCalc" }) {
+  SolarPerformance.linkerSettings = [
     .linkedLibrary("User32"),
     .unsafeFlags(["-Xlinker", "/INCREMENTAL:NO", "-Xlinker", "/IGNORE:4217,4286"])
   ]
