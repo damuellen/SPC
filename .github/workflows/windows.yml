@@ -28,7 +28,7 @@ jobs:
         run: |
           echo "C:\Library\Swift-development\bin;C:\Library\icu-67\usr\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
           echo "C:\Library\Developer\Toolchains\unknown-Asserts-development.xctoolchain\usr\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-          
+
       - name: Install Supporting Files
         run: |
           Copy-Item "$env:SDKROOT\usr\share\ucrt.modulemap" -destination "$env:UniversalCRTSdkDir\Include\$env:UCRTVersion\ucrt\module.modulemap"
@@ -44,10 +44,14 @@ jobs:
         run: swift build -v -c release
 
       - name: Strip Debug Info
-        run: llvm-strip -S --keep-file-symbols .build\x86_64-unknown-windows-msvc\release\SolarPerformanceCalc.exe
-          
-      - name: "Upload build artifact" 
+        run: |
+          llvm-strip -S --keep-file-symbols .build\x86_64-unknown-windows-msvc\release\SolarPerformanceCalc.exe
+          llvm-strip -S --keep-file-symbols .build\x86_64-unknown-windows-msvc\release\SolarFieldCalc.exe
+
+      - name: "Upload build artifact"
         uses: actions/upload-artifact@v2
         with:
           name: SPC-win32-x64
-          path: .build\x86_64-unknown-windows-msvc\release\SolarPerformanceCalc.exe
+          path: |
+            .build\x86_64-unknown-windows-msvc\release\SolarPerformanceCalc.exe
+            .build\x86_64-unknown-windows-msvc\release\SolarFieldCalc.exe

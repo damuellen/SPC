@@ -27,4 +27,21 @@ func currentDirectoryPath() -> String {
   return String(decodingCString: &szDirectory, as: UTF16.self)
 }
 
+func FileDialog() -> String? {
+  var strFile = "".utf8CString
+
+  var ofn = OPENFILENAMEA()
+
+  strFile.withUnsafeMutableBufferPointer() {
+    ofn.lpstrFile = $0.baseAddress
+    ofn.lpstrFile[0] = 0
+  }
+
+  ofn.nFilterIndex = 1
+  ofn.nMaxFile = 240
+  ofn.Flags = DWORD(OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST)
+  ofn.lStructSize = UInt32(MemoryLayout<OPENFILENAMEA>.size)
+
+  return GetOpenFileNameA(&ofn) ? String(cString: ofn.lpstrFile) : nil
+}
 #endif

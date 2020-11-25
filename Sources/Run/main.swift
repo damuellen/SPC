@@ -95,13 +95,17 @@ struct SolarPerformanceCalculator: ParsableCommand {
       BlackBoxModel.configure(location: loc)
     }
 
-    do {
-      try BlackBoxModel.configure(meteoFilePath: meteofilePath)
-    } catch {
+    do { try BlackBoxModel.configure(meteoFilePath: meteofilePath) } catch {
 #if os(Windows)
-      MessageBox(text: "Meteo file not found.", caption: name)
+      MessageBox(text: (error as! MeteoDataFileError).description, caption: name)
+      guard let path = FileDialog() else { return }
+      do { try BlackBoxModel.configure(meteoFilePath: path) } catch {
+        MessageBox(text: (error as! MeteoDataFileError).description, caption: name)
+        return
+      }
+#else
+      fatalError((error as! MeteoDataFileError).description)
 #endif
-      fatalError("Meteo file not found.")
     }
 
     let mode: PerformanceDataRecorder.Mode

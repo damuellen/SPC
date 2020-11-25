@@ -17,7 +17,8 @@ swift build -c release
 
 echo Strip debug info
 
-llvm-strip -S %cd%\.build\x86_64-unknown-windows-msvc\release\SolarPerformanceCalc.exe
+llvm-strip -S --keep-file-symbols .build\x86_64-unknown-windows-msvc\release\SolarPerformanceCalc.exe
+llvm-strip -S --keep-file-symbols .build\x86_64-unknown-windows-msvc\release\SolarFieldCalc.exe
 
 echo Create program folder
 
@@ -26,6 +27,7 @@ MKDIR %LOCALAPPDATA%\SPC 2>NUL
 echo Copy executable to program folder
 
 COPY %cd%\.build\x86_64-unknown-windows-msvc\release\SolarPerformanceCalc.exe %LOCALAPPDATA%\SPC\SPC.exe >NUL
+COPY %cd%\.build\x86_64-unknown-windows-msvc\release\SolarFieldCalc.exe %LOCALAPPDATA%\SPC\SFC.exe >NUL
 
 echo Add path environment variable
 
