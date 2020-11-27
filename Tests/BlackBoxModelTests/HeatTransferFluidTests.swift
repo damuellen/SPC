@@ -26,21 +26,9 @@ class HeatTransferFluidTests: XCTestCase {
     XCTAssertEqual(temperature.kelvin, 779.22, accuracy: 0.01)
   }
 
-  func testsHydronic() {
-    var tf = HeatTransfer(name: "")
-
-    tf.massFlow = 500.0
-    tf.temperature.inlet = Temperature(celsius: 293.0)
-    tf.temperature.outlet = Temperature(celsius: 393.0)
-
-    tf.temperature.inlet = Temperature(celsius: 393.0)
-    tf.temperature.outlet = Temperature(celsius: 293.0)
-  }
-
   static var allTests: [(String, (HeatTransferFluidTests) -> () throws -> Void)] {
     return [
-      ("testsTherminol", testsTherminol),
-      ("testsHydronic", testsHydronic),
+      ("testsTherminol", testsTherminol)
     ]
   }
 }

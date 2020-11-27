@@ -14,12 +14,13 @@ class HCETests: XCTestCase {
 
     XCTAssertEqual(radiationLosses, 16.59, accuracy: 0.01, "radiationLosses")
     measure {
-      for t in 300...400 {
+      for t in 290...400 {
         let t1 = Temperature(celsius: Double(t))
         let radiationLosses =  HCE.radiationLosses(
           t1, t2, insolationAbsorber: collector.insolationAbsorber, ambient: amb
         )
-        XCTAssertGreaterThan(radiationLosses, 16.59)
+        let y = 8.557636418896E-08 * Double(t) ** 3.348545826644
+        XCTAssertEqual(radiationLosses, y, accuracy: 0.5)
       }
     }
   }

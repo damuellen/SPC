@@ -628,7 +628,6 @@ public struct Plant {
       steamTurbine: &steamTurbine,
       powerBlock: &powerBlock,
       heater: &heater,
-      demand: heat.demand.megaWatt,
       fuelAvailable: fuel,
       heat: &heat
     )
@@ -676,13 +675,13 @@ public struct Plant {
       var supply: Double
       var parasitics: Double
       if fuel > 0 {  // Fuel available, Storage for Pre-Heating
-
+        storage.operationMode = .preheat
         (supply, parasitics) = Storage.perform(
           storage: &storage,
           solarField: &solarField,
           steamTurbine: &steamTurbine,
           powerBlock: &powerBlock,
-          mode: .preheat, heat: &heat
+          heat: &heat
         )
 
         heater.inletTemperature(outlet: storage)
@@ -703,13 +702,13 @@ public struct Plant {
 
         heater.massFlow = storage.massFlow
       } else {  // No Fuel Available -> Discharge directly with reduced TB load
-
+        storage.operationMode = .discharge
         (supply, parasitics) = Storage.perform(
           storage: &storage,
           solarField: &solarField,
           steamTurbine: &steamTurbine,
           powerBlock: &powerBlock,
-          mode: .discharge, heat: &heat
+          heat: &heat
         )
 
         powerBlock.formJoint(solarField, storage)

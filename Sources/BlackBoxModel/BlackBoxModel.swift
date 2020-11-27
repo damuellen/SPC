@@ -76,7 +76,7 @@ public enum BlackBoxModel {
 
   /// - Parameter recorder: Creates the log and write results to file.
   /// - Attention: `configure()` must called before this.
-  public static func runModel(with recorder: PerformanceDataRecorder) {
+  public static func runModel(with recorder: PerformanceDataRecorder) -> PerformanceLog {
 
     guard let 🌞 = sun, let 🌤 = meteoData else {
       print("We need the sun.")
@@ -181,7 +181,7 @@ public enum BlackBoxModel {
     }
 
     backgroundQueue.sync {}  // wait for background queue
-    recorder.complete()
+    return recorder.finish()
   }
 
   private static func makeGenerators(dataSource: MeteoDataSource)

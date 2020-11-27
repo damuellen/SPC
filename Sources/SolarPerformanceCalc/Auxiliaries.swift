@@ -42,8 +42,7 @@ class Population {
     for layout in layouts {
       Design.layout = layout
       print(layout)
-      BlackBoxModel.runModel(with: recorder)
-      individuals.append(recorder.log!)
+      individuals.append(BlackBoxModel.runModel(with: recorder))
     }
   }
 
@@ -62,8 +61,7 @@ class Population {
       } else {
         SolarField.parameter.massFlow.max = MassFlow(2000)
         Design.layout = layout
-        BlackBoxModel.runModel(with: recorder)
-        individuals.append(recorder.log!)
+        individuals.append(BlackBoxModel.runModel(with: recorder))
       }
     }
   }

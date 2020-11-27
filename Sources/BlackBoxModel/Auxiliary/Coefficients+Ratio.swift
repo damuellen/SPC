@@ -36,7 +36,7 @@ public struct Polynomial: Codable, Equatable {
     evaluated(temperature.kelvin)
   }
 
-  func callAsFunction(_ value: Double) -> Double {
+  public func callAsFunction(_ value: Double) -> Double {
     evaluated(value)
   }
 

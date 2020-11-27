@@ -12,20 +12,10 @@ extension Storage {
     solarField: inout SolarField,
     steamTurbine: inout SteamTurbine,
     powerBlock: inout PowerBlock,
-    mode: Storage.OperationMode,
     nightHour: Double = 12.0,
     heat: inout ThermalEnergy)
     -> (Double, Double)
-  {
-  /*  if storage.operationMode != mode {
-      let oldMode = storage.operationMode
-      debugPrint("""
-        \(DateTime.current) Storage mode change \(oldMode) -> \(mode)
-        """)
-    }*/
-  
-    storage.operationMode = mode
-    
+  {      
     func outletTemperature(_ status: Storage) -> Temperature {
       var temp: Double
       if parameter.temperatureDischarge2[1] > 0 {
@@ -59,7 +49,7 @@ extension Storage {
      */
     
     let thermalPower, parasitics: Double
-    switch mode {
+    switch storage.operationMode {
     case .charging:
       thermalPower = storageCharging(
         storage: &storage,

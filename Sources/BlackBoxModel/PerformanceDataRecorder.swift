@@ -44,8 +44,6 @@ public final class PerformanceDataRecorder {
   private var iso8601_Interval: String = ""
   private var stringBuffer: String = ""
 
-  public var log: PerformanceLog?
-
   private var db: Connection? = nil
   /// Totals
   private var annualEnergy = Energy()
@@ -241,8 +239,8 @@ public final class PerformanceDataRecorder {
 #endif
   }
 
-  public func complete() {
-    log = PerformanceLog(
+  public func finish() -> PerformanceLog {
+    let log = PerformanceLog(
       energy: annualEnergy,
       radiation: annualRadiation,
       energyHistory: energyHistory,
@@ -258,9 +256,11 @@ public final class PerformanceDataRecorder {
       storeInDB()
     }
 
+    clearResults()
   #if DEBUG && !os(Windows)
     animation.clear()
   #endif
+    return log
   }
 
 #if DEBUG && !os(Windows)

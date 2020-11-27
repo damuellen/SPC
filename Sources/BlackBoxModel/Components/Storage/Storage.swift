@@ -9,9 +9,9 @@
 //
 
 import DateGenerator
-
+/// Contains all data needed to simulate the operation of the storage
 public struct Storage: Component, HeatCycle {
-  /// Contains all data needed to simulate the operation of the storage
+  
   var operationMode: OperationMode
 
   var dT_HTFsalt: (cold: Double, hot: Double)
@@ -73,7 +73,6 @@ public struct Storage: Component, HeatCycle {
     steamTurbine: inout SteamTurbine,
     powerBlock: inout PowerBlock,
     heater: inout Heater,
-    demand: Double,
     fuelAvailable: Double,
     heat: inout ThermalEnergy)
     -> EnergyTransfer<Storage>
@@ -82,20 +81,20 @@ public struct Storage: Component, HeatCycle {
     if storage.heat > 0 {
       var supply: Double
       var parasitics: Double
-      let mode: Storage.OperationMode
+
       if storage.charge.ratio < parameter.chargeTo,
         solarField.massFlow.rate >= powerBlock.massFlow.rate
       {
-        mode = .charging
+        storage.operationMode = .charging
       } else { // heat cannot be stored
-        mode = .noOperation
+        storage.operationMode = .noOperation
       }
       (supply, parasitics) = Storage.perform(
         storage: &storage,
         solarField: &solarField,
         steamTurbine: &steamTurbine,
         powerBlock: &powerBlock,
-        mode: mode, heat: &heat
+        heat: &heat
       )
       powerBlock.inletTemperature(outlet: solarField)
       return EnergyTransfer(heat: supply, electric: parasitics, fuel: 0)
@@ -120,7 +119,7 @@ public struct Storage: Component, HeatCycle {
     #warning("The implementation here differs from PCT")
     if peakTariff,// status.storage.operationMode = .freezeProtection,
       storage.charge.ratio > parameter.dischargeToTurbine,
-      storage.heat < 1 * parameter.heatdiff * demand
+      storage.heat < 1 * parameter.heatdiff * heat.demand.megaWatt
     { // added dicharge only after peak hours
       // previous discharge condition commented:
       // if storage.heatrel > parameter.dischargeToTurbine
@@ -133,13 +132,13 @@ public struct Storage: Component, HeatCycle {
       }
       var supply: Double
       var parasitics: Double
-
+      storage.operationMode = .discharge
       (supply, parasitics) = Storage.perform(
         storage: &storage,
         solarField: &solarField,
         steamTurbine: &steamTurbine,
         powerBlock: &powerBlock,
-        mode: .discharge, heat: &heat
+        heat: &heat
       )
       
       if [.operating, .freezeProtection]
@@ -178,7 +177,7 @@ public struct Storage: Component, HeatCycle {
       var parasitics: Double
 
       var fuel = 0.0
-      let mode: Storage.OperationMode
+
       if OperationRestriction.fuelStrategy.isPredefined == false {
 
         let energy = heater(
@@ -186,7 +185,8 @@ public struct Storage: Component, HeatCycle {
           temperatureInlet: powerBlock.temperature.inlet,
           massFlowStorage: storage.massFlow,
           modeStorage: storage.operationMode, 
-          demand: demand, fuelAvailable: fuelAvailable, heat: heat
+          demand: heat.demand.megaWatt,
+          fuelAvailable: fuelAvailable, heat: heat
         )
         fuel = energy.fuel
         heat.heater.megaWatt = energy.heat
@@ -194,13 +194,13 @@ public struct Storage: Component, HeatCycle {
         
         powerBlock.massFlow = heater.massFlow
 
-        mode = .freezeProtection
+        storage.operationMode = .freezeProtection
       } else if case .freezeProtection = solarField.operationMode,
         storage.charge > -0.35 && parameter.FP == 0
       {
-        mode = .freezeProtection
+        storage.operationMode = .freezeProtection
       } else {
-        mode = .noOperation
+        storage.operationMode = .noOperation
       }
       
       (supply, parasitics) = Storage.perform(
@@ -208,7 +208,7 @@ public struct Storage: Component, HeatCycle {
         solarField: &solarField,
         steamTurbine: &steamTurbine,
         powerBlock: &powerBlock,
-        mode: mode, heat: &heat
+        heat: &heat
       )
       
       powerBlock.inletTemperature(outlet: storage)

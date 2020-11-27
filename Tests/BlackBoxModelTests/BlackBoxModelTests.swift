@@ -10,7 +10,7 @@ class BlackBoxModelTests: XCTestCase {
     df.timeZone = TimeZone(secondsFromGMT: 0)
     df.dateFormat = "dd.MM.yyyy"
     Simulation.time.firstDateOfOperation = df.date(from: "02.07.2005")!
-    Simulation.time.lastDateOfOperation = df.date(from: "03.07.2005")!
+    Simulation.time.lastDateOfOperation = df.date(from: "04.07.2005")!
     var location = Location(longitude: 47.73, latitude: 29, elevation: 0)
     location.timezone = 2
 
@@ -19,18 +19,16 @@ class BlackBoxModelTests: XCTestCase {
 
     let log = PerformanceDataRecorder()
 
-    BlackBoxModel.runModel(with: log)
-
-    let result = log.log!
-
-    XCTAssertEqual(result.electric.net, 250.16, accuracy: 0.1)
-    XCTAssertEqual(result.electric.consum, 27.7, accuracy: 0.1)
-    XCTAssertEqual(result.electric.parasitics, 83.55, accuracy: 0.1)
-    XCTAssertEqual(result.electric.steamTurbineGross, 305.9, accuracy: 0.1)
-    XCTAssertEqual(result.thermal.solar.megaWatt, 2314.4, accuracy: 0.1)
-   // XCTAssertEqual(result.thermal.startUp.megaWatt, 242.7, accuracy: 0.1)
-    XCTAssertEqual(result.thermal.production.megaWatt, 1816.6, accuracy: 0.1)
-    XCTAssertEqual(result.thermal.heatExchanger.megaWatt, 2079.4, accuracy: 0.1)
+    let result = BlackBoxModel.runModel(with: log)
+    let tol = 0.2
+    XCTAssertEqual(result.electric.net, 533.2, accuracy: tol)
+    XCTAssertEqual(result.electric.consum, 48.2, accuracy: tol)
+    XCTAssertEqual(result.electric.parasitics, 167.1, accuracy: tol)
+    XCTAssertEqual(result.electric.steamTurbineGross, 652.1, accuracy: tol)
+    XCTAssertEqual(result.thermal.solar.megaWatt, 4632.5, accuracy: tol)
+   // XCTAssertEqual(result.thermal.startUp.megaWatt, 242.7, accuracy: tol)
+    XCTAssertEqual(result.thermal.production.megaWatt, 3871.8, accuracy: tol)
+    XCTAssertEqual(result.thermal.heatExchanger.megaWatt, 4164.4, accuracy: tol)
   }
   
   func testsWinter() {
@@ -38,7 +36,7 @@ class BlackBoxModelTests: XCTestCase {
     df.timeZone = TimeZone(secondsFromGMT: 0)
     df.dateFormat = "dd.MM.yyyy"
     Simulation.time.firstDateOfOperation = df.date(from: "02.01.2005")!
-    Simulation.time.lastDateOfOperation = df.date(from: "03.01.2005")!
+    Simulation.time.lastDateOfOperation = df.date(from: "04.01.2005")!
     var location = Location(longitude: 47.73, latitude: 29, elevation: 0)
     location.timezone = 2
     BlackBoxModel.configure(year: 2005)
@@ -46,19 +44,16 @@ class BlackBoxModelTests: XCTestCase {
 
     let log = PerformanceDataRecorder()
 
-    BlackBoxModel.runModel(with: log)
-
-    let result = log.log!
-    
-
-    XCTAssertEqual(result.electric.net, 111.02, accuracy: 0.1)
-    XCTAssertEqual(result.electric.consum, 33.5, accuracy: 0.1)
-    XCTAssertEqual(result.electric.parasitics, 56.26, accuracy: 0.1)
-    XCTAssertEqual(result.electric.steamTurbineGross, 133.7, accuracy: 0.1)
-    XCTAssertEqual(result.thermal.solar.megaWatt, 1185.2, accuracy: 0.1)
-    //XCTAssertEqual(result.thermal.startUp.megaWatt, 243.5, accuracy: 0.1)
-    XCTAssertEqual(result.thermal.production.megaWatt, 793.8, accuracy: 0.1)
-    XCTAssertEqual(result.thermal.heatExchanger.megaWatt, 1063.0, accuracy: 0.1)
+    let result = BlackBoxModel.runModel(with: log)
+    let tol = 0.2
+    XCTAssertEqual(result.electric.net, 258.7, accuracy: tol)
+    XCTAssertEqual(result.electric.consum, 59.7, accuracy: tol)
+    XCTAssertEqual(result.electric.parasitics, 112.6, accuracy: tol)
+    XCTAssertEqual(result.electric.steamTurbineGross, 311.7, accuracy: tol)
+    XCTAssertEqual(result.thermal.solar.megaWatt, 2377.2, accuracy: tol)
+    //XCTAssertEqual(result.thermal.startUp.megaWatt, 243.5, accuracy: tol)
+    XCTAssertEqual(result.thermal.production.megaWatt, 1850.5, accuracy: tol)
+    XCTAssertEqual(result.thermal.heatExchanger.megaWatt, 2135.4, accuracy: tol)
   }
 
   static var allTests: [(String, (BlackBoxModelTests) -> () throws -> Void)] {

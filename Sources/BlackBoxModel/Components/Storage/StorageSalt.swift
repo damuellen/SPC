@@ -59,9 +59,7 @@ extension Storage: MeasurementsConvertible {
     if (saltMassFlow - massFlows.need)
       < massFlows.minimum
     {
-      massFlows.need =
-        massFlows.need
-        - (-massFlows.minimum + massFlows.cold)
+      massFlows.need -= (-massFlows.minimum + massFlows.cold)
 
       if massFlows.need.rate < 10 {
         massFlows.need.rate = 0
@@ -75,7 +73,7 @@ extension Storage: MeasurementsConvertible {
     return thermal
   }
 
-  mutating func indirectCharging(thermal: Double) {
+  private mutating func indirectCharging(thermal: Double) {
     calculateMassFlow(
       cold: temperatureTank.cold,
       hot: temperature.inlet - dT_HTFsalt.hot,
@@ -123,7 +121,7 @@ extension Storage: MeasurementsConvertible {
 
   }
 
-  mutating func fossilCharging(thermal: Double) {
+  private mutating func fossilCharging(thermal: Double) {
     let designT = Storage.parameter.designTemperature
     calculateMassFlow(
       cold: temperatureTank.cold,
@@ -161,8 +159,7 @@ extension Storage: MeasurementsConvertible {
     // massFlow.minimum = Storage.minMassFlow(storage)
     // added to avoid negative or too low mass and therefore no heat losses
     if massFlows.hot < massFlows.minimum {
-      massFlows.need -=
-        massFlows.minimum - massFlows.hot
+      massFlows.need -= massFlows.minimum - massFlows.hot
 
       if massFlows.need.rate < 10 {
         massFlows.need.rate = 0

@@ -348,8 +348,7 @@ extension Storage {
     return Temperature((-hcap[0] + (hcap[0] ** 2 - 4 * (hcap[1] * 0.5)
         * (-350.5536 - specificHeat)) ** 0.5) / (2 * hcap[1] * 0.5))
   }
-  
-  
+    
   static func minMassFlow(_ storage: Storage) -> MassFlow
   {
     switch Storage.parameter.definedBy {

@@ -237,14 +237,10 @@ public struct SolarField: Component, HeatCycle {
       oldTemp = newTemp
 
       heatLossHeader =
-        heatLoss[0]
-        * (heatLoss[1]
-          + heatLoss[2] * (newTemp - ambient).kelvin)  // [MWt]
+        heatLoss[0] * (heatLoss[1] + heatLoss[2] * (newTemp - ambient).kelvin) // [MWt]
 
       if header.massFlow.rate > 0 {
-        let deltaHeatPerKg =
-          heatLossHeader * 1_000
-          / header.massFlow.rate  // [kJ/kg]
+        let deltaHeatPerKg = heatLossHeader * 1_000 / header.massFlow.rate // [kJ/kg]
         newTemp = htf.temperature(-deltaHeatPerKg, header.temperature.outlet)
       } else {
         let averageTemperature = Temperature.average(

@@ -119,11 +119,10 @@ struct SolarPerformanceCalculator: ParsableCommand {
 
     let log = PerformanceDataRecorder(name: nameResults, path: resultsPath, output: mode)
 
-    BlackBoxModel.runModel(with: log)
-
-    SolarPerformanceCalculator.result = log.log
+    SolarPerformanceCalculator.result = BlackBoxModel.runModel(with: log)
 
     log.printResult()
+    
   }
 
   static var configuration = CommandConfiguration(
