@@ -1,5 +1,7 @@
 # Performance Model of Parabolic Trough Solar Power Plants
 
+  ![CI – Windows](https://github.com/damuellen/SPC/workflows/CI%20%E2%80%93%20Windows/badge.svg)   ![CI – Ubuntu](https://github.com/damuellen/SPC/workflows/CI%20%E2%80%93%20Ubuntu/badge.svg)
+
 ## Overview
 
 The performance model, SPM, is a computer program that simulates
@@ -97,15 +99,3 @@ together with their mode of operation. As DNI value varies, so do also
 load of SFI and level of operation of each electric consumer. This effect
 on auxiliary consumption of each electric consumer will then be
 considered by the SPM to calculate an auxiliary consumption.
-
-## Credits
-
-Developed by Daniel Müllenborn (TSK Flagsol Engineering, 2017)
-
-Based on a former version written in Visual Basic by
-Ulf Herrmann (PILKIGTON Solar International GmbH, 2000),
-Daniel Benitz, Yibekal Gedle, Markus Hoyer (Flagsol GmbH, 2008-2013)
-
-## License
-
-This program is licensed under the Apache 2.0 License.
