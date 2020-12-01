@@ -31,7 +31,7 @@ public struct Branch {
   /// The branch diameter is determined automatically, so that the design
   /// flow velocity is not exceeded at the specified mass flow.
   init(temperature: Double, massFlow: Double,
-       SCH: NominalPipeSizes = .sch40, header: Headers) {
+       SCH: NominalPipeSizes = .sch40, header: Piping) {
     self.schedule = SCH
     self.length = 0.0
     self.temperature = temperature

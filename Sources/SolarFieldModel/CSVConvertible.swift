@@ -11,7 +11,7 @@ protocol CommaSeparatedValuesConvertible {
 }
 
 extension CommaSeparatedValuesConvertible {
-  static var separator: String { "," }
+  static var separator: String { "\t" }
 }
 
 extension Branch: CommaSeparatedValuesConvertible {

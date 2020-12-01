@@ -6,12 +6,7 @@
 //  Copyright © 2015 Daniel Muellenborn. All rights reserved.
 //
 
-public protocol System {
-  var name: String { get }
-  var measurements: [String : String] { get }
-}
-
-protocol Headers: class {
+protocol Piping: class, MeasurementsConvertible {
   var name: String { get }
   var branches: [Branch] { get }
   var tail: (cold: Branch, hot: Branch)! { get }
@@ -25,10 +20,9 @@ protocol Headers: class {
   var pressureDrop: Double { get }
   var totalHeadLoss: Double { get }
   var totalPressureDrop: Double { get }
-  var measurements: [String : String] { get }
 }
 
-extension Headers {
+extension Piping {
   var pressureDrop: Double { branches.pressureDrop }
   var headLoss: Double { branches.headLoss }
   var heatLoss: Double { branches.heatLoss }

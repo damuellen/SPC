@@ -6,11 +6,11 @@
 //  Copyright © 2015 Daniel Muellenborn. All rights reserved.
 //
 
-public class Connector: Headers, System {
+public class Connector: Piping {
 
   public var name: String = "Header"
 
-  unowned var start: Headers
+  unowned var start: Piping
 
   public var distance: Double = 0.0 {
     didSet { SolarField.shared.recalculation() }

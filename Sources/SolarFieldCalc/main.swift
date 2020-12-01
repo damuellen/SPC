@@ -1,84 +1,63 @@
 import ArgumentParser
-import Foundation
 import SolarFieldModel
+import Foundation
 
-SolarField.createLayout(loops: 100)
-SolarField.designMassFlow = 500
+#if os(Windows)
+system("chcp 65001")
+#endif
 
-let table1 = TextTable.overview()
-let table2 = TextTable.bom()
-let table3 = SolarField.branchTable
+SolarFieldCalculator.main()
 
-let url1 = URL(fileURLWithPath: "Report.txt")
-let url2 = URL(fileURLWithPath: "BOM.txt")
-let url3 = URL(fileURLWithPath: "Branches.csv")
+#if os(Windows)
+system("pause")
+#endif
 
-try! table1.write(to: url1, atomically: false, encoding: .utf8)
-try! table2.write(to: url2, atomically: false, encoding: .utf8)
-try! table3.write(to: url3, atomically: false, encoding: .utf8)
+struct SolarFieldCalculator: ParsableCommand {
 
-print(TextTable.overview(style: Style.fancy))
-table3.clipboard()
-try! ModelModel().writeToFile(url: URL(fileURLWithPath: "Model.json"))
+  @Option(name: .shortAndLong, help: "Total number of loops")
+  var loops: Int? // "SolarFieldModel.json"
 
-extension TextTable {
-  public static func overview(style: TextTableStyle.Type = Style.fancy) -> String {
-    var output = ""
-    let numberFormatter = NumberFormatter()
-    numberFormatter.numberStyle = .decimal
-    numberFormatter.formatWidth = 8
+  @Option(name: .shortAndLong, help: "Total mass flow rate")
+  var massFlow: Double? // "SolarFieldModel.json"
 
-    let makeTable: ([(String, String)]) -> String = {
-      let columns: [Column] = $0.map { (key, measurement) in
-        return Column(title: key, value: measurement)
-      }
-      return TextTable([columns]).string(style: style)
+  @Option(name: .shortAndLong, help: "Layout (h/i)")
+  var layout: String? // "SolarFieldModel.json"
+
+  @Option(name: .shortAndLong, help: "Input file name")
+  var input: String? // "SolarFieldModel.json"
+
+  @Option(name: .shortAndLong, help: "Output file name.")
+  var output: String? // "SolarFieldModel.json"
+
+  func run() throws {
+
+    if let loops = loops {
+      SolarField.createLayout(loops: loops)
+    }
+    if let massFlow = massFlow {
+      SolarField.designMassFlow = massFlow
+    }
+    if let input = input {
+      try SolarFieldModel.readFromFile(url: URL(fileURLWithPath: input))?.apply()
     }
 
-    output += "SolarField\n"  + makeTable(SolarField.shared.measurements.sorted) + "\n"
-    output += "Loop\n"        + makeTable(SolarField.shared.loop.measurements.sorted) + "\n"
-    output += "PowerBlock\n"  + makeTable(SolarField.shared.powerBlock.measurements.sorted) + "\n"
-    output += "Expansion\n"   + makeTable(SolarField.shared.expansionVolume.measurements.sorted) + "\n"
+    let table1 = TextTable.overview()
+    let table2 = TextTable.bom()
+    let table3 = SolarField.branchTable
 
-    let makeOverviewTable: ([System]) -> String = { systems in
-      var measurements: [[Column]] = []
-      for system in systems {
-        var columns = [Column(title: "Name", value: system.name + " ")]
-        columns += system.measurements.sorted.map { (key, measurement) in
-          return Column(title: key, value: measurement.description, align: .right)
-        }
-        measurements.append(columns)
-      }
-      return TextTable(measurements).string(style: style)
+    let url1 = URL(fileURLWithPath: "Report.txt")
+    let url2 = URL(fileURLWithPath: "BOM.txt")
+    let url3 = URL(fileURLWithPath: "Branches.csv")
+
+    try table1.write(to: url1, atomically: false, encoding: .utf8)
+    try table2.write(to: url2, atomically: false, encoding: .utf8)
+    try table3.write(to: url3, atomically: false, encoding: .utf8)
+
+    print(TextTable.overview(style: Style.fancy))
+
+    table3.clipboard()
+    if let output = output {
+      try SolarFieldModel().writeToFile(url: URL(fileURLWithPath: output))
     }
-
-    output += "SubFields\n"   + makeOverviewTable(SolarField.shared.subfields) + "\n"
-    output += "Connections\n" + makeOverviewTable(SolarField.shared.connectors) + "\n"
-
-    return output
-  }
-
-  public static func bom(style: TextTableStyle.Type = Style.fancyCompact) -> String {
-    var output = ""
-    var billOfMaterials: [[Column]] = []
-
-    BillOfMaterials.tubesWeightAndLength.sorted.forEach { (key, value) in
-      billOfMaterials.append([Column(title: "Description", value: key, width: 55),
-                  Column(title: "Weight", value: String(format:"%.2f ", value.0), width: 9, align: .right),
-                  Column(title: "Quantity", value: String(format:"%.1f ", value.1), width: 9, align: .right)])
-    }
-
-    let tablePipeBOM = TextTable(billOfMaterials).string(style: style)
-    billOfMaterials.removeAll()
-
-    BillOfMaterials.fittingsWeightAndQuantity.sorted.forEach { (key, value) in
-      billOfMaterials.append([Column(title: "Description", value: key, width: 55),
-                  Column(title: "Weight", value: String(format:"%.2f ", value.0), width: 9, align: .right),
-                  Column(title: "Quantity", value: String(Int(value.1)), width: 9, align: .right)])
-    }
-
-    let tableFittingsBOM = TextTable(billOfMaterials).string(style: style)
-    Swift.print(tablePipeBOM, tableFittingsBOM, separator: "\n", to: &output)
-    return output
   }
 }

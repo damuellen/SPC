@@ -6,7 +6,7 @@
 //  Copyright © 2015 Daniel Muellenborn. All rights reserved.
 //
 
-public class PowerBlock : Headers {
+public class PowerBlock: Piping {
 
   public var name: String = "PowerBlock Header"
 

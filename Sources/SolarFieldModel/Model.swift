@@ -8,16 +8,59 @@
 
 import Foundation
 
-extension Connector {
+extension SolarField {
+  public struct Model: Codable {
 
-  convenience init(_ connector: Model.Connector) {
+    enum Absorber: String, Codable {
+      case ptr70, uvac90, custom
+    }
+    var massFlow: Double
+    var designStreamVelocity: Double
+    var rowDistance: Double
+    var inletTemperature: Double
+    var outletTemperature: Double
+    var ambientTemperature: Double
+    var fluid: Fluid = .terminol
+    var absorberTyp: Absorber = .ptr70
+    // var absorberDiameter: Double?
+
+    public init(_ solarField: SolarField = SolarField.shared) {
+      self.massFlow = solarField.massFlow
+      self.designStreamVelocity = solarField.designStreamVelocity
+      self.rowDistance = solarField.rowDistance
+      self.inletTemperature = solarField.designTemperature.inlet
+      self.outletTemperature = solarField.designTemperature.outlet
+      self.ambientTemperature = solarField.ambientTemperature
+      self.fluid = solarField.fluid
+    }
+  }
+
+  static func assign(_ model: Model) {
+    SolarField.shared.massFlow = model.massFlow
+    SolarField.shared.designStreamVelocity = model.designStreamVelocity
+    SolarField.shared.rowDistance = model.rowDistance
+    SolarField.shared.designTemperature.inlet = model.inletTemperature
+    SolarField.shared.designTemperature.outlet = model.outletTemperature
+    SolarField.shared.ambientTemperature = model.ambientTemperature
+    SolarField.shared.fluid = model.fluid
+  }
+}
+extension Connector {
+  struct Model: Codable, Hashable, Equatable {
+    var name: String = "Header "
+    var distance: Double = 150
+    var sizeAdaptation: [Int] = []
+    var head: String?
+  }
+
+  convenience init(_ connector: Model) {
     self.init()
     self.name = connector.name
     self.distance = connector.distance
   }
 
-  func model() -> Model.Connector {
-    var model = Model.Connector()
+  func model() -> Model {
+    var model = Connector.Model()
     model.name = name
     model.distance = distance
     model.head = start.name
@@ -28,7 +71,18 @@ extension Connector {
 
 extension SubField {
 
-  convenience init(subField: Model.SubField) {
+  struct Model: Codable {
+    var name: String = "Subfield "
+    var rowDistance: Double?
+    var streamVelocity: Double?
+    var distance: Double = 5
+    var lhsLoops: Int = 0
+    var rhsLoops: Int = 0
+    var sizeAdaptation: [Int] = []
+    var head: String?
+  }
+
+  convenience init(subField: Model) {
     self.init(name: subField.name, lhs: subField.lhsLoops, rhs: subField.rhsLoops)
     self.distance = subField.distance
     self.adaptedRowDistance = subField.rowDistance
@@ -36,8 +90,8 @@ extension SubField {
     self.sizeAdaptation = subField.sizeAdaptation
   }
 
-  func model() -> Model.SubField {
-    var model = Model.SubField()
+  func model() -> Model {
+    var model = Model()
     model.name = name
     model.distance = distance
     model.head = connection?.name ?? "null"
@@ -56,21 +110,21 @@ enum ModelError: Error {
   case danglingConnector(name: String)
 }
 
-public struct ModelModel: Codable {
-  var solarField: Model
-  var connectors: [Model.Connector]
-  var subfields: [Model.SubField]
+public struct SolarFieldModel: Codable {
+  var solarField: SolarField.Model
+  var connectors: [Connector.Model]
+  var subfields: [SubField.Model]
 
   public init() {
-    self.solarField = Model(SolarField.shared)
+    self.solarField = SolarField.Model(SolarField.shared)
     self.connectors = SolarField.shared.connectors.map { $0.model() }
     self.subfields = SolarField.shared.subfields.map { $0.model() }
   }
 
-  public static func readFromFile(url: URL) -> ModelModel? {
+  public static func readFromFile(url: URL) -> SolarFieldModel? {
     guard let data = try? Data(contentsOf: url) else { return nil }
     let decoder = JSONDecoder()
-    return try? decoder.decode(ModelModel.self, from: data)
+    return try? decoder.decode(SolarFieldModel.self, from: data)
   }
 
   public func writeToFile(url: URL) throws {
@@ -84,7 +138,7 @@ public struct ModelModel: Codable {
     var connectors = self.connectors.map(Connector.init)
 
     do { // Ceck for duplicated names
-      let names = connectors.map { $0.name }
+      let names = connectors.map(\.name)
       let groups = Dictionary(grouping: names, by: {$0})
       if let duplicate = groups.filter( {$1.count > 1}).first?.key {
         throw ModelError.duplicatedConnector(name: duplicate)
@@ -92,7 +146,7 @@ public struct ModelModel: Codable {
     }
 
     do { // Ceck for duplicated names
-      let names = subfields.map { $0.name }
+      let names = subfields.map(\.name)
       let groups = Dictionary(grouping: names, by: {$0})
       if let duplicate = groups.filter( {$1.count > 1}).first?.key {
         throw ModelError.duplicatedSubField(name: duplicate)
@@ -133,63 +187,7 @@ public struct ModelModel: Codable {
       }
     }
 
-    solarField.assign()
+    SolarField.assign(solarField)
     SolarField.attach(connectors)
-  }
-}
-
-public struct Model: Codable {
-
-  enum Absorber: String, Codable {
-    case ptr70, uvac90, custom
-  }
-  var massFlow: Double
-  var designStreamVelocity: Double
-  var rowDistance: Double
-  var inletTemperature: Double
-  var outletTemperature: Double
-  var ambientTemperature: Double
-  var fluid: Fluid = .terminol
-  var absorberTyp: Absorber = .ptr70
-  // var absorberDiameter: Double?
-
-  public init(_ solarField: SolarField) {
-    self.massFlow = solarField.massFlow
-    self.designStreamVelocity = solarField.designStreamVelocity
-    self.rowDistance = solarField.rowDistance
-    self.inletTemperature = solarField.designTemperature.inlet
-    self.outletTemperature = solarField.designTemperature.outlet
-    self.ambientTemperature = solarField.ambientTemperature
-    self.fluid = solarField.fluid
-  }
-
-  public func assign() {
-    SolarField.shared.massFlow = massFlow
-    SolarField.shared.designStreamVelocity = designStreamVelocity
-    SolarField.shared.rowDistance = rowDistance
-    SolarField.shared.designTemperature.inlet = inletTemperature
-    SolarField.shared.designTemperature.outlet = outletTemperature
-    SolarField.shared.ambientTemperature = ambientTemperature
-    SolarField.shared.fluid = fluid
-  }
-}
-
-extension Model {
-  struct Connector: Codable, Hashable, Equatable {
-    var name: String = "Header "
-    var distance: Double = 150
-    var sizeAdaptation: [Int] = []
-    var head: String?
-  }
-
-  struct SubField: Codable {
-    var name: String = "Subfield "
-    var rowDistance: Double?
-    var streamVelocity: Double?
-    var distance: Double = 5
-    var lhsLoops: Int = 0
-    var rhsLoops: Int = 0
-    var sizeAdaptation: [Int] = []
-    var head: String?
   }
 }

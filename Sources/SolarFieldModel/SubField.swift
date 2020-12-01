@@ -6,13 +6,13 @@
 //  Copyright © 2015 Daniel Muellenborn. All rights reserved.
 //
 
-public final class SubField: Headers, System {
+public final class SubField: Piping {
 
   public var name: String
 
   public var loopExemplar: CollectorLoop!
 
-  weak var connection: Headers? {
+  weak var connection: Piping? {
     didSet { SolarField.shared.recalculation() }
   }
 
