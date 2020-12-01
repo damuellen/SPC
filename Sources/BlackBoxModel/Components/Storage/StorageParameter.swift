@@ -11,7 +11,7 @@
 import Config
 
 extension Storage {
-  public enum Definition: String {
+  public enum Definition: String, Encodable {
     case hours = "hrs", cap, ton
   }
 

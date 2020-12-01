@@ -14,6 +14,7 @@ import Config
 /// freeze temperature, specific heat capacity, viscosity, thermal conductivity,
 /// enthalpy, and density as a function of temperature.
 public struct HeatTransferFluid: CustomStringConvertible, Equatable {
+  static var parameter = ParameterDefaults.HTF
   let name: String
   let freezeTemperature: Temperature
   let heatCapacity: [Double]
@@ -289,7 +290,7 @@ extension HeatTransferFluid: Codable {
   }
 
   public func encode(to encoder: Encoder) throws {
-    var container = encoder.container(keyedBy: CodingKeys.self)
+    var container = encoder.container(keyedBy: CodingKeys.self)    
     try container.encode(name, forKey: .name)
     try container.encode(freezeTemperature, forKey: .freezeTemperature)
     try container.encode(heatCapacity, forKey: .heatCapacity)

@@ -87,7 +87,7 @@ extension JSONConfig {
     }
   }
 
-  static func saveConfigurations(toPath path: String) throws {
+  public static func saveConfigurations(toPath path: String) throws {
     let directoryURL = URL(fileURLWithPath: path, isDirectory: true)
     let cases = JSONConfig.Name.allCases
     let json = try cases.map(generateJSON)
@@ -118,9 +118,9 @@ extension JSONConfig {
     case .LAY: return try encoder.encode(Design.layout)
     case .SF: return try encoder.encode(SolarField.parameter)
     case .COL: return try encoder.encode(Collector.parameter)
-    case .STO: break
+    case .STO: break //return try encoder.encode(Storage.parameter)
     case .HR: return try encoder.encode(Heater.parameter)
-    case .HTF: break // try encoder.encode(htf)
+    case .HTF: return try encoder.encode(HeatTransferFluid.parameter)
     case .HX: return try encoder.encode(HeatExchanger.parameter)
     case .BO: return try encoder.encode(Boiler.parameter)
     case .WHR: return try encoder.encode(WasteHeatRecovery.parameter)

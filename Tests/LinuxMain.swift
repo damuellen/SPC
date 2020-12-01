@@ -1,4 +1,5 @@
 @testable import BlackBoxModelTests
+@testable import SolarFieldModelTests
 @testable import MeteoTests
 import XCTest
 
@@ -18,4 +19,5 @@ XCTMain([
   testCase(SteamTurbineTests.allTests),
  // testCase(StorageTests.allTests),
   testCase(WasteHeatRecoveryTests.allTests),
+  testCase(SolarFieldModelTests.allTests),
 ])

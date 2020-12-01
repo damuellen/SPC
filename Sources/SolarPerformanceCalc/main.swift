@@ -76,8 +76,8 @@ struct SolarPerformanceCalculator: ParsableCommand {
   func run() throws {
     let name = "Solar Performance Calculator"
     print(decorated(name), "")
-    // BlackBoxModel.loadConfigurations(atPath: configPath, format: .json)
-    // BlackBoxModel.saveConfigurations(toPath: configPath)
+    BlackBoxModel.loadConfigurations(atPath: configPath, format: .text)
+    try JSONConfig.saveConfigurations(toPath: configPath)
     if let steps = stepsCalculation {
       Simulation.time.steps = Interval[steps]
     } else {
@@ -97,14 +97,18 @@ struct SolarPerformanceCalculator: ParsableCommand {
 
     do { try BlackBoxModel.configure(meteoFilePath: meteofilePath) } catch {
 #if os(Windows)
-      MessageBox(text: (error as! MeteoDataFileError).description, caption: name)
-      guard let path = FileDialog() else { return }
-      do { try BlackBoxModel.configure(meteoFilePath: path) } catch {
+      if case MeteoDataFileError.fileNotFound = error {
+        guard let path = FileDialog() else { return }
+        do { try BlackBoxModel.configure(meteoFilePath: path) } catch {
+          MessageBox(text: (error as! MeteoDataFileError).description, caption: name)
+          return
+        }
+      } else {
         MessageBox(text: (error as! MeteoDataFileError).description, caption: name)
         return
       }
 #else
-      fatalError((error as! MeteoDataFileError).description)
+      fatalError((error as! MeteoDataFileError).description) 
 #endif
     }
 
@@ -122,7 +126,7 @@ struct SolarPerformanceCalculator: ParsableCommand {
     SolarPerformanceCalculator.result = BlackBoxModel.runModel(with: log)
 
     log.printResult()
-    
+    log.clearResults()
   }
 
   static var configuration = CommandConfiguration(

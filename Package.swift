@@ -19,7 +19,8 @@ let package = Package(
   dependencies: [
     .package(url: "https://github.com/apple/swift-argument-parser.git",
              .revision("53555a04503c175eaffcf587e4b8c380a7c41a5c")),
-    .package(url: "https://github.com/damuellen/SQLite.swift.git", .branch("master"))
+    .package(url: "https://github.com/damuellen/SQLite.swift.git", .branch("master")),
+  //  .package(url: "https://github.com/jpsim/Yams.git", from: "4.0.1")
     ],
   targets: [
     .target(
@@ -79,6 +80,9 @@ let package = Package(
     .testTarget(
       name: "MeteoTests",
       dependencies: ["DateGenerator", "SolarPosition", "Meteo"]),
+    .testTarget(
+      name: "SolarFieldModelTests",
+      dependencies: ["SolarFieldModel"]),
     .testTarget(
       name: "BlackBoxModelTests",
       dependencies: ["Config", "Meteo", "SolarPosition", "BlackBoxModel"])

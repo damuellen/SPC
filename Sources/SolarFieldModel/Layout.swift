@@ -47,8 +47,9 @@ extension SolarField {
         }
       }
       let northSide = Connector(with: [nw, ne])
+      northSide.name = "North"
       let southSide = Connector(with: [sw, se])
-
+      southSide.name = "South"
       SolarField.attach([northSide, southSide])
 
     case .i:

@@ -256,7 +256,6 @@ public final class PerformanceDataRecorder {
       storeInDB()
     }
 
-    clearResults()
   #if DEBUG && !os(Windows)
     animation.clear()
   #endif

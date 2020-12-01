@@ -18,7 +18,7 @@ try! table2.write(to: url2, atomically: false, encoding: .utf8)
 try! table3.write(to: url3, atomically: false, encoding: .utf8)
 
 print(TextTable.overview(style: Style.fancy))
-
+table3.clipboard()
 try! ModelModel().writeToFile(url: URL(fileURLWithPath: "Model.json"))
 
 extension TextTable {

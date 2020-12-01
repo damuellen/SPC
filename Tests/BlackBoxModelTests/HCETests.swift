@@ -4,7 +4,7 @@ import XCTest
 
 class HCETests: XCTestCase {
   func testsRadiationLosses() {
-    let collector = Plant.initialState.collector
+    var collector = Plant.initialState.collector
     let t1 = Temperature(celsius: 300.0)
     let t2 = Temperature(celsius: 200.0)
     let amb = Temperature(celsius: 20.0)
@@ -14,13 +14,19 @@ class HCETests: XCTestCase {
 
     XCTAssertEqual(radiationLosses, 16.59, accuracy: 0.01, "radiationLosses")
     measure {
-      for t in 290...400 {
-        let t1 = Temperature(celsius: Double(t))
-        let radiationLosses =  HCE.radiationLosses(
-          t1, t2, insolationAbsorber: collector.insolationAbsorber, ambient: amb
-        )
-        let y = 8.557636418896E-08 * Double(t) ** 3.348545826644
-        XCTAssertEqual(radiationLosses, y, accuracy: 0.5)
+      for i in 550...600 {
+        for t2 in 150...200 {
+          for t1 in 290...390 {
+            let t1 = Temperature(celsius: Double(t1))
+            let t2 = Temperature(celsius: Double(t2))
+            collector.insolationAbsorber = Double(i)
+            let radiationLosses =  HCE.radiationLosses(
+              t1, t2, insolationAbsorber: collector.insolationAbsorber, ambient: amb
+            )
+            XCTAssertGreaterThan(radiationLosses, 10)
+            XCTAssertLessThan(radiationLosses, 50)          
+          }
+        }
       }
     }
   }
