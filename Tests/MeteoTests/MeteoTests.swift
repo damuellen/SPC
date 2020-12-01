@@ -10,11 +10,11 @@ class MeteoTests: XCTestCase {
     let location = Location(longitude: 47, latitude: 29, elevation: 0)
     let sun = SolarPosition(coords: (47, 29, 0), tz: 4, year: 2017,
                             frequence: .every5minutes)
-    
-    let dg = DateGenerator(year: 2017, interval: .every5minutes)
-    
-    let mds = MeteoDataSource.generatedFrom(sun)
-    
+
+    let _ = DateGenerator(year: 2017, interval: .every5minutes)
+
+    let _ = MeteoDataSource.generatedFrom(sun)
+
     let valuesDay: [(dni: Float, temp: Float, ws: Float)] = [
       (0,23.3,7.3), (0,23.3,6.3), (0,23.5,5.9), (0,23.4,4.3),
       (0,23.6,6.0), (0,23.6,8.0), (0,23.3,8.1), (0,23.2,7.6),
@@ -53,14 +53,14 @@ class MeteoTests: XCTestCase {
       (0,20.8,6.7), (0,20.7,6.3), (0,20.4,4.9), (0,19.9,3.9),
       (0,19.7,4.0), (0,19.6,4.0), (0,19.5,4.2), (0,19.3,4.5)
     ]
-    
+
     let meteoDataDay = valuesDay.map { return MeteoData(
       dni: $0.dni, ghi: 0, dhi: 0, temperature: $0.temp, windSpeed: $0.ws)
     }
 
     let meteoData = Array(repeatElement(meteoDataDay, count: 365).joined())
 
-    let datasource = MeteoDataSource(
+    let _ = MeteoDataSource(
       name: "", data: meteoData, (2017, location)
     )
   }

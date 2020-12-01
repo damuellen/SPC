@@ -8,7 +8,7 @@ jobs:
     runs-on: [ubuntu-18.04]
 
     steps:
-    
+
     - name: Checkout sources
       uses: actions/checkout@v2
 
@@ -16,7 +16,7 @@ jobs:
       run: swift package update
 
     - name: Build Debug mode
-      run: swift build
+      run: swift build --build-tests
 
     - name: Run tests
       run: swift test

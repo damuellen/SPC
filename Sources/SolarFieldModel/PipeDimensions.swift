@@ -66,16 +66,16 @@ public struct Schedule {
     45.24, 50.01, 59.54, 0, 0, 0, 0, 0, 0])
 }
 
-public enum NominalPipeSizes: String, CaseIterable {
+public enum NominalPipeSize: String, CaseIterable {
 
   case sch10 = "SCH10", sch10S = "SCH10S", sch30 = "SCH30",
   sch40 = "SCH40", sch80 = "SCH80", sch80S = "SCH80S",
   sch120 = "SCH120", sch140 = "SCH140", sch160 = "SCH160"
 
   subscript(nps: Float) -> (Float, Float) {
-    guard let idx = NominalPipeSizes.values.firstIndex(of: nps)
+    guard let idx = NominalPipeSize.values.firstIndex(of: nps)
       else { return (0, 0)}
-    return (NominalPipeSizes.outsideDiameters[idx], wallthickness[idx])
+    return (NominalPipeSize.outsideDiameters[idx], wallthickness[idx])
   }
 
   public var wallthickness: [Float] {

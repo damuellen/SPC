@@ -12,7 +12,7 @@ public struct Branch {
   let roughness = 0.1
 
   var nps: Float
-  var schedule: NominalPipeSizes
+  var schedule: NominalPipeSize
   var temperature: Double
   var length: Double
   var massFlow: Double = 0.0
@@ -21,7 +21,7 @@ public struct Branch {
   var components: [Component] = []
 
   public init(
-    temperature: Double, nps: Float = 12.0, SCH: NominalPipeSizes = .sch40) {
+    temperature: Double, nps: Float = 12.0, SCH: NominalPipeSize = .sch40) {
     self.schedule = SCH
     self.length = 0.0
     self.temperature = temperature
@@ -31,7 +31,7 @@ public struct Branch {
   /// The branch diameter is determined automatically, so that the design
   /// flow velocity is not exceeded at the specified mass flow.
   init(temperature: Double, massFlow: Double,
-       SCH: NominalPipeSizes = .sch40, header: Piping) {
+       SCH: NominalPipeSize = .sch40, header: Piping) {
     self.schedule = SCH
     self.length = 0.0
     self.temperature = temperature
@@ -42,7 +42,7 @@ public struct Branch {
 
   /// Returns the appropriate insultation thickness for the diameter and the temperature.
   var insulationThickness: Double {
-    guard let i = NominalPipeSizes.values.firstIndex(of: nps),
+    guard let i = NominalPipeSize.values.firstIndex(of: nps),
       i < Insulation.cold.count else { return 0.0 }
     return temperature < 350.0
       ? Double(Insulation.cold[i])
@@ -51,13 +51,13 @@ public struct Branch {
 
   /// Returns the outside diameter of the branch.
   var outsideDiameter: Double {
-    guard let i = NominalPipeSizes.values.firstIndex(of: nps) else { return 0.0 }
-    return Double(NominalPipeSizes.outsideDiameters[i])
+    guard let i = NominalPipeSize.values.firstIndex(of: nps) else { return 0.0 }
+    return Double(NominalPipeSize.outsideDiameters[i])
   }
 
   /// Returns the wallthickness of the pipe schedule.
   var wallThickness: Double {
-    guard let i = NominalPipeSizes.values.firstIndex(of: nps) else { return 0.0 }
+    guard let i = NominalPipeSize.values.firstIndex(of: nps) else { return 0.0 }
     return Double(schedule.wallthickness[i])
   }
 
@@ -165,16 +165,16 @@ public struct Branch {
 
   /// Decreases the branch size to next valid value
   mutating func decreaseSize(by steps: Int = 1) {
-    let smallerSize = NominalPipeSizes.values.firstIndex(of: nps)! - steps
-    self.nps = NominalPipeSizes.values[smallerSize]
+    let smallerSize = NominalPipeSize.values.firstIndex(of: nps)! - steps
+    self.nps = NominalPipeSize.values[smallerSize]
   }
 
   /// Increases the branch size to next valid value
   mutating func increaseSize(by steps: Int = 1) {
     if steps == 0 { return }
-    let largerSize = NominalPipeSizes.values.firstIndex(of: nps)! + steps
-    if NominalPipeSizes.values.endIndex - 1 < largerSize { return }
-    self.nps = NominalPipeSizes.values[largerSize]
+    let largerSize = NominalPipeSize.values.firstIndex(of: nps)! + steps
+    if NominalPipeSize.values.endIndex - 1 < largerSize { return }
+    self.nps = NominalPipeSize.values[largerSize]
   }
 
   /// Iterates the size of the branch until the design flow velocity is not exceeded

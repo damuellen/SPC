@@ -14,19 +14,19 @@ system("pause")
 
 struct SolarFieldCalculator: ParsableCommand {
 
-  @Option(name: .shortAndLong, help: "Total number of loops")
+  @Option(name: .long, help: "Total number of loops")
   var loops: Int? // "SolarFieldModel.json"
 
-  @Option(name: .shortAndLong, help: "Total mass flow rate")
-  var massFlow: Double? // "SolarFieldModel.json"
+  @Option(name: .long, help: "Total mass flow rate")
+  var massflow: Double? // "SolarFieldModel.json"
 
-  @Option(name: .shortAndLong, help: "Layout (h/i)")
+  @Option(name: .long, help: "Layout (h/i)")
   var layout: String? // "SolarFieldModel.json"
 
-  @Option(name: .shortAndLong, help: "Input file name")
+  @Option(name: .long, help: "Input file name")
   var input: String? // "SolarFieldModel.json"
 
-  @Option(name: .shortAndLong, help: "Output file name.")
+  @Option(name: .long, help: "Output file name.")
   var output: String? // "SolarFieldModel.json"
 
   func run() throws {
@@ -34,9 +34,11 @@ struct SolarFieldCalculator: ParsableCommand {
     if let loops = loops {
       SolarField.createLayout(loops: loops)
     }
-    if let massFlow = massFlow {
-      SolarField.designMassFlow = massFlow
+
+    if let massflow = massflow {
+      SolarField.designMassFlow = massflow
     }
+
     if let input = input {
       try SolarFieldModel.readFromFile(url: URL(fileURLWithPath: input))?.apply()
     }
