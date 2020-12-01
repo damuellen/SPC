@@ -110,6 +110,7 @@ if let SolarPerformance = package.targets.first(where: { $0.name == "SolarPerfor
 
 if let SolarField = package.targets.first(where: { $0.name == "SolarFieldCalc" }) {
   SolarField.linkerSettings = [
+    .linkedLibrary("User32"),
     .unsafeFlags(["-Xlinker", "/INCREMENTAL:NO", "-Xlinker", "/IGNORE:4217,4286"])
   ]
 }
