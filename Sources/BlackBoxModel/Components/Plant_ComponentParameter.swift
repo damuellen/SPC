@@ -21,6 +21,7 @@ extension Plant {
         + powerBlock.electricalParasiticsStep[1]
     }
     SolarField.parameter.wayLength()
+
     let solarField = SolarField.parameter
 
     if Design.hasGasTurbine {
@@ -36,7 +37,7 @@ extension Plant {
         ) / 1_000
 
       let sccHTFheat = HeatExchanger.parameter.sccHTFheat
-      SolarField.parameter.massFlow.max = MassFlow(
+      SolarField.parameter.massFlow = MassFlow(
         sccHTFheat / designHeatExchanger
       )
 
@@ -67,7 +68,7 @@ extension Plant {
           HeatExchanger.parameter.temperature.htf.outlet.max
         ) / 1_000
 
-      SolarField.parameter.massFlow.max = MassFlow(
+      SolarField.parameter.massFlow = MassFlow(
         HeatExchanger.parameter.sccHTFheat / designHeatExchanger
       )
     }
@@ -89,14 +90,14 @@ extension Plant {
       SolarField.parameter.edgeFactor = [edgeFactor1, edgeFactor2]
 
       if Design.hasStorage {
-        SolarField.parameter.massFlow.max = MassFlow(
+        SolarField.parameter.massFlow = MassFlow(
           100
             / Storage.parameter.massFlow.rate
-            * SolarField.parameter.massFlow.max.rate
+            * SolarField.parameter.massFlow.rate
         )
         Storage.parameter.massFlow = MassFlow(
           (1 - Storage.parameter.massFlow.rate / 100)
-            * SolarField.parameter.massFlow.max.rate
+            * SolarField.parameter.massFlow.rate
         )
       }
     }

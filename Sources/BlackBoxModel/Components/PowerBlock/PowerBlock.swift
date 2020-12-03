@@ -96,10 +96,10 @@ public struct PowerBlock: Component, HeatCycle {
     
     // added to simulate a bypass on the PB-HX if the expected
     // outlet temperature is so low that the salt to TES could freeze
-    var totalMassFlow = massFlow
+    let totalMassFlow = massFlow
   
     repeat {
-      #warning("Check this")
+      //#warning("Check this")
       temperature.outlet = HeatExchanger.outletTemperature(self, self)
 
       heatOut = htf.enthalpy(temperature.outlet)
@@ -130,7 +130,7 @@ public struct PowerBlock: Component, HeatCycle {
       if inlet > 0 {
         inletTemperature(kelvin: inlet)
       }
-      #warning("The implementation here differs from PCT")
+      //#warning("The implementation here differs from PCT")
       // FIXME: Was ist Tstatus ?????????
       let sec = Double(period)
       let outlet = (massFlow.rate * sec

@@ -24,7 +24,7 @@ public enum Design {
 
 public struct Layout: Codable, Equatable, Hashable, CustomStringConvertible {
   public var solarField = 148.0
-  public var heater = -10.0
+  public var heater = 10.0
   public var heatExchanger = 75.0
   public var boiler = 0.0
   public var gasTurbine = 0.0

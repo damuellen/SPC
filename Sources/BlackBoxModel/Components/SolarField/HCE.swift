@@ -77,11 +77,12 @@ enum HCE {
     let freezingTemperature = SolarField.parameter.HTF.freezeTemperature
       + Simulation.parameter.dfreezeTemperaturePump
       + Simulation.parameter.tempTolerance
-
+    let antiFreezeFlow = SolarField.parameter.antiFreezeFlow.ratio 
+      * SolarField.parameter.massFlow.rate
     if solarField.header.temperature.inlet < freezingTemperature
       || solarField.header.temperature.outlet < freezingTemperature
     {
-      solarField.header.massFlow = SolarField.parameter.antiFreezeFlow
+      solarField.header.massFlow.rate = antiFreezeFlow
       solarField.operationMode = .freezeProtection
     } else {
       solarField.operationMode = .noOperation
@@ -234,6 +235,8 @@ enum HCE {
       * Double(sof.numberOfSCAsInRow)
       * 2 * Collector.parameter.areaSCAnet
     
+    let massFlowMin = MassFlow(sof.minFlow.ratio * sof.massFlow.rate)
+
     let htf = sof.HTF
     
     let col = Collector.parameter
@@ -300,7 +303,7 @@ enum HCE {
     case let massFlow where massFlow.rate <= 0: // HCE loses heat
 
       if case .freezeProtection = solarField.operationMode {
-        hce.massFlow = sof.massFlow.min
+        hce.massFlow = massFlowMin
         (time, dumping) = mode2(&solarField, collector, loop, ambient)
       } else {
         // status = LastHTF
@@ -308,10 +311,10 @@ enum HCE {
         (time, dumping) = mode2(&solarField, collector, loop, ambient)
       }
 
-    case let massFlow where massFlow > sof.massFlow.max:
+    case let massFlow where massFlow > sof.massFlow:
       // Damped heat: The HL have to be added because they are independent from
       // the SCAs in focus. HL must be subtracted afterwards again.
-      solarField.inFocus = Ratio(sof.massFlow.max.rate / massFlow.rate)
+      solarField.inFocus = Ratio(sof.massFlow.rate / massFlow.rate)
       // [MW] added to calculate Q_dump with instantaneous irradiation
 
       dumping = deltaHeat * area * (1 - solarField.inFocus.ratio)
@@ -319,14 +322,14 @@ enum HCE {
       // changed to htf.maxTemperature to reach max temp possible
       hce.temperature.outlet = htf.maxTemperature
 
-      hce.massFlow = sof.massFlow.max
+      hce.massFlow = sof.massFlow
       time = calculateTime() // [sec]
      // time = period
 
-    case let massFlow where massFlow < sof.massFlow.min:
+    case let massFlow where massFlow < massFlowMin:
 
       if case .normal = solarField.operationMode,
-        massFlow.rate > sof.massFlow.max.rate * 0.05 {
+        massFlow.rate > sof.massFlow.rate * 0.05 {
         // pumps are working over massFlow.min
         solarField.inFocus = 1.0
         // changed to htf.maxTemperature to reach max temp possible
@@ -338,11 +341,11 @@ enum HCE {
       //  time = period
       } else if case .normal = solarField.operationMode {
         solarField.inFocus = 1.0
-        hce.massFlow = sof.massFlow.max.adjusted(withFactor: 0.05)
+        hce.massFlow = sof.massFlow.adjusted(withFactor: 0.05)
         (time, dumping) = mode2(&solarField, collector, loop, ambient)
       } else {
         solarField.inFocus = 1.0
-        hce.massFlow = sof.massFlow.min
+        hce.massFlow = massFlowMin
         (time, dumping) = mode2(&solarField, collector, loop, ambient)
       }
 
@@ -589,7 +592,7 @@ enum HCE {
         interval /= 2
         zoom += interval // Elongate interval
       }
-      #warning("The implementation here differs from PCT")
+      //#warning("The implementation here differs from PCT")
       if newTemp == oldTemp { break }
     }
     hce.temperature.outlet = newTemp

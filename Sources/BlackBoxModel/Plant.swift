@@ -139,8 +139,8 @@ public struct Plant {
     }
 
     func checkAvailability(_ steamTurbine: inout SteamTurbine) -> Double? {
-      var load = steamTurbine.load ?? Ratio(1)
-      guard load < Availability.current.value.powerBlock else { return nil }
+      guard steamTurbine.load < Availability.current.value.powerBlock
+        else { return nil }
 
       steamTurbine.load = Availability.current.value.powerBlock
       // The turbine load has changed recalculation of efficiency
@@ -283,7 +283,7 @@ public struct Plant {
 
       let minLoad: Double
       if SteamTurbine.parameter.minPowerFromTemp.isInapplicable {
-        #warning("The implementation here differs from PCT")
+        //#warning("The implementation here differs from PCT")
         minLoad =
           SteamTurbine.parameter.power.min
           / SteamTurbine.parameter.power.max
@@ -291,6 +291,9 @@ public struct Plant {
         minLoad =
           SteamTurbine.parameter.minPowerFromTemp(ambient)
           / SteamTurbine.parameter.power.max
+      }
+      if steamTurbine.load.ratio < minLoad {
+        steamTurbine.load.ratio = minLoad
       }
       var minPower: Double
       if SteamTurbine.parameter.minPowerFromTemp.isInapplicable {

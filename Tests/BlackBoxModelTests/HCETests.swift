@@ -70,7 +70,7 @@ class HCETests: XCTestCase {
     collector.insolationAbsorber = 0.0
     (_,dumping) = HCE.mode1(&solarField, collector, .design, amb)
     hce = solarField.loops[0]
-    XCTAssertEqual(hce.massFlow.rate, 50.0, accuracy: 0.1)
+    XCTAssertEqual(hce.massFlow.rate, 230.8, accuracy: 0.1)
     XCTAssertEqual(hce.temperature.outlet.celsius, 393.0, accuracy: 0.1) // FIXME
     XCTAssertEqual(dumping.isZero, true)
     XCTAssertEqual(solarField.heatLossHCE, 14.59, accuracy: 0.01)

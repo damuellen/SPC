@@ -100,7 +100,7 @@ extension HeatExchanger.Parameter: CustomStringConvertible {
     // d += "not used:" HXc.H2OoutTmin - TK0
     d += "Parameter for ISCCS Cycle\n"
     d += "Efficiency [%]:"
-      >< "\(sccEff)"
+      >< "\(sccEff * 100)"
     d += "Maximum Inlet Temperature [°C]:"
       >< "\(scc.htf.inlet.max.celsius)"
     d += "Maximum Outlet Temperature [°C]:"

@@ -31,7 +31,7 @@ extension Collector {
       case schott, rio
     }
   //  let kind: Kind = .sklalet
-    let newFunction: Bool = false
+    var newFunction: Bool = false
     let absorber: Absorber
     public let aperture, lengthSCA, areaSCAnet, extensionHCE, avgFocus,
       rabsOut, rabsInner, rglas, glassEmission, opticalEfficiency: Double

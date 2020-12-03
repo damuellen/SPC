@@ -11,9 +11,9 @@ class SolarFieldTests: XCTestCase {
     collector.theta = 29.18
     Collector.efficiency(&collector, ws: 0) // 0.90
 
-    let maxFlow = SolarField.parameter.massFlow.max
-    SolarField.parameter.massFlow.max = 300.0
-    defer { SolarField.parameter.massFlow.max = maxFlow }
+    let maxFlow = SolarField.parameter.massFlow
+    SolarField.parameter.massFlow = 300.0
+    defer { SolarField.parameter.massFlow = maxFlow }
 
     var dumping = 0.0
     collector.insolationAbsorber = 666.6

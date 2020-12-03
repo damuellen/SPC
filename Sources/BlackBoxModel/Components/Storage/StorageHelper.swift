@@ -19,12 +19,10 @@ extension Storage {
     let solarField = SolarField.parameter
     
     let heatExchanger = HeatExchanger.parameter
-    
-    let storage = Storage.parameter
-    
+        
     let time = DateTime.current
     
-    if storage.auxConsumptionCurve {
+    if parameter.auxConsumptionCurve {
       // old model:
       if status.averageTemperature.celsius < 50 { 
         print("Temperature too low.")
@@ -130,7 +128,7 @@ extension Storage {
         let htf = SolarField.parameter.HTF
         
         let designDischarge = (((
-          (solarField.massFlow.max - parameter.massFlow).rate * load.ratio)
+          (solarField.massFlow - parameter.massFlow).rate * load.ratio)
           / parameter.heatExchangerEfficiency) * htf.deltaHeat(
             parameter.designTemperature.hot - status.dT_HTFsalt.hot,
             parameter.designTemperature.cold - status.dT_HTFsalt.cold) / 1_000)
@@ -290,7 +288,7 @@ extension Storage {
     
     if solarField.pumpParastics.isEmpty {
       let layout = Design.layout.solarField
-      let maxFlow = solarField.massFlow.max.rate
+      let maxFlow = solarField.massFlow.rate
       if maxFlow < 900 {
         // calculation of solar field parasitics with empirical correlation
         // derived from solar field model

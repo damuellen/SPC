@@ -19,7 +19,7 @@ class BlackBoxModelTests: XCTestCase {
     measure {
       let log = PerformanceDataRecorder()
       let result = BlackBoxModel.runModel(with: log)
-      XCTAssertEqual(result.electric.net, 1070, accuracy: 0.1)
+      XCTAssertEqual(result.electric.net, 1139.7, accuracy: 0.1)
     }
   }
 
@@ -40,14 +40,14 @@ class BlackBoxModelTests: XCTestCase {
     let result = BlackBoxModel.runModel(with: log)
 
     let tol = 0.2
-    XCTAssertEqual(result.electric.net, 533.2, accuracy: tol)
-    XCTAssertEqual(result.electric.consum, 48.2, accuracy: tol)
+    XCTAssertEqual(result.electric.net, 585.4, accuracy: tol)
+    XCTAssertEqual(result.electric.consum, 41.7, accuracy: tol)
     XCTAssertEqual(result.electric.parasitics, 167.1, accuracy: tol)
-    XCTAssertEqual(result.electric.steamTurbineGross, 652.1, accuracy: tol)
-    XCTAssertEqual(result.thermal.solar.megaWatt, 4632.5, accuracy: tol)
+    XCTAssertEqual(result.electric.steamTurbineGross, 710.9, accuracy: tol)
+    XCTAssertEqual(result.thermal.solar.megaWatt, 4206.9, accuracy: tol)
    // XCTAssertEqual(result.thermal.startUp.megaWatt, 242.7, accuracy: tol)
-    XCTAssertEqual(result.thermal.production.megaWatt, 3871.8, accuracy: tol)
-    XCTAssertEqual(result.thermal.heatExchanger.megaWatt, 4164.4, accuracy: tol)
+    XCTAssertEqual(result.thermal.production.megaWatt, 4107.6, accuracy: tol)
+    XCTAssertEqual(result.thermal.heatExchanger.megaWatt, 4203.2, accuracy: tol)
     
   }
   
@@ -66,14 +66,14 @@ class BlackBoxModelTests: XCTestCase {
 
     let result = BlackBoxModel.runModel(with: log)
     let tol = 0.2
-    XCTAssertEqual(result.electric.net, 258.7, accuracy: tol)
-    XCTAssertEqual(result.electric.consum, 59.7, accuracy: tol)
-    XCTAssertEqual(result.electric.parasitics, 112.6, accuracy: tol)
-    XCTAssertEqual(result.electric.steamTurbineGross, 311.7, accuracy: tol)
-    XCTAssertEqual(result.thermal.solar.megaWatt, 2377.2, accuracy: tol)
+    XCTAssertEqual(result.electric.net, 338.2, accuracy: tol)
+    XCTAssertEqual(result.electric.consum, 53.9, accuracy: tol)
+    XCTAssertEqual(result.electric.parasitics, 111.5, accuracy: tol)
+    XCTAssertEqual(result.electric.steamTurbineGross, 395.8, accuracy: tol)
+    XCTAssertEqual(result.thermal.solar.megaWatt, 2378.3, accuracy: tol)
     //XCTAssertEqual(result.thermal.startUp.megaWatt, 243.5, accuracy: tol)
-    XCTAssertEqual(result.thermal.production.megaWatt, 1850.5, accuracy: tol)
-    XCTAssertEqual(result.thermal.heatExchanger.megaWatt, 2135.4, accuracy: tol)
+    XCTAssertEqual(result.thermal.production.megaWatt, 2287.0, accuracy: tol)
+    XCTAssertEqual(result.thermal.heatExchanger.megaWatt, 2374.1, accuracy: tol)
   }
 
   static var allTests: [(String, (BlackBoxModelTests) -> () throws -> Void)] {

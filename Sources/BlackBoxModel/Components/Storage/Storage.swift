@@ -116,7 +116,7 @@ public struct Storage: Component, HeatCycle {
       peakTariff = false // dont care about time to discharge
     }
 
-    #warning("The implementation here differs from PCT")
+    //#warning("The implementation here differs from PCT")
     if peakTariff,// status.storage.operationMode = .freezeProtection,
       storage.charge.ratio > parameter.dischargeToTurbine,
       storage.heat < 1 * parameter.heatdiff * heat.demand.megaWatt
@@ -171,7 +171,7 @@ public struct Storage: Component, HeatCycle {
       && OperationRestriction.fuelStrategy.isPredefined == false)
  //     || (OperationRestriction.fuelStrategy.isPredefined && fuelAvailable > 0)
     {
-      #warning("Check this")
+      //#warning("Check this")
       heater.operationMode = .freezeProtection(.zero)
       var supply: Double
       var parasitics: Double
@@ -214,7 +214,7 @@ public struct Storage: Component, HeatCycle {
       powerBlock.inletTemperature(outlet: storage)
 
       // check why to circulate HTF in SF
-      #warning("Storage.parasitics")
+      //#warning("Storage.parasitics")
     // FIXME  plant.electricalParasitics.solarField = SolarField.parameter.antiFreezeParastics
       
       return EnergyTransfer(heat: supply, electric: parasitics, fuel: fuel)
@@ -277,8 +277,8 @@ public struct Storage: Component, HeatCycle {
       // added to avoid input to storage lower than minimal HX's capacity
       let toStorageMin = parameter.heatExchangerMinCapacity
         * heatExchanger.sccHTFheat
-        * (1 - parameter.massFlow.rate / solarField.massFlow.max.rate)
-        / (parameter.massFlow.rate / solarField.massFlow.max.rate)
+        * (1 - parameter.massFlow.rate / solarField.massFlow.rate)
+        / (parameter.massFlow.rate / solarField.massFlow.rate)
       
       if case 0..<toStorageMin = storage.heat {
         demand -= (toStorageMin - storage.heat)
@@ -315,8 +315,8 @@ public struct Storage: Component, HeatCycle {
     if parameter.heatExchangerRestrictedMin {
       // avoiding input to storage lower than minimal HXs capacity
       let toStorageMin = heatExchanger.sccHTFheat
-        * (1 - parameter.massFlow.rate / solarField.massFlow.max.rate)
-        / (parameter.massFlow.rate / solarField.massFlow.max.rate)
+        * (1 - parameter.massFlow.rate / solarField.massFlow.rate)
+        / (parameter.massFlow.rate / solarField.massFlow.rate)
       
       if case 0..<toStorageMin = storage.heat {
         powerBlock.setMassFlow(rate: (heatExchanger.sccHTFheat

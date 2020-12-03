@@ -78,13 +78,13 @@ public struct Heater: Component, HeatCycle {
         fuel = fuelAvailable / Simulation.time.steps.fraction / 2
         // The fuelfl avl. [MW]
         thermalPower =
-          fuel * parameter.efficiency
+          fuel * parameter.efficiency.ratio
           * Simulation.adjustmentFactor.efficiencyHeater
         // net thermal power avail [MW]
         load = heat.heater.megaWatt / Design.layout.heater
         operationMode = .normal(Ratio(load))
 
-        guard load > parameter.minLoad else {
+        guard load > parameter.minLoad.ratio else {
           debugPrint(
             """
             \(DateTime.current)
@@ -119,7 +119,7 @@ public struct Heater: Component, HeatCycle {
             / htf.deltaHeat(
               parameter.nominalTemperatureOut, temperatureInlet)
         )
-        fuel = Design.layout.heater / parameter.efficiency
+        fuel = Design.layout.heater / parameter.efficiency.ratio
         load = 1
         operationMode = .charge(Ratio(load))
         // Parasitic power [MW]
@@ -144,7 +144,7 @@ public struct Heater: Component, HeatCycle {
       } else {
         temperature.outlet = parameter.antiFreezeTemperature
       }
-      thermalPower = heat.heater.megaWatt / parameter.efficiency
+      thermalPower = heat.heater.megaWatt / parameter.efficiency.ratio
 
       load = heat.heater.megaWatt / Design.layout.heater
       operationMode = .freezeProtection(Ratio(load))
@@ -171,7 +171,7 @@ public struct Heater: Component, HeatCycle {
     } else {
       // Normal operation requested  The fuel flow needed [MW]
       fuel =
-        max(-demand, Design.layout.heater) / parameter.efficiency
+        max(-demand, Design.layout.heater) / parameter.efficiency.ratio
         / Simulation.adjustmentFactor.efficiencyHeater
       // The fuelfl avl. [MW]
       fuel =
@@ -180,15 +180,15 @@ public struct Heater: Component, HeatCycle {
 
       /// net thermal power avail [MW]
       thermalPower =
-        fuel * parameter.efficiency
+        fuel * parameter.efficiency.ratio
         * Simulation.adjustmentFactor.efficiencyHeater
 
       load = abs(thermalPower / Design.layout.heater)  // load avail.
 
-      if load < parameter.minLoad {
-        load = parameter.minLoad
+      if load < parameter.minLoad.ratio {
+        load = parameter.minLoad.ratio
         thermalPower = load * Design.layout.heater
-        fuel = thermalPower / parameter.efficiency
+        fuel = thermalPower / parameter.efficiency.ratio
       }
 
       // Normal operation possible

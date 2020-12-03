@@ -33,7 +33,7 @@ enum PerformanceReport {
       layout.solarField * 2 * collector.areaSCAnet
       * Double(solarField.numberOfSCAsInRow)
     d += "    Aperture [m²]:" >< "\(aperture)"
-    d += "    Massflow [kg/s]:" >< solarField.massFlow.max.rate.description
+    d += "    Massflow [kg/s]:" >< solarField.massFlow.rate.description
     d +=
       "    Elevation [ø]:  " + "\(solarField.elevation)\t Azimut [ø]:  "
       + "\(solarField.azimut)"

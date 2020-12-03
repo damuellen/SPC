@@ -30,7 +30,7 @@ func bar() -> (Double, Double, Double, Double, Double, Double, Double) {
   let temperatureHTF =
     saturatedSteamTemperature
     + steamgeneratorTemperatureDifferenceBetweenEvaporationTemperatureAndSgHtfOutletTemperature
-  let steamgeneratorHtfEnthalpyOutlet = SolarField.parameter.HTF.enthalpy(temperatureHTF)
+ // let steamgeneratorHtfEnthalpyOutlet = SolarField.parameter.HTF.enthalpy(temperatureHTF)
   return (
     enthalpy, steamgeneratorPressure, saturatedSteamTemperature.celsius, evaporationPower,
     enthalpyBeforeEvaporation, superHeatingPower, temperatureHTF.celsius

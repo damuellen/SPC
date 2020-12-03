@@ -13,7 +13,8 @@ import Config
 extension Heater {
   public struct Parameter: ComponentParameter, Codable, Equatable {
     let name: String
-    let efficiency, maximumMassFlow, minLoad, nominalElectricalParasitics: Double
+    let efficiency, minLoad: Ratio
+    var maximumMassFlow, nominalElectricalParasitics: Double
     let antiFreezeTemperature, nominalTemperatureOut: Temperature
     let electricalParasitics: [Double]
     let onlyWithSolarField: Bool
@@ -27,7 +28,7 @@ extension Heater.Parameter: CustomStringConvertible {
     d += "Capacity of HTF-Heater [MW]:"
       >< "\(Design.layout.heater)"
     d += "Efficiency [%]:"
-      >< "\(efficiency)"
+      >< "\(efficiency.percentage)"
     d += "Outlet Temperature for Freeze Protection [°C]:"
       >< "\(antiFreezeTemperature.celsius)"
     d += "Nominal Outlet Temperature [°C]:"
@@ -35,7 +36,7 @@ extension Heater.Parameter: CustomStringConvertible {
     d += "Maximum Mass Flow [kg/s]:"
       >< "\(maximumMassFlow)"
     d += "Minimum Load [%]:"
-      >< "\(minLoad)"
+      >< "\(minLoad.percentage)"
     d += "Parasitics at Full Load [MW]:"
       >< "\(nominalElectricalParasitics)"
     d += "Parasitic Energy Coefficients;\nParasitics(Load) = Parasitics(100%)*(c0+c1*load)\n"
@@ -51,11 +52,11 @@ extension Heater.Parameter: TextConfigInitializable {
   public init(file: TextConfigFile) throws {
     let line: (Int) throws -> Double = { try file.parseDouble(line: $0) }
     name = file.name
-    efficiency = try line(10)
+    efficiency = try Ratio(line(10))
     antiFreezeTemperature = try Temperature(line(16))
     nominalTemperatureOut = try Temperature(line(19))
     maximumMassFlow = try line(22)
-    minLoad = try line(25)
+    minLoad = try Ratio(line(25))
     nominalElectricalParasitics = try line(28)
     electricalParasitics = [try line(31), try line(34)]
     onlyWithSolarField = true

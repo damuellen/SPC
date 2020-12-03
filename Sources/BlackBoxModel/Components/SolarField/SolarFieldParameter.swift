@@ -50,9 +50,10 @@ extension SolarField {
     public var azimut, elevation: Double
     let antiFreezeParastics: Double
     let pumpParastics: Polynomial
-    public var massFlow: (max: MassFlow, min: MassFlow)
+    var massFlow: MassFlow
+    var minFlow: Ratio 
     var pumpParasticsFullLoad: Double
-    var antiFreezeFlow: MassFlow
+    var antiFreezeFlow: Ratio
     var HTFmass: Double
     var HTF: HeatTransferFluid
     var collector: Collector.Parameter!
@@ -60,7 +61,7 @@ extension SolarField {
 
     var distRatio: Double = 0
     var pipeWay: Double = 0
-    var loopWays: [Double] = []
+    var loopWays: [Double] = []    
   }
 }
 
@@ -117,11 +118,11 @@ extension SolarField.Parameter: CustomStringConvertible {
     d += "Azimuth angle of Solar Field Orientation [°]:"
       >< "\(azimut)"
     d += "Mass Flow in Solar Field at Full Load [kg/s]:"
-      >< "\(massFlow.max.rate)"
+      >< "\(massFlow.rate)"
     d += "Minimum allowable Mass Flow [%]:"
-      >< "\(massFlow.min.rate)"
+      >< "\(minFlow.percentage)"
     d += "Anti-Freeze Mass Flow [%]:"
-      >< "\(antiFreezeFlow.rate)"
+      >< "\(antiFreezeFlow.percentage)"
     d += "Total Mass of HTF in System [kg]:"
       >< "\(HTFmass)"
     d += "Consider HL of ANY Dump. Collectors:"
@@ -182,8 +183,9 @@ extension SolarField.Parameter: TextConfigInitializable {
     pumpParasticsFullLoad = try line(34)
     antiFreezeParastics = try line(37)
     pumpParastics = try [line(40), line(43), line(46)]
-    massFlow = try (MassFlow(line(49)), MassFlow(line(52)))
-    antiFreezeFlow = try MassFlow(line(55))
+    massFlow = try MassFlow(line(49))
+    minFlow = try Ratio(line(52))
+    antiFreezeFlow = try Ratio(line(55))
     HTFmass = try line(58)
     HTF = ParameterDefaults.HTF
     imbalanceDesign = try [line(72), line(73), line(74)]
@@ -239,11 +241,11 @@ extension SolarField.Parameter: Codable {
     pumpParastics = try values.decode(
       Polynomial.self, forKey: .pumpParastics
     )
-    massFlow = (
-      try values.decode(MassFlow.self, forKey: .maxMassFlow),
-      try values.decode(MassFlow.self, forKey: .minMassFlow)
-    )
-    antiFreezeFlow = try values.decode(MassFlow.self, forKey: .antiFreezeFlow)
+    massFlow = 
+      try values.decode(MassFlow.self, forKey: .maxMassFlow)      
+    minFlow = 
+      try values.decode(Ratio.self, forKey: .minMassFlow)
+    antiFreezeFlow = try values.decode(Ratio.self, forKey: .antiFreezeFlow)
     HTFmass = try values.decode(Double.self, forKey: .HTFmass)
     HTF = ParameterDefaults.HTF
     imbalanceDesign = [
@@ -284,8 +286,8 @@ extension SolarField.Parameter: Codable {
     try container.encode(pumpParasticsFullLoad, forKey: .pumpParasticsFullLoad)
     try container.encode(antiFreezeParastics, forKey: .antiFreezeParastics)
     try container.encode(pumpParastics, forKey: .pumpParastics)
-    try container.encode(massFlow.max, forKey: .maxMassFlow)
-    try container.encode(massFlow.min, forKey: .minMassFlow)
+    try container.encode(massFlow, forKey: .maxMassFlow)
+    try container.encode(minFlow, forKey: .minMassFlow)
     try container.encode(antiFreezeFlow, forKey: .antiFreezeFlow)
     try container.encode(HTFmass, forKey: .HTFmass)
     try container.encode(imbalanceDesign[0], forKey: .imbalanceDesignNear)
@@ -334,8 +336,8 @@ extension SolarField.Parameter: Equatable {
       && rhs.elevation == rhs.elevation
       && lhs.antiFreezeParastics == rhs.antiFreezeParastics
       && lhs.pumpParastics == rhs.pumpParastics
-      && lhs.massFlow.max == rhs.massFlow.max
-      && lhs.massFlow.min == rhs.massFlow.min
+      && lhs.massFlow == rhs.massFlow
+      && lhs.minFlow == rhs.minFlow
       && lhs.pumpParasticsFullLoad == rhs.pumpParasticsFullLoad
       && lhs.antiFreezeFlow == rhs.antiFreezeFlow
       && lhs.HTFmass == rhs.HTFmass

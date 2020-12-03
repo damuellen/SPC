@@ -271,7 +271,7 @@ extension Storage {
       {
         thermalPower *= parameter.heatExchangerCapacity
         storage.setMassFlow(rate: thermalPower / storage.deltaHeat * 1_000)
-        #warning("The implementation here differs from PCT")
+        //#warning("The implementation here differs from PCT")
         if case .freezeProtection = solarField.operationMode {
           
           powerBlock.setMassFlow(rate: storage.massFlow.rate
@@ -356,8 +356,10 @@ extension Storage {
     solarField: inout SolarField,
     powerBlock: PowerBlock)
   {
-    let antiFreezeFlow = SolarField.parameter.antiFreezeFlow
-
+    let antiFreezeFlow = MassFlow(
+      SolarField.parameter.antiFreezeFlow.ratio 
+      * SolarField.parameter.massFlow.rate
+    )
     let splitfactor: Ratio = 0.4
     
     storage.massFlow = antiFreezeFlow.adjusted(withFactor: splitfactor)

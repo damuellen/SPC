@@ -226,12 +226,11 @@ extension Storage: MeasurementsConvertible {
     let splitfactor = Storage.parameter.HTF == .hiXL ? 0.4 : 1
 
     let solarField = SolarField.parameter
+    let antiFreezeFlow = solarField.antiFreezeFlow.ratio * solarField.massFlow.rate
 
-    massFlows.need.rate =
-      solarField.antiFreezeFlow.rate * Simulation.time.steps.interval
+    massFlows.need.rate = antiFreezeFlow * Simulation.time.steps.interval
 
-    let mf = massFlows.need
-      .adjusted(withFactor: splitfactor)
+    let mf = massFlows.need.adjusted(withFactor: splitfactor)
 
     temperatureTank.cold = Temperature.mixture(
       m1: mf, m2: massFlows.cold,

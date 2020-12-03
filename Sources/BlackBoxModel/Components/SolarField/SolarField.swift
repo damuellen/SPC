@@ -81,7 +81,7 @@ public struct SolarField: Component, HeatCycle {
     if operationMode == .freezeProtection {
       return parameter.antiFreezeParastics
     }
-    let load = massFlow.share(of: parameter.massFlow.max).ratio
+    let load = massFlow.share(of: parameter.massFlow).ratio
     return massFlow.rate > 0
       ? parameter.pumpParasticsFullLoad
         * (parameter.pumpParastics[0] + parameter.pumpParastics[1]
@@ -114,10 +114,11 @@ public struct SolarField: Component, HeatCycle {
     _ timeRemain: Double
   ) {
     let parameter = SolarField.parameter
+    let minFlow = MassFlow(parameter.minFlow.ratio * parameter.massFlow.rate)
     HCE.freezeProtectionCheck(&self)
     SolarField.last = loops
-    let m1 = (header.massFlow - parameter.massFlow.min).rate
-    let m2 = (parameter.massFlow.max - parameter.massFlow.min).rate
+    let m1 = (header.massFlow - minFlow).rate
+    let m2 = (parameter.massFlow - minFlow).rate
     for (n, loop) in zip(0..., [Loop.near, .average, .far]) {
       let massFlow =
         header.massFlow.rate == 0
@@ -146,13 +147,13 @@ public struct SolarField: Component, HeatCycle {
 
       if timeRemain < parameter.loopWays[0]
         / (designFlowVelocity
-          * header.massFlow.rate / parameter.massFlow.max.rate)
+          * header.massFlow.rate / parameter.massFlow.rate)
       {
         let timeRatio =
           timeRemain
           / (parameter.loopWays[0]
             / (designFlowVelocity * header.massFlow.rate
-              / parameter.massFlow.max.rate))
+              / parameter.massFlow.rate))
         // Correct the loop outlet temperatures
         let oneMinusTR = 1.0 - timeRatio
 
@@ -169,7 +170,7 @@ public struct SolarField: Component, HeatCycle {
           timeRemain
           / (parameter.loopWays[n]
             / (designFlowVelocity * loops[n].massFlow.rate
-              / parameter.massFlow.max.rate))
+              / parameter.massFlow.rate))
 
         let oneMinusTR: Double
         if timeRatio > 1.0 {
@@ -296,7 +297,7 @@ public struct SolarField: Component, HeatCycle {
     }
 
     operationMode = .unknown
-    #warning("The implementation here differs from PCT")
+    //#warning("The implementation here differs from PCT")
     loops[0].massFlow = header.massFlow
     loops[0].temperature.inlet = loops[1].temperature.inlet
 

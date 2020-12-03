@@ -12,10 +12,10 @@ public enum ParameterDefaults {
 
   static let hx = HeatExchanger.Parameter(
     name: "",
-    efficiency: 0.9,
+    efficiency: 1,
     sccEff: 0.99,
     temperature: HeatExchanger.Parameter.Temperatures(
-      htf: (inlet: (max: 393, min: 296), outlet: (max: 296, min: 0)),
+      htf: (inlet: (max: 393, min: 296), outlet: (max: 296, min: 245)),
       h2o: (inlet: (max: 0, min: 263), outlet: (max: 300, min: 300))
     ),
     scc: HeatExchanger.Parameter.Temperatures(
@@ -27,7 +27,7 @@ public enum ParameterDefaults {
     ToutMassFlow: nil,
     ToutTin: nil,
     ToutTinMassFlow: nil,
-    useAndsolFunction: false,
+    useAndsolFunction: true,
     Tout_f_Mfl: false,
     Tout_f_Tin: false,
     Tout_exp_Tin_Mfl: false
@@ -47,13 +47,13 @@ public enum ParameterDefaults {
 
   static let sf = SolarField.Parameter(
     imbalanceDesign: [1.0, 1.0, 1.0],
-    imbalanceMin: [1.0, 1.025, 1.0],
+    imbalanceMin: [1.03, 1.0, 0.97],
     windCoefficients: [0],
     useReferenceAmbientTemperature: false,
     referenceAmbientTemperature: 0.0,
-    heatlosses: [0.0],
+    heatlosses: [0.475, 0.0014],
     designTemperature: (inlet: 293.0, outlet: 393.0),
-    maxWind: Float(25.5),
+    maxWind: Float(14.5),
     numberOfSCAsInRow: 2,
     rowDistance: 18.0,
     distanceSCA: 1.5,
@@ -62,9 +62,10 @@ public enum ParameterDefaults {
     elevation: 0.0,
     antiFreezeParastics: 0.5,
     pumpParastics: [0.15, -0.293, 1.257],
-    massFlow: (1800.0, 50.0),
+    massFlow: 1800.0,
+    minFlow: 0.3,
     pumpParasticsFullLoad: 3.607,
-    antiFreezeFlow: 50.0,
+    antiFreezeFlow: 12.0,
     HTFmass: 396_359.0,
     HTF: HTF,
     collector: LS3,
@@ -139,24 +140,24 @@ public enum ParameterDefaults {
 
   static let hr = Heater.Parameter(
     name: "",
-    efficiency: 1,
-    maximumMassFlow: 10,
-    minLoad: 0, nominalElectricalParasitics: 1,
-    antiFreezeTemperature: .init(celsius: 100.0),
-    nominalTemperatureOut: .init(celsius: 200.0),
-    electricalParasitics: [10, 0],
+    efficiency: 0.9, minLoad: 0.3,
+    maximumMassFlow: 150,
+    nominalElectricalParasitics: 1,
+    antiFreezeTemperature: .init(celsius: 180.0),
+    nominalTemperatureOut: .init(celsius: 393.0),
+    electricalParasitics: [0.2589, 0.7411],
     onlyWithSolarField: false
   )
 
   static let tb = SteamTurbine.Parameter(
     name: "",
-    power: PowerRange(range: 33...77, nom: 75),
+    power: PowerRange(range: 10...77, nom: 75),
     efficiencyNominal: 0.4101728,
     efficiencyBoiler: 0.4101728,
     efficiencySCC: 0.4101728,
-    efficiency: [0.6526, 1.1839, -1.8611, 1.5008, -0.4761],
-    efficiencyTemperature: [0.99976, -0.00011537, 3.5579e-05, -1.6357e-06, 0],
-    startUpTime: 40, startUpEnergy: 250,
+    efficiency: [0.5665709, 1.38914, -1.595333, 0.6396214, 0],
+    efficiencyTemperature: [1.017685, 1.237701e-04, 5.270807e-05, -4.486609e-06, 4.374404e-08],
+    startUpTime: 30, startUpEnergy: 51,
     minPowerFromTemp: [1],
     hotStartUpTime: 120,
     efficiencyWetBulb: [0, 0, 0, 0, 0, 0],

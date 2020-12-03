@@ -102,7 +102,7 @@ public struct SteamTurbine: Component {
         let (maxLoad, efficiency) = SteamTurbine.perform(
           load, heat, modeBoiler, modeGasTurbine,
           heatExchanger.temperature.inlet, temperature)
-        #warning("Check this again")
+        //#warning("Check this again")
         let ratio = heat.production.megaWatt * efficiency / parameter.power.max
         load = Ratio(ratio, cap: maxLoad)
 
@@ -190,7 +190,7 @@ public struct SteamTurbine: Component {
 
     var dcFactor = 1.0
     // Dependency of Heat Rate on Ambient Temperature  - DRY COOLING -
-    #warning("The implementation here differs from PCT")
+    //#warning("The implementation here differs from PCT")
     if parameter.efficiencyTemperature[1] >= 1 {
       let (dc, loadMax) = DryCooling.update(
         steamTurbineLoad: load.ratio,

@@ -58,8 +58,7 @@ class Population {
     for layout in layouts {
       if let idx = oldLayouts.firstIndex(of: layout) {
         individuals.append(cache[idx])
-      } else {
-        SolarField.parameter.massFlow.max = MassFlow(2000)
+      } else {       
         Design.layout = layout
         individuals.append(BlackBoxModel.runModel(with: recorder))
       }

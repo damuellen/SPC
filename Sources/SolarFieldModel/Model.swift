@@ -71,7 +71,7 @@ extension Connector {
 
 extension SubField {
 
-  struct Model: Codable {
+  public struct Model: Codable {
     var name: String = "Subfield "
     var rowDistance: Double?
     var streamVelocity: Double?
@@ -115,8 +115,18 @@ public struct SolarFieldModel: Codable {
   var connectors: [Connector.Model]
   var subfields: [SubField.Model]
 
+  init(
+    solarField: SolarField.Model,
+    connectors: [Connector.Model],
+    subfields: [SubField.Model]) 
+  {
+    self.solarField = solarField
+    self.connectors = connectors
+    self.subfields = subfields
+  }
+
   public init() {
-    self.solarField = SolarField.Model(SolarField.shared)
+    self.solarField = SolarField.Model()
     self.connectors = SolarField.shared.connectors.map { $0.model() }
     self.subfields = SolarField.shared.subfields.map { $0.model() }
   }
