@@ -15,9 +15,9 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v2
 
-      - name: Install swift-DEVELOPMENT-SNAPSHOT-2020-11-18-a
+      - name: Install Swift compiler
         run: |
-          Install-Binary -Url "https://swift.org/builds/development/windows10/swift-2020-11-30-a/swift-2020-11-30-a-windows10.exe" -Name "installer.exe" -ArgumentList ("-q")
+          Install-Binary -Url "https://swift.org/builds/development/windows10/swift-DEVELOPMENT-SNAPSHOT-2020-11-18-a/swift-DEVELOPMENT-SNAPSHOT-2020-11-18-a-windows10.exe" -Name "installer.exe" -ArgumentList ("-q")
 
       - name: Set Environment Variables
         run: |
