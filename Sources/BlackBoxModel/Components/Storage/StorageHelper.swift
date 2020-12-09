@@ -313,7 +313,7 @@ extension Storage {
     // HeatExchanger.storage.HTFoutTmin = heatExchanger.HTFoutTmin never used
     self.dT_HTFsalt.cold = 1.0
     self.dT_HTFsalt.hot = 1.0
-    
+
     if storage.stepSizeIteration == -99.99 {
       heatInSalt.cold = Storage.parameter.HTF.properties.specificHeat(
         storage.designTemperature.cold
@@ -343,7 +343,7 @@ extension Storage {
   
   static func tankTemperature(_ specificHeat: Double) -> Temperature {
     let hcap = Storage.parameter.HTF.properties.heatCapacity
-    return Temperature((-hcap[0] + (hcap[0] ** 2 - 4 * (hcap[1] * 0.5)
+    return Temperature(celsius: (-hcap[0] + (hcap[0] ** 2 - 4 * (hcap[1] * 0.5)
         * (-350.5536 - specificHeat)) ** 0.5) / (2 * hcap[1] * 0.5))
   }
     
@@ -354,7 +354,7 @@ extension Storage {
       let minMassFlow = Design.layout.storage * parameter.dischargeToTurbine
         * HeatExchanger.parameter.sccHTFheat * 1_000 * 3_600
         / storage.heatInSalt.available
-      
+
       HeatExchanger.parameter.temperature.h2o.inlet.max = Temperature(
         parameter.startLoad.hot * Design.layout.storage
           * HeatExchanger.parameter.sccHTFheat * 1_000 * 3_600
@@ -373,7 +373,7 @@ extension Storage {
       let minMassFlow = Design.layout.storage_cap
         * parameter.dischargeToTurbine * 1_000 * 3_600
         / storage.heatInSalt.available
-      
+
       HeatExchanger.parameter.temperature.h2o.inlet.max = Temperature(
         parameter.startLoad.hot * Design.layout.storage_cap * 1_000 * 3_600
           / storage.heatInSalt.available + minMassFlow

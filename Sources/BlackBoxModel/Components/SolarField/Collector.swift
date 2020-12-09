@@ -22,17 +22,12 @@ public struct Collector: Component, CustomStringConvertible {
   /// Contains all data needed to simulate the operation of the collector
   public var parabolicElevation, theta, cosTheta, efficiency: Double
   public var insolationAbsorber: Double
-  
-  static var headers: String {
-    return "Parabolic Elevation, elevation, azimuth, theta, efficiency"
-  }
 
   public var description: String {
-    return String(format: "PE: %.1f°, ", parabolicElevation)
-      + String(format: "θ: %.2f°, ", theta)
-      + String(format: "cos(θ): %.2f, ", cosTheta)
-      + String(format: "η: %.2f", efficiency * 100) + "% "
-      + String(format: "insolationAbsorber: %.1f", insolationAbsorber)
+    formatting(
+      [insolationAbsorber, parabolicElevation, theta, cosTheta, efficiency],
+      ["Insolation absorber:", "PE:", "Theta:", "cos(Theta):", "Efficiency:"]
+    ) 
   }
 
   static let initialState = Collector(
@@ -131,7 +126,9 @@ public struct Collector: Component, CustomStringConvertible {
     
     let shadingHCE = self.shadingHCE(cosTheta: collector.cosTheta)
     
-    let eff = shadingSCA * shadingHCE * IAM * edge * k_torsion
+    let wind = solarField.windCoefficients(Double(ws))
+
+    let eff = shadingSCA * shadingHCE * IAM * edge * k_torsion * wind
       * Simulation.adjustmentFactor.efficiencySolarField
     collector.efficiency = eff
   }

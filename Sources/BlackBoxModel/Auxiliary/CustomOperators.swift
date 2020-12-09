@@ -29,7 +29,7 @@ extension Double {
   }
 }
 
-infix operator ><
+infix operator >< : MultiplicationPrecedence
 
 func >< (lhs: String, rhs: String) -> String {
   var width = TerminalController.terminalWidth() ?? 80

@@ -46,12 +46,12 @@ public enum ParameterDefaults {
   )
 
   static let sf = SolarField.Parameter(
+    heatLossHotHeader: [0, 0.475, 0.0014],
     imbalanceDesign: [1.0, 1.0, 1.0],
     imbalanceMin: [1.03, 1.0, 0.97],
-    windCoefficients: [0],
+    windCoefficients: [1.005474, -2.181319e-03, -6.416373e-05, 0, 0, 0],
     useReferenceAmbientTemperature: false,
-    referenceAmbientTemperature: 0.0,
-    heatlosses: [0.475, 0.0014],
+    referenceAmbientTemperature: 0.0,    
     designTemperature: (inlet: 293.0, outlet: 393.0),
     maxWind: Float(14.5),
     numberOfSCAsInRow: 2,
@@ -65,7 +65,7 @@ public enum ParameterDefaults {
     massFlow: 1800.0,
     minFlow: 0.3,
     pumpParasticsFullLoad: 3.607,
-    antiFreezeFlow: 12.0,
+    antiFreezeFlow: 0.12,
     HTFmass: 396_359.0,
     HTF: HTF,
     collector: LS3,
@@ -134,7 +134,20 @@ public enum ParameterDefaults {
     glassEmission: 0.0, opticalEfficiency: 0.7933452,
     emissionHCE: [0.033, 0.0001],
     shadingHCE: [0.962, 0.961, 0.938, 0.933],
-    IAMfac: [1, 0, -0.0817, 0.1689, -0.2639],
+    IAMfac: [0.996, 0.1556, -0.4821, 0.4028, -0.3085],
+    useIntegralRadialoss: false
+  )
+
+   static let NT_PRO = Collector.Parameter(
+    name: "NTPro_THVP1", absorber: .rio,
+    aperture: 6.707, lengthSCA: 192.984,
+    areaSCAnet: 1282.988103, extensionHCE: 0,
+    avgFocus: 2.169, rabsOut: 0.04445,
+    rabsInner: 0.04195, rglas: 0.071,
+    glassEmission: 0.86, opticalEfficiency: 0.790135815,
+    emissionHCE: [0.0047, 0.000134],
+    shadingHCE: [1, 1, 1, 1],
+    IAMfac: [0.9999789, 0.0967598, -0.3307049, 0, 0],
     useIntegralRadialoss: true
   )
 

@@ -27,8 +27,8 @@ public struct SolarField: Component, HeatCycle {
   var header: HeatTransfer
   var ETA: Double
   public var heatLosses: Double
-  public var heatLossHeader: Double
-  public var heatLossHCE: Double
+  public var heatLossesHotHeader: Double
+  public var heatLossesHCE: Double
   public var inFocus: Ratio
   var loops: [HeatTransfer]
   var loopEta: Double
@@ -62,7 +62,7 @@ public struct SolarField: Component, HeatCycle {
     isMaintained: false,
     header: HeatTransfer(name: "Header"),
     ETA: 0,
-    heatLosses: 0, heatLossHeader: 0, heatLossHCE: 0,
+    heatLosses: 0, heatLossesHotHeader: 0, heatLossesHCE: 0,
     inFocus: 0.0,
     loops: Loop.names.map { name in HeatTransfer(loop: name) },
     loopEta: 0
@@ -72,7 +72,7 @@ public struct SolarField: Component, HeatCycle {
   static var last: [HeatTransfer] = initialState.loops
 
   static func pipeHeatLoss(pipe: Temperature, ambient: Temperature) -> Double {
-    return ((pipe - ambient).kelvin / 333) ** 1 * parameter.pipeHeatLosses
+    return ((pipe.kelvin - ambient.kelvin) / 333) ** 1 * parameter.pipeHeatLosses
   }
 
   /// Calculates the parasitics
@@ -222,7 +222,7 @@ public struct SolarField: Component, HeatCycle {
 
   mutating func heatLossesHotHeader(ambient: Temperature) -> Temperature {
     let parameter = SolarField.parameter
-    let heatLoss = parameter.heatLossHeader
+    let c = parameter.heatLossHotHeader
     let htf = parameter.HTF
     let area =
       Design.layout.solarField
@@ -237,11 +237,10 @@ public struct SolarField: Component, HeatCycle {
     repeat {
       oldTemp = newTemp
 
-      heatLossHeader =
-        heatLoss[0] * (heatLoss[1] + heatLoss[2] * (newTemp - ambient).kelvin) // [MWt]
+      heatLossesHotHeader = c[0] * (c[1] + c[2] * (newTemp.kelvin - ambient.kelvin)) // [MWt]
 
       if header.massFlow.rate > 0 {
-        let deltaHeatPerKg = heatLossHeader * 1_000 / header.massFlow.rate // [kJ/kg]
+        let deltaHeatPerKg = heatLossesHotHeader * 1_000 / header.massFlow.rate // [kJ/kg]
         newTemp = htf.temperature(-deltaHeatPerKg, header.temperature.outlet)
       } else {
         let averageTemperature = Temperature.average(
@@ -258,9 +257,7 @@ public struct SolarField: Component, HeatCycle {
           * collector.rabsInner ** 2 / collector.aperture  // kg/m2
 
         /// Heat collected or lost during the flow through a whole loop [kJ/sqm]
-        let deltaHeatPerSqm =
-          heatLossHeader * 1_000_000  // [MW]
-          / area * 300 / 1_000
+        let deltaHeatPerSqm = heatLossesHotHeader * 1_000_000 / area * 300 / 1_000 // [MW]
         /// Change kJ/sqm to kJ/kg:
         let deltaHeatPerKg = deltaHeatPerSqm / areaDensity
 

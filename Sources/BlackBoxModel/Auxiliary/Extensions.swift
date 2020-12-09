@@ -12,6 +12,20 @@ import DateGenerator
 import Dispatch
 import Utility
 
+func formatting(_ values: [Double], _ labels: [String]) -> String {
+  let pairs = zip(    
+    labels.map { "  " + $0.padding(30) },
+    values.map { String(format: "%03.1f", $0) }
+  )
+  return pairs.map { $0.0 + $0.1 }.joined(separator: "\n")
+}
+
+extension String {
+  func padding(_ length: Int) -> String {
+    padding(toLength: length, withPad: " ", startingAt: 0)
+  }
+}
+
 extension Optional {
   var isNone: Bool {
     switch self {

@@ -293,7 +293,7 @@ public struct Boiler: Component {
 
 extension Boiler: CustomStringConvertible {
   public var description: String {
-    return "\(operationMode), "
+    "\(operationMode),\n"
       + "Maintenance: \(isMaintained ? "Yes" : "No"), "
       + "Load: \(load), "
       + String(format: "Start Energy: %.1f", startEnergy)

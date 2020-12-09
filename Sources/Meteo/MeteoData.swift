@@ -138,11 +138,11 @@ public struct MeteoData: CustomStringConvertible {
   }
 
   public var description: String {
-    return String(format: "Temp: %.1f ", temperature)
-      + String(format: "DNI: %.1f ", dni)
-      + String(format: "GHI: %.1f ", ghi)
-      + String(format: "DHI: %.1f ", dhi)
-      + String(format: "WS: %.1f\n", windSpeed)
+    String(format: "Ambient temperature: %.1f degreeC", temperature)
+      + String(format: "  DNI: %.1f W/m2", dni)
+      + String(format: "  GHI: %.1f W/m2", ghi)
+      + String(format: "  DHI: %.1f W/m2", dhi)
+      + String(format: "  WS: %.1f m/s\n", windSpeed)
   }
 
   var values: [String] {

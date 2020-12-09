@@ -42,7 +42,7 @@ class HCETests: XCTestCase {
     XCTAssertEqual(hce.massFlow.rate, 490.5, accuracy: 0.1)
     XCTAssertEqual(hce.temperature.outlet.celsius, 393.0, accuracy: 0.1)
     XCTAssertEqual(dumping.isZero, true)
-    XCTAssertEqual(solarField.heatLossHCE, 31.18, accuracy: 0.01)
+    XCTAssertEqual(solarField.heatLossesHCE, 31.18, accuracy: 0.01)
     XCTAssertEqual(solarField.heatLosses, 41.98, accuracy: 0.01)
     XCTAssertEqual(solarField.loopEta, 79.99, accuracy: 0.01)
     XCTAssertEqual(solarField.ETA, 79.99, accuracy: 0.01)
@@ -54,7 +54,7 @@ class HCETests: XCTestCase {
     XCTAssertEqual(hce.massFlow.rate, 598.9, accuracy: 0.1)
     XCTAssertEqual(hce.temperature.outlet.celsius, 393.0, accuracy: 0.1)
     XCTAssertEqual(dumping.isZero, true)
-    XCTAssertEqual(solarField.heatLossHCE, 30.48, accuracy: 0.01)
+    XCTAssertEqual(solarField.heatLossesHCE, 30.48, accuracy: 0.01)
     XCTAssertEqual(solarField.heatLosses, 40.88, accuracy: 0.01)
     XCTAssertEqual(solarField.inFocus.ratio, 1, accuracy: 0.01)
     collector.insolationAbsorber = 300.0
@@ -64,7 +64,7 @@ class HCETests: XCTestCase {
     XCTAssertEqual(hce.massFlow.rate, 274.97, accuracy: 0.1)
     XCTAssertEqual(hce.temperature.outlet.celsius, 393.0, accuracy: 0.1)
     XCTAssertEqual(dumping.isZero, true)
-    XCTAssertEqual(solarField.heatLossHCE, 31.86, accuracy: 0.01)
+    XCTAssertEqual(solarField.heatLossesHCE, 31.86, accuracy: 0.01)
     XCTAssertEqual(solarField.heatLosses, 43.05, accuracy: 0.01)
     XCTAssertEqual(solarField.inFocus.ratio, 1, accuracy: 0.01)
     collector.insolationAbsorber = 0.0
@@ -73,7 +73,7 @@ class HCETests: XCTestCase {
     XCTAssertEqual(hce.massFlow.rate, 230.8, accuracy: 0.1)
     XCTAssertEqual(hce.temperature.outlet.celsius, 393.0, accuracy: 0.1) // FIXME
     XCTAssertEqual(dumping.isZero, true)
-    XCTAssertEqual(solarField.heatLossHCE, 14.59, accuracy: 0.01)
+    XCTAssertEqual(solarField.heatLossesHCE, 14.59, accuracy: 0.01)
     XCTAssertEqual(solarField.heatLosses, 21.64, accuracy: 0.01)
     XCTAssertEqual(solarField.inFocus.ratio, 1, accuracy: 0.01)
   }
@@ -89,7 +89,7 @@ class HCETests: XCTestCase {
     XCTAssertEqual(hce.massFlow.rate, 0, accuracy: 0.1)
     XCTAssertEqual(hce.temperature.outlet.celsius, 200.0, accuracy: 0.1) // FIXME
     XCTAssertEqual(dumping.isZero, true)
-    XCTAssertEqual(solarField.heatLossHCE, 15.11, accuracy: 0.01)
+    XCTAssertEqual(solarField.heatLossesHCE, 15.11, accuracy: 0.01)
     XCTAssertEqual(solarField.heatLosses, 22.14, accuracy: 0.01)
     XCTAssertEqual(solarField.inFocus.ratio, 0, accuracy: 0.01)
   }

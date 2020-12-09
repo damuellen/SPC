@@ -33,12 +33,12 @@ public struct Energy: MeasurementsConvertible {
   }
 
   var numericalForm: [Double] {
-    return thermal.numericalForm + fuel.numericalForm
+    thermal.numericalForm + fuel.numericalForm
       + parasitics.numericalForm + electric.numericalForm
   }
 
   static var columns: [(name: String, unit: String)] {
-    return ThermalEnergy.columns + FuelConsumption.columns
+    ThermalEnergy.columns + FuelConsumption.columns
       + Parasitics.columns + ElectricPower.columns
   }
 }
@@ -59,23 +59,34 @@ public struct ElectricPower: Encodable, MeasurementsConvertible {
     parasitics = 0.0, net = 0.0, consum = 0.0
 
   var numericalForm: [Double] {
-    [steamTurbineGross, gasTurbineGross, backupGross, parasitics, net, consum]
+    [steamTurbineGross, gasTurbineGross, backupGross, storage, parasitics, shared, net, consum]
   }
 
   static var columns: [(name: String, unit: String)] {
     [
       ("Electric|SteamTurbineGross", "MWh e"),
       ("Electric|GasTurbineGross", "MWh e"),
-      ("Electric|BackupGross", "MWh e"), ("Electric|Parasitics", "MWh e"),
-      ("Electric|Net", "MWh e"), ("Electric|Consum", "MWh e"),
+      ("Electric|BackupGross", "MWh e"),
+      ("Electric|Storage", "MWh e"),
+      ("Electric|Parasitics", "MWh e"),
+      ("Electric|Shared", "MWh e"),
+      ("Electric|Net", "MWh e"),
+      ("Electric|Consum", "MWh e"),
     ]
   }
 
   mutating func totalize(_ electricEnergy: ElectricPower, fraction: Double) {
+    self.demand += electricEnergy.demand * fraction
+    self.gross += electricEnergy.gross * fraction
     self.steamTurbineGross += electricEnergy.steamTurbineGross * fraction
     self.gasTurbineGross += electricEnergy.gasTurbineGross * fraction
+    self.backupGross += electricEnergy.backupGross * fraction
     // backupGross +=
+    self.shared += electricEnergy.shared * fraction
+    self.solarField += electricEnergy.solarField * fraction
     self.parasitics += electricEnergy.parasitics * fraction
+    
+    self.storage += electricEnergy.storage * fraction
     self.net += electricEnergy.net * fraction
     self.consum += electricEnergy.consum * fraction
   }
@@ -160,11 +171,11 @@ public struct FuelConsumption: Encodable, MeasurementsConvertible {
     boiler = 0.0, heater = 0.0, gasTurbine = 0.0
 
   var combined: Double {
-    return boiler + heater
+    boiler + heater
   }
 
   var total: Double {
-    return boiler + heater + gasTurbine
+    boiler + heater + gasTurbine
   }
 
   var numericalForm: [Double] {
@@ -184,5 +195,14 @@ public struct FuelConsumption: Encodable, MeasurementsConvertible {
     boiler += fuel.boiler * fraction
     heater += fuel.heater * fraction
     gasTurbine += fuel.gasTurbine * fraction
+  }
+}
+
+extension Energy: CustomStringConvertible {
+  public var description: String {
+    thermal.prettyDescription
+      + electric.prettyDescription
+      + fuel.prettyDescription
+      + parasitics.prettyDescription
   }
 }

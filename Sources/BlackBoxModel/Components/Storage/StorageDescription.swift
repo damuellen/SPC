@@ -8,8 +8,17 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
-extension Storage {
+extension Storage: CustomStringConvertible {
   public var description: String {
-      "massFlow: \(massFlows.need), min: \(massFlows.minimum), cold: \(massFlows.cold), hot: \(massFlows.hot), heat: \(heatInSalt) "
+   "  Mode:".padding(30) + "\(operationMode)\n" + formatting(
+     [massFlow.rate, temperature.inlet.celsius, temperature.outlet.celsius,
+      massFlows.need.rate, massFlows.minimum.rate, massFlows.cold.rate, massFlows.hot.rate,
+      heatInSalt.cold, heatInSalt.hot, temperatureTank.cold.celsius, temperatureTank.hot.celsius,
+      antiFreezeTemperature, charge.ratio, storedHeat, heatProductionLoad.ratio, massOfSalt],
+     ["Mass flow rate:", "T in:", "T out:", 
+      "Salt need:", "Salt min:", "Salt cold:", "Salt hot:",
+      "Heat in salt cold:", "Heat in salt hot:", "Temperature tank cold:", "Temperature tank hot:",
+      "Anti freeze temperature:", "Charge:", "Stored Heat:", "Heat production Load:",  "Mass of salt:"]
+    )
   }
 }

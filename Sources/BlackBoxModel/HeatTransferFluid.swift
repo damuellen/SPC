@@ -14,7 +14,7 @@ import Config
 /// freeze temperature, specific heat capacity, viscosity, thermal conductivity,
 /// enthalpy, and density as a function of temperature.
 public struct HeatTransferFluid: CustomStringConvertible, Equatable {
-  static var parameter = ParameterDefaults.HTF
+  public static var parameter = ParameterDefaults.HTF
   let name: String
   let freezeTemperature: Temperature
   let heatCapacity: [Double]

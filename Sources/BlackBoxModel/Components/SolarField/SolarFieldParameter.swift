@@ -29,19 +29,18 @@ extension SolarField {
    - parasitic power as a function of HTF flow
    */
   public struct Parameter: ComponentParameter {
-    let HLDump = false
+    let HLDump = true
     let layout = SolarField.Layout.H
     let EtaWind = false
     /// Pipe heat losses in tested area [W/sqm]
     let SSFHL: Double = 0.0
-    let heatLossHeader: [Double] = [0, 0.475, 0.0014]
-    let HLDumpQuad = false
+    var heatLossHotHeader: [Double]
+    let HLDumpQuad = true
     var imbalanceDesign: [Double] = [1.0, 1.0, 1.0]
-    var imbalanceMin: [Double] = [0.0, 1.025, 1.05]
+    var imbalanceMin: [Double] = [1.03, 1.0, 0.97]
     var windCoefficients: Polynomial = [0.0]
-    var useReferenceAmbientTemperature = false
+    var useReferenceAmbientTemperature = true
     var referenceAmbientTemperature: Double = 0.0
-    var heatlosses: Polynomial = [0.0]
     var designTemperature: (inlet: Double, outlet: Double) = (0.0, 0.0)
     /// Maximum windspeed for operation [m/sec]
     let maxWind: Float
@@ -61,7 +60,8 @@ extension SolarField {
 
     var distRatio: Double = 0
     var pipeWay: Double = 0
-    var loopWays: [Double] = []    
+    var loopWays: [Double] = [] 
+    var heatlosses: [Double] = [] 
   }
 }
 
@@ -138,13 +138,13 @@ extension SolarField.Parameter: CustomStringConvertible {
       }
     }
     d += "Layout Design Type:"
-      >< "\(Design.layout.solarField)"
+      >< "\(layout.rawValue)"
     d += "Heat Losses in Hot Header [MW]:"
-      >< "\(heatLossHeader)"
-    if heatlosses.isEmpty == false {
+      >< "\(heatLossHotHeader[0])"
+    if heatLossHotHeader.count > 1 {
       d += "Heat Losses in Hot Header Coefficients;\nHL(Tout - Tamb) = HL(design)*(c0+c1*dT)\n"
-      for idx in heatlosses.indices {
-        d += "c\(idx):" >< "\(heatlosses[idx])"
+      for idx in heatLossHotHeader.indices.dropFirst() {
+        d += "c\(idx):" >< "\(heatLossHotHeader[idx])"
       }
     }
     d += "Use Reference T_amb from Solpipe:"
@@ -177,7 +177,7 @@ extension SolarField.Parameter: TextConfigInitializable {
     numberOfSCAsInRow = Int(try line(13))
     rowDistance = try line(16)
     distanceSCA = try line(19)
-    pipeHeatLosses = try line(22)
+    pipeHeatLosses = try line(22)    
     azimut = try line(25)
     elevation = try line(28)
     pumpParasticsFullLoad = try line(34)
@@ -188,6 +188,7 @@ extension SolarField.Parameter: TextConfigInitializable {
     antiFreezeFlow = try Ratio(line(55))
     HTFmass = try line(58)
     HTF = ParameterDefaults.HTF
+    heatLossHotHeader = try [line(66), line(67), line(68)]
     imbalanceDesign = try [line(72), line(73), line(74)]
     imbalanceMin = try [line(75), line(76), line(77)]
     windCoefficients =
@@ -206,7 +207,7 @@ extension SolarField.Parameter: Codable {
     case numberOfSCAsInRow
     case rowDistance
     case distanceSCA
-    case pipeHL
+    case pipeHL, heatLossHotHeader
     case azimut, elevation
     case pumpParasticsFullLoad, antiFreezeParastics, pumpParastics
     case maxMassFlow, minMassFlow
@@ -230,6 +231,7 @@ extension SolarField.Parameter: Codable {
     rowDistance = try values.decode(Double.self, forKey: .rowDistance)
     distanceSCA = try values.decode(Double.self, forKey: .distanceSCA)
     pipeHeatLosses = try values.decode(Double.self, forKey: .pipeHL)
+    heatLossHotHeader = try values.decode(Array<Double>.self, forKey: .heatLossHotHeader)
     azimut = try values.decode(Double.self, forKey: .elevation)
     elevation = try values.decode(Double.self, forKey: .elevation)
     pumpParasticsFullLoad = try values.decode(
@@ -271,7 +273,7 @@ extension SolarField.Parameter: Codable {
       try values.decode(Double.self, forKey: .inletDesignTemperature),
       try values.decode(Double.self, forKey: .outletDesignTemperature)
     )
-    heatlosses = try values.decode(Polynomial.self, forKey: .heatlosses)
+    heatlosses = try values.decode(Array<Double>.self, forKey: .heatlosses)
   }
 
   public func encode(to encoder: Encoder) throws {
@@ -316,7 +318,7 @@ extension SolarField.Parameter: Equatable {
       && lhs.EtaWind == rhs.EtaWind
       /// Pipe heat losses in tested area [W/sqm]
       && lhs.SSFHL == rhs.SSFHL
-      && lhs.heatLossHeader == rhs.heatLossHeader
+      && lhs.heatLossHotHeader == rhs.heatLossHotHeader
       && lhs.HLDumpQuad == rhs.HLDumpQuad
       && lhs.imbalanceDesign == rhs.imbalanceDesign
       && lhs.imbalanceMin == rhs.imbalanceMin

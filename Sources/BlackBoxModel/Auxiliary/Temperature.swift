@@ -29,7 +29,7 @@ public struct Temperature: CustomStringConvertible, Equatable {
   public var celsius: Double { return kelvin + Temperature.absoluteZeroCelsius }
 
   public var description: String {
-    return String(format: "%.1f°C", celsius)
+    String(format: "%.1f °C", celsius)
   }
 
   public init() {

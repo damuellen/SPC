@@ -35,7 +35,7 @@ extension PowerBlock.Parameter: CustomStringConvertible {
       >< "\(fixElectricalParasitics)"
     d += "Nominal Parasitics (Load = 1)[MW]:"
       >< "\(nominalElectricalParasiticsACC)"
-    d += "Parasitic ; Parasitics(Load) = Parasitics(100%)*(c0+c1*load)"
+    d += "Parasitic ; Parasitics(Load) = Parasitics(100%)*(c0+c1*load)\n"
     d += "c0:" >< "\(electricalParasitics[0])"
     d += "c1:" >< "\(electricalParasitics[1])"
     d += "c2:" >< "\(electricalParasitics[2])"
@@ -49,11 +49,11 @@ extension PowerBlock.Parameter: CustomStringConvertible {
       >< "\(electricalParasiticsShared[1])"
     d += "Nominal Parasitics of ACC [MW]:"
       >< "\(nominalElectricalParasiticsACC)"
-    d += "ACC Parasitic f(Load) = ParasiticsACC(100%)*(c0+c1*load+c2*load^2+...)"
+    d += "ACC Parasitic f(Load) = ParasiticsACC(100%)*(c0+c1*load+c2*load^2+...)\n"
     for (i, c) in electricalParasiticsACC.coefficients.enumerated() {
       d += "c\(i):" >< String(format: "%.4E", c)
     }
-    d += "ACC Parasitic f(Tamb) = ParasiticsACC(100%)*(c0+c1*Tamb+c2*Tamb^2+...)"
+    d += "ACC Parasitic f(Tamb) = ParasiticsACC(100%)*(c0+c1*Tamb+c2*Tamb^2+...)\n"
     for (i, c) in electricalParasiticsACCTamb.coefficients.enumerated() {
       d += "c\(i):" >< String(format: "%.4E", c)
     }

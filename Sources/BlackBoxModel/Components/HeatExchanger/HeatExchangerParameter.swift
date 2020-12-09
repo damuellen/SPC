@@ -32,8 +32,8 @@ extension HeatExchanger {
         self.h2o = ((T(celsius: h2o.inlet.max), T(celsius: h2o.inlet.min)),
                     (T(celsius: h2o.outlet.max),T(celsius: h2o.outlet.min)))
         self.range = (
-          inlet: Temperature(htf.inlet.max - htf.inlet.min),
-          outlet: Temperature(htf.outlet.max - htf.outlet.min)
+          inlet: T(celsius: htf.inlet.max - htf.inlet.min),
+          outlet: T(celsius: htf.outlet.max - htf.outlet.min)
         )
       }
     }

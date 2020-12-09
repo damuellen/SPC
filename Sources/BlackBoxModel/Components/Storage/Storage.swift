@@ -83,7 +83,7 @@ public struct Storage: Component, HeatCycle {
       var parasitics: Double
 
       if storage.charge.ratio < parameter.chargeTo,
-        solarField.massFlow.rate >= powerBlock.massFlow.rate
+        solarField.massFlow >= SolarField.parameter.massFlow
       {
         storage.operationMode = .charging
       } else { // heat cannot be stored
@@ -455,7 +455,7 @@ public struct Storage: Component, HeatCycle {
 
 extension HeatTransferFluid {
   func specificHeat(_ temperature: Temperature) -> Double {
-    return heatCapacity[0] * temperature.kelvin
-      + 0.5 * heatCapacity[1] * temperature.kelvin ** 2 - 350.5536
+    heatCapacity[0] * temperature.celsius
+      + 0.5 * heatCapacity[1] * temperature.celsius ** 2 - 350.5536
   }
 }

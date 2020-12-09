@@ -10,7 +10,7 @@
 
 extension GasTurbine: CustomStringConvertible {
   public var description: String {
-    return "\(operationMode), "
+    "\(operationMode),\n"
       + "Maintenance: \(isMaintained ? "Yes" : "No"), "
       + "Load: \(load)"
   }

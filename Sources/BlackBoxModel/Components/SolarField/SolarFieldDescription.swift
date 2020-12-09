@@ -10,13 +10,9 @@
 
 extension SolarField: CustomStringConvertible {
   public var description: String {
-    return "\(operationMode), "
-      + String(format: "Focus: %.1f%, ", inFocus.percentage)
-      + String(format: "ETA: %.1f, ", ETA)
-      + String(format: "HL: %.1f, ", heatLosses)
-      + String(format: "HL Header: %.1f, ", heatLossHeader)
-      + String(format: "HL HCE: %.1f", heatLossHCE)
-      + "\n\t\(header)\n"      
-      + "Loops: \n\t\(loops[0])\n\t\(loops[1])\n\t\(loops[2])\n\t\(loops[3])"
+    "  Mode:".padding(30) + "\(operationMode)\n" + formatting(
+      [inFocus.percentage, ETA, heatLosses, heatLossesHotHeader, heatLossesHCE],
+      ["Focus:", "ETA:", "Heat losses:", "Heat losses header:", "Heat losses HCE:"]      
+    ) + "\n" + cycle.description + "\nLoops:\nDesign\n\(loops[0])\nNear\n\(loops[1])\nAverage\n\(loops[2])\nFar\n\(loops[3])"
   }
 }

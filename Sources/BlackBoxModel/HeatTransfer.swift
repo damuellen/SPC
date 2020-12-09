@@ -38,10 +38,11 @@ public struct HeatTransfer: CustomStringConvertible {
     self.temperature = (inlet: temperature, outlet: temperature)
   }
 
-  public var description: String {
-    String(format: "\(name): Mfl: %.1fkg/s, ", massFlow.rate)
-      + String(format: "Tin: %.1f°C, ", temperature.inlet.celsius)
-      + String(format: "Tout: %.1f°C", temperature.outlet.celsius)
+  public var description: String {  
+    "  Mass flow rate:".padding(32) 
+      + String(format: "%3.1f\n", massFlow.rate)
+      + "  Temperatures:".padding(32) 
+      + String(format: "%3.1f / %3.1f", temperature.inlet.celsius, temperature.outlet.celsius)
   }
 
   var values: [String] {

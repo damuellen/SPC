@@ -77,15 +77,14 @@ extension Storage: MeasurementsConvertible {
     calculateMassFlow(
       cold: temperatureTank.cold,
       hot: temperature.inlet - dT_HTFsalt.hot,
-      thermal: -thermal)
+      thermal: thermal)
 
     massFlows.cold = massFlows.need
     massFlows.minimum = Storage.minMassFlow(self)
 
     // avoids negative or too low mass and therefore no heat losses.
     if massFlows.cold < massFlows.minimum {
-      massFlows.need -=
-        massFlows.minimum - massFlows.cold
+      massFlows.need -= massFlows.minimum - massFlows.cold
     }
 
     if abs(massFlows.need.rate) < 10 {
@@ -239,8 +238,7 @@ extension Storage: MeasurementsConvertible {
     )
 
     antiFreezeTemperature =
-      splitfactor
-      * temperatureTank.cold.kelvin
+      splitfactor * temperatureTank.cold.kelvin
       + (1 - splitfactor) * powerBlock.outletTemperature
   }
 

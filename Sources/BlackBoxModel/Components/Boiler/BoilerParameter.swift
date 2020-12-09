@@ -46,10 +46,12 @@ extension Boiler.Parameter: CustomStringConvertible {
       >< "\(start.energy.warm)"
     d += "Parasitics at Full Load [MW]:"
       >< "\(nominalElectricalParasitics)"
-    d += "Parasitic Energy Coefficients;\nParasitics(Load) = Parasitics(100%)*(c0+c1*load)"
+    d += "Parasitic Energy Coefficients; "
+    d += "Parasitics(Load) = Parasitics(100%)*(c0+c1*load)\n"
     d += "c0:" >< "\(electricalParasitics[0])"
     d += "c1:" >< "\(electricalParasitics[1])"
-    d += "Efficiency;\nEfficiency(Load) = c0+c1*load+c2*load^2+c3*load^3+c4*load^4)"
+    d += "Efficiency; "
+    d += "Efficiency(Load) = c0+c1*load+c2*load^2+c3*load^3+c4*load^4)\n"
     for (i, c) in efficiency.coefficients.enumerated() {
       d += "c\(i):" >< String(format: "%.6E", c)
     }
