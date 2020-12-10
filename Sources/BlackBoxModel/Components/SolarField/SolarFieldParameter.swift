@@ -55,7 +55,6 @@ extension SolarField {
     var antiFreezeFlow: Ratio
     var HTFmass: Double
     var HTF: HeatTransferFluid
-    var collector: Collector.Parameter!
     var edgeFactor: [Double] = []
 
     var distRatio: Double = 0
@@ -70,11 +69,11 @@ extension SolarField.Parameter {
   mutating func wayLength() {
     let designWay =
       Double(numberOfSCAsInRow)
-      * (collector.lengthSCA + distanceSCA) * 2.0 + rowDistance
+      * (Collector.parameter.lengthSCA + distanceSCA) * 2.0 + rowDistance
 
     var nearWay =
       Double(numberOfSCAsInRow)
-      * (collector.lengthSCA + distanceSCA)
+      * (Collector.parameter.lengthSCA + distanceSCA)
     nearWay =
       layout ~= .I
       ? nearWay
@@ -112,19 +111,19 @@ extension SolarField.Parameter: CustomStringConvertible {
     d += "Distance between Collectors in a Row [m]:"
       >< "\(distanceSCA)"
     d += "Heat Losses in total HTF Piping (per sqm aperture) [W/m²]:"
-      >< "\(pipeHeatLosses)"
+      >< String(format: "%G", pipeHeatLosses)
     d += "Heat Losses in Piping of tested field (per sqm aperture) [W/m²]:"
-      >< "\(SSFHL)"
+      >< String(format: "%G", SSFHL)
     d += "Azimuth angle of Solar Field Orientation [°]:"
       >< "\(azimut)"
     d += "Mass Flow in Solar Field at Full Load [kg/s]:"
-      >< "\(massFlow.rate)"
+      >< String(format: "%G", massFlow.rate)
     d += "Minimum allowable Mass Flow [%]:"
       >< "\(minFlow.percentage)"
     d += "Anti-Freeze Mass Flow [%]:"
       >< "\(antiFreezeFlow.percentage)"
     d += "Total Mass of HTF in System [kg]:"
-      >< "\(HTFmass)"
+      >< String(format: "%.1f",HTFmass)
     d += "Consider HL of ANY Dump. Collectors:"
       >< (HLDump ? "YES" : "NO ")
     d += "Consider HL of Dump. Col. for operating quadrant:"
@@ -134,25 +133,25 @@ extension SolarField.Parameter: CustomStringConvertible {
     if windCoefficients.isEmpty == false {
       d += "Collector efficiency vs Wind Speed c0+c1*WS+c2*WS^2+c3*WS^3+c4*WS^4+c5*WS^5\n"
       for idx in windCoefficients.indices {
-        d += "c\(idx):" >< "\(windCoefficients[idx])"
+        d += "c\(idx):" >< String(format: "%.6e", windCoefficients[idx])
       }
     }
     d += "Layout Design Type:"
       >< "\(layout.rawValue)"
     d += "Heat Losses in Hot Header [MW]:"
-      >< "\(heatLossHotHeader[0])"
+      >< String(format: "%G",heatLossHotHeader[0])
     if heatLossHotHeader.count > 1 {
       d += "Heat Losses in Hot Header Coefficients;\nHL(Tout - Tamb) = HL(design)*(c0+c1*dT)\n"
       for idx in heatLossHotHeader.indices.dropFirst() {
-        d += "c\(idx):" >< "\(heatLossHotHeader[idx])"
+        d += "c\(idx):" >< String(format: "%.6e", heatLossHotHeader[idx])
       }
     }
     d += "Use Reference T_amb from Solpipe:"
       >< (useReferenceAmbientTemperature ? "YES" : "NO ")
     d += "Design SOF T_inlet [°C]:"
-      >< "\(designTemperature.inlet)"
+      >< String(format: "%G", designTemperature.inlet)
     d += "Design SOF T_outlet [°C]:"
-      >< "\(designTemperature.outlet)"
+      >< String(format: "%G", designTemperature.outlet)
     d += "HTF Flow Imbalance\n"
     d += "Near, Design:"
       >< "\(imbalanceDesign[0])"
@@ -184,8 +183,8 @@ extension SolarField.Parameter: TextConfigInitializable {
     antiFreezeParastics = try line(37)
     pumpParastics = try [line(40), line(43), line(46)]
     massFlow = try MassFlow(line(49))
-    minFlow = try Ratio(line(52))
-    antiFreezeFlow = try Ratio(line(55))
+    minFlow = try Ratio(line(52) / 100)
+    antiFreezeFlow = try Ratio(line(55) / 100)
     HTFmass = try line(58)
     HTF = ParameterDefaults.HTF
     heatLossHotHeader = try [line(66), line(67), line(68)]
@@ -344,7 +343,6 @@ extension SolarField.Parameter: Equatable {
       && lhs.antiFreezeFlow == rhs.antiFreezeFlow
       && lhs.HTFmass == rhs.HTFmass
       && lhs.HTF == rhs.HTF
-      && lhs.collector == rhs.collector
       && lhs.edgeFactor == rhs.edgeFactor
   }
 }

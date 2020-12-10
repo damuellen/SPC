@@ -21,7 +21,11 @@ public struct Temperatures {
 public struct Temperature: CustomStringConvertible, Equatable {
 
   var kelvin: Double {
-    willSet { assert(newValue.isFinite) }
+    willSet { 
+      assert(newValue.isFinite)
+      assert(kelvin.isNormal)
+      assert(kelvin.sign == .plus)
+    }
   }
 
   static var absoluteZeroCelsius = -273.15

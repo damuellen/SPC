@@ -53,7 +53,7 @@ extension Boiler.Parameter: CustomStringConvertible {
     d += "Efficiency; "
     d += "Efficiency(Load) = c0+c1*load+c2*load^2+c3*load^3+c4*load^4)\n"
     for (i, c) in efficiency.coefficients.enumerated() {
-      d += "c\(i):" >< String(format: "%.6E", c)
+      d += "c\(i):" >< String(format: "%.6e", c)
     }
     d += "Booster Superheater (if NO regular boiler selected):"
       >< (booster ? "YES" : "NO")

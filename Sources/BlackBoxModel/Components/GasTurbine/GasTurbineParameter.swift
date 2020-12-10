@@ -30,17 +30,17 @@ extension GasTurbine.Parameter: CustomStringConvertible {
     d += "Efficiency; "
     d += "Efficiency(Load) = c0+c1*load+c2*load^2+c3*load^3+c4*load^4)\n"
     for (i, c) in efficiencyFromLoad.coefficients.enumerated() {
-      d += "c\(i):" >< String(format: "%.4E", c)
+      d += "c\(i):" >< String(format: "%.6e", c)
     }
     d += "Maximum Power as a func of temperature; "
     d += "Power(T) = GrossPower*(c0+c1*T+c2*T^2+c3*T^3+c4*T^4)\n"
     for (i, c) in loadMaxFromTemperature.coefficients.enumerated() {
-      d += "c\(i):" >< String(format: "%.4E", c)
+      d += "c\(i):" >< String(format: "%.6e", c)
     }
     d += "Parasitic as a func of load; "
     d += "Parasitics(Load) = Parasitcs(100%)*(c0+c1*load+c2*load^2+c3*load^3+c4*load^4)\n"
     for (i, c) in parasiticsFromLoad.coefficients.enumerated() {
-      d += "c\(i):" >< String(format: "%.4E", c)
+      d += "c\(i):" >< String(format: "%.6e", c)
     }
     return d
   }

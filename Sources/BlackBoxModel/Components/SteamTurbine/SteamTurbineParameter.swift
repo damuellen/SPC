@@ -31,7 +31,7 @@ extension SteamTurbine {
 extension SteamTurbine.Parameter: CustomStringConvertible {
   public var description: String {
     var d: String = ""
-    d += "Description:\t\(name)\n"
+    d += "Description:" >< name
     d += "Maximum Electrical Power [MW]:"
       >< "\(power.max)"
     d += "Minimum Electrical Power (nominal) [MW]:"
@@ -40,7 +40,7 @@ extension SteamTurbine.Parameter: CustomStringConvertible {
       >< "\(power.min)"
     d += "Min. Power;\nPower(Tamb) = PowerNom*(c0+c1*Tamb+c2*Tamb^2+c3*Tamb^3+c4*Tamb^4)\n"
     for (i, c) in minPowerFromTemp.coefficients.enumerated() {
-      d += "c\(i):" >< String(format: "%.6E", c)
+      d += "c\(i):" >< String(format: "%.6e", c)
     }
     d += "Efficiency in Solar Mode:"
       >< "\(efficiencyNominal * 100)"
@@ -50,11 +50,11 @@ extension SteamTurbine.Parameter: CustomStringConvertible {
       >< "\(efficiencySCC * 100)"
     d += "Efficiency;\nEfficiency(Load) = c0+c1*load+c2*load^2+c3*load^3+c4*load^4\n"
     for (i, c) in efficiency.coefficients.enumerated() {
-      d += "c\(i):" >< String(format: "%.6E", c)
+      d += "c\(i):" >< String(format: "%.6e", c)
     }
     d += "Efficiency;\nEfficiency(Temperature) = c0+c1*T+c2*T^2+c3*T^3+c4*T^4\n"
     for (i, c) in efficiencyTemperature.coefficients.enumerated() {
-      d += "c\(i):" >< String(format: "%.6E", c)
+      d += "c\(i):" >< String(format: "%.6e", c)
     }
     d += "Efficiency;\nEfficiency(Wet Bulb Temp.) = c0+c1*T+c2*T^2\n"
     d += "Below Wet Bulb Temperature: (°C)"
@@ -86,15 +86,15 @@ extension SteamTurbine.Parameter: TextConfigInitializable {
   public init(file: TextConfigFile) throws {
     let line: (Int) throws -> Double = { try file.parseDouble(line: $0) }
     name = file.name
-    power = try .init(range: line(10)...line(13), nom: 0)
-    efficiencyNominal = try line(32)
-    efficiencyBoiler = try line(35)
+    power = try .init(range: line(13)...line(10), nom: 0)
+    efficiencyNominal = try line(32) / 100
+    efficiencyBoiler = try line(35) / 100
     efficiencySCC = try line(38)
     efficiency = try [line(45), line(48), line(51), line(54), line(57)]
     efficiencyTemperature = try [line(64), line(67), line(70), line(73), line(76)]
     startUpTime = try Int(line(83))
     startUpEnergy = try line(86)
-    minPowerFromTemp = [0]
+    minPowerFromTemp = [1]
     hotStartUpTime = 75
     efficiencyWetBulb = .init(values: 0, 0, 0, 0, 0, 0)
     WetBulbTstep = 0

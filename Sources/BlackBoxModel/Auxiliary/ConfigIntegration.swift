@@ -55,7 +55,6 @@ extension JSONConfig {
     case .COL:
       Collector.update(parameter:
         try decoder.decode(Collector.Parameter.self, from: data))
-      SolarField.parameter.collector = Collector.parameter
     case .STO: break
     case .HR:
       Heater.update(parameter:
@@ -149,7 +148,7 @@ extension TextConfig {
       case .DEM: break
       case .TAR: break // Simulation.tariff = try .init(file: configFile)
       case .SIM: break // Simulation.parameter = try .init(file: configFile)
-      case .INI: break // Simulation.initialValues = try .init(file: configFile)
+      case .INI: Simulation.initialValues = try .init(file: configFile)
       case .TIM: Simulation.time = try .init(file: configFile)
       case .DES: break
       case .AVL: break

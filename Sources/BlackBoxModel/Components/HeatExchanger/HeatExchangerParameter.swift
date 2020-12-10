@@ -59,30 +59,30 @@ extension HeatExchanger {
 extension HeatExchanger.Parameter: CustomStringConvertible {
   public var description: String {
     var d = ""
-    d += "Description:\t\(name)\n"
+    d += "Description:" >< name
     d += "Parameter for Steam Cycle\n"
     d += "Efficiency [%]:"
-      >< "\(efficiency * 100)"
+      >< String(format: "%.1f", (efficiency * 100))
     d += "Maximum Inlet Temperature  [°C]:"
-      >< "\(temperature.htf.inlet.max.celsius)"
+      >< String(format: "%.1f", temperature.htf.inlet.max.celsius)
     d += "Maximum Outlet Temperature [°C]:"
-      >< "\(temperature.htf.outlet.max.celsius)"
+      >< String(format: "%.1f", temperature.htf.outlet.max.celsius)
     d += "Minimum Inlet Temperature  [°C]:"
-      >< "\(temperature.htf.inlet.min.celsius)"
+      >< String(format: "%.1f", temperature.htf.inlet.min.celsius)
     d += "Minimum Outlet Temperature [°C]:"
-      >< "\(temperature.htf.outlet.min.celsius)"
+      >< String(format: "%.1f", temperature.htf.outlet.min.celsius)
     d += "Calculate Outlet Temp. as function of HTF Massflow:"
       >< (Tout_f_Mfl ? "YES" : "NO ")
     if Tout_f_Mfl, ToutMassFlow != nil {
       for (i, c) in ToutMassFlow!.coefficients.enumerated() {
-        d += "c\(i):" >< String(format: "%.4E", c)
+        d += "c\(i):" >< String(format: "%.6e", c)
       }
     }
     d += "Calculate Outlet Temp. as function of HTF Inlet Temp.:"
       >< (Tout_f_Tin ? "YES" : "NO ")
     if Tout_f_Tin, ToutTin != nil {
       for (i, c) in ToutTin!.coefficients.enumerated() {
-        d += "c\(i):" >< String(format: "%.4E", c)
+        d += "c\(i):" >< String(format: "%.6e", c)
       }
     }
     d += "Calculate Outlet Temp. as Andasol-3 Function.:"
@@ -91,7 +91,7 @@ extension HeatExchanger.Parameter: CustomStringConvertible {
       >< (Tout_exp_Tin_Mfl ? "YES" : "NO ")
     if Tout_exp_Tin_Mfl, ToutTinMassFlow != nil {
       for (i, c) in ToutTinMassFlow!.coefficients.enumerated() {
-        d += "c\(i):" >< String(format: "%.4E", c)
+        d += "c\(i):" >< String(format: "%.6e", c)
       }
     }
     // d += "not used:" HXc.H2OinTmax
@@ -100,15 +100,15 @@ extension HeatExchanger.Parameter: CustomStringConvertible {
     // d += "not used:" HXc.H2OoutTmin - TK0
     d += "Parameter for ISCCS Cycle\n"
     d += "Efficiency [%]:"
-      >< "\(sccEff * 100)"
+      >< String(format: "%.1f", (sccEff * 100))
     d += "Maximum Inlet Temperature [°C]:"
-      >< "\(scc.htf.inlet.max.celsius)"
+      >< String(format: "%.1f", scc.htf.inlet.max.celsius)
     d += "Maximum Outlet Temperature [°C]:"
-      >< "\(scc.htf.outlet.max.celsius)"
+      >< String(format: "%.1f", scc.htf.outlet.max.celsius)
     d += "Minimum Inlet Temperature [°C]:"
-      >< "\(scc.htf.inlet.min.celsius)"
+      >< String(format: "%.1f", scc.htf.inlet.min.celsius)
     d += "Minimum Outlet Temperature [°C]:"
-      >< "\(scc.htf.outlet.min.celsius)"
+      >< String(format: "%.1f", scc.htf.outlet.min.celsius)
     // d += "not used:" HXc.sccH2OinTmax - TK0
     // d += "not used:" HXc.sccH2OinTmin - TK0
     // d += "not used:" HXc.sccH2OoutTmax - TK0
@@ -125,7 +125,7 @@ extension HeatExchanger.Parameter: TextConfigInitializable {
   public init(file: TextConfigFile) throws {
     let line: (Int) throws -> Double = { try file.parseDouble(line: $0) }
     name = file.name
-    efficiency = try line(10)
+    efficiency = try line(10) / 100
     temperature = try Temperatures(
       htf: (inlet: (max: line(13), min: line(16)),
             outlet: (max: line(19), min: line(22))),

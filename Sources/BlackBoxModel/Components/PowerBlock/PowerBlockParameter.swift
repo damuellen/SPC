@@ -51,11 +51,11 @@ extension PowerBlock.Parameter: CustomStringConvertible {
       >< "\(nominalElectricalParasiticsACC)"
     d += "ACC Parasitic f(Load) = ParasiticsACC(100%)*(c0+c1*load+c2*load^2+...)\n"
     for (i, c) in electricalParasiticsACC.coefficients.enumerated() {
-      d += "c\(i):" >< String(format: "%.4E", c)
+      d += "c\(i):" >< String(format: "%.6e", c)
     }
     d += "ACC Parasitic f(Tamb) = ParasiticsACC(100%)*(c0+c1*Tamb+c2*Tamb^2+...)\n"
     for (i, c) in electricalParasiticsACCTamb.coefficients.enumerated() {
-      d += "c\(i):" >< String(format: "%.4E", c)
+      d += "c\(i):" >< String(format: "%.6e", c)
     }
     return d
   }

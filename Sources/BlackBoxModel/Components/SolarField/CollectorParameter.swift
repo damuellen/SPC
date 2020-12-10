@@ -48,7 +48,7 @@ extension Collector {
 extension Collector.Parameter: CustomStringConvertible {
   public var description: String {
     var d: String = ""
-    d += "Description:\t\(name)\n"
+    d += "Description:" >< name
     d += "Aperture [m]:"
       >< "\(aperture)"
     d += "Length [m]:"
@@ -79,7 +79,7 @@ extension Collector.Parameter: CustomStringConvertible {
     d += "for incident angle >14°:" >< "\(shadingHCE[3])"
     d += "Incident Angle Modifier;\nIAM(theta) = c0+c1*theta+c2*theta^2+c3*theta^3+c4*theta^4\n"
     for (i, c) in IAMfac.coefficients.enumerated() {
-      d += "c\(i):" >< String(format: "%.4E", c)
+      d += "c\(i):" >< String(format: "%.6e", c)
     }
     return d
   }

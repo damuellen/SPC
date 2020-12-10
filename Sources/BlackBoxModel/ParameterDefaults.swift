@@ -68,7 +68,6 @@ public enum ParameterDefaults {
     antiFreezeFlow: 0.12,
     HTFmass: 396_359.0,
     HTF: HTF,
-    collector: LS3,
     edgeFactor: []
   )
 
@@ -111,7 +110,7 @@ public enum ParameterDefaults {
     DischrgParFac: 1, definedBy: .cap,
     //  resultingTemperature: (.init(celsius: 293.0), .init(celsius: 390.0)),
     designTemperature: (566.15, 663.15),
-    heatLoss: (1, 1),
+    heatLoss: (79.967, 98.98),
     startFossilCharging: (1, 1), stopFossilCharging: (1, 2),
     startFossilCharging2: (1, 1), stopFossilCharging2: (1, 2),
     heatExchangerEfficiency: 1,
@@ -179,7 +178,7 @@ public enum ParameterDefaults {
   )
 
   static let pb = PowerBlock.Parameter(
-    name: "",
+    name: "powerblock",
     fixElectricalParasitics: 0.3218,
     nominalElectricalParasitics: 0.5378732,
     fixElectricalParasitics0: 0.2497,

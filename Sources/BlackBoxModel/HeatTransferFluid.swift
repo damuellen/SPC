@@ -79,10 +79,9 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
           ))
       )
     }
-    return Temperature(
-      celsius: HeatTransferFluid.temperatureFromHeatCapacity(
-        heat, t.celsius, coefficients: heatCapacity)
-    )
+    return Temperature(celsius:
+     HeatTransferFluid.temperatureFromHeatCapacity(
+       heat, t.celsius, coefficients: heatCapacity))
   }
 
   func density(_ temperature: Temperature) -> Double {
@@ -199,26 +198,26 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
     if enthaplyFromTemperature.isEmpty == false {
       d += "Enthalpy as function on Temperature\n"
       for (i, c) in enthaplyFromTemperature.coefficients.enumerated() {
-        d += "c\(i):" >< String(format: "%.6E", c)
+        d += "c\(i):" >< String(format: "%.6e", c)
       }
     }
     if temperatureFromEnthalpy.isEmpty == false {
       d += "Temperature as function on Enthalpy\n"
       for (i, c) in temperatureFromEnthalpy.coefficients.enumerated() {
-        d += "c\(i):" >< String(format: "%.6E", c)
+        d += "c\(i):" >< String(format: "%.6e", c)
       }
     }
     d += "Density as a Function of Temperature; roh(T) = c0+c1*T+c1*T^2\n"
     for (i, c) in density.enumerated() {
-      d += "c\(i):" >< String(format: "%.6E", c)
+      d += "c\(i):" >< String(format: "%.6e", c)
     }
     d += "Viscosity as a Function of Temperature; eta(T) = c0+c1*T+c1*T^2\n"
     for (i, c) in viscosity.enumerated() {
-      d += "c\(i):" >< String(format: "%.6E", c)
+      d += "c\(i):" >< String(format: "%.6e", c)
     }
     d += "Conductivity as a Function of Temperature; lamda(T) = c0+c1*T+c1*T^2\n"
     for (i, c) in thermCon.enumerated() {
-      d += "c\(i):" >< String(format: "%.6E", c)
+      d += "c\(i):" >< String(format: "%.6e", c)
     }
     d += "Maximum Operating Temperature [°C]:" >< "\(maxTemperature.celsius)"
     return d

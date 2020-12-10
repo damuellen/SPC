@@ -32,8 +32,8 @@ enum PerformanceReport {
     let aperture =
       layout.solarField * 2 * collector.areaSCAnet
       * Double(solarField.numberOfSCAsInRow)
-    d += "    Aperture [m²]:" >< "\(aperture)"
-    d += "    Massflow [kg/s]:" >< solarField.massFlow.rate.description
+    d += "    Aperture [m²]:" >< String(format: "%G", aperture)
+    d += "    Massflow [kg/s]:" >< String(format: "%G",solarField.massFlow.rate)
     d +=
       "    Elevation [ø]:  " + "\(solarField.elevation)\t Azimut [ø]:  "
       + "\(solarField.azimut)"
@@ -149,17 +149,17 @@ enum PerformanceReport {
     d += "\n\n"
     d += "OPERATION\n"
     d += "\n"
-    d += "First Date of Operation [MM.dd  HH:mm]:                             "
+    let s1 = "First Date of Operation [MM.dd  HH:mm]:                             "
     if let firstDateOfOperation = Simulation.time.firstDateOfOperation {
-      d += String(describing: firstDateOfOperation) + .lineBreak
+      d += s1 >< String(describing: firstDateOfOperation)
     } else {
-      d += "01.01  00:00\n"
+      d += s1 >< "01.01  00:00"
     }
-    d += "Last Date of Operation [MM.dd  HH:mm]:                              "
+    let s2 = "Last Date of Operation [MM.dd  HH:mm]:                              "
     if let lastDateOfOperation = Simulation.time.lastDateOfOperation {
-      d += String(describing: lastDateOfOperation) + .lineBreak
+      d += s2 >< String(describing: lastDateOfOperation)
     } else {
-      d += "12.31  23:59\n"
+      d += s2 >< "12.31  23:59"
     }
     d += "HTF Temperature in Header [°C]:"
       >< "\(Simulation.initialValues.temperatureOfHTFinPipes.celsius)"

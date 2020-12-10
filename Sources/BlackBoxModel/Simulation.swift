@@ -15,8 +15,8 @@ public enum Simulation {
   static var isStart = true
 
   public static var initialValues = InitValues(
-    temperatureOfHTFinPipes: Temperature(celsius: 200.0),
-    temperatureOfHTFinHCE: Temperature(celsius: 200.0),
+    temperatureOfHTFinPipes: Temperature(celsius: 100.0),
+    temperatureOfHTFinHCE: Temperature(celsius: 50.0),
     massFlowInSolarField: 0.0
   )
 
@@ -75,8 +75,8 @@ public struct InitValues: Codable {
 extension InitValues {
   public init(file: TextConfigFile) throws {
     let line: (Int) throws -> Double = { try file.parseDouble(line: $0) }
-    self.temperatureOfHTFinPipes = try Temperature(line(7))
-    self.temperatureOfHTFinHCE = try Temperature(line(10))
+    self.temperatureOfHTFinPipes = try Temperature(celsius: line(7))
+    self.temperatureOfHTFinHCE = try Temperature(celsius: line(10))
     self.massFlowInSolarField = try MassFlow(line(13))
   }
 }

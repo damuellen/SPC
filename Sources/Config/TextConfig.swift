@@ -44,7 +44,7 @@ public enum TextConfig {
   public static func read(url: URL) -> TextConfigFile? {
     let path = url.absoluteString
     guard let data = FileManager.default.contents(atPath: path),
-      let content = String(data: data, encoding: .ascii)
+      let content = String(data: data, encoding: .utf8)
     else { return nil }
     return TextConfigFile(content: content, path: path)
   }

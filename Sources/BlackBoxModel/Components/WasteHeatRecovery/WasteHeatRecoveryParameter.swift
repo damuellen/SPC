@@ -36,11 +36,11 @@ extension WasteHeatRecovery.Parameter: CustomStringConvertible {
     d += "Ratio Fossil/Solar Thermal Contribution :" >< "\(ratioHTF)"
     d += "Efficiency(Solar-Load) = c0+c1*load+c2*load^2+c3*load^3+c4*load^4)\n"
     for (i, c) in efficiencySolar.coefficients.enumerated() {
-      d += "c\(i):" >< String(format: "%.4E", c)
+      d += "c\(i):" >< String(format: "%.6e", c)
     }
     d += "Efficiency(GT-Load) = c0+c1*load+c2*load^2+c3*load^3+c4*load^4)\n"
     for (i, c) in efficiencyGasTurbine.coefficients.enumerated() {
-      d += "c\(i):" >< String(format: "%.4E", c)
+      d += "c\(i):" >< String(format: "%.6e", c)
     }
     return d
   }
