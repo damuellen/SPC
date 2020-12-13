@@ -58,66 +58,51 @@ extension HeatExchanger {
 
 extension HeatExchanger.Parameter: CustomStringConvertible {
   public var description: String {
-    var d = ""
-    d += "Description:" >< name
-    d += "Parameter for Steam Cycle\n"
-    d += "Efficiency [%]:"
-      >< String(format: "%.1f", (efficiency * 100))
-    d += "Maximum Inlet Temperature  [°C]:"
-      >< String(format: "%.1f", temperature.htf.inlet.max.celsius)
-    d += "Maximum Outlet Temperature [°C]:"
-      >< String(format: "%.1f", temperature.htf.outlet.max.celsius)
-    d += "Minimum Inlet Temperature  [°C]:"
-      >< String(format: "%.1f", temperature.htf.inlet.min.celsius)
-    d += "Minimum Outlet Temperature [°C]:"
-      >< String(format: "%.1f", temperature.htf.outlet.min.celsius)
-    d += "Calculate Outlet Temp. as function of HTF Massflow:"
-      >< (Tout_f_Mfl ? "YES" : "NO ")
-    if Tout_f_Mfl, ToutMassFlow != nil {
-      for (i, c) in ToutMassFlow!.coefficients.enumerated() {
-        d += "c\(i):" >< String(format: "%.6e", c)
-      }
-    }
-    d += "Calculate Outlet Temp. as function of HTF Inlet Temp.:"
-      >< (Tout_f_Tin ? "YES" : "NO ")
-    if Tout_f_Tin, ToutTin != nil {
-      for (i, c) in ToutTin!.coefficients.enumerated() {
-        d += "c\(i):" >< String(format: "%.6e", c)
-      }
-    }
-    d += "Calculate Outlet Temp. as Andasol-3 Function.:"
-      >< (useAndsolFunction ? "YES" : "NO ")
-    d += "Calculate Outlet Temp. as f(Tin,Mfl):"
-      >< (Tout_exp_Tin_Mfl ? "YES" : "NO ")
-    if Tout_exp_Tin_Mfl, ToutTinMassFlow != nil {
-      for (i, c) in ToutTinMassFlow!.coefficients.enumerated() {
-        d += "c\(i):" >< String(format: "%.6e", c)
-      }
-    }
-    // d += "not used:" HXc.H2OinTmax
-    // d += "not used:" HXc.H2OinTmin
-    // d += "not used:" HXc.H2OoutTmax - TK0
-    // d += "not used:" HXc.H2OoutTmin - TK0
-    d += "Parameter for ISCCS Cycle\n"
-    d += "Efficiency [%]:"
-      >< String(format: "%.1f", (sccEff * 100))
-    d += "Maximum Inlet Temperature [°C]:"
-      >< String(format: "%.1f", scc.htf.inlet.max.celsius)
-    d += "Maximum Outlet Temperature [°C]:"
-      >< String(format: "%.1f", scc.htf.outlet.max.celsius)
-    d += "Minimum Inlet Temperature [°C]:"
-      >< String(format: "%.1f", scc.htf.inlet.min.celsius)
-    d += "Minimum Outlet Temperature [°C]:"
-      >< String(format: "%.1f", scc.htf.outlet.min.celsius)
-    // d += "not used:" HXc.sccH2OinTmax - TK0
-    // d += "not used:" HXc.sccH2OinTmin - TK0
-    // d += "not used:" HXc.sccH2OoutTmax - TK0
-    // d += "not used:" HXc.sccH2OoutTmin - TK0
-    d += "Nominal HTF Mass Flow [kg/s]:"
-      >< "\(sccHTFmassFlow.rate)"
-    d += "Nominal Capacity [MW]:"
-      >< String(format: "%.3f", sccHTFheat)
-    return d
+    "Description:" >< name
+    + "Parameter for Steam Cycle\n"
+    + "Efficiency [%]:" >< String(format: "%.1f", (efficiency * 100))
+    + "Maximum Inlet Temperature  [°C]:"
+    >< String(format: "%.1f", temperature.htf.inlet.max.celsius)
+    + "Maximum Outlet Temperature [°C]:"
+    >< String(format: "%.1f", temperature.htf.outlet.max.celsius)
+    + "Minimum Inlet Temperature  [°C]:"
+    >< String(format: "%.1f", temperature.htf.inlet.min.celsius)
+    + "Minimum Outlet Temperature [°C]:"
+    >< String(format: "%.1f", temperature.htf.outlet.min.celsius)
+    + "Calculate Outlet Temp. as function of HTF Massflow:"
+    >< (Tout_f_Mfl ? "YES" : "NO ")
+    + ((Tout_f_Mfl && ToutMassFlow != nil) ? "\(ToutMassFlow!)" : "")
+    + "Calculate Outlet Temp. as function of HTF Inlet Temp.:"
+    >< (Tout_f_Tin ? "YES" : "NO ")
+    + ((Tout_f_Tin && ToutTin != nil) ? "\(ToutTin!)" : "")    
+    + "Calculate Outlet Temp. as Andasol-3 Function.:"
+    >< (useAndsolFunction ? "YES" : "NO ")
+    + "Calculate Outlet Temp. as f(Tin,Mfl):"
+    >< (Tout_exp_Tin_Mfl ? "YES" : "NO ")
+    + ((Tout_exp_Tin_Mfl && ToutTinMassFlow != nil) ?
+    "\(ToutTinMassFlow!)" : "")
+    //  + "not used:" HXc.H2OinTmax
+    //  + "not used:" HXc.H2OinTmin
+    //  + "not used:" HXc.H2OoutTmax - TK0
+    //  + "not used:" HXc.H2OoutTmin - TK0
+    + "Parameter for ISCCS Cycle\n"
+    + "Efficiency [%]:"
+    >< String(format: "%.1f", (sccEff * 100))
+    + "Maximum Inlet Temperature [°C]:"
+    >< String(format: "%.1f", scc.htf.inlet.max.celsius)
+    + "Maximum Outlet Temperature [°C]:"
+    >< String(format: "%.1f", scc.htf.outlet.max.celsius)
+    + "Minimum Inlet Temperature [°C]:"
+    >< String(format: "%.1f", scc.htf.inlet.min.celsius)
+    + "Minimum Outlet Temperature [°C]:"
+    >< String(format: "%.1f", scc.htf.outlet.min.celsius)
+  //  + "not used:" HXc.sccH2OinTmax - TK0
+  //  + "not used:" HXc.sccH2OinTmin - TK0
+  //  + "not used:" HXc.sccH2OoutTmax - TK0
+  //  + "not used:" HXc.sccH2OoutTmin - TK0
+    + "Nominal HTF Mass Flow [kg/s]:" >< "\(sccHTFmassFlow.rate)"
+    + "Nominal Capacity [MW]:"
+    >< String(format: "%.3f", sccHTFheat)
   }
 }
 

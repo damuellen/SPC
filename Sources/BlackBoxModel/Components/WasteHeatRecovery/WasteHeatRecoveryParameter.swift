@@ -29,20 +29,14 @@ extension WasteHeatRecovery {
 
 extension WasteHeatRecovery.Parameter: CustomStringConvertible {
   public var description: String {
-    var d = ""
-    d += "Operation Mode:" >< operation.rawValue
-    d += "Efficiency in Hybrid Mode:" >< "\(efficiencyNominal * 100)"
-    d += "Efficiency in CC Mode:" >< "\(efficiencyPure * 100)"
-    d += "Ratio Fossil/Solar Thermal Contribution :" >< "\(ratioHTF)"
-    d += "Efficiency(Solar-Load) = c0+c1*load+c2*load^2+c3*load^3+c4*load^4)\n"
-    for (i, c) in efficiencySolar.coefficients.enumerated() {
-      d += "c\(i):" >< String(format: "%.6e", c)
-    }
-    d += "Efficiency(GT-Load) = c0+c1*load+c2*load^2+c3*load^3+c4*load^4)\n"
-    for (i, c) in efficiencyGasTurbine.coefficients.enumerated() {
-      d += "c\(i):" >< String(format: "%.6e", c)
-    }
-    return d
+    "Operation Mode:" >< operation.rawValue
+    + "Efficiency in Hybrid Mode:" >< "\(efficiencyNominal * 100)"
+    + "Efficiency in CC Mode:" >< "\(efficiencyPure * 100)"
+    + "Ratio Fossil/Solar Thermal Contribution :" >< "\(ratioHTF)"
+    + "Efficiency(Solar-Load) = c0+c1*load+c2*load^2+c3*load^3+c4*load^4)"
+    + "\n\(efficiencySolar)"
+    + "Efficiency(GT-Load) = c0+c1*load+c2*load^2+c3*load^3+c4*load^4)"
+    + "\n\(efficiencyGasTurbine)"
   }
 }
 

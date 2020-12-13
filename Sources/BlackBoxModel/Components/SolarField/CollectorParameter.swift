@@ -47,41 +47,28 @@ extension Collector {
 
 extension Collector.Parameter: CustomStringConvertible {
   public var description: String {
-    var d: String = ""
-    d += "Description:" >< name
-    d += "Aperture [m]:"
-      >< "\(aperture)"
-    d += "Length [m]:"
-      >< "\(lengthSCA)"
-    d += "Aperture Area [m²]:"
-      >< "\(areaSCAnet)"
-    d += "Extension of HCE [m]:"
-      >< "\(extensionHCE)"
-    d += "Average Distance Parabola to Focus [m]:"
-      >< "\(avgFocus)"
-    d += "Absorber Pipe Outer Radius [m]:"
-      >< "\(rabsOut)"
-    d += "Absorber Pipe Inner Radius [m]:"
-      >< "\(rabsInner)"
-    d += "Glas Tube Radius [m]:"
-      >< "\(rglas)"
-    d += "Optical Efficiency [%]:"
-      >< "\(opticalEfficiency * 100)"
-    d += "Absorber emittance; Emittance(T) = c0 + c1*T\n"
-    d += "c0:" >< "\(emissionHCE[0])"
-    d += "c1:" >< "\(emissionHCE[1])"
-    d += "Calc. Radialoss as Integral of dT:"
-      >< "\(useIntegralRadialoss ? "YES" : "NO")"
-    d += "Bellow Shadowing Factors\n"
-    d += "for incident angle 0 - 1.5°:" >< "\(shadingHCE[0])"
-    d += "for incident angle 1.5 - 5°:" >< "\(shadingHCE[1])"
-    d += "for incident angle 5 - 14°:" >< "\(shadingHCE[2])"
-    d += "for incident angle >14°:" >< "\(shadingHCE[3])"
-    d += "Incident Angle Modifier;\nIAM(theta) = c0+c1*theta+c2*theta^2+c3*theta^3+c4*theta^4\n"
-    for (i, c) in IAMfac.coefficients.enumerated() {
-      d += "c\(i):" >< String(format: "%.6e", c)
-    }
-    return d
+    "Description:" >< name
+    + "Aperture [m]:" >< "\(aperture)"
+    + "Length [m]:" >< "\(lengthSCA)"
+    + "Aperture Area [m²]:" >< "\(areaSCAnet)"
+    + "Extension of HCE [m]:" >< "\(extensionHCE)"
+    + "Average Distance Parabola to Focus [m]:" >< "\(avgFocus)"
+    + "Absorber Pipe Outer Radius [m]:" >< "\(rabsOut)"
+    + "Absorber Pipe Inner Radius [m]:" >< "\(rabsInner)"
+    + "Glas Tube Radius [m]:" >< "\(rglas)"
+    + "Optical Efficiency [%]:" >< "\(opticalEfficiency * 100)"
+    + "Absorber emittance; Emittance(T) = c0 + c1*T\n"
+    + "c0:" >< "\(emissionHCE[0])"
+    + "c1:" >< "\(emissionHCE[1])"
+    + "Calc. Radialoss as Integral of dT:"
+    >< "\(useIntegralRadialoss ? "YES" : "NO")"
+    + "Bellow Shadowing Factors\n"
+    + "for incident angle 0 - 1.5°:" >< "\(shadingHCE[0])"
+    + "for incident angle 1.5 - 5°:" >< "\(shadingHCE[1])"
+    + "for incident angle 5 - 14°:" >< "\(shadingHCE[2])"
+    + "for incident angle >14°:" >< "\(shadingHCE[3])"
+    + "Incident Angle Modifier;\nIAM(theta) = c0+c1*theta+c2*theta^2+c3*theta^3+c4*theta^4"
+    + "\n\(IAMfac)"
   }
 }
 

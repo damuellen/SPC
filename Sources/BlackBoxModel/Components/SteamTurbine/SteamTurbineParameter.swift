@@ -30,55 +30,36 @@ extension SteamTurbine {
 
 extension SteamTurbine.Parameter: CustomStringConvertible {
   public var description: String {
-    var d: String = ""
-    d += "Description:" >< name
-    d += "Maximum Electrical Power [MW]:"
-      >< "\(power.max)"
-    d += "Minimum Electrical Power (nominal) [MW]:"
-      >< "\(power.nominal)"
-    d += "Minimum Electrical Power (lower limit) [MW] :"
-      >< "\(power.min)"
-    d += "Min. Power;\nPower(Tamb) = PowerNom*(c0+c1*Tamb+c2*Tamb^2+c3*Tamb^3+c4*Tamb^4)\n"
-    for (i, c) in minPowerFromTemp.coefficients.enumerated() {
-      d += "c\(i):" >< String(format: "%.6e", c)
-    }
-    d += "Efficiency in Solar Mode:"
-      >< "\(efficiencyNominal * 100)"
-    d += "Efficiency in Boiler Mode:"
-      >< "\(efficiencyBoiler * 100)"
-    d += "Efficiency in IsccS Mode:"
-      >< "\(efficiencySCC * 100)"
-    d += "Efficiency;\nEfficiency(Load) = c0+c1*load+c2*load^2+c3*load^3+c4*load^4\n"
-    for (i, c) in efficiency.coefficients.enumerated() {
-      d += "c\(i):" >< String(format: "%.6e", c)
-    }
-    d += "Efficiency;\nEfficiency(Temperature) = c0+c1*T+c2*T^2+c3*T^3+c4*T^4\n"
-    for (i, c) in efficiencyTemperature.coefficients.enumerated() {
-      d += "c\(i):" >< String(format: "%.6e", c)
-    }
-    d += "Efficiency;\nEfficiency(Wet Bulb Temp.) = c0+c1*T+c2*T^2\n"
-    d += "Below Wet Bulb Temperature: (°C)"
-      >< "(WetBulbTstep)"
-    d += "c0:" >< "\(efficiencyWetBulb[0])"
-    d += "c1:" >< "\(efficiencyWetBulb[1])"
-    d += "c2:" >< "\(efficiencyWetBulb[2])"
-    d += "Above Wet Bulb Temperature: (°C)"
-      >< "(WetBulbTstep)"
-    d += "c0:" >< "\(efficiencyWetBulb[3])"
-    d += "c1:" >< "\(efficiencyWetBulb[4])"
-    d += "c2:" >< "\(efficiencyWetBulb[5])"
-    d += "Efficiency;\nEfficiency(HTF_Tin) = A * HTF_Tin ( °C ) ^ B * corrFactor\n"
-    d += "A" >< "\(efficiencyTempIn_A)"
-    d += "B" >< "\(efficiencyTempIn_B)"
-    d += "corr factor:"
-      >< "\(efficiencyTempIn_cf)"
-    d += "Time for Start-Up [min]:"
-      >< "\(startUpTime)"
-    d += "Energy for Start-Up [MWh]:"
-      >< "\(startUpEnergy)"
-    d += "Stand Still Time for Hot Start-up <= [min]:"
-      >< "\(hotStartUpTime)"
-    return d
+    "Description:" >< name
+    + "Maximum Electrical Power [MW]:" >< "\(power.max)"
+    + "Minimum Electrical Power (nominal) [MW]:" >< "\(power.nominal)"
+    + "Minimum Electrical Power (lower limit) [MW] :" >< "\(power.min)"
+    + "Min. Power;\nPower(Tamb) = PowerNom*(c0+c1*Tamb+c2*Tamb^2+c3*Tamb^3+c4*Tamb^4)"
+    + "\n\(minPowerFromTemp)"
+    + "Efficiency in Solar Mode:" >< "\(efficiencyNominal * 100)"
+    + "Efficiency in Boiler Mode:" >< "\(efficiencyBoiler * 100)"
+    + "Efficiency in IsccS Mode:" >< "\(efficiencySCC * 100)"
+    + "Efficiency;\nEfficiency(Load) = c0+c1*load+c2*load^2+c3*load^3+c4*load^4"
+    + "\n\(efficiency)"
+    + "Efficiency;\nEfficiency(Temperature) = c0+c1*T+c2*T^2+c3*T^3+c4*T^4"
+    + "\n\(efficiencyTemperature)"
+    + "Efficiency;\nEfficiency(Wet Bulb Temp.) = c0+c1*T+c2*T^2\n"
+    + "Below Wet Bulb Temperature: (°C)" >< "(WetBulbTstep)"
+    + "c0:" >< "\(efficiencyWetBulb[0])"
+    + "c1:" >< "\(efficiencyWetBulb[1])"
+    + "c2:" >< "\(efficiencyWetBulb[2])"
+    + "Above Wet Bulb Temperature: (°C)" >< "(WetBulbTstep)"
+    + "c0:" >< "\(efficiencyWetBulb[3])"
+    + "c1:" >< "\(efficiencyWetBulb[4])"
+    + "c2:" >< "\(efficiencyWetBulb[5])"
+    + "Efficiency;\nEfficiency(HTF_Tin) = A * HTF_Tin ( °C ) ^ B * corrFactor\n"
+    + "A" >< "\(efficiencyTempIn_A)"
+    + "B" >< "\(efficiencyTempIn_B)"
+    + "corr factor:" >< "\(efficiencyTempIn_cf)"
+    + "Time for Start-Up [min]:" >< "\(startUpTime)"
+    + "Energy for Start-Up [MWh]:" >< "\(startUpEnergy)"
+    + "Stand Still Time for Hot Start-up <= [min]:"
+    >< "\(hotStartUpTime)"
   }
 }
 

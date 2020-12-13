@@ -93,51 +93,49 @@ extension Storage {
 
 extension Storage.Parameter: CustomStringConvertible {
   public var description: String {
-    var d: String = ""
-    d += "Description:" + name
-    d += "Capacity of Thermal Energy Storage [h]:" // Design.layout.storage)"
-    d += "Storage Availability [%]:"
-      >< "\(Availability.current.values.storage.percentage)"
-    d += "Design Temperature of Cold Storage Tank [°C]:"
-      >< "\(designTemperature.cold))"
-    d += "Design Temperature of Hot Storage Tank [°C]:"
-      >< "\(designTemperature.hot)"
-    d += "DeltaT in Heat Exchanger during discharging [°C]:"
-      >< "\(temperatureDischarge2[0])"
-    d += "DeltaT in Heat Exchanger during charging [°C]:"
-      >< "\(temperatureCharge2[0])"
-    d += "Heat Loss of Cold Storage Tank [kW]:"
-      >< "\(heatlossC0to1[0])"
-    d += "Heat Loss of Hot Storage Tank [kW]:"
-      >< "\(heatlossC0to1[1])"
-    d += "Heat Exchanger Efficiency [%]:"
-      >< "\(heatExchangerEfficiency * 100)"
-    d += "Temperature of Cold Tank at Program Start [°]:"
-      >< "\(startTemperature.cold)"
-    d += "Temperature of Hot Tank at Program Start [°]:"
-      >< "\(startTemperature.hot)"
-    d += "Load of Cold Tank at Program Start [%]:"
-      >< "\(startLoad.cold * 100)"
-    d += "Load of Hot Tank at Program Start [%]:"
-      >< "\(startLoad.hot * 100)"
-    d += "Charging of Storage during Night by HTF-heater (0=YES; -1=NO): \(FC)"
-    d += "Stop charging strategy at day:" >< "\(stopFossilCharging.day)"
-    d += "Stop charging strategy at month:" >< "\(stopFossilCharging.month)"
-    d += "Start charging strategy at day:" >< "\(startFossilCharging.day)"
-    d += "Start charging strategy at month:" >< "\(startFossilCharging.month)"
-    d += "Charge Storage up to relative Load before Start-up of Turbine:"
-      >< "\(PrefChargeto)"
-    d += "Definition of Summer from Month:" >< "\(startexcep)"
-    d += "                       to Month:" >< "\(endexcep)"
-    d += "DNI for Bad Days Winter [kWh/m2]:" >< "\(badDNIwinter)"
-    d += "DNI for Bad Days Summer [kWh/m2]:" >< "\(badDNIsummer)"
-    d += "Massflow to POB during Charge in Bad Days Winter [%]:"
-      >< "\(heatProductionLoadWinter.percentage )"
-    d += "Massflow to POB during Charge in Bad Days Summer [%]:"
-      >< "\(heatProductionLoadSummer.percentage)"
-    d += "Time to begin TES Discharge in Winter [hr]:" >< "\(dischrgWinter)"
-    d += "Time to begin TES Discharge in Summer [hr]:" >< "\(dischrgSummer)"
-    return d
+    "Description:" >< name
+    + "Capacity of Thermal Energy Storage [h]:\n" // Design.layout.storage)"
+    + "Storage Availability [%]:"
+    >< "\(Availability.current.values.storage.percentage)"
+    + "Design Temperature of Cold Storage Tank [°C]:"
+    >< "\(designTemperature.cold))"
+    + "Design Temperature of Hot Storage Tank [°C]:"
+    >< "\(designTemperature.hot)"
+    + "DeltaT in Heat Exchanger during discharging [°C]:"
+    >< "\(temperatureDischarge2[0])"
+    + "DeltaT in Heat Exchanger during charging [°C]:"
+    >< "\(temperatureCharge2[0])"
+    + "Heat Loss of Cold Storage Tank [kW]:"
+    >< String(format: "%G", heatlossC0to1[0])
+    + "Heat Loss of Hot Storage Tank [kW]:"
+    >< String(format: "%G", heatlossC0to1[1])
+    + "Heat Exchanger Efficiency [%]:"
+    >< "\(heatExchangerEfficiency * 100)"
+    + "Temperature of Cold Tank at Program Start [°]:"
+    >< "\(startTemperature.cold)"
+    + "Temperature of Hot Tank at Program Start [°]:"
+    >< "\(startTemperature.hot)"
+    + "Load of Cold Tank at Program Start [%]:"
+    >< "\(startLoad.cold * 100)"
+    + "Load of Hot Tank at Program Start [%]:"
+    >< "\(startLoad.hot * 100)"
+    + "Charging of Storage during Night by HTF-heater (0=YES; -1=NO): \(FC)\n"
+    + "Stop charging strategy at day:" >< "\(stopFossilCharging.day)"
+    + "Stop charging strategy at month:" >< "\(stopFossilCharging.month)"
+    + "Start charging strategy at day:" >< "\(startFossilCharging.day)"
+    + "Start charging strategy at month:" >< "\(startFossilCharging.month)"
+    + "Charge Storage up to relative Load before Start-up of Turbine:"
+    >< "\(PrefChargeto)"
+    + "Definition of Summer from Month:" >< "\(startexcep)"
+    + "                       to Month:" >< "\(endexcep)"
+    + "DNI for Bad Days Winter [kWh/m2]:" >< "\(badDNIwinter)"
+    + "DNI for Bad Days Summer [kWh/m2]:" >< "\(badDNIsummer)"
+    + "Massflow to POB during Charge in Bad Days Winter [%]:"
+    >< "\(heatProductionLoadWinter.percentage )"
+    + "Massflow to POB during Charge in Bad Days Summer [%]:"
+    >< "\(heatProductionLoadSummer.percentage)"
+    + "Time to begin TES Discharge in Winter [hr]:" >< "\(dischrgWinter)"
+    + "Time to begin TES Discharge in Summer [hr]:" >< "\(dischrgSummer)"
   }
 }
 
@@ -156,15 +154,17 @@ extension Storage.Parameter: TextConfigInitializable {
     temperatureDischarge2 = try [line(62), line(65), line(68), line(71)]
     temperatureCharge = try [line(81), line(84), line(87), line(90)]
     temperatureCharge2 = try [line(96), line(99), line(102), line(105)]
-    heatlossCst = try [line(114), line(118), line(121), line(124)]
+    heatlossCst = try [line(115), line(118), line(121), line(124)]
     heatlossC0to1 = try [line(130), line(133), line(136), line(139)]
-    pumpEfficiency = try line(73) / 100
+    pumpEfficiency = try line(146) / 100
     pressureLoss = try line(149)
     massFlow = try .init(line(152))
     startTemperature = try (T(line(162)), T(line(165)))
     startLoad = try (line(168), line(171))
   //  HX = try line(172) //bool
-    strategy = .always//try line(173) 
+
+    file.values[172]
+    strategy = .demand//try line(173) 
     PrefChargeto = try line(174)
     startexcep = try line2(175)
     endexcep = try line2(176)
@@ -204,7 +204,7 @@ extension Storage.Parameter: TextConfigInitializable {
     badDNIwinter = try line(238)
     badDNIsummer = try line(239)
     type = .indirect // try line(241)
-    designTemperature = (T(0), T(0))
+    designTemperature = (T(290), T(390))
     heatdiff = 0
     heatLoss = (0,0)
     heatExchangerEfficiency = 0

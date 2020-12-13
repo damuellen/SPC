@@ -31,33 +31,22 @@ extension Boiler {
 
 extension Boiler.Parameter: CustomStringConvertible {
   public var description: String {
-    var d: String = ""
-    d += "Nominal Outlet Temperature [°]:"
-      >< "\(nominalTemperatureOut)"
-    d += "Minimum Load [%]:"
-      >< "\(minLoad * 100)"
-    d += "Cold Start-up necessary after [h]:"
-      >< "\(start.hours.cold)"
-    d += "Energy needed for Cold Start-up [MWh]:"
-      >< "\(start.energy.cold)"
-    d += "Warm Start-up necessary after [h]:"
-      >< "\(start.hours.warm)"
-    d += "Energy needed for Warm Start-up [MWh]:"
-      >< "\(start.energy.warm)"
-    d += "Parasitics at Full Load [MW]:"
-      >< "\(nominalElectricalParasitics)"
-    d += "Parasitic Energy Coefficients; "
-    d += "Parasitics(Load) = Parasitics(100%)*(c0+c1*load)\n"
-    d += "c0:" >< "\(electricalParasitics[0])"
-    d += "c1:" >< "\(electricalParasitics[1])"
-    d += "Efficiency; "
-    d += "Efficiency(Load) = c0+c1*load+c2*load^2+c3*load^3+c4*load^4)\n"
-    for (i, c) in efficiency.coefficients.enumerated() {
-      d += "c\(i):" >< String(format: "%.6e", c)
-    }
-    d += "Booster Superheater (if NO regular boiler selected):"
-      >< (booster ? "YES" : "NO")
-    return d
+    "Nominal Outlet Temperature [°]:" >< "\(nominalTemperatureOut)"
+    + "Minimum Load [%]:" >< "\(minLoad * 100)"
+    + "Cold Start-up necessary after [h]:" >< "\(start.hours.cold)"
+    + "Energy needed for Cold Start-up [MWh]:" >< "\(start.energy.cold)"
+    + "Warm Start-up necessary after [h]:" >< "\(start.hours.warm)"
+    + "Energy needed for Warm Start-up [MWh]:" >< "\(start.energy.warm)"
+    + "Parasitics at Full Load [MW]:" >< "\(nominalElectricalParasitics)"
+    + "Parasitic Energy Coefficients; "
+    + "Parasitics(Load) = Parasitics(100%)*(c0+c1*load)\n"
+    + "c0:" >< "\(electricalParasitics[0])"
+    + "c1:" >< "\(electricalParasitics[1])"
+    + "Efficiency; "
+    + "Efficiency(Load) = c0+c1*load+c2*load^2+c3*load^3+c4*load^4)\n"
+    + "\(efficiency)"
+    + "Booster Superheater (if NO regular boiler selected):"
+    >< (booster ? "YES" : "NO")
   }
 }
 

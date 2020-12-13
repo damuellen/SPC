@@ -99,73 +99,49 @@ extension SolarField.Parameter {
 
 extension SolarField.Parameter: CustomStringConvertible {
   public var description: String {
-    var d: String = ""
-    d += "Number of Loops:"
-      >< "\(Design.layout.solarField)"
-    d += "Maximum allowable Wind Speed for Operation [m]:"
-      >< "\(maxWind)"
-    d += "Numbers of Collectors in a Row:"
-      >< "\(numberOfSCAsInRow)"
-    d += "Distance between Rows [m]:"
-      >< "\(rowDistance)"
-    d += "Distance between Collectors in a Row [m]:"
-      >< "\(distanceSCA)"
-    d += "Heat Losses in total HTF Piping (per sqm aperture) [W/m²]:"
-      >< String(format: "%G", pipeHeatLosses)
-    d += "Heat Losses in Piping of tested field (per sqm aperture) [W/m²]:"
-      >< String(format: "%G", SSFHL)
-    d += "Azimuth angle of Solar Field Orientation [°]:"
-      >< "\(azimut)"
-    d += "Mass Flow in Solar Field at Full Load [kg/s]:"
-      >< String(format: "%G", massFlow.rate)
-    d += "Minimum allowable Mass Flow [%]:"
-      >< "\(minFlow.percentage)"
-    d += "Anti-Freeze Mass Flow [%]:"
-      >< "\(antiFreezeFlow.percentage)"
-    d += "Total Mass of HTF in System [kg]:"
-      >< String(format: "%.1f",HTFmass)
-    d += "Consider HL of ANY Dump. Collectors:"
-      >< (HLDump ? "YES" : "NO ")
-    d += "Consider HL of Dump. Col. for operating quadrant:"
-      >< (HLDumpQuad ? "YES" : "NO ")
-    d += "Consider SKAL-ET DemoLoop Effect of Wind Speed.:"
-      >< (EtaWind ? "YES" : "NO ")
-    if windCoefficients.isEmpty == false {
-      d += "Collector efficiency vs Wind Speed c0+c1*WS+c2*WS^2+c3*WS^3+c4*WS^4+c5*WS^5\n"
-      for idx in windCoefficients.indices {
-        d += "c\(idx):" >< String(format: "%.6e", windCoefficients[idx])
-      }
-    }
-    d += "Layout Design Type:"
-      >< "\(layout.rawValue)"
-    d += "Heat Losses in Hot Header [MW]:"
-      >< String(format: "%G",heatLossHotHeader[0])
-    if heatLossHotHeader.count > 1 {
-      d += "Heat Losses in Hot Header Coefficients;\nHL(Tout - Tamb) = HL(design)*(c0+c1*dT)\n"
-      for idx in heatLossHotHeader.indices.dropFirst() {
-        d += "c\(idx):" >< String(format: "%.6e", heatLossHotHeader[idx])
-      }
-    }
-    d += "Use Reference T_amb from Solpipe:"
-      >< (useReferenceAmbientTemperature ? "YES" : "NO ")
-    d += "Design SOF T_inlet [°C]:"
-      >< String(format: "%G", designTemperature.inlet)
-    d += "Design SOF T_outlet [°C]:"
-      >< String(format: "%G", designTemperature.outlet)
-    d += "HTF Flow Imbalance\n"
-    d += "Near, Design:"
-      >< "\(imbalanceDesign[0])"
-    d += "Average, Design:"
-      >< "\(imbalanceDesign[1])"
-    d += "Far, Design:"
-      >< "\(imbalanceDesign[2])"
-    d += "Near, Minimum:"
-      >< "\(imbalanceMin[0])"
-    d += "Average, Minimum:"
-      >< "\(imbalanceMin[1])"
-    d += "Far, Minimum:"
-      >< "\(imbalanceMin[2])"
-    return d
+    "Number of Loops:" >< "\(Design.layout.solarField)"
+    + "Maximum allowable Wind Speed for Operation [m]:" >< "\(maxWind)"
+    + "Numbers of Collectors in a Row:" >< "\(numberOfSCAsInRow)"
+    + "Distance between Rows [m]:" >< "\(rowDistance)"
+    + "Distance between Collectors in a Row [m]:" >< "\(distanceSCA)"
+    + "Heat Losses in total HTF Piping (per sqm aperture) [W/m²]:"
+    >< String(format: "%G", pipeHeatLosses)
+    + "Heat Losses in Piping of tested field (per sqm aperture) [W/m²]:"
+    >< String(format: "%G", SSFHL)
+    + "Azimuth angle of Solar Field Orientation [°]:" >< "\(azimut)"
+    + "Mass Flow in Solar Field at Full Load [kg/s]:"
+    >< String(format: "%.1f", massFlow.rate)
+    + "Minimum allowable Mass Flow [%]:" >< "\(minFlow.percentage)"
+    + "Anti-Freeze Mass Flow [%]:" >< "\(antiFreezeFlow.percentage)"
+    + "Total Mass of HTF in System [kg]:"
+    >< String(format: "%.1f", HTFmass)
+    + "Consider HL of ANY Dump. Collectors:" >< (HLDump ? "YES" : "NO ")
+    + "Consider HL of Dump. Col. for operating quadrant:"
+    >< (HLDumpQuad ? "YES" : "NO ")
+    + "Consider SKAL-ET DemoLoop Effect of Wind Speed.:"
+    >< (EtaWind ? "YES" : "NO ")
+    + (windCoefficients.isEmpty == false ?
+    "Collector efficiency vs Wind Speed c0+c1*WS+c2*WS^2+c3*WS^3+c4*WS^4+c5*WS^5"
+    + "\n\(windCoefficients)" : "")
+    + "Layout Design Type:" >< "\(layout.rawValue)"
+    + "Heat Losses in Hot Header [MW]:"
+    >< String(format: "%G",heatLossHotHeader[0])
+    + (heatLossHotHeader.count > 1 ?
+    "Heat Losses in Hot Header Coefficients;\nHL(Tout - Tamb) = HL(design)*(c0+c1*dT)"
+    + "\n\(Polynomial(heatLossHotHeader))" : "")
+    + "Use Reference T_amb from Solpipe:"
+    >< (useReferenceAmbientTemperature ? "YES" : "NO ")
+    + "Design SOF T_inlet [°C]:"
+    >< String(format: "%G", designTemperature.inlet)
+    + "Design SOF T_outlet [°C]:"
+    >< String(format: "%G", designTemperature.outlet)
+    + "HTF Flow Imbalance\n"
+    + "Near, Design:" >< "\(imbalanceDesign[0])"
+    + "Average, Design:" >< "\(imbalanceDesign[1])"
+    + "Far, Design:" >< "\(imbalanceDesign[2])"
+    + "Near, Minimum:" >< "\(imbalanceMin[0])"
+    + "Average, Minimum:" >< "\(imbalanceMin[1])"
+    + "Far, Minimum:" >< "\(imbalanceMin[2])"
   }
 }
 

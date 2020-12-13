@@ -187,40 +187,26 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
     return h2 - h1
   }
 
-  public var description: String {
-    var d = ""
-    d += "Description:" >< name
-    d += "Freezing Point [°C]:" >< "\(freezeTemperature.celsius)"
-    d += "Specific Heat as a Function of Temperature; cp(T) = c0+c1*T\n"
-    d += "c0:" >< "\(heatCapacity[0])"
-    d += "c1:" >< "\(heatCapacity[1])"
-    d += "Calculate with Enthalpy:" >< "\(useEnthalpy ? "YES" : "NO")"
-    if enthaplyFromTemperature.isEmpty == false {
-      d += "Enthalpy as function on Temperature\n"
-      for (i, c) in enthaplyFromTemperature.coefficients.enumerated() {
-        d += "c\(i):" >< String(format: "%.6e", c)
-      }
-    }
-    if temperatureFromEnthalpy.isEmpty == false {
-      d += "Temperature as function on Enthalpy\n"
-      for (i, c) in temperatureFromEnthalpy.coefficients.enumerated() {
-        d += "c\(i):" >< String(format: "%.6e", c)
-      }
-    }
-    d += "Density as a Function of Temperature; roh(T) = c0+c1*T+c1*T^2\n"
-    for (i, c) in density.enumerated() {
-      d += "c\(i):" >< String(format: "%.6e", c)
-    }
-    d += "Viscosity as a Function of Temperature; eta(T) = c0+c1*T+c1*T^2\n"
-    for (i, c) in viscosity.enumerated() {
-      d += "c\(i):" >< String(format: "%.6e", c)
-    }
-    d += "Conductivity as a Function of Temperature; lamda(T) = c0+c1*T+c1*T^2\n"
-    for (i, c) in thermCon.enumerated() {
-      d += "c\(i):" >< String(format: "%.6e", c)
-    }
-    d += "Maximum Operating Temperature [°C]:" >< "\(maxTemperature.celsius)"
-    return d
+  public var description: String {    
+    "Description:" >< name
+    + "Freezing Point [°C]:" >< "\(freezeTemperature.celsius)"
+    + "Specific Heat as a Function of Temperature; cp(T) = c0+c1*T\n"
+    + "c0:" >< "\(heatCapacity[0])"
+    + "c1:" >< "\(heatCapacity[1])"
+    + "Calculate with Enthalpy:" >< "\(useEnthalpy ? "YES" : "NO")"
+    + (enthaplyFromTemperature.isEmpty == false ?
+    "Enthalpy as function on Temperature" 
+    + "\n\(enthaplyFromTemperature)" : "")
+    + (temperatureFromEnthalpy.isEmpty == false ?
+    "Temperature as function on Enthalpy"
+    + "\n\(temperatureFromEnthalpy)" : "")
+    + "Density as a Function of Temperature; roh(T) = c0+c1*T+c1*T^2"
+    + "\n\(Polynomial(density))"
+    + "Viscosity as a Function of Temperature; eta(T) = c0+c1*T+c1*T^2"
+    + "\n\(Polynomial(viscosity))"
+    + "Conductivity as a Function of Temperature; lamda(T) = c0+c1*T+c1*T^2"
+    + "\n\(Polynomial(thermCon))"
+    + "Maximum Operating Temperature [°C]:" >< "\(maxTemperature.celsius)"
   }
 }
 

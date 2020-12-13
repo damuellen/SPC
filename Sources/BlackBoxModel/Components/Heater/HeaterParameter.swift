@@ -23,28 +23,21 @@ extension Heater {
 
 extension Heater.Parameter: CustomStringConvertible {
   public var description: String {
-    var d: String = ""
-    d += "Description:\t\(name)\n"
-    d += "Capacity of HTF-Heater [MW]:"
-      >< "\(Design.layout.heater)"
-    d += "Efficiency [%]:"
-      >< "\(efficiency.percentage)"
-    d += "Outlet Temperature for Freeze Protection [°C]:"
-      >< "\(antiFreezeTemperature.celsius)"
-    d += "Nominal Outlet Temperature [°C]:"
-      >< "\(nominalTemperatureOut.celsius)"
-    d += "Maximum Mass Flow [kg/s]:"
-      >< "\(maximumMassFlow)"
-    d += "Minimum Load [%]:"
-      >< "\(minLoad.percentage)"
-    d += "Parasitics at Full Load [MW]:"
-      >< "\(nominalElectricalParasitics)"
-    d += "Parasitic Energy Coefficients;\nParasitics(Load) = Parasitics(100%)*(c0+c1*load)\n"
-    d += "c0:" >< "\(electricalParasitics[0])"
-    d += "c1:" >< "\(electricalParasitics[1])"
-    d += "Use Heater in Parallel to SF:"
-      >< (onlyWithSolarField ? "YES" : "NO ")
-    return d
+    "Description:" >< name
+    + "Capacity of HTF-Heater [MW]:" >< "\(Design.layout.heater)"
+    + "Efficiency [%]:" >< "\(efficiency.percentage)"
+    + "Outlet Temperature for Freeze Protection [°C]:"
+    >< "\(antiFreezeTemperature.celsius)"
+    + "Nominal Outlet Temperature [°C]:"
+    >< "\(nominalTemperatureOut.celsius)"
+    + "Maximum Mass Flow [kg/s]:" >< "\(maximumMassFlow)"
+    + "Minimum Load [%]:" >< "\(minLoad.percentage)"
+    + "Parasitics at Full Load [MW]:" >< "\(nominalElectricalParasitics)"
+    + "Parasitic Energy Coefficients;\nParasitics(Load) = Parasitics(100%)*(c0+c1*load)\n"
+    + "c0:" >< "\(electricalParasitics[0])"
+    + "c1:" >< "\(electricalParasitics[1])"
+    + "Use Heater in Parallel to SF:"
+    >< (onlyWithSolarField ? "YES" : "NO ")
   }
 }
 
