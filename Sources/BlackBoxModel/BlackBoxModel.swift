@@ -60,17 +60,13 @@ public enum BlackBoxModel {
 
   public static func loadConfigurations(
     atPath path: String, format: Config.Formats = .json
-  ) {
-    do {
-      switch format {
-      case .json:
-        let urls = JSONConfig.fileSearch(atPath: path)
-        try JSONConfig.loadConfigurations(urls)
-      case .text:
-        try TextConfig.loadConfigurations(atPath: path)
-      }
-    } catch {
-      print(error)
+  ) throws {
+    switch format {
+    case .json:
+      let urls = JSONConfig.fileSearch(atPath: path)
+      try JSONConfig.loadConfigurations(urls)
+    case .text:
+      try TextConfig.loadConfigurations(atPath: path)
     }
   }
 
@@ -152,7 +148,7 @@ public enum BlackBoxModel {
 
       plant.calculate(&status, ambient: temperature)
 
-      if Design.hasStorage {        
+      if Design.hasStorage {
         // Calculate the operating state of the salt
         status.storage.calculate(
           thermal: &plant.heat.storage.megaWatt,
@@ -171,10 +167,11 @@ public enum BlackBoxModel {
           }
         }
       }
-      
+
       let energy = plant.energyBalance()
       let dt = DateTime.current
       //  print(DateTime.current, date, status, energy)
+
       backgroundQueue.async { [status] in
         recorder(dt, meteo: meteo, status: status, energy: energy)
       }

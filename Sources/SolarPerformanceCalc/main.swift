@@ -15,9 +15,14 @@ import Dispatch
 import Foundation
 import Meteo
 
+#if os(Windows)
+system("chcp 65001")
+#endif
+
 let start = DispatchTime.now().uptimeNanoseconds
 
 SolarPerformanceCalculator.main()
+print(SolarPerformanceCalculator.result!.report)
 
 let end = DispatchTime.now().uptimeNanoseconds
 let time = String((end - start) / 1_000_000) +  " ms"
@@ -55,7 +60,7 @@ struct SolarPerformanceCalculator: ParsableCommand {
   static let cwd = FileManager.default.currentDirectoryPath
 
   @Option(name: .shortAndLong, help: "The search path for meteofile.")
-  var meteofilePath: String = cwd
+  var meteofilePath: String?
   @Option(name: .shortAndLong, help: "The search path for config files.")
   var configPath: String = cwd
   @Option(name: .shortAndLong, help: "Destination path for result files.")
@@ -72,12 +77,47 @@ struct SolarPerformanceCalculator: ParsableCommand {
   var outputValues: Int?
   @Flag(help: "Output performance data to sqlite.")
   var database: Bool = false
+  @Flag(help: "Output of the model parameter.")
+  var parameter: Bool = false
 
   func run() throws {
     let name = "Solar Performance Calculator"
     print(decorated(name), "")
-    BlackBoxModel.loadConfigurations(atPath: configPath, format: .text)
-    try JSONConfig.saveConfigurations(toPath: configPath)
+    
+    let path = meteofilePath ?? configPath
+
+    do { try BlackBoxModel.configure(meteoFilePath: path) } catch {
+#if os(Windows)
+      if case MeteoDataFileError.fileNotFound = error {
+        guard let path = FileDialog() else { return }
+        do { try BlackBoxModel.configure(meteoFilePath: path) } catch {
+          MessageBox(text: (error as! MeteoDataFileError).description, caption: name)
+          return
+        }
+      } else {
+        MessageBox(text: (error as! MeteoDataFileError).description, caption: name)
+        return
+      }
+#else
+      fatalError((error as! MeteoDataFileError).description) 
+#endif
+    }
+
+    do {
+      try BlackBoxModel.loadConfigurations(atPath: configPath, format: .text)
+    } catch is TextConfigFile.ReadError {
+ #if os(Windows)
+      MessageBox(text: error.description, caption: name)
+      return
+ #endif
+    }
+    
+    if parameter { 
+      printParameter() 
+      try JSONConfig.saveConfiguration(toPath: configPath)
+      return
+    }
+
     if let steps = stepsCalculation {
       Simulation.time.steps = Interval[steps]
     } else {
@@ -93,23 +133,6 @@ struct SolarPerformanceCalculator: ParsableCommand {
         print(loc)
       }
       BlackBoxModel.configure(location: loc)
-    }
-
-    do { try BlackBoxModel.configure(meteoFilePath: meteofilePath) } catch {
-#if os(Windows)
-      if case MeteoDataFileError.fileNotFound = error {
-        guard let path = FileDialog() else { return }
-        do { try BlackBoxModel.configure(meteoFilePath: path) } catch {
-          MessageBox(text: (error as! MeteoDataFileError).description, caption: name)
-          return
-        }
-      } else {
-        MessageBox(text: (error as! MeteoDataFileError).description, caption: name)
-        return
-      }
-#else
-      fatalError((error as! MeteoDataFileError).description) 
-#endif
     }
 
     let mode: PerformanceDataRecorder.Mode
@@ -133,6 +156,24 @@ struct SolarPerformanceCalculator: ParsableCommand {
     commandName: "Solar Performance Calculator",
     abstract: "Simulates the performance of entire solar thermal power plants."
   )
+
+  func printParameter() {    
+    print(
+      Simulation.parameter,
+      SolarField.parameter,
+      Collector.parameter,
+      Heater.parameter,
+      HeatTransferFluid.parameter,
+      HeatExchanger.parameter,
+      Boiler.parameter,
+      WasteHeatRecovery.parameter,
+      GasTurbine.parameter,
+      SteamTurbine.parameter,
+      PowerBlock.parameter,
+      Storage.parameter,
+      separator: "\n"
+    )
+  }
 }
 /*
 

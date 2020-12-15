@@ -29,13 +29,12 @@ extension Double {
   }
 }
 
-infix operator >< : MultiplicationPrecedence
-
-func >< (lhs: String, rhs: String) -> String {
+func * (lhs: String, rhs: String) -> String {
   var width = TerminalController.terminalWidth() ?? 80
-  if width == 0 { width = 80 }
-  let count = width - lhs.count - rhs.count - 1
-  return lhs + String(repeating: " ", count: count) + rhs + "\n"
+  width.clamp(to: 70...100)
+  var c = width - lhs.count - rhs.count - 1
+  c = c < 0 ? 1 : c
+  return lhs + String(repeating: " ", count: c) + rhs + "\n"
 }
 
 infix operator |>

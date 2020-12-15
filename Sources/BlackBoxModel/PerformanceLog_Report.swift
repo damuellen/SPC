@@ -1,12 +1,5 @@
-//
-//  Copyright 2017 Daniel Müllenborn
-//
-//  Licensed under the Apache License, Version 2.0 (the "License");
-//  you may not use this file except in compliance with the License.
-//  You may obtain a copy of the License at
-//
-//  http://www.apache.org/licenses/LICENSE-2.0
-//
+// Copyright Daniel Müllenborn
+// SPDX-License-Identifier: Apache-2.0
 
 import struct Foundation.Date
 
@@ -15,37 +8,33 @@ enum PerformanceReport {
   static func create(energy: Energy, radiation: SolarRadiation) -> String
   {
     let solarField = SolarField.parameter
-    let storage = Storage.parameter
-    let heater = Heater.parameter
-    let heatExchanger = HeatExchanger.parameter
     let gasTurbine = GasTurbine.parameter
     let steamTurbine = SteamTurbine.parameter
     let collector = Collector.parameter
     let layout = Design.layout
     let aperture = layout.solarField * 2 * collector.areaSCAnet
       * Double(solarField.numberOfSCAsInRow)
-    var d = "\nPERFORMANCE RUN\n"
-      + "    Date: \(Date())\n"
+    var d = heading("PERFORMANCE RUN")
       + "\nSOLAR FIELD\n"
-      + "    No of Loops:" >< "\(layout.solarField)"
-      + "    Collector Type:" >< "\(collector.name)"
-      + "    Aperture [m²]:" >< String(format: "%G", aperture)
-      + "    Massflow [kg/s]:" >< String(format: "%G", solarField.massFlow.rate)
+      + "    No of Loops:" * layout.solarField.description
+      + "    Collector Type:" * collector.name.description
+      + "    Aperture [m²]:" * String(format: "%G", aperture)
+      + "    Massflow [kg/s]:" * String(format: "%G", solarField.massFlow.rate)
       + "    Elevation [ø]:  " + "\(solarField.elevation)\t Azimut [ø]:  "
       + "\(solarField.azimut)\n"
       + "\nSTORAGE\n"
       + "    Capacity [MWH,th]:"
-      >< String(format: "%G", layout.storage * steamTurbine.power.max / steamTurbine.efficiencyNominal)
+      * String(format: "%G", layout.storage * steamTurbine.power.max / steamTurbine.efficiencyNominal)
       + "\nSTEAM TURBINE\n"
-      + "    Gross Output [MW]:" >< "\(steamTurbine.power.max)"
-      + "    Efficiency [%] :" >< "\(steamTurbine.efficiencyNominal * 100)"
+      + "    Gross Output [MW]:" * steamTurbine.power.max.description
+      + "    Efficiency [%] :" * (steamTurbine.efficiencyNominal * 100).description
       + "\nGAS TURBINE\n"
-      + "    Gross Output [MW]:" >< "\(layout.gasTurbine)"
-      + "    Efficiency [%]:" >< "\(gasTurbine.efficiencyISO * 100)"
+      + "    Gross Output [MW]:" * layout.gasTurbine.description
+      + "    Efficiency [%]:" * (gasTurbine.efficiencyISO * 100).description
       + "\nWHR-SYSTEM\n"
       + "    Therm Output [MW]:"
-      >< "\(layout.gasTurbine * (1 / gasTurbine.efficiencyISO - 1)); \(WasteHeatRecovery.parameter.efficiencyNominal)"
-      + "    Efficiency [%]:" >< "\(WasteHeatRecovery.parameter.efficiencyNominal)"
+      * "\(layout.gasTurbine * (1 / gasTurbine.efficiencyISO - 1)); \(WasteHeatRecovery.parameter.efficiencyNominal)"
+      + "    Efficiency [%]:" * WasteHeatRecovery.parameter.efficiencyNominal.description
     // if let _ = Boiler.parameter.first {
     // For I% = 0 To 4: Efficiency = Efficiency + boiler.parameter.efficiency(I%): Next
     // Power = Design.layout.boiler: Efficiency = Efficiency * 100
@@ -58,34 +47,32 @@ enum PerformanceReport {
       + "FOSSIL FUEL:\n"
       + "    LHV [kWH/kg]: Fuel.LHV\n"
       + "\n\n"
-      + "  Annual Results\n"
-      + "  --------------\n"
-      + "\n"
+      + heading("Annual Results")
       + "Gross electricty producution [MWh_el/a]:"
-      >< String(format: "%G", energy.electric.gross)
+      * String(format: "%G", energy.electric.gross)
     //  Format((YTarS(0).EgrsST + YTarS(0).EgrsGasTurbine) * (1 - Simulation.parameter.UnSchedMain) * (1 - Simulation.parameter.TransLoss), )"
-      + "Parasitic consumption [MWh_el/a]:" >< String(format: "%G", energy.parasitics.shared)
+      + "Parasitic consumption [MWh_el/a]:" * String(format: "%G", energy.parasitics.shared)
     // Format(YTarS(0).electricalParasitics * (1 - Simulation.parameter.UnSchedMain) * (1 - Simulation.parameter.TransLoss), )"
-      + "Net electricty producution [MWh_el/a]:" >< String(format: "%G", energy.electric.net)
+      + "Net electricty producution [MWh_el/a]:" * String(format: "%G", energy.electric.net)
     // Format(YTarS(0).Enet * (1 - Simulation.parameter.UnSchedMain) * (1 - Simulation.parameter.TransLoss), )"
       + "Gas consumption [MWh_el/a]:\n"  // Format(YTarS(0).heatfuel, )"
       + "Solar share [%]:\n"  // Format(SolShare * 100, )"
       + "Annual direct solar insolation [kWh/m²a]:"  //  Format(YTarS(0).NDI,)"
-      >< String(format: "%G", radiation.dni / 1_000)
+      * String(format: "%G", radiation.dni / 1_000)
       + "Total heat from solar field [MWh_el/a]:"  // Format(YTarS(0).heatsol,)"
-      >< String(format: "%G", energy.thermal.solar.megaWatt)
+      * String(format: "%G", energy.thermal.solar.megaWatt)
     d += "\nAVAILABILITIES\n\n"
-      + "Plant Availability [%]:\n"  // >< "\(Simulation.parameter.PlantAvail * 100, )"
-      + "Plant Degradation [%]:"  // >< "\(Simulation.parameter.PlantDegrad,)"
-      + "\n\n\nFiles and Parameter\n\n"
+      + "Plant Availability [%]:\n"  // * Simulation.parameter.PlantAvail * 100, )"
+      + "Plant Degradation [%]:\n"  // * Simulation.parameter.PlantDegrad,)"
+      + heading("Files and Parameter")
       + "METEODATA  \(BlackBoxModel.meteoData!.name)\n"
-      + "Meteodata of a leap year" >< "\(Simulation.time.isLeapYear ? "YES" : "NO")"
+      + "Meteodata of a leap year" * (Simulation.time.isLeapYear ? "YES" : "NO")
       + "Location:"
-      >< (String(format: "%G", BlackBoxModel.meteoData!.location.longitude) 
+      * (String(format: "%G", BlackBoxModel.meteoData!.location.longitude) 
       + String(format: "%G",BlackBoxModel.meteoData!.location.latitude))
-       + "Position of Wet Bulb Temp. in mto-file [row]:" >< "\(Simulation.parameter.WBTpos)"
-       + "Position of Wind Direction in mto-file [row]:" >< "\(Simulation.parameter.WDpos)"
-       + "Pos. of Global Direct Irr. in mto-file [row]:""\(Simulation.parameter.GHI)"
+    //   + "Position of Wet Bulb Temp. in mto-file [row]:" * Simulation.parameter.WBTpos)"
+   //    + "Position of Wind Direction in mto-file [row]:" * Simulation.parameter.WDpos)"
+   //    + "Pos. of Global Direct Irr. in mto-file [row]:" * Simulation.parameter.GHI)"
        + "\n"
        + "Use Fuel Data from Typical Year [1: YES, 0: NO]: PFCsource\n"
      //Jn = InStrRev(Filespec.PFC, "\")
@@ -97,7 +84,7 @@ enum PerformanceReport {
      //Jn = InStrRev(Filespec.GAV, "\")
      //Bname = Mid(Filespec.GAV, Jn + 1, 40)
      //Bname = Trim(Bname)
-     */
+     
       + "\n"
       + "Turbine is Op. at Program Start [1: YES, 0: NO]: SteamTurbine.status.Op\n"
       + "\n"
@@ -117,58 +104,34 @@ enum PerformanceReport {
     // storage.tempInC0to1(0) = storage.heatLossConstants0(1) - storage.tempInC0to1(0)
     // storage.tempInCst0(0) = storage.tempInC0to1(0)
     // }
-    //      + "Power Block Availability [%]:" >< "\(Availability.current[0).powerBlock * 100)"
-    //        + "Transmission Losses [%]:" >< "\(Simulation.parameter.TransLoss * 100)"
-    d += "\nOPERATION\n\n"
-    let s1 = "First Date of Operation [MM.dd  HH:mm]:                             "
+    //      + "Power Block Availability [%]:" * Availability.current[0).powerBlock * 100)"
+    //        + "Transmission Losses [%]:" * Simulation.parameter.TransLoss * 100)"
+    d += heading("OPERATION")
+    let s1 = "First Date of Operation [MM.dd  HH:mm]:"
     if let firstDateOfOperation = Simulation.time.firstDateOfOperation {
-      d += s1 >< String(describing: firstDateOfOperation)
+      d += s1 * String(describing: firstDateOfOperation)
     } else {
-      d += s1 >< "01.01  00:00"
+      d += s1 * "01.01  00:00"
     }
-    let s2 = "Last Date of Operation [MM.dd  HH:mm]:                              "
+    let s2 = "Last Date of Operation [MM.dd  HH:mm]:"
     if let lastDateOfOperation = Simulation.time.lastDateOfOperation {
-      d += s2 >< String(describing: lastDateOfOperation)
+      d += s2 * String(describing: lastDateOfOperation)
     } else {
-      d += s2 >< "12.31  23:59"
+      d += s2 * "12.31  23:59"
     }
-    d += "HTF Temperature in Header [°C]:"
-      >< "\(Simulation.initialValues.temperatureOfHTFinPipes.celsius)"
-      + "HTF Temperature in Collector [°C]:"
-      >< "\(Simulation.initialValues.temperatureOfHTFinHCE.celsius)"
-      + "Mass Flow in Solar Field [kg/s]:"
-      >< "\(Simulation.initialValues.massFlowInSolarField.rate)"
-      + "Delta T for Start-Up of Anti-Freeze Pumping:"
-      >< "\(Simulation.parameter.dfreezeTemperaturePump.kelvin)"
+    d += Simulation.initialValues.description
+    d += "Delta T for Start-Up of Anti-Freeze Pumping:"
+      * Simulation.parameter.dfreezeTemperaturePump.kelvin.description
       + "Delta T for Start-Up of Anti-Freeze Heater:"
-      >< "\(Simulation.parameter.dfreezeTemperatureHeat.kelvin)"
+      * Simulation.parameter.dfreezeTemperatureHeat.kelvin.description
       + "Minimum Insolation for Start-Up [W/m²]:"
-      >< "\(Simulation.parameter.minInsolation)"
-      + "Fuel strategy:" >< "\(OperationRestriction.fuelStrategy)"
-    d += "\nAVAILABILITIES\n\n"
-      + "Annual Average Solar Field Availability [%]:"
-      >< "\(Availability.current.values.solarField.percentage)"
-      + "Average Percentage of Broken HCE [%]:"
-      >< "\(Availability.current.values.breakHCE.percentage)"
-      + "Average Percentage of HCE with Lost Vacuum [%]:"
-      >< "\(Availability.current.values.airHCE.percentage)"
-      + "Average Percentage of Flourescent HCE [%]:"
-      >< "\(Availability.current.values.fluorHCE.percentage)"
-      + "Average Mirror Reflectivity [%]:"
-      >< "\(Availability.current.values.reflMirror.percentage)"
-      + "Broken Mirrors [%]:"
-      >< "\(Availability.current.values.missingMirros.percentage)"
+      * Simulation.parameter.minInsolation.description
+      + "Fuel strategy:" * OperationRestriction.fuelStrategy.description
+    d += heading("AVAILABILITIES")
+    d += Availability.current.description
       + "Periods for Scheduled Maintenance [MM.DD]:\n"  // Maintnc(1).Lowlim, ) to Format(Maintnc(1).Uplim, )"
-      + "Unscheduled Maintenance [%]:\n"  // >< "\(Simulation.parameter.UnSchedMain * 100)"
-    d += "\nFixed Parameter\n"
-      + "---------------\n\n\n"
-      + "HEATER\n\n\(heater)\n"
-      + "HEAT EXCHANGER\n\n\(heatExchanger)\n"
-      + "STEAM TURBINE\n\n\(steamTurbine)\n"
-      + "SOLAR FIELD\n\n\(solarField)\n"
-      + "COLLECTOR\n\n\(collector)\n"
-      + "STORAGE\n\n\(storage)\n"
-      + "HEAT TRANSFER FLUID\n\n\(solarField.HTF)\n\n"
+      + "Unscheduled Maintenance [%]:\n"  // * Simulation.parameter.UnSchedMain * 100)"
+    d += Plant.parameterDescriptions
     return d
   }
 }

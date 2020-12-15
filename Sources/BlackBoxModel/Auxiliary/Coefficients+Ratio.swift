@@ -55,6 +55,16 @@ extension Polynomial: ExpressibleByArrayLiteral {
   }
 }
 
+extension Polynomial: CustomStringConvertible {
+  public var description: String {
+    var s: String = ""
+    for (i, c) in coefficients.enumerated() {
+      s += "c\(i):" * String(format: "%.6e", c)
+    }
+    return s
+  }
+}
+
 public struct Ratio: CustomStringConvertible, Codable {
   var ratio: Double
 

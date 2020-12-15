@@ -10,6 +10,6 @@
 
 extension Heater: CustomStringConvertible {  
   public var description: String {
-    "\(operationMode),\n" + "\(self.cycle)"
+    "  Mode:".padding(30) + "\(operationMode)\n" + "\(self.cycle)"
   }
 }

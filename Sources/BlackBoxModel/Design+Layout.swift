@@ -19,7 +19,7 @@ public enum Design {
   static let hasBoiler = layout.boiler > 0
   static let hasGasTurbine = layout.gasTurbine > 0
   static let hasPowerBlock = layout.powerBlock > 0
-  static let hasStorage = false //layout.storage > 0
+  static let hasStorage = layout.storage > 0
 }
 
 public struct Layout: Codable, Equatable, Hashable, CustomStringConvertible {
@@ -34,15 +34,15 @@ public struct Layout: Codable, Equatable, Hashable, CustomStringConvertible {
   public var storage_ton = 0.0
   
   public var description: String {
-    return ("Layout|SolarField " >< "\(Int(solarField)) loops")
-   //   + ("Layout|Heater " >< "\(Int(-heater)) MW")
-      + ("Layout|HeatExchanger " >< "\(Int(heatExchanger)) MW")
-   //   + ("Layout|Boiler " >< "\(Int(boiler)) MW")
-   //   + ("Layout|GasTurbine " >< "\(Int(gasTurbine)) MW")
-      + ("Layout|PowerBlock " >< "\(Int(powerBlock)) MW")
-  //    + ("Layout|Storage " >< "\(Int(storage)) MWh")
-  //    + ("Layout|Storage_cap " >< "\(Int(storage_cap))")
-  //    + ("Layout|Storage_ton " >< "\(Int(storage_ton))")
+    "Layout|SolarField " * "\(Int(solarField)) loops"
+//  + "Layout|Heater " * "\(Int(-heater)) MW"
+    + "Layout|HeatExchanger " * "\(Int(heatExchanger)) MW"
+//  + "Layout|Boiler " * "\(Int(boiler)) MW"
+//  + "Layout|GasTurbine " * "\(Int(gasTurbine)) MW"
+    + "Layout|PowerBlock " * "\(Int(powerBlock)) MW"
+//  + "Layout|Storage " * "\(Int(storage)) MWh"
+//  + "Layout|Storage_cap " * "\(Int(storage_cap))"
+//  + "Layout|Storage_ton " * "\(Int(storage_ton))"
   }
 }
 

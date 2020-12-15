@@ -86,6 +86,14 @@ extension JSONConfig {
     }
   }
 
+  public static func saveConfiguration(toPath path: String) throws {
+    let directoryURL = URL(fileURLWithPath: path, isDirectory: true)
+    let json = try generateJSON()
+    let url = URL(fileURLWithPath: "Parameter.json",
+                  isDirectory: false, relativeTo: directoryURL)
+    try json.write(to: url)
+  }
+
   public static func saveConfigurations(toPath path: String) throws {
     let directoryURL = URL(fileURLWithPath: path, isDirectory: true)
     let cases = JSONConfig.Name.allCases
@@ -96,6 +104,13 @@ extension JSONConfig {
                     isDirectory: false, relativeTo: directoryURL)
       try value.write(to: url)
     }
+  }
+
+  public static func generateJSON() throws -> Data {
+    let encoder = JSONEncoder()
+    encoder.outputFormatting = [.sortedKeys, .prettyPrinted]
+    encoder.dateEncodingStrategy = .iso8601
+    return try encoder.encode(Parameters())
   }
 
   public static func generateJSON(type: JSONConfig.Name) throws -> Data {
@@ -147,15 +162,15 @@ extension TextConfig {
       case .OPR: break
       case .DEM: break
       case .TAR: break // Simulation.tariff = try .init(file: configFile)
-      case .SIM: break // Simulation.parameter = try .init(file: configFile)
+      case .SIM: Simulation.parameter = try .init(file: configFile)
       case .INI: Simulation.initialValues = try .init(file: configFile)
       case .TIM: Simulation.time = try .init(file: configFile)
       case .DES: break
-      case .AVL: break
+      case .AVL: Availability.current = try .init(file: configFile)
       case .LAY: Design.layout = try .init(file: configFile)
       case .SF: SolarField.update(parameter: try .init(file: configFile))
       case .COL: Collector.update(parameter: try .init(file: configFile))
-      case .STO: break
+      case .STO: Storage.update(parameter: try .init(file: configFile))
       case .HR: Heater.update(parameter: try .init(file: configFile))
       case .HTF: break
       //  htf = try HeatTransferFluid(file: configFile, includesEnthalpy: true)
@@ -218,4 +233,23 @@ extension JSONConfig.Name {
     }
     return ""
   }
+}
+
+struct Parameters: Codable {
+  var tariff = Simulation.tariff
+  var simulation = Simulation.parameter
+  var initialValues = Simulation.initialValues
+  var time = Simulation.time
+  var availability = Availability.current
+  var layout = Design.layout
+  var solarField = SolarField.parameter
+  var collector = Collector.parameter
+  var heater = Heater.parameter
+  var heatTransferFluid = HeatTransferFluid.parameter
+  var heatExchanger = HeatExchanger.parameter
+  var boiler = Boiler.parameter
+  var wasteHeatRecovery = WasteHeatRecovery.parameter
+  var gasTurbine = GasTurbine.parameter
+  var steamTurbine = SteamTurbine.parameter
+  var powerBlock = PowerBlock.parameter
 }

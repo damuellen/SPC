@@ -23,35 +23,37 @@ extension Heater {
 
 extension Heater.Parameter: CustomStringConvertible {
   public var description: String {
-    "Description:" >< name
-    + "Capacity of HTF-Heater [MW]:" >< "\(Design.layout.heater)"
-    + "Efficiency [%]:" >< "\(efficiency.percentage)"
+    "Description:" * name
+    + "Capacity of HTF-Heater [MW]:" * Design.layout.heater.description
+    + "Efficiency [%]:" * efficiency.percentage.description
     + "Outlet Temperature for Freeze Protection [°C]:"
-    >< "\(antiFreezeTemperature.celsius)"
+    * antiFreezeTemperature.celsius.description
     + "Nominal Outlet Temperature [°C]:"
-    >< "\(nominalTemperatureOut.celsius)"
-    + "Maximum Mass Flow [kg/s]:" >< "\(maximumMassFlow)"
-    + "Minimum Load [%]:" >< "\(minLoad.percentage)"
-    + "Parasitics at Full Load [MW]:" >< "\(nominalElectricalParasitics)"
+    * nominalTemperatureOut.celsius.description
+    + "Maximum Mass Flow [kg/s]:" * maximumMassFlow.description
+    + "Minimum Load [%]:" * minLoad.percentage.description
+    + "Parasitics at Full Load [MW]:" * nominalElectricalParasitics.description
     + "Parasitic Energy Coefficients;\nParasitics(Load) = Parasitics(100%)*(c0+c1*load)\n"
-    + "c0:" >< "\(electricalParasitics[0])"
-    + "c1:" >< "\(electricalParasitics[1])"
+    + "c0:" * electricalParasitics[0].description
+    + "c1:" * electricalParasitics[1].description
     + "Use Heater in Parallel to SF:"
-    >< (onlyWithSolarField ? "YES" : "NO ")
+    * (onlyWithSolarField ? "YES" : "NO ")
   }
 }
 
 extension Heater.Parameter: TextConfigInitializable {
   public init(file: TextConfigFile) throws {
-    let line: (Int) throws -> Double = { try file.parseDouble(line: $0) }
-    name = file.name
-    efficiency = try Ratio(line(10))
-    antiFreezeTemperature = try Temperature(line(16))
-    nominalTemperatureOut = try Temperature(line(19))
-    maximumMassFlow = try line(22)
-    minLoad = try Ratio(line(25))
-    nominalElectricalParasitics = try line(28)
-    electricalParasitics = [try line(31), try line(34)]
-    onlyWithSolarField = true
+    let ln: (Int) throws -> Double = { try file.double(line: $0) }
+    self = try .init(
+      name: file.name,
+      efficiency: Ratio(ln(10)),
+      minLoad: Ratio(ln(25)),
+      maximumMassFlow: ln(22),
+      nominalElectricalParasitics: ln(28),
+      antiFreezeTemperature: Temperature(ln(16)),
+      nominalTemperatureOut: Temperature(ln(19)),
+      electricalParasitics: [ln(31), ln(34)],
+      onlyWithSolarField: true
+    )
   }
 }

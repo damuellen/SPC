@@ -1,12 +1,7 @@
-//
-//  Copyright 2017 Daniel Müllenborn
-//
-//  Licensed under the Apache License, Version 2.0 (the "License");
-//  you may not use this file except in compliance with the License.
-//  You may obtain a copy of the License at
-//
-//  http://www.apache.org/licenses/LICENSE-2.0
-//
+// Copyright 2021 TSK Flagsol Engineering GmbH
+// SPDX-License-Identifier: Apache-2.0
+
+import Foundation
 
 public protocol TextConfigInitializable {
   init(file: TextConfigFile) throws
@@ -36,23 +31,22 @@ public struct TextConfigFile {
     case unexpectedValueCount
   }
 
-  public subscript(line line: Int) -> String? {
-    let idx = line - 1
+  public subscript(_ idx: Int) -> String? {
     guard self.values.indices.contains(idx) else {
       return nil
     }
     return self.values[idx].trimmingCharacters(in: .whitespaces)
   }
 
-  public func extractString(from line: Int) throws -> String {
-    guard let string = self[line: line], string.count > 0 else {
+  public func string(_ line: Int) throws -> String {
+    guard let string = self[line - 1], string.count > 0 else {
       throw ReadError.missingValueInRow(line, self.path)
     }
     return string
   }
 
-  public func parseDouble(line: Int) throws -> Double {
-    let value = try extractString(from: line)
+  public func double(line: Int) throws -> Double {
+    let value = try string(line)
     if let value = Double(value) {
       return value
     } else {
@@ -60,8 +54,8 @@ public struct TextConfigFile {
     }
   }
 
-  public func parseInteger(line: Int) throws -> Int {
-    let value = try extractString(from: line)
+  public func integer(line: Int) throws -> Int {
+    let value = try string(line)
     if let value = Int(value) {
       return value
     } else {
@@ -70,8 +64,8 @@ public struct TextConfigFile {
   }
 }
 
-extension TextConfigFile.ReadError {
-  var errorDescription: String {
+extension TextConfigFile.ReadError: CustomStringConvertible {
+  public var description: String {
     switch self {
     case let .invalidValueInRow(line, path):
       return "\(path) - Invalid value in line \(line)."

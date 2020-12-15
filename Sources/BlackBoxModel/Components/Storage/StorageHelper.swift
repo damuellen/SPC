@@ -29,8 +29,10 @@ extension Storage {
         return 0
       }
       let rohMean = solarField.HTF.density(status.averageTemperature)
-      let avgTempHX = Temperature.average(heatExchanger.temperature.htf.inlet.max,
-                            heatExchanger.temperature.htf.outlet.max)
+      let avgTempHX = Temperature.average(
+        heatExchanger.temperature.htf.inlet.max,
+        heatExchanger.temperature.htf.outlet.max
+      )
       if avgTempHX.celsius < 50 { 
         print("Temperature too low.")
         return 0
@@ -183,8 +185,8 @@ extension Storage {
       parameter.designTemperature.hot
     )
     
-    let designDeltaT = (parameter.designTemperature.hot
-      - parameter.designTemperature.cold).kelvin
+    let designDeltaT = (parameter.designTemperature.hot.kelvin
+      - parameter.designTemperature.cold.kelvin)
     
     storage.storedHeat = storage.charge.ratio
       * Design.layout.storage_ton * storage.heatInSalt.available

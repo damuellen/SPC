@@ -35,6 +35,15 @@ extension Optional {
   }
 }
 
+extension Comparable {
+  mutating func clamp(to limits: ClosedRange<Self>) {
+    self = min(max(self, limits.lowerBound), limits.upperBound)
+  }
+  func clamped(to limits: ClosedRange<Self>) -> Self {    
+    return min(max(self, limits.lowerBound), limits.upperBound)
+  }
+}
+
 extension DefaultStringInterpolation {
   mutating func appendInterpolation(csv values: Double...) {
     values.forEach { value in
@@ -45,27 +54,32 @@ extension DefaultStringInterpolation {
 
   mutating func appendInterpolation(format values: Double...) {
     values.forEach { value in
-      self.appendInterpolation(string(value))
+      self.appendInterpolation(value.asString())
     }
   }
 }
 
 public func decorated(_ title: String) -> String {
   var width = TerminalController.terminalWidth() ?? 80
-  if width == 0 { width = 80 }
+  width.clamp(to: 70...100)
   let half = (width - title.count - 8) / 2
   let line = String(repeating: "─", count: half)
   return line + "┤   " + title + "   ├" + line
 }
 
-@inline(__always)
-func strings(_ array: [Double], precision: Int = 1) -> [String] {
-  array.map { String(format: "%.\(precision)f", $0) }
+public func heading(_ title: String) -> String {
+  var width = TerminalController.terminalWidth() ?? 80
+  width.clamp(to: 70...100)
+  let half = (width - title.count - 8) / 2
+  let s = String(repeating: "─", count: half)
+  return "\n" + s + "┤   " + title + "   ├" + s + "\n"
 }
 
-@inline(__always)
-func string(_ value: Double, precision: Int = 2) -> String {
-  String(format: "%.\(precision)f", value)
+extension Double {
+  @inline(__always)
+  func asString(precision: Int = 2) -> String {
+    String(format: "%.\(precision)f", self)
+  }
 }
 
 let backgroundQueue = DispatchQueue(label: "serial.queue")

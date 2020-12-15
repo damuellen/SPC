@@ -9,6 +9,18 @@
 //
 
 extension Plant {
+
+  static var parameterDescriptions: String {
+    heading("Fixed Parameter")
+    + "HEAT TRANSFER FLUID\n\n\(SolarField.parameter.HTF)\n\n"
+    + "HEATER\n\n\(Heater.parameter)\n"
+    + "HEAT EXCHANGER\n\n\(HeatExchanger.parameter)\n"
+    + "STEAM TURBINE\n\n\(SteamTurbine.parameter)\n"
+    + "STORAGE\n\n\(Storage.parameter)\n"
+    + "SOLAR FIELD\n\n\(SolarField.parameter)\n"
+    + "COLLECTOR\n\n\(Collector.parameter)\n"
+  }
+
   static func setup() -> Plant {
     let steamTurbine = SteamTurbine.parameter
     let powerBlock = PowerBlock.parameter

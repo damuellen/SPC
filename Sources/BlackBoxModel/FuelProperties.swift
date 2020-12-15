@@ -18,15 +18,29 @@ public struct FuelParameter: Codable {
 
 extension FuelParameter {
   public init(file: TextConfigFile) throws {
-    let line: (Int) throws -> Double = { try file.parseDouble(line: $0) }
+    let ln: (Int) throws -> Double = { try file.double(line: $0) }
     self.name = file.name
     self.measurementUnit = file.values[9]
-    self.LHV = try line(13)
-    self.price = try line(16)
-    self.density = try line(19)
-    self.part = try line(22)
-    self.FERCeff = try line(25)
-    self.usedAmount = try line(28)
-    self.Qsol = try line(31)
+    self.LHV = try ln(13)
+    self.price = try ln(16)
+    self.density = try ln(19)
+    self.part = try ln(22)
+    self.FERCeff = try ln(25)
+    self.usedAmount = try ln(28)
+    self.Qsol = try ln(31)
+  }
+}
+
+extension FuelParameter: CustomStringConvertible {
+  public var description: String {
+    "Name :" * name
+    + "Unit :" * measurementUnit.description
+    + "Lower Heat Value [kWh/kg] :" * LHV.description
+    + "Fuel Price [Currency/Unit] :" * price.description
+    + "Density [kg/m³] :" * density.description
+    + "Allowed Fuel share (currently not used) :" * part.description
+    + "Fuel Efficiency assumed by Authorities [%] (currently not used) :" * FERCeff.description
+    + "Fuel Amount already used [MWh] (currently not used) :" * usedAmount.description
+    + "Solar Energy already produced [MWh] (currently not used) :" * Qsol.description
   }
 }

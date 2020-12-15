@@ -15,13 +15,13 @@ protocol MeasurementsConvertible {
 }
 
 extension MeasurementsConvertible {
-  var values: [String] { strings(numericalForm) }
+  var values: [String] { numericalForm.map { $0.asString() } }
 
   var prettyDescription: String {
-    return zip(values, Self.columns).reduce("\n") { result, pair in
-      let (value, desc) = pair
+    return zip(numericalForm, Self.columns).reduce("\n") { result, tuple in
+      let (value, desc) = (tuple.0.asString(), tuple.1)
       if value.hasPrefix("0") { return result }
-      return result + (desc.name >< (value + " " + desc.unit))
+      return result + (desc.name * (value + " " + desc.unit))
     }
   }
 }

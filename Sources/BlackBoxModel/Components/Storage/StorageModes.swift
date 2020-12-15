@@ -164,8 +164,8 @@ extension Storage {
       if case .indirect = parameter.type {
         fittedTemperature = -Temperature.absoluteZeroCelsius
         fittedTemperature += parameter.temperatureCharge.coefficients[0]
-          - (parameter.designTemperature.cold
-            - storage.temperatureTank.cold).kelvin
+          - (parameter.designTemperature.cold.kelvin
+            - storage.temperatureTank.cold.kelvin)
       } else {
         fittedTemperature = storage.temperatureTank.cold.kelvin
       }
@@ -223,8 +223,8 @@ extension Storage {
     } else {
       fittedTemperature = -Temperature.absoluteZeroCelsius
       fittedTemperature += parameter.temperatureCharge.coefficients[0]
-        - (parameter.designTemperature.cold
-          - storage.temperatureTank.cold).kelvin
+        - (parameter.designTemperature.cold.kelvin
+          - storage.temperatureTank.cold.kelvin)
     }
     storage.outletTemperature(kelvin: fittedTemperature)
     

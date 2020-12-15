@@ -22,10 +22,10 @@ extension GasTurbine {
 
 extension GasTurbine.Parameter: CustomStringConvertible {
   public var description: String {
-    "Description:" >< name
+    "Description:" * name
   // d += "Gross Power [MW]: \t\(Pgross * 100 / Design.layout.gasTurbine)"
-    + "Efficiency:" >< "\(efficiencyISO * 100)"
-    + "Altitude [m]:" >< "\(altitude)"
+    + "Efficiency:" * (efficiencyISO * 100).description
+    + "Altitude [m]:" * altitude.description
     + "Efficiency; "
     + "Efficiency(Load) = c0+c1*load+c2*load^2+c3*load^3+c4*load^4)"
     + "\n\(efficiencyFromLoad)"
@@ -40,15 +40,17 @@ extension GasTurbine.Parameter: CustomStringConvertible {
 
 extension GasTurbine.Parameter: TextConfigInitializable {
   public init(file: TextConfigFile) throws {
-    let line: (Int) throws -> Double = { try file.parseDouble(line: $0) }
-    name = file.name
-    powerGross = try line(10)
-    efficiencyISO = try line(13)
-    loadMin = try line(16)
-    altitude = try line(19)
-    efficiencyFromLoad = try [line(41), line(44), line(47), line(50), line(53)]
-    loadMaxFromTemperature = try [line(60), line(63), line(66), line(69), line(72)]
-    parasiticsFromLoad = try [line(79), line(82), line(85), line(88), line(91)]
-    designTemperature = try line(28)
+    let ln: (Int) throws -> Double = { try file.double(line: $0) }
+    self = try .init(
+      name: file.name,
+      powerGross: ln(10),
+      efficiencyISO: ln(13),
+      loadMin: ln(16),
+      altitude: ln(19),
+      efficiencyFromLoad: [ln(41), ln(44), ln(47), ln(50), ln(53)],
+      loadMaxFromTemperature: [ln(60), ln(63), ln(66), ln(69), ln(72)],
+      parasiticsFromLoad: [ln(79), ln(82), ln(85), ln(88), ln(91)],
+      designTemperature: ln(28)
+    )
   }
 }

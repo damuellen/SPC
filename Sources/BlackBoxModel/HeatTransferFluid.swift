@@ -188,12 +188,12 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
   }
 
   public var description: String {    
-    "Description:" >< name
-    + "Freezing Point [°C]:" >< "\(freezeTemperature.celsius)"
+    "Description:" * name
+    + "Freezing Point [°C]:" * freezeTemperature.celsius.description
     + "Specific Heat as a Function of Temperature; cp(T) = c0+c1*T\n"
-    + "c0:" >< "\(heatCapacity[0])"
-    + "c1:" >< "\(heatCapacity[1])"
-    + "Calculate with Enthalpy:" >< "\(useEnthalpy ? "YES" : "NO")"
+    + "c0:" * heatCapacity[0].description
+    + "c1:" * heatCapacity[1].description
+    + "Calculate with Enthalpy:" * (useEnthalpy ? "YES" : "NO")
     + (enthaplyFromTemperature.isEmpty == false ?
     "Enthalpy as function on Temperature" 
     + "\n\(enthaplyFromTemperature)" : "")
@@ -206,7 +206,8 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
     + "\n\(Polynomial(viscosity))"
     + "Conductivity as a Function of Temperature; lamda(T) = c0+c1*T+c1*T^2"
     + "\n\(Polynomial(thermCon))"
-    + "Maximum Operating Temperature [°C]:" >< "\(maxTemperature.celsius)"
+    + "Maximum Operating Temperature [°C]:" 
+    * maxTemperature.celsius.description
   }
 }
 
@@ -291,21 +292,21 @@ extension HeatTransferFluid: Codable {
 
 extension HeatTransferFluid {
   public init(file: TextConfigFile, includesEnthalpy: Bool) throws {
-    let line: (Int) throws -> Double = { try file.parseDouble(line: $0) }
+    let ln: (Int) throws -> Double = { try file.double(line: $0) }
     self.name = file.name
-    self.freezeTemperature = try Temperature(line(10))
-    let heatCapacity = try [line(13), line(15)]
+    self.freezeTemperature = try Temperature(ln(10))
+    let heatCapacity = try [ln(13), ln(15)]
     self.heatCapacity = heatCapacity
-    density = try [try line(18), try line(21), line(24)]
-    viscosity = try [line(27), line(30), line(33)]
-    thermCon = try [line(36), line(39), line(42)]
-    maxTemperature = try Temperature(line(45))  // .toKelvin
+    density = try [try ln(18), try ln(21), ln(24)]
+    viscosity = try [ln(27), ln(30), ln(33)]
+    thermCon = try [ln(36), ln(39), ln(42)]
+    maxTemperature = try Temperature(ln(45))  // .toKelvin
     if includesEnthalpy {
-      let h_T = try [line(47), line(48), line(49), line(50), line(51)]
+      let h_T = try [ln(47), ln(48), ln(49), ln(50), ln(51)]
       enthaplyFromTemperature = Polynomial(h_T)
-      let T_h = try [line(53), line(54), line(55), line(56), line(57)]
+      let T_h = try [ln(53), ln(54), ln(55), ln(56), ln(57)]
       temperatureFromEnthalpy = Polynomial(T_h)
-      useEnthalpy = try line(59) > 0 ? true : false
+      useEnthalpy = try ln(59) > 0 ? true : false
 
     } else {
       self.useEnthalpy = false

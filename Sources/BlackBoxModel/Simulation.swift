@@ -70,13 +70,25 @@ public struct InitValues: Codable {
   let temperatureOfHTFinPipes,
     temperatureOfHTFinHCE: Temperature
   let massFlowInSolarField: MassFlow
+   
 }
 
 extension InitValues {
   public init(file: TextConfigFile) throws {
-    let line: (Int) throws -> Double = { try file.parseDouble(line: $0) }
-    self.temperatureOfHTFinPipes = try Temperature(celsius: line(7))
-    self.temperatureOfHTFinHCE = try Temperature(celsius: line(10))
-    self.massFlowInSolarField = try MassFlow(line(13))
+    let ln: (Int) throws -> Double = { try file.double(line: $0) }
+    self.temperatureOfHTFinPipes = try Temperature(celsius: ln(7))
+    self.temperatureOfHTFinHCE = try Temperature(celsius: ln(10))
+    self.massFlowInSolarField = try MassFlow(ln(13))
+  }
+}
+
+extension InitValues: CustomStringConvertible {
+  public var description: String {
+    "HTF Temperature in Header [°C]:"
+    * temperatureOfHTFinPipes.celsius.description
+    + "HTF Temperature in Collector [°C]:"
+    * temperatureOfHTFinHCE.celsius.description
+    + "Mass Flow in Solar Field [kg/s]:"
+    * massFlowInSolarField.rate.description
   }
 }

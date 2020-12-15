@@ -47,26 +47,26 @@ extension Collector {
 
 extension Collector.Parameter: CustomStringConvertible {
   public var description: String {
-    "Description:" >< name
-    + "Aperture [m]:" >< "\(aperture)"
-    + "Length [m]:" >< "\(lengthSCA)"
-    + "Aperture Area [m²]:" >< "\(areaSCAnet)"
-    + "Extension of HCE [m]:" >< "\(extensionHCE)"
-    + "Average Distance Parabola to Focus [m]:" >< "\(avgFocus)"
-    + "Absorber Pipe Outer Radius [m]:" >< "\(rabsOut)"
-    + "Absorber Pipe Inner Radius [m]:" >< "\(rabsInner)"
-    + "Glas Tube Radius [m]:" >< "\(rglas)"
-    + "Optical Efficiency [%]:" >< "\(opticalEfficiency * 100)"
+    "Description:" * name
+    + "Aperture [m]:" * aperture.description
+    + "Length [m]:" * lengthSCA.description
+    + "Aperture Area [m²]:" * areaSCAnet.description
+    + "Extension of HCE [m]:" * extensionHCE.description
+    + "Average Distance Parabola to Focus [m]:" * avgFocus.description
+    + "Absorber Pipe Outer Radius [m]:" * rabsOut.description
+    + "Absorber Pipe Inner Radius [m]:" * rabsInner.description
+    + "Glas Tube Radius [m]:" * rglas.description
+    + "Optical Efficiency [%]:" * (opticalEfficiency * 100).description
     + "Absorber emittance; Emittance(T) = c0 + c1*T\n"
-    + "c0:" >< "\(emissionHCE[0])"
-    + "c1:" >< "\(emissionHCE[1])"
+    + "c0:" * emissionHCE[0].description
+    + "c1:" * emissionHCE[1].description
     + "Calc. Radialoss as Integral of dT:"
-    >< "\(useIntegralRadialoss ? "YES" : "NO")"
+    * (useIntegralRadialoss ? "YES" : "NO")
     + "Bellow Shadowing Factors\n"
-    + "for incident angle 0 - 1.5°:" >< "\(shadingHCE[0])"
-    + "for incident angle 1.5 - 5°:" >< "\(shadingHCE[1])"
-    + "for incident angle 5 - 14°:" >< "\(shadingHCE[2])"
-    + "for incident angle >14°:" >< "\(shadingHCE[3])"
+    + "for incident angle 0 - 1.5°:" * shadingHCE[0].description
+    + "for incident angle 1.5 - 5°:" * shadingHCE[1].description
+    + "for incident angle 5 - 14°:" * shadingHCE[2].description
+    + "for incident angle >14°:" * shadingHCE[3].description
     + "Incident Angle Modifier;\nIAM(theta) = c0+c1*theta+c2*theta^2+c3*theta^3+c4*theta^4"
     + "\n\(IAMfac)"
   }
@@ -74,22 +74,22 @@ extension Collector.Parameter: CustomStringConvertible {
 
 extension Collector.Parameter: TextConfigInitializable {
   public init(file: TextConfigFile) throws {
-    let line: (Int) throws -> Double = { try file.parseDouble(line: $0) }
+    let ln: (Int) throws -> Double = { try file.double(line: $0) }
     name = file.name
-    aperture = try line(10)
-    lengthSCA = try line(13)
-    areaSCAnet = try line(16)
-    extensionHCE = try line(19)
-    avgFocus = try line(22)
-    rabsOut = try line(25)
-    rabsInner = try line(28)
-    rglas = try line(31)
-    glassEmission = try line(71)
-    opticalEfficiency = try line(34)
-    emissionHCE = try [line(37), line(40)]
-    shadingHCE = try [line(43), line(46), line(49), line(52)]
-    IAMfac = try [line(55), line(58), line(61), line(64), line(67)]
+    aperture = try ln(10)
+    lengthSCA = try ln(13)
+    areaSCAnet = try ln(16)
+    extensionHCE = try ln(19)
+    avgFocus = try ln(22)
+    rabsOut = try ln(25)
+    rabsInner = try ln(28)
+    rglas = try ln(31)
+    glassEmission = try ln(71)
+    opticalEfficiency = try ln(34)
+    emissionHCE = try [ln(37), ln(40)]
+    shadingHCE = try [ln(43), ln(46), ln(49), ln(52)]
+    IAMfac = try [ln(55), ln(58), ln(61), ln(64), ln(67)]
     absorber = .schott
-    useIntegralRadialoss = try line(73) > 0 ? true : false
+    useIntegralRadialoss = try ln(73) > 0 ? true : false
   }
 }

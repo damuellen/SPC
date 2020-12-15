@@ -199,7 +199,7 @@ public enum ParameterDefaults {
     start: .init(
       hours: .init(cold: 0, warm: 0),
       energy: .init(cold: 0, warm: 0)),
-    electricalParasitics: .init(values: 0),
+    electricalParasitics: .init(values: 0, 0),
     efficiency: .init(values: 0)
   )
 

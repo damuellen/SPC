@@ -10,11 +10,18 @@
 
 public struct OperationRestriction {
   static var fuelStrategy: FuelStrategy = .predefined
-  enum FuelStrategy {
+  enum FuelStrategy: CustomStringConvertible {
     case predefined, strategy
 
     var isPredefined: Bool {
       return self ~= .predefined
+    }
+
+    public var description: String {
+      switch self {
+        case .predefined: return "Predefined"
+        case .strategy: return "Strategy"
+      }
     }
   }
 }

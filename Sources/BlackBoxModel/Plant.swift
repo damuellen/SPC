@@ -45,8 +45,7 @@ public struct Plant {
     let heatExchanger = HeatExchanger.parameter
     let steamTurbine = SteamTurbine.parameter
     // added to reduced SOF massflow with electrical demand
-    solarField.setMassFlow(
-      rate: GridDemand.current.ratio
+    solarField.setMassFlow(rate: GridDemand.current.ratio
         * (steamTurbine.power.max / steamTurbine.efficiencyNominal
           / heatExchanger.efficiency) * 1_000 / heatExchanger.heatDesign
     )
@@ -69,8 +68,10 @@ public struct Plant {
     // powerblock mass flow can change when heater is running
     if heat.solar.watt > 0 {
       if case .startUp = steamTurbine.operationMode {
+        heat.startUp = heat.solar
         heat.production = 0.0
       } else {
+        heat.startUp = 0.0
         heat.production = heat.solar
       }
     } else if case .freezeProtection = solarField.operationMode {
@@ -433,7 +434,7 @@ public struct Plant {
     {  // No freeze protection heater use anymore if storage is in operation
       heater.inletTemperature(powerBlock)
 
-      heater.massFlow = powerBlock.massFlow
+      heater.massFlow(from: powerBlock)
 
       heater.operationMode = .freezeProtection(.zero)
 
@@ -703,7 +704,7 @@ public struct Plant {
           heatDiff: heatDiff,
           fuel: fuel)
 
-        heater.massFlow = storage.massFlow
+        heater.massFlow(from: storage)
       } else {  // No Fuel Available -> Discharge directly with reduced TB load
         storage.operationMode = .discharge
         (supply, parasitics) = Storage.perform(

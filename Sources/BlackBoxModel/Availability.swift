@@ -22,7 +22,7 @@ struct Availability: Codable {
   private let data: [Values]
 
   private static let defaults: Availability.Values = .init(
-    solarField: 0.99, breakHCE: 0.1, airHCE: 0.0, fluorHCE: 0.0,
+    solarField: 0.993, breakHCE: 0.001, airHCE: 0.0, fluorHCE: 0.0,
     reflMirror: 0.93, missingMirros: 0.0005, powerBlock: 1.0, storage: 0.98
   )
 
@@ -54,22 +54,40 @@ struct Availability: Codable {
 
 extension Availability {
   public init(file: TextConfigFile) throws {
-    let line: (Int) throws -> Double = { try file.parseDouble(line: $0) }
-    var data = [Values]()
+    let ln: (Int) throws -> Double = { try file.double(line: $0) }
+    var data = [Availability.defaults]
     for n in 0..<12 {
       let offset = 3 * n
       try data.append(
         Values(
-          solarField: Ratio(percent: line(38 + offset)),
-          breakHCE: Ratio(percent: line(78 + offset)),
-          airHCE: Ratio(percent: line(118 + offset)),
-          fluorHCE: Ratio(percent: line(158 + offset)),
-          reflMirror: Ratio(percent: line(198 + offset)),
-          missingMirros: Ratio(percent: line(238 + offset)),
-          powerBlock: Ratio(percent: line(278 + offset)),
-          storage: Ratio(percent: line(318 + offset))
-        ))
+          solarField: Ratio(percent: ln(38 + offset)),
+          breakHCE: Ratio(percent: ln(78 + offset)),
+          airHCE: Ratio(percent: ln(118 + offset)),
+          fluorHCE: Ratio(percent: ln(158 + offset)),
+          reflMirror: Ratio(percent: ln(198 + offset)),
+          missingMirros: Ratio(percent: ln(238 + offset)),
+          powerBlock: Ratio(percent: ln(278 + offset)),
+          storage: Ratio(percent: 98) //ln(318 + offset))
+        )
+      )
     }
     self.init(data: data)
+  }
+}
+
+extension Availability: CustomStringConvertible {
+  public var description: String {
+    "Annual Average Solar Field Availability [%]:"
+    * values.solarField.percentage.description
+    + "Average Percentage of Broken HCE [%]:"
+    * values.breakHCE.percentage.description
+    + "Average Percentage of HCE with Lost Vacuum [%]:"
+    * values.airHCE.percentage.description
+    + "Average Percentage of Flourescent HCE [%]:"
+    * values.fluorHCE.percentage.description
+    + "Average Mirror Reflectivity [%]:"
+    * values.reflMirror.percentage.description
+    + "Broken Mirrors [%]:"
+    * values.missingMirros.percentage.description
   }
 }

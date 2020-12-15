@@ -24,36 +24,27 @@ public struct Time {
 
 extension Time: TextConfigInitializable {
   public init(file: TextConfigFile) throws {
-    let line: (Int) throws -> Double = { try file.parseDouble(line: $0) }
+    let ln: (Int) throws -> Double = { try file.double(line: $0) }
 
     let getDate: (String) -> Date? = { dateString in
-      let components: [Int] = dateString.split(
-        separator: ".", maxSplits: 2, omittingEmptySubsequences: true
-      ).map(String.init).compactMap(Int.init)
-
-      guard components.count == 2 else { return nil }
-
-      let dateComponents = DateComponents(
-        year: BlackBoxModel.yearOfSimulation,
-        month: components[0], day: components[1]
+      let dateFormatter = DateFormatter()
+      dateFormatter.dateFormat = "MM.dd yyyy"
+      return dateFormatter.date(from:
+        dateString + "\(BlackBoxModel.yearOfSimulation)"
       )
-
-      guard let date = calendar.date(from: dateComponents)
-      else { return nil }
-      return date
     }
 
     if let firstDayOfOperation = getDate(file.values[12]) {
-      let hours = try line(14) * 3600
-      let minutes = try line(15) * 60
+      let hours = try ln(14) * 3600
+      let minutes = try ln(15) * 60
       let timeInterval = hours + minutes
       let date = firstDayOfOperation.addingTimeInterval(timeInterval)
       firstDateOfOperation = date
     }
 
     if let lastDayOfOperation = getDate(file.values[15]) {
-      let hours = try line(17) * 3600
-      let minutes = try line(18) * 60
+      let hours = try ln(17) * 3600
+      let minutes = try ln(18) * 60
       let timeInterval = hours + minutes
       let date = lastDayOfOperation.addingTimeInterval(timeInterval)
       lastDateOfOperation = date
@@ -61,7 +52,7 @@ extension Time: TextConfigInitializable {
 
     self.steps =
       try DateGenerator.Interval(
-        rawValue: Int(line(22))
+        rawValue: Int(ln(22))
       ) ?? .every5minutes
 
     var dates = [Date]()

@@ -35,21 +35,15 @@ public struct HeatExchanger: Component, HeatCycle {
 
   public static var parameter: Parameter = ParameterDefaults.hx
 
-  static func clamp(_ temperatureFactor: Double) -> Double {
-    var temperatureFactor = temperatureFactor
-    if temperatureFactor > 1.1 { temperatureFactor = 1.1 }
-    if temperatureFactor < 0 { temperatureFactor = 0 }
-    return temperatureFactor
-  }
-
   /// power function based on MAN-Turbo and OHL data with pinch point tool
   static func temperatureFactor(
     temperature: Temperature, load: Ratio, max: Temperature) -> Double
   {
-    return clamp(((0.0007592419869 * (temperature.kelvin / max.kelvin)
+    (((0.0007592419869 * (temperature.kelvin / max.kelvin)
       * 666 + 0.4943825893223) * load.ratio ** (0.0001400823882
         * (temperature.kelvin / max.kelvin)
-        * 666 - 0.0110227028559)) - 0.000151639) // function is based on 393°C
+        * 666 - 0.0110227028559)) - 0.000151639).clamped(to: 0...1.1)
+        // function is based on 393°C
   }
   
   /// Update HeatExchanger.temperature.outlet
@@ -89,20 +83,20 @@ public struct HeatExchanger: Component, HeatCycle {
 
           var factor = ToutMassFlow(massFlowLoad)
           factor *= ToutTin(temperature.inlet)
-          factor = HeatExchanger.clamp(factor)
-          setTemperature(outlet:
+          factor.clamp(to: 0...1.1) 
+          self.setTemperature(outlet:
             parameter.temperature.htf.outlet.max.adjusted(factor)
           )
         case let (ToutMassFlow?, .none, .none):
           outletTemperature(kelvin:
             temp.htf.outlet.min.kelvin + temp.range.outlet.kelvin
-            * (temperature.inlet - temp.htf.inlet.min).kelvin
+            * (temperature.inlet.kelvin - temp.htf.inlet.min.kelvin)
             / temp.range.inlet.kelvin)
 
           let massFlowLoad = massFlow.share(of: solarField.massFlow)
 
           var factor = ToutMassFlow(massFlowLoad)
-          factor = HeatExchanger.clamp(factor)
+          factor.clamp(to: 0...1.1)
           outletTemperature(kelvin: factor * self.outletTemperature)
         case let (_, _, ToutTinMassFlow?):
           let massFlowLoad = massFlow.share(of: solarField.massFlow)
@@ -114,16 +108,12 @@ public struct HeatExchanger: Component, HeatCycle {
             * massFlowLoad.ratio ** (ToutTinMassFlow[2]
               * (self.inletTemperature / temp.htf.inlet.max.kelvin)
               * 666 + ToutTinMassFlow[3])) + ToutTinMassFlow[4]
-          factor = HeatExchanger.clamp(factor)
-          self.setTemperature(outlet:
-            temp.htf.outlet.max.adjusted(factor)
-          )
+          factor.clamp(to: 0...1.1)
+          self.setTemperature(outlet: temp.htf.outlet.max.adjusted(factor))
         case let (_, ToutTin?, _):
           var factor = ToutTin(temperature.inlet)
-          factor = HeatExchanger.clamp(factor)
-          self.setTemperature(outlet:
-            temp.htf.outlet.max.adjusted(factor)
-          )
+          factor.clamp(to: 0...1.1)
+          self.setTemperature(outlet: temp.htf.outlet.max.adjusted(factor))
         default:
 // CHECK: the value of HTFoutTmax should be dependent on storage charging but only on PB self
           self.outletTemperature(kelvin:
@@ -161,20 +151,20 @@ public struct HeatExchanger: Component, HeatCycle {
 
           var factor = ToutMassFlow(load)
           factor *= ToutTin(temperature.inlet)
-          factor = HeatExchanger.clamp(factor)
+          factor.clamp(to: 0...1.1)
           setTemperature(outlet:
             parameter.temperature.htf.outlet.max.adjusted(factor)
           )
         } else if let ToutMassFlow = parameter.ToutMassFlow {
           // if Tout is dependant on massflow, recalculate Tout
-          let factor = HeatExchanger.clamp(ToutMassFlow(load))
+          let factor = ToutMassFlow(load).clamped(to: 0...1.1)
 
           temperature.outlet.adjust(withFactor: factor)
         } else if let c = parameter.ToutTinMassFlow {
           // power function based on MAN-Turbo and OHL data with pinch point tool
           var factor = ((c[0] * inletTemperature + c[1])
             * load.ratio ** (c[2] * inletTemperature + c[3])) + c[4]
-          factor = HeatExchanger.clamp(factor)
+          factor.clamp(to: 0...1.1)
           setTemperature(outlet:
             parameter.temperature.htf.outlet.max.adjusted(factor)
           )
@@ -226,7 +216,7 @@ public struct HeatExchanger: Component, HeatCycle {
 
         return Temperature(
           (temp.htf.outlet.min.kelvin + temp.range.outlet.kelvin
-            * (pb.temperature.inlet - temp.htf.inlet.min).kelvin
+            * (pb.temperature.inlet.kelvin - temp.htf.inlet.min.kelvin)
             / temp.range.inlet.kelvin) * factor.ratio
         )
       }
@@ -239,9 +229,8 @@ public struct HeatExchanger: Component, HeatCycle {
         let massFlowLoad = pb.massFlow.share(of: solarField.massFlow)
         var factor = ToutMassFlow(massFlowLoad.ratio)
         factor *= ToutTin(hx.temperature.inlet)
-        
-        return parameter.temperature.htf.outlet.max
-          .adjusted(clamp(factor))
+        factor.clamp(to: 0...1.1)
+        return parameter.temperature.htf.outlet.max.adjusted(factor)
       }
     } else if parameter.Tout_exp_Tin_Mfl,
       let c = parameter.ToutTinMassFlow
@@ -249,13 +238,12 @@ public struct HeatExchanger: Component, HeatCycle {
       return {
         (pb: PowerBlock, _: HeatCycle) -> Temperature in
         let massFlowLoad = pb.massFlow.share(of: solarField.massFlow)
-        let factor = ((c[0] * (pb.inletTemperature
+        var factor = ((c[0] * (pb.inletTemperature
           / parameter.temperature.htf.inlet.max.kelvin) * 666 + c[1])
           * massFlowLoad.ratio ** (c[2] * (pb.inletTemperature
             / parameter.temperature.htf.inlet.max.kelvin) * 666 + c[3])) + c[4]
-        
-        return parameter.temperature.htf.outlet.max
-          .adjusted(clamp(factor))
+        factor.clamp(to: 0...1.1)
+        return parameter.temperature.htf.outlet.max.adjusted(factor)
       }
     } else if let ToutTin = parameter.ToutTin {
       return { (_: PowerBlock,
@@ -270,7 +258,7 @@ public struct HeatExchanger: Component, HeatCycle {
       let temp = parameter.temperature
       return Temperature(
         temp.htf.outlet.min.kelvin + temp.range.outlet.kelvin
-          * (pb.temperature.inlet - temp.htf.inlet.min).kelvin
+          * (pb.temperature.inlet.kelvin - temp.htf.inlet.min.kelvin)
           / temp.range.inlet.kelvin
       )
     }

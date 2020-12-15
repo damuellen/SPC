@@ -27,27 +27,27 @@ extension PowerBlock {
 extension PowerBlock.Parameter: CustomStringConvertible {
   public var description: String {
     "Fixed Parasitics for Load = 0 [MW]:"
-    >< "\(fixElectricalParasitics0)"
+    * fixElectricalParasitics0.description
     + "Parasitics during PB Start-Up [MW]:"
-    >< "\(startUpElectricalParasitics)"
+    * startUpElectricalParasitics.description
     + "Fixed Parasitics (Load > 0) [MW]:"
-    >< "\(fixElectricalParasitics)"
+    * fixElectricalParasitics.description
     + "Nominal Parasitics (Load = 1)[MW]:"
-    >< "\(nominalElectricalParasiticsACC)"
+    * nominalElectricalParasiticsACC.description
     + "Parasitic ; Parasitics(Load) = Parasitics(100%)*(c0+c1*load)\n"
-    + "c0:" >< "\(electricalParasitics[0])"
-    + "c1:" >< "\(electricalParasitics[1])"
-    + "c2:" >< "\(electricalParasitics[2])"
+    + "c0:" * electricalParasitics[0].description
+    + "c1:" * electricalParasitics[1].description
+    + "c2:" * electricalParasitics[2].description
     + "Parasitics of Cooling Tower for load < 50% [MW]:"
-    >< "\(electricalParasiticsStep[0])"
+    * electricalParasiticsStep[0].description
     + "Parasitics of Cooling Tower for load > 50% [MW]:"
-    >< "\(electricalParasiticsStep[1])"
+    * electricalParasiticsStep[1].description
     + "Parasitics of Shared Facilities for load = 0 [MW]:"
-    >< "\(electricalParasiticsShared[0])"
+    * electricalParasiticsShared[0].description
     + "Parasitics of Shared Facilities for load > 0 [MW]:"
-    >< "\(electricalParasiticsShared[1])"
+    * electricalParasiticsShared[1].description
     + "Nominal Parasitics of ACC [MW]:"
-    >< "\(nominalElectricalParasiticsACC)"
+    * nominalElectricalParasiticsACC.description
     + "ACC Parasitic f(Load) = ParasiticsACC(100%)*(c0+c1*load+c2*load^2+...)"
     + "\n\(electricalParasiticsACC)"
     + "ACC Parasitic f(Tamb) = ParasiticsACC(100%)*(c0+c1*Tamb+c2*Tamb^2+...)"
@@ -61,7 +61,7 @@ extension PowerBlock.Parameter: TextConfigInitializable {
     var spacing = 3
     func parse() throws -> Double {
       defer { line += spacing }
-      return try file.parseDouble(line: line)
+      return try file.double(line: line)
     }
     name = file.name
     fixElectricalParasitics = try parse()

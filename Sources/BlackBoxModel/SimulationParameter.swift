@@ -27,75 +27,75 @@ extension Simulation {
   }
 }
 
+extension Simulation.AdjustmentFactors: CustomStringConvertible {
+  public var description: String {
+    "Adjustment factor for Solar Field Efficiency:" * efficiencySolarField.description
+    + "Adjustment factor for HCE heat Losses:" * heatLossHCE.description
+    + "Adjustment factor for Heat Losses in Piping and HTF- System:" * heatLossHTF.description
+    + "Adjustment factor for Heat Losses in Power Block:" * heatLossH2O.description
+    + "Adjustment factor for Turbine Efficiency:" * efficiencyTurbine.description
+    + "Adjustment factor for Parasitic Power:" * electricalParasitics.description
+  }
+}
+
 extension Simulation.Parameter: CustomStringConvertible {
   public var description: String {
     "Delta T for Start-Up of Anti-Freeze Pumping:"
-    >< "\(dfreezeTemperaturePump)"
+    * dfreezeTemperaturePump.celsius.description
     + "Delta T for Start-Up of Anti-Freeze Heating:"
-    >< "\(dfreezeTemperatureHeat)"
+    * dfreezeTemperatureHeat.celsius.description
     + "Minimum Raise of Temperature for Start-Up [K]:"
-    >< "\(minTemperatureRaiseStartUp)"
+    * minTemperatureRaiseStartUp.celsius.description
     + "Minimum Raise of Insolation for Start-Up [W/m²]:"
-    >< "\(minInsolationRaiseStartUp)"
+    * minInsolationRaiseStartUp.description
     + "Iteration Tolerance for Electrical Production meeting demand [MW]:"
-    >< "\(heatTolerance)"
-    + "Tolerance for Temperature Iteration [K]:" >< "\(tempTolerance)"
-    + "Tolerance for Time Iteration [min]:" >< "\(timeTolerance)"
-    + "Tolerance for Mass Iteration [kg]:" >< "\(massTolerance)"
-    + "Minimum Insolation for Start-Up [W/m²]:" >< "\(minInsolation)"
-    + "Adjustment factor for Solar Field Efficiency:"
-    >< "\(adjustmentFactor.efficiencySolarField)"
-    + "Adjustment factor for HCE heat Losses:"
-    >< "\(adjustmentFactor.heatLossHCE)"
-    + "Adjustment factor for Heat Losses in Piping and HTF- System:"
-    >< "\(adjustmentFactor.heatLossHTF)"
-    + "Adjustment factor for Heat Losses in Power Block:"
-    >< "\(adjustmentFactor.heatLossH2O)"
-    + "Adjustment factor for Turbine Efficiency:"
-    >< "\(adjustmentFactor.efficiencyTurbine)"
-    + "Adjustment factor for Parasitic Power:"
-    >< "\(adjustmentFactor.electricalParasitics)"
+    * heatTolerance.description
+    + "Tolerance for Temperature Iteration [K]:" * tempTolerance.description
+    + "Tolerance for Time Iteration [min]:" * timeTolerance.description
+    + "Tolerance for Mass Iteration [kg]:" * massTolerance.description
+    + "Minimum Insolation for Start-Up [W/m²]:" * minInsolation.description
+    + "\(adjustmentFactor)"
     + "Maximal heat input to power block (Boiler Operation):"
-    >< "\(maxToPowerBlock)"
+    * maxToPowerBlock.description
     + "Minimal heat from solar field for boiler start-up:"
-    >< "\(minInsolationForBoiler)"
+    * minInsolationForBoiler.description
     + "Iteration Tolerance for Electrical Production [MW]:"
-    >< "\(electricalTolerance)"
+    * electricalTolerance.description
     + "Iteration Start Value for Parasitics [% of production]:"
-    >< "\(electricalParasitics * 100)"
+    * "\(electricalParasitics * 100)"
     + "Tolerance for Temperature Drop in Hot Header Iteration [K]:"
-    >< "\(HLtempTolerance)"
+    * HLtempTolerance.description
   }
 }
 
 extension Simulation.Parameter: TextConfigInitializable {
   public init(file: TextConfigFile) throws {
-    let line: (Int) throws -> Double = { try file.parseDouble(line: $0) }
+    let ln: (Int) throws -> Double = { try file.double(line: $0) }
     let adjustmentFactor = try Simulation.AdjustmentFactors(
-      efficiencySolarField: line(34),
-      efficiencyTurbine: line(46),
-      efficiencyHeater: line(52),
-      efficiencyBoiler: line(55),
-      heatLossHCE: line(61),
-      heatLossHTF: line(40),
-      heatLossH2O: line(43),
-      electricalParasitics: line(61) / 100
+      efficiencySolarField: ln(34),
+      efficiencyTurbine: ln(46),
+      efficiencyHeater: ln(52),
+      efficiencyBoiler: ln(55),
+      heatLossHCE: ln(61),
+      heatLossHTF: ln(40),
+      heatLossH2O: ln(43),
+      electricalParasitics: ln(61) / 100
     )
 
     self = try Simulation.Parameter(
-      dfreezeTemperaturePump: Temperature(celsius: line(7)),
-      dfreezeTemperatureHeat: Temperature(celsius: line(10)),
-      minTemperatureRaiseStartUp: Temperature(celsius: line(13)),
-      tempTolerance: Temperature(line(22)),
-      minInsolationRaiseStartUp: line(16),
-      heatTolerance: line(19),
-      timeTolerance: line(25),
-      massTolerance: line(28),
-      minInsolation: line(31),
-      maxToPowerBlock: line(16),
-      minInsolationForBoiler: line(16),
-      electricalTolerance: line(58),
-      electricalParasitics: line(19),
+      dfreezeTemperaturePump: Temperature(celsius: ln(7)),
+      dfreezeTemperatureHeat: Temperature(celsius: ln(10)),
+      minTemperatureRaiseStartUp: Temperature(celsius: ln(13)),
+      tempTolerance: Temperature(ln(22)),
+      minInsolationRaiseStartUp: ln(16),
+      heatTolerance: ln(19),
+      timeTolerance: ln(25),
+      massTolerance: ln(28),
+      minInsolation: ln(31),
+      maxToPowerBlock: ln(16),
+      minInsolationForBoiler: ln(16),
+      electricalTolerance: ln(58),
+      electricalParasitics: ln(19),
       HLtempTolerance: 0.1,
       adjustmentFactor: adjustmentFactor
     )

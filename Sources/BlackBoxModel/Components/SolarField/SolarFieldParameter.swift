@@ -74,22 +74,16 @@ extension SolarField.Parameter {
     var nearWay =
       Double(numberOfSCAsInRow)
       * (Collector.parameter.lengthSCA + distanceSCA)
-    nearWay =
-      layout ~= .I
-      ? nearWay
-      : nearWay * 2 + rowDistance + 0.5
+    nearWay = layout ~= .I
+      ? nearWay : nearWay * 2 + rowDistance + 0.5
 
     var avgWay = Design.layout.solarField / 4 * rowDistance / 2
-    avgWay =
-      layout ~= .I
-      ? avgWay + 0.5
-      : avgWay + nearWay
+    avgWay = layout ~= .I
+      ? avgWay + 0.5 : avgWay + nearWay
 
     var farWay: Double = (2 * (Design.layout.solarField / 4 * rowDistance / 2))
-    farWay =
-      layout ~= .I
-      ? farWay
-      : farWay + nearWay
+    farWay = layout ~= .I
+      ? farWay : farWay + nearWay
 
     self.loopWays = [designWay, nearWay, avgWay, farWay]
     self.distRatio = pipeWay / (2 * loopWays[1])
@@ -99,79 +93,86 @@ extension SolarField.Parameter {
 
 extension SolarField.Parameter: CustomStringConvertible {
   public var description: String {
-    "Number of Loops:" >< "\(Design.layout.solarField)"
-    + "Maximum allowable Wind Speed for Operation [m]:" >< "\(maxWind)"
-    + "Numbers of Collectors in a Row:" >< "\(numberOfSCAsInRow)"
-    + "Distance between Rows [m]:" >< "\(rowDistance)"
-    + "Distance between Collectors in a Row [m]:" >< "\(distanceSCA)"
+    "Number of Loops:" * Design.layout.solarField.description
+    + "Maximum allowable Wind Speed for Operation [m]:" * maxWind.description
+    + "Numbers of Collectors in a Row:" * numberOfSCAsInRow.description
+    + "Distance between Rows [m]:" * rowDistance.description
+    + "Distance between Collectors in a Row [m]:" * distanceSCA.description
     + "Heat Losses in total HTF Piping (per sqm aperture) [W/m²]:"
-    >< String(format: "%G", pipeHeatLosses)
+    * String(format: "%G", pipeHeatLosses)
     + "Heat Losses in Piping of tested field (per sqm aperture) [W/m²]:"
-    >< String(format: "%G", SSFHL)
-    + "Azimuth angle of Solar Field Orientation [°]:" >< "\(azimut)"
+    * String(format: "%G", SSFHL)
+    + "Azimuth angle of Solar Field Orientation [°]:" * azimut.description
+    + "Pumping Parasitics at Full Load [MW]:"
+    * String(format: "%G", pumpParasticsFullLoad)
+    + "Pumping Parasitics of Anti-Freeze Pump [MW]:"
+    * String(format: "%G", antiFreezeParastics)
+    + "Parasitic Energy Coefficients; Parasitics(Load) = Parasitcs(100%)*(c0+c1*load+c2*load^2)"
+    + "\n\(pumpParastics)"
+    + "Tilt of Collectors [°]:" * elevation.description
     + "Mass Flow in Solar Field at Full Load [kg/s]:"
-    >< String(format: "%.1f", massFlow.rate)
-    + "Minimum allowable Mass Flow [%]:" >< "\(minFlow.percentage)"
-    + "Anti-Freeze Mass Flow [%]:" >< "\(antiFreezeFlow.percentage)"
+    * String(format: "%.1f", massFlow.rate)
+    + "Minimum allowable Mass Flow [%]:" * minFlow.percentage.description
+    + "Anti-Freeze Mass Flow [%]:" * antiFreezeFlow.percentage.description
     + "Total Mass of HTF in System [kg]:"
-    >< String(format: "%.1f", HTFmass)
-    + "Consider HL of ANY Dump. Collectors:" >< (HLDump ? "YES" : "NO ")
+    * String(format: "%.1f", HTFmass)
+    + "Consider HL of ANY Dump. Collectors:" * (HLDump ? "YES" : "NO ")
     + "Consider HL of Dump. Col. for operating quadrant:"
-    >< (HLDumpQuad ? "YES" : "NO ")
+    * (HLDumpQuad ? "YES" : "NO ")
     + "Consider SKAL-ET DemoLoop Effect of Wind Speed.:"
-    >< (EtaWind ? "YES" : "NO ")
+    * (EtaWind ? "YES" : "NO ")
     + (windCoefficients.isEmpty == false ?
     "Collector efficiency vs Wind Speed c0+c1*WS+c2*WS^2+c3*WS^3+c4*WS^4+c5*WS^5"
     + "\n\(windCoefficients)" : "")
-    + "Layout Design Type:" >< "\(layout.rawValue)"
+    + "Layout Design Type:" * layout.rawValue
     + "Heat Losses in Hot Header [MW]:"
-    >< String(format: "%G",heatLossHotHeader[0])
+    * String(format: "%G" ,heatLossHotHeader[0])
     + (heatLossHotHeader.count > 1 ?
     "Heat Losses in Hot Header Coefficients;\nHL(Tout - Tamb) = HL(design)*(c0+c1*dT)"
     + "\n\(Polynomial(heatLossHotHeader))" : "")
     + "Use Reference T_amb from Solpipe:"
-    >< (useReferenceAmbientTemperature ? "YES" : "NO ")
+    * (useReferenceAmbientTemperature ? "YES" : "NO ")
     + "Design SOF T_inlet [°C]:"
-    >< String(format: "%G", designTemperature.inlet)
+    * String(format: "%G", designTemperature.inlet)
     + "Design SOF T_outlet [°C]:"
-    >< String(format: "%G", designTemperature.outlet)
+    * String(format: "%G", designTemperature.outlet)
     + "HTF Flow Imbalance\n"
-    + "Near, Design:" >< "\(imbalanceDesign[0])"
-    + "Average, Design:" >< "\(imbalanceDesign[1])"
-    + "Far, Design:" >< "\(imbalanceDesign[2])"
-    + "Near, Minimum:" >< "\(imbalanceMin[0])"
-    + "Average, Minimum:" >< "\(imbalanceMin[1])"
-    + "Far, Minimum:" >< "\(imbalanceMin[2])"
+    + "Near, Design:" * imbalanceDesign[0].description
+    + "Average, Design:" * imbalanceDesign[1].description
+    + "Far, Design:" * imbalanceDesign[2].description
+    + "Near, Minimum:" * imbalanceMin[0].description
+    + "Average, Minimum:" * imbalanceMin[1].description
+    + "Far, Minimum:" * imbalanceMin[2].description
   }
 }
 
 extension SolarField.Parameter: TextConfigInitializable {
   public init(file: TextConfigFile) throws {
-    let line: (Int) throws -> Double = { try file.parseDouble(line: $0) }
-    maxWind = Float(try line(10))
-    numberOfSCAsInRow = Int(try line(13))
-    rowDistance = try line(16)
-    distanceSCA = try line(19)
-    pipeHeatLosses = try line(22)    
-    azimut = try line(25)
-    elevation = try line(28)
-    pumpParasticsFullLoad = try line(34)
-    antiFreezeParastics = try line(37)
-    pumpParastics = try [line(40), line(43), line(46)]
-    massFlow = try MassFlow(line(49))
-    minFlow = try Ratio(line(52) / 100)
-    antiFreezeFlow = try Ratio(line(55) / 100)
-    HTFmass = try line(58)
+    let ln: (Int) throws -> Double = { try file.double(line: $0) }
+    maxWind = Float(try ln(10))
+    numberOfSCAsInRow = Int(try ln(13))
+    rowDistance = try ln(16)
+    distanceSCA = try ln(19)
+    pipeHeatLosses = try ln(22)    
+    azimut = try ln(25)
+    elevation = try ln(28)
+    pumpParasticsFullLoad = try ln(34)
+    antiFreezeParastics = try ln(37)
+    pumpParastics = try [ln(40), ln(43), ln(46)]
+    massFlow = try MassFlow(ln(49))
+    minFlow = try Ratio(ln(52) / 100)
+    antiFreezeFlow = try Ratio(ln(55) / 100)
+    HTFmass = try ln(58)
     HTF = ParameterDefaults.HTF
-    heatLossHotHeader = try [line(66), line(67), line(68)]
-    imbalanceDesign = try [line(72), line(73), line(74)]
-    imbalanceMin = try [line(75), line(76), line(77)]
+    heatLossHotHeader = try [ln(66), ln(67), ln(68)]
+    imbalanceDesign = try [ln(72), ln(73), ln(74)]
+    imbalanceMin = try [ln(75), ln(76), ln(77)]
     windCoefficients =
-      try [line(79), line(80), line(81), line(82), line(83), line(84)]
-    useReferenceAmbientTemperature = try line(86) > 0 ? true : false
-    referenceAmbientTemperature = try line(87)
-    designTemperature = (try line(89), try line(90))
-    heatlosses = try [line(93), line(96), line(99), line(102), line(105)]
+      try [ln(79), ln(80), ln(81), ln(82), ln(83), ln(84)]
+    useReferenceAmbientTemperature = try ln(86) > 0 ? true : false
+    referenceAmbientTemperature = try ln(87)
+    designTemperature = (try ln(89), try ln(90))
+    heatlosses = try [ln(93), ln(96), ln(99), ln(102), ln(105)]
   }
 }
 

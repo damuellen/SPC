@@ -93,118 +93,133 @@ extension Storage {
 
 extension Storage.Parameter: CustomStringConvertible {
   public var description: String {
-    "Description:" >< name
+    "Description:" * (name + " " + type.rawValue)
+    + "Charge Storage up to Load:" * chargeTo.description
+    + "Discharge Storage directly to Turbine down to Load:" * dischargeToTurbine.description
+    + "Discharge Storage indirectly to Heater down to Load:" * dischargeToHeater.description
+    //+ "Discharge Storage, if (Qsolarfield - Qdemand) <" * heatdiff * 100; "% of Qdemand" 
+    + "Stepwidth of Qdemand to iterate Tmin for Turbine:" * stepSizeIteration.description
+    + "Relative Filling of Storage at Program Start (only for Thermocline):" * heatStoredrel.description
+    + "Outlet Temperature of storage during discharging (hot end)\nfor Load = 0; T = c0+c1*T+c2*T^2+c3*T^3:"
+    + "\n\(temperatureDischarge)"
+    + "Outlet Temperature (for Thermocline) or deltaT (for 2-Tank)\nof storage during discharging (hot end) for Load > 0; T = c0+c1*T+c2*T^2+c3*T^3:"
+    + "\n\(temperatureDischarge2)"
+    + "Outlet Temperature of storage during charging (cold end)\nfor Load = 0; T = c0+c1*T+c2*T^2+c3*T^3:"
+    + "\n\(temperatureCharge)"
+    + "Outlet Temperature (for Thermocline) or deltaT (for 2-Tank) of storage\nduring charging (cold end) for Load > 0; T = c0+c1*T+c2*T^2+c3*T^3:"
+    + "\n\(temperatureCharge2)"
     + "Capacity of Thermal Energy Storage [h]:\n" // Design.layout.storage)"
     + "Storage Availability [%]:"
-    >< "\(Availability.current.values.storage.percentage)"
+    * Availability.current.values.storage.percentage.description
     + "Design Temperature of Cold Storage Tank [°C]:"
-    >< "\(designTemperature.cold))"
+    * String(format: "%.1f", designTemperature.cold.celsius)
     + "Design Temperature of Hot Storage Tank [°C]:"
-    >< "\(designTemperature.hot)"
+    * String(format: "%.1f", designTemperature.hot.celsius)
     + "DeltaT in Heat Exchanger during discharging [°C]:"
-    >< "\(temperatureDischarge2[0])"
+    * temperatureDischarge2[0].description
     + "DeltaT in Heat Exchanger during charging [°C]:"
-    >< "\(temperatureCharge2[0])"
+    * temperatureCharge2[0].description
     + "Heat Loss of Cold Storage Tank [kW]:"
-    >< String(format: "%G", heatlossC0to1[0])
+    * String(format: "%G", heatlossC0to1[0])
     + "Heat Loss of Hot Storage Tank [kW]:"
-    >< String(format: "%G", heatlossC0to1[1])
-    + "Heat Exchanger Efficiency [%]:"
-    >< "\(heatExchangerEfficiency * 100)"
+    * String(format: "%G", heatlossC0to1[1])
+    + "Heat Exchanger Efficiency [%]:" * "\(heatExchangerEfficiency * 100)"
+    + "Pump Efficiency [%]:" * "\(pumpEfficiency * 100)"
+    + "Pressure Loss at Design Point [Pa]:" * String(format: "%G", pressureLoss)
     + "Temperature of Cold Tank at Program Start [°]:"
-    >< "\(startTemperature.cold)"
+    * startTemperature.cold.celsius.description
     + "Temperature of Hot Tank at Program Start [°]:"
-    >< "\(startTemperature.hot)"
+    * startTemperature.hot.celsius.description
     + "Load of Cold Tank at Program Start [%]:"
-    >< "\(startLoad.cold * 100)"
+    * (startLoad.cold * 100).description
     + "Load of Hot Tank at Program Start [%]:"
-    >< "\(startLoad.hot * 100)"
+    * (startLoad.hot * 100).description
     + "Charging of Storage during Night by HTF-heater (0=YES; -1=NO): \(FC)\n"
-    + "Stop charging strategy at day:" >< "\(stopFossilCharging.day)"
-    + "Stop charging strategy at month:" >< "\(stopFossilCharging.month)"
-    + "Start charging strategy at day:" >< "\(startFossilCharging.day)"
-    + "Start charging strategy at month:" >< "\(startFossilCharging.month)"
+    + "Stop charging strategy at day:" * stopFossilCharging.day.description
+    + "Stop charging strategy at month:" * stopFossilCharging.month.description
+    + "Start charging strategy at day:" * startFossilCharging.day.description
+    + "Start charging strategy at month:" * startFossilCharging.month.description
     + "Charge Storage up to relative Load before Start-up of Turbine:"
-    >< "\(PrefChargeto)"
-    + "Definition of Summer from Month:" >< "\(startexcep)"
-    + "                       to Month:" >< "\(endexcep)"
-    + "DNI for Bad Days Winter [kWh/m2]:" >< "\(badDNIwinter)"
-    + "DNI for Bad Days Summer [kWh/m2]:" >< "\(badDNIsummer)"
+    * PrefChargeto.description
+    + "Definition of Summer from Month:" * startexcep.description
+    + "                       to Month:" * endexcep.description
+    + "DNI for Bad Days Winter [kWh/m2]:" * badDNIwinter.description
+    + "DNI for Bad Days Summer [kWh/m2]:" * badDNIsummer.description
     + "Massflow to POB during Charge in Bad Days Winter [%]:"
-    >< "\(heatProductionLoadWinter.percentage )"
+    * heatProductionLoadWinter.percentage.description
     + "Massflow to POB during Charge in Bad Days Summer [%]:"
-    >< "\(heatProductionLoadSummer.percentage)"
-    + "Time to begin TES Discharge in Winter [hr]:" >< "\(dischrgWinter)"
-    + "Time to begin TES Discharge in Summer [hr]:" >< "\(dischrgSummer)"
+    * heatProductionLoadSummer.percentage.description
+    + "Time to begin TES Discharge in Winter [hr]:" * dischrgWinter.description
+    + "Time to begin TES Discharge in Summer [hr]:" * dischrgSummer.description
   }
 }
 
 extension Storage.Parameter: TextConfigInitializable {
   public init(file: TextConfigFile) throws {
     typealias T = Temperature
-    let line: (Int) throws -> Double = { try file.parseDouble(line: $0) }
-    let line2: (Int) throws -> Int = { try file.parseInteger(line: $0) }
+    let ln: (Int) throws -> Double = { try file.double(line: $0) }
+    let l2: (Int) throws -> Int = { try file.integer(line: $0) }
     name = file.name
-    chargeTo = try line(10)
-    dischargeToTurbine = try line(13)
-    dischargeToHeater = try line(16)
-    stepSizeIteration = try line(19)
-    heatStoredrel = try line(22)
-    temperatureDischarge = try [line(47), line(50), line(53), line(56)]
-    temperatureDischarge2 = try [line(62), line(65), line(68), line(71)]
-    temperatureCharge = try [line(81), line(84), line(87), line(90)]
-    temperatureCharge2 = try [line(96), line(99), line(102), line(105)]
-    heatlossCst = try [line(115), line(118), line(121), line(124)]
-    heatlossC0to1 = try [line(130), line(133), line(136), line(139)]
-    pumpEfficiency = try line(146) / 100
-    pressureLoss = try line(149)
-    massFlow = try .init(line(152))
-    startTemperature = try (T(line(162)), T(line(165)))
-    startLoad = try (line(168), line(171))
-  //  HX = try line(172) //bool
+    chargeTo = try ln(10)
+    dischargeToTurbine = try ln(13)
+    dischargeToHeater = try ln(16)
+    stepSizeIteration = try ln(19)
+    heatStoredrel = try ln(22)
+    temperatureDischarge = try [ln(47), ln(50), ln(53), ln(56)]
+    temperatureDischarge2 = try [ln(62), ln(65), ln(68), ln(71)]
+    temperatureCharge = try [ln(81), ln(84), ln(87), ln(90)]
+    temperatureCharge2 = try [ln(96), ln(99), ln(102), ln(105)]
+    heatlossCst = try [ln(115), ln(118), ln(121), ln(124)]
+    heatlossC0to1 = try [ln(130), ln(133), ln(136), ln(139)]
+    pumpEfficiency = try ln(146) / 100
+    pressureLoss = try ln(149)
+    massFlow = try .init(ln(152))
+    startTemperature = try (T(celsius: ln(162)), T(celsius:ln(165)))
+    startLoad = try (ln(168), ln(171))
+  //  HX = try ln(172) //bool
 
-    file.values[172]
-    strategy = .demand//try line(173) 
-    PrefChargeto = try line(174)
-    startexcep = try line2(175)
-    endexcep = try line2(176)
-    HTF = .solarSalt //try line(177)
-    FP = try line(178)
-    FC = try line(179)
-    stopFossilCharging = try (line2(180), line2(181))
-    startFossilCharging = try (line2(182), line2(183))
-    heatExchangerRestrictedMax = try line2(186) == 1 ? true:false
-    heatExchangerCapacity = try line(189)
-  //  Qfldif = try line(192)
-    isVariable = try line2(194) == 1 ? true:false
-    dSRise = try line(196)
-    minDischargeLoad = try Ratio(line(198))
-    fixedDischargeLoad = try Ratio(line(200))
-    heatTracingTime = try [line(202), line(205), line(208)]
-    heatTracingPower = try [line(203), line(206), line(209)]
- //   HTb_time = try line(205)
- //   HTb_pow = try line(206)
- //   HTc_time = try line(208)
- //   HTc_pow = try line(209)
-   // TempHeatTracing = try line(211)
-  //  HTc_Temp = try line(_)
-  //  HTe_pow = try line(_ )
-    heatExchangerRestrictedMin = try line2(217) == 1 ? true:false
-    heatExchangerMinCapacity = try line(218)
-    DischrgParFac = try line(220)
-    stopFossilCharging2 = try (line2(222), line2(223))
-    startFossilCharging2 = try (line2(224),line2(225))
-    auxConsumptionCurve = try line2(227) == 1 ? true:false
-    DesAuxIN = try line(228)
-    DesAuxEX = try line(229)
-    heatProductionLoadWinter = try Ratio(line(233))
-    heatProductionLoadSummer = try Ratio(line(234))
-    dischrgWinter = try line2(235)
-    dischrgSummer = try line2(236)
-    badDNIwinter = try line(238)
-    badDNIsummer = try line(239)
-    type = .indirect // try line(241)
-    designTemperature = (T(290), T(390))
+    //file.values[172]
+    strategy = .demand//try ln(173) 
+    PrefChargeto = try ln(174)
+    startexcep = try l2(175)
+    endexcep = try l2(176)
+    HTF = .solarSalt //try ln(177)
+    FP = try ln(178)
+    FC = try ln(179)
+    stopFossilCharging = try (l2(180), l2(181))
+    startFossilCharging = try (l2(182), l2(183))
+    heatExchangerRestrictedMax = try l2(186) == 1 ? true:false
+    heatExchangerCapacity = try ln(189)
+  //  Qfldif = try ln(192)
+    isVariable = try l2(194) == 1 ? true:false
+    dSRise = try ln(196)
+    minDischargeLoad = try Ratio(ln(198))
+    fixedDischargeLoad = try Ratio(ln(200))
+    heatTracingTime = try [ln(202), ln(205), ln(208)]
+    heatTracingPower = try [ln(203), ln(206), ln(209)]
+ //   HTb_time = try ln(205)
+ //   HTb_pow = try ln(206)
+ //   HTc_time = try ln(208)
+ //   HTc_pow = try ln(209)
+   // TempHeatTracing = try ln(211)
+  //  HTc_Temp = try ln(_)
+  //  HTe_pow = try ln(_ )
+    heatExchangerRestrictedMin = try l2(217) == 1 ? true:false
+    heatExchangerMinCapacity = try ln(218)
+    DischrgParFac = try ln(220)
+    stopFossilCharging2 = try (l2(222), l2(223))
+    startFossilCharging2 = try (l2(224),l2(225))
+    auxConsumptionCurve = try l2(227) == 1 ? true:false
+    DesAuxIN = try ln(228)
+    DesAuxEX = try ln(229)
+    heatProductionLoadWinter = try Ratio(ln(233))
+    heatProductionLoadSummer = try Ratio(ln(234))
+    dischrgWinter = try l2(235)
+    dischrgSummer = try l2(236)
+    badDNIwinter = try ln(238)
+    badDNIsummer = try ln(239)
+    type = .indirect // try ln(241)
+    designTemperature = try (T(celsius: ln(118)), T(celsius: ln(121)))
     heatdiff = 0
     heatLoss = (0,0)
     heatExchangerEfficiency = 0
