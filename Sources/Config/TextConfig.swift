@@ -27,25 +27,13 @@ public enum TextConfig {
 
   public static func fileSearch(atPath path: String) -> [URL] {
     do {
-      guard let pathUrl = URL(string: path)
-      else { preconditionFailure("Invalid string for path") }
-
+      let pathUrl = URL(fileURLWithPath: path)
       let files = try FileManager.default.subpathsOfDirectory(atPath: path)
       let urls = files.map { file in pathUrl.appendingPathComponent(file) }
-
       return urls.filter(Extension.isValid)
     } catch let error {
-      print(error)
+      print("\(error)")
       return []
     }
-  }
-
-  // Returns a String, which contains the content of needed config file.
-  public static func read(url: URL) -> TextConfigFile? {
-    let path = url.absoluteString
-    guard let data = FileManager.default.contents(atPath: path),
-      let content = String(data: data, encoding: .utf8)
-    else { return nil }
-    return TextConfigFile(content: content, path: path)
   }
 }

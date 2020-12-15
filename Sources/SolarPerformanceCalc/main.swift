@@ -83,7 +83,7 @@ struct SolarPerformanceCalculator: ParsableCommand {
   func run() throws {
     let name = "Solar Performance Calculator"
     print(decorated(name), "")
-    
+
     let path = meteofilePath ?? configPath
 
     do { try BlackBoxModel.configure(meteoFilePath: path) } catch {
@@ -99,21 +99,23 @@ struct SolarPerformanceCalculator: ParsableCommand {
         return
       }
 #else
-      fatalError((error as! MeteoDataFileError).description) 
+      fatalError((error as! MeteoDataFileError).description)
 #endif
     }
 
     do {
       try BlackBoxModel.loadConfigurations(atPath: configPath, format: .text)
-    } catch is TextConfigFile.ReadError {
+    } catch {
  #if os(Windows)
-      MessageBox(text: error.description, caption: name)
+      if let message = (error as? TextConfigFile.ReadError)?.description {
+        MessageBox(text: message, caption: name)
+      }
       return
  #endif
     }
-    
-    if parameter { 
-      printParameter() 
+
+    if parameter {
+      printParameter()
       try JSONConfig.saveConfiguration(toPath: configPath)
       return
     }
@@ -157,7 +159,7 @@ struct SolarPerformanceCalculator: ParsableCommand {
     abstract: "Simulates the performance of entire solar thermal power plants."
   )
 
-  func printParameter() {    
+  func printParameter() {
     print(
       Simulation.parameter,
       SolarField.parameter,

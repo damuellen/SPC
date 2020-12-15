@@ -15,12 +15,8 @@ extension JSONConfig {
 
   static func loadConfigurations(_ urls: [URL]) throws {
     for url in urls {
-      if let data = FileManager.default.contents(atPath: url.absoluteString) {
-        try loadConfiguration(.INI, data: data)      
-      } else {
-      //  print("Config file \(name.rawValue) not found.")
-        continue
-      }
+      let data = try Data(contentsOf: url)
+      try loadConfiguration(.INI, data: data)
     }
   }
 
@@ -144,7 +140,7 @@ extension JSONConfig {
     case .PFC: break
     case .STF: break // try encoder.encode(salt).write(to: url)
     }
-  
+
     return Data()
   }
 }
@@ -155,7 +151,7 @@ extension TextConfig {
 
     for url in urls {
       guard let e = Extension(rawValue: url.pathExtension.uppercased()),
-        let configFile = TextConfig.read(url: url)
+        let configFile = TextConfigFile(url: url)
       else { continue }
       switch e {
       case .FOS: break

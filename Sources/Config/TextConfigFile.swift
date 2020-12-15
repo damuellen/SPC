@@ -16,6 +16,19 @@ public struct TextConfigFile {
 
   private let path: String
 
+  // Returns a String, which contains the content of needed config file.
+  public init?(url: URL) {
+    let path = url.path
+    do {
+      let content = try String(contentsOf: url, encoding: .windowsCP1252)
+      self = .init(content: content, path: path)
+    } catch let error {
+      print(error.localizedDescription)
+      print("  " + url.path)
+      return nil
+    }
+  }
+
   init(content: String, path: String) {
     self.path = path
     let separator: Character = content.contains("\r\n") ? "\r\n" : "\n"
@@ -26,8 +39,8 @@ public struct TextConfigFile {
 
   public enum ReadError: Error {
     case missingRowInFile(Int, String)
-    case missingValueInRow(Int, String)
-    case invalidValueInRow(Int, String)
+    case missingValueInLine(Int, String)
+    case invalidValueInLine(Int, String)
     case unexpectedValueCount
   }
 
@@ -40,7 +53,7 @@ public struct TextConfigFile {
 
   public func string(_ line: Int) throws -> String {
     guard let string = self[line - 1], string.count > 0 else {
-      throw ReadError.missingValueInRow(line, self.path)
+      throw ReadError.missingValueInLine(line, self.path)
     }
     return string
   }
@@ -50,7 +63,7 @@ public struct TextConfigFile {
     if let value = Double(value) {
       return value
     } else {
-      throw ReadError.invalidValueInRow(line, self.path)
+      throw ReadError.invalidValueInLine(line, self.path)
     }
   }
 
@@ -59,7 +72,7 @@ public struct TextConfigFile {
     if let value = Int(value) {
       return value
     } else {
-      throw ReadError.invalidValueInRow(line, self.path)
+      throw ReadError.invalidValueInLine(line, self.path)
     }
   }
 }
@@ -67,12 +80,12 @@ public struct TextConfigFile {
 extension TextConfigFile.ReadError: CustomStringConvertible {
   public var description: String {
     switch self {
-    case let .invalidValueInRow(line, path):
-      return "\(path) - Invalid value in line \(line)."
+    case let .invalidValueInLine(line, path):
+      return "\(path) invalid value in line \(line)."
     case let .missingRowInFile(line, path):
-      return "\(path) - File has less then \(line) lines."
-    case let .missingValueInRow(row, path):
-      return "\(path) - Missing value in line \(row)."
+      return "\(path) has less then \(line) lines."
+    case let .missingValueInLine(line, path):
+      return "\(path) missing value in line \(line)."
     case .unexpectedValueCount:
       return "Layout file has unexpected format."
     }
