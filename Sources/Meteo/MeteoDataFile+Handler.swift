@@ -32,7 +32,7 @@ public struct MeteoDataFileHandler {
         throw MeteoDataFileError.fileNotFound(path)
       }
     }
-    print("Meteo file in use: \(url.path)\n")
+    print("Meteo file in use:\n  \(url.path)\n")
     self.file = try url.pathExtension == "mto" ? MET(url) : TMY(url)
   }
 

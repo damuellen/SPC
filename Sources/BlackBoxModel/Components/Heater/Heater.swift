@@ -10,8 +10,8 @@
 
 import DateGenerator
 
-public struct Heater: Component, HeatCycle {
-  /// Contains all data needed to simulate the operation of the heater
+/// Contains all data needed to simulate the operation of the heater
+public struct Heater: Component, HeatCycle {  
 
   var operationMode: OperationMode
 
@@ -44,11 +44,17 @@ public struct Heater: Component, HeatCycle {
 
   public static var parameter: Parameter = ParameterDefaults.hr
 
-  /// Calculates the parasitics of the heater which only depends on the current load
+  /// Returns the parasitics of the heater.
+  /// - Parameter load: Depends on the current load.
+  /// - Returns: Electric parasitics in MW
   static func parasitics(estimateFrom load: Ratio) -> Double {
     return parameter.nominalElectricalParasitics
       * (parameter.electricalParasitics[0]
         + parameter.electricalParasitics[1] * load.ratio)
+  }
+
+  mutating func massFlow(from c: HeatCycle) {
+     setMassFlow(rate: min(c.massFlow.rate, Heater.parameter.maximumMassFlow))
   }
 
   /// Calculates the thermal power and fuel consumption
@@ -68,8 +74,9 @@ public struct Heater: Component, HeatCycle {
     var fuel = 0.0
     var thermalPower = 0.0
     var parasitics = 0.0
-    var load = 0.0
-    massFlow.rate = min(massFlow.rate, parameter.maximumMassFlow)
+    var load = Ratio(0)
+
+    temperature.inlet = temperatureInlet
     // Freeze protection is always possible: massFlow fixed
     if case .charge = operationMode {
       // Fossil charge of storage
@@ -81,10 +88,10 @@ public struct Heater: Component, HeatCycle {
           fuel * parameter.efficiency.ratio
           * Simulation.adjustmentFactor.efficiencyHeater
         // net thermal power avail [MW]
-        load = heat.heater.megaWatt / Design.layout.heater
-        operationMode = .normal(Ratio(load))
+        load.ratio = heat.heater.megaWatt / Design.layout.heater
+        operationMode = .normal(load)
 
-        guard load > parameter.minLoad.ratio else {
+        guard load > parameter.minLoad else {
           debugPrint(
             """
             \(DateTime.current)
@@ -108,28 +115,26 @@ public struct Heater: Component, HeatCycle {
         if Design.hasStorage, case .preheat = modeStorage {
           massFlow = massFlowStorage
         } else {
-          setMassFlow(
-            rate: thermalPower * 1_000
-              / htf.deltaHeat(temperature.outlet, temperatureInlet)
+          setMassFlow(rate: thermalPower * 1_000
+              / htf.deltaHeat(
+                temperature.outlet, temperatureInlet)
           )
         }
       } else {
-        setMassFlow(
-          rate: Design.layout.heater
+        setMassFlow(rate: Design.layout.heater
             / htf.deltaHeat(
               parameter.nominalTemperatureOut, temperatureInlet)
         )
         fuel = Design.layout.heater / parameter.efficiency.ratio
-        load = 1
-        operationMode = .charge(Ratio(load))
+        load = Ratio(1)
+        operationMode = .charge(load)
         // Parasitic power [MW]
         thermalPower = Design.layout.heater
         // return
       }
     } else if case .freezeProtection = operationMode {
       thermalPower =
-        massFlow.rate
-        * htf.deltaHeat(
+        massFlow.rate * htf.deltaHeat(
           parameter.antiFreezeTemperature, temperature.inlet
         ) / 1_000
 
@@ -144,10 +149,10 @@ public struct Heater: Component, HeatCycle {
       } else {
         temperature.outlet = parameter.antiFreezeTemperature
       }
-      thermalPower = heat.heater.megaWatt / parameter.efficiency.ratio
+      thermalPower /= parameter.efficiency.ratio
 
-      load = heat.heater.megaWatt / Design.layout.heater
-      operationMode = .freezeProtection(Ratio(load))
+      load.ratio = heat.heater.megaWatt / Design.layout.heater
+      operationMode = .freezeProtection(load)
       // No operation requested or QProd > QNeed
     } else if case .noOperation = operationMode { /* || heat >= 0 */
       massFlow = 0.0
@@ -183,17 +188,17 @@ public struct Heater: Component, HeatCycle {
         fuel * parameter.efficiency.ratio
         * Simulation.adjustmentFactor.efficiencyHeater
 
-      load = abs(thermalPower / Design.layout.heater)  // load avail.
+      load.ratio = abs(thermalPower / Design.layout.heater)  // load avail.
 
-      if load < parameter.minLoad.ratio {
-        load = parameter.minLoad.ratio
-        thermalPower = load * Design.layout.heater
+      if load < parameter.minLoad {
+        load = parameter.minLoad
+        thermalPower = load.ratio * Design.layout.heater
         fuel = thermalPower / parameter.efficiency.ratio
       }
 
       // Normal operation possible
       if case .reheat = operationMode {
-        operationMode = .normal(Ratio(load))
+        operationMode = .normal(load)
       }
       // if Reheating, then do not change displayed operating status / mode
       setTemperature(outlet: parameter.nominalTemperatureOut)
@@ -204,7 +209,7 @@ public struct Heater: Component, HeatCycle {
         setMassFlow(rate: thermalPower * 1_000 / deltaHeat)
       }
     }
-    parasitics = Heater.parasitics(estimateFrom: Ratio(load))
+    parasitics = Heater.parasitics(estimateFrom: load)
     let energy = EnergyTransfer<Heater>(
       heat: thermalPower, electric: parasitics, fuel: fuel
     )
