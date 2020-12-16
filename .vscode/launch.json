@@ -7,11 +7,20 @@
         {
             "type": "lldb",
             "request": "launch",
+            "name": "PackageTests",
+            "program": "${workspaceFolder}/.build/debug/SPCPackageTests.xctest",
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "swift-build-tests"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
             "name": "SolarPerformanceCalc",
             "program": "${workspaceFolder}/.build/debug/SolarPerformanceCalc",
+            "args": ["-c", "${workspaceFolder}/COM"],
             "args": ["-m", "${workspaceFolder}/Model.playground/Resources/AlAbdaliyah.mto"],
             "cwd": "${workspaceFolder}",
-            "preLaunchTask": "swift-build-spc"
+            "preLaunchTask": "swift-build-executable"
         },
         {
             "type": "lldb",
@@ -19,7 +28,7 @@
             "name": "SolarFieldCalc",
             "program": "${workspaceFolder}/.build/debug/SolarFieldCalc",           
             "cwd": "${workspaceFolder}",
-            "preLaunchTask": "swift-build-sfc"
+            "preLaunchTask": "swift-build-executable"
         }
     ]
 }

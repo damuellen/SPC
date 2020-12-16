@@ -2,14 +2,14 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "swift-build-sfc",
+            "label": "swift-build-executable",
             "type": "shell",
-            "command": "swift build --target SolarFieldCalc"
+            "command": "swift build -Xswiftc -g -Xswiftc -Xfrontend -Xswiftc -serialize-debugging-options"
         },
         {
-            "label": "swift-build-spc",
+            "label": "swift-build-tests",
             "type": "shell",
-            "command": "swift build --target SolarPerformanceCalc"
+            "command": "swift build --build-tests -Xswiftc -g -Xswiftc -Xfrontend -Xswiftc -serialize-debugging-options"
         }
     ]
 }

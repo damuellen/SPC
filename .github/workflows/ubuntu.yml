@@ -12,6 +12,9 @@ jobs:
     - name: Checkout sources
       uses: actions/checkout@v2
 
+    - name: Show compiler version
+      run: swift --version
+
     - name: Update package dependencies
       run: swift package update
 
