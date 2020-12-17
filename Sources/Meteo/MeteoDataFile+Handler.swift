@@ -45,7 +45,7 @@ public struct MeteoDataFileHandler {
 
 public enum MeteoDataFileError: Error {
   case fileNotFound(String)
-  case lineMissingValue(Int)
+  case missingValueInLine(Int)
   case unexpectedRowCount, empty, startNotFound,
     unknownLocation, unknownDelimeter
 }
@@ -125,7 +125,7 @@ private struct MET: MeteoDataFile {
     let prefix = "1"
 
     guard
-      let startIndex = content.firstIndex(where: 
+      let startIndex = content.firstIndex(where:
         { $0.first?.hasPrefix(prefix) ?? false }
       )
     else { throw MeteoDataFileError.startNotFound }
@@ -141,7 +141,7 @@ private struct MET: MeteoDataFile {
       let values = content[idx].dropFirst(3).compactMap(Float.init)
 
       guard values.count > 2
-      else { throw MeteoDataFileError.lineMissingValue(line) }
+      else { throw MeteoDataFileError.missingValueInLine(line) }
       line += 1
       return MeteoData(values)
     }
@@ -153,8 +153,8 @@ extension MeteoDataFileError: CustomStringConvertible {
     switch self {
     case .unexpectedRowCount:
       return "Meteo file does not have enough values for one year."
-    case let .lineMissingValue(row):
-      return "Meteo file error. Format in line \(row) is invalid."
+    case let .missingValueInLine(line):
+      return "Meteo file error. Format in line \(line) is invalid."
     case let .fileNotFound(path):
       return "Meteo file not found at: \(path)"
     case .unknownLocation:
@@ -263,7 +263,7 @@ private struct TMY: MeteoDataFile {
     let last = Set(order).max()!
     return try zip(dataRange, 3...).map { data, line in
       guard data.endIndex > last else {
-        throw MeteoDataFileError.lineMissingValue(line)
+        throw MeteoDataFileError.missingValueInLine(line)
       }
       return MeteoData(tmy: data, order: order)
     }

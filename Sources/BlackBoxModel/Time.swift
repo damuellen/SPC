@@ -28,6 +28,7 @@ extension Time: TextConfigInitializable {
 
     let getDate: (String) -> Date? = { dateString in
       let dateFormatter = DateFormatter()
+      dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
       dateFormatter.dateFormat = "MM.dd yyyy"
       return dateFormatter.date(from:
         dateString + "\(BlackBoxModel.yearOfSimulation)"

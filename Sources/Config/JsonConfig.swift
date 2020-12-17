@@ -58,7 +58,7 @@ public enum JSONConfig {
 
       return urls.filter(matchName)
     } catch let error {
-      print(error)
+      print("\(error)")
       return []
     }
   }
