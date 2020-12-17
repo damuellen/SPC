@@ -65,7 +65,7 @@ public struct HeatExchanger: Component, HeatCycle {
       }
     } else {
       if parameter.useAndsolFunction {
-        let massFlowLoad = self.massFlow.share(of: solarField.massFlow)
+        let massFlowLoad = self.massFlow.share(of: solarField.maxMassFlow)
 
         let factor = HeatExchanger.temperatureFactor(
           temperature: self.temperature.inlet, load: massFlowLoad,
@@ -79,7 +79,7 @@ public struct HeatExchanger: Component, HeatCycle {
         let temp = parameter.temperature
         switch (p.ToutMassFlow, p.ToutTin, p.ToutTinMassFlow) {
         case let (ToutMassFlow?, ToutTin?, .none):
-          let massFlowLoad = self.massFlow.share(of: solarField.massFlow)
+          let massFlowLoad = self.massFlow.share(of: solarField.maxMassFlow)
 
           var factor = ToutMassFlow(massFlowLoad)
           factor *= ToutTin(temperature.inlet)
@@ -93,13 +93,13 @@ public struct HeatExchanger: Component, HeatCycle {
             * (temperature.inlet.kelvin - temp.htf.inlet.min.kelvin)
             / temp.range.inlet.kelvin)
 
-          let massFlowLoad = massFlow.share(of: solarField.massFlow)
+          let massFlowLoad = massFlow.share(of: solarField.maxMassFlow)
 
           var factor = ToutMassFlow(massFlowLoad)
           factor.clamp(to: 0...1.1)
           outletTemperature(kelvin: factor * self.outletTemperature)
         case let (_, _, ToutTinMassFlow?):
-          let massFlowLoad = massFlow.share(of: solarField.massFlow)
+          let massFlowLoad = massFlow.share(of: solarField.maxMassFlow)
 
           // power function based on MAN-Turbo and OHL data with pinch point tool
           var factor = ((ToutTinMassFlow[0]
@@ -134,7 +134,7 @@ public struct HeatExchanger: Component, HeatCycle {
       for i in 1...  where heatToTES > h_261 {
         // reduce massflow to PB in 5% every step until enthalpy is
         setMassFlow(rate: totalMassFlow.rate * (1 - (Double(i) / 20)))
-        let load = massFlow.share(of: solarField.massFlow)
+        let load = massFlow.share(of: solarField.maxMassFlow)
 
         if parameter.useAndsolFunction {
           // check how big massflow load can be (5% more than design?)
@@ -194,7 +194,7 @@ public struct HeatExchanger: Component, HeatCycle {
     if parameter.useAndsolFunction {
       return {
         (pb: PowerBlock, _: HeatCycle) -> Temperature in
-        let massFlowLoad = pb.massFlow.share(of: solarField.massFlow)
+        let massFlowLoad = pb.massFlow.share(of: solarField.maxMassFlow)
         let factor = temperatureFactor(
           temperature: pb.temperature.inlet, load: massFlowLoad,
           max: parameter.temperature.htf.inlet.max)
@@ -208,7 +208,7 @@ public struct HeatExchanger: Component, HeatCycle {
     {
       return {
         (pb: PowerBlock, _: HeatCycle) -> Temperature in
-        let massFlowLoad = pb.massFlow.share(of: solarField.massFlow)
+        let massFlowLoad = pb.massFlow.share(of: solarField.maxMassFlow)
         
         let factor = Ratio(ToutMassFlow(massFlowLoad.ratio))
         
@@ -226,7 +226,7 @@ public struct HeatExchanger: Component, HeatCycle {
     {
       return {
         (pb: PowerBlock, hx: HeatCycle) -> Temperature in
-        let massFlowLoad = pb.massFlow.share(of: solarField.massFlow)
+        let massFlowLoad = pb.massFlow.share(of: solarField.maxMassFlow)
         var factor = ToutMassFlow(massFlowLoad.ratio)
         factor *= ToutTin(hx.temperature.inlet)
         factor.clamp(to: 0...1.1)
@@ -237,7 +237,7 @@ public struct HeatExchanger: Component, HeatCycle {
     {
       return {
         (pb: PowerBlock, _: HeatCycle) -> Temperature in
-        let massFlowLoad = pb.massFlow.share(of: solarField.massFlow)
+        let massFlowLoad = pb.massFlow.share(of: solarField.maxMassFlow)
         var factor = ((c[0] * (pb.inletTemperature
           / parameter.temperature.htf.inlet.max.kelvin) * 666 + c[1])
           * massFlowLoad.ratio ** (c[2] * (pb.inletTemperature

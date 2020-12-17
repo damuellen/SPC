@@ -114,7 +114,7 @@ public enum BlackBoxModel {
 
       status.solarField.inletTemperature(outlet: status.powerBlock)
 
-      status.solarField.massFlow = SolarField.parameter.massFlow
+      status.solarField.massFlow = SolarField.parameter.maxMassFlow
 
       if GridDemand.current.ratio < 1 {
         Plant.adjustMassFlow(&status.solarField)
@@ -131,11 +131,11 @@ public enum BlackBoxModel {
         } else if Design.hasGasTurbine {
           status.solarField.massFlow = HeatExchanger.parameter.sccHTFmassFlow
         }
-        if status.solarField.massFlow > SolarField.parameter.massFlow {
-          status.solarField.massFlow = SolarField.parameter.massFlow
+        if status.solarField.massFlow > SolarField.parameter.maxMassFlow {
+          status.solarField.massFlow = SolarField.parameter.maxMassFlow
         }
       }
-
+      
       status.solarField.calculate(
         dumping: &plant.heat.dumping.watt,
         collector: status.collector,
@@ -170,7 +170,7 @@ public enum BlackBoxModel {
 
       let energy = plant.energyBalance()
       let dt = DateTime.current
-      //  print(DateTime.current, date, status, energy)
+//    print(decorated(dt.description), status, energy)
 
       backgroundQueue.async { [status] in
         recorder(dt, meteo: meteo, status: status, energy: energy)

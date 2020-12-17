@@ -78,9 +78,9 @@ class BlackBoxModelTests: XCTestCase {
 
   static var allTests: [(String, (BlackBoxModelTests) -> () throws -> Void)] {
     return [
-      ("testsSummer", testsSummer),
-      ("testsWinter", testsWinter),
       ("testsPerformance", testsPerformance),
+      ("testsSummer", testsSummer),
+      ("testsWinter", testsWinter),      
     ]
   }
 }

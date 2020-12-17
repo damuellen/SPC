@@ -13,8 +13,8 @@ import Config
 extension Simulation {
   public struct Parameter: Codable {
     let dfreezeTemperaturePump, dfreezeTemperatureHeat,
-      minTemperatureRaiseStartUp, tempTolerance: Temperature
-    let minInsolationRaiseStartUp, heatTolerance, timeTolerance, massTolerance,
+      minTemperatureRaiseStartUp, tempTolerance,
+      minInsolationRaiseStartUp, heatTolerance, timeTolerance, massTolerance,
       minInsolation, maxToPowerBlock, minInsolationForBoiler,
       electricalTolerance, electricalParasitics, HLtempTolerance: Double
     public var adjustmentFactor: AdjustmentFactors
@@ -41,11 +41,11 @@ extension Simulation.AdjustmentFactors: CustomStringConvertible {
 extension Simulation.Parameter: CustomStringConvertible {
   public var description: String {
     "Delta T for Start-Up of Anti-Freeze Pumping:"
-    * dfreezeTemperaturePump.celsius.description
+    * dfreezeTemperaturePump.description
     + "Delta T for Start-Up of Anti-Freeze Heating:"
-    * dfreezeTemperatureHeat.celsius.description
+    * dfreezeTemperatureHeat.description
     + "Minimum Raise of Temperature for Start-Up [K]:"
-    * minTemperatureRaiseStartUp.celsius.description
+    * minTemperatureRaiseStartUp.description
     + "Minimum Raise of Insolation for Start-Up [W/m²]:"
     * minInsolationRaiseStartUp.description
     + "Iteration Tolerance for Electrical Production meeting demand [MW]:"
@@ -83,10 +83,10 @@ extension Simulation.Parameter: TextConfigInitializable {
     )
 
     self = try Simulation.Parameter(
-      dfreezeTemperaturePump: Temperature(celsius: ln(7)),
-      dfreezeTemperatureHeat: Temperature(celsius: ln(10)),
-      minTemperatureRaiseStartUp: Temperature(celsius: ln(13)),
-      tempTolerance: Temperature(ln(22)),
+      dfreezeTemperaturePump: ln(7),
+      dfreezeTemperatureHeat: ln(10),
+      minTemperatureRaiseStartUp: ln(13),
+      tempTolerance: ln(22),
       minInsolationRaiseStartUp: ln(16),
       heatTolerance: ln(19),
       timeTolerance: ln(25),

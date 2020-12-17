@@ -40,7 +40,7 @@ extension Storage {
       let rohDP = solarField.HTF.density(avgTempHX)
 
       let pressureLoss = parameter.pressureLoss * rohDP / rohMean
-        * (status.massFlow.share(of: parameter.massFlow).ratio) ** 2
+        * (status.massFlow.share(of: parameter.designMassFlow).ratio) ** 2
       
       parasitics = pressureLoss * status.massFlow.rate / rohMean
         / parameter.pumpEfficiency / 10e6
@@ -130,7 +130,7 @@ extension Storage {
         let htf = SolarField.parameter.HTF
         
         let designDischarge = (((
-          (solarField.massFlow - parameter.massFlow).rate * load.ratio)
+          (solarField.maxMassFlow - parameter.designMassFlow).rate * load.ratio)
           / parameter.heatExchangerEfficiency) * htf.deltaHeat(
             parameter.designTemperature.hot - status.dT_HTFsalt.hot,
             parameter.designTemperature.cold - status.dT_HTFsalt.cold) / 1_000)
@@ -151,7 +151,7 @@ extension Storage {
         
         let htf = SolarField.parameter.HTF
         
-        let designCharge = (parameter.massFlow.rate * htf.deltaHeat(
+        let designCharge = (parameter.designMassFlow.rate * htf.deltaHeat(
           parameter.designTemperature.hot + status.dT_HTFsalt.hot,
           parameter.designTemperature.cold + status.dT_HTFsalt.cold) / 1_000)
           * parameter.heatExchangerEfficiency
@@ -269,7 +269,7 @@ extension Storage {
     self.heat = 0
     
 //  self.tempertureColdOut = tempertureColdOut
-    self.massFlows.minimum.rate = 0//Storage.minMassFlow()
+    self.massFlows.minimum.rate = 0 //Storage.minMassFlow()
 //  self.heatLossStorage = heatLossStorage
     self.heatProductionLoad.ratio = 0
     
@@ -279,18 +279,18 @@ extension Storage {
 
     let storage = Storage.parameter
     let solarField = SolarField.parameter
-
-    // solarField.massFlow.min = MassFlow(
-    //   solarField.massFlow.min.rate / 100 * solarField.massFlow.max.rate
-    // )
-    
-    // solarField.antiFreezeFlow = MassFlow(
-    //   solarField.antiFreezeFlow.rate / 100 * solarField.massFlow.max.rate
-    // )
-    
+/*
+    solarField.massFlow.min = MassFlow(
+      solarField.massFlow.min.rate / 100 * solarField.massFlow.rate
+    )
+  
+    solarField.antiFreezeFlow = MassFlow(
+      solarField.antiFreezeFlow.rate / 100 * solarField.massFlow.rate
+    )
+    */
     if solarField.pumpParastics.isEmpty {
       let layout = Design.layout.solarField
-      let maxFlow = solarField.massFlow.rate
+      let maxFlow = solarField.maxMassFlow.rate
       if maxFlow < 900 {
         // calculation of solar field parasitics with empirical correlation
         // derived from solar field model

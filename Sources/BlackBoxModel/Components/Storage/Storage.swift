@@ -83,7 +83,7 @@ public struct Storage: Component, HeatCycle {
       var parasitics: Double
 
       if storage.charge.ratio < parameter.chargeTo,
-        solarField.massFlow >= SolarField.parameter.massFlow
+        solarField.massFlow >= SolarField.parameter.maxMassFlow
       {
         storage.operationMode = .charging
       } else { // heat cannot be stored
@@ -234,16 +234,16 @@ public struct Storage: Component, HeatCycle {
     switch parameter.strategy {
     case .always: strategyAlways(
       storage: &storage, powerBlock: &powerBlock,
-      solarFieldMassFlow: solarField.massFlow,
+      solarFieldMassFlow: solarField.massFlowDemand,
       production: production, demand: &demand)
     case .demand : strategyDemand(
       storage: &storage, powerBlock: &powerBlock,
-      massFlowSolarField: solarField.massFlow,
+      massFlowSolarField: solarField.massFlowDemand,
       production: production)
     // parameter.strategy = "Ful" // Booster or Shifter
     case .shifter: strategyShifter(
       storage: &storage, powerBlock: &powerBlock,
-      massFlowSolarField: solarField.massFlow,
+      massFlowSolarField: solarField.massFlowDemand,
       production: production, demand: &demand)
     }
   }
@@ -277,8 +277,8 @@ public struct Storage: Component, HeatCycle {
       // added to avoid input to storage lower than minimal HX's capacity
       let toStorageMin = parameter.heatExchangerMinCapacity
         * heatExchanger.sccHTFheat
-        * (1 - parameter.massFlow.rate / solarField.massFlow.rate)
-        / (parameter.massFlow.rate / solarField.massFlow.rate)
+        * (1 - parameter.designMassFlow.rate / solarField.maxMassFlow.rate)
+        / (parameter.designMassFlow.rate / solarField.maxMassFlow.rate)
       
       if case 0..<toStorageMin = storage.heat {
         demand -= (toStorageMin - storage.heat)
@@ -315,8 +315,8 @@ public struct Storage: Component, HeatCycle {
     if parameter.heatExchangerRestrictedMin {
       // avoiding input to storage lower than minimal HXs capacity
       let toStorageMin = heatExchanger.sccHTFheat
-        * (1 - parameter.massFlow.rate / solarField.massFlow.rate)
-        / (parameter.massFlow.rate / solarField.massFlow.rate)
+        * (1 - parameter.designMassFlow.rate / solarField.maxMassFlow.rate)
+        / (parameter.designMassFlow.rate / solarField.maxMassFlow.rate)
       
       if case 0..<toStorageMin = storage.heat {
         powerBlock.setMassFlow(rate: (heatExchanger.sccHTFheat

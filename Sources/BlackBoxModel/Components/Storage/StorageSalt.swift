@@ -225,7 +225,7 @@ extension Storage: MeasurementsConvertible {
     let splitfactor = Storage.parameter.HTF == .hiXL ? 0.4 : 1
 
     let solarField = SolarField.parameter
-    let antiFreezeFlow = solarField.antiFreezeFlow.ratio * solarField.massFlow.rate
+    let antiFreezeFlow = solarField.antiFreezeFlow.ratio * solarField.maxMassFlow.rate
 
     massFlows.need.rate = antiFreezeFlow * Simulation.time.steps.interval
 

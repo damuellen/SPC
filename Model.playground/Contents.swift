@@ -31,7 +31,7 @@ BlackBoxModel.configure(meteoFilePath: 🌦)
 Simulation.time.steps = .every5minutes
 
 //Simulation.adjustmentFactor.efficiencySolarField = 0.99
-SolarField.parameter.massFlow = MassFlow(2500)
+SolarField.parameter.maxMassFlow = MassFlow(2500)
 
 Design.layout.solarField = 140
 

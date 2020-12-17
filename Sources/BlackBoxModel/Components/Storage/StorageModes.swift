@@ -149,8 +149,8 @@ extension Storage {
     let heatExchanger = HeatExchanger.parameter
     
     storage.inletTemperature(outlet: solarField)
-    
-    storage.massFlow = solarField.massFlow - powerBlock.massFlow
+    // FIXME: Check again
+    storage.massFlow = solarField.massFlowDemand - powerBlock.massFlow
     storage.massFlow.adjust(factor: parameter.heatExchangerEfficiency)
     
     var fittedTemperature: Double
@@ -358,7 +358,7 @@ extension Storage {
   {
     let antiFreezeFlow = MassFlow(
       SolarField.parameter.antiFreezeFlow.ratio 
-      * SolarField.parameter.massFlow.rate
+      * SolarField.parameter.maxMassFlow.rate
     )
     let splitfactor: Ratio = 0.4
     

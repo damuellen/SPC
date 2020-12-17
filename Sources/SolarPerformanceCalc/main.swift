@@ -177,7 +177,7 @@ struct SolarPerformanceCalculator: ParsableCommand {
 }
 /*
 
-SolarField.parameter.massFlow.max = 2500.0
+SolarField.parameter.maxMassFlow.max = 2500.0
 Design.layout.powerBlock = 73
 Design.layout.solarField = 98
 Design.layout.heatExchanger = 98

@@ -45,10 +45,9 @@ public struct Plant {
     let heatExchanger = HeatExchanger.parameter
     let steamTurbine = SteamTurbine.parameter
     // added to reduced SOF massflow with electrical demand
-    solarField.setMassFlow(rate: GridDemand.current.ratio
-        * (steamTurbine.power.max / steamTurbine.efficiencyNominal
-          / heatExchanger.efficiency) * 1_000 / heatExchanger.heatDesign
-    )
+    solarField.massFlowDemand.rate = GridDemand.current.ratio
+      * (steamTurbine.power.max / steamTurbine.efficiencyNominal
+        / heatExchanger.efficiency) * 1_000 / heatExchanger.heatDesign    
   }
 
   /// Calculation of the heat supplied by the solar field
@@ -455,7 +454,7 @@ public struct Plant {
     } else {
       if solarField.header.outletTemperature
         > freezeTemperature.kelvin
-        + Simulation.parameter.dfreezeTemperatureHeat.kelvin
+        + Simulation.parameter.dfreezeTemperatureHeat
       {
         heater.operationMode = .noOperation
 
@@ -515,7 +514,7 @@ public struct Plant {
     // Iteration: Find the right temperature for inlet and outlet of powerblock
     let fuel = Availability.fuel
     var heatDiff: Double = 0.0
-    let tolerance = Simulation.parameter.tempTolerance.kelvin
+    let tolerance = Simulation.parameter.tempTolerance
     // Calculation of the heat supplied by the solar field
 
     Iteration: while true {

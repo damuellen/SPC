@@ -1,5 +1,7 @@
 .DS_Store
 /*.csv
+/*.json
+/COM/*.json
 /.build
 /.swiftpm
 /Packages

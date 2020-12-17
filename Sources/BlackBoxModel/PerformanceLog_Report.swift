@@ -19,7 +19,7 @@ enum PerformanceReport {
       + "    No of Loops:" * layout.solarField.description
       + "    Collector Type:" * collector.name.description
       + "    Aperture [m²]:" * String(format: "%G", aperture)
-      + "    Massflow [kg/s]:" * String(format: "%G", solarField.massFlow.rate)
+      + "    Massflow [kg/s]:" * String(format: "%G", solarField.maxMassFlow.rate)
       + "    Elevation [ø]:  " + "\(solarField.elevation)\t Azimut [ø]:  "
       + "\(solarField.azimut)\n"
       + "\nSTORAGE\n"
@@ -47,7 +47,7 @@ enum PerformanceReport {
       + "FOSSIL FUEL:\n"
       + "    LHV [kWH/kg]: Fuel.LHV\n"
       + "\n\n"
-      + heading("Annual Results")
+    d += heading("Annual Results")
       + "Gross electricty producution [MWh_el/a]:"
       * String(format: "%G", energy.electric.gross)
     //  Format((YTarS(0).EgrsST + YTarS(0).EgrsGasTurbine) * (1 - Simulation.parameter.UnSchedMain) * (1 - Simulation.parameter.TransLoss), )"
@@ -121,9 +121,9 @@ enum PerformanceReport {
     }
     d += Simulation.initialValues.description
     d += "Delta T for Start-Up of Anti-Freeze Pumping:"
-      * Simulation.parameter.dfreezeTemperaturePump.kelvin.description
+      * Simulation.parameter.dfreezeTemperaturePump.description
       + "Delta T for Start-Up of Anti-Freeze Heater:"
-      * Simulation.parameter.dfreezeTemperatureHeat.kelvin.description
+      * Simulation.parameter.dfreezeTemperatureHeat.description
       + "Minimum Insolation for Start-Up [W/m²]:"
       * Simulation.parameter.minInsolation.description
       + "Fuel strategy:" * OperationRestriction.fuelStrategy.description

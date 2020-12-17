@@ -17,8 +17,10 @@
             "request": "launch",
             "name": "SolarPerformanceCalc",
             "program": "${workspaceFolder}/.build/debug/SolarPerformanceCalc",
-            "args": ["-c", "${workspaceFolder}/COM"],
-            "args": ["-m", "${workspaceFolder}/Model.playground/Resources/AlAbdaliyah.mto"],
+            "args": [
+                "-c", "${workspaceFolder}/COM", 
+                "-m", "${workspaceFolder}/Model.playground/Resources/AlAbdaliyah.mto"
+            ],
             "cwd": "${workspaceFolder}",
             "preLaunchTask": "swift-build-executable"
         },

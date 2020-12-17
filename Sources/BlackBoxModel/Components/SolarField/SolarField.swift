@@ -10,6 +10,7 @@
 
 import Meteo
 
+/// Contains all data needed to simulate the operation of the solar field
 public struct SolarField: Component, HeatCycle {
 
   public enum Loop: Int {
@@ -20,8 +21,7 @@ public struct SolarField: Component, HeatCycle {
       return ["Design", "Near", "Average", "Far"]
     }
   }
-
-  /// Contains all data needed to simulate the operation of the solar field
+  
   var operationMode: OperationMode
   var isMaintained: Bool
   var header: HeatTransfer
@@ -32,6 +32,8 @@ public struct SolarField: Component, HeatCycle {
   public var inFocus: Ratio
   var loops: [HeatTransfer]
   var loopEta: Double
+ // var temperature: (inlet: Temperature, outlet: Temperature)
+  var massFlowDemand: MassFlow = .zero
 
   var cycle: HeatTransfer {
     get { header }
@@ -81,7 +83,7 @@ public struct SolarField: Component, HeatCycle {
     if operationMode == .freezeProtection {
       return parameter.antiFreezeParastics
     }
-    let load = massFlow.share(of: parameter.massFlow).ratio
+    let load = massFlow.share(of: parameter.maxMassFlow).ratio
     return massFlow.rate > 0
       ? parameter.pumpParasticsFullLoad
         * (parameter.pumpParastics[0] + parameter.pumpParastics[1]
@@ -114,11 +116,11 @@ public struct SolarField: Component, HeatCycle {
     _ timeRemain: Double
   ) {
     let parameter = SolarField.parameter
-    let minFlow = MassFlow(parameter.minFlow.ratio * parameter.massFlow.rate)
+    let minFlow = MassFlow(parameter.minFlow.ratio * parameter.maxMassFlow.rate)
     HCE.freezeProtectionCheck(&self)
     SolarField.last = loops
     let m1 = (header.massFlow - minFlow).rate
-    let m2 = (parameter.massFlow - minFlow).rate
+    let m2 = (parameter.maxMassFlow - minFlow).rate
     for (n, loop) in zip(0..., [Loop.near, .average, .far]) {
       let massFlow =
         header.massFlow.rate == 0
@@ -147,13 +149,13 @@ public struct SolarField: Component, HeatCycle {
 
       if timeRemain < parameter.loopWays[0]
         / (designFlowVelocity
-          * header.massFlow.rate / parameter.massFlow.rate)
+          * header.massFlow.rate / parameter.maxMassFlow.rate)
       {
         let timeRatio =
           timeRemain
           / (parameter.loopWays[0]
             / (designFlowVelocity * header.massFlow.rate
-              / parameter.massFlow.rate))
+              / parameter.maxMassFlow.rate))
         // Correct the loop outlet temperatures
         let oneMinusTR = 1.0 - timeRatio
 
@@ -170,7 +172,7 @@ public struct SolarField: Component, HeatCycle {
           timeRemain
           / (parameter.loopWays[n]
             / (designFlowVelocity * loops[n].massFlow.rate
-              / parameter.massFlow.rate))
+              / parameter.maxMassFlow.rate))
 
         let oneMinusTR: Double
         if timeRatio > 1.0 {

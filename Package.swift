@@ -20,7 +20,7 @@ let package = Package(
     .package(url: "https://github.com/apple/swift-argument-parser.git",
              .revision("53555a04503c175eaffcf587e4b8c380a7c41a5c")),
     .package(url: "https://github.com/damuellen/SQLite.swift.git", .branch("master")),
-  //  .package(url: "https://github.com/jpsim/Yams.git", from: "4.0.1")
+//  .package(url: "https://github.com/jpsim/Yams.git", from: "4.0.1")
     ],
   targets: [
     .target(
@@ -37,6 +37,10 @@ let package = Package(
       name: "DateGenerator",
       dependencies: [],
       swiftSettings: swiftSettings),
+    .target(
+      name: "CPikchr",
+      dependencies: [],
+      cSettings: cSettings),
     .target(
       name: "CSPA",
       dependencies: [],
@@ -64,7 +68,7 @@ let package = Package(
     .target(
       name: "SolarFieldCalc",
       dependencies: [
-        "SolarFieldModel",
+        "SolarFieldModel", "CPikchr",
         .product(name: "ArgumentParser", package: "swift-argument-parser")],
       swiftSettings: swiftSettings),
     .target(

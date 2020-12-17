@@ -27,7 +27,8 @@ extension Storage {
     var temperatureCharge, temperatureCharge2: Polynomial
     var heatlossCst, heatlossC0to1: Polynomial
     var pumpEfficiency, pressureLoss: Double
-    var massFlow: MassFlow
+    var massFlowShare: Ratio
+    var designMassFlow: MassFlow
     let startTemperature: (cold: Temperature, hot: Temperature) // TurbTL(0) TurbTL(1)
     let startLoad: (cold: Double, hot: Double) // TurbTL(2) TurbTL(3)
 
@@ -126,6 +127,8 @@ extension Storage.Parameter: CustomStringConvertible {
     + "Heat Exchanger Efficiency [%]:" * "\(heatExchangerEfficiency * 100)"
     + "Pump Efficiency [%]:" * "\(pumpEfficiency * 100)"
     + "Pressure Loss at Design Point [Pa]:" * String(format: "%G", pressureLoss)
+    + "Mass Flow to Power Block at design point; Fraction of Total Solar Field Mass Flow [%]:"
+    * massFlowShare.percentage.description
     + "Temperature of Cold Tank at Program Start [°]:"
     * startTemperature.cold.celsius.description
     + "Temperature of Hot Tank at Program Start [°]:"
@@ -173,7 +176,8 @@ extension Storage.Parameter: TextConfigInitializable {
     heatlossC0to1 = try [ln(130), ln(133), ln(136), ln(139)]
     pumpEfficiency = try ln(146) / 100
     pressureLoss = try ln(149)
-    massFlow = try .init(ln(152))
+    massFlowShare = try .init(ln(152) / 100) 
+    designMassFlow = 0.0
     startTemperature = try (T(celsius: ln(162)), T(celsius:ln(165)))
     startLoad = try (ln(168), ln(171))
   //  HX = try ln(172) //bool

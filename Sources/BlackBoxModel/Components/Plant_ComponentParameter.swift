@@ -49,7 +49,7 @@ extension Plant {
         ) / 1_000
 
       let sccHTFheat = HeatExchanger.parameter.sccHTFheat
-      SolarField.parameter.massFlow = MassFlow(
+      SolarField.parameter.maxMassFlow = MassFlow(
         sccHTFheat / designHeatExchanger
       )
 
@@ -79,9 +79,9 @@ extension Plant {
           HeatExchanger.parameter.temperature.htf.inlet.max,
           HeatExchanger.parameter.temperature.htf.outlet.max
         ) / 1_000
-
-      SolarField.parameter.massFlow = MassFlow(
-        HeatExchanger.parameter.sccHTFheat / designHeatExchanger
+      let sccHTFheat = HeatExchanger.parameter.sccHTFheat
+      SolarField.parameter.maxMassFlow = MassFlow(
+        sccHTFheat / designHeatExchanger
       )
     }
 
@@ -102,14 +102,14 @@ extension Plant {
       SolarField.parameter.edgeFactor = [edgeFactor1, edgeFactor2]
 
       if Design.hasStorage {
-        SolarField.parameter.massFlow = MassFlow(
+        SolarField.parameter.maxMassFlow = MassFlow(
           100
-            / Storage.parameter.massFlow.rate
-            * SolarField.parameter.massFlow.rate
+            / Storage.parameter.massFlowShare.percentage
+            * SolarField.parameter.maxMassFlow.rate
         )
-        Storage.parameter.massFlow = MassFlow(
-          (1 - Storage.parameter.massFlow.rate / 100)
-            * SolarField.parameter.massFlow.rate
+        Storage.parameter.designMassFlow = MassFlow(
+          (1 - Storage.parameter.massFlowShare.ratio)
+            * SolarField.parameter.maxMassFlow.rate
         )
       }
     }

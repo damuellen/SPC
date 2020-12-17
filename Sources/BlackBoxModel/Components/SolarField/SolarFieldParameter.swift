@@ -49,7 +49,7 @@ extension SolarField {
     public var azimut, elevation: Double
     let antiFreezeParastics: Double
     let pumpParastics: Polynomial
-    var massFlow: MassFlow
+    var maxMassFlow: MassFlow
     var minFlow: Ratio 
     var pumpParasticsFullLoad: Double
     var antiFreezeFlow: Ratio
@@ -111,7 +111,7 @@ extension SolarField.Parameter: CustomStringConvertible {
     + "\n\(pumpParastics)"
     + "Tilt of Collectors [°]:" * elevation.description
     + "Mass Flow in Solar Field at Full Load [kg/s]:"
-    * String(format: "%.1f", massFlow.rate)
+    * String(format: "%.1f", maxMassFlow.rate)
     + "Minimum allowable Mass Flow [%]:" * minFlow.percentage.description
     + "Anti-Freeze Mass Flow [%]:" * antiFreezeFlow.percentage.description
     + "Total Mass of HTF in System [kg]:"
@@ -159,7 +159,7 @@ extension SolarField.Parameter: TextConfigInitializable {
     pumpParasticsFullLoad = try ln(34)
     antiFreezeParastics = try ln(37)
     pumpParastics = try [ln(40), ln(43), ln(46)]
-    massFlow = try MassFlow(ln(49))
+    maxMassFlow = try MassFlow(ln(49))
     minFlow = try Ratio(ln(52) / 100)
     antiFreezeFlow = try Ratio(ln(55) / 100)
     HTFmass = try ln(58)
@@ -219,7 +219,7 @@ extension SolarField.Parameter: Codable {
     pumpParastics = try values.decode(
       Polynomial.self, forKey: .pumpParastics
     )
-    massFlow = 
+    maxMassFlow = 
       try values.decode(MassFlow.self, forKey: .maxMassFlow)      
     minFlow = 
       try values.decode(Ratio.self, forKey: .minMassFlow)
@@ -264,7 +264,7 @@ extension SolarField.Parameter: Codable {
     try container.encode(pumpParasticsFullLoad, forKey: .pumpParasticsFullLoad)
     try container.encode(antiFreezeParastics, forKey: .antiFreezeParastics)
     try container.encode(pumpParastics, forKey: .pumpParastics)
-    try container.encode(massFlow, forKey: .maxMassFlow)
+    try container.encode(maxMassFlow, forKey: .maxMassFlow)
     try container.encode(minFlow, forKey: .minMassFlow)
     try container.encode(antiFreezeFlow, forKey: .antiFreezeFlow)
     try container.encode(HTFmass, forKey: .HTFmass)
@@ -314,7 +314,7 @@ extension SolarField.Parameter: Equatable {
       && rhs.elevation == rhs.elevation
       && lhs.antiFreezeParastics == rhs.antiFreezeParastics
       && lhs.pumpParastics == rhs.pumpParastics
-      && lhs.massFlow == rhs.massFlow
+      && lhs.maxMassFlow == rhs.maxMassFlow
       && lhs.minFlow == rhs.minFlow
       && lhs.pumpParasticsFullLoad == rhs.pumpParasticsFullLoad
       && lhs.antiFreezeFlow == rhs.antiFreezeFlow
