@@ -13,7 +13,7 @@ import Libc
 import Meteo
 import SolarPosition
 
-public struct Collector: Component, CustomStringConvertible {
+public struct Collector: Parameterizable, CustomStringConvertible {
   
   public enum OperationMode {
     case variable, freezeProtection, noOperation, operating, fixed

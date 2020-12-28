@@ -38,10 +38,9 @@ public struct TextConfigFile {
   }
 
   public enum ReadError: Error {
-    case missingRowInFile(Int, String)
+    case unexpectedEndOfFile(Int, String)
     case missingValueInLine(Int, String)
     case invalidValueInLine(Int, String)
-    case unexpectedValueCount
   }
 
   public subscript(_ idx: Int) -> String? {
@@ -82,12 +81,10 @@ extension TextConfigFile.ReadError: CustomStringConvertible {
     switch self {
     case let .invalidValueInLine(line, path):
       return "\(path) invalid value in line \(line)."
-    case let .missingRowInFile(line, path):
+    case let .unexpectedEndOfFile(line, path):
       return "\(path) has less then \(line) lines."
     case let .missingValueInLine(line, path):
       return "\(path) missing value in line \(line)."
-    case .unexpectedValueCount:
-      return "Layout file has unexpected format."
     }
   }
 }

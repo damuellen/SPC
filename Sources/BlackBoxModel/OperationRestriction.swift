@@ -14,7 +14,7 @@ public struct OperationRestriction {
     case predefined, strategy
 
     var isPredefined: Bool {
-      return self ~= .predefined
+      self ~= .predefined
     }
 
     public var description: String {

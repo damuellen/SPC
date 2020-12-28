@@ -11,7 +11,7 @@
 import Config
 
 extension HeatExchanger {
-  public struct Parameter: ComponentParameter, Equatable {
+  public struct Parameter: Equatable {
     public struct Temperatures {
       let htf: (inlet: (max: Temperature, min: Temperature),
                 outlet: (max: Temperature, min: Temperature))
@@ -39,7 +39,9 @@ extension HeatExchanger {
     }
 
     var heatDesign: Heat {
-      SolarField.parameter.HTF.deltaHeat(temperature.htf.outlet.max, temperature.htf.inlet.max)
+      SolarField.parameter.HTF.deltaHeat(
+        temperature.htf.inlet.max, temperature.htf.outlet.max
+      )
     }
     
     let name: String
@@ -122,7 +124,7 @@ extension HeatExchanger.Parameter: TextConfigInitializable {
             outlet: (max: ln(65), min: ln(68)))
     )
 
-    sccEff = try ln(44)
+    sccEff = try ln(44) / 100
     sccHTFmassFlow = try MassFlow(ln(71))
     sccHTFheat = try ln(74)
     useAndsolFunction = true

@@ -25,7 +25,7 @@ extension Collector {
      - bellow shadowing
      - optical efficiency as a function of incident angle (incident angle modifier).
    */
-  public struct Parameter: ComponentParameter, Codable, Equatable {
+  public struct Parameter: Codable, Equatable {
     let name: String
     public enum Absorber: String, Codable {
       case schott, rio

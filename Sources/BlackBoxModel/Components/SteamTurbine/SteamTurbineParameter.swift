@@ -11,7 +11,7 @@
 import Config
 
 extension SteamTurbine {
-  public struct Parameter: ComponentParameter, Codable {
+  public struct Parameter: Codable {
     let name: String
     var power: PowerRange
     let efficiencyNominal, efficiencyBoiler, efficiencySCC: Double

@@ -68,13 +68,13 @@ extension Polynomial: CustomStringConvertible {
 public struct Ratio: CustomStringConvertible, Codable {
   var ratio: Double
 
-  var isZero: Bool { return self.ratio == 0 }
+  var isZero: Bool { self.ratio == 0 }
 
-  public static var zero: Ratio { return Ratio(0) }
+  public static var zero: Ratio { Ratio(0) }
 
-  public var percentage: Double { return self.ratio * 100.0 }
+  public var percentage: Double { self.ratio * 100.0 }
 
-  public var description: String { return "\(self.percentage)%" }
+  public var description: String { "\(self.percentage)%" }
 
   public init(percent: Double) {
     self.ratio = percent / 100
@@ -103,13 +103,13 @@ extension Ratio: ExpressibleByFloatLiteral {
 
 extension Ratio: Equatable {
   public static func == (lhs: Ratio, rhs: Ratio) -> Bool {
-    return lhs.ratio == rhs.ratio
+    lhs.ratio == rhs.ratio
   }
 }
 
 extension Ratio: Comparable {
   public static func < (lhs: Ratio, rhs: Ratio) -> Bool {
-    return lhs.ratio < rhs.ratio
+    lhs.ratio < rhs.ratio
   }
 }
 

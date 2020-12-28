@@ -11,7 +11,7 @@
 import Config
 
 extension Boiler {
-  public struct Parameter: ComponentParameter, Codable, Equatable {
+  public struct Parameter: Codable, Equatable {
     let name: String
     let nominalTemperatureOut, minLoad, nominalElectricalParasitics: Double
 
@@ -34,11 +34,11 @@ extension Boiler.Parameter: CustomStringConvertible {
     "Nominal Outlet Temperature [°]:" * nominalTemperatureOut.description
     + "Minimum Load [%]:" * (minLoad * 100).description
     + "Cold Start-up necessary after [h]:" * start.hours.cold.description
-    + "Energy needed for Cold Start-up [MWh]:" * start.energy.cold.description
+    + "Performance needed for Cold Start-up [MWh]:" * start.energy.cold.description
     + "Warm Start-up necessary after [h]:" * start.hours.warm.description
-    + "Energy needed for Warm Start-up [MWh]:" * start.energy.warm.description
+    + "Performance needed for Warm Start-up [MWh]:" * start.energy.warm.description
     + "Parasitics at Full Load [MW]:" * nominalElectricalParasitics.description
-    + "Parasitic Energy Coefficients; "
+    + "Parasitic Performance Coefficients; "
     + "Parasitics(Load) = Parasitics(100%)*(c0+c1*load)\n"
     + "c0:" * electricalParasitics[0].description
     + "c1:" * electricalParasitics[1].description

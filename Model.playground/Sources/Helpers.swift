@@ -3,10 +3,10 @@ import AppKit
 
 /*
  public func goalSeek(
- _ keyPath: KeyPath<PerformanceLog.Results, Double>,
+ _ keyPath: KeyPath<Recording.Results, Double>,
  greaterThen: Double,
  block: ()->()
- ) -> PerformanceLog {
+ ) -> Recording {
  var result = BlackBoxModel.runModel()
  var count = 1
  while result.annual[keyPath: keyPath] < greaterThen {

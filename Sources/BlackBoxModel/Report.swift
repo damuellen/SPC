@@ -3,15 +3,14 @@
 
 import struct Foundation.Date
 
-enum PerformanceReport {
+extension Recording {
 
-  static func create(energy: Energy, radiation: SolarRadiation) -> String
-  {
-    let solarField = SolarField.parameter
-    let gasTurbine = GasTurbine.parameter
-    let steamTurbine = SteamTurbine.parameter
-    let collector = Collector.parameter
-    let layout = Design.layout
+  func report() -> String {
+    let solarField = designParameter.solarField
+    let gasTurbine = designParameter.gasTurbine
+    let steamTurbine = designParameter.steamTurbine
+    let collector = designParameter.collector
+    let layout = designParameter.layout
     let aperture = layout.solarField * 2 * collector.areaSCAnet
       * Double(solarField.numberOfSCAsInRow)
     var d = heading("PERFORMANCE RUN")
@@ -49,18 +48,18 @@ enum PerformanceReport {
       + "\n\n"
     d += heading("Annual Results")
       + "Gross electricty producution [MWh_el/a]:"
-      * String(format: "%G", energy.electric.gross)
+      * String(format: "%G", performance.electric.gross)
     //  Format((YTarS(0).EgrsST + YTarS(0).EgrsGasTurbine) * (1 - Simulation.parameter.UnSchedMain) * (1 - Simulation.parameter.TransLoss), )"
-      + "Parasitic consumption [MWh_el/a]:" * String(format: "%G", energy.parasitics.shared)
+      + "Parasitic consumption [MWh_el/a]:" * String(format: "%G", performance.parasitics.shared)
     // Format(YTarS(0).electricalParasitics * (1 - Simulation.parameter.UnSchedMain) * (1 - Simulation.parameter.TransLoss), )"
-      + "Net electricty producution [MWh_el/a]:" * String(format: "%G", energy.electric.net)
+      + "Net electricty producution [MWh_el/a]:" * String(format: "%G", performance.electric.net)
     // Format(YTarS(0).Enet * (1 - Simulation.parameter.UnSchedMain) * (1 - Simulation.parameter.TransLoss), )"
       + "Gas consumption [MWh_el/a]:\n"  // Format(YTarS(0).heatfuel, )"
       + "Solar share [%]:\n"  // Format(SolShare * 100, )"
       + "Annual direct solar insolation [kWh/m²a]:"  //  Format(YTarS(0).NDI,)"
       * String(format: "%G", radiation.dni / 1_000)
       + "Total heat from solar field [MWh_el/a]:"  // Format(YTarS(0).heatsol,)"
-      * String(format: "%G", energy.thermal.solar.megaWatt)
+      * String(format: "%G", performance.thermal.solar.megaWatt)
     d += "\nAVAILABILITIES\n\n"
       + "Plant Availability [%]:\n"  // * Simulation.parameter.PlantAvail * 100, )"
       + "Plant Degradation [%]:\n"  // * Simulation.parameter.PlantDegrad,)"

@@ -8,7 +8,7 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
-public struct HeatExchanger: Component, HeatCycle {
+public struct HeatExchanger: Parameterizable, HeatCycle {
   /// Contains all data needed to simulate the operation of the heat exchanger
   var operationMode: OperationMode
   

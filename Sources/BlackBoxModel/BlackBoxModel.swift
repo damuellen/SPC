@@ -59,20 +59,20 @@ public enum BlackBoxModel {
   }
 
   public static func loadConfigurations(
-    atPath path: String, format: Config.Formats = .json
+    atPath path: String, format: ConfigFormat = .json
   ) throws {
     switch format {
     case .json:
       let urls = JSONConfig.fileSearch(atPath: path)
-      try JSONConfig.loadConfigurations(urls)
+      //try JSONConfig.loadConfiguration(urls.first!)
     case .text:
       try TextConfig.loadConfigurations(atPath: path)
     }
   }
 
-  /// - Parameter recorder: Creates the log and write results to file.
+  /// - Parameter with: Creates the log and write results to file.
   /// - Attention: `configure()` must called before this.
-  public static func runModel(with recorder: PerformanceDataRecorder) -> PerformanceLog {
+  public static func runModel(with log: Recorder) -> Recording {
 
     guard let 🌞 = sun, let 🌤 = meteoData else {
       print("We need the sun.")
@@ -106,19 +106,19 @@ public enum BlackBoxModel {
         status.collector = Collector.initialState
         DateTime.setNight()
       }
-
-      //if DateTime.isSunRise { print(DateTime.current) }
-      //if DateTime.isSunSet { print(DateTime.current) }
-
+#if DEBUG
+      if DateTime.isSunRise {
+        print(DateTime.current)
+      }
+      if DateTime.isSunSet {
+        print(DateTime.current) 
+      }
+#endif
       let temperature = Temperature(meteo: meteo)
 
       status.solarField.inletTemperature(outlet: status.powerBlock)
 
       status.solarField.massFlow = SolarField.parameter.maxMassFlow
-
-      if GridDemand.current.ratio < 1 {
-        Plant.adjustMassFlow(&status.solarField)
-      }
 
       if Design.hasStorage {
 
@@ -168,17 +168,18 @@ public enum BlackBoxModel {
         }
       }
 
-      let energy = plant.energyBalance()
+      let performance = plant.performance()
       let dt = DateTime.current
-//    print(decorated(dt.description), status, energy)
+//    print(decorated(dt.description), status, performance)
+//    print()
 
       backgroundQueue.async { [status] in
-        recorder(dt, meteo: meteo, status: status, energy: energy)
+        log(dt, meteo: meteo, status: status, energy: performance)
       }
     }
 
     backgroundQueue.sync {}  // wait for background queue
-    return recorder.finish()
+    return log.finish()
   }
 
   private static func makeGenerators(dataSource: MeteoDataSource)

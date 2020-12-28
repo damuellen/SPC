@@ -29,7 +29,7 @@ extension HeatCycle {
   }
   // NOTE: The property is currently not used.
   var averageTemperature: Temperature {
-    return Temperature.average(temperature.inlet, temperature.outlet)
+    Temperature.average(temperature.inlet, temperature.outlet)
   }
 
   var inletTemperature: Double { temperature.inlet.kelvin }

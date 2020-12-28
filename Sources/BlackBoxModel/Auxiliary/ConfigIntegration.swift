@@ -11,13 +11,17 @@
 import Config
 import Foundation
 
+public enum ConfigFormat {
+  case json, text
+}
+
 extension JSONConfig {
 
-  static func loadConfigurations(_ urls: [URL]) throws {
-    for url in urls {
-      let data = try Data(contentsOf: url)
-      try loadConfiguration(.INI, data: data)
-    }
+  static func load(_ url: URL) throws {
+    let data = try Data(contentsOf: url)
+    let decoder = JSONDecoder()
+    decoder.dateDecodingStrategy = .iso8601
+    try decoder.decode(ParameterSet.self, from: data)()
   }
 
   public static func loadConfiguration(_ type: JSONConfig.Name, data: Data) throws {
@@ -45,36 +49,18 @@ extension JSONConfig {
       Availability.current = try decoder.decode(Availability.self, from: data)
     case .LAY:
       Design.layout = try decoder.decode(Layout.self, from: data)
-    case .SF:
-      SolarField.update(parameter:
-        try decoder.decode(SolarField.Parameter.self, from: data))
-    case .COL:
-      Collector.update(parameter:
-        try decoder.decode(Collector.Parameter.self, from: data))
+    case .SF: SolarField.decode(data)
+    case .COL: Collector.decode(data)
     case .STO: break
-    case .HR:
-      Heater.update(parameter:
-        try decoder.decode(Heater.Parameter.self, from: data))
+    case .HR: Heater.decode(data)
     case .HTF: break
      // htf = try decoder.decode(HeatTransferFluid.self, from: data)
-    case .HX:
-      HeatExchanger.update(parameter:
-        try decoder.decode(HeatExchanger.Parameter.self, from: data))
-    case .BO:
-      Boiler.update(parameter:
-        try decoder.decode(Boiler.Parameter.self, from: data))
-    case .WHR:
-      WasteHeatRecovery.update(parameter:
-        try decoder.decode(WasteHeatRecovery.Parameter.self, from: data))
-    case .GT:
-      GasTurbine.update(parameter:
-        try decoder.decode(GasTurbine.Parameter.self, from: data))
-    case .TB:
-      SteamTurbine.update(parameter:
-        try decoder.decode(SteamTurbine.Parameter.self, from: data))
-    case .PB:
-      PowerBlock.update(parameter:
-        try decoder.decode(PowerBlock.Parameter.self, from: data))
+    case .HX: HeatExchanger.decode(data)
+    case .BO: Boiler.decode(data)
+    case .WHR: WasteHeatRecovery.decode(data)
+    case .GT: GasTurbine.decode(data)
+    case .TB: SteamTurbine.decode(data)
+    case .PB: PowerBlock.decode(data)
     case .PFC:
       break
     case .STF: break
@@ -84,7 +70,7 @@ extension JSONConfig {
 
   public static func saveConfiguration(toPath path: String) throws {
     let directoryURL = URL(fileURLWithPath: path, isDirectory: true)
-    let json = try generateJSON()
+    let json = try generate()
     let url = URL(fileURLWithPath: "Parameter.json",
                   isDirectory: false, relativeTo: directoryURL)
     try json.write(to: url)
@@ -93,7 +79,7 @@ extension JSONConfig {
   public static func saveConfigurations(toPath path: String) throws {
     let directoryURL = URL(fileURLWithPath: path, isDirectory: true)
     let cases = JSONConfig.Name.allCases
-    let json = try cases.map(generateJSON)
+    let json = try cases.map(generate)
 
     for (key, value) in zip(cases, json) {
       let url = URL(fileURLWithPath: key.rawValue + ".json",
@@ -102,17 +88,16 @@ extension JSONConfig {
     }
   }
 
-  public static func generateJSON() throws -> Data {
+  public static func generate() throws -> Data {
     let encoder = JSONEncoder()
     encoder.outputFormatting = [.sortedKeys, .prettyPrinted]
     encoder.dateEncodingStrategy = .iso8601
-    return try encoder.encode(Parameters())
+    return try encoder.encode(ParameterSet())
   }
 
-  public static func generateJSON(type: JSONConfig.Name) throws -> Data {
+  public static func generate(type: JSONConfig.Name) throws -> Data {
     let encoder = JSONEncoder()
-
-    encoder.outputFormatting = .prettyPrinted
+    encoder.outputFormatting = [.sortedKeys, .prettyPrinted]
     encoder.dateEncodingStrategy = .iso8601
 
     switch type {
@@ -148,10 +133,10 @@ extension JSONConfig {
 extension TextConfig {
   static func loadConfigurations(atPath path: String) throws {
     let urls = TextConfig.fileSearch(atPath: path)
-
+    var memory = [FileExtension]()
     for url in urls {
-      guard let e = Extension(rawValue: url.pathExtension.uppercased()),
-        let configFile = TextConfigFile(url: url)
+      guard let e = FileExtension(rawValue: url.pathExtension.uppercased()),
+        memory.contains(e), let configFile = TextConfigFile(url: url)
       else { continue }
       switch e {
       case .FOS: break
@@ -164,88 +149,24 @@ extension TextConfig {
       case .DES: break
       case .AVL: Availability.current = try .init(file: configFile)
       case .LAY: Design.layout = try .init(file: configFile)
-      case .SF: SolarField.update(parameter: try .init(file: configFile))
-      case .COL: Collector.update(parameter: try .init(file: configFile))
-      case .STO: Storage.update(parameter: try .init(file: configFile))
-      case .HR: Heater.update(parameter: try .init(file: configFile))
+      case .SF: SolarField.parameterize(try .init(file: configFile))
+      case .COL: Collector.parameterize(try .init(file: configFile))
+      case .STO: Storage.parameterize(try .init(file: configFile))
+      case .HR: Heater.parameterize(try .init(file: configFile))
       case .HTF: break
       //  htf = try HeatTransferFluid(file: configFile, includesEnthalpy: true)
-      case .HX: HeatExchanger.update(parameter: try .init(file: configFile))
-      case .BO: Boiler.update(parameter: try .init(file: configFile))
-      case .WHR: WasteHeatRecovery.update(parameter: try .init(file: configFile))
-      case .GT: GasTurbine.update(parameter: try .init(file: configFile))
-      case .TB: SteamTurbine.update(parameter: try .init(file: configFile))
-      case .PB: PowerBlock.update(parameter: try .init(file: configFile))
+      case .HX: HeatExchanger.parameterize(try .init(file: configFile))
+      case .BO: Boiler.parameterize(try .init(file: configFile))
+      case .WHR: WasteHeatRecovery.parameterize(try .init(file: configFile))
+      case .GT: GasTurbine.parameterize(try .init(file: configFile))
+      case .TB: SteamTurbine.parameterize(try .init(file: configFile))
+      case .PB: PowerBlock.parameterize(try .init(file: configFile))
       case .PFC:
         break
       case .STF: break
       //  salt = try HeatTransferFluid(file: configFile, includesEnthalpy: false)
       }
+      memory.append(e)
     }
   }
-}
-
-extension JSONConfig.Name {
-  public var description: String {
-    switch self {
-    case .FOS: break
-    case .OPR: break
-    case .DEM: break
-    case .TAR:
-      return ""//Simulation.tariff.description
-    case .SIM:
-      return Simulation.parameter.description
-    case .INI:
-      return ""//Simulation.initialValues.description
-    case .TIM: break
-    case .DES: break
-    case .AVL:
-      return ""//Availability.current.description
-    case .LAY:
-      return Design.layout.description
-    case .SF:
-      return SolarField.parameter.description
-    case .COL:
-      return Collector.parameter.description
-    case .STO: break
-    case .HR:
-      return Heater.parameter.description
-    case .HTF: break
-    case .HX:
-      return HeatExchanger.parameter.description
-    case .BO:
-      return Boiler.parameter.description
-    case .WHR:
-      return WasteHeatRecovery.parameter.description
-    case .GT:
-      return GasTurbine.parameter.description
-    case .TB:
-      return SteamTurbine.parameter.description
-    case .PB:
-      return PowerBlock.parameter.description
-    case .PFC:
-      break
-    case .STF: break
-    }
-    return ""
-  }
-}
-
-struct Parameters: Codable {
-  var tariff = Simulation.tariff
-  var simulation = Simulation.parameter
-  var initialValues = Simulation.initialValues
-  var time = Simulation.time
-  var availability = Availability.current
-  var layout = Design.layout
-  var solarField = SolarField.parameter
-  var collector = Collector.parameter
-  var heater = Heater.parameter
-  var heatTransferFluid = HeatTransferFluid.parameter
-  var heatExchanger = HeatExchanger.parameter
-  var boiler = Boiler.parameter
-  var wasteHeatRecovery = WasteHeatRecovery.parameter
-  var gasTurbine = GasTurbine.parameter
-  var steamTurbine = SteamTurbine.parameter
-  var powerBlock = PowerBlock.parameter
 }

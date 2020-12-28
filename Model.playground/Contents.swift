@@ -1,4 +1,6 @@
-import AppKit
+#if canImport(AppKit)
+  import AppKit
+#endif
 import Meteo
 import BlackBoxModel
 
@@ -14,7 +16,7 @@ func prettyPrint<T>(_ values: T..., separator: String) where T: Numeric {
   }
 }
 
-extension PerformanceLog: CustomPlaygroundDisplayConvertible {
+extension Recording: CustomPlaygroundDisplayConvertible {
   public var playgroundDescription: Any {
     let attributes: [NSAttributedString.Key : Any] = [
       .font: NSFont(name: "Menlo", size: 16.0)!,
@@ -25,8 +27,8 @@ extension PerformanceLog: CustomPlaygroundDisplayConvertible {
 }
 
 let 🌦 = Bundle.main.path(forResource: "AlAbdaliyah", ofType: "mto")!
-let recorder = PerformanceDataRecorder()
-let recorder2 = PerformanceDataRecorder()
+let recorder = Recorder()
+let recorder2 = Recorder()
 BlackBoxModel.configure(meteoFilePath: 🌦)
 Simulation.time.steps = .every5minutes
 
@@ -41,7 +43,7 @@ result1[\.collector.insolationAbsorber, ofDay: 188].sum()
 let a = Array(result1[\.collector.insolationAbsorber, ofDay: 200]).filter {$0 > 0}
 a.mean()
 var best = result1
-let log = PerformanceDataRecorder(noHistory: true)
+let log = Recorder(noHistory: true)
 
 for n in (142...156).reversed() {
   Design.layout.solarField = Double(n)

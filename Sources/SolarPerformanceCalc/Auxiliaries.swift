@@ -15,16 +15,16 @@ let dateString: String = {
 */
 
 extension Substring.SubSequence {
-  var integerValue: Int? { return Int(self) }
+  var integerValue: Int? { Int(self) }
 }
 
-extension PerformanceLog {
-  var fitness: Double { return (electric.net / layout.solarField) / 1_000 }
+extension Recording {
+  var fitness: Double { (electric.net / layout.solarField) / 1_000 }
 }
 
 class Population {
 
-  var individuals = [PerformanceLog]()
+  var individuals = [Recording]()
 
   var softMax: [Double] {
     let z = individuals.map { $0.fitness }
@@ -37,7 +37,7 @@ class Population {
   init(size: Int) {
     let layouts = generateRandomLayouts(size: size)
 
-    let recorder = PerformanceDataRecorder()
+    let recorder = Recorder()
 
     for layout in layouts {
       Design.layout = layout
@@ -46,14 +46,14 @@ class Population {
     }
   }
 
-  init(logs: [PerformanceLog]) {
+  init(logs: [Recording]) {
     self.individuals = logs
   }
 
-  init(layouts: [Layout], cache: [PerformanceLog]) {
+  init(layouts: [Layout], cache: [Recording]) {
     let oldLayouts = cache.map { $0.layout }
 
-    let recorder = PerformanceDataRecorder()
+    let recorder = Recorder()
 
     for layout in layouts {
       if let idx = oldLayouts.firstIndex(of: layout) {
@@ -73,7 +73,7 @@ class Population {
     return layouts
   }
 
-  func fittest() -> PerformanceLog {
+  func fittest() -> Recording {
     individuals.sort(by: { $0.fitness > $1.fitness })
     return individuals[0]
   }
@@ -97,7 +97,7 @@ class GeneticAlgorithm {
   }
 
   // Simulate the evolution of 'n' generations
-  func simulateNGenerations() -> PerformanceLog? {
+  func simulateNGenerations() -> Recording? {
     let halfSize = populationSize / 2
     let fittest = currentPopulation.fittest()
 

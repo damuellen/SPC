@@ -17,7 +17,7 @@ struct Availability: Codable {
 
   static var fuel: Double = 5
 
-  private var index: Int { return DateTime.current.month }
+  private var index: Int { DateTime.current.month }
 
   private let data: [Values]
 
@@ -26,7 +26,7 @@ struct Availability: Codable {
     reflMirror: 0.93, missingMirros: 0.0005, powerBlock: 1.0, storage: 0.98
   )
 
-  init(data: [Values]) {
+  init(_ data: [Values]) {
     self.data = data
   }
 
@@ -41,14 +41,12 @@ struct Availability: Codable {
       storage: Ratio
   }
 
-  var value: Values { return self.data[index] }
+  var value: Values { self.data[index] }
 
-  var values: Values { return self.data[0] }
+  var values: Values { self.data[0] }
 
   static func withDefaults() -> Availability {
-    return Availability(
-      data:
-        Array(repeatElement(Availability.defaults, count: 13)))
+    Availability(Array(repeating: Availability.defaults, count: 13))
   }
 }
 
@@ -71,7 +69,7 @@ extension Availability {
         )
       )
     }
-    self.init(data: data)
+    self.init(data)
   }
 }
 

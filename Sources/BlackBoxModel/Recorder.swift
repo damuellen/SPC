@@ -14,12 +14,12 @@ import Meteo
 import SQLite
 import Utility
 
-public final class PerformanceDataRecorder {
+public final class Recorder {
 
 #if DEBUG && !os(Windows)
   let animation = NinjaProgressAnimation(stream: stdoutStream)
+  private var progress: Int = 0
 #endif
-
   let interval = Simulation.time.steps
   let stride: Int
   let mode: Mode
@@ -46,21 +46,21 @@ public final class PerformanceDataRecorder {
 
   private var db: Connection? = nil
   /// Totals
-  private var annualEnergy = Energy()
+  private var annualPerformance = Performance()
   private var annualRadiation = SolarRadiation()
   /// Volatile subtotals
-  private var hourlyEnergy = Energy()
+  private var hourlyPerformance = Performance()
   private var hourlyRadiation = SolarRadiation()
   /// Sum of hourly values
-  private var dailyEnergy = Energy()
+  private var dailyPerformance = Performance()
   private var dailyRadiation = SolarRadiation()
 
-  private var customIntervalEnergy = Energy()
+  private var customIntervalPerformance = Performance()
   private var customIntervalRadiation = SolarRadiation()
 
   /// All past states of the plant
-  private var performanceHistory: [PerformanceData] = []
-  private var energyHistory: [Energy] = []
+  private var statusHistory: [Status] = []
+  private var performanceHistory: [Performance] = []
 
   public init() {
     self.mode = .inMemory
@@ -73,8 +73,8 @@ public final class PerformanceDataRecorder {
     let suffix: String
 
     if case .inMemory = output {
+      statusHistory.reserveCapacity(8760 * interval.rawValue)
       performanceHistory.reserveCapacity(8760 * interval.rawValue)
-      energyHistory.reserveCapacity(8760 * interval.rawValue)
     }
 
     if case .custom(let i) = output, i.isMultiple(of: interval) {
@@ -85,7 +85,7 @@ public final class PerformanceDataRecorder {
       self.stride = 1
     }
 
-    let urlDir = URL(fileURLWithPath: path ?? 💾.currentDirectoryPath)
+    let urlDir = URL(fileURLWithPath: path ?? "")
 
     if output.hasFileOutput, !urlDir.hasDirectoryPath {
       print("Invalid path for results: \(urlDir.path)\n")
@@ -163,29 +163,29 @@ public final class PerformanceDataRecorder {
   }
 
   public func clearResults() {
-    annualEnergy.zero()
+    annualPerformance.zero()
     annualRadiation.zero()
-    dailyEnergy.zero()
+    dailyPerformance.zero()
     dailyRadiation.zero()
-    hourlyEnergy.zero()
+    hourlyPerformance.zero()
     hourlyRadiation.zero()
-    energyHistory.removeAll(keepingCapacity: true)
     performanceHistory.removeAll(keepingCapacity: true)
+    statusHistory.removeAll(keepingCapacity: true)
   }
 
   public func printResult() {
     print("")
     print(decorated("Annual results"))
     print(annualRadiation.prettyDescription)
-    print(annualEnergy.prettyDescription)
+    print(annualPerformance.prettyDescription)
   }
 
   func callAsFunction(
-    _ ts: DateTime, meteo: MeteoData, status: PerformanceData, energy: Energy
+    _ ts: DateTime, meteo: MeteoData, status: Status, energy: Performance
   ) {
     if mode.hasHistory {
-      self.performanceHistory.append(status)
-      self.energyHistory.append(energy)
+      self.statusHistory.append(status)
+      self.performanceHistory.append(energy)
     }
 
     let solar = SolarRadiation(
@@ -197,7 +197,7 @@ public final class PerformanceDataRecorder {
       defer { intervalCounter += 1 }
 
       if intervalCounter == 1 {
-        iso8601_Hourly = ts.description 
+        iso8601_Hourly = String(ts.description.dropFirst(3))
       }
 
       if case .custom(_) = mode {
@@ -206,25 +206,25 @@ public final class PerformanceDataRecorder {
         }
         let fraction = 1 / Double(stride)
         customIntervalRadiation.totalize(solar, fraction: fraction)
-        customIntervalEnergy.totalize(energy, fraction: fraction)
+        customIntervalPerformance.totalize(energy, fraction: fraction)
 
         if stride == 1 || intervalCounter % stride == 0 {
           let csv = generateValues()
           stringBuffer.append(contentsOf: csv)      
           customIntervalRadiation.zero()
-          customIntervalEnergy.zero()
+          customIntervalPerformance.zero()
         }
       }
     }
 
     if case .csv = mode {
       hourlyRadiation.totalize(solar, fraction: interval.fraction)
-      hourlyEnergy.totalize(energy, fraction: interval.fraction)
+      hourlyPerformance.totalize(energy, fraction: interval.fraction)
       // Daily and annual sum calculations see counters
     } else {
       // Only the annual sums are calculated.
       annualRadiation.totalize(solar, fraction: interval.fraction)
-      annualEnergy.totalize(energy, fraction: interval.fraction)
+      annualPerformance.totalize(energy, fraction: interval.fraction)
     }
 
 #if DEBUG && !os(Windows)
@@ -239,14 +239,10 @@ public final class PerformanceDataRecorder {
 #endif
   }
 
-  public func finish() -> PerformanceLog {
-    let log = PerformanceLog(
-      energy: annualEnergy,
-      radiation: annualRadiation,
-      energyHistory: energyHistory,
-      performanceHistory: performanceHistory
-    )
-
+  public func finish() -> Recording {
+  #if DEBUG && !os(Windows)
+    animation.clear()
+  #endif
     if case .custom(_) = mode {
       customIntervalStream?.write(stringBuffer)
       stringBuffer.removeAll()
@@ -256,20 +252,18 @@ public final class PerformanceDataRecorder {
       storeInDB()
     }
 
-  #if DEBUG && !os(Windows)
-    animation.clear()
-  #endif
-    return log
+    return Recording(
+      performance: annualPerformance,
+      radiation: annualRadiation,
+      performanceHistory: performanceHistory,
+      statusHistory: statusHistory
+    )
   }
-
-#if DEBUG && !os(Windows)
-  private var progress: Int = 0
-#endif
 
   private var hourCounter: Int = 1 {
     didSet {
       if case .csv = mode, hourCounter > 24 {
-        annualEnergy.totalize(dailyEnergy, fraction: 1)
+        annualPerformance.totalize(dailyPerformance, fraction: 1)
         annualRadiation.totalize(dailyRadiation, fraction: 1)
 
         let csv = generateDailyValues()
@@ -278,7 +272,7 @@ public final class PerformanceDataRecorder {
         hourlyResultsStream?.write(stringBuffer)
         stringBuffer.removeAll(keepingCapacity: true)
 
-        dailyEnergy.zero()
+        dailyPerformance.zero()
         dailyRadiation.zero()
 
         hourCounter = 1
@@ -289,14 +283,14 @@ public final class PerformanceDataRecorder {
   private var intervalCounter: Int = 1 {
     didSet {
       if case .csv = mode, intervalCounter > interval.rawValue {
-        dailyEnergy.totalize(hourlyEnergy, fraction: 1)
+        dailyPerformance.totalize(hourlyPerformance, fraction: 1)
         dailyRadiation.totalize(hourlyRadiation, fraction: 1)
 
         let csv = generateHourlyValues()
         // Will be written together with the daily results
         stringBuffer.append(contentsOf: csv)        
 
-        hourlyEnergy.zero()
+        hourlyPerformance.zero()
         hourlyRadiation.zero()
 
         hourCounter += 1
@@ -319,21 +313,21 @@ public final class PerformanceDataRecorder {
         })
     }
 
-    let performanceData = PerformanceData.columns.map(\.0)
-    let energy = Energy.columns.map(\.0)
-    createTable(name: "PerformanceData", columns: performanceData)
-    createTable(name: "Energy", columns: energy)
+    let status = Status.columns.map(\.0)
+    let energy = Performance.columns.map(\.0)
+    createTable(name: "PerformanceData", columns: status)
+    createTable(name: "Performance", columns: energy)
 
-    let p1 = repeatElement("?", count: performanceData.count).joined(separator: ",")
+    let p1 = repeatElement("?", count: status.count).joined(separator: ",")
     try! db.transaction {
       let stmt = try! db.prepare("INSERT INTO PerformanceData VALUES (\(p1))")
-      for entry in performanceHistory { try! stmt.run(entry.numericalForm) }
+      for entry in statusHistory { try! stmt.run(entry.numericalForm) }
     }
 
     let p2 = repeatElement("?", count: energy.count).joined(separator: ",")
     try! db.transaction {
-      let stmt = try! db.prepare("INSERT INTO Energy VALUES (\(p2))")
-      for entry in energyHistory { try! stmt.run(entry.numericalForm) }
+      let stmt = try! db.prepare("INSERT INTO Performance VALUES (\(p2))")
+      for entry in performanceHistory { try! stmt.run(entry.numericalForm) }
     }
   }
 
@@ -347,7 +341,7 @@ public final class PerformanceDataRecorder {
   // MARK: Table headers
 
   private var headers: (name: String, unit: String, count: Int) {
-    let columns = [SolarRadiation.columns, Energy.columns].joined()
+    let columns = [SolarRadiation.columns, Performance.columns].joined()
     let names: String = columns.map { $0.0 }.joined(separator: ",")
     let units: String = columns.map { $0.1 }.joined(separator: ",")
     return ("DateTime," + names, "_," + units, columns.count)
@@ -356,20 +350,20 @@ public final class PerformanceDataRecorder {
   // MARK: Write Results
 
   private func generateDailyValues() -> String {
-    return iso8601_Hourly.dropFirst(3).prefix(10) + .separator
-      + [dailyRadiation.values, dailyEnergy.values]
+    iso8601_Hourly.prefix(10) + .separator
+      + [dailyRadiation.values, dailyPerformance.values]
       .joined().joined(separator: ",") + .lineBreak
   }
 
   private func generateHourlyValues() -> String {
-    return iso8601_Hourly.dropFirst(3) + .separator
-      + [hourlyRadiation.values, hourlyEnergy.values]
+    iso8601_Hourly + .separator
+      + [hourlyRadiation.values, hourlyPerformance.values]
       .joined().joined(separator: .separator) + .lineBreak
   }
 
   private func generateValues() -> String {
-    return iso8601_Interval.dropFirst(3) + .separator
-      + [customIntervalRadiation.values, customIntervalEnergy.values]
+    iso8601_Interval + .separator
+      + [customIntervalRadiation.values, customIntervalPerformance.values]
       .joined().joined(separator: .separator) + .lineBreak
   }
 }

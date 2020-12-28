@@ -11,7 +11,7 @@
 import Config
 
 extension WasteHeatRecovery {
-  public struct Parameter: ComponentParameter, Codable {
+  public struct Parameter: Codable {
     let name: String
     let operation: OperationMode
 

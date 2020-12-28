@@ -12,12 +12,12 @@ public struct PowerRange {
 
   var range: ClosedRange<Double>
 
-  var min: Double { return self.range.lowerBound }
+  var min: Double { self.range.lowerBound }
 
   var nominal: Double = 0
 
   var max: Double {
-    get { return self.range.upperBound }
+    get { self.range.upperBound }
     set { self.range = self.range.lowerBound...newValue }
   }
 

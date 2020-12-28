@@ -22,7 +22,7 @@ system("chcp 65001")
 let start = DispatchTime.now().uptimeNanoseconds
 
 SolarPerformanceCalculator.main()
-print(SolarPerformanceCalculator.result!.report)
+print(SolarPerformanceCalculator.result!)
 
 let end = DispatchTime.now().uptimeNanoseconds
 let time = String((end - start) / 1_000_000) +  " ms"
@@ -55,10 +55,12 @@ struct LocationInfo: ParsableArguments {
 
 struct SolarPerformanceCalculator: ParsableCommand {
 
-  static var result: PerformanceLog!
-
-  static let cwd = FileManager.default.currentDirectoryPath
-
+  static var result: Recording!
+#if os(Windows)
+  static let cwd = currentDirectoryPath()
+#else
+  static let cwd = ""
+#endif
   @Option(name: .shortAndLong, help: "The search path for meteofile.")
   var meteofilePath: String?
   @Option(name: .shortAndLong, help: "The search path for config files.")
@@ -115,7 +117,7 @@ struct SolarPerformanceCalculator: ParsableCommand {
     }
 
     if parameter {
-      printParameter()
+      print(ParameterSet())
       try JSONConfig.saveConfiguration(toPath: configPath)
       return
     }
@@ -137,7 +139,7 @@ struct SolarPerformanceCalculator: ParsableCommand {
       BlackBoxModel.configure(location: loc)
     }
 
-    let mode: PerformanceDataRecorder.Mode
+    let mode: Recorder.Mode
     if let steps = outputValues {
       mode = .custom(interval: Interval[steps])
     } else if database {
@@ -146,7 +148,7 @@ struct SolarPerformanceCalculator: ParsableCommand {
       mode = .csv
     }
 
-    let log = PerformanceDataRecorder(name: nameResults, path: resultsPath, output: mode)
+    let log = Recorder(name: nameResults, path: resultsPath, output: mode)
 
     SolarPerformanceCalculator.result = BlackBoxModel.runModel(with: log)
 
@@ -158,24 +160,6 @@ struct SolarPerformanceCalculator: ParsableCommand {
     commandName: "Solar Performance Calculator",
     abstract: "Simulates the performance of entire solar thermal power plants."
   )
-
-  func printParameter() {
-    print(
-      Simulation.parameter,
-      SolarField.parameter,
-      Collector.parameter,
-      Heater.parameter,
-      HeatTransferFluid.parameter,
-      HeatExchanger.parameter,
-      Boiler.parameter,
-      WasteHeatRecovery.parameter,
-      GasTurbine.parameter,
-      SteamTurbine.parameter,
-      PowerBlock.parameter,
-      Storage.parameter,
-      separator: "\n"
-    )
-  }
 }
 /*
 
@@ -197,7 +181,7 @@ df.dateFormat = "dd.MM.yyyy"
 //Simulation.time.lastDateOfOperation = df.date(from: "04.01.2005")!
 
 
-let log = PerformanceDataRecorder(
+let log = Recorder(
   customNaming: "Result_\(lastRun + Int(1))"
 )
 */

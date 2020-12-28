@@ -11,7 +11,7 @@
 import Foundation
 import DateGenerator
 
-public struct Boiler: Component {
+public struct Boiler: Parameterizable {
   /// Contains all data needed to simulate the operation of the boiler
 
   var operationMode: OperationMode
@@ -59,7 +59,7 @@ public struct Boiler: Component {
 
   mutating func callAsFunction(
     demand: Double, Qsf_load: Double, fuelAvailable: Double)
-    -> EnergyTransfer<Boiler>
+    -> PerformanceData<Boiler>
   {
     let parameter = Boiler.parameter
 
@@ -74,13 +74,13 @@ public struct Boiler: Component {
       if isMaintained {
 
         operationMode = .scheduledMaintenance
-        return EnergyTransfer(
+        return PerformanceData(
           heat: thermalPower, electric: parasitics, fuel: fuel
         )
       }
 
       let fuel = Boiler.noOperation(&self, fuelAvailable: fuelAvailable)
-      return EnergyTransfer(
+      return PerformanceData(
         heat: thermalPower, electric: parasitics, fuel: fuel
       )
     }
@@ -104,7 +104,7 @@ public struct Boiler: Component {
 
       let fuel = Boiler.noOperation(&self, fuelAvailable: fuelAvailable)
 
-      return EnergyTransfer(
+      return PerformanceData(
         heat: thermalPower, electric: parasitics, fuel: fuel
       )
     }
@@ -119,7 +119,7 @@ public struct Boiler: Component {
         
       let fuel = Boiler.noOperation(&self, fuelAvailable: fuelAvailable)
 
-      return EnergyTransfer(
+      return PerformanceData(
         heat: thermalPower, electric: parasitics, fuel: fuel
       )
     }
@@ -187,7 +187,7 @@ public struct Boiler: Component {
           """)
         let fuel = Boiler.noOperation(&self, fuelAvailable: fuelAvailable)
 
-        return EnergyTransfer(
+        return PerformanceData(
           heat: thermalPower, electric: parasitics, fuel: fuel
         )
       }
@@ -210,7 +210,7 @@ public struct Boiler: Component {
     
     parasitics = Boiler.parasitics(estimateFrom: load)
 
-    return EnergyTransfer(
+    return PerformanceData(
       heat: thermalPower, electric: parasitics, fuel: fuel
     )
   }
@@ -296,7 +296,7 @@ extension Boiler: CustomStringConvertible {
     "\(operationMode),\n"
       + "Maintenance: \(isMaintained ? "Yes" : "No"), "
       + "Load: \(load), "
-      + String(format: "Start Energy: %.1f", startEnergy)
+      + String(format: "Start Performance: %.1f", startEnergy)
   }
 }
 

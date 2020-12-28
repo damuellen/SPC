@@ -11,7 +11,7 @@
 import Config
 
 extension PowerBlock {
-  public struct Parameter: ComponentParameter, Codable, Equatable {
+  public struct Parameter: Codable, Equatable {
     let name: String
     let fixElectricalParasitics: Double
     let nominalElectricalParasitics: Double

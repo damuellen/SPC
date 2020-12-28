@@ -8,9 +8,9 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
-public struct Energy: MeasurementsConvertible {
+public struct Performance: MeasurementsConvertible {
 
-  internal(set) public var thermal: ThermalEnergy
+  internal(set) public var thermal: ThermalPower
 
   internal(set) public var electric: ElectricPower
 
@@ -19,17 +19,17 @@ public struct Energy: MeasurementsConvertible {
   internal(set) public var parasitics: Parasitics
 
   mutating func zero() {
-    self.thermal = ThermalEnergy()
+    self.thermal = ThermalPower()
     self.fuel = FuelConsumption()
     self.parasitics = Parasitics()
     self.electric = ElectricPower()
   }
 
-  mutating func totalize(_ energy: Energy, fraction: Double) {
-    self.thermal.totalize(energy.thermal, fraction: fraction)
-    self.fuel.totalize(energy.fuel, fraction: fraction)
-    self.parasitics.totalize(energy.parasitics, fraction: fraction)
-    self.electric.totalize(energy.electric, fraction: fraction)
+  mutating func totalize(_ values: Performance, fraction: Double) {
+    self.thermal.totalize(values.thermal, fraction: fraction)
+    self.fuel.totalize(values.fuel, fraction: fraction)
+    self.parasitics.totalize(values.parasitics, fraction: fraction)
+    self.electric.totalize(values.electric, fraction: fraction)
   }
 
   var numericalForm: [Double] {
@@ -38,14 +38,14 @@ public struct Energy: MeasurementsConvertible {
   }
 
   static var columns: [(name: String, unit: String)] {
-    ThermalEnergy.columns + FuelConsumption.columns
+    ThermalPower.columns + FuelConsumption.columns
       + Parasitics.columns + ElectricPower.columns
   }
 }
 
-extension Energy {
+extension Performance {
   init() {
-    self.thermal = ThermalEnergy()
+    self.thermal = ThermalPower()
     self.electric = ElectricPower()
     self.fuel = FuelConsumption()
     self.parasitics = Parasitics()
@@ -75,20 +75,20 @@ public struct ElectricPower: Encodable, MeasurementsConvertible {
     ]
   }
 
-  mutating func totalize(_ electricEnergy: ElectricPower, fraction: Double) {
-    self.demand += electricEnergy.demand * fraction
-    self.gross += electricEnergy.gross * fraction
-    self.steamTurbineGross += electricEnergy.steamTurbineGross * fraction
-    self.gasTurbineGross += electricEnergy.gasTurbineGross * fraction
-    self.backupGross += electricEnergy.backupGross * fraction
+  mutating func totalize(_ values: ElectricPower, fraction: Double) {
+    self.demand += values.demand * fraction
+    self.gross += values.gross * fraction
+    self.steamTurbineGross += values.steamTurbineGross * fraction
+    self.gasTurbineGross += values.gasTurbineGross * fraction
+    self.backupGross += values.backupGross * fraction
     // backupGross +=
-    self.shared += electricEnergy.shared * fraction
-    self.solarField += electricEnergy.solarField * fraction
-    self.parasitics += electricEnergy.parasitics * fraction
+    self.shared += values.shared * fraction
+    self.solarField += values.solarField * fraction
+    self.parasitics += values.parasitics * fraction
     
-    self.storage += electricEnergy.storage * fraction
-    self.net += electricEnergy.net * fraction
-    self.consum += electricEnergy.consum * fraction
+    self.storage += values.storage * fraction
+    self.net += values.net * fraction
+    self.consum += values.consum * fraction
   }
 }
 
@@ -108,17 +108,17 @@ public struct Parasitics: Encodable, MeasurementsConvertible {
     ]
   }
 
-  mutating func totalize(_ electricalParasitics: Parasitics, fraction: Double) {
-    self.solarField += electricalParasitics.solarField * fraction
-    self.powerBlock += electricalParasitics.powerBlock * fraction
-    self.storage += electricalParasitics.storage * fraction
-    self.shared += electricalParasitics.shared * fraction
+  mutating func totalize(_ values: Parasitics, fraction: Double) {
+    self.solarField += values.solarField * fraction
+    self.powerBlock += values.powerBlock * fraction
+    self.storage += values.storage * fraction
+    self.shared += values.shared * fraction
     // parasiticsBackup += electricalParasitics
-    self.gasTurbine += electricalParasitics.gasTurbine * fraction
+    self.gasTurbine += values.gasTurbine * fraction
   }
 }
 
-public struct ThermalEnergy: Encodable, MeasurementsConvertible {
+public struct ThermalPower: Encodable, MeasurementsConvertible {
   internal(set) public var solar: Power = 0.0, toStorage: Power = 0.0,
     toStorageMin: Power = 0.0, storage: Power = 0.0, heater: Power = 0.0,
     boiler: Power = 0.0, wasteHeatRecovery: Power = 0.0,
@@ -149,20 +149,20 @@ public struct ThermalEnergy: Encodable, MeasurementsConvertible {
     ]
   }
 
-  mutating func totalize(_ thermal: ThermalEnergy, fraction: Double) {
-    solar += thermal.solar * fraction
-    if thermal.storage.watt < 0 {
-      toStorage += thermal.storage * fraction
+  mutating func totalize(_ values: ThermalPower, fraction: Double) {
+    solar += values.solar * fraction
+    if values.storage.watt < 0 {
+      toStorage += values.storage * fraction
     } else {
-      storage += thermal.storage * fraction
+      storage += values.storage * fraction
     }
-    heater += thermal.heater * fraction
-    heatExchanger += thermal.heatExchanger * fraction
-    startUp += thermal.startUp * fraction
-    wasteHeatRecovery += thermal.wasteHeatRecovery * fraction
-    boiler += thermal.boiler * fraction
-    dumping += thermal.dumping * fraction
-    production += thermal.production * fraction
+    heater += values.heater * fraction
+    heatExchanger += values.heatExchanger * fraction
+    startUp += values.startUp * fraction
+    wasteHeatRecovery += values.wasteHeatRecovery * fraction
+    boiler += values.boiler * fraction
+    dumping += values.dumping * fraction
+    production += values.production * fraction
   }
 }
 
@@ -198,11 +198,15 @@ public struct FuelConsumption: Encodable, MeasurementsConvertible {
   }
 }
 
-extension Energy: CustomStringConvertible {
+extension Performance: CustomStringConvertible {
   public var description: String {
     thermal.prettyDescription
       + electric.prettyDescription
       + fuel.prettyDescription
       + parasitics.prettyDescription
   }
+}
+
+struct PerformanceData<Parameterizable> {
+  var heat, electric, fuel: Double
 }

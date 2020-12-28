@@ -8,7 +8,7 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
-public enum WasteHeatRecovery: Component {
+public enum WasteHeatRecovery: Parameterizable {
   /// Contains all data needed to simulate the operation of the waste heat recovery
   public struct PerformanceData {
     var maintained: Bool

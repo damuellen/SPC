@@ -11,7 +11,7 @@
 import Config
 
 extension Heater {
-  public struct Parameter: ComponentParameter, Codable, Equatable {
+  public struct Parameter: Codable, Equatable {
     let name: String
     let efficiency, minLoad: Ratio
     var maximumMassFlow, nominalElectricalParasitics: Double
@@ -33,7 +33,7 @@ extension Heater.Parameter: CustomStringConvertible {
     + "Maximum Mass Flow [kg/s]:" * maximumMassFlow.description
     + "Minimum Load [%]:" * minLoad.percentage.description
     + "Parasitics at Full Load [MW]:" * nominalElectricalParasitics.description
-    + "Parasitic Energy Coefficients;\nParasitics(Load) = Parasitics(100%)*(c0+c1*load)\n"
+    + "Parasitic Performance Coefficients;\nParasitics(Load) = Parasitics(100%)*(c0+c1*load)\n"
     + "c0:" * electricalParasitics[0].description
     + "c1:" * electricalParasitics[1].description
     + "Use Heater in Parallel to SF:"
@@ -46,8 +46,8 @@ extension Heater.Parameter: TextConfigInitializable {
     let ln: (Int) throws -> Double = { try file.double(line: $0) }
     self = try .init(
       name: file.name,
-      efficiency: Ratio(ln(10)),
-      minLoad: Ratio(ln(25)),
+      efficiency: Ratio(ln(10) / 100),
+      minLoad: Ratio(ln(25) / 100),
       maximumMassFlow: ln(22),
       nominalElectricalParasitics: ln(28),
       antiFreezeTemperature: Temperature(ln(16)),

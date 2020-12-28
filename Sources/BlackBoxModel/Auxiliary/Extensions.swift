@@ -40,7 +40,7 @@ extension Comparable {
     self = min(max(self, limits.lowerBound), limits.upperBound)
   }
   func clamped(to limits: ClosedRange<Self>) -> Self {    
-    return min(max(self, limits.lowerBound), limits.upperBound)
+    min(max(self, limits.lowerBound), limits.upperBound)
   }
 }
 
@@ -89,20 +89,20 @@ public typealias Pressure = Double
 public typealias Angle = Double
 
 extension Angle {
-  public var toRadians: Double { return self * .pi / 180 }
-  public var toDegrees: Double { return self * (180 / .pi) }
+  public var toRadians: Double { self * .pi / 180 }
+  public var toDegrees: Double { self * (180 / .pi) }
 }
 
 extension String {
-  static var lineBreak: String { return "\n" }
-  static var separator: String { return ", " }
+  static var lineBreak: String { "\n" }
+  static var separator: String { ", " }
 }
 
 final class Cache<T: Hashable> {
   var cachedValues: [Int: T] = [:]
 
   func lookupResult(for hash: Int) -> T? {
-    return cachedValues[hash]
+    cachedValues[hash]
   }
 
   func update(hash: Int, result: T) {
@@ -112,7 +112,7 @@ final class Cache<T: Hashable> {
 
 @inline(__always)
 public func unreachable() -> Never {
-  return unsafeBitCast((), to: Never.self)
+  unsafeBitCast((), to: Never.self)
 }
 
 extension Array where Element: AdditiveArithmetic {

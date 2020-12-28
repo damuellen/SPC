@@ -11,7 +11,7 @@
 import DateGenerator
 import Meteo
 
-public struct SteamTurbine: Component {
+public struct SteamTurbine: Parameterizable {
   /// Contains all data needed to simulate the operation of the steam turbine
 
   var operationMode: OperationMode
@@ -59,7 +59,7 @@ public struct SteamTurbine: Component {
     modeGasTurbine: GasTurbine.OperationMode,
     heatExchanger: HeatExchanger,
     temperature: Temperature,
-    heat: ThermalEnergy
+    heat: ThermalPower
   )
     -> Double
   {
@@ -132,7 +132,7 @@ public struct SteamTurbine: Component {
   }
 
   static func perform(
-    _ load: Ratio, _ heat: ThermalEnergy,
+    _ load: Ratio, _ heat: ThermalPower,
     _ boiler: Boiler.OperationMode,
     _ gasTurbine: GasTurbine.OperationMode,
     _ heatExchanger: Temperature,

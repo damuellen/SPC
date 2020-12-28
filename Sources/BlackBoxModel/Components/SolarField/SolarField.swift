@@ -11,7 +11,7 @@
 import Meteo
 
 /// Contains all data needed to simulate the operation of the solar field
-public struct SolarField: Component, HeatCycle {
+public struct SolarField: Parameterizable, HeatCycle {
 
   public enum Loop: Int {
     case design = 0
@@ -33,7 +33,6 @@ public struct SolarField: Component, HeatCycle {
   var loops: [HeatTransfer]
   var loopEta: Double
  // var temperature: (inlet: Temperature, outlet: Temperature)
-  var massFlowDemand: MassFlow = .zero
 
   var cycle: HeatTransfer {
     get { header }
@@ -93,7 +92,7 @@ public struct SolarField: Component, HeatCycle {
 
   /// Determines the inlet temperature of the solar field
   /// depending on the operating mode of the storage
-  mutating func inletTemperature(storage: Storage, heat: ThermalEnergy) {
+  mutating func inletTemperature(storage: Storage, heat: ThermalPower) {
     switch storage.operationMode {
     case .freezeProtection:
       if Storage.parameter.temperatureCharge[1] > 0 {

@@ -11,43 +11,41 @@
 /// A namespace for the main routines of the simulation.
 public struct Plant {
 
-  var heat = ThermalEnergy()
+  var heat = ThermalPower()
 
-  var electricalEnergy = ElectricPower()
+  var electricity = ElectricPower()
 
   var fuelConsumption = FuelConsumption()
 
   var electricalParasitics = Parasitics()
 
-  public static let initialState = PerformanceData()
+  public static let initialState = Status()
 
-  mutating func energyBalance() -> Energy {
-    electricalEnergy.net = electricalEnergy.gross
-    electricalEnergy.net -= electricalEnergy.parasitics
+  mutating func performance() -> Performance {
+    electricity.net = electricity.gross
+    electricity.net -= electricity.parasitics
 
-    if electricalEnergy.net < 0 {
-      electricalEnergy.consum = -electricalEnergy.net
-      electricalEnergy.net = 0
+    if electricity.net < 0 {
+      electricity.consum = -electricity.net
+      electricity.net = 0
     } else {
-      electricalEnergy.consum = 0
+      electricity.consum = 0
     }
 
-    return Energy(
-      thermal: heat, electric: electricalEnergy,
+    return Performance(
+      thermal: heat, electric: electricity,
       fuel: fuelConsumption, parasitics: electricalParasitics)
   }
 
   // MARK: - SolarField
 
-  /// Reduces the mass flow of the solar field
-  /// when there is less demand from the grid
-  static func adjustMassFlow(_ solarField: inout SolarField) {
+  static func requiredMassFlow() -> MassFlow {
     let heatExchanger = HeatExchanger.parameter
     let steamTurbine = SteamTurbine.parameter
     // added to reduced SOF massflow with electrical demand
-    solarField.massFlowDemand.rate = GridDemand.current.ratio
+    return MassFlow(GridDemand.current.ratio
       * (steamTurbine.power.max / steamTurbine.efficiencyNominal
-        / heatExchanger.efficiency) * 1_000 / heatExchanger.heatDesign    
+        / heatExchanger.efficiency) * 1_000 / heatExchanger.heatDesign)    
   }
 
   /// Calculation of the heat supplied by the solar field
@@ -86,7 +84,7 @@ public struct Plant {
 
   // MARK: - PowerBlock
 
-  mutating func calculate(_ status: inout PerformanceData, ambient: Temperature) {
+  mutating func calculate(_ status: inout Status, ambient: Temperature) {
     let collector = status.collector
     var solarField = status.solarField
     var powerBlock = status.powerBlock
@@ -111,18 +109,18 @@ public struct Plant {
     @discardableResult func estimateElectricalEnergyDemand() -> Double {
       var estimate = 0.0
       if Design.hasGasTurbine {
-        electricalEnergy.demand =
+        electricity.demand =
           GridDemand.current.ratio
           * (Design.layout.powerBlock - Design.layout.gasTurbine)
         estimate =
-          electricalEnergy.demand
+          electricity.demand
           * Simulation.parameter.electricalParasitics
         // Iter. start val. for parasitics, 10% demand
-        electricalEnergy.demand += estimate
+        electricity.demand += estimate
       } else {
         let steamTurbine = SteamTurbine.parameter.power.max
-        electricalEnergy.demand = GridDemand.current.ratio * steamTurbine
-        estimate = electricalEnergy.storage
+        electricity.demand = GridDemand.current.ratio * steamTurbine
+        estimate = electricity.storage
       }
       return estimate
     }
@@ -134,7 +132,7 @@ public struct Plant {
       case .shifter:
         return SteamTurbine.parameter.power.max * GridDemand.current.ratio
       case .always:
-        return electricalEnergy.demand
+        return electricity.demand
       }
     }
 
@@ -177,21 +175,21 @@ public struct Plant {
 
     func totalizeElectricalParasitics() {
       // + GasTurbine = total productionuced electricity
-      electricalEnergy.solarField = electricalParasitics.solarField
-      electricalEnergy.storage = electricalParasitics.storage
+      electricity.solarField = electricalParasitics.solarField
+      electricity.storage = electricalParasitics.storage
 
-      // electricEnergy.parasiticsBU =
+      // electricPerformance.parasiticsBU =
       // electricalParasitics.heater + electricalParasitics.boiler
-      electricalEnergy.powerBlock = electricalParasitics.powerBlock
-      electricalEnergy.shared = electricalParasitics.shared
+      electricity.powerBlock = electricalParasitics.powerBlock
+      electricity.shared = electricalParasitics.shared
 
-      electricalEnergy.parasitics =
-        electricalEnergy.solarField
-        + electricalEnergy.gasTurbine
+      electricity.parasitics =
+        electricity.solarField
+        + electricity.gasTurbine
         + electricalParasitics.powerBlock
         + electricalParasitics.shared
 
-      electricalEnergy.parasitics *=
+      electricity.parasitics *=
         Simulation.adjustmentFactor.electricalParasitics
     }
 
@@ -206,7 +204,7 @@ public struct Plant {
       estimateElectricalEnergyDemand()
 
       let load =
-        (electricalEnergy.demand + Design.layout.gasTurbine)
+        (electricity.demand + Design.layout.gasTurbine)
         / SteamTurbine.parameter.power.max
 
       steamTurbine.load = Ratio(load)
@@ -323,7 +321,7 @@ public struct Plant {
          """)*/
       }
 
-      electricalEnergy.steamTurbineGross = steamTurbine(
+      electricity.steamTurbineGross = steamTurbine(
         heater: heater, modeBoiler: boiler.operationMode,
         modeGasTurbine: gasTurbine.operationMode,
         heatExchanger: heatExchanger,
@@ -333,37 +331,37 @@ public struct Plant {
       if OperationRestriction.fuelStrategy.isPredefined {
         let steamTurbine = SteamTurbine.parameter.power.max
         if fuelConsumption.combined > 0
-          && electricalEnergy.steamTurbineGross
+          && electricity.steamTurbineGross
             > steamTurbine + 1
         {
-          electricalEnergy.steamTurbineGross = steamTurbine + 1
+          electricity.steamTurbineGross = steamTurbine + 1
         }
         if fuelConsumption.combined > 0, heat.solar.watt > 0,
-          electricalEnergy.steamTurbineGross > steamTurbine - 1
+          electricity.steamTurbineGross > steamTurbine - 1
         {
-          electricalEnergy.steamTurbineGross = steamTurbine - 1
+          electricity.steamTurbineGross = steamTurbine - 1
         }
       }
 
       if Design.hasStorage {
         if case .always = Storage.parameter.strategy {
         }  // new restriction of production
-        else if electricalEnergy.steamTurbineGross > electricalEnergy.demand {
+        else if electricity.steamTurbineGross > electricity.demand {
           heat.dumping.megaWatt =
-            electricalEnergy.steamTurbineGross
-            - electricalEnergy.demand
-          electricalEnergy.steamTurbineGross = electricalEnergy.demand
+            electricity.steamTurbineGross
+            - electricity.demand
+          electricity.steamTurbineGross = electricity.demand
         }
       } else { /* if Heater.parameter.operationMode */
         // following uncomment for Shams-1.
-        if electricalEnergy.steamTurbineGross > electricalEnergy.demand {
+        if electricity.steamTurbineGross > electricity.demand {
           let electricEnergyFactor =
-            electricalEnergy.demand
-            / electricalEnergy.steamTurbineGross
+            electricity.demand
+            / electricity.steamTurbineGross
 
           heat.dumping.megaWatt =
-            electricalEnergy.steamTurbineGross
-            - electricalEnergy.demand * electricEnergyFactor
+            electricity.steamTurbineGross
+            - electricity.demand * electricEnergyFactor
 
           // reduction necessary for every project without storage
           heat.solar.watt *= electricEnergyFactor
@@ -382,7 +380,7 @@ public struct Plant {
           fuelConsumption.boiler = energy.fuel
           electricalParasitics.boiler = energy.electric
 
-          electricalEnergy.steamTurbineGross = steamTurbine(
+          electricity.steamTurbineGross = steamTurbine(
             heater: heater, modeBoiler: boiler.operationMode,
             modeGasTurbine: gasTurbine.operationMode,
             heatExchanger: heatExchanger,
@@ -391,8 +389,8 @@ public struct Plant {
         }
       }
 
-      electricalEnergy.gross = electricalEnergy.steamTurbineGross
-      electricalEnergy.gross += electricalEnergy.gasTurbineGross
+      electricity.gross = electricity.steamTurbineGross
+      electricity.gross += electricity.gasTurbineGross
 
       let (powerBlock, shared) = powerBlockElectricalParasitics(efficiency)
       electricalParasitics.powerBlock = powerBlock
@@ -411,8 +409,8 @@ public struct Plant {
         }
       }
 
-      deviation = abs(parasiticsAssumed - electricalEnergy.parasitics)
-      parasiticsAssumed = electricalEnergy.parasitics
+      deviation = abs(parasiticsAssumed - electricity.parasitics)
+      parasiticsAssumed = electricity.parasitics
 
     } while deviation > Simulation.parameter.electricalTolerance * factor
     assert(step < 11, "Too many iterations")
@@ -435,7 +433,7 @@ public struct Plant {
 
       heater.massFlow(from: powerBlock)
 
-      heater.operationMode = .freezeProtection(.zero)
+      heater.operationMode = .freezeProtection(Ratio(1))
 
       let energy = heater(
         temperatureOutlet: solarField.temperature.outlet,
@@ -530,7 +528,7 @@ public struct Plant {
       }
 
       if Design.hasGasTurbine {
-        electricalEnergy.gasTurbineGross = GasTurbine.update(
+        electricity.gasTurbineGross = GasTurbine.update(
           //        storage: &storage,
           //        powerBlock: &powerBlock,
           boiler: boiler.operationMode,
@@ -621,7 +619,6 @@ public struct Plant {
     Storage.demandStrategy(
       storage: &storage,
       powerBlock: &powerBlock,
-      solarField: solarField,
       heat: heat
     )
 
@@ -643,7 +640,7 @@ public struct Plant {
 
     heat.storage.megaWatt = storage.calculate(thermal)
 
-    if storage.heat > 0 {  // Energy surplus
+    if storage.heat > 0 {  // Performance surplus
       if storage.charge.ratio < Storage.parameter.chargeTo,
         solarField.massFlow >= powerBlock.massFlow
       {  // 1.1
@@ -653,7 +650,7 @@ public struct Plant {
         heat.production = heat.solar
         heat.production.megaWatt -= storage.heat
       }
-    } else {  // Energy deficit
+    } else {  // Performance deficit
       heat.production = heat.solar
       heat.production += heat.storage
     }
@@ -812,7 +809,7 @@ public struct Plant {
     } else if case .integrated = gasTurbine.operationMode {
       // Plant does not update in Pure CC Mode
       let energy =
-        electricalEnergy.gasTurbineGross
+        electricity.gasTurbineGross
         * (1
           / GasTurbine.efficiency(at: gasTurbine.load) - 1)
         * WasteHeatRecovery.parameter.efficiencyNominal

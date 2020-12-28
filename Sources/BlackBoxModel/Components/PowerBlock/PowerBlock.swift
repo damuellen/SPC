@@ -10,7 +10,7 @@
 
 import Meteo
 
-public struct PowerBlock: Component, HeatCycle {
+public struct PowerBlock: Parameterizable, HeatCycle {
   /// Contains all data needed to simulate the operation of the power block    
   var cycle: HeatTransfer = .init(name: PowerBlock.parameter.name)
   
@@ -42,7 +42,7 @@ public struct PowerBlock: Component, HeatCycle {
       // parasitics during start-up sequence
       // Strange effect of this function over gross output!!
       // "strange effect" is due to interation "Abs(electricalParasiticsAssumed
-      // - electricEnergy.parasitics) < Simulation.parameter.electricalTolerance"
+      // - electricPerformance.parasitics) < Simulation.parameter.electricalTolerance"
       electricalParasitics = parameter.startUpElectricalParasitics
     }
     

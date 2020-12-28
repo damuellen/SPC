@@ -10,7 +10,7 @@
 
 import Foundation
 
-public class PerformanceDataPlot {
+public class TimeSeriesPlot {
 
   public enum Style: String {
     case lines, impulses
@@ -45,11 +45,11 @@ public class PerformanceDataPlot {
     self.freq = Simulation.time.steps.interval
     self.xr = (range.start.timeIntervalSince1970, range.end.timeIntervalSince1970)
     self.style = style
-
-    if range.duration > 86400 * 7 {
-      self.x = (86400, "'%d.%d'", "Month")
-    } else if range.duration > 86400 {
-      self.x = (86400, "'%a'", "Week")
+    let secondsPerDay: Double = 86400
+    if range.duration > secondsPerDay * 7 {
+      self.x = (secondsPerDay, "'%d.%d'", "Month")
+    } else if range.duration > secondsPerDay {
+      self.x = (secondsPerDay, "'%a'", "Week")
     } else {
       self.x = (1800, "'%R'", "Day")
     }

@@ -11,7 +11,7 @@
 import DateGenerator
 
 /// Contains all data needed to simulate the operation of the heater
-public struct Heater: Component, HeatCycle {  
+public struct Heater: Parameterizable, HeatCycle {  
 
   var operationMode: OperationMode
 
@@ -65,9 +65,9 @@ public struct Heater: Component, HeatCycle {
     modeStorage: Storage.OperationMode,
     demand: Double,
     fuelAvailable: Double,
-    heat: ThermalEnergy
+    heat: ThermalPower
   )
-    -> EnergyTransfer<Heater>
+    -> PerformanceData<Heater>
   {
     let htf = SolarField.parameter.HTF
     let parameter = Heater.parameter
@@ -100,7 +100,7 @@ public struct Heater: Component, HeatCycle {
           operationMode = .noOperation
           massFlow = 0.0
           thermalPower = 0
-          let energy = EnergyTransfer<Heater>(
+          let energy = PerformanceData<Heater>(
             heat: thermalPower, electric: parasitics, fuel: fuel
           )
           return energy
@@ -135,7 +135,7 @@ public struct Heater: Component, HeatCycle {
     } else if case .freezeProtection = operationMode {
       thermalPower =
         massFlow.rate * htf.deltaHeat(
-          parameter.antiFreezeTemperature, temperature.inlet
+           temperature.inlet, parameter.antiFreezeTemperature
         ) / 1_000
 
       if thermalPower > Design.layout.heater {
@@ -151,7 +151,7 @@ public struct Heater: Component, HeatCycle {
       }
       thermalPower /= parameter.efficiency.ratio
 
-      load.ratio = heat.heater.megaWatt / Design.layout.heater
+      load.ratio = thermalPower / Design.layout.heater
       operationMode = .freezeProtection(load)
       // No operation requested or QProd > QNeed
     } else if case .noOperation = operationMode { /* || heat >= 0 */
@@ -210,7 +210,7 @@ public struct Heater: Component, HeatCycle {
       }
     }
     parasitics = Heater.parasitics(estimateFrom: load)
-    let energy = EnergyTransfer<Heater>(
+    let energy = PerformanceData<Heater>(
       heat: thermalPower, electric: parasitics, fuel: fuel
     )
     return energy

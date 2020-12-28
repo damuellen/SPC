@@ -28,7 +28,7 @@ extension SolarField {
    - “freeze protection” HTF flow and minimal HTF flow
    - parasitic power as a function of HTF flow
    */
-  public struct Parameter: ComponentParameter {
+  public struct Parameter {
     let HLDump = true
     let layout = SolarField.Layout.H
     let EtaWind = false

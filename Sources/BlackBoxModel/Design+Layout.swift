@@ -14,7 +14,7 @@ public enum Design {
   public static var layout: Layout = Layout()
 
   static let hasSolarField = layout.solarField > 0
-  static let hasHeater = layout.heater < 0
+  static let hasHeater = layout.heater > 0
   static let hasHeatExchanger = layout.heatExchanger > 0
   static let hasBoiler = layout.boiler > 0
   static let hasGasTurbine = layout.gasTurbine > 0
@@ -72,7 +72,7 @@ extension Layout: TextConfigInitializable {
       case 10: self.storage_cap = value
       case 11: self.storage_ton = value
       case 12: break // Through
-      default: throw TextConfigFile.ReadError.unexpectedValueCount
+      default: throw TextConfigFile.ReadError.unexpectedEndOfFile(count,"")
       }
     }
   }

@@ -8,17 +8,17 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
-public struct PerformanceData: CustomStringConvertible, MeasurementsConvertible {
+public struct Status: CustomStringConvertible, MeasurementsConvertible {
 
-  public var collector = Collector.initialState,
-    solarField = SolarField.initialState,
-    heatExchanger = HeatExchanger.initialState,
-    powerBlock = PowerBlock.initialState,
-    steamTurbine = SteamTurbine.initialState,
-    heater = Heater.initialState,
-    boiler = Boiler.initialState,
-    gasTurbine = GasTurbine.initialState,
-    storage = Storage.initialState
+  var collector = Collector.initialState
+  var solarField = SolarField.initialState
+  var heatExchanger = HeatExchanger.initialState
+  var powerBlock = PowerBlock.initialState
+  var steamTurbine = SteamTurbine.initialState
+  var heater = Heater.initialState
+  var boiler = Boiler.initialState
+  var gasTurbine = GasTurbine.initialState
+  var storage = Storage.initialState
 
   public var description: String {
     return "\nCollector:\n\(collector)\n\n"

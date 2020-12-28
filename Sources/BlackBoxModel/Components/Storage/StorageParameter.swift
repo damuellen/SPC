@@ -11,15 +11,15 @@
 import Config
 
 extension Storage {
-  public enum Definition: String, Encodable {
+  public enum Definition: String, Codable {
     case hours = "hrs", cap, ton
   }
 
-  public enum TypeDir: String {
+  public enum TypeDir: String, Codable {
     case indirect, direct
   }
   
-  public struct Parameter: ComponentParameter {
+  public struct Parameter {
     let name: String
     let chargeTo, dischargeToTurbine, dischargeToHeater,
       stepSizeIteration, heatStoredrel: Double
@@ -32,7 +32,7 @@ extension Storage {
     let startTemperature: (cold: Temperature, hot: Temperature) // TurbTL(0) TurbTL(1)
     let startLoad: (cold: Double, hot: Double) // TurbTL(2) TurbTL(3)
 
-    public enum Strategy: String {
+    public enum Strategy: String, Codable {
       case always, demand, shifter
 
       init?(string: String) {
@@ -229,4 +229,15 @@ extension Storage.Parameter: TextConfigInitializable {
     heatExchangerEfficiency = 0
     heatProductionLoad = 0
   }  
+}
+
+extension Storage.Parameter: Codable {
+
+  public init(from decoder: Decoder) throws {
+    fatalError()
+  }
+
+  public func encode(to encoder: Encoder) throws {
+   fatalError()
+  }
 }

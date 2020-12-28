@@ -36,15 +36,11 @@ public enum JSONConfig {
     case TB = "Steam_Turbine"
     case PB = "PowerBlock"
     case PFC = "Predefined_Fuel_Consumption"
-  }
 
-  static func matchName(url: URL) -> Bool {
-    if url.lastPathComponent.hasSuffix(".json"),
-      let _ = Name(rawValue: url.deletingPathExtension().lastPathComponent)
-    {
-      return true
-    } else {
-      return false
+    static func match(url: URL) -> Bool {
+      guard url.lastPathComponent.hasSuffix(".json") else { return false }
+      let file = url.deletingPathExtension().lastPathComponent
+      return Name.allCases.reduce(false) { $0 || file.contains($1.rawValue) }   
     }
   }
 
@@ -56,7 +52,7 @@ public enum JSONConfig {
       let files = try FileManager.default.subpathsOfDirectory(atPath: path)
       let urls = files.map { file in pathUrl.appendingPathComponent(file) }
 
-      return urls.filter(matchName)
+      return urls.filter(Name.match)
     } catch let error {
       print("\(error)")
       return []

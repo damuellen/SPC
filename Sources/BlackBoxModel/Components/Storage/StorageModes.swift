@@ -13,7 +13,7 @@ extension Storage {
     steamTurbine: inout SteamTurbine,
     powerBlock: inout PowerBlock,
     nightHour: Double = 12.0,
-    heat: inout ThermalEnergy)
+    heat: inout ThermalPower)
     -> (Double, Double)
   {      
     func outletTemperature(_ status: Storage) -> Temperature {
@@ -143,14 +143,14 @@ extension Storage {
   private static func storageCharging(
     storage: inout Storage,
     solarField: inout SolarField,
-    powerBlock: HeatCycle, heat: inout ThermalEnergy)
+    powerBlock: HeatCycle, heat: inout ThermalPower)
     -> Double
   {
     let heatExchanger = HeatExchanger.parameter
     
     storage.inletTemperature(outlet: solarField)
     // FIXME: Check again
-    storage.massFlow = solarField.massFlowDemand - powerBlock.massFlow
+    storage.massFlow = Plant.requiredMassFlow() - powerBlock.massFlow
     storage.massFlow.adjust(factor: parameter.heatExchangerEfficiency)
     
     var fittedTemperature: Double

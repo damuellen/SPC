@@ -10,7 +10,7 @@
 
 import DateGenerator
 /// Contains all data needed to simulate the operation of the storage
-public struct Storage: Component, HeatCycle {
+public struct Storage: Parameterizable, HeatCycle {
   
   var operationMode: OperationMode
 
@@ -74,8 +74,8 @@ public struct Storage: Component, HeatCycle {
     powerBlock: inout PowerBlock,
     heater: inout Heater,
     fuelAvailable: Double,
-    heat: inout ThermalEnergy)
-    -> EnergyTransfer<Storage>
+    heat: inout ThermalPower)
+    -> PerformanceData<Storage>
   {    
     // **************************  Energy surplus  *****************************
     if storage.heat > 0 {
@@ -97,7 +97,7 @@ public struct Storage: Component, HeatCycle {
         heat: &heat
       )
       powerBlock.inletTemperature(outlet: solarField)
-      return EnergyTransfer(heat: supply, electric: parasitics, fuel: 0)
+      return PerformanceData(heat: supply, electric: parasitics, fuel: 0)
     }
     
     // **************************  Energy deficit  *****************************
@@ -160,7 +160,7 @@ public struct Storage: Component, HeatCycle {
       } else {
         powerBlock.massFlow = .init() // set to zero
       }
-      return EnergyTransfer(heat: supply, electric: parasitics, fuel: 0)
+      return PerformanceData(heat: supply, electric: parasitics, fuel: 0)
     }
 
     // heat can only be provided with heater on
@@ -217,15 +217,15 @@ public struct Storage: Component, HeatCycle {
       //#warning("Storage.parasitics")
     // FIXME  plant.electricalParasitics.solarField = SolarField.parameter.antiFreezeParastics
       
-      return EnergyTransfer(heat: supply, electric: parasitics, fuel: fuel)
+      return PerformanceData(heat: supply, electric: parasitics, fuel: fuel)
     }
-    return EnergyTransfer(heat: 0, electric: 0, fuel: 0)
+    return PerformanceData(heat: 0, electric: 0, fuel: 0)
   }
   
   static func demandStrategy(
     storage: inout Storage,
     powerBlock: inout PowerBlock,
-    solarField: SolarField, heat: ThermalEnergy)
+    heat: ThermalPower)
   {
    // var demand = DateTime.current.isDaytime ? 0.5 : heat.demand.megaWatt
     var demand = heat.demand.megaWatt
@@ -234,16 +234,16 @@ public struct Storage: Component, HeatCycle {
     switch parameter.strategy {
     case .always: strategyAlways(
       storage: &storage, powerBlock: &powerBlock,
-      solarFieldMassFlow: solarField.massFlowDemand,
+      massFlow: Plant.requiredMassFlow(),
       production: production, demand: &demand)
     case .demand : strategyDemand(
       storage: &storage, powerBlock: &powerBlock,
-      massFlowSolarField: solarField.massFlowDemand,
+      massFlow: Plant.requiredMassFlow(),
       production: production)
     // parameter.strategy = "Ful" // Booster or Shifter
     case .shifter: strategyShifter(
       storage: &storage, powerBlock: &powerBlock,
-      massFlowSolarField: solarField.massFlowDemand,
+      massFlow: Plant.requiredMassFlow(),
       production: production, demand: &demand)
     }
   }
@@ -251,7 +251,7 @@ public struct Storage: Component, HeatCycle {
   private static func strategyAlways(
     storage: inout Storage,
     powerBlock: inout PowerBlock,
-    solarFieldMassFlow: MassFlow,
+    massFlow: MassFlow,
     production: Double,
     demand: inout Double)
   {
@@ -267,7 +267,7 @@ public struct Storage: Component, HeatCycle {
     
     if powerBlock.massFlow.rate < 0 { // to avoid negative massflows
       storage.heat = 0
-      powerBlock.massFlow = solarFieldMassFlow
+      powerBlock.massFlow = massFlow
       return
     }
 
@@ -291,7 +291,7 @@ public struct Storage: Component, HeatCycle {
   private static func strategyDemand(
     storage: inout Storage,
     powerBlock: inout PowerBlock,
-    massFlowSolarField: MassFlow,
+    massFlow: MassFlow,
     production: Double)
   {
     let solarField = SolarField.parameter
@@ -302,11 +302,11 @@ public struct Storage: Component, HeatCycle {
       heatExchanger.temperature.htf.inlet.max,
       heatExchanger.temperature.htf.outlet.max) / 1_000
 
-    powerBlock.setMassFlow(rate: heatExchanger.sccHTFheat / heatTransfer)
-    
+    //powerBlock.setMassFlow(rate: )
+    powerBlock.designMassFlow.rate = heatExchanger.sccHTFheat / heatTransfer
     if powerBlock.massFlow < 0.0 { // to avoid negative massflows
       storage.heat = 0
-      powerBlock.massFlow = massFlowSolarField
+      powerBlock.massFlow = massFlow
       return
     }
     
@@ -330,7 +330,7 @@ public struct Storage: Component, HeatCycle {
   private static func strategyShifter(
     storage: inout Storage,
     powerBlock: inout PowerBlock,
-    massFlowSolarField: MassFlow,
+    massFlow: MassFlow,
     production: Double,
     demand: inout Double)
   {
@@ -401,7 +401,7 @@ public struct Storage: Component, HeatCycle {
         }
       } else if production > demand,
         storage.charge.ratio < parameter.chargeTo,
-        massFlowSolarField >= powerBlock.massFlow
+        massFlow >= powerBlock.massFlow
       {
         // more Qsol than needed by POB and TES is not full
         let powerBlockDemand = storage.heatProductionLoad.ratio * demand

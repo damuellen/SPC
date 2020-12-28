@@ -15,12 +15,12 @@ public struct MassFlow: CustomStringConvertible, Equatable {
   
   var rate: Double
 
-  var isNearZero: Bool { return self < 1.0 }
+  var isNearZero: Bool { self < 1.0 }
   
   static var zero: MassFlow = MassFlow()
   
   public var description: String {
-    return String(format: "%.2f", rate)
+    String(format: "%.2f", rate)
   }
 
   public init() {
@@ -87,15 +87,15 @@ public struct MassFlow: CustomStringConvertible, Equatable {
   }
 
   static func + (lhs: MassFlow, rhs: MassFlow) -> MassFlow {
-    return MassFlow(lhs.rate + rhs.rate)
+    MassFlow(lhs.rate + rhs.rate)
   }
 
   static func - (lhs: MassFlow, rhs: MassFlow) -> MassFlow {
-    return MassFlow(lhs.rate - rhs.rate)
+    MassFlow(lhs.rate - rhs.rate)
   }
   
   static prefix func - (rhs: MassFlow) -> MassFlow {
-    return MassFlow(-rhs.rate)
+    MassFlow(-rhs.rate)
   }
 }
 

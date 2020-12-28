@@ -13,7 +13,7 @@ public struct Power: Codable {
   public var watt: Double
 
   public var megaWatt: Double {
-    get { return watt / 1_000_000 }
+    get { watt / 1_000_000 }
     set {
       assert(newValue.isFinite)
       watt = newValue * 1_000_000
@@ -21,7 +21,7 @@ public struct Power: Codable {
   }
 
   public var kiloWatt: Double {
-    get { return watt / 1_000 }
+    get { watt / 1_000 }
     set {
       assert(newValue.isFinite)
       watt = newValue * 1_000
@@ -38,7 +38,7 @@ public struct Power: Codable {
   }
 
   static func + (lhs: Power, rhs: Power) -> Power {
-    return Power(lhs.watt + rhs.watt)
+    Power(lhs.watt + rhs.watt)
   }
 
   static func += (lhs: inout Power, rhs: Power) {
@@ -46,11 +46,11 @@ public struct Power: Codable {
   }
 
   static func - (lhs: Power, rhs: Power) -> Power {
-    return Power(lhs.watt - rhs.watt)
+    Power(lhs.watt - rhs.watt)
   }
 
   static func * (lhs: Power, rhs: Double) -> Power {
-    return Power(lhs.watt * rhs)
+    Power(lhs.watt * rhs)
   }
 }
 
