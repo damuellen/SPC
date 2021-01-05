@@ -40,6 +40,10 @@ jobs:
         shell: cmd
         run: .github/install-sqlite.bat
 
+      - name: Install Zlib
+        shell: cmd
+        run: .github/install-zlib.bat
+
       - name: Update package dependencies
         run: swift package update
 
