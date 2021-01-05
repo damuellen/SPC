@@ -12,4 +12,4 @@ REM Prepared for GitHub Actions ( @see https://github.com/actions/virtual-enviro
 call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
 
 echo [ Creating Zlib.lib ]
-lib /machine:x64 /def:zlib.def /out:Zlib.lib
+lib /machine:x64 /def:lib\zlib.def /out:x64\Zlib.lib
