@@ -12,14 +12,13 @@ import DateGenerator
 import Libc
 import Meteo
 import SolarPosition
-
+/// Contains all data needed to simulate the operation of the collector
 public struct Collector: Parameterizable, CustomStringConvertible {
   
   public enum OperationMode {
     case variable, freezeProtection, noOperation, operating, fixed
   }
-
-  /// Contains all data needed to simulate the operation of the collector
+  
   public var parabolicElevation, theta, cosTheta, efficiency: Double
   public var insolationAbsorber: Double
 

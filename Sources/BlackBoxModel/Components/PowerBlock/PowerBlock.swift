@@ -9,9 +9,9 @@
 //
 
 import Meteo
-
+/// Contains all data needed to simulate the operation of the power block
 public struct PowerBlock: Parameterizable, HeatCycle {
-  /// Contains all data needed to simulate the operation of the power block    
+
   var cycle: HeatTransfer = .init(name: PowerBlock.parameter.name)
   
   var designMassFlow: MassFlow = .zero

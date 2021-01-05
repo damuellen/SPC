@@ -6,20 +6,11 @@
 //  Copyright © 2015 Daniel Muellenborn. All rights reserved.
 //
 
-protocol Piping: class, MeasurementsConvertible {
+protocol Piping: class, TableConvertible {
   var name: String { get }
   var branches: [Branch] { get }
   var tail: (cold: Branch, hot: Branch)! { get }
   var streamVelocity: Double { get }
-  var volume: Double { get }
-  var volumeCold: Double { get }
-  var volumeHot: Double { get }
-  var length: Double { get }
-  var heatLoss: Double { get }
-  var headLoss: Double { get }
-  var pressureDrop: Double { get }
-  var totalHeadLoss: Double { get }
-  var totalPressureDrop: Double { get }
 }
 
 extension Piping {

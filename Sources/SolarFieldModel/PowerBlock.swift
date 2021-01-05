@@ -8,7 +8,7 @@
 
 public class PowerBlock: Piping {
 
-  public var name: String = "PowerBlock Header"
+  public var name: String = "PowerBlock"
 
   public var distance: Double = 50.0
   public var numberOfPumps: Int = 3

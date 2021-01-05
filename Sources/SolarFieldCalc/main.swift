@@ -1,6 +1,7 @@
 import ArgumentParser
 import SolarFieldModel
 import Foundation
+import xlsxwriter
 
 #if os(Windows)
 system("chcp 65001")
@@ -30,7 +31,6 @@ struct SolarFieldCalculator: ParsableCommand {
   var output: String? // "SolarFieldModel.json"
 
   func run() throws {
-
     if let loops = loops {
       SolarField.createLayout(loops: loops)
     }
@@ -43,23 +43,30 @@ struct SolarFieldCalculator: ParsableCommand {
       try SolarFieldModel.readFromFile(url: URL(fileURLWithPath: input))?.apply()
     }
 
-    let table1 = TextTable.overview()
-    let table2 = TextTable.bom()
-    let table3 = SolarField.branchTable
+    let wb = Workbook(name: "Solarfield.xlsx")
+    wb.addTables()
+    wb.close()
 
-    let url1 = URL(fileURLWithPath: "Report.txt")
-    let url2 = URL(fileURLWithPath: "BOM.txt")
-    let url3 = URL(fileURLWithPath: "Branches.csv")
-
-    try table1.write(to: url1, atomically: false, encoding: .utf8)
-    try table2.write(to: url2, atomically: false, encoding: .utf8)
-    try table3.write(to: url3, atomically: false, encoding: .utf8)
-
+    openFile(atPath: "Solarfield.xlsx")
     print(TextTable.overview(style: Style.fancy))
-
-    table3.clipboard()
+    
     if let output = output {
+      String(
+        data: try JSONEncoder().encode(SolarFieldModel()),
+        encoding: .utf8)?
+        .clipboard()
       try SolarFieldModel().writeToFile(url: URL(fileURLWithPath: output))
     }
   }
+}
+
+func openFile(atPath: String) {
+#if os(Windows)
+  system(atPath)
+#elseif os(macOS)
+  let process = Process()
+  process.executableURL = URL(fileURLWithPath: "/usr/bin/open")
+  process.arguments = ["/Users/daniel/test.xlsx"]
+  try? process.run()
+#endif
 }

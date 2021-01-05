@@ -38,25 +38,25 @@ extension TextTable {
     numberFormatter.numberStyle = .decimal
     numberFormatter.formatWidth = 8
 
-    let makeTable: ([(String, String)]) -> String = {
-      let columns: [Column] = $0.map { (key, measurement) in
-        return Column(title: key, value: measurement)
+    let makeTable: (KeyValuePairs<String, Double>) -> String = {
+      let columns: [Column] = $0.map { (key, value) in
+        return Column(title: key, value: String(format:"%.1f ", value))
       }
       return TextTable([columns]).string(style: style)
     }
 
-    output += "SolarField\n"  + makeTable(SolarField.shared.measurements.sorted) + "\n"
-    output += "Loop\n"        + makeTable(SolarField.shared.loop.measurements.sorted) + "\n"
-    output += "PowerBlock\n"  + makeTable(SolarField.shared.powerBlock.measurements.sorted) + "\n"
-    output += "Expansion\n"   + makeTable(SolarField.shared.expansionVolume.measurements.sorted) + "\n"
+    output += "SolarField\n"  + makeTable(SolarField.shared.table) + "\n"
+    output += "Loop\n"        + makeTable(SolarField.shared.loop.table) + "\n"
+    output += "PowerBlock\n"  + makeTable(SolarField.shared.powerBlock.table) + "\n"
+    output += "Expansion\n"   + makeTable(SolarField.shared.expansionVolume.table) + "\n"
 
-    let makeOverviewTable: ([MeasurementsConvertible]) -> String = { systems in
+    let makeOverviewTable: ([TableConvertible]) -> String = { systems in
       var measurements: [[Column]] = []
       for system in systems {
 
         var columns = [Column(title: "Name", value: system.name + " ")]
-        columns += system.measurements.sorted.map { (key, measurement) in
-          return Column(title: key, value: measurement.description, align: .right)
+        columns += system.table.map { (key, value) in
+          return Column(title: key, value: String(format:"%.1f ", value), align: .right)
         }
         measurements.append(columns)
       }
@@ -73,7 +73,7 @@ extension TextTable {
     var output = ""
     var billOfMaterials: [[Column]] = []
 
-    BillOfMaterials.tubesWeightAndLength.sorted.forEach { (key, value) in
+    BillOfMaterials.tubeLengthAndWeight.forEach { (key, value) in
       billOfMaterials.append([Column(title: "Description", value: key, width: 55),
                   Column(title: "Weight", value: String(format:"%.2f ", value.0), width: 9, align: .right),
                   Column(title: "Quantity", value: String(format:"%.1f ", value.1), width: 9, align: .right)])
@@ -82,7 +82,7 @@ extension TextTable {
     let tablePipeBOM = TextTable(billOfMaterials).string(style: style)
     billOfMaterials.removeAll()
 
-    BillOfMaterials.fittingsWeightAndQuantity.sorted.forEach { (key, value) in
+    BillOfMaterials.fittingsQuantityAndWeight.forEach { (key, value) in
       billOfMaterials.append([Column(title: "Description", value: key, width: 55),
                   Column(title: "Weight", value: String(format:"%.2f ", value.0), width: 9, align: .right),
                   Column(title: "Quantity", value: String(Int(value.1)), width: 9, align: .right)])

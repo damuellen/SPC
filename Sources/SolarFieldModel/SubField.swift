@@ -66,8 +66,10 @@ public final class SubField: Piping {
     self.loopExemplar = CollectorLoop(subField: self)
   }
 
+  static var numberPool: [Int] = Array(1...100).shuffled()
+  
   public init(loops: Int) {
-    self.name = "SubField " + numberPool.removeLast().description
+    self.name = "SubField " + SubField.numberPool.removeLast().description
     self.lhsLoops = (loops / 2) + (loops % 2)
     self.rhsLoops = loops / 2
     self.loopExemplar = CollectorLoop(subField: self)

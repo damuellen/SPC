@@ -10,9 +10,8 @@
 
 import Foundation
 import DateGenerator
-
-public struct Boiler: Parameterizable {
-  /// Contains all data needed to simulate the operation of the boiler
+/// Contains all data needed to simulate the operation of the boiler
+public struct Boiler: Parameterizable {  
 
   var operationMode: OperationMode
 

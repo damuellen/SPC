@@ -9,7 +9,6 @@
 //
 
 import Meteo
-
 /// Contains all data needed to simulate the operation of the solar field
 public struct SolarField: Parameterizable, HeatCycle {
 

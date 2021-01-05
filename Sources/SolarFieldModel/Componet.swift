@@ -25,17 +25,17 @@ struct Component {
     switch valve {
     case .globe:
       self.type = .valve
-      self.name = "GLOBE VALVE ANSI B16.34 \(size)\""
+      self.name = "GLOBE VALVE ANSI B16.34"
       self.lossCoefficient = 4
       self.nps = size
     case .control:
       self.type = .valve
-      self.name = "CONTROL VALVE ANSI B16.34 \(size)\""
+      self.name = "CONTROL VALVE ANSI B16.34"
       self.lossCoefficient = 5
       self.nps = size
     case .butterfly:
       self.type = .valve
-      self.name = "BUTTERFLY VALVE ANSI B16.34 \(size)\""
+      self.name = "BUTTERFLY VALVE ANSI B16.34"
       self.lossCoefficient = 0.2
       self.nps = size
     }
@@ -55,12 +55,12 @@ struct Component {
       self.nps = size[0]
     case .valve:
       self.type = type
-      self.name = "UNKNOWN VALVE TYPE \(size[0])\""
+      self.name = "UNKNOWN VALVE TYPE"
       self.lossCoefficient = 0.0
       self.nps = size[0]
     case .hx:
       self.type = type
-      self.name = "HEATEXCHANGER \(size[0])\""
+      self.name = "HEATEXCHANGER"
       self.lossCoefficient = 30.0
       self.nps = size[0]
     }

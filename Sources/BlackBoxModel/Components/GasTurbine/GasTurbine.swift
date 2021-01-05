@@ -9,9 +9,9 @@
 //
 
 import DateGenerator
-
+/// Contains all data needed to simulate the operation of the gas turbine
 public struct GasTurbine: Parameterizable {
-  /// Contains all data needed to simulate the operation of the gas turbine
+
   var operationMode: OperationMode
 
   var isMaintained: Bool

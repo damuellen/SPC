@@ -9,7 +9,6 @@
 //
 
 import DateGenerator
-
 /// Contains all data needed to simulate the operation of the heater
 public struct Heater: Parameterizable, HeatCycle {  
 

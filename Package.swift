@@ -20,6 +20,7 @@ let package = Package(
     .package(url: "https://github.com/apple/swift-argument-parser.git",
              .revision("53555a04503c175eaffcf587e4b8c380a7c41a5c")),
     .package(url: "https://github.com/damuellen/SQLite.swift.git", .branch("master")),
+    .package(url: "https://github.com/damuellen/xlsxwriter.swift.git", .branch("main")),
 //  .package(url: "https://github.com/jpsim/Yams.git", from: "4.0.1")
     ],
   targets: [
@@ -59,7 +60,9 @@ let package = Package(
       name: "BlackBoxModel",
       dependencies: [
         "Config", "Meteo", "SolarPosition", "CIAPWSIF97", "Utility",
-        .product(name: "SQLite", package: "SQLite.swift")],
+        .product(name: "SQLite", package: "SQLite.swift"),
+        .product(name: "xlsxwriter", package: "xlsxwriter.swift")
+      ],
       swiftSettings: swiftSettings),
      .target(
       name: "SolarFieldModel",
@@ -69,7 +72,8 @@ let package = Package(
       name: "SolarFieldCalc",
       dependencies: [
         "SolarFieldModel", "CPikchr",
-        .product(name: "ArgumentParser", package: "swift-argument-parser")],
+        .product(name: "ArgumentParser", package: "swift-argument-parser"),
+        .product(name: "xlsxwriter", package: "xlsxwriter.swift")],
       swiftSettings: swiftSettings),
     .target(
       name: "Meteo",

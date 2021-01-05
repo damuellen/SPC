@@ -120,7 +120,7 @@ public final class SolarField {
       : 0
   }
 
-  static var branches: [Branch] {
+  public static var branches: [Branch] {
     var result = SolarField.shared.powerBlock.branches
     result += SolarField.shared.connectors.flatMap { $0.branches }
     result += SolarField.shared.subfields.flatMap { $0.branches }
@@ -131,12 +131,6 @@ public final class SolarField {
     }
     result += loopsPiping.flatMap { $0 }
     return result
-  }
-
-  public static var branchTable: String {
-    var table = [Branch.tableHeader]
-    table += SolarField.branches.map { $0.commaSeparatedValues }
-    return table.joined(separator: "\n")
   }
 
   public static func massFlow(scale: Double) {

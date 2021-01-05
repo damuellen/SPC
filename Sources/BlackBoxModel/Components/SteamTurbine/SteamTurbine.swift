@@ -10,10 +10,9 @@
 
 import DateGenerator
 import Meteo
-
+/// Contains all data needed to simulate the operation of the steam turbine
 public struct SteamTurbine: Parameterizable {
-  /// Contains all data needed to simulate the operation of the steam turbine
-
+  
   var operationMode: OperationMode
 
   var load: Ratio {

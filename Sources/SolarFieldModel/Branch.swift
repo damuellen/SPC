@@ -126,12 +126,12 @@ public struct Branch {
   var numberOfElbows: Int { components.filter({ $0.type == .elbow }).count }
 
   /// Returns true if branch contains one or more reducers.
-  var hasReducer: Bool {
+  public var hasReducer: Bool {
     !components.lazy.filter({ $0.type == .reducer }).isEmpty
   }
 
   /// Returns true if branch contains one or more valves.
-  var hasValve: Bool {
+  public var hasValve: Bool {
     !components.lazy.filter({ $0.type == .valve }).isEmpty
   }
 
