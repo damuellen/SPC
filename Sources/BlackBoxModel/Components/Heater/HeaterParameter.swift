@@ -50,8 +50,8 @@ extension Heater.Parameter: TextConfigInitializable {
       minLoad: Ratio(ln(25) / 100),
       maximumMassFlow: ln(22),
       nominalElectricalParasitics: ln(28),
-      antiFreezeTemperature: Temperature(ln(16)),
-      nominalTemperatureOut: Temperature(ln(19)),
+      antiFreezeTemperature: Temperature(celsius: ln(16)),
+      nominalTemperatureOut: Temperature(celsius: ln(19)),
       electricalParasitics: [ln(31), ln(34)],
       onlyWithSolarField: true
     )

@@ -23,9 +23,10 @@ extension Workbook {
     let f3 = addFormat().bold().align(horizontal: .right)
     func writeTable(_ table: TableConvertible) {
       let ws = addWorksheet(name: table.name)
-      ws.set_default(row_height: 15)
-      ws.column([0,0], width: 25)
-      ws.column([1,1], width: 10)
+        .set_default(row_height: 15)
+        .hide_columns(2)
+        .column([0,0], width: 25)
+        .column([1,1], width: 10)
       
       table.table.enumerated().forEach { (n, pair) in
         ws.write(.string(pair.key), [n, 0], format: f1)
@@ -41,8 +42,9 @@ extension Workbook {
     /// The values of the individual tables are written next to each other
     func writeOverviewTable(name: String, tables: [TableConvertible]) {
       let ws = addWorksheet(name: name)
-      ws.set_default(row_height: 15)
-      ws.column([0,tables.count], width: 15)
+        .set_default(row_height: 15)
+        .hide_columns(tables.count)
+        .column([0,tables.count], width: 15)
       
       for (t, c) in zip(tables, 1...) {
         if c == 1 { ws.write(.string("Name"), [0, 0], format: f1) }
@@ -72,6 +74,7 @@ extension Workbook {
       .set_default(row_height: 15)
       .column("A:B", width: 25)
       .column("C:F", width: 10)
+      .hide_columns(BillOfMaterials.headings.count)
       .write(BillOfMaterials.headings, row: row, format: captions)
     
     BillOfMaterials.tubeLengthAndWeight.sorted.forEach { (key, value) in
@@ -104,6 +107,7 @@ extension Workbook {
       .column("A:A", width: 27)
       .column("B:C", width: 12)
       .column("D:O", width: 15)
+      .hide_columns(Branch.tableHeader.count + 3)
       .write("Name", [0,0], format: captions)
       .write("Reducer", [0,1], format: captions)
       .write("Valve", [0,2], format: captions)

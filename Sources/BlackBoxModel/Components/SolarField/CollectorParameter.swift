@@ -36,7 +36,7 @@ extension Collector {
     public let aperture, lengthSCA, areaSCAnet, extensionHCE, avgFocus,
       rabsOut, rabsInner, rglas, glassEmission, opticalEfficiency: Double
     public let emissionHCE, shadingHCE: [Double]
-    public let IAMfac: Polynomial
+    public let factorIAM: Polynomial
     public let useIntegralRadialoss: Bool
   }
 /*
@@ -68,7 +68,7 @@ extension Collector.Parameter: CustomStringConvertible {
     + "for incident angle 5 - 14°:" * shadingHCE[2].description
     + "for incident angle >14°:" * shadingHCE[3].description
     + "Incident Angle Modifier;\nIAM(theta) = c0+c1*theta+c2*theta^2+c3*theta^3+c4*theta^4"
-    + "\n\(IAMfac)"
+    + "\n\(factorIAM)"
   }
 }
 
@@ -86,9 +86,9 @@ extension Collector.Parameter: TextConfigInitializable {
     rglas = try ln(31)
     glassEmission = try ln(71)
     opticalEfficiency = try ln(34)
-    emissionHCE = try [ln(37), ln(40)]
+    emissionHCE = try [ln(37), ln(40), 0]
     shadingHCE = try [ln(43), ln(46), ln(49), ln(52)]
-    IAMfac = try [ln(55), ln(58), ln(61), ln(64), ln(67)]
+    factorIAM = try [ln(55), ln(58), ln(61), ln(64), ln(67)]
     absorber = .schott
     useIntegralRadialoss = try ln(73) > 0 ? true : false
   }

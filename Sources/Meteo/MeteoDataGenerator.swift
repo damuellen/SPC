@@ -28,7 +28,7 @@ public class MeteoDataGenerator: Sequence {
   public init(
     _ source: MeteoDataSource,
     frequence: DateGenerator.Interval,
-    method: Method = .linear
+    method: Method = .gradient
   ) {
     precondition(
       frequence.fraction <= source.hourFraction,
@@ -46,30 +46,28 @@ public class MeteoDataGenerator: Sequence {
     let end = self.dateInterval!.end
     let fraction = Int(1 / dataSource.hourFraction)
 
-    let calendar = Calendar(identifier: .gregorian)
-
-    let startHour = calendar.ordinality(of: .hour, in: .year, for: start)!
+    let startHour = calendar.ordinality(of: .hour, in: .year, for: start)
     let startIndex = (startHour - 1) * fraction
 
-    let startMinute = calendar.ordinality(of: .minute, in: .hour, for: start)!
+    let startMinute = calendar.ordinality(of: .minute, in: .hour, for: start)
     firstStep += startMinute / (60 / frequence.rawValue) / fraction
 
-    let endHour = calendar.ordinality(of: .hour, in: .year, for: end)!
+    let endHour = calendar.ordinality(of: .hour, in: .year, for: end)
     let lastIndex = (endHour - 1) * fraction
 
     range = startIndex..<lastIndex
 
-    let endMinute = calendar.ordinality(of: .minute, in: .hour, for: end)!
-    lastStep = endMinute / (60 / frequence.rawValue) / fraction
+    //let endMinute = calendar.ordinality(of: .minute, in: .hour, for: end)
+    //lastStep = endMinute / (60 / frequence.rawValue) / fraction
   }
 
   private var range: Range<Int>
 
   private var firstStep = 1
-  private var lastStep = 0
 
   public func makeIterator() -> AnyIterator<MeteoData> {
     let data = dataSource.data
+    let r = 0...data.endIndex-1
     let method = self.method
     let steps =
       dataSource.hourFraction < 1
@@ -77,41 +75,54 @@ public class MeteoDataGenerator: Sequence {
       : frequence.rawValue
 
     let stride = (1 / Float(steps))
+    let firstStep = 0//-(s / 2)
+    let lastStep = steps * 2
 
-    var step = self.firstStep
-    var index = range.lowerBound
-
-    let lastStep = self.lastStep
-    let lastIndex = range.upperBound
+    var step = firstStep //self.firstStep
+    var cursor = range.startIndex
 
     return AnyIterator<MeteoData> {
       defer { step += 1 }
-      // When step count is reached move index to the next value.
-      if step > steps {
-        step = 1
-        index += 1
-      }
-      // Check whether the end of the range has been reached.
-      if index == lastIndex && step > lastStep { return nil }
-
-      if steps == 1 { return data[index] }
-      // The first values of the year are interpolated with it self,
-      // otherwise always with the previous.
-      let prev = index > 0 ? data[index - 1] : data[0]
-
-      let current = data[index]
-
+      
+      let idx0 = (cursor - 1).clamped(to: r)
+      let idx1 = cursor.clamped(to: r)
+      let idx2 = (cursor + 1).clamped(to: r)
+      
+      if idx2 == r.upperBound, step == lastStep { return nil }
+      
+      let prev = data[idx0]
+      let curr = data[idx1]
+      let next = data[idx2]      
+      
+      var meteo: MeteoData
       switch method {
       case .linear:
-        return MeteoData.lerp(start: prev, end: current, Float(step) * stride)
+      meteo = MeteoData.lerp(start: curr, end: next, Float(step) * stride)
       case .gradient:
-        // The last values of the year are interpolated with it self,
-        // otherwise always with the next.
-        let next = index < data.endIndex - 1 ? data[index + 1] : data[index]
-        return MeteoData.interpolation(
-          prev: prev, current: current, next: next, progess: Float(step) * stride
-        )
+        if idx0 == idx1 {
+          meteo = MeteoData.interpolation(
+            nil, curr, next, step: Float(step + 1), steps: Float(steps)
+          )
+        } else {
+          meteo = MeteoData.interpolation(
+            prev, curr, next, step: Float(step + 1), steps: Float(steps)
+          )
+        }
       }
+      
+      if step > 0, idx2 != r.upperBound,
+         step.isMultiple(of: steps) {
+        step = 0
+        cursor += 1
+      }
+      
+      return meteo
     }
+  }
+}
+
+extension Comparable {
+  func clamped(to limits: ClosedRange<Self>) -> Self {
+    min(max(self, limits.lowerBound), limits.upperBound)
   }
 }

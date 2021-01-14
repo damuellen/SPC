@@ -10,18 +10,18 @@
 
 public struct Status: CustomStringConvertible, MeasurementsConvertible {
 
-  var collector = Collector.initialState
-  var solarField = SolarField.initialState
-  var heatExchanger = HeatExchanger.initialState
-  var powerBlock = PowerBlock.initialState
-  var steamTurbine = SteamTurbine.initialState
-  var heater = Heater.initialState
-  var boiler = Boiler.initialState
-  var gasTurbine = GasTurbine.initialState
-  var storage = Storage.initialState
+  internal(set) public var collector = Collector.initialState
+  internal(set) public var solarField = SolarField.initialState
+  internal(set) public var heatExchanger = HeatExchanger.initialState
+  internal(set) public var powerBlock = PowerBlock.initialState
+  internal(set) public var steamTurbine = SteamTurbine.initialState
+  internal(set) public var heater = Heater.initialState
+  internal(set) public var boiler = Boiler.initialState
+  internal(set) public var gasTurbine = GasTurbine.initialState
+  internal(set) public var storage = Storage.initialState
 
   public var description: String {
-    return "\nCollector:\n\(collector)\n\n"
+    "\nCollector:\n\(collector)\n\n"
       + (Design.hasSolarField ? "Solar Field:\n\(solarField)\n\n" : "")
       + "Heat Exchanger:\n\(heatExchanger)\n\n"
       + (Design.hasPowerBlock ? "Power Block:\n\(powerBlock)\n\n" : "")
@@ -32,8 +32,22 @@ public struct Status: CustomStringConvertible, MeasurementsConvertible {
       + (Design.hasStorage ? "Storage:\n\(storage)\n" : "")
   }
 
+  static var modes: [String] {
+    ["SolarField", "Storage", "Heatexchanger", "Heater"]
+  }
+
+  var modes: [String] {
+    [
+      solarField.operationMode.rawValue,
+      storage.operationMode.rawValue,
+      heatExchanger.operationMode.rawValue,
+      heater.operationMode.rawValue
+    ]
+  }
+
   var numericalForm: [Double] {
-    return storage.cycle.numericalForm + heater.cycle.numericalForm
+    collector.numericalForm + storage.numericalForm
+      + storage.cycle.numericalForm + heater.cycle.numericalForm
       + powerBlock.cycle.numericalForm + heatExchanger.cycle.numericalForm
       + solarField.header.numericalForm
       + solarField.loops[0].numericalForm + solarField.loops[1].numericalForm
@@ -43,7 +57,7 @@ public struct Status: CustomStringConvertible, MeasurementsConvertible {
   static var columns: [(name: String, unit: String)] {
     let values: [(name: String, unit: String)] =
       [("|Massflow", "kg/s"), ("|Tin", "degC"), ("|Tout", "degC")]
-    return [
+    return Collector.columns + Storage.columns + [
       "Storage", "Heater", "PowerBlock", "HeatExchanger", "SolarField",
       "DesignLoop", "NearLoop", "AvgLoop", "FarLoop",
     ].flatMap { name in

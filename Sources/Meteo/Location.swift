@@ -9,30 +9,30 @@
 //
 
 public struct Location {
-  public let longitude: Float
-  public let latitude: Float
-  public let elevation: Float
+  public let longitude: Double
+  public let latitude: Double
+  public let elevation: Double
   public var timezone: Int
 
   public var coordinates: (Double, Double, Double) {
-    return (Double(longitude), Double(latitude), Double(elevation))
+    return (longitude, latitude, elevation)
   }
 
   public static var primeMeridian = Location(
-    longitude: 0, latitude: 0, elevation: 102
+    longitude: 0, latitude: 0, elevation: 102, timezone: 0
   )
   
-  public init(longitude: Float, latitude: Float, elevation: Float) {
+  public init(longitude: Double, latitude: Double, elevation: Double, timezone: Int) {
     self.longitude = longitude
     self.latitude = latitude
     self.elevation = elevation
-    self.timezone = Int(longitude) / 15
+    self.timezone = timezone
   }
 
-  public init(_ coords: (Double, Double, Double)) {
-    self.longitude = Float(coords.0)
-    self.latitude = Float(coords.1)
-    self.elevation = Float(coords.2)
-    self.timezone = Int(coords.0) / 15
+  public init(_ coords: (Double, Double, Double), timezone: Int) {
+    self.longitude = coords.0
+    self.latitude = coords.1
+    self.elevation = coords.2
+    self.timezone = timezone
   } 
 }

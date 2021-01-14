@@ -11,7 +11,7 @@ class BlackBoxModelTests: XCTestCase {
     df.dateFormat = "dd.MM.yyyy"
     Simulation.time.firstDateOfOperation = df.date(from: "29.07.2005")!
     Simulation.time.lastDateOfOperation = df.date(from: "02.08.2005")!
-    var location = Location(longitude: 47.73, latitude: 29, elevation: 0)
+    var location = Location(longitude: 47.73, latitude: 29, elevation: 0, timezone: 2)
     location.timezone = 2
 
     BlackBoxModel.configure(year: 2005)
@@ -29,7 +29,7 @@ class BlackBoxModelTests: XCTestCase {
     df.dateFormat = "dd.MM.yyyy"
     Simulation.time.firstDateOfOperation = df.date(from: "02.07.2005")!
     Simulation.time.lastDateOfOperation = df.date(from: "04.07.2005")!
-    var location = Location(longitude: 47.73, latitude: 29, elevation: 0)
+    var location = Location(longitude: 47.73, latitude: 29, elevation: 0, timezone: 2)
     location.timezone = 2
 
     BlackBoxModel.configure(year: 2005)
@@ -57,7 +57,7 @@ class BlackBoxModelTests: XCTestCase {
     df.dateFormat = "dd.MM.yyyy"
     Simulation.time.firstDateOfOperation = df.date(from: "02.01.2005")!
     Simulation.time.lastDateOfOperation = df.date(from: "04.01.2005")!
-    var location = Location(longitude: 47.73, latitude: 29, elevation: 0)
+    var location = Location(longitude: 47.73, latitude: 29, elevation: 0, timezone: 2)
     location.timezone = 2
     BlackBoxModel.configure(year: 2005)
     BlackBoxModel.configure(location: location)

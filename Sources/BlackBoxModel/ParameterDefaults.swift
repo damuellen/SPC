@@ -108,7 +108,7 @@ public enum ParameterDefaults {
     HTF: .solarSalt, FP: -1, FC: 0, heatdiff: 0.25, dSRise: 1,
     minDischargeLoad: Ratio(0), fixedDischargeLoad: Ratio(0.97),
     heatTracingTime: [1, 1], heatTracingPower: [1, 1],
-    DischrgParFac: 1, definedBy: .cap,
+    dischargeParasitcsFactor: 1, definedBy: .cap,
     //  resultingTemperature: (.init(celsius: 293.0), .init(celsius: 390.0)),
     designTemperature: (566.15, 663.15),
     heatLoss: (79.967, 98.98),
@@ -121,7 +121,7 @@ public enum ParameterDefaults {
     heatProductionLoad: 0.0,
     heatProductionLoadWinter: 0.0,
     heatProductionLoadSummer: 0.0,
-    dischrgWinter: 0, dischrgSummer: 0,
+    dischargeWinter: 0, dischargeSummer: 0,
     badDNIwinter: 0, badDNIsummer: 0
   )
 
@@ -132,10 +132,10 @@ public enum ParameterDefaults {
     avgFocus: 2.12, rabsOut: 0.035,
     rabsInner: 0.033, rglas: 0.0625,
     glassEmission: 0.0, opticalEfficiency: 0.7933452,
-    emissionHCE: [0.033, 0.0001],
+    emissionHCE: [0.033, 0.0001, 0],
     shadingHCE: [0.962, 0.961, 0.938, 0.933],
-    IAMfac: [0.996, 0.1556, -0.4821, 0.4028, -0.3085],
-    useIntegralRadialoss: false
+    factorIAM: [0.996, 0.1556, -0.4821, 0.4028, -0.3085],
+    useIntegralRadialoss: true
   )
 
    static let NT_PRO = Collector.Parameter(
@@ -145,9 +145,9 @@ public enum ParameterDefaults {
     avgFocus: 2.169, rabsOut: 0.04445,
     rabsInner: 0.04195, rglas: 0.071,
     glassEmission: 0.86, opticalEfficiency: 0.790135815,
-    emissionHCE: [0.0047, 0.000134],
+    emissionHCE: [0.0047, 0.000134, 0],
     shadingHCE: [1, 1, 1, 1],
-    IAMfac: [0.9999789, 0.0967598, -0.3307049, 0, 0],
+    factorIAM: [0.9999789, 0.0967598, -0.3307049, 0, 0],
     useIntegralRadialoss: true
   )
 

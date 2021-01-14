@@ -122,7 +122,9 @@ public class MeteoDataSource {
       }
     }
 
-    let location = Location(sun.location.coords)
+    let location = Location(
+      sun.location.coords, timezone: sun.location.timezone
+    )
 
     return MeteoDataSource(
       name: "Fake", data: data, (sun.year, location)

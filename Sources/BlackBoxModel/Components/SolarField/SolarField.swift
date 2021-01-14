@@ -17,7 +17,7 @@ public struct SolarField: Parameterizable, HeatCycle {
     case near, average, far
 
     static var names: [String] {
-      return ["Design", "Near", "Average", "Far"]
+      ["Design", "Near", "Average", "Far"]
     }
   }
   
@@ -29,7 +29,7 @@ public struct SolarField: Parameterizable, HeatCycle {
   public var heatLossesHotHeader: Double
   public var heatLossesHCE: Double
   public var inFocus: Ratio
-  var loops: [HeatTransfer]
+  public var loops: [HeatTransfer]
   var loopEta: Double
  // var temperature: (inlet: Temperature, outlet: Temperature)
 
@@ -58,7 +58,7 @@ public struct SolarField: Parameterizable, HeatCycle {
   }
 
   static let initialState = SolarField(
-    operationMode: .scheduledMaintenance,
+    operationMode: .noOperation,
     isMaintained: false,
     header: HeatTransfer(name: "Header"),
     ETA: 0,
@@ -78,15 +78,17 @@ public struct SolarField: Parameterizable, HeatCycle {
   /// Calculates the parasitics
   func parasitics() -> Double {
     let parameter = SolarField.parameter
-    if operationMode == .freezeProtection {
+    if operationMode.isFreezeProtection {
       return parameter.antiFreezeParastics
     }
     let load = massFlow.share(of: parameter.maxMassFlow).ratio
-    return massFlow.rate > 0
-      ? parameter.pumpParasticsFullLoad
+    if header.massFlow.rate > 0 { 
+    return parameter.pumpParasticsFullLoad
         * (parameter.pumpParastics[0] + parameter.pumpParastics[1]
           * load + parameter.pumpParastics[2] * load ** 2)
-      : 0
+    } else {
+      return 0
+    }
   }
 
   /// Determines the inlet temperature of the solar field
@@ -115,22 +117,24 @@ public struct SolarField: Parameterizable, HeatCycle {
   ) {
     let parameter = SolarField.parameter
     let minFlow = MassFlow(parameter.minFlow.ratio * parameter.maxMassFlow.rate)
-    HCE.freezeProtectionCheck(&self)
+    freezeProtectionCheck()
     SolarField.last = loops
     let m1 = (header.massFlow - minFlow).rate
     let m2 = (parameter.maxMassFlow - minFlow).rate
-    for (n, loop) in zip(0..., [Loop.near, .average, .far]) {
-      let massFlow =
-        header.massFlow.rate == 0
-        ? 0
-        : header.massFlow.rate
-          * (m1 * (parameter.imbalanceDesign[n] - parameter.imbalanceMin[n])
-            / m2 + parameter.imbalanceMin[n])
-      loops[loop.rawValue].massFlow.rate = massFlow
 
-      HCE.calculation(
-        &self, collector: collector, loop: loop,
-        mode: .variable, ambient: ambient)
+    for (n, loop) in zip(0..., [Loop.near, .average, .far]) {
+      if header.massFlow.rate > 0 {
+        let massFlow = header.massFlow.rate
+            * (m1 * (parameter.imbalanceDesign[n] - parameter.imbalanceMin[n])
+              / m2 + parameter.imbalanceMin[n])
+        loops[loop.rawValue].massFlow.rate = massFlow
+      } else {
+         loops[loop.rawValue].massFlow.rate = 0
+      }      
+      calculation(
+        collector: collector, loop: loop,
+        mode: operationMode, ambient: ambient
+      )
     }
 
     header.massFlow.rate =
@@ -220,6 +224,59 @@ public struct SolarField: Parameterizable, HeatCycle {
     }
   }
 
+  @discardableResult
+  mutating func calculation(
+    collector: Collector,
+    loop: SolarField.Loop,
+    mode: OperationMode,
+    ambient: Temperature
+  ) -> (Double, Double) {
+    switch mode {
+    case .fixed:
+      return HCE.mode2(&self, collector, loop, ambient)
+    case .noOperation:
+      //period = 300
+      freezeProtectionCheck()
+      return HCE.mode2(&self, collector, loop, ambient)
+    case .operating:
+      //period = 300
+      if /*meteo.windSpeed*/0 > SolarField.parameter.maxWind {
+        inFocus = 0.0
+      }
+      return HCE.mode1(&self, collector, loop, ambient)
+
+    default:
+      if /*meteo.windSpeed*/0 > SolarField.parameter.maxWind
+        || collector.insolationAbsorber < Simulation.parameter.minInsolation
+      {
+        freezeProtectionCheck()
+        loops[0].massFlow = header.massFlow
+        return HCE.mode2(&self, collector, loop, ambient)
+      } else {
+        return HCE.mode1(&self, collector, loop, ambient)
+      }
+    }    
+  }
+
+  mutating func freezeProtectionCheck() {
+    let freezingTemperature = SolarField.parameter.HTF.freezeTemperature
+      + Simulation.parameter.dfreezeTemperaturePump
+      + Simulation.parameter.tempTolerance
+    let antiFreezeFlow = SolarField.parameter.antiFreezeFlow.ratio 
+      * SolarField.parameter.maxMassFlow.rate
+    if header.temperature.inlet < freezingTemperature
+      || header.temperature.outlet < freezingTemperature
+    {
+      header.massFlow.rate = antiFreezeFlow
+      operationMode = .freezeProtection
+    } else {
+    //  operationMode = .noOperation
+      // status = LastHTF
+     // header.massFlow = 0.0
+    }
+  //  inFocus = 0.0
+  }
+
   mutating func heatLossesHotHeader(ambient: Temperature) -> Temperature {
     let parameter = SolarField.parameter
     let c = parameter.heatLossHotHeader
@@ -298,9 +355,9 @@ public struct SolarField: Parameterizable, HeatCycle {
     loops[0].massFlow = header.massFlow
     loops[0].temperature.inlet = loops[1].temperature.inlet
 
-    (time, dumping) = HCE.calculation(
-      &self, collector: collector, loop: .design,
-      mode: operationMode.collector, ambient: ambient
+    (time, dumping) = calculation(
+      collector: collector, loop: .design,
+      mode: operationMode, ambient: ambient
     )
 
     header.massFlow = loops[0].massFlow

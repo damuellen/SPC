@@ -43,7 +43,7 @@ public struct SolarPosition {
     var longitude: Double
     var latitude: Double
     var elevation: Double
-    var timezone: Int
+    public var timezone: Int
 
     public var coords: (longitude: Double, latitude: Double, elevation: Double) {
       return (longitude, latitude, elevation)

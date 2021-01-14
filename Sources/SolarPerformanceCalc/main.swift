@@ -81,6 +81,8 @@ struct SolarPerformanceCalculator: ParsableCommand {
   var database: Bool = false
   @Flag(help: "Output of the model parameter.")
   var parameter: Bool = false
+  @Flag(help: "Output performance data to excel.")
+  var excel: Bool = false
 
   func run() throws {
     let name = "Solar Performance Calculator"
@@ -130,12 +132,9 @@ struct SolarPerformanceCalculator: ParsableCommand {
 
     BlackBoxModel.configure(year: year)
 
-    if let coords = location.coords {
-      var loc = Location(coords)
-      if let tz = location.timezone {
-        loc.timezone = tz
-        print(loc)
-      }
+    if let coords = location.coords,
+     let tz = location.timezone {
+      let loc = Location(coords, timezone: tz)
       BlackBoxModel.configure(location: loc)
     }
 
@@ -153,6 +152,7 @@ struct SolarPerformanceCalculator: ParsableCommand {
     SolarPerformanceCalculator.result = BlackBoxModel.runModel(with: log)
 
     log.printResult()
+    if excel { log.writeExcel(to: "Results.xlsx") }
     log.clearResults()
   }
 

@@ -67,8 +67,9 @@ extension Recording {
       + "METEODATA  \(BlackBoxModel.meteoData!.name)\n"
       + "Meteodata of a leap year" * (Simulation.time.isLeapYear ? "YES" : "NO")
       + "Location:"
-      * (String(format: "%G", BlackBoxModel.meteoData!.location.longitude) 
-      + String(format: "%G",BlackBoxModel.meteoData!.location.latitude))
+      * String(format: "longitude: %G, latitude: %G",
+        BlackBoxModel.meteoData!.location.longitude,
+        BlackBoxModel.meteoData!.location.latitude)
     //   + "Position of Wet Bulb Temp. in mto-file [row]:" * Simulation.parameter.WBTpos)"
    //    + "Position of Wind Direction in mto-file [row]:" * Simulation.parameter.WDpos)"
    //    + "Pos. of Global Direct Irr. in mto-file [row]:" * Simulation.parameter.GHI)"

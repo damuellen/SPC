@@ -6,7 +6,7 @@
 //  Copyright © 2015 Daniel Muellenborn. All rights reserved.
 //
 
-protocol Piping: class, TableConvertible {
+protocol Piping: AnyObject, TableConvertible {
   var name: String { get }
   var branches: [Branch] { get }
   var tail: (cold: Branch, hot: Branch)! { get }

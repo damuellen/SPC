@@ -26,12 +26,12 @@ public struct Storage: Parameterizable, HeatCycle {
   
   var charge: Ratio = 0.0
 
-  var massFlows: MassFlows = .init(
+  var saltMass: SaltAmounts = .init(
     need: .init(), minimum: .init(), cold: .init(), hot: .init()
   )
   
-  struct MassFlows { // [kg/s]
-    var need, minimum, cold, hot: MassFlow
+  struct SaltAmounts { // [kg/s]
+    var need, minimum, cold, hot: Double
   }
   
   var heatInSalt: Heat = .init(cold: 0, hot: 0)
@@ -39,9 +39,7 @@ public struct Storage: Parameterizable, HeatCycle {
   struct Heat { // [kJ/kg]
     var cold: Double
     var hot: Double
-    var available: Double {
-      return hot - cold
-    }
+    var available: Double { hot - cold }
   }
 
   var storedHeat: Double = 0.0
@@ -53,8 +51,8 @@ public struct Storage: Parameterizable, HeatCycle {
  // var dischargeLoad: Ratio = 0.0
 
   var massOfSalt: Double = 0.0
-  
-  public enum OperationMode  {
+
+  public enum OperationMode: String  {
     case noOperation, discharge
     case preheat, charging, fossilCharge, freezeProtection
   }
@@ -77,10 +75,12 @@ public struct Storage: Parameterizable, HeatCycle {
     heat: inout ThermalPower)
     -> PerformanceData<Storage>
   {    
+    var supply: Double
+    var parasitics: Double
+    var fuel = 0.0
+    
     // **************************  Energy surplus  *****************************
     if storage.heat > 0 {
-      var supply: Double
-      var parasitics: Double
 
       if storage.charge.ratio < parameter.chargeTo,
         solarField.massFlow >= SolarField.parameter.maxMassFlow
@@ -108,12 +108,12 @@ public struct Storage: Parameterizable, HeatCycle {
       if time.month < parameter.startexcep
         || time.month > parameter.endexcep
       { // Oct to March
-        peakTariff = time.hour >= parameter.dischrgWinter
+        peakTariff = time.hour >= parameter.dischargeWinter
       } else { // April to Sept
-        peakTariff = time.hour >= parameter.dischrgSummer
+        peakTariff = time.hour >= parameter.dischargeSummer
       }
     } else { // not shifter
-      peakTariff = false // dont care about time to discharge
+      peakTariff = true // dont care about time to discharge
     }
 
     //#warning("The implementation here differs from PCT")
@@ -126,7 +126,7 @@ public struct Storage: Parameterizable, HeatCycle {
       // && storage.operationMode != .freezeProtection
       // && heatdiff < -1 * parameter.heatdiff * thermal.demand {
       // Discharge directly!! // 04.07.0 -0.25&& heatdiff < -0.25 * thermal.dem
-      if powerBlock.massFlow < solarField.massFlow {
+      if powerBlock.designMassFlow < solarField.massFlow {
         // there are cases, during cloudy days when mode .discharge although
         // massflow in SOF is higher that in PB.
       }
@@ -173,53 +173,49 @@ public struct Storage: Parameterizable, HeatCycle {
     {
       //#warning("Check this")
       heater.operationMode = .freezeProtection(.zero)
-      var supply: Double
-      var parasitics: Double
-
-      var fuel = 0.0
 
       if OperationRestriction.fuelStrategy.isPredefined == false {
-
-        let energy = heater(
-          temperatureOutlet: solarField.temperature.outlet,
-          temperatureInlet: powerBlock.temperature.inlet,
-          massFlowStorage: storage.massFlow,
-          modeStorage: storage.operationMode, 
-          demand: heat.demand.megaWatt,
-          fuelAvailable: fuelAvailable, heat: heat
-        )
-        fuel = energy.fuel
-        heat.heater.megaWatt = energy.heat
-     // FIXME   plant.electricalParasitics.heater = energy.electric
-        
-        powerBlock.massFlow = heater.massFlow
-
-        storage.operationMode = .freezeProtection
-      } else if case .freezeProtection = solarField.operationMode,
-        storage.charge > -0.35 && parameter.FP == 0
-      {
-        storage.operationMode = .freezeProtection
-      } else {
-        storage.operationMode = .noOperation
+      //  fuelAvailable = .infinity
       }
-      
-      (supply, parasitics) = Storage.perform(
-        storage: &storage,
-        solarField: &solarField,
-        steamTurbine: &steamTurbine,
-        powerBlock: &powerBlock,
-        heat: &heat
-      )
-      
-      powerBlock.inletTemperature(outlet: storage)
 
-      // check why to circulate HTF in SF
-      //#warning("Storage.parasitics")
-    // FIXME  plant.electricalParasitics.solarField = SolarField.parameter.antiFreezeParastics
+      let energy = heater(
+        temperatureOutlet: solarField.temperature.outlet,
+        temperatureInlet: powerBlock.temperature.inlet,
+        massFlowStorage: storage.massFlow,
+        modeStorage: storage.operationMode,
+        demand: heat.demand.megaWatt,
+        fuelAvailable: fuelAvailable, heat: heat
+      )
+      fuel = energy.fuel
+      heat.heater.megaWatt = energy.heat
+    // FIXME   plant.electricalParasitics.heater = energy.electric
       
-      return PerformanceData(heat: supply, electric: parasitics, fuel: fuel)
+      powerBlock.designMassFlow = heater.massFlow
+
+      storage.operationMode = .freezeProtection
+    } else if case .freezeProtection = solarField.operationMode,
+      storage.charge > -0.35 && parameter.FP == 0
+    {
+      storage.operationMode = .freezeProtection
+    } else {
+      storage.operationMode = .noOperation
     }
-    return PerformanceData(heat: 0, electric: 0, fuel: 0)
+      
+    (supply, parasitics) = Storage.perform(
+      storage: &storage,
+      solarField: &solarField,
+      steamTurbine: &steamTurbine,
+      powerBlock: &powerBlock,
+      heat: &heat
+    )
+    
+    powerBlock.inletTemperature(outlet: storage)
+
+    // check why to circulate HTF in SF
+    //#warning("Storage.parasitics")
+  // FIXME  plant.electricalParasitics.solarField = SolarField.parameter.antiFreezeParastics
+    
+    return PerformanceData(heat: supply, electric: parasitics, fuel: fuel)   
   }
   
   static func demandStrategy(
@@ -263,7 +259,7 @@ public struct Storage: Parameterizable, HeatCycle {
       heatExchanger.temperature.htf.inlet.max,
       heatExchanger.temperature.htf.outlet.max) / 1_000 // [MW]
 
-    powerBlock.setMassFlow(rate: demand / heatTransfer)
+    powerBlock.designMassFlow.rate = demand / heatTransfer
     
     if powerBlock.massFlow.rate < 0 { // to avoid negative massflows
       storage.heat = 0
@@ -302,9 +298,8 @@ public struct Storage: Parameterizable, HeatCycle {
       heatExchanger.temperature.htf.inlet.max,
       heatExchanger.temperature.htf.outlet.max) / 1_000
 
-    //powerBlock.setMassFlow(rate: )
     powerBlock.designMassFlow.rate = heatExchanger.sccHTFheat / heatTransfer
-    if powerBlock.massFlow < 0.0 { // to avoid negative massflows
+    if powerBlock.designMassFlow < 0.0 { // to avoid negative massflows
       storage.heat = 0
       powerBlock.massFlow = massFlow
       return
@@ -365,9 +360,9 @@ public struct Storage: Parameterizable, HeatCycle {
         time.hour < 17
       {
         // Qsol not enough for POB demand load (e.g. at the beginning of the day)
-        powerBlock.setMassFlow(rate:
+        powerBlock.designMassFlow.rate = 
           min(storage.heatProductionLoad.ratio * demand, production) / heatTransfer
-        )
+
         storage.heat = production/* - min(
           storage.heatProductionLoad * demand,
           production
@@ -386,7 +381,7 @@ public struct Storage: Parameterizable, HeatCycle {
         storage.charge.ratio >= parameter.chargeTo
       {
         // Qsol not enough for POB demand load (e.g. at the end of the day) and TES is full
-        powerBlock.setMassFlow(rate: demand / heatTransfer)
+        powerBlock.designMassFlow.rate =  demand / heatTransfer
         // send all to POB and if needed discharge TES
         storage.heat = production - demand
         // TES provides the rest available
@@ -455,7 +450,7 @@ public struct Storage: Parameterizable, HeatCycle {
 
 extension HeatTransferFluid {
   func specificHeat(_ temperature: Temperature) -> Double {
-    heatCapacity[0] * temperature.celsius
-      + 0.5 * heatCapacity[1] * temperature.celsius ** 2 - 350.5536
+    heatCapacity[0] * temperature.celsius + 0.5 
+    * heatCapacity[1] * temperature.celsius ** 2 - 350.5536
   }
 }

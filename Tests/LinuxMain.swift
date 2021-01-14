@@ -9,7 +9,7 @@ XCTMain([
   testCase(BoilerTests.allTests),
   testCase(CollectorTests.allTests),
  // testCase(DryCoolingTests.allTests),
- // testCase(HCETests.allTests),
+  testCase(HCETests.allTests),
   testCase(HeaterTests.allTests),
   testCase(HeatExchangersTests.allTests),
   testCase(HeatTransferFluidTests.allTests),

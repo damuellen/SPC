@@ -15,63 +15,45 @@ public struct MeteoData: CustomStringConvertible {
   public var temperature, dni, ghi, dhi, windSpeed: Float
   let wetBulbTemperature: Float? = nil
 
+  var values: [Float] { [temperature, dni, ghi, dhi, windSpeed] }
+
   /// Linear interpolation function for meteo data values
-  static func lerp(start: MeteoData, end: MeteoData, _ value: Float)
+  static func lerp(start: MeteoData, end: MeteoData, _ progress: Float)
     -> MeteoData
   {
-    if value >= 1 { return end }
-
-    let dni = start.dni + (value * (end.dni - start.dni))
-    let ghi = start.ghi + (value * (end.ghi - start.ghi))
-    let dhi = start.dhi + (value * (end.dhi - start.dhi))
-    let t = start.temperature + (value * (end.temperature - start.temperature))
-    let ws = start.windSpeed + (value * (end.windSpeed - start.windSpeed))
-
-    return MeteoData(
-      dni: dni, ghi: ghi, dhi: dhi, temperature: t, windSpeed: ws
-    )
-  }
-
-  static func cosineInterpolation(
-    start: MeteoData, end: MeteoData, _ progress: Float
-  ) -> MeteoData {
-    func cosine(y1: Float, y2: Float, mu: Float) -> Float {
-      let mu2 = (1 - cos(mu * .pi)) / 2
-      return (y1 * (1 - mu2) + y2 * mu2)
-    }
-
     if progress >= 1 { return end }
+    if progress <= 0 { return start }
 
-    let dni = cosine(y1: start.dni, y2: end.dni, mu: progress)
-    let ghi = cosine(y1: start.ghi, y2: end.ghi, mu: progress)
-    let dhi = cosine(y1: start.dhi, y2: end.dhi, mu: progress)
-    let t = cosine(y1: start.temperature, y2: end.temperature, mu: progress)
-    let ws = cosine(y1: start.windSpeed, y2: end.windSpeed, mu: progress)
-
-    return MeteoData(
-      dni: dni, ghi: ghi, dhi: dhi, temperature: t, windSpeed: ws
-    )
+    return .init(zip(start.values, end.values).map { start, end in
+      start + (progress * (end - start))
+    })
   }
 
   /// Interpolation function for meteo data values
   static func interpolation(
-    prev: MeteoData, current: MeteoData, next: MeteoData, progess: Float
-  )
-    -> MeteoData
-  {
-    let startValue = current
-    let endValue = next
+    _ prev: MeteoData?, _ curr: MeteoData, _ next: MeteoData,
+    step: Float, steps: Float
+  ) -> MeteoData {
+    
+    func interpolation(
+      _ curr: Float, _ next: Float, step: Float, steps: Float
+    ) -> Float {
+      let a = curr
+      let b = (next - curr) / 2 + curr
+      let m = (b - a)
+      let aPrime = (2 * curr - m) / 2
+      return m * step / steps + aPrime
+    }
 
     func interpolation(
-      _ prev: Float, _ current: Float,
-      _ next: Float, _ progess: Float
+      _ prev: Float, _ curr: Float, _ next: Float, step: Float, steps: Float
     ) -> Float {
-      let a = (current - prev) / 2 + prev
-      let b = (next - current) / 2 + current
+      let a = max((curr - prev) / 2 + prev, 0)
+      let b = max((next - curr) / 2 + curr, 0)
       var m = (b - a)
-      var aPrime = (2 * current - m) / 2
+      var aPrime = (2 * curr - m) / 2
       var bPrime = aPrime + m
-
+      
       if aPrime < 0 {
         bPrime += aPrime
         aPrime = 0
@@ -83,23 +65,23 @@ public struct MeteoData: CustomStringConvertible {
         bPrime = 0
         m = bPrime - aPrime
       }
-
-      return m * progess + aPrime
+      
+      if aPrime > 0 {
+        return m * (step - 1) / steps + aPrime
+      }
+      return m * step / steps
     }
 
-    let dni = interpolation(prev.dni, current.dni, next.dni, progess)
-    let ghi = interpolation(prev.ghi, current.ghi, next.ghi, progess)
-    let dhi = interpolation(prev.dhi, current.dhi, next.dhi, progess)
-    let t =
-      startValue.temperature
-      + (progess * (endValue.temperature - startValue.temperature))
-    let ws =
-      startValue.windSpeed
-      + (progess * (endValue.windSpeed - startValue.windSpeed))
-
-    return MeteoData(
-      dni: dni, ghi: ghi, dhi: dhi, temperature: t, windSpeed: ws
-    )
+    if let prev = prev {
+      let (prev, curr, next) = (prev.values, curr.values, next.values)
+      return .init((0..<5).map { i in
+        interpolation(prev[i], curr[i], next[i], step: step, steps: steps)
+      })
+    } else {
+      return .init(zip(curr.values, next.values).map { curr, next in
+        interpolation(curr, next, step: step, steps: steps)
+      })
+    }
   }
 
   public init(
@@ -113,12 +95,20 @@ public struct MeteoData: CustomStringConvertible {
     self.windSpeed = windSpeed
   }
 
+  public init(meteo: [Float]) {
+    self.dni = meteo[0]
+    self.temperature = meteo[1]
+    self.windSpeed = meteo[2]
+    self.ghi = meteo.count > 4 ? meteo[4] : 0
+    self.dhi = meteo.count > 5 ? meteo[5] : 0
+  }
+  
   public init(_ values: [Float]) {
-    self.dni = values[0]
-    self.temperature = values[1]
-    self.windSpeed = values[2]
-    self.ghi = values.count > 4 ? values[4] : 0
-    self.dhi = values.count > 5 ? values[5] : 0
+    self.temperature = values[0]
+    self.dni = values[1]
+    self.ghi = values[2]
+    self.dhi = values[3]
+    self.windSpeed = values[4]
   }
 
   public init(tmy values: [Float]) {
@@ -143,14 +133,5 @@ public struct MeteoData: CustomStringConvertible {
       + String(format: "  GHI: %.1f W/m2", ghi)
       + String(format: "  DHI: %.1f W/m2", dhi)
       + String(format: "  WS: %.1f m/s\n", windSpeed)
-  }
-
-  var values: [String] {
-    [
-      temperature.description,
-      ghi.description,
-      dhi.description,
-      windSpeed.description,
-    ]
   }
 }

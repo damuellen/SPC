@@ -134,9 +134,10 @@ extension TextConfig {
   static func loadConfigurations(atPath path: String) throws {
     let urls = TextConfig.fileSearch(atPath: path)
     var memory = [FileExtension]()
+    var htf: HeatTransferFluid?
     for url in urls {
       guard let e = FileExtension(rawValue: url.pathExtension.uppercased()),
-        memory.contains(e), let configFile = TextConfigFile(url: url)
+        !memory.contains(e), let configFile = TextConfigFile(url: url)
       else { continue }
       switch e {
       case .FOS: break
@@ -153,8 +154,7 @@ extension TextConfig {
       case .COL: Collector.parameterize(try .init(file: configFile))
       case .STO: Storage.parameterize(try .init(file: configFile))
       case .HR: Heater.parameterize(try .init(file: configFile))
-      case .HTF: break
-      //  htf = try HeatTransferFluid(file: configFile, includesEnthalpy: true)
+      case .HTF: htf = try HeatTransferFluid(file: configFile)
       case .HX: HeatExchanger.parameterize(try .init(file: configFile))
       case .BO: Boiler.parameterize(try .init(file: configFile))
       case .WHR: WasteHeatRecovery.parameterize(try .init(file: configFile))
@@ -164,9 +164,10 @@ extension TextConfig {
       case .PFC:
         break
       case .STF: break
-      //  salt = try HeatTransferFluid(file: configFile, includesEnthalpy: false)
+      //  salt = try HeatTransferFluid(file: configFile)
       }
       memory.append(e)
     }
+    if let htf = htf { SolarField.parameter.HTF = htf }
   }
 }

@@ -18,12 +18,8 @@ public struct GasTurbine: Parameterizable {
 
   var load: Ratio
 
-  public enum OperationMode: String, Codable, CustomStringConvertible {
+  public enum OperationMode: String {
     case free, load, integrated, pure, noOperation, scheduledMaintenance
-
-    public var description: String {
-      return rawValue
-    }
   }
 
   static let initialState = GasTurbine(

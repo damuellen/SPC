@@ -14,11 +14,7 @@ import Meteo
 import SolarPosition
 /// Contains all data needed to simulate the operation of the collector
 public struct Collector: Parameterizable, CustomStringConvertible {
-  
-  public enum OperationMode {
-    case variable, freezeProtection, noOperation, operating, fixed
-  }
-  
+    
   public var parabolicElevation, theta, cosTheta, efficiency: Double
   public var insolationAbsorber: Double
 
@@ -61,7 +57,7 @@ public struct Collector: Parameterizable, CustomStringConvertible {
   public static func efficiency(_ collector: inout Collector, ws: Float) {
     guard case 1...179 = collector.parabolicElevation else { return }
     
-    let IAM = parameter.IAMfac(collector.theta.toRadians)
+    let IAM = parameter.factorIAM(collector.theta.toRadians)
     
     let solarField = SolarField.parameter
     
@@ -153,21 +149,6 @@ public struct Collector: Parameterizable, CustomStringConvertible {
     collector.cosTheta = cos(theta.toRadians)
    
     return collector
-  }
-}
-
-extension SolarField.OperationMode {
-  var collector: Collector.OperationMode {
-    switch self {
-    case .fixed: return .fixed
-    case .startUp: return .operating
-    case .freezeProtection: return .freezeProtection
-    case .operating: return .operating
-    case .noOperation: return .noOperation
-    case .scheduledMaintenance: return .noOperation
-    case .unknown: return .variable
-    case .normal: return .operating
-    }
   }
 }
 

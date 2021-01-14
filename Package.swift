@@ -83,7 +83,9 @@ let package = Package(
       name: "SolarPerformanceCalc",
       dependencies: [
         "Config", "BlackBoxModel",
-        .product(name: "ArgumentParser", package: "swift-argument-parser")],
+        .product(name: "ArgumentParser", package: "swift-argument-parser"),
+        .product(name: "xlsxwriter", package: "xlsxwriter.swift")
+      ],
       swiftSettings: swiftSettings),
     .testTarget(
       name: "MeteoTests",

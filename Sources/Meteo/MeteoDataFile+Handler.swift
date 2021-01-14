@@ -111,11 +111,14 @@ private struct MET: MeteoDataFile {
 
     guard let long = metaData.popFirst()?.first,
       let lat = metaData.popFirst()?.first,
-      let longitude = Float(long), let latitude = Float(lat)
+      let lat_tz = metaData.popFirst()?.first,
+      let longitude = Double(long), 
+      let latitude = Double(lat),
+      let tz = Int(lat_tz)      
     else { throw MeteoDataFileError.unknownLocation }
-
+    let timezone = -tz / 15
     let location = Location(
-      longitude: -longitude, latitude: latitude, elevation: 0
+      (-longitude, latitude, 0), timezone: timezone
     )
 
     return (year, location)
@@ -143,7 +146,7 @@ private struct MET: MeteoDataFile {
       guard values.count > 2
       else { throw MeteoDataFileError.missingValueInLine(line) }
       line += 1
-      return MeteoData(values)
+      return MeteoData(meteo: values)
     }
   }
 }
@@ -217,11 +220,12 @@ private struct TMY: MeteoDataFile {
     let values = content.headers1
     guard values.endIndex > 3
     else { throw MeteoDataFileError.unknownLocation }
-    let longitude = values[2]
-    let latitude = values[1]
-    let elevation = values[3]
+    let longitude = Double(values[2])
+    let latitude = Double(values[1])
+    let elevation = Double(values[3])
+    let tz = fetchTimeZone()
     return Location(
-      longitude: longitude, latitude: latitude, elevation: elevation
+      (longitude,  latitude,  elevation), timezone: tz
     )
   }
 

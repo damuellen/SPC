@@ -7,7 +7,7 @@ import Meteo
 
 class MeteoTests: XCTestCase {
   func testsGenerator() {
-    let location = Location(longitude: 47, latitude: 29, elevation: 0)
+    let location = Location(longitude: 47, latitude: 29, elevation: 0, timezone: 2)
     let sun = SolarPosition(coords: (47, 29, 0), tz: 4, year: 2017,
                             frequence: .every5minutes)
 

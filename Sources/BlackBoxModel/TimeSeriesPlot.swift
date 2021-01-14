@@ -47,11 +47,11 @@ public class TimeSeriesPlot {
     self.style = style
     let secondsPerDay: Double = 86400
     if range.duration > secondsPerDay * 7 {
-      self.x = (secondsPerDay, "'%d.%d'", "Month")
+      self.x = (secondsPerDay, "'%d.%d'", "Date")
     } else if range.duration > secondsPerDay {
-      self.x = (secondsPerDay, "'%a'", "Week")
+      self.x = (secondsPerDay, "'%a'", "Day")
     } else {
-      self.x = (1800, "'%R'", "Day")
+      self.x = (1800, "'%R'", "Hour")
     }
   }
 
@@ -90,7 +90,7 @@ public class TimeSeriesPlot {
 
   var setCommands: String {
     [
-      "grid",
+      "grid", "key",
       "ylabel '\(y1Label)'",
       "y2label '\(y2Label)'",
       "xlabel '\(x.label)'",

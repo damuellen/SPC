@@ -41,9 +41,9 @@ public struct Temperature: CustomStringConvertible, Equatable {
   }
 
   static func mixture(
-    m1: MassFlow, m2: MassFlow, t1: Temperature, t2: Temperature
+    m1: Double, m2: Double, t1: Temperature, t2: Temperature
   ) -> Temperature {
-    .init((m1.rate * t1.kelvin + m2.rate * t2.kelvin) / (m1 + m2).rate)
+    .init((m1 * t1.kelvin + m2 * t2.kelvin) / (m1 + m2))
   }
 
   public init(_ kelvin: Double) {

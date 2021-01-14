@@ -12,7 +12,7 @@ extension Storage: CustomStringConvertible {
   public var description: String {
    "  Mode:".padding(30) + "\(operationMode)\n" + formatting(
      [massFlow.rate, temperature.inlet.celsius, temperature.outlet.celsius,
-      massFlows.need.rate, massFlows.minimum.rate, massFlows.cold.rate, massFlows.hot.rate,
+      saltMass.need, saltMass.minimum, saltMass.cold, saltMass.hot,
       heatInSalt.cold, heatInSalt.hot, temperatureTank.cold.celsius, temperatureTank.hot.celsius,
       antiFreezeTemperature, charge.ratio, storedHeat, heatProductionLoad.ratio, massOfSalt],
      ["Mass flow rate:", "T in:", "T out:", 

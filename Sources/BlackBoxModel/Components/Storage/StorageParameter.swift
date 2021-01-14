@@ -52,7 +52,7 @@ extension Storage {
     let minDischargeLoad, fixedDischargeLoad: Ratio
     
     let heatTracingTime, heatTracingPower: [Double]
-    let DischrgParFac: Double
+    let dischargeParasitcsFactor: Double
     
     var isVariable = true
     var heatExchangerRestrictedMin = false
@@ -85,8 +85,8 @@ extension Storage {
     var heatProductionLoad: Double // added for shifter
     let heatProductionLoadWinter: Ratio // added for shifter
     let heatProductionLoadSummer: Ratio // added for shifter
-    let dischrgWinter: Int
-    let dischrgSummer: Int
+    let dischargeWinter: Int
+    let dischargeSummer: Int
     let badDNIwinter: Double
     let badDNIsummer: Double
   }
@@ -152,8 +152,8 @@ extension Storage.Parameter: CustomStringConvertible {
     * heatProductionLoadWinter.percentage.description
     + "Massflow to POB during Charge in Bad Days Summer [%]:"
     * heatProductionLoadSummer.percentage.description
-    + "Time to begin TES Discharge in Winter [hr]:" * dischrgWinter.description
-    + "Time to begin TES Discharge in Summer [hr]:" * dischrgSummer.description
+    + "Time to begin TES Discharge in Winter [hr]:" * dischargeWinter.description
+    + "Time to begin TES Discharge in Summer [hr]:" * dischargeSummer.description
   }
 }
 
@@ -210,7 +210,7 @@ extension Storage.Parameter: TextConfigInitializable {
   //  HTe_pow = try ln(_ )
     heatExchangerRestrictedMin = try l2(217) == 1 ? true:false
     heatExchangerMinCapacity = try ln(218)
-    DischrgParFac = try ln(220)
+    dischargeParasitcsFactor = try ln(220)
     stopFossilCharging2 = try (l2(222), l2(223))
     startFossilCharging2 = try (l2(224),l2(225))
     auxConsumptionCurve = try l2(227) == 1 ? true:false
@@ -218,15 +218,15 @@ extension Storage.Parameter: TextConfigInitializable {
     DesAuxEX = try ln(229)
     heatProductionLoadWinter = try Ratio(ln(233))
     heatProductionLoadSummer = try Ratio(ln(234))
-    dischrgWinter = try l2(235)
-    dischrgSummer = try l2(236)
+    dischargeWinter = try l2(235)
+    dischargeSummer = try l2(236)
     badDNIwinter = try ln(238)
     badDNIsummer = try ln(239)
     type = .indirect // try ln(241)
     designTemperature = try (T(celsius: ln(118)), T(celsius: ln(121)))
     heatdiff = 0
     heatLoss = (0,0)
-    heatExchangerEfficiency = 0
+    heatExchangerEfficiency = 1
     heatProductionLoad = 0
   }  
 }

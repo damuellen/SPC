@@ -47,7 +47,7 @@ public struct Heater: Parameterizable, HeatCycle {
   /// - Parameter load: Depends on the current load.
   /// - Returns: Electric parasitics in MW
   static func parasitics(estimateFrom load: Ratio) -> Double {
-    return parameter.nominalElectricalParasitics
+    parameter.nominalElectricalParasitics
       * (parameter.electricalParasitics[0]
         + parameter.electricalParasitics[1] * load.ratio)
   }
@@ -134,7 +134,7 @@ public struct Heater: Parameterizable, HeatCycle {
     } else if case .freezeProtection = operationMode {
       thermalPower =
         massFlow.rate * htf.deltaHeat(
-           temperature.inlet, parameter.antiFreezeTemperature
+           parameter.antiFreezeTemperature, temperature.inlet
         ) / 1_000
 
       if thermalPower > Design.layout.heater {
@@ -150,7 +150,7 @@ public struct Heater: Parameterizable, HeatCycle {
       }
       thermalPower /= parameter.efficiency.ratio
 
-      load.ratio = thermalPower / Design.layout.heater
+      load.ratio = min(thermalPower / Design.layout.heater, 1.0)
       operationMode = .freezeProtection(load)
       // No operation requested or QProd > QNeed
     } else if case .noOperation = operationMode { /* || heat >= 0 */
@@ -187,7 +187,7 @@ public struct Heater: Parameterizable, HeatCycle {
         fuel * parameter.efficiency.ratio
         * Simulation.adjustmentFactor.efficiencyHeater
 
-      load.ratio = abs(thermalPower / Design.layout.heater)  // load avail.
+      load.ratio = min(thermalPower / Design.layout.heater, 1.0)  // load avail.
 
       if load < parameter.minLoad {
         load = parameter.minLoad
@@ -208,10 +208,39 @@ public struct Heater: Parameterizable, HeatCycle {
         setMassFlow(rate: thermalPower * 1_000 / deltaHeat)
       }
     }
-    parasitics = Heater.parasitics(estimateFrom: load)
+    parasitics = load.ratio > 0 ? Heater.parasitics(estimateFrom: load) : 0
     let energy = PerformanceData<Heater>(
       heat: thermalPower, electric: parasitics, fuel: fuel
     )
     return energy
+  }
+}
+
+extension Heater.OperationMode: RawRepresentable {
+  public typealias RawValue = String
+
+  public init?(rawValue: RawValue) {
+    switch rawValue {
+    case "normal(Ratio)": self = .normal(.zero)
+    case "charge(Ratio)": self = .normal(.zero)
+    case "reheat": self = .reheat
+    case "freezeProtection(Ratio)": self = .freezeProtection(.zero)
+    case "No Operation": self = .noOperation
+    case "Scheduled Maintenance": self = .maintenance
+    case "Unknown":  self = .unknown
+    default: return nil
+    }
+  }
+
+  public var rawValue: RawValue {
+    switch self {
+    case .normal(let load): return "Normal with load: \(load.percentage)"
+    case .charge(let load): return "Charge with load: \(load.percentage)"
+    case .reheat: return "Reheat"
+    case .freezeProtection(let load): return "Freeze protection with load: \(load.percentage)"
+    case .noOperation: return "No Operation"
+    case .maintenance: return "Scheduled Maintenance"
+    case .unknown: return "Unknown"
+    }
   }
 }

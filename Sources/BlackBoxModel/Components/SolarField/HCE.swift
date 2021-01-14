@@ -37,61 +37,7 @@ let period = 300
  freezeTemperature + Sim.deltaTemperaturefrzPump
  */
 enum HCE {
-  @discardableResult
-  static func calculation(
-    _ solarField: inout SolarField,
-    collector: Collector,
-    loop: SolarField.Loop,
-    mode: Collector.OperationMode,
-    ambient: Temperature
-  ) -> (Double, Double) {
-    switch mode {
-    case .fixed:
-      return mode2(&solarField, collector, loop, ambient)
-    case .noOperation:
-      //period = 300
-      freezeProtectionCheck(&solarField)
-      return mode2(&solarField, collector, loop, ambient)
-    case .operating:
-      //period = 300
-      if /*meteo.windSpeed*/0 > SolarField.parameter.maxWind {
-        solarField.inFocus = 0.0
-      }
-      return mode1(&solarField, collector, loop, ambient)
-
-    case .freezeProtection, .variable:
-      if /*meteo.windSpeed*/0 > SolarField.parameter.maxWind
-        || collector.insolationAbsorber < Simulation.parameter.minInsolation
-      {
-        freezeProtectionCheck(&solarField)
-        return mode2(&solarField, collector, loop, ambient)
-      } else {
-        return mode1(&solarField, collector, loop, ambient)
-      }
-    }
-    
-  }
-
-  @inline(__always) static func freezeProtectionCheck(
-    _ solarField: inout SolarField) {
-    let freezingTemperature = SolarField.parameter.HTF.freezeTemperature
-      + Simulation.parameter.dfreezeTemperaturePump
-      + Simulation.parameter.tempTolerance
-    let antiFreezeFlow = SolarField.parameter.antiFreezeFlow.ratio 
-      * SolarField.parameter.maxMassFlow.rate
-    if solarField.header.temperature.inlet < freezingTemperature
-      || solarField.header.temperature.outlet < freezingTemperature
-    {
-      solarField.header.massFlow.rate = antiFreezeFlow
-      solarField.operationMode = .freezeProtection
-    } else {
-      solarField.operationMode = .noOperation
-      // status = LastHTF
-      solarField.header.massFlow = 0.0
-    }
-    solarField.inFocus = 0.0
-  }
-
+ 
   // Radiation losses per m2 Aperture; now with the new losses that take into
   // account the percentage of HCE that are broken, lost vacuum and fluorescent
   static func radiationLosses(
@@ -124,7 +70,7 @@ enum HCE {
     let circumference = 2 * .pi * col.rabsOut
     let deltaT2 = deltaT * deltaT
 
-    if col.newFunction == false {
+    if col.useIntegralRadialoss == false {
       if col.name.hasPrefix("SKAL-ET") {
         // temperature.0+10 considers that average loop temperature is higher than (T_in + T_out)/2
         vacuumHeatLoss = sigma * circumference * (t1 * t1 * t1 * t1 - t2 * t2 * t2 * t2)
@@ -168,9 +114,9 @@ enum HCE {
       // changed to use new radiation loss formula
       // E_a = 0.0000002: E_b = -0.0001: E_c = 0.0769
       let Ebs_HCE: Double
-      if temperature1 != temperature2 {
+      if t1 != t2 {
         // check what if temperature.1 < temperature.0?!
-        Ebs_HCE = (1 / 3 * emissionHCE[1]
+        Ebs_HCE = (1 / 3 * emissionHCE[2]
           * (t1 * t1 * t1 - t2 * t2 * t2) + 1 / 2
           * emissionHCE[1] * (t1 * t1 - t2 * t2)
           + emissionHCE[0] * (t1 - t2)) / (t1 - t2)
@@ -179,7 +125,7 @@ enum HCE {
         Ebs_HCE = emissionHCE[0] + emissionHCE[1] * t1
       }
 
-      if temperature1 != temperature2 {
+      if t1 != t1 {
         vacuumHeatLoss = sigma / (1 / Ebs_HCE + col.rabsOut
           / col.rglas * (1 / col.glassEmission - 1))
           * circumference / aperture * (1 / 5
@@ -306,7 +252,7 @@ enum HCE {
         (time, dumping) = mode2(&solarField, collector, loop, ambient)
       } else {
         // status = LastHTF
-        freezeProtectionCheck(&solarField)
+        solarField.freezeProtectionCheck()
         (time, dumping) = mode2(&solarField, collector, loop, ambient)
       }
 
@@ -398,8 +344,8 @@ enum HCE {
     defer { solarField.loops[loop.rawValue] = hce }
     
     var newTemp = hce.temperature.inlet
-    var oldTemp = newTemp
-    
+    var oldTemp = hce.temperature.inlet
+   
     outerIteration: for o in 1...5 {
       swap(&oldTemp, &newTemp)
       var inFocusLoop = 0.0

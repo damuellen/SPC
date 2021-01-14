@@ -18,8 +18,10 @@
             "name": "SolarPerformanceCalc",
             "program": "${workspaceFolder}/.build/debug/SolarPerformanceCalc",
             "args": [
+                "--excel",
                 "-c", "${workspaceFolder}/COM", 
                 "-m", "${workspaceFolder}/Model.playground/Resources/AlAbdaliyah.mto"
+            //  "-m", "${workspaceFolder}/COM/Meteofile_Hyperion1-200430_P50-TMYs_10min_wind_speed_modified.mto"
             ],
             "cwd": "${workspaceFolder}",
             "preLaunchTask": "swift-build-executable"

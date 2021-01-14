@@ -53,8 +53,10 @@ public enum BlackBoxModel {
       return
     }
     sun = SolarPosition(
-      coords: meteoData!.location.coordinates, tz: meteoData!.location.timezone,
-      year: yearOfSimulation, frequence: Simulation.time.steps
+      coords: meteoData!.location.coordinates,
+      tz: meteoData!.location.timezone,
+      year: yearOfSimulation,
+      frequence: Simulation.time.steps
     )
   }
 
@@ -63,7 +65,7 @@ public enum BlackBoxModel {
   ) throws {
     switch format {
     case .json:
-      let urls = JSONConfig.fileSearch(atPath: path)
+      break//let urls = JSONConfig.fileSearch(atPath: path)
       //try JSONConfig.loadConfiguration(urls.first!)
     case .text:
       try TextConfig.loadConfigurations(atPath: path)
@@ -108,10 +110,10 @@ public enum BlackBoxModel {
       }
 #if DEBUG
       if DateTime.isSunRise {
-        print(DateTime.current)
+      //  print(DateTime.current)
       }
       if DateTime.isSunSet {
-        print(DateTime.current) 
+      //  print(DateTime.current) 
       }
 #endif
       let temperature = Temperature(meteo: meteo)

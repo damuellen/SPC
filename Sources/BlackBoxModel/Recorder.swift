@@ -13,6 +13,7 @@ import Foundation
 import Meteo
 import SQLite
 import Utility
+import xlsxwriter
 
 public final class Recorder {
 
@@ -34,9 +35,10 @@ public final class Recorder {
     }
 
     var hasHistory: Bool {
-      if case .database = self { return true }
-      if case .inMemory = self { return true }
-      return false
+      return true
+      //if case .database = self { return true }
+      //if case .inMemory = self { return true }
+      //return false
     }
   }
 
@@ -179,7 +181,47 @@ public final class Recorder {
     print(annualRadiation.prettyDescription)
     print(annualPerformance.prettyDescription)
   }
+  
+  public func writeExcel(to path: String) {
+    let wb = Workbook(name: path)
+    let f1 = wb.addFormat().set(num_format: "d mmm hh:mm")
+    let f2 = wb.addFormat().set(num_format: "0.0")
+    let status = ["Date"] + Status.modes + Status.columns.map(\.0)
+    let energy = ["Date"] + Performance.columns.map(\.0)
 
+    let ws1 = wb.addWorksheet()
+      .column("A:A", width: 12, format: f1)
+      .column([1, status.count], width: 8, format: f2)
+      .hide_columns(status.count + 1)
+      .write(status, row: 0)
+    let ws2 = wb.addWorksheet()
+      .column("A:A", width: 12, format: f1)
+      .column([1, energy.count], width: 8, format: f2)
+      .hide_columns(energy.count + 1)
+      .write(energy, row: 0)
+    var r = 0
+    
+    let interval = Simulation.time.steps.interval
+    var date = Simulation.time.firstDateOfOperation!
+    zip(statusHistory, 1...).forEach { status,row in
+      ws1.write(.datetime(date), [row,0])
+      ws1.write(status.modes, row: row, col: 1)
+      ws1.write(status.numericalForm, row: row, col: 1 + status.modes.count)
+      r = row
+      date.addTimeInterval(interval)
+    }
+    date = Simulation.time.firstDateOfOperation!
+    ws1.autofilter(range: [0,0,r, status.count])
+    zip(performanceHistory, 1...).forEach  { performance, row in
+      ws2.write(.datetime(date), [row,0])
+      ws2.write(performance.numericalForm, row: row, col: 1)
+      r = row
+      date.addTimeInterval(interval)
+    }
+    ws2.autofilter(range: [0,0,r, energy.count])
+    wb.close()
+  }  
+  
   func callAsFunction(
     _ ts: DateTime, meteo: MeteoData, status: Status, energy: Performance
   ) {

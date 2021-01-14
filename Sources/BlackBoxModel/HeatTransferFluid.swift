@@ -104,6 +104,8 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
   func mixingTemperature(_ f1: HeatCycle, _ f2: HeatCycle)
     -> Temperature
   {
+    if f1.massFlow.rate == 0 { return f2.temperature.outlet }
+    if f2.massFlow.rate == 0 { return f1.temperature.outlet }
     let (t1, t2) = (f1.outletTemperature, f2.outletTemperature)
     let (mf1, mf2) = (f1.massFlow.rate, f2.massFlow.rate)
     guard mf1 + mf2 > 0 else { return Temperature((t1 + t2) / 2) }
@@ -291,27 +293,26 @@ extension HeatTransferFluid: Codable {
 }
 
 extension HeatTransferFluid {
-  public init(file: TextConfigFile, includesEnthalpy: Bool) throws {
+  public init(file: TextConfigFile) throws {
     let ln: (Int) throws -> Double = { try file.double(line: $0) }
     self.name = file.name
-    self.freezeTemperature = try Temperature(ln(10))
-    let heatCapacity = try [ln(13), ln(15)]
-    self.heatCapacity = heatCapacity
-    density = try [try ln(18), try ln(21), ln(24)]
-    viscosity = try [ln(27), ln(30), ln(33)]
-    thermCon = try [ln(36), ln(39), ln(42)]
-    maxTemperature = try Temperature(ln(45))  // .toKelvin
-    if includesEnthalpy {
+    self.freezeTemperature = try Temperature(celsius: ln(10))
+    self.heatCapacity = try [ln(13), ln(16)]
+    self.density = try [ln(19), ln(22), ln(25)]
+    self.viscosity = try [ln(28), ln(31), ln(34)]
+    self.thermCon = try [ln(37), ln(40), ln(43)]
+    self.maxTemperature = try Temperature(celsius: ln(46)) 
+    /* if includesEnthalpy {
       let h_T = try [ln(47), ln(48), ln(49), ln(50), ln(51)]
       enthaplyFromTemperature = Polynomial(h_T)
       let T_h = try [ln(53), ln(54), ln(55), ln(56), ln(57)]
       temperatureFromEnthalpy = Polynomial(T_h)
       useEnthalpy = try ln(59) > 0 ? true : false
 
-    } else {
+    } else { */
       self.useEnthalpy = false
       self.enthaplyFromTemperature = []
       self.temperatureFromEnthalpy = []
-    }
+    // }
   }
 }

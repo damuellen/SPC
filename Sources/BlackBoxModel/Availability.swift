@@ -23,7 +23,7 @@ struct Availability: Codable {
 
   private static let defaults: Availability.Values = .init(
     solarField: 0.993, breakHCE: 0.001, airHCE: 0.0, fluorHCE: 0.0,
-    reflMirror: 0.93, missingMirros: 0.0005, powerBlock: 1.0, storage: 0.98
+    reflMirror: 0.93, missingMirros: 0.0005, powerBlock: 1.0, storage: 1.0
   )
 
   init(_ data: [Values]) {
@@ -65,7 +65,7 @@ extension Availability {
           reflMirror: Ratio(percent: ln(198 + offset)),
           missingMirros: Ratio(percent: ln(238 + offset)),
           powerBlock: Ratio(percent: ln(278 + offset)),
-          storage: Ratio(percent: 98) //ln(318 + offset))
+          storage: Ratio(percent: 100) //ln(318 + offset))
         )
       )
     }

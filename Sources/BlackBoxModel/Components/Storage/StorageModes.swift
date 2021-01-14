@@ -99,7 +99,7 @@ extension Storage {
       // Temperatures remain constant
       storage.setMassFlow(rate: 0)
       thermalPower = 0
-      parasitics = 0
+      parasitics = Storage.parasitics(&storage)
     }
     return (thermalPower, parasitics)
     /*Storage Heat Losses:
@@ -143,14 +143,14 @@ extension Storage {
   private static func storageCharging(
     storage: inout Storage,
     solarField: inout SolarField,
-    powerBlock: HeatCycle, heat: inout ThermalPower)
+    powerBlock: PowerBlock, heat: inout ThermalPower)
     -> Double
   {
     let heatExchanger = HeatExchanger.parameter
     
     storage.inletTemperature(outlet: solarField)
     // FIXME: Check again
-    storage.massFlow = Plant.requiredMassFlow() - powerBlock.massFlow
+    storage.massFlow = Plant.requiredMassFlow() - powerBlock.designMassFlow
     storage.massFlow.adjust(factor: parameter.heatExchangerEfficiency)
     
     var fittedTemperature: Double
@@ -195,7 +195,7 @@ extension Storage {
       }
       
       // reduce HTF massflow in solarfield
-      solarField.massFlow = powerBlock.massFlow + storage.massFlow
+      solarField.massFlow = powerBlock.designMassFlow + storage.massFlow
       
       heat.solar.kiloWatt = solarField.massFlow.rate * solarField.deltaHeat
       
@@ -212,7 +212,7 @@ extension Storage {
     // heat can be stored
     
     storage.setTemperature(inlet: Heater.parameter.nominalTemperatureOut)
-    storage.massFlow = powerBlock.massFlow
+    storage.massFlow = powerBlock.designMassFlow
     
     var fittedTemperature: Double
     if parameter.temperatureCharge.coefficients[1] > 0 { // usually = 0
@@ -237,7 +237,7 @@ extension Storage {
       
       storage.setMassFlow(rate: thermalPower / storage.deltaHeat * 1_000)
       
-      powerBlock.massFlow = storage.massFlow
+      powerBlock.designMassFlow = storage.massFlow
     }
     return thermalPower
   }
@@ -272,16 +272,14 @@ extension Storage {
         thermalPower *= parameter.heatExchangerCapacity
         storage.setMassFlow(rate: thermalPower / storage.deltaHeat * 1_000)
         //#warning("The implementation here differs from PCT")
-        if case .freezeProtection = solarField.operationMode {
-          
-          powerBlock.setMassFlow(rate: storage.massFlow.rate
-            * parameter.heatExchangerEfficiency / 0.97) // - solarField.massFlow
+        if case .freezeProtection = solarField.operationMode {          
+          powerBlock.designMassFlow.rate = storage.massFlow.rate
+            * parameter.heatExchangerEfficiency / 0.97 // - solarField.massFlow
         } else {
           // Mass flow is correctd by new factor
-          powerBlock.setMassFlow(rate:
+          powerBlock.designMassFlow.rate = 
             (storage.massFlow + solarField.massFlow).rate
-              * parameter.heatExchangerEfficiency / 0.97
-          )
+              * parameter.heatExchangerEfficiency / 0.97          
         }
       }
       let maxLoad: Double = 1
@@ -307,7 +305,7 @@ extension Storage {
         
         parasitics = Storage.parasitics(&storage)
         break
-      } else if storage.massFlow.rate <= 0.05 * powerBlock.massFlow.rate {
+      } else if storage.massFlow.rate <= 0.05 * powerBlock.designMassFlow.rate {
         thermalPower = 0.0
         storage.operationMode = .noOperation
         parasitics = 0.0
@@ -329,7 +327,7 @@ extension Storage {
     /// the rest is heated by SF
     var thermalPower = 0.0
     
-    storage.massFlow = powerBlock.massFlow(subtracted: solarField)
+    storage.massFlow = powerBlock.designMassFlow - solarField.massFlow
     
     storage.inletTemperature(outlet: powerBlock)
     

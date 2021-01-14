@@ -562,7 +562,7 @@ public struct Plant {
       if powerBlock.temperature.inlet
         < HeatExchanger.parameter.temperature.htf.inlet.min
         || powerBlock.massFlow.rate == 0//  || status.storage.operationMode.isFreezeProtection
-      //  || status.solarField.operationMode.isFreezeProtection
+        || solarField.operationMode.isFreezeProtection
       {
         if heater.operationMode.isFreezeProtection == false {
           powerBlock.temperatureLoss(wrt: solarField, storage)
@@ -642,7 +642,7 @@ public struct Plant {
 
     if storage.heat > 0 {  // Performance surplus
       if storage.charge.ratio < Storage.parameter.chargeTo,
-        solarField.massFlow >= powerBlock.massFlow
+        solarField.massFlow >= powerBlock.designMassFlow
       {  // 1.1
         heat.production = heat.solar
         heat.production += heat.storage
