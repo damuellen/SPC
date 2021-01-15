@@ -280,12 +280,12 @@ extension Storage {
     let storage = Storage.parameter
     let solarField = SolarField.parameter
 /*
-    solarField.massFlow.min = MassFlow(
-      solarField.massFlow.min.rate / 100 * solarField.massFlow.rate
+    SolarField.parameter.massFlow.min = MassFlow(
+      SolarField.parameter.massFlow.min.rate / 100 * SolarField.parameter.massFlow.rate
     )
   
-    solarField.antiFreezeFlow = MassFlow(
-      solarField.antiFreezeFlow.rate / 100 * solarField.massFlow.rate
+    SolarField.parameter.antiFreezeFlow = MassFlow(
+      SolarField.parameter.antiFreezeFlow.rate / 100 * SolarField.parameter.massFlow.rate
     )
     */
     if solarField.pumpParastics.isEmpty {

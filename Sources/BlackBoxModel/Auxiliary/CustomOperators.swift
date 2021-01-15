@@ -9,7 +9,7 @@
 //
 
 import Libc
-import Utility
+import Foundation
 
 precedencegroup ExponentiationPrecedence {
   associativity: right
@@ -30,7 +30,7 @@ extension Double {
 }
 
 func * (lhs: String, rhs: String) -> String {
-  var width = TerminalController.terminalWidth() ?? 80
+  var width = terminalWidth() ?? 80
   width.clamp(to: 70...100)
   var c = width - lhs.count - rhs.count - 1
   c = c < 0 ? 1 : c
@@ -41,4 +41,21 @@ infix operator |>
 
 func |> <T, U>(value: T, function: ((T)-> U)) -> U {
     return function(value)
+}
+
+func terminalWidth() -> Int? {
+#if os(Windows)
+  var csbi: CONSOLE_SCREEN_BUFFER_INFO = CONSOLE_SCREEN_BUFFER_INFO()
+  if !GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi) {
+    return nil
+  }
+  return Int(csbi.srWindow.Right - csbi.srWindow.Left) + 1
+#else
+  // Try to get from environment.
+  if let columns = ProcessInfo.processInfo.environment["COLUMNS"], let width = Int(columns) {
+    return width
+  } else {
+    return nil
+  }
+#endif
 }

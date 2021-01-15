@@ -27,9 +27,9 @@ extension Heater.Parameter: CustomStringConvertible {
     + "Capacity of HTF-Heater [MW]:" * Design.layout.heater.description
     + "Efficiency [%]:" * efficiency.percentage.description
     + "Outlet Temperature for Freeze Protection [°C]:"
-    * antiFreezeTemperature.celsius.description
+    * String(format: "%3.1f", antiFreezeTemperature.celsius)
     + "Nominal Outlet Temperature [°C]:"
-    * nominalTemperatureOut.celsius.description
+    * String(format: "%3.1f", nominalTemperatureOut.celsius)
     + "Maximum Mass Flow [kg/s]:" * maximumMassFlow.description
     + "Minimum Load [%]:" * minLoad.percentage.description
     + "Parasitics at Full Load [MW]:" * nominalElectricalParasitics.description

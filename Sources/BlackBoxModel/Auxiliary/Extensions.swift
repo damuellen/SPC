@@ -10,7 +10,6 @@
 
 import DateGenerator
 import Dispatch
-import Utility
 
 func formatting(_ values: [Double], _ labels: [String]) -> String {
   let pairs = zip(    
@@ -60,7 +59,7 @@ extension DefaultStringInterpolation {
 }
 
 public func decorated(_ title: String) -> String {
-  var width = TerminalController.terminalWidth() ?? 80
+  var width = terminalWidth() ?? 80
   width.clamp(to: 70...100)
   let half = (width - title.count - 8) / 2
   let line = String(repeating: "─", count: half)
@@ -68,7 +67,7 @@ public func decorated(_ title: String) -> String {
 }
 
 public func heading(_ title: String) -> String {
-  var width = TerminalController.terminalWidth() ?? 80
+  var width = terminalWidth() ?? 80
   width.clamp(to: 70...100)
   let half = (width - title.count - 8) / 2
   let s = String(repeating: "─", count: half)

@@ -28,9 +28,6 @@ let package = Package(
       name: "Libc",
       dependencies: []),
     .target(
-      name: "Utility",
-      dependencies: ["Libc"]),
-    .target(
       name: "Config",
       dependencies: [],
       swiftSettings: swiftSettings),
@@ -59,7 +56,7 @@ let package = Package(
     .target(
       name: "BlackBoxModel",
       dependencies: [
-        "Config", "Meteo", "SolarPosition", "CIAPWSIF97", "Utility",
+        "Config", "Meteo", "SolarPosition", "CIAPWSIF97",
         .product(name: "SQLite", package: "SQLite.swift"),
         .product(name: "xlsxwriter", package: "xlsxwriter.swift")
       ],

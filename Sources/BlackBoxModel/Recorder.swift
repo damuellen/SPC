@@ -12,13 +12,11 @@ import DateGenerator
 import Foundation
 import Meteo
 import SQLite
-import Utility
 import xlsxwriter
 
 public final class Recorder {
 
 #if DEBUG && !os(Windows)
-  let animation = NinjaProgressAnimation(stream: stdoutStream)
   private var progress: Int = 0
 #endif
   let interval = Simulation.time.steps
@@ -272,18 +270,17 @@ public final class Recorder {
 #if DEBUG && !os(Windows)
     if progress != ts.month {
       progress = ts.month
-      animation.update(
-        step: progress,
-        total: 12,
-        text: "recording month."
-      )
+      print(" [\(progress)/\(12)] recording month…", terminator: "\r")
+      fflush(stdout)   
     }
 #endif
   }
 
   public func finish() -> Recording {
   #if DEBUG && !os(Windows)
-    animation.clear()
+    let clearLineString = "\u{001B}[2K"
+    print(clearLineString, terminator: "\r")
+    fflush(stdout)
   #endif
     if case .custom(_) = mode {
       customIntervalStream?.write(stringBuffer)
