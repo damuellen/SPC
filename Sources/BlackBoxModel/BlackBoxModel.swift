@@ -92,7 +92,7 @@ public enum BlackBoxModel {
     for (meteo, date) in zip(🌦, 📅) {
 
       DateTime.setCurrent(date: date)
-
+      let dt = DateTime.current
       Maintenance.checkSchedule(date)
 
       if let position = 🌞[date] {
@@ -148,7 +148,7 @@ public enum BlackBoxModel {
 
       plant.electricalParasitics.solarField = status.solarField.parasitics()
 
-      plant.calculate(&status, ambient: temperature)
+      plant.perform(&status, ambient: temperature)
 
       if Design.hasStorage {
         // Calculate the operating state of the salt
@@ -171,7 +171,7 @@ public enum BlackBoxModel {
       }
 
       let performance = plant.performance()
-      let dt = DateTime.current
+      
 //    print(decorated(dt.description), status, performance)
 //    print()
 

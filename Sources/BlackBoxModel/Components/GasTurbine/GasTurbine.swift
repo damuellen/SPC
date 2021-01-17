@@ -94,7 +94,7 @@ public struct GasTurbine: Parameterizable {
     return (neededLoad, gasTurbineGross) // electricPerformance.GasTurbinegross - electricPerformance.parasiticsGasTurbine // net GasTurbine Power Produced
   }
 
-  static func update(
+  static func perform(
   //  storage: inout Storage,
   //  powerBlock: inout PowerBlock,
     boiler: Boiler.OperationMode,

@@ -143,16 +143,20 @@ struct SolarPerformanceCalculator: ParsableCommand {
       mode = .custom(interval: Interval[steps])
     } else if database {
       mode = .database
+    } else if excel {
+      mode = .excel
     } else {
       mode = .csv
     }
 
-    let log = Recorder(name: nameResults, path: resultsPath, output: mode)
+    let log = Recorder(
+      customName: nameResults, customPath: resultsPath, outputMode: mode
+    )
 
     SolarPerformanceCalculator.result = BlackBoxModel.runModel(with: log)
 
-    log.printResult()
-    if excel { log.writeExcel(to: "Results.xlsx") }
+  //  log.printResult()
+    if excel { log.writeExcel() }
     log.clearResults()
   }
 

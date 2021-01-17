@@ -49,7 +49,7 @@ struct SolarFieldCalculator: ParsableCommand {
 
     openFile(atPath: "Solarfield.xlsx")
     print(TextTable.overview(style: Style.fancy))
-    
+
     if let output = output {
       String(
         data: try JSONEncoder().encode(SolarFieldModel()),

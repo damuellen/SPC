@@ -17,14 +17,18 @@ import xlsxwriter
 public final class Recorder {
 
 #if DEBUG && !os(Windows)
+  /// Tracking the month
   private var progress: Int = 0
 #endif
-  let interval = Simulation.time.steps
-  let stride: Int
+  /// Number of values per hour
+  private let interval = Simulation.time.steps
+  /// Changes the resolution of the output
+  private let stride: Int
+  /// Specifies what the output is
   let mode: Mode
 
   public enum Mode {
-    case database, csv, inMemory
+    case database, csv, excel, inMemory
     case custom(interval: DateGenerator.Interval)
 
     var hasFileOutput: Bool {
@@ -33,18 +37,20 @@ public final class Recorder {
     }
 
     var hasHistory: Bool {
-      return true
-      //if case .database = self { return true }
-      //if case .inMemory = self { return true }
-      //return false
+      if case .excel = self { return true }
+      if case .database = self { return true }
+      if case .inMemory = self { return true }
+      return false
     }
   }
 
   private var iso8601_Hourly: String = ""
   private var iso8601_Interval: String = ""
   private var stringBuffer: String = ""
-
+  /// sqlite file
   private var db: Connection? = nil
+
+  private var xlsx: Workbook? = nil
   /// Totals
   private var annualPerformance = Performance()
   private var annualRadiation = SolarRadiation()
@@ -61,64 +67,73 @@ public final class Recorder {
   /// All past states of the plant
   private var statusHistory: [Status] = []
   private var performanceHistory: [Performance] = []
+  private var sunHistory: [SolarRadiation] = []
 
-  public init() {
-    self.mode = .inMemory
+  public init(mode: Mode) {
+    self.mode = mode
     self.stride = 1
+    self.parent = ""
   }
+  /// Common prefix of output
+  var name = "Results_"
+  /// Directory path of output
+  private let parent: String
+  /// Output name suffix
+  private var suffix: String = "001"
 
-  public init(name: String? = nil, path: String? = nil, output: Mode) {
-
-    let 💾 = FileManager.default
-    let suffix: String
-
-    if case .inMemory = output {
+  public init(
+   customName: String? = nil,
+   customPath: String? = nil,
+   outputMode: Mode
+  ) {
+    self.parent = customPath ?? ""
+        
+    if case .inMemory = outputMode {
       statusHistory.reserveCapacity(8760 * interval.rawValue)
       performanceHistory.reserveCapacity(8760 * interval.rawValue)
     }
 
-    if case .custom(let i) = output, i.isMultiple(of: interval) {
+    if case .custom(let i) = outputMode, i.isMultiple(of: interval) {
       self.stride = interval.rawValue / i.rawValue
-      self.mode = output
+      self.mode = outputMode
     } else {
-      self.mode = output
+      self.mode = outputMode
       self.stride = 1
     }
 
-    let urlDir = URL(fileURLWithPath: path ?? "")
+    let urlDir = URL(fileURLWithPath: parent)
 
-    if output.hasFileOutput, !urlDir.hasDirectoryPath {
+    if outputMode.hasFileOutput, !urlDir.hasDirectoryPath {
       print("Invalid path for results: \(urlDir.path)\n")
       print("There will be no output files.\n")
-      return
     }
 
-    if let name = name {
-      suffix = name
+    if let name = customName {
+      self.name = name
     } else {
-      let contents = try? 💾.contentsOfDirectory(atPath: urlDir.path)
-
-      let oldResults = contents?.filter { $0.hasSuffix("ly.csv") }
-
-      let numbers = oldResults?.compactMap { filename in
-        return Int(filename.filter(\.isWholeNumber))
-      }
+      let numbers = checkForResults(atPath: urlDir.path)
       let n = (numbers?.max() ?? 0) + 1
-      suffix = String(format: "%03d", n)
+      self.suffix = String(format: "%03d", n)
     }
 
     var urls = [URL]()
 
-    if case .database = output {
-      let url = urlDir.appendingPathComponent("Results_\(suffix).sqlite3") 
+    if case .excel = outputMode {
+      let url = urlDir.appendingPathComponent("\(name)\(suffix).xlsx") 
+      self.xlsx = Workbook(name: url.path)
+      urls = [url]
+    }
+
+    if case .database = outputMode {
+      let url = urlDir.appendingPathComponent("\(name)\(suffix).sqlite3") 
       self.db = try! Connection(url.path)
       urls = [url]
     }
 
-    if case .csv = output  {
+    if case .csv = outputMode  {
       let tableHeader = headers.name + .lineBreak + headers.unit + .lineBreak
-      let dailyResultsURL = urlDir.appendingPathComponent("Results_\(suffix)_daily.csv")
-      let hourlyResultsURL = urlDir.appendingPathComponent("Results_\(suffix)_hourly.csv")
+      let dailyResultsURL = urlDir.appendingPathComponent("\(name)\(suffix)_daily.csv")
+      let hourlyResultsURL = urlDir.appendingPathComponent("\(name)\(suffix)_hourly.csv")
       self.dailyResultsStream = OutputStream(url: dailyResultsURL, append: false)
       self.hourlyResultsStream = OutputStream(url: hourlyResultsURL, append: false)
       self.dailyResultsStream?.open()
@@ -141,7 +156,7 @@ public final class Recorder {
         + intervalTime + .lineBreak
         + headers.unit + .lineBreak
 
-      let resultsURL = urlDir.appendingPathComponent("Results_\(suffix)_\(i).csv")
+      let resultsURL = urlDir.appendingPathComponent("\(name)\(suffix)_\(i).csv")
 
       customIntervalStream = OutputStream(url: resultsURL, append: false)
       stringBuffer.reserveCapacity(200 * 8760 * i.rawValue)
@@ -149,7 +164,7 @@ public final class Recorder {
       customIntervalStream?.write(tableHeader)
       urls = [resultsURL]
     }
-    if case .inMemory = output { return } 
+    if case .inMemory = outputMode { return } 
     print("Results: \(urlDir.path)/")
     urls.map(\.lastPathComponent).enumerated()
       .forEach { print("  \($0.offset+1).\t", $0.element) }
@@ -179,47 +194,7 @@ public final class Recorder {
     print(annualRadiation.prettyDescription)
     print(annualPerformance.prettyDescription)
   }
-  
-  public func writeExcel(to path: String) {
-    let wb = Workbook(name: path)
-    let f1 = wb.addFormat().set(num_format: "d mmm hh:mm")
-    let f2 = wb.addFormat().set(num_format: "0.0")
-    let status = ["Date"] + Status.modes + Status.columns.map(\.0)
-    let energy = ["Date"] + Performance.columns.map(\.0)
-
-    let ws1 = wb.addWorksheet()
-      .column("A:A", width: 12, format: f1)
-      .column([1, status.count], width: 8, format: f2)
-      .hide_columns(status.count + 1)
-      .write(status, row: 0)
-    let ws2 = wb.addWorksheet()
-      .column("A:A", width: 12, format: f1)
-      .column([1, energy.count], width: 8, format: f2)
-      .hide_columns(energy.count + 1)
-      .write(energy, row: 0)
-    var r = 0
-    
-    let interval = Simulation.time.steps.interval
-    var date = Simulation.time.firstDateOfOperation!
-    zip(statusHistory, 1...).forEach { status,row in
-      ws1.write(.datetime(date), [row,0])
-      ws1.write(status.modes, row: row, col: 1)
-      ws1.write(status.numericalForm, row: row, col: 1 + status.modes.count)
-      r = row
-      date.addTimeInterval(interval)
-    }
-    date = Simulation.time.firstDateOfOperation!
-    ws1.autofilter(range: [0,0,r, status.count])
-    zip(performanceHistory, 1...).forEach  { performance, row in
-      ws2.write(.datetime(date), [row,0])
-      ws2.write(performance.numericalForm, row: row, col: 1)
-      r = row
-      date.addTimeInterval(interval)
-    }
-    ws2.autofilter(range: [0,0,r, energy.count])
-    wb.close()
-  }  
-  
+   
   func callAsFunction(
     _ ts: DateTime, meteo: MeteoData, status: Status, energy: Performance
   ) {
@@ -231,6 +206,8 @@ public final class Recorder {
     let solar = SolarRadiation(
       meteo: meteo, cosTheta: status.collector.cosTheta
     )
+    
+    self.sunHistory.append(solar)
 
     if mode.hasFileOutput {
 
@@ -277,11 +254,11 @@ public final class Recorder {
   }
 
   public func finish() -> Recording {
-  #if DEBUG && !os(Windows)
+#if DEBUG && !os(Windows)
     let clearLineString = "\u{001B}[2K"
     print(clearLineString, terminator: "\r")
     fflush(stdout)
-  #endif
+#endif
     if case .custom(_) = mode {
       customIntervalStream?.write(stringBuffer)
       stringBuffer.removeAll()
@@ -297,6 +274,18 @@ public final class Recorder {
       performanceHistory: performanceHistory,
       statusHistory: statusHistory
     )
+  }
+
+  private func checkForResults(atPath path: String) -> [Int]? {
+    let 💾 = FileManager.default
+
+    let contents = try? 💾.contentsOfDirectory(atPath: path)
+
+    let results = contents?.filter { $0.hasPrefix(name) }
+
+    return results?.compactMap { filename in
+      return Int(filename.filter(\.isWholeNumber))
+    }
   }
 
   private var hourCounter: Int = 1 {
@@ -338,8 +327,57 @@ public final class Recorder {
     }
   }
 
-  // MARK: Output database
+ public func writeExcel() {
+    guard let wb = xlsx else { return }
+    let f1 = wb.addFormat().set(num_format: "d mmm hh:mm")
+    let f2 = wb.addFormat().set(num_format: "0.0")
 
+    let statusCaptions = ["Date"] 
+      + SolarRadiation.columns.map(\.0) 
+      + Status.modes + Status.columns.map(\.0)
+    let statusCount = statusCaptions.count
+    let modesCount = Status.modes.count
+    let energyCaptions = ["Date"] 
+      + Performance.columns.map(\.0)
+    let energyCount = energyCaptions.count
+
+    let ws1 = wb.addWorksheet()
+      .column("A:A", width: 12, format: f1)
+      .column([1, statusCount], width: 8, format: f2)
+      .hide_columns(statusCount + 1)
+      .write(statusCaptions, row: 0)
+
+    let ws2 = wb.addWorksheet()
+      .column("A:A", width: 12, format: f1)
+      .column([1, energyCount], width: 8, format: f2)
+      .hide_columns(energyCount + 1)
+      .write(energyCaptions, row: 0)
+    
+    let interval = Simulation.time.steps.interval
+    var date = Simulation.time.firstDateOfOperation!
+
+    statusHistory.indices.forEach { i in
+      ws1.write(.datetime(date), [i+1,0])
+      ws1.write(sunHistory[i].numericalForm, row: i+1, col: 1)
+      ws1.write(statusHistory[i].modes, row: i+1, col: 5)
+      ws1.write(statusHistory[i].numericalForm, row: i+1, col: 5 + modesCount)
+      date.addTimeInterval(interval)
+    }
+
+    date = Simulation.time.firstDateOfOperation!
+    ws1.autofilter(range: [0,0,statusHistory.count+1, statusCount])
+
+    performanceHistory.indices.forEach  { i in
+      ws2.write(.datetime(date), [i+1,0])
+      ws2.write(performanceHistory[i].numericalForm, row: i+1, col: 1)
+      date.addTimeInterval(interval)
+    }
+
+    ws2.autofilter(range: [0,0,performanceHistory.count+1, energyCount])
+    wb.close()
+  }
+
+  // MARK: Output database
   public func storeInDB() {
     guard let db = db else { return }
 
@@ -373,7 +411,6 @@ public final class Recorder {
   // MARK: Output Streams
 
   private var customIntervalStream: OutputStream?
-
   private var dailyResultsStream: OutputStream?
   private var hourlyResultsStream: OutputStream?
 

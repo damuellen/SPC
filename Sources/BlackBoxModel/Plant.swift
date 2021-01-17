@@ -49,7 +49,7 @@ public struct Plant {
   }
 
   /// Calculation of the heat supplied by the solar field
-  private mutating func update(
+  private mutating func perform(
     _ solarField: SolarField,
     _ collector: Collector,
     _ steamTurbine: SteamTurbine
@@ -84,7 +84,7 @@ public struct Plant {
 
   // MARK: - PowerBlock
 
-  mutating func calculate(_ status: inout Status, ambient: Temperature) {
+  mutating func perform(_ status: inout Status, ambient: Temperature) {
     let collector = status.collector
     var solarField = status.solarField
     var powerBlock = status.powerBlock
@@ -232,7 +232,7 @@ public struct Plant {
       )
 
       if Design.hasSolarField {
-        solarField.massFlow = update(solarField, collector, steamTurbine)
+        solarField.massFlow = perform(solarField, collector, steamTurbine)
         powerBlock.massFlow = solarField.massFlow
       }
 
@@ -368,7 +368,7 @@ public struct Plant {
           heat.heatExchanger.watt *= electricEnergyFactor
 
           heatDiff *= electricEnergyFactor
-          var Qsf_load = 0.0
+          var Qsf_load = 1.0
           Qsf_load *= electricEnergyFactor
 
           let fuel = Availability.fuel
@@ -517,18 +517,49 @@ public struct Plant {
 
     Iteration: while true {
       if Design.hasStorage {
-        updateStorage(
-          &storage,
+           // Demand for operation of the storage and adjustment of the powerblock mass flow
+        Storage.demandStrategy(
+          storage: &storage,
+          powerBlock: &powerBlock,
+          heat: heat
+        )
+
+        let energy = Storage.perform(
+          storage: &storage,
           solarField: &solarField,
+          steamTurbine: &steamTurbine,
           powerBlock: &powerBlock,
           heater: &heater,
-          steamTurbine: &steamTurbine,
-          fuelAvailable: fuel
+          fuelAvailable: fuel,
+          heat: &heat
         )
+
+        heat.storage.megaWatt = -energy.heat
+        fuelConsumption.heater = energy.fuel
+        electricalParasitics.storage = energy.electric
+
+        let thermal = -storage.massFlow.rate * storage.deltaHeat / 1_000
+
+        heat.storage.megaWatt = storage.calculate(thermal)
+
+        if storage.heat > 0 {  // Performance surplus
+          if storage.charge.ratio < Storage.parameter.chargeTo,
+            solarField.massFlow >= powerBlock.designMassFlow
+          {  // 1.1
+            heat.production = heat.solar
+            heat.production += heat.storage
+          } else {  // heat cannot be stored
+            heat.production = heat.solar
+            heat.production.megaWatt -= storage.heat
+          }
+        } else {  // Performance deficit
+          heat.production = heat.solar
+          heat.production += heat.storage
+        }
       }
 
       if Design.hasGasTurbine {
-        electricity.gasTurbineGross = GasTurbine.update(
+        electricity.gasTurbineGross = GasTurbine.perform(
           //        storage: &storage,
           //        powerBlock: &powerBlock,
           boiler: boiler.operationMode,
@@ -603,57 +634,6 @@ public struct Plant {
       powerBlock.outletTemperature(heatExchanger)
     }
     return heatDiff
-  }
-
-  // MARK: - Storage
-
-  private mutating func updateStorage(
-    _ storage: inout Storage,
-    solarField: inout SolarField,
-    powerBlock: inout PowerBlock,
-    heater: inout Heater,
-    steamTurbine: inout SteamTurbine,
-    fuelAvailable fuel: Double
-  ) {
-    // Demand for operation of the storage and adjustment of the powerblock mass flow
-    Storage.demandStrategy(
-      storage: &storage,
-      powerBlock: &powerBlock,
-      heat: heat
-    )
-
-    let energy = Storage.update(
-      storage: &storage,
-      solarField: &solarField,
-      steamTurbine: &steamTurbine,
-      powerBlock: &powerBlock,
-      heater: &heater,
-      fuelAvailable: fuel,
-      heat: &heat
-    )
-
-    heat.storage.megaWatt = -energy.heat
-    fuelConsumption.heater = energy.fuel
-    electricalParasitics.storage = energy.electric
-
-    let thermal = -storage.massFlow.rate * storage.deltaHeat / 1_000
-
-    heat.storage.megaWatt = storage.calculate(thermal)
-
-    if storage.heat > 0 {  // Performance surplus
-      if storage.charge.ratio < Storage.parameter.chargeTo,
-        solarField.massFlow >= powerBlock.designMassFlow
-      {  // 1.1
-        heat.production = heat.solar
-        heat.production += heat.storage
-      } else {  // heat cannot be stored
-        heat.production = heat.solar
-        heat.production.megaWatt -= storage.heat
-      }
-    } else {  // Performance deficit
-      heat.production = heat.solar
-      heat.production += heat.storage
-    }
   }
 
   // MARK: - Heater

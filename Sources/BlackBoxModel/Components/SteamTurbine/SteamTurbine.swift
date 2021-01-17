@@ -191,7 +191,7 @@ public struct SteamTurbine: Parameterizable {
     // Dependency of Heat Rate on Ambient Temperature  - DRY COOLING -
     //#warning("The implementation here differs from PCT")
     if parameter.efficiencyTemperature[1] >= 1 {
-      let (dc, loadMax) = DryCooling.update(
+      let (dc, loadMax) = DryCooling.perform(
         steamTurbineLoad: load.ratio,
         temperature: ambient
       )

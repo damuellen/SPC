@@ -97,18 +97,6 @@ extension String {
   static var separator: String { ", " }
 }
 
-final class Cache<T: Hashable> {
-  var cachedValues: [Int: T] = [:]
-
-  func lookupResult(for hash: Int) -> T? {
-    cachedValues[hash]
-  }
-
-  func update(hash: Int, result: T) {
-    cachedValues[hash] = result
-  }
-}
-
 @inline(__always)
 public func unreachable() -> Never {
   unsafeBitCast((), to: Never.self)

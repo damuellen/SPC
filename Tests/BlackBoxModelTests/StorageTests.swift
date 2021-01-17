@@ -13,7 +13,7 @@ class StorageTests: XCTestCase {
     let fuel = 0.0
     var plant = Plant.setup()
 
-    let energy = Storage.update(
+    let energy = Storage.perform(
       storage: &storage,
       solarField: &solarField,
       steamTurbine: &steamTurbine,

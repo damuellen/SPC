@@ -22,7 +22,13 @@ public struct Storage: Parameterizable, HeatCycle {
 
   var antiFreezeTemperature: Double = 270.0
   
-  var heat: Double = 0.0
+  var heat: Double = 0.0 {
+    willSet {
+      if newValue > 0 {
+     //   print(newValue)
+      }
+    }
+  }
   
   var charge: Ratio = 0.0
 
@@ -65,7 +71,7 @@ public struct Storage: Parameterizable, HeatCycle {
   
   public static var parameter: Parameter = ParameterDefaults.st
   
-  static func update(
+  static func perform(
     storage: inout Storage,
     solarField: inout SolarField,
     steamTurbine: inout SteamTurbine,
