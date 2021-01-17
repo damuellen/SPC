@@ -2,9 +2,9 @@
 import PackageDescription
 
 let condition = BuildSettingCondition.when(configuration: .release)
-let cSettings = [CSetting.unsafeFlags(["-ffast-math", "-O3",  "-fomit-frame-pointer", "-funroll-loops"])]
-var swiftSettings = [SwiftSetting.unsafeFlags(["-Ounchecked", "-enforce-exclusivity=unchecked", "-DRELEASE"], condition)]
-swiftSettings.append(.define("DEBUG", .when(configuration: .debug)))
+let c = [CSetting.unsafeFlags(["-ffast-math", "-O3",  "-fomit-frame-pointer", "-funroll-loops"])]
+var swift = [SwiftSetting.unsafeFlags(["-Ounchecked", "-enforce-exclusivity=unchecked", "-DRELEASE"], condition)]
+swift.append(.define("DEBUG", .when(configuration: .debug)))
 let package = Package(
   name: "SPC",
   platforms: [
@@ -24,102 +24,67 @@ let package = Package(
 //  .package(url: "https://github.com/jpsim/Yams.git", from: "4.0.1")
     ],
   targets: [
-    .target(
-      name: "Libc",
-      dependencies: []),
-    .target(
-      name: "Config",
-      dependencies: [],
-      swiftSettings: swiftSettings),
-    .target(
-      name: "DateGenerator",
-      dependencies: [],
-      swiftSettings: swiftSettings),
-    .target(
-      name: "CPikchr",
-      dependencies: [],
-      cSettings: cSettings),
-    .target(
-      name: "CSPA",
-      dependencies: [],
-      cSettings: cSettings),
-    .target(
-      name: "CSOLPOS",
-      cSettings: cSettings),
-    .target(
-      name: "CIAPWSIF97",
-      cSettings: cSettings),
-    .target(
-      name: "SolarPosition",
+    .target(name: "Libc"),
+    .target(name: "Config", swiftSettings: swift),
+    .target(name: "DateGenerator", swiftSettings: swift),
+    .target(name: "CPikchr", cSettings: c),
+    .target(name: "CSPA", cSettings: c),
+    .target(name: "CSOLPOS", cSettings: c),
+    .target(name: "CIAPWSIF97", cSettings: c),
+    .target(name: "SolarPosition",
       dependencies: ["DateGenerator", "CSOLPOS", "CSPA"],
-      swiftSettings: swiftSettings),
-    .target(
-      name: "BlackBoxModel",
+      swiftSettings: swift),
+    .target(name: "BlackBoxModel",
       dependencies: [
         "Config", "Meteo", "SolarPosition", "CIAPWSIF97",
         .product(name: "SQLite", package: "SQLite.swift"),
-        .product(name: "xlsxwriter", package: "xlsxwriter.swift")
-      ],
-      swiftSettings: swiftSettings),
-     .target(
-      name: "SolarFieldModel",
+        .product(name: "xlsxwriter", package: "xlsxwriter.swift")],
+      swiftSettings: swift),
+     .target(name: "SolarFieldModel",
       dependencies: ["Libc"],
-      swiftSettings: swiftSettings),
-    .target(
-      name: "SolarFieldCalc",
+      swiftSettings: swift),
+    .target(name: "SolarFieldCalc",
       dependencies: [
         "SolarFieldModel", "CPikchr",
         .product(name: "ArgumentParser", package: "swift-argument-parser"),
         .product(name: "xlsxwriter", package: "xlsxwriter.swift")],
-      swiftSettings: swiftSettings),
-    .target(
-      name: "Meteo",
+      swiftSettings: swift),
+    .target(name: "Meteo",
       dependencies: ["DateGenerator", "SolarPosition"],
-      swiftSettings: swiftSettings),
-    .target(
-      name: "SolarPerformanceCalc",
+      swiftSettings: swift),
+    .target(name: "SolarPerformanceCalc",
       dependencies: [
         "Config", "BlackBoxModel",
         .product(name: "ArgumentParser", package: "swift-argument-parser"),
-        .product(name: "xlsxwriter", package: "xlsxwriter.swift")
-      ],
-      swiftSettings: swiftSettings),
-    .testTarget(
-      name: "MeteoTests",
+        .product(name: "xlsxwriter", package: "xlsxwriter.swift")],
+      swiftSettings: swift),
+    .testTarget(name: "MeteoTests",
       dependencies: ["DateGenerator", "SolarPosition", "Meteo"]),
-    .testTarget(
-      name: "SolarFieldModelTests",
+    .testTarget(name: "SolarFieldModelTests",
       dependencies: ["SolarFieldModel"]),
-    .testTarget(
-      name: "BlackBoxModelTests",
+    .testTarget(name: "BlackBoxModelTests",
       dependencies: ["Config", "Meteo", "SolarPosition", "BlackBoxModel"])
     ],
   swiftLanguageVersions: [.v5]
 )
 
-
 // FIXME: conditionalise these flags since SwiftPM 5.3 and earlier will crash
 // for platforms they don't know about.
 #if os(Windows)
+let flags = ["-Xlinker", "/INCREMENTAL:NO", "-Xlinker", "/IGNORE:4217,4286"]
+
 if let BlackBoxModel = package.targets.first(where: { $0.name == "BlackBoxModel" }) {
   BlackBoxModel.linkerSettings = [
-    .linkedLibrary("C:/Library/sqlite3/sqlite3.lib"),
-    .unsafeFlags(["-Xlinker", "/INCREMENTAL:NO", "-Xlinker", "/IGNORE:4217,4286"])
+    .linkedLibrary("C:/Library/sqlite3/sqlite3.lib"), .unsafeFlags(flags)
   ]
 }
 
 if let SolarPerformance = package.targets.first(where: { $0.name == "SolarPerformanceCalc" }) {
-  SolarPerformance.linkerSettings = [
-    .linkedLibrary("User32"),
-    .unsafeFlags(["-Xlinker", "/INCREMENTAL:NO", "-Xlinker", "/IGNORE:4217,4286"])
-  ]
+  SolarPerformance.linkerSettings = [.linkedLibrary("User32"), .unsafeFlags(flags)]
 }
 
 if let SolarField = package.targets.first(where: { $0.name == "SolarFieldCalc" }) {
-  SolarField.linkerSettings = [
-    .linkedLibrary("User32"),
-    .unsafeFlags(["-Xlinker", "/INCREMENTAL:NO", "-Xlinker", "/IGNORE:4217,4286"])
-  ]
+  SolarField.linkerSettings = [.linkedLibrary("User32"), .unsafeFlags(flags)]
 }
 
 if let Utility = package.targets.first(where: { $0.name == "Utility" }) {
