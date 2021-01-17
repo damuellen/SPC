@@ -33,32 +33,32 @@ public class MeteoDataSource {
     self.hourFraction = 8760 / Double(data.count)
     self.valuesPerDay = Int(24 / hourFraction)
 
-    self.classificationOfDays.reserveCapacity(365)
+    self.statisticsOfDays.reserveCapacity(365)
 
-    for day in 1...365 { classification(ofDay: day) }
+    for day in 1...365 { statistics(ofDay: day) }
   }
 
-  public var currentDay: Classification {
-    return classificationOfDays[DateTime.indexDay]
+  public var currentDay: Statistics {
+    return statisticsOfDays[DateTime.indexDay]
   }
 
-  public typealias Classification =
+  public typealias Statistics =
     (peaks: Int, hours: Double, sum: Double, avg: Double, max: Double, ratio: Double)
 
-  private var classificationOfDays: [Classification] = []
+  private var statisticsOfDays: [Statistics] = []
 
-  private func classification(ofDay day: Int) {
+  private func statistics(ofDay day: Int) {
     let end = (day * valuesPerDay)
     let start = end - valuesPerDay
 
     let day = data[start..<end]
 
-    let classification = analyse(day: day)
+    let statistics = analyse(day: day)
 
-    classificationOfDays.append(classification)
+    statisticsOfDays.append(statistics)
   }
 
-  private func analyse(day: ArraySlice<MeteoData>) -> Classification {
+  private func analyse(day: ArraySlice<MeteoData>) -> Statistics {
     var isPeak = false
     var peaks = 0
     var hours = 0.0
