@@ -14,6 +14,10 @@ import Meteo
 public enum Simulation {
   static var isStart = true
 
+  static var startTemperature =
+   (Simulation.initialValues.temperatureOfHTFinPipes,
+    Simulation.initialValues.temperatureOfHTFinPipes)
+
   public static var initialValues = InitValues(
     temperatureOfHTFinPipes: Temperature(celsius: 100.0),
     temperatureOfHTFinHCE: Temperature(celsius: 50.0),

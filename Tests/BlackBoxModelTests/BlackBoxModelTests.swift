@@ -17,7 +17,7 @@ class BlackBoxModelTests: XCTestCase {
     BlackBoxModel.configure(year: 2005)
     BlackBoxModel.configure(location: location)
     measure {
-      let log = Recorder()
+      let log = Recorder(mode: .none)
       let result = BlackBoxModel.runModel(with: log)
       XCTAssertEqual(result.electric.net, 1139.7, accuracy: 0.1)
     }
@@ -35,7 +35,7 @@ class BlackBoxModelTests: XCTestCase {
     BlackBoxModel.configure(year: 2005)
     BlackBoxModel.configure(location: location)
   
-    let log = Recorder()
+    let log = Recorder(mode: .none)
 
     let result = BlackBoxModel.runModel(with: log)
 
@@ -62,7 +62,7 @@ class BlackBoxModelTests: XCTestCase {
     BlackBoxModel.configure(year: 2005)
     BlackBoxModel.configure(location: location)
 
-    let log = Recorder()
+    let log = Recorder(mode: .none)
 
     let result = BlackBoxModel.runModel(with: log)
     let tol = 0.2

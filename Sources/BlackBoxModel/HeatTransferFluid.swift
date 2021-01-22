@@ -50,8 +50,8 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
     }
   }
 
-  func deltaHeat(_ flow: HeatCycle) -> Heat {
-    deltaHeat(flow.temperature.outlet, flow.temperature.inlet)
+  func deltaHeat(_ cycle: HeatTransfer) -> Heat {
+    deltaHeat(cycle.temperature.outlet, cycle.temperature.inlet)
   }
 
   @inline(__always)
@@ -101,7 +101,7 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
     return Temperature(celsius: temperatureFromEnthalpy(enthalpy))
   }
 
-  func mixingTemperature(_ f1: HeatCycle, _ f2: HeatCycle)
+  func mixingTemperature(_ f1: HeatTransfer, _ f2: HeatTransfer)
     -> Temperature
   {
     if f1.massFlow.rate == 0 { return f2.temperature.outlet }
@@ -116,7 +116,7 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
     return Temperature(t)
   }
 
-  func mixingTemperature(inlet f1: HeatCycle, with f2: HeatCycle)
+  func mixingTemperature(inlet f1: HeatTransfer, with f2: HeatTransfer)
     -> Temperature
   {
     let (t1, t2) = (f1.inletTemperature, f2.outletTemperature)
@@ -219,20 +219,22 @@ public enum StorageMedium: String {
   case th66 = "TH66"
   case solarSalt = "SolarSalt"
 
+  static var ss = HeatTransferFluid(
+    name: "Solar Salt",
+    freezeTemperature: 240.0,
+    heatCapacity: [1.44657, 0.000171715],
+    dens: [1969.9, -0.603505, 0],
+    visco: [0.0175373, -7.01716e-05, 7.62774e-08],
+    thermCon: [0.44152, 0.00019, 0],
+    maxTemperature: 400.0,
+    h_T: [], T_h: [],
+    useEnthalpy: false
+  )
+
   var properties: HeatTransferFluid {
     switch self {
     case .solarSalt:
-      return HeatTransferFluid(
-        name: "Solar Salt",
-        freezeTemperature: 240.0,
-        heatCapacity: [1.44657, 0.000171715],
-        dens: [1969.9, -0.603505, 0],
-        visco: [0.0175373, -7.01716e-05, 7.62774e-08],
-        thermCon: [0.44152, 0.00019, 0],
-        maxTemperature: 400.0,
-        h_T: [], T_h: [],
-        useEnthalpy: false
-      )
+      return StorageMedium.ss
     default:
       fatalError()
     }

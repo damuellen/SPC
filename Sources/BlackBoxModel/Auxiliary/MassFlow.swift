@@ -11,16 +11,14 @@
 import Libc
 
 /// A mass flow rate in kilogram per second.
-public struct MassFlow: CustomStringConvertible, Equatable {
+public struct MassFlow: CustomStringConvertible {
   
   var rate: Double
 
   var isNearZero: Bool { self < 1.0 }
   
-  static var zero: MassFlow = MassFlow()
-  
   public var description: String {
-    String(format: "%.2f", rate)
+    String(format: "%.1f", rate)
   }
 
   public init() {
@@ -78,22 +76,7 @@ public struct MassFlow: CustomStringConvertible, Equatable {
    return self.rate < rate
    }
    */
-  static func += (lhs: inout MassFlow, rhs: MassFlow) {
-    lhs = MassFlow(lhs.rate + rhs.rate)
-  }
 
-  static func -= (lhs: inout MassFlow, rhs: MassFlow) {
-    lhs = MassFlow(lhs.rate - rhs.rate)
-  }
-
-  static func + (lhs: MassFlow, rhs: MassFlow) -> MassFlow {
-    MassFlow(lhs.rate + rhs.rate)
-  }
-
-  static func - (lhs: MassFlow, rhs: MassFlow) -> MassFlow {
-    MassFlow(lhs.rate - rhs.rate)
-  }
-  
   static prefix func - (rhs: MassFlow) -> MassFlow {
     MassFlow(-rhs.rate)
   }
@@ -117,12 +100,24 @@ extension MassFlow: ExpressibleByFloatLiteral {
   }
 }
 
-extension MassFlow: Comparable {
+extension MassFlow: Comparable, Equatable {
   public static func < (lhs: MassFlow, rhs: MassFlow) -> Bool {
     lhs.rate < rhs.rate
   }
 
   public static func == (lhs: MassFlow, rhs: MassFlow) -> Bool {
     fdim(lhs.rate, rhs.rate) < 1e-4
+  }
+}
+
+extension MassFlow: AdditiveArithmetic {
+  public static var zero: MassFlow = MassFlow()
+
+  public static func + (lhs: MassFlow, rhs: MassFlow) -> MassFlow {
+    MassFlow(lhs.rate + rhs.rate)
+  }
+
+  public static func - (lhs: MassFlow, rhs: MassFlow) -> MassFlow {
+    MassFlow(lhs.rate - rhs.rate)
   }
 }

@@ -10,39 +10,52 @@
 
 import Config
 
+/// Design of the plant
 public enum Design {
   public static var layout: Layout = Layout()
-
+  /// The design has a solar field 
   static let hasSolarField = layout.solarField > 0
+  /// The design has a heater
   static let hasHeater = layout.heater > 0
-  static let hasHeatExchanger = layout.heatExchanger > 0
+  /// The design has a boiler
   static let hasBoiler = layout.boiler > 0
+  /// The design has a gas turbine
   static let hasGasTurbine = layout.gasTurbine > 0
-  static let hasPowerBlock = layout.powerBlock > 0
+  /// The design has a thermal storage
   static let hasStorage = layout.storage > 0
 }
 
+/// Layout of the plant
 public struct Layout: Codable, Equatable, Hashable, CustomStringConvertible {
+  /// Number of loops in solar field 
   public var solarField = 148.0
+  /// Thermal power of the heater
   public var heater = 10.0
+  /// Thermal power of the heatexchanger
   public var heatExchanger = 75.0
+  /// Thermal power of the boiler
   public var boiler = 0.0
+  /// Thermal power of the gas turbine
   public var gasTurbine = 0.0
+  /// Thermal power of the power block
   public var powerBlock = 80.0
+  /// Storage capacity in hours
   public var storage = 5.0
-  public var storage_cap = 200.0
+  /// Storage capacity in energy
+  public var storage_cap = 0.0
+  /// Storage capacity in mass
   public var storage_ton = 0.0
   
   public var description: String {
     "Layout|SolarField " * "\(Int(solarField)) loops"
-//  + "Layout|Heater " * "\(Int(-heater)) MW"
+    + "Layout|Heater " * "\(Int(-heater)) MW"
     + "Layout|HeatExchanger " * "\(Int(heatExchanger)) MW"
 //  + "Layout|Boiler " * "\(Int(boiler)) MW"
 //  + "Layout|GasTurbine " * "\(Int(gasTurbine)) MW"
     + "Layout|PowerBlock " * "\(Int(powerBlock)) MW"
-//  + "Layout|Storage " * "\(Int(storage)) MWh"
-//  + "Layout|Storage_cap " * "\(Int(storage_cap))"
-//  + "Layout|Storage_ton " * "\(Int(storage_ton))"
+    + "Layout|Storage " * "\(Int(storage)) h"
+//  + "Layout|Storage_cap " * "\(Int(storage_cap)) MWh"
+//  + "Layout|Storage_ton " * "\(Int(storage_ton)) t"
   }
 }
 

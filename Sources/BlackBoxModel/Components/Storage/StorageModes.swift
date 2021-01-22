@@ -14,41 +14,9 @@ extension Storage {
     powerBlock: inout PowerBlock,
     nightHour: Double = 12.0,
     heat: inout ThermalPower)
-    -> (Double, Double)
+    -> (Power, Power)
   {      
-    func outletTemperature(_ status: Storage) -> Temperature {
-      var temp: Double
-      if parameter.temperatureDischarge2[1] > 0 {
-        temp = status.charge > 0.5
-          ? 1 : parameter.temperatureDischarge2(status.charge)
-        temp *= parameter.designTemperature.hot.kelvin
-          - parameter.temperatureDischarge[1]
-      } else {
-        temp = -Temperature.absoluteZeroCelsius
-        if status.charge.ratio < 0 {
-          temp += parameter.temperatureDischarge[0]
-            - (parameter.designTemperature.hot.kelvin
-              - status.temperatureTank.hot.kelvin)
-        } else {
-          temp += parameter.temperatureCharge[0]
-            - (parameter.designTemperature.hot.kelvin
-              - status.temperatureTank.hot.kelvin)
-          // adjust of HTF outlet temp. with status hot tank temp.
-        }
-      }
-      return Temperature(temp)
-    }
-    /* FIXME: Is this useless code ???
-     if Plant.thermal.solar > 0 {
-     status.solarField.header.massFlow = status.solarField.massFlow
-     } else if case .freezeProtection = status.solarField.operationMode {
-     status.solarField.header.massFlow = status.solarField.massFlow
-     } else {
-     status.solarField.header.massFlow = 0.0
-     }
-     */
-    
-    let thermalPower, parasitics: Double
+    let thermalPower, parasitics: Power
     switch storage.operationMode {
     case .charging:
       thermalPower = storageCharging(
@@ -57,19 +25,19 @@ extension Storage {
         powerBlock: powerBlock,
         heat: &heat
       )
-      parasitics = Storage.parasitics(&storage)
+      parasitics = .init(megaWatt: Storage.parasitics(&storage))
     case .fossilCharge:
       thermalPower = storageFossilCharge(
         storage: &storage,
         powerBlock: &powerBlock
       )
-      parasitics = Storage.parasitics(&storage)
+      parasitics = .init(megaWatt: Storage.parasitics(&storage))
     case .discharge:
-      let load = dischargeLoad(&storage, nightHour)
+      let _ = dischargeLoad(&storage, nightHour)
       massFlowStorage(&storage,
         powerBlock: powerBlock,
         solarField: solarField,
-        dischargeLoad: load
+        dischargeLoad: 1.0
       )
       
       (thermalPower, parasitics) = storageDischarge(
@@ -77,7 +45,7 @@ extension Storage {
         powerBlock: &powerBlock,
         steamTurbine: &steamTurbine,
         solarField: solarField,
-        heatSolar: heat.solar.megaWatt,
+        heatSolar: heat.production.megaWatt,
         outletTemperature
       )
     case .preheat:
@@ -93,13 +61,13 @@ extension Storage {
         solarField: &solarField,
         powerBlock: powerBlock
       )
-      thermalPower = 0
-      parasitics = Storage.parasitics(&storage)
+      thermalPower = .zero
+      parasitics = .init(megaWatt: Storage.parasitics(&storage))
     case .noOperation:
       // Temperatures remain constant
-      storage.setMassFlow(rate: 0)
-      thermalPower = 0
-      parasitics = Storage.parasitics(&storage)
+      storage.massFlow.rate = .zero
+      thermalPower = .zero
+      parasitics = .init(megaWatt: Storage.parasitics(&storage))
     }
     return (thermalPower, parasitics)
     /*Storage Heat Losses:
@@ -123,20 +91,43 @@ extension Storage {
      }*/
   }
   
+  static func outletTemperature(_ status: Storage) -> Temperature {
+    var temp: Double
+    if parameter.temperatureDischarge2[1] > 0 {
+      temp = status.charge > 0.5
+        ? 1 : parameter.temperatureDischarge2(status.charge)
+      temp *= parameter.designTemperature.hot.kelvin
+        - parameter.temperatureDischarge[1]
+    } else {
+      temp = -Temperature.absoluteZeroCelsius
+      if status.charge.ratio < 0 {
+        temp += parameter.temperatureDischarge[0]
+          - (parameter.designTemperature.hot.kelvin
+            - status.temperatureTank.hot.kelvin)
+      } else {
+        temp += parameter.temperatureCharge[0]
+          - (parameter.designTemperature.hot.kelvin
+            - status.temperatureTank.hot.kelvin)
+        // adjust of HTF outlet temp. with status hot tank temp.
+      }
+    }
+    return Temperature(temp)
+  }
+
   private static func massFlowStorage(
     _ storage: inout Storage,
-    powerBlock: HeatCycle,
+    powerBlock: PowerBlock,
     solarField: SolarField,
     dischargeLoad: Ratio)
   {
     switch solarField.operationMode {
     case .operating where solarField.massFlow.rate > 0:
-      storage.setMassFlow(rate: powerBlock.massFlow.rate
-        / parameter.heatExchangerEfficiency - solarField.massFlow.rate)
+      storage.massFlow.rate = (powerBlock.designMassFlow.rate
+        / parameter.heatExchangerEfficiency) - solarField.massFlow.rate
     // * 0.97 deleted after separating combined from storage only operation
     default:
-      storage.setMassFlow(rate: dischargeLoad.ratio
-        * powerBlock.massFlow.rate / parameter.heatExchangerEfficiency)
+      storage.massFlow.rate = dischargeLoad.ratio
+        * powerBlock.massFlow.rate / parameter.heatExchangerEfficiency
     }
   }
 
@@ -144,13 +135,16 @@ extension Storage {
     storage: inout Storage,
     solarField: inout SolarField,
     powerBlock: PowerBlock, heat: inout ThermalPower)
-    -> Double
+    -> Power
   {
     let heatExchanger = HeatExchanger.parameter
-    
+    var thermalPower: Power = .zero
+
     storage.inletTemperature(outlet: solarField)
-    // FIXME: Check again
-    storage.massFlow = Plant.requiredMassFlow() - powerBlock.designMassFlow
+
+    let x = Plant.requiredMassFlow()
+    storage.massFlow.rate = solarField.massFlow.rate - x.rate
+
     storage.massFlow.adjust(factor: parameter.heatExchangerEfficiency)
     
     var fittedTemperature: Double
@@ -173,25 +167,24 @@ extension Storage {
 
     storage.outletTemperature(kelvin: fittedTemperature)
     
-    var thermalPower = storage.massFlow.rate * storage.deltaHeat / 1_000
+    thermalPower.kiloWatt = storage.massFlow.rate * storage.deltaHeat
     
     if case .indirect = parameter.type,
       parameter.heatExchangerRestrictedMax,
-      abs(thermalPower) > parameter.heatExchangerCapacity
+      abs(thermalPower.megaWatt) > parameter.heatExchangerCapacity
     {
       thermalPower *= parameter.heatExchangerCapacity
       
-      storage.setMassFlow(rate: thermalPower / storage.deltaHeat * 1_000)
+      storage.massFlow.rate = thermalPower.kiloWatt / storage.deltaHeat
       
       // FIXME: powerBlock.massFlow = powerBlock.massFlow
       // added to avoid increase in PB massFlow
       if case .demand = parameter.strategy {
         // too much power from sun, dump
         heat.dumping.megaWatt += heat.production.megaWatt
-          - heatExchanger.sccHTFheat + thermalPower
+          - heatExchanger.sccHTFheat + thermalPower.megaWatt
       } else {
-        heat.dumping.megaWatt += heat.production.megaWatt
-          - heat.demand.megaWatt + thermalPower
+        heat.dumping += heat.production - heat.demand + thermalPower
       }
       
       // reduce HTF massflow in solarfield
@@ -206,9 +199,9 @@ extension Storage {
  
   private static func storageFossilCharge(
     storage: inout Storage, powerBlock: inout PowerBlock
-    ) -> Double
+    ) -> Power
   {
-    var thermalPower = 0.0
+    var thermalPower: Power = .zero
     // heat can be stored
     
     storage.setTemperature(inlet: Heater.parameter.nominalTemperatureOut)
@@ -228,14 +221,14 @@ extension Storage {
     }
     storage.outletTemperature(kelvin: fittedTemperature)
     
-    thermalPower = -storage.massFlow.rate * storage.deltaHeat / 1_000
+    thermalPower.kiloWatt = -storage.massFlow.rate * storage.deltaHeat
     // limit the size of the salt-oil heat exchanger
     if parameter.heatExchangerRestrictedMax,
-      abs(thermalPower) > parameter.heatExchangerCapacity
+      abs(thermalPower.megaWatt) > parameter.heatExchangerCapacity
     {
       thermalPower *= parameter.heatExchangerCapacity
       
-      storage.setMassFlow(rate: thermalPower / storage.deltaHeat * 1_000)
+      storage.massFlow.rate = thermalPower.kiloWatt / storage.deltaHeat
       
       powerBlock.designMassFlow = storage.massFlow
     }
@@ -249,7 +242,7 @@ extension Storage {
     solarField: SolarField,
     heatSolar: Double,
     _ outletTemperature: (Storage) -> Temperature)
-    -> (Double, Double)
+    -> (Power, Power)
   {
     // used for parasitics
     storage.inletTemperature(outlet: powerBlock)
@@ -258,19 +251,18 @@ extension Storage {
     
     let htf = SolarField.parameter.HTF
     
-    var thermalPower = 0.0
-    
-    var parasitics = 0.0
+    var thermalPower: Power = .zero    
+    var parasitics: Power = .zero
     
     while true
     {
-      thermalPower = storage.massFlow.rate * storage.deltaHeat / 1_000
+      thermalPower.kiloWatt = storage.massFlow.rate * storage.deltaHeat
       
       if parameter.heatExchangerRestrictedMax,
-        abs(thermalPower) > parameter.heatExchangerCapacity
+        abs(thermalPower.megaWatt) > parameter.heatExchangerCapacity
       {
         thermalPower *= parameter.heatExchangerCapacity
-        storage.setMassFlow(rate: thermalPower / storage.deltaHeat * 1_000)
+        storage.massFlow.rate = thermalPower.kiloWatt / storage.deltaHeat
         //#warning("The implementation here differs from PCT")
         if case .freezeProtection = solarField.operationMode {          
           powerBlock.designMassFlow.rate = storage.massFlow.rate
@@ -291,24 +283,25 @@ extension Storage {
         gasTurbine: status.gasTurbine,
         heatExchanger: status.heatExchanger
       )*/
-      let ratio = (heatSolar + abs(thermalPower)) / (SteamTurbine.parameter.power.max / 1) //steamTurbine.efficiency)
+      let ratio = (heatSolar + abs(thermalPower.megaWatt)) 
+        / (SteamTurbine.parameter.power.max / 0.39) //steamTurbine.efficiency)
+
       steamTurbine.load = Ratio(ratio, cap: maxLoad)
       
       let mixTemp = htf.mixingTemperature(solarField, storage)
       
       let minTemp = Temperature(celsius: 310.0)
       
-      if mixTemp.kelvin
-        > (minTemp - Simulation.parameter.tempTolerance).kelvin * 2
+      if mixTemp.kelvin > minTemp.kelvin - Simulation.parameter.tempTolerance * 2
       {
-        thermalPower = storage.massFlow.rate * storage.deltaHeat / 1_000
+        thermalPower.kiloWatt = storage.massFlow.rate * storage.deltaHeat
         
-        parasitics = Storage.parasitics(&storage)
+        parasitics.megaWatt = Storage.parasitics(&storage)
         break
       } else if storage.massFlow.rate <= 0.05 * powerBlock.designMassFlow.rate {
         thermalPower = 0.0
         storage.operationMode = .noOperation
-        parasitics = 0.0
+        parasitics = .zero
         storage.massFlow = 0.0
         break
       }
@@ -322,10 +315,11 @@ extension Storage {
     powerBlock: PowerBlock,
     solarField: SolarField,
     _ outletTemperature: (Storage) -> Temperature)
-    -> (Double, Double)
+    -> (Power, Power)
   {
     /// the rest is heated by SF
-    var thermalPower = 0.0
+    var thermalPower: Power = .zero    
+    var parasitics: Power = .zero
     
     storage.massFlow = powerBlock.designMassFlow - solarField.massFlow
     
@@ -333,20 +327,22 @@ extension Storage {
     
     storage.temperature.outlet = outletTemperature(storage)
     
-    thermalPower = storage.massFlow.rate * storage.deltaHeat / 1_000
+    thermalPower.kiloWatt = storage.massFlow.rate * storage.deltaHeat
     // limit the size of the salt-oil heat exchanger
     if parameter.heatExchangerRestrictedMax,
-      abs(thermalPower) > parameter.heatExchangerCapacity
+      abs(thermalPower.megaWatt) > parameter.heatExchangerCapacity
     {
       thermalPower *= parameter.heatExchangerCapacity
       
-      storage.setMassFlow(rate: thermalPower / storage.deltaHeat * 1_000)
+      storage.massFlow.rate = thermalPower.kiloWatt / storage.deltaHeat
       
       storage.temperature.outlet = outletTemperature(storage)
       
-      thermalPower = -storage.massFlow.rate * storage.deltaHeat / 1_000
+      thermalPower.kiloWatt = -storage.massFlow.rate * storage.deltaHeat 
     }
-    return (thermalPower, Storage.parasitics(&storage))
+    parasitics.megaWatt = Storage.parasitics(&storage)
+
+    return (thermalPower, parasitics)
   }
   
   private static func storageFreezeProtection(
@@ -369,7 +365,7 @@ extension Storage {
     var fittedTemperature = 0.0
     if Storage.parameter.temperatureCharge[1] > 0 {
       if Storage.parameter.temperatureDischarge.indices.contains(2) {
-        storage.outletTemperatureInlet()
+        storage.outletTemperatureFromInlet()
       } else {
         fittedTemperature = storage.charge > 0.5
           ? 1 : Storage.parameter.temperatureCharge2(storage.charge)

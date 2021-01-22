@@ -107,7 +107,8 @@ extension SolarField.Parameter: CustomStringConvertible {
     * String(format: "%G", pumpParasticsFullLoad)
     + "Pumping Parasitics of Anti-Freeze Pump [MW]:"
     * String(format: "%G", antiFreezeParastics)
-    + "Parasitic Energy Coefficients; Parasitics(Load) = Parasitcs(100%)*(c0+c1*load+c2*load^2)"
+    + "Parasitic Energy Coefficients; \n"
+    + "Parasitics(Load) = Parasitcs(100%)*(c0+c1*load+c2*load^2)"
     + "\n\(pumpParastics)"
     + "Tilt of Collectors [°]:" * elevation.description
     + "Mass Flow in Solar Field at Full Load [kg/s]:"

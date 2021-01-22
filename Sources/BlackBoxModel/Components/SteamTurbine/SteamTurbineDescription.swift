@@ -10,8 +10,7 @@
 
 extension SteamTurbine: CustomStringConvertible {  
   public var description: String {
-    "  Mode:".padding(30) 
-      + "\(operationMode)\n" 
-      + formatting([load.percentage], ["Load:"])
+    "  Mode:".padding(30) + "\(operationMode)" 
+      
   }
 }

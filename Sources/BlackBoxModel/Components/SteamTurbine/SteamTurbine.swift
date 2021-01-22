@@ -230,14 +230,14 @@ public struct SteamTurbine: Parameterizable {
         }
       }
     }
-    let adjustmentFactor = Simulation.adjustmentFactor.efficiencyTurbine
+    
     if parameter.efficiencyTemperature[1] >= 1 {
-      efficiency *= maxEfficiency * adjustmentFactor / dcFactor
+      efficiency *= maxEfficiency / dcFactor
     } else {
       efficiency *=
-        maxEfficiency * adjustmentFactor
-        * correctionWetBulbTemperature
+        maxEfficiency * correctionWetBulbTemperature
     }
-    return (maxLoad, efficiency)
+    let adjustmentFactor = Simulation.adjustmentFactor.efficiencyTurbine
+    return (maxLoad, efficiency * adjustmentFactor)
   }
 }

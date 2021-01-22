@@ -10,6 +10,7 @@
 
 extension PowerBlock: CustomStringConvertible {
   public var description: String {
-    cycle.description
+    cycle.description + "\n  Design mass flow rate:".padding(32) 
+      + String(format: " %3.1f", designMassFlow.rate)
   }
 }

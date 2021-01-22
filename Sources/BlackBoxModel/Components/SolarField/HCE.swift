@@ -251,8 +251,9 @@ enum HCE {
         hce.massFlow = massFlowMin
         (time, dumping) = mode2(&solarField, collector, loop, ambient)
       } else {
-        // status = LastHTF
-        solarField.freezeProtectionCheck()
+        solarField.loops = SolarField.last
+        (solarField.massFlow, solarField.operationMode) = 
+          solarField.antiFreezeCheck()
         (time, dumping) = mode2(&solarField, collector, loop, ambient)
       }
 

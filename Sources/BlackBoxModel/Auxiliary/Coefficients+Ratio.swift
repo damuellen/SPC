@@ -81,7 +81,7 @@ public struct Ratio: CustomStringConvertible, Codable {
   }
 
   public init(_ value: Double) {
-    precondition(0...1 ~= value, "Ratio out of range.")
+    precondition(0...1.01 ~= value, "Ratio out of range.")
     self.ratio = value > 1 ? 1 : value
   }
 

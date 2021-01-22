@@ -16,6 +16,7 @@ import SolarPosition
 public struct Collector: Parameterizable, CustomStringConvertible {
     
   public var parabolicElevation, theta, cosTheta, efficiency: Double
+  /// The effective power on the absorber
   public var insolationAbsorber: Double
 
   public var description: String {

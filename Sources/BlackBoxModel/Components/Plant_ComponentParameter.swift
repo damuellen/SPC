@@ -20,7 +20,7 @@ extension Plant {
     + "SOLAR FIELD\n\n\(SolarField.parameter)\n"
     + "COLLECTOR\n\n\(Collector.parameter)\n"
   }
-
+  /// Sets some component parameter 
   static func setup() -> Plant {
     let steamTurbine = SteamTurbine.parameter
     let powerBlock = PowerBlock.parameter
@@ -32,9 +32,14 @@ extension Plant {
         + powerBlock.nominalElectricalParasitics
         + powerBlock.electricalParasiticsStep[1]
     }
+
     SolarField.parameter.wayLength()
 
-    let solarField = SolarField.parameter
+    let heatExchangerCapacity =
+      SolarField.parameter.HTF.deltaHeat(
+        HeatExchanger.parameter.temperature.htf.inlet.max,
+        HeatExchanger.parameter.temperature.htf.outlet.max
+      ) / 1_000
 
     if Design.hasGasTurbine {
 
@@ -42,15 +47,9 @@ extension Plant {
         Design.layout.heatExchanger
         / steamTurbine.efficiencySCC / HeatExchanger.parameter.sccEff
 
-      let designHeatExchanger =
-        solarField.HTF.deltaHeat(
-          HeatExchanger.parameter.scc.htf.outlet.max,
-          HeatExchanger.parameter.scc.htf.inlet.max
-        ) / 1_000
-
       let sccHTFheat = HeatExchanger.parameter.sccHTFheat
       SolarField.parameter.maxMassFlow = MassFlow(
-        sccHTFheat / designHeatExchanger
+        sccHTFheat / heatExchangerCapacity
       )
 
       WasteHeatRecovery.parameter.ratioHTF =
@@ -74,14 +73,10 @@ extension Plant {
           / HeatExchanger.parameter.efficiency
       }
 
-      let designHeatExchanger =
-        solarField.HTF.deltaHeat(
-          HeatExchanger.parameter.temperature.htf.inlet.max,
-          HeatExchanger.parameter.temperature.htf.outlet.max
-        ) / 1_000
+
       let sccHTFheat = HeatExchanger.parameter.sccHTFheat
       SolarField.parameter.maxMassFlow = MassFlow(
-        sccHTFheat / designHeatExchanger
+        sccHTFheat / heatExchangerCapacity
       )
     }
 
@@ -90,10 +85,9 @@ extension Plant {
       if name.hasPrefix("SKAL-ET") {
         Collector.parameter = .sklalet
       }*/
-
-      let numberOfSCAsInRow = Double(solarField.numberOfSCAsInRow)
+      let numberOfSCAsInRow = Double(SolarField.parameter.numberOfSCAsInRow)
       let edgeFactor1 =
-        solarField.distanceSCA / 2
+        SolarField.parameter.distanceSCA / 2
         * (1 - 1 / numberOfSCAsInRow)
         / Collector.parameter.lengthSCA
       let edgeFactor2 =

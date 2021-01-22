@@ -10,17 +10,27 @@
 
 import Meteo
 /// Contains all data needed to simulate the operation of the power block
-public struct PowerBlock: Parameterizable, HeatCycle {
+public struct PowerBlock: Parameterizable, HeatTransfer {
 
-  var cycle: HeatTransfer = .init(name: PowerBlock.parameter.name)
+  var name: String = PowerBlock.parameter.name
+
+  var massFlow: MassFlow = .zero
   
+  var temperature: (inlet: Temperature, outlet: Temperature)
+
   var designMassFlow: MassFlow = .zero
+
+  let heatExchangerCapacity  = SolarField.parameter.HTF.deltaHeat(
+    HeatExchanger.parameter.temperature.htf.inlet.max,
+    HeatExchanger.parameter.temperature.htf.outlet.max)
 
   public enum OperationMode {
     case scheduledMaintenance
   }
   
-  static let initialState = PowerBlock()
+  static let initialState = PowerBlock(
+    temperature: Simulation.startTemperature
+  )
   
   public static var parameter: Parameter = ParameterDefaults.pb
   
@@ -102,7 +112,7 @@ public struct PowerBlock: Parameterizable, HeatCycle {
   
     repeat {
       //#warning("Check this")
-      temperature.outlet = HeatExchanger.outletTemperature(self, self)
+      temperature.outlet = HeatExchanger.temperatureOutlet(self, self)
 
       heatOut = htf.enthalpy(temperature.outlet)
       
@@ -121,7 +131,7 @@ public struct PowerBlock: Parameterizable, HeatCycle {
   mutating func temperatureLoss(wrt solarField: SolarField, _ storage: Storage)
   {
     if Design.hasGasTurbine {
-      outletTemperatureInlet()
+      outletTemperatureFromInlet()
     } else {
       let tlpb = 0.0
       // 0.38 * (TpowerBlock.status - meteo.temperature) / 100 * (30 / Design.layout.powerBlock) ** 0.5 // 0.38
@@ -130,7 +140,7 @@ public struct PowerBlock: Parameterizable, HeatCycle {
       let inlet = (solarField.massFlow.rate * solarField.outletTemperature
         + massFlow.rate * storage.outletTemperature) / mf
       if inlet > 0 {
-        inletTemperature(kelvin: inlet)
+        temperature.inlet.kelvin = inlet
       }
       //#warning("The implementation here differs from PCT")
       // FIXME: Was ist Tstatus ?????????

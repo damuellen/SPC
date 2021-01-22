@@ -82,11 +82,11 @@ public struct Recording: CustomStringConvertible, Comparable {
   }
 
   public subscript(
-    keyPath: KeyPath<Status, HeatTransfer>, interval: DateInterval
+    keyPath: KeyPath<Status, Cycle>, interval: DateInterval
   ) -> [[Double]] {
-    if statusHistory.isEmpty { return [] }
+    if statusHistory.isEmpty { return [] } 
     let r = range(of: interval).clamped(to: statusHistory.indices)
-    return statusHistory[r].map { $0[keyPath: keyPath].numericalForm }
+    return statusHistory[r].map { $0[keyPath: keyPath].cycle.numericalForm }
   }
 
   public subscript(_ keyPaths: KeyPath<Performance, Double>...,
@@ -101,7 +101,7 @@ public struct Recording: CustomStringConvertible, Comparable {
     keyPaths.map { kp in self[kp, range] }
   }
 
-  public subscript(_ keyPath: KeyPath<Status, HeatTransfer>,
+  public subscript(_ keyPath: KeyPath<Status, Cycle>,
     range range: DateInterval
   ) -> ([[Double]], [[Double]]) {
     let (m, i, o) = self[keyPath, range].reduce(into: ([Double](), [Double](), [Double]())) {

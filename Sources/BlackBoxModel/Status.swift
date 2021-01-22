@@ -24,7 +24,7 @@ public struct Status: CustomStringConvertible, MeasurementsConvertible {
     "\nCollector:\n\(collector)\n\n"
       + (Design.hasSolarField ? "Solar Field:\n\(solarField)\n\n" : "")
       + "Heat Exchanger:\n\(heatExchanger)\n\n"
-      + (Design.hasPowerBlock ? "Power Block:\n\(powerBlock)\n\n" : "")
+      + "Power Block:\n\(powerBlock)\n\n"
       + "Steam Turbine:\n\(steamTurbine)\n\n"
       + (Design.hasHeater ? "Heater:\n\(heater)\n\n" : "")
       + (Design.hasBoiler ? "Boiler:\n\(boiler)\n\n" : "")
@@ -46,18 +46,17 @@ public struct Status: CustomStringConvertible, MeasurementsConvertible {
   }
 
   var numericalForm: [Double] {
-    collector.numericalForm + storage.numericalForm
-      + storage.cycle.numericalForm + heater.cycle.numericalForm
-      + powerBlock.cycle.numericalForm + heatExchanger.cycle.numericalForm
-      + solarField.header.numericalForm
-      + solarField.loops[0].numericalForm + solarField.loops[1].numericalForm
-      + solarField.loops[2].numericalForm + solarField.loops[3].numericalForm
+    collector.numericalForm + storage.salt.numericalForm
+      + storage.numericalForm + heater.numericalForm
+      + powerBlock.cycle.numericalForm + heatExchanger.numericalForm
+      + solarField.header.numericalForm 
+      + solarField.loops.flatMap(\.numericalForm)
   }
 
   static var columns: [(name: String, unit: String)] {
     let values: [(name: String, unit: String)] =
       [("|Massflow", "kg/s"), ("|Tin", "degC"), ("|Tout", "degC")]
-    return Collector.columns + Storage.columns + [
+    return Collector.columns + Storage.Salt.columns + [
       "Storage", "Heater", "PowerBlock", "HeatExchanger", "SolarField",
       "DesignLoop", "NearLoop", "AvgLoop", "FarLoop",
     ].flatMap { name in

@@ -40,10 +40,8 @@ public struct Temperature: CustomStringConvertible, Equatable {
     kelvin = -Temperature.absoluteZeroCelsius
   }
 
-  static func mixture(
-    m1: Double, m2: Double, t1: Temperature, t2: Temperature
-  ) -> Temperature {
-    .init((m1 * t1.kelvin + m2 * t2.kelvin) / (m1 + m2))
+  static func mixture(m1: Mass, m2: Mass, t1: T, t2: T) -> T {
+    .init((m1.kg * t1.kelvin + m2.kg * t2.kelvin) / (m1.kg + m2.kg))
   }
 
   public init(_ kelvin: Double) {
@@ -53,15 +51,10 @@ public struct Temperature: CustomStringConvertible, Equatable {
     self.kelvin = kelvin
   }
 
-  public static func average(_ t: Temperature...) -> Temperature {
-    if t.count == 2 {
-      return Temperature((t[0].kelvin + t[1].kelvin) / 2)
-    }
-    return Temperature(
-      t.reduce(0) { result, temp in
-        result + temp.kelvin
-      } / Double(t.count)
-    )
+  typealias T = Temperature
+
+  static func average(_ t1: T,_ t2: T) -> T {
+    T((t1.kelvin + t2.kelvin) / 2)
   }
 
   public init(celsius: Double) {

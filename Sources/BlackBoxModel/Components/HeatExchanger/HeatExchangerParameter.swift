@@ -27,6 +27,9 @@ extension HeatExchanger {
               outlet: (max: Double, min: Double))
       ) {
         typealias T = Temperature
+        precondition(htf.inlet.max > htf.inlet.min)
+        precondition(htf.inlet.max > htf.outlet.max)
+        precondition(htf.inlet.min > htf.outlet.min)
         self.htf = ((T(celsius: htf.inlet.max), T(celsius: htf.inlet.min)),
                     (T(celsius: htf.outlet.max),T(celsius: htf.outlet.min)))
         self.h2o = ((T(celsius: h2o.inlet.max), T(celsius: h2o.inlet.min)),

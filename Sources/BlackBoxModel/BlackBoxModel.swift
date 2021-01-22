@@ -92,7 +92,7 @@ public enum BlackBoxModel {
     for (meteo, date) in zip(🌦, 📅) {
 
       DateTime.setCurrent(date: date)
-      let dt = DateTime.current
+      
       Maintenance.checkSchedule(date)
 
       if let position = 🌞[date] {
@@ -108,6 +108,7 @@ public enum BlackBoxModel {
         status.collector = Collector.initialState
         DateTime.setNight()
       }
+      let dt = DateTime.current
 #if DEBUG
       if DateTime.isSunRise {
       //  print(DateTime.current)
@@ -143,7 +144,7 @@ public enum BlackBoxModel {
         collector: status.collector,
         ambient: temperature)
 
-      status.solarField.temperature.outlet =
+      status.solarField.header.temperature.outlet =
         status.solarField.heatLossesHotHeader(ambient: temperature)
 
       plant.electricalParasitics.solarField = status.solarField.parasitics()
@@ -171,10 +172,10 @@ public enum BlackBoxModel {
       }
 
       let performance = plant.performance()
-      
+#if DEBUG
 //    print(decorated(dt.description), status, performance)
 //    print()
-
+#endif
       backgroundQueue.async { [status] in
         log(dt, meteo: meteo, status: status, energy: performance)
       }

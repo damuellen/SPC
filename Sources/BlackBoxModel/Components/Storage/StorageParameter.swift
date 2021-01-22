@@ -83,11 +83,15 @@ extension Storage {
     // variables added to calculate TES aux. consumption :
 
     var heatProductionLoad: Double // added for shifter
+    /// Massflow to POB during Charge in Bad Days Winter 
     let heatProductionLoadWinter: Ratio // added for shifter
+    /// Massflow to POB during Charge in Bad Days Summer 
     let heatProductionLoadSummer: Ratio // added for shifter
     let dischargeWinter: Int
     let dischargeSummer: Int
+    /// DNI for Bad Days Winter
     let badDNIwinter: Double
+    /// DNI for Bad Days Summer
     let badDNIsummer: Double
   }
 }
@@ -127,8 +131,9 @@ extension Storage.Parameter: CustomStringConvertible {
     + "Heat Exchanger Efficiency [%]:" * "\(heatExchangerEfficiency * 100)"
     + "Pump Efficiency [%]:" * "\(pumpEfficiency * 100)"
     + "Pressure Loss at Design Point [Pa]:" * String(format: "%G", pressureLoss)
-    + "Mass Flow to Power Block at design point; Fraction of Total Solar Field Mass Flow [%]:"
-    * massFlowShare.percentage.description
+    + "Mass Flow to Power Block at design point;\n"
+    + "Fraction of Total Solar Field Mass Flow [%]:"
+    * String(format: "%G", massFlowShare.percentage)
     + "Temperature of Cold Tank at Program Start [°]:"
     * startTemperature.cold.celsius.description
     + "Temperature of Hot Tank at Program Start [°]:"
@@ -224,7 +229,7 @@ extension Storage.Parameter: TextConfigInitializable {
     badDNIsummer = try ln(239)
     type = .indirect // try ln(241)
     designTemperature = try (T(celsius: ln(118)), T(celsius: ln(121)))
-    heatdiff = 0
+    heatdiff = 0.25
     heatLoss = (0,0)
     heatExchangerEfficiency = 1
     heatProductionLoad = 0

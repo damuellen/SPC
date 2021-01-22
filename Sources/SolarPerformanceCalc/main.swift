@@ -155,8 +155,6 @@ struct SolarPerformanceCalculator: ParsableCommand {
 
     SolarPerformanceCalculator.result = BlackBoxModel.runModel(with: log)
 
-  //  log.printResult()
-    if excel { log.writeExcel() }
     log.clearResults()
   }
 
@@ -164,6 +162,37 @@ struct SolarPerformanceCalculator: ParsableCommand {
     commandName: "Solar Performance Calculator",
     abstract: "Simulates the performance of entire solar thermal power plants."
   )
+
+  func plotLoops(interval: DateInterval) {
+    do {
+      let ys = SolarPerformanceCalculator.result[\.solarField.loops[0], range: interval]
+      let plot = TimeSeriesPlot(y1: ys.0, y2: ys.1, range: interval)
+      plot.y1Titles = ["MassFlow"]
+      plot.y2Titles = ["T in", "T out"]
+      try! plot(toFile: "loop0")
+    }
+    do {
+      let ys = SolarPerformanceCalculator.result[\.solarField.loops[1], range: interval]
+      let plot = TimeSeriesPlot(y1: ys.0, y2: ys.1, range: interval)
+      plot.y1Titles = ["MassFlow"]
+      plot.y2Titles = ["T in", "T out"]
+      try! plot(toFile: "loop1")
+    }
+    do {
+      let ys = SolarPerformanceCalculator.result[\.solarField.loops[2], range: interval]
+      let plot = TimeSeriesPlot(y1: ys.0, y2: ys.1, range: interval)
+      plot.y1Titles = ["MassFlow"]
+      plot.y2Titles = ["T in", "T out"]
+      try! plot(toFile: "loop2")
+    }
+    do {
+      let ys = SolarPerformanceCalculator.result[\.solarField.loops[3], range: interval]
+      let plot = TimeSeriesPlot(y1: ys.0, y2: ys.1, range: interval)
+      plot.y1Titles = ["MassFlow"]
+      plot.y2Titles = ["T in", "T out"]
+      try! plot(toFile: "loop3")
+    }
+  }
 }
 /*
 

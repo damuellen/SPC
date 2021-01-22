@@ -28,19 +28,24 @@ public final class Recorder {
   let mode: Mode
 
   public enum Mode {
-    case database, csv, excel, inMemory
+    case database, csv, excel, inMemory, none
     case custom(interval: DateGenerator.Interval)
 
     var hasFileOutput: Bool {
+      if case .none = self { return false }  
       if case .inMemory = self { return false }  
       return true
     }
 
     var hasHistory: Bool {
+#if DEBUG && !os(Windows)
+      return true
+#else
       if case .excel = self { return true }
       if case .database = self { return true }
       if case .inMemory = self { return true }
       return false
+#endif
     }
   }
 
@@ -87,10 +92,15 @@ public final class Recorder {
    outputMode: Mode
   ) {
     self.parent = customPath ?? ""
-        
+
+#if DEBUG
+    let outputMode = Mode.custom(interval: interval)    
+#endif
+
     if case .inMemory = outputMode {
       statusHistory.reserveCapacity(8760 * interval.rawValue)
       performanceHistory.reserveCapacity(8760 * interval.rawValue)
+      sunHistory.reserveCapacity(8760 * interval.rawValue)
     }
 
     if case .custom(let i) = outputMode, i.isMultiple(of: interval) {
@@ -147,7 +157,8 @@ public final class Recorder {
     if case .custom(let i) = mode {
       let startTime = repeatElement("0", count: headers.count)
         .joined(separator: .separator)
-      let intervalTime = repeatElement("\(i.fraction)", count: headers.count)
+      let fraction = String(format: "%.5f", i.fraction)
+      let intervalTime = repeatElement(fraction, count: headers.count)
         .joined(separator: .separator)
       let tableHeader =
         "wxDVFileHeaderVer.1" + .lineBreak
@@ -164,7 +175,7 @@ public final class Recorder {
       customIntervalStream?.write(tableHeader)
       urls = [resultsURL]
     }
-    if case .inMemory = outputMode { return } 
+    if !mode.hasFileOutput { return } 
     print("Results: \(urlDir.path)/")
     urls.map(\.lastPathComponent).enumerated()
       .forEach { print("  \($0.offset+1).\t", $0.element) }
@@ -188,7 +199,7 @@ public final class Recorder {
     statusHistory.removeAll(keepingCapacity: true)
   }
 
-  public func printResult() {
+  func printResult() {
     print("")
     print(decorated("Annual results"))
     print(annualRadiation.prettyDescription)
@@ -198,16 +209,15 @@ public final class Recorder {
   func callAsFunction(
     _ ts: DateTime, meteo: MeteoData, status: Status, energy: Performance
   ) {
-    if mode.hasHistory {
-      self.statusHistory.append(status)
-      self.performanceHistory.append(energy)
-    }
-
     let solar = SolarRadiation(
       meteo: meteo, cosTheta: status.collector.cosTheta
     )
     
-    self.sunHistory.append(solar)
+    if mode.hasHistory {
+      self.statusHistory.append(status)
+      self.performanceHistory.append(energy)
+      self.sunHistory.append(solar)
+    }
 
     if mode.hasFileOutput {
 
@@ -227,7 +237,14 @@ public final class Recorder {
 
         if stride == 1 || intervalCounter % stride == 0 {
           let csv = generateValues()
-          stringBuffer.append(contentsOf: csv)      
+#if DEBUG
+          let s = status.numericalForm.map(\.description).joined(separator: ",")
+          stringBuffer.append(contentsOf: csv + "," + s + .lineBreak)
+#else
+          stringBuffer.append(contentsOf: csv + .lineBreak)
+#endif
+          customIntervalStream?.write(stringBuffer)
+          stringBuffer.removeAll()      
           customIntervalRadiation.zero()
           customIntervalPerformance.zero()
         }
@@ -259,6 +276,8 @@ public final class Recorder {
     print(clearLineString, terminator: "\r")
     fflush(stdout)
 #endif
+    printResult()
+
     if case .custom(_) = mode {
       customIntervalStream?.write(stringBuffer)
       stringBuffer.removeAll()
@@ -266,6 +285,10 @@ public final class Recorder {
 
     if case .database = mode {
       storeInDB()
+    }
+
+    if case .excel = mode {
+      writeExcel()
     }
 
     return Recording(
@@ -284,7 +307,8 @@ public final class Recorder {
     let results = contents?.filter { $0.hasPrefix(name) }
 
     return results?.compactMap { filename in
-      return Int(filename.filter(\.isWholeNumber))
+      let name = filename.split(separator: "_").dropLast().joined()
+      return Int(name.filter(\.isWholeNumber))
     }
   }
 
@@ -294,7 +318,7 @@ public final class Recorder {
         annualPerformance.totalize(dailyPerformance, fraction: 1)
         annualRadiation.totalize(dailyRadiation, fraction: 1)
 
-        let csv = generateDailyValues()
+        let csv = generateDailyValues() + .lineBreak
         dailyResultsStream?.write(csv)
 
         hourlyResultsStream?.write(stringBuffer)
@@ -314,7 +338,7 @@ public final class Recorder {
         dailyPerformance.totalize(hourlyPerformance, fraction: 1)
         dailyRadiation.totalize(hourlyRadiation, fraction: 1)
 
-        let csv = generateHourlyValues()
+        let csv = generateHourlyValues() + .lineBreak
         // Will be written together with the daily results
         stringBuffer.append(contentsOf: csv)        
 
@@ -417,7 +441,11 @@ public final class Recorder {
   // MARK: Table headers
 
   private var headers: (name: String, unit: String, count: Int) {
+#if DEBUG
+    let columns = [SolarRadiation.columns, Performance.columns, Status.columns].joined()
+#else
     let columns = [SolarRadiation.columns, Performance.columns].joined()
+#endif
     let names: String = columns.map { $0.0 }.joined(separator: ",")
     let units: String = columns.map { $0.1 }.joined(separator: ",")
     return ("DateTime," + names, "_," + units, columns.count)
@@ -428,19 +456,19 @@ public final class Recorder {
   private func generateDailyValues() -> String {
     iso8601_Hourly.prefix(10) + .separator
       + [dailyRadiation.values, dailyPerformance.values]
-      .joined().joined(separator: ",") + .lineBreak
+      .joined().joined(separator: .separator)
   }
 
   private func generateHourlyValues() -> String {
     iso8601_Hourly + .separator
       + [hourlyRadiation.values, hourlyPerformance.values]
-      .joined().joined(separator: .separator) + .lineBreak
+      .joined().joined(separator: .separator)
   }
 
   private func generateValues() -> String {
     iso8601_Interval + .separator
       + [customIntervalRadiation.values, customIntervalPerformance.values]
-      .joined().joined(separator: .separator) + .lineBreak
+      .joined().joined(separator: .separator)
   }
 }
 

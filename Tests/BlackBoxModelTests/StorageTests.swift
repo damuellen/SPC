@@ -13,6 +13,17 @@ class StorageTests: XCTestCase {
     let fuel = 0.0
     var plant = Plant.setup()
 
+    let demand = SteamTurbine.parameter.power.max
+
+    plant.heat.demand.megaWatt = min(
+      (demand / 0.39),
+        HeatExchanger.parameter.sccHTFheat)
+
+    plant.heat.demand.megaWatt = Storage.demandStrategy(
+      storage: &storage, powerBlock: &powerBlock,
+      demand: plant.heat.demand, production: Power(megaWatt: 300)
+    )
+
     let energy = Storage.perform(
       storage: &storage,
       solarField: &solarField,

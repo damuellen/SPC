@@ -44,7 +44,7 @@ public struct DateTime: CustomStringConvertible {
     let ds = String(
       format: "%04d-%02d-%02d %02d:%02d:%02d",
       year, month, day, hour, minute, second)
-    let symbol = isDaytime ? " 🌞 " : " 🌃 "
+    let symbol = isDaytime ? " 🌞 " : " 🌑 "
     return symbol + ds
   }
 

@@ -8,21 +8,25 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
-public struct HeatTransfer: CustomStringConvertible {
+protocol HeatTransfer: CustomStringConvertible {
+  var name: String { get }
+  var massFlow: MassFlow { get set }
+  var temperature: (inlet: Temperature, outlet: Temperature) { get set }
+}
 
-  var name = ""
+public struct Cycle: HeatTransfer {
+  public var name: String
+  public var massFlow: MassFlow
+  public var temperature: (inlet: Temperature, outlet: Temperature)
+}
 
-  var massFlow: MassFlow
-
-  var temperature: (inlet: Temperature, outlet: Temperature)
-
-  var averageTemperature: Temperature {
-    return Temperature.average(temperature.inlet, temperature.outlet)
+extension Cycle {
+    init(loop: String) {
+    self.name = loop
+    self.massFlow = 0.0
+    let temperature = Simulation.initialValues.temperatureOfHTFinHCE
+    self.temperature = (inlet: temperature, outlet: temperature)
   }
-
-  var inletTemperature: Double { temperature.inlet.kelvin }
-
-  var outletTemperature: Double { temperature.outlet.kelvin }
 
   init(name: String) {
     self.name = name
@@ -30,12 +34,31 @@ public struct HeatTransfer: CustomStringConvertible {
     let temperature = Simulation.initialValues.temperatureOfHTFinPipes
     self.temperature = (inlet: temperature, outlet: temperature)
   }
+}
 
-  init(loop: String) {
-    self.name = loop
-    self.massFlow = 0.0
-    let temperature = Simulation.initialValues.temperatureOfHTFinHCE
-    self.temperature = (inlet: temperature, outlet: temperature)
+extension HeatTransfer {
+  var cycle: Cycle {
+    Cycle(name: name, massFlow: massFlow, temperature: temperature)
+  }
+
+  var averageTemperature: Temperature {
+    Temperature.average(temperature.inlet, temperature.outlet)
+  }
+
+  var minTemperature: Double {
+    min(inletTemperature, outletTemperature)
+  }
+
+  var inletTemperature: Double { temperature.inlet.kelvin }
+
+  var outletTemperature: Double { temperature.outlet.kelvin }
+
+  var medium: HeatTransferFluid {
+    SolarField.parameter.HTF
+  }
+
+  var deltaHeat: Heat {
+    medium.deltaHeat(temperature.outlet, temperature.inlet)
   }
 
   public var description: String {  
@@ -57,8 +80,50 @@ public struct HeatTransfer: CustomStringConvertible {
     [massFlow.rate, temperature.inlet.celsius, temperature.outlet.celsius]
   }
 
-  public mutating func constantTemperature() {
+  mutating func formJoint(_ c1: HeatTransfer, _ c2: HeatTransfer) {
+    temperature.inlet = medium.mixingTemperature(c1, c2)
+    massFlow = c1.massFlow + c2.massFlow
+  }
+
+  mutating func merge(_ c1: HeatTransfer) {
+    temperature.inlet = medium.mixingTemperature(self, c1)
+    massFlow += c1.massFlow
+  }
+
+  mutating func inletTemperatureFromOutlet() {
     temperature.inlet = temperature.outlet
+  }
+
+  mutating func outletTemperatureFromInlet() {
+    temperature.outlet = temperature.inlet
+  }
+
+  mutating func setTemperature(inlet: Temperature) {
+    temperature.inlet = inlet
+  }
+
+  mutating func setTemperature(outlet: Temperature) {
+    temperature.outlet = outlet
+  }
+
+  mutating func inletTemperature(kelvin: Double) {
+    temperature.inlet = Temperature(kelvin)
+  }
+
+  mutating func outletTemperature(kelvin: Double) {
+    temperature.outlet = Temperature(kelvin)
+  }
+
+  mutating func inletTemperature(outlet other: HeatTransfer) {
+    temperature.inlet = other.temperature.outlet
+  }
+
+  mutating func inletTemperature(_ other: HeatTransfer) {
+    temperature.inlet = other.temperature.inlet
+  }
+
+  mutating func outletTemperature(_ other: HeatTransfer) {
+    temperature.outlet = other.temperature.outlet
   }
 }
 

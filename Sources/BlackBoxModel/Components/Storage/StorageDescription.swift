@@ -12,13 +12,13 @@ extension Storage: CustomStringConvertible {
   public var description: String {
    "  Mode:".padding(30) + "\(operationMode)\n" + formatting(
      [massFlow.rate, temperature.inlet.celsius, temperature.outlet.celsius,
-      saltMass.need, saltMass.minimum, saltMass.cold, saltMass.hot,
-      heatInSalt.cold, heatInSalt.hot, temperatureTank.cold.celsius, temperatureTank.hot.celsius,
-      antiFreezeTemperature, charge.ratio, storedHeat, heatProductionLoad.ratio, massOfSalt],
-     ["Mass flow rate:", "T in:", "T out:", 
-      "Salt need:", "Salt min:", "Salt cold:", "Salt hot:",
-      "Heat in salt cold:", "Heat in salt hot:", "Temperature tank cold:", "Temperature tank hot:",
-      "Anti freeze temperature:", "Charge:", "Stored Heat:", "Heat production Load:",  "Mass of salt:"]
+      temperatureTank.cold.celsius, temperatureTank.hot.celsius,
+      massOfSalt, salt.active.kg, salt.minimum.kg, salt.cold.kg, salt.hot.kg,      
+      antiFreezeTemperature, charge.percentage , storedHeat, heatProductionLoad.ratio],
+     ["Mass flow rate:", "T inlet:", "T outlet:",
+      "Temperature tank cold:", "Temperature tank hot:",  
+      "Mass of salt:", "Salt active:", "Salt min:", "Salt cold:", "Salt hot:",      
+      "Anti freeze temperature:", "Charge:", "Stored Heat:", "Heat production Load:"]
     )
   }
 }

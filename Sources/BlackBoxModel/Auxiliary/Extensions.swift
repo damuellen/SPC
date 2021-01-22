@@ -14,7 +14,7 @@ import Dispatch
 func formatting(_ values: [Double], _ labels: [String]) -> String {
   let pairs = zip(    
     labels.map { "  " + $0.padding(30) },
-    values.map { String(format: "%03.1f", $0) }
+    values.map { String(format: "%03.2f", $0) }
   )
   return pairs.map { $0.0 + $0.1 }.joined(separator: "\n")
 }
@@ -59,7 +59,7 @@ extension DefaultStringInterpolation {
 }
 
 public func decorated(_ title: String) -> String {
-  var width = terminalWidth() ?? 80
+  var width = terminalWidth()
   width.clamp(to: 70...100)
   let half = (width - title.count - 8) / 2
   let line = String(repeating: "─", count: half)
@@ -67,7 +67,7 @@ public func decorated(_ title: String) -> String {
 }
 
 public func heading(_ title: String) -> String {
-  var width = terminalWidth() ?? 80
+  var width = terminalWidth()
   width.clamp(to: 70...100)
   let half = (width - title.count - 8) / 2
   let s = String(repeating: "─", count: half)
@@ -93,7 +93,11 @@ extension Angle {
 }
 
 extension String {
+#if os(Windows)
+  static var lineBreak: String { "\r\n" }
+#else
   static var lineBreak: String { "\n" }
+#endif  
   static var separator: String { ", " }
 }
 
