@@ -32,7 +32,7 @@ extension Dictionary where Key: Comparable {
 }
 
 extension TextTable {
-  public static func overview(style: TextTableStyle.Type = Style.fancy) -> String {
+  public static func overview(solarField: SolarField, style: TextTableStyle.Type = Style.fancy) -> String {
     var output = ""
     let numberFormatter = NumberFormatter()
     numberFormatter.numberStyle = .decimal
@@ -45,10 +45,10 @@ extension TextTable {
       return TextTable([columns]).string(style: style)
     }
 
-    output += "SolarField\n"  + makeTable(SolarField.shared.table) + "\n"
-    output += "Loop\n"        + makeTable(SolarField.shared.loop.table) + "\n"
-    output += "PowerBlock\n"  + makeTable(SolarField.shared.powerBlock.table) + "\n"
-    output += "Expansion\n"   + makeTable(SolarField.shared.expansionVolume.table) + "\n"
+    output += "SolarField\n"  + makeTable(solarField.table) + "\n"
+    output += "Loop\n"        + makeTable(solarField.loop.table) + "\n"
+    output += "PowerBlock\n"  + makeTable(solarField.powerBlock.table) + "\n"
+    output += "Expansion\n"   + makeTable(solarField.expansionVolume.table) + "\n"
 
     let makeOverviewTable: ([TableConvertible]) -> String = { systems in
       var measurements: [[Column]] = []
@@ -63,17 +63,17 @@ extension TextTable {
       return TextTable(measurements).string(style: style)
     }
 
-    output += "SubFields\n"   + makeOverviewTable(SolarField.shared.subfields) + "\n"
-    output += "Connections\n" + makeOverviewTable(SolarField.shared.connectors) + "\n"
+    output += "SubFields\n"   + makeOverviewTable(solarField.subfields) + "\n"
+    output += "Connections\n" + makeOverviewTable(solarField.connectors) + "\n"
 
     return output
   }
 
-  public static func bom(style: TextTableStyle.Type = Style.fancyCompact) -> String {
+  public static func bom(solarField: SolarField, style: TextTableStyle.Type = Style.fancyCompact) -> String {
     var output = ""
     var billOfMaterials: [[Column]] = []
-
-    BillOfMaterials.tubeLengthAndWeight.forEach { (key, value) in
+    let bom = BillOfMaterials(solarField: solarField)
+    bom.tubeLengthAndWeight.forEach { (key, value) in
       billOfMaterials.append([Column(title: "Description", value: key, width: 55),
                   Column(title: "Weight", value: String(format:"%.2f ", value.0), width: 9, align: .right),
                   Column(title: "Quantity", value: String(format:"%.1f ", value.1), width: 9, align: .right)])
@@ -82,7 +82,7 @@ extension TextTable {
     let tablePipeBOM = TextTable(billOfMaterials).string(style: style)
     billOfMaterials.removeAll()
 
-    BillOfMaterials.fittingsQuantityAndWeight.forEach { (key, value) in
+    bom.fittingsQuantityAndWeight.forEach { (key, value) in
       billOfMaterials.append([Column(title: "Description", value: key, width: 55),
                   Column(title: "Weight", value: String(format:"%.2f ", value.0), width: 9, align: .right),
                   Column(title: "Quantity", value: String(Int(value.1)), width: 9, align: .right)])

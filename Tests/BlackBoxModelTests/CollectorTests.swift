@@ -17,12 +17,12 @@ class CollectorTests: XCTestCase {
     collector.cosTheta = 0.87
     collector.theta = 29.18
     Collector.efficiency(&collector, ws: 0)
-    XCTAssertEqual(collector.efficiency, 0.9, accuracy: 0.1)
+    XCTAssertEqual(collector.efficiency.ratio, 0.9, accuracy: 0.1)
     collector.parabolicElevation = 51.49
     collector.cosTheta = 0.56
     collector.theta = 55.53
     Collector.efficiency(&collector, ws: 0)
-    XCTAssertEqual(collector.efficiency, 0.77, accuracy: 0.1)
+    XCTAssertEqual(collector.efficiency.ratio, 0.77, accuracy: 0.1)
   }
 
   func testsTracking() {

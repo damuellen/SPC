@@ -9,10 +9,11 @@
 public class ExpansionVolume {
 
   public let temperatureFillIn: Double
-  lazy var solarField: SolarField = SolarField.shared
+
+  private unowned let solarField: SolarField 
 
   var temperatureLoops: Double {
-    let temperature = solarField.designTemperature
+    let temperature = SolarField.designTemperature
     return (temperature.inlet + temperature.outlet) / 2.0
   }
 
@@ -23,20 +24,21 @@ public class ExpansionVolume {
 
   public var maxVolume: Double {
     let densityHotHeaders = Fluid.terminol.density(
-      solarField.designTemperature.outlet
+      SolarField.designTemperature.outlet
     )
     return totalMass / densityHotHeaders
   }
 
   var vesselVolume: Double { maxVolume - solarField.volume }
 
-  public init(temperatureFillIn: Double = 35) {
+  public init(temperatureFillIn: Double = 35, solarField: SolarField) {
+    self.solarField = solarField 
     self.temperatureFillIn = temperatureFillIn
   }
 
   private func mass()
     -> (coldHeaders: Double, hotHeaders: Double, loops: Double, powerBlock: Double) {
-      let densityFillIn = solarField.fluid.density(temperatureFillIn)
+      let densityFillIn = SolarField.fluid.density(temperatureFillIn)
       let massColdHeaders = solarField.volumeColdHeaders * densityFillIn
       let massHotHeaders = solarField.volumeHotHeaders * densityFillIn
       let massLoops = solarField.volumeLoops * densityFillIn
@@ -47,13 +49,13 @@ public class ExpansionVolume {
 
   private func density() -> (coldHeaders: Double, hotHeaders: Double, loops: Double) {
 
-    let densityColdHeaders = solarField.fluid.density(
-      solarField.designTemperature.inlet
+    let densityColdHeaders = SolarField.fluid.density(
+      SolarField.designTemperature.inlet
     )
-    let densityHotHeaders = solarField.fluid.density(
-      solarField.designTemperature.outlet
+    let densityHotHeaders = SolarField.fluid.density(
+      SolarField.designTemperature.outlet
     )
-    let densityLoops = solarField.fluid.density(temperatureLoops)
+    let densityLoops = SolarField.fluid.density(temperatureLoops)
 
     return (densityColdHeaders, densityHotHeaders, densityLoops)
   }

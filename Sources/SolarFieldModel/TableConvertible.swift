@@ -6,6 +6,8 @@
 //  Copyright © 2015 Daniel Muellenborn. All rights reserved.
 //
 
+import Foundation
+
 public protocol TableConvertible {
   var name: String { get }
   var table: KeyValuePairs<String, Double> { get }
@@ -91,8 +93,8 @@ extension SolarField: CustomStringConvertible, TableConvertible {
 
   public var table: KeyValuePairs<String, Double> {
     [
-      "Temperature In" : designTemperature.inlet,
-      "Temperature Out" : designTemperature.outlet,
+      "Temperature In" : SolarField.designTemperature.inlet,
+      "Temperature Out" : SolarField.designTemperature.outlet,
       "Volume" : volume,
       "Massflow" : massFlow,
       "MF Per Loop" : massFlowPerLoop,

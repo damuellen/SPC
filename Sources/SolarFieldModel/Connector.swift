@@ -13,25 +13,29 @@ public class Connector: Piping {
   unowned var start: Piping
 
   public var distance: Double = 0.0 {
-    didSet { SolarField.shared.recalculation() }
+    didSet { solarField.recalculation() }
   }
 
   var successor: Connector? {
-    didSet { SolarField.shared.recalculation() }
+    didSet { solarField.recalculation() }
   }
 
   var connections: [SubField] = [] {
-    didSet { SolarField.shared.recalculation() }
+    didSet { solarField.recalculation() }
   }
+
+  private unowned let solarField: SolarField
 
   var tail: (cold: Branch, hot: Branch)!
 
-  public init() {
-    self.start = SolarField.shared.powerBlock
+  public init(solarField: SolarField) {
+    self.solarField = solarField
+    self.start = solarField.powerBlock
   }
 
-  public init(with fields: [SubField]) {
-    self.start = SolarField.shared.powerBlock
+  public init(with fields: [SubField], solarField: SolarField) {
+    self.solarField = solarField
+    self.start = solarField.powerBlock
     fields.forEach { $0.connection = self }
     self.distance = fields.map {  $0.loopExemplar.distance }.max() ?? 1
     connections = fields
@@ -63,7 +67,7 @@ public class Connector: Piping {
   }
 
   var streamVelocity: Double {
-    adaptedStreamVelocity ?? SolarField.shared.designStreamVelocity
+    adaptedStreamVelocity ?? solarField.designStreamVelocity
   }
 
   public var adaptedStreamVelocity: Double? {
@@ -127,7 +131,7 @@ public class Connector: Piping {
 
     if !_branches.isEmpty { return _branches }
 
-    let temperature = SolarField.shared.designTemperature
+    let temperature = SolarField.designTemperature
     let numberOfElbows = Int(distance / 75.0) * 4
 
     var cold = Branch(temperature: temperature.inlet,

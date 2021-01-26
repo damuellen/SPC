@@ -29,8 +29,6 @@ class StorageTests: XCTestCase {
       solarField: &solarField,
       steamTurbine: &steamTurbine,
       powerBlock: &powerBlock,
-      heater: &heater,
-      fuelAvailable: fuel,
       heat: &plant.heat
     )
 

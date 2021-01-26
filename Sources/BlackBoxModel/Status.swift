@@ -47,6 +47,7 @@ public struct Status: CustomStringConvertible, MeasurementsConvertible {
 
   var numericalForm: [Double] {
     collector.numericalForm + storage.salt.numericalForm
+      + (solarField as MeasurementsConvertible).numericalForm 
       + storage.numericalForm + heater.numericalForm
       + powerBlock.cycle.numericalForm + heatExchanger.numericalForm
       + solarField.header.numericalForm 
@@ -56,7 +57,7 @@ public struct Status: CustomStringConvertible, MeasurementsConvertible {
   static var columns: [(name: String, unit: String)] {
     let values: [(name: String, unit: String)] =
       [("|Massflow", "kg/s"), ("|Tin", "degC"), ("|Tout", "degC")]
-    return Collector.columns + Storage.Salt.columns + [
+    return Collector.columns + Storage.Salt.columns + SolarField.columns + [
       "Storage", "Heater", "PowerBlock", "HeatExchanger", "SolarField",
       "DesignLoop", "NearLoop", "AvgLoop", "FarLoop",
     ].flatMap { name in

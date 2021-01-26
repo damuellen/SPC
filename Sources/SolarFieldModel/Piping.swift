@@ -44,7 +44,7 @@ extension Sequence where Element == Branch {
   /// Sum of volume in cold branches.
   var volumeCold: Double {
     let isCold: (Branch) -> Bool = {
-      $0.temperature == SolarField.shared.designTemperature.inlet
+      $0.temperature == SolarField.designTemperature.inlet
     }
     var sum = 0.0
     for branch in self where isCold(branch) { sum += branch.volume }
@@ -53,7 +53,7 @@ extension Sequence where Element == Branch {
   /// Sum of volume in hot branches.
   var volumeHot: Double {
     let isHot: (Branch) -> Bool = {
-      return $0.temperature == SolarField.shared.designTemperature.outlet
+      return $0.temperature == SolarField.designTemperature.outlet
     }
     var sum = 0.0
     for branch in self where isHot(branch) { sum += branch.volume }

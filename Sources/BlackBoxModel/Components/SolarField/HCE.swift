@@ -37,16 +37,15 @@ let period = 300
  freezeTemperature + Sim.deltaTemperaturefrzPump
  */
 enum HCE {
- 
   // Radiation losses per m2 Aperture; now with the new losses that take into
   // account the percentage of HCE that are broken, lost vacuum and fluorescent
   static func radiationLosses(
-    _ temperature1: Temperature, _ temperature2: Temperature,
+    _ temperatures: (Temperature, Temperature),
     insolationAbsorber: Double, ambient: Temperature)
     -> Double
   {
     let ambientT = ambient.celsius
-    let (t1, t2) = (temperature1.kelvin, temperature2.kelvin)
+    let (t1, t2) = (temperatures.0.kelvin, temperatures.1.kelvin)
     let avgT = (t1 + t2) / 2
     let col = Collector.parameter
     let aperture = col.aperture
@@ -57,7 +56,7 @@ enum HCE {
     let fluorHCE = availability.fluorHCE.ratio
 
     let deltaT: Double
-    if col.newFunction {
+    if col.useIntegralRadialoss {
       deltaT = ((t1 + t2) / 2) - (ambientT + 30.0) + 10.0
     } else {
       deltaT = t1 - t2 + 10.0
@@ -67,7 +66,7 @@ enum HCE {
     let endLossFactor: Double
 
     let sigma = 0.00000005667
-    let circumference = 2 * .pi * col.rabsOut
+    let circumference = 2 * .pi * 0.04445//col.rabsOut
     let deltaT2 = deltaT * deltaT
 
     if col.useIntegralRadialoss == false {
@@ -197,12 +196,12 @@ enum HCE {
       htf.maxTemperature, hce.temperature.inlet
     )
 
-    let (t1, t2) = col.useIntegralRadialoss
+    let temperatures = col.useIntegralRadialoss
       ? (avgT, ambient + 20.0)
       : (htf.maxTemperature + 10.0, hce.temperature.inlet + 10.0)
       
-    solarField.heatLossesHCE = radiationLosses(
-      t1, t2, insolationAbsorber: collector.insolationAbsorber, ambient: ambient
+    solarField.heatLossesHCE = HCE.radiationLosses(temperatures,
+      insolationAbsorber: collector.insolationAbsorber, ambient: ambient
     )
     
     solarField.heatLossesHCE *= Simulation.adjustmentFactor.heatLossHCE
@@ -218,10 +217,10 @@ enum HCE {
     deltaHeat -= solarField.heatLosses
     
     if collector.insolationAbsorber > 0 {
-      solarField.loopEta = collector.efficiency - solarField.heatLossesHCE
-        / collector.insolationAbsorber / collector.efficiency
-      solarField.ETA = collector.efficiency - solarField.heatLosses
-        / collector.insolationAbsorber / collector.efficiency
+      solarField.loopEta = collector.efficiency.ratio - solarField.heatLossesHCE
+        / collector.insolationAbsorber / collector.efficiency.ratio
+      solarField.ETA = collector.efficiency.ratio - solarField.heatLosses
+        / collector.insolationAbsorber / collector.efficiency.ratio
     } else {
       solarField.loopEta = 0
       solarField.ETA = 0
@@ -251,9 +250,9 @@ enum HCE {
         hce.massFlow = massFlowMin
         (time, dumping) = mode2(&solarField, collector, loop, ambient)
       } else {
-        solarField.loops = SolarField.last
+    
         (solarField.massFlow, solarField.operationMode) = 
-          solarField.antiFreezeCheck()
+          solarField.antiFreezeCheck(loop: loop)
         (time, dumping) = mode2(&solarField, collector, loop, ambient)
       }
 
@@ -349,7 +348,7 @@ enum HCE {
    
     outerIteration: for o in 1...5 {
       swap(&oldTemp, &newTemp)
-      var inFocusLoop = 0.0
+      var inFocusLoop = 0.1
      // print("O", o, newTemp, oldTemp)
       innerIteration: for innerIteration in 1...10 {
       //  print("I", innerIteration)
@@ -366,7 +365,6 @@ enum HCE {
           * col.rabsInner ** 2 / col.aperture
         }
          
-        
         // Calculate time HTF needs to pass through HCE loop
         //if hce.massFlow <= sof.massFlow.min {
         if hce.massFlow.isNearZero {
@@ -392,8 +390,7 @@ enum HCE {
           var deltaHeat = collector.insolationAbsorber
           deltaHeat *= availability
           deltaHeat -= solarField.heatLosses
-          deltaHeat *= area
-            * (1 - inFocusLoop)
+          deltaHeat *= area * (1 - inFocusLoop)
           
           dumping = deltaHeat > 0 ? deltaHeat : 0.0
         }
@@ -402,12 +399,12 @@ enum HCE {
         // Net deltaHeat (+)=in or (-)=out HCE
         
         if heatInput > 0 {
-          let (t1, t2) = col.useIntegralRadialoss
+          let temperatures = col.useIntegralRadialoss
             ? (avgT, ambient + 30.0)
             : (newTemp + 10.0, hce.temperature.inlet + 10.0)
 
-          solarField.heatLossesHCE = radiationLosses(
-            t1, t2, insolationAbsorber: collector.insolationAbsorber, ambient: ambient
+          solarField.heatLossesHCE = HCE.radiationLosses(temperatures,
+            insolationAbsorber: collector.insolationAbsorber, ambient: ambient
           )
 
           solarField.heatLossesHCE *= Simulation.adjustmentFactor.heatLossHCE
@@ -447,12 +444,13 @@ enum HCE {
             }
           }
         } else { // No Massflow
-          let (t1, t2) = col.useIntegralRadialoss
+          let temperatures = col.useIntegralRadialoss
             ? (avgT, ambient + 20.0)
             : (newTemp + 10.0, hce.temperature.inlet + 10.0)
+          print(avgT.kelvin, ambient.kelvin + 20.0)
 
-          solarField.heatLossesHCE = radiationLosses(
-            t1, t2, insolationAbsorber: collector.insolationAbsorber, ambient: ambient
+          solarField.heatLossesHCE = HCE.radiationLosses(temperatures,
+            insolationAbsorber: collector.insolationAbsorber, ambient: ambient
           )
 
           solarField.heatLossesHCE *= Simulation.adjustmentFactor.heatLossHCE
@@ -467,21 +465,21 @@ enum HCE {
         let deltaHeat = heatInput - solarField.heatLosses
 
         if collector.insolationAbsorber > 0 {
-          solarField.loopEta = collector.efficiency
+          solarField.loopEta = collector.efficiency.ratio
 
           let (t1, t2) = col.useIntegralRadialoss
             ? (avgT, ambient + 30.0)
             : (newTemp + 10.0, hce.temperature.inlet + 10.0)
 
-          solarField.heatLossesHCE = radiationLosses(
-            t1, t2, insolationAbsorber: collector.insolationAbsorber, ambient: ambient
+          solarField.heatLossesHCE = HCE.radiationLosses((t1, t2),
+            insolationAbsorber: collector.insolationAbsorber, ambient: ambient
           )
           
           solarField.loopEta *= Simulation.adjustmentFactor.heatLossHCE
-            / collector.insolationAbsorber / collector.efficiency
+            / collector.insolationAbsorber / collector.efficiency.ratio
 
-          solarField.ETA = collector.efficiency - solarField.heatLosses
-            / collector.insolationAbsorber / collector.efficiency
+          solarField.ETA = collector.efficiency.ratio - solarField.heatLosses
+            / collector.insolationAbsorber / collector.efficiency.ratio
 
         } else {
           solarField.loopEta = 0

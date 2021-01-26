@@ -20,16 +20,17 @@ extension SolarField {
     }
   }
 
-  public static func createLayout(loops: Int, layout: Layout = .h) {
+  public static func createLayout(loops: Int, layout: Layout = .h) -> SolarField {
+    let solarField = SolarField(massFlow: Double(loops * 10))
     switch layout {
     case .h:
       let i = loops / 8
       let r = loops % 8
 
-      let nw = SubField(name: "NorthWest", lhs: i, rhs: i)
-      let ne = SubField(name: "NorthEast", lhs: i, rhs: i)
-      let sw = SubField(name: "SouthWest", lhs: i, rhs: i)
-      let se = SubField(name: "SouthEast", lhs: i, rhs: i)
+      let nw = solarField(name: "NorthWest", lhs: i, rhs: i)
+      let ne = solarField(name: "NorthEast", lhs: i, rhs: i)
+      let sw = solarField(name: "SouthWest", lhs: i, rhs: i)
+      let se = solarField(name: "SouthEast", lhs: i, rhs: i)
 
       if r > 0 {
         for x in 0..<r {
@@ -46,35 +47,39 @@ extension SolarField {
             }
         }
       }
-      let northSide = Connector(with: [nw, ne])
+
+      let northSide = solarField.connect(between: nw, ne)
       northSide.name = "North"
-      let southSide = Connector(with: [sw, se])
+      let southSide = solarField.connect(between: nw, ne)
       southSide.name = "South"
-      SolarField.attach([northSide, southSide])
 
     case .i:
+      let loops = loops - 4
       let i = loops / 4
       let r = loops % 4
-      let nw = SubField(name: "NorthWest", lhs: i, rhs: i)
-      let ne = SubField(name: "NorthEast", lhs: i, rhs: i)
-
+      let nw1 = solarField(name: "NorthWest", lhs: 0, rhs: 2)
+      let ne1 = solarField(name: "NorthEast", lhs: 0, rhs: 2)
+      let nw2 = solarField(name: "NorthWest2", lhs: i, rhs: i)
+      let ne2 = solarField(name: "NorthEast2", lhs: i, rhs: i)
+      nw2.attach(to: nw1)
+      ne2.attach(to: ne1)
+      
       if r > 0 {
         for x in 0..<r {
             switch x {
-            case 0: nw.lhsLoops += 1
-            case 1: ne.lhsLoops += 1
-            case 2: nw.rhsLoops += 1
-            case 3: ne.rhsLoops += 1
+            case 0: nw2.lhsLoops += 1
+            case 1: ne2.lhsLoops += 1
+            case 2: nw2.rhsLoops += 1
+            case 3: ne2.rhsLoops += 1
             default: break
             }
         }
       }
 
-      let conn = Connector(with: [nw, ne])
+      let conn = solarField.connect(between: nw1, ne1)
       conn.name = "NorthHeader"
       conn.distance = 15
-
-      SolarField.attach([conn])
     }
+    return solarField
   }
 }

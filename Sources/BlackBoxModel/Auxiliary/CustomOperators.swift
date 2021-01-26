@@ -47,9 +47,9 @@ func terminalWidth() -> Int {
 #if os(Windows)
   var csbi: CONSOLE_SCREEN_BUFFER_INFO = CONSOLE_SCREEN_BUFFER_INFO()
   if !GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi) {
-    return nil
+    return 80
   }
-  return Int(csbi.srWindow.Right - csbi.srWindow.Left) + 1
+  return Int(csbi.srWindow.Right - csbi.srWindow.Left)
 #else
   // Try to get from environment.
   if let columns = ProcessInfo.processInfo.environment["COLUMNS"],

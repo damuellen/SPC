@@ -8,13 +8,17 @@
 
 public class CollectorLoop {
 
-  private unowned var subField: SubField
+  private unowned let subField: SubField
 
   private var _branches: [Branch] = []
   private var _collectors: [Collector] = []
 
   init(subField: SubField) {
     self.subField = subField
+  }
+
+  var solarField: SolarField {
+    subField.solarField
   }
 
   public func scaleMassFlow(percentage: Double) {
@@ -45,7 +49,7 @@ public class CollectorLoop {
 
   var distance: Double { (collectors.first?.length ?? 0) * 2 }
 
-  var designMassFlow: Double { SolarField.shared.massFlowPerLoop }
+  var designMassFlow: Double { solarField.massFlowPerLoop }
 
   var totalVolume: Double { volumePipes + volumeCollectors }
 
@@ -59,7 +63,7 @@ public class CollectorLoop {
 
   var volumePipes: Double {
     var pipes = Branch(temperature: 0.0, nps: 3)
-    pipes.length = 30 + SolarField.shared.rowDistance
+    pipes.length = 30 + solarField.rowDistance
     return pipes.volume
   }
 
@@ -73,14 +77,14 @@ public class CollectorLoop {
 
     if !_collectors.isEmpty { return _collectors }
 
-    let inlet = SolarField.shared.designTemperature.inlet
-    let outlet = SolarField.shared.designTemperature.outlet
+    let inlet = SolarField.designTemperature.inlet
+    let outlet = SolarField.designTemperature.outlet
     let gainPerCollector = (outlet - inlet) / Double(numberOfCollectors)
 
     for n in 0 ..< numberOfCollectors {
       let averageTemperature =
         inlet + gainPerCollector * (0.5 + Double(n))
-      _collectors.append(Collector(temperature: averageTemperature))
+      _collectors.append(Collector(temperature: averageTemperature, subField: subField))
     }
     return _collectors
   }
@@ -89,8 +93,8 @@ public class CollectorLoop {
 
     if !_branches.isEmpty { return _branches }
 
-    let temperatureInlet = SolarField.shared.designTemperature.inlet
-    let temperatureOutlet = SolarField.shared.designTemperature.outlet
+    let temperatureInlet = SolarField.designTemperature.inlet
+    let temperatureOutlet = SolarField.designTemperature.outlet
     let temperatureMean = (temperatureInlet + temperatureOutlet) / 2
 
     var inlet = Branch(temperature: temperatureInlet, nps: 3.0)

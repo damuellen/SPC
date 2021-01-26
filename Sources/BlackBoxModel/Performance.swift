@@ -59,14 +59,14 @@ public struct ElectricPower: Encodable, MeasurementsConvertible {
     parasitics = 0.0, net = 0.0, consum = 0.0
 
   var numericalForm: [Double] {
-    [steamTurbineGross, gasTurbineGross, backupGross, storage, parasitics, shared, net, consum]
+    [steamTurbineGross, storage, parasitics, shared, net, consum]
   }
 
   static var columns: [(name: String, unit: String)] {
     [
       ("Electric|SteamTurbineGross", "MWh e"),
-      ("Electric|GasTurbineGross", "MWh e"),
-      ("Electric|BackupGross", "MWh e"),
+  //    ("Electric|GasTurbineGross", "MWh e"),
+  //    ("Electric|BackupGross", "MWh e"),
       ("Electric|Storage", "MWh e"),
       ("Electric|Parasitics", "MWh e"),
       ("Electric|Shared", "MWh e"),
@@ -79,8 +79,8 @@ public struct ElectricPower: Encodable, MeasurementsConvertible {
     self.demand += values.demand * fraction
     self.gross += values.gross * fraction
     self.steamTurbineGross += values.steamTurbineGross * fraction
-    self.gasTurbineGross += values.gasTurbineGross * fraction
-    self.backupGross += values.backupGross * fraction
+   // self.gasTurbineGross += values.gasTurbineGross * fraction
+   // self.backupGross += values.backupGross * fraction
     // backupGross +=
     self.shared += values.shared * fraction
     self.solarField += values.solarField * fraction
@@ -122,8 +122,13 @@ public struct ThermalPower: Encodable, MeasurementsConvertible {
   internal(set) public var solar: Power = 0.0, toStorage: Power = 0.0,
     toStorageMin: Power = 0.0, storage: Power = 0.0, heater: Power = 0.0,
     boiler: Power = 0.0, wasteHeatRecovery: Power = 0.0,
-    heatExchanger: Power = 0.0, production: Power = 0.0, demand: Power = 0.0,
-    dumping: Power = 0.0, overtemp_dump: Power = 0.0, startUp: Power = 0.0
+    heatExchanger: Power = 0.0, production: Power = 0.0
+    internal(set) public var demand: Power = 0.0 {
+      didSet {
+     //   print(demand)
+      }
+    }
+    internal(set) public var dumping: Power = 0.0, overtemp_dump: Power = 0.0, startUp: Power = 0.0
 
   var excess: Power { production - demand }
 

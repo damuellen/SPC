@@ -60,8 +60,8 @@ public func loops<T>(lhs: Int, rhs: Int, @TupleBuilder body: () throws -> T) ret
 public func subfield<T>(_ name: String, @TupleBuilder body: () throws -> T) rethrows -> T {
   return try body()
 }
-
+/*
 public func header<T>(_ name: String, @TupleBuilder body: () throws -> T) rethrows -> Connector  {
     print(try body())
   return Connector()
-}
+}*/

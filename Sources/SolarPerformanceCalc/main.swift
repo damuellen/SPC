@@ -70,7 +70,7 @@ struct SolarPerformanceCalculator: ParsableCommand {
   @Option(name: .shortAndLong, help: "Custom name, otherwise they are numbered with 3 digits.")
   var nameResults: String?
   @Option(name: .shortAndLong, help: "Year of simulation.")
-  var year: Int = 2019
+  var year: Int = 2003
   @OptionGroup()
   var location: LocationInfo
   @Option(name: .shortAndLong, help: "Calculation steps per hour.")

@@ -14,8 +14,14 @@ public class PowerBlock: Piping {
   public var numberOfPumps: Int = 3
   public var lossCoefficientHX = 75.0
 
+  let solarField: SolarField
+
+  init(solarField: SolarField) {
+    self.solarField = solarField
+  }
+
   var streamVelocity: Double {
-    adaptedStreamVelocity ?? SolarField.shared.designStreamVelocity
+    adaptedStreamVelocity ?? solarField.designStreamVelocity
   }
 
   public var adaptedStreamVelocity: Double? {
@@ -39,24 +45,24 @@ public class PowerBlock: Piping {
   }
 
   var pumpHydraulicPower: Double {
-    let temperature = SolarField.shared.designTemperature.inlet
-    let massFlow = SolarField.shared.massFlow
+    let temperature = SolarField.designTemperature.inlet
+    let massFlow = solarField.massFlow
     let volumeFlow = Branch.volumeFlow(massFlow: massFlow,
                                        temperature: temperature)
-    let headloss = SolarField.shared.totalHeadLoss + headLoss
+    let headloss = solarField.totalHeadLoss + headLoss
     let volumeFlowPerPump = volumeFlow / Double(numberOfPumps)
-    return volumeFlowPerPump * SolarField.shared.fluid.density(temperature)
+    return volumeFlowPerPump * SolarField.fluid.density(temperature)
       * 9.81 * headloss / 10e5
   }
 
   var pumpElectricPower: Double { pumpHydraulicPower / 0.8 }
 
   var leadingPressureDrop: Double {
-    return SolarField.shared.connectors.map { $0.totalPressureDrop }.max() ?? 0
+    return solarField.connectors.map { $0.totalPressureDrop }.max() ?? 0
   }
 
   var leadingHeadLoss: Double {
-    return SolarField.shared.connectors.map { $0.totalHeadLoss }.max() ?? 0
+    return solarField.connectors.map { $0.totalHeadLoss }.max() ?? 0
   }
 
   var totalPressureDrop: Double { pressureDrop + leadingPressureDrop }
@@ -69,15 +75,15 @@ public class PowerBlock: Piping {
 
     if !_branches.isEmpty { return _branches }
 
-    let temperature = SolarField.shared.designTemperature
+    let temperature = SolarField.designTemperature
 
     var cold = Branch(temperature: temperature.inlet,
-                      massFlow: SolarField.shared.massFlow,
+                      massFlow: solarField.massFlow,
                       header: self)
     cold.name = "Cold Header in powerblock"
 
     var hot = Branch(temperature: temperature.outlet,
-                     massFlow: SolarField.shared.massFlow,
+                     massFlow: solarField.massFlow,
                      header: self)
     hot.name = "Hot Header in powerblock"
 

@@ -62,7 +62,7 @@ public enum Fluid: String, Codable {
 
 extension Branch {
 
-  static var fluid: Fluid { return SolarField.shared.fluid }
+  static var fluid: Fluid { .terminol }
 
   static func insideDiameter(outsideDiameter: Double,
                              wallThickness: Double) -> Double {

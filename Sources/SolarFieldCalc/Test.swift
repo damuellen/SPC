@@ -27,12 +27,12 @@ arrow from S2.e left until even with last chop then to last chop <->
 """.withCString {
   try! ("<html><body>" + String(cString: pikchr($0,nil,0,nil,nil)) + "</body></html>").write(toFile: "pikchr.html", atomically: false, encoding: .utf8)
 }
-SolarField.shared.subfields.first!.measurements.reduce("") { (k,v) in 
+solarField.subfields.first!.measurements.reduce("") { (k,v) in 
 """"
 "\(k): \(v)"
 """"
  }
-box "\(SolarField.shared.subfields.first!.name)" 
+box "\(solarField.subfields.first!.name)" 
 SolarField(massFlow: 888) {
   header("North") {
     subfield("East") {

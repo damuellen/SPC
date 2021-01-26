@@ -11,13 +11,13 @@ import xlsxwriter
 
 extension Workbook {
   
-  func addTables() {
-    addOverviews()
-    addBranches()
-    addBillOfMaterials()
+  func addTables(solarField: SolarField) {
+    addOverviews(solarField: solarField)
+    addBranches(solarField: solarField)
+    addBillOfMaterials(solarField: solarField)
   }
   
-  func addOverviews() {
+  func addOverviews(solarField: SolarField) {
     let f1 = addFormat().bold()
     let f2 = addFormat().set(num_format: 4)
     let f3 = addFormat().bold().align(horizontal: .right)
@@ -34,10 +34,10 @@ extension Workbook {
       }
     }
     
-    writeTable(SolarField.shared)
-    writeTable(SolarField.shared.loop)
-    writeTable(SolarField.shared.powerBlock)
-    writeTable(SolarField.shared.expansionVolume)
+    writeTable(solarField)
+    writeTable(solarField.loop)
+    writeTable(solarField.powerBlock)
+    writeTable(solarField.expansionVolume)
 
     /// The values of the individual tables are written next to each other
     func writeOverviewTable(name: String, tables: [TableConvertible]) {
@@ -56,11 +56,11 @@ extension Workbook {
       }
     }
 
-    writeOverviewTable(name: "Subfields", tables: SolarField.shared.subfields)
-    writeOverviewTable(name: "Connectors", tables: SolarField.shared.connectors)
+    writeOverviewTable(name: "Subfields", tables: solarField.subfields)
+    writeOverviewTable(name: "Connectors", tables: solarField.connectors)
   }
 
-  func addBillOfMaterials() {
+  func addBillOfMaterials(solarField: SolarField) {
     let text = addFormat()
     let captions = addFormat().align(horizontal: .center).bold()
     let sch = addFormat().align(horizontal: .center)
@@ -76,8 +76,8 @@ extension Workbook {
       .column("C:F", width: 10)
       .hide_columns(BillOfMaterials.headings.count)
       .write(BillOfMaterials.headings, row: row, format: captions)
-    
-    BillOfMaterials.tubeLengthAndWeight.sorted.forEach { (key, value) in
+    let bom = BillOfMaterials(solarField: solarField)
+    bom.tubeLengthAndWeight.sorted.forEach { (key, value) in
       row += 1
       ws.write(.string(key.name), [row,0], format: text)
         .write(.string(key.material), [row,1], format: text)
@@ -87,7 +87,7 @@ extension Workbook {
         .write(.number(Double(value.weight)), [row,5], format: qty)
     }
 
-    BillOfMaterials.fittingsQuantityAndWeight.sorted.forEach { (key, value) in
+    bom.fittingsQuantityAndWeight.sorted.forEach { (key, value) in
       row += 1
       ws.write(.string(key.name), [row,0], format: text)
         .write(.string(key.material), [row,1], format: text)
@@ -98,7 +98,7 @@ extension Workbook {
     }
   }
   
-  func addBranches() {
+  func addBranches(solarField: SolarField) {
     let captions = addFormat().align(horizontal: .center).bold()
     let f = addFormat().set(num_format: 4)
     let f1 = addFormat().align(horizontal: .center)
@@ -113,7 +113,7 @@ extension Workbook {
       .write("Valve", [0,2], format: captions)
       .write(Branch.tableHeader, row: 0, col: 3, format: captions)
 
-    zip(SolarField.branches, 1...).forEach { value, row in
+    zip(solarField.branches, 1...).forEach { value, row in
       ws.write(.string(value.name), [row,0])
         .write(.boolean(value.hasReducer), [row,1], format: f1)
         .write(.boolean(value.hasValve), [row,2], format: f1)

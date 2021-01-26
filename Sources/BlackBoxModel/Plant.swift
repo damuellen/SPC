@@ -218,10 +218,10 @@ public struct Plant {
       )
 
       if Design.hasSolarField {
-        status.solarField.massFlow = perform(
+        status.powerBlock.massFlow = perform(
           status.solarField, status.collector, status.steamTurbine
         )
-        status.powerBlock.massFlow = status.solarField.massFlow
+      //  status.powerBlock.massFlow = status.solarField.massFlow
       }
 
       if Design.hasStorage {
@@ -418,11 +418,12 @@ public struct Plant {
       + Simulation.parameter.dfreezeTemperatureHeat,
       storage.massFlow.isNearZero
     {  // No freeze protection heater use anymore if storage is in operation
+
       heater.inletTemperature(powerBlock)
+      heater.massFlow = solarField.massFlow
+      
 
-      heater.massFlow = powerBlock.massFlow
-
-      heater.operationMode = .freezeProtection(Ratio(1))
+      heater.operationMode = .freezeProtection(Ratio(1.0))
 
       let energy = heater(
         temperatureOutlet: solarField.temperature.outlet,
@@ -1004,13 +1005,10 @@ public struct Plant {
 
       status.storage.operationMode = .freezeProtection
     } else if case .freezeProtection = status.solarField.operationMode,
-      status.storage.charge > -0.35 && parameter.FP == 0
+      status.storage.charge > 0.35 && parameter.FP == 0
     {
       status.storage.operationMode = .freezeProtection
-    } else {
-      status.storage.operationMode = .noOperation
-    }
-      
+    
     (supply, parasitics) = Storage.perform(
       storage: &status.storage,
       solarField: &status.solarField,
@@ -1020,12 +1018,16 @@ public struct Plant {
     )
     
     status.powerBlock.inletTemperature(outlet: status.storage)
-
-    // check why to circulate HTF in SF
-    //#warning("Storage.parasitics")
-  // FIXME  plant.electricalParasitics.solarField = SolarField.parameter.antiFreezeParastics
     heat.storage = supply
     fuelConsumption.heater = fuel
     electricalParasitics.storage = parasitics.megaWatt
+    } else {
+      status.storage.operationMode = .noOperation
+    }
+      
+    // check why to circulate HTF in SF
+    //#warning("Storage.parasitics")
+  // FIXME  plant.electricalParasitics.solarField = SolarField.parameter.antiFreezeParastics
+
   }
 }

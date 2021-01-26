@@ -17,15 +17,20 @@ protocol HeatTransfer: CustomStringConvertible {
 public struct Cycle: HeatTransfer {
   public var name: String
   public var massFlow: MassFlow
-  public var temperature: (inlet: Temperature, outlet: Temperature)
+  public var temperature: (inlet: Temperature, outlet: Temperature) {
+    didSet {
+ //     print(self)
+    }
+  }
 }
 
 extension Cycle {
     init(loop: String) {
     self.name = loop
     self.massFlow = 0.0
-    let temperature = Simulation.initialValues.temperatureOfHTFinHCE
-    self.temperature = (inlet: temperature, outlet: temperature)
+    let inlet = Simulation.initialValues.temperatureOfHTFinPipes
+    let outlet = Simulation.initialValues.temperatureOfHTFinHCE
+    self.temperature = (inlet: inlet, outlet: outlet)
   }
 
   init(name: String) {
@@ -62,10 +67,9 @@ extension HeatTransfer {
   }
 
   public var description: String {  
-    "  Mass flow rate:".padding(32) 
-      + String(format: "%3.1f\n", massFlow.rate)
-      + "  Temperatures:".padding(32) 
-      + String(format: "%3.1f / %3.1f", temperature.inlet.celsius, temperature.outlet.celsius)
+       String(format: "  Mass flow rate: %3.1f kg/s", massFlow.rate).padding(30) 
+      + String(format: " T in: %3.1f degC", temperature.inlet.celsius).padding(20) 
+      + String(format: "T out:%3.1f degC", temperature.outlet.celsius).padding(20) 
   }
 
   var values: [String] {

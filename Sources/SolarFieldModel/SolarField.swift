@@ -8,31 +8,25 @@
 
 public final class SolarField {
 
-  public static let shared = SolarField()
-  public let powerBlock = PowerBlock()
-  public let expansionVolume = ExpansionVolume()
+  public var powerBlock: PowerBlock!
+  public var expansionVolume: ExpansionVolume!
 
-  public var designTemperature = (inlet: 297.0, outlet: 393.0)
-  public var ambientTemperature = 20.0
-  public var fluid = Fluid.terminol
+  public static var designTemperature = (inlet: 297.0, outlet: 393.0)
+  public static var ambientTemperature = 20.0
+  public static var fluid = Fluid.terminol
 
   public var connectors: [Connector] = []
   public var subfields: [SubField] = []
 
   public var loop: CollectorLoop { subfields.first!.loopExemplar }
 
-  static var isValid: Bool {
-    !SolarField.shared.connectors.isEmpty
-      && !SolarField.shared.subfields.isEmpty
-      && SolarField.shared.massFlowPerLoop > 0
+  var isValid: Bool {
+    !connectors.isEmpty
+      && !subfields.isEmpty
+      && massFlowPerLoop > 0
   }
 
-  public static var designMassFlow: Double {
-    get { SolarField.shared.massFlow }
-    set { SolarField.shared.massFlow = newValue }
-  }
-
-  var massFlow: Double = 0.0 {
+  public var massFlow: Double {
     didSet { recalculation() }
   }
 
@@ -44,10 +38,42 @@ public final class SolarField {
     didSet { recalculation() }
   }
 
+  init(massFlow: Double = 0.0) {
+    self.massFlow = massFlow
+    self.powerBlock = PowerBlock(solarField: self)
+    self.expansionVolume = ExpansionVolume(solarField: self)
+  }
+
+  public func connect(between subFields: SubField...) -> Connector {    
+    var allConnectors = [Connector]()
+    func another(connector: Connector) {
+      allConnectors.append(connector)
+      if let next = connector.successor {
+        another(connector: next)
+      }
+    }
+
+   connectors.append(Connector(with: subFields, solarField: self))
+   return connectors.last!
+  }
+
+  public func callAsFunction(name: String, lhs: Int = 0, rhs: Int = 0) -> SubField {
+    SubField(name: name, lhs: lhs, rhs: rhs, solarField: self)
+  }
+
   public func recalculation() {
+    subfields = connectors.flatMap { $0.connections }
+    func another(subField: SubField) {
+      if let next = subField.successor {
+        subfields.append(next)
+        another(subField: next)
+      }
+    }
+    subfields.forEach { another(subField: $0) }    
     connectors.forEach { $0.recalculation() }
     subfields.forEach { $0.recalculation() }
     powerBlock.recalculation()
+  //  _ = branches // Make sure the order is right.
   }
 
   public func scaleMassFlow(percentage: Double) {
@@ -120,12 +146,12 @@ public final class SolarField {
       : 0
   }
 
-  public static var branches: [Branch] {
-    var result = SolarField.shared.powerBlock.branches
-    result += SolarField.shared.connectors.flatMap { $0.branches }
-    result += SolarField.shared.subfields.flatMap { $0.branches }
+  public var branches: [Branch] {
+    var result = powerBlock.branches
+    result += connectors.flatMap { $0.branches }
+    result += subfields.flatMap { $0.branches }
 
-    let loops = SolarField.shared.subfields.map { ($0.loopExemplar, $0.loopsCount) }
+    let loops = subfields.map { ($0.loopExemplar, $0.loopsCount) }
     let loopsPiping = loops.flatMap {
       [[Branch]](repeating: $0.0!.branches, count: $0.1)
     }
@@ -133,38 +159,10 @@ public final class SolarField {
     return result
   }
 
-  public static func massFlow(scale: Double) {
+  public func massFlow(scale: Double) {
     guard case 1 ... 100 = scale else { return }
-    SolarField.shared.recalculation()
-    SolarField.shared.scaleMassFlow(percentage: scale)
-  }
-
-  public static func attach(_ connector: [Connector]) {
-
-    var allConnectors: [Connector] = []
-
-    func another(connector: Connector) {
-      allConnectors.append(connector)
-      if let next = connector.successor {
-        another(connector: next)
-      }
-    }
-
-    func another(subField: SubField) {
-      if let next = subField.successor {
-        SolarField.shared.subfields.append(next)
-        another(subField: next)
-      }
-    }
-
-    connector.forEach { another(connector: $0) }
-
-    SolarField.shared.connectors = allConnectors
-    SolarField.shared.subfields = allConnectors.flatMap { $0.connections }
-
-    SolarField.shared.subfields.forEach { another(subField: $0) }
-    _ = SolarField.branches // Make sure the order is right.
-
+    recalculation()
+    scaleMassFlow(percentage: scale)
   }
 }
 

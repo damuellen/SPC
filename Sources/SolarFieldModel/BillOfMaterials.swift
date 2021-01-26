@@ -6,8 +6,14 @@
 //  Copyright © 2015 Daniel Muellenborn. All rights reserved.
 //
 
-public enum BillOfMaterials {
+public class BillOfMaterials {
   
+  private unowned let solarField: SolarField
+
+  public init(solarField: SolarField) {
+    self.solarField = solarField
+  }
+
   public static var headings: [String] =
     ["Description", "Material", "Schedule", "NPS", "Quantity", "Weight"]
   
@@ -28,13 +34,13 @@ public enum BillOfMaterials {
     }
   }
   
-  static var tubeLength: Items<Float> {
+  var tubeLength: Items<Float> {
     
     var sch10 = [Float](repeating: 0.0, count: NominalPipeSize.values.count)
     var (sch30, sch40, sch80, sch10S, sch80S, sch120, sch140, sch160) =
       (sch10, sch10, sch10, sch10, sch10, sch10, sch10, sch10)
     
-    SolarField.branches.forEach { branch in
+    solarField.branches.forEach { branch in
       guard let idx = NominalPipeSize.values.firstIndex(of: branch.nps)
       else { return }
       switch branch.schedule {
@@ -54,13 +60,13 @@ public enum BillOfMaterials {
             .sch120: sch120, .sch140: sch140, .sch160: sch160]
   }
   
-  static var elbowCount: Items<Int> {
+  var elbowCount: Items<Int> {
     
     var sch10 = [Int](repeating: 0, count: NominalPipeSize.values.count)
     var (sch30, sch40, sch10S, sch80, sch80S, sch120, sch140, sch160) =
       (sch10, sch10, sch10, sch10, sch10, sch10, sch10, sch10)
     
-    SolarField.branches.forEach { branch in
+    solarField.branches.forEach { branch in
       guard let idx = NominalPipeSize.values.firstIndex(of: branch.nps)
       else { return }
       switch branch.schedule {
@@ -80,12 +86,12 @@ public enum BillOfMaterials {
             .sch120: sch120, .sch140: sch140, .sch160: sch160]
   }
   
-  static var reducerLists: [NominalPipeSize: [Component]] {
+  var reducerLists: [NominalPipeSize: [Component]] {
     
     var reducers: [NominalPipeSize: [Component]] =
       [.sch10: [], .sch30: [], .sch40: []]
     
-    SolarField.branches.forEach { branch in
+    solarField.branches.forEach { branch in
       let reducer = branch.components.filter({ $0.type == .reducer })
       if reducer.count > 0 {
         reducers[branch.schedule]! += reducer
@@ -94,7 +100,7 @@ public enum BillOfMaterials {
     return reducers
   }
   
-  static var reducerCount: Items<Int> {
+  var reducerCount: Items<Int> {
     
     var sch10 = [Int](repeating: 0, count: NominalPipeSize.values.count)
     var (sch30, sch40, sch10S, sch80, sch80S, sch120, sch140, sch160) =
@@ -123,8 +129,8 @@ public enum BillOfMaterials {
             .sch120: sch120, .sch140: sch140, .sch160: sch160]
   }
   
-  static var valveList: [Item] {
-    let branches = SolarField.branches.lazy
+  var valveList: [Item] {
+    let branches = solarField.branches.lazy
     let components = branches.flatMap { $0.components }
     let valves = components.filter { $0.type == .valve }
     let descriptons = valves.map {
@@ -133,7 +139,7 @@ public enum BillOfMaterials {
     return Array(descriptons)
   }
   
-  public static var tubeLengthAndWeight: [Item: (length: Float, weight: Float)] {
+  public var tubeLengthAndWeight: [Item: (length: Float, weight: Float)] {
     
     func weightAndLengthOfTubes(
       schedule: NominalPipeSize,_ sizes: [Float]
@@ -162,7 +168,7 @@ public enum BillOfMaterials {
     return results
   }
   
-  public static var fittingsQuantityAndWeight: [Item: (qty: Float, weight: Float)] {
+  public var fittingsQuantityAndWeight: [Item: (qty: Float, weight: Float)] {
     
     func weightAndQuantityofElbows(
       schedule: NominalPipeSize,_ sizes: [Int]
@@ -213,7 +219,7 @@ public enum BillOfMaterials {
     return results
   }
   
-  static var valvesQuantity: [Item: (Float, Float)] {
+  var valvesQuantity: [Item: (Float, Float)] {
     var results: [Item: (Float, Float)] = [:]
     for valve in valveList {
       let zeroWeight = Float(0)

@@ -21,6 +21,7 @@
 		"terminal.integrated.shell.linux": "/bin/bash",
 		"lldb.library": "/usr/lib/liblldb.so",
 		"lldb.launch.expressions": "native",
+		"lldb.evaluateForHovers": false,
 		"swift.path.swift_driver_bin": "/usr/bin/swift",
 		"sde.languageservermode": "sourcekit-lsp",
 		"sourcekit-lsp.toolchainPath": "/usr/bin/",

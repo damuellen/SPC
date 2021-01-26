@@ -62,7 +62,7 @@ public struct Branch {
   }
 
   /// Returns the global ambient temperature of the solar field
-  var ambientTemperature: Double { SolarField.shared.ambientTemperature }
+  var ambientTemperature: Double { SolarField.ambientTemperature }
 
   /// Returns the calculated insideDiameter of the branch.
   var insideDiameter: Double {

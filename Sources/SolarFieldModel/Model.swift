@@ -7,7 +7,7 @@
 //
 
 import Foundation
-
+/*
 extension SolarField {
   public struct Model: Codable {
 
@@ -24,25 +24,25 @@ extension SolarField {
     var absorberTyp: Absorber = .ptr70
     // var absorberDiameter: Double?
 
-    public init(_ solarField: SolarField = SolarField.shared) {
+    public init(_ solarField: SolarField) {
       self.massFlow = solarField.massFlow
       self.designStreamVelocity = solarField.designStreamVelocity
       self.rowDistance = solarField.rowDistance
-      self.inletTemperature = solarField.designTemperature.inlet
-      self.outletTemperature = solarField.designTemperature.outlet
-      self.ambientTemperature = solarField.ambientTemperature
-      self.fluid = solarField.fluid
+      self.inletTemperature = SolarField.designTemperature.inlet
+      self.outletTemperature = SolarField.designTemperature.outlet
+      self.ambientTemperature = SolarField.ambientTemperature
+      self.fluid = SolarField.fluid
     }
   }
 
   static func assign(_ model: Model) {
-    SolarField.shared.massFlow = model.massFlow
-    SolarField.shared.designStreamVelocity = model.designStreamVelocity
-    SolarField.shared.rowDistance = model.rowDistance
-    SolarField.shared.designTemperature.inlet = model.inletTemperature
-    SolarField.shared.designTemperature.outlet = model.outletTemperature
-    SolarField.shared.ambientTemperature = model.ambientTemperature
-    SolarField.shared.fluid = model.fluid
+  //  massFlow = model.massFlow
+  //  designStreamVelocity = model.designStreamVelocity
+  //  rowDistance = model.rowDistance
+    SolarField.designTemperature.inlet = model.inletTemperature
+    SolarField.designTemperature.outlet = model.outletTemperature
+    SolarField.ambientTemperature = model.ambientTemperature
+    SolarField.fluid = model.fluid
   }
 }
 extension Connector {
@@ -54,7 +54,7 @@ extension Connector {
   }
 
   convenience init(_ connector: Model) {
-    self.init()
+    
     self.name = connector.name
     self.distance = connector.distance
   }
@@ -89,7 +89,6 @@ extension SubField {
     self.adaptedStreamVelocity = subField.streamVelocity
     self.sizeAdaptation = subField.sizeAdaptation
   }
-
   func model() -> Model {
     var model = Model()
     model.name = name
@@ -125,10 +124,10 @@ public struct SolarFieldModel: Codable {
     self.subfields = subfields
   }
 
-  public init() {
-    self.solarField = SolarField.Model()
-    self.connectors = SolarField.shared.connectors.map { $0.model() }
-    self.subfields = SolarField.shared.subfields.map { $0.model() }
+  public init(solarField: SolarField) {
+    self.solarField = SolarField.Model(solarField)
+    self.connectors = solarField.connectors.map { $0.model() }
+    self.subfields = solarField.subfields.map { $0.model() }
   }
 
   public static func readFromFile(url: URL) -> SolarFieldModel? {
@@ -164,13 +163,13 @@ public struct SolarFieldModel: Codable {
     }
 
     let subfields: [SubField] = self.subfields.map { subfield in
-      let s = SubField(subField: subfield)
+      //let s = SubField(subField: subfield)
       let c = connectors.first { connector in
         connector.name == subfield.head
       }
-      s.connection = c
-      c?.connections.append(s)
-      return s
+    //  s.connection = c
+    //  c?.connections.append(s)
+    //  return s
     }
 
     for (instance, model) in zip(subfields, self.subfields) {
@@ -198,6 +197,7 @@ public struct SolarFieldModel: Codable {
     }
 
     SolarField.assign(solarField)
-    SolarField.attach(connectors)
+  
   }
 }
+*/

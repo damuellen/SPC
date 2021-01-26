@@ -13,13 +13,17 @@ struct Collector {
   var temperature: Double
   var length: Double
   var insideDiameter: Double
+  
+  private unowned let subField: SubField
 
   init(temperature: Double,
        length: Double = 148.4,
-       insideDiameter: Double = 66.0) {
+       insideDiameter: Double = 66.0,
+       subField: SubField) {
     self.temperature = temperature
     self.length = length
     self.insideDiameter = insideDiameter
+    self.subField = subField
   }
 
   var crossSectionArea: Double {
@@ -40,7 +44,7 @@ struct Collector {
 
   var volume: Double { crossSectionArea * Double(length) }
 
-  var designMassFlow: Double { SolarField.shared.massFlowPerLoop }
+  var designMassFlow: Double { subField.solarField.massFlowPerLoop }
 
   var massFlow: Double { designMassFlow * scaleMassFlow }
 

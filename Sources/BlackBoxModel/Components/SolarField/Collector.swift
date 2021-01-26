@@ -15,20 +15,21 @@ import SolarPosition
 /// Contains all data needed to simulate the operation of the collector
 public struct Collector: Parameterizable, CustomStringConvertible {
     
-  public var parabolicElevation, theta, cosTheta, efficiency: Double
+  public var parabolicElevation, theta, cosTheta: Double
+  public var efficiency: Ratio
   /// The effective power on the absorber
   public var insolationAbsorber: Double
 
   public var description: String {
     formatting(
-      [insolationAbsorber, parabolicElevation, theta, cosTheta, efficiency],
+      [insolationAbsorber, parabolicElevation, theta, cosTheta, efficiency.percentage],
       ["Insolation absorber:", "PE:", "Theta:", "cos(Theta):", "Efficiency:"]
     ) 
   }
 
   static let initialState = Collector(
     parabolicElevation: 0, theta: 0, cosTheta: 0,
-    efficiency: 0, insolationAbsorber: 0
+    efficiency: 0.0, insolationAbsorber: 0
   )
 
   public static var parameter: Parameter = ParameterDefaults.LS3
@@ -126,7 +127,7 @@ public struct Collector: Parameterizable, CustomStringConvertible {
 
     let eff = shadingSCA * shadingHCE * IAM * edge * k_torsion * wind
       * Simulation.adjustmentFactor.efficiencySolarField
-    collector.efficiency = eff
+    collector.efficiency.ratio = eff
   }
 
   public static func tracking(sun: SolarPosition.OutputValues) -> Collector {
@@ -156,7 +157,7 @@ public struct Collector: Parameterizable, CustomStringConvertible {
 extension Collector: MeasurementsConvertible {
   
   var numericalForm: [Double] {
-    [theta, cosTheta, efficiency, parabolicElevation]
+    [theta, cosTheta, efficiency.percentage, parabolicElevation]
   }
   
   static var columns: [(name: String, unit: String)] {

@@ -28,6 +28,8 @@ public struct Temperature: CustomStringConvertible, Equatable {
     }
   }
 
+  static var zero = 0
+
   static var absoluteZeroCelsius = -273.15
 
   public var celsius: Double { return kelvin + Temperature.absoluteZeroCelsius }

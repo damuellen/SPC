@@ -31,32 +31,34 @@ struct SolarFieldCalculator: ParsableCommand {
   var output: String? // "SolarFieldModel.json"
 
   func run() throws {
-    if let loops = loops {
-      SolarField.createLayout(loops: loops)
-    }
+
 
     if let massflow = massflow {
-      SolarField.designMassFlow = massflow
+  //    SolarField.designMassFlow = massflow
     }
 
     if let input = input {
-      try SolarFieldModel.readFromFile(url: URL(fileURLWithPath: input))?.apply()
+   //   try SolarFieldModel.readFromFile(url: URL(fileURLWithPath: input))?.apply()
     }
 
+    //guard let loops = loops else { return }
+    let solarField = SolarField.createLayout(loops: 100)
+    solarField.massFlow = 1000
+
     let wb = Workbook(name: "Solarfield.xlsx")
-    wb.addTables()
+    wb.addTables(solarField: solarField)
     wb.close()
 
     openFile(atPath: "Solarfield.xlsx")
-    print(TextTable.overview(style: Style.fancy))
+    print(TextTable.overview(solarField: solarField, style: Style.fancy))
 
-    if let output = output {
-      String(
-        data: try JSONEncoder().encode(SolarFieldModel()),
-        encoding: .utf8)?
-        .clipboard()
-      try SolarFieldModel().writeToFile(url: URL(fileURLWithPath: output))
-    }
+  //  if let output = output {
+  //    String(
+   //     data: try JSONEncoder().encode(SolarFieldModel()),
+  //      encoding: .utf8)?
+  //      .clipboard()
+    //  try SolarFieldModel().writeToFile(url: URL(fileURLWithPath: output))
+    
   }
 }
 
