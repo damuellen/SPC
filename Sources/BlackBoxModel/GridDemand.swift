@@ -24,8 +24,8 @@ struct GridDemand: Codable {
   }
 
   var ratio: Double {
-    if index < 0 { return self.data[0].ratio }
-    return self.data[index].ratio
+    if index < 0 { return self.data[0].quotient }
+    return self.data[index].quotient
   }
 
   private init() {

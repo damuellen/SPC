@@ -56,7 +56,7 @@ public struct Heater: Parameterizable, HeatTransfer {
   static func parasitics(estimateFrom load: Ratio) -> Double {
     parameter.nominalElectricalParasitics
       * (parameter.electricalParasitics[0]
-        + parameter.electricalParasitics[1] * load.ratio)
+        + parameter.electricalParasitics[1] * load.quotient)
   }
 
   mutating func massFlow(from c: HeatTransfer) {
@@ -91,10 +91,10 @@ public struct Heater: Parameterizable, HeatTransfer {
         fuel = fuelAvailable / Simulation.time.steps.fraction / 2
         // The fuelfl avl. [MW]
         thermalPower.megaWatt =
-          fuel * parameter.efficiency.ratio
+          fuel * parameter.efficiency.quotient
           * Simulation.adjustmentFactor.efficiencyHeater
         // net thermal power avail [MW]
-        load.ratio = heat.heater.megaWatt / Design.layout.heater
+        load = Ratio(heat.heater.megaWatt / Design.layout.heater)
         operationMode = .normal(load)
 
         guard load > parameter.minLoad else {
@@ -131,7 +131,7 @@ public struct Heater: Parameterizable, HeatTransfer {
             / htf.deltaHeat(
               parameter.nominalTemperatureOut, temperatureInlet)
         
-        fuel = Design.layout.heater / parameter.efficiency.ratio
+        fuel = Design.layout.heater / parameter.efficiency.quotient
         load = Ratio(1)
         operationMode = .charge(load)
         // Parasitic power [MW]
@@ -155,9 +155,9 @@ public struct Heater: Parameterizable, HeatTransfer {
       } else {
         temperature.outlet = parameter.antiFreezeTemperature
       }
-      thermalPower.watt /= parameter.efficiency.ratio
+      thermalPower.watt /= parameter.efficiency.quotient
 
-      load.ratio = min(thermalPower.megaWatt / Design.layout.heater, 1.0)
+      load = Ratio(min(thermalPower.megaWatt / Design.layout.heater, 1.0))
       operationMode = .freezeProtection(load)
       // No operation requested or QProd > QNeed
     } else if case .noOperation = operationMode { /* || heat >= 0 */
@@ -182,7 +182,7 @@ public struct Heater: Parameterizable, HeatTransfer {
     } else {
       // Normal operation requested  The fuel flow needed [MW]
       fuel =
-        max(-demand, Design.layout.heater) / parameter.efficiency.ratio
+        max(-demand, Design.layout.heater) / parameter.efficiency.quotient
         / Simulation.adjustmentFactor.efficiencyHeater
       // The fuelfl avl. [MW]
       fuel =
@@ -191,15 +191,15 @@ public struct Heater: Parameterizable, HeatTransfer {
 
       /// net thermal power avail [MW]
       thermalPower.megaWatt =
-        fuel * parameter.efficiency.ratio
+        fuel * parameter.efficiency.quotient
         * Simulation.adjustmentFactor.efficiencyHeater
 
-      load.ratio = min(thermalPower.megaWatt / Design.layout.heater, 1.0)  // load avail.
+      load = Ratio(min(thermalPower.megaWatt / Design.layout.heater, 1.0))  // load avail.
 
       if load < parameter.minLoad {
         load = parameter.minLoad
-        thermalPower.megaWatt = load.ratio * Design.layout.heater
-        fuel = thermalPower.megaWatt / parameter.efficiency.ratio
+        thermalPower.megaWatt = load.quotient * Design.layout.heater
+        fuel = thermalPower.megaWatt / parameter.efficiency.quotient
       }
 
       // Normal operation possible
@@ -215,7 +215,7 @@ public struct Heater: Parameterizable, HeatTransfer {
         massFlow.rate = thermalPower.kiloWatt / deltaHeat
       }
     }
-    parasitics = load.ratio > 0 ? Heater.parasitics(estimateFrom: load) : 0
+    parasitics = load > .zero ? Heater.parasitics(estimateFrom: load) : 0
     let energy = PerformanceData<Heater>(
       heat: thermalPower.megaWatt, electric: parasitics, fuel: fuel
     )

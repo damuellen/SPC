@@ -23,7 +23,7 @@ class SolarFieldTests: XCTestCase {
 
     XCTAssertEqual(dumping, 159173093.3, accuracy: 0.1)
     XCTAssertEqual(solarField.outletTemperature, 666.15, accuracy: 0.1)
-    XCTAssertEqual(solarField.inFocus.ratio, 0.44, accuracy: 0.1)
+    XCTAssertEqual(solarField.inFocus.quotient, 0.44, accuracy: 0.1)
 
     let parasitics = solarField.parasitics()
 
@@ -34,14 +34,14 @@ class SolarFieldTests: XCTestCase {
 
     XCTAssertEqual(dumping, 63349013.3, accuracy: 0.1)
     XCTAssertEqual(solarField.outletTemperature, 666.15, accuracy: 0.1)
-    XCTAssertEqual(solarField.inFocus.ratio, 0.65, accuracy: 0.1)
+    XCTAssertEqual(solarField.inFocus.quotient, 0.65, accuracy: 0.1)
 
     collector.insolationAbsorber = 66.6
     solarField.calculate(dumping: &dumping, collector: collector, ambient: Temperature(celsius: 25.0))
 
     XCTAssertEqual(dumping, 0, accuracy: 0.1)
     XCTAssertEqual(solarField.outletTemperature, 467.96, accuracy: 0.1)
-    XCTAssertEqual(solarField.inFocus.ratio, 0, accuracy: 0.1)
+    XCTAssertEqual(solarField.inFocus.quotient, 0, accuracy: 0.1)
   }
 
   static var allTests: [(String, (SolarFieldTests) -> () throws -> Void)] {

@@ -76,7 +76,7 @@ public struct SolarField: Parameterizable, HeatTransfer {
   public static var parameter: Parameter = ParameterDefaults.sf
 
   static func pipeHeatLoss(pipe: Temperature, ambient: Temperature) -> Double {
-    return ((pipe.kelvin - ambient.kelvin) / 333) ** 1 * parameter.pipeHeatLosses
+    ((pipe.kelvin - ambient.kelvin) / 333) ** 1 * parameter.pipeHeatLosses
   }
 
   /// Calculates the parasitics
@@ -85,9 +85,9 @@ public struct SolarField: Parameterizable, HeatTransfer {
     if operationMode.isFreezeProtection {
       return parameter.antiFreezeParastics
     }
-    let load = massFlow.share(of: parameter.maxMassFlow).ratio
-    if header.massFlow.rate > 0 { 
-    return parameter.pumpParasticsFullLoad
+    let load = massFlow.share(of: parameter.maxMassFlow).quotient
+    if header.massFlow > .zero { 
+      return parameter.pumpParasticsFullLoad
         * (parameter.pumpParastics[0] + parameter.pumpParastics[1]
           * load + parameter.pumpParastics[2] * load ** 2)
     } else {
@@ -117,7 +117,7 @@ public struct SolarField: Parameterizable, HeatTransfer {
     let maxMassFlow = SolarField.parameter.maxMassFlow
     let design = SolarField.parameter.imbalanceDesign
     let minimum = SolarField.parameter.imbalanceMin
-    let minFlowRatio = SolarField.parameter.minFlow.ratio
+    let minFlowRatio = SolarField.parameter.minFlow.quotient
     let minFlow = MassFlow(minFlowRatio * maxMassFlow.rate)
     let m1 = (massFlow - minFlow).rate
     let m2 = (maxMassFlow - minFlow).rate
@@ -153,6 +153,7 @@ public struct SolarField: Parameterizable, HeatTransfer {
     _ timeRemain: Double
   ) {
     let last = loops
+    header.massFlow.rate = SolarField.parameter.maxMassFlow.rate * SolarField.parameter.minFlow.quotient
     if header.massFlow > .zero {
       let massFlows = imbalanceLoops(massFlow: header.massFlow)
       zip(Loop.indices, massFlows).forEach { i, massFlow in
@@ -251,9 +252,10 @@ public struct SolarField: Parameterizable, HeatTransfer {
       + Simulation.parameter.tempTolerance
 
     if loops[loop.rawValue].minTemperature < freezingTemperature.kelvin {
-      let antiFreezeFlow = SolarField.parameter.antiFreezeFlow.ratio 
-       * SolarField.parameter.maxMassFlow.rate    
-      return (MassFlow(antiFreezeFlow), .unknown)
+      let antiFreeze = SolarField.parameter.antiFreezeFlow.quotient
+      let maxMassFlow = SolarField.parameter.maxMassFlow.rate
+      let antiFreezeFlow = MassFlow(antiFreeze * maxMassFlow)  
+      return (antiFreezeFlow, .unknown)
     } else {
       return (0.0, operationMode)
     }

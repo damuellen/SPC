@@ -73,7 +73,7 @@ extension Storage {
     /*Storage Heat Losses:
      if parameter.temperatureCharge.coefficients[1] > 0 {
      if parameter.temperatureCharge.coefficients[2] > 0 {
-     let fittedHeatLoss = status.storage.charge.ratio <= 0
+     let fittedHeatLoss = status.storage.charge.quotient <= 0
      ? parameter.heatlossCst[status.storage.charge]
      : parameter.heatlossC0to1[status.storage.charge]
      
@@ -81,7 +81,7 @@ extension Storage {
      * 3_600 * 1e-07 * Design.layout.storage // [MW]
      } else {
      status.storage.heatLossStorage = parameter.heatlossCst[0] / 1_000
-     * (status.storage.charge.ratio * (parameter.designTemperature.hot
+     * (status.storage.charge.quotient * (parameter.designTemperature.hot
      - parameter.designTemperature.cold).kelvin
      + parameter.designTemperature.cold.kelvin)
      / parameter.designTemperature.hot.kelvin
@@ -100,7 +100,7 @@ extension Storage {
         - parameter.temperatureDischarge[1]
     } else {
       temp = -Temperature.absoluteZeroCelsius
-      if status.charge.ratio < 0 {
+      if status.charge < .zero {
         temp += parameter.temperatureDischarge[0]
           - (parameter.designTemperature.hot.kelvin
             - status.temperatureTank.hot.kelvin)
@@ -126,7 +126,7 @@ extension Storage {
         / parameter.heatExchangerEfficiency) - solarField.massFlow.rate
     // * 0.97 deleted after separating combined from storage only operation
     default:
-      storage.massFlow.rate = dischargeLoad.ratio
+      storage.massFlow.rate = dischargeLoad.quotient
         * powerBlock.massFlow.rate / parameter.heatExchangerEfficiency
     }
   }
@@ -350,10 +350,9 @@ extension Storage {
     solarField: inout SolarField,
     powerBlock: PowerBlock)
   {
-    let antiFreezeFlow = MassFlow(
-      SolarField.parameter.antiFreezeFlow.ratio 
-      * SolarField.parameter.maxMassFlow.rate
-    )
+    let antiFreeze = SolarField.parameter.antiFreezeFlow.quotient
+    let maxMassFlow = SolarField.parameter.maxMassFlow.rate
+    let antiFreezeFlow = MassFlow(antiFreeze * maxMassFlow) 
     let splitfactor: Ratio = 0.4
     
     storage.massFlow = antiFreezeFlow.adjusted(withFactor: splitfactor)
@@ -375,8 +374,8 @@ extension Storage {
         )
       }
       storage.outletTemperature(kelvin:
-        splitfactor.ratio * storage.outletTemperature
-          + (1 - splitfactor.ratio) * storage.inletTemperature
+        splitfactor.quotient * storage.outletTemperature
+          + (1 - splitfactor.quotient) * storage.inletTemperature
       )
     } else {
       storage.temperature.outlet = storage.temperatureTank.cold

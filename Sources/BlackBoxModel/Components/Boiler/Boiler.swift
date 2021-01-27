@@ -50,10 +50,10 @@ public struct Boiler: Parameterizable {
 
   /// Calculates the parasitics of the boiler which only depends on the current load
   private static func parasitics(estimateFrom load: Ratio) -> Double {
-    return load.ratio.isZero ? 0 :
+    return load.isZero ? 0 :
       parameter.nominalElectricalParasitics *
       (parameter.electricalParasitics[0] +
-        parameter.electricalParasitics[1] * load.ratio)
+        parameter.electricalParasitics[1] * load.quotient)
   }
 
   mutating func callAsFunction(
@@ -179,7 +179,7 @@ public struct Boiler: Parameterizable {
 
     if fuelAvailable < totalFuelNeed { // Check if sufficient fuel avail.
       load(fuel: &fuel, fuelAvailable: fuelAvailable)
-      if load.ratio < parameter.minLoad {
+      if load.quotient < parameter.minLoad {
         debugPrint("""
           \(DateTime.current)
           BO operation requested but insufficient fuel.
@@ -270,7 +270,7 @@ public struct Boiler: Parameterizable {
     repeat {
         newLoad = Ratio(fuel * Boiler.efficiency(at: load) / Design.layout.boiler)
         load = Ratio(fuel * Boiler.efficiency(at: newLoad) / Design.layout.boiler)
-    } while abs(newLoad.ratio - load.ratio) < 0.01
+    } while abs(newLoad.quotient - load.quotient) < 0.01
   }
 
   private static func noOperation(
@@ -283,7 +283,7 @@ public struct Boiler: Parameterizable {
     } else {
       boiler.operationMode = .noOperation(hours: Simulation.time.steps.fraction)
       fuel = 0
-      boiler.load.ratio = 0
+      boiler.load = .zero
       // FIXME: H2Ov.massFlow = 0
     }
     return fuel

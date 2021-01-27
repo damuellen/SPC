@@ -72,11 +72,11 @@ public struct Temperature: CustomStringConvertible, Equatable {
   }
 
   mutating func adjust(with ratio: Ratio) {
-    self.kelvin *= ratio.ratio
+    self.kelvin *= ratio.quotient
   }
 
   func adjusted(_ ratio: Ratio) -> Temperature {
-    Temperature(kelvin * ratio.ratio)
+    Temperature(kelvin * ratio.quotient)
   }
 
   mutating func adjust(withFactor factor: Double) {

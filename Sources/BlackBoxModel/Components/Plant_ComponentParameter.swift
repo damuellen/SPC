@@ -102,7 +102,7 @@ extension Plant {
             * SolarField.parameter.maxMassFlow.rate
         )
         Storage.parameter.designMassFlow = MassFlow(
-          (1 - Storage.parameter.massFlowShare.ratio)
+          (1 - Storage.parameter.massFlowShare.quotient)
             * SolarField.parameter.maxMassFlow.rate
         )
       }

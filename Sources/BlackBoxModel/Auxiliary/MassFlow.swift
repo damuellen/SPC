@@ -49,7 +49,7 @@ public struct MassFlow: CustomStringConvertible {
   }
 
   mutating func adjust(withFactor ratio: Ratio) {
-    rate *= ratio.ratio
+    rate *= ratio.quotient
   }
 
   func adjusted(withFactor ratio: Double) -> MassFlow {
@@ -57,7 +57,7 @@ public struct MassFlow: CustomStringConvertible {
   }
 
   func adjusted(withFactor ratio: Ratio) -> MassFlow {
-    MassFlow(rate * ratio.ratio)
+    MassFlow(rate * ratio.quotient)
   }
   /* not used
    func raised(by rate: Double) -> MassFlow {

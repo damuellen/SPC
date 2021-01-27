@@ -13,9 +13,11 @@ import Meteo
 
 public enum DryCooling {
 
-  static func perform(steamTurbineLoad: Double, temperature: Temperature)
+  static func perform(steamTurbineLoad: Ratio, temperature: Temperature)
     -> (DCFactor: Ratio, maxDCLoad: Ratio)
   {
+    let load = steamTurbineLoad.quotient
+    
     let coefficientHR: Polynomial = [92.13, 28.73, 18.62, -15.42]
 
     let pressureCondMin = 0.179, pressureCondMax = 0.421 // [bar]
@@ -28,7 +30,7 @@ public enum DryCooling {
 
     let Tamb = temperature.kelvin
 
-    let TCond = Temperature(steamTurbineLoad ** 0.91 * inTempDiff + Tamb)
+    let TCond = Temperature(load ** 0.91 * inTempDiff + Tamb)
     
     func saturationPressure(_ temperature: Temperature) -> Pressure {
       // Units: T in deg K, psat in MPa !!!

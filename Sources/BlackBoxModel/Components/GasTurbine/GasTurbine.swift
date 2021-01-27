@@ -49,7 +49,7 @@ public struct GasTurbine: Parameterizable {
     var maximumLoad = parameter.loadMaxFromTemperature(temperature)
     // correction for altitude effect
     maximumLoad *= ((101.3 - 9.81 * 1.2 / 1_000 * parameter.altitude) / 101.3)
-    // GasTurbine.load.ratio = maximumLoad)
+    // GasTurbine.load.quotient = maximumLoad)
     return maximumLoad
   }
 
@@ -88,7 +88,7 @@ public struct GasTurbine: Parameterizable {
      */
     // electricPerformance.parasiticsGasTurbine = GasTurbineParFit * (gasTurbine.Pgross - Design.layout.gasTurbine)
     // gross GasTurbine Power Produced
-    let gasTurbineGross = parameter.powerGross * gt.load.ratio
+    let gasTurbineGross = parameter.powerGross * gt.load.quotient
     //fuel = gasTurbineGross / GasTurbine.efficiency(at: gt.load)
 
     return (neededLoad, gasTurbineGross) // electricPerformance.GasTurbinegross - electricPerformance.parasiticsGasTurbine // net GasTurbine Power Produced
@@ -134,7 +134,7 @@ public struct GasTurbine: Parameterizable {
             (plant.electricity.demand - plant.electricity.gasTurbineGross)
               / SteamTurbine.parameter.power.max)
 
-        //  if status.steamTurbine.load.ratio != load {
+        //  if status.steamTurbine.load.quotient != load {
             // The turbine load has changed recalculation of efficiency
             let (_,  eff) = SteamTurbine.perform(
               steamTurbine.load, plant.heat, boiler, gasTurbine.operationMode,
@@ -151,7 +151,7 @@ public struct GasTurbine: Parameterizable {
             }
           } else {
             if demand > plant.electricity.gasTurbineGross {
-              if gasTurbine.load.ratio >= GasTurbineLmax {
+              if gasTurbine.load.quotient >= GasTurbineLmax {
                 break
               }
               demand -= (demand - plant.electricity.gasTurbineGross) / 2
@@ -176,7 +176,7 @@ public struct GasTurbine: Parameterizable {
           
           if GasTurbine.efficiency(at: gasTurbine.load) > 0 {
 
-          //  if status.steamTurbine.load.ratio != load {
+          //  if status.steamTurbine.load.quotient != load {
               steamTurbine.load = load
               // The turbine load has changed recalculation of efficiency
               let (_, eff) = SteamTurbine.perform(
@@ -193,7 +193,7 @@ public struct GasTurbine: Parameterizable {
               < Simulation.parameter.heatTolerance { break }
           } else {
             if demand > plant.electricity.gasTurbineGross {
-              if gasTurbine.load.ratio >= GasTurbineLmax { break }
+              if gasTurbine.load.quotient >= GasTurbineLmax { break }
               demand -= (demand - plant.electricity.gasTurbineGross) / 2
             } else {
               demand += (plant.electricity.gasTurbineGross - demand) / 2
@@ -258,14 +258,14 @@ public struct GasTurbine: Parameterizable {
         / SteamTurbine.parameter.power.max)
       steamTurbine.load.limited(to: Availability.current.value.powerBlock)
       
-    //  if status.steamTurbine.load.ratio != load {
+    //  if status.steamTurbine.load.quotient != load {
         // The turbine load has changed recalculation of efficiency
         let (_, eff) = SteamTurbine.perform(
         steamTurbine.load, plant.heat, boiler, gasTurbine.operationMode,
         heatExchanger.temperature.inlet, temperature)
     //  }
       
-      plant.heat.demand.megaWatt = steamTurbine.load.ratio
+      plant.heat.demand.megaWatt = steamTurbine.load.quotient
         * SteamTurbine.parameter.power.max / eff
       // FIXME: thermal.wasteHeatRecovery = WasteHeatRecovery(electricPerformance.gasTurbineGross, hourFraction)
 

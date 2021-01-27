@@ -40,7 +40,7 @@ extension Storage {
       let rohDP = solarField.HTF.density(avgTempHX)
 
       let pressureLoss = parameter.pressureLoss * rohDP / rohMean
-        * (status.massFlow.share(of: parameter.designMassFlow).ratio) ** 2
+        * status.massFlow.share(of: parameter.designMassFlow).quotient ** 2
       
       parasitics = pressureLoss * status.massFlow.rate / rohMean
         / parameter.pumpEfficiency / 10e6
@@ -120,12 +120,12 @@ extension Storage {
       if case .discharge = status.operationMode {
         
         let load = parameter.fixedDischargeLoad.isZero
-          ? 0.97 : parameter.fixedDischargeLoad
+          ? 0.97 : parameter.fixedDischargeLoad.quotient
         
         let htf = SolarField.parameter.HTF
         
         let designDischarge = (((
-          (solarField.maxMassFlow - parameter.designMassFlow).rate * load.ratio)
+          (solarField.maxMassFlow - parameter.designMassFlow).rate * load)
           / parameter.heatExchangerEfficiency) * htf.deltaHeat(
             parameter.designTemperature.hot - status.dT_HTFsalt.hot,
             parameter.designTemperature.cold - status.dT_HTFsalt.cold) / 1_000)
@@ -139,7 +139,7 @@ extension Storage {
         
         parasitics = ((1 - lowDc) * designAuxEX
           * saltFlowRatio ** expn + lowDc * designAuxEX)
-          * ((1 - level) + level * status.charge.ratio)
+          * ((1 - level) + level * status.charge.quotient)
           * ((1 - level2) + level2 * saltFlowRatio)
         
       } else if case .charging = status.operationMode {
@@ -159,7 +159,7 @@ extension Storage {
         
         parasitics = ((1 - lowCh) * designAuxIN
           * saltFlowRatio ** expn + lowCh * designAuxIN)
-          * ((1 - level) + level * status.charge.ratio)
+          * ((1 - level) + level * status.charge.quotient)
           * ((1 - level2) + level2 * saltFlowRatio)
       }
       
@@ -184,7 +184,7 @@ extension Storage {
     let t = parameter.designTemperature
     let designDeltaT = (t.hot - t.cold).kelvin
     
-    storage.storedHeat = storage.charge.ratio
+    storage.storedHeat = storage.charge.quotient
       * Design.layout.storage_ton * (hot - cold)
       * designDeltaT / 3_600
   }
@@ -202,11 +202,11 @@ extension Storage {
     {
       switch parameter.definedBy {
       case .hours:
-        storage.storedHeat = storage.charge.ratio
+        storage.storedHeat = storage.charge.quotient
           * Design.layout.storage * steamTurbine.power.max
           / steamTurbine.efficiencyNominal
       case .cap:
-        storage.storedHeat = storage.charge.ratio * Design.layout.storage_cap
+        storage.storedHeat = storage.charge.quotient * Design.layout.storage_cap
       case .ton:
         defindedByTonnage(&storage) // updates storedHeat
       }
@@ -214,18 +214,18 @@ extension Storage {
         / (steamTurbine.power.max / steamTurbine.efficiencyNominal)
       
       if dischargeLoad > 1 {
-        dischargeLoad = parameter.fixedDischargeLoad.ratio
+        dischargeLoad = parameter.fixedDischargeLoad.quotient
       }
     }
     // if no previous calculation has been done and TES must be discharged
     if dischargeLoad.isZero && parameter.isVariable {
       switch parameter.definedBy {
       case .hours:
-        storage.storedHeat = storage.charge.ratio
+        storage.storedHeat = storage.charge.quotient
           * Design.layout.storage * steamTurbine.power.max
           / steamTurbine.efficiencyNominal
       case .cap:
-        storage.storedHeat = storage.charge.ratio * Design.layout.storage_cap
+        storage.storedHeat = storage.charge.quotient * Design.layout.storage_cap
       case .ton:
         defindedByTonnage(&storage)
       }
@@ -235,8 +235,8 @@ extension Storage {
       if dischargeLoad > 1 { dischargeLoad = 1 }
     }
     
-    if dischargeLoad < parameter.minDischargeLoad.ratio {
-      dischargeLoad = parameter.minDischargeLoad.ratio
+    if dischargeLoad < parameter.minDischargeLoad.quotient {
+      dischargeLoad = parameter.minDischargeLoad.quotient
     }
     
     return Ratio(dischargeLoad)
@@ -261,14 +261,14 @@ extension Storage {
     self.operationMode = operationMode
     self.temperatureTank =
       .init(cold: temperatureTanks.cold, hot: temperatureTanks.hot)
-    self.charge.ratio = 0.0
+    self.charge = .zero
 //  self.dischargeLoad = Ratio(0)
     self.heat = 0
     
 //  self.tempertureColdOut = tempertureColdOut
 
 //  self.heatLossStorage = heatLossStorage
-    self.heatProductionLoad.ratio = 0
+    self.heatProductionLoad = .zero
     
    //self.massFlow.rate = 0
 

@@ -12,10 +12,10 @@ class HeaterTests: XCTestCase {
       temperatureInlet: status.powerBlock.temperature.inlet,
       massFlowStorage: status.storage.massFlow,
       modeStorage: status.storage.operationMode, 
-      demand: 1, fuelAvailable: 10, heat: plant.heat
+      demand: 10, fuelAvailable: 10, heat: plant.heat
     )
     XCTAssertEqual(energy.heat, 0.0, accuracy: 0.01, "heat")
-    XCTAssertEqual(energy.electric, 0.25, accuracy: 0.01, "electric")
+    XCTAssertEqual(energy.electric, 0.0, accuracy: 0.01, "electric")
     XCTAssertEqual(energy.fuel, 0.0, accuracy: 0.01, "fuel")
   }
 

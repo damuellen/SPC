@@ -189,12 +189,12 @@ public struct Storage: Parameterizable, HeatTransfer {
     
     if production.watt > 0 { // heat.solar > 0
       if production.watt < demand.watt,
-        storage.charge.ratio < parameter.chargeTo,
+        storage.charge < parameter.chargeTo,
         time.hour < 17
       {
         // Qsol not enough for POB demand load (e.g. at the beginning of the day)
         powerBlock.designMassFlow.rate = 
-          min(storage.heatProductionLoad.ratio * demand.kiloWatt, production.kiloWatt) 
+          min(storage.heatProductionLoad.quotient * demand.kiloWatt, production.kiloWatt) 
            / powerBlock.heatExchangerCapacity
 
         storage.heat = production.megaWatt /* - min(
@@ -212,7 +212,7 @@ public struct Storage: Parameterizable, HeatTransfer {
         }
         storage.heat = min(storage.heat, threshold)
       } else if production < demand,
-        storage.charge.ratio >= parameter.chargeTo
+        storage.charge >= parameter.chargeTo
       {
         // Qsol not enough for POB demand load (e.g. at the end of the day) and TES is full
         powerBlock.designMassFlow.rate = demand.kiloWatt / powerBlock.heatExchangerCapacity
@@ -229,11 +229,11 @@ public struct Storage: Parameterizable, HeatTransfer {
           if storage.heat > -value { storage.heat = -value }
         }
       } else if production > demand,
-        storage.charge.ratio < parameter.chargeTo,
+        storage.charge < parameter.chargeTo,
         massFlow >= powerBlock.massFlow
       {
         // more Qsol than needed by POB and TES is not full
-        demand = Power(storage.heatProductionLoad.ratio * demand.watt)
+        demand = Power(storage.heatProductionLoad.quotient * demand.watt)
         powerBlock.massFlow.rate = demand.kiloWatt / powerBlock.heatExchangerCapacity
         // from avail heat cover first 50% of POB demand
         storage.heat = production.megaWatt - demand.megaWatt  // [MW]
@@ -255,14 +255,14 @@ public struct Storage: Parameterizable, HeatTransfer {
     if case .hours = parameter.definedBy {
       // It usually doesn't get in here. therefore, not correctly programmed yet
       if production > demand,
-        storage.charge.ratio > steamTurbine.power.max
-          / steamTurbine.efficiencyNominal / Design.layout.storage {
+        storage.charge > Ratio(steamTurbine.power.max
+          / steamTurbine.efficiencyNominal / Design.layout.storage) {
         
 // FIXME:  let (eff, st) = SteamTurbine.efficiency(status, maxLoad: &maxLoad)
 //  status.steamTurbine = st
         let eff = 0.39//FIXME
         demand.megaWatt = steamTurbine.power.max
-          * Availability.current.value.powerBlock.ratio / eff
+          * Availability.current.value.powerBlock.quotient / eff
 
         var heatDiff = production - demand // [MW]
         // power to charge TES rest after operation POB at full load commented

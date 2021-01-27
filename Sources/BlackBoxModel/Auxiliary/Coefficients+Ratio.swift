@@ -41,7 +41,7 @@ public struct Polynomial: Codable, Equatable {
   }
 
   func callAsFunction(_ ratio: Ratio) -> Double {
-    evaluated(ratio.ratio)
+    evaluated(ratio.quotient)
   }
 
   subscript(index: Int) -> Double {
@@ -66,50 +66,50 @@ extension Polynomial: CustomStringConvertible {
 }
 
 public struct Ratio: CustomStringConvertible, Codable {
-  var ratio: Double
+  var quotient: Double
 
-  var isZero: Bool { self.ratio == 0 }
+  var isZero: Bool { self == .zero }
 
   public static var zero: Ratio { Ratio(0) }
 
-  public var percentage: Double { self.ratio * 100.0 }
+  public var percentage: Double { quotient * 100.0 }
 
   public var description: String { "\(self.percentage)%" }
 
   public init(percent: Double) {
-    self.ratio = percent / 100
+    self.quotient = percent / 100
   }
 
   public init(_ value: Double) {
     precondition(0...1.01 ~= value, "Ratio out of range.")
-    self.ratio = value > 1 ? 1 : value
+    self.quotient = value > 1 ? 1 : value
   }
 
   public init(_ value: Double, cap: Double) {
     precondition(0 <= value, "Ratio out of range.")
-    self.ratio = min(value, cap)
+    self.quotient = min(value, cap)
   }
 
   mutating func limited(to max: Ratio) {
-    self.ratio = min(max.ratio, ratio)
+    quotient = min(max.quotient, quotient)
   }
 }
 
 extension Ratio: ExpressibleByFloatLiteral {
   public init(floatLiteral value: Double) {
-    self.ratio = value
+    self.quotient = value
   }
 }
 
 extension Ratio: Equatable {
   public static func == (lhs: Ratio, rhs: Ratio) -> Bool {
-    lhs.ratio == rhs.ratio
+    lhs.quotient == rhs.quotient
   }
 }
 
 extension Ratio: Comparable {
   public static func < (lhs: Ratio, rhs: Ratio) -> Bool {
-    lhs.ratio < rhs.ratio
+    lhs.quotient < rhs.quotient
   }
 }
 

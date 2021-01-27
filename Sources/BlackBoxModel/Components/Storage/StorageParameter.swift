@@ -21,8 +21,8 @@ extension Storage {
   
   public struct Parameter {
     let name: String
-    let chargeTo, dischargeToTurbine, dischargeToHeater,
-      stepSizeIteration, heatStoredrel: Double
+    let chargeTo, dischargeToTurbine, dischargeToHeater: Ratio
+    let stepSizeIteration, heatStoredrel: Double
     var temperatureDischarge, temperatureDischarge2: Polynomial
     var temperatureCharge, temperatureCharge2: Polynomial
     var heatlossCst, heatlossC0to1: Polynomial
@@ -168,9 +168,9 @@ extension Storage.Parameter: TextConfigInitializable {
     let ln: (Int) throws -> Double = { try file.double(line: $0) }
     let l2: (Int) throws -> Int = { try file.integer(line: $0) }
     name = file.name
-    chargeTo = try ln(10)
-    dischargeToTurbine = try ln(13)
-    dischargeToHeater = try ln(16)
+    chargeTo = try Ratio(ln(10))
+    dischargeToTurbine = try Ratio(ln(13))
+    dischargeToHeater = try Ratio(ln(16))
     stepSizeIteration = try ln(19)
     heatStoredrel = try ln(22)
     temperatureDischarge = try [ln(47), ln(50), ln(53), ln(56)]

@@ -127,7 +127,7 @@ public struct Collector: Parameterizable, CustomStringConvertible {
 
     let eff = shadingSCA * shadingHCE * IAM * edge * k_torsion * wind
       * Simulation.adjustmentFactor.efficiencySolarField
-    collector.efficiency.ratio = eff
+    collector.efficiency = Ratio(eff)
   }
 
   public static func tracking(sun: SolarPosition.OutputValues) -> Collector {

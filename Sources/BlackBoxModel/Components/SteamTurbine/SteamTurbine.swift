@@ -105,7 +105,7 @@ public struct SteamTurbine: Parameterizable {
         let ratio = heat.production.megaWatt * efficiency / parameter.power.max
         load = Ratio(ratio, cap: maxLoad)
 
-        let gross = load.ratio * parameter.power.max * efficiency
+        let gross = load.quotient * parameter.power.max * efficiency
         return gross
       } else {  // Start Up sequence: Energy is lost / Dumped
         // Avoid summing up inside an iteration
@@ -139,7 +139,7 @@ public struct SteamTurbine: Parameterizable {
   )
     -> (maxLoad: Double, maxEfficiency: Double)
   {
-    guard load.ratio > 0 else { return (0, 0) }
+    guard load > .zero else { return (0, 0) }
 
     var maxLoad: Double = 1
 
@@ -192,12 +192,12 @@ public struct SteamTurbine: Parameterizable {
     //#warning("The implementation here differs from PCT")
     if parameter.efficiencyTemperature[1] >= 1 {
       let (dc, loadMax) = DryCooling.perform(
-        steamTurbineLoad: load.ratio,
+        steamTurbineLoad: load,
         temperature: ambient
       )
 
-      maxLoad = loadMax.ratio
-      dcFactor = dc.ratio
+      maxLoad = loadMax.quotient
+      dcFactor = dc.quotient
     }
     // Dependency of Heat Rate on Ambient Temperature  - DRY COOLING -
     var efficiency = parameter.efficiency(load)

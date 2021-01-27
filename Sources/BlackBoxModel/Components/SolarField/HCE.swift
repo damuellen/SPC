@@ -39,130 +39,151 @@ let period = 300
 enum HCE {
   // Radiation losses per m2 Aperture; now with the new losses that take into
   // account the percentage of HCE that are broken, lost vacuum and fluorescent
-  static func radiationLosses(
-    _ temperatures: (Temperature, Temperature),
-    insolationAbsorber: Double, ambient: Temperature)
+  static func radiationLossesOld(
+    _ temperatures: (Temperature, Temperature, Temperature), insolationAbsorber: Double)
     -> Double
   {
-    let ambientT = ambient.celsius
     let (t1, t2) = (temperatures.0.kelvin, temperatures.1.kelvin)
-    let avgT = (t1 + t2) / 2
     let col = Collector.parameter
     let aperture = col.aperture
     let emissionHCE = col.emissionHCE
     let availability = Availability.current.value
-    let breakHCE = availability.breakHCE.ratio
-    let airHCE = availability.airHCE.ratio
-    let fluorHCE = availability.fluorHCE.ratio
+    let breakHCE = availability.breakHCE.quotient
+    let airHCE = availability.airHCE.quotient
+    let fluorHCE = availability.fluorHCE.quotient
 
-    let deltaT: Double
-    if col.useIntegralRadialoss {
-      deltaT = ((t1 + t2) / 2) - (ambientT + 30.0) + 10.0
-    } else {
-      deltaT = t1 - t2 + 10.0
-    }
+    let dT = t1 - t2 + 10.0
 
     var vacuumHeatLoss: Double
     let endLossFactor: Double
 
     let sigma = 0.00000005667
-    let circumference = 2 * .pi * 0.04445//col.rabsOut
-    let deltaT2 = deltaT * deltaT
+    let circumference = 2 * .pi * col.rabsOut
+    let dT2 = dT * dT
 
-    if col.useIntegralRadialoss == false {
-      if col.name.hasPrefix("SKAL-ET") {
-        // temperature.0+10 considers that average loop temperature is higher than (T_in + T_out)/2
-        vacuumHeatLoss = sigma * circumference * (t1 * t1 * t1 * t1 - t2 * t2 * t2 * t2)
-        vacuumHeatLoss *= (emissionHCE[0] + emissionHCE[1] * t1) / aperture
-        let al = 0.7 * circumference * (t1 - t1) / aperture
-        vacuumHeatLoss = vacuumHeatLoss + al // added here and not for LS2 collector
-        endLossFactor = 1 // added in order to differenciate with LS2 collector
-      } else if col.name.hasPrefix("LS2") {
-        vacuumHeatLoss = 0.081 - 0.04752 * deltaT
-          + 0.0006787 * deltaT2 + 0.0007403 * insolationAbsorber
-        vacuumHeatLoss += 0.00003582 * deltaT * insolationAbsorber
-          + 0.00000014125 * deltaT2 * insolationAbsorber
-        endLossFactor = 1.3
-      } else if col.name.hasPrefix("PCT_validation") { // test
-        vacuumHeatLoss = sigma * circumference
-          * (t1 * t1 * t1 * t1 - t2 * t2 * t2 * t2)
-        vacuumHeatLoss *= (emissionHCE[0] + emissionHCE[1] * (t1 + 10)) / aperture
-        endLossFactor = 1.3 // added in order to differenciate with LS2 collector
-      } else {
-        // other types than LS-2!!
-        // old RadLoss as from LUZ Model
-        // temperature.0+10 considers that average loop temperature is higher than (T_in + T_out)/2
-        switch col.absorber {
-        case .schott:
-          vacuumHeatLoss = sigma * circumference
-            * (t1 ** 4 - t2 * t2 * t2 * t2)
-          vacuumHeatLoss *= (emissionHCE[0] + emissionHCE[1] * (t1 + 10)) / aperture
-        case .rio:
-          vacuumHeatLoss = (0.00001242 * t1 * t1 * t1 - 0.01864091
-            * t1 * t1 + 9.76467705 * t1 - 1714.03)
-          vacuumHeatLoss *= circumference / aperture
-        }
-        // these losses were somehow lower than vacuumHeatLoss used below, but only about 10%
-        let al = 0.7 * circumference * (t1 - t2) / col.aperture
-        vacuumHeatLoss += al // added here and not for LS2 collector
-        endLossFactor = 1
-      }
-      
+    if col.name.hasPrefix("SKAL-ET") {
+      // temperature.0+10 considers that average loop temperature is higher than (T_in + T_out)/2
+      vacuumHeatLoss = sigma * circumference * (t1 * t1 * t1 * t1 - t2 * t2 * t2 * t2)
+      vacuumHeatLoss *= (emissionHCE[0] + emissionHCE[1] * t1) / aperture
+      let al = 0.7 * circumference * (t1 - t1) / aperture
+      vacuumHeatLoss = vacuumHeatLoss + al // added here and not for LS2 collector
+      endLossFactor = 1 // added in order to differenciate with LS2 collector
+    } else if col.name.hasPrefix("LS2") {
+      vacuumHeatLoss = 0.081 - 0.04752 * dT
+        + 0.0006787 * dT2 + 0.0007403 * insolationAbsorber
+      vacuumHeatLoss += 0.00003582 * dT * insolationAbsorber
+        + 0.00000014125 * dT2 * insolationAbsorber
+      endLossFactor = 1.3
+    } else if col.name.hasPrefix("PCT_validation") { // test
+      vacuumHeatLoss = sigma * circumference
+        * (t1 * t1 * t1 * t1 - t2 * t2 * t2 * t2)
+      vacuumHeatLoss *= (emissionHCE[0] + emissionHCE[1] * (t1 + 10)) / aperture
+      endLossFactor = 1.3 // added in order to differenciate with LS2 collector
     } else {
-      // IMPORTANT: definition of temperature.0 and temperature.1
-      // changed to use new radiation loss formula
-      // E_a = 0.0000002: E_b = -0.0001: E_c = 0.0769
-      let Ebs_HCE: Double
-      if t1 != t2 {
-        // check what if temperature.1 < temperature.0?!
-        Ebs_HCE = (1 / 3 * emissionHCE[2]
-          * (t1 * t1 * t1 - t2 * t2 * t2) + 1 / 2
-          * emissionHCE[1] * (t1 * t1 - t2 * t2)
-          + emissionHCE[0] * (t1 - t2)) / (t1 - t2)
-      } else { // during FP?
-        // check, resulting emissivity too low without c2!
-        Ebs_HCE = emissionHCE[0] + emissionHCE[1] * t1
-      }
-
-      if t1 != t1 {
-        vacuumHeatLoss = sigma / (1 / Ebs_HCE + col.rabsOut
-          / col.rglas * (1 / col.glassEmission - 1))
-          * circumference / aperture * (1 / 5
-            * (t1 * t1 * t1 * t1 * t1 - t2 * t2 * t2 * t2 * t2)
-           + (ambientT + 30) ** 4 * (t2 - t1)) / (t1 - t2)
-      } else {
-        let t = (ambientT + 30)
+      // other types than LS-2!!
+      // old RadLoss as from LUZ Model
+      // temperature.0+10 considers that average loop temperature is higher than (T_in + T_out)/2
+      switch col.absorber {
+      case .schott:
         vacuumHeatLoss = sigma * circumference
-        vacuumHeatLoss *= avgT * avgT * avgT * avgT - t * t * t * t
-        vacuumHeatLoss *= (emissionHCE[0] + emissionHCE[1] * t2) / aperture
+          * (t1 ** 4 - t2 * t2 * t2 * t2)
+        vacuumHeatLoss *= (emissionHCE[0] + emissionHCE[1] * (t1 + 10)) / aperture
+      case .rio:
+        vacuumHeatLoss = (0.00001242 * t1 * t1 * t1 - 0.01864091
+          * t1 * t1 + 9.76467705 * t1 - 1714.03)
+        vacuumHeatLoss *= circumference / aperture
       }
-      var al = 0.7 * circumference
-      al *= (avgT - (ambientT + 30)) / aperture
-      vacuumHeatLoss += al
+      // these losses were somehow lower than vacuumHeatLoss used below, but only about 10%
+      let al = 0.7 * circumference * (t1 - t2) / aperture
+      vacuumHeatLoss += al // added here and not for LS2 collector
       endLossFactor = 1
-    }    
+    }
 
-    var RLHP: Double = 0.081 - 0.04752 * deltaT
-      + 0.0006787 * deltaT2 + 0.0007403 * insolationAbsorber
-    RLHP += 3.582e-05 * deltaT * insolationAbsorber
-      + 1.4125e-07 * deltaT2 * insolationAbsorber
+    var RLHP: Double = 0.081 - 0.04752 * dT
+      + 0.0006787 * dT2 + 0.0007403 * insolationAbsorber
+    RLHP += 3.582e-05 * dT2 * insolationAbsorber
+      + 1.4125e-07 * dT2 * insolationAbsorber
 
-    var addHLAir: Double = -0.114 + 0.1396 * deltaT
-      + 0.000006823 * deltaT2 - 0.002074 * insolationAbsorber
-    addHLAir += 0.0000602 * deltaT * insolationAbsorber
-      - 0.0000001624 * deltaT2 * insolationAbsorber
-
-    let addHLBare: Double = 0.416 * deltaT
-      - 0.000056 * deltaT2 + 0.0666 * deltaT // * windSpeed
+    var addHLAir: Double = -0.114 + 0.1396 * dT
+      + 0.000006823 * dT2 - 0.002074 * insolationAbsorber
+    addHLAir += 0.0000602 * dT * insolationAbsorber
+      - 0.0000001624 * dT2 * insolationAbsorber
+    
+    let addHLBare: Double = 0.416 * dT
+      - 0.000056 * dT2 + 0.0666 * dT // * windSpeed
     let losses = (vacuumHeatLoss + addHLAir * (airHCE + fluorHCE)
       + addHLBare * breakHCE) * endLossFactor
 
     return losses
-    // * 1.3
-    // Faktor 1.3 due to end HCE end losses
-    // "* endLossFactor" added in order to differenciate with LS2 collector
   }
   
+  static func radiationLossesNew(
+    _ temperatures: (Temperature, Temperature, Temperature),
+    insolationAbsorber: Double)
+    -> Double
+  {
+    var (t1, t2) = (temperatures.0.kelvin, temperatures.1.kelvin)
+    let tAmb = (temperatures.2.kelvin + 30)
+    
+    let dT = (t1 + t2) / 2 - tAmb + 10
+
+    let rabsOut = Collector.parameter.rabsOut
+    let rglas = Collector.parameter.rglas
+    let glassEmission = Collector.parameter.glassEmission
+    let aperture = Collector.parameter.aperture
+    let emissionHCE = Collector.parameter.emissionHCE
+    let availability = Availability.current.value
+    let breakHCE = availability.breakHCE.quotient
+    let airHCE = availability.airHCE.quotient
+    let fluorHCE = availability.fluorHCE.quotient
+
+    var vacuumHeatLoss: Double
+    let endLossFactor: Double
+
+    let sigma = 0.00000005667
+    let circumference = 2 * .pi * rabsOut    
+
+    if t1 == t2 { t2 = t1 * 0.999 }
+    let avgT = (t1 + t2) / 2.0
+
+    let Ebs_HCE = (1 / 3 * emissionHCE[2] * (t1 ** 3 - t2 ** 3) 
+      + 1 / 2 * emissionHCE[1] * (t1 * t1 - t2 * t2)
+      + emissionHCE[0] * (t1 - t2)) / (t1 - t2)
+
+    if t1 != t2 {
+      vacuumHeatLoss = sigma / (1 / Ebs_HCE + rabsOut / rglas 
+        * (1 / glassEmission - 1)) * circumference / aperture 
+        * (1 / 5 * (t1 * t1 * t1 * t1 * t1 - t2 * t2 * t2 * t2 * t2)
+          + tAmb ** 4 * (t2 - t1)) / (t1 - t2)
+    } else {
+      vacuumHeatLoss = sigma * circumference
+      vacuumHeatLoss *= avgT * avgT * avgT * avgT - tAmb ** 4
+      vacuumHeatLoss *= (emissionHCE[0] + emissionHCE[1] * t2) / aperture
+    }
+
+    let al = 0.7 * circumference * (avgT - tAmb) / aperture
+    vacuumHeatLoss += al
+    endLossFactor = 1
+
+    let dT2 = dT * dT
+    var RLHP: Double = 0.081 - 0.04752 * dT
+      + 0.0006787 * dT2 + 0.0007403 * insolationAbsorber
+    RLHP += 3.582e-05 * dT * insolationAbsorber
+      + 1.4125e-07 * dT2 * insolationAbsorber
+
+    var addHLAir: Double = -0.114 + 0.1396 * dT
+      + 0.000006823 * dT2 - 0.002074 * insolationAbsorber
+    addHLAir += 0.0000602 * dT * insolationAbsorber
+      - 0.0000001624 * dT2 * insolationAbsorber
+
+    let addHLBare: Double = 0.416 * dT
+      - 0.000056 * dT2 + 0.0666 * dT * 3// * windSpeed
+    let losses = (vacuumHeatLoss + addHLAir * (airHCE + fluorHCE)
+      + addHLBare * breakHCE) * endLossFactor
+
+    return losses
+  }
+
   //  MARK: - Mode 1
   /// Vary mass-flow to maintain optimum HTF-temp.
   static func mode1(
@@ -177,14 +198,14 @@ enum HCE {
       * Double(sof.numberOfSCAsInRow)
       * 2 * Collector.parameter.areaSCAnet
     
-    let massFlowMin = MassFlow(sof.minFlow.ratio * sof.maxMassFlow.rate)
+    let massFlowMin = MassFlow(sof.minFlow.quotient * sof.maxMassFlow.rate)
     let massFlowMax = sof.maxMassFlow.rate
 
     let htf = sof.HTF
     
     let col = Collector.parameter
     
-    var time = 0.0
+    var time = 300.0
     
     var dumping = 0.0
     
@@ -197,12 +218,13 @@ enum HCE {
     )
 
     let temperatures = col.useIntegralRadialoss
-      ? (avgT, ambient + 20.0)
-      : (htf.maxTemperature + 10.0, hce.temperature.inlet + 10.0)
+      ? (htf.maxTemperature + 10.0, hce.temperature.inlet + 10.0, ambient) 
+      : (avgT, ambient + 20.0, 0.0)
       
-    solarField.heatLossesHCE = HCE.radiationLosses(temperatures,
-      insolationAbsorber: collector.insolationAbsorber, ambient: ambient
-    )
+    let radiaLoss = col.useIntegralRadialoss
+      ? HCE.radiationLossesNew : HCE.radiationLossesOld
+
+    solarField.heatLossesHCE = radiaLoss(temperatures, collector.insolationAbsorber)
     
     solarField.heatLossesHCE *= Simulation.adjustmentFactor.heatLossHCE
     
@@ -213,14 +235,14 @@ enum HCE {
     solarField.heatLosses *= Simulation.adjustmentFactor.heatLossHTF
 
     var deltaHeat = collector.insolationAbsorber
-    deltaHeat *= Availability.current.value.solarField.ratio
+    deltaHeat *= Availability.current.value.solarField.quotient
     deltaHeat -= solarField.heatLosses
     
     if collector.insolationAbsorber > 0 {
-      solarField.loopEta = collector.efficiency.ratio - solarField.heatLossesHCE
-        / collector.insolationAbsorber / collector.efficiency.ratio
-      solarField.ETA = collector.efficiency.ratio - solarField.heatLosses
-        / collector.insolationAbsorber / collector.efficiency.ratio
+      solarField.loopEta = collector.efficiency.quotient - solarField.heatLossesHCE
+        / collector.insolationAbsorber / collector.efficiency.quotient
+      solarField.ETA = collector.efficiency.quotient - solarField.heatLosses
+        / collector.insolationAbsorber / collector.efficiency.quotient
     } else {
       solarField.loopEta = 0
       solarField.ETA = 0
@@ -262,7 +284,7 @@ enum HCE {
       solarField.inFocus = Ratio(massFlowMax / massFlow.rate)
       // [MW] added to calculate Q_dump with instantaneous irradiation
 
-      dumping = deltaHeat * area * (1 - solarField.inFocus.ratio)
+      dumping = deltaHeat * area * (1 - solarField.inFocus.quotient)
 
       // changed to htf.maxTemperature to reach max temp possible
       hce.temperature.outlet = htf.maxTemperature
@@ -327,11 +349,11 @@ enum HCE {
     
     let col = Collector.parameter
     
-    var time = 0.0
+    var time = 300.0
     
     var dumping = 0.0
     
-    let availability = Availability.current.value.solarField.ratio
+    let availability = Availability.current.value.solarField.quotient
     
     let minTemp = htf.freezeTemperature
       + Simulation.parameter.dfreezeTemperaturePump
@@ -357,34 +379,26 @@ enum HCE {
         )
         let areaDensity: Double
         if avgT.celsius < 20 {
-          print(o, innerIteration, newTemp, hce, solarField,
-                "Temperature too low.")
+          print(o, innerIteration, newTemp, hce, solarField, "Temperature too low.")
           areaDensity = 1
         } else {
           areaDensity = htf.density(avgT) * .pi
           * col.rabsInner ** 2 / col.aperture
         }
-         
-        // Calculate time HTF needs to pass through HCE loop
-        //if hce.massFlow <= sof.massFlow.min {
-        if hce.massFlow.isNearZero {
-          // mass flow is reduced to almost zero due to no demand and full storage
-          //  time = period
-        } else {
-          time = (areaDensity * area / hce.massFlow.rate)
-          //timePast = period
-          if time < 0 { time += time }
+
+        if hce.massFlow > .zero {
+          time = (areaDensity * area) / hce.massFlow.rate
         }
         
         if innerIteration == 1 {
-          inFocusLoop = solarField.inFocus.ratio
+          inFocusLoop = solarField.inFocus.quotient
           // Reduce dumping in order to reach design temperature.
           // I.e. dumping happens on first collector(s) and not last on loop
         }
 
         if newTemp.kelvin < 0.997 * htf.maxTemperature.kelvin {
           // solarField.InFocus > 0, solarField.InFocus < 0.95 {
-          inFocusLoop = Ratio(min(1, inFocusLoop * 1.01)).ratio
+          inFocusLoop = min(1, inFocusLoop * 1.01)
 
           // reduce dumping in 1%  limit it to 1
           var deltaHeat = collector.insolationAbsorber
@@ -400,12 +414,13 @@ enum HCE {
         
         if heatInput > 0 {
           let temperatures = col.useIntegralRadialoss
-            ? (avgT, ambient + 30.0)
-            : (newTemp + 10.0, hce.temperature.inlet + 10.0)
+            ? (newTemp + 10.0, hce.temperature.inlet + 10.0, ambient)
+            : (avgT, ambient + 30.0, 0.0)
 
-          solarField.heatLossesHCE = HCE.radiationLosses(temperatures,
-            insolationAbsorber: collector.insolationAbsorber, ambient: ambient
-          )
+          let radiaLoss = col.useIntegralRadialoss
+            ? HCE.radiationLossesNew : HCE.radiationLossesOld
+
+          solarField.heatLossesHCE = radiaLoss(temperatures, collector.insolationAbsorber)
 
           solarField.heatLossesHCE *= Simulation.adjustmentFactor.heatLossHCE
           
@@ -445,13 +460,13 @@ enum HCE {
           }
         } else { // No Massflow
           let temperatures = col.useIntegralRadialoss
-            ? (avgT, ambient + 20.0)
-            : (newTemp + 10.0, hce.temperature.inlet + 10.0)
-          print(avgT.kelvin, ambient.kelvin + 20.0)
+            ? (newTemp + 10.0, hce.temperature.inlet + 10.0, ambient)
+            : (avgT, ambient + 20.0, 0.0)
 
-          solarField.heatLossesHCE = HCE.radiationLosses(temperatures,
-            insolationAbsorber: collector.insolationAbsorber, ambient: ambient
-          )
+          let radiaLoss = col.useIntegralRadialoss
+            ? HCE.radiationLossesNew : HCE.radiationLossesOld
+
+          solarField.heatLossesHCE = radiaLoss(temperatures, collector.insolationAbsorber)
 
           solarField.heatLossesHCE *= Simulation.adjustmentFactor.heatLossHCE
           
@@ -465,28 +480,14 @@ enum HCE {
         let deltaHeat = heatInput - solarField.heatLosses
 
         if collector.insolationAbsorber > 0 {
-          solarField.loopEta = collector.efficiency.ratio
-
-          let (t1, t2) = col.useIntegralRadialoss
-            ? (avgT, ambient + 30.0)
-            : (newTemp + 10.0, hce.temperature.inlet + 10.0)
-
-          solarField.heatLossesHCE = HCE.radiationLosses((t1, t2),
-            insolationAbsorber: collector.insolationAbsorber, ambient: ambient
-          )
-          
-          solarField.loopEta *= Simulation.adjustmentFactor.heatLossHCE
-            / collector.insolationAbsorber / collector.efficiency.ratio
-
-          solarField.ETA = collector.efficiency.ratio - solarField.heatLosses
-            / collector.insolationAbsorber / collector.efficiency.ratio
+           solarField.ETA = 0
 
         } else {
           solarField.loopEta = 0
           solarField.ETA = 0
         }
         /// Heat collected or lost during the flow through a whole loop [kJ/sqm]
-        let deltaHeatPerSqm = deltaHeat * Double(time) / 1_000
+        let deltaHeatPerSqm = deltaHeat * time / 1_000
         // Change kJ/sqm to kJ/kg:
         let deltaHeatPerKg = deltaHeatPerSqm / areaDensity
         

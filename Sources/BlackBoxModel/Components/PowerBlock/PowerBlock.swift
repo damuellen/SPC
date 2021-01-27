@@ -46,8 +46,8 @@ public struct PowerBlock: Parameterizable, HeatTransfer {
     -> Double
   {
     var electricalParasitics = 0.0
-    let load = Ratio(1) //steamTurbine.load
-    if load.ratio >= 0.01 {
+    let load = steamTurbine.load
+    if load >= 0.01 {
 
       electricalParasitics = parameter.fixElectricalParasitics
       electricalParasitics += parameter.nominalElectricalParasitics
@@ -63,11 +63,11 @@ public struct PowerBlock: Parameterizable, HeatTransfer {
     // if Heater.parameter.operationMode {
     // if variable exist, then project Shams-1 is calculated. commented,
     // same for shams as for any project. check!
-    switch load.ratio { // Step function for Cooling Towers -
+    switch load.quotient { // Step function for Cooling Towers -
     case 0:
       if case .scheduledMaintenance = steamTurbine.operationMode {
         electricalParasitics = 0 // add sched. maint. parasitics as a parameter
-      } else if heat == 0 { // night TEST
+      } else { // night TEST
         electricalParasitics = parameter.fixElectricalParasitics0
       }
     case 0 ... 0.5:
@@ -78,7 +78,7 @@ public struct PowerBlock: Parameterizable, HeatTransfer {
     }
     
     // parasitics for ACC:
-    if load.ratio > 0 {
+    if load > .zero {
       // only during operation
       var electricalParasiticsACC = parameter.electricalParasiticsACC(load)
       

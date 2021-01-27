@@ -103,7 +103,7 @@ public enum BlackBoxModel {
         status.collector.insolationAbsorber =
           Double(meteo.dni)
           * status.collector.cosTheta
-          * status.collector.efficiency.ratio
+          * status.collector.efficiency.quotient
       } else {
         status.collector = Collector.initialState
         DateTime.setNight()
@@ -129,7 +129,7 @@ public enum BlackBoxModel {
           storage: status.storage, heat: plant.heat
         )
 
-        if status.storage.charge.ratio < Storage.parameter.chargeTo {
+        if status.storage.charge < Storage.parameter.chargeTo {
           status.solarField.massFlow += status.storage.massFlow
         } else if Design.hasGasTurbine {
           status.solarField.massFlow = HeatExchanger.parameter.sccHTFmassFlow

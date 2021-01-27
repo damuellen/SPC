@@ -131,7 +131,7 @@ public struct Plant {
         ambient)
 
       return min(
-        SteamTurbine.parameter.power.max * steamTurbine.load.ratio / efficiency,
+        SteamTurbine.parameter.power.max * steamTurbine.load.quotient / efficiency,
         HeatExchanger.parameter.sccHTFheat)
     }
 
@@ -265,19 +265,19 @@ public struct Plant {
           """)
       }*/
 
-      let minLoad: Double
+      let minLoad: Ratio
       if SteamTurbine.parameter.minPowerFromTemp.isInapplicable {
         //#warning("The implementation here differs from PCT")
-        minLoad =
+        minLoad = Ratio(
           SteamTurbine.parameter.power.min
-          / SteamTurbine.parameter.power.max
+          / SteamTurbine.parameter.power.max)
       } else {
-        minLoad =
+        minLoad = Ratio(
           SteamTurbine.parameter.minPowerFromTemp(ambient)
-          / SteamTurbine.parameter.power.max
+          / SteamTurbine.parameter.power.max)
       }
-      if status.steamTurbine.load.ratio < minLoad {
-        status.steamTurbine.load.ratio = minLoad
+      if status.steamTurbine.load < minLoad {
+        status.steamTurbine.load = minLoad
       }
       var minPower: Double
       if SteamTurbine.parameter.minPowerFromTemp.isInapplicable {
@@ -517,7 +517,7 @@ public struct Plant {
         heat.storage.megaWatt = status.storage.calculate(thermal)
 
         if status.storage.heat > 0 {  // Performance surplus
-          if status.storage.charge.ratio < Storage.parameter.chargeTo,
+          if status.storage.charge < Storage.parameter.chargeTo,
             status.solarField.massFlow >= status.powerBlock.designMassFlow
           {  // 1.1
             heat.production = heat.solar
@@ -609,14 +609,14 @@ public struct Plant {
     heatDiff: inout Double,
     fuel: Double
   ) {
-    if heatDiff < 0,
-      storage.charge.ratio < Storage.parameter.dischargeToTurbine,
-      storage.charge.ratio > Storage.parameter.dischargeToHeater
+    if heatDiff < .zero,
+      storage.charge < Storage.parameter.dischargeToTurbine,
+      storage.charge > Storage.parameter.dischargeToHeater
     {
       // Direct Discharging to SteamTurbine
       var supply: Power
       var parasitics: Power
-      if fuel > 0 {  // Fuel available, Storage for Pre-Heating
+      if fuel > .zero {  // Fuel available, Storage for Pre-Heating
         storage.operationMode = .preheat
         (supply, parasitics) = Storage.perform(
           storage: &storage,
@@ -660,8 +660,8 @@ public struct Plant {
 
       electricalParasitics.storage = parasitics.megaWatt
 
-    } else if heatDiff < 0,  //heater.operationMode != .freezeProtection,
-      storage.charge.ratio < Storage.parameter.dischargeToHeater
+    } else if heatDiff < .zero,  //heater.operationMode != .freezeProtection,
+      storage.charge < Storage.parameter.dischargeToHeater
     {
       heatDiff =
         (heat.production + heat.wasteHeatRecovery).megaWatt
@@ -886,9 +886,9 @@ public struct Plant {
     var fuel = 0.0
 
     // **************************  Energy surplus  *****************************
-    if status.storage.heat > 0 {
+    if status.storage.heat > .zero {
 
-      if status.storage.charge.ratio < parameter.chargeTo,
+      if status.storage.charge < parameter.chargeTo,
         status.solarField.massFlow >= status.powerBlock.designMassFlow // SolarField.parameter.maxMassFlow
       {
         status.storage.operationMode = .charging
@@ -926,7 +926,7 @@ public struct Plant {
 
     //#warning("The implementation here differs from PCT")
     if peakTariff,// status.storage.operationMode = .freezeProtection,
-      status.storage.charge.ratio > parameter.dischargeToTurbine,
+      status.storage.charge > parameter.dischargeToTurbine,
       status.storage.heat < 1 * parameter.heatdiff * heat.demand.megaWatt
     { // added dicharge only after peak hours
       // previous discharge condition commented:
@@ -976,7 +976,7 @@ public struct Plant {
 
     // heat can only be provided with heater on
     if (parameter.FC == 0 && DateTime.current.isNighttime
-      && status.storage.charge.ratio < parameter.chargeTo
+      && status.storage.charge < parameter.chargeTo
       && status.powerBlock.inletTemperature > 665
       && Storage.isFossilChargingAllowed(at: time)
       && OperationRestriction.fuelStrategy.isPredefined == false)

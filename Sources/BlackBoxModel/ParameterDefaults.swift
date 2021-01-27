@@ -86,7 +86,7 @@ public enum ParameterDefaults {
 
   static let st = Storage.Parameter(
     name: "2-Tank Molten Salt",
-    chargeTo: 1,
+    chargeTo: 1.0,
     dischargeToTurbine: 0.199278169307103,
     dischargeToHeater: 0.199278169307103,
     stepSizeIteration: -99.99,

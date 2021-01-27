@@ -14,7 +14,7 @@ extension Storage: CustomStringConvertible {
      [massFlow.rate, temperature.inlet.celsius, temperature.outlet.celsius,
       temperatureTank.cold.celsius, temperatureTank.hot.celsius,
       massOfSalt, salt.active.kg, salt.minimum.kg, salt.cold.kg, salt.hot.kg,      
-      antiFreezeTemperature, charge.percentage , storedHeat, heatProductionLoad.ratio],
+      antiFreezeTemperature, charge.percentage , storedHeat, heatProductionLoad.quotient],
      ["Mass flow rate:", "T inlet:", "T outlet:",
       "Temperature tank cold:", "Temperature tank hot:",  
       "Mass of salt:", "Salt active:", "Salt min:", "Salt cold:", "Salt hot:",      

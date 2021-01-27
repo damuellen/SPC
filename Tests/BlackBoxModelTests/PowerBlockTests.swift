@@ -8,7 +8,7 @@ class PowerBlockTests: XCTestCase {
     let parasitics = PowerBlock.parasitics(
       heat: 100, steamTurbine: steamTurbine,
       temperature: Temperature(celsius: 390.0))
-    XCTAssertEqual(parasitics, 1.39, accuracy: 0.01, "parasitics")
+    XCTAssertEqual(parasitics, 0.78, accuracy: 0.01, "parasitics")
   }
 
   static var allTests: [(String, (PowerBlockTests) -> () throws -> Void)] {
