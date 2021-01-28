@@ -158,7 +158,7 @@ public struct Boiler: Parameterizable {
       totalFuelNeed = fuelNeed // no additional fuel needed.
 
     default:
-      if startEnergy == 0 {
+      if startEnergy.isZero {
 
         operationMode = .operating
 

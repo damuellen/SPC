@@ -123,11 +123,7 @@ public struct ThermalPower: Encodable, MeasurementsConvertible {
     toStorageMin: Power = 0.0, storage: Power = 0.0, heater: Power = 0.0,
     boiler: Power = 0.0, wasteHeatRecovery: Power = 0.0,
     heatExchanger: Power = 0.0, production: Power = 0.0
-    internal(set) public var demand: Power = 0.0 {
-      didSet {
-     //   print(demand)
-      }
-    }
+    internal(set) public var demand: Power = 0.0
     internal(set) public var dumping: Power = 0.0, overtemp_dump: Power = 0.0, startUp: Power = 0.0
 
   var excess: Power { production - demand }

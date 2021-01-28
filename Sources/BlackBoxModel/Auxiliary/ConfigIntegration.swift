@@ -168,6 +168,6 @@ extension TextConfig {
       }
       memory.append(e)
     }
-    if let htf = htf { SolarField.parameter.HTF = htf }
+ //   if let htf = htf { SolarField.parameter.HTF = htf }
   }
 }

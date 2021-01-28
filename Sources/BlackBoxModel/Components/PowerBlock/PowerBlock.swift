@@ -16,11 +16,7 @@ public struct PowerBlock: Parameterizable, HeatTransfer {
 
   var massFlow: MassFlow = .zero
   
-  var temperature: (inlet: Temperature, outlet: Temperature) {
-    didSet {
-  //    print(temperature)
-    }
-  }
+  var temperature: (inlet: Temperature, outlet: Temperature)
 
   var designMassFlow: MassFlow = .zero
 

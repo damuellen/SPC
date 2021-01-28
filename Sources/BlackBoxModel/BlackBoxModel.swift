@@ -171,8 +171,8 @@ public enum BlackBoxModel {
 
       let performance = plant.performance()
 #if DEBUG
-   print(decorated(dt.description), status, performance)
-   print()
+ //  print(decorated(dt.description), status, performance)
+ //  print()
 #endif
       backgroundQueue.async { [status] in
         log(dt, meteo: meteo, status: status, energy: performance)

@@ -173,19 +173,15 @@ public struct HeatExchanger: Parameterizable, HeatTransfer {
             parameter.temperature.htf.outlet.max.adjusted(factor)
           )
         }
-        let h: (Double) -> Double = { t in
-          1.51129 * t + 1.2941 / 1000.0 * t ** 2.0
-          + 1.23697 / 10.0 ** 7.0 * t ** 3.0 - 0.62677
-        }
-        heatOut = h(temperature.outlet.celsius)
+        heatOut = htf.enthalpy(temperature.outlet)
         let bypassMassFlow = totalMassFlow - massFlow
-        let bypass_h = h(temperature.inlet.celsius)
-        heatToTES = (bypassMassFlow.rate * bypass_h
+        let bypass_h = htf.enthalpy(temperature.inlet)
+        heatToTES = (
+          bypassMassFlow.rate * bypass_h 
           + massFlow.rate * heatOut)
           / (bypassMassFlow + massFlow).rate
       }
-
-      setTemperature(outlet: htf.temperature(heatToTES))
+      temperature.outlet = htf.temperature(heatToTES)
     }
     let heat = massFlow.rate * deltaHeat / 1_000
     return -heat * parameter.efficiency

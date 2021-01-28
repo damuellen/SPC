@@ -24,19 +24,16 @@ extension Storage {
     
     if parameter.auxConsumptionCurve == false {
       // old model:
-      if status.averageTemperature.celsius < 50 { 
-        print("Temperature too low.")
-        return 0
-      }
+      assert(status.averageTemperature.celsius > 50, "Temperature too low.")
+
       let rohMean = solarField.HTF.density(status.averageTemperature)
       let avgTempHX = Temperature.average(
         heatExchanger.temperature.htf.inlet.max,
         heatExchanger.temperature.htf.outlet.max
       )
-      if avgTempHX.celsius < 50 { 
-        print("Temperature too low.")
-        return 0
-      }
+
+      assert(avgTempHX.celsius > 50, "Temperature too low.")
+
       let rohDP = solarField.HTF.density(avgTempHX)
 
       let pressureLoss = parameter.pressureLoss * rohDP / rohMean
@@ -194,7 +191,7 @@ extension Storage {
     _ nightHour: Double) -> Ratio
   {
     // calculate discharge rate only once per day, directly after sunset
-    var dischargeLoad = 0.5
+    var dischargeLoad = Ratio(0.5)
     
     let steamTurbine = SteamTurbine.parameter
     
@@ -210,12 +207,12 @@ extension Storage {
       case .ton:
         defindedByTonnage(&storage) // updates storedHeat
       }
-      dischargeLoad = storage.storedHeat / nightHour
+      let load = storage.storedHeat / nightHour
         / (steamTurbine.power.max / steamTurbine.efficiencyNominal)
       
-      if dischargeLoad > 1 {
-        dischargeLoad = parameter.fixedDischargeLoad.quotient
-      }
+      dischargeLoad = load > 1.0 
+        ? parameter.fixedDischargeLoad
+        : Ratio(load)
     }
     // if no previous calculation has been done and TES must be discharged
     if dischargeLoad.isZero && parameter.isVariable {
@@ -229,17 +226,13 @@ extension Storage {
       case .ton:
         defindedByTonnage(&storage)
       }
-      dischargeLoad = storage.storedHeat / nightHour
+      let load = storage.storedHeat / nightHour
         / (steamTurbine.power.max / steamTurbine.efficiencyNominal)
-      
-      if dischargeLoad > 1 { dischargeLoad = 1 }
+      dischargeLoad = load > 1.0 ? 1.0 : Ratio(load)
     }
+    dischargeLoad = max(dischargeLoad, parameter.minDischargeLoad)
     
-    if dischargeLoad < parameter.minDischargeLoad.quotient {
-      dischargeLoad = parameter.minDischargeLoad.quotient
-    }
-    
-    return Ratio(dischargeLoad)
+    return dischargeLoad
   }
   
   static func isFossilChargingAllowed(at time: DateTime) -> Bool {

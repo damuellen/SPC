@@ -64,7 +64,7 @@ public struct SteamTurbine: Parameterizable {
   {
     let parameter = SteamTurbine.parameter
     defer { SteamTurbine.oldMinute = DateTime.current.minute }
-    //load = 0.0
+
     let minutes = Int(Simulation.time.steps.fraction * 60)
     if heat.production.megaWatt <= 0 {
       // Avoid summing up inside an iteration
@@ -83,7 +83,7 @@ public struct SteamTurbine: Parameterizable {
       switch operationMode {
       case .noOperation(let standStillTime):
         if standStillTime < parameter.hotStartUpTime {
-          operationMode = .operating(Ratio(1))
+          operationMode = .operating(1.0)
         } else {
           operationMode = .startUp(time: 0, energy: 0)
         }
@@ -91,7 +91,7 @@ public struct SteamTurbine: Parameterizable {
         if startUpTime >= parameter.startUpTime,
           startUpEnergy >= parameter.startUpEnergy
         {
-          operationMode = .operating(Ratio(1))
+          operationMode = .operating(1.0)
         }
       case .scheduledMaintenance: return 0
       case .operating: break
@@ -101,23 +101,21 @@ public struct SteamTurbine: Parameterizable {
         let (maxLoad, efficiency) = SteamTurbine.perform(
           load, heat, modeBoiler, modeGasTurbine,
           heatExchanger.temperature.inlet, temperature)
-        //#warning("Check this again")
-        let ratio = heat.production.megaWatt * efficiency / parameter.power.max
+        
+        let gross = heat.production.megaWatt * efficiency
+        let ratio = gross / parameter.power.max
         load = Ratio(ratio, cap: maxLoad)
-
-        let gross = load.quotient * parameter.power.max * efficiency
         return gross
       } else {  // Start Up sequence: Energy is lost / Dumped
         // Avoid summing up inside an iteration
         if DateTime.current.minute != SteamTurbine.oldMinute {
           if case .startUp(let startUpTime, let startUpEnergy) = operationMode {
-            var energy =
-              heat.production.megaWatt
+            var energy = heat.production.megaWatt
               + heat.storage.megaWatt + heat.boiler.megaWatt
 
             // FIXME    Plant.heat.startUp.megaWatt = energy
 
-            if heater.massFlow.rate > 0 { energy = heat.production.megaWatt }
+            if heater.massFlow > .zero { energy = heat.production.megaWatt }
 
             operationMode = .startUp(
               time: startUpTime + minutes,

@@ -40,7 +40,7 @@ enum HCE {
   // Radiation losses per m2 Aperture; now with the new losses that take into
   // account the percentage of HCE that are broken, lost vacuum and fluorescent
   static func radiationLossesOld(
-    _ temperatures: (Temperature, Temperature, Temperature), insolationAbsorber: Double)
+    _ temperatures: (Temperature, Temperature, Temperature), insolation: Double)
     -> Double
   {
     let (t1, t2) = (temperatures.0.kelvin, temperatures.1.kelvin)
@@ -70,9 +70,9 @@ enum HCE {
       endLossFactor = 1 // added in order to differenciate with LS2 collector
     } else if col.name.hasPrefix("LS2") {
       vacuumHeatLoss = 0.081 - 0.04752 * dT
-        + 0.0006787 * dT2 + 0.0007403 * insolationAbsorber
-      vacuumHeatLoss += 0.00003582 * dT * insolationAbsorber
-        + 0.00000014125 * dT2 * insolationAbsorber
+        + 0.0006787 * dT2 + 0.0007403 * insolation
+      vacuumHeatLoss += 0.00003582 * dT * insolation
+        + 0.00000014125 * dT2 * insolation
       endLossFactor = 1.3
     } else if col.name.hasPrefix("PCT_validation") { // test
       vacuumHeatLoss = sigma * circumference
@@ -85,8 +85,7 @@ enum HCE {
       // temperature.0+10 considers that average loop temperature is higher than (T_in + T_out)/2
       switch col.absorber {
       case .schott:
-        vacuumHeatLoss = sigma * circumference
-          * (t1 ** 4 - t2 * t2 * t2 * t2)
+        vacuumHeatLoss = sigma * circumference * (t1 ** 4 - t2 * t2 * t2 * t2)
         vacuumHeatLoss *= (emissionHCE[0] + emissionHCE[1] * (t1 + 10)) / aperture
       case .rio:
         vacuumHeatLoss = (0.00001242 * t1 * t1 * t1 - 0.01864091
@@ -100,14 +99,14 @@ enum HCE {
     }
 
     var RLHP: Double = 0.081 - 0.04752 * dT
-      + 0.0006787 * dT2 + 0.0007403 * insolationAbsorber
-    RLHP += 3.582e-05 * dT2 * insolationAbsorber
-      + 1.4125e-07 * dT2 * insolationAbsorber
+      + 0.0006787 * dT2 + 0.0007403 * insolation
+    RLHP += 3.582e-05 * dT2 * insolation
+      + 1.4125e-07 * dT2 * insolation
 
     var addHLAir: Double = -0.114 + 0.1396 * dT
-      + 0.000006823 * dT2 - 0.002074 * insolationAbsorber
-    addHLAir += 0.0000602 * dT * insolationAbsorber
-      - 0.0000001624 * dT2 * insolationAbsorber
+      + 0.000006823 * dT2 - 0.002074 * insolation
+    addHLAir += 0.0000602 * dT * insolation
+      - 0.0000001624 * dT2 * insolation
     
     let addHLBare: Double = 0.416 * dT
       - 0.000056 * dT2 + 0.0666 * dT // * windSpeed
@@ -119,69 +118,71 @@ enum HCE {
   
   static func radiationLossesNew(
     _ temperatures: (Temperature, Temperature, Temperature),
-    insolationAbsorber: Double)
+    insolation: Double)
     -> Double
   {
     var (t1, t2) = (temperatures.0.kelvin, temperatures.1.kelvin)
-    let tAmb = (temperatures.2.kelvin + 30)
+    let avgT = (t1 + t2) / 2.0
+    let ambT = temperatures.2.kelvin + 30
     
-    let dT = (t1 + t2) / 2 - tAmb + 10
+    let dT = (t1 + t2) / 2 - ambT + 10
 
     let rabsOut = Collector.parameter.rabsOut
     let rglas = Collector.parameter.rglas
     let glassEmission = Collector.parameter.glassEmission
     let aperture = Collector.parameter.aperture
     let emissionHCE = Collector.parameter.emissionHCE
-    let availability = Availability.current.value
-    let breakHCE = availability.breakHCE.quotient
-    let airHCE = availability.airHCE.quotient
-    let fluorHCE = availability.fluorHCE.quotient
+    let value = Availability.current.value
+    let breakHCE = value.breakHCE.quotient
+    let airHCE = value.airHCE.quotient
+    let fluorHCE = value.fluorHCE.quotient
 
     var vacuumHeatLoss: Double
     let endLossFactor: Double
 
     let sigma = 0.00000005667
-    let circumference = 2 * .pi * rabsOut    
+    let circumference = 2 * .pi * rabsOut 
 
-    if t1 == t2 { t2 = t1 * 0.999 }
-    let avgT = (t1 + t2) / 2.0
-
-    let Ebs_HCE = (1 / 3 * emissionHCE[2] * (t1 ** 3 - t2 ** 3) 
+    if t1 == t2 { t2 *= 0.999 }
+    let Ebs_HCE = 
+      ( 1 / 3 * emissionHCE[2] * (t1 * t1 * t1 - t2 * t2 * t2) 
       + 1 / 2 * emissionHCE[1] * (t1 * t1 - t2 * t2)
-      + emissionHCE[0] * (t1 - t2)) / (t1 - t2)
-
+      + emissionHCE[0] * (t1 - t2) ) / (t1 - t2)
+   
     if t1 != t2 {
       vacuumHeatLoss = sigma / (1 / Ebs_HCE + rabsOut / rglas 
         * (1 / glassEmission - 1)) * circumference / aperture 
         * (1 / 5 * (t1 * t1 * t1 * t1 * t1 - t2 * t2 * t2 * t2 * t2)
-          + tAmb ** 4 * (t2 - t1)) / (t1 - t2)
+          + ambT * ambT * ambT * ambT * (t2 - t1)) / (t1 - t2)
     } else {
       vacuumHeatLoss = sigma * circumference
-      vacuumHeatLoss *= avgT * avgT * avgT * avgT - tAmb ** 4
+      vacuumHeatLoss *= avgT * avgT * avgT * avgT - ambT * ambT * ambT * ambT
       vacuumHeatLoss *= (emissionHCE[0] + emissionHCE[1] * t2) / aperture
     }
 
-    let al = 0.7 * circumference * (avgT - tAmb) / aperture
+    let al = 0.7 * circumference * (avgT - ambT) / aperture
     vacuumHeatLoss += al
     endLossFactor = 1
 
     let dT2 = dT * dT
     var RLHP: Double = 0.081 - 0.04752 * dT
-      + 0.0006787 * dT2 + 0.0007403 * insolationAbsorber
-    RLHP += 3.582e-05 * dT * insolationAbsorber
-      + 1.4125e-07 * dT2 * insolationAbsorber
+      + 0.0006787 * dT2 + 0.0007403 * insolation
+    RLHP += 3.582e-05 * dT * insolation
+      + 1.4125e-07 * dT2 * insolation
 
     var addHLAir: Double = -0.114 + 0.1396 * dT
-      + 0.000006823 * dT2 - 0.002074 * insolationAbsorber
-    addHLAir += 0.0000602 * dT * insolationAbsorber
-      - 0.0000001624 * dT2 * insolationAbsorber
+      + 0.000006823 * dT2 - 0.002074 * insolation
+    addHLAir += 0.0000602 * dT * insolation
+      - 0.0000001624 * dT2 * insolation
 
     let addHLBare: Double = 0.416 * dT
       - 0.000056 * dT2 + 0.0666 * dT * 3// * windSpeed
-    let losses = (vacuumHeatLoss + addHLAir * (airHCE + fluorHCE)
-      + addHLBare * breakHCE) * endLossFactor
 
-    return losses
+    var losses = vacuumHeatLoss
+    losses += addHLAir * (airHCE + fluorHCE)
+    losses += addHLBare * breakHCE 
+
+    return losses * endLossFactor
   }
 
   //  MARK: - Mode 1
@@ -256,10 +257,7 @@ enum HCE {
     hce.massFlow.rate = ratio * area
 
     func calculateTime() -> Double {
-      if hce.averageTemperature.celsius < 20 { 
-        print("Temperature too low.")
-        return 0
-      }
+      assert(hce.averageTemperature.celsius > 20, "Temperature too low.")
       let areaDensity = htf.density(hce.averageTemperature)
         * .pi * col.rabsOut ** 2 / col.aperture      
       return areaDensity * area / hce.massFlow.rate
@@ -370,30 +368,19 @@ enum HCE {
    
     outerIteration: for o in 1...5 {
       swap(&oldTemp, &newTemp)
-      var inFocusLoop = 0.1
+      var inFocusLoop = solarField.inFocus.quotient
      // print("O", o, newTemp, oldTemp)
-      innerIteration: for innerIteration in 1...10 {
+      innerIteration: for _ in 1...10 {
       //  print("I", innerIteration)
-        let avgT = Temperature.average(
-          newTemp, hce.temperature.inlet
-        )
-        let areaDensity: Double
-        if avgT.celsius < 20 {
-          print(o, innerIteration, newTemp, hce, solarField, "Temperature too low.")
-          areaDensity = 1
-        } else {
-          areaDensity = htf.density(avgT) * .pi
-          * col.rabsInner ** 2 / col.aperture
-        }
+        let avgT = Temperature.average(newTemp, hce.temperature.inlet)
+
+        assert(avgT.celsius > 20, "Temperature too low.")
+
+        let areaDensity = htf.density(avgT) * .pi
+          * col.rabsInner ** 2 / col.aperture        
 
         if hce.massFlow > .zero {
           time = (areaDensity * area) / hce.massFlow.rate
-        }
-        
-        if innerIteration == 1 {
-          inFocusLoop = solarField.inFocus.quotient
-          // Reduce dumping in order to reach design temperature.
-          // I.e. dumping happens on first collector(s) and not last on loop
         }
 
         if newTemp.kelvin < 0.997 * htf.maxTemperature.kelvin {
@@ -517,7 +504,7 @@ enum HCE {
         if abs(newTemp.kelvin - oldTemp.kelvin)
           < Simulation.parameter.tempTolerance,
          newTemp.kelvin > maxTemp.kelvin * 0.995
-        // inFocusLoop < 0.95 || inFocusLoop > 0.95 || inFocusLoop == 0
+         || inFocusLoop.isZero
         {
           break innerIteration
         }

@@ -107,17 +107,21 @@ extension Recording {
     //      + "Power Block Availability [%]:" * Availability.current[0).powerBlock * 100)"
     //        + "Transmission Losses [%]:" * Simulation.parameter.TransLoss * 100)"
     d += heading("OPERATION")
-    let s1 = "First Date of Operation [MM.dd  HH:mm]:"
+    let s1 = "First Date of Operation [MM-dd HH:mm]:"
     if let firstDateOfOperation = Simulation.time.firstDateOfOperation {
-      d += s1 * String(describing: firstDateOfOperation)
+      d += s1 * String(
+        String(describing: firstDateOfOperation).dropFirst(5).dropLast(9)
+      )
     } else {
-      d += s1 * "01.01  00:00"
+      d += s1 * "01-01  00:00"
     }
-    let s2 = "Last Date of Operation [MM.dd  HH:mm]:"
+    let s2 = "Last Date of Operation [MM.dd HH:mm]:"
     if let lastDateOfOperation = Simulation.time.lastDateOfOperation {
-      d += s2 * String(describing: lastDateOfOperation)
+      d += s2 * String(
+        String(describing: lastDateOfOperation).dropFirst(5).dropLast(9)
+      )
     } else {
-      d += s2 * "12.31  23:59"
+      d += s2 * "12-31  23:59"
     }
     d += Simulation.initialValues.description
     d += "Delta T for Start-Up of Anti-Freeze Pumping:"

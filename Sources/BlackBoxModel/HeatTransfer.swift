@@ -17,11 +17,7 @@ protocol HeatTransfer: CustomStringConvertible {
 public struct Cycle: HeatTransfer {
   public var name: String
   public var massFlow: MassFlow
-  public var temperature: (inlet: Temperature, outlet: Temperature) {
-    didSet {
- //     print(self)
-    }
-  }
+  public var temperature: (inlet: Temperature, outlet: Temperature)
 }
 
 extension Cycle {
@@ -67,9 +63,9 @@ extension HeatTransfer {
   }
 
   public var description: String {  
-       String(format: "  Mass flow rate: %3.1f kg/s", massFlow.rate).padding(30) 
+       String(format: "  Mass flow: %3.1f kg/s", massFlow.rate).padding(28) 
       + String(format: " T in: %3.1f degC", temperature.inlet.celsius).padding(20) 
-      + String(format: "T out:%3.1f degC", temperature.outlet.celsius).padding(20) 
+      + String(format: "T out: %3.1f degC", temperature.outlet.celsius).padding(20) 
   }
 
   var values: [String] {
@@ -122,11 +118,11 @@ extension HeatTransfer {
     temperature.inlet = other.temperature.outlet
   }
 
-  mutating func inletTemperature(_ other: HeatTransfer) {
+  mutating func inletTemperature(inlet other: HeatTransfer) {
     temperature.inlet = other.temperature.inlet
   }
 
-  mutating func outletTemperature(_ other: HeatTransfer) {
+  mutating func outletTemperature(outlet other: HeatTransfer) {
     temperature.outlet = other.temperature.outlet
   }
 }

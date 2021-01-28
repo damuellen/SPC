@@ -16,11 +16,7 @@ public struct Mass: Codable, CustomStringConvertible {
     "\(kg / 1000)t"
   }
 
-  public var kg: Double {
-    didSet {
-    //  print(self)
-    }
-  }
+  public var kg: Double 
 
   public init(_ kg: Double) {
     self.kg = kg

@@ -65,10 +65,8 @@ public struct Heater: Parameterizable, HeatTransfer {
 
   /// Calculates the thermal power and fuel consumption
   mutating func callAsFunction(
-    temperatureOutlet: Temperature,
-    temperatureInlet: Temperature,
-    massFlowStorage: MassFlow,
-    modeStorage: Storage.OperationMode,
+    storage: MassFlow,
+    mode: Storage.OperationMode,
     demand: Double,
     fuelAvailable: Double,
     heat: ThermalPower
@@ -80,9 +78,8 @@ public struct Heater: Parameterizable, HeatTransfer {
     var fuel = 0.0
     var thermalPower = Power()
     var parasitics = 0.0
-    var load = Ratio(0)
+    var load = Ratio(1.0)
 
-    temperature.inlet = temperatureInlet
     // Freeze protection is always possible: massFlow fixed
     if case .charge = operationMode {
       // Fossil charge of storage
@@ -117,19 +114,15 @@ public struct Heater: Parameterizable, HeatTransfer {
         temperature.outlet = parameter.nominalTemperatureOut
 
         // Calc. mass flow that can be achieved [kg/sec] = [MJ/sec] * 1000 / [kJ/kg]
-
-        if Design.hasStorage, case .preheat = modeStorage {
-          massFlow = massFlowStorage
+        if Design.hasStorage, case .preheat = mode {
+          massFlow = storage
         } else {
           massFlow.rate = thermalPower.kiloWatt
-              / htf.deltaHeat(
-                temperature.outlet, temperatureInlet)
-          
+            / htf.deltaHeat(temperature.outlet, temperature.inlet)
         }
       } else {
         massFlow.rate = Design.layout.heater
-            / htf.deltaHeat(
-              parameter.nominalTemperatureOut, temperatureInlet)
+          / htf.deltaHeat(parameter.nominalTemperatureOut, temperature.inlet)
         
         fuel = Design.layout.heater / parameter.efficiency.quotient
         load = Ratio(1)
@@ -161,12 +154,11 @@ public struct Heater: Parameterizable, HeatTransfer {
       operationMode = .freezeProtection(load)
       // No operation requested or QProd > QNeed
     } else if case .noOperation = operationMode { /* || heat >= 0 */
-      massFlow = 0.0
+      massFlow = .zero
       //  if isMaintained {
       //   operationMode = .maintenance
       //  }
-      temperature.outlet = temperatureOutlet
-
+      outletTemperatureFromInlet()
       thermalPower = .zero
     } else if case .maintenance = operationMode {
       // operation is requested
@@ -176,8 +168,8 @@ public struct Heater: Parameterizable, HeatTransfer {
         Sched. maintnc. of HR disables requested operation.
         """)
       operationMode = .noOperation
-      massFlow = 0.0
-      operationMode = .maintenance
+      massFlow = .zero
+      outletTemperatureFromInlet()
       thermalPower = .zero
     } else {
       // Normal operation requested  The fuel flow needed [MW]
@@ -209,8 +201,8 @@ public struct Heater: Parameterizable, HeatTransfer {
       // if Reheating, then do not change displayed operating status / mode
       setTemperature(outlet: parameter.nominalTemperatureOut)
       // Calc. mass flow that can be achieved [kg/sec] = [MJ/sec] * 1000 / [kJ/kg]
-      if Design.hasStorage, case .preheat = modeStorage {
-        massFlow = massFlowStorage
+      if Design.hasStorage, case .preheat = mode {
+        massFlow = storage
       } else {
         massFlow.rate = thermalPower.kiloWatt / deltaHeat
       }

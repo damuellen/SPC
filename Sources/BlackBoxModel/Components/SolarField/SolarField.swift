@@ -153,7 +153,7 @@ public struct SolarField: Parameterizable, HeatTransfer {
     _ timeRemain: Double
   ) {
     let last = loops
-    header.massFlow.rate = SolarField.parameter.maxMassFlow.rate * SolarField.parameter.minFlow.quotient
+    
     if header.massFlow > .zero {
       let massFlows = imbalanceLoops(massFlow: header.massFlow)
       zip(Loop.indices, massFlows).forEach { i, massFlow in
@@ -350,8 +350,7 @@ public struct SolarField: Parameterizable, HeatTransfer {
     case .operating, .freezeProtection:
       outletTemperature(collector, ambient, time)
     case .noOperation:  // does not neccessary mean no operation, see:
-      if header.temperature.outlet
-        > max(minTemperature, header.temperature.inlet)
+      if header.temperature.outlet > max(minTemperature, header.temperature.inlet)
       {
         operationMode = .operating
       }
@@ -367,8 +366,7 @@ public struct SolarField: Parameterizable, HeatTransfer {
 
       } else if collector.insolationAbsorber
         > SolarField.oldInsolation + Simulation.parameter.minInsolationRaiseStartUp,
-        header.temperature.outlet
-          > header.temperature.inlet
+        header.temperature.outlet > header.temperature.inlet
           + Simulation.parameter.minTemperatureRaiseStartUp
       {
         operationMode = .startUp
