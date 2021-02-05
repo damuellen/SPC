@@ -92,7 +92,7 @@ public enum BlackBoxModel {
     for (meteo, date) in zip(🌦, 📅) {
 
       DateTime.setCurrent(date: date)
-      
+
       Maintenance.checkSchedule(date)
 
       if let position = 🌞[date] {
@@ -121,26 +121,23 @@ public enum BlackBoxModel {
 
       status.solarField.inletTemperature(outlet: status.powerBlock)
 
-      status.solarField.massFlow = SolarField.parameter.maxMassFlow
-
       if Design.hasStorage {
-
         status.solarField.inletTemperature(
-          storage: status.storage, heat: plant.heat
+          storage: status.storage, heatFlow: plant.heatFlow
         )
-
-        if status.storage.charge < Storage.parameter.chargeTo {
-          status.solarField.massFlow += status.storage.massFlow
+        status.solarField.maxMassFlow = PowerBlock.requiredMassFlow()
+        if status.storage.relativeCharge < Storage.parameter.chargeTo {
+          status.solarField.maxMassFlow += Storage.parameter.designMassFlow
         } else if Design.hasGasTurbine {
-          status.solarField.massFlow = HeatExchanger.parameter.sccHTFmassFlow
+          status.solarField.massFlow = HeatExchanger.parameter.massFlowHTF
         }
-        if status.solarField.massFlow > SolarField.parameter.maxMassFlow {
-          status.solarField.massFlow = SolarField.parameter.maxMassFlow
+        if status.solarField.massFlow > status.solarField.maxMassFlow {
+          status.solarField.massFlow = status.solarField.maxMassFlow
         }
       }
       
       status.solarField.calculate(
-        dumping: &plant.heat.dumping.watt,
+        dumping: &plant.heatFlow.dumping.watt,
         collector: status.collector,
         ambient: temperature)
 
@@ -148,28 +145,10 @@ public enum BlackBoxModel {
         status.solarField.heatLossesHotHeader(ambient: temperature)
 
       plant.electricalParasitics.solarField = status.solarField.parasitics()
-
       plant.perform(&status, ambient: temperature)
+      plant.electricity.consumption()
 
-      if Design.hasStorage {
-        // Calculate the operating state of the salt
-        status.storage.calculate(thermal: &plant.heat.storage.megaWatt, status.powerBlock)
-        status.storage.heatlosses()
-
-        if plant.heat.storage.megaWatt < 0 {
-          if case .freezeProtection = status.storage.operationMode {
-            // FIXME: powerBlock.temperature.outlet // = powerBlock.temperature.outlet
-          } else if case .charging = status.storage.operationMode {
-            // added to avoid Tmix during TES discharge (valid for indirect storage), check!
-            let htf = SolarField.parameter.HTF
-            status.powerBlock.temperature.outlet = htf.mixingTemperature(
-              status.powerBlock, status.storage
-            )
-          }
-        }
-      }
-
-      let performance = plant.performance()
+      let performance = plant.performance
 #if DEBUG
  //  print(decorated(dt.description), status, performance)
  //  print()

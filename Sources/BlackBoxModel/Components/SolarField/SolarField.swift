@@ -44,6 +44,8 @@ public struct SolarField: Parameterizable, HeatTransfer {
     set { header.massFlow = newValue }
   }
 
+  var maxMassFlow: MassFlow = .zero
+
   public enum OperationMode: String, CustomStringConvertible {
     case startUp
     case freezeProtection
@@ -68,7 +70,7 @@ public struct SolarField: Parameterizable, HeatTransfer {
     header: Cycle(name: "Header"),
     ETA: 0,
     heatLosses: 0, heatLossesHotHeader: 0, heatLossesHCE: 0,
-    inFocus: 0.0,
+    inFocus: 1.0,
     loops: Loop.names.map { name in Cycle(loop: name) },
     loopEta: 0
   )
@@ -81,23 +83,34 @@ public struct SolarField: Parameterizable, HeatTransfer {
 
   /// Calculates the parasitics
   func parasitics() -> Double {
-    let parameter = SolarField.parameter
+    let maxMassFlow = SolarField.parameter.maxMassFlow    
     if operationMode.isFreezeProtection {
-      return parameter.antiFreezeParastics
+      return SolarField.parameter.antiFreezeParastics
     }
-    let load = massFlow.share(of: parameter.maxMassFlow).quotient
-    if header.massFlow > .zero { 
-      return parameter.pumpParasticsFullLoad
-        * (parameter.pumpParastics[0] + parameter.pumpParastics[1]
-          * load + parameter.pumpParastics[2] * load ** 2)
+    let load = massFlow.share(of: maxMassFlow).quotient
+    if header.massFlow > .zero {
+      let fullLoad = SolarField.parameter.pumpParasticsFullLoad
+      let p = SolarField.parameter.pumpParastics 
+      return fullLoad * (p[0] + p[1] * load + p[2] * load ** 2)
     } else {
-      return 0
+      return .zero
     }
   }
 
+  mutating func eta(collector: Collector) {
+    if collector.insolationAbsorber > .zero {
+      loopEta = collector.efficiency.quotient - heatLossesHCE
+        / collector.insolationAbsorber / collector.efficiency.quotient
+      ETA = collector.efficiency.quotient - heatLosses
+        / collector.insolationAbsorber / collector.efficiency.quotient
+    } else {
+      loopEta = .zero
+      ETA = .zero
+    }
+  }
   /// Determines the inlet temperature of the solar field
   /// depending on the operating mode of the storage
-  mutating func inletTemperature(storage: Storage, heat: ThermalPower) {
+  mutating func inletTemperature(storage: Storage, heatFlow: ThermalEnergy) {
     switch storage.operationMode {
     case .freezeProtection:
       if Storage.parameter.temperatureCharge[1] > 0 {
@@ -107,7 +120,7 @@ public struct SolarField: Parameterizable, HeatTransfer {
       }
     case .preheat:
       temperature.inlet = storage.temperatureTank.cold
-    case .charging where heat.production.watt == 0:
+    case .charging where heatFlow.production.watt == 0:
       inletTemperatureFromOutlet()
     default: break
     }
@@ -225,50 +238,60 @@ public struct SolarField: Parameterizable, HeatTransfer {
     mode: OperationMode,
     ambient: Temperature
   ) -> (Double, Double) {
+    let minInsolation = Simulation.parameter.minInsolation
+      * collector.cosTheta
+      * collector.efficiency.quotient
+    if /*meteo.windSpeed*/0 > SolarField.parameter.maxWind {
+      inFocus = 1.0
+    }
     switch mode {
-    case .noOperation, .freezeProtection:
-      return HCE.mode2(&self, collector, loop, ambient)
-    case .operating:
-      //period = 300
-      if /*meteo.windSpeed*/0 > SolarField.parameter.maxWind {
-        inFocus = 0.0
-      }
-      return HCE.mode1(&self, collector, loop, ambient)
-
-    default:
-      if /*meteo.windSpeed*/0 > SolarField.parameter.maxWind
-        || collector.insolationAbsorber < Simulation.parameter.minInsolation
-      { 
+    case .freezeProtection:
+        return HCE.mode2(&self, collector, loop, ambient)
+    case .unknown:
+      if collector.insolationAbsorber <= minInsolation { 
+        operationMode = antiFreezeCheck(loop: loop)
         return HCE.mode2(&self, collector, loop, ambient)
       } else {
         return HCE.mode1(&self, collector, loop, ambient)
       }
+    case .operating, .normal:
+      if collector.insolationAbsorber.isZero {
+        operationMode = .noOperation
+      }
+      return HCE.mode1(&self, collector, loop, ambient)
+    default:
+      return HCE.mode2(&self, collector, loop, ambient)
     }    
   }
 
-  mutating func antiFreezeCheck(loop: Loop) -> (MassFlow, OperationMode) {
+  mutating func antiFreezeCheck(loop: Loop) -> OperationMode {
     let freezingTemperature = SolarField.parameter.HTF.freezeTemperature
       + Simulation.parameter.dfreezeTemperaturePump
       + Simulation.parameter.tempTolerance
-
+    let maxMassFlow = SolarField.parameter.maxMassFlow.rate
     if loops[loop.rawValue].minTemperature < freezingTemperature.kelvin {
       let antiFreeze = SolarField.parameter.antiFreezeFlow.quotient
-      let maxMassFlow = SolarField.parameter.maxMassFlow.rate
-      let antiFreezeFlow = MassFlow(antiFreeze * maxMassFlow)  
-      return (antiFreezeFlow, .unknown)
+      let antiFreezeFlow = MassFlow(antiFreeze * maxMassFlow)
+      loops[loop.rawValue].massFlow = antiFreezeFlow
+      return .freezeProtection
     } else {
-      return (0.0, operationMode)
+      let minFlowRatio = SolarField.parameter.minFlow.quotient
+      let minFlow = MassFlow(minFlowRatio * maxMassFlow)
+      loops[loop.rawValue].massFlow = minFlow
+      return .normal
     }
   }
 
   mutating func heatLossesHotHeader(ambient: Temperature) -> Temperature {
     let parameter = SolarField.parameter
-    let c = parameter.heatLossHotHeader
-    let htf = parameter.HTF
-    let area =
-      Design.layout.solarField
-      * Double(parameter.numberOfSCAsInRow)
-      * 2 * Collector.parameter.areaSCAnet
+    let numberOfSCAsInRow = SolarField.parameter.numberOfSCAsInRow
+    let areaSCAnet = Collector.parameter.areaSCAnet
+    let rabsInner = Collector.parameter.rabsInner
+    let aperture = Collector.parameter.aperture
+    let c = SolarField.parameter.heatLossHotHeader
+    let htf = SolarField.parameter.HTF
+
+    let area = Design.layout.solarField * Double(numberOfSCAsInRow) * 2 * areaSCAnet
 
     var oldTemp: Temperature
     var newTemp: Temperature
@@ -284,28 +307,21 @@ public struct SolarField: Parameterizable, HeatTransfer {
         let deltaHeatPerKg = heatLossesHotHeader * 1_000 / header.massFlow.rate // [kJ/kg]
         newTemp = htf.temperature(-deltaHeatPerKg, header.temperature.outlet)
       } else {
-        let averageTemperature = Temperature.average(
-          newTemp, header.temperature.outlet
-        )
-        assert(averageTemperature.celsius > 20, "Temperature too low.")
-        /// Calculate average Temp. and areaDensity
-        let collector = Collector.parameter
-        
-        let areaDensity =
-          htf.density(averageTemperature) * .pi
-          * collector.rabsInner ** 2 / collector.aperture  // kg/m2
+        let avgT = Temperature.average(newTemp, header.temperature.outlet)
+        assert(avgT.celsius > 20, "Temperature too low.")
+        /// Calculate average Temp. and areaDensity    
+        let areaDensity = htf.density(avgT) * .pi * rabsInner ** 2 / aperture  // kg/m2
 
         /// Heat collected or lost during the flow through a whole loop [kJ/sqm]
         let deltaHeatPerSqm = heatLossesHotHeader * 1_000_000 / area * 300 / 1_000 // [MW]
         /// Change kJ/sqm to kJ/kg:
         let deltaHeatPerKg = deltaHeatPerSqm / areaDensity
 
-        let heatPerKg = htf.deltaHeat(header.temperature.outlet, ambient)
+        let heatPerKg = htf.heatContent(header.temperature.outlet, ambient)
         newTemp = htf.temperature(heatPerKg - deltaHeatPerKg, ambient)
       }
       newTemp.limit(to: parameter.HTF.maxTemperature)
-    } while abs(newTemp.kelvin - oldTemp.kelvin)
-      > Simulation.parameter.HLtempTolerance
+    } while abs(newTemp.kelvin - oldTemp.kelvin) > Simulation.parameter.HLtempTolerance
     return newTemp
   }
 
@@ -327,62 +343,54 @@ public struct SolarField: Parameterizable, HeatTransfer {
     if case .freezeProtection = operationMode {
       loops = loops.map { loop in
         var loop = loop
-        loop.temperature.inlet = temperature.inlet
+        loop.temperature.inlet = header.temperature.inlet
         return loop
       }
     }
+
     loops[0].temperature.inlet = header.temperature.inlet
-    (loops[0].massFlow, operationMode) = antiFreezeCheck(loop: .design)
 
     (time, dumping) = calculation(
       collector: collector, loop: .design,
-      mode: operationMode, ambient: ambient
+      mode: .unknown, ambient: ambient
     )
 
-    (header.massFlow, operationMode) = antiFreezeCheck(loop: .design)
+    header.massFlow = loops[0].massFlow
+    
     header.temperature.outlet = loops[0].temperature.outlet
 
-    if loops[0].massFlow.isNearZero {
-      loops[0].inletTemperatureFromOutlet()
-    }
+    if loops[0].massFlow.isNearZero { loops[0].inletTemperatureFromOutlet() }
 
     switch operationMode {  // Check HCE and decide what to do
-    case .operating, .freezeProtection:
+    case .freezeProtection, .operating:
       outletTemperature(collector, ambient, time)
-    case .noOperation:  // does not neccessary mean no operation, see:
-      if header.temperature.outlet > max(minTemperature, header.temperature.inlet)
-      {
-        operationMode = .operating
-      }
-      //GoSub CalcNearLoop
+    case .startUp:
+      operationMode = .operating
       outletTemperature(collector, ambient, time)
-
-    default:  // HCE returns with solarField.OPmode = unknown
-      // if solarField.htf.temperature.outlet > heatExchanger.temperature.htf.inlet.min
-      // && Not (Heater.solarField.operationMode = "OP" || Boiler.solarField.operationMode = "OP") {
-      if header.temperature.outlet > minTemperature {
-        // Boiler wurde hier rausgenommen, wegen nachrechenen von SEGS VI
-        operationMode = .operating  // Operation at minimum mass flow
-
-      } else if collector.insolationAbsorber
-        > SolarField.oldInsolation + Simulation.parameter.minInsolationRaiseStartUp,
+    default:  
+      if collector.insolationAbsorber
+        > 0.0 + Simulation.parameter.minInsolationRaiseStartUp,
         header.temperature.outlet > header.temperature.inlet
           + Simulation.parameter.minTemperatureRaiseStartUp
       {
         operationMode = .startUp
+      } else if header.temperature.outlet > minTemperature {
+        operationMode = .operating  // Operation at minimum mass flow
       } else {
         // Force No Operation: Calc. the heat losses in HCEs for the rest of IMet.period
         operationMode = .noOperation
-        // CalcnearLoop
+        header.massFlow = .zero
+        loops[0] = loops[1]
+        (time, dumping) = calculation(
+          collector: collector, loop: .design,
+          mode: operationMode, ambient: ambient
+        )
         // NOTE: dtime after next calculation might be shorter than oldTime,
         // if HTFinHCE,Tout drops beyond freeze protection Temp. during that period.
       }  // solarField.htf.temperature.outlet > heatExchanger.HTFinTmin
       outletTemperature(collector, ambient, time)
     }
-    SolarField.oldInsolation = collector.insolationAbsorber
   }
-
-  static private var oldInsolation = 0.0
 }
 
 extension SolarField: MeasurementsConvertible {

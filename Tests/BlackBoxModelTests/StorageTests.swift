@@ -15,34 +15,33 @@ class StorageTests: XCTestCase {
 
     let demand = SteamTurbine.parameter.power.max
 
-    plant.heat.demand.megaWatt = min(
+    plant.heatFlow.demand.megaWatt = min(
       (demand / 0.39),
-        HeatExchanger.parameter.sccHTFheat)
+        HeatExchanger.parameter.heatFlowHTF)
 
-    plant.heat.demand.megaWatt = Storage.demandStrategy(
-      storage: &storage, powerBlock: &powerBlock,
-      demand: plant.heat.demand, production: Power(megaWatt: 300)
+    plant.heatFlow = Storage.demandStrategy(
+      storage: &storage, powerBlock: &powerBlock, heatFlow: plant.heatFlow
     )
-
+    
     let energy = Storage.perform(
       storage: &storage,
       solarField: &solarField,
       steamTurbine: &steamTurbine,
       powerBlock: &powerBlock,
-      heat: &plant.heat
+      heatFlow: &plant.heatFlow
     )
 
     XCTAssertEqual(parasitics, 0, accuracy: 0.01)
  //   storage.operationMode = .discharge
  //   storage.massFlow.rate = 200.0
  //   storage.temperature.outlet = Temperature(celsius: 380.0)
-    var thermal = storage.massFlow.rate * storage.deltaHeat / 1_000
+    var thermal = storage.massFlow.rate * storage.heat / 1_000
 
     storage.calculate(thermal: &thermal, powerBlock)
 
     storage.operationMode = .charging
     thermal = storage.massFlow.rate
-      * SolarField.parameter.HTF.deltaHeat(storage) / 1_000
+      * SolarField.parameter.HTF.heatContent(storage) / 1_000
     storage.calculate(thermal: &thermal, powerBlock)
   }
 

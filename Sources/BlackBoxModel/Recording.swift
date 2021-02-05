@@ -25,7 +25,7 @@ public struct Recording: CustomStringConvertible, Comparable {
 
   public var layout: Layout { designParameter.layout }
 
-  public var thermal: ThermalPower { performance.thermal }
+  public var thermal: ThermalEnergy { performance.thermal }
 
   public var electric: ElectricPower { performance.electric }
 

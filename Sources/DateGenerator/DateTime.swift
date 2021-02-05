@@ -42,10 +42,10 @@ public struct DateTime: CustomStringConvertible {
 
   public var description: String {
     let ds = String(
-      format: "%04d-%02d-%02d %02d:%02d:%02d",
+      format: "%04d-%02d-%02d_%02d:%02d:%02d",
       year, month, day, hour, minute, second)
-    let symbol = isDaytime ? " 🌞 " : " 🌑 "
-    return symbol + ds
+    //let symbol = isDaytime ? " 🌞 " : " 🌑 "
+    return ds
   }
 
   public static func setCurrent(date: Date) {

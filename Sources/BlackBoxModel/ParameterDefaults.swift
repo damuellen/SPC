@@ -13,7 +13,7 @@ public enum ParameterDefaults {
   static let hx = HeatExchanger.Parameter(
     name: "",
     efficiency: 1,
-    sccEff: 0.99,
+    sccEfficiency: 0.99,
     temperature: HeatExchanger.Parameter.Temperatures(
       htf: (inlet: (max: 393, min: 296), outlet: (max: 296, min: 245)),
       h2o: (inlet: (max: 0, min: 263), outlet: (max: 300, min: 300))
@@ -22,8 +22,8 @@ public enum ParameterDefaults {
       htf: (inlet: (max: 390, min: 260), outlet: (max: 292, min: 198)),
       h2o: (inlet: (max: 374, min: 255), outlet: (max: 234, min: 128))
     ),
-    sccHTFmassFlow: 1000.0,
-    sccHTFheat: 90,
+    massFlowHTF: 1500.0,
+    heatFlowHTF: 250,
     ToutMassFlow: nil,
     ToutTin: nil,
     ToutTinMassFlow: nil,
@@ -104,7 +104,7 @@ public enum ParameterDefaults {
     startTemperature: (.init(celsius: 288.0), .init(celsius: 288.0)),
     startLoad: (cold: 1, hot: 0),
     strategy: .demand, PrefChargeto: 0.83,
-    startexcep: 4, endexcep: 8,
+    exception: 4...8,
     HTF: .solarSalt, FP: -1, FC: 0, heatdiff: 0.25, dSRise: 1,
     minDischargeLoad: Ratio(0), fixedDischargeLoad: Ratio(0.97),
     heatTracingTime: [1, 1], heatTracingPower: [1, 1],

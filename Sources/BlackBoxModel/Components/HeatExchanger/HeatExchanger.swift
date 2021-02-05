@@ -33,11 +33,15 @@ public struct HeatExchanger: Parameterizable, HeatTransfer {
     }
   }
 
+  static let capacity = SolarField.parameter.HTF.heatContent(
+    HeatExchanger.parameter.temperature.htf.inlet.max,
+    HeatExchanger.parameter.temperature.htf.outlet.max)
+
   /// working conditions of the heat exchanger at start
   static let initialState = HeatExchanger(
     temperature: Simulation.startTemperature,
     operationMode: .noOperation(hours: 0),
-    heatOut: 0.0,  heatToTES: 0.0
+    heatOut: 0.0, heatToTES: 0.0
   )
 
   public static var parameter: Parameter = ParameterDefaults.hx
@@ -55,12 +59,13 @@ public struct HeatExchanger: Parameterizable, HeatTransfer {
   
   /// Update HeatExchanger.temperature.outlet
   mutating func callAsFunction(
-    steamTurbine: SteamTurbine,
+    load: Ratio,
+    designMassFlow: MassFlow,
     storage: Storage) -> Double
   {
     let parameter = HeatExchanger.parameter
     let solarField = SolarField.parameter
-    let load = steamTurbine.load.quotient
+    let load = load.quotient
     let htf = solarField.HTF
     if parameter.name.hasPrefix("Heat Exchanger HTF-H2O - BK") {
       self.outletTemperature(kelvin:
@@ -72,7 +77,7 @@ public struct HeatExchanger: Parameterizable, HeatTransfer {
       }
     } else {
       if parameter.useAndsolFunction {
-        let massFlowLoad = self.massFlow.share(of: solarField.maxMassFlow)
+        let massFlowLoad = self.massFlow.share(of: designMassFlow)
 
         let factor = HeatExchanger.temperatureFactor(
           temperature: self.temperature.inlet, load: massFlowLoad,
@@ -86,7 +91,7 @@ public struct HeatExchanger: Parameterizable, HeatTransfer {
         let temp = parameter.temperature
         switch (p.ToutMassFlow, p.ToutTin, p.ToutTinMassFlow) {
         case let (ToutMassFlow?, ToutTin?, .none):
-          let massFlowLoad = self.massFlow.share(of: solarField.maxMassFlow)
+          let massFlowLoad = self.massFlow.share(of: designMassFlow)
 
           var factor = ToutMassFlow(massFlowLoad)
           factor *= ToutTin(temperature.inlet)
@@ -99,13 +104,13 @@ public struct HeatExchanger: Parameterizable, HeatTransfer {
             * (temperature.inlet.kelvin - temp.htf.inlet.min.kelvin)
             / temp.range.inlet.kelvin)
 
-          let massFlowLoad = massFlow.share(of: solarField.maxMassFlow)
+          let massFlowLoad = massFlow.share(of: designMassFlow)
 
           var factor = ToutMassFlow(massFlowLoad)
           factor.clamp(to: 0...1.1)
           outletTemperature(kelvin: factor * self.outletTemperature)
         case let (_, _, ToutTinMassFlow?):
-          let share = massFlow.share(of: solarField.maxMassFlow).quotient
+          let share = massFlow.share(of: designMassFlow).quotient
 
           // power function based on MAN-Turbo and OHL data with pinch point tool
           var factor = ((ToutTinMassFlow[0]
@@ -138,7 +143,7 @@ public struct HeatExchanger: Parameterizable, HeatTransfer {
       for i in 1...100 where heatToTES <= h_261 {
         // reduce massflow to PB in 5% every step until enthalpy is
         massFlow.rate = totalMassFlow.rate * (1 - (Double(i) / 20))
-        let load = massFlow.share(of: solarField.maxMassFlow)
+        let load = massFlow.share(of: designMassFlow)
 
         if parameter.useAndsolFunction {
           // check how big massflow load can be (5% more than design?)
@@ -183,8 +188,8 @@ public struct HeatExchanger: Parameterizable, HeatTransfer {
       }
       temperature.outlet = htf.temperature(heatToTES)
     }
-    let heat = massFlow.rate * deltaHeat / 1_000
-    return -heat * parameter.efficiency
+    let heatFlowRate = massFlow.rate * heat / 1_000
+    return -heatFlowRate * parameter.efficiency
   }
   /// Calculates the outlet temperature of the power block
   static var temperatureOutlet = outletTemperatureFunction()
@@ -192,14 +197,12 @@ public struct HeatExchanger: Parameterizable, HeatTransfer {
   private static func outletTemperatureFunction()
     -> (PowerBlock, HeatTransfer) -> Temperature
   {
-    let solarField = SolarField.parameter
-
     if parameter.useAndsolFunction {
       return {
         (pb: PowerBlock, _: HeatTransfer) -> Temperature in
-        let massFlowLoad = pb.massFlow.share(of: solarField.maxMassFlow)
+        let load = pb.massFlow.share(of: pb.designMassFlow)
         let factor = temperatureFactor(
-          temperature: pb.temperature.inlet, load: massFlowLoad,
+          temperature: pb.temperature.inlet, load: load,
           max: parameter.temperature.htf.inlet.max)
         
         return parameter.temperature.htf.outlet.max
@@ -211,7 +214,7 @@ public struct HeatExchanger: Parameterizable, HeatTransfer {
     {
       return {
         (pb: PowerBlock, _: HeatTransfer) -> Temperature in
-        let massFlowLoad = pb.massFlow.share(of: solarField.maxMassFlow)
+        let massFlowLoad = pb.massFlow.share(of: pb.designMassFlow)
         
         let factor = ToutMassFlow(massFlowLoad)
         
@@ -229,8 +232,8 @@ public struct HeatExchanger: Parameterizable, HeatTransfer {
     {
       return {
         (pb: PowerBlock, hx: HeatTransfer) -> Temperature in
-        let massFlowLoad = pb.massFlow.share(of: solarField.maxMassFlow)
-        var factor = ToutMassFlow(massFlowLoad)
+        let load = pb.massFlow.share(of: pb.designMassFlow)
+        var factor = ToutMassFlow(load)
         factor *= ToutTin(hx.temperature.inlet)
         factor.clamp(to: 0...1.1)
         return parameter.temperature.htf.outlet.max.adjusted(factor)
@@ -240,7 +243,7 @@ public struct HeatExchanger: Parameterizable, HeatTransfer {
     {
       return {
         (pb: PowerBlock, _: HeatTransfer) -> Temperature in
-        let share = pb.massFlow.share(of: solarField.maxMassFlow).quotient
+        let share = pb.massFlow.share(of: pb.designMassFlow).quotient
         var factor = ((c[0] * (pb.inletTemperature
           / parameter.temperature.htf.inlet.max.kelvin) * 666 + c[1])
           * share ** (c[2] * (pb.inletTemperature
@@ -249,8 +252,7 @@ public struct HeatExchanger: Parameterizable, HeatTransfer {
         return parameter.temperature.htf.outlet.max.adjusted(factor)
       }
     } else if let ToutTin = parameter.ToutTin {
-      return { (_: PowerBlock,
-        hx: HeatTransfer) -> Temperature in
+      return { (_: PowerBlock, hx: HeatTransfer) -> Temperature in
         let factor = Ratio(ToutTin(hx.temperature.inlet))
         
         return parameter.temperature.htf.outlet.max.adjusted(factor)

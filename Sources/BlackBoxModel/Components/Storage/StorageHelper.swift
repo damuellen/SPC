@@ -27,12 +27,11 @@ extension Storage {
       assert(status.averageTemperature.celsius > 50, "Temperature too low.")
 
       let rohMean = solarField.HTF.density(status.averageTemperature)
+
       let avgTempHX = Temperature.average(
         heatExchanger.temperature.htf.inlet.max,
         heatExchanger.temperature.htf.outlet.max
       )
-
-      assert(avgTempHX.celsius > 50, "Temperature too low.")
 
       let rohDP = solarField.HTF.density(avgTempHX)
 
@@ -123,7 +122,7 @@ extension Storage {
         
         let designDischarge = (((
           (solarField.maxMassFlow - parameter.designMassFlow).rate * load)
-          / parameter.heatExchangerEfficiency) * htf.deltaHeat(
+          / parameter.heatExchangerEfficiency) * htf.heatContent(
             parameter.designTemperature.hot - status.dT_HTFsalt.hot,
             parameter.designTemperature.cold - status.dT_HTFsalt.cold) / 1_000)
           * parameter.heatExchangerEfficiency // design charging power
@@ -136,14 +135,14 @@ extension Storage {
         
         parasitics = ((1 - lowDc) * designAuxEX
           * saltFlowRatio ** expn + lowDc * designAuxEX)
-          * ((1 - level) + level * status.charge.quotient)
+          * ((1 - level) + level * status.relativeCharge.quotient)
           * ((1 - level2) + level2 * saltFlowRatio)
         
       } else if case .charging = status.operationMode {
         
         let htf = SolarField.parameter.HTF
         
-        let designCharge = (parameter.designMassFlow.rate * htf.deltaHeat(
+        let designCharge = (parameter.designMassFlow.rate * htf.heatContent(
           parameter.designTemperature.hot + status.dT_HTFsalt.hot,
           parameter.designTemperature.cold + status.dT_HTFsalt.cold) / 1_000)
           * parameter.heatExchangerEfficiency
@@ -156,7 +155,7 @@ extension Storage {
         
         parasitics = ((1 - lowCh) * designAuxIN
           * saltFlowRatio ** expn + lowCh * designAuxIN)
-          * ((1 - level) + level * status.charge.quotient)
+          * ((1 - level) + level * status.relativeCharge.quotient)
           * ((1 - level2) + level2 * saltFlowRatio)
       }
       
@@ -181,33 +180,30 @@ extension Storage {
     let t = parameter.designTemperature
     let designDeltaT = (t.hot - t.cold).kelvin
     
-    storage.storedHeat = storage.charge.quotient
+    storage.storedHeat = storage.relativeCharge.quotient
       * Design.layout.storage_ton * (hot - cold)
       * designDeltaT / 3_600
   }
   
-  static func dischargeLoad(
-    _ storage: inout Storage,
-    _ nightHour: Double) -> Ratio
-  {
-    // calculate discharge rate only once per day, directly after sunset
-    var dischargeLoad = Ratio(0.5)
-    
+  // calculate discharge rate only once per day, directly after sunset   
+  mutating func dischargeLoad(_ nightHour: Double) {
+     let parameter = Storage.parameter
+     
     let steamTurbine = SteamTurbine.parameter
     
     if DateTime.isDaytime && parameter.isVariable
     {
       switch parameter.definedBy {
       case .hours:
-        storage.storedHeat = storage.charge.quotient
+        storedHeat = relativeCharge.quotient
           * Design.layout.storage * steamTurbine.power.max
           / steamTurbine.efficiencyNominal
       case .cap:
-        storage.storedHeat = storage.charge.quotient * Design.layout.storage_cap
+        storedHeat = relativeCharge.quotient * Design.layout.storage_cap
       case .ton:
-        defindedByTonnage(&storage) // updates storedHeat
+        Storage.defindedByTonnage(&self) // updates storedHeat
       }
-      let load = storage.storedHeat / nightHour
+      let load = storedHeat / nightHour
         / (steamTurbine.power.max / steamTurbine.efficiencyNominal)
       
       dischargeLoad = load > 1.0 
@@ -218,21 +214,19 @@ extension Storage {
     if dischargeLoad.isZero && parameter.isVariable {
       switch parameter.definedBy {
       case .hours:
-        storage.storedHeat = storage.charge.quotient
+        storedHeat = relativeCharge.quotient
           * Design.layout.storage * steamTurbine.power.max
           / steamTurbine.efficiencyNominal
       case .cap:
-        storage.storedHeat = storage.charge.quotient * Design.layout.storage_cap
+        storedHeat = relativeCharge.quotient * Design.layout.storage_cap
       case .ton:
-        defindedByTonnage(&storage)
+        Storage.defindedByTonnage(&self)
       }
-      let load = storage.storedHeat / nightHour
+      let load = storedHeat / nightHour
         / (steamTurbine.power.max / steamTurbine.efficiencyNominal)
       dischargeLoad = load > 1.0 ? 1.0 : Ratio(load)
     }
     dischargeLoad = max(dischargeLoad, parameter.minDischargeLoad)
-    
-    return dischargeLoad
   }
   
   static func isFossilChargingAllowed(at time: DateTime) -> Bool {
@@ -243,8 +237,6 @@ extension Storage {
   }
 }
 
-
-
 extension Storage {
   init(operationMode: Storage.OperationMode,
        temperature: (inlet: Temperature, outlet: Temperature),
@@ -254,9 +246,7 @@ extension Storage {
     self.operationMode = operationMode
     self.temperatureTank =
       .init(cold: temperatureTanks.cold, hot: temperatureTanks.hot)
-    self.charge = .zero
 //  self.dischargeLoad = Ratio(0)
-    self.heat = 0
     
 //  self.tempertureColdOut = tempertureColdOut
 
@@ -307,12 +297,10 @@ extension Storage {
     self.dT_HTFsalt.hot = 7.0
 
     if storage.stepSizeIteration == -99.99 {
-
       // FIXME
       HeatExchanger.parameter.temperature.h2o.inlet.max = storage.startTemperature.hot
-      
       HeatExchanger.parameter.temperature.h2o.inlet.min = storage.startTemperature.cold
-            
+
       if storage.temperatureCharge[1] == 0 {
       /* status.tempertureOffset.hot = Temperature(celsius: storage.temperatureCharge[0])
          status.tempertureOffset.cold = Temperature(celsius: storage.temperatureCharge[0])

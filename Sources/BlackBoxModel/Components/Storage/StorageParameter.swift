@@ -44,7 +44,7 @@ extension Storage {
     var type: TypeDir = .indirect
     let strategy: Strategy
     let PrefChargeto: Double
-    let startexcep, endexcep: Int
+    let exception: ClosedRange<Int>
     let HTF: StorageMedium
     
     let FP, FC, heatdiff, dSRise: Double
@@ -102,7 +102,7 @@ extension Storage.Parameter: CustomStringConvertible {
     + "Charge Storage up to Load:" * chargeTo.description
     + "Discharge Storage directly to Turbine down to Load:" * dischargeToTurbine.description
     + "Discharge Storage indirectly to Heater down to Load:" * dischargeToHeater.description
-    //+ "Discharge Storage, if (Qsolarfield - Qdemand) <" * heatdiff * 100; "% of Qdemand" 
+    + "Discharge Storage, if (Qsolarfield - Qdemand) <" * "\(heatdiff * 100) % of Qdemand" 
     + "Stepwidth of Qdemand to iterate Tmin for Turbine:" * stepSizeIteration.description
     + "Relative Filling of Storage at Program Start (only for Thermocline):" * heatStoredrel.description
     + "Outlet Temperature of storage during discharging (hot end)\nfor Load = 0; T = c0+c1*T+c2*T^2+c3*T^3:"
@@ -149,8 +149,8 @@ extension Storage.Parameter: CustomStringConvertible {
     + "Start charging strategy at month:" * startFossilCharging.month.description
     + "Charge Storage up to relative Load before Start-up of Turbine:"
     * PrefChargeto.description
-    + "Definition of Summer from Month:" * startexcep.description
-    + "                       to Month:" * endexcep.description
+    + "Definition of Summer from Month:" * exception.lowerBound.description
+    + "                       to Month:" * exception.upperBound.description
     + "DNI for Bad Days Winter [kWh/m2]:" * badDNIwinter.description
     + "DNI for Bad Days Summer [kWh/m2]:" * badDNIsummer.description
     + "Massflow to POB during Charge in Bad Days Winter [%]:"
@@ -190,8 +190,7 @@ extension Storage.Parameter: TextConfigInitializable {
     //file.values[172]
     strategy = .demand//try ln(173) 
     PrefChargeto = try ln(174)
-    startexcep = try l2(175)
-    endexcep = try l2(176)
+    exception = try l2(175)...l2(176)
     HTF = .solarSalt //try ln(177)
     FP = try ln(178)
     FC = try ln(179)

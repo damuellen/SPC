@@ -112,7 +112,7 @@ public struct GasTurbine: Parameterizable {
 
     var demand = plant.electricity.demand
 
-    demand -= plant.heat.production.megaWatt
+    demand -= plant.heatFlow.production.megaWatt
       * HeatExchanger.parameter.efficiency
       * SteamTurbine.parameter.efficiencySCC
 
@@ -137,7 +137,7 @@ public struct GasTurbine: Parameterizable {
         //  if status.steamTurbine.load.quotient != load {
             // The turbine load has changed recalculation of efficiency
             let (_,  eff) = SteamTurbine.perform(
-              steamTurbine.load, plant.heat, boiler, gasTurbine.operationMode,
+              steamTurbine.load, plant.heatFlow, boiler, gasTurbine.operationMode,
               heatExchanger.temperature.inlet, temperature)
         //  }
           
@@ -180,7 +180,7 @@ public struct GasTurbine: Parameterizable {
               steamTurbine.load = load
               // The turbine load has changed recalculation of efficiency
               let (_, eff) = SteamTurbine.perform(
-              steamTurbine.load, plant.heat, boiler, gasTurbine.operationMode,
+              steamTurbine.load, plant.heatFlow, boiler, gasTurbine.operationMode,
               heatExchanger.temperature.inlet, temperature)
           //  }
 
@@ -216,7 +216,7 @@ public struct GasTurbine: Parameterizable {
             * WasteHeatRecovery.parameter.efficiencyNominal
             / WasteHeatRecovery.parameter.ratioHTF
           // if only Intg Mode possible GasTurbine should not be fired to avoid dumping Q-solar
-          let production = plant.heat.production.megaWatt
+          let production = plant.heatFlow.production.megaWatt
           if case .integrated = WasteHeatRecovery.parameter.operation,
              production * HeatExchanger.parameter.efficiency > htfShare {
 
@@ -234,20 +234,20 @@ public struct GasTurbine: Parameterizable {
               """)
 
             demand = (plant.electricity.demand - SteamTurbine.parameter.efficiencySCC
-              * plant.heat.solar.megaWatt * HeatExchanger.parameter.efficiency) /
+              * plant.heatFlow.solar.megaWatt * HeatExchanger.parameter.efficiency) /
               (1 + SteamTurbine.parameter.efficiencySCC
                 * WasteHeatRecovery.parameter.efficiencyNominal
                 * (1 / GasTurbine.efficiency(at: gasTurbine.load) - 1))
             // Lower GasTurbine-demand, avoid production>demand
-          } else if htfShare > plant.heat.demand.watt {
+          } else if htfShare > plant.heatFlow.demand.watt {
 
-            demand *= plant.heat.demand.megaWatt / htfShare
+            demand *= plant.heatFlow.demand.megaWatt / htfShare
           }
 
           if (plant.electricity.demand - demand) > SteamTurbine.parameter.power.max {
             
             demand = (SteamTurbine.parameter.power.max / SteamTurbine.parameter.efficiencySCC
-              - plant.heat.solar.megaWatt * HeatExchanger.parameter.efficiency)
+              - plant.heatFlow.solar.megaWatt * HeatExchanger.parameter.efficiency)
               / (WasteHeatRecovery.parameter.efficiencyNominal
                 * (1 / parameter.efficiencyISO - 1))
           }
@@ -261,15 +261,15 @@ public struct GasTurbine: Parameterizable {
     //  if status.steamTurbine.load.quotient != load {
         // The turbine load has changed recalculation of efficiency
         let (_, eff) = SteamTurbine.perform(
-        steamTurbine.load, plant.heat, boiler, gasTurbine.operationMode,
+        steamTurbine.load, plant.heatFlow, boiler, gasTurbine.operationMode,
         heatExchanger.temperature.inlet, temperature)
     //  }
       
-      plant.heat.demand.megaWatt = steamTurbine.load.quotient
+      plant.heatFlow.demand.megaWatt = steamTurbine.load.quotient
         * SteamTurbine.parameter.power.max / eff
       // FIXME: thermal.wasteHeatRecovery = WasteHeatRecovery(electricPerformance.gasTurbineGross, hourFraction)
 
-      if plant.heat.wasteHeatRecovery.watt < 0 {
+      if plant.heatFlow.wasteHeatRecovery.watt < 0 {
         //	i = 0
       }
       // FIXME: SwitchTemp(gasTurbine.operationMode) // Change Temperatures according to Mode

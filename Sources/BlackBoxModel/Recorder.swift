@@ -155,10 +155,10 @@ public final class Recorder {
     }
 
     if case .custom(let i) = mode {
-      let startTime = repeatElement("0", count: headers.count)
+      let startTime = repeatElement("0", count: headers.count+1)
         .joined(separator: .separator)
       let fraction = String(format: "%.5f", i.fraction)
-      let intervalTime = repeatElement(fraction, count: headers.count)
+      let intervalTime = repeatElement(fraction, count: headers.count+1)
         .joined(separator: .separator)
       let tableHeader =
         "wxDVFileHeaderVer.1" + .lineBreak

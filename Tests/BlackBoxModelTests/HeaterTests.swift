@@ -8,14 +8,13 @@ class HeaterTests: XCTestCase {
     var heater = status.heater
     let plant = Plant()
     let energy = heater(
-      temperatureOutlet: status.solarField.temperature.outlet,
-      temperatureInlet: status.powerBlock.temperature.inlet,
-      massFlowStorage: status.storage.massFlow,
-      modeStorage: status.storage.operationMode, 
-      demand: 10, fuelAvailable: 10, heat: plant.heat
+      storage: status.storage.massFlow,
+      mode: status.storage.operationMode, 
+      heatDiff: 10, fuelAvailable: 10,
+      heatFlow: plant.heatFlow
     )
-    XCTAssertEqual(energy.heat, 0.0, accuracy: 0.01, "heat")
-    XCTAssertEqual(energy.electric, 0.0, accuracy: 0.01, "electric")
+    XCTAssertEqual(energy.heatFlow, 0.0, accuracy: 0.01, "heat")
+    XCTAssertEqual(energy.electric, 1.0, accuracy: 0.01, "electric")
     XCTAssertEqual(energy.fuel, 0.0, accuracy: 0.01, "fuel")
   }
 

@@ -10,7 +10,7 @@
 
 public struct Performance: MeasurementsConvertible {
 
-  internal(set) public var thermal: ThermalPower
+  internal(set) public var thermal: ThermalEnergy
 
   internal(set) public var electric: ElectricPower
 
@@ -19,7 +19,7 @@ public struct Performance: MeasurementsConvertible {
   internal(set) public var parasitics: Parasitics
 
   mutating func zero() {
-    self.thermal = ThermalPower()
+    self.thermal = ThermalEnergy()
     self.fuel = FuelConsumption()
     self.parasitics = Parasitics()
     self.electric = ElectricPower()
@@ -38,14 +38,14 @@ public struct Performance: MeasurementsConvertible {
   }
 
   static var columns: [(name: String, unit: String)] {
-    ThermalPower.columns + FuelConsumption.columns
+    ThermalEnergy.columns + FuelConsumption.columns
       + Parasitics.columns + ElectricPower.columns
   }
 }
 
 extension Performance {
   init() {
-    self.thermal = ThermalPower()
+    self.thermal = ThermalEnergy()
     self.electric = ElectricPower()
     self.fuel = FuelConsumption()
     self.parasitics = Parasitics()
@@ -59,13 +59,13 @@ public struct ElectricPower: Encodable, MeasurementsConvertible {
     parasitics = 0.0, net = 0.0, consum = 0.0
 
   var numericalForm: [Double] {
-    [steamTurbineGross, storage, parasitics, shared, net, consum]
+    [demand, steamTurbineGross, storage, parasitics, shared, net, consum]
   }
 
   static var columns: [(name: String, unit: String)] {
     [
+      ("Electric|Demand", "MWh e"),
       ("Electric|SteamTurbineGross", "MWh e"),
-  //    ("Electric|GasTurbineGross", "MWh e"),
   //    ("Electric|BackupGross", "MWh e"),
       ("Electric|Storage", "MWh e"),
       ("Electric|Parasitics", "MWh e"),
@@ -73,6 +73,57 @@ public struct ElectricPower: Encodable, MeasurementsConvertible {
       ("Electric|Net", "MWh e"),
       ("Electric|Consum", "MWh e"),
     ]
+  }
+
+  @discardableResult mutating func estimateDemand() -> Double {
+    var estimate = 0.0
+    if Design.hasGasTurbine {
+      demand =
+        GridDemand.current.ratio
+        * (Design.layout.powerBlock - Design.layout.gasTurbine)
+      estimate =
+        demand
+        * Simulation.parameter.electricalParasitics
+      // Iter. start val. for parasitics, 10% demand
+      demand += estimate
+    } else {
+      let power = SteamTurbine.parameter.power.max
+      demand = GridDemand.current.ratio * power
+      estimate = storage
+    }
+    return estimate
+  }
+
+  mutating  func totalize(parasitics: Parasitics) {
+    // + GasTurbine = total productionuced electricity
+    solarField = parasitics.solarField
+    storage = parasitics.storage
+
+    // electricPerformance.parasiticsBU =
+    // electricalParasitics.heater + electricalParasitics.boiler
+    powerBlock = parasitics.powerBlock
+    shared = parasitics.shared
+
+    self.parasitics =
+      solarField
+      + gasTurbine
+      + parasitics.powerBlock
+      + parasitics.shared
+
+    self.parasitics *=
+      Simulation.adjustmentFactor.electricalParasitics
+  }
+
+  mutating func consumption() {
+    net = gross
+    net -= parasitics
+
+    if net < .zero {
+      consum = -net
+      net = .zero
+    } else {
+      consum = .zero
+    }
   }
 
   mutating func totalize(_ values: ElectricPower, fraction: Double) {
@@ -118,7 +169,7 @@ public struct Parasitics: Encodable, MeasurementsConvertible {
   }
 }
 
-public struct ThermalPower: Encodable, MeasurementsConvertible {
+public struct ThermalEnergy: Encodable, MeasurementsConvertible {
   internal(set) public var solar: Power = 0.0, toStorage: Power = 0.0,
     toStorageMin: Power = 0.0, storage: Power = 0.0, heater: Power = 0.0,
     boiler: Power = 0.0, wasteHeatRecovery: Power = 0.0,
@@ -150,7 +201,7 @@ public struct ThermalPower: Encodable, MeasurementsConvertible {
     ]
   }
 
-  mutating func totalize(_ values: ThermalPower, fraction: Double) {
+  mutating func totalize(_ values: ThermalEnergy, fraction: Double) {
     solar += values.solar * fraction
     if values.storage.watt < 0 {
       toStorage += values.storage * fraction
@@ -209,5 +260,5 @@ extension Performance: CustomStringConvertible {
 }
 
 struct PerformanceData<Parameterizable> {
-  var heat, electric, fuel: Double
+  var heatFlow, electric, fuel: Double
 }

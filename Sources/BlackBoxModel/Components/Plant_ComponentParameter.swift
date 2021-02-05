@@ -25,7 +25,7 @@ extension Plant {
     let steamTurbine = SteamTurbine.parameter
     let powerBlock = PowerBlock.parameter
 
-    if steamTurbine.power.max == 0 {
+    if steamTurbine.power.max == .zero {
       SteamTurbine.parameter.power.max =
         Design.layout.powerBlock
         + powerBlock.fixElectricalParasitics
@@ -35,48 +35,42 @@ extension Plant {
 
     SolarField.parameter.wayLength()
 
-    let heatExchangerCapacity =
-      SolarField.parameter.HTF.deltaHeat(
-        HeatExchanger.parameter.temperature.htf.inlet.max,
-        HeatExchanger.parameter.temperature.htf.outlet.max
-      ) / 1_000
-
     if Design.hasGasTurbine {
 
-      HeatExchanger.parameter.sccHTFheat =
+      HeatExchanger.parameter.heatFlowHTF =
         Design.layout.heatExchanger
-        / steamTurbine.efficiencySCC / HeatExchanger.parameter.sccEff
+        / steamTurbine.efficiencySCC / HeatExchanger.parameter.sccEfficiency
 
-      let sccHTFheat = HeatExchanger.parameter.sccHTFheat
+      let heatFlowRate = HeatExchanger.parameter.heatFlowHTF
       SolarField.parameter.maxMassFlow = MassFlow(
-        sccHTFheat / heatExchangerCapacity
+        heatFlowRate / HeatExchanger.capacity
       )
 
       WasteHeatRecovery.parameter.ratioHTF =
-        sccHTFheat
-        / (steamTurbine.power.max - sccHTFheat)
+        heatFlowRate
+        / (steamTurbine.power.max - heatFlowRate)
 
     } else {
 
       if Design.layout.heatExchanger != Design.layout.powerBlock {
 
-        HeatExchanger.parameter.sccHTFheat =
+        HeatExchanger.parameter.heatFlowHTF =
           Design.layout.heatExchanger
           / steamTurbine.efficiencyNominal
           / HeatExchanger.parameter.efficiency
 
       } else {
 
-        HeatExchanger.parameter.sccHTFheat =
+        HeatExchanger.parameter.heatFlowHTF =
           steamTurbine.power.max
           / steamTurbine.efficiencyNominal
           / HeatExchanger.parameter.efficiency
       }
 
 
-      let sccHTFheat = HeatExchanger.parameter.sccHTFheat
+      let heatFlowRate = HeatExchanger.parameter.heatFlowHTF * 1_000
       SolarField.parameter.maxMassFlow = MassFlow(
-        sccHTFheat / heatExchangerCapacity
+        heatFlowRate / HeatExchanger.capacity
       )
     }
 

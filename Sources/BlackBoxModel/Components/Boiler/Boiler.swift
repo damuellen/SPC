@@ -74,13 +74,13 @@ public struct Boiler: Parameterizable {
 
         operationMode = .scheduledMaintenance
         return PerformanceData(
-          heat: thermalPower, electric: parasitics, fuel: fuel
+          heatFlow: thermalPower, electric: parasitics, fuel: fuel
         )
       }
 
       let fuel = Boiler.noOperation(&self, fuelAvailable: fuelAvailable)
       return PerformanceData(
-        heat: thermalPower, electric: parasitics, fuel: fuel
+        heatFlow: thermalPower, electric: parasitics, fuel: fuel
       )
     }
 
@@ -104,7 +104,7 @@ public struct Boiler: Parameterizable {
       let fuel = Boiler.noOperation(&self, fuelAvailable: fuelAvailable)
 
       return PerformanceData(
-        heat: thermalPower, electric: parasitics, fuel: fuel
+        heatFlow: thermalPower, electric: parasitics, fuel: fuel
       )
     }
 
@@ -119,7 +119,7 @@ public struct Boiler: Parameterizable {
       let fuel = Boiler.noOperation(&self, fuelAvailable: fuelAvailable)
 
       return PerformanceData(
-        heat: thermalPower, electric: parasitics, fuel: fuel
+        heatFlow: thermalPower, electric: parasitics, fuel: fuel
       )
     }
 
@@ -187,7 +187,7 @@ public struct Boiler: Parameterizable {
         let fuel = Boiler.noOperation(&self, fuelAvailable: fuelAvailable)
 
         return PerformanceData(
-          heat: thermalPower, electric: parasitics, fuel: fuel
+          heatFlow: thermalPower, electric: parasitics, fuel: fuel
         )
       }
     }
@@ -210,7 +210,7 @@ public struct Boiler: Parameterizable {
     parasitics = Boiler.parasitics(estimateFrom: load)
 
     return PerformanceData(
-      heat: thermalPower, electric: parasitics, fuel: fuel
+      heatFlow: thermalPower, electric: parasitics, fuel: fuel
     )
   }
 

@@ -15,7 +15,7 @@ class HCETests: XCTestCase {
       t1 = Temperature(celsius: Double(t))
       
       let current = HCE.radiationLossesNew(
-        (t1, t1, t2), insolationAbsorber: collector.insolationAbsorber
+        (t1, t1, t2), insolation: collector.insolationAbsorber
       )
       XCTAssertGreaterThan(current, previous)
       previous = current

@@ -24,6 +24,8 @@ public struct Power: Codable {
     set { watt = newValue * 1_000 }
   }
 
+  public var isZero: Bool { watt == 0 }
+
   public init() {
     self.watt = 0
   }

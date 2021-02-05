@@ -16,7 +16,7 @@ protocol HeatTransfer: CustomStringConvertible {
 
 public struct Cycle: HeatTransfer {
   public var name: String
-  public var massFlow: MassFlow
+  public var massFlow: MassFlow 
   public var temperature: (inlet: Temperature, outlet: Temperature)
 }
 
@@ -58,8 +58,8 @@ extension HeatTransfer {
     SolarField.parameter.HTF
   }
 
-  var deltaHeat: Heat {
-    medium.deltaHeat(temperature.outlet, temperature.inlet)
+  var heat: Heat {
+    medium.heatContent(temperature.outlet, temperature.inlet)
   }
 
   public var description: String {  
@@ -81,12 +81,12 @@ extension HeatTransfer {
   }
 
   mutating func formJoint(_ c1: HeatTransfer, _ c2: HeatTransfer) {
-    temperature.inlet = medium.mixingTemperature(c1, c2)
+    temperature.inlet = medium.mixingOutlets(c1, c2)
     massFlow = c1.massFlow + c2.massFlow
   }
 
   mutating func merge(_ c1: HeatTransfer) {
-    temperature.inlet = medium.mixingTemperature(self, c1)
+    temperature.inlet = medium.mixingOutlets(self, c1)
     massFlow += c1.massFlow
   }
 

@@ -40,20 +40,14 @@ extension HeatExchanger {
         )
       }
     }
-
-    var heatDesign: Heat {
-      SolarField.parameter.HTF.deltaHeat(
-        temperature.htf.inlet.max, temperature.htf.outlet.max
-      )
-    }
     
     let name: String
     let efficiency: Double
-    let sccEff: Double
+    let sccEfficiency: Double
     var temperature: Temperatures
     let scc: Temperatures
-    let sccHTFmassFlow: MassFlow
-    var sccHTFheat: Double
+    let massFlowHTF: MassFlow
+    var heatFlowHTF: Double
     var ToutMassFlow: Polynomial?
     var ToutTin: Polynomial?
     var ToutTinMassFlow: Polynomial?
@@ -91,7 +85,7 @@ extension HeatExchanger.Parameter: CustomStringConvertible {
     //  + "not used:" HXc.H2OoutTmax - TK0
     //  + "not used:" HXc.H2OoutTmin - TK0
     + "Parameter for ISCCS Cycle\n"
-    + "Efficiency [%]:" * String(format: "%.1f", (sccEff * 100))
+    + "Efficiency [%]:" * String(format: "%.1f", (sccEfficiency * 100))
     + "Maximum Inlet Temperature [°C]:"
     * String(format: "%.1f", scc.htf.inlet.max.celsius)
     + "Maximum Outlet Temperature [°C]:"
@@ -104,8 +98,8 @@ extension HeatExchanger.Parameter: CustomStringConvertible {
   //  + "not used:" HXc.sccH2OinTmin - TK0
   //  + "not used:" HXc.sccH2OoutTmax - TK0
   //  + "not used:" HXc.sccH2OoutTmin - TK0
-    + "Nominal HTF Mass Flow [kg/s]:" * sccHTFmassFlow.rate.description
-    + "Nominal Capacity [MW]:" * String(format: "%.3f", sccHTFheat)
+    + "Nominal HTF Mass Flow [kg/s]:" * massFlowHTF.rate.description
+    + "Nominal Capacity [MW]:" * String(format: "%.3f", heatFlowHTF)
   }
 }
 
@@ -127,9 +121,9 @@ extension HeatExchanger.Parameter: TextConfigInitializable {
             outlet: (max: ln(65), min: ln(68)))
     )
 
-    sccEff = try ln(44) / 100
-    sccHTFmassFlow = try MassFlow(ln(71))
-    sccHTFheat = try ln(74)
+    sccEfficiency = try ln(44) / 100
+    massFlowHTF = try MassFlow(ln(71))
+    heatFlowHTF = try ln(74)
     useAndsolFunction = true
     Tout_f_Mfl = false
     Tout_f_Tin = false
@@ -143,9 +137,9 @@ extension HeatExchanger.Parameter: Codable {
     case efficiency
     case temperature
     case scc
-    case sccEff
-    case sccHTFmassFlow
-    case sccHTFthermal
+    case sccEfficiency
+    case massFlowHTF
+    case heatFlowHTF
     case useAndsolFunction
     case Tout_f_Mfl
     case Tout_f_Tin
@@ -170,9 +164,9 @@ extension HeatExchanger.Parameter: Codable {
       h2o: (inlet: (max: temps[4], min: temps[5]),
             outlet: (max: temps[6], min: temps[7]))
     )
-    sccEff = try values.decode(Double.self, forKey: .sccEff)
-    sccHTFmassFlow = try values.decode(MassFlow.self, forKey: .sccHTFmassFlow)
-    sccHTFheat = try values.decode(Double.self, forKey: .sccHTFthermal)
+    sccEfficiency = try values.decode(Double.self, forKey: .sccEfficiency)
+    massFlowHTF = try values.decode(MassFlow.self, forKey: .massFlowHTF)
+    heatFlowHTF = try values.decode(Double.self, forKey: .heatFlowHTF)
     useAndsolFunction = try values.decode(Bool.self, forKey: .useAndsolFunction)
     Tout_f_Mfl = try values.decode(Bool.self, forKey: .Tout_f_Mfl)
     Tout_f_Tin = try values.decode(Bool.self, forKey: .Tout_f_Tin)
@@ -197,9 +191,9 @@ extension HeatExchanger.Parameter: Codable {
       scc.h2o.outlet.max.celsius, scc.h2o.outlet.min.celsius,
     ]
     try container.encode(sccTemperatures, forKey: .scc)
-    try container.encode(sccEff, forKey: .sccEff)
-    try container.encode(sccHTFmassFlow, forKey: .sccHTFmassFlow)
-    try container.encode(sccHTFheat, forKey: .sccHTFthermal)
+    try container.encode(sccEfficiency, forKey: .sccEfficiency)
+    try container.encode(massFlowHTF, forKey: .massFlowHTF)
+    try container.encode(heatFlowHTF, forKey: .heatFlowHTF)
     try container.encode(useAndsolFunction, forKey: .useAndsolFunction)
     try container.encode(Tout_f_Mfl, forKey: .Tout_f_Mfl)
     try container.encode(Tout_f_Tin, forKey: .Tout_f_Tin)

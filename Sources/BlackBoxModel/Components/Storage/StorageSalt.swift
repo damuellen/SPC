@@ -40,18 +40,18 @@ extension Storage {
 
       switch parameter.definedBy {
       case .hours:
-        let sccHTFheat = HeatExchanger.parameter.sccHTFheat
+        let heatFlowRate = HeatExchanger.parameter.heatFlowHTF
 
         self.minimum = Mass(Design.layout.storage * dischargeToTurbine
-          * sccHTFheat * 1_000 * 3_600 / (hot - cold)
+          * heatFlowRate * 1_000 * 3_600 / (hot - cold)
         )
         self.hot = Mass(
           parameter.startLoad.hot * Design.layout.storage
-            * sccHTFheat * 1_000 * 3_600 / (hot - cold) + self.minimum.kg
+            * heatFlowRate * 1_000 * 3_600 / (hot - cold) + self.minimum.kg
         )        
         self.cold = Mass(
           parameter.startLoad.cold * Design.layout.storage
-            * sccHTFheat * 1_000 * 3_600 / (hot - cold) + self.minimum.kg
+            * heatFlowRate * 1_000 * 3_600 / (hot - cold) + self.minimum.kg
         )
       case .cap:
         self.minimum = Mass(
@@ -100,7 +100,7 @@ extension Storage {
       (salt.active.kg, heat) = calculateMass(
         cold: temperature.inlet + dT_HTFsalt.cold,
         hot: temperatureTank.hot,
-        thermal: thermal
+        thermal: -thermal
       )
       m = salt.hot
     }
@@ -109,7 +109,7 @@ extension Storage {
       (salt.active.kg, heat) = calculateMass(
         cold: temperatureTank.cold,
         hot: temperature.inlet - dT_HTFsalt.hot,
-        thermal: -thermal
+        thermal: thermal
       )
       m = salt.cold
     }
@@ -149,16 +149,13 @@ extension Storage {
 
       salt.hot += salt.active
 
-      charge = Storage.parameter.chargeTo
+      relativeCharge = Storage.parameter.chargeTo
     } else {
       salt.hot += salt.active
       let designT = Storage.parameter.designTemperature
       let designDeltaT = (designT.hot - designT.cold).kelvin
 
-      charge = Ratio(salt.hot.kg * designDeltaT / (massOfSalt * designDeltaT))
-
-    // FIXME storedHeat =
-    //    salt.hot.kg * heatInSalt.hot / 1_000 / 3_600
+      relativeCharge = Ratio(salt.hot.kg * designDeltaT / (massOfSalt * designDeltaT))
     }
     if salt.hot > .zero {
        temperatureTank.hot = Temperature.mixture(
@@ -186,7 +183,7 @@ extension Storage {
 
     let designDeltaT = (designT.hot - designT.cold).kelvin
 
-    charge = Ratio(salt.hot.kg * designDeltaT / massOfSalt * designDeltaT)
+    relativeCharge = Ratio(salt.hot.kg * designDeltaT / (massOfSalt * designDeltaT))
 
     if salt.hot > .zero {
       temperatureTank.hot = Temperature.mixture(
@@ -198,14 +195,15 @@ extension Storage {
 
   private mutating func indirectDischarging(thermal: Double) -> Double {
     let hot = salt.hot
-    var thermalPower = -thermal
+    var thermalPower = thermal
     var heat: Double
 
     (salt.active.kg, heat) = calculateMass(
       cold: temperature.inlet + dT_HTFsalt.cold,
       hot: temperatureTank.hot,
-      thermal: thermalPower)
-    
+      thermal: -thermalPower)
+
+    salt.active.kg = abs(salt.active.kg)
     salt.hot -= salt.active
 
     if salt.hot < salt.minimum {
@@ -220,14 +218,14 @@ extension Storage {
 
       salt.cold += salt.active
 
-      //charge.quotient = Storage.parameter.dischargeToTurbine
+      relativeCharge = Storage.parameter.dischargeToTurbine
 
     } else {
       salt.cold += salt.active
       let designT = Storage.parameter.designTemperature
       let designDeltaT = (designT.hot - designT.cold).kelvin
 
-      charge = Ratio(salt.hot.kg * designDeltaT / (massOfSalt * designDeltaT))
+      relativeCharge = Ratio(salt.hot.kg * designDeltaT / (massOfSalt * designDeltaT))
     }
 
     if salt.cold > .zero {
@@ -257,7 +255,7 @@ extension Storage {
 
     let designDeltaT = (designT.hot - designT.cold).kelvin
 
-    charge = Ratio(salt.hot.kg * designDeltaT / massOfSalt * designDeltaT)
+    relativeCharge = Ratio(salt.hot.kg * designDeltaT / (massOfSalt * designDeltaT))
 
     temperatureTank.cold = Temperature.mixture(
       m1: salt.active, m2: salt.cold,
@@ -384,10 +382,10 @@ extension Storage {
     assert(hot > cold)
     switch Storage.parameter.definedBy {
     case .hours:
-      let sccHTFheat = HeatExchanger.parameter.sccHTFheat
+      let heatFlowRate = HeatExchanger.parameter.heatFlowHTF
       return Design.layout.storage
         * availability * (1 + dischargeToTurbine)
-        * sccHTFheat * 1_000 * 3_600 / (hot - cold)
+        * heatFlowRate * 1_000 * 3_600 / (hot - cold)
     case .cap:
       return Design.layout.storage_cap
         * availability * (1 + dischargeToTurbine) 

@@ -41,7 +41,7 @@ enum HCE {
   // account the percentage of HCE that are broken, lost vacuum and fluorescent
   static func radiationLossesOld(
     _ temperatures: (Temperature, Temperature, Temperature), insolation: Double)
-    -> Double
+    -> Double // [W/m2]
   {
     let (t1, t2) = (temperatures.0.kelvin, temperatures.1.kelvin)
     let col = Collector.parameter
@@ -69,14 +69,11 @@ enum HCE {
       vacuumHeatLoss = vacuumHeatLoss + al // added here and not for LS2 collector
       endLossFactor = 1 // added in order to differenciate with LS2 collector
     } else if col.name.hasPrefix("LS2") {
-      vacuumHeatLoss = 0.081 - 0.04752 * dT
-        + 0.0006787 * dT2 + 0.0007403 * insolation
-      vacuumHeatLoss += 0.00003582 * dT * insolation
-        + 0.00000014125 * dT2 * insolation
+      vacuumHeatLoss = 0.081 - 0.04752 * dT + 0.0006787 * dT2 + 0.0007403 * insolation
+      vacuumHeatLoss += 0.00003582 * dT * insolation + 0.00000014125 * dT2 * insolation
       endLossFactor = 1.3
     } else if col.name.hasPrefix("PCT_validation") { // test
-      vacuumHeatLoss = sigma * circumference
-        * (t1 * t1 * t1 * t1 - t2 * t2 * t2 * t2)
+      vacuumHeatLoss = sigma * circumference * (t1 * t1 * t1 * t1 - t2 * t2 * t2 * t2)
       vacuumHeatLoss *= (emissionHCE[0] + emissionHCE[1] * (t1 + 10)) / aperture
       endLossFactor = 1.3 // added in order to differenciate with LS2 collector
     } else {
@@ -98,28 +95,25 @@ enum HCE {
       endLossFactor = 1
     }
 
-    var RLHP: Double = 0.081 - 0.04752 * dT
-      + 0.0006787 * dT2 + 0.0007403 * insolation
-    RLHP += 3.582e-05 * dT2 * insolation
-      + 1.4125e-07 * dT2 * insolation
+    var RLHP: Double = 0.081 - 0.04752 * dT + 0.0006787 * dT2 + 0.0007403 * insolation
+    RLHP += 3.582e-05 * dT2 * insolation + 1.4125e-07 * dT2 * insolation
 
-    var addHLAir: Double = -0.114 + 0.1396 * dT
-      + 0.000006823 * dT2 - 0.002074 * insolation
-    addHLAir += 0.0000602 * dT * insolation
-      - 0.0000001624 * dT2 * insolation
+    var addHLAir: Double = -0.114 + 0.1396 * dT + 0.000006823 * dT2 - 0.002074 * insolation
+    addHLAir += 0.0000602 * dT * insolation - 0.0000001624 * dT2 * insolation
     
-    let addHLBare: Double = 0.416 * dT
-      - 0.000056 * dT2 + 0.0666 * dT // * windSpeed
-    let losses = (vacuumHeatLoss + addHLAir * (airHCE + fluorHCE)
-      + addHLBare * breakHCE) * endLossFactor
+    let addHLBare: Double = 0.416 * dT - 0.000056 * dT2 + 0.0666 * dT // * windSpeed
 
-    return losses
+    var losses = vacuumHeatLoss
+    losses += addHLAir * (airHCE + fluorHCE)
+    losses += addHLBare * breakHCE 
+
+    return losses * endLossFactor
   }
-  
+  // Radiation losses per m2 Aperture; now with the new losses that take into
+  // account the percentage of HCE that are broken, lost vacuum and fluorescent
   static func radiationLossesNew(
-    _ temperatures: (Temperature, Temperature, Temperature),
-    insolation: Double)
-    -> Double
+    _ temperatures: (Temperature, Temperature, Temperature), insolation: Double)
+    -> Double // [W/m2]
   {
     var (t1, t2) = (temperatures.0.kelvin, temperatures.1.kelvin)
     let avgT = (t1 + t2) / 2.0
@@ -165,18 +159,13 @@ enum HCE {
     endLossFactor = 1
 
     let dT2 = dT * dT
-    var RLHP: Double = 0.081 - 0.04752 * dT
-      + 0.0006787 * dT2 + 0.0007403 * insolation
-    RLHP += 3.582e-05 * dT * insolation
-      + 1.4125e-07 * dT2 * insolation
+    var RLHP: Double = 0.081 - 0.04752 * dT + 0.0006787 * dT2 + 0.0007403 * insolation
+    RLHP += 3.582e-05 * dT * insolation + 1.4125e-07 * dT2 * insolation
 
-    var addHLAir: Double = -0.114 + 0.1396 * dT
-      + 0.000006823 * dT2 - 0.002074 * insolation
-    addHLAir += 0.0000602 * dT * insolation
-      - 0.0000001624 * dT2 * insolation
+    var addHLAir: Double = -0.114 + 0.1396 * dT + 0.000006823 * dT2 - 0.002074 * insolation
+    addHLAir += 0.0000602 * dT * insolation - 0.0000001624 * dT2 * insolation
 
-    let addHLBare: Double = 0.416 * dT
-      - 0.000056 * dT2 + 0.0666 * dT * 3// * windSpeed
+    let addHLBare: Double = 0.416 * dT - 0.000056 * dT2 + 0.0666 * dT * 3// * windSpeed
 
     var losses = vacuumHeatLoss
     losses += addHLAir * (airHCE + fluorHCE)
@@ -193,18 +182,14 @@ enum HCE {
     _ loop: SolarField.Loop,
     _ ambient: Temperature
   ) -> (Double, Double) {
-    let sof = SolarField.parameter
+    let numberOfSCAsInRow = SolarField.parameter.numberOfSCAsInRow
+    let minFlow = SolarField.parameter.minFlow.quotient
+    let maxMassFlow = SolarField.parameter.maxMassFlow.rate
+    let massFlowMin = MassFlow(minFlow * maxMassFlow)
     
-    let area = Design.layout.solarField
-      * Double(sof.numberOfSCAsInRow)
-      * 2 * Collector.parameter.areaSCAnet
+    let htf = SolarField.parameter.HTF
     
-    let massFlowMin = MassFlow(sof.minFlow.quotient * sof.maxMassFlow.rate)
-    let massFlowMax = sof.maxMassFlow.rate
-
-    let htf = sof.HTF
-    
-    let col = Collector.parameter
+    let useIntegralRadialoss = Collector.parameter.useIntegralRadialoss
     
     var time = 300.0
     
@@ -218,11 +203,11 @@ enum HCE {
       htf.maxTemperature, hce.temperature.inlet
     )
 
-    let temperatures = col.useIntegralRadialoss
+    let temperatures = useIntegralRadialoss
       ? (htf.maxTemperature + 10.0, hce.temperature.inlet + 10.0, ambient) 
       : (avgT, ambient + 20.0, 0.0)
       
-    let radiaLoss = col.useIntegralRadialoss
+    let radiaLoss = useIntegralRadialoss
       ? HCE.radiationLossesNew : HCE.radiationLossesOld
 
     solarField.heatLossesHCE = radiaLoss(temperatures, collector.insolationAbsorber)
@@ -230,56 +215,44 @@ enum HCE {
     solarField.heatLossesHCE *= Simulation.adjustmentFactor.heatLossHCE
     
     solarField.heatLosses = solarField.heatLossesHCE
-    solarField.heatLosses += SolarField.pipeHeatLoss(
-      pipe: avgT, ambient: ambient
-    )
+    solarField.heatLosses += SolarField.pipeHeatLoss(pipe: avgT, ambient: ambient)
     solarField.heatLosses *= Simulation.adjustmentFactor.heatLossHTF
 
     var deltaHeat = collector.insolationAbsorber
     deltaHeat *= Availability.current.value.solarField.quotient
     deltaHeat -= solarField.heatLosses
     
-    if collector.insolationAbsorber > 0 {
-      solarField.loopEta = collector.efficiency.quotient - solarField.heatLossesHCE
-        / collector.insolationAbsorber / collector.efficiency.quotient
-      solarField.ETA = collector.efficiency.quotient - solarField.heatLosses
-        / collector.insolationAbsorber / collector.efficiency.quotient
-    } else {
-      solarField.loopEta = 0
-      solarField.ETA = 0
-    }
-    
     /// Calculate appropriate mass-flow [kg/(sec sqm)]
-    let ratio = abs(deltaHeat) / 1_000 / htf.deltaHeat(
+    let ratio = abs(deltaHeat) / 1_000 / htf.heatContent(
       htf.maxTemperature, hce.temperature.inlet
     )
+    let area = Design.layout.solarField 
+      * Double(numberOfSCAsInRow) * 2 * Collector.parameter.areaSCAnet
 
     hce.massFlow.rate = ratio * area
 
     func calculateTime() -> Double {
-      assert(hce.averageTemperature.celsius > 20, "Temperature too low.")
-      let areaDensity = htf.density(hce.averageTemperature)
-        * .pi * col.rabsOut ** 2 / col.aperture      
+      assert(avgT > 20.0, "Temperature too low.")
+      let areaDensity = htf.density(hce.averageTemperature) * .pi 
+        * Collector.parameter.rabsOut ** 2 / Collector.parameter.aperture      
       return areaDensity * area / hce.massFlow.rate
     }
     
     switch hce.massFlow { // Check if mass-flow is within acceptable limits
-    case let massFlow where massFlow.rate <= 0: // HCE loses heat
+    case let massFlow where massFlow.rate <= .zero: // HCE loses heat
 
       if case .freezeProtection = solarField.operationMode {
         hce.massFlow = massFlowMin
         (time, dumping) = mode2(&solarField, collector, loop, ambient)
-      } else {
-    
-        (solarField.massFlow, solarField.operationMode) = 
-          solarField.antiFreezeCheck(loop: loop)
+      } else {    
+        solarField.operationMode = solarField.antiFreezeCheck(loop: loop)
         (time, dumping) = mode2(&solarField, collector, loop, ambient)
       }
 
-    case let massFlow where massFlow > sof.maxMassFlow:
+    case let massFlow where massFlow > solarField.maxMassFlow:
       // Damped heat: The HL have to be added because they are independent from
       // the SCAs in focus. HL must be subtracted afterwards again.
-      solarField.inFocus = Ratio(massFlowMax / massFlow.rate)
+      solarField.inFocus = Ratio(solarField.maxMassFlow.rate / massFlow.rate)
       // [MW] added to calculate Q_dump with instantaneous irradiation
 
       dumping = deltaHeat * area * (1 - solarField.inFocus.quotient)
@@ -287,14 +260,14 @@ enum HCE {
       // changed to htf.maxTemperature to reach max temp possible
       hce.temperature.outlet = htf.maxTemperature
 
-      hce.massFlow = sof.maxMassFlow
+      hce.massFlow = solarField.maxMassFlow
       time = calculateTime() // [sec]
-     // time = period
+      time = 300.0
 
     case let massFlow where massFlow < massFlowMin:
 
       if case .normal = solarField.operationMode,
-        massFlow.rate > massFlowMax * 0.05 {
+        massFlow.rate > solarField.maxMassFlow.rate * 0.05 {
         // pumps are working over massFlow.min
         solarField.inFocus = 1.0
         // changed to htf.maxTemperature to reach max temp possible
@@ -303,10 +276,10 @@ enum HCE {
 
         time = calculateTime() // [sec]
 
-      //  time = period
+        time = 300.0
       } else if case .normal = solarField.operationMode {
         solarField.inFocus = 1.0
-        hce.massFlow = sof.maxMassFlow.adjusted(withFactor: 0.05)
+        hce.massFlow.rate = solarField.maxMassFlow.rate * 0.05
         (time, dumping) = mode2(&solarField, collector, loop, ambient)
       } else {
         solarField.inFocus = 1.0
@@ -316,8 +289,7 @@ enum HCE {
 
     default: // MassFlow is within acceptable limits and Tout is as required
       solarField.inFocus = 1.0
-      // FIXME: status.massFlow = massFlow
-      // changed to htf.maxTemperature to reach max temp possible
+
       hce.temperature.outlet = SolarField.parameter.HTF.maxTemperature
       avgT = hce.averageTemperature
 
@@ -337,16 +309,15 @@ enum HCE {
     _ loop: SolarField.Loop,
     _ ambient: Temperature
   ) -> (Double, Double) {
-    let sof = SolarField.parameter
-    
+    let htf = SolarField.parameter.HTF
+    let numberOfSCAsInRow = SolarField.parameter.numberOfSCAsInRow   
+    let rabsInner = Collector.parameter.rabsInner
+    let aperture = Collector.parameter.aperture
+    let useIntegralRadialoss = Collector.parameter.useIntegralRadialoss
+
     let area = Design.layout.solarField
-      * Double(sof.numberOfSCAsInRow)
-      * 2 * Collector.parameter.areaSCAnet
-    
-    let htf = sof.HTF
-    
-    let col = Collector.parameter
-    
+      * Double(numberOfSCAsInRow) * 2 * Collector.parameter.areaSCAnet
+
     var time = 300.0
     
     var dumping = 0.0
@@ -362,7 +333,8 @@ enum HCE {
 
     var hce = solarField.loops[loop.rawValue]
     defer { solarField.loops[loop.rawValue] = hce }
-    
+
+    let maxTemp = htf.maxTemperature
     var newTemp = hce.temperature.inlet
     var oldTemp = hce.temperature.inlet
    
@@ -376,14 +348,15 @@ enum HCE {
 
         assert(avgT.celsius > 20, "Temperature too low.")
 
-        let areaDensity = htf.density(avgT) * .pi
-          * col.rabsInner ** 2 / col.aperture        
+        let areaDensity = htf.density(avgT) * .pi * rabsInner ** 2 / aperture        
 
         if hce.massFlow > .zero {
           time = (areaDensity * area) / hce.massFlow.rate
+        } else {
+          time = 300.0
         }
 
-        if newTemp.kelvin < 0.997 * htf.maxTemperature.kelvin {
+        if newTemp.kelvin < 0.997 * maxTemp.kelvin {
           // solarField.InFocus > 0, solarField.InFocus < 0.95 {
           inFocusLoop = min(1, inFocusLoop * 1.01)
 
@@ -399,27 +372,26 @@ enum HCE {
         let heatInput = collector.insolationAbsorber * inFocusLoop * availability
         // Net deltaHeat (+)=in or (-)=out HCE
         
-        if heatInput > 0 {
-          let temperatures = col.useIntegralRadialoss
-            ? (newTemp + 10.0, hce.temperature.inlet + 10.0, ambient)
-            : (avgT, ambient + 30.0, 0.0)
+        let temperatures = useIntegralRadialoss
+          ? (newTemp + 10.0, hce.temperature.inlet + 10.0, ambient)
+          : (avgT, ambient + (heatInput > 0 ? 30.0 : 20.0), 0.0)
 
-          let radiaLoss = col.useIntegralRadialoss
-            ? HCE.radiationLossesNew : HCE.radiationLossesOld
+        let radiaLoss = useIntegralRadialoss
+          ? HCE.radiationLossesNew : HCE.radiationLossesOld
 
-          solarField.heatLossesHCE = radiaLoss(temperatures, collector.insolationAbsorber)
+        solarField.heatLossesHCE = radiaLoss(temperatures, collector.insolationAbsorber)
+        solarField.heatLossesHCE *= Simulation.adjustmentFactor.heatLossHCE
+        
+        solarField.heatLosses = solarField.heatLossesHCE
 
-          solarField.heatLossesHCE *= Simulation.adjustmentFactor.heatLossHCE
-          
-          solarField.heatLosses = solarField.heatLossesHCE
-          solarField.heatLosses += SolarField.pipeHeatLoss(
-            pipe: avgT, ambient: ambient
-          )
-          
+        solarField.heatLosses += SolarField.pipeHeatLoss(pipe: avgT, ambient: ambient)
+        solarField.heatLosses *= Simulation.adjustmentFactor.heatLossHTF
+
+        if heatInput > .zero {      
+          let sof = SolarField.parameter  
           let factorHeatLossHTF = Simulation.adjustmentFactor.heatLossHTF
           if sof.HLDump == false, sof.HLDumpQuad == false {
-            solarField.heatLosses *= factorHeatLossHTF
-              * inFocusLoop
+            solarField.heatLosses *= factorHeatLossHTF * inFocusLoop
           } else {
             if sof.HLDumpQuad == false {
               solarField.heatLosses *= factorHeatLossHTF
@@ -445,34 +417,10 @@ enum HCE {
               }
             }
           }
-        } else { // No Massflow
-          let temperatures = col.useIntegralRadialoss
-            ? (newTemp + 10.0, hce.temperature.inlet + 10.0, ambient)
-            : (avgT, ambient + 20.0, 0.0)
-
-          let radiaLoss = col.useIntegralRadialoss
-            ? HCE.radiationLossesNew : HCE.radiationLossesOld
-
-          solarField.heatLossesHCE = radiaLoss(temperatures, collector.insolationAbsorber)
-
-          solarField.heatLossesHCE *= Simulation.adjustmentFactor.heatLossHCE
-          
-          solarField.heatLosses = solarField.heatLossesHCE
-          solarField.heatLosses += SolarField.pipeHeatLoss(
-            pipe: avgT, ambient: ambient
-          )
-          solarField.heatLosses *= Simulation.adjustmentFactor.heatLossHTF
         }
 
         let deltaHeat = heatInput - solarField.heatLosses
 
-        if collector.insolationAbsorber > 0 {
-           solarField.ETA = 0
-
-        } else {
-          solarField.loopEta = 0
-          solarField.ETA = 0
-        }
         /// Heat collected or lost during the flow through a whole loop [kJ/sqm]
         let deltaHeatPerSqm = deltaHeat * time / 1_000
         // Change kJ/sqm to kJ/kg:
@@ -487,31 +435,27 @@ enum HCE {
         case 0:
           newTemp = oldTemp
         default:
-          let heatPerKg = htf.deltaHeat(hce.temperature.inlet, ambient)
-          
+          let heatPerKg = htf.heatContent(hce.temperature.inlet, ambient)
           newTemp = htf.temperature(heatPerKg + deltaHeatPerKg, ambient)
         }
-        
-        let maxTemp = htf.maxTemperature
+                
         // Flow is to low, dumping required
         dumping = newTemp > maxTemp
-          ? (hce.massFlow.rate / 3 * htf.deltaHeat(newTemp, maxTemp) * 1_000)
+          ? (hce.massFlow.rate / 3 * htf.heatContent(newTemp, maxTemp) * 1_000)
           : 0.0 // MWt
 
         newTemp.limit(to: maxTemp)
         oldTemp.limit(to: maxTemp)
-
-        if abs(newTemp.kelvin - oldTemp.kelvin)
-          < Simulation.parameter.tempTolerance,
-         newTemp.kelvin > maxTemp.kelvin * 0.995
-         || inFocusLoop.isZero
+        let inTolerance = abs(newTemp.kelvin - oldTemp.kelvin) 
+          < Simulation.parameter.tempTolerance
+        if inTolerance, newTemp.kelvin > maxTemp.kelvin * 0.997 || inFocusLoop.isZero
         {
           break innerIteration
         }
       } // innerLoop
       solarField.inFocus = Ratio(inFocusLoop)
-    //  if hce.massFlow.rate > 0  {
-      if hce.massFlow.isNearZero { break }
+
+      if hce.massFlow > .zero { break }
 
       if newTemp < minTemp {
         if (minTemp - newTemp).kelvin < 100 { break }

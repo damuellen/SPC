@@ -50,12 +50,12 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
     }
   }
 
-  func deltaHeat(_ cycle: HeatTransfer) -> Heat {
-    deltaHeat(cycle.temperature.outlet, cycle.temperature.inlet)
+  func heatContent(_ cycle: HeatTransfer) -> Heat {
+    heatContent(cycle.temperature.outlet, cycle.temperature.inlet)
   }
 
   @inline(__always)
-  func deltaHeat(_ t1: Temperature, _ t2: Temperature) -> Heat {
+  func heatContent(_ t1: Temperature, _ t2: Temperature) -> Heat {
     if useEnthalpy {
       return HeatTransferFluid.heatExchanged(
         from: t1.celsius, to: t2.celsius,
@@ -68,11 +68,11 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
   }
 
   @inline(__always)
-  func temperature(_ heat: Heat, _ t: Temperature) -> Temperature {
+  func temperature(_ heatFlowRate: Heat, _ t: Temperature) -> Temperature {
     if useEnthalpy {
       return Temperature(
         celsius: HeatTransferFluid.temperatureFromEnthalpy(
-          heat, t.celsius,
+          heatFlowRate, t.celsius,
           coefficients: (
             enthaplyFromTemperature.coefficients,
             temperatureFromEnthalpy.coefficients
@@ -80,8 +80,8 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
       )
     }
     return Temperature(celsius:
-     HeatTransferFluid.temperatureFromHeatCapacity(
-       heat, t.celsius, coefficients: heatCapacity))
+     HeatTransferFluid.temperatureFromHeat(
+       heatFlowRate, t.celsius, coefficients: heatCapacity))
   }
 
   func density(_ temperature: Temperature) -> Double {
@@ -104,7 +104,7 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
     return Temperature(celsius: celsius)
   }
 
-  func mixingTemperature(_ f1: HeatTransfer, _ f2: HeatTransfer)
+  func mixingOutlets(_ f1: HeatTransfer, _ f2: HeatTransfer)
     -> Temperature
   {
     if f1.massFlow.rate == 0 { return f2.temperature.outlet }
@@ -118,8 +118,8 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
     precondition(t > freezeTemperature.kelvin, "Fell below freezing point.\n")
     return Temperature(t)
   }
-
-  func mixingTemperature(inlet f1: HeatTransfer, with f2: HeatTransfer)
+/*
+  func mixing(inlet f1: HeatTransfer, outlet f2: HeatTransfer)
     -> Temperature
   {
     let (t1, t2) = (f1.inletTemperature, f2.outletTemperature)
@@ -131,9 +131,9 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
     precondition(t > freezeTemperature.kelvin, "Fell below freezing point.\n")
     return Temperature(t)
   }
-
-  @_transparent private static func temperatureFromHeatCapacity(
-    _ specificHeat: Double, _ temperature: Double, coefficients: [Double]
+*/
+  @_transparent private static func temperatureFromHeat(
+    _ heat: Double, _ temperature: Double, coefficients: [Double]
   )
     -> Double
   {
@@ -141,11 +141,11 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
     let cp = coefficients
     if cp[1] > 0 {
       return (
-        (2 * specificHeat + 2 * cp[0] * t) / cp[1] + t ** 2
+        (2 * heat + 2 * cp[0] * t) / cp[1] + t ** 2
           + (cp[0] / cp[1]) ** 2).squareRoot() - cp[0] / cp[1]
     } else {
       return -(
-        (2 * specificHeat + 2 * cp[0] * t) / cp[1] + t ** 2
+        (2 * heat + 2 * cp[0] * t) / cp[1] + t ** 2
           + (cp[0] / cp[1]) ** 2).squareRoot() - cp[0] / cp[1]
     }
   }
@@ -169,7 +169,7 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
     return temperature
   }
 
-  private static func heatExchanged(
+  @_transparent private static func heatExchanged(
     from high: Double, to low: Double, heatCapacity: [Double]
   )
     -> Double
@@ -178,7 +178,7 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
     q += heatCapacity[1] / 2 * (high * high - low * low)
     return q
   }
-
+  
   @_transparent private static func heatExchanged(
     from high: Double, to low: Double, coefficients: [Double]
   )

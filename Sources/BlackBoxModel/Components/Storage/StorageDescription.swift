@@ -10,15 +10,22 @@
 
 extension Storage: CustomStringConvertible {
   public var description: String {
-   "  Mode:".padding(30) + "\(operationMode)\n" + formatting(
-     [massFlow.rate, temperature.inlet.celsius, temperature.outlet.celsius,
-      temperatureTank.cold.celsius, temperatureTank.hot.celsius,
-      massOfSalt, salt.active.kg, salt.minimum.kg, salt.cold.kg, salt.hot.kg,      
-      antiFreezeTemperature, charge.percentage , storedHeat, heatProductionLoad.quotient],
-     ["Mass flow rate:", "T inlet:", "T outlet:",
-      "Temperature tank cold:", "Temperature tank hot:",  
-      "Mass of salt:", "Salt active:", "Salt min:", "Salt cold:", "Salt hot:",      
-      "Anti freeze temperature:", "Charge:", "Stored Heat:", "Heat production Load:"]
+    "  Mode:".padding(30) + "\(operationMode)\n" 
+    + String(format: "  Mass flow: %3.1f kg/s", massFlow.rate).padding(28) 
+    + String(format: " T in: %3.1f degC", temperature.inlet.celsius).padding(20) 
+    + String(format: "T out: %3.1f degC", temperature.outlet.celsius).padding(20) 
+    + "\n\n  Temperature tanks".padding(28)
+    + String(format: " cold: %3.1f degC", temperatureTank.cold.celsius).padding(20)
+    + String(format: "  hot: %3.1f degC", temperatureTank.hot.celsius).padding(20)
+    + String(format: "\n\n  massOfSalt: %3.0f", massOfSalt).padding(28)
+    + String(format: "  active: %3.0f", salt.active.kg).padding(20)
+    + String(format: "  min: %3.0f", salt.minimum.kg) .padding(20)
+    + .lineBreak + "".padding(28)
+    + String(format: "  cold: %3.0f",salt.cold.kg).padding(20)
+    + String(format: "  hot: %3.0f", salt.hot.kg).padding(20)
+    + .lineBreak + .lineBreak + formatting(
+     [antiFreezeTemperature, relativeCharge.percentage , storedHeat, heatProductionLoad.quotient],
+     ["Anti freeze temperature:", "Charge:", "Stored Heat:", "Heat production Load:"]
     )
   }
 }

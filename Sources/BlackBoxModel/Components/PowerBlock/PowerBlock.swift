@@ -16,13 +16,9 @@ public struct PowerBlock: Parameterizable, HeatTransfer {
 
   var massFlow: MassFlow = .zero
   
-  var temperature: (inlet: Temperature, outlet: Temperature)
+  var temperature: (inlet: Temperature, outlet: Temperature) 
 
-  var designMassFlow: MassFlow = .zero
-
-  let heatExchangerCapacity  = SolarField.parameter.HTF.deltaHeat(
-    HeatExchanger.parameter.temperature.htf.inlet.max,
-    HeatExchanger.parameter.temperature.htf.outlet.max)
+  var designMassFlow: MassFlow = .zero 
 
   public enum OperationMode {
     case scheduledMaintenance
@@ -34,6 +30,37 @@ public struct PowerBlock: Parameterizable, HeatTransfer {
   
   public static var parameter: Parameter = ParameterDefaults.pb
   
+  static func requiredMassFlow() -> MassFlow {
+    let heatExchanger = HeatExchanger.parameter
+    let steamTurbine = SteamTurbine.parameter
+    // added to reduced SOF massflow with electrical demand
+    return MassFlow(GridDemand.current.ratio
+      * (steamTurbine.power.max / steamTurbine.efficiencyNominal
+        / heatExchanger.efficiency) * 1_000 / HeatExchanger.capacity)    
+  }
+
+  mutating func temperatureOutlet(
+    heatExchanger: inout HeatExchanger, mode: Storage.OperationMode
+  ) {
+    if massFlow > .zero,
+      temperature.inlet
+        >= HeatExchanger.parameter.temperature.htf.inlet.min
+    {
+      temperature.outlet = HeatExchanger
+        .temperatureOutlet(self, heatExchanger)
+
+      if case .discharge = mode,
+        temperature.outlet.isLower(than: 534.0)
+      {
+        let result = heatExchangerBypass()
+        heatExchanger.heatOut = result.heatOut
+        heatExchanger.heatToTES = result.heatToTES
+      }
+    } else {
+      outletTemperatureFromInlet()
+    }
+  }
+
   /// Calculate parasitic power in PB
   static func parasitics(
     heat: Double,
@@ -136,11 +163,11 @@ public struct PowerBlock: Parameterizable, HeatTransfer {
       let tlpb = 0.0
       // 0.38 * (TpowerBlock.status - meteo.temperature) / 100 * (30 / Design.layout.powerBlock) ** 0.5 // 0.38
       
-      let mf = max(0.1, (solarField.massFlow + massFlow).rate)
+      let mf = max(0.1, (solarField.massFlow + storage.massFlow).rate)
       let inlet = (solarField.massFlow.rate * solarField.outletTemperature
-        + massFlow.rate * storage.outletTemperature) / mf
-      if inlet > 0 {
-        temperature.inlet.kelvin = inlet
+        + storage.massFlow.rate * storage.outletTemperature) / mf
+      if inlet > -Temperature.absoluteZeroCelsius {
+        inletTemperature(kelvin: inlet)
       }
       //#warning("The implementation here differs from PCT")
       // FIXME: Was ist Tstatus ?????????
@@ -149,10 +176,8 @@ public struct PowerBlock: Parameterizable, HeatTransfer {
         * inletTemperature + outletTemperature
         * (SolarField.parameter.HTFmass - massFlow.rate * sec))
         / SolarField.parameter.HTFmass - tlpb
-      
-      outletTemperature(kelvin: outlet)
-      if inlet > 0 {
-        outletTemperature(kelvin: inlet)
+      if outlet > -Temperature.absoluteZeroCelsius {
+        outletTemperature(kelvin: outlet)
       }
     }
   }

@@ -43,7 +43,7 @@ public struct SteamTurbine: Parameterizable {
   }
 
   static let initialState = SteamTurbine(
-    operationMode: .noOperation(time: 5)
+    operationMode: .noOperation(time: 0)
   )
 
   public static var parameter: Parameter = ParameterDefaults.tb
@@ -58,7 +58,7 @@ public struct SteamTurbine: Parameterizable {
     modeGasTurbine: GasTurbine.OperationMode,
     heatExchanger: HeatExchanger,
     temperature: Temperature,
-    heat: ThermalPower
+    heatFlow: ThermalEnergy
   )
     -> Double
   {
@@ -66,7 +66,7 @@ public struct SteamTurbine: Parameterizable {
     defer { SteamTurbine.oldMinute = DateTime.current.minute }
 
     let minutes = Int(Simulation.time.steps.fraction * 60)
-    if heat.production.megaWatt <= 0 {
+    if heatFlow.heatExchanger.isZero {
       // Avoid summing up inside an iteration
       if DateTime.current.minute != SteamTurbine.oldMinute {
 
@@ -99,10 +99,10 @@ public struct SteamTurbine: Parameterizable {
 
       if isOperating {
         let (maxLoad, efficiency) = SteamTurbine.perform(
-          load, heat, modeBoiler, modeGasTurbine,
+          load, heatFlow, modeBoiler, modeGasTurbine,
           heatExchanger.temperature.inlet, temperature)
         
-        let gross = heat.production.megaWatt * efficiency
+        let gross = heatFlow.heatExchanger.megaWatt * efficiency
         let ratio = gross / parameter.power.max
         load = Ratio(ratio, cap: maxLoad)
         return gross
@@ -110,12 +110,10 @@ public struct SteamTurbine: Parameterizable {
         // Avoid summing up inside an iteration
         if DateTime.current.minute != SteamTurbine.oldMinute {
           if case .startUp(let startUpTime, let startUpEnergy) = operationMode {
-            var energy = heat.production.megaWatt
-              + heat.storage.megaWatt + heat.boiler.megaWatt
+            var energy = heatFlow.heatExchanger.megaWatt
+            // FIXME    Plant.heatFlow.startUp.megaWatt = energy
 
-            // FIXME    Plant.heat.startUp.megaWatt = energy
-
-            if heater.massFlow > .zero { energy = heat.production.megaWatt }
+            if heater.massFlow > .zero { energy = heatFlow.heatExchanger.megaWatt }
 
             operationMode = .startUp(
               time: startUpTime + minutes,
@@ -128,8 +126,38 @@ public struct SteamTurbine: Parameterizable {
     }
   }
 
+  static func minLoad(ambient: Temperature) -> Ratio {
+    let minLoad: Ratio
+    if SteamTurbine.parameter.minPowerFromTemp.isInapplicable {
+      minLoad = Ratio(
+        SteamTurbine.parameter.power.min
+        / SteamTurbine.parameter.power.max)
+    } else {
+      minLoad = Ratio(
+        SteamTurbine.parameter.minPowerFromTemp(ambient)
+        / SteamTurbine.parameter.power.max)
+    }
+    return minLoad
+  }
+
+  static func minPower(ambient: Temperature) -> Double {
+    var minPower: Double
+    if SteamTurbine.parameter.minPowerFromTemp.isInapplicable {
+      minPower =
+        SteamTurbine.parameter.power.min
+        / SteamTurbine.parameter.efficiencyNominal
+    } else {
+      minPower = SteamTurbine.parameter.minPowerFromTemp(ambient)
+
+      minPower = max(
+        SteamTurbine.parameter.power.nominal * minPower,
+        SteamTurbine.parameter.power.min)
+    }
+    return minPower
+  }
+
   static func perform(
-    _ load: Ratio, _ heat: ThermalPower,
+    _ load: Ratio, _ heatFlow: ThermalEnergy,
     _ boiler: Boiler.OperationMode,
     _ gasTurbine: GasTurbine.OperationMode,
     _ heatExchanger: Temperature,
@@ -137,7 +165,7 @@ public struct SteamTurbine: Parameterizable {
   )
     -> (maxLoad: Double, maxEfficiency: Double)
   {
-    guard load > .zero else { return (0, 0) }
+    guard load > .zero else { return (1, 1) }
 
     var maxLoad: Double = 1
 
@@ -147,16 +175,16 @@ public struct SteamTurbine: Parameterizable {
       // this restriction was planned to simulate an specific case,
       // not correct for every case with Boiler
 
-      if heat.boiler.megaWatt > 50 || heat.solar.watt == 0 {
+      if heatFlow.boiler.megaWatt > 50 || heatFlow.solar.watt == 0 {
         maxEfficiency = parameter.efficiencyBoiler
       } else {
         maxEfficiency =
-          (heat.boiler.megaWatt
+          (heatFlow.boiler.megaWatt
             * parameter.efficiencyBoiler + 4.0
-            * heat.heatExchanger.megaWatt
+            * heatFlow.heatExchanger.megaWatt
             * parameter.efficiencyNominal)
-          / (heat.boiler.megaWatt + 4.0
-            * heat.heatExchanger.megaWatt)
+          / (heatFlow.boiler.megaWatt + 4.0
+            * heatFlow.heatExchanger.megaWatt)
         // maxEfficiency = parameter.effnom
       }
     } else if case .integrated = gasTurbine {

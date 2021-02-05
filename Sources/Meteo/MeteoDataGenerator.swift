@@ -19,16 +19,14 @@ public class MeteoDataGenerator: Sequence {
 
   private let dataSource: MeteoDataSource
 
-  public enum Method {
-    case linear, gradient
-  }
+  public enum Method { case linear, gradient }
 
   private let method: Method
 
   public init(
     _ source: MeteoDataSource,
     frequence: DateGenerator.Interval,
-    method: Method = .gradient
+    method: Method = .linear
   ) {
     precondition(
       frequence.fraction <= source.hourFraction,
@@ -110,8 +108,7 @@ public class MeteoDataGenerator: Sequence {
         }
       }
       
-      if step > 0, idx2 != r.upperBound,
-         step.isMultiple(of: steps) {
+      if step > 0, idx2 != r.upperBound, step.isMultiple(of: steps) {
         step = 0
         cursor += 1
       }

@@ -67,9 +67,9 @@ public struct Heater: Parameterizable, HeatTransfer {
   mutating func callAsFunction(
     storage: MassFlow,
     mode: Storage.OperationMode,
-    demand: Double,
+    heatDiff: Double,
     fuelAvailable: Double,
-    heat: ThermalPower
+    heatFlow: ThermalEnergy
   )
     -> PerformanceData<Heater>
   {
@@ -91,7 +91,7 @@ public struct Heater: Parameterizable, HeatTransfer {
           fuel * parameter.efficiency.quotient
           * Simulation.adjustmentFactor.efficiencyHeater
         // net thermal power avail [MW]
-        load = Ratio(heat.heater.megaWatt / Design.layout.heater)
+        load = Ratio(heatFlow.heater.megaWatt / Design.layout.heater)
         operationMode = .normal(load)
 
         guard load > parameter.minLoad else {
@@ -104,7 +104,7 @@ public struct Heater: Parameterizable, HeatTransfer {
           massFlow = 0.0
           thermalPower = .zero
           let energy = PerformanceData<Heater>(
-            heat: thermalPower.megaWatt, electric: parasitics, fuel: fuel
+            heatFlow: thermalPower.megaWatt, electric: parasitics, fuel: fuel
           )
           return energy
         }
@@ -118,11 +118,11 @@ public struct Heater: Parameterizable, HeatTransfer {
           massFlow = storage
         } else {
           massFlow.rate = thermalPower.kiloWatt
-            / htf.deltaHeat(temperature.outlet, temperature.inlet)
+            / htf.heatContent(temperature.outlet, temperature.inlet)
         }
       } else {
         massFlow.rate = Design.layout.heater
-          / htf.deltaHeat(parameter.nominalTemperatureOut, temperature.inlet)
+          / htf.heatContent(parameter.nominalTemperatureOut, temperature.inlet)
         
         fuel = Design.layout.heater / parameter.efficiency.quotient
         load = Ratio(1)
@@ -133,7 +133,7 @@ public struct Heater: Parameterizable, HeatTransfer {
       }
     } else if case .freezeProtection = operationMode {
       thermalPower.kiloWatt =
-        massFlow.rate * htf.deltaHeat(
+        massFlow.rate * htf.heatContent(
           parameter.antiFreezeTemperature, temperature.inlet
         ) 
 
@@ -174,7 +174,7 @@ public struct Heater: Parameterizable, HeatTransfer {
     } else {
       // Normal operation requested  The fuel flow needed [MW]
       fuel =
-        max(-demand, Design.layout.heater) / parameter.efficiency.quotient
+        max(-heatDiff, Design.layout.heater) / parameter.efficiency.quotient
         / Simulation.adjustmentFactor.efficiencyHeater
       // The fuelfl avl. [MW]
       fuel =
@@ -204,12 +204,12 @@ public struct Heater: Parameterizable, HeatTransfer {
       if Design.hasStorage, case .preheat = mode {
         massFlow = storage
       } else {
-        massFlow.rate = thermalPower.kiloWatt / deltaHeat
+        massFlow.rate = thermalPower.kiloWatt / heat
       }
     }
     parasitics = load > .zero ? Heater.parasitics(estimateFrom: load) : 0
     let energy = PerformanceData<Heater>(
-      heat: thermalPower.megaWatt, electric: parasitics, fuel: fuel
+      heatFlow: thermalPower.megaWatt, electric: parasitics, fuel: fuel
     )
     return energy
   }
