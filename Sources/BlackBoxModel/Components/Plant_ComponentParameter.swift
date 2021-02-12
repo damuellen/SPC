@@ -35,50 +35,20 @@ extension Plant {
 
     SolarField.parameter.wayLength()
 
+    HeatExchanger.parameter.heatFlowHTF = HeatExchanger.parameter.heatFlow()
+
     if Design.hasGasTurbine {
-
-      HeatExchanger.parameter.heatFlowHTF =
-        Design.layout.heatExchanger
-        / steamTurbine.efficiencySCC / HeatExchanger.parameter.sccEfficiency
-
       let heatFlowRate = HeatExchanger.parameter.heatFlowHTF
-      SolarField.parameter.maxMassFlow = MassFlow(
-        heatFlowRate / HeatExchanger.capacity
-      )
-
       WasteHeatRecovery.parameter.ratioHTF =
-        heatFlowRate
-        / (steamTurbine.power.max - heatFlowRate)
+        heatFlowRate / (steamTurbine.power.max - heatFlowRate)
+    } 
 
-    } else {
-
-      if Design.layout.heatExchanger != Design.layout.powerBlock {
-
-        HeatExchanger.parameter.heatFlowHTF =
-          Design.layout.heatExchanger
-          / steamTurbine.efficiencyNominal
-          / HeatExchanger.parameter.efficiency
-
-      } else {
-
-        HeatExchanger.parameter.heatFlowHTF =
-          steamTurbine.power.max
-          / steamTurbine.efficiencyNominal
-          / HeatExchanger.parameter.efficiency
-      }
-
-
-      let heatFlowRate = HeatExchanger.parameter.heatFlowHTF * 1_000
-      SolarField.parameter.maxMassFlow = MassFlow(
-        heatFlowRate / HeatExchanger.capacity
-      )
-    }
+    let heatFlowRate = HeatExchanger.parameter.heatFlowHTF * 1_000
+    SolarField.parameter.maxMassFlow = MassFlow(
+      heatFlowRate / HeatExchanger.capacity
+    )
 
     if Design.hasSolarField {
-      /*    let name = Collector.parameter.name
-      if name.hasPrefix("SKAL-ET") {
-        Collector.parameter = .sklalet
-      }*/
       let numberOfSCAsInRow = Double(SolarField.parameter.numberOfSCAsInRow)
       let edgeFactor1 =
         SolarField.parameter.distanceSCA / 2
@@ -91,13 +61,7 @@ extension Plant {
 
       if Design.hasStorage {
         SolarField.parameter.maxMassFlow = MassFlow(
-          100
-            / Storage.parameter.massFlowShare.percentage
-            * SolarField.parameter.maxMassFlow.rate
-        )
-        Storage.parameter.designMassFlow = MassFlow(
-          (1 - Storage.parameter.massFlowShare.quotient)
-            * SolarField.parameter.maxMassFlow.rate
+          SolarField.parameter.maxMassFlow.rate / Storage.parameter.massFlowShare.quotient
         )
       }
     }

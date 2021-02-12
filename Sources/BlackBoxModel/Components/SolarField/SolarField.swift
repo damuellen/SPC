@@ -8,6 +8,7 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
+import Libc
 import Meteo
 /// Contains all data needed to simulate the operation of the solar field
 public struct SolarField: Parameterizable, HeatTransfer {
@@ -18,9 +19,7 @@ public struct SolarField: Parameterizable, HeatTransfer {
     case design = 0
     case near, average, far
     static let indices: [Int] = [1,2,3] 
-    static var names: [String] {
-      ["Design", "Near", "Average", "Far"]
-    }
+    static var names: [String] { ["Design", "Near", "Average", "Far"] }
   }
   
   var operationMode: OperationMode
@@ -45,6 +44,13 @@ public struct SolarField: Parameterizable, HeatTransfer {
   }
 
   var maxMassFlow: MassFlow = .zero
+
+  var isOperating: Bool {
+    switch operationMode {
+      case .operating: return true
+      default: return false
+    } 
+  }
 
   public enum OperationMode: String, CustomStringConvertible {
     case startUp
@@ -77,11 +83,23 @@ public struct SolarField: Parameterizable, HeatTransfer {
 
   public static var parameter: Parameter = ParameterDefaults.sf
 
+  mutating func requiredMassFlow(storage: Storage) {
+    if storage.relativeCharge < Storage.parameter.chargeTo {
+      maxMassFlow += storage.designMassFlow
+    } else if Design.hasGasTurbine {
+      maxMassFlow = HeatExchanger.parameter.massFlowHTF
+    }
+    if massFlow > maxMassFlow {
+      massFlow = maxMassFlow
+    }
+    assert(maxMassFlow <= SolarField.parameter.maxMassFlow)
+  }
+
   static func pipeHeatLoss(pipe: Temperature, ambient: Temperature) -> Double {
     ((pipe.kelvin - ambient.kelvin) / 333) ** 1 * parameter.pipeHeatLosses
   }
 
-  /// Calculates the parasitics
+  /// Calculates the parasitics of pumps 
   func parasitics() -> Double {
     let maxMassFlow = SolarField.parameter.maxMassFlow    
     if operationMode.isFreezeProtection {
@@ -110,7 +128,7 @@ public struct SolarField: Parameterizable, HeatTransfer {
   }
   /// Determines the inlet temperature of the solar field
   /// depending on the operating mode of the storage
-  mutating func inletTemperature(storage: Storage, heatFlow: ThermalEnergy) {
+  mutating func inletTemperature(storage: Storage) {
     switch storage.operationMode {
     case .freezeProtection:
       if Storage.parameter.temperatureCharge[1] > 0 {
@@ -120,8 +138,6 @@ public struct SolarField: Parameterizable, HeatTransfer {
       }
     case .preheat:
       temperature.inlet = storage.temperatureTank.cold
-    case .charging where heatFlow.production.watt == 0:
-      inletTemperatureFromOutlet()
     default: break
     }
   }
@@ -189,13 +205,13 @@ public struct SolarField: Parameterizable, HeatTransfer {
       { sum, loop in sum + loop.massFlow.rate } / 3.0
     
     if header.massFlow.isNearZero {
-      Loop.indices.forEach { loops[$0].inletTemperatureFromOutlet() }
+      Loop.indices.forEach { loops[$0].temperatureFromOutlet() }
     } else {
       let maxMassFlow = SolarField.parameter.maxMassFlow.rate
       let pipeWay = SolarField.parameter.pipeWay      
       let loopWays = SolarField.parameter.loopWays
       
-      let flowVelocity: Double = 3.2
+      let flowVelocity: Double = 2.7
       
       let timeRatios =  ratios(timeRemain)
       
@@ -204,27 +220,24 @@ public struct SolarField: Parameterizable, HeatTransfer {
       {
         for i in Loop.indices {
           loops[i].temperature.outlet.kelvin =
-            timeRatios[0].0 * loops[i].outletTemperature
-            + timeRatios[0].1 * last[i].outletTemperature
+            timeRatios[0].0 * loops[i].outlet + timeRatios[0].1 * last[i].outlet
         }
       }
       // Now calc. the linear inlet temperature gradient:
       let wayRatio: Double = loopWays[2] / pipeWay
       
       loops[2].temperature.inlet.kelvin =
-        loops[3].inletTemperature + wayRatio
-        * (inletTemperature - loops[3].inletTemperature)
+        loops[3].inlet + wayRatio * (inlet - loops[3].inlet)
       
       loops[1].temperature.inlet.kelvin =
-        loops[3].inletTemperature + 2 * wayRatio
-        * (inletTemperature - loops[3].inletTemperature)
+        loops[3].inlet + 2 * wayRatio * (inlet - loops[3].inlet)
       
       var sum = 0.0
       zip(Loop.indices, timeRatios).forEach { i, tr in
-        loops[i].temperature.inlet.kelvin = tr.0 * inletTemperature
-          + tr.1 * last[i].inletTemperature
-        sum += (tr.0 * loops[i].outletTemperature
-          + tr.1 * last[i].outletTemperature) * loops[i].massFlow.rate
+        loops[i].temperature.inlet.kelvin = 
+          tr.0 * inlet + tr.1 * last[i].inlet
+        sum += (tr.0 * loops[i].outlet
+          + tr.1 * last[i].outlet) * loops[i].massFlow.rate
       }
       
       header.temperature.outlet.kelvin = sum / (3.0 * header.massFlow.rate)
@@ -277,7 +290,7 @@ public struct SolarField: Parameterizable, HeatTransfer {
     } else {
       let minFlowRatio = SolarField.parameter.minFlow.quotient
       let minFlow = MassFlow(minFlowRatio * maxMassFlow)
-      loops[loop.rawValue].massFlow = minFlow
+      //loops[loop.rawValue].massFlow = minFlow
       return .normal
     }
   }
@@ -329,7 +342,7 @@ public struct SolarField: Parameterizable, HeatTransfer {
     dumping: inout Double,
     collector: Collector,
     ambient: Temperature
-  ) {    
+  ) {
     let minTemperature = HeatExchanger.parameter.temperature.htf.inlet.min
     var time = 0.0
     if isMaintained {
@@ -359,7 +372,7 @@ public struct SolarField: Parameterizable, HeatTransfer {
     
     header.temperature.outlet = loops[0].temperature.outlet
 
-    if loops[0].massFlow.isNearZero { loops[0].inletTemperatureFromOutlet() }
+    if loops[0].massFlow.isNearZero { loops[0].temperatureFromOutlet() }
 
     switch operationMode {  // Check HCE and decide what to do
     case .freezeProtection, .operating:

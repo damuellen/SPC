@@ -67,11 +67,10 @@ public struct Heater: Parameterizable, HeatTransfer {
   mutating func callAsFunction(
     storage: MassFlow,
     mode: Storage.OperationMode,
-    heatDiff: Double,
     fuelAvailable: Double,
     heatFlow: ThermalEnergy
   )
-    -> PerformanceData<Heater>
+    -> Plant.Performance<Heater>
   {
     let htf = SolarField.parameter.HTF
     let parameter = Heater.parameter
@@ -103,7 +102,7 @@ public struct Heater: Parameterizable, HeatTransfer {
           operationMode = .noOperation
           massFlow = 0.0
           thermalPower = .zero
-          let energy = PerformanceData<Heater>(
+          let energy = Plant.Performance<Heater>(
             heatFlow: thermalPower.megaWatt, electric: parasitics, fuel: fuel
           )
           return energy
@@ -158,7 +157,7 @@ public struct Heater: Parameterizable, HeatTransfer {
       //  if isMaintained {
       //   operationMode = .maintenance
       //  }
-      outletTemperatureFromInlet()
+      temperatureFromInlet()
       thermalPower = .zero
     } else if case .maintenance = operationMode {
       // operation is requested
@@ -169,12 +168,14 @@ public struct Heater: Parameterizable, HeatTransfer {
         """)
       operationMode = .noOperation
       massFlow = .zero
-      outletTemperatureFromInlet()
+      temperatureFromInlet()
       thermalPower = .zero
     } else {
       // Normal operation requested  The fuel flow needed [MW]
+      
       fuel =
-        max(-heatDiff, Design.layout.heater) / parameter.efficiency.quotient
+        max(heatFlow.balance.megaWatt, Design.layout.heater) 
+        / parameter.efficiency.quotient
         / Simulation.adjustmentFactor.efficiencyHeater
       // The fuelfl avl. [MW]
       fuel =
@@ -208,7 +209,7 @@ public struct Heater: Parameterizable, HeatTransfer {
       }
     }
     parasitics = load > .zero ? Heater.parasitics(estimateFrom: load) : 0
-    let energy = PerformanceData<Heater>(
+    let energy = Plant.Performance<Heater>(
       heatFlow: thermalPower.megaWatt, electric: parasitics, fuel: fuel
     )
     return energy

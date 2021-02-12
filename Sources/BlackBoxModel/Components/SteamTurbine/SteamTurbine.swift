@@ -16,17 +16,17 @@ public struct SteamTurbine: Parameterizable {
   var operationMode: OperationMode
 
   var load: Ratio {
-    get {
-      if case .operating(let load) = operationMode { return load } else { return .zero }
+    get { 
+      if case .operating(let load) = operationMode
+        { return load } else { return .zero }
     }
-    set {
-      if case .operating(_) = operationMode {
-        operationMode = .operating(newValue)
-      }
+    set { 
+      if case .operating(_) = operationMode 
+        { operationMode = .operating(newValue) }
     }
   }
 
-  // var efficiency: Double
+  var efficiency: Ratio = .zero
 
   public enum OperationMode {
     case noOperation(time: Int)
@@ -42,9 +42,7 @@ public struct SteamTurbine: Parameterizable {
     }
   }
 
-  static let initialState = SteamTurbine(
-    operationMode: .noOperation(time: 0)
-  )
+  static let initialState = SteamTurbine(operationMode: .noOperation(time: 0))
 
   public static var parameter: Parameter = ParameterDefaults.tb
 
@@ -53,12 +51,10 @@ public struct SteamTurbine: Parameterizable {
 
   /// Calculates the Electric gross
   mutating func callAsFunction(
+    heatFlow: ThermalEnergy,
     heater: Heater,
-    modeBoiler: Boiler.OperationMode,
-    modeGasTurbine: GasTurbine.OperationMode,
     heatExchanger: HeatExchanger,
-    temperature: Temperature,
-    heatFlow: ThermalEnergy
+    temperature: Temperature    
   )
     -> Double
   {
@@ -98,11 +94,14 @@ public struct SteamTurbine: Parameterizable {
       }
 
       if isOperating {
-        let (maxLoad, efficiency) = SteamTurbine.perform(
-          load, heatFlow, modeBoiler, modeGasTurbine,
-          heatExchanger.temperature.inlet, temperature)
+        let maxLoad: Double
+        (maxLoad, efficiency.quotient) = SteamTurbine.perform(
+          load: load,
+          heatExchanger: heatExchanger.temperature.inlet,
+          ambient: temperature
+        )
         
-        let gross = heatFlow.heatExchanger.megaWatt * efficiency
+        let gross = heatFlow.heatExchanger.megaWatt * efficiency.quotient
         let ratio = gross / parameter.power.max
         load = Ratio(ratio, cap: maxLoad)
         return gross
@@ -157,66 +156,23 @@ public struct SteamTurbine: Parameterizable {
   }
 
   static func perform(
-    _ load: Ratio, _ heatFlow: ThermalEnergy,
-    _ boiler: Boiler.OperationMode,
-    _ gasTurbine: GasTurbine.OperationMode,
-    _ heatExchanger: Temperature,
-    _ ambient: Temperature
-  )
-    -> (maxLoad: Double, maxEfficiency: Double)
-  {
-    guard load > .zero else { return (1, 1) }
+    load: Ratio,
+    heatExchanger: Temperature,
+    ambient: Temperature
+  ) -> (maxLoad: Double, efficiency: Double) {
+    let maxEfficiency =
+      parameter.efficiencyNominal
+      * (parameter.efficiencyTempIn_A
+        * heatExchanger.celsius ** parameter.efficiencyTempIn_B)
+        * parameter.efficiencyTempIn_cf  
+
+    // Dependency of Heat Rate on Ambient Temperature
 
     var maxLoad: Double = 1
-
-    var maxEfficiency: Double = 1
-
-    if case .operating = boiler {
-      // this restriction was planned to simulate an specific case,
-      // not correct for every case with Boiler
-
-      if heatFlow.boiler.megaWatt > 50 || heatFlow.solar.watt == 0 {
-        maxEfficiency = parameter.efficiencyBoiler
-      } else {
-        maxEfficiency =
-          (heatFlow.boiler.megaWatt
-            * parameter.efficiencyBoiler + 4.0
-            * heatFlow.heatExchanger.megaWatt
-            * parameter.efficiencyNominal)
-          / (heatFlow.boiler.megaWatt + 4.0
-            * heatFlow.heatExchanger.megaWatt)
-        // maxEfficiency = parameter.effnom
-      }
-    } else if case .integrated = gasTurbine {
-      maxEfficiency = parameter.efficiencySCC
-    } else {
-      if parameter.efficiencyTempIn_A == 0
-        && parameter.efficiencyTempIn_B == 0
-      {
-        parameter.efficiencyTempIn_A = 0.2383
-        parameter.efficiencyTempIn_B = 0.2404
-        parameter.efficiencyTempIn_cf = 1
-      }
-
-      if parameter.efficiencyTempIn_cf == 0 {
-        parameter.efficiencyTempIn_cf = 1
-      }
-
-      maxEfficiency =
-        parameter.efficiencyNominal
-        * (parameter.efficiencyTempIn_A
-          * heatExchanger.celsius ** parameter.efficiencyTempIn_B)
-          * parameter.efficiencyTempIn_cf
-    }
-
-    if case .pure = gasTurbine {
-      maxEfficiency = parameter.efficiencySCC
-    }
-
     var dcFactor = 1.0
-    // Dependency of Heat Rate on Ambient Temperature  - DRY COOLING -
-    //#warning("The implementation here differs from PCT")
+    
     if parameter.efficiencyTemperature[1] >= 1 {
+      
       let (dc, loadMax) = DryCooling.perform(
         steamTurbineLoad: load,
         temperature: ambient
@@ -225,20 +181,18 @@ public struct SteamTurbine: Parameterizable {
       maxLoad = loadMax.quotient
       dcFactor = dc.quotient
     }
-    // Dependency of Heat Rate on Ambient Temperature  - DRY COOLING -
+
     var efficiency = parameter.efficiency(load)
 
-    var correcture = 0.0
-
     if parameter.efficiencyTemperature.coefficients.isEmpty == false {
-      correcture += parameter.efficiencyTemperature(ambient.celsius)
+      efficiency *= parameter.efficiencyTemperature(ambient.celsius)
     }
-    efficiency *= correcture
+
+    // wet bulb temperature effect
 
     let wetBulbTemperature = 1.1
-
     var correctionWetBulbTemperature = 1.0
-    // wet bulb temperature effect
+    
     if parameter.efficiencyWetBulb.coefficients.isEmpty {
       correctionWetBulbTemperature = 1.0
     } else {
@@ -260,9 +214,9 @@ public struct SteamTurbine: Parameterizable {
     if parameter.efficiencyTemperature[1] >= 1 {
       efficiency *= maxEfficiency / dcFactor
     } else {
-      efficiency *=
-        maxEfficiency * correctionWetBulbTemperature
+      efficiency *= maxEfficiency * correctionWetBulbTemperature
     }
+
     let adjustmentFactor = Simulation.adjustmentFactor.efficiencyTurbine
     return (maxLoad, efficiency * adjustmentFactor)
   }

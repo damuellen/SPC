@@ -7,6 +7,6 @@
 
 extension HeatExchanger: CustomStringConvertible {
     public var description: String {
-      "  Mode:".padding(30) + "\(operationMode)\n" + "\(self.cycle)"
+      "\(self.cycle)"
     }
 }

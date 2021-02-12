@@ -137,8 +137,10 @@ public struct GasTurbine: Parameterizable {
         //  if status.steamTurbine.load.quotient != load {
             // The turbine load has changed recalculation of efficiency
             let (_,  eff) = SteamTurbine.perform(
-              steamTurbine.load, plant.heatFlow, boiler, gasTurbine.operationMode,
-              heatExchanger.temperature.inlet, temperature)
+              load: steamTurbine.load,
+              heatExchanger: heatExchanger.temperature.inlet,
+              ambient: temperature
+            )
         //  }
           
           
@@ -180,8 +182,10 @@ public struct GasTurbine: Parameterizable {
               steamTurbine.load = load
               // The turbine load has changed recalculation of efficiency
               let (_, eff) = SteamTurbine.perform(
-              steamTurbine.load, plant.heatFlow, boiler, gasTurbine.operationMode,
-              heatExchanger.temperature.inlet, temperature)
+                load: steamTurbine.load,
+                heatExchanger: heatExchanger.temperature.inlet,
+                ambient: temperature
+              )
           //  }
 
             
@@ -261,8 +265,10 @@ public struct GasTurbine: Parameterizable {
     //  if status.steamTurbine.load.quotient != load {
         // The turbine load has changed recalculation of efficiency
         let (_, eff) = SteamTurbine.perform(
-        steamTurbine.load, plant.heatFlow, boiler, gasTurbine.operationMode,
-        heatExchanger.temperature.inlet, temperature)
+          load: steamTurbine.load,
+          heatExchanger: heatExchanger.temperature.inlet,
+          ambient: temperature
+        )
     //  }
       
       plant.heatFlow.demand.megaWatt = steamTurbine.load.quotient

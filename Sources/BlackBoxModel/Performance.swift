@@ -8,7 +8,7 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
-public struct Performance: MeasurementsConvertible {
+public struct PlantPerformance: MeasurementsConvertible {
 
   internal(set) public var thermal: ThermalEnergy
 
@@ -25,7 +25,7 @@ public struct Performance: MeasurementsConvertible {
     self.electric = ElectricPower()
   }
 
-  mutating func totalize(_ values: Performance, fraction: Double) {
+  mutating func totalize(_ values: PlantPerformance, fraction: Double) {
     self.thermal.totalize(values.thermal, fraction: fraction)
     self.fuel.totalize(values.fuel, fraction: fraction)
     self.parasitics.totalize(values.parasitics, fraction: fraction)
@@ -43,7 +43,15 @@ public struct Performance: MeasurementsConvertible {
   }
 }
 
-extension Performance {
+extension PlantPerformance {
+  
+  init(_ plant: Plant) {
+    self.thermal = plant.heatFlow
+    self.electric = plant.electricity
+    self.fuel = plant.fuelConsumption
+    self.parasitics = plant.electricalParasitics
+  }
+
   init() {
     self.thermal = ThermalEnergy()
     self.electric = ElectricPower()
@@ -170,14 +178,14 @@ public struct Parasitics: Encodable, MeasurementsConvertible {
 }
 
 public struct ThermalEnergy: Encodable, MeasurementsConvertible {
-  internal(set) public var solar: Power = 0.0, toStorage: Power = 0.0,
+    internal(set) public var solar: Power = 0.0, toStorage: Power = 0.0,
     toStorageMin: Power = 0.0, storage: Power = 0.0, heater: Power = 0.0,
     boiler: Power = 0.0, wasteHeatRecovery: Power = 0.0,
     heatExchanger: Power = 0.0, production: Power = 0.0
     internal(set) public var demand: Power = 0.0
     internal(set) public var dumping: Power = 0.0, overtemp_dump: Power = 0.0, startUp: Power = 0.0
 
-  var excess: Power { production - demand }
+  var balance: Power { production - demand }
 
   var numericalForm: [Double] {
     [
@@ -201,13 +209,25 @@ public struct ThermalEnergy: Encodable, MeasurementsConvertible {
     ]
   }
 
+  /// Calculation of the heat supplied by the solar field
+  mutating func solarProduction(_ solarField: SolarField) {    
+    solar.kiloWatt = solarField.massFlow.rate * solarField.heat
+
+    if solar > .zero {
+      production = solar
+    } else if case .freezeProtection = solarField.operationMode {
+      solar = .zero
+      production = solar
+    } else {
+      solar = .zero
+      production = .zero
+    }
+  }
+
   mutating func totalize(_ values: ThermalEnergy, fraction: Double) {
     solar += values.solar * fraction
-    if values.storage.watt < 0 {
-      toStorage += values.storage * fraction
-    } else {
-      storage += values.storage * fraction
-    }
+    toStorage += values.toStorage * fraction
+    storage += values.storage * fraction
     heater += values.heater * fraction
     heatExchanger += values.heatExchanger * fraction
     startUp += values.startUp * fraction
@@ -250,15 +270,11 @@ public struct FuelConsumption: Encodable, MeasurementsConvertible {
   }
 }
 
-extension Performance: CustomStringConvertible {
+extension PlantPerformance: CustomStringConvertible {
   public var description: String {
     thermal.prettyDescription
       + electric.prettyDescription
       + fuel.prettyDescription
       + parasitics.prettyDescription
   }
-}
-
-struct PerformanceData<Parameterizable> {
-  var heatFlow, electric, fuel: Double
 }

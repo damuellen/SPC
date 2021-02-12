@@ -16,8 +16,16 @@ protocol HeatTransfer: CustomStringConvertible {
 
 public struct Cycle: HeatTransfer {
   public var name: String
-  public var massFlow: MassFlow 
-  public var temperature: (inlet: Temperature, outlet: Temperature)
+  public var massFlow: MassFlow  {
+    didSet {
+//      print(self)      
+    }
+  }
+  public var temperature: (inlet: Temperature, outlet: Temperature) {
+    didSet {
+  //    print(self)      
+    }
+  }
 }
 
 extension Cycle {
@@ -42,17 +50,17 @@ extension HeatTransfer {
     Cycle(name: name, massFlow: massFlow, temperature: temperature)
   }
 
-  var averageTemperature: Temperature {
+  var average: Temperature {
     Temperature.average(temperature.inlet, temperature.outlet)
   }
 
   var minTemperature: Double {
-    min(inletTemperature, outletTemperature)
+    min(inlet, outlet)
   }
 
-  var inletTemperature: Double { temperature.inlet.kelvin }
+  var inlet: Double { temperature.inlet.kelvin }
 
-  var outletTemperature: Double { temperature.outlet.kelvin }
+  var outlet: Double { temperature.outlet.kelvin }
 
   var medium: HeatTransferFluid {
     SolarField.parameter.HTF
@@ -80,7 +88,7 @@ extension HeatTransfer {
     [massFlow.rate, temperature.inlet.celsius, temperature.outlet.celsius]
   }
 
-  mutating func formJoint(_ c1: HeatTransfer, _ c2: HeatTransfer) {
+  mutating func connectTo(_ c1: HeatTransfer, _ c2: HeatTransfer) {
     temperature.inlet = medium.mixingOutlets(c1, c2)
     massFlow = c1.massFlow + c2.massFlow
   }
@@ -90,11 +98,11 @@ extension HeatTransfer {
     massFlow += c1.massFlow
   }
 
-  mutating func inletTemperatureFromOutlet() {
+  mutating func temperatureFromOutlet() {
     temperature.inlet = temperature.outlet
   }
 
-  mutating func outletTemperatureFromInlet() {
+  mutating func temperatureFromInlet() {
     temperature.outlet = temperature.inlet
   }
 
@@ -106,12 +114,20 @@ extension HeatTransfer {
     temperature.outlet = outlet
   }
 
-  mutating func inletTemperature(kelvin: Double) {
-    temperature.inlet = Temperature(kelvin)
-  }
-
   mutating func outletTemperature(kelvin: Double) {
     temperature.outlet = Temperature(kelvin)
+    assert(temperature.outlet > medium.freezeTemperature,
+      "\(temperature) is below freezing point of the htf")
+  }
+
+  mutating func massFlow(inlet other: HeatTransfer) {
+    massFlow = other.massFlow
+    temperature.inlet = other.temperature.inlet
+  }
+
+  mutating func massFlow(outlet other: HeatTransfer) {
+    massFlow = other.massFlow
+    temperature.inlet = other.temperature.outlet
   }
 
   mutating func inletTemperature(outlet other: HeatTransfer) {

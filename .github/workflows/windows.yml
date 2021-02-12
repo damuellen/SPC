@@ -17,7 +17,7 @@ jobs:
 
       - name: Install Swift compiler
         run: |
-          Install-Binary -Url "https://swift.org/builds/development/windows10/swift-DEVELOPMENT-SNAPSHOT-2020-12-12-a/swift-DEVELOPMENT-SNAPSHOT-2020-12-12-a-windows10.exe" -Name "installer.exe" -ArgumentList ("-q")
+          Install-Binary -Url "https://swift.org/builds/swift-5.4-branch/windows10/swift-5.4-DEVELOPMENT-SNAPSHOT-2021-01-23/swift-5.4-DEVELOPMENT-SNAPSHOT-2021-01-23-windows10.exe" -Name "installer.exe" -ArgumentList ("-q")
 
       - name: Set Environment Variables
         run: |

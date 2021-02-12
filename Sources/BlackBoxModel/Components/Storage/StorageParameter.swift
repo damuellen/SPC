@@ -28,7 +28,7 @@ extension Storage {
     var heatlossCst, heatlossC0to1: Polynomial
     var pumpEfficiency, pressureLoss: Double
     var massFlowShare: Ratio
-    var designMassFlow: MassFlow
+
     let startTemperature: (cold: Temperature, hot: Temperature) // TurbTL(0) TurbTL(1)
     let startLoad: (cold: Double, hot: Double) // TurbTL(2) TurbTL(3)
 
@@ -43,7 +43,7 @@ extension Storage {
 
     var type: TypeDir = .indirect
     let strategy: Strategy
-    let PrefChargeto: Double
+    let prefChargeToTurbine: Double
     let exception: ClosedRange<Int>
     let HTF: StorageMedium
     
@@ -61,8 +61,6 @@ extension Storage {
 
     var definedBy: Definition = .hours
 
-  /*  let deltaTemperature: (design: Temperature,
-    charging: Temperature, discharging: Temperature)*/
     let designTemperature: (cold: Temperature, hot: Temperature)
     
     let heatLoss: (hot: Double, cold: Double)
@@ -105,14 +103,14 @@ extension Storage.Parameter: CustomStringConvertible {
     + "Discharge Storage, if (Qsolarfield - Qdemand) <" * "\(heatdiff * 100) % of Qdemand" 
     + "Stepwidth of Qdemand to iterate Tmin for Turbine:" * stepSizeIteration.description
     + "Relative Filling of Storage at Program Start (only for Thermocline):" * heatStoredrel.description
-    + "Outlet Temperature of storage during discharging (hot end)\nfor Load = 0; T = c0+c1*T+c2*T^2+c3*T^3:"
-    + "\n\(temperatureDischarge)"
-    + "Outlet Temperature (for Thermocline) or deltaT (for 2-Tank)\nof storage during discharging (hot end) for Load > 0; T = c0+c1*T+c2*T^2+c3*T^3:"
-    + "\n\(temperatureDischarge2)"
+    + "Outlet Temperature of storage during discharging (hot end)\n"
+    + "for Load = 0; T = c0+c1*T+c2*T^2+c3*T^3:\n\(temperatureDischarge)"
+    + "Outlet Temperature (for Thermocline) or deltaT (for 2-Tank) of storage\n"
+    + "during discharging (hot end) for Load > 0; T = c0+c1*T+c2*T^2+c3*T^3:\n\(temperatureDischarge2)"
     + "Outlet Temperature of storage during charging (cold end)\nfor Load = 0; T = c0+c1*T+c2*T^2+c3*T^3:"
     + "\n\(temperatureCharge)"
-    + "Outlet Temperature (for Thermocline) or deltaT (for 2-Tank) of storage\nduring charging (cold end) for Load > 0; T = c0+c1*T+c2*T^2+c3*T^3:"
-    + "\n\(temperatureCharge2)"
+    + "Outlet Temperature (for Thermocline) or deltaT (for 2-Tank) of storage\n"
+    + "during charging (cold end) for Load > 0; T = c0+c1*T+c2*T^2+c3*T^3:\n\(temperatureCharge2)"
     + "Capacity of Thermal Energy Storage [h]:\n" // Design.layout.storage)"
     + "Storage Availability [%]:"
     * Availability.current.values.storage.percentage.description
@@ -148,7 +146,7 @@ extension Storage.Parameter: CustomStringConvertible {
     + "Start charging strategy at day:" * startFossilCharging.day.description
     + "Start charging strategy at month:" * startFossilCharging.month.description
     + "Charge Storage up to relative Load before Start-up of Turbine:"
-    * PrefChargeto.description
+    * prefChargeToTurbine.description
     + "Definition of Summer from Month:" * exception.lowerBound.description
     + "                       to Month:" * exception.upperBound.description
     + "DNI for Bad Days Winter [kWh/m2]:" * badDNIwinter.description
@@ -182,14 +180,13 @@ extension Storage.Parameter: TextConfigInitializable {
     pumpEfficiency = try ln(146) / 100
     pressureLoss = try ln(149)
     massFlowShare = try .init(ln(152) / 100) 
-    designMassFlow = 0.0
     startTemperature = try (T(celsius: ln(162)), T(celsius:ln(165)))
     startLoad = try (ln(168), ln(171))
   //  HX = try ln(172) //bool
 
     //file.values[172]
     strategy = .demand//try ln(173) 
-    PrefChargeto = try ln(174)
+    prefChargeToTurbine = try ln(174)
     exception = try l2(175)...l2(176)
     HTF = .solarSalt //try ln(177)
     FP = try ln(178)

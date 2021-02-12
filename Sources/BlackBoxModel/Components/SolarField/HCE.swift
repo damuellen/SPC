@@ -233,7 +233,7 @@ enum HCE {
 
     func calculateTime() -> Double {
       assert(avgT > 20.0, "Temperature too low.")
-      let areaDensity = htf.density(hce.averageTemperature) * .pi 
+      let areaDensity = htf.density(hce.average) * .pi 
         * Collector.parameter.rabsOut ** 2 / Collector.parameter.aperture      
       return areaDensity * area / hce.massFlow.rate
     }
@@ -291,7 +291,7 @@ enum HCE {
       solarField.inFocus = 1.0
 
       hce.temperature.outlet = SolarField.parameter.HTF.maxTemperature
-      avgT = hce.averageTemperature
+      avgT = hce.average
 
       solarField.operationMode = .operating
 
@@ -339,14 +339,14 @@ enum HCE {
     var oldTemp = hce.temperature.inlet
    
     outerIteration: for o in 1...5 {
-      swap(&oldTemp, &newTemp)
-      var inFocusLoop = solarField.inFocus.quotient
+      newTemp = hce.temperature.inlet
+      var inFocusLoop = 0.0
      // print("O", o, newTemp, oldTemp)
       innerIteration: for _ in 1...10 {
       //  print("I", innerIteration)
         let avgT = Temperature.average(newTemp, hce.temperature.inlet)
 
-        assert(avgT.celsius > 20, "Temperature too low.")
+        assert(avgT > ambient, "Temperature too low.")
 
         let areaDensity = htf.density(avgT) * .pi * rabsInner ** 2 / aperture        
 

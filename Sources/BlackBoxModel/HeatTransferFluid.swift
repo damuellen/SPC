@@ -109,7 +109,7 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
   {
     if f1.massFlow.rate == 0 { return f2.temperature.outlet }
     if f2.massFlow.rate == 0 { return f1.temperature.outlet }
-    let (t1, t2) = (f1.outletTemperature, f2.outletTemperature)
+    let (t1, t2) = (f1.outlet, f2.outlet)
     let (mf1, mf2) = (f1.massFlow.rate, f2.massFlow.rate)
     guard mf1 + mf2 > 0 else { return Temperature((t1 + t2) / 2) }
     let cap1 = heatCapacity[0].addingProduct(heatCapacity[1], t1)

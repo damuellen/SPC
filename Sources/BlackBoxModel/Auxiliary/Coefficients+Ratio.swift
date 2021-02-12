@@ -74,7 +74,9 @@ public struct Ratio: CustomStringConvertible, Codable {
 
   public var percentage: Double { quotient * 100.0 }
 
-  public var description: String { "\(self.percentage)%" }
+  public var description: String { 
+    String(format: "%3.1f", quotient * 100.0) + "%"
+  }
 
   public init(percent: Double) {
     self.quotient = percent / 100

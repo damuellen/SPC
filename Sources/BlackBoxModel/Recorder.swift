@@ -57,21 +57,21 @@ public final class Recorder {
 
   private var xlsx: Workbook? = nil
   /// Totals
-  private var annualPerformance = Performance()
+  private var annualPerformance = PlantPerformance()
   private var annualRadiation = SolarRadiation()
   /// Volatile subtotals
-  private var hourlyPerformance = Performance()
+  private var hourlyPerformance = PlantPerformance()
   private var hourlyRadiation = SolarRadiation()
   /// Sum of hourly values
-  private var dailyPerformance = Performance()
+  private var dailyPerformance = PlantPerformance()
   private var dailyRadiation = SolarRadiation()
 
-  private var customIntervalPerformance = Performance()
+  private var customIntervalPerformance = PlantPerformance()
   private var customIntervalRadiation = SolarRadiation()
 
   /// All past states of the plant
   private var statusHistory: [Status] = []
-  private var performanceHistory: [Performance] = []
+  private var performanceHistory: [PlantPerformance] = []
   private var sunHistory: [SolarRadiation] = []
 
   public init(mode: Mode) {
@@ -207,7 +207,7 @@ public final class Recorder {
   }
    
   func callAsFunction(
-    _ ts: DateTime, meteo: MeteoData, status: Status, energy: Performance
+    _ ts: DateTime, meteo: MeteoData, status: Status, energy: PlantPerformance
   ) {
     let solar = SolarRadiation(
       meteo: meteo, cosTheta: status.collector.cosTheta
@@ -362,7 +362,7 @@ public final class Recorder {
     let statusCount = statusCaptions.count
     let modesCount = Status.modes.count
     let energyCaptions = ["Date"] 
-      + Performance.columns.map(\.0)
+      + PlantPerformance.columns.map(\.0)
     let energyCount = energyCaptions.count
 
     let ws1 = wb.addWorksheet()
@@ -415,7 +415,7 @@ public final class Recorder {
     }
 
     let status = Status.columns.map(\.0)
-    let energy = Performance.columns.map(\.0)
+    let energy = PlantPerformance.columns.map(\.0)
     createTable(name: "PerformanceData", columns: status)
     createTable(name: "Performance", columns: energy)
 
@@ -442,9 +442,11 @@ public final class Recorder {
 
   private var headers: (name: String, unit: String, count: Int) {
 #if DEBUG
-    let columns = [SolarRadiation.columns, Performance.columns, Status.columns].joined()
+    let columns = 
+      [SolarRadiation.columns, PlantPerformance.columns, Status.columns].joined()
 #else
-    let columns = [SolarRadiation.columns, Performance.columns].joined()
+    let columns = 
+      [SolarRadiation.columns, PlantPerformance.columns].joined()
 #endif
     let names: String = columns.map { $0.0 }.joined(separator: ",")
     let units: String = columns.map { $0.1 }.joined(separator: ",")

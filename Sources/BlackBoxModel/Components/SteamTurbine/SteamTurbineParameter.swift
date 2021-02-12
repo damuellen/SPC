@@ -79,8 +79,8 @@ extension SteamTurbine.Parameter: TextConfigInitializable {
     hotStartUpTime = 75
     efficiencyWetBulb = .init(values: 0, 0, 0, 0, 0, 0)
     WetBulbTstep = 0
-    efficiencyTempIn_A = 0
-    efficiencyTempIn_B = 0
-    efficiencyTempIn_cf = 0
+    efficiencyTempIn_A = 0.2383
+    efficiencyTempIn_B = 0.2404
+    efficiencyTempIn_cf = 1
   }
 }

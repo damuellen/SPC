@@ -83,19 +83,22 @@ public enum BlackBoxModel {
 
     Maintenance.setDefaultSchedule(for: yearOfSimulation)
 
-    var status = Plant.initialState
-
+    // Preparation of the plant parameters
     var plant = Plant.setup()
+  
+    // Set initial values
+    var status = Plant.initialState
 
     let (🌦, 📅) = makeGenerators(dataSource: 🌤)
 
     for (meteo, date) in zip(🌦, 📅) {
-
+      // Set the date for the calculation step
       DateTime.setCurrent(date: date)
 
       Maintenance.checkSchedule(date)
 
       if let position = 🌞[date] {
+        // Only when the sun is above the horizon.
         status.collector = Collector.tracking(sun: position)  // cosTheta
 
         Collector.efficiency(&status.collector, ws: meteo.windSpeed)
@@ -117,37 +120,45 @@ public enum BlackBoxModel {
       //  print(DateTime.current) 
       }
 #endif
+      // Used when calculating the heat losses and the efficiency
       let temperature = Temperature(meteo: meteo)
 
+      // Setting the mass flow required by the power block in the solar field
+      status.solarField.maxMassFlow = PowerBlock.requiredMassFlow()
       status.solarField.inletTemperature(outlet: status.powerBlock)
-
+     
       if Design.hasStorage {
-        status.solarField.inletTemperature(
-          storage: status.storage, heatFlow: plant.heatFlow
-        )
-        status.solarField.maxMassFlow = PowerBlock.requiredMassFlow()
-        if status.storage.relativeCharge < Storage.parameter.chargeTo {
-          status.solarField.maxMassFlow += Storage.parameter.designMassFlow
-        } else if Design.hasGasTurbine {
-          status.solarField.massFlow = HeatExchanger.parameter.massFlowHTF
-        }
-        if status.solarField.massFlow > status.solarField.maxMassFlow {
-          status.solarField.massFlow = status.solarField.maxMassFlow
-        }
+        // Increasing the mass flow allowed in the solar field
+        status.solarField.requiredMassFlow(storage: status.storage)
+        // Sets the temperature when the storage does freeze protection
+        status.solarField.inletTemperature(storage: status.storage)
       }
-      
+      // Calculate outlet temperature and mass flow
       status.solarField.calculate(
         dumping: &plant.heatFlow.dumping.watt,
         collector: status.collector,
         ambient: temperature)
 
-      status.solarField.header.temperature.outlet =
-        status.solarField.heatLossesHotHeader(ambient: temperature)
-
+      if status.solarField.isOperating {
+        // Calculate the heat losses in the hot header
+        status.solarField.header.temperature.outlet =
+          status.solarField.heatLossesHotHeader(ambient: temperature)
+      }
+      // Calculate power consumption of the pumps
       plant.electricalParasitics.solarField = status.solarField.parasitics()
-      plant.perform(&status, ambient: temperature)
-      plant.electricity.consumption()
 
+      // Calculate the performance data of the plant
+      plant.perform(&status, ambient: temperature)
+
+      if Design.hasStorage {
+        // Calculate the operating state of the salt
+        status.storage.calculate(thermal: &plant.heatFlow, status.powerBlock)
+        // Calculate the heat loss of the tanks
+        status.storage.heatlosses()
+      } 
+      
+      plant.electricity.consumption()
+      
       let performance = plant.performance
 #if DEBUG
  //  print(decorated(dt.description), status, performance)

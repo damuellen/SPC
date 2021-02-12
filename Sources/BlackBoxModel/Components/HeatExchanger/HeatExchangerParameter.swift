@@ -131,6 +131,19 @@ extension HeatExchanger.Parameter: TextConfigInitializable {
   }
 }
 
+extension HeatExchanger.Parameter {
+  func heatFlow() -> Double {
+    let st = SteamTurbine.parameter
+    if Design.hasGasTurbine {
+      return Design.layout.heatExchanger / st.efficiencySCC / sccEfficiency
+    }
+    if Design.layout.heatExchanger != Design.layout.powerBlock {
+      return Design.layout.heatExchanger / st.efficiencyNominal / efficiency
+    }
+    return st.power.max / st.efficiencyNominal / efficiency    
+  }
+}
+
 extension HeatExchanger.Parameter: Codable {
   enum CodingKeys: String, CodingKey {
     case name

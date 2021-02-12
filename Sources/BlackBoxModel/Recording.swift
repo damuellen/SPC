@@ -15,11 +15,11 @@ public struct Recording: CustomStringConvertible, Comparable {
 
   let designParameter = ParameterSet()
 
-  let performance: Performance
+  let performance: PlantPerformance
 
   let radiation: SolarRadiation
 
-  let performanceHistory: [Performance]
+  let performanceHistory: [PlantPerformance]
 
   let statusHistory: [Status]
 
@@ -46,9 +46,9 @@ public struct Recording: CustomStringConvertible, Comparable {
   private let calendar = Calendar(identifier: .gregorian)
   
   init(
-    performance: Performance,
+    performance: PlantPerformance,
     radiation: SolarRadiation,
-    performanceHistory: [Performance] = [],
+    performanceHistory: [PlantPerformance] = [],
     statusHistory: [Status] = []
   ) {
     self.performance = performance
@@ -66,7 +66,7 @@ public struct Recording: CustomStringConvertible, Comparable {
   }
 
   public subscript(
-    keyPath: KeyPath<Performance, Double>, interval: DateInterval
+    keyPath: KeyPath<PlantPerformance, Double>, interval: DateInterval
   ) -> [Double] {
     if performanceHistory.isEmpty { return [] }
     let r = range(of: interval).clamped(to: performanceHistory.indices)
@@ -89,7 +89,7 @@ public struct Recording: CustomStringConvertible, Comparable {
     return statusHistory[r].map { $0[keyPath: keyPath].cycle.numericalForm }
   }
 
-  public subscript(_ keyPaths: KeyPath<Performance, Double>...,
+  public subscript(_ keyPaths: KeyPath<PlantPerformance, Double>...,
     range range: DateInterval
   ) -> [[Double]] {
     keyPaths.map { kp in self[kp, range] }

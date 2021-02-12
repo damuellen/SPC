@@ -13,13 +13,17 @@ import Libc
 public struct Mass: Codable, CustomStringConvertible {
 
   public var description: String {
-    "\(kg / 1000)t"
+    String(format: "%.1ft", kg / 1_000)
   }
 
   public var kg: Double 
 
   public init(_ kg: Double) {
     self.kg = kg
+  }
+
+  public init(ton: Double) {
+    self.kg = ton * 1_000
   }
 
   public init() {

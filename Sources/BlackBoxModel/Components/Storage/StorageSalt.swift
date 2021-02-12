@@ -29,6 +29,7 @@ extension Storage {
     var minimum: Mass
     var cold: Mass
     var hot: Mass
+    var total: Mass
 
     init() {
       let parameter = Storage.parameter
@@ -36,134 +37,98 @@ extension Storage {
       let dischargeToTurbine = parameter.dischargeToTurbine.quotient
       let cold = specificHeat(parameter.designTemperature.cold)
       let hot = specificHeat(parameter.designTemperature.hot)
-      assert(hot > cold)
-
+      let startLoad = parameter.startLoad
+      precondition(hot > cold, "No usable heat content")
+      precondition(parameter.startLoad.hot + parameter.startLoad.cold == 1)
+      let mass: Double
       switch parameter.definedBy {
       case .hours:
         let heatFlowRate = HeatExchanger.parameter.heatFlowHTF
-
-        self.minimum = Mass(Design.layout.storage * dischargeToTurbine
-          * heatFlowRate * 1_000 * 3_600 / (hot - cold)
-        )
-        self.hot = Mass(
-          parameter.startLoad.hot * Design.layout.storage
-            * heatFlowRate * 1_000 * 3_600 / (hot - cold) + self.minimum.kg
-        )        
-        self.cold = Mass(
-          parameter.startLoad.cold * Design.layout.storage
-            * heatFlowRate * 1_000 * 3_600 / (hot - cold) + self.minimum.kg
-        )
+        mass = Design.layout.storage * heatFlowRate * 1_000 * 3_600 / (hot - cold)
       case .cap:
-        self.minimum = Mass(
-          Design.layout.storage_cap * dischargeToTurbine * 1_000 * 3_600
-          / (hot - cold)
-        )
-        self.hot = Mass(
-          parameter.startLoad.hot * Design.layout.storage_cap * 1_000 * 3_600
-            / (hot - cold) + self.minimum.kg
-        )        
-        self.cold = Mass(
-          parameter.startLoad.cold * Design.layout.storage_cap * 1_000 * 3_600
-            / (hot - cold) + self.minimum.kg
-        )
+        mass = Design.layout.storage_cap * dischargeToTurbine * 1_000 * 3_600 / (hot - cold)
       case .ton:
-        self.minimum = Mass(Design.layout.storage_ton * dischargeToTurbine)
-
-        self.hot = Mass(1_000 *
-          (parameter.startLoad.hot * Design.layout.storage_ton) + self.minimum.kg
-        )        
-        self.cold = Mass(1_000 *
-          (parameter.startLoad.cold * Design.layout.storage_ton) + self.minimum.kg
-        )
+        mass = Design.layout.storage_ton * dischargeToTurbine
       }
+      self.minimum = Mass(ton: dischargeToTurbine * mass)
+      self.hot = Mass(ton: (startLoad.hot + dischargeToTurbine) * mass)
+      self.cold = Mass(ton: (startLoad.cold + dischargeToTurbine) * mass)
+      self.total = Mass(ton: (1 + dischargeToTurbine) * mass)
+      assert(self.minimum.kg + self.total.kg == self.cold.kg + self.hot.kg)
     }
   }
 
+  /// Calculates the mass of salt needed to obtain the thermal output
   fileprivate mutating func calculateMass(
     cold: Temperature, hot: Temperature, thermal: Double
-  ) -> (mass: Double, delta: Double) {
+  ) -> (mass: Mass, delta: Double) {
     let salt = Storage.parameter.HTF.properties
     let cold = salt.specificHeat(cold)
     let hot = salt.specificHeat(hot)
-    assert(hot > cold)
-    let mass = (thermal / (hot - cold)
-      * Simulation.time.steps.fraction * 3_600 * 1_000)
+    let fraction = Simulation.time.steps.fraction
+    assert(hot > cold, "No usable heat content")
+    let mass = Mass(ton: thermal / (hot - cold) * fraction * 3_600)
     return (mass, hot - cold)
   }
 
-  /// Calculate thermal power given by TES
-  mutating func calculate(_ thermal: Double) -> Double {
-    var thermal = thermal
+  /// Recalculate thermal power if salt minimum was undershot
+  mutating func recalculate(_ thermal: inout Power) {
     var m: Mass = .zero
     var heat = 0.0
     if case .discharge = operationMode {
-      (salt.active.kg, heat) = calculateMass(
+      (salt.active, heat) = calculateMass(
         cold: temperature.inlet + dT_HTFsalt.cold,
         hot: temperatureTank.hot,
-        thermal: -thermal
+        thermal: thermal.megaWatt
       )
       m = salt.hot
     }
 
-    if case .charging = operationMode {
-      (salt.active.kg, heat) = calculateMass(
+    if case .charge = operationMode {
+      (salt.active, heat) = calculateMass(
         cold: temperatureTank.cold,
         hot: temperature.inlet - dT_HTFsalt.hot,
-        thermal: thermal
+        thermal: thermal.megaWatt
       )
       m = salt.cold
     }
 
-    if (m - salt.active) < salt.minimum
-    {
+    if (m - salt.active) < salt.minimum {
       salt.active.kg -= -salt.minimum.kg + salt.cold.kg
-
-      if salt.active < 10.0 {
-        salt.active = Mass.zero
-      }
-      // recalculate thermal power given by TES
-      thermal =
-        (salt.active.kg * heat
-          / Simulation.time.steps.fraction / 3_600) / 1_000
+      if salt.active < 10.0 { salt.active = .zero }      
+      thermal.kiloWatt =
+        (salt.active.kg * heat / Simulation.time.steps.fraction / 3_600)
     }
-    return thermal
   }
 
   private mutating func indirectCharging(thermal: Double) {
-    (salt.active.kg, _) = calculateMass(
+    (salt.active, _) = calculateMass(
       cold: temperatureTank.cold,
       hot: temperature.inlet - dT_HTFsalt.hot,
       thermal: thermal)
-
+    let cold = salt.cold
     salt.cold -= salt.active
 
     // avoids negative or too low mass and therefore no heat losses.
     if salt.cold < salt.minimum {
       salt.active -= salt.minimum - salt.cold
+      salt.cold = salt.minimum
     }
 
-    if salt.active < 10.0 {
+    if salt.active < 100.0 {
       salt.active = .zero
-
-      salt.cold = salt.minimum
-
-      salt.hot += salt.active
-
+      salt.cold = cold
       relativeCharge = Storage.parameter.chargeTo
     } else {
       salt.hot += salt.active
-      let designT = Storage.parameter.designTemperature
-      let designDeltaT = (designT.hot - designT.cold).kelvin
+      relativeCharge = Ratio(salt.hot.kg / salt.total.kg)
+    }
 
-      relativeCharge = Ratio(salt.hot.kg * designDeltaT / (massOfSalt * designDeltaT))
-    }
-    if salt.hot > .zero {
-       temperatureTank.hot = Temperature.mixture(
-        m1: salt.active, m2: salt.hot,
-        t1: temperature.inlet - dT_HTFsalt.hot,
-        t2: temperatureTank.hot
-      )
-    }
+    temperatureTank.hot = Temperature.mixture(
+      m1: salt.active, m2: salt.hot,
+      t1: temperature.inlet - dT_HTFsalt.hot,
+      t2: temperatureTank.hot
+    )
   }
 
   func directCharging(thermal: Double) {
@@ -172,38 +137,33 @@ extension Storage {
 
   private mutating func fossilCharging(thermal: Double) {
     let designT = Storage.parameter.designTemperature
-    (salt.active.kg, _) = calculateMass(
+    (salt.active, _) = calculateMass(
       cold: temperatureTank.cold,
       hot: designT.hot,
       thermal: thermal
     )
-
     salt.cold -= salt.active
     salt.hot += salt.active
 
-    let designDeltaT = (designT.hot - designT.cold).kelvin
+    relativeCharge = Ratio(salt.hot.kg / (salt.total.kg))
 
-    relativeCharge = Ratio(salt.hot.kg * designDeltaT / (massOfSalt * designDeltaT))
-
-    if salt.hot > .zero {
-      temperatureTank.hot = Temperature.mixture(
-        m1: salt.active, m2: salt.hot,
-        t1: designT.hot, t2: temperatureTank.hot
-      )
-    }
+    temperatureTank.hot = Temperature.mixture(
+      m1: salt.active, m2: salt.hot,
+      t1: designT.hot, t2: temperatureTank.hot
+    )
   }
 
   private mutating func indirectDischarging(thermal: Double) -> Double {
-    let hot = salt.hot
     var thermalPower = thermal
-    var heat: Double
+    let heat: Double
 
-    (salt.active.kg, heat) = calculateMass(
+    (salt.active, heat) = calculateMass(
       cold: temperature.inlet + dT_HTFsalt.cold,
       hot: temperatureTank.hot,
       thermal: -thermalPower)
 
     salt.active.kg = abs(salt.active.kg)
+    let hot = salt.hot
     salt.hot -= salt.active
 
     if salt.hot < salt.minimum {
@@ -219,22 +179,18 @@ extension Storage {
       salt.cold += salt.active
 
       relativeCharge = Storage.parameter.dischargeToTurbine
-
     } else {
       salt.cold += salt.active
-      let designT = Storage.parameter.designTemperature
-      let designDeltaT = (designT.hot - designT.cold).kelvin
 
-      relativeCharge = Ratio(salt.hot.kg * designDeltaT / (massOfSalt * designDeltaT))
+      relativeCharge = Ratio(salt.hot.kg  / salt.total.kg)
     }
 
-    if salt.cold > .zero {
-      temperatureTank.cold = Temperature.mixture(
-        m1: salt.active, m2: salt.cold,
-        t1: temperature.inlet + dT_HTFsalt.cold,
-        t2: temperatureTank.cold
-      )
-    }
+    temperatureTank.cold = Temperature.mixture(
+      m1: salt.active, m2: salt.cold,
+      t1: temperature.inlet + dT_HTFsalt.cold,
+      t2: temperatureTank.cold
+    )
+
     return thermalPower
   }
 
@@ -244,7 +200,7 @@ extension Storage {
 
   private mutating func preheating(thermal: Double) {
     let designT = Storage.parameter.designTemperature
-    (salt.active.kg, _) = calculateMass(
+    (salt.active, _) = calculateMass(
       cold: designT.cold,
       hot: temperatureTank.hot,
       thermal: thermal
@@ -253,9 +209,8 @@ extension Storage {
     salt.cold += salt.active
     salt.hot -= salt.active
 
-    let designDeltaT = (designT.hot - designT.cold).kelvin
 
-    relativeCharge = Ratio(salt.hot.kg * designDeltaT / (massOfSalt * designDeltaT))
+    relativeCharge = Ratio(salt.hot.kg / salt.total.kg)
 
     temperatureTank.cold = Temperature.mixture(
       m1: salt.active, m2: salt.cold,
@@ -282,7 +237,7 @@ extension Storage {
 
     antiFreezeTemperature =
       splitfactor * temperatureTank.cold.kelvin
-      + (1 - splitfactor) * powerBlock.outletTemperature
+      + (1 - splitfactor) * powerBlock.outlet
   }
 
   private mutating func noOperation(powerBlock: PowerBlock) {
@@ -305,39 +260,44 @@ extension Storage {
     }
   }
 
-  mutating func calculate(thermal: inout Double, _ powerBlock: PowerBlock) {
+  mutating func calculate(thermal: inout ThermalEnergy, _ powerBlock: PowerBlock) {
     switch operationMode {
-    case .charging:
+    case .charge:
       switch Storage.parameter.type {
       case .indirect:
-        indirectCharging(thermal: thermal)
+        indirectCharging(thermal: thermal.toStorage.kiloWatt)
       case .direct:
-        directCharging(thermal: thermal)
+        directCharging(thermal: thermal.toStorage.kiloWatt)
       }
     case .fossilCharge:
-      fossilCharging(thermal: thermal)
+      fossilCharging(thermal: thermal.toStorage.kiloWatt)
     case .discharge:
       switch Storage.parameter.type {
       case .indirect:
-        thermal = indirectDischarging(thermal: thermal)
+        thermal.storage.kiloWatt = indirectDischarging(thermal: thermal.storage.kiloWatt)
       case .direct:
-        thermal = directDischarging(thermal: thermal)
+        thermal.storage.kiloWatt = directDischarging(thermal: thermal.storage.kiloWatt)
       }
     case .preheat:
-      preheating(thermal: thermal)
+      preheating(thermal: thermal.storage.kiloWatt)
     case .freezeProtection:
       freezeProtection(powerBlock: powerBlock)
     // powerBlock.temperature.outlet = storage.temperatureTank.cold
     case .noOperation:
       noOperation(powerBlock: powerBlock)
     }
-    // FIXME: HeatExchanger.storage.H2OinTmax = storage.salt.hot
-    // HeatExchanger.storage.H2OinTmin = storage.salt.cold
-    // HeatExchanger.storage.H2OoutTmax = storage.temperatureTank.hot
-    // HeatExchanger.storage.H2OoutTmin = storage.temperatureTank.cold
+    assert((salt.minimum.kg + salt.total.kg) - (salt.cold.kg + salt.hot.kg) < 0.1)
   }
 
+  /// Calculates the temperature drop of the tanks with the help of the heat losses
   mutating func heatlosses() {
+
+    func tankTemperature(_ specificHeat: Double) -> Temperature {
+      let hcap = Storage.parameter.HTF.properties.heatCapacity
+      return Temperature(celsius: (-hcap[0] + (hcap[0] ** 2 - 4 * (hcap[1] * 0.5)
+          * (-350.5536 - specificHeat)) ** 0.5) / (2 * hcap[1] * 0.5))
+    }
+
     let parameter = Storage.parameter
     let specificHeat = parameter.HTF.properties.specificHeat
     if salt.cold.kg
@@ -353,7 +313,7 @@ extension Storage {
       // enthalpy after cooling down
       cold -= coldTankHeatLoss * Double(period) / salt.cold.kg
       // temp after cool down
-      temperatureTank.cold = Storage.tankTemperature(cold)
+      temperatureTank.cold = tankTemperature(cold)
     }
 
     if salt.hot > 1.0 {
@@ -368,10 +328,10 @@ extension Storage {
       // enthalpy after cooling down
       hot -= hotTankHeatLoss * Double(period) / salt.hot.kg
       // temp after cool down
-      temperatureTank.hot = Storage.tankTemperature(hot)
+      temperatureTank.hot = tankTemperature(hot)
     }    
   }
-    
+
   static func defineSaltMass() -> Double {
     let availability = Availability.current.value.storage.quotient
     let dischargeToTurbine = Storage.parameter.dischargeToTurbine.quotient
@@ -379,7 +339,7 @@ extension Storage {
     let salt = Storage.parameter.HTF.properties
     let cold = salt.specificHeat(designTemperature.cold)
     let hot = salt.specificHeat(designTemperature.hot)
-    assert(hot > cold)
+    precondition(hot > cold, "No usable heat content")
     switch Storage.parameter.definedBy {
     case .hours:
       let heatFlowRate = HeatExchanger.parameter.heatFlowHTF

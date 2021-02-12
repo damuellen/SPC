@@ -16,22 +16,9 @@ public struct HeatExchanger: Parameterizable, HeatTransfer {
   var massFlow: MassFlow = .zero
   
   var temperature: (inlet: Temperature, outlet: Temperature)
-
-  var operationMode: OperationMode
    
   var heatOut, heatToTES: Double
-  
-  public enum OperationMode: Equatable {
-    case noOperation(hours: Double), SI, startUp,
-    scheduledMaintenance, coldStartUp, warmStartUp
 
-    public static func == (lhs: OperationMode, rhs: OperationMode) -> Bool {
-      switch (lhs, rhs) {
-      case let (.noOperation(lhs), noOperation(rhs)): return lhs == rhs
-      default: return lhs.rawValue == rhs.rawValue
-      }
-    }
-  }
 
   static let capacity = SolarField.parameter.HTF.heatContent(
     HeatExchanger.parameter.temperature.htf.inlet.max,
@@ -40,7 +27,6 @@ public struct HeatExchanger: Parameterizable, HeatTransfer {
   /// working conditions of the heat exchanger at start
   static let initialState = HeatExchanger(
     temperature: Simulation.startTemperature,
-    operationMode: .noOperation(hours: 0),
     heatOut: 0.0, heatToTES: 0.0
   )
 
@@ -108,15 +94,15 @@ public struct HeatExchanger: Parameterizable, HeatTransfer {
 
           var factor = ToutMassFlow(massFlowLoad)
           factor.clamp(to: 0...1.1)
-          outletTemperature(kelvin: factor * self.outletTemperature)
+          outletTemperature(kelvin: factor * self.outlet)
         case let (_, _, ToutTinMassFlow?):
           let share = massFlow.share(of: designMassFlow).quotient
 
           // power function based on MAN-Turbo and OHL data with pinch point tool
           var factor = ((ToutTinMassFlow[0]
-              * (self.inletTemperature / temp.htf.inlet.max.kelvin)
+              * (self.inlet / temp.htf.inlet.max.kelvin)
               * 666 + ToutTinMassFlow[1]) * share ** (ToutTinMassFlow[2]
-              * (self.inletTemperature / temp.htf.inlet.max.kelvin)
+              * (self.inlet / temp.htf.inlet.max.kelvin)
               * 666 + ToutTinMassFlow[3])) + ToutTinMassFlow[4]
           factor.clamp(to: 0...1.1)
           self.setTemperature(outlet: temp.htf.outlet.max.adjusted(factor))
@@ -128,7 +114,7 @@ public struct HeatExchanger: Parameterizable, HeatTransfer {
 // CHECK: the value of HTFoutTmax should be dependent on storage charging but only on PB self
           self.outletTemperature(kelvin:
             temp.htf.outlet.min.kelvin + temp.range.outlet.kelvin
-            * (self.inletTemperature - temp.htf.inlet.min.kelvin)
+            * (self.inlet - temp.htf.inlet.min.kelvin)
             / temp.range.inlet.kelvin)
         }
       }
@@ -136,7 +122,7 @@ public struct HeatExchanger: Parameterizable, HeatTransfer {
 
     // Update HeatExchanger.temperature.outlet and massFlow
     if case .discharge = storage.operationMode,
-      outletTemperature < (261 - Temperature.absoluteZeroCelsius) {
+      outlet < (261 - Temperature.absoluteZeroCelsius) {
       // added to simulate a bypass on the PB-self if the expected
       // outlet temperture is so low that the salt to TES could freeze
       let totalMassFlow = massFlow
@@ -171,8 +157,8 @@ public struct HeatExchanger: Parameterizable, HeatTransfer {
           temperature.outlet.adjust(withFactor: factor)
         } else if let c = parameter.ToutTinMassFlow {
           // power function based on MAN-Turbo and OHL data with pinch point tool
-          var factor = ((c[0] * inletTemperature + c[1])
-            * load.quotient ** (c[2] * inletTemperature + c[3])) + c[4]
+          var factor = ((c[0] * inlet + c[1])
+            * load.quotient ** (c[2] * inlet + c[3])) + c[4]
           factor.clamp(to: 0...1.1)
           setTemperature(outlet:
             parameter.temperature.htf.outlet.max.adjusted(factor)
@@ -222,7 +208,7 @@ public struct HeatExchanger: Parameterizable, HeatTransfer {
 
         return Temperature(
           (temp.htf.outlet.min.kelvin + temp.range.outlet.kelvin
-            * (pb.temperature.inlet.kelvin - temp.htf.inlet.min.kelvin)
+            * (pb.inlet - temp.htf.inlet.min.kelvin)
             / temp.range.inlet.kelvin) * factor
         )
       }
@@ -244,17 +230,15 @@ public struct HeatExchanger: Parameterizable, HeatTransfer {
       return {
         (pb: PowerBlock, _: HeatTransfer) -> Temperature in
         let share = pb.massFlow.share(of: pb.designMassFlow).quotient
-        var factor = ((c[0] * (pb.inletTemperature
-          / parameter.temperature.htf.inlet.max.kelvin) * 666 + c[1])
-          * share ** (c[2] * (pb.inletTemperature
-            / parameter.temperature.htf.inlet.max.kelvin) * 666 + c[3])) + c[4]
+        let max = parameter.temperature.htf.inlet.max.kelvin
+        var factor = ((c[0] * (pb.inlet / max) * 666 + c[1])
+          * share ** (c[2] * (pb.inlet / max) * 666 + c[3])) + c[4]
         factor.clamp(to: 0...1.1)
         return parameter.temperature.htf.outlet.max.adjusted(factor)
       }
     } else if let ToutTin = parameter.ToutTin {
       return { (_: PowerBlock, hx: HeatTransfer) -> Temperature in
-        let factor = Ratio(ToutTin(hx.temperature.inlet))
-        
+        let factor = Ratio(ToutTin(hx.temperature.inlet))        
         return parameter.temperature.htf.outlet.max.adjusted(factor)
       }
     }
@@ -263,36 +247,9 @@ public struct HeatExchanger: Parameterizable, HeatTransfer {
       let temp = parameter.temperature
       return Temperature(
         temp.htf.outlet.min.kelvin + temp.range.outlet.kelvin
-          * (pb.temperature.inlet.kelvin - temp.htf.inlet.min.kelvin)
+          * (pb.inlet - temp.htf.inlet.min.kelvin)
           / temp.range.inlet.kelvin
       )
-    }
-  }
-}
-
-extension HeatExchanger.OperationMode: RawRepresentable {
-  public typealias RawValue = String
-  
-  public init?(rawValue: RawValue) {
-    switch rawValue {
-    case "No Operation for 0 hours": self = .noOperation(hours: 0)
-    case "SI": self = .SI
-    case "StartUp": self = .startUp
-    case "Scheduled Maintenanc": self = .scheduledMaintenance
-    case "Cold StartUp": self = .coldStartUp
-    case "Warm StartUp": self = .warmStartUp
-    default: return nil
-    }
-  }
-  
-  public var rawValue: RawValue {
-    switch self {
-    case let .noOperation(hours): return "No Operation for \(hours) hours"
-    case .SI: return "SI"
-    case .startUp: return "StartUp"
-    case .scheduledMaintenance: return "Scheduled Maintenance"
-    case .coldStartUp: return "Cold StartUp"
-    case .warmStartUp: return "Warm StartUp"
     }
   }
 }

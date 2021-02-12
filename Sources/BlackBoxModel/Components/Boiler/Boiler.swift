@@ -58,7 +58,7 @@ public struct Boiler: Parameterizable {
 
   mutating func callAsFunction(
     demand: Double, Qsf_load: Double, fuelAvailable: Double)
-    -> PerformanceData<Boiler>
+    -> Plant.Performance<Boiler>
   {
     let parameter = Boiler.parameter
 
@@ -73,13 +73,13 @@ public struct Boiler: Parameterizable {
       if isMaintained {
 
         operationMode = .scheduledMaintenance
-        return PerformanceData(
+        return Plant.Performance(
           heatFlow: thermalPower, electric: parasitics, fuel: fuel
         )
       }
 
       let fuel = Boiler.noOperation(&self, fuelAvailable: fuelAvailable)
-      return PerformanceData(
+      return Plant.Performance(
         heatFlow: thermalPower, electric: parasitics, fuel: fuel
       )
     }
@@ -103,7 +103,7 @@ public struct Boiler: Parameterizable {
 
       let fuel = Boiler.noOperation(&self, fuelAvailable: fuelAvailable)
 
-      return PerformanceData(
+      return Plant.Performance(
         heatFlow: thermalPower, electric: parasitics, fuel: fuel
       )
     }
@@ -118,7 +118,7 @@ public struct Boiler: Parameterizable {
         
       let fuel = Boiler.noOperation(&self, fuelAvailable: fuelAvailable)
 
-      return PerformanceData(
+      return Plant.Performance(
         heatFlow: thermalPower, electric: parasitics, fuel: fuel
       )
     }
@@ -186,7 +186,7 @@ public struct Boiler: Parameterizable {
           """)
         let fuel = Boiler.noOperation(&self, fuelAvailable: fuelAvailable)
 
-        return PerformanceData(
+        return Plant.Performance(
           heatFlow: thermalPower, electric: parasitics, fuel: fuel
         )
       }
@@ -209,7 +209,7 @@ public struct Boiler: Parameterizable {
     
     parasitics = Boiler.parasitics(estimateFrom: load)
 
-    return PerformanceData(
+    return Plant.Performance(
       heatFlow: thermalPower, electric: parasitics, fuel: fuel
     )
   }
@@ -287,6 +287,30 @@ public struct Boiler: Parameterizable {
       // FIXME: H2Ov.massFlow = 0
     }
     return fuel
+  }
+
+  static func performSteamTurbine(
+    _ heatFlow: ThermalEnergy,
+    _ gasTurbine: GasTurbine.OperationMode,
+    _ heatExchanger: Temperature,
+    _ ambient: Temperature
+  ) -> Double {
+    let parameter = SteamTurbine.parameter
+    let efficiency: Double
+    if heatFlow.boiler.megaWatt > 50 || heatFlow.solar.watt == 0 {
+      efficiency = parameter.efficiencyBoiler
+    } else {
+      efficiency =
+        (heatFlow.boiler.megaWatt
+          * parameter.efficiencyBoiler + 4.0
+          * heatFlow.heatExchanger.megaWatt
+          * parameter.efficiencyNominal)
+        / (heatFlow.boiler.megaWatt + 4.0
+          * heatFlow.heatExchanger.megaWatt)
+      // maxEfficiency = parameter.effnom
+    }
+    let adjustmentFactor = Simulation.adjustmentFactor.efficiencyTurbine
+    return (efficiency * adjustmentFactor)
   }
 }
 
