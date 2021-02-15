@@ -44,6 +44,7 @@ public struct PowerBlock: Parameterizable, HeatTransfer {
       temperature.inlet
         >= HeatExchanger.parameter.temperature.htf.inlet.min
     {
+
       temperature.outlet = HeatExchanger
         .temperatureOutlet(self, heatExchanger)
 
@@ -54,8 +55,6 @@ public struct PowerBlock: Parameterizable, HeatTransfer {
         heatExchanger.heatOut = result.heatOut
         heatExchanger.heatToTES = result.heatToTES
       }
-    } else {
-      temperatureFromInlet()
     }
   }
 
@@ -165,18 +164,14 @@ public struct PowerBlock: Parameterizable, HeatTransfer {
       let tin = (solarField.massFlow.rate * solarField.outlet
         + storage.massFlow.rate * storage.outlet) / mf
       if tin > 0 {
-      //  assert(temperature.inlet.kelvin >= tin)
         temperature.inlet.kelvin = tin
       }
 
-      //#warning("The implementation here differs from PCT")
-      // FIXME: Was ist Tstatus ?????????
       let sec = Double(period)
+      let HTFmass = SolarField.parameter.HTFmass
       let tout = (massFlow.rate * sec * inlet + outlet
-        * (SolarField.parameter.HTFmass - massFlow.rate * sec))
-        / SolarField.parameter.HTFmass - tlpb
+        * (HTFmass - mf * sec)) / HTFmass - tlpb
       if tout > 0 {
-        assert(temperature.outlet.kelvin >= tout - 30, "\(temperature.outlet) - \(tout)")
         temperature.outlet.kelvin = tout
       }
     }

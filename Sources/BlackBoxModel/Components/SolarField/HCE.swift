@@ -340,7 +340,7 @@ enum HCE {
    
     outerIteration: for o in 1...5 {
       newTemp = hce.temperature.inlet
-      var inFocusLoop = 0.0
+      var inFocusLoop = solarField.inFocus.quotient
      // print("O", o, newTemp, oldTemp)
       innerIteration: for _ in 1...10 {
       //  print("I", innerIteration)

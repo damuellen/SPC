@@ -20,13 +20,7 @@ public struct Temperatures {
 /// A temperature value in Kelvin.
 public struct Temperature: CustomStringConvertible, Equatable {
 
-  var kelvin: Double {
-    willSet { 
-      assert(newValue.isFinite)
-      assert(kelvin.isNormal)
-      assert(kelvin.sign == .plus)
-    }
-  }
+  var kelvin: Double
 
   static var zero = 0
 

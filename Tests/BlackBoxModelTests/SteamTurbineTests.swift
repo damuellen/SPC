@@ -17,7 +17,7 @@ class SteamTurbineTests: XCTestCase {
       heatExchanger: heatExchanger, ambient: ambientTemperature
     )
     XCTAssertEqual(maxLoad, 1, accuracy: 0.01, "maxLoad")
-    XCTAssertEqual(efficiency, 1, accuracy: 0.01, "efficiency")
+    XCTAssertEqual(efficiency, 0.22, accuracy: 0.01, "efficiency")
     status.boiler.operationMode = .operating
     (maxLoad, efficiency) = SteamTurbine.perform(load:Ratio(0.5),
       heatExchanger: heatExchanger, ambient: ambientTemperature

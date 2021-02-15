@@ -211,6 +211,7 @@ public struct Plant {
       deviation = abs(parasiticsAssumed - electricity.parasitics)
       parasiticsAssumed = electricity.parasitics
       assert(step < 4, "Too many iterations")
+      if heatFlow.production.isZero { break }
     } while deviation > Simulation.parameter.electricalTolerance * factor   
   }
 
@@ -286,11 +287,11 @@ public struct Plant {
           case (.operating, .discharge):
             status.powerBlock.connectTo(status.solarField, status.storage)
           case (.operating, .charge):
-            status.powerBlock.massFlow(outlet: status.solarField)
-            
-            status.storage.massFlow(outlet: status.solarField)
-
+            status.powerBlock.massFlow = 
+              status.solarField.massFlow - status.storage.massFlow
           case (.operating, .noOperation):
+            status.powerBlock.massFlow(outlet: status.solarField)
+          case (.freezeProtection, .noOperation):
             status.powerBlock.massFlow(outlet: status.solarField)
           case (_, .discharge):
             status.powerBlock.massFlow(outlet: status.storage)

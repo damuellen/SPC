@@ -44,9 +44,9 @@ extension Storage {
       switch parameter.definedBy {
       case .hours:
         let heatFlowRate = HeatExchanger.parameter.heatFlowHTF
-        mass = Design.layout.storage * heatFlowRate * 1_000 * 3_600 / (hot - cold)
+        mass = Design.layout.storage * heatFlowRate * 3_600 / (hot - cold)
       case .cap:
-        mass = Design.layout.storage_cap * dischargeToTurbine * 1_000 * 3_600 / (hot - cold)
+        mass = Design.layout.storage_cap * dischargeToTurbine * 3_600 / (hot - cold)
       case .ton:
         mass = Design.layout.storage_ton * dischargeToTurbine
       }
@@ -67,7 +67,7 @@ extension Storage {
     let hot = salt.specificHeat(hot)
     let fraction = Simulation.time.steps.fraction
     assert(hot > cold, "No usable heat content")
-    let mass = Mass(ton: thermal / (hot - cold) * fraction * 3_600)
+    let mass = Mass(thermal / (hot - cold) * fraction * 3_600)
     return (mass, hot - cold)
   }
 

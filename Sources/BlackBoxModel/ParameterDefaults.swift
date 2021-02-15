@@ -174,7 +174,7 @@ public enum ParameterDefaults {
     hotStartUpTime: 120,
     efficiencyWetBulb: [0, 0, 0, 0, 0, 0],
     WetBulbTstep: 0, efficiencyTempIn_A: 0.2383,
-    efficiencyTempIn_B: 0.2404, efficiencyTempIn_cf: 0
+    efficiencyTempIn_B: 0.2404, efficiencyTempIn_cf: 1
   )
 
   static let pb = PowerBlock.Parameter(
