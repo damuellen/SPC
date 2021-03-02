@@ -39,21 +39,13 @@ steps:
   displayName: Install Swift toolchain
 
 - script: |
-    set SDKROOT=C:\Library\Developer\Platforms\Windows.platform\Developer\SDKs\Windows.sdk
-    set DEVELOPER_DIR=C:\Library\Developer
-  displayName: Set environment variables
-
-- script: |
     .github/install-sqlite.bat
     .github/install-zlib.bat
   displayName: 'Install dependencies'
 
-- task: CmdLine@2
-  inputs:
-    script: 'swift package update'
-  displayName: 'Update swift package dependencies'
-
-- task: CmdLine@2
-  inputs:
-    script: 'swift build'
+- script: |
+    swift build
+  env:
+    SDKROOT: C:\Library\Developer\Platforms\Windows.platform\Developer\SDKs\Windows.sdk
+    DEVELOPER_DIR: C:\Library\Developer
   displayName: 'Build swift package'
