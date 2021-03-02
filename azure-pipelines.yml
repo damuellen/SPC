@@ -47,8 +47,8 @@ steps:
 - script: |
     lib /machine:x64 /def:C:\Library\sqlite3\sqlite3.def /out:C:\Library\sqlite3\sqlite3.lib
     swift build
-    llvm-strip -S --keep-file-symbols .build\x86_64-unknown-windows-msvc\release\SolarPerformanceCalc.exe
-    llvm-strip -S --keep-file-symbols .build\x86_64-unknown-windows-msvc\release\SolarFieldCalc.exe
+    llvm-strip -S --keep-file-symbols $(System.DefaultWorkingDirectory)\.build\x86_64-unknown-windows-msvc\release\SolarPerformanceCalc.exe
+    llvm-strip -S --keep-file-symbols $(System.DefaultWorkingDirectory)\.build\x86_64-unknown-windows-msvc\release\SolarFieldCalc.exe
   env:
     SDKROOT: C:\Library\Developer\Platforms\Windows.platform\Developer\SDKs\Windows.sdk
     DEVELOPER_DIR: C:\Library\Developer
@@ -56,7 +56,7 @@ steps:
 
 - task: CopyFiles@2
   inputs:
-    contents: '.build\x86_64-unknown-windows-msvc\release\*.exe'
+    contents: '$(System.DefaultWorkingDirectory)\.build\x86_64-unknown-windows-msvc\release\*.exe'
     targetFolder: $(Build.ArtifactStagingDirectory)
 
 - task: PublishBuildArtifacts@1
