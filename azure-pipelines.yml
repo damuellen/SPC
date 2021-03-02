@@ -18,6 +18,7 @@ steps:
           Invoke-WebRequest -Uri https://aka.ms/vs/16/release/vs_buildtools.exe -OutFile .\TEMP\vs_buildtools.exe; `
           Start-Process .\TEMP\vs_buildtools.exe  -Wait -ArgumentList '--quiet --wait --norestart --nocache `
           --installPath C:\BuildTools `
+          --add Microsoft.VisualStudio.Component.git `
           --add Microsoft.VisualStudio.Component.VC.CMake.Project `
           --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 `
           --add Microsoft.VisualStudio.Component.Windows10SDK `
@@ -25,12 +26,12 @@ steps:
           Remove-Item –path .\TEMP\vs_buildtools.exe
   displayName: Install vs_buildtools
 
-- task: PowerShell@2
+- task: BatchScript@1
+  displayName: VsDevCmd
   inputs:
-    targetType: 'inline'
-    script: |
-      Install-Binary -Url "https://swift.org/builds/swift-5.4-branch/windows10/swift-5.4-DEVELOPMENT-SNAPSHOT-2021-02-24-a/swift-5.4-DEVELOPMENT-SNAPSHOT-2021-02-24-a-windows10.exe" -Name "installer.exe" -ArgumentList ("-q")
-  displayName: Install Swift toolchain
+    filename: C:\BuildTools\Common7\Tools\VsDevCmd.bat
+    arguments: -no_logo -arch=x64 -host_arch=x64
+    modifyEnvironment: true
 
 - script: |
     curl -L "https://raw.githubusercontent.com/apple/swift/main/stdlib/public/Platform/ucrt.modulemap" -o "%UniversalCRTSdkDir%\Include\%UCRTVersion%\ucrt\module.modulemap"
@@ -38,18 +39,12 @@ steps:
     curl -L "https://raw.githubusercontent.com/apple/swift/main/stdlib/public/Platform/visualc.apinotes" -o "%VCToolsInstallDir%\include\visualc.apinotes"
     curl -L "https://raw.githubusercontent.com/apple/swift/main/stdlib/public/Platform/winsdk.modulemap" -o "%UniversalCRTSdkDir%\Include\%UCRTVersion%\um\module.modulemap"
   displayName: Configure SDK
-
 - task: PowerShell@2
   inputs:
     targetType: 'inline'
     script: |
-      $ErrorActionPreference = 'Stop' ; `
-          [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 ; `
-          Invoke-WebRequest $('https://github.com/git-for-windows/git/releases/download/v{0}.windows.{1}/MinGit-{0}.{1}-busybox-64-bit.zip' -f 2.15.1, 2) -OutFile 'mingit.zip' -UseBasicParsing ; `
-          Expand-Archive mingit.zip -DestinationPath c:\mingit ; `
-          Remove-Item mingit.zip -Force ; `
-          setx /M PATH $('c:\mingit\cmd;{0}' -f $env:PATH)
-  displayName: Install GIT
+      Install-Binary -Url "https://swift.org/builds/swift-5.4-branch/windows10/swift-5.4-DEVELOPMENT-SNAPSHOT-2021-02-24-a/swift-5.4-DEVELOPMENT-SNAPSHOT-2021-02-24-a-windows10.exe" -Name "installer.exe" -ArgumentList ("-q")
+  displayName: Install Swift toolchain
 
 - script: |
     .github/install-sqlite.bat
@@ -65,3 +60,9 @@ steps:
 - script: |
     swift package update
   displayName: 'Build swift package'
+- task: DownloadBuildArtifacts@0
+  inputs:
+    buildType: 'current'
+    downloadType: 'single'
+    artifactName: 'release'
+    downloadPath: '$(System.ArtifactsDirectory)'
