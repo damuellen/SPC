@@ -9,6 +9,9 @@ trigger:
 pool:
   vmImage: windows-latest
 
+variables:
+  bin.directory: C:/Library/Developer/Toolchains/unknown-Asserts-development.xctoolchain/usr/bin
+  
 steps:
 - task: BatchScript@1
   displayName: VsDevCmd
@@ -29,6 +32,10 @@ steps:
     script: |
       Install-Binary -Url "https://swift.org/builds/swift-5.4-branch/windows10/swift-5.4-DEVELOPMENT-SNAPSHOT-2021-02-24-a/swift-5.4-DEVELOPMENT-SNAPSHOT-2021-02-24-a-windows10.exe" -Name "installer.exe" -ArgumentList ("-q")
   displayName: Install Swift toolchain
+
+- script: |
+    echo ##vso[task.prependpath]$(bin.directory)
+  displayName: Update PATH
 
 - script: |
     .github/install-sqlite.bat
