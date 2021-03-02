@@ -10,9 +10,6 @@ pool:
   vmImage: windows-latest
 
 steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
-
 - task: PowerShell@2
   inputs:
     targetType: 'inline'
@@ -26,16 +23,21 @@ steps:
           --add Microsoft.VisualStudio.Component.Windows10SDK `
           --add Microsoft.VisualStudio.Component.Windows10SDK.17763'; `
           Remove-Item –path .\TEMP\vs_buildtools.exe
+  displayName: Install vs_buildtools
 
 - task: PowerShell@2
   inputs:
     targetType: 'inline'
     script: |
       Install-Binary -Url "https://swift.org/builds/swift-5.4-branch/windows10/swift-5.4-DEVELOPMENT-SNAPSHOT-2021-02-24-a/swift-5.4-DEVELOPMENT-SNAPSHOT-2021-02-24-a-windows10.exe" -Name "installer.exe" -ArgumentList ("-q")
-      Copy-Item "$env:SDKROOT\usr\share\ucrt.modulemap" -destination "$env:UniversalCRTSdkDir\Include\$env:UCRTVersion\ucrt\module.modulemap"
-      Copy-Item "$env:SDKROOT\usr\share\visualc.modulemap" -destination "$env:VCToolsInstallDir\include\module.modulemap"
-      Copy-Item "$env:SDKROOT\usr\share\visualc.apinotes" -destination "$env:VCToolsInstallDir\include\visualc.apinotes"
-      Copy-Item "$env:SDKROOT\usr\share\winsdk.modulemap" -destination "$env:UniversalCRTSdkDir\Include\$env:UCRTVersion\um\module.modulemap"
+  displayName: Install Swift toolchain
+
+- script: |
+    curl -L "https://raw.githubusercontent.com/apple/swift/main/stdlib/public/Platform/ucrt.modulemap" -o "%UniversalCRTSdkDir%\Include\%UCRTVersion%\ucrt\module.modulemap"
+    curl -L "https://raw.githubusercontent.com/apple/swift/main/stdlib/public/Platform/visualc.modulemap" -o "%VCToolsInstallDir%\include\module.modulemap"
+    curl -L "https://raw.githubusercontent.com/apple/swift/main/stdlib/public/Platform/visualc.apinotes" -o "%VCToolsInstallDir%\include\visualc.apinotes"
+    curl -L "https://raw.githubusercontent.com/apple/swift/main/stdlib/public/Platform/winsdk.modulemap" -o "%UniversalCRTSdkDir%\Include\%UCRTVersion%\um\module.modulemap"
+  displayName: Configure SDK
 
 - task: PowerShell@2
   inputs:
@@ -47,10 +49,19 @@ steps:
           Expand-Archive mingit.zip -DestinationPath c:\mingit ; `
           Remove-Item mingit.zip -Force ; `
           setx /M PATH $('c:\mingit\cmd;{0}' -f $env:PATH)
+  displayName: Install GIT
 
 - script: |
     .github/install-sqlite.bat
     .github/install-zlib.bat
     swift package update
     swift build -c release
-  displayName: 'Run a multi-line script'
+  displayName: 'Install dependencies'
+
+- script: |
+    swift package update
+  displayName: 'Update swift package dependencies'
+
+- script: |
+    swift package update
+  displayName: 'Build swift package'
