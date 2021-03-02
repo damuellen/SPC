@@ -10,26 +10,10 @@ pool:
   vmImage: windows-latest
 
 steps:
-- task: PowerShell@2
-  inputs:
-    targetType: 'inline'
-    script: |
-      mkdir .\TEMP\; `
-          Invoke-WebRequest -Uri https://aka.ms/vs/16/release/vs_buildtools.exe -OutFile .\TEMP\vs_buildtools.exe; `
-          Start-Process .\TEMP\vs_buildtools.exe  -Wait -ArgumentList '--quiet --wait --norestart --nocache `
-          --installPath C:\BuildTools `
-          --add Microsoft.VisualStudio.Component.git `
-          --add Microsoft.VisualStudio.Component.VC.CMake.Project `
-          --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 `
-          --add Microsoft.VisualStudio.Component.Windows10SDK `
-          --add Microsoft.VisualStudio.Component.Windows10SDK.17763'; `
-          Remove-Item –path .\TEMP\vs_buildtools.exe
-  displayName: Install vs_buildtools
-
 - task: BatchScript@1
   displayName: VsDevCmd
   inputs:
-    filename: C:\BuildTools\Common7\Tools\VsDevCmd.bat
+    filename: C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/Common7/Tools/VsDevCmd.bat
     arguments: -no_logo -arch=x64 -host_arch=x64
     modifyEnvironment: true
 
