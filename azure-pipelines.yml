@@ -37,22 +37,30 @@ steps:
       Write-Host "##vso[task.prependpath]$(toolchain.directory)"
       Write-Host "##vso[task.prependpath]$(bin.directory)"
       Write-Host "##vso[task.prependpath]$(icu.directory)"
-      Expand-Archive -Force '$(System.DefaultWorkingDirectory)/Zlib.zip' 'C:/Library'
-      md -Path 'C:\Library\sqlite3'
-      Invoke-WebRequest -OutFile "C:\Library\sqlite3\sqlite3.zip" 'https://www.sqlite.org/2020/sqlite-dll-win64-x64-3330000.zip'
-      Expand-Archive -Force 'C:\Library\sqlite3\sqlite3.zip' 'C:\Library\sqlite3'
-      Remove-Item 'C:\Library\sqlite3\sqlite3.zip'
   displayName: Install toolchain
+
+- task: PowerShell@2
+  inputs:
+    targetType: 'inline'
+    script: |
+      Expand-Archive -Force '$(System.DefaultWorkingDirectory)/Zlib.zip' 'C:/Library'
+  displayName: Install zlib
 
 - script: |
     lib /machine:x64 /def:C:\Library\sqlite3\sqlite3.def /out:C:\Library\sqlite3\sqlite3.lib
-    swift build
-    llvm-strip -S --keep-file-symbols $(System.DefaultWorkingDirectory)\.build\x86_64-unknown-windows-msvc\release\SolarPerformanceCalc.exe
-    llvm-strip -S --keep-file-symbols $(System.DefaultWorkingDirectory)\.build\x86_64-unknown-windows-msvc\release\SolarFieldCalc.exe
+  displayName: 'Build sqlite3'
+
+- script: |
+    swift build -c release
   env:
     SDKROOT: C:\Library\Developer\Platforms\Windows.platform\Developer\SDKs\Windows.sdk
     DEVELOPER_DIR: C:\Library\Developer
   displayName: 'Build swift package'
+
+- script: |
+    llvm-strip -S --keep-file-symbols $(System.DefaultWorkingDirectory)\.build\x86_64-unknown-windows-msvc\release\SolarPerformanceCalc.exe
+    llvm-strip -S --keep-file-symbols $(System.DefaultWorkingDirectory)\.build\x86_64-unknown-windows-msvc\release\SolarFieldCalc.exe
+  displayName: 'Strip symbols'
 
 - task: CopyFiles@2
   inputs:
