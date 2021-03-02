@@ -10,7 +10,9 @@ pool:
   vmImage: windows-latest
 
 variables:
-  bin.directory: C:/Library/Developer/Toolchains/unknown-Asserts-development.xctoolchain/usr/bin
+  toolchain.directory: C:/Library/Developer/Toolchains/unknown-Asserts-development.xctoolchain/usr/bin
+  bin.directory: C:/Library/Swift-development/bin
+  icu.directory: C:/Library/icu-67/usr/bin
   
 steps:
 - task: BatchScript@1
@@ -34,26 +36,22 @@ steps:
   displayName: Install Swift toolchain
 
 - script: |
+    echo ##vso[task.prependpath]$(toolchain.directory)
     echo ##vso[task.prependpath]$(bin.directory)
+    echo ##vso[task.prependpath]$(icu.directory)
   displayName: Update PATH
 
 - script: |
     .github/install-sqlite.bat
     .github/install-zlib.bat
-    swift package update
-    swift build -c release
   displayName: 'Install dependencies'
 
-- script: |
-    swift package update
+- task: CmdLine@2
+  inputs:
+    script: 'swift package update'
   displayName: 'Update swift package dependencies'
 
-- script: |
-    swift package update
-  displayName: 'Build swift package'
-- task: DownloadBuildArtifacts@0
+- task: CmdLine@2
   inputs:
-    buildType: 'current'
-    downloadType: 'single'
-    artifactName: 'release'
-    downloadPath: '$(System.ArtifactsDirectory)'
+    script: 'swift build'
+  displayName: 'Build swift package'
