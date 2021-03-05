@@ -8,6 +8,8 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
+import Foundation
+
 public struct Location {
   public let longitude: Double
   public let latitude: Double
@@ -34,5 +36,28 @@ public struct Location {
     self.latitude = coords.1
     self.elevation = coords.2
     self.timezone = timezone
-  } 
+  }
+
+  public var data: Data {
+    let values = [
+      Int32(longitude * 100),
+      Int32(latitude * 100),
+      Int32(elevation * 100),
+      Int32(timezone),
+    ]
+
+    return values.withUnsafeBufferPointer { Data(buffer: $0) }
+  }
+
+  public init(data: Data) {
+    let values = data.withUnsafeBytes { (p: UnsafeRawBufferPointer) -> [Int32] in
+			let p = p.baseAddress!.assumingMemoryBound(to: Int32.self)
+      let buffer = UnsafeBufferPointer(start: p, count: 4)
+      return Array<Int32>(buffer)
+    }
+    self.longitude = Double(values[0]) / 100
+    self.latitude = Double(values[1]) / 100
+    self.elevation = Double(values[2]) / 100
+    self.timezone = Int(values[3])
+  }
 }

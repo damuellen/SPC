@@ -7,13 +7,13 @@
 //
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
-
+import Foundation
 import Libc
 import SolarPosition
 
 public struct MeteoData: CustomStringConvertible {
   public var temperature, dni, ghi, dhi, windSpeed: Float
-  let wetBulbTemperature: Float? = nil
+  var wetBulbTemperature: Float? = nil
 
   var values: [Float] { [temperature, dni, ghi, dhi, windSpeed] }
 
@@ -128,10 +128,37 @@ public struct MeteoData: CustomStringConvertible {
   }
 
   public var description: String {
-    String(format: "Ambient temperature: %.1f degreeC", temperature)
+    String(format: "\nAmbient temp: %.1f degC", temperature)
       + String(format: "  DNI: %.1f W/m2", dni)
       + String(format: "  GHI: %.1f W/m2", ghi)
       + String(format: "  DHI: %.1f W/m2", dhi)
       + String(format: "  WS: %.1f m/s\n", windSpeed)
+  }
+
+  public var data: Data {
+    let values = [
+      Int16(dni * 10),
+      Int16(dhi * 10),
+      Int16(ghi * 10),
+      Int16(temperature * 100),
+      Int16(windSpeed * 100),
+      Int16(wetBulbTemperature ?? 0 * 100)
+    ]
+
+    return values.withUnsafeBufferPointer { Data(buffer: $0) }
+  }
+
+  public init(data: Data) {
+    let values = data.withUnsafeBytes { (p: UnsafeRawBufferPointer) -> [Int16] in
+			let p = p.baseAddress!.assumingMemoryBound(to: Int16.self)
+      let buffer = UnsafeBufferPointer(start: p, count: 6)
+      return Array<Int16>(buffer)
+    }
+    self.dni = Float(values[0]) / 10
+    self.dhi = Float(values[1]) / 10
+    self.ghi = Float(values[2]) / 10
+    self.temperature = Float(values[3]) / 100
+    self.windSpeed = Float(values[4]) / 100
+    self.wetBulbTemperature = Float(values[5]) / 100
   }
 }

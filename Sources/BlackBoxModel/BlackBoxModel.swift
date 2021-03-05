@@ -16,7 +16,7 @@ import SolarPosition
 
 public enum BlackBoxModel {
 
-  public private(set) static var yearOfSimulation = 0
+  public private(set) static var yearOfSimulation = 2019
   /// The apparent solar position based on date, time, and location.
   public private(set) static var sun: SolarPosition?
   /// Solar radiation and meteorological elements for a 1-year period.
@@ -30,6 +30,7 @@ public enum BlackBoxModel {
     if let sun = sun, sun.location.coords == location.coordinates {
       return
     }
+    // Calculate sun angles for location
     sun = SolarPosition(
       coords: location.coordinates, tz: location.timezone,
       year: yearOfSimulation, frequence: Simulation.time.steps
@@ -40,24 +41,35 @@ public enum BlackBoxModel {
     }
   }
 
-  public static func configure(meteoFilePath: String? = nil) throws {
+  public static func configure(meteoFilePath: String? = nil, convert: Bool) throws {
     let path = meteoFilePath ?? FileManager.default.currentDirectoryPath
-
+    // Search for the meteo data file
     let handler = try MeteoDataFileHandler(forReadingAtPath: path)
+    // Read the content meteo data file
     meteoData = try handler()
 
     yearOfSimulation = meteoData!.year ?? yearOfSimulation
+    // Check if the sun angles for the location have already been calculated
     if let sun = sun, let coords = meteoData?.location.coordinates,
       coords == sun.location.coords
     {
       return
     }
+
+    // Calculate sun angles for location
     sun = SolarPosition(
       coords: meteoData!.location.coordinates,
       tz: meteoData!.location.timezone,
       year: yearOfSimulation,
       frequence: Simulation.time.steps
     )
+
+    if convert, !handler.isBinaryFile {
+      // Create a binary file 
+      let data = meteoData?.serialized()
+      let url = handler.url.deletingPathExtension().appendingPathExtension("bin")
+      FileManager.default.createFile(atPath: url.path, contents: data)
+    }
   }
 
   public static func loadConfigurations(
@@ -133,6 +145,12 @@ public enum BlackBoxModel {
         // Sets the temperature when the storage does freeze protection
         status.solarField.inletTemperature(storage: status.storage)
       }
+/*
+      status.solarField.header.temperature.inlet = status.solarField.heatLosses(
+        header: status.solarField.header.temperature.inlet,
+        ambient: temperature
+      )
+*/
       // Calculate outlet temperature and mass flow
       status.solarField.calculate(
         dumping: &plant.heatFlow.dumping.watt,
@@ -141,8 +159,10 @@ public enum BlackBoxModel {
 
       if status.solarField.isOperating {
         // Calculate the heat losses in the hot header
-        status.solarField.header.temperature.outlet =
-          status.solarField.heatLossesHotHeader(ambient: temperature)
+        status.solarField.header.temperature.outlet = status.solarField.heatLosses(
+          header: status.solarField.header.temperature.outlet,
+          ambient: temperature
+        )
       }
       // Calculate power consumption of the pumps
       plant.electricalParasitics.solarField = status.solarField.parasitics()

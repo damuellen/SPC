@@ -9,7 +9,7 @@
 //
 
 import DateGenerator
-import Libc
+import Foundation
 import SolarPosition
 
 public class MeteoDataSource {
@@ -36,6 +36,32 @@ public class MeteoDataSource {
     self.statisticsOfDays.reserveCapacity(365)
 
     for day in 1...365 { statistics(ofDay: day) }
+  }
+
+  public init(data: Data, year: Int? = nil) {
+    self.name = ""
+    self.year = year
+    let sizeLocation = 16
+    self.location = Location(data: data.prefix(sizeLocation))
+    let stride = 12
+    let count = (data.count - sizeLocation) / stride
+
+    self.data = (0..<count).map {
+      let startIndex = sizeLocation + $0 * stride
+      let endIndex = startIndex + stride
+      return MeteoData(data: data[startIndex..<endIndex])
+    }
+
+    self.hourFraction = 8760 / Double(self.data.count)
+    self.valuesPerDay = Int(24 / hourFraction)
+
+    self.statisticsOfDays.reserveCapacity(365)
+
+    for day in 1...365 { statistics(ofDay: day) }
+  }
+
+  public func serialized() -> Data {
+    data.reduce(into: location.data) { $0 += $1.data }
   }
 
   public var currentDay: Statistics {

@@ -11,32 +11,48 @@
 import Foundation
 
 public struct MeteoDataFileHandler {
-  
-  private var file: MeteoDataFile
-  
+
+  let 💾 = FileManager.default
+
+  public let isBinaryFile: Bool
+
+  public private(set) var url: URL
+
   public init(forReadingAtPath path: String) throws {
-    let 💾 = FileManager.default
-    
+
     if !💾.fileExists(atPath: path) {
       throw MeteoDataFileError.fileNotFound(path)
     }
     
-    var url = URL(fileURLWithPath: path)
+    url = URL(fileURLWithPath: path)
     
     if url.hasDirectoryPath {
-      if let fileName = try 💾.contentsOfDirectory(atPath: path).first(where: { item in
-        item.hasSuffix("mto") || item.hasPrefix("TMY")
-      }) {
-        url.appendPathComponent(fileName)
+      guard let fileName = try 💾.contentsOfDirectory(atPath: path).first(
+        where: { $0.hasSuffix("mto") || $0.hasPrefix("TMY") }) else {
+          throw MeteoDataFileError.fileNotFound(path)
+      }
+      url.appendPathComponent(fileName)
+      isBinaryFile = false
+    } else {
+      let newUrl = url.deletingPathExtension().appendingPathExtension("bin")
+      let path = newUrl.path
+      if 💾.fileExists(atPath: path) {
+        url = newUrl
+        isBinaryFile = true
       } else {
-        throw MeteoDataFileError.fileNotFound(path)
+        isBinaryFile = false
       }
     }
     print("Meteo file in use:\n  \(url.path)\n")
-    self.file = try url.pathExtension == "mto" ? MET(url) : TMY(url)
   }
   
   public func callAsFunction() throws -> MeteoDataSource {
+    if isBinaryFile, let data = try? Data(contentsOf: url) {
+      return MeteoDataSource(data: data)
+    }
+
+    let file: MeteoDataFile = try url.pathExtension == "mto" 
+      ? MET(url) : TMY(url)
     let metaData = try file.fetchInfo()
     let data = try file.fetchData()
     return MeteoDataSource(name: file.name, data: data, metaData)

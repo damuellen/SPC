@@ -83,6 +83,8 @@ struct SolarPerformanceCalculator: ParsableCommand {
   var parameter: Bool = false
   @Flag(help: "Output performance data to excel.")
   var excel: Bool = false
+  @Flag(help: "Convert meteofile to binary format")
+  var convert: Bool = false
 
   func run() throws {
     let name = "Solar Performance Calculator"
@@ -90,11 +92,13 @@ struct SolarPerformanceCalculator: ParsableCommand {
 
     let path = meteofilePath ?? configPath
 
-    do { try BlackBoxModel.configure(meteoFilePath: path) } catch {
+    do { 
+      try BlackBoxModel.configure(meteoFilePath: path, convert: convert) } catch {
 #if os(Windows)
       if case MeteoDataFileError.fileNotFound = error {
         guard let path = FileDialog() else { return }
-        do { try BlackBoxModel.configure(meteoFilePath: path) } catch {
+        do { 
+          try BlackBoxModel.configure(meteoFilePath: path, convert: convert) } catch {
           MessageBox(text: (error as! MeteoDataFileError).description, caption: name)
           return
         }
@@ -154,7 +158,7 @@ struct SolarPerformanceCalculator: ParsableCommand {
     )
 
     SolarPerformanceCalculator.result = BlackBoxModel.runModel(with: log)
-
+    // plot(interval: DateInterval(ofWeek: 17, in: year))
     log.clearResults()
   }
 
@@ -163,31 +167,54 @@ struct SolarPerformanceCalculator: ParsableCommand {
     abstract: "Simulates the performance of entire solar thermal power plants."
   )
 
-  func plotLoops(interval: DateInterval) {
+  func plot(interval: DateInterval) {
+    do {
+      let ys = SolarPerformanceCalculator.result.power(range: interval)
+      let plot = TimeSeriesPlot(y1: ys.0, y2: ys.1, range: interval)
+      plot.y1Titles = ["solar", "toStorage", "storage", "production"]
+      plot.y2Titles = ["gross", "net", "consum"]
+      try! plot(toFile: "power")
+    }
+    do {
+      let ys = SolarPerformanceCalculator.result[\.collector.insolationAbsorber, range: interval]
+      let plot = TimeSeriesPlot(y1: ys,range: interval)
+      plot.y1Titles = ["MassFlow"]
+      plot.y2Titles = ["T in", "T out"]
+      try! plot(toFile: "insol")
+    }
+    do {
+      let ys = SolarPerformanceCalculator.result.solarFieldHeader(range: interval)
+      let plot = TimeSeriesPlot(y1: ys.0, y2: ys.1, range: interval, style: .impulses)
+      plot.y1Titles = ["MassFlow"]
+      plot.y2Titles = ["T in", "T out"]
+      try! plot(toFile: "header")
+    }
     do {
       let ys = SolarPerformanceCalculator.result[\.solarField.loops[0], range: interval]
-      let plot = TimeSeriesPlot(y1: ys.0, y2: ys.1, range: interval)
+      let plot = TimeSeriesPlot(y1: ys.0, y2: ys.1, range: interval, style: .impulses)
       plot.y1Titles = ["MassFlow"]
       plot.y2Titles = ["T in", "T out"]
       try! plot(toFile: "loop0")
     }
     do {
-      let ys = SolarPerformanceCalculator.result[\.solarField.loops[1], range: interval]
-      let plot = TimeSeriesPlot(y1: ys.0, y2: ys.1, range: interval)
-      plot.y1Titles = ["MassFlow"]
-      plot.y2Titles = ["T in", "T out"]
-      try! plot(toFile: "loop1")
+      let ys1 = SolarPerformanceCalculator.result.solarFieldHeader(range: interval)
+      let ys2 = SolarPerformanceCalculator.result[\.solarField.loops[1], range: interval]
+      let ys = (ys1.0 + ys2.0, ys1.1 + ys2.1)
+      let plot = TimeSeriesPlot(y1: ys.0, y2: ys.1, range: interval, style: .impulses)
+      plot.y1Titles = ["Header MassFlow", "Loop MassFlow"]
+      plot.y2Titles = ["Header T in", "Header T out", "Loop T in", "Loop T out"]
+     // try! plot(toFile: "loop1")
     }
     do {
       let ys = SolarPerformanceCalculator.result[\.solarField.loops[2], range: interval]
-      let plot = TimeSeriesPlot(y1: ys.0, y2: ys.1, range: interval)
+      let plot = TimeSeriesPlot(y1: ys.0, y2: ys.1, range: interval, style: .impulses)
       plot.y1Titles = ["MassFlow"]
       plot.y2Titles = ["T in", "T out"]
       try! plot(toFile: "loop2")
     }
     do {
       let ys = SolarPerformanceCalculator.result[\.solarField.loops[3], range: interval]
-      let plot = TimeSeriesPlot(y1: ys.0, y2: ys.1, range: interval)
+      let plot = TimeSeriesPlot(y1: ys.0, y2: ys.1, range: interval, style: .impulses)
       plot.y1Titles = ["MassFlow"]
       plot.y2Titles = ["T in", "T out"]
       try! plot(toFile: "loop3")
