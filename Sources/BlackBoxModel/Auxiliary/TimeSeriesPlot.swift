@@ -74,7 +74,7 @@ public class TimeSeriesPlot {
     var code: String = ""
     if let file = toFile {
       code = """
-        set terminal pdf size 36,20 enhanced color font 'Helvetica,14' lw 1;
+        set terminal pdf size 17,12 enhanced color font 'Helvetica,12' lw 1;
         set output \"\(file).pdf\";
         set title '\(file)';
         """
@@ -104,7 +104,7 @@ public class TimeSeriesPlot {
       "autoscale",
       "autoscale y2",
       "ytics nomirror 50",
-      "y2tics;",
+      "y2tics 10"
     ].map { "set " + $0 }.joined(separator: ";")
   }
 
@@ -115,16 +115,16 @@ public class TimeSeriesPlot {
       plotCommands =
         ["plot '-' using ($0*\(freq)+\(xr.start)):1 t '\(y1Titles.first!)' axes x1y1 w l lw 2"]
         + y1.indices.dropFirst().map { i in
-          "'' using ($0*\(freq)+\(xr.start)):1 t '\(y1Titles[i])' axes x1y1 with l lw 4"
+          "'' using ($0*\(freq)+\(xr.start)):1 t '\(y1Titles[i])' axes x1y1 with l lw 2"
         }
         + y2.indices.map { i in
-          "'' using ($0*\(freq)+\(xr.start)):1 t '\(y2Titles[i])' axes x1y2 with l lw 4"
+          "'' using ($0*\(freq)+\(xr.start)):1 t '\(y2Titles[i])' axes x1y2 with l lw 2"
         }
     case .impulses:
       plotCommands =
-        ["plot '-' using ($0*\(freq)+\(xr.start)):1 t '\(y1Titles.first!)' axes x1y1 w i lw 2"]
+        ["plot '-' using ($0*\(freq)+\(xr.start)):1 t '\(y1Titles.first!)' axes x1y1 w i lw 3"]
         + y1.indices.dropFirst().map { i in
-          "'' using ($0*\(freq)+\(xr.start + (freq / Double(y1.count)) * Double(i))):1 t '\(y1Titles[i])' axes x1y1 w i lw 2"
+          "'' using ($0*\(freq)+\(xr.start + (freq / Double(y1.count)) * Double(i))):1 t '\(y1Titles[i])' axes x1y1 w i lw 3"
         }
         + y2.indices.map { i in
           "'' using ($0*\(freq)+\(xr.start)):1 t '\(y2Titles[i])' axes x1y2 w l lw 2"

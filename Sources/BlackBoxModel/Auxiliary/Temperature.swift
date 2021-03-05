@@ -41,10 +41,12 @@ public struct Temperature: CustomStringConvertible, Equatable {
   }
 
   public init(_ kelvin: Double) {
-    assert(kelvin.isFinite)
-    assert(kelvin.isNormal)
-    assert(kelvin.sign == .plus)
-    self.kelvin = kelvin
+    if kelvin < 0 {
+      self.kelvin = 0
+    } else {
+      assert(kelvin.isFinite)
+      self.kelvin = kelvin
+    }
   }
 
   typealias T = Temperature

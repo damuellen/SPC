@@ -24,4 +24,23 @@ extension MeasurementsConvertible {
       return result + (desc.name * (value + " " + desc.unit))
     }
   }
+
+  var barChart: String {
+    let maxValue = numericalForm.max() ?? 0
+    let increment = maxValue
+    return zip(numericalForm, Self.columns).reduce("\n") { result, pair in
+      let (value, desc) = (pair.0.asString(), pair.1.name)
+      let c = 34 - desc.count - value.count
+      let text = desc + String(repeating: " ", count: c) + value
+      let r = result + text + " "
+      if pair.0.isZero { return result }
+      let (bar_chunks, remainder) = Int(pair.0 * maxValue / increment)
+        .quotientAndRemainder(dividingBy: 8)
+      let full = UnicodeScalar("█").value
+      let fractionalPart = remainder > 0
+        ? String(UnicodeScalar(full + UInt32(8 - remainder))!) : ""
+      return r + String(repeating: "█", count: bar_chunks)
+        + fractionalPart + .lineBreak
+    }
+  }
 }

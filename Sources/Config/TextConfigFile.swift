@@ -47,7 +47,7 @@ public struct TextConfigFile {
     guard self.values.indices.contains(idx) else {
       return nil
     }
-    return self.values[idx].trimmingCharacters(in: .whitespaces)
+    return self.values[idx].trimWhitespace()
   }
 
   public func string(_ line: Int) throws -> String {
@@ -86,5 +86,24 @@ extension TextConfigFile.ReadError: CustomStringConvertible {
     case let .missingValueInLine(line, path):
       return "\(path) missing value in line \(line)."
     }
+  }
+}
+
+extension Character {
+  fileprivate var isASCIIWhitespace: Bool {
+    self == " " || self == "\t"
+  }
+}
+
+extension String {
+  fileprivate func trimWhitespace() -> String {
+    var me = Substring(self)
+    while me.first?.isASCIIWhitespace == .some(true) {
+      me = me.dropFirst()
+    }
+    while me.last?.isASCIIWhitespace == .some(true) {
+      me = me.dropLast()
+    }
+    return String(me)
   }
 }

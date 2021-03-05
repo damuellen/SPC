@@ -11,18 +11,18 @@
 import Foundation
 
 public struct MeteoDataFileHandler {
-
+  
   private var file: MeteoDataFile
-
+  
   public init(forReadingAtPath path: String) throws {
     let 💾 = FileManager.default
-
+    
     if !💾.fileExists(atPath: path) {
       throw MeteoDataFileError.fileNotFound(path)
     }
-
+    
     var url = URL(fileURLWithPath: path)
-
+    
     if url.hasDirectoryPath {
       if let fileName = try 💾.contentsOfDirectory(atPath: path).first(where: { item in
         item.hasSuffix("mto") || item.hasPrefix("TMY")
@@ -35,7 +35,7 @@ public struct MeteoDataFileHandler {
     print("Meteo file in use:\n  \(url.path)\n")
     self.file = try url.pathExtension == "mto" ? MET(url) : TMY(url)
   }
-
+  
   public func callAsFunction() throws -> MeteoDataSource {
     let metaData = try file.fetchInfo()
     let data = try file.fetchData()
@@ -46,8 +46,8 @@ public struct MeteoDataFileHandler {
 public enum MeteoDataFileError: Error {
   case fileNotFound(String)
   case missingValueInLine(Int)
-  case unexpectedRowCount, empty, startNotFound,
-    unknownLocation, unknownDelimeter
+  case unexpectedRowCount, empty,
+       unknownLocation, unknownDelimeter
 }
 
 protocol MeteoDataFile {
@@ -58,94 +58,73 @@ protocol MeteoDataFile {
 
 private struct MET: MeteoDataFile {
   let name: String
-  let content: [[String]]
-
+  let metadata: [String]
+  let data: [[Float]]
+  
   init(_ url: URL) throws {
     let rawData = try Data(contentsOf: url)
     self.name = url.lastPathComponent
-
+    
     let newLine = UInt8(ascii: "\n")
     let cr = UInt8(ascii: "\r")
     let separator = UInt8(ascii: ",")
-
+    
     guard let firstNewLine = rawData.firstIndex(of: newLine) else {
       throw MeteoDataFileError.empty
     }
-
+    
     guard let _ = rawData.firstIndex(of: separator) else {
       throw MeteoDataFileError.unknownDelimeter
     }
-
-    if rawData[rawData.index(before: firstNewLine)] == cr {
-      self.content = rawData.withUnsafeBytes { content in
-        // Outter array
-        return content.split(separator: newLine).map { line in
-          // Inner array
-          return line.dropLast().split(separator: separator).map { slice in
-            return String(
-              decoding: UnsafeRawBufferPointer(rebasing: slice),
-              as: UTF8.self)
+    
+    let hasCR = rawData[rawData.index(before: firstNewLine)] == cr
+    
+    (metadata, data) = try rawData.withUnsafeBytes { content throws in
+      let lines = content.split(separator: newLine, maxSplits: 10,
+                                omittingEmptySubsequences: false)
+      guard lines.endIndex > 10 else { throw MeteoDataFileError.empty }
+      return (
+        lines[0..<10].map { line in
+          let line = hasCR ? line.dropLast() : line
+          let buffer = UnsafeRawBufferPointer(rebasing: line)
+          return String(decoding: buffer, as: UTF8.self)
+        },
+        lines[10].split(separator: newLine).map { line in
+          let line = hasCR ? line.dropLast() : line
+          return line.split(separator: separator).dropFirst(3).map { slice in
+            let buffer = UnsafeRawBufferPointer(rebasing: slice)
+              .baseAddress!.assumingMemoryBound(to: Int8.self)
+            return strtof(buffer, nil)
           }
         }
-      }
-    } else {
-      self.content = rawData.withUnsafeBytes { content in
-        // Outter array
-        return content.split(separator: newLine).map { line in
-          // Inner array
-          return line.split(separator: separator).map { slice in
-            return String(
-              decoding: UnsafeRawBufferPointer(rebasing: slice),
-              as: UTF8.self)
-          }
-        }
-      }
+      )
     }
   }
-
+  
   func fetchInfo() throws -> (year: Int, location: Location) {
-    var metaData = content.dropFirst().prefix(4)
-
-    guard let y = metaData.popFirst()?.first, let year = Int(y)
+    guard let year = Int(metadata[1])
     else { throw MeteoDataFileError.empty }
-
-    guard let long = metaData.popFirst()?.first,
-      let lat = metaData.popFirst()?.first,
-      let lat_tz = metaData.popFirst()?.first,
-      let longitude = Double(long), 
-      let latitude = Double(lat),
-      let tz = Int(lat_tz)      
+    
+    guard let longitude = Double(metadata[2]),
+          let latitude = Double(metadata[3]),
+          let lat_tz = Int(metadata[4])
     else { throw MeteoDataFileError.unknownLocation }
-    let timezone = -tz / 15
+    
+    let timezone = -lat_tz / 15
     let location = Location(
       (-longitude, latitude, 0), timezone: timezone
     )
-
     return (year, location)
   }
-
+  
   func fetchData() throws -> [MeteoData] {
-    let prefix = "1"
-
-    guard
-      let startIndex = content.firstIndex(where:
-        { $0.first?.hasPrefix(prefix) ?? false }
-      )
-    else { throw MeteoDataFileError.startNotFound }
-
-    let dataRange = startIndex..<content.endIndex
     // Check whether the dataRange matches one year of values.
-    guard dataRange.count.isMultiple(of: 8760)
+    guard data.count.isMultiple(of: 8760)
     //  || dataRange.count.isMultiple(of: 8764)
     else { throw MeteoDataFileError.unexpectedRowCount }
-    var line = startIndex + 1
-
-    return try content[dataRange].indices.map { idx in
-      let values = content[idx].dropFirst(3).compactMap(Float.init)
-
+    return try zip(data, 11...).map { values, line in
       guard values.count > 2
       else { throw MeteoDataFileError.missingValueInLine(line) }
-      line += 1
       return MeteoData(meteo: values)
     }
   }
@@ -162,12 +141,10 @@ extension MeteoDataFileError: CustomStringConvertible {
       return "Meteo file not found at: \(path)"
     case .unknownLocation:
       return "Meteo file does not contain a location."
-    case .startNotFound:
-      return "Meteo file format is unknown."
     case .unknownDelimeter:
       return "Meteo file unknown delimeter for values."
     case .empty:
-      return "Meteo file is empty."
+      return "Meteo file does not contain data."
     }
   }
 }
@@ -175,47 +152,46 @@ extension MeteoDataFileError: CustomStringConvertible {
 private struct TMY: MeteoDataFile {
   let name: String
   let content: (headers1: [Float], headers2: [String], values: [[Float]])
-
+  
   init(_ url: URL) throws {
     let rawData = try Data(contentsOf: url)
     self.name = url.lastPathComponent
-
+    
     let newLine = UInt8(ascii: "\n")
     let separator = UInt8(ascii: ",")
-
+    
     guard let _ = rawData.firstIndex(of: newLine) else {
       throw MeteoDataFileError.empty
     }
-
+    
     guard let _ = rawData.firstIndex(of: separator) else {
       throw MeteoDataFileError.unknownDelimeter
     }
-
-    self.content = try rawData.withUnsafeBytes { content throws in
-      let lines = content.split(separator: newLine)
+    
+    content = try rawData.withUnsafeBytes { content throws in
+      let lines = content.split(separator: newLine, maxSplits: 2)
       guard lines.endIndex > 2 else { throw MeteoDataFileError.empty }
       return (
         lines[0].split(separator: separator).dropFirst(3).map { slice in
-          let pointer = UnsafeRawBufferPointer(rebasing: slice)
+          let buffer = UnsafeRawBufferPointer(rebasing: slice)
             .baseAddress!.assumingMemoryBound(to: Int8.self)
-          return strtof(pointer, nil)
+          return strtof(buffer, nil)
         },
         lines[1].split(separator: separator).dropFirst(2).map { slice in
-          return String(
-            decoding: UnsafeRawBufferPointer(rebasing: slice),
-            as: UTF8.self)
+          let buffer = UnsafeRawBufferPointer(rebasing: slice)
+          return String(decoding: buffer, as: UTF8.self)
         },
-        lines[2...].map { line in
+        lines[2].split(separator: newLine).map { line in
           line.split(separator: separator).dropFirst(2).map { slice in
-            let pointer = UnsafeRawBufferPointer(rebasing: slice)
+            let buffer = UnsafeRawBufferPointer(rebasing: slice)
               .baseAddress!.assumingMemoryBound(to: Int8.self)
-            return strtof(pointer, nil)
+            return strtof(buffer, nil)
           }
         }
       )
     }
   }
-
+  
   func fetchLocation() throws -> Location {
     let values = content.headers1
     guard values.endIndex > 3
@@ -228,12 +204,12 @@ private struct TMY: MeteoDataFile {
       (longitude,  latitude,  elevation), timezone: tz
     )
   }
-
+  
   func fetchTimeZone() -> Int {
     let tz = content.headers1.first ?? 0
     return Int(-tz)
   }
-
+  
   func fetchYear() -> Int { 2011 }
 
   func fetchInfo() throws -> (year: Int, location: Location) {
@@ -261,9 +237,6 @@ private struct TMY: MeteoDataFile {
       }
     }
 
-    if Set(order).count < 5 {
-      throw MeteoDataFileError.startNotFound
-    }
     let last = Set(order).max()!
     return try zip(dataRange, 3...).map { data, line in
       guard data.endIndex > last else {

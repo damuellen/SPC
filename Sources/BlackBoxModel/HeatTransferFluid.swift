@@ -132,7 +132,7 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
     return Temperature(t)
   }
 */
-  @_transparent private static func temperatureFromHeat(
+  private static func temperatureFromHeat(
     _ heat: Double, _ temperature: Double, coefficients: [Double]
   )
     -> Double
@@ -169,7 +169,7 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
     return temperature
   }
 
-  @_transparent private static func heatExchanged(
+  private static func heatExchanged(
     from high: Double, to low: Double, heatCapacity: [Double]
   )
     -> Double
@@ -179,7 +179,7 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
     return q
   }
   
-  @_transparent private static func heatExchanged(
+  private static func heatExchanged(
     from high: Double, to low: Double, coefficients: [Double]
   )
     -> Double

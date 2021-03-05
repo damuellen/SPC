@@ -286,13 +286,9 @@ public struct Plant {
         switch (solarField, storage) {
           case (.operating, .discharge):
             status.powerBlock.connectTo(status.solarField, status.storage)
-          case (.operating, .charge):
+          case (_, .charge):
             status.powerBlock.massFlow = 
               status.solarField.massFlow - status.storage.massFlow
-          case (.operating, .noOperation):
-            status.powerBlock.massFlow(outlet: status.solarField)
-          case (.freezeProtection, .noOperation):
-            status.powerBlock.massFlow(outlet: status.solarField)
           case (_, .discharge):
             status.powerBlock.massFlow(outlet: status.storage)
           case (_, _): break         

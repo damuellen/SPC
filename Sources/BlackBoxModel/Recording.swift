@@ -84,7 +84,7 @@ public struct Recording: CustomStringConvertible, Comparable {
   public subscript(
     keyPath: KeyPath<Status, Cycle>, interval: DateInterval
   ) -> [[Double]] {
-    if statusHistory.isEmpty { return [] } 
+    if statusHistory.isEmpty { return [] }
     let r = range(of: interval).clamped(to: statusHistory.indices)
     return statusHistory[r].map { $0[keyPath: keyPath].cycle.numericalForm }
   }
@@ -99,6 +99,36 @@ public struct Recording: CustomStringConvertible, Comparable {
     range range: DateInterval
   ) -> [[Double]] {
     keyPaths.map { kp in self[kp, range] }
+  }
+
+  subscript(
+    keyPath: KeyPath<Status, HeatTransfer>, interval: DateInterval
+  ) -> [[Double]] {
+    if statusHistory.isEmpty { return [] } 
+    let r = range(of: interval).clamped(to: statusHistory.indices)
+    return statusHistory[r].map { $0[keyPath: keyPath].numericalForm }
+  }
+
+  public func solarFieldHeader(range: DateInterval) -> ([[Double]], [[Double]]) {
+    let (m, i, o) = self[\.solarField.header, range].reduce(into: ([Double](), [Double](), [Double]())) {
+      $0.0.append($1[0])
+      $0.1.append($1[1])
+      $0.2.append($1[2])
+    }
+    return ([m], [i, o])
+  }
+
+  public func power(range: DateInterval) -> ([[Double]], [[Double]]) {
+    let s = self[\.thermal.solar.megaWatt, range]
+    let t1 = self[\.thermal.toStorage.megaWatt, range]
+    let t2 = self[\.thermal.storage.megaWatt, range]
+    let p = self[\.thermal.production.megaWatt, range]
+
+    let g = self[\.electric.steamTurbineGross, range]
+    let n = self[\.electric.net, range]
+    let c = self[\.electric.consum, range]
+
+    return ([s, t1, t2, p], [g, n, c])
   }
 
   public subscript(_ keyPath: KeyPath<Status, Cycle>,

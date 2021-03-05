@@ -189,23 +189,20 @@ public struct ThermalEnergy: Encodable, MeasurementsConvertible {
 
   var numericalForm: [Double] {
     [
-      solar.megaWatt, dumping.megaWatt,
+      demand.megaWatt, solar.megaWatt, dumping.megaWatt,
       toStorage.megaWatt, storage.megaWatt,
       heater.megaWatt, heatExchanger.megaWatt,
-      startUp.megaWatt, wasteHeatRecovery.megaWatt,
-      boiler.megaWatt, production.megaWatt,
+      startUp.megaWatt, production.megaWatt
     ]
   }
 
   static var columns: [(name: String, unit: String)] {
     [
+      ("Thermal|Demand", "MWh th"),
       ("Thermal|Solar", "MWh th"), ("Thermal|Dumping", "MWh th"),
       ("Thermal|ToStorage", "MWh th"), ("Thermal|Storage", "MWh th"),
       ("Thermal|Heater", "MWh th"), ("Thermal|HeatExchanger", "MWh th"),
-      ("Thermal|Startup", "MWh th"),
-      ("Thermal|WasteHeatRecovery", "MWh th"),
-      ("Thermal|Boiler", "MWh th"),
-      ("Thermal|Production", "MWh th"),
+      ("Thermal|Startup", "MWh th"), ("Thermal|Production", "MWh th")
     ]
   }
 
@@ -272,9 +269,7 @@ public struct FuelConsumption: Encodable, MeasurementsConvertible {
 
 extension PlantPerformance: CustomStringConvertible {
   public var description: String {
-    thermal.prettyDescription
-      + electric.prettyDescription
-      + fuel.prettyDescription
-      + parasitics.prettyDescription
+    thermal.barChart + electric.barChart
+      + fuel.barChart + parasitics.barChart
   }
 }

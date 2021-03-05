@@ -95,7 +95,7 @@ public class MeteoDataGenerator: Sequence {
       var meteo: MeteoData
       switch method {
       case .linear:
-      meteo = MeteoData.lerp(start: curr, end: next, Float(step) * stride)
+      meteo = MeteoData.lerp(start: prev, end: curr, Float(step) * stride)
       case .gradient:
         if idx0 == idx1 {
           meteo = MeteoData.interpolation(
