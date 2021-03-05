@@ -159,10 +159,8 @@ public enum BlackBoxModel {
 
       if status.solarField.isOperating {
         // Calculate the heat losses in the hot header
-        status.solarField.header.temperature.outlet = status.solarField.heatLosses(
-          header: status.solarField.header.temperature.outlet,
-          ambient: temperature
-        )
+        status.solarField.header.temperature.outlet =
+          status.solarField.heatLossesHotHeader(ambient: temperature)
       }
       // Calculate power consumption of the pumps
       plant.electricalParasitics.solarField = status.solarField.parasitics()
