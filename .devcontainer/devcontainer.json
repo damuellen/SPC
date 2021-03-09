@@ -4,7 +4,7 @@
 		"dockerfile": "Dockerfile",
 		"args": {
 			// Update the VARIANT arg to pick a Swift version
-			"VARIANT": "5.3.2",
+			"VARIANT": "nightly-5.4",
 			// Options
 			"INSTALL_NODE": "false",
 			"NODE_VERSION": "lts/*"
@@ -24,6 +24,7 @@
 		"lldb.evaluateForHovers": false,
 		"swift.path.swift_driver_bin": "/usr/bin/swift",
 		"sde.languageservermode": "sourcekit-lsp",
+		"sde.buildOnSave": false,
 		"sourcekit-lsp.toolchainPath": "/usr/bin/",
 		"sourcekit-lsp.serverPath": "/usr/bin/sourcekit-lsp"
 	},
