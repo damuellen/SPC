@@ -33,7 +33,6 @@ jobs:
     - name: Generate Documentation
       uses: SwiftDocOrg/swift-doc@master
       with:
-        format: html
         module-name: BlackBoxModel
     
     - name: Upload Documentation
