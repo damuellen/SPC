@@ -3,8 +3,8 @@ import PackageDescription
 
 let condition = BuildSettingCondition.when(configuration: .release)
 let c = [CSetting.unsafeFlags(["-ffast-math", "-O3",  "-fomit-frame-pointer", "-funroll-loops"])]
-let flags = ["-cross-module-optimization", "-Ounchecked", "-enforce-exclusivity=unchecked", "-DRELEASE"]
-var swift = [SwiftSetting.unsafeFlags(flags, condition)]
+let s = ["-cross-module-optimization", "-Ounchecked", "-enforce-exclusivity=unchecked", "-DRELEASE"]
+var swift = [SwiftSetting.unsafeFlags(s, condition)]
 swift.append(.define("DEBUG", .when(configuration: .debug)))
 let package = Package(
   name: "SPC",
