@@ -1,6 +1,6 @@
 name: CI – Windows
 
-on: []
+on: [push]
 
 jobs:
   continuous-integration:
