@@ -18,7 +18,8 @@ jobs:
     - name: Get the lines of code.
       id: scc
       uses: iryanbell/scc-docker-action@v1.0.0
-      with: args: ${{ env.workspace }} -i swift
+      with: 
+        args: ${{ env.workspace }} -i swift
 
     - name: Update package dependencies
       run: swift package update
