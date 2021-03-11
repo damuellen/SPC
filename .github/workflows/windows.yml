@@ -54,6 +54,7 @@ jobs:
         run: |
           llvm-strip -S --keep-file-symbols .build\x86_64-unknown-windows-msvc\release\SolarPerformanceCalc.exe
           llvm-strip -S --keep-file-symbols .build\x86_64-unknown-windows-msvc\release\SolarFieldCalc.exe
+          llvm-strip -S --keep-file-symbols .build\x86_64-unknown-windows-msvc\release\TransTES.exe
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v2
@@ -62,3 +63,4 @@ jobs:
           path: |
             .build\x86_64-unknown-windows-msvc\release\SolarPerformanceCalc.exe
             .build\x86_64-unknown-windows-msvc\release\SolarFieldCalc.exe
+            .build\x86_64-unknown-windows-msvc\release\TransTES.exe

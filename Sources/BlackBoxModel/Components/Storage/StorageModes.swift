@@ -237,7 +237,7 @@ extension Storage {
 
     storage.temperature.outlet = outletTemperature(storage)
 
-    var thermalPower: Power = .zero    
+    var thermalPower: Power = .zero
     var parasitics: Power = .zero
     
     while true

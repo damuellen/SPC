@@ -144,6 +144,26 @@ extension DateInterval {
   }
 }
 
+
+extension Date {
+  public init(ofMonth month: Int, in year: Int) {
+    var dateComponents = DateComponents()
+    dateComponents.timeZone = calendar.timeZone
+    dateComponents.day = 1
+    dateComponents.month = month
+    dateComponents.year = year
+    self = calendar.date(from: dateComponents)!
+  }
+
+  public init(ofDay day: Int, in year: Int) {
+    var dateComponents = DateComponents()
+    dateComponents.timeZone = calendar.timeZone
+    dateComponents.day = day
+    dateComponents.year = year
+    self = calendar.date(from: dateComponents)!
+  }
+}
+
 extension TimeInterval {
   var minutes: TimeInterval { self * 60.0 }
   var hours: TimeInterval { self * 3600.0 }
