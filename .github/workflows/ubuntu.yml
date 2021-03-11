@@ -34,15 +34,16 @@ jobs:
       uses: SwiftDocOrg/swift-doc@master
       with:
         module-name: BlackBoxModel
+
+    - name: Publish PDF Document
+      uses: shrink/actions-document-publish@v1
+      id: publish-document
+      with:
+        sources: '.build/documentation/*.md'
         
-    - name: Zip Documentation
-      uses: papeloto/action-zip@v1
-      with:
-        files: .build/documentation/
-        dest: documentation.zip
-    
-    - name: Upload Documentation
+    - name: Upload Document
       uses: actions/upload-artifact@v2
+      id: upload-document
       with:
-        name: documentation
-        path: ./documentation.zip
+        name: 'document.pdf'
+        path: ${{ steps.publish-document.outputs.pdf }}
