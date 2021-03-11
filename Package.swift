@@ -19,7 +19,7 @@ let package = Package(
    // .library(name: "Utility", type: .dynamic, targets: ["Utility"])
     ],
   dependencies: [
-    .package(url: "https://github.com/apple/swift-argument-parser.git", .exact("0.4.0")),
+    .package(url: "https://github.com/apple/swift-argument-parser.git", .upToNextMinor(from: "0.4.0")),
     .package(url: "https://github.com/damuellen/SQLite.swift.git", .branch("master")),
     .package(url: "https://github.com/damuellen/xlsxwriter.swift.git", .branch("main")),
     .package(url: "https://github.com/jpsim/Yams.git", from: "4.0.1")
