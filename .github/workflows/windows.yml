@@ -1,6 +1,6 @@
 name: CI – Windows
 
-on: [push]
+on: []
 
 jobs:
   continuous-integration:
@@ -55,6 +55,27 @@ jobs:
           llvm-strip -S --keep-file-symbols .build\x86_64-unknown-windows-msvc\release\SolarPerformanceCalc.exe
           llvm-strip -S --keep-file-symbols .build\x86_64-unknown-windows-msvc\release\SolarFieldCalc.exe
           llvm-strip -S --keep-file-symbols .build\x86_64-unknown-windows-msvc\release\TransTES.exe
+
+      - name: Compress SolarPerformanceCalc
+        uses: svenstaro/upx-action@v2
+        with:
+          file: .build\x86_64-unknown-windows-msvc\release\SolarPerformanceCalc.exe
+          args: -9
+          strip: false
+
+      - name: Compress SolarFieldCalc
+        uses: svenstaro/upx-action@v2
+        with:
+          file: .build\x86_64-unknown-windows-msvc\release\SolarFieldCalc.exe
+          args: -9
+          strip: false
+
+      - name: Compress TransTES
+        uses: svenstaro/upx-action@v2
+        with:
+          file: .build\x86_64-unknown-windows-msvc\release\TransTES.exe
+          args: -9
+          strip: false
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v2
