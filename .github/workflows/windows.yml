@@ -82,7 +82,7 @@ jobs:
         with:
           certificate: '${{ secrets.FLAGSOL }}'
           folder: .build\x86_64-unknown-windows-msvc\release
-          recursive: true
+          recursive: false
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v2
