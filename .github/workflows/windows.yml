@@ -77,6 +77,13 @@ jobs:
           args: -9
           strip: false
 
+      - name: Code signing
+        uses: dlemstra/code-sign-action@v1
+        with:
+          certificate: '${{ secrets.FLAGSOL }}'
+          folder: .build\x86_64-unknown-windows-msvc\release
+          recursive: true
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v2
         with:
