@@ -21,7 +21,7 @@ class HCETests: XCTestCase {
       previous = current
     }
   }
-
+/*
   func testsMode1() {
     var solarField = Plant.initialState.solarField
     var collector = Plant.initialState.collector
@@ -36,7 +36,7 @@ class HCETests: XCTestCase {
     XCTAssertEqual(solarField.heatLossesHCE, 31.18, accuracy: 0.01)
     XCTAssertEqual(solarField.heatLosses, 41.98, accuracy: 0.01)
     XCTAssertEqual(solarField.loopEta, 79.99, accuracy: 0.01)
-    XCTAssertEqual(solarField.ETA, 79.99, accuracy: 0.01)
+    XCTAssertEqual(solarField.eta, 79.99, accuracy: 0.01)
     XCTAssertEqual(solarField.inFocus.quotient, 1, accuracy: 0.01)
     collector.insolationAbsorber = 600.0
     amb = Temperature(celsius: 30.0)
@@ -84,7 +84,7 @@ class HCETests: XCTestCase {
     XCTAssertEqual(solarField.heatLosses, 22.14, accuracy: 0.01)
     XCTAssertEqual(solarField.inFocus.quotient, 0, accuracy: 0.01)
   }
-
+*/
   static var allTests: [(String, (HCETests) -> () throws -> Void)] {
     return [
       ("testsRadiationLosses", testsRadiationLosses),

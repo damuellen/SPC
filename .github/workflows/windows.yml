@@ -50,12 +50,6 @@ jobs:
       - name: Build Release Mode
         run: swift build -c release
 
-      - name: Strip Debug Info
-        run: |
-          llvm-strip -S --keep-file-symbols .build\x86_64-unknown-windows-msvc\release\SolarPerformanceCalc.exe
-          llvm-strip -S --keep-file-symbols .build\x86_64-unknown-windows-msvc\release\SolarFieldCalc.exe
-          llvm-strip -S --keep-file-symbols .build\x86_64-unknown-windows-msvc\release\TransTES.exe
-
       - name: Compress SolarPerformanceCalc
         uses: svenstaro/upx-action@v2
         with:

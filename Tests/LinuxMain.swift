@@ -5,7 +5,7 @@ import XCTest
 
 XCTMain([
   testCase(MeteoTests.allTests),
- //testCase(BlackBoxModelTests.allTests),
+ // testCase(BlackBoxModelTests.allTests),
   testCase(BoilerTests.allTests),
   testCase(CollectorTests.allTests),
  // testCase(DryCoolingTests.allTests),
@@ -15,9 +15,9 @@ XCTMain([
   testCase(HeatTransferFluidTests.allTests),
   testCase(PlantTests.allTests),
   testCase(PowerBlockTests.allTests),
- // testCase(SolarFieldTests.allTests),
+  testCase(SolarFieldTests.allTests),
   testCase(SteamTurbineTests.allTests),
- // testCase(StorageTests.allTests),
+  testCase(StorageTests.allTests),
   testCase(WasteHeatRecoveryTests.allTests),
   testCase(SolarFieldModelTests.allTests),
 ])

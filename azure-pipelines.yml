@@ -33,7 +33,7 @@ steps:
   inputs:
     targetType: 'inline'
     script: |
-      Install-Binary -Url "https://swift.org/builds/development/windows10/swift-DEVELOPMENT-SNAPSHOT-03-09-a/swift-DEVELOPMENT-SNAPSHOT-03-09-a-windows10.exe" -Name "installer.exe" -ArgumentList ("-q")
+      Install-Binary -Url "https://swift.org/builds/development/windows10/swift-DEVELOPMENT-SNAPSHOT-03-21-a/swift-DEVELOPMENT-SNAPSHOT-03-21-a-windows10.exe" -Name "installer.exe" -ArgumentList ("-q")
       Write-Host "##vso[task.prependpath]$(toolchain.directory)"
       Write-Host "##vso[task.prependpath]$(bin.directory)"
       Write-Host "##vso[task.prependpath]$(icu.directory)"
@@ -61,16 +61,11 @@ steps:
   displayName: Build sqlite3
 
 - script: |
-    swift build -c release
+    swift build -v -c release
   env:
     SDKROOT: C:\Library\Developer\Platforms\Windows.platform\Developer\SDKs\Windows.sdk
     DEVELOPER_DIR: C:\Library\Developer
   displayName: 'Build swift package'
-
-- script: |
-    llvm-strip -S --keep-file-symbols $(System.DefaultWorkingDirectory)\.build\x86_64-unknown-windows-msvc\release\SolarPerformanceCalc.exe
-    llvm-strip -S --keep-file-symbols $(System.DefaultWorkingDirectory)\.build\x86_64-unknown-windows-msvc\release\SolarFieldCalc.exe
-  displayName: 'Strip symbols'
 
 - task: CopyFiles@2
   inputs:

@@ -4,8 +4,8 @@ import PackageDescription
 let condition = BuildSettingCondition.when(configuration: .release)
 let c = [CSetting.unsafeFlags(["-ffast-math", "-O3",  "-fomit-frame-pointer", "-funroll-loops"])]
 let s = ["-cross-module-optimization", "-Ounchecked", "-enforce-exclusivity=unchecked", "-DRELEASE"]
-var swift = [SwiftSetting.unsafeFlags(s, condition)]
-swift.append(.define("DEBUG", .when(configuration: .debug)))
+let linker = [LinkerSetting.unsafeFlags(["-Xlinker", "-s"], condition)]
+let swift = [SwiftSetting.unsafeFlags(s, condition), .define("DEBUG", .when(configuration: .debug))]
 let package = Package(
   name: "SPC",
   platforms: [
@@ -54,13 +54,15 @@ let package = Package(
       swiftSettings: swift),
     .target(name: "Meteo",
       dependencies: ["DateGenerator", "SolarPosition"],
-      swiftSettings: swift),
+      swiftSettings: swift,
+      linkerSettings: linker),
     .target(name: "SolarPerformanceCalc",
       dependencies: [
         "Config", "BlackBoxModel",
         .product(name: "ArgumentParser", package: "swift-argument-parser"),
         .product(name: "xlsxwriter", package: "xlsxwriter.swift")],
-      swiftSettings: swift),
+      swiftSettings: swift,
+      linkerSettings: linker),
     .testTarget(name: "MeteoTests",
       dependencies: ["DateGenerator", "SolarPosition", "Meteo"]),
     .testTarget(name: "SolarFieldModelTests",
@@ -74,12 +76,10 @@ let package = Package(
 // FIXME: conditionalise these flags since SwiftPM 5.3 and earlier will crash
 // for platforms they don't know about.
 #if os(Windows)
-let flags = ["-Xlinker", "/INCREMENTAL:NO", "-Xlinker", "/IGNORE:4217,4286"]
+let flags = ["-Xlinker", "-s", "-Xlinker", "/INCREMENTAL:NO", "-Xlinker", "/IGNORE:4217,4286"]
 
 if let BlackBoxModel = package.targets.first(where: { $0.name == "BlackBoxModel" }) {
-  BlackBoxModel.linkerSettings = [
-    .linkedLibrary("C:/Library/sqlite3/sqlite3.lib"), .unsafeFlags(flags)
-  ]
+  BlackBoxModel.linkerSettings = [.linkedLibrary("C:/Library/sqlite3/sqlite3.lib"), .unsafeFlags(flags)]
 }
 
 if let SolarPerformance = package.targets.first(where: { $0.name == "SolarPerformanceCalc" }) {
@@ -88,10 +88,5 @@ if let SolarPerformance = package.targets.first(where: { $0.name == "SolarPerfor
 
 if let SolarField = package.targets.first(where: { $0.name == "SolarFieldCalc" }) {
   SolarField.linkerSettings = [.linkedLibrary("User32"), .unsafeFlags(flags)]
-}
-
-if let Utility = package.targets.first(where: { $0.name == "Utility" }) {
-  Utility.cxxSettings = [.define("_CRT_SECURE_NO_WARNINGS")]
-  Utility.linkerSettings = [.linkedLibrary("Pathcch")]
 }
 #endif

@@ -16,13 +16,13 @@ class CollectorTests: XCTestCase {
     collector.parabolicElevation = 63.96
     collector.cosTheta = 0.87
     collector.theta = 29.18
-    Collector.efficiency(&collector, ws: 0)
-    XCTAssertEqual(collector.efficiency.quotient, 0.9, accuracy: 0.1)
+    collector.efficiency(ws: 0)
+    XCTAssertEqual(collector.efficiency.quotient, 0.72, accuracy: 0.1)
     collector.parabolicElevation = 51.49
     collector.cosTheta = 0.56
     collector.theta = 55.53
-    Collector.efficiency(&collector, ws: 0)
-    XCTAssertEqual(collector.efficiency.quotient, 0.77, accuracy: 0.1)
+    collector.efficiency(ws: 0)
+    XCTAssertEqual(collector.efficiency.quotient, 0.57, accuracy: 0.1)
   }
 
   func testsTracking() {
@@ -63,27 +63,27 @@ class CollectorTests: XCTestCase {
      cosIncidence: cos(0.56469857692718506 * .pi / 180),
      sunrise: 356.8873, sunset: 1055.5590)
 
-     collector = Collector.tracking(sun: januaryAM)
+     collector.tracking(sun: januaryAM)
      XCTAssertEqual(collector.parabolicElevation, 51.49, accuracy: 0.01)
      XCTAssertEqual(collector.cosTheta, 0.56, accuracy: 0.01)
      XCTAssertEqual(collector.theta, 55.53, accuracy: 0.01)
 
-     collector = Collector.tracking(sun: aprilAM)
+     collector.tracking(sun: aprilAM)
      XCTAssertEqual(collector.parabolicElevation, 63.96, accuracy: 0.01)
      XCTAssertEqual(collector.cosTheta, 0.87, accuracy: 0.01)
      XCTAssertEqual(collector.theta, 29.18, accuracy: 0.01)
 
-     collector = Collector.tracking(sun: julyAM)
+     collector.tracking(sun: julyAM)
      XCTAssertEqual(collector.parabolicElevation, 55.47, accuracy: 0.01)
      XCTAssertEqual(collector.cosTheta, 0.99, accuracy: 0.01)
      XCTAssertEqual(collector.theta, 7.27, accuracy: 0.01)
 
-     collector = Collector.tracking(sun: julyPM)
+     collector.tracking(sun: julyPM)
      XCTAssertEqual(collector.parabolicElevation, 124.21, accuracy: 0.01)
      XCTAssertEqual(collector.cosTheta, 0.99, accuracy: 0.01)
      XCTAssertEqual(collector.theta, 7.41, accuracy: 0.01)
 
-     collector = Collector.tracking(sun: octoberPM)
+     collector.tracking(sun: octoberPM)
      XCTAssertEqual(collector.parabolicElevation, 139.18, accuracy: 0.01)
      XCTAssertEqual(collector.cosTheta, 0.86, accuracy: 0.01)
      XCTAssertEqual(collector.theta, 30.23, accuracy: 0.01)

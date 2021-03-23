@@ -11,37 +11,34 @@ class SolarFieldTests: XCTestCase {
     collector.parabolicElevation = 63.96
     collector.cosTheta = 0.87
     collector.theta = 29.18
-    Collector.efficiency(&collector, ws: 0) // 0.90
-
+    collector.efficiency(ws: 0) // 0.90
+    solarField.temperature.inlet = 
+      Temperature(celsius: SolarField.parameter.designTemperature.inlet)
     let maxFlow = SolarField.parameter.maxMassFlow
-    SolarField.parameter.maxMassFlow = 300.0
+    solarField.maxMassFlow = solarField.minMassFlow + 1.0
     defer { SolarField.parameter.maxMassFlow = maxFlow }
 
-    var dumping = 0.0
     collector.insolationAbsorber = 666.6
-    solarField.calculate(dumping: &dumping, collector: collector, ambient: Temperature(celsius: 25.0))
-
-    XCTAssertEqual(dumping, 159173093.3, accuracy: 0.1)
-    XCTAssertEqual(solarField.outlet, 666.15, accuracy: 0.1)
-    XCTAssertEqual(solarField.inFocus.quotient, 0.44, accuracy: 0.1)
+    solarField.calculate(collector: collector, ambient: Temperature(celsius: 25.0))
+   
+    XCTAssertEqual(solarField.outlet, 513.8, accuracy: 0.1)
+    XCTAssertEqual(solarField.inFocus.quotient, 0.0, accuracy: 0.1)
 
     let parasitics = solarField.parasitics()
 
-    XCTAssertEqual(parasitics, 4.0, accuracy: 0.1)
+    XCTAssertEqual(parasitics, 0.5, accuracy: 0.1)
 
     collector.insolationAbsorber = 466.6
-    solarField.calculate(dumping: &dumping, collector: collector, ambient: Temperature(celsius: 25.0))
-
-    XCTAssertEqual(dumping, 63349013.3, accuracy: 0.1)
-    XCTAssertEqual(solarField.outlet, 666.15, accuracy: 0.1)
-    XCTAssertEqual(solarField.inFocus.quotient, 0.65, accuracy: 0.1)
+    solarField.calculate(collector: collector, ambient: Temperature(celsius: 25.0))
+    
+    XCTAssertEqual(solarField.outlet, 632.9, accuracy: 0.1)
+    XCTAssertEqual(solarField.inFocus.quotient, 0.61, accuracy: 0.1)
 
     collector.insolationAbsorber = 66.6
-    solarField.calculate(dumping: &dumping, collector: collector, ambient: Temperature(celsius: 25.0))
-
-    XCTAssertEqual(dumping, 0, accuracy: 0.1)
-    XCTAssertEqual(solarField.outlet, 467.96, accuracy: 0.1)
-    XCTAssertEqual(solarField.inFocus.quotient, 0, accuracy: 0.1)
+    solarField.calculate(collector: collector, ambient: Temperature(celsius: 25.0))
+    
+    XCTAssertEqual(solarField.outlet, 632.9, accuracy: 0.1)
+    XCTAssertEqual(solarField.inFocus.quotient, 1.0, accuracy: 0.1)
   }
 
   static var allTests: [(String, (SolarFieldTests) -> () throws -> Void)] {
