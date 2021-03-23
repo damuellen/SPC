@@ -63,6 +63,21 @@ public struct DateTime: CustomStringConvertible {
 
   public typealias MonthDay = (day: Int, month: Int)
 
+  public static func at(minute: Int = 0, hour: Int? = nil, day: Int? = nil, month: Int? = nil) -> Bool {
+    guard current.minute == minute else { return false }
+    guard current.hour == (hour ?? current.hour) else { return false }
+    guard current.day == (day ?? current.day) else { return false }
+    guard current.month == (month ?? current.month) else { return false }
+    return true
+  }
+
+  public static func at(minute: Int = 0, hour: Int? = nil, yearDay: Int? = nil) -> Bool {
+    guard current.minute == minute else { return false }
+    guard current.hour == (hour ?? current.hour) else { return false }
+    guard current.yearDay == (yearDay ?? current.day) else { return false }
+    return true
+  }
+
   public func isWithin(start: MonthDay, stop: MonthDay) -> Bool {
     assert(start.month <= stop.month)
     var result = false

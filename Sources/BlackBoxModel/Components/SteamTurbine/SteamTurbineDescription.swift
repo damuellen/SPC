@@ -17,10 +17,10 @@ extension SteamTurbine: CustomStringConvertible {
 extension SteamTurbine.OperationMode: CustomStringConvertible {  
   public var description: String {
     switch self {
-      case .noOperation(let minutes): return "No Operation(\(minutes)min)"
-      case .operating(let load): return "Operation(\(load))"
+      case .noOperation(let minutes): return "No Operation \(minutes)min "
+      case .operating(let load): return "Operation \(load.singleBar)"
       case .startUp(let minutes, energy: let energy):
-       return "Start up(\(minutes)min, \(energy))"
+       return "Start up \(minutes)min"
       case .scheduledMaintenance: return "Scheduled Maintenance"
     }
   }

@@ -15,7 +15,7 @@ public struct MassFlow: CustomStringConvertible {
   
   var rate: Double
 
-  var isNearZero: Bool { self < 1.0 }
+  var isZero: Bool { self <= 0.0 }
   
   public var description: String {
     String(format: "%.1f", rate)

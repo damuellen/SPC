@@ -183,7 +183,7 @@ public struct ThermalEnergy: Encodable, MeasurementsConvertible {
     boiler: Power = 0.0, wasteHeatRecovery: Power = 0.0,
     heatExchanger: Power = 0.0, production: Power = 0.0
     internal(set) public var demand: Power = 0.0
-    internal(set) public var dumping: Power = 0.0, overtemp_dump: Power = 0.0, startUp: Power = 0.0
+    internal(set) public var dumping: Power = 0.0, startUp: Power = 0.0
 
   var balance: Power { production - demand }
 
@@ -212,12 +212,18 @@ public struct ThermalEnergy: Encodable, MeasurementsConvertible {
 
     if solar > .zero {
       production = solar
-    } else if case .freezeProtection = solarField.operationMode {
+    } else if case .freeze = solarField.operationMode {
       solar = .zero
       production = solar
     } else {
       solar = .zero
       production = .zero
+    }
+
+    if case .defocus(let ratio) = solarField.operationMode {
+      dumping = (solar / ratio.quotient) * (1-ratio.quotient)
+    } else {
+      dumping = .zero
     }
   }
 
@@ -269,7 +275,6 @@ public struct FuelConsumption: Encodable, MeasurementsConvertible {
 
 extension PlantPerformance: CustomStringConvertible {
   public var description: String {
-    thermal.barChart + electric.barChart
-      + fuel.barChart + parasitics.barChart
+    thermal.multiBar + electric.multiBar + fuel.multiBar + parasitics.multiBar
   }
 }

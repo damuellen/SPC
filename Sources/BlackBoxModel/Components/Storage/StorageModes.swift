@@ -115,7 +115,7 @@ extension Storage {
     let dischargeLoad = operationMode.dischargeLoad.quotient
     let eff = Storage.parameter.heatExchangerEfficiency
     switch solarField.operationMode {
-    case .operating:
+    case .track, .defocus(_):
       massFlow.rate = (powerBlock.designMassFlow.rate / eff) - solarField.massFlow.rate
     default:
       massFlow.rate = dischargeLoad * powerBlock.designMassFlow.rate / eff
@@ -234,7 +234,7 @@ extension Storage {
     // used for parasitics
     storage.inletTemperature(outlet: powerBlock)
     storage.massFlow = powerBlock.designMassFlow - powerBlock.massFlow
-
+    storage.massFlow.rate *= storage.operationMode.dischargeLoad.quotient
     storage.temperature.outlet = outletTemperature(storage)
 
     var thermalPower: Power = .zero
@@ -250,7 +250,7 @@ extension Storage {
         thermalPower *= parameter.heatExchangerCapacity
         storage.massFlow.rate = thermalPower.kiloWatt / storage.heat
         //#warning("The implementation here differs from PCT")
-        if case .freezeProtection = solarField.operationMode {          
+        if case .freeze = solarField.operationMode {          
           powerBlock.massFlow.rate = storage.massFlow.rate
             * parameter.heatExchangerEfficiency / 0.97 // - solarField.massFlow
         } else {
@@ -374,8 +374,8 @@ extension Storage.OperationMode: CustomStringConvertible {
   public var description: String {
     switch self {
       case .noOperation: return "No operation"
-      case .charge(let load): return "Charging(\(load))"
-      case .discharge(let load): return "Discharge(\(load))"
+      case .charge(_): return "Charging"
+      case .discharge(let load): return "Discharge \(load.singleBar)"
       default: return "No description"
     }
   }

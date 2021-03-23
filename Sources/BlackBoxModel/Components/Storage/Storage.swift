@@ -111,10 +111,6 @@ public struct Storage: Parameterizable, HeatTransfer {
     heatFlow: ThermalEnergy) -> ThermalEnergy
   {
     var heatFlow = heatFlow
-    powerBlock.designMassFlow.rate = 
-      heatFlow.demand.kiloWatt / HeatExchanger.capacity
-    assert(powerBlock.designMassFlow.rate > 0)
-    
     heatFlow.storage = heatFlow.balance  // [MW]
 
     if parameter.heatExchangerRestrictedMin {
@@ -142,17 +138,13 @@ public struct Storage: Parameterizable, HeatTransfer {
     heatFlow: ThermalEnergy) -> ThermalEnergy
   { 
     var heatFlow = heatFlow
-    
-    let heatFlowRate = HeatExchanger.parameter.heatFlowHTF
-    assert(HeatExchanger.capacity > .zero)
-    powerBlock.designMassFlow.rate = heatFlowRate * 1_000 
-      / HeatExchanger.capacity
-   
+
     heatFlow.storage = heatFlow.balance // [MW]
 
     if parameter.heatExchangerRestrictedMin {
       // avoiding input to storage lower than minimal HXs capacity
       let maxMassFlow = SolarField.parameter.maxMassFlow.rate
+      let heatFlowRate = HeatExchanger.parameter.heatFlowHTF
 
       heatFlow.toStorageMin.megaWatt = heatFlowRate
         * (1 - storage.designMassFlow.rate / maxMassFlow)

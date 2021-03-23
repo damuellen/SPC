@@ -113,7 +113,7 @@ extension Storage {
       // calculate design salt massflows:
       let cold = specificHeat(tank.cold)
       let hot = specificHeat(tank.hot)
-
+      /// Fluid properties
       let htf = SolarField.parameter.HTF
 
       if case .discharge = status.operationMode {
@@ -139,7 +139,7 @@ extension Storage {
           * ((1 - level2) + level2 * saltFlowRatio)
         
       } else if case .charge = status.operationMode {
-        
+        /// Fluid properties
         let htf = SolarField.parameter.HTF
         
         let designCharge = (status.designMassFlow.rate * htf.heatContent(

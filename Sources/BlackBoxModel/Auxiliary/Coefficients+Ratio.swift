@@ -75,7 +75,7 @@ public struct Ratio: CustomStringConvertible, Codable {
   public var percentage: Double { quotient * 100.0 }
 
   public var description: String { 
-    String(format: "%3.1f", quotient * 100.0) + "%"
+    String(format: "%3.1f", percentage) + "%"
   }
 
   public init(percent: Double) {
@@ -116,3 +116,24 @@ extension Ratio: Comparable {
 }
 
 public struct Demand {}
+
+extension Ratio {
+  var multiBar: String {
+    let (bar_chunks, remainder) = Int(quotient * 80)
+      .quotientAndRemainder(dividingBy: 8)
+    let full = UnicodeScalar("█").value
+    let fractionalPart = remainder > 0
+      ? String(UnicodeScalar(full + UInt32(8 - remainder))!) : ""
+    return String(repeating: "█", count: bar_chunks)
+      + fractionalPart 
+      + String(repeating: " ", count: 10 - bar_chunks) 
+      + description
+  }
+
+  var singleBar: String {
+    let bar = Int(quotient * 7)
+    let full = UnicodeScalar("█").value
+    let block = String(UnicodeScalar(full - UInt32(7 - bar))!)
+    return block + " " + description
+  }
+}

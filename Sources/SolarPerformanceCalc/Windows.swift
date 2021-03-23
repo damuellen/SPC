@@ -5,33 +5,49 @@ import let WinSDK.MB_OK
 import struct WinSDK.UINT
 
 extension String {
-  var LPCWSTR: [UInt16] {
-    self.withCString(encodedAs: UTF16.self) { buffer in
-      Array<UInt16>(unsafeUninitializedCapacity: self.utf16.count + 1) {
+  internal init(from utf16: [UInt16]) {
+    self = utf16.withUnsafeBufferPointer {
+      String(decodingCString: $0.baseAddress!, as: UTF16.self)
+    }
+  }
+}
+
+extension String {
+  public var wide: [UInt16] {
+    return Array<UInt16>(from: self)
+  }
+}
+
+extension Array where Element == UInt16 {
+  internal init(from string: String) {
+    self = string.withCString(encodedAs: UTF16.self) { buffer in
+      Array<UInt16>(unsafeUninitializedCapacity: string.utf16.count + 1) {
         wcscpy_s($0.baseAddress, $0.count, buffer)
         $1 = $0.count
       }
     }
   }
-  func clipboard() {
-    let size = utf16.count * MemoryLayout<UInt16>.size
-    guard let hMem = GlobalAlloc(UINT(GHND), SIZE_T(size + 1))
-    else { return }
-    withCString(encodedAs: UTF16.self) {
-      let dst = GlobalLock(hMem)
-      memcpy(dst, $0, size)
-      GlobalUnlock(hMem)
-    }
-    if OpenClipboard(nil) {
-      EmptyClipboard()
-      SetClipboardData(UINT(CF_UNICODETEXT), hMem)
-      CloseClipboard()
-    }
+}
+
+func setClipboard(_ text: String) {
+  let size = text.utf16.count * MemoryLayout<UInt16>.size
+  guard let hMem = GlobalAlloc(UINT(GHND), SIZE_T(size + 1))
+  else { return }
+  text.withCString(encodedAs: UTF16.self) {
+    let dst = GlobalLock(hMem)
+    memcpy(dst, $0, size)
+    GlobalUnlock(hMem)
+  }
+  if OpenClipboard(nil) {
+    EmptyClipboard()
+    SetClipboardData(UINT(CF_UNICODETEXT), hMem)
+    CloseClipboard()
   }
 }
 
+
 func MessageBox(text: String, caption: String) {
-  MessageBoxW(nil, text.LPCWSTR, caption.LPCWSTR, UINT(MB_OK))
+  MessageBoxW(nil, text.wide, caption.wide, UINT(MB_OK))
 }
 
 func currentDirectoryPath() -> String {

@@ -3,6 +3,7 @@
 /*.csv
 /*.json
 /COM/*.json
+/.sde
 /.build
 /.swiftpm
 /Packages

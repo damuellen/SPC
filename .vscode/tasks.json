@@ -14,14 +14,54 @@
     },
     "tasks": [
         {
-            "label": "swift-build-executable",
+            "label": "swift-build-debug-SolarPerformanceCalc",
             "type": "shell",
-            "command": "swift build -Xswiftc -g -Xswiftc -Xfrontend -Xswiftc -serialize-debugging-options"
+            "command": "swift",
+            "args": [
+                "build",
+                "--configuration", "debug",
+                "--product", "SolarPerformanceCalc",
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "swift-build-debug-print-SolarPerformanceCalc",
+            "type": "shell",
+            "command": "swift",
+            "args": [
+                "build",
+                "--configuration", "debug",
+                "--product", "SolarPerformanceCalc",
+                "-Xswiftc", "-DPRINT",
+            ],
+            "group": "build"            
+        },
+        {
+            "label": "swift-build-debug",
+            "type": "shell",
+            "command": "swift build"
         },
         {
             "label": "swift-build-tests",
             "type": "shell",
-            "command": "swift build --build-tests -Xswiftc -g -Xswiftc -Xfrontend -Xswiftc -serialize-debugging-options"
+            "command": "swift",
+            "args": [
+                "build",
+                "--build-tests"
+            ],
+            "group": "test"
+        },
+        {
+            "label": "swift-build-release",
+            "type": "shell",
+            "command": "swift",
+            "args": [
+                "build",
+                "--configuration", "release"
+            ],
         }
     ]
 }

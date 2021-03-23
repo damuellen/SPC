@@ -25,7 +25,7 @@ extension MeasurementsConvertible {
     }
   }
 
-  var barChart: String {
+  var multiBar: String {
     let maxValue = numericalForm.max() ?? 0
     let increment = maxValue
     return zip(numericalForm, Self.columns).reduce("\n") { result, pair in

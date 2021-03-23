@@ -59,7 +59,7 @@ struct SolarPerformanceCalculator: ParsableCommand {
 #if os(Windows)
   static let cwd = currentDirectoryPath()
 #else
-  static let cwd = ""
+  static let cwd = FileManager.default.currentDirectoryPath
 #endif
   @Option(name: .shortAndLong, help: "The search path for meteofile.")
   var meteofilePath: String?

@@ -223,7 +223,7 @@ public struct Plant {
 
     if solarField.header.temperature.outlet < freezeTemperature
       + Simulation.parameter.dfreezeTemperatureHeat,
-      storage.massFlow.isNearZero
+      storage.massFlow.isZero
     {  // No freeze protection heater use anymore if storage is in operation
       heater.massFlow(outlet: solarField)
 
@@ -239,8 +239,7 @@ public struct Plant {
       add(heater: performance)
     }
 
-    if solarField.minTemperature
-      > freezeTemperature.kelvin
+    if solarField.minTemperature > freezeTemperature.kelvin
       + Simulation.parameter.dfreezeTemperatureHeat
     {
       heater.operationMode = .noOperation
@@ -284,13 +283,13 @@ public struct Plant {
         let storage = status.storage.operationMode
         // Adjustment of the powerblock mass flow
         switch (solarField, storage) {
-          case (.operating, .discharge):
+          case (.track, .discharge), (.defocus(_), .discharge):
             status.powerBlock.connectTo(status.solarField, status.storage)
-          case (_, .charge):
-            status.powerBlock.massFlow = 
-              status.solarField.massFlow - status.storage.massFlow
           case (_, .discharge):
             status.powerBlock.massFlow(outlet: status.storage)
+          case (_, .charge):
+            status.powerBlock.massFlow = 
+              status.solarField.massFlow - status.storage.massFlow 
           case (_, _): break         
         }
 
@@ -315,7 +314,6 @@ public struct Plant {
       if status.powerBlock.temperature.inlet
         < HeatExchanger.parameter.temperature.htf.inlet.min
         || status.powerBlock.massFlow == .zero // status.storage.operationMode.isFreezeProtection
-        || status.solarField.operationMode.isFreezeProtection
       {
         if status.heater.operationMode.isFreezeProtection == false {
           status.powerBlock.temperatureLoss(wrt: status.solarField, status.storage)
@@ -525,7 +523,7 @@ public struct Plant {
       powerBlock.connectTo(solarField, heater)
     }
 
-    if heater.massFlow.isNearZero == false {
+    if heater.massFlow.isZero == false {
       heatFlow.production.kiloWatt = powerBlock.massFlow.rate * powerBlock.heat
     }
   }

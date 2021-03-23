@@ -10,8 +10,8 @@
 
 extension Storage: CustomStringConvertible {
   public var description: String {
-    "  Mode:".padding(30) + "\(operationMode)".padding(20) + "\(relativeCharge)"
-    + .lineBreak 
+    "  Mode:".padding(20) + "\(operationMode)".padding(20)
+    + relativeCharge.multiBar + .lineBreak + .lineBreak
     + String(format: "  Mass flow: %3.1f kg/s", massFlow.rate).padding(28) 
     + String(format: " T in: %3.1f degC", temperature.inlet.celsius).padding(20) 
     + String(format: "T out: %3.1f degC", temperature.outlet.celsius).padding(20) 

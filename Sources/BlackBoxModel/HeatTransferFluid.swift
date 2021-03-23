@@ -22,7 +22,7 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
   let viscosity: [Double]
   let thermCon: [Double]
   let maxTemperature: Temperature
-  let enthaplyFromTemperature: Polynomial
+  let enthalpyFromTemperature: Polynomial
   let temperatureFromEnthalpy: Polynomial
   let useEnthalpy: Bool
 
@@ -39,7 +39,7 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
     self.viscosity = visco
     self.thermCon = thermCon
     self.maxTemperature = Temperature(celsius: maxTemperature)
-    self.enthaplyFromTemperature = Polynomial(h_T)
+    self.enthalpyFromTemperature = Polynomial(h_T)
     self.temperatureFromEnthalpy = Polynomial(T_h)
 
     if useEnthalpy, !h_T.isEmpty, !T_h.isEmpty {
@@ -54,34 +54,23 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
     heatContent(cycle.temperature.outlet, cycle.temperature.inlet)
   }
 
-  @inline(__always)
   func heatContent(_ t1: Temperature, _ t2: Temperature) -> Heat {
     if useEnthalpy {
-      return HeatTransferFluid.heatExchanged(
+      return HeatTransferFluid.delta(
         from: t1.celsius, to: t2.celsius,
-        coefficients: enthaplyFromTemperature.coefficients
+        enthalpy: enthalpyFromTemperature.coefficients
       )
     }
-    return HeatTransferFluid.heatExchanged(
+    return HeatTransferFluid.delta(
       from: t1.celsius, to: t2.celsius, heatCapacity: heatCapacity
     )
   }
 
-  @inline(__always)
-  func temperature(_ heatFlowRate: Heat, _ t: Temperature) -> Temperature {
-    if useEnthalpy {
-      return Temperature(
-        celsius: HeatTransferFluid.temperatureFromEnthalpy(
-          heatFlowRate, t.celsius,
-          coefficients: (
-            enthaplyFromTemperature.coefficients,
-            temperatureFromEnthalpy.coefficients
-          ))
-      )
-    }
-    return Temperature(celsius:
-     HeatTransferFluid.temperatureFromHeat(
-       heatFlowRate, t.celsius, coefficients: heatCapacity))
+  func temperature(_ heat: Heat, _ t: Temperature) -> Temperature {
+    let degree: Double = useEnthalpy
+      ? temperature(enthalpy: heat, degree: t.celsius)
+      : temperature(specificHeat: heat, degree: t.celsius)
+    return Temperature(celsius: degree)
   }
 
   func density(_ temperature: Temperature) -> Double {
@@ -94,7 +83,7 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
 
   func enthalpy(_ temperature: Temperature) -> Double {
     precondition(temperature.kelvin > freezeTemperature.kelvin)
-    return enthaplyFromTemperature(temperature.celsius)
+    return enthalpyFromTemperature(temperature.celsius)
   }
 
   func temperature(_ enthalpy: Double) -> Temperature {
@@ -131,61 +120,40 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
     precondition(t > freezeTemperature.kelvin, "Fell below freezing point.\n")
     return Temperature(t)
   }
-*/
-  private static func temperatureFromHeat(
-    _ heat: Double, _ temperature: Double, coefficients: [Double]
-  )
-    -> Double
-  {
-    let t = temperature
-    let cp = coefficients
+*/func temperature(specificHeat: Double, degree: Double) -> Double {
+    let t = degree
+    let cp = heatCapacity
     if cp[1] > 0 {
       return (
-        (2 * heat + 2 * cp[0] * t) / cp[1] + t ** 2
+        (2 * specificHeat + 2 * cp[0] * t) / cp[1] + t ** 2
           + (cp[0] / cp[1]) ** 2).squareRoot() - cp[0] / cp[1]
     } else {
       return -(
-        (2 * heat + 2 * cp[0] * t) / cp[1] + t ** 2
+        (2 * specificHeat + 2 * cp[0] * t) / cp[1] + t ** 2
           + (cp[0] / cp[1]) ** 2).squareRoot() - cp[0] / cp[1]
     }
   }
 
-  private static func temperatureFromEnthalpy(
-    _ enthalpy: Double, _ temperature: Double,
-    coefficients: ([Double], [Double])
-  )
-    -> Double
-  {
-    let (h_T, T_h) = coefficients
-    var h1 = 0.0
-    for coefficient in h_T.reversed() {
-      h1 = coefficient.addingProduct(h1, temperature)
-    }
+  func temperature(enthalpy: Double, degree: Double) -> Double {
+    let h1 = enthalpyFromTemperature(degree)
     let h2 = enthalpy + h1
-    var temperature = 0.0
-    for coefficient in T_h.reversed() {
-      temperature = coefficient.addingProduct(h2, temperature)
-    }
+    let temperature = temperatureFromEnthalpy(h2)
     return temperature
   }
 
-  private static func heatExchanged(
-    from high: Double, to low: Double, heatCapacity: [Double]
-  )
-    -> Double
+  static func delta(
+    from high: Double, to low: Double, heatCapacity: [Double]) -> Double
   {
     var q = heatCapacity[0] * (high - low)
     q += heatCapacity[1] / 2 * (high * high - low * low)
     return q
   }
   
-  private static func heatExchanged(
-    from high: Double, to low: Double, coefficients: [Double]
-  )
-    -> Double
+  static func delta(
+    from high: Double, to low: Double, enthalpy: [Double]) -> Double
   {
     var (h1, h2) = (0.0, 0.0)
-    for (i, c) in coefficients.enumerated() {
+    for (i, c) in enthalpy.enumerated() {
       h1 += c * (low ** Double(i))
       h2 += c * (high ** Double(i))
     }
@@ -199,9 +167,9 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
     + "c0:" * heatCapacity[0].description
     + "c1:" * heatCapacity[1].description
     + "Calculate with Enthalpy:" * (useEnthalpy ? "YES" : "NO")
-    + (enthaplyFromTemperature.isEmpty == false ?
+    + (enthalpyFromTemperature.isEmpty == false ?
     "Enthalpy as function on Temperature" 
-    + "\n\(enthaplyFromTemperature)" : "")
+    + "\n\(enthalpyFromTemperature)" : "")
     + (temperatureFromEnthalpy.isEmpty == false ?
     "Temperature as function on Enthalpy"
     + "\n\(temperatureFromEnthalpy)" : "")
@@ -270,7 +238,7 @@ extension HeatTransferFluid: Codable {
       Temperature.self,
       forKey: .maxTemperature)
     let h_T = try values.decode(Array<Double>.self, forKey: .h_T)
-    enthaplyFromTemperature = Polynomial(h_T)
+    enthalpyFromTemperature = Polynomial(h_T)
     let T_h = try values.decode(Array<Double>.self, forKey: .T_h)
     temperatureFromEnthalpy = Polynomial(T_h)
     useEnthalpy = try values.decode(Bool.self, forKey: .withEnthalpy)
@@ -291,7 +259,7 @@ extension HeatTransferFluid: Codable {
     try container.encode(viscosity, forKey: .visco)
     try container.encode(thermCon, forKey: .thermCon)
     try container.encode(maxTemperature, forKey: .maxTemperature)
-    try container.encode(enthaplyFromTemperature, forKey: .h_T)
+    try container.encode(enthalpyFromTemperature, forKey: .h_T)
     try container.encode(temperatureFromEnthalpy, forKey: .T_h)
     try container.encode(useEnthalpy, forKey: .withEnthalpy)
   }
@@ -316,7 +284,7 @@ extension HeatTransferFluid {
 
     } else { */
       self.useEnthalpy = false
-      self.enthaplyFromTemperature = []
+      self.enthalpyFromTemperature = []
       self.temperatureFromEnthalpy = []
     // }
   }

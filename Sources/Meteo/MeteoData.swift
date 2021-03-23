@@ -8,7 +8,6 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 import Foundation
-import Libc
 import SolarPosition
 
 public struct MeteoData: CustomStringConvertible {
@@ -128,7 +127,7 @@ public struct MeteoData: CustomStringConvertible {
   }
 
   public var description: String {
-    String(format: "\nAmbient temp: %.1f degC", temperature)
+    String(format: "\nAmbient: %.1f degC", temperature)
       + String(format: "  DNI: %.1f W/m2", dni)
       + String(format: "  GHI: %.1f W/m2", ghi)
       + String(format: "  DHI: %.1f W/m2", dhi)

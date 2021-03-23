@@ -16,16 +16,8 @@ protocol HeatTransfer: CustomStringConvertible {
 
 public struct Cycle: HeatTransfer {
   public var name: String
-  public var massFlow: MassFlow  {
-    didSet {
-//      print(self)      
-    }
-  }
-  public var temperature: (inlet: Temperature, outlet: Temperature) {
-    didSet {
-  //    print(self)      
-    }
-  }
+  public var massFlow: MassFlow
+  public var temperature: (inlet: Temperature, outlet: Temperature)
 }
 
 extension Cycle {
@@ -62,9 +54,9 @@ extension HeatTransfer {
 
   var outlet: Double { temperature.outlet.kelvin }
 
-  var medium: HeatTransferFluid {
-    SolarField.parameter.HTF
-  }
+  var flow: Double { massFlow.rate }
+
+  var medium: HeatTransferFluid { SolarField.parameter.HTF }
 
   var heat: Heat {
     medium.heatContent(temperature.outlet, temperature.inlet)

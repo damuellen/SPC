@@ -15,7 +15,7 @@ let package = Package(
     .executable(name: "SolarPerformanceCalc", targets: ["SolarPerformanceCalc"]),
     .executable(name: "SolarFieldCalc", targets: ["SolarFieldCalc"]),
     .executable(name: "TransTES", targets: ["TransTES"]),
-   // .library(name: "BlackBoxModel", type: .dynamic, targets: ["BlackBoxModel"]),
+    //.library(name: "BlackBoxModel", type: .dynamic, targets: ["BlackBoxModel"]),
    // .library(name: "Utility", type: .dynamic, targets: ["Utility"])
     ],
   dependencies: [
@@ -38,7 +38,7 @@ let package = Package(
       swiftSettings: swift),
     .target(name: "BlackBoxModel",
       dependencies: [
-        "Config", "Meteo", "SolarPosition", "CIAPWSIF97",
+        "Config", "Libc", "Meteo", "SolarPosition", "CIAPWSIF97",
         .product(name: "Yams", package: "Yams"),
         .product(name: "SQLite", package: "SQLite.swift"),
         .product(name: "xlsxwriter", package: "xlsxwriter.swift")],

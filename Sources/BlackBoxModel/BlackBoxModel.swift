@@ -111,57 +111,53 @@ public enum BlackBoxModel {
 
       if let position = 🌞[date] {
         // Only when the sun is above the horizon.
-        status.collector = Collector.tracking(sun: position)  // cosTheta
-
-        Collector.efficiency(&status.collector, ws: meteo.windSpeed)
-
-        status.collector.insolationAbsorber =
-          Double(meteo.dni)
-          * status.collector.cosTheta
-          * status.collector.efficiency.quotient
+        status.collector.tracking(sun: position) // cosTheta
+        status.collector.efficiency(ws: meteo.windSpeed)
+        status.collector.irradiation(dni: meteo.dni)
       } else {
         status.collector = Collector.initialState
         DateTime.setNight()
       }
       let dt = DateTime.current
 #if DEBUG
-      if DateTime.isSunRise {
-      //  print(DateTime.current)
-      }
-      if DateTime.isSunSet {
-      //  print(DateTime.current) 
-      }
+      if DateTime.isSunRise
+      {()}
+      if DateTime.isSunSet
+      {()}
+      if DateTime.at(minute: 10, hour: 6, day: 6, month: 1)
+      {()}
 #endif
       // Used when calculating the heat losses and the efficiency
       let temperature = Temperature(meteo: meteo)
 
       // Setting the mass flow required by the power block in the solar field
       status.solarField.maxMassFlow = PowerBlock.requiredMassFlow()
-      status.solarField.inletTemperature(outlet: status.powerBlock)
-     
+      if status.solarField.massFlow > .zero {
+        status.solarField.inletTemperature(outlet: status.powerBlock)
+      }
+
       if Design.hasStorage {
         // Increasing the mass flow allowed in the solar field
         status.solarField.requiredMassFlow(storage: status.storage)
         // Sets the temperature when the storage does freeze protection
         status.solarField.inletTemperature(storage: status.storage)
       }
-/*
+      // Calculate the heat losses in the cold header
       status.solarField.header.temperature.inlet = status.solarField.heatLosses(
         header: status.solarField.header.temperature.inlet,
         ambient: temperature
       )
-*/
+
       // Calculate outlet temperature and mass flow
       status.solarField.calculate(
-        dumping: &plant.heatFlow.dumping.watt,
-        collector: status.collector,
-        ambient: temperature)
+        collector: status.collector, ambient: temperature
+      )
 
-      if status.solarField.isOperating {
-        // Calculate the heat losses in the hot header
-        status.solarField.header.temperature.outlet =
-          status.solarField.heatLossesHotHeader(ambient: temperature)
-      }
+      // Calculate the heat losses in the hot header
+      status.solarField.header.temperature.outlet = status.solarField.heatLosses(
+        header: status.solarField.header.temperature.outlet,
+        ambient: temperature
+      )
       // Calculate power consumption of the pumps
       plant.electricalParasitics.solarField = status.solarField.parasitics()
 
@@ -178,9 +174,9 @@ public enum BlackBoxModel {
       plant.electricity.consumption()
       
       let performance = plant.performance
-#if DEBUG
- //  print(decorated(dt.description), status, performance)
- //  print()
+#if PRINT
+      print(decorated(dt.description), meteo, status, performance)
+   // print("\u{001B}[2J")
 #endif
       backgroundQueue.async { [status] in
         log(dt, meteo: meteo, status: status, energy: performance)

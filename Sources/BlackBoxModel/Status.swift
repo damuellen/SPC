@@ -38,7 +38,7 @@ public struct Status: CustomStringConvertible, MeasurementsConvertible {
 
   var modes: [String] {
     [
-      solarField.operationMode.rawValue,
+      solarField.operationMode.description,
       storage.operationMode.description,
       heater.operationMode.rawValue
     ]

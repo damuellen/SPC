@@ -124,7 +124,7 @@ public struct SolarPosition {
     let dates = sunHoursPeriod.flatMap {
       DateGenerator(range: $0, interval: SolarPosition.frequence)
     }
-    let offset = frequence.interval / 2
+    let offset = 0.0 //frequence.interval / 2
     for date in dates {
       result[date] = SolarPosition.compute(
         date: date + offset, location: location, with: SolarPosition.solpos

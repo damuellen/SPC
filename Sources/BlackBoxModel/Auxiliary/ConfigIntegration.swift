@@ -10,6 +10,7 @@
 
 import Config
 import Foundation
+import Yams
 
 public enum ConfigFormat {
   case json, text
@@ -27,7 +28,7 @@ extension JSONConfig {
   public static func loadConfiguration(_ type: JSONConfig.Name, data: Data) throws {
     let decoder = JSONDecoder()
     decoder.dateDecodingStrategy = .iso8601
-
+    decoder.keyDecodingStrategy = .convertFromSnakeCase
     switch type {
     case .FOS: break
     case .OPR: break
@@ -70,10 +71,10 @@ extension JSONConfig {
 
   public static func saveConfiguration(toPath path: String) throws {
     let directoryURL = URL(fileURLWithPath: path, isDirectory: true)
-    let json = try generate()
-    let url = URL(fileURLWithPath: "Parameter.json",
+    let json = try generateYAML()
+    let url = URL(fileURLWithPath: "Parameter.txt",
                   isDirectory: false, relativeTo: directoryURL)
-    try json.write(to: url)
+    try json.write(to: url, atomically: false, encoding: .utf8)
   }
 
   public static func saveConfigurations(toPath path: String) throws {
@@ -88,10 +89,16 @@ extension JSONConfig {
     }
   }
 
-  public static func generate() throws -> Data {
+  public static func generateJSON() throws -> Data {
     let encoder = JSONEncoder()
     encoder.outputFormatting = [.sortedKeys, .prettyPrinted]
     encoder.dateEncodingStrategy = .iso8601
+    encoder.keyEncodingStrategy = .convertToSnakeCase
+    return try encoder.encode(ParameterSet())
+  }
+
+  public static func generateYAML() throws -> String {
+    let encoder = YAMLEncoder()
     return try encoder.encode(ParameterSet())
   }
 
@@ -99,6 +106,7 @@ extension JSONConfig {
     let encoder = JSONEncoder()
     encoder.outputFormatting = [.sortedKeys, .prettyPrinted]
     encoder.dateEncodingStrategy = .iso8601
+    encoder.keyEncodingStrategy = .convertToSnakeCase
 
     switch type {
     case .FOS: break
