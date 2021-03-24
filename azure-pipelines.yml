@@ -17,13 +17,15 @@ variables:
 steps:
 - task: DownloadBuildArtifacts@0
   inputs:
-    buildType: specific
-    project: '3133d6ab-80a8-4996-ac4f-03df25cd3224'
-    allowPartiallySucceededBuilds: true
-    pipeline: 1
+    buildType: 'specific'
+    project: 'aed27b01-a098-473b-9a1b-b8b518639405'
+    pipeline: '5'
+    buildVersionToDownload: 'latest'
+    downloadType: 'single'
     artifactName: 'zlib-windows-x64'
     downloadPath: '$(System.ArtifactsDirectory)'
-  displayName: Download zlib
+    parallelizationLimit: '1'
+    retryDownloadCount: '3'
 
 - task: BatchScript@1
   displayName: VsDevCmd
