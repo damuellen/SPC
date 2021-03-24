@@ -76,7 +76,7 @@ let package = Package(
 let flags = ["-Xlinker", "/INCREMENTAL:NO", "-Xlinker", "/IGNORE:4217,4286"]
 
 if let BlackBoxModel = package.targets.first(where: { $0.name == "BlackBoxModel" }) {
-  BlackBoxModel.linkerSettings = [.linkedLibrary("C:/Library/sqlite3/sqlite3.lib"), .unsafeFlags(flags)]
+  BlackBoxModel.linkerSettings = [.linkedLibrary("sqlite3.lib"), .unsafeFlags(flags)]
 }
 
 if let SolarPerformance = package.targets.first(where: { $0.name == "SolarPerformanceCalc" }) {

@@ -15,32 +15,19 @@ variables:
   icu.directory: C:/Library/icu-67/usr/bin
   
 steps:
-- task: DownloadBuildArtifacts@0
-  inputs:
-    buildType: 'specific'
-    project: 'aed27b01-a098-473b-9a1b-b8b518639405'
-    pipeline: '5'
-    buildVersionToDownload: 'latest'
-    downloadType: 'single'
-    artifactName: 'zlib-windows-x64'
-    downloadPath: '$(System.ArtifactsDirectory)'
-    parallelizationLimit: '1'
-    retryDownloadCount: '3'
-  displayName: Download zlib
-
 - task: BatchScript@1
   inputs:
     filename: C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/Common7/Tools/VsDevCmd.bat
     arguments: -no_logo -arch=x64 -host_arch=x64
     modifyEnvironment: true
-  displayName: Setup Visual Studio developer environment
+  displayName: Setup developer environment
 
 - script: |
     curl -L "https://raw.githubusercontent.com/apple/swift/main/stdlib/public/Platform/ucrt.modulemap" -o "%UniversalCRTSdkDir%\Include\%UCRTVersion%\ucrt\module.modulemap"
     curl -L "https://raw.githubusercontent.com/apple/swift/main/stdlib/public/Platform/visualc.modulemap" -o "%VCToolsInstallDir%\include\module.modulemap"
     curl -L "https://raw.githubusercontent.com/apple/swift/main/stdlib/public/Platform/visualc.apinotes" -o "%VCToolsInstallDir%\include\visualc.apinotes"
     curl -L "https://raw.githubusercontent.com/apple/swift/main/stdlib/public/Platform/winsdk.modulemap" -o "%UniversalCRTSdkDir%\Include\%UCRTVersion%\um\module.modulemap"
-  displayName: Configure SDK
+  displayName: Configure Swift SDK
 
 - task: PowerShell@2
   inputs:
@@ -50,46 +37,26 @@ steps:
       Write-Host "##vso[task.prependpath]$(toolchain.directory)"
       Write-Host "##vso[task.prependpath]$(bin.directory)"
       Write-Host "##vso[task.prependpath]$(icu.directory)"
-  displayName: Install toolchain
-
-- task: PowerShell@2
-  inputs:
-    targetType: 'inline'
-    script: |
-      md -Path 'C:\Library\sqlite3'
-      Invoke-WebRequest -OutFile "C:\Library\sqlite3\sqlite3.zip" 'https://www.sqlite.org/2020/sqlite-dll-win64-x64-3330000.zip'
-      Expand-Archive -Force 'C:\Library\sqlite3\sqlite3.zip' 'C:\Library\sqlite3'
-      Remove-Item 'C:\Library\sqlite3\sqlite3.zip'
-  displayName: Download and extract sqlite3
-
-- script: |
-    lib /machine:x64 /def:C:\Library\sqlite3\sqlite3.def /out:C:\Library\sqlite3\sqlite3.lib
-  displayName: Build sqlite3
+  displayName: Install Swift toolchain
 
 - script: |
     swift build -v -c release
   env:
     SDKROOT: C:\Library\Developer\Platforms\Windows.platform\Developer\SDKs\Windows.sdk
     DEVELOPER_DIR: C:\Library\Developer
-  displayName: Build swift package
+  displayName: Build Swift package
 
 - script: FOR %%f IN (.build\x86_64-unknown-windows-msvc\release\*.exe) DO llvm-strip %%f
-  displayName: Strip symbols
+  displayName: Strip symbols from executables
 
 - task: CopyFiles@2
   inputs:
     contents: '$(System.DefaultWorkingDirectory)\.build\x86_64-unknown-windows-msvc\release\*.exe'
     targetFolder: $(Build.ArtifactStagingDirectory)
-  displayName: Copy executables to staging directory
-
-- task: CopyFiles@2
-  inputs:
-    contents: 'C:\Library\sqlite3\*.dll'
-    targetFolder: $(Build.ArtifactStagingDirectory)
-  displayName: Copy sqlite3 library to staging directory
+  displayName: Copy build artifacts to staging directory
 
 - task: PublishBuildArtifacts@1
   inputs:
     pathToPublish: $(Build.ArtifactStagingDirectory)
     artifactName: x86_64-unknown-windows-msvc-release
-  displayName: Publish artifacts
+  displayName: Publish build artifacts

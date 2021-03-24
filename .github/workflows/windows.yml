@@ -36,10 +36,6 @@ jobs:
           Copy-Item "$env:SDKROOT\usr\share\visualc.apinotes" -destination "$env:VCToolsInstallDir\include\visualc.apinotes"
           Copy-Item "$env:SDKROOT\usr\share\winsdk.modulemap" -destination "$env:UniversalCRTSdkDir\Include\$env:UCRTVersion\um\module.modulemap"
 
-      - name: Install SQLite
-        shell: cmd
-        run: .github/install-sqlite.bat
-
       - name: Update package dependencies
         run: swift package update
 
