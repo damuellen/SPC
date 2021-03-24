@@ -29,7 +29,6 @@ steps:
   displayName: Download zlib
 
 - task: BatchScript@1
-  displayName: VsDevCmd
   inputs:
     filename: C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/Common7/Tools/VsDevCmd.bat
     arguments: -no_logo -arch=x64 -host_arch=x64
@@ -72,7 +71,7 @@ steps:
   env:
     SDKROOT: C:\Library\Developer\Platforms\Windows.platform\Developer\SDKs\Windows.sdk
     DEVELOPER_DIR: C:\Library\Developer
-  displayName: 'Build swift package'
+  displayName: Build swift package
 
 - script: FOR %%f IN (.build\x86_64-unknown-windows-msvc\release\*.exe) DO llvm-strip %%f
   displayName: Strip symbols
