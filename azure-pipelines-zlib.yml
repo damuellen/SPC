@@ -1,0 +1,42 @@
+trigger:
+- master
+
+pool:
+  vmImage: windows-latest
+
+variables:
+  zlib.version: 1.2.11
+  install.directory: $(Build.StagingDirectory)/zlib-windows-x64/Library/zlib
+
+resources:
+  repositories:
+    - repository: madler/zlib
+      type: github
+      name: madler/zlib
+      ref: refs/tags/v$(zlib.version)
+      endpoint: GitHub
+
+steps:
+  - checkout: madler/zlib
+  - task: BatchScript@1
+    displayName: VsDevCmd
+    inputs:
+      filename: C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/Common7/Tools/VsDevCmd.bat
+      arguments: -no_logo -arch=x64 -host_arch=x64
+      modifyEnvironment: true
+
+  - task: CMake@1
+    inputs:
+      workingDirectory: $(Build.BinariesDirectory)/zlib
+      cmakeArgs: -C $(Build.SourcesDirectory)/swift-build/cmake/caches/${{ parameters.platform }}-${{ parameters.arch }}.cmake -G Ninja $(Build.SourcesDirectory)/zlib -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_INSTALL_PREFIX=$(install.directory)/usr -DBUILD_SHARED_LIBS=NO -DBUILD_TESTING=NO -DCMAKE_POSITION_INDEPENDENT_CODE=YES
+    displayName: 'Configure zlib'
+  - task: CMake@1
+    inputs:
+      cmakeArgs: --build $(Build.BinariesDirectory)/zlib
+    displayName: 'Build zlib'
+  - task: CMake@1
+    inputs:
+      cmakeArgs: --build $(Build.BinariesDirectory)/zlib --target install
+    displayName: 'Install zlib'
+  - publish: $(Build.StagingDirectory)/zlib-windows-x64
+    artifact: zlib-windows-x64
