@@ -40,10 +40,6 @@ jobs:
         shell: cmd
         run: .github/install-sqlite.bat
 
-      - name: Install Zlib
-        shell: cmd
-        run: .github/install-zlib.bat
-
       - name: Update package dependencies
         run: swift package update
 
@@ -51,7 +47,7 @@ jobs:
         run: swift build -c release
 
       - name: Strip symbols
-        run: FOR %y IN (.build\x86_64-unknown-windows-msvc\release\*.exe) DO llvm-strip %y
+        run: FOR %%f IN (.build\x86_64-unknown-windows-msvc\release\*.exe) DO llvm-strip %%f
 
       - name: Compress SolarPerformanceCalc
         uses: svenstaro/upx-action@v2
