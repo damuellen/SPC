@@ -47,6 +47,7 @@ jobs:
         run: swift build -c release
 
       - name: Strip symbols
+        shell: cmd
         run: FOR %%f IN (.build\x86_64-unknown-windows-msvc\release\*.exe) DO llvm-strip %%f
 
       - name: Compress SolarPerformanceCalc
