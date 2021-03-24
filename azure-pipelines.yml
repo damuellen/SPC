@@ -15,6 +15,16 @@ variables:
   icu.directory: C:/Library/icu-67/usr/bin
   
 steps:
+- task: DownloadBuildArtifacts@0
+  inputs:
+    buildType: specific
+    project: '3133d6ab-80a8-4996-ac4f-03df25cd3224'
+    allowPartiallySucceededBuilds: true
+    pipeline: 1
+    artifactName: 'zlib-${{ parameters.platform }}-${{ parameters.host }}'
+    downloadPath: '$(System.ArtifactsDirectory)'
+  displayName: Download zlib
+
 - task: BatchScript@1
   displayName: VsDevCmd
   inputs:
@@ -67,9 +77,17 @@ steps:
     DEVELOPER_DIR: C:\Library\Developer
   displayName: 'Build swift package'
 
+- script: FOR %y IN (.build\x86_64-unknown-windows-msvc\release\*.exe) DO llvm-strip %y
+  displayName: Strip symbols
+
 - task: CopyFiles@2
   inputs:
     contents: '$(System.DefaultWorkingDirectory)\.build\x86_64-unknown-windows-msvc\release\*.exe'
+    targetFolder: $(Build.ArtifactStagingDirectory)
+
+- task: CopyFiles@2
+  inputs:
+    contents: '$(System.ArtifactsDirectory)\*.dll'
     targetFolder: $(Build.ArtifactStagingDirectory)
 
 - task: PublishBuildArtifacts@1

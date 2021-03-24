@@ -4,7 +4,6 @@ import PackageDescription
 let condition = BuildSettingCondition.when(configuration: .release)
 let c = [CSetting.unsafeFlags(["-ffast-math", "-O3",  "-fomit-frame-pointer", "-funroll-loops"])]
 let s = ["-cross-module-optimization", "-Ounchecked", "-enforce-exclusivity=unchecked", "-DRELEASE"]
-let linker = [LinkerSetting.unsafeFlags(["-Xlinker", "-s"], condition)]
 let swift = [SwiftSetting.unsafeFlags(s, condition), .define("DEBUG", .when(configuration: .debug))]
 let package = Package(
   name: "SPC",
@@ -54,15 +53,13 @@ let package = Package(
       swiftSettings: swift),
     .target(name: "Meteo",
       dependencies: ["DateGenerator", "SolarPosition"],
-      swiftSettings: swift,
-      linkerSettings: linker),
+      swiftSettings: swift),
     .target(name: "SolarPerformanceCalc",
       dependencies: [
         "Config", "BlackBoxModel",
         .product(name: "ArgumentParser", package: "swift-argument-parser"),
         .product(name: "xlsxwriter", package: "xlsxwriter.swift")],
-      swiftSettings: swift,
-      linkerSettings: linker),
+      swiftSettings: swift),
     .testTarget(name: "MeteoTests",
       dependencies: ["DateGenerator", "SolarPosition", "Meteo"]),
     .testTarget(name: "SolarFieldModelTests",
@@ -76,7 +73,7 @@ let package = Package(
 // FIXME: conditionalise these flags since SwiftPM 5.3 and earlier will crash
 // for platforms they don't know about.
 #if os(Windows)
-let flags = ["-Xlinker", "-s", "-Xlinker", "/INCREMENTAL:NO", "-Xlinker", "/IGNORE:4217,4286"]
+let flags = ["-Xlinker", "/INCREMENTAL:NO", "-Xlinker", "/IGNORE:4217,4286"]
 
 if let BlackBoxModel = package.targets.first(where: { $0.name == "BlackBoxModel" }) {
   BlackBoxModel.linkerSettings = [.linkedLibrary("C:/Library/sqlite3/sqlite3.lib"), .unsafeFlags(flags)]
