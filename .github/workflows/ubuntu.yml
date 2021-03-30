@@ -28,7 +28,7 @@ jobs:
       run: swift build --build-tests --enable-test-discovery
 
     - name: Run tests
-      run: swift test
+      run: swift test --enable-test-discovery
 
     - name: Generate Documentation
       uses: SwiftDocOrg/swift-doc@master
