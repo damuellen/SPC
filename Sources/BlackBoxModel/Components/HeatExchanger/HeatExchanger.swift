@@ -19,7 +19,6 @@ public struct HeatExchanger: Parameterizable, HeatTransfer {
    
   var heatOut, heatToTES: Double
 
-
   static let capacity = SolarField.parameter.HTF.heatContent(
     HeatExchanger.parameter.temperature.htf.inlet.max,
     HeatExchanger.parameter.temperature.htf.outlet.max)

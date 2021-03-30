@@ -134,6 +134,12 @@ public enum BlackBoxModel {
       status.solarField.maxMassFlow = PowerBlock.requiredMassFlow()
       if status.solarField.massFlow > .zero {
         status.solarField.inletTemperature(outlet: status.powerBlock)
+      } else {
+        // Calculate the heat losses in the cold header
+        status.solarField.temperature.inlet = status.solarField.heatLosses(
+          header: status.solarField.header.temperature.inlet,
+          ambient: temperature
+        )
       }
 
       if Design.hasStorage {
@@ -142,19 +148,17 @@ public enum BlackBoxModel {
         // Sets the temperature when the storage does freeze protection
         status.solarField.inletTemperature(storage: status.storage)
       }
-      // Calculate the heat losses in the cold header
-      status.solarField.header.temperature.inlet = status.solarField.heatLosses(
-        header: status.solarField.header.temperature.inlet,
-        ambient: temperature
-      )
 
       // Calculate outlet temperature and mass flow
       status.solarField.calculate(
         collector: status.collector, ambient: temperature
       )
+      
+      // Determine the current efficiency of the solar field
+      status.solarField.eta(collector: status.collector)
 
       // Calculate the heat losses in the hot header
-      status.solarField.header.temperature.outlet = status.solarField.heatLosses(
+      status.solarField.temperature.outlet = status.solarField.heatLosses(
         header: status.solarField.header.temperature.outlet,
         ambient: temperature
       )

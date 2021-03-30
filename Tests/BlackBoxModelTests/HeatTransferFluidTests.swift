@@ -25,10 +25,4 @@ class HeatTransferFluidTests: XCTestCase {
     let temperature = htf.temperature(300, Temperature(celsius: 400.0))
     XCTAssertEqual(temperature.kelvin, 779.22, accuracy: 0.01)
   }
-
-  static var allTests: [(String, (HeatTransferFluidTests) -> () throws -> Void)] {
-    return [
-      ("testsTherminol", testsTherminol)
-    ]
-  }
 }

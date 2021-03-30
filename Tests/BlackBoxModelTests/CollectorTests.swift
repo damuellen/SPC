@@ -88,10 +88,4 @@ class CollectorTests: XCTestCase {
      XCTAssertEqual(collector.cosTheta, 0.86, accuracy: 0.01)
      XCTAssertEqual(collector.theta, 30.23, accuracy: 0.01)
   }
-
-  static var allTests: [(String, (CollectorTests) -> () throws -> Void)] {
-    return [
-      ("testsEfficiency", testsEfficiency), ("testsTracking", testsTracking)
-    ]
-  }
 }

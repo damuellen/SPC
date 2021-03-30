@@ -58,6 +58,10 @@ public struct SolarField: Parameterizable, HeatTransfer {
     SolarField.parameter.minFlow.quotient * SolarField.parameter.maxMassFlow.rate
   )
 
+  public let antiFreezeFlow = MassFlow(
+      SolarField.parameter.antiFreezeFlow.quotient * SolarField.parameter.maxMassFlow.rate
+  )
+
   public var maxMassFlow: MassFlow = .zero
 
   public enum OperationMode {
@@ -67,7 +71,7 @@ public struct SolarField: Parameterizable, HeatTransfer {
     case track
     case defocus(Ratio)
     case stow
-    case freeze
+    case freeze(Double)
     case maintenance
 
     var isFreezeProtection: Bool {
@@ -156,7 +160,8 @@ public struct SolarField: Parameterizable, HeatTransfer {
     }
   }
 
-  private func ratios(_ timeRemain: Double)  -> [(Double, Double)] {
+  private func ratios()  -> [(Double, Double)] {
+    let timeRemain = Simulation.time.steps.interval
     let maxMassFlow = SolarField.parameter.maxMassFlow.rate
     let loopWays = SolarField.parameter.loopWays
     let flowVelocity: Double = 2.7
@@ -184,11 +189,9 @@ public struct SolarField: Parameterizable, HeatTransfer {
 
     let flowVelocity: Double = 2.7
 
-    let timeRatios =  ratios(time)
-    let x = time > Simulation.time.steps.interval
-    let t = loopWays[0] / (flowVelocity * header.flow / maxMassFlow)
-    if x, time < t
-    {
+    let timeRatios =  ratios()
+    let remain = loopWays[0] / (flowVelocity * header.flow / maxMassFlow)
+    if time < remain {
       for i in Loop.indices {
         loops[i].temperature.outlet.kelvin =
           timeRatios[0].0 * loops[i].outlet + timeRatios[0].1 * last[i].outlet
@@ -205,28 +208,38 @@ public struct SolarField: Parameterizable, HeatTransfer {
 
     var sum = 0.0
     zip(Loop.indices, timeRatios).forEach { i, tr in
-      loops[i].temperature.inlet.kelvin = tr.0 * inlet + tr.1 * last[i].inlet
       sum += (tr.0 * loops[i].outlet + tr.1 * last[i].outlet) * loops[i].flow
+      loops[i].temperature.inlet.kelvin = tr.0 * inlet + tr.1 * last[i].inlet
     }
 
     header.temperature.outlet.kelvin = sum / (3.0 * header.flow)
   }
 
-  mutating func antiFreezeCheck(loop: Loop) -> OperationMode {
-    if case .startUp = operationMode { return operationMode }
+  mutating func isFreezeProtectionRequired() -> Bool {
     let freezingTemperature = SolarField.parameter.HTF.freezeTemperature
       + Simulation.parameter.dfreezeTemperaturePump
       + Simulation.parameter.tempTolerance
-    let maxMassFlow = SolarField.parameter.maxMassFlow.rate
-    if loops[loop.rawValue].minTemperature < freezingTemperature.kelvin {
-      let antiFreeze = SolarField.parameter.antiFreezeFlow.quotient
-      let antiFreezeFlow = antiFreeze * maxMassFlow
-      header.massFlow.rate = antiFreezeFlow
-      loops[loop.rawValue].temperature.inlet = header.temperature.inlet
-      return .freeze
-    } else {
-      return operationMode
+
+    let timeRemain = Simulation.time.steps.interval
+
+    if case .freeze(let time) = operationMode, time > .zero {
+      operationMode = .freeze(time - timeRemain)
+      return true
+    } 
+
+    if loops.dropFirst().min(by: <)!.minTemperature < freezingTemperature.kelvin {
+      loops.indices.forEach { 
+        loops[$0].temperature.inlet = header.temperature.inlet
+      }
+
+      let loopWays = SolarField.parameter.loopWays
+      let flowVelocity: Double = 2.7
+      let maxMassFlow = SolarField.parameter.maxMassFlow.rate
+      let remain = loopWays[0] / (flowVelocity * antiFreezeFlow.rate / maxMassFlow)
+      operationMode = .freeze(remain - timeRemain)
+      return true
     }
+    return false
   }
 
   mutating func heatLosses(header temperature: Temperature, ambient: Temperature) -> Temperature {
@@ -271,10 +284,8 @@ public struct SolarField: Parameterizable, HeatTransfer {
   }
 
   mutating func calculate(collector: Collector, ambient: Temperature) {
-    let insolation = 
-      collector.insolationAbsorber > Simulation.parameter.minInsolation
-      ? collector.insolationAbsorber : .zero
-    let past = collector.lastInsolation
+    let insolation = collector.insolationAbsorber < collector.lastInsolation 
+      ? collector.lastInsolation : collector.insolationAbsorber
     let elevation = collector.parabolicElevation
 
     /// The heat that can be absorbed by the HTF
@@ -308,8 +319,12 @@ public struct SolarField: Parameterizable, HeatTransfer {
     // Check if mass flow is within acceptable limits
     switch MassFlow(kgPerSqm * area) {
     case let massFlow where massFlow.rate <= .zero: // HCE loses heat      
-      operationMode = elevation.isZero ? .stow : .follow
-      header.massFlow = .zero
+      if isFreezeProtectionRequired() {
+        header.massFlow = antiFreezeFlow
+      } else {
+        operationMode = elevation.isZero ? .stow : .follow
+        header.massFlow = .zero
+      }
     case let massFlow where massFlow > maxMassFlow:
       let ratio = Ratio(maxMassFlow.rate / massFlow.rate)
       operationMode = .defocus(ratio)
@@ -317,20 +332,29 @@ public struct SolarField: Parameterizable, HeatTransfer {
       header.massFlow = maxMassFlow
     case let massFlow where massFlow < minMassFlow:
       operationMode = .follow
-      header.massFlow = massFlow > 30.0 ? massFlow : .zero
+      header.massFlow = minMassFlow
     case let massFlow: // MassFlow is within acceptable limits
       operationMode = .track
       header.massFlow = massFlow
     }
 
+    let last = loops
+
     let minTemp = HeatExchanger.parameter.temperature.htf.inlet.min.kelvin
     if header.massFlow > minMassFlow {
       if header.outlet < minTemp { header.massFlow = minMassFlow }
-    } 
+    }
+
+    loops[0].massFlow = header.massFlow
+    loops[0].temperature.inlet = header.temperature.inlet
+    // Calculate design loop outlet temperature
+    let time = HCE.temperatures(&self, .design, collector.insolationAbsorber, ambient)
+
     // Check HCE and decide what to do
     if case .follow = operationMode {
-      let minInsolation = Simulation.parameter.minInsolationRaiseStartUp
-      if elevation < 90, insolation > past + minInsolation {
+      let minRaise = Simulation.parameter.minInsolationRaiseStartUp
+      if elevation < 90, insolation > collector.lastInsolation + minRaise,
+        insolation > Simulation.parameter.minInsolation {
         operationMode = .startUp
         header.massFlow = minMassFlow
       } else if loops[0].outlet < minTemp, elevation > 90 {
@@ -343,38 +367,23 @@ public struct SolarField: Parameterizable, HeatTransfer {
       }
     } 
 
-    for loop in [Loop.design, .near, .far, .average] {
-      operationMode = antiFreezeCheck(loop: loop)
-    }
-
-    loops[0].massFlow = header.massFlow
-    loops[0].temperature.inlet = header.temperature.inlet
-    // Calculate design loop outlet temperature
-    let time = HCE.temperatures(&self, .design, insolation, ambient)
-    operationMode = antiFreezeCheck(loop: .design)
-    let last = loops
-
     if header.massFlow > .zero {
       let massFlows = imbalanceLoops(massFlow: header.massFlow)
       zip(Loop.indices, massFlows).forEach { i, massFlow in
         loops[i].massFlow = massFlow
       }
-    }
-
-    if header.massFlow == .zero {
+    } else {
       loops.indices.forEach { loops[$0].massFlow = .zero }
     }
 
     for loop in [Loop.near, .far, .average] {
-      _ = HCE.temperatures(&self, loop, insolation, ambient)
+      _ = HCE.temperatures(&self, loop, collector.insolationAbsorber, ambient)      
     }
     
     header.massFlow.rate = loops.dropFirst().reduce(0.0)
       { sum, loop in sum + loop.massFlow.rate } / 3.0
 
-    if header.massFlow > .zero { outletTemperature(last: last, time) }
-
-    eta(collector: collector)
+    if header.massFlow > .zero { outletTemperature(last: last, time) }    
   }
 }
 

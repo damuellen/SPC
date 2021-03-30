@@ -11,10 +11,4 @@ class HeatExchangersTests: XCTestCase {
     )
     XCTAssertEqual(factor, 0.88, accuracy: 0.01)
   }
-
-  static var allTests: [(String, (HeatExchangersTests) -> () throws -> Void)] {
-    return [
-      ("testsTemperatureFactor", testsTemperatureFactor),
-    ]
-  }
 }

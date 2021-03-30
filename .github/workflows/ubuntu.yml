@@ -25,7 +25,7 @@ jobs:
       run: swift package update
 
     - name: Build Debug mode
-      run: swift build --build-tests
+      run: swift build --build-tests --enable-test-discovery
 
     - name: Run tests
       run: swift test

@@ -414,8 +414,10 @@ public final class Recorder {
         })
     }
 
-    let status = Status.columns.map(\.0)
-    let energy = PlantPerformance.columns.map(\.0)
+    let status = Status.columns.map 
+      { $0.0.replacingOccurrences(of: "|", with: "_") }
+    let energy = PlantPerformance.columns.map
+      { $0.0.replacingOccurrences(of: "|", with: "_") }
     createTable(name: "PerformanceData", columns: status)
     createTable(name: "Performance", columns: energy)
 

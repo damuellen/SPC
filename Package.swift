@@ -14,8 +14,7 @@ let package = Package(
     .executable(name: "SolarPerformanceCalc", targets: ["SolarPerformanceCalc"]),
     .executable(name: "SolarFieldCalc", targets: ["SolarFieldCalc"]),
     .executable(name: "TransTES", targets: ["TransTES"]),
-    //.library(name: "BlackBoxModel", type: .dynamic, targets: ["BlackBoxModel"]),
-   // .library(name: "Utility", type: .dynamic, targets: ["Utility"])
+    .library(name: "BlackBoxModel", type: .dynamic, targets: ["BlackBoxModel"]),
     ],
   dependencies: [
     .package(url: "https://github.com/apple/swift-argument-parser.git", .upToNextMinor(from: "0.4.0")),

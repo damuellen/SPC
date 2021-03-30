@@ -85,11 +85,4 @@ class HCETests: XCTestCase {
     XCTAssertEqual(solarField.inFocus.quotient, 0, accuracy: 0.01)
   }
 */
-  static var allTests: [(String, (HCETests) -> () throws -> Void)] {
-    return [
-      ("testsRadiationLosses", testsRadiationLosses),
-     // ("testsMode1", testsMode1),
-     // ("testsMode2", testsMode2),
-    ]
-  }
 }

@@ -37,6 +37,16 @@ extension Cycle {
   }
 }
 
+extension Cycle: Comparable {
+  public static func < (lhs: Cycle, rhs: Cycle) -> Bool {
+    lhs.minTemperature < rhs.minTemperature
+  }
+
+  public static func == (lhs: Cycle, rhs: Cycle) -> Bool {
+    lhs.minTemperature == rhs.minTemperature
+  }
+}
+
 extension HeatTransfer {
   var cycle: Cycle {
     Cycle(name: name, massFlow: massFlow, temperature: temperature)
@@ -46,9 +56,7 @@ extension HeatTransfer {
     Temperature.average(temperature.inlet, temperature.outlet)
   }
 
-  var minTemperature: Double {
-    min(inlet, outlet)
-  }
+  var minTemperature: Double { min(inlet, outlet) }
 
   var inlet: Double { temperature.inlet.kelvin }
 

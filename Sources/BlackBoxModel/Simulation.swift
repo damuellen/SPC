@@ -19,8 +19,8 @@ public enum Simulation {
     Simulation.initialValues.temperatureOfHTFinPipes)
 
   public static var initialValues = InitValues(
-    temperatureOfHTFinPipes: Temperature(celsius: 100.0),
-    temperatureOfHTFinHCE: Temperature(celsius: 50.0),
+    temperatureOfHTFinPipes: Temperature(celsius: 300.0),
+    temperatureOfHTFinHCE: Temperature(celsius: 250.0),
     massFlowInSolarField: 0.0
   )
 

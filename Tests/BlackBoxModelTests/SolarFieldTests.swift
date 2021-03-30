@@ -14,36 +14,57 @@ class SolarFieldTests: XCTestCase {
     collector.efficiency(ws: 0) // 0.90
     solarField.temperature.inlet = 
       Temperature(celsius: SolarField.parameter.designTemperature.inlet)
+      solarField.temperature.outlet = 
+      Temperature(celsius: SolarField.parameter.designTemperature.outlet)
     let maxFlow = SolarField.parameter.maxMassFlow
-    solarField.maxMassFlow = solarField.minMassFlow + 1.0
-    defer { SolarField.parameter.maxMassFlow = maxFlow }
+    solarField.maxMassFlow = maxFlow
 
-    collector.insolationAbsorber = 666.6
+    for i in solarField.loops.indices {
+      solarField.loops[i].temperature = solarField.temperature
+    }
+    collector.insolationAbsorber = 700.0
+    solarField.calculate(collector: collector, ambient: Temperature(celsius: 25.0))
+
+    XCTAssertEqual(solarField.flow, maxFlow.rate, accuracy: 0.1)
+    XCTAssertEqual(solarField.outlet, 666.0, accuracy: 0.5)
+    XCTAssertEqual(solarField.inFocus.quotient, 0.82, accuracy: 0.1)
+
+    for i in solarField.loops.indices {
+      solarField.loops[i].temperature = solarField.temperature
+    }
+    collector.insolationAbsorber = 600.0
+    solarField.calculate(collector: collector, ambient: Temperature(celsius: 25.0))
+
+    XCTAssertEqual(solarField.flow, maxFlow.rate, accuracy: 0.5)
+    XCTAssertEqual(solarField.outlet, 666.0, accuracy: 0.5)
+    XCTAssertEqual(solarField.inFocus.quotient, 0.96, accuracy: 0.1)
+
+    for i in solarField.loops.indices {
+      solarField.loops[i].temperature = solarField.temperature
+    }
+    collector.insolationAbsorber = 500.0
+    solarField.calculate(collector: collector, ambient: Temperature(celsius: 25.0))
+    XCTAssertEqual(solarField.flow, 941.6, accuracy: 0.1)
+    XCTAssertEqual(solarField.outlet, 666.0, accuracy: 0.5)
+    for i in solarField.loops.indices {
+      solarField.loops[i].temperature = solarField.temperature
+    }
+    collector.insolationAbsorber = 400.0
     solarField.calculate(collector: collector, ambient: Temperature(celsius: 25.0))
    
-    XCTAssertEqual(solarField.outlet, 513.8, accuracy: 0.1)
-    XCTAssertEqual(solarField.inFocus.quotient, 0.0, accuracy: 0.1)
+    XCTAssertEqual(solarField.outlet, 666.0, accuracy: 0.5)
 
     let parasitics = solarField.parasitics()
+    XCTAssertEqual(parasitics, 1.9, accuracy: 0.1)
 
-    XCTAssertEqual(parasitics, 0.5, accuracy: 0.1)
+    solarField.maxMassFlow.rate = maxFlow.rate / 2
 
-    collector.insolationAbsorber = 466.6
+    for i in solarField.loops.indices {
+      solarField.loops[i].temperature = solarField.temperature
+    }
+    collector.insolationAbsorber = 300.0
     solarField.calculate(collector: collector, ambient: Temperature(celsius: 25.0))
-    
-    XCTAssertEqual(solarField.outlet, 632.9, accuracy: 0.1)
-    XCTAssertEqual(solarField.inFocus.quotient, 0.61, accuracy: 0.1)
-
-    collector.insolationAbsorber = 66.6
-    solarField.calculate(collector: collector, ambient: Temperature(celsius: 25.0))
-    
-    XCTAssertEqual(solarField.outlet, 632.9, accuracy: 0.1)
-    XCTAssertEqual(solarField.inFocus.quotient, 1.0, accuracy: 0.1)
-  }
-
-  static var allTests: [(String, (SolarFieldTests) -> () throws -> Void)] {
-    return [
-      ("testsOutletTemperature", testsOutletTemperature),
-    ]
+    XCTAssertEqual(solarField.flow, maxFlow.rate / 2, accuracy: 1.0)
+    XCTAssertEqual(solarField.outlet, 666.0, accuracy: 0.5)
   }
 }

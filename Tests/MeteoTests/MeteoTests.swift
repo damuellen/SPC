@@ -64,10 +64,4 @@ class MeteoTests: XCTestCase {
       name: "", data: meteoData, (2017, location)
     )
   }
-
-  static var allTests: [(String, (MeteoTests) -> () throws -> Void)] {
-    return [
-      ("testsGenerator", testsGenerator),
-    ]
-  }
 }

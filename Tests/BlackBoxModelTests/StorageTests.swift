@@ -31,7 +31,7 @@ class StorageTests: XCTestCase {
       heatFlow: &plant.heatFlow
     )
 
-    XCTAssertEqual(parasitics.kiloWatt, 0.0, accuracy: 0.01)
+    XCTAssertEqual(parasitics.kiloWatt, 2.0, accuracy: 0.01)
  //   storage.operationMode = .discharge
  //   storage.massFlow.rate = 200.0
  //   storage.temperature.outlet = Temperature(celsius: 380.0)
@@ -43,11 +43,5 @@ class StorageTests: XCTestCase {
     thermal = storage.massFlow.rate
       * SolarField.parameter.HTF.heatContent(storage) / 1_000
   //  storage.calculate(thermal: &plant.heatFlow, powerBlock)
-  }
-
-  static var allTests: [(String, (StorageTests) -> () throws -> Void)] {
-    return [
-      ("testsParasitics", testsParasitics),
-    ]
   }
 }

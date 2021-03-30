@@ -10,10 +10,4 @@ class PowerBlockTests: XCTestCase {
       temperature: Temperature(celsius: 390.0))
     XCTAssertEqual(parasitics, 0.78, accuracy: 0.01, "parasitics")
   }
-
-  static var allTests: [(String, (PowerBlockTests) -> () throws -> Void)] {
-    return [
-      ("testsParasitics", testsParasitics),
-    ]
-  }
 }

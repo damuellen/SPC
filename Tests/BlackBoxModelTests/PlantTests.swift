@@ -18,11 +18,4 @@ class PlantTests: XCTestCase {
   //  status.solarField.setInletTemperature(equalToOutlet: status.powerBlock)
 
   }
-
-
-  static var allTests: [(String, (PlantTests) -> () throws -> Void)] {
-    return [
-      ("testsPlant", testsPlant)
-    ]
-  }
 }

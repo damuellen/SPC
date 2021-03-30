@@ -19,6 +19,8 @@
             "command": "swift",
             "args": [
                 "build",
+                "-Xswiftc", "-Xfrontend",
+                "-Xswiftc", "-serialize-debugging-options",
                 "--configuration", "debug",
                 "--product", "SolarPerformanceCalc",
             ],
@@ -32,7 +34,9 @@
             "type": "shell",
             "command": "swift",
             "args": [
-                "build",
+                "build", 
+                "-Xswiftc", "-Xfrontend",
+                "-Xswiftc", "-serialize-debugging-options",
                 "--configuration", "debug",
                 "--product", "SolarPerformanceCalc",
                 "-Xswiftc", "-DPRINT",
@@ -42,7 +46,13 @@
         {
             "label": "swift-build-debug",
             "type": "shell",
-            "command": "swift build"
+            "command": "swift",
+            "args": [
+                "build",
+                "-Xswiftc", "-Xfrontend",
+                "-Xswiftc", "-serialize-debugging-options",
+                "--configuration", "debug",
+            ],
         },
         {
             "label": "swift-build-tests",
@@ -50,7 +60,10 @@
             "command": "swift",
             "args": [
                 "build",
-                "--build-tests"
+                "-Xswiftc", "-Xfrontend",
+                "-Xswiftc", "-serialize-debugging-options",
+                "--build-tests",
+                "--enable-test-discovery"
             ],
             "group": "test"
         },

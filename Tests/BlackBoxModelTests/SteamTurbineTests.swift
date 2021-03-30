@@ -25,10 +25,4 @@ class SteamTurbineTests: XCTestCase {
     XCTAssertEqual(maxLoad, 1, accuracy: 0.01, "maxLoad")
     XCTAssertEqual(efficiency, 0.383, accuracy: 0.01, "efficiency")
   }
-
-  static var allTests: [(String, (SteamTurbineTests) -> () throws -> Void)] {
-    return [
-      ("testsPerfomance", testsPerfomance),
-    ]
-  }
 }
