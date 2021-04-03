@@ -106,8 +106,17 @@ public enum BlackBoxModel {
     for (meteo, date) in zip(🌦, 📅) {
       // Set the date for the calculation step
       DateTime.setCurrent(date: date)
+      let dt = DateTime.current
 
-      Maintenance.checkSchedule(date)
+      if Maintenance.checkSchedule(date) {
+        // No operation is simulated
+        let status = Plant.initialState
+        let energy = PlantPerformance()
+        backgroundQueue.async { 
+          log(dt, meteo: meteo, status: status, energy: energy)
+        }
+        continue
+      }
 
       if let position = 🌞[date] {
         // Only when the sun is above the horizon.
@@ -118,7 +127,7 @@ public enum BlackBoxModel {
         status.collector = Collector.initialState
         DateTime.setNight()
       }
-      let dt = DateTime.current
+      
 #if DEBUG
       if DateTime.isSunRise
       {()}
