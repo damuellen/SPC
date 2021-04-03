@@ -61,7 +61,7 @@ public class MeteoDataGenerator: Sequence {
 
   private var range: Range<Int>
 
-  private var firstStep = 1
+  private var firstStep = 0
 
   public func makeIterator() -> AnyIterator<MeteoData> {
     let data = dataSource.data
@@ -72,8 +72,6 @@ public class MeteoDataGenerator: Sequence {
       ? Int(dataSource.hourFraction / frequence.fraction)
       : frequence.rawValue
 
-    let stride = (1 / Float(steps))
-    let firstStep = 0//-(s / 2)
     let lastStep = steps * 2
 
     var step = firstStep //self.firstStep
@@ -90,21 +88,17 @@ public class MeteoDataGenerator: Sequence {
       
       let prev = data[idx0]
       let curr = data[idx1]
-      let next = data[idx2]      
-      
-      var meteo: MeteoData
+
+      let meteo: MeteoData
       switch method {
-      case .linear:
-      meteo = MeteoData.lerp(start: prev, end: curr, Float(step) * stride)
+      case .linear: 
+        meteo =  .interpolation((prev, curr, nil), step: step, steps: steps)
       case .gradient:
+        let next = data[idx2]
         if idx0 == idx1 {
-          meteo = MeteoData.interpolation(
-            nil, curr, next, step: Float(step + 1), steps: Float(steps)
-          )
+          meteo = .interpolation((nil, curr, next), step: step, steps: steps)
         } else {
-          meteo = MeteoData.interpolation(
-            prev, curr, next, step: Float(step + 1), steps: Float(steps)
-          )
+          meteo = .interpolation((prev, curr, next), step: step, steps: steps)
         }
       }
       
@@ -121,5 +115,46 @@ public class MeteoDataGenerator: Sequence {
 extension Comparable {
   func clamped(to limits: ClosedRange<Self>) -> Self {
     min(max(self, limits.lowerBound), limits.upperBound)
+  }
+}
+
+extension MeteoData {
+  /// Interpolation function for meteo data
+  static func interpolation(
+    _ values: (MeteoData?, MeteoData, MeteoData?), step: Int, steps: Int
+  ) -> MeteoData {
+    let step = Float(step + 1)
+    let steps = Float(steps)
+    let stride = (1 / steps)
+    let curr = values.1
+    let progress = step * stride
+    let insolation: [Float]
+    let conditions: [Float]
+    if let next = values.2 {
+      if let prev = values.0 { 
+        let i = zip(curr.insolation,
+          zip(prev.insolation, next.insolation).map { ($0.0, $0.1) }
+        )
+        insolation = i.map { this, others in
+          this.interpolated(between: others, step: step, steps: steps)
+        }
+      } else { // First index only
+        insolation = zip(curr.insolation, next.insolation).map { this, other in
+          this.interpolated(to: other, step: step, steps: steps)
+        }
+      }
+      conditions = zip(curr.conditions, next.conditions).map { this, other in
+        this.lerp(to: other, progress)
+      }
+    } else { // Linear interpolation
+      guard let prev = values.0 else { preconditionFailure() }
+      insolation = zip(prev.insolation, curr.insolation).map { this, other in
+        this.lerp(to: other, progress) 
+      }
+      conditions = zip(prev.conditions, curr.conditions).map { this, other in
+        this.lerp(to: other, progress)
+      }
+    }
+    return MeteoData(insolation: insolation, conditions: conditions)
   }
 }

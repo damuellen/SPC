@@ -14,74 +14,8 @@ public struct MeteoData: CustomStringConvertible {
   public var temperature, dni, ghi, dhi, windSpeed: Float
   var wetBulbTemperature: Float? = nil
 
-  var values: [Float] { [temperature, dni, ghi, dhi, windSpeed] }
-
-  /// Linear interpolation function for meteo data values
-  static func lerp(start: MeteoData, end: MeteoData, _ progress: Float)
-    -> MeteoData
-  {
-    if progress >= 1 { return end }
-    if progress <= 0 { return start }
-
-    return .init(zip(start.values, end.values).map { start, end in
-      start + (progress * (end - start))
-    })
-  }
-
-  /// Interpolation function for meteo data values
-  static func interpolation(
-    _ prev: MeteoData?, _ curr: MeteoData, _ next: MeteoData,
-    step: Float, steps: Float
-  ) -> MeteoData {
-    
-    func interpolation(
-      _ curr: Float, _ next: Float, step: Float, steps: Float
-    ) -> Float {
-      let a = curr
-      let b = (next - curr) / 2 + curr
-      let m = (b - a)
-      let aPrime = (2 * curr - m) / 2
-      return m * step / steps + aPrime
-    }
-
-    func interpolation(
-      _ prev: Float, _ curr: Float, _ next: Float, step: Float, steps: Float
-    ) -> Float {
-      let a = max((curr - prev) / 2 + prev, 0)
-      let b = max((next - curr) / 2 + curr, 0)
-      var m = (b - a)
-      var aPrime = (2 * curr - m) / 2
-      var bPrime = aPrime + m
-      
-      if aPrime < 0 {
-        bPrime += aPrime
-        aPrime = 0
-        m = bPrime - aPrime
-      }
-
-      if bPrime < 0 {
-        aPrime += bPrime
-        bPrime = 0
-        m = bPrime - aPrime
-      }
-      
-      if aPrime > 0 {
-        return m * (step - 1) / steps + aPrime
-      }
-      return m * step / steps
-    }
-
-    if let prev = prev {
-      let (prev, curr, next) = (prev.values, curr.values, next.values)
-      return .init((0..<5).map { i in
-        interpolation(prev[i], curr[i], next[i], step: step, steps: steps)
-      })
-    } else {
-      return .init(zip(curr.values, next.values).map { curr, next in
-        interpolation(curr, next, step: step, steps: steps)
-      })
-    }
-  }
+  var conditions: [Float] { [temperature, windSpeed] }
+  var insolation: [Float] { [dni, ghi, dhi] }
 
   public init(
     dni: Float = 0, ghi: Float = 0, dhi: Float = 0,
@@ -102,12 +36,12 @@ public struct MeteoData: CustomStringConvertible {
     self.dhi = meteo.count > 5 ? meteo[5] : 0
   }
   
-  public init(_ values: [Float]) {
-    self.temperature = values[0]
-    self.dni = values[1]
-    self.ghi = values[2]
-    self.dhi = values[3]
-    self.windSpeed = values[4]
+  public init(insolation: [Float], conditions: [Float]) {
+    self.temperature = conditions[0]
+    self.dni = insolation[0]
+    self.ghi = insolation[1]
+    self.dhi = insolation[2]
+    self.windSpeed = conditions[1]
   }
 
   public init(tmy values: [Float]) {
