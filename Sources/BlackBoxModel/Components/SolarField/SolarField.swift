@@ -377,13 +377,13 @@ public struct SolarField: Parameterizable, HeatTransfer {
     }
 
     for loop in [Loop.near, .far, .average] {
-      _ = HCE.temperatures(&self, loop, collector.insolationAbsorber, ambient)      
+      _ = HCE.temperatures(&self, loop, collector.insolationAbsorber, ambient)
     }
     
     header.massFlow.rate = loops.dropFirst().reduce(0.0)
       { sum, loop in sum + loop.massFlow.rate } / 3.0
 
-    if header.massFlow > .zero { outletTemperature(last: last, time) }    
+    if header.massFlow > .zero { outletTemperature(last: last, time) }
   }
 }
 

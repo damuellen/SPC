@@ -5,26 +5,6 @@ import WinSDK
 import CRT
 #endif
 
-extension String {
-  func clipboard() {
-#if os(Windows)
-    let size = utf16.count * MemoryLayout<UInt16>.size
-    guard let hMem = GlobalAlloc(UINT(GHND), SIZE_T(size + 1))
-    else { return }
-    withCString(encodedAs: UTF16.self) {
-      let dst = GlobalLock(hMem)
-      memcpy(dst, $0, size)
-      GlobalUnlock(hMem)
-    }
-    if OpenClipboard(nil) {
-      EmptyClipboard()
-      SetClipboardData(UINT(CF_UNICODETEXT), hMem)
-      CloseClipboard()
-    }
-#endif
-  }
-}
-
 extension Dictionary where Key: Comparable {
 	var sorted: [(Key, Value)] {
 		return keys.sorted(by: <).map { ($0, self[$0]!) }

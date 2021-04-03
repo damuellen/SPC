@@ -110,8 +110,6 @@ public struct SteamTurbine: Parameterizable {
         if DateTime.current.minute != SteamTurbine.oldMinute {
           if case .startUp(let startUpTime, let startUpEnergy) = operationMode {
             var energy = heatFlow.heatExchanger.megaWatt
-            // FIXME    Plant.heatFlow.startUp.megaWatt = energy
-
             if heater.massFlow > .zero { energy = heatFlow.heatExchanger.megaWatt }
 
             operationMode = .startUp(
