@@ -29,7 +29,7 @@ extension Array where Element == UInt16 {
   }
 }
 
-func setClipboard(_ text: String) {
+public func setClipboard(_ text: String) {
   let size = text.utf16.count * MemoryLayout<UInt16>.size
   guard let hMem = GlobalAlloc(UINT(GHND), SIZE_T(size + 1))
   else { return }
@@ -45,12 +45,11 @@ func setClipboard(_ text: String) {
   }
 }
 
-
-func MessageBox(text: String, caption: String) {
+public func MessageBox(text: String, caption: String) {
   MessageBoxW(nil, text.wide, caption.wide, UINT(MB_OK))
 }
 
-func currentDirectoryPath() -> String {
+public func currentDirectoryPath() -> String {
   let dwLength: DWORD = GetCurrentDirectoryW(0, nil)
   var szDirectory: [WCHAR] = Array<WCHAR>(repeating: 0, count: Int(dwLength + 1))
 
@@ -58,7 +57,7 @@ func currentDirectoryPath() -> String {
   return String(decodingCString: &szDirectory, as: UTF16.self)
 }
 
-func FileDialog() -> String? {
+public func FileDialog() -> String? {
   var strFile = "".utf8CString
 
   var ofn = OPENFILENAMEA()
