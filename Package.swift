@@ -37,7 +37,7 @@ let package = Package(
       swiftSettings: swift),
     .target(name: "BlackBoxModel",
       dependencies: [
-        "Config", "Libc", "Meteo", "SolarPosition", "CIAPWSIF97", "CPikchr",
+        "Config", "Libc", "Meteo", "SolarPosition", "CIAPWSIF97", "CPikchr", "Helpers",
         .product(name: "Yams", package: "Yams"),
         .product(name: "SQLite", package: "SQLite.swift"),
         .product(name: "xlsxwriter", package: "xlsxwriter.swift")],
