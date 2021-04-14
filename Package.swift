@@ -79,11 +79,7 @@ if let BlackBoxModel = package.targets.first(where: { $0.name == "BlackBoxModel"
   BlackBoxModel.linkerSettings = [.linkedLibrary("sqlite3.lib"), .unsafeFlags(flags)]
 }
 
-if let SolarPerformance = package.targets.first(where: { $0.name == "SolarPerformanceCalc" }) {
-  SolarPerformance.linkerSettings = [.linkedLibrary("User32"), .unsafeFlags(flags)]
-}
-
-if let SolarField = package.targets.first(where: { $0.name == "SolarFieldCalc" }) {
-  SolarField.linkerSettings = [.linkedLibrary("User32"), .unsafeFlags(flags)]
+if let Helpers = package.targets.first(where: { $0.name == "Helpers" }) {
+  Helpers.linkerSettings = [.linkedLibrary("User32"), .unsafeFlags(flags)]
 }
 #endif
