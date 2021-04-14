@@ -14,6 +14,7 @@ import Config
 import Dispatch
 import Foundation
 import Meteo
+import Helpers
 
 #if os(Windows)
 system("chcp 65001")
@@ -22,7 +23,7 @@ system("chcp 65001")
 let start = DispatchTime.now().uptimeNanoseconds
 
 SolarPerformanceCalculator.main()
-print(SolarPerformanceCalculator.result!)
+//print(SolarPerformanceCalculator.result!)
 
 let end = DispatchTime.now().uptimeNanoseconds
 let time = String((end - start) / 1_000_000) +  " ms"
@@ -32,6 +33,9 @@ print("elapsed time:", time)
   MessageBox(text: time, caption: "")
 #endif
 
+#if os(Windows)
+system("pause")
+#endif
 struct LocationInfo: ParsableArguments {
   @Option(name: [.customShort("z"), .long], help: "Time zone")
   var timezone: Int?
@@ -70,7 +74,7 @@ struct SolarPerformanceCalculator: ParsableCommand {
   @Option(name: .shortAndLong, help: "Custom name, otherwise they are numbered with 3 digits.")
   var nameResults: String?
   @Option(name: .shortAndLong, help: "Year of simulation.")
-  var year: Int = 2003
+  var year: Int?
   @OptionGroup()
   var location: LocationInfo
   @Option(name: .shortAndLong, help: "Calculation steps per hour.")
@@ -134,7 +138,7 @@ struct SolarPerformanceCalculator: ParsableCommand {
       Simulation.time.steps = .every5minutes
     }
 
-    BlackBoxModel.configure(year: year)
+    BlackBoxModel.configure(year: year ?? BlackBoxModel.yearOfSimulation)
 
     if let coords = location.coords,
      let tz = location.timezone {

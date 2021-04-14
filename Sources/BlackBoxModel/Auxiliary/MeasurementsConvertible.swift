@@ -8,6 +8,7 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
+import Foundation
 protocol MeasurementsConvertible {
   static var columns: [(name: String, unit: String)] { get }
   var numericalForm: [Double] { get }
@@ -15,11 +16,11 @@ protocol MeasurementsConvertible {
 }
 
 extension MeasurementsConvertible {
-  var values: [String] { numericalForm.map { $0.asString() } }
+  var values: [String] { numericalForm.map { String(format: "%.2f", $0) } }
 
   var prettyDescription: String {
     return zip(numericalForm, Self.columns).reduce("\n") { result, tuple in
-      let (value, desc) = (tuple.0.asString(), tuple.1)
+      let (value, desc) = (String(format: "%.2f", tuple.0), tuple.1)
       if value.hasPrefix("0") { return result }
       return result + (desc.name * (value + " " + desc.unit))
     }
@@ -29,7 +30,7 @@ extension MeasurementsConvertible {
     let maxValue = numericalForm.max() ?? 0
     let increment = maxValue
     return zip(numericalForm, Self.columns).reduce("\n") { result, pair in
-      let (value, desc) = (pair.0.asString(), pair.1.name)
+      let (value, desc) = (String(format: "%.2f", pair.0), pair.1.name)
       let c = 34 - desc.count - value.count
       let text = desc + String(repeating: " ", count: c) + value
       let r = result + text + " "
@@ -44,3 +45,18 @@ extension MeasurementsConvertible {
     }
   }
 }
+
+extension String {
+#if os(Windows)
+  static var lineBreak: String { "\r\n" }
+#else
+  static var lineBreak: String { "\n" }
+#endif  
+  static var separator: String { ", " }
+}
+
+let backgroundQueue = DispatchQueue(label: "serial.queue")
+
+public typealias Heat = Double
+public typealias Pressure = Double
+

@@ -1,4 +1,38 @@
+
+import BlackBoxModel
+
 import Foundation
+
+import Helpers
+
+let sf = foo()
+
+let sss: [HeatBalanceDiagram.Stream] = (0..<17).map { _ in
+  return HeatBalanceDiagram.Stream(
+    temperature: Temperature(celsius: Double.random(in: 300...400)),
+    pressure: Double.random(in: 10...100),
+    massFlow: Double.random(in: 300...1000),
+    enthalpy: Double.random(in: 1000...3000)
+  ) 
+}
+let plt = temperatures()
+
+let s = try Gnuplot.svg(commands: Gnuplot.temperatures(data: plt))
+
+let p = try Gnuplot.pdf(commands: Gnuplot.temperatures(data: plt))
+try p.write(to: URL(fileURLWithPath: "1.pdf"))
+let aaa = [("a","1"),("b","1"),("c","1"),("d","1"),("e","1")]
+let dia = HeatBalanceDiagram(streams: sss, singleValues: aaa)
+let html1 = HTML(body: dia!.svg + s)
+let html2 = HTML(body: dia!.svg)
+try html2.pdf(toFile: "2.pdf")
+try html1.raw.write(toFile: "1.html", atomically: false, encoding: .utf8)
+try html2.raw.write(toFile: "2.html", atomically: false, encoding: .utf8)
+
+
+#if os(Windows)
+openFile(atPath: "1.html")
+#endif
 
 extension Date {
   var excel: TimeInterval {
@@ -308,4 +342,4 @@ func main() {
   }
 }
 
-main()
+//main()

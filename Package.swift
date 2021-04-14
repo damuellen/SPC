@@ -24,7 +24,8 @@ let package = Package(
     ],
   targets: [
     .target(name: "Libc"),
-    .target(name: "TransTES", swiftSettings: swift),
+    .target(name: "Helpers", dependencies: ["Libc"], swiftSettings: swift),
+    .target(name: "TransTES", dependencies: ["Helpers", "BlackBoxModel"], swiftSettings: swift),
     .target(name: "Config", swiftSettings: swift),
     .target(name: "DateGenerator", swiftSettings: swift),
     .target(name: "CPikchr", cSettings: c),
@@ -36,7 +37,7 @@ let package = Package(
       swiftSettings: swift),
     .target(name: "BlackBoxModel",
       dependencies: [
-        "Config", "Libc", "Meteo", "SolarPosition", "CIAPWSIF97",
+        "Config", "Libc", "Meteo", "SolarPosition", "CIAPWSIF97", "CPikchr",
         .product(name: "Yams", package: "Yams"),
         .product(name: "SQLite", package: "SQLite.swift"),
         .product(name: "xlsxwriter", package: "xlsxwriter.swift")],
@@ -46,7 +47,7 @@ let package = Package(
       swiftSettings: swift),
     .target(name: "SolarFieldCalc",
       dependencies: [
-        "SolarFieldModel", "CPikchr",
+        "SolarFieldModel", "CPikchr", "Helpers",
         .product(name: "ArgumentParser", package: "swift-argument-parser"),
         .product(name: "xlsxwriter", package: "xlsxwriter.swift")],
       swiftSettings: swift),
@@ -55,7 +56,7 @@ let package = Package(
       swiftSettings: swift),
     .target(name: "SolarPerformanceCalc",
       dependencies: [
-        "Config", "BlackBoxModel",
+        "Config", "BlackBoxModel", "Helpers",
         .product(name: "ArgumentParser", package: "swift-argument-parser"),
         .product(name: "xlsxwriter", package: "xlsxwriter.swift")],
       swiftSettings: swift),
