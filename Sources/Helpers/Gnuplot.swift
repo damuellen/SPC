@@ -9,6 +9,9 @@
 //
 
 import Foundation
+#if os(Windows)
+import WinSDK
+#endif
 
 public enum Gnuplot {
 

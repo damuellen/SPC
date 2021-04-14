@@ -27,7 +27,7 @@ public struct HTML {
     let exe = "/usr/local/bin/wkhtmltopdf"
 #endif
     let wkhtmltopdf = Process()
-    wkhtmltopdf.executableURL = .init(fileURLWithPath: exe)
+    wkhtmltopdf.executableURL = .init(fileURLWithPath: "wkhtmltopdf.exe")
     wkhtmltopdf.arguments = [
       "--quiet", "--print-media-type", "--disable-smart-shrinking",
       "-L", "0", "-R", "0", "-T", "0", "-B", "0",

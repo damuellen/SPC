@@ -9,7 +9,9 @@
 //
 
 import Foundation
-
+#if os(Windows)
+import WinSDK
+#endif
 public func terminalWidth() -> Int {
 #if os(Windows)
   var csbi: CONSOLE_SCREEN_BUFFER_INFO = CONSOLE_SCREEN_BUFFER_INFO()
@@ -33,10 +35,7 @@ public func terminalWidth() -> Int {
 
 public func openFile(atPath: String) {
 #if os(Windows)
-  try? Process.run(
-    url: URL(fileURLWithPath: atPath),
-    arguments: []
-  )
+  try? Process.run(URL(fileURLWithPath: atPath), arguments: [])
 #elseif os(macOS)
   try? Process.run(
     url: URL(fileURLWithPath: "/usr/bin/open"),
