@@ -1,6 +1,5 @@
 
 import BlackBoxModel
-
 import Foundation
 
 import Helpers
@@ -15,24 +14,19 @@ let sss: [HeatBalanceDiagram.Stream] = (0..<17).map { _ in
     enthalpy: Double.random(in: 1000...3000)
   ) 
 }
-let plt = temperatures()
 
-let s = try Gnuplot.svg(commands: Gnuplot.temperatures(data: plt))
-
-let p = try Gnuplot.pdf(commands: Gnuplot.temperatures(data: plt))
-try p.write(to: URL(fileURLWithPath: "1.pdf"))
+let plt = Gnuplot.temperatures(data: temperatures())
+let plotter = Gnuplot(commands: plt)
+let s = try plotter.svg()
+try plotter.pdf(toFile: "plot.pdf")
 let aaa = [("a","1"),("b","1"),("c","1"),("d","1"),("e","1")]
 let dia = HeatBalanceDiagram(streams: sss, singleValues: aaa)
 let html1 = HTML(body: dia!.svg + s)
 let html2 = HTML(body: dia!.svg)
-try html2.pdf(toFile: "2.pdf")
-try html1.raw.write(toFile: "1.html", atomically: false, encoding: .utf8)
-try html2.raw.write(toFile: "2.html", atomically: false, encoding: .utf8)
-
-
-#if os(Windows)
-openFile(atPath: "1.html")
-#endif
+try html2.pdf(toFile: "diagramm.pdf")
+try html1.raw.write(toFile: "all.html", atomically: false, encoding: .utf8)
+try html2.raw.write(toFile: "diagramm.html", atomically: false, encoding: .utf8)
+openFile(atPath: "all.html")
 
 extension Date {
   var excel: TimeInterval {

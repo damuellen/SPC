@@ -85,8 +85,25 @@ public struct HeatBalanceDiagram {
       down; line invis down .5cm; left; box "EC" thick
     ] with .end at previous.end
 
-    line invis down .5cm
+    line invis right 15cm up 2cm
 
+    CO: [
+      boxwid = 0.75; boxht = 0.75;
+      line left 1.0cm then up .5cm right .5cm then up .5cm left .5cm then right 1cm
+      down; line invis down .5cm; left; box "CO" thick
+    ] with .end at previous.end
+
+    line invis down 1cm right 1cm 
+    arrow down 1.5cm then left 4cm
+
+    [
+    P0: circle radius .2
+    line from P0.s to P0.w
+    line to P0.n
+    ] 
+
+    arrow left 9cm
+    line invis left 2cm
     arrow left 10cm
 
     boxht = 0.2
@@ -184,14 +201,14 @@ public struct HeatBalanceDiagram {
     line invis up 1cm
     arrow right 2cm then up 4cm then left 2cm
     line invis up 1cm
-    arrow right 2cm then up 2cm then right 8cm then down 5cm 
+    arrow right 2cm then up 2cm then right 8cm then down 5cm
     line invis right 1.5cm
-    arrow up 7cm then left 11.5cm 
+    arrow up 7cm then left 11.5cm
     line invis up 1cm
     arrow right 2cm then right 10cm then down 7.5cm
     line invis down 2cm right 2cm
-    arrow down 6.5cm then left 14cm
-    line invis right 10cm up 7cm
+    arrow down 3cm
+    line invis left 4cm up 3.5cm
     line up 1.0cm then up .5cm right 1.5cm then down 2cm then left 1.5cm up .5cm thick
     line invis right 1.5cm up .5cm
     line right .5cm thickness 0.1

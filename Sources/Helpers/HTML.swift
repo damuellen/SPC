@@ -16,28 +16,23 @@ import WinSDK
 public struct HTML {
   public func pdf(toFile name: String) throws {
     guard let data = raw.data(using: .utf8) else { return }
-#if os(Windows)
-    var exe = "wkhtmltopdf.exe".utf8CString
-    exe.withUnsafeMutableBufferPointer {
-      guard PathFindOnPathA($0.baseAddress, nil) else {
-        print("wkhtmltopdf is not installed on the system.");return 
-      }
-    }
-#else
-    let exe = "/usr/local/bin/wkhtmltopdf"
-#endif
+    let html = URL.temporaryFile().appendingPathExtension("html")
+    try data.write(to: html)
+    let path = html.path
     let wkhtmltopdf = Process()
-    wkhtmltopdf.executableURL = .init(fileURLWithPath: "wkhtmltopdf.exe")
     wkhtmltopdf.arguments = [
       "--quiet", "--print-media-type", "--disable-smart-shrinking",
       "-L", "0", "-R", "0", "-T", "0", "-B", "0",
-      "-O", "Landscape", "--dpi", "600", "-",
-      name
+      "-O", "Landscape", "--dpi", "600", path, name
     ]
-    let stdin = Pipe()
-    wkhtmltopdf.standardInput = stdin
-    stdin.fileHandleForWriting.write(data)
+#if os(Windows)
+    wkhtmltopdf.executableURL = .init(fileURLWithPath: "C:/bin/wkhtmltopdf.exe")
+#else
+    wkhtmltopdf.executableURL = .init(fileURLWithPath: "/usr/local/bin/wkhtmltopdf")
+#endif
     try wkhtmltopdf.run()
+    wkhtmltopdf.waitUntilExit()
+    html.removeItem()
   }
 
   public init(body: String) { self.body = body }
@@ -53,8 +48,8 @@ public struct HTML {
     <style media="screen">
       svg {
         padding-bottom: 2vh;
-        margin-left: 0.5cm; margin-right: auto; 
-        height: 95vh; width: 95%; 
+        margin-left: 0.5cm; margin-right: auto;
+        height: 95vh; width: 95%;
         font-family: 'Segoe UI', sans-serif;
         font-size: 1em;
       }
@@ -65,7 +60,7 @@ public struct HTML {
     """
 
   public var raw: String {
-    let head = "<html><head>" + meta + style + "</head>\n"   
+    let head = "<html><head>" + meta + style + "</head>\n"
     let content = "<body>" + body + "</body>\n"
     let tail = "</html>\n"
     return type + head + content + tail

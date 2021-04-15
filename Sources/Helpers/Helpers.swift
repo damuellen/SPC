@@ -35,11 +35,21 @@ public func terminalWidth() -> Int {
 
 public func openFile(atPath: String) {
 #if os(Windows)
-  try? Process.run(URL(fileURLWithPath: atPath), arguments: [])
+  system("start " + atPath)
 #elseif os(macOS)
   try? Process.run(
     url: URL(fileURLWithPath: "/usr/bin/open"),
     arguments: [atPath]
   )
 #endif
+}
+
+extension URL {
+  static public func temporaryFile() -> URL {
+    FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+  }
+
+  public func removeItem() {
+    try? FileManager.default.removeItem(at: self)
+  }
 }

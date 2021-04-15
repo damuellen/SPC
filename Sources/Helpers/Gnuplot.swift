@@ -13,64 +13,86 @@ import Foundation
 import WinSDK
 #endif
 
-public enum Gnuplot {
+public struct Gnuplot {
+  let commands: String
+  public init(commands: String) { self.commands = commands }
 
   private static func process() -> Process {
     let gnuplot = Process()
+#if os(Windows)
+    gnuplot.executableURL = URL(fileURLWithPath: "C:/bin/gnuplot.exe")
+#else
+    gnuplot.executableURL = .init(fileURLWithPath: "/usr/bin/gnuplot")
     gnuplot.standardInput = Pipe()
     gnuplot.standardOutput = Pipe()
-  #if os(Windows)
-    var exe = "gnuplot.exe".utf8CString
-    exe.withUnsafeMutableBufferPointer {
-      guard PathFindOnPathA($0.baseAddress, nil) else {
-        fatalError("gnuplot is not installed on the system.") 
-      }
-    }
-    gnuplot.executableURL = .init(fileURLWithPath: "gnuplot.exe")
-  #else
-    gnuplot.executableURL = .init(fileURLWithPath: "/usr/bin/gnuplot")
-  #endif
+#endif
     return gnuplot
   }
 
-  public static func svg(commands: String) throws -> String {
+  public func svg() throws -> String {
     let process = Gnuplot.process()
+#if os(Windows)
+    let term = "set terminal svg size 1100,700 enhanced font 'Segoe UI';\n"
+    let plt = URL.temporaryFile().appendingPathExtension("plt")
+    let svg = URL.temporaryFile().appendingPathExtension("svg")
+    let output = "set output '\(svg.path)';\n"
+    let input = term + output + Gnuplot.style + commands + ";exit\n"
+    try input.write(to: plt, atomically: false, encoding: .windowsCP1252)
+    process.arguments = [plt.path.replacingOccurrences(of: "/", with: "\\")]
+#endif
+
+#if os(Windows)
     try process.run()
-    let str = "set terminal svg size 1100,700 enhanced;" 
-      + style + commands + ";exit\n"
+    process.waitUntilExit()
+    let s = try String(contentsOf: svg, encoding: .windowsCP1252)
+    svg.removeItem()
+    plt.removeItem()
+    return s
+#else
+    let term = "set terminal svg size 1100,700;\n"
     let stdin = process.standardInput as! Pipe
-    stdin.fileHandleForWriting.write(str.data(using: .utf8)!)
+    let input = term + Gnuplot.style + commands + ";exit\n"
+    stdin.fileHandleForWriting.write(input.data(using: .utf8)!)
+    try process.run()
     process.waitUntilExit()
     let stdout = process.standardOutput as! Pipe
     let data = stdout.fileHandleForReading.readDataToEndOfFile()
-    return String(data: data, encoding: .utf8)!
+    return String(data: data, encoding: .utf8) ?? ""
+#endif
   }
 
-  public static func pdf(commands: String) throws -> Data {
+  public func pdf(toFile: String) throws {
+    let pdf = URL(fileURLWithPath: toFile)
     let process = Gnuplot.process()
+    let term = "set terminal pdfcairo size 10,7.1 enhanced font 'Arial';\n"
+    let output = "set output '\(pdf.path)';\n"
+#if os(Windows)
+    let plt = URL.temporaryFile().appendingPathExtension("plt")
+    let input = term + output + Gnuplot.style + commands + ";exit\n"
+    try input.write(to: plt, atomically: false, encoding: .windowsCP1252)
+    process.arguments = [plt.path.replacingOccurrences(of: "/", with: "\\")]
     try process.run()
-    let str = "set terminal pdfcairo size 10,7.1;" 
-      + style + commands + ";exit\n"
-    let stdin = process.standardInput as! Pipe
-    stdin.fileHandleForWriting.write(str.data(using: .utf8)!)
     process.waitUntilExit()
-    let stdout = process.standardOutput as! Pipe
-    let data = stdout.fileHandleForReading.readDataToEndOfFile()
-    return data
+    plt.removeItem()
+#else
+    let stdin = process.standardInput as! Pipe
+    let input = term + output + Gnuplot.style + commands + ";exit\n"
+    stdin.fileHandleForWriting.write(input.data(using: .utf8)!)
+    try process.run()
+    process.waitUntilExit()
+#endif
   }
 
   static var style = """
-  afont = "Arial";
-  text_color = "#000000";
-  set style line 11 lt 1 lw 3 pt 7 ps 0.5 lc rgb '#0072bd'; # blue
-  set style line 12 lt 1 lw 3 pt 7 ps 0.5 lc rgb '#d95319'; # orange
-  set style line 13 lt 1 lw 3 pt 7 ps 0.5 lc rgb '#edb120'; # yellow
-  set style line 14 lt 1 lw 3 pt 7 ps 0.5 lc rgb '#7e2f8e'; # purple
-  set style line 15 lt 1 lw 3 pt 7 ps 0.5 lc rgb '#77ac30'; # green
-  set style line 16 lt 0 lw 0.5 lc rgb text_color;
-  set style line 17 lt 1 lw 0.5 lc rgb text_color;
-  set border 31 lw 0.5 lc rgb text_color;
-  set label textcolor rgb text_color font afont;
+  set style line 11 lt 1 lw 3 pt 7 ps 0.5 lc rgb '#0072bd';
+  set style line 12 lt 1 lw 3 pt 7 ps 0.5 lc rgb '#d95319';
+  set style line 13 lt 1 lw 3 pt 7 ps 0.5 lc rgb '#edb120';
+  set style line 14 lt 1 lw 3 pt 7 ps 0.5 lc rgb '#7e2f8e';
+  set style line 15 lt 1 lw 3 pt 7 ps 0.5 lc rgb '#77ac30';
+  set style line 16 lt 0 lw 0.5 lc rgb 'black';
+  set style line 17 lt 1 lw 0.5 lc rgb 'black';
+  set border 31 lw 0.5 lc rgb'black';
+  set label textcolor rgb 'black';
   set grid ls 16;
   """
 
@@ -79,9 +101,9 @@ public enum Gnuplot {
     set xtics 10;
     set ytics 10;
     set key top left tc ls 17;
-    set title "T-Q" textcolor rgb text_color font afont;
-    set xlabel 'Power [MW]' textcolor rgb text_color font afont;
-    set ylabel 'Temperatures [°C]' textcolor rgb text_color font afont;
+    set title "T-Q" textcolor rgb 'black';
+    set xlabel 'Q̇ [MW]' textcolor rgb 'black';
+    set ylabel 'Temperatures [°C]' textcolor rgb 'black';
 
     plot $Data i 0 u 1:2 w lp ls 11 title columnheader(1), \
       $Data i 1 u 1:2 w lp ls 12 title columnheader(1), \
