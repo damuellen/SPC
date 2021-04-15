@@ -35,16 +35,16 @@ public struct Gnuplot {
     let term = "set terminal svg size 1100,700 enhanced font 'Segoe UI';\n"
     let plt = URL.temporaryFile().appendingPathExtension("plt")
     let svg = URL.temporaryFile().appendingPathExtension("svg")
-    let output = "set output '\(svg.path)';\n"
+    let output = "set output '\(svg.windowsPath)';\n"
     let input = term + output + Gnuplot.style + commands + ";exit\n"
-    try input.write(to: plt, atomically: false, encoding: .windowsCP1252)
-    process.arguments = [plt.path.replacingOccurrences(of: "/", with: "\\")]
+    try input.write(to: plt, atomically: false, encoding: .utf8)
+    process.arguments = [plt.windowsPath]
 #endif
 
 #if os(Windows)
     try process.run()
     process.waitUntilExit()
-    let s = try String(contentsOf: svg, encoding: .windowsCP1252)
+    let s = try String(contentsOf: svg, encoding: .utf8)
     svg.removeItem()
     plt.removeItem()
     return s
@@ -65,16 +65,18 @@ public struct Gnuplot {
     let pdf = URL(fileURLWithPath: toFile)
     let process = Gnuplot.process()
     let term = "set terminal pdfcairo size 10,7.1 enhanced font 'Arial';\n"
-    let output = "set output '\(pdf.path)';\n"
+
 #if os(Windows)
+    let output = "set output '\(pdf.windowsPath)';\n"
     let plt = URL.temporaryFile().appendingPathExtension("plt")
     let input = term + output + Gnuplot.style + commands + ";exit\n"
-    try input.write(to: plt, atomically: false, encoding: .windowsCP1252)
-    process.arguments = [plt.path.replacingOccurrences(of: "/", with: "\\")]
+    try input.write(to: plt, atomically: false, encoding: .utf8)
+    process.arguments = [plt.windowsPath]
     try process.run()
     process.waitUntilExit()
     plt.removeItem()
 #else
+    let output = "set output '\(pdf.path)';\n"
     let stdin = process.standardInput as! Pipe
     let input = term + output + Gnuplot.style + commands + ";exit\n"
     stdin.fileHandleForWriting.write(input.data(using: .utf8)!)

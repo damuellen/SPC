@@ -52,4 +52,8 @@ extension URL {
   public func removeItem() {
     try? FileManager.default.removeItem(at: self)
   }
+  
+  var windowsPath: String {
+    path.replacingOccurrences(of: "/", with: "\\")
+  }
 }
