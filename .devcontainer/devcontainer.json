@@ -18,22 +18,20 @@
 
 	// Set *default* container specific settings.json values on container create.
 	"settings": {
-		"terminal.integrated.shell.linux": "/bin/bash",
 		"lldb.library": "/usr/lib/liblldb.so",
 		"lldb.launch.expressions": "native",
 		"lldb.evaluateForHovers": false,
-		"swift.path.swift_driver_bin": "/usr/bin/swift",
-		"sde.languageservermode": "sourcekit-lsp",
-		"sde.buildOnSave": false,
+		"terminal.integrated.scrollback": 50000,
+		"extensions.ignoreRecommendations": true,
+		"diffEditor.ignoreTrimWhitespace": false,
 		"sourcekit-lsp.toolchainPath": "/usr/bin/",
-		"sourcekit-lsp.serverPath": "/usr/bin/sourcekit-lsp"
+		"sourcekit-lsp.serverPath": "/usr/bin/sourcekit-lsp",	
 	},
 
 	// Add the IDs of extensions you want installed when the container is created.
 	"extensions": [
-		"vknabel.vscode-swift-development-environment",
+		"pvasek.sourcekit-lsp--dev-unofficial",
 		"vadimcn.vscode-lldb",
-		"vknabel.swift-coverage"
 	],
 	// Uncomment to connect as a non-root user. See https://aka.ms/vscode-remote/containers/non-root.
 	// "remoteUser": "vscode"

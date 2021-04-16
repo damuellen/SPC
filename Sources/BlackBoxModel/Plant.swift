@@ -185,6 +185,12 @@ public struct Plant {
         temperature: ambient
       )
 
+      if case .startUp(_, _) = status.steamTurbine.operationMode {
+        heatFlow.startUp = heatFlow.heatExchanger
+      } else {
+        heatFlow.startUp = .zero
+      }
+
       if OperationRestriction.fuelStrategy.isPredefined {
         let steamTurbine = SteamTurbine.parameter.power.max
         if fuelConsumption.combined > 0

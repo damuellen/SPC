@@ -32,7 +32,7 @@ public struct HTML {
 #endif
     try wkhtmltopdf.run()
     wkhtmltopdf.waitUntilExit()
-    html.removeItem()
+    try html.removeItem()
   }
 
   public init(body: String) { self.body = body }

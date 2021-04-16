@@ -34,9 +34,9 @@ extension Storage {
       )
 
       let rohDP = solarField.HTF.density(avgTempHX)
-
+      let massFlowDP = SolarField.parameter.maxMassFlow
       let pressureLoss = parameter.pressureLoss * rohDP / rohMean
-        * status.massFlow.share(of: status.designMassFlow).quotient ** 2
+        * status.massFlow.share(of: massFlowDP).quotient ** 2
       
       parasitics = pressureLoss * status.massFlow.rate / rohMean
         / parameter.pumpEfficiency / 10e6
@@ -115,7 +115,7 @@ extension Storage {
       let hot = specificHeat(tank.hot)
       /// Fluid properties
       let htf = SolarField.parameter.HTF
-
+      let t = Simulation.time.steps.fraction
       if case .discharge = status.operationMode {
         let load = parameter.fixedDischargeLoad.isZero
           ? 0.97 : parameter.fixedDischargeLoad.quotient
@@ -128,8 +128,7 @@ extension Storage {
           * parameter.heatExchangerEfficiency // design charging power
           * parameter.heatExchangerEfficiency // design charging power
         
-        let massFlowDischarging = designDischarge
-          / (hot - cold) * Simulation.time.steps.fraction * 1_000
+        let massFlowDischarging = designDischarge / (hot - cold) * t * 1_000
         
         let saltFlowRatio = status.salt.active.kg / massFlowDischarging
         
@@ -147,8 +146,7 @@ extension Storage {
           parameter.designTemperature.cold + status.dT_HTFsalt.cold) / 1_000)
           * parameter.heatExchangerEfficiency
         
-        let massFlowCharging = designCharge
-          / (hot - cold) * Simulation.time.steps.fraction * 1_000
+        let massFlowCharging = designCharge / (hot - cold) * t * 1_000
         
         let saltFlowRatio = status.salt.active.kg / massFlowCharging
         

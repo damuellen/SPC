@@ -23,9 +23,9 @@ let aaa = [("a","1"),("b","1"),("c","1"),("d","1"),("e","1")]
 let dia = HeatBalanceDiagram(streams: sss, singleValues: aaa)
 let html1 = HTML(body: dia!.svg + s)
 let html2 = HTML(body: dia!.svg)
-try html2.pdf(toFile: "diagramm.pdf")
+try html2.pdf(toFile: "diagram.pdf")
 try html1.raw.write(toFile: "all.html", atomically: false, encoding: .utf8)
-try html2.raw.write(toFile: "diagramm.html", atomically: false, encoding: .utf8)
+try html2.raw.write(toFile: "diagram.html", atomically: false, encoding: .utf8)
 openFile(atPath: "all.html")
 
 extension Date {

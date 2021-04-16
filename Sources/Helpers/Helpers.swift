@@ -45,15 +45,45 @@ public func openFile(atPath: String) {
 }
 
 extension URL {
-  static public func temporaryFile() -> URL {
-    FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+  static func transientDirectory(url: (URL) throws -> Void) throws {
+    let fm = FileManager.default
+    let id = UUID().uuidString
+    let directory = fm.temporaryDirectory.appendingPathComponent(id, isDirectory: true)
+    try fm.createDirectory(at: directory, withIntermediateDirectories: false)
+    try url(directory)
+    try fm.removeItem(at: directory)
   }
 
-  public func removeItem() {
-    try? FileManager.default.removeItem(at: self)
-  }
-  
   var windowsPath: String {
     path.replacingOccurrences(of: "/", with: "\\")
   }
+
+  static public func temporaryFile() -> URL {
+    let fm = FileManager.default
+    let id = UUID().uuidString
+    return fm.temporaryDirectory.appendingPathComponent(id)
+  }
+
+  public func removeItem() throws {
+    try FileManager.default.removeItem(at: self)
+  }
+}
+
+public func seek(
+ _ range: ClosedRange<Double>, seekValue: Double,
+ tolerance: Double = 0.001, maxIterations: Int = 100,
+ _ f: (Double)-> Double) -> Double {
+  var a = range.lowerBound
+  var b = range.upperBound
+  for _ in 0..<maxIterations {
+    let c = (a + b) / 2
+    let fc = f(c)
+    let fa = f(a)
+    if (fc == seekValue || (b-a)/2 < tolerance)
+     { return c }
+    if (fc < seekValue && fa < seekValue) 
+    || (fc > seekValue && fa > seekValue) 
+     { a = c } else { b = c }
+  }
+  return Double.nan
 }

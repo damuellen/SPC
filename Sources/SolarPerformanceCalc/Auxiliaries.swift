@@ -14,10 +14,6 @@ let dateString: String = {
 }()
 */
 
-extension Substring.SubSequence {
-  var integerValue: Int? { Int(self) }
-}
-
 extension Recording {
   var fitness: Double { (electric.net / layout.solarField) / 1_000 }
 }
