@@ -23,63 +23,35 @@ public struct Gnuplot {
     gnuplot.executableURL = URL(fileURLWithPath: "C:/bin/gnuplot.exe")
 #else
     gnuplot.executableURL = .init(fileURLWithPath: "/usr/bin/gnuplot")
+#endif
     gnuplot.standardInput = Pipe()
     gnuplot.standardOutput = Pipe()
-#endif
     return gnuplot
   }
 
   public func svg() throws -> String {
     let process = Gnuplot.process()
-#if os(Windows)
-    let term = "set terminal svg size 1100,700 enhanced font 'Segoe UI';\n"
-    var s = ""
-    try URL.transientDirectory { dir in
-      let plt = dir.appendingPathComponent("plt")
-      let svg = dir.appendingPathComponent("svg")
-      let output = "set output '\(svg.windowsPath)';\n"
-      let input = term + output + Gnuplot.style + commands + ";exit\n"
-      try input.write(to: plt, atomically: false, encoding: .utf8)
-      process.arguments = [plt.windowsPath]
-      try process.run()
-      process.waitUntilExit()
-      s = try String(contentsOf: svg, encoding: .utf8)
-    }
-    return s
-#else
     let term = "set terminal svg size 1100,700;\n"
     let stdin = process.standardInput as! Pipe
-    let input = term + Gnuplot.style + commands + ";exit\n"
+    let input = term + Gnuplot.style + commands + ";exit\ne"
     stdin.fileHandleForWriting.write(input.data(using: .utf8)!)
+    stdin.fileHandleForWriting.closeFile()
     try process.run()
-    process.waitUntilExit()
     let stdout = process.standardOutput as! Pipe
     let data = stdout.fileHandleForReading.readDataToEndOfFile()
     return String(data: data, encoding: .utf8) ?? ""
-#endif
   }
 
   public func pdf(toFile: String) throws {
     let pdf = URL(fileURLWithPath: toFile)
     let process = Gnuplot.process()
     let term = "set terminal pdfcairo size 10,7.1 enhanced font 'Arial';\n"
-#if os(Windows)
-    let output = "set output '\(pdf.windowsPath)';\n"
-    let plt = URL.temporaryFile().appendingPathExtension("plt")
-    let input = term + output + Gnuplot.style + commands + ";exit\n"
-    try input.write(to: plt, atomically: false, encoding: .utf8)
-    process.arguments = [plt.windowsPath]
-    try process.run()
-    process.waitUntilExit()
-    try plt.removeItem()
-#else
     let output = "set output '\(pdf.path)';\n"
     let stdin = process.standardInput as! Pipe
-    let input = term + output + Gnuplot.style + commands + ";exit\n"
+    let input = term + output + Gnuplot.style + commands + ";exit\ne"
     stdin.fileHandleForWriting.write(input.data(using: .utf8)!)
+    stdin.fileHandleForWriting.closeFile()
     try process.run()
-    process.waitUntilExit()
-#endif
   }
 
   static var style = """

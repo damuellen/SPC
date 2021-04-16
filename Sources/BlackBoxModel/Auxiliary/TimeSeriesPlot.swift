@@ -68,6 +68,7 @@ public class TimeSeriesPlot {
     gnuplot.standardInput = inputPipe
     try gnuplot.run()
     inputFile.write(plotData.data(using: .utf8)!)
+    inputFile.closeFile()
   }
 
   public func callAsFunction(toFile: String? = nil) throws {
