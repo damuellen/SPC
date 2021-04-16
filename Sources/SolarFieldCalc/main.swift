@@ -1,12 +1,12 @@
 import ArgumentParser
 import SolarFieldModel
 import Foundation
+import Helpers
 import xlsxwriter
 
 #if os(Windows)
 system("chcp 65001")
 #endif
-
 SolarFieldCalculator.main()
 
 #if os(Windows)
@@ -33,17 +33,17 @@ struct SolarFieldCalculator: ParsableCommand {
   func run() throws {
 
 
-    if let massflow = massflow {
-  //    SolarField.designMassFlow = massflow
-    }
 
     if let input = input {
    //   try SolarFieldModel.readFromFile(url: URL(fileURLWithPath: input))?.apply()
     }
 
-    //guard let loops = loops else { return }
-    let solarField = SolarField.createLayout(loops: 100)
-    solarField.massFlow = 1000
+    guard let loops = loops else { return }
+    let solarField = SolarField.createLayout(loops: loops)
+
+    if let massflow = massflow {
+      solarField.massFlow = massflow
+    }
 
     let wb = Workbook(name: "Solarfield.xlsx")
     wb.addTables(solarField: solarField)
@@ -56,19 +56,10 @@ struct SolarFieldCalculator: ParsableCommand {
   //    String(
    //     data: try JSONEncoder().encode(SolarFieldModel()),
   //      encoding: .utf8)?
-  //      .clipboard()
+
     //  try SolarFieldModel().writeToFile(url: URL(fileURLWithPath: output))
     
   }
 }
 
-func openFile(atPath: String) {
-#if os(Windows)
-  system(atPath)
-#elseif os(macOS)
-  let process = Process()
-  process.executableURL = URL(fileURLWithPath: "/usr/bin/open")
-  process.arguments = ["/Users/daniel/test.xlsx"]
-  try? process.run()
-#endif
-}
+
