@@ -162,7 +162,7 @@ struct SolarPerformanceCalculator: ParsableCommand {
     )
 
     SolarPerformanceCalculator.result = BlackBoxModel.runModel(with: log)
-    // plot(interval: DateInterval(ofWeek: 17, in: year))
+    //plot(interval: DateInterval(ofWeek: 17, in: BlackBoxModel.yearOfSimulation))
     log.clearResults()
   }
 

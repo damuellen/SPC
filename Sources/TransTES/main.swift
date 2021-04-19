@@ -15,10 +15,9 @@ let sss: [HeatBalanceDiagram.Stream] = (0..<17).map { _ in
   ) 
 }
 
-let plt = Gnuplot.temperatures(data: temperatures())
-let plotter = Gnuplot(commands: plt)
-let s = try plotter.svg()
-try plotter.pdf(toFile: "plot.pdf")
+let plotter = Gnuplot(temperatures: temperatures())
+let s = try plotter.plot(terminal: .svg)!
+try plotter.plot(terminal: .pdf(path: "plot.pdf"))
 let aaa = [("a","1"),("b","1"),("c","1"),("d","1"),("e","1")]
 let dia = HeatBalanceDiagram(streams: sss, singleValues: aaa)
 let html1 = HTML(body: dia!.svg + s)

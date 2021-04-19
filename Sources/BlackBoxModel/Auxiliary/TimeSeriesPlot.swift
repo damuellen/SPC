@@ -56,31 +56,30 @@ public class TimeSeriesPlot {
   }
 
   func plot(code: String) throws {
-    let inputPipe = Pipe()
-    let inputFile = inputPipe.fileHandleForWriting
     let gnuplot = Process()
 #if os(Windows)
-    gnuplot.executableURL = .init(fileURLWithPath: "gnuplot.exe")
+    gnuplot.executableURL = .init(fileURLWithPath: "C:/bin/gnuplot.exe")
 #else
     gnuplot.executableURL = .init(fileURLWithPath: "/usr/bin/gnuplot")
 #endif
-    gnuplot.arguments = ["-p", "-e", code]
-    gnuplot.standardInput = inputPipe
+    gnuplot.standardInput = Pipe()
+    gnuplot.standardOutput = Pipe()
+    let stdin = gnuplot.standardInput as! Pipe
     try gnuplot.run()
-    inputFile.write(plotData.data(using: .utf8)!)
-    inputFile.closeFile()
+    stdin.fileHandleForWriting.write(code.data(using: .utf8)!)
+    stdin.fileHandleForWriting.closeFile()
   }
 
   public func callAsFunction(toFile: String? = nil) throws {
     var code: String = ""
     if let file = toFile {
       code = """
-        set terminal pdf size 17,12 enhanced color font 'Helvetica,12' lw 1;
-        set output \"\(file).pdf\";
-        set title '\(file)';
+        set terminal pdfcairo size 17,12 enhanced;
+        set output '\(file).pdf';
+        set title '\(file)'\n;
         """
     }
-    code += setCommands + plotCommands
+    code += settings.concatenated + datablock + plot + ";exit\n\n"
     try plot(code: code)
   }
 
@@ -89,55 +88,59 @@ public class TimeSeriesPlot {
   private let freq: Double
   private let style: Style
 
-  var setCommands: String {
-    [
-      "grid", "key",
-      "ylabel '\(y1Label)'",
-      "y2label '\(y2Label)'",
-      "xlabel '\(x.label)'",
-      "style textbox opaque margins 1.0, 1.0 fc bgnd border lt -1 lw 1.0",
-      "xdata time",
-      "timefmt '%s'",
-      "format x \(x.format)",
-      "xrange [\(xr.start):\(xr.end)]",
-      "xtics \(x.tics)",
-      "xtics rotate",
-      "autoscale",
-      "autoscale y2",
-      "ytics nomirror 50",
-      "y2tics 10"
-    ].map { "set " + $0 }.joined(separator: ";")
-  }
+  var settings: [String] { [
+    "grid", "key",
+    "ylabel '\(y1Label)'",
+    "y2label '\(y2Label)'",
+    "xlabel '\(x.label)'",
+    "style textbox opaque margins 1.0, 1.0 fc bgnd border lt -1 lw 1.0",
+    "xdata time",
+    "timefmt '%s'",
+    "format x \(x.format)",
+    "xrange [\(xr.start):\(xr.end)]",
+    "xtics \(x.tics)",
+    "xtics rotate",
+    "autoscale",
+    "autoscale y2",
+    "ytics nomirror 50",
+    "y2tics 10"
+  ] }
 
-  var plotCommands: String {
-    let plotCommands: [String]
+  var plot: String {
     switch style {
     case .lines:
-      plotCommands =
-        ["plot '-' using ($0*\(freq)+\(xr.start)):1 t '\(y1Titles.first!)' axes x1y1 w l lw 2"]
-        + y1.indices.dropFirst().map { i in
-          "'' using ($0*\(freq)+\(xr.start)):1 t '\(y1Titles[i])' axes x1y1 with l lw 2"
-        }
-        + y2.indices.map { i in
-          "'' using ($0*\(freq)+\(xr.start)):1 t '\(y2Titles[i])' axes x1y2 with l lw 2"
-        }
+      return "\nplot " + y1.indices.map { i in
+        "$data i 0 u ($0*\(freq)+\(xr.start)):\(i+1) t '\(y1Titles[i])' axes x1y1 with steps lw 3"
+      }.joined(separator: ", ") + ", " + y2.indices.map { i in
+        "$data i 1 u ($0*\(freq)+\(xr.start)):\(i+1) t '\(y2Titles[i])' axes x1y2 with steps lw 3"
+      }.joined(separator: ", ")
     case .impulses:
-      plotCommands =
-        ["plot '-' using ($0*\(freq)+\(xr.start)):1 t '\(y1Titles.first!)' axes x1y1 w i lw 3"]
-        + y1.indices.dropFirst().map { i in
-          "'' using ($0*\(freq)+\(xr.start + (freq / Double(y1.count)) * Double(i))):1 t '\(y1Titles[i])' axes x1y1 w i lw 3"
-        }
-        + y2.indices.map { i in
-          "'' using ($0*\(freq)+\(xr.start)):1 t '\(y2Titles[i])' axes x1y2 w l lw 2"
-        }
+      return "\nplot " + y1.indices.map { i in
+        let x = (xr.start + (freq / Double(y1.count)) * Double(i))
+        return "$data i 0 u ($0*\(freq)+\(x)):\(i+1) t '\(y1Titles[i])' axes x1y1 w i lw 3"
+      }.joined(separator: ", ") + ", " + y2.indices.map { i in
+        "$data i 1 u ($0*\(freq)+\(xr.start)):\(i+1) t '\(y2Titles[i])' axes x1y2 w steps lw 3"
+      }.joined(separator: ", ")
     }
-    return plotCommands.joined(separator: ",")
   }
 
-  var plotData: String {
-    y1.map { $0.map(\.description).joined(separator: "\n") }
-      .joined(separator: "\ne\n") + "\ne\n"
-      + y2.map { $0.map(\.description).joined(separator: "\n") }
-      .joined(separator: "\ne\n") + "\ne\n"
+  var datablock: String {
+    guard let y1s = y1.first?.indices else { return "" }
+    var data = "\n$data <<EOD\nHeader\n" 
+    for y in y1s {
+      data.append(y1.map { String($0[y]) }.joined(separator: ", ") + "\n")
+    }
+    data.append("\n\n")
+    if let y2s = y2.first?.indices {
+      for y in y2s {
+        data.append(y2.map { String($0[y]) }.joined(separator: ", ") + "\n")
+      }
+    }
+    data.append("EOD\n")
+    return data
   }
+}
+
+extension Array where Element == String { 
+  var concatenated: String { self.map { "set " + $0 + "\n" }.joined() }
 }

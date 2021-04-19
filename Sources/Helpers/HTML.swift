@@ -49,7 +49,7 @@ public struct HTML {
       svg {
         padding-bottom: 2vh;
         margin-left: 0.5cm; margin-right: auto;
-        height: 95vh; width: 95%;
+        height: 95vh; width: 97%;
         font-family: 'Segoe UI', sans-serif;
         font-size: 1em;
       }
