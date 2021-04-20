@@ -14,6 +14,7 @@ let package = Package(
     .executable(name: "SolarPerformanceCalc", targets: ["SolarPerformanceCalc"]),
     .executable(name: "SolarFieldCalc", targets: ["SolarFieldCalc"]),
     .executable(name: "TransTES", targets: ["TransTES"]),
+    .executable(name: "PinchPointTool", targets: ["PinchPoint"]),
     .library(name: "BlackBoxModel", type: .dynamic, targets: ["BlackBoxModel"]),
     ],
   dependencies: [
@@ -26,6 +27,10 @@ let package = Package(
     .target(name: "Libc"),
     .target(name: "Helpers", dependencies: ["Libc"], swiftSettings: swift),
     .target(name: "TransTES", dependencies: ["Helpers", "BlackBoxModel"], swiftSettings: swift),
+    .target(name: "PinchPoint", 
+      dependencies: ["CPikchr", "CIAPWSIF97", "Helpers", "BlackBoxModel",
+        .product(name: "ArgumentParser", package: "swift-argument-parser")],
+      swiftSettings: swift),
     .target(name: "Config", swiftSettings: swift),
     .target(name: "DateGenerator", swiftSettings: swift),
     .target(name: "CPikchr", cSettings: c),
@@ -36,8 +41,7 @@ let package = Package(
       dependencies: ["DateGenerator", "CSOLPOS", "CSPA"],
       swiftSettings: swift),
     .target(name: "BlackBoxModel",
-      dependencies: [
-        "Config", "Libc", "Meteo", "SolarPosition", "CIAPWSIF97", "CPikchr", "Helpers",
+      dependencies: ["Config", "Libc", "Meteo", "SolarPosition", "Helpers",
         .product(name: "Yams", package: "Yams"),
         .product(name: "SQLite", package: "SQLite.swift"),
         .product(name: "xlsxwriter", package: "xlsxwriter.swift")],
@@ -46,8 +50,7 @@ let package = Package(
       dependencies: ["Libc"],
       swiftSettings: swift),
     .target(name: "SolarFieldCalc",
-      dependencies: [
-        "SolarFieldModel", "CPikchr", "Helpers",
+      dependencies: ["SolarFieldModel", "CPikchr", "Helpers",
         .product(name: "ArgumentParser", package: "swift-argument-parser"),
         .product(name: "xlsxwriter", package: "xlsxwriter.swift")],
       swiftSettings: swift),
@@ -55,8 +58,7 @@ let package = Package(
       dependencies: ["DateGenerator", "SolarPosition"],
       swiftSettings: swift),
     .target(name: "SolarPerformanceCalc",
-      dependencies: [
-        "Config", "BlackBoxModel", "Helpers",
+      dependencies: ["Config", "BlackBoxModel", "Helpers",
         .product(name: "ArgumentParser", package: "swift-argument-parser"),
         .product(name: "xlsxwriter", package: "xlsxwriter.swift")],
       swiftSettings: swift),

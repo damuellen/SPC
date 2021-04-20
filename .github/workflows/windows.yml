@@ -67,6 +67,13 @@ jobs:
           args: -9
           strip: false
 
+      - name: Compress PinchPointTool
+        uses: svenstaro/upx-action@v2
+        with:
+          file: .build\x86_64-unknown-windows-msvc\release\PinchPointTool.exe
+          args: -9
+          strip: false
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v2
         with:
@@ -75,3 +82,4 @@ jobs:
             .build\x86_64-unknown-windows-msvc\release\SolarPerformanceCalc.exe
             .build\x86_64-unknown-windows-msvc\release\SolarFieldCalc.exe
             .build\x86_64-unknown-windows-msvc\release\TransTES.exe
+            .build\x86_64-unknown-windows-msvc\release\PinchPointTool.exe
