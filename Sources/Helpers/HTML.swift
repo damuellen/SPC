@@ -61,7 +61,8 @@ public struct HTML {
 
   public var raw: String {
     let head = "<html><head>" + meta + style + "</head>\n"
-    let content = "<body>" + body + "</body>\n"
+    let click = "onclick=\"document.documentElement.requestFullscreen();\""
+    let content = "<body \(click)>" + body + "</body>\n"
     let tail = "</html>\n"
     return type + head + content + tail
   }

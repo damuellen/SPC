@@ -73,7 +73,7 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
     return Temperature(celsius: degree)
   }
 
-  func density(_ temperature: Temperature) -> Double {
+  public func density(_ temperature: Temperature) -> Double {
     precondition(
       temperature.kelvin > freezeTemperature.kelvin,
       "\(temperature) is below freezing point of the htf")
@@ -81,12 +81,12 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
       + density[2] * temperature.celsius * temperature.celsius
   }
 
-  func enthalpy(_ temperature: Temperature) -> Double {
+  public func enthalpy(_ temperature: Temperature) -> Double {
     precondition(temperature.kelvin > freezeTemperature.kelvin)
     return enthalpyFromTemperature(temperature.celsius)
   }
 
-  func temperature(_ enthalpy: Double) -> Temperature {
+  public func temperature(_ enthalpy: Double) -> Temperature {
     let celsius = temperatureFromEnthalpy(enthalpy)
     precondition(celsius > freezeTemperature.celsius,
       "Fell below freezing point.\n")

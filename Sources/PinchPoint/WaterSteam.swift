@@ -1,5 +1,15 @@
-import CIAPWSIF97
+//
+//  Copyright 2021 Daniel Müllenborn
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//  http://www.apache.org/licenses/LICENSE-2.0
+//
 
+import CIAPWSIF97
+import BlackBoxModel
 /// IAPWS formulations of the thermodynamic properties of water and steam.
 public struct WaterSteam {
   public var temperature: Temperature

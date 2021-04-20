@@ -20,7 +20,7 @@ public struct Temperatures {
 /// A temperature value in Kelvin.
 public struct Temperature: CustomStringConvertible, Equatable {
 
-  var kelvin: Double
+  public var kelvin: Double
 
   static var zero = 0
 
@@ -99,11 +99,11 @@ public struct Temperature: CustomStringConvertible, Equatable {
     Temperature(lhs.kelvin - rhs.kelvin)
   }
 
-  static func + (lhs: Temperature, rhs: Double) -> Temperature {
+  public static func + (lhs: Temperature, rhs: Double) -> Temperature {
     Temperature(lhs.kelvin + rhs)
   }
 
-  static func - (lhs: Temperature, rhs: Double) -> Temperature {
+  public static func - (lhs: Temperature, rhs: Double) -> Temperature {
     Temperature(lhs.kelvin - rhs)
   }
 }

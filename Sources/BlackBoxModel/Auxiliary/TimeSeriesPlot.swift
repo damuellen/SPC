@@ -9,29 +9,18 @@
 //
 
 import Foundation
+import Helpers
 
-public class TimeSeriesPlot {
-
-  public enum Style: String {
-    case lines, impulses
-  }
+public final class TimeSeriesPlot {
+  let gnuplot: Process
+  public enum Style: String { case lines, impulses }
 
   let y1: [[Double]]
   let y2: [[Double]]
   let range: DateInterval
 
-  public var y1Titles: [String] {
-    didSet {
-      while y1.count - y1Titles.count > 0 { y1Titles.append("") }
-    }
-  }
-
-  public var y2Titles: [String] {
-    didSet {
-      while y2.count - y2Titles.count > 0 { y2Titles.append("") }
-    }
-  }
-
+  public var y1Titles: [String]
+  public var y2Titles: [String]
   public var y1Label: String = ""
   public var y2Label: String = ""
 
@@ -53,17 +42,11 @@ public class TimeSeriesPlot {
     } else {
       self.x = (1800, "'%R'", "Hour")
     }
+    gnuplot = Gnuplot.process()
   }
 
   func plot(code: String) throws {
-    let gnuplot = Process()
-#if os(Windows)
-    gnuplot.executableURL = .init(fileURLWithPath: "C:/bin/gnuplot.exe")
-#else
-    gnuplot.executableURL = .init(fileURLWithPath: "/usr/bin/gnuplot")
-#endif
-    gnuplot.standardInput = Pipe()
-    gnuplot.standardOutput = Pipe()
+
     let stdin = gnuplot.standardInput as! Pipe
     try gnuplot.run()
     stdin.fileHandleForWriting.write(code.data(using: .utf8)!)
@@ -74,12 +57,12 @@ public class TimeSeriesPlot {
     var code: String = ""
     if let file = toFile {
       code = """
-        set terminal pdfcairo size 17,12 enhanced;
+        set terminal pdfcairo size 17,12 enhanced font 'Arial,16';
         set output '\(file).pdf';
         set title '\(file)'\n;
         """
     }
-    code += settings.concatenated + datablock + plot + ";exit\n\n"
+    code += settings.concatenated + datablock + repeatElement(plot(), count: 365).joined(separator: "\n") + ";exit\n\n"
     try plot(code: code)
   }
 
@@ -106,7 +89,7 @@ public class TimeSeriesPlot {
     "y2tics 10"
   ] }
 
-  var plot: String {
+  func plot() -> String {
     switch style {
     case .lines:
       return "\nplot " + y1.indices.map { i in

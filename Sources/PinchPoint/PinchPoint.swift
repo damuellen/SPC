@@ -1,4 +1,14 @@
+//
+//  Copyright 2021 Daniel Müllenborn
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//  http://www.apache.org/licenses/LICENSE-2.0
+//
 
+import BlackBoxModel
 
 typealias Stream = HeatBalanceDiagram.Stream
 
@@ -8,7 +18,7 @@ struct SteamGenerator {
   var temperatureDifference: Double
   var temperatureDifferenceReheat: Double
 }
-fileprivate let HTF = SolarField.parameter.HTF
+fileprivate let HTF = ParameterDefaults.HTF
 
 public struct PressureDrop {
   var economizer: Double
@@ -177,7 +187,9 @@ public func foo(
     massFlow: reheatInlet.massFlow
   )
   
-  let (steamGeneratorWaterTemperatureInlet, steamGeneratorPowerForWaterHeatingInsideSg, steamGeneratorPowerOfBlowDownStream) = steamGenerator(
+  let (steamGeneratorWaterTemperatureInlet,
+    steamGeneratorPowerForWaterHeatingInsideSg,
+    steamGeneratorPowerOfBlowDownStream) = steamGenerator(
     saturatedSteam: saturatedSteam,
     economizerInlet: economizerInletFeedwater,
     blowDownMassFlow: blowDownMassFlow

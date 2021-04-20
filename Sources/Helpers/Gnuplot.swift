@@ -9,9 +9,6 @@
 //
 
 import Foundation
-#if os(Windows)
-import WinSDK
-#endif
 
 public struct Gnuplot {
   let datablock: String
@@ -22,7 +19,7 @@ public struct Gnuplot {
     self.plot = "plot $data"
   }
 
-  private static func process() -> Process {
+  public static func process() -> Process {
     let gnuplot = Process()
 #if os(Windows)
     gnuplot.executableURL = URL(fileURLWithPath: "C:/bin/gnuplot.exe")
@@ -34,7 +31,7 @@ public struct Gnuplot {
     return gnuplot
   }
 
-  public func plot(terminal: Terminal) throws -> String? {
+  public func plot(_ terminal: Terminal) throws -> String {
     let process = Gnuplot.process()
     let stdin = process.standardInput as! Pipe
     let code = terminal.output + settings.concatenated + datablock + plot + ";exit\n\n"
@@ -44,9 +41,9 @@ public struct Gnuplot {
     if case .svg = terminal {
       let stdout = process.standardOutput as! Pipe
       let data = stdout.fileHandleForReading.readDataToEndOfFile()
-      return String(data: data, encoding: .utf8)
+      return String(data: data, encoding: .utf8) ?? ""
     }
-    return nil
+    return terminal.output
   }
   
   var settings = [
@@ -81,23 +78,26 @@ public struct Gnuplot {
       $data i 3 u 1:2 w lp ls 15 title columnheader(1), \
       $data i 4 u 1:2 w lp ls 14 title columnheader(1), \
       $data i 5 u 1:2 w lp ls 14 title columnheader(1), \
-      $data i 0 u 1:2:(sprintf("%d °C", $2)) with labels tc ls 16 offset char 4,0 notitle , \
-      $data i 2 u 1:2:(sprintf("%d °C", $2)) with labels tc ls 16 offset char 4,0 notitle, \
-      $data i 3 u 1:2:(sprintf("%d °C", $2)) with labels tc ls 16 offset char 4,0 notitle, \
-      $data i 4 u 1:2:(sprintf("%d °C", $2)) with labels tc ls 16 offset char 4,0 notitle, \
-      $data i 5 u 1:2:(sprintf("%d °C", $2)) with labels tc ls 16 offset char 4,0 notitle\n
+      $data i 0 u 1:2:(sprintf("%d°C", $2)) with labels tc ls 16 offset char 3,0 notitle , \
+      $data i 2 u 1:2:(sprintf("%d°C", $2)) with labels tc ls 16 offset char 3,0 notitle, \
+      $data i 3 u 1:2:(sprintf("%d°C", $2)) with labels tc ls 16 offset char 3,0 notitle, \
+      $data i 4 u 1:2:(sprintf("%d°C", $2)) with labels tc ls 16 offset char 3,0 notitle, \
+      $data i 5 u 1:2:(sprintf("%d°C", $2)) with labels tc ls 16 offset char 3,0 notitle\n
     """
   }
 
   public enum Terminal {
-    case svg, pdf(path: String)
+    case svg, pdf(path: String), png(path: String)
 
     var output: String {
-       switch self {
+      let font = "font 'Arial,16'"
+      switch self {
         case .svg: 
-        return "set term svg size 1280,720;set output\n"
+        return "set term svg size 1280,800;set output\n"
         case .pdf(let path): 
-        return "set term pdfcairo size 10,7.1 enhanced font 'Arial';set output '\(path)'\n"
+        return "set term pdfcairo size 10,7.1 enhanced \(font);set output '\(path)'\n"
+        case .png(let path): 
+        return "set term pngcairo size 1280, 800 enhanced \(font);set output '\(path)'\n"
       }
     }
   }

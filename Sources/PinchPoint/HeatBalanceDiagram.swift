@@ -8,6 +8,7 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
+import BlackBoxModel
 import CPikchr
 import Helpers
 

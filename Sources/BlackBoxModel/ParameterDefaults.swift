@@ -71,7 +71,7 @@ public enum ParameterDefaults {
     edgeFactor: []
   )
 
-  static let HTF = HeatTransferFluid(
+  public static let HTF = HeatTransferFluid(
     name: "Therminol",
     freezeTemperature: 12,
     heatCapacity: [1.4856, 0.0028],
