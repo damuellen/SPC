@@ -34,7 +34,7 @@ jobs:
       uses: SwiftDocOrg/swift-doc@master
       with:
         module-name: BlackBoxModel
-        minimum-access-level: "private"
+        minimum-access-level: private
 
     - name: Publish PDF Document
       uses: shrink/actions-document-publish@v1
