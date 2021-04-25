@@ -13,7 +13,7 @@ private func unwrap(_ any: Any) -> Any {
   return some
 }
 
-public enum Alignment {
+public enum StringAlignment {
   case left
   case right
   case center
@@ -41,12 +41,12 @@ public struct Column {
   let title: String
   let value: Any
   let width: Int?
-  let align: Alignment
+  let align: StringAlignment
   let truncate: Truncation
   let formatter: Formatter?
 
   public init(title: String, value: Any, width: Int? = nil,
-              align: Alignment = .left, truncate: Truncation = .tail,
+              align: StringAlignment = .left, truncate: Truncation = .tail,
               formatter: Formatter? = nil) {
     self.title = title
     self.value = unwrap(value)
@@ -57,7 +57,7 @@ public struct Column {
   }
 
   public init(_ mapping: @autoclosure () -> (String, Any), width: Int? = nil,
-              align: Alignment = .left, truncate: Truncation = .tail,
+              align: StringAlignment = .left, truncate: Truncation = .tail,
               formatter: Formatter? = nil) {
     let (t, v) = mapping()
     self = Column(title: t,
@@ -175,7 +175,7 @@ public enum FancyGrid: TextTableStyle {
     var string = s
     if let width = column.width {
       string = string.truncated(column.truncate, length: width)
-      string = string.pad(column.align, length: width)
+      string = string.padding(column.align, length: width)
     }
     return escape(string)
   }
@@ -228,7 +228,7 @@ public enum FancyGridCompact: TextTableStyle {
     var string = s
     if let width = column.width {
       string = string.truncated(column.truncate, length: width)
-      string = string.pad(column.align, length: width)
+      string = string.padding(column.align, length: width)
     }
     return escape(string)
   }
@@ -276,7 +276,7 @@ public enum Grid: TextTableStyle {
     var string = s
     if let width = column.width {
       string = string.truncated(column.truncate, length: width)
-      string = string.pad(column.align, length: width)
+      string = string.padding(column.align, length: width)
     }
     return escape(string)
   }
@@ -332,7 +332,7 @@ public enum Html: TextTableStyle {
       .replacingOccurrences(of: "<", with: "&gt;")
   }
 
-  private static func string(for alignment: Alignment) -> String {
+  private static func string(for alignment: StringAlignment) -> String {
     switch alignment {
     case .left: return "left"
     case .right: return "right"
@@ -379,7 +379,7 @@ public enum Org: TextTableStyle {
     var string = s
     if let width = column.width {
       string = string.truncated(column.truncate, length: width)
-      string = string.pad(column.align, length: width)
+      string = string.padding(column.align, length: width)
     }
     return escape(string)
   }
@@ -417,7 +417,7 @@ public enum Pipe: TextTableStyle {
     var string = s
     if let width = column.width {
       string = string.truncated(column.truncate, length: width)
-      string = string.pad(column.align, length: width)
+      string = string.padding(column.align, length: width)
     }
     return escape(string)
   }
@@ -467,7 +467,7 @@ public enum Plain: TextTableStyle {
     var string = s
     if let width = column.width {
       string = string.truncated(column.truncate, length: width)
-      string = string.pad(column.align, length: width)
+      string = string.padding(column.align, length: width)
     }
     return escape(string)
   }
@@ -492,7 +492,7 @@ public enum Rst: TextTableStyle {
     var string = s
     if let width = column.width {
       string = string.truncated(column.truncate, length: width)
-      string = string.pad(column.align, length: width)
+      string = string.padding(column.align, length: width)
     }
     return escape(string)
   }
@@ -529,7 +529,7 @@ public enum Simple: TextTableStyle {
     var string = s
     if let width = column.width {
       string = string.truncated(column.truncate, length: width)
-      string = string.pad(column.align, length: width)
+      string = string.padding(column.align, length: width)
     }
     return escape(string)
   }
@@ -589,7 +589,7 @@ extension String {
     return out
   }
 
-  func pad(_ align: Alignment, length: Int) -> String {
+  func padding(_ align: StringAlignment, length: Int) -> String {
     let padfunc: PaddingFunction
     switch align {
     case .left: padfunc = rightpad
