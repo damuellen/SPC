@@ -50,17 +50,17 @@ public struct HTML {
         padding-bottom: 2vh;
         margin-left: 0.5cm; margin-right: auto;
         height: 95vh; width: 97%;
-        font-family: 'Segoe UI', sans-serif;
+        font-family: sans-serif;
         font-size: 1em;
       }
-      tspan { font-family: 'Segoe UI', sans-serif;}
+      tspan { font-family: sans-serif;}
       body {background-color: #f7f7f7;}
       @media (prefers-color-scheme: dark) { body {background: #1C1C1C; filter: invert(1);}}
     </style>
     """
 
   public var raw: String {
-    let head = "<html><head>" + meta + style + "</head>\n"
+    let head = "<html lang=\"en\"><head>" + meta + style + "</head>\n"
     let click = "onclick=\"document.documentElement.requestFullscreen();\""
     let content = "<body \(click)>" + body + "</body>\n"
     let tail = "</html>\n"
