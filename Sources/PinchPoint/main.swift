@@ -80,7 +80,7 @@ struct PinchPointTool: ParsableCommand {
       let _ = try plotter.plot(.pdf(path: "plot.pdf"))
     }
 
-    let path = URL.temporaryFile().appendPathExtension("html").path
+    let path = URL.temporaryFile().appendingPathExtension("html").path
     try html1.raw.write(toFile: path, atomically: false, encoding: .utf8)
     print(path)
   //  try html2.raw.write(toFile: "diagram.html", atomically: false, encoding: .utf8)
