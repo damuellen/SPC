@@ -33,7 +33,7 @@ steps:
   inputs:
     targetType: 'inline'
     script: |
-      Install-Binary -Url "https://swift.org/builds/development/windows10/swift-DEVELOPMENT-SNAPSHOT-03-25-a/swift-DEVELOPMENT-SNAPSHOT-03-25-a-windows10.exe" -Name "installer.exe" -ArgumentList ("-q")
+      Install-Binary -Url "https://swift.org/builds/swift-5.5-branch/windows10/swift-5.5-DEVELOPMENT-SNAPSHOT-2021-04-19-a/swift-5.5-DEVELOPMENT-SNAPSHOT-2021-04-19-a-windows10.exe" -Name "installer.exe" -ArgumentList ("-q")
       Write-Host "##vso[task.prependpath]$(toolchain.directory)"
       Write-Host "##vso[task.prependpath]$(bin.directory)"
       Write-Host "##vso[task.prependpath]$(icu.directory)"

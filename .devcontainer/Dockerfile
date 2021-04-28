@@ -1,5 +1,5 @@
 # [Choice] Swift version: 5.3, 5.2, 5.1, 4.2
-ARG VARIANT=5.3
+ARG VARIANT=5.4
 FROM swift:${VARIANT}
 
 # [Option] Install zsh
@@ -14,7 +14,7 @@ ARG USER_GID=$USER_UID
 COPY library-scripts/common-debian.sh /tmp/library-scripts/
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
     && /bin/bash /tmp/library-scripts/common-debian.sh "${INSTALL_ZSH}" "${USERNAME}" "${USER_UID}" "${USER_GID}" "${UPGRADE_PACKAGES}" \
-    && apt-get -y install --no-install-recommends lldb libsqlite3-0 libsqlite3-dev libpython2.7 \
+    && apt-get -y install --no-install-recommends lldb libsqlite3-dev gnuplot \
     && apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/* && rm -rf /tmp/library-scripts
 
 # [Option] Install Node.js
