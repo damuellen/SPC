@@ -13,9 +13,9 @@ import Libc
 /// A mass flow rate in kilogram per second.
 public struct MassFlow: CustomStringConvertible {
   
-  var rate: Double
+  public var rate: Double
 
-  var isZero: Bool { self <= 0.0 }
+  public var isZero: Bool { self <= 0.0 }
   
   public var description: String {
     String(format: "%.1f", rate)
@@ -39,24 +39,24 @@ public struct MassFlow: CustomStringConvertible {
     )
   }
   
-  func share(of max: MassFlow) -> Ratio {
+  public func share(of max: MassFlow) -> Ratio {
     let rate = abs(self.rate)
     return (rate - max.rate) <= 0.0001 ? Ratio(rate / max.rate) : Ratio(1)
   }
 
-  mutating func adjust(factor ratio: Double) {
+  public mutating func adjust(factor ratio: Double) {
     rate *= ratio
   }
 
-  mutating func adjust(withFactor ratio: Ratio) {
+  public mutating func adjust(withFactor ratio: Ratio) {
     rate *= ratio.quotient
   }
 
-  func adjusted(withFactor ratio: Double) -> MassFlow {
+  public func adjusted(withFactor ratio: Double) -> MassFlow {
     MassFlow(rate * ratio)
   }
 
-  func adjusted(withFactor ratio: Ratio) -> MassFlow {
+  public func adjusted(withFactor ratio: Ratio) -> MassFlow {
     MassFlow(rate * ratio.quotient)
   }
   /* not used
@@ -77,7 +77,7 @@ public struct MassFlow: CustomStringConvertible {
    }
    */
 
-  static prefix func - (rhs: MassFlow) -> MassFlow {
+  public static prefix func - (rhs: MassFlow) -> MassFlow {
     MassFlow(-rhs.rate)
   }
 }

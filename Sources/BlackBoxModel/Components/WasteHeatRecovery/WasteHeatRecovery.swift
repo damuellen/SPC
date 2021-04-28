@@ -8,6 +8,8 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
+import PhysicalQuantities
+
 public enum WasteHeatRecovery: Parameterizable {
   /// Contains all data needed to simulate the operation of the waste heat recovery
   public struct PerformanceData {

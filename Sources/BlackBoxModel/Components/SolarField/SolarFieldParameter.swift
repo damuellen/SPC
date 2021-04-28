@@ -9,6 +9,7 @@
 //
 
 import Config
+import PhysicalQuantities
 
 extension SolarField {
   enum Layout: String, Equatable {

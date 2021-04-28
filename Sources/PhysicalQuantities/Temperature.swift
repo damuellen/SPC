@@ -8,13 +8,17 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
-import DateGenerator
 import Libc
 import Meteo
 
 public struct Temperatures {
-  var cold: Temperature
-  var hot: Temperature
+  public var cold: Temperature
+  public var hot: Temperature
+
+  public init(cold: Temperature, hot: Temperature) {
+    self.cold = cold
+    self.hot = hot
+  }
 }
 
 /// A temperature value in Kelvin.
@@ -22,9 +26,9 @@ public struct Temperature: CustomStringConvertible, Equatable {
 
   public var kelvin: Double
 
-  static var zero = 0
+  public static var zero = 0
 
-  static var absoluteZeroCelsius = -273.15
+  public static var absoluteZeroCelsius = -273.15
 
   public var celsius: Double { return kelvin + Temperature.absoluteZeroCelsius }
 
@@ -36,7 +40,7 @@ public struct Temperature: CustomStringConvertible, Equatable {
     kelvin = -Temperature.absoluteZeroCelsius
   }
 
-  static func mixture(m1: Mass, m2: Mass, t1: T, t2: T) -> T {
+  public static func mixture(m1: Mass, m2: Mass, t1: T, t2: T) -> T {
     .init((m1.kg * t1.kelvin + m2.kg * t2.kelvin) / (m1.kg + m2.kg))
   }
 
@@ -49,14 +53,14 @@ public struct Temperature: CustomStringConvertible, Equatable {
     }
   }
 
-  typealias T = Temperature
+  public typealias T = Temperature
 
-  static func average(_ t1: T,_ t2: T) -> T {
+  public static func average(_ t1: T,_ t2: T) -> T {
     T((t1.kelvin + t2.kelvin) / 2)
   }
 
   public init(celsius: Double) {
-    assert(celsius.isFinite, "\(celsius), \(DateTime.current)")
+    assert(celsius.isFinite, "\(celsius)")
     assert(celsius > Temperature.absoluteZeroCelsius)
     self.kelvin = celsius - Temperature.absoluteZeroCelsius
   }
@@ -67,35 +71,35 @@ public struct Temperature: CustomStringConvertible, Equatable {
     self = .init(celsius: Double(meteo.temperature))
   }
 
-  mutating func adjust(with ratio: Ratio) {
+  public mutating func adjust(with ratio: Ratio) {
     self.kelvin *= ratio.quotient
   }
 
-  func adjusted(_ ratio: Ratio) -> Temperature {
+  public func adjusted(_ ratio: Ratio) -> Temperature {
     Temperature(kelvin * ratio.quotient)
   }
 
-  mutating func adjust(withFactor factor: Double) {
+  public mutating func adjust(withFactor factor: Double) {
     kelvin *= factor
   }
 
-  mutating func limit(to max: Temperature) {
+  public mutating func limit(to max: Temperature) {
     kelvin = min(max.kelvin, self.kelvin)
   }
 
-  func adjusted(_ factor: Double) -> Temperature {
+  public func adjusted(_ factor: Double) -> Temperature {
     Temperature(kelvin * factor)
   }
 
-  func isLower(than degree: Temperature) -> Bool {
+  public func isLower(than degree: Temperature) -> Bool {
     kelvin < degree.kelvin
   }
 
-  static func + (lhs: Temperature, rhs: Temperature) -> Temperature {
+  public static func + (lhs: Temperature, rhs: Temperature) -> Temperature {
     Temperature(lhs.kelvin + rhs.kelvin)
   }
 
-  static func - (lhs: Temperature, rhs: Temperature) -> Temperature {
+  public static func - (lhs: Temperature, rhs: Temperature) -> Temperature {
     Temperature(lhs.kelvin - rhs.kelvin)
   }
 

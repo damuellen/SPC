@@ -9,6 +9,8 @@
 //
 
 import Meteo
+import PhysicalQuantities
+
 /// Contains all data needed to simulate the operation of the power block
 public struct PowerBlock: Parameterizable, HeatTransfer {
 
@@ -103,8 +105,7 @@ public struct PowerBlock: Parameterizable, HeatTransfer {
       var electricalParasiticsACC = parameter.electricalParasiticsACC(load)
       
       if parameter.electricalParasiticsACCTamb.coefficients.isEmpty == false {
-        var adjustmentACC = parameter.electricalParasiticsACCTamb
-          .evaluated(temperature.celsius)
+        var adjustmentACC = parameter.electricalParasiticsACCTamb(temperature.celsius)
         // ambient temp is larger than design, ACC max. consumption fixed to nominal
         if adjustmentACC > 1 {
           adjustmentACC = 1

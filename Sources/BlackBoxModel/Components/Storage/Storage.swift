@@ -9,6 +9,7 @@
 //
 
 import DateGenerator
+import PhysicalQuantities
 /// Contains all data needed to simulate the operation of the storage
 public struct Storage: Parameterizable, HeatTransfer {
   

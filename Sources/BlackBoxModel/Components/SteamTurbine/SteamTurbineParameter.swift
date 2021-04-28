@@ -9,6 +9,7 @@
 //
 
 import Config
+import PhysicalQuantities
 
 extension SteamTurbine {
   public struct Parameter: Codable {

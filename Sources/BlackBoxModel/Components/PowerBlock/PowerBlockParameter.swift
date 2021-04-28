@@ -9,6 +9,7 @@
 //
 
 import Config
+import PhysicalQuantities
 
 extension PowerBlock {
   public struct Parameter: Codable, Equatable {

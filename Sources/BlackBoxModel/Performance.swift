@@ -8,6 +8,8 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
+import PhysicalQuantities
+
 public struct PlantPerformance: MeasurementsConvertible {
 
   internal(set) public var thermal: ThermalEnergy

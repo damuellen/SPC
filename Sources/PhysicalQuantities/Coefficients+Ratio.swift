@@ -8,22 +8,24 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
+import Helpers
+
 public struct Polynomial: Codable, Equatable {
-  let coefficients: [Double]
+  public let coefficients: [Double]
 
   public init(values: Double...) {
     self.coefficients = values
   }
 
-  init(_ array: [Double]) {
+  public init(_ array: [Double]) {
     self.coefficients = array
   }
 
-  var indices: CountableRange<Int> { coefficients.indices }
+  public var indices: CountableRange<Int> { coefficients.indices }
 
-  var isEmpty: Bool { coefficients.isEmpty }
+  public var isEmpty: Bool { coefficients.isEmpty }
 
-  var isInapplicable: Bool { coefficients.count < 2 }
+  public var isInapplicable: Bool { coefficients.count < 2 }
 
   @_transparent func evaluated(_ value: Double) -> Double {
     // Use Horner’s Method for solving
@@ -32,7 +34,7 @@ public struct Polynomial: Codable, Equatable {
     }
   }
 
-  func callAsFunction(_ temperature: Temperature) -> Double {
+  public func callAsFunction(_ temperature: Temperature) -> Double {
     evaluated(temperature.kelvin)
   }
 
@@ -40,11 +42,11 @@ public struct Polynomial: Codable, Equatable {
     evaluated(value)
   }
 
-  func callAsFunction(_ ratio: Ratio) -> Double {
+  public func callAsFunction(_ ratio: Ratio) -> Double {
     evaluated(ratio.quotient)
   }
 
-  subscript(index: Int) -> Double {
+  public subscript(index: Int) -> Double {
     coefficients[index]
   }
 }
@@ -66,9 +68,9 @@ extension Polynomial: CustomStringConvertible {
 }
 
 public struct Ratio: CustomStringConvertible, Codable {
-  var quotient: Double
+  public var quotient: Double
 
-  var isZero: Bool { self == .zero }
+  public var isZero: Bool { self == .zero }
 
   public static var zero: Ratio { Ratio(0) }
 
@@ -92,7 +94,7 @@ public struct Ratio: CustomStringConvertible, Codable {
     self.quotient = min(value, cap)
   }
 
-  mutating func limited(to max: Ratio) {
+  public mutating func limited(to max: Ratio) {
     quotient = min(max.quotient, quotient)
   }
 }
@@ -118,7 +120,7 @@ extension Ratio: Comparable {
 public struct Demand {}
 
 extension Ratio {
-  var multiBar: String {
+  public var multiBar: String {
     let (bar_chunks, remainder) = Int(quotient * 80)
       .quotientAndRemainder(dividingBy: 8)
     let full = UnicodeScalar("█").value
@@ -130,10 +132,17 @@ extension Ratio {
       + description
   }
 
-  var singleBar: String {
+  public var singleBar: String {
     let bar = Int(quotient * 7)
     let full = UnicodeScalar("█").value
     let block = String(UnicodeScalar(full - UInt32(7 - bar))!)
     return block + " " + description
   }
+}
+
+func * (lhs: String, rhs: String) -> String {
+  let width = min(max(terminalWidth(), 70), 100)  
+  var c = width - lhs.count - rhs.count - 1
+  c = c < 0 ? 1 : c
+  return lhs + String(repeating: " ", count: c) + rhs + "\n"
 }

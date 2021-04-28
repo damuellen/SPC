@@ -9,6 +9,7 @@
 //
 
 import Config
+import PhysicalQuantities
 
 extension GasTurbine {
   public struct Parameter: Codable, Equatable {    

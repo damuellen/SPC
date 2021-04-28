@@ -9,6 +9,8 @@
 //
 
 import Libc
+import PhysicalQuantities
+
 extension Storage.Salt: MeasurementsConvertible {
   static var columns: [(name: String, unit: String)] {
     [

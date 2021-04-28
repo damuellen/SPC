@@ -9,6 +9,8 @@
 //
 
 import DateGenerator
+import PhysicalQuantities
+
 /// A namespace for the main routines of the simulation.
 public struct Plant {
 

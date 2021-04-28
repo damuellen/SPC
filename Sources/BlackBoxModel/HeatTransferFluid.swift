@@ -9,6 +9,7 @@
 //
 
 import Config
+import PhysicalQuantities
 
 /// The Heat Transfer Fluid is characterized through maximum operating temperature,
 /// freeze temperature, specific heat capacity, viscosity, thermal conductivity,
@@ -56,12 +57,12 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
 
   func heatContent(_ t1: Temperature, _ t2: Temperature) -> Heat {
     if useEnthalpy {
-      return HeatTransferFluid.delta(
+      return HeatTransferFluid.change(
         from: t1.celsius, to: t2.celsius,
         enthalpy: enthalpyFromTemperature.coefficients
       )
     }
-    return HeatTransferFluid.delta(
+    return HeatTransferFluid.change(
       from: t1.celsius, to: t2.celsius, heatCapacity: heatCapacity
     )
   }
@@ -141,7 +142,7 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
     return temperature
   }
 
-  static func delta(
+  static func change(
     from high: Double, to low: Double, heatCapacity: [Double]) -> Double
   {
     var q = heatCapacity[0] * (high - low)
@@ -149,7 +150,7 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
     return q
   }
   
-  static func delta(
+  static func change(
     from high: Double, to low: Double, enthalpy: [Double]) -> Double
   {
     var (h1, h2) = (0.0, 0.0)

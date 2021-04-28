@@ -10,6 +10,7 @@
 
 import Config
 import DateGenerator
+import PhysicalQuantities
 
 struct Availability: Codable {
 

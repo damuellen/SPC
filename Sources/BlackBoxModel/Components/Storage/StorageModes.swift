@@ -5,6 +5,8 @@
 //  Created by Daniel Müllenborn on 04.02.19.
 //
 
+import PhysicalQuantities
+
 extension Storage {
 
   public enum OperationMode {

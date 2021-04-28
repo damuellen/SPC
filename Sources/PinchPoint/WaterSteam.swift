@@ -9,9 +9,10 @@
 //
 
 import CIAPWSIF97
-import BlackBoxModel
+import PhysicalQuantities
+
 /// IAPWS formulations of the thermodynamic properties of water and steam.
-public struct WaterSteam {
+public struct WaterSteam: Codable {
   public var temperature: Temperature
   public var pressure: Double
   public var massFlow: Double
@@ -68,5 +69,12 @@ extension WaterSteam {
     self.temperature = WaterSteam.temperature(
       pressure: pressure, enthalpy: enthalpy
     )
+  }
+
+  init() {
+    self.pressure = 0
+    self.massFlow = 0
+    self.enthalpy = 0
+    self.temperature = Temperature(celsius: 0)
   }
 }

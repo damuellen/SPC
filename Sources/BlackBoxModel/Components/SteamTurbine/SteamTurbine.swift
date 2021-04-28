@@ -10,6 +10,7 @@
 
 import DateGenerator
 import Meteo
+import PhysicalQuantities
 /// Contains all data needed to simulate the operation of the steam turbine
 public struct SteamTurbine: Parameterizable {
   

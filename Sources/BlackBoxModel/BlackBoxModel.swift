@@ -14,6 +14,7 @@ import Helpers
 import Foundation
 import Meteo
 import SolarPosition
+import PhysicalQuantities
 
 public enum BlackBoxModel {
 

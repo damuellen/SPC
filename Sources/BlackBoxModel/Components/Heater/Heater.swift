@@ -9,6 +9,8 @@
 //
 
 import DateGenerator
+import PhysicalQuantities
+
 /// Contains all data needed to simulate the operation of the heater
 public struct Heater: Parameterizable, HeatTransfer {  
 

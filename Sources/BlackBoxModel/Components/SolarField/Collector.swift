@@ -12,6 +12,8 @@ import DateGenerator
 import Libc
 import Meteo
 import SolarPosition
+import PhysicalQuantities
+
 /// Contains all data needed to simulate the operation of the collector
 public struct Collector: Parameterizable, CustomStringConvertible {
     

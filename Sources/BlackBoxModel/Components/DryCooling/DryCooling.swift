@@ -10,6 +10,7 @@
 
 import Libc
 import Meteo
+import PhysicalQuantities
 
 public enum DryCooling {
 

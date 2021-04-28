@@ -9,6 +9,7 @@
 //
 
 import Config
+import PhysicalQuantities
 
 extension Heater {
   public struct Parameter: Codable, Equatable {

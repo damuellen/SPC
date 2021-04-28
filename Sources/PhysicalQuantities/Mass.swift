@@ -30,7 +30,7 @@ public struct Mass: Codable, CustomStringConvertible {
     self.kg = 0
   }
 
-  static func * (lhs: Mass, rhs: Double) -> Mass {
+  public static func * (lhs: Mass, rhs: Double) -> Mass {
     Mass(lhs.kg * rhs)
   }
 }

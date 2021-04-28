@@ -8,6 +8,8 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
+import PhysicalQuantities
+
 extension SolarField: CustomStringConvertible {
   public var description: String {
     "  Mode:".padding(30) + "\(operationMode)\n" + formatting(

@@ -38,15 +38,15 @@ public struct Power: Codable {
     self.watt = megaWatt * 1_000_000
   }
 
-  static func * (lhs: Power, rhs: Double) -> Power {
+  public static func * (lhs: Power, rhs: Double) -> Power {
     Power(lhs.watt * rhs)
   }
 
-  static func *= (lhs: inout Power, rhs: Double) {
+  public static func *= (lhs: inout Power, rhs: Double) {
     lhs.watt = lhs.watt * rhs
   }
 
-  static func / (lhs: Power, rhs: Double) -> Power {
+  public static func / (lhs: Power, rhs: Double) -> Power {
     Power(lhs.watt / rhs)
   }
 }

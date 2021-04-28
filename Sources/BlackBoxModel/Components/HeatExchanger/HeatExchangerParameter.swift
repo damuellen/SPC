@@ -9,6 +9,7 @@
 //
 
 import Config
+import PhysicalQuantities
 
 extension HeatExchanger {
   public struct Parameter: Equatable {

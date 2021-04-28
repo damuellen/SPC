@@ -8,6 +8,8 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
+import PhysicalQuantities
+
 public enum ParameterDefaults {
 
   static let hx = HeatExchanger.Parameter(

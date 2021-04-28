@@ -9,6 +9,7 @@
 //
 
 import Config
+import PhysicalQuantities
 
 extension Storage {
   public enum Definition: String, Codable {

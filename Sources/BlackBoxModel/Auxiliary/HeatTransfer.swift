@@ -8,6 +8,8 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
+import PhysicalQuantities
+
 protocol HeatTransfer: CustomStringConvertible {
   var name: String { get }
   var massFlow: MassFlow { get set }

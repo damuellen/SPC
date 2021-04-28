@@ -8,6 +8,8 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
+import PhysicalQuantities
+
 /// Contains all data needed to simulate the operation of the heat exchanger
 public struct HeatExchanger: Parameterizable, HeatTransfer {
   
