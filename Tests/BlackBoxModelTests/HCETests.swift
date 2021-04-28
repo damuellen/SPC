@@ -1,6 +1,7 @@
 import XCTest
 
 @testable import BlackBoxModel
+import PhysicalQuantities
 
 class HCETests: XCTestCase {
   func testsRadiationLosses() {

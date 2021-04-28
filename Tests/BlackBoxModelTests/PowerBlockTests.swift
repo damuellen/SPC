@@ -1,6 +1,7 @@
 import XCTest
 
 @testable import BlackBoxModel
+import PhysicalQuantities
 
 class PowerBlockTests: XCTestCase {
   func testsParasitics() {
