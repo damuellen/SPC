@@ -68,6 +68,17 @@
         {
             "type": "lldb",
             "request": "launch",
+            "name": "PinchPointTool",
+            "program": "${workspaceFolder}/.build/debug/PinchPointTool",
+            "args": [
+                "--json"
+            ],
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "swift-build-debug"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
             "name": "TransTES",
             "program": "${workspaceFolder}/.build/debug/TransTES",
             "args": ["</root/workspace/SPC/kjvbible_x10.txt"],

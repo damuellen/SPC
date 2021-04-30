@@ -34,27 +34,26 @@ public struct HeatExchangerParameter: Codable {
 }
 
 struct PinchPoint: Codable {
+  var economizerFeedwaterTemperature = Temperature(celsius: 249.6) 
 
-  let ws = WaterSteam(
+  var ws = WaterSteam(
     temperature: Temperature(celsius: 383.0),
     pressure: 102.85,
     massFlow: 67.95
   )
 
-  let blowDownOfInputMassFlow: Double = 1.0
+  var blowDownOfInputMassFlow = 1.0
 
-  let reheatOutletSteamPressure: Double = 19.32
-
-  let reheatInlet = WaterSteam(
+  var reheatInlet = WaterSteam(
     temperature: Temperature(celsius: 217.8),
     pressure: 22.23,
     massFlow: 53.58,
     enthalpy: 2800.9
   )
 
-  let upperHTFTemperature: Temperature = Temperature(celsius: 393)
+  var reheatOutletSteamPressure = 19.32
 
-  let economizerFeedwaterTemperature = Temperature(celsius: 249.6)
+  var upperHTFTemperature = Temperature(celsius: 393)
 
   let parameter: HeatExchangerParameter
 
@@ -122,11 +121,13 @@ struct PinchPoint: Codable {
 
   mutating func preheat() -> Double {
     economizer.enthalpy.ws.inlet = WaterSteam.enthalpy(
-      pressure: economizer.pressure.ws.inlet, temperature: economizer.temperature.ws.inlet
+      pressure: economizer.pressure.ws.inlet, 
+      temperature: economizer.temperature.ws.inlet
     )
 
     economizer.enthalpy.ws.outlet = WaterSteam.enthalpy(
-      pressure: economizer.pressure.ws.outlet, temperature: economizer.temperature.ws.outlet
+      pressure: economizer.pressure.ws.outlet, 
+      temperature: economizer.temperature.ws.outlet
     )
 
     economizer.power = economizer.wsEnthalpyChange * economizer.massFlow.ws / 1_000
@@ -266,9 +267,6 @@ struct PinchPoint: Codable {
 
     let economizerHTFAbsoluteHeatFlowOutlet = preheat()
 
-    let economizer_Sg_ShTrainPower = 
-      steamGenerator.power + superheater.power + economizer.power
-
     let powerEc_Sg_Sh = 
       economizer.power + steamGenerator.power + superheater.power
 
@@ -292,7 +290,7 @@ struct PinchPoint: Codable {
 
     reheater.power = reheater.massFlow.ws * reheater.wsEnthalpyChange / 1_000
     
-    let powerBlockPower = economizer_Sg_ShTrainPower + reheater.power
+    let powerBlockPower = powerEc_Sg_Sh + reheater.power
 
     steamGenerator.massFlow.htf = htfMassFlowEc_Sg_ShTrain
 
@@ -320,7 +318,6 @@ struct PinchPoint: Codable {
     let mixHTFAbsoluteEnthalpy = mixHTFAbsoluteHeatFlow * 1_000 / mixHTFMassflow
 
     let mixHTFTemperature = HTF.temperature(mixHTFAbsoluteEnthalpy)
-    print(mixHTFTemperature, mixHTFAbsoluteEnthalpy, mixHTFMassflow)
   }
 
   func temperatures() -> String {
@@ -338,24 +335,24 @@ struct PinchPoint: Codable {
 
 
     "SH"
-    \(107.9), \(316.4)
-    \(128.8), \(380.0)
+    \(107.9), \(superheater.temperature.ws.inlet)
+    \(128.8), \(superheater.temperature.ws.outlet)
 
 
     "RH"
-    \(128.8), \(217.8)
-    \(150.3), \(380.0)
+    \(128.8), \(reheater.temperature.ws.inlet)
+    \(150.3), \(reheater.temperature.ws.outlet)
     
 
     "HTF"
     \(0), \(303.2)
     \(22.2), \(319.4)
-    \(128.8), \(393.0)
+    \(128.8), \(upperHTFTemperature.celsius)
 
 
     "HTF RH"
-    \(128.8), \(246.9)
-    \(150.3), \(393.0)
+    \(128.8), \(reheater.temperature.htf.outlet.celsius)
+    \(150.3), \(reheater.temperature.htf.inlet.celsius)    
     """
   }
 }

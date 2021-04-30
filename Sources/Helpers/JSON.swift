@@ -15,7 +15,11 @@ extension JSONDecoder {
 }
 
 extension JSONEncoder {
-  public static let shared = JSONEncoder()
+  public static let shared: JSONEncoder = {
+    let encoder = JSONEncoder()
+    encoder.outputFormatting = .prettyPrinted
+    return encoder
+  }()
 }
 
 extension Decodable {

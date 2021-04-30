@@ -17,19 +17,11 @@ import Helpers
 PinchPointTool.main()
 
 struct PinchPointTool: ParsableCommand {
-
-  @Option(name: .long, help: "")
-  var htfTemperature: Double = 393.0
-  @Option(name: .long, help: "")
-  var htfFluid: String = "ThVP1"
-  @Option(name: .long, help: "")
-  var hexCase: String = "2"
-  @Argument(help: "")
-  var steam: [Double] 
-  @Flag
-  var pdf: Bool = false
-  @Flag
-  var json: Bool = false
+  @Argument(help: "") var input: [Double] = []
+  @Option(name: .long, help: "") var htfFluid: String = "ThVP1"
+  @Option(name: .long, help: "") var hexCase: String = "2"
+  @Flag var pdf: Bool = false
+  @Flag var json: Bool = false
 
   func run() throws {
     let pressureDrop = HeatExchangerParameter.PressureDrop(
@@ -50,14 +42,38 @@ struct PinchPointTool: ParsableCommand {
 
     var pinchPoint = PinchPoint(parameter: parameter)
 
-    pinchPoint()    
-
     if json {
       try! print(String(data: pinchPoint.encodeToJSONData(), encoding: .utf8)!)
-      return
     }
 
-    let sss: [HeatBalanceDiagram.Stream] = (0..<17).map { _ in
+    guard input.count == 10 else { 
+      print("Inadequate number of parameters")
+      return
+    }
+    pinchPoint.economizerFeedwaterTemperature = Temperature(celsius: input[0])
+
+    pinchPoint.ws = WaterSteam(
+      temperature: Temperature(celsius: input[3]),
+      pressure: input[2],
+      massFlow: input[1]
+    )
+
+    pinchPoint.blowDownOfInputMassFlow = input[4]
+
+    pinchPoint.reheatInlet = WaterSteam(
+      temperature: Temperature(celsius: input[5]),
+      pressure: input[6],
+      massFlow: input[8],
+      enthalpy: input[7]
+    )
+
+    pinchPoint.reheatOutletSteamPressure = input[9]
+
+    pinchPoint.upperHTFTemperature = Temperature(celsius: input[10])
+
+    pinchPoint()    
+
+    let streams: [HeatBalanceDiagram.Stream] = (0..<17).map { _ in
       return HeatBalanceDiagram.Stream(
         temperature: Temperature(celsius: Double.random(in: 300...400)),
         pressure: Double.random(in: 10...100),
@@ -69,15 +85,14 @@ struct PinchPointTool: ParsableCommand {
     let plotter = Gnuplot(temperatures: pinchPoint.temperatures())
     let plot = try plotter.plot(.svg)
 
-    let aaa = [("LMTD","1"),("LMTD","1"),("Blowdown","1"),("LMTD","1"),("LMTD","1")]
-    let dia = HeatBalanceDiagram(streams: sss, singleValues: aaa)!
+    let singleValues = [("LMTD","1"),("LMTD","1"),("Blowdown","1"),("LMTD","1"),("LMTD","1")]
+    let dia = HeatBalanceDiagram(streams: streams, singleValues: singleValues)!
     let html1 = HTML(body: dia.svg + plot)
     
-
     if pdf {
+      let _ = try plotter.plot(.pdf(path: "plot.pdf"))
       let html2 = HTML(body: dia.svg)
       try html2.pdf(toFile: "diagram.pdf")
-      let _ = try plotter.plot(.pdf(path: "plot.pdf"))
     }
 
     let path = URL.temporaryFile().appendingPathExtension("html").path

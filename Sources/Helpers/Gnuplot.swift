@@ -23,8 +23,10 @@ public struct Gnuplot {
     let gnuplot = Process()
 #if os(Windows)
     gnuplot.executableURL = URL(fileURLWithPath: "C:/bin/gnuplot.exe")
-#else
+#elseif os(Linux)
     gnuplot.executableURL = .init(fileURLWithPath: "/usr/bin/gnuplot")
+#else
+    gnuplot.executableURL = .init(fileURLWithPath: "/opt/homebrew/bin/gnuplot")
 #endif
     gnuplot.standardInput = Pipe()
     gnuplot.standardOutput = Pipe()
@@ -70,7 +72,7 @@ public struct Gnuplot {
 
   public init(temperatures: String) {
     self.settings.append(contentsOf: Gnuplot.temperatures)
-    self.datablock = "\n$data <<EOD\n" + temperatures + "EOD\n"
+    self.datablock = "\n$data <<EOD\n" + temperatures + "\n\n\nEOD\n"
     self.plot = """
     \nplot $data i 0 u 1:2 w lp ls 11 title columnheader(1), \
       $data i 1 u 1:2 w lp ls 12 title columnheader(1), \

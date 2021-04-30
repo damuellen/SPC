@@ -51,7 +51,6 @@
                 "build",
                 "-Xswiftc", "-Xfrontend",
                 "-Xswiftc", "-serialize-debugging-options",
-                "--configuration", "debug",
             ],
         },
         {

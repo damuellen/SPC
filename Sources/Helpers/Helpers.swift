@@ -38,13 +38,12 @@ public func openFile(atPath: String) {
   system("start " + atPath)
 #elseif os(macOS)
   try? Process.run(
-    url: URL(fileURLWithPath: "/usr/bin/open"),
+    URL(fileURLWithPath: "/usr/bin/open"),
     arguments: [atPath]
   )
 #endif
 }
-
-extension URL {
+extension FileManager {
   static func transientDirectory(url: (URL) throws -> Void) throws {
     let fm = FileManager.default
     let id = UUID().uuidString
@@ -53,7 +52,9 @@ extension URL {
     try url(directory)
     try fm.removeItem(at: directory)
   }
+}
 
+extension URL {
   var windowsPath: String {
     path.replacingOccurrences(of: "/", with: "\\")
   }
