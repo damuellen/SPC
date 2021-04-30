@@ -46,15 +46,15 @@ struct PinchPointTool: ParsableCommand {
       try! print(String(data: pinchPoint.encodeToJSONData(), encoding: .utf8)!)
     }
 
-    guard input.count == 10 else { 
+    guard input.count == 11 else { 
       print("Inadequate number of parameters")
       return
     }
     pinchPoint.economizerFeedwaterTemperature = Temperature(celsius: input[0])
 
     pinchPoint.ws = WaterSteam(
-      temperature: Temperature(celsius: input[3]),
-      pressure: input[2],
+      temperature: Temperature(celsius: input[2]),
+      pressure: input[3],
       massFlow: input[1]
     )
 
