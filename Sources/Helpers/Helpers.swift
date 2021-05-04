@@ -12,17 +12,22 @@ import Foundation
 #if os(Windows)
 import WinSDK
 #endif
+
+fileprivate var cachedWidth: Int?
 public func terminalWidth() -> Int {
+  if let width = cachedWidth { return width }
 #if os(Windows)
   var csbi: CONSOLE_SCREEN_BUFFER_INFO = CONSOLE_SCREEN_BUFFER_INFO()
   if !GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi) {
     return 80
   }
-  return Int(csbi.srWindow.Right - csbi.srWindow.Left)
+  cachedWidth = Int(csbi.srWindow.Right - csbi.srWindow.Left)
+  return cachedWidth
 #else
   // Try to get from environment.
   if let columns = ProcessInfo.processInfo.environment["COLUMNS"],
    let width = Int(columns) {
+    cachedWidth = width
     return width
   }
   var ws = winsize()
@@ -46,7 +51,7 @@ public func openFile(atPath: String) {
 extension FileManager {
   static func transientDirectory(url: (URL) throws -> Void) throws {
     let fm = FileManager.default
-    let id = UUID().uuidString
+    let id = String(UUID().uuidString.prefix(8))
     let directory = fm.temporaryDirectory.appendingPathComponent(id, isDirectory: true)
     try fm.createDirectory(at: directory, withIntermediateDirectories: false)
     try url(directory)
@@ -61,7 +66,7 @@ extension URL {
 
   static public func temporaryFile() -> URL {
     let fm = FileManager.default
-    let id = UUID().uuidString
+    let id = String(UUID().uuidString.prefix(8))
     return fm.temporaryDirectory.appendingPathComponent(id)
   }
 

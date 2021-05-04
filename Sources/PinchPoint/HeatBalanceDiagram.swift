@@ -12,31 +12,71 @@ import PhysicalQuantities
 import CPikchr
 import Helpers
 
-public struct HeatBalanceDiagram {
-  public init?(streams: [Stream], singleValues: [(String, String)]) {
+extension HeatExchanger {
+  var inlet: Stream {
+    Stream(temperature.ws.inlet, pressure.ws.inlet, massFlow.ws, enthalpy.ws.inlet)
+  }
+
+  var outlet: Stream {
+    Stream(temperature.ws.outlet, pressure.ws.outlet, massFlow.ws, enthalpy.ws.outlet)
+  }
+
+  var htf: Stream {
+    Stream(temperature.htf.inlet, 0, massFlow.htf, enthalpy.htf.inlet)
+  }
+}
+
+
+struct HeatBalanceDiagram {
+  init(values: PinchPoint) {
+    self.streams = [
+      Stream(values.mixHTFTemperature, 0, values.mixHTFMassflow, values.mixHTFAbsoluteEnthalpy),
+      values.economizer.htf, //htf_outlet
+      values.economizer.inlet,
+      values.economizer.outlet,
+      values.steamGenerator.inlet,
+      values.steamGenerator.outlet,
+      values.superheater.inlet,
+      values.superheater.outlet,
+      values.reheater.inlet,
+      values.reheater.outlet,
+      values.reheater.htf, // inlet
+      values.superheater.outlet, // above
+      values.economizer.htf, //sh_outlet
+      values.steamGenerator.htf, //outlet
+      values.reheater.htf, //rh_outlet
+      values.superheater.htf, //sh_inlet
+      Stream(values.upperHTFTemperature, 0, values.mixHTFMassflow, values.superheater.enthalpy.htf.inlet),
+    ]
+    self.singleValues = [("LMTD","1"),("LMTD","1"),("Blowdown","1"),("LMTD","1"),("LMTD","1")]
+  }
+
+  init?(streams: [Stream], singleValues: [(String, String)]) {
     guard streams.count == 17, singleValues.count == 5 else { return nil }
     self.streams = streams
     self.singleValues = singleValues
   }
 
-  public struct Stream {
+  struct Stream {
     var temperature: String
     var massFlow: String
     var enthalpy: String
     var pressure: String
 
-    public init(stream: WaterSteam) {
-      self.temperature = String(format: "%.1f °C", stream.temperature.celsius)
+    init(stream: WaterSteam) {
+      self.temperature = String(format: "%.2f °C", stream.temperature.celsius)
       self.massFlow = String(format: "%.1f kg/s", stream.massFlow)
       self.enthalpy = String(format: "%.1f kJ/kg", stream.enthalpy)
-      self.pressure = String(format: "%.1f bar", stream.pressure)
+      self.pressure = String(format: "%.2f bar", stream.pressure)
     }
 
-    public init(temperature: Temperature, pressure: Double, massFlow: Double, enthalpy: Double) {
-      self.temperature = String(format: "%.1f °C", temperature.celsius)
+    init(
+      _ temperature: Temperature, _ pressure: Double,
+      _ massFlow: Double, _ enthalpy: Double) {
+      self.temperature = String(format: "%.2f °C", temperature.celsius)
       self.massFlow = String(format: "%.1f kg/s", massFlow)
       self.enthalpy = String(format: "%.1f kJ/kg", enthalpy)
-      self.pressure = String(format: "%.1f bar", pressure)
+      self.pressure = pressure > 0 ? String(format: "%.2f bar", pressure) : ""      
     }
 
     var boxLabel: String {
@@ -51,10 +91,10 @@ public struct HeatBalanceDiagram {
     }
   }
 
-  let streams: [Stream]
-  let singleValues: [(String, String)]
+  var streams: [Stream]
+  var singleValues: [(String, String)]
 
-  public var svg: String {
+  var svg: String {
     let diagram = """
     RH: [
       boxwid = 0.75; boxht = 0.75;
@@ -223,9 +263,6 @@ public struct HeatBalanceDiagram {
     let style = """
     <style media="print">
       svg.c {width: 28.2cm; height: 20.6cm; font-family: sans-serif; margin-left: 0.5cm;}
-    </style>
-    <style media="screen">
-      svg.c {margin-left: 1cm;}
     </style>
     """
     return style + svg

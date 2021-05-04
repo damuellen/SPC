@@ -39,13 +39,13 @@ extension Decodable {
 }
 
 extension Encodable {
-  public func encodeToJSONData() throws -> Data {
+  public func encodeToJSON() throws -> String {
     let data = try JSONEncoder.shared.encode(self)
-    return data
+    return String(data: data, encoding: .utf8)!
   }
   
   public func storeToJSON(file: URL) throws {
-    let data = try encodeToJSONData()
+    let data = try JSONEncoder.shared.encode(self)
     let dir = file.deletingLastPathComponent()
     try FileManager.default.createDirectory(
       at: dir, withIntermediateDirectories: true

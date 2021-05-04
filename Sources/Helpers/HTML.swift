@@ -47,15 +47,21 @@ public struct HTML {
     </style>
     <style media="screen">
       svg {
+        margin-top: 1%;
+        margin-left: 1%;
+        margin-right: auto;
         padding-bottom: 2vh;
-        margin-left: 0.5cm; margin-right: auto;
-        height: 95vh; width: 97%;
+        height: 95vh;
+        width: 98%;
         font-family: sans-serif;
         font-size: 1em;
       }
       tspan { font-family: sans-serif;}
-      body {background-color: #f7f7f7;}
-      @media (prefers-color-scheme: dark) { body {background: #1C1C1C; filter: invert(1);}}
+      body { background-color: rgb(10,10,10);}
+      @media (prefers-color-scheme: dark) {
+        svg { filter: drop-shadow(3px 3px 3px rgb(255, 255, 255)); }
+        body { background-image: radial-gradient(circle, rgb(40,40,40), rgb(10,10,10)); filter: invert(1); }
+      }
     </style>
     """
 

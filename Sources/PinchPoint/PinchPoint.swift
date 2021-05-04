@@ -34,12 +34,16 @@ public struct HeatExchangerParameter: Codable {
 }
 
 struct PinchPoint: Codable {
-  var economizerFeedwaterTemperature = Temperature(celsius: 249.6) 
+  var mixHTFMassflow = 0.0
+  var mixHTFAbsoluteEnthalpy = 0.0
+  var mixHTFTemperature: Temperature = 0.0
 
+  var economizerFeedwaterTemperature = Temperature(celsius: 250.8)
+  
   var ws = WaterSteam(
-    temperature: Temperature(celsius: 383.0),
+    temperature: Temperature(celsius: 380.0),
     pressure: 102.85,
-    massFlow: 67.95
+    massFlow: 66.42
   )
 
   var blowDownOfInputMassFlow = 1.0
@@ -51,7 +55,7 @@ struct PinchPoint: Codable {
     enthalpy: 2800.9
   )
 
-  var reheatOutletSteamPressure = 19.32
+  var reheatOutletSteamPressure = 21.02
 
   var upperHTFTemperature = Temperature(celsius: 393)
 
@@ -202,9 +206,9 @@ struct PinchPoint: Codable {
     
     let powerEvaporationAndSuperheating = superheater.power + evaporationPower
 
-    superheater.temperature.ws.inlet = ws.temperature
+    superheater.temperature.ws.inlet = steamGenerator.temperature.ws.outlet
 
-    superheater.pressure.ws.inlet = ws.pressure
+    superheater.pressure.ws.inlet = ws.pressure 
 
     superheater.enthalpy.ws.inlet = WaterSteam.enthalpy(
       pressure: superheater.pressure.ws.inlet,
@@ -313,11 +317,11 @@ struct PinchPoint: Codable {
     let mixHTFAbsoluteHeatFlow = economizerHTFAbsoluteHeatFlowOutlet 
       + reheatHTFAbsoluteHeatFlowOutlet
 
-    let mixHTFMassflow = economizer.massFlow.htf + reheater.massFlow.htf
+    mixHTFMassflow = economizer.massFlow.htf + reheater.massFlow.htf
 
-    let mixHTFAbsoluteEnthalpy = mixHTFAbsoluteHeatFlow * 1_000 / mixHTFMassflow
+    mixHTFAbsoluteEnthalpy = mixHTFAbsoluteHeatFlow * 1_000 / mixHTFMassflow
 
-    let mixHTFTemperature = HTF.temperature(mixHTFAbsoluteEnthalpy)
+    mixHTFTemperature = HTF.temperature(mixHTFAbsoluteEnthalpy)
   }
 
   func temperatures() -> String {

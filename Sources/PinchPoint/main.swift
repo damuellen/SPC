@@ -22,15 +22,16 @@ struct PinchPointTool: ParsableCommand {
   @Option(name: .long, help: "") var hexCase: String = "2"
   @Flag var pdf: Bool = false
   @Flag var json: Bool = false
+  @Flag var html: Bool = false
 
   func run() throws {
     let pressureDrop = HeatExchangerParameter.PressureDrop(
-      economizer: 1.2,
-      economizer_steamGenerator: 6.0,
-      steamGenerator: 0.1,
-      steamGenerator_superHeater: 0.2,
-      superHeater: 0.5,
-      superHeater_turbine: 1.5
+      economizer: 1.0,
+      economizer_steamGenerator: 0.2,
+      steamGenerator: 0.55,
+      steamGenerator_superHeater: 0.1,
+      superHeater: 1.25,
+      superHeater_turbine: 3.2
     )
 
     let parameter = HeatExchangerParameter(
@@ -43,62 +44,52 @@ struct PinchPointTool: ParsableCommand {
     var pinchPoint = PinchPoint(parameter: parameter)
 
     if json {
-      try! print(String(data: pinchPoint.encodeToJSONData(), encoding: .utf8)!)
+      try! print(pinchPoint.encodeToJSON())
     }
 
-    guard input.count == 11 else { 
-      print("Inadequate number of parameters")
-      return
+    if input.count == 11, (input.min() ?? 0) > .zero {      
+      pinchPoint.economizerFeedwaterTemperature = Temperature(celsius: input[0])
+
+      pinchPoint.ws = WaterSteam(
+        temperature: Temperature(celsius: input[2]),
+        pressure: input[3],
+        massFlow: input[1]
+      )
+
+      pinchPoint.blowDownOfInputMassFlow = input[4]
+
+      pinchPoint.reheatInlet = WaterSteam(
+        temperature: Temperature(celsius: input[5]),
+        pressure: input[6],
+        massFlow: input[8],
+        enthalpy: input[7]
+      )
+
+      pinchPoint.reheatOutletSteamPressure = input[9]
+
+      pinchPoint.upperHTFTemperature = Temperature(celsius: input[10])
+    } else { 
+      print("Invalid value in the input")
     }
-    pinchPoint.economizerFeedwaterTemperature = Temperature(celsius: input[0])
 
-    pinchPoint.ws = WaterSteam(
-      temperature: Temperature(celsius: input[2]),
-      pressure: input[3],
-      massFlow: input[1]
-    )
-
-    pinchPoint.blowDownOfInputMassFlow = input[4]
-
-    pinchPoint.reheatInlet = WaterSteam(
-      temperature: Temperature(celsius: input[5]),
-      pressure: input[6],
-      massFlow: input[8],
-      enthalpy: input[7]
-    )
-
-    pinchPoint.reheatOutletSteamPressure = input[9]
-
-    pinchPoint.upperHTFTemperature = Temperature(celsius: input[10])
-
-    pinchPoint()    
-
-    let streams: [HeatBalanceDiagram.Stream] = (0..<17).map { _ in
-      return HeatBalanceDiagram.Stream(
-        temperature: Temperature(celsius: Double.random(in: 300...400)),
-        pressure: Double.random(in: 10...100),
-        massFlow: Double.random(in: 300...1000),
-        enthalpy: Double.random(in: 1000...3000)
-      ) 
-    }
+    pinchPoint()
 
     let plotter = Gnuplot(temperatures: pinchPoint.temperatures())
     let plot = try plotter.plot(.svg)
 
-    let singleValues = [("LMTD","1"),("LMTD","1"),("Blowdown","1"),("LMTD","1"),("LMTD","1")]
-    let dia = HeatBalanceDiagram(streams: streams, singleValues: singleValues)!
-    let html1 = HTML(body: dia.svg + plot)
+    let dia = HeatBalanceDiagram(values: pinchPoint)
     
     if pdf {
       let _ = try plotter.plot(.pdf(path: "plot.pdf"))
-      let html2 = HTML(body: dia.svg)
-      try html2.pdf(toFile: "diagram.pdf")
+      let html = HTML(body: dia.svg)
+      try html.pdf(toFile: "diagram.pdf")
     }
 
-    let path = URL.temporaryFile().appendingPathExtension("html").path
-    try html1.raw.write(toFile: path, atomically: false, encoding: .utf8)
-    print(path)
-  //  try html2.raw.write(toFile: "diagram.html", atomically: false, encoding: .utf8)
-  //  try html3.raw.write(toFile: "plot.html", atomically: false, encoding: .utf8)
+    if html {
+      let path = URL.temporaryFile().appendingPathExtension("html").path
+      let html = HTML(body: dia.svg + plot)
+      try html.raw.write(toFile: path, atomically: false, encoding: .utf8)
+      print(path)
+    }
   }
 }
