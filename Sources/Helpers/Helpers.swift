@@ -21,8 +21,9 @@ public func terminalWidth() -> Int {
   if !GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi) {
     return 80
   }
-  cachedWidth = Int(csbi.srWindow.Right - csbi.srWindow.Left)
-  return cachedWidth
+  let width = Int(csbi.srWindow.Right - csbi.srWindow.Left)
+  cachedWidth = width
+  return width
 #else
   // Try to get from environment.
   if let columns = ProcessInfo.processInfo.environment["COLUMNS"],
