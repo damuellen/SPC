@@ -56,7 +56,3 @@ extension String {
 }
 
 let backgroundQueue = DispatchQueue(label: "serial.queue")
-
-public typealias Heat = Double
-public typealias Pressure = Double
-
