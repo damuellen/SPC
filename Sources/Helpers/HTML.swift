@@ -57,10 +57,13 @@ public struct HTML {
         font-size: 1em;
       }
       tspan { font-family: sans-serif;}
-      body { background-color: rgb(10,10,10);}
       @media (prefers-color-scheme: dark) {
         svg { filter: drop-shadow(3px 3px 3px rgb(255, 255, 255)); }
-        body { background-image: radial-gradient(circle, rgb(40,40,40), rgb(10,10,10)); filter: invert(1); }
+        body { 
+          background-color: rgb(20,20,20);
+          background-image: radial-gradient(circle, rgb(50,50,50), rgb(20,20,20));
+          filter: invert(1);
+        }
       }
     </style>
     """

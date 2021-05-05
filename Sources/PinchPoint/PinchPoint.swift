@@ -9,12 +9,9 @@
 //
 
 import PhysicalQuantities
-import BlackBoxModel
 import Libc
 
 typealias Stream = HeatBalanceDiagram.Stream
-
-fileprivate let HTF = ParameterDefaults.HTF
 
 public struct HeatExchangerParameter: Codable {
   /// Difference between evaporation temperature and htf outlet temperature
@@ -339,13 +336,13 @@ struct PinchPoint: Codable {
 
 
     "SH"
-    \(107.9), \(superheater.temperature.ws.inlet)
-    \(128.8), \(superheater.temperature.ws.outlet)
+    \(107.9), \(superheater.temperature.ws.inlet.celsius)
+    \(128.8), \(superheater.temperature.ws.outlet.celsius)
 
 
     "RH"
-    \(128.8), \(reheater.temperature.ws.inlet)
-    \(150.3), \(reheater.temperature.ws.outlet)
+    \(128.8), \(reheater.temperature.ws.inlet.celsius)
+    \(150.3), \(reheater.temperature.ws.outlet.celsius)
     
 
     "HTF"

@@ -10,6 +10,27 @@
 
 import PhysicalQuantities
 
+extension HeatTransferFluid {
+  func heatContent(_ cycle: HeatTransfer) -> Heat {
+    heatContent(cycle.temperature.outlet, cycle.temperature.inlet)
+  }
+
+  func mixingOutlets(_ f1: HeatTransfer, _ f2: HeatTransfer)
+    -> Temperature
+  {
+    if f1.massFlow.rate == 0 { return f2.temperature.outlet }
+    if f2.massFlow.rate == 0 { return f1.temperature.outlet }
+    let (t1, t2) = (f1.outlet, f2.outlet)
+    let (mf1, mf2) = (f1.massFlow.rate, f2.massFlow.rate)
+    guard mf1 + mf2 > 0 else { return Temperature((t1 + t2) / 2) }
+    let cap1 = heatCapacity[0].addingProduct(heatCapacity[1], t1)
+    let cap2 = heatCapacity[0].addingProduct(heatCapacity[1], t2)
+    let t = (mf1 * cap1 * t1 + mf2 * cap2 * t2) / (mf1 * cap1 + mf2 * cap2)
+    precondition(t > freezeTemperature.kelvin, "Fell below freezing point.\n")
+    return Temperature(t)
+  }
+}
+
 protocol HeatTransfer: CustomStringConvertible {
   var name: String { get }
   var massFlow: MassFlow { get set }
@@ -68,7 +89,7 @@ extension HeatTransfer {
 
   var medium: HeatTransferFluid { SolarField.parameter.HTF }
 
-  var heat: Heat {
+  var heat: Double {
     medium.heatContent(temperature.outlet, temperature.inlet)
   }
 

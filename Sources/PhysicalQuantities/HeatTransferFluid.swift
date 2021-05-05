@@ -9,20 +9,36 @@
 //
 
 import Config
-import PhysicalQuantities
+import Libc
+
+public typealias Heat = Double
+public typealias Pressure = Double
+
+public let HTF = HeatTransferFluid(
+  name: "Therminol",
+  freezeTemperature: 12,
+  heatCapacity: [1.4856, 0.0028],
+  dens: [1074.964, -0.6740513, -0.000650017],
+  visco: [-0.000201537, 0.1273247, -0.7167957],
+  thermCon: [0.1378081, -8.41485e-05, -1.788e-07],
+  maxTemperature: 393.0,
+  h_T: [-0.62677, 1.51129, 0.0012941, 1.23697e-07, 0],
+  T_h: [0.58315, 0.65556, -0.00032293, 1.9425e-07, -6.1133e-11],
+  useEnthalpy: false
+)
 
 /// The Heat Transfer Fluid is characterized through maximum operating temperature,
 /// freeze temperature, specific heat capacity, viscosity, thermal conductivity,
 /// enthalpy, and density as a function of temperature.
 public struct HeatTransferFluid: CustomStringConvertible, Equatable {
-  public static var parameter = ParameterDefaults.HTF
-  let name: String
-  let freezeTemperature: Temperature
-  let heatCapacity: [Double]
+ 
+  public let name: String
+  public let freezeTemperature: Temperature
+  public let heatCapacity: [Double]
   let density: [Double]
   let viscosity: [Double]
   let thermCon: [Double]
-  let maxTemperature: Temperature
+  public let maxTemperature: Temperature
   let enthalpyFromTemperature: Polynomial
   let temperatureFromEnthalpy: Polynomial
   let useEnthalpy: Bool
@@ -51,11 +67,7 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
     }
   }
 
-  func heatContent(_ cycle: HeatTransfer) -> Heat {
-    heatContent(cycle.temperature.outlet, cycle.temperature.inlet)
-  }
-
-  func heatContent(_ t1: Temperature, _ t2: Temperature) -> Heat {
+  public func heatContent(_ t1: Temperature, _ t2: Temperature) -> Heat {
     if useEnthalpy {
       return HeatTransferFluid.change(
         from: t1.celsius, to: t2.celsius,
@@ -67,7 +79,7 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
     )
   }
 
-  func temperature(_ heat: Heat, _ t: Temperature) -> Temperature {
+  public func temperature(_ heat: Heat, _ t: Temperature) -> Temperature {
     let degree: Double = useEnthalpy
       ? temperature(enthalpy: heat, degree: t.celsius)
       : temperature(specificHeat: heat, degree: t.celsius)
@@ -94,48 +106,21 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
     return Temperature(celsius: celsius)
   }
 
-  func mixingOutlets(_ f1: HeatTransfer, _ f2: HeatTransfer)
-    -> Temperature
-  {
-    if f1.massFlow.rate == 0 { return f2.temperature.outlet }
-    if f2.massFlow.rate == 0 { return f1.temperature.outlet }
-    let (t1, t2) = (f1.outlet, f2.outlet)
-    let (mf1, mf2) = (f1.massFlow.rate, f2.massFlow.rate)
-    guard mf1 + mf2 > 0 else { return Temperature((t1 + t2) / 2) }
-    let cap1 = heatCapacity[0].addingProduct(heatCapacity[1], t1)
-    let cap2 = heatCapacity[0].addingProduct(heatCapacity[1], t2)
-    let t = (mf1 * cap1 * t1 + mf2 * cap2 * t2) / (mf1 * cap1 + mf2 * cap2)
-    precondition(t > freezeTemperature.kelvin, "Fell below freezing point.\n")
-    return Temperature(t)
-  }
-/*
-  func mixing(inlet f1: HeatTransfer, outlet f2: HeatTransfer)
-    -> Temperature
-  {
-    let (t1, t2) = (f1.inletTemperature, f2.outletTemperature)
-    let (mf1, mf2) = (f1.massFlow.rate, f2.massFlow.rate)
-    guard mf1 + mf2 > 0 else { return Temperature((t1 + t2) / 2) }
-    let cap1 = heatCapacity[0].addingProduct(heatCapacity[1], t1)
-    let cap2 = heatCapacity[0].addingProduct(heatCapacity[1], t2)
-    let t = (mf1 * cap1 * t1 + mf2 * cap2 * t2) / (mf1 * cap1 + mf2 * cap2)
-    precondition(t > freezeTemperature.kelvin, "Fell below freezing point.\n")
-    return Temperature(t)
-  }
-*/func temperature(specificHeat: Double, degree: Double) -> Double {
+  public func temperature(specificHeat: Double, degree: Double) -> Double {
     let t = degree
     let cp = heatCapacity
     if cp[1] > 0 {
       return (
-        (2 * specificHeat + 2 * cp[0] * t) / cp[1] + t ** 2
-          + (cp[0] / cp[1]) ** 2).squareRoot() - cp[0] / cp[1]
+        (2 * specificHeat + 2 * cp[0] * t) / cp[1] + t * t
+          + (cp[0] / cp[1]) * (cp[0] / cp[1])).squareRoot() - cp[0] / cp[1]
     } else {
       return -(
-        (2 * specificHeat + 2 * cp[0] * t) / cp[1] + t ** 2
-          + (cp[0] / cp[1]) ** 2).squareRoot() - cp[0] / cp[1]
+        (2 * specificHeat + 2 * cp[0] * t) / cp[1] + t * t
+          + (cp[0] / cp[1]) * (cp[0] / cp[1])).squareRoot() - cp[0] / cp[1]
     }
   }
 
-  func temperature(enthalpy: Double, degree: Double) -> Double {
+  public func temperature(enthalpy: Double, degree: Double) -> Double {
     let h1 = enthalpyFromTemperature(degree)
     let h2 = enthalpy + h1
     let temperature = temperatureFromEnthalpy(h2)
@@ -155,8 +140,8 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
   {
     var (h1, h2) = (0.0, 0.0)
     for (i, c) in enthalpy.enumerated() {
-      h1 += c * (low ** Double(i))
-      h2 += c * (high ** Double(i))
+      h1 += c * pow(low, Double(i))
+      h2 += c * pow(high, Double(i))
     }
     return h2 - h1
   }
@@ -203,7 +188,7 @@ public enum StorageMedium: String {
     useEnthalpy: false
   )
 
-  var properties: HeatTransferFluid {
+  public var properties: HeatTransferFluid {
     switch self {
     case .solarSalt:
       return StorageMedium.ss

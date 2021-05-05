@@ -141,12 +141,13 @@ public func -= (lhs: inout T, rhs: Double) {
 extension Temperature: Codable {
   public init(from decoder: Decoder) throws {
     let container = try decoder.singleValueContainer()
-    kelvin = try container.decode(Double.self)
+    let celsius = try Double(container.decode(Float.self))
+    kelvin = celsius - Temperature.absoluteZeroCelsius
   }
 
   public func encode(to encoder: Encoder) throws {
     var container = encoder.singleValueContainer()
-    try container.encode(kelvin)
+    try container.encode(Float(celsius))
   }
 }
 
