@@ -11,7 +11,6 @@
 import Config
 import PhysicalQuantities
 import Foundation
-import Yams
 
 public enum ConfigFormat {
   case json, text
@@ -72,10 +71,10 @@ extension JSONConfig {
 
   public static func saveConfiguration(toPath path: String) throws {
     let directoryURL = URL(fileURLWithPath: path, isDirectory: true)
-    let json = try generateYAML()
+    let json = try generateJSON()
     let url = URL(fileURLWithPath: "Parameter.txt",
                   isDirectory: false, relativeTo: directoryURL)
-    try json.write(to: url, atomically: false, encoding: .utf8)
+    try json.write(to: url)
   }
 
   public static func saveConfigurations(toPath path: String) throws {
@@ -99,8 +98,8 @@ extension JSONConfig {
   }
 
   public static func generateYAML() throws -> String {
-    let encoder = YAMLEncoder()
-    return try encoder.encode(ParameterSet())
+    // let encoder = YAMLEncoder()
+    return "" // try encoder.encode(ParameterSet())
   }
 
   public static func generate(type: JSONConfig.Name) throws -> Data {

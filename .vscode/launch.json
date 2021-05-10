@@ -71,7 +71,7 @@
             "name": "PinchPointTool",
             "program": "${workspaceFolder}/.build/debug/PinchPointTool",
             "args": [
-                "--json"
+                "--json", "--pdf", "--html"
             ],
             "cwd": "${workspaceFolder}",
             "preLaunchTask": "swift-build-debug"

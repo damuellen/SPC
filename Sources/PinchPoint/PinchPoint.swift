@@ -10,6 +10,7 @@
 
 import PhysicalQuantities
 import Libc
+import Helpers
 
 typealias Stream = HeatBalanceDiagram.Stream
 
@@ -18,6 +19,7 @@ public struct HeatExchangerParameter: Codable {
   var temperatureDifferenceSteamGenerator: Double
   var temperatureDifferenceReheat: Double
   var steamQuality: Double
+  var requiredLMTD: Double
   var pressureDrop: PressureDrop
 
   struct PressureDrop: Codable {
@@ -34,7 +36,8 @@ struct PinchPoint: Codable {
   var mixHTFMassflow = 0.0
   var mixHTFAbsoluteEnthalpy = 0.0
   var mixHTFTemperature: Temperature = 0.0
-
+  var reheaterTemperatureDifference = 0.0
+  var blowDownMassFlow = 0.0
   var economizerFeedwaterTemperature = Temperature(celsius: 250.8)
   
   var ws = WaterSteam(
@@ -149,14 +152,9 @@ struct PinchPoint: Codable {
   }
 
   mutating func reheat() -> Double { // D51
+    reheaterTemperatureDifference = reheater(requiredLMTD: parameter.requiredLMTD)
     reheater.temperature.htf.outlet = 
-      reheater.temperature.ws.inlet + parameter.temperatureDifferenceReheat
-    let htf = reheater.temperature.htf
-    let ws = reheater.temperature.ws
-    
-    let reheatLmtd = 
-      (htf.inlet.kelvin - ws.outlet.kelvin) - (htf.outlet.kelvin - ws.inlet.kelvin)
-      / log((htf.inlet.kelvin - ws.outlet.kelvin) / (htf.outlet.kelvin - ws.inlet.kelvin))
+      reheater.temperature.ws.inlet + reheaterTemperatureDifference
 
     reheater.enthalpy.htf.inlet = HTF.enthalpy(reheater.temperature.htf.inlet)
     reheater.enthalpy.htf.outlet = HTF.enthalpy(reheater.temperature.htf.outlet)
@@ -167,6 +165,13 @@ struct PinchPoint: Codable {
       reheater.massFlow.htf * reheater.enthalpy.htf.outlet / 1_000
     
     return htfAbsoluteHeatFlowOutlet
+  }
+
+  func reheater(requiredLMTD: Double) -> Double {
+    return seek(goal: requiredLMTD, 1...50) { 
+      ((upperHTFTemperature.kelvin - ws.temperature.kelvin) - $0)
+      / (log((upperHTFTemperature.kelvin - ws.temperature.kelvin) / $0))
+    }
   }
 
   mutating func callAsFunction() {
@@ -189,7 +194,7 @@ struct PinchPoint: Codable {
 
     economizer.massFlow.ws = ws.massFlow / (1 - blowDownOfInputMassFlow / 100)
 
-    let blowDownMassFlow =  economizer.massFlow.ws - ws.massFlow
+    blowDownMassFlow =  economizer.massFlow.ws - ws.massFlow // FIXME
     
     let powerForWaterHeatingInsideSg = powerSteamGenerator()
 
@@ -217,13 +222,14 @@ struct PinchPoint: Codable {
 
     superheater.enthalpy.ws.outlet = superheater.enthalpy.ws.inlet + 4
 
-    superheater.temperature.ws.outlet = WaterSteam.temperature(
+    superheater.temperature.ws.outlet = ws.temperature
+    /*WaterSteam.temperature(
       pressure: superheater.pressure.ws.outlet,
       enthalpy: superheater.enthalpy.ws.outlet
-    )
+    )*/
 
     let enthalpyChangeDueToSuperheatingSteam = 
-      superheater.enthalpy.ws.inlet + steamGenerator.enthalpy.ws.outlet
+      superheater.enthalpy.ws.inlet - steamGenerator.enthalpy.ws.outlet
 
     superheater.power = enthalpyChangeDueToSuperheatingSteam * ws.massFlow / 1_000
 
@@ -243,8 +249,7 @@ struct PinchPoint: Codable {
     superheater.enthalpy.htf.inlet = HTF.enthalpy(superheater.temperature.htf.inlet)
     
     superheater.temperature.htf.outlet =
-      steamGenerator.temperature.ws.outlet 
-      + parameter.temperatureDifferenceSteamGenerator
+      steamGenerator.temperature.ws.outlet + parameter.temperatureDifferenceSteamGenerator
     
     superheater.enthalpy.htf.outlet = HTF.enthalpy(superheater.temperature.htf.outlet)
 
@@ -268,8 +273,7 @@ struct PinchPoint: Codable {
 
     let economizerHTFAbsoluteHeatFlowOutlet = preheat()
 
-    let powerEc_Sg_Sh = 
-      economizer.power + steamGenerator.power + superheater.power
+    let powerEc_Sg_Sh = economizer.power + steamGenerator.power + superheater.power
 
     reheater.temperature.ws.outlet = ws.temperature
 
@@ -329,10 +333,10 @@ struct PinchPoint: Codable {
 
 
     "SG"
-    \(22.2), \(313.4)
-    \(22.2), \(316.4)
-    \(22.2), \(316.4)
-    \(107.9), \(316.4)
+    \(economizer.power), \(313.4)
+    \(economizer.power), \(316.4)
+    \(economizer.power), \(316.4)
+    \(steamGenerator.power), \(316.4)
 
 
     "SH"
@@ -346,8 +350,8 @@ struct PinchPoint: Codable {
     
 
     "HTF"
-    \(0), \(303.2)
-    \(22.2), \(319.4)
+    \(0), \(economizer.temperature.htf.outlet.celsius)
+    \(economizer.power), \(steamGenerator.temperature.htf.outlet.celsius)
     \(128.8), \(upperHTFTemperature.celsius)
 
 

@@ -49,7 +49,7 @@ public struct Gnuplot {
     if case .svg = terminal {
       let stdout = process.standardOutput as! Pipe
       let data = stdout.fileHandleForReading.readDataToEndOfFile()
-      return String(data: data, encoding: .utf8) ?? ""
+      return String(decoding: data, as: Unicode.UTF8.self)
     }
     return terminal.output
   }

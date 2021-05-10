@@ -18,20 +18,20 @@ public struct WaterSteam: Codable {
   public var massFlow: Double
   public var enthalpy: Double
 
-  /// temperature on boiling point curve.
+  /// Temperature on boiling point curve.
   public static func temperature(pressure: Double) -> Temperature {
     let p = pressure / 10
     return Temperature(Ts_p(p))
   }
 
-  /// specific enthalpy [kJ/kg] on the boiling point curve.
+  /// Specific enthalpy [kJ/kg] on the boiling point curve.
   public static func enthalpyLiquid(pressure: Double) -> Double {
     let p = pressure / 10
     let t = Ts_p(p)
     return h_pT(p, t, 1)
   }
 
-  /// specific enthalpy [kJ/kg] on the dew point curve.
+  /// Specific enthalpy [kJ/kg] on the dew point curve.
   public static func enthalpyVapor(pressure: Double) -> Double {
     let p = pressure / 10
     let t = Ts_p(p)

@@ -9,46 +9,56 @@
 //
 
 import PhysicalQuantities
+import Libc
 import CPikchr
 import Helpers
 
 extension HeatExchanger {
-  var inlet: Stream {
-    Stream(temperature.ws.inlet, pressure.ws.inlet, massFlow.ws, enthalpy.ws.inlet)
+  var steamSide: (inlet: Stream, outlet: Stream) {
+    (Stream(temperature.ws.inlet, pressure.ws.inlet, massFlow.ws, enthalpy.ws.inlet),
+    Stream(temperature.ws.outlet, pressure.ws.outlet, massFlow.ws, enthalpy.ws.outlet))
   }
 
-  var outlet: Stream {
-    Stream(temperature.ws.outlet, pressure.ws.outlet, massFlow.ws, enthalpy.ws.outlet)
+  var htfSide: (inlet: Stream, outlet: Stream) {
+    (Stream(temperature.htf.inlet, 0, massFlow.htf, enthalpy.htf.inlet),
+    Stream(temperature.htf.outlet, 0, massFlow.htf, enthalpy.htf.outlet))
   }
 
-  var htf: Stream {
-    Stream(temperature.htf.inlet, 0, massFlow.htf, enthalpy.htf.inlet)
+  var LMTD: String {
+    String(format: "%.2f", ((temperature.htf.outlet.kelvin - temperature.ws.inlet.kelvin) 
+    - (temperature.htf.inlet.kelvin - temperature.ws.outlet.kelvin) ) 
+    / (log((temperature.htf.outlet.kelvin - temperature.ws.inlet.kelvin)
+    / (temperature.htf.inlet.kelvin - temperature.ws.outlet.kelvin))))
   }
 }
-
 
 struct HeatBalanceDiagram {
   init(values: PinchPoint) {
     self.streams = [
       Stream(values.mixHTFTemperature, 0, values.mixHTFMassflow, values.mixHTFAbsoluteEnthalpy),
-      values.economizer.htf, //htf_outlet
-      values.economizer.inlet,
-      values.economizer.outlet,
-      values.steamGenerator.inlet,
-      values.steamGenerator.outlet,
-      values.superheater.inlet,
-      values.superheater.outlet,
-      values.reheater.inlet,
-      values.reheater.outlet,
-      values.reheater.htf, // inlet
-      values.superheater.outlet, // above
-      values.economizer.htf, //sh_outlet
-      values.steamGenerator.htf, //outlet
-      values.reheater.htf, //rh_outlet
-      values.superheater.htf, //sh_inlet
+      values.economizer.htfSide.outlet, 
+      values.economizer.steamSide.inlet,
+      values.economizer.steamSide.outlet,
+      values.steamGenerator.steamSide.inlet,
+      values.steamGenerator.steamSide.outlet,
+      values.superheater.steamSide.inlet,
+      values.superheater.steamSide.outlet,
+      values.reheater.steamSide.inlet,
+      values.reheater.steamSide.outlet,
+      values.reheater.htfSide.inlet,
+      values.superheater.steamSide.outlet, 
+      values.superheater.htfSide.outlet, 
+      values.steamGenerator.htfSide.outlet, 
+      values.reheater.htfSide.outlet, 
+      values.superheater.htfSide.inlet, 
       Stream(values.upperHTFTemperature, 0, values.mixHTFMassflow, values.superheater.enthalpy.htf.inlet),
     ]
-    self.singleValues = [("LMTD","1"),("LMTD","1"),("Blowdown","1"),("LMTD","1"),("LMTD","1")]
+    self.singleValues = [
+      ("LMTD",values.economizer.LMTD),
+      ("LMTD",values.steamGenerator.LMTD),
+      ("Blowdown", String(format: "%.2f kg/s", values.blowDownMassFlow)),
+      ("LMTD",values.superheater.LMTD),
+      ("LMTD",values.reheater.LMTD)]
   }
 
   init?(streams: [Stream], singleValues: [(String, String)]) {

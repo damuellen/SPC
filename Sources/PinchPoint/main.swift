@@ -38,14 +38,12 @@ struct PinchPointTool: ParsableCommand {
       temperatureDifferenceSteamGenerator: 3.0,
       temperatureDifferenceReheat: 29.1514, 
       steamQuality: 1.0,
+      requiredLMTD: 20.0,
       pressureDrop: pressureDrop
     )
 
     var pinchPoint = PinchPoint(parameter: parameter)
 
-    if json {
-      try! print(pinchPoint.encodeToJSON())
-    }
 
     if input.count == 11, (input.min() ?? 0) > .zero {      
       pinchPoint.economizerFeedwaterTemperature = Temperature(celsius: input[0])
@@ -73,6 +71,10 @@ struct PinchPointTool: ParsableCommand {
     }
 
     pinchPoint()
+
+    if json {
+      try! print(pinchPoint.encodeToJSON())
+    }
 
     let plotter = Gnuplot(temperatures: pinchPoint.temperatures())
     let plot = try plotter.plot(.svg)

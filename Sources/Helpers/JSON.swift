@@ -41,7 +41,7 @@ extension Decodable {
 extension Encodable {
   public func encodeToJSON() throws -> String {
     let data = try JSONEncoder.shared.encode(self)
-    return String(data: data, encoding: .utf8)!
+    return String(decoding: data, as: Unicode.UTF8.self)
   }
   
   public func storeToJSON(file: URL) throws {

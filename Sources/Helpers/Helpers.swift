@@ -76,9 +76,8 @@ extension URL {
   }
 }
 
-public func seek(
- _ range: ClosedRange<Double>, seekValue: Double,
- tolerance: Double = 0.001, maxIterations: Int = 100,
+public func seek(goal: Double, _ range: ClosedRange<Double>, 
+ tolerance: Double = 0.0001, maxIterations: Int = 100,
  _ f: (Double)-> Double) -> Double {
   var a = range.lowerBound
   var b = range.upperBound
@@ -86,10 +85,8 @@ public func seek(
     let c = (a + b) / 2
     let fc = f(c)
     let fa = f(a)
-    if (fc == seekValue || (b-a)/2 < tolerance)
-     { return c }
-    if (fc < seekValue && fa < seekValue) 
-    || (fc > seekValue && fa > seekValue) 
+    if (fc == goal || (b-a)/2 < tolerance) { return c }
+    if (fc < goal && fa < goal) || (fc > goal && fa > goal) 
      { a = c } else { b = c }
   }
   return Double.nan
