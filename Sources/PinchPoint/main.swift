@@ -17,12 +17,24 @@ import Helpers
 PinchPointTool.main()
 
 struct PinchPointTool: ParsableCommand {
-  @Argument(help: "") var input: [Double] = []
-  @Option(name: .long, help: "") var htfFluid: String = "ThVP1"
-  @Option(name: .long, help: "") var hexCase: String = "2"
-  @Flag var pdf: Bool = false
-  @Flag var json: Bool = false
-  @Flag var html: Bool = false
+  
+  @Argument(help: "")
+  var input: [Double] = []
+
+  @Option(name: .long, help: "")
+  var htfFluid: String = "ThVP1"
+
+  @Option(name: .long, help: "")
+  var hexCase: String = "2"
+
+  @Flag(name: customLong("pdf", withSingleDash: true))
+  var pdf: Bool = false
+
+  @Flag(name: customLong("json", withSingleDash: true))
+  var json: Bool = false
+
+  @Flag(name: customLong("html", withSingleDash: true))
+  var html: Bool = false
 
   func run() throws {
     let pressureDrop = HeatExchangerParameter.PressureDrop(
@@ -43,7 +55,6 @@ struct PinchPointTool: ParsableCommand {
     )
 
     var pinchPoint = PinchPoint(parameter: parameter)
-
 
     if input.count == 11, (input.min() ?? 0) > .zero {      
       pinchPoint.economizerFeedwaterTemperature = Temperature(celsius: input[0])
@@ -67,7 +78,7 @@ struct PinchPointTool: ParsableCommand {
 
       pinchPoint.upperHTFTemperature = Temperature(celsius: input[10])
     } else { 
-      print("Invalid value in the input")
+      print("Missing or invalid input value")
     }
 
     pinchPoint()

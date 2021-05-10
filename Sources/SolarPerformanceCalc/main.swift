@@ -40,12 +40,16 @@ struct LocationInfo: ParsableArguments {
   @Option(name: [.customShort("z"), .long], help: "Time zone")
   var timezone: Int?
   @Option(
-    name: [.customLong("long")],
+    name: [.customLong("long", withSingleDash: true)],
     help: "Longitude (decimal degrees, negative west of Greenwich meridion)")
   var longitude: Double?
-  @Option(name: [.customLong("lat")], help: "Latitude (decimal degrees)")
+  @Option(
+    name: [.customLong("lat", withSingleDash: true)],
+    help: "Latitude (decimal degrees)")
   var latitude: Double?
-  @Option(name: [.customLong("ele")], help: "Elevation (meters)")
+  @Option(
+    name: [.customLong("ele", withSingleDash: true)],
+    help: "Elevation (meters)")
   var elevation: Double?
 
   var coords: (long: Double, lat: Double, ele: Double)? {
