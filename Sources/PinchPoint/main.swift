@@ -27,13 +27,13 @@ struct PinchPointTool: ParsableCommand {
   @Option(name: .long, help: "")
   var hexCase: String = "2"
 
-  @Flag(name: customLong("pdf", withSingleDash: true))
+  @Flag(name: .customLong("pdf", withSingleDash: true))
   var pdf: Bool = false
 
-  @Flag(name: customLong("json", withSingleDash: true))
+  @Flag(name: .customLong("json", withSingleDash: true))
   var json: Bool = false
 
-  @Flag(name: customLong("html", withSingleDash: true))
+  @Flag(name: .customLong("html", withSingleDash: true))
   var html: Bool = false
 
   func run() throws {
