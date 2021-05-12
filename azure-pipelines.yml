@@ -13,7 +13,7 @@ variables:
   toolchain.directory: C:/Library/Developer/Toolchains/unknown-Asserts-development.xctoolchain/usr/bin
   bin.directory: C:/Library/Swift-development/bin
   icu.directory: C:/Library/icu-67/usr/bin
-  
+
 steps:
 - task: BatchScript@1
   inputs:
@@ -40,7 +40,7 @@ steps:
   displayName: Install Swift toolchain
 
 - script: |
-    swift build -v -c release
+    swift build -v -c release -Xswiftc -suppress-warnings
   env:
     SDKROOT: C:\Library\Developer\Platforms\Windows.platform\Developer\SDKs\Windows.sdk
     DEVELOPER_DIR: C:\Library\Developer

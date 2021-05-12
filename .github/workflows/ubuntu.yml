@@ -18,14 +18,14 @@ jobs:
     - name: Get the lines of code.
       id: scc
       uses: iryanbell/scc-docker-action@v1.0.0
-      with: 
+      with:
         args: ${{ env.workspace }} -i swift
 
     - name: Update package dependencies
       run: swift package update
 
     - name: Build Debug mode
-      run: swift build --build-tests --enable-test-discovery
+      run: swift build --build-tests --enable-test-discovery -Xswiftc -suppress-warnings
 
     - name: Run tests
       run: swift test --enable-test-discovery
@@ -41,7 +41,7 @@ jobs:
       id: publish-document
       with:
         sources: '.build/documentation/*.md'
-        
+
     - name: Upload Document
       uses: actions/upload-artifact@v2
       id: upload-document

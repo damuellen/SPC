@@ -19,7 +19,7 @@
             "program": "${workspaceFolder}/.build/debug/SolarPerformanceCalc",
             "args": [
             //  "--excel",
-                "-c", "${workspaceFolder}/COM", 
+                "-c", "${workspaceFolder}/COM",
             //  "-m", "${workspaceFolder}/Model.playground/Resources/AlAbdaliyah.mto"
                 "-m", "${workspaceFolder}/COM/Meteofile_Hyperion1-200430_P50-TMYs_10min_wind_speed_modified.mto"
             ],
@@ -33,7 +33,7 @@
             "program": "${workspaceFolder}/.build/debug/SolarPerformanceCalc",
             "args": [
             //  "--excel",
-                "-c", "${workspaceFolder}/COM", 
+                "-c", "${workspaceFolder}/COM",
             //  "-m", "${workspaceFolder}/Model.playground/Resources/AlAbdaliyah.mto"
                 "-m", "${workspaceFolder}/COM/Meteofile_Hyperion1-200430_P50-TMYs_10min_wind_speed_modified.mto"
             ],
@@ -46,8 +46,8 @@
             "name": "SolarPerformanceCalc-Release",
             "program": "${workspaceFolder}/.build/release/SolarPerformanceCalc",
             "args": [
-                "-o", "12", 
-                "-c", "${workspaceFolder}/COM", 
+                "-o", "12",
+                "-c", "${workspaceFolder}/COM",
                 "-m", "${workspaceFolder}/COM/Meteofile_Hyperion1-200430_P50-TMYs_10min_wind_speed_modified.mto"
             ],
             "cwd": "${workspaceFolder}",
@@ -59,7 +59,7 @@
             "name": "SolarFieldCalc",
             "program": "${workspaceFolder}/.build/debug/SolarFieldCalc",
             "args": [
-                "--loops", "212", 
+                "--loops", "212",
                 "--massflow", "606"
             ],
             "cwd": "${workspaceFolder}",
@@ -71,7 +71,7 @@
             "name": "PinchPointTool",
             "program": "${workspaceFolder}/.build/debug/PinchPointTool",
             "args": [
-                "--json", "--pdf", "--html"
+                "-json", "-pdf", "-html"
             ],
             "cwd": "${workspaceFolder}",
             "preLaunchTask": "swift-build-debug"
