@@ -16,8 +16,9 @@ typealias Stream = HeatBalanceDiagram.Stream
 
 public struct HeatExchangerParameter: Codable {
   /// Difference between evaporation temperature and htf outlet temperature
-  var temperatureDifferenceSteamGenerator: Double
-  var temperatureDifferenceReheat: Double
+  var temperatureDifferenceHTF: Double
+  /// Difference between evaporation temperature and water inlet Temperature
+  var temperatureDifferenceWater: Double
   var steamQuality: Double
   var requiredLMTD: Double
   var pressureDrop: PressureDrop
@@ -36,10 +37,16 @@ struct PinchPoint: Codable {
   var mixHTFMassflow = 0.0
   var mixHTFAbsoluteEnthalpy = 0.0
   var mixHTFTemperature: Temperature = 0.0
-  var reheaterTemperatureDifference = 0.0
-  var blowDownMassFlow = 0.0
+
+  var reheaterTemperatureDifference: Double {
+    reheater(requiredLMTD: parameter.requiredLMTD)
+  }
+  /// Continuous blow down of input massflow
+  var blowDownMassFlow: Double {
+    economizer.massFlow.ws - ws.massFlow
+  }
   var economizerFeedwaterTemperature = Temperature(celsius: 250.8)
-  
+
   var ws = WaterSteam(
     temperature: Temperature(celsius: 380.0),
     pressure: 102.85,
@@ -66,21 +73,28 @@ struct PinchPoint: Codable {
   var reheater = HeatExchanger()
   var steamGenerator = HeatExchanger()
 
+  var powerBlockPower: Double {
+    economizer.power
+    + steamGenerator.power
+    + superheater.power
+    + reheater.power
+  }
+
   mutating func evaporation() -> (Double, Double, Double) {
     let pd = parameter.pressureDrop
 
     let pressureDropTotal = ws.pressure
       + pd.steamGenerator_superHeater + pd.superHeater + pd.superHeater_turbine
-    
-    let enthalpyBeforeEvaporation = 
+
+    let enthalpyBeforeEvaporation =
       WaterSteam.enthalpyLiquid(pressure: pressureDropTotal)
 
-    let enthalpyAfterEvaporation = 
+    let enthalpyAfterEvaporation =
       WaterSteam.enthalpyVapor(pressure: pressureDropTotal)
-    
+
     let enthalpy = enthalpyBeforeEvaporation + parameter.steamQuality
       * (enthalpyAfterEvaporation - enthalpyBeforeEvaporation)
-    
+
     steamGenerator.enthalpy.ws.outlet = enthalpy
     steamGenerator.pressure.ws.outlet = pressureDropTotal
     steamGenerator.massFlow.ws = ws.massFlow
@@ -89,22 +103,21 @@ struct PinchPoint: Codable {
       pressure: pressureDropTotal, enthalpy: enthalpy
     )
 
-    let enthalpyChangeDueToEvaporation = 
+    let enthalpyChangeDueToEvaporation =
       enthalpyAfterEvaporation - enthalpyBeforeEvaporation
-    
+
     let evaporationPower = enthalpyChangeDueToEvaporation * ws.massFlow / 1_000
-    
+
     let enthalpyChangeDueToSuperHeating = ws.enthalpy - enthalpyAfterEvaporation
-    
+
     let superHeatingPower = enthalpyChangeDueToSuperHeating * ws.massFlow / 1_000
-    
+
     return (enthalpyBeforeEvaporation, evaporationPower, superHeatingPower)
   }
 
   mutating func powerSteamGenerator() -> Double {
     steamGenerator.temperature.ws.inlet =
-      steamGenerator.temperature.ws.outlet 
-      - parameter.temperatureDifferenceSteamGenerator
+      steamGenerator.temperature.ws.outlet - parameter.temperatureDifferenceWater
 
     steamGenerator.enthalpy.ws.inlet = WaterSteam.enthalpy(
       pressure: steamGenerator.pressure.ws.outlet,
@@ -114,10 +127,10 @@ struct PinchPoint: Codable {
     let enthalpyBeforeEvaporation = WaterSteam
       .enthalpyLiquid(pressure: steamGenerator.pressure.ws.outlet)
 
-    let waterEnthalpyChangeDueToPreheating = 
+    let waterEnthalpyChangeDueToPreheating =
       enthalpyBeforeEvaporation - steamGenerator.enthalpy.ws.inlet
 
-    let powerForWaterHeatingInsideSg = 
+    let powerForWaterHeatingInsideSg =
       waterEnthalpyChangeDueToPreheating * economizer.massFlow.ws / 1_000
 
     return powerForWaterHeatingInsideSg
@@ -125,12 +138,12 @@ struct PinchPoint: Codable {
 
   mutating func preheat() -> Double {
     economizer.enthalpy.ws.inlet = WaterSteam.enthalpy(
-      pressure: economizer.pressure.ws.inlet, 
+      pressure: economizer.pressure.ws.inlet,
       temperature: economizer.temperature.ws.inlet
     )
 
     economizer.enthalpy.ws.outlet = WaterSteam.enthalpy(
-      pressure: economizer.pressure.ws.outlet, 
+      pressure: economizer.pressure.ws.outlet,
       temperature: economizer.temperature.ws.outlet
     )
 
@@ -145,15 +158,14 @@ struct PinchPoint: Codable {
 
     economizer.temperature.htf.outlet = HTF.temperature(requiredHTFEnthalpyOutlet)
 
-    let htfAbsoluteHeatFlowOutlet = 
+    let htfAbsoluteHeatFlowOutlet =
       economizer.enthalpy.htf.outlet * economizer.massFlow.htf / 1_000
 
     return htfAbsoluteHeatFlowOutlet
   }
 
   mutating func reheat() -> Double { // D51
-    reheaterTemperatureDifference = reheater(requiredLMTD: parameter.requiredLMTD)
-    reheater.temperature.htf.outlet = 
+    reheater.temperature.htf.outlet =
       reheater.temperature.ws.inlet + reheaterTemperatureDifference
 
     reheater.enthalpy.htf.inlet = HTF.enthalpy(reheater.temperature.htf.inlet)
@@ -161,14 +173,14 @@ struct PinchPoint: Codable {
 
     reheater.massFlow.htf = reheater.power * 1_000 / reheater.htfEnthalpyChange
 
-    let htfAbsoluteHeatFlowOutlet = 
+    let htfAbsoluteHeatFlowOutlet =
       reheater.massFlow.htf * reheater.enthalpy.htf.outlet / 1_000
-    
+
     return htfAbsoluteHeatFlowOutlet
   }
 
   func reheater(requiredLMTD: Double) -> Double {
-    return seek(goal: requiredLMTD, 1...50) { 
+    return seek(goal: requiredLMTD, 1...50) {
       ((upperHTFTemperature.kelvin - ws.temperature.kelvin) - $0)
       / (log((upperHTFTemperature.kelvin - ws.temperature.kelvin) / $0))
     }
@@ -177,25 +189,23 @@ struct PinchPoint: Codable {
   mutating func callAsFunction() {
     steamGenerator.temperature.ws.inlet = ws.temperature
 
-    let (enthalpyBeforeEvaporation, evaporationPower, superHeatingPower) = 
+    let (enthalpyBeforeEvaporation, evaporationPower, superHeatingPower) =
       evaporation()
 
     let pressureDrop = parameter.pressureDrop
-    steamGenerator.pressure.ws.inlet = 
+    steamGenerator.pressure.ws.inlet =
       pressureDrop.steamGenerator + steamGenerator.pressure.ws.outlet
 
-    economizer.pressure.ws.outlet = 
+    economizer.pressure.ws.outlet =
       steamGenerator.pressure.ws.inlet + pressureDrop.economizer_steamGenerator
-    
+
     economizer.temperature.ws.inlet = economizerFeedwaterTemperature
 
-    economizer.pressure.ws.inlet = 
+    economizer.pressure.ws.inlet =
       economizer.pressure.ws.outlet + pressureDrop.economizer
 
     economizer.massFlow.ws = ws.massFlow / (1 - blowDownOfInputMassFlow / 100)
 
-    blowDownMassFlow =  economizer.massFlow.ws - ws.massFlow // FIXME
-    
     let powerForWaterHeatingInsideSg = powerSteamGenerator()
 
     let boilingWaterMassFlowBlowDown = blowDownMassFlow
@@ -203,14 +213,14 @@ struct PinchPoint: Codable {
     let powerOfBlowDownStream = boilingWaterMassFlowBlowDown
       * (enthalpyBeforeEvaporation - economizer.enthalpy.ws.inlet) / 1_000
 
-    steamGenerator.power = 
+    steamGenerator.power =
       evaporationPower + powerForWaterHeatingInsideSg + superHeatingPower
-    
+
     let powerEvaporationAndSuperheating = superheater.power + evaporationPower
 
     superheater.temperature.ws.inlet = steamGenerator.temperature.ws.outlet
 
-    superheater.pressure.ws.inlet = ws.pressure 
+    superheater.pressure.ws.inlet = ws.pressure
 
     superheater.enthalpy.ws.inlet = WaterSteam.enthalpy(
       pressure: superheater.pressure.ws.inlet,
@@ -222,16 +232,15 @@ struct PinchPoint: Codable {
 
     superheater.enthalpy.ws.outlet = superheater.enthalpy.ws.inlet + 4
 
-    superheater.temperature.ws.outlet = ws.temperature
-    /*WaterSteam.temperature(
+    superheater.temperature.ws.outlet = WaterSteam.temperature(
       pressure: superheater.pressure.ws.outlet,
       enthalpy: superheater.enthalpy.ws.outlet
-    )*/
+    )
 
-    let enthalpyChangeDueToSuperheatingSteam = 
+    let enthalpyChangeDueToSuperheatingSteam =
       superheater.enthalpy.ws.inlet - steamGenerator.enthalpy.ws.outlet
 
-    superheater.power = enthalpyChangeDueToSuperheatingSteam * ws.massFlow / 1_000
+    superheater.power = enthalpyChangeDueToSuperheatingSteam * ws.massFlow / 1_000 //FIXME
 
     let superheaterSaturatedSteamEnthalpyOutletVirtual = WaterSteam.enthalpyVapor(
       pressure: ws.pressure + pressureDrop.superHeater_turbine
@@ -244,17 +253,17 @@ struct PinchPoint: Codable {
     let superheaterSteamQualityOutlet =
       (superheater.enthalpy.ws.inlet - superheaterWaterEnthalpyOutletVirtual)
       / (superheaterSaturatedSteamEnthalpyOutletVirtual - superheaterWaterEnthalpyOutletVirtual)
-    
+
     superheater.temperature.htf.inlet = upperHTFTemperature
     superheater.enthalpy.htf.inlet = HTF.enthalpy(superheater.temperature.htf.inlet)
-    
+
     superheater.temperature.htf.outlet =
-      steamGenerator.temperature.ws.outlet + parameter.temperatureDifferenceSteamGenerator
-    
+      steamGenerator.temperature.ws.outlet + parameter.temperatureDifferenceHTF
+
     superheater.enthalpy.htf.outlet = HTF.enthalpy(superheater.temperature.htf.outlet)
 
-    steamGenerator.temperature.htf.outlet = steamGenerator.temperature.ws.inlet 
-      + parameter.temperatureDifferenceSteamGenerator
+    steamGenerator.temperature.htf.outlet = steamGenerator.temperature.ws.inlet
+      + parameter.temperatureDifferenceHTF
 
     steamGenerator.enthalpy.htf.outlet = HTF.enthalpy(steamGenerator.temperature.htf.outlet)
 
@@ -264,16 +273,14 @@ struct PinchPoint: Codable {
 
     let steamGeneratorShPower = steamGenerator.power + superheater.power
 
-    let htfMassFlowEc_Sg_ShTrain = 
+    let htfMassFlowEc_Sg_ShTrain =
       steamGeneratorShPower * 1_000 / superheater.htfEnthalpyChange
 
     superheater.massFlow.htf = htfMassFlowEc_Sg_ShTrain
 
-    economizer.massFlow.htf = htfMassFlowEc_Sg_ShTrain    
+    steamGenerator.massFlow.htf = htfMassFlowEc_Sg_ShTrain
 
-    let economizerHTFAbsoluteHeatFlowOutlet = preheat()
-
-    let powerEc_Sg_Sh = economizer.power + steamGenerator.power + superheater.power
+    economizer.massFlow.htf = htfMassFlowEc_Sg_ShTrain
 
     reheater.temperature.ws.outlet = ws.temperature
 
@@ -294,28 +301,25 @@ struct PinchPoint: Codable {
     reheater.temperature.htf.inlet = upperHTFTemperature
 
     reheater.power = reheater.massFlow.ws * reheater.wsEnthalpyChange / 1_000
-    
-    let powerBlockPower = powerEc_Sg_Sh + reheater.power
-
-    steamGenerator.massFlow.htf = htfMassFlowEc_Sg_ShTrain
 
     steamGenerator.temperature.htf.inlet = superheater.temperature.htf.outlet
 
     steamGenerator.enthalpy.htf.inlet = HTF.enthalpy(steamGenerator.temperature.htf.inlet)
 
-    let steamGeneratorHTFEnthalpyChangeForWaterHeatingInSg = 
+    let steamGeneratorHTFEnthalpyChangeForWaterHeatingInSg =
       powerForWaterHeatingInsideSg * 1_000 / steamGenerator.massFlow.htf
 
-    let steamGeneratorHTFEnthalpyAtPinchPoint = 
-      steamGenerator.enthalpy.htf.outlet 
+    let steamGeneratorHTFEnthalpyAtPinchPoint =
+      steamGenerator.enthalpy.htf.outlet
       + steamGeneratorHTFEnthalpyChangeForWaterHeatingInSg
 
-    let steamGeneratorHTFTemperatureAtPinchPoint = 
+    let steamGeneratorHTFTemperatureAtPinchPoint =
       steamGenerator.temperature.htf.outlet
-    
+
+    let economizerHTFAbsoluteHeatFlowOutlet = preheat()
     let reheatHTFAbsoluteHeatFlowOutlet = reheat()
-    
-    let mixHTFAbsoluteHeatFlow = economizerHTFAbsoluteHeatFlowOutlet 
+
+    let mixHTFAbsoluteHeatFlow = economizerHTFAbsoluteHeatFlowOutlet
       + reheatHTFAbsoluteHeatFlowOutlet
 
     mixHTFMassflow = economizer.massFlow.htf + reheater.massFlow.htf
@@ -333,31 +337,31 @@ struct PinchPoint: Codable {
 
 
     "SG"
-    \(economizer.power), \(313.4)
-    \(economizer.power), \(316.4)
-    \(economizer.power), \(316.4)
-    \(steamGenerator.power), \(316.4)
+    \(economizer.power), \(steamGenerator.temperature.ws.inlet.celsius) //SG Water Temperature Inlet [°C]
+    \(economizer.power), \(316.4) //SG Water Temperature Start Evaporation (Pinch-Point) [°C]
+    \(economizer.power), \(316.4) //SG Steam Temperature after Evaporation [°C]
+    \(steamGenerator.power), \(316.4) //SG Steam Temperature Outlet [°C]
 
 
     "SH"
-    \(107.9), \(superheater.temperature.ws.inlet.celsius)
-    \(128.8), \(superheater.temperature.ws.outlet.celsius)
+    \(steamGenerator.power), \(superheater.temperature.ws.inlet.celsius)
+    \(powerBlockPower - reheater.power), \(superheater.temperature.ws.outlet.celsius)
 
 
     "RH"
-    \(128.8), \(reheater.temperature.ws.inlet.celsius)
-    \(150.3), \(reheater.temperature.ws.outlet.celsius)
-    
+    \(powerBlockPower - reheater.power), \(reheater.temperature.ws.inlet.celsius)
+    \(powerBlockPower), \(reheater.temperature.ws.outlet.celsius)
+
 
     "HTF"
     \(0), \(economizer.temperature.htf.outlet.celsius)
     \(economizer.power), \(steamGenerator.temperature.htf.outlet.celsius)
-    \(128.8), \(upperHTFTemperature.celsius)
+    \(powerBlockPower - reheater.power), \(upperHTFTemperature.celsius)
 
 
     "HTF RH"
-    \(128.8), \(reheater.temperature.htf.outlet.celsius)
-    \(150.3), \(reheater.temperature.htf.inlet.celsius)    
+    \(powerBlockPower - reheater.power), \(reheater.temperature.htf.outlet.celsius)
+    \(powerBlockPower), \(reheater.temperature.htf.inlet.celsius)
     """
   }
 }
@@ -381,7 +385,7 @@ struct HeatExchanger: Codable {
 struct Connection<T: Codable>: Codable {
   var inlet: T
   var outlet: T
-} 
+}
 
 extension HeatExchanger {
 
@@ -409,34 +413,34 @@ extension HeatExchanger {
 
 EC Power Inlet
 EC Power Outlet
-EC Temperature Inlet 
+EC Temperature Inlet
 EC Temperature Outlet
 
 SG Power Inlet
 SG Power at Pinch-Point
 SG Power after Evaporation
-SG Power Outlet 
-SG Water Temperature Inlet 
-SG Water Temperature Start Evaporation (Pinch-Point) 
+SG Power Outlet
+SG Water Temperature Inlet
+SG Water Temperature Start Evaporation (Pinch-Point)
 SG Steam Temperature after Evaporation
-SG Steam Temperature Outlet 
+SG Steam Temperature Outlet
 
-SH Power Inlet 
-SH Power after Evaporation 
-SH Power Outlet 
-SH Steam Temperature Inlet 
-SH Steam Temperature after Evaporation 
+SH Power Inlet
+SH Power after Evaporation
+SH Power Outlet
+SH Steam Temperature Inlet
+SH Steam Temperature after Evaporation
 SH Steam Temperature Outlet
 
-HTF Temperature Inlet 
-HTF Temperature Pinch-Point 
-HTF Temperature SG Outlet 
-HTF Temperature EC Outlet 
+HTF Temperature Inlet
+HTF Temperature Pinch-Point
+HTF Temperature SG Outlet
+HTF Temperature EC Outlet
 
-RH Steam Temperature Inlet 
-RH Steam Temperature Outlet 
-RH Power Inlet 
-RH Power Outlet 
-RH HTF Temperature Inlet 
-RH HTF Temperature Outlet 
+RH Steam Temperature Inlet
+RH Steam Temperature Outlet
+RH Power Inlet
+RH Power Outlet
+RH HTF Temperature Inlet
+RH HTF Temperature Outlet
 */

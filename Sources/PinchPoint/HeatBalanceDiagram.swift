@@ -25,8 +25,8 @@ extension HeatExchanger {
   }
 
   var LMTD: String {
-    String(format: "%.2f", ((temperature.htf.outlet.kelvin - temperature.ws.inlet.kelvin) 
-    - (temperature.htf.inlet.kelvin - temperature.ws.outlet.kelvin) ) 
+    String(format: "%.2f", ((temperature.htf.outlet.kelvin - temperature.ws.inlet.kelvin)
+    - (temperature.htf.inlet.kelvin - temperature.ws.outlet.kelvin))
     / (log((temperature.htf.outlet.kelvin - temperature.ws.inlet.kelvin)
     / (temperature.htf.inlet.kelvin - temperature.ws.outlet.kelvin))))
   }
@@ -36,29 +36,29 @@ struct HeatBalanceDiagram {
   init(values: PinchPoint) {
     self.streams = [
       Stream(values.mixHTFTemperature, 0, values.mixHTFMassflow, values.mixHTFAbsoluteEnthalpy),
-      values.economizer.htfSide.outlet, 
+      values.economizer.htfSide.outlet,
       values.economizer.steamSide.inlet,
       values.economizer.steamSide.outlet,
       values.steamGenerator.steamSide.inlet,
       values.steamGenerator.steamSide.outlet,
       values.superheater.steamSide.inlet,
-      values.superheater.steamSide.outlet,
+      Stream(values.ws.temperature, values.ws.pressure, values.ws.massFlow, values.ws.enthalpy),
       values.reheater.steamSide.inlet,
       values.reheater.steamSide.outlet,
       values.reheater.htfSide.inlet,
-      values.superheater.steamSide.outlet, 
-      values.superheater.htfSide.outlet, 
-      values.steamGenerator.htfSide.outlet, 
-      values.reheater.htfSide.outlet, 
-      values.superheater.htfSide.inlet, 
+      values.superheater.steamSide.outlet,
+      values.superheater.htfSide.outlet,
+      values.steamGenerator.htfSide.outlet,
+      values.reheater.htfSide.outlet,
+      values.superheater.htfSide.inlet,
       Stream(values.upperHTFTemperature, 0, values.mixHTFMassflow, values.superheater.enthalpy.htf.inlet),
     ]
     self.singleValues = [
-      ("LMTD",values.economizer.LMTD),
-      ("LMTD",values.steamGenerator.LMTD),
-      ("Blowdown", String(format: "%.2f kg/s", values.blowDownMassFlow)),
-      ("LMTD",values.superheater.LMTD),
-      ("LMTD",values.reheater.LMTD)]
+      ("LMTD", values.economizer.LMTD),
+      ("LMTD", values.steamGenerator.LMTD),
+      ("Blow Down", String(format: "%.2f kg/s", values.blowDownMassFlow)),
+      ("LMTD", values.superheater.LMTD),
+      ("LMTD", values.reheater.LMTD)]
   }
 
   init?(streams: [Stream], singleValues: [(String, String)]) {
@@ -80,13 +80,11 @@ struct HeatBalanceDiagram {
       self.pressure = String(format: "%.2f bar", stream.pressure)
     }
 
-    init(
-      _ temperature: Temperature, _ pressure: Double,
-      _ massFlow: Double, _ enthalpy: Double) {
+    init(_ temperature: Temperature, _ pressure: Double, _ massFlow: Double, _ enthalpy: Double) {
       self.temperature = String(format: "%.2f °C", temperature.celsius)
       self.massFlow = String(format: "%.1f kg/s", massFlow)
       self.enthalpy = String(format: "%.1f kJ/kg", enthalpy)
-      self.pressure = pressure > 0 ? String(format: "%.2f bar", pressure) : ""      
+      self.pressure = pressure > 0 ? String(format: "%.2f bar", pressure) : ""
     }
 
     var boxLabel: String {
@@ -144,14 +142,14 @@ struct HeatBalanceDiagram {
       down; line invis down .5cm; left; box "CO" thick
     ] with .end at previous.end
 
-    line invis down 1cm right 1cm 
+    line invis down 1cm right 1cm
     arrow down 1.5cm then left 4cm
 
     [
     P0: circle radius .2
     line from P0.s to P0.w
     line to P0.n
-    ] 
+    ]
 
     arrow left 9cm
     line invis left 2cm

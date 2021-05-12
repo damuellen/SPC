@@ -12,19 +12,20 @@ import ArgumentParser
 import PhysicalQuantities
 import Foundation
 import Helpers
+import xlsxwriter
 
 //system("clear")
 PinchPointTool.main()
 
 struct PinchPointTool: ParsableCommand {
-  
+
   @Argument(help: "")
   var input: [Double] = []
 
-  @Option(name: .long, help: "")
+  @Option(name: .customLong("htf", withSingleDash: true), help: "")
   var htfFluid: String = "ThVP1"
 
-  @Option(name: .long, help: "")
+  @Option(name: .customLong("case", withSingleDash: true), help: "")
   var hexCase: String = "2"
 
   @Flag(name: .customLong("pdf", withSingleDash: true))
@@ -35,6 +36,9 @@ struct PinchPointTool: ParsableCommand {
 
   @Flag(name: .customLong("html", withSingleDash: true))
   var html: Bool = false
+
+  @Flag(name: .customLong("excel", withSingleDash: true))
+  var excel: Bool = false
 
   func run() throws {
     let pressureDrop = HeatExchangerParameter.PressureDrop(
@@ -47,8 +51,8 @@ struct PinchPointTool: ParsableCommand {
     )
 
     let parameter = HeatExchangerParameter(
-      temperatureDifferenceSteamGenerator: 3.0,
-      temperatureDifferenceReheat: 29.1514, 
+      temperatureDifferenceHTF: 3.0,
+      temperatureDifferenceWater: 3.0,
       steamQuality: 1.0,
       requiredLMTD: 20.0,
       pressureDrop: pressureDrop
@@ -56,7 +60,7 @@ struct PinchPointTool: ParsableCommand {
 
     var pinchPoint = PinchPoint(parameter: parameter)
 
-    if input.count == 11, (input.min() ?? 0) > .zero {      
+    if input.count == 11, (input.min() ?? 0) > .zero {
       pinchPoint.economizerFeedwaterTemperature = Temperature(celsius: input[0])
 
       pinchPoint.ws = WaterSteam(
@@ -77,7 +81,7 @@ struct PinchPointTool: ParsableCommand {
       pinchPoint.reheatOutletSteamPressure = input[9]
 
       pinchPoint.upperHTFTemperature = Temperature(celsius: input[10])
-    } else { 
+    } else {
       print("Missing or invalid input value")
     }
 
@@ -91,7 +95,13 @@ struct PinchPointTool: ParsableCommand {
     let plot = try plotter.plot(.svg)
 
     let dia = HeatBalanceDiagram(values: pinchPoint)
-    
+
+    if excel {
+      let wb = Workbook(name: "pinchpoint.xlsx")
+      defer { wb.close() }
+      let _ = wb.addWorksheet()
+    }
+
     if pdf {
       let _ = try plotter.plot(.pdf(path: "plot.pdf"))
       let html = HTML(body: dia.svg)
@@ -99,8 +109,12 @@ struct PinchPointTool: ParsableCommand {
     }
 
     if html {
-      let path = URL.temporaryFile().appendingPathExtension("html").path
       let html = HTML(body: dia.svg + plot)
+#if DEBUG
+      let path = "temp.html"
+#else
+      let path = URL.temporaryFile().appendingPathExtension("html").path
+#endif
       try html.raw.write(toFile: path, atomically: false, encoding: .utf8)
       print(path)
     }

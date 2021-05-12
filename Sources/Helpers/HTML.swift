@@ -54,9 +54,10 @@ public struct HTML {
         height: 95vh;
         width: 98%;
         font-family: sans-serif;
-        font-size: 1em;
+        font-size: 16px;
       }
       tspan { font-family: sans-serif;}
+      body { background-color: rgb(247,247,247);}
       @media (prefers-color-scheme: dark) {
         svg { filter: drop-shadow(3px 3px 3px rgb(255, 255, 255)); }
         body { 
