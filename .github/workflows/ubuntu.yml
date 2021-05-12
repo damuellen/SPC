@@ -28,7 +28,7 @@ jobs:
       run: swift build --build-tests --enable-test-discovery -Xswiftc -suppress-warnings
 
     - name: Run tests
-      run: swift test --enable-test-discovery
+      run: swift test --enable-test-discovery -Xswiftc -suppress-warnings
 
     - name: Generate Documentation
       uses: SwiftDocOrg/swift-doc@master

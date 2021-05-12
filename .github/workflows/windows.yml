@@ -40,11 +40,7 @@ jobs:
         run: swift package update
 
       - name: Build Release Mode
-        run: swift build -c release -Xswiftc -suppress-warnings
-
-      - name: Strip symbols
-        shell: cmd
-        run: FOR %%f IN (.build\x86_64-unknown-windows-msvc\release\*.exe) DO llvm-strip %%f
+        run: swift build -c release -Xswifc -gnone -Xswiftc -suppress-warnings -Xlinker -s
 
       - name: Compress SolarPerformanceCalc
         uses: svenstaro/upx-action@v2
