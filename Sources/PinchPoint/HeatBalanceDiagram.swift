@@ -270,7 +270,7 @@ struct HeatBalanceDiagram {
     let svg = diagram.withCString { String(cString: pikchr($0, "c", 0, nil, nil)) }
     let style = """
     <style media="print">
-      svg.c {width: 28.2cm; height: 20.6cm; font-family: sans-serif; margin-left: 0.5cm;}
+      svg.c {width: 28.2cm; height: 20.6cm; margin-left: 0.5cm;}
     </style>
     """
     return style + svg

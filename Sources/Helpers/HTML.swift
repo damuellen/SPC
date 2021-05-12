@@ -43,7 +43,7 @@ public struct HTML {
 
   public var style = """
     <style media="print">
-      svg {font-family: sans-serif;}
+      svg { font-family: sans-serif; font-size: 16px;}
     </style>
     <style media="screen">
       svg {
@@ -60,7 +60,7 @@ public struct HTML {
       body { background-color: rgb(247,247,247);}
       @media (prefers-color-scheme: dark) {
         svg { filter: drop-shadow(3px 3px 3px rgb(255, 255, 255)); }
-        body { 
+        body {
           background-color: rgb(20,20,20);
           background-image: radial-gradient(circle, rgb(50,50,50), rgb(20,20,20));
           filter: invert(1);
