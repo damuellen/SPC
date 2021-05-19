@@ -2,7 +2,7 @@
 import PackageDescription
 
 let condition = BuildSettingCondition.when(configuration: .release)
-let c = [CSetting.unsafeFlags(["-ffast-math", "-O3",  "-fomit-frame-pointer", "-funroll-loops"])]
+let c = [CSetting.unsafeFlags(["-ffast-math", "-O3",  "-fomit-frame-pointer", "-funroll-loops", "-march=haswell", "-mtune=haswell"])]
 let s = ["-cross-module-optimization", "-Ounchecked", "-enforce-exclusivity=unchecked", "-DRELEASE"]
 let swift = [SwiftSetting.unsafeFlags(s, condition), .define("DEBUG", .when(configuration: .debug))]
 let package = Package(
@@ -26,13 +26,13 @@ let package = Package(
   targets: [
     .target(name: "Libc"),
     .target(name: "Helpers", dependencies: ["Libc"], swiftSettings: swift),
-    .target(name: "PhysicalQuantities", 
+    .target(name: "PhysicalQuantities",
       dependencies: ["Config", "Meteo", "Libc", "Helpers"],
       swiftSettings: swift),
     .target(name: "TransTES",
       dependencies: ["Helpers", "BlackBoxModel"],
       swiftSettings: swift),
-    .target(name: "PinchPoint", 
+    .target(name: "PinchPoint",
       dependencies: ["CPikchr", "CIAPWSIF97", "Helpers", "PhysicalQuantities",
         .product(name: "ArgumentParser", package: "swift-argument-parser"),
         .product(name: "xlsxwriter", package: "xlsxwriter.swift")],

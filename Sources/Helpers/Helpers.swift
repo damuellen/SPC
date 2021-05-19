@@ -76,7 +76,7 @@ extension URL {
   }
 }
 
-@_transparent
+@inlinable
 public func seek(goal: Double, _ range: ClosedRange<Double>,
  tolerance: Double = 0.0001, maxIterations: Int = 100,
  _ f: (Double)-> Double) -> Double {

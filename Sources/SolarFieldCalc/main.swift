@@ -32,8 +32,6 @@ struct SolarFieldCalculator: ParsableCommand {
 
   func run() throws {
 
-
-
     if let input = input {
    //   try SolarFieldModel.readFromFile(url: URL(fileURLWithPath: input))?.apply()
     }
@@ -51,14 +49,6 @@ struct SolarFieldCalculator: ParsableCommand {
 
     openFile(atPath: "Solarfield.xlsx")
     print(TextTable.overview(solarField: solarField, style: Style.fancy))
-
-  //  if let output = output {
-  //    String(
-   //     data: try JSONEncoder().encode(SolarFieldModel()),
-  //      encoding: .utf8)?
-
-    //  try SolarFieldModel().writeToFile(url: URL(fileURLWithPath: output))
-    
   }
 }
 

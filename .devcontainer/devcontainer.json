@@ -30,5 +30,7 @@
 	"extensions": [
 		"pvasek.sourcekit-lsp--dev-unofficial",
 		"vadimcn.vscode-lldb",
+		"hbenl.vscode-test-explorer",
+		"makeitbetter.vscode-swift-test-adapter"
 	],
 }

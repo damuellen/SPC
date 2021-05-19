@@ -82,15 +82,22 @@ struct PinchPointTool: ParsableCommand {
 
       pinchPoint.upperHTFTemperature = Temperature(celsius: input[10])
     } else {
-      print("Missing or invalid input value")
+      print("Missing or invalid input value. Fallback to default values.")
     }
 
     pinchPoint()
 
     if json {
       try! print(pinchPoint.encodeToJSON())
+    } else {
+      print(
+        "\nLower HTF temperature:", pinchPoint.mixHTFTemperature,
+        "\nTotal HTF massflow to HEX:", pinchPoint.mixHTFMassflow,
+        "\nPower of PB:", pinchPoint.powerBlockPower
+      )
     }
 
+    guard pdf || html else { return }
     let plotter = Gnuplot(temperatures: pinchPoint.temperatures())
     let plot = try plotter.plot(.svg)
 
