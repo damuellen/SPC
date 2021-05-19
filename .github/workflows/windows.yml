@@ -40,7 +40,7 @@ jobs:
         run: swift package update
 
       - name: Build Release Mode
-        run: swift build -c release -Xswifc -gnone -Xswiftc -suppress-warnings
+        run: swift build -c release -Xswiftc -gnone -Xswiftc -suppress-warnings
 
       - name: Compress SolarPerformanceCalc
         uses: svenstaro/upx-action@v2
