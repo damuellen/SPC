@@ -26,7 +26,7 @@ struct PinchPointTool: ParsableCommand {
   var htfFluid: String = "ThVP1"
 
   @Option(name: .customLong("case", withSingleDash: true), help: "")
-  var hexCase: String = "2"
+  var hexCase: Int = 2
 
   @Flag(name: .customLong("pdf", withSingleDash: true))
   var pdf: Bool = false
@@ -41,24 +41,16 @@ struct PinchPointTool: ParsableCommand {
   var excel: Bool = false
 
   func run() throws {
-    let pressureDrop = HeatExchangerParameter.PressureDrop(
-      economizer: 1.0,
-      economizer_steamGenerator: 0.2,
-      steamGenerator: 0.55,
-      steamGenerator_superHeater: 0.1,
-      superHeater: 1.25,
-      superHeater_turbine: 3.2
-    )
+    let parameter: HeatExchangerParameter
 
-    let parameter = HeatExchangerParameter(
-      temperatureDifferenceHTF: 3.0,
-      temperatureDifferenceWater: 3.0,
-      steamQuality: 1.0,
-      requiredLMTD: 20.0,
-      pressureDrop: pressureDrop
-    )
+    switch hexCase {
+      case 1: parameter = .case1
+      case 2: parameter = .case2
+      case 3: parameter = .case3
+      default: fatalError("Invalid case.")
+    }
 
-    var pinchPoint = PinchPoint(parameter: parameter)
+    var pinchPoint = Calculation(parameter: parameter)
 
     if input.count == 11, (input.min() ?? 0) > .zero {
       pinchPoint.economizerFeedwaterTemperature = Temperature(celsius: input[0])

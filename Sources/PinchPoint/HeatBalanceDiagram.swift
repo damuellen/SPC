@@ -33,7 +33,7 @@ extension HeatExchanger {
 }
 
 struct HeatBalanceDiagram {
-  init(values: PinchPoint) {
+  init(values: Calculation) {
     self.streams = [
       Stream(values.mixHTFTemperature, 0, values.mixHTFMassflow, values.mixHTFAbsoluteEnthalpy),
       values.economizer.htfSide.outlet,

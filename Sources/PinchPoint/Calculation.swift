@@ -14,26 +14,11 @@ import Helpers
 
 typealias Stream = HeatBalanceDiagram.Stream
 
-public struct HeatExchangerParameter: Codable {
-  /// Difference between evaporation temperature and htf outlet temperature
-  var temperatureDifferenceHTF: Double
-  /// Difference between evaporation temperature and water inlet Temperature
-  var temperatureDifferenceWater: Double
-  var steamQuality: Double
-  var requiredLMTD: Double
-  var pressureDrop: PressureDrop
-
-  struct PressureDrop: Codable {
-    var economizer: Double
-    var economizer_steamGenerator: Double
-    var steamGenerator: Double
-    var steamGenerator_superHeater: Double
-    var superHeater: Double
-    var superHeater_turbine: Double
+public struct Calculation: Codable {
+  public init(parameter: HeatExchangerParameter) {
+    self.parameter = parameter
   }
-}
 
-struct PinchPoint: Codable {
   var mixHTFMassflow = 0.0
   var mixHTFAbsoluteEnthalpy = 0.0
   var mixHTFTemperature: Temperature = 0.0
