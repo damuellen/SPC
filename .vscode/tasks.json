@@ -65,8 +65,7 @@
                 "-Xswiftc", "-suppress-warnings",
                 "-Xswiftc", "-Xfrontend",
                 "-Xswiftc", "-serialize-debugging-options",
-                "--build-tests",
-                "--enable-test-discovery"
+                "--build-tests"
             ],
             "group": "test"
         },

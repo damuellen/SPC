@@ -21,6 +21,7 @@ let package = Package(
     .package(url: "https://github.com/apple/swift-argument-parser.git", .upToNextMinor(from: "0.4.0")),
     .package(url: "https://github.com/damuellen/SQLite.swift.git", .branch("master")),
     .package(url: "https://github.com/damuellen/xlsxwriter.swift.git", .branch("main")),
+    .package(name: "Benchmark", url: "https://github.com/google/swift-benchmark", from: "0.1.0")
     // .package(url: "https://github.com/jpsim/Yams.git", from: "4.0.1")
     ],
   targets: [
@@ -67,6 +68,9 @@ let package = Package(
       dependencies: ["Config", "BlackBoxModel", "Helpers",
         .product(name: "ArgumentParser", package: "swift-argument-parser"),
         .product(name: "xlsxwriter", package: "xlsxwriter.swift")],
+      swiftSettings: swift),
+    .target(name: "Benchmarking",
+      dependencies: ["Meteo", "Benchmark"],
       swiftSettings: swift),
     .testTarget(name: "MeteoTests",
       dependencies: ["DateGenerator", "SolarPosition", "Meteo"]),

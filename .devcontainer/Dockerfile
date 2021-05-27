@@ -1,5 +1,5 @@
 # [Choice] Swift version: 5.3, 5.2, 5.1, 4.2
-ARG VARIANT=5.4
+ARG VARIANT=latest
 FROM swift:${VARIANT}
 
 # [Option] Install zsh
@@ -26,4 +26,4 @@ ENV NVM_SYMLINK_CURRENT=true \
 COPY library-scripts/node-debian.sh /tmp/library-scripts/
 RUN if [ "$INSTALL_NODE" = "true" ]; then /bin/bash /tmp/library-scripts/node-debian.sh "${NVM_DIR}" "${NODE_VERSION}" "${USERNAME}"; fi \
     && rm -rf /var/lib/apt/lists/* /tmp/library-scripts
-    
+
