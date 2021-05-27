@@ -28,7 +28,7 @@ public struct Calculation: Codable {
   }
   /// Continuous blow down of input massflow
   var blowDownMassFlow: Double {
-    economizer.massFlow.ws - ws.massFlow
+    economizer.massFlow.ws.outlet - ws.massFlow
   }
   var economizerFeedwaterTemperature = Temperature(celsius: 250.8)
 
@@ -82,7 +82,7 @@ public struct Calculation: Codable {
 
     steamGenerator.enthalpy.ws.outlet = enthalpy
     steamGenerator.pressure.ws.outlet = pressureDropTotal
-    steamGenerator.massFlow.ws = ws.massFlow
+    steamGenerator.massFlow.ws.outlet = ws.massFlow
 
     steamGenerator.temperature.ws.outlet = WaterSteam.temperature(
       pressure: pressureDropTotal, enthalpy: enthalpy
@@ -116,7 +116,7 @@ public struct Calculation: Codable {
       enthalpyBeforeEvaporation - steamGenerator.enthalpy.ws.inlet
 
     let powerForWaterHeatingInsideSg =
-      waterEnthalpyChangeDueToPreheating * economizer.massFlow.ws / 1_000
+      waterEnthalpyChangeDueToPreheating * economizer.massFlow.ws.outlet / 1_000
 
     return powerForWaterHeatingInsideSg
   }
@@ -132,7 +132,7 @@ public struct Calculation: Codable {
       temperature: economizer.temperature.ws.outlet
     )
 
-    economizer.power = economizer.wsEnthalpyChange * economizer.massFlow.ws / 1_000
+    economizer.power = economizer.wsEnthalpyChange * economizer.massFlow.ws.outlet / 1_000 //
 
     let requiredHTFEnthalpyChange = economizer.power / economizer.massFlow.htf * 1_000
 
@@ -189,7 +189,11 @@ public struct Calculation: Codable {
     economizer.pressure.ws.inlet =
       economizer.pressure.ws.outlet + pressureDrop.economizer
 
-    economizer.massFlow.ws = ws.massFlow / (1 - blowDownOfInputMassFlow / 100)
+    economizer.massFlow.ws.inlet = ws.massFlow / (1 - blowDownOfInputMassFlow / 100)
+
+    economizer.massFlow.ws.outlet = economizer.massFlow.ws.inlet
+
+    steamGenerator.massFlow.ws.inlet = economizer.massFlow.ws.outlet
 
     let powerForWaterHeatingInsideSg = powerSteamGenerator()
 
@@ -211,7 +215,7 @@ public struct Calculation: Codable {
       pressure: superheater.pressure.ws.inlet,
       temperature: superheater.temperature.ws.inlet
     )
-    superheater.massFlow.ws = economizer.massFlow.ws
+    superheater.massFlow.ws.inlet = steamGenerator.massFlow.ws.outlet
 
     superheater.pressure.ws.outlet = ws.pressure + pressureDrop.superHeater
 
@@ -275,7 +279,9 @@ public struct Calculation: Codable {
       pressure: reheatOutletSteamPressure, temperature: ws.temperature
     )
 
-    reheater.massFlow.ws = reheatInlet.massFlow
+    reheater.massFlow.ws.inlet = reheatInlet.massFlow
+
+    reheater.massFlow.ws.outlet = reheater.massFlow.ws.inlet
 
     reheater.temperature.ws.inlet = reheatInlet.temperature
 
@@ -285,7 +291,7 @@ public struct Calculation: Codable {
 
     reheater.temperature.htf.inlet = upperHTFTemperature
 
-    reheater.power = reheater.massFlow.ws * reheater.wsEnthalpyChange / 1_000
+    reheater.power = reheater.massFlow.ws.outlet * reheater.wsEnthalpyChange / 1_000
 
     steamGenerator.temperature.htf.inlet = superheater.temperature.htf.outlet
 
@@ -376,7 +382,7 @@ extension HeatExchanger {
 
   struct MassFlow: Codable {
     var htf: Double = 0
-    var ws: Double = 0
+    var ws: Connection = .init(inlet: 0.0, outlet: 0.0)
   }
 
   struct Enthalpy: Codable {
