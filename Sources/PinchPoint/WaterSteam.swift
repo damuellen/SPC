@@ -18,6 +18,17 @@ public struct WaterSteam: Codable {
   public var massFlow: Double
   public var enthalpy: Double
 
+  public init(
+    temperature: Temperature,
+    pressure: Double,
+    massFlow: Double,
+    enthalpy: Double
+  ) {
+    self.temperature = temperature
+    self.pressure = pressure
+    self.massFlow = massFlow
+    self.enthalpy = enthalpy
+  }
   /// Temperature on boiling point curve.
   public static func temperature(pressure: Double) -> Temperature {
     let p = pressure / 10
@@ -53,7 +64,7 @@ public struct WaterSteam: Codable {
 }
 
 extension WaterSteam {
-  init(temperature: Temperature, pressure: Double, massFlow: Double) {
+  public init(temperature: Temperature, pressure: Double, massFlow: Double) {
     self.temperature = temperature
     self.pressure = pressure
     self.massFlow = massFlow
@@ -62,7 +73,7 @@ extension WaterSteam {
     )
   }
 
-  init(enthalpy: Double, pressure: Double, massFlow: Double) {
+  public init(enthalpy: Double, pressure: Double, massFlow: Double) {
     self.pressure = pressure
     self.massFlow = massFlow
     self.enthalpy = enthalpy
@@ -71,7 +82,7 @@ extension WaterSteam {
     )
   }
 
-  init() {
+  public init() {
     self.pressure = 0
     self.massFlow = 0
     self.enthalpy = 0

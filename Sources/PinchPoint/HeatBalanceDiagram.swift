@@ -8,11 +8,10 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
-import PhysicalQuantities
-import Libc
 import CPikchr
 import Helpers
-
+import Libc
+import PhysicalQuantities
 extension HeatExchanger {
   var steamSide: (inlet: Stream, outlet: Stream) {
     (Stream(temperature.ws.inlet, pressure.ws.inlet, massFlow.ws.inlet, enthalpy.ws.inlet),
@@ -32,8 +31,8 @@ extension HeatExchanger {
   }
 }
 
-struct HeatBalanceDiagram {
-  init(values: Calculation) {
+public struct HeatBalanceDiagram {
+  public init(values: Calculation) {
     self.streams = [
       Stream(values.mixHTFTemperature, 0, values.mixHTFMassflow, values.mixHTFAbsoluteEnthalpy),
       values.economizer.htfSide.outlet,
@@ -42,7 +41,7 @@ struct HeatBalanceDiagram {
       values.steamGenerator.steamSide.inlet,
       values.steamGenerator.steamSide.outlet,
       values.superheater.steamSide.inlet,
-      Stream(values.ws.temperature, values.ws.pressure, values.ws.massFlow, values.ws.enthalpy),
+      Stream(values.turbine.temperature, values.turbine.pressure, values.turbine.massFlow, values.turbine.enthalpy),
       values.reheater.steamSide.inlet,
       values.reheater.steamSide.outlet,
       values.reheater.htfSide.inlet,
@@ -51,9 +50,15 @@ struct HeatBalanceDiagram {
       values.steamGenerator.htfSide.outlet,
       values.reheater.htfSide.outlet,
       values.superheater.htfSide.inlet,
-      Stream(values.upperHTFTemperature, 0, values.mixHTFMassflow, values.superheater.enthalpy.htf.inlet),
+      Stream(
+        values.upperHTFTemperature, 0, values.mixHTFMassflow, values.superheater.enthalpy.htf.inlet),
     ]
     self.singleValues = [
+
+      ("RH", String(format: "%.2f MW", values.reheater.power)),
+      ("SH", String(format: "%.2f MW", values.superheater.power)),
+      ("SG", String(format: "%.2f MW", values.steamGenerator.power)),
+      ("EC", String(format: "%.2f MW", values.economizer.power)),
       ("LMTD", values.economizer.LMTD),
       ("LMTD", values.steamGenerator.LMTD),
       ("Blow Down", String(format: "%.2f kg/s", values.blowDownMassFlow)),
@@ -62,7 +67,7 @@ struct HeatBalanceDiagram {
   }
 
   init?(streams: [Stream], singleValues: [(String, String)]) {
-    guard streams.count == 17, singleValues.count == 5 else { return nil }
+    guard streams.count == 17, singleValues.count == 9 else { return nil }
     self.streams = streams
     self.singleValues = singleValues
   }
@@ -102,12 +107,13 @@ struct HeatBalanceDiagram {
   var streams: [Stream]
   var singleValues: [(String, String)]
 
-  var svg: String {
+  public var svg: String {
     let diagram = """
     RH: [
       boxwid = 0.75; boxht = 0.75;
       line left 1.0cm then up .5cm right .5cm then up .5cm left .5cm then right 1cm
-      down; line invis down .5cm; left; box "RH" thick
+      down; line invis down .5cm; left; box "\(singleValues[0].0)" thick
+      down; "\(singleValues[0].1)"; line invis left.5cm;
     ]
 
     line invis down 5cm
@@ -115,7 +121,8 @@ struct HeatBalanceDiagram {
     SH: [
       boxwid = 0.75; boxht = 0.75;
       line left 1.0cm then up .5cm right .5cm then up .5cm left .5cm then right 1cm
-      down; line invis down .5cm; left; box "SH" thick
+      down; line invis down .5cm; left; box "\(singleValues[1].0)" thick
+      down; "\(singleValues[1].1)"; line invis left.5cm;
     ] with .end at previous.end
 
     line invis down 5cm
@@ -123,7 +130,9 @@ struct HeatBalanceDiagram {
     SG: [
       boxwid = 0.75; boxht = 0.75;
       line left 1.0cm then up .5cm right .5cm then up .5cm left .5cm then right 1cm
-      down; line invis down .5cm; left; box "SG" thick
+      down; line invis down .5cm; left; box "\(singleValues[2].0)" thick
+      down; "\(singleValues[2].1)"; line invis left.5cm;
+
     ]with .end at previous.end
 
     line invis down 5cm
@@ -131,10 +140,11 @@ struct HeatBalanceDiagram {
     EC: [
       boxwid = 0.75; boxht = 0.75;
       line left 1.0cm then up .5cm right .5cm then up .5cm left .5cm then right 1cm
-      down; line invis down .5cm; left; box "EC" thick
+      down; line invis down .5cm; left; box "\(singleValues[3].0)" thick
+    down; "\(singleValues[3].1)"; line invis left.5cm;
     ] with .end at previous.end
 
-    line invis right 15cm up 2cm
+    line invis right 15cm up 2.25cm
 
     CO: [
       boxwid = 0.75; boxht = 0.75;
@@ -146,9 +156,9 @@ struct HeatBalanceDiagram {
     arrow down 1.5cm then left 4cm
 
     [
-    P0: circle radius .2
-    line from P0.s to P0.w
-    line to P0.n
+      P0: circle radius .2
+      line from P0.s to P0.w
+      line to P0.n
     ]
 
     arrow left 9cm
@@ -166,8 +176,8 @@ struct HeatBalanceDiagram {
 
     line invis up 2.5cm left 2cm
     [
-      box "\(singleValues[0].0)" thin;right
-      box "\(singleValues[0].1)" thin
+      box "\(singleValues[4].0)" thin;right
+      box "\(singleValues[4].1)" thin
     ] with .ne at previous
 
     line invis up 2cm right 2cm
@@ -178,14 +188,14 @@ struct HeatBalanceDiagram {
 
     line invis up 2.5cm left 2cm
     [
-      box "\(singleValues[1].0)" thin;right
-      box "\(singleValues[1].1)" thin
+      box "\(singleValues[5].0)" thin;right
+      box "\(singleValues[5].1)" thin
     ] with .ne at previous
 
     line invis up 1.25cm right 10cm
     [
-      box "\(singleValues[2].0)" thin;right
-      box "\(singleValues[2].1)" thin
+      box "\(singleValues[6].0)" thin;right
+      box "\(singleValues[6].1)" thin
     ] with .ne at previous
 
     line invis up 1.25cm left 8cm
@@ -196,8 +206,8 @@ struct HeatBalanceDiagram {
 
     line invis up 2.5cm left 2cm
     [
-      box "\(singleValues[3].0)" thin;right
-      box "\(singleValues[3].1)" thin
+      box "\(singleValues[7].0)" thin;right
+      box "\(singleValues[7].1)" thin
     ] with .ne at previous
 
     line invis up 2cm right 2cm
@@ -211,8 +221,8 @@ struct HeatBalanceDiagram {
 
     line invis left 3cm
     [
-      box "\(singleValues[4].0)" thin;right
-      box "\(singleValues[4].1)" thin
+      box "\(singleValues[8].0)" thin;right
+      box "\(singleValues[8].1)" thin
     ] with .ne at previous.nw
 
     line invis left 18cm then up 0.5cm
@@ -269,10 +279,10 @@ struct HeatBalanceDiagram {
     """
     let svg = diagram.withCString { String(cString: pikchr($0, "c", 0, nil, nil)) }
     let style = """
-    <style media="print">
-      svg.c {width: 28.2cm; height: 20.6cm; margin-left: 0.5cm;}
-    </style>
-    """
+      <style media="print">
+        svg.c {width: 28.2cm; height: 20.6cm; margin-left: 0.5cm;}
+      </style>
+      """
     return style + svg
   }
 }

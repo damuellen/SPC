@@ -10,6 +10,7 @@
 
 import ArgumentParser
 import PhysicalQuantities
+import PinchPoint
 import Foundation
 import Helpers
 import xlsxwriter
@@ -50,12 +51,12 @@ struct PinchPointTool: ParsableCommand {
       default: fatalError("Invalid case.")
     }
 
-    var pinchPoint = Calculation(parameter: parameter)
+    var pinchPoint = PinchPoint.Calculation(parameter: parameter)
 
     if input.count == 11, (input.min() ?? 0) > .zero {
       pinchPoint.economizerFeedwaterTemperature = Temperature(celsius: input[0])
 
-      pinchPoint.ws = WaterSteam(
+      pinchPoint.turbine = WaterSteam(
         temperature: Temperature(celsius: input[2]),
         pressure: input[3],
         massFlow: input[1]
@@ -74,7 +75,9 @@ struct PinchPointTool: ParsableCommand {
 
       pinchPoint.upperHTFTemperature = Temperature(celsius: input[10])
     } else {
-      print("Missing or invalid input value. Fallback to default values.")
+      if !json {
+        print("Missing or invalid input value. Fallback to default values.")
+      }
     }
 
     pinchPoint()

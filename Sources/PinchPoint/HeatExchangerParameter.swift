@@ -10,25 +10,25 @@
 
 public struct HeatExchangerParameter: Codable {
   /// Difference between evaporation temperature and htf outlet temperature
-  var temperatureDifferenceHTF: Double
+  public var temperatureDifferenceHTF: Double
   /// Difference between evaporation temperature and water inlet Temperature
-  var temperatureDifferenceWater: Double
-  var steamQuality: Double
-  var requiredLMTD: Double
-  var pressureDrop: PressureDrop
+  public var temperatureDifferenceWater: Double
+  public var steamQuality: Double
+  public var requiredLMTD: Double
+  public var pressureDrop: PressureDrop
 
   public struct PressureDrop: Codable {
-    var economizer: Double
-    var economizer_steamGenerator: Double
-    var steamGenerator: Double
-    var steamGenerator_superHeater: Double
-    var superHeater: Double
-    var superHeater_turbine: Double
+    public var economizer: Double
+    public var economizer_steamGenerator: Double
+    public var steamGenerator: Double
+    public var steamGenerator_superHeater: Double
+    public var superHeater: Double
+    public var superHeater_turbine: Double
   }
 }
 
 extension HeatExchangerParameter {
-  static let case1 = HeatExchangerParameter(
+  public static let case1 = HeatExchangerParameter(
     temperatureDifferenceHTF: 3.0,
     temperatureDifferenceWater: 3.0,
     steamQuality: 1.0,
@@ -43,7 +43,7 @@ extension HeatExchangerParameter {
     )
   )
 
-  static let case2 = HeatExchangerParameter(
+  public static let case2 = HeatExchangerParameter(
     temperatureDifferenceHTF: 3.0,
     temperatureDifferenceWater: 3.0,
     steamQuality: 1.0,
@@ -58,7 +58,7 @@ extension HeatExchangerParameter {
     )
   )
 
-  static let case3 = HeatExchangerParameter(
+  public static let case3 = HeatExchangerParameter(
     temperatureDifferenceHTF: 5.4,
     temperatureDifferenceWater: 3.0,
     steamQuality: 1.0,
