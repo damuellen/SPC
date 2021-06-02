@@ -29,8 +29,8 @@ struct PinchPointTool: ParsableCommand {
   @Option(name: .customLong("case", withSingleDash: true), help: "")
   var hexCase: Int = 2
 
-  @Option(name: .customLong("hex", withSingleDash: true), help: "")
-  var hexValues: [Double] = []
+  @Flag(name: .customLong("hex", withSingleDash: true), help: "")
+  var hexValues: Bool = false
 
   @Flag(name: .customLong("pdf", withSingleDash: true))
   var pdf: Bool = false
@@ -45,18 +45,22 @@ struct PinchPointTool: ParsableCommand {
   var excel: Bool = false
 
   func run() throws {
-    var parameter = HeatExchangerParameter(values: hexValues)
-
-    if parameter == nil {
+    var input = input
+    let parameter: HeatExchangerParameter
+    if hexValues,
+    let hex = HeatExchangerParameter(values: Array(input.dropFirst(11))) {
+      input.removeLast(10)
+      parameter = hex
+    } else {
       switch hexCase {
         case 1: parameter = .case1
         case 2: parameter = .case2
         case 3: parameter = .case3
-        default: fatalError("Invalid case.")
+        default: fatalError("Invalid heat exchanger case.")
       }
     }
 
-    var pinchPoint = PinchPoint.Calculation(parameter: parameter!)
+    var pinchPoint = PinchPoint.Calculation(parameter: parameter)
 
     if input.count == 11, (input.min() ?? 0) > .zero {
       pinchPoint.economizerFeedwaterTemperature = Temperature(celsius: input[0])
