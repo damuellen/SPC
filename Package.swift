@@ -1,10 +1,11 @@
 // swift-tools-version:5.2
 import PackageDescription
-
-let condition = BuildSettingCondition.when(configuration: .release)
-let c = [CSetting.unsafeFlags(["-ffast-math", "-O3",  "-fomit-frame-pointer", "-funroll-loops", "-march=haswell", "-mtune=haswell"])]
-let s = ["-cross-module-optimization", "-Ounchecked", "-enforce-exclusivity=unchecked", "-DRELEASE"]
-let swift = [SwiftSetting.unsafeFlags(s, condition), .define("DEBUG", .when(configuration: .debug))]
+let c = [CSetting.unsafeFlags(["-ffast-math", "-O3",  "-fomit-frame-pointer", "-funroll-loops"])]
+let flags = ["-cross-module-optimization", "-Ounchecked", "-enforce-exclusivity=unchecked", "-gnone", "-DRELEASE"]
+let swift: [SwiftSetting] = [
+  .unsafeFlags(flags, .when(configuration: .release)),
+  .define("DEBUG", .when(configuration: .debug))
+]
 let package = Package(
   name: "SPC",
   platforms: [
@@ -90,10 +91,10 @@ let package = Package(
 // FIXME: conditionalise these flags since SwiftPM 5.3 and earlier will crash
 // for platforms they don't know about.
 #if os(Windows)
-let flags = ["-Xlinker", "/INCREMENTAL:NO", "-Xlinker", "/IGNORE:4217,4286"]
+let linker = ["-Xlinker", "/INCREMENTAL:NO", "-Xlinker", "/IGNORE:4217,4286"]
 
 if let BlackBoxModel = package.targets.first(where: { $0.name == "BlackBoxModel" }) {
-  BlackBoxModel.linkerSettings = [.linkedLibrary("sqlite3.lib"), .unsafeFlags(flags)]
+  BlackBoxModel.linkerSettings = [.linkedLibrary("sqlite3.lib"), .unsafeFlags(linker)]
 }
 
 if let Helpers = package.targets.first(where: { $0.name == "Helpers" }) {
