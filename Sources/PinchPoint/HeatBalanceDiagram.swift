@@ -12,36 +12,48 @@ import CPikchr
 import Helpers
 import Libc
 import PhysicalQuantities
+
 extension HeatExchanger {
   var steamSide: (inlet: Stream, outlet: Stream) {
-    (Stream(temperature.ws.inlet, pressure.ws.inlet, massFlow.ws.inlet, enthalpy.ws.inlet),
-    Stream(temperature.ws.outlet, pressure.ws.outlet, massFlow.ws.outlet, enthalpy.ws.outlet))
+    (
+      Stream(temperature.ws.inlet, pressure.ws.inlet, massFlow.ws.inlet, enthalpy.ws.inlet),
+      Stream(temperature.ws.outlet, pressure.ws.outlet, massFlow.ws.outlet, enthalpy.ws.outlet)
+    )
   }
 
   var htfSide: (inlet: Stream, outlet: Stream) {
-    (Stream(temperature.htf.inlet, 0, massFlow.htf, enthalpy.htf.inlet),
-    Stream(temperature.htf.outlet, 0, massFlow.htf, enthalpy.htf.outlet))
+    (
+      Stream(temperature.htf.inlet, 0, massFlow.htf, enthalpy.htf.inlet),
+      Stream(temperature.htf.outlet, 0, massFlow.htf, enthalpy.htf.outlet)
+    )
   }
 
   var LMTD: String {
-    String(format: "%.2f", ((temperature.htf.outlet.kelvin - temperature.ws.inlet.kelvin)
-    - (temperature.htf.inlet.kelvin - temperature.ws.outlet.kelvin))
-    / (log((temperature.htf.outlet.kelvin - temperature.ws.inlet.kelvin)
-    / (temperature.htf.inlet.kelvin - temperature.ws.outlet.kelvin))))
+    String(
+      format: "%.2f",
+      ((temperature.htf.outlet.kelvin - temperature.ws.inlet.kelvin)
+        - (temperature.htf.inlet.kelvin - temperature.ws.outlet.kelvin))
+        / (log(
+          (temperature.htf.outlet.kelvin - temperature.ws.inlet.kelvin)
+            / (temperature.htf.inlet.kelvin - temperature.ws.outlet.kelvin))))
   }
 }
 
 public struct HeatBalanceDiagram {
   public init(values: Calculation) {
     self.streams = [
-      Stream(values.mixHTFTemperature, 0, values.mixHTFMassflow, values.mixHTFAbsoluteEnthalpy),
+      Stream(
+       values.mixHTFTemperature, 0,
+       values.mixHTFMassflow, values.mixHTFAbsoluteEnthalpy),
       values.economizer.htfSide.outlet,
       values.economizer.steamSide.inlet,
       values.economizer.steamSide.outlet,
       values.steamGenerator.steamSide.inlet,
       values.steamGenerator.steamSide.outlet,
       values.superheater.steamSide.inlet,
-      Stream(values.turbine.temperature, values.turbine.pressure, values.turbine.massFlow, values.turbine.enthalpy),
+      Stream(
+        values.turbine.temperature, values.turbine.pressure,
+        values.turbine.massFlow, values.turbine.enthalpy),
       values.reheater.steamSide.inlet,
       values.reheater.steamSide.outlet,
       values.reheater.htfSide.inlet,
@@ -51,7 +63,8 @@ public struct HeatBalanceDiagram {
       values.reheater.htfSide.outlet,
       values.superheater.htfSide.inlet,
       Stream(
-        values.upperHTFTemperature, 0, values.mixHTFMassflow, values.superheater.enthalpy.htf.inlet),
+        values.upperHTFTemperature, 0,
+        values.mixHTFMassflow, values.superheater.enthalpy.htf.inlet),
     ]
     self.singleValues = [
 
@@ -63,7 +76,8 @@ public struct HeatBalanceDiagram {
       ("LMTD", values.steamGenerator.LMTD),
       ("Blow Down", String(format: "%.2f kg/s", values.blowDownMassFlow)),
       ("LMTD", values.superheater.LMTD),
-      ("LMTD", values.reheater.LMTD)]
+      ("LMTD", values.reheater.LMTD),
+    ]
   }
 
   init?(streams: [Stream], singleValues: [(String, String)]) {
@@ -79,14 +93,14 @@ public struct HeatBalanceDiagram {
     var pressure: String
 
     init(stream: WaterSteam) {
-      self.temperature = String(format: "%.2f °C", stream.temperature.celsius)
+      self.temperature = String(format: "%.1f °C", stream.temperature.celsius)
       self.massFlow = String(format: "%.1f kg/s", stream.massFlow)
       self.enthalpy = String(format: "%.1f kJ/kg", stream.enthalpy)
       self.pressure = String(format: "%.2f bar", stream.pressure)
     }
 
     init(_ temperature: Temperature, _ pressure: Double, _ massFlow: Double, _ enthalpy: Double) {
-      self.temperature = String(format: "%.2f °C", temperature.celsius)
+      self.temperature = String(format: "%.1f °C", temperature.celsius)
       self.massFlow = String(format: "%.1f kg/s", massFlow)
       self.enthalpy = String(format: "%.1f kJ/kg", enthalpy)
       self.pressure = pressure > 0 ? String(format: "%.2f bar", pressure) : ""

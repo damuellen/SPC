@@ -9,10 +9,10 @@
 //
 
 import ArgumentParser
-import PhysicalQuantities
-import PinchPoint
 import Foundation
 import Helpers
+import PhysicalQuantities
+import PinchPoint
 import xlsxwriter
 
 //system("clear")
@@ -47,16 +47,20 @@ struct PinchPointTool: ParsableCommand {
   func run() throws {
     var input = input
     let parameter: HeatExchangerParameter
-    if hexValues,
-    let hex = HeatExchangerParameter(values: Array(input.dropFirst(11))) {
-      input.removeLast(10)
-      parameter = hex
+    if hexValues {
+      let values = Array(input.dropFirst(11))
+      if let hex = HeatExchangerParameter(values: values) {
+        input.removeLast(10)
+        parameter = hex
+      } else {
+        fatalError("Invalid heat exchanger parameters.")
+      }
     } else {
       switch hexCase {
-        case 1: parameter = .case1
-        case 2: parameter = .case2
-        case 3: parameter = .case3
-        default: fatalError("Invalid heat exchanger case.")
+      case 1: parameter = .case1
+      case 2: parameter = .case2
+      case 3: parameter = .case3
+      default: fatalError("Invalid heat exchanger case.")
       }
     }
 
@@ -121,11 +125,11 @@ struct PinchPointTool: ParsableCommand {
 
     if html {
       let html = HTML(body: dia.svg + plot)
-#if DEBUG
-      let path = "temp.html"
-#else
-      let path = URL.temporaryFile().appendingPathExtension("html").path
-#endif
+      #if DEBUG
+        let path = "temp.html"
+      #else
+        let path = URL.temporaryFile().appendingPathExtension("html").path
+      #endif
       try html.raw.write(toFile: path, atomically: false, encoding: .utf8)
       print(path)
     }

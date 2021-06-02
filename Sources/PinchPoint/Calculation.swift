@@ -8,9 +8,9 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
-import PhysicalQuantities
-import Libc
 import Helpers
+import Libc
+import PhysicalQuantities
 
 typealias Stream = HeatBalanceDiagram.Stream
 
@@ -23,13 +23,8 @@ public struct Calculation: Codable {
   public var mixHTFAbsoluteEnthalpy = 0.0
   public var mixHTFTemperature: Temperature = 0.0
 
-  var reheaterTemperatureDifference: Double {
-    reheater(requiredLMTD: parameter.requiredLMTD)
-  }
-  /// Continuous blow down of input massflow
-  var blowDownMassFlow: Double {
-    economizer.massFlow.ws.outlet - superheater.massFlow.ws.inlet
-  }
+  public var upperHTFTemperature = Temperature(celsius: 393)
+  
   public var economizerFeedwaterTemperature = Temperature(celsius: 250.8)
 
   public var turbine = WaterSteam(
@@ -38,7 +33,7 @@ public struct Calculation: Codable {
     massFlow: 66.42
   )
 
-  public var blowDownOfInputMassFlow = 1.0 // %
+  public var blowDownOfInputMassFlow = 1.0  // %
 
   public var reheatInlet = WaterSteam(
     temperature: Temperature(celsius: 217.8),
@@ -49,7 +44,6 @@ public struct Calculation: Codable {
 
   public var reheatOutletSteamPressure = 21.02
 
-  public var upperHTFTemperature = Temperature(celsius: 393)
 
   let parameter: HeatExchangerParameter
 
@@ -60,14 +54,23 @@ public struct Calculation: Codable {
 
   public var powerBlockPower: Double {
     economizer.power
-    + steamGenerator.power
-    + superheater.power
-    + reheater.power
+      + steamGenerator.power
+      + superheater.power
+      + reheater.power
+  }
+
+  var reheaterTemperatureDifference: Double {
+    reheater(requiredLMTD: parameter.requiredLMTD)
+  }
+  /// Continuous blow down of input massflow
+  var blowDownMassFlow: Double {
+    economizer.massFlow.ws.outlet - superheater.massFlow.ws.inlet
   }
 
   mutating func evaporation() -> (Double, Double, Double) {
     let pd = parameter.pressureDrop
-    let pressureDropTotal = turbine.pressure
+    let pressureDropTotal =
+      turbine.pressure
       + pd.steamGenerator_superHeater + pd.superHeater + pd.superHeater_turbine
 
     steamGenerator.pressure.ws.outlet = pressureDropTotal
@@ -78,7 +81,8 @@ public struct Calculation: Codable {
     let enthalpyAfterEvaporation =
       WaterSteam.enthalpyVapor(pressure: pressureDropTotal)
 
-    let enthalpy = enthalpyBeforeEvaporation + parameter.steamQuality
+    let enthalpy =
+      enthalpyBeforeEvaporation + parameter.steamQuality
       * (enthalpyAfterEvaporation - enthalpyBeforeEvaporation)
 
     steamGenerator.enthalpy.ws.outlet = enthalpy
@@ -103,12 +107,12 @@ public struct Calculation: Codable {
   mutating func powerSteamGenerator() -> Double {
 
     steamGenerator.enthalpy.ws.inlet = WaterSteam.enthalpy(
-      pressure: steamGenerator.pressure.ws.outlet, /// ???
+      pressure: steamGenerator.pressure.ws.outlet,
       temperature: steamGenerator.temperature.ws.inlet
     )
 
-    let enthalpyBeforeEvaporation = WaterSteam
-      .enthalpyLiquid(pressure: steamGenerator.pressure.ws.outlet)
+    let enthalpyBeforeEvaporation =
+      WaterSteam.enthalpyLiquid(pressure: steamGenerator.pressure.ws.outlet)
 
     let waterEnthalpyChangeDueToPreheating =
       enthalpyBeforeEvaporation - steamGenerator.enthalpy.ws.inlet
@@ -130,7 +134,7 @@ public struct Calculation: Codable {
       temperature: economizer.temperature.ws.outlet
     )
 
-    economizer.power = economizer.wsEnthalpyChange * economizer.massFlow.ws.outlet / 1_000 //
+    economizer.power = economizer.wsEnthalpyChange * economizer.massFlow.ws.outlet / 1_000  //
 
     let requiredHTFEnthalpyChange = economizer.power / economizer.massFlow.htf * 1_000
 
@@ -146,7 +150,7 @@ public struct Calculation: Codable {
     return htfAbsoluteHeatFlowOutlet
   }
 
-  mutating func reheat() -> Double { // D51
+  mutating func reheat() -> Double {
     reheater.temperature.htf.outlet =
       reheater.temperature.ws.inlet + reheaterTemperatureDifference
 
@@ -164,7 +168,7 @@ public struct Calculation: Codable {
   func reheater(requiredLMTD: Double) -> Double {
     seek(goal: requiredLMTD, 1...50) {
       ((upperHTFTemperature.kelvin - turbine.temperature.kelvin) - $0)
-      / (log((upperHTFTemperature.kelvin - turbine.temperature.kelvin) / $0))
+        / (log((upperHTFTemperature.kelvin - turbine.temperature.kelvin) / $0))
     }
   }
 
@@ -183,12 +187,12 @@ public struct Calculation: Codable {
     steamGenerator.pressure.ws.inlet =
       steamGenerator.pressure.ws.outlet + pressureDrop.steamGenerator
 
-
     steamGenerator.temperature.ws.inlet =
       steamGenerator.temperature.ws.outlet - parameter.temperatureDifferenceWater
 
     economizer.temperature.ws.outlet = steamGenerator.temperature.ws.inlet
-    economizer.pressure.ws.outlet = steamGenerator.pressure.ws.inlet
+    economizer.pressure.ws.outlet =
+      steamGenerator.pressure.ws.inlet
       + pressureDrop.economizer_steamGenerator
 
     economizer.pressure.ws.inlet =
@@ -204,7 +208,8 @@ public struct Calculation: Codable {
 
     let boilingWaterMassFlowBlowDown = blowDownMassFlow
 
-    let powerOfBlowDownStream = boilingWaterMassFlowBlowDown
+    let powerOfBlowDownStream =
+      boilingWaterMassFlowBlowDown
       * (enthalpyBeforeEvaporation - economizer.enthalpy.ws.inlet) / 1_000
 
     steamGenerator.power =
@@ -261,17 +266,19 @@ public struct Calculation: Codable {
 
     steamGenerator.enthalpy.htf.outlet = HTF.enthalpy(steamGenerator.temperature.htf.outlet)
 
-    let htfMassFlowEc_Sg_ShTrain = (steamGenerator.power + superheater.power) * 1_000
+    let htfMassFlowEc_Sg_ShTrain =
+      (steamGenerator.power + superheater.power) * 1_000
       / (superheater.enthalpy.htf.inlet - steamGenerator.enthalpy.htf.outlet)
 
     superheater.massFlow.htf = htfMassFlowEc_Sg_ShTrain
     steamGenerator.massFlow.htf = htfMassFlowEc_Sg_ShTrain
     economizer.massFlow.htf = htfMassFlowEc_Sg_ShTrain
 
-    superheater.enthalpy.htf.outlet = superheater.enthalpy.htf.inlet
+    superheater.enthalpy.htf.outlet =
+      superheater.enthalpy.htf.inlet
       - (superheater.power * 1_000 / superheater.massFlow.htf)
 
-    superheater.temperature.htf.outlet =  HTF.temperature(superheater.enthalpy.htf.outlet)
+    superheater.temperature.htf.outlet = HTF.temperature(superheater.enthalpy.htf.outlet)
 
     steamGenerator.temperature.htf.inlet = superheater.temperature.htf.outlet
 
@@ -315,7 +322,8 @@ public struct Calculation: Codable {
     let economizerHTFAbsoluteHeatFlowOutlet = preheat()
     let reheatHTFAbsoluteHeatFlowOutlet = reheat()
 
-    let mixHTFAbsoluteHeatFlow = economizerHTFAbsoluteHeatFlowOutlet
+    let mixHTFAbsoluteHeatFlow =
+      economizerHTFAbsoluteHeatFlowOutlet
       + reheatHTFAbsoluteHeatFlowOutlet
 
     mixHTFMassflow = economizer.massFlow.htf + reheater.massFlow.htf
