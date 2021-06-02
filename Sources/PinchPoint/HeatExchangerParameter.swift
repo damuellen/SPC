@@ -28,6 +28,24 @@ public struct HeatExchangerParameter: Codable {
 }
 
 extension HeatExchangerParameter {
+  public init?(values: [Double]) {
+    guard values.count == 10 else { return nil }
+    self.temperatureDifferenceHTF = values[0]
+    self.temperatureDifferenceWater = values[1]
+
+    self.pressureDrop = .init(
+      economizer: values[2],
+      economizer_steamGenerator: values[3],
+      steamGenerator: values[4],
+      steamGenerator_superHeater: values[5],
+      superHeater: values[6],
+      superHeater_turbine: values[7]
+    )
+
+    self.steamQuality = values[8]
+    self.requiredLMTD = values[9]
+  }
+
   public static let case1 = HeatExchangerParameter(
     temperatureDifferenceHTF: 3.0,
     temperatureDifferenceWater: 3.0,
