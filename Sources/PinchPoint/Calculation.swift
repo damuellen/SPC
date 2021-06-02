@@ -93,7 +93,7 @@ public struct Calculation: Codable {
 
     let evaporationPower = enthalpyChangeDueToEvaporation * turbine.massFlow / 1_000
 
-    let enthalpyChangeDueToSuperHeating = turbine.enthalpy - enthalpyAfterEvaporation
+    let enthalpyChangeDueToSuperHeating = enthalpy - enthalpyAfterEvaporation
 
     let superHeatingPower = enthalpyChangeDueToSuperHeating * turbine.massFlow / 1_000
 
@@ -312,8 +312,6 @@ public struct Calculation: Codable {
 
     reheater.power = reheater.massFlow.ws.outlet * reheater.wsEnthalpyChange / 1_000
 
-
-
     let economizerHTFAbsoluteHeatFlowOutlet = preheat()
     let reheatHTFAbsoluteHeatFlowOutlet = reheat()
 
@@ -335,10 +333,10 @@ public struct Calculation: Codable {
 
 
     "SG"
-    \(economizer.power), \(steamGenerator.temperature.ws.inlet.celsius) //SG Water Temperature Inlet [°C]
-    \(economizer.power), \(316.4) //SG Water Temperature Start Evaporation (Pinch-Point) [°C]
-    \(economizer.power), \(316.4) //SG Steam Temperature after Evaporation [°C]
-    \(steamGenerator.power), \(316.4) //SG Steam Temperature Outlet [°C]
+    \(economizer.power), \(steamGenerator.temperature.ws.inlet.celsius)
+    \(economizer.power), \(steamGenerator.temperature.ws.outlet.celsius) //SG Water Temperature Start Evaporation (Pinch-Point) [°C]
+    \(economizer.power), \(steamGenerator.temperature.ws.outlet.celsius) //SG Steam Temperature after Evaporation [°C]
+    \(steamGenerator.power), \(steamGenerator.temperature.ws.outlet.celsius)
 
 
     "SH"

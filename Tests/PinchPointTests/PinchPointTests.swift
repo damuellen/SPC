@@ -14,9 +14,9 @@ class PinchPointTests: XCTestCase {
     XCTAssertLessThan(pp1.mixHTFTemperature, pp1.economizer.temperature.htf.outlet)
     XCTAssertGreaterThan(pp1.mixHTFTemperature, pp1.reheater.temperature.htf.outlet)
 
-    XCTAssertEqual(pp1.mixHTFTemperature.celsius, 298.7, accuracy: tol)
-    XCTAssertEqual(pp1.mixHTFMassflow, 739.5, accuracy: tol)
-    XCTAssertEqual(pp1.powerBlockPower, 170.8, accuracy: tol)
+    XCTAssertEqual(pp1.mixHTFTemperature.celsius, 295.3, accuracy: tol)
+    XCTAssertEqual(pp1.mixHTFMassflow, 629.3, accuracy: tol)
+    XCTAssertEqual(pp1.powerBlockPower, 150.2, accuracy: tol)
 
     XCTAssertEqual(
       pp1.economizer.pressure.ws.outlet,
