@@ -8,6 +8,51 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
+import PhysicalQuantities
+
+struct HeatExchanger: Codable {
+  var massFlow = MassFlow()
+  var temperature = Temperatures()
+  var enthalpy = Enthalpy()
+  var pressure = Pressure()
+  var power: Double = 0.0
+
+  var htfEnthalpyChange: Double {
+    enthalpy.htf.inlet - enthalpy.htf.outlet
+  }
+
+  var wsEnthalpyChange: Double {
+    enthalpy.ws.outlet - enthalpy.ws.inlet
+  }
+}
+
+struct Connection<T: Codable>: Codable {
+  var inlet: T
+  var outlet: T
+}
+
+extension HeatExchanger {
+
+  struct MassFlow: Codable {
+    var htf: Double = 0
+    var ws: Connection = .init(inlet: 0.0, outlet: 0.0)
+  }
+
+  struct Enthalpy: Codable {
+    var htf: Connection = .init(inlet: 0.0, outlet: 0.0)
+    var ws: Connection = .init(inlet: 0.0, outlet: 0.0)
+  }
+
+  struct Pressure: Codable {
+    var ws: Connection = .init(inlet: 0.0, outlet: 0.0)
+  }
+
+  struct Temperatures: Codable {
+    var htf: Connection<Temperature> = .init(inlet: 0.0, outlet: 0.0)
+    var ws: Connection<Temperature> = .init(inlet: 0.0, outlet: 0.0)
+  }
+}
+
 public struct HeatExchangerParameter: Codable {
   /// Difference between evaporation temperature and htf outlet temperature
   public var temperatureDifferenceHTF: Double

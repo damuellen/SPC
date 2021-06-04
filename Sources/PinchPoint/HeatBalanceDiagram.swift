@@ -13,6 +13,8 @@ import Helpers
 import Libc
 import PhysicalQuantities
 
+typealias Stream = HeatBalanceDiagram.Stream
+
 extension HeatExchanger {
   var steamSide: (inlet: Stream, outlet: Stream) {
     (
