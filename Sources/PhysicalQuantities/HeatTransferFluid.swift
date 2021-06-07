@@ -38,7 +38,7 @@ public let HELISOL_XLP = HeatTransferFluid(
     -1.25262719213376E-03,
     1.31924308102715E-01,
     -4.10349394308805E+00,
-  ],
+  ].reversed(),
   dens: [
     2.58818883828842E-12,
     -4.41892055919859E-09,
@@ -47,7 +47,7 @@ public let HELISOL_XLP = HeatTransferFluid(
     2.23959978961942E-01,
     -2.44772025890099E+01,
     1.98218481500559E+03,
-  ],
+  ].reversed(),
   visco: [
     -1.86465176227281E-17,
     3.84423262823152E-14,
@@ -56,12 +56,12 @@ public let HELISOL_XLP = HeatTransferFluid(
     -3.48912643899880E-06,
     4.30698361240265E-04,
     -1.94013913496905E-02,
-  ],
+  ].reversed(),
   thermCon: [
     2.9750737067810E-07,
     -2.8822299651568E-04,
     1.4246307960332E-01,
-  ],
+  ].reversed(),
   maxTemperature: 450.0,
   h_T: [
     -2.80342523341999E-13,
@@ -71,7 +71,7 @@ public let HELISOL_XLP = HeatTransferFluid(
     -2.30480305214602E-02,
     3.93395842253904E+00,
     -8.84695293317490E+01,
-  ],
+  ].reversed(),
   T_h: [
     1.01945101897670E-15,
     -3.13429657069657E-12,
@@ -80,8 +80,8 @@ public let HELISOL_XLP = HeatTransferFluid(
     5.73657916311544E-04,
     5.43040467737289E-01,
     -2.45746704987653E-01,
-  ],
-  useEnthalpy: false
+  ].reversed(),
+  useEnthalpy: true
 )
 
 /// The Heat Transfer Fluid is characterized through maximum operating temperature,
