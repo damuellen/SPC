@@ -14,8 +14,8 @@ import Libc
 public typealias Heat = Double
 public typealias Pressure = Double
 
-public let HTF = HeatTransferFluid(
-  name: "Therminol",
+public let VP1 = HeatTransferFluid(
+  name: "Therminol VP1",
   freezeTemperature: 12,
   heatCapacity: [1.4856, 0.0028],
   dens: [1074.964, -0.6740513, -0.000650017],
@@ -27,11 +27,68 @@ public let HTF = HeatTransferFluid(
   useEnthalpy: false
 )
 
+public let HELISOL_XLP = HeatTransferFluid(
+  name: "Helisol XLP",
+  freezeTemperature: 0.0,
+  heatCapacity: [
+    -1.58828198049302E-14,
+    2.62912713651709E-11,
+    -1.78368416423495E-08,
+    6.35344114963126E-06,
+    -1.25262719213376E-03,
+    1.31924308102715E-01,
+    -4.10349394308805E+00,
+  ],
+  dens: [
+    2.58818883828842E-12,
+    -4.41892055919859E-09,
+    3.06805664086603E-06,
+    -1.11688325387582E-03,
+    2.23959978961942E-01,
+    -2.44772025890099E+01,
+    1.98218481500559E+03,
+  ],
+  visco: [
+    -1.86465176227281E-17,
+    3.84423262823152E-14,
+    -3.25124460239875E-11,
+    1.43896557396696E-08,
+    -3.48912643899880E-06,
+    4.30698361240265E-04,
+    -1.94013913496905E-02,
+  ],
+  thermCon: [
+    2.9750737067810E-07,
+    -2.8822299651568E-04,
+    1.4246307960332E-01,
+  ],
+  maxTemperature: 450.0,
+  h_T: [
+    -2.80342523341999E-13,
+    4.78450915832572E-10,
+    -3.32254515569880E-07,
+    1.20735120072059E-04,
+    -2.30480305214602E-02,
+    3.93395842253904E+00,
+    -8.84695293317490E+01,
+  ],
+  T_h: [
+    1.01945101897670E-15,
+    -3.13429657069657E-12,
+    3.85253198875837E-09,
+    -2.35758605126147E-06,
+    5.73657916311544E-04,
+    5.43040467737289E-01,
+    -2.45746704987653E-01,
+  ],
+  useEnthalpy: false
+)
+
 /// The Heat Transfer Fluid is characterized through maximum operating temperature,
 /// freeze temperature, specific heat capacity, viscosity, thermal conductivity,
 /// enthalpy, and density as a function of temperature.
 public struct HeatTransferFluid: CustomStringConvertible, Equatable {
- 
+
   public let name: String
   public let freezeTemperature: Temperature
   public let heatCapacity: [Double]
@@ -134,7 +191,7 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
     q += heatCapacity[1] / 2 * (high * high - low * low)
     return q
   }
-  
+
   static func change(
     from high: Double, to low: Double, enthalpy: [Double]) -> Double
   {
@@ -146,7 +203,7 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
     return h2 - h1
   }
 
-  public var description: String {    
+  public var description: String {
     "Description:" * name
     + "Freezing Point [°C]:" * freezeTemperature.celsius.description
     + "Specific Heat as a Function of Temperature; cp(T) = c0+c1*T\n"
@@ -154,7 +211,7 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
     + "c1:" * heatCapacity[1].description
     + "Calculate with Enthalpy:" * (useEnthalpy ? "YES" : "NO")
     + (enthalpyFromTemperature.isEmpty == false ?
-    "Enthalpy as function on Temperature" 
+    "Enthalpy as function on Temperature"
     + "\n\(enthalpyFromTemperature)" : "")
     + (temperatureFromEnthalpy.isEmpty == false ?
     "Temperature as function on Enthalpy"
@@ -165,7 +222,7 @@ public struct HeatTransferFluid: CustomStringConvertible, Equatable {
     + "\n\(Polynomial(viscosity))"
     + "Conductivity as a Function of Temperature; lamda(T) = c0+c1*T+c1*T^2"
     + "\n\(Polynomial(thermCon))"
-    + "Maximum Operating Temperature [°C]:" 
+    + "Maximum Operating Temperature [°C]:"
     * maxTemperature.celsius.description
   }
 }
@@ -237,7 +294,7 @@ extension HeatTransferFluid: Codable {
   }
 
   public func encode(to encoder: Encoder) throws {
-    var container = encoder.container(keyedBy: CodingKeys.self)    
+    var container = encoder.container(keyedBy: CodingKeys.self)
     try container.encode(name, forKey: .name)
     try container.encode(freezeTemperature, forKey: .freezeTemperature)
     try container.encode(heatCapacity, forKey: .heatCapacity)
@@ -260,7 +317,7 @@ extension HeatTransferFluid {
     self.density = try [ln(19), ln(22), ln(25)]
     self.viscosity = try [ln(28), ln(31), ln(34)]
     self.thermCon = try [ln(37), ln(40), ln(43)]
-    self.maxTemperature = try Temperature(celsius: ln(46)) 
+    self.maxTemperature = try Temperature(celsius: ln(46))
     /* if includesEnthalpy {
       let h_T = try [ln(47), ln(48), ln(49), ln(50), ln(51)]
       enthaplyFromTemperature = Polynomial(h_T)

@@ -17,12 +17,13 @@ public struct Calculation: Codable {
     self.parameter = parameter
   }
 
+  public var HTF: HeatTransferFluid = VP1
+
   public var mixHTFMassflow = 0.0
   public var mixHTFAbsoluteEnthalpy = 0.0
   public var mixHTFTemperature: Temperature = 0.0
 
   public var upperHTFTemperature = Temperature(celsius: 393)
-  
   public var economizerFeedwaterTemperature = Temperature(celsius: 250.8)
 
   public var turbine = WaterSteam(
@@ -205,7 +206,7 @@ public struct Calculation: Codable {
       steamGenerator.pressure.ws.inlet + pressureDrop.economizer_steamGenerator
     economizer.pressure.ws.inlet =
       economizer.pressure.ws.outlet + pressureDrop.economizer
-    economizer.massFlow.ws.inlet = 
+    economizer.massFlow.ws.inlet =
       turbine.massFlow / (1 - blowDownOfInputMassFlow / 100)
     economizer.massFlow.ws.outlet = economizer.massFlow.ws.inlet
 
@@ -272,7 +273,7 @@ public struct Calculation: Codable {
     steamGenerator.massFlow.htf = htfMassFlowEc_Sg_ShTrain
     economizer.massFlow.htf = htfMassFlowEc_Sg_ShTrain
 
-    superheater.enthalpy.htf.outlet = superheater.enthalpy.htf.inlet 
+    superheater.enthalpy.htf.outlet = superheater.enthalpy.htf.inlet
       - (superheater.power * 1_000 / superheater.massFlow.htf)
     superheater.temperature.htf.outlet = HTF.temperature(superheater.enthalpy.htf.outlet)
 

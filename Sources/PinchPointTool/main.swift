@@ -66,6 +66,10 @@ struct PinchPointTool: ParsableCommand {
 
     var pinchPoint = PinchPoint.Calculation(parameter: parameter)
 
+    if htfFluid == "Hel_XLP" {
+      pinchPoint.HTF = HELISOL_XLP
+    }
+
     if input.count == 11, (input.min() ?? 0) > .zero {
       pinchPoint.economizerFeedwaterTemperature = Temperature(celsius: input[0])
 
@@ -124,7 +128,16 @@ struct PinchPointTool: ParsableCommand {
     }
 
     if html {
-      let html = HTML(body: dia.svg + plot)
+      var html = HTML(body: dia.svg + plot)
+      let script = """
+      <link href="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.4.1/jsoneditor.min.css" rel="stylesheet" type="text/css">
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.4.1/jsoneditor.min.js"></script>
+      <div id="jsoneditor" style="width: 50%; height: 95vh; margin-left: 22%; padding: 2vh; margin-top: 5vh;"></div>
+      <script>new JSONEditor(document.getElementById("jsoneditor"), {},
+      """
+      html.body.append(contentsOf: script)
+      try html.body.append(contentsOf: pinchPoint.encodeToJSON())
+      html.body.append(contentsOf: ")</script>")
       #if DEBUG
         let path = "temp.html"
       #else
