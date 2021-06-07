@@ -1,6 +1,6 @@
 Add-Type -AssemblyName System.Windows.Forms
 [System.Windows.Forms.Application]::EnableVisualStyles()
-
+$Expert = false
 $WidthBox = 60
 $HeightBox = 24
 $XLabels = 10
@@ -15,7 +15,6 @@ $Form.MaximumSize = '360,410'
 $Form.text = "Pinch Point Tool"
 $Form.TopMost = $true
 $Form.StartPosition = "CenterScreen" #loads the window in the center of the screen
-
 
 $Items = "ECO Inlet Feedwater Temperature  [°C]",
 "Live Steam Massflow  [kg/s]",
@@ -58,9 +57,10 @@ foreach ($Item in $Items) {
 
 $Combobox1 = New-Object 'System.Windows.Forms.ComboBox'
 $Combobox1.width = $WidthBox
-$Combobox1.Items.AddRange(@("ThVP1", "Hel5a"))
+$Combobox1.Items.AddRange(@("ThVP1", "Hel_XLP"))
 $Combobox1.SelectedIndex = 0
 $Combobox1.location = New-Object System.Drawing.Point($XBoxes, $Y)
+
 $label1 = New-Object system.Windows.Forms.Label
 $label1.text = "HTF Fluid"
 $label1.AutoSize = $true
@@ -75,6 +75,7 @@ $Combobox2.SelectedIndex = 0
 $Combobox2.location = New-Object System.Drawing.Point($XBoxes, $Y)
 
 $Combobox2.Add_SelectedIndexChanged({ if ($Form1.Visible) { Read-Inputs2 } })
+
 $label2 = New-Object system.Windows.Forms.Label
 $label2.text = "HEX CASE"
 $label2.AutoSize = $true
@@ -130,7 +131,7 @@ foreach ($Item in $Items1) {
 }
 
 $Button1.Add_Click({
-   Run-Tool
+   Run-HTML
  # $Form.Close()
 })
 
@@ -145,61 +146,90 @@ $Button3.Add_Click({
   } else {
     $Form1.Show()
     Read-Inputs2
+    $Expert = true
   }
 })
 
-Function Read-Inputs {
-  $P = new-object System.Diagnostics.Process
-  $P.StartInfo.Filename = "C:\bin\PinchPointTool.exe"
-  $P.StartInfo.Arguments = "-json", "-case 1"
-  $P.StartInfo.RedirectStandardOutput = $true;
-  $P.StartInfo.UseShellExecute = $false
-  $P.start()
-  $text = $P.StandardOutput.ReadToEnd()
-  $start = $text.IndexOf("{")
-  $length = $text.LastIndexOf("}") - $start + 1
-  $text = $text.Substring($start, $length)
-  $json = $text | ConvertFrom-Json
-  $Array = @($json.economizerFeedwaterTemperature,
-    $json.turbine.massFlow, $json.turbine.temperature, $json.turbine.pressure,
-    $json.blowDownOfInputMassFlow,
-    $json.reheatInlet.temperature ,$json.reheatInlet.pressure ,$json.reheatInlet.enthalpy ,$json.reheatInlet.massFlow,
-    $json.reheatOutletSteamPressure, $json.upperHTFTemperature
-  )
-  $idx = 0
-  $Form.Controls.where{$_ -is [System.Windows.Forms.TextBox]}.ForEach({
-    $_.Text = $Array[$idx]
-    $idx = $idx + 1
-  })
-}
-
-Function Run-Tool {
+Function New-Process {
     $P = new-object System.Diagnostics.Process
     $P.StartInfo.Filename = "C:\bin\PinchPointTool.exe"
     $P.StartInfo.RedirectStandardOutput = $true;
     $P.StartInfo.RedirectStandardInput = $true;
     $P.StartInfo.UseShellExecute = $false;
-    [string[]] $Array = @("-html")
-    $form.Controls.where{$_ -is [System.Windows.Forms.TextBox]}.ForEach({
-        $Array += $_.Text
-    })
-    $Hex = @()
-    $Form1.Controls.where{$_ -is [System.Windows.Forms.TextBox]}.ForEach({
-     $Hex += $_.Text
-    })
-    if ($Hex.Count -eq 10) {
-        $Array += $Hex
-        $Array += "-hex"
-    } else {
-        $Array += "-case"
-        $Array += $ComboBox2.Text
-    }
-    $Array = $Array.Trim()
-    $Array += "-htf"
-    $Array += $ComboBox1.Text
+    return $P;
+}
 
-    write-host $Array
-    $P.StartInfo.Arguments = $Array
+Function Read-Inputs {
+    $P = New-Process;
+    $P.StartInfo.Arguments = "-json", "-case 1"
+    $P.start()
+    $text = $P.StandardOutput.ReadToEnd()
+    $start = $text.IndexOf("{")
+    $length = $text.LastIndexOf("}") - $start + 1
+    $text = $text.Substring($start, $length)
+    $json = $text | ConvertFrom-Json
+    $Array = @($json.economizerFeedwaterTemperature,
+        $json.turbine.massFlow, $json.turbine.temperature, $json.turbine.pressure,
+        $json.blowDownOfInputMassFlow,
+        $json.reheatInlet.temperature ,$json.reheatInlet.pressure ,$json.reheatInlet.enthalpy ,$json.reheatInlet.massFlow,
+        $json.reheatOutletSteamPressure, $json.upperHTFTemperature
+    )
+    $idx = 0
+    $Form.Controls.where{$_ -is [System.Windows.Forms.TextBox]}.ForEach({
+        $_.Text = $Array[$idx]
+        $idx = $idx + 1
+    })
+}
+
+Function Read-Inputs2 {
+    $Selected = @()
+    $Form.Controls.where{$_ -is [System.Windows.Forms.ComboBox]}.ForEach({
+    $Selected += , ($_.SelectedIndex+1)
+    })
+    $P = New-Process;
+    $P.StartInfo.Arguments = "-json", "-case", $Selected[1]
+    $P.start()
+    $text = $P.StandardOutput.ReadToEnd()
+    $start = $text.IndexOf("{")
+    $length = $text.LastIndexOf("}") - $start + 1
+    $text = $text.Substring($start, $length)
+    $json = $text | ConvertFrom-Json
+    $Array = @($json.parameter.temperatureDifferenceHTF, $json.parameter.temperatureDifferenceWater,
+        $json.parameter.pressureDrop.economizer ,
+        $json.parameter.pressureDrop.economizer_steamGenerator ,
+        $json.parameter.pressureDrop.steamGenerator ,
+        $json.parameter.pressureDrop.steamGenerator_superHeater ,
+        $json.parameter.pressureDrop.superHeater ,
+        $json.parameter.pressureDrop.superHeater_turbine ,
+        $json.parameter.steamQuality , $json.parameter.requiredLMTD)
+    $idx = 0
+    $Form1.Controls.where{$_ -is [System.Windows.Forms.TextBox]}.ForEach({
+        $_.Text = $Array[$idx]
+        $idx = $idx + 1
+    })
+}
+
+Function Run-HTML {
+    $P = New-Process;
+    [string[]] $Arguments = @()
+    $form.Controls.where{$_ -is [System.Windows.Forms.TextBox]}.ForEach({
+        $Arguments += $_.Text
+    })
+    if ($Expert) {
+        $Form1.Controls.where{$_ -is [System.Windows.Forms.TextBox]}.ForEach({
+         $Arguments += $_.Text
+        })
+        $Arguments += "-hex"
+    } else {
+        $Arguments += "-case"
+        $Arguments += $ComboBox2.Text
+    }
+    $Arguments += "-htf"
+    $Arguments += $ComboBox1.Text
+
+    $Arguments += "-html"
+    $Arguments = $Arguments.Trim()
+    $P.StartInfo.Arguments = $Arguments
     $P.start()
     $P.WaitForExit()
     write-host $P.TotalProcessorTime
@@ -210,93 +240,36 @@ Function Run-Tool {
     } else {
       $path = $html.Trim()
     }
+    write-host $html
     Start-Process ((Resolve-Path $path).Path)
 }
 
 Function Run-PDF {
-    $P = new-object System.Diagnostics.Process
-    $P.StartInfo.Filename = "C:\bin\PinchPointTool.exe"
-    $P.StartInfo.RedirectStandardOutput = $true;
-    $P.StartInfo.RedirectStandardInput = $true;
-    $P.StartInfo.UseShellExecute = $false;
-    [string[]] $Array = @("-pdf")
+    $P = New-Process;
+    [string[]] $Arguments = @()
     $form.Controls.where{$_ -is [System.Windows.Forms.TextBox]}.ForEach({
-        $Array += $_.Text
+        $Arguments += $_.Text
     })
-    $Hex = @()
-    $Form1.Controls.where{$_ -is [System.Windows.Forms.TextBox]}.ForEach({
-     $Hex += $_.Text
-    })
-    if ($Hex.Count -eq 10) {
-        $Array += $Hex
-        $Array += "-hex"
+    if ($Expert) {
+        $Form1.Controls.where{$_ -is [System.Windows.Forms.TextBox]}.ForEach({
+         $Arguments += $_.Text
+        })
+        $Arguments += "-hex"
     } else {
-        $Array += "-case"
-        $Array += $ComboBox2.Text
+        $Arguments += "-case"
+        $Arguments += $ComboBox2.Text
     }
-    $Array = $Array.Trim()
-    $Array += "-htf"
-    $Array += $ComboBox1.Text
+    $Arguments += "-htf"
+    $Arguments += $ComboBox1.Text
 
-    write-host $Array
-    $P.StartInfo.Arguments = $Arrayy += $ComboBox2.Text
+    $Arguments += "-pdf"
+    $Arguments = $Arguments.Trim()
+    $P.StartInfo.Arguments = $Arguments
     $P.start()
     $P.WaitForExit()
     write-host $P.TotalProcessorTime
     Start-Process ((Resolve-Path ".\diagram.pdf").Path)
     Start-Process ((Resolve-Path ".\plot.pdf").Path)
-}
-
-Function Run-Excel {
-    $P = new-object System.Diagnostics.Process
-    $P.StartInfo.Filename = "C:\bin\PinchPointTool.exe"
-    $P.StartInfo.RedirectStandardOutput = $true;
-    $P.StartInfo.RedirectStandardInput = $true;
-    $P.StartInfo.UseShellExecute = $false;
-    [string[]] $Array = @("-excel")
-    $form.Controls.where{$_ -is [System.Windows.Forms.TextBox]}.ForEach({
-        $Array += $_.Text
-    })
-    $Array = $Array.Trim()
-    $Array += "-htf"
-    $Array += $ComboBox1.Text
-    $Array += "-case"
-    $Array += $ComboBox2.Text
-    $P.StartInfo.Arguments = $Array
-    $P.start()
-    $P.WaitForExit()
-    Start-Process ((Resolve-Path ".\pinchpoint.xlsx").Path)
-}
-
-Function Read-Inputs2 {
-  $Selected = @()
-  $Form.Controls.where{$_ -is [System.Windows.Forms.ComboBox]}.ForEach({
-    $Selected += , ($_.SelectedIndex+1)
-  })
-  $P = new-object System.Diagnostics.Process
-  $P.StartInfo.Filename = "C:\bin\PinchPointTool.exe"
-  $P.StartInfo.Arguments = "-json", "-case", $Selected[1]
-  $P.StartInfo.RedirectStandardOutput = $true;
-  $P.StartInfo.UseShellExecute = $false
-  $P.start()
-  $text = $P.StandardOutput.ReadToEnd()
-  $start = $text.IndexOf("{")
-  $length = $text.LastIndexOf("}") - $start + 1
-  $text = $text.Substring($start, $length)
-  $json = $text | ConvertFrom-Json
-  $Array = @($json.parameter.temperatureDifferenceHTF, $json.parameter.temperatureDifferenceWater,
-     $json.parameter.pressureDrop.economizer ,
-     $json.parameter.pressureDrop.economizer_steamGenerator ,
-     $json.parameter.pressureDrop.steamGenerator ,
-     $json.parameter.pressureDrop.steamGenerator_superHeater ,
-     $json.parameter.pressureDrop.superHeater ,
-     $json.parameter.pressureDrop.superHeater_turbine ,
-     $json.parameter.steamQuality , $json.parameter.requiredLMTD)
-  $idx = 0
-  $Form1.Controls.where{$_ -is [System.Windows.Forms.TextBox]}.ForEach({
-    $_.Text = $Array[$idx]
-    $idx = $idx + 1
-  })
 }
 
 Read-Inputs
