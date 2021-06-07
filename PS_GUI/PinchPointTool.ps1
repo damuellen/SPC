@@ -7,7 +7,6 @@ $XLabels = 10
 $XBoxes = 270
 $Y = 15
 $YOffset = 24
-$Form1 = New-Object system.Windows.Forms.Form
 $Form = New-Object system.Windows.Forms.Form
 $Form.FormBorderStyle = "FixedDialog"
 $Form.Size = '360,410'
@@ -17,7 +16,6 @@ $Form.text = "Pinch Point Tool"
 $Form.TopMost = $true
 $Form.StartPosition = "CenterScreen" #loads the window in the center of the screen
 
-#$Calendar = New-Object System.Windows.Forms.
 
 $Items = "ECO Inlet Feedwater Temperature  [°C]",
 "Live Steam Massflow  [kg/s]",
@@ -30,6 +28,17 @@ $Items = "ECO Inlet Feedwater Temperature  [°C]",
 "RH Inlet Steam Massflow  [kg/s]",
 "RH Outlet Steam Pressure  [bar]",
 "HTF HEX inlet temperature  [°C]"
+
+$Items1 = "Pinch-Point-dT  [°C]",
+"Approach  [°C]",
+"ECO Pressure Drop  [bar]",
+"Pressure Drop betw. ECO & SG  [bar]",
+"SG Pressure Drop  [bar]",
+"Pressure Drop betw. SG & SH  [bar]",
+"SH Pressure Drop  [bar]",
+"Pressure Drop betw. SH_out and Turbine_in  [bar]",
+"SG Steam Quality Outlet  [%]",
+"Required Reheater LMTD  [°C]"
 
 foreach ($Item in $Items) {
   $TextBox = New-Object system.Windows.Forms.TextBox
@@ -64,6 +73,8 @@ $Combobox2.width = $WidthBox
 $Combobox2.Items.AddRange(@("1", "2", "3"))
 $Combobox2.SelectedIndex = 0
 $Combobox2.location = New-Object System.Drawing.Point($XBoxes, $Y)
+
+$Combobox2.Add_SelectedIndexChanged({ if ($Form1.Visible) { Read-Inputs2 } })
 $label2 = New-Object system.Windows.Forms.Label
 $label2.text = "HEX CASE"
 $label2.AutoSize = $true
@@ -92,6 +103,32 @@ $Button3.location = New-Object System.Drawing.Point(230, $Y)
 
 $Form.controls.AddRange(@($Button1, $Button2, $Button3))
 
+$Y = 15
+$YOffset = 24
+$Form1 = New-Object system.Windows.Forms.Form
+$Form1.FormBorderStyle = "FixedDialog"
+$Form1.Size = '360,300'
+$Form1.MinimumSize = '360,300'
+$Form1.MaximumSize = '360,300'
+$Form1.text = "Expert values"
+$Form1.TopMost = $true
+$Form1.StartPosition = "WindowsDefaultLocation" #loads the window in the center of the screen
+
+foreach ($Item in $Items1) {
+  $TextBox = New-Object system.Windows.Forms.TextBox
+  $TextBox.multiline = $false
+  $TextBox.width = $WidthBox
+  $TextBox.height = $HeightBox
+  $TextBox.location = New-Object System.Drawing.Point($XBoxes, $Y)
+
+  $label = New-Object system.Windows.Forms.Label
+  $label.text = $Item
+  $label.AutoSize = $true
+  $label.location = New-Object System.Drawing.Point($XLabels, ($Y + 3))
+  $Y = $Y + $YOffset
+  $Form1.controls.AddRange(@($TextBox, $label))
+}
+
 $Button1.Add_Click({
    Run-Tool
  # $Form.Close()
@@ -103,8 +140,12 @@ $Button2.Add_Click({
 })
 
 $Button3.Add_Click({
-   FirstForm
- # $Form.Close()
+  if ($Form1.Visible) {
+    $Form1.Hide()
+  } else {
+    $Form1.Show()
+    Read-Inputs2
+  }
 })
 
 Function Read-Inputs {
@@ -119,14 +160,13 @@ Function Read-Inputs {
   $length = $text.LastIndexOf("}") - $start + 1
   $text = $text.Substring($start, $length)
   $json = $text | ConvertFrom-Json
-  $idx = 0
   $Array = @($json.economizerFeedwaterTemperature,
     $json.turbine.massFlow, $json.turbine.temperature, $json.turbine.pressure,
     $json.blowDownOfInputMassFlow,
     $json.reheatInlet.temperature ,$json.reheatInlet.pressure ,$json.reheatInlet.enthalpy ,$json.reheatInlet.massFlow,
     $json.reheatOutletSteamPressure, $json.upperHTFTemperature
   )
-
+  $idx = 0
   $Form.Controls.where{$_ -is [System.Windows.Forms.TextBox]}.ForEach({
     $_.Text = $Array[$idx]
     $idx = $idx + 1
@@ -200,7 +240,6 @@ Function Run-PDF {
 
     write-host $Array
     $P.StartInfo.Arguments = $Arrayy += $ComboBox2.Text
-    }
     $P.start()
     $P.WaitForExit()
     write-host $P.TotalProcessorTime
@@ -245,8 +284,6 @@ Function Read-Inputs2 {
   $length = $text.LastIndexOf("}") - $start + 1
   $text = $text.Substring($start, $length)
   $json = $text | ConvertFrom-Json
-
-  $idx = 0
   $Array = @($json.parameter.temperatureDifferenceHTF, $json.parameter.temperatureDifferenceWater,
      $json.parameter.pressureDrop.economizer ,
      $json.parameter.pressureDrop.economizer_steamGenerator ,
@@ -255,55 +292,12 @@ Function Read-Inputs2 {
      $json.parameter.pressureDrop.superHeater ,
      $json.parameter.pressureDrop.superHeater_turbine ,
      $json.parameter.steamQuality , $json.parameter.requiredLMTD)
-
+  $idx = 0
   $Form1.Controls.where{$_ -is [System.Windows.Forms.TextBox]}.ForEach({
     $_.Text = $Array[$idx]
     $idx = $idx + 1
   })
 }
-
-Function FirstForm {
-  $Y = 15
-  $YOffset = 24
-
-  $Form1.FormBorderStyle = "FixedDialog"
-  $Form1.Size = '360,300'
-  $Form1.MinimumSize = '360,300'
-  $Form1.MaximumSize = '360,300'
-  $Form1.text = "Expert values"
-  $Form1.TopMost = $true
-  $Form1.StartPosition = "WindowsDefaultLocation" #loads the window in the center of the screen
-
-  $Items1 = "Pinch-Point-dT  [°C]",
-  "Approach  [°C]",
-  "ECO Pressure Drop  [bar]",
-  "Pressure Drop betw. ECO & SG  [bar]",
-  "SG Pressure Drop  [bar]",
-  "Pressure Drop betw. SG & SH  [bar]",
-  "SH Pressure Drop  [bar]",
-  "Pressure Drop betw. SH_out and Turbine_in  [bar]",
-  "SG Steam Quality Outlet  [%]",
-  "Required Reheater LMTD  [°C]"
-
-  foreach ($Item in $Items1) {
-    $TextBox = New-Object system.Windows.Forms.TextBox
-    $TextBox.multiline = $false
-    $TextBox.width = $WidthBox
-    $TextBox.height = $HeightBox
-    $TextBox.location = New-Object System.Drawing.Point($XBoxes, $Y)
-
-    $label = New-Object system.Windows.Forms.Label
-    $label.text = $Item
-    $label.AutoSize = $true
-    $label.location = New-Object System.Drawing.Point($XLabels, ($Y + 3))
-    $Y = $Y + $YOffset
-    $Form1.controls.AddRange(@($TextBox, $label))
-  }
-    Read-Inputs2
-  $Form1.Show()
-}
-
-
 
 Read-Inputs
 
