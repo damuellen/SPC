@@ -46,7 +46,6 @@ public struct PlantPerformance: MeasurementsConvertible {
 }
 
 extension PlantPerformance {
-  
   init(_ plant: Plant) {
     self.thermal = plant.heatFlow
     self.electric = plant.electricity
@@ -65,18 +64,18 @@ extension PlantPerformance {
 public struct ElectricPower: Encodable, MeasurementsConvertible {
   internal(set) public var demand = 0.0, gross = 0.0, shared = 0.0,
     solarField = 0.0, powerBlock = 0.0, storage = 0.0, gasTurbine = 0.0,
-    steamTurbineGross = 0.0, gasTurbineGross = 0.0, backupGross = 0.0,
+    steamTurbineGross = 0.0, gasTurbineGross = 0.0, photovoltaic = 0.0,
     parasitics = 0.0, net = 0.0, consum = 0.0
 
   var numericalForm: [Double] {
-    [demand, steamTurbineGross, storage, parasitics, shared, net, consum]
+    [demand, steamTurbineGross, photovoltaic, storage, parasitics, shared, net, consum]
   }
 
   static var columns: [(name: String, unit: String)] {
     [
       ("Electric|Demand", "MWh e"),
       ("Electric|SteamTurbineGross", "MWh e"),
-  //    ("Electric|BackupGross", "MWh e"),
+      ("Electric|Photovoltaic", "MWh e"),
       ("Electric|Storage", "MWh e"),
       ("Electric|Parasitics", "MWh e"),
       ("Electric|Shared", "MWh e"),
@@ -141,12 +140,10 @@ public struct ElectricPower: Encodable, MeasurementsConvertible {
     self.gross += values.gross * fraction
     self.steamTurbineGross += values.steamTurbineGross * fraction
    // self.gasTurbineGross += values.gasTurbineGross * fraction
-   // self.backupGross += values.backupGross * fraction
-    // backupGross +=
+    self.photovoltaic += values.photovoltaic * fraction
     self.shared += values.shared * fraction
     self.solarField += values.solarField * fraction
     self.parasitics += values.parasitics * fraction
-    
     self.storage += values.storage * fraction
     self.net += values.net * fraction
     self.consum += values.consum * fraction
@@ -209,7 +206,7 @@ public struct ThermalEnergy: Encodable, MeasurementsConvertible {
   }
 
   /// Calculation of the heat supplied by the solar field
-  mutating func solarProduction(_ solarField: SolarField) {    
+  mutating func solarProduction(_ solarField: SolarField) {
     solar.kiloWatt = solarField.massFlow.rate * solarField.heat
 
     if solar > .zero {

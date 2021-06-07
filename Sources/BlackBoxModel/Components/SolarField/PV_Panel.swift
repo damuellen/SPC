@@ -10,7 +10,7 @@
 import Libc
 import PhysicalQuantities
 
-struct Cell {
+public struct Cell {
   static let radiation_at_ST = 1000.0
   static let temperature_at_ST = Temperature(celsius: 25.0)
   static let k = 1.3806488E-23
@@ -28,6 +28,17 @@ struct Cell {
   let Ioref: Double
   let gamma: Double
   let Egap: Double
+
+  init() {
+    self.Isc = 9.517
+    self.Rs = 0.272
+    self.RshRef = 3000
+    self.Rsh0 = 10000
+    self.muIsc = 5.7E-3
+    self.Ioref = 0.012E-9
+    self.gamma = 0.96
+    self.Egap = 1.12
+  }
 
   public struct PowerPoint {
     let current: Double
@@ -80,6 +91,13 @@ struct Panel {
   let area: Double
   /// Number of cells of the panel
   let numberOfCells: Int
+
+  init() {
+    self.cell = Cell()
+    self.nominalPower = 390
+    self.area = 1.972
+    self.numberOfCells = 76
+  }
 
   func voltage(radiation: Double, temperature: Temperature, current: Double)
     -> Double
@@ -157,9 +175,10 @@ struct Panel {
     return bisect(Iph: Iph, Io: I0, a: nVth, Rsh: Rsh)
   }
 
+
   func bisect(Iph: Double, Io: Double, a: Double, Rsh: Double) -> Cell.PowerPoint {
-    let Imp = calc_Imp_bisect(Iph, Io, a, cell.Rs, Rsh)
-    let z = calc_phi_exact(Imp, Iph, Io, a, Rsh)
+    let Imp = Imp_bisect(Iph, Io, a, cell.Rs, Rsh)
+    let z = phi_exact(Imp, Iph, Io, a, Rsh)
     let Vmp = (Iph + Io - Imp) * Rsh - Imp * cell.Rs - a * z
     return Cell.PowerPoint(current: Imp, voltage: Vmp)
   }
@@ -168,14 +187,14 @@ struct Panel {
   //    V_from_I(Rsh, Rs, nVth, 0, Io, Iph)
   //  }
 
-  func calc_Imp_bisect(
+  func Imp_bisect(
     _ Iph: Double, _ Io: Double, _ nVth: Double, _ Rs: Double, _ Rsh: Double
   ) -> Double {
     var A = 0.0
     var B = Iph + Io
 
     var gA = g(A, Iph, Io, nVth, Rs, Rsh)
-    var gB = g(B, Iph, Io, nVth, Rs, Rsh)
+    let gB = g(B, Iph, Io, nVth, Rs, Rsh)
 
     if gA * gB > 0 { A = .nan }
 
@@ -199,24 +218,25 @@ struct Panel {
     _ I: Double, _ Iph: Double, _ Io: Double, _ a: Double, _ Rs: Double,
     _ Rsh: Double
   ) -> Double {
-    let z = calc_phi_exact(I, Iph, Io, a, Rsh)
+    let z = phi_exact(I, Iph, Io, a, Rsh)
     return (Iph + Io - 2 * I) * Rsh - 2 * I * Rs - a * z + I * Rsh * z
       / (1 + z)
   }
 
-  func calc_phi_exact(
+  func phi_exact(
     _ Imp: Double, _ IL: Double, _ Io: Double, _ a: Double, _ Rsh: Double
   ) -> Double {
     let argw = Rsh * Io / a * exp(Rsh * (IL + Io - Imp) / a)
 
-    guard argw >= .zero else { return .nan }
+    guard argw > .zero else { return .nan }
     var tmp = lambertW(argw)
-
+    // Only re-compute LambertW if it overflowed
     if tmp.isNaN {
+
       let logargW = log(Rsh) + log(Io) - log(a) + Rsh * (IL + Io - Imp) / a
       var x = logargW
-      let K = Int(log10(x))
-      for _ in 0..<(3 * K) { x = x * ((1 - log(x)) + logargW) / (1 + x) }
+      //let K = Int(log10(x))
+      for _ in 0..<3 { x = x * ((1 - log(x)) + logargW) / (1 + x) }
       tmp = x
     }
 
@@ -224,7 +244,7 @@ struct Panel {
   }
 }
 
-func lambertW(_ z: Double) -> Double {
+public func lambertW(_ z: Double) -> Double {
   var tmp: Double
   var c1: Double
   var c2: Double

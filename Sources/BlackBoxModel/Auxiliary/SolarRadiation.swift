@@ -11,8 +11,9 @@
 import DateGenerator
 import Libc
 import Meteo
+import SolarPosition
 
-struct SolarRadiation: MeasurementsConvertible {
+public struct SolarRadiation: MeasurementsConvertible {
 
   var dni, ghi, dhi, ico: Double
 
@@ -54,7 +55,7 @@ struct SolarRadiation: MeasurementsConvertible {
   }
 }
 
-public struct PerezCoefficients {
+struct PerezCoefficients {
   var f11: Double
   var f12: Double
   var f13: Double
@@ -111,6 +112,34 @@ enum Albedo: Double {
 }
 
 extension SolarRadiation {
+  public static func effective(
+    ghi: Double, dhi: Double, surfTilt: Double, incidence: Double,
+    zenith: Double, doy: Int
+  ) -> Double {
+    if incidence >= 90 || incidence <= 0 { if ghi < 10.0 { return 0 } }
+    let beam: Double
+    let dni: Double
+    if zenith > 89 {
+      beam = 0
+      dni = 0
+    } else {
+      beam = SolarRadiation.beam(global: ghi, diffuse: dhi, incidence: incidence, zenith: zenith)
+      dni = SolarRadiation.normal(global: ghi, diffuse: dhi, zenith: zenith)
+    }
+
+    let hExtra = SolarRadiation.extra(doy: doy)
+
+    let AM = Atmosphere.relativeAirMass(
+      zenith: zenith, model: .kastenyoung1989)
+
+    let diffuse = SolarRadiation.perez(
+      surfaceTilt: surfTilt, incidence: incidence, diffuse: dhi, direct: dni,
+      hExtra: hExtra, sunZenith: zenith, AM: AM)
+
+    //var albedoInc = groundDiffuse(angles.SurfTilt, GHI, context.Albedo)
+    return beam + diffuse
+  }
+
   /// Determine diffuse irradiance from the sky on a tilted surface using the Perez model
   /// - Parameter surfaceTilt: Surf tilted angle in degrees
   /// - Parameter incidence: Angle of incidence of the sun to the surface in degrees
@@ -146,21 +175,21 @@ extension SolarRadiation {
   }
 
   static func beam(global: Double, diffuse: Double, incidence: Double, zenith: Double) -> Double {
-    if zenith > 89 || incidence >= 90 { return 0.0 }
+    if incidence > 89 { return 0.0 }
     let beam = global - diffuse
-    return beam * cos(incidence.toRadians) / cos(zenith.toRadians)
+    return beam * cos(incidence * .pi / 180) / cos(zenith * .pi / 180)
   }
 
   static func normal(global: Double, diffuse: Double, zenith: Double) -> Double {
-    beam(global: global, diffuse: diffuse, incidence: 0.0, zenith: zenith)
+    let beam = global - diffuse
+    return beam / cos(zenith * .pi / 180)
   }
 
   /// Extraterrestrial radiation from day of year
   /// - Parameter date: Date whose extraterrestial radiation will be calculated</param>
   /// - Returns: Extraterrestial radiation
-  static func extra(date: DateTime) -> Double {
-    let doy = Double(date.yearDay)
-    let B = 2.0 * .pi * doy / 365.0
+  static func extra(doy: Int) -> Double {
+    let B = 2.0 * .pi * Double(doy) / 365.0
     let roverR0sqrd = 1.00011
       + 0.034221 * cos(B)
       + 0.00128 * sin(B)

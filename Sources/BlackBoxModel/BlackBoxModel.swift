@@ -67,7 +67,7 @@ public enum BlackBoxModel {
     )
 
     if convert, !handler.isBinaryFile {
-      // Create a binary file 
+      // Create a binary format file
       let data = meteoData?.serialized()
       let url = handler.url.deletingPathExtension().appendingPathExtension("bin")
       FileManager.default.createFile(atPath: url.path, contents: data)
@@ -95,26 +95,68 @@ public enum BlackBoxModel {
       exit(1)
     }
 
+    let 🌦 = MeteoDataGenerator(🌤, frequence: Simulation.time.steps)
+    if let start = Simulation.time.firstDateOfOperation,
+      let end = Simulation.time.lastDateOfOperation
+    {
+      🌦.setRange(.init(start: start, end: end).align(with: Simulation.time.steps))
+    }
+
     Maintenance.setDefaultSchedule(for: yearOfSimulation)
 
     // Preparation of the plant parameters
     var plant = Plant.setup()
-  
+
     // Set initial values
     var status = Plant.initialState
 
-    let (🌦, 📅) = makeGenerators(dataSource: 🌤)
+    let array = PV_Array()
+    let inverter = Inverter()
+    let transformer = Transformer()
 
-    for (meteo, date) in zip(🌦, 📅) {
+    var photovoltaic = [Power]()
+    for (meteo, date) in zip(🌦, timeline(Simulation.time.steps)) {
+      DateTime.setCurrent(date: date)
+      let dt = DateTime.current
+
+      let temperature = Temperature(meteo: meteo)
+      if let position = 🌞[date] {
+        let panel = singleAxisTracker(
+          apparentZenith: position.zenith,
+          apparentAzimuth: position.azimuth,
+          maxAngle: 55, GCR: 0.444)
+        let effective = SolarRadiation.effective(
+          ghi: Double(meteo.ghi), dhi: Double(meteo.dhi),
+          surfTilt: panel.surfTilt, incidence: panel.AOI,
+          zenith: position.zenith, doy: dt.yearDay)
+        let pmp = array.pmp(radiation: effective, ambient: temperature, windSpeed: 0.0)
+        let acPower = pmp.power * inverter(power: pmp.power, voltage: pmp.voltage)
+        if acPower.isFinite {
+          let net = transformer(acPower: acPower)
+          photovoltaic.append(.init(net))
+        } else {
+          photovoltaic.append(.zero)
+        }
+      } else {
+        photovoltaic.append(.zero)
+      }
+    }
+    // Makes it easier to use when re-reading the values
+    photovoltaic.reverse()
+
+    for (meteo, date) in zip(🌦, timeline(Simulation.time.steps)) {
       // Set the date for the calculation step
       DateTime.setCurrent(date: date)
       let dt = DateTime.current
+
+      /// Use the already existing result
+      plant.electricity.photovoltaic = photovoltaic.removeLast().megaWatt
 
       if Maintenance.checkSchedule(date) {
         // No operation is simulated
         let status = Plant.initialState
         let energy = PlantPerformance()
-        backgroundQueue.async { 
+        backgroundQueue.async {
           log(dt, meteo: meteo, status: status, energy: energy)
         }
         continue
@@ -129,7 +171,6 @@ public enum BlackBoxModel {
         status.collector = Collector.initialState
         DateTime.setNight()
       }
-      
 #if DEBUG
       if DateTime.isSunRise
       {()}
@@ -164,7 +205,7 @@ public enum BlackBoxModel {
       status.solarField.calculate(
         collector: status.collector, ambient: temperature
       )
-      
+
       // Determine the current efficiency of the solar field
       status.solarField.eta(collector: status.collector)
 
@@ -184,10 +225,10 @@ public enum BlackBoxModel {
         status.storage.calculate(thermal: &plant.heatFlow, status.powerBlock)
         // Calculate the heat loss of the tanks
         status.storage.heatlosses()
-      } 
-      
+      }
+
       plant.electricity.consumption()
-      
+
       let performance = plant.performance
 #if PRINT
       print(decorated(dt.description), meteo, status, performance)
@@ -198,30 +239,24 @@ public enum BlackBoxModel {
       }
     }
 
+    precondition(photovoltaic.isEmpty, "All values must be consumed.")
+
     backgroundQueue.sync {}  // wait for background queue
     return log.finish()
   }
 
-  private static func makeGenerators(dataSource: MeteoDataSource)
-    -> (MeteoDataGenerator, DateGenerator)
+  private static func timeline(_ interval: Interval) -> DateGenerator
   {
-    let interval = Simulation.time.steps
-
-    let meteoDataGenerator = MeteoDataGenerator(
-      dataSource, frequence: interval
-    )
-
     let dateGenerator: DateGenerator
 
     if let start = Simulation.time.firstDateOfOperation,
       let end = Simulation.time.lastDateOfOperation
     {
       let range = DateInterval(start: start, end: end).align(with: interval)
-      meteoDataGenerator.setRange(range)
       dateGenerator = DateGenerator(range: range, interval: interval)
     } else {
       dateGenerator = DateGenerator(year: yearOfSimulation, interval: interval)
     }
-    return (meteoDataGenerator, dateGenerator)
+    return dateGenerator
   }
 }

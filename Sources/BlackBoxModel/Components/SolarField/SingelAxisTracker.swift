@@ -19,12 +19,12 @@ import Libc
 /// The tracker azimuth axis_azimuth defines the positive y-axis; the
 /// positive x-axis is 90 degress clockwise from the y-axis and parallel
 /// to the earth surface, and the positive z-axis is normal and oriented
-/// towards the sun. Rotation angle tracker_theta indicates tracker
-/// position relative to horizontal: tracker_theta = 0 is horizontal,
-/// and positive tracker_theta is a clockwise rotation around the y axis
+/// towards the sun. Rotation angle trackerTheta indicates tracker
+/// position relative to horizontal: trackerTheta = 0 is horizontal,
+/// and positive trackerTheta is a clockwise rotation around the y axis
 /// in the x, y, z coordinate system. For example, if tracker azimuth
-/// axis_azimuth is 180 (oriented south), tracker_theta = 30 is a
-/// rotation of 30 degrees towards the west, and tracker_theta = -90 is
+/// axis_azimuth is 180 (oriented south), trackerTheta = 30 is a
+/// rotation of 30 degrees towards the west, and trackerTheta = -90 is
 /// a rotation to the vertical plane facing east.
 ///
 /// - Parameters:
@@ -36,7 +36,7 @@ import Libc
 ///
 /// - axisTilt:
 /// The tilt of the axis of rotation (i.e, the y-axis defined by
-/// axis_azimuth) with respect to horizontal, in decimal degrees.
+/// axisAzimuth) with respect to horizontal, in decimal degrees.
 ///
 /// - axisAzimuth:
 /// A value denoting the compass direction along which the axis of
@@ -64,7 +64,7 @@ import Libc
 ///
 /// - Returns:
 /// The rotation angle of the tracker.
-/// tracker_theta = 0 is horizontal, and positive rotation angles are
+/// trackerTheta = 0 is horizontal, and positive rotation angles are
 /// clockwise.
 /// The angle-of-incidence of direct irradiance onto the
 /// rotated panel surface.
@@ -79,12 +79,10 @@ import Libc
 /// [1] Lorenzo, E et al., 2011, "Tracking and back-tracking", Prog. in
 /// Photovoltaics: Research and Applications, v. 19, pp. 747-753.
 func singleAxisTracker(
-  apparentZenith: Double, apparentAzimuth: Double, latitude: Double,
+  apparentZenith: Double, apparentAzimuth: Double, latitude: Double = 0,
   axisTilt: Double = 0, axisAzimuth: Double = 180, maxAngle: Double,
   GCR: Double, shouldBacktrack: Bool = true
-) -> (Double, Double, Double, Double) {
-  var trackerTheta: Double
-
+) -> (trackerTheta: Double, AOI: Double, surfTilt: Double, surfAz: Double) {
   let azimuth = apparentAzimuth - 180
   let elev = 90 - apparentZenith
   var x = cosd(elev) * sind(azimuth)
@@ -92,8 +90,8 @@ func singleAxisTracker(
   var z = sind(elev)
 
   // translate array azimuth from compass bearing to [1] coord system
-  var AxisAz: Double
-  AxisAz = axisAzimuth - 180
+  var axisAz: Double
+  axisAz = axisAzimuth - 180
 
   // translate input array tilt angle axistilt to [1] coordinate system.  In
   // [1] coordinates, axistilt is a rotation about the x-axis.  For a system
@@ -110,14 +108,14 @@ func singleAxisTracker(
   // positive x-axis is orthogonal, clockwise, parallel to earth surface
   // positive z-axis is normal to x-y axes, pointed upward.
   // Calculate sun position (xp,yp,zp) in panel coordinates using [1] Eq 11
-  var xp = x * cosd(AxisAz) - y * sind(AxisAz)
+  var xp = x * cosd(axisAz) - y * sind(axisAz)
   var yp =
-    x * cosd(axisTilt) * sind(AxisAz) + y * cosd(axisTilt) * cosd(AxisAz) - z
+    x * cosd(axisTilt) * sind(axisAz) + y * cosd(axisTilt) * cosd(axisAz) - z
     * sind(axisTilt)
   // note that equation for yp (y// in Eq. 11 of Lorenzo et al 2011) is
   // corrected, after conversation with paper's authors
   var zp =
-    x * sind(axisTilt) * sind(AxisAz) + y * sind(axisTilt) * cosd(AxisAz) + z
+    x * sind(axisTilt) * sind(axisAz) + y * sind(axisTilt) * cosd(axisAz) + z
     * cosd(axisTilt)
 
   // The ideal tracking angle wid is the rotation to place the sun position
@@ -168,7 +166,7 @@ func singleAxisTracker(
     widc = wid
   }
 
-  trackerTheta = widc
+  var trackerTheta = widc
 
   if zp < 0 { trackerTheta = 0 }  // set to zero when sun is below panel horizon
 
