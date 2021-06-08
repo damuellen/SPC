@@ -11,13 +11,14 @@
 import DateGenerator
 import PhysicalQuantities
 
-/// Contains all data needed to simulate the operation of the gas turbine
+/// This struct contains the state as well as the functions for mapping the gas turbine
 public struct GasTurbine: Parameterizable {
 
-  var operationMode: OperationMode
+  /// Returns the operating state
+  var operationMode: OperationMode
 
   var isMaintained: Bool
-
+  /// Returns the load applied
   var load: Ratio
 
   public enum OperationMode: String {

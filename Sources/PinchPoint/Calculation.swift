@@ -101,7 +101,6 @@ public struct Calculation: Codable {
   }
 
   mutating func powerSteamGenerator() -> Double {
-
     steamGenerator.enthalpy.ws.inlet = WaterSteam.enthalpy(
       pressure: steamGenerator.pressure.ws.outlet,
       temperature: steamGenerator.temperature.ws.inlet

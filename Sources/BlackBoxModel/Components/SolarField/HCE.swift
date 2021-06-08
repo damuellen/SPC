@@ -13,7 +13,7 @@ import PhysicalQuantities
 
 let period = 300
 /**
- # HCE  Heat Collecting Element
+ Heat Collecting Element
  
  - Mode 1:
  Calculate the right mass-flow to get maximum allowed HTF-outlet temp.

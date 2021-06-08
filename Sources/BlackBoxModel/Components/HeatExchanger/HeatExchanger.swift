@@ -10,7 +10,7 @@
 
 import PhysicalQuantities
 
-/// Contains all data needed to simulate the operation of the heat exchanger
+/// This struct contains the state as well as the functions for mapping the heat exchanger
 public struct HeatExchanger: Parameterizable, HeatTransfer {
   
   var name: String = HeatExchanger.parameter.name

@@ -11,8 +11,8 @@ let calendar = { calendar -> NSCalendar in
   return calendar
 }(NSCalendar(identifier: .gregorian)!)
 
-/// A table only containing values where the sun is above the horizon.
-/// To access values in the table use a date as a subscript.
+/// A struct containing values where the sun is above the horizon.
+/// Look up values using date-based subscript. Otherwise returns nil.
 public struct SolarPosition {
 
   internal var precalculatedValues = [Date: OutputValues]()
@@ -62,7 +62,7 @@ public struct SolarPosition {
 
   public var frequence: DateGenerator.Interval
 
-  /// Returns a table initialized with precalculated sun position
+  /// Creates a struct with precalculated sun position
   /// for the given location and year at the predetermined times.
   ///
   /// - parameter location: longitude, latitude, elevation

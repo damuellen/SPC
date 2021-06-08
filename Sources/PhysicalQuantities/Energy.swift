@@ -10,6 +10,14 @@
 
 import Libc
 
+/// A unit of measure for energy.
+///
+/// Energy is a fundamental property of matter than can be transferred 
+/// and converted into different forms, such as kinetic, electric, and thermal.
+/// The SI unit for energy is the joule (J), which is derived as the work 
+/// of one meter of displacement in the direction of a force of one newton. 
+/// It can also be derived as the work required to produce 
+/// one watt of power for one second (1J = 1W ∙ 1s).
 public struct Energy: Codable {
 
   public var joule: Double // W/s

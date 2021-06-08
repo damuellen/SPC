@@ -11,11 +11,12 @@
 import DateGenerator
 import Meteo
 import PhysicalQuantities
-/// Contains all data needed to simulate the operation of the steam turbine
+/// This struct contains the state as well as the functions for mapping the steam turbine
 public struct SteamTurbine: Parameterizable {
   
-  var operationMode: OperationMode
-
+  /// Returns the operating state
+  var operationMode: OperationMode
+  /// Returns the load applied
   var load: Ratio {
     get { 
       if case .operating(let load) = operationMode

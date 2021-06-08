@@ -11,7 +11,7 @@
 import Meteo
 import PhysicalQuantities
 
-/// Contains all data needed to simulate the operation of the power block
+/// This struct contains the state as well as the functions for mapping the power block
 public struct PowerBlock: Parameterizable, HeatTransfer {
 
   var name: String = PowerBlock.parameter.name

@@ -33,21 +33,18 @@ steps:
   inputs:
     targetType: 'inline'
     script: |
-      Install-Binary -Url "https://swift.org/builds/swift-5.5-branch/windows10/swift-5.5-DEVELOPMENT-SNAPSHOT-2021-04-19-a/swift-5.5-DEVELOPMENT-SNAPSHOT-2021-04-19-a-windows10.exe" -Name "installer.exe" -ArgumentList ("-q")
+      Install-Binary -Url "https://swift.org/builds/swift-5.5-branch/windows10/swift-5.5-DEVELOPMENT-SNAPSHOT-2021-06-02-a/swift-5.5-DEVELOPMENT-SNAPSHOT-2021-06-02-a-windows10.exe" -Name "installer.exe" -ArgumentList ("-q")
       Write-Host "##vso[task.prependpath]$(toolchain.directory)"
       Write-Host "##vso[task.prependpath]$(bin.directory)"
       Write-Host "##vso[task.prependpath]$(icu.directory)"
   displayName: Install Swift toolchain
 
 - script: |
-    swift build -v -c release -Xswiftc -suppress-warnings
+    swift build -v -c release -Xswiftc -gnone -Xswiftc -suppress-warnings
   env:
     SDKROOT: C:\Library\Developer\Platforms\Windows.platform\Developer\SDKs\Windows.sdk
     DEVELOPER_DIR: C:\Library\Developer
   displayName: Build Swift package
-
-- script: FOR %%f IN (.build\x86_64-unknown-windows-msvc\release\*.exe) DO llvm-strip %%f
-  displayName: Strip symbols from executables
 
 - task: CopyFiles@2
   inputs:

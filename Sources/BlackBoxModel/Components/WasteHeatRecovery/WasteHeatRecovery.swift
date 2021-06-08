@@ -11,7 +11,7 @@
 import PhysicalQuantities
 
 public enum WasteHeatRecovery: Parameterizable {
-  /// Contains all data needed to simulate the operation of the waste heat recovery
+  /// This struct contains the state as well as the functions for mapping the waste heat recovery
   public struct PerformanceData {
     var maintained: Bool
   }

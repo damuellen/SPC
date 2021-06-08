@@ -11,7 +11,7 @@
 import DateGenerator
 import PhysicalQuantities
 
-/// Contains all data needed to simulate the operation of the heater
+/// This struct contains the state as well as the functions for mapping the heater
 public struct Heater: Parameterizable, HeatTransfer {  
 
   var name: String = Heater.parameter.name
@@ -20,7 +20,8 @@ public struct Heater: Parameterizable, HeatTransfer {
   
   var temperature: (inlet: Temperature, outlet: Temperature)
   
-  var operationMode: OperationMode
+  /// Returns the operating state
+  var operationMode: OperationMode
 
   public enum OperationMode {
     case normal(Ratio)
@@ -34,7 +35,7 @@ public struct Heater: Parameterizable, HeatTransfer {
       if case .freezeProtection(_) = self { return true }
       return false
     }
-
+    /// Returns the load applied
     var load: Ratio {
       switch self {
       case let .normal(load), let .charge(load), let .freezeProtection(load):

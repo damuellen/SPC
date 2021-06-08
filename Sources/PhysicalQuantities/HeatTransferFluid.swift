@@ -88,15 +88,19 @@ public let HELISOL_XLP = HeatTransferFluid(
 /// freeze temperature, specific heat capacity, viscosity, thermal conductivity,
 /// enthalpy, and density as a function of temperature.
 public struct HeatTransferFluid: CustomStringConvertible, Equatable {
-
+  /// Product designation 
   public let name: String
+  /// Freezing point
   public let freezeTemperature: Temperature
   public let heatCapacity: [Double]
   let density: [Double]
   let viscosity: [Double]
   let thermCon: [Double]
+  /// Permissible maximum temperature
   public let maxTemperature: Temperature
+  /// Coefficients for calculating the enthalpy as a function of temperature
   let enthalpyFromTemperature: Polynomial
+  /// Coefficients for calculating the temperature as a function of enthalpy
   let temperatureFromEnthalpy: Polynomial
   let useEnthalpy: Bool
 

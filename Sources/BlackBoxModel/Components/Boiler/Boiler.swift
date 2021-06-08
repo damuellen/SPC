@@ -12,13 +12,13 @@ import Foundation
 import DateGenerator
 import PhysicalQuantities
 
-/// Contains all data needed to simulate the operation of the boiler
+/// This struct contains the state as well as the functions for mapping the boiler
 public struct Boiler: Parameterizable {  
-
-  var operationMode: OperationMode
+  /// Returns the operating state
+  var operationMode: OperationMode
 
   var isMaintained: Bool
-
+  /// Returns the load applied
   var load: Ratio
 
   var startEnergy: Double
@@ -43,7 +43,7 @@ public struct Boiler: Parameterizable {
   public static var parameter: Parameter = ParameterDefaults.bo
 
   /// Calculates the efficiency of the boiler which only depends on his current load
-  private static func efficiency(at load: Ratio) -> Double {
+  static func efficiency(at load: Ratio) -> Double {
     let efficiency = Boiler.parameter.efficiency(load)
     // debugPrint("boiler efficiency at \(efficiency)")
     precondition(efficiency < 1, "Perpetuum mobile boiler efficiency at over 100%")
@@ -51,7 +51,7 @@ public struct Boiler: Parameterizable {
   }
 
   /// Calculates the parasitics of the boiler which only depends on the current load
-  private static func parasitics(estimateFrom load: Ratio) -> Double {
+  static func parasitics(estimateFrom load: Ratio) -> Double {
     return load.isZero ? 0 :
       parameter.nominalElectricalParasitics *
       (parameter.electricalParasitics[0] +

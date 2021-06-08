@@ -14,7 +14,7 @@ import Meteo
 import SolarPosition
 import PhysicalQuantities
 
-/// Contains all data needed to simulate the operation of the collector
+/// This struct contains the state as well as the functions for mapping the collector
 public struct Collector: Parameterizable, CustomStringConvertible {
     
   public var parabolicElevation, theta, cosTheta: Double

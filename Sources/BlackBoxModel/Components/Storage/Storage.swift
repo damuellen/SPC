@@ -10,7 +10,7 @@
 
 import DateGenerator
 import PhysicalQuantities
-/// Contains all data needed to simulate the operation of the storage
+/// This struct contains the state as well as the functions for mapping the storage
 public struct Storage: Parameterizable, HeatTransfer {
   
   let name = Storage.parameter.name
@@ -24,7 +24,8 @@ public struct Storage: Parameterizable, HeatTransfer {
       * SolarField.parameter.maxMassFlow.rate
   )
 
-  var operationMode: OperationMode
+  /// Returns the operating state
+  var operationMode: OperationMode
 
   var dT_HTFsalt: (cold: Double, hot: Double)
   
@@ -106,7 +107,7 @@ public struct Storage: Parameterizable, HeatTransfer {
     }
   }
   /// Power Block delivers Power to Grid according to Demand in Grid
-  private static func strategyDemand(
+  static func strategyDemand(
     storage: Storage,
     powerBlock: inout PowerBlock,
     heatFlow: ThermalEnergy) -> ThermalEnergy
@@ -133,7 +134,7 @@ public struct Storage: Parameterizable, HeatTransfer {
   }
   
   /// Power Block delivers always design Power to Grid
-  private static func strategyAlways(
+  static func strategyAlways(
     storage: Storage,
     powerBlock: inout PowerBlock,
     heatFlow: ThermalEnergy) -> ThermalEnergy
@@ -162,7 +163,7 @@ public struct Storage: Parameterizable, HeatTransfer {
     return heatFlow
   }
   
-  private static func strategyShifter(
+  static func strategyShifter(
     storage: Storage,
     powerBlock: inout PowerBlock,
     heatFlow: ThermalEnergy) -> ThermalEnergy

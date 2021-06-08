@@ -99,7 +99,8 @@ public enum BlackBoxModel {
     if let start = Simulation.time.firstDateOfOperation,
       let end = Simulation.time.lastDateOfOperation
     {
-      🌦.setRange(.init(start: start, end: end).align(with: Simulation.time.steps))
+      🌦.setRange(.init(start: start, end: end)
+        .align(with: Simulation.time.steps))
     }
 
     Maintenance.setDefaultSchedule(for: yearOfSimulation)
@@ -110,9 +111,7 @@ public enum BlackBoxModel {
     // Set initial values
     var status = Plant.initialState
 
-    let array = PV_Array()
-    let inverter = Inverter()
-    let transformer = Transformer()
+    let pv = PV_System()
 
     var photovoltaic = [Power]()
     for (meteo, date) in zip(🌦, timeline(Simulation.time.steps)) {
@@ -129,10 +128,10 @@ public enum BlackBoxModel {
           ghi: Double(meteo.ghi), dhi: Double(meteo.dhi),
           surfTilt: panel.surfTilt, incidence: panel.AOI,
           zenith: position.zenith, doy: dt.yearDay)
-        let pmp = array.pmp(radiation: effective, ambient: temperature, windSpeed: 0.0)
-        let acPower = pmp.power * inverter(power: pmp.power, voltage: pmp.voltage)
+        let pmp = pv.array.pmp(radiation: effective, ambient: temperature, windSpeed: 0.0)
+        let acPower = pmp.power * pv.inverter(power: pmp.power, voltage: pmp.voltage)
         if acPower.isFinite {
-          let net = transformer(acPower: acPower)
+          let net = pv.transformer(acPower: acPower)
           photovoltaic.append(.init(net))
         } else {
           photovoltaic.append(.zero)

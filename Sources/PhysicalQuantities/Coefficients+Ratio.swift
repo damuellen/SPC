@@ -10,7 +10,9 @@
 
 import Helpers
 
+/// Represents a polynomial function, e.g. `2 + 3x + 4x²`.
 public struct Polynomial: Codable, Equatable {
+  /// Represents the coefficients of the polynomial
   public let coefficients: [Double]
 
   public init(values: Double...) {

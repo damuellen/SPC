@@ -12,7 +12,7 @@ import Libc
 import Meteo
 import PhysicalQuantities
 
-/// Contains all data needed to simulate the operation of the solar field
+/// This struct contains the state as well as the functions for mapping the solar field
 public struct SolarField: Parameterizable, HeatTransfer {
 
   public let name = "Solar field"
@@ -24,7 +24,8 @@ public struct SolarField: Parameterizable, HeatTransfer {
     static var names: [String] { ["Design", "Near", "Average", "Far"] }
   }
 
-  var operationMode: OperationMode
+  /// Returns the operating state
+  var operationMode: OperationMode
 
   public var eta: Double = 0.0
   public var loopEta: Double = 0.0

@@ -10,22 +10,23 @@
 
 import Libc
 
+/// A unit of measure for mass.
 public struct Mass: Codable, CustomStringConvertible {
-
+  /// A textual description of the value in metric tons.
   public var description: String {
     String(format: "%.1ft", kg / 1_000)
   }
-
+  /// Returns the kilograms unit of mass.
   public var kg: Double 
 
   public init(_ kg: Double) {
     self.kg = kg
   }
-
+  /// Create a Mass given a specified value in metric tons.
   public init(ton: Double) {
     self.kg = ton * 1_000
   }
-
+  /// Create a Mass of zero.
   public init() {
     self.kg = 0
   }

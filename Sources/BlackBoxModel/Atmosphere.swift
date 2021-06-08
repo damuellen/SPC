@@ -238,8 +238,8 @@ public enum Atmosphere {
 
    - Returns: precipitable water (cm)
 
-   References
-   ----------
+   References:
+   -----------
    .. [1] W. M. Keogh and A. W. Blakers, Accurate Measurement, Using Natural
    Sunlight, of Silicon Solar Cells, Prog. in Photovoltaics: Res.
    and Appl. 2004, vol 12, pp. 1-19 (:doi:`10.1002/pip.517`)
@@ -557,7 +557,7 @@ public enum Atmosphere {
    - SeeAlso: angstrom_alpha
 
    References:
-   ----------/
+   -----------
    [1] Anders Angstrom, "On the Atmospheric Transmission of Sun Radiation and
    On Dust in the Air", Geografiska Annaler Vol. 11, pp. 156-166 (1929) JSTOR
    :doi:`10.2307/519399`

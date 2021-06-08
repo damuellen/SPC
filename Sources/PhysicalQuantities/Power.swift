@@ -10,30 +10,35 @@
 
 import Libc
 
+/// A unit of measure for power.
+///
+/// Power is the amount of energy used over time.
+/// The SI unit for power is the watt (W),
+/// which is derived as one joule per second (1W = 1J / 1s).
 public struct Power: Codable {
-
+  /// Returns the watts unit of power.
   public var watt: Double
-
+  /// Returns the megawatts unit of power.
   public var megaWatt: Double {
     get { watt / 1_000_000 }
     set { watt = newValue * 1_000_000 }
   }
-
+  /// Returns the kilowatts unit of power.
   public var kiloWatt: Double {
     get { watt / 1_000 }
     set { watt = newValue * 1_000 }
   }
 
   public var isZero: Bool { watt == 0 }
-
+  /// Create a Power of zero.
   public init() {
     self.watt = 0
   }
-
+  /// Create a Power given a specified value in watts.
   public init(_ watt: Double) {
     self.watt = watt
   }
-
+  /// Create a Power given a specified value in megawatts.
   public init(megaWatt: Double) {
     self.watt = megaWatt * 1_000_000
   }

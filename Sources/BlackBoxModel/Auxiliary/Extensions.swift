@@ -41,6 +41,7 @@ extension Comparable {
   }
 }
 
+/// Generates the title with border
 public func decorated(_ title: String) -> String {
   var width = terminalWidth()
   width.clamp(to: 70...100)

@@ -12,7 +12,7 @@ import Libc
 
 /// A mass flow rate in kilogram per second.
 public struct MassFlow: CustomStringConvertible {
-  
+  /// Kilogram per second
   public var rate: Double
 
   public var isZero: Bool { self <= 0.0 }
