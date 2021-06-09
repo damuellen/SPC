@@ -15,6 +15,9 @@ $Form.MaximumSize = '360,410'
 $Form.text = "Pinch Point Tool"
 $Form.TopMost = $true
 $Form.StartPosition = "CenterScreen" #loads the window in the center of the screen
+$Form.Add_Closing({param($sender,$e)
+  Save-Inputs
+})
 
 $Items = "ECO Inlet Feedwater Temperature  [°C]",
 "Live Steam Massflow  [kg/s]",
@@ -134,7 +137,7 @@ foreach ($Item in $Items1) {
 
 $Button1.Add_Click({
    Run-HTML
- # $Form.Close()
+   $Form.Close()
 })
 
 $Button2.Add_Click({
@@ -172,11 +175,18 @@ Function Read-Inputs {
     $length = $text.LastIndexOf("}") - $start + 1
     $text = $text.Substring($start, $length)
     $json = $text | ConvertFrom-Json
-    $Array = @($json.economizerFeedwaterTemperature,
-        $json.turbine.massFlow, $json.turbine.temperature, $json.turbine.pressure,
+    $Array = @(
+        $json.economizerFeedwaterTemperature,
+        $json.turbine.massFlow,
+        $json.turbine.temperature,
+        $json.turbine.pressure,
         $json.blowDownOfInputMassFlow,
-        $json.reheatInlet.temperature ,$json.reheatInlet.pressure ,$json.reheatInlet.enthalpy ,$json.reheatInlet.massFlow,
-        $json.reheatOutletSteamPressure, $json.upperHTFTemperature
+        $json.reheatInlet.temperature,
+        $json.reheatInlet.pressure,
+        $json.reheatInlet.enthalpy,
+        $json.reheatInlet.massFlow,
+        $json.reheatOutletSteamPressure,
+        $json.upperHTFTemperature
     )
     $idx = 0
     $Form.Controls.where{$_ -is [System.Windows.Forms.TextBox]}.ForEach({
@@ -198,14 +208,17 @@ Function Read-Inputs2 {
     $length = $text.LastIndexOf("}") - $start + 1
     $text = $text.Substring($start, $length)
     $json = $text | ConvertFrom-Json
-    $Array = @($json.parameter.temperatureDifferenceHTF, $json.parameter.temperatureDifferenceWater,
-        $json.parameter.pressureDrop.economizer ,
-        $json.parameter.pressureDrop.economizer_steamGenerator ,
-        $json.parameter.pressureDrop.steamGenerator ,
-        $json.parameter.pressureDrop.steamGenerator_superHeater ,
-        $json.parameter.pressureDrop.superHeater ,
-        $json.parameter.pressureDrop.superHeater_turbine ,
-        $json.parameter.steamQuality , $json.parameter.requiredLMTD)
+    $Array = @(
+        $json.parameter.temperatureDifferenceHTF,
+        $json.parameter.temperatureDifferenceWater,
+        $json.parameter.pressureDrop.economizer,
+        $json.parameter.pressureDrop.economizer_steamGenerator,
+        $json.parameter.pressureDrop.steamGenerator,
+        $json.parameter.pressureDrop.steamGenerator_superHeater,
+        $json.parameter.pressureDrop.superHeater,
+        $json.parameter.pressureDrop.superHeater_turbine,
+        $json.parameter.steamQuality,
+        $json.parameter.requiredLMTD)
     $idx = 0
     $Form1.Controls.where{$_ -is [System.Windows.Forms.TextBox]}.ForEach({
         $_.Text = $Array[$idx]
@@ -276,6 +289,40 @@ Function Run-PDF {
     Start-Process ((Resolve-Path ".\plot.pdf").Path)
 }
 
-Read-Inputs
+Function Load-Inputs {
+    $Array = Get-Content -Path $env:Temp\pinchpoint.ini
+    $idx = 0
+    if ($Array.Length -ge 11) {
+        $Form.Controls.where{$_ -is [System.Windows.Forms.TextBox]}.ForEach({
+            $_.Text = $Array[$idx]
+            $idx = $idx + 1
+        })
+    } else {
+        Remove-Item $env:Temp\pinchpoint.ini
+        Read-Inputs
+    }
+    if ($Array.Length -eq 21) {
+    $global:Expert = $true
+    $Form1.Controls.where{$_ -is [System.Windows.Forms.TextBox]}.ForEach({
+        $_.Text = $Array[$idx]
+        $idx = $idx + 1
+    })
+    }
+}
+
+Function Save-Inputs {
+    [string[]] $Arguments = @()
+    $form.Controls.where{$_ -is [System.Windows.Forms.TextBox]}.ForEach({
+        $Arguments += $_.Text
+    })
+    if ($global:Expert) {
+        $Form1.Controls.where{$_ -is [System.Windows.Forms.TextBox]}.ForEach({
+            $Arguments += $_.Text
+        })
+    }
+    Set-Content -Path $env:Temp\pinchpoint.ini -Value $Arguments
+}
+
+Load-Inputs
 
 [void]$Form.ShowDialog()
