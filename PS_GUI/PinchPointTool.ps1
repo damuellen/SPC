@@ -228,65 +228,79 @@ Function Read-Inputs2 {
 
 Function Run-HTML {
     $P = New-Process;
+    $valid = $true
     [string[]] $Arguments = @()
     $form.Controls.where{$_ -is [System.Windows.Forms.TextBox]}.ForEach({
-        $Arguments += $_.Text
+        if ($_.Text -notmatch "^[\d\.]+$") { $valid = $false }
+        else { $Arguments += $_.Text }
     })
     if ($global:Expert) {
         $Form1.Controls.where{$_ -is [System.Windows.Forms.TextBox]}.ForEach({
-         $Arguments += $_.Text
+           if ($_.Text -notmatch "^[\d\.]+$") { $valid = $false }
+           else { $Arguments += $_.Text }
         })
         $Arguments += "-hex"
     } else {
         $Arguments += "-case"
         $Arguments += $ComboBox2.Text
     }
-    $Arguments += "-htf"
-    $Arguments += $ComboBox1.Text
+    if ($valid) {
+        $Arguments += "-htf"
+        $Arguments += $ComboBox1.Text
 
-    $Arguments += "-html"
-    $Arguments = $Arguments.Trim()
-    $P.StartInfo.Arguments = $Arguments
-    $P.start()
-    $P.WaitForExit()
-    write-host $P.TotalProcessorTime
-    $html = $P.StandardOutput.ReadToEnd().Trim()
-    $start = $html.LastIndexOf([Environment]::NewLine)
-    if ($start -gt 0) {
-      $path = $html.Substring($start).Trim()
+        $Arguments += "-html"
+        $Arguments = $Arguments.Trim()
+        $P.StartInfo.Arguments = $Arguments
+        $P.start()
+        $P.WaitForExit()
+        write-host $P.TotalProcessorTime
+        $html = $P.StandardOutput.ReadToEnd().Trim()
+        $start = $html.LastIndexOf([Environment]::NewLine)
+        if ($start -gt 0) {
+          $path = $html.Substring($start).Trim()
+        } else {
+          $path = $html.Trim()
+        }
+        write-host $html
+        Start-Process ((Resolve-Path $path).Path)
     } else {
-      $path = $html.Trim()
+        $oReturn=[System.Windows.Forms.Messagebox]::Show("Invalid input")
     }
-    write-host $html
-    Start-Process ((Resolve-Path $path).Path)
 }
 
 Function Run-PDF {
     $P = New-Process;
+    $valid = $true
     [string[]] $Arguments = @()
     $form.Controls.where{$_ -is [System.Windows.Forms.TextBox]}.ForEach({
-        $Arguments += $_.Text
+        if ($_.Text -notmatch "^[\d\.]+$") { $valid = $false }
+        else { $Arguments += $_.Text }
     })
     if ($global:Expert) {
         $Form1.Controls.where{$_ -is [System.Windows.Forms.TextBox]}.ForEach({
-         $Arguments += $_.Text
+            if ($_.Text -notmatch "^[\d\.]+$") { $valid = $false }
+            else { $Arguments += $_.Text }
         })
         $Arguments += "-hex"
     } else {
         $Arguments += "-case"
         $Arguments += $ComboBox2.Text
     }
-    $Arguments += "-htf"
-    $Arguments += $ComboBox1.Text
+    if ($valid) {
+        $Arguments += "-htf"
+        $Arguments += $ComboBox1.Text
 
-    $Arguments += "-pdf"
-    $Arguments = $Arguments.Trim()
-    $P.StartInfo.Arguments = $Arguments
-    $P.start()
-    $P.WaitForExit()
-    write-host $P.TotalProcessorTime
-    Start-Process ((Resolve-Path ".\diagram.pdf").Path)
-    Start-Process ((Resolve-Path ".\plot.pdf").Path)
+        $Arguments += "-pdf"
+        $Arguments = $Arguments.Trim()
+        $P.StartInfo.Arguments = $Arguments
+        $P.start()
+        $P.WaitForExit()
+        write-host $P.TotalProcessorTime
+        Start-Process ((Resolve-Path ".\diagram.pdf").Path)
+        Start-Process ((Resolve-Path ".\plot.pdf").Path)
+    } else {
+        $oReturn=[System.Windows.Forms.Messagebox]::Show("Invalid input")
+    }
 }
 
 Function Load-Inputs {
@@ -311,16 +325,20 @@ Function Load-Inputs {
 }
 
 Function Save-Inputs {
-    [string[]] $Arguments = @()
+    [string[]] $Array = @()
     $form.Controls.where{$_ -is [System.Windows.Forms.TextBox]}.ForEach({
-        $Arguments += $_.Text
+        if ($_.Text -match "^[\d\.]+$")  {
+            $Array += $_.Text
+        }
     })
-    if ($global:Expert) {
-        $Form1.Controls.where{$_ -is [System.Windows.Forms.TextBox]}.ForEach({
-            $Arguments += $_.Text
-        })
+    $Form1.Controls.where{$_ -is [System.Windows.Forms.TextBox]}.ForEach({
+        if ($_.Text -match "^[\d\.]+$") {
+            $Array += $_.Text
+        }
+    })
+    if ($Array.Length -eq 11 -or $Array.Length -eq 21) {
+        Set-Content -Path $env:Temp\pinchpoint.ini -Value $Array
     }
-    Set-Content -Path $env:Temp\pinchpoint.ini -Value $Arguments
 }
 
 Load-Inputs
