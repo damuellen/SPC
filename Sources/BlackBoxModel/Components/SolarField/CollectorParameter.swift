@@ -13,7 +13,9 @@ import PhysicalQuantities
 
 extension Collector {
   /**
-   ## The collector model contains the following:
+   A struct with the assigned details of the collector.
+
+   The collector model contains the following:
      - net collector surface area
      - length
      - parabola aperture

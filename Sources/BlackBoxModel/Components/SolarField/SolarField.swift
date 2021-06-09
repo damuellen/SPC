@@ -20,7 +20,7 @@ public struct SolarField: Parameterizable, HeatTransfer {
   public enum Loop: Int {
     case design = 0
     case near, average, far
-    static let indices: [Int] = [1,2,3] 
+    static let indices: [Int] = [1,2,3]
     static var names: [String] { ["Design", "Near", "Average", "Far"] }
   }
 
@@ -55,7 +55,7 @@ public struct SolarField: Parameterizable, HeatTransfer {
   }
 
   public let area = Design.layout.solarField * Collector.parameter.areaSCAnet
-    * 2 * Double(SolarField.parameter.numberOfSCAsInRow) 
+    * 2 * Double(SolarField.parameter.numberOfSCAsInRow)
 
   public let minMassFlow = MassFlow(
     SolarField.parameter.minFlow.quotient * SolarField.parameter.maxMassFlow.rate
@@ -82,13 +82,13 @@ public struct SolarField: Parameterizable, HeatTransfer {
       return false
     }
   }
-
+  /// Returns the fixed initial state.
   static let initialState = SolarField(
     operationMode: .stow,
     header: Cycle(name: "Header"),
     loops: Loop.names.map { name in Cycle(loop: name) }
   )
-
+  /// Returns the static parameters.
   public static var parameter: Parameter = ParameterDefaults.sf
 
   mutating func requiredMassFlow(storage: Storage) {
@@ -107,7 +107,7 @@ public struct SolarField: Parameterizable, HeatTransfer {
     ((pipe.kelvin - ambient.kelvin) / 333) ** 1 * parameter.pipeHeatLosses
   }
 
-  /// Calculates the parasitics of pumps 
+  /// Calculates the parasitics of pumps
   func parasitics() -> Double {
     let maxMassFlow = SolarField.parameter.maxMassFlow
     if operationMode.isFreezeProtection {
@@ -116,7 +116,7 @@ public struct SolarField: Parameterizable, HeatTransfer {
     let load = massFlow.share(of: maxMassFlow).quotient
     if header.massFlow > .zero {
       let fullLoad = SolarField.parameter.pumpParasticsFullLoad
-      let p = SolarField.parameter.pumpParastics 
+      let p = SolarField.parameter.pumpParastics
       return fullLoad * (p[0] + p[1] * load + p[2] * load ** 2)
     } else {
       return .zero
@@ -169,7 +169,7 @@ public struct SolarField: Parameterizable, HeatTransfer {
     let loopWays = SolarField.parameter.loopWays
     let flowVelocity: Double = 2.7
     return loopWays.indices.map { i -> (Double, Double) in
-      let time = (loopWays[i] / (flowVelocity 
+      let time = (loopWays[i] / (flowVelocity
         * loops[i].massFlow.rate / maxMassFlow))
       var timeRatio = timeRemain / time
 
@@ -228,10 +228,10 @@ public struct SolarField: Parameterizable, HeatTransfer {
     if case .freeze(let time) = operationMode, time > .zero {
       operationMode = .freeze(time - timeRemain)
       return true
-    } 
+    }
 
     if loops.dropFirst().min(by: <)!.minTemperature < freezingTemperature.kelvin {
-      loops.indices.forEach { 
+      loops.indices.forEach {
         loops[$0].temperature.inlet = header.temperature.inlet
       }
 
@@ -287,7 +287,7 @@ public struct SolarField: Parameterizable, HeatTransfer {
   }
 
   mutating func calculate(collector: Collector, ambient: Temperature) {
-    let insolation = collector.insolationAbsorber < collector.lastInsolation 
+    let insolation = collector.insolationAbsorber < collector.lastInsolation
       ? collector.lastInsolation : collector.insolationAbsorber
     let elevation = collector.parabolicElevation
 
@@ -321,7 +321,7 @@ public struct SolarField: Parameterizable, HeatTransfer {
 
     // Check if mass flow is within acceptable limits
     switch MassFlow(kgPerSqm * area) {
-    case let massFlow where massFlow.rate <= .zero: // HCE loses heat      
+    case let massFlow where massFlow.rate <= .zero: // HCE loses heat
       if isFreezeProtectionRequired() {
         header.massFlow = antiFreezeFlow
       } else {
@@ -368,7 +368,7 @@ public struct SolarField: Parameterizable, HeatTransfer {
       } else {
         header.massFlow = .zero
       }
-    } 
+    }
 
     if header.massFlow > .zero {
       let massFlows = imbalanceLoops(massFlow: header.massFlow)
@@ -382,7 +382,7 @@ public struct SolarField: Parameterizable, HeatTransfer {
     for loop in [Loop.near, .far, .average] {
       _ = HCE.temperatures(&self, loop, collector.insolationAbsorber, ambient)
     }
-    
+
     header.massFlow.rate = loops.dropFirst().reduce(0.0)
       { sum, loop in sum + loop.massFlow.rate } / 3.0
 

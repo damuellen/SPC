@@ -12,6 +12,7 @@ import Config
 import PhysicalQuantities
 
 extension Heater {
+  /// A struct with the assigned details of the heater.
   public struct Parameter: Codable, Equatable {
     let name: String
     let efficiency, minLoad: Ratio

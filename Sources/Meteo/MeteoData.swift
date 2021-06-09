@@ -10,6 +10,7 @@
 import Foundation
 import SolarPosition
 
+/// Meteorological data
 public struct MeteoData: CustomStringConvertible {
   public var temperature, dni, ghi, dhi, windSpeed: Float
   var wetBulbTemperature: Float? = nil
@@ -35,7 +36,7 @@ public struct MeteoData: CustomStringConvertible {
     self.ghi = meteo.count > 4 ? meteo[4] : 0
     self.dhi = meteo.count > 5 ? meteo[5] : 0
   }
-  
+
   public init(insolation: [Float], conditions: [Float]) {
     self.temperature = conditions[0]
     self.dni = insolation[0]

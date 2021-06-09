@@ -41,6 +41,9 @@ extension HeatExchanger {
   }
 }
 
+/// Heat Balance Diagram
+///
+/// Schematic representation of the whole steam cycle.
 public struct HeatBalanceDiagram {
   public init(values: Calculation) {
     self.streams = [

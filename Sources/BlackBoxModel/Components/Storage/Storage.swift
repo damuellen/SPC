@@ -12,13 +12,13 @@ import DateGenerator
 import PhysicalQuantities
 /// This struct contains the state as well as the functions for mapping the storage
 public struct Storage: Parameterizable, HeatTransfer {
-  
+
   let name = Storage.parameter.name
 
-  var temperature: (inlet: Temperature, outlet: Temperature) 
-  
+  var temperature: (inlet: Temperature, outlet: Temperature)
+
   var massFlow: MassFlow = .zero
-  
+
   var designMassFlow = MassFlow(
     (1 - Storage.parameter.massFlowShare.quotient)
       * SolarField.parameter.maxMassFlow.rate
@@ -28,7 +28,7 @@ public struct Storage: Parameterizable, HeatTransfer {
   var operationMode: OperationMode
 
   var dT_HTFsalt: (cold: Double, hot: Double)
-  
+
   var temperatureTank: Temperatures
 
   var antiFreezeTemperature: Double = 270.0
@@ -38,15 +38,15 @@ public struct Storage: Parameterizable, HeatTransfer {
   var relativeCharge: Ratio
 
 //  var massOfSalt: Double = Storage.defineSaltMass()
-
+  /// Returns the fixed initial state.
   static let initialState = Storage(
     operationMode: .noOperation,
     temperature: (560.0, 660.0),
     temperatureTanks: (566.0, 666.0)
   )
-  
+  /// Returns the static parameters.
   public static var parameter: Parameter = ParameterDefaults.st
-  
+
   fileprivate static func heatExchangerRestrictedMax(heatFlow: inout Power) {
     let steamTurbine = SteamTurbine.parameter
     let heatExchanger = HeatExchanger.parameter
@@ -67,16 +67,16 @@ public struct Storage: Parameterizable, HeatTransfer {
     let dischargeToTurbine = Storage.parameter.dischargeToTurbine
 
     /// Always zero when not discharging
-    let load = operationMode.dischargeLoad 
+    let load = operationMode.dischargeLoad
     operationMode = .noOperation
     if heat > .zero { // Energy surplus
-      if relativeCharge < chargeTo { 
+      if relativeCharge < chargeTo {
         operationMode = .charge(load: .zero)
         return heat
       }
-    } else { // Energy deficit 
-      if relativeCharge > dischargeToTurbine { 
-        operationMode = .discharge(load: load)        
+    } else { // Energy deficit
+      if relativeCharge > dischargeToTurbine {
+        operationMode = .discharge(load: load)
       }
     }
     return .zero
@@ -94,14 +94,14 @@ public struct Storage: Parameterizable, HeatTransfer {
     case .always: return strategyAlways(
       storage: storage,
       powerBlock: &powerBlock,
-      heatFlow: heatFlow)      
+      heatFlow: heatFlow)
     case .demand: return strategyDemand(
       storage: storage,
       powerBlock: &powerBlock,
-      heatFlow: heatFlow)      
+      heatFlow: heatFlow)
     // parameter.strategy = "Ful" // Booster or Shifter
     case .shifter: return strategyShifter(
-      storage: storage, 
+      storage: storage,
       powerBlock: &powerBlock,
       heatFlow: heatFlow)
     }
@@ -118,12 +118,12 @@ public struct Storage: Parameterizable, HeatTransfer {
     if parameter.heatExchangerRestrictedMin {
       // avoiding input to storage lower than minimal HXs capacity
       let maxMassFlow = SolarField.parameter.maxMassFlow.rate
-      
+
       heatFlow.toStorageMin.megaWatt = parameter.heatExchangerMinCapacity
         * HeatExchanger.parameter.heatFlowHTF
         * (1 - storage.designMassFlow.rate / maxMassFlow)
         / (storage.designMassFlow.rate / maxMassFlow)
-      
+
       if case 0..<heatFlow.toStorageMin.megaWatt = heatFlow.storage.megaWatt {
         heatFlow.demand -= heatFlow.toStorageMin - heatFlow.storage
         powerBlock.massFlow.rate = heatFlow.demand.kiloWatt / HeatExchanger.capacity
@@ -132,13 +132,13 @@ public struct Storage: Parameterizable, HeatTransfer {
     }
     return heatFlow
   }
-  
+
   /// Power Block delivers always design Power to Grid
   static func strategyAlways(
     storage: Storage,
     powerBlock: inout PowerBlock,
     heatFlow: ThermalEnergy) -> ThermalEnergy
-  { 
+  {
     var heatFlow = heatFlow
 
     heatFlow.storage = heatFlow.balance // [MW]
@@ -151,18 +151,18 @@ public struct Storage: Parameterizable, HeatTransfer {
       heatFlow.toStorageMin.megaWatt = heatFlowRate
         * (1 - storage.designMassFlow.rate / maxMassFlow)
         / (storage.designMassFlow.rate / maxMassFlow)
-      
+
       if case 0..<heatFlow.toStorageMin.megaWatt = heatFlow.storage.megaWatt {
         powerBlock.massFlow.rate = (heatFlowRate
-          - (heatFlow.toStorageMin - heatFlow.storage).megaWatt) * 1_000 
+          - (heatFlow.toStorageMin - heatFlow.storage).megaWatt) * 1_000
           / HeatExchanger.capacity
-        
+
         heatFlow.storage = heatFlow.toStorageMin
       }
     }
     return heatFlow
   }
-  
+
   static func strategyShifter(
     storage: Storage,
     powerBlock: inout PowerBlock,
@@ -195,8 +195,8 @@ public struct Storage: Parameterizable, HeatTransfer {
         storage.relativeCharge < parameter.chargeTo,
         DateTime.isDaytime
       {
-        powerBlock.designMassFlow.rate = 
-          min(heatProductionLoad.quotient * heatFlow.demand.kiloWatt, heatFlow.production.kiloWatt) 
+        powerBlock.designMassFlow.rate =
+          min(heatProductionLoad.quotient * heatFlow.demand.kiloWatt, heatFlow.production.kiloWatt)
            / HeatExchanger.capacity
 
         // TES gets the rest available
@@ -219,12 +219,12 @@ public struct Storage: Parameterizable, HeatTransfer {
           heatFlow.storage.megaWatt = max(
             heatFlow.storage.megaWatt, -parameter.heatExchangerCapacity
           )
-        } else { 
+        } else {
           let value = steamTurbine.power.max
             / steamTurbine.efficiencyNominal
             / heatExchanger.efficiency
             // signs below changed
-          if heatFlow.storage.megaWatt > -value { 
+          if heatFlow.storage.megaWatt > -value {
             heatFlow.storage.megaWatt = -value
           }
         }
@@ -246,10 +246,10 @@ public struct Storage: Parameterizable, HeatTransfer {
           powerBlock.designMassFlow.rate =
             (heatFlow.production.megaWatt - parameter.heatExchangerCapacity)
               / HeatExchanger.capacity
-          
+
           heatFlow.storage.megaWatt = parameter.heatExchangerCapacity
         }
-      }      
+      }
     }
     return heatFlow
   }

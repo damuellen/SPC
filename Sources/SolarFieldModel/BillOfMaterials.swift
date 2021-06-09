@@ -6,8 +6,9 @@
 //  Copyright © 2015 Daniel Muellenborn. All rights reserved.
 //
 
+/// A class that makes a list of piping material in the solar field.
 public class BillOfMaterials {
-  
+
   private unowned let solarField: SolarField
 
   public init(solarField: SolarField) {
@@ -16,30 +17,30 @@ public class BillOfMaterials {
 
   public static var headings: [String] =
     ["Description", "Material", "Schedule", "NPS", "Quantity", "Weight"]
-  
+
   typealias Items<T> = KeyValuePairs<NominalPipeSize, Array<T>>
-  
+
   public struct Item: Hashable, Comparable {
     public var name: String
     public var material: String
     public var schedule: String
     public var size: Float
-    
+
     var description: String {
       "\(name) \(material) \(schedule) " + .init(format: "%04.1f", size)
     }
-    
+
     public static func < (lhs: Self, rhs: Self) -> Bool {
       lhs.description < rhs.description
     }
   }
-  
+
   var tubeLength: Items<Float> {
-    
+
     var sch10 = [Float](repeating: 0.0, count: NominalPipeSize.values.count)
     var (sch30, sch40, sch80, sch10S, sch80S, sch120, sch140, sch160) =
       (sch10, sch10, sch10, sch10, sch10, sch10, sch10, sch10)
-    
+
     solarField.branches.forEach { branch in
       guard let idx = NominalPipeSize.values.firstIndex(of: branch.nps)
       else { return }
@@ -59,13 +60,13 @@ public class BillOfMaterials {
             .sch10S: sch10S,.sch80: sch80, .sch80S: sch80S,
             .sch120: sch120, .sch140: sch140, .sch160: sch160]
   }
-  
+
   var elbowCount: Items<Int> {
-    
+
     var sch10 = [Int](repeating: 0, count: NominalPipeSize.values.count)
     var (sch30, sch40, sch10S, sch80, sch80S, sch120, sch140, sch160) =
       (sch10, sch10, sch10, sch10, sch10, sch10, sch10, sch10)
-    
+
     solarField.branches.forEach { branch in
       guard let idx = NominalPipeSize.values.firstIndex(of: branch.nps)
       else { return }
@@ -85,12 +86,12 @@ public class BillOfMaterials {
             .sch10S: sch10S,.sch80: sch80, .sch80S: sch80S,
             .sch120: sch120, .sch140: sch140, .sch160: sch160]
   }
-  
+
   var reducerLists: [NominalPipeSize: [Component]] {
-    
+
     var reducers: [NominalPipeSize: [Component]] =
       [.sch10: [], .sch30: [], .sch40: []]
-    
+
     solarField.branches.forEach { branch in
       let reducer = branch.components.filter({ $0.type == .reducer })
       if reducer.count > 0 {
@@ -99,13 +100,13 @@ public class BillOfMaterials {
     }
     return reducers
   }
-  
+
   var reducerCount: Items<Int> {
-    
+
     var sch10 = [Int](repeating: 0, count: NominalPipeSize.values.count)
     var (sch30, sch40, sch10S, sch80, sch80S, sch120, sch140, sch160) =
       (sch10, sch10, sch10, sch10, sch10, sch10, sch10, sch10)
-    
+
     for reducers in reducerLists {
       reducers.value.forEach { reducer in
         guard let idx = NominalPipeSize.values.firstIndex(of: reducer.nps)
@@ -128,7 +129,7 @@ public class BillOfMaterials {
             .sch10S: sch10S,.sch80: sch80, .sch80S: sch80S,
             .sch120: sch120, .sch140: sch140, .sch160: sch160]
   }
-  
+
   var valveList: [Item] {
     let branches = solarField.branches.lazy
     let components = branches.flatMap { $0.components }
@@ -138,15 +139,15 @@ public class BillOfMaterials {
     }
     return Array(descriptons)
   }
-  
+
   public var tubeLengthAndWeight: [Item: (length: Float, weight: Float)] {
-    
+
     func weightAndLengthOfTubes(
       schedule: NominalPipeSize,_ sizes: [Float]
     ) -> [Item: (Float, Float)] {
       var results: [Item: (Float, Float)] = [:]
       let weightPerMeter = schedule.weightPerMeter
-      
+
       for (idx, length) in sizes.enumerated() where length > 0.0 {
         let item = Item(
           name: "PIPE SEAMLESS, BE",
@@ -160,16 +161,16 @@ public class BillOfMaterials {
       }
       return results
     }
-    
+
     var results = [Item: (Float, Float)]()
     tubeLength.forEach {
       results.merge(weightAndLengthOfTubes(schedule: $0.key, $0.value))
     }
     return results
   }
-  
+
   public var fittingsQuantityAndWeight: [Item: (qty: Float, weight: Float)] {
-    
+
     func weightAndQuantityofElbows(
       schedule: NominalPipeSize,_ sizes: [Int]
     ) -> [Item: (Float, Float)] {
@@ -188,7 +189,7 @@ public class BillOfMaterials {
       }
       return results
     }
-    
+
     func weightAndQuantityofReducers(
       schedule: NominalPipeSize,_ sizes: [Int]
     ) -> [Item: (Float, Float)] {
@@ -208,17 +209,17 @@ public class BillOfMaterials {
       return results
     }
     var results = [Item: (Float, Float)]()
-    
+
     elbowCount.forEach {
       results.merge(weightAndQuantityofElbows(schedule: $0.key, $0.value))
     }
-    
+
     reducerCount.forEach {
       results.merge(weightAndQuantityofReducers(schedule: $0.key, $0.value))
     }
     return results
   }
-  
+
   var valvesQuantity: [Item: (Float, Float)] {
     var results: [Item: (Float, Float)] = [:]
     for valve in valveList {

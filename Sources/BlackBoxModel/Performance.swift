@@ -62,10 +62,19 @@ extension PlantPerformance {
 }
 
 public struct ElectricPower: Encodable, MeasurementsConvertible {
-  internal(set) public var demand = 0.0, gross = 0.0, shared = 0.0,
-    solarField = 0.0, powerBlock = 0.0, storage = 0.0, gasTurbine = 0.0,
-    steamTurbineGross = 0.0, gasTurbineGross = 0.0, photovoltaic = 0.0,
-    parasitics = 0.0, net = 0.0, consum = 0.0
+  internal(set) public var demand: Double = .zero
+  internal(set) public var gross: Double = .zero
+  internal(set) public var shared: Double = .zero
+  internal(set) public var solarField: Double = .zero
+  internal(set) public var powerBlock: Double = .zero
+  internal(set) public var storage: Double = .zero
+  internal(set) public var gasTurbine: Double = .zero
+  internal(set) public var steamTurbineGross: Double = .zero
+  internal(set) public var gasTurbineGross: Double = .zero
+  internal(set) public var photovoltaic: Double = .zero
+  internal(set) public var parasitics: Double = .zero
+  internal(set) public var net: Double = .zero
+  internal(set) public var consum: Double = .zero
 
   var numericalForm: [Double] {
     [demand, steamTurbineGross, photovoltaic, storage, parasitics, shared, net, consum]
@@ -151,8 +160,13 @@ public struct ElectricPower: Encodable, MeasurementsConvertible {
 }
 
 public struct Parasitics: Encodable, MeasurementsConvertible {
-  internal(set) public var boiler = 0.0, gasTurbine = 0.0, heater = 0.0,
-    powerBlock = 0.0, shared = 0.0, solarField = 0.0, storage = 0.0
+  internal(set) public var boiler: Double = .zero
+  internal(set) public var gasTurbine: Double = .zero
+  internal(set) public var heater: Double = .zero
+  internal(set) public var powerBlock: Double = .zero
+  internal(set) public var shared: Double = .zero
+  internal(set) public var solarField: Double = .zero
+  internal(set) public var storage: Double = .zero
 
   var numericalForm: [Double] {
     [solarField, powerBlock, storage, shared, 0, gasTurbine]
@@ -177,12 +191,18 @@ public struct Parasitics: Encodable, MeasurementsConvertible {
 }
 
 public struct ThermalEnergy: Encodable, MeasurementsConvertible {
-    internal(set) public var solar: Power = 0.0, toStorage: Power = 0.0,
-    toStorageMin: Power = 0.0, storage: Power = 0.0, heater: Power = 0.0,
-    boiler: Power = 0.0, wasteHeatRecovery: Power = 0.0,
-    heatExchanger: Power = 0.0, production: Power = 0.0
-    internal(set) public var demand: Power = 0.0
-    internal(set) public var dumping: Power = 0.0, startUp: Power = 0.0
+  internal(set) public var solar: Power = .zero
+  internal(set) public var toStorage: Power = .zero
+  internal(set) public var toStorageMin: Power = .zero
+  internal(set) public var storage: Power = .zero
+  internal(set) public var heater: Power = .zero
+  internal(set) public var boiler: Power = .zero
+  internal(set) public var wasteHeatRecovery: Power = .zero
+  internal(set) public var heatExchanger: Power = .zero
+  internal(set) public var production: Power = .zero
+  internal(set) public var demand: Power = .zero
+  internal(set) public var dumping: Power = .zero
+  internal(set) public var startUp: Power = .zero
 
   var balance: Power { production - demand }
 
@@ -241,8 +261,10 @@ public struct ThermalEnergy: Encodable, MeasurementsConvertible {
 }
 
 public struct FuelConsumption: Encodable, MeasurementsConvertible {
-  internal(set) public var backup = 0.0,
-    boiler = 0.0, heater = 0.0, gasTurbine = 0.0
+  internal(set) public var backup: Double = .zero
+  internal(set) public var boiler: Double = .zero
+  internal(set) public var heater: Double = .zero
+  internal(set) public var gasTurbine: Double = .zero
 
   var combined: Double {
     boiler + heater

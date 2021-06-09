@@ -10,6 +10,8 @@
 
 import Libc
 
+/// A function for single-axis trackers
+///
 /// Determine the rotation angle of a single axis tracker using the
 /// equations in [1] when given a particular sun zenith and azimuth
 /// angle. backtracking may be specified, and if so, a ground coverage

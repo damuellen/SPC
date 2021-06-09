@@ -12,6 +12,7 @@ import Config
 import PhysicalQuantities
 
 extension PowerBlock {
+  /// A struct with the assigned details of the power block.
   public struct Parameter: Codable, Equatable {
     let name: String
     let fixElectricalParasitics: Double

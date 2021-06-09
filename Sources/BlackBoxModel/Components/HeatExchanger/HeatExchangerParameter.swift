@@ -12,6 +12,7 @@ import Config
 import PhysicalQuantities
 
 extension HeatExchanger {
+  /// A struct with the assigned details of the heat exchanger.
   public struct Parameter: Equatable {
     public struct Temperatures {
       let htf: (inlet: (max: Temperature, min: Temperature),

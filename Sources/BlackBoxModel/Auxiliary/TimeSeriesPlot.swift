@@ -11,6 +11,7 @@
 import Foundation
 import Helpers
 
+/// Creates a chart to represent time-series data using multiple y axis.
 public final class TimeSeriesPlot {
   let gnuplot: Process
   public enum Style: String { case lines, impulses }
@@ -109,7 +110,7 @@ public final class TimeSeriesPlot {
 
   var datablock: String {
     guard let y1s = y1.first?.indices else { return "" }
-    var data = "\n$data <<EOD\nHeader\n" 
+    var data = "\n$data <<EOD\nHeader\n"
     for y in y1s {
       data.append(y1.map { String($0[y]) }.joined(separator: ", ") + "\n")
     }
@@ -124,6 +125,6 @@ public final class TimeSeriesPlot {
   }
 }
 
-extension Array where Element == String { 
+extension Array where Element == String {
   var concatenated: String { self.map { "set " + $0 + "\n" }.joined() }
 }

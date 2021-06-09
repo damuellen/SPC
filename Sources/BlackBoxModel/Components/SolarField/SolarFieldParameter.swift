@@ -17,7 +17,9 @@ extension SolarField {
   }
 
   /**
-   ## The solar field is specified by:
+   A struct with the assigned details of the solar field.
+   
+   The solar field is specified by:
    - the total number of loops
    - number of collectors per loop
    - distance between collectors in a row

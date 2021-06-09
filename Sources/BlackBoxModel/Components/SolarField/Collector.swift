@@ -16,7 +16,7 @@ import PhysicalQuantities
 
 /// This struct contains the state as well as the functions for mapping the collector
 public struct Collector: Parameterizable, CustomStringConvertible {
-    
+
   public var parabolicElevation, theta, cosTheta: Double
   public var efficiency: Ratio
   /// Instantaneous irradiation on absorber tube
@@ -27,16 +27,16 @@ public struct Collector: Parameterizable, CustomStringConvertible {
     formatting(
       [insolationAbsorber, parabolicElevation, cosTheta, efficiency.percentage],
       ["Insolation absorber:", "PE:", "cos(Theta):", "Efficiency:"]
-    ) 
+    )
   }
-
+  /// Returns the fixed initial state.
   static let initialState = Collector(
     parabolicElevation: 0, theta: 0, cosTheta: 0,
     efficiency: 0.0, insolationAbsorber: 0
   )
-
+  /// Returns the static parameters.
   public static var parameter: Parameter = ParameterDefaults.LS3
-  
+
   /// Calculate shading of the HCEs
   static func shadingHCE(cosTheta: Double) -> Double {
     let shadingHCE = parameter.shadingHCE
@@ -72,14 +72,14 @@ public struct Collector: Parameterizable, CustomStringConvertible {
     let goodHCE = 1 - breakHCE - fluorHCE
 
     // Adjust Optical Efficiency for Missing Mirrors and Mirror Reflectivity
-    var opticalEfficiency = parameter.opticalEfficiency 
-      * (goodHCE + breakHCE * 1.037 + fluorHCE * 0.458)   
-    opticalEfficiency *= reflMirror / 0.93 * (1 - missgMirror)  
+    var opticalEfficiency = parameter.opticalEfficiency
+      * (goodHCE + breakHCE * 1.037 + fluorHCE * 0.458)
+    opticalEfficiency *= reflMirror / 0.93 * (1 - missgMirror)
 
     let IAM = parameter.factorIAM(theta.toRadians)
-    
+
     let solarField = SolarField.parameter
-    
+
     let shadlength = parameter.avgFocus * tan(theta.toRadians)
 
     let edge: Double
@@ -125,7 +125,7 @@ public struct Collector: Parameterizable, CustomStringConvertible {
     } else {
       T_14 = (354_672e-9 * lengthSCA * lengthSCA + 354_672e-9 * lengthSCA)
     }
-    
+
     if direction > 180 { T_14 = -T_14 }
     /// Effective wind speed
     let v_wind_eff = Double(ws) * abs(sin(Double(direction) * .pi / 180))
@@ -137,9 +137,9 @@ public struct Collector: Parameterizable, CustomStringConvertible {
     /// Correction factor due to torsion
     let k_torsion = max(0.2, (-0.0041 * torsion ** 3 - 0.0605
         * torsion ** 2 - 0.0354 * torsion + 99.997) / 100)
-    
+
     let shadingHCE = Collector.shadingHCE(cosTheta: cosTheta)
-    
+
     let wind = solarField.windCoefficients(Double(ws))
 
     let eff = shadingSCA * shadingHCE * IAM * edge * k_torsion * wind
@@ -158,7 +158,7 @@ public struct Collector: Parameterizable, CustomStringConvertible {
     let el: Double = sun.elevation.toRadians
     let beta: Double = SolarField.parameter.elevation.toRadians
     let sfaz: Double = SolarField.parameter.azimut.toRadians
- 
+
     theta = (cos(az - sfaz) / abs(cos(az - sfaz)) * 180
       / .pi * acos(sqrt(1 - (cos(el - beta) - cos(beta) * cos(el)
         * (1 - cos(az - sfaz))) ** 2))) * (-1)
@@ -174,11 +174,11 @@ public struct Collector: Parameterizable, CustomStringConvertible {
 }
 
 extension Collector: MeasurementsConvertible {
-  
+
   var numericalForm: [Double] {
     [insolationAbsorber, cosTheta, efficiency.percentage, parabolicElevation]
   }
-  
+
   static var columns: [(name: String, unit: String)] {
     [("Insolation", "W/sqm"), ("Collector|cosTheta", "Ratio"),
      ("Collector|Eff", "%"), ("Collector|Position", "degree")]

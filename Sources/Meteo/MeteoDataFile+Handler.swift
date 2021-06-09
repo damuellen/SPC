@@ -10,6 +10,7 @@
 
 import Foundation
 
+/// Handles the import of files with meteorological data.
 public struct MeteoDataFileHandler {
 
   let 💾 = FileManager.default
@@ -23,9 +24,9 @@ public struct MeteoDataFileHandler {
     if !💾.fileExists(atPath: path) {
       throw MeteoDataFileError.fileNotFound(path)
     }
-    
+
     url = URL(fileURLWithPath: path)
-    
+
     if url.hasDirectoryPath {
       guard let fileName = try 💾.contentsOfDirectory(atPath: path).first(
         where: { $0.hasSuffix("mto") || $0.hasPrefix("TMY") }) else {
@@ -45,13 +46,13 @@ public struct MeteoDataFileHandler {
     }
     print("Meteo file in use:\n  \(url.path)\n")
   }
-  
+
   public func callAsFunction() throws -> MeteoDataSource {
     if isBinaryFile, let data = try? Data(contentsOf: url) {
       return MeteoDataSource(data: data)
     }
 
-    let file: MeteoDataFile = try url.pathExtension == "mto" 
+    let file: MeteoDataFile = try url.pathExtension == "mto"
       ? MET(url) : TMY(url)
     let metaData = try file.fetchInfo()
     let data = try file.fetchData()
@@ -76,25 +77,25 @@ private struct MET: MeteoDataFile {
   let name: String
   let metadata: [String]
   let data: [[Float]]
-  
+
   init(_ url: URL) throws {
     let rawData = try Data(contentsOf: url)
     self.name = url.lastPathComponent
-    
+
     let newLine = UInt8(ascii: "\n")
     let cr = UInt8(ascii: "\r")
     let separator = UInt8(ascii: ",")
-    
+
     guard let firstNewLine = rawData.firstIndex(of: newLine) else {
       throw MeteoDataFileError.empty
     }
-    
+
     guard let _ = rawData.firstIndex(of: separator) else {
       throw MeteoDataFileError.unknownDelimeter
     }
-    
+
     let hasCR = rawData[rawData.index(before: firstNewLine)] == cr
-    
+
     (metadata, data) = try rawData.withUnsafeBytes { content throws in
       let lines = content.split(separator: newLine, maxSplits: 10,
                                 omittingEmptySubsequences: false)
@@ -116,23 +117,23 @@ private struct MET: MeteoDataFile {
       )
     }
   }
-  
+
   func fetchInfo() throws -> (year: Int, location: Location) {
     guard let year = Int(metadata[1])
     else { throw MeteoDataFileError.empty }
-    
+
     guard let longitude = Double(metadata[2]),
           let latitude = Double(metadata[3]),
           let lat_tz = Int(metadata[4])
     else { throw MeteoDataFileError.unknownLocation }
-    
+
     let timezone = -lat_tz / 15
     let location = Location(
       (-longitude, latitude, 0), timezone: timezone
     )
     return (year, location)
   }
-  
+
   func fetchData() throws -> [MeteoData] {
     // Check whether the dataRange matches one year of values.
     guard data.count.isMultiple(of: 8760)
@@ -168,22 +169,22 @@ extension MeteoDataFileError: CustomStringConvertible {
 private struct TMY: MeteoDataFile {
   let name: String
   let content: (headers1: [Float], headers2: [String], values: [[Float]])
-  
+
   init(_ url: URL) throws {
     let rawData = try Data(contentsOf: url)
     self.name = url.lastPathComponent
-    
+
     let newLine = UInt8(ascii: "\n")
     let separator = UInt8(ascii: ",")
-    
+
     guard let _ = rawData.firstIndex(of: newLine) else {
       throw MeteoDataFileError.empty
     }
-    
+
     guard let _ = rawData.firstIndex(of: separator) else {
       throw MeteoDataFileError.unknownDelimeter
     }
-    
+
     content = try rawData.withUnsafeBytes { content throws in
       let lines = content.split(separator: newLine, maxSplits: 2)
       guard lines.endIndex > 2 else { throw MeteoDataFileError.empty }
@@ -207,7 +208,7 @@ private struct TMY: MeteoDataFile {
       )
     }
   }
-  
+
   func fetchLocation() throws -> Location {
     let values = content.headers1
     guard values.endIndex > 3
@@ -220,12 +221,12 @@ private struct TMY: MeteoDataFile {
       (longitude,  latitude,  elevation), timezone: tz
     )
   }
-  
+
   func fetchTimeZone() -> Int {
     let tz = content.headers1.first ?? 0
     return Int(-tz)
   }
-  
+
   func fetchYear() -> Int { 2011 }
 
   func fetchInfo() throws -> (year: Int, location: Location) {

@@ -6,6 +6,7 @@
 //  Copyright © 2015 Daniel Muellenborn. All rights reserved.
 //
 
+/// A class that represents a solar field loop.
 public class CollectorLoop {
 
   private unowned let subField: SubField

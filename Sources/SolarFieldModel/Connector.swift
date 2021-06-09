@@ -6,6 +6,7 @@
 //  Copyright © 2015 Daniel Muellenborn. All rights reserved.
 //
 
+/// Connects the subfields of the solar field to each other and to the power block.
 public class Connector: Piping {
 
   public var name: String = "Header"

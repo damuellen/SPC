@@ -37,7 +37,7 @@ public struct SolarPosition {
     var sunrise: FractionalTime
     var sunset: FractionalTime
   }
-
+  /// A struct for latitude, longitude, timezone, and altitude data associated with a particular geographic location.
   public struct Location {
 
     var longitude: Double

@@ -55,6 +55,7 @@ public struct SolarRadiation: MeasurementsConvertible {
   }
 }
 
+/// Perez’s model coefficient sets
 struct PerezCoefficients {
   var f11: Double
   var f12: Double

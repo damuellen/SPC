@@ -12,14 +12,14 @@ import DateGenerator
 import PhysicalQuantities
 
 /// This struct contains the state as well as the functions for mapping the heater
-public struct Heater: Parameterizable, HeatTransfer {  
+public struct Heater: Parameterizable, HeatTransfer {
 
   var name: String = Heater.parameter.name
 
   var massFlow: MassFlow = .zero
-  
+
   var temperature: (inlet: Temperature, outlet: Temperature)
-  
+
   /// Returns the operating state
   var operationMode: OperationMode
 
@@ -50,7 +50,7 @@ public struct Heater: Parameterizable, HeatTransfer {
     temperature: Simulation.startTemperature,
     operationMode: .noOperation
   )
-
+  ///
   public static var parameter: Parameter = ParameterDefaults.hr
 
   /// Returns the parasitics of the heater.
@@ -125,7 +125,7 @@ public struct Heater: Parameterizable, HeatTransfer {
       } else {
         massFlow.rate = Design.layout.heater
           / htf.heatContent(parameter.nominalTemperatureOut, temperature.inlet)
-        
+
         fuel = Design.layout.heater / parameter.efficiency.quotient
         load = Ratio(1)
         operationMode = .charge(load)
@@ -137,7 +137,7 @@ public struct Heater: Parameterizable, HeatTransfer {
       thermalPower.kiloWatt =
         massFlow.rate * htf.heatContent(
           parameter.antiFreezeTemperature, temperature.inlet
-        ) 
+        )
 
       if thermalPower.megaWatt > Design.layout.heater {
         thermalPower = Power(megaWatt: Design.layout.heater)
@@ -175,9 +175,9 @@ public struct Heater: Parameterizable, HeatTransfer {
       thermalPower = .zero
     } else {
       // Normal operation requested  The fuel flow needed [MW]
-      
+
       fuel =
-        max(heatFlow.balance.megaWatt, Design.layout.heater) 
+        max(heatFlow.balance.megaWatt, Design.layout.heater)
         / parameter.efficiency.quotient
         / Simulation.adjustmentFactor.efficiencyHeater
       // The fuelfl avl. [MW]

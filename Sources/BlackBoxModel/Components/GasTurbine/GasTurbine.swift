@@ -24,14 +24,14 @@ public struct GasTurbine: Parameterizable {
   public enum OperationMode: String {
     case free, load, integrated, pure, noOperation, scheduledMaintenance
   }
-
+  /// Returns the fixed initial state.
   static let initialState = GasTurbine(
     operationMode: .free, isMaintained: false, load: 0.0
   )
-
+  /// Returns the static parameters.
   public static var parameter: Parameter = ParameterDefaults.gt
 
-  /// Calculates the efficiency of the gas turbine which only depends on its own load
+  /// Calculates the efficiency of the gas turbine which only depends on its own load.
   static func efficiency(at load: Ratio) -> Double {
 
     let efficiency = parameter.efficiencyFromLoad(load)
@@ -42,12 +42,12 @@ public struct GasTurbine: Parameterizable {
     return efficiency
   }
 
-  /// Calculates the parasitics of the gas turbine which only depends on its current load
+  /// Calculates the parasitics of the gas turbine which only depends on its current load.
   static func parasitics(estimateFrom load: Ratio) -> Double {
     return parameter.parasiticsFromLoad(load) * parameter.powerGross
   }
 
-  /// Calculates the maximal load of the gas turbine which only depends on the ambient temperature
+  /// Calculates the maximal load of the gas turbine which only depends on the ambient temperature.
   static func maxLoad(at temperature: Temperature) -> Double {
     var maximumLoad = parameter.loadMaxFromTemperature(temperature)
     // correction for altitude effect
@@ -145,8 +145,8 @@ public struct GasTurbine: Parameterizable {
               ambient: temperature
             )
         //  }
-          
-          
+
+
           if GasTurbine.efficiency(at: gasTurbine.load) > 0 {
             demand /= 1 + eff * WasteHeatRecovery.parameter.efficiencyPure
               * (1 / GasTurbine.efficiency(at: gasTurbine.load) - 1) // 1.135 *
@@ -178,7 +178,7 @@ public struct GasTurbine: Parameterizable {
           let load = Ratio(
             (plant.electricity.demand - plant.electricity.gasTurbineGross)
               / SteamTurbine.parameter.power.max)
-          
+
           if GasTurbine.efficiency(at: gasTurbine.load) > 0 {
 
           //  if status.steamTurbine.load.quotient != load {
@@ -191,7 +191,7 @@ public struct GasTurbine: Parameterizable {
               )
           //  }
 
-            
+
             demand /= 1 + eff * WasteHeatRecovery.parameter.efficiencyPure
               * (1 / GasTurbine.efficiency(at: gasTurbine.load) - 1) // 1.135 *
             // for RH !!
@@ -217,7 +217,7 @@ public struct GasTurbine: Parameterizable {
           steamTurbine.load = Ratio(
             (plant.electricity.demand - plant.electricity.gasTurbineGross)
               / SteamTurbine.parameter.power.max)
-          
+
           // to correctDC
           let htfShare = demand * (1 / parameter.efficiencyISO - 1)
             * WasteHeatRecovery.parameter.efficiencyNominal
@@ -252,7 +252,7 @@ public struct GasTurbine: Parameterizable {
           }
 
           if (plant.electricity.demand - demand) > SteamTurbine.parameter.power.max {
-            
+
             demand = (SteamTurbine.parameter.power.max / SteamTurbine.parameter.efficiencySCC
               - plant.heatFlow.solar.megaWatt * HeatExchanger.parameter.efficiency)
               / (WasteHeatRecovery.parameter.efficiencyNominal
@@ -264,7 +264,7 @@ public struct GasTurbine: Parameterizable {
       steamTurbine.load = Ratio((plant.electricity.demand - plant.electricity.gasTurbineGross)
         / SteamTurbine.parameter.power.max)
       steamTurbine.load.limited(to: Availability.current.value.powerBlock)
-      
+
     //  if status.steamTurbine.load.quotient != load {
         // The turbine load has changed recalculation of efficiency
         let (_, eff) = SteamTurbine.perform(
@@ -273,7 +273,7 @@ public struct GasTurbine: Parameterizable {
           ambient: temperature
         )
     //  }
-      
+
       plant.heatFlow.demand.megaWatt = steamTurbine.load.quotient
         * SteamTurbine.parameter.power.max / eff
       // FIXME: thermal.wasteHeatRecovery = WasteHeatRecovery(electricPerformance.gasTurbineGross, hourFraction)

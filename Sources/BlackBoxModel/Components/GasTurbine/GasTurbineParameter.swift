@@ -12,6 +12,7 @@ import Config
 import PhysicalQuantities
 
 extension GasTurbine {
+  /// A struct with the assigned details of the gas turbine
   public struct Parameter: Codable, Equatable {    
     let name: String
     let powerGross, efficiencyISO, loadMin, altitude: Double

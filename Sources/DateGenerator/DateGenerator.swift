@@ -5,6 +5,7 @@ public let calendar = { calendar -> NSCalendar in
   return calendar
 }(NSCalendar(identifier: .gregorian)!)
 
+/// A type that supplies a sequence of dates with a fixed interval.
 public final class DateGenerator: Sequence, IteratorProtocol {
 
   public enum Interval: Int, CaseIterable, CustomStringConvertible {

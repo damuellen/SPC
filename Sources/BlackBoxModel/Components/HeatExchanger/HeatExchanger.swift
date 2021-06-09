@@ -12,25 +12,25 @@ import PhysicalQuantities
 
 /// This struct contains the state as well as the functions for mapping the heat exchanger
 public struct HeatExchanger: Parameterizable, HeatTransfer {
-  
+
   var name: String = HeatExchanger.parameter.name
 
   var massFlow: MassFlow = .zero
-  
+
   var temperature: (inlet: Temperature, outlet: Temperature)
-   
+
   var heatOut, heatToTES: Double
 
   static let capacity = SolarField.parameter.HTF.heatContent(
     HeatExchanger.parameter.temperature.htf.inlet.max,
     HeatExchanger.parameter.temperature.htf.outlet.max)
 
-  /// working conditions of the heat exchanger at start
+  /// Returns the fixed initial state.
   static let initialState = HeatExchanger(
     temperature: Simulation.startTemperature,
     heatOut: 0.0, heatToTES: 0.0
   )
-
+  /// Returns the static parameters.
   public static var parameter: Parameter = ParameterDefaults.hx
 
   /// power function based on MAN-Turbo and OHL data with pinch point tool
@@ -43,7 +43,7 @@ public struct HeatExchanger: Parameterizable, HeatTransfer {
         * 666 - 0.0110227028559)) - 0.000151639).clamped(to: 0...1.1)
         // function is based on 393°C
   }
-  
+
   /// Update HeatExchanger.temperature.outlet
   mutating func callAsFunction(
     load: Ratio,
@@ -82,9 +82,9 @@ public struct HeatExchanger: Parameterizable, HeatTransfer {
 
           var factor = ToutMassFlow(massFlowLoad)
           factor *= ToutTin(temperature.inlet)
-          factor.clamp(to: 0...1.1) 
+          factor.clamp(to: 0...1.1)
           self.temperature.outlet =
-            parameter.temperature.htf.outlet.max.adjusted(factor)          
+            parameter.temperature.htf.outlet.max.adjusted(factor)
         case let (ToutMassFlow?, .none, .none):
           outletTemperature(kelvin:
             temp.htf.outlet.min.kelvin + temp.range.outlet.kelvin
@@ -140,7 +140,7 @@ public struct HeatExchanger: Parameterizable, HeatTransfer {
           )
           if factor > 0 {
             self.temperature.outlet =
-              parameter.temperature.htf.outlet.max.adjusted(factor)            
+              parameter.temperature.htf.outlet.max.adjusted(factor)
           }
         } else if let ToutMassFlow = parameter.ToutMassFlow,
           let ToutTin = parameter.ToutTin {
@@ -169,7 +169,7 @@ public struct HeatExchanger: Parameterizable, HeatTransfer {
         let bypassMassFlow = totalMassFlow - massFlow
         let bypass_h = htf.enthalpy(temperature.inlet)
         heatToTES = (
-          bypassMassFlow.rate * bypass_h 
+          bypassMassFlow.rate * bypass_h
           + massFlow.rate * heatOut)
           / (bypassMassFlow + massFlow).rate
       }
@@ -180,7 +180,7 @@ public struct HeatExchanger: Parameterizable, HeatTransfer {
   }
   /// Calculates the outlet temperature of the power block
   static var temperatureOutlet = outletTemperatureFunction()
-  
+
   private static func outletTemperatureFunction()
     -> (PowerBlock, HeatTransfer) -> Temperature
   {
@@ -191,7 +191,7 @@ public struct HeatExchanger: Parameterizable, HeatTransfer {
         let factor = temperatureFactor(
           temperature: pb.temperature.inlet, load: load,
           max: parameter.temperature.htf.inlet.max)
-        
+
         return parameter.temperature.htf.outlet.max
           .adjusted(factor)
       }
@@ -202,9 +202,9 @@ public struct HeatExchanger: Parameterizable, HeatTransfer {
       return {
         (pb: PowerBlock, _: HeatTransfer) -> Temperature in
         let massFlowLoad = pb.massFlow.share(of: pb.designMassFlow)
-        
+
         let factor = ToutMassFlow(massFlowLoad)
-        
+
         let temp = parameter.temperature
 
         return Temperature(
@@ -239,7 +239,7 @@ public struct HeatExchanger: Parameterizable, HeatTransfer {
       }
     } else if let ToutTin = parameter.ToutTin {
       return { (_: PowerBlock, hx: HeatTransfer) -> Temperature in
-        let factor = Ratio(ToutTin(hx.temperature.inlet))        
+        let factor = Ratio(ToutTin(hx.temperature.inlet))
         return parameter.temperature.htf.outlet.max.adjusted(factor)
       }
     }

@@ -14,6 +14,7 @@ import Meteo
 import SQLite
 import xlsxwriter
 
+/// A class that creates a recording of performance data.
 public final class Recorder {
 
 #if DEBUG && !os(Windows)
@@ -32,8 +33,8 @@ public final class Recorder {
     case custom(interval: DateGenerator.Interval)
 
     var hasFileOutput: Bool {
-      if case .none = self { return false }  
-      if case .inMemory = self { return false }  
+      if case .none = self { return false }
+      if case .inMemory = self { return false }
       return true
     }
 
@@ -94,7 +95,7 @@ public final class Recorder {
     self.parent = customPath ?? ""
 
 #if DEBUG
-    let outputMode = Mode.custom(interval: interval)    
+    let outputMode = Mode.custom(interval: interval)
 #endif
 
     if case .inMemory = outputMode {
@@ -129,13 +130,13 @@ public final class Recorder {
     var urls = [URL]()
 
     if case .excel = outputMode {
-      let url = urlDir.appendingPathComponent("\(name)\(suffix).xlsx") 
+      let url = urlDir.appendingPathComponent("\(name)\(suffix).xlsx")
       self.xlsx = Workbook(name: url.path)
       urls = [url]
     }
 
     if case .database = outputMode {
-      let url = urlDir.appendingPathComponent("\(name)\(suffix).sqlite3") 
+      let url = urlDir.appendingPathComponent("\(name)\(suffix).sqlite3")
       self.db = try! Connection(url.path)
       urls = [url]
     }
@@ -151,7 +152,7 @@ public final class Recorder {
       self.dailyResultsStream?.write(tableHeader)
       self.hourlyResultsStream?.write(tableHeader)
 
-      urls = [dailyResultsURL, hourlyResultsURL]      
+      urls = [dailyResultsURL, hourlyResultsURL]
     }
 
     if case .custom(let i) = mode {
@@ -175,7 +176,7 @@ public final class Recorder {
       customIntervalStream?.write(tableHeader)
       urls = [resultsURL]
     }
-    if !mode.hasFileOutput { return } 
+    if !mode.hasFileOutput { return }
     print("Results: \(urlDir.path)/")
     urls.map(\.lastPathComponent).enumerated()
       .forEach { print("  \($0.offset+1).\t", $0.element) }
@@ -205,14 +206,14 @@ public final class Recorder {
     print(annualRadiation.prettyDescription)
     print(annualPerformance.prettyDescription)
   }
-   
+
   func callAsFunction(
     _ ts: DateTime, meteo: MeteoData, status: Status, energy: PlantPerformance
   ) {
     let solar = SolarRadiation(
       meteo: meteo, cosTheta: status.collector.cosTheta
     )
-    
+
     if mode.hasHistory {
       self.statusHistory.append(status)
       self.performanceHistory.append(energy)
@@ -244,7 +245,7 @@ public final class Recorder {
           stringBuffer.append(contentsOf: csv + .lineBreak)
 #endif
           customIntervalStream?.write(stringBuffer)
-          stringBuffer.removeAll()      
+          stringBuffer.removeAll()
           customIntervalRadiation.zero()
           customIntervalPerformance.zero()
         }
@@ -265,7 +266,7 @@ public final class Recorder {
     if progress != ts.month {
       progress = ts.month
       print(" [\(progress)/\(12)] recording month…", terminator: "\r")
-      fflush(stdout)   
+      fflush(stdout)
     }
 #endif
   }
@@ -281,7 +282,7 @@ public final class Recorder {
     if case .custom(_) = mode {
       customIntervalStream?.write(stringBuffer)
       stringBuffer.removeAll()
-    }          
+    }
 
     if case .database = mode {
       storeInDB()
@@ -340,7 +341,7 @@ public final class Recorder {
 
         let csv = generateHourlyValues() + .lineBreak
         // Will be written together with the daily results
-        stringBuffer.append(contentsOf: csv)        
+        stringBuffer.append(contentsOf: csv)
 
         hourlyPerformance.zero()
         hourlyRadiation.zero()
@@ -356,12 +357,12 @@ public final class Recorder {
     let f1 = wb.addFormat().set(num_format: "d mmm hh:mm")
     let f2 = wb.addFormat().set(num_format: "0.0")
 
-    let statusCaptions = ["Date"] 
-      + SolarRadiation.columns.map(\.0) 
+    let statusCaptions = ["Date"]
+      + SolarRadiation.columns.map(\.0)
       + Status.modes + Status.columns.map(\.0)
     let statusCount = statusCaptions.count
     let modesCount = Status.modes.count
-    let energyCaptions = ["Date"] 
+    let energyCaptions = ["Date"]
       + PlantPerformance.columns.map(\.0)
     let energyCount = energyCaptions.count
 
@@ -376,7 +377,7 @@ public final class Recorder {
       .column([1, energyCount], width: 8, format: f2)
       .hide_columns(energyCount + 1)
       .write(energyCaptions, row: 0)
-    
+
     let interval = Simulation.time.steps.interval
     var date = Simulation.time.firstDateOfOperation!
 
@@ -414,7 +415,7 @@ public final class Recorder {
         })
     }
 
-    let status = Status.columns.map 
+    let status = Status.columns.map
       { $0.0.replacingOccurrences(of: "|", with: "_") }
     let energy = PlantPerformance.columns.map
       { $0.0.replacingOccurrences(of: "|", with: "_") }
@@ -444,10 +445,10 @@ public final class Recorder {
 
   private var headers: (name: String, unit: String, count: Int) {
 #if DEBUG
-    let columns = 
+    let columns =
       [SolarRadiation.columns, PlantPerformance.columns, Status.columns].joined()
 #else
-    let columns = 
+    let columns =
       [SolarRadiation.columns, PlantPerformance.columns].joined()
 #endif
     let names: String = columns.map { $0.0 }.joined(separator: ",")

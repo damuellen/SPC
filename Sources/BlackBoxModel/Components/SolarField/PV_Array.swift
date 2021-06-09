@@ -13,41 +13,44 @@ import Libc
 import PhysicalQuantities
 import SolarPosition
 
-public struct PV_Array {
-  var panelsPerString: Int = 27
-  var strings: Int = 295
-  var inverters: Int = 1
-  var panel: Panel = Panel()
+extension PV {
+  /// Represents a group of modules with the same orientation and module type.
+  public struct Array {
+    var panelsPerString: Int = 27
+    var strings: Int = 295
+    var inverters: Int = 1
+    var panel: Panel = Panel()
 
-  public func pmp(radiation: Double, ambient: Temperature, windSpeed: Double) -> Cell.PowerPoint {
-    let pmp = panel.maxPowerPoint(radiation: radiation, ambient: ambient, windSpeed: windSpeed)
-    return Cell.PowerPoint(
-      current: pmp.current * Double(strings) * Double(inverters),
-      voltage: pmp.voltage * Double(panelsPerString)
-    )
+    public func pmp(radiation: Double, ambient: Temperature, windSpeed: Double) -> PowerPoint {
+      let pmp = panel.maxPowerPoint(radiation: radiation, ambient: ambient, windSpeed: windSpeed)
+      return PowerPoint(
+        current: pmp.current * Double(strings) * Double(inverters),
+        voltage: pmp.voltage * Double(panelsPerString)
+      )
+    }
+
+    func pmp(radiation: Double, cell: Temperature) -> PowerPoint {
+      if radiation < 10 { return .zero }
+      return panel.maxPowerPoint(radiation: radiation, temperature: cell)
+    }
+
+    public init() {
+
+    }
   }
+  /// Represents a transformer with its losses.
+  public struct Transformer {
+    var injectionLossFractionAtST: Double = 0.006
+    var resistiveLossAtSTC: Double = 0.01
+    var ironLoss: Double = 14.83E3
 
-  func pmp(radiation: Double, cell: Temperature) -> Cell.PowerPoint {
-    if radiation < 10 { return .zero }
-    return panel.maxPowerPoint(radiation: radiation, temperature: cell)
-  }
-
-  public init() {
-
-  }
-}
-
-struct Transformer {
-  var injectionLossFractionAtST: Double = 0.006
-  var resistiveLossAtSTC: Double = 0.01
-  var ironLoss: Double = 14.83E3
-
-  func callAsFunction(acPower: Double) -> Double {
-    if acPower > .zero {
-      return acPower * (1 - resistiveLossAtSTC) * (1 - injectionLossFractionAtST)
-        - ironLoss
-    } else {
-      return -ironLoss
+    func callAsFunction(acPower: Double) -> Double {
+      if acPower > .zero {
+        return acPower * (1 - resistiveLossAtSTC) * (1 - injectionLossFractionAtST)
+          - ironLoss
+      } else {
+        return -ironLoss
+      }
     }
   }
 }

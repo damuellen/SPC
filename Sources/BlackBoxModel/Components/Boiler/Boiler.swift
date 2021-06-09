@@ -13,7 +13,7 @@ import DateGenerator
 import PhysicalQuantities
 
 /// This struct contains the state as well as the functions for mapping the boiler
-public struct Boiler: Parameterizable {  
+public struct Boiler: Parameterizable {
   /// Returns the operating state
   var operationMode: OperationMode
 
@@ -31,7 +31,7 @@ public struct Boiler: Parameterizable {
     case SI, NI, startUp, scheduledMaintenance,
       coldStartUp, warmStartUp, operating, unknown
   }
-
+  /// Returns the fixed initial state.
   static let initialState = Boiler(
     operationMode: .noOperation(hours: 0),
     isMaintained: false,
@@ -39,7 +39,7 @@ public struct Boiler: Parameterizable {
     startEnergy: 0.0
   )
   // startEnergyOld: 0.0)
-
+  /// Returns the static parameters
   public static var parameter: Parameter = ParameterDefaults.bo
 
   /// Calculates the efficiency of the boiler which only depends on his current load
@@ -117,7 +117,7 @@ public struct Boiler: Parameterizable {
         \(DateTime.current)
         Boiler operation requested but not performed because of underload.
         """)
-        
+
       let fuel = Boiler.noOperation(&self, fuelAvailable: fuelAvailable)
 
       return Plant.Performance(
@@ -166,7 +166,7 @@ public struct Boiler: Parameterizable {
 
         totalFuelNeed = fuelNeed // no additional fuel needed.
       } else {
-        
+
         operationMode = .startUp
 
         totalFuelNeed = fuelNeed + startEnergy
@@ -200,7 +200,7 @@ public struct Boiler: Parameterizable {
     if OperationRestriction.fuelStrategy.isPredefined { // predefined fuel consumption in *.pfc-file
       // Fuel flow [MW] in this hour fraction
       fuel = fuelAvailable / Simulation.time.steps.fraction
-      
+
       thermalPower = fuel // FIXME Plant.fuelConsumption.boiler
         * Boiler.efficiency(at: load) // net thermal power [MW]
     } else {
@@ -208,7 +208,7 @@ public struct Boiler: Parameterizable {
       thermalPower = fuel // FIXME Plant.fuelConsumption.boiler
         / Simulation.time.steps.fraction * Boiler.efficiency(at: load) // net thermal power [MW]
     }
-    
+
     parasitics = Boiler.parasitics(estimateFrom: load)
 
     return Plant.Performance(
@@ -266,7 +266,7 @@ public struct Boiler: Parameterizable {
       load = Ratio(fuel / (Design.layout.boiler * Simulation.time.steps.fraction))
       return
     }
-    
+
     // Iteration to get possible load with the fuel avail. for production:
     var newLoad = Ratio(0)
     repeat {

@@ -15,9 +15,9 @@ public enum WasteHeatRecovery: Parameterizable {
   public struct PerformanceData {
     var maintained: Bool
   }
-
+  /// Returns the fixed initial state.
   static let initialState = PerformanceData(maintained: true)
-
+  /// Returns the static parameters.
   public static var parameter: Parameter = ParameterDefaults.whr
 
   /// Returns the efficiency of the waste heat recovery based on working conditions of the gas turbine

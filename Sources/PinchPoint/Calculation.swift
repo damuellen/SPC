@@ -12,6 +12,7 @@ import Helpers
 import Libc
 import PhysicalQuantities
 
+/// Pinch point calculation for heat exchangers.
 public struct Calculation: Codable {
   public init(parameter: HeatExchangerParameter) {
     self.parameter = parameter

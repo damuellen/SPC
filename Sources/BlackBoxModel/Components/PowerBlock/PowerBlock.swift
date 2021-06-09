@@ -17,26 +17,26 @@ public struct PowerBlock: Parameterizable, HeatTransfer {
   var name: String = PowerBlock.parameter.name
 
   var massFlow: MassFlow = .zero
-  
+
   var temperature: (inlet: Temperature, outlet: Temperature)
 
   var designMassFlow = MassFlow(
     HeatExchanger.parameter.heatFlowHTF * 1_000 / HeatExchanger.capacity
   )
-  
+
   public enum OperationMode {
     case scheduledMaintenance
   }
-  
+  /// Returns the fixed initial state.
   static let initialState = PowerBlock(
     temperature: Simulation.startTemperature
   )
-  
+  /// Returns the static parameters
   public static var parameter: Parameter = ParameterDefaults.pb
 
-  static func requiredMassFlow() -> MassFlow {    
+  static func requiredMassFlow() -> MassFlow {
     MassFlow(GridDemand.current.ratio
-      * HeatExchanger.parameter.heatFlowHTF * 1_000 / HeatExchanger.capacity)    
+      * HeatExchanger.parameter.heatFlowHTF * 1_000 / HeatExchanger.capacity)
   }
 
   mutating func temperatureOutlet(
@@ -60,7 +60,7 @@ public struct PowerBlock: Parameterizable, HeatTransfer {
     }
   }
 
-  /// Calculate parasitic power in PB
+  /// Calculate parasitic power of the power block
   static func parasitics(
     heat: Double,
     steamTurbine: SteamTurbine,
@@ -81,7 +81,7 @@ public struct PowerBlock: Parameterizable, HeatTransfer {
       // - electricPerformance.parasitics) < Simulation.parameter.electricalTolerance"
       electricalParasitics = parameter.startUpElectricalParasitics
     }
-    
+
     // if Heater.parameter.operationMode {
     // if variable exist, then project Shams-1 is calculated. commented,
     // same for shams as for any project. check!
@@ -98,12 +98,12 @@ public struct PowerBlock: Parameterizable, HeatTransfer {
       electricalParasitics += parameter.electricalParasiticsStep[1]
     default: break
     }
-    
+
     // parasitics for ACC:
     if load > .zero {
       // only during operation
       var electricalParasiticsACC = parameter.electricalParasiticsACC(load)
-      
+
       if parameter.electricalParasiticsACCTamb.coefficients.isEmpty == false {
         var adjustmentACC = parameter.electricalParasiticsACCTamb(temperature.celsius)
         // ambient temp is larger than design, ACC max. consumption fixed to nominal
@@ -113,42 +113,42 @@ public struct PowerBlock: Parameterizable, HeatTransfer {
         electricalParasiticsACC *= adjustmentACC
       }
     }
-    
+
     electricalParasitics += parameter.nominalElectricalParasiticsACC
     return electricalParasitics // + 0.005 * steamTurbine.load * parameter.power.max
-    
+
     // return parameter.fixElectricalParasitics
     // electricalParasitics += parameter.nominalElectricalParasitics
     // * (parameter.electricalParasitics[0] + parameter.electricalParasitics[1]
     // * steamTurbine.load + parameter.electricalParasitics[2] * steamTurbine.load ** 2)
   }
-  
+
   mutating func heatExchangerBypass() -> (heatOut: Double, heatToTES: Double)
   {
     let htf = SolarField.parameter.HTF
 
     var heatOut = 0.0
-    
+
     var heatToTES = 0.0
-    
+
     // added to simulate a bypass on the PB-HX if the expected
     // outlet temperature is so low that the salt to TES could freeze
     let totalMassFlow = massFlow
-  
+
     repeat {
       //#warning("Check this")
       temperature.outlet = HeatExchanger.temperatureOutlet(self, self)
 
       heatOut = htf.enthalpy(temperature.outlet)
-      
+
       let bypassMassFlow = totalMassFlow - massFlow
       let Bypass_h = htf.enthalpy(temperature.inlet)
-      
+
       heatToTES = (bypassMassFlow.rate * Bypass_h + massFlow.rate * heatOut)
         / (bypassMassFlow + massFlow).rate
-      
+
     } while heatToTES > h_261
-    
+
     setTemperature(outlet: htf.temperature(heatToTES))
     return (heatOut, heatToTES)
   }

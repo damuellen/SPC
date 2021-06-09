@@ -37,6 +37,7 @@ protocol HeatTransfer: CustomStringConvertible {
   var temperature: (inlet: Temperature, outlet: Temperature) { get set }
 }
 
+/// A struct with a named set of values for mass flow and temperature.
 public struct Cycle: HeatTransfer {
   public var name: String
   public var massFlow: MassFlow
@@ -93,10 +94,10 @@ extension HeatTransfer {
     medium.heatContent(temperature.outlet, temperature.inlet)
   }
 
-  public var description: String {  
-       String(format: "  Mass flow: %3.1f kg/s", massFlow.rate).padding(28) 
-      + String(format: " T in: %3.1f degC", temperature.inlet.celsius).padding(20) 
-      + String(format: "T out: %3.1f degC", temperature.outlet.celsius).padding(20) 
+  public var description: String {
+       String(format: "  Mass flow: %3.1f kg/s", massFlow.rate).padding(28)
+      + String(format: " T in: %3.1f degC", temperature.inlet.celsius).padding(20)
+      + String(format: "T out: %3.1f degC", temperature.outlet.celsius).padding(20)
   }
 
   var values: [String] {

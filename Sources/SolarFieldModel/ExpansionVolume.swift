@@ -6,11 +6,12 @@
 //  Copyright © 2015 Daniel Muellenborn. All rights reserved.
 //
 
+/// Calculates the thermal expansion of the medium in the solar field and the required vessels.
 public class ExpansionVolume {
 
   public let temperatureFillIn: Double
 
-  private unowned let solarField: SolarField 
+  private unowned let solarField: SolarField
 
   var temperatureLoops: Double {
     let temperature = SolarField.designTemperature
@@ -32,7 +33,7 @@ public class ExpansionVolume {
   var vesselVolume: Double { maxVolume - solarField.volume }
 
   public init(temperatureFillIn: Double = 35, solarField: SolarField) {
-    self.solarField = solarField 
+    self.solarField = solarField
     self.temperatureFillIn = temperatureFillIn
   }
 

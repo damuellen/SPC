@@ -110,8 +110,8 @@ public enum BlackBoxModel {
 
     // Set initial values
     var status = Plant.initialState
-
-    let pv = PV_System()
+    // PV system setup
+    let pv = PV()
 
     var photovoltaic = [Power]()
     for (meteo, date) in zip(🌦, timeline(Simulation.time.steps)) {
@@ -128,16 +128,14 @@ public enum BlackBoxModel {
           ghi: Double(meteo.ghi), dhi: Double(meteo.dhi),
           surfTilt: panel.surfTilt, incidence: panel.AOI,
           zenith: position.zenith, doy: dt.yearDay)
-        let pmp = pv.array.pmp(radiation: effective, ambient: temperature, windSpeed: 0.0)
-        let acPower = pmp.power * pv.inverter(power: pmp.power, voltage: pmp.voltage)
-        if acPower.isFinite {
-          let net = pv.transformer(acPower: acPower)
-          photovoltaic.append(.init(net))
-        } else {
-          photovoltaic.append(.zero)
-        }
+        let watts = pv.watts(
+          radiation: effective,
+          ambient: temperature,
+          windSpeed: 0.0
+        )
+        photovoltaic.append(.init(watts))
       } else {
-        photovoltaic.append(.zero)
+        photovoltaic.append(.init(pv.transformer(acPower: .zero)))
       }
     }
     // Makes it easier to use when re-reading the values

@@ -10,6 +10,7 @@
 
 import Foundation
 
+/// A struct for latitude, longitude, timezone, and altitude data associated with a particular geographic location.
 public struct Location {
   public let longitude: Double
   public let latitude: Double
@@ -23,7 +24,7 @@ public struct Location {
   public static var primeMeridian = Location(
     longitude: 0, latitude: 0, elevation: 102, timezone: 0
   )
-  
+
   public init(longitude: Double, latitude: Double, elevation: Double, timezone: Int) {
     self.longitude = longitude
     self.latitude = latitude

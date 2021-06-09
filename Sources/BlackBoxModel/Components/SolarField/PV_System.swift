@@ -14,8 +14,18 @@ import PhysicalQuantities
 ///
 /// This simplifies the API by eliminating the need for a user to specify
 /// arguments such as module and inverter properties.
-public struct PV_System {
-  var array = PV_Array()
-  var inverter = Inverter()
-  var transformer = Transformer()
+public struct PV {
+  public var array = Array()
+  public var inverter = Inverter()
+  public var transformer = Transformer()
+
+  func watts(radiation effective: Double, ambient: Temperature, windSpeed: Double) -> Double {
+    let pmp = array.pmp(radiation: effective, ambient: ambient, windSpeed: 0.0)
+    let acPower = pmp.power * inverter(power: pmp.power, voltage: pmp.voltage)
+    if acPower.isFinite {
+      return transformer(acPower: acPower)
+    } else {
+      return transformer(acPower: 0)
+    }
+  }
 }

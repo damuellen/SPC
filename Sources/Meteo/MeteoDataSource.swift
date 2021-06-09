@@ -12,6 +12,7 @@ import DateGenerator
 import Foundation
 import SolarPosition
 
+/// A type that provides meteorological data for one year.
 public class MeteoDataSource {
   public let name: String
   public let year: Int?

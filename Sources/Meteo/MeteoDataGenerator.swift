@@ -11,6 +11,7 @@
 import DateGenerator
 import Foundation
 
+/// A type that supplies a sequence of meteorological data.
 public class MeteoDataGenerator: Sequence {
 
   private(set) var frequence: DateGenerator.Interval
@@ -79,19 +80,19 @@ public class MeteoDataGenerator: Sequence {
 
     return AnyIterator<MeteoData> {
       defer { step += 1 }
-      
+
       let idx0 = (cursor - 1).clamped(to: r)
       let idx1 = cursor.clamped(to: r)
       let idx2 = (cursor + 1).clamped(to: r)
-      
+
       if idx2 == r.upperBound, step == lastStep { return nil }
-      
+
       let prev = data[idx0]
       let curr = data[idx1]
 
       let meteo: MeteoData
       switch method {
-      case .linear: 
+      case .linear:
         meteo =  .interpolation((prev, curr, nil), step: step, steps: steps)
       case .gradient:
         let next = data[idx2]
@@ -101,12 +102,12 @@ public class MeteoDataGenerator: Sequence {
           meteo = .interpolation((prev, curr, next), step: step, steps: steps)
         }
       }
-      
+
       if step > 0, idx2 != r.upperBound, step.isMultiple(of: steps) {
         step = 0
         cursor += 1
       }
-      
+
       return meteo
     }
   }
@@ -131,7 +132,7 @@ extension MeteoData {
     let insolation: [Float]
     let conditions: [Float]
     if let next = values.2 {
-      if let prev = values.0 { 
+      if let prev = values.0 {
         let i = zip(curr.insolation,
           zip(prev.insolation, next.insolation).map { ($0.0, $0.1) }
         )
@@ -149,7 +150,7 @@ extension MeteoData {
     } else { // Linear interpolation
       guard let prev = values.0 else { preconditionFailure() }
       insolation = zip(prev.insolation, curr.insolation).map { this, other in
-        this.lerp(to: other, progress) 
+        this.lerp(to: other, progress)
       }
       conditions = zip(prev.conditions, curr.conditions).map { this, other in
         this.lerp(to: other, progress)
