@@ -1,11 +1,11 @@
 Add-Type -AssemblyName System.Windows.Forms
 [System.Windows.Forms.Application]::EnableVisualStyles()
-$Expert = false
+$global:Expert = $false
 $WidthBox = 60
 $HeightBox = 24
 $XLabels = 10
 $XBoxes = 270
-$Y = 15
+$Y = 12
 $YOffset = 24
 $Form = New-Object system.Windows.Forms.Form
 $Form.FormBorderStyle = "FixedDialog"
@@ -104,17 +104,19 @@ $Button3.location = New-Object System.Drawing.Point(230, $Y)
 
 $Form.controls.AddRange(@($Button1, $Button2, $Button3))
 
-$Y = 15
-$YOffset = 24
+$Y = 12
 $Form1 = New-Object system.Windows.Forms.Form
-$Form1.FormBorderStyle = "FixedDialog"
+$Form1.FormBorderStyle = "FixedToolWindow"
 $Form1.Size = '360,300'
 $Form1.MinimumSize = '360,300'
 $Form1.MaximumSize = '360,300'
 $Form1.text = "Expert values"
 $Form1.TopMost = $true
 $Form1.StartPosition = "WindowsDefaultLocation" #loads the window in the center of the screen
-
+$Form1.Add_Closing({param($sender,$e)
+  $e.Cancel= $true
+  $Form1.Hide()
+})
 foreach ($Item in $Items1) {
   $TextBox = New-Object system.Windows.Forms.TextBox
   $TextBox.multiline = $false
@@ -145,8 +147,10 @@ $Button3.Add_Click({
     $Form1.Hide()
   } else {
     $Form1.Show()
+  }
+  if (!$global:Expert) {
     Read-Inputs2
-    $Expert = true
+    $global:Expert = $true
   }
 })
 
@@ -215,7 +219,7 @@ Function Run-HTML {
     $form.Controls.where{$_ -is [System.Windows.Forms.TextBox]}.ForEach({
         $Arguments += $_.Text
     })
-    if ($Expert) {
+    if ($global:Expert) {
         $Form1.Controls.where{$_ -is [System.Windows.Forms.TextBox]}.ForEach({
          $Arguments += $_.Text
         })
@@ -250,7 +254,7 @@ Function Run-PDF {
     $form.Controls.where{$_ -is [System.Windows.Forms.TextBox]}.ForEach({
         $Arguments += $_.Text
     })
-    if ($Expert) {
+    if ($global:Expert) {
         $Form1.Controls.where{$_ -is [System.Windows.Forms.TextBox]}.ForEach({
          $Arguments += $_.Text
         })
