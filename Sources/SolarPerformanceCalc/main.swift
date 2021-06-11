@@ -100,12 +100,12 @@ struct SolarPerformanceCalculator: ParsableCommand {
 
     let path = meteofilePath ?? configPath
 
-    do { 
+    do {
       try BlackBoxModel.configure(meteoFilePath: path, convert: convert) } catch {
 #if os(Windows)
       if case MeteoDataFileError.fileNotFound = error {
         guard let path = FileDialog() else { return }
-        do { 
+        do {
           try BlackBoxModel.configure(meteoFilePath: path, convert: convert) } catch {
           MessageBox(text: (error as! MeteoDataFileError).description, caption: name)
           return

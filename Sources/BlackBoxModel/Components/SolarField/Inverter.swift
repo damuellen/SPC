@@ -9,6 +9,7 @@
 //
 
 /// Convert DC power and voltage to AC power
+///
 /// Performance is described at three DC input voltage levels
 public struct Inverter {
   var dc_power: [Double]

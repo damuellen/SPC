@@ -45,9 +45,11 @@ public struct Column {
   let truncate: Truncation
   let formatter: Formatter?
 
-  public init(title: String, value: Any, width: Int? = nil,
-              align: StringAlignment = .left, truncate: Truncation = .tail,
-              formatter: Formatter? = nil) {
+  public init(
+    title: String, value: Any, width: Int? = nil,
+    align: StringAlignment = .left, truncate: Truncation = .tail,
+    formatter: Formatter? = nil
+  ) {
     self.title = title
     self.value = unwrap(value)
     self.width = width
@@ -56,16 +58,19 @@ public struct Column {
     self.formatter = formatter
   }
 
-  public init(_ mapping: @autoclosure () -> (String, Any), width: Int? = nil,
-              align: StringAlignment = .left, truncate: Truncation = .tail,
-              formatter: Formatter? = nil) {
+  public init(
+    _ mapping: @autoclosure () -> (String, Any), width: Int? = nil,
+    align: StringAlignment = .left, truncate: Truncation = .tail,
+    formatter: Formatter? = nil
+  ) {
     let (t, v) = mapping()
-    self = Column(title: t,
-                  value: v,
-                  width: width,
-                  align: align,
-                  truncate: truncate,
-                  formatter: formatter)
+    self = Column(
+      title: t,
+      value: v,
+      width: width,
+      align: align,
+      truncate: truncate,
+      formatter: formatter)
   }
 
   internal var resolvedWidth: Int {
@@ -73,17 +78,18 @@ public struct Column {
   }
 
   fileprivate func settingWidth(_ newWidth: Int) -> Column {
-    return Column(title: self.title,
-                  value: self.value,
-                  width: newWidth,
-                  align: self.align,
-                  truncate: self.truncate,
-                  formatter: self.formatter)
+    return Column(
+      title: self.title,
+      value: self.value,
+      width: newWidth,
+      align: self.align,
+      truncate: self.truncate,
+      formatter: self.formatter)
   }
 }
 
-public extension Column {
-  func string(for style: TextTableStyle.Type) -> String {
+extension Column {
+  public func string(for style: TextTableStyle.Type) -> String {
     var string = ""
     if let formatter = formatter {
       string = formatter.string(for: value) ?? string
@@ -93,11 +99,11 @@ public extension Column {
     return style.prepare(string, for: self)
   }
 
-  func headerString(for style: TextTableStyle.Type) -> String {
+  public func headerString(for style: TextTableStyle.Type) -> String {
     return style.prepare(title, for: self)
   }
 
-  func repeated(_ string: String) -> String {
+  public func repeated(_ string: String) -> String {
     return String(repeating: string, count: resolvedWidth)
   }
 }
@@ -168,7 +174,6 @@ public struct TextTable {
     Swift.print(table)
   }
 }
-
 
 public enum FancyGrid: TextTableStyle {
   public static func prepare(_ s: String, for column: Column) -> String {
@@ -326,7 +331,8 @@ public enum Html: TextTableStyle {
   }
 
   public static func escape(_ s: String) -> String {
-    return s
+    return
+      s
       .replacingOccurrences(of: "&", with: "&amp;")
       .replacingOccurrences(of: "<", with: "&lt;")
       .replacingOccurrences(of: "<", with: "&gt;")
@@ -341,8 +347,8 @@ public enum Html: TextTableStyle {
   }
 
   private static func string(header col: Column) -> String {
-    return "        <th style=\"text-align:\(string(for: col.align));\">" +
-      col.headerString(for: self) + "</th>\n"
+    return "        <th style=\"text-align:\(string(for: col.align));\">"
+      + col.headerString(for: self) + "</th>\n"
   }
 
   private static func string(row col: Column) -> String {

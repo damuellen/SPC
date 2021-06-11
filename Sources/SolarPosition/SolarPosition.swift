@@ -12,6 +12,7 @@ let calendar = { calendar -> NSCalendar in
 }(NSCalendar(identifier: .gregorian)!)
 
 /// A struct containing values where the sun is above the horizon.
+///
 /// Look up values using date-based subscript. Otherwise returns nil.
 public struct SolarPosition {
 
