@@ -22,14 +22,14 @@ public struct Temperatures {
 }
 
 /// A unit of measure for temperture.
-/// 
+///
 /// Temperature is a comparative measure of thermal energy.
 /// The SI unit for temperature is the kelvin (K),
 /// which is defined in terms of the triple point of water.
 public struct Temperature: CustomStringConvertible, Equatable {
-  /// Returns the degree Kelvin unit of temperature. 
+  /// Returns the degree Kelvin unit of temperature.
   public var kelvin: Double
-  /// Absolute zero of temperatre.
+  /// Absolute zero of temperature.
   public static var zero = 0
 
   public static var absoluteZeroCelsius = -273.15
@@ -70,7 +70,7 @@ public struct Temperature: CustomStringConvertible, Equatable {
     assert(celsius > Temperature.absoluteZeroCelsius)
     self.kelvin = celsius - Temperature.absoluteZeroCelsius
   }
-
+  /// Create a Temperature using the ambient conditions.
   public init(meteo: MeteoData) {
     assert(meteo.temperature > -30)
     assert(meteo.temperature < 70)

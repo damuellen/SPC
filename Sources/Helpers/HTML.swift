@@ -13,7 +13,13 @@ import Foundation
 import WinSDK
 #endif
 
+/// A representation of an HTML document.
+///
+/// Call the `render()` method to turn it into a string.
 public struct HTML {
+  /// Creates an html string from the document
+  public func render() -> String { return raw }
+  /// Create a pdf file from the document.
   public func pdf(toFile name: String) throws {
     guard let data = raw.data(using: .utf8) else { return }
     let html = URL.temporaryFile().appendingPathExtension("html")
@@ -34,14 +40,17 @@ public struct HTML {
     wkhtmltopdf.waitUntilExit()
     try html.removeItem()
   }
+  /// Creates an HTML document with the given body.
+  public init(body: String) { self.bodyContent = body }
+  /// Optional json content to be rendered.
+  public var json: String? = nil
 
-  public init(body: String) { self.body = body }
+  private var bodyContent: String
 
-  public var body: String
-  let type = "<!DOCTYPE html>\n"
-  let meta = "<meta charset=\"utf-8\">\n"
+  private let type = "<!DOCTYPE html>\n"
+  private let meta = "<meta charset=\"utf-8\">\n"
 
-  public var style = """
+  private let style = """
     <style media="print">
       svg { font-family: sans-serif; font-size: 16px;}
     </style>
@@ -69,11 +78,20 @@ public struct HTML {
     </style>
     """
 
-  public var raw: String {
+  private let script = """
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.4.1/jsoneditor.min.css" rel="stylesheet" type="text/css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.4.1/jsoneditor.min.js"></script>
+    <div id="jsoneditor" style="width: 50%; height: 95vh; margin-left: 22%; padding: 2vh; margin-top: 5vh;"></div>
+    <script>new JSONEditor(document.getElementById("jsoneditor"), {},
+    """
+
+  private var raw: String {
     let head = "<html lang=\"en\"><head>" + meta + style + "</head>\n"
-    let click = "onclick=\"document.documentElement.requestFullscreen();\""
-    let content = "<body \(click)>" + body + "</body>\n"
-    let tail = "</html>\n"
-    return type + head + content + tail
+    let tail = "</body>\n</html>\n"
+    if let json = json {
+      let click = "<body onclick=\"document.documentElement.requestFullscreen();\")>"
+      return type + head + click + bodyContent + script + json + ")</script>" + tail
+    }
+    return type + head + "<body>" + bodyContent + tail
   }
 }
