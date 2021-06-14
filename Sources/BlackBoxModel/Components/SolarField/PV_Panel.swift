@@ -70,7 +70,6 @@ extension PV {
       RshRef + (Rsh0 - RshRef) * exp(5.5 * radiation / Cell.radiation_at_ST)
     }
 
-    
   }
   public struct PowerPoint {
     let current: Double
@@ -82,7 +81,7 @@ extension PV {
     init(current: Double, voltage: Double) {
       self.current = current
       self.voltage = voltage
-      self.power = current * voltage
+      self.power = abs(current * voltage)
     }
   }
   public struct Panel {
@@ -101,7 +100,7 @@ extension PV {
       self.numberOfCells = 76
     }
 
-    func voltage(radiation: Double, temperature: Temperature, current: Double)
+    func voltage(current: Double, radiation: Double, temperature: Temperature)
       -> Double
     {
       let nVth =
@@ -128,7 +127,7 @@ extension PV {
         * (-current * (cell.Rs / Rsh + 1.0) + Iph - nVth / Rsh * inputterm + I0)
     }
 
-    func current(radiation: Double, temperature: Temperature, voltage: Double)
+    func current(voltage: Double, radiation: Double, temperature: Temperature)
       -> Double
     {
       let nVth =
@@ -136,7 +135,7 @@ extension PV {
 
       let Iph = cell.photocurrent(radiation: radiation, temperature: temperature)
       let Rsh = cell.Rshunt(radiation: radiation, temperature: temperature)
-      let I0 = cell.photocurrent(radiation: radiation, temperature: temperature)
+      let I0 = cell.saturationCurrent(temperature: temperature)
 
       let argW =
         cell.Rs * I0
@@ -146,27 +145,12 @@ extension PV {
         * (Iph + I0) / (cell.Rs + Rsh)
     }
 
-    public func maxPowerPoint(
+    public func power(
       radiation: Double, ambient: Temperature, windSpeed: Double
     ) -> PowerPoint {
-      guard radiation > .zero else { return .zero }
-      let cell_temp = cell.temperature(
+      let temperature = cell.temperature(
         radiation: radiation, ambient: ambient, windSpeed: windSpeed,
         nominalPower: nominalPower, panelArea: area)
-
-      let nVth =
-        cell.gamma * Double(numberOfCells) * Cell.k * cell_temp.kelvin / Cell.q
-
-      let Iph = cell.photocurrent(radiation: radiation, temperature: cell_temp)
-      let Rsh = cell.Rshunt(radiation: radiation, temperature: cell_temp)
-      let I0 = cell.saturationCurrent(temperature: cell_temp)
-      return bisect(Iph: Iph, Io: I0, a: nVth, Rsh: Rsh)
-    }
-
-    public func maxPowerPoint(radiation: Double, temperature: Temperature)
-      -> PowerPoint
-    {
-      guard radiation > .zero else { return .zero }
 
       let nVth =
         cell.gamma * Double(numberOfCells) * Cell.k * temperature.kelvin / Cell.q
@@ -174,58 +158,49 @@ extension PV {
       let Iph = cell.photocurrent(radiation: radiation, temperature: temperature)
       let Rsh = cell.Rshunt(radiation: radiation, temperature: temperature)
       let I0 = cell.saturationCurrent(temperature: temperature)
-      return bisect(Iph: Iph, Io: I0, a: nVth, Rsh: Rsh)
+      return Pmp_bisect(Iph: Iph, Io: I0, a: nVth, Rsh: Rsh)
     }
 
-    func bisect(Iph: Double, Io: Double, a: Double, Rsh: Double) -> PowerPoint {
-      let Imp = Imp_bisect(Iph, Io, a, cell.Rs, Rsh)
-      let z = phi_exact(Imp, Iph, Io, a, Rsh)
+    func Pmp_bisect(Iph: Double, Io: Double, a: Double, Rsh: Double) -> PowerPoint {
+      let Imp = Imp_bisect(Iph: Iph, Io: Io, nVth: a, Rs: cell.Rs, Rsh: Rsh)
+      let z = phi_exact(Imp: Imp, IL: Iph, Io: Io, a: a, Rsh: Rsh)
       let Vmp = (Iph + Io - Imp) * Rsh - Imp * cell.Rs - a * z
       return PowerPoint(current: Imp, voltage: Vmp)
     }
 
-    //  func calc_Voc(Iph: Double, Io: Double, nVth: Double, Rs: Double, Rsh: Double) -> Double {
-    //    V_from_I(Rsh, Rs, nVth, 0, Io, Iph)
-    //  }
-
     func Imp_bisect(
-      _ Iph: Double, _ Io: Double, _ nVth: Double, _ Rs: Double, _ Rsh: Double
+      Iph: Double, Io: Double, nVth: Double, Rs: Double, Rsh: Double
     ) -> Double {
       var A = 0.0
       var B = Iph + Io
 
-      var gA = g(A, Iph, Io, nVth, Rs, Rsh)
-      let gB = g(B, Iph, Io, nVth, Rs, Rsh)
+      var gA = g(I: A, Iph: Iph, Io: Io, a: nVth, Rs: Rs, Rsh: Rsh)
+      let gB = g(I: B, Iph: Iph, Io: Io, a: nVth, Rs: Rs, Rsh: Rsh)
 
       if gA * gB > 0 { A = .nan }
 
       var p = (A + B) / 2
-      var err = g(p, Iph, Io, nVth, Rs, Rsh)
+      var err = g(I: p, Iph: Iph, Io: Io, a: nVth, Rs: Rs, Rsh: Rsh)
 
       while abs(B - A) > 1e-6 {
-        gA = g(A, Iph, Io, nVth, Rs, Rsh)
-
+        gA = g(I: A, Iph: Iph, Io: Io, a: nVth, Rs: Rs, Rsh: Rsh)
         if gA * err > .zero { A = p } else { B = p }
-
         p = (A + B) / 2
-
-        err = g(p, Iph, Io, nVth, Rs, Rsh)
+        err = g(I: p, Iph: Iph, Io: Io, a: nVth, Rs: Rs, Rsh: Rsh)
       }
-
       return p
     }
 
     func g(
-      _ I: Double, _ Iph: Double, _ Io: Double, _ a: Double, _ Rs: Double,
-      _ Rsh: Double
+      I: Double, Iph: Double, Io: Double, a: Double, Rs: Double, Rsh: Double
     ) -> Double {
-      let z = phi_exact(I, Iph, Io, a, Rsh)
+      let z = phi_exact(Imp: I, IL: Iph, Io: Io, a: a, Rsh: Rsh)
       return (Iph + Io - 2 * I) * Rsh - 2 * I * Rs - a * z + I * Rsh * z
         / (1 + z)
     }
 
     func phi_exact(
-      _ Imp: Double, _ IL: Double, _ Io: Double, _ a: Double, _ Rsh: Double
+      Imp: Double, IL: Double, Io: Double, a: Double, Rsh: Double
     ) -> Double {
       let argw = Rsh * Io / a * exp(Rsh * (IL + Io - Imp) / a)
 
@@ -233,14 +208,12 @@ extension PV {
       var tmp = lambertW(argw)
       // Only re-compute LambertW if it overflowed
       if tmp.isNaN {
-
         let logargW = log(Rsh) + log(Io) - log(a) + Rsh * (IL + Io - Imp) / a
         var x = logargW
-        //let K = Int(log10(x))
-        for _ in 0..<3 { x = x * ((1 - log(x)) + logargW) / (1 + x) }
+        let K = Int(log10(x))
+        for _ in 0..<K { x = x * ((1 - log(x)) + logargW) / (1 + x) }
         tmp = x
       }
-
       return tmp
     }
   }

@@ -19,13 +19,25 @@ public struct PV {
   public var inverter = Inverter()
   public var transformer = Transformer()
 
-  func watts(radiation effective: Double, ambient: Temperature, windSpeed: Double) -> Double {
-    let pmp = array.pmp(radiation: effective, ambient: ambient, windSpeed: 0.0)
-    let acPower = pmp.power * inverter(power: pmp.power, voltage: pmp.voltage)
-    if acPower.isFinite {
-      return transformer(acPower: acPower)
+  func callAsFunction(radiation effective: Double, ambient: Temperature, windSpeed: Double)
+    -> Double
+  {
+    guard effective > 10 else { return transformer(ac: .zero) }
+    var dc = array(radiation: effective, ambient: ambient, windSpeed: 0.0)
+    if dc.power > 0 {
+      var efficiency = inverter(power: dc.power, voltage: dc.voltage)
+      let cell = array.panel.cell.temperature(
+        radiation: effective, ambient: ambient, windSpeed: windSpeed,
+        nominalPower: array.panel.nominalPower, panelArea: array.panel.area)
+
+      while efficiency.isNaN {
+        dc = array(voltage: dc.voltage * 0.98, radiation: effective, cell: cell)
+        efficiency = inverter(power: dc.power, voltage: dc.voltage)
+      }
+      let acPower = dc.power * efficiency
+      return transformer(ac: acPower)  //point.Power * performance / 100D - (this.Auxiliares * inverters);
     } else {
-      return transformer(acPower: 0)
+      return transformer(ac: .zero)  //-inverter.NightConsumption
     }
   }
 }

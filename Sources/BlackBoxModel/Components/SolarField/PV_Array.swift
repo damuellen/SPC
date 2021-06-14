@@ -21,17 +21,20 @@ extension PV {
     var inverters: Int = 1
     var panel: Panel = Panel()
 
-    public func pmp(radiation: Double, ambient: Temperature, windSpeed: Double) -> PowerPoint {
-      let pmp = panel.maxPowerPoint(radiation: radiation, ambient: ambient, windSpeed: windSpeed)
+    func callAsFunction(radiation: Double, ambient: Temperature, windSpeed: Double) -> PowerPoint {
+      let pmp = panel.power(radiation: radiation, ambient: ambient, windSpeed: windSpeed)
       return PowerPoint(
         current: pmp.current * Double(strings) * Double(inverters),
         voltage: pmp.voltage * Double(panelsPerString)
       )
     }
 
-    func pmp(radiation: Double, cell: Temperature) -> PowerPoint {
-      if radiation < 10 { return .zero }
-      return panel.maxPowerPoint(radiation: radiation, temperature: cell)
+    func callAsFunction(voltage: Double, radiation: Double, cell: Temperature) -> PowerPoint
+    {
+      let current = panel.current(
+        voltage: voltage, radiation: radiation, temperature: cell
+      )
+      return PowerPoint(current: abs(current), voltage: voltage)
     }
 
     public init() {
@@ -44,9 +47,9 @@ extension PV {
     var resistiveLossAtSTC: Double = 0.01
     var ironLoss: Double = 14.83E3
 
-    func callAsFunction(acPower: Double) -> Double {
-      if acPower > .zero {
-        return acPower * (1 - resistiveLossAtSTC) * (1 - injectionLossFractionAtST)
+    func callAsFunction(ac power: Double) -> Double {
+      if power > .zero {
+        return power * (1 - resistiveLossAtSTC) * (1 - injectionLossFractionAtST)
           - ironLoss
       } else {
         return -ironLoss
