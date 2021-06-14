@@ -11,7 +11,7 @@ import Libc
 import PhysicalQuantities
 
 extension PV {
-  /// Low-level functions for solving the single diode equation.
+  /// Wraps low-level functions for solving the single diode equation.
   public struct Cell {
     static let radiation_at_ST = 1000.0
     static let temperature_at_ST = Temperature(celsius: 25.0)
@@ -27,6 +27,7 @@ extension PV {
     let Rsh0: Double
     /// Short circuit curent variaton in A/ºC
     let muIsc: Double
+    /// Saturation current reference
     let Ioref: Double
     let gamma: Double
     let Egap: Double
@@ -69,8 +70,8 @@ extension PV {
     func Rshunt(radiation: Double, temperature: Temperature) -> Double {
       RshRef + (Rsh0 - RshRef) * exp(5.5 * radiation / Cell.radiation_at_ST)
     }
-
   }
+
   public struct PowerPoint {
     let current: Double
     let voltage: Double
@@ -84,6 +85,7 @@ extension PV {
       self.power = abs(current * voltage)
     }
   }
+
   public struct Panel {
     let cell: Cell
     /// Nominal power in Watts
@@ -145,7 +147,7 @@ extension PV {
         * (Iph + I0) / (cell.Rs + Rsh)
     }
 
-    public func power(
+    func power(
       radiation: Double, ambient: Temperature, windSpeed: Double
     ) -> PowerPoint {
       let temperature = cell.temperature(
@@ -161,14 +163,16 @@ extension PV {
       return Pmp_bisect(Iph: Iph, Io: I0, a: nVth, Rsh: Rsh)
     }
 
-    func Pmp_bisect(Iph: Double, Io: Double, a: Double, Rsh: Double) -> PowerPoint {
+    private func Pmp_bisect(
+      Iph: Double, Io: Double, a: Double, Rsh: Double
+    ) -> PowerPoint {
       let Imp = Imp_bisect(Iph: Iph, Io: Io, nVth: a, Rs: cell.Rs, Rsh: Rsh)
       let z = phi_exact(Imp: Imp, IL: Iph, Io: Io, a: a, Rsh: Rsh)
       let Vmp = (Iph + Io - Imp) * Rsh - Imp * cell.Rs - a * z
       return PowerPoint(current: Imp, voltage: Vmp)
     }
 
-    func Imp_bisect(
+    private func Imp_bisect(
       Iph: Double, Io: Double, nVth: Double, Rs: Double, Rsh: Double
     ) -> Double {
       var A = 0.0
@@ -191,7 +195,7 @@ extension PV {
       return p
     }
 
-    func g(
+    private func g(
       I: Double, Iph: Double, Io: Double, a: Double, Rs: Double, Rsh: Double
     ) -> Double {
       let z = phi_exact(Imp: I, IL: Iph, Io: Io, a: a, Rsh: Rsh)
@@ -199,7 +203,7 @@ extension PV {
         / (1 + z)
     }
 
-    func phi_exact(
+    private func phi_exact(
       Imp: Double, IL: Double, Io: Double, a: Double, Rsh: Double
     ) -> Double {
       let argw = Rsh * Io / a * exp(Rsh * (IL + Io - Imp) / a)
@@ -219,7 +223,7 @@ extension PV {
   }
 }
 
-public func lambertW(_ z: Double) -> Double {
+fileprivate func lambertW(_ z: Double) -> Double {
   var tmp: Double
   var c1: Double
   var c2: Double

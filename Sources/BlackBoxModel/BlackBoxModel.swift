@@ -128,14 +128,14 @@ public enum BlackBoxModel {
           ghi: Double(meteo.ghi), dhi: Double(meteo.dhi),
           surfTilt: panel.surfTilt, incidence: panel.AOI,
           zenith: position.zenith, doy: dt.yearDay)
-        let watts = pv.watts(
+        let watts = pv(
           radiation: effective,
           ambient: temperature,
           windSpeed: 0.0
         )
         photovoltaic.append(.init(watts))
       } else {
-        photovoltaic.append(.init(pv.transformer(acPower: .zero)))
+        photovoltaic.append(.init(pv.transformer(ac: .zero)))
       }
     }
     // Makes it easier to use when re-reading the values
