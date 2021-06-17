@@ -170,7 +170,7 @@ extension SolarRadiation {
     let a = max(0.0, cos(incidence.toRadians))
     let b = max(cos(85.0.toRadians), cos(sunZenith.toRadians))
 
-    return direct
+    return diffuse
       * ((1 - F1) * ((1 + cos(surfaceTilt.toRadians)) / 2) + F1 * (a / b) + F2
         * sin(surfaceTilt.toRadians))
   }

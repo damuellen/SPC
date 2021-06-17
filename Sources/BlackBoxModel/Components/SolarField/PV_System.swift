@@ -19,7 +19,7 @@ public struct PV {
   public var inverter = Inverter()
   public var transformer = Transformer()
 
-  /// Net output of the pv system
+  /// Net output of the pv system.
   ///
   /// - Parameter radiation: Effective solar irradiation
   /// - Parameter ambient: Temperature of the environment
@@ -31,16 +31,23 @@ public struct PV {
     var dc = array(radiation: effective, ambient: ambient, windSpeed: 0.0)
     if dc.power > 0 {
       var efficiency = inverter(power: dc.power, voltage: dc.voltage)
-      let cell = array.panel.cell.temperature(
-        radiation: effective, ambient: ambient, windSpeed: windSpeed,
-        nominalPower: array.panel.nominalPower, panelArea: array.panel.area)
-
-      while efficiency.isNaN {
-        dc = array(voltage: dc.voltage * 0.98, radiation: effective, cell: cell)
-        efficiency = inverter(power: dc.power, voltage: dc.voltage)
+      if efficiency.isNaN {
+        let cell = array.panel.cell.temperature(
+          radiation: effective, ambient: ambient, windSpeed: windSpeed,
+          nominalPower: array.panel.nominalPower, panelArea: array.panel.area
+        )
+        dc = PowerPoint(
+          current: dc.current,
+          voltage: dc.voltage.clamped(to: inverter.voltageRange)
+        )
+        while efficiency.isNaN {
+          dc = array(voltage: dc.voltage - 1e-6, radiation: effective, cell: cell)
+          efficiency = inverter(power: dc.power, voltage: dc.voltage)
+        }
       }
-      let acPower = dc.power * efficiency
-      return transformer(ac: acPower)
+      let ratio = Ratio(percent: efficiency)
+      let power = min(dc.power * ratio.quotient, inverter.maxPower)
+      return transformer(ac: power)
     } else {
       return transformer(ac: .zero)
     }
@@ -48,32 +55,55 @@ public struct PV {
 
   /// Represents a group of modules with the same orientation and module type.
   public struct Array {
+    /// Number of panels per string
     let panelsPerString: Int
+    /// Number of strings
     let strings: Int
+    /// Number of inverters
     let inverters: Int
+    /// Panel type
     let panel: Panel
 
+    let lossAtSTC: Double
+
+    let degradation: Double = 0
+    let unavailability: Double = 0
+    /// Creates a pv array
     public init() {
       self.panelsPerString = 27
       self.strings = 295
       self.inverters = 1
       self.panel = Panel()
+      self.lossAtSTC = 0.43e-3
     }
-
-    func callAsFunction(radiation: Double, ambient: Temperature, windSpeed: Double) -> PowerPoint {
-      let pmp = panel.power(radiation: radiation, ambient: ambient, windSpeed: windSpeed)
+    /// Calculate the maximum power point of the array.
+    func callAsFunction(
+      radiation: Double, ambient: Temperature, windSpeed: Double
+    ) -> PowerPoint {
+      let mpp = panel(
+        radiation: radiation, ambient: ambient, windSpeed: windSpeed
+      )
+      /// Panel losses due to degradation, unavailability and losses in the copper
+      let voltageDrop = (mpp.voltage / mpp.current * lossAtSTC) * mpp.current
+      let losses = (1 - degradation) * (1 - unavailability)
       return PowerPoint(
-        current: pmp.current * Double(strings) * Double(inverters),
-        voltage: pmp.voltage * Double(panelsPerString)
+        current: mpp.current * losses * Double(strings) * Double(inverters),
+        voltage: (mpp.voltage - voltageDrop) * Double(panelsPerString)
       )
     }
 
-    func callAsFunction(voltage: Double, radiation: Double, cell: Temperature) -> PowerPoint
-    {
-      let current = panel.current(
-        voltage: voltage, radiation: radiation, temperature: cell
+    func callAsFunction(
+      voltage: Double, radiation: Double, cell: Temperature
+    ) -> PowerPoint {
+      let current = panel.currentFrom(
+        voltage: voltage / Double(panelsPerString),
+        radiation: radiation, cell_T: cell
       )
-      return PowerPoint(current: abs(current), voltage: voltage)
+
+      return PowerPoint(
+        current: current * Double(strings) * Double(inverters),
+        voltage: voltage
+      )
     }
   }
 
@@ -82,13 +112,13 @@ public struct PV {
     let injectionLossFractionAtST: Double
     let resistiveLossAtSTC: Double
     let ironLoss: Double
-
+    /// Creates a transformer
     public init() {
       self.injectionLossFractionAtST = 0.006
       self.resistiveLossAtSTC = 0.01
       self.ironLoss = 14.83E3
     }
-
+    /// Calculates power losses in transformer.
     func callAsFunction(ac power: Double) -> Double {
       if power > .zero {
         return power * (1 - resistiveLossAtSTC) * (1 - injectionLossFractionAtST)
@@ -103,6 +133,9 @@ public struct PV {
   ///
   /// Performance is described at three DC input voltage levels
   public struct Inverter {
+    public let voltageRange: ClosedRange<Double>
+    public let maxPower: Double
+
     let dc_power: [Double]
     let voltageLevels: [Double]
 
@@ -111,6 +144,8 @@ public struct PV {
     let minVoltage: [Double]
 
     public init() {
+      self.voltageRange = 915...1200
+      self.maxPower = 2550e3
       self.dc_power = [12e3, 132.302e3, 260.896e3, 518.503e3, 776.492e3, 1293.49e3, 1941.82e3,2591.46e3]
       self.voltageLevels = [1200, 990, 915]
 

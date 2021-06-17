@@ -25,7 +25,7 @@ public struct SolarField: Parameterizable, HeatTransfer {
   }
 
   /// Returns the operating state
-  var operationMode: OperationMode
+  var operationMode: OperationMode
 
   public var eta: Double = 0.0
   public var loopEta: Double = 0.0
