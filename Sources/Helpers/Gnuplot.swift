@@ -10,7 +10,8 @@
 
 import Foundation
 
-public struct Gnuplot {
+/// Create graphs using gnuplot.
+public final class Gnuplot {
   let datablock: String
   let plot: String
 
@@ -32,17 +33,18 @@ public struct Gnuplot {
     gnuplot.standardOutput = Pipe()
     return gnuplot
   }
-
+  /// Execute the plot commands.
   @discardableResult public func plot(_ terminal: Terminal) throws -> String {
     let process = Gnuplot.process()
     let stdin = process.standardInput as! Pipe
     let style: String
     if case .svg = terminal {
-      style = (settings + settingsSVG).concatenated
+      style = (settings + settingsSVG + userSettings).concatenated
     } else {
-      style = (settings + settingsPDF).concatenated
+      style = (settings + settingsPDF + userSettings).concatenated
     }
-    let code = terminal.output + style + datablock + plot + ";exit\n\n"
+    let command = userCommand ?? plot
+    let code = terminal.output + style + datablock + command + ";exit\n\n"
     try process.run()
     stdin.fileHandleForWriting.write(code.data(using: .utf8)!)
     stdin.fileHandleForWriting.closeFile()
@@ -54,7 +56,7 @@ public struct Gnuplot {
     return terminal.output
   }
 
-  var settings = [
+  let settings = [
     "style line 11 lt 1 lw 3 pt 7 ps 0.5 lc rgb '#0072bd'",
     "style line 12 lt 1 lw 3 pt 7 ps 0.5 lc rgb '#d95319'",
     "style line 13 lt 1 lw 3 pt 7 ps 0.5 lc rgb '#edb120'",
@@ -70,10 +72,13 @@ public struct Gnuplot {
     "key top left tc ls 16"
   ]
 
-  var settingsSVG = ["border 31 lw 0.5 lc rgb 'black'", "grid ls 17"]
-  var settingsPDF = ["border 31 lw 1 lc rgb 'black'", "grid ls 16"]
+  public var userSettings = [String]()
+  public var userCommand: String? = nil
 
-  static var temperatures = [
+  let settingsSVG = ["border 31 lw 0.5 lc rgb 'black'", "grid ls 17"]
+  let settingsPDF = ["border 31 lw 1 lc rgb 'black'", "grid ls 16"]
+
+  static let temperatures = [
     "xtics 10", "ytics 10",
     "title 'T-Q' textcolor rgb 'black'",
     "xlabel 'Q̇ [MW]' textcolor rgb 'black'",
@@ -81,7 +86,7 @@ public struct Gnuplot {
   ]
 
   public init(temperatures: String) {
-    self.settings.append(contentsOf: Gnuplot.temperatures)
+    self.userSettings = Gnuplot.temperatures
     self.datablock = "\n$data <<EOD\n" + temperatures + "\n\n\nEOD\n"
     self.plot = """
     \nplot $data i 0 u 1:2 w lp ls 11 title columnheader(1), \
