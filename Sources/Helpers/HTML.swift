@@ -89,9 +89,9 @@ public struct HTML {
     let head = "<html lang=\"en\"><head>" + meta + style + "</head>\n"
     let tail = "</body>\n</html>\n"
     if let json = json {
-      let click = "<body onclick=\"document.documentElement.requestFullscreen();\")>"
-      return type + head + click + bodyContent + script + json + ")</script>" + tail
+      return type + head + "<body>" + bodyContent + script + json + ")</script>" + tail
     }
-    return type + head + "<body>" + bodyContent + tail
+    let click = "<body onclick=\"document.documentElement.requestFullscreen();\")>"
+    return type + head + click + bodyContent + tail
   }
 }

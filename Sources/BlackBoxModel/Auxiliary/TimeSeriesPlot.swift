@@ -47,7 +47,6 @@ public final class TimeSeriesPlot {
   }
 
   func plot(code: String) throws {
-
     let stdin = gnuplot.standardInput as! Pipe
     try gnuplot.run()
     stdin.fileHandleForWriting.write(code.data(using: .utf8)!)
