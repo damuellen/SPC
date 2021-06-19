@@ -70,7 +70,7 @@ public final class Gnuplot {
     "style line 25 lt 1 lw 3 pt 9 ps 0.8 lc rgb '#77ac30'",
     "style line 16 lt 1 lw 1 dashtype 3 lc rgb 'black'",
     "style line 17 lt 0 lw 0.5 lc rgb 'black'", "label textcolor rgb 'black'",
-    "key top left tc ls 16",
+    "key above tc ls 16",
   ]
 
   public var userSettings = [String]()
@@ -80,7 +80,7 @@ public final class Gnuplot {
   let settingsPDF = ["border 31 lw 1 lc rgb 'black'", "grid ls 16"]
 
   static let temperatures = [
-    "xtics 10", "ytics 10", "title 'T-Q' textcolor rgb 'black'",
+    "key top left tc ls 16", "xtics 10", "ytics 10",
     "xlabel 'Q̇ [MW]' textcolor rgb 'black'",
     "ylabel 'Temperatures [°C]' textcolor rgb 'black'",
   ]
@@ -136,10 +136,10 @@ public final class Gnuplot {
     }
 
     let y1 = zip(titles, xy1s).map { 
-      $0.0 + "\n" + $0.1.map { (x,y) in "\(x), \(y)" }.joined(separator: "\n")
+      $0.0 + " ,\n" + $0.1.map { (x,y) in "\(x), \(y)" }.joined(separator: "\n")
     }
     let y2 = zip(titles.dropFirst(xy1s.count), xy2s).map { 
-      $0.0 + "\n" + $0.1.map { (x,y) in "\(x), \(y)" }.joined(separator: "\n")
+      $0.0 + " ,\n" + $0.1.map { (x,y) in "\(x), \(y)" }.joined(separator: "\n")
     }
 
     self.datablock = "\n$data <<EOD\n" 
@@ -182,12 +182,6 @@ extension Array where Element == String {
   var concatenated: String { self.map { "set " + $0 + "\n" }.joined() }
 }
 
-public func solve(in range: ClosedRange<Double>, by: Double, f: (Double) -> Double)
-  -> [(Double, Double)]
-{
-  var results = [(Double, Double)]()
-  for x in stride(from: range.lowerBound, through: range.upperBound, by: by) {
-    results.append((x, f(x)))
-  }
-  return results
+@inlinable public func solve(in range: ClosedRange<Double>, by: Double, f: (Double) -> Double) -> [(Double, Double)] {
+  stride(from: range.lowerBound, through: range.upperBound, by: by).map{($0,f($0))}
 }
