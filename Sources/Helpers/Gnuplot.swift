@@ -40,12 +40,14 @@ public final class Gnuplot {
     let stdin = process.standardInput as! Pipe
     let style: String
     if case .svg = terminal {
-      style = (settings + settingsSVG + userSettings).concatenated
+      style = (settings + SVG + userSettings).concatenated
+    } else if case .png = terminal {
+      style = (settings + PNG + SVG + userSettings).concatenated
     } else {
-      style = (settings + settingsPDF + userSettings).concatenated
+      style = (settings + PDF + userSettings).concatenated
     }
     let command = userCommand ?? plot
-    let code = terminal.output + style + datablock + command + ";exit\n\n"
+    let code = terminal.output + style + datablock + command + "exit\n\n"
     try process.run()
     stdin.fileHandleForWriting.write(code.data(using: .utf8)!)
     stdin.fileHandleForWriting.closeFile()
@@ -63,24 +65,31 @@ public final class Gnuplot {
     "style line 13 lt 1 lw 3 pt 7 ps 0.5 lc rgb '#edb120'",
     "style line 14 lt 1 lw 3 pt 7 ps 0.5 lc rgb '#7e2f8e'",
     "style line 15 lt 1 lw 3 pt 7 ps 0.5 lc rgb '#77ac30'",
+    "style line 16 lt 1 lw 3 pt 7 ps 0.5 lc rgb '#4dbeee'",
+    "style line 17 lt 1 lw 3 pt 7 ps 0.5 lc rgb '#a2142f'",
     "style line 21 lt 1 lw 3 pt 9 ps 0.8 lc rgb '#0072bd'",
     "style line 22 lt 1 lw 3 pt 9 ps 0.8 lc rgb '#d95319'",
     "style line 23 lt 1 lw 3 pt 9 ps 0.8 lc rgb '#edb120'",
     "style line 24 lt 1 lw 3 pt 9 ps 0.8 lc rgb '#7e2f8e'",
     "style line 25 lt 1 lw 3 pt 9 ps 0.8 lc rgb '#77ac30'",
-    "style line 16 lt 1 lw 1 dashtype 3 lc rgb 'black'",
-    "style line 17 lt 0 lw 0.5 lc rgb 'black'", "label textcolor rgb 'black'",
+    "style line 26 lt 1 lw 3 pt 9 ps 0.8 lc rgb '#4dbeee'",
+    "style line 27 lt 1 lw 3 pt 9 ps 0.8 lc rgb '#a2142f'",
+    "style line 18 lt 1 lw 1 dashtype 3 lc rgb 'black'",
+    "style line 19 lt 0 lw 0.5 lc rgb 'black'", "label textcolor rgb 'black'",
     "key above tc ls 16",
   ]
 
   public var userSettings = [String]()
   public var userCommand: String? = nil
 
-  let settingsSVG = ["border 31 lw 0.5 lc rgb 'black'", "grid ls 17"]
-  let settingsPDF = ["border 31 lw 1 lc rgb 'black'", "grid ls 16"]
+  let SVG = ["border 31 lw 0.5 lc rgb 'black'", "grid ls 19"]
+  let PDF = ["border 31 lw 1 lc rgb 'black'", "grid ls 18"]
+  let PNG = [
+    "object rectangle from graph 0,0 to graph 1,1 behind fillcolor rgb '#EBEBEB' fillstyle solid noborder"
+  ]
 
   static let temperatures = [
-    "key top left tc ls 16", "xtics 10", "ytics 10",
+    "key top left tc ls 18", "xtics 10", "ytics 10",
     "xlabel 'Q̇ [MW]' textcolor rgb 'black'",
     "ylabel 'Temperatures [°C]' textcolor rgb 'black'",
   ]
@@ -95,11 +104,11 @@ public final class Gnuplot {
       $data i 3 u 1:2 w lp ls 15 title columnheader(1), \
       $data i 4 u 1:2 w lp ls 14 title columnheader(1), \
       $data i 5 u 1:2 w lp ls 14 title columnheader(1), \
-      $data i 0 u 1:2:(sprintf("%d°C", $2)) with labels tc ls 16 offset char 3,0 notitle, \
-      $data i 2 u 1:2:(sprintf("%d°C", $2)) with labels tc ls 16 offset char 3,0 notitle, \
-      $data i 3 u 1:2:(sprintf("%d°C", $2)) with labels tc ls 16 offset char 3,0 notitle, \
-      $data i 4 u 1:2:(sprintf("%d°C", $2)) with labels tc ls 16 offset char 3,0 notitle, \
-      $data i 5 u 1:2:(sprintf("%d°C", $2)) with labels tc ls 16 offset char 3,0 notitle\n
+      $data i 0 u 1:2:(sprintf("%d°C", $2)) with labels tc ls 18 offset char 3,0 notitle, \
+      $data i 2 u 1:2:(sprintf("%d°C", $2)) with labels tc ls 18 offset char 3,0 notitle, \
+      $data i 3 u 1:2:(sprintf("%d°C", $2)) with labels tc ls 18 offset char 3,0 notitle, \
+      $data i 4 u 1:2:(sprintf("%d°C", $2)) with labels tc ls 18 offset char 3,0 notitle, \
+      $data i 5 u 1:2:(sprintf("%d°C", $2)) with labels tc ls 18 offset char 3,0 notitle\n
     """
   }
 
@@ -108,8 +117,6 @@ public final class Gnuplot {
     var titles = titles
     if missingTitles > 0 {
       titles.append(contentsOf: repeatElement("-", count: missingTitles))
-    } else if titles.isEmpty {
-      userSettings.append("nokey")
     }
     let data = zip(titles, xys).map {
       $0.0 + "\n" + $0.1.map { (x, y) in "\(x), \(y)" }.joined(separator: "\n")
@@ -128,11 +135,8 @@ public final class Gnuplot {
   ) {
     let missingTitles = xy1s.count + xy2s.count - titles.count
     var titles = titles
-
     if missingTitles > 0 {
       titles.append(contentsOf: repeatElement("-", count: missingTitles))
-    } else if titles.isEmpty {
-      userSettings.append("nokey")
     }
 
     let y1 = zip(titles, xy1s).map { 
