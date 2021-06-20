@@ -41,10 +41,10 @@ public final class Gnuplot {
     let style: String
     if case .svg = terminal {
       style = (settings + SVG + userSettings).concatenated
-    } else if case .png = terminal {
-      style = (settings + PNG + SVG + userSettings).concatenated
-    } else {
+    } else if case .pdf = terminal {
       style = (settings + PDF + userSettings).concatenated
+    } else {
+      style = (settings + PNG + SVG + userSettings).concatenated
     }
     let command = userCommand ?? plot
     let code = terminal.output + style + datablock + command + "exit\n\n"
@@ -75,8 +75,9 @@ public final class Gnuplot {
     "style line 26 lt 1 lw 3 pt 9 ps 0.8 lc rgb '#4dbeee'",
     "style line 27 lt 1 lw 3 pt 9 ps 0.8 lc rgb '#a2142f'",
     "style line 18 lt 1 lw 1 dashtype 3 lc rgb 'black'",
-    "style line 19 lt 0 lw 0.5 lc rgb 'black'", "label textcolor rgb 'black'",
-    "key above tc ls 16",
+    "style line 19 lt 0 lw 0.5 lc rgb 'black'",
+    "label textcolor rgb 'black'",
+    "key above tc ls 18",
   ]
 
   public var userSettings = [String]()
@@ -163,7 +164,8 @@ public final class Gnuplot {
     case svg
     case pdf(path: String)
     case png(path: String)
-
+    case pngSmall(path: String)
+    case pngLarge(path: String)
     var output: String {
       #if os(Linux)
       let font = "font 'Times,"
@@ -173,10 +175,13 @@ public final class Gnuplot {
       switch self {
       case .svg: return "set term svg size 1280,800;set output\n"
       case .pdf(let path):
-        return
-          "set term pdfcairo size 10,7.1 enhanced \(font)14';set output '\(path)'\n"
+        return "set term pdfcairo size 10,7.1 enhanced \(font)14';set output '\(path)'\n"
       case .png(let path):
         return "set term pngcairo size 1440, 900 enhanced \(font)12';set output '\(path)'\n"
+      case .pngSmall(let path):
+        return "set term pngcairo size 1024, 720 enhanced \(font)12';set output '\(path)'\n"
+      case .pngLarge(let path):
+        return "set term pngcairo size 1920, 1200 enhanced \(font)14';set output '\(path)'\n"
       }
     }
   }
