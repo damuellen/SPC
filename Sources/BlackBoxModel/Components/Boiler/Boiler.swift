@@ -15,7 +15,7 @@ import PhysicalQuantities
 /// This struct contains the state as well as the functions for mapping the boiler
 public struct Boiler: Parameterizable {
   /// Returns the operating state
-  var operationMode: OperationMode
+  var operationMode: OperationMode
 
   var isMaintained: Bool
   /// Returns the load applied

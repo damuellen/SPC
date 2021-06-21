@@ -110,13 +110,13 @@ func singleAxisTracker(
   // positive x-axis is orthogonal, clockwise, parallel to earth surface
   // positive z-axis is normal to x-y axes, pointed upward.
   // Calculate sun position (xp,yp,zp) in panel coordinates using [1] Eq 11
-  var xp = x * cosd(axisAz) - y * sind(axisAz)
-  var yp =
+  let xp = x * cosd(axisAz) - y * sind(axisAz)
+  let yp =
     x * cosd(axisTilt) * sind(axisAz) + y * cosd(axisTilt) * cosd(axisAz) - z
     * sind(axisTilt)
   // note that equation for yp (y// in Eq. 11 of Lorenzo et al 2011) is
   // corrected, after conversation with paper's authors
-  var zp =
+  let zp =
     x * sind(axisTilt) * sind(axisAz) + y * sind(axisTilt) * cosd(axisAz) + z
     * cosd(axisTilt)
 

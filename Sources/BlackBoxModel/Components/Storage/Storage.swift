@@ -25,7 +25,7 @@ public struct Storage: Parameterizable, HeatTransfer {
   )
 
   /// Returns the operating state
-  var operationMode: OperationMode
+  var operationMode: OperationMode
 
   var dT_HTFsalt: (cold: Double, hot: Double)
 

@@ -15,7 +15,7 @@ import PhysicalQuantities
 public struct GasTurbine: Parameterizable {
 
   /// Returns the operating state
-  var operationMode: OperationMode
+  var operationMode: OperationMode
 
   var isMaintained: Bool
   /// Returns the load applied
