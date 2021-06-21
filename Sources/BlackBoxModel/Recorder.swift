@@ -28,6 +28,8 @@ public final class Recorder {
   /// Specifies what the output is
   let mode: Mode
 
+  var startDate: Date? = Simulation.time.firstDateOfOperation
+
   public enum Mode {
     case database, csv, excel, inMemory, none
     case custom(interval: DateGenerator.Interval)
@@ -293,6 +295,7 @@ public final class Recorder {
     }
 
     return Recording(
+      startDate: startDate,
       performance: annualPerformance,
       radiation: annualRadiation,
       performanceHistory: performanceHistory,
