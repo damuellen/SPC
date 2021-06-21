@@ -4,10 +4,14 @@ import XCTest
 @testable import Meteo
 
 class BlackBoxModelTests: XCTestCase {
-  func testsSummer() {     
-    let df = DateFormatter()
+  let df = DateFormatter()
+
+  override func setUp() {
     df.timeZone = TimeZone(secondsFromGMT: 0)
     df.dateFormat = "dd.MM.yyyy"
+  }
+
+  func testsSummer() {
     Simulation.time.firstDateOfOperation = df.date(from: "11.07.2005")!
     Simulation.time.lastDateOfOperation = df.date(from: "13.07.2005")!
     var location = Location(longitude: 47.73, latitude: 29, elevation: 0, timezone: 2)
@@ -15,7 +19,7 @@ class BlackBoxModelTests: XCTestCase {
 
     BlackBoxModel.configure(year: 2005)
     BlackBoxModel.configure(location: location)
-  
+
     let log = Recorder(mode: .inMemory)
 
     let result = BlackBoxModel.runModel(with: log)
@@ -30,13 +34,18 @@ class BlackBoxModelTests: XCTestCase {
    // XCTAssertEqual(result.thermal.startUp.megaWatt, 242.7, accuracy: tol)
     XCTAssertEqual(result.thermal.production.megaWatt, 5135.5, accuracy: tol)
     XCTAssertEqual(result.thermal.heatExchanger.megaWatt, 5169.8, accuracy: tol)
-    
+    if false {
+      let interval = DateInterval(ofDay: 192, in: 2005)
+      let y1 = result.massFlows(range: interval)
+      let y2 = result.power(range: interval)
+      let plot = TimeSeriesPlot(y1: y1, y2: y2, range: interval, style: .impulses)
+      plot.y1Titles = ["solarfield", "powerblock", "storage"]
+      plot.y2Titles = ["solar", "toStorage", "production", "storage", "gross", "net", "consum"]
+      try! plot(toFile: "PowerSummer")
+    }
   }
-  
+
   func testsWinter() {
-    let df = DateFormatter()
-    df.timeZone = TimeZone(secondsFromGMT: 0)
-    df.dateFormat = "dd.MM.yyyy"
     Simulation.time.firstDateOfOperation = df.date(from: "11.01.2005")!
     Simulation.time.lastDateOfOperation = df.date(from: "13.01.2005")!
     var location = Location(longitude: 47.73, latitude: 29, elevation: 0, timezone: 2)
@@ -57,6 +66,15 @@ class BlackBoxModelTests: XCTestCase {
     //XCTAssertEqual(result.thermal.startUp.megaWatt, 243.5, accuracy: tol)
     XCTAssertEqual(result.thermal.production.megaWatt, 1864.4, accuracy: tol)
     XCTAssertEqual(result.thermal.heatExchanger.megaWatt, 1924.9, accuracy: tol)
+    if false {
+      let interval = DateInterval(ofDay: 11, in: 2005)
+      let y1 = result.massFlows(range: interval)
+      let y2 = result.power(range: interval)
+      let plot = TimeSeriesPlot(y1: y1, y2: y2, range: interval, style: .impulses)
+      plot.y1Titles = ["solarfield", "powerblock", "storage"]
+      plot.y2Titles = ["solar", "toStorage", "production", "storage", "gross", "net", "consum"]
+      try! plot(toFile: "PowerWinter")
+    }
   }
 }
 
