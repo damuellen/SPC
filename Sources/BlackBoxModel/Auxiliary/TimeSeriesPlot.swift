@@ -14,7 +14,7 @@ import Helpers
 /// Creates a chart to represent time-series data using multiple y axis.
 public final class TimeSeriesPlot {
   let gnuplot: Process
-  public enum Style: String { case lines, impulses }
+  public enum Style: String { case steps, impulses }
 
   let y1: [[Double]]
   let y2: [[Double]]
@@ -25,7 +25,7 @@ public final class TimeSeriesPlot {
   public var y1Label: String = ""
   public var y2Label: String = ""
 
-  public init(y1: [[Double]], y2: [[Double]] = [], range: DateInterval, style: Style = .lines) {
+  public init(y1: [[Double]], y2: [[Double]] = [], range: DateInterval, style: Style = .steps) {
     self.y1 = y1
     self.y2 = y2
     self.range = range
@@ -41,7 +41,7 @@ public final class TimeSeriesPlot {
     } else if range.duration > secondsPerDay {
       self.x = (secondsPerDay, "'%a'", "Day")
     } else {
-      self.x = (1800, "'%R'", "Hour")
+      self.x = (1800, "'%R'", "")
     }
     gnuplot = Gnuplot.process()
   }
@@ -57,12 +57,11 @@ public final class TimeSeriesPlot {
     var code: String = ""
     if let file = toFile {
       code = """
-        set terminal pdfcairo size 17,12 enhanced font 'Arial,16';
-        set output '\(file).pdf';
-        set title '\(file)'\n;
+        set terminal png size 1622,944;
+        set output '\(file).png'\n;
         """
     }
-    code += settings.concatenated + datablock + repeatElement(plot(), count: 365).joined(separator: "\n") + ";exit\n\n"
+    code += settings.concatenated + datablock + plot() + ";exit\n\n"
     try plot(code: code)
   }
 
@@ -72,10 +71,12 @@ public final class TimeSeriesPlot {
   private let style: Style
 
   var settings: [String] { [
-    "grid", "key",
+    "grid", "key above",
     "ylabel '\(y1Label)'",
     "y2label '\(y2Label)'",
     "xlabel '\(x.label)'",
+    "object 1 rectangle from graph 0,0 to graph 1,1 behind fillcolor rgb '#EBEBEB' fillstyle solid noborder",
+    // "object 2 rectangle from graph \(5.25/24),0 to graph \(16.75/24),1 behind fillcolor rgb '#DBDBDB' fillstyle solid noborder",
     "style textbox opaque margins 1.0, 1.0 fc bgnd border lt -1 lw 1.0",
     "xdata time",
     "timefmt '%s'",
@@ -83,26 +84,38 @@ public final class TimeSeriesPlot {
     "xrange [\(xr.start):\(xr.end)]",
     "xtics \(x.tics)",
     "xtics rotate",
-    "autoscale",
     "autoscale y2",
-    "ytics nomirror 50",
-    "y2tics 10"
+    "ytics nomirror 200",
+    "y2tics 25",
+    "style line 1 lt 1 lw 2 lc rgb '#FC8D62'",
+    "style line 2 lt 1 lw 2 lc rgb '#8DA0CB'",
+    "style line 3 lt 1 lw 2 lc rgb '#FFD92F'",
+    "style line 4 lt 1 lw 2 lc rgb '#A6D854'",
+    "style line 5 lt 1 lw 2 lc rgb '#E78AC3'",
+    "style line 6 lt 1 lw 2 lc rgb '#E5C494'",
+    "style line 11 lt 1 lw 2 lc rgb '#E41A1C'",
+    "style line 12 lt 1 lw 2 lc rgb '#377EB8'",
+    "style line 13 lt 1 lw 2 lc rgb '#498744'",
+    "style line 14 lt 1 lw 2 lc rgb '#FF7F00'",
+    "style line 15 lt 1 lw 2 lc rgb '#984EA3'",
+    "style line 16 lt 1 lw 2 lc rgb '#784520'",
+    "style line 17 lt 1 lw 2 lc rgb '#F781BF'",
   ] }
 
   func plot() -> String {
     switch style {
-    case .lines:
-      return "\nplot " + y1.indices.map { i in
-        "$data i 0 u ($0*\(freq)+\(xr.start)):\(i+1) t '\(y1Titles[i])' axes x1y1 with steps lw 3"
-      }.joined(separator: ", ") + ", " + y2.indices.map { i in
-        "$data i 1 u ($0*\(freq)+\(xr.start)):\(i+1) t '\(y2Titles[i])' axes x1y2 with steps lw 3"
-      }.joined(separator: ", ")
     case .impulses:
       return "\nplot " + y1.indices.map { i in
-        let x = (xr.start + (freq / Double(y1.count)) * Double(i))
-        return "$data i 0 u ($0*\(freq)+\(x)):\(i+1) t '\(y1Titles[i])' axes x1y1 w i lw 3"
+        "$data i 0 u ($0*\(freq)+\(xr.start)):\(i+1) t '\(y1Titles[i])' axes x1y1 with i ls \(i+1)"
       }.joined(separator: ", ") + ", " + y2.indices.map { i in
-        "$data i 1 u ($0*\(freq)+\(xr.start)):\(i+1) t '\(y2Titles[i])' axes x1y2 w steps lw 3"
+        "$data i 1 u ($0*\(freq)+\(xr.start)):\(i+1) t '\(y2Titles[i])' axes x1y2 with steps ls \(i+11)"
+      }.joined(separator: ", ")
+    case .steps:
+      return "\nplot " + y1.indices.map { i in
+        let x = (xr.start + (freq / Double(y1.count)) * Double(i))
+        return "$data i 0 u ($0*\(freq)+\(x)):\(i+1) t '\(y1Titles[i])' axes x1y1 with steps ls \(i+1)"
+      }.joined(separator: ", ") + ", " + y2.indices.map { i in
+        "$data i 1 u ($0*\(freq)+\(xr.start)):\(i+1) t '\(y2Titles[i])' axes x1y2 with steps ls \(i+1)"
       }.joined(separator: ", ")
     }
   }
