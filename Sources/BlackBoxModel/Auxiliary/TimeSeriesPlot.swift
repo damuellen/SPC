@@ -57,7 +57,7 @@ public final class TimeSeriesPlot {
     var code: String = ""
     if let file = toFile {
       code = """
-        set terminal png size 1622,944;
+        set terminal png size 1573,960 font 'Sans,9';
         set output '\(file).png'\n;
         """
     }
@@ -82,11 +82,12 @@ public final class TimeSeriesPlot {
     "timefmt '%s'",
     "format x \(x.format)",
     "xrange [\(xr.start):\(xr.end)]",
+    "yrange [0:300]",
+    "y2range [0:1500]",
     "xtics \(x.tics)",
     "xtics rotate",
-    "autoscale y2",
-    "ytics nomirror 200",
-    "y2tics 25",
+    "ytics nomirror 10",
+    "y2tics 100",
     "style line 1 lt 1 lw 2 lc rgb '#FC8D62'",
     "style line 2 lt 1 lw 2 lc rgb '#8DA0CB'",
     "style line 3 lt 1 lw 2 lc rgb '#FFD92F'",
@@ -106,16 +107,16 @@ public final class TimeSeriesPlot {
     switch style {
     case .impulses:
       return "\nplot " + y1.indices.map { i in
-        "$data i 0 u ($0*\(freq)+\(xr.start)):\(i+1) t '\(y1Titles[i])' axes x1y1 with i ls \(i+1)"
+        "$data i 0 u ($0*\(freq)+\(xr.start)):\(i+1) t '\(y1Titles[i])' axes x1y2 with i ls \(i+1)"
       }.joined(separator: ", ") + ", " + y2.indices.map { i in
-        "$data i 1 u ($0*\(freq)+\(xr.start)):\(i+1) t '\(y2Titles[i])' axes x1y2 with steps ls \(i+11)"
+        "$data i 1 u ($0*\(freq)+\(xr.start)):\(i+1) t '\(y2Titles[i])' axes x1y1 with steps ls \(i+11)"
       }.joined(separator: ", ")
     case .steps:
       return "\nplot " + y1.indices.map { i in
         let x = (xr.start + (freq / Double(y1.count)) * Double(i))
-        return "$data i 0 u ($0*\(freq)+\(x)):\(i+1) t '\(y1Titles[i])' axes x1y1 with steps ls \(i+1)"
+        return "$data i 0 u ($0*\(freq)+\(x)):\(i+1) t '\(y1Titles[i])' axes x1y2 with steps ls \(i+1)"
       }.joined(separator: ", ") + ", " + y2.indices.map { i in
-        "$data i 1 u ($0*\(freq)+\(xr.start)):\(i+1) t '\(y2Titles[i])' axes x1y2 with steps ls \(i+1)"
+        "$data i 1 u ($0*\(freq)+\(xr.start)):\(i+1) t '\(y2Titles[i])' axes x1y1 with steps ls \(i+1)"
       }.joined(separator: ", ")
     }
   }
