@@ -81,29 +81,26 @@ public struct PV {
       radiation: Double, ambient: Temperature, windSpeed: Double
     ) -> PowerPoint {
       let mpp = panel(
-        radiation: radiation, ambient: ambient, windSpeed: windSpeed
-      )
+        radiation: radiation, ambient: ambient, windSpeed: windSpeed)
       /// Panel losses due to degradation, unavailability and losses in the copper
       let voltageDrop = (mpp.voltage / mpp.current * lossAtSTC) * mpp.current
       let losses = (1 - degradation) * (1 - unavailability)
       return PowerPoint(
         current: mpp.current * losses * Double(strings) * Double(inverters),
-        voltage: (mpp.voltage - voltageDrop) * Double(panelsPerString)
-      )
+        voltage: (mpp.voltage - voltageDrop) * Double(panelsPerString))
     }
-
-    func callAsFunction(
-      voltage: Double, radiation: Double, cell: Temperature
-    ) -> PowerPoint {
+    /// Find new point within the I-V curve using the single diode model.
+    func callAsFunction(voltage: Double, radiation: Double, cell: Temperature)
+      -> PowerPoint
+    {
       let current = panel.currentFrom(
         voltage: voltage / Double(panelsPerString),
-        radiation: radiation, cell_T: cell
-      )
+        radiation: radiation,
+        cell_T: cell)
 
       return PowerPoint(
         current: current * Double(strings) * Double(inverters),
-        voltage: voltage
-      )
+        voltage: voltage)
     }
   }
 
@@ -121,8 +118,9 @@ public struct PV {
     /// Calculates power losses in transformer.
     func callAsFunction(ac power: Double) -> Double {
       if power > .zero {
-        return power * (1 - resistiveLossAtSTC) * (1 - injectionLossFractionAtST)
-          - ironLoss
+        return power
+          * (1 - resistiveLossAtSTC)
+          * (1 - injectionLossFractionAtST) - ironLoss
       } else {
         return -ironLoss
       }
@@ -146,7 +144,10 @@ public struct PV {
     public init() {
       self.voltageRange = 915...1200
       self.maxPower = 2550e3
-      self.dc_power = [12e3, 132.302e3, 260.896e3, 518.503e3, 776.492e3, 1293.49e3, 1941.82e3,2591.46e3]
+      self.dc_power = [
+        12e3, 132.302e3, 260.896e3, 518.503e3, 776.492e3, 1293.49e3, 1941.82e3,
+        2591.46e3
+      ]
       self.voltageLevels = [1200, 990, 915]
 
       self.maxVoltage = [80, 95.7, 97.35, 98.13, 98.33, 98.44, 98.38, 98.31]
@@ -163,25 +164,32 @@ public struct PV {
         let fxy2 = (x2 - x) / (x2 - x1) * v12 + (x - x1) / (x2 - x1) * v22
         return (y2 - y) / (y2 - y1) * fxy1 + (y - y1) / (y2 - y1) * fxy2
       }
-      guard let p1 = dc_power.lastIndex(where: { $0 < power }),
-        let p2 = dc_power.firstIndex(where: { $0 > power }),
-        let v = voltageLevels.firstIndex(where: { voltage < $0 })
-      else { return .nan }
 
-      let v1: [Double]
-      let v2: [Double]
+      guard let p1 = dc_power.lastIndex(where: { $0 <= power }), // lower bound
+      let p2 = dc_power.firstIndex(where: { $0 >= power }) // upper bound
+      else {  return .nan }
+      guard let _ = voltageLevels.first(where: { $0 > voltage }), // Overvoltage
+      let v2 = voltageLevels.first(where: { $0 < voltage }) // Undervoltage
+      else { return .zero }
 
-      if v == 0 {
-        v1 = maxVoltage
-        v2 = nomVoltage
+      let v1: Double
+      let v11: [Double]
+      let v21: [Double]
+
+      if voltage > voltageLevels[1] {
+        v1 = voltageLevels[0]
+        v11 = maxVoltage
+        v21 = nomVoltage
       } else {
-        v1 = nomVoltage
-        v2 = minVoltage
+        v1 = voltageLevels[1]
+        v11 = nomVoltage
+        v21 = minVoltage
       }
 
       let efficiency = biInterpolate(
-        dc_power[p1], voltageLevels[v], dc_power[p2], voltageLevels[v + 1],
-        v1[p1], v1[p2], v2[p1], v2[p2], power, voltage
+        dc_power[p1], v1, dc_power[p2], v2,
+        v11[p1], v21[p1], v11[p2], v21[p2],
+        power, voltage
       )
       return efficiency
     }
