@@ -90,7 +90,7 @@ public final class Gnuplot {
   ]
 
   static let temperatures = [
-    "key top left tc ls 18", "xtics 10", "ytics 10",
+    "xtics 10", "ytics 10",
     "xlabel 'Q̇ [MW]' textcolor rgb 'black'",
     "ylabel 'Temperatures [°C]' textcolor rgb 'black'",
   ]
@@ -123,10 +123,10 @@ public final class Gnuplot {
       $0.0 + "\n" + $0.1.map { (x, y) in "\(x), \(y)" }.joined(separator: "\n")
     }
 
-    self.datablock = "\n$data <<EOD\n" 
+    self.datablock = "\n$data <<EOD\n"
     + data.joined(separator: "\n\n\n") + "\n\n\nEOD\n"
 
-    self.plot = "\nplot " + xys.indices.map { i in 
+    self.plot = "\nplot " + xys.indices.map { i in
       "$data i \(i) u 1:2 w lp ls \(i+11) title columnheader(1)"
     }.joined(separator: ", ") + "\n"
   }
@@ -140,14 +140,14 @@ public final class Gnuplot {
       titles.append(contentsOf: repeatElement("-", count: missingTitles))
     }
 
-    let y1 = zip(titles, xy1s).map { 
+    let y1 = zip(titles, xy1s).map {
       $0.0 + " ,\n" + $0.1.map { (x,y) in "\(x), \(y)" }.joined(separator: "\n")
     }
-    let y2 = zip(titles.dropFirst(xy1s.count), xy2s).map { 
+    let y2 = zip(titles.dropFirst(xy1s.count), xy2s).map {
       $0.0 + " ,\n" + $0.1.map { (x,y) in "\(x), \(y)" }.joined(separator: "\n")
     }
 
-    self.datablock = "\n$data <<EOD\n" 
+    self.datablock = "\n$data <<EOD\n"
       + y1.joined(separator: "\n\n\n") + "\n\n\n"
       + y2.joined(separator: "\n\n\n") + "\n\n\nEOD\n"
 
