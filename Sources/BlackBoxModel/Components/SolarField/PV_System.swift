@@ -24,27 +24,33 @@ public struct PV {
   /// - Parameter radiation: Effective solar irradiation
   /// - Parameter ambient: Temperature of the environment
   /// - Parameter windSpeed: Apparent speed of wind
-  func callAsFunction(radiation effective: Double, ambient: Temperature, windSpeed: Double)
-    -> Double
-  {
-    guard effective > 10 else { return transformer(ac: .zero) }
+  func callAsFunction(
+    radiation effective: Double, ambient: Temperature, windSpeed: Double
+  ) -> Double {
+    guard effective > 15 else { return transformer(ac: .zero) }
     var dc = array(radiation: effective, ambient: ambient, windSpeed: 0.0)
     if dc.power > 0 {
       var efficiency = inverter(power: dc.power, voltage: dc.voltage)
       if efficiency.isNaN {
         let cell = array.panel.cell.temperature(
           radiation: effective, ambient: ambient, windSpeed: windSpeed,
-          nominalPower: array.panel.nominalPower, panelArea: array.panel.area
-        )
+          nominalPower: array.panel.nominalPower, panelArea: array.panel.area)
+
         dc = PowerPoint(
           current: dc.current,
-          voltage: dc.voltage.clamped(to: inverter.voltageRange)
-        )
-        while efficiency.isNaN {
-          dc = array(voltage: dc.voltage - 1e-6, radiation: effective, cell: cell)
+          voltage: min(dc.voltage, inverter.voltageLevels[0]))
+
+        let shift = Double(array.panelsPerString) * 1e-6
+        var iterations = 0
+        while efficiency.isNaN && iterations < 1000 {
+          iterations += 1
+          dc = array(
+            voltage: dc.voltage - shift, radiation: effective, cell: cell)
           efficiency = inverter(power: dc.power, voltage: dc.voltage)
         }
+        if efficiency.isNaN { efficiency = 0 }
       }
+
       let ratio = Ratio(percent: efficiency)
       let power = min(dc.power * ratio.quotient, inverter.maxPower)
       return transformer(ac: power)
@@ -155,7 +161,7 @@ public struct PV {
       self.minVoltage = [80, 96.82, 98.01, 98.53, 98.67, 98.7, 98.62, 98.54]
     }
     /// Determines the efficiency of an inverter given the DC power and DC voltage.
-    func callAsFunction(power: Double, voltage: Double) -> Double {
+    public func callAsFunction(power: Double, voltage: Double) -> Double {
       func biInterpolate(
         _ x1: Double, _ y1: Double, _ x2: Double, _ y2: Double, _ v11: Double,
         _ v12: Double, _ v21: Double, _ v22: Double, _ x: Double, _ y: Double
@@ -170,7 +176,7 @@ public struct PV {
       else {  return .nan }
       guard let _ = voltageLevels.first(where: { $0 > voltage }), // Overvoltage
       let v2 = voltageLevels.first(where: { $0 < voltage }) // Undervoltage
-      else { return .zero }
+      else { return .nan }
 
       let v1: Double
       let v11: [Double]

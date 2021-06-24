@@ -123,16 +123,14 @@ public enum BlackBoxModel {
         let panel = singleAxisTracker(
           apparentZenith: position.zenith,
           apparentAzimuth: position.azimuth,
-          maxAngle: 55, GCR: 0.444)
-        let effective = SolarRadiation.effective(
+          maxAngle: 55, GCR: 0.444
+        )
+        let gti = SolarRadiation.effective(
           ghi: Double(meteo.ghi), dhi: Double(meteo.dhi),
           surfTilt: panel.surfTilt, incidence: panel.AOI,
-          zenith: position.zenith, doy: dt.yearDay)
-        let watts = pv(
-          radiation: effective,
-          ambient: temperature,
-          windSpeed: 0.0
+          zenith: position.zenith, doy: dt.yearDay
         )
+        let watts = pv(radiation: gti, ambient: temperature, windSpeed: 0.0)
         photovoltaic.append(.init(watts))
       } else {
         photovoltaic.append(.init(pv.transformer(ac: .zero)))

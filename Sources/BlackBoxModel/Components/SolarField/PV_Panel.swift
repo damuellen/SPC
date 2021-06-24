@@ -120,9 +120,7 @@ extension PV {
       self.numberOfCells = 76
     }
     /// The voltage from a current point within the I-V curve using the single diode model
-    func voltageFrom(current: Double, radiation: Double, cell_T: Temperature)
-      -> Double
-    {
+    func voltageFrom(current: Double, radiation: Double, cell_T: Temperature) -> Double {
       let nVth =
         cell.gamma * Double(numberOfCells) * Cell.k * cell_T.kelvin / Cell.q
 
@@ -146,9 +144,9 @@ extension PV {
         * (-current * (cell.Rs / Rsh + 1.0) + I - nVth / Rsh * inputterm + I)
     }
     /// The current from a voltage value within the I-V curve using the single diode model
-    func currentFrom(voltage: Double, radiation: Double, cell_T: Temperature)
-      -> Double
-    {
+    func currentFrom(voltage: Double, radiation: Double, cell_T: Temperature) -> Double {
+      // The cells are connected in parallel, the voltage splits.
+      let voltage = voltage / Double(numberOfCells)
       let nVth =
         cell.gamma * Double(numberOfCells) * Cell.k * cell_T.kelvin / Cell.q
 
