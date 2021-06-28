@@ -1,7 +1,7 @@
 // swift-tools-version:5.2
 import PackageDescription
 let c = [CSetting.unsafeFlags(["-ffast-math", "-O3",  "-fomit-frame-pointer", "-funroll-loops"])]
-let flags = ["-cross-module-optimization", "-Ounchecked", "-enforce-exclusivity=unchecked", "-gnone", "-DRELEASE"]
+let flags = ["-cross-module-optimization", "-Ounchecked", "-enforce-exclusivity=unchecked", "-DRELEASE"]
 let swift: [SwiftSetting] = [
   .unsafeFlags(flags, .when(configuration: .release)),
   .define("DEBUG", .when(configuration: .debug))
@@ -57,6 +57,9 @@ let package = Package(
         .product(name: "SQLite", package: "SQLite.swift"),
         .product(name: "xlsxwriter", package: "xlsxwriter.swift")],
       swiftSettings: swift),
+    .target(name: "ThermalStorage",
+      dependencies: ["Libc", "Helpers", "PhysicalQuantities"],
+      swiftSettings: swift),
      .target(name: "SolarFieldModel",
       dependencies: ["Libc"],
       swiftSettings: swift),
@@ -74,10 +77,12 @@ let package = Package(
         .product(name: "xlsxwriter", package: "xlsxwriter.swift")],
       swiftSettings: swift),
     .target(name: "Benchmarking",
-      dependencies: ["Meteo", "Benchmark"],
+      dependencies: ["Meteo", "Benchmark", "BlackBoxModel"],
       swiftSettings: swift),
     .testTarget(name: "MeteoTests",
       dependencies: ["DateGenerator", "SolarPosition", "Meteo"]),
+    .testTarget(name: "ThermalStorageTests",
+      dependencies: ["ThermalStorage"]),
     .testTarget(name: "PinchPointTests",
       dependencies: ["PinchPoint"]),
     .testTarget(name: "SolarFieldModelTests",

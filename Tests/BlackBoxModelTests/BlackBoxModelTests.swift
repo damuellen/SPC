@@ -19,11 +19,8 @@ class BlackBoxModelTests: XCTestCase {
 
     BlackBoxModel.configure(year: 2005)
     BlackBoxModel.configure(location: location)
-
     let log = Recorder(mode: .inMemory)
-
     let result = BlackBoxModel.runModel(with: log)
-
     let tol = 1.0
     XCTAssertEqual(result.radiation.ico, 17608.5, accuracy: tol)
     XCTAssertEqual(result.electric.net, 1986.0, accuracy: tol)
@@ -36,6 +33,15 @@ class BlackBoxModelTests: XCTestCase {
     XCTAssertEqual(result.thermal.heatExchanger.megaWatt, 5169.8, accuracy: tol)
     if false {
       let interval = DateInterval(ofDay: 192, in: 2005)
+      let y1 = result.massFlows(range: interval)
+      let y2 = result.power(range: interval)
+      let plot = TimeSeriesPlot(y1: y1, y2: y2, range: interval, style: .impulses)
+      plot.y1Titles = ["solarfield", "powerblock", "storage"]
+      plot.y2Titles = ["solar", "toStorage", "production", "storage", "gross", "net", "consum"]
+      try! plot(toFile: "PowerSummer3")
+    }
+    if false {
+      let interval = DateInterval(ofDay: 193, in: 2005)
       let y1 = result.massFlows(range: interval)
       let y2 = result.power(range: interval)
       let plot = TimeSeriesPlot(y1: y1, y2: y2, range: interval, style: .impulses)
