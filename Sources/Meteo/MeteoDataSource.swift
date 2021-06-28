@@ -128,7 +128,7 @@ public class MeteoDataSource {
     var data = [MeteoData]()
     data.reserveCapacity(steps * 365)
 
-    let rng = LinearCongruentialGenerator()
+    var rng = LinearCongruentialGenerator()
 
     for d in DateGenerator(year: sun.year, interval: sun.frequence) {
       step += 1
@@ -159,13 +159,13 @@ public class MeteoDataSource {
   }
 }
 
-private class LinearCongruentialGenerator: RandomNumberGenerator {
+private struct LinearCongruentialGenerator {
   var lastRandom = 95.0  // random seed
   let m = 139968.0
   let a = 3877.0
   let c = 29573.0
 
-  func random() -> Double {
+  mutating func random() -> Double {
     lastRandom = ((lastRandom * a + c).truncatingRemainder(dividingBy: m))
     return lastRandom / m
   }
