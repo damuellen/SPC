@@ -113,28 +113,31 @@ public enum BlackBoxModel {
     // PV system setup
     let pv = PV()
 
-    var photovoltaic = [Power]()
+    var conditions = [(Temperature, Double, Double)]()
+
     for (meteo, date) in zip(🌦, timeline(Simulation.time.steps)) {
       DateTime.setCurrent(date: date)
       let dt = DateTime.current
-
-      let temperature = Temperature(meteo: meteo)
+      let (temperature, wind) = (Temperature(meteo), Double(meteo.windSpeed))
       if let position = 🌞[date] {
         let panel = singleAxisTracker(
           apparentZenith: position.zenith,
           apparentAzimuth: position.azimuth,
           maxAngle: 55, GCR: 0.444
         )
-        let gti = SolarRadiation.effective(
-          ghi: Double(meteo.ghi), dhi: Double(meteo.dhi),
-          surfTilt: panel.surfTilt, incidence: panel.AOI,
-          zenith: position.zenith, doy: dt.yearDay
+        conditions.append((temperature, wind,
+          SolarRadiation.effective(
+            ghi: Double(meteo.ghi), dhi: Double(meteo.dhi),
+            surfTilt: panel.surfTilt, incidence: panel.AOI,
+            zenith: position.zenith, doy: dt.yearDay)
+          )
         )
-        let watts = pv(radiation: gti, ambient: temperature, windSpeed: 0.0)
-        photovoltaic.append(.init(watts))
       } else {
-        photovoltaic.append(.init(pv.transformer(ac: .zero)))
+        conditions.append((temperature, wind, .zero))
       }
+    }
+    var photovoltaic = conditions.concurrentMap { t, ws, gti -> Double in
+       pv(radiation: gti, ambient: t, windSpeed: ws) / 10.0e6
     }
     // Makes it easier to use when re-reading the values
     photovoltaic.reverse()
@@ -145,7 +148,7 @@ public enum BlackBoxModel {
       let dt = DateTime.current
 
       /// Use the already existing result
-      plant.electricity.photovoltaic = photovoltaic.removeLast().megaWatt
+      plant.electricity.photovoltaic = photovoltaic.removeLast()
 
       if Maintenance.checkSchedule(date) {
         // No operation is simulated
@@ -175,7 +178,7 @@ public enum BlackBoxModel {
       {()}
 #endif
       // Used when calculating the heat losses and the efficiency
-      let temperature = Temperature(meteo: meteo)
+      let temperature = Temperature(meteo)
 
       // Setting the mass flow required by the power block in the solar field
       status.solarField.maxMassFlow = PowerBlock.requiredMassFlow()

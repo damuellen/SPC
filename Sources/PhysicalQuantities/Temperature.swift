@@ -71,7 +71,7 @@ public struct Temperature: CustomStringConvertible, Equatable {
     self.kelvin = celsius - Temperature.absoluteZeroCelsius
   }
   /// Create a Temperature using the ambient conditions.
-  public init(meteo: MeteoData) {
+  public init(_ meteo: MeteoData) {
     assert(meteo.temperature > -30)
     assert(meteo.temperature < 70)
     self = .init(celsius: Double(meteo.temperature))
