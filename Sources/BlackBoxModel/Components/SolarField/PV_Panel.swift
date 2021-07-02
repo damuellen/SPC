@@ -13,8 +13,10 @@ import PhysicalQuantities
 extension PV {
   /// Wraps low-level functions for solving the single diode equation.
   public struct Cell {
-    static let radiation_at_ST = 1000.0
-    static let temperature_at_ST = Temperature(celsius: 25.0)
+    /// Radiation at Standard Test Conditions
+    static let radiation_at_STC = 1000.0
+    /// Temperature at Standard Test Conditions
+    static let temperature_at_STC = Temperature(celsius: 25.0)
     /// Boltzman constant
     static let k = 1.3806488E-23
     /// Electron charge in coulombs
@@ -59,28 +61,31 @@ extension PV {
       radiation: Double, ambient: Temperature, windSpeed: Double,
       nominalPower: Double, panelArea: Double
     ) -> Temperature {
+      /// Absorption coefficient of the module
       let alpha = 0.9
-      let efficiency = nominalPower / (panelArea * Cell.radiation_at_ST)
+      let efficiency = nominalPower / (panelArea * Cell.radiation_at_STC)
+      /// Constant heat transfer component
       let Uc = 20.0
+      /// Convective heat transfer component
       let Uv = 0.0
       let U = Uc + Uv * windSpeed
       return ambient + ((1 / U) * alpha * radiation * (1 - efficiency))
     }
     /// Returns the radiation equivalent current within the single diode model.
     func photocurrent(radiation: Double, temperature: Temperature) -> Double {
-      (radiation / Cell.radiation_at_ST)
-        * (Isc - muIsc * (temperature - Cell.temperature_at_ST).kelvin)
+      (radiation / Cell.radiation_at_STC)
+        * (Isc - muIsc * (temperature - Cell.temperature_at_STC).kelvin)
     }
     /// Returns the corrected saturation current of the diode within the single diode model.
     func saturationCurrent(temperature: Temperature) -> Double {
-      Ioref * pow(temperature.kelvin / Cell.temperature_at_ST.kelvin, 3)
+      Ioref * pow(temperature.kelvin / Cell.temperature_at_STC.kelvin, 3)
         * exp(
           Cell.q * Egap / (gamma * Cell.k)
-            * ((1 / Cell.temperature_at_ST.kelvin) - (1 / temperature.kelvin)))
+            * ((1 / Cell.temperature_at_STC.kelvin) - (1 / temperature.kelvin)))
     }
     /// Returns the corrected Rshunt of the single diode model.
     func Rshunt(radiation: Double, temperature: Temperature) -> Double {
-      RshRef + (Rsh0 - RshRef) * exp(5.5 * radiation / Cell.radiation_at_ST)
+      RshRef + (Rsh0 - RshRef) * exp(5.5 * radiation / Cell.radiation_at_STC)
     }
   }
 
