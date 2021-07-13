@@ -40,7 +40,7 @@ extension Sequence where Element == Double {
   }
 }
 
-func average(_ values: [Double]) -> Double {
+func average(_ values: ArraySlice<Double>) -> Double {
   let sum = values.reduce(into: 0.0) { sum, value in
     sum += value
   }
