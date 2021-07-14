@@ -3,64 +3,103 @@ import Foundation
 import PhysicalQuantities
 
 class SunOl {
-  let CSP_Loop_Nr = 113.0
-  let PV_AC_Cap = 613.0
-  let PV_DC_Cap = 818.0
-  let Ref_PV_AC_capacity = 510.0
-  let Ref_PV_DC_capacity = 683.4
-  let Ref_meth_H2_consumption = 20000.0
-  let Ref_meth_prod_capacity = 100_000.0
-  let CSP_aux_elec_percentage = 0.0
-  let Ratio_CSP_vs_Heater = 0.0
-  let Heater_efficiency = 0.96
-  let Meaux_elecnominal_heat_cons = 0.0
-  let H2_storage_cap = 100.0
-  let PB_min_op_hours = 0.0
-  let PB_Nominal_Gross_Capacity = 250.0
-  let PB_eff_at_min_Op = 0.0
-  let PB_Ratio_Heat_input_vs_output = 0.0
-  let PB_nominal_heat_input = 0.0
-  let PB_Nominal_Gross_eff = 0.4713
-  let PB_elec_cons_perc = 0.0
-  let PB_aux_cons_perc = 0.0
-  let PB_max_heat_input = 0.0
-  let PB_min_heat_input = 0.0
-  let PB_hot_start_heat_req = 0.0
-  let PB_warm_start_heat_req = 0.0
-  let PB_cold_start_heat_req = 0.0
-  let PB_warm_start_duration = 0.0
-  let PB_cold_start_duration = 0.0
-  let PB_min_el_cap_perc = 0.0
-  let PB_minimum_Gross_Capacity = 0.0
-  let EY_ElectrEnergy_per_tH2 = 0.0
-  let EY_min_elec_input = 0.0
-  let EY_Nominal_aux_elec_input = 0.0
-  let EY_Nominal_gross_elec_input = 0.0
-  let EY_Nominal_elec_input = 0.0
-  let EY_min_cap_rate = 0.0
-  let EY_nominal_heat_input: Double = 0.0
-  let El_boiler_efficiency = 0.0
-  let El_boiler_capacity = 0.0
-  let Heater_cap = 0.0
-  let Ref_meaux_elecH2_consumption = 0.0
-  let Meth_min_cap_perc = 0.5
-  let Meth_max_H2_Cons = 0.0
-  let Meth_min_H2_Cons = 0.0
-  let Meth_nominal_aux_electr_cons = 0.0
-  let Meth_nominal_heat_cons = 0.0
-  let Meth_nominal_hourly_prod_cap = 14.8
-  let Meaux_elecmin_cap_perc = 0.0
-  let Meaux_elecnominal_elec_electr_cons = 0.0
-  let Ref_Inv_eff_approx_handover = 0.0
-  let TES_elec_elec_percentage = 0.0
-  let Ref_Inv_eff_appRef_Inv_eff_approx_handoverrox_handover = 0.0
-  let TES_Thermal_capacity = 0.0
-  let TES_Aux_elec_percentage = 0.0
-  let Grid_max_import = 70.0
-  let Grid_max_export = 70.0
-  let BESS_Capacity = 100.0
-  let BESS_Charging_Efficiency = 0.7
-  let BESS_max_Charging_capacity = 50.0
+  var CSP_Loop_Nr = 113.0
+  var PV_AC_Cap = 613.0
+  var PV_DC_Cap = 818.0
+  var Ref_PV_AC_capacity = 510.0
+  var Ref_PV_DC_capacity = 683.4
+  var Ref_meth_H2_consumption = 20000.0
+  var Ref_meth_prod_capacity = 100_000.0
+  var CSP_aux_elec_percentage = 0.01
+  var Ratio_CSP_vs_Heater = 1.32
+  var Heater_efficiency = 0.96
+  var EY_Nominal_gross_elec_input = 284.2
+  var EY_Nominal_elec_input = 280.0
+  var EY_min_cap_rate = 0.1
+  var El_boiler_efficiency = 0.99
+  var El_boiler_capacity = 100.0
+  var Heater_cap = 239.0
+  var Meth_min_cap_perc = 0.5
+  var TES_Full_Load_Hours = 14.0
+  var TES_Aux_elec_percentage = 0.01
+  var Grid_max_import = 70.0
+  var Grid_max_export = 70.0
+  var BESS_Capacity = 100.0
+  var BESS_Charging_Efficiency = 0.7
+  var BESS_max_Charging_capacity = 50.0
+  var H2_storage_cap = 100.0
+  var PB_min_op_hours = 5.0
+  var PB_Nominal_Gross_Capacity = 250.0
+  var PB_Nominal_Gross_eff = 0.4713
+  var PB_Ratio_Heat_input_vs_output = 0.62
+
+  var PB_nominal_heat_input: Double {
+    PB_Nominal_Gross_Capacity / PB_Nominal_Gross_eff
+  }
+
+  var PB_aux_cons_perc = 0.05
+  var PB_max_heat_input = 570.0
+  var PB_min_heat_input = 91.0
+  var PB_hot_start_heat_req = 0.0
+  var PB_warm_start_heat_req = 212.0
+  var PB_cold_start_heat_req = 1061.0
+  var PB_warm_start_duration = 6.0
+  var PB_cold_start_duration = 48.0
+  var PB_min_el_cap_perc = 0.125
+  var PB_minimum_Gross_Capacity = 31.3
+  var PB_heat_input_at_min_aux = 102.0
+
+  var PB_eff_at_min_Op: Double {
+    max(
+      PB_minimum_Gross_Capacity,
+      (EY_min_elec_input + Meth_min_cap_perc * Meth_nominal_aux_electr_cons)
+        / (1 - PB_aux_cons_perc))
+      / max(PB_min_heat_input, PB_heat_input_at_min_aux)
+  }
+
+  var EY_ElectrEnergy_per_tH2 = 0.0
+
+  var EY_min_elec_input: Double {
+    (EY_Nominal_aux_elec_input + EY_Nominal_elec_input) * EY_min_cap_rate
+  }
+
+  var Ref_EY_capacity = 180.0
+
+  var EY_Nominal_aux_elec_input: Double {
+    EY_Nominal_elec_input / Ref_EY_capacity * 2.7
+  }
+
+  var EY_nominal_heat_input: Double {
+    40 * EY_Nominal_elec_input / Ref_EY_capacity
+  }
+
+  var Meth_max_H2_Cons: Double {
+    Meth_nominal_hourly_prod_cap / Ref_meth_prod_capacity
+      * Ref_meth_H2_consumption
+  }
+
+  var Meth_min_H2_Cons: Double {
+    Meth_min_cap_perc * Meth_nominal_hourly_prod_cap / Ref_meth_prod_capacity
+      * Ref_meth_H2_consumption
+  }
+
+  var Ref_meth_hourly_prod_capacity: Double {
+    Ref_meth_prod_capacity * 334 * 24
+  }
+
+  var Meth_nominal_aux_electr_cons: Double {
+    Meth_nominal_hourly_prod_cap / Ref_meth_hourly_prod_capacity * 10.0  // G79
+  }
+
+  var Meth_nominal_heat_cons = 12.0
+  var Meth_nominal_hourly_prod_cap = 14.8
+
+  var Ref_Inv_eff_approx_handover = 0.14
+  var TES_elec_elec_percentage = 0.01
+
+  var TES_Thermal_capacity: Double {
+    TES_Full_Load_Hours * PB_nominal_heat_input
+  }
 
   let HL_C = Array([0.22, -0.36, 0.21, 1.00].reversed())
   let LL_C = Array(
@@ -208,7 +247,6 @@ class SunOl {
     var Grid_capacity_avail_after_EY = zeroes
     var Elec_avail_after_total_EY = zeroes
     var Amount_of_H2_produced_MTPH = zeroes
-    var H2_storage_level_MT = zeroes
 
     for i in indices.dropFirst() {
       let c1 =
@@ -357,16 +395,21 @@ class SunOl {
       let x1 =
         EY_min_elec_input + pr_met_plant_operation[i]
         * Meth_nominal_aux_electr_cons + TES_charging_aux_elec_consumption[i]
-      /*
-    min_PB_heat_request_from_EY_Meth_aux_to_PB_without_extractions[i] =
-       x1
-        / (1 - PB_aux_cons_perc) / (PB_Nominal_Gross_eff * (el_C[4] * x1
-        / (1 - PB_aux_cons_perc) / PB_Nominal_Gross_Capacity) ** 4 + el_C[3] * x1
-        / (1 - PB_aux_cons_perc) / PB_Nominal_Gross_Capacity) ** 3 + el_C[2] * x1
-        / (1 - PB_aux_cons_perc) / PB_Nominal_Gross_Capacity) ** 2 + el_C[1] *
-        (EY_min_elec_input + pr_met_plant_operation[i] * Meth_nominal_aux_electr_cons + TES_charging_aux_elec_consumption[i])
-        //FIXME                                                                                                                                                                                                                                                                                              / (1 - PB_aux_cons_perc) / PB_Nominal_Gross_Capacity) ** 1 + el_C[0])) * (1 + TES_Aux_elec_percentage / PB_eff_at_min_Op)
-*/
+
+      min_PB_heat_request_from_EY_Meth_aux_to_PB_without_extractions[i] =
+        x1 / (1 - PB_aux_cons_perc)
+        / (PB_Nominal_Gross_eff
+          * (el_C[4]
+            * (x1 / (1 - PB_aux_cons_perc) / PB_Nominal_Gross_Capacity) ** 4
+            + el_C[3]
+            * (x1 / (1 - PB_aux_cons_perc) / PB_Nominal_Gross_Capacity) ** 3
+            + el_C[2]
+            * (x1 / (1 - PB_aux_cons_perc) / PB_Nominal_Gross_Capacity) ** 2
+            + el_C[1]
+            * (x1 / (1 - PB_aux_cons_perc) / PB_Nominal_Gross_Capacity) ** 1
+            + el_C[0]))
+        * (1 + TES_Aux_elec_percentage / PB_eff_at_min_Op)
+
       steam_extraction_matching_min_op_case[i] = iff(
         pr_EY_Meth_el_consumption[i] == 0,
         pr_met_plant_operation[i] * Meth_nominal_heat_cons + EY_min_cap_rate
@@ -414,80 +457,60 @@ class SunOl {
             PB_operation_mode[i] <= PB_cold_start_duration,
             PB_warm_start_heat_req, PB_cold_start_heat_req)), 0)
 
-      let c11 =
-        (Max_net_elec_request_from_EY_Meth_aux_to_PB_after_pr_PV_EY_op[i]
-          >= PB_minimum_Gross_Capacity * (1 - PB_aux_cons_perc))
-        && (Max_net_elec_request_from_EY_Meth_aux_to_PB_after_pr_PV_EY_op[i]
-          < PB_minimum_Gross_Capacity * (1 - PB_aux_cons_perc))
-        && (pr_EY_Meth_el_consumption[i] > 0)
-
-      let c12 =
-        TES_storage_level[i] + TES_total_thermal_input[i - 1]
-        - PB_startup_heat_consumption_calculated[i] < PB_min_op_hours
-        * (min_PB_heat_request_from_EY_Meth_aux_to_PB_without_extractions[i]
-          + PB_Ratio_Heat_input_vs_output
-          * steam_extraction_matching_min_op_case[i])
-
-      let c13 =
-        pr_EY_Meth_el_consumption[i - 1] > 0
-        && pr_EY_Meth_el_consumption[i] == 0
-        && Max_net_elec_request_from_EY_Meth_aux_to_PB_after_pr_PV_EY_op[i]
-          >= PB_minimum_Gross_Capacity * (1 - PB_aux_cons_perc)
-
-      let c14 =
-        PV_elec_avail_after_TES_charging[i] > EY_Nominal_gross_elec_input
-        + Meth_nominal_aux_electr_cons * pr_met_plant_operation[i]
-        - PB_minimum_Gross_Capacity * (1 - PB_aux_cons_perc)
-        || TES_storage_level[i] == 0
-        || Max_net_elec_request_from_EY_Meth_aux_to_PB_after_pr_PV_EY_op[i]
-          == 0
-
-      let c15 =
-        TES_storage_level[i] + TES_total_thermal_input[i - 1]
-        - PB_startup_heat_consumption_calculated[i]
-        - pr_PB_heat_input_based_on_avail_heat[i - 1] < (PB_min_op_hours - 1)
-        * (min_PB_heat_request_from_EY_Meth_aux_to_PB_without_extractions[i]
-          + PB_Ratio_Heat_input_vs_output
-          * steam_extraction_matching_min_op_case[i])
-      /*
-    if c11 {
-      pr_PB_heat_input_based_on_avail_heat[i] = iff(c12,0,
-        min(
-          PB_max_heat_input,
-          max(
-            (TES_storage_level[i] + TES_total_thermal_input[i-1]
-              - PB_startup_heat_consumption_calculated[i])
-              / countiff(PV_MV_power_at_transformer_outlet[i...].prefix(6), { $0 < EY_min_elec_input }),
-            min_PB_heat_request_from_EY_Meth_aux_to_PB_without_extractions[i]
-              + PB_Ratio_Heat_input_vs_output * [i])))
-      iff(c13,
-        iff(c15
-          ,
-          0,
+      let AA = PV_elec_avail_after_TES_charging
+      let AB = Max_net_elec_request_from_EY_Meth_aux_to_PB_after_pr_PV_EY_op
+      let Q = pr_EY_Meth_el_consumption
+      let K = PV_MV_power_at_transformer_outlet
+      let N = pr_met_plant_operation
+      let U = TES_total_thermal_input
+      let Y = SF_TES_chrg_PV_aux_cons_not_covered_by_PV
+      let AM = TES_storage_level
+      let AG = pr_PB_heat_input_based_on_avail_heat
+      let AO = PB_startup_heat_consumption_calculated
+      let AD = min_PB_heat_request_from_EY_Meth_aux_to_PB_without_extractions
+      let AE = steam_extraction_matching_min_op_case
+      let AF = pr_PB_efficiency_excl_extraction_at_min_EY_and_pr_Meth
+      // AH
+      pr_PB_heat_input_based_on_avail_heat[i] = iff(
+        (AB[i] >= PB_minimum_Gross_Capacity * (1 - PB_aux_cons_perc)
+          && AB[i - 1] < PB_minimum_Gross_Capacity * (1 - PB_aux_cons_perc)
+          && Q[i] > 0),
+        iff(
+          AM[i - 1] + U[i - 1] - AO[i - 1] < PB_min_op_hours
+            * (AD[i] + PB_Ratio_Heat_input_vs_output * AE[i]), 0,
           min(
             PB_max_heat_input,
             max(
-              (TES_storage_level[i] + TES_total_thermal_input[i-1]
-                - PB_startup_heat_consumption_calculated[i]
-                - pr_PB_heat_input_based_on_avail_heat[i-1])
-                / countiff(PV_MV_power_at_transformer_outlet[i...].prefix(6), { $0 < EY_min_elec_input }),
-              min_PB_heat_request_from_EY_Meth_aux_to_PB_without_extractions[i]
-                + PB_Ratio_Heat_input_vs_output
-                * steam_extraction_matching_min_op_case[i]))),
-        iff(c14, 0,
-          pr_PB_heat_input_based_on_avail_heat[i-1]
-            + iff(
-              pr_PB_heat_input_based_on_avail_heat[i-1] > 0,
-              (SF_TES_chrg_PV_aux_cons_not_covered_by_PV[i] - SF_TES_chrg_PV_aux_cons_not_covered_by_PV[i-1])
-                / pr_PB_efficiency_excl_extraction_at_min_EY_and_pr_Meth[i]
-                + (Meth_nominal_heat_cons * PB_Ratio_Heat_input_vs_output
-                  + Meth_nominal_aux_electr_cons
-                  / pr_PB_efficiency_excl_extraction_at_min_EY_and_pr_Meth[i]
-                  * (-pr_met_plant_operation[i-1] + pr_met_plant_operation[i]),
-              0)))))
+              (AM[i - 1] + U[i - 1] - AO[i - 1])
+                / countiff(K[i...].prefix(16), { $0 < EY_min_elec_input }),
+              AD[i] + PB_Ratio_Heat_input_vs_output * AE[i]))),
 
-  }
-*/
+        iff(
+          (Q[i - 1] > 0 && Q[i] == 0
+            && AB[i] >= PB_minimum_Gross_Capacity * (1 - PB_aux_cons_perc)),
+          iff(
+            AM[i - 1] + U[i - 1] - AO[i - 1] - AG[i - 1]
+              < (PB_min_op_hours - 1)
+                * (AD[i] + PB_Ratio_Heat_input_vs_output * AE[i]),
+            0,
+            min(
+              PB_max_heat_input,
+              max(
+                (AM[i - 1] + U[i - 1] - AO[i - 1] - AG[i - 1])
+                  / countiff(K[i...].prefix(16), { $0 < EY_min_elec_input }),
+                AD[i] + PB_Ratio_Heat_input_vs_output * AE[i]))),
+          iff(
+            (AA[i] > EY_Nominal_gross_elec_input + Meth_nominal_aux_electr_cons
+              * N[i] - PB_minimum_Gross_Capacity * (1 - PB_aux_cons_perc)
+              || AM[i - 1] == 0 || AB[i] == 0), 0,
+            AG[i - 1]
+              + ((AG[i - 1] > 0)
+                ? ((Y[i] - Y[i - 1]) / AF[i]
+                  + (Meth_nominal_heat_cons * PB_Ratio_Heat_input_vs_output
+                    + Meth_nominal_aux_electr_cons / AF[i])
+                    * (-N[i - 1] + N[i]))
+                : 0))))
+
       let factor =
         ((pr_PB_heat_input_based_on_avail_heat[i]
           - PB_Ratio_Heat_input_vs_output
@@ -859,38 +882,81 @@ class SunOl {
 
       Amount_of_H2_produced_MTPH[i] =
         Net_elec_to_EY[i] / EY_ElectrEnergy_per_tH2  // CI
-      /*
-    H2_storage_level_MT[i] = min(
-        H2_storage_level_MT[i-1] + Amount_of_H2_produced_MTPH[i]
-          - H2_to_met_production_effective_MTPH[i], H2_storage_cap)
-*/
     }
-
     let COUNT = 39
 
-    var prev_H2_to_met_production_calculated_MTPH = 0.0
-    let H2_to_met_production_calculated_MTPH: [Double] = indices.map {  // CK
-      (i: Int) -> Double in guard i > 0 else { return 0 }
+    var H2_storage_level_MT = zeroes
+    var H2_to_met_production_calculated_MTPH = zeroes
+    var H2_to_met_production_effective_MTPH = zeroes
+
+    for i in indices.dropFirst() {
+      H2_storage_level_MT[i] = min(  // CJ
+        H2_storage_level_MT[i - 1] + Amount_of_H2_produced_MTPH[i - 1]
+          - H2_to_met_production_effective_MTPH[i - 1], H2_storage_cap)
 
       let count = countiff(
         Amount_of_H2_produced_MTPH[i...].prefix(17), { $0 < Meth_min_H2_Cons })
 
-      prev_H2_to_met_production_calculated_MTPH = iff(
-        Amount_of_H2_produced_MTPH[i - 1] >= Meth_min_H2_Cons
-          && Amount_of_H2_produced_MTPH[i] < Meth_min_H2_Cons,
-        max(
-          Meth_min_H2_Cons,
-          min(
-            (Amount_of_H2_produced_MTPH[i] + H2_storage_level_MT[i]) / count,
-            H2_storage_level_MT[i] + sum(
-              Amount_of_H2_produced_MTPH[i...].prefix(COUNT)) / Double(COUNT))),
+      H2_to_met_production_calculated_MTPH[i] =  // CK
         iff(
-          Amount_of_H2_produced_MTPH[i] >= Meth_min_H2_Cons, 0.0,
-          prev_H2_to_met_production_calculated_MTPH))
-      return prev_H2_to_met_production_calculated_MTPH
+          Amount_of_H2_produced_MTPH[i - 1] >= Meth_min_H2_Cons
+            && Amount_of_H2_produced_MTPH[i] < Meth_min_H2_Cons,
+          max(
+            Meth_min_H2_Cons,
+            min(
+              (Amount_of_H2_produced_MTPH[i] + H2_storage_level_MT[i]) / count,
+              H2_storage_level_MT[i] + sum(
+                Amount_of_H2_produced_MTPH[i...].prefix(COUNT)) / Double(COUNT)
+            )),
+          iff(
+            Amount_of_H2_produced_MTPH[i] >= Meth_min_H2_Cons, 0.0,
+            H2_to_met_production_calculated_MTPH[i - 1]))
+
+      let c = countiff(
+        Amount_of_H2_produced_MTPH[i...].prefix(16), { $0 < Meth_min_H2_Cons })
+      let avg: Double
+      if c > 0 {
+        avg = (H2_storage_level_MT[i] + Amount_of_H2_produced_MTPH[i]) / c
+      } else {
+        avg = average(Amount_of_H2_produced_MTPH[i...].prefix(16))
+      }
+      // FIXME
+      H2_to_met_production_effective_MTPH[i] =  // CL
+        max(
+          0,
+          min(
+            (Elec_avail_after_total_EY[i]
+              + PB_and_SF_aux_heat_avail_after_EY[i] / El_boiler_efficiency
+              + Grid_capacity_avail_after_EY[i]
+              - aux_electr_not_covered_by_plant[i])
+              / (Meth_nominal_aux_electr_cons + Meth_nominal_heat_cons
+                / El_boiler_efficiency) * Meth_max_H2_Cons,
+            (aux_boiler_capacity_avail_after_EY[i]
+              + PB_and_SF_aux_heat_avail_after_EY[i]) / Meth_nominal_heat_cons
+              * Meth_max_H2_Cons,
+            iff(
+              H2_storage_level_MT[i] + Amount_of_H2_produced_MTPH[i]
+                < Meth_min_H2_Cons, 0,
+              H2_storage_level_MT[i] + Amount_of_H2_produced_MTPH[i]),
+            Meth_max_H2_Cons,
+            max(
+              H2_storage_level_MT[i] + Amount_of_H2_produced_MTPH[i]
+                - H2_storage_cap, Meth_min_H2_Cons,
+              H2_to_met_production_calculated_MTPH[i],
+              iff(
+                H2_to_met_production_calculated_MTPH[i] > 0, 0,
+                min(
+                  (H2_storage_level_MT[i] + Amount_of_H2_produced_MTPH[i])
+                    / countiff(
+                      Amount_of_H2_produced_MTPH[i...].prefix(2), { $0 == 0 })
+                    * Meth_min_H2_Cons,
+                  iff(
+                    H2_storage_level_MT[i] < 10 * Meth_min_H2_Cons,
+                    average(Amount_of_H2_produced_MTPH[i...].prefix(2)),
+                    Meth_max_H2_Cons), avg)))))
+
     }
 
-    var H2_to_met_production_effective_MTPH = zeroes
     var H2_dumping_MTPH = zeroes
     var met_plant_start = zeroes
     var met_produced_MTPH = zeroes
@@ -920,41 +986,7 @@ class SunOl {
     var Q_Sol_and_aux_steam_dumped = zeroes
 
     for i in indices.dropFirst() {
-      /*
-      H2_to_met_production_effective_MTPH[i] = // CL
-        max(
-          0,
-          min(
-            (Elec_avail_after_total_EY[i] + PB_and_SF_aux_heat_avail_after_EY[i]
-              / El_boiler_efficiency + Grid_capacity_avail_after_EY[i]
-              - aux_electr_not_covered_by_plant[i])
-              / (Meth_nominal_aux_electr_cons + Meth_nominal_heat_cons
-                / El_boiler_efficiency) * Meth_max_H2_Cons,
-            (aux_boiler_capacity_avail_after_EY[i]
-              + PB_and_SF_aux_heat_avail_after_EY[i]) / Meth_nominal_heat_cons
-              * Meth_max_H2_Cons,
-            iff(
-              H2_storage_level_MT[i] + Amount_of_H2_produced_MTPH[i]
-                < Meth_min_H2_Cons, 0,
-              H2_storage_level_MT[i] + Amount_of_H2_produced_MTPH[i]),
-            Meth_max_H2_Cons,
-            max(H2_storage_level_MT[i] + Amount_of_H2_produced_MTPH[i] - H2_storage_cap, Meth_min_H2_Cons,
-              H2_to_met_production_calculated_MTPH[i],
-              iff(
-                H2_to_met_production_calculated_MTPH[i] > 0, 0,
-                min(
-                  (H2_storage_level_MT[i] + Amount_of_H2_produced_MTPH[i])
-                      / countiff(Amount_of_H2_produced_MTPH[i...].prefix(2), { $0 == 0 })
-                      * Meth_min_H2_Cons,
-                    iff(H2_storage_level_MT[i] < 10 * Meth_min_H2_Cons,
-                     average(Amount_of_H2_produced_MTPH[i...].prefix(2)), Meth_max_H2_Cons)
-                  ,
-                  ((H2_storage_level_MT[i] + Amount_of_H2_produced_MTPH[i]) / (
-                    countiff(
-                      Amount_of_H2_produced_MTPH[i...].prefix(16), { $0 < Meth_min_H2_Cons }),
-                    average(Amount_of_H2_produced_MTPH[i...].prefix(16))
-                  )))))))
-*/
+
       H2_dumping_MTPH[i] =  // CM
         max(
           H2_storage_level_MT[i] + Amount_of_H2_produced_MTPH[i]
@@ -1101,12 +1133,29 @@ class SunOl {
       Q_Sol_and_aux_steam_dumped[i] =  // DM
         max(0, PB_and_SF_aux_heat_avail_after_met[i])
     }
+    print(Q_solar_before_dumping.sum)
+    print(PV_electrical_input_to_heater.sum)
+    print(Q_Sol_and_aux_steam_dumped.sum)
+    print(TES_thermal_input_by_CSP.sum)
   }
 }
 
 func main() {
   let calc = SunOl()
-
+  /*
+  calc.CSP_Loop_Nr = 115
+  calc.PV_DC_Cap = 800
+  calc.PV_AC_Cap = 600
+  calc.Heater_cap = 220
+  calc.TES_Full_Load_Hours = 13
+  calc.EY_Nominal_elec_input = 180
+  calc.PB_Nominal_Gross_Capacity = 100
+  calc.BESS_Capacity = 40
+  calc.H2_storage_cap = 40
+  calc.Meth_nominal_hourly_prod_cap = 12
+  calc.El_boiler_capacity = 60
+  calc.Grid_max_export = 70
+  */
   calc()
 
 }

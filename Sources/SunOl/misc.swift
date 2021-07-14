@@ -38,6 +38,8 @@ extension Sequence where Element == Double {
   func product(_ factor: Double) -> [Double] {
     self.map { $0 * factor }
   }
+
+  var sum: Double { self.reduce(into: 0.0) { sum, value in sum += value  } }
 }
 
 func average(_ values: ArraySlice<Double>) -> Double {
