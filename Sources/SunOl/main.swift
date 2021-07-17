@@ -57,7 +57,7 @@ class SunOl {
       / max(PB_min_heat_input, PB_heat_input_at_min_aux)
   }
 
-  var EY_ElectrEnergy_per_tH2 = 0.0
+  var EY_ElectrEnergy_per_tH2 = 55.0
 
   var EY_min_elec_input: Double {
     (EY_Nominal_aux_elec_input + EY_Nominal_elec_input) * EY_min_cap_rate
@@ -91,7 +91,7 @@ class SunOl {
     Meth_nominal_hourly_prod_cap / Ref_meth_hourly_prod_capacity * 10.0  // G79
   }
 
-  var Meth_nominal_heat_cons = 12.0
+  var Meth_nominal_heat_cons = 11.86
   var Meth_nominal_hourly_prod_cap = 14.8
 
   var Ref_Inv_eff_approx_handover = 0.14
@@ -101,12 +101,12 @@ class SunOl {
     TES_Full_Load_Hours * PB_nominal_heat_input
   }
 
-  let HL_C = Array([0.22, -0.36, 0.21, 1.00].reversed())
+  let HL_C = Array([0.21780273, -0.36477020, 0.20504509, 0.92211117].reversed())
   let LL_C = Array(
-    [-2.93E+07, 1.87E+07, -4.83E+06, 6.48E+05, -47182, 1730, -21, 1].reversed()
+   [-29320401.9043, 18654492.9775, -4826041.5775, 647529.2062, -47182.1809, 1729.6407, -21.0418, 0.7047].reversed()
   )
-  let th_C = Array([-1.53, 4.61, -5.27, 2.81, 0.37].reversed())
-  let el_C = Array([-1.29, 3.80, -4.22, 2.20, 0.51].reversed())
+  let th_C = Array([-1.52794811, 4.61474612, -5.27135243, 2.81011828, 0.37443614].reversed())
+  let el_C = Array([-1.29372858, 3.79919336, -4.21508179, 2.20137842, 0.50823859].reversed())
 
   var Q_Sol_MW_thLoop: [Double] = [0]
   var Reference_PV_plant_power_at_inverter_inlet_DC: [Double] = [0]
@@ -124,7 +124,7 @@ class SunOl {
     }
   }
 
-  func callAsFunction() {
+  func callAsFunction(pr_met_plant_operation: [Double]) -> [Double] {
     let maximum = Reference_PV_MV_power_at_transformer_outlet.max() ?? 0
     let Inverter_power_fraction =
       Reference_PV_MV_power_at_transformer_outlet.map { max(0, $0 / maximum) }
@@ -143,34 +143,28 @@ class SunOl {
     let E_PV_Total_Scaled_DC =  // J
       Reference_PV_plant_power_at_inverter_inlet_DC.map {
         $0 * PV_DC_Cap / Ref_PV_DC_capacity
-      }
+    }
 
     let PV_MV_power_at_transformer_outlet: [Double] = indices.map {  // K
       let r = (E_PV_Total_Scaled_DC[$0] / PV_DC_Cap)
-      return min(
-        PV_AC_Cap,
-        iff(
-          E_PV_Total_Scaled_DC[$0] / PV_DC_Cap > Ref_Inv_eff_approx_handover,
-          E_PV_Total_Scaled_DC[$0]
-            * (r ** 3 * HL_C[3] + r ** 2 * HL_C[2] + r ** 1 * HL_C[1] + HL_C[0]),
-          iff(
-            r > 0,
-            E_PV_Total_Scaled_DC[$0]
-              * (r ** 7 * LL_C[7] + r ** 6 * LL_C[6] + r ** 5 * LL_C[5] + r
-                ** 4 * LL_C[4] + r ** 3 * LL_C[3] + r ** 2 * LL_C[2] + r ** 1
-                * LL_C[1] + LL_C[0]),
-            Reference_PV_MV_power_at_transformer_outlet[$0]
-              / Ref_PV_AC_capacity * PV_AC_Cap)))
+      if E_PV_Total_Scaled_DC[$0] / PV_DC_Cap > Ref_Inv_eff_approx_handover {
+        return E_PV_Total_Scaled_DC[$0] * (r ** 3 * HL_C[3] + r ** 2 * HL_C[2] + r ** 1 * HL_C[1] + HL_C[0])
+      } else if r > 0 {
+        return E_PV_Total_Scaled_DC[$0] *
+          (r ** 7 * LL_C[7] + r ** 6 * LL_C[6] + r ** 5 * LL_C[5] + r ** 4 * LL_C[4]
+            + r ** 3 * LL_C[3] + r ** 2 * LL_C[2] + r ** 1 * LL_C[1] + LL_C[0])
+      } else {
+        return Reference_PV_MV_power_at_transformer_outlet[$0] / Ref_PV_AC_capacity * PV_AC_Cap
+      }
     }
+
+
 
     let Aux_elec_for_CSP_SF_and_PV_Plant: [Double] = indices.map {  // L
-      (i: Int) -> Double in
-      Q_solar_before_dumping[i] * CSP_aux_elec_percentage
-        + max(0, -PV_MV_power_at_transformer_outlet[i])
+      Q_solar_before_dumping[$0] * CSP_aux_elec_percentage
+        + max(0, -PV_MV_power_at_transformer_outlet[$0])
     }
 
-    let pr_met_plant_operation = Array(  // N
-      repeating: Meth_min_cap_perc, count: indices.count)
     let zeroes = Array(repeating: 0.0, count: indices.count)
 
     var pr_EY_Meth_heat_consumption = zeroes
@@ -294,8 +288,8 @@ class SunOl {
                 - pr_EY_Meth_heat_consumption[i], 0)),
           EY_nominal_heat_input + Meth_nominal_heat_cons
             * pr_met_plant_operation[i]))
-
-      pr_EY_Meth_el_consumption[i] = max(
+// 34.26
+      pr_EY_Meth_el_consumption[i] = max( // Q
         0,
         min(
           iff(
@@ -320,7 +314,12 @@ class SunOl {
           EY_Nominal_gross_elec_input + Meth_nominal_aux_electr_cons
             * pr_met_plant_operation[i]))
 
-      PV_electrical_input_to_heater[i] = max(
+    }
+
+    //write(PV_MV_power_at_transformer_outlet, pr_el_boiler_op_for_EY_Meth_heat, pr_EY_Meth_el_consumption, maxLength: 30)
+
+    for i in indices.dropFirst() {
+      PV_electrical_input_to_heater[i] = max( // R
         0,
         min(
           Heater_cap,
@@ -510,7 +509,9 @@ class SunOl {
                     + Meth_nominal_aux_electr_cons / AF[i])
                     * (-N[i - 1] + N[i]))
                 : 0))))
+    }
 
+    for i in indices.dropFirst() { // AH --
       let factor =
         ((pr_PB_heat_input_based_on_avail_heat[i]
           - PB_Ratio_Heat_input_vs_output
@@ -527,7 +528,7 @@ class SunOl {
       pr_TES_discharging_aux_elec_consumption[i] =
         pr_PB_heat_input_based_on_avail_heat[i] * TES_Aux_elec_percentage
 
-      pr_Ey_op_by_PB[i] = iff(
+      pr_Ey_op_by_PB[i] = iff( // AJ
         pr_PB_heat_input_based_on_avail_heat[i] == 0, 0,
         (pr_PB_heat_input_based_on_avail_heat[i]
           - iff(
@@ -545,7 +546,7 @@ class SunOl {
             / EY_Nominal_gross_elec_input + 1 / (1 - PB_aux_cons_perc)
             / pr_PB_efficiency_excl_extraction_at_discharge_load[i]))
 
-      Check_calc_PB_heat_input_based_on_EY_operation[i] = iff(
+      Check_calc_PB_heat_input_based_on_EY_operation[i] = iff( // AK
         pr_Ey_op_by_PB[i] == 0 || pr_Ey_op_by_PB[i] < EY_min_elec_input, 0,
         (SF_TES_chrg_PV_aux_cons_not_covered_by_PV[i]
           + pr_TES_discharging_aux_elec_consumption[i] + pr_Ey_op_by_PB[i]
@@ -589,7 +590,7 @@ class SunOl {
               Meth_nominal_heat_cons * pr_met_plant_operation[i]))
           * PB_Ratio_Heat_input_vs_output)
 
-      pr_heat_request_for_aux_consumers_by_PB[i] = max(
+      pr_heat_request_for_aux_consumers_by_PB[i] = max( // AL
         0,
         iff(
           pr_Ey_op_by_PB[i] == 0
@@ -600,7 +601,7 @@ class SunOl {
               pr_EY_Meth_el_consumption[i] > 0, 0,
               pr_met_plant_operation[i] * Meth_nominal_heat_cons)))
 
-      TES_storage_level[i] = iff(
+      TES_storage_level[i] = iff(  // AM
         TES_storage_level[i - 1] + TES_total_thermal_input[i - 1]
           - TES_discharge_effective[i]
           - PB_startup_heat_consumption_effective[i] < 0.01, 0,
@@ -860,7 +861,7 @@ class SunOl {
         Elec_avail_after_EY_elec_cons[i])
 
       // Output
-      aux_boiler_capacity_avail_after_EY[i] = max(
+      aux_boiler_capacity_avail_after_EY[i] = max( // CF
         0,
         min(
           El_boiler_capacity * El_boiler_efficiency
@@ -869,7 +870,7 @@ class SunOl {
             - Elec_to_cover_EY_aux_heat_cons_covered_by_plant[i])
             * El_boiler_efficiency))
 
-      Grid_capacity_avail_after_EY[i] =
+      Grid_capacity_avail_after_EY[i] = // CG
         Grid_max_import
         - max(
           0,
@@ -883,13 +884,14 @@ class SunOl {
       Amount_of_H2_produced_MTPH[i] =
         Net_elec_to_EY[i] / EY_ElectrEnergy_per_tH2  // CI
     }
+
     let COUNT = 39
 
     var H2_storage_level_MT = zeroes
     var H2_to_met_production_calculated_MTPH = zeroes
     var H2_to_met_production_effective_MTPH = zeroes
 
-    for i in indices.dropFirst() {
+    for i in indices.dropFirst() { // CJ CK CL
       H2_storage_level_MT[i] = min(  // CJ
         H2_storage_level_MT[i - 1] + Amount_of_H2_produced_MTPH[i - 1]
           - H2_to_met_production_effective_MTPH[i - 1], H2_storage_cap)
@@ -957,6 +959,8 @@ class SunOl {
 
     }
 
+    //write(H2_storage_level_MT, H2_to_met_production_calculated_MTPH, H2_to_met_production_effective_MTPH, maxLength: 30)
+
     var H2_dumping_MTPH = zeroes
     var met_plant_start = zeroes
     var met_produced_MTPH = zeroes
@@ -985,7 +989,7 @@ class SunOl {
     var elec_dumped_due_to_grid_limit = zeroes
     var Q_Sol_and_aux_steam_dumped = zeroes
 
-    for i in indices.dropFirst() {
+    for i in indices.dropFirst() { // CM -- DM
 
       H2_dumping_MTPH[i] =  // CM
         max(
@@ -1133,10 +1137,48 @@ class SunOl {
       Q_Sol_and_aux_steam_dumped[i] =  // DM
         max(0, PB_and_SF_aux_heat_avail_after_met[i])
     }
-    print(Q_solar_before_dumping.sum)
-    print(PV_electrical_input_to_heater.sum)
-    print(Q_Sol_and_aux_steam_dumped.sum)
-    print(TES_thermal_input_by_CSP.sum)
+    //  print(Q_solar_before_dumping.sum)
+    //  print(PV_electrical_input_to_heater.sum)
+    //  print(Q_Sol_and_aux_steam_dumped.sum)
+    //  print(TES_thermal_input_by_CSP.sum)
+
+    return indices.map { i in
+      let c1 = countiff(Amount_of_H2_produced_MTPH[i...].prefix(2), { $0 == 0 })
+      let c2 = countiff(Amount_of_H2_produced_MTPH[i...].prefix(24), { $0 < Meth_min_H2_Cons })
+      let pr_met_plant_operation: Double = max(
+        min(
+          iff(
+            H2_storage_level_MT[i] + Amount_of_H2_produced_MTPH[i] < Meth_min_H2_Cons,
+            0,
+            H2_storage_level_MT[i] + Amount_of_H2_produced_MTPH[i]
+          ),
+          Meth_max_H2_Cons,
+          max(
+            H2_storage_level_MT[i] + Amount_of_H2_produced_MTPH[i] - H2_storage_cap,
+            Meth_min_H2_Cons,
+            H2_to_met_production_calculated_MTPH[i],
+            iff(
+              H2_to_met_production_calculated_MTPH[i] > 0,
+              0,
+              min(
+                (c1 > 0)
+                ? ((H2_storage_level_MT[i] + Amount_of_H2_produced_MTPH[i]) / (c1 * Meth_min_H2_Cons))
+                : iff(
+                    H2_storage_level_MT[i] < 10 * Meth_min_H2_Cons,
+                    average(Amount_of_H2_produced_MTPH[i...].prefix(2)),
+                    Meth_max_H2_Cons)
+                ,
+                (c2 > 0)
+                ? (H2_storage_level_MT[i] + Amount_of_H2_produced_MTPH[i]) / (c2)
+                : average(Amount_of_H2_produced_MTPH[i...].prefix(24))
+              )
+            )
+          )
+        ) / Meth_max_H2_Cons,
+        Meth_max_H2_Cons, met_produced_MTPH[i] / Meth_nominal_hourly_prod_cap
+      )
+      return pr_met_plant_operation
+    }
   }
 }
 
@@ -1156,8 +1198,11 @@ func main() {
   calc.El_boiler_capacity = 60
   calc.Grid_max_export = 70
   */
-  calc()
-
+for _ in 1...10 {
+    let r1 = calc(pr_met_plant_operation: Array(repeating: 0.5, count: 8761))
+    let r2 = calc(pr_met_plant_operation: r1)
+    let r3 = calc(pr_met_plant_operation: r2)
+}
 }
 
 main()

@@ -22,8 +22,19 @@ extension Double {
   }
 }
 
+func write(_ xs: [Double]..., maxLength: Int = Int.max) {
+  let count = min(xs.reduce(0) { max($0, $1.count) }, maxLength)
+  let places = "\(count)".count - 1
+  print("")
+  for i in 0..<count {
+    print(xs.reduce(String(format: "%0\(places)d   ", i)) {
+      $0 + String(format: "%3.1f\t", $1[i])
+    })
+  }
+}
+
 extension Sequence where Element == Double {
-  func show(_ count: Int? = nil) {
+  func write(_ count: Int? = nil) {
     if let count = count {
       zip(0..., self.prefix(count)).forEach { Swift.print($0, $1.asString()) }
     } else {
