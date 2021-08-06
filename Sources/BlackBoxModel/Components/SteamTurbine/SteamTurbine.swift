@@ -15,7 +15,7 @@ import PhysicalQuantities
 public struct SteamTurbine: Parameterizable {
   
   /// Returns the operating state
-  var operationMode: OperationMode
+  var operationMode: OperationMode
   /// Returns the load applied
   var load: Ratio {
     get { 

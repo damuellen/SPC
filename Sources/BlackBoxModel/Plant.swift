@@ -84,7 +84,7 @@ public struct Plant {
     }
 
     let minLoad = SteamTurbine.minLoad(ambient: ambient)
-    let minPower = SteamTurbine.minPower(ambient: ambient) 
+    let minPower = SteamTurbine.minPower(ambient: ambient)
 
     var deviation: Double
     var parasiticsAssumed = electricity.estimateDemand()
@@ -134,7 +134,7 @@ public struct Plant {
       )
 
       if Design.hasStorage {
-        // Heat flow rate of storage        
+        // Heat flow rate of storage
         heatFlow = Storage.demandStrategy(
           storage: status.storage,
           powerBlock: &status.powerBlock,
@@ -149,7 +149,7 @@ public struct Plant {
         solarField: status.solarField,
         Availability.fuel
       )
-    
+
       if case .freezeProtection = status.heater.operationMode {
         status.powerBlock.outletTemperature(outlet: status.heater)
       }
@@ -220,7 +220,7 @@ public struct Plant {
       parasiticsAssumed = electricity.parasitics
       assert(step < 4, "Too many iterations")
       if heatFlow.production.isZero { break }
-    } while deviation > Simulation.parameter.electricalTolerance * factor   
+    } while deviation > Simulation.parameter.electricalTolerance * factor
   }
 
   private mutating func checkForFreezeProtection(
@@ -265,7 +265,7 @@ public struct Plant {
 
   private mutating func powerBlockTemperature(
    _ status: inout Status, ambient: Temperature
-  ) {    
+  ) {
     let fuel = Availability.fuel
     let tolerance = Simulation.parameter.tempTolerance
 
@@ -273,7 +273,7 @@ public struct Plant {
       if Design.hasStorage {
         // Demand for operation of the storage
         heatFlow.toStorage = status.storage.chargeOrDischarge(heatFlow.storage)
-        
+
         storageMode(&status, fuelAvailable: fuel)
 
         let parasitics: Power
@@ -296,16 +296,16 @@ public struct Plant {
           case (_, .discharge):
             status.powerBlock.massFlow(outlet: status.storage)
           case (_, .charge):
-            status.powerBlock.massFlow = 
-              status.solarField.massFlow - status.storage.massFlow 
-          case (_, _): break         
+            status.powerBlock.massFlow =
+              status.solarField.massFlow - status.storage.massFlow
+          case (_, _): break
         }
 
         status.powerBlock.massFlow.adjust(factor:
           Storage.parameter.heatExchangerEfficiency
         )
         // recalculate thermal power given by TES
-        status.storage.recalculate(&heatFlow.storage)        
+        status.storage.recalculate(&heatFlow.storage)
       }
 
       if Design.hasHeater {
@@ -332,7 +332,7 @@ public struct Plant {
 
         break Iteration
       }
-      
+
       status.heatExchanger.massFlow(inlet: status.powerBlock)
 
       heatFlow.heatExchanger.megaWatt = status.heatExchanger(
@@ -425,7 +425,7 @@ public struct Plant {
     _ fuel: Double
   ) {
     if Design.hasStorage {
-      
+
       if heatFlow.balance < .zero,
         storage.relativeCharge < Storage.parameter.dischargeToTurbine,
         storage.relativeCharge > Storage.parameter.dischargeToHeater
@@ -482,9 +482,9 @@ public struct Plant {
         storage.relativeCharge < Storage.parameter.dischargeToHeater
       {
       //  heatDiff =
-          (heatFlow.production + heatFlow.wasteHeatRecovery).megaWatt
-          / HeatExchanger.parameter.efficiency
-          - GridDemand.current.ratio * heatFlow.demand.megaWatt
+       //   (heatFlow.production + heatFlow.wasteHeatRecovery).megaWatt
+      //    / HeatExchanger.parameter.efficiency
+      //    - GridDemand.current.ratio * heatFlow.demand.megaWatt
         // added to avoid heater use is storage is selected and checkbox marked:
         if heatFlow.production.isZero, Heater.parameter.onlyWithSolarField {
           // use heater only in parallel with solar field and not as stand alone.
@@ -509,8 +509,8 @@ public struct Plant {
 
     } else {
    //   heatDiff =
-        (heatFlow.production + heatFlow.wasteHeatRecovery).megaWatt
-        / HeatExchanger.parameter.efficiency - heatFlow.demand.megaWatt
+     //   (heatFlow.production + heatFlow.wasteHeatRecovery).megaWatt
+     //   / HeatExchanger.parameter.efficiency - heatFlow.demand.megaWatt
 
       if heatFlow.production.watt == 0 {
         // use heater only in parallel with solar field and not as stand alone.
@@ -574,7 +574,7 @@ public struct Plant {
     if heatFlow.heater.megaWatt == Design.layout.heater {
       Qsf_load = 0.769
     } else {
-      Qsf_load = heatFlow.production.megaWatt 
+      Qsf_load = heatFlow.production.megaWatt
       / (Design.layout.heatExchanger / efficiency)
     }
 
@@ -600,7 +600,7 @@ public struct Plant {
     }
   }
 
-  mutating func storageMode(_ status: inout Status, fuelAvailable: Double) {    
+  mutating func storageMode(_ status: inout Status, fuelAvailable: Double) {
     let parameter = Storage.parameter
     let summerMonths = Storage.parameter.exception
     let time = DateTime.current
@@ -629,11 +629,11 @@ public struct Plant {
       )
 
       add(heater: performance)
-      
+
       status.powerBlock.massFlow = status.heater.massFlow
 
       status.storage.operationMode = .freezeProtection
-    } 
+    }
 
     if status.solarField.operationMode.isFreezeProtection,
       status.storage.relativeCharge > 0.35, parameter.FP == 0
@@ -642,12 +642,12 @@ public struct Plant {
     }
 
     if case .charge = status.storage.operationMode,
-      status.solarField.massFlow < status.powerBlock.designMassFlow 
+      status.solarField.massFlow < status.powerBlock.designMassFlow
     {
       status.storage.operationMode = .noOperation
-    } 
+    }
 
-    if case .discharge = status.storage.operationMode, 
+    if case .discharge = status.storage.operationMode,
       -heatFlow.storage.megaWatt < 1 * parameter.heatdiff * heatFlow.demand.megaWatt
     {
       status.storage.operationMode = .noOperation
@@ -656,12 +656,12 @@ public struct Plant {
     if case .discharge = status.storage.operationMode {
       // check when to discharge TES
       if case .shifter = parameter.strategy {
-        if (summerMonths.contains(time.month) 
+        if (summerMonths.contains(time.month)
           && time.hour < parameter.dischargeSummer)
-          || time.hour < parameter.dischargeWinter { 
+          || time.hour < parameter.dischargeWinter {
           status.storage.operationMode = .noOperation
         }
-      } 
+      }
     }
     // check why to circulate HTF in SF
     //#warning("Storage.parasitics")

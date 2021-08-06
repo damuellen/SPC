@@ -21,7 +21,7 @@ public struct Heater: Parameterizable, HeatTransfer {
   var temperature: (inlet: Temperature, outlet: Temperature)
 
   /// Returns the operating state
-  var operationMode: OperationMode
+  var operationMode: OperationMode
 
   public enum OperationMode {
     case normal(Ratio)
