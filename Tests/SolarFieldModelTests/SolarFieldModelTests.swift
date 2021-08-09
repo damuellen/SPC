@@ -5,7 +5,7 @@ import Foundation
 
 class SolarFieldModelTests: XCTestCase {
   func testsLayouts() {
-    let h = SolarField.createLayout(loops: 100, layout: .h)
+    let h = SolarField.create(layout: .h, loops: 100)
     h.massFlow = 666
     XCTAssertEqual(h.totalPressureDrop, 10.6, accuracy: 0.1)
     XCTAssertEqual(h.totalHeadLoss, 144.4, accuracy: 0.1)
@@ -13,7 +13,7 @@ class SolarFieldModelTests: XCTestCase {
     XCTAssertEqual(h.volumeHotHeaders, 213.6, accuracy: 0.1)
     XCTAssertEqual(h.volumeColdHeaders, 204.9, accuracy: 0.1)
 
-    let i = SolarField.createLayout(loops: 60, layout: .i)
+    let i = SolarField.create(layout: .i, loops: 60)
     i.massFlow = 444
     XCTAssertEqual(i.totalPressureDrop, 11.56, accuracy: 0.1)
     XCTAssertEqual(i.totalHeadLoss, 156.54, accuracy: 0.1)
