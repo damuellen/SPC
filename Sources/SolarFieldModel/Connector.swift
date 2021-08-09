@@ -11,9 +11,6 @@
 public class Connector: Piping, Identifiable {
 
   public var name: String = "Header"
-
-  unowned var start: Piping
-
   public var distance: Double = 0.0 {
     didSet { solarField.recalculation() }
   }
@@ -32,25 +29,17 @@ public class Connector: Piping, Identifiable {
 
   public init(solarField: SolarField) {
     self.solarField = solarField
-    self.start = solarField.powerBlock
   }
 
   public init(with fields: [SubField], solarField: SolarField) {
     self.solarField = solarField
-    self.start = solarField.powerBlock
     fields.forEach { $0.connection = self }
     fields.forEach { $0.solarField = solarField }
     self.distance = fields.map {  $0.loopExemplar.distance }.max() ?? 1
     connections = fields
   }
 
-  public func connected(with fields: SubField...) {
-    fields.forEach { $0.connection = self }
-    connections = fields
-  }
-
   public func connected(to other: Connector) {
-    start = other
     other.successor = self
   }
 
