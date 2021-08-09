@@ -43,11 +43,11 @@ public final class SubField: Piping {
   public var lhsLoops: Int 
   public var rhsLoops: Int
 
-  var loopsCount: Int { return lhsLoops + rhsLoops }
-  var maxLoops: Int { return max(lhsLoops, rhsLoops) }
+  var loopsCount: Int { lhsLoops + rhsLoops }
+  var maxLoops: Int { max(lhsLoops, rhsLoops) }
 
   var loopsBefore: Int {
-    return ((head as? SubField)?.loopsBefore ?? 0)
+    ((head as? SubField)?.loopsBefore ?? 0)
       + ((head as? SubField)?.maxLoops ?? 0)
   }
 
