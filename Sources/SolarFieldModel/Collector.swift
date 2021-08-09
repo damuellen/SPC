@@ -44,7 +44,7 @@ struct Collector {
 
   var volume: Double { crossSectionArea * Double(length) }
 
-  var designMassFlow: Double { subField.solarField.massFlowPerLoop }
+  var designMassFlow: Double { subField.solarField?.massFlowPerLoop ?? 0 }
 
   var massFlow: Double { designMassFlow * scaleMassFlow }
 

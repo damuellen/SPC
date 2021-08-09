@@ -37,7 +37,7 @@ struct SolarFieldCalculator: ParsableCommand {
     }
 
     guard let loops = loops else { return }
-    let solarField = SolarField.createLayout(loops: loops)
+    let solarField = SolarField.create(loops: loops)
 
     if let massflow = massflow {
       solarField.massFlow = massflow

@@ -7,7 +7,8 @@
 //
 
 /// Connects the subfields of the solar field to each other and to the power block.
-public class Connector: Piping {
+@resultBuilder
+public class Connector: Piping, Identifiable {
 
   public var name: String = "Header"
 
@@ -38,6 +39,7 @@ public class Connector: Piping {
     self.solarField = solarField
     self.start = solarField.powerBlock
     fields.forEach { $0.connection = self }
+    fields.forEach { $0.solarField = solarField }
     self.distance = fields.map {  $0.loopExemplar.distance }.max() ?? 1
     connections = fields
   }
@@ -50,6 +52,14 @@ public class Connector: Piping {
   public func connected(to other: Connector) {
     start = other
     other.successor = self
+  }
+
+  public static func buildBlock(_ lhs: SubField, _ rhs: SubField) -> [SubField] {
+    return [lhs, rhs]
+  }
+
+  public static func buildBlock(_ field: SubField) -> [SubField] {
+    return [field]
   }
 
   public func scaleMassFlow(percentage: Double) {

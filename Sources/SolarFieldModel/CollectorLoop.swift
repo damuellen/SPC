@@ -18,9 +18,7 @@ public class CollectorLoop {
     self.subField = subField
   }
 
-  var solarField: SolarField {
-    subField.solarField
-  }
+  var solarField: SolarField { subField.solarField! }
 
   public func scaleMassFlow(percentage: Double) {
     guard case 1 ... 100 = percentage else { return }

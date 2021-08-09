@@ -12,45 +12,36 @@ public final class SubField: Piping {
 
   public var loopExemplar: CollectorLoop!
 
-  unowned let solarField: SolarField
+  weak var solarField: SolarField? 
 
-  weak var connection: Piping? {
-    didSet { solarField.recalculation() }
-  }
+  weak var connection: Piping? 
 
-  var successor: SubField? {
-    didSet { solarField.recalculation() }
-  }
+  var successor: SubField?
 
   var tail: (cold: Branch, hot: Branch)!
 
   var rowDistance: Double {
-    return adaptedRowDistance ?? solarField.rowDistance
+    adaptedRowDistance ?? (solarField?.rowDistance ?? 18)
   }
 
   public var adaptedRowDistance: Double? {
-    didSet { solarField.recalculation() }
+    didSet { solarField?.recalculation() }
   }
 
   var streamVelocity: Double {
-    adaptedStreamVelocity ?? solarField.designStreamVelocity
+    adaptedStreamVelocity ?? (solarField?.designStreamVelocity ?? 3.5)
   }
 
   public var adaptedStreamVelocity: Double? {
-    didSet { solarField.recalculation() }
+    didSet { solarField?.recalculation() }
   }
 
   public var distance: Double = 0 {
-    didSet { solarField.recalculation() }
+    didSet { solarField?.recalculation() }
   }
 
-  public var lhsLoops: Int {
-    didSet { solarField.recalculation() }
-  }
-
-  public var rhsLoops: Int {
-    didSet { solarField.recalculation() }
-  }
+  public var lhsLoops: Int 
+  public var rhsLoops: Int
 
   var loopsCount: Int { return lhsLoops + rhsLoops }
   var maxLoops: Int { return max(lhsLoops, rhsLoops) }
@@ -60,10 +51,15 @@ public final class SubField: Piping {
       + ((connection as? SubField)?.maxLoops ?? 0)
   }
 
-  public init(name: String, lhs: Int = 0, rhs: Int = 0,
-              solarField: SolarField) {
-    self.solarField = solarField            
+  public init(name: String, lhs: Int = 0, rhs: Int = 0) {     
     self.name = name
+    self.lhsLoops = lhs
+    self.rhsLoops = rhs
+    self.loopExemplar = CollectorLoop(subField: self)
+  }
+
+  public init(lhs: Int, rhs: Int) {     
+    self.name = "SubField " + SubField.numberPool.removeLast().description
     self.lhsLoops = lhs
     self.rhsLoops = rhs
     self.loopExemplar = CollectorLoop(subField: self)
@@ -71,21 +67,32 @@ public final class SubField: Piping {
 
   static var numberPool: [Int] = Array(1...100).shuffled()
   
-  public init(loops: Int, solarField: SolarField) {
-    self.solarField = solarField
+  public init(loops: Int) {
     self.name = "SubField " + SubField.numberPool.removeLast().description
     self.lhsLoops = (loops / 2) + (loops % 2)
     self.rhsLoops = loops / 2
     self.loopExemplar = CollectorLoop(subField: self)
   }
 
-  @discardableResult
-  public func attach(to other: SubField) -> SubField {
-    if self.solarField === other.solarField {
-      other.successor = self
-      self.connection = other
+  func isAttached(to other: SubField) -> Bool {
+    connection === other
+  }
+
+  public static func loops(lhs: Int..., rhs: Int...) -> SubField {
+    var lhs = lhs
+    var rhs = rhs
+    let diff = lhs.count - rhs.count
+    if diff > 0 {
+      rhs += repeatElement(0, count: diff)
+    } else if diff < 0 {
+      lhs += repeatElement(0, count: abs(diff))
     }
-    return self
+    let chain = zip(lhs, rhs).map(SubField.init) 
+    chain.indices.dropFirst().forEach { i in 
+      chain[i-1].successor = chain[i]
+      chain[i].connection = chain[i-1]
+    }
+    return chain[0]
   }
 
   public func scaleMassFlow(percentage: Double) {
@@ -120,7 +127,7 @@ public final class SubField: Piping {
     return result
   }
 
-  var massFlowPerLoop: Double { solarField.massFlowPerLoop }
+  var massFlowPerLoop: Double { solarField?.massFlowPerLoop ?? 0 }
 
   var massFlow: Double {
     var result = Double(totalLoops) * massFlowPerLoop
@@ -239,4 +246,3 @@ public final class SubField: Piping {
       return (cold, hot)
   }
 }
-

@@ -44,32 +44,21 @@ public final class SolarField {
     self.expansionVolume = ExpansionVolume(solarField: self)
   }
 
-  public func connect(between subFields: SubField...) -> Connector {    
-    var allConnectors = [Connector]()
-    func another(connector: Connector) {
-      allConnectors.append(connector)
-      if let next = connector.successor {
-        another(connector: next)
-      }
-    }
-
-   connectors.append(Connector(with: subFields, solarField: self))
-   return connectors.last!
-  }
-
-  public func callAsFunction(name: String, lhs: Int = 0, rhs: Int = 0) -> SubField {
-    SubField(name: name, lhs: lhs, rhs: rhs, solarField: self)
+  public func callAsFunction(@Connector fields: () -> [SubField]) -> Connector {
+    connectors.append(Connector(with: fields(), solarField: self))
+    return connectors.last!
   }
 
   public func recalculation() {
     subfields = connectors.flatMap { $0.connections }
     func another(subField: SubField) {
       if let next = subField.successor {
+        next.solarField = self
         subfields.append(next)
         another(subField: next)
       }
     }
-    subfields.forEach { another(subField: $0) }    
+    subfields.forEach { another(subField: $0) }
     connectors.forEach { $0.recalculation() }
     subfields.forEach { $0.recalculation() }
     powerBlock.recalculation()
@@ -169,17 +158,33 @@ public final class SolarField {
 extension Array where Element == Connector {
 
   func total(_ keyPath: KeyPath<Connector, Double>) -> Double {
-    return map { $0[keyPath: keyPath] }.reduce(0.0, +)
+    return map { $0[keyPath: keyPath] }.sum()
   }
 }
 
 extension Array where Element == SubField {
 
   func total(_ keyPath: KeyPath<SubField, Double>) -> Double {
-    map { $0[keyPath: keyPath] }.reduce(0.0, +)
+    map { $0[keyPath: keyPath] }.sum()
   }
 
   func sum(_ keyPath: KeyPath<SubField, Int>) -> Int {
     map { $0[keyPath: keyPath] }.reduce(0, +)
+  }
+}
+
+
+extension Sequence where Element: FloatingPoint {
+  func sum() -> Element {
+    var result: Element = 0
+    var excess: Element = 0
+
+    for x in self {
+      let large = Element.maximumMagnitude(result, x)
+      let small = Element.minimumMagnitude(result, x)
+      result += x
+      excess += (result - large) - small
+    }
+    return result - excess
   }
 }
