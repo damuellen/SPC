@@ -14,7 +14,7 @@ public final class SubField: Piping {
 
   weak var solarField: SolarField? 
 
-  weak var connection: Piping? 
+  weak var head: Piping? 
 
   var successor: SubField?
 
@@ -47,8 +47,8 @@ public final class SubField: Piping {
   var maxLoops: Int { return max(lhsLoops, rhsLoops) }
 
   var loopsBefore: Int {
-    return ((connection as? SubField)?.loopsBefore ?? 0)
-      + ((connection as? SubField)?.maxLoops ?? 0)
+    return ((head as? SubField)?.loopsBefore ?? 0)
+      + ((head as? SubField)?.maxLoops ?? 0)
   }
 
   public init(name: String, lhs: Int = 0, rhs: Int = 0) {     
@@ -75,7 +75,7 @@ public final class SubField: Piping {
   }
 
   func isAttached(to other: SubField) -> Bool {
-    connection === other
+    head === other
   }
 
   public static func loops(lhs: Int..., rhs: Int...) -> SubField {
@@ -90,7 +90,7 @@ public final class SubField: Piping {
     let chain = zip(lhs, rhs).map(SubField.init) 
     chain.indices.dropFirst().forEach { i in 
       chain[i-1].successor = chain[i]
-      chain[i].connection = chain[i-1]
+      chain[i].head = chain[i-1]
     }
     return chain[0]
   }
@@ -158,7 +158,7 @@ public final class SubField: Piping {
     if !_branches.isEmpty { return _branches }
     _branches.reserveCapacity(maxLoops * 2)
 
-    guard let start = connection else { return [] }
+    guard let start = head else { return [] }
 
     var massFlow = self.massFlow
 
@@ -237,7 +237,7 @@ public final class SubField: Piping {
       hot.name = name + " hot header loop \(loop)"
 
       hot.length = loop == 1
-        ? (connection is SubField ? cold.length : rowDistance) + distance
+        ? (head is SubField ? cold.length : rowDistance) + distance
         : cold.length
 
       if lhsLoops >= loop { massFlow -= massFlowPerLoop }
