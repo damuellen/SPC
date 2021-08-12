@@ -33,7 +33,7 @@ public class Connector: Piping, Identifiable {
 
   public init(with fields: [SubField], solarField: SolarField) {
     self.solarField = solarField
-    fields.forEach { $0.connection = self }
+    fields.forEach { $0.head = self }
     fields.forEach { $0.solarField = solarField }
     self.distance = fields.map {  $0.loopExemplar.distance }.max() ?? 1
     connections = fields
