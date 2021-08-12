@@ -56,6 +56,7 @@ public final class Gnuplot {
       let data = stdout.fileHandleForReading.readDataToEndOfFile()
       return String(decoding: data, as: Unicode.UTF8.self)
     }
+    // try! code.write(toFile: "/workspaces/SPC/plt", atomically: false, encoding: .utf8)
     return code
   }
 
@@ -113,7 +114,7 @@ public final class Gnuplot {
     """
   }
 
-  public init<T: FloatingPoint>(xys: [(T, T)]..., titles: String...) {
+  public init<T: FloatingPoint>(xys: [(T, T)]..., titles: String..., smooth: Bool = false) {
     let missingTitles = xys.count - titles.count
     var titles = titles
     if missingTitles > 0 {
@@ -125,15 +126,15 @@ public final class Gnuplot {
 
     self.datablock = "\n$data <<EOD\n"
     + data.joined(separator: "\n\n\n") + "\n\n\nEOD\n"
-
+    let s = smooth ? "smooth csplines" : ""
+    let l = smooth ? "l" : "lp"
     self.plot = "\nplot " + xys.indices.map { i in
-      "$data i \(i) u 1:2 w lp ls \(i+11) title columnheader(1)"
+      "$data i \(i) u 1:2 \(s) w \(l) ls \(i+11) title columnheader(1)"
     }.joined(separator: ", ") + "\n"
   }
 
   public init<T: FloatingPoint>(
-    xy1s: [(T, T)]..., xy2s: [(T, T)]..., titles: String...
-  ) {
+    xy1s: [(T, T)]..., xy2s: [(T, T)]..., titles: String..., smooth: Bool = false) {
     let missingTitles = xy1s.count + xy2s.count - titles.count
     var titles = titles
     if missingTitles > 0 {
@@ -150,13 +151,15 @@ public final class Gnuplot {
     self.datablock = "\n$data <<EOD\n"
       + y1.joined(separator: "\n\n\n") + "\n\n\n"
       + y2.joined(separator: "\n\n\n") + "\n\n\nEOD\n"
-
+    let s = smooth ? "smooth csplines" : ""
+    let l = smooth ? "l" : "lp"
+    let t = "title columnheader(1)"
     self.plot = "\nset ytics nomirror\nset y2tics\nplot "
       + xy1s.indices.map { i in
-        "$data i \(i) u 1:2 axes x1y1 w lp ls \(i+11) title columnheader(1)"
+        "$data i \(i) u 1:2 \(s) axes x1y1 w \(l) ls \(i+11) \(t)"
       }.joined(separator: ", ") + ", "
       + xy2s.indices.map { i in let n = i + xy1s.endIndex
-        return "$data i \(n) u 1:2 axes x1y2 w lp ls \(i+21) title columnheader(1)"
+        return "$data i \(n) u 1:2 \(s) axes x1y2 w \(l) ls \(i+21) \(t)"
       }.joined(separator: ", ") + "\n"
   }
 
@@ -172,6 +175,7 @@ public final class Gnuplot {
       #else
       let font = "font 'Arial,"
       #endif
+
       switch self {
       case .svg: return "set term svg size 1280,800;set output\n"
       case .pdf(let path):
