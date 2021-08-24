@@ -107,8 +107,8 @@ struct DataFile {
     guard let firstNewLine = rawData.firstIndex(of: newLine)
       else { return nil }
 
-    guard let firstSeparator = rawData.firstIndex(of: separator)
-      else { return nil }
+    let firstSeparator = rawData.firstIndex(of: separator) ?? 0
+
     guard firstSeparator < firstNewLine
       else { return nil }
 
@@ -270,9 +270,9 @@ struct Results {
     var c = 0
     zip(rows, results.dropFirst()).forEach {
       let value = $0[key]!
-      if abs(value - $1) > 0.1 {
+      if abs(value - $1) > 0.2 {
         isCorrect = false      
-        if c < 3 {
+        if c < 5 {
           print("Row \(r)", "set: ", $0[key]!.asString(), " is: ", $1.asString(), to: &out)
         } 
         c += 1
@@ -282,8 +282,8 @@ struct Results {
     if isCorrect {
       print("No mismatch in column \(key)")
     } else {
-      if c > 3 {
-        print("\(c - 3) other errors", to: &out)
+      if c > 5 {
+        print("\(c - 5) other errors", to: &out)
       }
       print(out)
     }
