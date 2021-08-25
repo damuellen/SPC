@@ -113,8 +113,13 @@ public final class Gnuplot {
       $data i 5 u 1:2:(sprintf("%d°C", $2)) with labels tc ls 18 offset char 3,0 notitle\n
     """
   }
+  public convenience init<T: FloatingPoint>(
+    xs: [T]..., ys: [T]..., titles: String..., smooth: Bool = false) 
+  {
+    self.init(xys: zip(xs, ys).map { a, b in zip(a, b).map { ($0, $1) } }, titles: titles, smooth: smooth)
+  }
 
-  public init<T: FloatingPoint>(xys: [(T, T)]..., titles: String..., smooth: Bool = false) {
+  public init<T: FloatingPoint>(xys: [[(T, T)]], titles: [String], smooth: Bool = false) {
     let missingTitles = xys.count - titles.count
     var titles = titles
     if missingTitles > 0 {
