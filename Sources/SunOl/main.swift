@@ -1,10 +1,21 @@
 import BlackBoxModel
 import Foundation
 import PhysicalQuantities
-import PythonKit
+import Helpers
 import xlsxwriter
 
 struct SunOl {
+
+  var PV_elec_avail_after_eHeater_sum: Double = 0
+  var PV_electrical_input_to_heater_sum: Double = 0
+  var Q_solar_before_dumping_sum: Double = 0
+  var TES_total_thermal_input_sum: Double = 0
+  var Q_solar_avail_sum: Double = 0
+  var Gross_elec_from_PB_sum: Double = 0
+  var Aux_steam_provided_by_PB_SF_sum: Double = 0
+  var Elec_from_grid_sum: Double = 0
+  var H2_to_meth_production_effective_MTPH_sum: Double = 0
+  var Amount_of_H2_produced_MTPH: [Double] = []
   var CSP_Loop_Nr = 113.0
   var PV_AC_Cap = 613.0
   var PV_DC_Cap = 818.0
@@ -89,7 +100,6 @@ struct SunOl {
       Reference_PV_MV_power_at_transformer_outlet.append(Double(data[2]))
     }
   }
- 
   mutating func callAsFunction(pr_meth_plant_op: [Double]) -> [Double] {
     let PB_nominal_heat_input = PB_Nominal_Gross_cap / PB_Nominal_Gross_eff
 
@@ -124,14 +134,14 @@ struct SunOl {
 
     let E_PV_Total_Scaled_DC =  // J
       Reference_PV_plant_power_at_inverter_inlet_DC.map { $0 * PV_DC_Cap / Ref_PV_DC_cap }
-    let test = E_PV_Total_Scaled_DC.prefix(200)
+    //  let test = E_PV_Total_Scaled_DC.prefix(200)
 
-    var chunked = E_PV_Total_Scaled_DC.chunked { !($0 == 0 && $1 > 0) }
-    let s = chunked.removeFirst()
-    chunked[chunked.endIndex - 1].append(contentsOf: s)
+    //  var chunked = E_PV_Total_Scaled_DC.chunked { !($0 == 0 && $1 > 0) }
+    //  let s = chunked.removeFirst()
+    //   chunked[chunked.endIndex - 1].append(contentsOf: s)
 
-    let sumOfDay = chunked.map(sum)
-    let dayNight = chunked.map { ($0.count, $0.endIndex - $0.firstIndex(of: 0)!) }
+    //  let sumOfDay = chunked.map(sum)
+    // let dayNight = chunked.map { ($0.count, $0.endIndex - $0.firstIndex(of: 0)!) }
 
     let PV_MV_power_at_transformer_outlet: [Double] = indices.map {  // K
 
@@ -678,7 +688,7 @@ struct SunOl {
     var aux_boiler_cap_avail_after_EY = zeroes  // CF
     var Grid_cap_avail_after_EY = zeroes  // CG
     var Elec_avail_after_total_EY = zeroes  // CH
-    var Amount_of_H2_produced_MTPH = zeroes
+    Amount_of_H2_produced_MTPH = zeroes
 
     for i in indices.dropFirst() {
       Elec_to_cover_EY_aux_heat_cons_covered_by_plant[i] = min(  // CE
@@ -1056,40 +1066,22 @@ struct SunOl {
     results.compare(Q_Sol_aux_steam_dumped, with: "DM")
     #endif
 
-    let PV_elec_avail_after_eHeater_sum = PV_elec_avail_after_eHeater.sum
-    let PV_electrical_input_to_heater_sum = PV_electrical_input_to_heater.sum
-    let Q_solar_before_dumping_sum = Q_solar_before_dumping.sum
-    let TES_total_thermal_input_sum = TES_total_thermal_input.sum
-    let Q_solar_avail_sum = Q_solar_avail.sum
-    let Gross_elec_from_PB_sum = Gross_elec_from_PB.sum
-    let Aux_steam_provided_by_PB_SF_sum = Aux_steam_provided_by_PB_SF.sum
-    let Elec_from_grid_sum = Elec_from_grid.sum
-
-    return indices.map { i in let c1 = countiff(Amount_of_H2_produced_MTPH[i...].prefix(2), { $0 == 0 })
-      let c2 = countiff(Amount_of_H2_produced_MTPH[i...].prefix(24), { $0 < Meth_min_H2_Cons })
-      let pr_meth_plant_op: Double = max(
-        min(
-          iff(H2_storage_level_MT[i] + Amount_of_H2_produced_MTPH[i] < Meth_min_H2_Cons, 0, H2_storage_level_MT[i] + Amount_of_H2_produced_MTPH[i]),
-          Meth_max_H2_Cons,
-          max(
-            H2_storage_level_MT[i] + Amount_of_H2_produced_MTPH[i] - H2_storage_cap, Meth_min_H2_Cons, H2_to_meth_production_calculated_MTPH[i],
-            iff(
-              H2_to_meth_production_calculated_MTPH[i] > 0, 0,
-              min(
-                (c1 > 0)
-                  ? ((H2_storage_level_MT[i] + Amount_of_H2_produced_MTPH[i]) / (c1 * Meth_min_H2_Cons))
-                  : iff(H2_storage_level_MT[i] < 10 * Meth_min_H2_Cons, average(Amount_of_H2_produced_MTPH[i...].prefix(2)), Meth_max_H2_Cons),
-                (c2 > 0) ? (H2_storage_level_MT[i] + Amount_of_H2_produced_MTPH[i]) / (c2) : average(Amount_of_H2_produced_MTPH[i...].prefix(24))))))
-          / Meth_max_H2_Cons, Meth_max_H2_Cons, meth_produced_MTPH[i] / Meth_nominal_hourly_prod_cap)
-      return pr_meth_plant_op
-    }
+    PV_elec_avail_after_eHeater_sum = PV_elec_avail_after_eHeater.sum
+    PV_electrical_input_to_heater_sum = PV_electrical_input_to_heater.sum
+    Q_solar_before_dumping_sum = Q_solar_before_dumping.sum
+    TES_total_thermal_input_sum = TES_total_thermal_input.sum
+    Q_solar_avail_sum = Q_solar_avail.sum
+    Gross_elec_from_PB_sum = Gross_elec_from_PB.sum
+    Aux_steam_provided_by_PB_SF_sum = Aux_steam_provided_by_PB_SF.sum
+    Elec_from_grid_sum = Elec_from_grid.sum
+    H2_to_meth_production_effective_MTPH_sum = H2_to_meth_production_effective_MTPH.sum
+    return indices.map { i in meth_produced_MTPH[i] / Meth_nominal_hourly_prod_cap }
   }
 }
 
 func main() {
 
   var calc = SunOl()
-
   /*
     calc.CSP_Loop_Nr = 114 + (Double(i) * 2)
     calc.PV_DC_Cap = 800
@@ -1104,11 +1096,46 @@ func main() {
     calc.El_boiler_cap = 60
     calc.Grid_max_export = 70
 */
-  for i in 1...10 {
-    let r1 = calc(pr_meth_plant_op: Array(repeating: 0.5, count: 8760))  //
+    let r1 = calc(pr_meth_plant_op: Array(repeating: 0.5, count: 8760))
     let r2 = calc(pr_meth_plant_op: r1)
     let r3 = calc(pr_meth_plant_op: r2)
-  }
+
+  let x1 = [1.0, 0.793, 0.586, 0.354, 0.172]
+  let y1 = [1.0, 0.985, 0.959, 0.889, 0.725]
+
+  let x2 = Array(stride(from: 0.2, through: 1, by: 0.1))
+
+  do {
+    let polynomial = Polynomial(x: x1, y: y1, degree: 5)
+    let y2 = x2.map(polynomial.callAsFunction)
+    let p1 = Gnuplot(xs: x1, x2, ys: y1, y2)
+    try p1.plot(.png(path: "testPolyFit5.png"))
+    let p2 = Gnuplot(xy1s: zip(x2,y2).tuples)
+    try p2.plot(.pngSmall(path: "testPolyFit51.png"))
+  } catch {}
+
+  do {
+    let polynomial = Polynomial(x: x1, y: y1, degree: 6)
+    let y2 = x2.map(polynomial.callAsFunction)
+    let plot = Gnuplot(xs: x1, x2, ys: y1, y2)
+    try plot.plot(.png(path: "testPolyFit6.png"))
+  } catch {}
+
+  do {
+    let polynomial = Polynomial(x: x1, y: y1, degree: 3)
+    let y2 = x2.map(polynomial.callAsFunction)
+    let plot = Gnuplot(xs: x1, x2, ys: y1, y2)
+    try plot.plot(.png(path: "testPolyFit3.png"))
+  } catch {}
+
+  do {
+    let polynomial = Polynomial(x: x1, y: y1, degree: 4)
+    let y2 = x2.map(polynomial.callAsFunction)
+    let plot = Gnuplot(xs: x1, x2, ys: y1, y2)
+    try plot.plot(.pdf(path: "testPolyFit4.pdf"))
+  } catch {}
 }
+
+
 
 main()

@@ -1,6 +1,10 @@
 import Foundation
 import PhysicalQuantities
 
+extension Zip2Sequence {
+  var tuples: [(Sequence1.Element, Sequence2.Element)] { map { ($0, $1) } }
+}
+
 precedencegroup ExponentiationPrecedence {
   associativity: right
   higherThan: MultiplicationPrecedence
@@ -291,9 +295,8 @@ struct Results {
   }
 }
 
-
 extension Polynomial {
-  init(x: [Double], y: [Double], n: Int = 5) {
+  init(x: [Double], y: [Double], degree n: Int = 5) {
     /// degree of polynomial to fit the data
     var n: Int = n
     /// no. of data points
@@ -303,7 +306,8 @@ extension Polynomial {
 
     for i in X.indices {
       for j in 0..<N {
-        X[i] = X[i] + pow(x[j], Double(i))  // consecutive positions of the array will store N,sigma(xi),sigma(xi^2),sigma(xi^3)....sigma(xi^2n)
+        // consecutive positions of the array will store N,sigma(xi),sigma(xi^2),sigma(xi^3)....sigma(xi^2n)
+        X[i] += pow(x[j], Double(i))  
       }
     }
     var a: [Double] = Array(repeating: 0, count: n + 1)
@@ -312,7 +316,8 @@ extension Polynomial {
 
     for i in 0...n {
       for j in 0...n {
-        B[i][j] = X[i + j]  // Build the Normal matrix by storing the corresponding coefficients at the right positions except the last column of the matrix
+        // Build the Normal matrix by storing the corresponding coefficients at the right positions except the last column of the matrix
+        B[i][j] = X[i + j]
       }
     }
 
@@ -322,16 +327,19 @@ extension Polynomial {
     for i in 0..<(n + 1) {
       Y[i] = 0
       for j in 0..<N {
-        Y[i] = Y[i] + pow(x[j], Double(i)) * y[j]  // consecutive positions will store sigma(yi),sigma(xi*yi),sigma(xi^2*yi)...sigma(xi^n*yi)
+        // consecutive positions will store sigma(yi),sigma(xi*yi),sigma(xi^2*yi)...sigma(xi^n*yi)
+        Y[i] += pow(x[j], Double(i)) * y[j]
       }
     }
 
     for i in 0...n {
-      B[i][n + 1] = Y[i]  // load the values of Y as the last column of B(Normal Matrix but augmented)
+      // load the values of Y as the last column of B(Normal Matrix but augmented)
+      B[i][n + 1] = Y[i]
     }
 
-    n = n + 1
-    for i in 0..<n {  // From now Gaussian Elimination starts(can be ignored) to solve the set of linear equations (Pivotisation)
+    n += 1
+    for i in 0..<n {  
+      // From now Gaussian Elimination starts(can be ignored) to solve the set of linear equations (Pivotisation)
       for k in (i + 1)..<n {
         if B[i][i] < B[k][i] {
           for j in 0...n {
@@ -347,20 +355,23 @@ extension Polynomial {
       for k in (i + 1)..<n {
         let t = B[k][i] / B[i][i]
         for j in 0...n {
-          B[k][j] = B[k][j] - t * B[i][j]  // make the elements below the pivot elements equal to zero or elimnate the variables
+          // make the elements below the pivot elements equal to zero or elimnate the variables
+          B[k][j] -= t * B[i][j]
         }
       }
     }
 
-    for i in (0..<(n - 1)).reversed() {  //back-substitution
+    for i in (0..<(n - 1)).reversed() { // back-substitution
       // x is an array whose values correspond to the values of x,y,z..
-      a[i] = B[i][n]  // make the variable to be calculated equal to the rhs of the last equation
+      // make the variable to be calculated equal to the rhs of the last equation
+      a[i] = B[i][n]
       for j in 0..<n {
-        if j != i {  // then subtract all the lhs values except the coefficient of the variable whose value is being calculated
-          a[i] = a[i] - B[i][j] * a[j]
+        if j != i {
+          // then subtract all the lhs values except the coefficient of the variable whose value is being calculated
+          a[i] -= B[i][j] * a[j]
         }
       }
-      a[i] = a[i] / B[i][i]  //now finally divide the rhs by the coefficient of the variable to be calculated
+      a[i] /= B[i][i] // now finally divide the rhs by the coefficient of the variable to be calculated
     }
     a.removeLast()
     self.init(a)

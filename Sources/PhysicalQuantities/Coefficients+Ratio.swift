@@ -15,8 +15,8 @@ public struct Polynomial: Codable, Equatable {
   /// Represents the coefficients of the polynomial
   public let coefficients: [Double]
 
-  public init(values: Double...) {
-    self.coefficients = values
+  public init(coeffs: Double...) {
+    self.coefficients = coeffs
   }
 
   public init(_ array: [Double]) {
