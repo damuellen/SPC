@@ -35,7 +35,7 @@ public final class Gnuplot {
   }
   /// Execute and returns the plot commands.
   /// - Note: If the svg terminal is used, the function returns the svg.
-  @discardableResult public func plot(_ terminal: Terminal) throws -> String {
+  @discardableResult public func callAsFunction(_ terminal: Terminal) throws -> String {
     let process = Gnuplot.process()
     let stdin = process.standardInput as! Pipe
     let style: String

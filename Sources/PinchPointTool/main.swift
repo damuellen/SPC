@@ -110,8 +110,8 @@ struct PinchPointTool: ParsableCommand {
     }
 
     guard pdf || html else { return }
-    let plotter = Gnuplot(temperatures: pinchPoint.temperatures())
-    let plot = try plotter.plot(.svg)
+    let plot = Gnuplot(temperatures: pinchPoint.temperatures())
+    let svg = try plot(.svg)
 
     let dia = HeatBalanceDiagram(values: pinchPoint)
 
@@ -122,13 +122,13 @@ struct PinchPointTool: ParsableCommand {
     }
 
     if pdf {
-      let _ = try plotter.plot(.pdf(path: "plot.pdf"))
+      try plot(.pdf(path: "plot.pdf"))
       let html = HTML(body: dia.svg)
       try html.pdf(toFile: "diagram.pdf")
     }
 
     if html {
-      var html = HTML(body: dia.svg + plot)
+      var html = HTML(body: dia.svg + svg)
       if json {
         html.json = try pinchPoint.encodeToJSON()
       }
