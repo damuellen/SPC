@@ -77,7 +77,7 @@ extension URL {
 }
 
 @inlinable
-public func seek(goal: Double, _ range: ClosedRange<Double>,
+public func seek(goal: Double, _ range: ClosedRange<Double> = 0...1,
  tolerance: Double = 0.0001, maxIterations: Int = 100,
  _ f: (Double)-> Double) -> Double {
   var a = range.lowerBound
