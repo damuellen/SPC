@@ -92,3 +92,21 @@ public func seek(goal: Double, _ range: ClosedRange<Double> = 0...1,
   }
   return Double.nan
 }
+
+@inlinable
+public func concurrentSeek(goal: Double, _ range: ClosedRange<Double> = 0...1,
+ tolerance: Double = 0.0001, maxIterations: Int = 100,
+ _ f: (Double)-> Double) -> Double {
+  var x = [range.lowerBound, 0.0, range.upperBound]
+  var y = [0.0, 0.0]
+  for _ in 0..<maxIterations {
+    x[1] = (x[0] + x[2]) / 2
+    DispatchQueue.concurrentPerform(iterations: 2) { i in
+      y[i] = f(x[i])
+    }
+    if (y[1] == goal || (x[2]-x[0])/2 < tolerance) { return x[1] }
+    if (y[1] < goal && y[0] < goal) || (y[1] > goal && y[0] > goal)
+     { x[0] = x[1] } else { x[2] = x[1] }
+  }
+  return Double.nan
+}
