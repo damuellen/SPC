@@ -1,8 +1,15 @@
 import Foundation
 import PhysicalQuantities
 
+func evaluate(_ f: (Double)->Double, _ range: ClosedRange<Double>, numberOfSamples: Int = 100) -> [(x: Double, y: Double)] {
+    let step = (range.upperBound - range.lowerBound) / Double(numberOfSamples)
+    let x = Array(stride(from: range.lowerBound, through: range.upperBound, by: step))
+    let y = x.map(f)
+    return zip(x,y).xy
+}
+
 extension Zip2Sequence {
-  var tuples: [(Sequence1.Element, Sequence2.Element)] { map { ($0, $1) } }
+  var xy: [(Sequence1.Element, Sequence2.Element)] { map { ($0, $1) } }
 }
 
 precedencegroup ExponentiationPrecedence {
@@ -70,8 +77,9 @@ extension Sequence where Element == Double {
   func product(_ factor: Double) -> [Double] {
     self.map { $0 * factor }
   }
-
-  var sum: Double { self.reduce(into: 0.0) { sum, value in sum += value  } }
+}
+extension Array where Element == Double {
+  var total: Float { Float(reduce(0.0, +)) }
 }
 
 func average(_ values: ArraySlice<Double>) -> Double {
@@ -294,6 +302,7 @@ struct Results {
     }
   }
 }
+
 
 extension Polynomial {
   init(x: [Double], y: [Double], degree n: Int = 5) {
