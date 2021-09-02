@@ -15,10 +15,11 @@ struct SpecificCost {
   let Electrical_boiler_capacity = (basis: 3.27, exp: 0.7, coeff: 262_862.0)
   let Substation_capacity = (basis: 135.0, exp: 0.7, coeff: 17_778.0)
 
-  func invest(config: SunOl) -> (Double, Double, Double, Double, Double) {
+  func invest(config: SunOl) -> (LCH2: Double, LCoM: Double, LCoE: Double, LCoTh: Double) {
     let auxLoops =
-      ((config.Q_solar_avail_sum - config.Q_Sol_aux_steam_dumped_sum) + (config.extracted_steam_sum * config.PB_Ratio_Heat_input_vs_output))
-      / config.Q_solar_before_dumping_sum * config.CSP_Loop_Nr
+      ((Double(config.Q_solar_avail_sum) - Double(config.Q_Sol_aux_steam_dumped_sum)) 
+      + (Double(config.extracted_steam_sum) * config.PB_Ratio_Heat_input_vs_output))
+      / Double(config.Q_solar_before_dumping_sum) * config.CSP_Loop_Nr
 
     let Assembly_hall = iff(
       config.CSP_Loop_Nr <= Solar_field.range.upperBound, Assembly_hall_1_line.c1 + Assembly_hall_1_line.c2,
@@ -71,11 +72,27 @@ struct SpecificCost {
       + Electrolysis_Cost + PB_Cost + Battery_storage_cost + Hydrogen_Storage_cost + Methanol_plant_cost + Electrical_boiler_cost + Substation_cost
     let Total_OPEX = CSP_O_M_Cost + PV_O_M_Cost + PB_O_M_Cost
 
-    return (CAPEX_ICPH_assembly_hall_csp_sf_dedicated_to_ICPH_PC_DC_PV_AC_Heaters_TES_PB_Substation,
-      CAPEX_aux_thermal_energy_csp_sf_cost_dedicated_to_aux_heat,
-      CAPEX_Hydrogen_ICPH_half_of_loops_dedicated_to_aux_heat_electrolysis_half_of_electrical_boiler_cost,
-      Total_CAPEX,
-      Total_OPEX
-    )
+    let Y = 25.0
+    let R = 0.07
+    let FCR = R * (1 + R) ** Y / ((1 + R) ** Y - 1)
+    let BUY = 2 * 0.091
+    let SELL = 0.33 * 0.091
+
+    let LCH2 =
+      (FCR * CAPEX_Hydrogen_ICPH_half_of_loops_dedicated_to_aux_heat_electrolysis_half_of_electrical_boiler_cost + Total_OPEX
+        + Double(config.Elec_from_grid_sum) * BUY * 1000 - Double(config.Elec_to_grid_sum) * SELL * 1000) / Double(config.H2_to_meth_production_effective_MTPH_sum)
+        
+    let LCoM =
+      (FCR * Total_CAPEX + Total_OPEX + Double(config.Elec_from_grid_sum) * BUY * 1000 - Double(config.Elec_to_grid_sum) * SELL * 1000)
+      / Double(config.meth_produced_MTPH_sum)
+
+    let LCoE =
+      (FCR * CAPEX_ICPH_assembly_hall_csp_sf_dedicated_to_ICPH_PC_DC_PV_AC_Heaters_TES_PB_Substation + Total_OPEX) / Double(config.avail_total_net_elec_sum)
+
+    let LCoTh =
+      (FCR * CAPEX_aux_thermal_energy_csp_sf_cost_dedicated_to_aux_heat) / Double(config.EY_aux_heat_cons_covered_by_PB_SF_sum)
+      + Double(config.meth_plant_heat_cons_covered_by_heat_from_PB_SF_sum)
+
+    return (LCH2, LCoM, LCoE, LCoTh)
   }
 }
