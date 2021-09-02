@@ -1,13 +1,13 @@
 struct SpecificCost {
-
+  let AdditionalCostPerLoop = 762533.1364
   let Solar_field = (basis: 38.0, c1: 1_581_220.0, exp: 0.8, f: 0.71, coeff: 18_000_000.0, range: 19.0...130.0)
   let Assembly_hall_1_line = (c1: 12_000_000.0, c2: 3_300_000.0, range: 19.0...60.0)
   let Assembly_hall_2_lines = (c1: 12_000_000.0, c2: 5_940_000.0, range: 61.0...130.0)
-  let PV_DC_part = (basis: 605.0, coeff: 465.124)
+  let PV_DC_part = (basis: 605.0, coeff: 465_124.0)
   let PV_AC_part = (basis: 490.0, exp: 0.7, coeff: 64_150.0, range: 267...778)
-  let Heater_system = (basis: 200.0, c1: 4_000_000.0, exp: 0.4, c2: 211_729.0, factor: 0.9, coeff: 3_500_000.0, range: 200.0...400.0)
+  let Heater_system = (basis: 200.0, c1: 4_000_000.0, exp: 0.4, c2: 211728.735839637, factor: 0.9, coeff: 3_500_000.0, range: 200.0...400.0)
   let Thermal_energy_storage = (basis: 26920.0, c1: 2_000_000.0, exp: 0.75, c2: 1908.888181, factor: 0.55, coeff: 26_000_000.0)
-  let Electrolysis_coeff = 840.000
+  let Electrolysis_coeff = 840_000.0
   let Hydrogen_storage = (basis: 60.0, coeff: 936_000.0)
   let Methanol_plant_coeff = 5_865_366.0
   let Power_Block = (basis: 50.0, c1: 84_370_000.0, coeff: 466_229.0, range: 50.0...200.0)
@@ -22,19 +22,25 @@ struct SpecificCost {
       / Double(config.Q_solar_before_dumping_sum) * config.CSP_Loop_Nr
 
     let Assembly_hall = iff(
-      config.CSP_Loop_Nr <= Solar_field.range.upperBound, Assembly_hall_1_line.c1 + Assembly_hall_1_line.c2,
+      config.CSP_Loop_Nr <= Assembly_hall_1_line.range.upperBound, Assembly_hall_1_line.c1 + Assembly_hall_1_line.c2,
       Assembly_hall_2_lines.c1 + Assembly_hall_2_lines.c2)
 
     let CSP_SF_cost_dedicated_to_ICPH =
       Solar_field.coeff * ((config.CSP_Loop_Nr - auxLoops) / Solar_field.basis) ** Solar_field.exp + Solar_field.c1 * Solar_field.f
       * (config.CSP_Loop_Nr - auxLoops)
-    let CSP_SF_cost_dedicated_to_aux_heat =
-      Solar_field.coeff * (auxLoops / Solar_field.basis) ** Solar_field.f + Solar_field.c1 * Solar_field.f * auxLoops
+
+    let aux_Heat_ratio = Double(config.EY_aux_heat_cons_sum / (config.meth_plant_heat_cons_sum + config.EY_aux_heat_cons_sum))
+
+    let CSP_SF_cost_dedicated_to_Hydrogen = Solar_field.coeff * ((config.CSP_Loop_Nr - auxLoops) / Solar_field.basis) ** Solar_field.exp + Solar_field.c1 * Solar_field.f
+      * (config.CSP_Loop_Nr - auxLoops * aux_Heat_ratio)
+    let CSP_SF_cost_dedicated_to_Methanol = Solar_field.coeff * (config.CSP_Loop_Nr / Solar_field.basis) ** Solar_field.exp + Solar_field.c1 * Solar_field.f
+      * config.CSP_Loop_Nr
+    let CSP_SF_cost_dedicated_to_aux_heat = AdditionalCostPerLoop * auxLoops
     let PV_DC_Cost = config.PV_DC_Cap * PV_DC_part.coeff + 0.0
     let PV_AC_Cost = (config.PV_AC_Cap / PV_AC_part.basis) ** PV_AC_part.exp * PV_AC_part.basis * PV_AC_part.coeff + 0.0
 
     let Heater_Cost =
-      Heater_system.exp + Heater_system.coeff * (config.Heater_cap / Heater_system.basis) ** Heater_system.exp + config.Heater_cap
+      Heater_system.c1 + Heater_system.coeff * (config.Heater_cap / Heater_system.basis) ** Heater_system.exp + config.Heater_cap
       * Heater_system.factor * Heater_system.c2
 
     let TES_Storage_cost =
@@ -64,11 +70,11 @@ struct SpecificCost {
     let CAPEX_aux_thermal_energy_csp_sf_cost_dedicated_to_aux_heat = CSP_SF_cost_dedicated_to_aux_heat
 
     let CAPEX_Hydrogen_ICPH_half_of_loops_dedicated_to_aux_heat_electrolysis_half_of_electrical_boiler_cost =
-      Assembly_hall + CSP_SF_cost_dedicated_to_ICPH + (CSP_SF_cost_dedicated_to_aux_heat / 2) + PV_DC_Cost + PV_AC_Cost + Heater_Cost
-      + TES_Storage_cost + PB_Cost + (Electrical_boiler_cost / 2) + Substation_cost + Electrolysis_Cost
+      Assembly_hall + CSP_SF_cost_dedicated_to_Hydrogen + PV_DC_Cost + PV_AC_Cost + Heater_Cost
+      + TES_Storage_cost + PB_Cost + (Electrical_boiler_cost * aux_Heat_ratio) + Substation_cost + Electrolysis_Cost
 
     let Total_CAPEX =
-      Assembly_hall + CSP_SF_cost_dedicated_to_ICPH + CSP_SF_cost_dedicated_to_aux_heat + PV_DC_Cost + PV_AC_Cost + Heater_Cost + TES_Storage_cost
+      Assembly_hall + CSP_SF_cost_dedicated_to_Methanol + PV_DC_Cost + PV_AC_Cost + Heater_Cost + TES_Storage_cost
       + Electrolysis_Cost + PB_Cost + Battery_storage_cost + Hydrogen_Storage_cost + Methanol_plant_cost + Electrical_boiler_cost + Substation_cost
     let Total_OPEX = CSP_O_M_Cost + PV_O_M_Cost + PB_O_M_Cost
 
@@ -90,9 +96,12 @@ struct SpecificCost {
       (FCR * CAPEX_ICPH_assembly_hall_csp_sf_dedicated_to_ICPH_PC_DC_PV_AC_Heaters_TES_PB_Substation + Total_OPEX) / Double(config.avail_total_net_elec_sum)
 
     let LCoTh =
-      (FCR * CAPEX_aux_thermal_energy_csp_sf_cost_dedicated_to_aux_heat) / Double(config.EY_aux_heat_cons_covered_by_PB_SF_sum)
-      + Double(config.meth_plant_heat_cons_covered_by_heat_from_PB_SF_sum)
+      (FCR * CAPEX_aux_thermal_energy_csp_sf_cost_dedicated_to_aux_heat) 
+      / (Double(config.Q_solar_avail_sum) + Double(config.extracted_steam_sum))
 
-    return (LCH2, LCoM, LCoE, LCoTh)
+    return ((LCH2 * 100).rounded() / 100,
+     (LCoM * 100).rounded() / 100,
+     (LCoE * 100).rounded() / 100,
+     (LCoTh * 100).rounded() / 100)
   }
 }

@@ -386,3 +386,55 @@ extension Polynomial {
     self.init(a)
   }
 }
+
+/**
+ Returns an iterator-sequence for the Cartesian product of the sequences.
+ ```
+ let values = product([1, 2, 3], [4, 5, 6, 7], [8, 9])
+ // [1, 4, 8], [1, 4, 9], [1, 5, 8], [1, 5, 9], [1, 6, 8], ... [3, 7, 9]
+ ```
+ - Parameter sequences: The sequences from which to compute the product.
+ - Returns: An iterator-sequence for the Cartesian product of the sequences.
+ */
+public func product<S: Sequence>(_ sequences: S...) -> CartesianProduct<S> {
+  // print(sequences.map({ s in s.reduce(0) { c,_ in c + 1 } }).reduce(1, *))
+  return CartesianProduct(sequences)
+}
+/// An iterator-sequence for the Cartesian product of multiple sequences of the same type.
+/// See `product(_:)`.
+public struct CartesianProduct<S: Sequence>: IteratorProtocol, Sequence {
+  private let sequences: [S]
+  private var iterators: [S.Iterator]
+  private var currentValues: [S.Iterator.Element] = []
+
+  fileprivate init(_ sequences: [S]) {
+    self.sequences = sequences
+    iterators = sequences.map { $0.makeIterator() }
+  }
+
+  public mutating func next() -> [S.Iterator.Element]? {
+    guard !currentValues.isEmpty else {
+      var firstValues: [S.Iterator.Element] = []
+      for index in iterators.indices {
+        guard let value = iterators[index].next() else { return nil }
+        firstValues.append(value)
+      }
+      currentValues = firstValues
+      return firstValues
+    }
+
+    for index in currentValues.indices.reversed() {
+      if let value = iterators[index].next() {
+        currentValues[index] = value
+        return currentValues
+      }
+
+      guard index != 0 else { return nil }
+
+      iterators[index] = sequences[index].makeIterator()
+      currentValues[index] = iterators[index].next()!
+    }
+
+    return currentValues
+  }
+}

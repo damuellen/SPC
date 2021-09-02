@@ -7,6 +7,14 @@
         {
             "type": "lldb",
             "request": "launch",
+            "name": "PackageTests",
+            "program": "${workspaceFolder}/.build/debug/SPCPackageTests.xctest",
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "swift-build-tests"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
             "name": "SolarPerformanceCalc-Debug-Print",
             "program": "${workspaceFolder}/.build/debug/SolarPerformanceCalc",
             "args": [
@@ -82,9 +90,10 @@
             "request": "launch",
             "name": "SunOl",
             "program": "${workspaceFolder}/.build/debug/SunOl",
-            //"args": ["</root/workspace/SPC/kjvbible_x10.txt"],
+            "args": ["1"],
             "cwd": "${workspaceFolder}",
-            "preLaunchTask": "swift-build-debug"
+            "preLaunchTask": "swift-build-debug",
+            "env": { "PYTHON_LIBRARY": "/usr/lib/x86_64-linux-gnu/libpython3.6m.so.1.0" }
         }
     ]
 }

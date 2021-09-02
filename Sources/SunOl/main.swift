@@ -139,11 +139,22 @@ struct SunOl {
   #if DEBUGA
   var results: Results
   #endif
-  init() {
+  init(values: [Double]) {
     #if DEBUGA
     self.results = .init()
     #endif
-
+    self.CSP_Loop_Nr = values[0]
+    self.PV_DC_Cap = values[1]
+    self.PV_AC_Cap = values[2]
+    self.Heater_cap = values[3]
+    self.TES_Full_Load_Hours = values[4]
+    self.EY_Nominal_elec_input = values[5]
+    self.PB_Nominal_Gross_cap = values[6]
+    self.BESS_cap = values[7]
+    self.H2_storage_cap = values[8]
+    self.Meth_nominal_hourly_prod_cap = values[9]
+    self.El_boiler_cap = values[10]
+    self.Grid_max_export = values[11]
   }
   
   mutating func callAsFunction(
@@ -622,6 +633,7 @@ struct SunOl {
       Elec_used_to_cover_EY_aux_heat[i] = EY_aux_heat_cons_not_covered_by_PB_SF[i] / El_boiler_eff
       aux_electr_not_covered_by_plant[i] = max(0, Elec_used_to_cover_EY_aux_heat[i] + aux_elec_cons_not_covered[i] - Elec_avail_after_EY_elec_cons[i])
     }
+
     var Elec_to_cover_EY_aux_heat_cons_covered_by_plant = zeroes  // CE
     var aux_boiler_cap_avail_after_EY = zeroes  // CF
     var Grid_cap_avail_after_EY = zeroes  // CG
@@ -878,7 +890,9 @@ struct SunOl {
     Elec_to_grid_sum = Elec_to_grid.total
     meth_produced_MTPH_sum = meth_produced_MTPH.total
     avail_total_net_elec_sum = avail_total_net_elec.total
+    EY_aux_heat_cons_sum = EY_aux_heat_cons.total
     EY_aux_heat_cons_covered_by_PB_SF_sum = EY_aux_heat_cons_covered_by_PB_SF.total
+    meth_plant_heat_cons_sum = meth_plant_heat_cons.total
     meth_plant_heat_cons_covered_by_heat_from_PB_SF_sum = meth_plant_heat_cons_covered_by_heat_from_PB_SF.total
     H2_to_meth_production_effective_MTPH_sum = H2_to_meth_production_effective_MTPH.total
     pr_meth_plant_op = indices.map { i in meth_produced_MTPH[i] / Meth.nominal_hourly_prod_cap }
@@ -895,7 +909,9 @@ struct SunOl {
   var Elec_to_grid_sum: Float = 0
   var H2_to_meth_production_effective_MTPH_sum: Float = 0
   var Q_Sol_aux_steam_dumped_sum: Float = 0
+  var EY_aux_heat_cons_sum: Float = 0
   var EY_aux_heat_cons_covered_by_PB_SF_sum: Float = 0
+  var meth_plant_heat_cons_sum: Float = 0
   var meth_plant_heat_cons_covered_by_heat_from_PB_SF_sum: Float = 0
   var extracted_steam_sum: Float = 0
   var meth_produced_MTPH_sum: Float = 0
@@ -906,18 +922,38 @@ struct SunOl {
 }
 
 struct Parameter {
-  var CSP_Loop_Nr: Double
-  var PV_DC_Cap: Double
-  var PV_AC_Cap: Double
-  var Heater_cap: Double
-  var TES_Full_Load_Hours: Double
-  var EY_Nominal_elec_input: Double
-  var PB_Nominal_Gross_cap: Double
-  var BESS_cap: Double
-  var H2_storage_cap: Double
-  var Meth_nominal_hourly_prod_cap: Double
-  var El_boiler_cap: Double
-  var Grid_max_export: Double
+  var CSP_Loop_Nr: ClosedRange<Double>
+  var PV_DC_Cap: ClosedRange<Double>
+  var PV_AC_Cap: ClosedRange<Double>
+  var Heater_cap: ClosedRange<Double>
+  var TES_Full_Load_Hours: ClosedRange<Double>
+  var EY_Nominal_elec_input: ClosedRange<Double>
+  var PB_Nominal_Gross_cap: ClosedRange<Double>
+  var BESS_cap: ClosedRange<Double>
+  var H2_storage_cap: ClosedRange<Double>
+  var Meth_nominal_hourly_prod_cap: ClosedRange<Double>
+  var El_boiler_cap: ClosedRange<Double>
+  var Grid_max_export: ClosedRange<Double>
+
+  func sets() -> CartesianProduct<[Double]> {
+    func range(_ range: ClosedRange<Double>, by: Double) -> [Double] {
+      Array(stride(from: range.lowerBound, through: range.upperBound, by: by))
+    }
+    return product(
+      range(CSP_Loop_Nr, by: 4),
+      range(PV_DC_Cap, by: 50),
+      range(PV_AC_Cap, by: 50),
+      range(Heater_cap, by: 10),
+      range(TES_Full_Load_Hours, by: 0.2),
+      range(EY_Nominal_elec_input, by: 20),
+      range(PB_Nominal_Gross_cap, by: 20),
+      range(BESS_cap, by: 20),
+      range(H2_storage_cap, by: 20),
+      range(Meth_nominal_hourly_prod_cap, by: 0.2),
+      range(El_boiler_cap, by: 10),
+      range(Grid_max_export, by: 10)
+    )
+  }
 }
 
 func main() {
@@ -933,16 +969,39 @@ func main() {
     Reference_PV_plant_power_at_inverter_inlet_DC.append(Double(data[1]))
     Reference_PV_MV_power_at_transformer_outlet.append(Double(data[2]))
   }
-  
-  // let H2_storage_cap = concurrentSeek(goal: Double.infinity, 50...150, tolerance: 1) {
-  var calc = SunOl()
-  // calc.H2_storage_cap = $0  // 100.0
-  calc(&pr_meth_plant_op, &Q_Sol_MW_thLoop, &Reference_PV_plant_power_at_inverter_inlet_DC, &Reference_PV_MV_power_at_transformer_outlet)
-  calc(&pr_meth_plant_op, &Q_Sol_MW_thLoop, &Reference_PV_plant_power_at_inverter_inlet_DC, &Reference_PV_MV_power_at_transformer_outlet)
-  calc(&pr_meth_plant_op, &Q_Sol_MW_thLoop, &Reference_PV_plant_power_at_inverter_inlet_DC, &Reference_PV_MV_power_at_transformer_outlet)
-  let result = SpecificCost().invest(config: calc)
-  dump(calc)
-  dump(result)
+
+  let parameter = Parameter(
+    CSP_Loop_Nr: 110...140,
+    PV_DC_Cap: 600...700,
+    PV_AC_Cap: 800...900,
+    Heater_cap: 150...200,
+    TES_Full_Load_Hours: 13...15,
+    EY_Nominal_elec_input: 200...300,
+    PB_Nominal_Gross_cap: 200...300,
+    BESS_cap: 100...100,
+    H2_storage_cap: 100...100,
+    Meth_nominal_hourly_prod_cap: 13...15,
+    El_boiler_cap: 100...100,
+    Grid_max_export: 50...50
+  )
+
+  for values in parameter.sets().prefix(Int(CommandLine.arguments.last!) ?? 1_000_000) {
+    var values = values
+    // let H2_storage_cap = concurrentSeek(goal: Double.infinity, 50...150, tolerance: 1) {
+    var calc = SunOl(values: values)
+    // calc.H2_storage_cap = $0  // 100.0
+    calc(&pr_meth_plant_op, &Q_Sol_MW_thLoop, &Reference_PV_plant_power_at_inverter_inlet_DC, &Reference_PV_MV_power_at_transformer_outlet)
+    calc(&pr_meth_plant_op, &Q_Sol_MW_thLoop, &Reference_PV_plant_power_at_inverter_inlet_DC, &Reference_PV_MV_power_at_transformer_outlet)
+    calc(&pr_meth_plant_op, &Q_Sol_MW_thLoop, &Reference_PV_plant_power_at_inverter_inlet_DC, &Reference_PV_MV_power_at_transformer_outlet)
+    let result = SpecificCost().invest(config: calc)
+
+    values.append(result.LCH2)
+    values.append(result.LCoM)
+    values.append(result.LCoE)
+    values.append(result.LCoTh)
+    values.append(Double(calc.H2_to_meth_production_effective_MTPH_sum))
+    print(values.map(\.description).joined(separator: ", "))
+  }
   /*
   let CSP_Loop_Nr = concurrentSeek(goal: Double.infinity, 50...150, tolerance: 1) {
     var calc = SunOl(dataFile: dataFile)
