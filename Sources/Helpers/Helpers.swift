@@ -110,3 +110,27 @@ public func concurrentSeek(goal: Double, _ range: ClosedRange<Double> = 0...1,
   }
   return Double.nan
 }
+
+// Fitting y = a0 + a1*x
+    // least squares method
+    // a0 =  (sumX - sumY) * sumXY / (sumX * sumX - n * sumXY)
+    // a1 =  (sumX * sumY - n * sumXY) / (sumX * sumX - n * sumXX)    
+@inlinable
+public func linearFit(x: [Double], y: [Double]) -> (Double)-> Double {
+  var sumX: Double = 0
+  var sumY: Double = 0
+  var sumXY: Double = 0
+  var sumXX: Double = 0
+  let count = min(x.count, y.count)
+  
+  for i in 0..<count {
+    sumX += x[i]
+    sumY += y[i]
+    sumXX += x[i] * x[i]
+    sumXY += x[i] * y[i]
+  }
+  let a0 = (sumX - sumY) * sumXY / (sumX * sumX - Double(count) * sumXY)
+  let a1 =  (sumX * sumY - Double(count) * sumXY) / (sumX * sumX - Double(count) * sumXX)
+
+  return { value in a0 + a1 * value }
+}
