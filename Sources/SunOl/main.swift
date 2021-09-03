@@ -159,9 +159,9 @@ struct SunOl {
   
   mutating func callAsFunction(
     _ pr_meth_plant_op: inout [Double], 
-    _ Q_Sol_MW_thLoop: inout [Double], 
-    _ Reference_PV_plant_power_at_inverter_inlet_DC: inout [Double], 
-    _ Reference_PV_MV_power_at_transformer_outlet: inout [Double]
+    _ Q_Sol_MW_thLoop: [Double], 
+    _ Reference_PV_plant_power_at_inverter_inlet_DC: [Double], 
+    _ Reference_PV_MV_power_at_transformer_outlet: [Double]
     ) {
     var Heater = Heater()
     Heater.cap = Heater_cap
@@ -363,7 +363,7 @@ struct SunOl {
             0,
             (Max_net_elec_request_from_EY_Meth_aux_to_PB_after_pr_PV_EY_op[i] - SF_TES_chrg_PV_aux_cons_not_covered_by_PV[i]) / EY.gross_elec_input
               * EY.heat_input))
-      let heat = (EY.min_elec_input + pr_meth_plant_op[i] * Meth.nominal_aux_electr_cons + TES_charging_aux_elec_cons[i]) / (1 - PB.aux_cons_perc)
+      let heat = (EY.min_elec_input + pr_meth_plant_op[i] * Meth.nominal_aux_electr_cons + SF_TES_chrg_PV_aux_cons_not_covered_by_PV[i]) / (1 - PB.aux_cons_perc)
       min_PB_heat_request_from_EY_Meth_aux_to_PB_without_extractions[i] =  // AD
         heat / (PB.nominal_Gross_eff * (PB.el(heat / PB.nominal_Gross_cap))) * (1 + TES_Aux_elec_perc / PB_eff_at_min_Op)
       steam_extraction_matching_min_op_case[i] =  // AE
@@ -729,7 +729,7 @@ struct SunOl {
           min(
             (Elec_avail_after_total_EY[i] + PB_SF_aux_heat_avail_after_EY[i] / El_boiler_eff + Grid_cap_avail_after_EY[i]
               - aux_electr_not_covered_by_plant[i]) / (Meth.nominal_aux_electr_cons + Meth.nominal_heat_cons / El_boiler_eff) * Meth.max_H2_Cons,
-            (aux_boiler_cap_avail_after_EY[i] + PB_SF_aux_heat_avail_after_EY[i]) / Meth.nominal_heat_cons * Meth.max_H2_Cons,
+            iff(Meth.nominal_heat_cons > 0,(aux_boiler_cap_avail_after_EY[i] + PB_SF_aux_heat_avail_after_EY[i]) / Meth.nominal_heat_cons * Meth.max_H2_Cons , Meth.max_H2_Cons),
             iff(H2_storage_level_MT[i] + Amount_of_H2_produced_MTPH[i] < Meth.min_H2_Cons, 0, H2_storage_level_MT[i] + Amount_of_H2_produced_MTPH[i]),
             Meth.max_H2_Cons,
             max(
@@ -940,18 +940,18 @@ struct Parameter {
       Array(stride(from: range.lowerBound, through: range.upperBound, by: by))
     }
     return product(
-      range(CSP_Loop_Nr, by: 4),
-      range(PV_DC_Cap, by: 50),
-      range(PV_AC_Cap, by: 50),
-      range(Heater_cap, by: 10),
-      range(TES_Full_Load_Hours, by: 0.2),
-      range(EY_Nominal_elec_input, by: 20),
-      range(PB_Nominal_Gross_cap, by: 20),
-      range(BESS_cap, by: 20),
-      range(H2_storage_cap, by: 20),
-      range(Meth_nominal_hourly_prod_cap, by: 0.2),
-      range(El_boiler_cap, by: 10),
-      range(Grid_max_export, by: 10)
+      range(CSP_Loop_Nr, by: 1),
+      range(PV_DC_Cap, by: 1),
+      range(PV_AC_Cap, by: 1),
+      range(Heater_cap, by: 1),
+      range(TES_Full_Load_Hours, by: 0.1),
+      range(EY_Nominal_elec_input, by: 1),
+      range(PB_Nominal_Gross_cap, by: 1),
+      range(BESS_cap, by: 1),
+      range(H2_storage_cap, by: 1),
+      range(Meth_nominal_hourly_prod_cap, by: 0.1),
+      range(El_boiler_cap, by: 1),
+      range(Grid_max_export, by: 1)
     )
   }
 }
@@ -959,7 +959,7 @@ struct Parameter {
 func main() {
   let url = URL(fileURLWithPath: "/workspaces/SPC/input.txt")
   guard let dataFile = DataFile(url) else { return }
-  var pr_meth_plant_op = Array(repeating: 0.5, count: 8760)
+  
   var Q_Sol_MW_thLoop: [Double] = [0]
   var Reference_PV_plant_power_at_inverter_inlet_DC: [Double] = [0]
   var Reference_PV_MV_power_at_transformer_outlet: [Double] = [0]
@@ -971,25 +971,46 @@ func main() {
   }
 
   let parameter = Parameter(
-    CSP_Loop_Nr: 110...140,
-    PV_DC_Cap: 600...700,
-    PV_AC_Cap: 800...900,
-    Heater_cap: 150...200,
-    TES_Full_Load_Hours: 13...15,
-    EY_Nominal_elec_input: 200...300,
-    PB_Nominal_Gross_cap: 200...300,
-    BESS_cap: 100...100,
-    H2_storage_cap: 100...100,
-    Meth_nominal_hourly_prod_cap: 13...15,
-    El_boiler_cap: 100...100,
-    Grid_max_export: 50...50
+    CSP_Loop_Nr: 130...130,
+    PV_DC_Cap: 980...990,
+    PV_AC_Cap: 710...730,
+    Heater_cap: 240...260,
+    TES_Full_Load_Hours: 12...14,
+    EY_Nominal_elec_input: 340...360,
+    PB_Nominal_Gross_cap: 140...150,
+    BESS_cap: 0...0,
+    H2_storage_cap: 50...55,
+    Meth_nominal_hourly_prod_cap: 20...22,
+    El_boiler_cap: 80...80,
+    Grid_max_export: 100...100
   )
 
+  var buffer = [[Double]]()
+  for values in parameter.sets().prefix(Int(CommandLine.arguments.last!) ?? 1_000_000) {
+    buffer.append(values)
+    if buffer.count == 8 {
+      DispatchQueue.concurrentPerform(iterations: 8) {
+        var calc = SunOl(values: buffer[$0])
+        var pr_meth_plant_op = Array(repeating: 0.5, count: 8760)
+        calc(&pr_meth_plant_op, Q_Sol_MW_thLoop, Reference_PV_plant_power_at_inverter_inlet_DC, Reference_PV_MV_power_at_transformer_outlet)
+        calc(&pr_meth_plant_op, Q_Sol_MW_thLoop, Reference_PV_plant_power_at_inverter_inlet_DC, Reference_PV_MV_power_at_transformer_outlet)
+        calc(&pr_meth_plant_op, Q_Sol_MW_thLoop, Reference_PV_plant_power_at_inverter_inlet_DC, Reference_PV_MV_power_at_transformer_outlet)
+        let result = SpecificCost().invest(config: calc)
+        buffer[$0].append(result.LCH2)
+        buffer[$0].append(result.LCoM)
+        buffer[$0].append(result.LCoE)
+        buffer[$0].append(result.LCoTh)
+        buffer[$0].append(Double(calc.H2_to_meth_production_effective_MTPH_sum))
+      }
+      print(buffer.map { $0.map(\.description).joined(separator: ", ") }.joined(separator: "\n"))
+      buffer.removeAll()
+    }
+  }
+  /* 
   for values in parameter.sets().prefix(Int(CommandLine.arguments.last!) ?? 1_000_000) {
     var values = values
-    // let H2_storage_cap = concurrentSeek(goal: Double.infinity, 50...150, tolerance: 1) {
     var calc = SunOl(values: values)
-    // calc.H2_storage_cap = $0  // 100.0
+
     calc(&pr_meth_plant_op, &Q_Sol_MW_thLoop, &Reference_PV_plant_power_at_inverter_inlet_DC, &Reference_PV_MV_power_at_transformer_outlet)
     calc(&pr_meth_plant_op, &Q_Sol_MW_thLoop, &Reference_PV_plant_power_at_inverter_inlet_DC, &Reference_PV_MV_power_at_transformer_outlet)
     calc(&pr_meth_plant_op, &Q_Sol_MW_thLoop, &Reference_PV_plant_power_at_inverter_inlet_DC, &Reference_PV_MV_power_at_transformer_outlet)
@@ -1002,34 +1023,7 @@ func main() {
     values.append(Double(calc.H2_to_meth_production_effective_MTPH_sum))
     print(values.map(\.description).joined(separator: ", "))
   }
-  /*
-  let CSP_Loop_Nr = concurrentSeek(goal: Double.infinity, 50...150, tolerance: 1) {
-    var calc = SunOl(dataFile: dataFile)
-    calc.CSP_Loop_Nr = $0  // 113
-    calc(pr_meth_plant_op: calc(pr_meth_plant_op: calc(pr_meth_plant_op: Array(repeating: 0.5, count: 8760))))
-    return calc.H2_to_meth_production_effective_MTPH_sum
-  }
-
-  let _ = concurrentSeek(goal: Double.infinity, 50...150, tolerance: 1) {
-    var calc = SunOl(dataFile: dataFile)
-    calc.CSP_Loop_Nr = 113
-    calc.PV_DC_Cap = 818
-    calc.PV_AC_Cap = 613
-    calc.Heater_cap = 239
-    calc.TES_Full_Load_Hours = 13
-    calc.EY_Nominal_elec_input = 280
-    calc.PB_Nominal_Gross_cap = 250
-    calc.BESS_cap = 100.0
-    calc.H2_storage_cap = $0  // 100.0
-    calc.Meth_nominal_hourly_prod_cap = 14.8
-    calc.El_boiler_cap = 100
-    calc.Grid_max_export = 70
-    calc(pr_meth_plant_op: calc(pr_meth_plant_op: calc(pr_meth_plant_op: Array(repeating: 0.5, count: 8760))))
-    SpecificCost().invest(config: calc)
-
-    return calc.H2_to_meth_production_effective_MTPH_sum
-  }
-  */
+*/
 }
 
 let now = Date()
