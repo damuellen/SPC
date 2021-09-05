@@ -29,7 +29,7 @@ struct SpecificCost {
       Solar_field.coeff * ((config.CSP_Loop_Nr - auxLoops) / Solar_field.basis) ** Solar_field.exp + Solar_field.c1 * Solar_field.f
       * (config.CSP_Loop_Nr - auxLoops)
 
-    let aux_Heat_ratio = Double(config.EY_aux_heat_cons_sum / (config.meth_plant_heat_cons_sum + config.EY_aux_heat_cons_sum))
+    let aux_Heat_ratio = Double(config.EY_aux_heatConsumption_sum / (config.meth_plant_heatConsumption_sum + config.EY_aux_heatConsumption_sum))
 
     let CSP_SF_cost_dedicated_to_Hydrogen = Solar_field.coeff * ((config.CSP_Loop_Nr - auxLoops) / Solar_field.basis) ** Solar_field.exp + Solar_field.c1 * Solar_field.f
       * (config.CSP_Loop_Nr - auxLoops * aux_Heat_ratio)
@@ -48,7 +48,7 @@ struct SpecificCost {
       + config.TES_salt_mass * Thermal_energy_storage.c2 * Thermal_energy_storage.factor
 
     let Electrolysis_Cost = config.EY_Nominal_elec_input * Electrolysis_coeff + 0.0
-    let PB_Cost = Power_Block.c1 + (config.PB_Nominal_Gross_cap - Power_Block.basis) * Power_Block.coeff
+    let PB_Cost = Power_Block.c1 + (config.PB_Nominal_gross_cap - Power_Block.basis) * Power_Block.coeff
     let Battery_storage_cost = config.BESS_cap * Battery_energy_storage.coeff + Battery_energy_storage.c1
     let Hydrogen_Storage_cost = config.H2_storage_cap * Hydrogen_storage.coeff + 0.0
     let Methanol_plant_cost = config.Meth_nominal_hourly_prod_cap * Methanol_plant_coeff + 0.0
@@ -58,11 +58,11 @@ struct SpecificCost {
       ** Electrical_boiler_capacity.exp
 
     let Substation_cost =
-      Substation_capacity.coeff * Substation_capacity.basis * (config.Grid_max_export / Substation_capacity.basis) ** Substation_capacity.exp
+      Substation_capacity.coeff * Substation_capacity.basis * (config.grid_max_export / Substation_capacity.basis) ** Substation_capacity.exp
 
     let CSP_O_M_Cost = (11.3333 / 3 * 1 / 3 * 1000 * 1000) + (0.00606061 / 3 * 1 / 3 * 1000 * 1000) * config.CSP_Loop_Nr
     let PV_O_M_Cost = (11.3333 * 1000 * 1000) + 0 * config.PV_DC_Cap
-    let PB_O_M_Cost = (11.3333 / 3 * 2 / 3 * 1000 * 1000) + (0.00606061 / 3 * 2 / 3 * 1000 * 1000) * config.PB_Nominal_Gross_cap
+    let PB_O_M_Cost = (11.3333 / 3 * 2 / 3 * 1000 * 1000) + (0.00606061 / 3 * 2 / 3 * 1000 * 1000) * config.PB_Nominal_gross_cap
 
     let CAPEX_ICPH_assembly_hall_csp_sf_dedicated_to_ICPH_PC_DC_PV_AC_Heaters_TES_PB_Substation =
       Assembly_hall + CSP_SF_cost_dedicated_to_ICPH + PV_DC_Cost + PV_AC_Cost + Heater_Cost + TES_Storage_cost + PB_Cost + Substation_cost
@@ -86,10 +86,10 @@ struct SpecificCost {
 
     let LCH2 =
       (FCR * CAPEX_Hydrogen_ICPH_half_of_loops_dedicated_to_aux_heat_electrolysis_half_of_electrical_boiler_cost + Total_OPEX
-        + Double(config.Elec_from_grid_sum) * BUY * 1000 - Double(config.Elec_to_grid_sum) * SELL * 1000) / Double(config.H2_to_meth_production_effective_MTPH_sum)
+        + Double(config.elec_from_grid_sum) * BUY * 1000 - Double(config.elec_to_grid_sum) * SELL * 1000) / Double(config.H2_to_meth_production_effective_MTPH_sum)
         
     let LCoM =
-      (FCR * Total_CAPEX + Total_OPEX + Double(config.Elec_from_grid_sum) * BUY * 1000 - Double(config.Elec_to_grid_sum) * SELL * 1000)
+      (FCR * Total_CAPEX + Total_OPEX + Double(config.elec_from_grid_sum) * BUY * 1000 - Double(config.elec_to_grid_sum) * SELL * 1000)
       / Double(config.meth_produced_MTPH_sum)
 
     let LCoE =
