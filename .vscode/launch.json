@@ -90,7 +90,7 @@
             "request": "launch",
             "name": "SunOl",
             "program": "${workspaceFolder}/.build/debug/SunOl",
-            "args": ["1"],
+            "args": ["/workspaces/SPC/input.txt"],
             "cwd": "${workspaceFolder}",
             "preLaunchTask": "swift-build-debug",
             "env": { "PYTHON_LIBRARY": "/usr/lib/x86_64-linux-gnu/libpython3.6m.so.1.0" }

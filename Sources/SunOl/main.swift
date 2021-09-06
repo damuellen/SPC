@@ -948,7 +948,8 @@ struct Parameter {
 }
 
 func main() {
-  let url = URL(fileURLWithPath: "/workspaces/SPC/input.txt")
+  guard CommandLine.argc > 1 else { return }
+  let url = URL(fileURLWithPath: CommandLine.arguments[1])
   guard let dataFile = DataFile(url) else { return }
   
   var Q_Sol_MW_thLoop: [Double] = [0]
@@ -972,8 +973,8 @@ func main() {
     BESS_cap: 0...0,
     H2_storage_cap: 50...55,
     Meth_nominal_hourly_prod_cap: 20...22,
-    El_boiler_cap: 80...80,
-    grid_max_export: 100...100
+    El_boiler_cap: 75...85,
+    grid_max_export: 90...110
   )
 
   var ranges = parameter.ranges
@@ -995,8 +996,6 @@ func main() {
     }
     ranges[i] = [buffer.sorted(by: {$0[13]<$1[13]})[0][i]]
   }
-
-
 }
 
 let now = Date()

@@ -19,11 +19,16 @@
             "command": "swift",
             "args": [
                 "build",
-                "-Xswiftc", "-suppress-warnings",
-                "-Xswiftc", "-Xfrontend",
-                "-Xswiftc", "-serialize-debugging-options",
-                "--configuration", "debug",
-                "--product", "SolarPerformanceCalc",
+                "-Xswiftc",
+                "-suppress-warnings",
+                "-Xswiftc",
+                "-Xfrontend",
+                "-Xswiftc",
+                "-serialize-debugging-options",
+                "--configuration",
+                "debug",
+                "--product",
+                "SolarPerformanceCalc"
             ],
             "group": {
                 "kind": "build",
@@ -36,12 +41,18 @@
             "command": "swift",
             "args": [
                 "build",
-                "-Xswiftc", "-suppress-warnings",
-                "-Xswiftc", "-Xfrontend",
-                "-Xswiftc", "-serialize-debugging-options",
-                "--configuration", "debug",
-                "--product", "SolarPerformanceCalc",
-                "-Xswiftc", "-DPRINT",
+                "-Xswiftc",
+                "-suppress-warnings",
+                "-Xswiftc",
+                "-Xfrontend",
+                "-Xswiftc",
+                "-serialize-debugging-options",
+                "--configuration",
+                "debug",
+                "--product",
+                "SolarPerformanceCalc",
+                "-Xswiftc",
+                "-DPRINT"
             ],
             "group": "build"
         },
@@ -51,10 +62,29 @@
             "command": "swift",
             "args": [
                 "build",
-                "-Xswiftc", "-suppress-warnings",
-                "-Xswiftc", "-Xfrontend",
-                "-Xswiftc", "-serialize-debugging-options",
-            ],
+                "-Xswiftc",
+                "-suppress-warnings",
+                "-Xswiftc",
+                "-Xfrontend",
+                "-Xswiftc",
+                "-serialize-debugging-options"
+            ]
+        },
+        {
+            "label": "swift-build-debug-sol",
+            "type": "shell",
+            "command": "swift",
+            "args": [
+                "build",
+                "--target",
+                "SunOl",
+                "-Xswiftc",
+                "-suppress-warnings",
+                "-Xswiftc",
+                "-Xfrontend",
+                "-Xswiftc",
+                "-serialize-debugging-options"
+            ]
         },
         {
             "label": "swift-build-tests",
@@ -62,12 +92,21 @@
             "command": "swift",
             "args": [
                 "build",
-                "-Xswiftc", "-suppress-warnings",
-                "-Xswiftc", "-Xfrontend",
-                "-Xswiftc", "-serialize-debugging-options",
+                "-Xswiftc",
+                "-Xfrontend",
+                "-Xswiftc",
+                "-serialize-debugging-options",
                 "--build-tests"
             ],
-            "group": "test"
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "never",
+                "echo": false
+            }
         },
         {
             "label": "swift-build-release",
@@ -75,9 +114,11 @@
             "command": "swift",
             "args": [
                 "build",
-                "-Xswiftc", "-suppress-warnings",
-                "--configuration", "release"
-            ],
+                "-Xswiftc",
+                "-suppress-warnings",
+                "--configuration",
+                "release"
+            ]
         }
     ]
 }
