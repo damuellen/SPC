@@ -47,16 +47,16 @@ public struct MeteoDataFileHandler {
     print("Meteo file in use:\n  \(url.path)\n")
   }
 
-  public func callAsFunction() throws -> MeteoDataSource {
+  public func callAsFunction() throws -> MeteoDataProvider {
     if isBinaryFile, let data = try? Data(contentsOf: url) {
-      return MeteoDataSource(data: data)
+      return MeteoDataProvider(data: data)
     }
 
     let file: MeteoDataFile = try url.pathExtension == "mto"
       ? MET(url) : TMY(url)
     let metaData = try file.fetchInfo()
     let data = try file.fetchData()
-    return MeteoDataSource(name: file.name, data: data, metaData)
+    return MeteoDataProvider(name: file.name, data: data, metaData)
   }
 }
 

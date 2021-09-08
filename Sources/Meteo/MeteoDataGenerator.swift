@@ -18,14 +18,14 @@ public class MeteoDataGenerator: Sequence {
 
   private(set) var dateInterval: DateInterval?
 
-  private let dataSource: MeteoDataSource
+  private let dataSource: MeteoDataProvider
 
   public enum Method { case linear, gradient }
 
   private let method: Method
 
   public init(
-    _ source: MeteoDataSource,
+    _ source: MeteoDataProvider,
     frequence: DateGenerator.Interval,
     method: Method = .linear
   ) {

@@ -13,7 +13,7 @@ import Foundation
 import SolarPosition
 
 /// A type that provides meteorological data for one year.
-public class MeteoDataSource {
+public class MeteoDataProvider {
   public let name: String
   public let year: Int?
   public let location: Location
@@ -118,7 +118,7 @@ public class MeteoDataSource {
   }
 
   public static func generatedFrom(_ sun: SolarPosition, clouds: Bool = false)
-    -> MeteoDataSource
+    -> MeteoDataProvider
   {
     let steps = 24
     var step = 0
@@ -153,7 +153,7 @@ public class MeteoDataSource {
       sun.location.coords, timezone: sun.location.timezone
     )
 
-    return MeteoDataSource(
+    return MeteoDataProvider(
       name: "Fake", data: data, (sun.year, location)
     )
   }
