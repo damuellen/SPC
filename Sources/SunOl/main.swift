@@ -964,22 +964,22 @@ func main() {
 
   let parameter = Parameter(
     CSP_Loop_Nr: 130...130,
-    PV_DC_Cap: 980...990,
-    PV_AC_Cap: 710...730,
-    Heater_cap: 240...260,
+    PV_DC_Cap: 950...1000,
+    PV_AC_Cap: 700...800,
+    Heater_cap: 220...260,
     TES_Full_Load_Hours: 12...14,
-    EY_Nominal_elec_input: 340...360,
-    PB_Nominal_gross_cap: 140...150,
+    EY_Nominal_elec_input: 330...360,
+    PB_Nominal_gross_cap: 140...200,
     BESS_cap: 0...0,
     H2_storage_cap: 50...55,
     Meth_nominal_hourly_prod_cap: 20...22,
     El_boiler_cap: 75...85,
-    grid_max_export: 90...110
+    grid_max_export: 100...100
   )
-
-  var ranges = parameter.ranges
-  for i in ranges.indices.reversed() {
-    var buffer = Array(CartesianProduct(ranges).prefix(ranges[i].count))
+  let all = parameter.ranges
+  var best = parameter.ranges
+  for i in all.indices.reversed() {
+    var buffer = Array(CartesianProduct(best).prefix(best[i].count))
     DispatchQueue.concurrentPerform(iterations: buffer.count) {
       var calc = SunOl(values: buffer[$0])
       var pr_meth_plant_op = Array(repeating: 0.5, count: 8760)
@@ -994,7 +994,28 @@ func main() {
       buffer[$0].append(Double(calc.H2_to_meth_production_effective_MTPH_sum))
       print(buffer[$0])
     }
-    ranges[i] = [buffer.sorted(by: {$0[13]<$1[13]})[0][i]]
+    best[i] = [buffer.sorted(by: {$0[13]<$1[13]})[0][i]]
+  }
+  for _ in 0..<1000 {
+    for i in all.indices.shuffled() {
+      best[i] = all[i]
+      var buffer = Array(CartesianProduct(best))
+      DispatchQueue.concurrentPerform(iterations: buffer.count) {
+        var calc = SunOl(values: buffer[$0])
+        var pr_meth_plant_op = Array(repeating: 0.5, count: 8760)
+        calc(&pr_meth_plant_op, Q_Sol_MW_thLoop, Reference_PV_plant_power_at_inverter_inlet_DC, Reference_PV_MV_power_at_transformer_outlet)
+        calc(&pr_meth_plant_op, Q_Sol_MW_thLoop, Reference_PV_plant_power_at_inverter_inlet_DC, Reference_PV_MV_power_at_transformer_outlet)
+        calc(&pr_meth_plant_op, Q_Sol_MW_thLoop, Reference_PV_plant_power_at_inverter_inlet_DC, Reference_PV_MV_power_at_transformer_outlet)
+        let result = SpecificCost().invest(config: calc)
+        buffer[$0].append(result.LCH2)
+        buffer[$0].append(result.LCoM)
+        buffer[$0].append(result.LCoE)
+        buffer[$0].append(result.LCoTh)
+        buffer[$0].append(Double(calc.H2_to_meth_production_effective_MTPH_sum))
+        print(buffer[$0])
+      }
+      best[i] = [buffer.sorted(by: {$0[13]<$1[13]})[0][i]]
+    }
   }
 }
 
