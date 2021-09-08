@@ -25,7 +25,7 @@ public struct DateTime: CustomStringConvertible {
   private(set) var isSunSet: Bool = false
 
   public var isNighttime: Bool { !isDaytime }
-  /// The meteorological data suitable for today are identified with this property. `MeteoDataSource.currentDay`
+  /// The meteorological data suitable for today are identified with this property. `MeteoDataProvider.currentDay`
   public static var indexDay: Int { current.yearDay - 1 }
   public static var indexMonth: Int { current.month - 1 }
   public static var isDaytime: Bool { current.isDaytime }

@@ -117,7 +117,7 @@ public class MeteoDataProvider {
     return (0, 0, 0, 0, 0, 0)
   }
 
-  public static func generatedFrom(_ sun: SolarPosition, clouds: Bool = false)
+  public static func using(_ sun: SolarPosition, clouds: Bool = false)
     -> MeteoDataProvider
   {
     let steps = 24

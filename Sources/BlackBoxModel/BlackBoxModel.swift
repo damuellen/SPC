@@ -22,7 +22,7 @@ public enum BlackBoxModel {
   /// The apparent solar position based on date, time, and location.
   public private(set) static var sun: SolarPosition?
   /// Solar radiation and meteorological elements for a 1-year period.
-  public private(set) static var meteoData: MeteoDataSource?
+  public private(set) static var meteoData: MeteoDataProvider?
 
   public static func configure(year: Int) {
     yearOfSimulation = year
@@ -39,7 +39,7 @@ public enum BlackBoxModel {
     )
 
     if meteoData == nil {
-      meteoData = MeteoDataSource.generatedFrom(sun!)
+      meteoData = MeteoDataProvider.using(sun!)
     }
   }
 

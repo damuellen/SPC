@@ -978,7 +978,7 @@ func main() {
   )
   
   var all = parameter.ranges
-  var best = parameter.ranges.compactMap(\.last).map{[$0]}
+  var best = all.compactMap(\.last).map{[$0]}
 
   for _ in 0..<1000 {
     let hashValue = best.hashValue
@@ -1000,7 +1000,7 @@ func main() {
       }
       buffer.sort(by: {$0[13]<$1[13]})
       print(buffer[0])
-      results.insert(SIMD2(x: buffer[0][13], y: buffer[0][16]))
+      results.insert(XY(x: buffer[0][13], y: buffer[0][16]))
       best[i] = [buffer[0][i]]
       let l = buffer.count-1
       if l > 1 {
@@ -1016,7 +1016,7 @@ func main() {
   }
 }
 
-var results: Set<SIMD2<Double>> = []
+var results: Set<XY> = []
 
 import Swifter
 let server = HttpServer()

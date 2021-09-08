@@ -134,3 +134,5 @@ public func linearFit(x: [Double], y: [Double]) -> (Double)-> Double {
 
   return { value in a0 + a1 * value }
 }
+
+public typealias XY = SIMD2<Double>

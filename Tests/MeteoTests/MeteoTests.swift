@@ -13,7 +13,7 @@ class MeteoTests: XCTestCase {
 
     let _ = DateGenerator(year: 2017, interval: .every5minutes)
 
-    let _ = MeteoDataSource.generatedFrom(sun)
+    let _ = MeteoDataProvider.using(sun)
 
     let valuesDay: [(dni: Float, temp: Float, ws: Float)] = [
       (0,23.3,7.3), (0,23.3,6.3), (0,23.5,5.9), (0,23.4,4.3),
@@ -60,7 +60,7 @@ class MeteoTests: XCTestCase {
 
     let meteoData = Array(repeatElement(meteoDataDay, count: 365).joined())
 
-    let _ = MeteoDataSource(
+    let _ = MeteoDataProvider(
       name: "", data: meteoData, (2017, location)
     )
   }
