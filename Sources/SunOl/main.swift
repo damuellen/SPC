@@ -947,6 +947,8 @@ struct Parameter {
   }
 }
 
+var tt = ""
+
 func main() {
   guard CommandLine.argc > 1 else { return }
   let url = URL(fileURLWithPath: CommandLine.arguments[1])
@@ -965,19 +967,21 @@ func main() {
   let parameter = Parameter(
     CSP_Loop_Nr: 130...130,
     PV_DC_Cap: 950...1000,
-    PV_AC_Cap: 700...800,
+    PV_AC_Cap: 800...850,
     Heater_cap: 220...260,
     TES_Full_Load_Hours: 12...14,
-    EY_Nominal_elec_input: 330...360,
-    PB_Nominal_gross_cap: 140...200,
+    EY_Nominal_elec_input: 340...360,
+    PB_Nominal_gross_cap: 180...200,
     BESS_cap: 0...0,
     H2_storage_cap: 50...55,
     Meth_nominal_hourly_prod_cap: 20...22,
     El_boiler_cap: 75...85,
     grid_max_export: 100...100
   )
-  let all = parameter.ranges
+  var all = parameter.ranges
   var best = parameter.ranges
+
+
   for i in all.indices.reversed() {
     var buffer = Array(CartesianProduct(best).prefix(best[i].count))
     DispatchQueue.concurrentPerform(iterations: buffer.count) {
@@ -996,8 +1000,9 @@ func main() {
     }
     best[i] = [buffer.sorted(by: {$0[13]<$1[13]})[0][i]]
   }
-  for _ in 0..<1000 {
-    for i in all.indices.shuffled() {
+
+  for k in 0..<1000 {
+    for i in all.indices.reversed() {
       best[i] = all[i]
       var buffer = Array(CartesianProduct(best))
       DispatchQueue.concurrentPerform(iterations: buffer.count) {
@@ -1012,13 +1017,41 @@ func main() {
         buffer[$0].append(result.LCoE)
         buffer[$0].append(result.LCoTh)
         buffer[$0].append(Double(calc.H2_to_meth_production_effective_MTPH_sum))
-        print(buffer[$0])
+        
       }
-      best[i] = [buffer.sorted(by: {$0[13]<$1[13]})[0][i]]
+      let sorted = buffer.sorted(by: {$0[13]<$1[13]})      
+      print(sorted[0])
+      tt = sorted[0].map(\.description).joined(separator: "\n")
+      let count = sorted.count
+      best[i] = [sorted[0][i]]
+      if count > 2 { 
+        if best[i][0] == all[i][0] {
+          all[i] = all[i].map { max(1, $0 - ((all[i][count-1] - all[i][0]) / 2)) }
+        } else if best[i][0] == all[i][count-1] {
+          all[i] = all[i].map { $0 + ((all[i][count-1] - all[i][0]) / 2) }
+        }        
+      }
     }
   }
 }
 
+import Swifter
+
+let server = HttpServer()
+server["/"] = scopes {
+  html {
+    meta { 
+     httpEquiv = "refresh"
+     content = "5"
+    }
+    body {
+      center {
+        pre { inner = tt }         
+      }
+    }
+  }
+}
+try server.start(9080, forceIPv4: true)
 let now = Date()
 main()
 print("Elapsed seconds:", -now.timeIntervalSinceNow)

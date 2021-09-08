@@ -23,6 +23,7 @@ let package = Package(
     .package(url: "https://github.com/damuellen/SQLite.swift.git", .branch("master")),
     .package(url: "https://github.com/damuellen/xlsxwriter.swift.git", .branch("main")),
     .package(name: "Benchmark", url: "https://github.com/google/swift-benchmark", from: "0.1.0"),
+    .package(name: "Swifter", url: "https://github.com/httpswift/swifter.git", .upToNextMajor(from: "1.5.0"))
     // .package(url: "https://github.com/pvieito/PythonKit.git", .branch("master")),
     // .package(url: "https://github.com/jpsim/Yams.git", from: "4.0.1")
     ],
@@ -36,7 +37,7 @@ let package = Package(
       dependencies: ["Helpers", "BlackBoxModel"],
       swiftSettings: swift),
     .target(name: "SunOl",
-      dependencies: ["Helpers", "BlackBoxModel", "PhysicalQuantities"],
+      dependencies: ["Helpers", "BlackBoxModel", "PhysicalQuantities", "Swifter"],
       swiftSettings: swift),
     .target(name: "PinchPoint",
       dependencies: ["CPikchr", "CIAPWSIF97", "Helpers", "PhysicalQuantities"],
