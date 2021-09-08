@@ -113,13 +113,41 @@ public final class Gnuplot {
       $data i 5 u 1:2:(sprintf("%d°C", $2)) with labels tc ls 18 offset char 3,0 notitle\n
     """
   }
-  public convenience init<T: FloatingPoint>(
-    xs: [T]..., ys: [T]..., titles: String..., smooth: Bool = false) 
+  public convenience init<F: FloatingPoint>(
+    xys: [SIMD2<F>]..., titles: String..., style: Style = .linePoints)
   {
-    self.init(xys: zip(xs, ys).map { a, b in zip(a, b).map { ($0, $1) } }, titles: titles, smooth: smooth)
+    self.init(xys: xys.map { xy in xy.map { ($0.x, $0.y) } }, titles: titles, style: style)
   }
 
-  public init<T: FloatingPoint>(xys: [[(T, T)]], titles: [String], smooth: Bool = false) {
+  public convenience init<T: FloatingPoint>(
+    xs: [T]..., ys: [T]..., titles: String..., style: Style = .linePoints)
+  {
+    self.init(xys: zip(xs, ys).map { a, b in zip(a, b).map { ($0, $1) } }, titles: titles, style: style)
+  }
+  
+  public enum Style {
+    case lines(smooth: Bool)
+    case linePoints
+    case points
+    
+    var raw: (String, String) {
+      let s, l: String
+      switch self {
+        case .lines(let smooth):
+        s = smooth ? "smooth csplines" : ""
+        l = "l"
+        case .linePoints:
+        s = ""
+        l = "lp"
+        case .points:
+        s = ""
+        l = "points"
+      }
+      return (s, l)
+    }
+  }
+  
+  public init<T: FloatingPoint>(xys: [[(T, T)]], titles: [String] = [], style: Style = .linePoints) {
     let missingTitles = xys.count - titles.count
     var titles = titles
     if missingTitles > 0 {
@@ -131,15 +159,15 @@ public final class Gnuplot {
 
     self.datablock = "\n$data <<EOD\n"
     + data.joined(separator: "\n\n\n") + "\n\n\nEOD\n"
-    let s = smooth ? "smooth csplines" : ""
-    let l = smooth ? "l" : "lp"
+
+    let (s, l) = style.raw
     self.plot = "\nplot " + xys.indices.map { i in
       "$data i \(i) u 1:2 \(s) w \(l) ls \(i+11) title columnheader(1)"
     }.joined(separator: ", ") + "\n"
   }
 
   public init<T: FloatingPoint>(
-    xy1s: [(T, T)]..., xy2s: [(T, T)]..., titles: String..., smooth: Bool = false) {
+    xy1s: [(T, T)]..., xy2s: [(T, T)]..., titles: String..., style: Style = .linePoints) {
     let missingTitles = xy1s.count + xy2s.count - titles.count
     var titles = titles
     if missingTitles > 0 {
@@ -156,8 +184,8 @@ public final class Gnuplot {
     self.datablock = "\n$data <<EOD\n"
       + y1.joined(separator: "\n\n\n") + "\n\n\n"
       + y2.joined(separator: "\n\n\n") + "\n\n\nEOD\n"
-    let s = smooth ? "smooth csplines" : ""
-    let l = smooth ? "l" : "lp"
+    
+    let (s, l) = style.raw
     let t = "title columnheader(1)"
     self.plot = "\nset ytics nomirror\nset y2tics\nplot "
       + xy1s.indices.map { i in
