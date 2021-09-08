@@ -113,14 +113,14 @@ public final class Gnuplot {
       $data i 5 u 1:2:(sprintf("%d°C", $2)) with labels tc ls 18 offset char 3,0 notitle\n
     """
   }
-  public convenience init<F: FloatingPoint>(
-    xys: [SIMD2<F>]..., titles: String..., style: Style = .linePoints)
+  public convenience init<S: Sequence, F: FloatingPoint>(
+    xys: S..., titles: String..., style: Style = .linePoints) where S.Element == SIMD2<F>
   {
     self.init(xys: xys.map { xy in xy.map { ($0.x, $0.y) } }, titles: titles, style: style)
   }
 
-  public convenience init<T: FloatingPoint>(
-    xs: [T]..., ys: [T]..., titles: String..., style: Style = .linePoints)
+  public convenience init<S: Sequence, F: FloatingPoint>(
+    xs: S..., ys: S..., titles: String..., style: Style = .linePoints) where S.Element == F
   {
     self.init(xys: zip(xs, ys).map { a, b in zip(a, b).map { ($0, $1) } }, titles: titles, style: style)
   }

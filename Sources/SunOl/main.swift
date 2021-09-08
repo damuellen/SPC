@@ -947,8 +947,6 @@ struct Parameter {
   }
 }
 
-var tt = ""
-
 func main() {
   guard CommandLine.argc > 1 else { return }
   let url = URL(fileURLWithPath: CommandLine.arguments[1])
@@ -978,31 +976,13 @@ func main() {
     El_boiler_cap: 75...85,
     grid_max_export: 100...100
   )
+  
   var all = parameter.ranges
-  var best = parameter.ranges
+  var best = parameter.ranges.compactMap(\.last).map{[$0]}
 
-
-  for i in all.indices.reversed() {
-    var buffer = Array(CartesianProduct(best).prefix(best[i].count))
-    DispatchQueue.concurrentPerform(iterations: buffer.count) {
-      var calc = SunOl(values: buffer[$0])
-      var pr_meth_plant_op = Array(repeating: 0.5, count: 8760)
-      calc(&pr_meth_plant_op, Q_Sol_MW_thLoop, Reference_PV_plant_power_at_inverter_inlet_DC, Reference_PV_MV_power_at_transformer_outlet)
-      calc(&pr_meth_plant_op, Q_Sol_MW_thLoop, Reference_PV_plant_power_at_inverter_inlet_DC, Reference_PV_MV_power_at_transformer_outlet)
-      calc(&pr_meth_plant_op, Q_Sol_MW_thLoop, Reference_PV_plant_power_at_inverter_inlet_DC, Reference_PV_MV_power_at_transformer_outlet)
-      let result = SpecificCost().invest(config: calc)
-      buffer[$0].append(result.LCH2)
-      buffer[$0].append(result.LCoM)
-      buffer[$0].append(result.LCoE)
-      buffer[$0].append(result.LCoTh)
-      buffer[$0].append(Double(calc.H2_to_meth_production_effective_MTPH_sum))
-      print(buffer[$0])
-    }
-    best[i] = [buffer.sorted(by: {$0[13]<$1[13]})[0][i]]
-  }
-
-  for k in 0..<1000 {
-    for i in all.indices.reversed() {
+  for _ in 0..<1000 {
+    let hashValue = best.hashValue
+    for i in all.indices.shuffled() {
       best[i] = all[i]
       var buffer = Array(CartesianProduct(best))
       DispatchQueue.concurrentPerform(iterations: buffer.count) {
@@ -1017,41 +997,45 @@ func main() {
         buffer[$0].append(result.LCoE)
         buffer[$0].append(result.LCoTh)
         buffer[$0].append(Double(calc.H2_to_meth_production_effective_MTPH_sum))
-        
       }
-      let sorted = buffer.sorted(by: {$0[13]<$1[13]})      
-      print(sorted[0])
-      tt = sorted[0].map(\.description).joined(separator: "\n")
-      let count = sorted.count
-      best[i] = [sorted[0][i]]
-      if count > 2 { 
+      buffer.sort(by: {$0[13]<$1[13]})
+      print(buffer[0])
+      results.insert(SIMD2(x: buffer[0][13], y: buffer[0][16]))
+      best[i] = [buffer[0][i]]
+      let l = buffer.count-1
+      if l > 1 {
+        let r = all[i][l] - all[i][0]
         if best[i][0] == all[i][0] {
-          all[i] = all[i].map { max(1, $0 - ((all[i][count-1] - all[i][0]) / 2)) }
-        } else if best[i][0] == all[i][count-1] {
-          all[i] = all[i].map { $0 + ((all[i][count-1] - all[i][0]) / 2) }
+          all[i] = all[i].map { max(1, $0 - r) }
+        } else if best[i][0] == all[i][l] {
+          all[i] = all[i].map { $0 + r }
         }        
       }
     }
+    if hashValue == best.hashValue { break }
   }
 }
 
-import Swifter
+var results: Set<SIMD2<Double>> = []
 
+import Swifter
 let server = HttpServer()
 server["/"] = scopes {
   html {
-    meta { 
-     httpEquiv = "refresh"
-     content = "5"
+    meta {
+      httpEquiv = "refresh"
+      content = "5"
     }
     body {
-      center {
-        pre { inner = tt }         
+      div {
+        inner = try! Gnuplot(xys: results, style: .points)(.svg)
       }
     }
   }
 }
+
 try server.start(9080, forceIPv4: true)
 let now = Date()
 main()
 print("Elapsed seconds:", -now.timeIntervalSinceNow)
+DispatchSemaphore(value: 0).wait()
