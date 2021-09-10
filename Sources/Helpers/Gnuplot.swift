@@ -14,10 +14,12 @@ import Foundation
 public final class Gnuplot {
   let datablock: String
   let plot: String
+  let settings: [String]
 
   public init(data: String) {
     self.datablock = data
     self.plot = "plot $data"
+    self.settings = []
   }
 
   public static func process() -> Process {
@@ -60,26 +62,38 @@ public final class Gnuplot {
     return code
   }
 
-  let settings = [
-    "style line 11 lt 1 lw 3 pt 7 ps 0.5 lc rgb '#0072bd'",
-    "style line 12 lt 1 lw 3 pt 7 ps 0.5 lc rgb '#d95319'",
-    "style line 13 lt 1 lw 3 pt 7 ps 0.5 lc rgb '#edb120'",
-    "style line 14 lt 1 lw 3 pt 7 ps 0.5 lc rgb '#7e2f8e'",
-    "style line 15 lt 1 lw 3 pt 7 ps 0.5 lc rgb '#77ac30'",
-    "style line 16 lt 1 lw 3 pt 7 ps 0.5 lc rgb '#4dbeee'",
-    "style line 17 lt 1 lw 3 pt 7 ps 0.5 lc rgb '#a2142f'",
-    "style line 21 lt 1 lw 3 pt 9 ps 0.8 lc rgb '#0072bd'",
-    "style line 22 lt 1 lw 3 pt 9 ps 0.8 lc rgb '#d95319'",
-    "style line 23 lt 1 lw 3 pt 9 ps 0.8 lc rgb '#edb120'",
-    "style line 24 lt 1 lw 3 pt 9 ps 0.8 lc rgb '#7e2f8e'",
-    "style line 25 lt 1 lw 3 pt 9 ps 0.8 lc rgb '#77ac30'",
-    "style line 26 lt 1 lw 3 pt 9 ps 0.8 lc rgb '#4dbeee'",
-    "style line 27 lt 1 lw 3 pt 9 ps 0.8 lc rgb '#a2142f'",
-    "style line 18 lt 1 lw 1 dashtype 3 lc rgb 'black'",
-    "style line 19 lt 0 lw 0.5 lc rgb 'black'",
-    "label textcolor rgb 'black'",
-    "key above tc ls 18",
-  ]
+  static private func settings(_ style: Style) -> [String] {
+    let lw, pt, ps: String
+    if case .points = style {
+      lw = "lw 2"
+      pt = "pt 6"
+      ps = "ps 1.0"
+    } else { 
+      lw = "lw 3"
+      pt = "pt 7"
+      ps = "ps 0.5"
+    }
+    return [
+      "style line 11 lt 1 \(lw) \(pt) \(ps) lc rgb '#0072bd'",
+      "style line 12 lt 1 \(lw) \(pt) \(ps) lc rgb '#d95319'",
+      "style line 13 lt 1 \(lw) \(pt) \(ps) lc rgb '#edb120'",
+      "style line 14 lt 1 \(lw) \(pt) \(ps) lc rgb '#7e2f8e'",
+      "style line 15 lt 1 \(lw) \(pt) \(ps) lc rgb '#77ac30'",
+      "style line 16 lt 1 \(lw) \(pt) \(ps) lc rgb '#4dbeee'",
+      "style line 17 lt 1 \(lw) \(pt) \(ps) lc rgb '#a2142f'",
+      "style line 21 lt 1 lw 3 pt 9 ps 0.8 lc rgb '#0072bd'",
+      "style line 22 lt 1 lw 3 pt 9 ps 0.8 lc rgb '#d95319'",
+      "style line 23 lt 1 lw 3 pt 9 ps 0.8 lc rgb '#edb120'",
+      "style line 24 lt 1 lw 3 pt 9 ps 0.8 lc rgb '#7e2f8e'",
+      "style line 25 lt 1 lw 3 pt 9 ps 0.8 lc rgb '#77ac30'",
+      "style line 26 lt 1 lw 3 pt 9 ps 0.8 lc rgb '#4dbeee'",
+      "style line 27 lt 1 lw 3 pt 9 ps 0.8 lc rgb '#a2142f'",
+      "style line 18 lt 1 lw 1 dashtype 3 lc rgb 'black'",
+      "style line 19 lt 0 lw 0.5 lc rgb 'black'",
+      "label textcolor rgb 'black'",
+      "key above tc ls 18",
+    ]
+  }
 
   public var userSettings = [String]()
   public var userCommand: String? = nil
@@ -97,7 +111,7 @@ public final class Gnuplot {
   ]
 
   public init(temperatures: String) {
-    self.userSettings = Gnuplot.temperatures
+    self.settings = Gnuplot.temperatures
     self.datablock = "\n$data <<EOD\n" + temperatures + "\n\n\nEOD\n"
     self.plot = """
     \nplot $data i 0 u 1:2 w lp ls 11 title columnheader(1), \
@@ -157,6 +171,8 @@ public final class Gnuplot {
       $0.0 + "\n" + $0.1.map { (x, y) in "\(x), \(y)" }.joined(separator: "\n")
     }
 
+    self.settings = Gnuplot.settings(style)
+
     self.datablock = "\n$data <<EOD\n"
     + data.joined(separator: "\n\n\n") + "\n\n\nEOD\n"
 
@@ -173,6 +189,8 @@ public final class Gnuplot {
     if missingTitles > 0 {
       titles.append(contentsOf: repeatElement("-", count: missingTitles))
     }
+
+    self.settings = Gnuplot.settings(style)
 
     let y1 = zip(titles, xy1s).map {
       $0.0 + " ,\n" + $0.1.map { (x,y) in "\(x), \(y)" }.joined(separator: "\n")
