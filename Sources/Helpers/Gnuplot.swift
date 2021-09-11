@@ -230,13 +230,17 @@ public final class Gnuplot {
       switch self {
       case .svg: return "set term svg size 1280,800;set output\n"
       case .pdf(let path):
-        return "set term pdfcairo size 10,7.1 enhanced \(font)14';set output '\(path)'\n"
+        return "set term pdfcairo size 10,7.1 enhanced \(font)14'\n" 
+        + "set output \(path.isEmpty ? "" : ("'" + path + "'"))\n"
       case .png(let path):
-        return "set term pngcairo size 1440, 900 enhanced \(font)12';set output '\(path)'\n"
+        return "set term pngcairo size 1440, 900 enhanced \(font)12'\n" 
+        + "set output \(path.isEmpty ? "" : ("'" + path + "'"))\n"
       case .pngSmall(let path):
-        return "set term pngcairo size 1024, 720 enhanced \(font)12';set output '\(path)'\n"
+        return "set term pngcairo size 1024, 720 enhanced \(font)12'\n" 
+        + "set output \(path.isEmpty ? "" : ("'" + path + "'"))\n"
       case .pngLarge(let path):
-        return "set term pngcairo size 1920, 1200 enhanced \(font)14';set output '\(path)'\n"
+        return "set term pngcairo size 1920, 1200 enhanced \(font)14'\n" 
+        + "set output \(path.isEmpty ? "" : ("'" + path + "'"))\n"
       }
     }
   }
