@@ -1,4 +1,4 @@
-// swift-tools-version:5.2
+// swift-tools-version:5.4
 import PackageDescription
 let c = [CSetting.unsafeFlags(["-ffast-math", "-O3",  "-fomit-frame-pointer", "-funroll-loops"])]
 let flags = ["-cross-module-optimization", "-Ounchecked", "-enforce-exclusivity=unchecked", "-DRELEASE"]
@@ -19,11 +19,12 @@ let package = Package(
     // .library(name: "BlackBoxModel", type: .dynamic, targets: ["BlackBoxModel"]),
     ],
   dependencies: [
-    .package(url: "https://github.com/apple/swift-argument-parser.git", .upToNextMinor(from: "0.4.0")),
+    .package(url: "https://github.com/apple/swift-argument-parser.git", .upToNextMinor(from: "0.5.0")),
     .package(url: "https://github.com/damuellen/SQLite.swift.git", .branch("master")),
     .package(url: "https://github.com/damuellen/xlsxwriter.swift.git", .branch("main")),
     .package(name: "Benchmark", url: "https://github.com/google/swift-benchmark", from: "0.1.0"),
     .package(name: "Swifter", url: "https://github.com/httpswift/swifter.git", .upToNextMajor(from: "1.5.0"))
+
     // .package(url: "https://github.com/pvieito/PythonKit.git", .branch("master")),
     // .package(url: "https://github.com/jpsim/Yams.git", from: "4.0.1")
     ],
@@ -33,16 +34,16 @@ let package = Package(
     .target(name: "PhysicalQuantities",
       dependencies: ["Config", "Meteo", "Libc", "Helpers"],
       swiftSettings: swift),
-    .target(name: "TransTES",
+    .executableTarget(name: "TransTES",
       dependencies: ["Helpers", "BlackBoxModel"],
       swiftSettings: swift),
-    .target(name: "SunOl",
+    .executableTarget(name: "SunOl",
       dependencies: ["Helpers", "BlackBoxModel", "PhysicalQuantities", "Swifter"],
       swiftSettings: swift),
     .target(name: "PinchPoint",
       dependencies: ["CPikchr", "CIAPWSIF97", "Helpers", "PhysicalQuantities"],
       swiftSettings: swift),
-    .target(name: "PinchPointTool",
+    .executableTarget(name: "PinchPointTool",
       dependencies: ["PinchPoint",
         .product(name: "ArgumentParser", package: "swift-argument-parser"),
         .product(name: "xlsxwriter", package: "xlsxwriter.swift")],
@@ -68,7 +69,7 @@ let package = Package(
      .target(name: "SolarFieldModel",
       dependencies: ["Libc"],
       swiftSettings: swift),
-    .target(name: "SolarFieldCalc",
+    .executableTarget(name: "SolarFieldCalc",
       dependencies: ["SolarFieldModel", "CPikchr", "Helpers",
         .product(name: "ArgumentParser", package: "swift-argument-parser"),
         .product(name: "xlsxwriter", package: "xlsxwriter.swift")],
@@ -76,12 +77,12 @@ let package = Package(
     .target(name: "Meteo",
       dependencies: ["DateGenerator", "SolarPosition"],
       swiftSettings: swift),
-    .target(name: "SolarPerformanceCalc",
+    .executableTarget(name: "SolarPerformanceCalc",
       dependencies: ["Config", "BlackBoxModel", "Helpers",
         .product(name: "ArgumentParser", package: "swift-argument-parser"),
         .product(name: "xlsxwriter", package: "xlsxwriter.swift")],
       swiftSettings: swift),
-    .target(name: "Benchmarking",
+    .executableTarget(name: "Benchmarking",
       dependencies: ["Meteo", "Benchmark", "BlackBoxModel"],
       swiftSettings: swift),
     .testTarget(name: "MeteoTests",
