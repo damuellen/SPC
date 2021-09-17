@@ -6,7 +6,7 @@ let swift: [SwiftSetting] = [
   .unsafeFlags(flags, .when(configuration: .release)),
   .define("DEBUG", .when(configuration: .debug))
 ]
-let package = Package(
+var package = Package(
   name: "SPC",
   platforms: [
     .macOS(.v10_13), .iOS(.v12),
@@ -22,9 +22,7 @@ let package = Package(
     .package(url: "https://github.com/apple/swift-argument-parser.git", .upToNextMinor(from: "0.5.0")),
     .package(url: "https://github.com/damuellen/SQLite.swift.git", .branch("master")),
     .package(url: "https://github.com/damuellen/xlsxwriter.swift.git", .branch("main")),
-    .package(name: "Benchmark", url: "https://github.com/google/swift-benchmark", from: "0.1.0"),
-    .package(name: "Swifter", url: "https://github.com/httpswift/swifter.git", .upToNextMajor(from: "1.5.0"))
-
+    .package(name: "Benchmark", url: "https://github.com/google/swift-benchmark", from: "0.1.0"),  
     // .package(url: "https://github.com/pvieito/PythonKit.git", .branch("master")),
     // .package(url: "https://github.com/jpsim/Yams.git", from: "4.0.1")
     ],
@@ -38,7 +36,8 @@ let package = Package(
       dependencies: ["Helpers", "BlackBoxModel"],
       swiftSettings: swift),
     .executableTarget(name: "SunOl",
-      dependencies: ["Helpers", "BlackBoxModel", "PhysicalQuantities", "Swifter"],
+      dependencies: ["Helpers", "BlackBoxModel", "PhysicalQuantities",
+      .byName(name: "Swifter", condition: .when(platforms: [.linux, .macOS]))],
       swiftSettings: swift),
     .target(name: "PinchPoint",
       dependencies: ["CPikchr", "CIAPWSIF97", "Helpers", "PhysicalQuantities"],
@@ -99,8 +98,6 @@ let package = Package(
   swiftLanguageVersions: [.v5]
 )
 
-// FIXME: conditionalise these flags since SwiftPM 5.3 and earlier will crash
-// for platforms they don't know about.
 #if os(Windows)
 let linker = ["-Xlinker", "/INCREMENTAL:NO", "-Xlinker", "/IGNORE:4217,4286"]
 
@@ -111,4 +108,8 @@ if let BlackBoxModel = package.targets.first(where: { $0.name == "BlackBoxModel"
 if let Helpers = package.targets.first(where: { $0.name == "Helpers" }) {
   Helpers.linkerSettings = [.linkedLibrary("User32"), .unsafeFlags(flags)]
 }
+#else
+package.dependencies.append(
+  .package(name: "Swifter", url: "https://github.com/httpswift/swifter.git", .upToNextMajor(from: "1.5.0"))
+)
 #endif

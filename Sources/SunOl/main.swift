@@ -11,13 +11,15 @@ struct SunOl {
   var Heater_cap = 239.0
   var TES_Full_Load_Hours = 14.0
   var EY_Nominal_elec_input = 280.0
+  var EY_aux_elec_input = 0.0
+  var Meth_nominal_aux_electr_cons = 0.0
   var PB_Nominal_gross_cap = 250.0
   var BESS_cap = 100.0
   var H2_storage_cap = 100.0
   var Meth_nominal_hourly_prod_cap = 14.8
   var El_boiler_cap = 100.0
   var grid_max_export = 70.0
-  var grid_max_import = 70.0  
+  var grid_max_import: Double { grid_max_export }
   var BESS_max_Charging_cap = 50.0
 
   struct Heater {
@@ -35,7 +37,7 @@ struct SunOl {
     private var ref_gross_cap = (nominal: 200.0, low: 63.0, min: 25.0, maxExport: 25.0)
     private var ref_heat_input = (nominal: 463.485, low: 168.787, min: 85.512, maxExport: 112.349)
     private var ref_aux_heat_prod: (nominal: Double, low: Double, min: Double, maxExport: Double) = (
-      56.911135799999997, 26.901868399999998, 17.902553200000003, 56.911135799999997  
+      56.911135799999997, 26.901868399999998, 17.902553200000003, 56.911135799999997
       // (23.333*2775.4-15.167*167.6-8.167*649.6)/1000.0,
       // (10.778*2775.4-8.278*167.6-2.5*649.6)/1000.0,
       // (7.194*2775.4-5.414*167.6-1.78*649.6)/1000.0,
@@ -65,8 +67,19 @@ struct SunOl {
     lazy var hot_start_heat_req = nominal_heat_input * hot_start_energyperc
 
     mutating func proportion(nominal_gross_cap: Double, EY: electrolysis, nominal_heatConsumption: Double) {
-      minimum_gross_cap = nominal_gross_cap * min_el_cap_perc 
-      
+      if nominal_gross_cap == 0 { 
+        self.nominal_gross_cap = 0
+        max_heat_input = 0
+        min_heat_input = 0
+        minimum_gross_cap = 0
+        nominal_gross_eff = 0
+        th = Polynomial([0])
+        el = Polynomial([0])
+        return 
+      }
+
+      minimum_gross_cap = nominal_gross_cap * min_el_cap_perc
+
       let gross_cap = [  // A29-A33
         ref_gross_cap.nominal, ((((ref_gross_cap.min + ref_gross_cap.nominal) / 2) + ref_gross_cap.nominal) / 2),
         ((ref_gross_cap.min + ref_gross_cap.nominal) / 2), ref_gross_cap.low, ref_gross_cap.min,
@@ -97,23 +110,25 @@ struct SunOl {
       th = Polynomial(x: thermal_load_perc, y: eff_factor)
       el = Polynomial(x: load_perc, y: eff_factor)
       Ratio_Heat_input_vs_output = factor * (no_extraction[0] / ref_aux_heat_prod.nominal) / (gross[0] / steam_extraction[0])
-      max_heat_input = gross[0] + steam_extraction[0] * Ratio_Heat_input_vs_output      
+      max_heat_input = gross[0] + steam_extraction[0] * Ratio_Heat_input_vs_output
       min_heat_input = minimum_gross_cap / (nominal_gross_eff * el(min_el_cap_perc))
       nominal_gross_eff = eff[0]
+      self.nominal_gross_cap = nominal_gross_cap
     }
   }
 
   struct electrolysis {
     private(set) var electrEnergy_per_tH2 = 55.0, min_cap_rate = 0.1, net_elec_input = 180.0, aux_elec_input = 2.7, heat_input = 40.0
-    
+
     lazy var gross_elec_input = net_elec_input + aux_elec_input
     lazy var min_elec_input = gross_elec_input * min_cap_rate
 
-    mutating func proportion(net_elec_input: Double) {
+    mutating func proportion(net_elec_input: Double) -> Double {
       let ratio = net_elec_input / self.net_elec_input
       self.net_elec_input = net_elec_input
       aux_elec_input *= ratio
       heat_input *= ratio
+      return aux_elec_input
     }
   }
 
@@ -136,11 +151,11 @@ struct SunOl {
     var DC_Cap = 818.0
   }
 
-  #if DEBUGA
+  #if DEBUG
   var results: Results
   #endif
   init(values: [Double]) {
-    #if DEBUGA
+    #if DEBUG
     self.results = .init()
     #endif
     self.CSP_Loop_Nr = values[0]
@@ -156,11 +171,11 @@ struct SunOl {
     self.El_boiler_cap = values[10]
     self.grid_max_export = values[11]
   }
-  
+
   mutating func callAsFunction(
-    _ pr_meth_plant_op: inout [Double], 
-    _ Q_Sol_MW_thLoop: [Double], 
-    _ Reference_PV_plant_power_at_inverter_inlet_DC: [Double], 
+    _ pr_meth_plant_op: inout [Double],
+    _ Q_Sol_MW_thLoop: [Double],
+    _ Reference_PV_plant_power_at_inverter_inlet_DC: [Double],
     _ Reference_PV_MV_power_at_transformer_outlet: [Double]
     ) {
     var Heater = Heater()
@@ -176,20 +191,21 @@ struct SunOl {
 
     var Meth = MethanolPlant()
     Meth.proportion(nominal_hourly_prod_cap: Meth_nominal_hourly_prod_cap)
-
+    Meth_nominal_aux_electr_cons = Meth.nominal_aux_electr_cons
     var EY = electrolysis()
-    EY.proportion(net_elec_input: EY_Nominal_elec_input)
-
+    EY_aux_elec_input = EY.proportion(net_elec_input: EY_Nominal_elec_input)
+  
     var PB = PowerBlock()
     PB.proportion(nominal_gross_cap: PB_Nominal_gross_cap, EY: EY, nominal_heatConsumption: Meth.nominal_heatConsumption)
     PB_Ratio_Heat_input_vs_output = PB.Ratio_Heat_input_vs_output
     TES_Thermal_capacity = TES_Full_Load_Hours * PB.nominal_heat_input
+
     let TES_aux_elec_perc = 0.01
     let TES_dead_mass_ratio = 0.1
     TES_salt_mass = TES_Thermal_capacity * 1000.0 * 3600.0 / (846.9867739 - 451.6806344) / 1000.0 * (1.0 + TES_dead_mass_ratio)
-    
+
     let El_boiler_eff = 0.99
-    
+
     let PB_heat_input_at_min_aux =
       (EY.min_elec_input + Meth.min_cap_perc * Meth.nominal_aux_electr_cons) / (1 - PB.aux_cons_perc)
       / (PB.nominal_gross_eff
@@ -225,15 +241,17 @@ struct SunOl {
 
     let PV_MV_power_at_transformer_outlet: [Double] = indices.map {  // K
       let load = E_PV_total_Scaled_DC[$0] / PV.DC_Cap
+      let value: Double
       if load > 0.2 {
-        return E_PV_total_Scaled_DC[$0] * HL(load)
+        value = E_PV_total_Scaled_DC[$0] * HL(load)
       } else if load > 0.1 {
-        return E_PV_total_Scaled_DC[$0] * ML(load)
+        value = E_PV_total_Scaled_DC[$0] * ML(load)
       } else if load > 0 {
-        return E_PV_total_Scaled_DC[$0] * LL(load)
+        value = E_PV_total_Scaled_DC[$0] * LL(load)
       } else {
-        return Reference_PV_MV_power_at_transformer_outlet[$0] / PV.Ref_AC_cap * PV.AC_Cap
+        value = Reference_PV_MV_power_at_transformer_outlet[$0] / PV.Ref_AC_cap * PV.AC_Cap
       }
+      return min(PV_AC_Cap, value)
     }
 
     let CSP_aux_elec_perc = 0.01
@@ -241,7 +259,7 @@ struct SunOl {
     let aux_elec_for_CSP_SF_PV_Plant: [Double] = indices.map {  // L
       Q_solar_before_dumping[$0] * CSP_aux_elec_perc + max(0, -PV_MV_power_at_transformer_outlet[$0])
     }
-    #if DEBUGA
+    #if DEBUG
     results.compare(Q_solar_before_dumping, with: "I")
     results.compare(PV_MV_power_at_transformer_outlet, with: "K")
     results.compare(aux_elec_for_CSP_SF_PV_Plant, with: "L")
@@ -288,7 +306,7 @@ struct SunOl {
               Q_solar_before_dumping[i] + pr_el_boiler_op_for_EY_Meth_heat[i] >= Meth.nominal_heatConsumption * pr_meth_plant_op[i],
               Meth.nominal_aux_electr_cons * pr_meth_plant_op[i], 0), EY.gross_elec_input + Meth.nominal_aux_electr_cons * pr_meth_plant_op[i]))
     }
-    #if DEBUGA
+    #if DEBUG
     results.compare(pr_EY_Meth_heatConsumption, with: "O")
     results.compare(pr_el_boiler_op_for_EY_Meth_heat, with: "P")
     results.compare(pr_EY_Meth_el_cons, with: "Q")
@@ -324,11 +342,12 @@ struct SunOl {
     var TES_discharge_effective = zeroes  // AQ
     var TES_discharging_aux_elec_cons = zeroes  // AR
 
-    let Ratio_CSP_vs_Heater = 1.315007 
+    let Ratio_CSP_vs_Heater = 1.315007
     for i in indices.dropFirst() {
       TES_storage_level[i] = iff(  // AM
         TES_storage_level[i - 1] + TES_total_thermal_input[i - 1] - TES_discharge_effective[i - 1] - PB_startup_heatConsumption_effective[i - 1] < 0.01, 0,
         TES_storage_level[i - 1] + TES_total_thermal_input[i - 1] - TES_discharge_effective[i - 1] - PB_startup_heatConsumption_effective[i - 1])
+
       PV_electrical_input_to_heater[i] = max(  // R
         0,
         min(
@@ -336,6 +355,7 @@ struct SunOl {
           (PV_MV_power_at_transformer_outlet[i] - aux_elec_for_CSP_SF_PV_Plant[i] - pr_EY_Meth_el_cons[i])
             * (1 - TES_aux_elec_perc * Heater.eff * (1 + 1 / Ratio_CSP_vs_Heater)),
           (TES_Thermal_cap - TES_storage_level[i]) / (1 + 1 / Ratio_CSP_vs_Heater) / Heater.eff))
+
       TES_thermal_input_by_heater[i] = PV_electrical_input_to_heater[i] * Heater.eff  // S
       TES_thermal_input_by_CSP[i] = TES_thermal_input_by_heater[i] / Ratio_CSP_vs_Heater  // T
       TES_total_thermal_input[i] = TES_thermal_input_by_CSP[i] + TES_thermal_input_by_heater[i]
@@ -364,12 +384,17 @@ struct SunOl {
             (Max_net_elec_request_from_EY_Meth_aux_to_PB_after_pr_PV_EY_op[i] - SF_TES_charge_PV_aux_cons_not_covered_by_PV[i]) / EY.gross_elec_input
               * EY.heat_input))
       let heat = (EY.min_elec_input + pr_meth_plant_op[i] * Meth.nominal_aux_electr_cons + SF_TES_charge_PV_aux_cons_not_covered_by_PV[i]) / (1 - PB.aux_cons_perc)
+      if PB.nominal_heat_input > 0 {
       min_PB_heat_request_from_EY_Meth_aux_to_PB_without_extractions[i] =  // AD
         heat / (PB.nominal_gross_eff * (PB.el(heat / PB.nominal_gross_cap))) * (1 + TES_aux_elec_perc / PB_eff_at_min_Op)
+      }
+
       steam_extraction_matching_min_op_case[i] =  // AE
         iff(pr_EY_Meth_el_cons[i] == 0, pr_meth_plant_op[i] * Meth.nominal_heatConsumption + EY.min_cap_rate * EY.heat_input, 0)
+      if PB.nominal_heat_input > 0 {
       pr_PB_eff_excl_extraction_at_min_EY_pr_Meth[i] =  // AF
         PB.nominal_gross_eff * PB.th(min_PB_heat_request_from_EY_Meth_aux_to_PB_without_extractions[i] / PB.nominal_heat_input)
+      }
 
       let AB = Max_net_elec_request_from_EY_Meth_aux_to_PB_after_pr_PV_EY_op
       let Q = pr_EY_Meth_el_cons
@@ -399,12 +424,12 @@ struct SunOl {
                 (TES_storage_level[i - 1] + TES_total_thermal_input[i - 1] - AO[i - 1] - pr_PB_heat_input_based_on_avail_heat[i - 1])
                   / count, AD[i] + PB.Ratio_Heat_input_vs_output * AE[i]))),
           iff(
-            (PV_elec_avail_after_TES_charging[i] > EY.gross_elec_input + Meth.nominal_aux_electr_cons * pr_meth_plant_op[i] - PB.minimum_gross_cap 
+            (PV_elec_avail_after_TES_charging[i] > EY.gross_elec_input + Meth.nominal_aux_electr_cons * pr_meth_plant_op[i] - PB.minimum_gross_cap
             * (1 - PB.aux_cons_perc) || TES_storage_level[i - 1] == 0 || AB[i] == 0), 0,
             pr_PB_heat_input_based_on_avail_heat[i - 1]
               + ((pr_PB_heat_input_based_on_avail_heat[i - 1] > 0)
                 ? ((Y[i] - Y[i - 1]) / pr_PB_eff_excl_extraction_at_min_EY_pr_Meth[i]
-                  + (Meth.nominal_heatConsumption * PB.Ratio_Heat_input_vs_output + Meth.nominal_aux_electr_cons 
+                  + (Meth.nominal_heatConsumption * PB.Ratio_Heat_input_vs_output + Meth.nominal_aux_electr_cons
                   / pr_PB_eff_excl_extraction_at_min_EY_pr_Meth[i]) * (-pr_meth_plant_op[i - 1] + pr_meth_plant_op[i])) : 0))))
       pr_PB_eff_excl_extraction_at_discharge_load[i] = iff(  // AH
         pr_PB_heat_input_based_on_avail_heat[i] == 0, 0,
@@ -435,9 +460,10 @@ struct SunOl {
       pr_heat_request_for_aux_consumers_by_PB[i] = max(  // AL
         0,
         iff(
-          pr_Ey_op_by_PB[i] == 0 || Check_calc_PB_heat_input_based_on_EY_op[i] == 0, 0,
+          pr_Ey_op_by_PB[i] == 0 || Check_calc_PB_heat_input_based_on_EY_op[i] == 0 || pr_EY_Meth_el_cons[i] > 0, 0,
           pr_Ey_op_by_PB[i] / (EY.gross_elec_input) * EY.heat_input + iff(pr_EY_Meth_el_cons[i] > 0, 0, pr_meth_plant_op[i] * Meth.nominal_heatConsumption))
       )
+
       /*
        TES_storage_level[i] = iff(  // AM
        TES_storage_level[i - 1] + TES_total_thermal_input[i - 1] - TES_discharge_effective[i - 1] - PB.startup_heatConsumption_effective[i - 1] < 0.01, 0,
@@ -479,7 +505,7 @@ struct SunOl {
           iff(TES_storage_level[i] == 0, 0, Check_calc_PB_heat_input_based_on_EY_op[i])))
       TES_discharging_aux_elec_cons[i] = TES_discharge_effective[i] * TES_aux_elec_perc
     }
-    #if DEBUGA
+    #if DEBUG
     results.compare(PV_electrical_input_to_heater, with: "R")
     results.compare(TES_thermal_input_by_heater, with: "S")
     results.compare(TES_thermal_input_by_CSP, with: "T")
@@ -537,16 +563,19 @@ struct SunOl {
         max(
           0,
           iff(
-            Check_calc_PB_heat_input_based_on_EY_op[i] > 0 && TES_discharge_effective[i] > 0,
+            Check_calc_PB_heat_input_based_on_EY_op[i] > 0 && TES_discharge_effective[i] > 0 && pr_EY_Meth_el_cons[i] == 0.0,
             iff(pr_EY_Meth_el_cons[i] > 0, 0, Meth.nominal_heatConsumption * pr_meth_plant_op[i])
               + (pr_Ey_op_by_PB[i] + TES_discharge_effective[i] - Check_calc_PB_heat_input_based_on_EY_op[i]) / EY.gross_elec_input * EY.heat_input, 0
           ))
       Heat_avail_for_elec_generation[i] =  // AT
         max(0, TES_discharge_effective[i] - extracted_steam[i] * PB.Ratio_Heat_input_vs_output)
+
+      if PB.nominal_heat_input > 0 {
       gross_elec_from_PB[i] =  // AU
         min(
           PB.nominal_gross_cap,
           Heat_avail_for_elec_generation[i] * (PB.th(Heat_avail_for_elec_generation[i] / PB.nominal_heat_input) * PB.nominal_gross_eff))
+      }
       PB_aux_cons[i] = gross_elec_from_PB[i] * PB.aux_cons_perc
       PB_aux_cons_not_covered_by_PB[i] = max(0, PB_aux_cons[i] - gross_elec_from_PB[i])
       aux_cons_covered_by_PB[i] = PB_aux_cons[i] - PB_aux_cons_not_covered_by_PB[i]
@@ -568,10 +597,10 @@ struct SunOl {
       pr_meth_elec_cons_covered_by_PB_SF[i] = min(pr_min_meth_elec_cons[i] + aux_cons_not_covered[i], avail_total_net_elec[i])
       pr_meth_heatConsumption_not_covered_by_aux_boiler[i] = max(
         0,
-        min(
-          pr_meth_heatConsumption_not_covered_by_PB_SF[i] - El_boiler_cap * El_boiler_eff,
-          (avail_total_net_elec[i] + grid_max_import - pr_meth_elec_cons_covered_by_PB_SF[i] - pr_meth_heatConsumption_not_covered_by_PB_SF[i]
-            / El_boiler_eff) * El_boiler_eff))
+        pr_meth_heatConsumption_not_covered_by_PB_SF[i] - El_boiler_cap * El_boiler_eff,
+        (pr_meth_heatConsumption_not_covered_by_PB_SF[i] / El_boiler_eff - avail_total_net_elec[i] - grid_max_import + pr_meth_elec_cons_covered_by_PB_SF[i]) * El_boiler_eff
+      )
+
       pr_meth_heatConsumption_covered_by_aux_boiler[i] = pr_meth_heatConsumption_not_covered_by_PB_SF[i] - pr_meth_heatConsumption_not_covered_by_aux_boiler[i]
       aux_boiler_cap_avail_after_pr_meth_cons[i] = max(
         0,
@@ -644,7 +673,7 @@ struct SunOl {
         elec_avail_after_EY_elec_cons[i] - elec_to_cover_EY_aux_heatConsumption_covered_by_plant[i]
       Amount_of_H2_produced_MTPH[i] = Net_elec_to_EY[i] / EY.electrEnergy_per_tH2  // CI
     }
-    #if DEBUGA
+    #if DEBUG
     results.compare(extracted_steam, with: "AS")
     results.compare(Heat_avail_for_elec_generation, with: "AT")
     results.compare(gross_elec_from_PB, with: "AU")
@@ -718,8 +747,9 @@ struct SunOl {
         max(
           0,
           min(
-            (elec_avail_after_total_EY[i] + PB_SF_aux_heat_avail_after_EY[i] / El_boiler_eff + grid_cap_avail_after_EY[i]
-              - aux_electr_not_covered_by_plant[i]) / (Meth.nominal_aux_electr_cons + Meth.nominal_heatConsumption / El_boiler_eff) * Meth.max_H2_Cons,
+            (elec_avail_after_total_EY[i] + PB_SF_aux_heat_avail_after_EY[i] / El_boiler_eff + grid_cap_avail_after_EY[i] - aux_electr_not_covered_by_plant[i]) 
+            / (Meth.nominal_aux_electr_cons + Meth.nominal_heatConsumption / El_boiler_eff) * Meth.max_H2_Cons,
+            (grid_cap_avail_after_EY[i] + elec_avail_after_total_EY[i]) / Meth.nominal_aux_electr_cons * Meth.max_H2_Cons,
             iff(Meth.nominal_heatConsumption > 0,(aux_boiler_cap_avail_after_EY[i] + PB_SF_aux_heat_avail_after_EY[i]) / Meth.nominal_heatConsumption * Meth.max_H2_Cons , Meth.max_H2_Cons),
             iff(H2_storage_level_MT[i] + Amount_of_H2_produced_MTPH[i] < Meth.min_H2_Cons, 0, H2_storage_level_MT[i] + Amount_of_H2_produced_MTPH[i]),
             Meth.max_H2_Cons,
@@ -732,7 +762,7 @@ struct SunOl {
                     * Meth.min_H2_Cons,
                   iff(H2_storage_level_MT[i] < 10 * Meth.min_H2_Cons, average(Amount_of_H2_produced_MTPH[i...].prefix(2)), Meth.max_H2_Cons), avg)))))
     }
-    #if DEBUGA
+    #if DEBUG
     results.compare(H2_storage_level_MT, with: "CJ")
     results.compare(H2_to_meth_production_calculated_MTPH, with: "CK")
     results.compare(H2_to_meth_production_effective_MTPH, with: "CL")
@@ -800,7 +830,7 @@ struct SunOl {
         + elec_to_cover_EY_aux_heatConsumption_covered_by_plant[i] + EY_aux_elec_cons_covered[i] + aux_cons_covered_by_PB[i] + TES_disch_Cons_covered[i]
         + SF_TES_charge_PV_aux_cons_covered_by_PV[i]
     }
-    #if DEBUGA
+    #if DEBUG
     results.compare(H2_dumping_MTPH, with: "CM")
     results.compare(meth_plant_start, with: "CN")
     results.compare(meth_produced_MTPH, with: "CO")
@@ -857,7 +887,7 @@ struct SunOl {
       Q_Sol_aux_steam_dumped[i] =  // DM
         max(0, PB_SF_aux_heat_avail_after_met[i])
     }
-    #if DEBUGA
+    #if DEBUG
     results.compare(Bat_charging, with: "DF")
     results.compare(Bat_storage_level_MWh, with: "DG")
     results.compare(Bat_discharging, with: "DH")
@@ -868,24 +898,52 @@ struct SunOl {
     results.compare(Q_Sol_aux_steam_dumped, with: "DM")
     #endif
 
+
+    var Heat_to_aux_directly_from_CSP = zeroes
+    var Heat_to_aux_from_PB = zeroes
+    var Total_SF_heat_dumped = zeroes
+    var net_elec_above_max_consumers = zeroes
+    for i in indices.dropFirst() {
+      Heat_to_aux_directly_from_CSP[i] = min(meth_plant_heatConsumption_covered_by_heat_from_PB_SF[i] + EY_aux_heatConsumption_covered_by_PB_SF[i], Q_solar_avail[i])
+      Heat_to_aux_from_PB[i] = max(0, min(Q_solar_avail[i] + EY_aux_heatConsumption_covered_by_PB_SF[i] - Heat_to_aux_directly_from_CSP[i], extracted_steam[i]))
+      Total_SF_heat_dumped[i] =  max(0, min(Q_Sol_aux_steam_dumped[i], Q_solar_before_dumping[i] - TES_thermal_input_by_CSP[i] - Heat_to_aux_directly_from_CSP[i]))
+      net_elec_above_max_consumers[i] = max(0, avail_total_net_elec[i] - Heater.cap - EY.gross_elec_input - Meth.nominal_aux_electr_cons)
+    }
+
     //PV_elec_avail_after_eHeater_sum = PV_elec_avail_after_eHeater.total
     //PV_electrical_input_to_heater_sum = PV_electrical_input_to_heater.total
+
+    Heat_to_aux_directly_from_CSP_sum = Heat_to_aux_directly_from_CSP.total
+    Heat_to_aux_from_PB_sum = Heat_to_aux_from_PB.total
+    Total_SF_heat_dumped_sum = Total_SF_heat_dumped.total
+
     Q_solar_before_dumping_sum = Q_solar_before_dumping.total
     TES_total_thermal_input_sum = TES_total_thermal_input.total
     Q_solar_avail_sum = Q_solar_avail.total
+    TES_thermal_input_by_CSP_sum = TES_thermal_input_by_CSP.total
     Q_Sol_aux_steam_dumped_sum = Q_Sol_aux_steam_dumped.total
-    extracted_steam_sum = extracted_steam.total
     gross_elec_from_PB_sum = gross_elec_from_PB.total
     aux_steam_provided_by_PB_SF_sum = aux_steam_provided_by_PB_SF.total
     elec_from_grid_sum = elec_from_grid.total
     elec_to_grid_sum = elec_to_grid.total
+    net_elec_above_max_consumers_sum = net_elec_above_max_consumers.total
     meth_produced_MTPH_sum = meth_produced_MTPH.total
+    meth_plant_heatConsumption_covered_by_heat_from_PB_SF_sum = meth_plant_heatConsumption_covered_by_heat_from_PB_SF.total
+    EY_aux_heatConsumption_covered_by_PB_SF_sum = EY_aux_heatConsumption_covered_by_PB_SF.total
+    Produced_thermal_energy_sum = meth_plant_heatConsumption_covered_by_heat_from_PB_SF_sum + EY_aux_heatConsumption_covered_by_PB_SF_sum
     avail_total_net_elec_sum = avail_total_net_elec.total
     EY_aux_heatConsumption_sum = EY_aux_heatConsumption.total
-    EY_aux_heatConsumption_covered_by_PB_SF_sum = EY_aux_heatConsumption_covered_by_PB_SF.total
     meth_plant_heatConsumption_sum = meth_plant_heatConsumption.total
-    meth_plant_heatConsumption_covered_by_heat_from_PB_SF_sum = meth_plant_heatConsumption_covered_by_heat_from_PB_SF.total
     H2_to_meth_production_effective_MTPH_sum = H2_to_meth_production_effective_MTPH.total
+    PB_startup_heatConsumption_effective_count = PB_startup_heatConsumption_effective.nonZeroCount
+    TES_discharge_effective_count = TES_discharge_effective.nonZeroCount
+    EY_plant_start_count = EY_plant_start.nonZeroCount
+    meth_plant_start_count = meth_plant_start.nonZeroCount
+    gross_operating_point_of_EY_count = gross_operating_point_of_EY.nonZeroCount
+    H2_to_meth_production_effective_MTPH_count = H2_to_meth_production_effective_MTPH.nonZeroCount
+
+    aux_elec_missing_due_to_grid_limit_sum = aux_elec_missing_due_to_grid_limit.total
+    
     pr_meth_plant_op = indices.map { i in meth_produced_MTPH[i] / Meth.nominal_hourly_prod_cap }
   }
 
@@ -904,7 +962,21 @@ struct SunOl {
   var EY_aux_heatConsumption_covered_by_PB_SF_sum: Float = 0
   var meth_plant_heatConsumption_sum: Float = 0
   var meth_plant_heatConsumption_covered_by_heat_from_PB_SF_sum: Float = 0
-  var extracted_steam_sum: Float = 0
+  var Produced_thermal_energy_sum: Float = 0
+  
+  var Heat_to_aux_directly_from_CSP_sum: Float = 0
+  var Heat_to_aux_from_PB_sum: Float = 0
+  var Total_SF_heat_dumped_sum: Float = 0
+  var net_elec_above_max_consumers_sum: Float = 0
+  var aux_elec_missing_due_to_grid_limit_sum: Float = 0
+  var PB_startup_heatConsumption_effective_count = 0
+  var TES_discharge_effective_count = 0
+  var EY_plant_start_count = 0
+  var meth_plant_start_count = 0
+  var gross_operating_point_of_EY_count = 0
+  var H2_to_meth_production_effective_MTPH_count = 0
+
+  var TES_thermal_input_by_CSP_sum: Float = 0
   var meth_produced_MTPH_sum: Float = 0
   var avail_total_net_elec_sum: Float = 0
   var TES_Thermal_capacity = 0.0
@@ -951,11 +1023,11 @@ func main() {
   guard CommandLine.argc > 1 else { return }
   let url = URL(fileURLWithPath: CommandLine.arguments[1])
   guard let dataFile = DataFile(url) else { return }
-  
+
   var Q_Sol_MW_thLoop: [Double] = [0]
   var Reference_PV_plant_power_at_inverter_inlet_DC: [Double] = [0]
   var Reference_PV_MV_power_at_transformer_outlet: [Double] = [0]
-  
+
   for data in dataFile.data {
     Q_Sol_MW_thLoop.append(Double(data[0]))
     Reference_PV_plant_power_at_inverter_inlet_DC.append(Double(data[1]))
@@ -963,26 +1035,40 @@ func main() {
   }
 
   let parameter = Parameter(
-    CSP_Loop_Nr: 130...130,
-    PV_DC_Cap: 950...1000,
-    PV_AC_Cap: 800...850,
-    Heater_cap: 220...260,
-    TES_Full_Load_Hours: 12...14,
-    EY_Nominal_elec_input: 340...360,
-    PB_Nominal_gross_cap: 180...200,
+    CSP_Loop_Nr: 0...0,
+    PV_DC_Cap: 900...1000,
+    PV_AC_Cap: 700...800,
+    Heater_cap: 210...260,
+    TES_Full_Load_Hours: 10...14,
+    EY_Nominal_elec_input: 320...370,
+    PB_Nominal_gross_cap: 0...0,
     BESS_cap: 0...0,
-    H2_storage_cap: 50...55,
-    Meth_nominal_hourly_prod_cap: 20...22,
-    El_boiler_cap: 75...85,
+    H2_storage_cap: 30...60,
+    Meth_nominal_hourly_prod_cap: 18...22,
+    El_boiler_cap: 65...95,
     grid_max_export: 100...100
   )
-  
+
   var all = parameter.ranges
+  
+  if all[6][0] == 0 { 
+    all[4] = [0]
+    all[3] = [0]
+  }
+
+  if all[1][0] == 0 { 
+    all[2] = [0]
+  }
+
+  if all[0][0] == 0 { 
+    all[3] = [0]
+  }
   var best = all.compactMap(\.last).map{[$0]}
 
   for _ in 0..<1000 {
     let hashValue = best.hashValue
-    for i in all.indices.shuffled() {
+    for i in all.indices {
+      if all[i].count == 1 { continue }
       best[i] = all[i]
       var buffer = Array(CartesianProduct(best))
       DispatchQueue.concurrentPerform(iterations: buffer.count) {
@@ -997,27 +1083,28 @@ func main() {
         buffer[$0].append(result.LCoE)
         buffer[$0].append(result.LCoTh)
         buffer[$0].append(Double(calc.H2_to_meth_production_effective_MTPH_sum))
+        buffer[$0].append(Double(calc.PB_startup_heatConsumption_effective_count))
+        buffer[$0].append(Double(calc.TES_discharge_effective_count))
+        buffer[$0].append(Double(calc.EY_plant_start_count))
+        buffer[$0].append(Double(calc.meth_plant_start_count))
+        buffer[$0].append(Double(calc.gross_operating_point_of_EY_count))
+        buffer[$0].append(Double(calc.H2_to_meth_production_effective_MTPH_count))
+        buffer[$0].append(Double(calc.aux_elec_missing_due_to_grid_limit_sum))        
       }
       buffer.sort(by: {$0[13]<$1[13]})
-      print(buffer[0])
-      results.insert(XY(x: buffer[0][13], y: buffer[0][16]))
+      print(buffer[0].readable)
+      results.insert(XY(x: buffer[0][16], y: buffer[0][13]))
       best[i] = [buffer[0][i]]
-      let l = buffer.count-1
-      if l > 1 {
-        let r = all[i][l] - all[i][0]
-        if best[i][0] == all[i][0] {
-          all[i] = all[i].map { max(1, $0 - r) }
-        } else if best[i][0] == all[i][l] {
-          all[i] = all[i].map { $0 + r }
-        }        
-      }
+      let freq = all[i][1] - all[i][0]
+      let offset = freq * Double((all[i].count / 2) - all[i].firstIndex(of: best[i][0])!)
+      all[i] = all[i].map { $0 - offset }
     }
     if hashValue == best.hashValue { break }
   }
 }
 
 var results: Set<XY> = []
-
+#if !os(Windows)
 import Swifter
 let server = HttpServer()
 server["/"] = scopes {
@@ -1026,15 +1113,12 @@ server["/"] = scopes {
       httpEquiv = "refresh"
       content = "5"
     }
-    body {
-      div {
-        inner = try! Gnuplot(xys: results, style: .points)(.svg)
-      }
-    }
+    body { div { inner = results.plot(.svg) } }
   }
 }
 
 try server.start(9080, forceIPv4: true)
+#endif
 let now = Date()
 main()
 print("Elapsed seconds:", -now.timeIntervalSinceNow)

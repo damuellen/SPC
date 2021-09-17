@@ -1,5 +1,6 @@
 import Foundation
 import PhysicalQuantities
+import Helpers
 
 func evaluate(_ f: (Double)->Double, _ range: ClosedRange<Double>, numberOfSamples: Int = 100) -> [(x: Double, y: Double)] {
     let step = (range.upperBound - range.lowerBound) / Double(numberOfSamples)
@@ -78,8 +79,22 @@ extension Sequence where Element == Double {
     self.map { $0 * factor }
   }
 }
+
+extension Double {
+  var formatted: String { String(format: "%G", self) }
+}
+
 extension Array where Element == Double {
   var total: Float { Float(reduce(0.0, +)) }
+  var nonZeroCount: Int { 
+    reduce(into: 0) { counter, value in
+      if value > 0 { counter += 1 }
+    } 
+  }
+
+  var readable: String {
+    map(\.formatted).joined(separator: " ")
+  }
 }
 
 func average(_ values: ArraySlice<Double>) -> Double {
@@ -439,4 +454,8 @@ public struct CartesianProduct<S: Sequence>: IteratorProtocol, Sequence {
   }
 }
 
-
+extension Sequence where Element == XY {
+  public func plot(_ terminal: Gnuplot.Terminal) -> String {
+    try! Gnuplot(xys: self, style: .points)(terminal)
+  }
+}
