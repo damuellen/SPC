@@ -22,7 +22,7 @@ struct SpecificCost {
 
     var auxLoops = config.CSP_Loop_Nr > 0 ?
      min(config.CSP_Loop_Nr, Double(Float(config.CSP_Loop_Nr) * factor / config.Q_solar_before_dumping_sum)) : 0
-    if (auxLoops <= 0 || y <= 0) {
+    if (auxLoops <= 0 || factor <= 0) {
       auxLoops = 0
     }
     let Assembly_hall: Double

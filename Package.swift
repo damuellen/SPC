@@ -22,7 +22,8 @@ var package = Package(
     .package(url: "https://github.com/apple/swift-argument-parser.git", .upToNextMinor(from: "0.5.0")),
     .package(url: "https://github.com/damuellen/SQLite.swift.git", .branch("master")),
     .package(url: "https://github.com/damuellen/xlsxwriter.swift.git", .branch("main")),
-    .package(name: "Benchmark", url: "https://github.com/google/swift-benchmark", from: "0.1.0"),  
+    .package(name: "Benchmark", url: "https://github.com/google/swift-benchmark", from: "0.1.0"),
+    .package(name: "Swifter", url: "https://github.com/httpswift/swifter.git", .upToNextMajor(from: "1.5.0"))
     // .package(url: "https://github.com/pvieito/PythonKit.git", .branch("master")),
     // .package(url: "https://github.com/jpsim/Yams.git", from: "4.0.1")
     ],
@@ -108,8 +109,4 @@ if let BlackBoxModel = package.targets.first(where: { $0.name == "BlackBoxModel"
 if let Helpers = package.targets.first(where: { $0.name == "Helpers" }) {
   Helpers.linkerSettings = [.linkedLibrary("User32"), .unsafeFlags(flags)]
 }
-#else
-package.dependencies.append(
-  .package(name: "Swifter", url: "https://github.com/httpswift/swifter.git", .upToNextMajor(from: "1.5.0"))
-)
 #endif
