@@ -105,6 +105,7 @@ public final class Gnuplot {
   ]
 
   static let temperatures = [
+    "size 1280,800",
     "xtics 10", "ytics 10",
     "xlabel 'Q̇ [MW]' textcolor rgb 'black'",
     "ylabel 'Temperatures [°C]' textcolor rgb 'black'",
@@ -228,7 +229,7 @@ public final class Gnuplot {
       #endif
 
       switch self {
-      case .svg: return "set term svg size 1280,800;set output\n"
+      case .svg: return "set term svg size 1000,710;set output\n"
       case .pdf(let path):
         return "set term pdfcairo size 10,7.1 enhanced \(font)14'\n" 
         + "set output \(path.isEmpty ? "" : ("'" + path + "'"))\n"
