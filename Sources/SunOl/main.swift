@@ -1020,6 +1020,7 @@ struct Parameter {
 }
 
 func main() {
+
   guard CommandLine.argc > 1 else { return }
   let url = URL(fileURLWithPath: CommandLine.arguments[1])
   guard let dataFile = DataFile(url) else { return }
@@ -1034,15 +1035,17 @@ func main() {
     Reference_PV_MV_power_at_transformer_outlet.append(Double(data[2]))
   }
 
+do {
+
   let parameter = Parameter(
-    CSP_Loop_Nr: 0...0,
+    CSP_Loop_Nr: 50...100,
     PV_DC_Cap: 900...1000,
     PV_AC_Cap: 700...800,
     Heater_cap: 210...260,
     TES_Full_Load_Hours: 10...14,
     EY_Nominal_elec_input: 320...370,
-    PB_Nominal_gross_cap: 0...0,
-    BESS_cap: 0...0,
+    PB_Nominal_gross_cap: 150...200,
+    BESS_cap: 20...50,
     H2_storage_cap: 30...60,
     Meth_nominal_hourly_prod_cap: 18...22,
     El_boiler_cap: 65...95,
@@ -1050,7 +1053,7 @@ func main() {
   )
 
   var all = parameter.ranges
-  
+  dump(all)
   if all[6][0] == 0 { 
     all[4] = [0]
     all[3] = [0]
@@ -1092,8 +1095,8 @@ func main() {
         buffer[$0].append(Double(calc.aux_elec_missing_due_to_grid_limit_sum))        
       }
       buffer.sort(by: {$0[13]<$1[13]})
-      print(buffer[0].readable)
-      results.insert(XY(x: buffer[0][16], y: buffer[0][13]))
+      // print(buffer[0].readable)
+      results.insert(XY(x: buffer[0][0], y: buffer[0][13]))
       best[i] = [buffer[0][i]]
       let freq = all[i][1] - all[i][0]
       let offset = freq * Double((all[i].count / 2) - all[i].firstIndex(of: best[i][0])!)
@@ -1101,6 +1104,363 @@ func main() {
     }
     if hashValue == best.hashValue { break }
   }
+}
+
+do {
+
+  let parameter = Parameter(
+    CSP_Loop_Nr: 130...130,
+    PV_DC_Cap: 900...1000,
+    PV_AC_Cap: 700...800,
+    Heater_cap: 210...260,
+    TES_Full_Load_Hours: 10...14,
+    EY_Nominal_elec_input: 320...370,
+    PB_Nominal_gross_cap: 150...200,
+    BESS_cap: 20...50,
+    H2_storage_cap: 30...60,
+    Meth_nominal_hourly_prod_cap: 18...22,
+    El_boiler_cap: 65...95,
+    grid_max_export: 100...100
+  )
+
+  var all = parameter.ranges
+  dump(all)
+  if all[6][0] == 0 { 
+    all[4] = [0]
+    all[3] = [0]
+  }
+
+  if all[1][0] == 0 { 
+    all[2] = [0]
+  }
+
+  if all[0][0] == 0 { 
+    all[3] = [0]
+  }
+  var best = all.compactMap(\.last).map{[$0]}
+
+  for _ in 0..<1000 {
+    let hashValue = best.hashValue
+    for i in all.indices {
+      if all[i].count == 1 { continue }
+      best[i] = all[i]
+      var buffer = Array(CartesianProduct(best))
+      DispatchQueue.concurrentPerform(iterations: buffer.count) {
+        var calc = SunOl(values: buffer[$0])
+        var pr_meth_plant_op = Array(repeating: 0.5, count: 8760)
+        calc(&pr_meth_plant_op, Q_Sol_MW_thLoop, Reference_PV_plant_power_at_inverter_inlet_DC, Reference_PV_MV_power_at_transformer_outlet)
+        calc(&pr_meth_plant_op, Q_Sol_MW_thLoop, Reference_PV_plant_power_at_inverter_inlet_DC, Reference_PV_MV_power_at_transformer_outlet)
+        calc(&pr_meth_plant_op, Q_Sol_MW_thLoop, Reference_PV_plant_power_at_inverter_inlet_DC, Reference_PV_MV_power_at_transformer_outlet)
+        let result = SpecificCost().invest(config: calc)
+        buffer[$0].append(result.LCH2)
+        buffer[$0].append(result.LCoM)
+        buffer[$0].append(result.LCoE)
+        buffer[$0].append(result.LCoTh)
+        buffer[$0].append(Double(calc.H2_to_meth_production_effective_MTPH_sum))
+        buffer[$0].append(Double(calc.PB_startup_heatConsumption_effective_count))
+        buffer[$0].append(Double(calc.TES_discharge_effective_count))
+        buffer[$0].append(Double(calc.EY_plant_start_count))
+        buffer[$0].append(Double(calc.meth_plant_start_count))
+        buffer[$0].append(Double(calc.gross_operating_point_of_EY_count))
+        buffer[$0].append(Double(calc.H2_to_meth_production_effective_MTPH_count))
+        buffer[$0].append(Double(calc.aux_elec_missing_due_to_grid_limit_sum))        
+      }
+      buffer.sort(by: {$0[13]<$1[13]})
+      // print(buffer[0].readable)
+      results.insert(XY(x: buffer[0][0], y: buffer[0][13]))
+      best[i] = [buffer[0][i]]
+      let freq = all[i][1] - all[i][0]
+      let offset = freq * Double((all[i].count / 2) - all[i].firstIndex(of: best[i][0])!)
+      all[i] = all[i].map { $0 - offset }
+    }
+    if hashValue == best.hashValue { break }
+  }
+}
+
+do {
+
+  let parameter = Parameter(
+    CSP_Loop_Nr: 110...110,
+    PV_DC_Cap: 900...1000,
+    PV_AC_Cap: 700...800,
+    Heater_cap: 210...260,
+    TES_Full_Load_Hours: 10...14,
+    EY_Nominal_elec_input: 320...370,
+    PB_Nominal_gross_cap: 150...200,
+    BESS_cap: 20...50,
+    H2_storage_cap: 30...60,
+    Meth_nominal_hourly_prod_cap: 18...22,
+    El_boiler_cap: 65...95,
+    grid_max_export: 100...100
+  )
+
+  var all = parameter.ranges
+  dump(all)
+  if all[6][0] == 0 { 
+    all[4] = [0]
+    all[3] = [0]
+  }
+
+  if all[1][0] == 0 { 
+    all[2] = [0]
+  }
+
+  if all[0][0] == 0 { 
+    all[3] = [0]
+  }
+  var best = all.compactMap(\.last).map{[$0]}
+
+  for _ in 0..<1000 {
+    let hashValue = best.hashValue
+    for i in all.indices {
+      if all[i].count == 1 { continue }
+      best[i] = all[i]
+      var buffer = Array(CartesianProduct(best))
+      DispatchQueue.concurrentPerform(iterations: buffer.count) {
+        var calc = SunOl(values: buffer[$0])
+        var pr_meth_plant_op = Array(repeating: 0.5, count: 8760)
+        calc(&pr_meth_plant_op, Q_Sol_MW_thLoop, Reference_PV_plant_power_at_inverter_inlet_DC, Reference_PV_MV_power_at_transformer_outlet)
+        calc(&pr_meth_plant_op, Q_Sol_MW_thLoop, Reference_PV_plant_power_at_inverter_inlet_DC, Reference_PV_MV_power_at_transformer_outlet)
+        calc(&pr_meth_plant_op, Q_Sol_MW_thLoop, Reference_PV_plant_power_at_inverter_inlet_DC, Reference_PV_MV_power_at_transformer_outlet)
+        let result = SpecificCost().invest(config: calc)
+        buffer[$0].append(result.LCH2)
+        buffer[$0].append(result.LCoM)
+        buffer[$0].append(result.LCoE)
+        buffer[$0].append(result.LCoTh)
+        buffer[$0].append(Double(calc.H2_to_meth_production_effective_MTPH_sum))
+        buffer[$0].append(Double(calc.PB_startup_heatConsumption_effective_count))
+        buffer[$0].append(Double(calc.TES_discharge_effective_count))
+        buffer[$0].append(Double(calc.EY_plant_start_count))
+        buffer[$0].append(Double(calc.meth_plant_start_count))
+        buffer[$0].append(Double(calc.gross_operating_point_of_EY_count))
+        buffer[$0].append(Double(calc.H2_to_meth_production_effective_MTPH_count))
+        buffer[$0].append(Double(calc.aux_elec_missing_due_to_grid_limit_sum))        
+      }
+      buffer.sort(by: {$0[13]<$1[13]})
+      // print(buffer[0].readable)
+      results.insert(XY(x: buffer[0][0], y: buffer[0][13]))
+      best[i] = [buffer[0][i]]
+      let freq = all[i][1] - all[i][0]
+      let offset = freq * Double((all[i].count / 2) - all[i].firstIndex(of: best[i][0])!)
+      all[i] = all[i].map { $0 - offset }
+    }
+    if hashValue == best.hashValue { break }
+  }
+}
+
+
+do {
+  let parameter = Parameter(
+    CSP_Loop_Nr: 70...70,
+    PV_DC_Cap: 900...1000,
+    PV_AC_Cap: 700...800,
+    Heater_cap: 210...260,
+    TES_Full_Load_Hours: 10...14,
+    EY_Nominal_elec_input: 320...370,
+    PB_Nominal_gross_cap: 150...200,
+    BESS_cap: 20...50,
+    H2_storage_cap: 30...60,
+    Meth_nominal_hourly_prod_cap: 18...22,
+    El_boiler_cap: 65...95,
+    grid_max_export: 100...100
+  )
+
+  var all = parameter.ranges
+  dump(all)
+  if all[6][0] == 0 { 
+    all[4] = [0]
+    all[3] = [0]
+  }
+
+  if all[1][0] == 0 { 
+    all[2] = [0]
+  }
+
+  if all[0][0] == 0 { 
+    all[3] = [0]
+  }
+  var best = all.compactMap(\.last).map{[$0]}
+
+  for _ in 0..<1000 {
+    let hashValue = best.hashValue
+    for i in all.indices {
+      if all[i].count == 1 { continue }
+      best[i] = all[i]
+      var buffer = Array(CartesianProduct(best))
+      DispatchQueue.concurrentPerform(iterations: buffer.count) {
+        var calc = SunOl(values: buffer[$0])
+        var pr_meth_plant_op = Array(repeating: 0.5, count: 8760)
+        calc(&pr_meth_plant_op, Q_Sol_MW_thLoop, Reference_PV_plant_power_at_inverter_inlet_DC, Reference_PV_MV_power_at_transformer_outlet)
+        calc(&pr_meth_plant_op, Q_Sol_MW_thLoop, Reference_PV_plant_power_at_inverter_inlet_DC, Reference_PV_MV_power_at_transformer_outlet)
+        calc(&pr_meth_plant_op, Q_Sol_MW_thLoop, Reference_PV_plant_power_at_inverter_inlet_DC, Reference_PV_MV_power_at_transformer_outlet)
+        let result = SpecificCost().invest(config: calc)
+        buffer[$0].append(result.LCH2)
+        buffer[$0].append(result.LCoM)
+        buffer[$0].append(result.LCoE)
+        buffer[$0].append(result.LCoTh)
+        buffer[$0].append(Double(calc.H2_to_meth_production_effective_MTPH_sum))
+        buffer[$0].append(Double(calc.PB_startup_heatConsumption_effective_count))
+        buffer[$0].append(Double(calc.TES_discharge_effective_count))
+        buffer[$0].append(Double(calc.EY_plant_start_count))
+        buffer[$0].append(Double(calc.meth_plant_start_count))
+        buffer[$0].append(Double(calc.gross_operating_point_of_EY_count))
+        buffer[$0].append(Double(calc.H2_to_meth_production_effective_MTPH_count))
+        buffer[$0].append(Double(calc.aux_elec_missing_due_to_grid_limit_sum))        
+      }
+      buffer.sort(by: {$0[13]<$1[13]})
+      // print(buffer[0].readable)
+      results.insert(XY(x: buffer[0][0], y: buffer[0][13]))
+      best[i] = [buffer[0][i]]
+      let freq = all[i][1] - all[i][0]
+      let offset = freq * Double((all[i].count / 2) - all[i].firstIndex(of: best[i][0])!)
+      all[i] = all[i].map { $0 - offset }
+    }
+    if hashValue == best.hashValue { break }
+  }
+}
+
+
+do {
+
+  let parameter = Parameter(
+    CSP_Loop_Nr: 40...40,
+    PV_DC_Cap: 900...1000,
+    PV_AC_Cap: 700...800,
+    Heater_cap: 210...260,
+    TES_Full_Load_Hours: 10...14,
+    EY_Nominal_elec_input: 320...370,
+    PB_Nominal_gross_cap: 150...200,
+    BESS_cap: 20...50,
+    H2_storage_cap: 30...60,
+    Meth_nominal_hourly_prod_cap: 18...22,
+    El_boiler_cap: 65...95,
+    grid_max_export: 100...100
+  )
+
+  var all = parameter.ranges
+  dump(all)
+  if all[6][0] == 0 { 
+    all[4] = [0]
+    all[3] = [0]
+  }
+
+  if all[1][0] == 0 { 
+    all[2] = [0]
+  }
+
+  if all[0][0] == 0 { 
+    all[3] = [0]
+  }
+  var best = all.compactMap(\.last).map{[$0]}
+
+  for _ in 0..<1000 {
+    let hashValue = best.hashValue
+    for i in all.indices {
+      if all[i].count == 1 { continue }
+      best[i] = all[i]
+      var buffer = Array(CartesianProduct(best))
+      DispatchQueue.concurrentPerform(iterations: buffer.count) {
+        var calc = SunOl(values: buffer[$0])
+        var pr_meth_plant_op = Array(repeating: 0.5, count: 8760)
+        calc(&pr_meth_plant_op, Q_Sol_MW_thLoop, Reference_PV_plant_power_at_inverter_inlet_DC, Reference_PV_MV_power_at_transformer_outlet)
+        calc(&pr_meth_plant_op, Q_Sol_MW_thLoop, Reference_PV_plant_power_at_inverter_inlet_DC, Reference_PV_MV_power_at_transformer_outlet)
+        calc(&pr_meth_plant_op, Q_Sol_MW_thLoop, Reference_PV_plant_power_at_inverter_inlet_DC, Reference_PV_MV_power_at_transformer_outlet)
+        let result = SpecificCost().invest(config: calc)
+        buffer[$0].append(result.LCH2)
+        buffer[$0].append(result.LCoM)
+        buffer[$0].append(result.LCoE)
+        buffer[$0].append(result.LCoTh)
+        buffer[$0].append(Double(calc.H2_to_meth_production_effective_MTPH_sum))
+        buffer[$0].append(Double(calc.PB_startup_heatConsumption_effective_count))
+        buffer[$0].append(Double(calc.TES_discharge_effective_count))
+        buffer[$0].append(Double(calc.EY_plant_start_count))
+        buffer[$0].append(Double(calc.meth_plant_start_count))
+        buffer[$0].append(Double(calc.gross_operating_point_of_EY_count))
+        buffer[$0].append(Double(calc.H2_to_meth_production_effective_MTPH_count))
+        buffer[$0].append(Double(calc.aux_elec_missing_due_to_grid_limit_sum))        
+      }
+      buffer.sort(by: {$0[13]<$1[13]})
+      // print(buffer[0].readable)
+      results.insert(XY(x: buffer[0][0], y: buffer[0][13]))
+      best[i] = [buffer[0][i]]
+      let freq = all[i][1] - all[i][0]
+      let offset = freq * Double((all[i].count / 2) - all[i].firstIndex(of: best[i][0])!)
+      all[i] = all[i].map { $0 - offset }
+    }
+    if hashValue == best.hashValue { break }
+  }
+}
+
+do {
+
+  let parameter = Parameter(
+    CSP_Loop_Nr: 0...0,
+    PV_DC_Cap: 900...1000,
+    PV_AC_Cap: 700...800,
+    Heater_cap: 210...260,
+    TES_Full_Load_Hours: 10...14,
+    EY_Nominal_elec_input: 320...370,
+    PB_Nominal_gross_cap: 150...200,
+    BESS_cap: 20...50,
+    H2_storage_cap: 30...60,
+    Meth_nominal_hourly_prod_cap: 18...22,
+    El_boiler_cap: 65...95,
+    grid_max_export: 100...100
+  )
+
+  var all = parameter.ranges
+  dump(all)
+  if all[6][0] == 0 { 
+    all[4] = [0]
+    all[3] = [0]
+  }
+
+  if all[1][0] == 0 { 
+    all[2] = [0]
+  }
+
+  if all[0][0] == 0 { 
+    all[3] = [0]
+  }
+  var best = all.compactMap(\.last).map{[$0]}
+
+  for _ in 0..<1000 {
+    let hashValue = best.hashValue
+    for i in all.indices {
+      if all[i].count == 1 { continue }
+      best[i] = all[i]
+      var buffer = Array(CartesianProduct(best))
+      DispatchQueue.concurrentPerform(iterations: buffer.count) {
+        var calc = SunOl(values: buffer[$0])
+        var pr_meth_plant_op = Array(repeating: 0.5, count: 8760)
+        calc(&pr_meth_plant_op, Q_Sol_MW_thLoop, Reference_PV_plant_power_at_inverter_inlet_DC, Reference_PV_MV_power_at_transformer_outlet)
+        calc(&pr_meth_plant_op, Q_Sol_MW_thLoop, Reference_PV_plant_power_at_inverter_inlet_DC, Reference_PV_MV_power_at_transformer_outlet)
+        calc(&pr_meth_plant_op, Q_Sol_MW_thLoop, Reference_PV_plant_power_at_inverter_inlet_DC, Reference_PV_MV_power_at_transformer_outlet)
+        let result = SpecificCost().invest(config: calc)
+        buffer[$0].append(result.LCH2)
+        buffer[$0].append(result.LCoM)
+        buffer[$0].append(result.LCoE)
+        buffer[$0].append(result.LCoTh)
+        buffer[$0].append(Double(calc.H2_to_meth_production_effective_MTPH_sum))
+        buffer[$0].append(Double(calc.PB_startup_heatConsumption_effective_count))
+        buffer[$0].append(Double(calc.TES_discharge_effective_count))
+        buffer[$0].append(Double(calc.EY_plant_start_count))
+        buffer[$0].append(Double(calc.meth_plant_start_count))
+        buffer[$0].append(Double(calc.gross_operating_point_of_EY_count))
+        buffer[$0].append(Double(calc.H2_to_meth_production_effective_MTPH_count))
+        buffer[$0].append(Double(calc.aux_elec_missing_due_to_grid_limit_sum))        
+      }
+      buffer.sort(by: {$0[13]<$1[13]})
+      // print(buffer[0].readable)
+      results.insert(XY(x: buffer[0][0], y: buffer[0][13]))
+      best[i] = [buffer[0][i]]
+      let freq = all[i][1] - all[i][0]
+      let offset = freq * Double((all[i].count / 2) - all[i].firstIndex(of: best[i][0])!)
+      all[i] = all[i].map { $0 - offset }
+    }
+    if hashValue == best.hashValue { break }
+  }
+}
 }
 
 var results: Set<XY> = []
@@ -1121,5 +1481,7 @@ try server.start(9080, forceIPv4: true)
 #endif
 let now = Date()
 main()
+dump(results)
+try! Gnuplot(xys: results)(.pngLarge(path: "SunOl.png"))
 print("Elapsed seconds:", -now.timeIntervalSinceNow)
 DispatchSemaphore(value: 0).wait()
