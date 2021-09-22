@@ -16,7 +16,7 @@ struct SpecificCost {
   let Electrical_boiler_capacity = (basis: 3.27, exp: 0.7, coeff: 262_862.0)
   let Substation_capacity = (basis: 135.0, exp: 0.7, coeff: 17_778.0)
  
-  func invest(config: SunOl) -> (LCH2: Double, LCoM: Double, LCoE: Double, LCoTh: Double) {
+  func invest(config: SunOl) -> (CAPEX: Double, LCH2: Double, LCoM: Double, LCoE: Double, LCoTh: Double) {
     let factor = min(config.Heat_to_aux_directly_from_CSP_sum + config.Heat_to_aux_from_PB_sum * Float(config.PB_Ratio_Heat_input_vs_output),
      config.Q_solar_before_dumping_sum - config.Total_SF_heat_dumped_sum - config.Q_solar_avail_sum)
 
@@ -117,11 +117,12 @@ struct SpecificCost {
     let LCoE =
       (FCR * CAPEX_ICPH_assembly_hall_csp_sf_dedicated_to_ICPH_PC_DC_PV_AC_Heaters_TES_PB_Substation + Total_OPEX) / Double(config.avail_total_net_elec_sum - config.net_elec_above_max_consumers_sum)
 
-    let LCoTh =
+    var LCoTh =
       (FCR * CAPEX_aux_thermal_energy_csp_sf_cost_dedicated_to_aux_heat) 
       / Double(config.Produced_thermal_energy_sum)
-
-    return ((LCH2 * 100).rounded() / 100,
+    if LCoTh.isNaN { LCoTh = 0 }
+    return ((Total_CAPEX * 100).rounded() / 100,
+      (LCH2 * 100).rounded() / 100,
      (LCoM * 100).rounded() / 100,
      (LCoE * 100).rounded() / 100,
      (LCoTh * 100).rounded() / 100)
