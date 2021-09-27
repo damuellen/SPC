@@ -34,7 +34,7 @@ var package = Package(
       dependencies: ["Config", "Meteo", "Libc", "Helpers"],
       swiftSettings: swift),
     .executableTarget(name: "TransTES",
-      dependencies: ["Helpers", "BlackBoxModel"],
+      dependencies: ["Helpers"],
       swiftSettings: swift),
     .executableTarget(name: "SunOl",
       dependencies: ["Helpers", "BlackBoxModel", "PhysicalQuantities",
