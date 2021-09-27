@@ -4,6 +4,8 @@ struct SpecificCost {
   let Assembly_hall_1_line = (c1: 12_000_000.0, c2: 3_300_000.0, range: 1.0...60.0)
   let Assembly_hall_2_lines = (c1: 12_000_000.0, c2: 5_940_000.0, range: 61.0...130.0)
   let Assembly_hall_3_lines = (c1: 12_000_000.0, c2: 9_240_000.0, range: 131.0...190.0)
+  let Assembly_hall_4_lines = (c1: 12_000_000.0, c2: 9_240_000.0, range: 191.0...220.0)
+  let Assembly_hall_5_lines = (c1: 12_000_000.0, c2: 9_240_000.0, range: 221.0...250.0)
   let PV_DC_part = (basis: 605.0, coeff: 465_124.0)
   let PV_AC_part = (basis: 490.0, exp: 0.7, coeff: 64_150.0, range: 267...778)
   let Heater_system = (basis: 200.0, c1: 4_000_000.0, exp: 0.4, c2: 211728.735839637, factor: 0.9, coeff: 3_500_000.0, range: 200.0...400.0)
@@ -18,7 +20,7 @@ struct SpecificCost {
  
   func invest(config: SunOl) -> (CAPEX: Double, LCH2: Double, LCoM: Double, LCoE: Double, LCoTh: Double) {
     let factor = min(config.Heat_to_aux_directly_from_CSP_sum + config.Heat_to_aux_from_PB_sum * Float(config.PB_Ratio_Heat_input_vs_output),
-     config.Q_solar_before_dumping_sum - config.Total_SF_heat_dumped_sum - config.Q_solar_avail_sum)
+     config.Q_solar_before_dumping_sum - config.Total_SF_heat_dumped_sum - config.TES_thermal_input_by_CSP_sum)
 
     var auxLoops = config.CSP_Loop_Nr > 0 ?
      min(config.CSP_Loop_Nr, Double(Float(config.CSP_Loop_Nr) * factor / config.Q_solar_before_dumping_sum)) : 0
@@ -33,6 +35,10 @@ struct SpecificCost {
         Assembly_hall = Assembly_hall_2_lines.c1 + Assembly_hall_2_lines.c2
       case Assembly_hall_3_lines.range: 
         Assembly_hall = Assembly_hall_3_lines.c1 + Assembly_hall_3_lines.c2
+      case Assembly_hall_4_lines.range: 
+        Assembly_hall = Assembly_hall_4_lines.c1 + Assembly_hall_4_lines.c2
+      case Assembly_hall_5_lines.range: 
+        Assembly_hall = Assembly_hall_5_lines.c1 + Assembly_hall_5_lines.c2
       default: 
         Assembly_hall = 0
     }

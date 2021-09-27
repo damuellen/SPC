@@ -80,6 +80,15 @@ extension Sequence where Element == Double {
   }
 }
 
+
+extension Array where Element==Double {
+  mutating func shift(half: Double) {
+    var offset = ((first! + last!) / 2) - half
+    if first! - offset < 0 { offset = first! }
+    self = map { $0 - offset }
+  }
+}
+
 extension Double {
   var formatted: String { String(format: "%G", self) }
 }
@@ -92,8 +101,8 @@ extension Array where Element == Double {
     } 
   }
 
-  var readable: String {
-    map(\.formatted).joined(separator: " ")
+  var readable: [String] {
+    map(\.formatted)
   }
 }
 
@@ -451,6 +460,19 @@ public struct CartesianProduct<S: Sequence>: IteratorProtocol, Sequence {
     }
 
     return currentValues
+  }
+}
+
+
+extension Sequence where Element: Equatable {
+  public func distinct() -> [Element] {
+    var unique = [Element]()
+    for item in self {
+        if !unique.contains(item) {
+          unique.append(item)
+        }
+    }
+    return unique
   }
 }
 
