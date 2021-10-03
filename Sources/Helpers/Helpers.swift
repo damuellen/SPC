@@ -76,7 +76,7 @@ extension URL {
   }
 }
 
-@inlinable
+@_alwaysEmitIntoClient
 public func seek(goal: Double, _ range: ClosedRange<Double> = 0...1,
  tolerance: Double = 0.0001, maxIterations: Int = 100,
  _ f: (Double)-> Double) -> Double {
@@ -93,7 +93,7 @@ public func seek(goal: Double, _ range: ClosedRange<Double> = 0...1,
   return Double.nan
 }
 
-@inlinable
+@_alwaysEmitIntoClient
 public func concurrentSeek(goal: Double, _ range: ClosedRange<Double> = 0...1,
  tolerance: Double = 0.0001, maxIterations: Int = 100,
  _ f: (Double)-> Double) -> Double {
@@ -115,7 +115,7 @@ public func concurrentSeek(goal: Double, _ range: ClosedRange<Double> = 0...1,
     // least squares method
     // a0 =  (sumX - sumY) * sumXY / (sumX * sumX - n * sumXY)
     // a1 =  (sumX * sumY - n * sumXY) / (sumX * sumX - n * sumXX)    
-@inlinable
+@_alwaysEmitIntoClient
 public func linearFit(x: [Double], y: [Double]) -> (Double)-> Double {
   var sumX: Double = 0
   var sumY: Double = 0
@@ -136,3 +136,110 @@ public func linearFit(x: [Double], y: [Double]) -> (Double)-> Double {
 }
 
 public typealias XY = SIMD2<Double>
+
+extension Sequence where Element == XY {
+  public func plot(_ terminal: Gnuplot.Terminal) -> Data {
+    try! Gnuplot(xys: self, style: .points)(terminal)
+  }
+}
+
+/// Sorts the given arguments in ascending order, and returns the middle value.
+///
+///     // Values clamped to `0...100`
+///     median(0, .min, 100)  //-> 0
+///     median(0, .max, 100)  //-> 100
+///
+/// - Parameters:
+///   - x: A value to compare.
+///   - y: Another value to compare.
+///   - z: A third value to compare.
+///
+/// - Returns: The middle value.
+@_alwaysEmitIntoClient
+public func median<T: Comparable>(_ x: T, _ y: T, _ z: T) -> T {
+  var (x, y, z) = (x, y, z)
+  // Compare (and swap) each pair of adjacent variables.
+  if x > y {
+    (x, y) = (y, x)
+  }
+  if y > z {
+    (y, z) = (z, y)
+    if x > y {
+      (x, y) = (y, x)
+    }
+  }
+  // Now `x` has the least value, and `z` has the greatest value.
+  return y
+}
+
+/// Sorts the given arguments in ascending order, and returns the middle value.
+///
+///     // Values clamped to `0.0...1.0`
+///     median(0.0, -.pi, 1.0)  //-> 0.0
+///     median(0.0, +.pi, 1.0)  //-> 1.0
+///
+/// The sorted values will be totally ordered, including signed zeros and NaNs.
+///
+/// - Parameters:
+///   - x: A value to compare.
+///   - y: Another value to compare.
+///   - z: A third value to compare.
+///
+/// - Returns: The middle value.
+@_alwaysEmitIntoClient
+public func median<T: FloatingPoint>(_ x: T, _ y: T, _ z: T) -> T {
+  var (x, y, z) = (x, y, z)
+  // Compare (and swap) each pair of adjacent variables.
+  if !x.isTotallyOrdered(belowOrEqualTo: y) {
+    (x, y) = (y, x)
+  }
+  if !y.isTotallyOrdered(belowOrEqualTo: z) {
+    (y, z) = (z, y)
+    if !x.isTotallyOrdered(belowOrEqualTo: y) {
+      (x, y) = (y, x)
+    }
+  }
+  // Now `x` has the least value, and `z` has the greatest value.
+  return y
+}
+
+/// Sorts the given arguments in ascending order, and returns the middle value,
+/// or the arithmetic mean of two middle values.
+///
+///     median(1, 2)            //-> 1.5
+///     median(1, 2, 4)         //-> 2
+///     median(1, 2, 4, 8)      //-> 3
+///     median(1, 2, 4, 8, 16)  //-> 4
+///
+/// The sorted values will be totally ordered, including signed zeros and NaNs.
+///
+/// - Parameters:
+///   - x: A value to compare.
+///   - y: Another value to compare.
+///   - rest: Zero or more additional values.
+///
+/// - Returns: The middle value, or the arithmetic mean of two middle values.
+@_alwaysEmitIntoClient
+public func median<T: FloatingPoint>(_ x: T, _ y: T, _ rest: T...) -> T {
+  func _mean(_ a: T, _ b: T) -> T {
+    (a.sign == b.sign)   // Avoid overflowing to infinity, by choosing to
+    ? a + ((b - a) / 2)  // ? either advance by half the distance,
+    : (a + b) / 2        // : or use the sum divided by the count.
+  }
+  guard !rest.isEmpty else { return _mean(x, y) }
+
+  var values = ContiguousArray<T>()
+  values.reserveCapacity(2 + rest.count)
+  values.append(x)
+  values.append(y)
+  values.append(contentsOf: rest)
+  values.sort(by: { !$1.isTotallyOrdered(belowOrEqualTo: $0) })
+
+  let index = (values.endIndex - 1) / 2
+  if values.count.isMultiple(of: 2) {
+    return _mean(values[index], values[index + 1])
+  } else {
+    return values[index]
+  }
+}
+

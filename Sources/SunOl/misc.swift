@@ -477,7 +477,7 @@ extension Sequence where Element: Equatable {
 }
 
 extension Sequence where Element == XY {
-  public func plot(_ terminal: Gnuplot.Terminal) -> String {
-    try! Gnuplot(xys: self, style: .points)(terminal)
+  public func plotSVG() -> String {
+    Gnuplot(xys: self, style: .points).svg!
   }
 }

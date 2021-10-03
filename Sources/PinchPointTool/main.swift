@@ -111,7 +111,7 @@ struct PinchPointTool: ParsableCommand {
 
     guard pdf || html else { return }
     let plot = Gnuplot(temperatures: pinchPoint.temperatures())
-    let svg = try plot(.svg)
+    let svg = plot.svg!
 
     let dia = HeatBalanceDiagram(values: pinchPoint)
 

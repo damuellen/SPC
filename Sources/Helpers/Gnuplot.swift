@@ -9,66 +9,70 @@
 //
 
 import Foundation
-
+#if canImport(Cocoa)
+import Cocoa
+#endif
 /// Create graphs using gnuplot.
 public final class Gnuplot {
-  let datablock: String
-  let plot: String
-  let settings: [String]
-
+#if canImport(Cocoa)
+  public var image: NSImage? {
+    try? NSImage(data: self(.pngSmall(path: "")))
+  }
+#endif
+  public var svg: String? {
+    try? String(decoding: self(.svg(path: "")), as: Unicode.UTF8.self)
+  }
+  
   public init(data: String) {
     self.datablock = data
     self.plot = "plot $data"
     self.settings = []
   }
-
+  
   public static func process() -> Process {
     let gnuplot = Process()
-    #if os(Windows)
+#if os(Windows)
     gnuplot.executableURL = URL(fileURLWithPath: "C:/bin/gnuplot.exe")
-    #elseif os(Linux)
+#elseif os(Linux)
     gnuplot.executableURL = .init(fileURLWithPath: "/usr/bin/gnuplot")
-    #else
+#else
     gnuplot.executableURL = .init(fileURLWithPath: "/opt/homebrew/bin/gnuplot")
-    #endif
+#endif
     gnuplot.standardInput = Pipe()
     gnuplot.standardOutput = Pipe()
     return gnuplot
   }
-  /// Execute and returns the plot commands.
-  /// - Note: If the svg terminal is used, the function returns the svg.
-  @discardableResult public func callAsFunction(_ terminal: Terminal) throws -> String {
+  /// Execute the plot commands.
+  @discardableResult public func callAsFunction(_ terminal: Terminal) throws -> Data {
     let process = Gnuplot.process()
     let stdin = process.standardInput as! Pipe
-    let style: String
-    if case .svg = terminal {
-      style = (settings + SVG + userSettings).concatenated
-    } else if case .pdf = terminal {
-      style = (settings + PDF + userSettings).concatenated
-    } else {
-      style = (settings + PNG + SVG + userSettings).concatenated
-    }
-    let command = userCommand ?? plot
-    let code = terminal.output + style + datablock + command + "exit\n\n"
     try process.run()
-    stdin.fileHandleForWriting.write(code.data(using: .utf8)!)
+    stdin.fileHandleForWriting.write(commands(terminal).data(using: .utf8)!)
     stdin.fileHandleForWriting.closeFile()
-    if case .svg = terminal {
-      let stdout = process.standardOutput as! Pipe
-      let data = stdout.fileHandleForReading.readDataToEndOfFile()
-      return String(decoding: data, as: Unicode.UTF8.self)
-    }
-    // try! code.write(toFile: "/workspaces/SPC/plt", atomically: false, encoding: .utf8)
-    return code
+    let stdout = process.standardOutput as! Pipe
+    return stdout.fileHandleForReading.readDataToEndOfFile()
   }
 
+  public func commands(_ terminal: Terminal) -> String {
+    let config: String
+    if case .svg = terminal {
+      config = (settings + SVG + userSettings).concatenated
+    } else if case .pdf = terminal {
+      config = (settings + PDF + userSettings).concatenated
+    } else {
+      config = (settings + PNG + SVG + userSettings).concatenated
+    }
+    let command = userCommand ?? plot
+    return terminal.output + config + datablock + command + "exit\n\n"
+  }
+  
   static private func settings(_ style: Style) -> [String] {
     let lw, pt, ps: String
     if case .points = style {
       lw = "lw 2"
       pt = "pt 6"
       ps = "ps 1.0"
-    } else { 
+    } else {
       lw = "lw 3"
       pt = "pt 7"
       ps = "ps 0.5"
@@ -94,25 +98,17 @@ public final class Gnuplot {
       "key above tc ls 18",
     ]
   }
-
+  
   public var userSettings = [String]()
   public var userCommand: String? = nil
 
-  let SVG = ["border 31 lw 0.5 lc rgb 'black'", "grid ls 19"]
-  let PDF = ["border 31 lw 1 lc rgb 'black'", "grid ls 18"]
-  let PNG = [
-    "object rectangle from graph 0,0 to graph 1,1 behind fillcolor rgb '#EBEBEB' fillstyle solid noborder"
-  ]
-
-  static let temperatures = [
-    "size 1280,800",
-    "xtics 10", "ytics 10",
-    "xlabel 'Q̇ [MW]' textcolor rgb 'black'",
-    "ylabel 'Temperatures [°C]' textcolor rgb 'black'",
-  ]
-
   public init(temperatures: String) {
-    self.settings = Gnuplot.temperatures
+    self.settings = [
+      "size 1280,800",
+      "xtics 10", "ytics 10",
+      "xlabel 'Q̇ [MW]' textcolor rgb 'black'",
+      "ylabel 'Temperatures [°C]' textcolor rgb 'black'",
+    ]
     self.datablock = "\n$data <<EOD\n" + temperatures + "\n\n\nEOD\n"
     self.plot = """
     \nplot $data i 0 u 1:2 w lp ls 11 title columnheader(1), \
@@ -133,35 +129,13 @@ public final class Gnuplot {
   {
     self.init(xys: xys.map { xy in xy.map { ($0.x, $0.y) } }, titles: titles, style: style)
   }
-
+  
   public convenience init<S: Sequence, F: FloatingPoint>(
     xs: S..., ys: S..., titles: String..., style: Style = .linePoints) where S.Element == F
   {
     self.init(xys: zip(xs, ys).map { a, b in zip(a, b).map { ($0, $1) } }, titles: titles, style: style)
   }
-  
-  public enum Style {
-    case lines(smooth: Bool)
-    case linePoints
-    case points
-    
-    var raw: (String, String) {
-      let s, l: String
-      switch self {
-        case .lines(let smooth):
-        s = smooth ? "smooth csplines" : ""
-        l = "l"
-        case .linePoints:
-        s = ""
-        l = "lp"
-        case .points:
-        s = ""
-        l = "points"
-      }
-      return (s, l)
-    }
-  }
-  
+
   public init<T: FloatingPoint>(xys: [[(T, T)]], titles: [String] = [], style: Style = .linePoints) {
     let missingTitles = xys.count - titles.count
     var titles = titles
@@ -171,80 +145,113 @@ public final class Gnuplot {
     let data = zip(titles, xys).map {
       $0.0 + "\n" + $0.1.map { (x, y) in "\(x), \(y)" }.joined(separator: "\n")
     }
-
+    
     self.settings = Gnuplot.settings(style)
-
+    
     self.datablock = "\n$data <<EOD\n"
     + data.joined(separator: "\n\n\n") + "\n\n\nEOD\n"
-
+    
     let (s, l) = style.raw
     self.plot = "\nplot " + xys.indices.map { i in
       "$data i \(i) u 1:2 \(s) w \(l) ls \(i+11) title columnheader(1)"
     }.joined(separator: ", ") + "\n"
   }
-
+  
   public init<T: FloatingPoint>(
     xy1s: [(T, T)]..., xy2s: [(T, T)]..., titles: String..., style: Style = .linePoints) {
-    let missingTitles = xy1s.count + xy2s.count - titles.count
-    var titles = titles
-    if missingTitles > 0 {
-      titles.append(contentsOf: repeatElement("-", count: missingTitles))
-    }
-
-    self.settings = Gnuplot.settings(style)
-
-    let y1 = zip(titles, xy1s).map {
-      $0.0 + " ,\n" + $0.1.map { (x,y) in "\(x), \(y)" }.joined(separator: "\n")
-    }
-    let y2 = zip(titles.dropFirst(xy1s.count), xy2s).map {
-      $0.0 + " ,\n" + $0.1.map { (x,y) in "\(x), \(y)" }.joined(separator: "\n")
-    }
-
-    self.datablock = "\n$data <<EOD\n"
+      let missingTitles = xy1s.count + xy2s.count - titles.count
+      var titles = titles
+      if missingTitles > 0 {
+        titles.append(contentsOf: repeatElement("-", count: missingTitles))
+      }
+      
+      self.settings = Gnuplot.settings(style)
+      
+      let y1 = zip(titles, xy1s).map {
+        $0.0 + " ,\n" + $0.1.map { (x,y) in "\(x), \(y)" }.joined(separator: "\n")
+      }
+      let y2 = zip(titles.dropFirst(xy1s.count), xy2s).map {
+        $0.0 + " ,\n" + $0.1.map { (x,y) in "\(x), \(y)" }.joined(separator: "\n")
+      }
+      
+      self.datablock = "\n$data <<EOD\n"
       + y1.joined(separator: "\n\n\n") + "\n\n\n"
       + y2.joined(separator: "\n\n\n") + "\n\n\nEOD\n"
-    
-    let (s, l) = style.raw
-    let t = "title columnheader(1)"
-    self.plot = "\nset ytics nomirror\nset y2tics\nplot "
+      
+      let (s, l) = style.raw
+      let t = "title columnheader(1)"
+      self.plot = "\nset ytics nomirror\nset y2tics\nplot "
       + xy1s.indices.map { i in
         "$data i \(i) u 1:2 \(s) axes x1y1 w \(l) ls \(i+11) \(t)"
       }.joined(separator: ", ") + ", "
       + xy2s.indices.map { i in let n = i + xy1s.endIndex
         return "$data i \(n) u 1:2 \(s) axes x1y2 w \(l) ls \(i+21) \(t)"
       }.joined(separator: ", ") + "\n"
+    }
+  
+  public enum Style {
+    case lines(smooth: Bool)
+    case linePoints
+    case points
+    var raw: (String, String) {
+      let s, l: String
+      switch self {
+      case .lines(let smooth):
+        s = smooth ? "smooth csplines" : ""
+        l = "l"
+      case .linePoints:
+        s = ""
+        l = "lp"
+      case .points:
+        s = ""
+        l = "points"
+      }
+      return (s, l)
+    }
   }
-
+  
   public enum Terminal {
-    case svg
+    case svg(path: String)
     case pdf(path: String)
     case png(path: String)
     case pngSmall(path: String)
     case pngLarge(path: String)
     var output: String {
-      #if os(Linux)
+#if os(Linux)
       let font = "font 'Times,"
-      #else
+#else
       let font = "font 'Arial,"
-      #endif
-
+#endif
+      
       switch self {
-      case .svg: return "set term svg size 1000,710;set output\n"
+      case .svg(let path):
+        return "set term svg size 1000,710\n"
+        + "set output \(path.isEmpty ? "" : ("'" + path + "'"))\n"
       case .pdf(let path):
-        return "set term pdfcairo size 10,7.1 enhanced \(font)14'\n" 
+        return "set term pdfcairo size 10,7.1 enhanced \(font)14'\n"
         + "set output \(path.isEmpty ? "" : ("'" + path + "'"))\n"
       case .png(let path):
-        return "set term pngcairo size 1440, 900 enhanced \(font)12'\n" 
+        return "set term pngcairo size 1440, 900 enhanced \(font)12'\n"
         + "set output \(path.isEmpty ? "" : ("'" + path + "'"))\n"
       case .pngSmall(let path):
-        return "set term pngcairo size 1024, 720 enhanced \(font)12'\n" 
+        return "set term pngcairo size 1024, 720 enhanced \(font)12'\n"
         + "set output \(path.isEmpty ? "" : ("'" + path + "'"))\n"
       case .pngLarge(let path):
-        return "set term pngcairo size 1920, 1200 enhanced \(font)14'\n" 
+        return "set term pngcairo size 1920, 1200 enhanced \(font)14'\n"
         + "set output \(path.isEmpty ? "" : ("'" + path + "'"))\n"
       }
     }
   }
+  
+  private let datablock: String
+  private let plot: String
+  private let settings: [String]
+  
+  private let SVG = ["border 31 lw 0.5 lc rgb 'black'", "grid ls 19"]
+  private let PDF = ["border 31 lw 1 lc rgb 'black'", "grid ls 18"]
+  private let PNG = [
+    "object rectangle from graph 0,0 to graph 1,1 behind fillcolor rgb '#EBEBEB' fillstyle solid noborder"
+  ]
 }
 
 extension Array where Element == String {
