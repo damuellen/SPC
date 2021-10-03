@@ -33,3 +33,5 @@ struct GridDemand: Codable {
     self = GridDemand(Array(repeatElement(Ratio(1), count: 12)))
   }
 }
+
+public struct Demand {}

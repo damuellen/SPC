@@ -475,9 +475,3 @@ extension Sequence where Element: Equatable {
     return unique
   }
 }
-
-extension Sequence where Element == XY {
-  public func plotSVG() -> String {
-    Gnuplot(xys: self, style: .points).svg!
-  }
-}

@@ -119,8 +119,6 @@ extension Ratio: Comparable {
   }
 }
 
-public struct Demand {}
-
 extension Ratio {
   public var multiBar: String {
     let (bar_chunks, remainder) = Int(quotient * 80)
