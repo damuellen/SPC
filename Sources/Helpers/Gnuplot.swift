@@ -63,7 +63,7 @@ public final class Gnuplot {
       config = (settings + PNG + SVG + userSettings).concatenated
     }
     let command = userCommand ?? plot
-    return terminal.output + config + datablock + command + "exit\n\n"
+    return config + terminal.output + datablock  + command + "exit\n\n"
   }
   
   static private func settings(_ style: Style) -> [String] {
@@ -103,8 +103,9 @@ public final class Gnuplot {
   public var userCommand: String? = nil
 
   public init(temperatures: String) {
-    self.settings = [
-      "size 1280,800",
+    self.settings = Gnuplot.settings(.linePoints)
+    self.userSettings = [
+      "term svg size 1280,800",
       "xtics 10", "ytics 10",
       "xlabel 'Q̇ [MW]' textcolor rgb 'black'",
       "ylabel 'Temperatures [°C]' textcolor rgb 'black'",
