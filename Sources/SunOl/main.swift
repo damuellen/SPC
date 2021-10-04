@@ -2,7 +2,7 @@ import Foundation
 import xlsxwriter
 import Helpers
 
-var results: Set<XY> = []
+var results: [Set<XY>] = [[],[],[]]
 
 #if !os(Windows)
 import Swifter
@@ -13,7 +13,27 @@ server["/"] = scopes {
       httpEquiv = "refresh"
       content = "5"
     }
-    body { div { inner = Gnuplot(xys: results, style: .points).svg! } }
+    body { div { inner = Gnuplot(xys: results[1], style: .points).svg! } }
+  }
+}
+
+server["/capex"] = scopes {
+  html {
+    meta {
+      httpEquiv = "refresh"
+      content = "5"
+    }
+    body { div { inner = Gnuplot(xys: results[0], style: .points).svg! } }
+  }
+}
+
+server["/loops"] = scopes {
+  html {
+    meta {
+      httpEquiv = "refresh"
+      content = "5"
+    }
+    body { div { inner = Gnuplot(xys: results[2], style: .points).svg! } }
   }
 }
 
@@ -33,7 +53,6 @@ source.resume()
 
 let now = Date()
 main()
-try! Gnuplot(xys: results, style: .points)(.png(path: "SunOl.png"))
 
 print("Elapsed seconds:", -now.timeIntervalSinceNow)
 #if !os(Windows)
@@ -67,9 +86,9 @@ func main() {
     parameter.forEach { calc(parameter: $0, wb: wb) }
   } else {
     calc(parameter: .init(
-      CSP_Loop_Nr: 10...210, PV_DC_Cap: 600...1100, PV_AC_Cap: 400...900, Heater_cap: 100...300, TES_Full_Load_Hours: 12...14,
-      EY_Nominal_elec_input: 200...400, PB_Nominal_gross_cap: 100...300, BESS_cap: 20...120, H2_storage_cap: 30...60,
-      Meth_nominal_hourly_prod_cap: 14...16, El_boiler_cap: 40...90, grid_max_export: 100...100), wb: wb)  
+      CSP_Loop_Nr: 10...210, PV_DC_Cap: 600...1000, PV_AC_Cap: 400...800, Heater_cap: 100...200, TES_Full_Load_Hours: 12...14,
+      EY_Nominal_elec_input: 200...300, PB_Nominal_gross_cap: 100...200, BESS_cap: 20...120, H2_storage_cap: 40...60,
+      Meth_nominal_hourly_prod_cap: 14...16, El_boiler_cap: 40...90, grid_max_export: 50...50), wb: wb)  
   }
 
   func calc(parameter: Parameter, wb: Workbook) {
@@ -91,12 +110,12 @@ func main() {
       all[3] = [0]
     }
     var selected = all.compactMap(\.last).map { [$0] }
-
+    var best = [Double]()
     var r = 1
     var hashes = Set<Int>()
-    var indices = all.indices.sorted()
+    var indices = all.indices.map {$0}
     var shuffled = false
-    for _ in 1...20 {
+    for _ in 1...25 {
       if source.isCancelled { break }
       for i in indices {
         if source.isCancelled { break }
@@ -125,19 +144,23 @@ func main() {
           buffer[$0].append(Double(calc.H2_to_meth_production_effective_MTPH_count))
           buffer[$0].append(Double(calc.aux_elec_missing_due_to_grid_limit_sum))
         }
-        buffer.forEach {
-          output($0.readable)
+        //if i == 0 { for i in results.indices { results[i].removeAll() } }
+        buffer.filter { $0[17] < best[17] }.forEach { 
+          results[0].insert(XY(x: $0[12], y: $0[17]))
+          results[1].insert(XY(x: $0[13], y: $0[17]))
+          results[2].insert(XY(x: $0[0], y: $0[17]))
           ws.write($0, row: r)
           r += 1
         }
-        buffer.sort(by: { $0[17] < $1[17] })
-        results.insert(XY(x: buffer[0][13], y: buffer[0][17]))
-        selected[i] = [buffer[0][i]]
+        best = buffer.sorted(by: { $0[17] < $1[17] }).first!
+        output(best.readable)
+        
+        selected[i] = [best[i]]
         if selected[i] == [0] {
           all[i] = [0]
           continue
         }
-        all[i].shift(half: buffer[0][i])
+        all[i].shift(half: best[i])
       }
 
       if hashes.contains(selected.hashValue) {
@@ -145,9 +168,7 @@ func main() {
         // all.indices.filter { all[$0].count > 1 }.forEach { i in 
         //   all[i].shift(half: all[i].last!)
         // }
-        if shuffled { break }
-        shuffled = true
-        print("Parameter shuffled.")
+        break
       }
       hashes.insert(selected.hashValue)
     }

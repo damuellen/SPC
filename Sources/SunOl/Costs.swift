@@ -129,7 +129,7 @@ struct SpecificCost {
     if LCoTh.isNaN { LCoTh = 0 }
     return ((Total_CAPEX * 100).rounded() / 100,
       (LCH2 * 100).rounded() / 100,
-     (LCoM * 100).rounded() / 100,
+     (LCoM * 1000).rounded() / 1000,
      (LCoE * 100).rounded() / 100,
      (LCoTh * 100).rounded() / 100)
   }

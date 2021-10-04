@@ -18,7 +18,7 @@ struct SunOl {
   var Meth_nominal_hourly_prod_cap = 14.8
   var El_boiler_cap = 100.0
   var grid_max_export = 70.0
-  var grid_max_import: Double { 10 }
+  var grid_max_import = 0.0
   var BESS_max_Charging_cap = 50.0
 
   struct Heater {
@@ -982,6 +982,10 @@ struct SunOl {
     H2_to_meth_production_effective_MTPH_count = H2_to_meth_production_effective_MTPH.nonZeroCount
     
     aux_elec_missing_due_to_grid_limit_sum = aux_elec_missing_due_to_grid_limit.total
+
+    if grid_max_import.isZero {
+      grid_max_import = min(grid_max_export, aux_elec_missing_due_to_grid_limit.max()!)
+    }
     pr_meth_plant_op = indices.map { i in meth_produced_MTPH[i] / Meth.nominal_hourly_prod_cap }
   }
 
@@ -1038,7 +1042,7 @@ struct Parameter: Codable {
   var ranges: [[Double]] {
     func range(_ range: ClosedRange<Double>, by: Double) -> [Double] { Array(stride(from: range.lowerBound, through: range.upperBound, by: by)) }
     return [
-      range(CSP_Loop_Nr, by: 1), range(PV_DC_Cap, by: 1), range(PV_AC_Cap, by: 1), range(Heater_cap, by: 1), range(TES_Full_Load_Hours, by: 0.1),
+      range(CSP_Loop_Nr, by: 1), range(PV_DC_Cap, by: 2), range(PV_AC_Cap, by: 2), range(Heater_cap, by: 1), range(TES_Full_Load_Hours, by: 0.1),
       range(EY_Nominal_elec_input, by: 1), range(PB_Nominal_gross_cap, by: 1), range(BESS_cap, by: 1), range(H2_storage_cap, by: 1),
       range(Meth_nominal_hourly_prod_cap, by: 0.1), range(El_boiler_cap, by: 1), range(grid_max_export, by: 1),
     ]
