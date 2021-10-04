@@ -15,6 +15,9 @@ jobs:
           branch: swift-5.5-release
           tag: 5.5-RELEASE
 
+      - name: Checkout sources
+        uses: actions/checkout@v2
+
       - name: Build Release Mode
         run: swift build -c release -Xswiftc -gnone -Xswiftc -suppress-warnings
 

@@ -2,7 +2,7 @@
 import PackageDescription
 
 let c = [CSetting.unsafeFlags(["-ffast-math", "-O3", "-fomit-frame-pointer", "-funroll-loops"])]
-let flags = ["-cross-module-optimization", "-Ounchecked", "-enforce-exclusivity=unchecked",  "-DRELEASE"]
+let flags = ["-cross-module-optimization", "-Ounchecked", "-enforce-exclusivity=unchecked", "-DRELEASE"]
 let posix = PackageDescription.TargetDependencyCondition.when(platforms: [.linux, .macOS])
 let win = PackageDescription.BuildSettingCondition.when(platforms: [.windows])
 let linker = PackageDescription.LinkerSetting.unsafeFlags(["-Xlinker", "/INCREMENTAL:NO", "-Xlinker", "/IGNORE:4217,4286"], win)
@@ -91,7 +91,7 @@ var package = Package(
     // .executableTarget(name: "Benchmarking",
     //   dependencies: ["Meteo", "Benchmark", "BlackBoxModel"],
     //   swiftSettings: swift),
-    
+
     .executableTarget(
       name: "SolarFieldCalc",
       dependencies: [
