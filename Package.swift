@@ -3,9 +3,9 @@ import PackageDescription
 
 let c = [CSetting.unsafeFlags(["-ffast-math", "-O3", "-fomit-frame-pointer", "-funroll-loops"])]
 let flags = ["-cross-module-optimization", "-Ounchecked", "-enforce-exclusivity=unchecked", "-DRELEASE"]
-let posix = PackageDescription.TargetDependencyCondition.when(platforms: [.linux, .macOS])
-let win = PackageDescription.BuildSettingCondition.when(platforms: [.windows])
-let linker = PackageDescription.LinkerSetting.unsafeFlags(["-Xlinker", "/INCREMENTAL:NO", "-Xlinker", "/IGNORE:4217,4286"], win)
+let posix = TargetDependencyCondition.when(platforms: [.linux, .macOS])
+let win = BuildSettingCondition.when(platforms: [.windows])
+let linker = LinkerSetting.unsafeFlags(["-Xlinker", "/INCREMENTAL:NO", "-Xlinker", "/IGNORE:4217,4286"], win)
 let swift: [SwiftSetting] = [
   .unsafeFlags(flags, .when(configuration: .release)),
   .define("DEBUG", .when(configuration: .debug)),
@@ -82,7 +82,12 @@ var package = Package(
       name: "ThermalStorage",
       dependencies: ["Libc", "Helpers", "PhysicalQuantities"],
       swiftSettings: swift
-    ), .target(name: "SolarFieldModel", dependencies: ["Libc"], swiftSettings: swift),
+    ), 
+    .target(
+      name: "SolarFieldModel",
+      dependencies: ["Libc"],
+      swiftSettings: swift
+    ),
     .target(
       name: "Meteo",
       dependencies: ["DateGenerator", "SolarPosition"],
