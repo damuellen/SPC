@@ -95,7 +95,11 @@ extension Workbook {
         .write(.number(Double(value.qty)), [row,4], format: qty)
         .write(.number(Double(value.weight)), [row,5], format: qty)
     }
-    ws.table(range: [0,0,row,5], name: "BOM", header: BillOfMaterials.headings)
+    ws.table(
+      range: [0,0,row,5], name: "BOM",
+      header: BillOfMaterials.headings,
+      totalRow: [0, 0, 0, 0, 109, 109]
+    )
   }
   
   func addBranches(solarField: SolarField) {
