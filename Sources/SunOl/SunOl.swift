@@ -169,11 +169,11 @@ struct SunOl {
     self.El_boiler_cap = values[10]
     self.grid_max_export = values[11]
   }
-
+  @discardableResult
   mutating func callAsFunction(
     _ pr_meth_plant_op: inout [Double], _ Q_Sol_MW_thLoop: [Double], _ Reference_PV_plant_power_at_inverter_inlet_DC: [Double],
     _ Reference_PV_MV_power_at_transformer_outlet: [Double]
-  ) {
+  ) -> [Double] {
     var Heater = Heater()
     Heater.cap = Heater_cap
 
@@ -987,6 +987,29 @@ struct SunOl {
       grid_max_import = min(grid_max_export, aux_elec_missing_due_to_grid_limit.max()!)
     }
     pr_meth_plant_op = indices.map { i in meth_produced_MTPH[i] / Meth.nominal_hourly_prod_cap }
+
+    let avg = [
+      average(Q_solar_before_dumping[1...]),
+      average(PV_MV_power_at_transformer_outlet[1...]),
+      average(PV_electrical_input_to_heater[1...]),
+      average(TES_thermal_input_by_CSP[1...]),
+      average(TES_storage_level[1...]),
+      average(TES_discharge_effective[1...]),
+      average(extracted_steam[1...]),
+      average(Net_elec_from_PB[1...]),
+      average(gross_operating_point_of_EY[1...]),
+      average(EY_aux_heatConsumption[1...]),
+      average(Amount_of_H2_produced_MTPH[1...]),
+      average(H2_storage_level_MT[1...]),
+      average(H2_dumping_MTPH[1...]),
+      average(meth_produced_MTPH[1...]),
+      average(meth_plant_aux_elec_cons[1...]),
+      average(meth_plant_heatConsumption[1...]),
+      average(elec_from_grid[1...]),
+      average(elec_to_grid[1...])
+    ]
+    
+    return avg
   }
 
   //var PV_elec_avail_after_eHeater_sum: Float = 0
@@ -1054,4 +1077,5 @@ func output(_ s: [String]) {
     "Loops \(s[0])", "DC \(s[1])", "AC \(s[2])", "Heater \(s[3])", "TES \(s[4])", "EY \(s[5])", "PB \(s[6])", "BESS \(s[7])", "H2 \(s[8])",
     "Meth \(s[9])", "Boiler \(s[10])", "Grid \(s[11])", "CAPEX \(s[12])", "H2 \(s[13])", "LCoE \(s[14])", "LCoTh \(s[15])", "LCH2 \(s[16])",
     "LCoM \(s[17])", "\(s[18])", "\(s[19])", "\(s[20])", "\(s[21])", "\(s[22])", "\(s[23])", "\(s[24])", separator: "  ")
+    print(s[25...].joined(separator: "  "))
 }

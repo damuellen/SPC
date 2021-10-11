@@ -2,11 +2,17 @@ import Foundation
 import xlsxwriter
 import Helpers
 
-var results: [Set<XY>] = [[],[],[]]
+var results: [Set<XY>] = [[], [], []]
+var values: [Double] = [1]
 
 #if !os(Windows)
 import Swifter
 let server = HttpServer()
+let enc = JSONEncoder()
+
+server["/Server/:path"] = shareFilesFromDirectory("/workspaces/SPC/Server")
+server.GET["sankey"] = { _ in try! .ok(.data(enc.encode(sankey(values: values)))) }
+
 server["/"] = scopes {
   html {
     meta {
@@ -52,7 +58,7 @@ source.setEventHandler {
 source.resume()
 
 let now = Date()
-main()
+// main()
 
 print("Elapsed seconds:", -now.timeIntervalSinceNow)
 #if !os(Windows)
@@ -86,7 +92,7 @@ func main() {
     parameter.forEach { calc(parameter: $0, wb: wb) }
   } else {
     calc(parameter: .init(
-      CSP_Loop_Nr: 10...210, PV_DC_Cap: 600...1000, PV_AC_Cap: 400...800, Heater_cap: 100...200, TES_Full_Load_Hours: 12...14,
+      CSP_Loop_Nr: 100...210, PV_DC_Cap: 700...1000, PV_AC_Cap: 500...800, Heater_cap: 100...200, TES_Full_Load_Hours: 12...14,
       EY_Nominal_elec_input: 200...300, PB_Nominal_gross_cap: 100...200, BESS_cap: 20...120, H2_storage_cap: 40...60,
       Meth_nominal_hourly_prod_cap: 14...16, El_boiler_cap: 40...90, grid_max_export: 50...50), wb: wb)  
   }
@@ -110,7 +116,7 @@ func main() {
       all[3] = [0]
     }
     var selected = all.compactMap(\.last).map { [$0] }
-    var best = [Double]()
+    var best = [Double](repeating: .infinity, count: 30)
     var r = 1
     var hashes = Set<Int>()
     var indices = all.indices.map {$0}
@@ -128,7 +134,7 @@ func main() {
           var pr_meth_plant_op = Array(repeating: 0.4, count: 8760)
           calc(&pr_meth_plant_op, Q_Sol_MW_thLoop, Reference_PV_plant_power_at_inverter_inlet_DC, Reference_PV_MV_power_at_transformer_outlet)
           calc(&pr_meth_plant_op, Q_Sol_MW_thLoop, Reference_PV_plant_power_at_inverter_inlet_DC, Reference_PV_MV_power_at_transformer_outlet)
-          calc(&pr_meth_plant_op, Q_Sol_MW_thLoop, Reference_PV_plant_power_at_inverter_inlet_DC, Reference_PV_MV_power_at_transformer_outlet)
+          let avg = calc(&pr_meth_plant_op, Q_Sol_MW_thLoop, Reference_PV_plant_power_at_inverter_inlet_DC, Reference_PV_MV_power_at_transformer_outlet)
           let result = SpecificCost().invest(config: calc)
           buffer[$0].append(result.CAPEX)
           buffer[$0].append(Double(calc.H2_to_meth_production_effective_MTPH_sum))
@@ -143,18 +149,20 @@ func main() {
           buffer[$0].append(Double(calc.meth_plant_start_count))
           buffer[$0].append(Double(calc.H2_to_meth_production_effective_MTPH_count))
           buffer[$0].append(Double(calc.aux_elec_missing_due_to_grid_limit_sum))
+          buffer[$0].append(contentsOf: avg)
         }
         //if i == 0 { for i in results.indices { results[i].removeAll() } }
         buffer.filter { $0[17] < best[17] }.forEach { 
           results[0].insert(XY(x: $0[12], y: $0[17]))
           results[1].insert(XY(x: $0[13], y: $0[17]))
           results[2].insert(XY(x: $0[0], y: $0[17]))
+          print($0)
           ws.write($0, row: r)
           r += 1
         }
         best = buffer.sorted(by: { $0[17] < $1[17] }).first!
         output(best.readable)
-        
+        values = Array(best[25...])
         selected[i] = [best[i]]
         if selected[i] == [0] {
           all[i] = [0]

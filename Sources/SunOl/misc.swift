@@ -475,3 +475,56 @@ extension Sequence where Element: Equatable {
     return unique
   }
 }
+
+struct Link: Codable {
+  let color: String
+  let source: String
+  let target: String
+  let type: String
+  let value: Double
+}
+
+struct Node: Codable {
+  let id: String
+  let title: String
+}
+
+struct Sankey: Codable {
+  let links: [Link]
+  let nodes: [Node]
+}
+
+func sankey(values: [Double]) -> Sankey {
+  Sankey(
+    links: [
+      Link(color: "rgb(178, 42, 42)", source: "PV", target: "za", type: "y", value: 0.5),
+      Link(color: "rgb(178, 42, 42)", source: "PV", target: "y", type: "y", value: 0.5),
+      Link(color: "rgb(0, 111, 222)", source: "G", target: "EL", type: "y", value: 0.5),
+      Link(color: "rgb(98, 230, 31)", source: "G", target: "H2", type: "y", value: 0.5),
+      Link(color: "rgb(98, 230, 31)", source: "ST", target: "G", type: "y", value: 1),
+      Link(color: "rgb(244, 230, 31)", source: "H2", target: "M", type: "y", value: 3),
+      Link(color: "rgb(0, 111, 222)", source: "CSP", target: "H2", type: "M", value: 1.5),
+      Link(color: "rgb(178, 42, 42)", source: "PV", target: "EL", type: "M", value: 2.5),
+      Link(color: "rgb(178, 42, 42)", source: "PV", target: "H", type: "M", value: 1.5),
+      Link(color: "rgb(244, 230, 31)", source: "H", target: "TES", type: "M", value: 1.5),
+      Link(color: "rgb(0, 111, 222)", source: "CSP", target: "HX", type: "z", value: 1.5),
+      Link(color: "rgb(0, 111, 222)", source: "HX", target: "TES", type: "z", value: 1.5),
+      Link(color: "rgb(244, 230, 31)", source: "TES", target: "ST", type: "z", value: 2.8),
+      Link(color: "rgb(244, 230, 31)", source: "TES", target: "zb", type: "z", value: 0.2),
+      Link(color: "rgb(98, 230, 31)", source: "EL", target: "H2", type: "z", value: 2),
+      Link(color: "rgb(98, 230, 31)", source: "ST", target: "C", type: "z", value: 1.6),
+      Link(color: "rgb(244, 230, 31)", source: "ST", target: "H2", type: "z", value: 0.2),
+      Link(color: "rgb(0, 111, 222)", source: "EL", target: "z", type: "z", value: 1),
+    ],
+    nodes: [
+      Node(id: "PVDC", title: "PV"), Node(id: "PV", title: "PV"),
+      Node(id: "CSP", title: "Heat"), Node(id: "TES", title: "TES"),
+      Node(id: "H2", title: "H2"), Node(id: "C", title: "Condenser"),
+      Node(id: "G", title: "Generator"), Node(id: "EL", title: "Electrolyser"),
+      Node(id: "HX", title: "Heatexchanger"), Node(id: "H", title: "Heater"),
+      Node(id: "ST", title: "Turbine"), Node(id: "M", title: "Methanol"),
+      Node(id: "y", title: "Grid"), Node(id: "z", title: "Losses"),
+      Node(id: "za", title: "Loss"), Node(id: "zb", title: "Loss"),
+    ]
+  )
+}
