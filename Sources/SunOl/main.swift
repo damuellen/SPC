@@ -58,7 +58,7 @@ source.setEventHandler {
 source.resume()
 
 let now = Date()
-// main()
+main()
 
 print("Elapsed seconds:", -now.timeIntervalSinceNow)
 #if !os(Windows)
@@ -82,25 +82,24 @@ func main() {
 
   let name = "SunOl_\(UUID().uuidString.prefix(6)).xlsx"
   let wb = Workbook(name: name)  
+  let ws = wb.addWorksheet()
   defer { 
     print(name)
     wb.close()
   }
-
+  var r = 1
   if CommandLine.argc == 3, let data = try? Data(contentsOf: .init(fileURLWithPath: CommandLine.arguments[2])), 
     let parameter = try? JSONDecoder().decode([Parameter].self, from: data) {
-    parameter.forEach { calc(parameter: $0, wb: wb) }
+    parameter.forEach { calc(parameter: $0, ws: ws, r: &r) }
   } else {
     calc(parameter: .init(
       CSP_Loop_Nr: 100...210, PV_DC_Cap: 700...1000, PV_AC_Cap: 500...800, Heater_cap: 100...200, TES_Full_Load_Hours: 12...14,
       EY_Nominal_elec_input: 200...300, PB_Nominal_gross_cap: 100...200, BESS_cap: 20...120, H2_storage_cap: 40...60,
-      Meth_nominal_hourly_prod_cap: 14...16, El_boiler_cap: 40...90, grid_max_export: 50...50), wb: wb)  
+      Meth_nominal_hourly_prod_cap: 14...16, El_boiler_cap: 40...90, grid_max_export: 50...50), ws: ws, r: &r)  
   }
 
-  func calc(parameter: Parameter, wb: Workbook) {
+  func calc(parameter: Parameter, ws: Worksheet, r: inout Int) {
     var all = parameter.ranges
-
-    let ws = wb.addWorksheet(name: Int(parameter.CSP_Loop_Nr.lowerBound).description)
 
     dump(parameter, maxDepth: 1)
 
@@ -117,11 +116,10 @@ func main() {
     }
     var selected = all.compactMap(\.last).map { [$0] }
     var best = [Double](repeating: .infinity, count: 30)
-    var r = 1
     var hashes = Set<Int>()
     var indices = all.indices.map {$0}
     var shuffled = false
-    for _ in 1...25 {
+    for _ in 1...30 {
       if source.isCancelled { break }
       for i in indices {
         if source.isCancelled { break }
@@ -179,7 +177,6 @@ func main() {
         break
       }
       hashes.insert(selected.hashValue)
-    }
-    ws.table(range: [0,0,r,24], header: ["Loops", "PV DC", "PV AC", "Heater", "TES", "EY", "PB", "BESS", "H22", "Meth", "Boiler", "Grid", "CAPEX", "H2_", "LCoE", "LCoTh", "LCH2","LCoM","Other1","Other2","Other3","Other4","Other5","Other6","Other7"])
+    }   
   }
 }
