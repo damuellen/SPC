@@ -168,7 +168,7 @@ struct DataFile {
 struct Results {
   init() {
     var rows = [[String:Double]]()
-    #if DEBUG
+    #if DEBUGA
     let url = URL(fileURLWithPath: "/workspaces/SPC/output.txt")
 
     guard let dataFile = DataFile(url) else { fatalError() }
@@ -301,6 +301,7 @@ struct Results {
   }
 
   func compare(_ results: [Double], with key: String) {
+    #if DEBUGA
     var r = 4
     var isCorrect = true
     var out = "Column \(key)\n"
@@ -324,6 +325,7 @@ struct Results {
       }
       print(out)
     }
+    #endif
   }
 }
 
@@ -463,6 +465,11 @@ public struct CartesianProduct<S: Sequence>: IteratorProtocol, Sequence {
   }
 }
 
+extension Gnuplot {
+  public convenience init<T: FloatingPoint>(xs: [[T]], _ index: (x: Int, y: Int), style: Style = .linePoints) {
+    self.init(xys: [xs.map { ($0[index.x], $0[index.y]) } ], style: style)
+  }
+}
 
 extension Sequence where Element: Equatable {
   public func distinct() -> [Element] {

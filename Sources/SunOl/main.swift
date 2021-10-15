@@ -79,23 +79,26 @@ func main() {
     Reference_PV_plant_power_at_inverter_inlet_DC.append(Double(data[1]))
     Reference_PV_MV_power_at_transformer_outlet.append(Double(data[2]))
   }
-
-  let name = "SunOl_\(UUID().uuidString.prefix(6)).xlsx"
+  let id = String(UUID().uuidString.prefix(6))
+  let name = "SunOl_\(id).xlsx"
   let wb = Workbook(name: name)  
   let ws = wb.addWorksheet()
+  var r = 1
   defer { 
     print(name)
+    ws.table(range: [0,0,r,17], header: [
+      "Loops", "PV DC", "PV AC", "Heater", "TES", "EY", "PB", "BESS", "H22", "Meth", "Boiler", "Grid", "CAPEX", "H2_", "LCoE", "LCoTh", "LCH2","LCoM"
+    ])
     wb.close()
   }
-  var r = 1
   if CommandLine.argc == 3, let data = try? Data(contentsOf: .init(fileURLWithPath: CommandLine.arguments[2])), 
     let parameter = try? JSONDecoder().decode([Parameter].self, from: data) {
     parameter.forEach { calc(parameter: $0, ws: ws, r: &r) }
   } else {
     calc(parameter: .init(
-      CSP_Loop_Nr: 100...210, PV_DC_Cap: 700...1000, PV_AC_Cap: 500...800, Heater_cap: 100...200, TES_Full_Load_Hours: 12...14,
+      CSP_Loop_Nr: 10...210, PV_DC_Cap: 700...1000, PV_AC_Cap: 500...800, Heater_cap: 100...200, TES_Full_Load_Hours: 10...14,
       EY_Nominal_elec_input: 200...300, PB_Nominal_gross_cap: 100...200, BESS_cap: 20...120, H2_storage_cap: 40...60,
-      Meth_nominal_hourly_prod_cap: 14...16, El_boiler_cap: 40...90, grid_max_export: 50...50), ws: ws, r: &r)  
+      Meth_nominal_hourly_prod_cap: 14...18, El_boiler_cap: 40...90, grid_max_export: 20...20), ws: ws, r: &r)  
   }
 
   func calc(parameter: Parameter, ws: Worksheet, r: inout Int) {
@@ -118,35 +121,39 @@ func main() {
     var best = [Double](repeating: .infinity, count: 30)
     var hashes = Set<Int>()
     var indices = all.indices.map {$0}
-    var shuffled = false
-    for _ in 1...30 {
+    for iter in 1...30 {
       if source.isCancelled { break }
       for i in indices {
         if source.isCancelled { break }
         selected[i] = all[i]
         if all[i].count == 1 { continue }
         var buffer = Array(CartesianProduct(selected))
-        DispatchQueue.concurrentPerform(iterations: buffer.count) {
-        // buffer.indices.forEach { 
-          var calc = SunOl(values: buffer[$0])
+        // DispatchQueue.concurrentPerform(iterations: buffer.count) {
+        buffer.indices.forEach { 
+          var model = SunOl(values: buffer[$0])
           var pr_meth_plant_op = Array(repeating: 0.4, count: 8760)
-          calc(&pr_meth_plant_op, Q_Sol_MW_thLoop, Reference_PV_plant_power_at_inverter_inlet_DC, Reference_PV_MV_power_at_transformer_outlet)
-          calc(&pr_meth_plant_op, Q_Sol_MW_thLoop, Reference_PV_plant_power_at_inverter_inlet_DC, Reference_PV_MV_power_at_transformer_outlet)
-          let avg = calc(&pr_meth_plant_op, Q_Sol_MW_thLoop, Reference_PV_plant_power_at_inverter_inlet_DC, Reference_PV_MV_power_at_transformer_outlet)
-          let result = SpecificCost().invest(config: calc)
+          var rows = [String](repeating: "", count: 8761)
+          let input = model(Q_Sol_MW_thLoop, Reference_PV_plant_power_at_inverter_inlet_DC, Reference_PV_MV_power_at_transformer_outlet, rows: &rows)
+          model(&pr_meth_plant_op, input.Q_solar_before_dumping, input.PV_MV_power_at_transformer_outlet, input.aux_elec_for_CSP_SF_PV_Plant, rows: &rows)
+          model(&pr_meth_plant_op, input.Q_solar_before_dumping, input.PV_MV_power_at_transformer_outlet, input.aux_elec_for_CSP_SF_PV_Plant, rows: &rows)
+          let avg = model(&pr_meth_plant_op, input.Q_solar_before_dumping, input.PV_MV_power_at_transformer_outlet, input.aux_elec_for_CSP_SF_PV_Plant, rows: &rows)
+          #if DEBUG
+          try! rows.joined(separator: "\n").write(toFile: "Output_\(id).csv", atomically: false, encoding: .utf8)
+          #endif
+          let result = SpecificCost().invest(config: model)
           buffer[$0].append(result.CAPEX)
-          buffer[$0].append(Double(calc.H2_to_meth_production_effective_MTPH_sum))
+          buffer[$0].append(Double(model.H2_to_meth_production_effective_MTPH_sum))
           buffer[$0].append(result.LCoE)
           buffer[$0].append(result.LCoTh)
           buffer[$0].append(result.LCH2)
           buffer[$0].append(result.LCoM)
-          buffer[$0].append(Double(calc.PB_startup_heatConsumption_effective_count))
-          buffer[$0].append(Double(calc.TES_discharge_effective_count))
-          buffer[$0].append(Double(calc.EY_plant_start_count))
-          buffer[$0].append(Double(calc.gross_operating_point_of_EY_count))
-          buffer[$0].append(Double(calc.meth_plant_start_count))
-          buffer[$0].append(Double(calc.H2_to_meth_production_effective_MTPH_count))
-          buffer[$0].append(Double(calc.aux_elec_missing_due_to_grid_limit_sum))
+          buffer[$0].append(Double(model.PB_startup_heatConsumption_effective_count))
+          buffer[$0].append(Double(model.TES_discharge_effective_count))
+          buffer[$0].append(Double(model.EY_plant_start_count))
+          buffer[$0].append(Double(model.gross_operating_point_of_EY_count))
+          buffer[$0].append(Double(model.meth_plant_start_count))
+          buffer[$0].append(Double(model.H2_to_meth_production_effective_MTPH_count))
+          buffer[$0].append(Double(model.aux_elec_missing_due_to_grid_limit_sum))
           buffer[$0].append(contentsOf: avg)
         }
         //if i == 0 { for i in results.indices { results[i].removeAll() } }
@@ -154,7 +161,7 @@ func main() {
           results[0].insert(XY(x: $0[12], y: $0[17]))
           results[1].insert(XY(x: $0[13], y: $0[17]))
           results[2].insert(XY(x: $0[0], y: $0[17]))
-          print($0)
+          // print($0)
           ws.write($0, row: r)
           r += 1
         }
@@ -174,6 +181,7 @@ func main() {
         // all.indices.filter { all[$0].count > 1 }.forEach { i in 
         //   all[i].shift(half: all[i].last!)
         // }
+        print("Iterations: \(iter)")
         break
       }
       hashes.insert(selected.hashValue)

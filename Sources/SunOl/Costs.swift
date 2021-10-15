@@ -85,7 +85,7 @@ struct SpecificCost {
       Substation_capacity.coeff * Substation_capacity.basis * ((config.Heater_cap + config.EY_Nominal_elec_input  + config.EY_aux_elec_input + config.Meth_nominal_aux_electr_cons) / Substation_capacity.basis) ** Substation_capacity.exp
 
     let Substation_cost =
-      Substation_capacity.coeff * Substation_capacity.basis * (config.grid_max_export / Substation_capacity.basis) ** Substation_capacity.exp
+      Substation_capacity.coeff * Substation_capacity.basis * (max(config.grid_max_export, config.grid_max_import) / Substation_capacity.basis) ** Substation_capacity.exp
 
     let CSP_O_M_Cost = (11.3333 / 3 * 1 / 3 * 1000 * 1000) + (0.00606061 / 3 * 1 / 3 * 1000 * 1000) * config.CSP_Loop_Nr
     let PV_O_M_Cost = (11.3333 * 1000 * 1000) + 0 * config.PV_DC_Cap
