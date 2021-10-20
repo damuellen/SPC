@@ -164,6 +164,19 @@ struct DataFile {
   }
 }
 
+extension Double {
+  public var multiBar: String {
+    let (bar_chunks, remainder) = Int(self * 80)
+      .quotientAndRemainder(dividingBy: 8)
+    let full = UnicodeScalar("█").value
+    let fractionalPart = remainder > 0
+      ? String(UnicodeScalar(full + UInt32(8 - remainder))!) : ""
+    return String(repeating: "█", count: bar_chunks)
+      + fractionalPart 
+      + String(repeating: " ", count: 10 - bar_chunks) 
+      + String(format: "%G", self)
+  }
+}
 
 struct Results {
   init() {

@@ -1284,26 +1284,59 @@ struct SunOl {
 }
 
 struct Parameter: Codable {
-  var CSP_Loop_Nr: ClosedRange<Double>
-  var PV_DC_Cap: ClosedRange<Double>
-  var PV_AC_Cap: ClosedRange<Double>
-  var Heater_cap: ClosedRange<Double>
-  var TES_Full_Load_Hours: ClosedRange<Double>
-  var EY_Nominal_elec_input: ClosedRange<Double>
-  var PB_Nominal_gross_cap: ClosedRange<Double>
-  var BESS_cap: ClosedRange<Double>
-  var H2_storage_cap: ClosedRange<Double>
-  var Meth_nominal_hourly_prod_cap: ClosedRange<Double>
-  var El_boiler_cap: ClosedRange<Double>
-  var grid_max_export: ClosedRange<Double>
+  var ranges: [ClosedRange<Double>]
 
-  var ranges: [[Double]] {
-    func range(_ range: ClosedRange<Double>, by: Double) -> [Double] { Array(stride(from: range.lowerBound, through: range.upperBound, by: by)) }
-    return [
-      range(CSP_Loop_Nr, by: 1), range(PV_DC_Cap, by: 2), range(PV_AC_Cap, by: 2), range(Heater_cap, by: 1), range(TES_Full_Load_Hours, by: 0.1),
-      range(EY_Nominal_elec_input, by: 1), range(PB_Nominal_gross_cap, by: 1), range(BESS_cap, by: 1), range(H2_storage_cap, by: 1),
-      range(Meth_nominal_hourly_prod_cap, by: 0.1), range(El_boiler_cap, by: 1), range(grid_max_export, by: 1),
+  init(
+    CSP_Loop_Nr: ClosedRange<Double>,
+    PV_DC_Cap: ClosedRange<Double>,
+    PV_AC_Cap: ClosedRange<Double>,
+    Heater_cap: ClosedRange<Double>,
+    TES_Full_Load_Hours: ClosedRange<Double>,
+    EY_Nominal_elec_input: ClosedRange<Double>,
+    PB_Nominal_gross_cap: ClosedRange<Double>,
+    BESS_cap: ClosedRange<Double>,
+    H2_storage_cap: ClosedRange<Double>,
+    Meth_nominal_hourly_prod_cap: ClosedRange<Double>,
+    El_boiler_cap: ClosedRange<Double>,
+    grid_max_export: ClosedRange<Double>
+  ) {
+    self.ranges = [
+      CSP_Loop_Nr,
+      PV_DC_Cap,
+      PV_AC_Cap,
+      Heater_cap,
+      TES_Full_Load_Hours,
+      EY_Nominal_elec_input,
+      PB_Nominal_gross_cap,
+      BESS_cap,
+      H2_storage_cap,
+      Meth_nominal_hourly_prod_cap,
+      El_boiler_cap,
+      grid_max_export
     ]
+  }
+
+  subscript(i: Int) -> ClosedRange<Double> {
+    get { ranges[i] } 
+    set { ranges[i] = newValue }
+  }
+
+  func steps(count: Int) -> [[Double]] {
+    ranges.map { range in
+      stride(from: 0, through: 1, by: 1 / Double(count)).map(range.denormalized(value:))
+    } 
+  }
+
+  func denormalized(values: [Double]) -> [Double] {
+    zip(ranges, values).map { range, value in range.normalized(value: value) }
+  }
+
+  func normalized(values: [Double]) -> [Double] {
+    zip(ranges, values).map { range, value in range.denormalized(value: value) }
+  }
+
+  var random: [Double] {
+    ranges.map { range in Double.random(in: range) }
   }
 }
 
@@ -1313,4 +1346,16 @@ func output(_ s: [String]) {
     "Meth \(s[9])", "Boiler \(s[10])", "Grid \(s[11])", "CAPEX \(s[12])", "H2 \(s[13])", "LCoE \(s[14])", "LCoTh \(s[15])", "LCH2 \(s[16])",
     "LCoM \(s[17])", "\(s[18])", "\(s[19])", "\(s[20])", "\(s[21])", "\(s[22])", "\(s[23])", "\(s[24])", separator: "  ")
     print(s[25...].joined(separator: "  "))
+}
+
+extension ClosedRange where Bound == Double {
+  func normalized(value: Double) -> Double {
+    if lowerBound == upperBound { return 1 }
+    precondition((0...1).contains(value))
+    return (value - lowerBound) / (upperBound - lowerBound)
+  }
+
+  func denormalized(value: Double) -> Double {
+    return lowerBound + value * (upperBound - lowerBound)
+  }
 }

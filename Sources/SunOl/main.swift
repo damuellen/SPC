@@ -96,40 +96,43 @@ func main() {
     parameter.forEach { calc(parameter: $0, ws: ws, r: &r) }
   } else {
     calc(parameter: .init(
-      CSP_Loop_Nr: 10...210, PV_DC_Cap: 700...1000, PV_AC_Cap: 500...800, Heater_cap: 100...200, TES_Full_Load_Hours: 10...14,
-      EY_Nominal_elec_input: 200...300, PB_Nominal_gross_cap: 100...200, BESS_cap: 20...120, H2_storage_cap: 40...60,
-      Meth_nominal_hourly_prod_cap: 14...18, El_boiler_cap: 40...90, grid_max_export: 20...20), ws: ws, r: &r)  
+      CSP_Loop_Nr: 10...190, PV_DC_Cap: 280...1200, PV_AC_Cap: 280...1200, Heater_cap: 10...400, TES_Full_Load_Hours: 10...15,
+      EY_Nominal_elec_input: 80...400, PB_Nominal_gross_cap: 10...150, BESS_cap: 0...1470, H2_storage_cap: 10...100,
+      Meth_nominal_hourly_prod_cap: 12...30, El_boiler_cap: 0...100, grid_max_export: 0...50), ws: ws, r: &r)  
   }
 
   func calc(parameter: Parameter, ws: Worksheet, r: inout Int) {
-    var all = parameter.ranges
+    var newParameter = parameter
+    var all = newParameter.steps(count: 10)
 
-    dump(parameter, maxDepth: 1)
+    // dump(parameter, maxDepth: 1)
 
-    if all[1][0] == 0 { all[2] = [0] }
+    // if all[1][0] == 0 { all[2] = [0] }
 
-    if all[0][0] == 0 {
-      all[3] = [0]
-      all[4] = [0]
-      all[6] = [0]
-    }
-    if all[6] == [0] {
-      all[4] = [0]
-      all[3] = [0]
-    }
-    var selected = all.compactMap(\.last).map { [$0] }
+    // if all[0][0] == 0 {
+    //   all[3] = [0]
+    //   all[4] = [0]
+    //   all[6] = [0]
+    // }
+    // if all[6] == [0] {
+    //   all[4] = [0]
+    //   all[3] = [0]
+    // }
+    var selected = parameter.random.map { [$0] }
     var best = [Double](repeating: .infinity, count: 30)
     var hashes = Set<Int>()
-    var indices = all.indices.map {$0}
-    for iter in 1...30 {
+    var count = 10
+    var LCOM = Double.infinity
+    for iter in 1...100 {
+      let indices = all.indices.shuffled()
       if source.isCancelled { break }
       for i in indices {
         if source.isCancelled { break }
         selected[i] = all[i]
         if all[i].count == 1 { continue }
         var buffer = Array(CartesianProduct(selected))
-        // DispatchQueue.concurrentPerform(iterations: buffer.count) {
-        buffer.indices.forEach { 
+        DispatchQueue.concurrentPerform(iterations: buffer.count) {
+        // buffer.indices.forEach { 
           var model = SunOl(values: buffer[$0])
           var pr_meth_plant_op = Array(repeating: 0.4, count: 8760)
           var rows = [String](repeating: "", count: 8761)
@@ -157,34 +160,40 @@ func main() {
           buffer[$0].append(contentsOf: avg)
         }
         //if i == 0 { for i in results.indices { results[i].removeAll() } }
-        buffer.filter { $0[17] < best[17] }.forEach { 
+        buffer.forEach { 
           results[0].insert(XY(x: $0[12], y: $0[17]))
           results[1].insert(XY(x: $0[13], y: $0[17]))
           results[2].insert(XY(x: $0[0], y: $0[17]))
-          // print($0)
+          // output($0.readable)
           ws.write($0, row: r)
           r += 1
         }
-        best = buffer.sorted(by: { $0[17] < $1[17] }).first!
-        output(best.readable)
+        let sorted = buffer.sorted(by: { $0[17] < $1[17] })
+        let new = sorted.map { $0[i] }.dropLast(2)
+        // print(i, parameter[i])
+        newParameter[i] = newParameter[i].clamped(to: (new.min()!...new.max()!))
+        
+        best = sorted.first!
+        
         values = Array(best[25...])
         selected[i] = [best[i]]
-        if selected[i] == [0] {
-          all[i] = [0]
-          continue
-        }
-        all[i].shift(half: best[i])
-      }
-
-      if hashes.contains(selected.hashValue) {
-        indices = all.indices.shuffled()
-        // all.indices.filter { all[$0].count > 1 }.forEach { i in 
-        //   all[i].shift(half: all[i].last!)
+        // print(parameter[i], best[i])
+        // if selected[i] == [0] {
+        //   all[i] = [0]
+        //   continue
         // }
-        print("Iterations: \(iter)")
-        break
+        all = parameter.steps(count: count)
       }
-      hashes.insert(selected.hashValue)
+      if LCOM > best[17] { LCOM = best[17] }
+      
+      print(parameter.denormalized(values: selected.compactMap(\.first)).map(\.multiBar).joined(separator: "\n"))
+      if LCOM < best[17] || iter.isMultiple(of: 10) || hashes.contains(selected.hashValue) {
+        LCOM = Double.infinity
+        selected = parameter.random.map { [$0] }
+        print("Lets roll!")
+      } else {
+        hashes.insert(selected.hashValue)
+      }      
     }   
   }
 }
