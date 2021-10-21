@@ -3,15 +3,14 @@ import xlsxwriter
 import Helpers
 
 var results: [Set<XY>] = [[], [], []]
-var values: [Double] = [1]
 
 #if !os(Windows)
 import Swifter
 let server = HttpServer()
 let enc = JSONEncoder()
 
-server["/Server/:path"] = shareFilesFromDirectory("/workspaces/SPC/Server")
-server.GET["sankey"] = { _ in try! .ok(.data(enc.encode(sankey(values: values)))) }
+// server["/Server/:path"] = shareFilesFromDirectory("/workspaces/SPC/Server")
+// server.GET["sankey"] = { _ in try! .ok(.data(enc.encode(sankey(values: values)))) }
 
 server["/"] = scopes {
   html {
@@ -86,9 +85,7 @@ func main() {
   var r = 1
   defer { 
     print(name)
-    ws.table(range: [0,0,r,17], header: [
-      "Loops", "PV DC", "PV AC", "Heater", "TES", "EY", "PB", "BESS", "H22", "Meth", "Boiler", "Grid", "CAPEX", "H2_", "LCoE", "LCoTh", "LCH2","LCoM"
-    ])
+    ws.table(range: [0,0,r,17], header: SpecificCost.labels)
     wb.close()
   }
   if CommandLine.argc == 3, let data = try? Data(contentsOf: .init(fileURLWithPath: CommandLine.arguments[2])), 
@@ -102,98 +99,72 @@ func main() {
   }
 
   func calc(parameter: Parameter, ws: Worksheet, r: inout Int) {
+    let steps = 10
+
     var newParameter = parameter
-    var all = newParameter.steps(count: 10)
 
-    // dump(parameter, maxDepth: 1)
-
-    // if all[1][0] == 0 { all[2] = [0] }
-
-    // if all[0][0] == 0 {
-    //   all[3] = [0]
-    //   all[4] = [0]
-    //   all[6] = [0]
-    // }
-    // if all[6] == [0] {
-    //   all[4] = [0]
-    //   all[3] = [0]
-    // }
-    var selected = parameter.random.map { [$0] }
-    var best = [Double](repeating: .infinity, count: 30)
-    var hashes = Set<Int>()
-    var count = 10
-    var LCOM = Double.infinity
-    for iter in 1...100 {
-      let indices = all.indices.shuffled()
+    var selection = parameter.randomValues.map { [$0] }
+    var resultStorage = [Int:[Double]]()
+    var configHashes = Set<Int>()
+    var bestResult = [Double]()
+    for iter in 1...200 {
+      
+      let indices = parameter.ranges.indices.shuffled()
       if source.isCancelled { break }
+      let permutations = newParameter.steps(count: steps)
       for i in indices {
         if source.isCancelled { break }
-        selected[i] = all[i]
-        if all[i].count == 1 { continue }
-        var buffer = Array(CartesianProduct(selected))
-        DispatchQueue.concurrentPerform(iterations: buffer.count) {
-        // buffer.indices.forEach { 
-          var model = SunOl(values: buffer[$0])
-          var pr_meth_plant_op = Array(repeating: 0.4, count: 8760)
-          var rows = [String](repeating: "", count: 8761)
-          let input = model(Q_Sol_MW_thLoop, Reference_PV_plant_power_at_inverter_inlet_DC, Reference_PV_MV_power_at_transformer_outlet, rows: &rows)
-          model(&pr_meth_plant_op, input.Q_solar_before_dumping, input.PV_MV_power_at_transformer_outlet, input.aux_elec_for_CSP_SF_PV_Plant, rows: &rows)
-          model(&pr_meth_plant_op, input.Q_solar_before_dumping, input.PV_MV_power_at_transformer_outlet, input.aux_elec_for_CSP_SF_PV_Plant, rows: &rows)
-          let avg = model(&pr_meth_plant_op, input.Q_solar_before_dumping, input.PV_MV_power_at_transformer_outlet, input.aux_elec_for_CSP_SF_PV_Plant, rows: &rows)
-          #if DEBUG
-          try! rows.joined(separator: "\n").write(toFile: "Output_\(id).csv", atomically: false, encoding: .utf8)
-          #endif
-          let result = SpecificCost().invest(config: model)
-          buffer[$0].append(result.CAPEX)
-          buffer[$0].append(Double(model.H2_to_meth_production_effective_MTPH_sum))
-          buffer[$0].append(result.LCoE)
-          buffer[$0].append(result.LCoTh)
-          buffer[$0].append(result.LCH2)
-          buffer[$0].append(result.LCoM)
-          buffer[$0].append(Double(model.PB_startup_heatConsumption_effective_count))
-          buffer[$0].append(Double(model.TES_discharge_effective_count))
-          buffer[$0].append(Double(model.EY_plant_start_count))
-          buffer[$0].append(Double(model.gross_operating_point_of_EY_count))
-          buffer[$0].append(Double(model.meth_plant_start_count))
-          buffer[$0].append(Double(model.H2_to_meth_production_effective_MTPH_count))
-          buffer[$0].append(Double(model.aux_elec_missing_due_to_grid_limit_sum))
-          buffer[$0].append(contentsOf: avg)
+        selection[i] = permutations[i]
+        if permutations[i].count == 1 { continue }
+        var workingBuffer = Array(CartesianProduct(selection))
+        DispatchQueue.concurrentPerform(iterations: workingBuffer.count) {
+        // workingBuffer.indices.forEach {
+          let key = workingBuffer[$0].hashValue
+          if let result = resultStorage[key] {
+            workingBuffer[$0] = result
+          } else {
+            var model = SunOl(values: workingBuffer[$0])
+            var pr_meth_plant_op = Array(repeating: 0.4, count: 8760)
+            var rows = [String](repeating: "", count: 8761)
+            let input = model(Q_Sol_MW_thLoop, Reference_PV_plant_power_at_inverter_inlet_DC, Reference_PV_MV_power_at_transformer_outlet, rows: &rows)
+            model(&pr_meth_plant_op, input.Q_solar_before_dumping, input.PV_MV_power_at_transformer_outlet, input.aux_elec_for_CSP_SF_PV_Plant, rows: &rows)
+            model(&pr_meth_plant_op, input.Q_solar_before_dumping, input.PV_MV_power_at_transformer_outlet, input.aux_elec_for_CSP_SF_PV_Plant, rows: &rows)
+            model(&pr_meth_plant_op, input.Q_solar_before_dumping, input.PV_MV_power_at_transformer_outlet, input.aux_elec_for_CSP_SF_PV_Plant, rows: &rows)
+            #if DEBUG
+            try! rows.joined(separator: "\n").write(toFile: "Output_\(id).csv", atomically: false, encoding: .utf8)
+            #endif
+            workingBuffer[$0].append(contentsOf: SpecificCost.invest(model))
+          }
         }
-        //if i == 0 { for i in results.indices { results[i].removeAll() } }
-        buffer.forEach { 
-          results[0].insert(XY(x: $0[12], y: $0[17]))
-          results[1].insert(XY(x: $0[13], y: $0[17]))
-          results[2].insert(XY(x: $0[0], y: $0[17]))
-          // output($0.readable)
-          ws.write($0, row: r)
-          r += 1
+
+        for result in workingBuffer {
+          if resultStorage.updateValue(result, forKey: result[0..<12].hashValue) == nil {
+            results[0].insert(XY(x: result[12], y: result[17]))
+            results[1].insert(XY(x: result[13], y: result[17]))
+            results[2].insert(XY(x: result[0], y: result[17]))
+            // output($0.readable)
+            ws.write(result, row: r)
+            r += 1
+          }
         }
-        let sorted = buffer.sorted(by: { $0[17] < $1[17] })
-        let new = sorted.map { $0[i] }.dropLast(2)
-        // print(i, parameter[i])
-        newParameter[i] = newParameter[i].clamped(to: (new.min()!...new.max()!))
-        
-        best = sorted.first!
-        
-        values = Array(best[25...])
-        selected[i] = [best[i]]
-        // print(parameter[i], best[i])
-        // if selected[i] == [0] {
-        //   all[i] = [0]
-        //   continue
-        // }
-        all = parameter.steps(count: count)
+
+        let sortedResults = workingBuffer.sorted(by: { $0[17] < $1[17] })
+        let newRange = sortedResults.map { $0[i] }.dropLast(2)
+        newParameter[i] = newParameter[i].clamped(to: (newRange.min()!...newRange.max()!))
+        bestResult = sortedResults.first!        
+        selection[i] = [bestResult[i]]        
       }
-      if LCOM > best[17] { LCOM = best[17] }
       
-      print(parameter.denormalized(values: selected.compactMap(\.first)).map(\.multiBar).joined(separator: "\n"))
-      if LCOM < best[17] || iter.isMultiple(of: 10) || hashes.contains(selected.hashValue) {
-        LCOM = Double.infinity
-        selected = parameter.random.map { [$0] }
+
+      if configHashes.contains(selection.hashValue) {
+        configHashes.removeAll()
+        newParameter = parameter
+        selection = parameter.randomValues.map { [$0] }
         print("Lets roll!")
       } else {
-        hashes.insert(selected.hashValue)
-      }      
+        configHashes.insert(selection.hashValue)
+      }
+      print("\u{1B}[1A\u{1B}[\u{1B}[1A\u{1B}[K\(ASCIIColor.blue.rawValue)Iterations: \(iter)\n\(labeled(bestResult.readable))")
     }   
   }
 }
