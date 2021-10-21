@@ -548,3 +548,19 @@ func sankey(values: [Double]) -> Sankey {
     ]
   )
 }
+
+func labeled(_ strings: [String]) -> String {  
+  zip(SpecificCost.labels, strings).map { l, s in "\(ASCIIColor.red.rawValue)\(l) \(ASCIIColor.green.rawValue)\(s)" }.joined(separator: " ")
+}
+
+enum ASCIIColor: String {
+  case black = "\u{1B}[0;30m"
+  case red = "\u{1B}[0;31m"
+  case green = "\u{1B}[0;32m"
+  case yellow = "\u{1B}[0;33m"
+  case blue = "\u{1B}[0;34m"
+  case magenta = "\u{1B}[0;35m"
+  case cyan = "\u{1B}[0;36m"
+  case white = "\u{1B}[0;37m"
+  case `default` = "\u{1B}[0;0m"
+}
