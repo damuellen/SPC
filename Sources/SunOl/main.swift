@@ -107,8 +107,8 @@ func main() {
     var resultStorage = [Int:[Double]]()
     var configHashes = Set<Int>()
     var bestResult = [Double]()
-    for iter in 1...200 {
-      
+    for iter in 1...500 {
+      print("\u{1B}[1A\u{1B}[\u{1B}[1A\u{1B}[K\(ASCIIColor.blue.rawValue)Iterations: \(iter)\n\(labeled(bestResult.readable))")
       let indices = parameter.ranges.indices.shuffled()
       if source.isCancelled { break }
       let permutations = newParameter.steps(count: steps)
@@ -154,7 +154,7 @@ func main() {
         bestResult = sortedResults.first!        
         selection[i] = [bestResult[i]]        
       }
-      
+
 
       if configHashes.contains(selection.hashValue) {
         configHashes.removeAll()
@@ -163,8 +163,7 @@ func main() {
         print("Lets roll!")
       } else {
         configHashes.insert(selection.hashValue)
-      }
-      print("\u{1B}[1A\u{1B}[\u{1B}[1A\u{1B}[K\(ASCIIColor.blue.rawValue)Iterations: \(iter)\n\(labeled(bestResult.readable))")
+      }      
     }   
   }
 }
