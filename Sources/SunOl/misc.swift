@@ -550,10 +550,7 @@ func sankey(values: [Double]) -> Sankey {
 }
 
 func labeled(_ strings: [String]) -> String {  
-  var text = zip(SpecificCost.labels, strings).map { l, s in "\(ASCIIColor.red.rawValue)\(l) \(ASCIIColor.green.rawValue)\(s)" }.joined(separator: " ") 
-  let pad = 220 - text.count
-  if pad > 0 { text += String(repeating: " ", count: pad) }
-  return text
+  zip(SpecificCost.labels, strings).map { l, s in "\(ASCIIColor.red.rawValue)\(l) \(ASCIIColor.green.rawValue)\(s)" }.joined(separator: " ")
 }
 
 enum ASCIIColor: String {
