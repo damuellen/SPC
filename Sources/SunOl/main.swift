@@ -2,9 +2,12 @@ import Foundation
 import xlsxwriter
 import Helpers
 
+signal(SIGINT, SIG_IGN)
+let source = DispatchSource.makeSignalSource(signal: SIGINT, queue: .global())
+let semaphore = DispatchSemaphore(value: 0)
+#if !os(Windows)
 var results: [Set<XY>] = [[], [], []]
 
-#if !os(Windows)
 import Swifter
 let server = HttpServer()
 let enc = JSONEncoder()
@@ -43,11 +46,7 @@ server["/loops"] = scopes {
 }
 
 try server.start(9080, forceIPv4: true)
-let semaphore = DispatchSemaphore(value: 0)
-#endif
-signal(SIGINT, SIG_IGN)
-let source = DispatchSource.makeSignalSource(signal: SIGINT, queue: .global())
-#if !os(Windows)
+
 source.setEventHandler {
   server.stop()
   semaphore.signal()
@@ -57,6 +56,7 @@ source.setEventHandler {
 import WinSDK
 SetConsoleCtrlHandler(
   { _ in source.cancel()
+    semaphore.wait()
     return WindowsBool(true)
   }, true)
 #endif
@@ -66,7 +66,9 @@ let now = Date()
 main()
 
 print("Elapsed seconds:", -now.timeIntervalSinceNow)
-#if !os(Windows)
+#if os(Windows)
+semaphore.signal()
+#else
 semaphore.wait()
 #endif
 
@@ -113,8 +115,7 @@ func main() {
     var resultStorage = [Int:[Double]]()
     var configHashes = Set<Int>()
     var bestResult = [Double]()
-    for iter in 1...500 {
-      print("\u{1B}[1A\u{1B}[\u{1B}[1A\u{1B}[K\(ASCIIColor.blue.rawValue)Iterations: \(iter)\n\(labeled(bestResult.readable))")
+    for iter in 1...10000 {
       let indices = parameter.ranges.indices.shuffled()
       if source.isCancelled { break }
       let permutations = newParameter.steps(count: steps)
@@ -145,9 +146,11 @@ func main() {
 
         for result in workingBuffer {
           if resultStorage.updateValue(result, forKey: result[0..<12].hashValue) == nil {
+            #if !os(Windows)
             results[0].insert(XY(x: result[12], y: result[17]))
             results[1].insert(XY(x: result[13], y: result[17]))
             results[2].insert(XY(x: result[0], y: result[17]))
+            #endif
             // output($0.readable)
             ws.write(result, row: r)
             r += 1
@@ -161,12 +164,12 @@ func main() {
         selection[i] = [bestResult[i]]        
       }
 
+      print("\u{1B}[H\u{1B}[2J\(ASCIIColor.blue.rawValue)Iterations: \(iter)\n\(labeled(bestResult.readable))")
 
       if configHashes.contains(selection.hashValue) {
         configHashes.removeAll()
         newParameter = parameter
-        selection = parameter.randomValues.map { [$0] }
-        print("Lets roll!")
+        selection = parameter.randomValues.map { [$0] }        
       } else {
         configHashes.insert(selection.hashValue)
       }      
