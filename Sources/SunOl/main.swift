@@ -47,13 +47,19 @@ let semaphore = DispatchSemaphore(value: 0)
 #endif
 signal(SIGINT, SIG_IGN)
 let source = DispatchSource.makeSignalSource(signal: SIGINT, queue: .global())
+#if !os(Windows)
 source.setEventHandler {
-  #if !os(Windows)
-  server.stop()  
+  server.stop()
   semaphore.signal()
-  #endif
-  source.cancel() 
+  source.cancel()
 }
+#else
+import WinSDK
+SetConsoleCtrlHandler(
+  { _ in source.cancel()
+    return WindowsBool(true)
+  }, true)
+#endif
 source.resume()
 
 let now = Date()
