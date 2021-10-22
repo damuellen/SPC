@@ -18,10 +18,12 @@
             "name": "SolarPerformanceCalc-Debug-Print",
             "program": "${workspaceFolder}/.build/debug/SolarPerformanceCalc",
             "args": [
-            //  "--excel",
-                "-c", "${workspaceFolder}/COM",
-            //  "-m", "${workspaceFolder}/Model.playground/Resources/AlAbdaliyah.mto"
-                "-m", "${workspaceFolder}/COM/Meteofile_Hyperion1-200430_P50-TMYs_10min_wind_speed_modified.mto"
+                //  "--excel",
+                "-c",
+                "${workspaceFolder}/COM",
+                //  "-m", "${workspaceFolder}/Model.playground/Resources/AlAbdaliyah.mto"
+                "-m",
+                "${workspaceFolder}/COM/Meteofile_Hyperion1-200430_P50-TMYs_10min_wind_speed_modified.mto"
             ],
             "cwd": "${workspaceFolder}",
             "preLaunchTask": "swift-build-debug-print-SolarPerformanceCalc"
@@ -32,10 +34,12 @@
             "name": "SolarPerformanceCalc-Debug",
             "program": "${workspaceFolder}/.build/debug/SolarPerformanceCalc",
             "args": [
-            //  "--excel",
-                "-c", "${workspaceFolder}/COM",
-            //  "-m", "${workspaceFolder}/Model.playground/Resources/AlAbdaliyah.mto"
-                "-m", "${workspaceFolder}/COM/Midelt.mto"
+                //  "--excel",
+                "-c",
+                "${workspaceFolder}/COM",
+                //  "-m", "${workspaceFolder}/Model.playground/Resources/AlAbdaliyah.mto"
+                "-m",
+                "${workspaceFolder}/COM/Midelt.mto"
             ],
             "cwd": "${workspaceFolder}",
             "preLaunchTask": "swift-build-debug-SolarPerformanceCalc"
@@ -46,9 +50,11 @@
             "name": "SolarPerformanceCalc-Release",
             "program": "${workspaceFolder}/.build/release/SolarPerformanceCalc",
             "args": [
-             //   "-o", "12",
-                "-c", "${workspaceFolder}/COM",
-                "-m", "${workspaceFolder}/COM/Midelt.mto"
+                //   "-o", "12",
+                "-c",
+                "${workspaceFolder}/COM",
+                "-m",
+                "${workspaceFolder}/COM/Midelt.mto"
             ],
             "cwd": "${workspaceFolder}",
             "preLaunchTask": "swift-build-release"
@@ -59,8 +65,10 @@
             "name": "SolarFieldCalc",
             "program": "${workspaceFolder}/.build/debug/SolarFieldCalc",
             "args": [
-                "--loops", "212",
-                "--massflow", "606"
+                "--loops",
+                "212",
+                "--massflow",
+                "606"
             ],
             "cwd": "${workspaceFolder}",
             "preLaunchTask": "swift-build-debug"
@@ -71,17 +79,21 @@
             "name": "PinchPointTool",
             "program": "${workspaceFolder}/.build/debug/PinchPointTool",
             "args": [
-                "-json", "-pdf", "-html"
+                "-json",
+                "-pdf",
+                "-html"
             ],
             "cwd": "${workspaceFolder}",
-            "preLaunchTask": "swift-build-debug"
+            "preLaunchTask": "swift-build-debug-pp"
         },
         {
             "type": "lldb",
             "request": "launch",
             "name": "TransTES",
             "program": "${workspaceFolder}/.build/debug/TransTES",
-            "args": ["</root/workspace/SPC/kjvbible_x10.txt"],
+            "args": [
+                "</root/workspace/SPC/kjvbible_x10.txt"
+            ],
             "cwd": "${workspaceFolder}",
             "preLaunchTask": "swift-build-debug"
         },
@@ -90,10 +102,14 @@
             "request": "launch",
             "name": "SunOl",
             "program": "${workspaceFolder}/.build/debug/SunOl",
-            "args": ["/workspaces/SPC/input.txt"],
+            "args": [
+                "/workspaces/SPC/input.txt"
+            ],
             "cwd": "${workspaceFolder}",
-            "preLaunchTask": "swift-build-debug",
-            "env": { "PYTHON_LIBRARY": "/usr/lib/x86_64-linux-gnu/libpython3.6m.so.1.0" }
+            "preLaunchTask": "swift-build-debug-sol",
+            "env": {
+                "PYTHON_LIBRARY": "/usr/lib/x86_64-linux-gnu/libpython3.6m.so.1.0"
+            }
         }
     ]
 }

@@ -4,12 +4,12 @@
         "owner": "sourcekit-lsp",
         "fileLocation": "autoDetect",
         "pattern": {
-          "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
-          "file": 1,
-          "line": 2,
-          "column": 3,
-          "severity": 4,
-          "message": 5
+            "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+            "file": 1,
+            "line": 2,
+            "column": 3,
+            "severity": 4,
+            "message": 5
         }
     },
     "tasks": [
@@ -21,10 +21,6 @@
                 "build",
                 "-Xswiftc",
                 "-suppress-warnings",
-                "-Xswiftc",
-                "-Xfrontend",
-                "-Xswiftc",
-                "-serialize-debugging-options",
                 "--configuration",
                 "debug",
                 "--product",
@@ -43,12 +39,6 @@
                 "build",
                 "-Xswiftc",
                 "-suppress-warnings",
-                "-Xswiftc",
-                "-Xfrontend",
-                "-Xswiftc",
-                "-serialize-debugging-options",
-                "--configuration",
-                "debug",
                 "--product",
                 "SolarPerformanceCalc",
                 "-Xswiftc",
@@ -63,11 +53,7 @@
             "args": [
                 "build",
                 "-Xswiftc",
-                "-suppress-warnings",
-                "-Xswiftc",
-                "-Xfrontend",
-                "-Xswiftc",
-                "-serialize-debugging-options"
+                "-suppress-warnings"
             ]
         },
         {
@@ -76,14 +62,22 @@
             "command": "swift",
             "args": [
                 "build",
-                "--target",
+                "--product",
                 "SunOl",
                 "-Xswiftc",
-                "-suppress-warnings",
+                "-suppress-warnings"
+            ]
+        },
+        {
+            "label": "swift-build-debug-pp",
+            "type": "shell",
+            "command": "swift",
+            "args": [
+                "build",
+                "--product",
+                "SunOl",
                 "-Xswiftc",
-                "-Xfrontend",
-                "-Xswiftc",
-                "-serialize-debugging-options"
+                "-suppress-warnings"
             ]
         },
         {
@@ -92,10 +86,6 @@
             "command": "swift",
             "args": [
                 "build",
-                "-Xswiftc",
-                "-Xfrontend",
-                "-Xswiftc",
-                "-serialize-debugging-options",
                 "--build-tests"
             ],
             "group": {
