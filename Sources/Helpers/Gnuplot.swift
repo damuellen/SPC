@@ -126,15 +126,9 @@ public final class Gnuplot {
     """
   }
   public convenience init<S: Sequence, F: FloatingPoint>(
-    xys: S..., titles: String..., style: Style = .linePoints) where S.Element == SIMD2<F>
+    xys: S..., titles: [String] = [], style: Style = .linePoints) where S.Element == SIMD2<F>
   {
     self.init(xys: xys.map { xy in xy.map { ($0.x, $0.y) } }, titles: titles, style: style)
-  }
-  
-  public convenience init<S: Sequence, F: FloatingPoint>(
-    xs: S..., ys: S..., titles: String..., style: Style = .linePoints) where S.Element == F
-  {
-    self.init(xys: zip(xs, ys).map { a, b in zip(a, b).map { ($0, $1) } }, titles: titles, style: style)
   }
 
   public init<T: FloatingPoint>(xys: [[(T, T)]], titles: [String] = [], style: Style = .linePoints) {
@@ -156,6 +150,12 @@ public final class Gnuplot {
     self.plot = "\nplot " + xys.indices.map { i in
       "$data i \(i) u 1:2 \(s) w \(l) ls \(i+11) title columnheader(1)"
     }.joined(separator: ", ") + "\n"
+  }
+  #if swift(>=5.4)
+  public convenience init<S: Sequence, F: FloatingPoint>(
+    xs: S..., ys: S..., titles: String..., style: Style = .linePoints) where S.Element == F
+  {
+    self.init(xys: zip(xs, ys).map { a, b in zip(a, b).map { ($0, $1) } }, titles: titles, style: style)
   }
   
   public init<T: FloatingPoint>(
@@ -189,7 +189,7 @@ public final class Gnuplot {
         return "$data i \(n) u 1:2 \(s) axes x1y2 w \(l) ls \(i+21) \(t)"
       }.joined(separator: ", ") + "\n"
     }
-  
+  #endif
   public enum Style {
     case lines(smooth: Bool)
     case linePoints
