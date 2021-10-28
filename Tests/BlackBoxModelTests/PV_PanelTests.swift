@@ -1,5 +1,5 @@
 import Helpers
-import PhysicalQuantities
+import Physics
 import XCTest
 
 @testable import BlackBoxModel

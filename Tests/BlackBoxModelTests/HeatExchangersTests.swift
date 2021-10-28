@@ -1,7 +1,7 @@
 import XCTest
 
 @testable import BlackBoxModel
-import PhysicalQuantities
+import Physics
 
 class HeatExchangersTests: XCTestCase {
   func testsTemperatureFactor() {
