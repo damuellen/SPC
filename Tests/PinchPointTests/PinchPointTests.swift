@@ -1,7 +1,7 @@
 import XCTest
 
 @testable import PinchPoint
-import PhysicalQuantities
+import Physics
 
 class PinchPointTests: XCTestCase {
   func testsCalculation() {
