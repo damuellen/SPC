@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import struct Foundation.Date
-import PhysicalQuantities
+import Physics
 
 extension Recording {
 

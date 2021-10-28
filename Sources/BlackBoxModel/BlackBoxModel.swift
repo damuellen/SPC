@@ -14,7 +14,7 @@ import Helpers
 import Foundation
 import Meteo
 import SolarPosition
-import PhysicalQuantities
+import Physics
 
 public enum BlackBoxModel {
 
@@ -137,7 +137,7 @@ public enum BlackBoxModel {
       }
     }
     var photovoltaic = conditions.concurrentMap { t, ws, gti -> Double in
-       pv(radiation: gti, ambient: t, windSpeed: ws) / 10.0e6
+      pv(radiation: gti, ambient: t, windSpeed: ws) / 10.0e6
     }
     // Makes it easier to use when re-reading the values
     photovoltaic.reverse()
@@ -229,8 +229,8 @@ public enum BlackBoxModel {
 
       let performance = plant.performance
 #if PRINT
+      // print("\u{1B}[H\u{1B}[2J")
       print(decorated(dt.description), meteo, status, performance)
-   // print("\u{001B}[2J")
 #endif
       backgroundQueue.async { [status] in
         log(dt, meteo: meteo, status: status, energy: performance)

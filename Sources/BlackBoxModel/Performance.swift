@@ -8,7 +8,7 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
-import PhysicalQuantities
+import Physics
 
 public struct PlantPerformance: MeasurementsConvertible {
 

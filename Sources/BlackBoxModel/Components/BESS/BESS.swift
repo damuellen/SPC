@@ -9,7 +9,7 @@
 //
 
 import Foundation
-import PhysicalQuantities
+import Physics
 
 public struct BESS {
 

@@ -6,7 +6,7 @@
 //
 
 import DateGenerator
-import PhysicalQuantities
+import Physics
 
 extension Storage {
   

@@ -9,7 +9,6 @@
 //
 
 import CIAPWSIF97
-import PhysicalQuantities
 
 /// IAPWS formulations of the thermodynamic properties of water and steam.
 public struct WaterSteam: Codable {

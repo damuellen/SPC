@@ -10,7 +10,7 @@
 
 import Helpers
 import Libc
-import PhysicalQuantities
+import Physics
 
 /// Pinch point calculation for heat exchangers.
 public struct Calculation: Codable {
@@ -192,7 +192,7 @@ public struct Calculation: Codable {
 
     let (enthalpyBeforeEvaporation, evaporationPower, superHeatingPower) =
       evaporation()
-
+    _ = enthalpyBeforeEvaporation
     /// Specified pressure drop of heat exchangers
     let pressureDrop = parameter.pressureDrop
 
@@ -219,11 +219,11 @@ public struct Calculation: Codable {
     let powerOfBlowDownStream =
       boilingWaterMassFlowBlowDown
       * (enthalpyBeforeEvaporation - economizer.enthalpy.ws.inlet) / 1_000
-
+    _ = powerOfBlowDownStream
     steamGenerator.power =
       evaporationPower + powerForWaterHeatingInsideSg + superHeatingPower
 
-    let powerEvaporationAndSuperheating = superheater.power + evaporationPower
+    // let powerEvaporationAndSuperheating = superheater.power + evaporationPower
 
     superheater.enthalpy.ws.inlet = steamGenerator.enthalpy.ws.outlet
     superheater.enthalpy.ws.outlet = turbine.enthalpy
@@ -250,7 +250,7 @@ public struct Calculation: Codable {
     let superheaterSteamQualityOutlet =
       (superheater.enthalpy.ws.inlet - superheaterWaterEnthalpyOutletVirtual)
       / (superheaterSaturatedSteamEnthalpyOutletVirtual - superheaterWaterEnthalpyOutletVirtual)
-
+    _ = superheaterSteamQualityOutlet
     let enthalpyChangeDueToSuperheatingSteam =
       superheater.enthalpy.ws.outlet - steamGenerator.enthalpy.ws.outlet
 
@@ -282,13 +282,13 @@ public struct Calculation: Codable {
 
     let steamGeneratorHTFEnthalpyChangeForWaterHeatingInSg =
       powerForWaterHeatingInsideSg * 1_000 / steamGenerator.massFlow.htf
+    _ = steamGeneratorHTFEnthalpyChangeForWaterHeatingInSg
+    // let steamGeneratorHTFEnthalpyAtPinchPoint =
+    //   steamGenerator.enthalpy.htf.outlet
+    //   + steamGeneratorHTFEnthalpyChangeForWaterHeatingInSg
 
-    let steamGeneratorHTFEnthalpyAtPinchPoint =
-      steamGenerator.enthalpy.htf.outlet
-      + steamGeneratorHTFEnthalpyChangeForWaterHeatingInSg
-
-    let steamGeneratorHTFTemperatureAtPinchPoint =
-      steamGenerator.temperature.htf.outlet
+    // let steamGeneratorHTFTemperatureAtPinchPoint =
+    //   steamGenerator.temperature.htf.outlet
 
     let economizerHTFAbsoluteHeatFlowOutlet = preheat()
     let reheatHTFAbsoluteHeatFlowOutlet = reheat()

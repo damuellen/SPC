@@ -9,7 +9,7 @@
 //
 
 import Config
-import PhysicalQuantities
+import Physics
 
 extension Boiler {
   public struct Parameter: Codable, Equatable {

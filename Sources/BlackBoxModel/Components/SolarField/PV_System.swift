@@ -8,7 +8,7 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 import Libc
-import PhysicalQuantities
+import Physics
 
 /// The PV_System struct wraps the functions of the pv system components.
 ///
@@ -35,17 +35,17 @@ public struct PV {
         let cell = array.panel.cell.temperature(
           radiation: effective, ambient: ambient, windSpeed: windSpeed,
           nominalPower: array.panel.nominalPower, panelArea: array.panel.area)
-
-        dc = PowerPoint(
-          current: dc.current,
-          voltage: min(dc.voltage, inverter.voltageLevels[0]))
-
+                dc = PowerPoint(
+        current: dc.current,
+        voltage: min(dc.voltage, inverter.voltageLevels[0] - 1e-6))
         let shift = Double(array.panelsPerString) * 1e-6
         var iterations = 0
-        while efficiency.isNaN && iterations < 1000 {
+        while efficiency.isNaN && iterations < 50000 {
           iterations += 1
+          //print(dc)
           dc = array(
-            voltage: dc.voltage - shift, radiation: effective, cell: cell)
+            voltage: dc.voltage + shift, radiation: effective, cell: cell)
+
           efficiency = inverter(power: dc.power, voltage: dc.voltage)
         }
         if efficiency.isNaN { efficiency = 0 }
@@ -76,7 +76,7 @@ public struct PV {
     let unavailability: Double = 0
     /// Creates a pv array
     public init() {
-      self.panelsPerString = 27
+      self.panelsPerString = 26
       self.strings = 295
       self.inverters = 1
       self.panel = Panel()

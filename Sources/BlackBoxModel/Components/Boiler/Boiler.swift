@@ -10,7 +10,7 @@
 
 import Foundation
 import DateGenerator
-import PhysicalQuantities
+import Physics
 
 /// This struct contains the state as well as the functions for mapping the boiler
 public struct Boiler: Parameterizable {

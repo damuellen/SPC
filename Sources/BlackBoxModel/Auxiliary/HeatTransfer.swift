@@ -8,7 +8,7 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
-import PhysicalQuantities
+import Physics
 
 extension HeatTransferFluid {
   func heatContent(_ cycle: HeatTransfer) -> Heat {

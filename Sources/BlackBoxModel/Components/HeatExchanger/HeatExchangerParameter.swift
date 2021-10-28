@@ -9,7 +9,7 @@
 //
 
 import Config
-import PhysicalQuantities
+import Physics
 
 extension HeatExchanger {
   /// A struct with the assigned details of the heat exchanger.

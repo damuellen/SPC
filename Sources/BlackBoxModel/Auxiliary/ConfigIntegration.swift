@@ -9,7 +9,7 @@
 //
 
 import Config
-import PhysicalQuantities
+import Physics
 import Foundation
 
 public enum ConfigFormat {

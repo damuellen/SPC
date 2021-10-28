@@ -11,7 +11,7 @@
 import ArgumentParser
 import Foundation
 import Helpers
-import PhysicalQuantities
+import Physics
 import PinchPoint
 import xlsxwriter
 

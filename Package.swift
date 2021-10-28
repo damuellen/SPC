@@ -2,7 +2,7 @@
 import PackageDescription
 
 let c = [CSetting.unsafeFlags(["-ffast-math", "-O3", "-fomit-frame-pointer", "-funroll-loops"])]
-let flags = ["-cross-module-optimization", "-Ounchecked", "-enforce-exclusivity=unchecked", "-DRELEASE"]
+let flags = ["-Ounchecked", "-enforce-exclusivity=unchecked"]
 let posix = TargetDependencyCondition.when(platforms: [.linux, .macOS])
 let win = BuildSettingCondition.when(platforms: [.windows])
 let linker = LinkerSetting.unsafeFlags(["-Xlinker", "/INCREMENTAL:NO", "-Xlinker", "/IGNORE:4217,4286"], win)
@@ -32,6 +32,7 @@ var package = Package(
       name: "Swifter", url: "https://github.com/httpswift/swifter.git",
       .upToNextMajor(from: "1.5.0")
     ),  
+ // .package(url: "https://github.com/damuellen/Numerical.git", .branch("master")),
  // .package(name: "Benchmark", url: "https://github.com/google/swift-benchmark", from: "0.1.0"),
  // .package(url: "https://github.com/pvieito/PythonKit.git", .branch("master")),
  // .package(url: "https://github.com/jpsim/Yams.git", from: "4.0.1")
@@ -45,8 +46,8 @@ var package = Package(
       linkerSettings: [linker]
     ),
     .target(
-      name: "PhysicalQuantities",
-      dependencies: ["Config", "Meteo", "Libc", "Helpers"],
+      name: "Physics",
+      dependencies: ["Config", "Meteo", "Libc", "Helpers", "CIAPWSIF97",],
       swiftSettings: swift
     ), 
     .target(name: "Config", swiftSettings: swift),
@@ -62,13 +63,13 @@ var package = Package(
     ),
     .target(
       name: "PinchPoint",
-      dependencies: ["CPikchr", "CIAPWSIF97", "Helpers", "PhysicalQuantities"],
+      dependencies: ["CPikchr", "Helpers", "Physics"],
       swiftSettings: swift
     ),
     .target(
       name: "BlackBoxModel",
       dependencies: [
-        "Config", "Libc", "Meteo", "SolarPosition", "Helpers", "PhysicalQuantities",
+        "Config", "Libc", "Meteo", "SolarPosition", "Helpers", "Physics",
         // .product(name: "Yams", package: "Yams"),
         .product(name: "SQLite", package: "SQLite.swift"),
         .product(name: "xlsxwriter", package: "xlsxwriter.swift"),
@@ -80,7 +81,7 @@ var package = Package(
     ),
     .target(
       name: "ThermalStorage",
-      dependencies: ["Libc", "Helpers", "PhysicalQuantities"],
+      dependencies: ["Libc", "Helpers", "Physics"],
       swiftSettings: swift
     ), 
     .target(
@@ -126,7 +127,8 @@ var package = Package(
     .executableTarget(
       name: "SunOl",
       dependencies: [
-        "Helpers", "PhysicalQuantities",
+        "Helpers", "Physics",
+        // .byName(name: "Numerical"),
         .product(name: "xlsxwriter", package: "xlsxwriter.swift"),
         .byName(name: "Swifter", condition: posix),
       ],
@@ -148,6 +150,7 @@ var package = Package(
       name: "MeteoTests",
       dependencies: ["DateGenerator", "SolarPosition", "Meteo"]
     ), 
+    // .testTarget(name: "SunOlTests", dependencies: ["SunOl"]),
     .testTarget(name: "ThermalStorageTests", dependencies: ["ThermalStorage"]),
     .testTarget(name: "PinchPointTests", dependencies: ["PinchPoint"]),
     .testTarget(name: "SolarFieldModelTests", dependencies: ["SolarFieldModel"]),

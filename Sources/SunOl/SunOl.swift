@@ -1,6 +1,6 @@
 import Foundation
 import Helpers
-import PhysicalQuantities
+import Physics
 
 
 struct SunOl {

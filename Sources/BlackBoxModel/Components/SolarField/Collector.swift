@@ -12,7 +12,7 @@ import DateGenerator
 import Libc
 import Meteo
 import SolarPosition
-import PhysicalQuantities
+import Physics
 
 /// This struct contains the state as well as the functions for mapping the collector
 public struct Collector: Parameterizable, CustomStringConvertible {

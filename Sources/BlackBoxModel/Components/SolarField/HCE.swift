@@ -9,7 +9,7 @@
 //
 
 import Meteo
-import PhysicalQuantities
+import Physics
 
 let period = 300
 /**

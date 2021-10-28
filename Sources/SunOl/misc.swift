@@ -1,5 +1,5 @@
 import Foundation
-import PhysicalQuantities
+import Physics
 import Helpers
 
 func evaluate(_ f: (Double)->Double, _ range: ClosedRange<Double>, numberOfSamples: Int = 100) -> [(x: Double, y: Double)] {
@@ -113,11 +113,18 @@ func average(_ values: ArraySlice<Double>) -> Double {
   return sum / Double(values.count)
 }
 
+/// Kahan-Babuška-Neumaier Sum
 func sum(_ values: ArraySlice<Double>) -> Double {
-  values.reduce(into: 0.0) { sum, value in
-    sum += value
+  let (s,w) = values.reduce((s: Double.zero, w: Double.zero)) { accum, aᵢ in
+    let (sᵢ₋₁,wᵢ₋₁) = accum
+    let sᵢ = sᵢ₋₁ + aᵢ
+    let Δ = abs(aᵢ) <= abs(sᵢ₋₁) ? (sᵢ₋₁ - sᵢ) + aᵢ : (aᵢ - sᵢ) + sᵢ₋₁
+    let wᵢ = wᵢ₋₁ + Δ
+    return (s: sᵢ, w: wᵢ)
   }
+  return s + w
 }
+
 
 func countiff(_ values: ArraySlice<Double>, _ predicat: (Double)-> Bool) -> Double {
   let count = values.reduce(into: 0) { counter, value in
@@ -563,4 +570,11 @@ enum ASCIIColor: String {
   case cyan = "\u{1B}[0;36m"
   case white = "\u{1B}[0;37m"
   case `default` = "\u{1B}[0;0m"
+}
+
+protocol Labeled {
+  var labels: [String] { get }
+}
+extension Labeled {
+  var labels: [String] { Mirror(reflecting: self).children.compactMap(\.label) }
 }

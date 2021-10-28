@@ -10,7 +10,7 @@
 
 import Config
 import Meteo
-import PhysicalQuantities
+import Physics
 
 public enum Simulation {
   static var isStart = true

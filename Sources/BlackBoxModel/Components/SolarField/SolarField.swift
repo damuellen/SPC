@@ -10,7 +10,7 @@
 
 import Libc
 import Meteo
-import PhysicalQuantities
+import Physics
 
 /// This struct contains the state as well as the functions for mapping the solar field
 public struct SolarField: Parameterizable, HeatTransfer {

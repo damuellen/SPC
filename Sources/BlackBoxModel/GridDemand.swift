@@ -10,7 +10,7 @@
 
 import Config
 import DateGenerator
-import PhysicalQuantities
+import Physics
 
 struct GridDemand: Codable {
 

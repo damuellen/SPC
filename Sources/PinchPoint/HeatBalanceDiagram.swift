@@ -11,7 +11,7 @@
 import CPikchr
 import Helpers
 import Libc
-import PhysicalQuantities
+import Physics
 
 typealias Stream = HeatBalanceDiagram.Stream
 

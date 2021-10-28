@@ -9,7 +9,7 @@
 //
 
 import Config
-import PhysicalQuantities
+import Physics
 
 extension WasteHeatRecovery {
   public struct Parameter: Codable {

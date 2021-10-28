@@ -9,7 +9,7 @@
 //
 
 import Meteo
-import PhysicalQuantities
+import Physics
 
 /// This struct contains the state as well as the functions for mapping the power block
 public struct PowerBlock: Parameterizable, HeatTransfer {

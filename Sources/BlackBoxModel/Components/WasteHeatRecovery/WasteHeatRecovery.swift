@@ -8,7 +8,7 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
-import PhysicalQuantities
+import Physics
 
 public enum WasteHeatRecovery: Parameterizable {
   /// This struct contains the state as well as the functions for mapping the waste heat recovery
