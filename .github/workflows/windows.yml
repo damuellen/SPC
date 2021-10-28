@@ -13,7 +13,7 @@ jobs:
         uses: compnerd/gha-setup-swift@main
         with:
           branch: swift-5.5-release
-          tag: 5.5-RELEASE
+          tag: 5.5.1-RELEASE
 
       - name: Checkout sources
         uses: actions/checkout@v2
