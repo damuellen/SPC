@@ -74,8 +74,8 @@ public final class Gnuplot {
       ps = "ps 1.0"
     } else {
       lw = "lw 3"
-      pt = "pt 7"
-      ps = "ps 0.5"
+      pt = "pt 6"
+      ps = "ps 2.0"
     }
     return [
       "style line 11 lt 1 \(lw) \(pt) \(ps) lc rgb '#0072bd'",
@@ -155,9 +155,21 @@ public final class Gnuplot {
   public convenience init<S: Sequence, F: FloatingPoint>(
     xs: S..., ys: S..., titles: String..., style: Style = .linePoints) where S.Element == F
   {
-    self.init(xys: zip(xs, ys).map { a, b in zip(a, b).map { ($0, $1) } }, titles: titles, style: style)
+    if xs.count == 1, ys.count > 1 {
+      self.init(xys: zip(repeatElement(xs[0], count: ys.count), ys).map { a, b in zip(a, b).map { ($0, $1) } }, titles: titles, style: style)
+    } else {
+      self.init(xys: zip(xs, ys).map { a, b in zip(a, b).map { ($0, $1) } }, titles: titles, style: style)
+    }   
   }
-  
+
+  public convenience init<X: Collection, Y: Collection, F: FloatingPoint, S: SIMD>(
+    xs: X, ys: Y, titles: String..., style: Style = .linePoints)
+    where X.Element == F, Y.Element == S, S.Scalar == F
+  {
+    let xys = ys.first!.indices.map { i in zip(xs, ys).map { ($0.0 ,$0.1[i]) } }
+    self.init(xys: xys, titles: titles, style: style)   
+  }
+
   public init<T: FloatingPoint>(
     xy1s: [(T, T)]..., xy2s: [(T, T)]..., titles: String..., style: Style = .linePoints) {
       let missingTitles = xy1s.count + xy2s.count - titles.count

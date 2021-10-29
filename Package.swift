@@ -30,8 +30,8 @@ var package = Package(
     .package(url: "https://github.com/damuellen/xlsxwriter.swift.git", .branch("main")),
     .package(
       name: "Swifter", url: "https://github.com/httpswift/swifter.git",
-      .upToNextMajor(from: "1.5.0")
-    ),  
+      .upToNextMajor(from: "1.5.0")),
+    .package(url: "https://github.com/apple/swift-numerics.git", from: "1.0.0")
  // .package(url: "https://github.com/damuellen/Numerical.git", .branch("master")),
  // .package(name: "Benchmark", url: "https://github.com/google/swift-benchmark", from: "0.1.0"),
  // .package(url: "https://github.com/pvieito/PythonKit.git", .branch("master")),
@@ -41,7 +41,7 @@ var package = Package(
     .target(name: "Libc"),
     .target(
       name: "Helpers",
-      dependencies: ["Libc"],
+      dependencies: ["Libc", .product(name: "Numerics", package: "swift-numerics"),],
       swiftSettings: swift,
       linkerSettings: [linker]
     ),
@@ -127,8 +127,7 @@ var package = Package(
     .executableTarget(
       name: "SunOl",
       dependencies: [
-        "Helpers", "Physics",
-        // .byName(name: "Numerical"),
+         "Helpers", "Physics",
         .product(name: "xlsxwriter", package: "xlsxwriter.swift"),
         .byName(name: "Swifter", condition: posix),
       ],
