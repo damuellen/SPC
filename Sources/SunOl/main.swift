@@ -102,13 +102,12 @@ func main() {
   } else {
     calc(parameter: .init(
       CSP_Loop_Nr: 10...190, PV_DC_Cap: 280...1200, PV_AC_Cap: 280...1200, Heater_cap: 10...400, TES_Full_Load_Hours: 10...15,
-      EY_Nominal_elec_input: 80...400, PB_Nominal_gross_cap: 10...150, BESS_cap: 0...1470, H2_storage_cap: 10...100,
-      Meth_nominal_hourly_prod_cap: 12...30, El_boiler_cap: 0...100, grid_max_export: 0...50), ws: ws, r: &r)  
+      EY_Nominal_elec_input: 80...450, PB_Nominal_gross_cap: 10...200, BESS_cap: 0...1470, H2_storage_cap: 10...100,
+      Meth_nominal_hourly_prod_cap: 12...30, El_boiler_cap: 0...100, grid_max_export: 50...50), ws: ws, r: &r)  
   }
 
   func calc(parameter: Parameter, ws: Worksheet, r: inout Int) {
-    let steps = 10
-
+    let steps = 24
     var newParameter = parameter
 
     var selection = parameter.randomValues.map { [$0] }
@@ -123,7 +122,7 @@ func main() {
         if source.isCancelled { break }
         selection[i] = permutations[i]
         if permutations[i].count == 1 { continue }
-        var workingBuffer = Array(CartesianProduct(selection))
+        var workingBuffer: [[Double]] = Array(CartesianProduct(selection).prefix(100))
         DispatchQueue.concurrentPerform(iterations: workingBuffer.count) {
         // workingBuffer.indices.forEach {
           let key = workingBuffer[$0].hashValue
@@ -132,7 +131,11 @@ func main() {
           } else {
             var model = SunOl(values: workingBuffer[$0])
             var pr_meth_plant_op = Array(repeating: 0.4, count: 8760)
+            #if DEBUG
             var rows = [String](repeating: "", count: 8761)
+            #else
+            var rows = [String](repeating: "", count: 1)
+            #endif
             let input = model(Q_Sol_MW_thLoop, Reference_PV_plant_power_at_inverter_inlet_DC, Reference_PV_MV_power_at_transformer_outlet, rows: &rows)
             model(&pr_meth_plant_op, input.Q_solar_before_dumping, input.PV_MV_power_at_transformer_outlet, input.aux_elec_for_CSP_SF_PV_Plant, rows: &rows)
             model(&pr_meth_plant_op, input.Q_solar_before_dumping, input.PV_MV_power_at_transformer_outlet, input.aux_elec_for_CSP_SF_PV_Plant, rows: &rows)
@@ -143,7 +146,7 @@ func main() {
             workingBuffer[$0].append(contentsOf: SpecificCost.invest(model))
           }
         }
-
+        workingBuffer.removeAll { $0.last! > 0.001 }
         for result in workingBuffer {
           if resultStorage.updateValue(result, forKey: result[0..<12].hashValue) == nil {
             #if !os(Windows)
@@ -158,18 +161,16 @@ func main() {
         }
 
         let sortedResults = workingBuffer.sorted(by: { $0[17] < $1[17] })
-        let newRange = sortedResults.map { $0[i] }.dropLast(2)
+        let newRange = sortedResults.map { $0[i] }.dropLast(10)
         newParameter[i] = newParameter[i].clamped(to: (newRange.min()!...newRange.max()!))
-        bestResult = sortedResults.first!        
-        selection[i] = [bestResult[i]]        
+        bestResult = sortedResults.first!
+        print("\u{1B}[H\u{1B}[2J\(ASCIIColor.blue.rawValue)Iterations: \(iter)\n\(labeled(bestResult.readable))")
       }
-
-      print("\u{1B}[H\u{1B}[2J\(ASCIIColor.blue.rawValue)Iterations: \(iter)\n\(labeled(bestResult.readable))")
 
       if configHashes.contains(selection.hashValue) {
         configHashes.removeAll()
         newParameter = parameter
-        selection = parameter.randomValues.map { [$0] }        
+        selection = parameter.randomValues.map { [$0] }
       } else {
         configHashes.insert(selection.hashValue)
       }      
