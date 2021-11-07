@@ -28,22 +28,9 @@ enum SpecificCost {
     if (auxLoops <= 0 || factor <= 0) {
       auxLoops = 0
     }
-    let Assembly_hall: Double
-    switch model.CSP_Loop_Nr { 
-      case Assembly_hall_1_line.range: 
-        Assembly_hall = Assembly_hall_1_line.c1 + Assembly_hall_1_line.c2
-      case Assembly_hall_2_lines.range: 
-        Assembly_hall = Assembly_hall_2_lines.c1 + Assembly_hall_2_lines.c2
-      case Assembly_hall_3_lines.range: 
-        Assembly_hall = Assembly_hall_3_lines.c1 + Assembly_hall_3_lines.c2
-      case Assembly_hall_4_lines.range: 
-        Assembly_hall = Assembly_hall_4_lines.c1 + Assembly_hall_4_lines.c2
-      case Assembly_hall_5_lines.range: 
-        Assembly_hall = Assembly_hall_5_lines.c1 + Assembly_hall_5_lines.c2
-      default: 
-        Assembly_hall = 0
-    }
-
+    let Assembly_hall = 12_000_000.0 + (-132.967033 * Double(model.CSP_Loop_Nr) ** 2 + 62978.02 * Double(model.CSP_Loop_Nr) + -2.32831E-10)
+		
+    
     let CSP_SF_cost_dedicated_to_ICPH =
       Solar_field.coeff * ((model.CSP_Loop_Nr - auxLoops) / Solar_field.basis) ** Solar_field.exp + Solar_field.c1 * Solar_field.f
       * (model.CSP_Loop_Nr - auxLoops)

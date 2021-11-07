@@ -351,7 +351,7 @@ struct Results {
 
 
 extension Polynomial {
-  init(x: [Double], y: [Double], degree n: Int = 5) {
+  static func fit(x: [Double], y: [Double], degree n: Int = 5) -> Polynomial {
     /// degree of polynomial to fit the data
     var n: Int = n
     /// no. of data points
@@ -429,7 +429,7 @@ extension Polynomial {
       a[i] /= B[i][i] // now finally divide the rhs by the coefficient of the variable to be calculated
     }
     a.removeLast()
-    self.init(a)
+    return self.init(a)
   }
 }
 
@@ -482,12 +482,6 @@ public struct CartesianProduct<S: Sequence>: IteratorProtocol, Sequence {
     }
 
     return currentValues
-  }
-}
-
-extension Gnuplot {
-  public convenience init<T: FloatingPoint>(xs: [[T]], _ index: (x: Int, y: Int), style: Style = .linePoints) {
-    self.init(xys: [xs.map { ($0[index.x], $0[index.y]) } ], style: style)
   }
 }
 

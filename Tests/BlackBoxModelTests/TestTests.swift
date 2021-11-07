@@ -1,7 +1,8 @@
 import XCTest
 
 @testable import BlackBoxModel
-import PhysicalQuantities
+import Physics
+
 
 class TestTests: XCTestCase {
 

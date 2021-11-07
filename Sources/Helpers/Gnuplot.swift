@@ -73,9 +73,9 @@ public final class Gnuplot {
       pt = "pt 6"
       ps = "ps 1.0"
     } else {
-      lw = "lw 3"
+      lw = "lw 1.5"
       pt = "pt 6"
-      ps = "ps 2.0"
+      ps = "ps 1.5"
     }
     return [
       "style line 11 lt 1 \(lw) \(pt) \(ps) lc rgb '#0072bd'",
@@ -128,23 +128,21 @@ public final class Gnuplot {
   public convenience init<S: Sequence, F: FloatingPoint>(
     xys: S..., titles: [String] = [], style: Style = .linePoints) where S.Element == SIMD2<F>
   {
-    self.init(xys: xys.map { xy in xy.map { ($0.x, $0.y) } }, titles: titles, style: style)
+    self.init(xys: xys.map { xy in xy.map { [$0.x, $0.y] } }, titles: titles, style: style)
   }
 
-  public init<T: FloatingPoint>(xys: [[(T, T)]], titles: [String] = [], style: Style = .linePoints) {
+  public init<T: FloatingPoint>(xys: [[[T]]], titles: [String] = [], style: Style = .linePoints) {
     let missingTitles = xys.count - titles.count
     var titles = titles
     if missingTitles > 0 {
       titles.append(contentsOf: repeatElement("-", count: missingTitles))
     }
-    let data = zip(titles, xys).map {
-      $0.0 + "\n" + $0.1.map { (x, y) in "\(x), \(y)" }.joined(separator: "\n")
-    }
+
+    let data = zip(titles, xys).map { title, xys in title + " ,\n" + csv(xys) }
     
     self.settings = Gnuplot.settings(style)
     
-    self.datablock = "\n$data <<EOD\n"
-    + data.joined(separator: "\n\n\n") + "\n\n\nEOD\n"
+    self.datablock = "\n$data <<EOD\n" + data.joined(separator: "\n\n\n") + "\n\n\nEOD\n"
     
     let (s, l) = style.raw
     self.plot = "\nplot " + xys.indices.map { i in
@@ -156,9 +154,9 @@ public final class Gnuplot {
     xs: S..., ys: S..., titles: String..., style: Style = .linePoints) where S.Element == F
   {
     if xs.count == 1, ys.count > 1 {
-      self.init(xys: zip(repeatElement(xs[0], count: ys.count), ys).map { a, b in zip(a, b).map { ($0, $1) } }, titles: titles, style: style)
+      self.init(xys: zip(repeatElement(xs[0], count: ys.count), ys).map { a, b in zip(a, b).map { [$0, $1] } }, titles: titles, style: style)
     } else {
-      self.init(xys: zip(xs, ys).map { a, b in zip(a, b).map { ($0, $1) } }, titles: titles, style: style)
+      self.init(xys: zip(xs, ys).map { a, b in zip(a, b).map { [$0, $1] } }, titles: titles, style: style)
     }   
   }
 
@@ -166,12 +164,12 @@ public final class Gnuplot {
     xs: X, ys: Y, titles: String..., style: Style = .linePoints)
     where X.Element == F, Y.Element == S, S.Scalar == F
   {
-    let xys = ys.first!.indices.map { i in zip(xs, ys).map { ($0.0 ,$0.1[i]) } }
+    let xys = ys.first!.indices.map { i in zip(xs, ys).map { [$0.0 ,$0.1[i]] } }
     self.init(xys: xys, titles: titles, style: style)   
   }
 
   public init<T: FloatingPoint>(
-    xy1s: [(T, T)]..., xy2s: [(T, T)]..., titles: String..., style: Style = .linePoints) {
+    xy1s: [[T]]..., xy2s: [[T]]..., titles: String..., style: Style = .linePoints) {
       let missingTitles = xy1s.count + xy2s.count - titles.count
       var titles = titles
       if missingTitles > 0 {
@@ -180,28 +178,27 @@ public final class Gnuplot {
       
       self.settings = Gnuplot.settings(style)
       
-      let y1 = zip(titles, xy1s).map {
-        $0.0 + " ,\n" + $0.1.map { (x,y) in "\(x), \(y)" }.joined(separator: "\n")
-      }
-      let y2 = zip(titles.dropFirst(xy1s.count), xy2s).map {
-        $0.0 + " ,\n" + $0.1.map { (x,y) in "\(x), \(y)" }.joined(separator: "\n")
-      }
+      let y1 = zip(titles, xy1s).map { t, xys in t + " ,\n" + csv(xys) }
+      let y2 = zip(titles.dropFirst(xy1s.count), xy2s).map { t, xys in t + " ,\n" + csv(xys) }
       
       self.datablock = "\n$data <<EOD\n"
-      + y1.joined(separator: "\n\n\n") + "\n\n\n"
-      + y2.joined(separator: "\n\n\n") + "\n\n\nEOD\n"
+        + y1.joined(separator: "\n\n\n") + "\n\n\n"
+        + y2.joined(separator: "\n\n\n") + "\n\n\nEOD\n"
       
       let (s, l) = style.raw
       let t = "title columnheader(1)"
       self.plot = "\nset ytics nomirror\nset y2tics\nplot "
       + xy1s.indices.map { i in
-        "$data i \(i) u 1:2 \(s) axes x1y1 w \(l) ls \(i+11) \(t)"
+        let c = xy1s[i][0].count
+        return "$data i \(i) u 1:\(c) \(s) axes x1y1 w \(l) ls \(i+11) \(t)"
       }.joined(separator: ", ") + ", "
-      + xy2s.indices.map { i in let n = i + xy1s.endIndex
+      + xy2s.indices.map { i in 
+        let n = i + xy1s.endIndex
         return "$data i \(n) u 1:2 \(s) axes x1y2 w \(l) ls \(i+21) \(t)"
       }.joined(separator: ", ") + "\n"
     }
   #endif
+  
   public enum Style {
     case lines(smooth: Bool)
     case linePoints
@@ -267,10 +264,14 @@ public final class Gnuplot {
   ]
 }
 
+private func csv<T: FloatingPoint>(_ xys: [[T]]) -> String {
+  xys.map { xy in xy.map { "\($0)" }.joined(separator: ", ") }.joined(separator: "\n")
+}
+
 extension Array where Element == String {
   var concatenated: String { self.map { "set " + $0 + "\n" }.joined() }
 }
 
-@inlinable public func solve(in range: ClosedRange<Double>, by: Double, f: (Double) -> Double) -> [(Double, Double)] {
-  stride(from: range.lowerBound, through: range.upperBound, by: by).map{($0,f($0))}
+@inlinable public func solve(in range: ClosedRange<Double>, by: Double, f: (Double) -> Double) -> [[Double]] {
+  stride(from: range.lowerBound, through: range.upperBound, by: by).map{[$0,f($0)]}
 }
