@@ -16,12 +16,23 @@ public struct CSV {
   public let headerRow: [String]?
   public let dataRows: [[Double]]
 
-  public var csv: String {
+  public var csv: String { peek(dataRows.indices) }
+
+  public var head: String { peek(0..<30) }
+
+  public var tail: String { 
+    if dataRows.count > 30 {
+      return peek(dataRows.endIndex-30..<dataRows.endIndex) 
+    }
+    return peek(0..<dataRows.endIndex) 
+  }
+
+  public func peek(_ range: Array.Indices) -> String {
     if let headerRow = headerRow {
       return headerRow.joined(separator: ", ") + "\n" 
-        + Array.formatted(dataRows)
+       + Array.formatted(dataRows[range])
     }
-    return Array.formatted(dataRows)
+    return Array.formatted(dataRows[range])
   }
 
   public subscript(row: Int) -> [Double] {
@@ -98,7 +109,7 @@ public extension Array where Element == Double {
 }
 
 public extension Array where Element == Double {
-  static func formatted(_ array: [[Double]]) -> String {
+  static func formatted(_ array: ArraySlice<[Double]>) -> String {
     array.map(\.formatted).joined(separator: "\n")
   }
 }

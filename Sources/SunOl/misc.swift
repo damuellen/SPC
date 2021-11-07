@@ -2,17 +2,6 @@ import Foundation
 import Physics
 import Helpers
 
-func evaluate(_ f: (Double)->Double, _ range: ClosedRange<Double>, numberOfSamples: Int = 100) -> [(x: Double, y: Double)] {
-    let step = (range.upperBound - range.lowerBound) / Double(numberOfSamples)
-    let x = Array(stride(from: range.lowerBound, through: range.upperBound, by: step))
-    let y = x.map(f)
-    return zip(x,y).xy
-}
-
-extension Zip2Sequence {
-  var xy: [(Sequence1.Element, Sequence2.Element)] { map { ($0, $1) } }
-}
-
 precedencegroup ExponentiationPrecedence {
   associativity: right
   higherThan: MultiplicationPrecedence

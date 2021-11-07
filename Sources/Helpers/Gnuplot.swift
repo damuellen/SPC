@@ -272,6 +272,7 @@ extension Array where Element == String {
   var concatenated: String { self.map { "set " + $0 + "\n" }.joined() }
 }
 
-@inlinable public func solve(in range: ClosedRange<Double>, by: Double, f: (Double) -> Double) -> [[Double]] {
-  stride(from: range.lowerBound, through: range.upperBound, by: by).map{[$0,f($0)]}
+@inlinable public func evaluate(in range: ClosedRange<Double>, numberOfSamples: Int = 100, f: (Double) -> Double) -> [[Double]] {
+  let step = (range.upperBound - range.lowerBound) / Double(numberOfSamples)
+  return stride(from: range.lowerBound, through: range.upperBound, by: step).map{[$0,f($0)]}
 }
