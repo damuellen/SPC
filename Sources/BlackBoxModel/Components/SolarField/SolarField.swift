@@ -125,10 +125,10 @@ public struct SolarField: Parameterizable, HeatTransfer {
 
   mutating func eta(collector: Collector) {
     if collector.insolationAbsorber > .zero {
-      loopEta = collector.efficiency.quotient - heatLossesHCE
-        / collector.insolationAbsorber / collector.efficiency.quotient
-      eta = collector.efficiency.quotient - heatLosses
-        / collector.insolationAbsorber / collector.efficiency.quotient
+      loopEta = collector.efficiency - heatLossesHCE
+        / collector.insolationAbsorber / collector.efficiency
+      eta = collector.efficiency - heatLosses
+        / collector.insolationAbsorber / collector.efficiency
     } else {
       loopEta = .zero
       eta = .zero

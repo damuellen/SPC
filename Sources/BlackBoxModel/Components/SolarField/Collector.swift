@@ -12,20 +12,19 @@ import DateGenerator
 import Libc
 import Meteo
 import SolarPosition
-import Physics
 
 /// This struct contains the state as well as the functions for mapping the collector
 public struct Collector: Parameterizable, CustomStringConvertible {
 
   public var parabolicElevation, theta, cosTheta: Double
-  public var efficiency: Ratio
+  public var efficiency: Double
   /// Instantaneous irradiation on absorber tube
   public var insolationAbsorber: Double
   var lastInsolation: Double = 0
 
   public var description: String {
     formatting(
-      [insolationAbsorber, parabolicElevation, cosTheta, efficiency.percentage],
+      [insolationAbsorber, parabolicElevation, cosTheta, efficiency * 100],
       ["Insolation absorber:", "PE:", "cos(Theta):", "Efficiency:"]
     )
   }
@@ -144,7 +143,7 @@ public struct Collector: Parameterizable, CustomStringConvertible {
 
     let eff = shadingSCA * shadingHCE * IAM * edge * k_torsion * wind
       * opticalEfficiency * Simulation.adjustmentFactor.efficiencySolarField
-    efficiency = Ratio(eff)
+    efficiency = eff
   }
   /// Elevation and incidence angle calculation
   public mutating func tracking(sun: SolarPosition.OutputValues)  {
@@ -160,8 +159,8 @@ public struct Collector: Parameterizable, CustomStringConvertible {
     let sfaz: Double = SolarField.parameter.azimut.toRadians
 
     theta = (cos(az - sfaz) / abs(cos(az - sfaz)) * 180
-      / .pi * acos(sqrt(1 - (cos(el - beta) - cos(beta) * cos(el)
-        * (1 - cos(az - sfaz))) ** 2))) * (-1)
+      / .pi * acos(sqrt(1 - pow(cos(el - beta) - cos(beta) * cos(el)
+        * (1 - cos(az - sfaz)), 2)))) * (-1)
 
     cosTheta = cos(theta.toRadians)
   }
@@ -169,14 +168,14 @@ public struct Collector: Parameterizable, CustomStringConvertible {
   /// the angle of incidence and optical efficiency
   public mutating func irradiation(dni: Float) {
     lastInsolation = insolationAbsorber
-    insolationAbsorber = Double(dni) * cosTheta * efficiency.quotient
+    insolationAbsorber = Double(dni) * cosTheta * efficiency
   }
 }
 
 extension Collector: MeasurementsConvertible {
 
   var numericalForm: [Double] {
-    [insolationAbsorber, cosTheta, efficiency.percentage, parabolicElevation]
+    [insolationAbsorber, cosTheta, efficiency * 100, parabolicElevation]
   }
 
   static var columns: [(name: String, unit: String)] {
