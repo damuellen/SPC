@@ -9,6 +9,7 @@
 //
 
 import Physics
+import Helpers
 
 /// This struct contains the state as well as the functions for mapping the heat exchanger
 public struct HeatExchanger: Parameterizable, HeatTransfer {

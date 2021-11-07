@@ -32,15 +32,6 @@ extension String {
   }
 }
 
-extension Comparable {
-  mutating func clamp(to limits: ClosedRange<Self>) {
-    self = min(max(self, limits.lowerBound), limits.upperBound)
-  }
-  func clamped(to limits: ClosedRange<Self>) -> Self {    
-    min(max(self, limits.lowerBound), limits.upperBound)
-  }
-}
-
 /// Generates the title with border
 public func decorated(_ title: String) -> String {
   var width = terminalWidth()

@@ -143,6 +143,15 @@ extension Sequence where Element == XY {
   }
 }
 
+public extension Comparable {
+  mutating func clamp(to limits: ClosedRange<Self>) {
+    self = min(max(self, limits.lowerBound), limits.upperBound)
+  }
+  func clamped(to limits: ClosedRange<Self>) -> Self {    
+    min(max(self, limits.lowerBound), limits.upperBound)
+  }
+}
+
 /// Sorts the given arguments in ascending order, and returns the middle value.
 ///
 ///     // Values clamped to `0...100`
