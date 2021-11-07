@@ -10,24 +10,40 @@
 
 import Foundation
 
+/// Read files only containing numbers.
+/// - Note: Auto-detect of optional String headers.
 public struct CSV {
-  public let headerRow: [String]
+  public let headerRow: [String]?
   public let dataRows: [[Double]]
+
+  public var csv: String {
+    if let headerRow = headerRow {
+      return headerRow.joined(separator: ", ") + "\n" 
+        + Array.formatted(dataRows)
+    }
+    return Array.formatted(dataRows)
+  }
 
   public subscript(row: Int) -> [Double] {
     dataRows[row]
   }
 
   public subscript(column: String, row: Int) -> Double {
-    dataRows[row][headerRow.firstIndex(of: column) ?? dataRows[row].startIndex]
+    dataRows[row][headerRow?.firstIndex(of: column) ?? dataRows[row].startIndex]
   }
 
   public subscript(column: String) -> [Double] {
-    let c = headerRow.firstIndex(of: column) ?? dataRows[0].startIndex
-    return Array<Double>(unsafeUninitializedCapacity: dataRows.count) { 
-      uninitializedMemory, resultCount in 
+    let c = headerRow?.firstIndex(of: column) ?? dataRows[0].startIndex
+    return self[column: c]
+  }
+
+  public subscript(column c: Int) -> [Double] {
+    return Array<Double>(unsafeUninitializedCapacity: dataRows.count) {
+      uninitializedMemory, resultCount in
       resultCount = dataRows.count
-      for i in dataRows.indices { uninitializedMemory[i] = dataRows[i][c] }
+      for i in dataRows.indices {
+        uninitializedMemory[i] = dataRows[i][c]
+      }
     }
   }
 
@@ -45,9 +61,16 @@ public struct CSV {
     let end = hasCR ? rawData.index(before: firstNewLine) : firstNewLine
     let hasHeader = rawData[..<end].contains(where: isLetter)
     let start = hasHeader ? rawData.index(after: firstNewLine) : rawData.startIndex
-    self.headerRow = !hasHeader ? [] : rawData[..<end].split(separator: separator).map { slice in
+    self.headerRow = !hasHeader ? nil : rawData[..<end].split(separator: separator).map { slice in
       String(decoding: slice.filter(isSpace), as: UTF8.self)
     }
+    #if DEBUG
+    if let headerRow = headerRow {
+      print("Header row detected.", headerRow)
+    } else {
+      print("No header.")
+    }
+    #endif
     self.dataRows = rawData[start...].withUnsafeBytes { content in
       content.split(separator: newLine).map { line in
         let line = hasCR ? line.dropLast() : line
@@ -58,5 +81,24 @@ public struct CSV {
         }
       }
     }
+    #if DEBUG
+    if let headerRow = headerRow, dataRows[0].count != headerRow.count {
+      print("Header missing !")
+      print(dataRows[0])
+    }
+    print("\(url.absoluteString) loaded.")
+    #endif
+  }
+}
+
+public extension Array where Element == Double {
+  var formatted: String {
+    self.map(\.description).joined(separator: ", ")
+  }
+}
+
+public extension Array where Element == Double {
+  static func formatted(_ array: [[Double]]) -> String {
+    array.map(\.formatted).joined(separator: "\n")
   }
 }
