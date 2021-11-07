@@ -209,3 +209,13 @@ extension SIMD8: OdeVector where Scalar: Real & BinaryFloatingPoint {}
 extension SIMD16: OdeVector where Scalar: Real & BinaryFloatingPoint {}
 extension SIMD32: OdeVector where Scalar: Real & BinaryFloatingPoint {}
 extension SIMD64: OdeVector where Scalar: Real & BinaryFloatingPoint {}
+
+#if os(macOS)
+extension SIMD2: AdditiveArithmetic where Scalar: Real & BinaryFloatingPoint {}
+extension SIMD3: AdditiveArithmetic where Scalar: Real & BinaryFloatingPoint {}
+extension SIMD4: AdditiveArithmetic where Scalar: Real & BinaryFloatingPoint {}
+extension SIMD8: AdditiveArithmetic where Scalar: Real & BinaryFloatingPoint {}
+extension SIMD16: AdditiveArithmetic where Scalar: Real & BinaryFloatingPoint {}
+extension SIMD32: AdditiveArithmetic where Scalar: Real & BinaryFloatingPoint {}
+extension SIMD64: AdditiveArithmetic where Scalar: Real & BinaryFloatingPoint {}
+#endif
