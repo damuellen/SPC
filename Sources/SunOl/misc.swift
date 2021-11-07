@@ -137,40 +137,6 @@ func iff(_ expression: Bool, _ yes: Double, _ no: Double) -> Double {
   expression ? yes : no
 }
 
-struct DataFile {
-  let data: [[Float]]
-
-  init?(_ url: URL) {
-    guard let rawData = try? Data(contentsOf: url)
-     else { return nil }
-
-    let newLine = UInt8(ascii: "\n")
-    let cr = UInt8(ascii: "\r")
-    let separator = UInt8(ascii: ",")
-
-    guard let firstNewLine = rawData.firstIndex(of: newLine)
-      else { return nil }
-
-    let firstSeparator = rawData.firstIndex(of: separator) ?? 0
-
-    guard firstSeparator < firstNewLine
-      else { return nil }
-
-    let hasCR = rawData[rawData.index(before: firstNewLine)] == cr
-
-    self.data = rawData.withUnsafeBytes { content in
-      content.split(separator: newLine).map { line in
-        let line = hasCR ? line.dropLast() : line
-        return line.split(separator: separator).map { slice in
-          let buffer = UnsafeRawBufferPointer(rebasing: slice)
-            .baseAddress!.assumingMemoryBound(to: Int8.self)
-          return strtof(buffer, nil)
-        }
-      }
-    }
-  }
-}
-
 extension Double {
   public var multiBar: String {
     let (bar_chunks, remainder) = Int(self * 80)
@@ -191,7 +157,7 @@ struct Results {
     #if DEBUGA
     let url = URL(fileURLWithPath: "/workspaces/SPC/output.txt")
 
-    guard let dataFile = DataFile(url) else { fatalError() }
+    guard let dataFile = CSV(url: url) else { fatalError() }
 
     for data in dataFile.data {
       var dict: [String:Double] = [:]

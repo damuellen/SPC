@@ -8,44 +8,10 @@ extension Date {
   }
 }
 
-struct DataFile {
-  let data: [[Float]]
-  
-  init?(_ url: URL) {
-    guard let rawData = try? Data(contentsOf: url)
-     else { return nil }
-    
-    let newLine = UInt8(ascii: "\n")
-    let cr = UInt8(ascii: "\r")
-    let separator = UInt8(ascii: ";")
-    
-    guard let firstNewLine = rawData.firstIndex(of: newLine)
-      else { return nil }
-    
-    guard let firstSeparator = rawData.firstIndex(of: separator)
-      else { return nil }
-    guard firstSeparator < firstNewLine
-      else { return nil }
-
-    let hasCR = rawData[rawData.index(before: firstNewLine)] == cr
-    
-    self.data = rawData.withUnsafeBytes { content in
-      content.split(separator: newLine).map { line in
-        let line = hasCR ? line.dropLast() : line
-        return line.split(separator: separator).map { slice in
-          let buffer = UnsafeRawBufferPointer(rebasing: slice)
-            .baseAddress!.assumingMemoryBound(to: Int8.self)
-          return strtof(buffer, nil)
-        }
-      }      
-    }
-  }
-}
-
 func readTariffs() -> [Tariffs] {
   let url = URL(fileURLWithPath: "Tariffs.txt")
 
-  guard let dataFile = DataFile(url) else { return [] }
+  guard let dataFile = CSV(url: url) else { return [] }
 
   let cal = Calendar(identifier: .gregorian)
 
@@ -89,8 +55,8 @@ struct Price {
 }
 
 extension Price {
-  init(_ float: Float) {
-    self.euro = Double(float)
+  init(_ value: Double) {
+    self.euro = value
   }
 }
 
@@ -125,7 +91,7 @@ struct Tariffs {
 }
 
 extension Tariffs {
-  init(date: Date, values: [Float]) {
+  init(date: Date, values: [Double]) {
     precondition(values.count == 3, "Value missing")
     self.date = date
     self.electricity = Price(values[0])
@@ -276,23 +242,23 @@ func main() {
   let tariffs = readTariffs()
   let years = splitIntoYears(tariffs: tariffs)
 
-  let cheaperPerDay = years.map { year in
-    year.days.map { day in
-      day.tariffs
-        .filter(\.isElectricityCheaper)
-        .count
-    } 
-  }
+  // let cheaperPerDay = years.map { year in
+  //   year.days.map { day in
+  //     day.tariffs
+  //       .filter(\.isElectricityCheaper)
+  //       .count
+  //   } 
+  // }
 
-  let cheaperHours = years.map { year in
-    year.tariffs
-      .filter(\.isElectricityCheaper)
-      .count 
-  } 
+  // let cheaperHours = years.map { year in
+  //   year.tariffs
+  //     .filter(\.isElectricityCheaper)
+  //     .count 
+  // } 
 
-  let cheaperDays = cheaperPerDay.map { days in 
-    days.filter({ $0 > 0 }).count
-  }
+  // let cheaperDays = cheaperPerDay.map { days in 
+  //   days.filter({ $0 > 0 }).count
+  // }
 
   //print(cheaperDays)
   //print(cheaperHours)
