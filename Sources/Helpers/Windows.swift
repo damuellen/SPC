@@ -1,5 +1,6 @@
 #if os(Windows)
-import Libc
+import CRT
+import WinSDK
 import func WinSDK.MessageBoxW
 import let WinSDK.MB_OK
 import struct WinSDK.UINT
