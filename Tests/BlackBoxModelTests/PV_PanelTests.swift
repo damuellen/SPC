@@ -7,7 +7,7 @@ import XCTest
 class PVPanelTests: XCTestCase {
   func testsPanel() {
     let panel = PV.Panel()
-    let S = { solve(in: 50...1050, by: 50, f: $0) }
+    let S = { evaluate(in: 50...1050, numberOfSamples: 100, f: $0) }
     let P = { panel(radiation: $0, ambient: .init(celsius: $1), windSpeed: 0) }
     let p = { t in S { P($0, t).power }}
     let I = { t in S { P($0, t).current }}
@@ -31,8 +31,8 @@ class PVPanelTests: XCTestCase {
     // try! plot(.png(path: "panel.png"))
     // try! plot(.png(path: "panel2.png"))
 
-    let S2 = { solve(in: 0...1000, by: 0.05, f: $0) }
-    let S3 = { solve(in: 0.8...1.1, by: 0.001, f: $0) }
+    let S2 = { evaluate(in: 0...1000, numberOfSamples: 20000, f: $0) }
+    let S3 = { evaluate(in: 0.8...1.1, numberOfSamples: 100, f: $0)  }
     let i = S2 { panel.currentFrom(voltage: $0, radiation: 50, cell_T: .init(celsius: 30)) }
     let v = S3 { panel.voltageFrom(current: $0, radiation: 50, cell_T: .init(celsius: 30)) }
 
