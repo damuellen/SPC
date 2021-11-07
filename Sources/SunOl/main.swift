@@ -115,8 +115,8 @@ func main() {
       let permutations = parameter.steps(count: steps)
       for i in indices {
         if source.isCancelled { break }
-        let previous = selection[i]
         selection[i] = permutations[i]
+        defer { selection[i] = [bestResult[i]] }
         if permutations[i].count == 1 { continue }
         var workingBuffer: [[Double]]
         workingBuffer = Array(CartesianProduct(selection))
@@ -158,13 +158,14 @@ func main() {
         }
 
         let sortedResults = workingBuffer.sorted(by: { $0[17] < $1[17] })
-        if sortedResults.first![17] < bestResult[17] {
+        if iter == 1 {
           bestResult = sortedResults.first!
-        } 
-        selection[i] = sortedResults.first!
-        
+        } else if sortedResults.first![17] < bestResult[17] {
+          bestResult = sortedResults.first!
+        }
         print("\u{1B}[H\u{1B}[2J\(ASCIIColor.blue.rawValue)Iterations: \(iter)\n\(labeled(bestResult.readable))")
       }
+      
       if configHashes.contains(selection.hashValue) {
         if steps > 25 {
           parameter.bisect(selection.compactMap(\.first))
