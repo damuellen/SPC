@@ -11,7 +11,7 @@ extension Date {
 func readTariffs() -> [Tariffs] {
   let url = URL(fileURLWithPath: "Tariffs.txt")
 
-  guard let dataFile = CSV(url: url) else { return [] }
+  guard let csv = CSV(url: url) else { return [] }
 
   let cal = Calendar(identifier: .gregorian)
 
@@ -22,7 +22,7 @@ func readTariffs() -> [Tariffs] {
 
   var currentDate = startOfYear
 
-  let tariffs = dataFile.data.map { values -> Tariffs in
+  let tariffs = csv.dataRows.map { values -> Tariffs in
     defer { currentDate.addTimeInterval(3600) }
     return Tariffs(date: currentDate, values: values)
   }

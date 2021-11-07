@@ -76,11 +76,11 @@ semaphore.wait()
 func main() {
   guard CommandLine.argc > 1 else { return }
   let url = URL(fileURLWithPath: CommandLine.arguments[1])
-  guard let csv = CSV(url: url, separator: ";") else { return }
+  guard let csv = CSV(url: url) else { return }
 
-  var Q_Sol_MW_thLoop: [Double] = csv["csp"]
-  var Reference_PV_plant_power_at_inverter_inlet_DC: [Double] = csv["pv"]
-  var Reference_PV_MV_power_at_transformer_outlet: [Double] = csv["out"]
+  let Q_Sol_MW_thLoop: [Double] = csv["csp"]
+  let Reference_PV_plant_power_at_inverter_inlet_DC: [Double] = csv["pv"]
+  let Reference_PV_MV_power_at_transformer_outlet: [Double] = csv["out"]
   
   let id = String(UUID().uuidString.prefix(6))
   let name = "SunOl_\(id).xlsx"

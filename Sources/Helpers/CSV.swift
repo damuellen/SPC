@@ -11,23 +11,23 @@
 import Foundation
 
 public struct CSV {
-  public let header: [String]
-  public let data: [[Double]]
+  public let headerRow: [String]
+  public let dataRows: [[Double]]
 
   public subscript(row: Int) -> [Double] {
-    data[row]
+    dataRows[row]
   }
 
   public subscript(column: String, row: Int) -> Double {
-    data[row][header.firstIndex(of: column) ?? data[row].startIndex]
+    dataRows[row][headerRow.firstIndex(of: column) ?? dataRows[row].startIndex]
   }
 
   public subscript(column: String) -> [Double] {
-    let c = header.firstIndex(of: column) ?? data[0].startIndex
-    return Array<Double>(unsafeUninitializedCapacity: data.count) { 
+    let c = headerRow.firstIndex(of: column) ?? dataRows[0].startIndex
+    return Array<Double>(unsafeUninitializedCapacity: dataRows.count) { 
       uninitializedMemory, resultCount in 
-      resultCount = data.count
-      for i in data.indices { uninitializedMemory[i] = data[i][c] }
+      resultCount = dataRows.count
+      for i in dataRows.indices { uninitializedMemory[i] = dataRows[i][c] }
     }
   }
 
@@ -36,7 +36,7 @@ public struct CSV {
     let newLine = UInt8(ascii: "\n")
     let cr = UInt8(ascii: "\r")
     let separator = UInt8(ascii: separator)
-    let isSpace = { $0 != UInt8(ascii: "\"") }
+    let isSpace = { $0 != UInt8(ascii: " ") }
     let isLetter = { $0 < UInt8(ascii: "A") }
     guard let firstNewLine = rawData.firstIndex(of: newLine) else { return nil }
     let firstSeparator = rawData.firstIndex(of: separator) ?? 0
@@ -45,10 +45,10 @@ public struct CSV {
     let end = hasCR ? rawData.index(before: firstNewLine) : firstNewLine
     let hasHeader = rawData[..<end].contains(where: isLetter)
     let start = hasHeader ? rawData.index(after: firstNewLine) : rawData.startIndex
-    self.header = !hasHeader ? [] : rawData[..<end].split(separator: separator).map { slice in
+    self.headerRow = !hasHeader ? [] : rawData[..<end].split(separator: separator).map { slice in
       String(decoding: slice.filter(isSpace), as: UTF8.self)
     }
-    self.data = rawData[start...].withUnsafeBytes { content in
+    self.dataRows = rawData[start...].withUnsafeBytes { content in
       content.split(separator: newLine).map { line in
         let line = hasCR ? line.dropLast() : line
         return line.split(separator: separator).map { slice in
