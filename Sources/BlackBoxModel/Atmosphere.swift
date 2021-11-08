@@ -9,7 +9,7 @@
 //
 
 import Libc
-import Physics
+import Utilities
 
 /// The Atmosphere enum contains public static methods to calculate relative and
 /// absolute airmass and to determine pressure from altitude or vice versa.

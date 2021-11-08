@@ -9,6 +9,7 @@
 //
 
 import Config
+import Helpers
 
 /// Design of the plant
 public enum Design {

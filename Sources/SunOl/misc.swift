@@ -1,22 +1,7 @@
 import Foundation
 import Utilities
 
-precedencegroup ExponentiationPrecedence {
-  associativity: right
-  higherThan: MultiplicationPrecedence
-}
-
-infix operator **: ExponentiationPrecedence
-infix operator **=: AssignmentPrecedence
-
 extension Double {
-  static func ** (lhs: Double, rhs: Double) -> Double {
-    return pow(lhs, rhs)
-  }
-
-  static func **= (lhs: inout Double, rhs: Double) {
-    lhs = lhs ** rhs
-  }
   @inline(__always)
   func asString(precision: Int = 2) -> String {
     String(format: "%.\(precision)f", self)
@@ -300,90 +285,6 @@ struct Results {
       print(out)
     }
     #endif
-  }
-}
-
-
-extension Polynomial {
-  static func fit(x: [Double], y: [Double], degree n: Int = 5) -> Polynomial {
-    /// degree of polynomial to fit the data
-    var n: Int = n
-    /// no. of data points
-    let N: Int = min(x.count, y.count)
-
-    var X: [Double] = Array(repeating: 0.0, count: 2 * n + 1)
-
-    for i in X.indices {
-      for j in 0..<N {
-        // consecutive positions of the array will store N,sigma(xi),sigma(xi^2),sigma(xi^3)....sigma(xi^2n)
-        X[i] += pow(x[j], Double(i))  
-      }
-    }
-    var a: [Double] = Array(repeating: 0, count: n + 1)
-    /// B is the Normal matrix(augmented) that will store the equations, 'a' is for value of the final coefficients
-    var B: [[Double]] = Array(repeating: Array(repeating: 0, count: n + 2), count: n + 1)
-
-    for i in 0...n {
-      for j in 0...n {
-        // Build the Normal matrix by storing the corresponding coefficients at the right positions except the last column of the matrix
-        B[i][j] = X[i + j]
-      }
-    }
-
-    /// Array to store the values of sigma(yi),sigma(xi*yi),sigma(xi^2*yi)...sigma(xi^n*yi)
-    var Y: [Double] = Array(repeating: 0, count: n + 1)
-
-    for i in 0..<(n + 1) {
-      Y[i] = 0
-      for j in 0..<N {
-        // consecutive positions will store sigma(yi),sigma(xi*yi),sigma(xi^2*yi)...sigma(xi^n*yi)
-        Y[i] += pow(x[j], Double(i)) * y[j]
-      }
-    }
-
-    for i in 0...n {
-      // load the values of Y as the last column of B(Normal Matrix but augmented)
-      B[i][n + 1] = Y[i]
-    }
-
-    n += 1
-    for i in 0..<n {  
-      // From now Gaussian Elimination starts(can be ignored) to solve the set of linear equations (Pivotisation)
-      for k in (i + 1)..<n {
-        if B[i][i] < B[k][i] {
-          for j in 0...n {
-            let temp = B[i][j]
-            B[i][j] = B[k][j]
-            B[k][j] = temp
-          }
-        }
-      }
-    }
-
-    for i in 0..<(n - 1) {  // loop to perform the gauss elimination
-      for k in (i + 1)..<n {
-        let t = B[k][i] / B[i][i]
-        for j in 0...n {
-          // make the elements below the pivot elements equal to zero or elimnate the variables
-          B[k][j] -= t * B[i][j]
-        }
-      }
-    }
-
-    for i in (0..<(n - 1)).reversed() { // back-substitution
-      // x is an array whose values correspond to the values of x,y,z..
-      // make the variable to be calculated equal to the rhs of the last equation
-      a[i] = B[i][n]
-      for j in 0..<n {
-        if j != i {
-          // then subtract all the lhs values except the coefficient of the variable whose value is being calculated
-          a[i] -= B[i][j] * a[j]
-        }
-      }
-      a[i] /= B[i][i] // now finally divide the rhs by the coefficient of the variable to be calculated
-    }
-    a.removeLast()
-    return self.init(a)
   }
 }
 

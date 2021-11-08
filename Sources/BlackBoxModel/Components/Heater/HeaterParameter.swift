@@ -9,7 +9,7 @@
 //
 
 import Config
-import Physics
+import Utilities
 
 extension Heater {
   /// A struct with the assigned details of the heater.

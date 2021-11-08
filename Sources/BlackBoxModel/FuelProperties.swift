@@ -9,6 +9,7 @@
 //
 
 import Config
+import Helpers
 
 public struct FuelParameter: Codable {
   let name: String

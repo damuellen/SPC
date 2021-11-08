@@ -1,3 +1,5 @@
+import Helpers
+
 enum SpecificCost {
   static let labels = ["Loops", "DC", "AC", "Heater", "TES", "EY", "PB", "BESS", "H2", "Meth", "Boiler", "Grid", "CAPEX", "H2_", "LCoE", "LCoTh", "LCH2", "LCoM"]
   static let AdditionalCostPerLoop = 762533.1364
