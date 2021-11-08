@@ -1,5 +1,4 @@
-import Helpers
-import Physics
+import Utilities
 import XCTest
 
 @testable import BlackBoxModel
@@ -48,4 +47,9 @@ class PVPanelTests: XCTestCase {
     // )
     // try! plotter4.plot(.pngLarge(path: "panel4.png"))
   }
+}
+
+func evaluate(in range: ClosedRange<Double>, numberOfSamples: Int = 100, f: (Double)->Double) -> [[Double]] {
+  let step = (range.upperBound - range.lowerBound) / Double(numberOfSamples)
+  return stride(from: range.lowerBound, through: range.upperBound, by: step).map{[$0,f($0)]}
 }

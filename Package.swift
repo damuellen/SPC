@@ -2,7 +2,7 @@
 import PackageDescription
 
 let c = [CSetting.unsafeFlags(["-ffast-math", "-O3", "-fomit-frame-pointer", "-funroll-loops"])]
-let flags = ["-Ounchecked", "-enforce-exclusivity=unchecked"]
+let flags = ["-cross-module-optimization", "-Ounchecked", "-enforce-exclusivity=unchecked"]
 let posix = TargetDependencyCondition.when(platforms: [.linux, .macOS])
 let win = BuildSettingCondition.when(platforms: [.windows])
 let linker = LinkerSetting.unsafeFlags(["-Xlinker", "/INCREMENTAL:NO", "-Xlinker", "/IGNORE:4217,4286"], win)
@@ -28,34 +28,21 @@ var package = Package(
     ),
     .package(url: "https://github.com/damuellen/SQLite.swift.git", .branch("master")),
     .package(url: "https://github.com/damuellen/xlsxwriter.swift.git", .branch("main")),
+    .package(url: "https://github.com/damuellen/Utilities.git", .branch("main")),
     .package(
       name: "Swifter", url: "https://github.com/httpswift/swifter.git",
-      .upToNextMajor(from: "1.5.0")),
-    .package(url: "https://github.com/apple/swift-numerics.git", from: "1.0.0")
+      .upToNextMajor(from: "1.5.0"))
  // .package(url: "https://github.com/damuellen/Numerical.git", .branch("master")),
  // .package(name: "Benchmark", url: "https://github.com/google/swift-benchmark", from: "0.1.0"),
  // .package(url: "https://github.com/pvieito/PythonKit.git", .branch("master")),
  // .package(url: "https://github.com/jpsim/Yams.git", from: "4.0.1")
   ],
   targets: [
-    .target(name: "Libc"),
-    .target(
-      name: "Helpers",
-      dependencies: ["Libc", .product(name: "Numerics", package: "swift-numerics"),],
-      swiftSettings: swift,
-      linkerSettings: [linker]
-    ),
-    .target(
-      name: "Physics",
-      dependencies: ["Config", "Meteo", "Libc", "Helpers", "CIAPWSIF97",],
-      swiftSettings: swift
-    ), 
     .target(name: "Config", swiftSettings: swift),
     .target(name: "DateGenerator", swiftSettings: swift),
     .target(name: "CPikchr", cSettings: c), 
     .target(name: "CSPA", cSettings: c),
     .target(name: "CSOLPOS", cSettings: c), 
-    .target(name: "CIAPWSIF97", cSettings: c),
     .target(
       name: "SolarPosition",
       dependencies: ["DateGenerator", "CSOLPOS", "CSPA"],
@@ -63,13 +50,13 @@ var package = Package(
     ),
     .target(
       name: "PinchPoint",
-      dependencies: ["CPikchr", "Helpers", "Physics"],
+      dependencies: ["CPikchr", "Utilities"],
       swiftSettings: swift
     ),
     .target(
       name: "BlackBoxModel",
       dependencies: [
-        "Config", "Libc", "Meteo", "SolarPosition", "Helpers", "Physics",
+        "Config", "Meteo", "SolarPosition", "Utilities",
         // .product(name: "Yams", package: "Yams"),
         .product(name: "SQLite", package: "SQLite.swift"),
         .product(name: "xlsxwriter", package: "xlsxwriter.swift"),
@@ -81,12 +68,12 @@ var package = Package(
     ),
     .target(
       name: "ThermalStorage",
-      dependencies: ["Libc", "Helpers", "Physics"],
+      dependencies: ["Utilities"],
       swiftSettings: swift
     ), 
     .target(
       name: "SolarFieldModel",
-      dependencies: ["Libc"],
+      dependencies: ["Utilities"],
       swiftSettings: swift
     ),
     .target(
@@ -101,7 +88,7 @@ var package = Package(
     .executableTarget(
       name: "SolarFieldCalc",
       dependencies: [
-        "SolarFieldModel", "CPikchr", "Helpers",
+        "SolarFieldModel", "CPikchr", "Utilities",
         .product(name: "ArgumentParser", package: "swift-argument-parser"),
         .product(name: "xlsxwriter", package: "xlsxwriter.swift"),
       ],
@@ -111,7 +98,7 @@ var package = Package(
     .executableTarget(
       name: "SolarPerformanceCalc",
       dependencies: [
-        "Config", "BlackBoxModel", "Helpers",
+        "Config", "BlackBoxModel", "Utilities",
         .product(name: "ArgumentParser", package: "swift-argument-parser"),
         .product(name: "xlsxwriter", package: "xlsxwriter.swift"),
       ],
@@ -120,14 +107,14 @@ var package = Package(
     ),
     .executableTarget(
       name: "TransTES",
-      dependencies: ["Helpers"],
+      dependencies: ["Utilities"],
       swiftSettings: swift,
       linkerSettings: [linker]
     ),
     .executableTarget(
       name: "SunOl",
       dependencies: [
-         "Helpers", "Physics",
+         "Utilities",
         .product(name: "xlsxwriter", package: "xlsxwriter.swift"),
         .byName(name: "Swifter", condition: posix),
       ],

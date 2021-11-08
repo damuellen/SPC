@@ -1,7 +1,5 @@
 import Foundation
-import Helpers
-import Physics
-
+import Utilities
 
 struct SunOl {
   var CSP_Loop_Nr = 113.0

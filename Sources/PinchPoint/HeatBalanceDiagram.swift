@@ -9,9 +9,8 @@
 //
 
 import CPikchr
-import Helpers
 import Libc
-import Physics
+import Utilities
 
 typealias Stream = HeatBalanceDiagram.Stream
 

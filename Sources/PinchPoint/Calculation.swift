@@ -8,9 +8,8 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
-import Helpers
+import Utilities
 import Libc
-import Physics
 
 /// Pinch point calculation for heat exchangers.
 public struct Calculation: Codable {

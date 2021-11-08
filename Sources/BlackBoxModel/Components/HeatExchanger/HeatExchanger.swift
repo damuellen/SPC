@@ -8,8 +8,7 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
-import Physics
-import Helpers
+import Utilities
 
 /// This struct contains the state as well as the functions for mapping the heat exchanger
 public struct HeatExchanger: Parameterizable, HeatTransfer {

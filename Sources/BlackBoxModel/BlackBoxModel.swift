@@ -10,11 +10,10 @@
 
 import Config
 import DateGenerator
-import Helpers
+import Utilities
 import Foundation
 import Meteo
 import SolarPosition
-import Physics
 
 public enum BlackBoxModel {
 
@@ -118,7 +117,8 @@ public enum BlackBoxModel {
     for (meteo, date) in zip(🌦, timeline(Simulation.time.steps)) {
       DateTime.setCurrent(date: date)
       let dt = DateTime.current
-      let (temperature, wind) = (Temperature(meteo), Double(meteo.windSpeed))
+      let (temperature, wind) = 
+        (Temperature(celsius: Double(meteo.temperature)), Double(meteo.windSpeed))
       if let position = 🌞[date] {
         let panel = singleAxisTracker(
           apparentZenith: position.zenith,
@@ -178,7 +178,7 @@ public enum BlackBoxModel {
       {()}
 #endif
       // Used when calculating the heat losses and the efficiency
-      let temperature = Temperature(meteo)
+      let temperature = Temperature(celsius: Double(meteo.temperature))
 
       // Setting the mass flow required by the power block in the solar field
       status.solarField.maxMassFlow = PowerBlock.requiredMassFlow()
