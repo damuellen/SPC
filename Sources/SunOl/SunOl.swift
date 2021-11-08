@@ -246,7 +246,6 @@ struct SunOl {
     return (Q_solar_before_dumping, PV_MV_power_at_transformer_outlet, aux_elec_for_CSP_SF_PV_Plant)
   }
 
-  @discardableResult
   mutating func callAsFunction(
     _ pr_meth_plant_op: inout [Double],
     _ Q_solar_before_dumping: [Double],

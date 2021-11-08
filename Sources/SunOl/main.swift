@@ -109,7 +109,7 @@ func main() {
     var bestResult = [Double]()
     var selection = parameter.randomValues(count: 1)
     var steps = 25
-    for iter in 1...10 {
+    for iter in 1...25 {
       let indices = parameter.ranges.indices.shuffled()
       if source.isCancelled { break }
       let permutations = parameter.steps(count: steps)
