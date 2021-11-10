@@ -1,60 +1,35 @@
 import Foundation
 import Utilities
 
-extension Double {
-  @inline(__always)
-  func asString(precision: Int = 2) -> String {
-    String(format: "%.\(precision)f", self)
-  }
-}
+extension Double { @inline(__always) func asString(precision: Int = 2) -> String { String(format: "%.\(precision)f", self) } }
 
 func write(_ xs: [Double]..., maxLength: Int = Int.max) {
   let count = min(xs.reduce(0) { max($0, $1.count) }, maxLength)
   let places = "\(count)".count
-  
-  for i in 0..<count {
-    print(xs.reduce(String(format: "%0\(places)d\t", i)) {
-      $0 + String(format: "%3.1f\t", $1[i]).replacingOccurrences(of: "0.0", with: "0").leftpad(length: 6)
-    })
-  }
-  print("")
+  for i in 0..<count { print(xs.reduce(String(format: "%0\(places)d\t", i)) { $0 + String(format: "%3.1f\t", $1[i]).replacingOccurrences(of: "0.0", with: "0").leftpad(length: 6) }) }
+
 }
 extension String {
   public func leftpad(length: Int, character: Character = " ") -> String {
-    
     var outString: String = self
-    
     let extraLength = length - outString.count
-    
     var i = 0
-    while (i < extraLength) {
+    while i < extraLength {
       outString.insert(character, at: outString.startIndex)
       i += 1
     }
-    
     return outString
   }
 }
 extension Sequence where Element == Double {
-  func write(_ count: Int? = nil) {
-    if let count = count {
-      zip(0..., self.prefix(count)).forEach { Swift.print($0, $1.asString()) }
-    } else {
-      zip(0..., self).forEach { Swift.print($0, $1.asString()) }
-    }
-  }
+  func write(_ count: Int? = nil) { if let count = count { zip(0..., self.prefix(count)).forEach { Swift.print($0, $1.asString()) } } else { zip(0..., self).forEach { Swift.print($0, $1.asString()) } } }
 
-  func quotient(_ divisor: Double) -> [Double] {
-    self.map { $0 / divisor }
-  }
+  func quotient(_ divisor: Double) -> [Double] { self.map { $0 / divisor } }
 
-  func product(_ factor: Double) -> [Double] {
-    self.map { $0 * factor }
-  }
+  func product(_ factor: Double) -> [Double] { self.map { $0 * factor } }
 }
 
-
-extension Array where Element==Double {
+extension Array where Element == Double {
   mutating func shift(half: Double) {
     var offset = ((first! + last!) / 2) - half
     if first! - offset < 0 { offset = first! }
@@ -62,34 +37,24 @@ extension Array where Element==Double {
   }
 }
 
-extension Double {
-  var formatted: String { String(format: "%G", self) }
-}
+extension Double { var formatted: String { String(format: "%G", self) } }
 
 extension Array where Element == Double {
   var total: Float { Float(reduce(0.0, +)) }
-  var nonZeroCount: Int { 
-    reduce(into: 0) { counter, value in
-      if value > 0 { counter += 1 }
-    } 
-  }
+  var nonZeroCount: Int { reduce(into: 0) { counter, value in if value > 0 { counter += 1 } } }
 
-  var readable: [String] {
-    map(\.formatted)
-  }
+  var readable: [String] { map(\.formatted) }
 }
 
 func average(_ values: ArraySlice<Double>) -> Double {
-  let sum = values.reduce(into: 0.0) { sum, value in
-    sum += value
-  }
+  let sum = values.reduce(into: 0.0) { sum, value in sum += value }
   return sum / Double(values.count)
 }
 
 /// Kahan-Babuška-Neumaier Sum
 func sum(_ values: ArraySlice<Double>) -> Double {
-  let (s,w) = values.reduce((s: Double.zero, w: Double.zero)) { accum, aᵢ in
-    let (sᵢ₋₁,wᵢ₋₁) = accum
+  let (s, w) = values.reduce((s: Double.zero, w: Double.zero)) { accum, aᵢ in 
+    let (sᵢ₋₁, wᵢ₋₁) = accum
     let sᵢ = sᵢ₋₁ + aᵢ
     let Δ = abs(aᵢ) <= abs(sᵢ₋₁) ? (sᵢ₋₁ - sᵢ) + aᵢ : (aᵢ - sᵢ) + sᵢ₋₁
     let wᵢ = wᵢ₋₁ + Δ
@@ -98,44 +63,34 @@ func sum(_ values: ArraySlice<Double>) -> Double {
   return s + w
 }
 
-
-func countiff(_ values: ArraySlice<Double>, _ predicat: (Double)-> Bool) -> Double {
-  let count = values.reduce(into: 0) { counter, value in
-    if predicat(value) { counter += 1 }
-  }
+func countiff(_ values: ArraySlice<Double>, _ predicat: (Double) -> Bool) -> Double {
+  let count = values.reduce(into: 0) { counter, value in if predicat(value) { counter += 1 } }
   return Double(count)
 }
 
-func iff(_ expression: Bool, _ yes: Double, _ no: Double) -> Double {
-  expression ? yes : no
-}
+func iff(_ expression: Bool, _ yes: Double, _ no: Double) -> Double { expression ? yes : no }
 
 extension Double {
   public var multiBar: String {
-    let (bar_chunks, remainder) = Int(self * 80)
-      .quotientAndRemainder(dividingBy: 8)
+    let (bar_chunks, remainder) = Int(self * 80).quotientAndRemainder(dividingBy: 8)
     let full = UnicodeScalar("█").value
-    let fractionalPart = remainder > 0
-      ? String(UnicodeScalar(full + UInt32(8 - remainder))!) : ""
-    return String(repeating: "█", count: bar_chunks)
-      + fractionalPart 
-      + String(repeating: " ", count: 10 - bar_chunks) 
-      + String(format: "%G", self)
+    let fractionalPart = remainder > 0 ? String(UnicodeScalar(full + UInt32(8 - remainder))!) : ""
+    return String(repeating: "█", count: bar_chunks) + fractionalPart + String(repeating: " ", count: 10 - bar_chunks) + String(format: "%G", self)
   }
 }
 
 struct Results {
   init() {
-    var rows = [[String:Double]]()
+    var rows = [[String: Double]]()
     #if DEBUGA
     let url = URL(fileURLWithPath: "/workspaces/SPC/output.txt")
 
     guard let dataFile = CSV(url: url) else { fatalError() }
 
-    for data in dataFile.data {
-      var dict: [String:Double] = [:]
+    for data in dataFile.dataRows {
+      var dict: [String: Double] = [:]
       var i = 0
-      dict["G"] = Double(data[i]);i += 1 
+       dict["G"] = Double(data[i]);i += 1 
       dict["H"] = Double(data[i]);i += 1 
       dict["I"] = Double(data[i]);i += 1 
       dict["J"] = Double(data[i]);i += 1 
@@ -252,7 +207,7 @@ struct Results {
     self.rows = rows
   }
 
-  let rows: [[String:Double]]
+  let rows: [[String: Double]]
 
   subscript(key: String) -> Double {
     let i = Int(key.filter(\.isNumber))! + 1
@@ -265,92 +220,26 @@ struct Results {
     var isCorrect = true
     var out = "Column \(key)\n"
     var c = 0
-    zip(rows, results.dropFirst()).forEach {
-      let value = $0[key]!
-      if abs(value - $1) > 0.2 {
-        isCorrect = false      
-        if c < 5 {
-          print("Row \(r)", "set: ", $0[key]!.asString(), " is: ", $1.asString(), to: &out)
-        } 
-        c += 1
+    zip(rows, results.dropFirst())
+      .forEach {
+        let value = $0[key]!
+        if abs(value - $1) > 0.2 {
+          isCorrect = false
+          if c < 5 { print("Row \(r)", "set: ", $0[key]!.asString(), " is: ", $1.asString(), to: &out) }
+          c += 1
+        }
+        r += 1
       }
-      r += 1
-    }
     if isCorrect {
       print("No mismatch in column \(key)")
     } else {
-      if c > 5 {
-        print("\(c - 5) other errors", to: &out)
-      }
+      if c > 5 { print("\(c - 5) other errors", to: &out) }
       print(out)
     }
     #endif
   }
 }
 
-/**
- Returns an iterator-sequence for the Cartesian product of the sequences.
- ```
- let values = product([1, 2, 3], [4, 5, 6, 7], [8, 9])
- // [1, 4, 8], [1, 4, 9], [1, 5, 8], [1, 5, 9], [1, 6, 8], ... [3, 7, 9]
- ```
- - Parameter sequences: The sequences from which to compute the product.
- - Returns: An iterator-sequence for the Cartesian product of the sequences.
- */
-public func product<S: Sequence>(_ sequences: S...) -> CartesianProduct<S> {
-  // print(sequences.map({ s in s.reduce(0) { c,_ in c + 1 } }).reduce(1, *))
-  return CartesianProduct(sequences)
-}
-/// An iterator-sequence for the Cartesian product of multiple sequences of the same type.
-/// See `product(_:)`.
-public struct CartesianProduct<S: Sequence>: IteratorProtocol, Sequence {
-  private let sequences: [S]
-  private var iterators: [S.Iterator]
-  private var currentValues: [S.Iterator.Element] = []
-
-  init(_ sequences: [S]) {
-    self.sequences = sequences
-    iterators = sequences.map { $0.makeIterator() }
-  }
-
-  public mutating func next() -> [S.Iterator.Element]? {
-    guard !currentValues.isEmpty else {
-      var firstValues: [S.Iterator.Element] = []
-      for index in iterators.indices {
-        guard let value = iterators[index].next() else { return nil }
-        firstValues.append(value)
-      }
-      currentValues = firstValues
-      return firstValues
-    }
-
-    for index in currentValues.indices.reversed() {
-      if let value = iterators[index].next() {
-        currentValues[index] = value
-        return currentValues
-      }
-
-      guard index != 0 else { return nil }
-
-      iterators[index] = sequences[index].makeIterator()
-      currentValues[index] = iterators[index].next()!
-    }
-
-    return currentValues
-  }
-}
-
-extension Sequence where Element: Equatable {
-  public func distinct() -> [Element] {
-    var unique = [Element]()
-    for item in self {
-        if !unique.contains(item) {
-          unique.append(item)
-        }
-    }
-    return unique
-  }
-}
 
 struct Link: Codable {
   let color: String
@@ -373,41 +262,25 @@ struct Sankey: Codable {
 func sankey(values: [Double]) -> Sankey {
   Sankey(
     links: [
-      Link(color: "rgb(178, 42, 42)", source: "PV", target: "za", type: "y", value: 0.5),
-      Link(color: "rgb(178, 42, 42)", source: "PV", target: "y", type: "y", value: 0.5),
-      Link(color: "rgb(0, 111, 222)", source: "G", target: "EL", type: "y", value: 0.5),
-      Link(color: "rgb(98, 230, 31)", source: "G", target: "H2", type: "y", value: 0.5),
-      Link(color: "rgb(98, 230, 31)", source: "ST", target: "G", type: "y", value: 1),
-      Link(color: "rgb(244, 230, 31)", source: "H2", target: "M", type: "y", value: 3),
-      Link(color: "rgb(0, 111, 222)", source: "CSP", target: "H2", type: "M", value: 1.5),
-      Link(color: "rgb(178, 42, 42)", source: "PV", target: "EL", type: "M", value: 2.5),
-      Link(color: "rgb(178, 42, 42)", source: "PV", target: "H", type: "M", value: 1.5),
-      Link(color: "rgb(244, 230, 31)", source: "H", target: "TES", type: "M", value: 1.5),
-      Link(color: "rgb(0, 111, 222)", source: "CSP", target: "HX", type: "z", value: 1.5),
-      Link(color: "rgb(0, 111, 222)", source: "HX", target: "TES", type: "z", value: 1.5),
-      Link(color: "rgb(244, 230, 31)", source: "TES", target: "ST", type: "z", value: 2.8),
-      Link(color: "rgb(244, 230, 31)", source: "TES", target: "zb", type: "z", value: 0.2),
-      Link(color: "rgb(98, 230, 31)", source: "EL", target: "H2", type: "z", value: 2),
-      Link(color: "rgb(98, 230, 31)", source: "ST", target: "C", type: "z", value: 1.6),
-      Link(color: "rgb(244, 230, 31)", source: "ST", target: "H2", type: "z", value: 0.2),
-      Link(color: "rgb(0, 111, 222)", source: "EL", target: "z", type: "z", value: 1),
+      Link(color: "rgb(178, 42, 42)", source: "PV", target: "za", type: "y", value: 0.5), Link(color: "rgb(178, 42, 42)", source: "PV", target: "y", type: "y", value: 0.5),
+      Link(color: "rgb(0, 111, 222)", source: "G", target: "EL", type: "y", value: 0.5), Link(color: "rgb(98, 230, 31)", source: "G", target: "H2", type: "y", value: 0.5),
+      Link(color: "rgb(98, 230, 31)", source: "ST", target: "G", type: "y", value: 1), Link(color: "rgb(244, 230, 31)", source: "H2", target: "M", type: "y", value: 3),
+      Link(color: "rgb(0, 111, 222)", source: "CSP", target: "H2", type: "M", value: 1.5), Link(color: "rgb(178, 42, 42)", source: "PV", target: "EL", type: "M", value: 2.5),
+      Link(color: "rgb(178, 42, 42)", source: "PV", target: "H", type: "M", value: 1.5), Link(color: "rgb(244, 230, 31)", source: "H", target: "TES", type: "M", value: 1.5),
+      Link(color: "rgb(0, 111, 222)", source: "CSP", target: "HX", type: "z", value: 1.5), Link(color: "rgb(0, 111, 222)", source: "HX", target: "TES", type: "z", value: 1.5),
+      Link(color: "rgb(244, 230, 31)", source: "TES", target: "ST", type: "z", value: 2.8), Link(color: "rgb(244, 230, 31)", source: "TES", target: "zb", type: "z", value: 0.2),
+      Link(color: "rgb(98, 230, 31)", source: "EL", target: "H2", type: "z", value: 2), Link(color: "rgb(98, 230, 31)", source: "ST", target: "C", type: "z", value: 1.6),
+      Link(color: "rgb(244, 230, 31)", source: "ST", target: "H2", type: "z", value: 0.2), Link(color: "rgb(0, 111, 222)", source: "EL", target: "z", type: "z", value: 1),
     ],
     nodes: [
-      Node(id: "PVDC", title: "PV"), Node(id: "PV", title: "PV"),
-      Node(id: "CSP", title: "Heat"), Node(id: "TES", title: "TES"),
-      Node(id: "H2", title: "H2"), Node(id: "C", title: "Condenser"),
-      Node(id: "G", title: "Generator"), Node(id: "EL", title: "Electrolyser"),
-      Node(id: "HX", title: "Heatexchanger"), Node(id: "H", title: "Heater"),
-      Node(id: "ST", title: "Turbine"), Node(id: "M", title: "Methanol"),
-      Node(id: "y", title: "Grid"), Node(id: "z", title: "Losses"),
+      Node(id: "PVDC", title: "PV"), Node(id: "PV", title: "PV"), Node(id: "CSP", title: "Heat"), Node(id: "TES", title: "TES"), Node(id: "H2", title: "H2"), Node(id: "C", title: "Condenser"), Node(id: "G", title: "Generator"),
+      Node(id: "EL", title: "Electrolyser"), Node(id: "HX", title: "Heatexchanger"), Node(id: "H", title: "Heater"), Node(id: "ST", title: "Turbine"), Node(id: "M", title: "Methanol"), Node(id: "y", title: "Grid"), Node(id: "z", title: "Losses"),
       Node(id: "za", title: "Loss"), Node(id: "zb", title: "Loss"),
     ]
   )
 }
 
-func labeled(_ strings: [String]) -> String {  
-  zip(SpecificCost.labels, strings).map { l, s in "\(ASCIIColor.red.rawValue)\(l) \(ASCIIColor.green.rawValue)\(s)" }.joined(separator: " ")
-}
+func labeled(_ strings: [String]) -> String { zip(SpecificCost.labels, strings).map { l, s in "\(ASCIIColor.red.rawValue)\(l) \(ASCIIColor.green.rawValue)\(s)" }.joined(separator: " ") }
 
 enum ASCIIColor: String {
   case black = "\u{1B}[0;30m"
@@ -421,9 +294,5 @@ enum ASCIIColor: String {
   case `default` = "\u{1B}[0;0m"
 }
 
-protocol Labeled {
-  var labels: [String] { get }
-}
-extension Labeled {
-  var labels: [String] { Mirror(reflecting: self).children.compactMap(\.label) }
-}
+protocol Labeled { var labels: [String] { get } }
+extension Labeled { var labels: [String] { Mirror(reflecting: self).children.compactMap(\.label) } }

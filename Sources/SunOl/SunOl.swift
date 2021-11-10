@@ -1317,34 +1317,6 @@ struct Parameter: Codable {
     get { ranges[i] } 
     set { ranges[i] = newValue }
   }
-
-  mutating func bisect(_ values: [Double])  {
-    ranges = zip(ranges, values).map { range, half in
-      let mid = range.normalized(value: half)
-      var lowerBound = max(0, mid - 0.25)
-      let upperBound = min(1, lowerBound + 0.5)
-      lowerBound = upperBound - 0.5
-      return range.denormalized(value: lowerBound)...range.denormalized(value: upperBound)
-    }
-  } 
-
-  func denormalized(values: [Double]) -> [Double] {
-    zip(ranges, values).map { range, value in range.normalized(value: value) }
-  }
-
-  func normalized(values: [Double]) -> [Double] {
-    zip(ranges, values).map { range, value in range.denormalized(value: value) }
-  }
-
-  func steps(count: Int) -> [[Double]] {
-    ranges.map { range in
-      stride(from: 0, to: 1, by: 1 / Double(count)).map(range.denormalized(value:))
-    } 
-  }
-
-  func randomValues(count: Int) -> [[Double]] {
-    ranges.map { range in (1...count).map { _ in Double.random(in: range) } }
-  }
 }
 
 extension ClosedRange where Bound == Double {
@@ -1356,5 +1328,11 @@ extension ClosedRange where Bound == Double {
 
   func denormalized(value: Double) -> Double {
     return lowerBound + value * (upperBound - lowerBound)
+  }
+}
+
+extension Array where Element == ClosedRange<Double> {
+  func randomValues(count: Int) -> [[Double]] {
+    (1...count).map { _ in map { range in Double.random(in: range) } }
   }
 }
