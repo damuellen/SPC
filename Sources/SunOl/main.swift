@@ -68,7 +68,7 @@ func main() {
   let name = "SunOl_\(id).xlsx"
   let wb = Workbook(name: name)
   let ws = wb.addWorksheet()
-  var r = 1
+  var r = 0
   defer {
     print(name)
     ws.table(range: [0, 0, r, SpecificCost.labels.count - 1], header: SpecificCost.labels)
@@ -101,8 +101,8 @@ func main() {
     for population in zip(history.fitness, history.positions).map({ fitness, position in 
       fitness.indices.map { i in [fitness[i]] + position[i] } }) {
       for generation in population where !generation[0].isZero {
-        ws.write(generation, row: r, col: 0)
         r += 1
+        ws.write(generation, row: r, col: 0)
       }
     }
   }
@@ -173,7 +173,9 @@ func GOA(n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fitness: ([Double]
   }
 
   var l = 0
+  #if !os(Windows)
   convergenceCurve.append(XY(x: Double(l), y: targetFitness))
+  #endif
   while l < maxIter && !source.isCancelled {
 
     let c = cMax - (Double(l) * ((cMax - cMin) / Double(maxIter)))  // Eq. (2.8) in the paper
