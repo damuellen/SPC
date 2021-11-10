@@ -221,7 +221,9 @@ func GOA(n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fitness: ([Double]
       }
     }
     // convergenceCurve[l] = targetFitness
+    #if !os(Windows)
     convergenceCurve.append(XY(x: Double(l), y: targetFitness))
+    #endif
     l += 1
     print("\u{1B}[H\u{1B}[2J\(ASCIIColor.blue.rawValue)Iterations: \(l)\n\(targetFitness) \(targetPosition)")
   }
