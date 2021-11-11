@@ -6,7 +6,7 @@ signal(SIGINT, SIG_IGN)
 let source = DispatchSource.makeSignalSource(signal: SIGINT, queue: .global())
 let semaphore = DispatchSemaphore(value: 0)
 #if !os(Windows)
-var convergenceCurve: [XY] = []
+var convergenceCurve = [[XY]](repeating: [XY](), count: 3)
 
 import Swifter
 let server = HttpServer()
@@ -21,7 +21,7 @@ server["/"] = scopes {
       httpEquiv = "refresh"
       content = "5"
     }
-    body { div { inner = Gnuplot(xys: convergenceCurve, style: .points).svg! } }
+    body { div { inner = Gnuplot(xys: convergenceCurve[0], convergenceCurve[1], convergenceCurve[2], style: .points).svg! } }
   }
 }
 
@@ -39,7 +39,9 @@ SetConsoleCtrlHandler(
   { _ in source.cancel()
     semaphore.wait()
     return WindowsBool(true)
-  }, true)
+  },
+  true
+)
 #endif
 
 source.resume()
@@ -75,20 +77,19 @@ func main() {
     wb.close()
   }
   let parameter: [Parameter]
-  if CommandLine.argc == 3, let data = try? Data(contentsOf: .init(fileURLWithPath: CommandLine.arguments[2])),
-  let parameters = try? JSONDecoder().decode([Parameter].self, from: data) {
+  if CommandLine.argc == 3, let data = try? Data(contentsOf: .init(fileURLWithPath: CommandLine.arguments[2])), let parameters = try? JSONDecoder().decode([Parameter].self, from: data) {
     parameter = parameters
   } else {
     parameter = [
       Parameter(
-        CSP_Loop_Nr: 20...220,
-        PV_DC_Cap: 280...1280,
+        CSP_Loop_Nr: 20...250,
+        PV_DC_Cap: 280...1380,
         PV_AC_Cap: 280...1280,
         Heater_cap: 10...500,
-        TES_Full_Load_Hours: 9...16,
-        EY_Nominal_elec_input: 80...500,
-        PB_Nominal_gross_cap: 20...250,
-        BESS_cap: 0...0,
+        TES_Full_Load_Hours: 8...18,
+        EY_Nominal_elec_input: 80...400,
+        PB_Nominal_gross_cap: 20...220,
+        BESS_cap: 0...1400,
         H2_storage_cap: 10...110,
         Meth_nominal_hourly_prod_cap: 12...30,
         El_boiler_cap: 0...120,
@@ -96,19 +97,15 @@ func main() {
       )
     ]
   }
-  parameter.forEach { parameter in 
-    let history = GOA(n: 200, maxIter: 100, bounds: parameter.ranges, fitness: fitness)
-    for population in zip(history.fitness, history.positions).map({ fitness, position in 
-      fitness.indices.map { i in [fitness[i]] + position[i] } }) {
-      for generation in population where !generation[0].isZero {
-        r += 1
-        ws.write(generation, row: r, col: 0)
+  parameter.forEach { parameter in
+    MGGOA(n: 225, maxIter: 500, bounds: parameter.ranges, fitness: fitness)
+      .forEach { row in r += 1
+        ws.write(row, row: r)
       }
-    }
   }
 }
 
-func fitness(values: [Double]) -> Double {
+func fitness(values: [Double]) -> [Double] {
   var model = SunOl(values: values)
   var pr_meth_plant_op = Array(repeating: 0.4, count: 8760)
   #if DEBUG
@@ -121,16 +118,13 @@ func fitness(values: [Double]) -> Double {
   model(&pr_meth_plant_op, input.Q_solar_before_dumping, input.PV_MV_power_at_transformer_outlet, input.aux_elec_for_CSP_SF_PV_Plant, rows: &rows)
   model(&pr_meth_plant_op, input.Q_solar_before_dumping, input.PV_MV_power_at_transformer_outlet, input.aux_elec_for_CSP_SF_PV_Plant, rows: &rows)
   let result = SpecificCost.invest(model)
-  return result[5]
+  return result
 }
 
-func GOA(n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fitness: ([Double]) -> Double) -> (fitness: [[Double]], positions: [[[Double]]]) {
-  // var convergenceCurve = [Double](repeating: 0, count: maxIter)
-  // var trajectories = [[Double]](repeating: [Double](repeating: 0, count: maxIter), count: n)
-  var fitnessHistory = [[Double]](repeating: [Double](repeating: 0, count: maxIter), count: n)
-  var positionHistory = [[[Double]]](repeating: [[Double]](repeating: [Double](repeating: 0, count: bounds.count), count: maxIter), count: n)
-  var targetPosition = [Double]()
-  var targetFitness = Double.infinity
+func MGGOA(n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fitness: ([Double]) -> [Double]) -> [[Double]] {
+  var targetResults = [[Double]](repeating: [Double](repeating: 0, count: bounds.count + 13), count: n * maxIter)
+  var targetPosition = [[Double]](repeating: [Double](repeating: 0, count: bounds.count), count: 3)
+  var targetFitness = [Double](repeating: .infinity, count: 3)
   let EPSILON = 1E-14
 
   // Initialize the population of grasshoppers
@@ -138,24 +132,29 @@ func GOA(n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fitness: ([Double]
   var grassHopperFitness = [Double](repeating: 0, count: n)
 
   let cMax = 1.0
-  let cMin = 0.00004
+  let cMin = 0.00002
 
   print("\u{1B}[H\n\u{1B}[2J\(ASCIIColor.blue.rawValue)Calculate the fitness of initial population.")
 
   // Calculate the fitness of initial grasshoppers
   DispatchQueue.concurrentPerform(iterations: grassHopperPositions.count) { i in
-    // for i in grassHopperPositions.indices {
-    grassHopperFitness[i] = fitness(grassHopperPositions[i])
 
-    fitnessHistory[i][0] = grassHopperFitness[i]
-    positionHistory[i][0] = grassHopperPositions[i]// trajectories[i][0] = grassHopperPositions[i][0]
+    let result = fitness(grassHopperPositions[i])
+    grassHopperFitness[i] = result[5]
   }
-  // Find the best grasshopper (target) in the first population
-  for i in grassHopperFitness.indices {
-    if grassHopperFitness[i] < targetFitness {
-      targetFitness = grassHopperFitness[i]
-      targetPosition = grassHopperPositions[i]
+  let third = n / 3
+  for n in 0..<3 {
+    // Find the best grasshopper (target) in the first populations
+    let p = n * third
+    for i in grassHopperFitness[p..<min(p + third, grassHopperFitness.endIndex)].indices {
+      if grassHopperFitness[i] < targetFitness[n] {
+        targetFitness[n] = grassHopperFitness[i]
+        targetPosition[n] = grassHopperPositions[i]
+      }
     }
+    #if !os(Windows)
+    convergenceCurve[n].append(XY(x: Double(0), y: targetFitness[n]))
+    #endif
   }
 
   print("\u{1B}[H\u{1B}[2J\(ASCIIColor.blue.rawValue)First population:\n\(targetFitness) \(targetPosition)")
@@ -171,63 +170,82 @@ func GOA(n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fitness: ([Double]
     let l = 1.5
     return f * exp(-r / l) - exp(-r)  // Eq. (2.3) in the paper
   }
-
+  var pos = 0
   var l = 0
-  #if !os(Windows)
-  convergenceCurve.append(XY(x: Double(l), y: targetFitness))
-  #endif
   while l < maxIter && !source.isCancelled {
-
+    l += 1
     let c = cMax - (Double(l) * ((cMax - cMin) / Double(maxIter)))  // Eq. (2.8) in the paper
 
-    for i in grassHopperPositions.indices {
-      var S_i = [Double](repeating: 0, count: bounds.count)
-      for j in 0..<n {
-        if i != j {
-          // Calculate the distance between two grasshoppers
-          let distance = euclideanDistance(a: grassHopperPositions[i], b: grassHopperPositions[j])
-          var r_ij_vec = [Double](repeating: 0, count: bounds.count)
-          for p in r_ij_vec.indices {
-            r_ij_vec[p] = (grassHopperPositions[j][p] - grassHopperPositions[i][p]) / (distance + EPSILON)  // xj-xi/dij in Eq. (2.7)
-          }
-          let xj_xi = 2 + distance.remainder(dividingBy: 2)  // |xjd - xid| in Eq. (2.7)
+    for m in 0..<3 {
+      let p = m * third
+      for i in grassHopperPositions[p..<min(p + third, grassHopperPositions.endIndex)].indices {
+        var S_i = [Double](repeating: 0, count: bounds.count)
+        for j in 0..<n {
+          if i != j {
+            // Calculate the distance between two grasshoppers
+            let distance = euclideanDistance(a: grassHopperPositions[i], b: grassHopperPositions[j])
+            var r_ij_vec = [Double](repeating: 0, count: bounds.count)
+            for p in r_ij_vec.indices {
+              r_ij_vec[p] = (grassHopperPositions[j][p] - grassHopperPositions[i][p]) / (distance + EPSILON)  // xj-xi/dij in Eq. (2.7)
+            }
+            let xj_xi = 2 + distance.remainder(dividingBy: 2)  // |xjd - xid| in Eq. (2.7)
 
-          var s_ij = [Double](repeating: 0, count: bounds.count)
-          for p in r_ij_vec.indices {
-            // The first part inside the big bracket in Eq. (2.7)
-            s_ij[p] = ((bounds[p].upperBound - bounds[p].lowerBound) * c / 2) * S_func(r: xj_xi) * r_ij_vec[p]
+            var s_ij = [Double](repeating: 0, count: bounds.count)
+            for p in r_ij_vec.indices {
+              // The first part inside the big bracket in Eq. (2.7)
+              s_ij[p] = ((bounds[p].upperBound - bounds[p].lowerBound) * c / 2) * S_func(r: xj_xi) * r_ij_vec[p]
+            }
+            for p in S_i.indices { S_i[p] = S_i[p] + s_ij[p] }
           }
-          for p in S_i.indices { S_i[p] = S_i[p] + s_ij[p] }
+        }
+
+        let S_i_total = S_i
+        var X_new = [Double](repeating: 0, count: bounds.count)
+        for p in S_i.indices {
+          X_new[p] = c * S_i_total[p] + targetPosition[n][p]  // Eq. (2.7) in the paper
+        }
+        // Update the target
+        grassHopperPositions[i] = X_new
+      }
+    }
+    DispatchQueue.concurrentPerform(iterations: grassHopperPositions.count) { i in
+      for j in grassHopperPositions[i].indices {
+        grassHopperPositions[i][j].clamp(to: bounds[j])
+        targetResults[pos + i][j] = grassHopperPositions[i][j]
+      }
+      let result = fitness(grassHopperPositions[i])
+      for r in result.indices { targetResults[pos + i][bounds.count + r] = result[r] }
+      grassHopperFitness[i] = result[5]
+    }
+    pos += grassHopperPositions.count
+
+    for n in 0..<3 {
+      // Update the target
+      let p = n * third
+      for i in grassHopperFitness[p..<min(p + third, grassHopperFitness.endIndex)].indices {
+        if grassHopperFitness[i] < targetFitness[n] {
+          targetFitness[n] = grassHopperFitness[i]
+          targetPosition[n] = grassHopperPositions[i]
         }
       }
 
-      let S_i_total = S_i
-      var X_new = [Double](repeating: 0, count: bounds.count)
-      for p in S_i.indices {
-        X_new[p] = c * S_i_total[p] + targetPosition[p]  // Eq. (2.7) in the paper
-      }
-      grassHopperPositions[i] = X_new
+      #if !os(Windows)
+      convergenceCurve[n].append(XY(x: Double(l), y: targetFitness[n]))
+      #endif
     }
-
-    DispatchQueue.concurrentPerform(iterations: grassHopperPositions.count) { i in for j in grassHopperPositions[i].indices { grassHopperPositions[i][j].clamp(to: bounds[j]) }
-      grassHopperFitness[i] = fitness(grassHopperPositions[i])
-
-      fitnessHistory[i][l] = grassHopperFitness[i]
-      positionHistory[i][l] = grassHopperPositions[i]
-      // trajectories[i][l] = grassHopperPositions[i][l]
-
-      // Update the target
-      if grassHopperFitness[i] < targetFitness {
-        targetPosition = grassHopperPositions[i]
-        targetFitness = grassHopperFitness[i]
+    // Multi-group strategy
+    if (l % 10) == 0 {
+      for n in 0..<3 {
+        let p = n * third
+        var o = [0, 1, 2]
+        o.remove(at: n)
+        for i in grassHopperPositions[p..<min(p + third, grassHopperFitness.endIndex)].indices {
+          for p in grassHopperPositions[i].indices { grassHopperPositions[i][p] += Double.random(in: 0...1) * (((targetPosition[o[0]][p] + targetPosition[o[1]][p]) / 2) - grassHopperPositions[i][p]) }
+        }
       }
     }
-    // convergenceCurve[l] = targetFitness
-    #if !os(Windows)
-    convergenceCurve.append(XY(x: Double(l), y: targetFitness))
-    #endif
-    l += 1
+
     print("\u{1B}[H\u{1B}[2J\(ASCIIColor.blue.rawValue)Iterations: \(l)\n\(targetFitness) \(targetPosition)")
   }
-  return (fitnessHistory, positionHistory)
+  return targetResults
 }

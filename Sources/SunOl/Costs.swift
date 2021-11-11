@@ -1,7 +1,10 @@
 import Helpers
 
 enum SpecificCost {
-  static let labels = ["LCoM", "Loops", "DC", "AC", "Heater", "TES", "EY", "PB", "BESS", "H2", "Meth", "Boiler", "Grid"]
+  static let labels = ["Loops", "DC", "AC", "Heater", "TES", "EY", "PB", "BESS", "H2", "Meth",
+   "Boiler", "Grid", "Total_CAPEX", "Meth_Prod", "LCoE", "LCoTh", "LCH2", "LCoM", "PB_startups",
+   "TES_discharges", "EY_plant_starts", "EY_count", "Meth_starts", "H2_to_Meth", "limit_sum"]
+
   static let AdditionalCostPerLoop = 762533.1364
   static let Solar_field = (basis: 38.0, c1: 1_581_220.0, exp: 0.8, f: 0.71, coeff: 18_000_000.0, range: 19.0...130.0)
   static let Assembly_hall_1_line = (c1: 12_000_000.0, c2: 3_300_000.0, range: 1.0...60.0)
