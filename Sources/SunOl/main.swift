@@ -138,7 +138,6 @@ func MGGOA(n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fitness: ([Doubl
 
   // Calculate the fitness of initial grasshoppers
   DispatchQueue.concurrentPerform(iterations: grassHopperPositions.count) { i in
-
     let result = fitness(grassHopperPositions[i])
     grassHopperFitness[i] = result[5]
   }
@@ -202,7 +201,7 @@ func MGGOA(n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fitness: ([Doubl
         let S_i_total = S_i
         var X_new = [Double](repeating: 0, count: bounds.count)
         for p in S_i.indices {
-          X_new[p] = c * S_i_total[p] + targetPosition[n][p]  // Eq. (2.7) in the paper
+          X_new[p] = c * S_i_total[p] + targetPosition[m][p]  // Eq. (2.7) in the paper
         }
         // Update the target
         grassHopperPositions[i] = X_new
