@@ -141,18 +141,17 @@ func MGGOA(n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fitness: ([Doubl
     let result = fitness(grassHopperPositions[i])
     grassHopperFitness[i] = result[5]
   }
-  let third = n / 3
-  for n in 0..<3 {
-    // Find the best grasshopper (target) in the first populations
-    let p = n * third
-    for i in grassHopperFitness[p..<min(p + third, grassHopperFitness.endIndex)].indices {
+  let groups = grassHopperFitness.indices.split(in: 3)
+  for g in groups.indices {
+    // Find the best grasshopper per group (target) in the first population
+    for i in groups[g].indices {
       if grassHopperFitness[i] < targetFitness[n] {
-        targetFitness[n] = grassHopperFitness[i]
-        targetPosition[n] = grassHopperPositions[i]
+        targetFitness[g] = grassHopperFitness[i]
+        targetPosition[g] = grassHopperPositions[i]
       }
     }
     #if !os(Windows)
-    convergenceCurve[n].append(XY(x: Double(0), y: targetFitness[n]))
+    convergenceCurve[g].append(XY(x: Double(0), y: targetFitness[g]))
     #endif
   }
 
@@ -175,9 +174,8 @@ func MGGOA(n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fitness: ([Doubl
     l += 1
     let c = cMax - (Double(l) * ((cMax - cMin) / Double(maxIter)))  // Eq. (2.8) in the paper
 
-    for m in 0..<3 {
-      let p = m * third
-      for i in grassHopperPositions[p..<min(p + third, grassHopperPositions.endIndex)].indices {
+    for g in groups.indices {
+      for i in groups[g].indices {
         var S_i = [Double](repeating: 0, count: bounds.count)
         for j in 0..<n {
           if i != j {
@@ -201,7 +199,7 @@ func MGGOA(n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fitness: ([Doubl
         let S_i_total = S_i
         var X_new = [Double](repeating: 0, count: bounds.count)
         for p in S_i.indices {
-          X_new[p] = c * S_i_total[p] + targetPosition[m][p]  // Eq. (2.7) in the paper
+          X_new[p] = c * S_i_total[p] + targetPosition[g][p]  // Eq. (2.7) in the paper
         }
         // Update the target
         grassHopperPositions[i] = X_new
@@ -218,28 +216,28 @@ func MGGOA(n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fitness: ([Doubl
     }
     pos += grassHopperPositions.count
 
-    for n in 0..<3 {
+    for g in groups.indices {
       // Update the target
-      let p = n * third
-      for i in grassHopperFitness[p..<min(p + third, grassHopperFitness.endIndex)].indices {
-        if grassHopperFitness[i] < targetFitness[n] {
-          targetFitness[n] = grassHopperFitness[i]
-          targetPosition[n] = grassHopperPositions[i]
+      for i in groups[g].indices {
+        if grassHopperFitness[i] < targetFitness[g] {
+          targetFitness[g] = grassHopperFitness[i]
+          targetPosition[g] = grassHopperPositions[i]
         }
       }
 
       #if !os(Windows)
-      convergenceCurve[n].append(XY(x: Double(l), y: targetFitness[n]))
+      convergenceCurve[g].append(XY(x: Double(l), y: targetFitness[g]))
       #endif
     }
     // Multi-group strategy
     if (l % 10) == 0 {
-      for n in 0..<3 {
-        let p = n * third
+      for g in groups.indices {
         var o = [0, 1, 2]
-        o.remove(at: n)
-        for i in grassHopperPositions[p..<min(p + third, grassHopperFitness.endIndex)].indices {
-          for p in grassHopperPositions[i].indices { grassHopperPositions[i][p] += Double.random(in: 0...1) * (((targetPosition[o[0]][p] + targetPosition[o[1]][p]) / 2) - grassHopperPositions[i][p]) }
+        o.remove(at: g)
+        for i in groups[g].indices {
+          for p in grassHopperPositions[i].indices { 
+            grassHopperPositions[i][p] += Double.random(in: 0...1) * (((targetPosition[o[0]][p] + targetPosition[o[1]][p]) / 2) - grassHopperPositions[i][p])
+          }
         }
       }
     }

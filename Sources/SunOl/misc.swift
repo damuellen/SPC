@@ -1,6 +1,15 @@
 import Foundation
 import Utilities
 
+extension Range where Bound == Int {
+  func split(in parts: Int) -> [Self] {
+    let size = count / parts + (count % parts > 0 ? 1 : 0)
+    return stride(from: 0, to: count, by: size).map { cursor in 
+      cursor ..< Swift.min(cursor.advanced(by: size), endIndex)
+    }
+  }
+}
+
 extension Double { @inline(__always) func asString(precision: Int = 2) -> String { String(format: "%.\(precision)f", self) } }
 
 func write(_ xs: [Double]..., maxLength: Int = Int.max) {
