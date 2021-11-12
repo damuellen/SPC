@@ -70,10 +70,21 @@ func main() {
   let name = "SunOl_\(id).xlsx"
   let wb = Workbook(name: name)
   let ws = wb.addWorksheet()
+  let names = SpecificCost.labels[0..<11]
+
   var r = 0
   defer {
     print(name)
     ws.table(range: [0, 0, r, SpecificCost.labels.count - 1], header: SpecificCost.labels)
+    names.enumerated().forEach { column, name in      
+      let chart = wb.addChart(type: .scatter) //.set(y_axis: 1000...2500)
+      chart.addSeries()
+        .set(marker: 5, size: 4)
+        .values(sheet: ws, range: [1, 17, r, 17])
+        .categories(sheet: ws, range: [1, column, r, column])
+      chart.remove(legends: 0)
+      wb.addChartsheet(name: name).set(chart: chart)
+    }
     wb.close()
   }
   let parameter: [Parameter]
@@ -145,7 +156,7 @@ func MGGOA(n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fitness: ([Doubl
   for g in groups.indices {
     // Find the best grasshopper per group (target) in the first population
     for i in groups[g].indices {
-      if grassHopperFitness[i] < targetFitness[n] {
+      if grassHopperFitness[i] < targetFitness[g] {
         targetFitness[g] = grassHopperFitness[i]
         targetPosition[g] = grassHopperPositions[i]
       }
