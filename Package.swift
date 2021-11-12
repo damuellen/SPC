@@ -84,7 +84,8 @@ var package = Package(
     // .executableTarget(name: "Benchmarking",
     //   dependencies: ["Meteo", "Benchmark", "BlackBoxModel"],
     //   swiftSettings: swift),
-
+    // .executableTarget(name: "Playground",
+    //    dependencies: ["Utilities"], swiftSettings: swift, linkerSettings: [linker]),
     .executableTarget(
       name: "SolarFieldCalc",
       dependencies: [
@@ -115,6 +116,7 @@ var package = Package(
       name: "SunOl",
       dependencies: [
          "Utilities",
+        .product(name: "ArgumentParser", package: "swift-argument-parser"),
         .product(name: "xlsxwriter", package: "xlsxwriter.swift"),
         .byName(name: "Swifter", condition: posix),
       ],

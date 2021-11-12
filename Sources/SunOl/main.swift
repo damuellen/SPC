@@ -1,3 +1,4 @@
+import ArgumentParser
 import Foundation
 import Utilities
 import xlsxwriter
@@ -11,9 +12,6 @@ var convergenceCurve = [[XY]](repeating: [XY](), count: 3)
 import Swifter
 let server = HttpServer()
 let enc = JSONEncoder()
-
-// server["/Server/:path"] = shareFilesFromDirectory("/workspaces/SPC/Server")
-// server.GET["sankey"] = { _ in try! .ok(.data(enc.encode(sankey(values: values)))) }
 
 server["/"] = scopes {
   html {
@@ -46,7 +44,7 @@ SetConsoleCtrlHandler(
 
 source.resume()
 let now = Date()
-main()
+Command.main()
 print("Elapsed seconds:", -now.timeIntervalSinceNow)
 #if os(Windows)
 semaphore.signal()
@@ -57,64 +55,6 @@ semaphore.wait()
 var Q_Sol_MW_thLoop = [Double]()
 var Reference_PV_plant_power_at_inverter_inlet_DC = [Double]()
 var Reference_PV_MV_power_at_transformer_outlet = [Double]()
-
-func main() {
-  guard CommandLine.argc > 1 else { return }
-  let url = URL(fileURLWithPath: CommandLine.arguments[1])
-  guard let csv = CSV(url: url) else { return }
-
-  Q_Sol_MW_thLoop = csv["csp"]
-  Reference_PV_plant_power_at_inverter_inlet_DC = csv["pv"]
-  Reference_PV_MV_power_at_transformer_outlet = csv["out"]
-  let id = String(UUID().uuidString.prefix(6))
-  let name = "SunOl_\(id).xlsx"
-  let wb = Workbook(name: name)
-  let ws = wb.addWorksheet()
-  let names = SpecificCost.labels[0..<11]
-
-  var r = 0
-  defer {
-    print(name)
-    ws.table(range: [0, 0, r, SpecificCost.labels.count - 1], header: SpecificCost.labels)
-    names.enumerated().forEach { column, name in      
-      let chart = wb.addChart(type: .scatter) //.set(y_axis: 1000...2500)
-      chart.addSeries()
-        .set(marker: 5, size: 4)
-        .values(sheet: ws, range: [1, 17, r, 17])
-        .categories(sheet: ws, range: [1, column, r, column])
-      chart.remove(legends: 0)
-      wb.addChartsheet(name: name).set(chart: chart)
-    }
-    wb.close()
-  }
-  let parameter: [Parameter]
-  if CommandLine.argc == 3, let data = try? Data(contentsOf: .init(fileURLWithPath: CommandLine.arguments[2])), let parameters = try? JSONDecoder().decode([Parameter].self, from: data) {
-    parameter = parameters
-  } else {
-    parameter = [
-      Parameter(
-        CSP_Loop_Nr: 20...250,
-        PV_DC_Cap: 280...1380,
-        PV_AC_Cap: 280...1280,
-        Heater_cap: 10...500,
-        TES_Full_Load_Hours: 8...18,
-        EY_Nominal_elec_input: 80...400,
-        PB_Nominal_gross_cap: 20...220,
-        BESS_cap: 0...1400,
-        H2_storage_cap: 10...110,
-        Meth_nominal_hourly_prod_cap: 12...30,
-        El_boiler_cap: 0...120,
-        grid_max_export: 50...50
-      )
-    ]
-  }
-  parameter.forEach { parameter in
-    MGGOA(n: 225, maxIter: 500, bounds: parameter.ranges, fitness: fitness)
-      .forEach { row in r += 1
-        ws.write(row, row: r)
-      }
-  }
-}
 
 func fitness(values: [Double]) -> [Double] {
   var model = SunOl(values: values)
@@ -132,18 +72,19 @@ func fitness(values: [Double]) -> [Double] {
   return result
 }
 
-func MGGOA(n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fitness: ([Double]) -> [Double]) -> [[Double]] {
+func MGOA(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fitness: ([Double]) -> [Double]) -> [[Double]] {
   var targetResults = [[Double]](repeating: [Double](repeating: 0, count: bounds.count + 13), count: n * maxIter)
-  var targetPosition = [[Double]](repeating: [Double](repeating: 0, count: bounds.count), count: 3)
-  var targetFitness = [Double](repeating: .infinity, count: 3)
+  var targetPosition = [[Double]](repeating: [Double](repeating: 0, count: bounds.count), count: group ? 3 : 1)
+  var targetFitness = [Double](repeating: .infinity, count: group ? 3 : 1)
   let EPSILON = 1E-14
 
   // Initialize the population of grasshoppers
   var grassHopperPositions = bounds.randomValues(count: n)
   var grassHopperFitness = [Double](repeating: 0, count: n)
+  let groups = grassHopperFitness.indices.split(in: group ? 3 : 1)
 
   let cMax = 1.0
-  let cMin = 0.00002
+  let cMin = 0.00004
 
   print("\u{1B}[H\n\u{1B}[2J\(ASCIIColor.blue.rawValue)Calculate the fitness of initial population.")
 
@@ -152,7 +93,7 @@ func MGGOA(n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fitness: ([Doubl
     let result = fitness(grassHopperPositions[i])
     grassHopperFitness[i] = result[5]
   }
-  let groups = grassHopperFitness.indices.split(in: 3)
+  
   for g in groups.indices {
     // Find the best grasshopper per group (target) in the first population
     for i in groups[g].indices {
@@ -241,7 +182,7 @@ func MGGOA(n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fitness: ([Doubl
       #endif
     }
     // Multi-group strategy
-    if (l % 10) == 0 {
+    if group, (l % 10) == 0 {
       for g in groups.indices {
         var o = [0, 1, 2]
         o.remove(at: g)
@@ -256,4 +197,71 @@ func MGGOA(n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fitness: ([Doubl
     print("\u{1B}[H\u{1B}[2J\(ASCIIColor.blue.rawValue)Iterations: \(l)\n\(targetFitness) \(targetPosition)")
   }
   return targetResults
+}
+
+struct Command: ParsableCommand {
+
+  @Option(name: .short, help: "Input data file") var file: String?
+
+  @Option(name: .short, help: "Parameter file") var json: String?
+
+  @Flag(name: .long, help: "Do not use Multi-group algorithm") var noGroups: Bool = false
+
+  @Option(name: .short, help: "Population size") var n: Int?
+
+  @Option(name: .short, help: "Iterations") var iterations: Int?
+
+  func run() throws {
+    let url = URL(fileURLWithPath: file ?? "input.txt")
+    guard let csv = CSV(url: url) else { return }
+
+    Q_Sol_MW_thLoop = csv["csp"]
+    Reference_PV_plant_power_at_inverter_inlet_DC = csv["pv"]
+    Reference_PV_MV_power_at_transformer_outlet = csv["out"]
+    let id = String(UUID().uuidString.prefix(6))
+    let name = "SunOl_\(id).xlsx"
+    let wb = Workbook(name: name)
+    let ws = wb.addWorksheet()
+    let names = SpecificCost.labels[0..<11]
+
+    var r = 0
+    defer {
+      print(name)
+      ws.table(range: [0, 0, r, SpecificCost.labels.count - 1], header: SpecificCost.labels)
+      names.enumerated()
+        .forEach { column, name in let chart = wb.addChart(type: .scatter)  //.set(y_axis: 1000...2500)
+          chart.addSeries().set(marker: 5, size: 4).values(sheet: ws, range: [1, 17, r, 17]).categories(sheet: ws, range: [1, column, r, column])
+          chart.remove(legends: 0)
+          wb.addChartsheet(name: name).set(chart: chart)
+        }
+      wb.close()
+    }
+    let parameter: [Parameter]
+    if let path = json, let data = try? Data(contentsOf: .init(fileURLWithPath: path)), let parameters = try? JSONDecoder().decode([Parameter].self, from: data) {
+      parameter = parameters
+    } else {
+      parameter = [
+        Parameter(
+          CSP_Loop_Nr: 20...250,
+          PV_DC_Cap: 280...1380,
+          PV_AC_Cap: 280...1280,
+          Heater_cap: 10...500,
+          TES_Full_Load_Hours: 8...18,
+          EY_Nominal_elec_input: 80...400,
+          PB_Nominal_gross_cap: 20...220,
+          BESS_cap: 0...1400,
+          H2_storage_cap: 10...110,
+          Meth_nominal_hourly_prod_cap: 12...30,
+          El_boiler_cap: 0...120,
+          grid_max_export: 50...50
+        )
+      ]
+    }
+    parameter.forEach { parameter in
+      MGOA(group: !noGroups, n: n ?? 225, maxIter: iterations ?? 500, bounds: parameter.ranges, fitness: fitness)
+        .forEach { row in r += 1
+          ws.write(row, row: r)
+        }
+    }
+  }
 }
