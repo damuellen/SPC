@@ -1,6 +1,6 @@
 import Helpers
 
-enum SpecificCost {
+enum CostModel {
   static let labels = ["Loops", "DC", "AC", "Heater", "TES", "EY", "PB", "BESS", "H2", "Meth",
    "Boiler", "Grid", "Total_CAPEX", "Meth_Prod", "LCoE", "LCoTh", "LCH2", "LCoM", "PB_startups",
    "TES_discharges", "EY_plant_starts", "EY_count", "Meth_starts", "H2_to_Meth", "limit_sum"]

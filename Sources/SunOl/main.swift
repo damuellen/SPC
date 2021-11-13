@@ -7,7 +7,7 @@ signal(SIGINT, SIG_IGN)
 let source = DispatchSource.makeSignalSource(signal: SIGINT, queue: .global())
 let semaphore = DispatchSemaphore(value: 0)
 #if !os(Windows)
-var convergenceCurve = [[XY]](repeating: [XY](), count: 3)
+var convergenceCurve = [[[Double]]](repeating: [[Double]](), count: 3)
 
 import Swifter
 let server = HttpServer()
@@ -17,9 +17,9 @@ server["/"] = scopes {
   html {
     meta {
       httpEquiv = "refresh"
-      content = "5"
+      content = "10"
     }
-    body { div { inner = Gnuplot(xys: convergenceCurve[0], convergenceCurve[1], convergenceCurve[2], style: .points).svg! } }
+    body { div { inner = Gnuplot(xys: convergenceCurve, style: .points).svg! } }
   }
 }
 
@@ -68,7 +68,7 @@ func fitness(values: [Double]) -> [Double] {
   model(&pr_meth_plant_op, input.Q_solar_before_dumping, input.PV_MV_power_at_transformer_outlet, input.aux_elec_for_CSP_SF_PV_Plant, rows: &rows)
   model(&pr_meth_plant_op, input.Q_solar_before_dumping, input.PV_MV_power_at_transformer_outlet, input.aux_elec_for_CSP_SF_PV_Plant, rows: &rows)
   model(&pr_meth_plant_op, input.Q_solar_before_dumping, input.PV_MV_power_at_transformer_outlet, input.aux_elec_for_CSP_SF_PV_Plant, rows: &rows)
-  let result = SpecificCost.invest(model)
+  let result = CostModel.invest(model)
   return result
 }
 
@@ -103,11 +103,12 @@ func MGOA(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fitn
       }
     }
     #if !os(Windows)
-    convergenceCurve[g].append(XY(x: Double(0), y: targetFitness[g]))
+    convergenceCurve[g].append([Double(0), targetFitness[g]])
     #endif
   }
 
-  print("\u{1B}[H\u{1B}[2J\(ASCIIColor.blue.rawValue)First population:\n\(targetFitness) \(targetPosition)")
+  print("\u{1B}[H\u{1B}[2J\(ASCIIColor.blue.rawValue)First population:\n\(targetFitness)")
+  print(targetPosition.map(labeled(values:)).joined(separator: "\n"))
 
   func euclideanDistance(a: [Double], b: [Double]) -> Double {
     var distance = 0.0
@@ -120,6 +121,7 @@ func MGOA(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fitn
     let l = 1.5
     return f * exp(-r / l) - exp(-r)  // Eq. (2.3) in the paper
   }
+
   var pos = 0
   var l = 0
   while l < maxIter && !source.isCancelled {
@@ -163,7 +165,7 @@ func MGOA(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fitn
         targetResults[pos + i][j] = grassHopperPositions[i][j]
       }
       let result = fitness(grassHopperPositions[i])
-      for r in result.indices { targetResults[pos + i][bounds.count + r] = result[r] }
+      targetResults[pos + i].replaceSubrange(bounds.count..., with: result)
       grassHopperFitness[i] = result[5]
     }
     pos += grassHopperPositions.count
@@ -178,7 +180,7 @@ func MGOA(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fitn
       }
 
       #if !os(Windows)
-      convergenceCurve[g].append(XY(x: Double(l), y: targetFitness[g]))
+      convergenceCurve[g].append([Double(0), targetFitness[g]])
       #endif
     }
     // Multi-group strategy
@@ -194,8 +196,10 @@ func MGOA(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fitn
       }
     }
 
-    print("\u{1B}[H\u{1B}[2J\(ASCIIColor.blue.rawValue)Iterations: \(l)\n\(targetFitness) \(targetPosition)")
+    print("\u{1B}[H\u{1B}[2J\(ASCIIColor.blue.rawValue)Iterations: \(l)\n\(targetFitness)")
+    print(targetPosition.map(labeled(values:)).joined(separator: "\n"))
   }
+  targetResults.removeLast((maxIter - l) * n)
   return targetResults
 }
 
@@ -222,22 +226,33 @@ struct Command: ParsableCommand {
     let name = "SunOl_\(id).xlsx"
     let wb = Workbook(name: name)
     let ws = wb.addWorksheet()
-    let names = SpecificCost.labels[0..<11]
+    let ws2 = wb.addWorksheet()
+    let names = CostModel.labels[0..<11]
 
     var r = 0
+    var r2 = 0
     defer {
       print(name)
-      ws.table(range: [0, 0, r, SpecificCost.labels.count - 1], header: SpecificCost.labels)
+      ws.table(range: [0, 0, r, CostModel.labels.count - 1], header: CostModel.labels)
       names.enumerated()
         .forEach { column, name in let chart = wb.addChart(type: .scatter)  //.set(y_axis: 1000...2500)
           chart.addSeries().set(marker: 5, size: 4).values(sheet: ws, range: [1, 17, r, 17]).categories(sheet: ws, range: [1, column, r, column])
           chart.remove(legends: 0)
           wb.addChartsheet(name: name).set(chart: chart)
         }
+      ws2.table(range: [0, 0, r2, 3], header: ["CAPEX", "Count", "Min", "Max"])
+      let chart = wb.addChart(type: .line)
+      chart.addSeries().values(sheet: ws2, range: [1, 2, r2, 2]).categories(sheet: ws2, range: [1, 0, r2, 0])
+      wb.addChartsheet(name: "CAPEX").set(chart: chart)
+      let bc = wb.addChart(type: .bar)
+      bc.addSeries().values(sheet: ws2, range: [1, 1, r2, 1]).categories(sheet: ws2, range: [1, 0, r2, 0])
+      bc.remove(legends: 0)
+      ws2.insert(chart: bc, (1, 5)).activate()
       wb.close()
     }
     let parameter: [Parameter]
-    if let path = json, let data = try? Data(contentsOf: .init(fileURLWithPath: path)), let parameters = try? JSONDecoder().decode([Parameter].self, from: data) {
+    if let path = json, let data = try? Data(contentsOf: .init(fileURLWithPath: path)), 
+      let parameters = try? JSONDecoder().decode([Parameter].self, from: data) {
       parameter = parameters
     } else {
       parameter = [
@@ -258,10 +273,18 @@ struct Command: ParsableCommand {
       ]
     }
     parameter.forEach { parameter in
-      MGOA(group: !noGroups, n: n ?? 225, maxIter: iterations ?? 500, bounds: parameter.ranges, fitness: fitness)
-        .forEach { row in r += 1
-          ws.write(row, row: r)
-        }
+      let a = MGOA(group: !noGroups, n: n ?? 225, maxIter: iterations ?? 500, bounds: parameter.ranges, fitness: fitness)
+      a.forEach { row in r += 1; ws.write(row, row: r) }
+
+      let (x,y) = (12, 17)
+      let freq = 10e7
+      var d = [Double:[Double]]()
+      for i in a.indices {
+        let key = (a[i][x] / freq).rounded(.up)
+        if let v = d[key] { d[key] = [v[0] + 1, min(v[1], a[i][y]), max(v[2], a[i][y])] } 
+        else { d[key] = [1, a[i][y], a[i][y]] }
+      }
+      d.keys.sorted().map { [$0 * freq] + d[$0]! }.forEach { row in r2 += 1; ws2.write(row, row: r2) }
     }
   }
 }
