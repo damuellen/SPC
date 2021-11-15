@@ -72,7 +72,7 @@ func fitness(values: [Double]) -> [Double] {
   return result
 }
 
-func MGOA(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fitness: ([Double]) -> [Double]) -> [[Double]] {
+func MGOADE(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fitness: ([Double]) -> [Double]) -> [[Double]] {
   var targetResults = [[Double]](repeating: [Double](repeating: 0, count: bounds.count + 13), count: n * maxIter)
   var targetPosition = [[Double]](repeating: [Double](repeating: 0, count: bounds.count), count: group ? 3 : 1)
   var targetFitness = [Double](repeating: .infinity, count: group ? 3 : 1)
@@ -81,11 +81,13 @@ func MGOA(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fitn
   // Initialize the population of grasshoppers
   var grassHopperPositions = bounds.randomValues(count: n)
   var grassHopperFitness = [Double](repeating: 0, count: n)
+  var grassHopperTrialPositions = grassHopperPositions
   let groups = grassHopperFitness.indices.split(in: group ? 3 : 1)
 
   let cMax = 1.0
   let cMin = 0.00004
-
+  let cr = 0.4
+  let f = 0.9
   print("\u{1B}[H\n\u{1B}[2J\(ASCIIColor.blue.rawValue)Calculate the fitness of initial population.")
 
   // Calculate the fitness of initial grasshoppers
@@ -159,6 +161,7 @@ func MGOA(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fitn
         grassHopperPositions[i] = X_new
       }
     }
+    if source.isCancelled { break }
     DispatchQueue.concurrentPerform(iterations: grassHopperPositions.count) { i in
       for j in grassHopperPositions[i].indices {
         grassHopperPositions[i][j].clamp(to: bounds[j])
@@ -168,8 +171,53 @@ func MGOA(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fitn
       targetResults[pos + i].replaceSubrange(bounds.count..., with: result)
       grassHopperFitness[i] = result[5]
     }
-    pos += grassHopperPositions.count
 
+    var refresh = group
+    // Multi-group strategy
+    if group, l.isMultiple(of: 2) {
+      for g in groups.indices {
+        // Update the target
+        for i in groups[g].indices {
+          var o = [0, 1, 2]
+          o.remove(at: g)
+          let r1 = groups[o[0]].indices.randomElement()!
+          let r2 = groups[o[1]].indices.randomElement()!
+          
+          for j in grassHopperPositions[i].indices {
+            if Double.random(in: 0...1) < cr {
+              grassHopperTrialPositions[i][j] =
+                targetPosition[g][j] + f * (Double.random(in: 0...1) + 0.0001) * (grassHopperPositions[r1][j] - grassHopperPositions[r2][j])
+              grassHopperTrialPositions[i][j].clamp(to: bounds[j])
+            }
+          }
+        }
+      }
+    } else if group {
+      for g in groups.indices {
+        var o = [0, 1, 2]
+        o.remove(at: g)
+        for i in groups[g].indices {
+          for p in grassHopperPositions[i].indices {
+            grassHopperTrialPositions[i][p] += Double.random(in: 0...1) * (((targetPosition[o[0]][p] + targetPosition[o[1]][p]) / 2) - grassHopperPositions[i][p])
+            grassHopperTrialPositions[i][p].clamp(to: bounds[p])
+          }
+        }
+      }
+    } else { refresh = false }
+
+    if source.isCancelled { break }
+    if refresh {
+      DispatchQueue.concurrentPerform(iterations: grassHopperTrialPositions.count) { i in
+        let result = fitness(grassHopperTrialPositions[i])
+        if result[5] < grassHopperFitness[i] {
+          grassHopperFitness[i] = result[5]
+          grassHopperPositions[i] = grassHopperTrialPositions[i]
+          targetResults[pos + i].replaceSubrange(0..<bounds.count, with: grassHopperPositions[i])
+          targetResults[pos + i].replaceSubrange(bounds.count..., with: result)
+        }
+      }
+    }
+    pos += grassHopperPositions.count
     for g in groups.indices {
       // Update the target
       for i in groups[g].indices {
@@ -178,22 +226,9 @@ func MGOA(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fitn
           targetPosition[g] = grassHopperPositions[i]
         }
       }
-
       #if !os(Windows)
-      convergenceCurve[g].append([Double(0), targetFitness[g]])
+      convergenceCurve[g].append([Double(l), targetFitness[g]])
       #endif
-    }
-    // Multi-group strategy
-    if group, (l % 10) == 0 {
-      for g in groups.indices {
-        var o = [0, 1, 2]
-        o.remove(at: g)
-        for i in groups[g].indices {
-          for p in grassHopperPositions[i].indices { 
-            grassHopperPositions[i][p] += Double.random(in: 0...1) * (((targetPosition[o[0]][p] + targetPosition[o[1]][p]) / 2) - grassHopperPositions[i][p])
-          }
-        }
-      }
     }
 
     print("\u{1B}[H\u{1B}[2J\(ASCIIColor.blue.rawValue)Iterations: \(l)\n\(targetFitness)")
@@ -273,7 +308,7 @@ struct Command: ParsableCommand {
       ]
     }
     parameter.forEach { parameter in
-      let a = MGOA(group: !noGroups, n: n ?? 225, maxIter: iterations ?? 500, bounds: parameter.ranges, fitness: fitness)
+      let a = MGOADE(group: !noGroups, n: n ?? 150, maxIter: iterations ?? 100, bounds: parameter.ranges, fitness: fitness)
       a.forEach { row in r += 1; ws.write(row, row: r) }
 
       let (x,y) = (12, 17)
