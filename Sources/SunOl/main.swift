@@ -321,6 +321,7 @@ struct Command: ParsableCommand {
         else { d[key] = [1, a[i][y], a[i][y]] }
       }
       d.keys.sorted().map { [$0 * freq] + d[$0]! }.forEach { row in r2 += 1; ws2.write(row, row: r2) }
+      try? Gnuplot(xys: pareto_frontier(xys: a, x: x, y: y))(.pngLarge(path: "pareto_frontier.png"))
     }
   }
 }

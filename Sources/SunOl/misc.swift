@@ -16,8 +16,19 @@ func write(_ xs: [Double]..., maxLength: Int = Int.max) {
   let count = min(xs.reduce(0) { max($0, $1.count) }, maxLength)
   let places = "\(count)".count
   for i in 0..<count { print(xs.reduce(String(format: "%0\(places)d\t", i)) { $0 + String(format: "%3.1f\t", $1[i]).replacingOccurrences(of: "0.0", with: "0").leftpad(length: 6) }) }
-
 }
+
+func pareto_frontier(xys: [[Double]], x: Int, y: Int) -> [[Double]] {
+  let sort = xys.sorted(by: { lhs, rhs in lhs[x] < rhs[x] })
+  var p_front = [sort[0]]   
+  for i in sort.indices[1...] {
+    if sort[i][y] <= p_front.last![y] {
+      p_front.append(sort[i])
+    }
+  }
+  return p_front.map { [$0[x], $0[y]] }
+}
+
 extension String {
   public func leftpad(length: Int, character: Character = " ") -> String {
     var outString: String = self
@@ -99,7 +110,7 @@ struct Results {
     for data in dataFile.dataRows {
       var dict: [String: Double] = [:]
       var i = 0
-       dict["G"] = Double(data[i]);i += 1 
+      dict["G"] = Double(data[i]);i += 1 
       dict["H"] = Double(data[i]);i += 1 
       dict["I"] = Double(data[i]);i += 1 
       dict["J"] = Double(data[i]);i += 1 
