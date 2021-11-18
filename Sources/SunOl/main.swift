@@ -6,28 +6,13 @@ import xlsxwriter
 signal(SIGINT, SIG_IGN)
 let source = DispatchSource.makeSignalSource(signal: SIGINT, queue: .global())
 
-var convergenceCurve = [[[Double]]](repeating: [[Double]](), count: 3)
+var convergenceCurves = [[[Double]]](repeating: [[Double]](), count: 3)
 
-/*
-import Swifter
-let server = HttpServer()
-let enc = JSONEncoder()
-
-server["/"] = scopes {
-  html {
-    meta {
-      httpEquiv = "refresh"
-      content = "10"
-    }
-    body { div { inner = Gnuplot(xys: convergenceCurve, style: .points).svg! } }
-  }
-}
-
-try server.start(9080, forceIPv4: true)
-*/
 
 let server = HTTP() { request in 
-  HTTP.Response(body: Gnuplot(xys: convergenceCurve, style: .linePoints).svg!)! 
+  let curves = convergenceCurves.map { Array($0.suffix(10)) }
+  let svg = Gnuplot(xys: curves, style: .linePoints).svg!
+  return .init(html: .init(body: svg))
 }
 
 server.start()
@@ -106,7 +91,7 @@ func MGOADE(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fi
         targetPosition[g] = grassHopperPositions[i]
       }
     }
-    convergenceCurve[g].append([Double(0), targetFitness[g]])
+    convergenceCurves[g].append([Double(0), targetFitness[g]])
   }
 
   print("\u{1B}[H\u{1B}[2J\(ASCIIColor.blue.rawValue)First population:\n\(targetFitness)")
@@ -226,7 +211,7 @@ func MGOADE(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fi
           targetPosition[g] = grassHopperPositions[i]
         }
       }
-      convergenceCurve[g].append([Double(l), targetFitness[g]])
+      convergenceCurves[g].append([Double(l), targetFitness[g]])
     }
 
     print("\u{1B}[H\u{1B}[2J\(ASCIIColor.blue.rawValue)Iterations: \(l)\n\(targetFitness)")
@@ -283,7 +268,7 @@ struct Command: ParsableCommand {
       bc.remove(legends: 0)
       ws2.insert(chart: bc, (1, 5)).activate()
       wb.close()
-      try! Gnuplot(xys: convergenceCurve, style: .lines(smooth: false))(.pngLarge(path: "SunOl_\(id).png"))
+      try! Gnuplot(xys: convergenceCurves, style: .lines(smooth: false))(.pngLarge(path: "SunOl_\(id).png"))
     }
 
     let parameter: [Parameter]
