@@ -5,10 +5,10 @@ import xlsxwriter
 
 signal(SIGINT, SIG_IGN)
 let source = DispatchSource.makeSignalSource(signal: SIGINT, queue: .global())
-let semaphore = DispatchSemaphore(value: 0)
-#if !os(Windows)
+
 var convergenceCurve = [[[Double]]](repeating: [[Double]](), count: 3)
 
+/*
 import Swifter
 let server = HttpServer()
 let enc = JSONEncoder()
@@ -24,18 +24,24 @@ server["/"] = scopes {
 }
 
 try server.start(9080, forceIPv4: true)
+*/
 
+let server = HTTP() { request in 
+  HTTP.Response(body: Gnuplot(xys: convergenceCurve, style: .linePoints).svg!)! 
+}
+
+server.start()
+#if !os(Windows)
 source.setEventHandler {
   server.stop()
-  semaphore.signal()
   source.cancel()
 }
 #else
 import WinSDK
 _ = SetConsoleOutputCP(UINT(CP_UTF8))
 SetConsoleCtrlHandler(
-  { _ in source.cancel()
-    semaphore.wait()
+  { _ in server.stop()
+    source.cancel()
     return WindowsBool(true)
   },
   true
@@ -46,11 +52,7 @@ source.resume()
 let now = Date()
 Command.main()
 print("Elapsed seconds:", -now.timeIntervalSinceNow)
-#if os(Windows)
-semaphore.signal()
-#else
-semaphore.wait()
-#endif
+server.stop()
 
 var Q_Sol_MW_thLoop = [Double]()
 var Reference_PV_plant_power_at_inverter_inlet_DC = [Double]()
@@ -104,9 +106,7 @@ func MGOADE(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fi
         targetPosition[g] = grassHopperPositions[i]
       }
     }
-    #if !os(Windows)
     convergenceCurve[g].append([Double(0), targetFitness[g]])
-    #endif
   }
 
   print("\u{1B}[H\u{1B}[2J\(ASCIIColor.blue.rawValue)First population:\n\(targetFitness)")
@@ -186,7 +186,7 @@ func MGOADE(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fi
           for j in grassHopperPositions[i].indices {
             if Double.random(in: 0...1) < cr {
               grassHopperTrialPositions[i][j] =
-                targetPosition[g][j] + f * (Double.random(in: 0...1) + 0.0001) * (grassHopperPositions[r1][j] - grassHopperPositions[r2][j])
+                targetPosition[g][j] + f * (.random(in: 0...1) + 0.0001) * (grassHopperPositions[r1][j] - grassHopperPositions[r2][j])
               grassHopperTrialPositions[i][j].clamp(to: bounds[j])
             }
           }
@@ -198,7 +198,7 @@ func MGOADE(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fi
         o.remove(at: g)
         for i in groups[g].indices {
           for p in grassHopperPositions[i].indices {
-            grassHopperTrialPositions[i][p] += Double.random(in: 0...1) * (((targetPosition[o[0]][p] + targetPosition[o[1]][p]) / 2) - grassHopperPositions[i][p])
+            grassHopperTrialPositions[i][p] += .random(in: 0...1) * (((targetPosition[o[0]][p] + targetPosition[o[1]][p]) / 2) - grassHopperPositions[i][p])
             grassHopperTrialPositions[i][p].clamp(to: bounds[p])
           }
         }
@@ -226,13 +226,12 @@ func MGOADE(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fi
           targetPosition[g] = grassHopperPositions[i]
         }
       }
-      #if !os(Windows)
       convergenceCurve[g].append([Double(l), targetFitness[g]])
-      #endif
     }
 
     print("\u{1B}[H\u{1B}[2J\(ASCIIColor.blue.rawValue)Iterations: \(l)\n\(targetFitness)")
     print(targetPosition.map(labeled(values:)).joined(separator: "\n"))
+    if (targetFitness.reduce(0, +) / 3) - targetFitness.min()! < 0.001 { break }
   }
   targetResults.removeLast((maxIter - l) * n)
   return targetResults
@@ -284,7 +283,9 @@ struct Command: ParsableCommand {
       bc.remove(legends: 0)
       ws2.insert(chart: bc, (1, 5)).activate()
       wb.close()
+      try! Gnuplot(xys: convergenceCurve, style: .lines(smooth: false))(.pngLarge(path: "SunOl_\(id).png"))
     }
+
     let parameter: [Parameter]
     if let path = json, let data = try? Data(contentsOf: .init(fileURLWithPath: path)), 
       let parameters = try? JSONDecoder().decode([Parameter].self, from: data) {
