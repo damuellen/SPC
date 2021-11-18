@@ -29,9 +29,9 @@ var package = Package(
     .package(url: "https://github.com/damuellen/SQLite.swift.git", .branch("master")),
     .package(url: "https://github.com/damuellen/xlsxwriter.swift.git", .branch("main")),
     .package(url: "https://github.com/damuellen/Utilities.git", .branch("main")),
-    .package(
-      name: "Swifter", url: "https://github.com/httpswift/swifter.git",
-      .upToNextMajor(from: "1.5.0"))
+ // .package(
+ //   name: "Swifter", url: "https://github.com/httpswift/swifter.git",
+ //   .upToNextMajor(from: "1.5.0"))
  // .package(url: "https://github.com/damuellen/Numerical.git", .branch("master")),
  // .package(name: "Benchmark", url: "https://github.com/google/swift-benchmark", from: "0.1.0"),
  // .package(url: "https://github.com/pvieito/PythonKit.git", .branch("master")),
@@ -118,7 +118,6 @@ var package = Package(
          "Utilities",
         .product(name: "ArgumentParser", package: "swift-argument-parser"),
         .product(name: "xlsxwriter", package: "xlsxwriter.swift"),
-        .byName(name: "Swifter", condition: posix),
       ],
       swiftSettings: swift,
       linkerSettings: [linker]
