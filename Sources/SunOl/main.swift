@@ -5,18 +5,21 @@ import xlsxwriter
 
 signal(SIGINT, SIG_IGN)
 let source = DispatchSource.makeSignalSource(signal: SIGINT, queue: .global())
+let semaphore = DispatchSemaphore(value: 0)
 var stopwatch = 0
 var convergenceCurves = [[[Double]]](repeating: [[Double]](), count: 3)
 
 let server = HTTP { request -> HTTP.Response in
-  let curves = convergenceCurves.map { Array($0.suffix(10)) }
+  var uri = request.uri
+  uri.remove(at: uri.startIndex)
+  let curves = convergenceCurves.map { Array($0.suffix(Int(uri) ?? 10)) }
   if curves[0].count > 1 {
     let plot = Gnuplot(xys: curves, titles: ["Best1", "Best2", "Best3"])
     plot.userSettings = ["title 'Convergence curves'", "xlabel 'Iteration'", "ylabel 'LCoM'"]
     let svg = plot.svg!
-    return .init(html: .init(body: svg, refresh: stopwatch))
+    return .init(html: .init(body: svg, refresh: min(stopwatch, 30)))
   }
-  return .init(html: .init(refresh: 5))
+  return .init(html: .init(refresh: 10))
 }
 
 server.start()
@@ -31,6 +34,7 @@ _ = SetConsoleOutputCP(UINT(CP_UTF8))
 SetConsoleCtrlHandler(
   { _ in server.stop()
     source.cancel()
+    semaphore.wait()
     return WindowsBool(true)
   },
   true
@@ -39,7 +43,8 @@ SetConsoleCtrlHandler(
 
 source.resume()
 let now = Date()
-Command.main()
+DispatchQueue.global(qos: .background).sync { Command.main() }
+semaphore.signal()
 print("Elapsed seconds:", -now.timeIntervalSinceNow)
 server.stop()
 
