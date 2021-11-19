@@ -156,8 +156,8 @@ func MGOADE(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fi
       }
     }
     if l == maxIter { stopwatch = 0 }
-    if source.isCancelled { break }
     DispatchQueue.concurrentPerform(iterations: grassHopperPositions.count) { i in
+      if source.isCancelled { return }
       for j in grassHopperPositions[i].indices {
         grassHopperPositions[i][j].clamp(to: bounds[j])
         targetResults[pos + i][j] = grassHopperPositions[i][j]
@@ -166,6 +166,7 @@ func MGOADE(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fi
       targetResults[pos + i].replaceSubrange(bounds.count..., with: result)
       grassHopperFitness[i] = result[5]
     }
+    if source.isCancelled { break }
     if l == 1 { stopwatch = Int(-now.timeIntervalSinceNow) }
     var refresh = group
     // Multi-group strategy
@@ -200,9 +201,9 @@ func MGOADE(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fi
       }
     } else { refresh = false }
 
-    if source.isCancelled { break }
     if refresh {
       DispatchQueue.concurrentPerform(iterations: grassHopperTrialPositions.count) { i in
+        if source.isCancelled { return }
         let result = fitness(grassHopperTrialPositions[i])
         if result[5] < grassHopperFitness[i] {
           grassHopperFitness[i] = result[5]
@@ -212,6 +213,7 @@ func MGOADE(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fi
         }
       }
     }
+    if source.isCancelled { break }
     pos += grassHopperPositions.count
     for g in groups.indices {
       // Update the target
