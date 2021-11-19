@@ -150,6 +150,7 @@ func MGOADE(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fi
         grassHopperPositions[i] = X_new
       }
     }
+    if l == maxIter { stopwatch = 0 }
     if source.isCancelled { break }
     DispatchQueue.concurrentPerform(iterations: grassHopperPositions.count) { i in
       for j in grassHopperPositions[i].indices {
