@@ -5,14 +5,18 @@ import xlsxwriter
 
 signal(SIGINT, SIG_IGN)
 let source = DispatchSource.makeSignalSource(signal: SIGINT, queue: .global())
-
+var stopwatch = 0
 var convergenceCurves = [[[Double]]](repeating: [[Double]](), count: 3)
 
-
-let server = HTTP() { request in 
+let server = HTTP { request -> HTTP.Response in
   let curves = convergenceCurves.map { Array($0.suffix(10)) }
-  let svg = Gnuplot(xys: curves, style: .linePoints).svg!
-  return .init(html: .init(body: svg))
+  if curves[0].count > 1 {
+    let plot = Gnuplot(xys: curves, titles: ["Best1", "Best2", "Best3"])
+    plot.userSettings = ["title 'Convergence curves'", "xlabel 'Iteration'", "ylabel 'LCoM'"]
+    let svg = plot.svg!
+    return .init(html: .init(body: svg, refresh: stopwatch))
+  }
+  return .init(html: .init(refresh: 5))
 }
 
 server.start()
@@ -156,7 +160,7 @@ func MGOADE(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fi
       targetResults[pos + i].replaceSubrange(bounds.count..., with: result)
       grassHopperFitness[i] = result[5]
     }
-
+    if l == 1 { stopwatch = Int(-now.timeIntervalSinceNow) }
     var refresh = group
     // Multi-group strategy
     if group, l.isMultiple(of: 2) {
