@@ -101,130 +101,26 @@ extension Double {
 
 struct Results {
   init() {
-    var rows = [[String: Double]]()
     #if DEBUGA
     let url = URL(fileURLWithPath: "/workspaces/SPC/output.txt")
 
     guard let dataFile = CSV(url: url) else { fatalError() }
-
-    for data in dataFile.dataRows {
-      var dict: [String: Double] = [:]
-      var i = 0
-      dict["G"] = Double(data[i]);i += 1 
-      dict["H"] = Double(data[i]);i += 1 
-      dict["I"] = Double(data[i]);i += 1 
-      dict["J"] = Double(data[i]);i += 1 
-      dict["K"] = Double(data[i]);i += 1 
-      dict["L"] = Double(data[i]);i += 1 
-      dict["M"] = Double(data[i]);i += 1 
-      dict["N"] = Double(data[i]);i += 1 
-      dict["O"] = Double(data[i]);i += 1 
-      dict["P"] = Double(data[i]);i += 1 
-      dict["Q"] = Double(data[i]);i += 1 
-      dict["R"] = Double(data[i]);i += 1 
-      dict["S"] = Double(data[i]);i += 1 
-      dict["T"] = Double(data[i]);i += 1 
-      dict["U"] = Double(data[i]);i += 1 
-      dict["V"] = Double(data[i]);i += 1 
-      dict["W"] = Double(data[i]);i += 1 
-      dict["X"] = Double(data[i]);i += 1 
-      dict["Y"] = Double(data[i]);i += 1 
-      dict["Z"] = Double(data[i]);i += 1 
-      dict["AA"] = Double(data[i]);i += 1 
-      dict["AB"] = Double(data[i]);i += 1 
-      dict["AC"] = Double(data[i]);i += 1 
-      dict["AD"] = Double(data[i]);i += 1 
-      dict["AE"] = Double(data[i]);i += 1 
-      dict["AF"] = Double(data[i]);i += 1 
-      dict["AG"] = Double(data[i]);i += 1 
-      dict["AH"] = Double(data[i]);i += 1 
-      dict["AI"] = Double(data[i]);i += 1 
-      dict["AJ"] = Double(data[i]);i += 1 
-      dict["AK"] = Double(data[i]);i += 1 
-      dict["AL"] = Double(data[i]);i += 1 
-      dict["AM"] = Double(data[i]);i += 1 
-      dict["AN"] = Double(data[i]);i += 1 
-      dict["AO"] = Double(data[i]);i += 1 
-      dict["AP"] = Double(data[i]);i += 1 
-      dict["AQ"] = Double(data[i]);i += 1 
-      dict["AR"] = Double(data[i]);i += 1 
-      dict["AS"] = Double(data[i]);i += 1 
-      dict["AT"] = Double(data[i]);i += 1 
-      dict["AU"] = Double(data[i]);i += 1 
-      dict["AV"] = Double(data[i]);i += 1 
-      dict["AW"] = Double(data[i]);i += 1 
-      dict["AX"] = Double(data[i]);i += 1 
-      dict["AY"] = Double(data[i]);i += 1 
-      dict["AZ"] = Double(data[i]);i += 1 
-      dict["BA"] = Double(data[i]);i += 1 
-      dict["BB"] = Double(data[i]);i += 1 
-      dict["BC"] = Double(data[i]);i += 1 
-      dict["BD"] = Double(data[i]);i += 1 
-      dict["BE"] = Double(data[i]);i += 1 
-      dict["BF"] = Double(data[i]);i += 1 
-      dict["BG"] = Double(data[i]);i += 1 
-      dict["BH"] = Double(data[i]);i += 1 
-      dict["BI"] = Double(data[i]);i += 1 
-      dict["BJ"] = Double(data[i]);i += 1 
-      dict["BK"] = Double(data[i]);i += 1 
-      dict["BL"] = Double(data[i]);i += 1 
-      dict["BM"] = Double(data[i]);i += 1 
-      dict["BN"] = Double(data[i]);i += 1 
-      dict["BO"] = Double(data[i]);i += 1 
-      dict["BP"] = Double(data[i]);i += 1 
-      dict["BQ"] = Double(data[i]);i += 1 
-      dict["BR"] = Double(data[i]);i += 1 
-      dict["BS"] = Double(data[i]);i += 1 
-      dict["BT"] = Double(data[i]);i += 1 
-      dict["BU"] = Double(data[i]);i += 1 
-      dict["BV"] = Double(data[i]);i += 1 
-      dict["BW"] = Double(data[i]);i += 1 
-      dict["BX"] = Double(data[i]);i += 1 
-      dict["BY"] = Double(data[i]);i += 1 
-      dict["BZ"] = Double(data[i]);i += 1 
-      dict["CA"] = Double(data[i]);i += 1 
-      dict["CB"] = Double(data[i]);i += 1 
-      dict["CC"] = Double(data[i]);i += 1 
-      dict["CD"] = Double(data[i]);i += 1 
-      dict["CE"] = Double(data[i]);i += 1 
-      dict["CF"] = Double(data[i]);i += 1 
-      dict["CG"] = Double(data[i]);i += 1 
-      dict["CH"] = Double(data[i]);i += 1 
-      dict["CI"] = Double(data[i]);i += 1 
-      dict["CJ"] = Double(data[i]);i += 1 
-      dict["CK"] = Double(data[i]);i += 1 
-      dict["CL"] = Double(data[i]);i += 1 
-      dict["CM"] = Double(data[i]);i += 1 
-      dict["CN"] = Double(data[i]);i += 1 
-      dict["CO"] = Double(data[i]);i += 1 
-      dict["CP"] = Double(data[i]);i += 1 
-      dict["CQ"] = Double(data[i]);i += 1 
-      dict["CR"] = Double(data[i]);i += 1 
-      dict["CS"] = Double(data[i]);i += 1 
-      dict["CT"] = Double(data[i]);i += 1 
-      dict["CU"] = Double(data[i]);i += 1 
-      dict["CV"] = Double(data[i]);i += 1 
-      dict["CW"] = Double(data[i]);i += 1 
-      dict["CX"] = Double(data[i]);i += 1 
-      dict["CY"] = Double(data[i]);i += 1 
-      dict["CZ"] = Double(data[i]);i += 1 
-      dict["DA"] = Double(data[i]);i += 1 
-      dict["DB"] = Double(data[i]);i += 1 
-      dict["DC"] = Double(data[i]);i += 1 
-      dict["DD"] = Double(data[i]);i += 1 
-      dict["DE"] = Double(data[i]);i += 1 
-      dict["DF"] = Double(data[i]);i += 1 
-      dict["DG"] = Double(data[i]);i += 1 
-      dict["DH"] = Double(data[i]);i += 1 
-      dict["DI"] = Double(data[i]);i += 1 
-      dict["DJ"] = Double(data[i]);i += 1 
-      dict["DK"] = Double(data[i]);i += 1 
-      dict["DL"] = Double(data[i]);i += 1 
-      dict["DM"] = Double(data[i])
-      rows.append(dict)
+   
+    let A = UnicodeScalar("A").value
+    let count = dataFile.dataRows[0].count
+    precondition(count < 676)
+    // G == 7
+    let columns = (7..<7+count).map { i -> String in
+      let i = i.quotientAndRemainder(dividingBy: 26)
+      let q = i.quotient > 0 ? String(UnicodeScalar(A + UInt32(i.quotient-1))!) : ""
+      return q + String(UnicodeScalar(A + UInt32(i.remainder))!)
     }
+    self.rows = dataFile.dataRows.map { data in 
+      .init(uniqueKeysWithValues: zip(columns, data)) 
+    }
+    #else
+    self.rows = [[String: Double]]()
     #endif
-    self.rows = rows
   }
 
   let rows: [[String: Double]]
