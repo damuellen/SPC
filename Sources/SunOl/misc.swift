@@ -29,18 +29,6 @@ func pareto_frontier(xys: [[Double]], x: Int, y: Int) -> [[Double]] {
   return p_front.map { [$0[x], $0[y]] }
 }
 
-extension String {
-  public func leftpad(length: Int, character: Character = " ") -> String {
-    var outString: String = self
-    let extraLength = length - outString.count
-    var i = 0
-    while i < extraLength {
-      outString.insert(character, at: outString.startIndex)
-      i += 1
-    }
-    return outString
-  }
-}
 extension Sequence where Element == Double {
   func write(_ count: Int? = nil) { if let count = count { zip(0..., self.prefix(count)).forEach { Swift.print($0, $1.asString()) } } else { zip(0..., self).forEach { Swift.print($0, $1.asString()) } } }
 
@@ -197,8 +185,12 @@ func sankey(values: [Double]) -> Sankey {
 }
 
 func labeled(values: [Double]) -> String {
-  zip(CostModel.labels, values).map { l, v in
+  zip( CostModel.labels, values).map { l, v in
+  #if os(Windows)
+    l + String(format: ": %.1f", v)
+  #else 
     "\(ASCIIColor.red.rawValue)\(l) \(ASCIIColor.green.rawValue)\(String(format: "%.1f", v))"
+  #endif
   }.joined(separator: " ")
 }
 

@@ -11,29 +11,30 @@ var convergenceCurves = [[[Double]]](repeating: [[Double]](), count: 3)
 
 let server = HTTP { request -> HTTP.Response in
   var uri = request.uri
-  uri.remove(at: uri.startIndex)
+  if uri == "/cancel" {
+    source.cancel()
+    stopwatch = 0
+  } else {
+    uri.remove(at: uri.startIndex)
+  }
   let curves = convergenceCurves.map { Array($0.suffix(Int(uri) ?? 10)) }
   if curves[0].count > 1 {
     let plot = Gnuplot(xys: curves, titles: ["Best1", "Best2", "Best3"])
     plot.userSettings = ["title 'Convergence curves'", "xlabel 'Iteration'", "ylabel 'LCoM'"]
-    let svg = plot.svg!
-    return .init(html: .init(body: svg, refresh: min(stopwatch, 30)))
+    return .init(html: .init(body: plot.svg!, refresh: min(stopwatch, 30)))
   }
   return .init(html: .init(refresh: 10))
 }
 
+source.resume()
 server.start()
 #if !os(Windows)
-source.setEventHandler {
-  server.stop()
-  source.cancel()
-}
+source.setEventHandler { source.cancel() }
 #else
 import WinSDK
 _ = SetConsoleOutputCP(UINT(CP_UTF8))
 SetConsoleCtrlHandler(
-  { _ in server.stop()
-    source.cancel()
+  { _ in source.cancel()
     semaphore.wait()
     return WindowsBool(true)
   },
@@ -41,12 +42,11 @@ SetConsoleCtrlHandler(
 )
 #endif
 
-source.resume()
 let now = Date()
 DispatchQueue.global(qos: .background).sync { Command.main() }
-semaphore.signal()
 print("Elapsed seconds:", -now.timeIntervalSinceNow)
 server.stop()
+semaphore.signal()
 
 var Q_Sol_MW_thLoop = [Double]()
 var Reference_PV_plant_power_at_inverter_inlet_DC = [Double]()
@@ -309,6 +309,8 @@ struct Command: ParsableCommand {
       let a = MGOADE(group: !noGroups, n: n ?? 150, maxIter: iterations ?? 100, bounds: parameter.ranges, fitness: fitness)
       a.forEach { row in r += 1; ws.write(row, row: r) }
 
+      // let r = a.transposed()
+      // try? Gnuplot(xs: r[12], ys: r[17], r[13], style: .points)(.pngLarge(path: "test.png"))
       let (x,y) = (12, 17)
       let freq = 10e7
       var d = [Double:[Double]]()
