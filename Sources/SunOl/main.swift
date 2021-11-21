@@ -69,14 +69,14 @@ func fitness(values: [Double]) -> [Double] {
 }
 
 func MGOADE(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fitness: ([Double]) -> [Double]) -> [[Double]] {
-  var targetResults = [[Double]](repeating: [Double](repeating: 0, count: bounds.count + 13), count: n * maxIter)
-  var targetPosition = [[Double]](repeating: [Double](repeating: 0, count: bounds.count), count: group ? 3 : 1)
-  var targetFitness = [Double](repeating: .infinity, count: group ? 3 : 1)
+  var targetResults = Matrix(n * maxIter, bounds.count + 13)
+  var targetPosition = Matrix(group ? 3 : 1, bounds.count)
+  var targetFitness = Vector(group ? 3 : 1, .infinity)
   let EPSILON = 1E-14
 
   // Initialize the population of grasshoppers
   var grassHopperPositions = bounds.randomValues(count: n)
-  var grassHopperFitness = [Double](repeating: 0, count: n)
+  var grassHopperFitness = Vector(n)
   var grassHopperTrialPositions = grassHopperPositions
   let groups = grassHopperFitness.indices.split(in: group ? 3 : 1)
 
@@ -120,24 +120,24 @@ func MGOADE(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fi
 
   var pos = 0
   var l = 0
+
   while l < maxIter && !source.isCancelled {
     l += 1
     let c = cMax - (Double(l) * ((cMax - cMin) / Double(maxIter)))  // Eq. (2.8) in the paper
-
+    var S_i = Vector(bounds.count)
+    var r_ij_vec = Vector(bounds.count)
+    var s_ij = Vector(bounds.count)
+    var X_new = Vector(bounds.count)
     for g in groups.indices {
       for i in groups[g].indices {
-        var S_i = [Double](repeating: 0, count: bounds.count)
         for j in 0..<n {
           if i != j {
             // Calculate the distance between two grasshoppers
             let distance = euclideanDistance(a: grassHopperPositions[i], b: grassHopperPositions[j])
-            var r_ij_vec = [Double](repeating: 0, count: bounds.count)
             for p in r_ij_vec.indices {
               r_ij_vec[p] = (grassHopperPositions[j][p] - grassHopperPositions[i][p]) / (distance + EPSILON)  // xj-xi/dij in Eq. (2.7)
             }
             let xj_xi = 2 + distance.remainder(dividingBy: 2)  // |xjd - xid| in Eq. (2.7)
-
-            var s_ij = [Double](repeating: 0, count: bounds.count)
             for p in r_ij_vec.indices {
               // The first part inside the big bracket in Eq. (2.7)
               s_ij[p] = ((bounds[p].upperBound - bounds[p].lowerBound) * c / 2) * S_func(r: xj_xi) * r_ij_vec[p]
@@ -147,7 +147,6 @@ func MGOADE(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fi
         }
 
         let S_i_total = S_i
-        var X_new = [Double](repeating: 0, count: bounds.count)
         for p in S_i.indices {
           X_new[p] = c * S_i_total[p] + targetPosition[g][p]  // Eq. (2.7) in the paper
         }
@@ -309,8 +308,6 @@ struct Command: ParsableCommand {
       let a = MGOADE(group: !noGroups, n: n ?? 150, maxIter: iterations ?? 100, bounds: parameter.ranges, fitness: fitness)
       a.forEach { row in r += 1; ws.write(row, row: r) }
 
-      // let r = a.transposed()
-      // try? Gnuplot(xs: r[12], ys: r[17], r[13], style: .points)(.pngLarge(path: "test.png"))
       let (x,y) = (12, 17)
       let freq = 10e7
       var d = [Double:[Double]]()

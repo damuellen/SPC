@@ -208,3 +208,18 @@ enum ASCIIColor: String {
 
 protocol Labeled { var labels: [String] { get } }
 extension Labeled { var labels: [String] { Mirror(reflecting: self).children.compactMap(\.label) } }
+
+typealias Matrix<T> = [[T]]
+typealias Vector<T> = [T]
+
+extension Matrix where Element == Vector<Double> {
+  init(_ x: Int, _ y: Int, _ z: Double = .zero) {
+    self = Matrix(repeating: Vector(y), count: x)
+  }
+}
+
+extension Vector where Element == Double {
+  init(_ x: Int,  _ z: Double = .zero) {
+    self = Vector(repeating: z, count: x)
+  }
+}
