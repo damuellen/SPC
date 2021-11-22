@@ -75,7 +75,7 @@
             "args": [
                 "build",
                 "--product",
-                "SunOl",
+                "PinchPointTool",
                 "-Xswiftc",
                 "-suppress-warnings"
             ]

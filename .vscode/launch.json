@@ -103,7 +103,7 @@
             "name": "SunOl",
             "program": "${workspaceFolder}/.build/debug/SunOl",
             "args": [
-                "/workspaces/SPC/input.txt"
+                "-f", "/workspaces/SPC/input.txt"
             ],
             "cwd": "${workspaceFolder}",
             "preLaunchTask": "swift-build-debug-sol",
