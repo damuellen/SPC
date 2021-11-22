@@ -20,7 +20,7 @@ let server = HTTP { request -> HTTP.Response in
   let curves = convergenceCurves.map { Array($0.suffix(Int(uri) ?? 10)) }
   if curves[0].count > 1 {
     let plot = Gnuplot(xys: curves, titles: ["Best1", "Best2", "Best3"])
-    plot.userSettings = ["title 'Convergence curves'", "xlabel 'Iteration'", "ylabel 'LCoM'"]
+    plot.set(title: "Convergence curves").set(xlabel: "Iteration").set(ylabel: "LCoM")
     return .init(html: .init(body: plot.svg!, refresh: min(stopwatch, 30)))
   }
   return .init(html: .init(refresh: 10))
@@ -83,9 +83,12 @@ func MGOADE(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fi
   let cMax = 1.0
   let cMin = 0.00004
   let cr = 0.4
-  let f = 0.9
+  let f = 0.9    
+  #if os(Windows)
+  print("Calculate the fitness of initial population.")
+  #else
   print("\u{1B}[H\n\u{1B}[2J\(ASCIIColor.blue.rawValue)Calculate the fitness of initial population.")
-
+  #endif
   // Calculate the fitness of initial grasshoppers
   DispatchQueue.concurrentPerform(iterations: grassHopperPositions.count) { i in
     let result = fitness(grassHopperPositions[i])
@@ -103,7 +106,11 @@ func MGOADE(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fi
     convergenceCurves[g].append([Double(0), targetFitness[g]])
   }
 
+  #if os(Windows)
+  print("First population:\n\(targetFitness)")
+  #else
   print("\u{1B}[H\u{1B}[2J\(ASCIIColor.blue.rawValue)First population:\n\(targetFitness)")
+  #endif
   print(targetPosition.map(labeled(values:)).joined(separator: "\n"))
 
   func euclideanDistance(a: [Double], b: [Double]) -> Double {
@@ -224,8 +231,11 @@ func MGOADE(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fi
       }
       convergenceCurves[g].append([Double(l), targetFitness[g]])
     }
-
+    #if os(Windows)
+    print("Iterations: \(l)\n\(targetFitness)")
+    #else
     print("\u{1B}[H\u{1B}[2J\(ASCIIColor.blue.rawValue)Iterations: \(l)\n\(targetFitness)")
+    #endif
     print(targetPosition.map(labeled(values:)).joined(separator: "\n"))
     if (targetFitness.reduce(0, +) / 3) - targetFitness.min()! < 0.001 { break }
   }
