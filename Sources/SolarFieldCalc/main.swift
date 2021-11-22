@@ -47,7 +47,7 @@ struct SolarFieldCalculator: ParsableCommand {
     wb.addTables(solarField: solarField)
     wb.close()
 
-    openFile(atPath: "Solarfield.xlsx")
+    start("Solarfield.xlsx")
     print(TextTable.overview(solarField: solarField, style: Style.fancy))
   }
 }

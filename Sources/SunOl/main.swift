@@ -20,7 +20,7 @@ let server = HTTP { request -> HTTP.Response in
   let curves = convergenceCurves.map { Array($0.suffix(Int(uri) ?? 10)) }
   if curves[0].count > 1 {
     let plot = Gnuplot(xys: curves, titles: ["Best1", "Best2", "Best3"])
-    plot.set(title: "Convergence curves").set(xlabel: "Iteration").set(ylabel: "LCoM")
+    .set(title: "Convergence curves").set(xlabel: "Iteration").set(ylabel: "LCoM")
     return .init(html: .init(body: plot.svg!, refresh: min(stopwatch, 30)))
   }
   return .init(html: .init(refresh: 10))
@@ -28,6 +28,7 @@ let server = HTTP { request -> HTTP.Response in
 
 source.resume()
 server.start()
+start("http://127.0.0.1:9080")
 #if !os(Windows)
 source.setEventHandler { source.cancel() }
 #else
