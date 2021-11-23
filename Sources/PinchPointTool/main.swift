@@ -110,7 +110,26 @@ struct PinchPointTool: ParsableCommand {
     }
 
     guard pdf || html else { return }
-    let plot = Gnuplot(temperatures: pinchPoint.temperatures())
+    let plot = Gnuplot(data: pinchPoint.temperatures())
+    plot.settings.merge(
+      ["term": "svg size 1280,800", "encoding": "utf8",
+      "xtics": "10", "ytics": "10",
+      "xlabel": "'Q̇ [MW]' textcolor rgb 'black'",
+      "ylabel": "'Temperatures [°C]' textcolor rgb 'black'"]
+    ) { (_, new) in new }
+    plot.userCommand = """
+      plot $data i 0 u 1:2 w lp ls 11 title columnheader(1), \
+      $data i 1 u 1:2 w lp ls 12 title columnheader(1), \
+      $data i 2 u 1:2 w lp ls 13 title columnheader(1), \
+      $data i 3 u 1:2 w lp ls 15 title columnheader(1), \
+      $data i 4 u 1:2 w lp ls 14 title columnheader(1), \
+      $data i 5 u 1:2 w lp ls 14 title columnheader(1), \
+      $data i 0 u 1:2:(sprintf("%d°C", $2)) with labels tc ls 18 offset char 3,0 notitle, \
+      $data i 2 u 1:2:(sprintf("%d°C", $2)) with labels tc ls 18 offset char 3,0 notitle, \
+      $data i 3 u 1:2:(sprintf("%d°C", $2)) with labels tc ls 18 offset char 3,0 notitle, \
+      $data i 4 u 1:2:(sprintf("%d°C", $2)) with labels tc ls 18 offset char 3,0 notitle, \
+      $data i 5 u 1:2:(sprintf("%d°C", $2)) with labels tc ls 18 offset char 3,0 notitle
+      """
     let svg = plot.svg!
 
     let dia = HeatBalanceDiagram(values: pinchPoint)
@@ -119,6 +138,7 @@ struct PinchPointTool: ParsableCommand {
       let wb = Workbook(name: "pinchpoint.xlsx")
       defer { wb.close() }
       let _ = wb.addWorksheet()
+      start("pinchpoint.xlsx")
     }
 
     if pdf {
@@ -138,7 +158,7 @@ struct PinchPointTool: ParsableCommand {
         let path = URL.temporaryFile().appendingPathExtension("html").path
       #endif
       try html.render().write(toFile: path, atomically: false, encoding: .utf8)
-      print(path)
+      start(path)
     }
   }
 }

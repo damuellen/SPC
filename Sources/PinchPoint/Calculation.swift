@@ -306,72 +306,37 @@ public struct Calculation: Codable {
   public func temperatures() -> String {
     """
     "EC"
-    \(0), \(economizer.temperature.ws.inlet.celsius)
-    \(economizer.power), \(economizer.temperature.ws.outlet.celsius)
+    \(0) \(economizer.temperature.ws.inlet.celsius)
+    \(economizer.power) \(economizer.temperature.ws.outlet.celsius)
 
 
     "SG"
-    \(economizer.power), \(steamGenerator.temperature.ws.inlet.celsius)
-    \(economizer.power), \(steamGenerator.temperature.ws.outlet.celsius) //SG Water Temperature Start Evaporation (Pinch-Point) [°C]
-    \(economizer.power), \(steamGenerator.temperature.ws.outlet.celsius) //SG Steam Temperature after Evaporation [°C]
-    \(steamGenerator.power), \(steamGenerator.temperature.ws.outlet.celsius)
+    \(economizer.power) \(steamGenerator.temperature.ws.inlet.celsius)
+    \(economizer.power) \(steamGenerator.temperature.ws.outlet.celsius) //SG Water Temperature Start Evaporation (Pinch-Point) [°C]
+    \(economizer.power) \(steamGenerator.temperature.ws.outlet.celsius) //SG Steam Temperature after Evaporation [°C]
+    \(steamGenerator.power) \(steamGenerator.temperature.ws.outlet.celsius)
 
 
     "SH"
-    \(steamGenerator.power), \(superheater.temperature.ws.inlet.celsius)
-    \(powerBlockPower - reheater.power), \(superheater.temperature.ws.outlet.celsius)
+    \(steamGenerator.power) \(superheater.temperature.ws.inlet.celsius)
+    \(powerBlockPower - reheater.power) \(superheater.temperature.ws.outlet.celsius)
 
 
     "RH"
-    \(powerBlockPower - reheater.power), \(reheater.temperature.ws.inlet.celsius)
-    \(powerBlockPower), \(reheater.temperature.ws.outlet.celsius)
+    \(powerBlockPower - reheater.power) \(reheater.temperature.ws.inlet.celsius)
+    \(powerBlockPower) \(reheater.temperature.ws.outlet.celsius)
 
 
     "HTF"
-    \(0), \(economizer.temperature.htf.outlet.celsius)
-    \(economizer.power), \(steamGenerator.temperature.htf.outlet.celsius)
-    \(powerBlockPower - reheater.power), \(upperHTFTemperature.celsius)
+    \(0) \(economizer.temperature.htf.outlet.celsius)
+    \(economizer.power) \(steamGenerator.temperature.htf.outlet.celsius)
+    \(powerBlockPower - reheater.power) \(upperHTFTemperature.celsius)
 
 
     "HTF RH"
-    \(powerBlockPower - reheater.power), \(reheater.temperature.htf.outlet.celsius)
-    \(powerBlockPower), \(reheater.temperature.htf.inlet.celsius)
+    \(powerBlockPower - reheater.power) \(reheater.temperature.htf.outlet.celsius)
+    \(powerBlockPower) \(reheater.temperature.htf.inlet.celsius)
     """
   }
 }
 
-/*
-
-EC Power Inlet
-EC Power Outlet
-EC Temperature Inlet
-EC Temperature Outlet
-
-SG Power Inlet
-SG Power at Pinch-Point
-SG Power after Evaporation
-SG Power Outlet
-SG Water Temperature Inlet
-SG Water Temperature Start Evaporation (Pinch-Point)
-SG Steam Temperature after Evaporation
-SG Steam Temperature Outlet
-
-SH Power Inlet
-SH Power after Evaporation
-SH Power Outlet
-SH Steam Temperature Inlet
-SH Steam Temperature after Evaporation
-SH Steam Temperature Outlet
-
-HTF Temperature Inlet
-HTF Temperature Pinch-Point
-HTF Temperature SG Outlet
-HTF Temperature EC Outlet
-
-RH Steam Temperature Inlet
-RH Steam Temperature Outlet
-RH Power Inlet
-RH Power Outlet
-RH HTF Temperature Inlet
-RH HTF Temperature Outlet
-*/
