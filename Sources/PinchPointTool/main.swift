@@ -117,7 +117,7 @@ struct PinchPointTool: ParsableCommand {
       "xlabel": "'Q̇ [MW]' textcolor rgb 'black'",
       "ylabel": "'Temperatures [°C]' textcolor rgb 'black'"]
     ) { (_, new) in new }
-    plot.userCommand = """
+    plot.userPlot = """
       plot $data i 0 u 1:2 w lp ls 11 title columnheader(1), \
       $data i 1 u 1:2 w lp ls 12 title columnheader(1), \
       $data i 2 u 1:2 w lp ls 13 title columnheader(1), \
