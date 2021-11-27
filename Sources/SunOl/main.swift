@@ -259,8 +259,8 @@ struct Command: ParsableCommand {
   @Option(name: .short, help: "Iterations") var iterations: Int?
 
   func run() throws {
-    guard let csv = CSV(path: "input.txt") else { return }
-
+    let path = file ?? "/Users/daniel/spc/input.txt"
+    guard let csv = CSV(path: path) else { print("No input."); return }
     Q_Sol_MW_thLoop = csv["csp"]
     Reference_PV_plant_power_at_inverter_inlet_DC = csv["pv"]
     Reference_PV_MV_power_at_transformer_outlet = csv["out"]
