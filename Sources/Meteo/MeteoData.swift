@@ -29,12 +29,12 @@ public struct MeteoData: CustomStringConvertible {
     self.windSpeed = windSpeed
   }
 
-  public init(meteo: [Float]) {
-    self.dni = meteo[0]
-    self.temperature = meteo[1]
-    self.windSpeed = meteo[2]
-    self.ghi = meteo.count > 4 ? meteo[4] : 0
-    self.dhi = meteo.count > 5 ? meteo[5] : 0
+  public init(meteo: [Double]) {
+    self.dni = Float(meteo[0])
+    self.temperature = Float(meteo[1])
+    self.windSpeed = Float(meteo[2])
+    self.ghi = meteo.count > 4 ? Float(meteo[4]) : 0
+    self.dhi = meteo.count > 5 ? Float(meteo[5]) : 0
   }
 
   public init(insolation: [Float], conditions: [Float]) {
@@ -53,12 +53,12 @@ public struct MeteoData: CustomStringConvertible {
     self.dhi = values[4]
   }
 
-  public init(tmy values: [Float], order: [Int]) {
-    self.dni = values[order[0]]
-    self.temperature = values[order[1]]
-    self.windSpeed = values[order[2]]
-    self.ghi = values[order[3]]
-    self.dhi = values[order[4]]
+  public init(tmy values: [Double], order: [Int]) {
+    self.dni = Float(values[order[0]])
+    self.temperature = Float(values[order[1]])
+    self.windSpeed = Float(values[order[2]])
+    self.ghi = Float(values[order[3]])
+    self.dhi = Float(values[order[4]])
   }
 
   public var description: String {

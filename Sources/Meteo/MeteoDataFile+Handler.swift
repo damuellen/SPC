@@ -9,6 +9,7 @@
 //
 
 import Foundation
+import Helpers
 
 /// Handles the import of files with meteorological data.
 public struct MeteoDataFileHandler {
@@ -76,10 +77,10 @@ protocol MeteoDataFile {
 private struct MET: MeteoDataFile {
   let name: String
   let metadata: [String]
-  let data: [[Float]]
+  let csv: CSV
 
   init(_ url: URL) throws {
-    let rawData = try Data(contentsOf: url)
+    let rawData = try Data(contentsOf: url, options: [.mappedIfSafe, .uncached])
     self.name = url.lastPathComponent
 
     let newLine = UInt8(ascii: "\n")
@@ -96,26 +97,16 @@ private struct MET: MeteoDataFile {
 
     let hasCR = rawData[rawData.index(before: firstNewLine)] == cr
 
-    (metadata, data) = try rawData.withUnsafeBytes { content throws in
-      let lines = content.split(separator: newLine, maxSplits: 10,
-                                omittingEmptySubsequences: false)
-      guard lines.endIndex > 10 else { throw MeteoDataFileError.empty }
-      return (
-        lines[0..<10].map { line in
-          let line = hasCR ? line.dropLast() : line
-          let buffer = UnsafeRawBufferPointer(rebasing: line)
-          return String(decoding: buffer, as: UTF8.self)
-        },
-        lines[10].split(separator: newLine).map { line in
-          let line = hasCR ? line.dropLast() : line
-          return line.split(separator: separator).dropFirst(3).map { slice in
-            let buffer = UnsafeRawBufferPointer(rebasing: slice)
-              .baseAddress!.assumingMemoryBound(to: Int8.self)
-            return strtof(buffer, nil)
-          }
-        }
-      )
+    let lines = rawData.split(separator: newLine, maxSplits: 10,
+                              omittingEmptySubsequences: false)
+    guard lines.endIndex > 10 else { throw MeteoDataFileError.empty }
+    self.metadata = lines[0..<10].map { line in
+      let line = hasCR ? line.dropLast() : line
+      return String(decoding: line, as: UTF8.self)
     }
+    guard let csv = CSV(data: lines[10])
+    else { throw MeteoDataFileError.empty }
+    self.csv = csv
   }
 
   func fetchInfo() throws -> (year: Int, location: Location) {
@@ -136,10 +127,10 @@ private struct MET: MeteoDataFile {
 
   func fetchData() throws -> [MeteoData] {
     // Check whether the dataRange matches one year of values.
-    guard data.count.isMultiple(of: 8760)
+    guard csv.dataRows.count.isMultiple(of: 8760)
     //  || dataRange.count.isMultiple(of: 8764)
     else { throw MeteoDataFileError.unexpectedRowCount }
-    return try zip(data, 11...).map { values, line in
+    return try zip(csv.dataRows, 11...).map { values, line in
       guard values.count > 2
       else { throw MeteoDataFileError.missingValueInLine(line) }
       return MeteoData(meteo: values)
@@ -168,10 +159,11 @@ extension MeteoDataFileError: CustomStringConvertible {
 
 private struct TMY: MeteoDataFile {
   let name: String
-  let content: (headers1: [Float], headers2: [String], values: [[Float]])
+  let metadata: [Double]
+  let csv: CSV
 
   init(_ url: URL) throws {
-    let rawData = try Data(contentsOf: url)
+    let rawData = try Data(contentsOf: url, options: [.mappedIfSafe, .uncached])
     self.name = url.lastPathComponent
 
     let newLine = UInt8(ascii: "\n")
@@ -185,37 +177,22 @@ private struct TMY: MeteoDataFile {
       throw MeteoDataFileError.unknownDelimeter
     }
 
-    content = try rawData.withUnsafeBytes { content throws in
-      let lines = content.split(separator: newLine, maxSplits: 2)
-      guard lines.endIndex > 2 else { throw MeteoDataFileError.empty }
-      return (
-        lines[0].split(separator: separator).dropFirst(3).map { slice in
-          let buffer = UnsafeRawBufferPointer(rebasing: slice)
-            .baseAddress!.assumingMemoryBound(to: Int8.self)
-          return strtof(buffer, nil)
-        },
-        lines[1].split(separator: separator).dropFirst(2).map { slice in
-          let buffer = UnsafeRawBufferPointer(rebasing: slice)
-          return String(decoding: buffer, as: UTF8.self)
-        },
-        lines[2].split(separator: newLine).map { line in
-          line.split(separator: separator).dropFirst(2).map { slice in
-            let buffer = UnsafeRawBufferPointer(rebasing: slice)
-              .baseAddress!.assumingMemoryBound(to: Int8.self)
-            return strtof(buffer, nil)
-          }
-        }
-      )
-    }
+    let lines = rawData.split(separator: newLine, maxSplits: 1)
+    guard lines.endIndex > 1,
+          let metadata = CSV(data: lines[0])?.dataRows[0],
+          let csv = CSV(data: lines[1])
+    else { throw MeteoDataFileError.empty }
+    self.metadata = metadata
+    self.csv = csv
   }
 
   func fetchLocation() throws -> Location {
-    let values = content.headers1
+    let values = metadata
     guard values.endIndex > 3
     else { throw MeteoDataFileError.unknownLocation }
-    let longitude = Double(values[2])
-    let latitude = Double(values[1])
-    let elevation = Double(values[3])
+    let longitude = values[2]
+    let latitude = values[1]
+    let elevation = values[3]
     let tz = fetchTimeZone()
     return Location(
       (longitude,  latitude,  elevation), timezone: tz
@@ -223,7 +200,7 @@ private struct TMY: MeteoDataFile {
   }
 
   func fetchTimeZone() -> Int {
-    let tz = content.headers1.first ?? 0
+    let tz = metadata.first ?? 0
     return Int(-tz)
   }
 
@@ -236,26 +213,26 @@ private struct TMY: MeteoDataFile {
   }
 
   func fetchData() throws -> [MeteoData] {
-    let dataRange = content.values
+    let dataRange = csv.dataRows
     // Check whether the dataRange matches one year of values.
     guard dataRange.count.isMultiple(of: 8760)
     //  || dataRange.count.isMultiple(of: 8764)
     else { throw MeteoDataFileError.unexpectedRowCount }
 
     var order = [Int](repeating: 0, count: 5)
-    for (name, pos) in zip(content.headers2, 0...) {
+    for (name, pos) in zip(csv.headerRow!, 0...) {
       switch name {
-      case "DNI (W/m^2)": order[0] = pos
-      case "Dry-bulb (C)": order[1] = pos
-      case "Wspd (m/s)": order[2] = pos
-      case "GHI (W/m^2)": order[3] = pos
-      case "DHI (W/m^2)": order[4] = pos
+      case "DNI(W/m^2)": order[0] = pos
+      case "Dry-bulb(C)": order[1] = pos
+      case "Wspd(m/s)": order[2] = pos
+      case "GHI(W/m^2)": order[3] = pos
+      case "DHI(W/m^2)": order[4] = pos
       default: break
       }
     }
 
     let last = Set(order).max()!
-    return try zip(dataRange, 3...).map { data, line in
+    return try zip(csv.dataRows, 3...).map { data, line in
       guard data.endIndex > last else {
         throw MeteoDataFileError.missingValueInLine(line)
       }
