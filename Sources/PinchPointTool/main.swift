@@ -157,7 +157,7 @@ struct PinchPointTool: ParsableCommand {
       #else
         let path = URL.temporaryFile().appendingPathExtension("html").path
       #endif
-      try html.render().write(toFile: path, atomically: false, encoding: .utf8)
+      try html.description.write(toFile: path, atomically: false, encoding: .utf8)
       start(path)
     }
   }

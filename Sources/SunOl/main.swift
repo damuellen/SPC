@@ -28,7 +28,9 @@ let server = HTTP { request -> HTTP.Response in
 
 source.resume()
 server.start()
-start("http://127.0.0.1:9080")
+DispatchQueue.global().asyncAfter(deadline: .now() + 2) {
+  start("http://127.0.0.1:9080")
+}
 #if !os(Windows)
 source.setEventHandler { source.cancel() }
 #else
@@ -257,8 +259,7 @@ struct Command: ParsableCommand {
   @Option(name: .short, help: "Iterations") var iterations: Int?
 
   func run() throws {
-    let url = URL(fileURLWithPath: file ?? "input.txt")
-    guard let csv = CSV(url: url) else { return }
+    guard let csv = CSV(path: "input.txt") else { return }
 
     Q_Sol_MW_thLoop = csv["csp"]
     Reference_PV_plant_power_at_inverter_inlet_DC = csv["pv"]

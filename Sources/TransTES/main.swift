@@ -9,9 +9,7 @@ extension Date {
 }
 
 func readTariffs() -> [Tariffs] {
-  let url = URL(fileURLWithPath: "Tariffs.txt")
-
-  guard let csv = CSV(url: url) else { return [] }
+  guard let csv = CSV(path: "Tariffs.txt") else { return [] }
 
   let cal = Calendar(identifier: .gregorian)
 

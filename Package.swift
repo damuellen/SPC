@@ -12,7 +12,7 @@ let swift: [SwiftSetting] = [
 ]
 var package = Package(
   name: "SPC",
-  platforms: [.macOS(.v10_13), .iOS(.v12)],
+  platforms: [.macOS(.v10_15), .iOS(.v14)],
   products: [
     .executable(name: "SolarPerformanceCalc", targets: ["SolarPerformanceCalc"]),
     .executable(name: "SolarFieldCalc", targets: ["SolarFieldCalc"]),
@@ -78,7 +78,7 @@ var package = Package(
     ),
     .target(
       name: "Meteo",
-      dependencies: ["DateGenerator", "SolarPosition"],
+      dependencies: ["DateGenerator", "SolarPosition", "Utilities"],
       swiftSettings: swift
     ),
     // .executableTarget(name: "Benchmarking",
