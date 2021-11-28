@@ -14,7 +14,7 @@ extension Recording {
     let layout = designParameter.layout
     let aperture = layout.solarField * 2 * collector.areaSCAnet
       * Double(solarField.numberOfSCAsInRow)
-    var d = heading("PERFORMANCE RUN")
+    var d = decorated("PERFORMANCE RUN")
       + "\nSOLAR FIELD\n"
       + "    No of Loops:" * layout.solarField.description
       + "    Collector Type:" * collector.name.description
@@ -47,7 +47,7 @@ extension Recording {
       + "FOSSIL FUEL:\n"
       + "    LHV [kWH/kg]: Fuel.LHV\n"
       + "\n\n"
-    d += heading("Annual Results")
+    d += decorated("Annual Results")
       + "Gross electricty producution [MWh_el/a]:"
       * String(format: "%G", performance.electric.gross)
     //  Format((YTarS(0).EgrsST + YTarS(0).EgrsGasTurbine) * (1 - Simulation.parameter.UnSchedMain) * (1 - Simulation.parameter.TransLoss), )"
@@ -64,7 +64,7 @@ extension Recording {
     d += "\nAVAILABILITIES\n\n"
       + "Plant Availability [%]:\n"  // * Simulation.parameter.PlantAvail * 100, )"
       + "Plant Degradation [%]:\n"  // * Simulation.parameter.PlantDegrad,)"
-      + heading("Files and Parameter")
+      + decorated("Files and Parameter")
       + "METEODATA  \(BlackBoxModel.meteoData!.name)\n"
       + "Meteodata of a leap year" * (Simulation.time.isLeapYear ? "YES" : "NO")
       + "Location:"
@@ -107,7 +107,7 @@ extension Recording {
     // }
     //      + "Power Block Availability [%]:" * Availability.current[0).powerBlock * 100)"
     //        + "Transmission Losses [%]:" * Simulation.parameter.TransLoss * 100)"
-    d += heading("OPERATION")
+    d += decorated("OPERATION")
     let s1 = "First Date of Operation [MM-dd HH:mm]:"
     if let firstDateOfOperation = Simulation.time.firstDateOfOperation {
       d += s1 * String(
@@ -132,7 +132,7 @@ extension Recording {
       + "Minimum Insolation for Start-Up [W/m²]:"
       * Simulation.parameter.minInsolation.description
       + "Fuel strategy:" * OperationRestriction.fuelStrategy.description
-    d += heading("AVAILABILITIES")
+    d += decorated("AVAILABILITIES")
     d += Availability.current.description
       + "Periods for Scheduled Maintenance [MM.DD]:\n"  // Maintnc(1).Lowlim, ) to Format(Maintnc(1).Uplim, )"
       + "Unscheduled Maintenance [%]:\n"  // * Simulation.parameter.UnSchedMain * 100)"

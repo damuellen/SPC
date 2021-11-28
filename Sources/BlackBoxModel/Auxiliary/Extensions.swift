@@ -33,20 +33,11 @@ extension String {
 }
 
 /// Generates the title with border
-public func decorated(_ title: String) -> String {
-  var width = terminalWidth()
-  width.clamp(to: 70...100)
+public func decorated(_ title: String, width: Int = terminalWidth()) -> String {
+  let width = median(70, width, 100)
   let half = (width - title.count - 8) / 2
   let line = String(repeating: "─", count: half)
   return line + "┤   " + title + "   ├" + line
-}
-
-public func heading(_ title: String) -> String {
-  var width = terminalWidth()
-  width.clamp(to: 70...100)
-  let half = (width - title.count - 8) / 2
-  let s = String(repeating: "─", count: half)
-  return "\n" + s + "┤   " + title + "   ├" + s + "\n"
 }
 
 public typealias Angle = Double

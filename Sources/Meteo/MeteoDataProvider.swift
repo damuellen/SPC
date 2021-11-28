@@ -92,8 +92,8 @@ public class MeteoDataProvider {
     var sum = 0.0
     var max = 0.0
     for i in day.indices.dropFirst() {
-      let prev = Double(day[i - 1].dni)
-      let curr = Double(day[i].dni)
+      let prev = day[i - 1].dni
+      let curr = day[i].dni
       if curr > max { max = curr }
       if curr > 0 {
         hours += hourFraction
@@ -140,9 +140,8 @@ public class MeteoDataProvider {
         if (step * 2) % steps == 0 {
           isCloudy = (rng.random() < 0.314) && clouds
         }
-        let dni = Float(
-          insolation(zenith: pos.zenith, day: day)
-            * (isCloudy ? rng.random() : 1))
+        let dni = insolation(zenith: pos.zenith, day: day)
+         * (isCloudy ? rng.random() : 1)
         data.append(MeteoData(dni: dni, temperature: 20))
       } else {
         data.append(MeteoData(temperature: 10))

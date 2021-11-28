@@ -276,7 +276,7 @@ extension Storage {
       let ratio = (heatSolar + thermalPower.megaWatt) 
         / (SteamTurbine.parameter.power.max / steamTurbine.efficiency.quotient)
 
-      steamTurbine.load = Ratio(ratio, cap: maxLoad)
+      steamTurbine.load = Ratio(abs(ratio), cap: maxLoad)
       let mixingOutlets = SolarField.parameter.HTF.mixingOutlets
       let mixTemp = mixingOutlets(solarField, storage)
       

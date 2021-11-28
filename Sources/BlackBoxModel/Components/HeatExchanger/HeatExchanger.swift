@@ -37,10 +37,10 @@ public struct HeatExchanger: Parameterizable, HeatTransfer {
   static func temperatureFactor(
     temperature: Temperature, load: Ratio, max: Temperature) -> Double
   {
-    (((0.0007592419869 * (temperature.kelvin / max.kelvin)
+    median((((0.0007592419869 * (temperature.kelvin / max.kelvin)
       * 666 + 0.4943825893223) * load.quotient ** (0.0001400823882
         * (temperature.kelvin / max.kelvin)
-        * 666 - 0.0110227028559)) - 0.000151639).clamped(to: 0...1.1)
+        * 666 - 0.0110227028559)) - 0.000151639), 0, 1.1)
         // function is based on 393°C
   }
 
@@ -153,7 +153,7 @@ public struct HeatExchanger: Parameterizable, HeatTransfer {
           )
         } else if let ToutMassFlow = parameter.ToutMassFlow {
           // if Tout is dependant on massflow, recalculate Tout
-          let factor = ToutMassFlow(load).clamped(to: 0...1.1)
+          let factor = median(ToutMassFlow(load), 0, 1.1)
 
           temperature.outlet.adjust(withFactor: factor)
         } else if let c = parameter.ToutTinMassFlow {

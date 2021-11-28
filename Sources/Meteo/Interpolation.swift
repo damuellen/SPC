@@ -8,15 +8,15 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
-extension Float {
+extension Double {
    /// Linear interpolation function
-  func lerp(to: Float, _ progress: Float) -> Float  {
+  func lerp(to: Double, _ progress: Double) -> Double  {
     if progress >= 1 { return to }
     if progress <= 0 { return self }
     return self + (progress * (to - self))
   }
 
-  func interpolated(to: Float, step: Float, steps: Float) -> Float {
+  func interpolated(to: Double, step: Double, steps: Double) -> Double {
     let a = self
     let b = (to - self) / 2 + self
     let m = (b - a)
@@ -24,13 +24,11 @@ extension Float {
     return m * step / steps + aPrime
   }
 
-  typealias Pair = (past: Float, future: Float)
-
-  func interpolated(between: Pair, step: Float, steps: Float) -> Float {
-    let a = max((self - between.past) / 2 + between.past, 0)
-    let b = max((between.future - self) / 2 + self, 0)
+  static func interpolated(from domain: [Double], step: Double, steps: Double) -> Double {
+    let a = max((domain[0] - domain[1]) / 2 + domain[1], 0)
+    let b = max((domain[2] - domain[0]) / 2 + domain[0], 0)
     var m = (b - a)
-    var aPrime = (2 * self - m) / 2
+    var aPrime = (2 * domain[0] - m) / 2
     var bPrime = aPrime + m
     
     if aPrime < 0 {

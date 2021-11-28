@@ -12,15 +12,15 @@ import SolarPosition
 
 /// Meteorological data
 public struct MeteoData: CustomStringConvertible {
-  public var temperature, dni, ghi, dhi, windSpeed: Float
-  var wetBulbTemperature: Float? = nil
+  public var temperature, dni, ghi, dhi, windSpeed: Double
+  var wetBulbTemperature: Double? = nil
 
-  var conditions: [Float] { [temperature, windSpeed] }
-  var insolation: [Float] { [dni, ghi, dhi] }
+  var conditions: [Double] { [temperature, windSpeed] }
+  var insolation: [Double] { [dni, ghi, dhi] }
 
   public init(
-    dni: Float = 0, ghi: Float = 0, dhi: Float = 0,
-    temperature: Float = 0, windSpeed: Float = 0
+    dni: Double = 0, ghi: Double = 0, dhi: Double = 0,
+    temperature: Double = 0, windSpeed: Double = 0
   ) {
     self.dni = dni
     self.ghi = ghi
@@ -30,14 +30,14 @@ public struct MeteoData: CustomStringConvertible {
   }
 
   public init(meteo: [Double]) {
-    self.dni = Float(meteo[0])
-    self.temperature = Float(meteo[1])
-    self.windSpeed = Float(meteo[2])
-    self.ghi = meteo.count > 4 ? Float(meteo[4]) : 0
-    self.dhi = meteo.count > 5 ? Float(meteo[5]) : 0
+    self.dni = meteo[0]
+    self.temperature = meteo[1]
+    self.windSpeed = meteo[2]
+    self.ghi = meteo.count > 4 ? meteo[4] : 0
+    self.dhi = meteo.count > 5 ? meteo[5] : 0
   }
 
-  public init(insolation: [Float], conditions: [Float]) {
+  public init(insolation: [Double], conditions: [Double]) {
     self.temperature = conditions[0]
     self.dni = insolation[0]
     self.ghi = insolation[1]
@@ -45,20 +45,12 @@ public struct MeteoData: CustomStringConvertible {
     self.windSpeed = conditions[1]
   }
 
-  public init(tmy values: [Float]) {
-    self.dni = values[3]
-    self.temperature = values[0]
-    self.windSpeed = values[6]
-    self.ghi = values[2]
-    self.dhi = values[4]
-  }
-
   public init(tmy values: [Double], order: [Int]) {
-    self.dni = Float(values[order[0]])
-    self.temperature = Float(values[order[1]])
-    self.windSpeed = Float(values[order[2]])
-    self.ghi = Float(values[order[3]])
-    self.dhi = Float(values[order[4]])
+    self.dni = values[order[0]]
+    self.temperature = values[order[1]]
+    self.windSpeed = values[order[2]]
+    self.ghi = values[order[3]]
+    self.dhi = values[order[4]]
   }
 
   public var description: String {
@@ -88,11 +80,11 @@ public struct MeteoData: CustomStringConvertible {
       let buffer = UnsafeBufferPointer(start: p, count: 6)
       return Array<Int16>(buffer)
     }
-    self.dni = Float(values[0]) / 10
-    self.dhi = Float(values[1]) / 10
-    self.ghi = Float(values[2]) / 10
-    self.temperature = Float(values[3]) / 100
-    self.windSpeed = Float(values[4]) / 100
-    self.wetBulbTemperature = Float(values[5]) / 100
+    self.dni = Double(values[0]) / 10
+    self.dhi = Double(values[1]) / 10
+    self.ghi = Double(values[2]) / 10
+    self.temperature = Double(values[3]) / 100
+    self.windSpeed = Double(values[4]) / 100
+    self.wetBulbTemperature = Double(values[5]) / 100
   }
 }

@@ -68,7 +68,7 @@ extension Storage {
     let cold = salt.specificHeat(cold)
     let hot = salt.specificHeat(hot)
     let fraction = Simulation.time.steps.fraction
-    assert(hot > cold, "No usable heat content")
+    // assert(hot > cold, "No usable heat content")
     let mass = Mass(thermal / (hot - cold) * fraction * 3_600)
     return (mass, hot - cold)
   }

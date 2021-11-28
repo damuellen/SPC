@@ -60,7 +60,7 @@ public struct Collector: Parameterizable, CustomStringConvertible {
   /// This function calculates the efficiency of the parabolic trough
   /// which is depending on: incidence angle (theta), elevation angle,
   /// edge factors of the solarfield and the optical efficiency
-  public mutating func efficiency(ws: Float) {
+  public mutating func efficiency(ws: Double) {
     let parameter = Collector.parameter
     guard case 1...179 = parabolicElevation else { return }
     /// Current availability values
@@ -128,7 +128,7 @@ public struct Collector: Parameterizable, CustomStringConvertible {
 
     if direction > 180 { T_14 = -T_14 }
     /// Effective wind speed
-    let v_wind_eff = Double(ws) * abs(sin(Double(direction) * .pi / 180))
+    let v_wind_eff = ws * abs(sin(Double(direction) * .pi / 180))
     // Torsion due to bearing friction
     let T_R = -(939_549e-10 * parameter.lengthSCA ** 2
       + 939_549e-10 * parameter.lengthSCA)
@@ -140,7 +140,7 @@ public struct Collector: Parameterizable, CustomStringConvertible {
 
     let shadingHCE = Collector.shadingHCE(cosTheta: cosTheta)
 
-    let wind = solarField.windCoefficients(Double(ws))
+    let wind = solarField.windCoefficients(ws)
 
     let eff = shadingSCA * shadingHCE * IAM * edge * k_torsion * wind
       * opticalEfficiency * Simulation.adjustmentFactor.efficiencySolarField
@@ -167,9 +167,9 @@ public struct Collector: Parameterizable, CustomStringConvertible {
   }
   /// Irradiation on the absorber taking into account
   /// the angle of incidence and optical efficiency
-  public mutating func irradiation(dni: Float) {
+  public mutating func irradiation(dni: Double) {
     lastInsolation = insolationAbsorber
-    insolationAbsorber = Double(dni) * cosTheta * efficiency
+    insolationAbsorber = dni * cosTheta * efficiency
   }
 }
 

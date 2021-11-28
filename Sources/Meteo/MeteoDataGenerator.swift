@@ -20,8 +20,6 @@ public class MeteoDataGenerator: Sequence {
 
   private let dataSource: MeteoDataProvider
 
-  public enum Method { case linear, gradient }
-
   private let method: Method
 
   public init(
@@ -66,93 +64,64 @@ public class MeteoDataGenerator: Sequence {
 
   public func makeIterator() -> AnyIterator<MeteoData> {
     let data = dataSource.data
-    let r = 0...data.endIndex-1
     let method = self.method
-    let steps =
-      dataSource.hourFraction < 1
+    let steps = dataSource.hourFraction < 1
       ? Int(dataSource.hourFraction / frequence.fraction)
       : frequence.rawValue
 
     let lastStep = steps * 2
-
     var step = firstStep //self.firstStep
     var cursor = range.startIndex
 
     return AnyIterator<MeteoData> {
       defer { step += 1 }
-
-      let idx0 = (cursor - 1).clamped(to: r)
-      let idx1 = cursor.clamped(to: r)
-      let idx2 = (cursor + 1).clamped(to: r)
-
-      if idx2 == r.upperBound, step == lastStep { return nil }
-
-      let prev = data[idx0]
-      let curr = data[idx1]
-
-      let meteo: MeteoData
+      let window: [MeteoData]
       switch method {
-      case .linear:
-        meteo =  .interpolation((prev, curr, nil), step: step, steps: steps)
-      case .gradient:
-        let next = data[idx2]
-        if idx0 == idx1 {
-          meteo = .interpolation((nil, curr, next), step: step, steps: steps)
-        } else {
-          meteo = .interpolation((prev, curr, next), step: step, steps: steps)
-        }
+        case .gradient:
+        window = Array(data[((cursor-1)..<(cursor+2)).clamped(to: data.indices)])
+        case .linear:
+        window = Array(data[((cursor)..<(cursor+2)).clamped(to: data.indices)])
       }
-
-      if step > 0, idx2 != r.upperBound, step.isMultiple(of: steps) {
+      if data.endIndex > cursor, step == lastStep { return nil }
+      let meteo = MeteoData.interpolation(window, method: method, step: step, steps: steps)
+      if step > 0, cursor-1 < data.endIndex, step.isMultiple(of: steps) {
         step = 0
         cursor += 1
       }
-
       return meteo
     }
   }
 }
 
-extension Comparable {
-  func clamped(to limits: ClosedRange<Self>) -> Self {
-    min(max(self, limits.lowerBound), limits.upperBound)
-  }
-}
+public enum Method { case linear, gradient }
 
 extension MeteoData {
   /// Interpolation function for meteo data
-  static func interpolation(
-    _ values: (MeteoData?, MeteoData, MeteoData?), step: Int, steps: Int
-  ) -> MeteoData {
-    let step = Float(step + 1)
-    let steps = Float(steps)
+  static func interpolation(_ data: [MeteoData], method: Method, step: Int, steps: Int) -> MeteoData {
+    let step = Double(step + 1)
+    let steps = Double(steps)
     let stride = (1 / steps)
-    let curr = values.1
     let progress = step * stride
-    let insolation: [Float]
-    let conditions: [Float]
-    if let next = values.2 {
-      if let prev = values.0 {
-        let i = zip(curr.insolation,
-          zip(prev.insolation, next.insolation).map { ($0.0, $0.1) }
-        )
-        insolation = i.map { this, others in
-          this.interpolated(between: others, step: step, steps: steps)
-        }
-      } else { // First index only
-        insolation = zip(curr.insolation, next.insolation).map { this, other in
-          this.interpolated(to: other, step: step, steps: steps)
+    let insolation: [Double]
+    let conditions: [Double]
+    
+    switch method {
+      case .gradient:
+      insolation = data.map(\.insolation).map { values in
+        if data.count > 2 {
+          return Double.interpolated(from: values, step: step, steps: steps)
+        } else {
+          return values[0].interpolated(to: values[1], step: step, steps: steps)
         }
       }
-      conditions = zip(curr.conditions, next.conditions).map { this, other in
+      conditions = zip(data[0].conditions, data[2].conditions).map { this, other in
         this.lerp(to: other, progress)
       }
-    } else { // Linear interpolation
-      guard let prev = values.0 else { preconditionFailure() }
-      insolation = zip(prev.insolation, curr.insolation).map { this, other in
+      case .linear:
+      insolation = zip(data[0].insolation, data[1].insolation).map { this, other in
         this.lerp(to: other, progress)
       }
-      conditions = zip(prev.conditions, curr.conditions).map { this, other in
+      conditions = zip(data[0].conditions, data[1].conditions).map { this, other in
         this.lerp(to: other, progress)
       }
     }

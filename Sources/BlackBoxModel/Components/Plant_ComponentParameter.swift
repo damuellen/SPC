@@ -13,7 +13,7 @@ import Utilities
 extension Plant {
 
   static var parameterDescriptions: String {
-    heading("Fixed Parameter")
+    decorated("Fixed Parameter")
     + "HEAT TRANSFER FLUID\n\n\(SolarField.parameter.HTF)\n\n"
     + "HEATER\n\n\(Heater.parameter)\n"
     + "HEAT EXCHANGER\n\n\(HeatExchanger.parameter)\n"
