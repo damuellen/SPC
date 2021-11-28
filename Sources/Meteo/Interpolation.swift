@@ -25,10 +25,10 @@ extension Double {
   }
 
   static func interpolated(from domain: [Double], step: Double, steps: Double) -> Double {
-    let a = max((domain[0] - domain[1]) / 2 + domain[1], 0)
-    let b = max((domain[2] - domain[0]) / 2 + domain[0], 0)
+    let a = max((domain[1] - domain[0]) / 2 + domain[0], 0)
+    let b = max((domain[2] - domain[1]) / 2 + domain[1], 0)
     var m = (b - a)
-    var aPrime = (2 * domain[0] - m) / 2
+    var aPrime = (2 * domain[1] - m) / 2
     var bPrime = aPrime + m
     
     if aPrime < 0 {
