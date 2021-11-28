@@ -110,7 +110,7 @@ public enum BlackBoxModel {
     // Set initial values
     var status = Plant.initialState
     // PV system setup
-    let pv = PV()
+ /*   let pv = PV()
 
     var conditions = [(Temperature, Double, Double)]()
 
@@ -141,14 +141,14 @@ public enum BlackBoxModel {
     }
     // Makes it easier to use when re-reading the values
     photovoltaic.reverse()
-
+*/
     for (meteo, date) in zip(🌦, timeline(Simulation.time.steps)) {
       // Set the date for the calculation step
       DateTime.setCurrent(date: date)
       let dt = DateTime.current
 
       /// Use the already existing result
-      plant.electricity.photovoltaic = photovoltaic.removeLast()
+      plant.electricity.photovoltaic = 0// photovoltaic.removeLast()
 
       if Maintenance.checkSchedule(date) {
         // No operation is simulated
@@ -237,7 +237,7 @@ public enum BlackBoxModel {
       }
     }
 
-    precondition(photovoltaic.isEmpty, "All values must be consumed.")
+    //precondition(photovoltaic.isEmpty, "All values must be consumed.")
 
     backgroundQueue.sync {}  // wait for background queue
     return log.finish()
