@@ -38,7 +38,7 @@ public enum BlackBoxModel {
     )
 
     if meteoData == nil {
-      meteoData = MeteoDataProvider.using(sun!)
+      meteoData = MeteoDataProvider.using(sun!, model: .meinel)
     }
   }
 
@@ -94,11 +94,11 @@ public enum BlackBoxModel {
       exit(1)
     }
 
-    let 🌦 = MeteoDataGenerator(🌤, frequence: Simulation.time.steps)
+    🌤.setInterval(Simulation.time.steps)
     if let start = Simulation.time.firstDateOfOperation,
       let end = Simulation.time.lastDateOfOperation
     {
-      🌦.setRange(.init(start: start, end: end)
+      🌤.setRange(.init(start: start, end: end)
         .align(with: Simulation.time.steps))
     }
 
@@ -114,7 +114,7 @@ public enum BlackBoxModel {
 
     var conditions = [(Temperature, Double, Double)]()
 
-    for (meteo, date) in zip(🌦, timeline(Simulation.time.steps)) {
+    for (meteo, date) in zip(🌤, timeline(Simulation.time.steps)) {
       DateTime.setCurrent(date: date)
       let dt = DateTime.current
       let (temperature, wind) = 
@@ -142,7 +142,7 @@ public enum BlackBoxModel {
     // Makes it easier to use when re-reading the values
     photovoltaic.reverse()
 */
-    for (meteo, date) in zip(🌦, timeline(Simulation.time.steps)) {
+    for (meteo, date) in zip(🌤,timeline(Simulation.time.steps)) {
       // Set the date for the calculation step
       DateTime.setCurrent(date: date)
       let dt = DateTime.current

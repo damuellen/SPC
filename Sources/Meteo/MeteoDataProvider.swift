@@ -13,7 +13,7 @@ import Foundation
 import SolarPosition
 
 /// A type that provides meteorological data for one year.
-public class MeteoDataProvider {
+public class MeteoDataProvider: Sequence {
   public let name: String
   public let year: Int?
   public let location: Location
@@ -22,6 +22,8 @@ public class MeteoDataProvider {
   let hourFraction: Double
 
   private let valuesPerDay: Int
+  private(set) var frequence: DateGenerator.Interval
+  private(set) var dateInterval: DateInterval?
 
   public init(
     name: String, data: [MeteoData],
@@ -33,7 +35,8 @@ public class MeteoDataProvider {
     self.name = name
     self.hourFraction = 8760 / Double(data.count)
     self.valuesPerDay = Int(24 / hourFraction)
-
+    self.frequence = .init(rawValue: Int(1 / hourFraction)) ?? .hourly
+    self.range = data.startIndex..<data.endIndex
     self.statisticsOfDays.reserveCapacity(365)
 
     for day in 1...365 { statistics(ofDay: day) }
@@ -55,7 +58,8 @@ public class MeteoDataProvider {
 
     self.hourFraction = 8760 / Double(self.data.count)
     self.valuesPerDay = Int(24 / hourFraction)
-
+    self.frequence = .init(rawValue: Int(1 / hourFraction)) ?? .hourly
+    self.range = data.startIndex..<data.endIndex
     self.statisticsOfDays.reserveCapacity(365)
 
     for day in 1...365 { statistics(ofDay: day) }
@@ -64,6 +68,34 @@ public class MeteoDataProvider {
   public func serialized() -> Data {
     data.reduce(into: location.data) { $0 += $1.data }
   }
+
+  public func setInterval(_ frequence: DateGenerator.Interval) {
+    self.frequence = frequence
+  }
+
+  public func setRange(_ dateInterval: DateInterval) {
+    self.dateInterval = dateInterval.align(with: self.frequence)
+
+    let start = self.dateInterval!.start
+    let end = self.dateInterval!.end
+    let fraction = Int(1 / hourFraction)
+
+    let startHour = calendar.ordinality(of: .hour, in: .year, for: start)
+    let startIndex = (startHour - 1) * fraction
+
+    let startMinute = calendar.ordinality(of: .minute, in: .hour, for: start)
+    firstStep += startMinute / (60 / frequence.rawValue) / fraction
+
+    let endHour = calendar.ordinality(of: .hour, in: .year, for: end)
+    let lastIndex = (endHour - 1) * fraction
+
+    range = startIndex..<lastIndex
+
+    //let endMinute = calendar.ordinality(of: .minute, in: .hour, for: end)
+    //lastStep = endMinute / (60 / frequence.rawValue) / fraction
+  }
+
+  private var range: Range<Int>
 
   public var currentDay: Statistics {
     return statisticsOfDays[DateTime.indexDay]
@@ -117,7 +149,7 @@ public class MeteoDataProvider {
     return (0, 0, 0, 0, 0, 0)
   }
 
-  public static func using(_ sun: SolarPosition, clouds: Bool = false)
+  public static func using(_ sun: SolarPosition, model: ClearSkyModel, clouds: Bool = false)
     -> MeteoDataProvider
   {
     let steps = 24
@@ -140,7 +172,7 @@ public class MeteoDataProvider {
         if (step * 2) % steps == 0 {
           isCloudy = (rng.random() < 0.314) && clouds
         }
-        let dni = insolation(zenith: pos.zenith, day: day)
+        let dni = insolation(zenith: pos.zenith, day: day, model: model)
          * (isCloudy ? rng.random() : 1)
         data.append(MeteoData(dni: dni, temperature: 20))
       } else {
@@ -156,6 +188,31 @@ public class MeteoDataProvider {
       name: "Fake", data: data, (sun.year, location)
     )
   }
+
+  private var firstStep = 0
+
+  public func makeIterator() -> AnyIterator<MeteoData> {
+    let data = self.data
+    let steps = hourFraction < 1
+      ? Int(hourFraction / frequence.fraction)
+      : frequence.rawValue
+
+    let lastStep = steps * 2
+    var step = firstStep
+
+    var cursor = range.startIndex
+
+    return AnyIterator<MeteoData> {
+      defer { step += 1 }
+      if step > 0, cursor-1 < data.endIndex, step.isMultiple(of: steps) {
+        step = 0; cursor += 1
+      }
+      let window = Array(data[((cursor)..<(cursor+2)).clamped(to: data.indices)])
+      if data.endIndex > cursor, step == lastStep { return nil }
+      let meteo = MeteoData.interpolation(window, step: step, steps: steps)
+      return meteo
+    }
+  }
 }
 
 private struct LinearCongruentialGenerator {
@@ -170,13 +227,9 @@ private struct LinearCongruentialGenerator {
   }
 }
 
-enum ClearSkyModel {
-  case meinel, hottel, constant, moon
-}
+public enum ClearSkyModel { case meinel, hottel, constant }
 
-private func insolation(
-  zenith: Double, day: Int, model: ClearSkyModel = .hottel
-) -> Double {
+private func insolation(zenith: Double, day: Int, model: ClearSkyModel) -> Double {
   let S0 = 1.353 * (1 + 0.0335 * cos(2 * .pi * (Double(day) + 10) / 365))
 
   let sz = sin(zenith * .pi / 180)
@@ -200,21 +253,15 @@ private func insolation(
 
   switch model {
   case .meinel:
-    dni = (1 - 0.14 * al) * exp(-0.357 / pow(cz, 0.678)) + 0.14 * al
+    dni = 940 * ((1 - 0.14 * al) * exp(-0.357 / pow(cz, 0.678)) + 0.14 * al) 
   case .hottel:
-    dni =
-      0.4237 - 0.00821 * pow(6.0 - al, 2)
+    dni = 1030 *
+      (0.4237 - 0.00821 * pow(6.0 - al, 2)
       + (0.5055 + 0.00595 * pow(6.5 - al, 2))
-      * exp(-(0.2711 + 0.01858 * pow(2.5 - al, 2)) / (cz + 0.00001))
+      * exp(-(0.2711 + 0.01858 * pow(2.5 - al, 2)) / (cz + 0.00001)))
   case .constant:
-    let dni_des = 950.0
-    dni = dni_des / (S0 * 1000.0)
-  case .moon:
-    let dpres = 1.0
-    let del_h2o = 1.0
-    dni =
-      1 - 0.263 * ((del_h2o + 2.72) / (del_h2o + 5))
-      * pow(save * dpres, ((del_h2o + 11.53) / (del_h2o + 7.88)) * 0.367)
+    let dni_des = 900.0
+    dni = dni_des / S0
   }
-  return dni * S0 * 1000.0
+  return dni * S0 
 }
