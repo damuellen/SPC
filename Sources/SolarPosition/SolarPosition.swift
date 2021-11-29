@@ -2,6 +2,7 @@ import CSOLPOS
 import CSPA
 import DateGenerator
 import Foundation
+import Utilities
 
 typealias FractionalTime = Double
 typealias Algorithm = (SolarPosition.InputValues) -> SolarPosition.OutputValues
@@ -16,7 +17,8 @@ let calendar = { calendar -> NSCalendar in
 /// Look up values using date-based subscript. Otherwise returns nil.
 public struct SolarPosition {
 
-  internal var precalculatedValues = [Date: OutputValues]()
+  public private(set) var calculatedValues = [OutputValues]()
+  internal var lookupDates = [Date: Int]()
 
   public struct InputValues {
     var year, month, day, hour, minute, second: Int
@@ -85,18 +87,19 @@ public struct SolarPosition {
     let sunHours = SolarPosition.sunHoursPeriod(
       location: location, year: year
     )
-    precalculatedValues = calculateSunPositions(
-      sunHours: sunHours, location: location
-    )
+    let result = calculateSunPositions(sunHours: sunHours, location: location)
+    lookupDates = Dictionary(uniqueKeysWithValues: zip(result.map(\.0), 0...))
+    calculatedValues = result.map(\.1)
   }
 
   /// Accesses the values associated with the given date.
   public subscript(date: Date) -> OutputValues? {
-    return precalculatedValues[date]
+    guard let i = lookupDates[date] else { return nil }
+    return calculatedValues[i]
   }
 
   private static func compute(
-    date: Date, location: Location, with algorithm: Algorithm
+    date: Date, location: Location, with algorithm: Algorithm = SolarPosition.solpos
   ) -> OutputValues {
     let ΔT = SolarPosition.estimatedDelta_T
 
@@ -114,24 +117,17 @@ public struct SolarPosition {
 
   private func calculateSunPositions(
     sunHours: [DateInterval], location: Location
-  ) -> [Date: OutputValues] {
-
-    var result: [Date: SolarPosition.OutputValues] = [:]
-
+  ) -> [(Date, OutputValues)] {
     let sunHoursPeriod = sunHours.map {
       $0.align(with: SolarPosition.frequence)
     }
-
     let dates = sunHoursPeriod.flatMap {
       DateGenerator(range: $0, interval: SolarPosition.frequence)
     }
     let offset = 0.0 //frequence.interval / 2
-    for date in dates {
-      result[date] = SolarPosition.compute(
-        date: date + offset, location: location, with: SolarPosition.solpos
-      )
+    return dates.concurrentMap { date in result.append(
+      (date, SolarPosition.compute(date: date + offset, location: location)))
     }
-    return result
   }
 
   private static func sunHoursPeriod(
