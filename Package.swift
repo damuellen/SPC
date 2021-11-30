@@ -45,7 +45,7 @@ var package = Package(
     .target(name: "CSOLPOS", cSettings: c), 
     .target(
       name: "SolarPosition",
-      dependencies: ["DateGenerator", "CSOLPOS", "CSPA"],
+      dependencies: ["Utilities", "DateGenerator", "CSOLPOS", "CSPA"],
       swiftSettings: swift
     ),
     .target(
@@ -135,7 +135,7 @@ var package = Package(
     // MARK: Tests
     .testTarget(
       name: "MeteoTests",
-      dependencies: ["DateGenerator", "SolarPosition", "Meteo"]
+      dependencies: ["Utilities", "DateGenerator", "SolarPosition", "Meteo"]
     ), 
     // .testTarget(name: "SunOlTests", dependencies: ["SunOl"]),
     .testTarget(name: "ThermalStorageTests", dependencies: ["ThermalStorage"]),
