@@ -149,10 +149,11 @@ public class MeteoDataProvider: Sequence {
     return (0, 0, 0, 0, 0, 0)
   }
 
-  public static func using(_ sun: SolarPosition, model: ClearSkyModel, clouds: Bool = false)
-    -> MeteoDataProvider
+  public static func using(
+    _ sun: SolarPosition, model: ClearSkyModel = .constant, clouds: Bool = false
+    ) -> MeteoDataProvider
   {
-    let steps = 24
+    let steps = sun.frequence.rawValue
     var step = 0
     var day = 1
     var isCloudy = false
@@ -170,7 +171,7 @@ public class MeteoDataProvider: Sequence {
       }
       if let pos = sun[d], pos.zenith < 90 {
         if (step * 2) % steps == 0 {
-          isCloudy = (rng.random() < 0.314) && clouds
+          isCloudy = clouds && (rng.random() < 0.2)
         }
         let dni = insolation(zenith: pos.zenith, day: day, model: model)
          * (isCloudy ? rng.random() : 1)
@@ -193,22 +194,21 @@ public class MeteoDataProvider: Sequence {
 
   public func makeIterator() -> AnyIterator<MeteoData> {
     let data = self.data
+    let range = self.range
     let steps = hourFraction < 1
       ? Int(hourFraction / frequence.fraction)
       : frequence.rawValue
 
-    let lastStep = steps * 2
-    var step = firstStep
-
+    let lastStep = (steps / 2)
+    var step = firstStep - (steps / 2)
     var cursor = range.startIndex
 
     return AnyIterator<MeteoData> {
       defer { step += 1 }
-      if step > 0, cursor-1 < data.endIndex, step.isMultiple(of: steps) {
-        step = 0; cursor += 1
-      }
-      let window = Array(data[((cursor)..<(cursor+2)).clamped(to: data.indices)])
-      if data.endIndex > cursor, step == lastStep { return nil }
+      if step > 0, cursor < range.last!, step.isMultiple(of: steps) { step = 0; cursor += 1 }
+      if cursor == range.last!, step == lastStep { return nil }
+      let r = (cursor..<cursor+2).clamped(to: range)
+      let window = Array(data[r])
       let meteo = MeteoData.interpolation(window, step: step, steps: steps)
       return meteo
     }
@@ -227,41 +227,36 @@ private struct LinearCongruentialGenerator {
   }
 }
 
-public enum ClearSkyModel { case meinel, hottel, constant }
+public enum ClearSkyModel { case meinel, hottel, constant, special }
 
 private func insolation(zenith: Double, day: Int, model: ClearSkyModel) -> Double {
   let S0 = 1.353 * (1 + 0.0335 * cos(2 * .pi * (Double(day) + 10) / 365))
+  let B = 2.0 * .pi * Double(day) / 365.0
+  let roverR0sqrd = 1.00011
+   + 0.034221 * cos(B) + 0.00128 * sin(B)
+   + 0.000719 * cos(2 * B) + 0.000077 * sin(2 * B)
 
-  let sz = sin(zenith * .pi / 180)
+  let dni_des = 930.0 * roverR0sqrd
+
   let cz = cos(zenith * .pi / 180)
-
-  let R2D = 57.29577951308232286465
-
-  let save2 = 90 - atan2(sz, cz) * R2D
-  var save = 1 / cz
-
-  if save2 <= 30 {
-    save =
-      save - 41.972213
-      * pow(
-        save2, -2.0936381 - 0.04117341 * save2 + 0.000849854 * pow(save2, 2)
-      )
-  }
   let al = 0.1 / 1000.0
 
   var dni: Double
 
   switch model {
   case .meinel:
-    dni = 940 * ((1 - 0.14 * al) * exp(-0.357 / pow(cz, 0.678)) + 0.14 * al) 
+    dni = (1 - 0.14 * al) * exp(-0.357 / pow(cz, 0.678)) + 0.14 * al
   case .hottel:
-    dni = 1030 *
-      (0.4237 - 0.00821 * pow(6.0 - al, 2)
+    dni = 
+      0.4237 - 0.00821 * pow(6.0 - al, 2)
       + (0.5055 + 0.00595 * pow(6.5 - al, 2))
-      * exp(-(0.2711 + 0.01858 * pow(2.5 - al, 2)) / (cz + 0.00001)))
+      * exp(-(0.2711 + 0.01858 * pow(2.5 - al, 2)) / (cz + 0.00001))
   case .constant:
-    let dni_des = 900.0
     dni = dni_des / S0
+  case .special:
+    dni = (0.5 * ((1 - 0.14 * al) * exp(-0.357 / pow(cz, 0.678)) + 0.14 * al) + 
+      (0.4237 - 0.00821 * pow(6.0 - al, 2) + (0.5055 + 0.00595 * pow(6.5 - al, 2))
+      * exp(-(0.2711 + 0.01858 * pow(2.5 - al, 2)) / (cz + 0.00001)))) / 1.45
   }
-  return dni * S0 
+  return dni * S0 * dni_des
 }

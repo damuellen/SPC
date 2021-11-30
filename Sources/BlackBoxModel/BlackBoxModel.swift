@@ -38,7 +38,7 @@ public enum BlackBoxModel {
     )
 
     if meteoData == nil {
-      meteoData = MeteoDataProvider.using(sun!, model: .meinel)
+      meteoData = MeteoDataProvider.using(sun!, model: .special, clouds: false)
     }
   }
 

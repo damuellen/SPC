@@ -131,9 +131,9 @@ private struct MET: MeteoDataFile {
     //  || dataRange.count.isMultiple(of: 8764)
     else { throw MeteoDataFileError.unexpectedRowCount }
     return try zip(csv.dataRows, 11...).map { values, line in
-      guard values.count > 2
+      guard values.count >= 6 // Day,Hour,Min,DNI,Temperature,Windspeed
       else { throw MeteoDataFileError.missingValueInLine(line) }
-      return MeteoData(meteo: values)
+      return MeteoData(meteo: Array(values[3...]))
     }
   }
 }

@@ -8,10 +8,10 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
-
 extension MeteoData {
   /// Interpolation function for meteo data
   static func interpolation(_ data: [MeteoData], step: Int, steps: Int) -> MeteoData {
+    if data.count < 2 { return data[0] }
     let step = Double(step + 1)
     let steps = Double(steps)
     let stride = (1 / steps)
@@ -33,5 +33,4 @@ extension Double {
     if progress <= 0 { return self }
     return self + (progress * (to - self))
   }
-
 }

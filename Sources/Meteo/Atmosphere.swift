@@ -586,3 +586,10 @@ public enum Atmosphere {
     aod1: Double, lambda1: Double, aod2: Double, lambda2: Double
   ) -> Double { return -log(aod1 / aod2) / log(lambda1 / lambda2) }
 }
+
+typealias Angle = Double
+
+extension Angle {
+  public var toRadians: Double { self * .pi / 180 }
+  public var toDegrees: Double { self * (180 / .pi) }
+}

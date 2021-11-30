@@ -125,8 +125,8 @@ public struct SolarPosition {
       DateGenerator(range: $0, interval: SolarPosition.frequence)
     }
     let offset = 0.0 //frequence.interval / 2
-    return dates.concurrentMap { date in result.append(
-      (date, SolarPosition.compute(date: date + offset, location: location)))
+    return dates.concurrentMap { date in 
+      (date, SolarPosition.compute(date: date + offset, location: location))
     }
   }
 

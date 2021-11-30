@@ -40,7 +40,7 @@ public func decorated(_ title: String, width: Int = terminalWidth()) -> String {
   return line + "┤   " + title + "   ├" + line
 }
 
-public typealias Angle = Double
+typealias Angle = Double
 
 extension Angle {
   public var toRadians: Double { self * .pi / 180 }
