@@ -3,6 +3,7 @@ import XCTest
 @testable import BlackBoxModel
 @testable import SolarPosition
 import Meteo
+import Utilities
 
 class CollectorTests: XCTestCase {
   func testsEfficiency() {
@@ -23,6 +24,15 @@ class CollectorTests: XCTestCase {
     collector.theta = 55.53
     collector.efficiency(ws: 0)
     XCTAssertEqual(collector.efficiency, 0.57, accuracy: 0.1)
+  }
+
+  func testMeteo() {
+    //let sun1 = SolarPosition(coords: (-26, 35, 0), tz: 2, year: 2017, frequence: .half_hourly)
+    //let sun2 = SolarPosition(coords: (-26, 35, 0), tz: 2, year: 2017, frequence: .every5minutes).calculatedValues
+    //let meteo = MeteoDataProvider.using(sun1, model: .special)
+    //meteo.setInterval(.every5minutes)
+    //let dni = meteo.map(\.dni)
+    //try? Gnuplot(xs: Array(dni))(.pngLarge(path: "____1.png"))
   }
 
   func testsTracking() {
