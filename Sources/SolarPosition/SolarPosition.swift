@@ -87,9 +87,17 @@ public struct SolarPosition {
     let sunHours = SolarPosition.sunHoursPeriod(
       location: location, year: year
     )
-    let result = calculateSunPositions(sunHours: sunHours, location: location)
-    lookupDates = Dictionary(uniqueKeysWithValues: zip(result.map(\.0), 0...))
-    calculatedValues = result.map(\.1)
+    let sunHoursPeriod = sunHours.map {
+      $0.align(with: SolarPosition.frequence)
+    }
+    let dates = sunHoursPeriod.flatMap {
+      DateGenerator(range: $0, interval: SolarPosition.frequence)
+    }
+    lookupDates = Dictionary(uniqueKeysWithValues: zip(dates, 0...))
+    let offset = 0.0 //frequence.interval / 2
+    calculatedValues = dates.concurrentMap { date in 
+      SolarPosition.compute(date: date + offset, location: location)
+    }
   }
 
   /// Accesses the values associated with the given date.
@@ -113,21 +121,6 @@ public struct SolarPosition {
         longitude: location.longitude, latitude: location.latitude,
         elevation: location.elevation, pressure: 1023, temperature: 15,
         slope: 0, azm_rotation: 0, atmos_refract: 0.5667))
-  }
-
-  private func calculateSunPositions(
-    sunHours: [DateInterval], location: Location
-  ) -> [(Date, OutputValues)] {
-    let sunHoursPeriod = sunHours.map {
-      $0.align(with: SolarPosition.frequence)
-    }
-    let dates = sunHoursPeriod.flatMap {
-      DateGenerator(range: $0, interval: SolarPosition.frequence)
-    }
-    let offset = 0.0 //frequence.interval / 2
-    return dates.concurrentMap { date in 
-      (date, SolarPosition.compute(date: date + offset, location: location))
-    }
   }
 
   private static func sunHoursPeriod(
