@@ -153,7 +153,7 @@ public class MeteoDataProvider: Sequence {
     _ sun: SolarPosition, model: ClearSkyModel = .constant, clouds: Bool = false
     ) -> MeteoDataProvider
   {
-    let steps = sun.frequence.rawValue
+    let steps = sun.frequence.rawValue * 24
     var step = 0
     var day = 1
     var isCloudy = false
