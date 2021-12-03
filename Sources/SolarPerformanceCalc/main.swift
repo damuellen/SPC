@@ -139,7 +139,7 @@ struct SolarPerformanceCalculator: ParsableCommand {
     if let steps = stepsCalculation {
       Simulation.time.steps = Interval[steps]
     } else {
-      Simulation.time.steps = .every5minutes
+      Simulation.time.steps = .fiveMinutes
     }
 
     BlackBoxModel.configure(year: year ?? BlackBoxModel.yearOfSimulation)

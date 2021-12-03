@@ -54,7 +54,7 @@ extension Time: TextConfigInitializable {
     self.steps =
       try DateGenerator.Interval(
         rawValue: Int(ln(22))
-      ) ?? .every5minutes
+      ) ?? .fiveMinutes
 
     var dates = [Date]()
     for row in stride(from: 38, through: 95, by: 3) {

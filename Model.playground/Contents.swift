@@ -30,7 +30,7 @@ let 🌦 = Bundle.main.path(forResource: "AlAbdaliyah", ofType: "mto")!
 let recorder = Recorder()
 let recorder2 = Recorder()
 BlackBoxModel.configure(meteoFilePath: 🌦)
-Simulation.time.steps = .every5minutes
+Simulation.time.steps = .fiveMinutes
 
 //Simulation.adjustmentFactor.efficiencySolarField = 0.99
 SolarField.parameter.maxMassFlow = MassFlow(2500)

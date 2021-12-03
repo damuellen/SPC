@@ -8,10 +8,13 @@ import XCTest
 class MeteoTests: XCTestCase {
   func testsGenerator() {
     let location = Location(longitude: -26, latitude: 35, elevation: 0, timezone: 2)
-    let sun = SolarPosition(coords: (-26, 35, 0), tz: 2, year: 2017, frequence: .half_hourly)
-
-    let _ = DateGenerator(year: 2017, interval: .every5minutes)
-
+    if false {
+      let sun = SolarPosition(coords: (-26, 35, 0), tz: 2, year: 2017, frequence: .hourly)
+      let clearSky = MeteoDataProvider.using(sun, model: .special)
+      clearSky.setInterval(.fiveMinutes)
+      let dni = Array(clearSky.map(\.dni).prefix(24*12*4))
+      try? Gnuplot(xs: dni)(.pngLarge(path: "dni.png"))
+    }
 
     let hourly: [(dni: Double, temp: Double, ws: Double)] = [
       (0, 19.2, 3.9), (0, 18.4, 5.3), (0, 17.5, 6.2), (0, 16.9, 6), (0, 16.4, 4.6), (54, 16.7, 3.8), (309, 18.8, 3.2), (533, 22.4, 2.2), (699, 26, 2), (789, 28.7, 2.4), (845, 30.8, 3.2), (868, 32.4, 4), (874, 33.5, 4.9), (842, 34, 5.8),
@@ -53,11 +56,11 @@ class MeteoTests: XCTestCase {
     let meteoData = Array(repeatElement(meteoDataHourly, count: 365).joined())
 
     let m = MeteoDataProvider(name: "", data: meteoData, (2017, location))
-    m.setInterval(.every5minutes)
+    m.setInterval(.fiveMinutes)
     XCTAssertEqual(Array(m).count, 105120)
-    m.setInterval(.every10minutes)
+    m.setInterval(.teenMinutes)
     XCTAssertEqual(Array(m).count, 52560)
-    m.setInterval(.quarter_hourly)
+    m.setInterval(.fifteenMinutes)
     XCTAssertEqual(Array(m).count, 35040)
   }
 }

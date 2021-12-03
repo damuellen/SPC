@@ -10,16 +10,10 @@ public final class DateGenerator: Sequence, IteratorProtocol {
 
   public enum Interval: Int, CaseIterable, CustomStringConvertible {
     case hourly = 1
-    case half_hourly = 2
-    case thirdOfHour = 3
-    case quarter_hourly = 4
-    case every12minutes = 5
-    case every10minutes = 6
-    case every6minutes = 10
-    case every5minutes = 12
-    case every3minutes = 20
-    case every2minutes = 30
-    case everyMinute = 60
+    case thirtyMinutes = 2
+    case fifteenMinutes = 4
+    case teenMinutes = 6
+    case fiveMinutes = 12
 
     public var fraction: Double {
       return 1 / Double(self.rawValue)

@@ -27,10 +27,10 @@ class CollectorTests: XCTestCase {
   }
 
   func testMeteo() {
-    //let sun1 = SolarPosition(coords: (-26, 35, 0), tz: 2, year: 2017, frequence: .half_hourly)
-    //let sun2 = SolarPosition(coords: (-26, 35, 0), tz: 2, year: 2017, frequence: .every5minutes).calculatedValues
+    //let sun1 = SolarPosition(coords: (-26, 35, 0), tz: 2, year: 2017, frequence: .thirtyMinutes)
+    //let sun2 = SolarPosition(coords: (-26, 35, 0), tz: 2, year: 2017, frequence: .fiveMinutes).calculatedValues
     //let meteo = MeteoDataProvider.using(sun1, model: .special)
-    //meteo.setInterval(.every5minutes)
+    //meteo.setInterval(.fiveMinutes)
     //let dni = meteo.map(\.dni)
     //try? Gnuplot(xs: Array(dni))(.pngLarge(path: "____1.png"))
   }

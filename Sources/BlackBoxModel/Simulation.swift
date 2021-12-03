@@ -42,7 +42,7 @@ public enum Simulation {
     firstDateOfOperation: nil,
     lastDateOfOperation: nil,
     holidays: [],
-    steps: .every5minutes
+    steps: .fiveMinutes
   )
 
   public static var parameter = Simulation.Parameter(
