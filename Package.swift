@@ -19,6 +19,7 @@ var package = Package(
     .executable(name: "TransTES", targets: ["TransTES"]),
     .executable(name: "PinchPointTool", targets: ["PinchPointTool"]),
     .executable(name: "SunOl", targets: ["SunOl"]), 
+    .executable(name: "Playground", targets: ["Playground"]), 
  // .library(name: "BlackBoxModel", type: .dynamic, targets: ["BlackBoxModel"]),
   ],
   dependencies: [
@@ -84,8 +85,8 @@ var package = Package(
     // .executableTarget(name: "Benchmarking",
     //   dependencies: ["Meteo", "Benchmark", "BlackBoxModel"],
     //   swiftSettings: swift),
-    // .executableTarget(name: "Playground",
-    //    dependencies: ["Utilities"], swiftSettings: swift, linkerSettings: [linker]),
+    .executableTarget(name: "Playground",
+        dependencies: ["Utilities"], swiftSettings: swift, linkerSettings: [linker]),
     .executableTarget(
       name: "SolarFieldCalc",
       dependencies: [
