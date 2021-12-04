@@ -47,21 +47,26 @@ public final class TimeSeriesPlot {
   }
 
   func plot(code: String) throws {
+    if !gnuplot.isRunning { try gnuplot.run() }
     let stdin = gnuplot.standardInput as! Pipe
-    try gnuplot.run()
     stdin.fileHandleForWriting.write(code.data(using: .utf8)!)
+    #if !os(Linux)
     stdin.fileHandleForWriting.closeFile()
+    #endif
   }
 
   public func callAsFunction(toFile: String? = nil) throws {
     var code: String = ""
     if let file = toFile {
       code = """
-        set terminal png size 1573,960 font 'Sans,9';
-        set output '\(file).png'\n;
+        set terminal svg size 1573,960 font 'Sans,9';
+        set output '\(file).svg'\n;
         """
     }
-    code += settings.concatenated + datablock + plot() + ";exit\n\n"
+    code += settings.concatenated + datablock + plot() + "\n"
+    #if !os(Linux)
+    code += "exit\n\n"
+    #endif
     try plot(code: code)
   }
 
