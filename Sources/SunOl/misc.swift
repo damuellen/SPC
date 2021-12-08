@@ -78,6 +78,11 @@ func countiff(_ values: ArraySlice<Double>, _ predicat: (Double) -> Bool) -> Dou
 
 func iff(_ expression: Bool, _ yes: Double, _ no: Double) -> Double { expression ? yes : no }
 
+
+func IFERROR(_ check: Double, _ subs: Double) -> Double {
+  check.isFinite ? check : subs
+}
+
 extension Double {
   public var multiBar: String {
     let (bar_chunks, remainder) = Int(self * 80).quotientAndRemainder(dividingBy: 8)
