@@ -4,7 +4,7 @@ on: [push]
 
 jobs:
   continuous-integration:
-
+    timeout-minutes: 15
     runs-on: [windows-2019]
 
     steps:
@@ -20,16 +20,19 @@ jobs:
 
       - name: Build Release Mode
         run: swift build -c release -Xswiftc -gnone -Xswiftc -suppress-warnings
+        continue-on-error: true
 
       - name: Compress SolarPerformanceCalc
         uses: svenstaro/upx-action@v2
+        continue-on-error: true
         with:
-          file: .build\x86_64-unknown-windows-msvc\release\SolarPerformanceCalc.exe
+          file: .build\x86_64-unknown-windows-msvc\release\SPC.exe
           args: -9
           strip: false
 
       - name: Compress SolarFieldCalc
         uses: svenstaro/upx-action@v2
+        continue-on-error: true
         with:
           file: .build\x86_64-unknown-windows-msvc\release\SolarFieldCalc.exe
           args: -9
@@ -37,6 +40,7 @@ jobs:
 
       - name: Compress TransTES
         uses: svenstaro/upx-action@v2
+        continue-on-error: true
         with:
           file: .build\x86_64-unknown-windows-msvc\release\TransTES.exe
           args: -9
@@ -44,6 +48,7 @@ jobs:
 
       - name: Compress SunOl
         uses: svenstaro/upx-action@v2
+        continue-on-error: true
         with:
           file: .build\x86_64-unknown-windows-msvc\release\SunOl.exe
           args: -9
@@ -51,6 +56,7 @@ jobs:
 
       - name: Compress PinchPointTool
         uses: svenstaro/upx-action@v2
+        continue-on-error: true
         with:
           file: .build\x86_64-unknown-windows-msvc\release\PinchPointTool.exe
           args: -9
@@ -58,6 +64,7 @@ jobs:
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v2
+        continue-on-error: true
         with:
           name: SPC-win32-x64
           path: |
