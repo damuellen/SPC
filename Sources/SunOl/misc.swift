@@ -71,6 +71,18 @@ func sum(_ values: ArraySlice<Double>) -> Double {
   return s + w
 }
 
+/// Kahan-Babuška-Neumaier Sum
+func sum(_ values: Array<Double>) -> Double {
+  let (s, w) = values.reduce((s: Double.zero, w: Double.zero)) { accum, aᵢ in 
+    let (sᵢ₋₁, wᵢ₋₁) = accum
+    let sᵢ = sᵢ₋₁ + aᵢ
+    let Δ = abs(aᵢ) <= abs(sᵢ₋₁) ? (sᵢ₋₁ - sᵢ) + aᵢ : (aᵢ - sᵢ) + sᵢ₋₁
+    let wᵢ = wᵢ₋₁ + Δ
+    return (s: sᵢ, w: wᵢ)
+  }
+  return s + w
+}
+
 func countiff(_ values: ArraySlice<Double>, _ predicat: (Double) -> Bool) -> Double {
   let count = values.reduce(into: 0) { counter, value in if predicat(value) { counter += 1 } }
   return Double(count)
@@ -79,10 +91,17 @@ func countiff(_ values: ArraySlice<Double>, _ predicat: (Double) -> Bool) -> Dou
 func iff(_ expression: Bool, _ yes: Double, _ no: Double) -> Double { expression ? yes : no }
 
 
-func IFERROR(_ check: Double, _ subs: Double) -> Double {
+func ifFinite(_ check: Double, _ subs: Double) -> Double {
   check.isFinite ? check : subs
 }
 
+func and(_ conditions: Bool...) -> Bool {
+  conditions.allSatisfy{$0}
+}
+
+func or(_ conditions: Bool...) -> Bool {
+  conditions.contains(true)
+}
 extension Double {
   public var multiBar: String {
     let (bar_chunks, remainder) = Int(self * 80).quotientAndRemainder(dividingBy: 8)

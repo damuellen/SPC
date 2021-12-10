@@ -196,11 +196,7 @@ struct SunOl {
 
     let E_PV_total_Scaled_DC =  // J
       Reference_PV_plant_power_at_inverter_inlet_DC.map { $0 * PV.DC_Cap / PV.Ref_DC_cap }
-    // var chunked = E_PV_total_Scaled_DC.chunked { !($0 == 0 && $1 > 0) }
-    // let s = chunked.removeFirst()
-    // chunked[chunked.endIndex - 1].append(contentsOf: s)
-    // let sumOfDay = chunked.map(sum)
-    // let dayNight = chunked.map { ($0.count, $0.endIndex - $0.firstIndex(of: 0)!) }
+
 
     let PV_MV_power_at_transformer_outlet: [Double] = indices.map {  // K
       let load = E_PV_total_Scaled_DC[$0] / PV.DC_Cap

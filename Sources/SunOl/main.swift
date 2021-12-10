@@ -3,14 +3,22 @@ import Foundation
 import Utilities
 import xlsxwriter
 
-signal(SIGINT, SIG_IGN)
 let source = DispatchSource.makeSignalSource(signal: SIGINT, queue: .global())
 let semaphore = DispatchSemaphore(value: 0)
+#if !os(Windows)
+try! Gnuplot.process().run()
+source.setEventHandler { source.cancel() }
+#else
+import WinSDK
+_ = SetConsoleOutputCP(UINT(CP_UTF8))
+SetConsoleCtrlHandler({_ in source.cancel();semaphore.wait();return WindowsBool(true)}, true)
+DispatchQueue.global().asyncAfter(deadline: .now() + 3) { start("http://127.0.0.1:9080") }
+#endif
+
 var stopwatch = 0
 var convergenceCurves = [[[Double]]](repeating: [[Double]](), count: 3)
 
-let server = HTTP { request -> HTTP.Response in
-  var uri = request.uri
+let server = HTTP { request -> HTTP.Response in var uri = request.uri
   if uri == "/cancel" {
     source.cancel()
     stopwatch = 0
@@ -19,8 +27,14 @@ let server = HTTP { request -> HTTP.Response in
   }
   let curves = convergenceCurves.map { Array($0.suffix(Int(uri) ?? 10)) }
   if curves[0].count > 1 {
+    let m = curves.map(\.last!).map { $0[1] }.min()
+    let i = curves.firstIndex(where: { $0.last![1] == m })!
     let plot = Gnuplot(xys: curves, titles: ["Best1", "Best2", "Best3"])
-    .set(title: "Convergence curves").set(xlabel: "Iteration").set(ylabel: "LCoM")
+      .plot(multi: true, index: 0).plot(index: 1).plot(index: 2)
+      .plot(multi: true, index: i).plot(index: i, label: 2)
+      .set(title: "Convergence curves")
+      .set(xlabel: "Iteration").set(ylabel: "LCoM")
+    plot.settings["xtics"] = "1"
     return .init(html: .init(body: plot.svg!, refresh: min(stopwatch, 30)))
   }
   return .init(html: .init(refresh: 10))
@@ -28,26 +42,13 @@ let server = HTTP { request -> HTTP.Response in
 
 source.resume()
 server.start()
-DispatchQueue.global().asyncAfter(deadline: .now() + 2) {
-  start("http://127.0.0.1:9080")
-}
-#if !os(Windows)
-source.setEventHandler { source.cancel() }
-#else
-import WinSDK
-_ = SetConsoleOutputCP(UINT(CP_UTF8))
-SetConsoleCtrlHandler(
-  { _ in source.cancel()
-    semaphore.wait()
-    return WindowsBool(true)
-  },
-  true
-)
-#endif
 
 let now = Date()
+
 DispatchQueue.global(qos: .background).sync { Command.main() }
+
 print("Elapsed seconds:", -now.timeIntervalSinceNow)
+
 server.stop()
 semaphore.signal()
 
@@ -276,12 +277,13 @@ struct Command: ParsableCommand {
     defer {
       print(name)
       ws.table(range: [0, 0, r, CostModel.labels.count - 1], header: CostModel.labels)
-      names.enumerated()
-        .forEach { column, name in let chart = wb.addChart(type: .scatter)  //.set(y_axis: 1000...2500)
-          chart.addSeries().set(marker: 5, size: 4).values(sheet: ws, range: [1, 17, r, 17]).categories(sheet: ws, range: [1, column, r, column])
-          chart.remove(legends: 0)
-          wb.addChartsheet(name: name).set(chart: chart)
-        }
+      names.enumerated().forEach { column, name in let chart = wb.addChart(type: .scatter)  //.set(y_axis: 1000...2500)
+        chart.addSeries().set(marker: 5, size: 4)
+        .values(sheet: ws, range: [1, 17, r, 17])
+        .categories(sheet: ws, range: [1, column, r, column])
+        chart.remove(legends: 0)
+        wb.addChartsheet(name: name).set(chart: chart)
+      }
       ws2.table(range: [0, 0, r2, 3], header: ["CAPEX", "Count", "Min", "Max"])
       let chart = wb.addChart(type: .line)
       chart.addSeries().values(sheet: ws2, range: [1, 2, r2, 2]).categories(sheet: ws2, range: [1, 0, r2, 0])
@@ -319,7 +321,7 @@ struct Command: ParsableCommand {
     parameter.forEach { parameter in
       let a = MGOADE(group: !noGroups, n: n ?? 150, maxIter: iterations ?? 100, bounds: parameter.ranges, fitness: fitness)
       a.forEach { row in r += 1; ws.write(row, row: r) }
-
+      if r < 2 { return }
       let (x,y) = (12, 17)
       let freq = 10e7
       var d = [Double:[Double]]()
