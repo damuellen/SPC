@@ -114,7 +114,7 @@ extension Double {
 struct Results {
   init() {
     #if DEBUGA
-    guard let dataFile = CSV(path: "/workspaces/SPC/output.txt") else { fatalError() }
+    guard let dataFile = CSV(atPath: "/workspaces/SPC/output.txt") else { fatalError() }
    
     let A = UnicodeScalar("A").value
     let count = dataFile.dataRows[0].count

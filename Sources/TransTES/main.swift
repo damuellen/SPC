@@ -9,7 +9,7 @@ extension Date {
 }
 
 func readTariffs() -> [Tariffs] {
-  guard let csv = CSV(path: "Tariffs.txt") else { return [] }
+  guard let csv = CSV(atPath: "Tariffs.txt") else { return [] }
 
   let cal = Calendar(identifier: .gregorian)
 

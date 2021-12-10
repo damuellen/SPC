@@ -261,7 +261,7 @@ struct Command: ParsableCommand {
 
   func run() throws {
     let path = file ?? "/Users/daniel/spc/input.txt"
-    guard let csv = CSV(path: path) else { print("No input."); return }
+    guard let csv = CSV(atPath: path) else { print("No input."); return }
     Q_Sol_MW_thLoop = csv["csp"]
     Reference_PV_plant_power_at_inverter_inlet_DC = csv["pv"]
     Reference_PV_MV_power_at_transformer_outlet = csv["out"]
@@ -331,7 +331,7 @@ struct Command: ParsableCommand {
         else { d[key] = [1, a[i][y], a[i][y]] }
       }
       d.keys.sorted().map { [$0 * freq] + d[$0]! }.forEach { row in r2 += 1; ws2.write(row, row: r2) }
-      try? Gnuplot(xys: pareto_frontier(xys: a, x: x, y: y))(.pngLarge(path: "pareto_frontier.png"))
+      let _ = try? Gnuplot(xys: pareto_frontier(xys: a, x: x, y: y))(.pngLarge(path: "pareto_frontier.png"))
     }
   }
 }
