@@ -4,7 +4,7 @@ on: [push]
 
 jobs:
   continuous-integration:
-
+    timeout-minutes: 15
     runs-on: [ubuntu-18.04]
 
     steps:
@@ -25,9 +25,10 @@ jobs:
       run: swift package update
 
     - name: Build Debug mode
-      run: swift build --build-tests --enable-test-discovery -Xswiftc -suppress-warnings
+      run: swift build --build-tests --enable-test-discovery -Xswiftc -suppress-warnings -Xswiftc -continue-building-after-errors
 
     - name: Run tests
+      continue-on-error: true
       run: swift test --enable-test-discovery -Xswiftc -suppress-warnings
 
     - name: Generate Documentation

@@ -26,9 +26,10 @@
                 "--product",
                 "SolarPerformanceCalc"
             ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
+            "group": "build",
+            "presentation": {
+                "reveal": "never",
+                "echo": false
             }
         },
         {
@@ -44,7 +45,11 @@
                 "-Xswiftc",
                 "-DPRINT"
             ],
-            "group": "build"
+            "group": "build",
+            "presentation": {
+                "reveal": "never",
+                "echo": false
+            }
         },
         {
             "label": "swift-build-debug",
@@ -54,7 +59,11 @@
                 "build",
                 "-Xswiftc",
                 "-suppress-warnings"
-            ]
+            ],
+            "presentation": {
+                "reveal": "never",
+                "echo": false
+            }
         },
         {
             "label": "swift-build-debug-sol",
@@ -66,7 +75,29 @@
                 "SunOl",
                 "-Xswiftc",
                 "-suppress-warnings"
-            ]
+            ],
+            "presentation": {
+                "reveal": "never",
+                "echo": false
+            }
+        },
+        {
+            "label": "swift-build-release-sol",
+            "type": "shell",
+            "command": "swift",
+            "args": [
+                "build",
+                "--product",
+                "SunOl",
+                "-Xswiftc",
+                "-suppress-warnings",
+                "--configuration",
+                "release"
+            ],
+            "presentation": {
+                "reveal": "never",
+                "echo": false
+            }
         },
         {
             "label": "swift-build-debug-pp",
@@ -78,7 +109,11 @@
                 "PinchPointTool",
                 "-Xswiftc",
                 "-suppress-warnings"
-            ]
+            ],
+            "presentation": {
+                "reveal": "never",
+                "echo": false
+            }
         },
         {
             "label": "swift-build-tests",
@@ -107,8 +142,20 @@
                 "-Xswiftc",
                 "-suppress-warnings",
                 "--configuration",
-                "release"
-            ]
+                "release",
+                "-Xswiftc",
+                "-target-cpu",
+                "-Xswiftc",
+                "nativ"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "never",
+                "echo": false
+            }
         }
     ]
 }

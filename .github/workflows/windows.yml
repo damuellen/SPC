@@ -68,7 +68,7 @@ jobs:
         with:
           name: SPC-win32-x64
           path: |
-            .build\x86_64-unknown-windows-msvc\release\SolarPerformanceCalc.exe
+            .build\x86_64-unknown-windows-msvc\release\SPC.exe
             .build\x86_64-unknown-windows-msvc\release\SolarFieldCalc.exe
             .build\x86_64-unknown-windows-msvc\release\TransTES.exe
             .build\x86_64-unknown-windows-msvc\release\PinchPointTool.exe
