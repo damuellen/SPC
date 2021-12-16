@@ -2,11 +2,11 @@ import ArgumentParser
 import Foundation
 import Utilities
 import xlsxwriter
+// import SwiftPlot
 
 let source = DispatchSource.makeSignalSource(signal: SIGINT, queue: .global())
 let semaphore = DispatchSemaphore(value: 0)
 #if !os(Windows)
-try! Gnuplot.process().run()
 source.setEventHandler { source.cancel() }
 #else
 import WinSDK
@@ -14,7 +14,9 @@ _ = SetConsoleOutputCP(UINT(CP_UTF8))
 SetConsoleCtrlHandler({_ in source.cancel();semaphore.wait();return WindowsBool(true)}, true)
 DispatchQueue.global().asyncAfter(deadline: .now() + 3) { start("http://127.0.0.1:9080") }
 #endif
-
+#if os(Linux)
+try! Gnuplot.process().run()
+#endif
 var stopwatch = 0
 var convergenceCurves = [[[Double]]](repeating: [[Double]](), count: 3)
 
@@ -29,6 +31,17 @@ let server = HTTP { request -> HTTP.Response in var uri = request.uri
   if curves[0].count > 1 {
     let m = curves.map(\.last!).map { $0[1] }.min()
     let i = curves.firstIndex(where: { $0.last![1] == m })!
+    /*
+    var lineGraph = LineGraph<Float,Float>(enablePrimaryAxisGrid: true)
+    lineGraph.addSeries(points: curves[0].map { Pair(Float($0[0]), Float($0[1])) }, label: "Best1")
+    lineGraph.addSeries(points: curves[1].map { Pair(Float($0[0]), Float($0[1])) }, label: "Best2")
+    lineGraph.addSeries(points: curves[2].map { Pair(Float($0[0]), Float($0[1])) }, label: "Best3")
+    lineGraph.plotTitle = PlotTitle("Convergence curves")
+    lineGraph.plotLabel = PlotLabel(xLabel: "Iteration", yLabel: "LCoM")
+    lineGraph.plotLineThickness = 2.0
+    let svg = SVGRenderer()
+    lineGraph.drawGraph(renderer: svg)
+    */
     let plot = Gnuplot(xys: curves, titles: ["Best1", "Best2", "Best3"])
       .plot(multi: true, index: 0).plot(index: 1).plot(index: 2)
       .plot(multi: true, index: i).plot(index: i, label: 2)
@@ -265,6 +278,9 @@ struct Command: ParsableCommand {
     Q_Sol_MW_thLoop = csv["csp"]
     Reference_PV_plant_power_at_inverter_inlet_DC = csv["pv"]
     Reference_PV_MV_power_at_transformer_outlet = csv["out"]
+
+
+    foo2(Q_Sol_MW_thLoop, Reference_PV_plant_power_at_inverter_inlet_DC, Reference_PV_MV_power_at_transformer_outlet)
     let id = String(UUID().uuidString.prefix(6))
     let name = "SunOl_\(id).xlsx"
     let wb = Workbook(name: name)
@@ -297,7 +313,7 @@ struct Command: ParsableCommand {
     }
 
     let parameter: [Parameter]
-    if let path = json, let data = try? Data(contentsOf: .init(fileURLWithPath: path)), 
+    if let path = json, let data = try? Data(contentsOf: path), 
       let parameters = try? JSONDecoder().decode([Parameter].self, from: data) {
       parameter = parameters
     } else {
