@@ -28,7 +28,7 @@
             ],
             "group": "build",
             "presentation": {
-                "reveal": "never",
+                "reveal": "silent",
                 "echo": false
             }
         },
@@ -47,7 +47,7 @@
             ],
             "group": "build",
             "presentation": {
-                "reveal": "never",
+                "reveal": "silent",
                 "echo": false
             }
         },
@@ -61,7 +61,7 @@
                 "-suppress-warnings"
             ],
             "presentation": {
-                "reveal": "never",
+                "reveal": "silent",
                 "echo": false
             }
         },
@@ -77,7 +77,7 @@
                 "-suppress-warnings"
             ],
             "presentation": {
-                "reveal": "never",
+                "reveal": "silent",
                 "echo": false
             }
         },
@@ -95,7 +95,7 @@
                 "release"
             ],
             "presentation": {
-                "reveal": "never",
+                "reveal": "silent",
                 "echo": false
             }
         },
@@ -111,7 +111,23 @@
                 "-suppress-warnings"
             ],
             "presentation": {
-                "reveal": "never",
+                "reveal": "silent",
+                "echo": false
+            }
+        },
+        {
+            "label": "swift-build-debug-playground",
+            "type": "shell",
+            "command": "swift",
+            "args": [
+                "build",
+                "--product",
+                "Playground",
+                "-Xswiftc",
+                "-suppress-warnings"
+            ],
+            "presentation": {
+                "reveal": "silent",
                 "echo": false
             }
         },
@@ -129,7 +145,7 @@
             },
             "problemMatcher": [],
             "presentation": {
-                "reveal": "never",
+                "reveal": "silent",
                 "echo": false
             }
         },
@@ -153,7 +169,7 @@
                 "isDefault": true
             },
             "presentation": {
-                "reveal": "never",
+                "reveal": "silent",
                 "echo": false
             }
         }

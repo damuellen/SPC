@@ -1,4 +1,4 @@
-// swift-tools-version:5.4
+// swift-tools-version:5.5
 import PackageDescription
 
 let c: CSetting = .unsafeFlags(["-ffast-math", "-O3", "-fomit-frame-pointer", "-funroll-loops"])
@@ -9,7 +9,7 @@ let linker: LinkerSetting = .unsafeFlags(["-Xlinker", "/INCREMENTAL:NO", "-Xlink
 let swift: [SwiftSetting] = [.unsafeFlags(flags, .when(configuration: .release)), .define("DEBUG", .when(configuration: .debug))]
 var package = Package(
   name: "SPC",
-  platforms: [.macOS(.v10_15)],
+  platforms: [.macOS(.v10_15), .iOS(.v15)],
   products: [
     .executable(name: "SPC", targets: ["SolarPerformanceCalc"]),
     .executable(name: "SolarFieldCalc", targets: ["SolarFieldCalc"]),
@@ -22,7 +22,9 @@ var package = Package(
     .package(url: "https://github.com/apple/swift-argument-parser.git", .upToNextMinor(from: "0.5.0")),
     .package(url: "https://github.com/damuellen/SQLite.swift.git", .branch("master")),
     .package(url: "https://github.com/damuellen/xlsxwriter.swift.git", .branch("main")),
-    .package(url: "https://github.com/damuellen/Utilities.git", .branch("main")),  // .package(url: "https://github.com/damuellen/Numerical.git", .branch("master")),
+    .package(url: "https://github.com/damuellen/Utilities.git", .branch("main")),  
+    // .package(url: "https://github.com/damuellen/Swiftplot.git", .branch("master")),
+    // .package(url: "https://github.com/damuellen/Numerical.git", .branch("master")),
     // .package(name: "Benchmark", url: "https://github.com/google/swift-benchmark", from: "0.1.0"),
     // .package(url: "https://github.com/pvieito/PythonKit.git", .branch("master")),
     // .package(url: "https://github.com/jpsim/Yams.git", from: "4.0.1")
@@ -67,6 +69,7 @@ var package = Package(
       dependencies: [
         "Utilities", .product(name: "ArgumentParser", package: "swift-argument-parser"),
         .product(name: "xlsxwriter", package: "xlsxwriter.swift")],
+        // .product(name: "SwiftPlot", package: "SwiftPlot")
       swiftSettings: swift, linkerSettings: [linker]),
     .executableTarget(
       name: "PinchPointTool",

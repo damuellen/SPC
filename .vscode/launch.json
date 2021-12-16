@@ -89,6 +89,14 @@
         {
             "type": "lldb",
             "request": "launch",
+            "name": "Playground",
+            "program": "${workspaceFolder}/.build/debug/Playground",
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "swift-build-debug-playground"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
             "name": "TransTES",
             "program": "${workspaceFolder}/.build/debug/TransTES",
             "args": [
