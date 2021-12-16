@@ -7,6 +7,7 @@ import xlsxwriter
 let source = DispatchSource.makeSignalSource(signal: SIGINT, queue: .global())
 let semaphore = DispatchSemaphore(value: 0)
 #if !os(Windows)
+signal(SIGINT, SIG_IGN)
 source.setEventHandler { source.cancel() }
 #else
 import WinSDK
