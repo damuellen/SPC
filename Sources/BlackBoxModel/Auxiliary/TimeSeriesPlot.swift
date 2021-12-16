@@ -13,7 +13,9 @@ import Helpers
 
 /// Creates a chart to represent time-series data using multiple y axis.
 public final class TimeSeriesPlot {
+  #if !os(iOS)
   let gnuplot: Process
+  #endif
   public enum Style: String { case steps, impulses }
 
   let y1: [[Double]]
@@ -43,9 +45,14 @@ public final class TimeSeriesPlot {
     } else {
       self.x = (1800, "'%R'", "")
     }
+    #if !os(iOS)
     gnuplot = Gnuplot.process()
+    #endif
   }
 
+  #if os(iOS)
+  func plot(code: String) throws {}
+  #else
   func plot(code: String) throws {
     if !gnuplot.isRunning { try gnuplot.run() }
     let stdin = gnuplot.standardInput as! Pipe
@@ -54,7 +61,7 @@ public final class TimeSeriesPlot {
     stdin.fileHandleForWriting.closeFile()
     #endif
   }
-
+  #endif
   public func callAsFunction(toFile: String? = nil) throws {
     var code: String = ""
     if let file = toFile {
