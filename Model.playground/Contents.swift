@@ -27,8 +27,8 @@ extension Recording: CustomPlaygroundDisplayConvertible {
 }
 
 let 🌦 = Bundle.main.path(forResource: "AlAbdaliyah", ofType: "mto")!
-let recorder = Recorder()
-let recorder2 = Recorder()
+let history = Historian()
+
 BlackBoxModel.configure(meteoFilePath: 🌦)
 Simulation.time.steps = .fiveMinutes
 
@@ -37,13 +37,13 @@ SolarField.parameter.maxMassFlow = MassFlow(2500)
 
 Design.layout.solarField = 140
 
-let result1 = BlackBoxModel.runModel(with: recorder)
+let result1 = BlackBoxModel.runModel(with: history)
 
 result1[\.collector.insolationAbsorber, ofDay: 188].sum()
 let a = Array(result1[\.collector.insolationAbsorber, ofDay: 200]).filter {$0 > 0}
 a.mean()
 var best = result1
-let log = Recorder(noHistory: true)
+let log = Historian(noHistory: true)
 
 for n in (142...156).reversed() {
   Design.layout.solarField = Double(n)

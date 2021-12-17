@@ -15,7 +15,7 @@ import SQLite
 import xlsxwriter
 
 /// A class that creates a recording of performance data.
-public final class Recorder {
+public final class Historian {
 
 #if DEBUG && !os(Windows)
   /// Tracking the month

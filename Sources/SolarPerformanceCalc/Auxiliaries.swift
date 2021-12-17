@@ -33,12 +33,12 @@ class Population {
   init(size: Int) {
     let layouts = generateRandomLayouts(size: size)
 
-    let recorder = Recorder(mode: .inMemory)
+    let history = Historian(mode: .inMemory)
 
     for layout in layouts {
       Design.layout = layout
       print(layout)
-      individuals.append(BlackBoxModel.runModel(with: recorder))
+      individuals.append(BlackBoxModel.runModel(with: history))
     }
   }
 
@@ -49,14 +49,14 @@ class Population {
   init(layouts: [Layout], cache: [Recording]) {
     let oldLayouts = cache.map { $0.layout }
 
-    let recorder = Recorder(mode: .inMemory)
+    let history = Historian(mode: .inMemory)
 
     for layout in layouts {
       if let idx = oldLayouts.firstIndex(of: layout) {
         individuals.append(cache[idx])
       } else {       
         Design.layout = layout
-        individuals.append(BlackBoxModel.runModel(with: recorder))
+        individuals.append(BlackBoxModel.runModel(with: history))
       }
     }
   }

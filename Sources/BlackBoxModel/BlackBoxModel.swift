@@ -87,7 +87,7 @@ public enum BlackBoxModel {
 
   /// - Parameter with: Creates the log and write results to file.
   /// - Attention: `configure()` must called before this.
-  public static func runModel(with log: Recorder) -> Recording {
+  public static func runModel(with log: Historian) -> Recording {
 
     guard let 🌞 = sun, let 🌤 = meteoData else {
       print("We need the sun.")

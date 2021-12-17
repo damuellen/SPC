@@ -7,7 +7,7 @@
 //
 
 import Foundation
-/*
+
 extension SolarField {
   public struct Model: Codable {
 
@@ -54,16 +54,14 @@ extension Connector {
   }
 
   convenience init(_ connector: Model) {
-    
-    self.name = connector.name
-    self.distance = connector.distance
+    self.init(solarField: SolarField(massFlow: 0))
   }
 
   func model() -> Model {
     var model = Connector.Model()
     model.name = name
     model.distance = distance
-    model.head = start.name
+
     model.sizeAdaptation = sizeAdaptation
     return model
   }
@@ -93,7 +91,7 @@ extension SubField {
     var model = Model()
     model.name = name
     model.distance = distance
-    model.head = connection?.name ?? "null"
+    model.head = head?.name ?? "null"
     model.lhsLoops = lhsLoops
     model.rhsLoops = rhsLoops
     model.sizeAdaptation = sizeAdaptation
@@ -163,13 +161,13 @@ public struct SolarFieldModel: Codable {
     }
 
     let subfields: [SubField] = self.subfields.map { subfield in
-      //let s = SubField(subField: subfield)
+      let s = SubField(subField: subfield)
       let c = connectors.first { connector in
         connector.name == subfield.head
       }
-    //  s.connection = c
-    //  c?.connections.append(s)
-    //  return s
+      s.head = c
+      c?.connections.append(s)
+      return s
     }
 
     for (instance, model) in zip(subfields, self.subfields) {
@@ -180,7 +178,7 @@ public struct SolarFieldModel: Codable {
       }
     }
 
-    if let invalidSubfields = subfields.lazy.filter({ $0.connection == nil }).first {
+    if let invalidSubfields = subfields.lazy.filter({ $0.head == nil }).first {
       throw ModelError.disconnectedSubField(name: invalidSubfields.name)
     }
 
@@ -191,13 +189,11 @@ public struct SolarFieldModel: Codable {
     let zipped = zip(connectors, self.connectors)
     for (c, m) in zipped {
       if let s = zipped.first(where: { $0.1.head == m.name })?.0 {
-        c.successor = s; s.start = c
+        c.successor = s;
         connectors.removeAll { $0 === s }
       }
     }
 
     SolarField.assign(solarField)
-  
   }
 }
-*/

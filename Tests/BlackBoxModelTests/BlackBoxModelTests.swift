@@ -19,7 +19,7 @@ class BlackBoxModelTests: XCTestCase {
 
     BlackBoxModel.configure(year: 2005)
     BlackBoxModel.configure(location: location)
-    let log = Recorder(mode: .inMemory)
+    let log = Historian(mode: .inMemory)
     let result = BlackBoxModel.runModel(with: log)
     let tol = 0.2
     XCTAssertEqual(result.radiation.ico, 16865.8, accuracy: tol)
@@ -59,7 +59,7 @@ class BlackBoxModelTests: XCTestCase {
     BlackBoxModel.configure(year: 2005)
     BlackBoxModel.configure(location: location)
 
-    let log = Recorder(mode: .inMemory)
+    let log = Historian(mode: .inMemory)
 
     let result = BlackBoxModel.runModel(with: log)
     let tol = 0.2
