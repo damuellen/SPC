@@ -1,5 +1,5 @@
 import Utilities
-
+/*
 struct SunOl2 {
 
   let A_CCU_max_perc: Double
@@ -363,17 +363,17 @@ struct SunOl2 {
 
     // self._ = 6.43407043308906E-03
 
-    self.fix_aux_el = Polynomial([3.30241955243857E-01, -4.95362932865787E-01, 2.93145114445988E-01, 8.71975863175942E-01].reversed())
+    // self.fix_aux_el = Polynomial([3.30241955243857E-01, -4.95362932865787E-01, 2.93145114445988E-01, 8.71975863175942E-01].reversed())
 
     // self._ = 4.62509835126915E-03
     // self._ = 5.26407043308906E-03
 
-    self.fix_stby_el = Polynomial([2.11142058373717E-01, -3.16713087560573E-01, 2.14558232294004E-01, 8.91012796892852E-01].reversed())
+    // self.fix_stby_el = Polynomial([2.11142058373717E-01, -3.16713087560573E-01, 2.14558232294004E-01, 8.91012796892852E-01].reversed())
 
     // self._ = 1.27891539980364E-02
     // self._ = 5.98157043308906E-03
 
-    self.fix_stup_el = Polynomial([1.85815193367649E-01, -2.78722790051474E-01, 1.98852401739667E-01, 8.94055194944158E-01].reversed())
+    // self.fix_stup_el = Polynomial([1.85815193367649E-01, -2.78722790051474E-01, 1.98852401739667E-01, 8.94055194944158E-01].reversed())
     self.A_CCU_max_perc = 0.0
     self.A_CCU_Min_perc = 0.0
     self.A_CO2_max_cons = -A_CCU_max_perc * CCU_CO2_nom_prod_ud + A_MethSynt_max_perc * MethSynt_CO2_nom_cons
@@ -932,7 +932,7 @@ struct SunOl2 {
     self.TES_cold_tank_T = 304.55
     self.TES_dead_mass_ratio = 0.1
     self.TES_full_load_hours_ud = 14.0
-    self.TES_salt_mass = TES_thermal_cap * 1000.0 * 3600.0 / (_xll.h(SS, Heater_outlet_T) - _xll.h(SS, TES_cold_tank_T)) / 1000 * (1 + TES_dead_mass_ratio)
+    // self.TES_salt_mass = TES_thermal_cap * 1000.0 * 3600.0 / (_xll.h(SS, Heater_outlet_T) - _xll.h(SS, TES_cold_tank_T)) / 1000 * (1 + TES_dead_mass_ratio)
     self.TES_thermal_cap = TES_full_load_hours_ud * PB_nom_heat_cons
     // self.th_C0 = PB_calcU3
     // self.th_C1 = PB_calcT3
@@ -943,3 +943,4 @@ struct SunOl2 {
   }
 
 }
+*/

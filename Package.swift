@@ -11,6 +11,7 @@ let linker: LinkerSetting = .unsafeFlags(
 let swift: [SwiftSetting] = [
   .unsafeFlags(flags, .when(configuration: .release)),
   .define("DEBUG", .when(configuration: .debug)),
+  .unsafeFlags(["-Xfrontend", "-entry-point-function-name","-Xfrontend", "wWinMain"], .when(platforms: [.windows]))
 ]
 
 #if os(iOS)

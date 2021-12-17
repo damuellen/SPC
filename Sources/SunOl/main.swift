@@ -101,12 +101,9 @@ func MGOADE(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fi
   let cMax = 1.0
   let cMin = 0.00004
   let cr = 0.4
-  let f = 0.9    
-  #if os(Windows)
-  print("Calculate the fitness of initial population.")
-  #else
+  let f = 0.9  
+
   print("\u{1B}[H\n\u{1B}[2J\(ASCIIColor.blue.rawValue)Calculate the fitness of initial population.")
-  #endif
   // Calculate the fitness of initial grasshoppers
   DispatchQueue.concurrentPerform(iterations: grassHopperPositions.count) { i in
     let result = fitness(grassHopperPositions[i])
@@ -123,12 +120,7 @@ func MGOADE(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fi
     }
     convergenceCurves[g].append([Double(0), targetFitness[g]])
   }
-
-  #if os(Windows)
-  print("First population:\n\(targetFitness)")
-  #else
   print("\u{1B}[H\u{1B}[2J\(ASCIIColor.blue.rawValue)First population:\n\(targetFitness)")
-  #endif
   print(targetPosition.map(labeled(values:)).joined(separator: "\n"))
 
   func euclideanDistance(a: [Double], b: [Double]) -> Double {
@@ -249,11 +241,7 @@ func MGOADE(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fi
       }
       convergenceCurves[g].append([Double(l), targetFitness[g]])
     }
-    #if os(Windows)
-    print("Iterations: \(l)\n\(targetFitness)")
-    #else
     print("\u{1B}[H\u{1B}[2J\(ASCIIColor.blue.rawValue)Iterations: \(l)\n\(targetFitness)")
-    #endif
     print(targetPosition.map(labeled(values:)).joined(separator: "\n"))
     if (targetFitness.reduce(0, +) / 3) - targetFitness.min()! < 0.001 { break }
   }
@@ -280,8 +268,6 @@ struct Command: ParsableCommand {
     Reference_PV_plant_power_at_inverter_inlet_DC = csv["pv"]
     Reference_PV_MV_power_at_transformer_outlet = csv["out"]
 
-
-    foo2(Q_Sol_MW_thLoop, Reference_PV_plant_power_at_inverter_inlet_DC, Reference_PV_MV_power_at_transformer_outlet)
     let id = String(UUID().uuidString.prefix(6))
     let name = "SunOl_\(id).xlsx"
     let wb = Workbook(name: name)
@@ -314,7 +300,7 @@ struct Command: ParsableCommand {
     }
 
     let parameter: [Parameter]
-    if let path = json, let data = try? Data(contentsOf: path), 
+    if let path = json, let data = try? Data(contentsOf: .init(fileURLWithPath: path)), 
       let parameters = try? JSONDecoder().decode([Parameter].self, from: data) {
       parameter = parameters
     } else {

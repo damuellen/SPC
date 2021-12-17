@@ -93,7 +93,7 @@ struct Production {
     return result
   }
 }
-
+/*
 extension SunOl2 {
 
   mutating func calc() {
@@ -1879,3 +1879,4 @@ extension SunOl2 {
 
   }
 }
+*/
