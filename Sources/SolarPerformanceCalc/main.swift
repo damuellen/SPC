@@ -15,7 +15,7 @@ import Dispatch
 import Foundation
 import Meteo
 import Helpers
-
+import DateGenerator
 #if os(Windows)
 system("chcp 65001")
 #endif
@@ -150,7 +150,7 @@ struct SolarPerformanceCalculator: ParsableCommand {
       BlackBoxModel.configure(location: loc)
     }
 
-    let mode: Recorder.Mode
+    let mode: Historian.Mode
     if let steps = outputValues {
       mode = .custom(interval: Interval[steps])
     } else if database {
@@ -161,7 +161,7 @@ struct SolarPerformanceCalculator: ParsableCommand {
       mode = .csv
     }
 
-    let log = Recorder(
+    let log = Historian(
       customName: nameResults, customPath: resultsPath, outputMode: mode
     )
 
@@ -177,6 +177,8 @@ struct SolarPerformanceCalculator: ParsableCommand {
   )
 
   func plot(interval: DateInterval) {
+    let formatter = DateFormatter()
+    formatter.dateFormat = "MM_dd"
     for i in 1...365 {
       let interval = DateInterval(ofDay: i, in: BlackBoxModel.yearOfSimulation)
       let y1 = SolarPerformanceCalculator.result.massFlows(range: interval)
@@ -184,58 +186,8 @@ struct SolarPerformanceCalculator: ParsableCommand {
       let plot = TimeSeriesPlot(y1: y1, y2: y2, range: interval, style: .impulses)
       plot.y1Titles = ["solarfield", "powerblock", "storage"]
       plot.y2Titles = ["solar", "toStorage", "production", "storage", "gross", "net", "consum"]
-      try! plot(toFile: "/workspaces/SPC/res/Power_\(i)")
-    }
-    do {
-      let ys = SolarPerformanceCalculator.result.power(range: interval)
-      let plot = TimeSeriesPlot(y1: ys, y2: ys, range: interval)
-      plot.y1Titles = ["solar", "toStorage", "storage", "production"]
-      plot.y2Titles = ["gross", "net", "consum"]
-      try! plot(toFile: "power")
-    }
-    do {
-      let ys = SolarPerformanceCalculator.result[\.collector.insolationAbsorber, range: interval]
-      let plot = TimeSeriesPlot(y1: ys,range: interval)
-      plot.y1Titles = ["MassFlow"]
-      plot.y2Titles = ["T in", "T out"]
-      try! plot(toFile: "insol")
-    }
-    do {
-      let ys = SolarPerformanceCalculator.result.solarFieldHeader(range: interval)
-      let plot = TimeSeriesPlot(y1: ys.0, y2: ys.1, range: interval, style: .impulses)
-      plot.y1Titles = ["MassFlow"]
-      plot.y2Titles = ["T in", "T out"]
-      try! plot(toFile: "header")
-    }
-    do {
-      let ys = SolarPerformanceCalculator.result[\.solarField.loops[0], range: interval]
-      let plot = TimeSeriesPlot(y1: ys.0, y2: ys.1, range: interval, style: .impulses)
-      plot.y1Titles = ["MassFlow"]
-      plot.y2Titles = ["T in", "T out"]
-      try! plot(toFile: "loop0")
-    }
-    do {
-      let ys1 = SolarPerformanceCalculator.result.solarFieldHeader(range: interval)
-      let ys2 = SolarPerformanceCalculator.result[\.solarField.loops[1], range: interval]
-      let ys = (ys1.0 + ys2.0, ys1.1 + ys2.1)
-      let plot = TimeSeriesPlot(y1: ys.0, y2: ys.1, range: interval, style: .impulses)
-      plot.y1Titles = ["Header MassFlow", "Loop MassFlow"]
-      plot.y2Titles = ["Header T in", "Header T out", "Loop T in", "Loop T out"]
-     // try! plot(toFile: "loop1")
-    }
-    do {
-      let ys = SolarPerformanceCalculator.result[\.solarField.loops[2], range: interval]
-      let plot = TimeSeriesPlot(y1: ys.0, y2: ys.1, range: interval, style: .impulses)
-      plot.y1Titles = ["MassFlow"]
-      plot.y2Titles = ["T in", "T out"]
-      try! plot(toFile: "loop2")
-    }
-    do {
-      let ys = SolarPerformanceCalculator.result[\.solarField.loops[3], range: interval]
-      let plot = TimeSeriesPlot(y1: ys.0, y2: ys.1, range: interval, style: .impulses)
-      plot.y1Titles = ["MassFlow"]
-      plot.y2Titles = ["T in", "T out"]
-      try! plot(toFile: "loop3")
+      
+      try? plot(toFile: "/workspaces/SPC/res/Power_\(formatter.string(from: interval.start))")
     }
   }
 }
@@ -259,7 +211,7 @@ df.dateFormat = "dd.MM.yyyy"
 //Simulation.time.lastDateOfOperation = df.date(from: "04.01.2005")!
 
 
-let log = Recorder(
+let log = Historian(
   customNaming: "Result_\(lastRun + Int(1))"
 )
 */
