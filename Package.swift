@@ -20,6 +20,9 @@ let platformProducts: [Product] = [
 ]
 #else
 let platformProducts: [Product] = [
+  .library(name: "BlackBoxModel", type: .dynamic, targets: ["BlackBoxModel"]),
+  .library(name: "SolarPosition", type: .dynamic, targets: ["SolarPosition"]),
+  .library(name: "PinchPoint", type: .dynamic, targets: ["PinchPoint"]),
   .executable(name: "SPC", targets: ["SolarPerformanceCalc"]),
   .executable(name: "SolarFieldCalc", targets: ["SolarFieldCalc"]),
   .executable(name: "TransTES", targets: ["TransTES"]),
