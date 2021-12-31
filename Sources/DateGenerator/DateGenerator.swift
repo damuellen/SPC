@@ -12,7 +12,7 @@ public final class DateGenerator: Sequence, IteratorProtocol {
     case hourly = 1
     case thirtyMinutes = 2
     case fifteenMinutes = 4
-    case teenMinutes = 6
+    case tenMinutes = 6
     case fiveMinutes = 12
 
     public var fraction: Double {
