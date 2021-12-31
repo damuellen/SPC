@@ -103,8 +103,8 @@ struct SunOl {
         min(EY.heat_input, EY.heat_input * $0 * nominal_gross_cap * (1.0 - aux_cons_perc) / (EY.net_elec_input + EY.aux_elec_input))
           + nominal_heatConsumption
       }  // F
-      th = Polynomial.fit(x: thermal_load_perc, y: eff_factor)
-      el = Polynomial.fit(x: load_perc, y: eff_factor)
+      th = Polynomial.fit(x: thermal_load_perc, y: eff_factor, order: 4)!
+      el = Polynomial.fit(x: load_perc, y: eff_factor, order: 4)!
       Ratio_Heat_input_vs_output = factor * (no_extraction[0] / ref_aux_heat_prod.nominal) / (gross[0] / steam_extraction[0])
       max_heat_input = gross[0] + steam_extraction[0] * Ratio_Heat_input_vs_output
       min_heat_input = minimum_gross_cap / (nominal_gross_eff * el(min_el_cap_perc))
@@ -190,9 +190,9 @@ struct SunOl {
     let chunks = inverter.chunked { Int($0.0 * 100) == Int($1.0 * 100) }
     let eff1 = chunks.map { bin in bin.reduce(0.0) { $0 + $1.1 } / Double(bin.count) }
     let eff2 = zip(stride(from: 0.01, through: 1, by: 0.01), eff1).map { PV.AC_Cap * $0.0 / $0.1 / PV.DC_Cap }
-    let LL = Polynomial.fit(x: Array(eff2[...20]), y: Array(eff1[...20]), degree: 6)
-    let ML = Polynomial.fit(x: Array(eff2[8...22]), y: Array(eff1[8...22]), degree: 3)
-    let HL = Polynomial.fit(x: Array(eff2[20...]), y: Array(eff1[20...]), degree: 4)
+    let LL = Polynomial.fit(x: Array(eff2[...20]), y: Array(eff1[...20]), order: 6)!
+    let ML = Polynomial.fit(x: Array(eff2[8...22]), y: Array(eff1[8...22]), order: 3)!
+    let HL = Polynomial.fit(x: Array(eff2[20...]), y: Array(eff1[20...]), order: 4)!
 
     let E_PV_total_Scaled_DC =  // J
       Reference_PV_plant_power_at_inverter_inlet_DC.map { $0 * PV.DC_Cap / PV.Ref_DC_cap }
