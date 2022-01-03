@@ -16,13 +16,11 @@ jobs:
       uses: actions/checkout@v2
       with: 
         repository: jmcnamara/libxlsxwriter
-        ref: 'RELEASE_1.1.4'
         path: libxlsxwriter
         
     - name: Build libxlsxwriter
       working-directory: ./libxlsxwriter
       run: |
-        sudo apt-get install -y zlib1g-dev
         make
         sudo make install
 
