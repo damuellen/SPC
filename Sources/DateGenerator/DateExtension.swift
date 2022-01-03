@@ -1,11 +1,27 @@
+//
+//  Copyright 2022 Daniel Müllenborn
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//  http://www.apache.org/licenses/LICENSE-2.0
+//
+
 import Foundation
 
 public typealias FractionalTime = Double
 
+extension Date: ExpressibleByStringLiteral {
+  public init(stringLiteral value: String) {
+    self = ISO8601DateFormatter().date(from: value) ?? Date()
+  }
+}
+
 extension Date {
 
   public func getComponents() -> DateComponents {
-    calendar.components([.day, .month, .year, .weekday, .hour, .minute, .second], from: self)
+    Greenwich.components([.day, .month, .year, .weekday, .hour, .minute, .second], from: self)
   }
 
   public func set(time fractionalTime: FractionalTime) -> Date? {
@@ -15,7 +31,7 @@ extension Date {
     components.hour = Int(fractionalTime)
     components.minute = Int(min)
     components.second = Int(sec)
-    return calendar.date(from: components)
+    return Greenwich.date(from: components)
   }
 }
 
@@ -32,6 +48,6 @@ extension DateInterval {
     start.minute = (Int(Double(start.minute!) / interval)) * Int(interval)
     end.minute = (Int(Double(end.minute!) / interval)) * Int(interval)
 
-    return DateInterval(start: calendar.date(from: start)!, end: calendar.date(from: end)!)
+    return DateInterval(start: Greenwich.date(from: start)!, end: Greenwich.date(from: end)!)
   }
 }

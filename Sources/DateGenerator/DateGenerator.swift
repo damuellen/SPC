@@ -1,6 +1,16 @@
+//
+//  Copyright 2022 Daniel Müllenborn
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//  http://www.apache.org/licenses/LICENSE-2.0
+//
+
 import Foundation
 
-public let calendar = { calendar -> NSCalendar in
+public let Greenwich = { calendar -> NSCalendar in
   calendar.timeZone = TimeZone(secondsFromGMT: 0)!
   return calendar
 }(NSCalendar(identifier: .gregorian)!)
@@ -60,15 +70,15 @@ public final class DateGenerator: Sequence, IteratorProtocol {
       "year out of valid range or wrong format")
 
     var dateComponents = DateComponents()
-    dateComponents.timeZone = calendar.timeZone
+    dateComponents.timeZone = Greenwich.timeZone
     dateComponents.year = year
     dateComponents.month = 1
 
-    self.startDate = calendar.date(from: dateComponents)!
+    self.startDate = Greenwich.date(from: dateComponents)!
     self.valuesPerHour = interval.rawValue
     self.currentDate = self.startDate
     dateComponents.year = year + 1
-    self.endDate = calendar.date(from: dateComponents)! - 1
+    self.endDate = Greenwich.date(from: dateComponents)! - 1
   }
 
   public init(range: DateInterval, interval: Interval) {
@@ -94,19 +104,19 @@ public final class DateGenerator: Sequence, IteratorProtocol {
 extension DateInterval {
   public init(ofMonth month: Int, in year: Int) {
     var dateComponents = DateComponents()
-    dateComponents.timeZone = calendar.timeZone
+    dateComponents.timeZone = Greenwich.timeZone
     dateComponents.day = 1
     dateComponents.month = month
     dateComponents.year = year
-    let start = calendar.date(from: dateComponents)!
+    let start = Greenwich.date(from: dateComponents)!
     dateComponents.month! += 1
-    let end = calendar.date(from: dateComponents)! - 1
+    let end = Greenwich.date(from: dateComponents)! - 1
     self = .init(start: start, end: end)
   }
 
   public init(ofWeek week: Int, in year: Int) {
     var dateComponents = DateComponents()
-    dateComponents.timeZone = calendar.timeZone
+    dateComponents.timeZone = Greenwich.timeZone
 
     if week > 1 {
       dateComponents.weekOfYear = week
@@ -114,7 +124,7 @@ extension DateInterval {
 
     dateComponents.year = year
     dateComponents.weekday = 2
-    let start = calendar.date(from: dateComponents)!
+    let start = Greenwich.date(from: dateComponents)!
 
     if week < 53 {
       dateComponents.weekOfYear = week + 1
@@ -123,18 +133,18 @@ extension DateInterval {
       dateComponents.weekday = nil
     }
 
-    let end = calendar.date(from: dateComponents)! - 1
+    let end = Greenwich.date(from: dateComponents)! - 1
     self = .init(start: start, end: end)
   }
 
   public init(ofDay day: Int, in year: Int) {
     var dateComponents = DateComponents()
-    dateComponents.timeZone = calendar.timeZone
+    dateComponents.timeZone = Greenwich.timeZone
     dateComponents.day = day
     dateComponents.year = year
-    let start = calendar.date(from: dateComponents)!
+    let start = Greenwich.date(from: dateComponents)!
     dateComponents.day! += 1
-    let end = calendar.date(from: dateComponents)! - 1
+    let end = Greenwich.date(from: dateComponents)! - 1
     self = .init(start: start, end: end)
   }
 }
@@ -143,19 +153,19 @@ extension DateInterval {
 extension Date {
   public init(ofMonth month: Int, in year: Int) {
     var dateComponents = DateComponents()
-    dateComponents.timeZone = calendar.timeZone
+    dateComponents.timeZone = Greenwich.timeZone
     dateComponents.day = 1
     dateComponents.month = month
     dateComponents.year = year
-    self = calendar.date(from: dateComponents)!
+    self = Greenwich.date(from: dateComponents)!
   }
 
   public init(ofDay day: Int, in year: Int) {
     var dateComponents = DateComponents()
-    dateComponents.timeZone = calendar.timeZone
+    dateComponents.timeZone = Greenwich.timeZone
     dateComponents.day = day
     dateComponents.year = year
-    self = calendar.date(from: dateComponents)!
+    self = Greenwich.date(from: dateComponents)!
   }
 }
 
