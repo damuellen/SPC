@@ -58,7 +58,7 @@ class MeteoTests: XCTestCase {
     let m = MeteoDataProvider(name: "", data: meteoData, (2017, location))
     m.setInterval(.fiveMinutes)
     XCTAssertEqual(Array(m).count, 105120)
-    m.setInterval(.teenMinutes)
+    m.setInterval(.tenMinutes)
     XCTAssertEqual(Array(m).count, 52560)
     m.setInterval(.fifteenMinutes)
     XCTAssertEqual(Array(m).count, 35040)
