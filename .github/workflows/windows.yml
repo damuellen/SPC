@@ -26,11 +26,11 @@ jobs:
         run: swift build -c release -Xswiftc -gnone -Xswiftc -suppress-warnings -Xswiftc -continue-building-after-errors -Xswiftc -LC:/vcpkg/installed/x64-windows/lib/
         continue-on-error: true
 
-      - name: Run UPX
+      - name: Compress Programs and libraries
         uses: svenstaro/upx-action@v2
         continue-on-error: true
         with:
-          file: .build\x86_64-unknown-windows-msvc\release\*.exe
+          file: .build\x86_64-unknown-windows-msvc\release\
           args: -9
           strip: false
 

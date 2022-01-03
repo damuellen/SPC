@@ -33,7 +33,7 @@ steps:
   inputs:
     targetType: 'inline'
     script: |
-      Install-Binary -Url "https://download.swift.org/development/windows10/swift-DEVELOPMENT-SNAPSHOT-2021-10-27-a/swift-DEVELOPMENT-SNAPSHOT-2021-10-27-a-windows10.exe" -Name "installer.exe" -ArgumentList ("-q")
+      Install-Binary -Url "https://download.swift.org/swift-5.5.2-release/windows10/swift-5.5.2-RELEASE/swift-5.5.2-RELEASE-windows10.exe" -Name "installer.exe" -ArgumentList ("-q")
       Write-Host "##vso[task.prependpath]$(toolchain.directory)"
       Write-Host "##vso[task.prependpath]$(bin.directory)"
       Write-Host "##vso[task.prependpath]$(icu.directory)"
@@ -49,6 +49,12 @@ steps:
 - task: CopyFiles@2
   inputs:
     contents: '$(System.DefaultWorkingDirectory)\.build\x86_64-unknown-windows-msvc\release\*.exe'
+    targetFolder: $(Build.ArtifactStagingDirectory)
+  displayName: Copy build artifacts to staging directory
+
+- task: CopyFiles@2
+  inputs:
+    contents: '$(System.DefaultWorkingDirectory)\.build\x86_64-unknown-windows-msvc\release\*.dll'
     targetFolder: $(Build.ArtifactStagingDirectory)
   displayName: Copy build artifacts to staging directory
 
