@@ -17,7 +17,7 @@ extension Date: ExpressibleByStringLiteral {
     if let date = ISO8601DateFormatter().date(from: value) {
       self = date
     } else {
-      fatalError(value + "is not iso 8601 compliant")
+      fatalError(value + " is not iso 8601 compliant")
     }
   }
 }
