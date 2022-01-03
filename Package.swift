@@ -35,20 +35,15 @@ let platformProducts: [Product] = [
 var dependencies: [Package.Dependency] = [
   .package(url: "https://github.com/apple/swift-argument-parser.git", .upToNextMinor(from: "0.5.0")),
   .package(url: "https://github.com/damuellen/SQLite.swift.git", .branch("master")),
-  .package(url: "https://github.com/damuellen/Utilities.git", .branch("main")),  
+  .package(url: "https://github.com/damuellen/Utilities.git", .branch("main")),
+  .package(url: "https://github.com/damuellen/xlsxwriter.swift.git", .branch("vcpkg"))
   // .package(url: "https://github.com/damuellen/Swiftplot.git", .branch("master")),
   // .package(url: "https://github.com/damuellen/Numerical.git", .branch("master")),
   // .package(name: "Benchmark", url: "https://github.com/google/swift-benchmark", from: "0.1.0"),
   // .package(url: "https://github.com/pvieito/PythonKit.git", .branch("master")),
   // .package(url: "https://github.com/jpsim/Yams.git", from: "4.0.1")
 ]
-#if os(Windows)
-  dependencies.append(.package(url: "https://github.com/damuellen/xlsxwriter.swift.git", .branch("windows")))
-#elseif os(macOS)
-  dependencies.append(.package(url: "https://github.com/damuellen/xlsxwriter.swift.git", .branch("macOS")))
-#else
-  dependencies.append(.package(url: "https://github.com/damuellen/xlsxwriter.swift.git", .branch("main")))
-#endif
+
 let platformTargets: [Target] = [
   .target(name: "Config", swiftSettings: swift),
   .target(name: "DateGenerator", swiftSettings: swift), .target(name: "CPikchr", cSettings: [c]),
