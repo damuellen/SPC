@@ -26,43 +26,11 @@ jobs:
         run: swift build -c release -Xswiftc -gnone -Xswiftc -suppress-warnings -Xswiftc -continue-building-after-errors -Xswiftc -LC:/vcpkg/installed/x64-windows/lib/
         continue-on-error: true
 
-      - name: Compress SolarPerformanceCalc
+      - name: Run UPX
         uses: svenstaro/upx-action@v2
         continue-on-error: true
         with:
-          file: .build\x86_64-unknown-windows-msvc\release\SPC.exe
-          args: -9
-          strip: false
-
-      - name: Compress SolarFieldCalc
-        uses: svenstaro/upx-action@v2
-        continue-on-error: true
-        with:
-          file: .build\x86_64-unknown-windows-msvc\release\SolarFieldCalc.exe
-          args: -9
-          strip: false
-
-      - name: Compress TransTES
-        uses: svenstaro/upx-action@v2
-        continue-on-error: true
-        with:
-          file: .build\x86_64-unknown-windows-msvc\release\TransTES.exe
-          args: -9
-          strip: false
-
-      - name: Compress SunOl
-        uses: svenstaro/upx-action@v2
-        continue-on-error: true
-        with:
-          file: .build\x86_64-unknown-windows-msvc\release\SunOl.exe
-          args: -9
-          strip: false
-
-      - name: Compress PinchPointTool
-        uses: svenstaro/upx-action@v2
-        continue-on-error: true
-        with:
-          file: .build\x86_64-unknown-windows-msvc\release\PinchPointTool.exe
+          file: .build\x86_64-unknown-windows-msvc\release\*.exe
           args: -9
           strip: false
 
