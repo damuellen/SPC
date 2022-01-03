@@ -14,7 +14,11 @@ public typealias FractionalTime = Double
 
 extension Date: ExpressibleByStringLiteral {
   public init(stringLiteral value: String) {
-    self = ISO8601DateFormatter().date(from: value) ?? Date()
+    if let date = ISO8601DateFormatter().date(from: value) {
+      self = date
+    } else {
+      fatalError(value + "is not iso 8601 compliant")
+    }
   }
 }
 
