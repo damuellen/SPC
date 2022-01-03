@@ -34,7 +34,7 @@ jobs:
         uses: svenstaro/upx-action@v2
         continue-on-error: true
         with:
-          file: .build\x86_64-unknown-windows-msvc\release\
+          file: .build\x86_64-unknown-windows-msvc\release
           args: -9
           strip: false
 
