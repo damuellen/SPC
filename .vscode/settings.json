@@ -1,8 +1,24 @@
 {
-  "editor.renderIndentGuides": false,
-  "terminal.integrated.shell.windows": "cmd.exe",
-  "terminal.integrated.shellArgs.windows": [
-    "/k",
-    "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Auxiliary/Build/vcvars64.bat"
-  ]
+    "workbench.editorAssociations": {
+        "*.png": "imagePreview.previewEditor"
+    },
+    "terminal.integrated.defaultLocation": "editor",
+    "terminal.integrated.fontSize": 16,
+    "swiftTest.swift.logpanel": true,
+    "editor.fontFamily": "SF Mono, Menlo, Monaco, 'Courier New', monospace",
+    "editor.fontSize": 16,
+    "git.autofetch": true,
+    "editor.suggestSelection": "first",
+    "editor.quickSuggestionsDelay": 50,
+    "comments.openPanel": "neverOpen",
+    "debug.internalConsoleOptions": "neverOpen",
+    "debug.openDebug": "neverOpen",
+    "debug.onTaskErrors": "showErrors",
+    "debug.showInStatusBar": "never",
+    "testing.autoRun.delay": 5000,
+    "debug.console.closeOnEnd": true,
+    "workbench.startupEditor": "none",
+    "lldb.library": "/usr/lib/liblldb.so",
+    "lldb.launch.expressions": "native",
+    "sourcekit-lsp.inlayHints.enabled": true
 }

@@ -36,7 +36,7 @@ var dependencies: [Package.Dependency] = [
   .package(url: "https://github.com/apple/swift-argument-parser.git", .upToNextMinor(from: "0.5.0")),
   .package(url: "https://github.com/damuellen/SQLite.swift.git", .branch("master")),
   .package(url: "https://github.com/damuellen/Utilities.git", .branch("main")),
-  .package(url: "https://github.com/damuellen/xlsxwriter.swift.git", .branch("vcpkg"))
+  .package(url: "https://github.com/damuellen/xlsxwriter.swift.git", .branch("main"))
   // .package(url: "https://github.com/damuellen/Swiftplot.git", .branch("master")),
   // .package(url: "https://github.com/damuellen/Numerical.git", .branch("master")),
   // .package(name: "Benchmark", url: "https://github.com/google/swift-benchmark", from: "0.1.0"),

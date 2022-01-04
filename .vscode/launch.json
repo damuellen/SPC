@@ -7,16 +7,8 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "PackageTests",
-            "program": "${workspaceFolder}/.build/debug/SPCPackageTests.xctest",
-            "cwd": "${workspaceFolder}",
-            "preLaunchTask": "swift-build-tests"
-        },
-        {
-            "type": "lldb",
-            "request": "launch",
-            "name": "SolarPerformanceCalc-Debug-Print",
-            "program": "${workspaceFolder}/.build/debug/SolarPerformanceCalc",
+            "name": "Debug SPC",
+            "program": "${workspaceFolder}/.build/debug/SPC",
             "args": [
                 //  "--excel",
                 "-c",
@@ -25,44 +17,29 @@
                 "-m",
                 "${workspaceFolder}/COM/Meteofile_Hyperion1-200430_P50-TMYs_10min_wind_speed_modified.mto"
             ],
-            "cwd": "${workspaceFolder}",
-            "preLaunchTask": "swift-build-debug-print-SolarPerformanceCalc"
+            "cwd": "${workspaceFolder:SPC}",
+            "preLaunchTask": "swift: Build Debug SPC"
         },
         {
             "type": "lldb",
             "request": "launch",
-            "name": "SolarPerformanceCalc-Debug",
-            "program": "${workspaceFolder}/.build/debug/SolarPerformanceCalc",
+            "name": "Release SPC",
+            "program": "${workspaceFolder}/.build/release/SPC",
             "args": [
                 //  "--excel",
                 "-c",
                 "${workspaceFolder}/COM",
                 //  "-m", "${workspaceFolder}/Model.playground/Resources/AlAbdaliyah.mto"
                 "-m",
-                "${workspaceFolder}/COM/Midelt.mto"
+                "${workspaceFolder}/COM/Meteofile_Hyperion1-200430_P50-TMYs_10min_wind_speed_modified.mto"
             ],
-            "cwd": "${workspaceFolder}",
-            "preLaunchTask": "swift-build-debug-SolarPerformanceCalc"
+            "cwd": "${workspaceFolder:SPC}",
+            "preLaunchTask": "swift: Build Release SPC"
         },
         {
             "type": "lldb",
             "request": "launch",
-            "name": "SolarPerformanceCalc-Release",
-            "program": "${workspaceFolder}/.build/release/SolarPerformanceCalc",
-            "args": [
-                //   "-o", "12",
-                "-c",
-                "${workspaceFolder}/COM",
-                "-m",
-                "${workspaceFolder}/COM/Midelt.mto"
-            ],
-            "cwd": "${workspaceFolder}",
-            "preLaunchTask": "swift-build-release"
-        },
-        {
-            "type": "lldb",
-            "request": "launch",
-            "name": "SolarFieldCalc",
+            "name": "Debug SolarFieldCalc",
             "program": "${workspaceFolder}/.build/debug/SolarFieldCalc",
             "args": [
                 "--loops",
@@ -70,54 +47,110 @@
                 "--massflow",
                 "606"
             ],
-            "cwd": "${workspaceFolder}",
-            "preLaunchTask": "swift-build-debug"
+            "cwd": "${workspaceFolder:SPC}",
+            "preLaunchTask": "swift: Build Debug SolarFieldCalc"
         },
         {
             "type": "lldb",
             "request": "launch",
-            "name": "PinchPointTool",
+            "name": "Release SolarFieldCalc",
+            "program": "${workspaceFolder}/.build/release/SolarFieldCalc",
+            "args": [
+                "--loops",
+                "212",
+                "--massflow",
+                "606"
+            ],
+            "cwd": "${workspaceFolder:SPC}",
+            "preLaunchTask": "swift: Build Release SolarFieldCalc"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug TransTES",
+            "program": "${workspaceFolder}/.build/debug/TransTES",
+            "args": [],
+            "cwd": "${workspaceFolder:SPC}",
+            "preLaunchTask": "swift: Build Debug TransTES"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Release TransTES",
+            "program": "${workspaceFolder}/.build/release/TransTES",
+            "args": [],
+            "cwd": "${workspaceFolder:SPC}",
+            "preLaunchTask": "swift: Build Release TransTES"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug PinchPointTool",
             "program": "${workspaceFolder}/.build/debug/PinchPointTool",
             "args": [
                 "-json",
                 "-pdf",
                 "-html"
             ],
-            "cwd": "${workspaceFolder}",
-            "preLaunchTask": "swift-build-debug-pp"
+            "cwd": "${workspaceFolder:SPC}",
+            "preLaunchTask": "swift: Build Debug PinchPointTool"
         },
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Playground",
-            "program": "${workspaceFolder}/.build/debug/Playground",
-            "cwd": "${workspaceFolder}",
-            "preLaunchTask": "swift-build-debug-playground"
-        },
-        {
-            "type": "lldb",
-            "request": "launch",
-            "name": "TransTES",
-            "program": "${workspaceFolder}/.build/debug/TransTES",
+            "name": "Release PinchPointTool",
+            "program": "${workspaceFolder}/.build/release/PinchPointTool",
             "args": [
-                "</root/workspace/SPC/kjvbible_x10.txt"
+                "-json",
+                "-pdf",
+                "-html"
             ],
-            "cwd": "${workspaceFolder}",
-            "preLaunchTask": "swift-build-debug"
+            "cwd": "${workspaceFolder:SPC}",
+            "preLaunchTask": "swift: Build Release PinchPointTool"
         },
         {
             "type": "lldb",
             "request": "launch",
-            "name": "SunOl",
+            "name": "Debug SunOl",
             "program": "${workspaceFolder}/.build/debug/SunOl",
-            "args": [
-                "-f", "/workspaces/SPC/input.txt"
-            ],
-            "cwd": "${workspaceFolder}",
-            "preLaunchTask": "swift-build-debug-sol",
-            "env": {
-                "PYTHON_LIBRARY": "/usr/lib/x86_64-linux-gnu/libpython3.6m.so.1.0"
-            }
+            "args": [],
+            "cwd": "${workspaceFolder:SPC}",
+            "preLaunchTask": "swift: Build Debug SunOl"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Release SunOl",
+            "program": "${workspaceFolder}/.build/release/SunOl",
+            "args": [],
+            "cwd": "${workspaceFolder:SPC}",
+            "preLaunchTask": "swift: Build Release SunOl"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug Playground",
+            "program": "${workspaceFolder}/.build/debug/Playground",
+            "args": [],
+            "cwd": "${workspaceFolder:SPC}",
+            "preLaunchTask": "swift: Build Debug Playground"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Release Playground",
+            "program": "${workspaceFolder}/.build/release/Playground",
+            "args": [],
+            "cwd": "${workspaceFolder:SPC}",
+            "preLaunchTask": "swift: Build Release Playground"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Test SPC",
+            "program": "./.build/debug/SPCPackageTests.xctest",
+            "cwd": "${workspaceFolder:SPC}",
+            "preLaunchTask": "swift: Build All"
         }
     ]
 }
