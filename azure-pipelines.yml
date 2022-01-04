@@ -24,7 +24,7 @@ steps:
 
 - task: run-vcpkg@0
   displayName: 'vcpkg install libxlsxwriter sqlite3'
-  timeoutInMinutes: 3
+  timeoutInMinutes: 10
   inputs:
     vcpkgArguments: libxlsxwriter sqlite3
     vcpkgGitCommitId: "5ddd7f02689b7c5aab78711d77f61db5d2e5e79c"
@@ -40,7 +40,7 @@ steps:
   displayName: Configure Swift SDK
 
 - task: PowerShell@2
-  timeoutInMinutes: 3
+  timeoutInMinutes: 5
   inputs:
     targetType: 'inline'
     script: |
@@ -55,7 +55,7 @@ steps:
   env:
     SDKROOT: C:\Library\Developer\Platforms\Windows.platform\Developer\SDKs\Windows.sdk
     DEVELOPER_DIR: C:\Library\Developer
-  timeoutInMinutes: 10
+  timeoutInMinutes: 15
   continueOnError: true
   displayName: Build Swift package
 
