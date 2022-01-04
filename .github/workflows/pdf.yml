@@ -1,0 +1,49 @@
+name: CI – Ubuntu
+
+on: workflow_dispatch
+
+jobs:
+  continuous-integration:
+    timeout-minutes: 15
+    runs-on: [ubuntu-18.04]
+
+    steps:
+
+    - name: Checkout sources
+      uses: actions/checkout@v2
+
+    - name: Checkout libxlsxwriter
+      uses: actions/checkout@v2
+      with: 
+        repository: jmcnamara/libxlsxwriter
+        ref: 'RELEASE_1.1.4'
+        path: libxlsxwriter
+        
+    - name: Build libxlsxwriter
+      working-directory: ./libxlsxwriter
+      run: |
+        make
+        sudo make install
+        sudo ldconfig
+
+    - name: Build Debug mode
+      run: swift build -Xswiftc -suppress-warnings -Xswiftc -continue-building-after-errors
+
+    - name: Generate Documentation
+      uses: SwiftDocOrg/swift-doc@master
+      with:
+        module-name: BlackBoxModel
+        minimum-access-level: internal
+
+    - name: Publish PDF Document
+      uses: shrink/actions-document-publish@v1
+      id: publish-document
+      with:
+        sources: '.build/documentation/*.md'
+
+    - name: Upload Document
+      uses: actions/upload-artifact@v2
+      id: upload-document
+      with:
+        name: 'document.pdf'
+        path: ${{ steps.publish-document.outputs.pdf }}

@@ -1,6 +1,6 @@
 name: CI – Ubuntu
 
-on: [push]
+on: workflow_dispatch
 
 jobs:
   continuous-integration:
@@ -26,9 +26,6 @@ jobs:
         sudo make install
         sudo ldconfig
 
-    - name: Show compiler version
-      run: swift --version
-
     - name: Get the lines of code.
       id: scc
       uses: iryanbell/scc-docker-action@v1.0.0
@@ -38,28 +35,6 @@ jobs:
     - name: Update package dependencies
       run: swift package update
 
-    - name: Build Debug mode
-      run: swift build --build-tests --enable-test-discovery -Xswiftc -suppress-warnings -Xswiftc -continue-building-after-errors
-
     - name: Run tests
-      continue-on-error: true
-      run: swift test --enable-test-discovery -Xswiftc -suppress-warnings
+      run: swift test
 
-    - name: Generate Documentation
-      uses: SwiftDocOrg/swift-doc@master
-      with:
-        module-name: BlackBoxModel
-        minimum-access-level: internal
-
-    - name: Publish PDF Document
-      uses: shrink/actions-document-publish@v1
-      id: publish-document
-      with:
-        sources: '.build/documentation/*.md'
-
-    - name: Upload Document
-      uses: actions/upload-artifact@v2
-      id: upload-document
-      with:
-        name: 'document.pdf'
-        path: ${{ steps.publish-document.outputs.pdf }}
