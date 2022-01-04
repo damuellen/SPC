@@ -5,22 +5,17 @@ import Foundation
 import Utilities
 
 typealias FractionalTime = Double
-typealias Algorithm = (SolarPosition.InputValues) -> SolarPosition.OutputValues
-
-let calendar = { calendar -> NSCalendar in
-  calendar.timeZone = TimeZone(secondsFromGMT: 0)!
-  return calendar
-}(NSCalendar(identifier: .gregorian)!)
+typealias Algorithm = (SolarPosition.Input) -> SolarPosition.Output
 
 /// A struct containing values where the sun is above the horizon.
 ///
 /// Look up values using date-based subscript. Otherwise returns nil.
 public struct SolarPosition {
 
-  public private(set) var calculatedValues = [OutputValues]()
+  public private(set) var calculatedValues = [Output]()
   internal var lookupDates = [Date: Int]()
 
-  public struct InputValues {
+  public struct Input {
     var year, month, day, hour, minute, second: Int
     var timezone: Double
     var delta_t: Double
@@ -31,7 +26,7 @@ public struct SolarPosition {
     var atmos_refract: Double
   }
 
-  public struct OutputValues: Equatable {
+  public struct Output: Equatable {
     public var zenith, azimuth, elevation: Double
     public var hourAngle: Double
     public var declination: Double
@@ -101,20 +96,20 @@ public struct SolarPosition {
   }
 
   /// Accesses the values associated with the given date.
-  public subscript(date: Date) -> OutputValues? {
+  public subscript(date: Date) -> Output? {
     guard let i = lookupDates[date] else { return nil }
     return calculatedValues[i]
   }
 
   private static func compute(
     date: Date, location: Location, with algorithm: Algorithm = SolarPosition.solpos
-  ) -> OutputValues {
+  ) -> Output {
     let ΔT = SolarPosition.estimatedDelta_T
 
     let dt = DateTime(date)
 
     return algorithm(
-      InputValues(
+      Input(
         year: dt.year, month: dt.month, day: dt.day,
         hour: dt.hour, minute: dt.minute, second: 0,
         timezone: Double(location.timezone), delta_t: ΔT,
@@ -128,7 +123,7 @@ public struct SolarPosition {
   ) -> [DateInterval] {
 
     var components = DateComponents()
-    components.timeZone = calendar.timeZone
+    components.timeZone = Greenwich.timeZone
     components.year = year
     components.hour = 12 + location.timezone
 
@@ -137,7 +132,7 @@ public struct SolarPosition {
     return (1...(isLeapYear ? 366 : 365)).map { day in
 
       components.day = day
-      let date = calendar.date(from: components)!
+      let date = Greenwich.date(from: components)!
       let output = SolarPosition.compute(
         date: date, location: location, with: SolarPosition.spa
       )
@@ -163,7 +158,7 @@ public struct SolarPosition {
   private static var estimatedDelta_T: Double = 0
   private static var frequence: DateGenerator.Interval = .hourly
 
-  static func spa(input: InputValues) -> OutputValues {
+  static func spa(input: Input) -> Output {
 
     enum Output: Int32 {
       case ZA, ZA_INC, ZA_RTS, ALL
@@ -189,14 +184,14 @@ public struct SolarPosition {
     data.function = Output.ALL.rawValue
 
     let _ = spa_calculate(&data)
-    return OutputValues(
+    return SolarPosition.Output(
       zenith: data.zenith, azimuth: data.azimuth, elevation: data.e,
       hourAngle: Double(data.h_prime), declination: data.delta,
       incidence: data.incidence, cosIncidence: cos(data.incidence * .pi / 180),
       sunrise: data.sunrise, sunset: data.sunset)
   }
 
-  static func solpos(input: InputValues) -> OutputValues {
+  static func solpos(input: Input) -> Output {
 
     var data = posdata()
     data.day = Int32(input.day)  // Day of month (May 27 = 27, etc.)
@@ -221,12 +216,49 @@ public struct SolarPosition {
     data.function = S_ALL  // compute all parameters
 
     let _ = S_solpos(&data)
-    return OutputValues(
+    return Output(
       zenith: Double(data.zenref), azimuth: Double(data.azim),
       elevation: Double(data.elevref), hourAngle: Double(data.hrang),
       declination: Double(data.declin),
       incidence: acos(Double(data.cosinc)) * 180 / .pi,
       cosIncidence: Double(data.cosinc),
       sunrise: Double(data.sretr), sunset: Double(data.ssetr))
+  }
+}
+
+extension SolarPosition.Output: CustomStringConvertible {
+  public var description: String {
+    String(
+      format: "%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.2f", 
+      zenith, azimuth, elevation, hourAngle, declination, incidence, cosIncidence
+    )
+  }
+  public var values: [Double] {
+    [zenith, azimuth, elevation, hourAngle, declination, incidence, cosIncidence]
+  }
+  public static var labels: String {
+    ["zenith", "azimuth", "elevation", "hourAngle", "declination", "incidence", "cosIncidence"].joined(separator: ",")
+  }
+}
+
+extension SolarPosition: CustomStringConvertible {
+  public var description: String {
+    var description = ""
+    print(
+      "month", "day", "hour", "minute", SolarPosition.Output.labels,
+      separator: ",", to: &description)
+    for date in DateGenerator(year: year, interval: frequence) {
+      let time = DateTime(date)
+      if let pos = self[date] {
+        print(
+          time.month, time.day, time.hour, time.minute, pos, 
+          separator: ",", to: &description)
+      } else {
+        print(
+          time.month, time.day, time.hour, time.minute, 0, 0, 0, 0, 0, 0, 0,
+          separator: ",", to: &description)
+      }
+    }
+    return description
   }
 }

@@ -147,7 +147,7 @@ public struct Collector: Parameterizable, CustomStringConvertible {
     efficiency = eff
   }
   /// Elevation and incidence angle calculation
-  public mutating func tracking(sun: SolarPosition.OutputValues)  {
+  public mutating func tracking(sun: SolarPosition.Output)  {
     guard sun.zenith < 90.0 else { return }
 
     parabolicElevation = 90 - (atan(tan(sun.zenith.toRadians)
