@@ -11,5 +11,140 @@
             "severity": 4,
             "message": 5
         }
-    }
+    },
+        "tasks": [
+        {
+            "label": "swift-build-debug-SPC",
+            "type": "shell",
+            "command": "swift",
+            "args": [
+                "build",
+                "-Xswiftc",
+                "-Xfrontend",
+                "-Xswiftc",
+                "-serialize-debugging-options",
+                "--product",
+                "SPC"
+            ],
+            "group": "build",
+            "presentation": {
+                "reveal": "silent",
+                "echo": false
+            }
+        },
+        {
+            "label": "swift-build-debug-SolarFieldCalc",
+            "type": "shell",
+            "command": "swift",
+            "args": [
+                "build",
+                "-Xswiftc",
+                "-Xfrontend",
+                "-Xswiftc",
+                "-serialize-debugging-options",
+                "--product",
+                "SolarFieldCalc"
+            ],
+            "group": "build",
+            "presentation": {
+                "reveal": "silent",
+                "echo": false
+            }
+        },
+        {
+            "label": "swift-build-debug-TransTES",
+            "type": "shell",
+            "command": "swift",
+            "args": [
+                "build",
+                "-Xswiftc",
+                "-Xfrontend",
+                "-Xswiftc",
+                "-serialize-debugging-options",
+                "--product",
+                "TransTES"
+            ],
+            "group": "build",
+            "presentation": {
+                "reveal": "silent",
+                "echo": false
+            }
+        },
+        {
+            "label": "swift-build-debug-PinchPointTool",
+            "type": "shell",
+            "command": "swift",
+            "args": [
+                "build",
+                "-Xswiftc",
+                "-Xfrontend",
+                "-Xswiftc",
+                "-serialize-debugging-options",
+                "--product",
+                "PinchPointTool"
+            ],
+            "group": "build",
+            "presentation": {
+                "reveal": "silent",
+                "echo": false
+            }
+        },
+        {
+            "label": "swift-build-debug-SunOl",
+            "type": "shell",
+            "command": "swift",
+            "args": [
+                "build",
+                "-Xswiftc",
+                "-Xfrontend",
+                "-Xswiftc",
+                "-serialize-debugging-options",
+                "--product",
+                "SunOl"
+            ],
+            "group": "build",
+            "presentation": {
+                "reveal": "silent",
+                "echo": false
+            }
+        },
+        {
+            "label": "swift-build-debug-Playground",
+            "type": "shell",
+            "command": "swift",
+            "args": [
+                "build",
+                "-Xswiftc",
+                "-Xfrontend",
+                "-Xswiftc",
+                "-serialize-debugging-options",
+                "--product",
+                "Playground"
+            ],
+            "group": "build",
+            "presentation": {
+                "reveal": "silent",
+                "echo": false
+            }
+        },
+        {
+            "label": "swift-build-debug-All",
+            "type": "shell",
+            "command": "swift",
+            "args": [
+                "build",
+                "-Xswiftc",
+                "-Xfrontend",
+                "-Xswiftc",
+                "-serialize-debugging-options"
+            ],
+            "group": "build",
+            "presentation": {
+                "reveal": "silent",
+                "echo": false
+            }
+        },
+
+        
+    ]
 }

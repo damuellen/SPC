@@ -19,7 +19,6 @@
     "workbench.startupEditor": "none",
     "lldb.library": "/usr/lib/liblldb.so",
     "lldb.launch.expressions": "native",
-    "sourcekit-lsp.inlayHints.enabled": true,
     "swiftTest.swift.logpanel": true,
-    "swiftTest.swift.reloadOnTextSave": false
+    "swiftTest.swift.reloadOnTextSave": false,
 }
