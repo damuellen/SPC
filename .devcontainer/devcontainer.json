@@ -18,10 +18,14 @@
 		"lldb.launch.expressions": "native",
 		"lldb.evaluateForHovers": false,
 		"terminal.integrated.scrollback": 50000,
+		"terminal.integrated.defaultLocation": "editor",
+    "terminal.integrated.fontSize": 16,
 		"extensions.ignoreRecommendations": true,
 		"diffEditor.ignoreTrimWhitespace": false,
 		"sourcekit-lsp.toolchainPath": "/usr/bin/",
 		"sourcekit-lsp.serverPath": "/usr/bin/sourcekit-lsp",
+		"editor.fontFamily": "SF Mono, Menlo, Monaco, Consolas, monospace",
+    "editor.fontSize": 16,
 		"editor.tabSize": 2,
 		"editor.autoClosingQuotes": "never",
 		"editor.autoIndent": "advanced",
@@ -32,6 +36,7 @@
 		"vadimcn.vscode-lldb",
 		"hbenl.vscode-test-explorer",
 		"makeitbetter.vscode-swift-test-adapter",
-		"cweijan.vscode-office"
-	],
+		"cweijan.vscode-office",
+		"philhindle.errorlens"
+	], 
 }

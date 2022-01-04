@@ -5,7 +5,7 @@
     "terminal.integrated.defaultLocation": "editor",
     "terminal.integrated.fontSize": 16,
     "swiftTest.swift.logpanel": true,
-    "editor.fontFamily": "SF Mono, Menlo, Monaco, 'Courier New', monospace",
+    "editor.fontFamily": "SF Mono, Menlo, Monaco, Consolas, monospace",
     "editor.fontSize": 16,
     "git.autofetch": true,
     "editor.suggestSelection": "first",
