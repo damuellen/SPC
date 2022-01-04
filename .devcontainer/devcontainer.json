@@ -24,6 +24,7 @@
 		"diffEditor.ignoreTrimWhitespace": false,
 		"sourcekit-lsp.toolchainPath": "/usr/bin/",
 		"sourcekit-lsp.serverPath": "/usr/bin/sourcekit-lsp",
+		"apple-swift-format.path": "/workspaces/swift-format/.build/release/swift-format",
 		"editor.fontFamily": "SF Mono, Menlo, Monaco, Consolas, monospace",
     "editor.fontSize": 16,
 		"editor.tabSize": 2,
