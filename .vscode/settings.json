@@ -4,7 +4,6 @@
     },
     "terminal.integrated.defaultLocation": "editor",
     "terminal.integrated.fontSize": 16,
-    "swiftTest.swift.logpanel": true,
     "editor.fontFamily": "SF Mono, Menlo, Monaco, Consolas, monospace",
     "editor.fontSize": 16,
     "git.autofetch": true,
@@ -20,5 +19,7 @@
     "workbench.startupEditor": "none",
     "lldb.library": "/usr/lib/liblldb.so",
     "lldb.launch.expressions": "native",
-    "sourcekit-lsp.inlayHints.enabled": true
+    "sourcekit-lsp.inlayHints.enabled": true,
+    "swiftTest.swift.logpanel": true,
+    "swiftTest.swift.reloadOnTextSave": false
 }
