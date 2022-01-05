@@ -18,7 +18,7 @@
                 "${workspaceFolder}/COM/Meteofile_Hyperion1-200430_P50-TMYs_10min_wind_speed_modified.mto"
             ],
             "cwd": "${workspaceFolder:SPC}",
-            "preLaunchTask": "swift-build-debug-SPC"
+            "preLaunchTask": "swift: Build Debug SPC"
         },
         {
             "type": "lldb",
@@ -30,9 +30,8 @@
                 "212",
                 "--massflow",
                 "606"
-            ],
-            "cwd": "${workspaceFolder:SPC}",
-            "preLaunchTask": "swift-build-debug-SolarFieldCalc"
+            ],            "cwd": "${workspaceFolder:SPC}",
+            "preLaunchTask": "swift: Build Debug SolarFieldCalc"
         },
         {
             "type": "lldb",
@@ -41,7 +40,7 @@
             "program": "${workspaceFolder}/.build/debug/TransTES",
             "args": [],
             "cwd": "${workspaceFolder:SPC}",
-            "preLaunchTask": "swift-build-debug-TransTES"
+            "preLaunchTask": "swift: Build Debug TransTES"
         },
         {
             "type": "lldb",
@@ -54,7 +53,7 @@
                 "-html"
             ],
             "cwd": "${workspaceFolder:SPC}",
-            "preLaunchTask": "swift-build-debug-PinchPointTool"
+            "preLaunchTask": "swift: Build Debug PinchPointTool"
         },
         {
             "type": "lldb",
@@ -63,7 +62,7 @@
             "program": "${workspaceFolder}/.build/debug/SunOl",
             "args": [],
             "cwd": "${workspaceFolder:SPC}",
-            "preLaunchTask": "swift-build-debug-SunOl"
+            "preLaunchTask": "swift: Build Debug SunOl"
         },
         {
             "type": "lldb",
@@ -72,7 +71,7 @@
             "program": "${workspaceFolder}/.build/debug/Playground",
             "args": [],
             "cwd": "${workspaceFolder:SPC}",
-            "preLaunchTask": "swift-build-debug-Playground"
+            "preLaunchTask": "swift: Build Debug Playground"
         },
         {
             "type": "lldb",
@@ -80,7 +79,61 @@
             "name": "Test SPC",
             "program": "./.build/debug/SPCPackageTests.xctest",
             "cwd": "${workspaceFolder:SPC}",
-            "preLaunchTask": "swift-build-debug-All"
+            "preLaunchTask": "swift: Build All"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Release SPC",
+            "program": "${workspaceFolder}/.build/release/SPC",
+            "args": [],
+            "cwd": "${workspaceFolder:SPC}",
+            "preLaunchTask": "swift: Build Release SPC"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Release SolarFieldCalc",
+            "program": "${workspaceFolder}/.build/release/SolarFieldCalc",
+            "args": [],
+            "cwd": "${workspaceFolder:SPC}",
+            "preLaunchTask": "swift: Build Release SolarFieldCalc"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Release TransTES",
+            "program": "${workspaceFolder}/.build/release/TransTES",
+            "args": [],
+            "cwd": "${workspaceFolder:SPC}",
+            "preLaunchTask": "swift: Build Release TransTES"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Release PinchPointTool",
+            "program": "${workspaceFolder}/.build/release/PinchPointTool",
+            "args": [],
+            "cwd": "${workspaceFolder:SPC}",
+            "preLaunchTask": "swift: Build Release PinchPointTool"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Release SunOl",
+            "program": "${workspaceFolder}/.build/release/SunOl",
+            "args": [],
+            "cwd": "${workspaceFolder:SPC}",
+            "preLaunchTask": "swift: Build Release SunOl"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Release Playground",
+            "program": "${workspaceFolder}/.build/release/Playground",
+            "args": [],
+            "cwd": "${workspaceFolder:SPC}",
+            "preLaunchTask": "swift: Build Release Playground"
         }
     ]
 }

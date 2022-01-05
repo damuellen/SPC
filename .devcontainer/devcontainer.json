@@ -1,12 +1,7 @@
 {
 	"name": "Swift",
 	"build": {
-		"dockerfile": "Dockerfile",
-		"args": {
-			"VARIANT": "latest",
-			"INSTALL_NODE": "false",
-			"NODE_VERSION": "lts/*"
-		}
+		"dockerfile": "Dockerfile"
 	},
 	"runArgs": [
 		"--cap-add=SYS_PTRACE",
@@ -33,7 +28,8 @@
 		"editor.rulers": [80,100]
 	},
 	"extensions": [
-		"pvasek.sourcekit-lsp--dev-unofficial",
+		//"pvasek.sourcekit-lsp--dev-unofficial",
+		"sswg.swift-lang",
 		"vadimcn.vscode-lldb",
 		"hbenl.vscode-test-explorer",
 		"makeitbetter.vscode-swift-test-adapter",

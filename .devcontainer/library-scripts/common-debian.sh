@@ -439,7 +439,7 @@ echo -e "\
     RC_SNIPPET_ALREADY_ADDED=${RC_SNIPPET_ALREADY_ADDED}\n\
     ZSH_ALREADY_INSTALLED=${ZSH_ALREADY_INSTALLED}" > "${MARKER_FILE}"
 
-echo "Done!"
+echo "Install libxlsxwriter"
 cd ../../
 git clone --single-branch -b RELEASE_1.1.4 https://github.com/jmcnamara/libxlsxwriter --quiet
 cd libxlsxwriter
@@ -448,3 +448,5 @@ sudo make install
 sudo ldconfig
 cd ../
 rm -rf libxlsxwriter
+
+echo "Done!"
