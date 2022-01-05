@@ -2,6 +2,7 @@
     "workbench.editorAssociations": {
         "*.png": "imagePreview.previewEditor"
     },
+    "terminal.integrated.confirmOnKill": "never",
     "terminal.integrated.defaultLocation": "editor",
     "terminal.integrated.fontSize": 16,
     "editor.fontFamily": "SF Mono, Menlo, Monaco, Consolas, monospace",
@@ -19,6 +20,9 @@
     "workbench.startupEditor": "none",
     "lldb.library": "/usr/lib/liblldb.so",
     "lldb.launch.expressions": "native",
-    "swiftTest.swift.logpanel": true,
     "swiftTest.swift.reloadOnTextSave": false,
+    "editor.autoClosingDelete": "never",
+    "editor.bracketPairColorization.enabled": false,
+    "editor.mouseWheelZoom":true,
+    "editor.smoothScrolling": true,
 }
