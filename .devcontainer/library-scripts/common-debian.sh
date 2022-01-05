@@ -440,7 +440,7 @@ echo -e "\
     ZSH_ALREADY_INSTALLED=${ZSH_ALREADY_INSTALLED}" > "${MARKER_FILE}"
 
 echo "Install libxlsxwriter"
-cd ../../
+cd /tmp
 git clone --single-branch -b RELEASE_1.1.4 https://github.com/jmcnamara/libxlsxwriter --quiet
 cd libxlsxwriter
 make
