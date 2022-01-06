@@ -1,17 +1,15 @@
-// swift-tools-version:5.5
+// swift-tools-version:5.0
 import PackageDescription
 
 let c: CSetting = .unsafeFlags(["-ffast-math", "-O3", "-fomit-frame-pointer", "-funroll-loops"])
-let flags = ["-cross-module-optimization", "-Ounchecked", "-enforce-exclusivity=unchecked"]
+var flags = ["-cross-module-optimization", "-Ounchecked", "-enforce-exclusivity=unchecked"]
+#if os(Windows)
+flags += ["-Xfrontend", "-entry-point-function-name","-Xfrontend", "wWinMain"]
+#endif
 let posix: TargetDependencyCondition = .when(platforms: [.linux, .macOS])
-let windows: BuildSettingCondition = .when(platforms: [.windows])
-let linker: LinkerSetting = .unsafeFlags(
-  ["-Xlinker", "/INCREMENTAL:NO", "-Xlinker", "/IGNORE:4217,4286"], windows
-)
 let swift: [SwiftSetting] = [
   .unsafeFlags(flags, .when(configuration: .release)),
   .define("DEBUG", .when(configuration: .debug)),
-  .unsafeFlags(["-Xfrontend", "-entry-point-function-name","-Xfrontend", "wWinMain"], .when(platforms: [.windows]))
 ]
 
 #if os(iOS)
@@ -67,62 +65,55 @@ let platformTargets: [Target] = [
       .product(name: "SQLite", package: "SQLite.swift"),
       .product(name: "xlsxwriter", package: "xlsxwriter.swift"),
     ],
-    swiftSettings: swift,
-    linkerSettings: [.linkedLibrary("sqlite3.lib", windows), linker]
+    swiftSettings: swift
   ),
   // .executableTarget(name: "Benchmarking",
   //   dependencies: ["Meteo", "Benchmark", "BlackBoxModel"],
   //   swiftSettings: swift),
-  .executableTarget(
+  .target(
     name: "Playground",
     dependencies: ["Utilities"],
-    swiftSettings: swift,
-    linkerSettings: [linker]
+    swiftSettings: swift
   ),
-  .executableTarget(
+  .target(
     name: "SolarFieldCalc",
     dependencies: [
       "SolarFieldModel", "CPikchr", "Utilities",
       .product(name: "ArgumentParser", package: "swift-argument-parser"),
       .product(name: "xlsxwriter", package: "xlsxwriter.swift"),
     ],
-    swiftSettings: swift,
-    linkerSettings: [linker]
+    swiftSettings: swift
   ),
-  .executableTarget(
+  .target(
     name: "SolarPerformanceCalc",
     dependencies: [
       "Config", "BlackBoxModel", "Utilities",
       .product(name: "ArgumentParser", package: "swift-argument-parser"),
       .product(name: "xlsxwriter", package: "xlsxwriter.swift"),
     ],
-    swiftSettings: swift,
-    linkerSettings: [linker]
+    swiftSettings: swift
   ),
-  .executableTarget(
+  .target(
     name: "TransTES",
     dependencies: ["Utilities"],
-    swiftSettings: swift,
-    linkerSettings: [linker]
+    swiftSettings: swift
   ),
-  .executableTarget(
+  .target(
     name: "SunOl",
     dependencies: [
       "Utilities", .product(name: "ArgumentParser", package: "swift-argument-parser"),
       .product(name: "xlsxwriter", package: "xlsxwriter.swift"),
     ],
     // .product(name: "SwiftPlot", package: "SwiftPlot")
-    swiftSettings: swift,
-    linkerSettings: [linker]
+    swiftSettings: swift
   ),
-  .executableTarget(
+  .target(
     name: "PinchPointTool",
     dependencies: [
       "PinchPoint", .product(name: "ArgumentParser", package: "swift-argument-parser"),
       .product(name: "xlsxwriter", package: "xlsxwriter.swift"),
     ],
-    swiftSettings: swift,
-    linkerSettings: [linker]
+    swiftSettings: swift
   ),
   .testTarget(
     name: "MeteoTests",
@@ -140,7 +131,7 @@ let platformTargets: [Target] = [
 
 let package = Package(
   name: "SPC",
-  platforms: [.macOS(.v10_15), .iOS(.v15)],
+  platforms: [.macOS(.v10_14)],
   products: platformProducts,
   dependencies: dependencies,
   targets: platformTargets,
