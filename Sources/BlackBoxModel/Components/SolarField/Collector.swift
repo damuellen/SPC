@@ -17,10 +17,10 @@ import SolarPosition
 /// This struct contains the state as well as the functions for mapping the collector
 public struct Collector: Parameterizable, CustomStringConvertible {
 
-  public var parabolicElevation, theta, cosTheta: Double
-  public var efficiency: Double
+  public internal(set) var parabolicElevation, theta, cosTheta: Double
+  public internal(set) var efficiency: Double
   /// Instantaneous irradiation on absorber tube
-  public var insolationAbsorber: Double
+  public internal(set) var insolationAbsorber: Double
   var lastInsolation: Double = 0
 
   public var description: String {

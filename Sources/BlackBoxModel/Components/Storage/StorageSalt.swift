@@ -26,12 +26,12 @@ extension Storage.Salt: MeasurementsConvertible {
 
 extension Storage {
 
-  struct Salt { 
-    var active: Mass = .zero
-    var minimum: Mass
-    var cold: Mass
-    var hot: Mass
-    var total: Mass
+  public struct Salt { 
+    public internal(set) var active: Mass = .zero
+    public internal(set) var minimum: Mass
+    public internal(set) var cold: Mass
+    public internal(set) var hot: Mass
+    public internal(set) var total: Mass
 
     init() {
       let parameter = Storage.parameter

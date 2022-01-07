@@ -16,9 +16,9 @@ public struct PowerBlock: Parameterizable, HeatTransfer {
 
   var name: String = PowerBlock.parameter.name
 
-  var massFlow: MassFlow = .zero
+  public internal(set) var massFlow: MassFlow = .zero
 
-  var temperature: (inlet: Temperature, outlet: Temperature)
+  public internal(set) var temperature: (inlet: Temperature, outlet: Temperature)
 
   var designMassFlow = MassFlow(
     HeatExchanger.parameter.heatFlowHTF * 1_000 / HeatExchanger.capacity

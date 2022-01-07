@@ -25,16 +25,16 @@ public struct SolarField: Parameterizable, HeatTransfer {
   }
 
   /// Returns the operating state
-  var operationMode: OperationMode
+  public internal(set) var operationMode: OperationMode
 
-  public var eta: Double = 0.0
-  public var loopEta: Double = 0.0
-  public var heatLosses: Double = 0.0
-  public var heatLossesHotHeader: Double = 0.0
-  public var heatLossesHCE: Double = 0.0
+  public internal(set) var eta: Double = 0.0
+  public internal(set) var loopEta: Double = 0.0
+  public internal(set) var heatLosses: Double = 0.0
+  public internal(set) var heatLossesHotHeader: Double = 0.0
+  public internal(set) var heatLossesHCE: Double = 0.0
 
   var header: HeatTransfer
-  public var loops: [Cycle]
+  public internal(set) var loops: [Cycle]
 
   public var inFocus: Ratio {
     switch operationMode {
@@ -44,12 +44,12 @@ public struct SolarField: Parameterizable, HeatTransfer {
     }
   }
 
-  public var temperature: (inlet: Temperature, outlet: Temperature) {
+  public internal(set) var temperature: (inlet: Temperature, outlet: Temperature) {
     get { header.temperature }
     set { header.temperature = newValue }
   }
 
-  public var massFlow: MassFlow {
+  public internal(set) var massFlow: MassFlow {
     get { header.massFlow }
     set { header.massFlow = newValue }
   }

@@ -15,9 +15,9 @@ public struct HeatExchanger: Parameterizable, HeatTransfer {
 
   var name: String = HeatExchanger.parameter.name
 
-  var massFlow: MassFlow = .zero
+  public internal(set) var massFlow: MassFlow = .zero
 
-  var temperature: (inlet: Temperature, outlet: Temperature)
+  public internal(set) var temperature: (inlet: Temperature, outlet: Temperature)
 
   var heatOut, heatToTES: Double
 

@@ -15,9 +15,9 @@ import Utilities
 public struct SteamTurbine: Parameterizable {
   
   /// Returns the operating state
-  var operationMode: OperationMode
+  public internal(set) var operationMode: OperationMode
   /// Returns the load applied
-  var load: Ratio {
+  public internal(set) var load: Ratio {
     get { 
       if case .operating(let load) = operationMode
         { return load } else { return .zero }
@@ -28,7 +28,7 @@ public struct SteamTurbine: Parameterizable {
     }
   }
 
-  var efficiency: Ratio = .zero
+  public internal(set) var efficiency: Ratio = .zero
 
   public enum OperationMode {
     case noOperation(time: Int)
@@ -37,7 +37,7 @@ public struct SteamTurbine: Parameterizable {
     case operating(Ratio)
   }
 
-  var isOperating: Bool {
+  public var isOperating: Bool {
     switch operationMode {
     case .operating: return true
     default: return false

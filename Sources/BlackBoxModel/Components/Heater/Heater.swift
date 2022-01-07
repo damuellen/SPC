@@ -16,12 +16,12 @@ public struct Heater: Parameterizable, HeatTransfer {
 
   var name: String = Heater.parameter.name
 
-  var massFlow: MassFlow = .zero
+  public internal(set) var massFlow: MassFlow = .zero
 
-  var temperature: (inlet: Temperature, outlet: Temperature)
+  public internal(set) var temperature: (inlet: Temperature, outlet: Temperature)
 
   /// Returns the operating state
-  var operationMode: OperationMode
+  public internal(set) var operationMode: OperationMode
 
   public enum OperationMode {
     case normal(Ratio)

@@ -15,9 +15,9 @@ public struct Storage: Parameterizable, HeatTransfer {
 
   let name = Storage.parameter.name
 
-  var temperature: (inlet: Temperature, outlet: Temperature)
+  public internal(set) var temperature: (inlet: Temperature, outlet: Temperature)
 
-  var massFlow: MassFlow = .zero
+  public internal(set) var massFlow: MassFlow = .zero
 
   var designMassFlow = MassFlow(
     (1 - Storage.parameter.massFlowShare.quotient)
@@ -25,17 +25,17 @@ public struct Storage: Parameterizable, HeatTransfer {
   )
 
   /// Returns the operating state
-  var operationMode: OperationMode
+  public internal(set) var operationMode: OperationMode
 
   var dT_HTFsalt: (cold: Double, hot: Double)
 
-  var temperatureTank: Temperatures
+  public internal(set)  var temperatureTank: Temperatures
 
   var antiFreezeTemperature: Double = 270.0
 
-  var salt = Salt()
+  public internal(set) var salt = Salt()
 
-  var relativeCharge: Ratio
+  public internal(set)  var relativeCharge: Ratio
 
 //  var massOfSalt: Double = Storage.defineSaltMass()
   /// Returns the fixed initial state.

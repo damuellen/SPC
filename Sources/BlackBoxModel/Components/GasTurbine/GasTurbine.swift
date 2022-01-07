@@ -15,11 +15,11 @@ import Physics
 public struct GasTurbine: Parameterizable {
 
   /// Returns the operating state
-  var operationMode: OperationMode
+  public internal(set) var operationMode: OperationMode
 
   var isMaintained: Bool
   /// Returns the load applied
-  var load: Ratio
+  public internal(set) var load: Ratio
 
   public enum OperationMode: String {
     case free, load, integrated, pure, noOperation, scheduledMaintenance
