@@ -295,7 +295,7 @@ public final class Historian {
     }
 
     return Recording(
-      startDate: startDate,
+      startDate: startDate!,
       performance: annualPerformance,
       radiation: annualRadiation,
       performanceHistory: performanceHistory,

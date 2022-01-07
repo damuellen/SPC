@@ -10,6 +10,7 @@
 
 import Foundation
 import Meteo
+import DateGenerator
 
 public struct Recording: CustomStringConvertible, Comparable {
 
@@ -43,12 +44,10 @@ public struct Recording: CustomStringConvertible, Comparable {
 
   private let interval = Simulation.time.steps
 
-  private let calendar = Calendar(identifier: .gregorian)
-
-  private let startDate: Date?
+  private let startDate: Date
 
   init(
-    startDate: Date? = nil,
+    startDate: Date,
     performance: PlantPerformance,
     radiation: SolarRadiation,
     performanceHistory: [PlantPerformance] = [],
@@ -62,12 +61,9 @@ public struct Recording: CustomStringConvertible, Comparable {
   }
 
   private func range(of interval: DateInterval) -> Range<Int> {
-    var start = calendar.ordinality(of: .hour, in: .year, for: interval.start)! - 1
-    var end = calendar.ordinality(of: .hour, in: .year, for: interval.end)!
-    var offset = 0
-    if let startDate = startDate {
-      offset = calendar.ordinality(of: .hour, in: .year, for: startDate)! - 1
-    }
+    var start = Greenwich.ordinality(of: .hour, in: .year, for: interval.start) - 1
+    var end = Greenwich.ordinality(of: .hour, in: .year, for: interval.end)
+    let offset = Greenwich.ordinality(of: .hour, in: .year, for: startDate) - 1
     start = (start - offset) * self.interval.rawValue
     end = (end - offset) * self.interval.rawValue
     return start..<end
@@ -159,5 +155,35 @@ public struct Recording: CustomStringConvertible, Comparable {
       $0.2.append($1[2])
     }
     return ([m], [i, o])
+  }
+  public func annual(_ keyPath: KeyPath<Status, Double>) -> [[[Double]]] {
+    let year = startDate.getComponents().year!
+    let daysBeforeMonth = [31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334]
+    var month = 0
+    var months = [[[Double]]](repeating: [[Double]](), count: 12)
+    for d in 1...364 {
+      let range = DateInterval(ofDay: d, in: year)
+      let day = self[status: keyPath, range]
+      months[month].append(day)
+      if daysBeforeMonth.contains(d) { 
+        month += 1
+      }
+    }
+    return months
+  }
+  public func annual(_ keyPath: KeyPath<PlantPerformance, Double>) -> [[[Double]]] {
+    let year = startDate.getComponents().year!
+    let daysBeforeMonth = [31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334]
+    var month = 0
+    var months = [[[Double]]](repeating: [[Double]](), count: 12)
+    for d in 1...364 {
+      let range = DateInterval(ofDay: d, in: year)
+      let day = self[performance: keyPath, range]
+      months[month].append(day)
+      if daysBeforeMonth.contains(d) { 
+        month += 1
+      }
+    }
+    return months
   }
 }
