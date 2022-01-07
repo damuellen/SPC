@@ -152,7 +152,7 @@ struct PinchPointTool: ParsableCommand {
       if json {
         html.json = try pinchPoint.encodeToJSON()
       }
-      #if DEBUG
+      #if DEBUG || os(macOS)
         let path = "temp.html"
       #else
         let path = URL.temporaryFile().appendingPathExtension("html").path
