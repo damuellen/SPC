@@ -18,9 +18,9 @@ let platformProducts: [Product] = [
 ]
 #else
 let platformProducts: [Product] = [
-  .library(name: "BlackBoxModel", type: .dynamic, targets: ["BlackBoxModel"]),
-  .library(name: "SolarPosition", type: .dynamic, targets: ["SolarPosition"]),
-  .library(name: "PinchPoint", type: .dynamic, targets: ["PinchPoint"]),
+  // .library(name: "BlackBoxModel", type: .dynamic, targets: ["BlackBoxModel"]),
+  // .library(name: "SolarPosition", type: .dynamic, targets: ["SolarPosition"]),
+  // .library(name: "PinchPoint", type: .dynamic, targets: ["PinchPoint"]),
   .executable(name: "SPC", targets: ["SolarPerformanceCalc"]),
   .executable(name: "SolarFieldCalc", targets: ["SolarFieldCalc"]),
   .executable(name: "TransTES", targets: ["TransTES"]),
@@ -31,7 +31,7 @@ let platformProducts: [Product] = [
 #endif
 
 var dependencies: [Package.Dependency] = [
-  .package(url: "https://github.com/apple/swift-argument-parser.git", .upToNextMinor(from: "0.5.0")),
+  .package(url: "https://github.com/damuellen/swift-argument-parser.git", .branch("main")),
   .package(url: "https://github.com/damuellen/SQLite.swift.git", .branch("master")),
   .package(url: "https://github.com/damuellen/Utilities.git", .branch("main")),
   .package(url: "https://github.com/damuellen/xlsxwriter.swift.git", .branch("main"))
@@ -72,7 +72,7 @@ let platformTargets: [Target] = [
   //   swiftSettings: swift),
   .executableTarget(
     name: "Playground",
-    dependencies: ["Utilities"],
+    dependencies: ["BlackBoxModel", "Utilities", .product(name: "xlsxwriter", package: "xlsxwriter.swift"),],
     swiftSettings: swift
   ),
   .executableTarget(

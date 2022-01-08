@@ -31,7 +31,7 @@ let platformProducts: [Product] = [
 #endif
 
 var dependencies: [Package.Dependency] = [
-  .package(url: "https://github.com/apple/swift-argument-parser.git", .upToNextMinor(from: "0.5.0")),
+  .package(url: "https://github.com/damuellen/swift-argument-parser.git", .branch("main")),
   .package(url: "https://github.com/damuellen/SQLite.swift.git", .branch("master")),
   .package(url: "https://github.com/damuellen/Utilities.git", .branch("main")),
   .package(url: "https://github.com/damuellen/xlsxwriter.swift.git", .branch("main"))
