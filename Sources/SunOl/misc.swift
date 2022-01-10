@@ -208,24 +208,8 @@ func sankey(values: [Double]) -> Sankey {
 
 func labeled(values: [Double]) -> String {
   zip( CostModel.labels, values).map { l, v in
-  #if os(Windows)
-    l + String(format: ": %.1f", v)
-  #else 
-    "\(ASCIIColor.red.rawValue)\(l) \(ASCIIColor.green.rawValue)\(String(format: "%.1f", v))"
-  #endif
+    "\(l.text(.red)) \(String(format: "%.1f", v).text(.red))"
   }.joined(separator: " ")
-}
-
-enum ASCIIColor: String {
-  case black = "\u{1B}[0;30m"
-  case red = "\u{1B}[0;31m"
-  case green = "\u{1B}[0;32m"
-  case yellow = "\u{1B}[0;33m"
-  case blue = "\u{1B}[0;34m"
-  case magenta = "\u{1B}[0;35m"
-  case cyan = "\u{1B}[0;36m"
-  case white = "\u{1B}[0;37m"
-  case `default` = "\u{1B}[0;0m"
 }
 
 protocol Labeled { var labels: [String] { get } }
@@ -245,3 +229,59 @@ extension Vector where Element == Double {
     self = Vector(repeating: z, count: x)
   }
 }
+
+extension String {
+	func ansi(_ ansi: ANSI) -> String {
+    #if os(Windows)
+    return self
+    #else
+		let reset = ANSI.style(.reset).escapeCode
+		return "\(ansi.escapeCode)\(self)\(reset)"
+    #endif
+	}
+	public func style(_ style: ANSIStyle) -> String {
+		ansi(.style(style))
+	}
+  public func randomColor() -> String {
+		ansi(.text(color: .init(rawValue: Int.random(in: 31...36))!))
+	}
+	public func text(_ color: ANSIColor) -> String {
+		ansi(.text(color: color))
+	}
+	public func background(_ color: ANSIColor) -> String {
+		ansi(.background(color: color))
+	}
+}
+
+public enum ANSIColor: Int {
+	case black = 30, red, green, yellow, blue, magenta, cyan, white
+}
+
+public enum ANSIStyle: Int {
+	case reset = 0, bold, italic, underline, blink, inverse, strikethrough
+}
+
+public enum ANSI {
+	case text(color: ANSIColor)
+	case background(color: ANSIColor)
+	case style(_ style: ANSIStyle)
+	var escapeCode: String {
+		var code = ANSIStyle.reset.rawValue
+		switch self {
+			case .text(let color):
+				code = color.rawValue
+			case .background(let color):
+				code = color.rawValue + 10
+			case .style(let style):
+				code = style.rawValue
+		}
+		return "\u{001B}[\(code)m"
+	}
+}
+let compute = """
+ ▄▄·       • ▌ ▄ ·.  ▄▄▄·▄• ▄▌▄▄▄▄▄▄▪   ▐ ▄  ▄▄ •
+▐█ ▌▪ ▄█▀▄ ·██ ▐███▪▐█ ▄██▪██▌▀•██ ▀██ •█▌▐█▐█ ▀ ▪
+██ ▄▄▐█▌.▐▌▐█ ▌▐▌▐█· ██▀·█▌▐█▌  ▐█.▪▐█·▐█▐▐▌▄█ ▀█▄
+▐███▌▐█▌.▐▌██ ██▌▐█▌▐█▪·•▐█▄█▌  ▐█▌·▐█▌██▐█▌▐█▄▪▐█
+·▀▀▀  ▀█▄▀▪▀▀  █▪▀▀▀.▀    ▀▀▀   ▀▀▀ ▀▀▀▀▀ █▪·▀▀▀▀
+""".randomColor()

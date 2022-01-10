@@ -103,7 +103,7 @@ func MGOADE(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fi
   let cr = 0.4
   let f = 0.9  
 
-  print("\u{1B}[H\n\u{1B}[2J\(ASCIIColor.blue.rawValue)Calculate the fitness of initial population.")
+  print(compute)
   // Calculate the fitness of initial grasshoppers
   DispatchQueue.concurrentPerform(iterations: grassHopperPositions.count) { i in
     let result = fitness(grassHopperPositions[i])
@@ -120,7 +120,7 @@ func MGOADE(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fi
     }
     convergenceCurves[g].append([Double(0), targetFitness[g]])
   }
-  print("\u{1B}[H\u{1B}[2J\(ASCIIColor.blue.rawValue)First population:\n\(targetFitness)")
+  print("First population:\n\(targetFitness)".text(.green))
   print(targetPosition.map(labeled(values:)).joined(separator: "\n"))
 
   func euclideanDistance(a: [Double], b: [Double]) -> Double {
@@ -241,7 +241,7 @@ func MGOADE(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fi
       }
       convergenceCurves[g].append([Double(l), targetFitness[g]])
     }
-    print("\u{1B}[H\u{1B}[2J\(ASCIIColor.blue.rawValue)Iterations: \(l)\n\(targetFitness)")
+    print("Iterations: \(l)\n\(targetFitness)".randomColor())
     print(targetPosition.map(labeled(values:)).joined(separator: "\n"))
     if (targetFitness.reduce(0, +) / 3) - targetFitness.min()! < 0.001 { break }
   }
