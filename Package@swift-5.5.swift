@@ -24,13 +24,10 @@ var platformProducts: [Product] = [
   .executable(name: "PinchPointTool", targets: ["PinchPointTool"]),
   .executable(name: "SunOl", targets: ["SunOl"]),
   .executable(name: "Playground", targets: ["Playground"]),
-]
-#endif
-#if os(Windows)
-platformProducts.append(contentsOf: [
   .library(name: "BlackBoxModel", type: .dynamic, targets: ["BlackBoxModel"]),
   .library(name: "SolarPosition", type: .dynamic, targets: ["SolarPosition"]),
-  .library(name: "PinchPoint", type: .dynamic, targets: ["PinchPoint"])])
+  .library(name: "PinchPoint", type: .dynamic, targets: ["PinchPoint"])
+]
 #endif
 
 var dependencies: [Package.Dependency] = [
