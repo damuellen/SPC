@@ -54,3 +54,4 @@ jobs:
           path: |
             .build\x86_64-unknown-windows-msvc\release\*.exe
             .build\x86_64-unknown-windows-msvc\release\*.dll
+            C:\vcpkg\installed\x64-windows\bin\*.dll
