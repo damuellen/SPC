@@ -177,6 +177,11 @@ struct SolarPerformanceCalculator: ParsableCommand {
   )
 
   func plot(interval: DateInterval) {
+    let steamTurbine = SolarPerformanceCalculator.result.annual(\.steamTurbine.load.quotient)
+    let parabolicElevation = SolarPerformanceCalculator.result.annual(\.collector.parabolicElevation)
+    try! Gnuplot(y1s: steamTurbine, y2s: parabolicElevation)(.pdf(path: "parabolicElevation.pdf"))
+    let electric = SolarPerformanceCalculator.result.annual(\.thermal.storage.megaWatt)
+    try! Gnuplot(y1s: steamTurbine, y2s: electric)(.pdf(path: "thermal.pdf"))
     let formatter = DateFormatter()
     formatter.dateFormat = "MM_dd"
     for i in 1...365 {
