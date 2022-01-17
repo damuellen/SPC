@@ -593,13 +593,13 @@ func cleanUp(_ formulas: [String: String], _ titles: [String: String], _ count: 
   for (i, k) in columns.enumerated() {
     guard var formula = formulas[k], let title = titles[k] else { continue }
     formula = formula.dropFirst().replacingOccurrences(of: "MAX(", with: "max(")
-      .replacingOccurrences(of: "MIN(", with: "min(")
-      .replacingOccurrences(of: "IFERROR(", with: "ifFinite(\n ")
-      .replacingOccurrences(of: "IF(", with: "iff(\n ")
-      .replacingOccurrences(of: "AND(", with: "and(\n ")
-      .replacingOccurrences(of: "OR(", with: "or(\n ")
-      .replacingOccurrences(of: "COUNT", with: "count")
-      .replacingOccurrences(of: "SUM", with: "sum")
+      .replacingOccurrences(of: "MIN(", with: " min(")
+      .replacingOccurrences(of: "IFERROR(", with: " ifFinite(\n ")
+      .replacingOccurrences(of: "IF(", with: " iff(\n ")
+      .replacingOccurrences(of: "AND(", with: " and(\n ")
+      .replacingOccurrences(of: "OR(", with: " or(\n ")
+      .replacingOccurrences(of: "COUNT", with: " count")
+      .replacingOccurrences(of: "SUM", with: " sum")
 
     formula = formula.replacingOccurrences(of: "_n2g_", with: "_n_g_")
     formula = formula.replacingOccurrences(of: "_CO2_", with: "_C_O_2_")
@@ -609,11 +609,13 @@ func cleanUp(_ formulas: [String: String], _ titles: [String: String], _ count: 
 
     formula = #"\$([A-Z]{1,3})\$([0-9])"#.r!.replaceAll(in: formula, with: "_$1_$2")
 
-    formula = formula.replacingOccurrences(of: "=0", with: ".isZero")
-      .replacingOccurrences(of: "=", with: "==").replacingOccurrences(of: "<>", with: "!=")
+    formula = formula.replacingOccurrences(of: "<=", with: " <= ")
+      .replacingOccurrences(of: ">=", with: " >= ")
+      .replacingOccurrences(of: "=0", with: ".isZero")
+      .replacingOccurrences(of: "=", with: " == ").replacingOccurrences(of: "<>", with: " != ")
       .replacingOccurrences(of: "#", with: "_").replacingOccurrences(of: "$", with: "")
       .replacingOccurrences(of: "&", with: "").replacingOccurrences(of: "!", with: "_")
-      .replacingOccurrences(of: "^", with: "**").replacingOccurrences(of: "\"", with: "")
+      .replacingOccurrences(of: "^", with: " ** ").replacingOccurrences(of: "\"", with: "")
       .replacingOccurrences(of: ";", with: ", ")
 
     formula = #"([A-Z]+)[0-9]*:[A-Z]+[0-9]*"#.r!.replaceAll(in: formula, with: "$1..<$1+\(count)")
