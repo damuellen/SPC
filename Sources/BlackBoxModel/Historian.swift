@@ -11,9 +11,12 @@
 import DateGenerator
 import Foundation
 import Meteo
+#if canImport(SQLite)
 import SQLite
+#endif
+#if canImport(xlsxwriter)
 import xlsxwriter
-
+#endif
 /// A class that creates a recording of performance data.
 public final class Historian {
 
@@ -31,9 +34,15 @@ public final class Historian {
   var startDate: Date? = Simulation.time.firstDateOfOperation
 
   public enum Mode {
-    case database, csv, excel, inMemory, none
+    #if canImport(SQLite)
+    case database
+    #endif
+    case inMemory, none
     case custom(interval: DateGenerator.Interval)
-
+    case csv
+    #if canImport(xlsxwriter)
+    case excel
+    #endif
     var hasFileOutput: Bool {
       if case .none = self { return false }
       if case .inMemory = self { return false }
@@ -55,10 +64,13 @@ public final class Historian {
   private var iso8601_Hourly: String = ""
   private var iso8601_Interval: String = ""
   private var stringBuffer: String = ""
+  #if canImport(SQLite)
   /// sqlite file
   private var db: Connection? = nil
-
+  #endif
+  #if canImport(xlsxwriter)
   private var xlsx: Workbook? = nil
+  #endif
   /// Totals
   private var annualPerformance = PlantPerformance()
   private var annualRadiation = SolarRadiation()
@@ -286,13 +298,12 @@ public final class Historian {
       stringBuffer.removeAll()
     }
 
-    if case .database = mode {
-      storeInDB()
-    }
-
-    if case .excel = mode {
-      writeExcel()
-    }
+    #if canImport(SQLite)
+    if case .database = mode { storeInDB() }
+    #endif
+    #if canImport(xlsxwriter)
+    if case .excel = mode { writeExcel() }
+    #endif
 
     return Recording(
       startDate: startDate!,
@@ -354,8 +365,8 @@ public final class Historian {
       }
     }
   }
-
- public func writeExcel() {
+ #if canImport(xlsxwriter)
+ private func writeExcel() {
     guard let wb = xlsx else { return }
     let f1 = wb.addFormat().set(num_format: "d mmm hh:mm")
     let f2 = wb.addFormat().set(num_format: "0.0")
@@ -404,9 +415,10 @@ public final class Historian {
     ws2.autofilter(range: [0,0,performanceHistory.count+1, energyCount])
     wb.close()
   }
-
+  #endif
+  #if canImport(SQLite)
   // MARK: Output database
-  public func storeInDB() {
+  private func storeInDB() {
     guard let db = db else { return }
 
     func createTable(name: String, columns: [String]) {
@@ -437,7 +449,7 @@ public final class Historian {
       for entry in performanceHistory { try! stmt.run(entry.numericalForm) }
     }
   }
-
+  #endif
   // MARK: Output Streams
 
   private var customIntervalStream: OutputStream?
