@@ -1,16 +1,15 @@
 import Foundation
 import Utilities
+let skipCalc = ["FT",	"FU",	"FV",	"FW",	"FX",	"FY",	"FZ",	"GA",	"GB",	"GC",	"GD",	"GE",	"GF",	"GG",	"GH",	"GI",	"GJ",	"GK",	"GL",	"GM",	"GN",	"GO",	"GP",	"GQ",	"GR",	"GS",	"GT",	"GU",	"GV",	"GW",	"GX",	"GY",	"GZ",	"HA",	"HB",	"HC",	"HD",	"HE",	"HF",	"HG",	"HH",	"HI",	"HJ",	"HK",	"HL",	"HM",	"HN",	"HO",	"HP",	"HQ",	"HR",	"HS",	"HT",	"HU",	"HV",	"HW",	"HX",	"HY",	"HZ",	"IA",	"IB",	"IC",	"ID",	"IE",	"IF",	"IG",	"IH",	"II",	"IJ",	"IK",	"IL",	"IM",	"IN",	"IO",	"IP",	"IQ",	"IR",	"IS",	"IT",	"IU",	"IV",	"IW",	"IX",	"IY",	"IZ",	"JA",	"JB",	"JC",	"JD",	"JE",	"JF",	"JG",	"JH",	"JI",	"JJ",	"JK",	"JL",	"JM",	"JN",	"JO",	"JP",	"JQ",	"JR",	"JS",	"JT",	"JU",	"JV",	"JW",	"JX",	"JY",	"JZ",	"KA",	"KB",	"KC",	"KD",	"KE",	"KF",	"KG",	"KH",	"KI",	"KJ",	"KK",	"KL",	"KM",	"KN",	"KO",	"KP",	"KQ",	"KR",	"KS",	"KT",	"KU",	"KV",	"KW",	"KX",	"KY",	"KZ",	"LA",	"LB",	"LC",	"LD",	"LE",	"LF",	"LG",	"LH",	"LI",	"LJ",	"LK",	"LL",	"LM",	"LN",	"LO",	"LP",	"LQ",	"LR",	"LS",	"LT",	"LU",	"LV",	"LW",	"LX",	"LY",	"LZ",	"MA",	"MB",	"MC",	"MD",	"ME",	"MF",	"MG",	"MH",	"MI",	"MJ",	"MK",	"ML",	"MM",	"MN",	"MO",	"MP",	"MQ",	"MR",	"MS",	"MT",	"MU",	"MV",	"MW",	"MX",	"MY",	"MZ",	"NA",	"NB",	"NC",	"ND",	"NE",	"NF",	"NG",	"NH",	"NI",	"NJ",	"NK",	"NL",	"NM",	"NN",	"NO",	"NP",	"NQ",	"NR",	"NS",	"NT",	"NU",	"NV",	"NW",	"NX",	"NY",	"NZ",	"OA",	"OB",	"OC",	"OD",	"OE",	"OF",	"OG",	"OH",	"OI",	"OJ",	"OK",	"OL",	"OM",	"ON",	"OO",	"OP",	"OQ",	"OR",	"OS",	"OT",	"OU",	"OV",	"OW",	"OX",	"OY",	"OZ",	"PA",	"PB",	"PC",	"PD",	"PE",	"PF",	"PG",	"PH",	"PI",	"PJ",	"PK",	"PL",	"PM",	"PN",	"PO",	"PP",	"PQ",	"PR",	"PS",	"PT",	"PU",	"PV",	"PW",	"PX",	"PY",	"PZ",	"QA",	"QB",	"QC",	"QD",	"QE",	"QF",	"QG",	"QH",	"QI",	"QJ",	"QK",	"QL",	"QM",	"QN",	"QO",	"QP",	"QQ",	"QR",	"QS",	"QT",	"QU",	"QV",	"QW",	"QX",	"QY",	"QZ",	"RA",	"RB",	"RC",	"RD",	"RE",	"RF",	"RG",	"RH",	"RI",	"RJ",	"RK",	"RL",	"RM",	"RN",	"RO",	"RP",	"RQ",	"RR",	"RS",	"RT",	"RU",	"RV",	"RW",
+]
+let skipDaily2 = ["AA",	"AB",	"AC",	"AD",	"AE",	"AF",	"AG",	"AH",	"AI",	"AJ",	"AK",	"AL",	"AM",	"AN",	"AO",	"AP",	"AQ",	"AR",	"AS",	"AT",	"AU",	"AV",	"AW",	"AX",	"AY",	"AZ",	"BA",	"BB",	"BC",	"BD",	"BE",	"BF",	"BG",	"BH",	"BI",	"BJ",	"BK",	"BL",	"BM",	"BN",	"BO",	"BP",	"BQ",	"BR",	"BS",	"BT",	"BU",	"BV",	"BW",	"BX",	"BY",	"BZ",	"CA",	"CB",	"CC",	"CD",	"CE",	"CF",	"CG",	"CH",	"CI",	"CJ",	"CK",	"CL",	"CM",
+]
 
-
-// print(cleanUp(formulasCalculation, titlesCalculation).joined(separator: "\n\n"))
-// print(cleanUp(formulasDaily1, titlesDaily1, 365).joined(separator: "\n\n"))
-// print(cleanUp(formulasDaily2, titlesDaily2, 365).joined(separator: "\n\n"))
-
-try! cleanUp(formulasCalculation, titlesCalculation).joined(separator: "\n\n").write(toFile: "Calculation.swift", atomically: false, encoding: .utf8)
+try! cleanUp(formulasCalculation, titlesCalculation, skip: []).joined(separator: "\n\n").write(toFile: "Calculation.swift", atomically: false, encoding: .utf8)
 try! _ = Process.run(.init(fileURLWithPath: "/workspaces/swift-format/.build/release/swift-format"), arguments: ["-i", "Calculation.swift"], terminationHandler: nil)
-try! cleanUp(formulasDaily1, titlesDaily1, 365).joined(separator: "\n\n").write(toFile: "Daily1.swift", atomically: false, encoding: .utf8)
+try! cleanUp(formulasDaily1, titlesDaily1, 365, skip: []).joined(separator: "\n\n").write(toFile: "Daily1.swift", atomically: false, encoding: .utf8)
 try! _ = Process.run(.init(fileURLWithPath: "/workspaces/swift-format/.build/release/swift-format"), arguments: ["-i", "Daily1.swift"], terminationHandler: nil)
-try! cleanUp(formulasDaily2, titlesDaily2, 365).joined(separator: "\n\n").write(toFile: "Daily2.swift", atomically: false, encoding: .utf8)
+try! cleanUp(formulasDaily2, titlesDaily2, 365, skip: []).joined(separator: "\n\n").write(toFile: "Daily2.swift", atomically: false, encoding: .utf8)
 try! _ = Process.run(.init(fileURLWithPath: "/workspaces/swift-format/.build/release/swift-format"), arguments: ["-i", "Daily2.swift"], terminationHandler: nil)
 
 func inputOutput() {
