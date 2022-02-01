@@ -45,6 +45,68 @@ extension Array where Element == Double {
   }
 }
 
+
+extension Array where Element == Double {
+  func sum(days: [[Int]], range: Int, predicate: (Double) -> Bool) -> [Double] {
+    days.map { day in var sum = 0.0
+      day.forEach { d in let value = self[(d + range)]
+        if predicate(value) { sum += value }
+      }
+      return sum
+    }
+  }
+
+  func sumOf(range: Int, days: [[Int]], condition: Int, predicate: (Double) -> Bool) -> [Double] {
+    days.map { day in var sum = 0.0
+      day.forEach { d in 
+        if predicate(self[(d + condition)]) { sum += self[(d + range)] }
+      }
+      return sum
+    }
+  }
+
+  func sum(hours: [[Int]], condition: Int, predicate: (Double) -> Bool) -> [Double] {
+    Array(
+      hours.map { day -> [Double] in var sum = 0.0
+        day.forEach { d in let value = self[(d + condition)]
+          if predicate(value) { sum += value }
+        }
+        return [Double](repeating: sum, count: day.count)
+      }
+      .joined())
+  }
+
+  func countOf(range: Int, days: [[Int]], predicate: (Double) -> Bool) -> [Double] {
+    days.map { day in var count = 0.0
+      day.forEach { d in let value = self[(d + range)]
+        if predicate(value) { count += 1 }
+      }
+      return count
+    }
+  }
+
+
+  func count(days: [[Int]], range: Int, predicate: (Double) -> Bool) -> [Double] {
+    days.map { day in var count = 0.0
+      day.forEach { d in let value = self[(d + range)]
+        if predicate(value) { count += 1 }
+      }
+      return count
+    }
+  }
+
+  func count(hours: [[Int]], range: Int, predicate: (Double) -> Bool) -> [Double] {
+    Array(
+      hours.map { day -> [Double] in var count = 0.0
+        day.forEach { d in let value = self[(d + range)]
+          if predicate(value) { count += 1 }
+        }
+        return [Double](repeating: count, count: day.count)
+      }
+      .joined())
+  }
+}
+
 extension Double { var formatted: String { String(format: "%G", self) } }
 
 extension Array where Element == Double {
@@ -53,6 +115,8 @@ extension Array where Element == Double {
 
   var readable: [String] { map(\.formatted) }
 }
+
+func round(_ value: Double) -> Double { value.rounded() }
 
 func average(_ values: ArraySlice<Double>) -> Double {
   let sum = values.reduce(into: 0.0) { sum, value in sum += value }
@@ -82,6 +146,23 @@ func sum(_ values: Array<Double>) -> Double {
   }
   return s + w
 }
+
+
+func sumDay( _ i: Int, _ array: Array<Double>, _ offset: Int) -> Double {
+  let offset = offset + i.quotientAndRemainder(dividingBy: 24).quotient
+  let slice = array[offset...].prefix(24)
+  let sum = slice.reduce(into: 0) { sum, value in sum += value }
+  return sum
+}
+
+
+func countDay( _ i: Int, _ array: Array<Double>, _ offset: Int, _ predicat: (Double) -> Bool) -> Double {
+  let offset = offset + i.quotientAndRemainder(dividingBy: 24).quotient
+  let slice = array[offset...].prefix(24)
+  let count = slice.reduce(into: 0) { counter, value in if predicat(value) { counter += 1 } }
+  return Double(count)
+}
+
 
 func countiff(_ values: ArraySlice<Double>, _ predicat: (Double) -> Bool) -> Double {
   let count = values.reduce(into: 0) { counter, value in if predicat(value) { counter += 1 } }
@@ -278,10 +359,12 @@ public enum ANSI {
 		return "\u{001B}[\(code)m"
 	}
 }
-let compute = """
- ▄▄·       • ▌ ▄ ·.  ▄▄▄·▄• ▄▌▄▄▄▄▄▄▪   ▐ ▄  ▄▄ •
-▐█ ▌▪ ▄█▀▄ ·██ ▐███▪▐█ ▄██▪██▌▀•██ ▀██ •█▌▐█▐█ ▀ ▪
-██ ▄▄▐█▌.▐▌▐█ ▌▐▌▐█· ██▀·█▌▐█▌  ▐█.▪▐█·▐█▐▐▌▄█ ▀█▄
-▐███▌▐█▌.▐▌██ ██▌▐█▌▐█▪·•▐█▄█▌  ▐█▌·▐█▌██▐█▌▐█▄▪▐█
-·▀▀▀  ▀█▄▀▪▀▀  █▪▀▀▀.▀    ▀▀▀   ▀▀▀ ▀▀▀▀▀ █▪·▀▀▀▀
+
+let tunol = """
+████████╗██╗   ██╗███╗   ██╗ ██████╗ ██╗         
+╚══██╔══╝██║   ██║████╗  ██║██╔═══██╗██║         
+   ██║   ██║   ██║██╔██╗ ██║██║   ██║██║         
+   ██║   ██║   ██║██║╚██╗██║██║   ██║██║         
+   ██║   ╚██████╔╝██║ ╚████║╚██████╔╝███████╗    
+   ╚═╝    ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝ ╚══════╝    
 """.randomColor()
