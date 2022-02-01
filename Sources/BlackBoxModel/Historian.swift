@@ -14,16 +14,16 @@ import Meteo
 #if canImport(SQLite)
 import SQLite
 #endif
-#if canImport(xlsxwriter)
+#if canImport(Cxlsxwriter)
 import xlsxwriter
 #endif
 /// A class that creates a recording of performance data.
 public final class Historian {
 
-#if DEBUG && !os(Windows)
+  #if DEBUG && !os(Windows)
   /// Tracking the month
   private var progress: Int = 0
-#endif
+  #endif
   /// Number of values per hour
   private let interval = Simulation.time.steps
   /// Changes the resolution of the output
@@ -34,13 +34,13 @@ public final class Historian {
   var startDate: Date? = Simulation.time.firstDateOfOperation
 
   public enum Mode {
-    #if canImport(SQLite)
+    #if canImport(CSQLite)
     case database
     #endif
     case inMemory, none
     case custom(interval: DateGenerator.Interval)
     case csv
-    #if canImport(xlsxwriter)
+    #if canImport(Cxlsxwriter)
     case excel
     #endif
     var hasFileOutput: Bool {
@@ -50,25 +50,29 @@ public final class Historian {
     }
 
     var hasHistory: Bool {
-#if DEBUG && !os(Windows)
+      #if DEBUG && !os(Windows)
       return true
-#else
+      #else
+      #if canImport(Cxlsxwriter)
       if case .excel = self { return true }
+      #endif
+      #if canImport(CSQLite)
       if case .database = self { return true }
+      #endif
       if case .inMemory = self { return true }
       return false
-#endif
+      #endif
     }
   }
 
   private var iso8601_Hourly: String = ""
   private var iso8601_Interval: String = ""
   private var stringBuffer: String = ""
-  #if canImport(SQLite)
+  #if canImport(CSQLite)
   /// sqlite file
   private var db: Connection? = nil
   #endif
-  #if canImport(xlsxwriter)
+  #if canImport(Cxlsxwriter)
   private var xlsx: Workbook? = nil
   #endif
   /// Totals
@@ -102,15 +106,13 @@ public final class Historian {
   private var suffix: String = "001"
 
   public init(
-   customName: String? = nil,
-   customPath: String? = nil,
-   outputMode: Mode
+    customName: String? = nil, customPath: String? = nil, outputMode: Mode
   ) {
     self.parent = customPath ?? ""
 
-#if DEBUG
+    #if DEBUG
     let outputMode = Mode.custom(interval: interval)
-#endif
+    #endif
 
     if case .inMemory = outputMode {
       statusHistory.reserveCapacity(8760 * interval.rawValue)
@@ -142,25 +144,30 @@ public final class Historian {
     }
 
     var urls = [URL]()
-
+    #if canImport(Cxlsxwriter)
     if case .excel = outputMode {
       let url = urlDir.appendingPathComponent("\(name)\(suffix).xlsx")
       self.xlsx = Workbook(name: url.path)
       urls = [url]
     }
-
+    #endif
+    #if canImport(CSQLite)
     if case .database = outputMode {
       let url = urlDir.appendingPathComponent("\(name)\(suffix).sqlite3")
       self.db = try! Connection(url.path)
       urls = [url]
     }
-
-    if case .csv = outputMode  {
+    #endif
+    if case .csv = outputMode {
       let tableHeader = headers.name + .lineBreak + headers.unit + .lineBreak
-      let dailyResultsURL = urlDir.appendingPathComponent("\(name)\(suffix)_daily.csv")
-      let hourlyResultsURL = urlDir.appendingPathComponent("\(name)\(suffix)_hourly.csv")
-      self.dailyResultsStream = OutputStream(url: dailyResultsURL, append: false)
-      self.hourlyResultsStream = OutputStream(url: hourlyResultsURL, append: false)
+      let dailyResultsURL = urlDir.appendingPathComponent(
+        "\(name)\(suffix)_daily.csv")
+      let hourlyResultsURL = urlDir.appendingPathComponent(
+        "\(name)\(suffix)_hourly.csv")
+      self.dailyResultsStream = OutputStream(
+        url: dailyResultsURL, append: false)
+      self.hourlyResultsStream = OutputStream(
+        url: hourlyResultsURL, append: false)
       self.dailyResultsStream?.open()
       self.hourlyResultsStream?.open()
       self.dailyResultsStream?.write(tableHeader)
@@ -170,19 +177,18 @@ public final class Historian {
     }
 
     if case .custom(let i) = mode {
-      let startTime = repeatElement("0", count: headers.count+1)
+      let startTime = repeatElement("0", count: headers.count + 1)
         .joined(separator: .separator)
       let fraction = String(format: "%.5f", i.fraction)
-      let intervalTime = repeatElement(fraction, count: headers.count+1)
+      let intervalTime = repeatElement(fraction, count: headers.count + 1)
         .joined(separator: .separator)
       let tableHeader =
-        "wxDVFileHeaderVer.1" + .lineBreak
-        + headers.name + .lineBreak
-        + startTime + .lineBreak
-        + intervalTime + .lineBreak
-        + headers.unit + .lineBreak
+        "wxDVFileHeaderVer.1" + .lineBreak + headers.name + .lineBreak
+        + startTime + .lineBreak + intervalTime + .lineBreak + headers.unit
+        + .lineBreak
 
-      let resultsURL = urlDir.appendingPathComponent("\(name)\(suffix)_\(i).csv")
+      let resultsURL = urlDir.appendingPathComponent(
+        "\(name)\(suffix)_\(i).csv")
 
       customIntervalStream = OutputStream(url: resultsURL, append: false)
       stringBuffer.reserveCapacity(200 * 8760 * i.rawValue)
@@ -225,8 +231,7 @@ public final class Historian {
     _ ts: DateTime, meteo: MeteoData, status: Status, energy: PlantPerformance
   ) {
     let solar = SolarRadiation(
-      meteo: meteo, cosTheta: status.collector.cosTheta
-    )
+      meteo: meteo, cosTheta: status.collector.cosTheta)
 
     if mode.hasHistory {
       self.statusHistory.append(status)
@@ -252,12 +257,13 @@ public final class Historian {
 
         if stride == 1 || intervalCounter % stride == 0 {
           let csv = generateValues()
-#if DEBUG
-          let s = status.numericalForm.map(\.description).joined(separator: ",")
+          #if DEBUG
+          let s = status.numericalForm.map(\.description)
+            .joined(separator: ",")
           stringBuffer.append(contentsOf: csv + "," + s + .lineBreak)
-#else
+          #else
           stringBuffer.append(contentsOf: csv + .lineBreak)
-#endif
+          #endif
           customIntervalStream?.write(stringBuffer)
           stringBuffer.removeAll()
           customIntervalRadiation.zero()
@@ -268,29 +274,28 @@ public final class Historian {
 
     if case .csv = mode {
       hourlyRadiation.totalize(solar, fraction: interval.fraction)
-      hourlyPerformance.totalize(energy, fraction: interval.fraction)
-      // Daily and annual sum calculations see counters
+      hourlyPerformance.totalize(energy, fraction: interval.fraction)  // Daily and annual sum calculations see counters
     } else {
       // Only the annual sums are calculated.
       annualRadiation.totalize(solar, fraction: interval.fraction)
       annualPerformance.totalize(energy, fraction: interval.fraction)
     }
 
-#if DEBUG && !os(Windows)
+    #if DEBUG && !os(Windows)
     if progress != ts.month {
       progress = ts.month
       print(" [\(progress)/\(12)] recording month…", terminator: "\r")
       fflush(stdout)
     }
-#endif
+    #endif
   }
 
   public func finish() -> Recording {
-#if DEBUG && !os(Windows)
+    #if DEBUG && !os(Windows)
     let clearLineString = "\u{001B}[2K"
     print(clearLineString, terminator: "\r")
     fflush(stdout)
-#endif
+    #endif
     printResult()
 
     if case .custom(_) = mode {
@@ -298,20 +303,17 @@ public final class Historian {
       stringBuffer.removeAll()
     }
 
-    #if canImport(SQLite)
+    #if canImport(CSQLite)
     if case .database = mode { storeInDB() }
     #endif
-    #if canImport(xlsxwriter)
+    #if canImport(Cxlsxwriter)
     if case .excel = mode { writeExcel() }
     #endif
 
     return Recording(
-      startDate: startDate!,
-      performance: annualPerformance,
-      radiation: annualRadiation,
-      performanceHistory: performanceHistory,
-      statusHistory: statusHistory
-    )
+      startDate: startDate!, performance: annualPerformance,
+      radiation: annualRadiation, performanceHistory: performanceHistory,
+      statusHistory: statusHistory)
   }
 
   private func checkForResults(atPath path: String) -> [Int]? {
@@ -321,10 +323,11 @@ public final class Historian {
 
     let results = contents?.filter { $0.hasPrefix(name) }
 
-    return results?.compactMap { filename in
-      let name = filename.split(separator: "_").dropLast().joined()
-      return Int(name.filter(\.isWholeNumber))
-    }
+    return results?
+      .compactMap { filename in
+        let name = filename.split(separator: "_").dropLast().joined()
+        return Int(name.filter(\.isWholeNumber))
+      }
   }
 
   private var hourCounter: Int = 1 {
@@ -365,54 +368,50 @@ public final class Historian {
       }
     }
   }
- #if canImport(xlsxwriter)
- private func writeExcel() {
+  #if canImport(Cxlsxwriter)
+  private func writeExcel() {
     guard let wb = xlsx else { return }
     let f1 = wb.addFormat().set(num_format: "d mmm hh:mm")
     let f2 = wb.addFormat().set(num_format: "0.0")
 
-    let statusCaptions = ["Date"]
-      + SolarRadiation.columns.map(\.0)
-      + Status.modes + Status.columns.map(\.0)
+    let statusCaptions =
+      ["Date"] + SolarRadiation.columns.map(\.0) + Status.modes
+      + Status.columns.map(\.0)
     let statusCount = statusCaptions.count
     let modesCount = Status.modes.count
-    let energyCaptions = ["Date"]
-      + PlantPerformance.columns.map(\.0)
+    let energyCaptions = ["Date"] + PlantPerformance.columns.map(\.0)
     let energyCount = energyCaptions.count
 
-    let ws1 = wb.addWorksheet()
-      .column("A:A", width: 12, format: f1)
+    let ws1 = wb.addWorksheet().column("A:A", width: 12, format: f1)
       .column([1, statusCount], width: 8, format: f2)
-      .hide_columns(statusCount + 1)
-      .write(statusCaptions, row: 0)
+      .hide_columns(statusCount + 1).write(statusCaptions, row: 0)
 
-    let ws2 = wb.addWorksheet()
-      .column("A:A", width: 12, format: f1)
+    let ws2 = wb.addWorksheet().column("A:A", width: 12, format: f1)
       .column([1, energyCount], width: 8, format: f2)
-      .hide_columns(energyCount + 1)
-      .write(energyCaptions, row: 0)
+      .hide_columns(energyCount + 1).write(energyCaptions, row: 0)
 
     let interval = Simulation.time.steps.interval
     var date = Simulation.time.firstDateOfOperation!
 
     statusHistory.indices.forEach { i in
-      ws1.write(.datetime(date), [i+1,0])
-      ws1.write(sunHistory[i].numericalForm, row: i+1, col: 1)
-      ws1.write(statusHistory[i].modes, row: i+1, col: 5)
-      ws1.write(statusHistory[i].numericalForm, row: i+1, col: 5 + modesCount)
+      ws1.write(.datetime(date), [i + 1, 0])
+      ws1.write(sunHistory[i].numericalForm, row: i + 1, col: 1)
+      ws1.write(statusHistory[i].modes, row: i + 1, col: 5)
+      ws1.write(
+        statusHistory[i].numericalForm, row: i + 1, col: 5 + modesCount)
       date.addTimeInterval(interval)
     }
 
     date = Simulation.time.firstDateOfOperation!
-    ws1.autofilter(range: [0,0,statusHistory.count+1, statusCount])
+    ws1.autofilter(range: [0, 0, statusHistory.count + 1, statusCount])
 
-    performanceHistory.indices.forEach  { i in
-      ws2.write(.datetime(date), [i+1,0])
-      ws2.write(performanceHistory[i].numericalForm, row: i+1, col: 1)
+    performanceHistory.indices.forEach { i in
+      ws2.write(.datetime(date), [i + 1, 0])
+      ws2.write(performanceHistory[i].numericalForm, row: i + 1, col: 1)
       date.addTimeInterval(interval)
     }
 
-    ws2.autofilter(range: [0,0,performanceHistory.count+1, energyCount])
+    ws2.autofilter(range: [0, 0, performanceHistory.count + 1, energyCount])
     wb.close()
   }
   #endif
@@ -424,16 +423,15 @@ public final class Historian {
     func createTable(name: String, columns: [String]) {
       let table = Table(name)
       let expressions = columns.map { Expression<Double>($0) }
-      try! db.run(
-        table.create { t in
-          expressions.forEach { t.column($0) }
-        })
+      try! db.run(table.create { t in expressions.forEach { t.column($0) } })
     }
 
-    let status = Status.columns.map
-      { $0.0.replacingOccurrences(of: "|", with: "_") }
-    let energy = PlantPerformance.columns.map
-      { $0.0.replacingOccurrences(of: "|", with: "_") }
+    let status = Status.columns.map {
+      $0.0.replacingOccurrences(of: "|", with: "_")
+    }
+    let energy = PlantPerformance.columns.map {
+      $0.0.replacingOccurrences(of: "|", with: "_")
+    }
     createTable(name: "PerformanceData", columns: status)
     createTable(name: "Performance", columns: energy)
 
@@ -459,13 +457,14 @@ public final class Historian {
   // MARK: Table headers
 
   private var headers: (name: String, unit: String, count: Int) {
-#if DEBUG
-    let columns =
-      [SolarRadiation.columns, PlantPerformance.columns, Status.columns].joined()
-#else
-    let columns =
-      [SolarRadiation.columns, PlantPerformance.columns].joined()
-#endif
+    #if DEBUG
+    let columns = [
+      SolarRadiation.columns, PlantPerformance.columns, Status.columns,
+    ]
+    .joined()
+    #else
+    let columns = [SolarRadiation.columns, PlantPerformance.columns].joined()
+    #endif
     let names: String = columns.map { $0.0 }.joined(separator: ",")
     let units: String = columns.map { $0.1 }.joined(separator: ",")
     return ("DateTime," + names, "_," + units, columns.count)
@@ -475,14 +474,14 @@ public final class Historian {
 
   private func generateDailyValues() -> String {
     iso8601_Hourly.prefix(10) + .separator
-      + [dailyRadiation.values, dailyPerformance.values]
-      .joined().joined(separator: .separator)
+      + [dailyRadiation.values, dailyPerformance.values].joined()
+      .joined(separator: .separator)
   }
 
   private func generateHourlyValues() -> String {
     iso8601_Hourly + .separator
-      + [hourlyRadiation.values, hourlyPerformance.values]
-      .joined().joined(separator: .separator)
+      + [hourlyRadiation.values, hourlyPerformance.values].joined()
+      .joined(separator: .separator)
   }
 
   private func generateValues() -> String {

@@ -154,9 +154,11 @@ struct SolarPerformanceCalculator: ParsableCommand {
     if let steps = outputValues {
       mode = .custom(interval: Interval[steps])
     } else if database {
+      #if canImport(CSQLite)
       mode = .database
-    } else if excel {
-      mode = .excel
+      #else
+      mode = .csv
+      #endif    
     } else {
       mode = .csv
     }
