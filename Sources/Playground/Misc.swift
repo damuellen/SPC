@@ -10,7 +10,7 @@
 
 
 let A = UnicodeScalar("A").value
-let columns = (0..<1100).map { n -> String in 
+let columns = (0..<1300).map { n -> String in 
   var nn = n
   var x = ""
   if n > 701 {

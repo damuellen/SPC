@@ -7,9 +7,12 @@ import xlsxwriter
 let source = DispatchSource.makeSignalSource(signal: SIGINT, queue: .global())
 let semaphore = DispatchSemaphore(value: 0)
 #if !os(Windows)
+print("\u{1b}[1J", terminator: "")
+print(tunol)
 signal(SIGINT, SIG_IGN)
 source.setEventHandler { source.cancel() }
 #else
+MessageBox(text: "Calculation started.\nhttp://127.0.0.1:9080", caption: "TunOl")
 import WinSDK
 _ = SetConsoleOutputCP(UINT(CP_UTF8))
 SetConsoleCtrlHandler({_ in source.cancel();semaphore.wait();return WindowsBool(true)}, true)
@@ -87,6 +90,11 @@ func fitness(values: [Double]) -> [Double] {
 }
 
 func MGOADE(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fitness: ([Double]) -> [Double]) -> [[Double]] {
+  #if DEBUG
+  let group = false
+  let n = 2
+  let maxIter = 2
+  #endif
   var targetResults = Matrix(n * maxIter, bounds.count + 13)
   var targetPosition = Matrix(group ? 3 : 1, bounds.count)
   var targetFitness = Vector(group ? 3 : 1, .infinity)
@@ -103,7 +111,6 @@ func MGOADE(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fi
   let cr = 0.4
   let f = 0.9  
 
-  print(compute)
   // Calculate the fitness of initial grasshoppers
   DispatchQueue.concurrentPerform(iterations: grassHopperPositions.count) { i in
     let result = fitness(grassHopperPositions[i])
@@ -120,6 +127,7 @@ func MGOADE(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fi
     }
     convergenceCurves[g].append([Double(0), targetFitness[g]])
   }
+  print("\u{1b}[1J", terminator: "")
   print("First population:\n\(targetFitness)".text(.green))
   print(targetPosition.map(labeled(values:)).joined(separator: "\n"))
 

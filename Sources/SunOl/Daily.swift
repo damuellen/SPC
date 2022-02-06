@@ -1,3 +1,4 @@
+/*
 struct Production {
 
   let storage_cap = (RawMeth: 300.0, CO2: 275.0, H2: 50.0)
@@ -93,7 +94,7 @@ struct Production {
     return result
   }
 }
-/*
+
 extension SunOl2 {
 
   mutating func calc() {
