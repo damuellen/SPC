@@ -1,10 +1,6 @@
 name: CI – Ubuntu
 
 on: push
-  branches:
-    - main
-  paths:
-    - '**.swift'
 
 jobs:
   continuous-integration:
