@@ -56,7 +56,16 @@ extension Array where Element == Double {
     }
   }
 
-  func sumOf(range: Int, days: [[Int]], condition: Int, predicate: (Double) -> Bool) -> [Double] {
+  func sum(days: [[Int]], range: Int) -> [Double] {
+    days.map { day in var sum = 0.0
+      day.forEach { d in let value = self[(d + range)]
+        sum += value 
+      }
+      return sum
+    }
+  }
+
+  func sumOf(_ range: Int, days: [[Int]], condition: Int, predicate: (Double) -> Bool) -> [Double] {
     days.map { day in var sum = 0.0
       day.forEach { d in 
         if predicate(self[(d + condition)]) { sum += self[(d + range)] }
@@ -76,7 +85,28 @@ extension Array where Element == Double {
       .joined())
   }
 
-  func countOf(range: Int, days: [[Int]], predicate: (Double) -> Bool) -> [Double] {
+  func sum(hours: [[Int]], condition: Int) -> [Double] {
+    Array(
+      hours.map { day -> [Double] in var sum = 0.0
+        day.forEach { d in let value = self[(d + condition)]
+          sum += value
+        }
+        return [Double](repeating: sum, count: day.count)
+      }
+      .joined())
+  }
+
+
+  func countOf(_ range: Int, days: [[Int]], predicate: (Double) -> Bool) -> [Double] {
+    days.map { day in var count = 0.0
+      day.forEach { d in let value = self[(d + range)]
+        if predicate(value) { count += 1 }
+      }
+      return count
+    }
+  }
+
+  func countOf(_ range: Int, days: [[Int]], condition: Int, predicate: (Double) -> Bool) -> [Double] {
     days.map { day in var count = 0.0
       day.forEach { d in let value = self[(d + range)]
         if predicate(value) { count += 1 }
@@ -116,7 +146,7 @@ extension Array where Element == Double {
   var readable: [String] { map(\.formatted) }
 }
 
-func round(_ value: Double) -> Double { value.rounded() }
+func round(_ value: Double, _ digits: Double) -> Double { value.rounded() }
 
 func average(_ values: ArraySlice<Double>) -> Double {
   let sum = values.reduce(into: 0.0) { sum, value in sum += value }

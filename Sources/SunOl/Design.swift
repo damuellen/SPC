@@ -1,196 +1,5 @@
 import Utilities
 
-extension TunOl {
-  var j: Int { 0 }
-  func hourly() {
-  var r0 = [Double](repeating: 0, count: 52560)
-  var z = [Double](repeating: 0, count: 8760)
-  let result = hourly(r0: z)
-  hourly(r0: &result)
-  var r1 = [Double](repeating: 0, count: 280320)
-
-
-ho
-
-  hourly(r1: &r1)
-  var r2 = [Double](repeating: 0, count: 210240)
-  hourly(r2: &r2)
-  // var r3 = [Double](repeating: 0, count: 175200)
-  // hourly(r3: &r3)
-  // var r4 = [Double](repeating: 0, count: 271560)
-  // hourly(r4: &r4)
-  // var r5 = [Double](repeating: 0, count: 227760)
-  // hourly(r5: &r5)
-  // var r6 = [Double](repeating: 0, count: 271560)
-  // hourly(r6: &r6)
-  // var r7 = [Double](repeating: 0, count: 175200)
-  // hourly(r7: &r7)
-  // var r8 = [Double](repeating: 0, count: 271560)
-  // hourly(r8: &r8)
-  // var r9 = [Double](repeating: 0, count: 227760)
-  // hourly(r9: &r9)
-  // var r10 = [Double](repeating: 0, count: 271560)
-  // hourly(r10: &r10)
-  // var r11 = [Double](repeating: 0, count: 175200)
-  // hourly(r11: &r11)
-  // var r12 = [Double](repeating: 0, count: 271560)
-  // hourly(r12: &r12)
-  // var r13 = [Double](repeating: 0, count: 227760)
-  // hourly(r13: &r13)
-  // var r14 = [Double](repeating: 0, count: 271560)
-  // hourly(r14: &r14)
-  // var r15 = [Double](repeating: 0, count: 175200)
-  // hourly(r15: &r15)
-  // var r16 = [Double](repeating: 0, count: 271560)
-  // hourly(r16: &r16)
-  // var r17 = [Double](repeating: 0, count: 227760)
-  // hourly(r17: &r17)
-  // var r18 = [Double](repeating: 0, count: 271560)
-  // hourly(r18: &r18)
-  }
-func daily1() {
-var r0 = [Double](repeating: 0, count: 365)
-daily1(r0: &r0)
-var r1 = [Double](repeating: 0, count: 5840)
-daily1(r1: &r1)
-// var r2 = [Double](repeating: 0, count: 7300)
-// daily1(r2: &r2)
-// var r3 = [Double](repeating: 0, count: 5840)
-// daily1(r3: &r3)
-// var r4 = [Double](repeating: 0, count: 7300)
-// daily1(r4: &r4)
-// var r5 = [Double](repeating: 0, count: 5840)
-// daily1(r5: &r5)
-// var r6 = [Double](repeating: 0, count: 7300)
-// daily1(r6: &r6)
-// var r7 = [Double](repeating: 0, count: 5840)
-// daily1(r7: &r7)
-// var r8 = [Double](repeating: 0, count: 7300)
-// daily1(r8: &r8)
-// var r9 = [Double](repeating: 0, count: 17155)
-// daily1(r9: &r9)
-// var r10 = [Double](repeating: 0, count: 17155)
-// daily1(r10: &r10)
-// var r11 = [Double](repeating: 0, count: 7665)
-// daily1(r11: &r11)
-// var r12 = [Double](repeating: 0, count: 5840)
-// daily1(r12: &r12)
-// var r13 = [Double](repeating: 0, count: 5840)
-// daily1(r13: &r13)
-// var r14 = [Double](repeating: 0, count: 12410)
-// daily1(r14: &r14)
-// var r15 = [Double](repeating: 0, count: 12410)
-// daily1(r15: &r15)
-// var r16 = [Double](repeating: 0, count: 17155)
-// daily1(r16: &r16)
-// var r17 = [Double](repeating: 0, count: 17155)
-// daily1(r17: &r17)
-// var r18 = [Double](repeating: 0, count: 7665)
-// daily1(r18: &r18)
-// var r19 = [Double](repeating: 0, count: 5840)
-// daily1(r19: &r19)
-// var r20 = [Double](repeating: 0, count: 5840)
-// daily1(r20: &r20)
-// var r21 = [Double](repeating: 0, count: 12410)
-// daily1(r21: &r21)
-// var r22 = [Double](repeating: 0, count: 12410)
-// daily1(r22: &r22)
-// var r23 = [Double](repeating: 0, count: 17155)
-// daily1(r23: &r23)
-// var r24 = [Double](repeating: 0, count: 17155)
-// daily1(r24: &r24)
-// var r25 = [Double](repeating: 0, count: 7665)
-// daily1(r25: &r25)
-// var r26 = [Double](repeating: 0, count: 5840)
-// daily1(r26: &r26)
-// var r27 = [Double](repeating: 0, count: 5840)
-// daily1(r27: &r27)
-// var r28 = [Double](repeating: 0, count: 12410)
-// daily1(r28: &r28)
-// var r29 = [Double](repeating: 0, count: 12410)
-// daily1(r29: &r29)
-// var r30 = [Double](repeating: 0, count: 17155)
-// daily1(r30: &r30)
-// var r31 = [Double](repeating: 0, count: 17155)
-// daily1(r31: &r31)
-// var r32 = [Double](repeating: 0, count: 7665)
-// daily1(r32: &r32)
-// var r33 = [Double](repeating: 0, count: 5840)
-// daily1(r33: &r33)
-// var r34 = [Double](repeating: 0, count: 5840)
-// daily1(r34: &r34)
-// var r35 = [Double](repeating: 0, count: 12410)
-// daily1(r35: &r35)
-// var r36 = [Double](repeating: 0, count: 12410)
-// daily1(r36: &r36)
-// var r37 = [Double](repeating: 0, count: 0)
-// daily1(r37: &r37)
-// var r38 = [Double](repeating: 0, count: 23360)
-// daily1(r38: &r38)
-}
-func daily2() {
-var r0 = [Double](repeating: 0, count: 1095)
-daily2(r0: &r0)
-var r1 = [Double](repeating: 0, count: 9855)
-daily2(r1: &r1)
-var r2 = [Double](repeating: 0, count: 9855)
-// daily2(r2: &r2)
-// var r3 = [Double](repeating: 0, count: 9855)
-// daily2(r3: &r3)
-// var r4 = [Double](repeating: 0, count: 9855)
-// daily2(r4: &r4)
-// var r5 = [Double](repeating: 0, count: 1460)
-// daily2(r5: &r5)
-// var r6 = [Double](repeating: 0, count: 13140)
-// daily2(r6: &r6)
-// var r7 = [Double](repeating: 0, count: 9855)
-// daily2(r7: &r7)
-// var r8 = [Double](repeating: 0, count: 7300)
-// daily2(r8: &r8)
-// var r9 = [Double](repeating: 0, count: 7300)
-// daily2(r9: &r9)
-// var r10 = [Double](repeating: 0, count: 10950)
-// daily2(r10: &r10)
-// var r11 = [Double](repeating: 0, count: 10950)
-// daily2(r11: &r11)
-// var r12 = [Double](repeating: 0, count: 9855)
-// daily2(r12: &r12)
-// var r13 = [Double](repeating: 0, count: 7300)
-// daily2(r13: &r13)
-// var r14 = [Double](repeating: 0, count: 7300)
-// daily2(r14: &r14)
-// var r15 = [Double](repeating: 0, count: 10950)
-// daily2(r15: &r15)
-// var r16 = [Double](repeating: 0, count: 10950)
-// daily2(r16: &r16)
-// var r17 = [Double](repeating: 0, count: 9855)
-// daily2(r17: &r17)
-// var r18 = [Double](repeating: 0, count: 7300)
-// daily2(r18: &r18)
-// var r19 = [Double](repeating: 0, count: 7300)
-// daily2(r19: &r19)
-// var r20 = [Double](repeating: 0, count: 10950)
-// daily2(r20: &r20)
-// var r21 = [Double](repeating: 0, count: 10950)
-// daily2(r21: &r21)
-// var r22 = [Double](repeating: 0, count: 9855)
-// daily2(r22: &r22)
-// var r23 = [Double](repeating: 0, count: 7300)
-// daily2(r23: &r23)
-// var r24 = [Double](repeating: 0, count: 7300)
-// daily2(r24: &r24)
-// var r25 = [Double](repeating: 0, count: 10950)
-// daily2(r25: &r25)
-// var r26 = [Double](repeating: 0, count: 10950)
-// daily2(r26: &r26)
-// var r27 = [Double](repeating: 0, count: 13870)
-// daily2(r27: &r27)
-// var r28 = [Double](repeating: 0, count: 365)
-// daily2(r28: &r28)
-
-}
-}
-
 struct TunOl {
   let A_CCU_max_perc: Double = 0
   let A_CCU_Min_perc: Double = 0
@@ -377,14 +186,14 @@ struct TunOl {
   let EY_var_aux_nom_cons: Double
   let EY_var_gross_nom_cons: Double
   let EY_var_heat_nom_cons: Double
-  let fix_aux_el = Polynomial([0.87197586317594244, 0.29314511444598762, -0.49536293286578681, 0.33024195524385674])
-  let fix_stby_el = Polynomial([0.8910127968928524, 0.21455823229400395, -0.31671308756057304, 0.21114205837371655])
-  let fix_stup_el = Polynomial([0.89405519494415775, 0.19885240173966706, -0.27872279005147399, 0.18581519336764935])
+  let fix_aux_el = [0.87197586317594244, 0.29314511444598762, -0.49536293286578681, 0.33024195524385674]
+  let fix_stby_el = [0.8910127968928524, 0.21455823229400395, -0.31671308756057304, 0.21114205837371655]
+  let fix_stup_el = [0.89405519494415775, 0.19885240173966706, -0.27872279005147399, 0.18581519336764935]
   let Heater_eff: Double = 0.96
   let Heater_outlet_T: Double = 565
-  let HL_coeff: [Double]
+  let HL_Coeff: [Double]
   let Inv_eff_Ref_approx_handover: Double
-  let LL_coeff: [Double]
+  let LL_Coeff: [Double]
   let MethDist_cap_min_perc: Double = 0.5
   let MethDist_fix_cons: Double
   let MethDist_HydrogenO_min_prod: Double
@@ -473,7 +282,7 @@ struct TunOl {
   let PB_el_cap_min_perc: Double
   let PB_fix_aux_el: Double
   let PB_fix_aux_elec_cons_perc_of_ref: Double = 6.4340704330890603E-3
-  let PB_g2n_var_aux_el: Polynomial
+  let PB_g2n_var_aux_el_Coeff: [Double]
   let PB_gross_cap_at_max_harmonious: Double
   let PB_gross_cap_at_min_harmonious: Double
   let PB_gross_min_cap: Double
@@ -529,7 +338,7 @@ struct TunOl {
   let PB_stup_aux_cons: Double
   let PB_stup_fix_aux_elec_cons_perc: Double = 5.9815704330890597E-3
   let PB_stup_var_aux_elec_cons_perc: Double = 1.2789153998036399E-2
-  let PB_var_aux_cons = Polynomial([0.29437013201591916, 0.10280513176871063, -6.5249624421765337E-2, 0.67514642417652304])
+  let PB_var_aux_cons = [0.29437013201591916, 0.10280513176871063, -6.5249624421765337E-2, 0.67514642417652304]
   let PB_var_heat_max_cons: Double
   let PB_warm_start_duration: Double = 6
   let PB_warm_start_energyperc: Double = 0.4
@@ -543,7 +352,7 @@ struct TunOl {
   let TES_dead_mass_ratio: Double = 0.1
   let TES_salt_mass: Double
   let TES_thermal_cap: Double
-  let th: Double
+  let th_Coeff: [Double]
   let BESS_cap_ud: Double = 130
   let CCU_C_O_2_nom_prod_ud: Double = 35
   let C_O_2_storage_cap_ud: Double = 0

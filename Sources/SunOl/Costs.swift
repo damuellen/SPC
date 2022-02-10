@@ -25,29 +25,29 @@ enum CostModel {
   static let Substation_capacity = (basis: 135.0, exp: 0.7, coeff: 17_778.0)
  
   static func invest(_ model: SunOl) -> [Double] {
-    let factor = min(model.Heat_to_aux_directly_from_CSP_sum + model.Heat_to_aux_from_PB_sum * Float(model.PB_Ratio_Heat_input_vs_output),
-     model.Q_solar_before_dumping_sum - model.Total_SF_heat_dumped_sum - model.TES_thermal_input_by_CSP_sum)
+    // let factor = min(model.Heat_to_aux_directly_from_CSP_sum + model.Heat_to_aux_from_PB_sum * Float(model.PB_Ratio_Heat_input_vs_output),
+    //  model.Q_solar_before_dumping_sum - model.Total_SF_heat_dumped_sum - model.TES_thermal_input_by_CSP_sum)
 
-    var auxLoops = model.CSP_Loop_Nr > 0 ?
-     min(model.CSP_Loop_Nr, Double(Float(model.CSP_Loop_Nr) * factor / model.Q_solar_before_dumping_sum)) : 0
-    if (auxLoops <= 0 || factor <= 0) {
-      auxLoops = 0
-    }
-    let Assembly_hall = 12_000_000.0 + (-132.967033 * Double(model.CSP_Loop_Nr) ** 2 + 62978.02 * Double(model.CSP_Loop_Nr) + -2.32831E-10)
+    // var auxLoops = model.CSP_Loop_Nr > 0 ?
+    //  min(model.CSP_Loop_Nr, Double(Float(model.CSP_Loop_Nr) * factor / model.Q_solar_before_dumping_sum)) : 0
+    // if (auxLoops <= 0 || factor <= 0) {
+    //   auxLoops = 0
+    // }
+    // let Assembly_hall = 12_000_000.0 + (-132.967033 * Double(model.CSP_Loop_Nr) ** 2 + 62978.02 * Double(model.CSP_Loop_Nr) + -2.32831E-10)
 		
     
-    let CSP_SF_cost_dedicated_to_ICPH =
-      Solar_field.coeff * ((model.CSP_Loop_Nr - auxLoops) / Solar_field.basis) ** Solar_field.exp + Solar_field.c1 * Solar_field.f
-      * (model.CSP_Loop_Nr - auxLoops)
+    // let CSP_SF_cost_dedicated_to_ICPH =
+    //   Solar_field.coeff * ((model.CSP_Loop_Nr - auxLoops) / Solar_field.basis) ** Solar_field.exp + Solar_field.c1 * Solar_field.f
+    //   * (model.CSP_Loop_Nr - auxLoops)
 
-    var aux_Heat_ratio = Double(model.meth_plant_heatConsumption_sum / (model.meth_plant_heatConsumption_sum + model.EY_aux_heatConsumption_sum))
-    if aux_Heat_ratio.isNaN { aux_Heat_ratio = 0 }
-    let CSP_SF_cost_dedicated_to_Hydrogen = Solar_field.coeff * ((model.CSP_Loop_Nr - auxLoops * aux_Heat_ratio) / Solar_field.basis) ** Solar_field.exp + Solar_field.c1 * Solar_field.f
-      * (model.CSP_Loop_Nr - auxLoops * aux_Heat_ratio)
+    // var aux_Heat_ratio = Double(model.meth_plant_heatConsumption_sum / (model.meth_plant_heatConsumption_sum + model.EY_aux_heatConsumption_sum))
+    // if aux_Heat_ratio.isNaN { aux_Heat_ratio = 0 }
+    // let CSP_SF_cost_dedicated_to_Hydrogen = Solar_field.coeff * ((model.CSP_Loop_Nr - auxLoops * aux_Heat_ratio) / Solar_field.basis) ** Solar_field.exp + Solar_field.c1 * Solar_field.f
+    //   * (model.CSP_Loop_Nr - auxLoops * aux_Heat_ratio)
     
-    let CSP_SF_cost_dedicated_to_Methanol = Solar_field.coeff * (model.CSP_Loop_Nr / Solar_field.basis) ** Solar_field.exp + Solar_field.c1 * Solar_field.f
-      * model.CSP_Loop_Nr
-    let CSP_SF_cost_dedicated_to_aux_heat = AdditionalCostPerLoop * auxLoops
+    // let CSP_SF_cost_dedicated_to_Methanol = Solar_field.coeff * (model.CSP_Loop_Nr / Solar_field.basis) ** Solar_field.exp + Solar_field.c1 * Solar_field.f
+    //   * model.CSP_Loop_Nr
+    // let CSP_SF_cost_dedicated_to_aux_heat = AdditionalCostPerLoop * auxLoops
 
     let PV_DC_Cost = model.PV_DC_Cap * PV_DC_part.coeff + 0.0
     let PV_AC_Cost = (model.PV_AC_Cap / PV_AC_part.basis) ** PV_AC_part.exp * PV_AC_part.basis * PV_AC_part.coeff + 0.0
@@ -56,10 +56,10 @@ enum CostModel {
       (Heater_system.c1 + Heater_system.coeff * (model.Heater_cap / Heater_system.basis) ** Heater_system.exp + model.Heater_cap
       * Heater_system.factor * Heater_system.c2) : 0
 
-    var TES_Storage_cost =
-      Thermal_energy_storage.c1 + Thermal_energy_storage.coeff * (model.TES_salt_mass / Thermal_energy_storage.basis) ** Thermal_energy_storage.exp
-      + model.TES_salt_mass * Thermal_energy_storage.c2 * Thermal_energy_storage.factor
-    if TES_Storage_cost.isNaN { TES_Storage_cost = 0 }
+    // var TES_Storage_cost =
+    //   Thermal_energy_storage.c1 + Thermal_energy_storage.coeff * (model.TES_salt_mass / Thermal_energy_storage.basis) ** Thermal_energy_storage.exp
+    //   + model.TES_salt_mass * Thermal_energy_storage.c2 * Thermal_energy_storage.factor
+    // if TES_Storage_cost.isNaN { TES_Storage_cost = 0 }
     let Electrolysis_Cost = model.EY_Nominal_elec_input * Electrolysis_coeff + 0.0
 
     let PB_Cost = model.PB_Nominal_gross_cap > 0 ? (Power_Block.c1 + (model.PB_Nominal_gross_cap - Power_Block.basis) * Power_Block.coeff) : 0
@@ -84,50 +84,52 @@ enum CostModel {
     let PV_O_M_Cost = (11.3333 * 1000 * 1000) + 0 * model.PV_DC_Cap
     let PB_O_M_Cost = (11.3333 / 3 * 2 / 3 * 1000 * 1000) + (0.00606061 / 3 * 2 / 3 * 1000 * 1000) * model.PB_Nominal_gross_cap
 
-    let CAPEX_ICPH_assembly_hall_csp_sf_dedicated_to_ICPH_PC_DC_PV_AC_Heaters_TES_PB_Substation =
-      Assembly_hall + CSP_SF_cost_dedicated_to_ICPH + PV_DC_Cost + PV_AC_Cost + Heater_Cost + TES_Storage_cost + PB_Cost + Substation_cost_ICPH
+    // let CAPEX_ICPH_assembly_hall_csp_sf_dedicated_to_ICPH_PC_DC_PV_AC_Heaters_TES_PB_Substation =
+    //   Assembly_hall + CSP_SF_cost_dedicated_to_ICPH + PV_DC_Cost + PV_AC_Cost + Heater_Cost + TES_Storage_cost + PB_Cost + Substation_cost_ICPH
 
-    let CAPEX_aux_thermal_energy_csp_sf_cost_dedicated_to_aux_heat = CSP_SF_cost_dedicated_to_aux_heat
+    // let CAPEX_aux_thermal_energy_csp_sf_cost_dedicated_to_aux_heat = CSP_SF_cost_dedicated_to_aux_heat
 
-    let CAPEX_Hydrogen_ICPH_half_of_loops_dedicated_to_aux_heat_electrolysis_half_of_electrical_boiler_cost =
-      Assembly_hall + CSP_SF_cost_dedicated_to_Hydrogen + PV_DC_Cost + PV_AC_Cost + Heater_Cost
-      + TES_Storage_cost + PB_Cost + (Electrical_boiler_cost * aux_Heat_ratio) + Substation_cost + Electrolysis_Cost
+    // let CAPEX_Hydrogen_ICPH_half_of_loops_dedicated_to_aux_heat_electrolysis_half_of_electrical_boiler_cost =
+    //   Assembly_hall + CSP_SF_cost_dedicated_to_Hydrogen + PV_DC_Cost + PV_AC_Cost + Heater_Cost
+    //   + TES_Storage_cost + PB_Cost + (Electrical_boiler_cost * aux_Heat_ratio) + Substation_cost + Electrolysis_Cost
 
-    let Total_CAPEX =
-      Assembly_hall + CSP_SF_cost_dedicated_to_Methanol + PV_DC_Cost + PV_AC_Cost + Heater_Cost + TES_Storage_cost
-      + Electrolysis_Cost + PB_Cost + Battery_storage_cost + Hydrogen_Storage_cost + Methanol_plant_cost + Electrical_boiler_cost + Substation_cost
+    // let Total_CAPEX =
+    //   Assembly_hall + CSP_SF_cost_dedicated_to_Methanol + PV_DC_Cost + PV_AC_Cost + Heater_Cost + TES_Storage_cost
+    //   + Electrolysis_Cost + PB_Cost + Battery_storage_cost + Hydrogen_Storage_cost + Methanol_plant_cost + Electrical_boiler_cost + Substation_cost
 
-    let Total_OPEX = CSP_O_M_Cost + PV_O_M_Cost + PB_O_M_Cost
+    // let Total_OPEX = CSP_O_M_Cost + PV_O_M_Cost + PB_O_M_Cost
 
-    let Y = 25.0
-    let R = 0.07
-    let FCR = R * (1 + R) ** Y / ((1 + R) ** Y - 1)
-    let BUY = 2 * 0.091
-    let SELL = 0.33 * 0.091
+    // let Y = 25.0
+    // let R = 0.07
+    // let FCR = R * (1 + R) ** Y / ((1 + R) ** Y - 1)
+    // let BUY = 2 * 0.091
+    // let SELL = 0.33 * 0.091
 
-    let LCH2 =
-      (FCR * CAPEX_Hydrogen_ICPH_half_of_loops_dedicated_to_aux_heat_electrolysis_half_of_electrical_boiler_cost + Total_OPEX
-        + Double(model.elec_from_grid_sum) * BUY * 1000 - Double(model.elec_to_grid_sum) * SELL * 1000) / Double(model.H2_to_meth_production_effective_MTPH_sum)
+    // let LCH2 =
+    //   (FCR * CAPEX_Hydrogen_ICPH_half_of_loops_dedicated_to_aux_heat_electrolysis_half_of_electrical_boiler_cost + Total_OPEX
+    //     + Double(model.elec_from_grid_sum) * BUY * 1000 - Double(model.elec_to_grid_sum) * SELL * 1000) / Double(model.H2_to_meth_production_effective_MTPH_sum)
         
-    let LCoM =
-      (FCR * Total_CAPEX + Total_OPEX + Double(model.elec_from_grid_sum) * BUY * 1000 - Double(model.elec_to_grid_sum) * SELL * 1000)
-      / Double(model.meth_produced_MTPH_sum)
+    // let LCoM =
+    //   (FCR * Total_CAPEX + Total_OPEX + Double(model.elec_from_grid_sum) * BUY * 1000 - Double(model.elec_to_grid_sum) * SELL * 1000)
+    //   / Double(model.meth_produced_MTPH_sum)
 
-    let LCoE =
-      (FCR * CAPEX_ICPH_assembly_hall_csp_sf_dedicated_to_ICPH_PC_DC_PV_AC_Heaters_TES_PB_Substation + Total_OPEX) / Double(model.avail_total_net_elec_sum - model.net_elec_above_max_consumers_sum)
+    // let LCoE =
+    //   (FCR * CAPEX_ICPH_assembly_hall_csp_sf_dedicated_to_ICPH_PC_DC_PV_AC_Heaters_TES_PB_Substation + Total_OPEX) / Double(model.avail_total_net_elec_sum - model.net_elec_above_max_consumers_sum)
 
-    var LCoTh =
-      (FCR * CAPEX_aux_thermal_energy_csp_sf_cost_dedicated_to_aux_heat) 
-      / Double(model.Produced_thermal_energy_sum)
-    if LCoTh.isNaN { LCoTh = 0 }
-    return [
-      (Total_CAPEX * 100).rounded() / 100, Double(model.H2_to_meth_production_effective_MTPH_sum),
-      (LCoE * 100).rounded() / 100, (LCoTh * 100).rounded() / 100, (LCH2 * 100).rounded() / 100,
-      (LCoM * 1000).rounded() / 1000, Double(model.PB_startup_heatConsumption_effective_count),
-      Double(model.TES_discharge_effective_count), Double(model.EY_plant_start_count),
-      Double(model.gross_operating_point_of_EY_count), Double(model.meth_plant_start_count),
-      Double(model.H2_to_meth_production_effective_MTPH_count),
-      Double(model.aux_elec_missing_due_to_grid_limit_sum)
-    ]
+    // var LCoTh =
+    //   (FCR * CAPEX_aux_thermal_energy_csp_sf_cost_dedicated_to_aux_heat) 
+    //   / Double(model.Produced_thermal_energy_sum)
+    // if LCoTh.isNaN { LCoTh = 0 }
+    // return [
+    //   (Total_CAPEX * 100).rounded() / 100, Double(model.H2_to_meth_production_effective_MTPH_sum),
+    //   (LCoE * 100).rounded() / 100, (LCoTh * 100).rounded() / 100, (LCH2 * 100).rounded() / 100,
+    //   (LCoM * 1000).rounded() / 1000, Double(model.PB_startup_heatConsumption_effective_count),
+    //   Double(model.TES_discharge_effective_count), Double(model.EY_plant_start_count),
+    //   Double(model.gross_operating_point_of_EY_count), Double(model.meth_plant_start_count),
+    //   Double(model.H2_to_meth_production_effective_MTPH_count),
+    //   Double(model.aux_elec_missing_due_to_grid_limit_sum)
+    // ]
+
+    return []
   }
 }

@@ -94,5 +94,11 @@ extension TunOl {
   var L: [Double] { [0] }
   var M: [Double] { [0] }
   var CSP: [Double] { [0] }
-  func POLY(_ value: Double, _ coeffs: [Double]) -> Double { 0 }
+  
+}
+
+func POLY(_ value: Double, _ coeffs: [Double]) -> Double { 
+  coeffs.reversed().reduce(into: 0.0) { result, coefficient in
+    result = coefficient.addingProduct(result, value)
+  }
 }

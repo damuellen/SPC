@@ -312,22 +312,17 @@ struct Command: ParsableCommand {
       let parameters = try? JSONDecoder().decode([Parameter].self, from: data) {
       parameter = parameters
     } else {
-      parameter = [
-        Parameter(
-          CSP_Loop_Nr: 20...250,
-          PV_DC_Cap: 280...1380,
-          PV_AC_Cap: 280...1280,
-          Heater_cap: 10...500,
-          TES_Full_Load_Hours: 8...18,
-          EY_Nominal_elec_input: 80...400,
-          PB_Nominal_gross_cap: 20...220,
-          BESS_cap: 0...1400,
-          H2_storage_cap: 10...110,
-          Meth_nominal_hourly_prod_cap: 12...30,
-          El_boiler_cap: 0...120,
-          grid_max_export: 50...50
-        )
-      ]
+     parameter = [
+  Parameter(
+    BESS_cap_ud: 0...1400, CCU_C_O_2_nom_prod_ud: 10...110, C_O_2_storage_cap_ud: 10...110,
+    CSP_loop_nr_ud: 20...250, El_boiler_cap_ud: 10...110, EY_var_net_nom_cons_ud: 10...110,
+    Grid_export_max_ud: 50...50, Grid_import_max_ud: 50...50, Hydrogen_storage_cap_ud: 10...110,
+    Heater_cap_ud: 10...500, MethDist_Meth_nom_prod_ud: 10...110,
+    MethSynt_RawMeth_nom_prod_ud: 10...110, PB_nom_gross_cap_ud: 10...110,
+    PV_AC_cap_ud: 280...1280, PV_DC_cap_ud: 280...1380, RawMeth_storage_cap_ud: 10...110,
+    TES_full_load_hours_ud: 10...110)
+]
+
     }
     parameter.forEach { parameter in
       let a = MGOADE(group: !noGroups, n: n ?? 150, maxIter: iterations ?? 100, bounds: parameter.ranges, fitness: fitness)
