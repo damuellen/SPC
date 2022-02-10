@@ -29,7 +29,7 @@ steps:
     vcpkgArguments: libxlsxwriter sqlite3
     vcpkgGitCommitId: "5ddd7f02689b7c5aab78711d77f61db5d2e5e79c"
     vcpkgDirectory: 'C:\vcpkg\'
-    vcpkgTriplet: 'x64-windows-release'
+    vcpkgTriplet: 'x64-windows'
     vcpkgGitURL: https://github.com/microsoft/vcpkg.git
 
 - task: PowerShell@2
