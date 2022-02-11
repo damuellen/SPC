@@ -74,19 +74,20 @@ var Reference_PV_plant_power_at_inverter_inlet_DC = [Double]()
 var Reference_PV_MV_power_at_transformer_outlet = [Double]()
 
 func fitness(values: [Double]) -> [Double] {
-  var model = SunOl(values: values)
+  var model = TunOl(values)
   var pr_meth_plant_op = Array(repeating: 0.4, count: 8760)
   #if DEBUG
   var rows = [String](repeating: "", count: 8761)
   #else
   var rows = [String](repeating: "", count: 1)
   #endif
-  let input = model(Q_Sol_MW_thLoop, Reference_PV_plant_power_at_inverter_inlet_DC, Reference_PV_MV_power_at_transformer_outlet, rows: &rows)
-  model(&pr_meth_plant_op, input.Q_solar_before_dumping, input.PV_MV_power_at_transformer_outlet, input.aux_elec_for_CSP_SF_PV_Plant, rows: &rows)
-  model(&pr_meth_plant_op, input.Q_solar_before_dumping, input.PV_MV_power_at_transformer_outlet, input.aux_elec_for_CSP_SF_PV_Plant, rows: &rows)
-  model(&pr_meth_plant_op, input.Q_solar_before_dumping, input.PV_MV_power_at_transformer_outlet, input.aux_elec_for_CSP_SF_PV_Plant, rows: &rows)
-  let result = CostModel.invest(model)
-  return result
+  let hourly0 = model.hourly0()
+  let hourly1 = model.hourly1(hourly0: hourly0)
+  let hourly2 = model.hourly2(hourly0: hourly0, hourly1: hourly1)
+  let _ = model.hourly3(hourly0: hourly0, hourly1: hourly1, hourly2: hourly2)
+  model.daily1(hourly0: hourly0)
+  model.hourly4(hourly0: hourly0, hourly1: hourly1, hourly2: hourly2)
+  return values
 }
 
 func MGOADE(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fitness: ([Double]) -> [Double]) -> [[Double]] {
