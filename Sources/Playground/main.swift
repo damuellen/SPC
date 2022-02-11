@@ -1,12 +1,30 @@
 import Foundation
 import Utilities
 
-try! cleanUp(formulasCalculation, titlesCalculation, skip: [], name: "hourly").joined(separator: "\n\n").write(toFile: "_Calculation.swift", atomically: false, encoding: .utf8)
-try! _ = Process.run(.init(fileURLWithPath: "/workspaces/swift-format/.build/release/swift-format"), arguments: ["-i", "_Calculation.swift"], terminationHandler: nil)
-try! cleanUp(formulasDaily1, titlesDaily1, 365, skip: [], name: "daily1").joined(separator: "\n\n").write(toFile: "_Daily1.swift", atomically: false, encoding: .utf8)
-try! _ = Process.run(.init(fileURLWithPath: "/workspaces/swift-format/.build/release/swift-format"), arguments: ["-i", "_Daily1.swift"], terminationHandler: nil)
-try! cleanUp(formulasDaily2, titlesDaily2, 365, skip: [], name: "daily2").joined(separator: "\n\n").write(toFile: "_Daily2.swift", atomically: false, encoding: .utf8)
-try! _ = Process.run(.init(fileURLWithPath: "/workspaces/swift-format/.build/release/swift-format"), arguments: ["-i", "_Daily2.swift"], terminationHandler: nil)
+// let csv = CSV(atPath: "hps2.csv")!
+
+// let headers = [["Unix", "WindMax", "DNIMax", "WindSpeed", "DNI", "SFPS", "MASSFLOW", "DNIMAXMEASUREDCOS", 
+// "DUMPINGAVERAGE", "INCIDENCEANGLE", "CURRENTSUNANGLE", "TSFSETOUT", 
+// "SCA4LOCCOMMAND", "SCA4LOCACCPRESSURE", "SCA4LOCGRADIENT", "SCA4LOCTMAX", "SCA4LOCTNORM", "SCA4LOCT2_3", "SCA4LOCT2_2", "SCA4LOCT2_1", "SCA4LOCT2", "SCA4LOCT1", "SCA4LOCPOSERROR", "SCA4LOCSCAANGLE",
+// "SCA3LOCCOMMAND", "SCA3LOCACCPRESSURE", "SCA3LOCGRADIENT", 
+// "WINDDIRECTION", "SCA3LOCTMAX", "THOTTANK", "TCOLDTANK", "AMBIENTTEMP", "FLOW", "DUMPINGEXPECTED", "SCA3LOCTNORM",
+//  "SCA3LOCT23", "SCA3LOCT22", "SCA3LOCT21", "SCA3LOCT2", "SCA3LOCT1", "SCA3LOCPOSERROR", "SCA3LOCSCAANGLE", "SCA2LOCCOMMAND",
+//  "SCA2LOCACCPRESSURE", "SCA2LOCGRADIENT", "SCA2LOCTMAX", "SCA2LOCTNORM", "SCA2LOCT23", "SCA2LOCT22", "SCA2LOCT21", "SCA2LOCT2",
+//  "SCA2LOCT1", "SCA2LOCPOSERROR", "SCA2LOCSCAANGLE", "SCA1LOCCOMMAND", "SCA1LOCACCPRESSURE", "SCA1LOCGRADIENT", "SCA1LOCTMAX",
+//  "SCA1LOCTNORM", "SCA1LOCT23", "SCA1LOCT22", "SCA1LOCT21", "SCA1LOCT2", "SCA1LOCT1", "SCA1LOCT02", "SCA1LOCT01", "SCA1LOCT0", "SCA1LOCPOSERROR", "SCA1LOCSCAANGLE"]]
+
+// let sca4 = [csv["SCA4LOCT2_3"], csv["SCA4LOCT2_2"], csv["SCA4LOCT2_1"], csv["SCA4LOCT2"], csv["SCA4LOCT1"]]
+
+// let sca = sca4.map { v in stride(from: 0, to: v.count, by: 30).map { return v[$0...].prefix(30).reduce(0, +) / 30 }  }
+
+// try! Gnuplot(ys: sca[0], sca[1], sca[2] , sca[3], sca[4], titles: "SCA4LOCT2_3", "SCA4LOCT2_2", "SCA4LOCT2_1", "SCA4LOCT2"," SCA4LOCT1" ,style: .points)(.pngLarge(path: "SCA4.png"))
+
+// try! cleanUp(formulasCalculation, titlesCalculation, skip: ["AU", "BT", "CO", "DU", "QS"], name: "hourly").joined(separator: "\n\n").write(toFile: "_Calculation.swift", atomically: false, encoding: .utf8)
+// try! _ = Process.run(.init(fileURLWithPath: "/workspaces/swift-format/.build/release/swift-format"), arguments: ["-i", "_Calculation.swift"], terminationHandler: nil)
+// try! cleanUp(formulasDaily1, titlesDaily1, 365, skip: ["B", "AN", "BZ", "DL", "EX", "GT", "IP"], name: "daily1").joined(separator: "\n\n").write(toFile: "_Daily1.swift", atomically: false, encoding: .utf8)
+// try! _ = Process.run(.init(fileURLWithPath: "/workspaces/swift-format/.build/release/swift-format"), arguments: ["-i", "_Daily1.swift"], terminationHandler: nil)
+// try! cleanUp(formulasDaily2, titlesDaily2, 365, skip: ["D", "AF", "BH", "CJ", "DL", "DQ", "FB"], name: "daily2").joined(separator: "\n\n").write(toFile: "_Daily2.swift", atomically: false, encoding: .utf8)
+// try! _ = Process.run(.init(fileURLWithPath: "/workspaces/swift-format/.build/release/swift-format"), arguments: ["-i", "_Daily2.swift"], terminationHandler: nil)
 
 // inputOutput()
 
