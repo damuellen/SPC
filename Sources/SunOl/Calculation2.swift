@@ -1,5 +1,5 @@
 extension TunOl {
-  mutating func hourly4(hourly0: [Double], hourly1: [Double], hourly2: [Double]) {
+  mutating func hourly4(daily11: [Double], hourly0: [Double], hourly1: [Double], hourly2: [Double]) {
     let j = 0
     let hourlyJ = 26280
     let hourlyL = 43800
@@ -18,12 +18,13 @@ extension TunOl {
     let AYsum = hourly1.sum(hours: daysD, condition: hourlyAY)
     /// Maximum night op perc considering tank sizes
     let hourlyDV = 0
+    let daily1R = 5475
+    let hourly = daysBO.indices.map { day -> [Double] in        
+      let value = daily11[(day + daily1R)]
+      return [Double](repeating: value, count: daysBO[day].count)
+    }.joined()
     // VLOOKUP(BO6,DailyCalc_1A3:R367,COLUMN(DailyCalc_1R3))
-    // for i in 0..<8760 {
-    //   hourly4[hourlyDV + i] = VLOOKUP(
-    //     hourly1[hourlyBO + i], DailyCalc_1hourly_[(A + i)...].prefix(),
-    //     COLUMN(DailyCalc_1hourly0[hourlyR + i]))
-    // }
+    hourly4.replaceSubrange(0..<8760, with: hourly)
 
     /// Max net elec demand outside harm op period
     let hourlyDW = 8760
