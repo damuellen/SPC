@@ -415,7 +415,7 @@ public final class Historian {
     wb.close()
   }
   #endif
-  #if canImport(SQLite)
+  #if canImport(CSQLite)
   // MARK: Output database
   private func storeInDB() {
     guard let db = db else { return }
