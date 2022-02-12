@@ -29,7 +29,7 @@ steps:
     vcpkgArguments: libxlsxwriter sqlite3
     vcpkgGitCommitId: "5ddd7f02689b7c5aab78711d77f61db5d2e5e79c"
     vcpkgDirectory: 'C:\vcpkg\'
-    vcpkgTriplet: 'x64-windows-static'
+    vcpkgTriplet: 'x64-windows'
     vcpkgGitURL: https://github.com/microsoft/vcpkg.git
 
 - task: PowerShell@2
@@ -44,7 +44,7 @@ steps:
   displayName: Install Swift toolchain
 
 - script: |
-    swift build -c release -Xlinker /INCREMENTAL:NO -Xlinker /IGNORE:4217 -Xswiftc -gnone -Xswiftc -suppress-warnings -Xswiftc -continue-building-after-errors -Xswiftc -LC:/vcpkg/installed/x64-windows-static/lib/
+    swift build -c release -Xlinker /INCREMENTAL:NO -Xlinker /IGNORE:4217 -Xswiftc -gnone -Xswiftc -suppress-warnings -Xswiftc -continue-building-after-errors -Xswiftc -LC:/vcpkg/installed/x64-windows/lib/
   env:
     SDKROOT: C:\Library\Developer\Platforms\Windows.platform\Developer\SDKs\Windows.sdk
     DEVELOPER_DIR: C:\Library\Developer
