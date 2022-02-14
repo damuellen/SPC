@@ -17,11 +17,15 @@ jobs:
         run: vcpkg install sqlite3:x64-windows
         continue-on-error: true
 
+      - name: Copy dlls to workspace
+        run: Copy 'C:\vcpkg\installed\x64-windows\bin' '${{GITHUB_WORKSPACE}}\bin'
+        shell: powershell
+
       - name: Setup Swift compiler
         uses: compnerd/gha-setup-swift@main
         with:
-          branch: swift-5.5.2-release
-          tag: 5.5.2-RELEASE
+          branch: swift-5.5.3-release
+          tag: 5.5.3-RELEASE
 
       - name: Checkout sources
         uses: actions/checkout@v2
@@ -54,4 +58,4 @@ jobs:
           path: |
             .build\x86_64-unknown-windows-msvc\release\*.exe
             .build\x86_64-unknown-windows-msvc\release\*.dll
-            C:\vcpkg\installed\x64-windows\bin\*.dll
+            ${{GITHUB_WORKSPACE}}\bin\*.dll

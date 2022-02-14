@@ -14,6 +14,17 @@ variables:
   bin.directory: C:/Library/Swift-development/bin
   icu.directory: C:/Library/icu-67/usr/bin
 
+- task: PowerShell@2
+  timeoutInMinutes: 3
+  inputs:
+    targetType: 'inline'
+    script: |
+      Install-Binary -Url "https://download.swift.org/swift-5.5.3-release/windows10/swift-5.5.3-RELEASE/swift-5.5.3-RELEASE-windows10.exe" -Name "installer.exe" -ArgumentList ("-q")
+      Write-Host "##vso[task.prependpath]$(toolchain.directory)"
+      Write-Host "##vso[task.prependpath]$(bin.directory)"
+      Write-Host "##vso[task.prependpath]$(icu.directory)"
+  displayName: Install Swift toolchain
+
 steps:
 - task: BatchScript@1
   inputs:
@@ -31,17 +42,6 @@ steps:
     vcpkgDirectory: 'C:\vcpkg\'
     vcpkgTriplet: 'x64-windows'
     vcpkgGitURL: https://github.com/microsoft/vcpkg.git
-
-- task: PowerShell@2
-  timeoutInMinutes: 5
-  inputs:
-    targetType: 'inline'
-    script: |
-      Install-Binary -Url "https://download.swift.org/swift-5.5.3-release/windows10/swift-5.5.3-RELEASE/swift-5.5.3-RELEASE-windows10.exe" -Name "installer.exe" -ArgumentList ("-q")
-      Write-Host "##vso[task.prependpath]$(toolchain.directory)"
-      Write-Host "##vso[task.prependpath]$(bin.directory)"
-      Write-Host "##vso[task.prependpath]$(icu.directory)"
-  displayName: Install Swift toolchain
 
 - script: |
     swift build -c release -Xlinker /INCREMENTAL:NO -Xlinker /IGNORE:4217 -Xswiftc -gnone -Xswiftc -suppress-warnings -Xswiftc -continue-building-after-errors -Xswiftc -LC:/vcpkg/installed/x64-windows/lib/
