@@ -30,6 +30,11 @@ jobs:
         run: swift build -c release -Xlinker /INCREMENTAL:NO -Xlinker /IGNORE:4217 -Xswiftc -gnone -Xswiftc -suppress-warnings -Xswiftc -continue-building-after-errors -Xswiftc -LC:/vcpkg/installed/x64-windows/lib/
         continue-on-error: true
 
+      - name: Copy libs to build folder
+        run: Copy-Item -Path "C:\vcpkg\installed\x64-windows\bin\*.dll" -Destination "D:\a\SPC\SPC\.build\x86_64-unknown-windows-msvc\release" -Recurse
+        continue-on-error: true
+        shell: powershell
+
       - name: Compress exe binaries 
         uses: damuellen/upx-action@master
         continue-on-error: true
@@ -37,10 +42,6 @@ jobs:
           file: .build\x86_64-unknown-windows-msvc\release\*.exe
           args: -9
           strip: false
-
-      - name: Copy libs to workspace
-        run: Copy 'C:\vcpkg\installed\x64-windows\bin' '.build\x86_64-unknown-windows-msvc\release'
-        shell: powershell
 
       - name: Compress dll binaries 
         uses: damuellen/upx-action@master
