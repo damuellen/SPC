@@ -58,4 +58,3 @@ jobs:
           path: |
             .build\x86_64-unknown-windows-msvc\release\*.exe
             .build\x86_64-unknown-windows-msvc\release\*.dll
-            ${{GITHUB_WORKSPACE}}\bin\*.dll
