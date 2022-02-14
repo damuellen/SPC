@@ -2318,10 +2318,10 @@ extension TunOl {
     /// grid input for night prep during harm op period
     let daily2IB = 27010
     // IF(GE6=0,0,MIN(EH6+(EI6-EH6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE6-Overall_harmonious_min_perc),MAX(0,-(HZ6-HV6-HW6-HY6))))
-    // for i in 0..<365 {
-    //   daily27[daily2IB + i] = iff(
-    //  daily27[daily2GE + i]=0,0, min(daily21[daily2EH + i] + (daily26[daily2EI + i] - daily21[daily2EH + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (daily27[daily2GE + i] - Overall_harmonious_min_perc),max(0, - (daily27[daily2HZ + i] - daily21[daily2HV + i] - daily21[daily2HW + i] - daily21[daily2HY + i]))))
-    // }
+    for i in 0..<365 {
+      daily27[daily2IB + i] = iff(
+        daily27[daily2GE + i].isZero,0, min(daily21[daily2EH + i] + (daily26[daily2EI + i] - daily21[daily2EH + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (daily27[daily2GE + i] - Overall_harmonious_min_perc),max(0, -(daily27[daily2HZ + i] - daily21[daily2HV + i] - daily21[daily2HW + i] - daily21[daily2HY + i]))))
+    }
 
     /// Balance of electricity during harm op period
     let daily2IC = 27375
@@ -2431,11 +2431,10 @@ extension TunOl {
     /// grid input outside of harm op period
     let daily2IO = 31755
     // IF(OR(GE6=0,GX6=0),0,MIN(EJ6+EA6,MAX(0,-(IM6+IN6-IJ6-IK6-IL6))))
-    // for i in 0..<365 {
-    //   daily27[daily2IO + i] = iff(
-    //   or(
-    //  daily27[daily2GE + i]=0,daily27[daily2GX + i]=0),0, min(daily26[daily2EJ + i] + daily26[daily2EA + i],max(0, - (daily21[daily2IM + i] + daily27[daily2IN + i] - daily21[daily2IJ + i] - daily21[daily2IK + i] - daily27[daily2IL + i]))))
-    // }
+    for i in 0..<365 {
+      daily27[daily2IO + i] = iff(
+      or(daily27[daily2GE + i].isZero,daily27[daily2GX + i].isZero), 0, min(daily26[daily2EJ + i] + daily26[daily2EA + i], max(0, -(daily21[daily2IM + i] + daily27[daily2IN + i] - daily21[daily2IJ + i] - daily21[daily2IK + i] - daily27[daily2IL + i]))))
+    }
 
     /// Balance of electricity outside of harm op period
     let daily2IP = 32120
@@ -2518,9 +2517,9 @@ extension TunOl {
     /// Checksum
     let daily2IX = 35040
     // MAX(0,-IC6)+MAX(0,-II6)+MAX(0,-IP6)+MAX(0,-IT6)
-    // for i in 0..<365 {
-    //   daily27[daily2IX + i] = max(0, - daily27[daily2IC + i]) + max(0, - daily21[daily2II + i]) + max(0, - daily27[daily2IP + i]) + max(0, - daily27[daily2IT + i])
-    // }
+    for i in 0..<365 {
+      daily27[daily2IX + i] = max(0, -daily27[daily2IC + i]) + max(0, -daily21[daily2II + i]) + max(0, -daily27[daily2IP + i]) + max(0, -daily27[daily2IT + i])
+    }
 
     /// el cons for harm op during harm op period
     let daily2IZ = 35405
@@ -2605,10 +2604,10 @@ extension TunOl {
     /// grid input for night prep during harm op period
     let daily2JG = 37960
     // IF(HS6=0,0,MIN(EH6+(EI6-EH6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(HS6-Overall_harmonious_min_perc),MAX(0,-(JE6-JA6-JB6-JD6))))
-    // for i in 0..<365 {
-    //   daily27[daily2JG + i] = iff(
-    //  daily21[daily2HS + i]=0,0, min(daily21[daily2EH + i] + (daily26[daily2EI + i] - daily21[daily2EH + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (daily21[daily2HS + i] - Overall_harmonious_min_perc),max(0, - (daily27[daily2JE + i] - daily27[daily2JA + i] - daily21[daily2JB + i] - daily27[daily2JD + i]))))
-    // }
+    for i in 0..<365 {
+      daily27[daily2JG + i] = iff(
+        daily21[daily2HS + i].isZero, 0, min(daily21[daily2EH + i] + (daily26[daily2EI + i] - daily21[daily2EH + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (daily21[daily2HS + i] - Overall_harmonious_min_perc),max(0, -(daily27[daily2JE + i] - daily27[daily2JA + i] - daily21[daily2JB + i] - daily27[daily2JD + i]))))
+    }
 
     /// Balance of electricity during harm op period
     let daily2JH = 38325
@@ -2718,11 +2717,11 @@ extension TunOl {
     /// grid input outside of harm op period
     let daily2JT = 42705
     // IF(OR(HS6=0,GZ6=0),0,MIN(EJ6+EA6,MAX(0,-(JR6+JS6-JO6-JP6-JQ6))))
-    // for i in 0..<365 {
-    //   daily27[daily2JT + i] = iff(
-    //   or(
-    //  daily21[daily2HS + i]=0,daily27[daily2GZ + i]=0),0, min(daily26[daily2EJ + i] + daily26[daily2EA + i],max(0, - (daily21[daily2JR + i] + daily21[daily2JS + i] - daily27[daily2JO + i] - daily21[daily2JP + i] - daily21[daily2JQ + i]))))
-    // }
+    for i in 0..<365 {
+      daily27[daily2JT + i] = iff(
+      or(daily21[daily2HS + i].isZero, daily27[daily2GZ + i].isZero), 0, min(daily26[daily2EJ + i] + daily26[daily2EA + i],
+       max(0, -(daily21[daily2JR + i] + daily21[daily2JS + i] - daily27[daily2JO + i] - daily21[daily2JP + i] - daily21[daily2JQ + i]))))
+    }
 
     /// Balance of electricity outside of harm op period
     let daily2JU = 43070

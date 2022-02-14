@@ -354,7 +354,8 @@ extension String {
 		ansi(.style(style))
 	}
   public func randomColor() -> String {
-		ansi(.text(color: .init(rawValue: Int.random(in: 31...36))!))
+    let color = ANSIColor(rawValue: Int.random(in: 31...36))!
+		return ansi(.text(color: color))
 	}
 	public func text(_ color: ANSIColor) -> String {
 		ansi(.text(color: color))
