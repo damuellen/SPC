@@ -14,6 +14,7 @@ variables:
   bin.directory: C:/Library/Swift-development/bin
   icu.directory: C:/Library/icu-67/usr/bin
 
+steps:
 - task: PowerShell@2
   timeoutInMinutes: 3
   inputs:
@@ -25,7 +26,6 @@ variables:
       Write-Host "##vso[task.prependpath]$(icu.directory)"
   displayName: Install Swift toolchain
 
-steps:
 - task: BatchScript@1
   inputs:
     filename: C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/Common7/Tools/VsDevCmd.bat
