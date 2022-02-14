@@ -359,7 +359,7 @@ extension TunOl {
         iff(
           and(
             hourly4[hourlyER + i] > 0, hourly1[hourlyBO + i] == hourly1[hourlyBO + i - 1],
-            sum(hourly4[(hourlyEX + i)...].prefix(3)) == 0), hourly4[hourlyEZ + i - 1] + 1, hourly4[hourlyEZ + i - 1]))
+            sum(hourly4[(hourlyEX + i)...].prefix(3)).isZero), hourly4[hourlyEZ + i - 1] + 1, hourly4[hourlyEZ + i - 1]))
     }
 
     /// El cons due to op outside of harm op period

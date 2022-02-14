@@ -74,6 +74,15 @@ extension Array where Element == Double {
     }
   }
 
+  func sumOf(_ range: Int, days: [[Int]], condition1: Int, predicate1: (Double) -> Bool, range2: [Double], condition2: Int, predicate2: (Double) -> Bool) -> [Double] {
+    days.map { day in var sum = 0.0
+      day.forEach { d in 
+        if predicate1(self[(d + condition1)]), predicate2(range2[(d + condition2)]) { sum += self[(d + range)] }
+      }
+      return sum
+    }
+  }
+
   func sum(hours: [[Int]], condition: Int, predicate: (Double) -> Bool) -> [Double] {
     Array(
       hours.map { day -> [Double] in var sum = 0.0
@@ -96,15 +105,6 @@ extension Array where Element == Double {
       .joined())
   }
 
-
-  func countOf(_ range: Int, days: [[Int]], predicate: (Double) -> Bool) -> [Double] {
-    days.map { day in var count = 0.0
-      day.forEach { d in let value = self[(d + range)]
-        if predicate(value) { count += 1 }
-      }
-      return count
-    }
-  }
 
   func countOf(_ range: Int, days: [[Int]], condition: Int, predicate: (Double) -> Bool) -> [Double] {
     days.map { day in var count = 0.0

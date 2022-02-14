@@ -82,11 +82,9 @@ func fitness(values: [Double]) -> [Double] {
   var rows = [String](repeating: "", count: 1)
   #endif
   let hourly0 = model.hourly0()
-  //let hourly1 = model.hourly1(hourly0: hourly0)
-  //let hourly2 = model.hourly2(hourly0: hourly0, hourly1: hourly1)
-  //let _ = model.hourly3(hourly0: hourly0, hourly1: hourly1, hourly2: hourly2)
-  //model.daily1(hourly0: hourly0)
-  //model.hourly4(hourly0: hourly0, hourly1: hourly1, hourly2: hourly2)
+  let hourly1 = model.hourly1(hourly0: hourly0)
+  let hourly2 = model.hourly2(hourly0: hourly0, hourly1: hourly1)
+  let _ = model.hourly3(hourly0: hourly0, hourly1: hourly1, hourly2: hourly2)
   return values
 }
 
