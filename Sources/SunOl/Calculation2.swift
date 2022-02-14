@@ -4,6 +4,7 @@ extension TunOl {
     let hourlyJ = 26280
     let hourlyL = 43800
     let hourlyM = 52560
+    let hourlyAW = 8760
     let hourlyBK = 131400
     let hourlyBM = 148920
     let hourlyBP = 175200
@@ -13,7 +14,7 @@ extension TunOl {
     let hourlyBO = 166440
     let daysBO: [[Int]] = hourly1[hourlyBO..<(hourlyBO + 8760)].indices.chunked(by: { hourly1[$0] == hourly1[$1] })
       .map { $0.map { $0 - hourlyBO } }
-    let daysD = [[Int]]()
+    let daysD: [[Int]] = (0..<365).map { Array(repeating: $0, count: 24) }
     let hourlyAY = 26280
     let AYsum = hourly1.sum(hours: daysD, condition: hourlyAY)
     /// Maximum night op perc considering tank sizes
@@ -243,18 +244,20 @@ extension TunOl {
     }
     /// Partitions of PV hour PV to be dedicated to TES chrg
     let hourlyEO = 166440
+    let EN_BOcountNonZero = hourly4.count(hours: daysBO, range: hourlyEN, predicate: {$0>0})
+    let ENsum = hourly4.sum(hours: daysBO, condition: hourlyEN)
     // IF(OR(EN6=0,EM6=0),0,MAX((AW6-EN6)/(EM6/(1+1/Ratio_CSP_vs_Heater)/Heater_eff/COUNTIFS(BO5:BO8763,"="BO6,EN5:EN8763,">0")),(J6-EN6*Heater_eff/Ratio_CSP_vs_Heater)/(EM6/(1+Ratio_CSP_vs_Heater)/COUNTIFS(BO5:BO8763,"="BO6,EN5:EN8763,">0")))/SUMIF(BO5:BO8763,"="BO6,EN5:EN8763)*EN6)
-    // for i in 0..<8760 {
-    //   hourly4[hourlyEO + i] = iff(
-    //     or(hourly4[hourlyEN + i].isZero, hourly4[hourlyEM + i].isZero), 0,
-    //     max(
-    //       (hourly1[hourlyAW + i] - hourly4[hourlyEN + i])
-    //         / (hourly4[hourlyEM + i] / (1 + 1 / Ratio_CSP_vs_Heater) / Heater_eff
-    //           / EN_BOcountNonZero[i]),
-    //       (hourly0[hourlyJ + i] - hourly4[hourlyEN + i] * Heater_eff / Ratio_CSP_vs_Heater)
-    //         / (hourly4[hourlyEM + i] / (1 + Ratio_CSP_vs_Heater) / EN_BOcountNonZero[i])) / ENsum[i]
-    //       * hourly4[hourlyEN + i])
-    // }
+    for i in 0..<8760 {
+      hourly4[hourlyEO + i] = iff(
+        or(hourly4[hourlyEN + i].isZero, hourly4[hourlyEM + i].isZero), 0,
+        max(
+          (hourly1[hourlyAW + i] - hourly4[hourlyEN + i])
+            / (hourly4[hourlyEM + i] / (1 + 1 / Ratio_CSP_vs_Heater) / Heater_eff
+              / EN_BOcountNonZero[i]),
+          (hourly0[hourlyJ + i] - hourly4[hourlyEN + i] * Heater_eff / Ratio_CSP_vs_Heater)
+            / (hourly4[hourlyEM + i] / (1 + Ratio_CSP_vs_Heater) / EN_BOcountNonZero[i])) / ENsum[i]
+          * hourly4[hourlyEN + i])
+    }
     let EOsum = hourly4.sum(days: daysBO, range: hourlyEO)
     /// corrected max possible PV elec to TES
     let hourlyEP = 175200

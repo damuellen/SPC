@@ -331,7 +331,8 @@ extension TunOl {
     let hourlyM = 52560
     var hourly1 = [Double](repeating: 0, count: 210_240)
 
-    let daysD = [[Int]]()
+    let daysD: [[Int]] = (0..<365).map { Array(repeating: $0, count: 24) }
+
     /// Aux elec for CSP SF and PV Plant MWel
     let hourlyAV = 0
     // IF(J6>0,J6*CSP_var_aux_nom_perc,CSP_nonsolar_aux_cons)+M6
@@ -551,15 +552,17 @@ extension TunOl {
     let hourlyJ = 26280
     let hourlyL = 43800
     let hourlyM = 52560
+    let hourlyAW = 8760
     let hourlyBK = 131400
     let hourlyBM = 148920
     let hourlyBO = 166440
     let hourlyBP = 175200
     let hourlyBQ = 183960
 
+    let daysD: [[Int]] = (0..<365).map { Array(repeating: $0, count: 24) }
     let daysBO: [[Int]] = hourly1[hourlyBO..<(hourlyBO + 8760)].indices.chunked(by: { hourly1[$0] == hourly1[$1] })
       .map { $0.map { $0 - hourlyBO } }
-    let daysD = [[Int]]()
+    
     let hourlyAY = 26280
     let AYsum = hourly1.sum(hours: daysD, condition: hourlyAY)
     var hourly2 = [Double]()
@@ -728,20 +731,22 @@ extension TunOl {
           / (CEsum[i] * Heater_eff * (1 + 1 / Ratio_CSP_vs_Heater)) * hourly2[hourlyCE + i])
     }
 
+    let CG_BOcountNonZero = hourly2.count(hours: daysBO, range: hourlyCG, predicate: {$0>0})
+    let CGsum = hourly2.sum(days: daysBO, range: hourlyCG)
     /// Partitions of PV hour PV to be dedicated to TES chrg
     let hourlyCH = 113880
     // IF(OR(CG6=0,CF6=0),0,MAX((AW6-CG6)/(CF6/(1+1/Ratio_CSP_vs_Heater)/Heater_eff/COUNTIFS(BO5:BO8763,"="BO6,CG5:CG8763,">0")),(J6-CG6*Heater_eff/Ratio_CSP_vs_Heater)/(CF6/(1+Ratio_CSP_vs_Heater)/COUNTIFS(BO5:BO8763,"="BO6,CG5:CG8763,">0")))/SUMIF(BO5:BO8763,"="BO6,CG5:CG8763)*CG6)
-    // for i in 0..<8760 {
-    //   hourly2[hourlyCH + i] = iff(
-    //     or(hourly2[hourlyCG + i].isZero, hourly2[hourlyCF + i].isZero), 0,
-    //     max(
-    //       (hourly1[hourlyAW + i] - hourly2[hourlyCG + i])
-    //         / (hourly2[hourlyCF + i] / (1 + 1 / Ratio_CSP_vs_Heater) / Heater_eff
-    //           / CG_BOcountNonZero[i]),
-    //       (hourly0[hourlyJ + i] - hourly2[hourlyCG + i] * Heater_eff / Ratio_CSP_vs_Heater)
-    //         / (hourly2[hourlyCF + i] / (1 + Ratio_CSP_vs_Heater) / CG_BOcountNonZero[i])) / CGsum[i]
-    //       * hourly2[hourlyCG + i])
-    // }
+    for i in 0..<8760 {
+      hourly2[hourlyCH + i] = iff(
+        or(hourly2[hourlyCG + i].isZero, hourly2[hourlyCF + i].isZero), 0,
+        max(
+          (hourly1[hourlyAW + i] - hourly2[hourlyCG + i])
+            / (hourly2[hourlyCF + i] / (1 + 1 / Ratio_CSP_vs_Heater) / Heater_eff
+              / CG_BOcountNonZero[i]),
+          (hourly0[hourlyJ + i] - hourly2[hourlyCG + i] * Heater_eff / Ratio_CSP_vs_Heater)
+            / (hourly2[hourlyCF + i] / (1 + Ratio_CSP_vs_Heater) / CG_BOcountNonZero[i])) / CGsum[i]
+          * hourly2[hourlyCG + i])
+    }
     let CHsum = hourly2.sum(hours: daysBO, condition: hourlyCH)
     /// corrected max possible PV elec to TES
     let hourlyCI = 122640
