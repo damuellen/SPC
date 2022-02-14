@@ -7,7 +7,7 @@ trigger:
 - master
 
 pool:
-  vmImage: windows-latest
+  vmImage: windows-2019
 
 variables:
   toolchain.directory: C:/Library/Developer/Toolchains/unknown-Asserts-development.xctoolchain/usr/bin
@@ -61,12 +61,6 @@ steps:
 - task: CopyFiles@2
   inputs:
     contents: '$(System.DefaultWorkingDirectory)\.build\x86_64-unknown-windows-msvc\release\*.dll'
-    targetFolder: $(Build.ArtifactStagingDirectory)
-  displayName: Copy build artifacts to staging directory
-
-- task: CopyFiles@2
-  inputs:
-    contents: 'C:\vcpkg\installed\x64-windows\bin\*.dll'
     targetFolder: $(Build.ArtifactStagingDirectory)
   displayName: Copy build artifacts to staging directory
 
