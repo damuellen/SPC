@@ -17,10 +17,6 @@ jobs:
         run: vcpkg install sqlite3:x64-windows
         continue-on-error: true
 
-      - name: Copy dlls to workspace
-        run: Copy 'C:\vcpkg\installed\x64-windows\bin' '${{GITHUB_WORKSPACE}}\bin'
-        shell: powershell
-
       - name: Setup Swift compiler
         uses: compnerd/gha-setup-swift@main
         with:
@@ -41,6 +37,10 @@ jobs:
           file: .build\x86_64-unknown-windows-msvc\release\*.exe
           args: -9
           strip: false
+
+      - name: Copy libs to workspace
+        run: Copy 'C:\vcpkg\installed\x64-windows\bin' '.build\x86_64-unknown-windows-msvc\release'
+        shell: powershell
 
       - name: Compress dll binaries 
         uses: damuellen/upx-action@master
