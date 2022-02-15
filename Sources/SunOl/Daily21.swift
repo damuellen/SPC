@@ -1,6 +1,6 @@
 
 extension TunOl {
-    mutating func daily25(hourly0: [Double], daily21: [Double]) {
+  mutating func daily25(j: Int, hourly0: [Double], daily21: [Double]) -> [Double] {
     let daysA: [[Int]] = hourly0[0..<(8760)].indices.chunked(by: { hourly0[$0] == hourly0[$1] }).map { $0.map { $0 } }
     let daysU: [[Int]] = hourly0[113880..<(113880 + 8760)].indices.chunked(by: { hourly0[$0] == hourly0[$1] })
       .map { $0.map { $0 - 113880 } }
@@ -121,7 +121,7 @@ extension TunOl {
     let AHsum = hourly0.sum(days: daysU, range: hourlyAH)
 
     var daily25 = [Double]()
-    var j = 0
+
     /// Available day op PV elec after CSP, PB stby aux
     let daily2DM = 0
     // SUMIFS(CalculationP5:P8763,CalculationU5:U8763,"="A6,CalculationS5:S8763,">0")
@@ -1962,5 +1962,6 @@ extension TunOl {
         max(0, -daily21[daily2JH + i]) + max(0, -daily27[daily2JN + i]) + max(0, -daily21[daily2JU + i])
         + max(0, -daily27[daily2JY + i])
     }
+    return daily27
   }
 }

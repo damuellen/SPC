@@ -1,5 +1,5 @@
 extension TunOl {
-  mutating func daily20(hourly0: [Double]) {
+  mutating func daily20(j: Int, hourly0: [Double]) -> [Double] {
     let daysA: [[Int]] = hourly0[0..<(8760)].indices.chunked(by: { hourly0[$0] == hourly0[$1] }).map { $0.map { $0 } }
     let daysU: [[Int]] = hourly0[113880..<(113880 + 8760)].indices.chunked(by: { hourly0[$0] == hourly0[$1] })
       .map { $0.map { $0 - 113880 } }
@@ -28,7 +28,7 @@ extension TunOl {
     for i in 0..<365 { daily20[daily2C + i] = S_UcountNonZero[i] }
 
     var daily21 = [Double](repeating: 0, count: 9_855)
-    let j = 0
+
     /// Min el cons during night
     let daily2E = 0
     // (A_overall_var_min_cons+A_overall_fix_stby_cons)*B6+A_overall_stup_cons
@@ -227,6 +227,7 @@ extension TunOl {
           ifFinite(daily21[daily2AC + i] / (daily21[daily2AC + i] - daily21[daily2AD + i]), 1))
           * (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]) + equiv_harmonious_min_perc[j])
     }
+    return daily21
   }  
 }  
 

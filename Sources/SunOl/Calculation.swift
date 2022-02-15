@@ -548,7 +548,7 @@ extension TunOl {
     return hourly1
   }
 
-  mutating func hourly2(hourly0: [Double], hourly1: [Double]) -> [Double] {
+  mutating func hourly2(j: Int, hourly0: [Double], hourly1: [Double]) -> [Double] {
     let hourlyJ = 26280
     let hourlyL = 43800
     let hourlyM = 52560
@@ -566,7 +566,7 @@ extension TunOl {
     let hourlyAY = 26280
     let AYsum = hourly1.sum(hours: daysD, condition: hourlyAY)
     var hourly2 = [Double]()
-    let j = 0
+
     /// Min net elec demand to power block
     let hourlyBU = 0
     // IF(BM6>0,0,IF(A_overall_var_min_cons+A_overall_fix_stby_cons+BK6+IF(BM7=0,0,A_overall_stup_cons)+MAX(0,A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons+IF(BM7=0,0,A_overall_heat_stup_cons)-BQ6)/El_boiler_eff<BP6-PB_stby_aux_cons,0,A_overall_var_min_cons+A_overall_fix_stby_cons+IF(BM7=0,0,A_overall_stup_cons)))
@@ -801,8 +801,7 @@ extension TunOl {
     }
     return hourly2
   }
-  mutating func hourly3(hourly0: [Double], hourly1: [Double], hourly2: [Double]) -> [Double] {
-    let j = 0
+  mutating func hourly3(j: Int, hourly0: [Double], hourly1: [Double], hourly2: [Double]) -> [Double] {
     let hourlyBO = 166440
     let hourlyBX = 26280
     let hourlyCB = 61320

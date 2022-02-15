@@ -1,6 +1,6 @@
 
 extension TunOl {
-  mutating func foo(hourly0: [Double], hourly2: [Double], hourly3: [Double], daily11: [Double]) {
+  mutating func daily15(hourly0: [Double], hourly2: [Double], hourly3: [Double], daily11: [Double]) -> [Double] {
     let daysCS = [[Int]]()
     let hourlyJ = 26280
     let hourlyL = 43800
@@ -335,6 +335,6 @@ extension TunOl {
     let daily1GS = 16790
     // SUMIF(CalculationCS5:CS8763,"="A6,CalculationDD5:DD8763)-GQ6
     for i in 0..<365 { daily15[daily1GS + i] = DDsum[i] - daily15[daily1GQ + i] }
-
+    return daily15
   }
 }

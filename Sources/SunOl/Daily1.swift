@@ -1,12 +1,8 @@
 extension TunOl {
-  mutating func daily2(hourly3: [Double], hourly4: [Double]) -> [Double] {
-    let daysA = [[Int]]()
+  mutating func daily11(j: Int, hourly3: [Double]) -> [Double] {
 
     var daily10 = [Double]()
 
-    let hourlyEH = 105120
-    let hourlyEX = 236520
-    let hourlyEZ = 254040
 
     /// Day
     let daily1A = 0
@@ -33,7 +29,7 @@ extension TunOl {
     for i in 0..<365 {
       // daily11[daily1E + i] =  countIFS(Calculationdaily1_[(CS+i)...].prefix(),"="daily10[daily1A + i],Calculationdaily1_[(BX+i)...].prefix(),{!$0.isZero},Calculationdaily1_[(CC+i)...].prefix(),{!$0.isZero})
     }
-    let j = 0
+
     /// Min RawMeth cons during night
     let daily1F = 1095
     // A_RawMeth_min_cons*C6
@@ -106,6 +102,14 @@ extension TunOl {
           ifFinite(daily11[daily1P + i] / (daily11[daily1P + i] - daily11[daily1Q + i]), 1))
           * (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]) + equiv_harmonious_min_perc[j])
     }
+    return daily11
+  }
+
+  mutating func daily12(j: Int, daily11: inout [Double], hourly3: [Double], hourly4: [Double]) {
+    let daysA = [[Int]]()
+    let hourlyEH = 105120
+    let hourlyEX = 236520
+    let hourlyEZ = 254040
     let EX_EZcountZero = hourly4.countOf(hourlyEZ, days: daysA, condition: hourlyEX, predicate: {$0<=0})
     /// Nr of hours outside of harm op period after max night prep
     let daily1T = 5840

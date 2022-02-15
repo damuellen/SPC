@@ -4,6 +4,28 @@ import Utilities
 import xlsxwriter
 // import SwiftPlot
 
+var model = TunOl([])
+
+let hourly0 = model.hourly0()
+let hourly1 = model.hourly1(hourly0: hourly0)
+var daily = [[Double]]()
+
+for j in 0..<4 {
+  let hourly2 = model.hourly2(j: j, hourly0: hourly0, hourly1: hourly1)
+  let hourly3 = model.hourly3(j: j, hourly0: hourly0, hourly1: hourly1, hourly2: hourly2)
+  var daily11 = model.daily11(j: j, hourly3: hourly3)
+  let hourly4 = model.hourly4(j: j, daily11: daily11, hourly0: hourly0, hourly1: hourly1, hourly2: hourly2)
+  model.daily12(j: j, daily11: &daily11, hourly3: hourly2, hourly4: hourly4)
+  let daily15 = model.daily15(hourly0: hourly0, hourly2: hourly2, hourly3: hourly3, daily11: daily11)
+  let daily16 = model.daily16(hourly0: hourly0, hourly4: hourly4, daily11: daily11, daily15: daily15)
+  let daily17 = model.daily17(j: j, daily11: daily11, daily15: daily15, daily16: daily16)
+  daily.append(daily17)
+  let daily21 = model.daily20(j: j, hourly0: hourly0) 
+  let daily27 = model.daily25(j: j,hourly0: hourly0, daily21: daily21)
+  daily.append(daily27)
+}
+
+
 let source = DispatchSource.makeSignalSource(signal: SIGINT, queue: .global())
 let semaphore = DispatchSemaphore(value: 0)
 #if !os(Windows)
