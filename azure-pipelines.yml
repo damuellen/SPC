@@ -24,6 +24,9 @@ steps:
       Write-Host "##vso[task.prependpath]$(toolchain.directory)"
       Write-Host "##vso[task.prependpath]$(bin.directory)"
       Write-Host "##vso[task.prependpath]$(icu.directory)"
+      Invoke-WebRequest https://github.com/upx/upx/releases/download/v3.96/upx-3.96-win64.zip -OutFile C:\upx.zip
+      Expand-Archive -Path C:\upx.zip -DestinationPath C:\
+      C:\upx-3.96-win64\upx.exe -9 $(icu.directory)/*
   displayName: Install Swift toolchain
 
 - task: BatchScript@1
