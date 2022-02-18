@@ -34,10 +34,10 @@ steps:
   displayName: Setup developer environment
 
 - task: Cache@2
-  displayName: 'Cache installed vcpkg'
+  displayName: 'Cache vcpkg'
   inputs:
-    key: "vcpkg_install_cache"
-    path: 'C:\vcpkg\installed'
+    key: "vcpkg_cache"
+    path: 'C:\vcpkg'
 
 - task: run-vcpkg@0
   displayName: 'vcpkg install libxlsxwriter sqlite3'
