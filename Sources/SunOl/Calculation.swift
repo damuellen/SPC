@@ -3,40 +3,33 @@ extension TunOl {
     _ Reference_PV_MV_power_at_transformer_outlet: [Double]) -> [Double] {
     var hour0 = [Double](repeating: 0, count: 341_640)
 
-    /// Day of year
-    let hourD = 0
-    // IF(C6=0,D5+1,D5)
-    // for i in 1..<8760 {
-    //   hour0[hourD + i] = iff(
-    //     hour0[C + i].isZero, hour0[hourD + i - 1] + 1, hour0[hourD + i - 1])
-    // }
-
+    let maximum = Reference_PV_MV_power_at_transformer_outlet.max() ?? 0
     /// Inverter power fraction -
     let hourH = 8760
     // MAX(0,G6/MAX(G5:G8763))
-    // for i in 1..<8760 {
-    // hour0[hourH + i] = max(0, hour0[hourG + i] / max(hour0[(hourG + i)...].prefix(8760)))
-    // }
+    for i in 1..<8760 {
+      hour0[hourH + i] = max(0, Reference_PV_plant_power_at_inverter_inlet_DC[i] / maximum)
+    }
 
     /// Inverter efficiency -
     let hourI = 17520
     // IFERROR(IF(G6<MAX(G5:G8763),MAX(G6,0)/F6,0),0)
-    // for i in 1..<8760 {
-    //   hour0[hourI + i] = ifFinite(
-    //     iff(
-    //       hour_[G + i] < max(hour0[(G + i)...].prefix()),
-    //       max(hour_[G + i], 0) / hour0[F + i], 0), 0)
-    // }
+    for i in 1..<8760 {
+      hour0[hourI + i] = ifFinite(
+        iff(
+          Reference_PV_MV_power_at_transformer_outlet[i] < maximum,
+          max(Reference_PV_MV_power_at_transformer_outlet[i], 0) / Reference_PV_plant_power_at_inverter_inlet_DC[i], 0), 0)
+    }
 
     /// Q_solar (before dumping) MWth
     let hourJ = 26280
     // E6*CSP_loop_nr_ud
-    // for i in 1..<8760 { hour0[hourJ + i] = hour0[E + i] * CSP_loop_nr_ud }
+    for i in 1..<8760 { hour0[hourJ + i] = Q_Sol_MW_thLoop[i] * CSP_loop_nr_ud }
 
     /// E_PV_Total _Scaled MWel_DC
     let hourK = 35040
     // F6*PV_DC_cap_ud/PV_Ref_DC_cap
-    // for i in 1..<8760 { hour0[hourK + i] = hour0[F + i] * PV_DC_cap_ud / PV_Ref_DC_cap }
+    for i in 1..<8760 { hour0[hourK + i] = Reference_PV_plant_power_at_inverter_inlet_DC[i] * PV_DC_cap_ud / PV_Ref_DC_cap }
 
     /// PV MV net power at transformer outlet MWel
     let hourL = 43800
@@ -55,9 +48,9 @@ extension TunOl {
     /// PV aux consumption at transformer level MWel
     let hourM = 52560
     // MAX(0,-G6/PV_Ref_AC_cap*PV_AC_cap_ud)
-    // for i in 1..<8760 {
-    //   hour0[hourM + i] = max(0, -hour0[G + i] / PV_Ref_AC_cap * PV_AC_cap_ud)
-    // }
+    for i in 1..<8760 {
+      hour0[hourM + i] = max(0, -Reference_PV_MV_power_at_transformer_outlet[i] / PV_Ref_AC_cap * PV_AC_cap_ud)
+    }
 
     /// Aux elec for PB stby, CSP SF and PV Plant MWel
     let hourO = 61320

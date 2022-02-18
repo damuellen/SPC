@@ -115,6 +115,15 @@ extension Array where Element == Double {
     }
   }
 
+  func countOf(_ days: [[Int]], condition1: Int, predicate1: (Double) -> Bool, condition2: Int, predicate2: (Double) -> Bool) -> [Double] {
+    days.map { day in var count = 0.0
+      day.forEach { d in 
+        if  predicate1(self[(d + condition1)]), predicate2(self[(d + condition2)]) { count += 1 }
+      }
+      return count
+    }
+  }
+
   func count(hours: [[Int]], range: Int, predicate: (Double) -> Bool) -> [Double] {
     Array(
       hours.map { day -> [Double] in var count = 0.0

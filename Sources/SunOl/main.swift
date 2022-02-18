@@ -83,7 +83,7 @@ func fitness(values: [Double]) -> [Double] {
   for j in 0..<4 {
     let hour2 = model.hour2(j: j, hour0: hour0, hour1: hour1)
     let hour3 = model.hour3(j: j, hour0: hour0, hour1: hour1, hour2: hour2)
-    var day1 = model.day(case: j, hour3: hour3)
+    var day1 = model.day(case: j, hour2: hour2, hour3: hour3)
     let hour4 = model.hour4(j: j, day1: day1, hour0: hour0, hour1: hour1, hour2: hour2)
     model.night(case: j, day1: &day1, hour3: hour3, hour4: hour4)
     let day15 = model.day(hour0: hour0, hour2: hour2, hour3: hour3, day11: day1)

@@ -1,5 +1,7 @@
 extension TunOl {
-  mutating func day(case j: Int, hour3: [Double]) -> [Double] {
+  mutating func day(case j: Int, hour2: [Double], hour3: [Double]) -> [Double] {
+    let hourBX = 26280
+    let hourCC = 70080
     let hourCS = 26280
     let hourCQ = 8760
     let daysCS: [[Int]] =  hour3[hourCS..<(hourCS + 8760)].indices.chunked(by: { hour3[$0] == hour3[$1] })
@@ -27,10 +29,9 @@ extension TunOl {
 
     /// Nr of PB op hours after min night prep
     let dayE = 730
+    let opHours = hour2.countOf(daysCS, condition1: hourBX, predicate1: {$0>0}, condition2: hourCC, predicate2: {$0>0})
     // COUNTIFS(CalculationCS5:CS8763,"="A6,CalculationBX5:BX8763,">0",CalculationCC5:CC8763,">0")
-    // for i in 0..<365 {
-      // day1[dayE + i] =  countIFS(Calculationday_[(CS+i)...].prefix(),"="day0[dayA + i],Calculationday_[(BX+i)...].prefix(),{!$0.isZero},Calculationday_[(CC+i)...].prefix(),{!$0.isZero})
-    // }
+    for i in 0..<365 { day1[dayE + i] = opHours[i] }
 
     /// Min RawMeth cons during night
     let dayF = 1095
