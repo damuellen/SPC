@@ -26,6 +26,13 @@ jobs:
         sudo make install
         sudo ldconfig
 
+    - uses: actions/cache@v2
+      with:
+        path: .build
+        key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved') }}
+        restore-keys: |
+          ${{ runner.os }}-spm-
+
     - name: Update package dependencies
       run: swift package update
 
