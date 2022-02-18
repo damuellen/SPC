@@ -34,10 +34,10 @@ steps:
   displayName: Setup developer environment
 
 - task: Cache@2
-  displayName: 'Cache vcpkg'
+  displayName: 'Cache installed vcpkg'
   inputs:
-    key: "vcpkg_cache"
-    path: 'C:\vcpkg'
+    key: "vcpkg_install_cache"
+    path: 'C:\vcpkg\installed'
 
 - task: run-vcpkg@0
   displayName: 'vcpkg install libxlsxwriter sqlite3'
@@ -76,6 +76,7 @@ steps:
   inputs:
     SourceFolder: '$(System.DefaultWorkingDirectory)\.build\x86_64-unknown-windows-msvc\release'
     contents: '*.dll'
+    targetFolder: $(Build.ArtifactStagingDirectory)
   displayName: Copy build artifacts to staging directory
 
 - task: PublishBuildArtifacts@1
