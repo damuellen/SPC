@@ -63,18 +63,19 @@ steps:
     SourceFolder: 'C:\vcpkg\installed\x64-windows\bin'
     Contents: '*.dll'
     TargetFolder: '$(Build.ArtifactStagingDirectory)'
-  displayName: 'Copy Binaries to Artifact Dir'
+  displayName: 'Copy build artifacts to staging directory
 
 - task: CopyFiles@2
   inputs:
-    contents: '$(System.DefaultWorkingDirectory)\.build\x86_64-unknown-windows-msvc\release\*.exe'
+    SourceFolder: '$(System.DefaultWorkingDirectory)\.build\x86_64-unknown-windows-msvc\release'
+    contents: '*.exe'
     targetFolder: $(Build.ArtifactStagingDirectory)
   displayName: Copy build artifacts to staging directory
 
 - task: CopyFiles@2
   inputs:
-    contents: '$(System.DefaultWorkingDirectory)\.build\x86_64-unknown-windows-msvc\release\*.dll'
-    targetFolder: $(Build.ArtifactStagingDirectory)
+    SourceFolder: '$(System.DefaultWorkingDirectory)\.build\x86_64-unknown-windows-msvc\release'
+    contents: '*.dll'
   displayName: Copy build artifacts to staging directory
 
 - task: PublishBuildArtifacts@1
