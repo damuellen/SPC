@@ -49,6 +49,12 @@ steps:
     vcpkgTriplet: 'x64-windows'
     vcpkgGitURL: https://github.com/microsoft/vcpkg.git
 
+- task: Cache@2
+  displayName: 'Cache build'
+  inputs:
+    key: "swift-cache"
+    path: '.build'
+
 - script: |
     swift build -c release -Xlinker /INCREMENTAL:NO -Xlinker /IGNORE:4217 -Xswiftc -gnone -Xswiftc -suppress-warnings -Xswiftc -continue-building-after-errors -Xswiftc -LC:/vcpkg/installed/x64-windows/lib/
   env:
