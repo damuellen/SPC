@@ -36,8 +36,8 @@ steps:
 - task: Cache@2
   displayName: 'Cache vcpkg'
   inputs:
-    key: $(VCPKG_REVISION) | "$(platform)"
-    path: '$(VCPKG_INSTALLATION_ROOT)'
+    key: "vcpkg_cache"
+    path: 'C:\vcpkg'
 
 - task: run-vcpkg@0
   displayName: 'vcpkg install libxlsxwriter sqlite3'
@@ -45,12 +45,12 @@ steps:
   inputs:
     vcpkgArguments: libxlsxwriter sqlite3
     vcpkgGitCommitId: "5ddd7f02689b7c5aab78711d77f61db5d2e5e79c"
-    vcpkgDirectory: '$(System.DefaultWorkingDirectory)\vcpkg\'
+    vcpkgDirectory: 'C:\vcpkg\'
     vcpkgTriplet: 'x64-windows'
     vcpkgGitURL: https://github.com/microsoft/vcpkg.git
 
 - script: |
-    swift build -c release -Xlinker /INCREMENTAL:NO -Xlinker /IGNORE:4217 -Xswiftc -gnone -Xswiftc -suppress-warnings -Xswiftc -continue-building-after-errors -Xswiftc -L$(VCPKG_INSTALLATION_ROOT)/installed/x64-windows/lib/
+    swift build -c release -Xlinker /INCREMENTAL:NO -Xlinker /IGNORE:4217 -Xswiftc -gnone -Xswiftc -suppress-warnings -Xswiftc -continue-building-after-errors -Xswiftc -LC:/vcpkg/installed/x64-windows/lib/
   env:
     SDKROOT: C:\Library\Developer\Platforms\Windows.platform\Developer\SDKs\Windows.sdk
     DEVELOPER_DIR: C:\Library\Developer
@@ -58,16 +58,9 @@ steps:
   continueOnError: true
   displayName: Build Swift package
 
-- task: PowerShell@2
-  timeoutInMinutes: 3
-  inputs:
-    targetType: 'inline'
-    script: Copy-Item -Path "C:\vcpkg\installed\x64-windows\bin\*.dll" -Destination "$(System.DefaultWorkingDirectory)\.build\x86_64-unknown-windows-msvc\release" -Recurse
-  displayName: Copy library dlls 
-
 - task: CopyFiles@2
   inputs:
-    SourceFolder: '$(VCPKG_INSTALLATION_ROOT)\installed\$(platform)-windows\'
+    SourceFolder: 'C:\vcpkg\installed\x64-windows\bin'
     Contents: '*.dll'
     TargetFolder: '$(Build.ArtifactStagingDirectory)'
   displayName: 'Copy Binaries to Artifact Dir'
