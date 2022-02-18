@@ -9,23 +9,23 @@ struct TunOl {
   let CCU_cap_min_perc: Double = 0.5
   lazy var CCU_C_O_2_min_prod: Double = CCU_C_O_2_nom_prod_ud * CCU_cap_min_perc
 
-  lazy var CCU_fix_cons = CCU_C_O_2_nom_prod_ud / CCU_Ref_C_O_2_hourly_prod * CCU_Ref_fix_cons
-  lazy var CCU_fix_heat_cons = CCU_C_O_2_nom_prod_ud / CCU_Ref_C_O_2_hourly_prod * CCU_Ref_heat_fix_cons
+  lazy var CCU_fix_cons = CCU_C_O_2_nom_prod_ud / CCU_Ref_C_O_2_hour_prod * CCU_Ref_fix_cons
+  lazy var CCU_fix_heat_cons = CCU_C_O_2_nom_prod_ud / CCU_Ref_C_O_2_hour_prod * CCU_Ref_heat_fix_cons
   lazy var CCU_harmonious_max_perc = min(1, MethSynt_C_O_2_nom_cons / CCU_C_O_2_nom_prod_ud, EY_Hydrogen_nom_prod / MethSynt_Hydrogen_nom_cons * MethSynt_C_O_2_nom_cons / CCU_C_O_2_nom_prod_ud, MethDist_RawMeth_nom_cons / MethSynt_RawMeth_nom_prod_ud * MethSynt_C_O_2_nom_cons / CCU_C_O_2_nom_prod_ud)
   lazy var CCU_harmonious_min_perc = max(
     CCU_cap_min_perc, MethSynt_C_O_2_min_cons / CCU_C_O_2_nom_prod_ud, max(MethSynt_cap_min_perc, EY_Hydrogen_min_prod / MethSynt_Hydrogen_nom_cons) * MethSynt_C_O_2_nom_cons / CCU_C_O_2_nom_prod_ud,
     max(MethSynt_cap_min_perc, MethDist_RawMeth_min_cons / MethSynt_RawMeth_nom_prod_ud) * MethSynt_C_O_2_nom_cons / CCU_C_O_2_nom_prod_ud)
   lazy var CCU_harmonious_perc_at_PB_min = CCU_harmonious_max_perc / Overall_harmonious_var_max_cons * Overall_harmonious_var_cons_at_PB_min
   lazy var CCU_harmonious_perc_at_PB_nom = iff(PB_nom_net_cap / Overall_harmonious_var_max_cons * CCU_harmonious_max_perc < CCU_harmonious_min_perc, 0, PB_nom_net_cap / Overall_harmonious_var_max_cons * CCU_harmonious_max_perc)
-  lazy var CCU_heat_stby_cons = CCU_C_O_2_nom_prod_ud / CCU_Ref_C_O_2_hourly_prod * CCU_Ref_heat_stby_cons
-  lazy var CCU_heat_stup_cons = CCU_C_O_2_nom_prod_ud / CCU_Ref_C_O_2_hourly_prod * CCU_Ref_heat_stup_cons
+  lazy var CCU_heat_stby_cons = CCU_C_O_2_nom_prod_ud / CCU_Ref_C_O_2_hour_prod * CCU_Ref_heat_stby_cons
+  lazy var CCU_heat_stup_cons = CCU_C_O_2_nom_prod_ud / CCU_Ref_C_O_2_hour_prod * CCU_Ref_heat_stup_cons
 
-  lazy var CCU_stby_cons = CCU_C_O_2_nom_prod_ud / CCU_Ref_C_O_2_hourly_prod * CCU_Ref_stby_cons
-  lazy var CCU_stup_cons = CCU_C_O_2_nom_prod_ud / CCU_Ref_C_O_2_hourly_prod * CCU_Ref_stup_cons
-  lazy var CCU_var_heat_nom_cons = CCU_C_O_2_nom_prod_ud / CCU_Ref_C_O_2_hourly_prod * CCU_Ref_var_heat_nom_cons
-  lazy var CCU_var_nom_cons = CCU_C_O_2_nom_prod_ud / CCU_Ref_C_O_2_hourly_prod * CCU_Ref_var_nom_cons
+  lazy var CCU_stby_cons = CCU_C_O_2_nom_prod_ud / CCU_Ref_C_O_2_hour_prod * CCU_Ref_stby_cons
+  lazy var CCU_stup_cons = CCU_C_O_2_nom_prod_ud / CCU_Ref_C_O_2_hour_prod * CCU_Ref_stup_cons
+  lazy var CCU_var_heat_nom_cons = CCU_C_O_2_nom_prod_ud / CCU_Ref_C_O_2_hour_prod * CCU_Ref_var_heat_nom_cons
+  lazy var CCU_var_nom_cons = CCU_C_O_2_nom_prod_ud / CCU_Ref_C_O_2_hour_prod * CCU_Ref_var_nom_cons
 
-  let CCU_Ref_C_O_2_hourly_prod: Double = 22
+  let CCU_Ref_C_O_2_hour_prod: Double = 22
   let CCU_Ref_fix_cons: Double = 0
   let CCU_Ref_heat_fix_cons: Double = 0
   let CCU_Ref_heat_stby_cons: Double = 0
@@ -73,7 +73,7 @@ struct TunOl {
   lazy var EY_aux_heat_input_at_min_PB = max(EY_var_aux_min_cons, (PB_net_min_cap - MethSynt_var_nom_cons * MethSynt_cap_min_perc - MethSynt_fix_cons - MethDist_var_nom_cons * MethDist_cap_min_perc - MethDist_fix_cons)) / EY_var_gross_nom_cons * EY_var_heat_nom_cons
   lazy var EY_fix_cons = EY_var_net_nom_cons_ud / EY_Ref_var_net_nom_cons * EY_Ref_fix_cons
   lazy var EY_Hydrogen_min_prod = EY_Hydrogen_nom_prod * EY_cap_min_perc
-  lazy var EY_Hydrogen_nom_prod = EY_Ref_Hydrogen_hourly_nom_prod / EY_Ref_var_net_nom_cons * EY_var_net_nom_cons_ud
+  lazy var EY_Hydrogen_nom_prod = EY_Ref_Hydrogen_hour_nom_prod / EY_Ref_var_net_nom_cons * EY_var_net_nom_cons_ud
   lazy var EY_harmonious_max_perc = min(1, MethSynt_Hydrogen_nom_cons / EY_Hydrogen_nom_prod, CCU_C_O_2_nom_prod_ud / MethSynt_C_O_2_nom_cons * MethSynt_Hydrogen_nom_cons / EY_Hydrogen_nom_prod, MethDist_RawMeth_nom_cons / MethSynt_RawMeth_nom_prod_ud * MethSynt_Hydrogen_nom_cons / EY_Hydrogen_nom_prod)
   lazy var EY_harmonious_min_perc = max(
     EY_cap_min_perc, MethSynt_Hydrogen_min_cons / EY_Hydrogen_nom_prod, max(MethSynt_cap_min_perc, CCU_C_O_2_min_prod / MethSynt_C_O_2_nom_cons) * MethSynt_Hydrogen_nom_cons / EY_Hydrogen_nom_prod,
@@ -84,7 +84,7 @@ struct TunOl {
   lazy var EY_heat_stby_cons = EY_var_net_nom_cons_ud / EY_Ref_var_net_nom_cons * EY_Ref_heat_stby_cons
   lazy var EY_heat_stup_cons = EY_var_net_nom_cons_ud / EY_Ref_var_net_nom_cons * EY_Ref_heat_stup_cons
   let EY_Ref_fix_cons: Double = 0
-  lazy var EY_Ref_Hydrogen_hourly_nom_prod = EY_Ref_var_net_nom_cons / 55
+  lazy var EY_Ref_Hydrogen_hour_nom_prod = EY_Ref_var_net_nom_cons / 55
 
   lazy var EY_stby_cons = EY_var_net_nom_cons_ud / EY_Ref_var_net_nom_cons * EY_Ref_stby_cons
   lazy var EY_stup_cons = EY_var_net_nom_cons_ud / EY_Ref_var_net_nom_cons * EY_Ref_stup_cons
@@ -114,30 +114,30 @@ struct TunOl {
   let LL_Coeff: [Double] = [0]
   let MethDist_cap_min_perc: Double = 0.5
 
-  lazy var MethDist_fix_cons = MethDist_Meth_nom_prod_ud / MethDist_Ref_meth_hourly_prod * MethDist_Ref_fix_cons
+  lazy var MethDist_fix_cons = MethDist_Meth_nom_prod_ud / MethDist_Ref_meth_hour_prod * MethDist_Ref_fix_cons
   lazy var MethDist_HydrogenO_min_prod = MethDist_HydrogenO_nom_prod * MethDist_cap_min_perc
-  lazy var MethDist_HydrogenO_nom_prod = MethDist_Meth_nom_prod_ud / MethDist_Ref_meth_hourly_prod * MethDist_Ref_water_hourly_prod
+  lazy var MethDist_HydrogenO_nom_prod = MethDist_Meth_nom_prod_ud / MethDist_Ref_meth_hour_prod * MethDist_Ref_water_hour_prod
   lazy var MethDist_harmonious_max_perc = min(1, MethSynt_RawMeth_nom_prod_ud / MethDist_RawMeth_nom_cons, EY_Hydrogen_nom_prod / MethSynt_Hydrogen_nom_cons * MethSynt_RawMeth_nom_prod_ud / MethDist_RawMeth_nom_cons, CCU_C_O_2_nom_prod_ud / MethSynt_C_O_2_nom_cons * MethSynt_RawMeth_nom_prod_ud / MethDist_RawMeth_nom_cons)
   lazy var MethDist_harmonious_min_perc = max(
     MethDist_cap_min_perc, MethSynt_RawMeth_min_prod / MethDist_RawMeth_nom_cons, max(MethSynt_cap_min_perc, EY_Hydrogen_min_prod / MethSynt_Hydrogen_nom_cons) * MethSynt_RawMeth_nom_prod_ud / MethDist_RawMeth_nom_cons,
     max(MethSynt_cap_min_perc, CCU_C_O_2_min_prod / MethSynt_C_O_2_nom_cons) * MethSynt_RawMeth_nom_prod_ud / MethDist_RawMeth_nom_cons)
   lazy var MethDist_harmonious_perc_at_PB_min = MethDist_harmonious_max_perc / Overall_harmonious_var_max_cons * Overall_harmonious_var_cons_at_PB_min
   lazy var MethDist_harmonious_perc_at_PB_nom = iff(PB_nom_net_cap / Overall_harmonious_var_max_cons * MethDist_harmonious_max_perc < MethDist_harmonious_min_perc, 0, PB_nom_net_cap / Overall_harmonious_var_max_cons * MethDist_harmonious_max_perc)
-  lazy var MethDist_heat_fix_cons = MethDist_Meth_nom_prod_ud / MethDist_Ref_meth_hourly_prod * MethDist_Ref_heat_fix_cons
-  lazy var MethDist_heat_stby_cons = MethDist_Meth_nom_prod_ud / MethDist_Ref_meth_hourly_prod * MethDist_Ref_heat_stby_cons
-  lazy var MethDist_heat_stup_cons = MethDist_Meth_nom_prod_ud / MethDist_Ref_meth_hourly_prod * MethDist_Ref_heat_stup_cons
+  lazy var MethDist_heat_fix_cons = MethDist_Meth_nom_prod_ud / MethDist_Ref_meth_hour_prod * MethDist_Ref_heat_fix_cons
+  lazy var MethDist_heat_stby_cons = MethDist_Meth_nom_prod_ud / MethDist_Ref_meth_hour_prod * MethDist_Ref_heat_stby_cons
+  lazy var MethDist_heat_stup_cons = MethDist_Meth_nom_prod_ud / MethDist_Ref_meth_hour_prod * MethDist_Ref_heat_stup_cons
   lazy var MethDist_Meth_min_prod = MethDist_cap_min_perc * MethDist_Meth_nom_prod_ud
   lazy var MethDist_RawMeth_min_cons = MethDist_RawMeth_nom_cons * MethDist_cap_min_perc
-  lazy var MethDist_RawMeth_nom_cons = MethDist_Meth_nom_prod_ud / MethDist_Ref_meth_hourly_prod * MethDist_Ref_rawmeth_hourly_cons
+  lazy var MethDist_RawMeth_nom_cons = MethDist_Meth_nom_prod_ud / MethDist_Ref_meth_hour_prod * MethDist_Ref_rawmeth_hour_cons
 
-  lazy var MethDist_Ref_meth_hourly_prod = MethDist_Ref_meth_annual_prod / MethSynt_annual_op_hours
-  lazy var MethDist_Ref_rawmeth_hourly_cons = MethSynt_Ref_rawmeth_hourly_prod
+  lazy var MethDist_Ref_meth_hour_prod = MethDist_Ref_meth_annual_prod / MethSynt_annual_op_hours
+  lazy var MethDist_Ref_rawmeth_hour_cons = MethSynt_Ref_rawmeth_hour_prod
 
-  lazy var MethDist_Ref_water_hourly_prod = MethDist_Ref_water_annual_prod / MethSynt_annual_op_hours
-  lazy var MethDist_stby_cons = MethDist_Meth_nom_prod_ud / MethDist_Ref_meth_hourly_prod * MethDist_Ref_stby_cons
-  lazy var MethDist_stup_cons = MethDist_Meth_nom_prod_ud / MethDist_Ref_meth_hourly_prod * MethDist_Ref_stup_cons
-  lazy var MethDist_var_heat_nom_cons = MethDist_Meth_nom_prod_ud / MethDist_Ref_meth_hourly_prod * MethDist_Ref_var_heat_nom_cons
-  lazy var MethDist_var_nom_cons = MethDist_Meth_nom_prod_ud / MethDist_Ref_meth_hourly_prod * MethDist_Ref_var_nom_cons
+  lazy var MethDist_Ref_water_hour_prod = MethDist_Ref_water_annual_prod / MethSynt_annual_op_hours
+  lazy var MethDist_stby_cons = MethDist_Meth_nom_prod_ud / MethDist_Ref_meth_hour_prod * MethDist_Ref_stby_cons
+  lazy var MethDist_stup_cons = MethDist_Meth_nom_prod_ud / MethDist_Ref_meth_hour_prod * MethDist_Ref_stup_cons
+  lazy var MethDist_var_heat_nom_cons = MethDist_Meth_nom_prod_ud / MethDist_Ref_meth_hour_prod * MethDist_Ref_var_heat_nom_cons
+  lazy var MethDist_var_nom_cons = MethDist_Meth_nom_prod_ud / MethDist_Ref_meth_hour_prod * MethDist_Ref_var_nom_cons
 
   let MethDist_Ref_fix_cons: Double = 0
   let MethDist_Ref_heat_fix_cons: Double = 0
@@ -157,26 +157,26 @@ struct TunOl {
   let MethSynt_annual_outage_days: Double = 32
   let MethSynt_cap_min_perc: Double = 0.1
   lazy var MethSynt_C_O_2_min_cons: Double = MethSynt_C_O_2_nom_cons * MethSynt_cap_min_perc
-  lazy var MethSynt_C_O_2_nom_cons: Double = MethSynt_RawMeth_nom_prod_ud / MethSynt_Ref_rawmeth_hourly_prod * MethSynt_Ref_C_O_2_hourly_cons
+  lazy var MethSynt_C_O_2_nom_cons: Double = MethSynt_RawMeth_nom_prod_ud / MethSynt_Ref_rawmeth_hour_prod * MethSynt_Ref_C_O_2_hour_cons
 
-  lazy var MethSynt_fix_cons = MethSynt_RawMeth_nom_prod_ud / MethSynt_Ref_rawmeth_hourly_prod * MethSynt_Ref_fix_cons
+  lazy var MethSynt_fix_cons = MethSynt_RawMeth_nom_prod_ud / MethSynt_Ref_rawmeth_hour_prod * MethSynt_Ref_fix_cons
   lazy var MethSynt_Hydrogen_min_cons = MethSynt_Hydrogen_nom_cons * MethSynt_cap_min_perc
-  lazy var MethSynt_Hydrogen_nom_cons = MethSynt_RawMeth_nom_prod_ud / MethSynt_Ref_rawmeth_hourly_prod * MethSynt_Ref_Hydrogen_hourly_cons
+  lazy var MethSynt_Hydrogen_nom_cons = MethSynt_RawMeth_nom_prod_ud / MethSynt_Ref_rawmeth_hour_prod * MethSynt_Ref_Hydrogen_hour_cons
   lazy var MethSynt_harmonious_max_perc = min(1, MethDist_RawMeth_nom_cons / MethSynt_RawMeth_nom_prod_ud, EY_Hydrogen_nom_prod / MethSynt_Hydrogen_nom_cons, CCU_C_O_2_nom_prod_ud / MethSynt_C_O_2_nom_cons)
   lazy var MethSynt_harmonious_min_perc = max(MethSynt_cap_min_perc, MethDist_RawMeth_min_cons / MethSynt_RawMeth_nom_prod_ud, EY_Hydrogen_min_prod / MethSynt_Hydrogen_nom_cons, CCU_C_O_2_min_prod / MethSynt_C_O_2_nom_cons)
   lazy var MethSynt_harmonious_perc_at_PB_min = MethSynt_harmonious_max_perc / Overall_harmonious_var_max_cons * Overall_harmonious_var_cons_at_PB_min
   lazy var MethSynt_harmonious_perc_at_PB_nom = iff(PB_nom_net_cap / Overall_harmonious_var_max_cons * MethSynt_harmonious_max_perc < MethSynt_harmonious_min_perc, 0, PB_nom_net_cap / Overall_harmonious_var_max_cons * MethSynt_harmonious_max_perc)
-  lazy var MethSynt_heat_fix_prod = MethSynt_RawMeth_nom_prod_ud / MethSynt_Ref_rawmeth_hourly_prod * MethSynt_Ref_heat_fix_prod
-  lazy var MethSynt_heat_stby_cons = MethSynt_RawMeth_nom_prod_ud / MethSynt_Ref_rawmeth_hourly_prod * MethSynt_Ref_heat_stby_cons
-  lazy var MethSynt_heat_stup_cons = MethSynt_RawMeth_nom_prod_ud / MethSynt_Ref_rawmeth_hourly_prod * MethSynt_Ref_heat_stup_cons
+  lazy var MethSynt_heat_fix_prod = MethSynt_RawMeth_nom_prod_ud / MethSynt_Ref_rawmeth_hour_prod * MethSynt_Ref_heat_fix_prod
+  lazy var MethSynt_heat_stby_cons = MethSynt_RawMeth_nom_prod_ud / MethSynt_Ref_rawmeth_hour_prod * MethSynt_Ref_heat_stby_cons
+  lazy var MethSynt_heat_stup_cons = MethSynt_RawMeth_nom_prod_ud / MethSynt_Ref_rawmeth_hour_prod * MethSynt_Ref_heat_stup_cons
   lazy var MethSynt_RawMeth_min_prod = MethSynt_RawMeth_nom_prod_ud * MethSynt_cap_min_perc
-  lazy var MethSynt_Ref_C_O_2_hourly_cons = MethSynt_Ref_C_O_2_annual_cons / MethSynt_annual_op_hours
-  lazy var MethSynt_Ref_Hydrogen_hourly_cons = MethSynt_Ref_Hydrogen_annual_cons / MethSynt_annual_op_hours
-  lazy var MethSynt_Ref_rawmeth_hourly_prod = MethSynt_Ref_C_O_2_hourly_cons + MethSynt_Ref_Hydrogen_hourly_cons
-  lazy var MethSynt_stby_cons = MethSynt_RawMeth_nom_prod_ud / MethSynt_Ref_rawmeth_hourly_prod * MethSynt_Ref_stby_cons
-  lazy var MethSynt_stup_cons = MethSynt_RawMeth_nom_prod_ud / MethSynt_Ref_rawmeth_hourly_prod * MethSynt_Ref_stup_cons
-  lazy var MethSynt_var_heat_nom_prod = MethSynt_RawMeth_nom_prod_ud / MethSynt_Ref_rawmeth_hourly_prod * MethSynt_Ref_var_heat_nom_prod
-  lazy var MethSynt_var_nom_cons = MethSynt_RawMeth_nom_prod_ud / MethSynt_Ref_rawmeth_hourly_prod * MethSynt_Ref_var_nom_cons
+  lazy var MethSynt_Ref_C_O_2_hour_cons = MethSynt_Ref_C_O_2_annual_cons / MethSynt_annual_op_hours
+  lazy var MethSynt_Ref_Hydrogen_hour_cons = MethSynt_Ref_Hydrogen_annual_cons / MethSynt_annual_op_hours
+  lazy var MethSynt_Ref_rawmeth_hour_prod = MethSynt_Ref_C_O_2_hour_cons + MethSynt_Ref_Hydrogen_hour_cons
+  lazy var MethSynt_stby_cons = MethSynt_RawMeth_nom_prod_ud / MethSynt_Ref_rawmeth_hour_prod * MethSynt_Ref_stby_cons
+  lazy var MethSynt_stup_cons = MethSynt_RawMeth_nom_prod_ud / MethSynt_Ref_rawmeth_hour_prod * MethSynt_Ref_stup_cons
+  lazy var MethSynt_var_heat_nom_prod = MethSynt_RawMeth_nom_prod_ud / MethSynt_Ref_rawmeth_hour_prod * MethSynt_Ref_var_heat_nom_prod
+  lazy var MethSynt_var_nom_cons = MethSynt_RawMeth_nom_prod_ud / MethSynt_Ref_rawmeth_hour_prod * MethSynt_Ref_var_nom_cons
   let MethSynt_Ref_C_O_2_annual_cons: Double = 137372
 
   let MethSynt_Ref_fix_cons: Double = 0

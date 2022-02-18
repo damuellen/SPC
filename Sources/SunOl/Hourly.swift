@@ -2,7 +2,7 @@ import Utilities
 
 extension TunOl {
 
-  mutating func hourly(
+  mutating func hour(
     _ Q_Sol_MW_thLoop: [Double],
     _ Reference_PV_plant_power_at_inverter_inlet_DC: [Double],
     _ Reference_PV_MV_power_at_transformer_outlet: [Double]

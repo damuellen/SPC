@@ -4,28 +4,6 @@ import Utilities
 import xlsxwriter
 // import SwiftPlot
 
-var model = TunOl([])
-
-let hourly0 = model.hourly0()
-let hourly1 = model.hourly1(hourly0: hourly0)
-var daily = [[Double]]()
-
-for j in 0..<4 {
-  let hourly2 = model.hourly2(j: j, hourly0: hourly0, hourly1: hourly1)
-  let hourly3 = model.hourly3(j: j, hourly0: hourly0, hourly1: hourly1, hourly2: hourly2)
-  var daily11 = model.daily11(j: j, hourly3: hourly3)
-  let hourly4 = model.hourly4(j: j, daily11: daily11, hourly0: hourly0, hourly1: hourly1, hourly2: hourly2)
-  model.daily12(j: j, daily11: &daily11, hourly3: hourly2, hourly4: hourly4)
-  let daily15 = model.daily15(hourly0: hourly0, hourly2: hourly2, hourly3: hourly3, daily11: daily11)
-  let daily16 = model.daily16(hourly0: hourly0, hourly4: hourly4, daily11: daily11, daily15: daily15)
-  let daily17 = model.daily17(j: j, daily11: daily11, daily15: daily15, daily16: daily16)
-  daily.append(daily17)
-  let daily21 = model.daily20(j: j, hourly0: hourly0) 
-  let daily27 = model.daily25(j: j,hourly0: hourly0, daily21: daily21)
-  daily.append(daily27)
-}
-
-
 let source = DispatchSource.makeSignalSource(signal: SIGINT, queue: .global())
 let semaphore = DispatchSemaphore(value: 0)
 #if !os(Windows)
@@ -97,16 +75,26 @@ var Reference_PV_MV_power_at_transformer_outlet = [Double]()
 
 func fitness(values: [Double]) -> [Double] {
   var model = TunOl(values)
-  var pr_meth_plant_op = Array(repeating: 0.4, count: 8760)
-  #if DEBUG
-  var rows = [String](repeating: "", count: 8761)
-  #else
-  var rows = [String](repeating: "", count: 1)
-  #endif
-  let hourly0 = model.hourly0()
-  let hourly1 = model.hourly1(hourly0: hourly0)
-  let hourly2 = model.hourly2(hourly0: hourly0, hourly1: hourly1)
-  let _ = model.hourly3(hourly0: hourly0, hourly1: hourly1, hourly2: hourly2)
+  let hour0 = model.hour0(Q_Sol_MW_thLoop, Reference_PV_plant_power_at_inverter_inlet_DC, Reference_PV_MV_power_at_transformer_outlet)
+  let hour1 = model.hour1(hour0: hour0)
+  let day6 = model.day(hour0: hour0)
+  var day = [[Double]]()
+
+  for j in 0..<4 {
+    let hour2 = model.hour2(j: j, hour0: hour0, hour1: hour1)
+    let hour3 = model.hour3(j: j, hour0: hour0, hour1: hour1, hour2: hour2)
+    var day1 = model.day(case: j, hour3: hour3)
+    let hour4 = model.hour4(j: j, day1: day1, hour0: hour0, hour1: hour1, hour2: hour2)
+    model.night(case: j, day1: &day1, hour3: hour3, hour4: hour4)
+    let day15 = model.day(hour0: hour0, hour2: hour2, hour3: hour3, day11: day1)
+    let day16 = model.day(hour0: hour0, hour4: hour4, day11: day1, day15: day15)
+    let day17 = model.day(case: j, day1: day1, day5: day15, day6: day16)
+    day.append(day17)
+    let day21 = model.day(case: j, hour0: hour0)     
+    let day27 = model.day(case: j, day1: day21, day6: day6) 
+    day.append(day27)
+  }
+
   return values
 }
 

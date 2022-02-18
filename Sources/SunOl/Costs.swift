@@ -34,8 +34,6 @@ enum CostModel {
     //   auxLoops = 0
     // }
     // let Assembly_hall = 12_000_000.0 + (-132.967033 * Double(model.CSP_Loop_Nr) ** 2 + 62978.02 * Double(model.CSP_Loop_Nr) + -2.32831E-10)
-		
-    
     // let CSP_SF_cost_dedicated_to_ICPH =
     //   Solar_field.coeff * ((model.CSP_Loop_Nr - auxLoops) / Solar_field.basis) ** Solar_field.exp + Solar_field.c1 * Solar_field.f
     //   * (model.CSP_Loop_Nr - auxLoops)
@@ -68,7 +66,7 @@ enum CostModel {
 
     let Hydrogen_Storage_cost = model.H2_storage_cap * Hydrogen_storage.coeff + 0.0
 
-    let Methanol_plant_cost = model.Meth_nominal_hourly_prod_cap * Methanol_plant_coeff + 0.0
+    let Methanol_plant_cost = model.Meth_nominal_hour_prod_cap * Methanol_plant_coeff + 0.0
 
     let Electrical_boiler_cost = model.El_boiler_cap > 0 ?
       (Electrical_boiler_capacity.coeff * Electrical_boiler_capacity.basis * (model.El_boiler_cap / Electrical_boiler_capacity.basis)

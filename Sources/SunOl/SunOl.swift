@@ -13,7 +13,7 @@ struct SunOl {
   var PB_Nominal_gross_cap = 250.0
   var BESS_cap = 100.0
   var H2_storage_cap = 100.0
-  var Meth_nominal_hourly_prod_cap = 14.8
+  var Meth_nominal_hour_prod_cap = 14.8
   var El_boiler_cap = 100.0
   var grid_max_export = 70.0
   var grid_max_import: Double { grid_max_export }
@@ -129,15 +129,15 @@ struct SunOl {
   }
 
   struct MethanolPlant {
-    private(set) var H2_cons = 20000.0, prod_cap = 100_000.0, min_cap_perc = 0.4, nominal_hourly_prod_cap = 14.8
+    private(set) var H2_cons = 20000.0, prod_cap = 100_000.0, min_cap_perc = 0.4, nominal_hour_prod_cap = 14.8
 
-    lazy var nominal_heatConsumption = nominal_hourly_prod_cap / Ref_meth_hourly_prod_cap * 10.0
-    lazy var nominal_aux_electr_cons = nominal_hourly_prod_cap / Ref_meth_hourly_prod_cap * 10.0
-    lazy var max_H2_Cons = nominal_hourly_prod_cap / prod_cap * H2_cons
-    lazy var min_H2_Cons = min_cap_perc * nominal_hourly_prod_cap / prod_cap * H2_cons
-    lazy var Ref_meth_hourly_prod_cap = prod_cap / (334 * 24)
+    lazy var nominal_heatConsumption = nominal_hour_prod_cap / Ref_meth_hour_prod_cap * 10.0
+    lazy var nominal_aux_electr_cons = nominal_hour_prod_cap / Ref_meth_hour_prod_cap * 10.0
+    lazy var max_H2_Cons = nominal_hour_prod_cap / prod_cap * H2_cons
+    lazy var min_H2_Cons = min_cap_perc * nominal_hour_prod_cap / prod_cap * H2_cons
+    lazy var Ref_meth_hour_prod_cap = prod_cap / (334 * 24)
 
-    mutating func proportion(nominal_hourly_prod_cap: Double) { self.nominal_hourly_prod_cap = nominal_hourly_prod_cap }
+    mutating func proportion(nominal_hour_prod_cap: Double) { self.nominal_hour_prod_cap = nominal_hour_prod_cap }
   }
 
   struct PV {
@@ -163,7 +163,7 @@ struct SunOl {
     self.PB_Nominal_gross_cap = values[6]
     self.BESS_cap = values[7]
     self.H2_storage_cap = values[8]
-    self.Meth_nominal_hourly_prod_cap = values[9]
+    self.Meth_nominal_hour_prod_cap = values[9]
     self.El_boiler_cap = values[10]
     self.grid_max_export = values[11]
   }
@@ -255,7 +255,7 @@ struct SunOl {
     BESS.cap = BESS_cap
 
     var Meth = MethanolPlant()
-    Meth.proportion(nominal_hourly_prod_cap: Meth_nominal_hourly_prod_cap)
+    Meth.proportion(nominal_hour_prod_cap: Meth_nominal_hour_prod_cap)
     Meth_nominal_aux_electr_cons = Meth.nominal_aux_electr_cons
     var EY = electrolysis()
     EY_aux_elec_input = EY.proportion(net_elec_input: EY_Nominal_elec_input)
