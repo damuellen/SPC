@@ -63,7 +63,7 @@ steps:
     SourceFolder: 'C:\vcpkg\installed\x64-windows\bin'
     Contents: '*.dll'
     TargetFolder: '$(Build.ArtifactStagingDirectory)'
-  displayName: 'Copy build artifacts to staging directory
+  displayName: Copy build artifacts to staging directory
 
 - task: CopyFiles@2
   inputs:
