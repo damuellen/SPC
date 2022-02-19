@@ -16,7 +16,7 @@ variables:
 
 steps:
 - task: PowerShell@2
-  timeoutInMinutes: 3
+  timeoutInMinutes: 2
   inputs:
     targetType: 'inline'
     script: |
@@ -24,9 +24,6 @@ steps:
       Write-Host "##vso[task.prependpath]$(toolchain.directory)"
       Write-Host "##vso[task.prependpath]$(bin.directory)"
       Write-Host "##vso[task.prependpath]$(icu.directory)"
-      Invoke-WebRequest https://github.com/upx/upx/releases/download/v3.96/upx-3.96-win64.zip -OutFile C:\upx.zip
-      Expand-Archive -Path C:\upx.zip -DestinationPath C:\
-      C:\upx-3.96-win64\upx.exe -9 $(icu.directory)/*
   displayName: Install Swift toolchain
 
 - task: BatchScript@1
@@ -59,6 +56,7 @@ steps:
     path: '.build'
 
 - script: |
+    swift package update
     swift build -c release -Xlinker /INCREMENTAL:NO -Xlinker /IGNORE:4217 -Xswiftc -gnone -Xswiftc -suppress-warnings -Xswiftc -continue-building-after-errors -Xswiftc -LC:/vcpkg/installed/x64-windows/lib/
   env:
     SDKROOT: C:\Library\Developer\Platforms\Windows.platform\Developer\SDKs\Windows.sdk
@@ -87,6 +85,16 @@ steps:
     contents: '*.dll'
     targetFolder: $(Build.ArtifactStagingDirectory)
   displayName: Copy build artifacts to staging directory
+
+- task: PowerShell@2
+  timeoutInMinutes: 1
+  inputs:
+    targetType: 'inline'
+    script: |
+      Invoke-WebRequest https://github.com/upx/upx/releases/download/v3.96/upx-3.96-win64.zip -OutFile C:\upx.zip
+      Expand-Archive -Path C:\upx.zip -DestinationPath C:\
+      C:\upx-3.96-win64\upx.exe -9 $(Build.ArtifactStagingDirectory)/*
+  displayName: UPX compress build artifacts
 
 - task: PublishBuildArtifacts@1
   inputs:
