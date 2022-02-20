@@ -3,24 +3,13 @@ import PackageDescription
 
 let c: CSetting = .unsafeFlags(["-ffast-math", "-O3", "-fomit-frame-pointer", "-funroll-loops"])
 var flags = ["-cross-module-optimization", "-Ounchecked", "-enforce-exclusivity=unchecked"]
-#if os(Windows) 
-flags += ["-Xfrontend", "-entry-point-function-name", "-Xfrontend", "wWinMain"]
-#endif
 let posix: TargetDependencyCondition = .when(platforms: [.linux, .macOS])
 let swift: [SwiftSetting] = [
   .unsafeFlags(flags, .when(configuration: .release)),
   .define("DEBUG", .when(configuration: .debug)),
 ]
 
-#if os(iOS)
-let platformProducts: [Product] = [
-  .library(name: "BlackBoxModel", type: .dynamic, targets: ["BlackBoxModel"])
-]
-#else
-let platformProducts: [Product] = [
-  .library(name: "BlackBoxModel", type: .dynamic, targets: ["BlackBoxModel"]),
-  .library(name: "SolarPosition", type: .dynamic, targets: ["SolarPosition"]),
-  .library(name: "PinchPoint", type: .dynamic, targets: ["PinchPoint"]),
+let platformProducts: [Product] =  [
   .executable(name: "SPC", targets: ["SolarPerformanceCalc"]),
   .executable(name: "SolarFieldCalc", targets: ["SolarFieldCalc"]),
   .executable(name: "TransTES", targets: ["TransTES"]),
@@ -28,18 +17,16 @@ let platformProducts: [Product] = [
   .executable(name: "SunOl", targets: ["SunOl"]),
   .executable(name: "Playground", targets: ["Playground"]),
 ]
-#endif
 
-var dependencies: [Package.Dependency] = [
+let dependencies: [Package.Dependency] = [
   .package(url: "https://github.com/damuellen/swift-argument-parser.git", .branch("main")),
   .package(url: "https://github.com/damuellen/SQLite.swift.git", .branch("master")),
   .package(url: "https://github.com/damuellen/Utilities.git", .branch("main")),
   .package(url: "https://github.com/damuellen/xlsxwriter.swift.git", .branch("main"))
   // .package(url: "https://github.com/damuellen/Swiftplot.git", .branch("master")),
   // .package(url: "https://github.com/damuellen/Numerical.git", .branch("master")),
-  // .package(name: "Benchmark", url: "https://github.com/google/swift-benchmark", from: "0.1.0"),
+  // .package(url: "https://github.com/google/swift-benchmark", .branch("main")),
   // .package(url: "https://github.com/pvieito/PythonKit.git", .branch("master")),
-  // .package(url: "https://github.com/jpsim/Yams.git", from: "4.0.1")
 ]
 
 let platformTargets: [Target] = [
@@ -101,7 +88,8 @@ let platformTargets: [Target] = [
   .target(
     name: "SunOl",
     dependencies: [
-      "Utilities", .product(name: "ArgumentParser", package: "swift-argument-parser"),
+      "Utilities", 
+      .product(name: "ArgumentParser", package: "swift-argument-parser"),
       .product(name: "xlsxwriter", package: "xlsxwriter.swift"),
     ],
     // .product(name: "SwiftPlot", package: "SwiftPlot")
@@ -110,7 +98,8 @@ let platformTargets: [Target] = [
   .target(
     name: "PinchPointTool",
     dependencies: [
-      "PinchPoint", .product(name: "ArgumentParser", package: "swift-argument-parser"),
+      "PinchPoint", 
+      .product(name: "ArgumentParser", package: "swift-argument-parser"),
       .product(name: "xlsxwriter", package: "xlsxwriter.swift"),
     ],
     swiftSettings: swift
