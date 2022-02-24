@@ -76,7 +76,9 @@ var Reference_PV_MV_power_at_transformer_outlet = [Double]()
 func fitness(values: [Double]) -> [Double] {
   var model = TunOl(values)
   let hour0 = model.hour0(Q_Sol_MW_thLoop, Reference_PV_plant_power_at_inverter_inlet_DC, Reference_PV_MV_power_at_transformer_outlet)
+  hour0.head(8, steps: 8760)
   let hour1 = model.hour1(hour0: hour0)
+  hour1.head(48, steps: 8760)
   let day6 = model.day(hour0: hour0)
   var day = [[Double]]()
 
@@ -119,7 +121,7 @@ func MGOADE(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fi
   let cMin = 0.00004
   let cr = 0.4
   let f = 0.9  
-
+  let _ = fitness(grassHopperPositions[0])
   // Calculate the fitness of initial grasshoppers
   DispatchQueue.concurrentPerform(iterations: grassHopperPositions.count) { i in
     let result = fitness(grassHopperPositions[i])
@@ -279,11 +281,11 @@ struct Command: ParsableCommand {
   @Option(name: .short, help: "Iterations") var iterations: Int?
 
   func run() throws {
-    let path = file ?? "/Users/daniel/spc/input.txt"
+    let path = file ?? "input.txt"
     guard let csv = CSV(atPath: path) else { print("No input."); return }
-    Q_Sol_MW_thLoop = csv["csp"]
-    Reference_PV_plant_power_at_inverter_inlet_DC = csv["pv"]
-    Reference_PV_MV_power_at_transformer_outlet = csv["out"]
+    Q_Sol_MW_thLoop = [0] + csv["csp"]
+    Reference_PV_plant_power_at_inverter_inlet_DC = [0] + csv["pv"]
+    Reference_PV_MV_power_at_transformer_outlet = [0] + csv["out"]
 
     let id = String(UUID().uuidString.prefix(6))
     let name = "SunOl_\(id).xlsx"

@@ -46,7 +46,7 @@ extension TunOl {
     let hourDT = 262800
     let daysCS: [[Int]] =  hour3[hourCS..<(hourCS + 8760)].indices.chunked(by: { hour3[$0] == hour3[$1] })
       .map { $0.map { $0 - hourCS } }
-    var day15 = [Double](repeating: 0, count: 17_155)
+    var day15 = [Double](repeating: Double.zero, count: 17_155)
     let CS_CQ_Lsum = hour0.sumOf(hourL, days: daysCS, condition: hourCQ, predicate: { $0 > 0 })
     let CS_CC_CQ_BXsum = hour2.sumOf(hourBX, days: daysCS, condition1: hourCQ, predicate1: { $0 > 0 }, range2: hour3, condition2: hourCC, predicate2: { $0 > 0 })
     let CS_CQ_CIsum = hour2.sumOf(hourCI, days: daysCS, condition: hourCQ, predicate: { $0 > 0 })

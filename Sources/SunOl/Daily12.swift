@@ -17,7 +17,7 @@ extension TunOl {
       481800, 490560
     )
 
-    var day16 = [Double](repeating: 0, count: 17_155)
+    var day16 = [Double](repeating: Double.zero, count: 17_155)
 
     let EZ_EX_Lsum = hour0.sumOf(hourL, days: daysEZ, condition: hourEX, predicate: { $0 > 0 })
     let EZ_EX_EHsum = hour4.sumOf(hourEH, days: daysEZ, condition: hourEX, predicate: { $0 > 0 })

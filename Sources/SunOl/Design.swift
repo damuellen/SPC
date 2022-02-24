@@ -279,7 +279,7 @@ struct TunOl {
   let PB_warm_start_duration: Double = 6
   let PB_warm_start_energyperc: Double = 0.4
   lazy var PB_warm_start_heat_req: Double = PB_nom_heat_cons * PB_warm_start_energyperc
-  let PV_Ref_AC_cap: Double = 0  //max(Calculation!G5,G8764)
+  let PV_Ref_AC_cap: Double = 510  //max(Calculation!G5,G8764)
   let PV_Ref_DC_cap: Double = 683.4
   lazy var Ratio_CSP_vs_Heater = (h_SS(Heater_outlet_T) - h_SS(CSP_Hot_HTF_T - SF_heat_exch_approach_temp)) / (h_SS(CSP_Hot_HTF_T - SF_heat_exch_approach_temp) - h_SS(CSP_Cold_HTF_T - SF_heat_exch_approach_temp))
   let SF_heat_exch_approach_temp: Double = 7
@@ -327,8 +327,8 @@ struct TunOl {
     self.PV_DC_cap_ud = parameter[14]
     self.RawMeth_storage_cap_ud = parameter[15]
     self.TES_full_load_hours_ud = parameter[16]
-    self.Grid_import_yes_no_BESS_strategy = parameter[17]
-    self.Grid_import_yes_no_PB_strategy = parameter[18]
+    self.Grid_import_yes_no_BESS_strategy = 0//parameter[17]
+    self.Grid_import_yes_no_PB_strategy = 0//parameter[18]
 
     for j in 0..<4 {
       self.CCU_max_perc[j] = 0
