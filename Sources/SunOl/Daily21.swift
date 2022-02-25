@@ -538,15 +538,13 @@ extension TunOl {
 
     /// Surplus el boiler cap after max harm op and min night op prep during harm op period
     let dayFQ = 5110
-    // EQ6-MAX(0,Q6-EF6)/El_boiler_eff
-    for i in 0..<365 {
-      day7[dayFQ + i] = day6[dayEQ + i] - max(Double.zero, day1[dayQ + i] - day6[dayEF + i]) / El_boiler_eff
-    }
-
     /// Surplus el boiler cap after min harm op and min night op prep outside of harm op period
     let dayFR = 5475
-    // ER6-MAX(0,G6-EG6)/El_boiler_eff
+    
     for i in 0..<365 {
+      // EQ6-MAX(0,Q6-EF6)/El_boiler_eff
+      day7[dayFQ + i] = day6[dayEQ + i] - max(Double.zero, day1[dayQ + i] - day6[dayEF + i]) / El_boiler_eff
+      // ER6-MAX(0,G6-EG6)/El_boiler_eff
       day7[dayFR + i] = day6[dayER + i] - max(Double.zero, day1[dayG + i] - day6[dayEG + i]) / El_boiler_eff
     }
 

@@ -308,7 +308,6 @@ extension TunOl {
               * (MethSynt_harmonious_max_perc - MethSynt_harmonious_min_perc) + MethSynt_harmonious_min_perc)) * MethSynt_RawMeth_nom_prod_ud
     }
 
-
     /// Remaining CCU cap after max harm cons
     let hourAQ = 306600
     // =MAX(0,1-(AH6-Overall_fix_cons)/Overall_harmonious_var_max_cons*CCU_harmonious_max_perc)*CCU_CO2_nom_prod_ud

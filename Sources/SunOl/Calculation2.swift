@@ -153,13 +153,14 @@ extension TunOl {
               * El_boiler_eff)))
     }
     let EDsum = hour1.sum(hours: daysBO, condition: hourED)
+    let ECEDsum = zip(ECsum, EDsum).map { $0 + $1 }
     /// TES energy available if above min op case
     let hourEE = 78840
     // IF(CC6=0,0,MIN(SUMIF(BO5:BO8763,"="BO6,AY5:AY8763)*Heater_eff*(1+1/Ratio_CSP_vs_Heater),TES_thermal_cap,SUMIF(BO5:BO8763,"="BO6,EB5:EB8763)+SUMIF(BO5:BO8763,"="BO6,EC5:EC8763)+SUMIF(BO5:BO8763,"="BO6,ED5:ED8763)))
     for i in 1..<8760 {
       hour4[hourEE + i] = iff(
         hour2[hourCC + i].isZero, Double.zero,
-        min(AYsum[i] * Heater_eff * (1 + 1 / Ratio_CSP_vs_Heater), TES_thermal_cap, EBsum[i] + ECsum[i] + EDsum[i]))
+        min(AYsum[i] * Heater_eff * (1 + 1 / Ratio_CSP_vs_Heater), TES_thermal_cap, EBsum[i] + ECEDsum[i]))
     }
 
     /// Effective gross heat cons for ST
@@ -167,7 +168,7 @@ extension TunOl {
     // IF(EE6=0,0,(EE6-SUMIF(BO5:BO8763,"="BO6,EB5:EB8763))/(SUMIF(BO5:BO8763,"="BO6,EC5:EC8763)+SUMIF(BO5:BO8763,"="BO6,ED5:ED8763))*EC6)
     for i in 1..<8760 {
       hour4[hourEF + i] = iff(
-        hour4[hourEE + i].isZero, Double.zero, (hour4[hourEE + i] - EBsum[i]) / (ECsum[i] + EDsum[i]) * hour4[hourEC + i])
+        hour4[hourEE + i].isZero, Double.zero, (hour4[hourEE + i] - EBsum[i]) / (ECEDsum[i]) * hour4[hourEC + i])
     }
 
     /// Effective PB gross elec output
@@ -194,7 +195,7 @@ extension TunOl {
     // IF(EE6=0,0,(EE6-SUMIF(BO5:BO8763,"="BO6,EB5:EB8763))/(SUMIF(BO5:BO8763,"="BO6,EC5:EC8763)+SUMIF(BO5:BO8763,"="BO6,ED5:ED8763))*ED6)
     for i in 1..<8760 {
       hour4[hourEI + i] = iff(
-        hour4[hourEE + i].isZero, Double.zero, (hour4[hourEE + i] - EBsum[i]) / (ECsum[i] + EDsum[i]) * hour4[hourED + i])
+        hour4[hourEE + i].isZero, Double.zero, (hour4[hourEE + i] - EBsum[i]) / (ECEDsum[i]) * hour4[hourED + i])
     }
 
     /// TES energy to fulfil op case if above
@@ -202,8 +203,8 @@ extension TunOl {
     // IF(MIN(SUMIF(BO5:BO8763,"="BO6,AY5:AY8763)*Heater_eff*(1+1/Ratio_CSP_vs_Heater),TES_thermal_cap)<SUMIF(BO5:BO8763,"="BO6,EB5:EB8763)+SUMIF(BO5:BO8763,"="BO6,EC5:EC8763)+SUMIF(BO5:BO8763,"="BO6,ED5:ED8763),EE6,SUMIF(BO5:BO8763,"="BO6,EB5:EB8763)+SUMIF(BO5:BO8763,"="BO6,EC5:EC8763)+SUMIF(BO5:BO8763,"="BO6,ED5:ED8763))
     for i in 1..<8760 {
       hour4[hourEJ + i] = iff(
-        min(AYsum[i] * Heater_eff * (1 + 1 / Ratio_CSP_vs_Heater), TES_thermal_cap) < EBsum[i] + ECsum[i] + EDsum[i],
-        hour4[hourEE + i], EBsum[i] + ECsum[i] + EDsum[i])
+        min(AYsum[i] * Heater_eff * (1 + 1 / Ratio_CSP_vs_Heater), TES_thermal_cap) < EBsum[i] + ECEDsum[i],
+        hour4[hourEE + i], EBsum[i] + ECEDsum[i])
     }
 
     /// Surplus TES energy due to op case
@@ -278,13 +279,15 @@ extension TunOl {
 
     /// Available elec from PV after TES chrg
     let hourER = 192720
-    // MAX(0,L6-EP6)
-    for i in 1..<8760 { hour4[hourER + i] = max(Double.zero, hour0[hourL + i] - hour4[hourEP + i]) }
-
     /// Available heat from CSP after TES
     let hourES = 201480
-    // MAX(0,J6-EQ6)
-    for i in 1..<8760 { hour4[hourES + i] = max(Double.zero, hour0[hourJ + i] - hour4[hourEQ + i]) }
+    
+    for i in 1..<8760 { 
+      // MAX(0,L6-EP6)
+      hour4[hourER + i] = max(Double.zero, hour0[hourL + i] - hour4[hourEP + i])
+      // MAX(0,J6-EQ6)
+      hour4[hourES + i] = max(Double.zero, hour0[hourJ + i] - hour4[hourEQ + i])
+    }
 
     /// Total aux el TES chrg&disch CSP SF, PV, PB stby  MWel
     let hourET = 210240
@@ -308,6 +311,8 @@ extension TunOl {
         Double.zero,
         -(hour0[hourL + i] + hour0[hourEH + i] - hour4[hourEP + i] - hour4[hourET + i]))
     }
+
+    //for i in 1..<8760 { hour4[hourET + i] -= hour4[hourEU + i] }
 
     /// Min harmonious net elec cons not considering grid import
     let hourEW = 227760
@@ -521,13 +526,15 @@ extension TunOl {
 
     /// Max BESS charging after min harmonious cons
     let hourFL = 359160
-    // MIN(BESS_chrg_max_cons,FC6)
-    for i in 1..<8760 { hour4[hourFL + i] = min(BESS_chrg_max_cons, hour4[hourFC + i]) }
-
     /// Max grid export after TES chrg, min harm, night and aux el  cons
     let hourFM = 367920
-    // MIN(Grid_export_max_ud,FC6)
-    for i in 1..<8760 { hour4[hourFM + i] = min(Grid_export_max_ud, hour4[hourFC + i]) }
+    
+    for i in 1..<8760 { 
+      // MIN(BESS_chrg_max_cons,FC6)
+      hour4[hourFL + i] = min(BESS_chrg_max_cons, hour4[hourFC + i])
+      // MIN(Grid_export_max_ud,FC6)
+      hour4[hourFM + i] = min(Grid_export_max_ud, hour4[hourFC + i])
+    }
 
     /// Max harmonious net elec cons without considering grid
     let hourFN = 376680
@@ -683,13 +690,15 @@ extension TunOl {
 
     /// Max BESS charging after max harmonious cons
     let hourFZ = 481800
-    // MIN(BESS_chrg_max_cons,FQ6)
-    for i in 1..<8760 { hour4[hourFZ + i] = min(BESS_chrg_max_cons, hour4[hourFQ + i]) }
-
     /// Max grid export after TES chrg, min harm, night and aux el cons
     let hourGA = 490560
-    // MIN(Grid_export_max_ud,FQ6)
-    for i in 1..<8760 { hour4[hourGA + i] = min(Grid_export_max_ud, hour4[hourFQ + i]) }
+    
+    for i in 1..<8760 { 
+      // MIN(BESS_chrg_max_cons,FQ6)
+      hour4[hourFZ + i] = min(BESS_chrg_max_cons, hour4[hourFQ + i])
+      // MIN(Grid_export_max_ud,FQ6)
+      hour4[hourGA + i] = min(Grid_export_max_ud, hour4[hourFQ + i])
+    }
     return hour4
   }
 }
