@@ -291,15 +291,14 @@ extension TunOl {
 
     /// Total aux el TES chrg&disch CSP SF, PV, PB stby  MWel
     let hourET = 210240
-    // =IF($J6>0,$J6*CSP_var_aux_nom_perc,CSP_nonsolar_aux_cons)+$M6+(EP6*Heater_eff+EQ6)*TES_aux_cons_perc+IF(OR(EE6=0,AND(EH6=0,EB6=0)),PB_stby_aux_cons,0)+IF(AND(EE6>0,EB6>0),PB_stup_aux_cons+EB6*TES_aux_cons_perc,0)+IF(EH6>0,(EB6+EF6+EI6)*TES_aux_cons_perc,0)
-    // IF(J6>0,J6*CSP_var_aux_nom_perc,CSP_nonsolar_aux_cons)+M6+(EP6*Heater_eff+EQ6)*TES_aux_cons_perc+IF(EH6=0,PB_stby_aux_cons+EB6*TES_aux_cons_perc,(EB6+EF6+EI6)*TES_aux_cons_perc)
+    // IF($J6>0,$J6*CSP_var_aux_nom_perc,CSP_nonsolar_aux_cons)+$M6+(EP6*Heater_eff+EQ6)*TES_aux_cons_perc+IF(OR(EE6=0,AND(EH6=0,EB6=0)),PB_stby_aux_cons,0)+IF(AND(EE6>0,EB6>0),PB_stup_aux_cons+EB6*TES_aux_cons_perc,0)+IF(EH6>0,(EB6+EF6+EI6)*TES_aux_cons_perc,0)
     for i in 1..<8760 {
       hour4[hourET + i] =
         iff(hour0[hourJ + i] > Double.zero, hour0[hourJ + i] * CSP_var_aux_nom_perc, CSP_nonsolar_aux_cons) + hour0[hourM + i]
         + (hour4[hourEP + i] * Heater_eff + hour4[hourEQ + i]) * TES_aux_cons_perc
-        + iff(
-          hour4[hourEH + i].isZero, PB_stby_aux_cons + hour4[hourEB + i] * TES_aux_cons_perc,
-          (hour4[hourEB + i] + hour4[hourEF + i] + hour4[hourEI + i]) * TES_aux_cons_perc)
+        + iff(or(hour4[hourEE + i].isZero, and(hour4[hourEH + i].isZero, hour4[hourEB + i].isZero)), PB_stby_aux_cons, Double.zero)
+        + iff(and(hour4[hourEE + i] > Double.zero, hour4[hourEB + i] > Double.zero), PB_stup_aux_cons + hour4[hourEB + i] * TES_aux_cons_perc, Double.zero)
+        + iff(hour4[hourEH + i] > Double.zero, (hour4[hourEB + i] + hour4[hourEF + i] + hour4[hourEI + i]) * TES_aux_cons_perc, Double.zero)
     }
 
     /// Not covered aux elec MWel
@@ -316,41 +315,39 @@ extension TunOl {
 
     /// Min harmonious net elec cons not considering grid import
     let hourEW = 227760
-    // =IF(MIN(Overall_harmonious_var_max_cons+Overall_fix_cons,ER6+Grid_import_max_ud*Grid_import_yes_no_PB_strategy-(ET6-EU6),(MIN(ES6+El_boiler_cap_ud*El_boiler_eff,(ER6+Grid_import_max_ud*Grid_import_yes_no_PB_strategy-(ET6-EU6))/(Overall_harmonious_var_max_cons+Overall_fix_cons+(ET6-EU6)+MAX(0,(Overall_harmonious_var_heat_max_cons+Overall_heat_fix_cons-ES6))/El_boiler_eff)*(Overall_harmonious_var_heat_max_cons+Overall_heat_fix_cons))-Overall_heat_fix_cons)/Overall_harmonious_var_heat_max_cons*Overall_harmonious_var_max_cons+Overall_fix_cons)<Overall_harmonious_var_min_cons+Overall_fix_cons,0,Overall_harmonious_var_min_cons+Overall_fix_cons)
-    // IF(MIN(Overall_harmonious_var_max_cons+Overall_fix_cons,ER6+Grid_import_max_ud*Grid_import_yes_no_PB_strategy-(ET6-EU6),MIN(ES6+El_boiler_cap_ud*El_boiler_eff,(ER6+Grid_import_max_ud*Grid_import_yes_no_PB_strategy-(ET6-EU6))/(Overall_harmonious_var_max_cons+Overall_fix_cons+(ET6-EU6)+MAX(0,(Overall_harmonious_var_heat_max_cons+Overall_heat_fix_cons-ES6))/El_boiler_eff)*(Overall_harmonious_var_heat_max_cons+Overall_heat_fix_cons))/(Overall_harmonious_var_heat_max_cons+Overall_heat_fix_cons)*(Overall_harmonious_var_max_cons+Overall_fix_cons))<Overall_harmonious_var_min_cons+Overall_fix_cons,0,Overall_harmonious_var_min_cons+Overall_fix_cons)
+    // IF(MIN(Overall_harmonious_var_max_cons+Overall_fix_cons,ER6+Grid_import_max_ud*Grid_import_yes_no_PB_strategy-(ET6-EU6),(MIN(ES6+El_boiler_cap_ud*El_boiler_eff,(ER6+Grid_import_max_ud*Grid_import_yes_no_PB_strategy-(ET6-EU6))/(Overall_harmonious_var_max_cons+Overall_fix_cons+(ET6-EU6)+MAX(0,(Overall_harmonious_var_heat_max_cons+Overall_heat_fix_cons-ES6))/El_boiler_eff)*(Overall_harmonious_var_heat_max_cons+Overall_heat_fix_cons))-Overall_heat_fix_cons)/Overall_harmonious_var_heat_max_cons*Overall_harmonious_var_max_cons+Overall_fix_cons)<Overall_harmonious_var_min_cons+Overall_fix_cons,0,Overall_harmonious_var_min_cons+Overall_fix_cons)
     for i in 1..<8760 {
       hour4[hourEW + i] = iff(
         min(
           Overall_harmonious_var_max_cons + Overall_fix_cons,
-          hour4[hourER + i] + Grid_import_max_ud * Grid_import_yes_no_PB_strategy
-            - (hour4[hourET + i] - hour4[hourEU + i]),
-          min(
+          hour4[hourER + i] + Grid_import_max_ud * Grid_import_yes_no_PB_strategy - (hour4[hourET + i] - hour4[hourEU + i]),
+          (min(
             hour4[hourES + i] + El_boiler_cap_ud * El_boiler_eff,
-            (hour4[hourER + i] + Grid_import_max_ud * Grid_import_yes_no_PB_strategy
-              - (hour4[hourET + i] - hour4[hourEU + i]))
+            (hour4[hourER + i] + Grid_import_max_ud * Grid_import_yes_no_PB_strategy - (hour4[hourET + i] - hour4[hourEU + i]))
               / (Overall_harmonious_var_max_cons + Overall_fix_cons + (hour4[hourET + i] - hour4[hourEU + i]) + max(
                 Double.zero, (Overall_harmonious_var_heat_max_cons + Overall_heat_fix_cons - hour4[hourES + i])) / El_boiler_eff)
-              * (Overall_harmonious_var_heat_max_cons + Overall_heat_fix_cons))
-            / (Overall_harmonious_var_heat_max_cons + Overall_heat_fix_cons)
-            * (Overall_harmonious_var_max_cons + Overall_fix_cons)) < Overall_harmonious_var_min_cons + Overall_fix_cons, Double.zero,
-        Overall_harmonious_var_min_cons + Overall_fix_cons)
+              * (Overall_harmonious_var_heat_max_cons + Overall_heat_fix_cons)) - Overall_heat_fix_cons)
+            / Overall_harmonious_var_heat_max_cons * Overall_harmonious_var_max_cons + Overall_fix_cons)
+          < Overall_harmonious_var_min_cons + Overall_fix_cons, 0, Overall_harmonious_var_min_cons + Overall_fix_cons)
     }
 
     /// Optimized min harmonious net elec cons
     let hourEX = 236520
-    // =IF(OR(AND(EW6>0,EW5=0,EW7=0),AND(EW6>0,OR(AND(EW4=0,EW5=0,EW8=0),AND(EW4=0,EW7=0,EW8=0)))),0,EW6)
-    // IF(AND(EW6>0,EW5=0,OR(EW6=0,EW7=0)),0,EW6)
+    // IF(OR(AND(EW6>0,EW5=0,EW7=0),AND(EW6>0,OR(AND(EW4=0,EW5=0,EW8=0),AND(EW4=0,EW7=0,EW8=0)))),0,EW6)
     for i in 1..<8760 {
       hour4[hourEX + i] = iff(
-        and(
-          hour4[hourEW + i] > Double.zero, hour4[hourEW + i - 1].isZero,
-          or(hour4[hourEW + i].isZero, hour4[hourEW + i].isZero)), Double.zero, hour4[hourEW + i])
+        or(
+          and(hour4[hourEW + i] > Double.zero, hour4[hourEW + i - 1].isZero, hour4[hourEW + i + 1].isZero),
+          and(
+            hour4[hourEW + i] > Double.zero,
+            or(
+              and(hour4[hourEW + i - 2].isZero, hour4[hourEW + i - 1].isZero, hour4[hourEW + i + 2].isZero),
+              and(hour4[hourEW + i - 2].isZero, hour4[hourEW + i + 1].isZero, hour4[hourEW + i + 2].isZero)))), 0, hour4[hourEW + i])
     }
 
     /// Min harmonious net heat cons
     let hourEY = 245280
-    // =MAX(0,(EX6-Overall_fix_cons)/Overall_harmonious_var_max_cons*Overall_harmonious_var_heat_max_cons+Overall_heat_fix_cons)
-    // EX6/(Overall_harmonious_var_max_cons+Overall_fix_cons)*(Overall_harmonious_var_heat_max_cons+Overall_heat_fix_cons)
+    // MAX(0,(EX6-Overall_fix_cons)/Overall_harmonious_var_max_cons*Overall_harmonious_var_heat_max_cons+Overall_heat_fix_cons)
     for i in 1..<8760 {
       hour4[hourEY + i] =
         max(Double.zero, (hour4[hourEX + i] - Overall_fix_cons) / Overall_harmonious_var_max_cons 
