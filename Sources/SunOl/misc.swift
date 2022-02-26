@@ -1,6 +1,203 @@
 import Foundation
 import Utilities
 
+public let source = DispatchSource.makeSignalSource(signal: SIGINT, queue: .global())
+public let semaphore = DispatchSemaphore(value: 0)
+
+public func fitness(values: [Double]) -> [Double] {
+  var model = TunOl(values)
+  let hour0 = model.hour0(TunOl.Q_Sol_MW_thLoop, TunOl.Reference_PV_plant_power_at_inverter_inlet_DC, TunOl.Reference_PV_MV_power_at_transformer_outlet)
+  hour0.head(8, steps: 8760)
+  let hour1 = model.hour1(hour0: hour0)
+  hour1.head(48, steps: 8760)
+  let day6 = model.day(hour0: hour0)
+  var day = [[Double]]()
+
+  for j in 0..<4 {
+    let hour2 = model.hour2(j: j, hour0: hour0, hour1: hour1)
+    let hour3 = model.hour3(j: j, hour0: hour0, hour1: hour1, hour2: hour2)
+    var day1 = model.day(case: j, hour2: hour2, hour3: hour3)
+    let hour4 = model.hour4(j: j, day1: day1, hour0: hour0, hour1: hour1, hour2: hour2)
+    model.night(case: j, day1: &day1, hour3: hour3, hour4: hour4)
+    let day15 = model.day(hour0: hour0, hour2: hour2, hour3: hour3, day11: day1)
+    let day16 = model.day(hour0: hour0, hour4: hour4, day11: day1, day15: day15)
+    let day17 = model.day(case: j, day1: day1, day5: day15, day6: day16)
+    day.append(day17)
+    let day21 = model.day(case: j, hour0: hour0)     
+    let day27 = model.day(case: j, day1: day21, day6: day6) 
+    day.append(day27)
+  }
+
+  return values
+}
+
+public func MGOADE(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fitness: ([Double]) -> [Double]) -> [[Double]] {
+  #if DEBUG
+  let group = false
+  let n = 2
+  let maxIter = 2
+  #endif
+  var targetResults = Matrix(n * maxIter, bounds.count + 13)
+  var targetPosition = Matrix(group ? 3 : 1, bounds.count)
+  var targetFitness = Vector(group ? 3 : 1, .infinity)
+  let EPSILON = 1E-14
+
+  // Initialize the population of grasshoppers
+  var grassHopperPositions = bounds.randomValues(count: n)
+  var grassHopperFitness = Vector(n)
+  var grassHopperTrialPositions = grassHopperPositions
+  let groups = grassHopperFitness.indices.split(in: group ? 3 : 1)
+
+  let cMax = 1.0
+  let cMin = 0.00004
+  let cr = 0.4
+  let f = 0.9  
+  let _ = fitness(grassHopperPositions[0])
+  // Calculate the fitness of initial grasshoppers
+  DispatchQueue.concurrentPerform(iterations: grassHopperPositions.count) { i in
+    let result = fitness(grassHopperPositions[i])
+    grassHopperFitness[i] = result[5]
+  }
+  
+  for g in groups.indices {
+    // Find the best grasshopper per group (target) in the first population
+    for i in groups[g].indices {
+      if grassHopperFitness[i] < targetFitness[g] {
+        targetFitness[g] = grassHopperFitness[i]
+        targetPosition[g] = grassHopperPositions[i]
+      }
+    }
+    TunOl.convergenceCurves[g].append([Double(0), targetFitness[g]])
+  }
+  print("\u{1b}[1J", terminator: "")
+  print("First population:\n\(targetFitness)".text(.green))
+  print(targetPosition.map(labeled(values:)).joined(separator: "\n"))
+
+  func euclideanDistance(a: [Double], b: [Double]) -> Double {
+    var distance = 0.0
+    for i in a.indices { distance += pow((a[i] - b[i]), 2) }
+    return sqrt(distance)
+  }
+
+  func S_func(r: Double) -> Double {
+    let f = 0.5
+    let l = 1.5
+    return f * exp(-r / l) - exp(-r)  // Eq. (2.3) in the paper
+  }
+
+  var pos = 0
+  var l = 0
+
+  while l < maxIter && !source.isCancelled {
+    l += 1
+    let c = cMax - (Double(l) * ((cMax - cMin) / Double(maxIter)))  // Eq. (2.8) in the paper
+    var S_i = Vector(bounds.count)
+    var r_ij_vec = Vector(bounds.count)
+    var s_ij = Vector(bounds.count)
+    var X_new = Vector(bounds.count)
+    for g in groups.indices {
+      for i in groups[g].indices {
+        for j in 0..<n {
+          if i != j {
+            // Calculate the distance between two grasshoppers
+            let distance = euclideanDistance(a: grassHopperPositions[i], b: grassHopperPositions[j])
+            for p in r_ij_vec.indices {
+              r_ij_vec[p] = (grassHopperPositions[j][p] - grassHopperPositions[i][p]) / (distance + EPSILON)  // xj-xi/dij in Eq. (2.7)
+            }
+            let xj_xi = 2 + distance.remainder(dividingBy: 2)  // |xjd - xid| in Eq. (2.7)
+            for p in r_ij_vec.indices {
+              // The first part inside the big bracket in Eq. (2.7)
+              s_ij[p] = ((bounds[p].upperBound - bounds[p].lowerBound) * c / 2) * S_func(r: xj_xi) * r_ij_vec[p]
+            }
+            for p in S_i.indices { S_i[p] = S_i[p] + s_ij[p] }
+          }
+        }
+
+        let S_i_total = S_i
+        for p in S_i.indices {
+          X_new[p] = c * S_i_total[p] + targetPosition[g][p]  // Eq. (2.7) in the paper
+        }
+        // Update the target
+        grassHopperPositions[i] = X_new
+      }
+    }
+    DispatchQueue.concurrentPerform(iterations: grassHopperPositions.count) { i in
+      if source.isCancelled { return }
+      for j in grassHopperPositions[i].indices {
+        grassHopperPositions[i][j].clamp(to: bounds[j])
+        targetResults[pos + i][j] = grassHopperPositions[i][j]
+      }
+      let result = fitness(grassHopperPositions[i])
+      targetResults[pos + i].replaceSubrange(bounds.count..., with: result)
+      grassHopperFitness[i] = result[5]
+    }
+    if source.isCancelled { break }
+
+    var refresh = group
+    // Multi-group strategy
+    if group, l.isMultiple(of: 2) {
+      for g in groups.indices {
+        // Update the target
+        for i in groups[g].indices {
+          var o = [0, 1, 2]
+          o.remove(at: g)
+          let r1 = groups[o[0]].indices.randomElement()!
+          let r2 = groups[o[1]].indices.randomElement()!
+          
+          for j in grassHopperPositions[i].indices {
+            if Double.random(in: 0...1) < cr {
+              grassHopperTrialPositions[i][j] =
+                targetPosition[g][j] + f * (.random(in: 0...1) + 0.0001) * (grassHopperPositions[r1][j] - grassHopperPositions[r2][j])
+              grassHopperTrialPositions[i][j].clamp(to: bounds[j])
+            }
+          }
+        }
+      }
+    } else if group {
+      for g in groups.indices {
+        var o = [0, 1, 2]
+        o.remove(at: g)
+        for i in groups[g].indices {
+          for p in grassHopperPositions[i].indices {
+            grassHopperTrialPositions[i][p] += .random(in: 0...1) * (((targetPosition[o[0]][p] + targetPosition[o[1]][p]) / 2) - grassHopperPositions[i][p])
+            grassHopperTrialPositions[i][p].clamp(to: bounds[p])
+          }
+        }
+      }
+    } else { refresh = false }
+
+    if refresh {
+      DispatchQueue.concurrentPerform(iterations: grassHopperTrialPositions.count) { i in
+        if source.isCancelled { return }
+        let result = fitness(grassHopperTrialPositions[i])
+        if result[5] < grassHopperFitness[i] {
+          grassHopperFitness[i] = result[5]
+          grassHopperPositions[i] = grassHopperTrialPositions[i]
+          targetResults[pos + i].replaceSubrange(0..<bounds.count, with: grassHopperPositions[i])
+          targetResults[pos + i].replaceSubrange(bounds.count..., with: result)
+        }
+      }
+    }
+    if source.isCancelled { break }
+    pos += grassHopperPositions.count
+    for g in groups.indices {
+      // Update the target
+      for i in groups[g].indices {
+        if grassHopperFitness[i] < targetFitness[g] {
+          targetFitness[g] = grassHopperFitness[i]
+          targetPosition[g] = grassHopperPositions[i]
+        }
+      }
+      TunOl.convergenceCurves[g].append([Double(l), targetFitness[g]])
+    }
+    print("Iterations: \(l)\n\(targetFitness)".randomColor())
+    print(targetPosition.map(labeled(values:)).joined(separator: "\n"))
+    if (targetFitness.reduce(0, +) / 3) - targetFitness.min()! < 0.001 { break }
+  }
+  targetResults.removeLast((maxIter - l) * n)
+  return targetResults
+}
+
 func POLY(_ value: Double, _ coeffs: [Double]) -> Double { 
   coeffs.reversed().reduce(into: 0.0) { result, coefficient in
     result = coefficient.addingProduct(result, value)
@@ -357,7 +554,7 @@ public enum ANSI {
 	}
 }
 
-let tunol = """
+public let tunol = """
 ████████╗██╗   ██╗███╗   ██╗ ██████╗ ██╗         
 ╚══██╔══╝██║   ██║████╗  ██║██╔═══██╗██║         
    ██║   ██║   ██║██╔██╗ ██║██║   ██║██║         

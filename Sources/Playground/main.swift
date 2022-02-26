@@ -1,121 +1,141 @@
+import ArgumentParser
 import Foundation
 import Utilities
+import xlsxwriter
+import SunOl
 
-// let csv = CSV(atPath: "hps2.csv")!
+#if !os(Windows)
+print("\u{1b}[1J", terminator: "")
+print(tunol)
+signal(SIGINT, SIG_IGN)
+source.setEventHandler { source.cancel() }
+#else
+MessageBox(text: "Calculation started.\nhttp://127.0.0.1:9080", caption: "TunOl")
+import WinSDK
+_ = SetConsoleOutputCP(UINT(CP_UTF8))
+SetConsoleCtrlHandler({_ in source.cancel();semaphore.wait();return WindowsBool(true)}, true)
+DispatchQueue.global().asyncAfter(deadline: .now() + 3) { start("http://127.0.0.1:9080") }
+#endif
+#if os(Linux)
+try! Gnuplot.process().run()
+#endif
+var stopwatch = 0
 
-// let headers = [["Unix", "WindMax", "DNIMax", "WindSpeed", "DNI", "SFPS", "MASSFLOW", "DNIMAXMEASUREDCOS", 
-// "DUMPINGAVERAGE", "INCIDENCEANGLE", "CURRENTSUNANGLE", "TSFSETOUT", 
-// "SCA4LOCCOMMAND", "SCA4LOCACCPRESSURE", "SCA4LOCGRADIENT", "SCA4LOCTMAX", "SCA4LOCTNORM", "SCA4LOCT2_3", "SCA4LOCT2_2", "SCA4LOCT2_1", "SCA4LOCT2", "SCA4LOCT1", "SCA4LOCPOSERROR", "SCA4LOCSCAANGLE",
-// "SCA3LOCCOMMAND", "SCA3LOCACCPRESSURE", "SCA3LOCGRADIENT", 
-// "WINDDIRECTION", "SCA3LOCTMAX", "THOTTANK", "TCOLDTANK", "AMBIENTTEMP", "FLOW", "DUMPINGEXPECTED", "SCA3LOCTNORM",
-//  "SCA3LOCT23", "SCA3LOCT22", "SCA3LOCT21", "SCA3LOCT2", "SCA3LOCT1", "SCA3LOCPOSERROR", "SCA3LOCSCAANGLE", "SCA2LOCCOMMAND",
-//  "SCA2LOCACCPRESSURE", "SCA2LOCGRADIENT", "SCA2LOCTMAX", "SCA2LOCTNORM", "SCA2LOCT23", "SCA2LOCT22", "SCA2LOCT21", "SCA2LOCT2",
-//  "SCA2LOCT1", "SCA2LOCPOSERROR", "SCA2LOCSCAANGLE", "SCA1LOCCOMMAND", "SCA1LOCACCPRESSURE", "SCA1LOCGRADIENT", "SCA1LOCTMAX",
-//  "SCA1LOCTNORM", "SCA1LOCT23", "SCA1LOCT22", "SCA1LOCT21", "SCA1LOCT2", "SCA1LOCT1", "SCA1LOCT02", "SCA1LOCT01", "SCA1LOCT0", "SCA1LOCPOSERROR", "SCA1LOCSCAANGLE"]]
 
-// let sca4 = [csv["SCA4LOCT2_3"], csv["SCA4LOCT2_2"], csv["SCA4LOCT2_1"], csv["SCA4LOCT2"], csv["SCA4LOCT1"]]
+let server = HTTP { request -> HTTP.Response in var uri = request.uri
+  if uri == "/cancel" {
+    source.cancel()
+    stopwatch = 0
+  } else {
+    uri.remove(at: uri.startIndex)
+  }
+  let curves = TunOl.convergenceCurves.map { Array($0.suffix(Int(uri) ?? 10)) }
+  if curves[0].count > 1 {
+    let m = curves.map(\.last!).map { $0[1] }.min()
+    let i = curves.firstIndex(where: { $0.last![1] == m })!
+    let plot = Gnuplot(xys: curves, titles: ["Best1", "Best2", "Best3"])
+      .plot(multi: true, index: 0).plot(index: 1).plot(index: 2)
+      .plot(multi: true, index: i).plot(index: i, label: 2)
+      .set(title: "Convergence curves")
+      .set(xlabel: "Iteration").set(ylabel: "LCoM")
+    plot.settings["xtics"] = "1"
+    return .init(html: .init(body: plot.svg!, refresh: min(stopwatch, 30)))
+  }
+  return .init(html: .init(refresh: 10))
+}
 
-// let sca = sca4.map { v in stride(from: 0, to: v.count, by: 30).map { return v[$0...].prefix(30).reduce(0, +) / 30 }  }
+source.resume()
+server.start()
 
-// try! Gnuplot(ys: sca[0], sca[1], sca[2] , sca[3], sca[4], titles: "SCA4LOCT2_3", "SCA4LOCT2_2", "SCA4LOCT2_1", "SCA4LOCT2"," SCA4LOCT1" ,style: .points)(.pngLarge(path: "SCA4.png"))
+let now = Date()
 
-// try! cleanUp(formulasCalculation, titlesCalculation, skip: ["AU", "BT", "CO", "DU", "QS"], name: "hourly").joined(separator: "\n\n").write(toFile: "_Calculation.swift", atomically: false, encoding: .utf8)
-// try! _ = Process.run(.init(fileURLWithPath: "/workspaces/swift-format/.build/release/swift-format"), arguments: ["-i", "_Calculation.swift"], terminationHandler: nil)
-// try! cleanUp(formulasDaily1, titlesDaily1, 365, skip: ["B", "AN", "BZ", "DL", "EX", "GT", "IP"], name: "daily1").joined(separator: "\n\n").write(toFile: "_Daily1.swift", atomically: false, encoding: .utf8)
-// try! _ = Process.run(.init(fileURLWithPath: "/workspaces/swift-format/.build/release/swift-format"), arguments: ["-i", "_Daily1.swift"], terminationHandler: nil)
-// try! cleanUp(formulasDaily2, titlesDaily2, 365, skip: ["D", "AF", "BH", "CJ", "DL", "DQ", "FB"], name: "daily2").joined(separator: "\n\n").write(toFile: "_Daily2.swift", atomically: false, encoding: .utf8)
-// try! _ = Process.run(.init(fileURLWithPath: "/workspaces/swift-format/.build/release/swift-format"), arguments: ["-i", "_Daily2.swift"], terminationHandler: nil)
+DispatchQueue.global(qos: .background).sync { Command.main() }
 
-// inputOutput()
+print("Elapsed seconds:", -now.timeIntervalSinceNow)
 
-func inputOutput() {
+server.stop()
+semaphore.signal()
 
-  let workbook = try! XML(atPath: "/workspaces/SPC/xl/workbook.xml")
-  let definedNamesRef: [(Int, String)] = workbook.children[5].children
-    .compactMap { child -> (Int, String)? in
-      let ref = child.value.replacingOccurrences(of: "Input_Output_Summary!", with: "").replacingOccurrences(of: "$", with: "")
-      if ref.contains(":") { return nil }
-      return (Int(String(ref.dropFirst()))!, ref)
+struct Command: ParsableCommand {
+
+  @Option(name: .short, help: "Input data file") var file: String?
+
+  @Option(name: .short, help: "Parameter file") var json: String?
+
+  @Flag(name: .long, help: "Do not use Multi-group algorithm") var noGroups: Bool = false
+
+  @Option(name: .short, help: "Population size") var n: Int?
+
+  @Option(name: .short, help: "Iterations") var iterations: Int?
+
+  func run() throws {
+    let path = file ?? "input.txt"
+    guard let csv = CSV(atPath: path) else { print("No input."); return }
+    TunOl.Q_Sol_MW_thLoop = [0] + csv["csp"]
+    TunOl.Reference_PV_plant_power_at_inverter_inlet_DC = [0] + csv["pv"]
+    TunOl.Reference_PV_MV_power_at_transformer_outlet = [0] + csv["out"]
+
+    let id = String(UUID().uuidString.prefix(6))
+    let name = "SunOl_\(id).xlsx"
+    let wb = Workbook(name: name)
+    let ws = wb.addWorksheet()
+    let ws2 = wb.addWorksheet()
+    let names = CostModel.labels[0..<11]
+
+    var r = 0
+    var r2 = 0
+    defer {
+      print(name)
+      ws.table(range: [0, 0, r, CostModel.labels.count - 1], header: CostModel.labels)
+      names.enumerated().forEach { column, name in let chart = wb.addChart(type: .scatter)  //.set(y_axis: 1000...2500)
+        chart.addSeries().set(marker: 5, size: 4)
+        .values(sheet: ws, range: [1, 17, r, 17])
+        .categories(sheet: ws, range: [1, column, r, column])
+        chart.remove(legends: 0)
+        wb.addChartsheet(name: name).set(chart: chart)
+      }
+      ws2.table(range: [0, 0, r2, 3], header: ["CAPEX", "Count", "Min", "Max"])
+      let chart = wb.addChart(type: .line)
+      chart.addSeries().values(sheet: ws2, range: [1, 2, r2, 2]).categories(sheet: ws2, range: [1, 0, r2, 0])
+      wb.addChartsheet(name: "CAPEX").set(chart: chart)
+      let bc = wb.addChart(type: .bar)
+      bc.addSeries().values(sheet: ws2, range: [1, 1, r2, 1]).categories(sheet: ws2, range: [1, 0, r2, 0])
+      bc.remove(legends: 0)
+      ws2.insert(chart: bc, (1, 5)).activate()
+      wb.close()
+      try! Gnuplot(xys: TunOl.convergenceCurves, style: .lines(smooth: false))(.pngLarge(path: "SunOl_\(id).png"))
     }
 
-  let definedNames = workbook.children[5].children.map { $0.attributes["name"]! }
+    let parameter: [Parameter]
+    if let path = json, let data = try? Data(contentsOf: .init(fileURLWithPath: path)), 
+      let parameters = try? JSONDecoder().decode([Parameter].self, from: data) {
+      parameter = parameters
+    } else {
+     parameter = [
+  Parameter(
+    BESS_cap_ud: 0...1400, CCU_C_O_2_nom_prod_ud: 10...110, C_O_2_storage_cap_ud: 10...110,
+    CSP_loop_nr_ud: 20...250, El_boiler_cap_ud: 10...110, EY_var_net_nom_cons_ud: 10...110,
+    Grid_export_max_ud: 50...50, Grid_import_max_ud: 50...50, Hydrogen_storage_cap_ud: 10...110,
+    Heater_cap_ud: 10...500, MethDist_Meth_nom_prod_ud: 10...110,
+    MethSynt_RawMeth_nom_prod_ud: 10...110, PB_nom_gross_cap_ud: 10...110,
+    PV_AC_cap_ud: 280...1280, PV_DC_cap_ud: 280...1380, RawMeth_storage_cap_ud: 10...110,
+    TES_full_load_hours_ud: 10...110)
+]
 
-  let xml1 = try! XML(atPath: "/workspaces/SPC/xl/worksheets/sheet1.xml")
-  let sheetData1 = xml1.children.first(where: { $0.name == "sheetData" })!
-  let rows1 = sheetData1.children
-
-  let design = definedNamesRef.indices.compactMap { i -> (String, String)? in
-    let ref = definedNamesRef[i]
-    let name = definedNames[i]
-    if let formula = rows1.first(where: { $0.attributes["r"]! == String(ref.0) })?.children
-      .first(where: { $0.attributes["r"]! == ref.1 })?
-      .children.first(where: { att in att.name == "f" })?
-      .value
-    {
-      return (name, formula)
-    } else if let value = rows1.first(where: { $0.attributes["r"]! == String(ref.0) })?.children
-      .first(where: { $0.attributes["r"]! == ref.1 })?
-      .children.first(where: { att in att.name == "v" })?
-      .value
-    {
-      return (name, value)
     }
-    return nil
+    parameter.forEach { parameter in
+      let a = MGOADE(group: !noGroups, n: n ?? 150, maxIter: iterations ?? 100, bounds: parameter.ranges, fitness: fitness)
+      a.forEach { row in r += 1; ws.write(row, row: r) }
+      if r < 2 { return }
+      let (x,y) = (12, 17)
+      let freq = 10e7
+      var d = [Double:[Double]]()
+      for i in a.indices {
+        let key = (a[i][x] / freq).rounded(.up)
+        if let v = d[key] { d[key] = [v[0] + 1, min(v[1], a[i][y]), max(v[2], a[i][y])] } 
+        else { d[key] = [1, a[i][y], a[i][y]] }
+      }
+      d.keys.sorted().map { [$0 * freq] + d[$0]! }.forEach { row in r2 += 1; ws2.write(row, row: r2) }
+    }
   }
-  let declaration = design.map { "let \($0.0): Double" }.joined(separator: "\n")
-  let assign = design.map { "self.\($0.0) = \($0.1)" }.joined(separator: "\n")
-    .replacingOccurrences(of: "MAX(", with: "max(").replacingOccurrences(of: "MIN(", with: "min(")
-    .replacingOccurrences(of: "IFERROR(", with: "ifFinite(\n ")
-    .replacingOccurrences(of: "IF(", with: "iff(\n ")
-    .replacingOccurrences(of: "AND(", with: "and(\n ")
-    .replacingOccurrences(of: "OR(", with: "or(\n ").replacingOccurrences(of: ",", with: ",\n ")
-    .replacingOccurrences(of: ":", with: ",").replacingOccurrences(of: "^", with: "**")
-    .replacingOccurrences(of: "\"", with: "")
-
-  let sharedStrings = try! XML(atPath: "/workspaces/SPC/xl/sharedStrings.xml")
-  let strings = sharedStrings.children.compactMap { $0.children.first?.value }
-  print(strings)
 }
-/*
-var cleanFormulas = [String:String]()
-for formula in calculationFormulas {
-  var expression = formula.value.dropFirst()
-    .replacingOccurrences(of: "MAX(", with: "max(")
-    .replacingOccurrences(of: "MIN(", with: "min(")
-    .replacingOccurrences(of: "IFERROR(", with: "ifFinite(\n ")
-    .replacingOccurrences(of: "IF(", with: "iff(\n ")
-    .replacingOccurrences(of: "AND(", with: "and(\n ")
-    .replacingOccurrences(of: "OR(", with: "or(\n ")
-    .replacingOccurrences(of: "COUNT", with: "count")
-  expression = expression.replacingOccurrences(of: "=", with: "==")
-    .replacingOccurrences(of: "#", with: "_")
-    .replacingOccurrences(of: "$", with: "")
-    .replacingOccurrences(of: "&", with: "")
-    .replacingOccurrences(of: "!", with: "_")
-    .replacingOccurrences(of: ":", with: "...")
-    .replacingOccurrences(of: "^", with: "**")
-    .replacingOccurrences(of: "\"", with: "")
-  columns.reversed().forEach {
-    expression = expression.replacingOccurrences(of: "\($0)3", with: "xy[\($0) + i]")
-  }
-  cleanFormulas[formula.key] = expression
-}
-var i = 0
-let text: [String] = columns.compactMap { 
-  if i == 440 {
-    print(i)
-  }
-  guard let formula = cleanFormulas[$0] else { return nil }
-  i += 1
-  return """
-  let \($0) = \((i-1)*8760+cleanFormulas.keys.count*365)
-  let \($0)0 = \((i-1)*365)
-  for i in 1..<8760 {
-    xy[\($0)+i] = \(formula)
-    xy[\($0)0 + day[i]] += xy[\($0) + i]
-    c[\($0)0 + day[i]] += xy[\($0) + i] > 0 ? 1 : 0
-  }
-  """
-}
-print(text.joined(separator: "\n"))
-*/

@@ -114,8 +114,7 @@ extension TunOl {
 
     /// Remaining PV after min harmonious
     let hourV = 122640
-    // =MAX(0,$P6-$Q6-S6-MIN(El_boiler_cap_ud,MAX(0,(T6-$J6)/El_boiler_eff)))
-    // MAX(0,P6-Q6-S6-MAX(0,(T6-J6)/El_boiler_eff))
+    // MAX(0,$P6-$Q6-S6-MIN(El_boiler_cap_ud,MAX(0,(T6-$J6)/El_boiler_eff)))
     for i in 1..<8760 {
       hour0[hourV + i] = max(
         Double.zero,

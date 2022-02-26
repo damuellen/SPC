@@ -74,8 +74,7 @@ extension TunOl {
     //+SUMIFS(CalculationCB5:CB8763,CalculationCC5:CC8763,">0",CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,">0")/PB_Ratio_Heat_input_vs_output
     //-SUMIFS(CalculationCJ5:CJ8763,CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,">0")
     for i in 0..<365 {
-      day15[day1FA + i] =
-        CS_CQ_Jsum[i] + CS_CC_CQ_CBsum[i] / PB_Ratio_Heat_input_vs_output - CS_CQ_CJsum[i]
+      day15[day1FA + i] = CS_CQ_Jsum[i] + CS_CC_CQ_CBsum[i] / PB_Ratio_Heat_input_vs_output - CS_CQ_CJsum[i]
     }
 
     /// Available heat after TES chrg outside of harm op period
@@ -84,8 +83,7 @@ extension TunOl {
     //+SUMIFS(CalculationCB5:CB8763,CalculationCC5:CC8763,">0",CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,"=0")/PB_Ratio_Heat_input_vs_output
     //-SUMIFS(CalculationCJ5:CJ8763,CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,"=0")
     for i in 0..<365 {
-      day15[day1FB + i] =
-        CS_CQ_Jsum[i] + CS_CC_CQ_CBsum[i] / PB_Ratio_Heat_input_vs_output - CS_CQ_CJsum[i]
+      day15[day1FB + i] = CS_CQ_Jsum[i] + CS_CC_CQ_CBsum[i] / PB_Ratio_Heat_input_vs_output - CS_CQ_CJsum[i]
     }
     let CQsum = hour3.sum(days: daysCS, range: hourCQ)
     let CS_CQ_CTsum = hour3.sumOf(hourCT, days: daysCS, condition: hourCQ, predicate: { $0 > 0 })

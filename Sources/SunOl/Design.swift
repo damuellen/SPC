@@ -2,7 +2,13 @@ import Libc
 import Utilities
 
 func h_SS(_ t: Double) -> Double { 0.000085999999711 * pow(t, 2) + 1.44300000008555 * t + 4.23842398826006 }
-struct TunOl {
+public struct TunOl {
+
+  public static var convergenceCurves = [[[Double]]](repeating: [[Double]](), count: 3)
+  public static var Q_Sol_MW_thLoop = [Double]()
+  public static var Reference_PV_plant_power_at_inverter_inlet_DC = [Double]()
+  public static var Reference_PV_MV_power_at_transformer_outlet = [Double]()
+
   let BESS_chrg_eff: Double = 0.7
   lazy var BESS_chrg_max_cons: Double = BESS_cap_ud * BESS_chrg_max_ratio
   let BESS_chrg_max_ratio: Double = 0.5
@@ -110,7 +116,7 @@ struct TunOl {
   let Heater_eff: Double = 0.96
   let Heater_outlet_T: Double = 565
   let HL_Coeff: [Double] = [0]
-  let Inv_eff_Ref_approx_handover: Double = 0  // Inv_Eff!C22
+  let Inv_eff_Ref_approx_handover: Double = 1  // Inv_Eff!C22
   let LL_Coeff: [Double] = [0]
   let MethDist_cap_min_perc: Double = 0.5
 
