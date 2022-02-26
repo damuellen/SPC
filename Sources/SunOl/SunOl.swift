@@ -323,10 +323,10 @@ struct SunOl {
   }
 }
 
-struct Parameter: Codable {
-  var ranges: [ClosedRange<Double>]
+public struct Parameter: Codable {
+  public var ranges: [ClosedRange<Double>]
 
-  init(
+  public init(
     BESS_cap_ud: ClosedRange<Double>,
     CCU_C_O_2_nom_prod_ud: ClosedRange<Double>,
     C_O_2_storage_cap_ud: ClosedRange<Double>,
