@@ -17,7 +17,7 @@ var platformProducts: [Product] = [
   .library(name: "BlackBoxModel", type: .dynamic, targets: ["BlackBoxModel"]),
   .library(name: "SolarPosition", type: .dynamic, targets: ["SolarPosition"]),
   .library(name: "PinchPoint", type: .dynamic, targets: ["PinchPoint"]),
-  .library(name: "TunOl", type: .dynamic, targets: ["SunOl"])
+  .library(name: "SunOl", type: .dynamic, targets: ["SunOl"])
 ]
 #else
 var platformProducts: [Product] = []
@@ -28,7 +28,6 @@ platformProducts.append(contentsOf: [
   .executable(name: "SolarFieldCalc", targets: ["SolarFieldCalc"]),
   .executable(name: "TransTES", targets: ["TransTES"]),
   .executable(name: "PinchPointTool", targets: ["PinchPointTool"]),
-  .executable(name: "SunOl", targets: ["SunOl"]),
   .executable(name: "Playground", targets: ["Playground"]),
 ])
 #endif
@@ -75,7 +74,7 @@ let platformTargets: [Target] = [
   .executableTarget(
     name: "Playground",
     dependencies: [
-      "BlackBoxModel", "Utilities", 
+      "BlackBoxModel", "Utilities", "SunOl",
       .product(name: "xlsxwriter", package: "xlsxwriter.swift")
     ],
     swiftSettings: swift
@@ -103,7 +102,7 @@ let platformTargets: [Target] = [
     dependencies: ["Utilities"],
     swiftSettings: swift
   ),
-  .executableTarget(
+  .target(
     name: "SunOl",
     dependencies: [
       "Utilities", 
