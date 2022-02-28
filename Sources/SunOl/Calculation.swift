@@ -159,7 +159,7 @@ extension TunOl {
     /// Remaining EY cap after min harm cons
     let hourAD = 192720
     for i in 1..<8760 {
-      // MAX(0,1-(S6-Overall_fix_cons)/Overall_harmonious_var_max_cons*MethSynt_harmonious_max_perc)*MethSynt_RawMeth_nom_prod_ud
+      // MAX(0;Overall_harmonious_max_perc-((MAX(0;S6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(MethSynt_harmonious_max_perc-MethSynt_harmonious_min_perc)+MethSynt_harmonious_min_perc))*MethSynt_RawMeth_nom_prod_ud
       hour0[hourAB + i] =
         max(
           Double.zero,
@@ -168,7 +168,7 @@ extension TunOl {
               / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
               * (MethSynt_harmonious_max_perc - MethSynt_harmonious_min_perc) + MethSynt_harmonious_min_perc))
         * MethSynt_RawMeth_nom_prod_ud
-      // MAX(0,1-(S6-Overall_fix_cons)/Overall_harmonious_var_max_cons*CCU_harmonious_max_perc)*CCU_CO2_nom_prod_ud
+      // MAX(0;Overall_harmonious_max_perc-((MAX(0;S6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(MethSynt_harmonious_max_perc-MethSynt_harmonious_min_perc)+MethSynt_harmonious_min_perc))*MethSynt_RawMeth_nom_prod_ud
       hour0[hourAC + i] =
         max(
           Double.zero,
@@ -176,7 +176,7 @@ extension TunOl {
             - ((max(Double.zero, hour0[hourS + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons)
               / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
               * (CCU_harmonious_max_perc - CCU_harmonious_min_perc) + CCU_harmonious_min_perc)) * CCU_C_O_2_nom_prod_ud
-      // MAX(0,1-(S6-Overall_fix_cons)/Overall_harmonious_var_max_cons*EY_harmonious_max_perc)*EY_Hydrogen_nom_prod
+      // MAX(0;Overall_harmonious_max_perc-((MAX(0;S6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(EY_harmonious_max_perc-EY_harmonious_min_perc)+EY_harmonious_min_perc))*EY_Hydrogen_nom_prod
       hour0[hourAD + i] =
         max(
           Double.zero,
