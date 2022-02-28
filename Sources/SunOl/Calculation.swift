@@ -57,6 +57,7 @@ extension TunOl {
 
     /// Min harmonious net elec cons
     let hourR = 87600
+    // IF(MIN(MAX(0;P6+Grid_import_max_ud*Grid_import_yes_no_BESS_strategy-MIN(El_boiler_cap_ud;MAX(0;Overall_harmonious_var_heat_min_cons+Overall_heat_fix_cons-J6)/El_boiler_eff));MAX(0;J6+MIN(El_boiler_cap_ud;MAX(0;P6+Grid_import_max_ud*Grid_import_yes_no_BESS_strategy-Overall_harmonious_var_min_cons-Overall_fix_cons))*El_boiler_eff-Overall_heat_fix_cons)/Overall_harmonious_var_heat_max_cons*Overall_harmonious_var_max_cons+Overall_fix_cons)<Overall_harmonious_var_min_cons+Overall_fix_cons;0;Overall_harmonious_var_min_cons+Overall_fix_cons)
     // IF(MIN(Overall_harmonious_var_max_cons+Overall_fix_cons,P6+Grid_import_max_ud*Grid_import_yes_no_BESS_strategy,
     //(MIN(J6+El_boiler_cap_ud*El_boiler_eff,MAX(0,P6+Grid_import_max_ud*Grid_import_yes_no_BESS_strategy-Overall_fix_cons)/(Overall_harmonious_var_max_cons+MIN(El_boiler_cap_ud,MAX(0,Overall_harmonious_var_heat_max_cons+Overall_heat_fix_cons-$J6)/El_boiler_eff))*Overall_harmonious_var_heat_max_cons+Overall_heat_fix_cons)-Overall_heat_fix_cons)/Overall_harmonious_var_heat_max_cons*Overall_harmonious_var_max_cons+Overall_fix_cons)<Overall_harmonious_var_min_cons+Overall_fix_cons,0,Overall_harmonious_var_min_cons+Overall_fix_cons)
     // IF(MIN(Overall_harmonious_var_max_cons+Overall_fix_cons,P6+Grid_import_max_ud*Grid_import_yes_no_BESS_strategy,
@@ -159,30 +160,29 @@ extension TunOl {
     /// Remaining EY cap after min harm cons
     let hourAD = 192720
     for i in 1..<8760 {
-      // MAX(0;Overall_harmonious_max_perc-((MAX(0;S6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(MethSynt_harmonious_max_perc-MethSynt_harmonious_min_perc)+MethSynt_harmonious_min_perc))*MethSynt_RawMeth_nom_prod_ud
+      // MAX(0;1-((MAX(0;S6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(MethSynt_harmonious_max_perc-MethSynt_harmonious_min_perc)+MethSynt_harmonious_min_perc))*MethSynt_RawMeth_nom_prod_ud
+      let fraction = ((max(Double.zero, hour0[hourS + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons)
+              / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
       hour0[hourAB + i] =
         max(
           Double.zero,
-          Overall_harmonious_max_perc
-            - ((max(Double.zero, hour0[hourS + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons)
-              / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
+          1
+            - fraction
               * (MethSynt_harmonious_max_perc - MethSynt_harmonious_min_perc) + MethSynt_harmonious_min_perc))
         * MethSynt_RawMeth_nom_prod_ud
-      // MAX(0;Overall_harmonious_max_perc-((MAX(0;S6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(MethSynt_harmonious_max_perc-MethSynt_harmonious_min_perc)+MethSynt_harmonious_min_perc))*MethSynt_RawMeth_nom_prod_ud
-      hour0[hourAC + i] =
-        max(
+      // MAX(0;1-((MAX(0;S6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(MethSynt_harmonious_max_perc-MethSynt_harmonious_min_perc)+MethSynt_harmonious_min_perc))*MethSynt_RawMeth_nom_prod_ud
+      hour0[hourAC + i] = 
+      max(
           Double.zero,
-          Overall_harmonious_max_perc
-            - ((max(Double.zero, hour0[hourS + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons)
-              / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
+          1
+            - fraction
               * (CCU_harmonious_max_perc - CCU_harmonious_min_perc) + CCU_harmonious_min_perc)) * CCU_C_O_2_nom_prod_ud
-      // MAX(0;Overall_harmonious_max_perc-((MAX(0;S6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(EY_harmonious_max_perc-EY_harmonious_min_perc)+EY_harmonious_min_perc))*EY_Hydrogen_nom_prod
+      // MAX(0;1-((MAX(0;S6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(EY_harmonious_max_perc-EY_harmonious_min_perc)+EY_harmonious_min_perc))*EY_Hydrogen_nom_prod
       hour0[hourAD + i] =
         max(
           Double.zero,
-          Overall_harmonious_max_perc
-            - ((max(Double.zero, hour0[hourS + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons)
-              / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
+          1
+            - fraction
               * (EY_harmonious_max_perc - EY_harmonious_min_perc) + EY_harmonious_min_perc)) * EY_Hydrogen_nom_prod
     }
 
@@ -201,6 +201,7 @@ extension TunOl {
     /// Max harm net elec cons
     let hourAG = 219000
     // IF(R6=0,0,MIN(Overall_harmonious_var_max_cons+Overall_fix_cons,$P6+Grid_import_max_ud*Grid_import_yes_no_BESS_strategy,(MIN($J6+El_boiler_cap_ud*El_boiler_eff,MAX(0,$P6+Grid_import_max_ud*Grid_import_yes_no_BESS_strategy-Overall_fix_cons)/(Overall_harmonious_var_max_cons+MIN(El_boiler_cap_ud,MAX(0,Overall_harmonious_var_heat_max_cons+Overall_heat_fix_cons-$J6)/El_boiler_eff))*Overall_harmonious_var_heat_max_cons+Overall_heat_fix_cons)-Overall_heat_fix_cons)/Overall_harmonious_var_heat_max_cons*Overall_harmonious_var_max_cons+Overall_fix_cons))
+    // IF(MIN(Overall_harmonious_var_max_cons+Overall_fix_cons,P6+Grid_import_max_ud*Grid_import_yes_no_BESS_strategy,MIN(J6+El_boiler_cap_ud*El_boiler_eff,(P6+Grid_import_max_ud*Grid_import_yes_no_BESS_strategy)/(Overall_harmonious_var_max_cons+Overall_fix_cons+MAX(0,(Overall_harmonious_var_heat_max_cons+Overall_heat_fix_cons-J6))/El_boiler_eff)*(Overall_harmonious_var_heat_max_cons+Overall_heat_fix_cons))/(Overall_harmonious_var_heat_max_cons+Overall_heat_fix_cons)*(Overall_harmonious_var_max_cons+Overall_fix_cons))<Overall_harmonious_var_min_cons+Overall_fix_cons,0,MIN(Overall_harmonious_var_max_cons+Overall_fix_cons,P6+Grid_import_max_ud*Grid_import_yes_no_BESS_strategy,MIN(J6+El_boiler_cap_ud*El_boiler_eff,(P6+Grid_import_max_ud*Grid_import_yes_no_BESS_strategy)/(Overall_harmonious_var_max_cons+Overall_fix_cons+MAX(0,(Overall_harmonious_var_heat_max_cons+Overall_heat_fix_cons-J6))/El_boiler_eff)*(Overall_harmonious_var_heat_max_cons+Overall_heat_fix_cons))/(Overall_harmonious_var_heat_max_cons+Overall_heat_fix_cons)*(Overall_harmonious_var_max_cons+Overall_fix_cons)))
     for i in 1..<8760 {
       let grid: Double = (hour0[hourP + i] + Grid_import_max_ud * Grid_import_yes_no_BESS_strategy)
         / (Overall_harmonious_var_max_cons + Overall_fix_cons + max(
@@ -289,44 +290,39 @@ extension TunOl {
 
     /// Remaining MethSynt cap after max harm cons
     let hourAP = 297840
-    // =MAX(0,Overall_harmonious_max_perc-((MAX(0,AH6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(MethSynt_harmonious_max_perc-MethSynt_harmonious_min_perc)+MethSynt_harmonious_min_perc))*MethSynt_RawMeth_nom_prod_ud
-    // =MAX(0,1-(AH6-Overall_fix_cons)/Overall_harmonious_var_max_cons*MethSynt_harmonious_max_perc)*MethSynt_RawMeth_nom_prod_ud
-    // MAX(0,1-AH6/(Overall_harmonious_var_max_cons+Overall_fix_cons)*MethSynt_harmonious_max_perc)*MethSynt_RawMeth_nom_prod_ud
+    // =MAX(0,1-((MAX(0,AH6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(MethSynt_harmonious_max_perc-MethSynt_harmonious_min_perc)+MethSynt_harmonious_min_perc))*MethSynt_RawMeth_nom_prod_ud
     for i in 1..<8760 {
+      let fraction = ((max(Double.zero, hour0[hourAH + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons)
+              / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
       hour0[hourAP + i] =
         max(
           Double.zero,
-          Overall_harmonious_max_perc
-            - ((max(Double.zero, hour0[hourAH + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons)
-              / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
+          1
+            - fraction
               * (MethSynt_harmonious_max_perc - MethSynt_harmonious_min_perc) + MethSynt_harmonious_min_perc)) * MethSynt_RawMeth_nom_prod_ud
     }
 
     /// Remaining CCU cap after max harm cons
     let hourAQ = 306600
-    // =MAX(0,1-(AH6-Overall_fix_cons)/Overall_harmonious_var_max_cons*CCU_harmonious_max_perc)*CCU_CO2_nom_prod_ud
-    // MAX(0,1-AH6/(Overall_harmonious_var_max_cons+Overall_fix_cons)*CCU_harmonious_max_perc)*CCU_CO2_nom_prod_ud
+    // MAX(0;1-((MAX(0;AH6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(CCU_harmonious_max_perc-CCU_harmonious_min_perc)+CCU_harmonious_min_perc))*CCU_CO2_nom_prod_ud
     for i in 1..<8760 {
       hour0[hourAQ + i] =
         max(
           Double.zero,
-          Overall_harmonious_max_perc
-            - ((max(Double.zero, hour0[hourAH + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons)
-              / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
+          1
+            - fraction
               * (CCU_harmonious_max_perc - CCU_harmonious_min_perc) + CCU_harmonious_min_perc)) * CCU_C_O_2_nom_prod_ud
     }
 
     /// Remaining EY cap after max harm cons
     let hourAR = 315360
-    // =MAX(0,1-(AH6-Overall_fix_cons)/Overall_harmonious_var_max_cons*EY_harmonious_max_perc)*EY_Hydrogen_nom_prod
-    // MAX(0,1-AH6/(Overall_harmonious_var_max_cons+Overall_fix_cons)*EY_harmonious_max_perc)*EY_Hydrogen_nom_prod
+    // MAX(0;1-((MAX(0;AH6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(EY_harmonious_max_perc-EY_harmonious_min_perc)+EY_harmonious_min_perc))*EY_Hydrogen_nom_prod
     for i in 1..<8760 {
       hour0[hourAR + i] =
         max(
           Double.zero,
-          Overall_harmonious_max_perc
-            - ((max(Double.zero, hour0[hourAH + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons)
-              / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
+          1
+            - fraction
               * (EY_harmonious_max_perc - EY_harmonious_min_perc) + EY_harmonious_min_perc)) * EY_Hydrogen_nom_prod
     }
 
@@ -1005,12 +1001,13 @@ extension TunOl {
     let hourDB = 105120
     // MAX(0,1-((MAX(0,CQ6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(MethSynt_harmonious_max_perc-MethSynt_harmonious_min_perc)+MethSynt_harmonious_min_perc))*MethSynt_RawMeth_nom_prod_ud
     for i in 1..<8760 {
+      let fraction = ((max(Double.zero, hour3[hourCQ + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons)
+              / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
       hour3[hourDB + i] =
         max(
           Double.zero,
-          Overall_harmonious_max_perc
-            - ((max(Double.zero, hour3[hourCQ + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons)
-              / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
+          1
+            - fraction
               * (MethSynt_harmonious_max_perc - MethSynt_harmonious_min_perc) + MethSynt_harmonious_min_perc)) * MethSynt_RawMeth_nom_prod_ud
     }
 
@@ -1021,9 +1018,8 @@ extension TunOl {
       hour3[hourDC + i] =
         max(
           Double.zero,
-          Overall_harmonious_max_perc
-            - ((max(Double.zero, hour3[hourCQ + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons)
-              / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
+          1
+            - fraction
               * (CCU_harmonious_max_perc - CCU_harmonious_min_perc) + CCU_harmonious_min_perc)) * CCU_C_O_2_nom_prod_ud
     }
 
@@ -1034,9 +1030,8 @@ extension TunOl {
       hour3[hourDD + i] =
         max(
           Double.zero,
-          Overall_harmonious_max_perc
-            - ((max(Double.zero, hour3[hourCQ + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons)
-              / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
+          1
+            - fraction
               * (EY_harmonious_max_perc - EY_harmonious_min_perc) + EY_harmonious_min_perc)) * EY_Hydrogen_nom_prod
     }
 
@@ -1161,12 +1156,13 @@ extension TunOl {
     let hourDP = 227760
     // MAX(0,1-((MAX(0,DH6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(MethSynt_harmonious_max_perc-MethSynt_harmonious_min_perc)+MethSynt_harmonious_min_perc))*MethSynt_RawMeth_nom_prod_ud
     for i in 1..<8760 {
+      let fraction = ((max(Double.zero, hour0[hourDH + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons)
+              / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
       hour3[hourDP + i] =
         max(
           Double.zero,
-          Overall_harmonious_max_perc
-            - ((max(Double.zero, hour0[hourDH + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons)
-              / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
+          1
+            - fraction
               * (MethSynt_harmonious_max_perc - MethSynt_harmonious_min_perc) + MethSynt_harmonious_min_perc)) * MethSynt_RawMeth_nom_prod_ud
     }
 
@@ -1178,8 +1174,7 @@ extension TunOl {
         max(
           Double.zero,
           Overall_harmonious_max_perc
-            - ((max(Double.zero, hour0[hourDH + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons)
-              / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
+            - fraction
               * (CCU_harmonious_max_perc - CCU_harmonious_min_perc) + CCU_harmonious_min_perc)) * CCU_C_O_2_nom_prod_ud
     }
 
@@ -1191,8 +1186,7 @@ extension TunOl {
         max(
           Double.zero,
           Overall_harmonious_max_perc
-            - ((max(Double.zero, hour0[hourDH + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons)
-              / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
+            - fraction
               * (EY_harmonious_max_perc - EY_harmonious_min_perc) + EY_harmonious_min_perc)) * EY_Hydrogen_nom_prod
     }
 
