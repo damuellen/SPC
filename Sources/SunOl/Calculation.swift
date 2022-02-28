@@ -161,13 +161,13 @@ extension TunOl {
     let hourAD = 192720
     for i in 1..<8760 {
       // MAX(0;1-((MAX(0;S6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(MethSynt_harmonious_max_perc-MethSynt_harmonious_min_perc)+MethSynt_harmonious_min_perc))*MethSynt_RawMeth_nom_prod_ud
-      let fraction = ((max(Double.zero, hour0[hourS + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons)
+      let fraction = (max(Double.zero, hour0[hourS + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons)
               / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
       hour0[hourAB + i] =
         max(
           Double.zero,
           1
-            - fraction
+            - (fraction
               * (MethSynt_harmonious_max_perc - MethSynt_harmonious_min_perc) + MethSynt_harmonious_min_perc))
         * MethSynt_RawMeth_nom_prod_ud
       // MAX(0;1-((MAX(0;S6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(MethSynt_harmonious_max_perc-MethSynt_harmonious_min_perc)+MethSynt_harmonious_min_perc))*MethSynt_RawMeth_nom_prod_ud
@@ -175,14 +175,14 @@ extension TunOl {
       max(
           Double.zero,
           1
-            - fraction
+            - (fraction
               * (CCU_harmonious_max_perc - CCU_harmonious_min_perc) + CCU_harmonious_min_perc)) * CCU_C_O_2_nom_prod_ud
       // MAX(0;1-((MAX(0;S6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(EY_harmonious_max_perc-EY_harmonious_min_perc)+EY_harmonious_min_perc))*EY_Hydrogen_nom_prod
       hour0[hourAD + i] =
         max(
           Double.zero,
           1
-            - fraction
+            - (fraction
               * (EY_harmonious_max_perc - EY_harmonious_min_perc) + EY_harmonious_min_perc)) * EY_Hydrogen_nom_prod
     }
 
@@ -292,13 +292,13 @@ extension TunOl {
     let hourAP = 297840
     // =MAX(0,1-((MAX(0,AH6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(MethSynt_harmonious_max_perc-MethSynt_harmonious_min_perc)+MethSynt_harmonious_min_perc))*MethSynt_RawMeth_nom_prod_ud
     for i in 1..<8760 {
-      let fraction = ((max(Double.zero, hour0[hourAH + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons)
+      let fraction = (max(Double.zero, hour0[hourAH + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons)
               / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
       hour0[hourAP + i] =
         max(
           Double.zero,
           1
-            - fraction
+            - (fraction
               * (MethSynt_harmonious_max_perc - MethSynt_harmonious_min_perc) + MethSynt_harmonious_min_perc)) * MethSynt_RawMeth_nom_prod_ud
     }
 
@@ -310,7 +310,7 @@ extension TunOl {
         max(
           Double.zero,
           1
-            - fraction
+            - (fraction
               * (CCU_harmonious_max_perc - CCU_harmonious_min_perc) + CCU_harmonious_min_perc)) * CCU_C_O_2_nom_prod_ud
     }
 
@@ -322,7 +322,7 @@ extension TunOl {
         max(
           Double.zero,
           1
-            - fraction
+            - (fraction
               * (EY_harmonious_max_perc - EY_harmonious_min_perc) + EY_harmonious_min_perc)) * EY_Hydrogen_nom_prod
     }
 
@@ -1001,13 +1001,13 @@ extension TunOl {
     let hourDB = 105120
     // MAX(0,1-((MAX(0,CQ6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(MethSynt_harmonious_max_perc-MethSynt_harmonious_min_perc)+MethSynt_harmonious_min_perc))*MethSynt_RawMeth_nom_prod_ud
     for i in 1..<8760 {
-      let fraction = ((max(Double.zero, hour3[hourCQ + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons)
+      let fraction = (max(Double.zero, hour3[hourCQ + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons)
               / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
       hour3[hourDB + i] =
         max(
           Double.zero,
           1
-            - fraction
+            - (fraction
               * (MethSynt_harmonious_max_perc - MethSynt_harmonious_min_perc) + MethSynt_harmonious_min_perc)) * MethSynt_RawMeth_nom_prod_ud
     }
 
@@ -1019,7 +1019,7 @@ extension TunOl {
         max(
           Double.zero,
           1
-            - fraction
+            - (fraction
               * (CCU_harmonious_max_perc - CCU_harmonious_min_perc) + CCU_harmonious_min_perc)) * CCU_C_O_2_nom_prod_ud
     }
 
@@ -1031,7 +1031,7 @@ extension TunOl {
         max(
           Double.zero,
           1
-            - fraction
+            - (fraction
               * (EY_harmonious_max_perc - EY_harmonious_min_perc) + EY_harmonious_min_perc)) * EY_Hydrogen_nom_prod
     }
 
@@ -1156,13 +1156,13 @@ extension TunOl {
     let hourDP = 227760
     // MAX(0,1-((MAX(0,DH6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(MethSynt_harmonious_max_perc-MethSynt_harmonious_min_perc)+MethSynt_harmonious_min_perc))*MethSynt_RawMeth_nom_prod_ud
     for i in 1..<8760 {
-      let fraction = ((max(Double.zero, hour0[hourDH + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons)
+      let fraction = (max(Double.zero, hour0[hourDH + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons)
               / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
       hour3[hourDP + i] =
         max(
           Double.zero,
           1
-            - fraction
+            - (fraction
               * (MethSynt_harmonious_max_perc - MethSynt_harmonious_min_perc) + MethSynt_harmonious_min_perc)) * MethSynt_RawMeth_nom_prod_ud
     }
 
@@ -1173,8 +1173,8 @@ extension TunOl {
       hour3[hourDQ + i] =
         max(
           Double.zero,
-          Overall_harmonious_max_perc
-            - fraction
+          1
+            - (fraction
               * (CCU_harmonious_max_perc - CCU_harmonious_min_perc) + CCU_harmonious_min_perc)) * CCU_C_O_2_nom_prod_ud
     }
 
@@ -1185,8 +1185,8 @@ extension TunOl {
       hour3[hourDR + i] =
         max(
           Double.zero,
-          Overall_harmonious_max_perc
-            - fraction
+          1
+            - (fraction
               * (EY_harmonious_max_perc - EY_harmonious_min_perc) + EY_harmonious_min_perc)) * EY_Hydrogen_nom_prod
     }
 
