@@ -63,15 +63,20 @@ extension TunOl {
       hour0[hourR + i] = iff(
         min(
           max(Double.zero,          
-          hour0[hourP + i] + Grid_import_max_ud * Grid_import_yes_no_BESS_strategy - min( El_boiler_cap_ud , 
-          max( Double.zero, Overall_harmonious_var_heat_min_cons + Overall_heat_fix_cons -
-          hour0[hourJ + i]) / El_boiler_eff)),
-          max( Double.zero, hour0[hourJ + i] + min(El_boiler_cap_ud , max(Double.zero,          
-          hour0[hourP + i] + Grid_import_max_ud * Grid_import_yes_no_BESS_strategy -
-          Overall_harmonious_var_min_cons - Overall_fix_cons)) * El_boiler_eff -
-          Overall_heat_fix_cons) / Overall_harmonious_var_heat_max_cons * Overall_harmonious_var_max_cons+
-          Overall_fix_cons) < Overall_harmonious_var_min_cons + Overall_fix_cons
-            , Double.zero, Overall_harmonious_var_min_cons + Overall_fix_cons)
+            hour0[hourP + i] + Grid_import_max_ud * Grid_import_yes_no_BESS_strategy - 
+            min(El_boiler_cap_ud , 
+              max(Double.zero, 
+                Overall_harmonious_var_heat_min_cons + Overall_heat_fix_cons -
+                hour0[hourJ + i]) / El_boiler_eff)),
+          max(Double.zero,
+            hour0[hourJ + i] + min(El_boiler_cap_ud,
+            max(Double.zero,  
+              hour0[hourP + i] + Grid_import_max_ud * Grid_import_yes_no_BESS_strategy -
+              Overall_harmonious_var_min_cons - Overall_fix_cons)) * El_boiler_eff -
+            Overall_heat_fix_cons) / Overall_harmonious_var_heat_max_cons * Overall_harmonious_var_max_cons +
+            Overall_fix_cons)
+        < Overall_harmonious_var_min_cons + Overall_fix_cons,
+        Double.zero, Overall_harmonious_var_min_cons + Overall_fix_cons)
     }
 
     /// Optimized min harmonious net elec cons
