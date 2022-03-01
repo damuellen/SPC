@@ -471,7 +471,7 @@ extension TunOl {
     }
 
     /// Harmonious op day
-    let hourBO = 166440  // FIXME
+    let hourBO = 166440
     // IF(OR(AND(BM5<=0,BM6>0,SUM(BM$1:BM5)=0),AND($F5<=0,$F6>0,SUM(BM$1:BM16)=0)),IF(BO5<364,BO5+1,0),BO5)
     for i in 2..<8760 {
       hour1[hourBO + i] = iff(

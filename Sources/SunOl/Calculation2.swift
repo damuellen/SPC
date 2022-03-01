@@ -357,14 +357,13 @@ extension TunOl {
     /// Harmonious op day
     let hourEZ = 254040
     // =IF(OR(AND(EX5<=0,EX6>0,SUM(EX$1:EX5)=0),AND($F5<=0,$F6>0,SUM(EX$1:EX16)=0)),IF(EZ5<364,EZ5+1,0),EZ5)
-    // IF(AND(EX5<=0,EX6>0),EZ5+1,IF(AND(ER6>0,BO6<>BO5,SUM(EX6:EX8)=0),EZ5+1,EZ5))
-    for i in 1..<8760 {
+    let hourF = 0
+    for i in 2..<8760 {
       hour4[hourEZ + i] = iff(
-        and(hour4[hourEX + i - 1] <= Double.zero, hour4[hourEX + i] > Double.zero), hour4[hourEZ + i - 1] + 1,
-        iff(
-          and(
-            hour4[hourER + i] > Double.zero, hour1[hourBO + i] == hour1[hourBO + i - 1],
-            sum(hour4[(hourEX + i)...].prefix(3)).isZero), hour4[hourEZ + i - 1] + 1, hour4[hourEZ + i - 1]))
+        or(
+          and(hour4[hourEX + i - 1] <= 0, hour4[hourEX + i] > 0, hour4[max(hourEX + i - 10, hourEY)..<min(hourEX + i - 1, hourEY)].reduce(0, +).isZero),
+          and(hour0[hourF + i - 1] <= 0, hour0[hourF + i] > 0, hour4[max(hourEX + i - 10, hourEY)..<min(hourEX + i + 10, hourEY)].reduce(0, +).isZero)),
+        iff(hour4[hourEZ + i - 1] < 364, hour4[hourEZ + i - 1] + 1, 0), hour4[hourEZ + i - 1])
     }
 
     /// El cons due to op outside of harm op period

@@ -105,7 +105,6 @@ extension TunOl {
     let hourCB = 61320
     // COUNTIFS($BO$5:$BO$8763,"="&$BO6,$BF$5:$BF$8763,">0")=0) FIXME BM7
     // =IF(OR($BM6>0,PB_nom_gross_cap_ud<=0,COUNTIFS($BO$5:$BO$8763,"="&$BO6,$BF$5:$BF$8763,">0")=0),0,PB_Ratio_Heat_input_vs_output*MAX(0,MIN(A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons+IF($BM7=0,0,A_overall_heat_stup_cons),(BX6-BW6+$BP6-A_overall_fix_stby_cons-IF($BM7=0,0,A_overall_stup_cons))/A_overall_var_max_cons*A_overall_var_heat_max_cons+A_overall_heat_fix_stby_cons+IF($BM7=0,0,A_overall_heat_stup_cons))-$BQ6-MIN(El_boiler_cap_ud,MAX(0,BX6-BV6-BW6)*El_boiler_eff)))
-    // IF(CA6=0,0,MAX(0,PB_Ratio_Heat_input_vs_output*(MIN(A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons+IF(BM7=0,0,A_overall_heat_stup_cons),(BX6-BW6+BP6)/(A_overall_var_min_cons+A_overall_fix_stby_cons+IF(BM7=0,0,A_overall_stup_cons))*(A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons+IF(BM7=0,0,A_overall_heat_stup_cons)))-BQ6-MAX(0,BX6-BV6-BW6)*El_boiler_eff)))
     let BO_BFcount = [Double]()
     for i in 1..<8760 {
       hour2[hourCB + i] = iff(
@@ -124,9 +123,7 @@ extension TunOl {
     let CBsum = hour2.sum(hours: daysBO, condition: hourCB)
     /// TES energy needed to fulfil op case
     let hourCC = 70080
-    // IF(MIN(SUMIF(BO5:BO8763,"="BO6,AY5:AY8763)*Heater_eff*(1+1/Ratio_CSP_vs_Heater),TES_thermal_cap)<
-    // SUMIF(BO5:BO8763,"="BO6,BZ5:BZ8763)+SUMIF(BO5:BO8763,"="BO6,CA5:CA8763)+SUMIF(BO5:BO8763,"="BO6,CB5:CB8763),0,
-    // SUMIF(BO5:BO8763,"="BO6,BZ5:BZ8763)+SUMIF(BO5:BO8763,"="BO6,CA5:CA8763)+SUMIF(BO5:BO8763,"="BO6,CB5:CB8763))
+    // IF(MIN(SUMIF(BO5:BO8763,"="BO6,AY5:AY8763)*Heater_eff*(1+1/Ratio_CSP_vs_Heater),TES_thermal_cap)<SUMIF(BO5:BO8763,"="BO6,BZ5:BZ8763)+SUMIF(BO5:BO8763,"="BO6,CA5:CA8763)+SUMIF(BO5:BO8763,"="BO6,CB5:CB8763),0,SUMIF(BO5:BO8763,"="BO6,BZ5:BZ8763)+SUMIF(BO5:BO8763,"="BO6,CA5:CA8763)+SUMIF(BO5:BO8763,"="BO6,CB5:CB8763))
     for i in 1..<8760 {
       hour2[hourCC + i] = iff(
         min(AYsum[i] * Heater_eff * (1 + 1 / Ratio_CSP_vs_Heater), TES_thermal_cap) < BZsum[i] + CAsum[i] + CBsum[i], Double.zero,
@@ -282,17 +279,17 @@ extension TunOl {
         Double.zero,
         (hour3[hourCQ + i] - Overall_fix_cons) / Overall_harmonious_var_max_cons * Overall_harmonious_var_heat_max_cons + Overall_heat_fix_cons)
     }
-
+    let hourF = 0
     /// Harmonious op day
     let hourCS = 26280  // FIXME
     // =IF(OR(AND(CQ5<=0,CQ6>0,SUM(CQ$1:CQ5)=0),AND($F5<=0,$F6>0,SUM(CQ$1:CQ16)=0)),IF(CS5<364,CS5+1,0),CS5)
     // IF(AND(CQ5<=0,CQ6>0),CS5+1,IF(AND(CK6>0,BO6<>BO5,SUM(CQ6:CQ8)=0),CS5+1,CS5))
-    for i in 1..<8760 {
+    for i in 2..<8760 {
       hour3[hourCS + i] = iff(
-        and(hour3[hourCQ + i - 1] <= Double.zero, hour3[hourCQ + i] > Double.zero), hour3[hourCS + i - 1] + 1,
-        iff(
-          and(hour2[hourCK + i] > Double.zero, hour1[hourBO + i] == hour1[hourBO + i - 1], sum(hour2[(hourCQ + i)...].prefix(3)) == Double.zero),
-          hour3[hourCS + i - 1] + 1, hour3[hourCS + i - 1]))
+        or(
+          and(hour3[hourCQ + i - 1] <= 0, hour3[hourCQ + i] > 0, hour3[max(hourCQ + i - 10, hourCQ)..<min(hourCQ + i - 1, hourCR)].reduce(0, +).isZero),
+          and(hour0[hourF + i - 1] <= 0, hour0[hourF + i] > 0, hour3[max(hourCQ + i - 10, hourCQ)..<min(hourCQ + i + 10, hourCR)].reduce(0, +).isZero)),
+        iff(hour3[hourCS + i - 1] < 364, hour3[hourCS + i - 1] + 1, 0), hour3[hourCS + i - 1])
     }
 
     /// El cons due to op outside of harm op period
