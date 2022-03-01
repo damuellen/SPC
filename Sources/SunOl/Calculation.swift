@@ -24,6 +24,7 @@ extension TunOl {
     /// Not covered aux elec for PB stby, CSP SF and PV Plant MWel
     let hourQ = 78840
     for i in 1..<8760 {
+      hour0[i] = Reference_PV_plant_power_at_inverter_inlet_DC[i]
       // MAX(0,G6/MAX(G5:G8763))
       hour0[hourH + i] = max(Double.zero, Reference_PV_plant_power_at_inverter_inlet_DC[i] / maximum)
       // IFERROR(IF(G6<MAX(G5:G8763),MAX(G6,0)/F6,0),0)
@@ -301,7 +302,7 @@ extension TunOl {
   }
 
   mutating func hour1(hour0: [Double]) -> [Double] {
-    let (hourJ, hourL, hourM) = (26280, 43800, 52560)
+    let (hourF, hourJ, hourL, hourM) = (0, 26280, 43800, 52560)
     var hour1 = [Double](repeating: Double.zero, count: 192_720)
     let daysD: [[Int]] = (0..<365).map { Array(repeating: $0, count: 24) }
 
@@ -471,16 +472,13 @@ extension TunOl {
 
     /// Harmonious op day
     let hourBO = 166440  // FIXME
-    // =IF(OR(AND(BM5<=0,BM6>0,SUM(BM$1:BM5)=0),AND($F5<=0,$F6>0,SUM(BM$1:BM16)=0)),IF(BO5<364,BO5+1,0),BO5)
-    // IF(AND(BM5<=0,BM6>0),BO5+1,IF(AND(BI5<=0,BI6>0,COUNTIF(BM6:BM15,"=0")=10,COUNTIF(BI6:BI15,">0")>5),BO5+1,BO5))
-    for i in 1..<8760 {
+    // IF(OR(AND(BM5<=0,BM6>0,SUM(BM$1:BM5)=0),AND($F5<=0,$F6>0,SUM(BM$1:BM16)=0)),IF(BO5<364,BO5+1,0),BO5)
+    for i in 2..<8760 {
       hour1[hourBO + i] = iff(
-        and(hour1[hourBM + i - 1] <= Double.zero, hour1[hourBM + i] > Double.zero), hour1[hourBO + i - 1] + 1,
-        iff(
-          and(
-            hour1[hourBI + i - 1] <= Double.zero, hour1[hourBI + i] > Double.zero,
-            countiff(hour1[(hourBM + i)...].prefix(8760), { $0.isZero }) == 10, countiff(hour1[(hourBI + i)...].prefix(8760), { !$0.isZero }) > 5),
-          hour1[hourBO + i - 1] + 1, hour1[hourBO + i - 1]))
+        or(
+          and(hour1[hourBM + i - 1] <= 0, hour1[hourBM + i] > 0, hour1[max(hourBM + i - 10, hourBM)..<min(hourBM + i - 1, hourBN)].reduce(0, +).isZero),
+          and(hour0[hourF + i - 1] <= 0, hour0[hourF + i] > 0, hour1[max(hourBM + i - 10, hourBM)..<min(hourBM + i + 10, hourBN)].reduce(0, +).isZero)),
+        iff(hour1[hourBO + i - 1] < 364, hour1[hourBO + i - 1] + 1, 0), hour1[hourBO + i - 1])
     }
 
     /// Remaining PV after min harmonious
