@@ -481,7 +481,7 @@ extension TunOl {
     for i in 1..<8760 {
       hour3[hourDI + i] = max(
         Double.zero,
-        (hour0[hourDH + i] - Overall_fix_cons) / Overall_harmonious_var_max_cons * Overall_harmonious_var_heat_max_cons + Overall_heat_fix_cons)
+        (hour3[hourDH + i] - Overall_fix_cons) / Overall_harmonious_var_max_cons * Overall_harmonious_var_heat_max_cons + Overall_heat_fix_cons)
     }
 
     /// Remaining el after max harmonious
@@ -491,7 +491,7 @@ extension TunOl {
       hour3[hourDJ + i] = max(
         Double.zero,
         iff(hour2[hourCC + i] > Double.zero, hour2[hourBX + i], Double.zero) + hour2[hourCK + i] - (hour2[hourCM + i] - hour2[hourCN + i])
-          - hour0[hourDH + i] - hour3[hourCT + i]
+          - hour3[hourDH + i] - hour3[hourCT + i]
           - min(
             El_boiler_cap_ud,
             max(
@@ -518,7 +518,7 @@ extension TunOl {
       hour3[hourDL + i] = max(
         Double.zero,
         -(iff(hour2[hourCC + i] > Double.zero, hour2[hourBX + i], Double.zero) + hour2[hourCK + i] - (hour2[hourCM + i] - hour2[hourCN + i])
-          - hour0[hourDH + i] - hour3[hourCT + i]
+          - hour3[hourDH + i] - hour3[hourCT + i]
           - min(
             El_boiler_cap_ud,
             max(
@@ -560,7 +560,7 @@ extension TunOl {
 
       // MAX(0,1-((MAX(0,DH6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(MethSynt_harmonious_max_perc-MethSynt_harmonious_min_perc)+MethSynt_harmonious_min_perc))*MethSynt_RawMeth_nom_prod_ud
       let fraction =
-        (max(Double.zero, hour0[hourDH + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons)
+        (max(Double.zero, hour3[hourDH + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons)
         / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
       hour3[hourDP + i] =
         max(Double.zero, 1 - (fraction * (MethSynt_harmonious_max_perc - MethSynt_harmonious_min_perc) + MethSynt_harmonious_min_perc))

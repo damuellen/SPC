@@ -101,7 +101,7 @@ extension TunOl {
     }
 
     /// Harmonious op day
-    let hourU = 113880
+    let hourU = 113880 // FIXME
     // =IF(OR(AND(S5<=0,S6>0,SUM(S1:S5)=0),AND($F5<=0,$F6>0,SUM(S4:S18)=0)),IF(U5<364,U5+1,0),U5)
     // IF(AND(S5<=0,S6>0),U5+1,U5)
     for i in 1..<8760 {
@@ -428,7 +428,7 @@ extension TunOl {
     for i in 1..<8760 { hour1[hourBK + i] = max(Double.zero, -(hour1[hourAW + i] - hour1[hourBF + i] - hour1[hourBH + i])) }
 
     /// Min harmonious net elec cons not considering grid import
-    let hourBL = 140160
+    let hourBL = 140160 // FIXME
     // =IF(MIN(Overall_harmonious_var_max_cons+Overall_fix_cons,BI6+Grid_import_max_ud*Grid_import_yes_no_PB_strategy-PB_stby_aux_cons,(MIN(BJ6+El_boiler_cap_ud*El_boiler_eff,MAX(0,BI6+Grid_import_max_ud*Grid_import_yes_no_PB_strategy-PB_stby_aux_cons-Overall_fix_cons)/(Overall_harmonious_var_max_cons+MIN(El_boiler_cap_ud,MAX(0,Overall_harmonious_var_heat_max_cons+Overall_heat_fix_cons-BJ6)/El_boiler_eff))*Overall_harmonious_var_heat_max_cons+Overall_heat_fix_cons)-Overall_heat_fix_cons)/Overall_harmonious_var_heat_max_cons*Overall_harmonious_var_max_cons+Overall_fix_cons)<Overall_harmonious_var_min_cons+Overall_fix_cons,0,Overall_harmonious_var_min_cons+Overall_fix_cons)
     for i in 1..<8760 {
       hour1[hourBL + i] = iff(
