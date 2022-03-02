@@ -1552,7 +1552,10 @@ extension TunOl {
     // IF(GE6=0,0,MIN(EH6+(EI6-EH6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE6-Overall_harmonious_min_perc),MAX(0,-(HZ6-HV6-HW6-HY6))))
     for i in 0..<365 {
       day7[dayIB + i] = iff(
-        day7[dayGE + i].isZero,0, min(day1[dayEH + i] + (day6[dayEI + i] - day1[dayEH + i]) / Overall_harmonious_range * (day7[dayGE + i] - Overall_harmonious_min_perc),max(Double.zero, -(day7[dayHZ + i] - day1[dayHV + i] - day1[dayHW + i] - day1[dayHY + i]))))
+        day7[dayGE + i].isZero, Double.zero,
+        min(
+          day1[dayEH + i] + (day6[dayEI + i] - day1[dayEH + i]) / Overall_harmonious_range * (day7[dayGE + i] - Overall_harmonious_min_perc),
+          max(Double.zero, -(day7[dayHZ + i] - day1[dayHV + i] - day1[dayHW + i] - day1[dayHY + i]))))
     }
 
     /// Balance of electricity during harm op period
@@ -1602,8 +1605,7 @@ extension TunOl {
       day7[dayIJ + i] = iff(
         or(day7[dayGE + i].isZero, day7[dayGX + i].isZero), Double.zero,
         day1[dayE + i] + (day1[dayF + i] - day1[dayE + i])
-          / equiv_harmonious_range
-          * (day7[dayGX + i] - equiv_harmonious_min_perc[j]))
+          / equiv_harmonious_range * (day7[dayGX + i] - equiv_harmonious_min_perc[j]))
     }
 
     /// el cons by el boiler outside of harm op period
@@ -1686,7 +1688,9 @@ extension TunOl {
     let dayIX = 35040
     // MAX(0,-IC6)+MAX(0,-II6)+MAX(0,-IP6)+MAX(0,-IT6)
     for i in 0..<365 {
-      day7[dayIX + i] = max(Double.zero, -day7[dayIC + i]) + max(Double.zero, -day1[dayII + i]) + max(Double.zero, -day7[dayIP + i]) + max(Double.zero, -day7[dayIT + i])
+      let IX = max(Double.zero, -day7[dayIC + i]) + max(Double.zero, -day1[dayII + i]) + max(Double.zero, -day7[dayIP + i]) + max(Double.zero, -day7[dayIT + i])
+      if !IX.isZero { print("Checksum error", i) }
+      day7[dayIX + i] = IX
     }
 
     /// Heat cons for harm op during harm op period
@@ -1704,8 +1708,7 @@ extension TunOl {
     for i in 0..<365 {
       day7[dayJJ + i] = iff(
         day7[dayGZ + i].isZero, Double.zero,
-        (day1[dayQ + i]
-          + (day1[dayR + i] - day1[dayQ + i]) / equiv_harmonious_range * (day7[dayGZ + i] - equiv_harmonious_min_perc[j]))
+        (day1[dayQ + i] + (day1[dayR + i] - day1[dayQ + i]) / equiv_harmonious_range * (day7[dayGZ + i] - equiv_harmonious_min_perc[j]))
       )
     }
 
@@ -1727,8 +1730,7 @@ extension TunOl {
         day7[dayHS + i].isZero, Double.zero,
         (day6[dayEN + i]
           + (day6[dayEO + i] - day6[dayEN + i]) / Overall_harmonious_range
-            * (day7[dayHS + i] - Overall_harmonious_min_perc))
-          * El_boiler_eff)
+            * (day7[dayHS + i] - Overall_harmonious_min_perc)) * El_boiler_eff)
     }
 
     /// El boiler heat prod for night prep during harm op period
@@ -1765,8 +1767,7 @@ extension TunOl {
     for i in 0..<365 {
       day7[dayJA + i] = iff(
         day7[dayGZ + i].isZero, Double.zero,
-        (day1[dayO + i]
-          + (day1[dayP + i] - day1[dayO + i]) / equiv_harmonious_range * (day7[dayGZ + i] - equiv_harmonious_min_perc[j]))
+        (day1[dayO + i] + (day1[dayP + i] - day1[dayO + i]) / equiv_harmonious_range * (day7[dayGZ + i] - equiv_harmonious_min_perc[j]))
       )
     }
 
@@ -1919,8 +1920,7 @@ extension TunOl {
     let dayJU = 43070
     // JR6+JS6+JT6-JO6-JP6-JQ6
     for i in 0..<365 {
-      day7[dayJU + i] =
-        day7[dayJR + i] + day7[dayJS + i] + day7[dayJT + i] - day7[dayJO + i] - day7[dayJP + i] - day7[dayJQ + i]
+      day7[dayJU + i] = day7[dayJR + i] + day7[dayJS + i] + day7[dayJT + i] - day7[dayJO + i] - day7[dayJP + i] - day7[dayJQ + i]
     }
 
     /// Pure Methanol prod with min night prep and resp day op
@@ -1964,9 +1964,9 @@ extension TunOl {
     let dayKC = 45990
     // MAX(0,-JH6)+MAX(0,-JN6)+MAX(0,-JU6)+MAX(0,-JY6)
     for i in 0..<365 {
-      day7[dayKC + i] =
-        max(Double.zero, -day7[dayJH + i]) + max(Double.zero, -day7[dayJN + i]) + max(Double.zero, -day7[dayJU + i])
-        + max(Double.zero, -day7[dayJY + i])
+      let KC = max(Double.zero, -day7[dayJH + i]) + max(Double.zero, -day7[dayJN + i]) + max(Double.zero, -day7[dayJU + i]) + max(Double.zero, -day7[dayJY + i])
+      if !KC.isZero { print("Checksum error", i) }
+      day7[dayKC + i] = KC
     }
     return day7
   }
