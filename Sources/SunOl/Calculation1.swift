@@ -37,32 +37,31 @@ extension TunOl {
         and(hour2[hourBU + i + 1] > Double.zero, hour2[hourBU + i].isZero, hour2[hourBU + i - 1] > Double.zero), hour2[hourBU + i - 1],
         hour2[hourBU + i])
     }
-
+    let hourBF = 87600
+    let BO_BFcount = hour1.count(hours: daysBO, range: hourBF, predicate: {$0>0})
     /// Outside harm op aux elec for TES dischrg, CSP SF and PV Plant MWel
     let hourBW = 17520
-    // COUNTIFS($BO$5:$BO$8763,"="&$BO6,$BF$5:$BF$8763,">0")=0) FIXME
-    // =IF(OR($BM6>0,PB_nom_gross_cap_ud<=0,COUNTIFS($BO$5:$BO$8763,"="&$BO6,$BF$5:$BF$8763,">0")=0),0,$BK6+((MIN(PB_nom_net_cap,MAX(PB_net_min_cap,(1+TES_aux_cons_perc)*(BV6+$BK6-$BP6)))+PB_nom_net_cap*PB_nom_var_aux_cons_perc_net*POLY(MIN(PB_nom_net_cap,MAX(PB_net_min_cap,(1+TES_aux_cons_perc)*(BV6+$BK6-$BP6)))/PB_nom_net_cap,PB_n2g_var_aux_el_Coeff)+PB_fix_aux_el)/(PB_gross_min_eff+(PB_nom_gross_eff-PB_gross_min_eff)/(PB_nom_net_cap-PB_net_min_cap)*(MIN(PB_nom_net_cap,MAX(0,BV6+$BK6-$BP6))-PB_net_min_cap))+MAX(0,A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons-$BQ6)*PB_Ratio_Heat_input_vs_output)*TES_aux_cons_perc+IF(AND(BV6=0,BV7>0),MAX(0,IF(COUNTIF(BV$1:BV6,"0")=PB_warm_start_duration,PB_warm_start_heat_req,PB_hot_start_heat_req)-$BQ6)*TES_aux_cons_perc,0))
-    // IF(OR(BV6=0;PB_nom_gross_cap_ud<=0),0,BK6+((MIN(PB_nom_net_cap,MAX(PB_net_min_cap,(1+TES_aux_cons_perc)*(BV6+BK6-BP6)))+PB_nom_net_cap*PB_nom_var_aux_cons_perc_net*POLY(MIN(PB_nom_net_cap,MAX(PB_net_min_cap,(1+TES_aux_cons_perc)*(BV6+BK6-BP6)))/PB_nom_net_cap,PB_n2g_var_aux_el_Coeff)+PB_fix_aux_el)/(PB_gross_min_eff+(PB_nom_gross_eff-PB_gross_min_eff)/(PB_nom_net_cap-PB_net_min_cap)*(MIN(PB_nom_net_cap,MAX(0,BV6+BK6-BP6))-PB_net_min_cap))+MAX(0,A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons-BQ6)*PB_Ratio_Heat_input_vs_output)*TES_aux_cons_perc+IF(AND(BV6=0,BV7>0),MAX(0,IF(COUNTIF(BV1:BV6,"0")=PB_warm_start_duration,PB_warm_start_heat_req,PB_hot_start_heat_req)-BQ6)*TES_aux_cons_perc,0))
+    // IF(OR($BM6>0,PB_nom_gross_cap_ud<=0,COUNTIFS($BO$5:$BO$8763,"="&$BO6,$BF$5:$BF$8763,">0")=0),0,$BK6+((MIN(PB_nom_net_cap,MAX(PB_net_min_cap,(1+TES_aux_cons_perc)*(BV6+$BK6-$BP6)))+PB_nom_net_cap*PB_nom_var_aux_cons_perc_net*POLY(MIN(PB_nom_net_cap,MAX(PB_net_min_cap,(1+TES_aux_cons_perc)*(BV6+$BK6-$BP6)))/PB_nom_net_cap,PB_n2g_var_aux_el_Coeff)+PB_fix_aux_el)/(PB_gross_min_eff+(PB_nom_gross_eff-PB_gross_min_eff)/(PB_nom_net_cap-PB_net_min_cap)*(MIN(PB_nom_net_cap,MAX(0,BV6+$BK6-$BP6))-PB_net_min_cap))+MAX(0,A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons-$BQ6)*PB_Ratio_Heat_input_vs_output)*TES_aux_cons_perc+IF(AND(BV6=0,BV7>0),MAX(0,IF(COUNTIF(BV$1:BV6,"0")=PB_warm_start_duration,PB_warm_start_heat_req,PB_hot_start_heat_req)-$BQ6)*TES_aux_cons_perc,0))
     for i in 1..<8760 {
       hour2[hourBW + i] = iff(
-        or(hour2[hourBV + i].isZero, PB_nom_gross_cap_ud <= Double.zero), Double.zero,
+        or(hour1[hourBM + i] > 0, PB_nom_gross_cap_ud <= 0, BO_BFcount[i].isZero), 0,
         hour1[hourBK + i]
-          + ((min(PB_nom_net_cap, max(PB_net_min_cap, (1 + TES_aux_cons_perc) * (hour2[hourBV + i] + hour1[hourBK + i] - hour1[hourBP + i])))
+          + ((min(PB_nom_net_cap, max(PB_net_min_cap, (1 + TES_aux_cons_perc) * (hour2[hourBQ + i] + hour1[hourBK + i] - hour1[hourBP + i])))
             + PB_nom_net_cap * PB_nom_var_aux_cons_perc_net
             * POLY(
-              min(PB_nom_net_cap, max(PB_net_min_cap, (1 + TES_aux_cons_perc) * (hour2[hourBV + i] + hour1[hourBK + i] - hour1[hourBP + i])))
+              min(PB_nom_net_cap, max(PB_net_min_cap, (1 + TES_aux_cons_perc) * (hour2[hourBQ + i] + hour1[hourBK + i] - hour1[hourBP + i])))
                 / PB_nom_net_cap, PB_n_g_var_aux_el_Coeff) + PB_fix_aux_el)
             / (PB_gross_min_eff
               + (PB_nom_gross_eff - PB_gross_min_eff) / (PB_nom_net_cap - PB_net_min_cap)
-                * (min(PB_nom_net_cap, max(Double.zero, hour2[hourBV + i] + hour1[hourBK + i] - hour1[hourBP + i])) - PB_net_min_cap))
-            + max(Double.zero, overall_var_heat_min_cons[j] + overall_heat_fix_stby_cons[j] - hour1[hourBQ + i]) * PB_Ratio_Heat_input_vs_output)
-          * TES_aux_cons_perc
+                * (min(PB_nom_net_cap, max(0, hour2[hourBQ + i] + hour1[hourBK + i] - hour1[hourBP + i])) - PB_net_min_cap))
+            + max(0, overall_var_heat_min_cons[j] + overall_heat_fix_stby_cons[j] - hour1[hourBQ + i]) * PB_Ratio_Heat_input_vs_output) * TES_aux_cons_perc
           + iff(
-            and(hour2[hourBV + i].isZero, hour2[hourBV + i] > Double.zero),
+            and(hour2[hourBQ + i].isZero, hour2[hourBV + i + 1] > 0),
             max(
-              Double.zero,
-              iff(countiff(hour2[(hourBV + i)...].prefix(6), { $0.isZero }) == PB_warm_start_duration, PB_warm_start_heat_req, PB_hot_start_heat_req)
-                - hour1[hourBQ + i]) * TES_aux_cons_perc, Double.zero))
+              0,
+              iff(
+                (hour2[min(hourBV + i - 6, hourBV + i)...(hourBV + i)].reduce(0.0) { if $1.isZero { return $0+1 }; return $0 }) == PB_warm_start_duration,
+                PB_warm_start_heat_req, PB_hot_start_heat_req) - hour1[hourBQ + i]) * TES_aux_cons_perc, 0))
     }
 
     /// Corresponding min PB net elec output
@@ -103,9 +102,7 @@ extension TunOl {
     let CAsum = hour2.sum(hours: daysBO, condition: hourCA)
     /// Min gross heat cons for extraction
     let hourCB = 61320
-    // COUNTIFS($BO$5:$BO$8763,"="&$BO6,$BF$5:$BF$8763,">0")=0) FIXME BM7
     // =IF(OR($BM6>0,PB_nom_gross_cap_ud<=0,COUNTIFS($BO$5:$BO$8763,"="&$BO6,$BF$5:$BF$8763,">0")=0),0,PB_Ratio_Heat_input_vs_output*MAX(0,MIN(A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons+IF($BM7=0,0,A_overall_heat_stup_cons),(BX6-BW6+$BP6-A_overall_fix_stby_cons-IF($BM7=0,0,A_overall_stup_cons))/A_overall_var_max_cons*A_overall_var_heat_max_cons+A_overall_heat_fix_stby_cons+IF($BM7=0,0,A_overall_heat_stup_cons))-$BQ6-MIN(El_boiler_cap_ud,MAX(0,BX6-BV6-BW6)*El_boiler_eff)))
-    let BO_BFcount = [Double]()
     for i in 1..<8760 {
       hour2[hourCB + i] = iff(
         or(hour1[hourBM + i] > Double.zero, PB_nom_gross_cap_ud <= Double.zero, BO_BFcount[i].isZero), Double.zero,
@@ -229,8 +226,9 @@ extension TunOl {
     }
     return hour2
   }
+
   mutating func hour3(j: Int, hour0: [Double], hour1: [Double], hour2: [Double]) -> [Double] {
-    let (hourBO, hourBX, hourCB, hourCC, hourCK, hourCL, hourCM, hourCN) = (166440, 26280, 61320, 70080, 140160, 148920, 157680, 166440)
+    let (hourBX, hourCB, hourCC, hourCK, hourCL, hourCM, hourCN) = (26280, 61320, 70080, 140160, 148920, 157680, 166440)
     var hour3 = [Double](repeating: Double.zero, count: 271_560)
 
     /// Min harmonious net elec cons not considering grid import
@@ -281,9 +279,8 @@ extension TunOl {
     }
     let hourF = 0
     /// Harmonious op day
-    let hourCS = 26280  // FIXME
-    // =IF(OR(AND(CQ5<=0,CQ6>0,SUM(CQ$1:CQ5)=0),AND($F5<=0,$F6>0,SUM(CQ$1:CQ16)=0)),IF(CS5<364,CS5+1,0),CS5)
-    // IF(AND(CQ5<=0,CQ6>0),CS5+1,IF(AND(CK6>0,BO6<>BO5,SUM(CQ6:CQ8)=0),CS5+1,CS5))
+    let hourCS = 26280
+    // IF(OR(AND(CQ5<=0,CQ6>0,SUM(CQ$1:CQ5)=0),AND($F5<=0,$F6>0,SUM(CQ$1:CQ16)=0)),IF(CS5<364,CS5+1,0),CS5)
     for i in 2..<8760 {
       hour3[hourCS + i] = iff(
         or(
@@ -410,16 +407,15 @@ extension TunOl {
     // MAX(0,El_boiler_cap_ud-CZ6)
     for i in 1..<8760 { hour3[hourDA + i] = max(Double.zero, El_boiler_cap_ud - hour3[hourCZ + i]) }
 
+    /// Remaining MethSynt cap after min harmonious cons
+    let hourDB = 105120
+    /// Remaining CCU cap after min harmonious cons
+    let hourDC = 113880
+    /// Remaining EY cap after min harmonious cons
+    let hourDD = 122640
+
     for i in 1..<8760 {
-      /// Remaining MethSynt cap after min harmonious cons
-      let hourDB = 105120
-      /// Remaining CCU cap after min harmonious cons
-      let hourDC = 113880
-      /// Remaining EY cap after min harmonious cons
-      let hourDD = 122640
-
       // MAX(0,1-((MAX(0,CQ6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(MethSynt_harmonious_max_perc-MethSynt_harmonious_min_perc)+MethSynt_harmonious_min_perc))*MethSynt_RawMeth_nom_prod_ud
-
       let fraction =
         (max(Double.zero, hour3[hourCQ + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons)
         / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
