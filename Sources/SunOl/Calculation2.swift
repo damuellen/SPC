@@ -22,22 +22,21 @@ extension TunOl {
 
     /// Max net elec demand outside harm op period
     let hourDW = 8760
-    // =IF($BM6>0,0,IF(((A_overall_var_max_cons-A_overall_var_min_cons)*(DV6-A_equiv_harmonious_min_perc)+A_overall_var_min_cons)+A_overall_fix_stby_cons+$BK6+IF($BM7=0,0,A_overall_stup_cons)+MIN(El_boiler_cap_ud,MAX(0,((A_overall_var_heat_max_cons-A_overall_var_heat_min_cons)*(DV6-A_equiv_harmonious_min_perc)+A_overall_var_heat_min_cons)+A_overall_heat_fix_stby_cons+IF($BM7=0,0,A_overall_heat_stup_cons)-$BQ6)/El_boiler_eff)<$BP6-PB_stby_aux_cons,0,MAX(0,((A_overall_var_max_cons-A_overall_var_min_cons)*(DV6-A_equiv_harmonious_min_perc)+A_overall_var_min_cons)+A_overall_fix_stby_cons+IF($BM7=0,0,A_overall_stup_cons)-$BP6)))
-    // IF(BM6>0,0,IF(((A_overall_var_max_cons-A_overall_var_min_cons)*(DV6-A_equiv_harmonious_min_perc)+A_overall_var_min_cons)+A_overall_fix_stby_cons+BK6+IF(BM7=0,0,A_overall_stup_cons)+MAX(0,((A_overall_var_heat_max_cons-A_overall_var_heat_min_cons)*(DV6-A_equiv_harmonious_min_perc)+A_overall_var_heat_min_cons)+A_overall_heat_fix_stby_cons+IF(BM7=0,0,A_overall_heat_stup_cons)-BQ6)/El_boiler_eff<BP6-PB_stby_aux_cons,0,((A_overall_var_max_cons-A_overall_var_min_cons)*(DV6-A_equiv_harmonious_min_perc)+A_overall_var_min_cons)+A_overall_fix_stby_cons+IF(BM7=0,0,A_overall_stup_cons)))
+    // IF(BM6>0;0;IF(((A_overall_var_max_cons-A_overall_var_min_cons)*(DV6-A_equiv_harmonious_min_perc)+A_overall_var_min_cons)+A_overall_fix_stby_cons+BK6+IF(BM7=0;0;A_overall_stup_cons)+MIN(El_boiler_cap_ud;MAX(0;((A_overall_var_heat_max_cons-A_overall_var_heat_min_cons)*(DV6-A_equiv_harmonious_min_perc)+A_overall_var_heat_min_cons)+A_overall_heat_fix_stby_cons+IF(BM7=0;0;A_overall_heat_stup_cons)-BQ6)/El_boiler_eff)<BP6-PB_stby_aux_cons;0;MAX(0;((A_overall_var_max_cons-A_overall_var_min_cons)*(DV6-A_equiv_harmonious_min_perc)+A_overall_var_min_cons)+A_overall_fix_stby_cons+IF(BM7=0;0;A_overall_stup_cons)-BP6)))
     for i in 1..<8760 {
       hour4[hourDW + i] = iff(
         hour1[hourBM + i] > Double.zero, Double.zero,
         iff(
           ((overall_var_max_cons[j] - overall_var_min_cons[j]) * (hour4[hourDV + i] - equiv_harmonious_min_perc[j])
             + overall_var_min_cons[j]) + overall_fix_stby_cons[j] + hour1[hourBK + i]
-            + iff(hour1[hourBM + i].isZero, Double.zero, overall_stup_cons[j]) + max(
-              Double.zero,
+            + iff(hour1[hourBM + i + 1].isZero, Double.zero, overall_stup_cons[j]) + min(
+              El_boiler_cap_ud, max(Double.zero,
               ((overall_var_heat_max_cons[j] - overall_var_heat_min_cons[j])
                 * (hour4[hourDV + i] - equiv_harmonious_min_perc[j]) + overall_var_heat_min_cons[j])
-                + overall_heat_fix_stby_cons[j] + iff(hour1[hourBM + i].isZero, Double.zero, overall_heat_stup_cons[j])
-                - hour1[hourBQ + i]) / El_boiler_eff < hour1[hourBP + i] - PB_stby_aux_cons, Double.zero,
-          ((overall_var_max_cons[j] - overall_var_min_cons[j]) * (hour4[hourDV + i] - equiv_harmonious_min_perc[j])
-            + overall_var_min_cons[j]) + overall_fix_stby_cons[j] + iff(hour1[hourBM + i].isZero, Double.zero, overall_stup_cons[j])))
+                + overall_heat_fix_stby_cons[j] + iff(hour1[hourBM + i + 1].isZero, Double.zero, overall_heat_stup_cons[j])
+                - hour1[hourBQ + i]) / El_boiler_eff) < hour1[hourBP + i] - PB_stby_aux_cons, Double.zero,
+          max(Double.zero, ((overall_var_max_cons[j] - overall_var_min_cons[j]) * (hour4[hourDV + i] - equiv_harmonious_min_perc[j])
+            + overall_var_min_cons[j]) + overall_fix_stby_cons[j] + iff(hour1[hourBM + i + 1].isZero, Double.zero, overall_stup_cons[j])-hour1[hourBP + i])))
     }
 
     /// Optimized max net elec demand outside harm op period
