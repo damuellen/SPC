@@ -32,11 +32,6 @@ public func fitness(values: [Double]) -> [Double] {
 }
 
 public func MGOADE(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fitness: ([Double]) -> [Double]) -> [[Double]] {
-  #if DEBUG
-  let group = false
-  let n = 2
-  let maxIter = 2
-  #endif
   var targetResults = Matrix(n * maxIter, bounds.count + 13)
   var targetPosition = Matrix(group ? 3 : 1, bounds.count)
   var targetFitness = Vector(group ? 3 : 1, .infinity)
