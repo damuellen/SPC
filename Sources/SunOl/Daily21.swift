@@ -323,30 +323,9 @@ extension TunOl {
     // let dayAD = 9125
     let dayAE = 9490
     
-    let dayEA = 3285
-    let dayEB = 3650
-    let dayEC = 4015
-    let dayED = 4380
-    let dayEE = 4745
-    let dayEF = 5110
-    let dayEG = 5475
-    let dayEH = 5840
-    let dayEI = 6205
-    let dayEJ = 6570
-    let dayEK = 6935
-    let dayEL = 7300
-    let dayEM = 7665
-    let dayEN = 8030
-    let dayEO = 8395
-    let dayEP = 8760
-    let dayEQ = 9125
-    let dayER = 9490
-    let dayES = 9855
-    let dayET = 10220    
-    let dayEV = 10950
-    let dayEW = 11315
-    let dayEY = 12045
-    let dayEZ = 12410
+    let (dayEA, dayEB, dayEC, dayED, dayEE, dayEF, dayEG, dayEH, dayEI, dayEJ, dayEK, dayEL, dayEM, dayEN, dayEO, dayEP, dayEQ, dayER, dayES, dayET, dayEV, dayEW, dayEY, dayEZ) = (
+      3285, 3650, 4015, 4380, 4745, 5110, 5475, 5840, 6205, 6570, 6935, 7300, 7665, 8030, 8395, 8760, 9125, 9490, 9855, 10220, 10950, 11315, 12045, 12410
+    )
 
     let dayDR = 0
     let dayDS = 365

@@ -103,20 +103,20 @@ extension TunOl {
     /// Harmonious op day
     let hourU = 113880
     // IF(OR(AND(S5<=0,S6>0,SUM(S1:S5)=0),AND($F5<=0,$F6>0,SUM(S4:S18)=0)),IF(U5<364,U5+1,0),U5)
-    for i in 1..<8760 {
+    for i in 2..<8760 {
       let U = iff(
         or(
           and(
             hour0[hourS + i - 1] <= 0, hour0[hourS + i] > 0,
-            (hour0[min(hourS + i - 6, hourBV + i)...(hourS + i - 1)]
+            (hour0[min(hourS + i - 6, hourS)...(hourS + i - 1)]
               .reduce(0.0) {
                 if $1.isZero { return $0 + 1 }
                 return $0
               })
               .isZero),
           and(
-            hour0[hourF + i - 1] <= 0, hour0[hourF + i] > 0,
-            (hour0[min(hourS + i - 2, hourBV + i)...(hourS + i + 12)]
+            hour0[i - 1] <= 0, hour0[i] > 0,
+            (hour0[min(hourS + i - 2, hourS)...(hourS + i + 12)]
               .reduce(0.0) {
                 if $1.isZero { return $0 + 1 }
                 return $0
@@ -203,7 +203,7 @@ extension TunOl {
     // =IF(R6=0,0,Overall_fix_cons+MIN(Overall_harmonious_var_max_cons,Overall_harmonious_var_min_cons+(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*MIN((P6+Grid_import_max_ud*Grid_import_yes_no_PB_strategy-Overall_harmonious_var_min_cons-Overall_fix_cons+MAX(0,$J6-Overall_harmonious_var_heat_min_cons-Overall_heat_fix_cons)/El_boiler_eff)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons+(Overall_harmonious_var_heat_max_cons-Overall_harmonious_var_heat_min_cons)/El_boiler_eff),($J6+El_boiler_cap_ud*El_boiler_eff-Overall_harmonious_var_heat_min_cons-Overall_heat_fix_cons)/(Overall_harmonious_var_heat_max_cons-Overall_harmonious_var_heat_min_cons))))
     for i in 1..<8760 {
       hour0[hourAG + i] = iff(
-        hour3[hourR + i].isZero, Double.zero,
+        hour0[hourR + i].isZero, Double.zero,
         Overall_fix_cons
           + min(
             Overall_harmonious_var_max_cons,

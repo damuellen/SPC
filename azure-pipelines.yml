@@ -16,7 +16,7 @@ variables:
 
 steps:
 - task: PowerShell@2
-  timeoutInMinutes: 2
+  timeoutInMinutes: 4
   inputs:
     targetType: 'inline'
     script: |
