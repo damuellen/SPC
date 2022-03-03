@@ -1,7 +1,6 @@
 
 extension TunOl {
   mutating func day(hour0: [Double]) -> [Double] {
-    print(hour0[113880..<(113880 + 100)])
     let daysU: [[Int]] = hour0[113880..<(113880 + 8760)].indices.chunked(by: { hour0[$0] == hour0[$1] })
       .map { $0.map { $0 - 113880 } } 
     // let hourD = 0
@@ -88,7 +87,7 @@ extension TunOl {
     let ADsum = hour0.sum(days: daysU, range: hourAD)
     let AHsum = hour0.sum(days: daysU, range: hourAH)
 
-    var day5 = [Double]()
+    var day5 = [Double](repeating: Double.zero, count: 1095+365)
 
     /// Available day op PV elec after CSP, PB stby aux
     let dayDM = 0
@@ -110,7 +109,7 @@ extension TunOl {
     // SUMIF(CalculationU5:U8763,"="A6,CalculationJ5:J8763)-DO6
     for i in 0..<365 { day5[dayDP + i] = Jsum[i] - day5[dayDO + i] }
 
-    var day6 = [Double]()
+    var day6 = [Double](repeating: Double.zero, count: 12775+365)
 
     /// El cons considering min harm op during harm op period
     let dayDR = 0
@@ -336,7 +335,7 @@ extension TunOl {
     let dayDX = 2190
     let dayDY = 2555
     let dayDZ = 2920
-    var day7 = [Double]()
+    var day7 = [Double](repeating: Double.zero, count: 45990+365)
 
     let equiv_harmonious_range = equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]
 

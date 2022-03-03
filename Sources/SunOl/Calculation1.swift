@@ -5,7 +5,7 @@ extension TunOl {
     let daysBO: [[Int]] = hour1[hourBO..<(hourBO + 8760)].indices.chunked(by: { hour1[$0] == hour1[$1] }).map { $0.map { $0 - hourBO } }
     let hourAY = 26280
     let AYsum = hour1.sum(hours: daysD, condition: hourAY)
-    var hour2 = [Double]()
+    var hour2 = [Double](repeating: Double.zero, count: 166440+8760)
 
     /// Min net elec demand to power block
     let hourBU = 0
@@ -46,17 +46,17 @@ extension TunOl {
       hour2[hourBW + i] = iff(
         or(hour1[hourBM + i] > 0, PB_nom_gross_cap_ud <= 0, BO_BFcount[i].isZero), 0,
         hour1[hourBK + i]
-          + ((min(PB_nom_net_cap, max(PB_net_min_cap, (1 + TES_aux_cons_perc) * (hour2[hourBQ + i] + hour1[hourBK + i] - hour1[hourBP + i])))
+          + ((min(PB_nom_net_cap, max(PB_net_min_cap, (1 + TES_aux_cons_perc) * (hour1[hourBQ + i] + hour1[hourBK + i] - hour1[hourBP + i])))
             + PB_nom_net_cap * PB_nom_var_aux_cons_perc_net
             * POLY(
-              min(PB_nom_net_cap, max(PB_net_min_cap, (1 + TES_aux_cons_perc) * (hour2[hourBQ + i] + hour1[hourBK + i] - hour1[hourBP + i])))
+              min(PB_nom_net_cap, max(PB_net_min_cap, (1 + TES_aux_cons_perc) * (hour1[hourBQ + i] + hour1[hourBK + i] - hour1[hourBP + i])))
                 / PB_nom_net_cap, PB_n_g_var_aux_el_Coeff) + PB_fix_aux_el)
             / (PB_gross_min_eff
               + (PB_nom_gross_eff - PB_gross_min_eff) / (PB_nom_net_cap - PB_net_min_cap)
-                * (min(PB_nom_net_cap, max(0, hour2[hourBQ + i] + hour1[hourBK + i] - hour1[hourBP + i])) - PB_net_min_cap))
+                * (min(PB_nom_net_cap, max(0, hour1[hourBQ + i] + hour1[hourBK + i] - hour1[hourBP + i])) - PB_net_min_cap))
             + max(0, overall_var_heat_min_cons[j] + overall_heat_fix_stby_cons[j] - hour1[hourBQ + i]) * PB_Ratio_Heat_input_vs_output) * TES_aux_cons_perc
           + iff(
-            and(hour2[hourBQ + i].isZero, hour2[hourBV + i + 1] > 0),
+            and(hour1[hourBQ + i].isZero, hour2[hourBV + i + 1] > 0),
             max(
               0,
               iff(
@@ -161,7 +161,7 @@ extension TunOl {
     }
 
     let CG_BOcountNonZero = hour2.count(hours: daysBO, range: hourCG, predicate: { $0 > 0 })
-    let CGsum = hour2.sum(days: daysBO, range: hourCG)
+    let CGsum = hour2.sum(hours: daysBO, condition: hourCG)
     /// Partitions of PV hour PV to be dedicated to TES chrg
     let hourCH = 113880
     // IF(OR(CG6=0,CF6=0),0,MAX((AW6-CG6)/(CF6/(1+1/Ratio_CSP_vs_Heater)/Heater_eff/COUNTIFS(BO5:BO8763,"="BO6,CG5:CG8763,">0")),(J6-CG6*Heater_eff/Ratio_CSP_vs_Heater)/(CF6/(1+Ratio_CSP_vs_Heater)/COUNTIFS(BO5:BO8763,"="BO6,CG5:CG8763,">0")))/SUMIF(BO5:BO8763,"="BO6,CG5:CG8763)*CG6)

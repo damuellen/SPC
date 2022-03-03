@@ -104,24 +104,27 @@ extension TunOl {
     let hourU = 113880
     // IF(OR(AND(S5<=0,S6>0,SUM(S1:S5)=0),AND($F5<=0,$F6>0,SUM(S4:S18)=0)),IF(U5<364,U5+1,0),U5)
     for i in 2..<8760 {
-      let U = iff(
-        or(
-          and(
-            hour0[hourS + i - 1] <= 0, hour0[hourS + i] > 0,
-            (hour0[min(hourS + i - 6, hourS)..<(hourS + i)]
-              .reduce(0.0) {
-                if $1.isZero { return $0 + 1 }
-                return $0
-              })
-              .isZero),
-          and(
-            hour0[i - 1] <= 0, hour0[i] > 0,
-            (hour0[min(hourS + i - 2, hourS)...(hourS + i + 12)]
-              .reduce(0.0) {
-                if $1.isZero { return $0 + 1 }
-                return $0
-              })
-              .isZero)), iff(hour0[hourU + i - 1] < 364, hour0[hourU + i - 1] + 1, 0), hour0[hourU + i - 1])
+      let prevA = hour0[hourS + i - 1] <= 0
+      let nowA = hour0[hourS + i] > 0
+      let sumA = hour0[min(hourS + i - 6, hourS)..<(hourS + i)].reduce(true) {
+        if $1.isZero { return $0 }
+        return false
+      }
+      let prevB = hour0[i - 1] <= 0
+      let nowB = hour0[i] > 0
+      let sumB = hour0[min(hourS + i - 2, hourS)...(hourS + i + 12)].reduce(true) {
+        if $1.isZero { return $0 }
+        return false
+      }
+
+      let x = and(prevA, nowA, sumA)  
+      let y = and(prevB, nowB, sumB)
+      let U: Double
+      if or(x, y) {
+        U = iff(hour0[hourU + i - 1] < 364, hour0[hourU + i - 1] + 1, 0)
+      } else {
+        U = hour0[hourU + i - 1]
+      }
       hour0[hourU + i] = U
     }
 

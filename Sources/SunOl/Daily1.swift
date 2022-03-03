@@ -6,7 +6,7 @@ extension TunOl {
     let hourCQ = 8760
     let daysCS: [[Int]] =  hour3[hourCS..<(hourCS + 8760)].indices.chunked(by: { hour3[$0] == hour3[$1] })
       .map { $0.map { $0 - hourCS } }
-    var day0 = [Double]()
+    var day0 = [Double](repeating: Double.zero, count: 365)
     
     /// Day
     let dayA = 0
