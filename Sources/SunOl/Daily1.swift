@@ -11,7 +11,7 @@ extension TunOl {
     /// Day
     let dayA = 0
     // A5+1
-    for i in 0..<365 { day0[dayA + i] = day0[dayA + i - 1] + 1 }
+    for i in 1..<365 { day0[dayA + i] = day0[dayA + i - 1] + 1 }
 
     let CQ_CScountZero = hour3.countOf(daysCS, condition: hourCQ, predicate: {$0<=0})
     let CQ_CScountNonZero = hour3.countOf(daysCS, condition: hourCQ, predicate: {$0>0})

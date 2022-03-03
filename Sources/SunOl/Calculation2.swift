@@ -251,7 +251,7 @@ extension TunOl {
             / (hour4[hourEM + i] / (1 + Ratio_CSP_vs_Heater) / EN_BOcountNonZero[i])) / ENsum[i]
           * hour4[hourEN + i])
     }
-    let EOsum = hour4.sum(days: daysBO, range: hourEO)
+    let EOsum = hour4.sum(hours: daysBO, condition: hourEO)
     /// corrected max possible PV elec to TES
     let hourEP = 175200
     // IF(EJ6=0,0,EN6-IF(EM6=0,0,EM6/(1+1/Ratio_CSP_vs_Heater)/Heater_eff/SUMIF(BO5:BO8763,"="BO6,EO5:EO8763)*EO6))
@@ -348,10 +348,14 @@ extension TunOl {
     // =IF(OR(AND(EX5<=0,EX6>0,SUM(EX$1:EX5)=0),AND($F5<=0,$F6>0,SUM(EX$1:EX16)=0)),IF(EZ5<364,EZ5+1,0),EZ5)
     let hourF = 0
     for i in 2..<8760 {
+      let start = max(hourEX + i - 10, hourEX)
+      let end = max(min(hourEX + i - 1, hourEX+1), start+1)
       hour4[hourEZ + i] = iff(
         or(
-          and(hour4[hourEX + i - 1] <= 0, hour4[hourEX + i] > 0, hour4[max(hourEX + i - 10, hourEY)..<min(hourEX + i - 1, hourEY)].reduce(0, +).isZero),
-          and(hour0[hourF + i - 1] <= 0, hour0[hourF + i] > 0, hour4[max(hourEX + i - 10, hourEY)..<min(hourEX + i + 10, hourEY)].reduce(0, +).isZero)),
+          and(hour4[hourEX + i - 1] <= 0, hour4[hourEX + i] > 0,
+              hour4[start..<end].reduce(0, +).isZero),
+          and(hour0[hourF + i - 1] <= 0, hour0[hourF + i] > 0,
+              hour4[start..<min(hourEX + i + 10, hourEY-1)].reduce(0, +).isZero)),
         iff(hour4[hourEZ + i - 1] < 364, hour4[hourEZ + i - 1] + 1, 0), hour4[hourEZ + i - 1])
     }
 

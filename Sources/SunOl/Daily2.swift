@@ -12,7 +12,7 @@ extension TunOl {
     /// Day
     let dayA = 0
     // A5+1
-    for i in 0..<365 { day0[dayA + i] = day0[dayA + i - 1] + 1 }
+    for i in 1..<365 { day0[dayA + i] = day0[dayA + i - 1] + 1 }
 
     /// Nr of hours where min harmonious is not possible in spite of grid support
     let dayB = 365
