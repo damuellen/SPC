@@ -39,8 +39,8 @@ public func fitness(values: [Double]) -> [Double] {
     let day21 = model.day(case: j, hour0: hour0)     
     let day27 = model.day(case: j, day1: day21, day6: day6)
 
-    day.append(Array(day27[dayLVstart..<dayMBend]))
-    day.append(Array(day27[dayNEstart..<dayNKend]))
+    day.append(Array(day27[dayIPstart..<dayIXend]))
+    day.append(Array(day27[dayJUstart..<dayKCend]))
   }
 
   return values

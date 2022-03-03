@@ -3,7 +3,7 @@ extension TunOl {
   mutating func day(hour0: [Double]) -> [Double] {
     print(hour0[113880..<(113880 + 100)])
     let daysU: [[Int]] = hour0[113880..<(113880 + 8760)].indices.chunked(by: { hour0[$0] == hour0[$1] })
-      .map { $0.map { $0 - 113880 } } // FIXME
+      .map { $0.map { $0 - 113880 } } 
     // let hourD = 0
     // let hourH = 8760
     // let hourI = 17520

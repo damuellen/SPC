@@ -519,6 +519,55 @@ public struct TunOl {
       EY_harmonious_perc_at_PB_nom * EY_var_heat_nom_cons + MethDist_harmonious_perc_at_PB_nom * MethDist_var_heat_nom_cons
       - MethSynt_harmonious_perc_at_PB_nom * MethSynt_var_heat_nom_prod + CCU_harmonious_perc_at_PB_nom * CCU_var_heat_nom_cons
 
+      // if nominal_gross_cap == 0 {
+      //   self.nominal_gross_cap = 0
+      //   max_heat_input = 0
+      //   min_heat_input = 0
+      //   minimum_gross_cap = 0
+      //   nominal_gross_eff = 0
+      //   th = Polynomial([0])
+      //   el = Polynomial([0])
+      //   return
+      // }
+
+      // minimum_gross_cap = nominal_gross_cap * min_el_cap_perc
+
+      // let gross_cap = [  // A29-A33
+      //   ref_gross_cap.nominal, ((((ref_gross_cap.min + ref_gross_cap.nominal) / 2) + ref_gross_cap.nominal) / 2),
+      //   ((ref_gross_cap.min + ref_gross_cap.nominal) / 2), ref_gross_cap.low, ref_gross_cap.min,
+      // ]
+      // let load_perc = gross_cap.map { $0 / ref_gross_cap.nominal }  // B
+
+      // let heat_input = load_perc.map { $0 * nominal_gross_cap }  // D
+
+      // let factor = seek(goal: 0) { (ref_heat_input.min - ref_aux_heat_prod.min * $0) - (ref_heat_input.maxExport - ref_aux_heat_prod.maxExport * $0) }
+
+      // let no_extraction = [  // B
+      //   ref_heat_input.nominal - ref_aux_heat_prod.nominal * factor,
+      //   ((((ref_heat_input.min + ref_heat_input.nominal) / 2) + ref_heat_input.nominal) / 2)
+      //     - ((((ref_aux_heat_prod.min + ref_aux_heat_prod.nominal) / 2) + ref_aux_heat_prod.nominal) / 2) * factor,
+      //   ((ref_heat_input.min + ref_heat_input.nominal) / 2) - ((ref_aux_heat_prod.min + ref_aux_heat_prod.nominal) / 2) * factor,
+      //   ref_heat_input.low - ref_aux_heat_prod.low * factor, ref_heat_input.min - ref_aux_heat_prod.min * factor,
+      // ]
+
+      // let ref_eff = zip(gross_cap, no_extraction).map(/)  // C
+      // let gross = zip(heat_input, ref_eff).map(/)  // E
+      // let eff = zip(heat_input, gross).map(/)  // K
+      // let eff_factor = eff.map { $0 / eff[0] }  // L
+      // let thermal_load_perc = gross.map { $0 / gross[0] }  // J
+      // let steam_extraction = load_perc.map {
+      //   min(EY.heat_input, EY.heat_input * $0 * nominal_gross_cap * (1.0 - aux_cons_perc) / (EY.net_elec_input + EY.aux_elec_input))
+      //     + nominal_heatConsumption
+      // }  // F
+      // th = Polynomial.fit(x: thermal_load_perc, y: eff_factor, order: 4)!
+      // el = Polynomial.fit(x: load_perc, y: eff_factor, order: 4)!
+      // Ratio_Heat_input_vs_output = factor * (no_extraction[0] / ref_aux_heat_prod.nominal) / (gross[0] / steam_extraction[0])
+      // max_heat_input = gross[0] + steam_extraction[0] * Ratio_Heat_input_vs_output
+      // min_heat_input = minimum_gross_cap / (nominal_gross_eff * el(min_el_cap_perc))
+      // nominal_gross_eff = eff[0]
+      // self.nominal_gross_cap = nominal_gross_cap
+
+
     // let HL_Coeff0 = Inv_Eff!$Q$25
     // let PV_Ref_AC_cap = max(Calculation!G5:G8764)
     // let Inv_eff_Ref_approx_handover = Inv_Eff!C22

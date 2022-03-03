@@ -108,7 +108,7 @@ extension TunOl {
         or(
           and(
             hour0[hourS + i - 1] <= 0, hour0[hourS + i] > 0,
-            (hour0[min(hourS + i - 6, hourS)...(hourS + i - 1)]
+            (hour0[min(hourS + i - 6, hourS)..<(hourS + i)]
               .reduce(0.0) {
                 if $1.isZero { return $0 + 1 }
                 return $0
