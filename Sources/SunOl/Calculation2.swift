@@ -130,7 +130,7 @@ extension TunOl {
     // IF(OR(BM6>0;PB_nom_gross_cap_ud<=0;COUNTIFS(BO5:BO8763;\"=\"&BO6;BF5:BF8763;\">0\")=0);0;PB_Ratio_Heat_input_vs_output*MAX(0;MIN((A_overall_var_heat_max_cons-A_overall_var_heat_min_cons)*(DV6-A_equiv_harmonious_min_perc)+A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons+IF(BM7=0;0;A_overall_heat_stup_cons);(DZ6-DY6+BP6-IF(BM7=0;0;A_overall_stup_cons)-A_overall_fix_stby_cons)/((A_overall_var_max_cons-A_overall_var_min_cons)*(DV6-A_equiv_harmonious_min_perc)+A_overall_var_min_cons)*((A_overall_var_heat_max_cons-A_overall_var_heat_min_cons)*(DV6-A_equiv_harmonious_min_perc)+A_overall_var_heat_min_cons)+A_overall_heat_fix_stby_cons+IF(BM7=0;0;A_overall_heat_stup_cons))-BQ6-MIN(El_boiler_cap_ud;MAX(0;DZ6-DX6-DY6)*El_boiler_eff)))
     for i in 1..<8760 {
       hour4[hourED + i] = iff(
-        or(hour1[hourBM + i]>Double.zero, Double.zero,PB_nom_gross_cap_ud <= Double.zero, BO_BFcount[i].isZero), Double.zero,
+        or(hour1[hourBM + i] > Double.zero, PB_nom_gross_cap_ud <= Double.zero, BO_BFcount[i].isZero), Double.zero,
           PB_Ratio_Heat_input_vs_output * max(
             Double.zero,
             min(
@@ -473,7 +473,7 @@ extension TunOl {
     // MAX(0,1-((MAX(0,EX6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(MethSynt_harmonious_max_perc-MethSynt_harmonious_min_perc)+MethSynt_harmonious_min_perc))*MethSynt_RawMeth_nom_prod_ud
     for i in 1..<8760 {
       let fraction =
-        (max(Double.zero, hour4[hourFO + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons)
+        (max(Double.zero, hour4[hourEX + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons)
         / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
       
       hour4[hourFI + i] =
