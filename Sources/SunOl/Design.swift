@@ -189,7 +189,7 @@ public struct TunOl {
   let PB_nom_var_aux_cons_perc_net: Double = 0  // PB_Eff!I18
   let PB_op_hours_min_nr: Double = 5
   let PB_Ratio_Heat_input_vs_output: Double = 0  // PB_Eff!I14
-  let PB_Ref_25p_aux_heat_prod: Double = (7.194 * 2775.4 - 5.414 * 167.6 - 1.78 * 649.6) / 1000
+
   let PB_Ref_25p_gross_cap: Double = 25
   let PB_Ref_25p_gross_cap_max_aux_heat: Double = 25
 
@@ -201,15 +201,14 @@ public struct TunOl {
   // let PB_Ref_25p_heat_cons_excl_max_aux_heat: Double = 0  // PB_Eff!E23
 
   let PB_Ref_25p_heat_cons_max_aux_heat: Double = 112.349
-  let PB_Ref_25p_max_aux_heat_prod: Double = (23.333 * 2775.4 - 15.167 * 167.6 - 8.167 * 649.6) / 1000
-  let PB_Ref_30p_aux_heat_prod: Double = (10.778 * 2775.4 - 8.278 * 167.6 - 2.5 * 649.6) / 1000
+
   let PB_Ref_30p_gross_cap: Double = 63
 
   // let PB_Ref_30p_gross_eff_excl_aux_heat_cons: Double = 0  // PB_Eff!E20
 
   let PB_Ref_30p_heat_cons: Double = 168.78700000000001
   // let PB_Ref_30p_heat_cons_excl_aux_heat: Double = 0  // PB_Eff!E19
-  let PB_Ref_nom_aux_heat_prod: Double = (23.333 * 2775.4 - 15.167 * 167.6 - 8.167 * 649.6) / 1000
+
   let PB_Ref_nom_gross_cap: Double = 200
 
   // let PB_Ref_nom_gross_eff_excl_aux_heat_cons: Double = 0  // PB_Eff!E18
@@ -519,6 +518,15 @@ public struct TunOl {
       EY_harmonious_perc_at_PB_nom * EY_var_heat_nom_cons + MethDist_harmonious_perc_at_PB_nom * MethDist_var_heat_nom_cons
       - MethSynt_harmonious_perc_at_PB_nom * MethSynt_var_heat_nom_prod + CCU_harmonious_perc_at_PB_nom * CCU_var_heat_nom_cons
 
+
+    self.PB_nom_heat_cons = ifFinite(PB_nom_gross_cap_ud / PB_nom_gross_eff, 0)
+    self.PB_heat_min_input = ifFinite(PB_gross_min_cap / (PB_nom_gross_eff * POLY(PB_grs_el_cap_min_perc, el_Coeff)), 0)
+
+    self.PB_gross_min_eff = ifFinite(PB_gross_min_cap / PB_heat_min_input, 0)
+    self.PB_cold_start_heat_req = PB_nom_heat_cons * PB_cold_start_energyperc
+    self.PB_warm_start_heat_req = PB_nom_heat_cons * PB_warm_start_energyperc
+    self.PB_hot_start_heat_req = PB_nom_heat_cons * PB_hot_start_energyperc
+
       // if nominal_gross_cap == 0 {
       //   self.nominal_gross_cap = 0
       //   max_heat_input = 0
@@ -531,37 +539,44 @@ public struct TunOl {
       // }
 
       // minimum_gross_cap = nominal_gross_cap * min_el_cap_perc
+      let PB_Ref_25p_aux_heat_prod: Double = (7.194 * 2775.4 - 5.414 * 167.6 - 1.78 * 649.6) / 1000
+      let PB_Ref_30p_aux_heat_prod: Double = (10.778 * 2775.4 - 8.278 * 167.6 - 2.5 * 649.6) / 1000
+      let PB_Ref_nom_aux_heat_prod: Double = (23.333 * 2775.4 - 15.167 * 167.6 - 8.167 * 649.6) / 1000
+      let TES_cold_tank_T: Double = 304.55
+      let TES_dead_mass_ratio: Double = 0.1
+      self.TES_thermal_cap = TES_full_load_hours_ud * PB_nom_heat_cons
+      self.TES_salt_mass = TES_thermal_cap * 1000 * 3600 / (h_SS(Heater_outlet_T) - h_SS(TES_cold_tank_T)) / 1000 * (1 + TES_dead_mass_ratio)
 
-      // let gross_cap = [  // A29-A33
-      //   ref_gross_cap.nominal, ((((ref_gross_cap.min + ref_gross_cap.nominal) / 2) + ref_gross_cap.nominal) / 2),
-      //   ((ref_gross_cap.min + ref_gross_cap.nominal) / 2), ref_gross_cap.low, ref_gross_cap.min,
-      // ]
-      // let load_perc = gross_cap.map { $0 / ref_gross_cap.nominal }  // B
+     let gross_cap = [  // A29-A33
+       PB_Ref_nom_gross_cap, ((((PB_Ref_25p_gross_cap_max_aux_heat + PB_Ref_nom_gross_cap) / 2) + PB_Ref_nom_gross_cap) / 2),
+       ((PB_Ref_25p_gross_cap_max_aux_heat + PB_Ref_nom_gross_cap) / 2), PB_Ref_30p_gross_cap, PB_Ref_25p_gross_cap_max_aux_heat,
+     ]
+      let load_perc: [Double] = gross_cap.map { $0 / PB_Ref_nom_gross_cap }  // B
+      let PB_Ref_25p_max_aux_heat_prod: Double = (23.333 * 2775.4 - 15.167 * 167.6 - 8.167 * 649.6) / 1000
+      let heat_input = load_perc.map { $0 * PB_nom_gross_cap_ud }  // D
+      let factor = seek(goal: 0) { (PB_Ref_25p_heat_cons - PB_Ref_25p_aux_heat_prod * $0) - (PB_Ref_25p_heat_cons_max_aux_heat - PB_Ref_25p_max_aux_heat_prod * $0) }
 
-      // let heat_input = load_perc.map { $0 * nominal_gross_cap }  // D
+      let no_extraction = [  // B
+        PB_Ref_nom_heat_cons - PB_Ref_nom_aux_heat_prod * factor,
+         ((((PB_Ref_25p_heat_cons + PB_Ref_nom_heat_cons) / 2) + PB_Ref_nom_heat_cons) / 2)
+           - ((((PB_Ref_25p_aux_heat_prod + PB_Ref_nom_aux_heat_prod) / 2) + PB_Ref_nom_aux_heat_prod) / 2) * factor,
+         ((PB_Ref_25p_heat_cons + PB_Ref_nom_heat_cons) / 2) - ((PB_Ref_25p_aux_heat_prod + PB_Ref_nom_aux_heat_prod) / 2) * factor,
+        PB_Ref_30p_heat_cons - PB_Ref_30p_aux_heat_prod * factor, PB_Ref_25p_heat_cons - PB_Ref_25p_aux_heat_prod * factor,
+       ]
 
-      // let factor = seek(goal: 0) { (ref_heat_input.min - ref_aux_heat_prod.min * $0) - (ref_heat_input.maxExport - ref_aux_heat_prod.maxExport * $0) }
-
-      // let no_extraction = [  // B
-      //   ref_heat_input.nominal - ref_aux_heat_prod.nominal * factor,
-      //   ((((ref_heat_input.min + ref_heat_input.nominal) / 2) + ref_heat_input.nominal) / 2)
-      //     - ((((ref_aux_heat_prod.min + ref_aux_heat_prod.nominal) / 2) + ref_aux_heat_prod.nominal) / 2) * factor,
-      //   ((ref_heat_input.min + ref_heat_input.nominal) / 2) - ((ref_aux_heat_prod.min + ref_aux_heat_prod.nominal) / 2) * factor,
-      //   ref_heat_input.low - ref_aux_heat_prod.low * factor, ref_heat_input.min - ref_aux_heat_prod.min * factor,
-      // ]
-
-      // let ref_eff = zip(gross_cap, no_extraction).map(/)  // C
-      // let gross = zip(heat_input, ref_eff).map(/)  // E
-      // let eff = zip(heat_input, gross).map(/)  // K
-      // let eff_factor = eff.map { $0 / eff[0] }  // L
-      // let thermal_load_perc = gross.map { $0 / gross[0] }  // J
-      // let steam_extraction = load_perc.map {
-      //   min(EY.heat_input, EY.heat_input * $0 * nominal_gross_cap * (1.0 - aux_cons_perc) / (EY.net_elec_input + EY.aux_elec_input))
+      let ref_eff = zip(gross_cap, no_extraction).map(/)  // C
+      let gross = zip(heat_input, ref_eff).map(/)  // E
+      let eff = zip(heat_input, gross).map(/)  // K
+      let eff_factor = eff.map { $0 / eff[0] }  // L
+      let thermal_load_perc = gross.map { $0 / gross[0] }  // J
+      //let steam_extraction = load_perc.map {
+      //   min(EY_heat_fix_cons, EY_heat_fix_cons * $0 * nominal_gross_cap * (1.0 - aux_cons_perc) / (EY.net_elec_input + EY.aux_elec_input))
       //     + nominal_heatConsumption
-      // }  // F
-      // th = Polynomial.fit(x: thermal_load_perc, y: eff_factor, order: 4)!
+      //}  // F
+      //th = Polynomial.fit(x: thermal_load_perc, y: eff_factor, order: 4)!
       // el = Polynomial.fit(x: load_perc, y: eff_factor, order: 4)!
-      // Ratio_Heat_input_vs_output = factor * (no_extraction[0] / ref_aux_heat_prod.nominal) / (gross[0] / steam_extraction[0])
+
+      //self.PB_Ratio_Heat_input_vs_output = 0 factor * (no_extraction[0] / PB_Ref_nom_aux_heat_prod) / (gross[0] / steam_extraction[0])
       // max_heat_input = gross[0] + steam_extraction[0] * Ratio_Heat_input_vs_output
       // min_heat_input = minimum_gross_cap / (nominal_gross_eff * el(min_el_cap_perc))
       // nominal_gross_eff = eff[0]
@@ -589,17 +604,8 @@ public struct TunOl {
     // let PB_n2g_var_aux_el_Coeff2 = PB_Eff!M49
     // let PB_n2g_var_aux_el_Coeff1 = PB_Eff!N49
     // let PB_n2g_var_aux_el_Coeff0 = PB_Eff!O49
-    self.PB_nom_heat_cons = ifFinite(PB_nom_gross_cap_ud / PB_nom_gross_eff, 0)
-    self.PB_heat_min_input = ifFinite(PB_gross_min_cap / (PB_nom_gross_eff * POLY(PB_grs_el_cap_min_perc, el_Coeff)), 0)
 
-    self.PB_gross_min_eff = ifFinite(PB_gross_min_cap / PB_heat_min_input, 0)
-    self.PB_cold_start_heat_req = PB_nom_heat_cons * PB_cold_start_energyperc
-    self.PB_warm_start_heat_req = PB_nom_heat_cons * PB_warm_start_energyperc
-    self.PB_hot_start_heat_req = PB_nom_heat_cons * PB_hot_start_energyperc
 
-    let TES_cold_tank_T: Double = 304.55
-    let TES_dead_mass_ratio: Double = 0.1
-    self.TES_thermal_cap = TES_full_load_hours_ud * PB_nom_heat_cons
-    self.TES_salt_mass = TES_thermal_cap * 1000 * 3600 / (h_SS(Heater_outlet_T) - h_SS(TES_cold_tank_T)) / 1000 * (1 + TES_dead_mass_ratio)
+
   }
 }
