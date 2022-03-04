@@ -1,8 +1,9 @@
 
 extension TunOl {
-  mutating func day(hour0: [Double]) -> [Double] {
+  func day(hour0: [Double]) -> [Double] {
     let daysU: [[Int]] = hour0[113880..<(113880 + 8760)].indices.chunked(by: { hour0[$0] == hour0[$1] })
       .map { $0.map { $0 - 113880 } } 
+    assert(daysU.count == 365)
     // let hourD = 0
     // let hourH = 8760
     // let hourI = 17520
@@ -293,7 +294,7 @@ extension TunOl {
     return day6
   }
 
-  mutating func day(case j: Int, day1: [Double], day6: [Double]) -> [Double] {
+  func day(case j: Int, day1: [Double], day6: [Double]) -> [Double] {
     let dayE = 0
     let dayF = 365
     let dayG = 730
@@ -1663,13 +1664,13 @@ extension TunOl {
     for i in 0..<365 { day7[dayIW + i] = day7[dayIA + i] + day7[dayIB + i] + day7[dayIO + i] }
 
     /// Checksum
-    let dayIX = 35040
+    // let dayIX = 35040
     // MAX(0,-IC6)+MAX(0,-II6)+MAX(0,-IP6)+MAX(0,-IT6)
-    for i in 1..<365 {
-      let IX = max(Double.zero, -day7[dayIC + i]) + max(Double.zero, -day7[dayII + i]) + max(Double.zero, -day7[dayIP + i]) + max(Double.zero, -day7[dayIT + i])
-      if !IX.isZero { print("Checksum error", i); break }
-      day7[dayIX + i] = IX
-    }
+    // for i in 1..<365 {
+    //   let IX = max(Double.zero, -day7[dayIC + i]) + max(Double.zero, -day7[dayII + i]) + max(Double.zero, -day7[dayIP + i]) + max(Double.zero, -day7[dayIT + i])
+    //   if !IX.isZero { print("Checksum error", i); break }
+    //   day7[dayIX + i] = IX
+    // }
 
     /// Heat cons for harm op during harm op period
     let dayJI = 38690
@@ -1939,13 +1940,13 @@ extension TunOl {
     for i in 0..<365 { day7[dayKB + i] = day7[dayJF + i] + day7[dayJG + i] + day7[dayJT + i] }
 
     /// Checksum
-    let dayKC = 45990
+    // let dayKC = 45990
     // MAX(0,-JH6)+MAX(0,-JN6)+MAX(0,-JU6)+MAX(0,-JY6)
-    for i in 1..<365 {
-      let KC = max(Double.zero, -day7[dayJH + i]) + max(Double.zero, -day7[dayJN + i]) + max(Double.zero, -day7[dayJU + i]) + max(Double.zero, -day7[dayJY + i])
-      if !KC.isZero { print("Checksum error", i); break }
-      day7[dayKC + i] = KC
-    }
+    // for i in 1..<365 {
+    //   let KC = max(Double.zero, -day7[dayJH + i]) + max(Double.zero, -day7[dayJN + i]) + max(Double.zero, -day7[dayJU + i]) + max(Double.zero, -day7[dayJY + i])
+    //   if !KC.isZero { print("Checksum error", i); break }
+    //   day7[dayKC + i] = KC
+    // }
     return day7
   }
 }

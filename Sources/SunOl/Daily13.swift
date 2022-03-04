@@ -1,6 +1,6 @@
 
 extension TunOl {
-  mutating func day(case j: Int, day1: [Double], day5: [Double], day6: [Double]) -> [Double] {
+  func day(case j: Int, day1: [Double], day5: [Double], day6: [Double]) -> [Double] {
     let (dayC, dayD, dayE, dayT, dayU, dayV, dayZ, dayAA, dayAB, dayAC, dayAD, dayAE, dayAF, dayAG, dayAH, dayAI, dayAM) = (
       0, 365, 730, 5840, 6205, 6570, 8030, 8395, 8760, 9125, 9490, 9855, 10220, 10585, 10950, 11315, 12775 
     ) // day1
@@ -39,8 +39,6 @@ extension TunOl {
                 * (day1[dayAM + i] - equiv_harmonious_min_perc[j]))
               - day6[dayHR + i]) / El_boiler_eff) - min(day6[dayHU + i], day6[dayHN + i] / BESS_chrg_eff)
     }
-
-
 
     /// Surplus harm op period electricity after max harm op and min night op prep
     let dayIS = 730 
@@ -1180,13 +1178,13 @@ extension TunOl {
     }
 
     /// Checksum
-    let dayMB = 31390
+    // let dayMB = 31390
     // MAX(0,-LD6)+MAX(0,-LJ6)+MAX(0,-LQ6)+MAX(0,-LU6)
-    for i in 1..<365 {
-      let MB = max(Double.zero, -day7[dayLD + i]) + max(Double.zero, -day7[dayLJ + i]) + max(Double.zero, -day7[dayLQ + i]) + max(Double.zero, -day7[dayLU + i])
-      if !MB.isZero { print("Checksum error", i); break }
-      day7[dayMB + i] = MB
-    }
+    // for i in 1..<365 {
+    //   let MB = max(Double.zero, -day7[dayLD + i]) + max(Double.zero, -day7[dayLJ + i]) + max(Double.zero, -day7[dayLQ + i]) + max(Double.zero, -day7[dayLU + i])
+    //   if !MB.isZero { print("Checksum error", i); break }
+    //   day7[dayMB + i] = MB
+    // }
 
     /// el cons for harm op during harm op period
     let dayMD = 31755
@@ -1579,13 +1577,13 @@ extension TunOl {
     }
 
     /// Checksum
-    let dayNK = 43800
+    // let dayNK = 43800
     // MAX(0,-MM6)+MAX(0,-MS6)+MAX(0,-MZ6)+MAX(0,-ND6)
-    for i in 1..<365 {
-      let NK = max(Double.zero, -day7[dayMM + i]) + max(Double.zero, -day7[dayMS + i]) + max(Double.zero, -day7[dayMZ + i]) + max(Double.zero, -day7[dayND + i])
-      if !NK.isZero { print("Checksum error", i); break }
-      day7[dayNK + i] = NK
-    }
+    // for i in 1..<365 {
+    //   let NK = max(Double.zero, -day7[dayMM + i]) + max(Double.zero, -day7[dayMS + i]) + max(Double.zero, -day7[dayMZ + i]) + max(Double.zero, -day7[dayND + i])
+    //   if !NK.isZero { print("Checksum error", i); break }
+    //   day7[dayNK + i] = NK
+    // }
     return day7
   }
 }

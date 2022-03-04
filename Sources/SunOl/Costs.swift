@@ -24,7 +24,7 @@ public enum CostModel {
   static let Electrical_boiler_capacity = (basis: 3.27, exp: 0.7, coeff: 262_862.0)
   static let Substation_capacity = (basis: 135.0, exp: 0.7, coeff: 17_778.0)
  
-  static func invest(_ model: SunOl) -> [Double] {
+  static func invest(_ model: TunOl) -> [Double] {
     // let factor = min(model.Heat_to_aux_directly_from_CSP_sum + model.Heat_to_aux_from_PB_sum * Float(model.PB_Ratio_Heat_input_vs_output),
     //  model.Q_solar_before_dumping_sum - model.Total_SF_heat_dumped_sum - model.TES_thermal_input_by_CSP_sum)
 
@@ -47,40 +47,40 @@ public enum CostModel {
     //   * model.CSP_Loop_Nr
     // let CSP_SF_cost_dedicated_to_aux_heat = AdditionalCostPerLoop * auxLoops
 
-    let PV_DC_Cost = model.PV_DC_Cap * PV_DC_part.coeff + 0.0
-    let PV_AC_Cost = (model.PV_AC_Cap / PV_AC_part.basis) ** PV_AC_part.exp * PV_AC_part.basis * PV_AC_part.coeff + 0.0
+    // let PV_DC_Cost = model.PV_DC_Cap * PV_DC_part.coeff + 0.0
+    // let PV_AC_Cost = (model.PV_AC_Cap / PV_AC_part.basis) ** PV_AC_part.exp * PV_AC_part.basis * PV_AC_part.coeff + 0.0
 
-    let Heater_Cost = model.Heater_cap > 0 ?
-      (Heater_system.c1 + Heater_system.coeff * (model.Heater_cap / Heater_system.basis) ** Heater_system.exp + model.Heater_cap
-      * Heater_system.factor * Heater_system.c2) : 0
+    // let Heater_Cost = model.Heater_cap > 0 ?
+    //   (Heater_system.c1 + Heater_system.coeff * (model.Heater_cap / Heater_system.basis) ** Heater_system.exp + model.Heater_cap
+    //   * Heater_system.factor * Heater_system.c2) : 0
 
     // var TES_Storage_cost =
     //   Thermal_energy_storage.c1 + Thermal_energy_storage.coeff * (model.TES_salt_mass / Thermal_energy_storage.basis) ** Thermal_energy_storage.exp
     //   + model.TES_salt_mass * Thermal_energy_storage.c2 * Thermal_energy_storage.factor
     // if TES_Storage_cost.isNaN { TES_Storage_cost = 0 }
-    let Electrolysis_Cost = model.EY_Nominal_elec_input * Electrolysis_coeff + 0.0
+    // let Electrolysis_Cost = model.EY_Nominal_elec_input * Electrolysis_coeff + 0.0
 
-    let PB_Cost = model.PB_Nominal_gross_cap > 0 ? (Power_Block.c1 + (model.PB_Nominal_gross_cap - Power_Block.basis) * Power_Block.coeff) : 0
+    // let PB_Cost = model.PB_Nominal_gross_cap > 0 ? (Power_Block.c1 + (model.PB_Nominal_gross_cap - Power_Block.basis) * Power_Block.coeff) : 0
 
-    let Battery_storage_cost = model.BESS_cap * Battery_energy_storage.coeff + (model.BESS_cap > 0 ? Battery_energy_storage.c1 : 0)
+    // let Battery_storage_cost = model.BESS_cap * Battery_energy_storage.coeff + (model.BESS_cap > 0 ? Battery_energy_storage.c1 : 0)
 
-    let Hydrogen_Storage_cost = model.H2_storage_cap * Hydrogen_storage.coeff + 0.0
+    // let Hydrogen_Storage_cost = model.H2_storage_cap * Hydrogen_storage.coeff + 0.0
 
-    let Methanol_plant_cost = model.Meth_nominal_hour_prod_cap * Methanol_plant_coeff + 0.0
+    // let Methanol_plant_cost = model.Meth_nominal_hour_prod_cap * Methanol_plant_coeff + 0.0
 
-    let Electrical_boiler_cost = model.El_boiler_cap > 0 ?
-      (Electrical_boiler_capacity.coeff * Electrical_boiler_capacity.basis * (model.El_boiler_cap / Electrical_boiler_capacity.basis)
-      ** Electrical_boiler_capacity.exp) : 0
+    // let Electrical_boiler_cost = model.El_boiler_cap > 0 ?
+    //   (Electrical_boiler_capacity.coeff * Electrical_boiler_capacity.basis * (model.El_boiler_cap / Electrical_boiler_capacity.basis)
+    //   ** Electrical_boiler_capacity.exp) : 0
 
-    let Substation_cost_ICPH =
-      Substation_capacity.coeff * Substation_capacity.basis * ((model.Heater_cap + model.EY_Nominal_elec_input  + model.EY_aux_elec_input + model.Meth_nominal_aux_electr_cons) / Substation_capacity.basis) ** Substation_capacity.exp
+    // let Substation_cost_ICPH =
+    //   Substation_capacity.coeff * Substation_capacity.basis * ((model.Heater_cap + model.EY_Nominal_elec_input  + model.EY_aux_elec_input + model.Meth_nominal_aux_electr_cons) / Substation_capacity.basis) ** Substation_capacity.exp
 
-    let Substation_cost =
-      Substation_capacity.coeff * Substation_capacity.basis * (max(model.grid_max_export, model.grid_max_import) / Substation_capacity.basis) ** Substation_capacity.exp
+    // let Substation_cost =
+    //   Substation_capacity.coeff * Substation_capacity.basis * (max(model.grid_max_export, model.grid_max_import) / Substation_capacity.basis) ** Substation_capacity.exp
 
-    let CSP_O_M_Cost = (11.3333 / 3 * 1 / 3 * 1000 * 1000) + (0.00606061 / 3 * 1 / 3 * 1000 * 1000) * model.CSP_Loop_Nr
-    let PV_O_M_Cost = (11.3333 * 1000 * 1000) + 0 * model.PV_DC_Cap
-    let PB_O_M_Cost = (11.3333 / 3 * 2 / 3 * 1000 * 1000) + (0.00606061 / 3 * 2 / 3 * 1000 * 1000) * model.PB_Nominal_gross_cap
+    // let CSP_O_M_Cost = (11.3333 / 3 * 1 / 3 * 1000 * 1000) + (0.00606061 / 3 * 1 / 3 * 1000 * 1000) * model.CSP_Loop_Nr
+    // let PV_O_M_Cost = (11.3333 * 1000 * 1000) + 0 * model.PV_DC_Cap
+    // let PB_O_M_Cost = (11.3333 / 3 * 2 / 3 * 1000 * 1000) + (0.00606061 / 3 * 2 / 3 * 1000 * 1000) * model.PB_Nominal_gross_cap
 
     // let CAPEX_ICPH_assembly_hall_csp_sf_dedicated_to_ICPH_PC_DC_PV_AC_Heaters_TES_PB_Substation =
     //   Assembly_hall + CSP_SF_cost_dedicated_to_ICPH + PV_DC_Cost + PV_AC_Cost + Heater_Cost + TES_Storage_cost + PB_Cost + Substation_cost_ICPH

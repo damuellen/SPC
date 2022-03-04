@@ -5,8 +5,9 @@ public let source = DispatchSource.makeSignalSource(signal: SIGINT, queue: .glob
 public let semaphore = DispatchSemaphore(value: 0)
 
 public func fitness(values: [Double]) -> [Double] {
+  let date = Date()
   let values = [Double]()
-  var model = TunOl(values)
+  let model = TunOl(values)
   let hour0 = model.hour0(TunOl.Q_Sol_MW_thLoop, TunOl.Reference_PV_plant_power_at_inverter_inlet_DC, TunOl.Reference_PV_MV_power_at_transformer_outlet)
   // hour0.head(8, steps: 8760)
   let hour1 = model.hour1(hour0: hour0)
@@ -43,7 +44,7 @@ public func fitness(values: [Double]) -> [Double] {
     day.append(Array(day27[dayIPstart..<dayIXend]))
     day.append(Array(day27[dayJUstart..<dayKCend]))
   }
-
+  print(-date.timeIntervalSinceNow)
   return values
 }
 

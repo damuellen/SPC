@@ -1,5 +1,5 @@
 extension TunOl {
-  mutating func hour4(j: Int, day1 day11: [Double], hour0: [Double], hour1: [Double], hour2: [Double]) -> [Double] {
+  func hour4(j: Int, day1 day11: [Double], hour0: [Double], hour1: [Double], hour2: [Double]) -> [Double] {
     let (hourJ, hourL, hourM, hourAW, hourBK, hourBM, hourBP, hourBQ, hourCC) = (
       26280, 43800, 52560, 8760, 131400, 148920, 175200, 183960, 70080
     )

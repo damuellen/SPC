@@ -1,6 +1,6 @@
 
 extension TunOl {
-  mutating func day(hour0: [Double], hour2: [Double], hour3: [Double], day11: [Double]) -> [Double] {
+  func day(hour0: [Double], hour2: [Double], hour3: [Double], day11: [Double]) -> [Double] {
 
     let hourJ = 26280
     let hourL = 43800

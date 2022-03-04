@@ -1,5 +1,5 @@
 extension TunOl {
-  mutating func hour2(j: Int, hour0: [Double], hour1: [Double]) -> [Double] {
+  func hour2(j: Int, hour0: [Double], hour1: [Double]) -> [Double] {
     let (hourJ, hourL, hourM, hourAW, hourBK, hourBM, hourBO, hourBP, hourBQ) = (26280, 43800, 52560, 8760, 131400, 148920, 166440, 175200, 183960)
     let daysD: [[Int]] = (0..<365).map { Array(repeating: $0, count: 24) }
     let daysBO: [[Int]] = hour1[hourBO..<(hourBO + 8760)].indices.chunked(by: { hour1[$0] == hour1[$1] }).map { $0.map { $0 - hourBO } }
@@ -228,7 +228,7 @@ extension TunOl {
     return hour2
   }
 
-  mutating func hour3(j: Int, hour0: [Double], hour1: [Double], hour2: [Double]) -> [Double] {
+  func hour3(j: Int, hour0: [Double], hour1: [Double], hour2: [Double]) -> [Double] {
     let (hourBX, hourCB, hourCC, hourCK, hourCL, hourCM, hourCN) = (26280, 61320, 70080, 140160, 148920, 157680, 166440)
     var hour3 = [Double](repeating: Double.zero, count: 271_560)
 

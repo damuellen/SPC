@@ -1,5 +1,5 @@
 extension TunOl {
-  mutating func hour0(
+  func hour0(
     _ Q_Sol_MW_thLoop: [Double], _ Reference_PV_plant_power_at_inverter_inlet_DC: [Double], _ Reference_PV_MV_power_at_transformer_outlet: [Double]
   ) -> [Double] {
     var hour0 = [Double](repeating: Double.zero, count: 341_640)
@@ -319,7 +319,7 @@ extension TunOl {
     return hour0
   }
 
-  mutating func hour1(hour0: [Double]) -> [Double] {
+  func hour1(hour0: [Double]) -> [Double] {
     let (hourF, hourJ, hourL, hourM) = (0, 26280, 43800, 52560)
     var hour1 = [Double](repeating: Double.zero, count: 192_720)
     let daysD: [[Int]] = (0..<365).map { Array(repeating: $0, count: 24) }

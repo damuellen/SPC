@@ -1,5 +1,5 @@
 extension TunOl {
-  mutating func day(case j: Int, hour2: [Double], hour3: [Double]) -> [Double] {
+  func day(case j: Int, hour2: [Double], hour3: [Double]) -> [Double] {
     let hourBX = 26280
     let hourCC = 70080
     let hourCS = 26280
@@ -104,7 +104,7 @@ extension TunOl {
     return day1
   }
 
-  mutating func night(case j: Int, day1: inout [Double], hour3: [Double], hour4: [Double]) {
+  func night(case j: Int, day1: inout [Double], hour3: [Double], hour4: [Double]) {
     let (dayD, dayF, dayH, dayJ, dayL, dayN, dayP, hourEH, hourEX) = (
       365, 1095, 1825, 2555, 3285, 4015, 4745, 105120, 236520
     )

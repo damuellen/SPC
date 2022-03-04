@@ -285,12 +285,12 @@ public struct TunOl {
     self.Grid_import_yes_no_BESS_strategy = TunOl.Grid_import_yes_no_BESS_strategy
     self.Grid_import_yes_no_PB_strategy = TunOl.Grid_import_yes_no_PB_strategy
 
-    let maximum = TunOl.Reference_PV_MV_power_at_transformer_outlet.max() ?? 0
-    let Inverter_power_fraction = TunOl.Reference_PV_MV_power_at_transformer_outlet.map { max(0, $0 / maximum) }
+    let maximum = TunOl.Reference_PV_MV_power_at_transformer_outlet.max() ?? Double.zero
+    let Inverter_power_fraction = TunOl.Reference_PV_MV_power_at_transformer_outlet.map { max(Double.zero, $0 / maximum) }
     let Inverter_eff = Inverter_power_fraction.indices.map {
       return iff(
         TunOl.Reference_PV_MV_power_at_transformer_outlet[$0] < maximum,
-        max(TunOl.Reference_PV_MV_power_at_transformer_outlet[$0], 0) / TunOl.Reference_PV_plant_power_at_inverter_inlet_DC[$0], 0)
+        max(TunOl.Reference_PV_MV_power_at_transformer_outlet[$0], Double.zero) / TunOl.Reference_PV_plant_power_at_inverter_inlet_DC[$0], Double.zero)
     }
     let inverter = zip(Inverter_power_fraction, Inverter_eff).filter { $0.0 > 0 && $0.0 < 1 }.sorted(by: { $0.0 < $1.0 })
     let chunks = inverter.chunked { Int($0.0 * 100) == Int($1.0 * 100) }
@@ -433,8 +433,8 @@ public struct TunOl {
       EY_harmonious_max_perc * EY_var_heat_nom_cons + MethDist_harmonious_max_perc * MethDist_var_heat_nom_cons - MethSynt_harmonious_max_perc
       * MethSynt_var_heat_nom_prod + CCU_harmonious_max_perc * CCU_var_heat_nom_cons
     self.MethDist_min_perc[0] = MethDist_cap_min_perc
-    self.MethDist_min_perc[1] = max(MethDist_cap_min_perc, MethSynt_RawMeth_min_prod / MethDist_RawMeth_nom_cons, 0)
-    self.MethSynt_min_perc[1] = max(MethSynt_cap_min_perc, MethDist_RawMeth_min_cons / MethSynt_RawMeth_nom_prod_ud, 0)
+    self.MethDist_min_perc[1] = max(MethDist_cap_min_perc, MethSynt_RawMeth_min_prod / MethDist_RawMeth_nom_cons, Double.zero)
+    self.MethSynt_min_perc[1] = max(MethSynt_cap_min_perc, MethDist_RawMeth_min_cons / MethSynt_RawMeth_nom_prod_ud, Double.zero)
     self.MethDist_max_perc[1] = max(1, MethSynt_RawMeth_nom_prod_ud / MethDist_RawMeth_nom_cons)
     self.MethSynt_max_perc[1] = max(1, MethDist_RawMeth_nom_cons / MethSynt_RawMeth_nom_prod_ud)
     self.MethDist_min_perc[2] = max(
@@ -480,8 +480,8 @@ public struct TunOl {
       self.C_O_2_min_cons[j] = -CCU_min_perc[j] * CCU_C_O_2_nom_prod_ud + MethSynt_min_perc[j] * MethSynt_C_O_2_nom_cons
       self.Hydrogen_min_cons[j] = -EY_min_perc[j] * EY_Hydrogen_nom_prod + MethSynt_min_perc[j] * MethSynt_Hydrogen_nom_cons
       self.overall_stup_cons[j] =
-        iff(MethDist_min_perc[j] > 0, 0, MethDist_stup_cons) + iff(MethSynt_min_perc[j] > Double.zero, Double.zero, MethSynt_stup_cons)
-        + iff(CCU_min_perc[j] > 0, 0, CCU_stup_cons) + iff(EY_min_perc[j] > Double.zero, Double.zero, EY_stup_cons)
+        iff(MethDist_min_perc[j] > Double.zero, Double.zero, MethDist_stup_cons) + iff(MethSynt_min_perc[j] > Double.zero, Double.zero, MethSynt_stup_cons)
+        + iff(CCU_min_perc[j] > Double.zero, Double.zero, CCU_stup_cons) + iff(EY_min_perc[j] > Double.zero, Double.zero, EY_stup_cons)
       self.equiv_harmonious_max_perc[j] = max(
         0, ifFinite(Overall_harmonious_max_perc / MethDist_harmonious_max_perc * MethDist_max_perc[j], Double.zero),
         ifFinite(Overall_harmonious_max_perc / MethSynt_harmonious_max_perc * MethSynt_max_perc[j], Double.zero),
@@ -570,8 +570,8 @@ public struct TunOl {
       }  // F
       self.th_Coeff = Polynomial.fit(x: thermal_load_perc, y: eff_factor, order: 4)!.coefficients.reversed()
       self.el_Coeff = Polynomial.fit(x: load_perc, y: eff_factor, order: 4)!.coefficients.reversed()
-      self.PB_heat_min_input = ifFinite(PB_gross_min_cap / (PB_nom_gross_eff * POLY(PB_grs_el_cap_min_perc, el_Coeff)), 0)
-      self.PB_gross_min_eff = ifFinite(PB_gross_min_cap / PB_heat_min_input, 0)
+      self.PB_heat_min_input = ifFinite(PB_gross_min_cap / (PB_nom_gross_eff * POLY(PB_grs_el_cap_min_perc, el_Coeff)), Double.zero)
+      self.PB_gross_min_eff = ifFinite(PB_gross_min_cap / PB_heat_min_input, Double.zero)
 
       self.PB_Ratio_Heat_input_vs_output = factor * (no_extraction[0] / PB_Ref_nom_aux_heat_prod) / (gross[0] / steam_extraction[0])
       let gross_electrical_output = heat_input.map { $0 - PB_fix_aux_el }
