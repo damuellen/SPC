@@ -1665,9 +1665,9 @@ extension TunOl {
     /// Checksum
     let dayIX = 35040
     // MAX(0,-IC6)+MAX(0,-II6)+MAX(0,-IP6)+MAX(0,-IT6)
-    for i in 0..<365 {
+    for i in 1..<365 {
       let IX = max(Double.zero, -day7[dayIC + i]) + max(Double.zero, -day7[dayII + i]) + max(Double.zero, -day7[dayIP + i]) + max(Double.zero, -day7[dayIT + i])
-      if !IX.isZero { print("Checksum error", i) }
+      if !IX.isZero { print("Checksum error", i); break }
       day7[dayIX + i] = IX
     }
 
@@ -1941,9 +1941,9 @@ extension TunOl {
     /// Checksum
     let dayKC = 45990
     // MAX(0,-JH6)+MAX(0,-JN6)+MAX(0,-JU6)+MAX(0,-JY6)
-    for i in 0..<365 {
+    for i in 1..<365 {
       let KC = max(Double.zero, -day7[dayJH + i]) + max(Double.zero, -day7[dayJN + i]) + max(Double.zero, -day7[dayJU + i]) + max(Double.zero, -day7[dayJY + i])
-      if !KC.isZero { print("Checksum error", i) }
+      if !KC.isZero { print("Checksum error", i); break }
       day7[dayKC + i] = KC
     }
     return day7
