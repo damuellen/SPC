@@ -5,7 +5,6 @@ public let source = DispatchSource.makeSignalSource(signal: SIGINT, queue: .glob
 public let semaphore = DispatchSemaphore(value: 0)
 
 public func fitness(values: [Double]) -> [Double] {
-  let date = Date()
   let values = [Double]()
   let model = TunOl(values)
   let hour0 = model.hour0(TunOl.Q_Sol_MW_thLoop, TunOl.Reference_PV_plant_power_at_inverter_inlet_DC, TunOl.Reference_PV_MV_power_at_transformer_outlet)
@@ -44,8 +43,32 @@ public func fitness(values: [Double]) -> [Double] {
     day.append(Array(day27[dayIPstart..<dayIXend]))
     day.append(Array(day27[dayJUstart..<dayKCend]))
   }
-  print(-date.timeIntervalSinceNow)
-  return values
+
+  var year = [Int]()
+  for d in 0..<365 {
+    let valuesDay = day.indices.map { i in day[i][d] }
+    let best = valuesDay.indices.filter { valuesDay[$0] > 0 }.sorted { valuesDay[$0] > valuesDay[$1] }
+    year.append(best[0])
+  }
+
+  let costs = Costs(
+    Heat_to_aux_directly_from_CSP_sum: 0,
+    Heat_to_aux_from_PB_sum: 0,
+    Q_solar_before_dumping_sum: 0,
+    Total_SF_heat_dumped_sum: 0, 
+    TES_thermal_input_by_CSP_sum: 0,
+    meth_plant_heatConsumption_sum: 0, 
+    EY_aux_heatConsumption_sum: 0,
+    elec_from_grid_sum: 0, 
+    elec_to_grid_sum: 0, 
+    meth_produced_MTPH_sum: 0,
+    avail_total_net_elec_sum: 0, 
+    net_elec_above_max_consumers_sum: 0, 
+    Produced_thermal_energy_sum: 0,
+    H2_to_meth_production_effective_MTPH_sum: 0
+  )
+  
+  return costs.invest(model)
 }
 
 public func MGOADE(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fitness: ([Double]) -> [Double]) -> [[Double]] {
@@ -493,7 +516,7 @@ struct Results {
 
 
 func labeled(values: [Double]) -> String {
-  zip( CostModel.labels, values).map { l, v in
+  zip( Costs.labels, values).map { l, v in
     "\(l.text(.red)) \(String(format: "%.1f", v).text(.red))"
   }.joined(separator: " ")
 }

@@ -1,6 +1,6 @@
 
 extension TunOl {
-  mutating func day(hour0: [Double]) -> [Double] {
+  func day(hour0: [Double]) -> [Double] {
     let daysU: [[Int]] = hour0[113880..<(113880 + 8760)].indices.chunked(by: { hour0[$0] == hour0[$1] })
       .map { $0.map { $0 - 113880 } } 
     // let hourD = 0
@@ -293,7 +293,7 @@ extension TunOl {
     return day6
   }
 
-  mutating func day(case j: Int, day1: [Double], day6: [Double]) -> [Double] {
+  func day(case j: Int, day1: [Double], day6: [Double]) -> [Double] {
     let dayE = 0
     let dayF = 365
     let dayG = 730
