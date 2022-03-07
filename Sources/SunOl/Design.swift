@@ -14,17 +14,17 @@ public struct TunOl {
   public static var Reference_PV_MV_power_at_transformer_outlet = [Double]()
 
   let BESS_chrg_eff: Double = 0.7
-  var BESS_chrg_max_cons: Double
+  let BESS_chrg_max_cons: Double
   let BESS_chrg_max_ratio: Double = 0.5
   let CCU_cap_min_perc: Double = 0.5
 
-  var CCU_fix_cons: Double
-  var CCU_fix_heat_cons: Double
-  var CCU_harmonious_max_perc: Double
-  var CCU_harmonious_min_perc: Double
+  let CCU_fix_cons: Double
+  let CCU_fix_heat_cons: Double
+  let CCU_harmonious_max_perc: Double
+  let CCU_harmonious_min_perc: Double
 
-  var CCU_var_heat_nom_cons: Double
-  var CCU_var_nom_cons: Double
+  let CCU_var_heat_nom_cons: Double
+  let CCU_var_nom_cons: Double
 
   let CCU_Ref_C_O_2_hour_prod: Double = 22
   let CCU_Ref_fix_cons: Double = 0
@@ -36,10 +36,10 @@ public struct TunOl {
   let CCU_Ref_var_heat_nom_cons: Double = 22
   let CCU_Ref_var_nom_cons: Double = 2
 
-  var CSP_Cold_HTF_T: Double
+  let CSP_Cold_HTF_T: Double
   let CSP_Hot_HTF_T: Double = 425
   let CSP_night_aux_cons_per_loop: Double = 3.0E-3
-  var CSP_nonsolar_aux_cons: Double
+  let CSP_nonsolar_aux_cons: Double
   let CSP_var_aux_nom_perc: Double = 0.01
   var CCU_max_perc = [Double](repeating: 0, count: 4)
   var CCU_min_perc = [Double](repeating: 0, count: 4)
@@ -70,20 +70,20 @@ public struct TunOl {
   let El_boiler_eff: Double = 0.99
   var el_Coeff: [Double] = []// [PB_Eff!$U6, PB_Eff!$T6, PB_Eff!$S6, PB_Eff!$R6, PB_Eff!$Q6]
 
-  var EY_fix_cons: Double
-  var EY_Hydrogen_nom_prod: Double
+  let EY_fix_cons: Double
+  let EY_Hydrogen_nom_prod: Double
 
-  var EY_harmonious_max_perc: Double
-  var EY_harmonious_min_perc: Double
-  var EY_harmonious_perc_at_PB_nom: Double
-  var EY_heat_fix_cons: Double
-  var EY_heat_stby_cons: Double
-  var EY_heat_stup_cons: Double
+  let EY_harmonious_max_perc: Double
+  let EY_harmonious_min_perc: Double
+  let EY_harmonious_perc_at_PB_nom: Double
+  let EY_heat_fix_cons: Double
+  let EY_heat_stby_cons: Double
+  let EY_heat_stup_cons: Double
   let EY_Ref_fix_cons: Double = 1
 
-  var EY_var_aux_min_cons: Double
-  var EY_var_gross_nom_cons: Double
-  var EY_var_heat_nom_cons: Double
+  let EY_var_aux_min_cons: Double
+  let EY_var_gross_nom_cons: Double
+  let EY_var_heat_nom_cons: Double
 
   let EY_cap_min_perc: Double = 0.1
   let EY_Ref_heat_fix_cons: Double = 1
@@ -105,15 +105,15 @@ public struct TunOl {
   let LL_Coeff: [Double]
   let MethDist_cap_min_perc: Double = 0.5
 
-  var MethDist_fix_cons: Double
-  var MethDist_HydrogenO_min_prod: Double
+  let MethDist_fix_cons: Double
+  let MethDist_HydrogenO_min_prod: Double
 
-  var MethDist_harmonious_max_perc: Double
-  var MethDist_harmonious_min_perc: Double
+  let MethDist_harmonious_max_perc: Double
+  let MethDist_harmonious_min_perc: Double
 
-  var MethDist_harmonious_perc_at_PB_nom: Double
-  var MethDist_RawMeth_nom_cons: Double
-  var MethDist_Ref_meth_hour_prod: Double
+  let MethDist_harmonious_perc_at_PB_nom: Double
+  let MethDist_RawMeth_nom_cons: Double
+  let MethDist_Ref_meth_hour_prod: Double
   let MethDist_Ref_fix_cons: Double = 1
   let MethDist_Ref_heat_fix_cons: Double = 1
   let MethDist_Ref_heat_stby_cons: Double = 1.7
@@ -128,18 +128,18 @@ public struct TunOl {
 
   let MethSynt_annual_outage_days: Double = 32
   let MethSynt_cap_min_perc: Double = 0.1
-  var MethSynt_C_O_2_min_cons: Double
-  var MethSynt_C_O_2_nom_cons: Double
-  var MethSynt_fix_cons: Double
-  var MethSynt_Hydrogen_nom_cons: Double
-  var MethSynt_harmonious_max_perc: Double
-  var MethSynt_harmonious_min_perc: Double
-  var MethSynt_heat_fix_prod: Double
-  var MethSynt_Ref_C_O_2_hour_cons: Double
-  var MethSynt_Ref_Hydrogen_hour_cons: Double
-  var MethSynt_Ref_rawmeth_hour_prod: Double
-  var MethSynt_var_heat_nom_prod: Double
-  var MethSynt_var_nom_cons: Double
+  let MethSynt_C_O_2_min_cons: Double
+  let MethSynt_C_O_2_nom_cons: Double
+  let MethSynt_fix_cons: Double
+  let MethSynt_Hydrogen_nom_cons: Double
+  let MethSynt_harmonious_max_perc: Double
+  let MethSynt_harmonious_min_perc: Double
+  let MethSynt_heat_fix_prod: Double
+  let MethSynt_Ref_C_O_2_hour_cons: Double
+  let MethSynt_Ref_Hydrogen_hour_cons: Double
+  let MethSynt_Ref_rawmeth_hour_prod: Double
+  let MethSynt_var_heat_nom_prod: Double
+  let MethSynt_var_nom_cons: Double
   let MethSynt_Ref_C_O_2_annual_cons: Double = 137372
 
   let MethSynt_Ref_fix_cons: Double = 1
@@ -156,19 +156,19 @@ public struct TunOl {
   let MethSynt_stup_duration: Double = 15
 
   let Overall_harmonious_max_perc: Double = 1
-  var Overall_fix_cons: Double
-  var Overall_harmonious_min_perc: Double
-  var Overall_harmonious_var_heat_cons_at_PB_nom: Double
-  var Overall_harmonious_var_heat_max_cons: Double
-  var Overall_harmonious_var_heat_min_cons: Double
-  var Overall_harmonious_var_max_cons: Double
-  var Overall_harmonious_var_min_cons: Double
-  var Overall_heat_fix_cons: Double
+  let Overall_fix_cons: Double
+  let Overall_harmonious_min_perc: Double
+  let Overall_harmonious_var_heat_cons_at_PB_nom: Double
+  let Overall_harmonious_var_heat_max_cons: Double
+  let Overall_harmonious_var_heat_min_cons: Double
+  let Overall_harmonious_var_max_cons: Double
+  let Overall_harmonious_var_min_cons: Double
+  let Overall_heat_fix_cons: Double
 
   let PB_cold_start_duration: Double = 48
   let PB_cold_start_energyperc: Double = 2
   var PB_cold_start_heat_req: Double = 0
-  var PB_fix_aux_el: Double
+  let PB_fix_aux_el: Double
   let PB_fix_aux_elec_cons_perc_of_ref: Double = 6.4340704330890603E-3
   
   var PB_gross_min_cap: Double = 0
@@ -179,11 +179,11 @@ public struct TunOl {
 
   var PB_n_g_var_aux_el_Coeff: [Double] = [0]  // PB_Eff!O49 PB_Eff!N49 PB_Eff!M49 PB_Eff!L49
 
-  var PB_net_min_cap: Double
+  let PB_net_min_cap: Double
   var PB_nom_gross_eff: Double = 0.4  // PB_Eff!I16
   var PB_nom_heat_cons: Double = 0
-  var PB_nom_net_cap: Double
-  var PB_nom_var_aux_cons: Double
+  let PB_nom_net_cap: Double
+  let PB_nom_var_aux_cons: Double
   let PB_nom_var_aux_cons_perc_gross: Double = 3.3931144552042103E-2
   var PB_nom_var_aux_cons_perc_net: Double = 0  // PB_Eff!I18
   let PB_op_hours_min_nr: Double = 5
@@ -214,10 +214,10 @@ public struct TunOl {
 
   let PB_Ref_nom_heat_cons: Double = 463.48500000000001
   // let PB_Ref_nom_heat_cons_excl_aux_heat: Double = 0  // PB_Eff!E17
-  var PB_stby_aux_cons: Double
+  let PB_stby_aux_cons: Double
   let PB_stby_fix_aux_cons_perc: Double = 5.2640704330890603E-3
   let PB_stby_var_aux_cons_perc: Double = 4.6250983512691503E-3
-  var PB_stup_aux_cons: Double
+  let PB_stup_aux_cons: Double
   let PB_stup_fix_aux_elec_cons_perc: Double = 5.9815704330890597E-3
   let PB_stup_var_aux_elec_cons_perc: Double = 1.2789153998036399E-2
   let PB_var_aux_cons = [0.29437013201591916, 0.10280513176871063, -6.5249624421765337E-2, 0.67514642417652304]
@@ -229,7 +229,7 @@ public struct TunOl {
   var PB_warm_start_heat_req: Double = 0
   let PV_Ref_AC_cap: Double = 510  //max(Calculation!G5,G8764)
   let PV_Ref_DC_cap: Double = 683.4
-  var Ratio_CSP_vs_Heater: Double
+  let Ratio_CSP_vs_Heater: Double
   let SF_heat_exch_approach_temp: Double = 7
   let TES_aux_cons_perc: Double = 0.01
   let TES_cold_tank_T: Double = 304.55
