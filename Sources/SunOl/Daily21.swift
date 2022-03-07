@@ -1024,7 +1024,7 @@ extension TunOl {
           day7[dayFO + i] < Double.zero, day7[dayFR + i] < Double.zero, day1[dayFU + i] < Double.zero, day7[dayFX + i] < Double.zero,
           day7[dayGA + i] < 0), Double.zero,
         min(
-          1, ifFinite(day7[dayFC + i] / max(Double.zero, (day7[dayFC + i] - day7[dayFD + i]), 1),
+          1, ifFinite(day7[dayFC + i] / max(Double.zero, day7[dayFC + i] - day7[dayFD + i]), 1),
           ifFinite(day7[dayFF + i] / max(Double.zero, day7[dayFF + i] - day7[dayFG + i]), 1),
           ifFinite(day7[dayFI + i] / max(Double.zero, day7[dayFI + i] - day7[dayFJ + i]), 1),
           ifFinite(day7[dayFL + i] / max(Double.zero, day7[dayFL + i] - day7[dayFM + i]), 1),
