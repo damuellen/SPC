@@ -1,9 +1,8 @@
 
 extension TunOl {
-  func day(hour0: [Double]) -> [Double] {
+  mutating func day(hour0: [Double]) -> [Double] {
     let daysU: [[Int]] = hour0[113880..<(113880 + 8760)].indices.chunked(by: { hour0[$0] == hour0[$1] })
       .map { $0.map { $0 - 113880 } } 
-    assert(daysU.count == 365)
     // let hourD = 0
     // let hourH = 8760
     // let hourI = 17520
@@ -294,7 +293,7 @@ extension TunOl {
     return day6
   }
 
-  func day(case j: Int, day1: [Double], day6: [Double]) -> [Double] {
+  mutating func day(case j: Int, day1: [Double], day6: [Double]) -> [Double] {
     let dayE = 0
     let dayF = 365
     let dayG = 730
@@ -612,7 +611,7 @@ extension TunOl {
     let Overall_harmonious_range = Overall_harmonious_max_perc - Overall_harmonious_min_perc
     /// Optimal harmonious day prod after min night prep due to prod cap limits
     let dayGE = 9855
-    // IF(OR(FC6<0,FF6<0,FI6<0,FL6<0,FO6<0,FR6<0,FU6<0,FX6<0,GA6<0),0,MIN(1,IFERROR(FC6/(FC6-FE6),1),IFERROR(FF6/(FF6-FH6),1),IFERROR(FI6/(FI6-FK6),1),IFERROR(FL6/(FL6-FN6),1),IFERROR(FO6/(FO6-FQ6),1),IFERROR(FR6/(FR6-FT6),1),IFERROR(FU6/(FU6-FW6),1),IFERROR(FX6/(FX6-FZ6),1),IFERROR(GA6/(GA6-GC6),1))*(Overall_harmonious_max_perc-Overall_harmonious_min_perc)+Overall_harmonious_min_perc)
+    // IF(OR(FC6<0;FF6<0;FI6<0;FL6<0;FO6<0;FR6<0;FU6<0;FX6<0;GA6<0);0;MIN(1;IFERROR(FC6/MAX(0;FC6-FE6);1);IFERROR(FF6/MAX(0;FF6-FH6);1);IFERROR(FI6/MAX(0;FI6-FK6);1);IFERROR(FL6/MAX(0;FL6-FN6);1);IFERROR(FO6/MAX(0;FO6-FQ6);1);IFERROR(FR6/MAX(0;FR6-FT6);1);IFERROR(FU6/MAX(0;FU6-FW6);1);IFERROR(FX6/MAX(0;FX6-FZ6);1);IFERROR(GA6/MAX(0;GA6-GC6);1))*(Overall_harmonious_max_perc-Overall_harmonious_min_perc)+Overall_harmonious_min_perc)
     for i in 0..<365 {
       day7[dayGE + i] = iff(
         or(
@@ -621,14 +620,14 @@ extension TunOl {
           day7[dayGA + i] < 0), Double.zero,
         min(
           1, ifFinite(day7[dayFC + i] / (day7[dayFC + i] - day7[dayFE + i]), 1),
-          ifFinite(day7[dayFF + i] / (day7[dayFF + i] - day7[dayFH + i]), 1),
-          ifFinite(day7[dayFI + i] / (day7[dayFI + i] - day7[dayFK + i]), 1),
-          ifFinite(day7[dayFL + i] / (day7[dayFL + i] - day7[dayFN + i]), 1),
-          ifFinite(day7[dayFO + i] / (day7[dayFO + i] - day7[dayFQ + i]), 1),
-          ifFinite(day7[dayFR + i] / (day7[dayFR + i] - day7[dayFT + i]), 1),
-          ifFinite(day1[dayFU + i] / (day1[dayFU + i] - day7[dayFW + i]), 1),
-          ifFinite(day7[dayFX + i] / (day7[dayFX + i] - day7[dayFZ + i]), 1),
-          ifFinite(day7[dayGA + i] / (day7[dayGA + i] - day7[dayGC + i]), 1))
+          ifFinite(day7[dayFF + i] / max(Double.zero, day7[dayFF + i] - day7[dayFH + i]), 1),
+          ifFinite(day7[dayFI + i] / max(Double.zero, day7[dayFI + i] - day7[dayFK + i]), 1),
+          ifFinite(day7[dayFL + i] / max(Double.zero, day7[dayFL + i] - day7[dayFN + i]), 1),
+          ifFinite(day7[dayFO + i] / max(Double.zero, day7[dayFO + i] - day7[dayFQ + i]), 1),
+          ifFinite(day7[dayFR + i] / max(Double.zero, day7[dayFR + i] - day7[dayFT + i]), 1),
+          ifFinite(day1[dayFU + i] / max(Double.zero, day1[dayFU + i] - day7[dayFW + i]), 1),
+          ifFinite(day7[dayFX + i] / max(Double.zero, day7[dayFX + i] - day7[dayFZ + i]), 1),
+          ifFinite(day7[dayGA + i] / max(Double.zero, day7[dayGA + i] - day7[dayGC + i]), 1))
           * Overall_harmonious_range + Overall_harmonious_min_perc)
     }
 
@@ -998,29 +997,26 @@ extension TunOl {
 
     /// Max harmonious day prod after min night prep due to prod cap limits
     let dayGX = 16790
-    // IF(OR(GE6=0,GF6<0,GH6<0,GJ6<0,GL6<0,GN6<0,GP6<0,GR6<0,GT6<0,GV6<0),0,MIN(1,IFERROR(GF6/(GF6-GG6),1),IFERROR(GH6/(GH6-GI6),1),IFERROR(GJ6/(GJ6-GK6),1),IFERROR(GL6/(GL6-GM6),1),IFERROR(GN6/(GN6-GO6),1),IFERROR(GP6/(GP6-GQ6),1),IFERROR(GR6/(GR6-GS6),1),IFERROR(GT6/(GT6-GU6),1),IFERROR(GV6/(GV6-GW6),1))*(AE6-A_equiv_harmonious_min_perc)+A_equiv_harmonious_min_perc)
+    // IF(GE6=0;0;MIN(1;IFERROR(GF6/MAX(0;GF6-GG6);1);IFERROR(GH6/MAX(0;GH6-GI6);1);IFERROR(GJ6/MAX(0;GJ6-GK6);1);IFERROR(GL6/MAX(0;GL6-GM6);1);IFERROR(GN6/MAX(0;GN6-GO6);1);IFERROR(GP6/MAX(0;GP6-GQ6);1);IFERROR(GR6/MAX(0;GR6-GS6);1);IFERROR(GT6/MAX(0;GT6-GU6);1);IFERROR(GV6/MAX(0;GV6-GW6);1))*($AE6-A_equiv_harmonious_min_perc)+A_equiv_harmonious_min_perc)
     for i in 0..<365 {
       day7[dayGX + i] = iff(
-        or(
-          day7[dayGE + i].isZero, day7[dayGF + i] < Double.zero, day7[dayGH + i] < Double.zero, day7[dayGJ + i] < Double.zero,
-          day7[dayGL + i] < Double.zero, day7[dayGN + i] < Double.zero, day7[dayGP + i] < Double.zero, day7[dayGR + i] < Double.zero,
-          day7[dayGT + i] < Double.zero, day7[dayGV + i] < Double.zero), Double.zero,
+        day7[dayGE + i].isZero, Double.zero,
         min(
-          1, ifFinite(day7[dayGF + i] / (day7[dayGF + i] - day7[dayGG + i]), 1),
-          ifFinite(day7[dayGH + i] / (day7[dayGH + i] - day7[dayGI + i]), 1),
-          ifFinite(day7[dayGJ + i] / (day7[dayGJ + i] - day7[dayGK + i]), 1),
-          ifFinite(day7[dayGL + i] / (day7[dayGL + i] - day7[dayGM + i]), 1),
-          ifFinite(day7[dayGN + i] / (day7[dayGN + i] - day7[dayGO + i]), 1),
-          ifFinite(day7[dayGP + i] / (day7[dayGP + i] - day7[dayGQ + i]), 1),
-          ifFinite(day7[dayGR + i] / (day7[dayGR + i] - day7[dayGS + i]), 1),
-          ifFinite(day7[dayGT + i] / (day7[dayGT + i] - day7[dayGU + i]), 1),
-          ifFinite(day7[dayGV + i] / (day7[dayGV + i] - day7[dayGW + i]), 1))
+          1, ifFinite(day7[dayGF + i] / max(Double.zero, day7[dayGF + i] - day7[dayGG + i]), 1),
+          ifFinite(day7[dayGH + i] / max(Double.zero, day7[dayGH + i] - day7[dayGI + i]), 1),
+          ifFinite(day7[dayGJ + i] / max(Double.zero, day7[dayGJ + i] - day7[dayGK + i]), 1),
+          ifFinite(day7[dayGL + i] / max(Double.zero, day7[dayGL + i] - day7[dayGM + i]), 1),
+          ifFinite(day7[dayGN + i] / max(Double.zero, day7[dayGN + i] - day7[dayGO + i]), 1),
+          ifFinite(day7[dayGP + i] / max(Double.zero, day7[dayGP + i] - day7[dayGQ + i]), 1),
+          ifFinite(day7[dayGR + i] / max(Double.zero, day7[dayGR + i] - day7[dayGS + i]), 1),
+          ifFinite(day7[dayGT + i] / max(Double.zero, day7[dayGT + i] - day7[dayGU + i]), 1),
+          ifFinite(day7[dayGV + i] / max(Double.zero, day7[dayGV + i] - day7[dayGW + i]), 1))
           * (day1[dayAE + i] - equiv_harmonious_min_perc[j]) + equiv_harmonious_min_perc[j])
     }
 
     /// Max Equiv harmonious night prod due to prod cap limits
     let dayGZ = 17155
-    // IF(OR(FC6<0,FF6<0,FI6<0,FL6<0,FO6<0,FR6<0,FU6<0,FX6<0,GA6<0),0,MIN(1,IFERROR(FC6/(FC6-FD6),1),IFERROR(FF6/(FF6-FG6),1),IFERROR(FI6/(FI6-FJ6),1),IFERROR(FL6/(FL6-FM6),1),IFERROR(FO6/(FO6-FP6),1),IFERROR(FR6/(FR6-FS6),1),IFERROR(FU6/(FU6-FV6),1),IFERROR(FX6/(FX6-FY6),1),IFERROR(GA6/(GA6-GB6),1))*(AE6-A_equiv_harmonious_min_perc)+A_equiv_harmonious_min_perc)
+    // IF(OR(FC6<0;FF6<0;FI6<0;FL6<0;FO6<0;FR6<0;FU6<0;FX6<0;GA6<0);0;MIN(1;IFERROR(FC6/MAX(0;FC6-FD6);1);IFERROR(FF6/MAX(0;FF6-FG6);1);IFERROR(FI6/MAX(0;FI6-FJ6);1);IFERROR(FL6/MAX(0;FL6-FM6);1);IFERROR(FO6/MAX(0;FO6-FP6);1);IFERROR(FR6/MAX(0;FR6-FS6);1);IFERROR(FU6/MAX(0;FU6-FV6);1);IFERROR(FX6/MAX(0;FX6-FY6);1);IFERROR(GA6/MAX(0;GA6-GB6);1))*($AE6-A_equiv_harmonious_min_perc)+A_equiv_harmonious_min_perc)
     for i in 0..<365 {
       day7[dayGZ + i] = iff(
         or(
@@ -1028,15 +1024,15 @@ extension TunOl {
           day7[dayFO + i] < Double.zero, day7[dayFR + i] < Double.zero, day1[dayFU + i] < Double.zero, day7[dayFX + i] < Double.zero,
           day7[dayGA + i] < 0), Double.zero,
         min(
-          1, ifFinite(day7[dayFC + i] / (day7[dayFC + i] - day7[dayFD + i]), 1),
-          ifFinite(day7[dayFF + i] / (day7[dayFF + i] - day7[dayFG + i]), 1),
-          ifFinite(day7[dayFI + i] / (day7[dayFI + i] - day7[dayFJ + i]), 1),
-          ifFinite(day7[dayFL + i] / (day7[dayFL + i] - day7[dayFM + i]), 1),
-          ifFinite(day7[dayFO + i] / (day7[dayFO + i] - day7[dayFP + i]), 1),
-          ifFinite(day7[dayFR + i] / (day7[dayFR + i] - day7[dayFS + i]), 1),
-          ifFinite(day7[dayFU + i] / (day7[dayFU + i] - day7[dayFV + i]), 1),
-          ifFinite(day7[dayFX + i] / (day7[dayFX + i] - day7[dayFY + i]), 1),
-          ifFinite(day7[dayGA + i] / (day7[dayGA + i] - day7[dayGB + i]), 1))
+          1, ifFinite(day7[dayFC + i] / max(Double.zero, (day7[dayFC + i] - day7[dayFD + i]), 1),
+          ifFinite(day7[dayFF + i] / max(Double.zero, day7[dayFF + i] - day7[dayFG + i]), 1),
+          ifFinite(day7[dayFI + i] / max(Double.zero, day7[dayFI + i] - day7[dayFJ + i]), 1),
+          ifFinite(day7[dayFL + i] / max(Double.zero, day7[dayFL + i] - day7[dayFM + i]), 1),
+          ifFinite(day7[dayFO + i] / max(Double.zero, day7[dayFO + i] - day7[dayFP + i]), 1),
+          ifFinite(day7[dayFR + i] / max(Double.zero, day7[dayFR + i] - day7[dayFS + i]), 1),
+          ifFinite(day7[dayFU + i] / max(Double.zero, day7[dayFU + i] - day7[dayFV + i]), 1),
+          ifFinite(day7[dayFX + i] / max(Double.zero, day7[dayFX + i] - day7[dayFY + i]), 1),
+          ifFinite(day7[dayGA + i] / max(Double.zero, day7[dayGA + i] - day7[dayGB + i]), 1))
           * (day1[dayAE + i] - equiv_harmonious_min_perc[j]) + equiv_harmonious_min_perc[j])
     }
 
@@ -1372,22 +1368,22 @@ extension TunOl {
 
     /// Opt harm op period op during night prio operation
     let dayHS = 24090
-    // IF(GZ6<=0,0,MIN(1,MIN(IFERROR(HA6/(HA6-HB6),1),IFERROR(HC6/(HC6-HD6),1),IFERROR(HE6/(HE6-HF6),1),IFERROR(HG6/(HG6-HH6),1),IFERROR(HI6/(HI6-HJ6),1),IFERROR(HK6/(HK6-HL6),1),IFERROR(HM6/(HM6-HN6),1),IFERROR(HO6/(HO6-HP6),1),IFERROR(HQ6/(HQ6-HR6),1))*(Overall_harmonious_max_perc-Overall_harmonious_min_perc)+Overall_harmonious_min_perc))
+    // IF(GZ6<=0;0;MIN(1;MIN(IFERROR(HA6/MAX(0;HA6-HB6);1);IFERROR(HC6/MAX(0;HC6-HD6);1);IFERROR(HE6/MAX(0;HE6-HF6);1);IFERROR(HG6/MAX(0;HG6-HH6);1);IFERROR(HI6/MAX(0;HI6-HJ6);1);IFERROR(HK6/MAX(0;HK6-HL6);1);IFERROR(HM6/MAX(0;HM6-HN6);1);IFERROR(HO6/MAX(0;HO6-HP6);1);IFERROR(HQ6/MAX(0;HQ6-HR6);1))*(Overall_harmonious_max_perc-Overall_harmonious_min_perc)+Overall_harmonious_min_perc))
     for i in 0..<365 {
       day7[dayHS + i] = iff(
         day7[dayGZ + i] <= Double.zero, Double.zero,
         min(
           1,
           min(
-            ifFinite(day7[dayHA + i] / (day7[dayHA + i] - day7[dayHB + i]), 1),
-            ifFinite(day7[dayHC + i] / (day7[dayHC + i] - day7[dayHD + i]), 1),
-            ifFinite(day7[dayHE + i] / (day7[dayHE + i] - day7[dayHF + i]), 1),
-            ifFinite(day7[dayHG + i] / (day7[dayHG + i] - day7[dayHH + i]), 1),
-            ifFinite(day7[dayHI + i] / (day7[dayHI + i] - day7[dayHJ + i]), 1),
-            ifFinite(day7[dayHK + i] / (day7[dayHK + i] - day7[dayHL + i]), 1),
-            ifFinite(day7[dayHM + i] / (day7[dayHM + i] - day7[dayHN + i]), 1),
-            ifFinite(day7[dayHO + i] / (day7[dayHO + i] - day7[dayHP + i]), 1),
-            ifFinite(day7[dayHQ + i] / (day7[dayHQ + i] - day7[dayHR + i]), 1))
+            ifFinite(day7[dayHA + i] / max(Double.zero, day7[dayHA + i] - day7[dayHB + i]), 1),
+            ifFinite(day7[dayHC + i] / max(Double.zero, day7[dayHC + i] - day7[dayHD + i]), 1),
+            ifFinite(day7[dayHE + i] / max(Double.zero, day7[dayHE + i] - day7[dayHF + i]), 1),
+            ifFinite(day7[dayHG + i] / max(Double.zero, day7[dayHG + i] - day7[dayHH + i]), 1),
+            ifFinite(day7[dayHI + i] / max(Double.zero, day7[dayHI + i] - day7[dayHJ + i]), 1),
+            ifFinite(day7[dayHK + i] / max(Double.zero, day7[dayHK + i] - day7[dayHL + i]), 1),
+            ifFinite(day7[dayHM + i] / max(Double.zero, day7[dayHM + i] - day7[dayHN + i]), 1),
+            ifFinite(day7[dayHO + i] / max(Double.zero, day7[dayHO + i] - day7[dayHP + i]), 1),
+            ifFinite(day7[dayHQ + i] / max(Double.zero, day7[dayHQ + i] - day7[dayHR + i]), 1))
             * Overall_harmonious_range + Overall_harmonious_min_perc))
     }
 
@@ -1664,13 +1660,13 @@ extension TunOl {
     for i in 0..<365 { day7[dayIW + i] = day7[dayIA + i] + day7[dayIB + i] + day7[dayIO + i] }
 
     /// Checksum
-    // let dayIX = 35040
+    let dayIX = 35040
     // MAX(0,-IC6)+MAX(0,-II6)+MAX(0,-IP6)+MAX(0,-IT6)
-    // for i in 1..<365 {
-    //   let IX = max(Double.zero, -day7[dayIC + i]) + max(Double.zero, -day7[dayII + i]) + max(Double.zero, -day7[dayIP + i]) + max(Double.zero, -day7[dayIT + i])
-    //   if !IX.isZero { print("Checksum error", i); break }
-    //   day7[dayIX + i] = IX
-    // }
+    for i in 0..<365 {
+      let IX = max(Double.zero, -day7[dayIC + i]) + max(Double.zero, -day7[dayII + i]) + max(Double.zero, -day7[dayIP + i]) + max(Double.zero, -day7[dayIT + i])
+      if !IX.isZero { print("Checksum error", i) }
+      day7[dayIX + i] = IX
+    }
 
     /// Heat cons for harm op during harm op period
     let dayJI = 38690
@@ -1940,13 +1936,13 @@ extension TunOl {
     for i in 0..<365 { day7[dayKB + i] = day7[dayJF + i] + day7[dayJG + i] + day7[dayJT + i] }
 
     /// Checksum
-    // let dayKC = 45990
+    let dayKC = 45990
     // MAX(0,-JH6)+MAX(0,-JN6)+MAX(0,-JU6)+MAX(0,-JY6)
-    // for i in 1..<365 {
-    //   let KC = max(Double.zero, -day7[dayJH + i]) + max(Double.zero, -day7[dayJN + i]) + max(Double.zero, -day7[dayJU + i]) + max(Double.zero, -day7[dayJY + i])
-    //   if !KC.isZero { print("Checksum error", i); break }
-    //   day7[dayKC + i] = KC
-    // }
+    for i in 0..<365 {
+      let KC = max(Double.zero, -day7[dayJH + i]) + max(Double.zero, -day7[dayJN + i]) + max(Double.zero, -day7[dayJU + i]) + max(Double.zero, -day7[dayJY + i])
+      if !KC.isZero { print("Checksum error", i) }
+      day7[dayKC + i] = KC
+    }
     return day7
   }
 }
