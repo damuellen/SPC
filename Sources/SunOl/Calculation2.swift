@@ -6,8 +6,8 @@ extension TunOl {
     var hour4 = [Double](repeating: Double.zero, count: 490560+8760)
     let hourBO = 166440
     var daysBO: [[Int]] = hour1[hourBO..<(hourBO + 8760)].indices.chunked(by: { hour1[$0] == hour1[$1] }).map { $0.map { $0 - hourBO } }
-    let start = daysBO.removeFirst()
-    daysBO[daysBO.endIndex-1].append(contentsOf: start)
+    let end = daysBO.removeLast()
+    daysBO[0].append(contentsOf: end)
     let daysD: [[Int]] = (0..<365).map { Array(repeating: $0, count: 24) }
     let hourAY = 26280
     let AYsum = hour1.sum(hours: daysD, condition: hourAY)
