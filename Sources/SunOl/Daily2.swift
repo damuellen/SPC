@@ -1,8 +1,9 @@
 extension TunOl {
   func day(case j: Int, hour0: [Double]) -> [Double] {
-    let daysU: [[Int]] = Array(hour0[113880..<(113880 + 8760)].indices.chunked(by: { hour0[$0] == hour0[$1] })
-      .map { $0.map { $0 - 113880 } }.dropFirst())
-
+    var daysU: [[Int]] = hour0[113880..<(113880 + 8760)].indices.chunked(by: { hour0[$0] == hour0[$1] })
+      .map { $0.map { $0 - 113880 } }
+    let start = daysU.removeFirst()
+    daysU[daysU.endIndex-1].append(contentsOf: start)
     let hourS = 96360
 
     let S_UcountZero = hour0.countOf(daysU, condition: hourS, predicate: { $0 <= 0 })
