@@ -1,9 +1,9 @@
 import Helpers
 
 public struct Costs {
-  // public static let labels = ["Loops", "DC", "AC", "Heater", "TES", "EY", "PB", "BESS", "H2", "Meth",
-  //  "Boiler", "Grid", "Total_CAPEX", "Meth_Prod", "LCoE", "LCoTh", "LCH2", "LCoM", "PB_startups",
-  //  "TES_discharges", "EY_plant_starts", "EY_count", "Meth_starts", "H2_to_Meth", "limit_sum"]
+  public static let labels = ["Loops", "DC", "AC", "Heater", "TES", "EY", "PB", "BESS", "H2", "Meth",
+   "Boiler", "Grid", "Total_CAPEX", "Meth_Prod", "LCoE", "LCoTh", "LCH2", "LCoM", "PB_startups",
+   "TES_discharges", "EY_plant_starts", "EY_count", "Meth_starts", "H2_to_Meth", "limit_sum"]
 
   // static let AdditionalCostPerLoop = 762533.1364
   static let FX_USD = 0.82
@@ -70,7 +70,7 @@ public struct Costs {
     // let CSP_SF_cost_dedicated_to_aux_heat = Costs.AdditionalCostPerLoop * auxLoops
 
     let PV_DC_cost = model.PV_DC_cap_ud * Costs.PV_DC_part.coeff + 0.0
-    let PV_AC_Cost = (model.PV_AC_cap_ud / Costs.PV_AC_part.basis) ** Costs.PV_AC_part.exp * Costs.PV_AC_part.basis * Costs.PV_AC_part.coeff + 0.0
+    let PV_AC_cost = (model.PV_AC_cap_ud / Costs.PV_AC_part.basis) ** Costs.PV_AC_part.exp * Costs.PV_AC_part.basis * Costs.PV_AC_part.coeff + 0.0
 
     let Heater_cost = model.Heater_cap_ud > 0 ?
       (Costs.Heater_system.c1 + Costs.Heater_system.coeff * (model.Heater_cap_ud / Costs.Heater_system.basis) ** Costs.Heater_system.exp + model.Heater_cap_ud
