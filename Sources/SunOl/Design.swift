@@ -239,45 +239,47 @@ public struct TunOl {
 
   var th_Coeff: [Double] = [0]  // PB_Eff!$U3 PB_Eff!$T3 PB_Eff!$S3 PB_Eff!$R3 PB_Eff!$Q3
 
-  var BESS_cap_ud: Double = 130
-  var CCU_C_O_2_nom_prod_ud: Double = 25
-  var C_O_2_storage_cap_ud: Double = 5000
+  
+  
   var CSP_loop_nr_ud: Double = 120
-  var El_boiler_cap_ud: Double = 100
-  var EY_var_net_nom_cons_ud: Double = 450
-  var Grid_export_max_ud: Double = 50
-  var Grid_import_max_ud: Double = 50
-  var Hydrogen_storage_cap_ud: Double = 60
-  var Heater_cap_ud: Double = 300
-  var MethDist_Meth_nom_prod_ud: Double = 20
-  var MethSynt_RawMeth_nom_prod_ud: Double = 50
+  var TES_full_load_hours_ud: Double = 20
   var PB_nom_gross_cap_ud: Double = 190
   var PV_AC_cap_ud: Double = 800
   var PV_DC_cap_ud: Double = 1116
+  var EY_var_net_nom_cons_ud: Double = 450
+  var Hydrogen_storage_cap_ud: Double = 60
+  var Heater_cap_ud: Double = 300
+  var CCU_C_O_2_nom_prod_ud: Double = 27
+  var C_O_2_storage_cap_ud: Double = 5000
+  var MethSynt_RawMeth_nom_prod_ud: Double = 50
   var RawMeth_storage_cap_ud: Double = 300
-  var TES_full_load_hours_ud: Double = 20
+  var MethDist_Meth_nom_prod_ud: Double = 20
+  var El_boiler_cap_ud: Double = 100
+  var BESS_cap_ud: Double = 130
+  var Grid_export_max_ud: Double = 50
+  var Grid_import_max_ud: Double = 50
   var Grid_import_yes_no_BESS_strategy: Double = 1
   var Grid_import_yes_no_PB_strategy: Double = 1
 
   init(_ parameter: [Double]) {
     if !parameter.isEmpty {
-      self.BESS_cap_ud = parameter[0]
-      self.CCU_C_O_2_nom_prod_ud = parameter[1]
-      self.C_O_2_storage_cap_ud = parameter[2]
-      self.CSP_loop_nr_ud = parameter[3]
-      self.El_boiler_cap_ud = parameter[4]
+      self.CSP_loop_nr_ud = parameter[0]
+      self.TES_full_load_hours_ud = parameter[1]
+      self.PB_nom_gross_cap_ud = parameter[2]
+      self.PV_AC_cap_ud = parameter[3]
+      self.PV_DC_cap_ud = parameter[4]
       self.EY_var_net_nom_cons_ud = parameter[5]
-      self.Grid_export_max_ud = parameter[6]
-      self.Grid_import_max_ud = parameter[7]
-      self.Hydrogen_storage_cap_ud = parameter[8]
-      self.Heater_cap_ud = parameter[9]
-      self.MethDist_Meth_nom_prod_ud = parameter[10]
-      self.MethSynt_RawMeth_nom_prod_ud = parameter[11]
-      self.PB_nom_gross_cap_ud = parameter[12]
-      self.PV_AC_cap_ud = parameter[13]
-      self.PV_DC_cap_ud = parameter[14]
-      self.RawMeth_storage_cap_ud = parameter[15]
-      self.TES_full_load_hours_ud = parameter[16]   
+      self.Hydrogen_storage_cap_ud = parameter[6]
+      self.Heater_cap_ud = parameter[7]
+      self.CCU_C_O_2_nom_prod_ud = parameter[8]
+      self.C_O_2_storage_cap_ud = parameter[9]
+      self.MethSynt_RawMeth_nom_prod_ud = parameter[10]
+      self.RawMeth_storage_cap_ud = parameter[11]
+      self.MethDist_Meth_nom_prod_ud = parameter[12]
+      self.El_boiler_cap_ud = parameter[13]
+      self.BESS_cap_ud = parameter[14]
+      self.Grid_export_max_ud = parameter[15]
+      self.Grid_import_max_ud = parameter[16] 
     }
 
     let ac = self.PV_AC_cap_ud
@@ -377,9 +379,12 @@ public struct TunOl {
     let MethDist_heat_stup_cons = MethDist_Meth_nom_prod_ud / MethDist_Ref_meth_hour_prod * MethDist_Ref_heat_stup_cons
     self.Overall_fix_cons = EY_fix_cons + CCU_fix_cons + MethSynt_fix_cons + MethDist_fix_cons
     self.Overall_heat_fix_cons = EY_heat_fix_cons + CCU_heat_fix_cons - MethSynt_heat_fix_prod + MethDist_heat_fix_cons
-    // let Overall_harmonious_stup_cons = MethDist_stup_cons + MethSynt_stup_cons + CCU_stup_cons + EY_stup_cons
-    // let Overall_harmonious_heat_stup_cons =
+    // let Overall_stup_cons = MethDist_stup_cons + MethSynt_stup_cons + CCU_stup_cons + EY_stup_cons
+    // let Overall_heat_stup_cons =
     //   MethDist_heat_stup_cons + MethSynt_heat_stup_cons + CCU_heat_stup_cons + EY_heat_stup_cons
+    // let Overall_stby_cons = MethDist_stby_cons + MethSynt_stby_cons + CCU_stby_cons + EY_stby_cons
+    // let Overall_heat_stby_cons =
+    //   MethDist_heat_stby_cons + MethSynt_heat_stby_cons + CCU_heat_stby_cons + EY_heat_stby_cons
     self.MethDist_harmonious_min_perc = max(
       MethDist_cap_min_perc, MethSynt_RawMeth_min_prod / MethDist_RawMeth_nom_cons,
       max(MethSynt_cap_min_perc, EY_Hydrogen_min_prod / MethSynt_Hydrogen_nom_cons) * MethSynt_RawMeth_nom_prod_ud / MethDist_RawMeth_nom_cons,
@@ -465,7 +470,7 @@ public struct TunOl {
     self.CCU_max_perc[3] = CCU_harmonious_max_perc
     self.EY_max_perc[3] = EY_harmonious_max_perc
     let Overall_harmonious_var_cons_at_PB_nom = max(PB_net_min_cap, min(PB_nom_net_cap - Overall_fix_cons, Overall_harmonious_var_max_cons))
-    let Overall_harmonious_perc_at_PB_nom = Overall_harmonious_max_perc / Overall_harmonious_var_max_cons * Overall_harmonious_var_cons_at_PB_nom
+    let Overall_harmonious_perc_at_PB_nom = max(Overall_harmonious_min_perc, min(Overall_harmonious_max_perc, Overall_harmonious_max_perc / Overall_harmonious_var_max_cons * Overall_harmonious_var_cons_at_PB_nom))
 
     for j in 0..<4 {
       self.overall_fix_stby_cons[j] =
