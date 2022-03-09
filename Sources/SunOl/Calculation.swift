@@ -313,7 +313,7 @@ extension TunOl {
   func hour1(hour0: [Double]) -> [Double] {
     let (hourF, hourJ, hourL, hourM) = (0, 26280, 43800, 52560)
     var hour1 = [Double](repeating: Double.zero, count: 192_720)
-    let daysD: [[Int]] = (0..<365).map { Array(repeating: $0, count: 24) }
+    let daysD: [[Int]] = (0..<365).map { Array(stride(from: $0 * 24, to: ($0+1) * 24, by: 1)) }
 
     /// Aux elec for CSP SF and PV Plant MWel
     let hourAV = 0
