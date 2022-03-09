@@ -1,18 +1,23 @@
+import Utilities
 import XCTest
 import xlsxwriter
+
 @testable import SunOl
-import Utilities
 
 class SunOlTests: XCTestCase {
   func testsCalculation() {
     let path = "/workspaces/SPC/input.txt"
-    guard let csv = CSV(atPath: path) else { print("No input."); return }
+    guard let csv = CSV(atPath: path) else {
+      print("No input.")
+      return
+    }
     TunOl.Q_Sol_MW_thLoop = [0] + csv["csp"]
     TunOl.Reference_PV_plant_power_at_inverter_inlet_DC = [0] + csv["pv"]
     TunOl.Reference_PV_MV_power_at_transformer_outlet = [0] + csv["out"]
 
     let model = TunOl([])
-    let hour0 = model.hour0(TunOl.Q_Sol_MW_thLoop, TunOl.Reference_PV_plant_power_at_inverter_inlet_DC, TunOl.Reference_PV_MV_power_at_transformer_outlet)
+    let hour0 = model.hour0(
+      TunOl.Q_Sol_MW_thLoop, TunOl.Reference_PV_plant_power_at_inverter_inlet_DC, TunOl.Reference_PV_MV_power_at_transformer_outlet)
     XCTAssertEqual(hour0[9113], 0.28, accuracy: 0.1, "H357")
     XCTAssertEqual(hour0[17873], 0.95, accuracy: 0.1, "I357")
     XCTAssertEqual(hour0[26633], 36.00, accuracy: 0.1, "J357")
@@ -78,7 +83,6 @@ class SunOlTests: XCTestCase {
 
     let day6 = model.day(hour0: hour0)
     var day = [[Double]]()
-  
     let dayLVstart = 29200
     let dayMBend = 31390 + 365
     let dayNEstart = 41610
@@ -147,7 +151,6 @@ class SunOlTests: XCTestCase {
         XCTAssertEqual(hour3[254393], 0.00, accuracy: 0.1, "DS357")
         XCTAssertEqual(hour3[263153], 0.00, accuracy: 0.1, "DT357")
       }
-      
       var day1 = model.day(case: j, hour2: hour2, hour3: hour3)
       if j == 0 {
         XCTAssertEqual(day1[330], 15.00, accuracy: 0.1, "C333")
@@ -163,6 +166,8 @@ class SunOlTests: XCTestCase {
         XCTAssertEqual(day1[5440], 1.00, accuracy: 0.1, "Q333")
         XCTAssertEqual(day1[5805], 0.70, accuracy: 0.1, "R333")
       }
+
+      
       let hour4 = model.hour4(j: j, day1: day1, hour0: hour0, hour1: hour1, hour2: hour2)
       model.night(case: j, day1: &day1, hour3: hour3, hour4: hour4)
       if j == 0 {
@@ -194,7 +199,123 @@ class SunOlTests: XCTestCase {
       day.append(Array(day17[dayLVstart..<dayMBend]))
       day.append(Array(day17[dayNEstart..<dayNKend]))
 
-      let day21 = model.day(case: j, hour0: hour0)     
+      let day21 = model.day(case: j, hour0: hour0)
+      if j == 0 {
+        XCTAssertEqual(day21[330], 136.32, accuracy: 0.1, "E333")
+        XCTAssertEqual(day21[695], 149.51, accuracy: 0.1, "F333")
+        XCTAssertEqual(day21[1060], 333.43, accuracy: 0.1, "G333")
+        XCTAssertEqual(day21[1425], 543.74, accuracy: 0.1, "H333")
+        XCTAssertEqual(day21[1790], 234.40, accuracy: 0.1, "I333")
+        XCTAssertEqual(day21[2155], 468.80, accuracy: 0.1, "J333")
+        XCTAssertEqual(day21[2520], 0.00, accuracy: 0.1, "K333")
+        XCTAssertEqual(day21[2885], 0.00, accuracy: 0.1, "L333")
+        XCTAssertEqual(day21[3250], 0.00, accuracy: 0.1, "M333")
+        XCTAssertEqual(day21[3615], 0.00, accuracy: 0.1, "N333")
+        XCTAssertEqual(day21[3980], 1673.42, accuracy: 0.1, "O333")
+        XCTAssertEqual(day21[4345], 3291.09, accuracy: 0.1, "P333")
+        XCTAssertEqual(day21[4710], 497.36, accuracy: 0.1, "Q333")
+        XCTAssertEqual(day21[5075], 985.02, accuracy: 0.1, "R333")
+        XCTAssertEqual(day21[5440], 234.40, accuracy: 0.1, "S333")
+        XCTAssertEqual(day21[5805], 468.80, accuracy: 0.1, "T333")
+        XCTAssertEqual(day21[6170], 206.06, accuracy: 0.1, "U333")
+        XCTAssertEqual(day21[6535], 412.12, accuracy: 0.1, "V333")
+        XCTAssertEqual(day21[6900], 28.34, accuracy: 0.1, "W333")
+        XCTAssertEqual(day21[7265], 56.68, accuracy: 0.1, "X333")
+        XCTAssertEqual(day21[7630], 0.22, accuracy: 0.1, "Y333")
+        XCTAssertEqual(day21[7995], -0.56, accuracy: 0.1, "Z333")
+        XCTAssertEqual(day21[8360], 1.00, accuracy: 0.1, "AA333")
+        XCTAssertEqual(day21[8725], 1.00, accuracy: 0.1, "AB333")
+        XCTAssertEqual(day21[9090], 1.00, accuracy: 0.1, "AC333")
+        XCTAssertEqual(day21[9455], 1.00, accuracy: 0.1, "AD333")
+        XCTAssertEqual(day21[9820], 0.70, accuracy: 0.1, "AE333")
+      }
+      if j == 1 {
+        XCTAssertEqual(day21[330], 150.55, accuracy: 0.1, "AG333")
+        XCTAssertEqual(day21[695], 180.55, accuracy: 0.1, "AH333")
+        XCTAssertEqual(day21[1060], 189.31, accuracy: 0.1, "AI333")
+        XCTAssertEqual(day21[1425], 334.84, accuracy: 0.1, "AJ333")
+        XCTAssertEqual(day21[1790], 0.00, accuracy: 0.1, "AK333")
+        XCTAssertEqual(day21[2155], 0.00, accuracy: 0.1, "AL333")
+        XCTAssertEqual(day21[2520], 206.06, accuracy: 0.1, "AM333")
+        XCTAssertEqual(day21[2885], 412.12, accuracy: 0.1, "AN333")
+        XCTAssertEqual(day21[3250], 28.34, accuracy: 0.1, "AO333")
+        XCTAssertEqual(day21[3615], 56.68, accuracy: 0.1, "AP333")
+        XCTAssertEqual(day21[3980], 1656.63, accuracy: 0.1, "AQ333")
+        XCTAssertEqual(day21[4345], 3257.50, accuracy: 0.1, "AR333")
+        XCTAssertEqual(day21[4710], 562.14, accuracy: 0.1, "AS333")
+        XCTAssertEqual(day21[5075], 1114.59, accuracy: 0.1, "AT333")
+        XCTAssertEqual(day21[5440], 0.00, accuracy: 0.1, "AU333")
+        XCTAssertEqual(day21[5805], 0.00, accuracy: 0.1, "AV333")
+        XCTAssertEqual(day21[6170], 206.06, accuracy: 0.1, "AW333")
+        XCTAssertEqual(day21[6535], 412.12, accuracy: 0.1, "AX333")
+        XCTAssertEqual(day21[6900], 28.34, accuracy: 0.1, "AY333")
+        XCTAssertEqual(day21[7265], 56.68, accuracy: 0.1, "AZ333")
+        XCTAssertEqual(day21[7630], 1.00, accuracy: 0.1, "BA333")
+        XCTAssertEqual(day21[7995], 1.00, accuracy: 0.1, "BB333")
+        XCTAssertEqual(day21[8360], 0.96, accuracy: 0.1, "BC333")
+        XCTAssertEqual(day21[8725], 0.92, accuracy: 0.1, "BD333")
+        XCTAssertEqual(day21[9090], 0.53, accuracy: 0.1, "BE333")
+        XCTAssertEqual(day21[9455], 0.06, accuracy: 0.1, "BF333")
+        XCTAssertEqual(day21[9820], 1.10, accuracy: 0.1, "BG333")
+      }
+      if j == 2 {
+        XCTAssertEqual(day21[330], 168.15, accuracy: 0.1, "BI333")
+        XCTAssertEqual(day21[695], 208.10, accuracy: 0.1, "BJ333")
+        XCTAssertEqual(day21[1060], 394.23, accuracy: 0.1, "BK333")
+        XCTAssertEqual(day21[1425], 682.49, accuracy: 0.1, "BL333")
+        XCTAssertEqual(day21[1790], 0.00, accuracy: 0.1, "BM333")
+        XCTAssertEqual(day21[2155], 0.00, accuracy: 0.1, "BN333")
+        XCTAssertEqual(day21[2520], 0.00, accuracy: 0.1, "BO333")
+        XCTAssertEqual(day21[2885], 0.00, accuracy: 0.1, "BP333")
+        XCTAssertEqual(day21[3250], 28.34, accuracy: 0.1, "BQ333")
+        XCTAssertEqual(day21[3615], 51.58, accuracy: 0.1, "BR333")
+        XCTAssertEqual(day21[3980], 1637.90, accuracy: 0.1, "BS333")
+        XCTAssertEqual(day21[4345], 2935.05, accuracy: 0.1, "BT333")
+        XCTAssertEqual(day21[4710], 356.09, accuracy: 0.1, "BU333")
+        XCTAssertEqual(day21[5075], 640.08, accuracy: 0.1, "BV333")
+        XCTAssertEqual(day21[5440], 0.00, accuracy: 0.1, "BW333")
+        XCTAssertEqual(day21[5805], 0.00, accuracy: 0.1, "BX333")
+        XCTAssertEqual(day21[6170], 0.00, accuracy: 0.1, "BY333")
+        XCTAssertEqual(day21[6535], 0.00, accuracy: 0.1, "BZ333")
+        XCTAssertEqual(day21[6900], 28.34, accuracy: 0.1, "CA333")
+        XCTAssertEqual(day21[7265], 51.58, accuracy: 0.1, "CB333")
+        XCTAssertEqual(day21[7630], 1.00, accuracy: 0.1, "CC333")
+        XCTAssertEqual(day21[7995], 1.00, accuracy: 0.1, "CD333")
+        XCTAssertEqual(day21[8360], 1.00, accuracy: 0.1, "CE333")
+        XCTAssertEqual(day21[8725], 1.00, accuracy: 0.1, "CF333")
+        XCTAssertEqual(day21[9090], 0.53, accuracy: 0.1, "CG333")
+        XCTAssertEqual(day21[9455], 0.14, accuracy: 0.1, "CH333")
+        XCTAssertEqual(day21[9820], 1.00, accuracy: 0.1, "CI333")
+      }
+      if j == 3 {
+        XCTAssertEqual(day21[330], 1747.79, accuracy: 0.1, "CK333")
+        XCTAssertEqual(day21[695], 3084.89, accuracy: 0.1, "CL333")
+        XCTAssertEqual(day21[1060], 738.12, accuracy: 0.1, "CM333")
+        XCTAssertEqual(day21[1425], 1310.37, accuracy: 0.1, "CN333")
+        XCTAssertEqual(day21[1790], 0.00, accuracy: 0.1, "CO333")
+        XCTAssertEqual(day21[2155], 0.00, accuracy: 0.1, "CP333")
+        XCTAssertEqual(day21[2520], 0.00, accuracy: 0.1, "CQ333")
+        XCTAssertEqual(day21[2885], 0.00, accuracy: 0.1, "CR333")
+        XCTAssertEqual(day21[3250], 0.00, accuracy: 0.1, "CS333")
+        XCTAssertEqual(day21[3615], 0.00, accuracy: 0.1, "CT333")
+        XCTAssertEqual(day21[3980], 55.76, accuracy: 0.1, "CU333")
+        XCTAssertEqual(day21[4345], 55.76, accuracy: 0.1, "CV333")
+        XCTAssertEqual(day21[4710], 9.70, accuracy: 0.1, "CW333")
+        XCTAssertEqual(day21[5075], 9.70, accuracy: 0.1, "CX333")
+        XCTAssertEqual(day21[5440], 0.00, accuracy: 0.1, "CY333")
+        XCTAssertEqual(day21[5805], 0.00, accuracy: 0.1, "CZ333")
+        XCTAssertEqual(day21[6170], 0.00, accuracy: 0.1, "DA333")
+        XCTAssertEqual(day21[6535], 0.00, accuracy: 0.1, "DB333")
+        XCTAssertEqual(day21[6900], 0.00, accuracy: 0.1, "DC333")
+        XCTAssertEqual(day21[7265], 0.00, accuracy: 0.1, "DD333")
+        XCTAssertEqual(day21[7630], 1.00, accuracy: 0.1, "DE333")
+        XCTAssertEqual(day21[7995], 1.00, accuracy: 0.1, "DF333")
+        XCTAssertEqual(day21[8360], 1.00, accuracy: 0.1, "DG333")
+        XCTAssertEqual(day21[8725], 1.00, accuracy: 0.1, "DH333")
+        XCTAssertEqual(day21[9090], 1.00, accuracy: 0.1, "DI333")
+        XCTAssertEqual(day21[9455], 1.00, accuracy: 0.1, "DJ333")
+        XCTAssertEqual(day21[9820], 1.00, accuracy: 0.1, "DK333")
+      }
       let day27 = model.day(case: j, day1: day21, day6: day6)
 
       day.append(Array(day27[dayIPstart..<dayIXend]))
@@ -208,9 +329,6 @@ class SunOlTests: XCTestCase {
       // year.append(best[0])
     }
 
-    let costs = Costs(
-    )
-  
+    let costs = Costs()
   }
 }
-
