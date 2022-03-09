@@ -7,6 +7,8 @@ public let semaphore = DispatchSemaphore(value: 0)
 public func fitness(values: [Double]) -> [Double] {
   let values = [Double]()
   let model = TunOl(values)
+  let costs = Costs.invest(model)
+  dump(costs)
   //TunOl.Grid_import_yes_no_BESS_strategy = 0
   //TunOl.Grid_import_yes_no_PB_strategy = 0
   //dump(model)
@@ -49,17 +51,17 @@ public func fitness(values: [Double]) -> [Double] {
 
   var year = [Int]()
   for d in 0..<365 {
-    // let value1Day = day.indices.map { i in day[i][d] }
-    // let value2Day = day.indices.map { i in day[i+365][d] }
-    // let value3Day = day.indices.map { i in day[i+365+365][d] }
+    let value1Day = day.indices.map { i in day[i][d+365] }
+    let value2Day = day.indices.map { i in day[i][d+365] }
+    let value3Day = day.indices.map { i in day[i][d+365+365] }
     // let valuesDay = value1Day[d] * value2Day[d] * value3Day[d]
     // let best = valuesDay.indices.filter { valuesDay[$0] > 0 }.sorted { valuesDay[$0] > valuesDay[$1] }
     // year.append(best[0])
   }
 
-  let costs = Costs()
   
-  return costs.invest(model)
+  
+  return []
 }
 
 public func MGOADE(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fitness: ([Double]) -> [Double]) -> [[Double]] {

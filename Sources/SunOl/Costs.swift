@@ -25,7 +25,7 @@ public struct Costs {
   static let Electrical_boiler = (basis: 3.27, exp: 0.7, coeff: 494000 * 1.45 * 1.2)
   static let Substation = (basis: 135.0, exp: 0.7, coeff: 2_400_000.0)
  
-  public func invest(_ model: TunOl) -> [Double]
+  public static func invest(_ model: TunOl) -> [Double]
    {
     // let factor = min(Heat_to_aux_directly_from_CSP_sum + Heat_to_aux_from_PB_sum * model.PB_Ratio_Heat_input_vs_output,
     //  Q_solar_before_dumping_sum - Total_SF_heat_dumped_sum - TES_thermal_input_by_CSP_sum)
