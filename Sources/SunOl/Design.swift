@@ -249,7 +249,7 @@ public struct TunOl {
   var EY_var_net_nom_cons_ud: Double = 450
   var Hydrogen_storage_cap_ud: Double = 60
   var Heater_cap_ud: Double = 300
-  var CCU_C_O_2_nom_prod_ud: Double = 27
+  var CCU_C_O_2_nom_prod_ud: Double = 25
   var C_O_2_storage_cap_ud: Double = 5000
   var MethSynt_RawMeth_nom_prod_ud: Double = 50
   var RawMeth_storage_cap_ud: Double = 300
