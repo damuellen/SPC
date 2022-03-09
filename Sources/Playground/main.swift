@@ -10,7 +10,7 @@ print(tunol)
 signal(SIGINT, SIG_IGN)
 source.setEventHandler { source.cancel() }
 #else
-MessageBox(text: "Calculation started.\nhttp://127.0.0.1:9080", caption: "TunOl")
+MessageBox(text: "Calculation started.", caption: "TunOl")
 import WinSDK
 _ = SetConsoleOutputCP(UINT(CP_UTF8))
 SetConsoleCtrlHandler({_ in source.cancel();semaphore.wait();return WindowsBool(true)}, true)
@@ -80,13 +80,13 @@ struct Command: ParsableCommand {
     let wb = Workbook(name: name)
     let ws = wb.addWorksheet()
     let ws2 = wb.addWorksheet()
-    let names = Costs.labels[0..<11]
+    let names = labels[0..<11]
 
     var r = 0
     var r2 = 0
     defer {
       print(name)
-      ws.table(range: [0, 0, r, Costs.labels.count - 1], header: Costs.labels)
+      ws.table(range: [0, 0, r, labels.count - 1], header: labels)
       names.enumerated().forEach { column, name in let chart = wb.addChart(type: .scatter)  //.set(y_axis: 1000...2500)
         chart.addSeries().set(marker: 5, size: 4)
         .values(sheet: ws, range: [1, 17, r, 17])

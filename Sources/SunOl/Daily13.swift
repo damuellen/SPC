@@ -1178,13 +1178,13 @@ extension TunOl {
     }
 
     /// Checksum
-    // let dayMB = 31390
+    let dayMB = 31390
     // MAX(0,-LD6)+MAX(0,-LJ6)+MAX(0,-LQ6)+MAX(0,-LU6)
-    // for i in 1..<365 {
-    //   let MB = max(Double.zero, -day7[dayLD + i]) + max(Double.zero, -day7[dayLJ + i]) + max(Double.zero, -day7[dayLQ + i]) + max(Double.zero, -day7[dayLU + i])
-    //   if !MB.isZero { print("Checksum error", i); break }
-    //   day7[dayMB + i] = MB
-    // }
+    for i in 0..<365 {
+      let MB = max(Double.zero, -day7[dayLD + i]) + max(Double.zero, -day7[dayLJ + i]) + max(Double.zero, -day7[dayLQ + i]) + max(Double.zero, -day7[dayLU + i])
+      // if MB > 1E-13 { print("Checksum error daily 1", i, j, MB); break }
+      day7[dayMB + i] = MB
+    }
 
     /// el cons for harm op during harm op period
     let dayMD = 31755
@@ -1577,13 +1577,13 @@ extension TunOl {
     }
 
     /// Checksum
-    // let dayNK = 43800
+    let dayNK = 43800
     // MAX(0,-MM6)+MAX(0,-MS6)+MAX(0,-MZ6)+MAX(0,-ND6)
-    // for i in 1..<365 {
-    //   let NK = max(Double.zero, -day7[dayMM + i]) + max(Double.zero, -day7[dayMS + i]) + max(Double.zero, -day7[dayMZ + i]) + max(Double.zero, -day7[dayND + i])
-    //   if !NK.isZero { print("Checksum error", i); break }
-    //   day7[dayNK + i] = NK
-    // }
+    for i in 0..<365 {
+      let NK = max(Double.zero, -day7[dayMM + i]) + max(Double.zero, -day7[dayMS + i]) + max(Double.zero, -day7[dayMZ + i]) + max(Double.zero, -day7[dayND + i])
+      // if NK > 1E-13 { print("Checksum error daily 1", i, j, NK); break }
+      day7[dayNK + i] = NK
+    }
     return day7
   }
 }
