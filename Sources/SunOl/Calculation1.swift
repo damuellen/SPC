@@ -1,7 +1,7 @@
 extension TunOl {
   func hour2(j: Int, hour0: [Double], hour1: [Double]) -> [Double] {
     let (hourJ, hourL, hourM, hourAW, hourBK, hourBM, hourBO, hourBP, hourBQ) = (26280, 43800, 52560, 8760, 131400, 148920, 166440, 175200, 183960)
-    let daysD: [[Int]] = (0..<365).map { Array(repeating: $0, count: 24) }
+    let daysD: [[Int]] = (0..<365).map  { Array(stride(from: $0 * 24, to: ($0+1) * 24, by: 1)) }
     var daysBO: [[Int]] = hour1[hourBO..<(hourBO + 8760)].indices.chunked(by: { hour1[$0] == hour1[$1] }).map { $0.map { $0 - hourBO } }
     let end = daysBO.removeLast()
     daysBO[0].append(contentsOf: end)
@@ -90,7 +90,7 @@ extension TunOl {
     for i in 1..<8760 {
       hour2[hourBZ + i] = iff(
         and(hour2[hourBY + i].isZero, hour2[hourBY + i + 1] > Double.zero),
-        iff((hour2[min(hourBY + i - 6, hourBY + i)...(hourBY + i)].reduce(0.0) { if $1.isZero { return $0+1 }; return $0 }) == PB_warm_start_duration, PB_warm_start_heat_req, PB_hot_start_heat_req),
+        iff((hour2[min(hourBY + i - 5, hourBY + i)...(hourBY + i)].reduce(0.0) { if $1.isZero { return $0+1 }; return $0 }) == PB_warm_start_duration, PB_warm_start_heat_req, PB_hot_start_heat_req),
         Double.zero)
     }
 

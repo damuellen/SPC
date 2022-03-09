@@ -8,7 +8,7 @@ extension TunOl {
     var daysBO: [[Int]] = hour1[hourBO..<(hourBO + 8760)].indices.chunked(by: { hour1[$0] == hour1[$1] }).map { $0.map { $0 - hourBO } }
     let end = daysBO.removeLast()
     daysBO[0].append(contentsOf: end)
-    let daysD: [[Int]] = (0..<365).map { Array(repeating: $0, count: 24) }
+    let daysD: [[Int]] = (0..<365).map { Array(stride(from: $0 * 24, to: ($0+1) * 24, by: 1)) }
     let hourAY = 26280
     let AYsum = hour1.sum(hours: daysD, condition: hourAY)
     /// Maximum night op perc considering tank sizes
