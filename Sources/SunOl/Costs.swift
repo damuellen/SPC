@@ -1,15 +1,11 @@
 import Helpers
 
 public struct Costs {
-  public static let labels = ["Loops", "DC", "AC", "Heater", "TES", "EY", "PB", "BESS", "H2", "Meth",
-   "Boiler", "Grid", "Total_CAPEX", "Meth_Prod", "LCoE", "LCoTh", "LCH2", "LCoM", "PB_startups",
-   "TES_discharges", "EY_plant_starts", "EY_count", "Meth_starts", "H2_to_Meth", "limit_sum"]
-
   // static let AdditionalCostPerLoop = 762533.1364
   static let FX_USD = 0.82
   static let Hydrogen_density = 5.783
-  static let CO2_density = 945
-  static let RawMeth_density = 782
+  static let CO2_density = 945.0
+  static let RawMeth_density = 782.0
 
   static let Solar_field = (basis: 38.0, c1: 1_581_220.0, exp: 0.8, f: 0.71, coeff: 18_000_000.0, range: 19.0...130.0)
   static let Assembly_hall = (c4: -0.037401977, c3: 23.83076428, c2: -5296.963373, c1: 518074.8094, c0: 185180.2005, range: 1.0...270.0)
@@ -21,7 +17,7 @@ public struct Costs {
   static let Electrolysis_coeff = 700_000.0 * 1.2
   static let Hydrogen_storage = (basis: 240 * Hydrogen_density, exp: 0.9, coeff: 780_000 * 1.2)
   static let CCU_plant = (basis: 20.6, exp: 0.7, coeff: 15_000_000.0 / FX_USD)
-  static let CO2_storage = (basis: 240 * CO2_density, exp: 0.9, coeff: 780_000)
+  static let CO2_storage = (basis: 240 * CO2_density, exp: 0.9, coeff: 780_000.0)
   static let MethSynt_plant = (basis: 19.5, exp: 0.7, coeff: 60_000_000.0 / FX_USD * 0.4)
   static let RawMeth_storage = (basis: 240 * RawMeth_density, exp: 0.9, coeff: 694146.8625 / FX_USD)
   static let MethDist_plant = (basis: 12.5, exp: 0.7, coeff: 60_000_000.0 / FX_USD * 0.6)
@@ -29,21 +25,6 @@ public struct Costs {
   static let Electrical_boiler = (basis: 3.27, exp: 0.7, coeff: 494000 * 1.45 * 1.2)
   static let Substation = (basis: 135.0, exp: 0.7, coeff: 2_400_000.0)
  
-  // var Heat_to_aux_directly_from_CSP_sum: Double
-  // var Heat_to_aux_from_PB_sum: Double
-  // var Q_solar_before_dumping_sum: Double
-  // var Total_SF_heat_dumped_sum: Double
-  // var TES_thermal_input_by_CSP_sum: Double
-  // var meth_plant_heatConsumption_sum: Double
-  // var EY_aux_heatConsumption_sum: Double
-  // var elec_from_grid_sum: Double
-  // var elec_to_grid_sum: Double
-  // var meth_produced_MTPH_sum: Double
-  // var avail_total_net_elec_sum: Double
-  // var net_elec_above_max_consumers_sum: Double
-  // var Produced_thermal_energy_sum: Double
-  // var H2_to_meth_production_effective_MTPH_sum: Double
-
   public func invest(_ model: TunOl) -> [Double]
    {
     // let factor = min(Heat_to_aux_directly_from_CSP_sum + Heat_to_aux_from_PB_sum * model.PB_Ratio_Heat_input_vs_output,
@@ -54,8 +35,8 @@ public struct Costs {
     // if (auxLoops <= 0 || factor <= 0) {
     //   auxLoops = 0
     // }
-    let Assembly_hall_cost = model.CSP_loop_nr_ud > 0 ? Assembly_hall.c4 * Double(model.CSP_loop_nr_ud) ** 4 + Assembly_hall.c3 * Double(model.CSP_loop_nr_ud) ** 3
-      + Assembly_hall.c2 * Double(model.CSP_loop_nr_ud) ** 2 + Assembly_hall.c1 * Double(model.CSP_loop_nr_ud) ** 1 + Assembly_hall.c0 : 0
+    let Assembly_hall_cost = model.CSP_loop_nr_ud > 0 ? Costs.Assembly_hall.c4 * Double(model.CSP_loop_nr_ud) ** 4 + Costs.Assembly_hall.c3 * Double(model.CSP_loop_nr_ud) ** 3
+      + Costs.Assembly_hall.c2 * Double(model.CSP_loop_nr_ud) ** 2 + Costs.Assembly_hall.c1 * Double(model.CSP_loop_nr_ud) ** 1 + Costs.Assembly_hall.c0 : 0
     // let CSP_SF_cost_dedicated_to_ICPH =
     //   Costs.Solar_field.coeff * ((model.CSP_loop_nr_ud - auxLoops) / Costs.Solar_field.basis) ** Costs.Solar_field.exp + Costs.Solar_field.c1 * Costs.Solar_field.f
     //   * (model.CSP_loop_nr_ud - auxLoops)
@@ -79,7 +60,7 @@ public struct Costs {
     var TES_storage_cost =
       Costs.Thermal_energy_storage.c1 + Costs.Thermal_energy_storage.coeff * (model.TES_salt_mass / Costs.Thermal_energy_storage.basis) ** Costs.Thermal_energy_storage.exp
       + model.TES_salt_mass * Costs.Thermal_energy_storage.c2 * Costs.Thermal_energy_storage.factor
-    if TES_Storage_cost.isNaN { TES_Storage_cost = 0 }
+    if TES_storage_cost.isNaN { TES_storage_cost = 0 }
     
     let PB_cost = model.PB_nom_gross_cap_ud > 0 ? (Costs.Power_Block.c1 + (model.PB_nom_gross_cap_ud - Costs.Power_Block.basis) * Costs.Power_Block.coeff) : 0
 
@@ -87,9 +68,9 @@ public struct Costs {
 
     let Hydrogen_storage_cost = Costs.Hydrogen_storage.coeff * (model.Hydrogen_storage_cap_ud / Costs.Hydrogen_storage.basis) ** Costs.Hydrogen_storage.exp + 0.0
 
-    let CCU_plant_cost = Costs.CCU_plant.coeff * (model.CCU_CO2_nom_prod_ud / Costs.CCU_plant.basis) ** Costs.CCU_plant.exp + 0.0
+    let CCU_plant_cost = Costs.CCU_plant.coeff * (model.CCU_C_O_2_nom_prod_ud / Costs.CCU_plant.basis) ** Costs.CCU_plant.exp + 0.0
 
-    let CO2_storage_cost = Costs.CO2_storage.coeff * (model.CO2_storage_cap_ud / Costs.CO2_storage.basis) ** Costs.CO2_storage.exp + 0.0
+    let CO2_storage_cost = Costs.CO2_storage.coeff * (model.C_O_2_storage_cap_ud / Costs.CO2_storage.basis) ** Costs.CO2_storage.exp + 0.0
 
     let MethSynt_plant_cost = Costs.MethSynt_plant.coeff * (model.MethSynt_RawMeth_nom_prod_ud / Costs.MethSynt_plant.basis) ** Costs.MethSynt_plant.exp + 0.0
 
@@ -133,6 +114,13 @@ public struct Costs {
     let Elec_buy = 2 * 0.091
     let Elec_sell = 0.33 * 0.091
 
+    return [
+      Total_CAPEX, Total_OPEX, FCR, Elec_buy, Elec_sell
+    ]
+  }
+  
+  public func production(_ model: TunOl) -> [Double]
+   {
     // let LCH2 =
     //   (FCR * CAPEX_Hydrogen_ICPH_half_of_loops_dedicated_to_aux_heat_electrolysis_half_of_electrical_boiler_cost + Total_OPEX
     //     + elec_from_grid_sum * BUY * 1000 - elec_to_grid_sum * SELL * 1000) / H2_to_meth_production_effective_MTPH_sum
@@ -146,16 +134,8 @@ public struct Costs {
     // var LCoTh =
     //   (FCR * CAPEX_aux_thermal_energy_csp_sf_cost_dedicated_to_aux_heat) / Produced_thermal_energy_sum
     // if LCoTh.isNaN { LCoTh = 0 }
-    return [
-      Total_CAPEX, Total_OPEX, FCR, Elec_buy, Elec_sell
-    //   Double(model.H2_to_meth_production_effective_MTPH_sum), (LCoM * 1000).rounded() / 1000, 
-    //   (LCoE * 100).rounded() / 100, (LCoTh * 100).rounded() / 100, (LCH2 * 100).rounded() / 100, Double(model.PB_startup_heatConsumption_effective_count),
-    //   Double(model.TES_discharge_effective_count), Double(model.EY_plant_start_count),
-    //   Double(model.gross_operating_point_of_EY_count), Double(model.meth_plant_start_count),
-    //   Double(model.H2_to_meth_production_effective_MTPH_count),
-    //   Double(aux_elec_missing_due_to_grid_limit_sum)
-    ]
 
-    return []
-  }
+     return []
+   }
 }
+
