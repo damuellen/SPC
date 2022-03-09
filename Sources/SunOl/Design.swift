@@ -298,8 +298,8 @@ public struct TunOl {
     let chunks = inverter.chunked { Int($0.0 * 100) == Int($1.0 * 100) }
     let eff1 = chunks.map { bin in bin.reduce(0.0) { $0 + $1.1 } / Double(bin.count) }
     let eff2 = zip(stride(from: 0.01, through: 1, by: 0.01), eff1).map { ac * $0.0 / $0.1 / dc }
-    self.LL_Coeff = Polynomial.fit(x: Array(eff2[...20]), y: Array(eff1[...20]), order: 6)!.coefficients
-    self.HL_Coeff = Polynomial.fit(x: Array(eff2[20...]), y: Array(eff1[20...]), order: 4)!.coefficients
+    self.LL_Coeff = Polynomial.fit(x: Array(eff2[..<20]), y: Array(eff1[..<20]), order: 7)!.coefficients
+    self.HL_Coeff = Polynomial.fit(x: Array(eff2[15...]), y: Array(eff1[15...]), order: 3)!.coefficients
 
     let PB_grs_el_cap_min_perc = PB_Ref_25p_gross_cap_max_aux_heat / PB_Ref_nom_gross_cap
     self.CSP_Cold_HTF_T = TES_cold_tank_T + SF_heat_exch_approach_temp

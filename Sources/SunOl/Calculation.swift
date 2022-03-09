@@ -26,7 +26,7 @@ extension TunOl {
     for i in 1..<8760 {
       hour0[i] = Reference_PV_plant_power_at_inverter_inlet_DC[i]
       // MAX(0,G6/MAX(G5:G8763))
-      hour0[hourH + i] = max(Double.zero, Reference_PV_plant_power_at_inverter_inlet_DC[i] / maximum)
+      hour0[hourH + i] = max(Double.zero, Reference_PV_MV_power_at_transformer_outlet[i] / maximum)
       // IFERROR(IF(G6<MAX(G5:G8763),MAX(G6,0)/F6,0),0)
       hour0[hourI + i] = ifFinite(
         iff(
