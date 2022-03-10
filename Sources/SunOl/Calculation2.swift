@@ -84,8 +84,7 @@ extension TunOl {
             max(
               Double.zero,
               iff(
-                (hour4[max(hourDX + i - 6, hourDX)...(hourDX + i)].reduce(0) { if $1.isZero { return $0+1 }; return $0 }) == PB_warm_start_duration, PB_warm_start_heat_req,
-                PB_hot_start_heat_req) - hour1[hourBQ + i]) * TES_aux_cons_perc, Double.zero))
+                (hour4[max(hourDX + i - 6, hourDX)...(hourDX + i)].reduce(0) { if $1.isZero { return $0 }; return $0+1 }) < PB_warm_start_duration, PB_hot_start_heat_req, PB_warm_start_heat_req) - hour1[hourBQ + i]) * TES_aux_cons_perc, Double.zero))
     }
 
     /// Corresponding max PB net elec output
@@ -114,10 +113,9 @@ extension TunOl {
       hour4[hourEB + i] = iff(
         and(hour4[hourEA + i].isZero, hour4[hourEA + i + 1] > Double.zero),
         iff(
-          (hour4[max(hourEA + i - 6, hourEA)...(hourEA + i)].reduce(0) { if $1.isZero { return $0+1 }; return $0 }) == PB_warm_start_duration, PB_warm_start_heat_req,
-          PB_hot_start_heat_req), Double.zero)
+          (hour4[max(hourEA + i - 6, hourEA)...(hourEA + i)].reduce(0) { if $1.isZero { return $0 }; return $0+1 }) < PB_warm_start_duration, PB_hot_start_heat_req,PB_warm_start_heat_req), Double.zero)
     }
-    let EBsum = hour1.sum(hours: daysBO, condition: hourEB)
+    let EBsum = hour4.sum(hours: daysBO, condition: hourEB)
     /// Max gross heat cons for ST
     let hourEC = 61320
     // IF(EA6=0,0,EA6/PB_nom_gross_eff/POLY(EA6/PB_nom_gross_cap_ud,el_Coeff))
@@ -126,7 +124,7 @@ extension TunOl {
         hour4[hourEA + i].isZero, Double.zero,
         hour4[hourEA + i] / PB_nom_gross_eff / POLY(hour4[hourEA + i] / PB_nom_gross_cap_ud, el_Coeff))
     }
-    let ECsum = hour1.sum(hours: daysBO, condition: hourEC)
+    let ECsum = hour4.sum(hours: daysBO, condition: hourEC)
     /// Max gross heat cons for extraction
     let hourED = 70080
     // IF(OR(BM6>0;PB_nom_gross_cap_ud<=0;COUNTIFS(BO5:BO8763;\"=\"&BO6;BF5:BF8763;\">0\")=0);0;PB_Ratio_Heat_input_vs_output*MAX(0;MIN((A_overall_var_heat_max_cons-A_overall_var_heat_min_cons)*(DV6-A_equiv_harmonious_min_perc)+A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons+IF(BM7=0;0;A_overall_heat_stup_cons);(DZ6-DY6+BP6-IF(BM7=0;0;A_overall_stup_cons)-A_overall_fix_stby_cons)/((A_overall_var_max_cons-A_overall_var_min_cons)*(DV6-A_equiv_harmonious_min_perc)+A_overall_var_min_cons)*((A_overall_var_heat_max_cons-A_overall_var_heat_min_cons)*(DV6-A_equiv_harmonious_min_perc)+A_overall_var_heat_min_cons)+A_overall_heat_fix_stby_cons+IF(BM7=0;0;A_overall_heat_stup_cons))-BQ6-MIN(El_boiler_cap_ud;MAX(0;DZ6-DX6-DY6)*El_boiler_eff)))
@@ -148,7 +146,7 @@ extension TunOl {
               - hour1[hourBQ + i] - min(El_boiler_cap_ud, max(Double.zero, hour4[hourDZ + i] - hour4[hourDX + i] - hour4[hourDY + i])
               * El_boiler_eff)))
     }
-    let EDsum = hour1.sum(hours: daysBO, condition: hourED)
+    let EDsum = hour4.sum(hours: daysBO, condition: hourED)
     let ECEDsum = zip(ECsum, EDsum).map { $0 + $1 }
     /// TES energy available if above min op case
     let hourEE = 78840
@@ -220,7 +218,7 @@ extension TunOl {
           and(hour4[hourEK + i] > Double.zero, hour1[hourAY + i] > Double.zero, hour1[hourAY + i - 1].isZero),
           and(hour4[hourEK + i] > Double.zero, hour1[hourAY + i + 1].isZero, hour1[hourAY + i] > Double.zero)), hour1[hourAY + i], Double.zero)
     }
-    let ELsum = hour1.sum(hours: daysBO, condition: hourEL)
+    let ELsum = hour4.sum(hours: daysBO, condition: hourEL)
     /// Surplus energy due to op limit after removal of peripherial hours
     let hourEM = 148920
     // MAX(0,EK6-SUMIF(BO5:BO8763,"="BO6,EL5:EL8763)*Heater_eff*(1+1/Ratio_CSP_vs_Heater))
