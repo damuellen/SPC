@@ -30,9 +30,7 @@ class SunOlTests: XCTestCase {
     XCTAssertEqual(hour0[87945], 116.52, accuracy: 0.05, "R357")
     XCTAssertEqual(hour0[96705], 116.52, accuracy: 0.05, "S357")
     XCTAssertEqual(hour0[105465], 49.21, accuracy: 0.05, "T357")
-
     XCTAssertEqual(hour0[114225], 14.0, accuracy: 1, "U357")
-
     XCTAssertEqual(hour0[122985], 100.36, accuracy: 0.05, "V357")
     XCTAssertEqual(hour0[131745], 0.00, accuracy: 0.05, "W357")
     XCTAssertEqual(hour0[140505], 0.00, accuracy: 0.05, "X357")
@@ -124,7 +122,6 @@ class SunOlTests: XCTestCase {
         XCTAssertEqual(hour3[345], 116.52, accuracy: 0.05, "CP357")
         XCTAssertEqual(hour3[9105], 116.52, accuracy: 0.05, "CQ357")
         XCTAssertEqual(hour3[17865], 49.21, accuracy: 0.05, "CR357")
-
         XCTAssertEqual(hour3[35385], 0.00, accuracy: 0.05, "CT357")
         XCTAssertEqual(hour3[44145], 0.00, accuracy: 0.05, "CU357")
         XCTAssertEqual(hour3[52905], 97.06, accuracy: 0.05, "CV357")
