@@ -48,17 +48,17 @@ extension TunOl {
       hour2[hourBW + i] = iff(
         or(hour1[hourBM + i] > 0, PB_nom_gross_cap_ud <= 0, BO_BFcount[i].isZero), 0,
         hour1[hourBK + i]
-          + ((min(PB_nom_net_cap, max(PB_net_min_cap, (1 + TES_aux_cons_perc) * (hour1[hourBQ + i] + hour1[hourBK + i] - hour1[hourBP + i])))
+          + ((min(PB_nom_net_cap, max(PB_net_min_cap, (1 + TES_aux_cons_perc) * (hour2[hourBV + i] + hour1[hourBK + i] - hour1[hourBP + i])))
             + PB_nom_net_cap * PB_nom_var_aux_cons_perc_net
             * POLY(
-              min(PB_nom_net_cap, max(PB_net_min_cap, (1 + TES_aux_cons_perc) * (hour1[hourBQ + i] + hour1[hourBK + i] - hour1[hourBP + i])))
+              min(PB_nom_net_cap, max(PB_net_min_cap, (1 + TES_aux_cons_perc) * (hour2[hourBV + i] + hour1[hourBK + i] - hour1[hourBP + i])))
                 / PB_nom_net_cap, PB_n_g_var_aux_el_Coeff) + PB_fix_aux_el)
             / (PB_gross_min_eff
               + (PB_nom_gross_eff - PB_gross_min_eff) / (PB_nom_net_cap - PB_net_min_cap)
-                * (min(PB_nom_net_cap, max(0, hour1[hourBQ + i] + hour1[hourBK + i] - hour1[hourBP + i])) - PB_net_min_cap))
+                * (min(PB_nom_net_cap, max(0, hour2[hourBV + i] + hour1[hourBK + i] - hour1[hourBP + i])) - PB_net_min_cap))
             + max(0, overall_var_heat_min_cons[j] + overall_heat_fix_stby_cons[j] - hour1[hourBQ + i]) * PB_Ratio_Heat_input_vs_output) * TES_aux_cons_perc
           + iff(
-            and(hour1[hourBQ + i].isZero, hour2[hourBV + i + 1] > 0),
+            and(hour2[hourBV + i].isZero, hour2[hourBV + i + 1] > 0),
             max(
               0,
               iff(
@@ -499,7 +499,7 @@ extension TunOl {
             El_boiler_cap_ud,
             max(
               Double.zero,
-              (hour0[hourDI + i] + hour3[hourCU + i]
+              (hour3[hourDI + i] + hour3[hourCU + i]
                 - iff(hour2[hourCC + i] > Double.zero, hour2[hourCB + i] / PB_Ratio_Heat_input_vs_output, Double.zero) - hour2[hourCL + i])
                 / El_boiler_eff)))
     }
@@ -510,7 +510,7 @@ extension TunOl {
     for i in 1..<8760 {
       hour3[hourDK + i] = max(
         Double.zero,
-        hour2[hourCL + i] + iff(hour2[hourCC + i].isZero, Double.zero, hour2[hourCB + i] / PB_Ratio_Heat_input_vs_output) - hour0[hourDI + i]
+        hour2[hourCL + i] + iff(hour2[hourCC + i].isZero, Double.zero, hour2[hourCB + i] / PB_Ratio_Heat_input_vs_output) - hour3[hourDI + i]
           - hour3[hourCU + i])
     }
 
@@ -526,7 +526,7 @@ extension TunOl {
             El_boiler_cap_ud,
             max(
               Double.zero,
-              (hour0[hourDI + i] + hour3[hourCU + i]
+              (hour3[hourDI + i] + hour3[hourCU + i]
                 - iff(hour2[hourCC + i] > Double.zero, hour2[hourCB + i] / PB_Ratio_Heat_input_vs_output, Double.zero) - hour2[hourCL + i])
                 / El_boiler_eff))))
     }
@@ -534,7 +534,7 @@ extension TunOl {
     /// Remaining grid import capacity after max harm
     let hourDM = 201480
     // MAX(0,Grid_import_max_ud-DL6)
-    for i in 1..<8760 { hour3[hourDM + i] = max(Double.zero, Grid_import_max_ud - hour0[hourDL + i]) }
+    for i in 1..<8760 { hour3[hourDM + i] = max(Double.zero, Grid_import_max_ud - hour3[hourDL + i]) }
 
     /// El boiler op after max harmonious heat cons
     let hourDN = 210240
@@ -544,14 +544,14 @@ extension TunOl {
         El_boiler_cap_ud,
         max(
           Double.zero,
-          (hour0[hourDI + i] + hour3[hourCU + i] - hour2[hourCL + i]
+          (hour3[hourDI + i] + hour3[hourCU + i] - hour2[hourCL + i]
             - iff(hour2[hourCC + i] > Double.zero, hour2[hourCB + i] / PB_Ratio_Heat_input_vs_output, Double.zero)) / El_boiler_eff))
     }
 
     /// Remaining el boiler cap after max harmonious heat cons
     let hourDO = 219000
     // MAX(0,El_boiler_cap_ud-DN6)
-    for i in 1..<8760 { hour3[hourDO + i] = max(Double.zero, El_boiler_cap_ud - hour0[hourDN + i]) }
+    for i in 1..<8760 { hour3[hourDO + i] = max(Double.zero, El_boiler_cap_ud - hour3[hourDN + i]) }
 
     for i in 1..<8760 {
       /// Remaining MethSynt cap after max harmonious cons
