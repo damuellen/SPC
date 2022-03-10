@@ -4,7 +4,7 @@ import PackageDescription
 let c: CSetting = .unsafeFlags(["-ffast-math", "-O3", "-fomit-frame-pointer", "-funroll-loops"])
 var flags = ["-cross-module-optimization", "-Ounchecked", "-enforce-exclusivity=unchecked"]
 #if os(Windows)
-flags += ["-Xfrontend", "-entry-point-function-name", "-Xfrontend", "wWinMain"]
+//flags += ["-Xfrontend", "-entry-point-function-name", "-Xfrontend", "wWinMain"]
 #endif
 let posix: TargetDependencyCondition = .when(platforms: [.linux, .macOS])
 let swift: [SwiftSetting] = [

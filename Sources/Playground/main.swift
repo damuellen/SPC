@@ -10,7 +10,6 @@ print(tunol)
 signal(SIGINT, SIG_IGN)
 source.setEventHandler { source.cancel() }
 #else
-MessageBox(text: "Calculation started.", caption: "TunOl")
 import WinSDK
 _ = SetConsoleOutputCP(UINT(CP_UTF8))
 SetConsoleCtrlHandler({_ in source.cancel();semaphore.wait();return WindowsBool(true)}, true)
@@ -70,7 +69,12 @@ struct Command: ParsableCommand {
 
   func run() throws {
     let path = file ?? "input2.txt"
+    #if os(Windows)
+    guard let csv = CSV(atPath: path) else { MessageBox(text: "No input.", caption: "TunOl"); return }
+    #else
     guard let csv = CSV(atPath: path) else { print("No input."); return }
+    #endif
+    
     TunOl.Q_Sol_MW_thLoop = [0] + csv["csp"]
     TunOl.Reference_PV_plant_power_at_inverter_inlet_DC = [0] + csv["pv"]
     TunOl.Reference_PV_MV_power_at_transformer_outlet = [0] + csv["out"]
@@ -85,7 +89,11 @@ struct Command: ParsableCommand {
     var r = 0
     var r2 = 0
     defer {
+      #if os(Windows)
+      MessageBox(text: "name", caption: "TunOl")
+      #else
       print(name)
+      #endif
       ws.table(range: [0, 0, r, labels.count - 1], header: labels)
       names.enumerated().forEach { column, name in let chart = wb.addChart(type: .scatter)  //.set(y_axis: 1000...2500)
         chart.addSeries().set(marker: 5, size: 4)
@@ -124,6 +132,9 @@ struct Command: ParsableCommand {
 
     }
     parameter.forEach { parameter in
+      #if os(Windows)
+      MessageBox(text: "Start MGOADE Optimizer", caption: "TunOl")
+      #endif
       let a = MGOADE(group: !noGroups, n: n ?? 150, maxIter: iterations ?? 100, bounds: parameter.ranges, fitness: fitness)
       a.forEach { row in r += 1; ws.write(row, row: r) }
       if r < 2 { return }
