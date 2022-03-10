@@ -4,6 +4,8 @@
 /*.xlsx
 /*.csv
 /*.json
+/*.swift
+Package.resolved
 /COM/*.json
 /.sde
 /.build
@@ -14,3 +16,5 @@
 /Build
 /DerivedData
 /Index
+/xl
+/venv
