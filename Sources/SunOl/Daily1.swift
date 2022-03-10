@@ -5,8 +5,8 @@ extension TunOl {
     let hourCS = 26280
     let hourCQ = 8760
     var daysCS: [[Int]] =  hour3[hourCS..<(hourCS + 8760)].indices.chunked(by: { hour3[$0] == hour3[$1] }).map { $0.map { $0 - hourCS } }
-    let end = daysCS.removeLast()
-    daysCS[0].append(contentsOf: end)
+   // let end = daysCS.removeLast()
+   // daysCS[0].append(contentsOf: end)
     var day0 = [Double](repeating: Double.zero, count: 365)
 
     /// Day
@@ -111,8 +111,8 @@ extension TunOl {
     )
     var daysEZ: [[Int]] = hour4[254040..<(254040 + 8760)].indices.chunked(by: { hour4[$0] == hour4[$1] })
       .map { $0.map { $0 - 254040 } }
-    let end = daysEZ.removeLast()
-    daysEZ[0].append(contentsOf: end)
+  //  let end = daysEZ.removeLast()
+   // daysEZ[0].append(contentsOf: end)
     let EX_EZcountZero = hour4.countOf(daysEZ, condition: hourEX, predicate: {$0<=0})
     /// Nr of hours outside of harm op period after max night prep
     let dayT = 5840

@@ -224,7 +224,7 @@ public struct TunOl {
   let PB_g2n_var_aux_el_Coeff: [Double] = [0.29437013201591916, 0.10280513176871063, -6.5249624421765337E-2, 0.67514642417652304]  // PB_var_aux_cons_C0
   var PB_var_heat_max_cons: Double = 0  // PB_Eff!I17
 
-  let PB_warm_start_duration: Double = 6
+  let PB_warm_start_duration: Int = 6
   let PB_warm_start_energyperc: Double = 0.4
   var PB_warm_start_heat_req: Double = 0
   let PV_Ref_AC_cap: Double = 510  //max(Calculation!G5,G8764)

@@ -6,8 +6,8 @@ extension TunOl {
     var hour4 = [Double](repeating: Double.zero, count: 490560+8760)
     let hourBO = 166440
     var daysBO: [[Int]] = hour1[hourBO..<(hourBO + 8760)].indices.chunked(by: { hour1[$0] == hour1[$1] }).map { $0.map { $0 - hourBO } }
-    let end = daysBO.removeLast()
-    daysBO[0].append(contentsOf: end)
+   // let end = daysBO.removeLast()
+   // daysBO[0].append(contentsOf: end)
     let daysD: [[Int]] = (0..<365).map { Array(stride(from: $0 * 24, to: ($0+1) * 24, by: 1)) }
     let hourAY = 26280
     let AYsum = hour1.sum(hours: daysD, condition: hourAY)
@@ -84,7 +84,7 @@ extension TunOl {
             max(
               Double.zero,
               iff(
-                (hour4[min(hourDX + i - 6, hourDX + i)...(hourDX + i)].reduce(0.0) { if $1.isZero { return $0+1 }; return $0 }) == PB_warm_start_duration, PB_warm_start_heat_req,
+                (hour4[max(hourDX + i - 6, hourDX)...(hourDX + i)].reduce(0) { if $1.isZero { return $0+1 }; return $0 }) == PB_warm_start_duration, PB_warm_start_heat_req,
                 PB_hot_start_heat_req) - hour1[hourBQ + i]) * TES_aux_cons_perc, Double.zero))
     }
 
@@ -114,7 +114,7 @@ extension TunOl {
       hour4[hourEB + i] = iff(
         and(hour4[hourEA + i].isZero, hour4[hourEA + i + 1] > Double.zero),
         iff(
-          (hour4[min(hourEA + i - 6, hourEA + i)...(hourEA + i)].reduce(0.0) { if $1.isZero { return $0+1 }; return $0 }) == PB_warm_start_duration, PB_warm_start_heat_req,
+          (hour4[max(hourEA + i - 6, hourEA)...(hourEA + i)].reduce(0) { if $1.isZero { return $0+1 }; return $0 }) == PB_warm_start_duration, PB_warm_start_heat_req,
           PB_hot_start_heat_req), Double.zero)
     }
     let EBsum = hour1.sum(hours: daysBO, condition: hourEB)
@@ -357,7 +357,7 @@ extension TunOl {
           and(hour4[hourEX + i - 1] <= 0, hour4[hourEX + i] > 0,
               hour4[start..<end].reduce(0, +).isZero),
           and(hour0[hourF + i - 1] <= 0, hour0[hourF + i] > 0,
-              hour4[start..<min(hourEX + i + 10, hourEY-1)].reduce(0, +).isZero)),
+              hour4[start..<min(hourEX + i + 10, hourEY)].reduce(0, +).isZero)),
         iff(hour4[hourEZ + i - 1] < 364, hour4[hourEZ + i - 1] + 1, 0), hour4[hourEZ + i - 1])
     }
 

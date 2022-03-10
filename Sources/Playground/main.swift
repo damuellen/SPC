@@ -69,7 +69,7 @@ struct Command: ParsableCommand {
   @Option(name: .short, help: "Iterations") var iterations: Int?
 
   func run() throws {
-    let path = file ?? "input.txt"
+    let path = file ?? "input2.txt"
     guard let csv = CSV(atPath: path) else { print("No input."); return }
     TunOl.Q_Sol_MW_thLoop = [0] + csv["csp"]
     TunOl.Reference_PV_plant_power_at_inverter_inlet_DC = [0] + csv["pv"]

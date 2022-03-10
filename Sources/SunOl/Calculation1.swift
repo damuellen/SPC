@@ -1,12 +1,12 @@
 extension TunOl {
   func hour2(j: Int, hour0: [Double], hour1: [Double]) -> [Double] {
     let (hourJ, hourL, hourM, hourAW, hourBK, hourBM, hourBO, hourBP, hourBQ) = (26280, 43800, 52560, 8760, 131400, 148920, 166440, 175200, 183960)
-    let daysD: [[Int]] = (0..<365).map  { Array(stride(from: $0 * 24, to: ($0+1) * 24, by: 1)) }
     var daysBO: [[Int]] = hour1[hourBO..<(hourBO + 8760)].indices.chunked(by: { hour1[$0] == hour1[$1] }).map { $0.map { $0 - hourBO } }
-    let end = daysBO.removeLast()
-    daysBO[0].append(contentsOf: end)
+   // let end = daysBO.removeLast()
+   // daysBO[0].append(contentsOf: end)
+
     let hourAY = 26280
-    let AYsum = hour1.sum(hours: daysD, condition: hourAY)
+    let AYsum = hour1.sum(hours: daysBO, condition: hourAY)
     var hour2 = [Double](repeating: Double.zero, count: 166440+8760)
 
     /// Min net elec demand to power block
@@ -62,7 +62,7 @@ extension TunOl {
             max(
               0,
               iff(
-                (hour2[min(hourBV + i - 6, hourBV + i)...(hourBV + i)].reduce(0.0) { if $1.isZero { return $0+1 }; return $0 }) == PB_warm_start_duration,
+                (hour2[max(hourBV + i - 6, hourBV)...(hourBV + i)].reduce(0) { if $1.isZero { return $0+1 }; return $0 }) == PB_warm_start_duration,
                 PB_warm_start_heat_req, PB_hot_start_heat_req) - hour1[hourBQ + i]) * TES_aux_cons_perc, 0))
     }
 
@@ -90,7 +90,7 @@ extension TunOl {
     for i in 1..<8760 {
       hour2[hourBZ + i] = iff(
         and(hour2[hourBY + i].isZero, hour2[hourBY + i + 1] > Double.zero),
-        iff((hour2[min(hourBY + i - 5, hourBY + i)...(hourBY + i)].reduce(0.0) { if $1.isZero { return $0+1 }; return $0 }) == PB_warm_start_duration, PB_warm_start_heat_req, PB_hot_start_heat_req),
+        iff((hour2[max(hourBY + i - 5, hourBY)...(hourBY + i)].reduce(0) { if $1.isZero { return $0+1 }; return $0 }) == PB_warm_start_duration, PB_warm_start_heat_req, PB_hot_start_heat_req),
         Double.zero)
     }
 
@@ -115,10 +115,10 @@ extension TunOl {
             min(
               overall_var_heat_min_cons[j] + overall_heat_fix_stby_cons[j]
                 + iff(hour1[hourBM + i + 1].isZero, Double.zero, overall_heat_stup_cons[j]),
-              (hour1[hourBX + i] - hour1[hourBW + i] + hour1[hourBP + i] - overall_fix_stby_cons[j]
+              (hour2[hourBX + i] - hour2[hourBW + i] + hour1[hourBP + i] - overall_fix_stby_cons[j]
                 - iff(hour1[hourBM + i + 1].isZero, Double.zero, overall_stup_cons[j])) / overall_var_max_cons[j] * overall_var_heat_max_cons[j]
                 + overall_heat_fix_stby_cons[j] + iff(hour1[hourBM + i + 1].isZero, Double.zero, overall_heat_stup_cons[j])) - hour1[hourBQ + i]
-              - min(El_boiler_cap_ud, max(Double.zero, hour1[hourBX + i] - hour1[hourBV + i] - hour1[hourBW + i]) * El_boiler_eff)))
+              - min(El_boiler_cap_ud, max(Double.zero, hour2[hourBX + i] - hour2[hourBV + i] - hour2[hourBW + i]) * El_boiler_eff)))
     }
     let CBsum = hour2.sum(hours: daysBO, condition: hourCB)
     /// TES energy needed to fulfil op case
