@@ -655,10 +655,10 @@ extension Array where Element==Double {
       let q = i.quotient > 0 ? String(UnicodeScalar(A + UInt32(i.quotient - 1))!) : ""
       return x + q + String(UnicodeScalar(A + UInt32(i.remainder))!)
     }
-    print(columns.joined(separator: "\t"))
+    print(columns.joined(separator: " \t"))
     for i in 0..<100 {
       let s = stride(from: i, to: endIndex, by: steps)
-      print(s.map { String(format: "%.1f", self[$0]) }.joined(separator: "\t"))
+      print(s.map { String(format: "%2.f", self[$0]) }.joined(separator: "\t"))
     }
     print()
   }

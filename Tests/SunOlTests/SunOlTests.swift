@@ -82,6 +82,7 @@ class SunOlTests: XCTestCase {
     XCTAssertEqual(hour1[184305], 0.00, accuracy: 0.05, "BQ349")
 
     let day6 = model.day(hour0: hour0)
+    day6.head(2, steps: 365)
     var day = [[Double]]()
     let day11start = 29200
     let day11end = 31390
@@ -117,9 +118,9 @@ class SunOlTests: XCTestCase {
         XCTAssertEqual(hour2[158025], 5.59, accuracy: 0.05, "CM349")
         XCTAssertEqual(hour2[166785], 0.00, accuracy: 0.05, "CN349")
       }
-
+      print("Case", j)
       let hour3 = model.hour3(j: j, hour0: hour0, hour1: hour1, hour2: hour2)
-      //hour3.head(93, steps: 8760)
+      hour3.head(93, steps: 8760)
       if j == 0 {
         XCTAssertEqual(hour3[345], 116.52, accuracy: 0.05, "CP349")
         XCTAssertEqual(hour3[9105], 116.52, accuracy: 0.05, "CQ349")
@@ -169,7 +170,7 @@ class SunOlTests: XCTestCase {
         XCTAssertEqual(day1[5441], 1.00, accuracy: 0.05, "Q333")
         XCTAssertEqual(day1[5806], 0.70, accuracy: 0.05, "R333")
       }
-
+      print("Case", j)
       let hour4 = model.hour4(j: j, day1: day1, hour0: hour0, hour1: hour1, hour2: hour2)
       hour4.head(125, steps: 8760)
       if j == 0 {
@@ -356,7 +357,7 @@ class SunOlTests: XCTestCase {
         XCTAssertEqual(day15[17121], 122.73, accuracy: 0.1, "GS334")
 
       }
-
+      print("Daily 1 Case", j)
       let day16 = model.day(hour0: hour0, hour4: hour4, day11: day1, day15: day15)
       day16.head(202, steps: 365)
       if j == 0 {
@@ -458,7 +459,10 @@ class SunOlTests: XCTestCase {
       }
 
       let day17 = model.day(case: j, day1: day1, day5: day15, day6: day16)
-      day17.head(250, steps: 365)
+      print("Case", j)
+      Array(day17[..<13870]).head(250, steps: 365)
+      Array(day17[13870..<27010]).head(288, steps: 365)
+      Array(day17[27010...]).head(315, steps: 365)
       if j == 0 {
         XCTAssertEqual(day17[330], -157.80, accuracy: 0.1, "IQ333")
         XCTAssertEqual(day17[695], -544.24, accuracy: 0.1, "IR333")
@@ -607,11 +611,14 @@ class SunOlTests: XCTestCase {
         XCTAssertEqual(day17[43766], 14.00, accuracy: 0.1, "AEL334")
         XCTAssertEqual(day17[44131], 0.00, accuracy: 0.1, "AEM334")
       }
-      
+
       day.append(Array(day17[day11start..<day11end]))
       day.append(Array(day17[day12start..<day12end]))
 
       let day21 = model.day(case: j, hour0: hour0)
+
+      print("Daily 2 Case", j)
+      day21.head(0, steps: 365)
       if j == 0 {
         XCTAssertEqual(day21[329], 136.32, accuracy: 0.05, "E333")
         XCTAssertEqual(day21[694], 149.51, accuracy: 0.05, "F333")
@@ -729,7 +736,9 @@ class SunOlTests: XCTestCase {
         XCTAssertEqual(day21[9819], 1.00, accuracy: 0.05, "DK333")
       }
       let day27 = model.day(case: j, day1: day21, day6: day6)
-
+      Array(day27[..<13870]).head(250, steps: 365)
+      Array(day27[13870..<27010]).head(288, steps: 365)
+      Array(day27[27010...]).head(315, steps: 365)
       day.append(Array(day27[day21start..<day21end]))
       day.append(Array(day27[day22start..<day22end]))
     }
