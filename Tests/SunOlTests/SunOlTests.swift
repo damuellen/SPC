@@ -120,7 +120,7 @@ class SunOlTests: XCTestCase {
       }
 
       let hour3 = model.hour3(j: j, hour0: hour0, hour1: hour1, hour2: hour2)
-
+      //hour3.head(93, steps: 8760)
       if j == 0 {
         XCTAssertEqual(hour3[345], 116.52, accuracy: 0.05, "CP349")
         XCTAssertEqual(hour3[9105], 116.52, accuracy: 0.05, "CQ349")
@@ -146,7 +146,7 @@ class SunOlTests: XCTestCase {
         XCTAssertEqual(hour3[193065], 30.62, accuracy: 0.05, "DL349")
         XCTAssertEqual(hour3[201825], 19.38, accuracy: 0.05, "DM349")
         XCTAssertEqual(hour3[210585], 51.88, accuracy: 0.05, "DN349")
-        XCTAssertEqual(hour3[219325], 48.12, accuracy: 0.05, "DO349")
+        XCTAssertEqual(hour3[219326], 48.12, accuracy: 0.05, "DO349")
         XCTAssertEqual(hour3[228105], 21.56, accuracy: 0.05, "DP349")
         XCTAssertEqual(hour3[236865], 0.00, accuracy: 0.05, "DQ349")
         XCTAssertEqual(hour3[245625], 4.74, accuracy: 0.05, "DR349")
@@ -172,7 +172,7 @@ class SunOlTests: XCTestCase {
       }
 
       let hour4 = model.hour4(j: j, day1: day1, hour0: hour0, hour1: hour1, hour2: hour2)
-
+      hour4.head(125, steps: 8760)
       if j == 0 {
         XCTAssertEqual(hour4[9114], 0.00, accuracy: 0.05, "DW350")
         XCTAssertEqual(hour4[17874], 0.00, accuracy: 0.05, "DX350")
@@ -258,7 +258,7 @@ class SunOlTests: XCTestCase {
       }
 
       let day15 = model.day(hour0: hour0, hour2: hour2, hour3: hour3, day11: day1)
-
+      day15.head(154, steps: 365)
       if j == 0 {
         XCTAssertEqual(day15[330], 2992.33, accuracy: 0.1, "EY333")
         XCTAssertEqual(day15[695], 139.83, accuracy: 0.1, "EZ333")
@@ -359,7 +359,7 @@ class SunOlTests: XCTestCase {
       }
 
       let day16 = model.day(hour0: hour0, hour4: hour4, day11: day1, day15: day15)
-
+      day16.head(202, steps: 365)
       if j == 0 {
         XCTAssertEqual(day16[330], 2992.33, accuracy: 0.1, "GU333")
         XCTAssertEqual(day16[695], 139.83, accuracy: 0.1, "GV333")
@@ -459,7 +459,7 @@ class SunOlTests: XCTestCase {
       }
 
       let day17 = model.day(case: j, day1: day1, day5: day15, day6: day16)
-
+      day17.head(250, steps: 365)
       if j == 0 {
         XCTAssertEqual(day17[330], -157.80, accuracy: 0.1, "IQ333")
         XCTAssertEqual(day17[695], -544.24, accuracy: 0.1, "IR333")

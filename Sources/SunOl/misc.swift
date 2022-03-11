@@ -67,7 +67,9 @@ public func MGOADE(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Doubl
   let cMin = 0.00004
   let cr = 0.4
   let f = 0.9  
-  // let _ = fitness([])
+  let date = Date()
+  let _ = fitness([])
+  print(-date.timeIntervalSinceNow)
   // Calculate the fitness of initial grasshoppers
   DispatchQueue.concurrentPerform(iterations: grassHopperPositions.count) { i in
     let result = fitness(grassHopperPositions[i])
@@ -494,15 +496,14 @@ struct Results {
   }
 }
 
-
 func labeled(values: [Double]) -> String {
-  let labels = ["Loops", "DC", "AC", "Heater", "TES", "EY", "PB", "BESS", "H2", "Meth",
-   "Boiler", "Grid", "Total_CAPEX", "Meth_Prod", "LCoE", "LCoTh", "LCH2", "LCoM", "PB_startups",
-   "TES_discharges", "EY_plant_starts", "EY_count", "Meth_starts", "H2_to_Meth", "limit_sum"]
+  let labels = [
+    "LCOM", "BESS_cap", "CCU_C_O_2_nom_prod", "C_O_2_storage_cap", "CSP_loop_nr", "El_boiler_cap", "EY_var_net_nom_cons", "Grid_export_max",
+    "Grid_import_max", "Hydrogen_storage_cap", "Heater_cap", "MethDist_Meth_nom_prod", "MethSynt_RawMeth_nom_prod", "PB_nom_gross_cap", "PV_AC_cap",
+    "PV_DC_cap", "RawMeth_storage_cap", "TES_full_load_hours",
+  ]
 
-  return zip(labels, values).map { l, v in
-    "\(l.text(.red)) \(String(format: "%.1f", v).text(.red))"
-  }.joined(separator: " ")
+  return zip(labels, values).map { l, v in "\(l.text(.red)) \(String(format: "%.1f", v).text(.red))" }.joined(separator: " ")
 }
 
 protocol Labeled { var labels: [String] { get } }
