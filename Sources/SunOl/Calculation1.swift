@@ -62,7 +62,7 @@ extension TunOl {
             max(
               0,
               iff(
-                (hour2[max(hourBV + i - 6, hourBV)...(hourBV + i)].reduce(0) { if $1.isZero { return $0 }; return $0+1 }) < PB_warm_start_duration, PB_hot_start_heat_req, PB_warm_start_heat_req) - hour1[hourBQ + i]) * TES_aux_cons_perc, 0))
+                (hour2[max(hourBV + i - 5, hourBV)...(hourBV + i)].reduce(0) { if $1.isZero { return $0+1 }; return $0 }) < PB_warm_start_duration, PB_hot_start_heat_req, PB_warm_start_heat_req) - hour1[hourBQ + i]) * TES_aux_cons_perc, 0))
     }
 
     /// Corresponding min PB net elec output
@@ -87,9 +87,10 @@ extension TunOl {
     let hourBZ = 43800
     // IF(AND(BY6=0,BY7>0),IF(COUNTIF(BY1:BY6,"0")=PB_warm_start_duration,PB_warm_start_heat_req,PB_hot_start_heat_req),0)
     for i in 1..<8760 {
+      let count = (hour2[max(hourBY + i - 5, hourBY)...(hourBY + i)].reduce(0) { if $1.isZero { return $0+1 }; return $0 })
       hour2[hourBZ + i] = iff(
         and(hour2[hourBY + i].isZero, hour2[hourBY + i + 1] > Double.zero),
-        iff((hour2[max(hourBY + i - 6, hourBY)...(hourBY + i)].reduce(0) { if $1.isZero { return $0 }; return $0+1 }) < PB_warm_start_duration, PB_hot_start_heat_req,PB_warm_start_heat_req),
+        iff(count < PB_warm_start_duration, PB_hot_start_heat_req,PB_warm_start_heat_req),
         Double.zero)
     }
 

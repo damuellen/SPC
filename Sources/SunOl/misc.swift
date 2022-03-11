@@ -5,10 +5,9 @@ public let source = DispatchSource.makeSignalSource(signal: SIGINT, queue: .glob
 public let semaphore = DispatchSemaphore(value: 0)
 
 public func fitness(values: [Double]) -> [Double] {
-  let values = [Double]()
   let model = TunOl(values)
-  let costs = Costs.invest(model)
-  dump(costs)
+  let costs = Costs(model)
+  //dump(costs)
   //TunOl.Grid_import_yes_no_BESS_strategy = 0
   //TunOl.Grid_import_yes_no_PB_strategy = 0
   //dump(model)
@@ -18,16 +17,6 @@ public func fitness(values: [Double]) -> [Double] {
   // hour1.head(48, steps: 8760)
   let day6 = model.day(hour0: hour0)
   var day = [[Double]]()
-
-  let dayLVstart = 29200
-  let dayMBend = 31390 + 365
-  let dayNEstart = 41610
-  let dayNKend = 43800 + 365
-
-  let dayIPstart = 32120
-  let dayIXend = 35040 + 365
-  let dayJUstart = 43070
-  let dayKCend = 45990 + 365
 
   for j in 0..<4 {
     let hour2 = model.hour2(j: j, hour0: hour0, hour1: hour1)
@@ -39,29 +28,27 @@ public func fitness(values: [Double]) -> [Double] {
     let day16 = model.day(hour0: hour0, hour4: hour4, day11: day1, day15: day15)
     let day17 = model.day(case: j, day1: day1, day5: day15, day6: day16)
 
-    day.append(Array(day17[dayLVstart..<dayMBend]))
-    day.append(Array(day17[dayNEstart..<dayNKend]))
+    day.append(Array(day17[29200..<31390]))
+    day.append(Array(day17[41610..<43800]))
 
     let day21 = model.day(case: j, hour0: hour0)     
     let day27 = model.day(case: j, day1: day21, day6: day6)
 
-    day.append(Array(day27[dayIPstart..<dayIXend]))
-    day.append(Array(day27[dayJUstart..<dayKCend]))
+    day.append(Array(day27[33945..<35040]))
+    day.append(Array(day27[44895..<45990]))
   }
 
-  var year = [Int]()
+  var year = [Double?]()
   for d in 0..<365 {
-    let value1Day = day.indices.map { i in day[i][d+365] }
-    let value2Day = day.indices.map { i in day[i][d+365] }
-    let value3Day = day.indices.map { i in day[i][d+365+365] }
-    // let valuesDay = value1Day[d] * value2Day[d] * value3Day[d]
-    // let best = valuesDay.indices.filter { valuesDay[$0] > 0 }.sorted { valuesDay[$0] > valuesDay[$1] }
-    // year.append(best[0])
+    let cases = day.indices.map { i in
+      costs.LCOM(meth_produced_MTPH: day[i][d], elec_from_grid: day[i][d+365], elec_to_grid: day[i][d+365+365])
+    }
+    let best = cases.filter(\.isFinite).filter{$0>0}.sorted()
+    if best.count > 0 { year.append(best[0]) } else { year.append(nil) } 
   }
-
-  
-  
-  return []
+  let i = year.compactMap {$0}
+  let lcom = i.reduce(0.0,+) / Double(i.count)
+  return [lcom] + values
 }
 
 public func MGOADE(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fitness: ([Double]) -> [Double]) -> [[Double]] {
@@ -80,11 +67,11 @@ public func MGOADE(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Doubl
   let cMin = 0.00004
   let cr = 0.4
   let f = 0.9  
-  let _ = fitness(grassHopperPositions[0])
+  // let _ = fitness([])
   // Calculate the fitness of initial grasshoppers
   DispatchQueue.concurrentPerform(iterations: grassHopperPositions.count) { i in
     let result = fitness(grassHopperPositions[i])
-    grassHopperFitness[i] = result[5]
+    grassHopperFitness[i] = result[0]
   }
   
   for g in groups.indices {
@@ -157,7 +144,7 @@ public func MGOADE(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Doubl
       }
       let result = fitness(grassHopperPositions[i])
       targetResults[pos + i].replaceSubrange(bounds.count..., with: result)
-      grassHopperFitness[i] = result[5]
+      grassHopperFitness[i] = result[0]
     }
     if source.isCancelled { break }
 
@@ -198,8 +185,8 @@ public func MGOADE(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Doubl
       DispatchQueue.concurrentPerform(iterations: grassHopperTrialPositions.count) { i in
         if source.isCancelled { return }
         let result = fitness(grassHopperTrialPositions[i])
-        if result[5] < grassHopperFitness[i] {
-          grassHopperFitness[i] = result[5]
+        if result[0] < grassHopperFitness[i] {
+          grassHopperFitness[i] = result[0]
           grassHopperPositions[i] = grassHopperTrialPositions[i]
           targetResults[pos + i].replaceSubrange(0..<bounds.count, with: grassHopperPositions[i])
           targetResults[pos + i].replaceSubrange(bounds.count..., with: result)

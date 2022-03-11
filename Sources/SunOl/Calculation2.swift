@@ -84,7 +84,7 @@ extension TunOl {
             max(
               Double.zero,
               iff(
-                (hour4[max(hourDX + i - 6, hourDX)...(hourDX + i)].reduce(0) { if $1.isZero { return $0 }; return $0+1 }) < PB_warm_start_duration, PB_hot_start_heat_req, PB_warm_start_heat_req) - hour1[hourBQ + i]) * TES_aux_cons_perc, Double.zero))
+                (hour4[max(hourDX + i - 5, hourDX)...(hourDX + i)].reduce(0) { if $1.isZero { return $0+1 }; return $0 }) < PB_warm_start_duration, PB_hot_start_heat_req, PB_warm_start_heat_req) - hour1[hourBQ + i]) * TES_aux_cons_perc, Double.zero))
     }
 
     /// Corresponding max PB net elec output
@@ -113,7 +113,7 @@ extension TunOl {
       hour4[hourEB + i] = iff(
         and(hour4[hourEA + i].isZero, hour4[hourEA + i + 1] > Double.zero),
         iff(
-          (hour4[max(hourEA + i - 6, hourEA)...(hourEA + i)].reduce(0) { if $1.isZero { return $0 }; return $0+1 }) < PB_warm_start_duration, PB_hot_start_heat_req,PB_warm_start_heat_req), Double.zero)
+          (hour4[max(hourEA + i - 5, hourEA)...(hourEA + i)].reduce(0) { if $1.isZero { return $0+1 }; return $0 }) < PB_warm_start_duration, PB_hot_start_heat_req,PB_warm_start_heat_req), Double.zero)
     }
     let EBsum = hour4.sum(hours: daysBO, condition: hourEB)
     /// Max gross heat cons for ST
