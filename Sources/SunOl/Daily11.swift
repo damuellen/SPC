@@ -44,48 +44,54 @@ extension TunOl {
     let hourDR = 245280
     let hourDS = 254040
     let hourDT = 262800
-    var daysCS: [[Int]] = hour3[hourCS..<(hourCS + 8760)].indices.chunked(by: { hour3[$0] == hour3[$1] })
+    let daysCS: [[Int]] = hour3[hourCS..<(hourCS + 8760)].indices.chunked(by: { hour3[$0] == hour3[$1] })
       .map { $0.map { $0 - hourCS } }
    // let end = daysCS.removeLast()
    // daysCS[0].append(contentsOf: end)
     var day15 = [Double](repeating: Double.zero, count: 17_155)
-    let CS_CQ_Lsum = hour0.sumOf(hourL, days: daysCS, condition: hourCQ, predicate: { $0 > 0 })
-    let CS_CC_CQ_BXsum = hour2.sumOf(hourBX, days: daysCS, condition1: hourCQ, predicate1: { $0 > 0 }, range2: hour3, condition2: hourCC, predicate2: { $0 > 0 })
-    let CS_CQ_CIsum = hour2.sumOf(hourCI, days: daysCS, condition: hourCQ, predicate: { $0 > 0 })
-
     /// Available elec after TES chrg during harm op period
     let day1EY = 0
-    // SUMIFS(CalculationL5:L8763,CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,">0")
-    // +SUMIFS(CalculationBX5:BX8763,CalculationCC5:CC8763,">0",CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,">0")
-    // -SUMIFS(CalculationCI5:CI8763,CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,">0")
-    for i in 0..<365 { day15[day1EY + i] = CS_CQ_Lsum[i] + CS_CC_CQ_BXsum[i] - CS_CQ_CIsum[i] }
-
     /// Available elec after TES chrg outside harm op period
     let day1EZ = 365
-    // SUMIFS(CalculationL5:L8763,CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,"=0")
-    //+SUMIFS(CalculationBX5:BX8763,CalculationCC5:CC8763,">0",CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,"=0")
-    //-SUMIFS(CalculationCI5:CI8763,CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,"=0")
-    for i in 0..<365 { day15[day1EZ + i] = CS_CQ_Lsum[i] + CS_CC_CQ_BXsum[i] - CS_CQ_CIsum[i] }
-
-    let CS_CQ_CJsum = hour2.sumOf(hourCJ, days: daysCS, condition: hourCQ, predicate: { $0 > 0 })
-    let CS_CQ_Jsum = hour0.sumOf(hourJ, days: daysCS, condition: hourCQ, predicate: { $0 > 0 })
-    let CS_CC_CQ_CBsum = hour2.sumOf(hourCB, days: daysCS, condition1: hourCQ, predicate1: { $0 > 0 }, range2: hour3, condition2: hourCC, predicate2: { $0 > 0 })
+    do {
+      let CS_CQ_Lsum = hour0.sumOfRanges(hourL, days: daysCS, range1: hour3, condition: hourCQ, predicate: { $0 > 0 })
+      let CS_CC_CQ_BXsum = hour2.sumOfRanges(hourBX, days: daysCS, range1: hour3, condition1: hourCQ, predicate1: { $0 > 0 }, range2: hour2, condition2: hourCC, predicate2: { $0 > 0 })
+      let CS_CQ_CIsum = hour2.sumOfRanges(hourCI, days: daysCS, range1: hour3, condition: hourCQ, predicate: { $0 > 0 })
+      // SUMIFS(CalculationL5:L8763,CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,">0")
+      // +SUMIFS(CalculationBX5:BX8763,CalculationCC5:CC8763,">0",CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,">0")
+      // -SUMIFS(CalculationCI5:CI8763,CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,">0")
+      for i in 0..<365 { day15[day1EY + i] = CS_CQ_Lsum[i] + CS_CC_CQ_BXsum[i] - CS_CQ_CIsum[i] }
+    }
+    do {
+      let CS_CQ_Lsum = hour0.sumOfRanges(hourL, days: daysCS, range1: hour3, condition: hourCQ, predicate: { $0.isZero })
+      let CS_CC_CQ_BXsum = hour2.sumOfRanges(hourBX, days: daysCS, range1: hour3, condition1: hourCQ, predicate1: { $0.isZero }, range2: hour2, condition2: hourCC, predicate2: { $0 > 0 })
+      let CS_CQ_CIsum = hour2.sumOfRanges(hourCI, days: daysCS, range1: hour3, condition: hourCQ, predicate: { $0.isZero })
+      // SUMIFS(CalculationL5:L8763,CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,"=0")
+      //+SUMIFS(CalculationBX5:BX8763,CalculationCC5:CC8763,">0",CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,"=0")
+      //-SUMIFS(CalculationCI5:CI8763,CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,"=0")
+      for i in 0..<365 { day15[day1EZ + i] = CS_CQ_Lsum[i] + CS_CC_CQ_BXsum[i] - CS_CQ_CIsum[i] }
+    }
     /// Available heat after TES chrg during harm op period
     let day1FA = 730
-    // SUMIFS(CalculationJ5:J8763,CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,">0")
-    //+SUMIFS(CalculationCB5:CB8763,CalculationCC5:CC8763,">0",CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,">0")/PB_Ratio_Heat_input_vs_output
-    //-SUMIFS(CalculationCJ5:CJ8763,CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,">0")
-    for i in 0..<365 {
-      day15[day1FA + i] = CS_CQ_Jsum[i] + CS_CC_CQ_CBsum[i] / PB_Ratio_Heat_input_vs_output - CS_CQ_CJsum[i]
-    }
-
     /// Available heat after TES chrg outside of harm op period
     let day1FB = 1095
-    // SUMIFS(CalculationJ5:J8763,CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,"=0")
-    //+SUMIFS(CalculationCB5:CB8763,CalculationCC5:CC8763,">0",CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,"=0")/PB_Ratio_Heat_input_vs_output
-    //-SUMIFS(CalculationCJ5:CJ8763,CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,"=0")
-    for i in 0..<365 {
-      day15[day1FB + i] = CS_CQ_Jsum[i] + CS_CC_CQ_CBsum[i] / PB_Ratio_Heat_input_vs_output - CS_CQ_CJsum[i]
+    do {
+      let CS_CQ_CJsum = hour2.sumOfRanges(hourCJ, days: daysCS, range1: hour3, condition: hourCQ, predicate: { $0 > 0 })
+      let CS_CQ_Jsum = hour0.sumOfRanges(hourJ, days: daysCS, range1: hour3, condition: hourCQ, predicate: { $0 > 0 })
+      let CS_CC_CQ_CBsum = hour2.sumOfRanges(hourCB, days: daysCS, range1: hour3, condition1: hourCQ, predicate1: { $0 > 0 }, range2: hour2, condition2: hourCC, predicate2: { $0 > 0 })
+      // SUMIFS(CalculationJ5:J8763,CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,">0")
+      //+SUMIFS(CalculationCB5:CB8763,CalculationCC5:CC8763,">0",CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,">0")/PB_Ratio_Heat_input_vs_output
+      //-SUMIFS(CalculationCJ5:CJ8763,CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,">0")
+      for i in 0..<365 { day15[day1FA + i] = CS_CQ_Jsum[i] + CS_CC_CQ_CBsum[i] / PB_Ratio_Heat_input_vs_output - CS_CQ_CJsum[i] }
+    }
+    do {
+      let CS_CQ_CJsum = hour2.sumOfRanges(hourCJ, days: daysCS, range1: hour3, condition: hourCQ, predicate: { $0.isZero })
+      let CS_CQ_Jsum = hour0.sumOfRanges(hourJ, days: daysCS, range1: hour3, condition: hourCQ, predicate: { $0.isZero })
+      let CS_CC_CQ_CBsum = hour2.sumOfRanges(hourCB, days: daysCS, range1: hour3, condition1: hourCQ, predicate1: { $0.isZero }, range2: hour2, condition2: hourCC, predicate2: { $0 > 0 })
+      // SUMIFS(CalculationJ5:J8763,CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,"=0")
+      //+SUMIFS(CalculationCB5:CB8763,CalculationCC5:CC8763,">0",CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,"=0")/PB_Ratio_Heat_input_vs_output
+      //-SUMIFS(CalculationCJ5:CJ8763,CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,"=0")
+      for i in 0..<365 { day15[day1FB + i] = CS_CQ_Jsum[i] + CS_CC_CQ_CBsum[i] / PB_Ratio_Heat_input_vs_output - CS_CQ_CJsum[i] }
     }
     let CQsum = hour3.sum(days: daysCS, range: hourCQ)
     let CS_CQ_CTsum = hour3.sumOf(hourCT, days: daysCS, condition: hourCQ, predicate: { $0 > 0 })
@@ -103,8 +109,9 @@ extension TunOl {
 
     /// Harm el cons outside of harm op period
     let day1FE = 2190
+    let CS_CQ_CTsum2 = hour3.sumOf(hourCT, days: daysCS, condition: hourCQ, predicate: { $0.isZero })
     // SUMIFS(CalculationCT5:CT8763,CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,"=0")
-    for i in 0..<365 { day15[day1FE + i] = CS_CQ_CTsum[i] }
+    for i in 0..<365 { day15[day1FE + i] = CS_CQ_CTsum2[i] }
 
     let CRsum = hour3.sum(days: daysCS, range: hourCR)
     let CS_CQ_CUsum = hour3.sumOf(hourCU, days: daysCS, condition: hourCQ, predicate: { $0 > 0 })
@@ -122,8 +129,9 @@ extension TunOl {
 
     /// Harm heat cons outside of harm op period
     let day1FH = 3285
+    let CS_CQ_CUsum2 = hour3.sumOf(hourCU, days: daysCS, condition: hourCQ, predicate: { $0.isZero })
     // SUMIFS(CalculationCU5:CU8763,CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,"=0")
-    for i in 0..<365 { day15[day1FH + i] = CS_CQ_CUsum[i] }
+    for i in 0..<365 { day15[day1FH + i] = CS_CQ_CUsum2[i] }
 
     let CS_CQ_CXsum = hour3.sumOf(hourCX, days: daysCS, condition: hourCQ, predicate: { $0 > 0 })
     /// Grid import considering min harm op during harm op period
@@ -161,25 +169,25 @@ extension TunOl {
     // SUMIF(CalculationCS5:CS8763,"="A6,CalculationCZ5:CZ8763)-FL6
     for i in 0..<365 { day15[day1FN + i] = CZsum[i] - day15[day1FL + i] }
 
-    let CS_CQ_CMsum = hour2.sumOf(hourCM, days: daysCS, condition: hourCQ, predicate: { $0 > 0 })
+    let CS_CQ_CMsum = hour2.sumOfRanges(hourCM, days: daysCS, range1: hour3, condition: hourCQ, predicate: { $0 > 0 })
     /// Total aux cons during harm op period
     let day1FO = 5840
     // SUMIFS(CalculationCM5:CM8763,CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,">0")
     for i in 0..<365 { day15[day1FO + i] = CS_CQ_CMsum[i] }
 
-    let CMsum = hour3.sum(days: daysCS, range: hourCM)
+    let CMsum = hour2.sum(days: daysCS, range: hourCM)
     /// Total aux cons outside of harm op period
     let day1FP = 6205
     // SUMIF(CalculationCS5:CS8763,"="A6,CalculationCM5:CM8763)-FO6
     for i in 0..<365 { day15[day1FP + i] = CMsum[i] - day15[day1FO + i] }
 
-    let CS_CQ_CNsum = hour2.sumOf(hourCN, days: daysCS, condition: hourCQ, predicate: { $0 > 0 })
+    let CS_CQ_CNsum = hour2.sumOfRanges(hourCN, days: daysCS, range1: hour3, condition: hourCQ, predicate: { $0 > 0 })
     /// El cons not covered during harm op period
     let day1FQ = 6570
     // SUMIFS(CalculationCN5:CN8763,CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,">0")
     for i in 0..<365 { day15[day1FQ + i] = CS_CQ_CNsum[i] }
 
-    let CNsum = hour3.sum(days: daysCS, range: hourCN)
+    let CNsum = hour2.sum(days: daysCS, range: hourCN)
     /// El cons not covered outside of harm op period
     let day1FR = 6935
     // SUMIF(CalculationCS5:CS8763,"="A6,CalculationCN5:CN8763)-FQ6
@@ -235,8 +243,9 @@ extension TunOl {
 
     /// Max BESS night prep outside of harm op period
     let day1GA = 10220
+    let CS_CQ_DEsum2 = hour3.sumOf(hourDE, days: daysCS, condition: hourCQ, predicate: { $0.isZero })
     // MIN(SUMIFS(CalculationDE5:DE8763,CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,"=0"),BESS_cap_ud/BESS_chrg_eff)
-    for i in 0..<365 { day15[day1GA + i] = min(CS_CQ_DEsum[i], BESS_cap_ud / BESS_chrg_eff) }
+    for i in 0..<365 { day15[day1GA + i] = min(CS_CQ_DEsum2[i], BESS_cap_ud / BESS_chrg_eff) }
 
     let CS_CQ_DFsum = hour3.sumOf(hourDF, days: daysCS, condition: hourCQ, predicate: { $0 > 0 })
     /// Max grid export after min harm cons during harm op period
@@ -290,7 +299,7 @@ extension TunOl {
     /// Remaining El boiler cap outside of harm op period
     let day1GJ = 13505
     // SUMIF(CalculationCS5:CS8763,"="A6,CalculationDA5:DA8763)-GH6
-    for i in 0..<365 { day15[day1GJ + i] = DAsum[i] - day11[day1GH + i] }
+    for i in 0..<365 { day15[day1GJ + i] = DAsum[i] - day15[day1GH + i] }
 
     let CS_CQ_DBsum = hour3.sumOf(hourDB, days: daysCS, condition: hourCQ, predicate: { $0 > 0 })
     /// Remaining MethSynt cap during harm op after min harm op

@@ -20,32 +20,45 @@ extension TunOl {
 
     var day16 = [Double](repeating: Double.zero, count: 17_155)
 
-    let EZ_EX_Lsum = hour0.sumOf(hourL, days: daysEZ, condition: hourEX, predicate: { $0 > 0 })
+    let day1GU = 0
+    /// Available elec after TES chrg outside harm op period
+    let day1GV = 365
+    do {
+    let EZ_EX_Lsum = hour0.sumOfRanges(hourL, days: daysEZ, range1: hour4, condition: hourEX, predicate: { $0 > 0 })
     let EZ_EX_EHsum = hour4.sumOf(hourEH, days: daysEZ, condition: hourEX, predicate: { $0 > 0 })
     let EZ_EX_EPsum = hour4.sumOf(hourEP, days: daysEZ, condition: hourEX, predicate: { $0 > 0 })
     /// Available elec after TES chrg during harm op period
-    let day1GU = 0
+
     // SUMIFS(CalculationL5:L8763,CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,">0")+SUMIFS(CalculationEH5:EH8763,CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,">0")-SUMIFS(CalculationEP5:EP8763,CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,">0")
     for i in 0..<365 { day16[day1GU + i] = EZ_EX_Lsum[i] + EZ_EX_EHsum[i] - EZ_EX_EPsum[i] }
-
-    /// Available elec after TES chrg outside harm op period
-    let day1GV = 365
+    }
+    do {
+    let EZ_EX_Lsum = hour0.sumOfRanges(hourL, days: daysEZ, range1: hour4, condition: hourEX, predicate: { $0.isZero })
+    let EZ_EX_EHsum = hour4.sumOf(hourEH, days: daysEZ, condition: hourEX, predicate: { $0.isZero })
+    let EZ_EX_EPsum = hour4.sumOf(hourEP, days: daysEZ, condition: hourEX, predicate: { $0.isZero })
     // SUMIFS(CalculationL5:L8763,CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,"=0")+SUMIFS(CalculationEH5:EH8763,CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,"=0")-SUMIFS(CalculationEP5:EP8763,CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,"=0")
     for i in 0..<365 { day16[day1GV + i] = EZ_EX_Lsum[i] + EZ_EX_EHsum[i] - EZ_EX_EPsum[i] }
 
-    let EZ_EX_Jsum = hour0.sumOf(hourJ, days: daysEZ, condition: hourEX, predicate: { $0 > 0 })
-    let EZ_EX_EQsum = hour4.sumOf(hourEQ, days: daysEZ, condition: hourEX, predicate: { $0 > 0 })
-    let EZ_EX_EIsum = hour4.sumOf(hourEI, days: daysEZ, condition: hourEX, predicate: { $0 > 0 })
+    }
     /// Available heat after TES chrg during harm op period
     let day1GW = 730
-    // SUMIFS(CalculationJ5:J8763,CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,">0")+SUMIFS(CalculationEI5:EI8763,CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,">0")/PB_Ratio_Heat_input_vs_output-SUMIFS(CalculationEQ5:EQ8763,CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,">0")
-    for i in 0..<365 { day16[day1GW + i] = EZ_EX_Jsum[i] + EZ_EX_EIsum[i] / PB_Ratio_Heat_input_vs_output - EZ_EX_EQsum[i] }
-
     /// Available heat after TES chrg outside of harm op period
     let day1GX = 1095
-    // SUMIFS(CalculationJ5:J8763,CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,"=0")+SUMIFS(CalculationEI5:EI8763,CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,"=0")/PB_Ratio_Heat_input_vs_output-SUMIFS(CalculationEQ5:EQ8763,CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,"=0")
-    for i in 0..<365 { day16[day1GX + i] = EZ_EX_Jsum[i] + EZ_EX_EIsum[i] / PB_Ratio_Heat_input_vs_output - EZ_EX_EQsum[i] }
 
+    do {
+      let EZ_EX_Jsum = hour0.sumOfRanges(hourJ, days: daysEZ, range1: hour4, condition: hourEX, predicate: { $0 > 0 })
+      let EZ_EX_EQsum = hour4.sumOf(hourEQ, days: daysEZ, condition: hourEX, predicate: { $0 > 0 })
+      let EZ_EX_EIsum = hour4.sumOf(hourEI, days: daysEZ, condition: hourEX, predicate: { $0 > 0 })
+      // SUMIFS(CalculationJ5:J8763,CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,">0")+SUMIFS(CalculationEI5:EI8763,CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,">0")/PB_Ratio_Heat_input_vs_output-SUMIFS(CalculationEQ5:EQ8763,CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,">0")
+      for i in 0..<365 { day16[day1GW + i] = EZ_EX_Jsum[i] + EZ_EX_EIsum[i] / PB_Ratio_Heat_input_vs_output - EZ_EX_EQsum[i] }
+    }
+    do {
+      let EZ_EX_Jsum = hour0.sumOfRanges(hourJ, days: daysEZ, range1: hour4, condition: hourEX, predicate: { $0.isZero })
+      let EZ_EX_EQsum = hour4.sumOf(hourEQ, days: daysEZ, condition: hourEX, predicate: { $0.isZero })
+      let EZ_EX_EIsum = hour4.sumOf(hourEI, days: daysEZ, condition: hourEX, predicate: { $0.isZero })
+      // SUMIFS(CalculationJ5:J8763,CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,"=0")+SUMIFS(CalculationEI5:EI8763,CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,"=0")/PB_Ratio_Heat_input_vs_output-SUMIFS(CalculationEQ5:EQ8763,CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,"=0")
+      for i in 0..<365 { day16[day1GX + i] = EZ_EX_Jsum[i] + EZ_EX_EIsum[i] / PB_Ratio_Heat_input_vs_output - EZ_EX_EQsum[i] }
+    }
     let EXsum = hour4.sum(days: daysEZ, range: hourEX)
     let EZ_EX_FAsum = hour4.sumOf(hourFA, days: daysEZ, condition: hourEX, predicate: { $0 > 0 })
     /// Harm el cons considering min harm op during harm op period
@@ -62,8 +75,9 @@ extension TunOl {
 
     /// Harm el cons outside of harm op period
     let day1HA = 2190
+    let EZ_EX_FAsum2 = hour4.sumOf(hourFA, days: daysEZ, condition: hourEX, predicate: { $0.isZero })
     // SUMIFS(CalculationFA5:FA8763,CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,"=0")
-    for i in 0..<365 { day16[day1HA + i] = EZ_EX_FAsum[i] }
+    for i in 0..<365 { day16[day1HA + i] = EZ_EX_FAsum2[i] }
 
     let EYsum = hour4.sum(days: daysEZ, range: hourEY)
     let EZ_EX_FBsum = hour4.sumOf(hourFB, days: daysEZ, condition: hourEX, predicate: { $0 > 0 })
@@ -81,8 +95,9 @@ extension TunOl {
 
     /// Harm heat cons outside of harm op period
     let day1HD = 3285
+    let EZ_EX_FBsum2 = hour4.sumOf(hourFB, days: daysEZ, condition: hourEX, predicate: { $0.isZero })
     // SUMIFS(CalculationFB5:FB8763,CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,"=0")
-    for i in 0..<365 { day16[day1HD + i] = EZ_EX_FBsum[i] }
+    for i in 0..<365 { day16[day1HD + i] = EZ_EX_FBsum2[i] }
 
     let EZ_EX_FEsum = hour4.sumOf(hourFE, days: daysEZ, condition: hourEX, predicate: { $0 > 0 })
     /// Grid import considering min harm op during harm op period
@@ -100,7 +115,7 @@ extension TunOl {
     /// Grid import  outside of harm op period
     let day1HG = 4380
     // SUMIF(CalculationEZ5:EZ8763,"="A6,CalculationFE5:FE8763)-HE6
-    for i in 0..<365 { day16[day1HG + i] = FEsum[i] - day11[day1HE + i] }
+    for i in 0..<365 { day16[day1HG + i] = FEsum[i] - day16[day1HE + i] }
 
     let EZ_EX_FGsum = hour4.sumOf(hourFG, days: daysEZ, condition: hourEX, predicate: { $0 > 0 })
     /// El boiler op considering min harm op during harm op period
@@ -141,7 +156,7 @@ extension TunOl {
     /// El cons not covered outside of harm op period
     let day1HN = 6935
     // SUMIF(CalculationEZ5:EZ8763,"="A6,CalculationEU5:EU8763)-HM6
-    for i in 0..<365 { day16[day1HN + i] = EUsum[i] - day11[day1HM + i] }
+    for i in 0..<365 { day16[day1HN + i] = EUsum[i] - day16[day1HM + i] }
 
     let EZ_EX_FCsum = hour4.sumOf(hourFC, days: daysEZ, condition: hourEX, predicate: { $0 > 0 })
     /// Remaining PV el after TES chrg& min harm&aux during harm op period
@@ -159,7 +174,7 @@ extension TunOl {
     /// Remaining PV el outside of harm op period
     let day1HQ = 8030
     // SUMIF(CalculationEZ5:EZ8763,"="A6,CalculationFC5:FC8763)-HO6
-    for i in 0..<365 { day16[day1HQ + i] = FCsum[i] - day11[day1HO + i] }
+    for i in 0..<365 { day16[day1HQ + i] = FCsum[i] - day16[day1HO + i] }
 
     let EZ_EX_FDsum = hour4.sumOf(hourFD, days: daysEZ, condition: hourEX, predicate: { $0 > 0 })
     /// Remaining CSP heat after min harm during harm op period
@@ -177,7 +192,7 @@ extension TunOl {
     /// Remaining CSP heat outside of harm op period
     let day1HT = 9125
     // SUMIF(CalculationEZ5:EZ8763,"="A6,CalculationFD5:FD8763)-HR6
-    for i in 0..<365 { day16[day1HT + i] = FDsum[i] - day11[day1HR + i] }
+    for i in 0..<365 { day16[day1HT + i] = FDsum[i] - day16[day1HR + i] }
 
     let EZ_EX_FLsum = hour4.sumOf(hourFL, days: daysEZ, condition: hourEX, predicate: { $0 > 0 })
     /// Max elec to BESS for night prep after min harm op during harm op period
