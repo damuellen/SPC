@@ -4,7 +4,7 @@ extension TunOl {
     let hourCC = 70080
     let hourCS = 26280
     let hourCQ = 8760
-    var daysCS: [[Int]] =  hour3[hourCS..<(hourCS + 8760)].indices.chunked(by: { hour3[$0] == hour3[$1] }).map { $0.map { $0 - hourCS } }
+    var daysCS: [[Int]] =  hour3[hourCS+1..<(hourCS + 8760)].indices.chunked(by: { hour3[$0] == hour3[$1] }).map { $0.map { $0 - hourCS } }
    // let end = daysCS.removeLast()
    // daysCS[0].append(contentsOf: end)
     var day0 = [Double](repeating: Double.zero, count: 365)
@@ -109,7 +109,7 @@ extension TunOl {
     let (dayD, dayF, dayH, dayJ, dayL, dayN, dayP, hourEH, hourEX) = (
       365, 1095, 1825, 2555, 3285, 4015, 4745, 105120, 236520
     )
-    var daysEZ: [[Int]] = hour4[254040..<(254040 + 8760)].indices.chunked(by: { hour4[$0] == hour4[$1] })
+    var daysEZ: [[Int]] = hour4[254041..<(254040 + 8760)].indices.chunked(by: { hour4[$0] == hour4[$1] })
       .map { $0.map { $0 - 254040 } }
   //  let end = daysEZ.removeLast()
    // daysEZ[0].append(contentsOf: end)

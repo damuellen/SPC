@@ -44,7 +44,7 @@ extension TunOl {
     let hourDR = 245280
     let hourDS = 254040
     let hourDT = 262800
-    let daysCS: [[Int]] = hour3[hourCS..<(hourCS + 8760)].indices.chunked(by: { hour3[$0] == hour3[$1] })
+    let daysCS: [[Int]] = hour3[(hourCS+1)..<(hourCS + 8760)].indices.chunked(by: { hour3[$0] == hour3[$1] })
       .map { $0.map { $0 - hourCS } }
    // let end = daysCS.removeLast()
    // daysCS[0].append(contentsOf: end)

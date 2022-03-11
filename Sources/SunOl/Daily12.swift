@@ -1,7 +1,7 @@
 
 extension TunOl {
   func day(hour0: [Double], hour4: [Double], day11: [Double], day15: [Double]) -> [Double] {
-    var daysEZ: [[Int]] = hour4[254040..<(254040 + 8760)].indices.chunked(by: { hour4[$0] == hour4[$1] })
+    var daysEZ: [[Int]] = hour4[254041..<(254040 + 8760)].indices.chunked(by: { hour4[$0] == hour4[$1] })
       .map { $0.map { $0 - 254040 } }
    // let end = daysEZ.removeLast()
    // daysEZ[0].append(contentsOf: end)
