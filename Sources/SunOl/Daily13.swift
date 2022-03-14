@@ -44,7 +44,7 @@ extension TunOl {
     for i in 0..<365 {
       day7[dayIS + i] =
         day5[dayFT + i] + day5[dayGF + i] - day1[dayZ + i] - max(
-          Double.zero, day1[dayAB + i] - day5[dayFW + i]) / El_boiler_eff -day5[dayFR + i] / BESS_chrg_eff
+          Double.zero, day1[dayAB + i] - day5[dayFW + i]) / El_boiler_eff - day5[dayFR + i] / BESS_chrg_eff
     }
 
     /// Surplus harm op heat+boiler prod after min harm op and min night op prep

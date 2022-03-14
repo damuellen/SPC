@@ -1910,7 +1910,7 @@ extension TunOl {
             * MethDist_Meth_nom_prod_ud)
         + iff(
           or(day7[dayGZ + i] <= Double.zero, day7[dayJO + i] <= Double.zero), Double.zero,
-          (day0[dayB + i] * day7[dayGZ + i] / equiv_harmonious_max_perc[j] * MethDist_max_perc[j] * MethDist_Meth_nom_prod_ud)
+          day0[dayB + i] * day7[dayGZ + i] / equiv_harmonious_max_perc[j] * MethDist_max_perc[j] * MethDist_Meth_nom_prod_ud)
     }
 
    
