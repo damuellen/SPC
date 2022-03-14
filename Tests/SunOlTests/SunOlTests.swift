@@ -628,14 +628,20 @@ class SunOlTests: XCTestCase {
         XCTAssertEqual(day21[9819], 1.00, accuracy: 0.05, "DK333")
       }
       let day27 = model.day(case: j, day1: day21, day6: day6)
-      if j == 0 {
-        print("Daily 2 Case", j)
-        Array(day27[..<9855]).head(158, steps: 365)
-        print("Daily 2 Case", j)
-        Array(day27[9855..<17155]).head(186, steps: 365)
-        print("Daily 2 Case", j)
-        Array(day27[17155...]).head(0, steps: 365)
-      }
+      
+      print("Daily 2 Case", j)
+      Array(day27[..<9855]).head(121, steps: 365)
+      print("Daily 2 Case", j)
+      Array(day27[9855..<17155]).head(148, steps: 365)
+      print("Daily 2 Case", j)
+      Array(day27[17155..<24090]).head(168, steps: 365)
+      print("Daily 2 Case", j)
+      Array(day27[24090..<31755]).head(188, steps: 365)
+      print("Daily 2 Case", j)
+      Array(day27[31755..<38690]).head(206, steps: 365)
+      print("Daily 2 Case", j)
+      Array(day27[38690...]).head(242, steps: 365)
+      
       day.append(Array(day27[day21start..<day21end]))
       day.append(Array(day27[day22start..<day22end]))
     }
