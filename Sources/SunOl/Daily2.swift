@@ -87,52 +87,62 @@ extension TunOl {
 
     /// Min el cons during day for night op prep
     let dayO = 3650
-    // (M6+I6/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_Hydrogen_nom_cons)/EY_Hydrogen_nom_prod*EY_var_gross_nom_cons+C6*EY_fix_cons+(K6+I6/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_CO2_nom_cons)/CCU_CO2_nom_prod_ud*CCU_var_nom_cons+C6*CCU_fix_cons+I6/MethSynt_RawMeth_nom_prod_ud*MethSynt_var_nom_cons+C6*MethSynt_fix_cons
+    // IF(AND(M3=0;I3=0);0;(M3+I3/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_Hydrogen_nom_cons)/EY_Hydrogen_nom_prod*EY_var_gross_nom_cons+$C3*EY_fix_cons)+IF(AND(K3=0;I3=0);0;(K3+I3/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_CO2_nom_cons)/CCU_CO2_nom_prod_ud*CCU_var_nom_cons+$C3*CCU_fix_cons)+IF(I3=0;0;I3/MethSynt_RawMeth_nom_prod_ud*MethSynt_var_nom_cons+$C3*MethSynt_fix_cons)
     for i in 0..<365 {
-      day1[dayO + i] =
+      day1[dayO + i] = iff(
+        and(day1[dayM + i] = 0, day1[dayI + i] = 0), Double.zero, 
         (day1[dayM + i] + day1[dayI + i] / (MethSynt_C_O_2_nom_cons + MethSynt_Hydrogen_nom_cons)
-          * MethSynt_Hydrogen_nom_cons) / EY_Hydrogen_nom_prod * EY_var_gross_nom_cons + day0[dayC + i] * EY_fix_cons
-        + (day1[dayK + i] + day1[dayI + i] / (MethSynt_C_O_2_nom_cons + MethSynt_Hydrogen_nom_cons)
-          * MethSynt_C_O_2_nom_cons) / CCU_C_O_2_nom_prod_ud * CCU_var_nom_cons + day0[dayC + i] * CCU_fix_cons
-        + day1[dayI + i] / MethSynt_RawMeth_nom_prod_ud * MethSynt_var_nom_cons + day0[dayC + i] * MethSynt_fix_cons
+          * MethSynt_Hydrogen_nom_cons) / EY_Hydrogen_nom_prod * EY_var_gross_nom_cons + day0[dayC + i] * EY_fix_cons)
+        + iff(and(day1[dayK + i] = 0, day1[dayI + i] = 0), Double.zero,  
+          (day1[dayK + i] + day1[dayI + i] / (MethSynt_C_O_2_nom_cons + MethSynt_Hydrogen_nom_cons)
+          * MethSynt_C_O_2_nom_cons) / CCU_C_O_2_nom_prod_ud * CCU_var_nom_cons + day0[dayC + i] * CCU_fix_cons)
+        + iff(day1[dayI + i], Double.zero,
+          day1[dayI + i] / MethSynt_RawMeth_nom_prod_ud * MethSynt_var_nom_cons + day0[dayC + i] * MethSynt_fix_cons)
     }
 
     /// Max el cons during day for night op prep
     let dayP = 4015
-    // (N6+J6/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_Hydrogen_nom_cons)/EY_Hydrogen_nom_prod*EY_var_gross_nom_cons+C6*EY_fix_cons+(L6+J6/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_CO2_nom_cons)/CCU_CO2_nom_prod_ud*CCU_var_nom_cons+C6*CCU_fix_cons+J6/MethSynt_RawMeth_nom_prod_ud*MethSynt_var_nom_cons+C6*MethSynt_fix_cons
+    // IF(AND(N3=0;J3=0);0;(N3+J3/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_Hydrogen_nom_cons)/EY_Hydrogen_nom_prod*EY_var_gross_nom_cons+$C3*EY_fix_cons)+IF(AND(L3=0;J3=0);0;(L3+J3/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_CO2_nom_cons)/CCU_CO2_nom_prod_ud*CCU_var_nom_cons+$C3*CCU_fix_cons)+IF(J3=0;0;J3/MethSynt_RawMeth_nom_prod_ud*MethSynt_var_nom_cons+$C3*MethSynt_fix_cons)
     for i in 0..<365 {
-      day1[dayP + i] =
+      day1[dayP + i] = iff(
+        and(day1[dayN + i] = 0, day1[dayJ + i] = 0), Double.zero, 
         (day1[dayN + i] + day1[dayJ + i] / (MethSynt_C_O_2_nom_cons + MethSynt_Hydrogen_nom_cons)
-          * MethSynt_Hydrogen_nom_cons) / EY_Hydrogen_nom_prod * EY_var_gross_nom_cons + day0[dayC + i] * EY_fix_cons
-        + (day1[dayL + i] + day1[dayJ + i] / (MethSynt_C_O_2_nom_cons + MethSynt_Hydrogen_nom_cons)
-          * MethSynt_C_O_2_nom_cons) / CCU_C_O_2_nom_prod_ud * CCU_var_nom_cons + day0[dayC + i] * CCU_fix_cons
-        + day1[dayJ + i] / MethSynt_RawMeth_nom_prod_ud * MethSynt_var_nom_cons + day0[dayC + i] * MethSynt_fix_cons
+          * MethSynt_Hydrogen_nom_cons) / EY_Hydrogen_nom_prod * EY_var_gross_nom_cons + day0[dayC + i] * EY_fix_cons)
+        + iff(and(day1[dayL + i] = 0, day1[dayJ + i] = 0), Double.zero,
+          (day1[dayL + i] + day1[dayJ + i] / (MethSynt_C_O_2_nom_cons + MethSynt_Hydrogen_nom_cons)
+          * MethSynt_C_O_2_nom_cons) / CCU_C_O_2_nom_prod_ud * CCU_var_nom_cons + day0[dayC + i] * CCU_fix_cons)
+        + iff(day1[dayJ + i], Double.zero,
+          day1[dayJ + i] / MethSynt_RawMeth_nom_prod_ud * MethSynt_var_nom_cons + day0[dayC + i] * MethSynt_fix_cons)
     }
 
     /// Min heat cons during day for night op prep
     let dayQ = 4380
-    // (M6+I6/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_Hydrogen_nom_cons)/EY_Hydrogen_nom_prod*EY_var_heat_nom_cons+C6*EY_heat_fix_cons+(K6+I6/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_CO2_nom_cons)/CCU_CO2_nom_prod_ud*CCU_var_heat_nom_cons+C6*CCU_fix_heat_cons-I6/MethSynt_RawMeth_nom_prod_ud*MethSynt_var_heat_nom_prod-C6*MethSynt_heat_fix_prod
+    // IF(AND(M3=0;I3=0);0;(M3+I3/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_Hydrogen_nom_cons)/EY_Hydrogen_nom_prod*EY_var_heat_nom_cons+$C3*EY_heat_fix_cons)+IF(AND(K3=0;I3=0);0;(K3+I3/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_CO2_nom_cons)/CCU_CO2_nom_prod_ud*CCU_var_heat_nom_cons+$C3*CCU_heat_fix_cons)-IF(I3=0;0;I3/MethSynt_RawMeth_nom_prod_ud*MethSynt_var_heat_nom_prod+$C3*MethSynt_heat_fix_prod)
     for i in 0..<365 {
-      day1[dayQ + i] =
+      day1[dayQ + i] = iff(
+        and(day1[dayM + i] = 0, day1[dayI + i] = 0), Double.zero,
         (day1[dayM + i] + day1[dayI + i] / (MethSynt_C_O_2_nom_cons + MethSynt_Hydrogen_nom_cons)
-          * MethSynt_Hydrogen_nom_cons) / EY_Hydrogen_nom_prod * EY_var_heat_nom_cons + day0[dayC + i] * EY_heat_fix_cons
-        + (day1[dayK + i] + day1[dayI + i] / (MethSynt_C_O_2_nom_cons + MethSynt_Hydrogen_nom_cons)
-          * MethSynt_C_O_2_nom_cons) / CCU_C_O_2_nom_prod_ud * CCU_var_heat_nom_cons + day0[dayC + i] * CCU_fix_heat_cons
-        - day1[dayI + i] / MethSynt_RawMeth_nom_prod_ud * MethSynt_var_heat_nom_prod - day0[dayC + i]
-        * MethSynt_heat_fix_prod
+          * MethSynt_Hydrogen_nom_cons) / EY_Hydrogen_nom_prod * EY_var_heat_nom_cons + day0[dayC + i] * EY_heat_fix_cons)
+        + iff(and(day1[dayK + i] = 0, day1[dayI + i] = 0), Double.zero,
+          (day1[dayK + i] + day1[dayI + i] / (MethSynt_C_O_2_nom_cons + MethSynt_Hydrogen_nom_cons)
+          * MethSynt_C_O_2_nom_cons) / CCU_C_O_2_nom_prod_ud * CCU_var_heat_nom_cons + day0[dayC + i] * CCU_fix_heat_cons)
+        - iff(day1[dayI + i], Double.zero,
+          day1[dayI + i] / MethSynt_RawMeth_nom_prod_ud * MethSynt_var_heat_nom_prod + day0[dayC + i] * MethSynt_heat_fix_prod)
     }
 
     /// Max heat cons during day for prep of night
     let dayR = 4745
-    // (N6+J6/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_Hydrogen_nom_cons)/EY_Hydrogen_nom_prod*EY_var_heat_nom_cons+C6*EY_heat_fix_cons+(L6+J6/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_CO2_nom_cons)/CCU_CO2_nom_prod_ud*CCU_var_heat_nom_cons+C6*CCU_fix_heat_cons-J6/MethSynt_RawMeth_nom_prod_ud*MethSynt_var_heat_nom_prod-C6*MethSynt_heat_fix_prod
+    // IF(AND(N3=0;J3=0);0;(N3+J3/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_Hydrogen_nom_cons)/EY_Hydrogen_nom_prod*EY_var_heat_nom_cons+$C3*EY_heat_fix_cons)+IF(AND(L3=0;J3=0);0;(L3+J3/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_CO2_nom_cons)/CCU_CO2_nom_prod_ud*CCU_var_heat_nom_cons+$C3*CCU_heat_fix_cons)-IF(J3=0;0;J3/MethSynt_RawMeth_nom_prod_ud*MethSynt_var_heat_nom_prod+$C3*MethSynt_heat_fix_prod)
     for i in 0..<365 {
-      day1[dayR + i] =
+      day1[dayR + i] = iff(
+        and(day1[dayN + i] = 0, day1[dayJ + i] = 0), Double.zero,
         (day1[dayN + i] + day1[dayJ + i] / (MethSynt_C_O_2_nom_cons + MethSynt_Hydrogen_nom_cons)
-          * MethSynt_Hydrogen_nom_cons) / EY_Hydrogen_nom_prod * EY_var_heat_nom_cons + day0[dayC + i] * EY_heat_fix_cons
-        + (day1[dayL + i] + day1[dayJ + i] / (MethSynt_C_O_2_nom_cons + MethSynt_Hydrogen_nom_cons)
-          * MethSynt_C_O_2_nom_cons) / CCU_C_O_2_nom_prod_ud * CCU_var_heat_nom_cons + day0[dayC + i] * CCU_fix_heat_cons
-        - day1[dayJ + i] / MethSynt_RawMeth_nom_prod_ud * MethSynt_var_heat_nom_prod - day0[dayC + i]
-        * MethSynt_heat_fix_prod
+          * MethSynt_Hydrogen_nom_cons) / EY_Hydrogen_nom_prod * EY_var_heat_nom_cons + day0[dayC + i] * EY_heat_fix_cons)
+        + iff(and(day1[dayL + i] = 0, day1[dayJ + i] = 0), Double.zero,
+          (day1[dayL + i] + day1[dayJ + i] / (MethSynt_C_O_2_nom_cons + MethSynt_Hydrogen_nom_cons)
+          * MethSynt_C_O_2_nom_cons) / CCU_C_O_2_nom_prod_ud * CCU_var_heat_nom_cons + day0[dayC + i] * CCU_fix_heat_cons)
+        - iff(day1[dayJ + i] = 0, Double.zero,
+          day1[dayJ + i] / MethSynt_RawMeth_nom_prod_ud * MethSynt_var_heat_nom_prod + day0[dayC + i] * MethSynt_heat_fix_prod)
     }
 
     /// Min Rawmeth prod during day for night op prep
