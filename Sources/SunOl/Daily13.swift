@@ -16,63 +16,58 @@ extension TunOl {
     
     /// Surplus harm op period electricity after min harm op and min night op prep
     let dayIQ = 0 
-    // FS6+GE6-$Z6-MIN(GH6,MAX(0,$AB6-FV6)/El_boiler_eff)-MIN(FY6,FR6/BESS_chrg_eff)
+    // FS6+GE6-$Z6-MAX(0;$AB6-FV6)/El_boiler_eff-FR6/BESS_chrg_eff
     for i in 0..<365 {
       day7[dayIQ + i] =
-        day5[dayFS + i] + day5[dayGE + i] - day1[dayZ + i] - min(day5[dayGH + i], max(
-          Double.zero, day1[dayAB + i] - day5[dayFV + i]) / El_boiler_eff) - min(day5[dayFY + i], day5[dayFR + i] / BESS_chrg_eff)
+        day5[dayFS + i] + day5[dayGE + i] - day1[dayZ + i] - max(
+          Double.zero, day1[dayAB + i] - day5[dayFV + i]) / El_boiler_eff - day5[dayFR + i] / BESS_chrg_eff
     }
 
     let equiv_harmonious_range = (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j])
     /// Surplus harm op period electricity after min harm op and max night op prep
     let dayIR = 365
-    // =HO6+IA6-(Z6+(AA6-Z6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(AM6-A_equiv_harmonious_min_perc))-MIN(ID6,MAX(0,($AB6+($AC6-$AB6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*($AM6-A_equiv_harmonious_min_perc))-HR6)/El_boiler_eff)-MIN(HU6,HN6/BESS_chrg_eff)
+    // HO6+IA6-($Z6+($AA6-$Z6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*($AM6-A_equiv_harmonious_min_perc))-MAX(0;($AB6+($AC6-$AB6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*($AM6-A_equiv_harmonious_min_perc))-HR6)/El_boiler_eff-HN6/BESS_chrg_eff
     for i in 0..<365 {
       day7[dayIR + i] =
         day6[dayHO + i] + day6[dayIA + i] - (day1[dayZ + i] + (day1[dayAA + i] - day1[dayZ + i]) / equiv_harmonious_range * (day1[dayAM + i] - equiv_harmonious_min_perc[j]))
-        - min(
-          day6[dayID + i],
-          max(
+        - max(
             0,
             (day1[dayAB + i]
               + (day1[dayAC + i] - day1[dayAB + i]) / equiv_harmonious_range
                 * (day1[dayAM + i] - equiv_harmonious_min_perc[j]))
-              - day6[dayHR + i]) / El_boiler_eff) - min(day6[dayHU + i], day6[dayHN + i] / BESS_chrg_eff)
+              - day6[dayHR + i]) / El_boiler_eff - day6[dayHN + i] / BESS_chrg_eff
     }
 
     /// Surplus harm op period electricity after max harm op and min night op prep
     let dayIS = 730 
-    // FT6+GF6-Z6-MIN(GI6,MAX(0,$AB6-FW6)/El_boiler_eff)-MIN(FZ6,FR6/BESS_chrg_eff)
+    // FT6+GF6-$Z6-MAX(0;$AB6-FW6)/El_boiler_eff-FR6/BESS_chrg_eff
     for i in 0..<365 {
       day7[dayIS + i] =
-        day5[dayFT + i] + day5[dayGF + i] - day1[dayZ + i] - min(day5[dayGI + i], max(
-          Double.zero, day1[dayAB + i] - day5[dayFW + i]) / El_boiler_eff) - min(day5[dayFZ + i], day5[dayFR + i] / BESS_chrg_eff)
+        day5[dayFT + i] + day5[dayGF + i] - day1[dayZ + i] - max(
+          Double.zero, day1[dayAB + i] - day5[dayFW + i]) / El_boiler_eff -day5[dayFR + i] / BESS_chrg_eff
     }
 
     /// Surplus harm op heat+boiler prod after min harm op and min night op prep
     let dayIT = 1095 
-    // FV6+MIN(GH6,MAX(0,FS6+GE6-Z6-MIN(FY6,FR6/BESS_chrg_eff))*El_boiler_eff)-$AB6
+    // FV6+MAX(0;FS6+GE6-$Z6-FR6/BESS_chrg_eff)*El_boiler_eff-$AB6
     for i in 0..<365 {
       day7[dayIT + i] =
-        day5[dayFV + i] + min(day5[dayGH + i], max(
-          Double.zero, day5[dayFS + i] + day5[dayGE + i] - day1[dayZ + i] - min(day5[dayFY + i], day5[dayFR + i] / BESS_chrg_eff))
-        * El_boiler_eff) - day1[dayAB + i]
+        day5[dayFV + i] + max(
+          Double.zero, day5[dayFS + i] + day5[dayGE + i] - day1[dayZ + i] - day5[dayFR + i] / BESS_chrg_eff)
+        * El_boiler_eff - day1[dayAB + i]
     }
 
     /// Surplus harm op heat+boiler prod after min harm op and max night op prep
     let dayIU = 1460 
-    // =HR6+MIN(ID6,MAX(0,HO6+IA6-($Z6+($AA6-$Z6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*($AM6-A_equiv_harmonious_min_perc))-MIN(HU6,HN6/BESS_chrg_eff))*El_boiler_eff)-($AB6+($AC6-$AB6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*($AM6-A_equiv_harmonious_min_perc))
+    // =HR6+MAX(0;HO6+IA6-($Z6+($AA6-$Z6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*($AM6-A_equiv_harmonious_min_perc))-HN6/BESS_chrg_eff)*El_boiler_eff-($AB6+($AC6-$AB6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*($AM6-A_equiv_harmonious_min_perc))
     for i in 0..<365 {
       day7[dayIU + i] =
         day6[dayHR + i]
-        + min(
-          day6[dayID + i],
-          max(
-            0,
+        + max(Double.zero,
             day6[dayHO + i] + day6[dayIA + i]-(day1[dayZ + i]
               + (day1[dayAA + i] - day1[dayZ + i]) / equiv_harmonious_range
                 * (day1[dayAM + i] - equiv_harmonious_min_perc[j]))
-              - min(day6[dayHU + i], day6[dayHN + i] / BESS_chrg_eff)) * El_boiler_eff)
+              - day6[dayHN + i] / BESS_chrg_eff) * El_boiler_eff
         - (day1[dayAB + i]
           + (day1[dayAC + i] - day1[dayAB + i]) / equiv_harmonious_range
             * (day1[dayAM + i] - equiv_harmonious_min_perc[j]))
@@ -81,12 +76,12 @@ extension TunOl {
 
     /// Surplus harm op heat+boiler prod after max harm op and min night op prep
     let dayIV = 1825
-    // FW6+MIN(GI6,MAX(0,FT6+GF6-Z6-MIN(FZ6,FR6/BESS_chrg_eff))*El_boiler_eff)-$AB6
+    // =FW6+MAX(0;FT6+GF6-$Z6-FR6/BESS_chrg_eff)*El_boiler_eff-$AB6
     for i in 0..<365 { 
       day7[dayIV + i] =
-        day5[dayFW + i] + min(day5[dayGI + i], max(
-          Double.zero, day5[dayFT + i] + day5[dayGF + i] - day1[dayZ + i] - min(day5[dayFZ + i], day5[dayFR + i] / BESS_chrg_eff))
-        * El_boiler_eff) - day1[dayAB + i]
+        day5[dayFW + i] + max(
+          Double.zero, day5[dayFT + i] + day5[dayGF + i] - day1[dayZ + i] - day5[dayFR + i] / BESS_chrg_eff)
+        * El_boiler_eff - day1[dayAB + i]
     }
 
     /// Surplus el boiler cap after min harm op and min night op prep

@@ -1627,17 +1627,16 @@ extension TunOl {
 
     /// Pure Methanol prod with min night prep and resp day op
     let dayIU = 33945
-    // IF(HU6<=0,0,HU6/(Overall_harmonious_var_max_cons+Overall_fix_cons)*MethDist_harmonious_max_perc*MethDist_Meth_nom_prod_ud)+IF(IJ6<=0,0,(IJ6-A_overall_stup_cons)/(A_overall_var_max_cons+A_overall_fix_stby_cons)*A_MethDist_max_perc*MethDist_Meth_nom_prod_ud)
+    // IF(OR(GE6<=0;HU6<=0);0;$C6*GE6/Overall_harmonious_max_perc*MethDist_harmonious_max_perc*MethDist_Meth_nom_prod_ud)+IF(OR(GX6<=0;IJ6<=0);0;$B6*GX6/A_equiv_harmonious_max_perc*A_MethDist_max_perc*MethDist_Meth_nom_prod_ud)
     for i in 0..<365 {
       day7[dayIU + i] =
         iff(
-          day7[dayHU + i] <= Double.zero, Double.zero,
-          day7[dayHU + i] / (Overall_harmonious_var_max_cons + Overall_fix_cons) * MethDist_harmonious_max_perc
+          or(day7[dayGE + i] <= Double.zero, day7[dayHU + i] <= Double.zero), Double.zero,
+          day0[dayC + i] * day7[dayGE + i] / Overall_harmonious_max_perc * MethDist_harmonious_max_perc
             * MethDist_Meth_nom_prod_ud)
         + iff(
-          day7[dayIJ + i] <= Double.zero, Double.zero,
-          (day7[dayIJ + i] - overall_stup_cons[j]) / (overall_var_max_cons[j] + overall_fix_stby_cons[j])
-            * MethDist_max_perc[j] * MethDist_Meth_nom_prod_ud)
+          or(day7[dayGX + i] <= Double.zero, day7[dayIJ + i] <= Double.zero), Double.zero,
+          day0[dayB + i] * day7[dayGX + i] / equiv_harmonious_max_perc[j] * MethDist_max_perc[j] * MethDist_Meth_nom_prod_ud)
     }
 
     /// grid export
@@ -1902,20 +1901,19 @@ extension TunOl {
 
     /// Pure Methanol prod with min night prep and resp day op
     let dayJZ = 44895
-    // IF(IZ6<=0,0,IZ6/(Overall_harmonious_var_max_cons+Overall_fix_cons)*MethDist_harmonious_max_perc*MethDist_Meth_nom_prod_ud)+IF(GZ6<=0,0,(I6+(J6-I6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(GZ6-A_equiv_harmonious_min_perc))/MethDist_RawMeth_nom_cons*MethDist_Meth_nom_prod_ud)
+    // IF(OR(HS6<=0;IZ6<=0);0;$C6*HS6/Overall_harmonious_max_perc*MethDist_harmonious_max_perc*MethDist_Meth_nom_prod_ud)+IF(OR(GZ6<=0;JO6<=0);0;$B6*GZ6/A_equiv_harmonious_max_perc*A_MethDist_max_perc*MethDist_Meth_nom_prod_ud)
     for i in 0..<365 {
       day7[dayJZ + i] =
         iff(
-          day7[dayIZ + i] <= Double.zero, Double.zero,
-          day7[dayIZ + i] / (Overall_harmonious_var_max_cons + Overall_fix_cons) * MethDist_harmonious_max_perc
+          or(day7[dayHS + i] <= Double.zero, day7[dayIZ + i] <= Double.zero), Double.zero,
+          day0[dayC + i] * day7[dayHS + i] / Overall_harmonious_max_perc * MethDist_harmonious_max_perc
             * MethDist_Meth_nom_prod_ud)
         + iff(
-          day7[dayGZ + i] <= Double.zero, Double.zero,
-          (day1[dayI + i]
-            + (day7[dayJ + i] - day1[dayI + i]) / equiv_harmonious_range * (day7[dayGZ + i] - equiv_harmonious_min_perc[j]))
-            / MethDist_RawMeth_nom_cons * MethDist_Meth_nom_prod_ud)
+          or(day7[dayGZ + i] <= Double.zero, day7[dayJO + i] <= Double.zero), Double.zero,
+          (day0[dayB + i] * day7[dayGZ + i] / equiv_harmonious_max_perc[j] * MethDist_max_perc[j] * MethDist_Meth_nom_prod_ud)
     }
 
+   
     /// grid export
     let dayKA = 45260
     // MIN(JH6,IF(OR(HS6=0,GZ6=0),0,(DV6+(DW6-DV6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(HS6-Overall_harmonious_min_perc))))+MIN(JU6,IF(OR(HS6=0,GZ6=0),0,DX6))
