@@ -48,11 +48,12 @@ public func fitness(values: [Double]) -> [Double] {
   }
   let i = year.compactMap {$0}
   let lcom = i.reduce(0.0,+) / Double(i.count)
+  if i.count < 300 || lcom < 100 { return [Double.infinity] + values }
   return [lcom] + values
 }
 
 public func MGOADE(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fitness: ([Double]) -> [Double]) -> [[Double]] {
-  var targetResults = Matrix(n * maxIter, bounds.count + 13)
+  var targetResults = Matrix(n * maxIter, bounds.count + 1)
   var targetPosition = Matrix(group ? 3 : 1, bounds.count)
   var targetFitness = Vector(group ? 3 : 1, .infinity)
   let EPSILON = 1E-14
@@ -71,22 +72,24 @@ public func MGOADE(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Doubl
   let _ = fitness([])
   print(-date.timeIntervalSinceNow)
   // Calculate the fitness of initial grasshoppers
+  let date2 = Date()
   DispatchQueue.concurrentPerform(iterations: grassHopperPositions.count) { i in
     let result = fitness(grassHopperPositions[i])
     grassHopperFitness[i] = result[0]
   }
-  
+  print(-date2.timeIntervalSinceNow / Double(grassHopperPositions.count))
   for g in groups.indices {
     // Find the best grasshopper per group (target) in the first population
     for i in groups[g].indices {
       if grassHopperFitness[i] < targetFitness[g] {
         targetFitness[g] = grassHopperFitness[i]
         targetPosition[g] = grassHopperPositions[i]
+        
       }
     }
     TunOl.convergenceCurves[g].append([Double(0), targetFitness[g]])
   }
-  print("\u{1b}[1J", terminator: "")
+  
   print("First population:\n\(targetFitness)".text(.green))
   print(targetPosition.map(labeled(values:)).joined(separator: "\n"))
 
@@ -145,6 +148,7 @@ public func MGOADE(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Doubl
         targetResults[pos + i][j] = grassHopperPositions[i][j]
       }
       let result = fitness(grassHopperPositions[i])
+      //targetResults[pos + i] = result
       targetResults[pos + i].replaceSubrange(bounds.count..., with: result)
       grassHopperFitness[i] = result[0]
     }
@@ -516,7 +520,7 @@ struct Results {
 
 func labeled(values: [Double]) -> String {
   let labels = [
-    "LCOM", "BESS_cap", "CCU_C_O_2_nom_prod", "C_O_2_storage_cap", "CSP_loop_nr", "El_boiler_cap", "EY_var_net_nom_cons", "Grid_export_max",
+    "BESS_cap", "CCU_C_O_2_nom_prod", "C_O_2_storage_cap", "CSP_loop_nr", "El_boiler_cap", "EY_var_net_nom_cons", "Grid_export_max",
     "Grid_import_max", "Hydrogen_storage_cap", "Heater_cap", "MethDist_Meth_nom_prod", "MethSynt_RawMeth_nom_prod", "PB_nom_gross_cap", "PV_AC_cap",
     "PV_DC_cap", "RawMeth_storage_cap", "TES_full_load_hours",
   ]

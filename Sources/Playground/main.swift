@@ -119,23 +119,32 @@ struct Command: ParsableCommand {
       let parameters = try? JSONDecoder().decode([Parameter].self, from: data) {
       parameter = parameters
     } else {
-     parameter = [
-  Parameter(
-    BESS_cap_ud: 0...1400, CCU_C_O_2_nom_prod_ud: 10...110, C_O_2_storage_cap_ud: 10...110,
-    CSP_loop_nr_ud: 20...250, El_boiler_cap_ud: 10...110, EY_var_net_nom_cons_ud: 10...110,
-    Grid_export_max_ud: 50...50, Grid_import_max_ud: 50...50, Hydrogen_storage_cap_ud: 10...110,
-    Heater_cap_ud: 10...500, MethDist_Meth_nom_prod_ud: 10...110,
-    MethSynt_RawMeth_nom_prod_ud: 10...110, PB_nom_gross_cap_ud: 10...110,
-    PV_AC_cap_ud: 280...1280, PV_DC_cap_ud: 280...1380, RawMeth_storage_cap_ud: 10...110,
-    TES_full_load_hours_ud: 10...110)
-]
-
+      parameter = [
+        Parameter(
+          BESS_cap_ud: 0...1400,
+          CCU_C_O_2_nom_prod_ud: 10...110,
+          C_O_2_storage_cap_ud: 5000...5000,
+          CSP_loop_nr_ud: 20...250,
+          El_boiler_cap_ud: 10...110,
+          EY_var_net_nom_cons_ud: 100...600,
+          Grid_export_max_ud: 50...50,
+          Grid_import_max_ud: 50...50,
+          Hydrogen_storage_cap_ud: 10...110,
+          Heater_cap_ud: 10...500,
+          MethDist_Meth_nom_prod_ud: 10...110,
+          MethSynt_RawMeth_nom_prod_ud: 10...110,
+          PB_nom_gross_cap_ud: 20...300,
+          PV_AC_cap_ud: 280...1280,
+          PV_DC_cap_ud: 280...1380,
+          RawMeth_storage_cap_ud: 300...300,
+          TES_full_load_hours_ud: 5...30)
+      ]
     }
     parameter.forEach { parameter in
       #if os(Windows)
       MessageBox(text: "Start MGOADE Optimizer", caption: "TunOl")
       #endif
-      let a = MGOADE(group: !noGroups, n: n ?? 150, maxIter: iterations ?? 100, bounds: parameter.ranges, fitness: fitness)
+      let a = MGOADE(group: !noGroups, n: n ?? 150, maxIter: iterations ?? 10, bounds: parameter.ranges, fitness: fitness)
       a.forEach { row in r += 1; ws.write(row, row: r) }
       if r < 2 { return }
       let (x,y) = (12, 17)
