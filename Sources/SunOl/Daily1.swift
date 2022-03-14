@@ -10,7 +10,7 @@ extension TunOl {
     var day0 = [Double](repeating: Double.zero, count: 365)
 
     /// Day
-    let dayA.isZero
+    let dayA = 0
     // A5+1
     for i in 1..<365 { day0[dayA + i] = day0[dayA + i - 1] + 1 }
 
@@ -19,7 +19,7 @@ extension TunOl {
 
     var day1 = [Double](repeating: Double.zero, count: 13_140)
     /// Nr of hours outside of harm op period after min night prep
-    let dayC.isZero
+    let dayC = 0
     // COUNTIFS(CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,"<=0")
     for i in 0..<365 { day1[dayC + i] = CQ_CScountZero[i] }
 
