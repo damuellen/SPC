@@ -38,7 +38,6 @@ public func fitness(values: [Double]) -> [Double] {
     day.append(Array(day27[44895..<45990]))
   }
 
-  let costs = Costs(model)
   var year = [Double?]()
   var meth_produced_MTPH_sum = Double.zero
   var elec_from_grid_sum = Double.zero
