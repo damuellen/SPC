@@ -1,7 +1,7 @@
 extension TunOl {
   func hour2(j: Int, hour0: [Double], hour1: [Double]) -> [Double] {
     let (hourJ, hourL, hourM, hourAW, hourBK, hourBM, hourBO, hourBP, hourBQ) = (26280, 43800, 52560, 8760, 131400, 148920, 166440, 175200, 183960)
-    var daysBO: [[Int]] = hour1[hourBO..<(hourBO + 8760)].indices.chunked(by: { hour1[$0] == hour1[$1] }).map { $0.map { $0 - hourBO } }
+    let daysBO: [[Int]] = hour1[hourBO..<(hourBO + 8760)].indices.chunked(by: { hour1[$0] == hour1[$1] }).map { $0.map { $0 - hourBO } }
    // let end = daysBO.removeLast()
    // daysBO[0].append(contentsOf: end)
 

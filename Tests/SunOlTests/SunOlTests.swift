@@ -506,7 +506,8 @@ class SunOlTests: XCTestCase {
       day.append(Array(day17[day11start..<day11end]))
       day.append(Array(day17[day12start..<day12end]))
 
-      let day21 = model.day(case: j, hour0: hour0)
+      let day0 = model.day0(hour0: hour0)
+      let day21 = model.day1(case: j, day0: day0)
       print("Daily 2 Case", j)
       Array(day21[0..<6935]).head(0, steps: 365)
       print("Daily 2 Case", j)
@@ -627,7 +628,8 @@ class SunOlTests: XCTestCase {
         XCTAssertEqual(day21[9454], 1.00, accuracy: 0.05, "DJ333")
         XCTAssertEqual(day21[9819], 1.00, accuracy: 0.05, "DK333")
       }
-      let day27 = model.day(case: j, day1: day21, day6: day6)
+ 
+      let day27 = model.day(case: j, day0: day0, day1: day21, day6: day6)
       
       print("Daily 2 Case", j)
       Array(day27[..<9855]).head(121, steps: 365)
@@ -647,17 +649,23 @@ class SunOlTests: XCTestCase {
     }
     let costs = Costs(model)
     var year = [Double?]()
+    var meth_produced_MTPH_sum = Double.zero
+    var elec_from_grid_sum = Double.zero
+    var elec_to_grid_MTPH_sum = Double.zero
+
     for d in 0..<365 {
       let cases = day.indices.map { i in
-        costs.LCOM(meth_produced_MTPH: day[i][d], elec_from_grid: day[i][d + 365], elec_to_grid: day[i][d + 365 + 365])
+        costs.LCOM(meth_produced_MTPH: day[i][d], elec_from_grid: day[i][d+365], elec_to_grid: day[i][d+365+365])
       }
-      print(cases)
-      let best = cases.filter(\.isFinite).filter { $0 > 0 }.sorted()
-      if best.count > 0 { year.append(best[0]) } else { year.append(nil) }
-    }
-    let i = year.compactMap { $0 }
-    print(i)
-    let lcom = i.reduce(0.0, +) / Double(i.count)
-    print(lcom)
+      let best = cases.indices.filter{cases[$0].isFinite}.filter{cases[$0]>0}.sorted()
+      if best.count > 0 { 
+        meth_produced_MTPH_sum += day[best[0]][d]
+        elec_from_grid_sum += day[best[0]][d+365]
+        elec_to_grid_MTPH_sum += day[best[0]][d+365+365]
+        year.append(cases[best[0]])
+      } else { year.append(nil) } 
+    }    
+    let LCOM = costs.LCOM(meth_produced_MTPH: meth_produced_MTPH_sum, elec_from_grid: elec_from_grid_sum, elec_to_grid: elec_to_grid_MTPH_sum)
+    print(LCOM)
   }
 }

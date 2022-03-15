@@ -295,7 +295,9 @@ extension TunOl {
     return day6
   }
 
-  func day(case j: Int, day1: [Double], day6: [Double]) -> [Double] {
+  func day(case j: Int, day0: [Double], day1: [Double], day6: [Double]) -> [Double] {
+    let dayB = 365
+    let dayC = 730
     let dayE = 0
     let dayF = 365
     let dayG = 730

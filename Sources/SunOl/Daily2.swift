@@ -1,6 +1,6 @@
 extension TunOl {
-  func day(case j: Int, hour0: [Double]) -> [Double] {
-    var daysU: [[Int]] = hour0[113881..<(113880 + 8760)].indices.chunked(by: { hour0[$0] == hour0[$1] })
+  func day0(hour0: [Double]) -> [Double] {
+    let daysU: [[Int]] = hour0[113881..<(113880 + 8760)].indices.chunked(by: { hour0[$0] == hour0[$1] })
       .map { $0.map { $0 - 113880 } }
    // let end = daysU.removeLast()
    // daysU[0].append(contentsOf: end)
@@ -24,9 +24,13 @@ extension TunOl {
     let dayC = 730
     // COUNTIFS(CalculationU5:U8763,"="A6,CalculationS5:S8763,">0")
     for i in 0..<365 { day0[dayC + i] = S_UcountNonZero[i] }
+    return day0
+  }
 
+  func day1(case j: Int, day0: [Double]) -> [Double] {
     var day1 = [Double](repeating: Double.zero, count: 9_855)
-
+    let dayB = 365
+    let dayC = 730
     /// Min el cons during night
     let dayE = 0
     // (A_overall_var_min_cons+A_overall_fix_stby_cons)*B6+A_overall_stup_cons
