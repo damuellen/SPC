@@ -953,10 +953,10 @@ for i in 0..<365 {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /// el cons for night prep during harm op period
-    let dddKV = 19710
+    let ddLC = 22265
     // IF(OR(JM6=0,KB6=0),0,(Z6+(AA6-Z6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(KB6-A_equiv_harmonious_min_perc)))
     for i in 0..<365 {
-      day7[dddKV + i] = iff(
+      day7[ddLC + i] = iff(
         or(day7[ddJP + i].isZero, day7[ddKG + i].isZero), Double.zero,
         (day1[dayZ + i] + (day1[dayAA + i] - day1[dayZ + i]) / equiv_harmonious_range
             * (day7[ddKG + i] - equiv_harmonious_min_perc[j]))
@@ -964,20 +964,20 @@ for i in 0..<365 {
     }
 
     /// el to cover aux cons during harm op period
-    let dddKW = 20075
+    let ddLD = 22630
     // IF(OR(JM6=0,KB6=0),0,FO6+(HK6-FO6)/(AM6-A_equiv_harmonious_min_perc)*(KB6-A_equiv_harmonious_min_perc))
     for i in 0..<365 {
-      day7[dddKW + i] = iff(
+      day7[ddLD + i] = iff(
         or(day7[ddJP + i].isZero, day7[ddKG + i].isZero), Double.zero,
         day5[dayFO + i] + (day6[dayHK + i] - day5[dayFO + i])
           / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKG + i] - equiv_harmonious_min_perc[j]))
     }
 
     /// el cons for BESS charging during harm op period
-    let dddKX = 20440
+    let ddLE = 22995
     // IF(OR(JM6=0,KB6=0),0,MIN(((FY6+(HU6-FY6)/(AM6-A_equiv_harmonious_min_perc)*(KB6-A_equiv_harmonious_min_perc))+((FZ6+(HV6-FZ6)/(AM6-A_equiv_harmonious_min_perc)*(KB6-A_equiv_harmonious_min_perc))-(FY6+(HU6-FY6)/(AM6-A_equiv_harmonious_min_perc)*(KB6-A_equiv_harmonious_min_perc)))/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JM6-Overall_harmonious_min_perc)),(FR6+(HN6-FR6)/(AM6-A_equiv_harmonious_min_perc)*(KB6-A_equiv_harmonious_min_perc))/BESS_chrg_eff))
     for i in 0..<365 {
-      day7[dddKX + i] = iff(
+      day7[ddLE + i] = iff(
         or(day7[ddJP + i].isZero, day7[ddKG + i].isZero), Double.zero,
         min(
           ((day5[dayFY + i]
@@ -997,10 +997,10 @@ for i in 0..<365 {
     }
 
     /// el cons for el boiler op for harm op during harm op period
-    let dddKY = 20805
+    let ddLF = 23360
     // IF(OR(JM6=0,KB6=0),0,(FL6+(HH6-FL6)/(AM6-A_equiv_harmonious_min_perc)*(KB6-A_equiv_harmonious_min_perc))+((FM6+(HI6-FM6)/(AM6-A_equiv_harmonious_min_perc)*(KB6-A_equiv_harmonious_min_perc))-(FL6+(HH6-FL6)/(AM6-A_equiv_harmonious_min_perc)*(KB6-A_equiv_harmonious_min_perc)))/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JM6-Overall_harmonious_min_perc))
     for i in 0..<365 {
-      day7[dddKY + i] = iff(
+      day7[ddLF + i] = iff(
         or(day7[ddJP + i].isZero, day7[ddKG + i].isZero), Double.zero,
         (day5[dayFL + i]
           + (day6[dayHH + i] - day5[dayFL + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j])
@@ -1014,11 +1014,13 @@ for i in 0..<365 {
           / Overall_harmonious_range * (day7[ddJP + i] - Overall_harmonious_min_perc))
     }
 
+
+///
     /// heat cons for harm op during harm op period
-    let dddLE = 22995
+    let ddLL = 25550
     // IF(OR(JM6=0,KB6=0),0,(FF6+(HB6-FF6)/(AM6-A_equiv_harmonious_min_perc)*(KB6-A_equiv_harmonious_min_perc))+((FG6+(HC6-FG6)/(AM6-A_equiv_harmonious_min_perc)*(KB6-A_equiv_harmonious_min_perc))-(FF6+(HB6-FF6)/(AM6-A_equiv_harmonious_min_perc)*(KB6-A_equiv_harmonious_min_perc)))/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JM6-Overall_harmonious_min_perc))
     for i in 0..<365 {
-      day7[dddLE + i] = iff(
+      day7[ddLL + i] = iff(
         or(day7[ddJP + i].isZero, day7[ddKG + i].isZero), Double.zero,
         (day5[dayFF + i]
           + (day6[dayHB + i] - day5[dayFF + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j])
@@ -1033,10 +1035,10 @@ for i in 0..<365 {
     }
 
     /// heat cons for night prep during harm op period
-    let dddLF = 23360
+    let ddLM = 25915
     // IF(OR(JM6=0,KB6=0),0,(AB6+(AC6-AB6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(KB6-A_equiv_harmonious_min_perc)))
     for i in 0..<365 {
-      day7[dddLF + i] = iff(
+      day7[ddLM + i] = iff(
         or(day7[ddJP + i].isZero, day7[ddKG + i].isZero), Double.zero,
         (day1[dayAB + i] + (day1[dayAC + i] - day1[dayAB + i]) / equiv_harmonious_range
             * (day7[ddKG + i] - equiv_harmonious_min_perc[j]))
@@ -1044,22 +1046,22 @@ for i in 0..<365 {
     }
 
     /// heat prod by el boiler for harm op during harm op period
-    let dddLG = 23725
+    let ddLN = 26280
     // IF(OR(JM6=0,KB6=0),0,KY6*El_boiler_eff)
     for i in 0..<365 {
-      day7[dddLG + i] = iff(
-        or(day7[ddJP + i].isZero, day7[ddKG + i].isZero), Double.zero, day7[dddKY + i] * El_boiler_eff)
+      day7[ddLN + i] = iff(
+        or(day7[ddJP + i].isZero, day7[ddKG + i].isZero), Double.zero, day7[ddLF + i] * El_boiler_eff)
     }
 
     /// heat prod by el boiler for night prep during harm op period
-    let dddLH = 24090
+    let ddLO = 26645
     // IF(OR(JM6=0,KB6=0),0,MAX(0,LF6-((FV6+(HR6-FV6)/(AM6-A_equiv_harmonious_min_perc)*(KB6-A_equiv_harmonious_min_perc))+((FW6+(HS6-FW6)/(AM6-A_equiv_harmonious_min_perc)*(KB6-A_equiv_harmonious_min_perc))-(FV6+(HR6-FV6)/(AM6-A_equiv_harmonious_min_perc)*(KB6-A_equiv_harmonious_min_perc)))/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JM6-Overall_harmonious_min_perc))))
     for i in 0..<365 {
-      day7[dddLH + i] = iff(
+      day7[ddLO + i] = iff(
         or(day7[ddJP + i].isZero, day7[ddKG + i].isZero), Double.zero,
         max(
           Double.zero,
-          day7[dddLF + i]
+          day7[ddLM + i]
             - ((day5[dayFV + i]
               + (day6[dayHR + i] - day5[dayFV + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j])
                 * (day7[ddKG + i] - equiv_harmonious_min_perc[j]))
@@ -1074,42 +1076,44 @@ for i in 0..<365 {
     }
 
     /// Heat available during harm op period after TES chrg
-    let dddLI = 24455
+    let ddLP = 27010
     // IF(OR(JM6=0,KB6=0),0,FA6+(GW6-FA6)/(AM6-A_equiv_harmonious_min_perc)*(KB6-A_equiv_harmonious_min_perc))
     for i in 0..<365 {
-      day7[dddLI + i] = iff(
+      day7[ddLP + i] = iff(
         or(day7[ddJP + i].isZero, day7[ddKG + i].isZero), Double.zero,
         day5[dayFA + i] + (day6[dayGW + i] - day5[dayFA + i])
           / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKG + i] - equiv_harmonious_min_perc[j]))
     }
 
     /// Balance of heat during harm op period
-    let dddLJ = 24820
+    let ddLQ = 27375
     // LG6+LH6+LI6-LE6-LF6
     for i in 0..<365 {
-      day7[dddLJ + i] =
-        day7[dddLG + i] + day7[dddLH + i] + day7[dddLI + i] - day7[dddLE + i] - day7[dddLF + i]
+      day7[ddLQ + i] =
+        day7[ddLN + i] + day7[ddLO + i] + day7[ddLP + i] - day7[ddLL + i] - day7[ddLM + i]
     }
 
+///
+
     /// el cons for el boiler op for night prep during harm op period
-    let dddKZ = 21170
+    let ddLG = 23725
     // LH6/El_boiler_eff
-    for i in 0..<365 { day7[dddKZ + i] = day7[dddLH + i] / El_boiler_eff }
+    for i in 0..<365 { day7[ddLG + i] = day7[ddLO + i] / El_boiler_eff }
 
     /// El available during harm op period after TES chrg
-    let dddLA = 21535
+    let ddLH = 24090
     // IF(OR(JM6=0,KB6=0),0,EY6+(GU6-EY6)/(AM6-A_equiv_harmonious_min_perc)*(KB6-A_equiv_harmonious_min_perc))
     for i in 0..<365 {
       let a: Double = day5[dayEY + i] + (day6[dayGU + i] - day5[dayEY + i])
       let b: Double = (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKG + i] - equiv_harmonious_min_perc[j])
-      day7[dddLA + i] = iff(or(day7[ddJP + i].isZero, day7[ddKG + i].isZero), Double.zero, a / b)
+      day7[ddLH + i] = iff(or(day7[ddJP + i].isZero, day7[ddKG + i].isZero), Double.zero, a / b)
     }
 
     /// Grid import for harm op during harm op period
-    let dddLB = 21900
+    let ddLI = 24455
     // IF(OR(JM6=0,KB6=0),0,(FI6+(HE6-FI6)/(AM6-A_equiv_harmonious_min_perc)*(KB6-A_equiv_harmonious_min_perc))+((FJ6+(HF6-FJ6)/(AM6-A_equiv_harmonious_min_perc)*(KB6-A_equiv_harmonious_min_perc))-(FI6+(HE6-FI6)/(AM6-A_equiv_harmonious_min_perc)*(KB6-A_equiv_harmonious_min_perc)))/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JM6-Overall_harmonious_min_perc))
     for i in 0..<365 {
-      day7[dddLB + i] = iff(
+      day7[ddLI + i] = iff(
         or(day7[ddJP + i].isZero, day7[ddKG + i].isZero), Double.zero,
         (day5[dayFI + i]
           + (day6[dayHE + i] - day5[dayFI + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j])
@@ -1124,139 +1128,142 @@ for i in 0..<365 {
     }
 
     /// Grid import for night prep during harm op period
-    let dddLC = 22265
+    let ddLJ = 24820
     // IF(OR(JM6=0,KB6=0),0,MIN((GE6+(IA6-GE6)/(AM6-A_equiv_harmonious_min_perc)*(KB6-A_equiv_harmonious_min_perc))+((GF6+(IB6-GF6)/(AM6-A_equiv_harmonious_min_perc)*(KB6-A_equiv_harmonious_min_perc))-(GE6+(IA6-GE6)/(AM6-A_equiv_harmonious_min_perc)*(KB6-A_equiv_harmonious_min_perc)))/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JM6-Overall_harmonious_min_perc),MAX(0,-(LA6+LB6-KU6-KV6-KW6-KX6-KY6-KZ6))))
     for i in 0..<365 {
-      day7[dddLC + i] = iff(
+      day7[ddLJ + i] = iff(
       or(
-     day7[ddJP + i].isZero,day7[ddKG + i].isZero),0, min((day5[dayGE + i] + (day6[dayIA + i] - day5[dayGE + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKG + i] - equiv_harmonious_min_perc[j])) + ((day5[dayGF + i] + (day6[dayIB + i] - day5[dayGF + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKG + i] - equiv_harmonious_min_perc[j])) - (day5[dayGE + i] + (day6[dayIA + i] - day5[dayGE + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKG + i] - equiv_harmonious_min_perc[j]))) / Overall_harmonious_range * (day7[ddJP + i] - Overall_harmonious_min_perc),max(Double.zero, -(day7[dddLA + i] + day7[dddLB + i] - day7[ddLB + i] - day7[dddKV + i] - day7[dddKW + i] - day7[dddKX + i] - day7[dddKY + i] - day7[dddKZ + i]))))
+     day7[ddJP + i].isZero,day7[ddKG + i].isZero),0, min((day5[dayGE + i] + (day6[dayIA + i] - day5[dayGE + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKG + i] - equiv_harmonious_min_perc[j])) + ((day5[dayGF + i] + (day6[dayIB + i] - day5[dayGF + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKG + i] - equiv_harmonious_min_perc[j])) - (day5[dayGE + i] + (day6[dayIA + i] - day5[dayGE + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKG + i] - equiv_harmonious_min_perc[j]))) / Overall_harmonious_range * (day7[ddJP + i] - Overall_harmonious_min_perc),max(Double.zero, -(day7[ddLH + i] + day7[ddLI + i] - day7[ddLB + i] - day7[ddLC + i] - day7[ddLD + i] - day7[ddLE + i] - day7[ddLF + i] - day7[ddLG + i]))))
     }
 
     /// Balance of electricity during harm op period
-    let dddLD = 22630
+    let ddLK = 25185
     // LA6+LB6+LC6-KU6-KV6-KW6-KX6-KY6-KZ6
     for i in 0..<365 {
-      day7[dddLD + i] =
-        day7[dddLA + i] + day7[dddLB + i] + day7[dddLC + i] - day7[ddLB + i] - day7[dddKV + i] - day7[dddKW + i] - day7[dddKX + i] - day7[dddKY + i] - day7[dddKZ + i]
+      day7[ddLK + i] =
+        day7[ddLH + i] + day7[ddLI + i] + day7[ddLJ + i] - day7[ddLB + i] - day7[ddLC + i] - day7[ddLD + i] - day7[ddLE + i] - day7[ddLF + i] - day7[ddLG + i]
     }  
 
+///
+
+
     /// el cons for harm op outside of harm op period
-    let dddLK = 25185
+    let ddLR = 27740
     // IF(OR(JM6=0,KB6=0),0,FE6+(HA6-FE6)/(AM6-A_equiv_harmonious_min_perc)*(KB6-A_equiv_harmonious_min_perc))
     for i in 0..<365 {
-      day7[dddLK + i] = iff(
+      day7[ddLR + i] = iff(
         or(day7[ddJP + i].isZero, day7[ddKG + i].isZero), Double.zero,
         day5[dayFE + i] + (day6[dayHA + i] - day5[dayFE + i])
           / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKG + i] - equiv_harmonious_min_perc[j]))
     }
 
     /// el to cover aux cons outside of harm op period
-    let dddLL = 25550
+    let ddLS = 28105
     // IF(OR(JM6=0,KB6=0),0,FP6+(HL6-FP6)/(AM6-A_equiv_harmonious_min_perc)*(KB6-A_equiv_harmonious_min_perc))
     for i in 0..<365 {
-      day7[dddLL + i] = iff(
+      day7[ddLS + i] = iff(
         or(day7[ddJP + i].isZero, day7[ddKG + i].isZero), Double.zero,
         day5[dayFP + i] + (day6[dayHL + i] - day5[dayFP + i])
           / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKG + i] - equiv_harmonious_min_perc[j]))
     }
 
     /// el cons for el boiler for harm op outside of harm op period
-    let dddLM = 25915
+    let ddLT = 28470
     // IF(OR(JM6=0,KB6=0),0,FN6+(HJ6-FN6)/(AM6-A_equiv_harmonious_min_perc)*(KB6-A_equiv_harmonious_min_perc))
     for i in 0..<365 {
-      day7[dddLM + i] = iff(
+      day7[ddLT + i] = iff(
         or(day7[ddJP + i].isZero, day7[ddKG + i].isZero), Double.zero,
         day5[dayFN + i] + (day6[dayHJ + i] - day5[dayFN + i])
           / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKG + i] - equiv_harmonious_min_perc[j]))
     }
 
     /// el from BESS discharging outside of harm op period
-    let dddLN = 26280
+    let ddLU = 28835
     // KX6*BESS_chrg_eff
-    for i in 0..<365 { day7[dddLN + i] = day7[dddKX + i] * BESS_chrg_eff }
+    for i in 0..<365 { day7[ddLU + i] = day7[ddLE + i] * BESS_chrg_eff }
 
     /// El available outside of harm op period after TES chrg
-    let dddLO = 26645
+    let ddLV = 29200
     // IF(OR(JM6=0,KB6=0),0,EZ6+(GV6-EZ6)/(AM6-A_equiv_harmonious_min_perc)*(KB6-A_equiv_harmonious_min_perc))
     for i in 0..<365 {
-      day7[dddLO + i] = iff(
+      day7[ddLV + i] = iff(
         or(day7[ddJP + i].isZero, day7[ddKG + i].isZero), Double.zero,
         day5[dayEZ + i] + (day6[dayGV + i] - day5[dayEZ + i])
           / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKG + i] - equiv_harmonious_min_perc[j]))
     }
 
     /// Grid import needed outside of harm op period
-    let dddLP = 27010
+    let ddLW = 29565
     // IF(OR(JM6=0,KB6=0),0,MIN(GG6+(IC6-GG6)/(AM6-A_equiv_harmonious_min_perc)*(KB6-A_equiv_harmonious_min_perc),MAX(0,-(LN6+LO6-LK6-LL6-LM6))))
     for i in 0..<365 {
-      day7[dddLP + i] = iff(
+      day7[ddLW + i] = iff(
       or(
-     day7[ddJP + i].isZero, day7[ddKG + i].isZero), Double.zero, min(day5[dayGG + i] + (day6[dayIC + i] - day5[dayGG + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKG + i] - equiv_harmonious_min_perc[j]),max(Double.zero, -(day7[dddLN + i] + day7[dddLO + i] - day7[dddLK + i] - day7[dddLL + i] - day7[dddLM + i]))))
+     day7[ddJP + i].isZero, day7[ddKG + i].isZero), Double.zero, min(day5[dayGG + i] + (day6[dayIC + i] - day5[dayGG + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKG + i] - equiv_harmonious_min_perc[j]),max(Double.zero, -(day7[ddLU + i] + day7[ddLV + i] - day7[ddLR + i] - day7[ddLS + i] - day7[ddLT + i]))))
     }
 
     /// Balance of electricity outside of harm op period
-    let dddLQ = 27375
+    let ddLX = 29930
     // LN6+LO6+LP6-LK6-LL6-LM6
     for i in 0..<365 {
-      day7[dddLQ + i] =
-        day7[dddLN + i] + day7[dddLO + i] + day7[dddLP + i] - day7[dddLK + i] - day7[dddLL + i] - day7[dddLM + i]
+      day7[ddLX + i] =
+        day7[ddLU + i] + day7[ddLV + i] + day7[ddLW + i] - day7[ddLR + i] - day7[ddLS + i] - day7[ddLT + i]
     }
 
     /// heat cons for harm op outside of harm op period
-    let dddLR = 27740
+    let ddLY = 30295
     // IF(OR(JM6=0,KB6=0),0,FH6+(HD6-FH6)/(AM6-A_equiv_harmonious_min_perc)*(KB6-A_equiv_harmonious_min_perc))
     for i in 0..<365 {
-      day7[dddLR + i] = iff(
+      day7[ddLY + i] = iff(
         or(day7[ddJP + i].isZero, day7[ddKG + i].isZero), Double.zero,
         day5[dayFH + i] + (day6[dayHD + i] - day5[dayFH + i])
           / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKG + i] - equiv_harmonious_min_perc[j]))
     }
 
     /// Heat prod by el boiler for harm op outside of harm op period
-    let dddLS = 28105
+    let ddLZ = 30660
     // IF(OR(JM6=0,KB6=0),0,LM6*El_boiler_eff)
     for i in 0..<365 {
-      day7[dddLS + i] = iff(
-        or(day7[ddJP + i].isZero, day7[ddKG + i].isZero), Double.zero, day7[dddLM + i] * El_boiler_eff)
+      day7[ddLZ + i] = iff(
+        or(day7[ddJP + i].isZero, day7[ddKG + i].isZero), Double.zero, day7[ddLT + i] * El_boiler_eff)
     }
 
     /// Heat available outside of harm op period after TES chrg
-    let dddLT = 28470
+    let ddMA = 31025
     // IF(OR(JM6=0,KB6=0),0,FB6+(GX6-FB6)/(AM6-A_equiv_harmonious_min_perc)*(KB6-A_equiv_harmonious_min_perc))
     for i in 0..<365 {
-      day7[dddLT + i] = iff(
+      day7[ddMA + i] = iff(
         or(day7[ddJP + i].isZero, day7[ddKG + i].isZero), Double.zero,
         day5[dayFB + i] + (day6[dayGX + i] - day5[dayFB + i])
           / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKG + i] - equiv_harmonious_min_perc[j]))
     }
 
     /// Balance of heat outside of harm op period
-    let dddLU = 28835
+    let ddMB = 31390
     // LS6+LT6-LR6
-    for i in 0..<365 { day7[dddLU + i] = day7[dddLS + i] + day7[dddLT + i] - day7[dddLR + i] }
+    for i in 0..<365 { day7[ddMB + i] = day7[ddLZ + i] + day7[ddMA + i] - day7[ddLY + i] }
 
     /// Pure Methanol prod with day priority and resp night op
-    let dddLV = 29200
+    let ddMC = 31755
     // IF(KU6<=0,0,KU6/(Overall_harmonious_var_max_cons+Overall_fix_cons)*MethDist_harmonious_max_perc*MethDist_Meth_nom_prod_ud)+IF(LK6<=0,0,(LK6-A_overall_stup_cons)/(A_overall_var_max_cons+A_overall_fix_stby_cons)*A_MethDist_max_perc*MethDist_Meth_nom_prod_ud)
     for i in 0..<365 {
-      day7[dddLV + i] =
+      day7[ddMC + i] =
         iff(
           day7[ddLB + i] <= Double.zero, Double.zero,
           day7[ddLB + i] / (Overall_harmonious_var_max_cons + Overall_fix_cons) * MethDist_harmonious_max_perc
             * MethDist_Meth_nom_prod_ud)
         + iff(
-          day7[dddLK + i] <= Double.zero, Double.zero,
-          (day7[dddLK + i] - overall_stup_cons[j]) / (overall_var_max_cons[j] + overall_fix_stby_cons[j])
+          day7[ddLR + i] <= Double.zero, Double.zero,
+          (day7[ddLR + i] - overall_stup_cons[j]) / (overall_var_max_cons[j] + overall_fix_stby_cons[j])
             * MethDist_max_perc[j] * MethDist_Meth_nom_prod_ud)
     }
 
     /// grid export
-    let dddLW = 29565
+    let ddMD = 32120
     // MIN(LD6,IF(OR(JM6=0,KB6=0),0,(GB6+(HX6-GB6)/(AM6-A_equiv_harmonious_min_perc)*(KB6-A_equiv_harmonious_min_perc))+((GC6+(HY6-GC6)/(AM6-A_equiv_harmonious_min_perc)*(KB6-A_equiv_harmonious_min_perc))-(GB6+(HX6-GB6)/(AM6-A_equiv_harmonious_min_perc)*(KB6-A_equiv_harmonious_min_perc)))/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JM6-Overall_harmonious_min_perc)))+MIN(LQ6,IF(OR(JM6=0,KB6=0),0,GD6+(HZ6-GD6)/(AM6-A_equiv_harmonious_min_perc)*(KB6-A_equiv_harmonious_min_perc)))
     for i in 0..<365 {
-      day7[dddLW + i] =
+      day7[ddMD + i] =
         min(
-          day7[dddLD + i],
+          day7[ddLK + i],
           iff(
             or(day7[ddJP + i].isZero, day7[ddKG + i].isZero), Double.zero,
             (day5[dayGB + i]
@@ -1271,7 +1278,7 @@ for i in 0..<365 {
               / Overall_harmonious_range
               * (day7[ddJP + i] - Overall_harmonious_min_perc)))
         + min(
-          day7[dddLQ + i],
+          day7[ddLX + i],
           iff(
             or(day7[ddJP + i].isZero, day7[ddKG + i].isZero), Double.zero,
             day5[dayGD + i] + (day6[dayHZ + i] - day5[dayGD + i])
@@ -1279,15 +1286,15 @@ for i in 0..<365 {
     }
 
     /// Grid import
-    let dddLX = 29930
+    let ddME = 32485
     // LP6+LC6
-    for i in 0..<365 { day7[dddLX + i] = day7[dddLP + i] + day7[dddLC + i] }
+    for i in 0..<365 { day7[ddME + i] = day7[ddLW + i] + day7[ddLJ + i] }
 
     /// Outside harmonious operation period hours
-    let dddLY = 30295
+    let ddMF = 32850
     // IF(KB6<=0,0,(C6+(T6-C6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(KB6-A_equiv_harmonious_min_perc)))
     for i in 0..<365 {
-      day7[dddLY + i] = iff(
+      day7[ddMF + i] = iff(
         day7[ddKG + i] <= Double.zero, Double.zero,
         (day1[dayC + i] + (day1[dayT + i] - day1[dayC + i]) / equiv_harmonious_range
             * (day7[ddKG + i] - equiv_harmonious_min_perc[j]))
@@ -1295,10 +1302,10 @@ for i in 0..<365 {
     }
 
     /// Harmonious operation period hours
-    let dddLZ = 30660
+    let ddMG = 33215
     // IF(KB6<=0,0,(D6+(U6-D6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(KB6-A_equiv_harmonious_min_perc)))
     for i in 0..<365 {
-      day7[dddLZ + i] = iff(
+      day7[ddMG + i] = iff(
         day7[ddKG + i] <= Double.zero, Double.zero,
         (day1[dayD + i] + (day1[dayU + i] - day1[dayD + i]) / equiv_harmonious_range
             * (day7[ddKG + i] - equiv_harmonious_min_perc[j]))
@@ -1306,10 +1313,10 @@ for i in 0..<365 {
     }
 
     /// PB operating hours
-    let dddMA = 31025
+    let ddMH = 33580
     // IF(KB6<=0,0,(E6+(V6-E6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(KB6-A_equiv_harmonious_min_perc)))
     for i in 0..<365 {
-      day7[dddMA + i] = iff(
+      day7[ddMH + i] = iff(
         day7[ddKG + i] <= Double.zero, Double.zero,
         (day1[dayE + i] + (day1[dayV + i] - day1[dayE + i]) / equiv_harmonious_range
             * (day7[ddKG + i] - equiv_harmonious_min_perc[j]))
@@ -1317,19 +1324,19 @@ for i in 0..<365 {
     }
 
     /// Checksum
-    let dddMB = 31390
+    let ddMI = 33945
     // MAX(0,-LD6)+MAX(0,-LJ6)+MAX(0,-LQ6)+MAX(0,-LU6)
     for i in 0..<365 {
-      let MB = max(Double.zero, -day7[dddLD + i]) + max(Double.zero, -day7[dddLJ + i]) + max(Double.zero, -day7[dddLQ + i]) + max(Double.zero, -day7[dddLU + i])
+      let MB = max(Double.zero, -day7[ddLK + i]) + max(Double.zero, -day7[ddLQ + i]) + max(Double.zero, -day7[ddLX + i]) + max(Double.zero, -day7[ddMB + i])
       // if MB > 1E-13 { print("Checksum error daily 1", i, j, MB); break }
-      day7[dddMB + i] = MB
+      day7[ddMI + i] = MB
     }
 
     /// el cons for harm op during harm op period
-    let dddMD = 31755
+    let ddMK = 34310
     // IF(OR(KS6=0,KD6=0),0,(FC6+(GY6-FC6)/(AM6-A_equiv_harmonious_min_perc)*(KD6-A_equiv_harmonious_min_perc))+((FD6+(GZ6-FD6)/(AM6-A_equiv_harmonious_min_perc)*(KD6-A_equiv_harmonious_min_perc))-(FC6+(GY6-FC6)/(AM6-A_equiv_harmonious_min_perc)*(KD6-A_equiv_harmonious_min_perc)))/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(KS6-Overall_harmonious_min_perc))
     for i in 0..<365 {
-      day7[dddMD + i] = iff(
+      day7[ddMK + i] = iff(
         or(day7[ddKZ + i].isZero, day7[ddKI + i].isZero), Double.zero,
         (day5[dayFC + i]
           + (day6[dayGY + i] - day5[dayFC + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j])
@@ -1344,10 +1351,10 @@ for i in 0..<365 {
     }
 
     /// el cons for night prep during harm op period
-    let dddME = 32120
+    let ddML = 34675
     // IF(OR(KS6=0,KD6=0),0,(Z6+(AA6-Z6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(KD6-A_equiv_harmonious_min_perc)))
     for i in 0..<365 {
-      day7[dddME + i] = iff(
+      day7[ddML + i] = iff(
         or(day7[ddKZ + i].isZero, day7[ddKI + i].isZero), Double.zero,
         (day1[dayZ + i] + (day1[dayAA + i] - day1[dayZ + i]) / equiv_harmonious_range
             * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
@@ -1355,20 +1362,20 @@ for i in 0..<365 {
     }
 
     /// el to cover aux cons during harm op period
-    let dddMF = 32485
+    let ddMM = 35040
     // IF(OR(KS6=0,KD6=0),0,FO6+(HK6-FO6)/(AM6-A_equiv_harmonious_min_perc)*(KD6-A_equiv_harmonious_min_perc))
     for i in 0..<365 {
-      day7[dddMF + i] = iff(
+      day7[ddMM + i] = iff(
         or(day7[ddKZ + i].isZero, day7[ddKI + i].isZero), Double.zero,
         day5[dayFO + i] + (day6[dayHK + i] - day5[dayFO + i])
           / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
     }
 
     /// el cons for BESS charging during harm op period
-    let dddMG = 32850
+    let ddMN = 35405
     // IF(OR(KS6=0,KD6=0),0,MIN(((FY6+(HU6-FY6)/(AM6-A_equiv_harmonious_min_perc)*(KD6-A_equiv_harmonious_min_perc))+((FZ6+(HV6-FZ6)/(AM6-A_equiv_harmonious_min_perc)*(KD6-A_equiv_harmonious_min_perc))-(FY6+(HU6-FY6)/(AM6-A_equiv_harmonious_min_perc)*(KD6-A_equiv_harmonious_min_perc)))/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(KS6-Overall_harmonious_min_perc)),(FR6+(HN6-FR6)/(AM6-A_equiv_harmonious_min_perc)*(KD6-A_equiv_harmonious_min_perc))/BESS_chrg_eff))
     for i in 0..<365 {
-      day7[dddMG + i] = iff(
+      day7[ddMN + i] = iff(
         or(day7[ddKZ + i].isZero, day7[ddKI + i].isZero), Double.zero,
         min(
           ((day5[dayFY + i]
@@ -1388,10 +1395,10 @@ for i in 0..<365 {
     }
 
     /// el cons for el boiler op for harm op during harm op period
-    let dddMH = 33215
+    let ddMO = 35770
     // IF(OR(KS6=0,KD6=0),0,(FL6+(HH6-FL6)/(AM6-A_equiv_harmonious_min_perc)*(KD6-A_equiv_harmonious_min_perc))+((FM6+(HI6-FM6)/(AM6-A_equiv_harmonious_min_perc)*(KD6-A_equiv_harmonious_min_perc))-(FL6+(HH6-FL6)/(AM6-A_equiv_harmonious_min_perc)*(KD6-A_equiv_harmonious_min_perc)))/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(KS6-Overall_harmonious_min_perc))
     for i in 0..<365 {
-      day7[dddMH + i] = iff(
+      day7[ddMO + i] = iff(
         or(day7[ddKZ + i].isZero, day7[ddKI + i].isZero), Double.zero,
         (day5[dayFL + i]
           + (day6[dayHH + i] - day5[dayFL + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j])
@@ -1406,10 +1413,10 @@ for i in 0..<365 {
     }
 
     /// heat cons for harm op during harm op period
-    let dddMN = 35405
+    let ddMU = 37960
     // IF(OR(KS6=0,KD6=0),0,(FF6+(HB6-FF6)/(AM6-A_equiv_harmonious_min_perc)*(KD6-A_equiv_harmonious_min_perc))+((FG6+(HC6-FG6)/(AM6-A_equiv_harmonious_min_perc)*(KD6-A_equiv_harmonious_min_perc))-(FF6+(HB6-FF6)/(AM6-A_equiv_harmonious_min_perc)*(KD6-A_equiv_harmonious_min_perc)))/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(KS6-Overall_harmonious_min_perc))
     for i in 0..<365 {
-      day7[dddMN + i] = iff(
+      day7[ddMU + i] = iff(
         or(day7[ddKZ + i].isZero, day7[ddKI + i].isZero), Double.zero,
         (day5[dayFF + i]
           + (day6[dayHB + i] - day5[dayFF + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j])
@@ -1424,10 +1431,10 @@ for i in 0..<365 {
     }
 
     /// heat cons for night prep during harm op period
-    let dddMO = 35770
+    let ddMV = 38325
     // IF(OR(KS6=0,KD6=0),0,(AB6+(AC6-AB6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(KD6-A_equiv_harmonious_min_perc)))
     for i in 0..<365 {
-      day7[dddMO + i] = iff(
+      day7[ddMV + i] = iff(
         or(day7[ddKZ + i].isZero, day7[ddKI + i].isZero), Double.zero,
         (day1[dayAB + i]
           + (day1[dayAC + i] - day1[dayAB + i]) / equiv_harmonious_range
@@ -1436,22 +1443,22 @@ for i in 0..<365 {
     }
 
     /// heat prod by el boiler for harm op during harm op period
-    let dddMP = 36135
+    let ddMW = 38690
     // IF(OR(KS6=0,KD6=0),0,MH6*El_boiler_eff)
     for i in 0..<365 {
-      day7[dddMP + i] = iff(
-        or(day7[ddKZ + i].isZero, day7[ddKI + i].isZero), Double.zero, day7[dddMH + i] * El_boiler_eff)
+      day7[ddMW + i] = iff(
+        or(day7[ddKZ + i].isZero, day7[ddKI + i].isZero), Double.zero, day7[ddMO + i] * El_boiler_eff)
     }
 
     /// heat prod by el boiler for night prep during harm op period
-    let dddMQ = 36500
+    let ddMX = 39055
     // IF(OR(KS6=0,KD6=0),0,MAX(0,MO6-((FV6+(HR6-FV6)/(AM6-A_equiv_harmonious_min_perc)*(KD6-A_equiv_harmonious_min_perc))+((FW6+(HS6-FW6)/(AM6-A_equiv_harmonious_min_perc)*(KD6-A_equiv_harmonious_min_perc))-(FV6+(HR6-FV6)/(AM6-A_equiv_harmonious_min_perc)*(KD6-A_equiv_harmonious_min_perc)))/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(KS6-Overall_harmonious_min_perc))))
     for i in 0..<365 {
-      day7[dddMQ + i] = iff(
+      day7[ddMX + i] = iff(
         or(day7[ddKZ + i].isZero, day7[ddKI + i].isZero), Double.zero,
         max(
           Double.zero,
-          day7[dddMO + i]
+          day7[ddMV + i]
             - ((day5[dayFV + i]
               + (day6[dayHR + i] - day5[dayFV + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j])
                 * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
@@ -1467,43 +1474,45 @@ for i in 0..<365 {
     }
 
     /// Heat available during harm op period after TES chrg
-    let dddMR = 37595
+    let ddMY = 39420
     // IF(OR(KS6=0,KD6=0),0,FA6+(GW6-FA6)/(AM6-A_equiv_harmonious_min_perc)*(KD6-A_equiv_harmonious_min_perc))
     for i in 0..<365 {
-      day7[dddMR + i] = iff(
+      day7[ddMY + i] = iff(
         or(day7[ddKZ + i].isZero, day7[ddKI + i].isZero), Double.zero,
         day5[dayFA + i] + (day6[dayGW + i] - day5[dayFA + i])
           / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
     }
 
     /// Balance of heat during harm op period
-    let dddMS = 37960
+    let ddMZ = 39785
     // MP6+MQ6+MR6-MN6-MO6
     for i in 0..<365 {
-      day7[dddMS + i] =
-        day7[dddMP + i] + day7[dddMQ + i] + day7[dddMR + i] - day7[dddMN + i] - day7[dddMO + i]
+      day7[ddMZ + i] =
+        day7[ddMW + i] + day7[ddMX + i] + day7[ddMY + i] - day7[ddMU + i] - day7[ddMV + i]
     }
 
+///
+
     /// el cons for el boiler op for night prep during harm op period
-    let dddMI = 38325
+    let ddMP = 36135
     // MQ6/El_boiler_eff
-    for i in 0..<365 { day7[dddMI + i] = day7[dddMQ + i] / El_boiler_eff }
+    for i in 0..<365 { day7[ddMP + i] = day7[ddMX + i] / El_boiler_eff }
 
     /// El available during harm op period after TES chrg
-    let dddMJ = 38690
+    let ddMQ = 36500
     // IF(OR(KS6=0,KD6=0),0,EY6+(GU6-EY6)/(AM6-A_equiv_harmonious_min_perc)*(KD6-A_equiv_harmonious_min_perc))
     for i in 0..<365 {
-      day7[dddMJ + i] = iff(
+      day7[ddMQ + i] = iff(
         or(day7[ddKZ + i].isZero, day7[ddKI + i].isZero), Double.zero,
         day5[dayEY + i] + (day6[dayGU + i] - day5[dayEY + i])
           / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
     }
 
     /// Grid import for harm op during harm op period
-    let dddMK = 39055
+    let ddMR = 36865
     // IF(OR(KD6=0,KS6=0),0,(FI6+(HE6-FI6)/(AM6-A_equiv_harmonious_min_perc)*(KD6-A_equiv_harmonious_min_perc))+((FJ6+(HF6-FJ6)/(AM6-A_equiv_harmonious_min_perc)*(KD6-A_equiv_harmonious_min_perc))-(FI6+(HE6-FI6)/(AM6-A_equiv_harmonious_min_perc)*(KD6-A_equiv_harmonious_min_perc)))/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(KS6-Overall_harmonious_min_perc))
     for i in 0..<365 {
-      day7[dddMK + i] = iff(
+      day7[ddMR + i] = iff(
         or(day7[ddKI + i].isZero, day7[ddKZ + i].isZero), Double.zero,
         (day5[dayFI + i]
           + (day6[dayHE + i] - day5[dayFI + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j])
@@ -1518,133 +1527,133 @@ for i in 0..<365 {
     }
 
     /// Grid import for night prep during harm op period
-    let dddML = 39420
+    let ddMS = 37230
     // IF(OR(KD6=0,KS6=0),0,MIN((GE6+(IA6-GE6)/(AM6-A_equiv_harmonious_min_perc)*(KD6-A_equiv_harmonious_min_perc))+((GF6+(IB6-GF6)/(AM6-A_equiv_harmonious_min_perc)*(KD6-A_equiv_harmonious_min_perc))-(GE6+(IA6-GE6)/(AM6-A_equiv_harmonious_min_perc)*(KD6-A_equiv_harmonious_min_perc)))/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(KS6-Overall_harmonious_min_perc),MAX(0,-(MJ6+MK6-MD6-ME6-MF6-MG6-MH6-MI6))))
     for i in 0..<365 {
-      day7[dddML + i] = iff(
+      day7[ddMS + i] = iff(
       or(
-     day7[ddKI + i].isZero, day7[ddKZ + i].isZero),0, min((day5[dayGE + i] + (day6[dayIA + i] - day5[dayGE + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j])) + ((day5[dayGF + i] + (day6[dayIB + i] - day5[dayGF + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j])) - (day5[dayGE + i] + (day6[dayIA + i] - day5[dayGE + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))) / Overall_harmonious_range * (day7[ddKZ + i] - Overall_harmonious_min_perc),max(Double.zero, -(day7[dddMJ + i] + day7[dddMK + i] - day7[dddMD + i] - day7[dddME + i] - day7[dddMF + i] - day7[dddMG + i] - day7[dddMH + i] - day7[dddMI + i]))))
+     day7[ddKI + i].isZero, day7[ddKZ + i].isZero),0, min((day5[dayGE + i] + (day6[dayIA + i] - day5[dayGE + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j])) + ((day5[dayGF + i] + (day6[dayIB + i] - day5[dayGF + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j])) - (day5[dayGE + i] + (day6[dayIA + i] - day5[dayGE + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))) / Overall_harmonious_range * (day7[ddKZ + i] - Overall_harmonious_min_perc),max(Double.zero, -(day7[ddMQ + i] + day7[ddMR + i] - day7[ddMK + i] - day7[ddML + i] - day7[ddMM + i] - day7[ddMN + i] - day7[ddMO + i] - day7[ddMP + i]))))
     }
 
 //////////////////////////////////////////////////////////////////
 
     /// Balance of electricity during harm op period
-    let dddMZ = 39785
+    let ddNG = 42340
     // MJ6+MK6+ML6-MD6-ME6-MF6-MG6-MH6-MI6
     for i in 0..<365 {
-      day7[dddMZ + i] =
-        day7[dddMJ + i] + day7[dddMK + i] + day7[dddML + i] - day7[dddMD + i] - day7[dddME + i]
-        - day7[dddMF + i] - day7[dddMG + i] - day7[dddMH + i] - day7[dddMI + i]
+      day7[ddNG + i] =
+        day7[ddMQ + i] + day7[ddMR + i] + day7[ddMS + i] - day7[ddMK + i] - day7[ddML + i]
+        - day7[ddMM + i] - day7[ddMN + i] - day7[ddMO + i] - day7[ddMP + i]
     }
 
     
     /// el cons for harm op outside of harm op period
-    let dddNA = 40150
+    let ddNH = 42705
     // IF(OR(KS6=0,KD6=0),0,FE6+(HA6-FE6)/(AM6-A_equiv_harmonious_min_perc)*(KD6-A_equiv_harmonious_min_perc))
     for i in 0..<365 {
-      day7[dddNA + i] = iff(
+      day7[ddNH + i] = iff(
         or(day7[ddKZ + i].isZero, day7[ddKI + i].isZero), Double.zero,
         day5[dayFE + i] + (day6[dayHA + i] - day5[dayFE + i])
           / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
     }
 
     /// el to cover aux cons outside of harm op period
-    let dddNB = 40515
+    let ddNI = 43070
     // IF(OR(KS6=0,KD6=0),0,FP6+(HL6-FP6)/(AM6-A_equiv_harmonious_min_perc)*(KD6-A_equiv_harmonious_min_perc))
     for i in 0..<365 {
-      day7[dddNB + i] = iff(
+      day7[ddNI + i] = iff(
         or(day7[ddKZ + i].isZero, day7[ddKI + i].isZero), Double.zero,
         day5[dayFP + i] + (day6[dayHL + i] - day5[dayFP + i])
           / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
     }
 
     /// el cons for el boiler for harm op outside of harm op period
-    let dddNC = 40880
+    let ddNJ = 43435
     // IF(OR(KS6=0,KD6=0),0,FN6+(HJ6-FN6)/(AM6-A_equiv_harmonious_min_perc)*(KD6-A_equiv_harmonious_min_perc))
     for i in 0..<365 {
-      day7[dddNC + i] = iff(
+      day7[ddNJ + i] = iff(
         or(day7[ddKZ + i].isZero, day7[ddKI + i].isZero), Double.zero,
         day5[dayFN + i] + (day6[dayHJ + i] - day5[dayFN + i])
           / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
     }
 
     /// el from BESS discharging outside of harm op period
-    let dddND = 41245
+    let ddNK = 43800
     // MG6*BESS_chrg_eff
-    for i in 0..<365 { day7[dddND + i] = day7[dddMG + i] * BESS_chrg_eff }
+    for i in 0..<365 { day7[ddNK + i] = day7[ddMN + i] * BESS_chrg_eff }
 
     /// El available outside of harm op period after TES chrg
-    let dddNE = 41610
+    let d_NF = 0
     // IF(OR(KS6=0,KD6=0),0,EZ6+(GV6-EZ6)/(AM6-A_equiv_harmonious_min_perc)*(KD6-A_equiv_harmonious_min_perc))
     for i in 0..<365 {
-      day7[dddNE + i] = iff(
+      day7[d_NF + i] = iff(
         or(day7[ddKZ + i].isZero, day7[ddKI + i].isZero), Double.zero,
         day5[dayEZ + i] + (day6[dayGV + i] - day5[dayEZ + i])
           / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
     }
 
     /// Grid import needed outside of harm op period
-    let dddNF = 41975
+    let ddNM = 44530
     // IF(OR(KS6=0,KD6=0),0,MIN(GG6+(IC6-GG6)/(AM6-A_equiv_harmonious_min_perc)*(KD6-A_equiv_harmonious_min_perc),MAX(0,-(MW6+MX6-MT6-MU6-MV6))))
     for i in 0..<365 {
-      day7[dddNF + i] = iff(
+      day7[ddNM + i] = iff(
       or(
-     day7[ddKZ + i].isZero, day7[ddKI + i].isZero),0, min(day5[dayGG + i] + (day6[dayIC + i] - day5[dayGG + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]),max(Double.zero, -(day7[dddND + i] + day7[dddNE + i] - day7[dddNA + i] - day7[dddNB + i] - day7[dddNC + i]))))
+     day7[ddKZ + i].isZero, day7[ddKI + i].isZero),0, min(day5[dayGG + i] + (day6[dayIC + i] - day5[dayGG + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]),max(Double.zero, -(day7[ddNK + i] + day7[d_NF + i] - day7[ddNH + i] - day7[ddNI + i] - day7[ddNJ + i]))))
     }
 
     /// Balance of electricity outside of harm op period
-    let dddNG = 42340
+    let ddNN = 44895
     // MW6+MX6+MY6-MT6-MU6-MV6
     for i in 0..<365 {
-      day7[dddNG + i] =
-        day7[dddND + i] + day7[dddNE + i] + day7[dddNF + i] - day7[dddNA + i] - day7[dddNB + i] - day7[dddNC + i]
+      day7[ddNN + i] =
+        day7[ddNK + i] + day7[d_NF + i] + day7[ddNM + i] - day7[ddNH + i] - day7[ddNI + i] - day7[ddNJ + i]
     }
 
     /// heat cons for harm op outside of harm op period
-    let dddNH = 42705
+    let ddNO = 45260
     // IF(OR(KS6=0,KD6=0),0,FH6+(HD6-FH6)/(AM6-A_equiv_harmonious_min_perc)*(KD6-A_equiv_harmonious_min_perc))
     for i in 0..<365 {
-      day7[dddNH + i] = iff(
+      day7[ddNO + i] = iff(
         or(day7[ddKZ + i].isZero, day7[ddKI + i].isZero), Double.zero,
         day5[dayFH + i] + (day6[dayHD + i] - day5[dayFH + i])
           / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
     }
 
     /// Heat prod by el boiler for harm op outside of harm op period
-    let dddNI = 43070
+    let ddNP = 45625
     // IF(OR(KS6=0,KD6=0),0,MV6*El_boiler_eff)
     for i in 0..<365 {
-      day7[dddNI + i] = iff(
-        or(day7[ddKZ + i].isZero, day7[ddKI + i].isZero), Double.zero, day7[dddNC + i] * El_boiler_eff)
+      day7[ddNP + i] = iff(
+        or(day7[ddKZ + i].isZero, day7[ddKI + i].isZero), Double.zero, day7[ddNJ + i] * El_boiler_eff)
     }
 
     /// Heat available outside of harm op period after TES chrg
-    let dddNJ = 43435
+    let ddNQ = 45990
     // IF(OR(KS6=0,KD6=0),0,FB6+(GX6-FB6)/(AM6-A_equiv_harmonious_min_perc)*(KD6-A_equiv_harmonious_min_perc))
     for i in 0..<365 {
-      day7[dddNJ + i] = iff(
+      day7[ddNQ + i] = iff(
         or(day7[ddKZ + i].isZero, day7[ddKI + i].isZero), Double.zero,
         day5[dayFB + i] + (day6[dayGX + i] - day5[dayFB + i])
           / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
     }
 
     /// Balance of heat outside of harm op period
-    /// let dddND = 43800
+    //let ddNK = 43800 
     // NB6+NC6-NA6
-    for i in 0..<365 { day7[dddND + i] = day7[dddNI + i] + day7[dddNJ + i] - day7[dddNH + i] }
+    for i in 0..<365 { day7[ddNK + i] = day7[ddNP + i] + day7[ddNQ + i] - day7[ddNO + i] }
 
     /// Pure Methanol prod with night priority and resp day op
-    let dddNL = 44165
+    let dd_NF = 44165
     // IF(MD6<=0,0,MD6/(Overall_harmonious_var_max_cons+Overall_fix_cons)*MethDist_harmonious_max_perc*MethDist_Meth_nom_prod_ud)+IF(MT6<=0,0,(MT6-A_overall_stup_cons)/(A_overall_var_max_cons+A_overall_fix_stby_cons)*A_MethDist_max_perc*MethDist_Meth_nom_prod_ud)
     for i in 0..<365 {
-      day7[dddNL + i] =
+      day7[dd_NF + i] =
         iff(
-          day7[dddMD + i] <= Double.zero, Double.zero,
-          day7[dddMD + i] / (Overall_harmonious_var_max_cons + Overall_fix_cons) * MethDist_harmonious_max_perc
+          day7[ddMK + i] <= Double.zero, Double.zero,
+          day7[ddMK + i] / (Overall_harmonious_var_max_cons + Overall_fix_cons) * MethDist_harmonious_max_perc
             * MethDist_Meth_nom_prod_ud)
         + iff(
-          day7[dddNA + i] <= Double.zero, Double.zero,
-          (day7[dddNA + i] - overall_stup_cons[j]) / (overall_var_max_cons[j] + overall_fix_stby_cons[j])
+          day7[ddNH + i] <= Double.zero, Double.zero,
+          (day7[ddNH + i] - overall_stup_cons[j]) / (overall_var_max_cons[j] + overall_fix_stby_cons[j])
             * MethDist_max_perc[j] * MethDist_Meth_nom_prod_ud)
     }
 
@@ -1654,7 +1663,7 @@ for i in 0..<365 {
     for i in 0..<365 {
       day7[dddNM + i] =
         min(
-          day7[dddMZ + i],
+          day7[ddNG + i],
           iff(
             or(day7[ddKZ + i].isZero, day7[ddKI + i].isZero), Double.zero,
             (day5[dayGB + i]
@@ -1669,7 +1678,7 @@ for i in 0..<365 {
               / Overall_harmonious_range
               * (day7[ddKZ + i] - Overall_harmonious_min_perc)))
         + min(
-          day7[dddNG + i],
+          day7[ddNN + i],
           iff(
             or(day7[ddKZ + i].isZero, day7[ddKI + i].isZero), Double.zero,
             day5[dayGD + i] + (day6[dayHZ + i] - day5[dayGD + i])
@@ -1679,7 +1688,7 @@ for i in 0..<365 {
     /// Grid import
     let dddNN = 44895
     // MY6+ML6
-    for i in 0..<365 { day7[dddNN + i] = day7[dddNF + i] + day7[dddML + i] }
+    for i in 0..<365 { day7[dddNN + i] = day7[ddNM + i] + day7[ddMS + i] }
 
     /// Outside harmonious operation period hours
     let dddNO = 45260
@@ -1721,7 +1730,7 @@ for i in 0..<365 {
     let dddNR = 46355
     // MAX(0,-MM6)+MAX(0,-MS6)+MAX(0,-MZ6)+MAX(0,-ND6)
     for i in 0..<365 {
-      let NK = max(Double.zero, -day7[dddMZ + i]) + max(Double.zero, -day7[dddMS + i]) + max(Double.zero, -day7[dddNG + i]) + max(Double.zero, -day7[dddND + i])
+      let NK = max(Double.zero, -day7[ddNG + i]) + max(Double.zero, -day7[ddMZ + i]) + max(Double.zero, -day7[ddNN + i]) + max(Double.zero, -day7[ddNK + i])
       // if NK > 1E-13 { print("Checksum error daily 1", i, j, NK); break }
       day7[dddNR + i] = NK
     }
