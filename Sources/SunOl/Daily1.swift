@@ -75,19 +75,25 @@ extension TunOl {
     /// Surplus H2 storage cap after max night op prep
     let dayQ = 5110
 
-    // 1-F6/RawMeth_storage_cap_ud
+    // 1-IF(F3=0;0;IFERROR(F3/RawMeth_storage_cap_ud;1))
     for i in 0..<365 { 
-      day1[dayL + i] = 1 - day1[dayF + i] / RawMeth_storage_cap_ud
-      // 1-G6/RawMeth_storage_cap_ud
-      day1[dayM + i] = 1 - day1[dayG + i] / RawMeth_storage_cap_ud
-      // 1-H6/CO2_storage_cap_ud
-      day1[dayN + i] = 1 - day1[dayH + i] / C_O_2_storage_cap_ud
-      // 1-I6/CO2_storage_cap_ud
-      day1[dayO + i] = 1 - day1[dayI + i] / C_O_2_storage_cap_ud
-      // 1-J6/Hydrogen_storage_cap_ud
-      day1[dayP + i] = 1 - day1[dayJ + i] / Hydrogen_storage_cap_ud
-      // 1-K6/Hydrogen_storage_cap_ud
-      day1[dayQ + i] = 1 - day1[dayK + i] / Hydrogen_storage_cap_ud
+      day1[dayL + i] = 1 - iff(
+        day1[dayF + i].isZero, Double.zero, ifFinite(day1[dayF + i] / RawMeth_storage_cap_ud, 1))
+      // 1-IF(G3=0;0;IFERROR(G3/RawMeth_storage_cap_ud;1))
+      day1[dayM + i] = 1 - iff(
+        day1[dayG + i].isZero, Double.zero, ifFinite(day1[dayG + i] / RawMeth_storage_cap_ud, 1))
+      // 1-IF(H3=0;0;IFERROR(H3/CO2_storage_cap_ud;1))
+      day1[dayN + i] = 1 - iff(
+        day1[dayH + i].isZero, Double.zero, ifFinite(day1[dayH + i] / C_O_2_storage_cap_ud, 1))
+      // 1-IF(I3=0;0;IFERROR(I3/CO2_storage_cap_ud;1))
+      day1[dayO + i] = 1 - iff(
+        day1[dayI + i].isZero, Double.zero, ifFinite(day1[dayI + i] / C_O_2_storage_cap_ud, 1))
+      // 1-IF(J3=0;0;IFERROR(J3/Hydrogen_storage_cap_ud;1))
+      day1[dayP + i] = 1 - iff(
+        day1[dayJ + i].isZero, Double.zero, ifFinite(day1[dayJ + i] / Hydrogen_storage_cap_ud, 1))
+      // 1-IF(K3=0;0;IFERROR(K3/Hydrogen_storage_cap_ud;1))
+      day1[dayQ + i] = 1 - iff(
+        day1[dayK + i].isZero, Double.zero, ifFinite(day1[dayK + i] / Hydrogen_storage_cap_ud, 1))
     }
 
     /// Max Equiv harmonious night prod due to physical limits
@@ -259,12 +265,15 @@ extension TunOl {
 
     
     for i in 0..<365 {
-      // 1-W6/RawMeth_storage_cap_ud
-      day1[dayAJ + i] = 1 - day1[dayW + i] / RawMeth_storage_cap_ud
-      // 1-X6/CO2_storage_cap_ud
-      day1[dayAK + i] = 1 - day1[dayX + i] / C_O_2_storage_cap_ud
-      // 1-Y6/Hydrogen_storage_cap_ud
-      day1[dayAL + i] = 1 - day1[dayY + i] / Hydrogen_storage_cap_ud
+      // 1-IF(W3=0;0;IFERROR(W3/RawMeth_storage_cap_ud;1))
+      day1[dayAJ + i] = 1 - iff(
+        day1[dayW + i].isZero, Double.zero, ifFinite(day1[dayW + i] / RawMeth_storage_cap_ud, 1))
+      // =1-IF(X3=0;0;IFERROR(X3/CO2_storage_cap_ud;1))
+      day1[dayAK + i] = 1 - iff(
+        day1[dayX + i].isZero, Double.zero, ifFinite(day1[dayX + i] / C_O_2_storage_cap_ud, 1))
+      // =1-IF(Y3=0;0;IFERROR(Y3/Hydrogen_storage_cap_ud;1))
+      day1[dayAL + i] = 1 - iff(
+        day1[dayY + i].isZero, Double.zero, ifFinite(day1[dayY + i] / Hydrogen_storage_cap_ud, 1))
     }
 
     /// Max Equiv harmonious night prod due to physical limits

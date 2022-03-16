@@ -209,18 +209,24 @@ extension TunOl {
     let dayAD = 9125
     
     for i in 0..<365 { 
-      // 1-I6/RawMeth_storage_cap_ud
-      day1[dayY + i] = 1 - day1[dayI + i] / RawMeth_storage_cap_ud 
-      // 1-J6/RawMeth_storage_cap_ud
-      day1[dayZ + i] = 1 - day1[dayJ + i] / RawMeth_storage_cap_ud
-      // 1-K6/CO2_storage_cap_ud
-      day1[dayAA + i] = 1 - day1[dayK + i] / C_O_2_storage_cap_ud
-      // 1-L6/CO2_storage_cap_ud
-      day1[dayAB + i] = 1 - day1[dayL + i] / C_O_2_storage_cap_ud
-      // 1-M6/Hydrogen_storage_cap_ud
-      day1[dayAC + i] = 1 - day1[dayM + i] / Hydrogen_storage_cap_ud
-      // 1-N6/Hydrogen_storage_cap_ud
-      day1[dayAD + i] = 1 - day1[dayN + i] / Hydrogen_storage_cap_ud
+      // 1-IF(I3=0;0;IFERROR(I3/RawMeth_storage_cap_ud;1))
+      day1[dayY + i] = 1 - iff(
+        day1[dayI + i].isZero, Double.zero, ifFinite(day1[dayI + i] / RawMeth_storage_cap_ud, 1)) 
+      // 1-IF(J3=0;0;IFERROR(J3/RawMeth_storage_cap_ud;1))
+      day1[dayZ + i] = 1 - iff(
+        day1[dayJ + i].isZero, Double.zero, ifFinite(day1[dayJ + i] / RawMeth_storage_cap_ud, 1)) 
+      // 1-IF(K3=0;0;IFERROR(K3/CO2_storage_cap_ud;1))
+      day1[dayAA + i] = 1 - iff(
+        day1[dayK + i].isZero, Double.zero, ifFinite(day1[dayK + i] / C_O_2_storage_cap_ud, 1)) 
+      // 1-IF(L3=0;0;IFERROR(L3/CO2_storage_cap_ud;1))
+      day1[dayAB + i] = 1 - iff(
+        day1[dayL + i].isZero, Double.zero, ifFinite(day1[dayL + i] / C_O_2_storage_cap_ud, 1)) 
+      // 1-IF(M3=0;0;IFERROR(M6/Hydrogen_storage_cap_ud;1))
+      day1[dayAC + i] = 1 - iff(
+        day1[dayM + i].isZero, Double.zero, ifFinite(day1[dayM + i] / Hydrogen_storage_cap_ud, 1)) 
+      // 1-IF(N3=0;0;IFERROR(N6/Hydrogen_storage_cap_ud;1))
+      day1[dayAD + i] = 1 - iff(
+        day1[dayN + i].isZero, Double.zero, ifFinite(day1[dayN + i] / Hydrogen_storage_cap_ud, 1)) 
     }
 
     /// Max Equiv harmonious night prod due to physical limits
