@@ -1,4 +1,4 @@
-FROM swift:5.5
+FROM swift:5.6
 
 # [Option] Install zsh
 ARG INSTALL_ZSH="false"
