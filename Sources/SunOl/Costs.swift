@@ -121,7 +121,7 @@ public struct Costs {
 
   public func LCOM(meth_produced_MTPH: Double, elec_from_grid: Double, elec_to_grid: Double) -> Double {
     // print(meth_produced_MTPH, elec_from_grid, elec_to_grid)
-    let lcom = ((Costs.FCR * Total_CAPEX + Total_OPEX) / 365 + elec_from_grid * Costs.Elec_buy * 1000 - elec_to_grid * Costs.Elec_sell * 1000) / meth_produced_MTPH
+    let lcom = ((Costs.FCR * Total_CAPEX + Total_OPEX) + elec_from_grid * Costs.Elec_buy * 1000 - elec_to_grid * Costs.Elec_sell * 1000) / meth_produced_MTPH
     return lcom
   }
 }

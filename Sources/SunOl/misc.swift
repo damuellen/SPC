@@ -53,8 +53,7 @@ public func fitness(values: [Double]) -> [Double] {
 
   for d in 0..<365 {
     let cases = day.indices.map { i in
-      costs.LCOM(meth_produced_MTPH: day[i][d], elec_from_grid: day[i][d+365], elec_to_grid: day[i][d+365+365])
-      
+      costs.LCOM(meth_produced_MTPH: day[i][d] * 365.0, elec_from_grid: day[i][d+365], elec_to_grid: day[i][d+365+365])
     }
     let best = cases.indices.filter{cases[$0].isFinite}.filter{cases[$0]>0}.sorted().first
     if let best = best { 
