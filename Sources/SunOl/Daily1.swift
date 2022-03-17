@@ -1,5 +1,5 @@
 extension TunOl {
-  func day(case j: Int, hour2: [Double], hour3: [Double]) -> [Double] {
+  func day1(_ day1: inout [Double], case j: Int, hour2: [Double], hour3: [Double]) {
     let hourBX = 26280
     let hourCC = 70080
     let hourCS = 26280
@@ -7,17 +7,10 @@ extension TunOl {
     let daysCS: [[Int]] =  hour3[hourCS+1..<(hourCS + 8760)].indices.chunked(by: { hour3[$0] == hour3[$1] }).map { $0.map { $0 - hourCS } }
    // let end = daysCS.removeLast()
    // daysCS[0].append(contentsOf: end)
-    var day0 = [Double](repeating: Double.zero, count: 365)
-
-    /// Day
-    let dayA = 0
-    // A5+1
-    for i in 1..<365 { day0[dayA + i] = day0[dayA + i - 1] + 1 }
 
     let CQ_CScountZero = hour3.countOf(daysCS, condition: hourCQ, predicate: {$0<=0})
     let CQ_CScountNonZero = hour3.countOf(daysCS, condition: hourCQ, predicate: {$0>0})
 
-    var day1 = [Double](repeating: Double.zero, count: 13_140)
     /// Nr of hours outside of harm op period after min night prep
     let dayC = 0
     // COUNTIFS(CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,"<=0")
@@ -108,7 +101,6 @@ extension TunOl {
           ifFinite(day1[dayP + i] / (day1[dayP + i] - day1[dayQ + i]), 1))
           * (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]) + equiv_harmonious_min_perc[j])
     }
-    return day1
   }
 
   func night(case j: Int, day1: inout [Double], hour3: [Double], hour4: [Double]) {
@@ -263,7 +255,6 @@ extension TunOl {
     /// Surplus H2 storage cap after max night op prep
     let dayAL = 12410
 
-    
     for i in 0..<365 {
       // 1-IF(W3=0;0;IFERROR(W3/RawMeth_storage_cap_ud;1))
       day1[dayAJ + i] = 1 - iff(

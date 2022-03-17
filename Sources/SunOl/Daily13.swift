@@ -1,6 +1,6 @@
 
 extension TunOl {
-  func day(case j: Int, day1: [Double], day5: [Double], day6: [Double]) -> [Double] {
+  func day17(_ day7: inout [Double], case j: Int, day1: [Double], day5: [Double], day6: [Double]) {
     let (dayC, dayD, dayE, dayT, dayU, dayV, dayZ, dayAA, dayAB, dayAC, dayAD, dayAE, dayAF, dayAG, dayAH, dayAI, dayAM) = (
       0, 365, 730, 5840, 6205, 6570, 8030, 8395, 8760, 9125, 9490, 9855, 10220, 10585, 10950, 11315, 12775 
     ) // day1
@@ -12,7 +12,6 @@ extension TunOl {
     let (dayGU, dayGV, dayGW, dayGX, dayGY, dayGZ, dayHA, dayHB, dayHC, dayHD, dayHE, dayHF, dayHH, dayHI, dayHJ, dayHK, dayHL, dayHN, dayHO, dayHP, dayHR, dayHS, dayHU, dayHV, dayHX, dayHY, dayHZ, dayIA, dayIB, dayIC, dayID, dayIE, dayIG, dayIH, dayIJ, dayIK, dayIM, dayIN) = (
       0, 365, 730, 1095, 1460, 1825, 2190, 2555, 2920, 3285, 3650, 4015, 4745, 5110, 5475, 5840, 6205, 6935, 7300, 7665, 8395, 8760, 9490, 9855, 10585, 10950, 11315, 11680, 12045, 12410, 12775, 13140, 13870, 14235, 14965, 15330, 16060, 16425
     ) // day6
-    var day7 = [Double](repeating: Double.zero, count: 46_720)
     
     /// Surplus harm op period electricity after min harm op and min night op prep
     let dddIQ = 0 
@@ -1014,7 +1013,6 @@ for i in 0..<365 {
           / Overall_harmonious_range * (day7[ddJP + i] - Overall_harmonious_min_perc))
     }
 
-
 ///
     /// heat cons for harm op during harm op period
     let ddLL = 25550
@@ -1145,7 +1143,6 @@ for i in 0..<365 {
     }  
 
 ///
-
 
     /// el cons for harm op outside of harm op period
     let ddLR = 27740
@@ -1545,7 +1542,6 @@ for i in 0..<365 {
         day7[ddMQ + i] + day7[ddMR + i] + day7[ddMS + i] - day7[ddMK + i] - day7[ddML + i]
         - day7[ddMM + i] - day7[ddMN + i] - day7[ddMO + i] - day7[ddMP + i]
     }
-
     
     /// el cons for harm op outside of harm op period
     let ddNH = 42705
@@ -1578,15 +1574,15 @@ for i in 0..<365 {
     }
 
     /// el from BESS discharging outside of harm op period
-    let ddNK = 43800
+    let ddND = 41245
     // MG6*BESS_chrg_eff
-    for i in 0..<365 { day7[ddNK + i] = day7[ddMN + i] * BESS_chrg_eff }
+    for i in 0..<365 { day7[ddND + i] = day7[ddMN + i] * BESS_chrg_eff }
 
     /// El available outside of harm op period after TES chrg
-    let d_NF = 0
+    let ddNE = 41610
     // IF(OR(KS6=0,KD6=0),0,EZ6+(GV6-EZ6)/(AM6-A_equiv_harmonious_min_perc)*(KD6-A_equiv_harmonious_min_perc))
     for i in 0..<365 {
-      day7[d_NF + i] = iff(
+      day7[ddNE + i] = iff(
         or(day7[ddKZ + i].isZero, day7[ddKI + i].isZero), Double.zero,
         day5[dayEZ + i] + (day6[dayGV + i] - day5[dayEZ + i])
           / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
@@ -1598,7 +1594,8 @@ for i in 0..<365 {
     for i in 0..<365 {
       day7[ddNM + i] = iff(
       or(
-     day7[ddKZ + i].isZero, day7[ddKI + i].isZero),0, min(day5[dayGG + i] + (day6[dayIC + i] - day5[dayGG + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]),max(Double.zero, -(day7[ddNK + i] + day7[d_NF + i] - day7[ddNH + i] - day7[ddNI + i] - day7[ddNJ + i]))))
+     day7[ddKZ + i].isZero, day7[ddKI + i].isZero),0, min(day5[dayGG + i] + (day6[dayIC + i] - day5[dayGG + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]),
+      max(Double.zero, -(day7[ddND + i] + day7[ddNE + i] - day7[ddNH + i] - day7[ddNI + i] - day7[ddNJ + i]))))
     }
 
     /// Balance of electricity outside of harm op period
@@ -1606,7 +1603,7 @@ for i in 0..<365 {
     // MW6+MX6+MY6-MT6-MU6-MV6
     for i in 0..<365 {
       day7[ddNN + i] =
-        day7[ddNK + i] + day7[d_NF + i] + day7[ddNM + i] - day7[ddNH + i] - day7[ddNI + i] - day7[ddNJ + i]
+        day7[ddND + i] + day7[ddNE + i] + day7[ddNM + i] - day7[ddNH + i] - day7[ddNI + i] - day7[ddNJ + i]
     }
 
     /// heat cons for harm op outside of harm op period
@@ -1638,15 +1635,15 @@ for i in 0..<365 {
     }
 
     /// Balance of heat outside of harm op period
-    //let ddNK = 43800 
+    let ddNK = 43800 
     // NB6+NC6-NA6
-    for i in 0..<365 { day7[ddNK + i] = day7[ddNP + i] + day7[ddNQ + i] - day7[ddNO + i] }
+    for i in 0..<365 { day7[ddNK + i] = day7[ddNI + i] + day7[ddNJ + i] - day7[ddNH + i] }
 
     /// Pure Methanol prod with night priority and resp day op
-    let dd_NF = 44165
+    let ddNL = 44165
     // IF(MD6<=0,0,MD6/(Overall_harmonious_var_max_cons+Overall_fix_cons)*MethDist_harmonious_max_perc*MethDist_Meth_nom_prod_ud)+IF(MT6<=0,0,(MT6-A_overall_stup_cons)/(A_overall_var_max_cons+A_overall_fix_stby_cons)*A_MethDist_max_perc*MethDist_Meth_nom_prod_ud)
     for i in 0..<365 {
-      day7[dd_NF + i] =
+      day7[ddNL + i] =
         iff(
           day7[ddMK + i] <= Double.zero, Double.zero,
           day7[ddMK + i] / (Overall_harmonious_var_max_cons + Overall_fix_cons) * MethDist_harmonious_max_perc
@@ -1715,10 +1712,10 @@ for i in 0..<365 {
     }
 
     /// PB operating hours
-    let dddNQ = 45990
+    // let ddNQ = 45990 FIXME
     // IF(KD6<=0,0,(E6+(V6-E6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(KD6-A_equiv_harmonious_min_perc)))
     for i in 0..<365 {
-      day7[dddNQ + i] = iff(
+      day7[ddNQ + i] = iff(
         day7[ddKI + i] <= Double.zero, Double.zero,
         (day1[dayE + i]
           + (day1[dayV + i] - day1[dayE + i]) / equiv_harmonious_range
@@ -1727,14 +1724,13 @@ for i in 0..<365 {
     }
 
     /// Checksum
-    let dddNR = 46355
+    let ddNR = 46355
     // MAX(0,-MM6)+MAX(0,-MS6)+MAX(0,-MZ6)+MAX(0,-ND6)
     for i in 0..<365 {
       let NK = max(Double.zero, -day7[ddNG + i]) + max(Double.zero, -day7[ddMZ + i]) + max(Double.zero, -day7[ddNN + i]) + max(Double.zero, -day7[ddNK + i])
       // if NK > 1E-13 { print("Checksum error daily 1", i, j, NK); break }
-      day7[dddNR + i] = NK
+      day7[ddNR + i] = NK
     }
-    return day7
   }
 }
 

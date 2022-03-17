@@ -1,5 +1,5 @@
 extension TunOl {
-  func hour2(j: Int, hour0: [Double], hour1: [Double]) -> [Double] {
+  func hour2(_ hour2: inout [Double], j: Int, hour0: [Double], hour1: [Double]) {
     let (hourJ, hourL, hourM, hourAW, hourBK, hourBM, hourBO, hourBP, hourBQ) = (26280, 43800, 52560, 8760, 131400, 148920, 166440, 175200, 183960)
     let daysBO: [[Int]] = hour1[hourBO..<(hourBO + 8760)].indices.chunked(by: { hour1[$0] == hour1[$1] }).map { $0.map { $0 - hourBO } }
    // let end = daysBO.removeLast()
@@ -7,7 +7,6 @@ extension TunOl {
 
     let hourAY = 26280
     let AYsum = hour1.sum(hours: daysBO, condition: hourAY)
-    var hour2 = [Double](repeating: Double.zero, count: 166440+8760)
 
     /// Min net elec demand to power block
     let hourBU = 0
@@ -227,13 +226,10 @@ extension TunOl {
         Double.zero,
         -(hour0[hourL + i] + iff(hour2[hourCC + i] > Double.zero, hour2[hourBX + i], Double.zero) - hour2[hourCI + i] - hour2[hourCM + i]))
     }
-    return hour2
   }
 
-  func hour3(j: Int, hour0: [Double], hour1: [Double], hour2: [Double]) -> [Double] {
+  func hour3(_ hour3: inout [Double], j: Int, hour0: [Double], hour1: [Double], hour2: [Double]) {
     let (hourBX, hourCB, hourCC, hourCK, hourCL, hourCM, hourCN) = (26280, 61320, 70080, 140160, 148920, 157680, 166440)
-    var hour3 = [Double](repeating: Double.zero, count: 271_560)
-
     /// Min harmonious net elec cons not considering grid import
     let hourCP = 0
     // IF(MIN(MAX(0,CK6+Grid_import_max_ud*Grid_import_yes_no_PB_strategy-(CM6-CN6)-MIN(El_boiler_cap_ud,MAX(0,Overall_harmonious_var_heat_min_cons+Overall_heat_fix_cons-CL6)/El_boiler_eff)),MAX(0,CL6+MIN(El_boiler_cap_ud,MAX(0,CK6+Grid_import_max_ud*Grid_import_yes_no_PB_strategy-(CM6-CN6)-Overall_harmonious_var_min_cons-Overall_fix_cons))*El_boiler_eff-Overall_heat_fix_cons)/Overall_harmonious_var_heat_max_cons*Overall_harmonious_var_max_cons+Overall_fix_cons)<Overall_harmonious_var_min_cons+Overall_fix_cons,0,Overall_harmonious_var_min_cons+Overall_fix_cons)
@@ -587,6 +583,5 @@ extension TunOl {
     let hourDT = 262800
     // MIN(Grid_export_max_ud,DJ6)
     for i in 1..<8760 { hour3[hourDT + i] = min(Grid_export_max_ud, hour3[hourDJ + i]) }
-    return hour3
   }
 }

@@ -1,6 +1,6 @@
 
 extension TunOl {
-  func day(hour0: [Double], hour4: [Double], day11: [Double], day15: [Double]) -> [Double] {
+  func day16(_ day16: inout [Double], hour0: [Double], hour4: [Double], day11: [Double], day15: [Double]) {
     var daysEZ: [[Int]] = hour4[254041..<(254040 + 8760)].indices.chunked(by: { hour4[$0] == hour4[$1] })
       .map { $0.map { $0 - 254040 } }
    // let end = daysEZ.removeLast()
@@ -17,8 +17,6 @@ extension TunOl {
       332880, 341640, 350400, 359160, 367920, 385440, 394200, 402960, 411720, 420480, 429240, 438000, 446760, 455520, 464280, 473040,
       481800, 490560
     )
-
-    var day16 = [Double](repeating: Double.zero, count: 17_155)
 
     let day1GU = 0
     /// Available elec after TES chrg outside harm op period
@@ -319,6 +317,5 @@ extension TunOl {
     let day1IO = 16790
     // SUMIF(CalculationEZ5:EZ8763,"="A6,CalculationFK5:FK8763)-IM6
     for i in 0..<365 { day16[day1IO + i] = FKsum[i] - day16[day1IM + i] }
-    return day16
   }
 }

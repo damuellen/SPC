@@ -1,6 +1,6 @@
 
 extension TunOl {
-  func day(hour0: [Double], hour2: [Double], hour3: [Double], day11: [Double]) -> [Double] {
+  func day15(_ day15: inout [Double], hour0: [Double], hour2: [Double], hour3: [Double], day11: [Double]) {
 
     let hourJ = 26280
     let hourL = 43800
@@ -48,7 +48,7 @@ extension TunOl {
       .map { $0.map { $0 - hourCS } }
    // let end = daysCS.removeLast()
    // daysCS[0].append(contentsOf: end)
-    var day15 = [Double](repeating: Double.zero, count: 17_155)
+
     /// Available elec after TES chrg during harm op period
     let day1EY = 0
     /// Available elec after TES chrg outside harm op period
@@ -354,6 +354,5 @@ extension TunOl {
     let day1GS = 16790
     // SUMIF(CalculationCS5:CS8763,"="A6,CalculationDD5:DD8763)-GQ6
     for i in 0..<365 { day15[day1GS + i] = DDsum[i] - day15[day1GQ + i] }
-    return day15
   }
 }

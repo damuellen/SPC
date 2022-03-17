@@ -1,9 +1,9 @@
 extension TunOl {
-  func hour4(j: Int, day1 day11: [Double], hour0: [Double], hour1: [Double], hour2: [Double]) -> [Double] {
+  func hour4(_ hour4: inout [Double], j: Int, day1 day11: [Double], hour0: [Double], hour1: [Double], hour2: [Double]) {
     let (hourJ, hourL, hourM, hourAW, hourBK, hourBM, hourBP, hourBQ, hourCC) = (
       26280, 43800, 52560, 8760, 131400, 148920, 175200, 183960, 70080
     )
-    var hour4 = [Double](repeating: Double.zero, count: 490560+8760)
+    
     let hourBO = 166440
     var daysBO: [[Int]] = hour1[hourBO..<(hourBO + 8760)].indices.chunked(by: { hour1[$0] == hour1[$1] }).map { $0.map { $0 - hourBO } }
    // let end = daysBO.removeLast()
@@ -659,6 +659,5 @@ extension TunOl {
       // MIN(Grid_export_max_ud,FQ6)
       hour4[hourGA + i] = min(Grid_export_max_ud, hour4[hourFQ + i])
     }
-    return hour4
   }
 }

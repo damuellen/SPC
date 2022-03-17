@@ -27,8 +27,7 @@ extension TunOl {
     return day0
   }
 
-  func day1(case j: Int, day0: [Double]) -> [Double] {
-    var day1 = [Double](repeating: Double.zero, count: 9_855)
+  func day21(_ day1: inout [Double], case j: Int, day0: [Double]) {
     let dayB = 365
     let dayC = 730
     /// Min el cons during night
@@ -241,7 +240,6 @@ extension TunOl {
           ifFinite(day1[dayAC + i] / (day1[dayAC + i] - day1[dayAD + i]), 1))
           * (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]) + equiv_harmonious_min_perc[j])
     }
-    return day1
   }  
 }  
 

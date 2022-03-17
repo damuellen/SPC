@@ -295,7 +295,7 @@ extension TunOl {
     return day6
   }
 
-  func day(case j: Int, day0: [Double], day1: [Double], day6: [Double]) -> [Double] {
+  func day27(_ day7: inout [Double], case j: Int, day0: [Double], day1: [Double], day6: [Double]) {
     let dayB = 365
     let dayC = 730
     let dayE = 0
@@ -339,7 +339,7 @@ extension TunOl {
     let dayDX = 2190
     let dayDY = 2555
     let dayDZ = 2920
-    var day7 = [Double](repeating: Double.zero, count: 45990+365)
+
 
     let equiv_harmonious_range = equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]
 
@@ -1945,6 +1945,5 @@ extension TunOl {
       // if KC > 1E-13 { print("Checksum error daily 2", i, j, KC) }
       day7[dayKC + i] = KC
     }
-    return day7
   }
 }
