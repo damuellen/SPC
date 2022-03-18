@@ -150,6 +150,7 @@ extension TunOl {
                   * (day1[dayAM + i] - equiv_harmonious_min_perc[j]))
                 - day6[dayHR + i]) / El_boiler_eff - day6[dayHN + i] / BESS_chrg_eff))
     }
+    
     /// Surplus grid import cap after max harm op and min night op prep
     let ddJE = 5110
     /// =GF6-MAX(0,-(FT6-$Z6-MAX(0,$AB6-FW6)/El_boiler_eff-FR6/BESS_chrg_eff))
@@ -389,6 +390,7 @@ extension TunOl {
               * (day7[ddJP + i] - Overall_harmonious_min_perc))
             - day6[dayHN + i] / BESS_chrg_eff, 5))
     }
+
     /// Surplus grid import cap after opt day harm and min night op prep
     let ddJY = 12045
     // JY=IF(JP6=0,0,ROUND((GE6+(GF6-GE6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc))-MAX(0,-((FS6+(FT6-FS6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc))-$Z6-MAX(0,$AB6-(FV6+(FW6-FV6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc)))/El_boiler_eff-FR6/BESS_chrg_eff)),5))
@@ -412,6 +414,7 @@ extension TunOl {
                       * (day7[ddJP + i] - Overall_harmonious_min_perc))
               ) / El_boiler_eff - day5[dayFR + i] / BESS_chrg_eff)), 5))
     }
+
     /// Surplus grid import cap after opt day harm and max night op prep
     let ddJZ = 12410
     // JZ=IF(JP6=0,0,ROUND((IA6+(IB6-IA6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc))-MAX(0,-((HO6+(HP6-HO6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc))-($Z6+($AA6-$Z6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*($AM6-A_equiv_harmonious_min_perc))-MAX(0,($AB6+($AC6-$AB6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*($AM6-A_equiv_harmonious_min_perc))-(HR6+(HS6-HR6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc)))/El_boiler_eff-HN6/BESS_chrg_eff)),5))
@@ -729,6 +732,7 @@ extension TunOl {
               / BESS_chrg_eff,
           5))
     }
+
     /// Surplus grid import cap after min day harmonious and opti night op prep
     let ddKR = 18615
     // KR=IF(KI6=0,0,ROUND((GE6+(IA6-GE6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-MAX(0,-((FS6+(HO6-FS6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-($Z6+($AA6-$Z6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-MAX(0,($AB6+($AC6-$AB6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(FV6+(HR6-FV6)/($AM6-B_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)))/El_boiler_eff-(FR6+(HN6-FR6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))/BESS_chrg_eff)),5))
@@ -759,6 +763,7 @@ extension TunOl {
                 / BESS_chrg_eff)
           ), 5))
     }
+
     /// Surplus grid import cap after max day harmonious and opti night op prep
     let ddKS = 18980
     // KS=IF(KI6=0,0,ROUND((GF6+(IB6-GF6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-MAX(0,-((FT6+(HP6-FT6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-($Z6+($AA6-$Z6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(MAX(0,($AB6+($AC6-$AB6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(FW6+(HS6-FW6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)))/El_boiler_eff)-((FR6+(HN6-FR6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))/BESS_chrg_eff))),5))
@@ -789,6 +794,7 @@ extension TunOl {
                 / BESS_chrg_eff))
           ), 5))
     }
+
     /// Surplus RawMeth prod cap after min day harmonious and opti night op prep
     let ddKT = 19345
     // KT=IF(KI6=0,0,ROUND((GK6+(IG6-GK6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-($AD6+($AE6-$AD6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)),5))
@@ -903,8 +909,6 @@ extension TunOl {
                 * (day7[ddKG + i] - equiv_harmonious_min_perc[j])))
           / Overall_harmonious_range * (day7[ddJP + i] - Overall_harmonious_min_perc))
     }
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /// el cons for night prep during harm op period
     let ddLC = 22265
@@ -1549,7 +1553,7 @@ extension TunOl {
     let ddNG = 42340
     // NG=ND6+NE6+NF6-NA6-NB6-NC6
     for i in 0..<365 {
-      day7[ddNG + i] = // FIXME
+      day7[ddNG + i] = 
         day7[ddND + i] + day7[ddNE + i] + day7[ddNF + i] - day7[ddNA + i] - day7[ddNB + i] - day7[ddNC + i]
     }
 
@@ -1584,7 +1588,7 @@ extension TunOl {
     /// Balance of heat outside of harm op period
     let ddNK = 43800 
     // NK=NI6+NJ6-NH6
-    for i in 0..<365 { day7[ddNK + i] = day7[ddNI + i] + day7[ddNJ + i] - day7[ddNA + i] }
+    for i in 0..<365 { day7[ddNK + i] = day7[ddNI + i] + day7[ddNJ + i] - day7[ddNH + i] }
 
     /// Pure Methanol prod with night priority and resp day op
     let ddNL = 44165
@@ -1674,7 +1678,7 @@ extension TunOl {
     let ddNR = 46355
     // NR=MAX(0,-MT6)+MAX(0,-MZ6)+MAX(0,-NG6)+MAX(0,-NK6)
     for i in 0..<365 {
-      let NR = max(Double.zero, -day7[ddMT + i]) + max(Double.zero, -day7[ddMZ + i]) + max(Double.zero, -day7[ddNN + i]) + max(Double.zero, -day7[ddNK + i])
+      let NR = max(Double.zero, -day7[ddMT + i]) + max(Double.zero, -day7[ddMZ + i]) + max(Double.zero, -day7[ddNG + i]) + max(Double.zero, -day7[ddNK + i])
       // if NK > 1E-13 { print("Checksum error daily 1", i, j, NK); break }
       day7[ddNR + i] = NR
     }
