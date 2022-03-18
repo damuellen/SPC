@@ -10,7 +10,7 @@ extension TunOl {
 
     /// Min net elec demand to power block
     let hourBU = 0
-    // IF($BM6>0,0,IF(A_overall_var_min_cons+A_overall_fix_stby_cons+$BK6+IF($BM7=0,0,A_overall_stup_cons)+MIN(El_boiler_cap_ud,MAX(0,A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons+IF($BM7=0,0,A_overall_heat_stup_cons)-$BQ6)/El_boiler_eff)<$BP6-PB_stby_aux_cons,0,MAX(0,A_overall_var_min_cons+A_overall_fix_stby_cons+IF($BM7=0,0,A_overall_stup_cons)-BP6)))
+    // IF($BM6>0,0,IF(A_overall_var_min_cons+A_overall_fix_stby_cons+$BK6+IF($BM7=0,0,A_overall_stup_cons)+MIN(El_boiler_cap_ud,MAX(0,A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons+IF($BM7=0,0,A_overall_heat_stup_cons)-$BQ6)/El_boiler_eff)<$BP6-PB_stby_aux_cons,0,MAX(0,A_overall_var_min_cons+A_overall_fix_stby_cons+IF($BM7=0,0,A_overall_stup_cons))))
     for i in 1..<8760 {
       hour2[hourBU + i] = iff(
         hour1[hourBM + i] > Double.zero, Double.zero,
@@ -26,8 +26,7 @@ extension TunOl {
             < hour1[hourBP + i] - PB_stby_aux_cons[j], Double.zero,
           max(
             Double.zero,
-            overall_var_min_cons[j] + overall_fix_stby_cons[j] + iff(hour1[hourBM + i + 1].isZero, Double.zero, overall_stup_cons[j])
-              - hour1[hourBP + i])))
+            overall_var_min_cons[j] + overall_fix_stby_cons[j] + iff(hour1[hourBM + i + 1].isZero, Double.zero, overall_stup_cons[j]))))
     }
 
     /// Optimized min net elec demand to power block
@@ -104,7 +103,7 @@ extension TunOl {
     let CAsum = hour2.sum(hours: daysBO, condition: hourCA)
     /// Min gross heat cons for extraction
     let hourCB = 61320
-    // =IF(OR($BM6>0,PB_nom_gross_cap_ud<=0,COUNTIFS($BO$5:$BO$8763,"="&$BO6,$BF$5:$BF$8763,">0")=0),0,PB_Ratio_Heat_input_vs_output*MAX(0,MIN(A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons+IF($BM7=0,0,A_overall_heat_stup_cons),(BX6-BW6+$BP6-A_overall_fix_stby_cons-IF($BM7=0,0,A_overall_stup_cons))/A_overall_var_max_cons*A_overall_var_heat_max_cons+A_overall_heat_fix_stby_cons+IF($BM7=0,0,A_overall_heat_stup_cons))-$BQ6-MIN(El_boiler_cap_ud,MAX(0,BX6-BV6-BW6)*El_boiler_eff)))
+    // =IF(OR($BM6>0;PB_nom_gross_cap_ud<=0;COUNTIFS($BO$5:$BO$8764;"="&$BO6;$BF$5:$BF$8764;">0")=0);0;PB_Ratio_Heat_input_vs_output*MAX(0;MIN(A_overall_var_heat_min_cons;(BX6-BW6+$BP6-A_overall_fix_stby_cons-IF($BM7=0;0;A_overall_stup_cons))/A_overall_var_max_cons*A_overall_var_heat_max_cons)+A_overall_heat_fix_stby_cons+IF($BM7=0;0;A_overall_heat_stup_cons)-$BQ6-MIN(El_boiler_cap_ud;MAX(0;BX6+$BP6-BW6-BV6)*El_boiler_eff)))
     for i in 1..<8760 {
       hour2[hourCB + i] = iff(
         or(hour1[hourBM + i] > Double.zero, PB_nom_gross_cap_ud <= Double.zero, BO_BFcount[i].isZero), Double.zero,
@@ -112,12 +111,11 @@ extension TunOl {
           * max(
             Double.zero,
             min(
-              overall_var_heat_min_cons[j] + overall_heat_fix_stby_cons[j]
-                + iff(hour1[hourBM + i + 1].isZero, Double.zero, overall_heat_stup_cons[j]),
+              overall_var_heat_min_cons[j],
               (hour2[hourBX + i] - hour2[hourBW + i] + hour1[hourBP + i] - overall_fix_stby_cons[j]
-                - iff(hour1[hourBM + i + 1].isZero, Double.zero, overall_stup_cons[j])) / overall_var_max_cons[j] * overall_var_heat_max_cons[j]
-                + overall_heat_fix_stby_cons[j] + iff(hour1[hourBM + i + 1].isZero, Double.zero, overall_heat_stup_cons[j])) - hour1[hourBQ + i]
-              - min(El_boiler_cap_ud, max(Double.zero, hour2[hourBX + i] - hour2[hourBV + i] - hour2[hourBW + i]) * El_boiler_eff)))
+                - iff(hour1[hourBM + i + 1].isZero, Double.zero, overall_stup_cons[j])) / overall_var_max_cons[j] * overall_var_heat_max_cons[j])
+                + overall_heat_fix_stby_cons[j] + iff(hour1[hourBM + i + 1].isZero, Double.zero, overall_heat_stup_cons[j]) - hour1[hourBQ + i]
+              - min(El_boiler_cap_ud, max(Double.zero, hour2[hourBX + i] + hour1[hourBP + i] - hour2[hourBV + i] - hour2[hourBW + i]) * El_boiler_eff)))
     }
     let CBsum = hour2.sum(hours: daysBO, condition: hourCB)
     /// TES energy needed to fulfil op case
