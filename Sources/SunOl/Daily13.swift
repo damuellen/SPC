@@ -1192,21 +1192,6 @@ extension TunOl {
     // MB=LZ6+MA6-LY6
     for i in 0..<365 { day7[ddMB + i] = day7[ddLZ + i] + day7[ddMA + i] - day7[ddLY + i] }
 
-    /// Pure Methanol prod with day priority and resp night op
-    let ddMC = 31755
-    // MC=IF(OR(LB6<=0,JP6<=0),0,MG6*JP6/Overall_harmonious_max_perc*MethDist_harmonious_max_perc*MethDist_Meth_nom_prod_ud)+IF(OR(KG6<=0,LR6<=0),0,MF6*KG6/A_equiv_harmonious_max_perc*A_MethDist_max_perc*MethDist_Meth_nom_prod_ud)
-    for i in 0..<365 {
-      day7[ddMC + i] =
-        iff(
-          day7[ddLB + i] <= Double.zero, Double.zero,
-          day7[ddLB + i] / (Overall_harmonious_var_max_cons + Overall_fix_cons) * MethDist_harmonious_max_perc
-            * MethDist_Meth_nom_prod_ud)
-        + iff(
-          day7[ddLR + i] <= Double.zero, Double.zero,
-          (day7[ddLR + i] - overall_stup_cons[j]) / (overall_var_max_cons[j] + overall_fix_stby_cons[j])
-            * MethDist_max_perc[j] * MethDist_Meth_nom_prod_ud)
-    }
-
     /// grid export
     let ddMD = 32120
     // MD=MIN(LK6,IF(OR(JP6=0,KG6=0),0,(GB6+(HX6-GB6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc))+((GC6+(HY6-GC6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc))-(GB6+(HX6-GB6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc)))/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc)))+MIN(LX6,IF(OR(JP6=0,KG6=0),0,GD6+(HZ6-GD6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc)))
@@ -1271,6 +1256,13 @@ extension TunOl {
         (day1[dayE + i] + (day1[dayV + i] - day1[dayE + i]) / equiv_harmonious_range
             * (day7[ddKG + i] - equiv_harmonious_min_perc[j]))
       )
+    }
+
+    /// Pure Methanol prod with day priority and resp night op
+    let ddMC = 31755
+    // MC=IF(OR(LB6<=0,JP6<=0),0,MG6*JP6/Overall_harmonious_max_perc*MethDist_harmonious_max_perc*MethDist_Meth_nom_prod_ud)+IF(OR(KG6<=0,LR6<=0),0,MF6*KG6/A_equiv_harmonious_max_perc*A_MethDist_max_perc*MethDist_Meth_nom_prod_ud)
+    for i in 0..<365 {
+      day7[ddMC + i] = iff(or(day7[ddLB + i] <= Double.zero,day7[ddJP + i] <= Double.zero), Double.zero, day7[ddMG + i] * day7[ddJP + i] / Overall_harmonious_max_perc*MethDist_harmonious_max_perc * MethDist_Meth_nom_prod_ud)+iff(or(day7[ddKG + i] <= Double.zero,day7[ddLR + i] <= Double.zero ), Double.zero, day7[ddMF + i] * day7[ddKG + i] / equiv_harmonious_max_perc[j] * MethDist_max_perc[j] * MethDist_Meth_nom_prod_ud)
     }
 
     /// Checksum
@@ -1588,21 +1580,6 @@ extension TunOl {
     // NK=NI6+NJ6-NH6
     for i in 0..<365 { day7[ddNK + i] = day7[ddNI + i] + day7[ddNJ + i] - day7[ddNH + i] }
 
-    /// Pure Methanol prod with night priority and resp day op
-    let ddNL = 44165
-   // NL=IF(OR(KZ6<=0,MK6<=0),0,NP6*KZ6/Overall_harmonious_max_perc*MethDist_harmonious_max_perc*MethDist_Meth_nom_prod_ud)+IF(OR(KI6<=0,NA6<=0),0,NO6*KI6/A_equiv_harmonious_max_perc*A_MethDist_max_perc*MethDist_Meth_nom_prod_ud)
-    for i in 0..<365 {
-      day7[ddNL + i] =
-        iff(
-          day7[ddMK + i] <= Double.zero, Double.zero,
-          day7[ddMK + i] / (Overall_harmonious_var_max_cons + Overall_fix_cons) * MethDist_harmonious_max_perc
-            * MethDist_Meth_nom_prod_ud)
-        + iff(
-          day7[ddNA + i] <= Double.zero, Double.zero,
-          (day7[ddNA + i] - overall_stup_cons[j]) / (overall_var_max_cons[j] + overall_fix_stby_cons[j])
-            * MethDist_max_perc[j] * MethDist_Meth_nom_prod_ud)
-    }
-
     /// Grid export
     let ddNM = 44530
     // NM=MIN(MT6,IF(OR(KZ6=0,KI6=0),0,(GB6+(HX6-GB6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))+((GC6+(HY6-GC6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(GB6+(HX6-GB6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)))/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(KZ6-Overall_harmonious_min_perc)))+MIN(NG6,IF(OR(KZ6=0,KI6=0),0,GD6+(HZ6-GD6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)))
@@ -1658,6 +1635,14 @@ extension TunOl {
           + (day1[dayU + i] - day1[dayD + i]) / equiv_harmonious_range
             * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
       )
+    }
+
+    /// Pure Methanol prod with night priority and resp day op
+    let ddNL = 44165
+   // NL=IF(OR(KZ6<=0,MK6<=0),0,NP6*KZ6/Overall_harmonious_max_perc*MethDist_harmonious_max_perc*MethDist_Meth_nom_prod_ud)+IF(OR(KI6<=0,NA6<=0),0,NO6*KI6/A_equiv_harmonious_max_perc*A_MethDist_max_perc*MethDist_Meth_nom_prod_ud)
+    for i in 0..<365 {
+      day7[ddNL + i] =
+        iff(or(day7[ddKZ + i] <= Double.zero, day7[ddMK + i] <= Double.zero),0, day7[ddNP + i] * day7[ddKZ + i] / Overall_harmonious_max_perc * MethDist_harmonious_max_perc * MethDist_Meth_nom_prod_ud) + iff(or(day7[ddKI + i] <= Double.zero, day7[ddNA + i] <= Double.zero), 0, day7[ddNO + i] * day7[ddKI + i] / equiv_harmonious_max_perc[j] * MethDist_max_perc[j] * MethDist_Meth_nom_prod_ud)
     }
 
     /// PB operating hours
