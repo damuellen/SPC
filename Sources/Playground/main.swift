@@ -90,7 +90,7 @@ struct Command: ParsableCommand {
     var r2 = 0
     defer {
       #if os(Windows)
-      MessageBox(text: "name", caption: "TunOl")
+      MessageBox(text: currentDirectoryPath() + name, caption: "TunOl")
       #else
       print(name)
       #endif

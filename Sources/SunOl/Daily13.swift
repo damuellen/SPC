@@ -541,7 +541,7 @@ extension TunOl {
     }
 
     /// Surplus harm op period electricity after min day harmonious and opti night op prep
-    let ddKJ = 15698
+    let ddKJ = 15695
     // KJ=IF(KI6=0,0,ROUND((FS6+(HO6-FS6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))+(GE6+(IA6-GE6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-($Z6+($AA6-$Z6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-MAX(0,($AB6+($AC6-$AB6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(FV6+(HR6-FV6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)))/El_boiler_eff-(FR6+(HN6-FR6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))/BESS_chrg_eff,5))
     for i in 0..<365 {
       day7[ddKJ + i] = iff(
@@ -1059,9 +1059,7 @@ extension TunOl {
     let ddLH = 24090
     // LH=IF(OR(JP6=0,KG6=0),0,EY6+(GU6-EY6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc))
     for i in 0..<365 {
-      let a: Double = day5[dayEY + i] + (day6[dayGU + i] - day5[dayEY + i])
-      let b: Double = (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKG + i] - equiv_harmonious_min_perc[j])
-      day7[ddLH + i] = iff(or(day7[ddJP + i].isZero, day7[ddKG + i].isZero), Double.zero, a / b)
+      day7[ddLH + i] = iff(or(day7[ddJP + i].isZero, day7[ddKG + i].isZero), Double.zero, day5[dayEY + i] + (day6[dayGU + i] - day5[dayEY + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKG + i] - equiv_harmonious_min_perc[j]))
     }
 
     /// Grid import for harm op during harm op period
