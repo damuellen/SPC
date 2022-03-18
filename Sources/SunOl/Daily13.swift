@@ -1092,8 +1092,6 @@ extension TunOl {
         day7[ddLN + i] + day7[ddLO + i] + day7[ddLP + i] - day7[ddLL + i] - day7[ddLM + i]
     }
 
-///
-
     /// el cons for el boiler op for night prep during harm op period
     let ddLG = 23725
     // LG=LO6/El_boiler_eff
@@ -1487,8 +1485,6 @@ extension TunOl {
         day7[ddMW + i] + day7[ddMX + i] + day7[ddMY + i] - day7[ddMU + i] - day7[ddMV + i]
     }
 
-///
-
     /// el cons for el boiler op for night prep during harm op period
     let ddMP = 36135
     // MP=MX6/El_boiler_eff
@@ -1536,6 +1532,7 @@ extension TunOl {
     /// Balance of electricity during harm op period
     let ddNG = 42340
     // NG=ND6+NE6+NF6-NA6-NB6-NC6
+  ////  MT=MQ6+MR6+MS6-MK6-ML6-MM6-MN6-MO6-MP6
     for i in 0..<365 {
       day7[ddNG + i] =
         day7[ddMQ + i] + day7[ddMR + i] + day7[ddMS + i] - day7[ddMK + i] - day7[ddML + i]
@@ -1545,6 +1542,7 @@ extension TunOl {
     /// el cons for harm op outside of harm op period
     let ddNH = 42705
     // NH=IF(OR(KZ6=0,KI6=0),0,FH6+(HD6-FH6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))
+  //// NA=IF(OR(KZ6=0,KI6=0),0,FE6+(HA6-FE6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))
     for i in 0..<365 {
       day7[ddNH + i] = iff(
         or(day7[ddKZ + i].isZero, day7[ddKI + i].isZero), Double.zero,
@@ -1555,6 +1553,7 @@ extension TunOl {
     /// el to cover aux cons outside of harm op period
     let ddNI = 43070
     // NI=IF(OR(KZ6=0,KI6=0),0,NC6*El_boiler_eff)
+  //// NB=IF(OR(KZ6=0,KI6=0),0,FP6+(HL6-FP6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))
     for i in 0..<365 {
       day7[ddNI + i] = iff(
         or(day7[ddKZ + i].isZero, day7[ddKI + i].isZero), Double.zero,
@@ -1565,6 +1564,7 @@ extension TunOl {
     /// el cons for el boiler for harm op outside of harm op period
     let ddNJ = 43435
     // NJ=IF(OR(KZ6=0,KI6=0),0,FB6+(GX6-FB6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))
+  //// NC=IF(OR(KZ6=0,KI6=0),0,FN6+(HJ6-FN6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))
     for i in 0..<365 {
       day7[ddNJ + i] = iff(
         or(day7[ddKZ + i].isZero, day7[ddKI + i].isZero), Double.zero,
@@ -1590,6 +1590,7 @@ extension TunOl {
     /// Grid import needed outside of harm op period
     let ddNM = 44530
     // IF(OR(KS6=0,KD6=0),0,MIN(GG6+(IC6-GG6)/(AM6-A_equiv_harmonious_min_perc)*(KD6-A_equiv_harmonious_min_perc),MAX(0,-(MW6+MX6-MT6-MU6-MV6))))
+  //// NF=IF(OR(KZ6=0,KI6=0),0,MIN(GG6+(IC6-GG6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc),MAX(0,-(ND6+NE6-NA6-NB6-NC6))))
     for i in 0..<365 {
       day7[ddNM + i] = iff(
       or(
@@ -1599,15 +1600,17 @@ extension TunOl {
 
     /// Balance of electricity outside of harm op period
     let ddNN = 44895
-    // MW6+MX6+MY6-MT6-MU6-MV6
+    //// MW6+MX6+MY6-MT6-MU6-MV6
+    // NG=ND6+NE6+NF6-NA6-NB6-NC6
     for i in 0..<365 {
-      day7[ddNN + i] =
+      day7[ddNN + i] = // FIXME
         day7[ddND + i] + day7[ddNE + i] + day7[ddNM + i] - day7[ddNH + i] - day7[ddNI + i] - day7[ddNJ + i]
     }
 
     /// heat cons for harm op outside of harm op period
     let ddNO = 45260
-    // IF(OR(KS6=0,KD6=0),0,FH6+(HD6-FH6)/(AM6-A_equiv_harmonious_min_perc)*(KD6-A_equiv_harmonious_min_perc))
+    //// IF(OR(KS6=0,KD6=0),0,FH6+(HD6-FH6)/(AM6-A_equiv_harmonious_min_perc)*(KD6-A_equiv_harmonious_min_perc))
+    // NH=IF(OR(KZ6=0,KI6=0),0,FH6+(HD6-FH6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))
     for i in 0..<365 {
       day7[ddNO + i] = iff(
         or(day7[ddKZ + i].isZero, day7[ddKI + i].isZero), Double.zero,
@@ -1617,7 +1620,8 @@ extension TunOl {
 
     /// Heat prod by el boiler for harm op outside of harm op period
     let ddNP = 45625
-    // IF(OR(KS6=0,KD6=0),0,MV6*El_boiler_eff)
+    //// IF(OR(KS6=0,KD6=0),0,MV6*El_boiler_eff)
+    // NI=IF(OR(KZ6=0,KI6=0),0,NC6*El_boiler_eff)
     for i in 0..<365 {
       day7[ddNP + i] = iff(
         or(day7[ddKZ + i].isZero, day7[ddKI + i].isZero), Double.zero, day7[ddNJ + i] * El_boiler_eff)
@@ -1625,7 +1629,8 @@ extension TunOl {
 
     /// Heat available outside of harm op period after TES chrg
     let ddNQ = 45990
-    // IF(OR(KS6=0,KD6=0),0,FB6+(GX6-FB6)/(AM6-A_equiv_harmonious_min_perc)*(KD6-A_equiv_harmonious_min_perc))
+    //// IF(OR(KS6=0,KD6=0),0,FB6+(GX6-FB6)/(AM6-A_equiv_harmonious_min_perc)*(KD6-A_equiv_harmonious_min_perc))
+    // NJ=IF(OR(KZ6=0,KI6=0),0,FB6+(GX6-FB6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))
     for i in 0..<365 {
       day7[ddNQ + i] = iff(
         or(day7[ddKZ + i].isZero, day7[ddKI + i].isZero), Double.zero,
@@ -1732,14 +1737,3 @@ extension TunOl {
     }
   }
 }
-
-
-// MT=MQ6+MR6+MS6-MK6-ML6-MM6-MN6-MO6-MP6
-
-// NA=IF(OR(KZ6=0,KI6=0),0,FE6+(HA6-FE6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))
-
-// NB=IF(OR(KZ6=0,KI6=0),0,FP6+(HL6-FP6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))
-
-// NC=IF(OR(KZ6=0,KI6=0),0,FN6+(HJ6-FN6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))
-
-// NF=IF(OR(KZ6=0,KI6=0),0,MIN(GG6+(IC6-GG6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc),MAX(0,-(ND6+NE6-NA6-NB6-NC6))))
