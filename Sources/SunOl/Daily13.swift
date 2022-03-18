@@ -14,20 +14,20 @@ extension TunOl {
     ) // day6
     
     /// Surplus harm op period electricity after min harm op and min night op prep
-    let dddIQ = 0 
+    let ddIQ = 0 
     // FS6+GE6-$Z6-MAX(0;$AB6-FV6)/El_boiler_eff-FR6/BESS_chrg_eff
     for i in 0..<365 {
-      day7[dddIQ + i] =
+      day7[ddIQ + i] =
         day5[dayFS + i] + day5[dayGE + i] - day1[dayZ + i] - max(
           Double.zero, day1[dayAB + i] - day5[dayFV + i]) / El_boiler_eff - day5[dayFR + i] / BESS_chrg_eff
     }
 
     let equiv_harmonious_range = (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j])
     /// Surplus harm op period electricity after min harm op and max night op prep
-    let dddIR = 365
+    let ddIR = 365
     // HO6+IA6-($Z6+($AA6-$Z6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*($AM6-A_equiv_harmonious_min_perc))-MAX(0;($AB6+($AC6-$AB6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*($AM6-A_equiv_harmonious_min_perc))-HR6)/El_boiler_eff-HN6/BESS_chrg_eff
     for i in 0..<365 {
-      day7[dddIR + i] =
+      day7[ddIR + i] =
         day6[dayHO + i] + day6[dayIA + i] - (day1[dayZ + i] + (day1[dayAA + i] - day1[dayZ + i]) / equiv_harmonious_range * (day1[dayAM + i] - equiv_harmonious_min_perc[j]))
         - max(
             0,
@@ -38,29 +38,29 @@ extension TunOl {
     }
 
     /// Surplus harm op period electricity after max harm op and min night op prep
-    let dddIS = 730 
+    let ddIS = 730 
     // FT6+GF6-$Z6-MAX(0;$AB6-FW6)/El_boiler_eff-FR6/BESS_chrg_eff
     for i in 0..<365 {
-      day7[dddIS + i] =
+      day7[ddIS + i] =
         day5[dayFT + i] + day5[dayGF + i] - day1[dayZ + i] - max(
           Double.zero, day1[dayAB + i] - day5[dayFW + i]) / El_boiler_eff - day5[dayFR + i] / BESS_chrg_eff
     }
 
     /// Surplus harm op heat+boiler prod after min harm op and min night op prep
-    let dddIT = 1095 
+    let ddIT = 1095 
     // FV6+MAX(0;FS6+GE6-$Z6-FR6/BESS_chrg_eff)*El_boiler_eff-$AB6
     for i in 0..<365 {
-      day7[dddIT + i] =
+      day7[ddIT + i] =
         day5[dayFV + i] + max(
           Double.zero, day5[dayFS + i] + day5[dayGE + i] - day1[dayZ + i] - day5[dayFR + i] / BESS_chrg_eff)
         * El_boiler_eff - day1[dayAB + i]
     }
 
     /// Surplus harm op heat+boiler prod after min harm op and max night op prep
-    let dddIU = 1460 
+    let ddIU = 1460 
     // =HR6+MAX(0;HO6+IA6-($Z6+($AA6-$Z6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*($AM6-A_equiv_harmonious_min_perc))-HN6/BESS_chrg_eff)*El_boiler_eff-($AB6+($AC6-$AB6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*($AM6-A_equiv_harmonious_min_perc))
     for i in 0..<365 {
-      day7[dddIU + i] =
+      day7[ddIU + i] =
         day6[dayHR + i]
         + max(Double.zero,
             day6[dayHO + i] + day6[dayIA + i]-(day1[dayZ + i]
@@ -73,27 +73,27 @@ extension TunOl {
     }
 
     /// Surplus harm op heat+boiler prod after max harm op and min night op prep
-    let dddIV = 1825
+    let ddIV = 1825
     // =FW6+MAX(0;FT6+GF6-$Z6-FR6/BESS_chrg_eff)*El_boiler_eff-$AB6
     for i in 0..<365 { 
-      day7[dddIV + i] =
+      day7[ddIV + i] =
         day5[dayFW + i] + max(
           Double.zero, day5[dayFT + i] + day5[dayGF + i] - day1[dayZ + i] - day5[dayFR + i] / BESS_chrg_eff)
         * El_boiler_eff - day1[dayAB + i]
     }
 
     /// Surplus el boiler cap after min harm op and min night op prep
-    let dddIW = 2190
+    let ddIW = 2190
     // GH6-MAX(0,$AB6-FV6)/El_boiler_eff
     for i in 0..<365 {
-      day7[dddIW + i] = day5[dayGH + i] - max(Double.zero, day1[dayAB + i] - day5[dayFV + i]) / El_boiler_eff
+      day7[ddIW + i] = day5[dayGH + i] - max(Double.zero, day1[dayAB + i] - day5[dayFV + i]) / El_boiler_eff
     }
 
     /// Surplus el boiler cap after min harm op and max night op prep
-    let dddIX = 2555
+    let ddIX = 2555
     // ID6-MAX(0,($AB6+($AC6-$AB6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*($AM6-A_equiv_harmonious_min_perc))-HR6)/El_boiler_eff
     for i in 0..<365 { 
-      day7[dddIX + i] =
+      day7[ddIX + i] =
         day6[dayID + i]
         - max(Double.zero, (day1[dayAB + i]
           + (day1[dayAC + i] - day1[dayAB + i]) / equiv_harmonious_range
@@ -102,26 +102,26 @@ extension TunOl {
     }
 
     /// Surplus el boiler cap after max harm op and min night op prep
-    let dddIY = 2920
+    let ddIY = 2920
     // =GI6-MAX(0,$AB6-FW6)/El_boiler_eff
     for i in 0..<365 {
-      day7[dddIY + i] = day5[dayGI + i] - max(0,(day1[dayAB + i] - day5[dayFW + i]) / El_boiler_eff)
+      day7[ddIY + i] = day5[dayGI + i] - max(0,(day1[dayAB + i] - day5[dayFW + i]) / El_boiler_eff)
     }
 
     /// Surplus BESS chrg cap after min harm op and min night op prep
-    let dddIZ = 3285
+    let ddIZ = 3285
     /// Surplus BESS chrg cap after min harm op and max night op prep
-    let dddJA = 3650
+    let ddJA = 3650
     /// Surplus BESS chrg cap after max harm op and min night op prep
-    let dddJB = 4015
+    let ddJB = 4015
 
     for i in 0..<365 {
       // FY6-FR6/BESS_chrg_eff
-      day7[dddIZ + i] = day5[dayFY + i] - day5[dayFR + i] / BESS_chrg_eff
+      day7[ddIZ + i] = day5[dayFY + i] - day5[dayFR + i] / BESS_chrg_eff
       // HU6-HN6/BESS_chrg_eff
-      day7[dddJA + i] = day6[dayHU + i] - day6[dayHN + i] / BESS_chrg_eff
+      day7[ddJA + i] = day6[dayHU + i] - day6[dayHN + i] / BESS_chrg_eff
       // FZ6-FR6/BESS_chrg_eff
-      day7[dddJB + i] = day5[dayFZ + i] - day5[dayFR + i] / BESS_chrg_eff
+      day7[ddJB + i] = day5[dayFZ + i] - day5[dayFR + i] / BESS_chrg_eff
     }
 
     /// Surplus Grid input cap after min harm op and min night op prep
@@ -224,19 +224,7 @@ extension TunOl {
     let ddJP = 8760
     // JP=IF(OR(IQ6<0,IT6<0,IW6<0,IZ6<0,JC6<0,JF6<0,JI6<0,JL6<0),0,MIN(1,IFERROR(IQ6/MAX(0,IQ6-IS6),1),IFERROR(IT6/MAX(0,IT6-IV6),1),IFERROR(IW6/MAX(0,IW6-IY6),1),IFERROR(IZ6/MAX(0,IZ6-JB6),1),IFERROR(JC6/MAX(0,JC6-JE6),1),IFERROR(JF6/MAX(0,JF6-JH6),1),IFERROR(JI6/MAX(0,JI6-JK6),1),IFERROR(JL6/MAX(0,JL6-JN6),1))*(Overall_harmonious_max_perc-Overall_harmonious_min_perc)+Overall_harmonious_min_perc)
     for i in 0..<365 {
-      day7[ddJP + i] = iff(
-        or(
-          day7[dddIQ + i] < Double.zero, day7[dddIT + i] < Double.zero, day7[dddIW + i] < Double.zero, day7[dddIZ + i] < Double.zero,
-          day7[ddJF + i] < Double.zero, day7[ddJI + i] < Double.zero, day7[ddJL + i] < 0), Double.zero,
-        min(
-          1, ifFinite(day7[dddIQ + i] / max(Double.zero, (day7[dddIQ + i] - day7[dddIS + i])), 1),
-          ifFinite(day7[dddIT + i] / max(Double.zero, (day7[dddIT + i] - day7[dddIV + i])), 1),
-          ifFinite(day7[dddIW + i] / max(Double.zero, (day7[dddIW + i] - day7[dddIY + i])), 1),
-          ifFinite(day7[dddIZ + i] / max(Double.zero, (day7[dddIZ + i] - day7[dddJB + i])), 1),
-          ifFinite(day7[ddJF + i] / max(Double.zero, (day7[ddJF + i] - day7[ddJH + i])), 1),
-          ifFinite(day7[ddJI + i] / max(Double.zero, (day7[ddJI + i] - day7[ddJK + i])), 1),
-          ifFinite(day7[ddJL + i] / max(Double.zero, (day7[ddJL + i] - day7[ddJN + i])), 1))
-          * Overall_harmonious_range + Overall_harmonious_min_perc)
+      day7[ddJP + i] = iff(or(day7[ddIQ + i] < Double.zero, day7[ddIT + i] < Double.zero, day7[ddIW + i] < Double.zero, day7[ddIZ + i] < Double.zero, day7[ddJC + i] < Double.zero, day7[ddJF + i] < Double.zero, day7[ddJI + i] < Double.zero, day7[ddJL + i] < Double.zero), 0, min(1, ifFinite(day7[ddIQ + i]/max(0, day7[ddIQ + i]-day7[ddIS + i]), 1), ifFinite(day7[ddIT + i]/max(0, day7[ddIT + i]-day7[ddIV + i]), 1), ifFinite(day7[ddIW + i]/max(0, day7[ddIW + i]-day7[ddIY + i]), 1), ifFinite(day7[ddIZ + i]/max(0, day7[ddIZ + i]-day7[ddJB + i]), 1), ifFinite(day7[ddJC + i]/max(0, day7[ddJC + i]-day7[ddJE + i]), 1), ifFinite(day7[ddJF + i]/max(0, day7[ddJF + i]-day7[ddJH + i]), 1), ifFinite(day7[ddJI + i]/max(0, day7[ddJI + i]-day7[ddJK + i]), 1), ifFinite(day7[ddJL + i]/max(0, day7[ddJL + i]-day7[ddJN + i]), 1))*(Overall_harmonious_max_perc-Overall_harmonious_min_perc)+Overall_harmonious_min_perc)
     }
 
     /// Surplus harm op period electricity after opt harmonious and min night op prep
@@ -539,38 +527,14 @@ extension TunOl {
     let ddKG = 14965
     // KG=IF(OR(JP6=0,JQ6<0,JS6<0,JU6<0,JW6<0,JY6<0,KA6<0,KC6<0,KE6<0),0,MIN(1,IFERROR(JQ6/MAX(0,JQ6-JR6),1),IFERROR(JS6/MAX(0,JS6-JT6),1),IFERROR(JU6/MAX(0,JU6-JV6),1),IFERROR(JW6/MAX(0,JW6-JX6),1),IFERROR(JY6/MAX(0,JY6-JZ6),1),IFERROR(KA6/MAX(0,KA6-KB6),1),IFERROR(KC6/MAX(0,KC6-KD6),1),IFERROR(KE6/MAX(0,KE6-KF6),1))*($AM6-A_equiv_harmonious_min_perc)+A_equiv_harmonious_min_perc)
     for i in 0..<365 {
-      day7[ddKG + i] = iff(
-        or(
-          day7[ddJP + i].isZero, day7[ddJQ + i] < Double.zero, day7[ddJS + i] < Double.zero, day7[ddJU + i] < Double.zero,
-          day7[ddJW + i] < Double.zero, day7[ddKA + i] < Double.zero, day7[ddKC + i] < Double.zero, day7[ddKE + i] < 0), Double.zero,
-        min(
-          1, ifFinite(day7[ddJQ + i] / max(Double.zero, (day7[ddJQ + i] - day7[ddJR + i])), 1),
-          ifFinite(day7[ddJS + i] / max(Double.zero, (day7[ddJS + i] - day7[ddJT + i])), 1),
-          ifFinite(day7[ddJU + i] / max(Double.zero, (day7[ddJU + i] - day7[ddJV + i])), 1),
-          ifFinite(day7[ddJW + i] / max(Double.zero, (day7[ddJW + i] - day7[ddJX + i])), 1),
-          ifFinite(day7[ddKA + i] / max(Double.zero, (day7[ddKA + i] - day7[ddKB + i])), 1),
-          ifFinite(day7[ddKC + i] / max(Double.zero, (day7[ddKC + i] - day7[ddKD + i])), 1),
-          ifFinite(day7[ddKE + i] / max(Double.zero, (day7[ddKE + i] - day7[ddKF + i])), 1))
-          * (day1[dayAM + i] - equiv_harmonious_min_perc[j]) + equiv_harmonious_min_perc[j])
+      day7[ddKG + i] = iff(or(day7[ddJP + i].isZero, day7[ddJQ + i] < Double.zero, day7[ddJS + i] < Double.zero, day7[ddJU + i] < Double.zero, day7[ddJW + i] < Double.zero, day7[ddJY + i] < Double.zero, day7[ddKA + i] < Double.zero, day7[ddKC + i] < Double.zero, day7[ddKE + i] < Double.zero), 0, min(1, ifFinite(day7[ddJQ + i]/max(0, day7[ddJQ + i]-day7[ddJR + i]), 1), ifFinite(day7[ddJS + i]/max(0, day7[ddJS + i]-day7[ddJT + i]), 1), ifFinite(day7[ddJU + i]/max(0, day7[ddJU + i]-day7[ddJV + i]), 1), ifFinite(day7[ddJW + i]/max(0, day7[ddJW + i]-day7[ddJX + i]), 1), ifFinite(day7[ddJY + i]/max(0, day7[ddJY + i]-day7[ddJZ + i]), 1), ifFinite(day7[ddKA + i]/max(0, day7[ddKA + i]-day7[ddKB + i]), 1), ifFinite(day7[ddKC + i]/max(0, day7[ddKC + i]-day7[ddKD + i]), 1), ifFinite(day7[ddKE + i]/max(0, day7[ddKE + i]-day7[ddKF + i]), 1))*(day1[dayAM + i]-equiv_harmonious_min_perc[j])+equiv_harmonious_min_perc[j])
     }
 
     /// min harmonious day prod after opt equiv harmonious night prod due to prod cap limits
     let ddKI = 15330
     // KI=IF(OR(IQ6<0,IT6<0,IW6<0,IZ6<0,JC6<0,JF6<0,JI6<0,JL6<0),0,MIN(1,IFERROR(IQ6/MAX(0,IQ6-IR6),1),IFERROR(IT6/MAX(0,IT6-IU6),1),IFERROR(IW6/MAX(0,IW6-IX6),1),IFERROR(IZ6/MAX(0,IZ6-JA6),1),IFERROR(JC6/MAX(0,JC6-JD6),1),IFERROR(JF6/MAX(0,JF6-JG6),1),IFERROR(JI6/MAX(0,JI6-JJ6),1),IFERROR(JL6/MAX(0,JL6-JM6),1))*($AM6-A_equiv_harmonious_min_perc)+A_equiv_harmonious_min_perc)
     for i in 0..<365 {
-      day7[ddKI + i] = iff(
-        or(
-          day7[dddIQ + i] < Double.zero, day7[dddIT + i] < Double.zero, day7[dddIW + i] < Double.zero, day7[dddIZ + i] < Double.zero,
-          day7[ddJF + i] < Double.zero, day7[ddJI + i] < Double.zero, day7[ddJL + i] < 0), Double.zero,
-        min(
-          1, ifFinite(day7[dddIQ + i] / max(Double.zero, (day7[dddIQ + i] - day7[dddIR + i])), 1),
-          ifFinite(day7[dddIT + i] / max(Double.zero, (day7[dddIT + i] - day7[dddIU + i])), 1),
-          ifFinite(day7[dddIW + i] / max(Double.zero, (day7[dddIW + i] - day7[dddIX + i])), 1),
-          ifFinite(day7[dddIZ + i] / max(Double.zero, (day7[dddIZ + i] - day7[dddJA + i])), 1),
-          ifFinite(day7[ddJF + i] / max(Double.zero, (day7[ddJF + i] - day7[ddJG + i])), 1),
-          ifFinite(day7[ddJI + i] / max(Double.zero, (day7[ddJI + i] - day7[ddJJ + i])), 1),
-          ifFinite(day7[ddJL + i] / max(Double.zero, (day7[ddJL + i] - day7[ddJM + i])), 1))
-          * (day1[dayAM + i] - equiv_harmonious_min_perc[j]) + equiv_harmonious_min_perc[j])
+      day7[ddKI + i] = iff(or(day7[ddIQ + i] < Double.zero, day7[ddIT + i] < Double.zero, day7[ddIW + i] < Double.zero, day7[ddIZ + i] < Double.zero, day7[ddJC + i] < Double.zero, day7[ddJF + i] < Double.zero, day7[ddJI + i] < Double.zero, day7[ddJL + i] < Double.zero), 0, min(1, ifFinite(day7[ddIQ + i]/max(0, day7[ddIQ + i]-day7[ddIR + i]), 1), ifFinite(day7[ddIT + i]/max(0, day7[ddIT + i]-day7[ddIU + i]), 1), ifFinite(day7[ddIW + i]/max(0, day7[ddIW + i]-day7[ddIX + i]), 1), ifFinite(day7[ddIZ + i]/max(0, day7[ddIZ + i]-day7[ddJA + i]), 1), ifFinite(day7[ddJC + i]/max(0, day7[ddJC + i]-day7[ddJD + i]), 1), ifFinite(day7[ddJF + i]/max(0, day7[ddJF + i]-day7[ddJG + i]), 1), ifFinite(day7[ddJI + i]/max(0, day7[ddJI + i]-day7[ddJJ + i]), 1), ifFinite(day7[ddJL + i]/max(0, day7[ddJL + i]-day7[ddJM + i]), 1))*(day1[dayAM + i]-equiv_harmonious_min_perc[j])+equiv_harmonious_min_perc[j])
     }
 
     /// Surplus harm op period electricity after min day harmonious and opti night op prep
@@ -919,17 +883,7 @@ extension TunOl {
     let ddKZ = 21535
     // KZ=IF(OR(KI6=0,KJ6<0,KL6<0,KN6<0,KP6<0,KR6<0,KT6<0,KV6<0,KX6<0),0,MIN(1,IFERROR(KJ6/MAX(0,KJ6-KK6),1),IFERROR(KL6/MAX(0,KL6-KM6),1),IFERROR(KN6/MAX(0,KN6-KO6),1),IFERROR(KP6/MAX(0,KP6-KQ6),1),IFERROR(KR6/MAX(0,KR6-KS6),1),IFERROR(KT6/MAX(0,KT6-KU6),1),IFERROR(KV6/MAX(0,KV6-KW6),1),IFERROR(KX6/MAX(0,KX6-KY6),1))*(Overall_harmonious_max_perc-Overall_harmonious_min_perc)+Overall_harmonious_min_perc)
     for i in 0..<365 {
-      day7[ddKZ + i] = iff(
-        day7[ddKI + i] <= Double.zero, Double.zero,
-        min(
-          1, ifFinite(day7[ddKJ + i] / max(Double.zero, (day7[ddKJ + i] - day7[ddKK + i])), 1),
-          ifFinite(day7[ddKL + i] / max(Double.zero, (day7[ddKL + i] - day7[ddKM + i])), 1),
-          ifFinite(day7[ddKN + i] / max(Double.zero, (day7[ddKN + i] - day7[ddKO + i])), 1),
-          ifFinite(day7[ddKP + i] / max(Double.zero, (day7[ddKP + i] - day7[ddKQ + i])), 1),
-          ifFinite(day7[ddKT + i] / max(Double.zero, (day7[ddKT + i] - day7[ddKU + i])), 1),
-          ifFinite(day7[ddKV + i] / max(Double.zero, (day7[ddKV + i] - day7[ddKW + i])), 1),
-          ifFinite(day7[ddKX + i] / max(Double.zero, (day7[ddKX + i] - day7[ddKY + i])), 1))
-          * Overall_harmonious_range + Overall_harmonious_min_perc)
+      day7[ddKZ + i] = iff(or(day7[ddKI + i].isZero, day7[ddKJ + i] < Double.zero, day7[ddKL + i] < Double.zero, day7[ddKN + i] < Double.zero, day7[ddKP + i] < Double.zero, day7[ddKR + i] < Double.zero, day7[ddKT + i] < Double.zero, day7[ddKV + i] < Double.zero, day7[ddKX + i] < Double.zero), 0, min(1, ifFinite(day7[ddKJ + i]/max(0, day7[ddKJ + i]-day7[ddKK + i]), 1), ifFinite(day7[ddKL + i]/max(0, day7[ddKL + i]-day7[ddKM + i]), 1), ifFinite(day7[ddKN + i]/max(0, day7[ddKN + i]-day7[ddKO + i]), 1), ifFinite(day7[ddKP + i]/max(0, day7[ddKP + i]-day7[ddKQ + i]), 1), ifFinite(day7[ddKR + i]/max(0, day7[ddKR + i]-day7[ddKS + i]), 1), ifFinite(day7[ddKT + i]/max(0, day7[ddKT + i]-day7[ddKU + i]), 1), ifFinite(day7[ddKV + i]/max(0, day7[ddKV + i]-day7[ddKW + i]), 1), ifFinite(day7[ddKX + i]/max(0, day7[ddKX + i]-day7[ddKY + i]), 1))*(Overall_harmonious_max_perc-Overall_harmonious_min_perc)+Overall_harmonious_min_perc)
     }
 
     /// el cons for harm op during harm op period
@@ -1648,10 +1602,10 @@ extension TunOl {
     }
 
     /// Grid export
-    let dddNF = 44530
+    let ddNM = 44530
     // NM=MIN(MT6,IF(OR(KZ6=0,KI6=0),0,(GB6+(HX6-GB6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))+((GC6+(HY6-GC6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(GB6+(HX6-GB6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)))/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(KZ6-Overall_harmonious_min_perc)))+MIN(NG6,IF(OR(KZ6=0,KI6=0),0,GD6+(HZ6-GD6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)))
     for i in 0..<365 {
-      day7[dddNF + i] =
+      day7[ddNM + i] =
         min(
           day7[ddMT + i],
           iff(
@@ -1676,15 +1630,15 @@ extension TunOl {
     }
 
     /// Grid import
-    let dddNN = 44895
+    let ddNN = 44895
     // NN=NF6+MS6
-    for i in 0..<365 { day7[dddNN + i] = day7[ddNF + i] + day7[ddMS + i] }
+    for i in 0..<365 { day7[ddNN + i] = day7[ddNF + i] + day7[ddMS + i] }
 
     /// Outside harmonious operation period hours
-    let dddNO = 45260
+    let ddNO = 45260
     // NO=IF(KI6<=0,0,($C6+($T6-$C6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)))
     for i in 0..<365 {
-      day7[dddNO + i] = iff(
+      day7[ddNO + i] = iff(
         day7[ddKI + i] <= Double.zero, Double.zero,
         (day1[dayC + i]
           + (day1[dayT + i] - day1[dayC + i]) / equiv_harmonious_range
@@ -1693,10 +1647,10 @@ extension TunOl {
     }
 
     /// Harmonious operation period hours
-    let dddNP = 45625
+    let ddNP = 45625
     // NP=IF(KI6<=0,0,($D6+($U6-$D6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)))
     for i in 0..<365 {
-      day7[dddNP + i] = iff(
+      day7[ddNP + i] = iff(
         day7[ddKI + i] <= Double.zero, Double.zero,
         (day1[dayD + i]
           + (day1[dayU + i] - day1[dayD + i]) / equiv_harmonious_range
@@ -1720,7 +1674,7 @@ extension TunOl {
     let ddNR = 46355
     // NR=MAX(0,-MT6)+MAX(0,-MZ6)+MAX(0,-NG6)+MAX(0,-NK6)
     for i in 0..<365 {
-      let NR = max(Double.zero, -day7[ddMT + i]) + max(Double.zero, -day7[ddMZ + i]) + max(Double.zero, -day7[dddNN + i]) + max(Double.zero, -day7[ddNK + i])
+      let NR = max(Double.zero, -day7[ddMT + i]) + max(Double.zero, -day7[ddMZ + i]) + max(Double.zero, -day7[ddNN + i]) + max(Double.zero, -day7[ddNK + i])
       // if NK > 1E-13 { print("Checksum error daily 1", i, j, NK); break }
       day7[ddNR + i] = NR
     }
