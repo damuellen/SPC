@@ -44,7 +44,7 @@ extension TunOl {
     // IF(OR($BM6>0;PB_nom_gross_cap_ud<=0;COUNTIFS($BO$5:$BO$8764;"="&$BO6;$BF$5:$BF$8764;">0")=0);0;$BK6+((MIN(PB_nom_net_cap;MAX(PB_net_min_cap;(1+TES_aux_cons_perc)*MAX(0;BV6+$BK6-$BP6)))+PB_nom_net_cap*PB_nom_var_aux_cons_perc_net*POLY(MIN(PB_nom_net_cap;MAX(PB_net_min_cap;(1+TES_aux_cons_perc)*MAX(0;BV6+$BK6-$BP6)))/PB_nom_net_cap;PB_n2g_var_aux_el_Coeff)+PB_fix_aux_el)/(PB_gross_min_eff+(PB_nom_gross_eff-PB_gross_min_eff)/(PB_nom_net_cap-PB_net_min_cap)*(MIN(PB_nom_net_cap;MAX(0;BV6+$BK6-$BP6))-PB_net_min_cap))+MAX(0;A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons-$BQ6)*PB_Ratio_Heat_input_vs_output)*TES_aux_cons_perc+IF(AND(BV6=0;BV7>0);MAX(0;IF(COUNTIF(BV$1:BV6;"0")<PB_warm_start_duration;PB_hot_start_heat_req;PB_warm_start_heat_req)-$BQ6)*TES_aux_cons_perc;0))
     for i in 1..<8760 {
       hour2[hourBW + i] = iff(
-        or(hour1[hourBM + i] > 0, PB_nom_gross_cap_ud <= 0, BO_BFcount[i].isZero), 0,
+        or(hour1[hourBM + i] > Double.zero, PB_nom_gross_cap_ud <= Double.zero, BO_BFcount[i].isZero), Double.zero,
         hour1[hourBK + i]
           + ((min(PB_nom_net_cap, max(PB_net_min_cap, (1 + TES_aux_cons_perc)
             * max(Double.zero, hour2[hourBV + i] + hour1[hourBK + i] - hour1[hourBP + i])))
@@ -58,7 +58,7 @@ extension TunOl {
                 * (min(PB_nom_net_cap, max(0, hour2[hourBV + i] + hour1[hourBK + i] - hour1[hourBP + i])) - PB_net_min_cap))
             + max(0, overall_var_heat_min_cons[j] + overall_heat_fix_stby_cons[j] - hour1[hourBQ + i]) * PB_Ratio_Heat_input_vs_output) * TES_aux_cons_perc
           + iff(
-            and(hour2[hourBV + i].isZero, hour2[hourBV + i + 1] > 0),
+            and(hour2[hourBV + i].isZero, hour2[hourBV + i + 1] > Double.zero),
             max(
               0,
               iff(
