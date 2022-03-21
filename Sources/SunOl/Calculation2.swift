@@ -127,14 +127,13 @@ extension TunOl {
     let ECsum = hour4.sum(hours: daysBO, condition: hourEC)
     /// Max gross heat cons for extraction
     let hourED = 70080
-    // IF(OR($BM6>0;PB_nom_gross_cap_ud<=0;COUNTIFS($BO$5:$BO$8764;"="&$BO6;$BF$5:$BF$8764;">0")=0);0;PB_Ratio_Heat_input_vs_output*MAX(0;(A_overall_var_heat_max_cons-A_overall_var_heat_min_cons)*(DV6-A_equiv_harmonious_min_perc)+A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons+IF($BM7=0;0;A_overall_heat_stup_cons)-$BQ6-MIN(El_boiler_cap_ud;MAX(0;DZ6+$BP6-DX6-DY6)*El_boiler_eff)))
+    // IF(OR($BM6>0;PB_nom_gross_cap_ud<=0;COUNTIFS($BO$5:$BO$8764;"="&$BO6;$BF$5:$BF$8764;">0")=0);0;PB_Ratio_Heat_input_vs_output*MAX(0;(A_overall_var_heat_max_cons-A_overall_var_heat_min_cons)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(DV6-A_equiv_harmonious_min_perc)+A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons+IF($BM7=0;0;A_overall_heat_stup_cons)-$BQ6-MIN(El_boiler_cap_ud;MAX(0;DZ6+$BP6-DX6-DY6)*El_boiler_eff)))
     for i in 1..<8760 {
       hour4[hourED + i] = iff(
         or(hour1[hourBM + i] > Double.zero, PB_nom_gross_cap_ud <= Double.zero, BO_BFcount[i].isZero), Double.zero,
           PB_Ratio_Heat_input_vs_output * max(
             Double.zero,
-            min(
-              (overall_var_heat_max_cons[j] - overall_var_heat_min_cons[j])
+            (overall_var_heat_max_cons[j] - overall_var_heat_min_cons[j]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j])
                 * (hour4[hourDV + i] - equiv_harmonious_min_perc[j]) + overall_var_heat_min_cons[j]
                   + overall_heat_fix_stby_cons[j] + iff(hour1[hourBM + i + 1].isZero, Double.zero, overall_heat_stup_cons[j])
               - hour1[hourBQ + i] - min(El_boiler_cap_ud, max(Double.zero, hour4[hourDZ + i] + hour1[hourBP + i] - hour4[hourDX + i] - hour4[hourDY + i])
