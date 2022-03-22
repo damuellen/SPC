@@ -225,7 +225,7 @@ extension TunOl {
   }
 
   func hour3(_ hour3: inout [Double], j: Int, hour0: [Double], hour1: [Double], hour2: [Double]) {
-    let (hourBX, hourCB, hourCC, hourCK, hourCL, hourCM, hourCN) = (26280, 61320, 70080, 140160, 148920, 157680, 166440)
+    let (hourBX, hourCB, hourCC, hourCK, hourCL, hourCM) = (26280, 61320, 70080, 140160, 148920, 157680)
     /// Min harmonious net elec cons not considering grid import
     let hourCP = 0
     // IF(MIN(MAX(0;CK6+Grid_import_max_ud*Grid_import_yes_no_PB_strategy-CM6-MIN(El_boiler_cap_ud;MAX(0;Overall_harmonious_var_heat_min_cons+Overall_heat_fix_cons-CL6)/El_boiler_eff));MAX(0;CL6+MIN(El_boiler_cap_ud;MAX(0;CK6+Grid_import_max_ud*Grid_import_yes_no_PB_strategy-CM6-Overall_harmonious_var_min_cons-Overall_fix_cons))*El_boiler_eff-Overall_heat_fix_cons)/Overall_harmonious_var_heat_max_cons*Overall_harmonious_var_max_cons+Overall_fix_cons)<Overall_harmonious_var_min_cons+Overall_fix_cons;0;Overall_harmonious_var_min_cons+Overall_fix_cons)

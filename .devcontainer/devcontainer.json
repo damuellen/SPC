@@ -17,16 +17,15 @@
 		"editor.defaultFormatter": "vknabel.vscode-apple-swift-format",
 	},
 	"extensions": [
-		//"pvasek.sourcekit-lsp--dev-unofficial",
 		"sswg.swift-lang",
 		"vadimcn.vscode-lldb",
-		"hbenl.vscode-test-explorer",
-		"makeitbetter.vscode-swift-test-adapter",
+		// "hbenl.vscode-test-explorer",
+		// "makeitbetter.vscode-swift-test-adapter",
 		"vknabel.vscode-apple-swift-format",
 		"fredapackages.swift-add-documentation",
 		"cweijan.vscode-office",
 		"philhindle.errorlens",
 		"wattenberger.footsteps"
 	],
-	"postCreateCommand": "[[ ! -d /workspaces/swift-format ]] && cd /workspaces && git clone --single-branch -b 0.50500.0 https://github.com/apple/swift-format.git --quiet && cd swift-format && swift build -c release --product swift-format",
+	"postCreateCommand": "[[ ! -d /workspaces/swift-format ]] && cd /workspaces && git clone --single-branch -b 0.50600.0 https://github.com/apple/swift-format.git --quiet && cd swift-format && swift build -c release --product swift-format",
 }

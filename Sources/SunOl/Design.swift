@@ -239,8 +239,6 @@ public struct TunOl {
 
   var th_Coeff: [Double] = [0]  // PB_Eff!$U3 PB_Eff!$T3 PB_Eff!$S3 PB_Eff!$R3 PB_Eff!$Q3
 
-  
-  
   var CSP_loop_nr_ud: Double = 120
   var TES_full_load_hours_ud: Double = 20
   var PB_nom_gross_cap_ud: Double = 190
@@ -539,7 +537,6 @@ public struct TunOl {
     self.Overall_harmonious_var_heat_cons_at_PB_nom =
       EY_harmonious_perc_at_PB_nom * EY_var_heat_nom_cons + MethDist_harmonious_perc_at_PB_nom * MethDist_var_heat_nom_cons
       - MethSynt_harmonious_perc_at_PB_nom * MethSynt_var_heat_nom_prod + CCU_harmonious_perc_at_PB_nom * CCU_var_heat_nom_cons
-
 
       // if nominal_gross_cap == 0 {
       //   self.nominal_gross_cap = 0

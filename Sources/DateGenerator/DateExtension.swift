@@ -13,14 +13,29 @@ import Foundation
 public typealias FractionalTime = Double
 
 extension Date: ExpressibleByStringLiteral {
-  public init(stringLiteral value: String) {
-    if let date = ISO8601DateFormatter().date(from: value) {
-      self = date
-    } else {
-      fatalError(value + " is not iso 8601 compliant")
-    }
+  public init(stringLiteral: String) {
+    self.init(stringLiteral)
   }
-}
+  public init(_ dateString: String) {
+    let values = dateString.split(whereSeparator: {!$0.isWholeNumber}).compactMap{Int32($0)}
+    var t = time_t()
+    time(&t)
+    var info = localtime(&t)!.pointee
+    if values.count > 2 {
+      info.tm_year = values[0] - 1900
+      info.tm_mon = values[1] - 1
+      info.tm_mday = values[2]
+    }
+    if values.count > 4 {
+      info.tm_hour = values[3]
+      info.tm_min = values[4]
+    }
+    if values.count > 5 {
+      info.tm_sec = values[5]
+    }
+    let time = mktime(&info)
+    self.init(timeIntervalSince1970: TimeInterval(time))
+}} 
 
 extension Date {
 

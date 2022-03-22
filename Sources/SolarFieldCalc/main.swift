@@ -33,7 +33,7 @@ struct SolarFieldCalculator: ParsableCommand {
   func run() throws {
 
     if let input = input {
-   //   try SolarFieldModel.readFromFile(url: URL(fileURLWithPath: input))?.apply()
+      try SolarFieldModel.readFromFile(url: URL(fileURLWithPath: input))?.apply()
     }
 
     guard let loops = loops else { return }

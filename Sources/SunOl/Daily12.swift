@@ -1,10 +1,9 @@
 
 extension TunOl {
   func day16(_ day16: inout [Double], hour0: [Double], hour4: [Double], day11: [Double], day15: [Double]) {
-    var daysEZ: [[Int]] = hour4[254041..<(254040 + 8760)].indices.chunked(by: { hour4[$0] == hour4[$1] })
+    let daysEZ: [[Int]] = hour4[254041..<(254040 + 8760)].indices.chunked(by: { hour4[$0] == hour4[$1] })
       .map { $0.map { $0 - 254040 } }
-   // let end = daysEZ.removeLast()
-   // daysEZ[0].append(contentsOf: end)
+
     let hourJ = 26280
     let hourL = 43800
 

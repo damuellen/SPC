@@ -302,12 +302,7 @@ extension TunOl {
     let dayF = 365
     let dayG = 730
     let dayH = 1095
-    let dayI = 1460
-    let dayJ = 1825
-    // let dayK = 2190
-    // let dayL = 2555
-    // let dayM = 2920
-    // let dayN = 3285
+
     let dayO = 3650
     let dayP = 4015
     let dayQ = 4380
@@ -318,12 +313,7 @@ extension TunOl {
     let dayV = 6205
     let dayW = 6570
     let dayX = 6935
-    // let dayY = 7300
-    // let dayZ = 7665
-    // let dayAA = 8030
-    // let dayAB = 8395
-    // let dayAC = 8760
-    // let dayAD = 9125
+
     let dayAE = 9490
     
     let (dayEA, dayEB, dayEC, dayED, dayEE, dayEF, dayEG, dayEH, dayEI, dayEJ, dayEK, dayEL, dayEM, dayEN, dayEO, dayEP, dayEQ, dayER, dayES, dayET, dayEV, dayEW, dayEY, dayEZ) = (

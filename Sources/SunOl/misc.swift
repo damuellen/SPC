@@ -13,6 +13,7 @@ public func fitness(values: [Double]) -> [Double] {
   //dump(model)
   let hour0 = model.hour0(TunOl.Q_Sol_MW_thLoop, TunOl.Reference_PV_plant_power_at_inverter_inlet_DC, TunOl.Reference_PV_MV_power_at_transformer_outlet)
   let hour1 = model.hour1(hour0: hour0)
+  let day0 = model.day(hour0: hour0)
   let day6 = model.day(hour0: hour0)
   var day = [[Double]]()
 
@@ -39,7 +40,6 @@ public func fitness(values: [Double]) -> [Double] {
     day.append(Array(day17[31755..<32850]))
     day.append(Array(day17[44165..<45625]))
 
-    let day0 = model.day0(hour0: hour0)
     model.day21(&day21, case: j, day0: day0)
     model.day27(&day27, case: j, day0: day0, day1: day21, day6: day6)
 

@@ -385,7 +385,7 @@ public struct Plant {
         * WasteHeatRecovery.parameter.efficiencyNominal
         / WasteHeatRecovery.parameter.ratioHTF
       /// necessary HTF share
-      let balance = heatFlow.production.megaWatt - power
+      let _ = heatFlow.production.megaWatt - power
 
       heater.inletTemperature(inlet: powerBlock)
 
@@ -448,9 +448,7 @@ public struct Plant {
 
           heater.operationMode = .unknown
 
-          let heatDiff =
-            heatFlow.production.megaWatt
-            + heatFlow.storage.megaWatt - heatFlow.demand.megaWatt
+          //let heatDiff = heatFlow.production.megaWatt + heatFlow.storage.megaWatt - heatFlow.demand.megaWatt
 
           let performance = heater(
             storage: storage.massFlow,
