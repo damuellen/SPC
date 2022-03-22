@@ -373,7 +373,7 @@ extension TunOl {
         or(hour4[hourEX + i] > Double.zero, hour4[hourEJ + i].isZero, min(
           max(Double.zero, Grid_import_max_ud * Grid_import_yes_no_PB_strategy
           + hour4[hourEH + i] + hour4[hourER + i] - hour4[hourET + i] - hour4[hourEX + i]
-          - min(El_boiler_cap_ud, max(Double.zero, MIN((hour4[hourDX + i] - overall_fix_stby_cons[j]
+          - min(El_boiler_cap_ud, max(Double.zero, min((hour4[hourDX + i] - overall_fix_stby_cons[j]
             - iff(hour4[hourEX + i + 1].isZero, Double.zero, overall_stup_cons[j]))
             / overall_var_max_cons[j] * overall_var_heat_max_cons[j],          
           (overall_var_heat_max_cons[j] - overall_var_heat_min_cons[j])
@@ -392,7 +392,7 @@ extension TunOl {
             / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j])
             * (hour4[hourDV + i] - equiv_harmonious_min_perc[j]) + overall_var_min_cons[j]) + overall_fix_stby_cons[j]
             + iff(hour4[hourEX + i + 1].isZero, Double.zero, overall_stup_cons[j])) < overall_var_min_cons[j] + overall_fix_stby_cons[j] + iff(hour4[hourEX + i + 1].isZero, Double.zero, overall_stup_cons[j])),
-          Double.zero, MIN(hour4[hourDX + i], (overall_var_max_cons[j] - overall_var_min_cons[j])
+          Double.zero, min(hour4[hourDX + i], (overall_var_max_cons[j] - overall_var_min_cons[j])
           / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j])
           * (hour4[hourDV + i] - equiv_harmonious_min_perc[j]) + overall_var_min_cons[j] + overall_fix_stby_cons[j]
           + iff(hour4[hourEX + i + 1].isZero, Double.zero, overall_stup_cons[j])))
