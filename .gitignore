@@ -13,8 +13,4 @@ Package.resolved
 /Packages
 /Package.resolved
 /*.xcodeproj
-/Build
-/DerivedData
-/Index
-/xl
-/venv
+/*
