@@ -123,6 +123,7 @@ class SunOlTests: XCTestCase {
       if j == 1 {
 
       }
+      
       if j == 2 {
 
       }
@@ -164,13 +165,21 @@ class SunOlTests: XCTestCase {
     var elec_from_grid_sum = Double.zero
     var elec_to_grid_MTPH_sum = Double.zero
 
+    let names = [
+      "1a day prio", "1a night prio", "2a day prio", "2a night prio",
+      "1b day prio", "1b night prio", "2b day prio", "2b night prio",
+      "1c day prio", "1c night prio", "2c day prio", "2c night prio",
+      "1d day prio", "1d night prio", "2d day prio", "2d night prio",
+    ]
+
     for d in 0..<365 {
       let cases = day.indices.map { i in
         costs.LCOM(meth_produced_MTPH: day[i][d], elec_from_grid: day[i][d + 365], elec_to_grid: day[i][d + 365 + 365])
       }
-      print(cases)
+      
       let best = cases.indices.filter { cases[$0].isFinite }.filter { cases[$0] > 0 }.sorted().first
       if let best = best {
+        print(d, names[best], cases)
         meth_produced_MTPH_sum += day[best][d]
         elec_from_grid_sum += day[best][d + 365]
         elec_to_grid_MTPH_sum += day[best][d + 365 + 365]
