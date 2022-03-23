@@ -25,7 +25,7 @@ public struct Costs {
      let Power_Block = (basis: 50.0, c1: 84_370_000.0, coeff:  466228.5721, range: 50.0...200.0)
      let Electrolysis_coeff = 700_000.0 * 1.2
      let Hydrogen_storage = (basis: 24E-2 * Hydrogen_density, exp: 0.9, coeff: 780_000 * 1.2)
-     let CCU_plant = (basis: 20.6, exp: 0.7, coeff: 18292682.9268293)
+     let CCU_plant = (basis: 20.6058, exp: 0.7, coeff: 18292682.9268293)
      let CO2_storage = (basis:  226.8, exp: 0.9, coeff: 780_000.0)
      let MethSynt_plant = (basis: 1.94942614770459E+01, exp: 0.7, coeff: 60_000_000.0 / FX_USD * 0.4)
      let RawMeth_storage = (basis: 1.87680000000000E+02, exp: 0.9, coeff: 694146.8625 / FX_USD)
