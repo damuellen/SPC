@@ -14,25 +14,25 @@ public struct Costs {
      let FX_USD = 0.82
      let Hydrogen_density = 5.783
      let CO2_density = 945.0
-     let RawMeth_density = 782.0
+    //  let RawMeth_density = 782.0
  
-     let Solar_field = (basis: 38.0, c1: 1_581_220.0, exp: 0.8, f: 0.71, coeff: 18_000_000.0, range: 19.0...130.0)
-     let Assembly_hall = (c4: -0.037401977, c3: 23.83076428, c2: -5296.963373, c1: 518074.8094, c0: 185180.2005, range: 1.0...270.0)
-     let PV_DC_part = (basis: 605.0, coeff: 465_124.0)
-     let PV_AC_part = (basis: 490.0, exp: 0.7, coeff: 64_150.0, range: 267...778)
+     let Solar_field = (basis: 38.0, c1: 1581220.07314946, exp: 0.8, f: 0.71, coeff: 18_000_000.0, range: 19.0...130.0)
+     let Assembly_hall = (c4: -0.0374019773004541, c3: 23.8307642775062, c2: -5296.96337283834, c1: 518074.809368001, c0: 185180.200451687, range: 1.0...270.0)
+     let PV_DC_part = (basis: 605.0, coeff: 465123.72321881)
+     let PV_AC_part = (basis: 490.0, exp: 0.7, coeff: 64150.294897127, range: 267...778)
      let Heater_system = (basis: 200.0, c1: 4_000_000.0, exp: 0.4, c2: 211728.735839637, factor: 0.9, coeff: 3_500_000.0, range: 200.0...400.0)
-     let Thermal_energy_storage = (basis: 26920.0, c1: 2_000_000.0, exp: 0.75, c2: 1908.888181, factor: 0.55, coeff: 26_000_000.0)
-     let Power_Block = (basis: 50.0, c1: 84_370_000.0, coeff: 466_229.0, range: 50.0...200.0)
+     let Thermal_energy_storage = (basis: 26920.0, c1: 2_000_000.0, exp: 0.75, c2: 1.90888818091572E+03, factor: 0.55, coeff: 26_000_000.0)
+     let Power_Block = (basis: 50.0, c1: 84_370_000.0, coeff:  466228.5721, range: 50.0...200.0)
      let Electrolysis_coeff = 700_000.0 * 1.2
      let Hydrogen_storage = (basis: 24E-2 * Hydrogen_density, exp: 0.9, coeff: 780_000 * 1.2)
-     let CCU_plant = (basis: 20.6, exp: 0.7, coeff: 15_000_000.0 / FX_USD)
-     let CO2_storage = (basis: 24E-2 * CO2_density, exp: 0.9, coeff: 780_000.0)
-     let MethSynt_plant = (basis: 19.5, exp: 0.7, coeff: 60_000_000.0 / FX_USD * 0.4)
-     let RawMeth_storage = (basis: 24E-2 * RawMeth_density, exp: 0.9, coeff: 694146.8625 / FX_USD)
-     let MethDist_plant = (basis: 12.5, exp: 0.7, coeff: 60_000_000.0 / FX_USD * 0.6)
-     let Battery_energy_storage = (basis: 50.0, c1: 5_317_746.0, coeff: 319_065.0)
+     let CCU_plant = (basis: 20.6, exp: 0.7, coeff: 18292682.9268293)
+     let CO2_storage = (basis:  226.8, exp: 0.9, coeff: 780_000.0)
+     let MethSynt_plant = (basis: 1.94942614770459E+01, exp: 0.7, coeff: 60_000_000.0 / FX_USD * 0.4)
+     let RawMeth_storage = (basis: 1.87680000000000E+02, exp: 0.9, coeff: 694146.8625 / FX_USD)
+     let MethDist_plant = (basis: 1.24750499001996E+01, exp: 0.7, coeff: 60_000_000.0 / FX_USD * 0.6)
+     let Battery_energy_storage = (basis: 50.0, c1: 5317746.25, coeff:  319064.775)
      let Electrical_boiler = (basis: 3.27, exp: 0.7, coeff: 494000 * 1.45 * 1.2)
-     let Substation = (basis: 135.0, exp: 0.7, coeff: 2_400_000.0)
+     let Substation = (basis: 135.0, exp: 0.7, coeff: 2.4E+06)
 
     // let factor = min(Heat_to_aux_directly_from_CSP_sum + Heat_to_aux_from_PB_sum * model.PB_Ratio_Heat_input_vs_output,
     //  Q_solar_before_dumping_sum - Total_SF_heat_dumped_sum - TES_thermal_input_by_CSP_sum)
@@ -121,7 +121,7 @@ public struct Costs {
 
   public func LCOM(meth_produced_MTPH: Double, elec_from_grid: Double, elec_to_grid: Double) -> Double {
     // print(meth_produced_MTPH, elec_from_grid, elec_to_grid)
-    let lcom = ((Costs.FCR * Total_CAPEX + Total_OPEX) + elec_from_grid * Costs.Elec_buy * 1000 - elec_to_grid * Costs.Elec_sell * 1000) / meth_produced_MTPH
+    let lcom = ((Costs.FCR * Total_CAPEX + Total_OPEX) + (elec_from_grid * Costs.Elec_buy * 1000) - (elec_to_grid * Costs.Elec_sell * 1000)) / meth_produced_MTPH
     return lcom
   }
 }
