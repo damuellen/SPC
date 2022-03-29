@@ -248,7 +248,7 @@ public struct TunOl {
   var Hydrogen_storage_cap_ud: Double = 60
   var Heater_cap_ud: Double = 300
   var CCU_C_O_2_nom_prod_ud: Double = 25
-  var C_O_2_storage_cap_ud: Double = 5000
+  var C_O_2_storage_cap_ud: Double = 1000
   var MethSynt_RawMeth_nom_prod_ud: Double = 50
   var RawMeth_storage_cap_ud: Double = 300
   var MethDist_Meth_nom_prod_ud: Double = 20
@@ -296,8 +296,20 @@ public struct TunOl {
     let chunks = inverter.chunked { Int($0.0 * 100) == Int($1.0 * 100) }
     let eff1 = chunks.map { bin in bin.reduce(0.0) { $0 + $1.1 } / Double(bin.count) }
     let eff2 = zip(stride(from: 0.01, through: 1, by: 0.01), eff1).map { ac * $0.0 / $0.1 / dc }
-    self.LL_Coeff = Polynomial.fit(x: Array(eff2[..<20]), y: Array(eff1[..<20]), order: 7)!.coefficients
-    self.HL_Coeff = Polynomial.fit(x: Array(eff2[15...]), y: Array(eff1[15...]), order: 3)!.coefficients
+    self.LL_Coeff = [-4.00073299744972E+07,
+2.43484724631423E+07,
+-6.02556743789485E+06,
+7.73365644668189E+05,
+-5.39041431697126E+04,
+1.89024744899734E+03,
+-2.19970897604758E+01,
+7.04670199599962E-01].reversed()
+//Polynomial.fit(x: Array(eff2[..<20]), y: Array(eff1[..<20]), order: 7)!.coefficients
+    self.HL_Coeff = [2.48832703984911E-01,
+-3.98641131275815E-01,
+2.14353590144310E-01,
+9.22111172341115E-01].reversed()
+//Polynomial.fit(x: Array(eff2[15...]), y: Array(eff1[15...]), order: 3)!.coefficients
 
     let PB_grs_el_cap_min_perc = PB_Ref_25p_gross_cap_max_aux_heat / PB_Ref_nom_gross_cap
     self.CSP_Cold_HTF_T = TES_cold_tank_T + SF_heat_exch_approach_temp

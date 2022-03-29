@@ -53,17 +53,21 @@ public func fitness(values: [Double]) -> [Double] {
 
   for d in 0..<365 {
     let cases = day.indices.map { i in
-      costs.LCOM(meth_produced_MTPH: day[i][d] * 365.0, elec_from_grid: day[i][d+365], elec_to_grid: day[i][d+365+365])
+      costs.LCOM(meth_produced_MTPH: day[i][d] * 365.0, elec_from_grid: day[i][d+365+365], elec_to_grid: day[i][d+365])
     }
     let best = cases.indices.filter{cases[$0].isFinite}.filter{cases[$0]>0}.sorted().first
     if let best = best { 
       meth_produced_MTPH_sum += day[best][d]
-      elec_from_grid_sum += day[best][d+365]
-      elec_to_grid_MTPH_sum += day[best][d+365+365]
+      elec_from_grid_sum += day[best][d+365+365]
+      elec_to_grid_MTPH_sum += day[best][d+365]
     } 
   }
   let LCOM = costs.LCOM(meth_produced_MTPH: meth_produced_MTPH_sum, elec_from_grid: elec_from_grid_sum, elec_to_grid: elec_to_grid_MTPH_sum)
-  return [LCOM] + values
+  if 1...10000 ~= LCOM {
+    return [LCOM] + values
+  }
+  print(LCOM, values)
+  return [10000] + values
 }
 
 public func MGOADE(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fitness: ([Double]) -> [Double]) -> [[Double]] {
@@ -83,7 +87,10 @@ public func MGOADE(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Doubl
   let cr = 0.4
   let f = 0.9  
   let date = Date()
-  let _ = fitness([])
+  let dummy = fitness([])
+  TunOl.convergenceCurves[0].append([Double(0), dummy[0]])
+  TunOl.convergenceCurves[1].append([Double(0), dummy[0]])
+  TunOl.convergenceCurves[2].append([Double(0), dummy[0]])
   print(-date.timeIntervalSinceNow)
   // Calculate the fitness of initial grasshoppers
   let date2 = Date()
@@ -401,7 +408,9 @@ extension Array where Element == Double {
   var readable: [String] { map(\.formatted) }
 }
 
-func round(_ value: Double, _ digits: Double) -> Double { value.rounded() }
+func round(_ value: Double, _ digits: Double) -> Double { 
+  (pow(10, digits) * value).rounded() / pow(10, digits)
+}
 
 func average(_ values: ArraySlice<Double>) -> Double {
   let sum = values.reduce(into: 0.0) { sum, value in sum += value }

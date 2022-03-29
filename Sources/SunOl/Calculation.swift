@@ -112,7 +112,7 @@ extension TunOl {
       let sumB = hour0[max(hourS + i - 2, hourS)...(hourS + i + 12)].reduce(Double.zero, +)
       let U: Double
       if or(and(prevA, nowA, sumA.isZero), and(prevB, nowB, sumB.isZero)) {
-        U = iff(hour0[hourU + i - 1] < 364, hour0[hourU + i - 1] + 1, Double.zero)
+        U = hour0[hourU + i - 1] + 1
       } else {
         U = hour0[hourU + i - 1]
       }
@@ -313,7 +313,7 @@ extension TunOl {
   func hour1(hour0: [Double]) -> [Double] {
     let (hourF, hourJ, hourL, hourM) = (0, 26280, 43800, 52560)
     var hour1 = [Double](repeating: Double.zero, count: 192_720)
-    let daysD: [[Int]] = (0..<365).map { Array(stride(from: $0 * 24, to: ($0+1) * 24, by: 1)) }
+    let daysD: [[Int]] = (0..<365).map { Array(stride(from: 1 + $0 * 24, to: 1 + ($0+1) * 24, by: 1)) }
 
     /// Aux elec for CSP SF and PV Plant MWel
     let hourAV = 0
@@ -351,12 +351,12 @@ extension TunOl {
     /// Maximum TES energy per PV day
     let hourAZ = 35040
     // MIN(TES_thermal_cap,SUMIF(D5:D8763,"="D6,AY5:AY8763)*Heater_eff*(1+1/Ratio_CSP_vs_Heater))
-    for i in 1..<8760 { hour1[hourAZ + i] = min(TES_thermal_cap, AYsum[i] * Heater_eff * (1 + 1 / Ratio_CSP_vs_Heater)) }
+    for i in 1..<8760 { hour1[hourAZ + i] = min(TES_thermal_cap, AYsum[i-1] * Heater_eff * (1 + 1 / Ratio_CSP_vs_Heater)) }
 
     /// Surplus energy due to TES size limit
     let hourBA = 43800
     // MAX(0,SUMIF(D5:D8763,"="D6,AY5:AY8763)*Heater_eff*(1+1/Ratio_CSP_vs_Heater)-TES_thermal_cap)
-    for i in 1..<8760 { hour1[hourBA + i] = max(Double.zero, AYsum[i] * Heater_eff * (1 + 1 / Ratio_CSP_vs_Heater) - TES_thermal_cap) }
+    for i in 1..<8760 { hour1[hourBA + i] = max(Double.zero, AYsum[i-1] * Heater_eff * (1 + 1 / Ratio_CSP_vs_Heater) - TES_thermal_cap) }
 
     /// Peripherial PV hour PV to heater
     let hourBB = 52560
@@ -373,7 +373,7 @@ extension TunOl {
     /// Surplus energy due to op limit after removal of peripherial hours
     let hourBC = 61320
     // MAX(0,BA6-SUMIF(D5:D8763,"="D6,BB5:BB8763)*Heater_eff*(1+1/Ratio_CSP_vs_Heater))
-    for i in 1..<8760 { hour1[hourBC + i] = max(Double.zero, hour1[hourBA + i] - BBsum[i] * Heater_eff * (1 + 1 / Ratio_CSP_vs_Heater)) }
+    for i in 1..<8760 { hour1[hourBC + i] = max(Double.zero, hour1[hourBA + i] - BBsum[i-1] * Heater_eff * (1 + 1 / Ratio_CSP_vs_Heater)) }
 
     /// intermediate resulting PV elec to TES
     let hourBD = 70080
@@ -384,7 +384,7 @@ extension TunOl {
         hour1[hourAY + i]
           - iff(
             hour1[hourBA + i].isZero, Double.zero,
-            (hour1[hourBA + i] - hour1[hourBC + i]) / (BBsum[i] * Heater_eff * (1 + 1 / Ratio_CSP_vs_Heater)) * hour1[hourBB + i]))
+            (hour1[hourBA + i] - hour1[hourBC + i]) / (BBsum[i-1] * Heater_eff * (1 + 1 / Ratio_CSP_vs_Heater)) * hour1[hourBB + i]))
     }
     let BDcountNonZero = hour1.count(hours: daysD, range: hourBD, predicate: { $0 > 0 })
     let BDsum = hour1.sum(hours: daysD, condition: hourBD)
@@ -397,7 +397,7 @@ extension TunOl {
         max(
           (hour1[hourAW + i] - hour1[hourBD + i]) / (hour1[hourBC + i] / (1 + 1 / Ratio_CSP_vs_Heater) / Heater_eff / BDcountNonZero[i]),
           (hour0[hourJ + i] - hour1[hourBD + i] * Heater_eff / Ratio_CSP_vs_Heater)
-            / (hour1[hourBC + i] / (1 + Ratio_CSP_vs_Heater) / BDcountNonZero[i])) / BDsum[i] * hour1[hourBD + i])
+            / (hour1[hourBC + i] / (1 + Ratio_CSP_vs_Heater) / BDcountNonZero[i])) / BDsum[i-1] * hour1[hourBD + i])
     }
     let BEsum = hour1.sum(hours: daysD, condition: hourBE)
     /// corrected max possible PV elec to TES
@@ -407,7 +407,7 @@ extension TunOl {
       hour1[hourBF + i] = iff(
         hour1[hourAZ + i].isZero, Double.zero,
         hour1[hourBD + i]
-          - iff(hour1[hourBC + i].isZero, Double.zero, hour1[hourBC + i] / (1 + 1 / Ratio_CSP_vs_Heater) / Heater_eff / BEsum[i] * hour1[hourBE + i])
+          - iff(hour1[hourBC + i].isZero, Double.zero, hour1[hourBC + i] / (1 + 1 / Ratio_CSP_vs_Heater) / Heater_eff / BEsum[i-1] * hour1[hourBE + i])
       )
     }
 

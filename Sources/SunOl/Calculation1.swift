@@ -1,7 +1,7 @@
 extension TunOl {
   func hour2(_ hour2: inout [Double], j: Int, hour0: [Double], hour1: [Double]) {
     let (hourJ, hourL, hourM, hourAW, hourBK, hourBM, hourBO, hourBP, hourBQ) = (26280, 43800, 52560, 8760, 131400, 148920, 166440, 175200, 183960)
-    let daysBO: [[Int]] = hour1[hourBO..<(hourBO + 8760)].indices.chunked(by: { hour1[$0] == hour1[$1] }).map { $0.map { $0 - hourBO } }
+    let daysBO: [[Int]] = hour1[hourBO+1..<(hourBO + 8760)].indices.chunked(by: { hour1[$0] == hour1[$1] }).map { $0.map { $0 - hourBO } }
    // let end = daysBO.removeLast()
    // daysBO[0].append(contentsOf: end)
 
@@ -44,7 +44,7 @@ extension TunOl {
     // IF(OR($BM6>0;PB_nom_gross_cap_ud<=0;COUNTIFS($BO$5:$BO$8764;"="&$BO6;$BF$5:$BF$8764;">0")=0);0;$BK6+((MIN(PB_nom_net_cap;MAX(PB_net_min_cap;(1+TES_aux_cons_perc)*MAX(0;BV6+$BK6-$BP6)))+PB_nom_net_cap*PB_nom_var_aux_cons_perc_net*POLY(MIN(PB_nom_net_cap;MAX(PB_net_min_cap;(1+TES_aux_cons_perc)*MAX(0;BV6+$BK6-$BP6)))/PB_nom_net_cap;PB_n2g_var_aux_el_Coeff)+PB_fix_aux_el)/(PB_gross_min_eff+(PB_nom_gross_eff-PB_gross_min_eff)/(PB_nom_net_cap-PB_net_min_cap)*(MIN(PB_nom_net_cap;MAX(0;BV6+$BK6-$BP6))-PB_net_min_cap))+MAX(0;A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons-$BQ6)*PB_Ratio_Heat_input_vs_output)*TES_aux_cons_perc+IF(AND(BV6=0;BV7>0);MAX(0;IF(COUNTIF(BV$1:BV6;"0")<PB_warm_start_duration;PB_hot_start_heat_req;PB_warm_start_heat_req)-$BQ6)*TES_aux_cons_perc;0))
     for i in 1..<8760 {
       hour2[hourBW + i] = iff(
-        or(hour1[hourBM + i] > Double.zero, PB_nom_gross_cap_ud <= Double.zero, BO_BFcount[i].isZero), Double.zero,
+        or(hour1[hourBM + i] > Double.zero, PB_nom_gross_cap_ud <= Double.zero, BO_BFcount[i-1].isZero), Double.zero,
         hour1[hourBK + i]
           + ((min(PB_nom_net_cap, max(PB_net_min_cap, (1 + TES_aux_cons_perc)
             * max(Double.zero, hour2[hourBV + i] + hour1[hourBK + i] - hour1[hourBP + i])))
@@ -108,7 +108,7 @@ extension TunOl {
     // IF(OR($BM6>0;PB_nom_gross_cap_ud<=0;COUNTIFS($BO$5:$BO$8764;"="&$BO6;$BF$5:$BF$8764;">0")=0);0;PB_Ratio_Heat_input_vs_output*MAX(0;A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons+IF($BM7=0;0;A_overall_heat_stup_cons)-$BQ6-MIN(El_boiler_cap_ud;MAX(0;BX6+$BP6-BW6-BV6)*El_boiler_eff)))
     for i in 1..<8760 {
       hour2[hourCB + i] = iff(
-        or(hour1[hourBM + i] > Double.zero, PB_nom_gross_cap_ud <= Double.zero, BO_BFcount[i].isZero), Double.zero,
+        or(hour1[hourBM + i] > Double.zero, PB_nom_gross_cap_ud <= Double.zero, BO_BFcount[i-1].isZero), Double.zero,
         PB_Ratio_Heat_input_vs_output
           * max(
             Double.zero,
@@ -121,8 +121,8 @@ extension TunOl {
     // IF(MIN(SUMIF(BO5:BO8763,"="BO6,AY5:AY8763)*Heater_eff*(1+1/Ratio_CSP_vs_Heater),TES_thermal_cap)<SUMIF(BO5:BO8763,"="BO6,BZ5:BZ8763)+SUMIF(BO5:BO8763,"="BO6,CA5:CA8763)+SUMIF(BO5:BO8763,"="BO6,CB5:CB8763),0,SUMIF(BO5:BO8763,"="BO6,BZ5:BZ8763)+SUMIF(BO5:BO8763,"="BO6,CA5:CA8763)+SUMIF(BO5:BO8763,"="BO6,CB5:CB8763))
     for i in 1..<8760 {
       hour2[hourCC + i] = iff(
-        min(AYsum[i] * Heater_eff * (1 + 1 / Ratio_CSP_vs_Heater), TES_thermal_cap) < BZsum[i] + CAsum[i] + CBsum[i], Double.zero,
-        BZsum[i] + CAsum[i] + CBsum[i])
+        min(AYsum[i-1] * Heater_eff * (1 + 1 / Ratio_CSP_vs_Heater), TES_thermal_cap) < BZsum[i-1] + CAsum[i-1] + CBsum[i-1], Double.zero,
+        BZsum[i-1] + CAsum[i-1] + CBsum[i-1])
     }
 
     /// Surplus TES energy due to op case
@@ -130,7 +130,7 @@ extension TunOl {
     // IF(CC6=0,0,MAX(0,SUMIF(BO5:BO8763,"="BO6,AY5:AY8763)*Heater_eff*(1+1/Ratio_CSP_vs_Heater)-CC6))
     for i in 1..<8760 {
       hour2[hourCD + i] = iff(
-        hour2[hourCC + i].isZero, Double.zero, max(Double.zero, AYsum[i] * Heater_eff * (1 + 1 / Ratio_CSP_vs_Heater) - hour2[hourCC + i]))
+        hour2[hourCC + i].isZero, Double.zero, max(Double.zero, AYsum[i-1] * Heater_eff * (1 + 1 / Ratio_CSP_vs_Heater) - hour2[hourCC + i]))
     }
 
     /// Peripherial PV hour PV to heater
@@ -146,15 +146,15 @@ extension TunOl {
     /// Surplus energy due to op limit after removal of peripherial hours
     let hourCF = 96360
     // MAX(0,CD6-SUMIF(BO5:BO8763,"="BO6,CE5:CE8763)*Heater_eff*(1+1/Ratio_CSP_vs_Heater))
-    for i in 1..<8760 { hour2[hourCF + i] = max(Double.zero, hour2[hourCD + i] - CEsum[i] * Heater_eff * (1 + 1 / Ratio_CSP_vs_Heater)) }
+    for i in 1..<8760 { hour2[hourCF + i] = max(Double.zero, hour2[hourCD + i] - CEsum[i-1] * Heater_eff * (1 + 1 / Ratio_CSP_vs_Heater)) }
 
     /// intermediate resulting PV elec to TES
     let hourCG = 105120
-    // IF(CD6=0,0,AY6-(CD6-CF6)/(SUMIF(BO5:BO8763,"="BO6,CE5:CE8763)*Heater_eff*(1+1/Ratio_CSP_vs_Heater))*CE6)
+    // IF(CD6=0;0;ROUND($AY6-(CD6-CF6)/(SUMIF($BO$5:$BO$8764;"="&$BO6;CE$5:CE$8764)*Heater_eff*(1+1/Ratio_CSP_vs_Heater))*CE6;5))
     for i in 1..<8760 {
       hour2[hourCG + i] = iff(
         hour2[hourCD + i].isZero, Double.zero,
-        hour1[hourAY + i] - (hour2[hourCD + i] - hour2[hourCF + i]) / (CEsum[i] * Heater_eff * (1 + 1 / Ratio_CSP_vs_Heater)) * hour2[hourCE + i])
+        round(hour1[hourAY + i] - (hour2[hourCD + i] - hour2[hourCF + i]) / (CEsum[i-1] * Heater_eff * (1 + 1 / Ratio_CSP_vs_Heater)) * hour2[hourCE + i],5))
     }
 
     let CG_BOcountNonZero = hour2.count(hours: daysBO, range: hourCG, predicate: { $0 > 0 })
@@ -166,9 +166,9 @@ extension TunOl {
       hour2[hourCH + i] = iff(
         or(hour2[hourCG + i].isZero, hour2[hourCF + i].isZero), Double.zero,
         max(
-          (hour1[hourAW + i] - hour2[hourCG + i]) / (hour2[hourCF + i] / (1 + 1 / Ratio_CSP_vs_Heater) / Heater_eff / CG_BOcountNonZero[i]),
+          (hour1[hourAW + i] - hour2[hourCG + i]) / (hour2[hourCF + i] / (1 + 1 / Ratio_CSP_vs_Heater) / Heater_eff / CG_BOcountNonZero[i-1]),
           (hour0[hourJ + i] - hour2[hourCG + i] * Heater_eff / Ratio_CSP_vs_Heater)
-            / (hour2[hourCF + i] / (1 + Ratio_CSP_vs_Heater) / CG_BOcountNonZero[i])) / CGsum[i] * hour2[hourCG + i])
+            / (hour2[hourCF + i] / (1 + Ratio_CSP_vs_Heater) / CG_BOcountNonZero[i-1])) / CGsum[i-1] * hour2[hourCG + i])
     }
     let CHsum = hour2.sum(hours: daysBO, condition: hourCH)
     /// corrected max possible PV elec to TES
@@ -178,7 +178,7 @@ extension TunOl {
       hour2[hourCI + i] = iff(
         hour2[hourCC + i].isZero, Double.zero,
         hour2[hourCG + i]
-          - iff(hour2[hourCF + i].isZero, Double.zero, hour2[hourCF + i] / (1 + 1 / Ratio_CSP_vs_Heater) / Heater_eff / CHsum[i] * hour2[hourCH + i])
+          - iff(hour2[hourCF + i].isZero, Double.zero, hour2[hourCF + i] / (1 + 1 / Ratio_CSP_vs_Heater) / Heater_eff / CHsum[i-1] * hour2[hourCH + i])
       )
     }
 
@@ -326,7 +326,7 @@ extension TunOl {
     for i in 1..<8760 {
       hour3[hourCV + i] = max(
         Double.zero,
-        iff(hour2[hourCC + i] > Double.zero, hour2[hourBX + i], Double.zero) + hour2[hourCK + i] - hour2[hourCM + i]
+        round(iff(hour2[hourCC + i] > Double.zero, hour2[hourBX + i], Double.zero) + hour2[hourCK + i] - hour2[hourCM + i]
           - hour3[hourCQ + i] - hour3[hourCT + i]
           - min(
             El_boiler_cap_ud,
@@ -334,7 +334,7 @@ extension TunOl {
               Double.zero,
               (hour3[hourCR + i] + hour3[hourCU + i]
                 - iff(hour2[hourCC + i] > Double.zero, hour2[hourCB + i] / PB_Ratio_Heat_input_vs_output, Double.zero) - hour2[hourCL + i])
-                / El_boiler_eff)))
+                / El_boiler_eff)),5))
     }
 
     /// Remaining heat after min harmonious
@@ -343,8 +343,8 @@ extension TunOl {
     for i in 1..<8760 {
       hour3[hourCW + i] = max(
         Double.zero,
-        hour2[hourCL + i] + iff(hour2[hourCC + i].isZero, Double.zero, hour2[hourCB + i] / PB_Ratio_Heat_input_vs_output) - hour3[hourCR + i]
-          - hour3[hourCU + i])
+        round(hour2[hourCL + i] + iff(hour2[hourCC + i].isZero, Double.zero, hour2[hourCB + i] / PB_Ratio_Heat_input_vs_output) - hour3[hourCR + i]
+          - hour3[hourCU + i],5))
     }
 
     /// Grid import necessary for min harm
@@ -353,7 +353,7 @@ extension TunOl {
     for i in 1..<8760 {
       hour3[hourCX + i] = max(
         Double.zero,
-        -(iff(hour2[hourCC + i] > Double.zero, hour2[hourBX + i], Double.zero) + hour2[hourCK + i] - hour2[hourCM + i]
+        round(-(iff(hour2[hourCC + i] > Double.zero, hour2[hourBX + i], Double.zero) + hour2[hourCK + i] - hour2[hourCM + i]
           - hour3[hourCQ + i] - hour3[hourCT + i]
           - min(
             El_boiler_cap_ud,
@@ -361,13 +361,13 @@ extension TunOl {
               Double.zero,
               (hour3[hourCR + i] + hour3[hourCU + i]
                 - iff(hour2[hourCC + i] > Double.zero, hour2[hourCB + i] / PB_Ratio_Heat_input_vs_output, Double.zero) - hour2[hourCL + i])
-                / El_boiler_eff))))
+                / El_boiler_eff))),5))
     }
 
     /// Remaining grid import capacity after min harm
     let hourCY = 78840
     // MAX(0;Grid_import_max_ud-CX6)
-    for i in 1..<8760 { hour3[hourCY + i] = max(Double.zero, Grid_import_max_ud - hour3[hourCX + i]) }
+    for i in 1..<8760 { hour3[hourCY + i] = max(Double.zero, round(Grid_import_max_ud - hour3[hourCX + i],5)) }
 
     /// El boiler op after min harmonious heat cons
     let hourCZ = 87600
@@ -377,14 +377,14 @@ extension TunOl {
         El_boiler_cap_ud,
         max(
           Double.zero,
-          (hour3[hourCR + i] + hour3[hourCU + i] - hour2[hourCL + i]
-            - iff(hour2[hourCC + i] > Double.zero, hour2[hourCB + i] / PB_Ratio_Heat_input_vs_output, Double.zero)) / El_boiler_eff))
+          round((hour3[hourCR + i] + hour3[hourCU + i] - hour2[hourCL + i]
+            - iff(hour2[hourCC + i] > Double.zero, hour2[hourCB + i] / PB_Ratio_Heat_input_vs_output, Double.zero)),5) / El_boiler_eff))
     }
 
     /// Remaining el boiler cap after min harmonious heat cons
     let hourDA = 96360
     // MAX(0,El_boiler_cap_ud-CZ6)
-    for i in 1..<8760 { hour3[hourDA + i] = max(Double.zero, El_boiler_cap_ud - hour3[hourCZ + i]) }
+    for i in 1..<8760 { hour3[hourDA + i] = max(Double.zero, round(El_boiler_cap_ud - hour3[hourCZ + i],5)) }
 
     /// Remaining MethSynt cap after min harmonious cons
     let hourDB = 105120
@@ -473,7 +473,7 @@ extension TunOl {
     for i in 1..<8760 {
       hour3[hourDJ + i] = max(
         Double.zero,
-        iff(hour2[hourCC + i] > Double.zero, hour2[hourBX + i], Double.zero) + hour2[hourCK + i] - hour2[hourCM + i]
+        round(iff(hour2[hourCC + i] > Double.zero, hour2[hourBX + i], Double.zero) + hour2[hourCK + i] - hour2[hourCM + i]
           - hour3[hourDH + i] - hour3[hourCT + i]
           - min(
             El_boiler_cap_ud,
@@ -481,7 +481,7 @@ extension TunOl {
               Double.zero,
               (hour3[hourDI + i] + hour3[hourCU + i]
                 - iff(hour2[hourCC + i] > Double.zero, hour2[hourCB + i] / PB_Ratio_Heat_input_vs_output, Double.zero) - hour2[hourCL + i])
-                / El_boiler_eff)))
+                / El_boiler_eff)),5))
     }
 
     /// Remaining heat after max harmonious
@@ -490,8 +490,8 @@ extension TunOl {
     for i in 1..<8760 {
       hour3[hourDK + i] = max(
         Double.zero,
-        hour2[hourCL + i] + iff(hour2[hourCC + i].isZero, Double.zero, hour2[hourCB + i] / PB_Ratio_Heat_input_vs_output) - hour3[hourDI + i]
-          - hour3[hourCU + i])
+        round(hour2[hourCL + i] + iff(hour2[hourCC + i].isZero, Double.zero, hour2[hourCB + i] / PB_Ratio_Heat_input_vs_output) - hour3[hourDI + i]
+          - hour3[hourCU + i],5))
     }
 
     /// Grid import necessary for max harm
@@ -500,7 +500,7 @@ extension TunOl {
     for i in 1..<8760 {
       hour3[hourDL + i] = max(
         Double.zero,
-        -(iff(hour2[hourCC + i] > Double.zero, hour2[hourBX + i], Double.zero) + hour2[hourCK + i] - hour2[hourCM + i]
+        round(-(iff(hour2[hourCC + i] > Double.zero, hour2[hourBX + i], Double.zero) + hour2[hourCK + i] - hour2[hourCM + i]
           - hour3[hourDH + i] - hour3[hourCT + i]
           - min(
             El_boiler_cap_ud,
@@ -508,7 +508,7 @@ extension TunOl {
               Double.zero,
               (hour3[hourDI + i] + hour3[hourCU + i]
                 - iff(hour2[hourCC + i] > Double.zero, hour2[hourCB + i] / PB_Ratio_Heat_input_vs_output, Double.zero) - hour2[hourCL + i])
-                / El_boiler_eff))))
+                / El_boiler_eff))),5))
     }
 
     /// Remaining grid import capacity after max harm
@@ -524,14 +524,14 @@ extension TunOl {
         El_boiler_cap_ud,
         max(
           Double.zero,
-          (hour3[hourDI + i] + hour3[hourCU + i] - hour2[hourCL + i]
-            - iff(hour2[hourCC + i] > Double.zero, hour2[hourCB + i] / PB_Ratio_Heat_input_vs_output, Double.zero)) / El_boiler_eff))
+          round((hour3[hourDI + i] + hour3[hourCU + i] - hour2[hourCL + i]
+            - iff(hour2[hourCC + i] > Double.zero, hour2[hourCB + i] / PB_Ratio_Heat_input_vs_output, Double.zero)),5) / El_boiler_eff))
     }
 
     /// Remaining el boiler cap after max harmonious heat cons
     let hourDO = 219000
     // MAX(0,El_boiler_cap_ud-DN6)
-    for i in 1..<8760 { hour3[hourDO + i] = max(Double.zero, El_boiler_cap_ud - hour3[hourDN + i]) }
+    for i in 1..<8760 { hour3[hourDO + i] = max(Double.zero, round(El_boiler_cap_ud - hour3[hourDN + i],5)) }
 
     for i in 1..<8760 {
       /// Remaining MethSynt cap after max harmonious cons
