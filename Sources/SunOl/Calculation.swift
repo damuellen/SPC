@@ -395,9 +395,9 @@ extension TunOl {
       hour1[hourBE + i] = iff(
         or(hour1[hourBD + i].isZero, hour1[hourBC + i].isZero), Double.zero,
         max(
-          (hour1[hourAW + i] - hour1[hourBD + i]) / (hour1[hourBC + i] / (1 + 1 / Ratio_CSP_vs_Heater) / Heater_eff / BDcountNonZero[i]),
+          (hour1[hourAW + i] - hour1[hourBD + i]) / (hour1[hourBC + i] / (1 + 1 / Ratio_CSP_vs_Heater) / Heater_eff / BDcountNonZero[i-1]),
           (hour0[hourJ + i] - hour1[hourBD + i] * Heater_eff / Ratio_CSP_vs_Heater)
-            / (hour1[hourBC + i] / (1 + Ratio_CSP_vs_Heater) / BDcountNonZero[i])) / BDsum[i-1] * hour1[hourBD + i])
+            / (hour1[hourBC + i] / (1 + Ratio_CSP_vs_Heater) / BDcountNonZero[i-1])) / BDsum[i-1] * hour1[hourBD + i])
     }
     let BEsum = hour1.sum(hours: daysD, condition: hourBE)
     /// corrected max possible PV elec to TES
