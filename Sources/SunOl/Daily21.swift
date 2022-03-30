@@ -1,6 +1,6 @@
 
 extension TunOl {
-  func day(hour0: [Double]) -> [Double] {
+  func day26(hour0: [Double]) -> [Double] {
     let daysU: [[Int]] = hour0[113881..<(113880 + 8760)].indices.chunked(by: { hour0[$0] == hour0[$1] })
       .map { $0.map { $0 - 113880 } }
    // let end = daysU.removeLast()
@@ -1715,7 +1715,7 @@ extension TunOl {
     }
 
     /// Balance of heat during harm op period
-    let dayJN = 46355
+    let dayJN = 40515
     // JK6+JM6-JJ6
     for i in 0..<365 { day7[dayJN + i] = day7[dayJK + i] + day7[dayJM + i] - day7[dayJJ + i] }
 

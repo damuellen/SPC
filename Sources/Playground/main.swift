@@ -95,7 +95,8 @@ struct Command: ParsableCommand {
       print(name)
       #endif
       ws.table(range: [0, 0, r, labels.count - 1], header: labels)
-      names.enumerated().forEach { column, name in let chart = wb.addChart(type: .scatter)  //.set(y_axis: 1000...2500)
+      names.enumerated().forEach { column, name in 
+        let chart = wb.addChart(type: .scatter) //.set(y_axis: 1000...2500)
         chart.addSeries().set(marker: 5, size: 4)
         .values(sheet: ws, range: [1, 17, r, 17])
         .categories(sheet: ws, range: [1, column, r, column])
@@ -144,7 +145,7 @@ struct Command: ParsableCommand {
       #if os(Windows)
       MessageBox(text: "Start MGOADE Optimizer", caption: "TunOl")
       #endif
-      let a = MGOADE(group: !noGroups, n: n ?? 150, maxIter: iterations ?? 10, bounds: parameter.ranges, fitness: fitness)
+      let a = MGOADE(group: !noGroups, n: n ?? 150, maxIter: iterations ?? 30, bounds: parameter.ranges, fitness: fitness)
       a.forEach { row in r += 1; ws.write(row, row: r) }
       if r < 2 { return }
       let (x,y) = (12, 17)

@@ -259,7 +259,7 @@ public struct TunOl {
   var Grid_import_yes_no_BESS_strategy: Double = 1
   var Grid_import_yes_no_PB_strategy: Double = 1
 
-  init(_ parameter: [Double]) {
+  init?(_ parameter: [Double]) {
     if !parameter.isEmpty {
       self.CSP_loop_nr_ud = parameter[0]
       self.TES_full_load_hours_ud = parameter[1]
@@ -304,12 +304,12 @@ public struct TunOl {
 1.89024744899734E+03,
 -2.19970897604758E+01,
 7.04670199599962E-01].reversed()
-//Polynomial.fit(x: Array(eff2[..<20]), y: Array(eff1[..<20]), order: 7)!.coefficients
+// self.LL_Coeff = Polynomial.fit(x: Array(eff2[..<20]), y: Array(eff1[..<20]), order: 7)!.coefficients
     self.HL_Coeff = [2.48832703984911E-01,
 -3.98641131275815E-01,
 2.14353590144310E-01,
 9.22111172341115E-01].reversed()
-//Polynomial.fit(x: Array(eff2[15...]), y: Array(eff1[15...]), order: 3)!.coefficients
+// self.HL_Coeff = Polynomial.fit(x: Array(eff2[15...]), y: Array(eff1[15...]), order: 3)!.coefficients
 
     let PB_grs_el_cap_min_perc = PB_Ref_25p_gross_cap_max_aux_heat / PB_Ref_nom_gross_cap
     self.CSP_Cold_HTF_T = TES_cold_tank_T + SF_heat_exch_approach_temp
@@ -433,7 +433,6 @@ public struct TunOl {
       PB_nom_gross_cap_ud <= Double.zero, Double.zero,
       PB_gross_min_cap - PB_fix_aux_el - PB_nom_var_aux_cons * POLY(PB_gross_min_cap / PB_nom_gross_cap_ud, PB_g2n_var_aux_el_Coeff))
     self.MethDist_HydrogenO_min_prod = MethDist_H2O_nom_prod * MethDist_cap_min_perc
-
     self.Overall_harmonious_min_perc = Overall_harmonious_max_perc / MethDist_harmonious_max_perc * MethDist_harmonious_min_perc
     self.Overall_harmonious_var_min_cons =
       EY_harmonious_min_perc * (EY_var_net_nom_cons_ud + EY_var_aux_nom_cons) + MethSynt_harmonious_min_perc * MethSynt_var_nom_cons
@@ -622,5 +621,12 @@ public struct TunOl {
       self.PB_nom_var_aux_cons_perc_net = var_aux_cons[0] / net_electrical_output[0]
       self.TES_thermal_cap = TES_full_load_hours_ud * PB_var_heat_max_cons
       self.TES_salt_mass = TES_thermal_cap * 1000 * 3600 / (h_SS(Heater_outlet_T) - h_SS(TES_cold_tank_T)) / 1000 * (1 + TES_dead_mass_ratio)
+
+      guard self.Overall_harmonious_min_perc < self.Overall_harmonious_max_perc,
+        self.equiv_harmonious_min_perc[0] < self.equiv_harmonious_max_perc[0],
+        self.equiv_harmonious_min_perc[1] < self.equiv_harmonious_max_perc[1],
+        self.equiv_harmonious_min_perc[2] < self.equiv_harmonious_max_perc[2],
+        self.equiv_harmonious_min_perc[3] < self.equiv_harmonious_max_perc[3]
+      else { return nil }
   }
 }

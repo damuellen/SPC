@@ -5,7 +5,7 @@ public let source = DispatchSource.makeSignalSource(signal: SIGINT, queue: .glob
 public let semaphore = DispatchSemaphore(value: 0)
 
 public func fitness(values: [Double]) -> [Double] {
-  let model = TunOl(values)
+  guard let model = TunOl(values) else { return [Double.infinity] + values }
   let costs = Costs(model)
   //dump(costs)
   //TunOl.Grid_import_yes_no_BESS_strategy = 0
@@ -13,8 +13,8 @@ public func fitness(values: [Double]) -> [Double] {
   //dump(model)
   let hour0 = model.hour0(TunOl.Q_Sol_MW_thLoop, TunOl.Reference_PV_plant_power_at_inverter_inlet_DC, TunOl.Reference_PV_MV_power_at_transformer_outlet)
   let hour1 = model.hour1(hour0: hour0)
-  let day0 = model.day(hour0: hour0)
-  let day6 = model.day(hour0: hour0)
+  let day0 = model.day0(hour0: hour0)
+  let day6 = model.day26(hour0: hour0)
   var day = [[Double]]()
 
   var hour2 = [Double](repeating: Double.zero, count: 166440 + 8760)
@@ -63,6 +63,9 @@ public func fitness(values: [Double]) -> [Double] {
     }
   }
   let LCOM = costs.LCOM(meth_produced_MTPH: meth_produced_MTPH_sum, elec_from_grid: elec_from_grid_sum, elec_to_grid: elec_to_grid_MTPH_sum)
+  if LCOM.isInfinite || meth_produced_MTPH_sum.isZero {
+    return [Double.infinity] + values
+  }
   return [LCOM] + values
 }
 
@@ -94,7 +97,7 @@ public func MGOADE(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Doubl
     let result = fitness(grassHopperPositions[i])
     grassHopperFitness[i] = result[0]
   }
-  print(-date2.timeIntervalSinceNow / Double(grassHopperPositions.count))
+  // print(-date2.timeIntervalSinceNow / Double(grassHopperPositions.count))
   for g in groups.indices {
     // Find the best grasshopper per group (target) in the first population
     for i in groups[g].indices {
@@ -539,13 +542,14 @@ struct Results {
 
 func labeled(values: [Double]) -> String {
   let labels = [
-    "BESS_cap", "CCU_C_O_2_nom_prod", "C_O_2_storage_cap", "CSP_loop_nr", "El_boiler_cap", "EY_var_net_nom_cons", "Grid_export_max",
-    "Grid_import_max", "Hydrogen_storage_cap", "Heater_cap", "MethDist_Meth_nom_prod", "MethSynt_RawMeth_nom_prod", "PB_nom_gross_cap", "PV_AC_cap",
-    "PV_DC_cap", "RawMeth_storage_cap", "TES_full_load_hours",
+    "CSP_loop_nr", "TES_full_load_hours", "PB_nom_gross_cap", "PV_AC_cap", "PV_DC_cap", "EY_var_net_nom_cons", "Hydrogen_storage_cap", "Heater_cap",
+    "CCU_C_O_2_nom_prod", "C_O_2_storage_cap", "MethSynt_RawMeth_nom_prod", "RawMeth_storage_cap", "MethDist_Meth_nom_prod", "El_boiler_cap",
+    "BESS_cap", "Grid_export_max", "Grid_import_max",
   ]
 
   return zip(labels, values).map { l, v in "\(l.text(.red)) \(String(format: "%.1f", v).text(.red))" }.joined(separator: " ")
 }
+
 
 protocol Labeled { var labels: [String] { get } }
 extension Labeled { var labels: [String] { Mirror(reflecting: self).children.compactMap(\.label) } }

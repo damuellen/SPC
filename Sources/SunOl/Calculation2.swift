@@ -251,10 +251,6 @@ extension TunOl {
     let ENsum = hour4.sum(hours: daysBO, condition: hourEN)
     // IF(OR(EN6=0,EM6=0),0,MAX((AW6-EN6)/(EM6/(1+1/Ratio_CSP_vs_Heater)/Heater_eff/COUNTIFS(BO5:BO8763,"="BO6,EN5:EN8763,">0")),(J6-EN6*Heater_eff/Ratio_CSP_vs_Heater)/(EM6/(1+Ratio_CSP_vs_Heater)/COUNTIFS(BO5:BO8763,"="BO6,EN5:EN8763,">0")))/SUMIF(BO5:BO8763,"="BO6,EN5:EN8763)*EN6)
     for i in 1..<8760 {
-      if i == 554 {
-        print(hour1[hourAW + i], hour4[hourEM + i])
-      }
-      let c = EN_BOcountNonZero[i-1]
       let a = (hour1[hourAW + i] - hour4[hourEN + i])
             / (hour4[hourEM + i] / (1 + 1 / Ratio_CSP_vs_Heater) / Heater_eff / EN_BOcountNonZero[i-1])
       let b = (hour0[hourJ + i] - hour4[hourEN + i] * Heater_eff / Ratio_CSP_vs_Heater)

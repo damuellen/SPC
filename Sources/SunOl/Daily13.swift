@@ -749,10 +749,6 @@ extension TunOl {
       let x13 = (x4 - x5 - iff(x00 - x2 > 0, x00 - x2, 0) / El_boiler_eff - x3 / BESS_chrg_eff)
 
       day7[ddKR + i] = iff(day7[ddKI + i].isZero, 0, round(x1 + iff(x13 < 0, x13, 0), 5))
-      if i == 48, j == 2 {
-        print(day7[ddKR + i])
-      }
-
     }
 
     /// Surplus grid import cap after max day harmonious and opti night op prep
