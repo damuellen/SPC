@@ -737,31 +737,22 @@ extension TunOl {
     let ddKR = 18615
     // KR=IF(KI6=0,0,ROUND((GE6+(IA6-GE6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-MAX(0,-((FS6+(HO6-FS6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-($Z6+($AA6-$Z6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-MAX(0,($AB6+($AC6-$AB6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(FV6+(HR6-FV6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)))/El_boiler_eff-(FR6+(HN6-FR6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))/BESS_chrg_eff)),5))
     for i in 0..<365 {
-    day7[ddKR + i] = iff(
-      day7[ddKI + i].isZero, 0,
-      round(
-        (day5[dayGE + i]
-          + (day6[dayIA + i] - day5[dayGE + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
-          - max(
-            Double.zero,
-            -((day5[dayFS + i]
-              + (day6[dayHO + i] - day5[dayFS + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
-              - (day1[dayZ + 1]
-                + (day1[dayAA + i] - day1[dayZ + i]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j])
-                  * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
-              - max(
-                Double.zero,
-                (day1[dayAB + i]
-                  + (day1[dayAC + i] - day1[dayAB + i]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j])
-                    * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
-                  - (day5[dayFV + i]
-                    + (day6[dayHR + i] - day5[dayFV + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j])
-                      * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
-              ) / El_boiler_eff
-              - (day5[dayFR + i]
-                + (day6[dayHN + i] - day5[dayFR + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
-                / BESS_chrg_eff)
-          ), 5))
+
+      let x1 = day5[dayGE + i] + (day6[dayIA + i] - day5[dayGE + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j])
+      let x2 = day5[dayFV + i] + (day6[dayHR + i] - day5[dayFV + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j])
+      let x3 = day5[dayFR + i] + (day6[dayHN + i] - day5[dayFR + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j])
+      let x4 = day5[dayFS + i] + (day6[dayHO + i] - day5[dayFS + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j])
+      let x5 = day1[dayZ + i] + (day1[dayAA + i] - day1[dayZ + i]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j])
+
+      let x00 = day1[dayAB + i] + (day1[dayAC + i] - day1[dayAB + i]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j])
+
+      let x13 = (x4 - x5 - iff(x00 - x2 > 0, x00 - x2, 0) / El_boiler_eff - x3 / BESS_chrg_eff)
+
+      day7[ddKR + i] = iff(day7[ddKI + i].isZero, 0, round(x1 + iff(x13 < 0, x13, 0), 5))
+      if i == 48, j == 2 {
+        print(day7[ddKR + i])
+      }
+
     }
 
     /// Surplus grid import cap after max day harmonious and opti night op prep
@@ -777,7 +768,7 @@ extension TunOl {
             Double.zero,
             -((day5[dayFT + i]
               + (day6[dayHP + i] - day5[dayFT + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
-              - (day1[dayZ + 1]
+              - (day1[dayZ + i]
                 + (day1[dayAA + i] - day1[dayZ + i]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j])
                   * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
               - (max(

@@ -13,7 +13,7 @@ class SunOlTests: XCTestCase {
     }
     let csv_ref = CSV(atPath: "/workspaces/SPC/calc.csv", separator: "\t")!
     let csv_ref2 = CSV(atPath: "/workspaces/SPC/daily1.csv", separator: "\t")!
-    // let csv_ref3 = CSV(atPath: "/workspaces/SPC/daily2.csv", separator: "\t")!
+    let csv_ref3 = CSV(atPath: "/workspaces/SPC/daily2.csv", separator: "\t")!
 
     func compare(_ array: [Double], letter: String, start index: Int) {
       let index = index
@@ -33,7 +33,7 @@ class SunOlTests: XCTestCase {
       let ref = csv_ref2[letter]
       var correct = true
       for i in 0..<364 {
-        if abs(ref[i] - array[index + i]) > 0.2 {
+        if abs(ref[i] - array[index + i]) > 0.1 {
           correct = false
           print(letter, i, ref[i], "not equal", array[index + i])
         }
@@ -42,16 +42,16 @@ class SunOlTests: XCTestCase {
     }
 
     func compareDay2(_ array: [Double], letter: String, start index: Int) {
-      // let index = index
-      // let ref = csv_ref3[letter]
-      // var correct = true
-      // for i in 0..<365 {
-      //   if abs(ref[i] - array[index+i]) > 0.1 {
-      //     correct = false
-      //     print(letter, i, ref[i], "not equal", array[index+i])
-      //   }
-      // }
-      // if correct { print(letter, "all equal") }
+      let index = index
+      let ref = csv_ref3[letter]
+      var correct = true
+      for i in 0..<364 {
+        if abs(ref[i] - array[index + i]) > 0.1 {
+          correct = false
+          print(letter, i, ref[i], "not equal", array[index + i])
+        }
+      }
+      if correct { print(letter, "all equal") }
     }
 
     TunOl.Q_Sol_MW_thLoop = [0] + csv["csp"]
@@ -139,6 +139,42 @@ class SunOlTests: XCTestCase {
 
     let day6 = model.day(hour0: hour0)
     print("Daily 2")
+    compareDay2(day6, letter: "DR", start: 0)
+    compareDay2(day6, letter: "DS", start: 365)
+    compareDay2(day6, letter: "DT", start: 730)
+    compareDay2(day6, letter: "DU", start: 1095)
+    compareDay2(day6, letter: "DV", start: 1460)
+    compareDay2(day6, letter: "DW", start: 1825)
+    compareDay2(day6, letter: "DX", start: 2190)
+    compareDay2(day6, letter: "DY", start: 2555)
+    compareDay2(day6, letter: "DZ", start: 2920)
+    compareDay2(day6, letter: "EA", start: 3285)
+    compareDay2(day6, letter: "EB", start: 3650)
+    compareDay2(day6, letter: "EC", start: 4015)
+    compareDay2(day6, letter: "ED", start: 4380)
+    compareDay2(day6, letter: "EE", start: 4745)
+    compareDay2(day6, letter: "EF", start: 5110)
+    compareDay2(day6, letter: "EG", start: 5475)
+    compareDay2(day6, letter: "EH", start: 5840)
+    compareDay2(day6, letter: "EI", start: 6205)
+    compareDay2(day6, letter: "EJ", start: 6570)
+    compareDay2(day6, letter: "EK", start: 6935)
+    compareDay2(day6, letter: "EL", start: 7300)
+    compareDay2(day6, letter: "EM", start: 7665)
+    compareDay2(day6, letter: "EN", start: 8030)
+    compareDay2(day6, letter: "EO", start: 8395)
+    compareDay2(day6, letter: "EP", start: 8760)
+    compareDay2(day6, letter: "EQ", start: 9125)
+    compareDay2(day6, letter: "ER", start: 9490)
+    compareDay2(day6, letter: "ES", start: 9855)
+    compareDay2(day6, letter: "ET", start: 10220)
+    compareDay2(day6, letter: "EU", start: 10585)
+    compareDay2(day6, letter: "EV", start: 10950)
+    compareDay2(day6, letter: "EW", start: 11315)
+    compareDay2(day6, letter: "EX", start: 11680)
+    compareDay2(day6, letter: "EY", start: 12045)
+    compareDay2(day6, letter: "EZ", start: 12410)
+    compareDay2(day6, letter: "FA", start: 12775)
     // Array(day6[0..<5840]).head(121, steps: 365)
     // print("Daily 2")
     // Array(day6[5840...]).head(137, steps: 365)
@@ -152,7 +188,7 @@ class SunOlTests: XCTestCase {
     var day15 = [Double](repeating: Double.zero, count: 17_155)
     var day16 = [Double](repeating: Double.zero, count: 17_155)
     var day17 = [Double](repeating: Double.zero, count: 46_720)
-    var day27 = [Double](repeating: Double.zero, count: 45990 + 365)
+    var day27 = [Double](repeating: Double.zero, count: 45990 + 1095)
     var day21 = [Double](repeating: Double.zero, count: 9_855)
 
     for j in 0..<4 {
@@ -178,10 +214,10 @@ class SunOlTests: XCTestCase {
         compare(hour2, letter: "CL", start: 148920)
         compare(hour2, letter: "CM", start: 157680)
         compare(hour2, letter: "CN", start: 166440)
-        print("Hour Case", j)// hour2.head(72, steps: 8760)
+        print("Hour Case", j)  // hour2.head(72, steps: 8760)
       }
       if j == 1 {
-        print("Hour Case", j)// hour2.head(184, steps: 8760)
+        print("Hour Case", j)  // hour2.head(184, steps: 8760)
       }
       if j == 2 {
         compare(hour2, letter: "KK", start: 0)
@@ -204,7 +240,7 @@ class SunOlTests: XCTestCase {
         compare(hour2, letter: "LB", start: 148920)
         compare(hour2, letter: "LC", start: 157680)
         compare(hour2, letter: "LD", start: 166440)
-        print("Hour Case", j)// hour2.head(296, steps: 8760)
+        print("Hour Case", j)  // hour2.head(296, steps: 8760)
       }
 
       model.hour3(&hour3, j: j, hour0: hour0, hour1: hour1, hour2: hour2)
@@ -329,9 +365,24 @@ class SunOlTests: XCTestCase {
 
       model.night(case: j, day1: &day1, hour3: hour3, hour4: hour4)
       print("Daily Case", j)
-      // Array(day1[0..<5840]).head(2, steps: 365)
+      // if j == 2 { Array(day1[8760..<9490]).head(26, steps: 365) }
       // print("Daily Case", j)
       // Array(day1[5840...]).head(19, steps: 365)
+      if j == 0 {
+        compareDay(day1, letter: "Z", start: 8030)
+        compareDay(day1, letter: "AA", start: 8395)
+        compareDay(day1, letter: "AB", start: 8760)
+        compareDay(day1, letter: "AC", start: 9125)
+        compareDay(day1, letter: "AM", start: 12775)
+      }
+
+      if j == 2 {
+        compareDay(day1, letter: "CX", start: 8030)
+        compareDay(day1, letter: "CY", start: 8395)
+        compareDay(day1, letter: "CZ", start: 8760)
+        compareDay(day1, letter: "DA", start: 9125)
+        compareDay(day1, letter: "DK", start: 12775)
+      }
 
       model.day15(&day15, hour0: hour0, hour2: hour2, hour3: hour3, day11: day1)
       if j == 0 {
@@ -340,12 +391,12 @@ class SunOlTests: XCTestCase {
 
         compareDay(day15, letter: "FR", start: 6935)
         compareDay(day15, letter: "FS", start: 7300)
-        print("Daily Case", j)// Array(day15[0..<9125]).head(154, steps: 365)
+        print("Daily Case", j)  // Array(day15[0..<9125]).head(154, steps: 365)
         // print("Daily Case", j)
         // Array(day15[9125...]).head(179, steps: 365)
       }
       if j == 1 {
-        print("Daily Case", j)// Array(day15[0..<9125]).head(376, steps: 365)
+        print("Daily Case", j)  // Array(day15[0..<9125]).head(376, steps: 365)
         // print("Daily Case", j)
         // Array(day15[9125...]).head(401, steps: 365)
       }
@@ -473,7 +524,7 @@ class SunOlTests: XCTestCase {
         compareDay(day17, letter: "KJ", start: 15695)
         compareDay(day17, letter: "KK", start: 16060)
         compareDay(day17, letter: "KZ", start: 21535)
-        print("Daily 1 Case", j)// Array(day17[..<7665]).head(250, steps: 365)
+        print("Daily 1 Case", j)  // Array(day17[..<7665]).head(250, steps: 365)
         // print("Daily 1 Case", j)
         // Array(day17[7665..<13505]).head(272, steps: 365)
         // print("Daily 1 Case", j)
@@ -594,33 +645,114 @@ class SunOlTests: XCTestCase {
         compareDay2(day27, letter: "FV", start: 6935)
         compareDay2(day27, letter: "FW", start: 7300)
         compareDay2(day27, letter: "FX", start: 7665)
+        compareDay2(day27, letter: "FY", start: 8030)
+        compareDay2(day27, letter: "FZ", start: 8395)
+        compareDay2(day27, letter: "GA", start: 8760)
+        compareDay2(day27, letter: "GB", start: 9125)
+        compareDay2(day27, letter: "GC", start: 9490)
+
+        compareDay2(day27, letter: "GE", start: 9855)
+        compareDay2(day27, letter: "GF", start: 10220)
+        compareDay2(day27, letter: "GG", start: 10585)
+        compareDay2(day27, letter: "GH", start: 10950)
+        compareDay2(day27, letter: "GI", start: 11315)
+        compareDay2(day27, letter: "GJ", start: 11680)
+        compareDay2(day27, letter: "GK", start: 12045)
+        compareDay2(day27, letter: "GL", start: 12410)
+        compareDay2(day27, letter: "GM", start: 12775)
+        compareDay2(day27, letter: "GN", start: 13140)
+        compareDay2(day27, letter: "GO", start: 13505)
+        compareDay2(day27, letter: "GP", start: 13870)
+        compareDay2(day27, letter: "GQ", start: 14235)
+        compareDay2(day27, letter: "GR", start: 14600)
+        compareDay2(day27, letter: "GS", start: 14965)
+        compareDay2(day27, letter: "GT", start: 15330)
+        compareDay2(day27, letter: "GU", start: 15695)
+        compareDay2(day27, letter: "GV", start: 16060)
+        compareDay2(day27, letter: "GW", start: 16425)
+        compareDay2(day27, letter: "GX", start: 16790)
+
+        compareDay2(day27, letter: "GZ", start: 17155)
+        compareDay2(day27, letter: "HA", start: 17520)
+        compareDay2(day27, letter: "HB", start: 17885)
+        compareDay2(day27, letter: "HC", start: 18250)
+        compareDay2(day27, letter: "HD", start: 18615)
+        compareDay2(day27, letter: "HE", start: 18980)
+        compareDay2(day27, letter: "HF", start: 19345)
+        compareDay2(day27, letter: "HG", start: 19710)
+        compareDay2(day27, letter: "HH", start: 20075)
+        compareDay2(day27, letter: "HI", start: 20440)
+        compareDay2(day27, letter: "HJ", start: 20805)
+        compareDay2(day27, letter: "HK", start: 21170)
+        compareDay2(day27, letter: "HL", start: 21535)
+        compareDay2(day27, letter: "HM", start: 21900)
+        compareDay2(day27, letter: "HN", start: 22265)
+        compareDay2(day27, letter: "HO", start: 22630)
+        compareDay2(day27, letter: "HP", start: 22995)
+        compareDay2(day27, letter: "HQ", start: 23360)
+        compareDay2(day27, letter: "HR", start: 23725)
+        compareDay2(day27, letter: "HS", start: 24090)
+
+        compareDay2(day27, letter: "HU", start: 24455)
+        compareDay2(day27, letter: "HV", start: 24820)
+        compareDay2(day27, letter: "HW", start: 25185)
+        compareDay2(day27, letter: "HX", start: 25550)
+        compareDay2(day27, letter: "HY", start: 25915)
+        compareDay2(day27, letter: "HZ", start: 26280)
+        compareDay2(day27, letter: "IA", start: 26645)
+        compareDay2(day27, letter: "IB", start: 27010)
+        compareDay2(day27, letter: "IC", start: 27375)
+        compareDay2(day27, letter: "ID", start: 27740)
+        compareDay2(day27, letter: "IE", start: 28105)
+        compareDay2(day27, letter: "IF", start: 28470)
+        compareDay2(day27, letter: "IG", start: 28835)
+        compareDay2(day27, letter: "IH", start: 29200)
+        compareDay2(day27, letter: "II", start: 29565)
+        compareDay2(day27, letter: "IJ", start: 29930)
+        compareDay2(day27, letter: "IK", start: 30295)
+        compareDay2(day27, letter: "IL", start: 30660)
+        compareDay2(day27, letter: "IM", start: 31025)
+        compareDay2(day27, letter: "IN", start: 31390)
+        compareDay2(day27, letter: "IO", start: 31755)
+        compareDay2(day27, letter: "IP", start: 32120)
+        compareDay2(day27, letter: "IQ", start: 32485)
+        compareDay2(day27, letter: "IR", start: 32850)
+        compareDay2(day27, letter: "IS", start: 33215)
+        compareDay2(day27, letter: "IT", start: 33580)
         compareDay2(day27, letter: "IU", start: 33945)
+        compareDay2(day27, letter: "IV", start: 34310)
+        compareDay2(day27, letter: "IW", start: 34675)
+        compareDay2(day27, letter: "IX", start: 35040)
+
+        compareDay2(day27, letter: "IZ", start: 35405)
+        compareDay2(day27, letter: "JA", start: 35770)
+        compareDay2(day27, letter: "JB", start: 36135)
+        compareDay2(day27, letter: "JC", start: 36500)
+        compareDay2(day27, letter: "JD", start: 36865)
+        compareDay2(day27, letter: "JE", start: 37230)
+        compareDay2(day27, letter: "JF", start: 37595)
+        compareDay2(day27, letter: "JG", start: 37960)
+        compareDay2(day27, letter: "JH", start: 38325)
+
+        compareDay2(day27, letter: "JN", start: 40515)
+        compareDay2(day27, letter: "JO", start: 40880)
+        compareDay2(day27, letter: "JP", start: 41245)
+        compareDay2(day27, letter: "JQ", start: 41610)
+        compareDay2(day27, letter: "JR", start: 41975)
+        compareDay2(day27, letter: "JS", start: 42340)
+        compareDay2(day27, letter: "JT", start: 42705)
+        compareDay2(day27, letter: "JU", start: 43070)
+        compareDay2(day27, letter: "JV", start: 43435)
+        compareDay2(day27, letter: "JW", start: 43800)
+        compareDay2(day27, letter: "JX", start: 44165)
+        compareDay2(day27, letter: "JY", start: 44530)
+        compareDay2(day27, letter: "JZ", start: 44895)
+        compareDay2(day27, letter: "KA", start: 45260)
+        compareDay2(day27, letter: "KB", start: 45625)
+        compareDay2(day27, letter: "KC", start: 45990)
+
       }
-      if j == 2 { compareDay2(day27, letter: "UD", start: 33945) }
-      if j == 3 {
-        compareDay2(day27, letter: "UI", start: 0)
-        compareDay2(day27, letter: "UJ", start: 365)
-        compareDay2(day27, letter: "UK", start: 730)
-        compareDay2(day27, letter: "UL", start: 1095)
-        compareDay2(day27, letter: "UM", start: 1460)
-        compareDay2(day27, letter: "UN", start: 1825)
-        compareDay2(day27, letter: "UO", start: 2190)
-        compareDay2(day27, letter: "UP", start: 2555)
-        compareDay2(day27, letter: "UQ", start: 2920)
-        compareDay2(day27, letter: "UR", start: 3285)
-        compareDay2(day27, letter: "US", start: 3650)
-        compareDay2(day27, letter: "UT", start: 4015)
-        compareDay2(day27, letter: "UU", start: 4380)
-        compareDay2(day27, letter: "UV", start: 4745)
-        compareDay2(day27, letter: "UW", start: 5110)
-        compareDay2(day27, letter: "UX", start: 5475)
-        compareDay2(day27, letter: "UY", start: 5840)
-        compareDay2(day27, letter: "UZ", start: 6205)
-        compareDay2(day27, letter: "VA", start: 6570)
-        compareDay2(day27, letter: "VB", start: 6935)
-        compareDay2(day27, letter: "VC", start: 7300)
-        compareDay2(day27, letter: "VD", start: 7665)
-      }
+
       print("Daily 2 Case", j)
       // Array(day27[..<9855]).head(121, steps: 365)
       // print("Daily 2 Case", j)
@@ -651,9 +783,9 @@ class SunOlTests: XCTestCase {
       let cases = day.indices.map { i in
         costs.LCOM(meth_produced_MTPH: day[i][d] * 365.0, elec_from_grid: day[i][d + 365 + 365] * 365.0, elec_to_grid: day[i][d + 365] * 365.0)
       }
-      let best = cases.indices.filter { cases[$0].isFinite }.filter { cases[$0] > 0 }.sorted().first
+      let best = cases.indices.filter { cases[$0].isFinite }.filter { cases[$0] > 0 }.sorted { cases[$0] < cases[$1] }.first
       if let best = best {
-        // print(d, names[best], cases, day[best][d])
+        print(d, names[best], cases, day[best][d])
         meth_produced_MTPH_sum += day[best][d]
         elec_from_grid_sum += day[best][d + 365 + 365]
         elec_to_grid_MTPH_sum += day[best][d + 365]

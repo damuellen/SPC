@@ -60,7 +60,7 @@ extension TunOl {
     let U_AH_AMsum = hour0.sumOf(hourAM, days: daysU, condition: hourAH, predicate: { $0 > 0 })
     let U_S_AEsum = hour0.sumOf(hourAE, days: daysU, condition: hourS, predicate: { $0 > 0 })
     let U_AH_ASsum = hour0.sumOf(hourAS, days: daysU, condition: hourAH, predicate: { $0 > 0 })
-    // let U_S_AEsumZero = hour0.sumOf(hourAE, days: daysU, condition: hourS, predicate: { $0.isZero })
+    let U_S_AEsumZero = hour0.sumOf(hourAE, days: daysU, condition: hourS, predicate: { $0.isZero })
     let U_S_Zsum = hour0.sumOf(hourZ, days: daysU, condition: hourS, predicate: { $0 > 0 })
     let U_S_ANsum = hour0.sumOf(hourAN, days: daysU, condition: hourS, predicate: { $0 > 0 })
     let U_S_AAsum = hour0.sumOf(hourAA, days: daysU, condition: hourS, predicate: { $0 > 0 })
@@ -221,7 +221,7 @@ extension TunOl {
     /// Max elec to BESS for night prep after min harm op outside harm op period
     let dayEM = 7665
     // MIN(SUMIFS(CalculationAE5:AE8763,CalculationU5:U8763,"="A6,CalculationS5:S8763,"=0"),BESS_cap_ud/BESS_chrg_eff)
-    for i in 0..<365 { day6[dayEM + i] = min(U_S_AEsum[i], BESS_cap_ud / BESS_chrg_eff) }
+    for i in 0..<365 { day6[dayEM + i] = min(U_S_AEsumZero[i], BESS_cap_ud / BESS_chrg_eff) }
 
     /// El boiler op for min harm during harm op period
     let dayEN = 8030
@@ -1715,7 +1715,7 @@ extension TunOl {
     }
 
     /// Balance of heat during harm op period
-    let dayJN = 40515
+    let dayJN = 46355
     // JK6+JM6-JJ6
     for i in 0..<365 { day7[dayJN + i] = day7[dayJK + i] + day7[dayJM + i] - day7[dayJJ + i] }
 
