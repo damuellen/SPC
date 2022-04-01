@@ -77,7 +77,7 @@ protocol MeteoDataFile {
 private struct MET: MeteoDataFile {
   let name: String
   let metadata: [String]
-  let csv: CSV
+  let csv: CSVReader
 
   init(_ url: URL) throws {
     let rawData = try Data(contentsOf: url, options: [.mappedIfSafe, .uncached])
@@ -104,7 +104,7 @@ private struct MET: MeteoDataFile {
       let line = hasCR ? line.dropLast() : line
       return String(decoding: line, as: UTF8.self)
     }
-    guard let csv = CSV(data: lines[10])
+    guard let csv = CSVReader(data: lines[10])
     else { throw MeteoDataFileError.empty }
     self.csv = csv
   }
@@ -160,7 +160,7 @@ extension MeteoDataFileError: CustomStringConvertible {
 private struct TMY: MeteoDataFile {
   let name: String
   let metadata: [Double]
-  let csv: CSV
+  let csv: CSVReader
 
   init(_ url: URL) throws {
     let rawData = try Data(contentsOf: url, options: [.mappedIfSafe, .uncached])
@@ -179,8 +179,8 @@ private struct TMY: MeteoDataFile {
 
     let lines = rawData.split(separator: newLine, maxSplits: 1)
     guard lines.endIndex > 1,
-          let metadata = CSV(data: lines[0])?.dataRows[0],
-          let csv = CSV(data: lines[1])
+          let metadata = CSVReader(data: lines[0])?.dataRows[0],
+          let csv = CSVReader(data: lines[1])
     else { throw MeteoDataFileError.empty }
     self.metadata = metadata
     self.csv = csv

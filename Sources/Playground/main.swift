@@ -13,7 +13,6 @@ source.setEventHandler { source.cancel() }
 import WinSDK
 _ = SetConsoleOutputCP(UINT(CP_UTF8))
 SetConsoleCtrlHandler({_ in source.cancel();semaphore.wait();return WindowsBool(true)}, true)
-DispatchQueue.global().asyncAfter(deadline: .now() + 3) { start("http://127.0.0.1:9080") }
 #endif
 #if os(Linux)
 try! Gnuplot.process().run()
@@ -63,6 +62,8 @@ struct Command: ParsableCommand {
 
   @Flag(name: .long, help: "Do not use Multi-group algorithm") var noGroups: Bool = false
 
+  @Flag(name: .long, help: "No print out") var silent: Bool = false
+
   @Option(name: .short, help: "Population size") var n: Int?
 
   @Option(name: .short, help: "Iterations") var iterations: Int?
@@ -70,9 +71,9 @@ struct Command: ParsableCommand {
   func run() throws {
     let path = file ?? "input2.txt"
     #if os(Windows)
-    guard let csv = CSV(atPath: path) else { MessageBox(text: "No input.", caption: "TunOl"); return }
+    guard let csv = CSVReader(atPath: path) else { MessageBox(text: "No input.", caption: "TunOl"); return }
     #else
-    guard let csv = CSV(atPath: path) else { print("No input."); return }
+    guard let csv = CSVReader(atPath: path) else { print("No input."); return }
     #endif
     
     TunOl.Q_Sol_MW_thLoop = [0] + csv["csp"]
@@ -90,7 +91,9 @@ struct Command: ParsableCommand {
     var r2 = 0
     defer {
       #if os(Windows)
-      MessageBox(text: currentDirectoryPath() + name, caption: "TunOl")
+      DispatchQueue.global().asyncAfter(deadline: .now()) { 
+        if !silent { MessageBox(text: currentDirectoryPath() + "\n" + name, caption: "TunOl") }
+      }
       #else
       print(name)
       #endif
@@ -143,7 +146,10 @@ struct Command: ParsableCommand {
     }
     parameter.forEach { parameter in
       #if os(Windows)
-      MessageBox(text: "Start MGOADE Optimizer", caption: "TunOl")
+      DispatchQueue.global().asyncAfter(deadline: .now()) { 
+        if !silent { MessageBox(text: "Start MGOADE Optimizer", caption: "TunOl") }
+        start("http://127.0.0.1:9080")
+      }
       #endif
       let a = MGOADE(group: !noGroups, n: n ?? 150, maxIter: iterations ?? 30, bounds: parameter.ranges, fitness: fitness)
       a.forEach { row in r += 1; ws.write(row, row: r) }

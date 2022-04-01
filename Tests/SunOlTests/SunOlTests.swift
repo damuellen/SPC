@@ -7,13 +7,13 @@ import xlsxwriter
 class SunOlTests: XCTestCase {
   func testsCalculation() {
     let path = "/workspaces/SPC/input2.txt"
-    guard let csv = CSV(atPath: path) else {
+    guard let csv = CSVReader(atPath: path) else {
       print("No input.")
       return
     }
-    let csv_ref = CSV(atPath: "/workspaces/SPC/calc.csv", separator: "\t")!
-    let csv_ref2 = CSV(atPath: "/workspaces/SPC/daily1.csv", separator: "\t")!
-    let csv_ref3 = CSV(atPath: "/workspaces/SPC/daily2.csv", separator: "\t")!
+    let csv_ref = CSVReader(atPath: "/workspaces/SPC/calc.csv", separator: "\t")!
+    let csv_ref2 = CSVReader(atPath: "/workspaces/SPC/daily1.csv", separator: "\t")!
+    let csv_ref3 = CSVReader(atPath: "/workspaces/SPC/daily2.csv", separator: "\t")!
 
     func compare(_ array: [Double], letter: String, start index: Int) {
       let index = index
@@ -182,7 +182,7 @@ class SunOlTests: XCTestCase {
 
     var day = [[Double]]()
 
-    var hour2 = [Double](repeating: Double.zero, count: 166440 + 8760)
+    var hour2 = [Double](repeating: Double.zero, count: 183_960)
     var hour3 = [Double](repeating: Double.zero, count: 271_560)
     var hour4 = [Double](repeating: Double.zero, count: 490560 + 8760)
     var day1 = [Double](repeating: Double.zero, count: 13_140)
