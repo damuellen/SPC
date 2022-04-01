@@ -30,18 +30,60 @@ extension TunOl {
   func day21(_ day1: inout [Double], case j: Int, day0: [Double]) {
     let dayB = 365
     let dayC = 730
+
+    /// Surplus RawMeth storage cap after night min op  prep
+    let dayY = 7300
+    /// Surplus RawMeth storage cap after max night op prep
+    let dayZ = 7665
+    /// Surplus CO2 storage cap after min night op prep
+    let dayAA = 8030
+    /// Surplus CO2 storage cap after max night op prep
+    let dayAB = 8395
+    /// Surplus H2 storage cap after min night op prep
+    let dayAC = 8760
+    /// Surplus H2 storage cap after max night op prep
+    let dayAD = 9125
+    
+    for i in 0..<365 { 
+      // =1-IF(OR($B3=0,RawMeth_storage_cap_ud=0),0,A_RawMeth_min_cons*$B3/RawMeth_storage_cap_ud)
+      day1[dayY + i] = 1 - iff(or(day1[dayB + i].isZero, RawMeth_storage_cap_ud.isZero), Double.zero, RawMeth_min_cons[j] * day1[dayB + i] / RawMeth_storage_cap_ud)
+      // =1-IF(OR($B3=0,RawMeth_storage_cap_ud=0),0,A_RawMeth_max_cons*$B3/RawMeth_storage_cap_ud)
+      day1[dayZ + i] = 1 - iff(or(day1[dayB + i].isZero, RawMeth_storage_cap_ud.isZero), Double.zero, RawMeth_max_cons[j] * day1[dayB + i] / RawMeth_storage_cap_ud)
+      // =1-IF(OR($B3=0,CO2_storage_cap_ud=0),0,A_CO2_min_cons*$B3/CO2_storage_cap_ud)
+      day1[dayAA + i] = 1 - iff(or(day1[dayB + i].isZero, C_O_2_storage_cap_ud.isZero), Double.zero, C_O_2_min_cons[j] * day1[dayB + i] / C_O_2_storage_cap_ud)
+      // =1-IF(OR($B3=0,CO2_storage_cap_ud=0),0,A_CO2_max_cons*$B3/CO2_storage_cap_ud)
+      day1[dayAB + i] = 1 - iff(or(day1[dayB + i].isZero, C_O_2_storage_cap_ud.isZero), Double.zero, C_O_2_max_cons[j] * day1[dayB + i] / C_O_2_storage_cap_ud)
+      // =1-IF(OR($B3=0,Hydrogen_storage_cap_ud=0),0,A_Hydrogen_min_cons*$B3/Hydrogen_storage_cap_ud)
+      day1[dayAC + i] = 1 - iff(or(day1[dayB + i].isZero, Hydrogen_storage_cap_ud.isZero), Double.zero, Hydrogen_min_cons[j] * day1[dayB + i] / Hydrogen_storage_cap_ud)
+      // =1-IF(OR($B3=0,Hydrogen_storage_cap_ud=0),0,A_Hydrogen_max_cons*$B3/Hydrogen_storage_cap_ud)
+      day1[dayAD + i] = 1 - iff(or(day1[dayB + i].isZero, Hydrogen_storage_cap_ud.isZero), Double.zero, Hydrogen_max_cons[j] * day1[dayB + i] / Hydrogen_storage_cap_ud)
+    }
+
+    /// Max Equiv harmonious night prod due to physical limits
+    let dayAE = 9490
+    // IF(OR(Y6<=0,AA6<=0,AC6<=0),0,MIN(1,IFERROR(Y6/(Y6-Z6),1),IFERROR(AA6/(AA6-AB6),1),IFERROR(AC6/(AC6-AD6),1))*(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)+A_equiv_harmonious_min_perc)
+    for i in 0..<365 {
+      day1[dayAE + i] = iff(
+        or(day1[dayY + i] <= Double.zero, day1[dayAA + i] <= Double.zero, day1[dayAC + i] <= 0), Double.zero,
+        min(
+          1, ifFinite(day1[dayY + i] / (day1[dayY + i] - day1[dayZ + i]), 1),
+          ifFinite(day1[dayAA + i] / (day1[dayAA + i] - day1[dayAB + i]), 1),
+          ifFinite(day1[dayAC + i] / (day1[dayAC + i] - day1[dayAD + i]), 1))
+          * (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]) + equiv_harmonious_min_perc[j])
+    }
+
     /// Min el cons during night
     let dayE = 0
     // (A_overall_var_min_cons+A_overall_fix_stby_cons)*B6+A_overall_stup_cons
     for i in 0..<365 {
-      day1[dayE + i] = (overall_var_min_cons[j] + overall_fix_stby_cons[j]) * day0[dayB + i] + overall_stup_cons[j]
+      day1[dayE + i] = iff(day1[dayAE + i].isZero, Double.zero, (overall_var_min_cons[j] + overall_fix_stby_cons[j]) * day0[dayB + i] + overall_stup_cons[j])
     }
 
     /// Max el cons during night
     let dayF = 365
     // (A_overall_var_max_cons+A_overall_fix_stby_cons)*B6+A_overall_stup_cons
     for i in 0..<365 {
-      day1[dayF + i] = (overall_var_max_cons[j] + overall_fix_stby_cons[j]) * day0[dayB + i] + overall_stup_cons[j]
+      day1[dayF + i] = iff(day1[dayAE + i].isZero, Double.zero, (overall_var_max_cons[j] + overall_fix_stby_cons[j]) * day0[dayB + i] + overall_stup_cons[j])
     }
 
     /// Min heat cons during night
@@ -49,7 +91,7 @@ extension TunOl {
     // (A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons)*B6+A_overall_heat_stup_cons
     for i in 0..<365 {
       day1[dayG + i] =
-        (overall_var_heat_min_cons[j] + overall_heat_fix_stby_cons[j]) * day0[dayB + i] + overall_heat_stup_cons[j]
+        iff(day1[dayAE + i].isZero, Double.zero, (overall_var_heat_min_cons[j] + overall_heat_fix_stby_cons[j]) * day0[dayB + i] + overall_heat_stup_cons[j])
     }
 
     /// Max heat cons during night
@@ -57,7 +99,7 @@ extension TunOl {
     // (A_overall_var_heat_max_cons+A_overall_heat_fix_stby_cons)*B6+A_overall_heat_stup_cons
     for i in 0..<365 {
       day1[dayH + i] =
-        (overall_var_heat_max_cons[j] + overall_heat_fix_stby_cons[j]) * day0[dayB + i] + overall_heat_stup_cons[j]
+        iff(day1[dayAE + i].isZero, Double.zero, (overall_var_heat_max_cons[j] + overall_heat_fix_stby_cons[j]) * day0[dayB + i] + overall_heat_stup_cons[j])
     }
 
     /// Min RawMeth cons during night
@@ -73,19 +115,28 @@ extension TunOl {
     /// Max H2 cons during night
     let dayN = 3285
     
-    for i in 0..<365 { 
-      // A_RawMeth_min_cons*B6
-      day1[dayI + i] = RawMeth_min_cons[j] * day0[dayB + i] 
-      // A_RawMeth_max_cons*B6
-      day1[dayJ + i] = RawMeth_max_cons[j] * day0[dayB + i] 
-      // A_CO2_min_cons*B6
-      day1[dayK + i] = C_O_2_min_cons[j] * day0[dayB + i] 
-      // A_CO2_max_cons*B6
-      day1[dayL + i] = C_O_2_max_cons[j] * day0[dayB + i] 
-      // A_Hydrogen_min_cons*B6
-      day1[dayM + i] = Hydrogen_min_cons[j] * day0[dayB + i] 
-      // A_Hydrogen_max_cons*B6
-      day1[dayN + i] = Hydrogen_max_cons[j] * day0[dayB + i]
+    for i in 0..<365 {
+      if day1[dayAE + i].isZero {
+        day1[dayI + i] = Double.zero
+        day1[dayJ + i] = Double.zero
+        day1[dayK + i] = Double.zero
+        day1[dayL + i] = Double.zero
+        day1[dayM + i] = Double.zero
+        day1[dayN + i] = Double.zero
+      } else {
+        // A_RawMeth_min_cons*B6
+        day1[dayI + i] = RawMeth_min_cons[j] * day0[dayB + i] 
+        // A_RawMeth_max_cons*B6
+        day1[dayJ + i] = RawMeth_max_cons[j] * day0[dayB + i] 
+        // A_CO2_min_cons*B6
+        day1[dayK + i] = C_O_2_min_cons[j] * day0[dayB + i] 
+        // A_CO2_max_cons*B6
+        day1[dayL + i] = C_O_2_max_cons[j] * day0[dayB + i] 
+        // A_Hydrogen_min_cons*B6
+        day1[dayM + i] = Hydrogen_min_cons[j] * day0[dayB + i] 
+        // A_Hydrogen_max_cons*B6
+        day1[dayN + i] = Hydrogen_max_cons[j] * day0[dayB + i]
+      }
     }
 
     /// Min el cons during day for night op prep
@@ -192,53 +243,6 @@ extension TunOl {
       day1[dayX + i] =
         day1[dayN + i] + day1[dayJ + i] / (MethSynt_C_O_2_nom_cons + MethSynt_Hydrogen_nom_cons)
         * MethSynt_Hydrogen_nom_cons
-    }
-
-    /// Surplus RawMeth storage cap after night min op  prep
-    let dayY = 7300
-    /// Surplus RawMeth storage cap after max night op prep
-    let dayZ = 7665
-    /// Surplus CO2 storage cap after min night op prep
-    let dayAA = 8030
-    /// Surplus CO2 storage cap after max night op prep
-    let dayAB = 8395
-    /// Surplus H2 storage cap after min night op prep
-    let dayAC = 8760
-    /// Surplus H2 storage cap after max night op prep
-    let dayAD = 9125
-    
-    for i in 0..<365 { 
-      // 1-IF(I3=0;0;IFERROR(I3/RawMeth_storage_cap_ud;1))
-      day1[dayY + i] = 1 - iff(
-        day1[dayI + i].isZero, Double.zero, ifFinite(day1[dayI + i] / RawMeth_storage_cap_ud, 1)) 
-      // 1-IF(J3=0;0;IFERROR(J3/RawMeth_storage_cap_ud;1))
-      day1[dayZ + i] = 1 - iff(
-        day1[dayJ + i].isZero, Double.zero, ifFinite(day1[dayJ + i] / RawMeth_storage_cap_ud, 1)) 
-      // 1-IF(K3=0;0;IFERROR(K3/CO2_storage_cap_ud;1))
-      day1[dayAA + i] = 1 - iff(
-        day1[dayK + i].isZero, Double.zero, ifFinite(day1[dayK + i] / C_O_2_storage_cap_ud, 1)) 
-      // 1-IF(L3=0;0;IFERROR(L3/CO2_storage_cap_ud;1))
-      day1[dayAB + i] = 1 - iff(
-        day1[dayL + i].isZero, Double.zero, ifFinite(day1[dayL + i] / C_O_2_storage_cap_ud, 1)) 
-      // 1-IF(M3=0;0;IFERROR(M6/Hydrogen_storage_cap_ud;1))
-      day1[dayAC + i] = 1 - iff(
-        day1[dayM + i].isZero, Double.zero, ifFinite(day1[dayM + i] / Hydrogen_storage_cap_ud, 1)) 
-      // 1-IF(N3=0;0;IFERROR(N6/Hydrogen_storage_cap_ud;1))
-      day1[dayAD + i] = 1 - iff(
-        day1[dayN + i].isZero, Double.zero, ifFinite(day1[dayN + i] / Hydrogen_storage_cap_ud, 1)) 
-    }
-
-    /// Max Equiv harmonious night prod due to physical limits
-    let dayAE = 9490
-    // IF(OR(Y6<=0,AA6<=0,AC6<=0),0,MIN(1,IFERROR(Y6/(Y6-Z6),1),IFERROR(AA6/(AA6-AB6),1),IFERROR(AC6/(AC6-AD6),1))*(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)+A_equiv_harmonious_min_perc)
-    for i in 0..<365 {
-      day1[dayAE + i] = iff(
-        or(day1[dayY + i] <= Double.zero, day1[dayAA + i] <= Double.zero, day1[dayAC + i] <= 0), Double.zero,
-        min(
-          1, ifFinite(day1[dayY + i] / (day1[dayY + i] - day1[dayZ + i]), 1),
-          ifFinite(day1[dayAA + i] / (day1[dayAA + i] - day1[dayAB + i]), 1),
-          ifFinite(day1[dayAC + i] / (day1[dayAC + i] - day1[dayAD + i]), 1))
-          * (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]) + equiv_harmonious_min_perc[j])
     }
   }  
 }  

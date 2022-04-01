@@ -477,9 +477,9 @@ extension TunOl {
     let hourBN = 157680
     // MAX(0,(BM6-Overall_fix_cons)/Overall_harmonious_var_max_cons*Overall_harmonious_var_heat_max_cons+Overall_heat_fix_cons)
     for i in 1..<8760 {
-      hour1[hourBN + i] = max(
+      hour1[hourBN + i] = iff(hour1[hourBM + i].isZero, Double.zero, max(
         Double.zero,
-        (hour1[hourBM + i] - Overall_fix_cons) / Overall_harmonious_var_max_cons * Overall_harmonious_var_heat_max_cons + Overall_heat_fix_cons)
+        (hour1[hourBM + i] - Overall_fix_cons) / Overall_harmonious_var_max_cons * Overall_harmonious_var_heat_max_cons + Overall_heat_fix_cons))
     }
 
     /// Harmonious op day
