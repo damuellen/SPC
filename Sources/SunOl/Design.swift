@@ -239,21 +239,21 @@ public struct TunOl {
 
   var th_Coeff: [Double] = [0]  // PB_Eff!$U3 PB_Eff!$T3 PB_Eff!$S3 PB_Eff!$R3 PB_Eff!$Q3
 
-  var CSP_loop_nr_ud: Double = 120
+  var CSP_loop_nr_ud: Double = 130
   var TES_full_load_hours_ud: Double = 20
   var PB_nom_gross_cap_ud: Double = 190
-  var PV_AC_cap_ud: Double = 800
-  var PV_DC_cap_ud: Double = 1116
-  var EY_var_net_nom_cons_ud: Double = 450
-  var Hydrogen_storage_cap_ud: Double = 60
+  var PV_AC_cap_ud: Double = 900
+  var PV_DC_cap_ud: Double = 1200
+  var EY_var_net_nom_cons_ud: Double = 300
+  var Hydrogen_storage_cap_ud: Double = 150
   var Heater_cap_ud: Double = 300
-  var CCU_C_O_2_nom_prod_ud: Double = 25
-  var C_O_2_storage_cap_ud: Double = 1000
+  var CCU_C_O_2_nom_prod_ud: Double = 30
+  var C_O_2_storage_cap_ud: Double = 5000
   var MethSynt_RawMeth_nom_prod_ud: Double = 50
-  var RawMeth_storage_cap_ud: Double = 300
+  var RawMeth_storage_cap_ud: Double = 5000
   var MethDist_Meth_nom_prod_ud: Double = 20
   var El_boiler_cap_ud: Double = 100
-  var BESS_cap_ud: Double = 130
+  var BESS_cap_ud: Double = 80
   var Grid_export_max_ud: Double = 50
   var Grid_import_max_ud: Double = 50
   var Grid_import_yes_no_BESS_strategy: Double = 1
@@ -296,20 +296,28 @@ public struct TunOl {
     let chunks = inverter.chunked { Int($0.0 * 100) == Int($1.0 * 100) }
     let eff1 = chunks.map { bin in bin.reduce(0.0) { $0 + $1.1 } / Double(bin.count) }
     let eff2 = zip(stride(from: 0.01, through: 1, by: 0.01), eff1).map { ac * $0.0 / $0.1 / dc }
-    self.LL_Coeff = [-4.00073299744972E+07,
-2.43484724631423E+07,
--6.02556743789485E+06,
-7.73365644668189E+05,
--5.39041431697126E+04,
-1.89024744899734E+03,
--2.19970897604758E+01,
-7.04670199599962E-01].reversed()
-// self.LL_Coeff = Polynomial.fit(x: Array(eff2[..<20]), y: Array(eff1[..<20]), order: 7)!.coefficients
-    self.HL_Coeff = [2.48832703984911E-01,
--3.98641131275815E-01,
-2.14353590144310E-01,
-9.22111172341115E-01].reversed()
-// self.HL_Coeff = Polynomial.fit(x: Array(eff2[15...]), y: Array(eff1[15...]), order: 3)!.coefficients
+
+    self.LL_Coeff = [
+    -2.915353827098490E+07,
+    1.856345862103330E+07,
+    -4.806407585714870E+06,
+    6.454208507036740E+05,
+    -4.706691507668490E+04,
+    1.726822579018590E+03,
+    -2.102469750112070E+01,
+    7.046701996005100E-01,
+    ].reversed()
+
+    self.HL_Coeff = [
+    2.172706411428880E-01,
+    -3.641758684962090E-01,
+    2.048779834115270E-01,
+    9.221111723411150E-01,
+    ].reversed()
+
+
+    //self.LL_Coeff = Polynomial.fit(x: Array(eff2[..<20]), y: Array(eff1[..<20]), order: 7)!.coefficients
+    //self.HL_Coeff = Polynomial.fit(x: Array(eff2[15...]), y: Array(eff1[15...]), order: 3)!.coefficients
 
     let PB_grs_el_cap_min_perc = PB_Ref_25p_gross_cap_max_aux_heat / PB_Ref_nom_gross_cap
     self.CSP_Cold_HTF_T = TES_cold_tank_T + SF_heat_exch_approach_temp
