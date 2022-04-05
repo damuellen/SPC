@@ -1,4 +1,3 @@
-
 extension TunOl {
   func day15(_ day15: inout [Double], hour0: [Double], hour2: [Double], hour3: [Double], day11: [Double]) {
 
@@ -44,10 +43,9 @@ extension TunOl {
     let hourDR = 245280
     let hourDS = 254040
     let hourDT = 262800
-    let daysCS: [[Int]] = hour3[(hourCS+1)..<(hourCS + 8760)].indices.chunked(by: { hour3[$0] == hour3[$1] })
-      .map { $0.map { $0 - hourCS } }
-   // let end = daysCS.removeLast()
-   // daysCS[0].append(contentsOf: end)
+    let daysCS: [[Int]] = hour3[(hourCS + 1)..<(hourCS + 8760)].indices.chunked(by: { hour3[$0] == hour3[$1] }).map { $0.map { $0 - hourCS } }
+    // let end = daysCS.removeLast()
+    // daysCS[0].append(contentsOf: end)
 
     /// Available elec after TES chrg during harm op period
     let day1EY = 0

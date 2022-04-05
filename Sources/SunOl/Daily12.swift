@@ -1,40 +1,36 @@
-
 extension TunOl {
   func day16(_ day16: inout [Double], hour0: [Double], hour4: [Double], day11: [Double], day15: [Double]) {
-    let daysEZ: [[Int]] = hour4[254041..<(254040 + 8760)].indices.chunked(by: { hour4[$0] == hour4[$1] })
-      .map { $0.map { $0 - 254040 } }
+    let daysEZ: [[Int]] = hour4[254041..<(254040 + 8760)].indices.chunked(by: { hour4[$0] == hour4[$1] }).map { $0.map { $0 - 254040 } }
 
     let hourJ = 26280
     let hourL = 43800
 
     let (
-      hourEH, hourEI, hourEP, hourEQ, hourET, hourEU, hourEX, hourEY, hourFA, hourFB, hourFC, hourFD, hourFE, hourFF, hourFG, hourFH,
-      hourFI, hourFJ, hourFK, hourFL, hourFM, hourFO, hourFP, hourFQ, hourFR, hourFS, hourFT, hourFU, hourFV, hourFW, hourFX, hourFY,
-      hourFZ, hourGA
+      hourEH, hourEI, hourEP, hourEQ, hourET, hourEU, hourEX, hourEY, hourFA, hourFB, hourFC, hourFD, hourFE, hourFF, hourFG, hourFH, hourFI, hourFJ, hourFK, hourFL, hourFM, hourFO, hourFP,
+      hourFQ, hourFR, hourFS, hourFT, hourFU, hourFV, hourFW, hourFX, hourFY, hourFZ, hourGA
     ) = (
-      105120, 113880, 175200, 183960, 210240, 219000, 236520, 245280, 262800, 271560, 280320, 289080, 297840, 306600, 315360, 324120,
-      332880, 341640, 350400, 359160, 367920, 385440, 394200, 402960, 411720, 420480, 429240, 438000, 446760, 455520, 464280, 473040,
-      481800, 490560
+      105120, 113880, 175200, 183960, 210240, 219000, 236520, 245280, 262800, 271560, 280320, 289080, 297840, 306600, 315360, 324120, 332880, 341640, 350400, 359160, 367920, 385440, 394200,
+      402960, 411720, 420480, 429240, 438000, 446760, 455520, 464280, 473040, 481800, 490560
     )
 
     let day1GU = 0
     /// Available elec after TES chrg outside harm op period
     let day1GV = 365
     do {
-    let EZ_EX_Lsum = hour0.sumOfRanges(hourL, days: daysEZ, range1: hour4, condition: hourEX, predicate: { $0 > 0 })
-    let EZ_EX_EHsum = hour4.sumOf(hourEH, days: daysEZ, condition: hourEX, predicate: { $0 > 0 })
-    let EZ_EX_EPsum = hour4.sumOf(hourEP, days: daysEZ, condition: hourEX, predicate: { $0 > 0 })
-    /// Available elec after TES chrg during harm op period
+      let EZ_EX_Lsum = hour0.sumOfRanges(hourL, days: daysEZ, range1: hour4, condition: hourEX, predicate: { $0 > 0 })
+      let EZ_EX_EHsum = hour4.sumOf(hourEH, days: daysEZ, condition: hourEX, predicate: { $0 > 0 })
+      let EZ_EX_EPsum = hour4.sumOf(hourEP, days: daysEZ, condition: hourEX, predicate: { $0 > 0 })
+      /// Available elec after TES chrg during harm op period
 
-    // SUMIFS(CalculationL5:L8763,CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,">0")+SUMIFS(CalculationEH5:EH8763,CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,">0")-SUMIFS(CalculationEP5:EP8763,CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,">0")
-    for i in 0..<365 { day16[day1GU + i] = EZ_EX_Lsum[i] + EZ_EX_EHsum[i] - EZ_EX_EPsum[i] }
+      // SUMIFS(CalculationL5:L8763,CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,">0")+SUMIFS(CalculationEH5:EH8763,CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,">0")-SUMIFS(CalculationEP5:EP8763,CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,">0")
+      for i in 0..<365 { day16[day1GU + i] = EZ_EX_Lsum[i] + EZ_EX_EHsum[i] - EZ_EX_EPsum[i] }
     }
     do {
-    let EZ_EX_Lsum = hour0.sumOfRanges(hourL, days: daysEZ, range1: hour4, condition: hourEX, predicate: { $0.isZero })
-    let EZ_EX_EHsum = hour4.sumOf(hourEH, days: daysEZ, condition: hourEX, predicate: { $0.isZero })
-    let EZ_EX_EPsum = hour4.sumOf(hourEP, days: daysEZ, condition: hourEX, predicate: { $0.isZero })
-    // SUMIFS(CalculationL5:L8763,CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,"=0")+SUMIFS(CalculationEH5:EH8763,CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,"=0")-SUMIFS(CalculationEP5:EP8763,CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,"=0")
-    for i in 0..<365 { day16[day1GV + i] = EZ_EX_Lsum[i] + EZ_EX_EHsum[i] - EZ_EX_EPsum[i] }
+      let EZ_EX_Lsum = hour0.sumOfRanges(hourL, days: daysEZ, range1: hour4, condition: hourEX, predicate: { $0.isZero })
+      let EZ_EX_EHsum = hour4.sumOf(hourEH, days: daysEZ, condition: hourEX, predicate: { $0.isZero })
+      let EZ_EX_EPsum = hour4.sumOf(hourEP, days: daysEZ, condition: hourEX, predicate: { $0.isZero })
+      // SUMIFS(CalculationL5:L8763,CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,"=0")+SUMIFS(CalculationEH5:EH8763,CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,"=0")-SUMIFS(CalculationEP5:EP8763,CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,"=0")
+      for i in 0..<365 { day16[day1GV + i] = EZ_EX_Lsum[i] + EZ_EX_EHsum[i] - EZ_EX_EPsum[i] }
 
     }
     /// Available heat after TES chrg during harm op period
