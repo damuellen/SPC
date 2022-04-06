@@ -1283,7 +1283,7 @@ extension TunOl {
     /// Grid import
     let ddNN = 44895
     // NN=MR6+NF6+NC6+MS6
-    for i in 0..<365 { day7[ddMR + i] = day7[ddNF + i] + day7[ddNF + i] + day7[ddNC + i] + day7[ddMS + i] }
+    for i in 0..<365 { day7[ddNN + i] = day7[ddMR + i] + day7[ddNF + i] + day7[ddNC + i] + day7[ddMS + i] }
 
     /// Outside harmonious operation period hours
     let ddNO = 45260
