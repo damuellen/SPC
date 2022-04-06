@@ -8,7 +8,7 @@ class SunOlTests: XCTestCase {
   func testsCalculation() {
     let path = "/workspaces/SPC/input2.txt"
     guard let csv = CSVReader(atPath: path) else {
-      print("No input.")
+      print("No input")
       return
     }
     let csv_ref = CSVReader(atPath: "/workspaces/SPC/calc.csv", separator: "\t")!
@@ -19,10 +19,13 @@ class SunOlTests: XCTestCase {
       let index = index
       let ref = csv_ref[letter]
       var correct = true
+      var counter = 1
       for i in 1..<8736 {
-        if abs(ref[i - 1] - array[index + i]) > 0.1 {
+        if counter > 20 { break }
+        if abs(ref[i - 1] - array[index + i]) / ref[i - 1] > 0.005 {
+          counter += 1
           correct = false
-          print("Calculation", letter, i, "Excel value:", ref[i - 1], "not equal", array[index + i])
+          print("Calculation", letter, i + 4, "=", ref[i - 1], "not equal", array[index + i])
         }
       }
       if correct { print("Calculation", letter, "all equal") }
@@ -32,10 +35,13 @@ class SunOlTests: XCTestCase {
       let index = index
       let ref = csv_ref2[letter]
       var correct = true
+      var counter = 1
       for i in 0..<364 {
-        if abs(ref[i] - array[index + i]) > 0.1 {
+        if counter > 20 { break }
+        if abs(ref[i] - array[index + i]) / ref[i] > 0.005 {
+          counter += 1
           correct = false
-          print("Daily1", letter, i, "Excel value:", ref[i], "not equal", array[index + i])
+          print("Daily1", letter, i + 3, "=", ref[i], "not equal", array[index + i])
         }
       }
       if correct { print("Daily1", letter, "all equal") }
@@ -45,10 +51,13 @@ class SunOlTests: XCTestCase {
       let index = index
       let ref = csv_ref3[letter]
       var correct = true
+      var counter = 1
       for i in 0..<364 {
-        if abs(ref[i] - array[index + i]) > 0.1 {
+        if counter > 20 { break }
+        if abs(ref[i] - array[index + i]) / ref[i] > 0.005 {
+          counter += 1
           correct = false
-          print("Daily2", letter, i, "Excel value:", ref[i], "not equal", array[index + i])
+          print("Daily2", letter, i + 3, "=", ref[i], "not equal", array[index + i])
         }
       }
       if correct { print("Daily2", letter, "all equal") }
@@ -61,6 +70,7 @@ class SunOlTests: XCTestCase {
     let costs = Costs(model)
     let hour0 = model.hour0(
       TunOl.Q_Sol_MW_thLoop, TunOl.Reference_PV_plant_power_at_inverter_inlet_DC, TunOl.Reference_PV_MV_power_at_transformer_outlet)
+
 
     compare(hour0, letter: "H", start: 8760)
     compare(hour0, letter: "I", start: 17520)
@@ -195,6 +205,7 @@ class SunOlTests: XCTestCase {
     for j in 0..<4 {
       model.hour2(&hour2, j: j, hour0: hour0, hour1: hour1)
       if j == 0 {
+        compare(hour2, letter: "BT", start: 175200)
         compare(hour2, letter: "BU", start: 0)
         compare(hour2, letter: "BV", start: 8760)
         compare(hour2, letter: "BW", start: 17520)
@@ -616,8 +627,11 @@ class SunOlTests: XCTestCase {
       day.append(Array(day17[44165..<45625]))
 
       let day0 = model.day0(hour0: hour0)
+
       model.day21(&day21, case: j, day0: day0)
       if j == 0 {
+        compareDay2(day0, letter: "B", start: 365)
+        compareDay2(day0, letter: "C", start: 730)
         compareDay2(day21, letter: "E", start: 0)
         compareDay2(day21, letter: "F", start: 365)
         compareDay2(day21, letter: "G", start: 730)
