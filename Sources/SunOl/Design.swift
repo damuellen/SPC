@@ -101,7 +101,7 @@ public struct TunOl {
   let Heater_eff: Double = 0.96
   let Heater_outlet_T: Double = 565
   let HL_Coeff: [Double]
-  let Inv_eff_Ref_approx_handover: Double = 0.13653  // Inv_Eff!C22
+  let Inv_eff_Ref_approx_handover: Double // Inv_Eff!C22
   let LL_Coeff: [Double]
   let MethDist_cap_min_perc: Double = 0.5
 
@@ -220,7 +220,7 @@ public struct TunOl {
   let PB_stup_aux_cons: Double
   let PB_stup_fix_aux_elec_cons_perc: Double = 5.9815704330890597E-3
   let PB_stup_var_aux_elec_cons_perc: Double = 1.2789153998036399E-2
-  let PB_var_aux_cons = [0.29437013201591916, 0.10280513176871063, -6.5249624421765337E-2, 0.67514642417652304]
+  // let PB_var_aux_cons = [0.29437013201591916, 0.10280513176871063, -6.5249624421765337E-2, 0.67514642417652304]
   let PB_g2n_var_aux_el_Coeff: [Double] = [0.29437013201591916, 0.10280513176871063, -6.5249624421765337E-2, 0.67514642417652304]  // PB_var_aux_cons_C0
   var PB_var_heat_max_cons: Double = 0  // PB_Eff!I17
 
@@ -239,21 +239,21 @@ public struct TunOl {
 
   var th_Coeff: [Double] = [0]  // PB_Eff!$U3 PB_Eff!$T3 PB_Eff!$S3 PB_Eff!$R3 PB_Eff!$Q3
 
-  var CSP_loop_nr_ud: Double = 130
-  var TES_full_load_hours_ud: Double = 20
-  var PB_nom_gross_cap_ud: Double = 190
-  var PV_AC_cap_ud: Double = 900
-  var PV_DC_cap_ud: Double = 1200
-  var EY_var_net_nom_cons_ud: Double = 300
-  var Hydrogen_storage_cap_ud: Double = 150
-  var Heater_cap_ud: Double = 300
-  var CCU_C_O_2_nom_prod_ud: Double = 30
+  var CSP_loop_nr_ud: Double = 222.3
+  var TES_full_load_hours_ud: Double = 18.8
+  var PB_nom_gross_cap_ud: Double = 20.4
+  var PV_AC_cap_ud: Double = 1008.4
+  var PV_DC_cap_ud: Double = 1380
+  var EY_var_net_nom_cons_ud: Double = 560.1
+  var Hydrogen_storage_cap_ud: Double = 107.3
+  var Heater_cap_ud: Double = 346.6
+  var CCU_C_O_2_nom_prod_ud: Double = 26.6
   var C_O_2_storage_cap_ud: Double = 5000
-  var MethSynt_RawMeth_nom_prod_ud: Double = 50
-  var RawMeth_storage_cap_ud: Double = 5000
-  var MethDist_Meth_nom_prod_ud: Double = 20
-  var El_boiler_cap_ud: Double = 100
-  var BESS_cap_ud: Double = 80
+  var MethSynt_RawMeth_nom_prod_ud: Double = 79.6
+  var RawMeth_storage_cap_ud: Double = 300
+  var MethDist_Meth_nom_prod_ud: Double = 35
+  var El_boiler_cap_ud: Double = 15.6
+  var BESS_cap_ud: Double = 1400
   var Grid_export_max_ud: Double = 50
   var Grid_import_max_ud: Double = 50
   var Grid_import_yes_no_BESS_strategy: Double = 1
@@ -295,29 +295,13 @@ public struct TunOl {
     let inverter = zip(Inverter_power_fraction, Inverter_eff).filter { $0.0 > 0 && $0.0 < 1 }.sorted(by: { $0.0 < $1.0 })
     let chunks = inverter.chunked { Int($0.0 * 100) == Int($1.0 * 100) }
     let eff1 = chunks.map { bin in bin.reduce(0.0) { $0 + $1.1 } / Double(bin.count) }
-    let eff2 = zip(stride(from: 0.01, through: 1, by: 0.01), eff1).map { ac * $0.0 / $0.1 / dc }
+    let s = Array(stride(from: 0.01, through: 1, by: 0.01))
+    let eff2 = zip(s, eff1).map { ac * $0.0 / $0.1 / dc }
 
-    self.LL_Coeff = [
-    -2.915353827098490E+07,
-    1.856345862103330E+07,
-    -4.806407585714870E+06,
-    6.454208507036740E+05,
-    -4.706691507668490E+04,
-    1.726822579018590E+03,
-    -2.102469750112070E+01,
-    7.046701996005100E-01,
-    ].reversed()
+    self.LL_Coeff = Polynomial.fit(x: Array(eff2[..<20]), y: Array(eff1[..<20]), order: 7)!.coefficients
+    self.HL_Coeff = Polynomial.fit(x: Array(eff2[15...].dropLast(2)), y: Array(eff1[15...].dropLast(2)), order: 3)!.coefficients
 
-    self.HL_Coeff = [
-    2.172706411428880E-01,
-    -3.641758684962090E-01,
-    2.048779834115270E-01,
-    9.221111723411150E-01,
-    ].reversed()
-
-
-    //self.LL_Coeff = Polynomial.fit(x: Array(eff2[..<20]), y: Array(eff1[..<20]), order: 7)!.coefficients
-    //self.HL_Coeff = Polynomial.fit(x: Array(eff2[15...]), y: Array(eff1[15...]), order: 3)!.coefficients
+    self.Inv_eff_Ref_approx_handover = self.PV_AC_cap_ud * s[17] / eff1[17] / self.PV_DC_cap_ud
 
     let PB_grs_el_cap_min_perc = PB_Ref_25p_gross_cap_max_aux_heat / PB_Ref_nom_gross_cap
     self.CSP_Cold_HTF_T = TES_cold_tank_T + SF_heat_exch_approach_temp
@@ -642,9 +626,9 @@ public struct TunOl {
 
       for j in 0..<3 {
         if self.MethDist_max_perc[j] < self.MethDist_cap_min_perc { return nil }
-        if self.MethSynt_max_perc[j] < self.MethSynt_cap_min_perc { return nil }
-        if self.CCU_max_perc[j] < self.CCU_cap_min_perc { return nil }
-        if self.EY_max_perc[j] < self.EY_cap_min_perc { return nil }
+        if self.MethSynt_max_perc[j] > 0, self.MethSynt_max_perc[j] < self.MethSynt_cap_min_perc { return nil }
+        if self.CCU_max_perc[j] > 0, self.CCU_max_perc[j] < self.CCU_cap_min_perc { return nil }
+        if self.EY_max_perc[j] > 0, self.EY_max_perc[j] < self.EY_cap_min_perc { return nil }
 
         if self.MethDist_min_perc[j] > 1.0 { return nil }
         if self.MethSynt_min_perc[j] > 1.0 { return nil }

@@ -503,12 +503,12 @@ extension TunOl {
       day7[dayGE + i] = iff(
         or(
           day6[dayDR + i].isZero, day7[dayFC + i] < Double.zero, day7[dayFF + i] < Double.zero, day7[dayFI + i] < Double.zero, day7[dayFL + i] < Double.zero, day7[dayFO + i] < Double.zero,
-          day7[dayFR + i] < Double.zero, day1[dayFU + i] < Double.zero, day7[dayFX + i] < Double.zero, day7[dayGA + i] < 0), Double.zero,
+          day7[dayFR + i] < Double.zero, day7[dayFU + i] < Double.zero, day7[dayFX + i] < Double.zero, day7[dayGA + i] < 0), Double.zero,
         min(
           1, ifFinite(day7[dayFC + i] / (day7[dayFC + i] - day7[dayFE + i]), 1), ifFinite(day7[dayFF + i] / max(Double.zero, day7[dayFF + i] - day7[dayFH + i]), 1),
           ifFinite(day7[dayFI + i] / max(Double.zero, day7[dayFI + i] - day7[dayFK + i]), 1), ifFinite(day7[dayFL + i] / max(Double.zero, day7[dayFL + i] - day7[dayFN + i]), 1),
           ifFinite(day7[dayFO + i] / max(Double.zero, day7[dayFO + i] - day7[dayFQ + i]), 1), ifFinite(day7[dayFR + i] / max(Double.zero, day7[dayFR + i] - day7[dayFT + i]), 1),
-          ifFinite(day1[dayFU + i] / max(Double.zero, day1[dayFU + i] - day7[dayFW + i]), 1), ifFinite(day7[dayFX + i] / max(Double.zero, day7[dayFX + i] - day7[dayFZ + i]), 1),
+          ifFinite(day7[dayFU + i] / max(Double.zero, day7[dayFU + i] - day7[dayFW + i]), 1), ifFinite(day7[dayFX + i] / max(Double.zero, day7[dayFX + i] - day7[dayFZ + i]), 1),
           ifFinite(day7[dayGA + i] / max(Double.zero, day7[dayGA + i] - day7[dayGC + i]), 1)) * Overall_harmonious_range + Overall_harmonious_min_perc)
     }
 
@@ -724,7 +724,7 @@ extension TunOl {
       day7[dayGX + i] = iff(
         or(day7[dayGE + i].isZero,
           day7[dayGF + i] < Double.zero, day7[dayGH + i] < Double.zero, day7[dayGJ + i] < Double.zero, day7[dayGL + i] < Double.zero, day7[dayGN + i] < Double.zero,
-          day7[dayGP + i] < Double.zero, day1[dayGR + i] < Double.zero, day7[dayGT + i] < Double.zero, day7[dayGV + i] < 0), Double.zero,        
+          day7[dayGP + i] < Double.zero, day7[dayGR + i] < Double.zero, day7[dayGT + i] < Double.zero, day7[dayGV + i] < 0), Double.zero,        
         min(
           1, ifFinite(day7[dayGF + i] / max(Double.zero, day7[dayGF + i] - day7[dayGG + i]), 1), ifFinite(day7[dayGH + i] / max(Double.zero, day7[dayGH + i] - day7[dayGI + i]), 1),
           ifFinite(day7[dayGJ + i] / max(Double.zero, day7[dayGJ + i] - day7[dayGK + i]), 1), ifFinite(day7[dayGL + i] / max(Double.zero, day7[dayGL + i] - day7[dayGM + i]), 1),
@@ -740,7 +740,7 @@ extension TunOl {
       day7[dayGZ + i] = iff(
         or(
           day6[dayDR + i].isZero, day7[dayFC + i] < Double.zero, day7[dayFF + i] < Double.zero, day7[dayFI + i] < Double.zero, day7[dayFL + i] < Double.zero,
-          day7[dayFO + i] < Double.zero, day7[dayFR + i] < Double.zero, day1[dayFU + i] < Double.zero, day7[dayFX + i] < Double.zero, day7[dayGA + i] < 0), Double.zero,
+          day7[dayFO + i] < Double.zero, day7[dayFR + i] < Double.zero, day7[dayFU + i] < Double.zero, day7[dayFX + i] < Double.zero, day7[dayGA + i] < 0), Double.zero,
         min(
           1, ifFinite(day7[dayFC + i] / max(Double.zero, day7[dayFC + i] - day7[dayFD + i]), 1), ifFinite(day7[dayFF + i] / max(Double.zero, day7[dayFF + i] - day7[dayFG + i]), 1),
           ifFinite(day7[dayFI + i] / max(Double.zero, day7[dayFI + i] - day7[dayFJ + i]), 1), ifFinite(day7[dayFL + i] / max(Double.zero, day7[dayFL + i] - day7[dayFM + i]), 1),
@@ -935,7 +935,7 @@ extension TunOl {
       day7[dayHS + i] = iff(
         or(day7[dayGZ + i].isZero,
           day7[dayHA + i] < Double.zero, day7[dayHC + i] < Double.zero, day7[dayHE + i] < Double.zero, day7[dayHG + i] < Double.zero, day7[dayHI + i] < Double.zero,
-          day7[dayHK + i] < Double.zero, day1[dayHM + i] < Double.zero, day7[dayHO + i] < Double.zero, day7[dayHQ + i] < 0), Double.zero,
+          day7[dayHK + i] < Double.zero, day7[dayHM + i] < Double.zero, day7[dayHO + i] < Double.zero, day7[dayHQ + i] < 0), Double.zero,
         min(
           1,
           min(

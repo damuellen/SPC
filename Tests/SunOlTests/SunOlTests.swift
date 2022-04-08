@@ -25,7 +25,7 @@ class SunOlTests: XCTestCase {
         if abs(ref[i - 1] - array[index + i]) / ref[i - 1] > 0.005 {
           counter += 1
           correct = false
-          print("Calculation", letter, i + 4, "=", ref[i - 1], "not equal", array[index + i])
+          print("Calculation", letter, i + 4, "=", ref[i - 1], "not equal [\(index + i)] =", array[index + i])
         }
       }
       if correct { print("Calculation", letter, "all equal") }
