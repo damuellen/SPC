@@ -13,7 +13,7 @@ public struct Costs {
    {
      let FX_USD = 0.82
      let Hydrogen_density = 5.783
-     let CO2_density = 945.0
+    //  let CO2_density = 945.0
     //  let RawMeth_density = 782.0
  
      let Solar_field = (basis: 38.0, c1: 1581220.07314946, exp: 0.8, f: 0.71, coeff: 18_000_000.0, range: 19.0...130.0)
