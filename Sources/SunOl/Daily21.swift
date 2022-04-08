@@ -328,7 +328,8 @@ extension TunOl {
     let equiv_harmonious_range = equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]
 
     let ddAE = 45990
-    for i in 0..<365 { day7[ddAE + i] = equiv_harmonious_range < 1E-10 ? 1 : (day1[dayAE + i] - equiv_harmonious_min_perc[j]) / equiv_harmonious_range }  // This value to be 1 in case equiv_harmonious_range=zero
+    for i in 0..<365 { day7[ddAE + i] = equiv_harmonious_range < 1E-10 ? 1 : (day1[dayAE + i] - equiv_harmonious_min_perc[j]) / equiv_harmonious_range }
+    
     /// Surplus harm op period el after min day harm op and min night op prep
     let dayFC = 0
     // EB6+EH6-O6-MIN(EK6,max(0,EA6+E6+G6/El_boiler_eff-EJ6)/BESS_chrg_eff)-MAX(0,Q6-EE6)/El_boiler_eff
