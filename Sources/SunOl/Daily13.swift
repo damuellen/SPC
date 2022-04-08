@@ -31,14 +31,17 @@ extension TunOl {
     for i in 0..<365 { day7[ddIQ + i] = day5[dayFS + i] + day5[dayGE + i] - day1[dayZ + i] - max(Double.zero, day1[dayAB + i] - day5[dayFV + i]) / El_boiler_eff
         - min(day5[dayFY + i], max(Double.zero, day5[dayFK + i] - day6[dayGG + i]) / BESS_chrg_eff) }
 
-    let equiv_harmonious_range = (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j])
+    let equiv_harmonious_range = (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j])    
+    let ddAM = 30295 // let ddLY = 30295
+    for i in 0..<365 { day7[ddAM + i] = equiv_harmonious_range < 1E-10 ? 1 : (day1[dayAM + i] - equiv_harmonious_min_perc[j]) / equiv_harmonious_range }
+
     /// Surplus harm op period electricity after min harm op and max night op prep
     let ddIR = 365
     // =HO6+IA6-($Z6+($AA6-$Z6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*($AM6-A_equiv_harmonious_min_perc))-MAX(0,($AB6+($AC6-$AB6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*($AM6-A_equiv_harmonious_min_perc))-HR6)/El_boiler_eff-MIN(HU6,MAX(0,HG6-IC6)/BESS_chrg_eff)
     for i in 0..<365 {
       day7[ddIR + i] =
-        day6[dayHO + i] + day6[dayIA + i] - (day1[dayZ + i] + (day1[dayAA + i] - day1[dayZ + i]) / equiv_harmonious_range * (day1[dayAM + i] - equiv_harmonious_min_perc[j])) - max(
-          0, (day1[dayAB + i] + (day1[dayAC + i] - day1[dayAB + i]) / equiv_harmonious_range * (day1[dayAM + i] - equiv_harmonious_min_perc[j])) - day6[dayHR + i]) / El_boiler_eff
+        day6[dayHO + i] + day6[dayIA + i] - (day1[dayZ + i] + (day1[dayAA + i] - day1[dayZ + i]) * day7[ddAM + i]) - max(
+          0, (day1[dayAB + i] + (day1[dayAC + i] - day1[dayAB + i]) * day7[ddAM + i]) - day6[dayHR + i]) / El_boiler_eff
           - min(day6[dayHU + i], max(Double.zero, day6[dayHG + i] - day6[dayIC + i]) / BESS_chrg_eff)
     }
 
@@ -60,9 +63,9 @@ extension TunOl {
     for i in 0..<365 {
       day7[ddIU + i] =
         day6[dayHR + i] + max(
-          Double.zero, day6[dayHO + i] + day6[dayIA + i] - (day1[dayZ + i] + (day1[dayAA + i] - day1[dayZ + i]) / equiv_harmonious_range * (day1[dayAM + i] - equiv_harmonious_min_perc[j]))
+          Double.zero, day6[dayHO + i] + day6[dayIA + i] - (day1[dayZ + i] + (day1[dayAA + i] - day1[dayZ + i]) * day7[ddAM + i])
           - min(day6[dayHU + i], max(Double.zero, day6[dayHG + i] - day6[dayIC + i]) / BESS_chrg_eff))
-        * El_boiler_eff - (day1[dayAB + i] + (day1[dayAC + i] - day1[dayAB + i]) / equiv_harmonious_range * (day1[dayAM + i] - equiv_harmonious_min_perc[j]))
+        * El_boiler_eff - (day1[dayAB + i] + (day1[dayAC + i] - day1[dayAB + i]) * day7[ddAM + i])
     }
 
     /// Surplus harm op heat+boiler prod after max harm op and min night op prep
@@ -82,7 +85,7 @@ extension TunOl {
     for i in 0..<365 {
       day7[ddIX + i] =
         day6[dayID + i] - max(
-          Double.zero, (day1[dayAB + i] + (day1[dayAC + i] - day1[dayAB + i]) / equiv_harmonious_range * (day1[dayAM + i] - equiv_harmonious_min_perc[j])) - day6[dayHR + i]) / El_boiler_eff
+          Double.zero, (day1[dayAB + i] + (day1[dayAC + i] - day1[dayAB + i]) * day7[ddAM + i]) - day6[dayHR + i]) / El_boiler_eff
     }
 
     /// Surplus el boiler cap after max harm op and min night op prep
@@ -121,8 +124,8 @@ extension TunOl {
         day6[dayIA + i]
         - max(
           Double.zero,
-          -(day6[dayHO + i] - (day1[dayZ + i] + (day1[dayAA + i] - day1[dayZ + i]) / equiv_harmonious_range * (day1[dayAM + i] - equiv_harmonious_min_perc[j])) - max(
-            Double.zero, (day1[dayAB + i] + (day1[dayAC + i] - day1[dayAB + i]) / equiv_harmonious_range * (day1[dayAM + i] - equiv_harmonious_min_perc[j])) - day6[dayHR + i])
+          -(day6[dayHO + i] - (day1[dayZ + i] + (day1[dayAA + i] - day1[dayZ + i]) * day7[ddAM + i]) - max(
+            Double.zero, (day1[dayAB + i] + (day1[dayAC + i] - day1[dayAB + i]) * day7[ddAM + i]) - day6[dayHR + i])
             / El_boiler_eff - min(day6[dayHU + i], max(Double.zero, day6[dayHG + i] - day6[dayIC + i]) / BESS_chrg_eff)))
     }
     /// Surplus grid import cap after max harm op and min night op prep
@@ -140,7 +143,7 @@ extension TunOl {
     let ddJG = 5840
     // JG=IG6-($AD6+($AE6-$AD6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*($AM6-A_equiv_harmonious_min_perc))
     for i in 0..<365 {
-      day7[ddJG + i] = day6[dayIG + i] - (day1[dayAD + i] + (day1[dayAE + i] - day1[dayAD + i]) / equiv_harmonious_range * (day1[dayAM + i] - equiv_harmonious_min_perc[j]))
+      day7[ddJG + i] = day6[dayIG + i] - (day1[dayAD + i] + (day1[dayAE + i] - day1[dayAD + i]) * day7[ddAM + i])
     }
 
     /// Surplus RawMeth prod cap after max harm op and min night op prep
@@ -157,7 +160,7 @@ extension TunOl {
     let ddJJ = 6935
     // JJ=IJ6-($AF6+($AG6-$AF6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*($AM6-A_equiv_harmonious_min_perc))
     for i in 0..<365 {
-      day7[ddJJ + i] = day6[dayIJ + i] - (day1[dayAF + i] + (day1[dayAG + i] - day1[dayAF + i]) / equiv_harmonious_range * (day1[dayAM + i] - equiv_harmonious_min_perc[j]))
+      day7[ddJJ + i] = day6[dayIJ + i] - (day1[dayAF + i] + (day1[dayAG + i] - day1[dayAF + i]) * day7[ddAM + i])
     }
 
     /// Surplus CO2 prod cap after max harm op and min night op prep
@@ -174,7 +177,7 @@ extension TunOl {
     let ddJM = 8030
     // JM=IM6-($AH6+($AI6-$AH6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*($AM6-A_equiv_harmonious_min_perc))
     for i in 0..<365 {
-      day7[ddJM + i] = day6[dayIM + i] - (day1[dayAH + i] + (day1[dayAI + i] - day1[dayAH + i]) / equiv_harmonious_range * (day1[dayAM + i] - equiv_harmonious_min_perc[j]))
+      day7[ddJM + i] = day6[dayIM + i] - (day1[dayAH + i] + (day1[dayAI + i] - day1[dayAH + i]) * day7[ddAM + i])
     }
 
     /// Surplus H2 prod cap after max harm op and min night op prep
@@ -198,9 +201,8 @@ extension TunOl {
           ifFinite(day7[ddJI + i] / max(0, day7[ddJI + i] - day7[ddJK + i]), 1), ifFinite(day7[ddJL + i] / max(0, day7[ddJL + i] - day7[ddJN + i]), 1)) * Overall_harmonious_range
           + Overall_harmonious_min_perc)
     }
-
-    //let dddJP = 45990 new number!
-    //for i in 0..<365 { day7[dddJP + i] = Overall_harmonious_range < 1E-10 ? 1 : (day7[ddJP + i] - Overall_harmonious_min_perc) / Overall_harmonious_range }
+    let dddJP = 26280 // let ddLN = 26280
+    for i in 0..<365 { day7[dddJP + i] = Overall_harmonious_range < 1E-10 ? 1 : (day7[ddJP + i] - Overall_harmonious_min_perc) / Overall_harmonious_range }
 
     /// Surplus harm op period electricity after opt harmonious and min night op prep
     let ddJQ = 9125
@@ -209,10 +211,10 @@ extension TunOl {
       day7[ddJQ + i] = iff(
         day7[ddJP + i].isZero, Double.zero,
         round(
-          (day5[dayFS + i] + (day5[dayFT + i] - day5[dayFS + i]) / Overall_harmonious_range * (day7[ddJP + i] - Overall_harmonious_min_perc))
-            + (day5[dayGE + i] + (day5[dayGF + i] - day5[dayGE + i]) / Overall_harmonious_range * (day7[ddJP + i] - Overall_harmonious_min_perc)) - day1[dayZ + i] - max(
-              Double.zero, day1[dayAB + i] - (day5[dayFV + i] + (day5[dayFW + i] - day5[dayFV + i]) / Overall_harmonious_range * (day7[ddJP + i] - Overall_harmonious_min_perc)))
-            / El_boiler_eff - min((day5[dayFY + i] + (day5[dayFZ + i] - day5[dayFY + i]) / Overall_harmonious_range * (day7[ddJP + i] - Overall_harmonious_min_perc)),
+          (day5[dayFS + i] + (day5[dayFT + i] - day5[dayFS + i]) * day7[dddJP + i])
+            + (day5[dayGE + i] + (day5[dayGF + i] - day5[dayGE + i]) * day7[dddJP + i]) - day1[dayZ + i] - max(
+              Double.zero, day1[dayAB + i] - (day5[dayFV + i] + (day5[dayFW + i] - day5[dayFV + i]) * day7[dddJP + i]))
+            / El_boiler_eff - min((day5[dayFY + i] + (day5[dayFZ + i] - day5[dayFY + i]) * day7[dddJP + i]),
               max(Double.zero, day5[dayFK + i] - day6[dayGG + i]) / BESS_chrg_eff), 5))
     }
 
@@ -223,13 +225,13 @@ extension TunOl {
       day7[ddJR + i] = iff(
         day7[ddJP + i].isZero, Double.zero,
         round(
-          (day6[dayHO + i] + (day6[dayHP + i] - day6[dayHO + i]) / Overall_harmonious_range * (day7[ddJP + i] - Overall_harmonious_min_perc))
-            + (day6[dayIA + i] + (day6[dayIB + i] - day6[dayIA + i]) / Overall_harmonious_range * (day7[ddJP + i] - Overall_harmonious_min_perc))
-            - (day1[dayZ + i] + (day1[dayAA + i] - day1[dayZ + i]) / equiv_harmonious_range * (day1[dayAM + i] - equiv_harmonious_min_perc[j])) - max(
+          (day6[dayHO + i] + (day6[dayHP + i] - day6[dayHO + i]) * day7[dddJP + i])
+            + (day6[dayIA + i] + (day6[dayIB + i] - day6[dayIA + i]) * day7[dddJP + i])
+            - (day1[dayZ + i] + (day1[dayAA + i] - day1[dayZ + i]) * day7[ddAM + i]) - max(
               Double.zero,
-              (day1[dayAB + i] + (day1[dayAC + i] - day1[dayAB + i]) / equiv_harmonious_range * (day1[dayAM + i] - equiv_harmonious_min_perc[j]))
-                - (day6[dayHR + i] + (day6[dayHS + i] - day6[dayHR + i]) / Overall_harmonious_range * (day7[ddJP + i] - Overall_harmonious_min_perc))) / El_boiler_eff
-                - min((day6[dayHU + i] + (day6[dayHV + i] - day6[dayHU + i]) / Overall_harmonious_range * (day7[ddJP + i] - Overall_harmonious_min_perc)), max(Double.zero, day6[dayHG + i] - day6[dayIC + i]) / BESS_chrg_eff), 5))
+              (day1[dayAB + i] + (day1[dayAC + i] - day1[dayAB + i]) * day7[ddAM + i])
+                - (day6[dayHR + i] + (day6[dayHS + i] - day6[dayHR + i]) * day7[dddJP + i])) / El_boiler_eff
+                - min((day6[dayHU + i] + (day6[dayHV + i] - day6[dayHU + i]) * day7[dddJP + i]), max(Double.zero, day6[dayHG + i] - day6[dayIC + i]) / BESS_chrg_eff), 5))
     }
 
     /// Surplus harm op csp steam+boiler prod cap after opt day harm and min night op prep
@@ -239,11 +241,11 @@ extension TunOl {
       day7[ddJS + i] = iff(
         day7[ddJP + i].isZero, Double.zero,
         round(
-          (day5[dayFV + i] + (day5[dayFW + i] - day5[dayFV + i]) / Overall_harmonious_range * (day7[ddJP + i] - Overall_harmonious_min_perc)) + max(
+          (day5[dayFV + i] + (day5[dayFW + i] - day5[dayFV + i]) * day7[dddJP + i]) + max(
             Double.zero,
-            (day5[dayFS + i] + (day5[dayFT + i] - day5[dayFS + i]) / Overall_harmonious_range * (day7[ddJP + i] - Overall_harmonious_min_perc))
-              + (day5[dayGE + i] + (day5[dayGF + i] - day5[dayGE + i]) / Overall_harmonious_range * (day7[ddJP + i] - Overall_harmonious_min_perc)) - day1[dayZ + i]) * El_boiler_eff
-              - min((day5[dayFY + i] + (day5[dayFZ + i] - day5[dayFY + i]) / Overall_harmonious_range * (day7[ddJP + i] - Overall_harmonious_min_perc)),
+            (day5[dayFS + i] + (day5[dayFT + i] - day5[dayFS + i]) * day7[dddJP + i])
+              + (day5[dayGE + i] + (day5[dayGF + i] - day5[dayGE + i]) * day7[dddJP + i]) - day1[dayZ + i]) * El_boiler_eff
+              - min((day5[dayFY + i] + (day5[dayFZ + i] - day5[dayFY + i]) * day7[dddJP + i]),
                 max(Double.zero, day5[dayFK + i] - day6[dayGG + i]) / BESS_chrg_eff) - day1[dayAB + i], 5))
     }
 
@@ -254,14 +256,14 @@ extension TunOl {
       day7[ddJT + i] = iff(
         day7[ddJP + i].isZero, Double.zero,
         round(
-          (day6[dayHR + i] + (day6[dayHS + i] - day6[dayHR + i]) / Overall_harmonious_range * (day7[ddJP + i] - Overall_harmonious_min_perc)) + max(
+          (day6[dayHR + i] + (day6[dayHS + i] - day6[dayHR + i]) * day7[dddJP + i]) + max(
             Double.zero,
-            (day6[dayHO + i] + (day6[dayHP + i] - day6[dayHO + i]) / Overall_harmonious_range * (day7[ddJP + i] - Overall_harmonious_min_perc))
-              + (day6[dayIA + i] + (day6[dayIB + i] - day6[dayIA + i]) / Overall_harmonious_range * (day7[ddJP + i] - Overall_harmonious_min_perc))
-              - (day1[dayZ + i] + (day1[dayAA + i] - day1[dayZ + i]) / equiv_harmonious_range * (day1[dayAM + i] - equiv_harmonious_min_perc[j]))) * El_boiler_eff
-              - min((day6[dayHU + i] + (day6[dayHV + i] - day6[dayHU + i]) / Overall_harmonious_range * (day7[ddJP + i] - Overall_harmonious_min_perc)),
+            (day6[dayHO + i] + (day6[dayHP + i] - day6[dayHO + i]) * day7[dddJP + i])
+              + (day6[dayIA + i] + (day6[dayIB + i] - day6[dayIA + i]) * day7[dddJP + i])
+              - (day1[dayZ + i] + (day1[dayAA + i] - day1[dayZ + i]) * day7[ddAM + i])) * El_boiler_eff
+              - min((day6[dayHU + i] + (day6[dayHV + i] - day6[dayHU + i]) * day7[dddJP + i]),
                 max(Double.zero, day6[dayHG + i] - day6[dayIC + i]) / BESS_chrg_eff)
-            - (day1[dayAB + i] + (day1[dayAC + i] - day1[dayAB + i]) / equiv_harmonious_range * (day1[dayAM + i] - equiv_harmonious_min_perc[j])), 5))
+            - (day1[dayAB + i] + (day1[dayAC + i] - day1[dayAB + i]) * day7[ddAM + i]), 5))
     }
 
     /// Surplus el boiler cap after opt day harm and min night op prep
@@ -271,8 +273,8 @@ extension TunOl {
       day7[ddJU + i] = iff(
         day7[ddJP + i].isZero, Double.zero,
         round(
-          (day5[dayGH + i] + (day5[dayGI + i] - day5[dayGH + i]) / Overall_harmonious_range * (day7[ddJP + i] - Overall_harmonious_min_perc)) - max(
-            Double.zero, day1[dayAB + i] - (day5[dayFV + i] + (day5[dayFW + i] - day5[dayFV + i]) / Overall_harmonious_range * (day7[ddJP + i] - Overall_harmonious_min_perc)))
+          (day5[dayGH + i] + (day5[dayGI + i] - day5[dayGH + i]) * day7[dddJP + i]) - max(
+            Double.zero, day1[dayAB + i] - (day5[dayFV + i] + (day5[dayFW + i] - day5[dayFV + i]) * day7[dddJP + i]))
             / El_boiler_eff, 5))
     }
 
@@ -283,10 +285,10 @@ extension TunOl {
       day7[ddJV + i] = iff(
         day7[ddJP + i].isZero, Double.zero,
         round(
-          (day6[dayID + i] + (day6[dayIE + i] - day6[dayID + i]) / Overall_harmonious_range * (day7[ddJP + i] - Overall_harmonious_min_perc)) - max(
+          (day6[dayID + i] + (day6[dayIE + i] - day6[dayID + i]) * day7[dddJP + i]) - max(
             Double.zero,
-            (day1[dayAB + i] + (day1[dayAC + i] - day1[dayAB + i]) / equiv_harmonious_range * (day1[dayAM + i] - equiv_harmonious_min_perc[j]))
-              - (day6[dayHR + i] + (day6[dayHS + i] - day6[dayHR + i]) / Overall_harmonious_range * (day7[ddJP + i] - Overall_harmonious_min_perc))) / El_boiler_eff, 5))
+            (day1[dayAB + i] + (day1[dayAC + i] - day1[dayAB + i]) * day7[ddAM + i])
+              - (day6[dayHR + i] + (day6[dayHS + i] - day6[dayHR + i]) * day7[dddJP + i])) / El_boiler_eff, 5))
     }
 
     /// Surplus BESS chrg cap after opt day harm and min night op prep
@@ -322,12 +324,12 @@ extension TunOl {
       day7[ddJY + i] = iff(
         day7[ddJP + i].isZero, 0,
         round(
-          (day5[dayGE + i] + (day5[dayGF + i] - day5[dayGE + i]) / Overall_harmonious_range * (day7[ddJP + i] - Overall_harmonious_min_perc))
+          (day5[dayGE + i] + (day5[dayGF + i] - day5[dayGE + i]) * day7[dddJP + i])
             - max(
               Double.zero,
-              -((day5[dayFS + i] + (day5[dayFT + i] - day5[dayFS + i]) / Overall_harmonious_range * (day7[ddJP + i] - Overall_harmonious_min_perc)) - day1[dayZ + i] - max(
-                Double.zero, day1[dayAB + i] - (day5[dayFV + i] + (day5[dayFW + i] - day5[dayFV + i]) / Overall_harmonious_range * (day7[ddJP + i] - Overall_harmonious_min_perc)))
-                / El_boiler_eff - min((day5[dayFY + i] + (day5[dayFZ + i] - day5[dayFY + i]) / Overall_harmonious_range * (day7[ddJP + i] - Overall_harmonious_min_perc)),
+              -((day5[dayFS + i] + (day5[dayFT + i] - day5[dayFS + i]) * day7[dddJP + i]) - day1[dayZ + i] - max(
+                Double.zero, day1[dayAB + i] - (day5[dayFV + i] + (day5[dayFW + i] - day5[dayFV + i]) * day7[dddJP + i]))
+                / El_boiler_eff - min((day5[dayFY + i] + (day5[dayFZ + i] - day5[dayFY + i]) * day7[dddJP + i]),
                   max(Double.zero, day5[dayFK + i] - day6[dayGG + i]) / BESS_chrg_eff))), 5))
     }
 
@@ -338,16 +340,16 @@ extension TunOl {
       day7[ddJZ + i] = iff(
         day7[ddJP + i].isZero, Double.zero,
         round(
-          (day6[dayIA + i] + (day6[dayIB + i] - day6[dayIA + i]) / Overall_harmonious_range * (day7[ddJP + i] - Overall_harmonious_min_perc))
+          (day6[dayIA + i] + (day6[dayIB + i] - day6[dayIA + i]) * day7[dddJP + i])
             - max(
               Double.zero,
-              -((day6[dayHO + i] + (day6[dayHP + i] - day6[dayHO + i]) / Overall_harmonious_range * (day7[ddJP + i] - Overall_harmonious_min_perc))
+              -((day6[dayHO + i] + (day6[dayHP + i] - day6[dayHO + i]) * day7[dddJP + i])
                 - (day1[dayZ + i] + (day1[dayAA + i] - day1[dayZ + i]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]) * (day1[dayAM + i] - equiv_harmonious_min_perc[j]))
                 - max(
                   Double.zero,
                   (day1[dayAB + i] + (day1[dayAC + i] - day1[dayAB + i]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]) * (day1[dayAM + i] - equiv_harmonious_min_perc[j]))
-                    - (day6[dayHR + i] + (day6[dayHS + i] - day6[dayHR + i]) / Overall_harmonious_range * (day7[ddJP + i] - Overall_harmonious_min_perc))) / El_boiler_eff
-                    - min((day6[dayHU + i] + (day6[dayHV + i] - day6[dayHU + i]) / Overall_harmonious_range * (day7[ddJP + i] - Overall_harmonious_min_perc)),
+                    - (day6[dayHR + i] + (day6[dayHS + i] - day6[dayHR + i]) * day7[dddJP + i])) / El_boiler_eff
+                    - min((day6[dayHU + i] + (day6[dayHV + i] - day6[dayHU + i]) * day7[dddJP + i]),
                       max(Double.zero, day6[dayHG + i] - day6[dayIC + i]) / BESS_chrg_eff))), 5))
     }
 
@@ -357,7 +359,7 @@ extension TunOl {
     for i in 0..<365 {
       day7[ddKA + i] = iff(
         day7[ddJP + i].isZero, Double.zero,
-        round((day5[dayGK + i] + (day5[dayGL + i] - day5[dayGK + i]) / Overall_harmonious_range * (day7[ddJP + i] - Overall_harmonious_min_perc)) - day1[dayAD + i], 5))
+        round((day5[dayGK + i] + (day5[dayGL + i] - day5[dayGK + i]) * day7[dddJP + i]) - day1[dayAD + i], 5))
     }
 
     /// Surplus RawMeth prod cap after opt day harm and max night op prep
@@ -367,8 +369,8 @@ extension TunOl {
       day7[ddKB + i] = iff(
         day7[ddJP + i].isZero, Double.zero,
         round(
-          day5[dayGK + i] + (day5[dayGL + i] - day5[dayGK + i]) / Overall_harmonious_range * (day7[ddJP + i] - Overall_harmonious_min_perc)
-            - (day1[dayAD + i] + (day1[dayAE + i] - day1[dayAD + i]) / equiv_harmonious_range * (day1[dayAM + i] - equiv_harmonious_min_perc[j])), 5))
+          day5[dayGK + i] + (day5[dayGL + i] - day5[dayGK + i]) * day7[dddJP + i]
+            - (day1[dayAD + i] + (day1[dayAE + i] - day1[dayAD + i]) * day7[ddAM + i]), 5))
     }
 
     /// Surplus CO2 prod cap after opt day harm and min night op prep
@@ -377,7 +379,7 @@ extension TunOl {
     for i in 0..<365 {
       day7[ddKC + i] = iff(
         day7[ddJP + i].isZero, Double.zero,
-        round((day5[dayGN + i] + (day5[dayGO + i] - day5[dayGN + i]) / Overall_harmonious_range * (day7[ddJP + i] - Overall_harmonious_min_perc)) - day1[dayAF + i], 5))
+        round((day5[dayGN + i] + (day5[dayGO + i] - day5[dayGN + i]) * day7[dddJP + i]) - day1[dayAF + i], 5))
     }
 
     /// Surplus CO2 prod cap after opt day harm and max night op prep
@@ -387,8 +389,8 @@ extension TunOl {
       day7[ddKD + i] = iff(
         day7[ddJP + i].isZero, Double.zero,
         round(
-          day5[dayGN + i] + (day5[dayGO + i] - day5[dayGN + i]) / Overall_harmonious_range * (day7[ddJP + i] - Overall_harmonious_min_perc)
-            - (day1[dayAF + i] + (day1[dayAG + i] - day1[dayAF + i]) / equiv_harmonious_range * (day1[dayAM + i] - equiv_harmonious_min_perc[j])), 5))
+          day5[dayGN + i] + (day5[dayGO + i] - day5[dayGN + i]) * day7[dddJP + i]
+            - (day1[dayAF + i] + (day1[dayAG + i] - day1[dayAF + i]) * day7[ddAM + i]), 5))
     }
 
     /// Surplus H2 prod cap after opt day harm and min night op prep
@@ -397,7 +399,7 @@ extension TunOl {
     for i in 0..<365 {
       day7[ddKE + i] = iff(
         day7[ddJP + i].isZero, Double.zero,
-        round((day5[dayGQ + i] + (day5[dayGR + i] - day5[dayGQ + i]) / Overall_harmonious_range * (day7[ddJP + i] - Overall_harmonious_min_perc)) - day1[dayAH + i], 5))
+        round((day5[dayGQ + i] + (day5[dayGR + i] - day5[dayGQ + i]) * day7[dddJP + i]) - day1[dayAH + i], 5))
     }
 
     /// Surplus H2 prod cap after opt day harm and max night op prep
@@ -407,8 +409,8 @@ extension TunOl {
       day7[ddKF + i] = iff(
         day7[ddJP + i].isZero, Double.zero,
         round(
-          day5[dayGQ + i] + (day5[dayGR + i] - day5[dayGQ + i]) / Overall_harmonious_range * (day7[ddJP + i] - Overall_harmonious_min_perc)
-            - (day1[dayAH + i] + (day1[dayAI + i] - day1[dayAH + i]) / equiv_harmonious_range * (day1[dayAM + i] - equiv_harmonious_min_perc[j])), 5))
+          day5[dayGQ + i] + (day5[dayGR + i] - day5[dayGQ + i]) * day7[dddJP + i]
+            - (day1[dayAH + i] + (day1[dayAI + i] - day1[dayAH + i]) * day7[ddAM + i]), 5))
     }
 
     /// Opt night prep during day prio operation
@@ -442,9 +444,15 @@ extension TunOl {
           ifFinite(day7[ddJI + i] / max(0, day7[ddJI + i] - day7[ddJJ + i]), 1), ifFinite(day7[ddJL + i] / max(0, day7[ddJL + i] - day7[ddJM + i]), 1))
           * (day1[dayAM + i] - equiv_harmonious_min_perc[j]) + equiv_harmonious_min_perc[j])
     }
-
-    // let dddKI = 47085 NEW NUMBER
-    // for i in 0..<365 { day7[dddKI + i] = equiv_harmonious_range[j] < 1E-10 ? 1 : (day7[ddKI + i] - equiv_harmonious_min_perc[j]) / equiv_harmonious_range[j] }
+    
+    let ddAMKG = 23360 // let ddLF = 23360 
+    let dddKI = 25550 // let ddLL = 25550
+    let ddAMKI = 38690 // let ddMW = 38690
+    for i in 0..<365 { 
+      day7[dddKI + i] = equiv_harmonious_range[j] < 1E-10 ? 1 : (day7[ddKI + i] - equiv_harmonious_min_perc[j]) / equiv_harmonious_range[j]
+      day7[ddAMKG + i] = (day1[dayAM + i] - equiv_harmonious_min_perc[j]) < 1E-10 ? 1 : (day7[ddKG + i] - equiv_harmonious_min_perc[j]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j])
+      day7[ddAMKI + i] = (day1[dayAM + i] - equiv_harmonious_min_perc[j]) < 1E-10 ? 1 : (day7[ddKI + i] - equiv_harmonious_min_perc[j]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j])
+    }
 
     /// Surplus harm op period electricity after min day harmonious and opti night op prep
     let ddKJ = 15695
@@ -453,15 +461,15 @@ extension TunOl {
       day7[ddKJ + i] = iff(
         day7[ddKI + i].isZero, Double.zero,
         round(
-          (day5[dayFS + i] + (day6[dayHO + i] - day5[dayFS + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
-            + (day5[dayGE + i] + (day6[dayIA + i] - day5[dayGE + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
-            - (day1[dayZ + i] + (day1[dayAA + i] - day1[dayZ + i]) / equiv_harmonious_range * (day7[ddKI + i] - equiv_harmonious_min_perc[j])) - max(
+          (day5[dayFS + i] + (day6[dayHO + i] - day5[dayFS + i]) * day7[ddAMKI + i])
+            + (day5[dayGE + i] + (day6[dayIA + i] - day5[dayGE + i]) * day7[ddAMKI + i])
+            - (day1[dayZ + i] + (day1[dayAA + i] - day1[dayZ + i]) * day7[dddKI + i]) - max(
               Double.zero,
-              (day1[dayAB + i] + (day1[dayAC + i] - day1[dayAB + i]) / equiv_harmonious_range * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
-                - (day5[dayFV + i] + (day6[dayHR + i] - day5[dayFV + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j])))
+              (day1[dayAB + i] + (day1[dayAC + i] - day1[dayAB + i]) * day7[dddKI + i])
+                - (day5[dayFV + i] + (day6[dayHR + i] - day5[dayFV + i]) * day7[ddAMKI + i]))
             / El_boiler_eff
-              - min((day5[dayFY + i] + (day6[dayHU + i] - day5[dayFY + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j])),
-                max(Double.zero, (day5[dayFK + i] + (day6[dayHG + i] - day5[dayFK + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j])) - (day5[dayGG + i] + (day6[dayIC + i] - day5[dayGG + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))) / BESS_chrg_eff), 5))
+              - min((day5[dayFY + i] + (day6[dayHU + i] - day5[dayFY + i]) * day7[ddAMKI + i]),
+                max(Double.zero, (day5[dayFK + i] + (day6[dayHG + i] - day5[dayFK + i]) * day7[ddAMKI + i]) - (day5[dayGG + i] + (day6[dayIC + i] - day5[dayGG + i]) * day7[ddAMKI + i])) / BESS_chrg_eff), 5))
     }
 
     /// Surplus harm op period electricity after max day harmonious and opti night op prep
@@ -471,15 +479,15 @@ extension TunOl {
       day7[ddKK + i] = iff(
         day7[ddKI + i].isZero, Double.zero,
         round(
-          (day5[dayFT + i] + (day6[dayHP + i] - day5[dayFT + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
-            + (day5[dayGF + i] + (day6[dayIB + i] - day5[dayGF + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
-            - (day1[dayZ + i] + (day1[dayAA + i] - day1[dayZ + i]) / equiv_harmonious_range * (day7[ddKI + i] - equiv_harmonious_min_perc[j])) - max(
+          (day5[dayFT + i] + (day6[dayHP + i] - day5[dayFT + i]) * day7[ddAMKI + i])
+            + (day5[dayGF + i] + (day6[dayIB + i] - day5[dayGF + i]) * day7[ddAMKI + i])
+            - (day1[dayZ + i] + (day1[dayAA + i] - day1[dayZ + i]) * day7[dddKI + i]) - max(
               Double.zero,
-              (day1[dayAB + i] + (day1[dayAC + i] - day1[dayAB + i]) / equiv_harmonious_range * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
-                - (day5[dayFW + i] + (day6[dayHS + i] - day5[dayFW + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j])))
+              (day1[dayAB + i] + (day1[dayAC + i] - day1[dayAB + i]) * day7[dddKI + i])
+                - (day5[dayFW + i] + (day6[dayHS + i] - day5[dayFW + i]) * day7[ddAMKI + i]))
             / El_boiler_eff
-              - min((day5[dayFZ + i] + (day6[dayHV + i] - day5[dayFZ + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j])),
-                max(Double.zero, (day5[dayFK + i] + (day6[dayHG + i] - day5[dayFK + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j])) - (day5[dayGG + i] + (day6[dayIC + i] - day5[dayGG + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))) / BESS_chrg_eff), 5))
+              - min((day5[dayFZ + i] + (day6[dayHV + i] - day5[dayFZ + i]) * day7[ddAMKI + i]),
+                max(Double.zero, (day5[dayFK + i] + (day6[dayHG + i] - day5[dayFK + i]) * day7[ddAMKI + i]) - (day5[dayGG + i] + (day6[dayIC + i] - day5[dayGG + i]) * day7[ddAMKI + i])) / BESS_chrg_eff), 5))
     }
 
     /// Surplus harmonious op csp steam+boiler prod cap after min day harmonious and opti night op prep
@@ -489,15 +497,15 @@ extension TunOl {
       day7[ddKL + i] = iff(
         day7[ddKI + i].isZero, Double.zero,
         round(
-          (day5[dayFV + i] + (day6[dayHR + i] - day5[dayFV + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
+          (day5[dayFV + i] + (day6[dayHR + i] - day5[dayFV + i]) * day7[ddAMKI + i])
             + (max(
               Double.zero,
-              (day5[dayFS + i] + (day6[dayHO + i] - day5[dayFS + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
-                + (day5[dayGE + i] + (day6[dayIA + i] - day5[dayGE + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
-                - (day1[dayZ + i] + (day1[dayAA + i] - day1[dayZ + i]) / equiv_harmonious_range * (day7[ddKI + i] - equiv_harmonious_min_perc[j])))) * El_boiler_eff
-            - min((day5[dayFY + i] + (day6[dayHU + i] - day5[dayFY + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j])),
-                max(Double.zero, (day5[dayFK + i] + (day6[dayHG + i] - day5[dayFK + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j])) - (day5[dayGG + i] + (day6[dayIC + i] - day5[dayGG + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))) / BESS_chrg_eff)
-            - (day1[dayAB + i] + (day1[dayAC + i] - day1[dayAB + i]) / equiv_harmonious_range * (day7[ddKI + i] - equiv_harmonious_min_perc[j])), 5))
+              (day5[dayFS + i] + (day6[dayHO + i] - day5[dayFS + i]) * day7[ddAMKI + i])
+                + (day5[dayGE + i] + (day6[dayIA + i] - day5[dayGE + i]) * day7[ddAMKI + i])
+                - (day1[dayZ + i] + (day1[dayAA + i] - day1[dayZ + i]) * day7[dddKI + i]))) * El_boiler_eff
+            - min((day5[dayFY + i] + (day6[dayHU + i] - day5[dayFY + i]) * day7[ddAMKI + i]),
+                max(Double.zero, (day5[dayFK + i] + (day6[dayHG + i] - day5[dayFK + i]) * day7[ddAMKI + i]) - (day5[dayGG + i] + (day6[dayIC + i] - day5[dayGG + i]) * day7[ddAMKI + i])) / BESS_chrg_eff)
+            - (day1[dayAB + i] + (day1[dayAC + i] - day1[dayAB + i]) * day7[dddKI + i]), 5))
     }
 
     /// Surplus harmonious op csp steam+boiler prod cap after max day harmonious and opti night op prep
@@ -507,15 +515,15 @@ extension TunOl {
       day7[ddKM + i] = iff(
         day7[ddKI + i].isZero, Double.zero,
         round(
-          (day5[dayFW + i] + (day6[dayHS + i] - day5[dayFW + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
+          (day5[dayFW + i] + (day6[dayHS + i] - day5[dayFW + i]) * day7[ddAMKI + i])
             + (max(
               Double.zero,
-              (day5[dayFT + i] + (day6[dayHP + i] - day5[dayFT + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
-                + (day5[dayGF + i] + (day6[dayIB + i] - day5[dayGF + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
-                - (day1[dayZ + i] + (day1[dayAA + i] - day1[dayZ + i]) / equiv_harmonious_range * (day7[ddKI + i] - equiv_harmonious_min_perc[j])))) * El_boiler_eff
-                - min((day5[dayFZ + i] + (day6[dayHV + i] - day5[dayFZ + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j])),
-                  max(Double.zero, (day5[dayFK + i] + (day6[dayHG + i] - day5[dayFK + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j])) - (day5[dayGG + i] + (day6[dayIC + i] - day5[dayGG + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))) / BESS_chrg_eff)
-            - (day1[dayAB + i] + (day1[dayAC + i] - day1[dayAB + i]) / equiv_harmonious_range * (day7[ddKI + i] - equiv_harmonious_min_perc[j])), 5))
+              (day5[dayFT + i] + (day6[dayHP + i] - day5[dayFT + i]) * day7[ddAMKI + i])
+                + (day5[dayGF + i] + (day6[dayIB + i] - day5[dayGF + i]) * day7[ddAMKI + i])
+                - (day1[dayZ + i] + (day1[dayAA + i] - day1[dayZ + i]) * day7[dddKI + i]))) * El_boiler_eff
+                - min((day5[dayFZ + i] + (day6[dayHV + i] - day5[dayFZ + i]) * day7[ddAMKI + i]),
+                  max(Double.zero, (day5[dayFK + i] + (day6[dayHG + i] - day5[dayFK + i]) * day7[ddAMKI + i]) - (day5[dayGG + i] + (day6[dayIC + i] - day5[dayGG + i]) * day7[ddAMKI + i])) / BESS_chrg_eff)
+            - (day1[dayAB + i] + (day1[dayAC + i] - day1[dayAB + i]) * day7[dddKI + i]), 5))
     }
 
     /// Surplus el boiler cap after min day harmonious and opti night op prep
@@ -525,10 +533,10 @@ extension TunOl {
       day7[ddKN + i] = iff(
         day7[ddKI + i].isZero, Double.zero,
         round(
-          (day5[dayGH + i] + (day6[dayID + i] - day5[dayGH + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j])) - max(
+          (day5[dayGH + i] + (day6[dayID + i] - day5[dayGH + i]) * day7[ddAMKI + i]) - max(
             Double.zero,
-            (day1[dayAB + i] + (day1[dayAC + i] - day1[dayAB + i]) / equiv_harmonious_range * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
-              - (day5[dayFV + i] + (day6[dayHR + i] - day5[dayFV + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j])))
+            (day1[dayAB + i] + (day1[dayAC + i] - day1[dayAB + i]) * day7[dddKI + i])
+              - (day5[dayFV + i] + (day6[dayHR + i] - day5[dayFV + i]) * day7[ddAMKI + i]))
             / El_boiler_eff, 5))
     }
 
@@ -539,10 +547,10 @@ extension TunOl {
       day7[ddKO + i] = iff(
         day7[ddKI + i].isZero, Double.zero,
         round(
-          (day5[dayGI + i] + (day6[dayIE + i] - day5[dayGI + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j])) - max(
+          (day5[dayGI + i] + (day6[dayIE + i] - day5[dayGI + i]) * day7[ddAMKI + i]) - max(
             Double.zero,
-            (day1[dayAB + i] + (day1[dayAC + i] - day1[dayAB + i]) / equiv_harmonious_range * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
-              - (day5[dayFW + i] + (day6[dayHS + i] - day5[dayFW + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j])))
+            (day1[dayAB + i] + (day1[dayAC + i] - day1[dayAB + i]) * day7[dddKI + i])
+              - (day5[dayFW + i] + (day6[dayHS + i] - day5[dayFW + i]) * day7[ddAMKI + i]))
             / El_boiler_eff, 5))
     }
 
@@ -581,11 +589,11 @@ extension TunOl {
     // KR=IF(KI6=0,0,ROUND((GE6+(IA6-GE6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-MAX(0,-((FS6+(HO6-FS6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-($Z6+($AA6-$Z6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-MAX(0,($AB6+($AC6-$AB6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(FV6+(HR6-FV6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)))/El_boiler_eff-MIN(FY3+(HU3-FY3)/($AM3-A_equiv_harmonious_min_perc)*(KI3-A_equiv_harmonious_min_perc),MAX(0,(FK3+(HG3-FK3)/($AM3-A_equiv_harmonious_min_perc)*(KI3-A_equiv_harmonious_min_perc))-(GG3+(IC3-GG3)/($AM3-A_equiv_harmonious_min_perc)*(KI3-A_equiv_harmonious_min_perc)))/BESS_chrg_eff))),5))
     for i in 0..<365 {
 
-      let x1 = day5[dayGE + i] + (day6[dayIA + i] - day5[dayGE + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j])
-      let x2 = day5[dayFV + i] + (day6[dayHR + i] - day5[dayFV + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j])
-      let x3 = min((day5[dayFY + i] + (day6[dayHU + i] - day5[dayFY + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j])),
-                max(Double.zero, (day5[dayFK + i] + (day6[dayHG + i] - day5[dayFK + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j])) - (day5[dayGG + i] + (day6[dayIC + i] - day5[dayGG + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))) / BESS_chrg_eff)
-      let x4 = day5[dayFS + i] + (day6[dayHO + i] - day5[dayFS + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j])
+      let x1 = day5[dayGE + i] + (day6[dayIA + i] - day5[dayGE + i]) * day7[ddAMKI + i]
+      let x2 = day5[dayFV + i] + (day6[dayHR + i] - day5[dayFV + i]) * day7[ddAMKI + i]
+      let x3 = min((day5[dayFY + i] + (day6[dayHU + i] - day5[dayFY + i]) * day7[ddAMKI + i]),
+                max(Double.zero, (day5[dayFK + i] + (day6[dayHG + i] - day5[dayFK + i]) * day7[ddAMKI + i]) - (day5[dayGG + i] + (day6[dayIC + i] - day5[dayGG + i]) * day7[ddAMKI + i])) / BESS_chrg_eff)
+      let x4 = day5[dayFS + i] + (day6[dayHO + i] - day5[dayFS + i]) * day7[ddAMKI + i]
       let x5 = day1[dayZ + i] + (day1[dayAA + i] - day1[dayZ + i]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j])
 
       let x00 = day1[dayAB + i] + (day1[dayAC + i] - day1[dayAB + i]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j])
@@ -602,18 +610,18 @@ extension TunOl {
       day7[ddKS + i] = iff(
         day7[ddKI + i].isZero, 0,
         round(
-          (day5[dayGF + i] + (day6[dayIB + i] - day5[dayGF + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
+          (day5[dayGF + i] + (day6[dayIB + i] - day5[dayGF + i]) * day7[ddAMKI + i])
             - max(
               Double.zero,
-              -((day5[dayFT + i] + (day6[dayHP + i] - day5[dayFT + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
+              -((day5[dayFT + i] + (day6[dayHP + i] - day5[dayFT + i]) * day7[ddAMKI + i])
                 - (day1[dayZ + i] + (day1[dayAA + i] - day1[dayZ + i]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
                 - max(
                   Double.zero,
                   (day1[dayAB + i] + (day1[dayAC + i] - day1[dayAB + i]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
-                    - (day5[dayFW + i] + (day6[dayHS + i] - day5[dayFW + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j])))
+                    - (day5[dayFW + i] + (day6[dayHS + i] - day5[dayFW + i]) * day7[ddAMKI + i]))
                 / El_boiler_eff
-                  - min((day5[dayFZ + i] + (day6[dayHV + i] - day5[dayFZ + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j])),
-                    max(Double.zero, (day5[dayFK + i] + (day6[dayHG + i] - day5[dayFK + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j])) - (day5[dayGG + i] + (day6[dayIC + i] - day5[dayGG + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))) / BESS_chrg_eff))), 5))
+                  - min((day5[dayFZ + i] + (day6[dayHV + i] - day5[dayFZ + i]) * day7[ddAMKI + i]),
+                    max(Double.zero, (day5[dayFK + i] + (day6[dayHG + i] - day5[dayFK + i]) * day7[ddAMKI + i]) - (day5[dayGG + i] + (day6[dayIC + i] - day5[dayGG + i]) * day7[ddAMKI + i])) / BESS_chrg_eff))), 5))
     }
 
     /// Surplus RawMeth prod cap after min day harmonious and opti night op prep
@@ -623,8 +631,8 @@ extension TunOl {
       day7[ddKT + i] = iff(
         day7[ddKI + i].isZero, Double.zero,
         round(
-          (day5[dayGK + i] + (day6[dayIG + i] - day5[dayGK + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
-            - (day1[dayAD + i] + (day1[dayAE + i] - day1[dayAD + i]) / equiv_harmonious_range * (day7[ddKI + i] - equiv_harmonious_min_perc[j])), 5))
+          (day5[dayGK + i] + (day6[dayIG + i] - day5[dayGK + i]) * day7[ddAMKI + i])
+            - (day1[dayAD + i] + (day1[dayAE + i] - day1[dayAD + i]) * day7[dddKI + i]), 5))
     }
 
     /// Surplus RawMeth prod cap after max day harmonious and opti night op prep
@@ -634,8 +642,8 @@ extension TunOl {
       day7[ddKU + i] = iff(
         day7[ddKI + i].isZero, Double.zero,
         round(
-          (day5[dayGL + i] + (day6[dayIH + i] - day5[dayGL + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
-            - (day1[dayAD + i] + (day1[dayAE + i] - day1[dayAD + i]) / equiv_harmonious_range * (day7[ddKI + i] - equiv_harmonious_min_perc[j])), 5))
+          (day5[dayGL + i] + (day6[dayIH + i] - day5[dayGL + i]) * day7[ddAMKI + i])
+            - (day1[dayAD + i] + (day1[dayAE + i] - day1[dayAD + i]) * day7[dddKI + i]), 5))
     }
 
     /// Surplus CO2 prod cap after min day harmonious and opti night op prep
@@ -645,8 +653,8 @@ extension TunOl {
       day7[ddKV + i] = iff(
         day7[ddKI + i].isZero, Double.zero,
         round(
-          (day5[dayGN + i] + (day6[dayIJ + i] - day5[dayGN + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
-            - (day1[dayAF + i] + (day1[dayAG + i] - day1[dayAF + i]) / equiv_harmonious_range * (day7[ddKI + i] - equiv_harmonious_min_perc[j])), 5))
+          (day5[dayGN + i] + (day6[dayIJ + i] - day5[dayGN + i]) * day7[ddAMKI + i])
+            - (day1[dayAF + i] + (day1[dayAG + i] - day1[dayAF + i]) * day7[dddKI + i]), 5))
     }
 
     /// Surplus CO2 prod cap after max day harmonious and opti night op prep
@@ -656,8 +664,8 @@ extension TunOl {
       day7[ddKW + i] = iff(
         day7[ddKI + i].isZero, Double.zero,
         round(
-          (day5[dayGO + i] + (day6[dayIK + i] - day5[dayGO + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
-            - (day1[dayAF + i] + (day1[dayAG + i] - day1[dayAF + i]) / equiv_harmonious_range * (day7[ddKI + i] - equiv_harmonious_min_perc[j])), 5))
+          (day5[dayGO + i] + (day6[dayIK + i] - day5[dayGO + i]) * day7[ddAMKI + i])
+            - (day1[dayAF + i] + (day1[dayAG + i] - day1[dayAF + i]) * day7[dddKI + i]), 5))
     }
 
     /// Surplus H2 prod cap after min day harmonious and opti night op prep
@@ -667,8 +675,8 @@ extension TunOl {
       day7[ddKX + i] = iff(
         day7[ddKI + i].isZero, Double.zero,
         round(
-          (day5[dayGQ + i] + (day6[dayIM + i] - day5[dayGQ + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
-            - (day1[dayAH + i] + (day1[dayAI + i] - day1[dayAH + i]) / equiv_harmonious_range * (day7[ddKI + i] - equiv_harmonious_min_perc[j])), 5))
+          (day5[dayGQ + i] + (day6[dayIM + i] - day5[dayGQ + i]) * day7[ddAMKI + i])
+            - (day1[dayAH + i] + (day1[dayAI + i] - day1[dayAH + i]) * day7[dddKI + i]), 5))
     }
 
     /// Surplus H2 prod cap after max day harmonious and opti night op prep
@@ -678,8 +686,8 @@ extension TunOl {
       day7[ddKY + i] = iff(
         day7[ddKI + i].isZero, Double.zero,
         round(
-          (day5[dayGR + i] + (day6[dayIN + i] - day5[dayGR + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
-            - (day1[dayAH + i] + (day1[dayAI + i] - day1[dayAH + i]) / equiv_harmonious_range * (day7[ddKI + i] - equiv_harmonious_min_perc[j])), 5))
+          (day5[dayGR + i] + (day6[dayIN + i] - day5[dayGR + i]) * day7[ddAMKI + i])
+            - (day1[dayAH + i] + (day1[dayAI + i] - day1[dayAH + i]) * day7[dddKI + i]), 5))
     }
 
     /// Opt harm op period op during night prio operation
@@ -704,10 +712,10 @@ extension TunOl {
     for i in 0..<365 {
       day7[ddLB + i] = iff(
         day7[ddJP + i].isZero, max(day5[dayFC + i], day5[dayFD + i], day6[dayGY + i], day6[dayGZ + i]),
-        (day5[dayFC + i] + (day6[dayGY + i] - day5[dayFC + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKG + i] - equiv_harmonious_min_perc[j]))
-          + ((day5[dayFD + i] + (day6[dayGZ + i] - day5[dayFD + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKG + i] - equiv_harmonious_min_perc[j]))
-            - (day5[dayFC + i] + (day6[dayGY + i] - day5[dayFC + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKG + i] - equiv_harmonious_min_perc[j])))
-          / Overall_harmonious_range * (day7[ddJP + i] - Overall_harmonious_min_perc))
+        (day5[dayFC + i] + (day6[dayGY + i] - day5[dayFC + i]) * day7[ddAMKG + i])
+          + ((day5[dayFD + i] + (day6[dayGZ + i] - day5[dayFD + i]) * day7[ddAMKG + i])
+            - (day5[dayFC + i] + (day6[dayGY + i] - day5[dayFC + i]) * day7[ddAMKG + i]))
+          * day7[dddJP + i])
     }
 
     /// el cons for night prep during harm op period
@@ -726,7 +734,7 @@ extension TunOl {
     //   day7[ddLD + i] = iff(
     //     or(day7[ddJP + i].isZero, day7[ddKG + i].isZero), Double.zero,
     //     day5[dayFO + i] + (day6[dayHK + i] - day5[dayFO + i])
-    //       / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKG + i] - equiv_harmonious_min_perc[j]))
+    //       * day7[ddAMKG + i])
     // }
 
     /// el cons for BESS charging during harm op period
@@ -736,19 +744,18 @@ extension TunOl {
       day7[ddLE + i] = min(
         iff(
           day7[ddJP + i].isZero, min(day5[dayFY + i], day5[dayFY + i], day6[dayHU + i], day6[dayHV + i]),
-          (day5[dayFY + i] + (day6[dayHU + i] - day5[dayFY + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKG + i] - equiv_harmonious_min_perc[j])
-            + ((day5[dayFZ + i] + (day6[dayHV + i] - day5[dayFZ + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKG + i] - equiv_harmonious_min_perc[j]))
-              - (day5[dayFY + i] + (day6[dayHU + i] - day5[dayFY + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKG + i] - equiv_harmonious_min_perc[j])))
-              / Overall_harmonious_range * (day7[ddJP + i] - Overall_harmonious_min_perc))
+          (day5[dayFY + i] + (day6[dayHU + i] - day5[dayFY + i]) * day7[ddAMKG + i]
+            + ((day5[dayFZ + i] + (day6[dayHV + i] - day5[dayFZ + i]) * day7[ddAMKG + i])
+              - (day5[dayFY + i] + (day6[dayHU + i] - day5[dayFY + i]) * day7[ddAMKG + i]))
+              * day7[dddJP + i])
         ),
         iff(
           day7[ddJP + i].isZero, min(day5[dayFR + i], day6[dayHN + i]),
-          (day5[dayFR + i] + (day6[dayHN + i] - day5[dayFR + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKG + i] - equiv_harmonious_min_perc[j]))) / BESS_chrg_eff)
+          (day5[dayFR + i] + (day6[dayHN + i] - day5[dayFR + i]) * day7[ddAMKG + i])) / BESS_chrg_eff)
     }
 
     /// el cons for el boiler op for harm op during harm op period
-    let ddLF = 23360
-    for i in 0..<365 { day7[ddLF + i] = 99 }
+    // let ddLF = 23360 // reused
     // // LF=IF(OR(JP6=0,KG6=0),0,(FL6+(HH6-FL6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc))+((FM6+(HI6-FM6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc))-(FL6+(HH6-FL6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc)))/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc))
     // for i in 0..<365 {
     //   day7[ddLF + i] = iff(
@@ -762,11 +769,11 @@ extension TunOl {
     //         - (day5[dayFL + i]
     //           + (day6[dayHH + i] - day5[dayFL + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j])
     //             * (day7[ddKG + i] - equiv_harmonious_min_perc[j])))
-    //       / Overall_harmonious_range * (day7[ddJP + i] - Overall_harmonious_min_perc))
+    //       * day7[dddJP + i])
     // }
 
     // /// heat cons for harm op during harm op period
-    // let ddLL = 25550
+    // let ddLL = 25550 // reused
     // // LL=IF(OR(JP6=0,KG6=0),0,(FF6+(HB6-FF6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc))+((FG6+(HC6-FG6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc))-(FF6+(HB6-FF6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc)))/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc))
     // for i in 0..<365 {
     //   day7[ddLL + i] = iff(
@@ -780,7 +787,7 @@ extension TunOl {
     //         - (day5[dayFF + i]
     //           + (day6[dayHB + i] - day5[dayFF + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j])
     //             * (day7[ddKG + i] - equiv_harmonious_min_perc[j])))
-    //       / Overall_harmonious_range * (day7[ddJP + i] - Overall_harmonious_min_perc))
+    //       * day7[dddJP + i])
     // }
 
     /// heat cons for night prep during harm op period
@@ -792,7 +799,7 @@ extension TunOl {
     }
 
     // /// heat prod by el boiler for harm op during harm op period
-    // let ddLN = 26280
+    // let ddLN = 26280 // reused
     // // LN=IF(OR(JP6=0,KG6=0),0,LF6*El_boiler_eff)
     // for i in 0..<365 {
     //   day7[ddLN + i] = iff(
@@ -805,9 +812,9 @@ extension TunOl {
     for i in 0..<365 {
       day7[ddLP + i] = iff(
         day7[ddJP + i].isZero, min(day5[dayFV + i], day5[dayFW + i], day6[dayHR + i], day6[dayHS + i]),
-        day5[dayFV + i] + (day6[dayHR + i] - day5[dayFV + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKG + i] - equiv_harmonious_min_perc[j])
-          + ((day5[dayFW + i] + (day6[dayHS + i] - day5[dayFW + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKG + i] - equiv_harmonious_min_perc[j]))
-            - (day5[dayFV + i] + (day6[dayHR + i] - day5[dayFV + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKG + i] - equiv_harmonious_min_perc[j])))
+        day5[dayFV + i] + (day6[dayHR + i] - day5[dayFV + i]) * day7[ddAMKG + i]
+          + ((day5[dayFW + i] + (day6[dayHS + i] - day5[dayFW + i]) * day7[ddAMKG + i])
+            - (day5[dayFV + i] + (day6[dayHR + i] - day5[dayFV + i]) * day7[ddAMKG + i]))
           / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (day7[ddJP + i] - Overall_harmonious_min_perc))
     }
 
@@ -818,9 +825,9 @@ extension TunOl {
       day7[ddLO + i] = iff(
         day7[ddJP + i].isZero, 0,
         min(
-          (day5[dayGH + i] + (day6[dayID + i] - day5[dayGH + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKG + i] - equiv_harmonious_min_perc[j]))
-            + ((day5[dayGI + i] + (day6[dayIE + i] - day5[dayGI + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKG + i] - equiv_harmonious_min_perc[j]))
-              - (day5[dayGH + i] + (day6[dayID + i] - day5[dayGH + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKG + i] - equiv_harmonious_min_perc[j])))
+          (day5[dayGH + i] + (day6[dayID + i] - day5[dayGH + i]) * day7[ddAMKG + i])
+            + ((day5[dayGI + i] + (day6[dayIE + i] - day5[dayGI + i]) * day7[ddAMKG + i])
+              - (day5[dayGH + i] + (day6[dayID + i] - day5[dayGH + i]) * day7[ddAMKG + i]))
               / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (day7[ddJP + i] - Overall_harmonious_min_perc),
           max(0, day7[ddLM + i] - day7[ddLP + i])))
     }
@@ -841,9 +848,9 @@ extension TunOl {
     for i in 0..<365 {
       day7[ddLH + i] = iff(
         day7[ddJP + i].isZero, min(day5[dayFS + i], day5[dayFT + i], day6[dayHO + i], day6[dayHP + i]),
-        day5[dayFS + i] + (day6[dayHO + i] - day5[dayFS + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKG + i] - equiv_harmonious_min_perc[j])
-          + ((day5[dayFT + i] + (day6[dayHP + i] - day5[dayFT + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKG + i] - equiv_harmonious_min_perc[j]))
-            - (day5[dayFS + i] + (day6[dayHO + i] - day5[dayFS + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKG + i] - equiv_harmonious_min_perc[j])))
+        day5[dayFS + i] + (day6[dayHO + i] - day5[dayFS + i]) * day7[ddAMKG + i]
+          + ((day5[dayFT + i] + (day6[dayHP + i] - day5[dayFT + i]) * day7[ddAMKG + i])
+            - (day5[dayFS + i] + (day6[dayHO + i] - day5[dayFS + i]) * day7[ddAMKG + i]))
           / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (day7[ddJP + i] - Overall_harmonious_min_perc))
     }
 
@@ -853,9 +860,9 @@ extension TunOl {
     for i in 0..<365 {
       day7[ddLI + i] = iff(
         day7[ddJP + i].isZero, max(day5[dayFI + i], day5[dayFJ + i], day6[dayHE + i], day6[dayHF + i]),
-        (day5[dayFI + i] + (day6[dayHE + i] - day5[dayFI + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKG + i] - equiv_harmonious_min_perc[j]))
-          + ((day5[dayFJ + i] + (day6[dayHF + i] - day5[dayFJ + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKG + i] - equiv_harmonious_min_perc[j]))
-            - (day5[dayFI + i] + (day6[dayHE + i] - day5[dayFI + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKG + i] - equiv_harmonious_min_perc[j])))
+        (day5[dayFI + i] + (day6[dayHE + i] - day5[dayFI + i]) * day7[ddAMKG + i])
+          + ((day5[dayFJ + i] + (day6[dayHF + i] - day5[dayFJ + i]) * day7[ddAMKG + i])
+            - (day5[dayFI + i] + (day6[dayHE + i] - day5[dayFI + i]) * day7[ddAMKG + i]))
           / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (day7[ddJP + i] - Overall_harmonious_min_perc))
 
     }
@@ -867,10 +874,10 @@ extension TunOl {
       day7[ddLJ + i] = min(
         iff(
           day7[ddJP + i].isZero, min(day5[dayGE + i], day6[dayIA + i]),
-          (day5[dayGE + i] + (day6[dayIA + i] - day5[dayGE + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKG + i] - equiv_harmonious_min_perc[j]))
-            + ((day5[dayGF + i] + (day6[dayIB + i] - day5[dayGF + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKG + i] - equiv_harmonious_min_perc[j]))
-              - (day5[dayGE + i] + (day6[dayIA + i] - day5[dayGE + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKG + i] - equiv_harmonious_min_perc[j])))
-            / Overall_harmonious_range * (day7[ddJP + i] - Overall_harmonious_min_perc)), max(Double.zero, day7[ddLC + i] - day7[ddLE + i] - day7[ddLG + i] - day7[ddLH + i]))
+          (day5[dayGE + i] + (day6[dayIA + i] - day5[dayGE + i]) * day7[ddAMKG + i])
+            + ((day5[dayGF + i] + (day6[dayIB + i] - day5[dayGF + i]) * day7[ddAMKG + i])
+              - (day5[dayGE + i] + (day6[dayIA + i] - day5[dayGE + i]) * day7[ddAMKG + i]))
+            * day7[dddJP + i]), max(Double.zero, day7[ddLC + i] - day7[ddLE + i] - day7[ddLG + i] - day7[ddLH + i]))
     }
 
     /// Balance of electricity during harm op period
@@ -884,7 +891,7 @@ extension TunOl {
     for i in 0..<365 {
       day7[ddLR + i] = iff(
         day7[ddJP + i].isZero, Double.zero,
-        day5[dayFE + i] + (day6[dayHA + i] - day5[dayFE + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKG + i] - equiv_harmonious_min_perc[j]))
+        day5[dayFE + i] + (day6[dayHA + i] - day5[dayFE + i]) * day7[ddAMKG + i])
     }
 
     /// el to cover aux cons outside of harm op period
@@ -893,7 +900,7 @@ extension TunOl {
     for i in 0..<365 {
       day7[ddLS + i] = iff(
         day7[ddJP + i].isZero, day5[dayFR + i],
-        day5[dayFK + i] + (day6[dayHG + i] - day5[dayFK + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKG + i] - equiv_harmonious_min_perc[j]))
+        day5[dayFK + i] + (day6[dayHG + i] - day5[dayFK + i]) * day7[ddAMKG + i])
     }
 
     /// el from BESS discharging outside of harm op period
@@ -913,7 +920,7 @@ extension TunOl {
     for i in 0..<365 {
       day7[ddLV + i] = iff(
         day7[ddJP + i].isZero, min(day5[dayFU + i], day6[dayHQ + i]),
-        day5[dayFU + i] + (day6[dayHQ + i] - day5[dayFU + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKG + i] - equiv_harmonious_min_perc[j]))
+        day5[dayFU + i] + (day6[dayHQ + i] - day5[dayFU + i]) * day7[ddAMKG + i])
     }
 
     /// Grid import needed outside of harm op period
@@ -923,7 +930,7 @@ extension TunOl {
       day7[ddLW + i] = min(
         iff(
           day7[ddKG + i].isZero, min(day5[dayGG + i], day6[dayIC + i]),
-          day6[dayGG + i] + (day6[dayIC + i] - day5[dayGG + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKG + i] - equiv_harmonious_min_perc[j]) + day7[ddLU + i]),
+          day6[dayGG + i] + (day6[dayIC + i] - day5[dayGG + i]) * day7[ddAMKG + i] + day7[ddLU + i]),
         max(Double.zero, day7[ddLS + i] - day7[ddLT + i] - day7[ddLU + i] - day7[ddLV + i]))
     }
 
@@ -939,7 +946,7 @@ extension TunOl {
     //   day7[ddLY + i] = iff(
     //     or(day7[ddJP + i].isZero, day7[ddKG + i].isZero), Double.zero,
     //     day5[dayFH + i] + (day6[dayHD + i] - day5[dayFH + i])
-    //       / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKG + i] - equiv_harmonious_min_perc[j]))
+    //       * day7[ddAMKG + i])
     // }
 
     // /// Heat prod by el boiler for harm op outside of harm op period
@@ -956,7 +963,7 @@ extension TunOl {
     for i in 0..<365 {
       day7[ddMA + i] = iff(
         day7[ddJP + i].isZero, min(day5[dayFX + i], day6[dayHT + i]),
-        day5[dayFX + i] + (day6[dayHT + i] - day5[dayFX + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKG + i] - equiv_harmonious_min_perc[j]))
+        day5[dayFX + i] + (day6[dayHT + i] - day5[dayFX + i]) * day7[ddAMKG + i])
     }
 
     /// Balance of heat outside of harm op period
@@ -973,17 +980,17 @@ extension TunOl {
           day7[ddLK + i],
           iff(
             day7[ddJP + i].isZero, min(day5[dayGB + i], day5[dayGC + i], day6[dayHX + i], day6[dayHY + i]),
-            day5[dayGB + i] + (day6[dayHX + i] - day5[dayGB + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKG + i] - equiv_harmonious_min_perc[j])
-              + ((day5[dayGC + i] + (day6[dayHY + i] - day5[dayGC + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKG + i] - equiv_harmonious_min_perc[j]))
-                - (day5[dayGB + i] + (day6[dayHX + i] - day5[dayGB + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKG + i] - equiv_harmonious_min_perc[j])))
-              / Overall_harmonious_range * (day7[ddJP + i] - Overall_harmonious_min_perc)))
+            day5[dayGB + i] + (day6[dayHX + i] - day5[dayGB + i]) * day7[ddAMKG + i]
+              + ((day5[dayGC + i] + (day6[dayHY + i] - day5[dayGC + i]) * day7[ddAMKG + i])
+                - (day5[dayGB + i] + (day6[dayHX + i] - day5[dayGB + i]) * day7[ddAMKG + i]))
+              * day7[dddJP + i]))
         + max(
           Double.zero,
           min(
             day7[ddLX + i],
             iff(
               day7[ddJP + i].isZero, min(day5[dayGD + i], day6[dayHZ + i]),
-              day5[dayGD + i] + (day6[dayHZ + i] - day5[dayGD + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKG + i] - equiv_harmonious_min_perc[j]))))
+              day5[dayGD + i] + (day6[dayHZ + i] - day5[dayGD + i]) * day7[ddAMKG + i])))
     }
 
     /// Grid import
@@ -1030,9 +1037,9 @@ extension TunOl {
     for i in 0..<365 {
       day7[ddMK + i] = iff(
         day7[ddKI + i].isZero, max(day5[dayFC + i], day5[dayFD + i], day6[dayGY + i], day6[dayGZ + i]),
-        day5[dayFC + i] + (day6[dayGY + i] - day5[dayFC + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j])
-          + ((day5[dayFD + i] + (day6[dayGZ + i] - day5[dayFD + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
-            - (day5[dayFC + i] + (day6[dayGY + i] - day5[dayFC + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j])))
+        day5[dayFC + i] + (day6[dayGY + i] - day5[dayFC + i]) * day7[ddAMKI + i]
+          + ((day5[dayFD + i] + (day6[dayGZ + i] - day5[dayFD + i]) * day7[ddAMKI + i])
+            - (day5[dayFC + i] + (day6[dayGY + i] - day5[dayFC + i]) * day7[ddAMKI + i]))
           / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (day7[ddKZ + i] - Overall_harmonious_min_perc))
     }
 
@@ -1041,7 +1048,7 @@ extension TunOl {
     // ML=IF(KI6=0,0,$Z6+($AA6-$Z6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))
     for i in 0..<365 {
       day7[ddML + i] = iff(
-        day7[ddKI + i].isZero, Double.zero, day1[dayZ + i] + (day1[dayAA + i] - day1[dayZ + i]) / equiv_harmonious_range * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
+        day7[ddKI + i].isZero, Double.zero, day1[dayZ + i] + (day1[dayAA + i] - day1[dayZ + i]) * day7[dddKI + i])
     }
 
     /// el to cover aux cons during harm op period
@@ -1052,7 +1059,7 @@ extension TunOl {
     //   day7[ddMM + i] = iff(
     //     or(day7[ddKZ + i].isZero, day7[ddKI + i].isZero), Double.zero,
     //     day5[dayFO + i] + (day6[dayHK + i] - day5[dayFO + i])
-    //       / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
+    //       * day7[ddAMKI + i])
     // }
 
     /// el cons for BESS charging during harm op period
@@ -1062,14 +1069,14 @@ extension TunOl {
       day7[ddMN + i] = min(
         iff(
           day7[ddKI + i].isZero, min(day5[dayFY + i], day5[dayFZ + i], day6[dayHU + i], day6[dayHV + i]),
-          (day5[dayFY + i] + (day6[dayHU + i] - day5[dayFY + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j])
-            + ((day5[dayFZ + i] + (day6[dayHV + i] - day5[dayFZ + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
-              - (day5[dayFY + i] + (day6[dayHU + i] - day5[dayFY + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j])))
+          (day5[dayFY + i] + (day6[dayHU + i] - day5[dayFY + i]) * day7[ddAMKI + i]
+            + ((day5[dayFZ + i] + (day6[dayHV + i] - day5[dayFZ + i]) * day7[ddAMKI + i])
+              - (day5[dayFY + i] + (day6[dayHU + i] - day5[dayFY + i]) * day7[ddAMKI + i]))
               / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (day7[ddKZ + i] - Overall_harmonious_min_perc))
         ),
         iff(
           day7[ddKI + i].isZero, min(day5[dayFR + i], day6[dayHN + i]),
-          (day5[dayFR + i] + (day6[dayHN + i] - day5[dayFR + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))) / BESS_chrg_eff)
+          (day5[dayFR + i] + (day6[dayHN + i] - day5[dayFR + i]) * day7[ddAMKI + i])) / BESS_chrg_eff)
     }
 
     /// el cons for el boiler op for harm op during harm op period
@@ -1114,7 +1121,7 @@ extension TunOl {
     // MV=IF(KI6=0,0,$AB6+($AC6-$AB6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))
     for i in 0..<365 {
       day7[ddMV + i] = iff(
-        day7[ddKI + i].isZero, Double.zero, day1[dayAB + i] + (day1[dayAC + i] - day1[dayAB + i]) / equiv_harmonious_range * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
+        day7[ddKI + i].isZero, Double.zero, day1[dayAB + i] + (day1[dayAC + i] - day1[dayAB + i]) * day7[dddKI + i])
     }
 
     // /// heat prod by el boiler for harm op during harm op period
@@ -1131,7 +1138,7 @@ extension TunOl {
     for i in 0..<365 {
       day7[ddMY + i] = iff(
         or(day7[ddKZ + i].isZero, day7[ddKI + i].isZero), Double.zero,
-        day5[dayFA + i] + (day6[dayGW + i] - day5[dayFA + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
+        day5[dayFA + i] + (day6[dayGW + i] - day5[dayFA + i]) * day7[ddAMKI + i])
     }
 
     /// heat prod by el boiler for night prep during harm op period
@@ -1141,9 +1148,9 @@ extension TunOl {
       day7[ddMX + i] = iff(
         day7[ddKI + i].isZero, Double.zero,
         min(
-          (day5[dayGH + i] + (day6[dayID + i] - day5[dayGH + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
-            + ((day5[dayGI + i] + (day6[dayIE + i] - day5[dayGI + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
-              - (day5[dayGH + i] + (day6[dayID + i] - day5[dayGH + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j])))
+          (day5[dayGH + i] + (day6[dayID + i] - day5[dayGH + i]) * day7[ddAMKI + i])
+            + ((day5[dayGI + i] + (day6[dayIE + i] - day5[dayGI + i]) * day7[ddAMKI + i])
+              - (day5[dayGH + i] + (day6[dayID + i] - day5[dayGH + i]) * day7[ddAMKI + i]))
               / Overall_harmonious_range * (day7[ddKZ + i] - Overall_harmonious_min_perc),
           max(Double.zero, day7[ddMV + i] - day7[ddMY + i])))
     }
@@ -1164,7 +1171,7 @@ extension TunOl {
     for i in 0..<365 {
       day7[ddMQ + i] = iff(
         or(day7[ddKZ + i].isZero, day7[ddKI + i].isZero), Double.zero,
-        day5[dayEY + i] + (day6[dayGU + i] - day5[dayEY + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
+        day5[dayEY + i] + (day6[dayGU + i] - day5[dayEY + i]) * day7[ddAMKI + i])
     }
 
     /// Grid import for harm op during harm op period
@@ -1173,9 +1180,9 @@ extension TunOl {
     for i in 0..<365 {
       day7[ddMR + i] = iff(
         day7[ddKI + i].isZero, max(day5[dayFI + i], day5[dayFJ + i], day6[dayHE + i], day6[dayHF + i]),
-        (day5[dayFI + i] + (day6[dayHE + i] - day5[dayFI + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
-          + ((day5[dayFJ + i] + (day6[dayHF + i] - day5[dayFJ + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
-            - (day5[dayFI + i] + (day6[dayHE + i] - day5[dayFI + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j])))
+        (day5[dayFI + i] + (day6[dayHE + i] - day5[dayFI + i]) * day7[ddAMKI + i])
+          + ((day5[dayFJ + i] + (day6[dayHF + i] - day5[dayFJ + i]) * day7[ddAMKI + i])
+            - (day5[dayFI + i] + (day6[dayHE + i] - day5[dayFI + i]) * day7[ddAMKI + i]))
           / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (day7[ddKZ + i] - Overall_harmonious_min_perc))
     }
 
@@ -1186,9 +1193,9 @@ extension TunOl {
       day7[ddMS + i] = min(
         iff(
           day7[ddKI + i].isZero, min(day5[dayGE + i], day6[dayIA + i]),
-          (day5[dayGE + i] + (day6[dayIA + i] - day5[dayGE + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
-            + ((day5[dayGF + i] + (day6[dayIB + i] - day5[dayGF + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
-              - (day5[dayGE + i] + (day6[dayIA + i] - day5[dayGE + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j])))
+          (day5[dayGE + i] + (day6[dayIA + i] - day5[dayGE + i]) * day7[ddAMKI + i])
+            + ((day5[dayGF + i] + (day6[dayIB + i] - day5[dayGF + i]) * day7[ddAMKI + i])
+              - (day5[dayGE + i] + (day6[dayIA + i] - day5[dayGE + i]) * day7[ddAMKI + i]))
             / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (day7[ddKZ + i] - Overall_harmonious_min_perc)),
         max(0, day7[ddML + i] + day7[ddMN + i] + day7[ddMP + i] - day7[ddMQ + i]))
     }
@@ -1203,7 +1210,7 @@ extension TunOl {
     for i in 0..<365 {
       day7[ddNA + i] = iff(
         day7[ddKI + i].isZero, Double.zero,
-        day5[dayFE + i] + (day6[dayHA + i] - day5[dayFE + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
+        day5[dayFE + i] + (day6[dayHA + i] - day5[dayFE + i]) * day7[ddAMKI + i])
     }
 
     /// el to cover aux cons outside of harm op period
@@ -1212,7 +1219,7 @@ extension TunOl {
     for i in 0..<365 {
       day7[ddNB + i] = iff(
         day7[ddKI + i].isZero, day5[dayFR + i],
-        day5[dayFK + i] + (day6[dayHG + i] - day5[dayFK + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
+        day5[dayFK + i] + (day6[dayHG + i] - day5[dayFK + i]) * day7[ddAMKI + i])
     }
 
     /// el from BESS discharging outside of harm op period
@@ -1231,7 +1238,7 @@ extension TunOl {
     for i in 0..<365 {
       day7[ddNE + i] = iff(
         day7[ddKI + i].isZero, min(day5[dayFU + i], day6[dayHQ + i]),
-        day5[dayFU + i] + (day6[dayHQ + i] - day5[dayFU + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
+        day5[dayFU + i] + (day6[dayHQ + i] - day5[dayFU + i]) * day7[ddAMKI + i])
     }
 
     /// Grid import needed outside of harm op period
@@ -1241,7 +1248,7 @@ extension TunOl {
       day7[ddNF + i] = min(
         iff(
           day7[ddKZ + i].isZero, min(day5[dayGG + i], day6[dayIC + i]),
-          day5[dayGG + i] + (day6[dayIC + i] - day5[dayGG + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]) + day7[ddND + i]),
+          day5[dayGG + i] + (day6[dayIC + i] - day5[dayGG + i]) * day7[ddAMKI + i] + day7[ddND + i]),
         max(Double.zero, day7[ddNB + i] - day7[ddNC + i] - day7[ddND + i] - day7[ddNE + i]))
     }
 
@@ -1257,7 +1264,7 @@ extension TunOl {
     //   day7[ddNH + i] = iff(
     //     or(day7[ddKZ + i].isZero, day7[ddKI + i].isZero), Double.zero,
     //     day5[dayFH + i] + (day6[dayHD + i] - day5[dayFH + i])
-    //       / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
+    //       * day7[ddAMKI + i])
     // }
 
     // /// Heat prod by el boiler for harm op outside of harm op period
@@ -1274,7 +1281,7 @@ extension TunOl {
     for i in 0..<365 {
       day7[ddNJ + i] = iff(
         day7[ddKI + i].isZero, min(day5[dayFX + i], day6[dayHT + i]),
-        day5[dayFX + i] + (day6[dayHT + i] - day5[dayFX + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
+        day5[dayFX + i] + (day6[dayHT + i] - day5[dayFX + i]) * day7[ddAMKI + i])
     }
 
     /// Balance of heat outside of harm op period
@@ -1293,9 +1300,9 @@ extension TunOl {
             day7[ddMT + i],
             iff(
               day7[ddKI + i].isZero, min(day5[dayGB + i], day5[dayGC + i], day6[dayHX + i], day6[dayHY + i]),
-              day5[dayGB + i] + (day6[dayHX + i] - day5[dayGB + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
-              + ((day5[dayGC + i] + (day6[dayHY + i] - day5[dayGC + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
-                - (day5[dayGB + i] + (day6[dayHX + i] - day5[dayGB + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j])))
+              day5[dayGB + i] + (day6[dayHX + i] - day5[dayGB + i]) * day7[ddAMKI + i])
+              + ((day5[dayGC + i] + (day6[dayHY + i] - day5[dayGC + i]) * day7[ddAMKI + i])
+                - (day5[dayGB + i] + (day6[dayHX + i] - day5[dayGB + i]) * day7[ddAMKI + i]))
               / Overall_harmonious_range * (day7[ddKZ + i] - Overall_harmonious_min_perc)))
         + max(
           Double.zero,
@@ -1303,7 +1310,7 @@ extension TunOl {
             day7[ddNG + i],
             iff(
               day7[ddKI + i].isZero, min(day5[dayGD + i], day6[dayHZ + i]),
-              day5[dayGD + i] + (day6[dayHZ + i] - day5[dayGD + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))))
+              day5[dayGD + i] + (day6[dayHZ + i] - day5[dayGD + i]) * day7[ddAMKI + i])))
     }
 
     /// Grid import
@@ -1314,12 +1321,12 @@ extension TunOl {
     /// Outside harmonious operation period hours
     let ddNO = 45260
     // NO=$C6+($T6-$C6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)
-    for i in 0..<365 { day7[ddNO + i] = day1[dayC + i] + (day1[dayT + i] - day1[dayC + i]) / equiv_harmonious_range * (day7[ddKI + i] - equiv_harmonious_min_perc[j]) }
+    for i in 0..<365 { day7[ddNO + i] = day1[dayC + i] + (day1[dayT + i] - day1[dayC + i]) * day7[dddKI + i] }
 
     /// Harmonious operation period hours
     let ddNP = 45625
     // NP=$D6+($U6-$D6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)
-    for i in 0..<365 { day7[ddNP + i] = day1[dayD + i] + (day1[dayU + i] - day1[dayD + i]) / equiv_harmonious_range * (day7[ddKI + i] - equiv_harmonious_min_perc[j]) }
+    for i in 0..<365 { day7[ddNP + i] = day1[dayD + i] + (day1[dayU + i] - day1[dayD + i]) * day7[dddKI + i] }
 
     /// Pure Methanol prod with night priority and resp day op
     let ddNL = 44165
@@ -1333,7 +1340,7 @@ extension TunOl {
     /// PB operating hours
     let ddNQ = 45990
     // NQ=$E6+($V6-$E6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)
-    for i in 0..<365 { day7[ddNQ + i] = day1[dayE + i] + (day1[dayV + i] - day1[dayE + i]) / equiv_harmonious_range * (day7[ddKI + i] - equiv_harmonious_min_perc[j]) }
+    for i in 0..<365 { day7[ddNQ + i] = day1[dayE + i] + (day1[dayV + i] - day1[dayE + i]) * day7[dddKI + i] }
 
     /// Checksum
     let ddNR = 46355
