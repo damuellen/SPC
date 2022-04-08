@@ -199,7 +199,7 @@ class SunOlTests: XCTestCase {
     var day15 = [Double](repeating: Double.zero, count: 17_155)
     var day16 = [Double](repeating: Double.zero, count: 17_155)
     var day17 = [Double](repeating: Double.zero, count: 46_720)
-    var day27 = [Double](repeating: Double.zero, count: 45990 + 1095)
+    var day27 = [Double](repeating: Double.zero, count: 47_815)
     var day21 = [Double](repeating: Double.zero, count: 9_855)
 
     for j in 0..<4 {

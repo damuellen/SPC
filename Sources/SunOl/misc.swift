@@ -17,15 +17,15 @@ public func fitness(values: [Double]) -> [Double] {
   let day6 = model.day26(hour0: hour0)
   var day = [[Double]]()
 
-  var hour2 = [Double](repeating: Double.zero, count: 183_960)
-  var hour3 = [Double](repeating: Double.zero, count: 271_560)
-  var hour4 = [Double](repeating: Double.zero, count: 490560 + 8760)
-  var day1 = [Double](repeating: Double.zero, count: 13_140)
-  var day15 = [Double](repeating: Double.zero, count: 17_155)
-  var day16 = [Double](repeating: Double.zero, count: 17_155)
-  var day17 = [Double](repeating: Double.zero, count: 46_720)
-  var day27 = [Double](repeating: Double.zero, count: 45990 + 1095)
-  var day21 = [Double](repeating: Double.zero, count: 9_855)
+  var hour2 = [Double](repeating: .zero, count: 183_960)
+  var hour3 = [Double](repeating: .zero, count: 271_560)
+  var hour4 = [Double](repeating: .zero, count: 490560 + 8760)
+  var day1 = [Double](repeating: .zero, count: 13_140)
+  var day15 = [Double](repeating: .zero, count: 17_155)
+  var day16 = [Double](repeating: .zero, count: 17_155)
+  var day17 = [Double](repeating: .zero, count: 46_720)
+  var day27 = [Double](repeating: .zero, count: 47_815)
+  var day21 = [Double](repeating: .zero, count: 9_855)
 
   for j in 0..<4 {
     model.hour2(&hour2, j: j, hour0: hour0, hour1: hour1)
@@ -166,11 +166,11 @@ public func MGOADE(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Doubl
       if source.isCancelled { return }
       for j in grassHopperPositions[i].indices {
         grassHopperPositions[i][j].clamp(to: bounds[j])
-        targetResults[pos + i][j] = grassHopperPositions[i][j]
+        targetResults[pos+i][j] = grassHopperPositions[i][j]
       }
       let result = fitness(grassHopperPositions[i])
-      //targetResults[pos + i] = result
-      targetResults[pos + i].replaceSubrange(bounds.count..., with: result)
+      //targetResults[pos+i] = result
+      targetResults[pos+i].replaceSubrange(bounds.count..., with: result)
       grassHopperFitness[i] = result[0]
     }
     if source.isCancelled { break }
@@ -215,8 +215,8 @@ public func MGOADE(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Doubl
         if result[0] < grassHopperFitness[i] {
           grassHopperFitness[i] = result[0]
           grassHopperPositions[i] = grassHopperTrialPositions[i]
-          targetResults[pos + i].replaceSubrange(0..<bounds.count, with: grassHopperPositions[i])
-          targetResults[pos + i].replaceSubrange(bounds.count..., with: result)
+          targetResults[pos+i].replaceSubrange(0..<bounds.count, with: grassHopperPositions[i])
+          targetResults[pos+i].replaceSubrange(bounds.count..., with: result)
         }
       }
     }
