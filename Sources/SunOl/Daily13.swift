@@ -22,6 +22,8 @@ extension TunOl {
 
     let dayFX = 9125
     let dayHT = 9125
+    let dayFK = 4380
+    let dayHG = 4380
 
     /// Surplus harm op period electricity after min harm op and min night op prep
     let ddIQ = 0
@@ -554,7 +556,7 @@ extension TunOl {
           (day5[dayFY + i]
             + (day6[dayHU + i] - day5[dayFY + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j])
               * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
-            - max(Below.zero, (day5[dayFK + i] + (day6[dayHG + i] - day5[dayFK + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j])
+            - max(.zero, (day5[dayFK + i] + (day6[dayHG + i] - day5[dayFK + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j])
                 * (day7[ddKI + i] - equiv_harmonious_min_perc[j])) - (day5[dayGG + i] + (day6[dayIC + i] - day5[dayGG + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j])
                 * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))) / BESS_chrg_eff, 5))
     }
@@ -569,7 +571,7 @@ extension TunOl {
           (day5[dayFZ + i]
             + (day6[dayHV + i] - day5[dayFZ + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j])
               * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))
-            - max(Below.zero, (day5[dayFK + i] + (day6[dayHG + i] - day5[dayFK + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j])
+            - max(.zero, (day5[dayFK + i] + (day6[dayHG + i] - day5[dayFK + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j])
                 * (day7[ddKI + i] - equiv_harmonious_min_perc[j])) - (day5[dayGG + i] + (day6[dayIC + i] - day5[dayGG + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j])
                 * (day7[ddKI + i] - equiv_harmonious_min_perc[j]))) / BESS_chrg_eff, 5))
     }
@@ -885,8 +887,6 @@ extension TunOl {
         day5[dayFE + i] + (day6[dayHA + i] - day5[dayFE + i]) / (day1[dayAM + i] - equiv_harmonious_min_perc[j]) * (day7[ddKG + i] - equiv_harmonious_min_perc[j]))
     }
 
-    let dayFK = 4380
-    let dayHG = 4380
     /// el to cover aux cons outside of harm op period
     let ddLS = 28105
     // LS=IF(JP6=0,FR6,FK6+(HG6-FK6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc))
