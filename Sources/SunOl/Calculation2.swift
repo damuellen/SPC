@@ -24,7 +24,7 @@ extension TunOl {
     let hourDW = 8760
     // =IF(OR(BU5=0,DV5=0),0,IF(OR($BM5>0,(A_overall_var_max_cons-A_overall_var_min_cons)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(DV5-A_equiv_harmonious_min_perc)+A_overall_var_min_cons+A_overall_fix_stby_cons+$BK5+IF($BM6=0,0,A_overall_stup_cons)+MIN(El_boiler_cap_ud,MAX(0,(A_overall_var_heat_max_cons-A_overall_var_heat_min_cons)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(DV5-A_equiv_harmonious_min_perc)+A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons+IF($BM6=0,0,A_overall_heat_stup_cons)-$BQ5)/El_boiler_eff)<$BP5-PB_stby_aux_cons),0,MIN(((A_overall_var_max_cons-A_overall_var_min_cons)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(DV5-A_equiv_harmonious_min_perc)+A_overall_var_min_cons)+A_overall_fix_stby_cons+IF($BM6=0,0,A_overall_stup_cons),PB_nom_net_cap+$BP5+Grid_import_max_ud*Grid_import_yes_no_PB_strategy-PB_var_heat_max_cons*TES_aux_cons_perc-$BK5)))
     for i in 1..<8760 {
-      hour4[hourDW + i] = iff(or(hour1[i].isZero, hour4[hourDV + i].isZero), Double.zero, iff(
+      hour4[hourDW + i] = iff(or(hour2[i].isZero, hour4[hourDV + i].isZero), Double.zero, iff(
         or(hour1[hourBM + i] > Double.zero,
           (overall_var_max_cons[j] - overall_var_min_cons[j])
             / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j])
