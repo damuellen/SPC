@@ -331,7 +331,7 @@ extension TunOl {
 
     /// Optimized min harmonious net elec cons
     let hourEX = 236520
-    // IF(OR(AND(EW6>0,EW5=0,EW7=0),AND(EW6>0,OR(AND(EW4=0,EW5=0,EW8=0),AND(EW4=0,EW7=0,EW8=0)))),0,EW6)
+    // IF(OR(AND(EW6>0,EW5=0,EW7=0),AND(EW6>0,OR(AND(EW4=0,EW5>0,EW7=0),AND(EW5=0,EW7>0,EW8=0)))),0,EW6)
     for i in 1..<8760 {
       hour4[hourEX + i] = iff(
         or(
@@ -339,8 +339,8 @@ extension TunOl {
           and(
             hour4[hourEW + i] > Double.zero,
             or(
-              and(hour4[hourEW + i - 2].isZero, hour4[hourEW + i - 1].isZero, hour4[hourEW + i + 2].isZero),
-              and(hour4[hourEW + i - 2].isZero, hour4[hourEW + i + 1].isZero, hour4[hourEW + i + 2].isZero)))), 0, hour4[hourEW + i])
+              and(hour4[hourEW + i - 2].isZero, hour4[hourEW + i - 1] > 0, hour4[hourEW + i + 1].isZero),
+              and(hour4[hourEW + i - 1].isZero, hour4[hourEW + i + 1] > 0, hour4[hourEW + i + 2].isZero)))), 0, hour4[hourEW + i])
     }
 
     /// Min harmonious net heat cons
@@ -551,8 +551,8 @@ extension TunOl {
           and(
             hour4[hourFN + i] > Double.zero,
             or(
-              and(hour4[hourFN + i - 2].isZero, hour4[hourFN + i - 1].isZero, hour4[hourFN + i + 2].isZero),
-              and(hour4[hourFN + i - 2].isZero, hour4[hourFN + i + 1].isZero, hour4[hourFN + i + 2].isZero)))), 0, hour4[hourFN + i])
+              and(hour4[hourFN + i - 2].isZero, hour4[hourFN + i - 1] > 0, hour4[hourFN + i + 1].isZero),
+              and(hour4[hourFN + i - 1].isZero, hour4[hourFN + i + 1] > 0, hour4[hourFN + i + 2].isZero)))), 0, hour4[hourFN + i])
     }
 
     /// max harmonious net heat cons

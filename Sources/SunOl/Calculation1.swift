@@ -273,8 +273,8 @@ extension TunOl {
           and(
             hour3[hourCP + i] > Double.zero,
             or(
-              and(hour3[max(i - 2, 0)].isZero, hour3[max(i - 1, 0)].isZero, hour3[hourCP + i + 2].isZero),
-              and(hour3[max(i - 2, 0)].isZero, hour3[hourCP + i + 1].isZero, hour3[hourCP + i + 2].isZero)))), 0, hour3[hourCP + i])
+              and(hour3[max(i - 2, 0)].isZero, hour3[max(i - 1, 0)] > 0, hour3[hourCP + i + 1].isZero),
+              and(hour3[max(i - 1, 0)].isZero, hour3[hourCP + i + 1] > 0, hour3[hourCP + i + 2].isZero)))), 0, hour3[hourCP + i])
     }
 
     /// Min harmonious net heat cons
@@ -467,8 +467,8 @@ extension TunOl {
           and(
             hour3[hourDG + i] > Double.zero,
             or(
-              and(hour3[hourDG + i - 2].isZero, hour3[hourDG + i - 1].isZero, hour3[hourDG + i + 2].isZero),
-              and(hour3[hourDG + i - 2].isZero, hour3[hourDG + i + 1].isZero, hour3[hourDG + i + 2].isZero)))), 0, hour3[hourDG + i])
+              and(hour3[hourDG + i - 2].isZero, hour3[hourDG + i - 1] > 0, hour3[hourDG + i + 1].isZero),
+              and(hour3[hourDG + i - 1].isZero, hour3[hourDG + i + 1] > 0, hour3[hourDG + i + 2].isZero)))), 0, hour3[hourDG + i])
     }
 
     /// max harmonious net heat cons

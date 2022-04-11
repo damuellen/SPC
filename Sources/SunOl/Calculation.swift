@@ -87,8 +87,8 @@ extension TunOl {
           and(
             hour0[hourR + i] > Double.zero,
             or(
-              and(hour0[hourR + i - 2].isZero, hour0[hourR + i - 1].isZero, hour0[hourR + i + 2].isZero),
-              and(hour0[hourR + i - 2].isZero, hour0[hourR + i + 1].isZero, hour0[hourR + i + 2].isZero)))), 0, hour0[hourR + i])
+              and(hour0[hourR + i - 2].isZero, hour0[hourR + i - 1] > 0, hour0[hourR + i + 1].isZero),
+              and(hour0[hourR + i - 1].isZero, hour0[hourR + i + 1] > 0, hour0[hourR + i + 2].isZero)))), 0, hour0[hourR + i])
     }
 
     /// Min harmonious net heat cons
@@ -222,8 +222,8 @@ extension TunOl {
           and(
             hour0[hourAG + i] > Double.zero,
             or(
-              and(hour0[hourAG + i - 2].isZero, hour0[hourAG + i - 1].isZero, hour0[hourAG + i + 2].isZero),
-              and(hour0[hourAG + i - 2].isZero, hour0[hourAG + i + 1].isZero, hour0[hourAG + i + 2].isZero)))), 0, hour0[hourAG + i])
+              and(hour0[hourAG + i - 2].isZero, hour0[hourAG + i - 1] > 0, hour0[hourAG + i + 1].isZero),
+              and(hour0[hourAG + i - 1].isZero, hour0[hourAG + i + 1] > 0, hour0[hourAG + i + 2].isZero)))), 0, hour0[hourAG + i])
     }
 
     /// max harm net heat cons
@@ -333,17 +333,17 @@ extension TunOl {
 
     /// Max possible PV elec to TES (considering TES chrg aux)
     let hourAY = 26280
-    // MAX(0,MIN(AW6*(1-Heater_eff*(1+1/Ratio_CSP_vs_Heater)*TES_aux_cons_perc),Heater_cap_ud,($J6-MAX(0,Overall_harmonious_var_heat_min_cons+Overall_heat_fix_cons-MIN(El_boiler_cap_ud*El_boiler_eff,(AW6-Heater_cap_ud)*Heater_eff)))*Ratio_CSP_vs_Heater/Heater_eff))
+    // =MAX(0,MIN(AW6*(1-Heater_eff*(1+1/Ratio_CSP_vs_Heater)*TES_aux_cons_perc)-PB_stby_aux_cons,Heater_cap_ud,($J6-MAX(0,Overall_harmonious_var_heat_min_cons+Overall_heat_fix_cons-MIN(El_boiler_cap_ud,MAX(0,AW6-MIN(AW6*(1-Heater_eff*(1+1/Ratio_CSP_vs_Heater)*TES_aux_cons_perc)-PB_stby_aux_cons+Grid_import_max_ud*Grid_import_yes_no_PB_strategy,Heater_cap_ud)))*El_boiler_eff))*Ratio_CSP_vs_Heater/Heater_eff))
     for i in 1..<8760 {
       hour1[hourAY + i] = max(
         Double.zero,
         min(
-          hour1[hourAW + i] * (1 - Heater_eff * (1 + 1 / Ratio_CSP_vs_Heater) * TES_aux_cons_perc), Heater_cap_ud,
+          hour1[hourAW + i] * (1 - Heater_eff * (1 + 1 / Ratio_CSP_vs_Heater) * TES_aux_cons_perc) - PB_stby_aux_cons, Heater_cap_ud,
           (hour0[hourJ + i]
             - max(
               Double.zero,
               Overall_harmonious_var_heat_min_cons + Overall_heat_fix_cons
-                - min(El_boiler_cap_ud * El_boiler_eff, (hour1[hourAW + i] - Heater_cap_ud) * Heater_eff))) * Ratio_CSP_vs_Heater / Heater_eff))
+                - min(El_boiler_cap_ud, max(0, hour1[hourAW + i] - min(hour1[hourAW + i] * (1 - Heater_eff * (1 + 1 / Ratio_CSP_vs_Heater) * TES_aux_cons_perc) - PB_stby_aux_cons + Grid_import_max_ud * Grid_import_yes_no_PB_strategy, Heater_cap_ud))) * El_boiler_eff)) * Ratio_CSP_vs_Heater / Heater_eff))
     }
 
     let AYsum = hour1.sum(hours: daysD, condition: hourAY)
@@ -440,22 +440,22 @@ extension TunOl {
     let hourBL = 140160
     // =IF(MIN(MAX(0,BI6+Grid_import_max_ud*Grid_import_yes_no_PB_strategy-PB_stby_aux_cons-MIN(El_boiler_cap_ud,MAX(0,Overall_harmonious_var_heat_min_cons+Overall_heat_fix_cons-BJ6)/El_boiler_eff)),MAX(0,BJ6+MIN(El_boiler_cap_ud,MAX(0,BI6+Grid_import_max_ud*Grid_import_yes_no_PB_strategy-PB_stby_aux_cons-Overall_harmonious_var_min_cons-Overall_fix_cons))*El_boiler_eff-Overall_heat_fix_cons)/Overall_harmonious_var_heat_max_cons*Overall_harmonious_var_max_cons+Overall_fix_cons)<Overall_harmonious_var_min_cons+Overall_fix_cons,0,Overall_harmonious_var_min_cons+Overall_fix_cons)
     for i in 1..<8760 {
-      hour1[hourBL + i] = iff(
-        min(
-          max(
-            Double.zero,
-            hour1[hourBI + i] + Grid_import_max_ud * Grid_import_yes_no_PB_strategy - PB_stby_aux_cons
-              - min(El_boiler_cap_ud, max(Double.zero, Overall_harmonious_var_heat_min_cons + Overall_heat_fix_cons - hour1[hourBJ + i]) / El_boiler_eff)
-          ),
-          max(
-            Double.zero,
-            hour1[hourBJ + i] + min(
-              El_boiler_cap_ud,
-              max(
-                Double.zero,
-                hour1[hourBI + i] + Grid_import_max_ud * Grid_import_yes_no_PB_strategy - PB_stby_aux_cons - Overall_harmonious_var_min_cons
-                  - Overall_fix_cons)) * El_boiler_eff - Overall_heat_fix_cons) / Overall_harmonious_var_heat_max_cons * Overall_harmonious_var_max_cons
-            + Overall_fix_cons) < Overall_harmonious_var_min_cons + Overall_fix_cons, Double.zero, Overall_harmonious_var_min_cons + Overall_fix_cons)
+      let min_net_elec = min(
+        max(
+          Double.zero,
+          hour1[hourBI + i] + Grid_import_max_ud * Grid_import_yes_no_PB_strategy - PB_stby_aux_cons
+            - min(El_boiler_cap_ud, max(Double.zero, Overall_harmonious_var_heat_min_cons + Overall_heat_fix_cons - hour1[hourBJ + i]) / El_boiler_eff)
+        ),
+        max(
+          Double.zero,
+          hour1[hourBJ + i] + min(
+            El_boiler_cap_ud,
+            max(
+              Double.zero,
+              hour1[hourBI + i] + Grid_import_max_ud * Grid_import_yes_no_PB_strategy - PB_stby_aux_cons - Overall_harmonious_var_min_cons
+                - Overall_fix_cons)) * El_boiler_eff - Overall_heat_fix_cons) / Overall_harmonious_var_heat_max_cons * Overall_harmonious_var_max_cons
+          + Overall_fix_cons)
+      hour1[hourBL + i] = iff((min_net_elec * 10000).rounded() < ((Overall_harmonious_var_min_cons + Overall_fix_cons) * 10000).rounded(), Double.zero, Overall_harmonious_var_min_cons + Overall_fix_cons)
     }
 
 
@@ -469,8 +469,8 @@ extension TunOl {
           and(
             hour1[hourBL + i] > Double.zero,
             or(
-              and(hour1[hourBL + i - 2].isZero, hour1[hourBL + i - 1].isZero, hour1[hourBL + i + 2].isZero),
-              and(hour1[hourBL + i - 2].isZero, hour1[hourBL + i + 1].isZero, hour1[hourBL + i + 2].isZero)))), 0, hour1[hourBL + i])
+              and(hour1[hourBL + i - 2].isZero, hour1[hourBL + i - 1] > 0, hour1[hourBL + i + 1].isZero),
+              and(hour1[hourBL + i - 1].isZero, hour1[hourBL + i + 1] > 0, hour1[hourBL + i + 2].isZero)))), 0, hour1[hourBL + i])
     }
 
     /// Min harmonious net heat cons

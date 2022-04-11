@@ -98,7 +98,7 @@ public func MGOADE(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Doubl
     let result = fitness(grassHopperPositions[i])
     grassHopperFitness[i] = result[0]
   }
-  // print(-date2.timeIntervalSinceNow / Double(grassHopperPositions.count))
+  print(-date2.timeIntervalSinceNow / Double(grassHopperPositions.count))
   for g in groups.indices {
     // Find the best grasshopper per group (target) in the first population
     for i in groups[g].indices {
