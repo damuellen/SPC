@@ -21,7 +21,7 @@ class SunOlTests: XCTestCase {
       var correct = true
       var counter = 1
       for i in 1..<8736 {
-        if counter > 20 { break }
+        if counter > 30 { break }
         if abs(ref[i - 1] - array[index + i]) / ref[i - 1] > 0.005 {
           counter += 1
           correct = false
@@ -37,7 +37,7 @@ class SunOlTests: XCTestCase {
       var correct = true
       var counter = 1
       for i in 0..<364 {
-        if counter > 20 { break }
+        if counter > 50 { break }
         if abs(ref[i] - array[index + i]) / ref[i] > 0.005 {
           counter += 1
           correct = false
@@ -53,7 +53,7 @@ class SunOlTests: XCTestCase {
       var correct = true
       var counter = 1
       for i in 0..<364 {
-        if counter > 20 { break }
+        if counter > 50 { break }
         if abs(ref[i] - array[index + i]) / ref[i] > 0.005 {
           counter += 1
           correct = false
@@ -536,6 +536,11 @@ class SunOlTests: XCTestCase {
         compareDay(day17, letter: "KJ", start: 15695)
         compareDay(day17, letter: "KK", start: 16060)
         compareDay(day17, letter: "KZ", start: 21535)
+        compareDay(day17, letter: "MK", start: 34310)
+        compareDay(day17, letter: "NA", start: 40150)
+        compareDay(day17, letter: "NO", start: 45260)
+        compareDay(day17, letter: "NP", start: 45625)
+        compareDay(day17, letter: "NL", start: 44165)
         print("Daily 1 Case", j)  // Array(day17[..<7665]).head(250, steps: 365)
         // print("Daily 1 Case", j)
         // Array(day17[7665..<13505]).head(272, steps: 365)
@@ -856,7 +861,7 @@ class SunOlTests: XCTestCase {
         compareDay2(day27, letter: "JZ", start: 44895)
         compareDay2(day27, letter: "KA", start: 45260)
         compareDay2(day27, letter: "KB", start: 45625)
-        compareDay2(day27, letter: "KC", start: 45990)
+        // compareDay2(day27, letter: "KC", start: 45990)
 
       }
 
@@ -992,7 +997,7 @@ class SunOlTests: XCTestCase {
         compareDay2(day27, letter: "PB", start: 44895)
         compareDay2(day27, letter: "PC", start: 45260)
         compareDay2(day27, letter: "PD", start: 45625)
-        compareDay2(day27, letter: "PE", start: 45990)
+        // compareDay2(day27, letter: "PE", start: 45990)
       }
 
       if j == 2 {
@@ -1126,7 +1131,7 @@ class SunOlTests: XCTestCase {
         compareDay2(day27, letter:"UD", start:44895)
         compareDay2(day27, letter:"UE", start:45260)
         compareDay2(day27, letter:"UF", start:45625)
-        compareDay2(day27, letter:"UG", start:45990)
+        // compareDay2(day27, letter:"UG", start:45990)
       }
       // Array(day27[..<9855]).head(121, steps: 365)
       // print("Daily 2 Case", j)
