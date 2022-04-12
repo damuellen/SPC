@@ -1018,8 +1018,8 @@ extension TunOl {
     // MC=(MAX(0,LB6-MG6*Overall_fix_cons)/Overall_harmonious_var_max_cons*MethDist_harmonious_max_perc*MethDist_Meth_nom_prod_ud+MAX(0,LR6-MF6*A_overall_fix_stby_cons)/A_overall_var_max_cons*A_MethDist_max_perc*MethDist_Meth_nom_prod_ud)
     for i in 0..<365 {
       day7[ddMC + i] =
-        (max(Double.zero, day7[ddLB + i] - day7[ddMG + i] * Overall_fix_cons / Overall_harmonious_var_max_cons * MethDist_harmonious_max_perc * MethDist_Meth_nom_prod_ud) + max(
-          Double.zero, day7[ddLR + i] - day7[ddMF + i] * overall_fix_stby_cons[j]) / overall_var_max_cons[j] * MethDist_max_perc[j] * MethDist_Meth_nom_prod_ud)
+        max(Double.zero, day7[ddLB + i] - day7[ddMG + i] * Overall_fix_cons) / Overall_harmonious_var_max_cons * MethDist_harmonious_max_perc * MethDist_Meth_nom_prod_ud + max(
+          Double.zero, day7[ddLR + i] - day7[ddMF + i] * overall_fix_stby_cons[j]) / overall_var_max_cons[j] * MethDist_max_perc[j] * MethDist_Meth_nom_prod_ud
     }
 
     /// Checksum
@@ -1335,6 +1335,7 @@ extension TunOl {
       day7[ddNL + i] =
         (max(Double.zero, day7[ddMK + i] - day7[ddNP + i] * Overall_fix_cons) / Overall_harmonious_var_max_cons * MethDist_harmonious_max_perc * MethDist_Meth_nom_prod_ud + max(
           Double.zero, day7[ddNA + i] - day7[ddNO + i] * overall_fix_stby_cons[j]) / overall_var_max_cons[j] * MethDist_max_perc[j] * MethDist_Meth_nom_prod_ud)
+
     }
 
     /// PB operating hours
