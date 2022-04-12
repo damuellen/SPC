@@ -43,17 +43,17 @@ extension TunOl {
     let dayAD = 9125
     for i in 0..<365 {
       // =1-IF(OR($B3=0,RawMeth_storage_cap_ud=0),0,A_RawMeth_min_cons*$B3/RawMeth_storage_cap_ud)
-      day1[dayY + i] = 1 - iff(or(day1[dayB + i].isZero, RawMeth_storage_cap_ud.isZero), Double.zero, RawMeth_min_cons[j] * day1[dayB + i] / RawMeth_storage_cap_ud)
+      day1[dayY + i] = 1 - iff(or(day0[dayB + i].isZero, RawMeth_storage_cap_ud.isZero), Double.zero, RawMeth_min_cons[j] * day0[dayB + i] / RawMeth_storage_cap_ud)
       // =1-IF(OR($B3=0,RawMeth_storage_cap_ud=0),0,A_RawMeth_max_cons*$B3/RawMeth_storage_cap_ud)
-      day1[dayZ + i] = 1 - iff(or(day1[dayB + i].isZero, RawMeth_storage_cap_ud.isZero), Double.zero, RawMeth_max_cons[j] * day1[dayB + i] / RawMeth_storage_cap_ud)
+      day1[dayZ + i] = 1 - iff(or(day0[dayB + i].isZero, RawMeth_storage_cap_ud.isZero), Double.zero, RawMeth_max_cons[j] * day0[dayB + i] / RawMeth_storage_cap_ud)
       // =1-IF(OR($B3=0,CO2_storage_cap_ud=0),0,A_CO2_min_cons*$B3/CO2_storage_cap_ud)
-      day1[dayAA + i] = 1 - iff(or(day1[dayB + i].isZero, C_O_2_storage_cap_ud.isZero), Double.zero, C_O_2_min_cons[j] * day1[dayB + i] / C_O_2_storage_cap_ud)
+      day1[dayAA + i] = 1 - iff(or(day0[dayB + i].isZero, C_O_2_storage_cap_ud.isZero), Double.zero, C_O_2_min_cons[j] * day0[dayB + i] / C_O_2_storage_cap_ud)
       // =1-IF(OR($B3=0,CO2_storage_cap_ud=0),0,A_CO2_max_cons*$B3/CO2_storage_cap_ud)
-      day1[dayAB + i] = 1 - iff(or(day1[dayB + i].isZero, C_O_2_storage_cap_ud.isZero), Double.zero, C_O_2_max_cons[j] * day1[dayB + i] / C_O_2_storage_cap_ud)
+      day1[dayAB + i] = 1 - iff(or(day0[dayB + i].isZero, C_O_2_storage_cap_ud.isZero), Double.zero, C_O_2_max_cons[j] * day0[dayB + i] / C_O_2_storage_cap_ud)
       // =1-IF(OR($B3=0,Hydrogen_storage_cap_ud=0),0,A_Hydrogen_min_cons*$B3/Hydrogen_storage_cap_ud)
-      day1[dayAC + i] = 1 - iff(or(day1[dayB + i].isZero, Hydrogen_storage_cap_ud.isZero), Double.zero, Hydrogen_min_cons[j] * day1[dayB + i] / Hydrogen_storage_cap_ud)
+      day1[dayAC + i] = 1 - iff(or(day0[dayB + i].isZero, Hydrogen_storage_cap_ud.isZero), Double.zero, Hydrogen_min_cons[j] * day0[dayB + i] / Hydrogen_storage_cap_ud)
       // =1-IF(OR($B3=0,Hydrogen_storage_cap_ud=0),0,A_Hydrogen_max_cons*$B3/Hydrogen_storage_cap_ud)
-      day1[dayAD + i] = 1 - iff(or(day1[dayB + i].isZero, Hydrogen_storage_cap_ud.isZero), Double.zero, Hydrogen_max_cons[j] * day1[dayB + i] / Hydrogen_storage_cap_ud)
+      day1[dayAD + i] = 1 - iff(or(day0[dayB + i].isZero, Hydrogen_storage_cap_ud.isZero), Double.zero, Hydrogen_max_cons[j] * day0[dayB + i] / Hydrogen_storage_cap_ud)
     }
 
     /// Max Equiv harmonious night prod due to physical limits
@@ -61,7 +61,7 @@ extension TunOl {
     // IF(OR(Y6<=0,AA6<=0,AC6<=0),0,MIN(1,IFERROR(Y6/(Y6-Z6),1),IFERROR(AA6/(AA6-AB6),1),IFERROR(AC6/(AC6-AD6),1))*(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)+A_equiv_harmonious_min_perc)
     for i in 0..<365 {
       day1[dayAE + i] = iff(
-        or(day1[dayY + i] <= Double.zero, day1[dayAA + i] <= Double.zero, day1[dayAC + i] <= 0), Double.zero,
+        or(day1[dayY + i] <= Double.zero, day1[dayAA + i] <= Double.zero, day1[dayAC + i] <= Double.zero), Double.zero,
         min(
           1, ifFinite(day1[dayY + i] / (day1[dayY + i] - day1[dayZ + i]), 1), ifFinite(day1[dayAA + i] / (day1[dayAA + i] - day1[dayAB + i]), 1),
           ifFinite(day1[dayAC + i] / (day1[dayAC + i] - day1[dayAD + i]), 1)) * (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]) + equiv_harmonious_min_perc[j])

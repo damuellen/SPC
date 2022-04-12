@@ -1333,7 +1333,7 @@ extension TunOl {
     // NL=(MAX(0,MK6-NP6*Overall_fix_cons)/Overall_harmonious_var_max_cons*MethDist_harmonious_max_perc*MethDist_Meth_nom_prod_ud+MAX(0,NA6-NO6*A_overall_fix_stby_cons)/A_overall_var_max_cons*A_MethDist_max_perc*MethDist_Meth_nom_prod_ud)
     for i in 0..<365 {
       day7[ddNL + i] =
-        (max(Double.zero, day7[ddMK + i] - day7[ddNP + i] * Overall_fix_cons / Overall_harmonious_var_max_cons * MethDist_harmonious_max_perc * MethDist_Meth_nom_prod_ud) + max(
+        (max(Double.zero, day7[ddMK + i] - day7[ddNP + i] * Overall_fix_cons) / Overall_harmonious_var_max_cons * MethDist_harmonious_max_perc * MethDist_Meth_nom_prod_ud + max(
           Double.zero, day7[ddNA + i] - day7[ddNO + i] * overall_fix_stby_cons[j]) / overall_var_max_cons[j] * MethDist_max_perc[j] * MethDist_Meth_nom_prod_ud)
     }
 
