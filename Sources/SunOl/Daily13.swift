@@ -5,18 +5,18 @@ extension TunOl {
     )  // day1
 
     let (
-      dayEY, dayEZ, dayFA, dayFB, dayFC, dayFD, dayFE, dayFF, dayFG, dayFH, dayFI, dayFJ, dayFL, dayFM, dayFN, dayFO, dayFP, dayFR, dayFS, dayFT, dayFV, dayFW, dayFY, dayFZ, dayGB, dayGC,
+      dayEY, dayFA, dayFC, dayFD, dayFE, dayFI, dayFJ, _, _, _, _, _, dayFR, dayFS, dayFT, dayFV, dayFW, dayFY, dayFZ, dayGB, dayGC,
       dayGD, dayGE, dayGF, dayGG, dayGH, dayGI, dayGK, dayGL, dayGN, dayGO, dayGQ, dayGR
     ) = (
-      0, 365, 730, 1095, 1460, 1825, 2190, 2555, 2920, 3285, 3650, 4015, 4745, 5110, 5475, 5840, 6205, 6935, 7300, 7665, 8395, 8760, 9490, 9855, 10585, 10950, 11315, 11680, 12045, 12410,
+      0, 730, 1460, 1825, 2190, 2555, 4015, 4745, 5110, 5475, 5840, 6205, 6935, 7300, 7665, 8395, 8760, 9490, 9855, 10585, 10950, 11315, 11680, 12045, 12410,
       12775, 13140, 13870, 14235, 14965, 15330, 16060, 16425
     )  // day5
 
     let (
-      dayGU, dayGV, dayGW, dayGX, dayGY, dayGZ, dayHA, dayHB, dayHC, dayHD, dayHE, dayHF, dayHH, dayHI, dayHJ, dayHK, dayHL, dayHN, dayHO, dayHP, dayHR, dayHS, dayHU, dayHV, dayHX, dayHY,
+      dayGU, dayGW, dayGY, dayGZ, dayHA, _, _, _, dayHE, dayHF, _, _, _, _, _, dayHN, dayHO, dayHP, dayHR, dayHS, dayHU, dayHV, dayHX, dayHY,
       dayHZ, dayIA, dayIB, dayIC, dayID, dayIE, dayIG, dayIH, dayIJ, dayIK, dayIM, dayIN
     ) = (
-      0, 365, 730, 1095, 1460, 1825, 2190, 2555, 2920, 3285, 3650, 4015, 4745, 5110, 5475, 5840, 6205, 6935, 7300, 7665, 8395, 8760, 9490, 9855, 10585, 10950, 11315, 11680, 12045, 12410,
+      0, 730, 1460, 1825, 2190, 2555, 2920, 3285, 3650, 4015, 4745, 5110, 5475, 5840, 6205, 6935, 7300, 7665, 8395, 8760, 9490, 9855, 10585, 10950, 11315, 11680, 12045, 12410,
       12775, 13140, 13870, 14235, 14965, 15330, 16060, 16425
     )  // day6
 
@@ -1335,7 +1335,6 @@ extension TunOl {
       day7[ddNL + i] =
         (max(Double.zero, day7[ddMK + i] - day7[ddNP + i] * Overall_fix_cons) / Overall_harmonious_var_max_cons * MethDist_harmonious_max_perc * MethDist_Meth_nom_prod_ud + max(
           Double.zero, day7[ddNA + i] - day7[ddNO + i] * overall_fix_stby_cons[j]) / overall_var_max_cons[j] * MethDist_max_perc[j] * MethDist_Meth_nom_prod_ud)
-
     }
 
     /// PB operating hours
