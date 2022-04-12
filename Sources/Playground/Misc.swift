@@ -7,24 +7,15 @@
 //
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
-let labels = [
-  "LCOM", "BESS_cap", "CCU_C_O_2_nom_prod", "C_O_2_storage_cap", "CSP_loop_nr", "El_boiler_cap", "EY_var_net_nom_cons", "Grid_export_max",
-  "Grid_import_max", "Hydrogen_storage_cap", "Heater_cap", "MethDist_Meth_nom_prod", "MethSynt_RawMeth_nom_prod", "PB_nom_gross_cap", "PV_AC_cap",
-  "PV_DC_cap", "RawMeth_storage_cap", "TES_full_load_hours",
-]
 
-let A = UnicodeScalar("A").value
-let columns = (0..<1300).map { n -> String in 
-  var nn = n
-  var x = ""
-  if n > 701 {
-    nn -= 676
-    x = "A"
-  }
-  let i = nn.quotientAndRemainder(dividingBy: 26)
-  let q = i.quotient > 0 ? String(UnicodeScalar(A + UInt32(i.quotient - 1))!) : ""
-  return x + q + String(UnicodeScalar(A + UInt32(i.remainder))!)
-}
+let labels = [
+  "LCOM", "CSP_loop_nr_ud", "TES_full_load_hours_ud", "PB_nom_gross_cap_ud",
+  "PV_AC_cap_ud", "PV_DC_cap_ud", "EY_var_net_nom_cons_ud",
+  "Hydrogen_storage_cap_ud", "Heater_cap_ud", "CCU_C_O_2_nom_prod_ud",
+  "C_O_2_storage_cap_ud", "MethSynt_RawMeth_nom_prod_ud",
+  "RawMeth_storage_cap_ud", "MethDist_Meth_nom_prod_ud", "El_boiler_cap_ud",
+  "BESS_cap_ud", "Grid_export_max_ud", "Grid_import_max_ud",
+]
 
 /*
 public struct CubicSpline {
