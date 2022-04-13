@@ -143,9 +143,9 @@ extension TunOl {
 
     for i in 0..<365 {
       // =1-IF(OR(T3=0,RawMeth_storage_cap_ud=0),0,A_RawMeth_max_cons*T3/RawMeth_storage_cap_ud)
-      day1[dayAJ + i] = 1 - iff(or(day1[dayT + i].isZero, RawMeth_storage_cap_ud.isZero), Double.zero, Hydrogen_max_cons[j] * day1[dayT + i] / RawMeth_storage_cap_ud)
+      day1[dayAJ + i] = 1 - iff(or(day1[dayT + i].isZero, RawMeth_storage_cap_ud.isZero), Double.zero, RawMeth_max_cons[j] * day1[dayT + i] / RawMeth_storage_cap_ud)
       // =1-IF(OR(T3=0,CO2_storage_cap_ud=0),0,A_CO2_max_cons*T3/CO2_storage_cap_ud)
-      day1[dayAK + i] = 1 - iff(or(day1[dayT + i].isZero, C_O_2_storage_cap_ud.isZero), Double.zero, Hydrogen_max_cons[j] * day1[dayT + i] / C_O_2_storage_cap_ud)
+      day1[dayAK + i] = 1 - iff(or(day1[dayT + i].isZero, C_O_2_storage_cap_ud.isZero), Double.zero, C_O_2_max_cons[j] * day1[dayT + i] / C_O_2_storage_cap_ud)
       // =1-IF(OR(T3=0,Hydrogen_storage_cap_ud=0),0,A_Hydrogen_max_cons*T3/Hydrogen_storage_cap_ud)
       day1[dayAL + i] = 1 - iff(or(day1[dayT + i].isZero, Hydrogen_storage_cap_ud.isZero), Double.zero, Hydrogen_max_cons[j] * day1[dayT + i] / Hydrogen_storage_cap_ud)
     }

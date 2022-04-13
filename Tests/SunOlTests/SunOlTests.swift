@@ -381,10 +381,23 @@ class SunOlTests: XCTestCase {
       // print("Daily Case", j)
       // Array(day1[5840...]).head(19, steps: 365)
       if j == 0 {
+        compareDay(day1, letter: "L", start: 3285)
+        compareDay(day1, letter: "M", start: 3650)
+        compareDay(day1, letter: "N", start: 4015)
+        compareDay(day1, letter: "O", start: 4380)
+        compareDay(day1, letter: "P", start: 4745)
+        compareDay(day1, letter: "T", start: 5840)
         compareDay(day1, letter: "Z", start: 8030)
         compareDay(day1, letter: "AA", start: 8395)
         compareDay(day1, letter: "AB", start: 8760)
         compareDay(day1, letter: "AC", start: 9125)
+
+        compareDay(day1, letter: "AJ", start: 11680)
+        compareDay(day1, letter: "AK", start: 12045)
+        compareDay(day1, letter: "AL", start: 12410)
+
+        compareDay(day1, letter: "AM", start: 12775)
+
         compareDay(day1, letter: "AM", start: 12775)
       }
 

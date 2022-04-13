@@ -238,21 +238,21 @@ public struct TunOl {
 
   var th_Coeff: [Double] = [0]  // PB_Eff!$U3 PB_Eff!$T3 PB_Eff!$S3 PB_Eff!$R3 PB_Eff!$Q3
 
-  var CSP_loop_nr_ud: Double = 222.3
-  var TES_full_load_hours_ud: Double = 18.8
-  var PB_nom_gross_cap_ud: Double = 20.4
-  var PV_AC_cap_ud: Double = 1008.4
-  var PV_DC_cap_ud: Double = 1380
-  var EY_var_net_nom_cons_ud: Double = 560.1
-  var Hydrogen_storage_cap_ud: Double = 107.3
-  var Heater_cap_ud: Double = 346.6
-  var CCU_C_O_2_nom_prod_ud: Double = 26.6
+  var CSP_loop_nr_ud: Double = 234
+  var TES_full_load_hours_ud: Double = 24
+  var PB_nom_gross_cap_ud: Double = 74.4
+  var PV_AC_cap_ud: Double = 912.3
+  var PV_DC_cap_ud: Double = 827.8
+  var EY_var_net_nom_cons_ud: Double = 243.6
+  var Hydrogen_storage_cap_ud: Double = 24.1
+  var Heater_cap_ud: Double = 357.6
+  var CCU_C_O_2_nom_prod_ud: Double = 51
   var C_O_2_storage_cap_ud: Double = 5000
-  var MethSynt_RawMeth_nom_prod_ud: Double = 79.6
+  var MethSynt_RawMeth_nom_prod_ud: Double = 51.5
   var RawMeth_storage_cap_ud: Double = 600
-  var MethDist_Meth_nom_prod_ud: Double = 35
-  var El_boiler_cap_ud: Double = 15.6
-  var BESS_cap_ud: Double = 1400
+  var MethDist_Meth_nom_prod_ud: Double = 44.1
+  var El_boiler_cap_ud: Double = 38.2
+  var BESS_cap_ud: Double = 1195
   var Grid_export_max_ud: Double = 50
   var Grid_import_max_ud: Double = 50
   var Grid_import_yes_no_BESS_strategy: Double = 1
