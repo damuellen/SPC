@@ -31,12 +31,12 @@ public func MGOADE(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Doubl
   let f = 0.9
 
   // Calculate the fitness of initial grasshoppers
-  let date = Date()
+
   DispatchQueue.concurrentPerform(iterations: grassHopperPositions.count) { i in 
     let result = fitness(grassHopperPositions[i])
     grassHopperFitness[i] = result[0]
   }
-  print(-date.timeIntervalSinceNow / Double(grassHopperPositions.count))
+
   for g in groups.indices {
     // Find the best grasshopper per group (target) in the first population
     for i in groups[g].indices {
@@ -47,8 +47,9 @@ public func MGOADE(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Doubl
     }
     convergenceCurves[g].append([Double(0), targetFitness[g]])
   }
-  print("First population:\n\(targetFitness)".text(.green))
-  print(targetPosition.map(labeled(values:)).joined(separator: "\n"))
+  print(" Population: \(grassHopperPositions.count) ".randomColor(), " Iterations: 0".randomColor())
+  print(format(values: targetFitness))
+  print(labeled(values: targetPosition))
 
   func euclideanDistance(a: [Double], b: [Double]) -> Double {
     var distance = 0.0
@@ -166,8 +167,9 @@ public func MGOADE(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Doubl
       }
       convergenceCurves[g].append([Double(l), targetFitness[g]])
     }
-    print("Iterations: \(l)\n\(targetFitness)".randomColor())
-    print(targetPosition.map(labeled(values:)).joined(separator: "\n"))
+    print("\u{001B}[19A", "Population: \(grassHopperPositions.count) ".randomColor(), " Iterations: \(l)".randomColor())
+    print(format(values: targetFitness))
+    print(labeled(values: targetPosition))
     if (targetFitness.reduce(0, +) / 3) - targetFitness.min()! < 0.001 { break }
   }
   targetResults.removeLast((maxIter - l) * n)
@@ -202,11 +204,29 @@ extension Range where Bound == Int {
   }
 }
 
-func labeled(values: [Double]) -> String {
+func labeled(values: [[Double]]) -> String {
   let labels = [
-    "CSP_loop_nr", "TES_full_load_hours", "PB_nom_gross_cap", "PV_AC_cap", "PV_DC_cap", "EY_var_net_nom_cons", "Hydrogen_storage_cap", "Heater_cap", "CCU_C_O_2_nom_prod", "C_O_2_storage_cap", "MethSynt_RawMeth_nom_prod", "RawMeth_storage_cap", "MethDist_Meth_nom_prod",
-    "El_boiler_cap", "BESS_cap", "Grid_export_max", "Grid_import_max",
+    "Loops", "TES", "PB", "PV_AC", "PV_DC", "EY_cons", "H2_storage", "Heater",
+    "CCU_CO2_prod", "CO2_storage", "Synt_RawMeth", "RawMeth_storage",
+    "Dist_Meth", "El_boiler", "BESS", "Grid_export", "Grid_import",
   ]
 
-  return zip(labels, values).map { l, v in "\(l.text(.red)) \(String(format: "%.1f", v).text(.red))" }.joined(separator: " ")
+  return values[0].indices.map { i in
+    """
+    \(labels[i].leftpad(length: 16).text(.red))\(": ".text(.red))\
+    \(String(format: "%.1f", values[0][i]).leftpad(length: 9).text(.green))\
+    \(String(format: "%.1f", values[1][i]).leftpad(length: 9).text(.yellow))\
+    \(String(format: "%.1f", values[2][i]).leftpad(length: 9).text(.magenta))
+    """
+  }.joined(separator: "\n")
+}
+
+func format(values: [Double]) -> String {
+  let label = "LCOM"
+  return """
+    \(label.leftpad(length: 16).text(.red))\(": ".text(.red))\
+    \(String(format: "%.2f", values[0]).leftpad(length: 9).text(.green))\
+    \(String(format: "%.2f", values[1]).leftpad(length: 9).text(.yellow))\
+    \(String(format: "%.2f", values[2]).leftpad(length: 9).text(.magenta))
+    """
 }
