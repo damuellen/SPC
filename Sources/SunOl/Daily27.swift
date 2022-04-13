@@ -55,7 +55,7 @@ extension TunOl {
         day6[dayEB + i] + day6[dayEH + i] - (day1[dayO + i] + (day1[dayP + i] - day1[dayO + i]) * day7[ddAE + i])
         - min(
           day6[dayEK + i],
-          max(Double.zero, day6[dayEA + i] + (day1[dayE + i] + (day1[dayF + i] - day1[dayE + i]) * day7[ddAE + i]) + (day1[dayG + i] + (day1[dayH + i] - day1[dayG + i]) * day7[ddAE + i] - day6[dayEJ + i]) / El_boiler_eff)
+          max(Double.zero, day6[dayEA + i] + (day1[dayE + i] + (day1[dayF + i] - day1[dayE + i]) * day7[ddAE + i]) + (day1[dayG + i] + (day1[dayH + i] - day1[dayG + i]) * day7[ddAE + i]) / El_boiler_eff - day6[dayEJ + i])
             / BESS_chrg_eff) - max(Double.zero, (day1[dayQ + i] + (day1[dayR + i] - day1[dayQ + i]) * day7[ddAE + i]) - day6[dayEE + i]) / El_boiler_eff
     }
 
