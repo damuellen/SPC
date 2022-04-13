@@ -20,12 +20,10 @@ SetConsoleCtrlHandler({_ in source.cancel();semaphore.wait();return WindowsBool(
 #if os(Linux)
 try! Gnuplot.process().run()
 #endif
-var stopwatch = 0
 
 let server = HTTP { request -> HTTP.Response in var uri = request.uri
   if uri == "/cancel" {
     source.cancel()
-    stopwatch = 0
   } else {
     uri.remove(at: uri.startIndex)
   }
@@ -39,7 +37,7 @@ let server = HTTP { request -> HTTP.Response in var uri = request.uri
       .set(title: "Convergence curves")
       .set(xlabel: "Iteration").set(ylabel: "LCoM")
     plot.settings["xtics"] = "1"
-    return .init(html: .init(body: plot.svg!, refresh: min(stopwatch, 30)))
+    return .init(html: .init(body: plot.svg!, refresh: 30))
   }
   return .init(html: .init(refresh: 10))
 }
