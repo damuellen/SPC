@@ -1,9 +1,6 @@
 import Foundation
 import Utilities
 
-public let source = DispatchSource.makeSignalSource(signal: SIGINT, queue: .global())
-public let semaphore = DispatchSemaphore(value: 0)
-
 public func fitness(values: [Double]) -> [Double] {
   guard let model = TunOl(values) else { return [Double.infinity] + values }
   let costs = Costs(model)

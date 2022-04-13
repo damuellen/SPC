@@ -3,18 +3,10 @@ import Foundation
 import Utilities
 import xlsxwriter
 import SunOl
-// let d = Date()
 
-// let data = try String(contentsOfFile: CommandLine.arguments[1], encoding: .utf16).data(using: .utf8)!
-// let reader = CSVReader(data: data, separator: ";", filter: ["ValueY"])!
-// try reader.csv.write(toFile: "New" + CommandLine.arguments[1], atomically: false, encoding: .utf8)
+let source = DispatchSource.makeSignalSource(signal: SIGINT, queue: .global())
+let semaphore = DispatchSemaphore(value: 0)
 
-
-// print(-d.timeIntervalSinceNow)
-// let d2 = Date()
-// try!  Gnuplot(ys: csv["SCA4_LOC_TEMPERATURE1_ValueY"], csv["SCA3LOC_TEMPERATURE_1_ValueY"], csv["SCA2LOC_TEMPERATURE1_ValueY"], style: .lines(smooth: false))(.pdf(path: "SCA4_LOC_TEMPERATURE2_3_ValueY.pdf"))
-// print(-d2.timeIntervalSinceNow)
-// fatalError()
 #if !os(Windows)
 print("\u{1b}[1J", terminator: "")
 print(tunol)
@@ -29,7 +21,6 @@ SetConsoleCtrlHandler({_ in source.cancel();semaphore.wait();return WindowsBool(
 try! Gnuplot.process().run()
 #endif
 var stopwatch = 0
-
 
 let server = HTTP { request -> HTTP.Response in var uri = request.uri
   if uri == "/cancel" {
@@ -106,7 +97,7 @@ struct Command: ParsableCommand {
     ]
 
     var r = 0
-    var r2 = 0
+    // var r2 = 0
     defer {
       #if os(Windows)
       DispatchQueue.global().asyncAfter(deadline: .now()) { 
@@ -115,7 +106,7 @@ struct Command: ParsableCommand {
       #else
       print(name)
       #endif
-      ws.table(range: [0, 0, r, labels.count - 1], header: labels)
+      ws.table(range: [0, 0, r, labels.endIndex - 1], header: labels)
       // names.enumerated().forEach { column, name in 
       //   let chart = wb.addChart(type: .scatter) //.set(y_axis: 1000...2500)
       //   chart.addSeries().set(marker: 5, size: 4)
@@ -145,42 +136,28 @@ struct Command: ParsableCommand {
         Parameter(
           BESS_cap_ud: 0...1400,
           CCU_C_O_2_nom_prod_ud: 10...110,
-          C_O_2_storage_cap_ud: 1000...5000,
-          CSP_loop_nr_ud: 20...250,
-          El_boiler_cap_ud: 10...110,
-          EY_var_net_nom_cons_ud: 100...600,
+          C_O_2_storage_cap_ud: 0...5000,
+          CSP_loop_nr_ud: 0...250,
+          El_boiler_cap_ud: 0...110,
+          EY_var_net_nom_cons_ud: 10...600,
           Grid_export_max_ud: 50...50,
           Grid_import_max_ud: 50...50,
-          Hydrogen_storage_cap_ud: 10...110,
-          Heater_cap_ud: 10...500,
+          Hydrogen_storage_cap_ud: 0...110,
+          Heater_cap_ud: 0...500,
           MethDist_Meth_nom_prod_ud: 10...110,
           MethSynt_RawMeth_nom_prod_ud: 10...110,
-          PB_nom_gross_cap_ud: 20...300,
-          PV_AC_cap_ud: 280...1280,
-          PV_DC_cap_ud: 280...1380,
-          RawMeth_storage_cap_ud: 100...300,
-          TES_full_load_hours_ud: 5...30)
+          PB_nom_gross_cap_ud: 0...300,
+          PV_AC_cap_ud: 10...1280,
+          PV_DC_cap_ud: 10...1380,
+          RawMeth_storage_cap_ud: 0...300,
+          TES_full_load_hours_ud: 0...30)
       ]
     }
     parameter.forEach { parameter in
       DispatchQueue.global().asyncAfter(deadline: .now()) { start("http://127.0.0.1:9080") }
-      let a = MGOADE(group: !noGroups, n: n ?? 90, maxIter: iterations ?? 20, bounds: parameter.ranges, source: source, fitness: fitness)
-      a.forEach { row in r += 1; 
-      if row.count != 18 {
-        print(row)
-      }
-      ws.write(row, row: r)
+      let a = MGOADE(group: !noGroups, n: n ?? 90, maxIter: iterations ?? 20, bounds: parameter.ranges, fitness: fitness)
+      a.filter(\.first!.isFinite).forEach { row in r += 1; ws.write(row, row: r)
      }
-      // if r < 2 { return }
-      // let (x,y) = (12, 17)
-      // let freq = 10e7
-      // var d = [Double:[Double]]()
-      // for i in a.indices {
-      //   let key = (a[i][x] / freq).rounded(.up)
-      //   if let v = d[key] { d[key] = [v[0] + 1, min(v[1], a[i][y]), max(v[2], a[i][y])] } 
-      //   else { d[key] = [1, a[i][y], a[i][y]] }
-      // }
-      // d.keys.sorted().map { [$0 * freq] + d[$0]! }.forEach { row in r2 += 1; ws2.write(row, row: r2) }
     }
   }
 }

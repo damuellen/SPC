@@ -66,7 +66,8 @@ class SunOlTests: XCTestCase {
     TunOl.Q_Sol_MW_thLoop = [0] + csv["csp"]
     TunOl.Reference_PV_plant_power_at_inverter_inlet_DC = [0] + csv["pv"]
     TunOl.Reference_PV_MV_power_at_transformer_outlet = [0] + csv["out"]
-    let model = TunOl([])!
+    let model = TunOl([167.92,30,20,1280,1150.557,600,10,281.49,84.68,5000,90.77,110.55,61.85,31.74,26.5,50,50])!
+
     let costs = Costs(model)
     let hour0 = model.hour0(
       TunOl.Q_Sol_MW_thLoop, TunOl.Reference_PV_plant_power_at_inverter_inlet_DC, TunOl.Reference_PV_MV_power_at_transformer_outlet)

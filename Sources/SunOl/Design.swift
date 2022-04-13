@@ -238,46 +238,44 @@ public struct TunOl {
 
   var th_Coeff: [Double] = [0]  // PB_Eff!$U3 PB_Eff!$T3 PB_Eff!$S3 PB_Eff!$R3 PB_Eff!$Q3
 
-  var CSP_loop_nr_ud: Double = 234
-  var TES_full_load_hours_ud: Double = 24
-  var PB_nom_gross_cap_ud: Double = 74.4
-  var PV_AC_cap_ud: Double = 912.3
-  var PV_DC_cap_ud: Double = 827.8
-  var EY_var_net_nom_cons_ud: Double = 243.6
-  var Hydrogen_storage_cap_ud: Double = 24.1
-  var Heater_cap_ud: Double = 357.6
-  var CCU_C_O_2_nom_prod_ud: Double = 51
-  var C_O_2_storage_cap_ud: Double = 5000
-  var MethSynt_RawMeth_nom_prod_ud: Double = 51.5
-  var RawMeth_storage_cap_ud: Double = 600
-  var MethDist_Meth_nom_prod_ud: Double = 44.1
-  var El_boiler_cap_ud: Double = 38.2
-  var BESS_cap_ud: Double = 1195
-  var Grid_export_max_ud: Double = 50
-  var Grid_import_max_ud: Double = 50
+  var CSP_loop_nr_ud: Double
+  var TES_full_load_hours_ud: Double
+  var PB_nom_gross_cap_ud: Double
+  var PV_AC_cap_ud: Double
+  var PV_DC_cap_ud: Double
+  var EY_var_net_nom_cons_ud: Double
+  var Hydrogen_storage_cap_ud: Double
+  var Heater_cap_ud: Double
+  var CCU_C_O_2_nom_prod_ud: Double
+  var C_O_2_storage_cap_ud: Double
+  var MethSynt_RawMeth_nom_prod_ud: Double
+  var RawMeth_storage_cap_ud: Double
+  var MethDist_Meth_nom_prod_ud: Double
+  var El_boiler_cap_ud: Double
+  var BESS_cap_ud: Double
+  var Grid_export_max_ud: Double
+  var Grid_import_max_ud: Double
   var Grid_import_yes_no_BESS_strategy: Double = 1
   var Grid_import_yes_no_PB_strategy: Double = 1
 
   init?(_ parameter: [Double]) {
-    if !parameter.isEmpty {
-      self.CSP_loop_nr_ud = parameter[0]
-      self.TES_full_load_hours_ud = parameter[1]
-      self.PB_nom_gross_cap_ud = parameter[2]
-      self.PV_AC_cap_ud = parameter[3]
-      self.PV_DC_cap_ud = parameter[4]
-      self.EY_var_net_nom_cons_ud = parameter[5]
-      self.Hydrogen_storage_cap_ud = parameter[6]
-      self.Heater_cap_ud = parameter[7]
-      self.CCU_C_O_2_nom_prod_ud = parameter[8]
-      self.C_O_2_storage_cap_ud = parameter[9]
-      self.MethSynt_RawMeth_nom_prod_ud = parameter[10]
-      self.RawMeth_storage_cap_ud = parameter[11]
-      self.MethDist_Meth_nom_prod_ud = parameter[12]
-      self.El_boiler_cap_ud = parameter[13]
-      self.BESS_cap_ud = parameter[14]
-      self.Grid_export_max_ud = parameter[15]
-      self.Grid_import_max_ud = parameter[16] 
-    }
+    self.CSP_loop_nr_ud = parameter[0]
+    self.TES_full_load_hours_ud = parameter[1]
+    self.PB_nom_gross_cap_ud = parameter[2]
+    self.PV_AC_cap_ud = parameter[3]
+    self.PV_DC_cap_ud = parameter[4]
+    self.EY_var_net_nom_cons_ud = parameter[5]
+    self.Hydrogen_storage_cap_ud = parameter[6]
+    self.Heater_cap_ud = parameter[7]
+    self.CCU_C_O_2_nom_prod_ud = parameter[8]
+    self.C_O_2_storage_cap_ud = parameter[9]
+    self.MethSynt_RawMeth_nom_prod_ud = parameter[10]
+    self.RawMeth_storage_cap_ud = parameter[11]
+    self.MethDist_Meth_nom_prod_ud = parameter[12]
+    self.El_boiler_cap_ud = parameter[13]
+    self.BESS_cap_ud = parameter[14]
+    self.Grid_export_max_ud = parameter[15]
+    self.Grid_import_max_ud = parameter[16]
 
     let ac = self.PV_AC_cap_ud
     let dc = self.PV_DC_cap_ud

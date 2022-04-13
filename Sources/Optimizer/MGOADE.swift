@@ -13,7 +13,7 @@ import Utilities
 
 public var convergenceCurves = [[[Double]]](repeating: [[Double]](), count: 3)
 
-public func MGOADE(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Double>], source: DispatchSourceSignal, fitness: ([Double]) -> [Double]) -> [[Double]] {
+public func MGOADE(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Double>], fitness: ([Double]) -> [Double]) -> [[Double]] {
   var targetResults = Matrix(n * maxIter, bounds.count + 1)
   var targetPosition = Matrix(group ? 3 : 1, bounds.count)
   var targetFitness = Vector(group ? 3 : 1, .infinity)
@@ -29,17 +29,14 @@ public func MGOADE(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Doubl
   let cMin = 0.00004
   let cr = 0.4
   let f = 0.9
-  let date = Date()
-  let _ = fitness([])
 
-  print(-date.timeIntervalSinceNow)
   // Calculate the fitness of initial grasshoppers
-  let date2 = Date()
+  let date = Date()
   DispatchQueue.concurrentPerform(iterations: grassHopperPositions.count) { i in 
     let result = fitness(grassHopperPositions[i])
     grassHopperFitness[i] = result[0]
   }
-  print(-date2.timeIntervalSinceNow / Double(grassHopperPositions.count))
+  print(-date.timeIntervalSinceNow / Double(grassHopperPositions.count))
   for g in groups.indices {
     // Find the best grasshopper per group (target) in the first population
     for i in groups[g].indices {
