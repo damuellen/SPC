@@ -29,6 +29,7 @@ platformProducts.append(contentsOf: [
   .executable(name: "TransTES", targets: ["TransTES"]),
   .executable(name: "PinchPointTool", targets: ["PinchPointTool"]),
   .executable(name: "Playground", targets: ["Playground"]),
+  .executable(name: "Optimizer", targets: ["Optimizer"]),
 ])
 #endif
 
@@ -74,7 +75,15 @@ let platformTargets: [Target] = [
   .executableTarget(
     name: "Playground",
     dependencies: [
-      "BlackBoxModel", "Utilities", "SunOl",
+      "Utilities",
+      .product(name: "xlsxwriter", package: "xlsxwriter.swift")
+    ],
+    swiftSettings: swift
+  ),
+  .executableTarget(
+    name: "Optimizer",
+    dependencies: [
+      "Utilities", "SunOl",
       .product(name: "xlsxwriter", package: "xlsxwriter.swift")
     ],
     swiftSettings: swift

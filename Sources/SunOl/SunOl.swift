@@ -61,9 +61,3 @@ extension ClosedRange where Bound == Double {
     return lowerBound + value * (upperBound - lowerBound)
   }
 }
-
-extension Array where Element == ClosedRange<Double> {
-  func randomValues(count: Int) -> [[Double]] {
-    (1...count).map { _ in map { range in Double.random(in: range) } }
-  }
-}

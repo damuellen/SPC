@@ -8,7 +8,6 @@ public struct TunOl {
   public static var Grid_import_yes_no_BESS_strategy: Double = 1
   public static var Grid_import_yes_no_PB_strategy: Double = 1
 
-  public static var convergenceCurves = [[[Double]]](repeating: [[Double]](), count: 3)
   public static var Q_Sol_MW_thLoop = [Double]()
   public static var Reference_PV_plant_power_at_inverter_inlet_DC = [Double]()
   public static var Reference_PV_MV_power_at_transformer_outlet = [Double]()
@@ -250,7 +249,7 @@ public struct TunOl {
   var CCU_C_O_2_nom_prod_ud: Double = 26.6
   var C_O_2_storage_cap_ud: Double = 5000
   var MethSynt_RawMeth_nom_prod_ud: Double = 79.6
-  var RawMeth_storage_cap_ud: Double = 300
+  var RawMeth_storage_cap_ud: Double = 600
   var MethDist_Meth_nom_prod_ud: Double = 35
   var El_boiler_cap_ud: Double = 15.6
   var BESS_cap_ud: Double = 1400

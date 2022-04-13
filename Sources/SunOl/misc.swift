@@ -3,13 +3,6 @@ import Utilities
 
 func POLY(_ value: Double, _ coeffs: [Double]) -> Double { coeffs.reversed().reduce(into: 0.0) { result, coefficient in result = coefficient.addingProduct(result, value) } }
 
-extension Range where Bound == Int {
-  func split(in parts: Int) -> [Self] {
-    let size = count / parts + (count % parts > 0 ? 1 : 0)
-    return stride(from: 0, to: count, by: size).map { cursor in cursor..<Swift.min(cursor.advanced(by: size), endIndex) }
-  }
-}
-
 extension Double { @inline(__always) func asString(precision: Int = 2) -> String { String(format: "%.\(precision)f", self) } }
 
 func write(_ xs: [Double]..., maxLength: Int = Int.max) {
@@ -180,15 +173,6 @@ func ifFinite(_ check: Double, _ subs: Double) -> Double { check.isFinite ? chec
 func and(_ conditions: Bool...) -> Bool { conditions.allSatisfy { $0 } }
 
 func or(_ conditions: Bool...) -> Bool { conditions.contains(true) }
-
-func labeled(values: [Double]) -> String {
-  let labels = [
-    "CSP_loop_nr", "TES_full_load_hours", "PB_nom_gross_cap", "PV_AC_cap", "PV_DC_cap", "EY_var_net_nom_cons", "Hydrogen_storage_cap", "Heater_cap", "CCU_C_O_2_nom_prod", "C_O_2_storage_cap", "MethSynt_RawMeth_nom_prod", "RawMeth_storage_cap", "MethDist_Meth_nom_prod",
-    "El_boiler_cap", "BESS_cap", "Grid_export_max", "Grid_import_max",
-  ]
-
-  return zip(labels, values).map { l, v in "\(l.text(.red)) \(String(format: "%.1f", v).text(.red))" }.joined(separator: " ")
-}
 
 protocol Labeled { var labels: [String] { get } }
 extension Labeled { var labels: [String] { Mirror(reflecting: self).children.compactMap(\.label) } }

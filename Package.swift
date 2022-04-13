@@ -16,6 +16,7 @@ let platformProducts: [Product] =  [
   .executable(name: "PinchPointTool", targets: ["PinchPointTool"]),
   .executable(name: "SunOl", targets: ["SunOl"]),
   .executable(name: "Playground", targets: ["Playground"]),
+  .executable(name: "Optimizer", targets: ["Optimizer"]),
 ]
 
 let dependencies: [Package.Dependency] = [
@@ -57,9 +58,20 @@ let platformTargets: [Target] = [
   // .executableTarget(name: "Benchmarking",
   //   dependencies: ["Meteo", "Benchmark", "BlackBoxModel"],
   //   swiftSettings: swift),
-  .target(
+  .executableTarget(
     name: "Playground",
-    dependencies: ["Utilities"],
+    dependencies: [
+      "Utilities",
+      .product(name: "xlsxwriter", package: "xlsxwriter.swift")
+    ],
+    swiftSettings: swift
+  ),
+  .executableTarget(
+    name: "Optimizer",
+    dependencies: [
+      "Utilities", "SunOl",
+      .product(name: "xlsxwriter", package: "xlsxwriter.swift")
+    ],
     swiftSettings: swift
   ),
   .target(

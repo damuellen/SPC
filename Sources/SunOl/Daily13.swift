@@ -5,18 +5,18 @@ extension TunOl {
     )  // day1
 
     let (
-      dayEY, dayFA, dayFC, dayFD, dayFE, dayFI, dayFJ, _, _, _, _, _, dayFR, dayFS, dayFT, dayFV, dayFW, dayFY, dayFZ, dayGB, dayGC,
+      dayEY, dayFA, dayFC, dayFD, dayFE, dayFI, dayFJ, _, _, _, _, _, dayFR, dayFS, dayFT, dayFV, dayFW, dayFY, dayFZ, dayGA, dayGB, dayGC,
       dayGD, dayGE, dayGF, dayGG, dayGH, dayGI, dayGK, dayGL, dayGN, dayGO, dayGQ, dayGR
     ) = (
-      0, 730, 1460, 1825, 2190, 2555, 4015, 4745, 5110, 5475, 5840, 6205, 6935, 7300, 7665, 8395, 8760, 9490, 9855, 10585, 10950, 11315, 11680, 12045, 12410,
+      0, 730, 1460, 1825, 2190, 2555, 4015, 4745, 5110, 5475, 5840, 6205, 6935, 7300, 7665, 8395, 8760, 9490, 9855, 10220, 10585, 10950, 11315, 11680, 12045, 12410,
       12775, 13140, 13870, 14235, 14965, 15330, 16060, 16425
     )  // day5
 
     let (
-      dayGU, dayGW, dayGY, dayGZ, dayHA, _, _, _, dayHE, dayHF, _, _, _, _, _, dayHN, dayHO, dayHP, dayHR, dayHS, dayHU, dayHV, dayHX, dayHY,
+      dayGU, dayGW, dayGY, dayGZ, dayHA, _, _, _, dayHE, dayHF, _, _, _, _, _, dayHN, dayHO, dayHP, dayHR, dayHS, dayHU, dayHV, dayHW, dayHX, dayHY,
       dayHZ, dayIA, dayIB, dayIC, dayID, dayIE, dayIG, dayIH, dayIJ, dayIK, dayIM, dayIN
     ) = (
-      0, 730, 1460, 1825, 2190, 2555, 2920, 3285, 3650, 4015, 4745, 5110, 5475, 5840, 6205, 6935, 7300, 7665, 8395, 8760, 9490, 9855, 10585, 10950, 11315, 11680, 12045, 12410,
+      0, 730, 1460, 1825, 2190, 2555, 2920, 3285, 3650, 4015, 4745, 5110, 5475, 5840, 6205, 6935, 7300, 7665, 8395, 8760, 9490, 9855, 10220, 10585, 10950, 11315, 11680, 12045, 12410,
       12775, 13140, 13870, 14235, 14965, 15330, 16060, 16425
     )  // day6
 
@@ -715,7 +715,7 @@ extension TunOl {
         (day5[dayFC + i] + (day6[dayGY + i] - day5[dayFC + i]) * day7[ddAMKG + i])
           + ((day5[dayFD + i] + (day6[dayGZ + i] - day5[dayFD + i]) * day7[ddAMKG + i])
             - (day5[dayFC + i] + (day6[dayGY + i] - day5[dayFC + i]) * day7[ddAMKG + i]))
-          * day7[dddJP + i])
+          * day7[dddJP + i]))
     }
 
     /// el cons for night prep during harm op period
@@ -741,8 +741,7 @@ extension TunOl {
     let ddLE = 22995
     // LE=IF(OR(JP6=0,KG6=0),MIN(FR6/BESS_chrg_eff,FZ6),MIN(((FY6+(HU6-FY6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc))+((FZ6+(HV6-FZ6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc))-(FY6+(HU6-FY6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc)))/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc)),(FR6+(HN6-FR6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc))/BESS_chrg_eff))
     for i in 0..<365 {
-      day7[ddLE + i] = min(
-        iff(
+      day7[ddLE + i] = iff(
           or(day7[ddJP + i].isZero, day7[ddKG + i].isZero), min(day5[dayFR + i] / BESS_chrg_eff, day5[dayFZ + i]),
           min((day5[dayFY + i] + (day6[dayHU + i] - day5[dayFY + i]) * day7[ddAMKG + i]
             + ((day5[dayFZ + i] + (day6[dayHV + i] - day5[dayFZ + i]) * day7[ddAMKG + i])
@@ -810,8 +809,7 @@ extension TunOl {
         or(day7[ddJP + i].isZero, day7[ddKG + i].isZero), day5[dayFW + i],
         day5[dayFV + i] + (day6[dayHR + i] - day5[dayFV + i]) * day7[ddAMKG + i]
           + ((day5[dayFW + i] + (day6[dayHS + i] - day5[dayFW + i]) * day7[ddAMKG + i])
-            - (day5[dayFV + i] + (day6[dayHR + i] - day5[dayFV + i]) * day7[ddAMKG + i]))
-         day7[dddJP + i])
+            - (day5[dayFV + i] + (day6[dayHR + i] - day5[dayFV + i]) * day7[ddAMKG + i])) * day7[dddJP + i])
     }
 
     /// heat prod by el boiler for night prep during harm op period
@@ -823,8 +821,7 @@ extension TunOl {
         min(
           (day5[dayGH + i] + (day6[dayID + i] - day5[dayGH + i]) * day7[ddAMKG + i])
             + ((day5[dayGI + i] + (day6[dayIE + i] - day5[dayGI + i]) * day7[ddAMKG + i])
-              - (day5[dayGH + i] + (day6[dayID + i] - day5[dayGH + i]) * day7[ddAMKG + i]))
-             day7[dddJP + i],
+              - (day5[dayGH + i] + (day6[dayID + i] - day5[dayGH + i]) * day7[ddAMKG + i])) * day7[dddJP + i],
           max(0, day7[ddLM + i] - day7[ddLP + i])))
     }
 
@@ -846,8 +843,7 @@ extension TunOl {
         or(day7[ddJP + i].isZero, day7[ddKG + i].isZero), day5[dayFT + i],
         day5[dayFS + i] + (day6[dayHO + i] - day5[dayFS + i]) * day7[ddAMKG + i]
           + ((day5[dayFT + i] + (day6[dayHP + i] - day5[dayFT + i]) * day7[ddAMKG + i])
-            - (day5[dayFS + i] + (day6[dayHO + i] - day5[dayFS + i]) * day7[ddAMKG + i]))
-         day7[dddJP + i])
+            - (day5[dayFS + i] + (day6[dayHO + i] - day5[dayFS + i]) * day7[ddAMKG + i])) * day7[dddJP + i])
     }
 
     /// Grid import for harm op during harm op period
@@ -858,8 +854,7 @@ extension TunOl {
         or(day7[ddJP + i].isZero, day7[ddKG + i].isZero), day5[dayFJ + i],
         (day5[dayFI + i] + (day6[dayHE + i] - day5[dayFI + i]) * day7[ddAMKG + i])
           + ((day5[dayFJ + i] + (day6[dayHF + i] - day5[dayFJ + i]) * day7[ddAMKG + i])
-            - (day5[dayFI + i] + (day6[dayHE + i] - day5[dayFI + i]) * day7[ddAMKG + i]))
-         day7[dddJP + i])
+            - (day5[dayFI + i] + (day6[dayHE + i] - day5[dayFI + i]) * day7[ddAMKG + i])) * day7[dddJP + i])
 
     }
 
@@ -1245,7 +1240,7 @@ extension TunOl {
     for i in 0..<365 {
       day7[ddNE + i] = iff(
         or(day7[ddKI + i].isZero, day7[ddKZ + i].isZero), day5[dayFU + i],
-        day5[dayFU + i] + (day6[dayHQ + i] - day5[dayFU + i]) * day7[ddAMKI + i]) - (day7[ddND + i]) / BESS_chrg_eff - day7[ddMN + i])
+        day5[dayFU + i] + (day6[dayHQ + i] - day5[dayFU + i]) * day7[ddAMKI + i]) - (day7[ddND + i] / BESS_chrg_eff - day7[ddMN + i])
     }
 
     /// Grid import needed outside of harm op period
