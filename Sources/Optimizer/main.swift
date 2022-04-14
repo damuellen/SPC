@@ -117,7 +117,8 @@ struct Command: ParsableCommand {
   }
 }
 
-public func runModel(csv: CSVReader, n: Int = 90, maxIter: Int = 20) -> [[Double]]  {
+public func runModel(inputFile: String, n: Int = 90, maxIter: Int = 20) -> [[Double]]  {
+  guard let csv = CSVReader(atPath: inputFile) else { print("No input."); return [[Double]]() }
   let parameter = Parameter(
     BESS_cap_ud: 0...1400,
     CCU_C_O_2_nom_prod_ud: 10...110,
