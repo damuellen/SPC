@@ -153,8 +153,8 @@ struct Command: ParsableCommand {
     }
     parameter.forEach { parameter in
       DispatchQueue.global().asyncAfter(deadline: .now()) { start("http://127.0.0.1:9080") }
-      let a = MGOADE(group: !noGroups, n: n ?? 90, maxIter: iterations ?? 20, bounds: parameter.ranges, fitness: fitness)
-      a.filter(\.first!.isFinite).forEach { row in r += 1; ws.write(row, row: r)
+      let optimizer = MGOADE(group: !noGroups, n: n ?? 90, maxIter: iterations ?? 20, bounds: parameter.ranges)
+      optimizer(SunOl.fitness).filter(\.first!.isFinite).forEach { row in r += 1; ws.write(row, row: r)
      }
     }
   }
