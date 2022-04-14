@@ -5,18 +5,18 @@ extension TunOl {
     )  // day1
 
     let (
-      dayEY, dayFA, dayFC, dayFD, dayFE, dayFI, dayFJ, _, _, _, _, _, dayFR, dayFS, dayFT, dayFV, dayFW, dayFY, dayFZ, dayGA, dayGB, dayGC,
+      dayFC, dayFD, dayFE, dayFI, dayFJ, _, _, _, _, _, dayFR, dayFS, dayFT, dayFV, dayFW, dayFY, dayFZ, dayGA, dayGB, dayGC,
       dayGD, dayGE, dayGF, dayGG, dayGH, dayGI, dayGK, dayGL, dayGN, dayGO, dayGQ, dayGR
     ) = (
-      0, 730, 1460, 1825, 2190, 2555, 4015, 4745, 5110, 5475, 5840, 6205, 6935, 7300, 7665, 8395, 8760, 9490, 9855, 10220, 10585, 10950, 11315, 11680, 12045, 12410,
+      1460, 1825, 2190, 2555, 4015, 4745, 5110, 5475, 5840, 6205, 6935, 7300, 7665, 8395, 8760, 9490, 9855, 10220, 10585, 10950, 11315, 11680, 12045, 12410,
       12775, 13140, 13870, 14235, 14965, 15330, 16060, 16425
     )  // day5
 
     let (
-      dayGU, dayGW, dayGY, dayGZ, dayHA, _, _, _, dayHE, dayHF, _, _, _, _, _, dayHN, dayHO, dayHP, dayHR, dayHS, dayHU, dayHV, dayHW, dayHX, dayHY,
+      dayGY, dayGZ, dayHA, _, _, _, dayHE, dayHF, _, _, _, _, _, dayHN, dayHO, dayHP, dayHR, dayHS, dayHU, dayHV, dayHW, dayHX, dayHY,
       dayHZ, dayIA, dayIB, dayIC, dayID, dayIE, dayIG, dayIH, dayIJ, dayIK, dayIM, dayIN
     ) = (
-      0, 730, 1460, 1825, 2190, 2555, 2920, 3285, 3650, 4015, 4745, 5110, 5475, 5840, 6205, 6935, 7300, 7665, 8395, 8760, 9490, 9855, 10220, 10585, 10950, 11315, 11680, 12045, 12410,
+      1460, 1825, 2190, 2555, 2920, 3285, 3650, 4015, 4745, 5110, 5475, 5840, 6205, 6935, 7300, 7665, 8395, 8760, 9490, 9855, 10220, 10585, 10950, 11315, 11680, 12045, 12410,
       12775, 13140, 13870, 14235, 14965, 15330, 16060, 16425
     )  // day6
 

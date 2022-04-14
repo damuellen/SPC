@@ -17,7 +17,7 @@ var platformProducts: [Product] = [
   .library(name: "BlackBoxModel", type: .dynamic, targets: ["BlackBoxModel"]),
   .library(name: "SolarPosition", type: .dynamic, targets: ["SolarPosition"]),
   .library(name: "PinchPoint", type: .dynamic, targets: ["PinchPoint"]),
-  .library(name: "SunOl", type: .dynamic, targets: ["Optimizer"]),
+  .library(name: "SunOl", type: .dynamic, targets: ["SunOl"]),
 ]
 #else
 var platformProducts: [Product] = []

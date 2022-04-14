@@ -2,7 +2,7 @@ import Foundation
 import Utilities
 
 public func fitness(values: [Double]) -> [Double] {
-  guard let model = TunOl(values) else { return [Double.infinity] + values }
+  guard let model = TunOl(values) else { return [Double.infinity] }
   let costs = Costs(model)
   //dump(costs)
   //TunOl.Grid_import_yes_no_BESS_strategy = 0
@@ -59,6 +59,6 @@ public func fitness(values: [Double]) -> [Double] {
     }
   }
   let LCOM = costs.LCOM(meth_produced_MTPH: meth_produced_MTPH_sum, elec_from_grid: elec_from_grid_sum, elec_to_grid: elec_to_grid_MTPH_sum)
-  if counter > 100 || LCOM < 666 || LCOM.isInfinite || meth_produced_MTPH_sum.isZero { return [Double.infinity] + values }
-  return [LCOM] + values
+  if counter > 100 || LCOM < 666 || LCOM.isInfinite || meth_produced_MTPH_sum.isZero { return [Double.infinity] }
+  return [LCOM, costs.Total_CAPEX, costs.Total_OPEX, meth_produced_MTPH_sum, elec_from_grid_sum, elec_to_grid_MTPH_sum] + values
 }

@@ -34,7 +34,7 @@ public struct MGOADE {
   }
 
   public func callAsFunction(_ fitness: FitnessFunction) -> [[Double]] {
-    var targetResults = Matrix(n * maxIter, bounds.count + 1)
+    var targetResults = Matrix(n * maxIter, bounds.count + 6)
     var targetPosition = Matrix(group ? 3 : 1, bounds.count)
     var targetFitness = Vector(group ? 3 : 1, .infinity)
     let EPSILON = 1E-14
@@ -108,11 +108,9 @@ public struct MGOADE {
         if source.isCancelled { return }
         for j in grassHopperPositions[i].indices {
           grassHopperPositions[i][j].clamp(to: bounds[j])
-          targetResults[pos + i][j] = grassHopperPositions[i][j]
         }
         let result = fitness(grassHopperPositions[i])
         targetResults[pos+i] = result
-        // targetResults[pos + i].replaceSubrange(bounds.count..., with: result)
         grassHopperFitness[i] = result[0]
       }
       if source.isCancelled { break }

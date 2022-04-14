@@ -21,26 +21,7 @@ SetConsoleCtrlHandler({_ in source.cancel();semaphore.wait();return WindowsBool(
 try! Gnuplot.process().run()
 #endif
 
-let server = HTTP { request -> HTTP.Response in var uri = request.uri
-  if uri == "/cancel" {
-    source.cancel()
-  } else {
-    uri.remove(at: uri.startIndex)
-  }
-  let curves = convergenceCurves.map { Array($0.suffix(Int(uri) ?? 10)) }
-  if curves[0].count > 1 {
-    let m = curves.map(\.last!).map { $0[1] }.min()
-    let i = curves.firstIndex(where: { $0.last![1] == m })!
-    let plot = Gnuplot(xys: curves, titles: ["Best1", "Best2", "Best3"])
-      .plot(multi: true, index: 0).plot(index: 1).plot(index: 2)
-      .plot(multi: true, index: i).plot(index: i, label: 2)
-      .set(title: "Convergence curves")
-      .set(xlabel: "Iteration").set(ylabel: "LCoM")
-    plot.settings["xtics"] = "1"
-    return .init(html: .init(body: plot.svg!, refresh: 30))
-  }
-  return .init(html: .init(refresh: 10))
-}
+let server = HTTP(handler: handler)
 
 source.resume()
 server.start()
@@ -70,12 +51,14 @@ struct Command: ParsableCommand {
 
   func run() throws {
     let path = file ?? "input2.txt"
-    #if os(Windows)
-    guard let csv = CSVReader(atPath: path) else { MessageBox(text: "No input.", caption: "TunOl"); return }
-    #else
-    guard let csv = CSVReader(atPath: path) else { print("No input."); return }
-    #endif
-
+    guard let csv = CSVReader(atPath: path) else { 
+      #if os(Windows)
+      MessageBox(text: "No input.", caption: "TunOl")
+      #else
+      print("No input.");
+      #endif
+      return
+    }
     let parameter: [Parameter]
     if let path = json, let data = try? Data(contentsOf: .init(fileURLWithPath: path)), 
       let parameters = try? JSONDecoder().decode([Parameter].self, from: data) {
@@ -110,67 +93,32 @@ struct Command: ParsableCommand {
     TunOl.Reference_PV_MV_power_at_transformer_outlet = [0] + csv["out"]
 
     parameter.forEach { parameter in      
-      let optimizer = MGOADE(group: !noGroups, n: n ?? 90, maxIter: iterations ?? 20, bounds: parameter.ranges)
-      let fileID = String(UUID().uuidString.prefix(6))
-      writeExcel(results: optimizer(SunOl.fitness).filter(\.first!.isFinite), toFile: fileID)
+      let optimizer = MGOADE(group: !noGroups, n: n ?? 90, maxIter: iterations ?? 30, bounds: parameter.ranges)
+      let valid = optimizer(SunOl.fitness).filter(\.first!.isFinite)
+      writeExcel(results: valid.sorted { $0[0] < $1[0] })
     }
   }
 }
 
-public func runModel(inputFile: String, n: Int = 90, maxIter: Int = 20) -> [[Double]]  {
-  guard let csv = CSVReader(atPath: inputFile) else { print("No input."); return [[Double]]() }
-  let parameter = Parameter(
-    BESS_cap_ud: 0...1400,
-    CCU_C_O_2_nom_prod_ud: 10...110,
-    C_O_2_storage_cap_ud: 0...5000,
-    CSP_loop_nr_ud: 0...250,
-    El_boiler_cap_ud: 0...110,
-    EY_var_net_nom_cons_ud: 10...600,
-    Grid_export_max_ud: 50...50,
-    Grid_import_max_ud: 50...50,
-    Hydrogen_storage_cap_ud: 0...110,
-    Heater_cap_ud: 0...500,
-    MethDist_Meth_nom_prod_ud: 10...110,
-    MethSynt_RawMeth_nom_prod_ud: 10...110,
-    PB_nom_gross_cap_ud: 0...300,
-    PV_AC_cap_ud: 10...1280,
-    PV_DC_cap_ud: 10...1380,
-    RawMeth_storage_cap_ud: 0...300,
-    TES_full_load_hours_ud: 0...30
-  )
-  TunOl.Q_Sol_MW_thLoop = [0] + csv["csp"]
-  TunOl.Reference_PV_plant_power_at_inverter_inlet_DC = [0] + csv["pv"]
-  TunOl.Reference_PV_MV_power_at_transformer_outlet = [0] + csv["out"]
-  let optimizer = MGOADE(group: true, n: n, maxIter: maxIter, bounds: parameter.ranges)
-  return optimizer(SunOl.fitness).filter(\.first!.isFinite).sorted { $0[0] < $1[0] }
-}
 
-public let labels = [
-  "LCOM", "CSP_loop_nr", "TES_full_load_hours", "PB_nom_gross_cap",
-  "PV_AC_cap", "PV_DC_cap", "EY_var_net_nom_cons",
-  "Hydrogen_storage_cap", "Heater_cap", "CCU_C_O_2_nom_prod",
-  "C_O_2_storage_cap", "MethSynt_RawMeth_nom_prod",
-  "RawMeth_storage_cap", "MethDist_Meth_nom_prod", "El_boiler_cap",
-  "BESS_cap", "Grid_export_max", "Grid_import_max",
-]
 
-func writeExcel(results: [[Double]], toFile: String) {
-  let name = toFile
+func writeExcel(results: [[Double]]) {
+  let name = "SunOl_\(UUID().uuidString.prefix(6)).xlsx"
   let wb = Workbook(name: name)
   let ws = wb.addWorksheet()
   // let ws2 = wb.addWorksheet()
-
   var r = 0
   results.forEach { row in r += 1; ws.write(row, row: r) }
   // var r2 = 0
-
-  #if os(Windows)
-  DispatchQueue.global().asyncAfter(deadline: .now()) { 
-    start(currentDirectoryPath() + "/" + name)
-  }
-  #else
-  print(name)
-  #endif
+  let labels = [
+    "LCOM", "CAPEX", "OPEX", "Methanol", "Import", "Export",
+    "CSP_loop_nr", "TES_full_load_hours", "PB_nom_gross_cap",
+    "PV_AC_cap", "PV_DC_cap", "EY_var_net_nom_cons",
+    "Hydrogen_storage_cap", "Heater_cap", "CCU_C_O_2_nom_prod",
+    "C_O_2_storage_cap", "MethSynt_RawMeth_nom_prod",
+    "RawMeth_storage_cap", "MethDist_Meth_nom_prod", "El_boiler_cap",
+    "BESS_cap", "Grid_export_max", "Grid_import_max",
+  ]
   ws.table(range: [0, 0, r, labels.endIndex - 1], header: labels)
   // names.enumerated().forEach { column, name in 
   //   let chart = wb.addChart(type: .scatter) //.set(y_axis: 1000...2500)
@@ -189,4 +137,33 @@ func writeExcel(results: [[Double]], toFile: String) {
   // bc.remove(legends: 0)
   // ws2.insert(chart: bc, (1, 5)).activate()
   wb.close()
+  #if os(Windows)
+  DispatchQueue.global().asyncAfter(deadline: .now()) { 
+    start(currentDirectoryPath() + "/" + name)
+  }
+  #else
+  print(name)
+  #endif
+}
+
+func handler(request: HTTP.Request) -> HTTP.Response {
+  var uri = request.uri
+  if uri == "/cancel" {
+    source.cancel()
+  } else {
+    uri.remove(at: uri.startIndex)
+  }
+  let curves = convergenceCurves.map { Array($0.suffix(Int(uri) ?? 10)) }
+  if curves[0].count > 1 {
+    let m = curves.map(\.last!).map { $0[1] }.min()
+    let i = curves.firstIndex(where: { $0.last![1] == m })!
+    let plot = Gnuplot(xys: curves, titles: ["Best1", "Best2", "Best3"])
+      .plot(multi: true, index: 0).plot(index: 1).plot(index: 2)
+      .plot(multi: true, index: i).plot(index: i, label: 2)
+      .set(title: "Convergence curves")
+      .set(xlabel: "Iteration").set(ylabel: "LCoM")
+    plot.settings["xtics"] = "1"
+    return .init(html: .init(body: plot.svg!, refresh: 30))
+  }
+  return .init(html: .init(refresh: 10))
 }
