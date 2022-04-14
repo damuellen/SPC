@@ -104,35 +104,61 @@ struct Command: ParsableCommand {
     }
     
     DispatchQueue.global().asyncAfter(deadline: .now()) { start("http://127.0.0.1:9080") }
-    let fitness = prepareModel(csv: csv)
+
+    TunOl.Q_Sol_MW_thLoop = [0] + csv["csp"]
+    TunOl.Reference_PV_plant_power_at_inverter_inlet_DC = [0] + csv["pv"]
+    TunOl.Reference_PV_MV_power_at_transformer_outlet = [0] + csv["out"]
+
     parameter.forEach { parameter in      
       let optimizer = MGOADE(group: !noGroups, n: n ?? 90, maxIter: iterations ?? 20, bounds: parameter.ranges)
       let fileID = String(UUID().uuidString.prefix(6))
-      writeExcel(results: optimizer(fitness).filter(\.first!.isFinite), toFile: fileID)
+      writeExcel(results: optimizer(SunOl.fitness).filter(\.first!.isFinite), toFile: fileID)
     }
   }
 }
 
-public func prepareModel(csv: CSVReader) -> FitnessFunction {
+public func runModel(csv: CSVReader, n: Int = 90, maxIter: Int = 20) -> [[Double]]  {
+  let parameter = Parameter(
+    BESS_cap_ud: 0...1400,
+    CCU_C_O_2_nom_prod_ud: 10...110,
+    C_O_2_storage_cap_ud: 0...5000,
+    CSP_loop_nr_ud: 0...250,
+    El_boiler_cap_ud: 0...110,
+    EY_var_net_nom_cons_ud: 10...600,
+    Grid_export_max_ud: 50...50,
+    Grid_import_max_ud: 50...50,
+    Hydrogen_storage_cap_ud: 0...110,
+    Heater_cap_ud: 0...500,
+    MethDist_Meth_nom_prod_ud: 10...110,
+    MethSynt_RawMeth_nom_prod_ud: 10...110,
+    PB_nom_gross_cap_ud: 0...300,
+    PV_AC_cap_ud: 10...1280,
+    PV_DC_cap_ud: 10...1380,
+    RawMeth_storage_cap_ud: 0...300,
+    TES_full_load_hours_ud: 0...30
+  )
   TunOl.Q_Sol_MW_thLoop = [0] + csv["csp"]
   TunOl.Reference_PV_plant_power_at_inverter_inlet_DC = [0] + csv["pv"]
   TunOl.Reference_PV_MV_power_at_transformer_outlet = [0] + csv["out"]
-  return SunOl.fitness
+  let optimizer = MGOADE(group: true, n: n, maxIter: maxIter, bounds: parameter.ranges)
+  return optimizer(SunOl.fitness).filter(\.first!.isFinite).sorted { $0[0] < $1[0] }
 }
+
+public let labels = [
+  "LCOM", "CSP_loop_nr", "TES_full_load_hours", "PB_nom_gross_cap",
+  "PV_AC_cap", "PV_DC_cap", "EY_var_net_nom_cons",
+  "Hydrogen_storage_cap", "Heater_cap", "CCU_C_O_2_nom_prod",
+  "C_O_2_storage_cap", "MethSynt_RawMeth_nom_prod",
+  "RawMeth_storage_cap", "MethDist_Meth_nom_prod", "El_boiler_cap",
+  "BESS_cap", "Grid_export_max", "Grid_import_max",
+]
 
 func writeExcel(results: [[Double]], toFile: String) {
   let name = toFile
   let wb = Workbook(name: name)
   let ws = wb.addWorksheet()
   // let ws2 = wb.addWorksheet()
-  let labels = [
-    "LCOM", "CSP_loop_nr", "TES_full_load_hours", "PB_nom_gross_cap",
-    "PV_AC_cap", "PV_DC_cap", "EY_var_net_nom_cons",
-    "Hydrogen_storage_cap", "Heater_cap", "CCU_C_O_2_nom_prod",
-    "C_O_2_storage_cap", "MethSynt_RawMeth_nom_prod",
-    "RawMeth_storage_cap", "MethDist_Meth_nom_prod", "El_boiler_cap",
-    "BESS_cap", "Grid_export_max", "Grid_import_max",
-  ]
+
   var r = 0
   results.forEach { row in r += 1; ws.write(row, row: r) }
   // var r2 = 0
