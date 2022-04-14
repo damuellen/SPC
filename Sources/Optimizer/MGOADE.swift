@@ -15,7 +15,7 @@ public var convergenceCurves = [[[Double]]](repeating: [[Double]](), count: 3)
 public typealias FitnessFunction = ([Double]) -> [Double]
 
 public struct MGOADE {
-  
+
   let group: Bool
   let n: Int
   let maxIter: Int
@@ -222,11 +222,13 @@ func pretty(values: [[Double]]) -> String {
     "CCU_CO2_prod", "CO2_storage", "Synt_RawMeth", "RawMeth_storage",
     "Dist_Meth", "El_boiler", "BESS", "Grid_export", "Grid_import",
   ]
-  if values.count = 1 {
-    return """
+  if values.count == 1 {
+    return values[0].indices.map { i in
+    """
     \(labels[i].leftpad(length: 16).text(.red))\(": ".text(.red))\
     \(String(format: "%.1f", values[0][i]).leftpad(length: 9).text(.yellow))
     """
+    }.joined(separator: "\n")
   }
   return values[0].indices.map { i in
     """
@@ -240,7 +242,7 @@ func pretty(values: [[Double]]) -> String {
 
 func pretty(values: [Double]) -> String {
   let label = "LCOM"
-  if values.count = 1 {
+  if values.count == 1 {
     return """
     \(label.leftpad(length: 16).text(.red))\(": ".text(.red))\
     \(String(format: "%.2f", values[0]).leftpad(length: 9).text(.cyan))
