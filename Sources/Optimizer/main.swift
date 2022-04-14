@@ -75,56 +75,9 @@ struct Command: ParsableCommand {
     #else
     guard let csv = CSVReader(atPath: path) else { print("No input."); return }
     #endif
+
+    readModelInput(csv: csv)
     
-    TunOl.Q_Sol_MW_thLoop = [0] + csv["csp"]
-    TunOl.Reference_PV_plant_power_at_inverter_inlet_DC = [0] + csv["pv"]
-    TunOl.Reference_PV_MV_power_at_transformer_outlet = [0] + csv["out"]
-
-    let id = String(UUID().uuidString.prefix(6))
-    let name = "SunOl_\(id).xlsx"
-    let wb = Workbook(name: name)
-    let ws = wb.addWorksheet()
-    // let ws2 = wb.addWorksheet()
-    let labels = [
-      "LCOM", "CSP_loop_nr_ud", "TES_full_load_hours_ud", "PB_nom_gross_cap_ud",
-      "PV_AC_cap_ud", "PV_DC_cap_ud", "EY_var_net_nom_cons_ud",
-      "Hydrogen_storage_cap_ud", "Heater_cap_ud", "CCU_C_O_2_nom_prod_ud",
-      "C_O_2_storage_cap_ud", "MethSynt_RawMeth_nom_prod_ud",
-      "RawMeth_storage_cap_ud", "MethDist_Meth_nom_prod_ud", "El_boiler_cap_ud",
-      "BESS_cap_ud", "Grid_export_max_ud", "Grid_import_max_ud",
-    ]
-
-    var r = 0
-    // var r2 = 0
-    defer {
-      #if os(Windows)
-      DispatchQueue.global().asyncAfter(deadline: .now()) { 
-        start(currentDirectoryPath() + "/" + name)
-      }
-      #else
-      print(name)
-      #endif
-      ws.table(range: [0, 0, r, labels.endIndex - 1], header: labels)
-      // names.enumerated().forEach { column, name in 
-      //   let chart = wb.addChart(type: .scatter) //.set(y_axis: 1000...2500)
-      //   chart.addSeries().set(marker: 5, size: 4)
-      //   .values(sheet: ws, range: [1, 17, r, 17])
-      //   .categories(sheet: ws, range: [1, column, r, column])
-      //   chart.remove(legends: 0)
-      //   wb.addChartsheet(name: name).set(chart: chart)
-      // }
-      // ws2.table(range: [0, 0, r2, 3], header: ["CAPEX", "Count", "Min", "Max"])
-      // let chart = wb.addChart(type: .line)
-      // chart.addSeries().values(sheet: ws2, range: [1, 2, r2, 2]).categories(sheet: ws2, range: [1, 0, r2, 0])
-      // wb.addChartsheet(name: "CAPEX").set(chart: chart)
-      // let bc = wb.addChart(type: .bar)
-      // bc.addSeries().values(sheet: ws2, range: [1, 1, r2, 1]).categories(sheet: ws2, range: [1, 0, r2, 0])
-      // bc.remove(legends: 0)
-      // ws2.insert(chart: bc, (1, 5)).activate()
-      wb.close()
-      try! Gnuplot(xys: convergenceCurves, style: .lines(smooth: false))(.pngLarge(path: "SunOl_\(id).png"))
-    }
-
     let parameter: [Parameter]
     if let path = json, let data = try? Data(contentsOf: .init(fileURLWithPath: path)), 
       let parameters = try? JSONDecoder().decode([Parameter].self, from: data) {
@@ -151,11 +104,63 @@ struct Command: ParsableCommand {
           TES_full_load_hours_ud: 0...30)
       ]
     }
-    parameter.forEach { parameter in
-      DispatchQueue.global().asyncAfter(deadline: .now()) { start("http://127.0.0.1:9080") }
+    
+    DispatchQueue.global().asyncAfter(deadline: .now()) { start("http://127.0.0.1:9080") }
+    
+    parameter.forEach { parameter in      
       let optimizer = MGOADE(group: !noGroups, n: n ?? 90, maxIter: iterations ?? 20, bounds: parameter.ranges)
-      optimizer(SunOl.fitness).filter(\.first!.isFinite).forEach { row in r += 1; ws.write(row, row: r)
-     }
+      let fileID = String(UUID().uuidString.prefix(6))
+      writeExcel(results: optimizer(SunOl.fitness).filter(\.first!.isFinite), toFile: fileID)
     }
   }
+}
+
+public func readModelInput(csv: CSVReader) {
+  TunOl.Q_Sol_MW_thLoop = [0] + csv["csp"]
+  TunOl.Reference_PV_plant_power_at_inverter_inlet_DC = [0] + csv["pv"]
+  TunOl.Reference_PV_MV_power_at_transformer_outlet = [0] + csv["out"]
+}
+
+func writeExcel(results: [[Double]], toFile: String) {
+  let name = toFile
+  let wb = Workbook(name: name)
+  let ws = wb.addWorksheet()
+  // let ws2 = wb.addWorksheet()
+  let labels = [
+    "LCOM", "CSP_loop_nr", "TES_full_load_hours", "PB_nom_gross_cap",
+    "PV_AC_cap", "PV_DC_cap", "EY_var_net_nom_cons",
+    "Hydrogen_storage_cap", "Heater_cap", "CCU_C_O_2_nom_prod",
+    "C_O_2_storage_cap", "MethSynt_RawMeth_nom_prod",
+    "RawMeth_storage_cap", "MethDist_Meth_nom_prod", "El_boiler_cap",
+    "BESS_cap", "Grid_export_max", "Grid_import_max",
+  ]
+  var r = 0
+  results.forEach { row in r += 1; ws.write(row, row: r) }
+  // var r2 = 0
+
+  #if os(Windows)
+  DispatchQueue.global().asyncAfter(deadline: .now()) { 
+    start(currentDirectoryPath() + "/" + name)
+  }
+  #else
+  print(name)
+  #endif
+  ws.table(range: [0, 0, r, labels.endIndex - 1], header: labels)
+  // names.enumerated().forEach { column, name in 
+  //   let chart = wb.addChart(type: .scatter) //.set(y_axis: 1000...2500)
+  //   chart.addSeries().set(marker: 5, size: 4)
+  //   .values(sheet: ws, range: [1, 17, r, 17])
+  //   .categories(sheet: ws, range: [1, column, r, column])
+  //   chart.remove(legends: 0)
+  //   wb.addChartsheet(name: name).set(chart: chart)
+  // }
+  // ws2.table(range: [0, 0, r2, 3], header: ["CAPEX", "Count", "Min", "Max"])
+  // let chart = wb.addChart(type: .line)
+  // chart.addSeries().values(sheet: ws2, range: [1, 2, r2, 2]).categories(sheet: ws2, range: [1, 0, r2, 0])
+  // wb.addChartsheet(name: "CAPEX").set(chart: chart)
+  // let bc = wb.addChart(type: .bar)
+  // bc.addSeries().values(sheet: ws2, range: [1, 1, r2, 1]).categories(sheet: ws2, range: [1, 0, r2, 0])
+  // bc.remove(legends: 0)
+  // ws2.insert(chart: bc, (1, 5)).activate()
+  wb.close()
 }

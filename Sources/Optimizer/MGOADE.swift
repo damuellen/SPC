@@ -26,6 +26,13 @@ public struct MGOADE {
   let cr = 0.4
   let f = 0.9
 
+  public init(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Double>]) {
+    self.group = group
+    self.n = n
+    self.maxIter = maxIter
+    self.bounds = bounds
+  }
+
   public func callAsFunction(_ fitness: FitnessFunction) -> [[Double]] {
     var targetResults = Matrix(n * maxIter, bounds.count + 1)
     var targetPosition = Matrix(group ? 3 : 1, bounds.count)
