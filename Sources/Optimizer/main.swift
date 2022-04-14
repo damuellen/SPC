@@ -76,8 +76,6 @@ struct Command: ParsableCommand {
     guard let csv = CSVReader(atPath: path) else { print("No input."); return }
     #endif
 
-    readModelInput(csv: csv)
-    
     let parameter: [Parameter]
     if let path = json, let data = try? Data(contentsOf: .init(fileURLWithPath: path)), 
       let parameters = try? JSONDecoder().decode([Parameter].self, from: data) {
@@ -106,19 +104,20 @@ struct Command: ParsableCommand {
     }
     
     DispatchQueue.global().asyncAfter(deadline: .now()) { start("http://127.0.0.1:9080") }
-    
+    let fitness = prepareModel(csv: csv)
     parameter.forEach { parameter in      
       let optimizer = MGOADE(group: !noGroups, n: n ?? 90, maxIter: iterations ?? 20, bounds: parameter.ranges)
       let fileID = String(UUID().uuidString.prefix(6))
-      writeExcel(results: optimizer(SunOl.fitness).filter(\.first!.isFinite), toFile: fileID)
+      writeExcel(results: optimizer(fitness).filter(\.first!.isFinite), toFile: fileID)
     }
   }
 }
 
-public func readModelInput(csv: CSVReader) {
+public func prepareModel(csv: CSVReader) -> FitnessFunction {
   TunOl.Q_Sol_MW_thLoop = [0] + csv["csp"]
   TunOl.Reference_PV_plant_power_at_inverter_inlet_DC = [0] + csv["pv"]
   TunOl.Reference_PV_MV_power_at_transformer_outlet = [0] + csv["out"]
+  return SunOl.fitness
 }
 
 func writeExcel(results: [[Double]], toFile: String) {
