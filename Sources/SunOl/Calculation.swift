@@ -93,11 +93,11 @@ extension TunOl {
 
     /// Min harmonious net heat cons
     let hourT = 105120
-    // =MAX(0,(S6-Overall_fix_cons)/Overall_harmonious_var_max_cons*Overall_harmonious_var_heat_max_cons+Overall_heat_fix_cons)
+    // =IF(S6=0,0,MAX(0,(S6-Overall_fix_cons)/Overall_harmonious_var_max_cons*Overall_harmonious_var_heat_max_cons+Overall_heat_fix_cons))
     for i in 1..<8760 {
-      hour0[hourT + i] = max(
+      hour0[hourT + i] = iff(hour0[hourS + i].isZero, Double.zero, max(
         Double.zero,
-        (hour0[hourS + i] - Overall_fix_cons) / Overall_harmonious_var_max_cons * Overall_harmonious_var_heat_max_cons + Overall_heat_fix_cons)
+        (hour0[hourS + i] - Overall_fix_cons) / Overall_harmonious_var_max_cons * Overall_harmonious_var_heat_max_cons + Overall_heat_fix_cons))
     }
 
     /// Harmonious op day
@@ -228,11 +228,11 @@ extension TunOl {
 
     /// max harm net heat cons
     let hourAI = 236520
-    // MAX(0,(AH6-Overall_fix_cons)/Overall_harmonious_var_max_cons*Overall_harmonious_var_heat_max_cons+Overall_heat_fix_cons)
+    // IF(AH6=0,0,MAX(0,(AH6-Overall_fix_cons)/Overall_harmonious_var_max_cons*Overall_harmonious_var_heat_max_cons+Overall_heat_fix_cons))
     for i in 1..<8760 {
-      hour0[hourAI + i] = max(
+      hour0[hourAI + i] = iff(hour0[hourAH + i].isZero, Double.zero, max(
         Double.zero,
-        (hour0[hourAH + i] - Overall_fix_cons) / Overall_harmonious_var_max_cons * Overall_harmonious_var_heat_max_cons + Overall_heat_fix_cons)
+        (hour0[hourAH + i] - Overall_fix_cons) / Overall_harmonious_var_max_cons * Overall_harmonious_var_heat_max_cons + Overall_heat_fix_cons))
     }
 
     /// Remaining PV after max harm
