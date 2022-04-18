@@ -61,7 +61,7 @@ public struct MGOADE {
           targetPosition[g] = grassHopperPositions[i]
         }
       }
-      convergenceCurves[g].append([Double(0), targetFitness[g]])
+      convergenceCurves[g].append([Double(0), (targetFitness[g] * 100).rounded() / 100])
     }
     print(" Population: \(grassHopperPositions.count) ".randomColor(), " Iterations: 0".randomColor())
     print(pretty(values: targetFitness))
@@ -169,7 +169,7 @@ public struct MGOADE {
             targetPosition[g] = grassHopperPositions[i]
           }
         }
-        convergenceCurves[g].append([Double(l), targetFitness[g]])
+        convergenceCurves[g].append([Double(l), (targetFitness[g] * 100).rounded() / 100])
       }
       print("\u{001B}[19A", "Population: \(grassHopperPositions.count) ".randomColor(), " Iterations: \(l)".randomColor())
       print(pretty(values: targetFitness))

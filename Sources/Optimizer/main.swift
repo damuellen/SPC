@@ -67,8 +67,8 @@ struct Command: ParsableCommand {
       parameter = [
         Parameter(
           BESS_cap_ud: 0...1400,
-          CCU_C_O_2_nom_prod_ud: 10...110,
-          C_O_2_storage_cap_ud: 0...5000,
+          CCU_CO2_nom_prod_ud: 10...110,
+          CO2_storage_cap_ud: 0...5000,
           CSP_loop_nr_ud: 0...250,
           El_boiler_cap_ud: 0...110,
           EY_var_net_nom_cons_ud: 10...600,
@@ -114,28 +114,22 @@ func writeExcel(results: [[Double]]) {
     "LCOM", "CAPEX", "OPEX", "Methanol", "Import", "Export",
     "CSP_loop_nr", "TES_full_load_hours", "PB_nom_gross_cap",
     "PV_AC_cap", "PV_DC_cap", "EY_var_net_nom_cons",
-    "Hydrogen_storage_cap", "Heater_cap", "CCU_C_O_2_nom_prod",
-    "C_O_2_storage_cap", "MethSynt_RawMeth_nom_prod",
+    "Hydrogen_storage_cap", "Heater_cap", "CCU_CO2_nom_prod",
+    "CO2_storage_cap", "MethSynt_RawMeth_nom_prod",
     "RawMeth_storage_cap", "MethDist_Meth_nom_prod", "El_boiler_cap",
     "BESS_cap", "Grid_export_max", "Grid_import_max",
   ]
   ws.table(range: [0, 0, r, labels.endIndex - 1], header: labels)
-  // names.enumerated().forEach { column, name in 
-  //   let chart = wb.addChart(type: .scatter) //.set(y_axis: 1000...2500)
-  //   chart.addSeries().set(marker: 5, size: 4)
-  //   .values(sheet: ws, range: [1, 17, r, 17])
-  //   .categories(sheet: ws, range: [1, column, r, column])
-  //   chart.remove(legends: 0)
-  //   wb.addChartsheet(name: name).set(chart: chart)
-  // }
-  // ws2.table(range: [0, 0, r2, 3], header: ["CAPEX", "Count", "Min", "Max"])
-  // let chart = wb.addChart(type: .line)
-  // chart.addSeries().values(sheet: ws2, range: [1, 2, r2, 2]).categories(sheet: ws2, range: [1, 0, r2, 0])
-  // wb.addChartsheet(name: "CAPEX").set(chart: chart)
-  // let bc = wb.addChart(type: .bar)
-  // bc.addSeries().values(sheet: ws2, range: [1, 1, r2, 1]).categories(sheet: ws2, range: [1, 0, r2, 0])
-  // bc.remove(legends: 0)
-  // ws2.insert(chart: bc, (1, 5)).activate()
+  for (column, name) in labels.enumerated() {
+    if column < 6 { continue }
+    let chart = wb.addChart(type: .scatter) //.set(y_axis: 1000...2500)
+    chart.addSeries().set(marker: 5, size: 4)
+    .values(sheet: ws, range: [1, 0, r, 0])
+    .categories(sheet: ws, range: [1, column, r, column])
+     chart.remove(legends: 0)
+     wb.addChartsheet(name: name).set(chart: chart)
+  }
+
   wb.close()
   #if os(Windows)
   DispatchQueue.global().asyncAfter(deadline: .now()) { 

@@ -6,8 +6,8 @@ public struct Parameter: Codable {
 
   public init(
     BESS_cap_ud: ClosedRange<Double>,
-    CCU_C_O_2_nom_prod_ud: ClosedRange<Double>,
-    C_O_2_storage_cap_ud: ClosedRange<Double>,
+    CCU_CO2_nom_prod_ud: ClosedRange<Double>,
+    CO2_storage_cap_ud: ClosedRange<Double>,
     CSP_loop_nr_ud: ClosedRange<Double>,
     El_boiler_cap_ud: ClosedRange<Double>,
     EY_var_net_nom_cons_ud: ClosedRange<Double>,
@@ -32,8 +32,8 @@ public struct Parameter: Codable {
       EY_var_net_nom_cons_ud,
       Hydrogen_storage_cap_ud,
       Heater_cap_ud,
-      CCU_C_O_2_nom_prod_ud,
-      C_O_2_storage_cap_ud,
+      CCU_CO2_nom_prod_ud,
+      CO2_storage_cap_ud,
       MethSynt_RawMeth_nom_prod_ud,
       RawMeth_storage_cap_ud,
       MethDist_Meth_nom_prod_ud,
