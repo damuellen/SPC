@@ -152,12 +152,18 @@ extension TunOl {
     let AL = 12410
 
     for i in 0..<365 {
-      // =1-IF(OR(T3=0,RawMeth_storage_cap_ud=0),0,A_RawMeth_max_cons*T3/RawMeth_storage_cap_ud)
-      d1[AJ + i] = 1 - iff(or(d1[T + i].isZero, RawMeth_storage_cap_ud.isZero), .zero, RawMeth_max_cons[j] * d1[T + i] / RawMeth_storage_cap_ud)
-      // =1-IF(OR(T3=0,CO2_storage_cap_ud=0),0,A_CO2_max_cons*T3/CO2_storage_cap_ud)
-      d1[AK + i] = 1 - iff(or(d1[T + i].isZero, CO2_storage_cap_ud.isZero), .zero, CO2_max_cons[j] * d1[T + i] / CO2_storage_cap_ud)
-      // =1-IF(OR(T3=0,Hydrogen_storage_cap_ud=0),0,A_Hydrogen_max_cons*T3/Hydrogen_storage_cap_ud)
-      d1[AL + i] = 1 - iff(or(d1[T + i].isZero, Hydrogen_storage_cap_ud.isZero), .zero, Hydrogen_max_cons[j] * d1[T + i] / Hydrogen_storage_cap_ud)
+      let hours = d1[T + i]
+      if RawMeth_storage_cap_ud.isZero { d1[AJ + i] = 0 } 
+      else if hours.isZero { d1[AJ + i] = 1 } 
+      else { d1[AJ + i] = 1 - (RawMeth_max_cons[j] * hours / RawMeth_storage_cap_ud) }
+
+      if CO2_storage_cap_ud.isZero { d1[AK + i] = 0 } 
+      else if hours.isZero { d1[AK + i] = 1 }
+      else { d1[AK + i] = 1 - (CO2_max_cons[j] * hours / CO2_storage_cap_ud) }
+
+      if Hydrogen_storage_cap_ud.isZero { d1[AL + i] = 0 }
+      else if hours.isZero { d1[AL + i] = 1 }
+      else { d1[AL + i] = 1 - (Hydrogen_max_cons[j] * hours / Hydrogen_storage_cap_ud) }
     }
 
     /// Max Equiv harmonious night prod due to physical limits
