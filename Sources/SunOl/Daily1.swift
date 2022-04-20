@@ -39,18 +39,33 @@ extension TunOl {
     let Q = 5110
 
     for i in 0..<365 {
-      // =1-IF(OR(C3=0,RawMeth_storage_cap_ud=0),0,A_RawMeth_min_cons*C3/RawMeth_storage_cap_ud)
-      d1[L + i] = 1 - iff(or(d1[C + i].isZero, RawMeth_storage_cap_ud.isZero), .zero, RawMeth_min_cons[j] * d1[C + i] / RawMeth_storage_cap_ud)
-      // =1-IF(OR(C3=0,RawMeth_storage_cap_ud=0),0,A_RawMeth_max_cons*C3/RawMeth_storage_cap_ud)
-      d1[M + i] = 1 - iff(or(d1[C + i].isZero, RawMeth_storage_cap_ud.isZero), .zero, RawMeth_max_cons[j] * d1[C + i] / RawMeth_storage_cap_ud)
-      // =1-IF(OR(C3=0,CO2_storage_cap_ud=0),0,A_CO2_min_cons*C3/CO2_storage_cap_ud)
-      d1[N + i] = 1 - iff(or(d1[C + i].isZero, CO2_storage_cap_ud.isZero), .zero, CO2_min_cons[j] * d1[C + i] / CO2_storage_cap_ud)
-      // =1-IF(OR(C3=0,CO2_storage_cap_ud=0),0,A_CO2_max_cons*C3/CO2_storage_cap_ud)
-      d1[O + i] = 1 - iff(or(d1[C + i].isZero, CO2_storage_cap_ud.isZero), .zero, CO2_max_cons[j] * d1[C + i] / CO2_storage_cap_ud)
-      // =1-IF(OR(C3=0,Hydrogen_storage_cap_ud=0),0,A_Hydrogen_min_cons*C3/Hydrogen_storage_cap_ud)
-      d1[P + i] = 1 - iff(or(d1[C + i].isZero, Hydrogen_storage_cap_ud.isZero), .zero, Hydrogen_min_cons[j] * d1[C + i] / Hydrogen_storage_cap_ud)
-      // =1-IF(OR(C3=0,Hydrogen_storage_cap_ud=0),0,A_Hydrogen_max_cons*C3/Hydrogen_storage_cap_ud)
-      d1[Q + i] = 1 - iff(or(d1[C + i].isZero, Hydrogen_storage_cap_ud.isZero), .zero, Hydrogen_max_cons[j] * d1[C + i] / Hydrogen_storage_cap_ud)
+      let hours = d1[C + i]
+      if RawMeth_storage_cap_ud.isZero {
+        (d1[L + i], d1[M + i]) = (0, 0)
+      } else if hours.isZero {
+        (d1[L + i], d1[M + i]) = (1, 1)
+      } else {
+        d1[L + i] = 1 - (RawMeth_min_cons[j] * hours / RawMeth_storage_cap_ud)
+        d1[M + i] = 1 - (RawMeth_max_cons[j] * hours / RawMeth_storage_cap_ud)
+      }
+
+      if CO2_storage_cap_ud.isZero {
+        (d1[N + i], d1[O + i]) = (0, 0)
+      } else if hours.isZero {
+        (d1[N + i], d1[O + i]) = (1, 1)
+      } else {
+        d1[N + i] = 1 - (CO2_min_cons[j] * hours / CO2_storage_cap_ud)
+        d1[O + i] = 1 - (CO2_max_cons[j] * hours / CO2_storage_cap_ud)
+      }
+
+      if Hydrogen_storage_cap_ud.isZero {
+        (d1[P + i], d1[Q + i]) = (0, 0)
+      } else if hours.isZero {
+        (d1[P + i], d1[Q + i]) = (1, 1)
+      } else {
+        d1[P + i] = 1 - (Hydrogen_min_cons[j] * hours / Hydrogen_storage_cap_ud)
+        d1[Q + i] = 1 - (Hydrogen_max_cons[j] * hours / Hydrogen_storage_cap_ud)
+      }
     }
 
     /// Max Equiv harmonious night prod due to physical limits
