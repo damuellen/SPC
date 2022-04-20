@@ -63,9 +63,12 @@ public struct MGOADE {
       }
       convergenceCurves[g].append([Double(0), (targetFitness[g] * 100).rounded() / 100])
     }
-    print(" Population: \(grassHopperPositions.count) ".randomColor(), " Iterations: 0".randomColor())
-    print(pretty(values: targetFitness))
-    print(pretty(values: targetPosition))
+
+    resetCursor {
+      print("Population: \(grassHopperPositions.count) ".randomColor(), " Iterations: 0".randomColor())
+      print(pretty(values: targetFitness))
+      print(pretty(values: targetPosition))
+    }
 
     var pos = 0
     var l = 0
@@ -171,9 +174,13 @@ public struct MGOADE {
         }
         convergenceCurves[g].append([Double(l), (targetFitness[g] * 100).rounded() / 100])
       }
-      print("\u{001B}[19A", "Population: \(grassHopperPositions.count) ".randomColor(), " Iterations: \(l)".randomColor())
-      print(pretty(values: targetFitness))
-      print(pretty(values: targetPosition))
+
+      resetCursor {
+        print("Population: \(grassHopperPositions.count) ".randomColor(), " Iterations: \(l)".randomColor())
+        print(pretty(values: targetFitness))
+        print(pretty(values: targetPosition))
+      }
+
       if (targetFitness.reduce(0, +) / 3) - targetFitness.min()! < 0.001 { break }
     }
     targetResults.removeLast((maxIter - l) * n)
@@ -259,4 +266,17 @@ func pretty(values: [Double]) -> String {
     \(String(format: "%.2f", values[1]).leftpad(length: 9).text(.yellow))\
     \(String(format: "%.2f", values[2]).leftpad(length: 9).text(.magenta))
     """
+}
+
+func resetCursor(_ closure: ()->()) {
+  #if os(Windows)
+  let hConsole = GetStdHandle(STD_OUTPUT_HANDLE)
+  var info = CONSOLE_SCREEN_BUFFER_INFO()
+  GetConsoleScreenBufferInfo(hConsole, &info)
+  closure()
+  SetConsoleCursorPosition(hConsole, info.dwCursorPosition)
+  #else 
+  print("\u{001B}[20A")
+  closure()
+  #endif
 }
