@@ -155,7 +155,7 @@ extension TunOl {
 
     /// Optimized max harm net elec cons
     let AH = 227760
-    // IF(OR(AND(AG6>0,AG5=0,AG7=0),AND(AG6>0,OR(AND(AG4=0,AG5=0,AG8=0),AND(AG4=0,AG7=0,AG8=0)))),0,AG6)
+    // IF(OR(AND(AG6>0,AG5=0,AG7=0),AND(AG6>0,OR(AND(AG4=0,AG5>0,AG7=0),AND(AG5=0,AG7>0,AG8=0)))),0,AG6)
     for i in 1..<8760 {
       hour0[AH + i] = iff(or(and(hour0[AG + i] > .zero, hour0[AG + i - 1].isZero, hour0[AG + i + 1].isZero), and(hour0[AG + i] > .zero, or(and(hour0[AG + i - 2].isZero, hour0[AG + i - 1] > 0, hour0[AG + i + 1].isZero), and(hour0[AG + i - 1].isZero, hour0[AG + i + 1] > 0, hour0[AG + i + 2].isZero)))), 0, hour0[AG + i])
     }

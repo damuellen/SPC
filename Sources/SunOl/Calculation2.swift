@@ -240,12 +240,14 @@ extension TunOl {
 
     /// Harmonious op day
     let EZ = 254040
-    // =IF(OR(AND(EX5<=0,EX6>0,SUM(EX$1:EX5)=0),AND($F5<=0,$F6>0,SUM(EX$1:EX16)=0)),IF(EZ5<364,EZ5+1,0),EZ5)
-    let F = 0
-    for i in 2..<8760 {
-      let start = max(EX + i - 10, EX)
-      let end = max(min(EX + i - 1, EX + 1), start + 1)
-      hour4[EZ + i] = iff(or(and(hour4[EX + i - 1] <= 0, hour4[EX + i] > 0, hour4[start..<end].reduce(0, +).isZero), and(hour0[F + i - 1] <= 0, hour0[F + i] > 0, hour4[start..<min(EX + i + 10, EY)].reduce(0, +).isZero)), iff(hour4[EZ + i - 1] < 364, hour4[EZ + i - 1] + 1, 0), hour4[EZ + i - 1])
+    // =IF(OR(AND(EX19<=0,EX20>0,SUM(EX10:EX19)=0),AND($F19<=0,$F20>0,SUM(EX10:EX30)=0)),IF(EZ19<364,EZ19+1,0),EZ19)
+    for i in 12..<8748 {
+      hour4[EZ + i] = hour4[EZ + i - 1]
+      if hour4[EX + i - 1].isZero, hour4[EX + i] > 0, hour4[EX + i + 1] > 0, hour4[(EZ + i - 12)..<(EZ + i)].allSatisfy( { $0 == hour4[EZ + i] }) {
+        hour4[EZ + i] += 1
+      } else if hour0[i - 1].isZero, hour0[i] > 0, hour4[EX + i..<EX + i + 12].allSatisfy(\.isZero), hour4[EZ + i - 12..<EZ + i].allSatisfy({ $0 == hour4[EZ + i] }) {
+        hour4[EZ + i] += 1
+      }
     }
 
     /// El cons due to op outside of harm op period

@@ -83,24 +83,12 @@ extension TunOl {
 
     /// Min el cons during night
     let E = 0
-    // (A_overall_var_min_cons+A_overall_fix_stby_cons)*B6+A_overall_stup_cons
-    for i in 0..<365 { d1[E + i] = iff(d1[AE + i].isZero, .zero, (overall_var_min_cons[j] + overall_fix_stby_cons[j]) * day0[B + i] + overall_stup_cons[j]) }
-
     /// Max el cons during night
     let F = 365
-    // (A_overall_var_max_cons+A_overall_fix_stby_cons)*B6+A_overall_stup_cons
-    for i in 0..<365 { d1[F + i] = iff(d1[AE + i].isZero, .zero, (overall_var_max_cons[j] + overall_fix_stby_cons[j]) * day0[B + i] + overall_stup_cons[j]) }
-
     /// Min heat cons during night
     let G = 730
-    // (A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons)*B6+A_overall_heat_stup_cons
-    for i in 0..<365 { d1[G + i] = iff(d1[AE + i].isZero, .zero, (overall_var_heat_min_cons[j] + overall_heat_fix_stby_cons[j]) * day0[B + i] + overall_heat_stup_cons[j]) }
-
     /// Max heat cons during night
     let H = 1095
-    // (A_overall_var_heat_max_cons+A_overall_heat_fix_stby_cons)*B6+A_overall_heat_stup_cons
-    for i in 0..<365 { d1[H + i] = iff(d1[AE + i].isZero, .zero, (overall_var_heat_max_cons[j] + overall_heat_fix_stby_cons[j]) * day0[B + i] + overall_heat_stup_cons[j]) }
-
     /// Min RawMeth cons during night
     let I = 1460
     /// Max RawMeth cons during night
@@ -115,6 +103,10 @@ extension TunOl {
     let N = 3285
     for i in 0..<365 {
       if d1[AE + i].isZero {
+        d1[E + i] = .zero
+        d1[F + i] = .zero
+        d1[G + i] = .zero
+        d1[H + i] = .zero
         d1[I + i] = .zero
         d1[J + i] = .zero
         d1[K + i] = .zero
@@ -122,6 +114,14 @@ extension TunOl {
         d1[M + i] = .zero
         d1[N + i] = .zero
       } else {
+        // (A_overall_var_min_cons+A_overall_fix_stby_cons)*B6+A_overall_stup_cons
+        d1[E + i] = (overall_var_min_cons[j] + overall_fix_stby_cons[j]) * day0[B + i] + overall_stup_cons[j]
+        // (A_overall_var_max_cons+A_overall_fix_stby_cons)*B6+A_overall_stup_cons
+        d1[F + i] = (overall_var_max_cons[j] + overall_fix_stby_cons[j]) * day0[B + i] + overall_stup_cons[j]
+        // (A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons)*B6+A_overall_heat_stup_cons
+        d1[G + i] = (overall_var_heat_min_cons[j] + overall_heat_fix_stby_cons[j]) * day0[B + i] + overall_heat_stup_cons[j]
+        // (A_overall_var_heat_max_cons+A_overall_heat_fix_stby_cons)*B6+A_overall_heat_stup_cons
+        d1[H + i] = (overall_var_heat_max_cons[j] + overall_heat_fix_stby_cons[j]) * day0[B + i] + overall_heat_stup_cons[j]
         // A_RawMeth_min_cons*B6
         d1[I + i] = RawMeth_min_cons[j] * day0[B + i]
         // A_RawMeth_max_cons*B6
