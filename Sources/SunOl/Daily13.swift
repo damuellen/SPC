@@ -253,8 +253,8 @@ extension TunOl {
 
     /// Surplus RawMeth prod cap after opt day harm and max night op prep
     let ddKB = 13140
-    // KB=IF(JP6=0,0,ROUND(GK6+(GL6-GK6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc)-($AD6+($AE6-$AD6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*($AM6-A_equiv_harmonious_min_perc)),5))
-    for i in 0..<365 { d7[ddKB + i] = iff(d7[ddJP + i].isZero, .zero, round(d5[GK + i] + (d5[GL + i] - d5[GK + i]) * d7[dddJP + i] - (d1[AD + i] + (d1[AE + i] - d1[AD + i]) * d7[ddAM + i]), 5)) }
+    // KB=IF(JP3=0;0;ROUND(IG3+(IH3-IG3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP3-Overall_harmonious_min_perc)-($AD3+($AE3-$AD3)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*($AM3-A_equiv_harmonious_min_perc));5))
+    for i in 0..<365 { d7[ddKB + i] = iff(d7[ddJP + i].isZero, .zero, round(d6[IG + i] + (d6[IH + i] - d6[IG + i]) * d7[dddJP + i] - (d1[AD + i] + (d1[AE + i] - d1[AD + i]) * d7[ddAM + i]), 5)) }
 
     /// Surplus CO2 prod cap after opt day harm and min night op prep
     let ddKC = 13505
@@ -263,8 +263,8 @@ extension TunOl {
 
     /// Surplus CO2 prod cap after opt day harm and max night op prep
     let ddKD = 13870
-    // KD=IF(JP6=0,0,ROUND(GN6+(GO6-GN6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc)-($AF6+($AG6-$AF6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*($AM6-A_equiv_harmonious_min_perc)),5))
-    for i in 0..<365 { d7[ddKD + i] = iff(d7[ddJP + i].isZero, .zero, round(d5[GN + i] + (d5[GO + i] - d5[GN + i]) * d7[dddJP + i] - (d1[AF + i] + (d1[AG + i] - d1[AF + i]) * d7[ddAM + i]), 5)) }
+    // KD=IF(JP3=0;0;ROUND(IJ3+(IK3-IJ3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP3-Overall_harmonious_min_perc)-($AF3+($AG3-$AF3)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*($AM3-A_equiv_harmonious_min_perc));5))
+    for i in 0..<365 { d7[ddKD + i] = iff(d7[ddJP + i].isZero, .zero, round(d6[IJ + i] + (d6[IK + i] - d6[IJ + i]) * d7[dddJP + i] - (d1[AF + i] + (d1[AG + i] - d1[AF + i]) * d7[ddAM + i]), 5)) }
 
     /// Surplus H2 prod cap after opt day harm and min night op prep
     let ddKE = 14235
@@ -273,8 +273,8 @@ extension TunOl {
 
     /// Surplus H2 prod cap after opt day harm and max night op prep
     let ddKF = 14600
-    // KF=IF(JP6=0,0,ROUND(GQ6+(GR6-GQ6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc)-($AH6+($AI6-$AH6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*($AM6-A_equiv_harmonious_min_perc)),5))
-    for i in 0..<365 { d7[ddKF + i] = iff(d7[ddJP + i].isZero, .zero, round(d5[GQ + i] + (d5[GR + i] - d5[GQ + i]) * d7[dddJP + i] - (d1[AH + i] + (d1[AI + i] - d1[AH + i]) * d7[ddAM + i]), 5)) }
+    // KF=IF(JP3=0;0;ROUND(IM3+(IN3-IM3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP3-Overall_harmonious_min_perc)-($AH3+($AI3-$AH3)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*($AM3-A_equiv_harmonious_min_perc));5))
+    for i in 0..<365 { d7[ddKF + i] = iff(d7[ddJP + i].isZero, .zero, round(d6[IM + i] + (d6[IN + i] - d6[IM + i]) * d7[dddJP + i] - (d1[AH + i] + (d1[AI + i] - d1[AH + i]) * d7[ddAM + i]), 5)) }
 
     /// Opt night prep during day prio operation
     let ddKG = 14965
