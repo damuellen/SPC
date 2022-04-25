@@ -65,7 +65,8 @@ public struct MGOADE {
     }
 
     resetCursor {
-      print("Population: \(grassHopperPositions.count) ".randomColor(), " Iterations: 0".randomColor())
+      print("Population: \(grassHopperPositions.count) ".randomColor(),
+            "Iterations: 0".leftpad(length: 28).randomColor())
       print(pretty(values: targetFitness))
       print(pretty(values: targetPosition))
     }
@@ -176,7 +177,8 @@ public struct MGOADE {
       }
 
       resetCursor {
-        print("Population: \(grassHopperPositions.count) ".randomColor(), " Iterations: \(l)".randomColor())
+        print("Population: \(grassHopperPositions.count) ".randomColor(),
+              "Iterations: \(l)".leftpad(length: 28).randomColor())
         print(pretty(values: targetFitness))
         print(pretty(values: targetPosition))
       }
@@ -267,6 +269,10 @@ func pretty(values: [Double]) -> String {
     \(String(format: "%.2f", values[2]).leftpad(length: 9).text(.magenta))
     """
 }
+
+#if os(Windows)
+import WinSDK
+#endif
 
 func resetCursor(_ closure: ()->()) {
   #if os(Windows)
