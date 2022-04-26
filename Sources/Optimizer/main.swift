@@ -31,11 +31,6 @@ var finished = false
 DispatchQueue.global(qos: .background).sync { Command.main() }
 finished = true
 print("Elapsed seconds:", -now.timeIntervalSinceNow)
-#if os(Windows)
-if !source.isCancelled { Sleep(20000) }
-#else
-if !source.isCancelled { sleep(20) }
-#endif
 server.stop()
 semaphore.signal()
 
@@ -85,8 +80,8 @@ struct Command: ParsableCommand {
           CSP_loop_nr_ud: 0...250,
           El_boiler_cap_ud: 0...110,
           EY_var_net_nom_cons_ud: 10...600,
-          Grid_export_max_ud: 0...0,
-          Grid_import_max_ud: 0...0,
+          Grid_export_max_ud: 0...50,
+          Grid_import_max_ud: 0...50,
           Hydrogen_storage_cap_ud: 0...110,
           Heater_cap_ud: 0...500,
           MethDist_Meth_nom_prod_ud: 10...110,
