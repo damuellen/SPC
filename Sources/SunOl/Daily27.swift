@@ -1,22 +1,6 @@
 extension TunOl {
   func d27(_ d7: inout [Double], case j: Int, day0: [Double], d1: [Double], d6: [Double]) {
-    let B = 365
-    let C = 730
-    let E = 0
-    let F = 365
-    let G = 730
-    let H = 1095
-
-    let O = 3650
-    let P = 4015
-    let Q = 4380
-    let R = 4745
-    let S = 5110
-    let T = 5475
-    let U = 5840
-    let V = 6205
-    let W = 6570
-    let X = 6935
+    let (B, C, E, F, G, H, O, P, Q, R, S, T, U, V, W, X) = (365, 730, 0, 365, 730, 1095, 3650, 4015, 4380, 4745, 5110, 5475, 5840, 6205, 6570, 6935)
 
     let AE = 9490
     let (EA, EB, EC, ED, EE, EF, EG, EH, EI, EJ, EK, EL, EM, EN, EO, EP, EQ, ER, ES, ET, EV, EW, EY, EZ) = (3285, 3650, 4015, 4380, 4745, 5110, 5475, 5840, 6205, 6570, 6935, 7300, 7665, 8030, 8395, 8760, 9125, 9490, 9855, 10220, 10950, 11315, 12045, 12410)

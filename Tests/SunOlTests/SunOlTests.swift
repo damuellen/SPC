@@ -66,7 +66,8 @@ class SunOlTests: XCTestCase {
     TunOl.Q_Sol_MW_thLoop = [0] + csv["csp"]
     TunOl.Reference_PV_plant_power_at_inverter_inlet_DC = [0] + csv["pv"]
     TunOl.Reference_PV_MV_power_at_transformer_outlet = [0] + csv["out"]
-    let model = TunOl([167.92,30,20,1280,1150.557,600,10,281.49,84.68,5000,90.77,110.55,61.85,31.74,26.5,50,50])!
+    guard let model = TunOl([170.15,30.00,0.00,609.27,1197.17,600.00,67.39,348.63,55.54,5000.00,110.00,0.00,79.00,1.17,700.98,0.00,0.00,])
+    else { print("Invalid config"); return }
 
     let costs = Costs(model)
     let hour0 = model.hour0(
@@ -538,6 +539,7 @@ class SunOlTests: XCTestCase {
       }
 
       model.d17(&d17, case: j, d1: d1, d5: d15, d6: d16)
+      model.d172(&d17, case: j, d1: d1, d5: d15, d6: d16)
       if j == 0 {
         compareDay(d17, letter: "IQ", start: 0)
         compareDay(d17, letter: "IR", start: 365)
@@ -1178,7 +1180,7 @@ class SunOlTests: XCTestCase {
       }
       let best = cases.indices.filter { cases[$0].isFinite }.filter { cases[$0] > 0 }.sorted { cases[$0] < cases[$1] }.first
       if let best = best {
-        // print(d, names[best], cases, day[best][d])
+        print(d, names[best], cases, day[best][d])
         meth_produced_MTPH_sum += day[best][d]
         elec_from_grid_sum += day[best][d + 365 + 365]
         elec_to_grid_MTPH_sum += day[best][d + 365]
@@ -1186,5 +1188,85 @@ class SunOlTests: XCTestCase {
     }
     let LCOM = costs.LCOM(meth_produced_MTPH: meth_produced_MTPH_sum, elec_from_grid: elec_from_grid_sum, elec_to_grid: elec_to_grid_MTPH_sum)
     // XCTAssertEqual(LCOM, 1076, accuracy: 1E-1)
+  }
+
+  func testsCalculation2() {
+    let path = "/workspaces/SPC/input2.txt"
+    guard let csv = CSVReader(atPath: path) else {
+      print("No input")
+      return
+    }
+   
+    TunOl.Q_Sol_MW_thLoop = [0] + csv["csp"]
+    TunOl.Reference_PV_plant_power_at_inverter_inlet_DC = [0] + csv["pv"]
+    TunOl.Reference_PV_MV_power_at_transformer_outlet = [0] + csv["out"]
+    guard let model =  TunOl([41.94,25.26,0.00,247.31,638.08,600.00,8.01,228.66,12.83,822.70,76.92,87.14,18.21,93.97,253.75,0.00,0.00,])
+    else { print("Invalid config"); return }
+
+    let costs = Costs(model)
+    let hour0 = model.hour0(
+      TunOl.Q_Sol_MW_thLoop, TunOl.Reference_PV_plant_power_at_inverter_inlet_DC, TunOl.Reference_PV_MV_power_at_transformer_outlet)
+
+    let hour1 = model.hour1(hour0: hour0)
+    let d6 = model.d26(hour0: hour0)
+    var day = [[Double]]()
+    var hour2 = [Double](repeating: Double.zero, count: 183_960)
+    var hour3 = [Double](repeating: Double.zero, count: 271_560)
+    var hour4 = [Double](repeating: Double.zero, count: 490560 + 8760)
+    var d1 = [Double](repeating: Double.zero, count: 13_140)
+    var d15 = [Double](repeating: Double.zero, count: 17_155)
+    var d16 = [Double](repeating: Double.zero, count: 17_155)
+    var d17 = [Double](repeating: Double.zero, count: 46_720)
+    var d27 = [Double](repeating: Double.zero, count: 47_815)
+    var d21 = [Double](repeating: Double.zero, count: 9_855)
+
+    for j in 0..<4 {
+      model.hour2(&hour2, j: j, hour0: hour0, hour1: hour1)     
+      model.hour3(&hour3, j: j, hour0: hour0, hour1: hour1, hour2: hour2)
+      model.d1(&d1, case: j, hour2: hour2, hour3: hour3)      
+      model.hour4(&hour4, j: j, d1: d1, hour0: hour0, hour1: hour1, hour2: hour2)
+      model.night(case: j, d1: &d1, hour3: hour3, hour4: hour4)
+      model.d15(&d15, hour0: hour0, hour2: hour2, hour3: hour3, d11: d1)
+      model.d16(&d16, hour0: hour0, hour4: hour4, d11: d1, d15: d15)
+      model.d17(&d17, case: j, d1: d1, d5: d15, d6: d16)
+      model.d172(&d17, case: j, d1: d1, d5: d15, d6: d16)
+      day.append(Array(d17[31755..<33215]))
+      day.append(Array(d17[44165..<45625]))
+
+      let d0 = model.day0(hour0: hour0)
+
+      model.d21(&d21, case: j, day0: d0)
+      model.d27(&d27, case: j, day0: d0, d1: d21, d6: d6)
+      
+      day.append(Array(d27[33945..<35040]))
+      day.append(Array(d27[44895..<45990]))
+    }
+
+    var meth_produced_MTPH_sum = Double.zero
+    var elec_from_grid_sum = Double.zero
+    var elec_to_grid_MTPH_sum = Double.zero
+
+    let names = [
+      "1a day prio", "1a night prio", "2a day prio", "2a night prio", "1b day prio", "1b night prio", "2b day prio", "2b night prio", "1c day prio",
+      "1c night prio", "2c day prio", "2c night prio", "1d day prio", "1d night prio", "2d day prio", "2d night prio",
+    ]
+
+    for d in 0..<365 {
+      if d == 333 {
+        print()
+      }
+      let cases = day.indices.map { i in
+        costs.LCOM(meth_produced_MTPH: day[i][d] * 365.0, elec_from_grid: day[i][d + 365 + 365] * 365.0, elec_to_grid: day[i][d + 365] * 365.0)
+      }
+      let ranked = cases.indices.filter { cases[$0].isFinite }.filter { cases[$0] > 0 }.sorted { cases[$0] < cases[$1] }
+      if let best = ranked.first {
+        print(d, day[best][d])
+        meth_produced_MTPH_sum += day[best][d]
+        elec_from_grid_sum += day[best][d + 365 + 365]
+        elec_to_grid_MTPH_sum += day[best][d + 365]
+      }
+    }
+    let LCOM = costs.LCOM(meth_produced_MTPH: meth_produced_MTPH_sum, elec_from_grid: elec_from_grid_sum, elec_to_grid: elec_to_grid_MTPH_sum)
+    print(LCOM, meth_produced_MTPH_sum, elec_from_grid_sum, elec_to_grid_MTPH_sum)
   }
 }

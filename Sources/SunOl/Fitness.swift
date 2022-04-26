@@ -33,7 +33,7 @@ public func fitness(values: [Double]) -> [Double] {
     model.d15(&d15, hour0: hour0, hour2: hour2, hour3: hour3, d11: d1)
     model.d16(&d16, hour0: hour0, hour4: hour4, d11: d1, d15: d15)
     model.d17(&d17, case: j, d1: d1, d5: d15, d6: d16)
-
+    model.d172(&d17, case: j, d1: d1, d5: d15, d6: d16)
     day.append(Array(d17[31755..<32850]))
     day.append(Array(d17[44165..<45625]))
 
