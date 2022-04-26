@@ -27,11 +27,11 @@ source.resume()
 server.start()
 
 let now = Date()
-
+var finished = false
 DispatchQueue.global(qos: .background).sync { Command.main() }
-
+finished = true
 print("Elapsed seconds:", -now.timeIntervalSinceNow)
-
+if !source.isCancelled { sleep(30) }
 server.stop()
 semaphore.signal()
 
@@ -50,6 +50,9 @@ struct Command: ParsableCommand {
   @Option(name: .short, help: "Iterations") var iterations: Int?
 
   func run() throws {
+    #if os(Windows)
+    if file == nil { file = FileDialog() }
+    #endif
     let path = file ?? "input2.txt"
     guard let csv = CSVReader(atPath: path) else { 
       #if os(Windows)
@@ -72,8 +75,8 @@ struct Command: ParsableCommand {
           CSP_loop_nr_ud: 0...250,
           El_boiler_cap_ud: 0...110,
           EY_var_net_nom_cons_ud: 10...600,
-          Grid_export_max_ud: 50...50,
-          Grid_import_max_ud: 50...50,
+          Grid_export_max_ud: 0...0,
+          Grid_import_max_ud: 0...0,
           Hydrogen_storage_cap_ud: 0...110,
           Heater_cap_ud: 0...500,
           MethDist_Meth_nom_prod_ud: 10...110,
@@ -122,7 +125,7 @@ func writeExcel(results: [[Double]]) {
   ws.table(range: [0, 0, r, labels.endIndex - 1], header: labels)
   for (column, name) in labels.enumerated() {
     if column < 6 { continue }
-    let chart = wb.addChart(type: .scatter) //.set(y_axis: 1000...2500)
+    let chart = wb.addChart(type: .scatter).set(y_axis: 800...1400)
     chart.addSeries().set(marker: 5, size: 4)
     .values(sheet: ws, range: [1, 0, r, 0])
     .categories(sheet: ws, range: [1, column, r, column])
@@ -144,6 +147,7 @@ func handler(request: HTTP.Request) -> HTTP.Response {
   var uri = request.uri
   if uri == "/cancel" {
     source.cancel()
+    finished = true
   } else {
     uri.remove(at: uri.startIndex)
   }
@@ -157,6 +161,9 @@ func handler(request: HTTP.Request) -> HTTP.Response {
       .set(title: "Convergence curves")
       .set(xlabel: "Iteration").set(ylabel: "LCoM")
     plot.settings["xtics"] = "1"
+    if finished {
+      return .init(html: .init(body: plot.svg!, refresh: 0))
+    }
     return .init(html: .init(body: plot.svg!, refresh: 30))
   }
   return .init(html: .init(refresh: 10))
