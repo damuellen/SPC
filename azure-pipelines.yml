@@ -16,7 +16,8 @@ variables:
 
 steps:
 - task: PowerShell@2
-  timeoutInMinutes: 5
+  timeoutInMinutes: 3
+  retryCountOnTaskFailure: 3
   inputs:
     targetType: 'inline'
     script: |
