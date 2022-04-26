@@ -28,7 +28,7 @@ server.start()
 
 let now = Date()
 DispatchQueue.global(qos: .background).sync { Command.main() }
-print("\u{1b}[2J", "Elapsed seconds:", -now.timeIntervalSinceNow)
+print("Elapsed seconds:", -now.timeIntervalSinceNow)
 
 server.stop()
 semaphore.signal()
@@ -113,7 +113,6 @@ func writeExcel(results: [[Double]]) {
   let name = "SunOl_\(UUID().uuidString.prefix(6)).xlsx"
   let wb = Workbook(name: name)
   let ws = wb.addWorksheet()
-  // let ws2 = wb.addWorksheet()
   var r = 0
   results.forEach { row in r += 1; ws.write(row, row: r) }
   // var r2 = 0
@@ -142,9 +141,8 @@ func writeExcel(results: [[Double]]) {
   DispatchQueue.global().asyncAfter(deadline: .now()) { 
     start(currentDirectoryPath() + "/" + name)
   }
-  #else
-  print(name)
   #endif
+  print("\u{1b}[2J", name)
 }
 
 func handler(request: HTTP.Request) -> HTTP.Response {
