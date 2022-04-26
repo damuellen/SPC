@@ -31,7 +31,11 @@ var finished = false
 DispatchQueue.global(qos: .background).sync { Command.main() }
 finished = true
 print("Elapsed seconds:", -now.timeIntervalSinceNow)
-if !source.isCancelled { sleep(30) }
+#if os(Windows)
+if !source.isCancelled { Sleep(20000) }
+#else
+if !source.isCancelled { sleep(20) }
+#endif
 server.stop()
 semaphore.signal()
 
@@ -50,10 +54,16 @@ struct Command: ParsableCommand {
   @Option(name: .short, help: "Iterations") var iterations: Int?
 
   func run() throws {
+    let path: String
     #if os(Windows)
-    if file == nil { file = FileDialog() }
+    if let file = file { 
+      path = file
+    } else {
+      path = FileDialog() ?? "input2.txt"  
+    }
+    #else
+    path = file ?? "input2.txt"
     #endif
-    let path = file ?? "input2.txt"
     guard let csv = CSVReader(atPath: path) else { 
       #if os(Windows)
       MessageBox(text: "No input.", caption: "TunOl")
@@ -164,7 +174,7 @@ func handler(request: HTTP.Request) -> HTTP.Response {
     if finished {
       return .init(html: .init(body: plot.svg!, refresh: 0))
     }
-    return .init(html: .init(body: plot.svg!, refresh: 30))
+    return .init(html: .init(body: plot.svg!, refresh: 20))
   }
   return .init(html: .init(refresh: 10))
 }
