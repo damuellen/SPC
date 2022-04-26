@@ -27,10 +27,9 @@ source.resume()
 server.start()
 
 let now = Date()
-var finished = false
 DispatchQueue.global(qos: .background).sync { Command.main() }
-finished = true
-print("Elapsed seconds:", -now.timeIntervalSinceNow)
+print("\u{1b}[2J", "Elapsed seconds:", -now.timeIntervalSinceNow)
+
 server.stop()
 semaphore.signal()
 
@@ -152,7 +151,6 @@ func handler(request: HTTP.Request) -> HTTP.Response {
   var uri = request.uri
   if uri == "/cancel" {
     source.cancel()
-    finished = true
   } else {
     uri.remove(at: uri.startIndex)
   }
@@ -166,9 +164,6 @@ func handler(request: HTTP.Request) -> HTTP.Response {
       .set(title: "Convergence curves")
       .set(xlabel: "Iteration").set(ylabel: "LCoM")
     plot.settings["xtics"] = "1"
-    if finished {
-      return .init(html: .init(body: plot.svg!, refresh: 0))
-    }
     return .init(html: .init(body: plot.svg!, refresh: 20))
   }
   return .init(html: .init(refresh: 10))
