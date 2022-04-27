@@ -249,6 +249,7 @@ extension TunOl {
         hour4[EZ + i] += 1
       }
     }
+    for i in 8748..<8760 { hour4[EZ + i] = hour4[EZ + i - 1] }
 
     /// El cons due to op outside of harm op period
     let FA = 262800

@@ -20,7 +20,7 @@ class SunOlTests: XCTestCase {
       let ref = csv_ref[letter]
       var correct = true
       var counter = 1
-      for i in 1..<8736 {
+      for i in 1..<8760 {
         if counter > 30 { break }
         if abs(ref[i - 1] - array[index + i]) / ref[i - 1] > 0.005 {
           counter += 1

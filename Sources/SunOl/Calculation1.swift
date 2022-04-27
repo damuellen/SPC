@@ -200,7 +200,7 @@ extension TunOl {
         hour3[CS + i] += 1
       }
     }
-
+    for i in 8748..<8760 { hour3[CS + i] = hour3[CS + i - 1] }
     /// El cons due to op outside of harm op period
     let CT = 35040
     // IF(OR(CQ6>0;CC6=0;MIN(MAX(0;Grid_import_max_ud*Grid_import_yes_no_PB_strategy+BX6+CK6-CM6-CQ6-MIN(El_boiler_cap_ud;MAX(0;A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons+IF(CQ7=0;0;A_overall_heat_stup_cons)+CR6-CL6-CB6/PB_Ratio_Heat_input_vs_output)/El_boiler_eff));MAX(0;MIN(El_boiler_cap_ud;Grid_import_max_ud*Grid_import_yes_no_PB_strategy+BX6+CK6-CM6-CQ6)*El_boiler_eff+CL6+CB6/PB_Ratio_Heat_input_vs_output-CR6-IF(CQ7=0;0;A_overall_heat_stup_cons)-A_overall_heat_fix_stby_cons)/A_overall_var_heat_max_cons*A_overall_var_max_cons+A_overall_fix_stby_cons+IF(CQ7=0;0;A_overall_stup_cons))<A_overall_var_min_cons+A_overall_fix_stby_cons+IF(CQ7=0;0;A_overall_stup_cons));0;A_overall_var_min_cons+A_overall_fix_stby_cons+IF(CQ7=0;0;A_overall_stup_cons))
