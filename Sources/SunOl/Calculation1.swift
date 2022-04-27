@@ -2,8 +2,6 @@ extension TunOl {
   func hour2(_ hour2: inout [Double], j: Int, hour0: [Double], hour1: [Double]) {
     let (J, L, M, AW, BK, BM, BO, BP, BQ) = (26280, 43800, 52560, 8760, 131400, 148920, 166440, 175200, 183960)
     let daysBO: [[Int]] = hour1[BO + 1..<(BO + 8760)].indices.chunked(by: { hour1[$0] == hour1[$1] }).map { $0.map { $0 - BO } }
-    // let end = daysBO.removeLast()
-    // daysBO[0].append(contentsOf: end)
 
     let AY = 26280
     let BL = 140160
@@ -190,13 +188,17 @@ extension TunOl {
     let CR = 17520
     // MAX(0,(CQ6-Overall_fix_cons)/Overall_harmonious_var_max_cons*Overall_harmonious_var_heat_max_cons+Overall_heat_fix_cons)
     for i in 1..<8760 { hour3[CR + i] = iff(hour3[CQ + i].isZero, .zero, max(.zero, (hour3[CQ + i] - Overall_fix_cons) / Overall_harmonious_var_max_cons * Overall_harmonious_var_heat_max_cons + Overall_heat_fix_cons)) }
-    let F = 0
+
     /// Harmonious op day
     let CS = 26280
     // IF(OR(AND(CQ5<=0,CQ6>0,SUM(CQ$1:CQ5)=0),AND($F5<=0,$F6>0,SUM(CQ$1:CQ16)=0)),IF(CS5<364,CS5+1,0),CS5)
-    for i in 2..<8760 {
-      hour3[CS + i] = iff(
-        or(and(hour3[CQ + i - 1] <= 0, hour3[CQ + i] > 0, hour3[max(CQ + i - 10, CQ)..<min(CQ + i - 1, CR)].reduce(0, +).isZero), and(hour0[F + i - 1] <= 0, hour0[F + i] > 0, hour3[max(CQ + i - 10, CQ)..<min(CQ + i + 10, CR)].reduce(0, +).isZero)), iff(hour3[CS + i - 1] < 364, hour3[CS + i - 1] + 1, 0), hour3[CS + i - 1])
+    for i in 12..<8748 {
+      hour3[CS + i] = hour3[CS + i - 1]
+      if hour3[CQ + i - 1].isZero, hour3[CQ + i] > 0, hour3[CQ + i + 1] > 0, hour3[(CS + i - 12)..<(CS + i)].allSatisfy( { $0 == hour3[CS + i] }) {
+        hour3[CS + i] += 1
+      } else if hour0[i - 1].isZero, hour0[i] > 0, hour3[CQ + i..<CQ + i + 12].allSatisfy(\.isZero), hour3[CS + i - 12..<CS + i].allSatisfy({ $0 == hour3[CS + i] }) {
+        hour3[CS + i] += 1
+      }
     }
 
     /// El cons due to op outside of harm op period

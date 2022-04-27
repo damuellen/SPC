@@ -41,7 +41,7 @@ class SunOlTests: XCTestCase {
         if abs(ref[i] - array[index + i]) / ref[i] > 0.005 {
           counter += 1
           correct = false
-          print("Daily1", letter, i + 3, "=", ref[i], "not equal", array[index + i])
+          // print("Daily1", letter, i + 3, "=", ref[i], "not equal", array[index + i])
         }
       }
       if correct { print("Daily1", letter, "all equal") }
@@ -57,7 +57,7 @@ class SunOlTests: XCTestCase {
         if abs(ref[i] - array[index + i]) / ref[i] > 0.005 {
           counter += 1
           correct = false
-          print("Daily2", letter, i + 3, "=", ref[i], "not equal", array[index + i])
+          // print("Daily2", letter, i + 3, "=", ref[i], "not equal", array[index + i])
         }
       }
       if correct { print("Daily2", letter, "all equal") }
@@ -66,7 +66,7 @@ class SunOlTests: XCTestCase {
     TunOl.Q_Sol_MW_thLoop = [0] + csv["csp"]
     TunOl.Reference_PV_plant_power_at_inverter_inlet_DC = [0] + csv["pv"]
     TunOl.Reference_PV_MV_power_at_transformer_outlet = [0] + csv["out"]
-    guard let model = TunOl([170.15,30.00,0.00,609.27,1197.17,600.00,67.39,348.63,55.54,5000.00,110.00,0.00,79.00,1.17,700.98,0.00,0.00,])
+    guard let model = TunOl([41.94,25.26,0.00,247.31,638.08,600.00,8.01,228.66,12.83,822.70,76.92,87.14,18.21,93.97,253.75,0.00,0.00,])
     else { print("Invalid config"); return }
 
     let costs = Costs(model)
@@ -227,7 +227,7 @@ class SunOlTests: XCTestCase {
         compare(hour2, letter: "CK", start: 140160)
         compare(hour2, letter: "CL", start: 148920)
         compare(hour2, letter: "CM", start: 157680)
-        compare(hour2, letter: "CN", start: 166440)
+        compare(hour2, letter: "CN", start: 166440)        
         print("Hour Case", j)  // hour2.head(72, steps: 8760)
       }
       if j == 1 {
@@ -260,6 +260,15 @@ class SunOlTests: XCTestCase {
       model.hour3(&hour3, j: j, hour0: hour0, hour1: hour1, hour2: hour2)
       print("Hour Case", j)
       // hour3.head(93, steps: 8760)
+
+      compare(hour3, letter: "CP", start: 0)
+      compare(hour3, letter: "CQ", start: 8760)
+      compare(hour3, letter: "CR", start: 17520)
+      compare(hour3, letter: "CS", start: 26280)
+      compare(hour3, letter: "CT", start: 35040)
+      compare(hour3, letter: "CU", start: 43800)
+      compare(hour3, letter: "CV", start: 52560)
+      compare(hour3, letter: "CW", start: 61320)
 
       model.d1(&d1, case: j, hour2: hour2, hour3: hour3)
       if j == 0 {
@@ -1200,7 +1209,7 @@ class SunOlTests: XCTestCase {
     TunOl.Q_Sol_MW_thLoop = [0] + csv["csp"]
     TunOl.Reference_PV_plant_power_at_inverter_inlet_DC = [0] + csv["pv"]
     TunOl.Reference_PV_MV_power_at_transformer_outlet = [0] + csv["out"]
-    guard let model =  TunOl([41.94,25.26,0.00,247.31,638.08,600.00,8.01,228.66,12.83,822.70,76.92,87.14,18.21,93.97,253.75,0.00,0.00,])
+    guard let model = TunOl([41.94,25.26,0.00,247.31,638.08,600.00,8.01,228.66,12.83,822.70,76.92,87.14,18.21,93.97,253.75,0.00,0.00,])
     else { print("Invalid config"); return }
 
     let costs = Costs(model)

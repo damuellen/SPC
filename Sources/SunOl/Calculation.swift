@@ -68,16 +68,13 @@ extension TunOl {
     /// Harmonious op day
     let U = 113880
     // IF(OR(AND(S5<=0,S6>0,SUM(S1:S5)=0),AND($F5<=0,$F6>0,SUM(S4:S18)=0)),IF(U5<364,U5+1,0),U5)
-    for i in 2..<8760 {
-      let prevA = hour0[S + i - 1] <= .zero
-      let nowA = hour0[S + i] > .zero
-      let sumA = hour0[max(S + i - 6, S)..<(S + i)].reduce(.zero, +)
-      let prevB = hour0[i - 1] <= .zero
-      let nowB = hour0[i] > .zero
-      let sumB = hour0[max(S + i - 2, S)...(S + i + 12)].reduce(.zero, +)
-      let u: Double
-      if or(and(prevA, nowA, sumA.isZero), and(prevB, nowB, sumB.isZero)) { u = hour0[U + i - 1] + 1 } else { u = hour0[U + i - 1] }
-      hour0[U + i] = u
+    for i in 12..<8748 {
+      hour0[U + i] = hour0[U + i - 1]
+      if hour0[S + i - 1].isZero, hour0[S + i] > 0, hour0[S + i + 1] > 0, hour0[(U + i - 12)..<(U + i)].allSatisfy( { $0 == hour0[U + i] }) {
+        hour0[U + i] += 1
+      } else if hour0[i - 1].isZero, hour0[i] > 0, hour0[S + i..<S + i + 12].allSatisfy(\.isZero), hour0[U + i - 12..<U + i].allSatisfy({ $0 == hour0[U + i] }) {
+        hour0[U + i] += 1
+      }
     }
 
     /// Remaining PV after min harmonious
@@ -225,7 +222,7 @@ extension TunOl {
   }
 
   func hour1(hour0: [Double]) -> [Double] {
-    let (F, J, L, M) = (0, 26280, 43800, 52560)
+    let (J, L, M) = (26280, 43800, 52560)
     var hour1 = [Double](repeating: .zero, count: 192_720)
     let daysD: [[Int]] = (0..<365).map { Array(stride(from: 1 + $0 * 24, to: 1 + ($0 + 1) * 24, by: 1)) }
 
@@ -351,9 +348,13 @@ extension TunOl {
     /// Harmonious op day
     let BO = 166440
     // IF(OR(AND(BM5<=0,BM6>0,SUM(BM$1:BM5)=0),AND($F5<=0,$F6>0,SUM(BM$1:BM16)=0)),IF(BO5<364,BO5+1,0),BO5)
-    for i in 2..<8760 {
-      hour1[BO + i] = iff(
-        or(and(hour1[BM + i - 1] <= 0, hour1[BM + i] > 0, hour1[max(BM + i - 10, BM)..<min(BM + i - 1, BN)].reduce(0, +).isZero), and(hour0[F + i - 1] <= 0, hour0[F + i] > 0, hour1[max(BM + i - 10, BM)..<min(BM + i + 10, BN)].reduce(0, +).isZero)), iff(hour1[BO + i - 1] < 364, hour1[BO + i - 1] + 1, 0), hour1[BO + i - 1])
+    for i in 12..<8748 {
+      hour1[BO + i] = hour1[BO + i - 1]
+      if hour1[BM + i - 1].isZero, hour1[BM + i] > 0, hour1[BM + i + 1] > 0, hour1[(BO + i - 12)..<(BO + i)].allSatisfy( { $0 == hour1[BO + i] }) {
+        hour1[BO + i] += 1
+      } else if hour0[i - 1].isZero, hour0[i] > 0, hour1[BM + i..<BM + i + 12].allSatisfy(\.isZero), hour1[BO + i - 12..<BO + i].allSatisfy({ $0 == hour1[BO + i] }) {
+        hour1[BO + i] += 1
+      }
     }
 
     /// Remaining PV after min harmonious
