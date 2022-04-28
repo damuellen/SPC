@@ -258,23 +258,34 @@ public struct TunOl {
   var Grid_import_max_ud: Double
   var Grid_import_yes_no_BESS_strategy: Double = 1
   var Grid_import_yes_no_PB_strategy: Double = 1
+  
+  var values: [Double] {
+    [
+      CSP_loop_nr_ud, TES_full_load_hours_ud, PB_nom_gross_cap_ud, PV_AC_cap_ud, PV_DC_cap_ud,
+      EY_var_net_nom_cons_ud, Hydrogen_storage_cap_ud, Heater_cap_ud, CCU_CO2_nom_prod_ud,
+      CO2_storage_cap_ud, MethSynt_RawMeth_nom_prod_ud, RawMeth_storage_cap_ud,
+      MethDist_Meth_nom_prod_ud, El_boiler_cap_ud, BESS_cap_ud, Grid_export_max_ud,
+      Grid_import_max_ud,
+    ]
+  }
 
   init?(_ parameter: [Double]) {
-    self.CSP_loop_nr_ud = parameter[0] < 1 ? 0 : parameter[0]
+    let parameter = parameter.map { $0 < 1 ? .zero : $0 }
+    self.CSP_loop_nr_ud = parameter[0]
     self.TES_full_load_hours_ud = parameter[1]
-    self.PB_nom_gross_cap_ud = parameter[2] < 1 ? 0 : parameter[2]
+    self.PB_nom_gross_cap_ud = parameter[2]
     self.PV_AC_cap_ud = parameter[3]
     self.PV_DC_cap_ud = parameter[4]
     self.EY_var_net_nom_cons_ud = parameter[5]
     self.Hydrogen_storage_cap_ud = parameter[6]
-    self.Heater_cap_ud = parameter[7] < 1 ? 0 : parameter[7]
+    self.Heater_cap_ud = parameter[7]
     self.CCU_CO2_nom_prod_ud = parameter[8]
     self.CO2_storage_cap_ud = parameter[9]
     self.MethSynt_RawMeth_nom_prod_ud = parameter[10]
     self.RawMeth_storage_cap_ud = parameter[11]
     self.MethDist_Meth_nom_prod_ud = parameter[12]
     self.El_boiler_cap_ud = parameter[13]
-    self.BESS_cap_ud = parameter[14] < 1 ? 0 : parameter[14]
+    self.BESS_cap_ud = parameter[14]
     self.Grid_export_max_ud = parameter[15]
     self.Grid_import_max_ud = parameter[16]
 
