@@ -282,7 +282,7 @@ func resetCursor(_ closure: ()->()) {
   closure()
   SetConsoleCursorPosition(hConsole, info.dwCursorPosition)
   #else 
-  print("\u{001B}[20A")
+  print("\u{1b}[2J", "\u{1b}[0;0H", terminator: "")
   closure()
   #endif
 }
