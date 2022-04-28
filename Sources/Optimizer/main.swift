@@ -7,8 +7,8 @@ import SunOl
 let source = DispatchSource.makeSignalSource(signal: SIGINT, queue: .global())
 let semaphore = DispatchSemaphore(value: 0)
 
+print("\u{1b}[2J", "\u{1b}[0;0H", terminator: "")
 #if !os(Windows)
-print("\u{1b}[1J", terminator: "")
 print(tunol)
 signal(SIGINT, SIG_IGN)
 source.setEventHandler { source.cancel() }
@@ -128,7 +128,7 @@ func writeExcel(results: [[Double]]) {
   ws.table(range: [0, 0, r, labels.endIndex - 1], header: labels)
   for (column, name) in labels.enumerated() {
     if column < 6 { continue }
-    let chart = wb.addChart(type: .scatter).set(y_axis: 800...1400)
+    let chart = wb.addChart(type: .scatter).set(y_axis: 900...1400)
     chart.addSeries().set(marker: 5, size: 4)
     .values(sheet: ws, range: [1, 0, r, 0])
     .categories(sheet: ws, range: [1, column, r, column])
@@ -142,7 +142,8 @@ func writeExcel(results: [[Double]]) {
     start(currentDirectoryPath() + "/" + name)
   }
   #endif
-  print("\u{1b}[2J", name)
+  ClearScreen()
+  print(name)
 }
 
 func handler(request: HTTP.Request) -> HTTP.Response {
