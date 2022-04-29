@@ -136,9 +136,7 @@ func writeExcel(results: [[Double]]) -> String {
 
   wb.close()
   #if os(Windows)
-  DispatchQueue.global().asyncAfter(deadline: .now()) { 
-    start(currentDirectoryPath() + "/" + name)
-  }
+  start(currentDirectoryPath() + "/" + name)
   #endif
   return name
 }
