@@ -87,7 +87,7 @@ struct Command: ParsableCommand {
     let server = HTTP(handler: handler)
     if http { 
       server.start()
-      DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { 
+      DispatchQueue.global().asyncAfter(deadline: .now() + 0.5) { 
         start("http://127.0.0.1:9080") 
       }
     }
@@ -136,7 +136,7 @@ func writeExcel(results: [[Double]]) -> String {
 
   wb.close()
   #if os(Windows)
-  DispatchQueue.main.asyncAfter(deadline: .now()) { 
+  DispatchQueue.global().asyncAfter(deadline: .now()) { 
     start(currentDirectoryPath() + "/" + name)
   }
   #endif
