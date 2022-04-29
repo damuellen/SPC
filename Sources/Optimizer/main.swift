@@ -7,30 +7,21 @@ import SunOl
 let source = DispatchSource.makeSignalSource(signal: SIGINT, queue: .global())
 let semaphore = DispatchSemaphore(value: 0)
 
-print("\u{1b}[2J", "\u{1b}[0;0H", terminator: "")
-#if !os(Windows)
-print(tunol)
-signal(SIGINT, SIG_IGN)
-source.setEventHandler { source.cancel() }
-#else
+ClearScreen()
+#if os(Windows)
 import WinSDK
 _ = SetConsoleOutputCP(UINT(CP_UTF8))
 SetConsoleCtrlHandler({_ in source.cancel();semaphore.wait();return WindowsBool(true)}, true)
+#else
+print(tunol)
+signal(SIGINT, SIG_IGN)
+source.setEventHandler { source.cancel() }
 #endif
-#if os(Linux)
-try! Gnuplot.process().run()
-#endif
-
-let server = HTTP(handler: handler)
 
 source.resume()
-server.start()
 
-let now = Date()
-DispatchQueue.global(qos: .background).sync { Command.main() }
-print("Elapsed seconds:", -now.timeIntervalSinceNow)
+Command.main()
 
-server.stop()
 semaphore.signal()
 
 struct Command: ParsableCommand {
@@ -41,7 +32,7 @@ struct Command: ParsableCommand {
 
   @Flag(name: .long, help: "Do not use Multi-group algorithm") var noGroups: Bool = false
 
-  @Flag(name: .long, help: "No print out") var silent: Bool = false
+  @Flag(name: .long, help: "Run HTTP server") var http: Bool = false
 
   @Option(name: .short, help: "Population size") var n: Int?
 
@@ -93,23 +84,30 @@ struct Command: ParsableCommand {
       ]
     }
     
-    DispatchQueue.global().asyncAfter(deadline: .now()) { start("http://127.0.0.1:9080") }
-
+    let server = HTTP(handler: handler)
+    if http { 
+      server.start()
+      DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { 
+        start("http://127.0.0.1:9080") 
+      }
+    }
     TunOl.Q_Sol_MW_thLoop = [0] + csv["csp"]
     TunOl.Reference_PV_plant_power_at_inverter_inlet_DC = [0] + csv["pv"]
     TunOl.Reference_PV_MV_power_at_transformer_outlet = [0] + csv["out"]
 
     parameter.forEach { parameter in      
       let optimizer = MGOADE(group: !noGroups, n: n ?? 90, maxIter: iterations ?? 30, bounds: parameter.ranges)
+      let now = Date()
       let valid = optimizer(SunOl.fitness).filter(\.first!.isFinite)
-      writeExcel(results: valid.sorted { $0[0] < $1[0] })
+      print("Elapsed seconds:", -now.timeIntervalSinceNow)
+      print(writeExcel(results: valid.sorted { $0[0] < $1[0] }))
     }
+
+    if http { server.stop() }
   }
 }
 
-
-
-func writeExcel(results: [[Double]]) {
+func writeExcel(results: [[Double]]) -> String {
   let name = "SunOl_\(UUID().uuidString.prefix(6)).xlsx"
   let wb = Workbook(name: name)
   let ws = wb.addWorksheet()
@@ -138,12 +136,11 @@ func writeExcel(results: [[Double]]) {
 
   wb.close()
   #if os(Windows)
-  DispatchQueue.global().asyncAfter(deadline: .now()) { 
+  DispatchQueue.main.asyncAfter(deadline: .now()) { 
     start(currentDirectoryPath() + "/" + name)
   }
   #endif
-  ClearScreen()
-  print(name)
+  return name
 }
 
 func handler(request: HTTP.Request) -> HTTP.Response {
