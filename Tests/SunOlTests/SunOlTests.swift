@@ -5,15 +5,25 @@ import xlsxwriter
 @testable import SunOl
 
 class SunOlTests: XCTestCase {
-  func testsCalculation() {
-    let path = "/workspaces/SPC/input2.txt"
+  override func setUp() {
+    let path = "input2.txt"
     guard let csv = CSVReader(atPath: path) else {
       print("No input")
       return
     }
-    let csv_ref = CSVReader(atPath: "/workspaces/SPC/calc.csv", separator: "\t")!
-    let csv_ref2 = CSVReader(atPath: "/workspaces/SPC/daily1.csv", separator: "\t")!
-    let csv_ref3 = CSVReader(atPath: "/workspaces/SPC/daily2.csv", separator: "\t")!
+    TunOl.Q_Sol_MW_thLoop = [0] + csv["csp"]
+    TunOl.Reference_PV_plant_power_at_inverter_inlet_DC = [0] + csv["pv"]
+    TunOl.Reference_PV_MV_power_at_transformer_outlet = [0] + csv["out"]
+  }
+
+  func testsCalculation() {
+    guard let csv_ref = CSVReader(atPath: "calc.csv", separator: "\t"),
+      let csv_ref2 = CSVReader(atPath: "daily1.csv", separator: "\t"),
+      let csv_ref3 = CSVReader(atPath: "daily2.csv", separator: "\t")
+    else {
+      print("No input")
+      return
+    }
 
     func compare(_ array: [Double], letter: String, start index: Int) {
       let index = index
@@ -40,7 +50,7 @@ class SunOlTests: XCTestCase {
         if counter > 50 { break }
         if abs(ref[i] - array[index + i]) / ref[i] > 0.005 {
           counter += 1
-          correct = false
+          correct = false  
           // print("Daily1", letter, i + 3, "=", ref[i], "not equal", array[index + i])
         }
       }
@@ -56,23 +66,25 @@ class SunOlTests: XCTestCase {
         if counter > 50 { break }
         if abs(ref[i] - array[index + i]) / ref[i] > 0.005 {
           counter += 1
-          correct = false
+          correct = false  
           // print("Daily2", letter, i + 3, "=", ref[i], "not equal", array[index + i])
         }
       }
       if correct { print("Daily2", letter, "all equal") }
     }
 
-    TunOl.Q_Sol_MW_thLoop = [0] + csv["csp"]
-    TunOl.Reference_PV_plant_power_at_inverter_inlet_DC = [0] + csv["pv"]
-    TunOl.Reference_PV_MV_power_at_transformer_outlet = [0] + csv["out"]
-    guard let model = TunOl([41.94,25.26,0.00,247.31,638.08,600.00,8.01,228.66,12.83,822.70,76.92,87.14,18.21,93.97,253.75,0.00,0.00,])
-    else { print("Invalid config"); return }
+    guard let model = TunOl([
+        100.5149357, 0.994237658, 0.000546636, 938.974253, 1380, 596.0038574, 67.64945773, 0, 43.26483749, 73.02240138,
+        53.22251588, 272.4743539, 31.04143015, 98.39201198, 902.2703878, 0, 0,
+      ])
+    else {
+      print("Invalid config")
+      return
+    }
 
-    let costs = Costs(model)
     let hour0 = model.hour0(
-      TunOl.Q_Sol_MW_thLoop, TunOl.Reference_PV_plant_power_at_inverter_inlet_DC, TunOl.Reference_PV_MV_power_at_transformer_outlet)
-
+      TunOl.Q_Sol_MW_thLoop, TunOl.Reference_PV_plant_power_at_inverter_inlet_DC,
+      TunOl.Reference_PV_MV_power_at_transformer_outlet)
 
     compare(hour0, letter: "H", start: 8760)
     compare(hour0, letter: "I", start: 17520)
@@ -192,8 +204,6 @@ class SunOlTests: XCTestCase {
     // print("Daily 2")
     // Array(d6[5840...]).head(137, steps: 365)
 
-    var day = [[Double]]()
-
     var hour2 = [Double](repeating: Double.zero, count: 183_960)
     var hour3 = [Double](repeating: Double.zero, count: 271_560)
     var hour4 = [Double](repeating: Double.zero, count: 490560 + 8760)
@@ -227,7 +237,7 @@ class SunOlTests: XCTestCase {
         compare(hour2, letter: "CK", start: 140160)
         compare(hour2, letter: "CL", start: 148920)
         compare(hour2, letter: "CM", start: 157680)
-        compare(hour2, letter: "CN", start: 166440)        
+        compare(hour2, letter: "CN", start: 166440)
         print("Hour Case", j)  // hour2.head(72, steps: 8760)
       }
       if j == 1 {
@@ -649,13 +659,6 @@ class SunOlTests: XCTestCase {
         compareDay(d17, letter: "ACP", start: 21535)
       }
 
-      if j == 3 {
-
-      }
-
-      day.append(Array(d17[31755..<33215]))
-      day.append(Array(d17[44165..<45625]))
-
       let d0 = model.day0(hour0: hour0)
 
       model.d21(&d21, case: j, day0: d0)
@@ -885,8 +888,7 @@ class SunOlTests: XCTestCase {
         compare2Day(d27, letter: "JY", start: 44530)
         compare2Day(d27, letter: "JZ", start: 44895)
         compare2Day(d27, letter: "KA", start: 45260)
-        compare2Day(d27, letter: "KB", start: 45625)
-        // compare2Day(d27, letter: "KC", start: 45990)
+        compare2Day(d27, letter: "KB", start: 45625)  // compare2Day(d27, letter: "KC", start: 45990)
 
       }
 
@@ -1021,8 +1023,7 @@ class SunOlTests: XCTestCase {
         compare2Day(d27, letter: "PA", start: 44530)
         compare2Day(d27, letter: "PB", start: 44895)
         compare2Day(d27, letter: "PC", start: 45260)
-        compare2Day(d27, letter: "PD", start: 45625)
-        // compare2Day(d27, letter: "PE", start: 45990)
+        compare2Day(d27, letter: "PD", start: 45625)  // compare2Day(d27, letter: "PE", start: 45990)
       }
 
       if j == 2 {
@@ -1127,38 +1128,36 @@ class SunOlTests: XCTestCase {
         compare2Day(d27, letter: "TA", start: 34675)
         compare2Day(d27, letter: "TB", start: 35040)
 
-        compare2Day(d27, letter:"TD", start:35405)
-        compare2Day(d27, letter:"TE", start:35770)
-        compare2Day(d27, letter:"TF", start:36135)
-        compare2Day(d27, letter:"TG", start:36500)
-        compare2Day(d27, letter:"TH", start:36865)
-        compare2Day(d27, letter:"TI", start:37230)
-        compare2Day(d27, letter:"TJ", start:37595)
-        compare2Day(d27, letter:"TK", start:37960)
-        compare2Day(d27, letter:"TL", start:38325)
-        compare2Day(d27, letter:"TM", start:38690)
-        compare2Day(d27, letter:"TN", start:39055)
-        compare2Day(d27, letter:"TO", start:39420)
-        compare2Day(d27, letter:"TP", start:39785)
-        compare2Day(d27, letter:"TQ", start:40150)
-        compare2Day(d27, letter:"TR", start:40515)
-        compare2Day(d27, letter:"TS", start:40880)
-        compare2Day(d27, letter:"TT", start:41245)
-        compare2Day(d27, letter:"TU", start:41610)
-        compare2Day(d27, letter:"TV", start:41975)
-        compare2Day(d27, letter:"TW", start:42340)
-        compare2Day(d27, letter:"TX", start:42705)
-        compare2Day(d27, letter:"TY", start:43070)
-        compare2Day(d27, letter:"TZ", start:43435)
-        compare2Day(d27, letter:"UA", start:43800)
-        compare2Day(d27, letter:"UB", start:44165)
-        compare2Day(d27, letter:"UC", start:44530)
-        compare2Day(d27, letter:"UD", start:44895)
-        compare2Day(d27, letter:"UE", start:45260)
-        compare2Day(d27, letter:"UF", start:45625)
-        // compare2Day(d27, letter:"UG", start:45990)
-      }
-      // Array(d27[..<9855]).head(121, steps: 365)
+        compare2Day(d27, letter: "TD", start: 35405)
+        compare2Day(d27, letter: "TE", start: 35770)
+        compare2Day(d27, letter: "TF", start: 36135)
+        compare2Day(d27, letter: "TG", start: 36500)
+        compare2Day(d27, letter: "TH", start: 36865)
+        compare2Day(d27, letter: "TI", start: 37230)
+        compare2Day(d27, letter: "TJ", start: 37595)
+        compare2Day(d27, letter: "TK", start: 37960)
+        compare2Day(d27, letter: "TL", start: 38325)
+        compare2Day(d27, letter: "TM", start: 38690)
+        compare2Day(d27, letter: "TN", start: 39055)
+        compare2Day(d27, letter: "TO", start: 39420)
+        compare2Day(d27, letter: "TP", start: 39785)
+        compare2Day(d27, letter: "TQ", start: 40150)
+        compare2Day(d27, letter: "TR", start: 40515)
+        compare2Day(d27, letter: "TS", start: 40880)
+        compare2Day(d27, letter: "TT", start: 41245)
+        compare2Day(d27, letter: "TU", start: 41610)
+        compare2Day(d27, letter: "TV", start: 41975)
+        compare2Day(d27, letter: "TW", start: 42340)
+        compare2Day(d27, letter: "TX", start: 42705)
+        compare2Day(d27, letter: "TY", start: 43070)
+        compare2Day(d27, letter: "TZ", start: 43435)
+        compare2Day(d27, letter: "UA", start: 43800)
+        compare2Day(d27, letter: "UB", start: 44165)
+        compare2Day(d27, letter: "UC", start: 44530)
+        compare2Day(d27, letter: "UD", start: 44895)
+        compare2Day(d27, letter: "UE", start: 45260)
+        compare2Day(d27, letter: "UF", start: 45625)  // compare2Day(d27, letter:"UG", start:45990)
+      }  // Array(d27[..<9855]).head(121, steps: 365)
       // print("Daily 2 Case", j)
       // Array(d27[9855..<17155]).head(148, steps: 365)
       // print("Daily 2 Case", j)
@@ -1169,52 +1168,25 @@ class SunOlTests: XCTestCase {
       // Array(d27[31755..<38690]).head(206, steps: 365)
       // print("Daily 2 Case", j)
       // Array(d27[38690...]).head(242, steps: 365)
-
-      day.append(Array(d27[33945..<35040]))
-      day.append(Array(d27[44895..<45990]))
     }
-
-    var meth_produced_MTPH_sum = Double.zero
-    var elec_from_grid_sum = Double.zero
-    var elec_to_grid_MTPH_sum = Double.zero
-
-    let names = [
-      "1a day prio", "1a night prio", "2a day prio", "2a night prio", "1b day prio", "1b night prio", "2b day prio", "2b night prio", "1c day prio",
-      "1c night prio", "2c day prio", "2c night prio", "1d day prio", "1d night prio", "2d day prio", "2d night prio",
-    ]
-
-    for d in 0..<365 {
-      let cases = day.indices.map { i in
-        costs.LCOM(meth_produced_MTPH: day[i][d] * 365.0, elec_from_grid: day[i][d + 365 + 365] * 365.0, elec_to_grid: day[i][d + 365] * 365.0)
-      }
-      let best = cases.indices.filter { cases[$0].isFinite }.filter { cases[$0] > 0 }.sorted { cases[$0] < cases[$1] }.first
-      if let best = best {
-        print(d, names[best], cases, day[best][d])
-        meth_produced_MTPH_sum += day[best][d]
-        elec_from_grid_sum += day[best][d + 365 + 365]
-        elec_to_grid_MTPH_sum += day[best][d + 365]
-      }
-    }
-    let LCOM = costs.LCOM(meth_produced_MTPH: meth_produced_MTPH_sum, elec_from_grid: elec_from_grid_sum, elec_to_grid: elec_to_grid_MTPH_sum)
-    // XCTAssertEqual(LCOM, 1076, accuracy: 1E-1)
   }
 
   func testsCalculation2() {
-    let path = "/workspaces/SPC/input2.txt"
-    guard let csv = CSVReader(atPath: path) else {
-      print("No input")
+    guard
+      let model = TunOl([
+        100.00, 10.00, 50.00, 600.00, 1000.00, 600.00, 5.00, 5.00, 80.00, 3.00, 90.00, 5.00, 60.00, 110.00, 200.00,
+        0.00, 0.00,
+      ])
+    else {
+      print("Invalid config")
       return
     }
-   
-    TunOl.Q_Sol_MW_thLoop = [0] + csv["csp"]
-    TunOl.Reference_PV_plant_power_at_inverter_inlet_DC = [0] + csv["pv"]
-    TunOl.Reference_PV_MV_power_at_transformer_outlet = [0] + csv["out"]
-    guard let model = TunOl([41.94,25.26,0.00,247.31,638.08,600.00,8.01,228.66,12.83,822.70,76.92,87.14,18.21,93.97,253.75,0.00,0.00,])
-    else { print("Invalid config"); return }
 
     let costs = Costs(model)
+
     let hour0 = model.hour0(
-      TunOl.Q_Sol_MW_thLoop, TunOl.Reference_PV_plant_power_at_inverter_inlet_DC, TunOl.Reference_PV_MV_power_at_transformer_outlet)
+      TunOl.Q_Sol_MW_thLoop, TunOl.Reference_PV_plant_power_at_inverter_inlet_DC,
+      TunOl.Reference_PV_MV_power_at_transformer_outlet)
 
     let hour1 = model.hour1(hour0: hour0)
     let d6 = model.d26(hour0: hour0)
@@ -1230,9 +1202,9 @@ class SunOlTests: XCTestCase {
     var d21 = [Double](repeating: Double.zero, count: 9_855)
 
     for j in 0..<4 {
-      model.hour2(&hour2, j: j, hour0: hour0, hour1: hour1)     
+      model.hour2(&hour2, j: j, hour0: hour0, hour1: hour1)
       model.hour3(&hour3, j: j, hour0: hour0, hour1: hour1, hour2: hour2)
-      model.d1(&d1, case: j, hour2: hour2, hour3: hour3)      
+      model.d1(&d1, case: j, hour2: hour2, hour3: hour3)
       model.hour4(&hour4, j: j, d1: d1, hour0: hour0, hour1: hour1, hour2: hour2)
       model.night(case: j, d1: &d1, hour3: hour3, hour4: hour4)
       model.d15(&d15, hour0: hour0, hour2: hour2, hour3: hour3, d11: d1)
@@ -1246,7 +1218,6 @@ class SunOlTests: XCTestCase {
 
       model.d21(&d21, case: j, day0: d0)
       model.d27(&d27, case: j, day0: d0, d1: d21, d6: d6)
-      
       day.append(Array(d27[33945..<35040]))
       day.append(Array(d27[44895..<45990]))
     }
@@ -1255,27 +1226,51 @@ class SunOlTests: XCTestCase {
     var elec_from_grid_sum = Double.zero
     var elec_to_grid_MTPH_sum = Double.zero
 
-    let names = [
-      "1a day prio", "1a night prio", "2a day prio", "2a night prio", "1b day prio", "1b night prio", "2b day prio", "2b night prio", "1c day prio",
-      "1c night prio", "2c day prio", "2c night prio", "1d day prio", "1d night prio", "2d day prio", "2d night prio",
+    let _ = [
+      "1a day prio", "1a night prio", "2a day prio", "2a night prio", "1b day prio", "1b night prio", "2b day prio",
+      "2b night prio", "1c day prio", "1c night prio", "2c day prio", "2c night prio", "1d day prio", "1d night prio",
+      "2d day prio", "2d night prio",
     ]
 
     for d in 0..<365 {
-      if d == 333 {
-        print()
-      }
+      if d == 333 { print() }
       let cases = day.indices.map { i in
-        costs.LCOM(meth_produced_MTPH: day[i][d] * 365.0, elec_from_grid: day[i][d + 365 + 365] * 365.0, elec_to_grid: day[i][d + 365] * 365.0)
+        costs.LCOM(
+          meth_produced_MTPH: day[i][d] * 365.0, elec_from_grid: day[i][d + 365 + 365] * 365.0,
+          elec_to_grid: day[i][d + 365] * 365.0)
       }
-      let ranked = cases.indices.filter { cases[$0].isFinite }.filter { cases[$0] > 0 }.sorted { cases[$0] < cases[$1] }
+      let ranked = cases.indices.filter { cases[$0].isFinite }.filter { cases[$0] > 0 }
+        .sorted { cases[$0] < cases[$1] }
       if let best = ranked.first {
-        print(d, day[best][d])
         meth_produced_MTPH_sum += day[best][d]
         elec_from_grid_sum += day[best][d + 365 + 365]
         elec_to_grid_MTPH_sum += day[best][d + 365]
       }
     }
-    let LCOM = costs.LCOM(meth_produced_MTPH: meth_produced_MTPH_sum, elec_from_grid: elec_from_grid_sum, elec_to_grid: elec_to_grid_MTPH_sum)
-    print(LCOM, meth_produced_MTPH_sum, elec_from_grid_sum, elec_to_grid_MTPH_sum)
+
+    let LCOM = costs.LCOM(
+      meth_produced_MTPH: meth_produced_MTPH_sum, elec_from_grid: elec_from_grid_sum,
+      elec_to_grid: elec_to_grid_MTPH_sum)
+    XCTAssertEqual(LCOM, 1144.237560450558, accuracy: 1, "LCOM")
+    XCTAssertEqual(meth_produced_MTPH_sum, 139274.52512169446, accuracy: 1, "meth_produced_MTPH_sum")
+    XCTAssertEqual(elec_from_grid_sum, 6623.312102832027, accuracy: 1, "elec_from_grid_sum")
+    XCTAssertEqual(elec_to_grid_MTPH_sum, -1.1145528944211947e-11, accuracy: 1, "elec_to_grid_MTPH_sum")
+  }
+
+  func testsCosts() {
+    let model = TunOl([
+      100.00, 10.00, 50.00, 600.00, 1000.00, 600.00, 5.00, 5.00, 80.00, 3.00, 90.00, 5.00, 60.00, 110.00, 200.00, 0.00,
+      0.00,
+    ])!
+    let costs = Costs(model)
+    var fixtures = [
+      19113593.96, 151300856.2, 465123723.2, 36221243.55, 5753063.152, 54162339.42, 84_370_000, 504_000_000,
+      2966339.549, 43922259.87, 15901.02011, 86731590.14, 32406.66362, 131_815_026, 69130701.25, 10070885.31,
+      930492495.8,
+    ]
+    .makeIterator()
+    for child in Mirror(reflecting: costs).children.filter({ $0.label?.contains("cost") ?? false }) {
+      XCTAssertEqual(child.value as! Double, fixtures.next()!, accuracy: 1, child.label!)
+    }
   }
 }
