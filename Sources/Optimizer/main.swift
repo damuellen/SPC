@@ -57,34 +57,32 @@ struct Command: ParsableCommand {
       #endif
       return
     }
-    let parameter: [Parameter]
+    let parameter: Parameter
     if let path = json, let data = try? Data(contentsOf: .init(fileURLWithPath: path)), 
-      let parameters = try? JSONDecoder().decode([Parameter].self, from: data) {
+      let parameters = try? JSONDecoder().decode(Parameter.self, from: data) {
       parameter = parameters
     } else {
-      parameter = [
-        Parameter(
-          BESS_cap_ud: 0...1400,
-          CCU_CO2_nom_prod_ud: 10...110,
-          CO2_storage_cap_ud: 0...5000,
-          CSP_loop_nr_ud: 0...250,
-          El_boiler_cap_ud: 0...110,
-          EY_var_net_nom_cons_ud: 10...600,
-          Grid_export_max_ud: 0...0,
-          Grid_import_max_ud: 0...0,
-          Hydrogen_storage_cap_ud: 0...110,
-          Heater_cap_ud: 0...500,
-          MethDist_Meth_nom_prod_ud: 10...110,
-          MethSynt_RawMeth_nom_prod_ud: 10...110,
-          PB_nom_gross_cap_ud: 0...300,
-          PV_AC_cap_ud: 10...1280,
-          PV_DC_cap_ud: 10...1380,
-          RawMeth_storage_cap_ud: 0...300,
-          TES_full_load_hours_ud: 0...30)
-      ]
+      parameter = Parameter(
+        BESS_cap_ud: 0...1400,
+        CCU_CO2_nom_prod_ud: 10...110,
+        CO2_storage_cap_ud: 0...5000,
+        CSP_loop_nr_ud: 0...250,
+        El_boiler_cap_ud: 0...110,
+        EY_var_net_nom_cons_ud: 10...600,
+        Grid_export_max_ud: 0...0,
+        Grid_import_max_ud: 0...0,
+        Hydrogen_storage_cap_ud: 0...110,
+        Heater_cap_ud: 0...500,
+        MethDist_Meth_nom_prod_ud: 10...110,
+        MethSynt_RawMeth_nom_prod_ud: 10...110,
+        PB_nom_gross_cap_ud: 0...300,
+        PV_AC_cap_ud: 10...1280,
+        PV_DC_cap_ud: 10...1380,
+        RawMeth_storage_cap_ud: 0...300,
+        TES_full_load_hours_ud: 0...30)
     }
     
-    let server = HTTP(handler: handler)
+    let server = HTTP(handler: respond)
     if http { 
       server.start()
       DispatchQueue.global().asyncAfter(deadline: .now() + 0.5) { 
@@ -95,13 +93,11 @@ struct Command: ParsableCommand {
     TunOl.Reference_PV_plant_power_at_inverter_inlet_DC = [0] + csv["pv"]
     TunOl.Reference_PV_MV_power_at_transformer_outlet = [0] + csv["out"]
 
-    parameter.forEach { parameter in      
-      let optimizer = MGOADE(group: !noGroups, n: n ?? 90, maxIter: iterations ?? 30, bounds: parameter.ranges)
-      let now = Date()
-      let valid = optimizer(SunOl.fitness).filter(\.first!.isFinite)
-      print("Elapsed seconds:", -now.timeIntervalSinceNow)
-      print(writeExcel(results: valid.sorted { $0[0] < $1[0] }))
-    }
+    let optimizer = MGOADE(group: !noGroups, n: n ?? 90, maxIter: iterations ?? 30, bounds: parameter.ranges)
+    let now = Date()
+    let valid = optimizer(SunOl.fitness).filter(\.first!.isFinite)
+    print("Elapsed seconds:", -now.timeIntervalSinceNow)
+    print(writeExcel(results: valid.sorted { $0[0] < $1[0] }))
 
     if http { server.stop() }
   }
@@ -141,7 +137,7 @@ func writeExcel(results: [[Double]]) -> String {
   return name
 }
 
-func handler(request: HTTP.Request) -> HTTP.Response {
+func respond(request: HTTP.Request) -> HTTP.Response {
   var uri = request.uri
   if uri == "/cancel" {
     source.cancel()

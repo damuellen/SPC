@@ -3,37 +3,6 @@ import Utilities
 
 func POLY(_ value: Double, _ coeffs: [Double]) -> Double { coeffs.reversed().reduce(into: 0.0) { result, coefficient in result = coefficient.addingProduct(result, value) } }
 
-extension Double { @inline(__always) func asString(precision: Int = 2) -> String { String(format: "%.\(precision)f", self) } }
-
-func write(_ xs: [Double]..., maxLength: Int = Int.max) {
-  let count = min(xs.reduce(0) { max($0, $1.count) }, maxLength)
-  let places = "\(count)".count
-  for i in 0..<count { print(xs.reduce(String(format: "%0\(places)d\t", i)) { $0 + String(format: "%3.1f\t", $1[i]).replacingOccurrences(of: "0.0", with: "0").leftpad(length: 6) }) }
-}
-
-func pareto_frontier(xys: [[Double]], x: Int, y: Int) -> [[Double]] {
-  let sort = xys.sorted(by: { lhs, rhs in lhs[x] < rhs[x] })
-  var p_front = [sort[0]]
-  for i in sort.indices[1...] { if sort[i][y] <= p_front.last![y] { p_front.append(sort[i]) } }
-  return p_front.map { [$0[x], $0[y]] }
-}
-
-extension Sequence where Element == Double {
-  func write(_ count: Int? = nil) { if let count = count { zip(0..., self.prefix(count)).forEach { Swift.print($0, $1.asString()) } } else { zip(0..., self).forEach { Swift.print($0, $1.asString()) } } }
-
-  func quotient(_ divisor: Double) -> [Double] { self.map { $0 / divisor } }
-
-  func product(_ factor: Double) -> [Double] { self.map { $0 * factor } }
-}
-
-extension Array where Element == Double {
-  mutating func shift(half: Double) {
-    var offset = ((first! + last!) / 2) - half
-    if first! - offset < 0 { offset = first! }
-    self = map { $0 - offset }
-  }
-}
-
 extension Array where Element == Double {
   func sum(days: [[Int]], range: Int, predicate: (Double) -> Bool) -> [Double] {
     days.map { day in var sum = 0.0

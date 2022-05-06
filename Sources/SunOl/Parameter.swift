@@ -49,15 +49,3 @@ public struct Parameter: Codable {
     set { ranges[i] = newValue }
   }
 }
-
-extension ClosedRange where Bound == Double {
-  func normalized(value: Double) -> Double {
-    if lowerBound == upperBound { return 1 }
-    precondition((0...1).contains(value))
-    return (value - lowerBound) / (upperBound - lowerBound)
-  }
-
-  func denormalized(value: Double) -> Double {
-    return lowerBound + value * (upperBound - lowerBound)
-  }
-}
