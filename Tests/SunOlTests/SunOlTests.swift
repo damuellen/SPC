@@ -1251,10 +1251,10 @@ class SunOlTests: XCTestCase {
     let LCOM = costs.LCOM(
       meth_produced_MTPH: meth_produced_MTPH_sum, elec_from_grid: elec_from_grid_sum,
       elec_to_grid: elec_to_grid_MTPH_sum)
-    XCTAssertEqual(LCOM, 1144.237560450558, accuracy: 1, "LCOM")
-    XCTAssertEqual(meth_produced_MTPH_sum, 139274.52512169446, accuracy: 1, "meth_produced_MTPH_sum")
-    XCTAssertEqual(elec_from_grid_sum, 6623.312102832027, accuracy: 1, "elec_from_grid_sum")
-    XCTAssertEqual(elec_to_grid_MTPH_sum, -1.1145528944211947e-11, accuracy: 1, "elec_to_grid_MTPH_sum")
+    XCTAssertEqual(LCOM, 1177, accuracy: 1, "LCOM")
+    XCTAssertEqual(meth_produced_MTPH_sum, 135185, accuracy: 1, "meth_produced_MTPH_sum")
+    XCTAssertEqual(elec_from_grid_sum, 573.2502945139066, accuracy: 1, "elec_from_grid_sum")
+    XCTAssertEqual(elec_to_grid_MTPH_sum, 0, accuracy: 1, "elec_to_grid_MTPH_sum")
   }
 
   func testsCosts() {
@@ -1264,9 +1264,9 @@ class SunOlTests: XCTestCase {
     ])!
     let costs = Costs(model)
     var fixtures = [
-      19113593.96, 151300856.2, 465123723.2, 36221243.55, 5753063.152, 54162339.42, 84_370_000, 504_000_000,
+      19113593.96, 151300856.2, 465123723.2, 36221243.55, 5753063.152, 54162465.32, 84_370_000, 504_000_000,
       2966339.549, 43922259.87, 15901.02011, 86731590.14, 32406.66362, 131_815_026, 69130701.25, 10070885.31,
-      930492495.8,
+      0,
     ]
     .makeIterator()
     for child in Mirror(reflecting: costs).children.filter({ $0.label?.contains("cost") ?? false }) {
