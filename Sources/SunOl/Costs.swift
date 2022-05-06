@@ -6,7 +6,7 @@ public struct Costs {
   static let Plant_life = 25.0
   static let Rate_of_return = 0.07
   static let FCR = Rate_of_return * (1 + Rate_of_return) ** Plant_life / ((1 + Rate_of_return) ** Plant_life - 1)
-  static let Elec_buy = 2 * 0.091
+  static let Elec_buy = 20 * 0.091
   static let Elec_sell = 0.33 * 0.091
 
   public init(_ model: TunOl) {
@@ -84,7 +84,7 @@ public struct Costs {
     // let Substation_cost_ICPH =
     // Substation_capacity.coeff * Substation_capacity.basis * ((model.Heater_cap_ud + model.EY_var_net_nom_cons_ud  + model.EY_aux_elec_input + model.Meth_nominal_aux_electr_cons) / Substation_capacity.basis) ** Substation_capacity.exp
 
-    self.Substation_cost = Substation.coeff * (max(model.Grid_export_max_ud, model.Grid_import_max_ud) / Substation.basis) ** Substation.exp
+    self.Substation_cost = max(model.Grid_export_max_ud, model.Grid_import_max_ud) > 0 ? Substation.coeff * (max(model.Grid_export_max_ud, model.Grid_import_max_ud) / Substation.basis) ** Substation.exp : 0
 
     let CSP_O_M_Cost = (11.3333 / 3 * 1 / 3 * 1000 * 1000) + (0.00606061 / 3 * 1 / 3 * 1000 * 1000) * model.CSP_loop_nr_ud
     let PV_O_M_Cost = (11.3333 * 1000 * 1000) + (0.00606061 / 100 * 1000 * 1000) * model.PV_DC_cap_ud
