@@ -102,6 +102,9 @@ struct Command: ParsableCommand {
     print(writeExcel(results: valid.sorted { $0[0] < $1[0] }))
 
     if http { server.stop() }
+    #if os(Windows)
+    if excel { start(currentDirectoryPath() + "/" + name) }
+    #endif
   }
 }
 
@@ -130,11 +133,7 @@ func writeExcel(results: [[Double]]) -> String {
      chart.remove(legends: 0)
      wb.addChartsheet(name: name).set(chart: chart)
   }
-
   wb.close()
-  #if os(Windows)
-  if excel { start(currentDirectoryPath() + "/" + name) }
-  #endif
   return name
 }
 
