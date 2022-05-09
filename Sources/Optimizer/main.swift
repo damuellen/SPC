@@ -99,7 +99,8 @@ struct Command: ParsableCommand {
     let now = Date()
     let valid = optimizer(SunOl.fitness).filter(\.first!.isFinite)
     print("Elapsed seconds:", -now.timeIntervalSinceNow)
-    print(writeExcel(results: valid.sorted { $0[0] < $1[0] }))
+    let name = writeExcel(results: valid.sorted { $0[0] < $1[0] })
+    print(name)
 
     if http { server.stop() }
     #if os(Windows)
@@ -109,7 +110,7 @@ struct Command: ParsableCommand {
 }
 
 func writeExcel(results: [[Double]]) -> String {
-  let name = "SunOl_\(UUID().uuidString.prefix(6)).xlsx"
+  let name = "SunOl_\(UUID().uuidString.prefix(4)).xlsx"
   let wb = Workbook(name: name)
   let ws = wb.addWorksheet()
   var r = 0
