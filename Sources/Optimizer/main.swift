@@ -33,7 +33,9 @@ struct Command: ParsableCommand {
   @Flag(name: .long, help: "Do not use Multi-group algorithm") var noGroups: Bool = false
 
   @Flag(name: .long, help: "Run HTTP server") var http: Bool = false
-
+  #if os(Windows)
+  @Flag(name: .long, help: "Start excel afterwards") var excel: Bool = false
+  #endif
   @Option(name: .short, help: "Population size") var n: Int?
 
   @Option(name: .short, help: "Iterations") var iterations: Int?
@@ -109,7 +111,6 @@ func writeExcel(results: [[Double]]) -> String {
   let ws = wb.addWorksheet()
   var r = 0
   results.forEach { row in r += 1; ws.write(row, row: r) }
-  // var r2 = 0
   let labels = [
     "LCOM", "CAPEX", "OPEX", "Methanol", "Import", "Export",
     "CSP_loop_nr", "TES_full_load_hours", "PB_nom_gross_cap",
@@ -132,7 +133,7 @@ func writeExcel(results: [[Double]]) -> String {
 
   wb.close()
   #if os(Windows)
-  start(currentDirectoryPath() + "/" + name)
+  if excel { start(currentDirectoryPath() + "/" + name) }
   #endif
   return name
 }
