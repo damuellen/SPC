@@ -12,6 +12,7 @@
 		"lldb.library": "/usr/lib/liblldb.so",
 		"lldb.launch.expressions": "native",
 		"lldb.evaluateForHovers": false,
+		"lldb.evaluationTimeout": 30,
 		"apple-swift-format.path": "/workspaces/swift-format/.build/release/swift-format",
 		"swiftTest.swift.reloadOnTextSave": false,
 		"editor.defaultFormatter": "vknabel.vscode-apple-swift-format",
@@ -27,5 +28,5 @@
 		"philhindle.errorlens",
 		"wattenberger.footsteps"
 	],
-	"postCreateCommand": "[[ ! -d /workspaces/swift-format ]] && cd /workspaces && git clone --single-branch -b 0.50600.0 https://github.com/apple/swift-format.git --quiet && cd swift-format && swift build -c release --product swift-format",
+	"postCreateCommand": "[[ ! -d /workspaces/swift-format ]] && cd /workspaces && git clone --single-branch -b 0.50600.1 https://github.com/apple/swift-format.git --quiet && cd swift-format && swift build -c release --product swift-format"
 }
