@@ -34,20 +34,18 @@ steps:
     modifyEnvironment: true
   displayName: Setup developer environment
 
-
-- task: run-vcpkg@0
-  displayName: 'vcpkg install libxlsxwriter sqlite3'
-  timeoutInMinutes: 10
+- task: DownloadBuildArtifacts@1
   inputs:
-    vcpkgArguments: libxlsxwriter sqlite3
-    vcpkgGitCommitId: "14e7bb4ae24616ec54ff6b2f6ef4e8659434ea44"
-    vcpkgDirectory: 'C:\vcpkg\'
-    vcpkgTriplet: 'x64-windows'
-    vcpkgGitURL: https://github.com/microsoft/vcpkg.git
+    buildType: 'specific'
+    project: 'aed27b01-a098-473b-9a1b-b8b518639405'
+    pipeline: '6'
+    buildVersionToDownload: 'latest'
+    downloadType: 'specific'
+    downloadPath: '$(System.DefaultWorkingDirectory)\vcpkg\'
 
 - script: |
     swift package update
-    swift build -c release -Xlinker /INCREMENTAL:NO -Xlinker /IGNORE:4217 -Xswiftc -gnone -Xswiftc -suppress-warnings -Xswiftc -continue-building-after-errors -Xswiftc -LC:/vcpkg/installed/x64-windows/lib/
+    swift build -c release -Xlinker /INCREMENTAL:NO -Xlinker /IGNORE:4217 -Xswiftc -gnone -Xswiftc -suppress-warnings -Xswiftc -continue-building-after-errors -Xswiftc -LD:\a\1\s\vcpkg\lib\
   env:
     SDKROOT: C:\Library\Developer\Platforms\Windows.platform\Developer\SDKs\Windows.sdk
     DEVELOPER_DIR: C:\Library\Developer
@@ -57,7 +55,7 @@ steps:
 
 - task: CopyFiles@2
   inputs:
-    SourceFolder: 'C:\vcpkg\installed\x64-windows\bin'
+    SourceFolder: '$(System.DefaultWorkingDirectory)\vcpkg\bin'
     Contents: '*.dll'
     TargetFolder: '$(Build.ArtifactStagingDirectory)'
   displayName: Copy build artifacts to staging directory
