@@ -27,13 +27,6 @@ steps:
       Write-Host "##vso[task.prependpath]$(icu.directory)"
   displayName: Install Swift toolchain
 
-- task: BatchScript@1
-  inputs:
-    filename: C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/Common7/Tools/VsDevCmd.bat
-    arguments: -no_logo -arch=x64 -host_arch=x64
-    modifyEnvironment: true
-  displayName: Setup developer environment
-
 - task: DownloadBuildArtifacts@1
   inputs:
     buildType: 'specific'
@@ -41,11 +34,25 @@ steps:
     pipeline: '6'
     buildVersionToDownload: 'latest'
     downloadType: 'specific'
-    downloadPath: '$(System.DefaultWorkingDirectory)\vcpkg\'
+    downloadPath: 'C:\vcpkg\installed\'
+
+- task: CopyFiles@2
+  inputs:
+    SourceFolder: 'C:\vcpkg\installed\x64-windows\bin'
+    Contents: '*.dll'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)'
+  displayName: Copy build artifacts to staging directory
+
+- task: BatchScript@1
+  inputs:
+    filename: C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/Common7/Tools/VsDevCmd.bat
+    arguments: -no_logo -arch=x64 -host_arch=x64
+    modifyEnvironment: true
+  displayName: Setup developer environment
 
 - script: |
     swift package update
-    swift build -c release -Xlinker /INCREMENTAL:NO -Xlinker /IGNORE:4217 -Xswiftc -gnone -Xswiftc -suppress-warnings -Xswiftc -continue-building-after-errors -Xswiftc -LD:\a\1\s\vcpkg\lib\
+    swift build -c release -Xlinker /INCREMENTAL:NO -Xlinker /IGNORE:4217 -Xswiftc -gnone -Xswiftc -suppress-warnings -Xswiftc -continue-building-after-errors -Xswiftc -LC:/vcpkg/installed/x64-windows/lib/
   env:
     SDKROOT: C:\Library\Developer\Platforms\Windows.platform\Developer\SDKs\Windows.sdk
     DEVELOPER_DIR: C:\Library\Developer
@@ -55,22 +62,10 @@ steps:
 
 - task: CopyFiles@2
   inputs:
-    SourceFolder: '$(System.DefaultWorkingDirectory)\vcpkg\bin'
-    Contents: '*.dll'
-    TargetFolder: '$(Build.ArtifactStagingDirectory)'
-  displayName: Copy build artifacts to staging directory
-
-- task: CopyFiles@2
-  inputs:
     SourceFolder: '$(System.DefaultWorkingDirectory)\.build\x86_64-unknown-windows-msvc\release'
-    contents: '*.exe'
-    targetFolder: $(Build.ArtifactStagingDirectory)
-  displayName: Copy build artifacts to staging directory
-
-- task: CopyFiles@2
-  inputs:
-    SourceFolder: '$(System.DefaultWorkingDirectory)\.build\x86_64-unknown-windows-msvc\release'
-    contents: '*.dll'
+    contents: |
+      *.exe
+      *.dll
     targetFolder: $(Build.ArtifactStagingDirectory)
   displayName: Copy build artifacts to staging directory
 
