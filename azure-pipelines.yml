@@ -34,11 +34,6 @@ steps:
     modifyEnvironment: true
   displayName: Setup developer environment
 
-- task: Cache@2
-  displayName: 'Cache vcpkg'
-  inputs:
-    key: "vcpkg_cache"
-    path: 'C:\vcpkg'
 
 - task: run-vcpkg@0
   displayName: 'vcpkg install libxlsxwriter sqlite3'
@@ -49,12 +44,6 @@ steps:
     vcpkgDirectory: 'C:\vcpkg\'
     vcpkgTriplet: 'x64-windows'
     vcpkgGitURL: https://github.com/microsoft/vcpkg.git
-
-- task: Cache@2
-  displayName: 'Cache build'
-  inputs:
-    key: "swift-cache"
-    path: '.build'
 
 - script: |
     swift package update
@@ -86,16 +75,6 @@ steps:
     contents: '*.dll'
     targetFolder: $(Build.ArtifactStagingDirectory)
   displayName: Copy build artifacts to staging directory
-
-- task: PowerShell@2
-  timeoutInMinutes: 1
-  inputs:
-    targetType: 'inline'
-    script: |
-      Invoke-WebRequest https://github.com/upx/upx/releases/download/v3.96/upx-3.96-win64.zip -OutFile C:\upx.zip
-      Expand-Archive -Path C:\upx.zip -DestinationPath C:\
-      C:\upx-3.96-win64\upx.exe -9 $(Build.ArtifactStagingDirectory)/*
-  displayName: UPX compress build artifacts
 
 - task: PublishBuildArtifacts@1
   inputs:
