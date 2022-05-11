@@ -1,6 +1,6 @@
 extension TunOl {
   func hour0(_ Q_Sol_MW_thLoop: [Double], _ Reference_PV_plant_power_at_inverter_inlet_DC: [Double], _ Reference_PV_MV_power_at_transformer_outlet: [Double]) -> [Double] {
-    var hour0 = [Double](repeating: .zero, count: 341_640)
+    var hour0 = [Double](repeating: .zero, count: 350_400)
 
     let maximum = Reference_PV_MV_power_at_transformer_outlet.max() ?? 0
     /// Inverter power fraction -
@@ -89,13 +89,17 @@ extension TunOl {
 
     /// Grid import necessary for min harmonious
     let X = 140160
-    // MAX(0,-($P6-$Q6-$S6-MIN(El_boiler_cap_ud,MAX(0,(T6-$J6)/El_boiler_eff))))
-    for i in 1..<8760 { hour0[X + i] = max(.zero, -(hour0[P + i] - hour0[Q + i] - hour0[S + i] - min(El_boiler_cap_ud, max(.zero, (hour0[T + i] - hour0[J + i]) / El_boiler_eff)))) }
+    // =ROUND(MAX(0,-($P5-$Q5-S5-MIN(El_boiler_cap_ud,MAX(0,(T5-$J5)/El_boiler_eff)))),5)
+    for i in 1..<8760 { hour0[X + i] = round(max(.zero, -(hour0[P + i] - hour0[Q + i] - hour0[S + i] - min(El_boiler_cap_ud, max(.zero, (hour0[T + i] - hour0[J + i]) / El_boiler_eff)))),5) }
+
+    let N = 341640
+    // MIN(IF(S5>0,Grid_import_yes_no_BESS_strategy,Grid_import_yes_no_BESS_strategy_outsideharmop)*Grid_import_max_ud,X5)
+    for i in 1..<8760 { hour0[N + i] = min(iff(hour0[S + i] > 0, Grid_import_yes_no_BESS_strategy, Grid_import_yes_no_BESS_strategy_outsideharmop) * Grid_import_max_ud, hour0[X + i]) }
 
     /// Remaining grid import capacity after min harmonious
     let Y = 148920
-    // =MAX(0,Grid_import_max_ud-X6)
-    for i in 1..<8760 { hour0[Y + i] = max(.zero, Grid_import_max_ud - hour0[X + i]) }
+    // =MAX(0,IF(S5>0,Grid_import_yes_no_BESS_strategy,Grid_import_yes_no_BESS_strategy_outsideharmop)*Grid_import_max_ud-N5)
+    for i in 1..<8760 { hour0[Y + i] = max(.zero, iff(hour0[S + i] > 0,Grid_import_yes_no_BESS_strategy, Grid_import_yes_no_BESS_strategy_outsideharmop) * Grid_import_max_ud - hour0[N + i]) }
 
     /// El to el boiler after min harm heat cons
     let Z = 157680
@@ -130,24 +134,50 @@ extension TunOl {
     for i in 1..<8760 {
       // MIN(BESS_chrg_max_cons,V6)
       hour0[AE + i] = min(BESS_chrg_max_cons, hour0[V + i])
-      // MIN(Grid_export_max_ud,V6)
-      hour0[AF + i] = min(Grid_export_max_ud, hour0[V + i])
+      // =MIN(IF(S5>0,Grid_export_yes_no_BESS_strategy,Grid_export_yes_no_BESS_strategy_outsideharmop)*Grid_export_max_ud,V5)
+      hour0[AF + i] = min(
+        iff(hour0[S + i] > 0, Grid_export_yes_no_BESS_strategy, Grid_export_yes_no_BESS_strategy_outsideharmop) * Grid_export_max_ud, hour0[V + i])
     }
 
     /// Max harm net elec cons
     let AG = 219000
-    // =IF(R6=0,0,Overall_fix_cons+MIN(Overall_harmonious_var_max_cons,Overall_harmonious_var_min_cons+(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*MIN((P6+Grid_import_max_ud*Grid_import_yes_no_PB_strategy-Overall_harmonious_var_min_cons-Overall_fix_cons+MAX(0,$J6-Overall_harmonious_var_heat_min_cons-Overall_heat_fix_cons)/El_boiler_eff)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons+(Overall_harmonious_var_heat_max_cons-Overall_harmonious_var_heat_min_cons)/El_boiler_eff),($J6+El_boiler_cap_ud*El_boiler_eff-Overall_harmonious_var_heat_min_cons-Overall_heat_fix_cons)/(Overall_harmonious_var_heat_max_cons-Overall_harmonious_var_heat_min_cons))))
+    // =IF(S5=0,0,Overall_fix_cons+Overall_harmonious_var_min_cons+(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*MIN(1,MAX(0,P5+Grid_import_max_ud*Grid_import_yes_no_PB_strategy-Q5-Overall_harmonious_var_min_cons-Overall_fix_cons-MAX(0,Overall_harmonious_var_heat_min_cons+Overall_heat_fix_cons-J5)/El_boiler_eff)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons+(Overall_harmonious_var_heat_max_cons-Overall_harmonious_var_heat_min_cons)/El_boiler_eff),MAX(0,J5-Overall_harmonious_var_heat_min_cons-Overall_heat_fix_cons+MAX(0,P5+Grid_import_max_ud*Grid_import_yes_no_PB_strategy-Q5-Overall_harmonious_var_min_cons-Overall_fix_cons)*El_boiler_eff)/(Overall_harmonious_var_heat_max_cons-Overall_harmonious_var_heat_min_cons+(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*El_boiler_eff),MAX(0,J5+El_boiler_cap_ud*El_boiler_eff-Overall_harmonious_var_heat_min_cons-Overall_heat_fix_cons)/(Overall_harmonious_var_heat_max_cons-Overall_harmonious_var_heat_min_cons)))
     for i in 1..<8760 {
       hour0[AG + i] = iff(
-        hour0[R + i].isZero, .zero,
-        Overall_fix_cons
-          + min(
-            Overall_harmonious_var_max_cons,
-            Overall_harmonious_var_min_cons + (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
-              * min(
-                (hour0[P + i] + Grid_import_max_ud * Grid_import_yes_no_PB_strategy - Overall_harmonious_var_min_cons - Overall_fix_cons + max(0, hour0[J + i] - Overall_harmonious_var_heat_min_cons - Overall_heat_fix_cons) / El_boiler_eff)
-                  / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons + (Overall_harmonious_var_heat_max_cons - Overall_harmonious_var_heat_min_cons) / El_boiler_eff),
-                (hour0[J + i] + El_boiler_cap_ud * El_boiler_eff - Overall_harmonious_var_heat_min_cons - Overall_heat_fix_cons) / (Overall_harmonious_var_heat_max_cons - Overall_harmonious_var_heat_min_cons))))
+        hour0[S + i].isZero, .zero,
+        Overall_fix_cons + Overall_harmonious_var_min_cons
+          + (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
+          * min(
+            1,
+            max(
+              .zero,
+              hour0[P + i] + Grid_import_max_ud * Grid_import_yes_no_PB_strategy
+                - hour0[Q + i] - Overall_harmonious_var_min_cons - Overall_fix_cons
+                - max(
+                  .zero,
+                  Overall_harmonious_var_heat_min_cons + Overall_heat_fix_cons
+                    - hour0[J + i]) / El_boiler_eff)
+              / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons
+                + (Overall_harmonious_var_heat_max_cons
+                  - Overall_harmonious_var_heat_min_cons) / El_boiler_eff),
+            max(
+              .zero,
+              hour0[J + i] - Overall_harmonious_var_heat_min_cons
+                - Overall_heat_fix_cons + max(
+                  .zero,
+                  hour0[P + i] + Grid_import_max_ud * Grid_import_yes_no_PB_strategy
+                    - hour0[Q + i] - Overall_harmonious_var_min_cons
+                    - Overall_fix_cons) * El_boiler_eff)
+              / (Overall_harmonious_var_heat_max_cons
+                - Overall_harmonious_var_heat_min_cons
+                + (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
+                  * El_boiler_eff),
+            max(
+              .zero,
+              hour0[J + i] + El_boiler_cap_ud * El_boiler_eff
+                - Overall_harmonious_var_heat_min_cons - Overall_heat_fix_cons)
+              / (Overall_harmonious_var_heat_max_cons
+                - Overall_harmonious_var_heat_min_cons)))
     }
 
     /// Optimized max harm net elec cons
@@ -174,13 +204,16 @@ extension TunOl {
 
     /// Grid import necessary for max harm
     let AL = 262800
-    // MAX(0,-($P6-$Q6-AH6-MIN(El_boiler_cap_ud,MAX(0,(AI6-$J6)/El_boiler_eff))))
-    for i in 1..<8760 { hour0[AL + i] = max(.zero, -(hour0[P + i] - hour0[Q + i] - hour0[AH + i] - min(El_boiler_cap_ud, max(.zero, (hour0[AI + i] - hour0[J + i]) / El_boiler_eff)))) }
+    // =ROUND(MAX(0,-($P6-$Q6-AH6-MIN(El_boiler_cap_ud,MAX(0,(AI6-$J6)/El_boiler_eff)))),5)
+    for i in 1..<8760 { hour0[AL + i] = round(max(.zero, -(hour0[P + i] - hour0[Q + i] - hour0[AH + i] - min(El_boiler_cap_ud, max(.zero, (hour0[AI + i] - hour0[J + i]) / El_boiler_eff)))),5) }
 
+    let AU = 271560
+    // =MIN(IF(AH5>0,Grid_import_yes_no_BESS_strategy,Grid_import_yes_no_BESS_strategy_outsideharmop)*Grid_import_max_ud,AL5)
+    for i in 1..<8760 { hour0[AU + i] = min(iff(hour0[AH + i] > 0, Grid_import_yes_no_BESS_strategy, Grid_import_yes_no_BESS_strategy_outsideharmop) * Grid_import_max_ud, hour0[AL + i]) }
     /// Remaining grid import capacity after max harm
     let AM = 271560
-    // MAX(0,Grid_import_max_ud-AL6)
-    for i in 1..<8760 { hour0[AM + i] = max(.zero, Grid_import_max_ud - hour0[AL + i]) }
+    // =MAX(0,IF(AH5>0,Grid_import_yes_no_BESS_strategy,Grid_import_yes_no_BESS_strategy_outsideharmop)*Grid_import_max_ud-AU6)
+    for i in 1..<8760 { hour0[AM + i] = max(.zero, iff(hour0[AH + i] > 0, Grid_import_yes_no_BESS_strategy, Grid_import_yes_no_BESS_strategy_outsideharmop) * Grid_import_max_ud - hour0[AU + i]) }
 
     /// El to el boiler after max harm heat cons
     let AN = 280320
@@ -215,8 +248,8 @@ extension TunOl {
     for i in 1..<8760 {
       // MIN(BESS_chrg_max_cons,AJ6)
       hour0[AS + i] = min(BESS_chrg_max_cons, hour0[AJ + i])
-      // MIN(Grid_export_max_ud,AJ6)
-      hour0[AT + i] = min(Grid_export_max_ud, hour0[AJ + i])
+      // =MIN(IF(AH5>0,Grid_export_yes_no_BESS_strategy,Grid_export_yes_no_BESS_strategy_outsideharmop)*Grid_export_max_ud,AJ5)
+      hour0[AT + i] = min(iff(hour0[AH + i] > 0, Grid_export_yes_no_BESS_strategy,Grid_export_yes_no_BESS_strategy_outsideharmop) * Grid_export_max_ud, hour0[AJ + i])
     }
     return hour0
   }

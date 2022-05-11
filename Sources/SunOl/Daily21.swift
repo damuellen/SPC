@@ -32,8 +32,8 @@ extension TunOl {
     let AT = 332880
     // let S_UcountZero = hour0.countOf(U, condition: S, predicate: { $0 <= 0 })
     // let S_UcountNonZero = hour0.countOf(U, condition: S, predicate: { $0 > 0 })
-    let U_S_Psum = hour0.sumOf(P, days: U, condition: S, predicate: { $0 > 0 })
-    let U_T_Jsum = hour0.sumOf(J, days: U, condition: T, predicate: { $0 > 0 })
+    // let U_S_Psum = hour0.sumOf(P, days: U, condition: S, predicate: { $0 > 0 })
+    // let U_T_Jsum = hour0.sumOf(J, days: U, condition: T, predicate: { $0 > 0 })
     let U_S_AFsum = hour0.sumOf(AF, days: U, condition: S, predicate: { $0 > 0 })
     let U_S_ATsum = hour0.sumOf(AT, days: U, condition: S, predicate: { $0 > 0 })
     let U_S_Xsum = hour0.sumOf(X, days: U, condition: S, predicate: { $0 > 0 })
@@ -58,8 +58,12 @@ extension TunOl {
     let U_S_ADsum = hour0.sumOf(AD, days: U, condition: S, predicate: { $0 > 0 })
     let U_AH_ARsum = hour0.sumOf(AR, days: U, condition: AH, predicate: { $0 > 0 })
 
-    let Psum = hour0.sum(days: U, range: P)
-    let Jsum = hour0.sum(days: U, range: J)
+    let N = 341640
+    let S_Nsum = hour0.sumOf(N, days: U, condition: S, predicate: { $0 > 0 })
+    let AU = 271560
+    let U_AH_AUsum = hour0.sumOf(AU, days: U, condition: AH, predicate: { $0 > 0 })
+    let Nsum = hour0.sum(days: U, range: N)
+    // let Jsum = hour0.sum(days: U, range: J)
     let Ssum = hour0.sum(days: U, range: S)
     let Tsum = hour0.sum(days: U, range: T)
     let AIsum = hour0.sum(days: U, range: AI)
@@ -75,29 +79,29 @@ extension TunOl {
     let ADsum = hour0.sum(days: U, range: AD)
     let AHsum = hour0.sum(days: U, range: AH)
 
-    var d5 = [Double](repeating: .zero, count: 1095 + 365)
+    var d6 = [Double](repeating: .zero, count: 14235)
 
     /// Available day op PV elec after CSP, PB stby aux
-    let DM = 0
-    // SUMIFS(CalculationP5:P8763,CalculationU5:U8763,"="A6,CalculationS5:S8763,">0")
-    for i in 0..<365 { d5[DM + i] = U_S_Psum[i] }
+    let DM = 13140
+    // =SUMIFS(Calculation!$N$5:$N$8764,Calculation!$U$5:$U$8764,"="&$A3,Calculation!$S$5:$S$8764,">0")
+    for i in 0..<365 { d6[DM + i] = S_Nsum[i] }
 
     /// Available night op PV elec after CSP, PB stby aux
-    let DN = 365
-    // SUMIF(CalculationU5:U8763,"="A6,CalculationP5:P8763)-DM6
-    for i in 0..<365 { d5[DN + i] = Psum[i] - d5[DM + i] }
+    let DN = 13505
+    // =SUMIFS(Calculation!$AU$5:$AU$8764,Calculation!$U$5:$U$8764,"="&$A3,Calculation!$AH$5:$AH$8764,">0")
+    for i in 0..<365 { d6[DN + i] = U_AH_AUsum[i] }
 
     /// Available day op  CSP heat
-    let DO = 730
-    // SUMIFS(CalculationJ5:J8763,CalculationU5:U8763,"="A6,CalculationT5:T8763,">0")
-    for i in 0..<365 { d5[DO + i] = U_T_Jsum[i] }
+    let DO = 13870
+    // =SUMIF(Calculation!$U$5:$U$8764,"="&$A3,Calculation!$N$5:$N$8764)-DM3
+    for i in 0..<365 { d6[DO + i] = Nsum[i] - d6[DM + i] }
 
     /// Available night op  CSP heat
-    let DP = 1095
-    // SUMIF(CalculationU5:U8763,"="A6,CalculationJ5:J8763)-DO6
-    for i in 0..<365 { d5[DP + i] = Jsum[i] - d5[DO + i] }
+    // let DP = 1095
+    // NOT USED
+    // for i in 0..<365 { d5[DP + i] = Jsum[i] - d5[DO + i] }
 
-    var d6 = [Double](repeating: .zero, count: 12775 + 365)
+
 
     /// El cons considering min harm op during harm op period
     let DR = 0
