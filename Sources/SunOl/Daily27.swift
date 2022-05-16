@@ -12,8 +12,6 @@ extension TunOl {
     let DV = 1460
     let DW = 1825
     let DX = 2190
-    let DY = 2555
-    let DZ = 2920
 
     let equiv_harmonious_range = equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]
 

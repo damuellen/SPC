@@ -2,8 +2,6 @@ extension TunOl {
   func d26(hour0: [Double]) -> [Double] {
     let U: [[Int]] = hour0[113881..<(113880 + 8760)].indices.chunked(by: { hour0[$0] == hour0[$1] }).map { $0.map { $0 - 113880 } }
 
-    let J = 26280
-    let P = 70080
     let S = 96360
     let T = 105120
     let V = 122640
@@ -30,10 +28,7 @@ extension TunOl {
     let AR = 315360
     let AS = 324120
     let AT = 332880
-    // let S_UcountZero = hour0.countOf(U, condition: S, predicate: { $0 <= 0 })
-    // let S_UcountNonZero = hour0.countOf(U, condition: S, predicate: { $0 > 0 })
-    // let U_S_Psum = hour0.sumOf(P, days: U, condition: S, predicate: { $0 > 0 })
-    // let U_T_Jsum = hour0.sumOf(J, days: U, condition: T, predicate: { $0 > 0 })
+
     let U_S_AFsum = hour0.sumOf(AF, days: U, condition: S, predicate: { $0 > 0 })
     let U_S_ATsum = hour0.sumOf(AT, days: U, condition: S, predicate: { $0 > 0 })
     let U_S_Xsum = hour0.sumOf(X, days: U, condition: S, predicate: { $0 > 0 })
@@ -63,7 +58,7 @@ extension TunOl {
     let AU = 271560
     let U_AH_AUsum = hour0.sumOf(AU, days: U, condition: AH, predicate: { $0 > 0 })
     let Nsum = hour0.sum(days: U, range: N)
-    // let Jsum = hour0.sum(days: U, range: J)
+
     let Ssum = hour0.sum(days: U, range: S)
     let Tsum = hour0.sum(days: U, range: T)
     let AIsum = hour0.sum(days: U, range: AI)
@@ -95,13 +90,6 @@ extension TunOl {
     let DO = 13870
     // =SUMIF(Calculation!$U$5:$U$8764,"="&$A3,Calculation!$N$5:$N$8764)-DM3
     for i in 0..<365 { d6[DO + i] = Nsum[i] - d6[DM + i] }
-
-    /// Available night op  CSP heat
-    // let DP = 1095
-    // NOT USED
-    // for i in 0..<365 { d5[DP + i] = Jsum[i] - d5[DO + i] }
-
-
 
     /// El cons considering min harm op during harm op period
     let DR = 0

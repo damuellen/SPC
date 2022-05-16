@@ -256,6 +256,7 @@ public struct TunOl {
   var BESS_cap_ud: Double
   var Grid_export_max_ud: Double
   var Grid_import_max_ud: Double
+  var Grid_export_yes_no_PB_strategy: Double = 1
   var Grid_import_yes_no_BESS_strategy: Double = 1
   var Grid_import_yes_no_PB_strategy: Double = 1
   var Grid_import_yes_no_PB_strategy_outsideharmop: Double = 1

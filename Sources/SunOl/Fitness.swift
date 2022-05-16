@@ -15,8 +15,8 @@ public func fitness(values: [Double]) -> [Double] {
   var day = [[Double]]()
 
   var hour2 = [Double](repeating: .zero, count: 183_960)
-  var hour3 = [Double](repeating: .zero, count: 271_560)
-  var hour4 = [Double](repeating: .zero, count: 490560 + 8760)
+  var hour3 = [Double](repeating: .zero, count: 289_080)
+  var hour4 = [Double](repeating: .zero, count: 516_840)
   var d1 = [Double](repeating: .zero, count: 13_140)
   var d15 = [Double](repeating: .zero, count: 17_155)
   var d16 = [Double](repeating: .zero, count: 17_155)
