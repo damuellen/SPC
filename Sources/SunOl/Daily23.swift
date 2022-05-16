@@ -345,70 +345,90 @@ extension TunOl {
     for i in 0..<365 { d23[ddGZ + i] = equiv_harmonious_range[j] < 1E-10 ? 1 : (d23[GZ + i] - equiv_harmonious_min_perc[j]) / equiv_harmonious_range[j] }
 
     // IF(GZ6=0,0,ROUND(EB6+EH6-(O6+(P6-O6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(GZ6-A_equiv_harmonious_min_perc))-MIN(EK6,max(0,EA6+(E6+(F6-E6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(GZ6-A_equiv_harmonious_min_perc))+(G6+(H6-G6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(GZ6-A_equiv_harmonious_min_perc))/El_boiler_eff-ej6)/BESS_chrg_eff)-MAX(0,(Q6+(R6-Q6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(GZ6-A_equiv_harmonious_min_perc))-EE6)/El_boiler_eff,5))
-    for i in 0..<365 {
-      d23[HA + i] = iff(
-        d23[GZ + i].isZero, .zero,
+    for i in 0..<365 { 
+      if d23[GZ + i].isZero {
+        d23[HA + i] = .zero
+        d23[HB + i] = .zero
+        d23[HC + i] = .zero
+        d23[HD + i] = .zero
+        d23[HE + i] = .zero
+        d23[HF + i] = .zero
+        d23[HG + i] = .zero
+        d23[HH + i] = .zero
+        d23[HI + i] = .zero
+        d23[HJ + i] = .zero
+        d23[HK + i] = .zero
+        d23[HL + i] = .zero
+        d23[HM + i] = .zero
+        d23[HN + i] = .zero
+        d23[HO + i] = .zero
+        d23[HP + i] = .zero
+        d23[HQ + i] = .zero
+        d23[HR + i] = .zero
+        continue
+      } 
+      d23[HA + i] = 
         round(
           d22[EB + i] + d22[EH + i] - (d21[O + i] + (d21[P + i] - d21[O + i]) * d23[ddGZ + i]) - min(d22[EK + i], max(.zero, d22[EA + i] + (d21[E + i] + (d21[F + i] - d21[E + i]) * d23[ddGZ + i]) + (d21[G + i] + (d21[H + i] - d21[G + i]) * d23[ddGZ + i]) / El_boiler_eff - d22[EJ + i]) / BESS_chrg_eff) - max(
-            .zero, (d21[Q + i] + (d21[R + i] - d21[Q + i]) * d23[ddGZ + i]) - d22[EE + i]) / El_boiler_eff, 5))
+            .zero, (d21[Q + i] + (d21[R + i] - d21[Q + i]) * d23[ddGZ + i]) - d22[EE + i]) / El_boiler_eff, 5)
 
       // IF(GZ6=0,0,ROUND(EC6+EI6-(O6+(P6-O6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(GZ6-A_equiv_harmonious_min_perc))-MIN(EL6,max(0,EA6+(E6+(F6-E6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(GZ6-A_equiv_harmonious_min_perc))+(G6+(H6-G6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(GZ6-A_equiv_harmonious_min_perc))/El_boiler_eff-ej6)/BESS_chrg_eff)-MAX(0,(Q6+(R6-Q6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(GZ6-A_equiv_harmonious_min_perc))-EF6)/El_boiler_eff,5))
-      d23[HB + i] = iff(
-        d23[GZ + i].isZero, .zero,
-        round(
-          d22[EC + i] + d22[EI + i] - (d21[O + i] + (d21[P + i] - d21[O + i]) * d23[ddGZ + i]) - min(d22[EL + i], max(.zero, d22[EA + i] + (d21[E + i] + (d21[F + i] - d21[E + i]) * d23[ddGZ + i]) + (d21[G + i] + (d21[H + i] - d21[G + i]) * d23[ddGZ + i]) / El_boiler_eff - d22[EJ + i]) / BESS_chrg_eff) - max(
-            .zero, (d21[Q + i] + (d21[R + i] - d21[Q + i]) * d23[ddGZ + i]) - d22[EF + i]) / El_boiler_eff, 5))
+      d23[HB + i] = round(
+        d22[EC + i] + d22[EI + i] - (d21[O + i] + (d21[P + i] - d21[O + i]) * d23[ddGZ + i]) - min(d22[EL + i], max(.zero, d22[EA + i] + (d21[E + i] + (d21[F + i] - d21[E + i]) * d23[ddGZ + i]) + (d21[G + i] + (d21[H + i] - d21[G + i]) * d23[ddGZ + i]) / El_boiler_eff - d22[EJ + i]) / BESS_chrg_eff) - max(
+          .zero, (d21[Q + i] + (d21[R + i] - d21[Q + i]) * d23[ddGZ + i]) - d22[EF + i]) / El_boiler_eff, 5)
+
       // =IF(GZ6=0,0,ROUND((EK6+EM6)*BESS_chrg_eff+EJ6-EA6-(E6+(F6-E6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(GZ6-A_equiv_harmonious_min_perc))-(G6+(H6-G6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(GZ6-A_equiv_harmonious_min_perc))/El_boiler_eff,5))
-      d23[HC + i] = iff(d23[GZ + i].isZero, .zero, round((d22[EK + i] + d22[EM + i]) * BESS_chrg_eff + d22[EJ + i] - d22[EA + i] - (d21[E + i] + (d21[F + i] - d21[E + i]) * d23[ddGZ + i]) - (d21[G + i] + (d21[H + i] - d21[G + i]) * d23[ddGZ + i]) / El_boiler_eff, 5))
+
+      d23[HC + i] = round((d22[EK + i] + d22[EM + i]) * BESS_chrg_eff + d22[EJ + i] - d22[EA + i] - (d21[E + i] + (d21[F + i] - d21[E + i]) * d23[ddGZ + i]) - (d21[G + i] + (d21[H + i] - d21[G + i]) * d23[ddGZ + i]) / El_boiler_eff, 5)
       // =IF(GZ6=0,0,ROUND((EL6+EM6)*BESS_chrg_eff+EJ6-EA6-(E6+(F6-E6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(GZ6-A_equiv_harmonious_min_perc))-(G6+(H6-G6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(GZ6-A_equiv_harmonious_min_perc))/El_boiler_eff,5))
-      d23[HD + i] = iff(d23[GZ + i].isZero, .zero, round((d22[EL + i] + d22[EM + i]) * BESS_chrg_eff + d22[EJ + i] - d22[EA + i] - (d21[E + i] + (d21[F + i] - d21[E + i]) * d23[ddGZ + i]) - (d21[G + i] + (d21[H + i] - d21[G + i]) * d23[ddGZ + i]) / El_boiler_eff, 5))
+
+      d23[HD + i] = round((d22[EL + i] + d22[EM + i]) * BESS_chrg_eff + d22[EJ + i] - d22[EA + i] - (d21[E + i] + (d21[F + i] - d21[E + i]) * d23[ddGZ + i]) - (d21[G + i] + (d21[H + i] - d21[G + i]) * d23[ddGZ + i]) / El_boiler_eff, 5)
       // IF(GZ6=0,0,ROUND(EE6+(EB6+EH6-MIN(EK6,max(0,EA6+(E6+(F6-E6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(GZ6-A_equiv_harmonious_min_perc))+(G6+(H6-G6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(GZ6-A_equiv_harmonious_min_perc))/El_boiler_eff-ej6)/BESS_chrg_eff)-(O6+(P6-O6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(GZ6-A_equiv_harmonious_min_perc)))*El_boiler_eff-(Q6+(R6-Q6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(GZ6-A_equiv_harmonious_min_perc)),5))
-      d23[HE + i] = iff(
-        d23[GZ + i].isZero, .zero,
-        round(
-          d22[EE + i] + (d22[EB + i] + d22[EH + i] - min(d22[EK + i], max(.zero, d22[EA + i] + (d21[E + i] + (d21[F + i] - d21[E + i]) * d23[ddGZ + i]) + (d21[G + i] + (d21[H + i] - d21[G + i]) * d23[ddGZ + i]) / El_boiler_eff - d22[EJ + i]) / BESS_chrg_eff) - (d21[O + i] + (d21[P + i] - d21[O + i]) * d23[ddGZ + i])) * El_boiler_eff
-            - (d21[Q + i] + (d21[R + i] - d21[Q + i]) * d23[ddGZ + i]), 5))
+
+      d23[HE + i] = round(
+        d22[EE + i] + (d22[EB + i] + d22[EH + i] - min(d22[EK + i], max(.zero, d22[EA + i] + (d21[E + i] + (d21[F + i] - d21[E + i]) * d23[ddGZ + i]) + (d21[G + i] + (d21[H + i] - d21[G + i]) * d23[ddGZ + i]) / El_boiler_eff - d22[EJ + i]) / BESS_chrg_eff) - (d21[O + i] + (d21[P + i] - d21[O + i]) * d23[ddGZ + i])) * El_boiler_eff
+          - (d21[Q + i] + (d21[R + i] - d21[Q + i]) * d23[ddGZ + i]), 5)
+
       // IF(GZ6=0,0,ROUND(EF6+(EC6+EI6-MIN(EL6,max(0,EA6+(E6+(F6-E6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(GZ6-A_equiv_harmonious_min_perc))+(G6+(H6-G6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(GZ6-A_equiv_harmonious_min_perc))/El_boiler_eff-ej6)/BESS_chrg_eff)-(O6+(P6-O6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(GZ6-A_equiv_harmonious_min_perc)))*El_boiler_eff-(Q6+(R6-Q6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(GZ6-A_equiv_harmonious_min_perc)),5))
-      d23[HF + i] = iff(
-        d23[GZ + i].isZero, .zero,
-        round(
-          d22[EF + i] + (d22[EC + i] + d22[EI + i] - min(d22[EL + i], max(.zero, d22[EA + i] + (d21[E + i] + (d21[F + i] - d21[E + i]) * d23[ddGZ + i]) + (d21[G + i] + (d21[H + i] - d21[G + i]) * d23[ddGZ + i]) / El_boiler_eff - d22[EJ + i]) / BESS_chrg_eff) - (d21[O + i] + (d21[P + i] - d21[O + i]) * d23[ddGZ + i])) * El_boiler_eff
-            - (d21[Q + i] + (d21[R + i] - d21[Q + i]) * d23[ddGZ + i]), 5))
+      d23[HF + i] = round(
+        d22[EF + i] + (d22[EC + i] + d22[EI + i] - min(d22[EL + i], max(.zero, d22[EA + i] + (d21[E + i] + (d21[F + i] - d21[E + i]) * d23[ddGZ + i]) + (d21[G + i] + (d21[H + i] - d21[G + i]) * d23[ddGZ + i]) / El_boiler_eff - d22[EJ + i]) / BESS_chrg_eff) - (d21[O + i] + (d21[P + i] - d21[O + i]) * d23[ddGZ + i])) * El_boiler_eff
+          - (d21[Q + i] + (d21[R + i] - d21[Q + i]) * d23[ddGZ + i]), 5)
+            
       // IF(GZ6=0,0,ROUND(EG6+ER6*El_boiler_eff-(G6+(H6-G6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(GZ6-A_equiv_harmonious_min_perc)),5))
-      d23[HG + i] = iff(d23[GZ + i].isZero, .zero, round(d22[EG + i] + d22[ER + i] * El_boiler_eff - (d21[G + i] + (d21[H + i] - d21[G + i]) * d23[ddGZ + i]), 5))
+      d23[HG + i] = round(d22[EG + i] + d22[ER + i] * El_boiler_eff - (d21[G + i] + (d21[H + i] - d21[G + i]) * d23[ddGZ + i]), 5)
 
       // IF(GZ6=0,0,ROUND(EG6+ER6*El_boiler_eff-(G6+(H6-G6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(GZ6-A_equiv_harmonious_min_perc)),5))
-      d23[HH + i] = iff(d23[GZ + i].isZero, .zero, round(d22[EG + i] + d22[ER + i] * El_boiler_eff - (d21[G + i] + (d21[H + i] - d21[G + i]) * d23[ddGZ + i]), 5))
+      d23[HH + i] = round(d22[EG + i] + d22[ER + i] * El_boiler_eff - (d21[G + i] + (d21[H + i] - d21[G + i]) * d23[ddGZ + i]), 5)
 
       // IF(GZ6=0,0,ROUND(EP6-MAX(0,(Q6+(R6-Q6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(GZ6-A_equiv_harmonious_min_perc))-EE6)/El_boiler_eff,5))
-      d23[HI + i] = iff(d23[GZ + i].isZero, .zero, round(d22[EP + i] - max(.zero, (d21[Q + i] + (d21[R + i] - d21[Q + i]) * d23[ddGZ + i]) - d22[EE + i]) / El_boiler_eff, 5))
+      d23[HI + i] = round(d22[EP + i] - max(.zero, (d21[Q + i] + (d21[R + i] - d21[Q + i]) * d23[ddGZ + i]) - d22[EE + i]) / El_boiler_eff, 5)
 
       // IF(GZ6=0,0,ROUND(EQ6-MAX(0,(Q6+(R6-Q6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(GZ6-A_equiv_harmonious_min_perc))-EF6)/El_boiler_eff,5))
-      d23[HJ + i] = iff(d23[GZ + i].isZero, .zero, round(d22[EQ + i] - max(.zero, (d21[Q + i] + (d21[R + i] - d21[Q + i]) * d23[ddGZ + i]) - d22[EF + i]) / El_boiler_eff, 5))
+      d23[HJ + i] = round(d22[EQ + i] - max(.zero, (d21[Q + i] + (d21[R + i] - d21[Q + i]) * d23[ddGZ + i]) - d22[EF + i]) / El_boiler_eff, 5)
 
       // IF(GZ6=0,0,ROUND(ER6-MAX(0,(G6+(H6-G6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(GZ6-A_equiv_harmonious_min_perc))-EG6)/El_boiler_eff,5))
-      d23[HK + i] = iff(d23[GZ + i].isZero, .zero, round(d22[ER + i] - max(.zero, (d21[G + i] + (d21[H + i] - d21[G + i]) * d23[ddGZ + i]) - d22[EG + i]) / El_boiler_eff, 5))
+      d23[HK + i] = round(d22[ER + i] - max(.zero, (d21[G + i] + (d21[H + i] - d21[G + i]) * d23[ddGZ + i]) - d22[EG + i]) / El_boiler_eff, 5)
 
       // IF(GZ6=0,0,ROUND(ER6-MAX(0,(G6+(H6-G6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(GZ6-A_equiv_harmonious_min_perc))-EG6)/El_boiler_eff,5))
-      d23[HL + i] = iff(d23[GZ + i].isZero, .zero, round(d22[ER + i] - max(.zero, (d21[G + i] + (d21[H + i] - d21[G + i]) * d23[ddGZ + i]) - d22[EG + i]) / El_boiler_eff, 5))
+      d23[HL + i] = round(d22[ER + i] - max(.zero, (d21[G + i] + (d21[H + i] - d21[G + i]) * d23[ddGZ + i]) - d22[EG + i]) / El_boiler_eff, 5)
 
       // IF(GZ6=0,0,ROUND(ES6-(S6+(T6-S6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(GZ6-A_equiv_harmonious_min_perc)),5))
-      d23[HM + i] = iff(d23[GZ + i].isZero, .zero, round(d22[ES + i] - (d21[S + i] + (d21[T + i] - d21[S + i]) * d23[ddGZ + i]), 5))
+      d23[HM + i] = round(d22[ES + i] - (d21[S + i] + (d21[T + i] - d21[S + i]) * d23[ddGZ + i]), 5)
 
       // IF(GZ6=0,0,ROUND(ET6-(S6+(T6-S6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(GZ6-A_equiv_harmonious_min_perc)),5))
-      d23[HN + i] = iff(d23[GZ + i].isZero, .zero, round(d22[ET + i] - (d21[S + i] + (d21[T + i] - d21[S + i]) * d23[ddGZ + i]), 5))
+      d23[HN + i] = round(d22[ET + i] - (d21[S + i] + (d21[T + i] - d21[S + i]) * d23[ddGZ + i]), 5)
 
       // IF(GZ6=0,0,ROUND(EV6-(U6+(V6-U6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(GZ6-A_equiv_harmonious_min_perc)),5))
-      d23[HO + i] = iff(d23[GZ + i].isZero, .zero, round(d22[EV + i] - (d21[U + i] + (d21[V + i] - d21[U + i]) * d23[ddGZ + i]), 5))
+      d23[HO + i] = round(d22[EV + i] - (d21[U + i] + (d21[V + i] - d21[U + i]) * d23[ddGZ + i]), 5)
 
       // IF(GZ6=0,0,ROUND(EW6-(U6+(V6-U6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(GZ6-A_equiv_harmonious_min_perc)),5))
-      d23[HP + i] = iff(d23[GZ + i].isZero, .zero, round(d22[EW + i] - (d21[U + i] + (d21[V + i] - d21[U + i]) * d23[ddGZ + i]), 5))
+      d23[HP + i] = round(d22[EW + i] - (d21[U + i] + (d21[V + i] - d21[U + i]) * d23[ddGZ + i]), 5)
 
       // IF(GZ6=0,0,ROUND(EY6-(W6+(X6-W6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(GZ6-A_equiv_harmonious_min_perc)),5))
-      d23[HQ + i] = iff(d23[GZ + i].isZero, .zero, round(d22[EY + i] - (d21[W + i] + (d21[X + i] - d21[W + i]) * d23[ddGZ + i]), 5))
+      d23[HQ + i] = round(d22[EY + i] - (d21[W + i] + (d21[X + i] - d21[W + i]) * d23[ddGZ + i]), 5)
 
       // IF(GZ6=0,0,ROUND(EZ6-(W6+(X6-W6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(GZ6-A_equiv_harmonious_min_perc)),5))
-      d23[HR + i] = iff(d23[GZ + i].isZero, .zero, round(d22[EZ + i] - (d21[W + i] + (d21[X + i] - d21[W + i]) * d23[ddGZ + i]), 5))
+      d23[HR + i] = round(d22[EZ + i] - (d21[W + i] + (d21[X + i] - d21[W + i]) * d23[ddGZ + i]), 5)
     }
 
     /// Opt harm op period op during night prio operation
