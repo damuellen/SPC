@@ -26,7 +26,6 @@ var platformProducts: [Product] = []
 platformProducts.append(contentsOf: [
   .executable(name: "SPC", targets: ["SolarPerformanceCalc"]),
   .executable(name: "SolarFieldCalc", targets: ["SolarFieldCalc"]),
-  .executable(name: "TransTES", targets: ["TransTES"]),
   .executable(name: "PinchPointTool", targets: ["PinchPointTool"]),
   .executable(name: "Playground", targets: ["Playground"]),
   .executable(name: "Optimizer", targets: ["Optimizer"]),
@@ -104,11 +103,6 @@ let platformTargets: [Target] = [
       .product(name: "ArgumentParser", package: "swift-argument-parser"),
       .product(name: "xlsxwriter", package: "xlsxwriter.swift"),
     ],
-    swiftSettings: swift
-  ),
-  .executableTarget(
-    name: "TransTES",
-    dependencies: ["Utilities"],
     swiftSettings: swift
   ),
   .target(
