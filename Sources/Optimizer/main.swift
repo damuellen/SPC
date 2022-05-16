@@ -87,6 +87,7 @@ struct Command: ParsableCommand {
     let server = HTTP(handler: respond)
     if http { 
       server.start()
+      print("web server listening on port 9080")
       DispatchQueue.global().asyncAfter(deadline: .now() + 0.5) { 
         start("http://127.0.0.1:9080") 
       }
@@ -155,7 +156,7 @@ func respond(request: HTTP.Request) -> HTTP.Response {
       .set(title: "Convergence curves")
       .set(xlabel: "Iteration").set(ylabel: "LCoM")
     plot.settings["xtics"] = "1"
-    return .init(html: .init(body: plot.svg!, refresh: 20))
+    return .init(html: .init(body: plot.svg!, refresh: source.isCancelled ? 0:10))
   }
   return .init(html: .init(refresh: 10))
 }
