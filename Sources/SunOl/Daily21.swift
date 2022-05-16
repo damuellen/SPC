@@ -1,275 +1,194 @@
 extension TunOl {
-  func d26(hour0: [Double]) -> [Double] {
-    let U: [[Int]] = hour0[113881..<(113880 + 8760)].indices.chunked(by: { hour0[$0] == hour0[$1] }).map { $0.map { $0 - 113880 } }
+  func day0(hour0: [Double]) -> [Double] {
+    let daysU: [[Int]] = hour0[113881..<(113880 + 8760)].indices.chunked(by: { hour0[$0] == hour0[$1] }).map { $0.map { $0 - 113880 } }
+    // let end = daysU.removeLast()
+    // daysU[0].append(contentsOf: end)
+    let hourS = 96360
 
-    let S = 96360
-    let T = 105120
-    let V = 122640
-    let W = 131400
-    let X = 140160
-    let Y = 148920
-    let Z = 157680
-    let AA = 166440
-    let AB = 175200
-    let AC = 183960
-    let AD = 192720
-    let AE = 201480
-    let AF = 210240
-    let AH = 227760
-    let AI = 236520
-    let AJ = 245280
-    let AK = 254040
-    let AL = 262800
-    let AM = 271560
-    let AN = 280320
-    let AO = 289080
-    let AP = 297840
-    let AQ = 306600
-    let AR = 315360
-    let AS = 324120
-    let AT = 332880
+    let S_UcountZero = hour0.countOf(daysU, condition: hourS, predicate: { $0 <= 0 })
+    let S_UcountNonZero = hour0.countOf(daysU, condition: hourS, predicate: { $0 > 0 })
+    var day0 = [Double](repeating: .zero, count: 1_095)
+    /// Day
+    let A = 0
+    // A5+1
+    for i in 1..<365 { day0[A + i] = day0[A + i - 1] + 1 }
 
-    let U_S_AFsum = hour0.sumOf(AF, days: U, condition: S, predicate: { $0 > 0 })
-    let U_S_ATsum = hour0.sumOf(AT, days: U, condition: S, predicate: { $0 > 0 })
-    let U_S_Xsum = hour0.sumOf(X, days: U, condition: S, predicate: { $0 > 0 })
-    let U_AH_ALsum = hour0.sumOf(AL, days: U, condition: AH, predicate: { $0 > 0 })
-    let U_S_Vsum = hour0.sumOf(V, days: U, condition: S, predicate: { $0 > 0 })
-    let U_AH_AJsum = hour0.sumOf(AJ, days: U, condition: AH, predicate: { $0 > 0 })
-    let U_S_Wsum = hour0.sumOf(W, days: U, condition: S, predicate: { $0 > 0 })
-    let U_AH_AKsum = hour0.sumOf(AK, days: U, condition: AH, predicate: { $0 > 0 })
-    let U_S_Ysum = hour0.sumOf(Y, days: U, condition: S, predicate: { $0 > 0 })
-    let U_AH_AMsum = hour0.sumOf(AM, days: U, condition: AH, predicate: { $0 > 0 })
-    let U_S_AEsum = hour0.sumOf(AE, days: U, condition: S, predicate: { $0 > 0 })
-    let U_AH_ASsum = hour0.sumOf(AS, days: U, condition: AH, predicate: { $0 > 0 })
-    let U_S_AEsumZero = hour0.sumOf(AE, days: U, condition: S, predicate: { $0.isZero })
-    let U_S_Zsum = hour0.sumOf(Z, days: U, condition: S, predicate: { $0 > 0 })
-    let U_S_ANsum = hour0.sumOf(AN, days: U, condition: S, predicate: { $0 > 0 })
-    let U_S_AAsum = hour0.sumOf(AA, days: U, condition: S, predicate: { $0 > 0 })
-    let U_AH_AOsum = hour0.sumOf(AO, days: U, condition: AH, predicate: { $0 > 0 })
-    let U_S_ABsum = hour0.sumOf(AB, days: U, condition: S, predicate: { $0 > 0 })
-    let U_AH_APsum = hour0.sumOf(AP, days: U, condition: AH, predicate: { $0 > 0 })
-    let U_S_ACsum = hour0.sumOf(AC, days: U, condition: S, predicate: { $0 > 0 })
-    let U_AH_AQsum = hour0.sumOf(AQ, days: U, condition: AH, predicate: { $0 > 0 })
-    let U_S_ADsum = hour0.sumOf(AD, days: U, condition: S, predicate: { $0 > 0 })
-    let U_AH_ARsum = hour0.sumOf(AR, days: U, condition: AH, predicate: { $0 > 0 })
+    /// Nr of hours where min harmonious is not possible in spite of grid support
+    let B = 365
+    // COUNTIFS(CalculationU5:U8763,"="A6,CalculationS5:S8763,"<=0")
+    for i in 0..<365 { day0[B + i] = S_UcountZero[i] }
 
-    let N = 341640
-    let S_Nsum = hour0.sumOf(N, days: U, condition: S, predicate: { $0 > 0 })
-    let AU = 271560
-    let U_AH_AUsum = hour0.sumOf(AU, days: U, condition: AH, predicate: { $0 > 0 })
-    let Nsum = hour0.sum(days: U, range: N)
+    /// Nr of hours where min harmonious is possible considering grid support
+    let C = 730
+    // COUNTIFS(CalculationU5:U8763,"="A6,CalculationS5:S8763,">0")
+    for i in 0..<365 { day0[C + i] = S_UcountNonZero[i] }
+    return day0
+  }
 
-    let Ssum = hour0.sum(days: U, range: S)
-    let Tsum = hour0.sum(days: U, range: T)
-    let AIsum = hour0.sum(days: U, range: AI)
-    let AFsum = hour0.sum(days: U, range: AF)
-    let Xsum = hour0.sum(days: U, range: X)
-    let Ysum = hour0.sum(days: U, range: Y)
-    let Vsum = hour0.sum(days: U, range: V)
-    let Wsum = hour0.sum(days: U, range: W)
+  func d21(_ d1: inout [Double], case j: Int, day0: [Double]) {
+    let B = 365
+    let C = 730
 
-    let AAsum = hour0.sum(days: U, range: AA)
-    let ABsum = hour0.sum(days: U, range: AB)
-    let ACsum = hour0.sum(days: U, range: AC)
-    let ADsum = hour0.sum(days: U, range: AD)
-    let AHsum = hour0.sum(days: U, range: AH)
+    /// Surplus RawMeth storage cap after night min op  prep
+    let Y = 7300
+    /// Surplus RawMeth storage cap after max night op prep
+    let Z = 7665
+    /// Surplus CO2 storage cap after min night op prep
+    let AA = 8030
+    /// Surplus CO2 storage cap after max night op prep
+    let AB = 8395
+    /// Surplus H2 storage cap after min night op prep
+    let AC = 8760
+    /// Surplus H2 storage cap after max night op prep
+    let AD = 9125
+    for i in 0..<365 {
+      // Y=IF(A_RawMeth_min_cons=0,1,1-IFERROR(A_RawMeth_min_cons*$B3/RawMeth_storage_cap_ud,2))
+      // Z=IF(A_RawMeth_max_cons=0,1,1-IFERROR(A_RawMeth_max_cons*$B3/RawMeth_storage_cap_ud,2))
+      d1[Y + i] = iff(RawMeth_min_cons[j].isZero, 1, 1 - ifFinite(RawMeth_min_cons[j] * day0[B + i] / RawMeth_storage_cap_ud, 2))
+      d1[Z + i] = iff(RawMeth_max_cons[j].isZero, 1, 1 - ifFinite(RawMeth_max_cons[j] * day0[B + i] / RawMeth_storage_cap_ud, 2))
 
-    var d6 = [Double](repeating: .zero, count: 14235)
+      // AA=IF(A_CO2_min_cons=0,1,1-IFERROR(A_CO2_min_cons*$B3/CO2_storage_cap_ud,2))
+      // AB=IF(A_CO2_max_cons=0,1,1-IFERROR(A_CO2_max_cons*$B3/CO2_storage_cap_ud,2))
+      d1[AA + i] = iff(CO2_min_cons[j].isZero, 1, 1 - ifFinite(CO2_min_cons[j] * day0[B + i] / CO2_storage_cap_ud, 2))
+      d1[AB + i] = iff(CO2_max_cons[j].isZero, 1, 1 - ifFinite(CO2_max_cons[j] * day0[B + i] / CO2_storage_cap_ud, 2))
 
-    /// Available day op PV elec after CSP, PB stby aux
-    let DM = 13140
-    // =SUMIFS(Calculation!$N$5:$N$8764,Calculation!$U$5:$U$8764,"="&$A3,Calculation!$S$5:$S$8764,">0")
-    for i in 0..<365 { d6[DM + i] = S_Nsum[i] }
+      // AC=IF(A_Hydrogen_min_cons=0,1,1-IFERROR(A_Hydrogen_min_cons*$B3/Hydrogen_storage_cap_ud,2))
+      // AD=IF(A_Hydrogen_max_cons=0,1,1-IFERROR(A_Hydrogen_max_cons*$B3/Hydrogen_storage_cap_ud,2))
+      d1[AC + i] = iff(Hydrogen_min_cons[j].isZero, 1, 1 - ifFinite(Hydrogen_min_cons[j] * day0[B + i] / Hydrogen_storage_cap_ud, 2))
+      d1[AD + i] = iff(Hydrogen_max_cons[j].isZero, 1, 1 - ifFinite(Hydrogen_max_cons[j] * day0[B + i] / Hydrogen_storage_cap_ud, 2))
+    }
 
-    /// Available night op PV elec after CSP, PB stby aux
-    let DN = 13505
-    // =SUMIFS(Calculation!$AU$5:$AU$8764,Calculation!$U$5:$U$8764,"="&$A3,Calculation!$AH$5:$AH$8764,">0")
-    for i in 0..<365 { d6[DN + i] = U_AH_AUsum[i] }
+    /// Max Equiv harmonious night prod due to physical limits
+    let AE = 9490
+    // IF(OR(Y6<=0,AA6<=0,AC6<=0),0,MIN(1,IFERROR(Y6/(Y6-Z6),1),IFERROR(AA6/(AA6-AB6),1),IFERROR(AC6/(AC6-AD6),1))*(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)+A_equiv_harmonious_min_perc)
+    for i in 0..<365 {
+      d1[AE + i] = iff(
+        or(d1[Y + i] <= .zero, d1[AA + i] <= .zero, d1[AC + i] <= .zero), .zero,
+        min(1, ifFinite(d1[Y + i] / (d1[Y + i] - d1[Z + i]), 1), ifFinite(d1[AA + i] / (d1[AA + i] - d1[AB + i]), 1), ifFinite(d1[AC + i] / (d1[AC + i] - d1[AD + i]), 1)) * (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]) + equiv_harmonious_min_perc[j])
+    }
 
-    /// Available day op  CSP heat
-    let DO = 13870
-    // =SUMIF(Calculation!$U$5:$U$8764,"="&$A3,Calculation!$N$5:$N$8764)-DM3
-    for i in 0..<365 { d6[DO + i] = Nsum[i] - d6[DM + i] }
+    /// Min el cons during night
+    let E = 0
+    /// Max el cons during night
+    let F = 365
+    /// Min heat cons during night
+    let G = 730
+    /// Max heat cons during night
+    let H = 1095
+    /// Min RawMeth cons during night
+    let I = 1460
+    /// Max RawMeth cons during night
+    let J = 1825
+    /// Min CO2 cons during night
+    let K = 2190
+    /// Max CO2 cons during night
+    let L = 2555
+    /// Min H2 cons during night
+    let M = 2920
+    /// Max H2 cons during night
+    let N = 3285
+    for i in 0..<365 {
+      if d1[AE + i].isZero {
+        d1[E + i] = .zero
+        d1[F + i] = .zero
+        d1[G + i] = .zero
+        d1[H + i] = .zero
+        d1[I + i] = .zero
+        d1[J + i] = .zero
+        d1[K + i] = .zero
+        d1[L + i] = .zero
+        d1[M + i] = .zero
+        d1[N + i] = .zero
+      } else {
+        // (A_overall_var_min_cons+A_overall_fix_stby_cons)*B6+A_overall_stup_cons
+        d1[E + i] = (overall_var_min_cons[j] + overall_fix_stby_cons[j]) * day0[B + i] + overall_stup_cons[j]
+        // (A_overall_var_max_cons+A_overall_fix_stby_cons)*B6+A_overall_stup_cons
+        d1[F + i] = (overall_var_max_cons[j] + overall_fix_stby_cons[j]) * day0[B + i] + overall_stup_cons[j]
+        // (A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons)*B6+A_overall_heat_stup_cons
+        d1[G + i] = (overall_var_heat_min_cons[j] + overall_heat_fix_stby_cons[j]) * day0[B + i] + overall_heat_stup_cons[j]
+        // (A_overall_var_heat_max_cons+A_overall_heat_fix_stby_cons)*B6+A_overall_heat_stup_cons
+        d1[H + i] = (overall_var_heat_max_cons[j] + overall_heat_fix_stby_cons[j]) * day0[B + i] + overall_heat_stup_cons[j]
+        // A_RawMeth_min_cons*B6
+        d1[I + i] = RawMeth_min_cons[j] * day0[B + i]
+        // A_RawMeth_max_cons*B6
+        d1[J + i] = RawMeth_max_cons[j] * day0[B + i]
+        // A_CO2_min_cons*B6
+        d1[K + i] = CO2_min_cons[j] * day0[B + i]
+        // A_CO2_max_cons*B6
+        d1[L + i] = CO2_max_cons[j] * day0[B + i]
+        // A_Hydrogen_min_cons*B6
+        d1[M + i] = Hydrogen_min_cons[j] * day0[B + i]
+        // A_Hydrogen_max_cons*B6
+        d1[N + i] = Hydrogen_max_cons[j] * day0[B + i]
+      }
+    }
 
-    /// El cons considering min harm op during harm op period
-    let DR = 0
-    // SUMIF(CalculationU5:U8763,"="A6,CalculationS5:S8763)
-    for i in 0..<365 { d6[DR + i] = Ssum[i] }
+    /// Min el cons during day for night op prep
+    let O = 3650
+    // IF(AND(M3=0;I3=0);0;(M3+I3/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_Hydrogen_nom_cons)/EY_Hydrogen_nom_prod*EY_var_gross_nom_cons+$C3*EY_fix_cons)+IF(AND(K3=0;I3=0);0;(K3+I3/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_CO2_nom_cons)/CCU_CO2_nom_prod_ud*CCU_var_nom_cons+$C3*CCU_fix_cons)+IF(I3=0;0;I3/MethSynt_RawMeth_nom_prod_ud*MethSynt_var_nom_cons+$C3*MethSynt_fix_cons)
+    for i in 0..<365 {
+      d1[O + i] =
+        iff(and(d1[M + i].isZero, d1[I + i].isZero), .zero, (d1[M + i] + d1[I + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_Hydrogen_nom_cons) / EY_Hydrogen_nom_prod * EY_var_gross_nom_cons + day0[C + i] * EY_fix_cons)
+        + iff(and(d1[K + i].isZero, d1[I + i].isZero), .zero, (d1[K + i] + d1[I + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_CO2_nom_cons) / CCU_CO2_nom_prod_ud * CCU_var_nom_cons + day0[C + i] * CCU_fix_cons)
+        + iff(d1[I + i].isZero, .zero, d1[I + i] / MethSynt_RawMeth_nom_prod_ud * MethSynt_var_nom_cons + day0[C + i] * MethSynt_fix_cons)
+    }
 
-    /// El cons considering max harm op during harm op period
-    let DS = 365
-    // SUMIF(CalculationU5:U8763,"="A6,CalculationAH5:AH8763)
-    for i in 0..<365 { d6[DS + i] = AHsum[i] }
+    /// Max el cons during day for night op prep
+    let P = 4015
+    // IF(AND(N3=0;J3=0);0;(N3+J3/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_Hydrogen_nom_cons)/EY_Hydrogen_nom_prod*EY_var_gross_nom_cons+$C3*EY_fix_cons)+IF(AND(L3=0;J3=0);0;(L3+J3/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_CO2_nom_cons)/CCU_CO2_nom_prod_ud*CCU_var_nom_cons+$C3*CCU_fix_cons)+IF(J3=0;0;J3/MethSynt_RawMeth_nom_prod_ud*MethSynt_var_nom_cons+$C3*MethSynt_fix_cons)
+    for i in 0..<365 {
+      d1[P + i] =
+        iff(and(d1[N + i].isZero, d1[J + i].isZero), .zero, (d1[N + i] + d1[J + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_Hydrogen_nom_cons) / EY_Hydrogen_nom_prod * EY_var_gross_nom_cons + day0[C + i] * EY_fix_cons)
+        + iff(and(d1[L + i].isZero, d1[J + i].isZero), .zero, (d1[L + i] + d1[J + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_CO2_nom_cons) / CCU_CO2_nom_prod_ud * CCU_var_nom_cons + day0[C + i] * CCU_fix_cons)
+        + iff(d1[J + i].isZero, .zero, d1[J + i] / MethSynt_RawMeth_nom_prod_ud * MethSynt_var_nom_cons + day0[C + i] * MethSynt_fix_cons)
+    }
 
-    /// Heat cons considering min harm op during harm op period
-    let DT = 730
-    // SUMIF(CalculationU5:U8763,"="A6,CalculationT5:T8763)
-    for i in 0..<365 { d6[DT + i] = Tsum[i] }
+    /// Min heat cons during day for night op prep
+    let Q = 4380
+    // IF(AND(M3=0;I3=0);0;(M3+I3/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_Hydrogen_nom_cons)/EY_Hydrogen_nom_prod*EY_var_heat_nom_cons+$C3*EY_heat_fix_cons)+IF(AND(K3=0;I3=0);0;(K3+I3/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_CO2_nom_cons)/CCU_CO2_nom_prod_ud*CCU_var_heat_nom_cons+$C3*CCU_heat_fix_cons)-IF(I3=0;0;I3/MethSynt_RawMeth_nom_prod_ud*MethSynt_var_heat_nom_prod+$C3*MethSynt_heat_fix_prod)
+    for i in 0..<365 {
+      d1[Q + i] =
+        iff(and(d1[M + i].isZero, d1[I + i].isZero), .zero, (d1[M + i] + d1[I + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_Hydrogen_nom_cons) / EY_Hydrogen_nom_prod * EY_var_heat_nom_cons + day0[C + i] * EY_heat_fix_cons)
+        + iff(and(d1[K + i].isZero, d1[I + i].isZero), .zero, (d1[K + i] + d1[I + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_CO2_nom_cons) / CCU_CO2_nom_prod_ud * CCU_var_heat_nom_cons + day0[C + i] * CCU_fix_heat_cons)
+        - iff(d1[I + i].isZero, .zero, d1[I + i] / MethSynt_RawMeth_nom_prod_ud * MethSynt_var_heat_nom_prod + day0[C + i] * MethSynt_heat_fix_prod)
+    }
 
-    /// Heat cons considering max harm op during harm op period
-    let DU = 1095
-    // SUMIF(CalculationU5:U8763,"="A6,CalculationAI5:AI8763)
-    for i in 0..<365 { d6[DU + i] = AIsum[i] }
+    /// Max heat cons during day for prep of night
+    let R = 4745
+    // IF(AND(N3=0;J3=0);0;(N3+J3/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_Hydrogen_nom_cons)/EY_Hydrogen_nom_prod*EY_var_heat_nom_cons+$C3*EY_heat_fix_cons)+IF(AND(L3=0;J3=0);0;(L3+J3/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_CO2_nom_cons)/CCU_CO2_nom_prod_ud*CCU_var_heat_nom_cons+$C3*CCU_heat_fix_cons)-IF(J3=0;0;J3/MethSynt_RawMeth_nom_prod_ud*MethSynt_var_heat_nom_prod+$C3*MethSynt_heat_fix_prod)
+    for i in 0..<365 {
+      d1[R + i] =
+        iff(and(d1[N + i].isZero, d1[J + i].isZero), .zero, (d1[N + i] + d1[J + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_Hydrogen_nom_cons) / EY_Hydrogen_nom_prod * EY_var_heat_nom_cons + day0[C + i] * EY_heat_fix_cons)
+        + iff(and(d1[L + i].isZero, d1[J + i].isZero), .zero, (d1[L + i] + d1[J + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_CO2_nom_cons) / CCU_CO2_nom_prod_ud * CCU_var_heat_nom_cons + day0[C + i] * CCU_fix_heat_cons)
+        - iff(d1[J + i].isZero, .zero, d1[J + i] / MethSynt_RawMeth_nom_prod_ud * MethSynt_var_heat_nom_prod + day0[C + i] * MethSynt_heat_fix_prod)
+    }
 
-    /// Max grid export after min harm op during harm op period
-    let DV = 1460
-    // SUMIFS(CalculationAF5:AF8763,CalculationU5:U8763,"="A6,CalculationS5:S8763,">0")
-    for i in 0..<365 { d6[DV + i] = U_S_AFsum[i] }
+    /// Min Rawmeth prod during day for night op prep
+    let S = 5110
+    /// Max Rawmeth prod during day for night op prep
+    let T = 5475
+    /// Min CO2 prod during day for night op prep
+    let U = 5840
+    /// Max CO2 prod during day for night op prep
+    let V = 6205
+    /// Min H2 prod during day for night op prep
+    let W = 6570
+    /// Max H2 prod during day for night op prep
+    let X = 6935
 
-    /// Max grid export after max harm op during harm op period
-    let DW = 1825
-    // SUMIFS(CalculationAT5:AT8763,CalculationU5:U8763,"="A6,CalculationS5:S8763,">0")
-    for i in 0..<365 { d6[DW + i] = U_S_ATsum[i] }
-
-    /// Max grid export after min/max harm op outside of harm op period
-    let DX = 2190
-    // SUMIF(CalculationU5:U8763,"="A6,CalculationAF5:AF8763)-DV6
-    for i in 0..<365 { d6[DX + i] = AFsum[i] - d6[DV + i] }
-
-    /// Grid cons considering min harm op during harm op period
-    let DY = 2555
-    // SUMIFS(CalculationX5:X8763,CalculationU5:U8763,"="A6,CalculationS5:S8763,">0")
-    for i in 0..<365 { d6[DY + i] = U_S_Xsum[i] }
-
-    /// Grid cons considering max harm op during harm op period
-    let DZ = 2920
-    // SUMIFS(CalculationAL5:AL8763,CalculationU5:U8763,"="A6,CalculationAH5:AH8763,">0")
-    for i in 0..<365 { d6[DZ + i] = U_AH_ALsum[i] }
-
-    /// Grid cons considering min/max harm op outside harm op period
-    let EA = 3285
-    // SUMIF(CalculationU5:U8763,"="A6,CalculationX5:X8763)-DY6
-    for i in 0..<365 { d6[EA + i] = Xsum[i] - d6[DY + i] }
-
-    /// Remaining PV el after min harm during harm op period
-    let EB = 3650
-    // SUMIFS(CalculationV5:V8763,CalculationU5:U8763,"="A6,CalculationS5:S8763,">0")
-    for i in 0..<365 { d6[EB + i] = U_S_Vsum[i] }
-
-    /// Remaining PV el after max harm during harm op period
-    let EC = 4015
-    // SUMIFS(CalculationAJ5:AJ8763,CalculationU5:U8763,"="A6,CalculationAH5:AH8763,">0")
-    for i in 0..<365 { d6[EC + i] = U_AH_AJsum[i] }
-
-    /// Remaining PV el after min harm outside harm op period
-    let ED = 4380
-    // SUMIF(CalculationU5:U8763,"="A6,CalculationV5:V8763)-EB6
-    for i in 0..<365 { d6[ED + i] = Vsum[i] - d6[EB + i] }
-
-    /// Remaining CSP heat after min harm during harm op period
-    let EE = 4745
-    // SUMIFS(CalculationW5:W8763,CalculationU5:U8763,"="A6,CalculationS5:S8763,">0")
-    for i in 0..<365 { d6[EE + i] = U_S_Wsum[i] }
-
-    /// Remaining CSP heat after max harm during harm op period
-    let EF = 5110
-    // SUMIFS(CalculationAK5:AK8763,CalculationU5:U8763,"="A6,CalculationAH5:AH8763,">0")
-    for i in 0..<365 { d6[EF + i] = U_AH_AKsum[i] }
-
-    /// Remaining CSP heat after min harm outside harm op period
-    let EG = 5475
-    // SUMIF(CalculationU5:U8763,"="A6,CalculationW5:W8763)-EE6
-    for i in 0..<365 { d6[EG + i] = Wsum[i] - d6[EE + i] }
-
-    /// Remaining grid import cap after min harm during harm op period
-    let EH = 5840
-    // SUMIFS(CalculationY5:Y8763,CalculationU5:U8763,"="A6,CalculationS5:S8763,">0")
-    for i in 0..<365 { d6[EH + i] = U_S_Ysum[i] }
-
-    /// Remaining grid import cap after max harm during harm op period
-    let EI = 6205
-    // SUMIFS(CalculationAM5:AM8763,CalculationU5:U8763,"="A6,CalculationAH5:AH8763,">0")
-    for i in 0..<365 { d6[EI + i] = U_AH_AMsum[i] }
-
-    /// Remaining grid import cap after min harm outside harm op period
-    let EJ = 6570
-    // SUMIF(CalculationU5:U8763,"="A6,CalculationY5:Y8763)-EH6
-    for i in 0..<365 { d6[EJ + i] = Ysum[i] - d6[EH + i] }
-
-    /// Max elec to BESS for night prep after min harm op during harm op period
-    let EK = 6935
-    // MIN(SUMIFS(CalculationAE5:AE8763,CalculationU5:U8763,"="A6,CalculationS5:S8763,">0"),BESS_cap_ud/BESS_chrg_eff)
-    for i in 0..<365 { d6[EK + i] = min(U_S_AEsum[i], BESS_cap_ud / BESS_chrg_eff) }
-
-    /// Max BESS night prep after max harm cons during harm op period
-    let EL = 7300
-    // MIN(SUMIFS(CalculationAS5:AS8763,CalculationU5:U8763,"="A6,CalculationAH5:AH8763,">0"),BESS_cap_ud/BESS_chrg_eff)
-    for i in 0..<365 { d6[EL + i] = min(U_AH_ASsum[i], BESS_cap_ud / BESS_chrg_eff) }
-
-    /// Max elec to BESS for night prep after min harm op outside harm op period
-    let EM = 7665
-    // MIN(SUMIFS(CalculationAE5:AE8763,CalculationU5:U8763,"="A6,CalculationS5:S8763,"=0"),BESS_cap_ud/BESS_chrg_eff)
-    for i in 0..<365 { d6[EM + i] = min(U_S_AEsumZero[i], BESS_cap_ud / BESS_chrg_eff) }
-
-    /// El boiler op for min harm during harm op period
-    let EN = 8030
-    // SUMIFS(CalculationZ5:Z8763,CalculationU5:U8763,"="A6,CalculationS5:S8763,">0")
-    for i in 0..<365 { d6[EN + i] = U_S_Zsum[i] }
-
-    /// El boiler op for max harm during harm op period
-    let EO = 8395
-    // SUMIFS(CalculationAN5:AN8763,CalculationU5:U8763,"="A6,CalculationS5:S8763,">0")
-    for i in 0..<365 { d6[EO + i] = U_S_ANsum[i] }
-
-    /// Remaining El boiler cap after min harm during harm op period
-    let EP = 8760
-    // SUMIFS(CalculationAA5:AA8763,CalculationU5:U8763,"="A6,CalculationS5:S8763,">0")
-    for i in 0..<365 { d6[EP + i] = U_S_AAsum[i] }
-
-    /// Remaining El boiler cap after max harm during harm op period
-    let EQ = 9125
-    // SUMIFS(CalculationAO5:AO8763,CalculationU5:U8763,"="A6,CalculationAH5:AH8763,">0")
-    for i in 0..<365 { d6[EQ + i] = U_AH_AOsum[i] }
-
-    /// Remaining El boiler cap after min harm outside harm op period
-    let ER = 9490
-    // SUMIF(CalculationU5:U8763,"="A6,CalculationAA5:AA8763)-EP6
-    for i in 0..<365 { d6[ER + i] = AAsum[i] - d6[EP + i] }
-
-    /// Remaining MethSynt cap after min harm during harm op period
-    let ES = 9855
-    // SUMIFS(CalculationAB5:AB8763,CalculationU5:U8763,"="A6,CalculationS5:S8763,">0")
-    for i in 0..<365 { d6[ES + i] = U_S_ABsum[i] }
-
-    /// Remaining MethSynt cap after max harm during harm op period
-    let ET = 10220
-    // SUMIFS(CalculationAP5:AP8763,CalculationU5:U8763,"="A6,CalculationAH5:AH8763,">0")
-    for i in 0..<365 { d6[ET + i] = U_AH_APsum[i] }
-
-    /// Remaining MethSynt cap after min harm outside of harm op period
-    let EU = 10585
-    // SUMIF(CalculationU5:U8763,"="A6,CalculationAB5:AB8763)-ES6
-    for i in 0..<365 { d6[EU + i] = ABsum[i] - d6[ES + i] }
-
-    /// Remaining CCU cap after min harm during harm op period
-    let EV = 10950
-    // SUMIFS(CalculationAC5:AC8763,CalculationU5:U8763,"="A6,CalculationS5:S8763,">0")
-    for i in 0..<365 { d6[EV + i] = U_S_ACsum[i] }
-
-    /// Remaining CCU cap after max harm during harm op period
-    let EW = 11315
-    // SUMIFS(CalculationAQ5:AQ8763,CalculationU5:U8763,"="A6,CalculationAH5:AH8763,">0")
-    for i in 0..<365 { d6[EW + i] = U_AH_AQsum[i] }
-
-    /// Remaining CCU cap after min harm outside of harm op period
-    let EX = 11680
-    // SUMIF(CalculationU5:U8763,"="A6,CalculationAC5:AC8763)-EV6
-    for i in 0..<365 { d6[EX + i] = ACsum[i] - d6[EV + i] }
-
-    /// Remaining EY cap after min harm during harm op period
-    let EY = 12045
-    // SUMIFS(CalculationAD5:AD8763,CalculationU5:U8763,"="A6,CalculationS5:S8763,">0")
-    for i in 0..<365 { d6[EY + i] = U_S_ADsum[i] }
-
-    /// Remaining EY cap after max harm during harm op period
-    let EZ = 12410
-    // SUMIFS(CalculationAR5:AR8763,CalculationU5:U8763,"="A6,CalculationAH5:AH8763,">0")
-    for i in 0..<365 { d6[EZ + i] = U_AH_ARsum[i] }
-
-    /// Remaining EY cap after min harm outside of harm op period
-    let FA = 12775
-    // SUMIF(CalculationU5:U8763,"="A6,CalculationAD5:AD8763)-EY6
-    for i in 0..<365 { d6[FA + i] = ADsum[i] - d6[EY + i] }
-    return d6
+    for i in 0..<365 {
+      // I6
+      d1[S + i] = d1[I + i]
+      // J6
+      d1[T + i] = d1[J + i]
+      // K6+I6/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_CO2_nom_cons
+      d1[U + i] = d1[K + i] + d1[I + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_CO2_nom_cons
+      // L6+J6/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_CO2_nom_cons
+      d1[V + i] = d1[L + i] + d1[J + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_CO2_nom_cons
+      // M6+I6/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_Hydrogen_nom_cons
+      d1[W + i] = d1[M + i] + d1[I + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_Hydrogen_nom_cons
+      // N6+J6/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_Hydrogen_nom_cons
+      d1[X + i] = d1[N + i] + d1[J + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_Hydrogen_nom_cons
+    }
   }
 }
