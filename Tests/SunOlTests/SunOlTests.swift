@@ -210,7 +210,7 @@ class SunOlTests: XCTestCase {
     var d10 = [Double](repeating: .zero, count: 13_140)
     var d11 = [Double](repeating: .zero, count: 17_155)
     var d12 = [Double](repeating: .zero, count: 17_155)
-    var d13 = [Double](repeating: .zero, count: 46_720) 
+    var d13 = [Double](repeating: .zero, count: 47_085) 
     var d23 = [Double](repeating: .zero, count: 47_815)
     var d21 = [Double](repeating: .zero, count: 9_855)
 
@@ -1199,7 +1199,7 @@ class SunOlTests: XCTestCase {
     var d10 = [Double](repeating: .zero, count: 13_140)
     var d11 = [Double](repeating: .zero, count: 17_155)
     var d12 = [Double](repeating: .zero, count: 17_155)
-    var d13 = [Double](repeating: .zero, count: 46_720) 
+    var d13 = [Double](repeating: .zero, count: 47_085) 
     var d23 = [Double](repeating: .zero, count: 47_815)
     var d21 = [Double](repeating: .zero, count: 9_855)
     
@@ -1252,9 +1252,9 @@ class SunOlTests: XCTestCase {
     let LCOM = costs.LCOM(
       meth_produced_MTPH: meth_produced_MTPH_sum, elec_from_grid: elec_from_grid_sum,
       elec_to_grid: elec_to_grid_MTPH_sum)
-    XCTAssertEqual(LCOM, 1177, accuracy: 1, "LCOM")
-    XCTAssertEqual(meth_produced_MTPH_sum, 135185, accuracy: 1, "meth_produced_MTPH_sum")
-    XCTAssertEqual(elec_from_grid_sum, 573.2502945139066, accuracy: 1, "elec_from_grid_sum")
+    XCTAssertEqual(LCOM, 1227, accuracy: 1, "LCOM")
+    XCTAssertEqual(meth_produced_MTPH_sum, 128806, accuracy: 1, "meth_produced_MTPH_sum")
+    XCTAssertEqual(elec_from_grid_sum, 0, accuracy: 1, "elec_from_grid_sum")
     XCTAssertEqual(elec_to_grid_MTPH_sum, 0, accuracy: 1, "elec_to_grid_MTPH_sum")
   }
 

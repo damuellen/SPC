@@ -19,7 +19,7 @@ extension TunOl {
     for i in 0..<365 { d13[ddIQ + i] = d11[FS + i] + d11[GE + i] - d10[Z + i] - max(.zero, d10[AB + i] - d11[FV + i]) / El_boiler_eff - min(d11[FY + i], max(.zero, d11[FK + i] - d12[GG + i]) / BESS_chrg_eff) }
 
     let equiv_harmonious_range = (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j])
-    let ddAM = 30295  // let ddLY = 30295
+    let ddAM = 46720 
     for i in 0..<365 { d13[ddAM + i] = equiv_harmonious_range < 1E-10 ? 1 : (d10[AM + i] - equiv_harmonious_min_perc[j]) / equiv_harmonious_range }
 
     /// Surplus harm op period electricity after min harm op and max night op prep

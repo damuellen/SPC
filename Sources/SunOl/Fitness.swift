@@ -20,7 +20,7 @@ public func fitness(values: [Double]) -> [Double] {
   var d10 = [Double](repeating: .zero, count: 13_140)
   var d11 = [Double](repeating: .zero, count: 17_155)
   var d12 = [Double](repeating: .zero, count: 17_155)
-  var d13 = [Double](repeating: .zero, count: 46_720) 
+  var d13 = [Double](repeating: .zero, count: 47_085) 
   var d23 = [Double](repeating: .zero, count: 47_815)
   var d21 = [Double](repeating: .zero, count: 9_855)
   
