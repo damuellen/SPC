@@ -2,11 +2,11 @@ extension TunOl {
   func d14(_ d13: inout [Double], case j: Int, d10: [Double], d11: [Double], d12: [Double]) {
     let (C, D, E, T, U, V, Z, AA, AB, AC) = (0, 365, 730, 5840, 6205, 6570, 8030, 8395, 8760, 9125)  // d10
 
-    let (EY, EZ, FA, FC, FD, FE, FI, FJ, FR, FS, FT, FV, FW, FY, FZ, GA, GB, GC, GD, GE, GF, GG, GH, GI) = (
+    let (EY, EZ, FA, FC, FD, FE, _, _, FR, FS, FT, FV, FW, FY, FZ, GA, GB, GC, GD, GE, GF, GG, GH, GI) = (
       0, 365, 730, 1460, 1825, 2190, 2555, 4015, 6935, 7300, 7665, 8395, 8760, 9490, 9855, 10220, 10585, 10950, 11315, 11680, 12045, 12410, 12775, 13140
     )  // d11
 
-    let (GU, GV, GW, GY, GZ, HA, HE, HF, HN, HO, HP, HR, HS, HU, HV, HW, HX, HY, HZ, IA, IB, IC, ID, IE) = (
+    let (GU, GV, GW, GY, GZ, HA, _, _, HN, HO, HP, HR, HS, HU, HV, HW, HX, HY, HZ, IA, IB, IC, ID, IE) = (
       0, 365, 730, 1460, 1825, 2190, 3650, 4015, 6935, 7300, 7665, 8395, 8760, 9490, 9855, 10220, 10585, 10950, 11315, 11680, 12045, 12410, 12775, 13140
     )  // d12
     let FX = 9125
@@ -283,10 +283,10 @@ extension TunOl {
 
     /// el cons for BESS charging during harm op period
     let ddMN = 35405
-    // MN=IF(OR(KI6=0,KZ6=0),MIN(FR6/BESS_chrg_eff,FZ6),MIN(((FY6+(HU6-FY6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))+((FZ6+(HV6-FZ6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(FY6+(HU6-FY6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)))/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(KZ6-Overall_harmonious_min_perc)),(FK6+(HG6-FK6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))/BESS_chrg_eff))
+    // MN=IF(OR(KI6=0,KZ6=0),MIN(FK6/BESS_chrg_eff,FZ6),MIN(((FY6+(HU6-FY6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))+((FZ6+(HV6-FZ6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(FY6+(HU6-FY6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)))/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(KZ6-Overall_harmonious_min_perc)),(FK6+(HG6-FK6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))/BESS_chrg_eff))
     for i in 0..<365 {
       d13[ddMN + i] = iff(
-        or(d13[ddKI + i].isZero, d13[ddKZ + i].isZero), min(d11[FR + i] / BESS_chrg_eff, d11[FZ + i]),
+        or(d13[ddKI + i].isZero, d13[ddKZ + i].isZero), min(d11[FK + i] / BESS_chrg_eff, d11[FZ + i]),
         min(
           (d11[FY + i] + (d12[HU + i] - d11[FY + i]) * d13[ddAMKI + i] + ((d11[FZ + i] + (d12[HV + i] - d11[FZ + i]) * d13[ddAMKI + i]) - (d11[FY + i] + (d12[HU + i] - d11[FY + i]) * d13[ddAMKI + i])) / Overall_harmonious_range * (d13[ddKZ + i] - Overall_harmonious_min_perc)),
           (d11[FR + i] + (d12[HN + i] - d11[FR + i]) * d13[ddAMKI + i]) / BESS_chrg_eff))
@@ -439,15 +439,13 @@ extension TunOl {
     /// Grid import needed outside of harm op period
     let ddNF = 41975
     // NF=MIN(IF(KI6=0,GG6,GG6+(IC6-GG6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)),MAX(0,NB6-NC6-ND6-NH6*BESS_chrg_eff))
-    for i in 0..<365 { d13[ddNF + i] = min(iff(d13[ddKI + i].isZero, d11[GG + i], d11[GG + i] + (d12[IC + i] - d11[GG + i]) * d13[ddAMKI + i]), max(.zero, d13[ddNB + i] - d13[ddNC + i] - d13[ddND + i] - d13[ddNH + i] * BESS_chrg_eff)) }
-
-    
-
-
+    for i in 0..<365 { 
+      d13[ddNF + i] = min(iff(d13[ddKI + i].isZero, d11[GG + i], d11[GG + i] + (d12[IC + i] - d11[GG + i]) * d13[ddAMKI + i]), max(.zero, d13[ddNB + i] - d13[ddNC + i] - d13[ddND + i] - d13[ddNH + i] * BESS_chrg_eff)) 
+    }
 
     /// Balance of electricity outside of harm op period
-        let ddNG = 42340
-        // NG=NC6+ND6+NF6+NH6*BESS_chrg_eff-MAX(0,NH6-NE6)-NB6
+    let ddNG = 42340
+    // NG=NC6+ND6+NF6+NH6*BESS_chrg_eff-MAX(0,NH6-NE6)-NB6
     for i in 0..<365 { 
       d13[ddNG + i] = d13[ddNC + i] + d13[ddND + i] + d13[ddNF + i] + d13[ddNH + i] * BESS_chrg_eff - max(0, d13[ddNH + i] - d13[ddNE + i]) - d13[ddNB + i]
     }
