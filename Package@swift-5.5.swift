@@ -18,7 +18,6 @@ var platformProducts: [Product] = [
   .library(name: "SolarPosition", type: .dynamic, targets: ["SolarPosition"]),
   .library(name: "PinchPoint", type: .dynamic, targets: ["PinchPoint"]),
   .library(name: "SunOl", type: .dynamic, targets: ["SunOl"]),
-  .library(name: "SolarFieldModel", type: .dynamic, targets: ["SolarFieldModel"]),
 ]
 #else
 var platformProducts: [Product] = []
@@ -26,7 +25,6 @@ var platformProducts: [Product] = []
 #if !os(iOS)
 platformProducts.append(contentsOf: [
   .executable(name: "SPC", targets: ["SolarPerformanceCalc"]),
-  .executable(name: "SolarFieldCalc", targets: ["SolarFieldCalc"]),
   .executable(name: "PinchPointTool", targets: ["PinchPointTool"]),
   .executable(name: "Playground", targets: ["Playground"]),
   .executable(name: "Optimizer", targets: ["Optimizer"]),
@@ -54,7 +52,6 @@ let platformTargets: [Target] = [
     swiftSettings: swift
   ), .target(name: "PinchPoint", dependencies: ["CPikchr", "Utilities"], swiftSettings: swift),
   .target(name: "ThermalStorage", dependencies: ["Utilities"], swiftSettings: swift),
-  .target(name: "SolarFieldModel", swiftSettings: swift),
   .target(
     name: "Meteo",
     dependencies: ["DateGenerator", "SolarPosition", "Utilities"],
@@ -85,15 +82,6 @@ let platformTargets: [Target] = [
     dependencies: [
       "Utilities", "SunOl",
       .product(name: "xlsxwriter", package: "xlsxwriter.swift")
-    ],
-    swiftSettings: swift
-  ),
-  .executableTarget(
-    name: "SolarFieldCalc",
-    dependencies: [
-      "SolarFieldModel", "CPikchr", "Utilities",
-      .product(name: "ArgumentParser", package: "swift-argument-parser"),
-      .product(name: "xlsxwriter", package: "xlsxwriter.swift"),
     ],
     swiftSettings: swift
   ),
@@ -132,7 +120,6 @@ let platformTargets: [Target] = [
   .testTarget(name: "SunOlTests", dependencies: ["SunOl"]),
   .testTarget(name: "ThermalStorageTests", dependencies: ["ThermalStorage"]),
   .testTarget(name: "PinchPointTests", dependencies: ["PinchPoint"]),
-  .testTarget(name: "SolarFieldModelTests", dependencies: ["SolarFieldModel"]),
   .testTarget(
     name: "BlackBoxModelTests",
     dependencies: ["Config", "Meteo", "SolarPosition", "BlackBoxModel"]
