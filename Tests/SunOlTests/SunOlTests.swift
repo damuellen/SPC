@@ -32,7 +32,7 @@ class SunOlTests: XCTestCase {
       var counter = 1
       for i in 1..<8760 {
         if counter > 30 { break }
-        if abs(ref[i - 1] - array[index + i]) / ref[i - 1] > 0.005 {
+        if abs(ref[i - 1] - array[index + i]) / ref[i - 1] > 0.01 {
           counter += 1
           correct = false
           print("Calculation", letter, i + 4, "=", ref[i - 1], "not equal [\(index + i)] =", array[index + i])
@@ -48,10 +48,10 @@ class SunOlTests: XCTestCase {
       var counter = 1
       for i in 0..<364 {
         if counter > 50 { break }
-        if abs(ref[i] - array[index + i]) / ref[i] > 0.005 {
+        if abs(ref[i] - array[index + i]) / ref[i] > 0.01 {
           counter += 1
           correct = false  
-          // print("Daily1", letter, i + 3, "=", ref[i], "not equal", array[index + i])
+          print("Daily1", letter, i + 3, "=", ref[i], "not equal", array[index + i])
         }
       }
       if correct { print("Daily1", letter, "all equal") }
@@ -64,19 +64,17 @@ class SunOlTests: XCTestCase {
       var counter = 1
       for i in 0..<364 {
         if counter > 50 { break }
-        if abs(ref[i] - array[index + i]) / ref[i] > 0.005 {
+        if abs(ref[i] - array[index + i]) / ref[i] > 0.01 {
           counter += 1
           correct = false  
-          // print("Daily2", letter, i + 3, "=", ref[i], "not equal", array[index + i])
+          print("Daily2", letter, i + 3, "=", ref[i], "not equal", array[index + i])
         }
       }
       if correct { print("Daily2", letter, "all equal") }
     }
 
-    guard let model = TunOl([
-        100.5149357, 0.994237658, 0.000546636, 938.974253, 1380, 596.0038574, 67.64945773, 0, 43.26483749, 73.02240138,
-        53.22251588, 272.4743539, 31.04143015, 98.39201198, 902.2703878, 0, 0,
-      ])
+    guard let model = TunOl([120.00,8867.00,190.00,950.00,1350.00,500.00,100.00,300.00,40.00,30000.00,46.00,30000.00,30.00,120.00,1200.00,50.00,0.00,])
+
     else {
       print("Invalid config")
       return
@@ -211,7 +209,7 @@ class SunOlTests: XCTestCase {
     var d11 = [Double](repeating: .zero, count: 17_155)
     var d12 = [Double](repeating: .zero, count: 17_155)
     var d13 = [Double](repeating: .zero, count: 47_085) 
-    var d23 = [Double](repeating: .zero, count: 47_815)
+    var d23 = [Double](repeating: .zero, count: 48_545)
     var d21 = [Double](repeating: .zero, count: 9_855)
 
     for j in 0..<4 {
@@ -1173,10 +1171,8 @@ class SunOlTests: XCTestCase {
 
   func testsCalculation2() {
     guard
-      let model = TunOl([
-        100.00, 10.00, 50.00, 600.00, 1000.00, 600.00, 5.00, 5.00, 80.00, 3.00, 90.00, 5.00, 60.00, 110.00, 200.00,
-        0.00, 0.00,
-      ])
+      let model = TunOl([93.45593212,0.0000,0.0000,943.1577,1380.0000,600.0000,75.7355,0.00,43.13,3.6215,46.61,279.4058,30.6744,109.5815,1021.4523,0.00,0.0000,])
+
     else {
       print("Invalid config")
       return
@@ -1200,7 +1196,7 @@ class SunOlTests: XCTestCase {
     var d11 = [Double](repeating: .zero, count: 17_155)
     var d12 = [Double](repeating: .zero, count: 17_155)
     var d13 = [Double](repeating: .zero, count: 47_085) 
-    var d23 = [Double](repeating: .zero, count: 47_815)
+    var d23 = [Double](repeating: .zero, count: 48_545)
     var d21 = [Double](repeating: .zero, count: 9_855)
     
     for j in 0..<4 {
@@ -1252,7 +1248,7 @@ class SunOlTests: XCTestCase {
     let LCOM = costs.LCOM(
       meth_produced_MTPH: meth_produced_MTPH_sum, elec_from_grid: elec_from_grid_sum,
       elec_to_grid: elec_to_grid_MTPH_sum)
-    XCTAssertEqual(LCOM, 1227, accuracy: 1, "LCOM")
+    XCTAssertEqual(LCOM, 1193, accuracy: 1, "LCOM")
     XCTAssertEqual(meth_produced_MTPH_sum, 128806, accuracy: 1, "meth_produced_MTPH_sum")
     XCTAssertEqual(elec_from_grid_sum, 0, accuracy: 1, "elec_from_grid_sum")
     XCTAssertEqual(elec_to_grid_MTPH_sum, 0, accuracy: 1, "elec_to_grid_MTPH_sum")
@@ -1265,7 +1261,7 @@ class SunOlTests: XCTestCase {
     ])!
     let costs = Costs(model)
     var fixtures = [
-      19113593.96, 151300856.2, 465123723.2, 36221243.55, 5753063.152, 54162465.32, 84_370_000, 504_000_000,
+      19113593.96, 151300856.2, 465123723.2, 36221243.55, 5753063.152, 2496904, 84_370_000, 504_000_000,
       2966339.549, 43922259.87, 15901.02011, 86731590.14, 32406.66362, 131_815_026, 69130701.25, 10070885.31,
       0,
     ]

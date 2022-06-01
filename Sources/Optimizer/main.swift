@@ -81,7 +81,7 @@ struct Command: ParsableCommand {
         PV_AC_cap_ud: 10...1280,
         PV_DC_cap_ud: 10...1380,
         RawMeth_storage_cap_ud: 0...300,
-        TES_full_load_hours_ud: 0...30)
+        TES_thermal_cap_ud: 0...99999)
     }
     
     let server = HTTP(handler: respond)
@@ -118,7 +118,7 @@ func writeExcel(results: [[Double]]) -> String {
   results.forEach { row in r += 1; ws.write(row, row: r) }
   let labels = [
     "LCOM", "CAPEX", "OPEX", "Methanol", "Import", "Export",
-    "CSP_loop_nr", "TES_full_load_hours", "PB_nom_gross_cap",
+    "CSP_loop_nr", "TES_thermal_cap_ud", "PB_nom_gross_cap",
     "PV_AC_cap", "PV_DC_cap", "EY_var_net_nom_cons",
     "Hydrogen_storage_cap", "Heater_cap", "CCU_CO2_nom_prod",
     "CO2_storage_cap", "MethSynt_RawMeth_nom_prod",

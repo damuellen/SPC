@@ -18,6 +18,7 @@ var platformProducts: [Product] = [
   .library(name: "SolarPosition", type: .dynamic, targets: ["SolarPosition"]),
   .library(name: "PinchPoint", type: .dynamic, targets: ["PinchPoint"]),
   .library(name: "SunOl", type: .dynamic, targets: ["SunOl"]),
+  .library(name: "SolarFieldModel", type: .dynamic, targets: ["SolarFieldModel"]),
 ]
 #else
 var platformProducts: [Product] = []

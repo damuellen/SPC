@@ -21,11 +21,11 @@ public struct Parameter: Codable {
     PV_AC_cap_ud: ClosedRange<Double>,
     PV_DC_cap_ud: ClosedRange<Double>,
     RawMeth_storage_cap_ud: ClosedRange<Double>,
-    TES_full_load_hours_ud: ClosedRange<Double>
+    TES_thermal_cap_ud: ClosedRange<Double>
   ) {
     self.ranges = [
       CSP_loop_nr_ud,
-      TES_full_load_hours_ud,
+      TES_thermal_cap_ud,
       PB_nom_gross_cap_ud,
       PV_AC_cap_ud,
       PV_DC_cap_ud,

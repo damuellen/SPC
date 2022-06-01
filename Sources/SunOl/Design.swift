@@ -236,11 +236,12 @@ public struct TunOl {
   let TES_dead_mass_ratio: Double = 0.1
   var TES_salt_mass: Double = 0
   var TES_thermal_cap: Double = 0
+  var TES_full_load_hours: Double = 0
 
   var th_Coeff: [Double] = [0]  // PB_Eff!$U3 PB_Eff!$T3 PB_Eff!$S3 PB_Eff!$R3 PB_Eff!$Q3
 
   var CSP_loop_nr_ud: Double
-  var TES_full_load_hours_ud: Double
+  var TES_thermal_cap_ud: Double
   var PB_nom_gross_cap_ud: Double
   var PV_AC_cap_ud: Double
   var PV_DC_cap_ud: Double
@@ -268,7 +269,7 @@ public struct TunOl {
   
   var values: [Double] {
     [
-      CSP_loop_nr_ud, TES_full_load_hours_ud, PB_nom_gross_cap_ud, PV_AC_cap_ud, PV_DC_cap_ud,
+      CSP_loop_nr_ud, TES_thermal_cap_ud, PB_nom_gross_cap_ud, PV_AC_cap_ud, PV_DC_cap_ud,
       EY_var_net_nom_cons_ud, Hydrogen_storage_cap_ud, Heater_cap_ud, CCU_CO2_nom_prod_ud,
       CO2_storage_cap_ud, MethSynt_RawMeth_nom_prod_ud, RawMeth_storage_cap_ud,
       MethDist_Meth_nom_prod_ud, El_boiler_cap_ud, BESS_cap_ud, Grid_export_max_ud,
@@ -279,7 +280,7 @@ public struct TunOl {
   init?(_ parameter: [Double]) {
     let parameter = parameter.map { $0 < 1 ? .zero : $0 }
     self.CSP_loop_nr_ud = parameter[0]
-    self.TES_full_load_hours_ud = parameter[1]
+    self.TES_thermal_cap_ud = parameter[1]
     self.PB_nom_gross_cap_ud = parameter[2]
     self.PV_AC_cap_ud = parameter[3]
     self.PV_DC_cap_ud = parameter[4]
@@ -303,7 +304,7 @@ public struct TunOl {
 
     let maximum = TunOl.Reference_PV_MV_power_at_transformer_outlet.max() ?? .zero
     let Inverter_power_fraction = TunOl.Reference_PV_MV_power_at_transformer_outlet.map { max(.zero, $0 / maximum) }
-    let Inverter_eff = Inverter_power_fraction.indices.map { return iff(TunOl.Reference_PV_MV_power_at_transformer_outlet[$0] < maximum, max(TunOl.Reference_PV_MV_power_at_transformer_outlet[$0], .zero) / TunOl.Reference_PV_plant_power_at_inverter_inlet_DC[$0], .zero) }
+    let Inverter_eff = Inverter_power_fraction.indices.map { iff(TunOl.Reference_PV_MV_power_at_transformer_outlet[$0] < maximum, max(TunOl.Reference_PV_MV_power_at_transformer_outlet[$0], .zero) / TunOl.Reference_PV_plant_power_at_inverter_inlet_DC[$0], .zero) }
     let inverter = zip(Inverter_power_fraction, Inverter_eff).filter { $0.0 > 0 && $0.0 < 1 }.sorted(by: { $0.0 < $1.0 })
     let chunks = inverter.chunked { Int($0.0 * 100) == Int($1.0 * 100) }
     let eff1 = chunks.map { bin in bin.reduce(0.0) { $0 + $1.1 } / Double(bin.count) }
@@ -349,10 +350,7 @@ public struct TunOl {
     let CCU_heat_stup_cons = CCU_CO2_nom_prod_ud / CCU_Ref_CO2_hour_prod * CCU_Ref_heat_stup_cons
     self.PB_fix_aux_el = iff(PB_nom_gross_cap_ud <= .zero, .zero, PB_Ref_nom_gross_cap * PB_fix_aux_elec_cons_perc_of_ref * POLY(PB_nom_gross_cap_ud / PB_Ref_nom_gross_cap, fix_aux_el))
     self.PB_nom_var_aux_cons = PB_nom_gross_cap_ud * PB_nom_var_aux_cons_perc_gross
-    // let PB_g2n_var_aux_el_Coeff3 = PB_var_aux_cons_Coeff3
-    // let PB_g2n_var_aux_el_Coeff2 = PB_var_aux_cons_Coeff2
-    // let PB_g2n_var_aux_el_Coeff1 = PB_var_aux_cons_Coeff1
-    // let PB_g2n_var_aux_el_Coeff0 = PB_var_aux_cons_Coeff0
+
     self.PB_stby_aux_cons = iff(PB_nom_gross_cap_ud <= .zero, .zero, PB_nom_gross_cap_ud * PB_stby_var_aux_cons_perc + PB_Ref_nom_gross_cap * PB_stby_fix_aux_cons_perc * POLY(PB_nom_gross_cap_ud / PB_Ref_nom_gross_cap, fix_stby_el))
     self.PB_stup_aux_cons = iff(PB_nom_gross_cap_ud <= .zero, .zero, PB_nom_gross_cap_ud * PB_stup_var_aux_elec_cons_perc + PB_Ref_nom_gross_cap * PB_stup_fix_aux_elec_cons_perc * POLY(PB_nom_gross_cap_ud / PB_Ref_nom_gross_cap, fix_stup_el))
     self.PB_gross_min_cap = PB_nom_gross_cap_ud * PB_grs_el_cap_min_perc
@@ -477,70 +475,80 @@ public struct TunOl {
     self.EY_harmonious_perc_at_PB_nom = EY_harmonious_max_perc / Overall_harmonious_max_perc * Overall_harmonious_perc_at_PB_nom
     self.Overall_harmonious_var_heat_cons_at_PB_nom = EY_harmonious_perc_at_PB_nom * EY_var_heat_nom_cons + MethDist_harmonious_perc_at_PB_nom * MethDist_var_heat_nom_cons - MethSynt_harmonious_perc_at_PB_nom * MethSynt_var_heat_nom_prod + CCU_harmonious_perc_at_PB_nom * CCU_var_heat_nom_cons
 
-    // if nominal_gross_cap == 0 {
-    //   self.nominal_gross_cap = 0
-    //   max_heat_input = 0
-    //   min_heat_input = 0
-    //   minimum_gross_cap = 0
-    //   nominal_gross_eff = 0
-    //   th = Polynomial([0])
-    //   el = Polynomial([0])
-    //   return
-    // }
+    if PB_nom_gross_cap_ud.isZero {
+      self.PB_nom_gross_eff = 0
+      self.PB_nom_heat_cons = 0
+      self.PB_cold_start_heat_req = 0
+      self.PB_warm_start_heat_req = 0
+      self.PB_hot_start_heat_req = 0
+      self.th_Coeff = [0]
+      self.el_Coeff = [0]
+      self.PB_heat_min_input = 0
+      self.PB_gross_min_eff = 0
+      self.PB_Ratio_Heat_input_vs_output = 0
+      self.PB_n_g_var_aux_el_Coeff = [0]
+      self.PB_var_heat_max_cons = 0
+      self.PB_nom_var_aux_cons_perc_net = 0
+    } else {
+      let PB_Ref_25p_aux_heat_prod: Double = (7.194 * 2775.4 - 5.414 * 167.6 - 1.78 * 649.6) / 1000
+      let PB_Ref_30p_aux_heat_prod: Double = (10.778 * 2775.4 - 8.278 * 167.6 - 2.5 * 649.6) / 1000
+      let PB_Ref_nom_aux_heat_prod: Double = (23.333 * 2775.4 - 15.167 * 167.6 - 8.167 * 649.6) / 1000
 
-    // minimum_gross_cap = nominal_gross_cap * min_el_cap_perc
+      let gross_cap = [  // A29-A33
+        PB_Ref_nom_gross_cap, ((((PB_Ref_25p_gross_cap_max_aux_heat + PB_Ref_nom_gross_cap) / 2) + PB_Ref_nom_gross_cap) / 2), ((PB_Ref_25p_gross_cap_max_aux_heat + PB_Ref_nom_gross_cap) / 2), PB_Ref_30p_gross_cap, PB_Ref_25p_gross_cap_max_aux_heat,
+      ]
+      let load_perc: [Double] = gross_cap.map { $0 / PB_Ref_nom_gross_cap }  // B
+      let PB_Ref_25p_max_aux_heat_prod: Double = (23.333 * 2775.4 - 15.167 * 167.6 - 8.167 * 649.6) / 1000
+      let heat_input = load_perc.map { $0 * PB_nom_gross_cap_ud }  // D
+      let factor = seek(goal: 0) { (PB_Ref_25p_heat_cons - PB_Ref_25p_aux_heat_prod * $0) - (PB_Ref_25p_heat_cons_max_aux_heat - PB_Ref_25p_max_aux_heat_prod * $0) }  // 0.68792724609375
 
-    let PB_Ref_25p_aux_heat_prod: Double = (7.194 * 2775.4 - 5.414 * 167.6 - 1.78 * 649.6) / 1000
-    let PB_Ref_30p_aux_heat_prod: Double = (10.778 * 2775.4 - 8.278 * 167.6 - 2.5 * 649.6) / 1000
-    let PB_Ref_nom_aux_heat_prod: Double = (23.333 * 2775.4 - 15.167 * 167.6 - 8.167 * 649.6) / 1000
+      let no_extraction = [  // B
+        PB_Ref_nom_heat_cons - PB_Ref_nom_aux_heat_prod * factor, ((((PB_Ref_25p_heat_cons + PB_Ref_nom_heat_cons) / 2) + PB_Ref_nom_heat_cons) / 2) - ((((PB_Ref_25p_aux_heat_prod + PB_Ref_nom_aux_heat_prod) / 2) + PB_Ref_nom_aux_heat_prod) / 2) * factor,
+        ((PB_Ref_25p_heat_cons + PB_Ref_nom_heat_cons) / 2) - ((PB_Ref_25p_aux_heat_prod + PB_Ref_nom_aux_heat_prod) / 2) * factor, PB_Ref_30p_heat_cons - PB_Ref_30p_aux_heat_prod * factor, PB_Ref_25p_heat_cons - PB_Ref_25p_aux_heat_prod * factor,
+      ]
+
+      let ref_eff = zip(gross_cap, no_extraction).map(/)  // C
+      let gross = zip(heat_input, ref_eff).map(/)  // E
+      let eff = zip(heat_input, gross).map(/)  // K
+      let eff_factor = eff.map { $0 / eff[0] }  // L
+      let thermal_load_perc = gross.map { $0 / gross[0] }  // J
+
+      self.PB_nom_gross_eff = heat_input[0] / gross[0]
+      self.PB_nom_heat_cons = ifFinite(PB_nom_gross_cap_ud / PB_nom_gross_eff, .zero)
+      self.PB_cold_start_heat_req = PB_nom_heat_cons * PB_cold_start_energyperc
+      self.PB_warm_start_heat_req = PB_nom_heat_cons * PB_warm_start_energyperc
+      self.PB_hot_start_heat_req = PB_nom_heat_cons * PB_hot_start_energyperc
+
+      let gross_electrical_output = heat_input.map { $0 - PB_fix_aux_el }
+      let net_electrical_output = zip(heat_input, gross_electrical_output).map { iff($0 <= 0, 0, $1 - PB_nom_var_aux_cons_perc_gross * PB_nom_gross_cap_ud * (POLY($0 / PB_nom_gross_cap_ud, PB_g2n_var_aux_el_Coeff))) }
+      let net_el_output_factor = net_electrical_output.map { $0 / net_electrical_output[0] }
+      let var_aux_cons = zip(gross_electrical_output, net_electrical_output).map(-)
+      let auxiliary_consumption_factor = var_aux_cons.map { $0 / var_aux_cons[0] }
+
+      let steam_extraction: [Double] = net_electrical_output.map { output -> Double in return iff(PB_nom_gross_cap_ud.isZero, .zero, (Overall_harmonious_var_heat_cons_at_PB_nom + Overall_heat_fix_cons) / PB_nom_net_cap * output) }  // F
+
+      self.th_Coeff = Polynomial.fit(x: thermal_load_perc, y: eff_factor, order: 4)!.coefficients
+      self.el_Coeff = Polynomial.fit(x: load_perc, y: eff_factor, order: 4)!.coefficients
+      let PBeff = POLY(PB_grs_el_cap_min_perc, el_Coeff)
+      self.PB_heat_min_input = ifFinite(PB_gross_min_cap / (PB_nom_gross_eff * PBeff), .zero)
+      self.PB_gross_min_eff = ifFinite(PB_gross_min_cap / PB_heat_min_input, .zero)
+
+      self.PB_Ratio_Heat_input_vs_output = min(1, factor * (no_extraction[0] / PB_Ref_nom_aux_heat_prod) / (gross[0] / steam_extraction[0]))
+      self.PB_n_g_var_aux_el_Coeff = Polynomial.fit(x: net_el_output_factor, y: auxiliary_consumption_factor, order: 4)!.coefficients
+      self.PB_var_heat_max_cons = gross[0] + steam_extraction[0] * PB_Ratio_Heat_input_vs_output
+      self.PB_nom_var_aux_cons_perc_net = var_aux_cons[0] / net_electrical_output[0]
+    }
+
     let TES_cold_tank_T: Double = 304.55
     let TES_dead_mass_ratio: Double = 0.1
 
-    let gross_cap = [  // A29-A33
-      PB_Ref_nom_gross_cap, ((((PB_Ref_25p_gross_cap_max_aux_heat + PB_Ref_nom_gross_cap) / 2) + PB_Ref_nom_gross_cap) / 2), ((PB_Ref_25p_gross_cap_max_aux_heat + PB_Ref_nom_gross_cap) / 2), PB_Ref_30p_gross_cap, PB_Ref_25p_gross_cap_max_aux_heat,
-    ]
-    let load_perc: [Double] = gross_cap.map { $0 / PB_Ref_nom_gross_cap }  // B
-    let PB_Ref_25p_max_aux_heat_prod: Double = (23.333 * 2775.4 - 15.167 * 167.6 - 8.167 * 649.6) / 1000
-    let heat_input = load_perc.map { $0 * PB_nom_gross_cap_ud }  // D
-    let factor = seek(goal: 0) { (PB_Ref_25p_heat_cons - PB_Ref_25p_aux_heat_prod * $0) - (PB_Ref_25p_heat_cons_max_aux_heat - PB_Ref_25p_max_aux_heat_prod * $0) }  // 0.68792724609375
-
-    let no_extraction = [  // B
-      PB_Ref_nom_heat_cons - PB_Ref_nom_aux_heat_prod * factor, ((((PB_Ref_25p_heat_cons + PB_Ref_nom_heat_cons) / 2) + PB_Ref_nom_heat_cons) / 2) - ((((PB_Ref_25p_aux_heat_prod + PB_Ref_nom_aux_heat_prod) / 2) + PB_Ref_nom_aux_heat_prod) / 2) * factor,
-      ((PB_Ref_25p_heat_cons + PB_Ref_nom_heat_cons) / 2) - ((PB_Ref_25p_aux_heat_prod + PB_Ref_nom_aux_heat_prod) / 2) * factor, PB_Ref_30p_heat_cons - PB_Ref_30p_aux_heat_prod * factor, PB_Ref_25p_heat_cons - PB_Ref_25p_aux_heat_prod * factor,
-    ]
-
-    let ref_eff = zip(gross_cap, no_extraction).map(/)  // C
-    let gross = zip(heat_input, ref_eff).map(/)  // E
-    let eff = zip(heat_input, gross).map(/)  // K
-    let eff_factor = eff.map { $0 / eff[0] }  // L
-    let thermal_load_perc = gross.map { $0 / gross[0] }  // J
-
-    self.PB_nom_gross_eff = heat_input[0] / gross[0]
-    self.PB_nom_heat_cons = ifFinite(PB_nom_gross_cap_ud / PB_nom_gross_eff, .zero)
-    self.PB_cold_start_heat_req = PB_nom_heat_cons * PB_cold_start_energyperc
-    self.PB_warm_start_heat_req = PB_nom_heat_cons * PB_warm_start_energyperc
-    self.PB_hot_start_heat_req = PB_nom_heat_cons * PB_hot_start_energyperc
-
-    let gross_electrical_output = heat_input.map { $0 - PB_fix_aux_el }
-    let net_electrical_output = zip(heat_input, gross_electrical_output).map { iff($0 <= 0, 0, $1 - PB_nom_var_aux_cons_perc_gross * PB_nom_gross_cap_ud * (POLY($0 / PB_nom_gross_cap_ud, PB_g2n_var_aux_el_Coeff))) }
-    let net_el_output_factor = net_electrical_output.map { $0 / net_electrical_output[0] }
-    let var_aux_cons = zip(gross_electrical_output, net_electrical_output).map(-)
-    let auxiliary_consumption_factor = var_aux_cons.map { $0 / var_aux_cons[0] }
-
-    let steam_extraction: [Double] = net_electrical_output.map { output -> Double in return iff(PB_nom_gross_cap_ud.isZero, .zero, (Overall_harmonious_var_heat_cons_at_PB_nom + Overall_heat_fix_cons) / PB_nom_net_cap * output) }  // F
-
-    self.th_Coeff = Polynomial.fit(x: thermal_load_perc, y: eff_factor, order: 4)!.coefficients
-    self.el_Coeff = Polynomial.fit(x: load_perc, y: eff_factor, order: 4)!.coefficients
-    let PBeff = POLY(PB_grs_el_cap_min_perc, el_Coeff)
-    self.PB_heat_min_input = ifFinite(PB_gross_min_cap / (PB_nom_gross_eff * PBeff), .zero)
-    self.PB_gross_min_eff = ifFinite(PB_gross_min_cap / PB_heat_min_input, .zero)
-
-    self.PB_Ratio_Heat_input_vs_output = min(1, factor * (no_extraction[0] / PB_Ref_nom_aux_heat_prod) / (gross[0] / steam_extraction[0]))
-    self.PB_n_g_var_aux_el_Coeff = Polynomial.fit(x: net_el_output_factor, y: auxiliary_consumption_factor, order: 4)!.coefficients
-    self.PB_var_heat_max_cons = gross[0] + steam_extraction[0] * PB_Ratio_Heat_input_vs_output
-    self.PB_nom_var_aux_cons_perc_net = var_aux_cons[0] / net_electrical_output[0]
-    self.TES_thermal_cap = TES_full_load_hours_ud * PB_var_heat_max_cons
-    self.TES_salt_mass = TES_thermal_cap * 1000 * 3600 / (h_SS(Heater_outlet_T) - h_SS(TES_cold_tank_T)) / 1000 * (1 + TES_dead_mass_ratio)
+    if PB_var_heat_max_cons > .zero {
+      self.TES_full_load_hours = TES_thermal_cap_ud / PB_var_heat_max_cons
+      self.TES_thermal_cap = TES_full_load_hours * PB_var_heat_max_cons
+      self.TES_salt_mass = TES_thermal_cap * 1000 * 3600 / (h_SS(Heater_outlet_T) - h_SS(TES_cold_tank_T)) / 1000 * (1 + TES_dead_mass_ratio)
+    } else {
+      self.TES_thermal_cap_ud = 0
+    }
 
     if self.MethDist_harmonious_max_perc < self.MethDist_cap_min_perc { return nil }
     if self.MethSynt_harmonious_max_perc < self.MethSynt_cap_min_perc { return nil }
