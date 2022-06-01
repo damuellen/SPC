@@ -6,7 +6,6 @@
 //  Copyright © 2015 Daniel Muellenborn. All rights reserved.
 //
 
-import Utilities
 import Foundation
 
 extension SolarField {
@@ -130,11 +129,16 @@ public struct SolarFieldModel: Codable {
   }
 
   public static func readFromFile(url: URL) -> SolarFieldModel? {
-    return try? loadFromJSONIfExists(file: url)
+    guard let data = try? Data(contentsOf: url) else { return nil }
+    let decoder = JSONDecoder()
+    return try? decoder.decode(SolarFieldModel.self, from: data)
   }
 
   public func writeToFile(url: URL) throws {
-    try storeToJSON(file: url)
+    let encoder = JSONEncoder()
+    encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+    let data = try? encoder.encode(self)
+    try data?.write(to: url)
   }
 
   public func apply() throws {

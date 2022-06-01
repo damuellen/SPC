@@ -38,7 +38,7 @@ let platformTargets: [Target] = [
     swiftSettings: swift
   ), .target(name: "PinchPoint", dependencies: ["CPikchr", "Utilities"], swiftSettings: swift),
   .target(name: "ThermalStorage", dependencies: ["Utilities"], swiftSettings: swift),
-  .target(name: "SolarFieldModel", dependencies: ["Utilities"], swiftSettings: swift),
+  .target(name: "SolarFieldModel", swiftSettings: swift),
   .target(
     name: "Meteo",
     dependencies: ["DateGenerator", "SolarPosition", "Utilities"],

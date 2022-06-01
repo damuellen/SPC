@@ -6,7 +6,13 @@
 //  Copyright © 2015 Daniel Muellenborn. All rights reserved.
 //
 
-import Libc
+#if canImport(Glibc)
+  import Glibc
+#elseif os(Windows)
+  import CRT
+#else
+  import Darwin.C
+#endif
 
 extension Branch {
 
