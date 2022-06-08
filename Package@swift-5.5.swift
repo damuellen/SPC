@@ -36,7 +36,7 @@ let dependencies: [Package.Dependency] = [
   .package(url: "https://github.com/damuellen/SQLite.swift.git", branch: "master"),
   .package(url: "https://github.com/damuellen/Utilities.git", branch: "main"),
   .package(url: "https://github.com/damuellen/xlsxwriter.swift.git", branch: "main"),
-  // .package(url: "https://github.com/damuellen/Swiftplot.git", branch: "master"),
+  // .package(url: "https://github.com/damuellen/SolarFieldPiping.git", branch: "main"),
   // .package(url: "https://github.com/damuellen/Numerical.git", branch: "master"),
   // .package(url: "https://github.com/google/swift-benchmark", branch: "main"),
   // .package(url: "https://github.com/pvieito/PythonKit.git", branch: "master"),

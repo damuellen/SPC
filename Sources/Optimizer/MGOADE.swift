@@ -9,7 +9,8 @@
 //
 
 import Foundation
-import Utilities
+@_exported import Utilities
+@_exported import SunOl
 
 public var convergenceCurves = [[[Double]]](repeating: [[Double]](), count: 3)
 public typealias FitnessFunction = ([Double]) -> [Double]

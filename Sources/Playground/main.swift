@@ -532,7 +532,6 @@ public struct ExcelFormula {
 import Utilities
 
 func foo1() {
-  let date = Date()
   let csv = CSVReader(atPath: "20220416_sun overtaking.csv", separator: ";", filter: "ValueY", parseDates: 0)!
 
   let xs = csv.dates.map(\.timeIntervalSince1970).map{Double($0)}.prefix(3600)
