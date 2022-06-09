@@ -32,6 +32,7 @@ class SunOlTests: XCTestCase {
       var counter = 1
       for i in 1..<8760 {
         if counter > 30 { break }
+        if array[index + i] < 1E-13 { continue }
         if abs(ref[i - 1] - array[index + i]) / ref[i - 1] > 0.01 {
           counter += 1
           correct = false
@@ -42,38 +43,38 @@ class SunOlTests: XCTestCase {
     }
 
     func compareDay(_ array: [Double], letter: String, start index: Int) {
-      let index = index
-      let ref = csv_ref2[letter]
-      var correct = true
-      var counter = 1
-      for i in 0..<364 {
-        if counter > 50 { break }
-        if abs(ref[i] - array[index + i]) / ref[i] > 0.01 {
-          counter += 1
-          correct = false  
-          print("Daily1", letter, i + 3, "=", ref[i], "not equal", array[index + i])
-        }
-      }
-      if correct { print("Daily1", letter, "all equal") }
+      // let index = index
+      // let ref = csv_ref2[letter]
+      // var correct = true
+      // var counter = 1
+      // for i in 0..<364 {
+      //   if counter > 50 { break }
+      //   if abs(ref[i] - array[index + i]) / ref[i] > 0.01 {
+      //     counter += 1
+      //     correct = false  
+      //     print("Daily1", letter, i + 3, "=", ref[i], "not equal", array[index + i])
+      //   }
+      // }
+      // if correct { print("Daily1", letter, "all equal") }
     }
 
     func compare2Day(_ array: [Double], letter: String, start index: Int) {
-      let index = index
-      let ref = csv_ref3[letter]
-      var correct = true
-      var counter = 1
-      for i in 0..<364 {
-        if counter > 50 { break }
-        if abs(ref[i] - array[index + i]) / ref[i] > 0.01 {
-          counter += 1
-          correct = false  
-          print("Daily2", letter, i + 3, "=", ref[i], "not equal", array[index + i])
-        }
-      }
-      if correct { print("Daily2", letter, "all equal") }
+      // let index = index
+      // let ref = csv_ref3[letter]
+      // var correct = true
+      // var counter = 1
+      // for i in 0..<364 {
+      //   if counter > 50 { break }
+      //   if abs(ref[i] - array[index + i]) / ref[i] > 0.01 {
+      //     counter += 1
+      //     correct = false  
+      //     print("Daily2", letter, i + 3, "=", ref[i], "not equal", array[index + i])
+      //   }
+      // }
+      // if correct { print("Daily2", letter, "all equal") }
     }
 
-    guard let model = TunOl([120.00,8867.00,190.00,950.00,1350.00,500.00,100.00,300.00,40.00,30000.00,46.00,30000.00,30.00,120.00,1200.00,50.00,0.00,])
+    guard let model = TunOl([110.00,8550.00,190.00,950.00,1350.00,300.00,75.00,300.00,40.00,5000.00,45.00,5000.00,30.00,120.00,1200.00,50.00,0.00,])
 
     else {
       print("Invalid config")
@@ -203,7 +204,7 @@ class SunOlTests: XCTestCase {
     // Array(d6[5840...]).head(137, steps: 365)
 
     var hour2 = [Double](repeating: .zero, count: 183_960)
-    var hour3 = [Double](repeating: .zero, count: 289_080)
+    var hour3 = [Double](repeating: .zero, count: 297_840)
     var hour4 = [Double](repeating: .zero, count: 516_840)
     var d10 = [Double](repeating: .zero, count: 13_140)
     var d11 = [Double](repeating: .zero, count: 17_155)
@@ -235,7 +236,6 @@ class SunOlTests: XCTestCase {
         compare(hour2, letter: "CK", start: 140160)
         compare(hour2, letter: "CL", start: 148920)
         compare(hour2, letter: "CM", start: 157680)
-        compare(hour2, letter: "CN", start: 166440)
         print("Hour Case", j)  // hour2.head(72, steps: 8760)
       }
       if j == 1 {
@@ -272,6 +272,7 @@ class SunOlTests: XCTestCase {
       compare(hour3, letter: "CP", start: 0)
       compare(hour3, letter: "CQ", start: 8760)
       compare(hour3, letter: "CR", start: 17520)
+      compare(hour3, letter: "CN", start: 289080)
       compare(hour3, letter: "CS", start: 26280)
       compare(hour3, letter: "CT", start: 35040)
       compare(hour3, letter: "CU", start: 43800)
@@ -1190,7 +1191,7 @@ class SunOlTests: XCTestCase {
     var day = [[Double]]()
 
     var hour2 = [Double](repeating: .zero, count: 183_960)
-    var hour3 = [Double](repeating: .zero, count: 289_080)
+    var hour3 = [Double](repeating: .zero, count: 297_840)
     var hour4 = [Double](repeating: .zero, count: 516_840)
     var d10 = [Double](repeating: .zero, count: 13_140)
     var d11 = [Double](repeating: .zero, count: 17_155)
