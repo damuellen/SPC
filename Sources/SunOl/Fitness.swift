@@ -28,7 +28,7 @@ public func fitness(values: [Double]) -> [Double] {
     model.hour2(&hour2, j: j, hour0: hour0, hour1: hour1)
     model.hour3(&hour3, j: j, hour0: hour0, hour1: hour1, hour2: hour2)
     model.d10(&d10, case: j, hour2: hour2, hour3: hour3)
-    model.hour4(&hour4, j: j, d1: d10, hour0: hour0, hour1: hour1, hour2: hour2)
+    model.hour4(&hour4, j: j, d1: d10, hour0: hour0, hour1: hour1, hour2: hour2, hour3: hour3)
     model.night(case: j, d10: &d10, hour3: hour3, hour4: hour4)
     model.d11(&d11, hour0: hour0, hour2: hour2, hour3: hour3)
     model.d12(&d12, hour0: hour0, hour4: hour4)

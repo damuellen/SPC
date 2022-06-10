@@ -10,7 +10,6 @@ extension TunOl {
     for i in 1..<8760 { hour2[BR + i] = BMcountZero[i - 1] }
 
     let AY = 26280
-    let BL = 140160
     let BF = 87600
     let AYsum = hour1.sum(hours: daysBO, condition: AY)
     let BFcount = hour1.count(hours: daysBO, range: BF, predicate: { $0 > 0 })
@@ -24,19 +23,9 @@ extension TunOl {
 
     /// Min net elec demand outside harm op period
     let BU = 0
-    // =IF(OR(BT6=0,$BM6>0),0,IF(AND(A_overall_var_min_cons+A_overall_fix_stby_cons+IF($BM7=0,0,A_overall_stup_cons)+MIN(El_boiler_cap_ud,MAX(0,A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons+IF($BM7=0,0,A_overall_heat_stup_cons)-$BQ6)/El_boiler_eff)<$BP6-PB_stby_aux_cons,A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons+IF($BM7=0,0,A_overall_heat_stup_cons)<El_boiler_cap_ud*El_boiler_eff+$BQ6),0,A_overall_var_min_cons+A_overall_fix_stby_cons+IF($BM7=0,0,A_overall_stup_cons)))
+    // BU=IF(OR(BT6=0,$BM6>0,AND(A_overall_var_min_cons+A_overall_fix_stby_cons+IF($BM7=0,0,A_overall_stup_cons)+MIN(El_boiler_cap_ud,MAX(0,A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons+IF($BM7=0,0,A_overall_heat_stup_cons)-$BQ6)/El_boiler_eff)<$BP6-PB_stby_aux_cons,A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons+IF($BM7=0,0,A_overall_heat_stup_cons)<El_boiler_cap_ud*El_boiler_eff+$BQ6)),0,A_overall_var_min_cons+A_overall_fix_stby_cons+IF($BM7=0,0,A_overall_stup_cons)))
     for i in 1..<8760 {
-      hour2[BU + i] = iff(
-        or(hour2[BT + i].isZero, hour1[BM + i] > 0), 0,
-        iff(
-          and(
-            overall_var_min_cons[j] + overall_fix_stby_cons[j] + iff(hour1[BM + i + 1].isZero, 0, overall_stup_cons[j])
-              + min(
-                El_boiler_cap_ud,
-                max(0, overall_var_heat_min_cons[j] + overall_heat_fix_stby_cons[j] + iff(hour1[BM + i + 1].isZero, 0, overall_heat_stup_cons[j]) - hour1[BQ + i]) / El_boiler_eff)
-              < hour1[BP + i] - PB_stby_aux_cons,
-            overall_var_heat_min_cons[j] + overall_heat_fix_stby_cons[j] + iff(hour1[BM + i + 1].isZero, 0, overall_heat_stup_cons[j]) < El_boiler_cap_ud * El_boiler_eff
-              + hour1[BQ + i]), 0, overall_var_min_cons[j] + overall_fix_stby_cons[j] + iff(hour1[BM + i + 1].isZero, 0, overall_stup_cons[j])))
+      hour2[BU + i] = iff(or(hour2[BT + i].isZero, hour1[BM + i] > .zero, and(overall_var_min_cons[j] + overall_fix_stby_cons[j] + iff(hour1[BM + i + 1].isZero, .zero, overall_stup_cons[j]) + min(El_boiler_cap_ud, max(.zero, overall_var_heat_min_cons[j] + overall_heat_fix_stby_cons[j] + iff(hour1[BM + i + 1].isZero, .zero, overall_heat_stup_cons[j]) - hour1[BQ + i]) / El_boiler_eff)<hour1[BP + i] - PB_stby_aux_cons, overall_var_heat_min_cons[j] + overall_heat_fix_stby_cons[j] + iff(hour1[BM + i + 1].isZero, .zero, overall_heat_stup_cons[j])<El_boiler_cap_ud * El_boiler_eff + hour1[BQ + i])), .zero, overall_var_min_cons[j] + overall_fix_stby_cons[j] + iff(hour1[BM + i + 1].isZero, .zero, overall_stup_cons[j]))
     }
 
     /// Optimized min net elec demand outside harm op period
@@ -222,8 +211,10 @@ extension TunOl {
     for i in 8748..<8760 { hour3[CS + i] = hour3[CS + i - 1] }
     /// El cons due to op outside of harm op period
     let CT = 35040
-    // =IF(OR(CQ6>0,CC6=0,MIN(MAX(0,MAX(0,IF(CQ6>0,Grid_import_yes_no_PB_strategy,Grid_import_yes_no_PB_strategy_outsideharmop)*Grid_import_max_ud-CN6)+BX6+CK6-CM6-CQ6-MIN(El_boiler_cap_ud,MAX(0,A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons+IF(CQ7=0,0,A_overall_heat_stup_cons)+CR6-CL6-CB6/PB_Ratio_Heat_input_vs_output)/El_boiler_eff)),MAX(0,MIN(El_boiler_cap_ud,MAX(0,IF(CQ6>0,Grid_import_yes_no_PB_strategy,Grid_import_yes_no_PB_strategy_outsideharmop)*Grid_import_max_ud-CN6)+BX6+CK6-CM6-CQ6)*El_boiler_eff+CL6+CB6/PB_Ratio_Heat_input_vs_output-CR6-IF(CQ7=0,0,A_overall_heat_stup_cons)-A_overall_heat_fix_stby_cons)/A_overall_var_heat_max_cons*A_overall_var_max_cons+A_overall_fix_stby_cons+IF(CQ7=0,0,A_overall_stup_cons))<A_overall_var_min_cons+A_overall_fix_stby_cons+IF(CQ7=0,0,A_overall_stup_cons)),0,A_overall_var_min_cons+A_overall_fix_stby_cons+IF(CQ7=0,0,A_overall_stup_cons))
-    for i in 1..<8760 { hour3[CT + i] = hour3[CT + i] }
+    // CT=IF(OR(CQ6>0,CC6=0),0,A_overall_var_min_cons+A_overall_fix_stby_cons+IF(CQ7=0,0,A_overall_stup_cons))
+    for i in 1..<8760 { 
+      hour3[CT + i] = iff(or(hour3[CQ + i] > .zero, hour3[CC + i].isZero), .zero, overall_var_min_cons[j] + overall_fix_stby_cons[j] + iff(hour3[CQ + i + 1].isZero, .zero, overall_stup_cons[j]))
+    }
 
 
 
