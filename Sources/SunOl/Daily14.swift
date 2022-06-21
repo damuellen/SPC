@@ -24,13 +24,19 @@ extension TunOl {
     let equiv_harmonious_range = (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j])
     /// el cons for harm op during harm op period
     let ddLB = 21900
-    // LB=IF(FC6=0,0,IF(OR(JP6=0;KG6=0),FD6,FC6+(GY6-FC6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc)+((FD6+(GZ6-FD6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc))-(FC6+(GY6-FC6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc)))/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc)))
-    for i in 0..<365 { d13[ddLB + i] = iff(d11[FC + i].isZero, .zero, iff(or(d13[ddJP + i].isZero, d13[ddKG + i].isZero), d11[FD + i], (d11[FC + i] + (d12[GY + i] - d11[FC + i]) * d13[ddAMKG + i]) + ((d11[FD + i] + (d12[GZ + i] - d11[FD + i]) * d13[ddAMKG + i]) - (d11[FC + i] + (d12[GY + i] - d11[FC + i]) * d13[ddAMKG + i])) * d13[dddJP + i])) }
+    // LB=IF(FC6=0,0,IF(OR(JP6=0,KG6=0),MAX(0,FD6-MAX(0,FK6/BESS_chrg_eff-FZ6-GA6)),FC6+(GY6-FC6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc)+((FD6+(GZ6-FD6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc))-(FC6+(GY6-FC6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc)))/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc)))
+    for i in 0..<365 {
+      d13[ddLB + i] = iff(
+        d11[FC + i].isZero, .zero,
+        iff(
+          or(d13[ddJP + i].isZero, d13[ddKG + i].isZero), max(0, d11[FD + i] - max(0, d11[FK + i] / BESS_chrg_eff - d11[FZ + i] - d11[GA + i])),
+          (d11[FC + i] + (d12[GY + i] - d11[FC + i]) * d13[ddAMKG + i]) + ((d11[FD + i] + (d12[GZ + i] - d11[FD + i]) * d13[ddAMKG + i]) - (d11[FC + i] + (d12[GY + i] - d11[FC + i]) * d13[ddAMKG + i])) * d13[dddJP + i]))
+    }
 
     /// el cons for night prep during harm op period
     let ddLC = 22265
-    // LC=IF(KG6=0,0,$Z6+($AA6-$Z6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc))
-    for i in 0..<365 { d13[ddLC + i] = iff(d13[ddKG + i].isZero, .zero, d10[Z + i] + (d10[AA + i] - d10[Z + i]) / equiv_harmonious_range * (d13[ddKG + i] - equiv_harmonious_min_perc[j])) }
+    // LC=IF(KG6=0,0,$Z6+($AA6-$Z6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc))
+    for i in 0..<365 { d13[ddLC + i] = iff(d13[ddKG + i].isZero, .zero, d10[Z + i] + (d10[AA + i] - d10[Z + i]) * d13[ddAMKG + i]) }
 
     /// el to cover aux cons during harm op period
     let ddLD = 22630
@@ -45,10 +51,10 @@ extension TunOl {
 
     /// el cons for BESS charging during harm op period
     let ddLE = 22995
-    // LE=IF(OR(JP6=0,KG6=0),MIN(FK6/BESS_chrg_eff,FZ6),MIN(((FY6+(HU6-FY6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc))+((FZ6+(HV6-FZ6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc))-(FY6+(HU6-FY6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc)))/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc)),(FK6+(HG6-FK6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc))/BESS_chrg_eff))
+    // LE=IF(OR(JP6=0,KG6=0),MIN(MAX(0,FK6/BESS_chrg_eff-GA6),FZ6),MIN(((FY6+(HU6-FY6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc))+((FZ6+(HV6-FZ6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc))-(FY6+(HU6-FY6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc)))/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc)),(FK6+(HG6-FK6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc))/BESS_chrg_eff))
     for i in 0..<365 {
       d13[ddLE + i] = iff(
-        or(d13[ddJP + i].isZero, d13[ddKG + i].isZero), min(d11[FK + i] / BESS_chrg_eff, d11[FZ + i]),
+        or(d13[ddJP + i].isZero, d13[ddKG + i].isZero), min(max(0, d11[FK + i] / BESS_chrg_eff - d11[GA + i]), d11[FZ + i]),
         min((d11[FY + i] + (d12[HU + i] - d11[FY + i]) * d13[ddAMKG + i] + ((d11[FZ + i] + (d12[HV + i] - d11[FZ + i]) * d13[ddAMKG + i]) - (d11[FY + i] + (d12[HU + i] - d11[FY + i]) * d13[ddAMKG + i])) * d13[dddJP + i]), (d11[FK + i] + (d12[HG + i] - d11[FK + i]) * d13[ddAMKG + i]) / BESS_chrg_eff))
     }
 
@@ -87,11 +93,11 @@ extension TunOl {
     //             * (d13[ddKG + i] - equiv_harmonious_min_perc[j])))
     //       * d13[dddJP + i])
     // }
-
+    let AM = 12775
     /// heat cons for night prep during harm op period
     let ddLM = 25915
-    // LM=IF(KG6=0,0,$AB6+($AC6-$AB6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc))
-    for i in 0..<365 { d13[ddLM + i] = iff(d13[ddKG + i].isZero, .zero, d10[AB + i] + (d10[AC + i] - d10[AB + i]) / equiv_harmonious_range * (d13[ddKG + i] - equiv_harmonious_min_perc[j])) }
+    // LM=IF(KG6=0,0,$AB6+($AC6-$AB6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc))
+    for i in 0..<365 { d13[ddLM + i] = iff(d13[ddKG + i].isZero, .zero, d10[AB + i] + (d10[AC + i] - d10[AB + i]) / (d10[AM + i] - equiv_harmonious_min_perc[j]) * (d13[ddKG + i] - equiv_harmonious_min_perc[j])) }
 
     // /// heat prod by el boiler for harm op during harm op period
     // let ddLN = 26280 // reused
@@ -145,8 +151,8 @@ extension TunOl {
 
     /// Balance of electricity during harm op period
     let ddLK = 25185
-    // LK=LH6+LJ6-LC6-LE6-LG6
-    for i in 0..<365 { d13[ddLK + i] = d13[ddLH + i] + d13[ddLJ + i] - d13[ddLC + i] - d13[ddLE + i] - d13[ddLG + i] }
+    // LK=ROUND(LH6+LJ6-LC6-LE6-LG6,5)
+    for i in 0..<365 { d13[ddLK + i] = round(d13[ddLH + i] + d13[ddLJ + i] - d13[ddLC + i] - d13[ddLE + i] - d13[ddLG + i], 5) }
 
     /// el cons for harm op outside of harm op period
     let ddLR = 27740
@@ -185,7 +191,7 @@ extension TunOl {
     /// Grid import needed outside of harm op period
     let ddLW = 29565
     // LW=MIN(IF(KG6=0,GG6,GG6+(IC6-GG6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc)),MAX(0,LS6-LT6-LU6-LY6*BESS_chrg_eff))
-    for i in 0..<365 { d13[ddLW + i] = min(iff(d13[ddKG + i].isZero, d11[GG + i], d12[GG + i] + (d12[IC + i] - d11[GG + i]) * d13[ddAMKG + i]), max(.zero, d13[ddLS + i] - d13[ddLT + i] - d13[ddLU + i] - d13[ddLY + i] * BESS_chrg_eff)) }
+    for i in 0..<365 { d13[ddLW + i] = min(iff(d13[ddKG + i].isZero, d11[GG + i], d11[GG + i] + (d12[IC + i] - d11[GG + i]) * d13[ddAMKG + i]), max(.zero, d13[ddLS + i] - d13[ddLT + i] - d13[ddLU + i] - d13[ddLY + i] * BESS_chrg_eff)) }
 
     /// Balance of electricity outside of harm op period
     let ddLX = 29930

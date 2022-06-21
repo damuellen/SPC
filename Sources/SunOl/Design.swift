@@ -541,13 +541,14 @@ public struct TunOl {
 
     let TES_cold_tank_T: Double = 304.55
     let TES_dead_mass_ratio: Double = 0.1
-
-    if PB_var_heat_max_cons > .zero {
+    if PB_var_heat_max_cons > 0 {
       self.TES_full_load_hours = TES_thermal_cap_ud / PB_var_heat_max_cons
       self.TES_thermal_cap = TES_full_load_hours * PB_var_heat_max_cons
       self.TES_salt_mass = TES_thermal_cap * 1000 * 3600 / (h_SS(Heater_outlet_T) - h_SS(TES_cold_tank_T)) / 1000 * (1 + TES_dead_mass_ratio)
     } else {
-      self.TES_thermal_cap_ud = 0
+      self.TES_salt_mass = TES_thermal_cap_ud * 1000 * 3600 / (h_SS(Heater_outlet_T) - h_SS(TES_cold_tank_T)) / 1000 * (1 + TES_dead_mass_ratio)
+      self.TES_thermal_cap = 0
+      self.TES_full_load_hours = 0
     }
 
     if self.MethDist_harmonious_max_perc < self.MethDist_cap_min_perc { return nil }

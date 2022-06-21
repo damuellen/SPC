@@ -1,5 +1,5 @@
 extension TunOl {
-  func d11(_ d11: inout [Double], hour0: [Double], hour2: [Double], hour3: [Double]) {
+  func d11(case j: Int, _ d11: inout [Double], hour0: [Double], hour2: [Double], hour3: [Double]) {
     let (CM, CN, CQ, CR, CS, CT, CU, CV, CW, CX, CY, CZ, DA, DB, DC, DD, DE, DF, DH, DI, DJ, DK, DL, DM, DN, DO, DP, DQ, DR, DS, DT) = (
       157680, 166440, 8760, 17520, 26280, 35040, 43800, 52560, 61320, 70080, 78840, 87600, 96360, 105120, 113880, 122640, 131400, 140160, 157680, 166440, 175200, 183960, 192720, 201480, 210240, 219000, 227760, 236520, 245280, 254040, 262800
     )
@@ -8,9 +8,10 @@ extension TunOl {
     /// Grid import for min harm and stby during  harm op
     let EY = 0
     /// Grid import for max harm and stby during  harm opC
+    let CO = 271560
     let EZ = 365
     do {
-      let CS_CQ_COsum = hour3.sum(hours: daysCS, condition: CQ, predicate: { $0 > 0 })
+      let CS_CQ_COsum = hour3.sumOf(CO, days: daysCS, condition: CQ, predicate: { $0 > 0 })
       // SUMIFS(Calculation!CO5:CO8764,Calculation!CS$5:CS8764,"="&$A6,Calculation!CQ5:CQ8764,">0")
       for i in 0..<365 { d11[EY + i] = CS_CQ_COsum[i] }
     }
@@ -57,8 +58,10 @@ extension TunOl {
     /// El cons considering min/max harm op outside  harm op period including grid import (if any)
     let FE = 2190
     let CS_CQ_CTsum2 = hour3.sumOf(CT, days: daysCS, condition: CQ, predicate: { $0.isZero })
-    // SUMIFS(CalculationCT5:CT8763,CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,"=0")
-    for i in 0..<365 { d11[FE + i] = CS_CQ_CTsum2[i] }
+    // =MAX(0,SUMIFS(Calculation!$CT$5:$CT$8764,Calculation!$CS$5:$CS$8764,"="&$A6,Calculation!$CQ$5:$CQ$8764,"=0")-A_overall_stup_cons)
+    for i in 0..<365 { 
+      d11[FE + i] = max(0, CS_CQ_CTsum2[i] - overall_stup_cons[j]) 
+    }
 
     let CRsum = hour3.sum(days: daysCS, range: CR)
     let CS_CQ_CUsum = hour3.sumOf(CU, days: daysCS, condition: CQ, predicate: { $0 > 0 })
@@ -191,7 +194,7 @@ extension TunOl {
     /// Max BESS night prep outside of harm op period
     let GA = 10220
     let CS_CQ_DEsum2 = hour3.sumOf(DE, days: daysCS, condition: CQ, predicate: { $0.isZero })
-    // MIN(SUMIFS(CalculationDE5:DE8763,CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,"=0"),BESS_cap_ud/BESS_chrg_eff)
+    // =MIN(SUMIFS(Calculation!$DE$5:$DE$8764,Calculation!$CS$5:$CS$8764,"="&$A6,Calculation!$CQ$5:$CQ$8764,"=0"),BESS_cap_ud/BESS_chrg_eff)
     for i in 0..<365 { d11[GA + i] = min(CS_CQ_DEsum2[i], BESS_cap_ud / BESS_chrg_eff) }
 
     let CS_CQ_DFsum = hour3.sumOf(DF, days: daysCS, condition: CQ, predicate: { $0 > 0 })

@@ -195,7 +195,7 @@ extension TunOl {
     /// Remaining PV after max harm
     let AJ = 245280
     // MAX(0,$P6-$Q6-AH6-MIN(El_boiler_cap_ud,MAX(0,(AI6-$J6)/El_boiler_eff)))
-    for i in 1..<8760 { hour0[AJ + i] = max(.zero, hour0[P + i] - hour0[Q + i] - hour0[AH + i] - min(El_boiler_cap_ud, max(.zero, (hour0[AI + i] - hour0[J + i]) / El_boiler_eff))) }
+    for i in 1..<8760 { hour0[AJ + i] = round(max(.zero, hour0[P + i] - hour0[Q + i] - hour0[AH + i] - min(El_boiler_cap_ud, max(.zero, (hour0[AI + i] - hour0[J + i]) / El_boiler_eff))), 5) }
 
     /// Remaining CSP heat after max harm
     let AK = 254040
@@ -223,7 +223,7 @@ extension TunOl {
     /// Remaining el boiler cap after max harm heat cons
     let AO = 289080
     // MAX(0,El_boiler_cap_ud-AN6)
-    for i in 1..<8760 { hour0[AO + i] = max(.zero, El_boiler_cap_ud - hour0[AN + i]) }
+    for i in 1..<8760 { hour0[AO + i] = round(max(.zero, El_boiler_cap_ud - hour0[AN + i]), 5) }
 
     for i in 1..<8760 {
       /// Remaining MethSynt cap after max harm cons
@@ -247,9 +247,9 @@ extension TunOl {
     let AT = 332880
     for i in 1..<8760 {
       // MIN(BESS_chrg_max_cons,AJ6)
-      hour0[AS + i] = min(BESS_chrg_max_cons, hour0[AJ + i])
+      hour0[AS + i] = round(min(BESS_chrg_max_cons, hour0[AJ + i]), 5)
       // =MIN(IF(AH5>0,Grid_export_yes_no_BESS_strategy,Grid_export_yes_no_BESS_strategy_outsideharmop)*Grid_export_max_ud,AJ5)
-      hour0[AT + i] = min(iff(hour0[AH + i] > 0, Grid_export_yes_no_BESS_strategy,Grid_export_yes_no_BESS_strategy_outsideharmop) * Grid_export_max_ud, hour0[AJ + i])
+      hour0[AT + i] = round(min(iff(hour0[AH + i] > 0, Grid_export_yes_no_BESS_strategy,Grid_export_yes_no_BESS_strategy_outsideharmop) * Grid_export_max_ud, hour0[AJ + i]), 5)
     }
     return hour0
   }
@@ -342,7 +342,7 @@ extension TunOl {
     /// Remaining CSP heat after TES
     let BJ = 122640
     // J6-BG6
-    for i in 1..<8760 { hour1[BJ + i] = hour0[J + i] - hour1[BG + i] }
+    for i in 1..<8760 { hour1[BJ + i] = round(hour0[J + i] - hour1[BG + i], 5) }
 
     /// Not covered aux elec for TES chrg, CSP SF and PV Plant MWel
     let BK = 131400

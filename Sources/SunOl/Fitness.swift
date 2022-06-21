@@ -4,10 +4,7 @@ import Utilities
 public func fitness(values: [Double]) -> [Double] {
   guard let model = TunOl(values) else { return [Double.infinity] }
   let costs = Costs(model)
-  //dump(costs)
-  //TunOl.Grid_import_yes_no_BESS_strategy = 0
-  //TunOl.Grid_import_yes_no_PB_strategy = 0
-  //dump(model)
+
   let hour0 = model.hour0(TunOl.Q_Sol_MW_thLoop, TunOl.Reference_PV_plant_power_at_inverter_inlet_DC, TunOl.Reference_PV_MV_power_at_transformer_outlet)
   let hour1 = model.hour1(hour0: hour0)
   let day0 = model.day0(hour0: hour0)
@@ -30,8 +27,8 @@ public func fitness(values: [Double]) -> [Double] {
     model.d10(&d10, case: j, hour2: hour2, hour3: hour3)
     model.hour4(&hour4, j: j, d1: d10, hour0: hour0, hour1: hour1, hour2: hour2, hour3: hour3)
     model.night(case: j, d10: &d10, hour3: hour3, hour4: hour4)
-    model.d11(&d11, hour0: hour0, hour2: hour2, hour3: hour3)
-    model.d12(&d12, hour0: hour0, hour4: hour4)
+    model.d11(case: j, &d11, hour0: hour0, hour2: hour2, hour3: hour3)
+    model.d12(case: j, &d12, hour0: hour0, hour4: hour4)
     model.d13(&d13, case: j, d10: d10, d11: d11, d12: d12)
     model.d14(&d13, case: j, d10: d10, d11: d11, d12: d12)
     day.append(Array(d13[31755..<32850]))

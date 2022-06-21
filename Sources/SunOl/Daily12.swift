@@ -1,5 +1,5 @@
 extension TunOl {
-  func d12(_ d12: inout [Double], hour0: [Double], hour4: [Double]) {
+  func d12(case j: Int, _ d12: inout [Double], hour0: [Double], hour4: [Double]) {
     let daysEZ: [[Int]] = hour4[254041..<(254040 + 8760)].indices.chunked(by: { hour4[$0] == hour4[$1] }).map { $0.map { $0 - 254040 } }
 
 
@@ -61,7 +61,7 @@ extension TunOl {
     let HA = 2190
     let EZ_EX_FAsum2 = hour4.sumOf(FA, days: daysEZ, condition: EX, predicate: { $0.isZero })
     // MAX(0,SUMIFS(Calculation!$FA$5:$FA$8764,Calculation!$EZ$5:$EZ$8764,"="A6,Calculation!$EX$5:$EX$8764,"=0")-A_overall_stup_cons)
-    for i in 0..<365 { d12[HA + i] = EZ_EX_FAsum2[i] }
+    for i in 0..<365 { d12[HA + i] = max(0, EZ_EX_FAsum2[i] - overall_stup_cons[j]) }
 
     let EYsum = hour4.sum(days: daysEZ, range: EY)
     let EZ_EX_FBsum = hour4.sumOf(FB, days: daysEZ, condition: EX, predicate: { $0 > 0 })

@@ -50,6 +50,30 @@ extension Array where Element == Double {
     }
   }
 
+  func sum(_ range: Int, hours: [[Int]], condition: Int, predicate: (Double) -> Bool) -> [Double] {
+    Array(
+      hours.map { day -> [Double] in var sum = 0.0
+        day.forEach { d in 
+          let value = self[(d + condition)]
+          if predicate(value) { sum += self[(d + range)] }
+        }
+        return [Double](repeating: sum, count: day.count)
+      }
+      .joined())
+  }
+
+  func sum(_ range: Int, hours: [[Int]], range2: [Double], condition: Int, predicate: (Double) -> Bool) -> [Double] {
+    Array(
+      hours.map { day -> [Double] in var sum = 0.0
+        day.forEach { d in 
+          let value = range2[(d + condition)]
+          if predicate(value) { sum += self[(d + range)] }
+        }
+        return [Double](repeating: sum, count: day.count)
+      }
+      .joined())
+  }
+
   func sum(hours: [[Int]], condition: Int, predicate: (Double) -> Bool) -> [Double] {
     Array(
       hours.map { day -> [Double] in var sum = 0.0
@@ -98,6 +122,8 @@ extension Array where Element == Double {
       }
       .joined())
   }
+
+
 }
 
 extension Double { var formatted: String { String(format: "%G", self) } }
