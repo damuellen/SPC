@@ -15,7 +15,7 @@ public struct TunOl {
   let BESS_chrg_eff: Double = 0.7
   let BESS_chrg_max_cons: Double
   let BESS_chrg_max_ratio: Double = 0.5
-  let CCU_cap_min_perc: Double = 0.5
+  let CCU_cap_min_perc: Double = 0
 
   let CCU_fix_cons: Double
   let CCU_fix_heat_cons: Double
@@ -26,14 +26,14 @@ public struct TunOl {
   let CCU_var_nom_cons: Double
 
   let CCU_Ref_CO2_hour_prod: Double = 22
-  let CCU_Ref_fix_cons: Double = 1
-  let CCU_Ref_heat_fix_cons: Double = 1
-  let CCU_Ref_heat_stby_cons: Double = 1
-  let CCU_Ref_heat_stup_cons: Double = 1
-  let CCU_Ref_stby_cons: Double = 1
-  let CCU_Ref_stup_cons: Double = 1
-  let CCU_Ref_var_heat_nom_cons: Double = 22
-  let CCU_Ref_var_nom_cons: Double = 2
+  let CCU_Ref_fix_cons: Double = 0
+  let CCU_Ref_heat_fix_cons: Double = 0
+  let CCU_Ref_heat_stby_cons: Double = 0
+  let CCU_Ref_heat_stup_cons: Double = 0
+  let CCU_Ref_stby_cons: Double = 0
+  let CCU_Ref_stup_cons: Double = 0
+  let CCU_Ref_var_heat_nom_cons: Double = 0
+  let CCU_Ref_var_nom_cons: Double = 0
 
   let CSP_Cold_HTF_T: Double
   let CSP_Hot_HTF_T: Double = 425
@@ -85,14 +85,14 @@ public struct TunOl {
   let EY_var_heat_nom_cons: Double
 
   let EY_cap_min_perc: Double = 0.1
-  let EY_Ref_heat_fix_cons: Double = 1
-  let EY_Ref_heat_stby_cons: Double = 1
-  let EY_Ref_heat_stup_cons: Double = 1
-  let EY_Ref_stby_cons: Double = 1.25
-  let EY_Ref_stup_cons: Double = 1
-  let EY_Ref_var_heat_nom_cons: Double = 40
+  let EY_Ref_heat_fix_cons: Double = 0
+  let EY_Ref_heat_stby_cons: Double = 0
+  let EY_Ref_heat_stup_cons: Double = 0
+  let EY_Ref_stby_cons: Double = 0
+  let EY_Ref_stup_cons: Double = 0
+  let EY_Ref_var_heat_nom_cons: Double = 0
   let EY_Ref_var_net_nom_cons: Double = 140
-  let EY_Ref_var_nom_cons: Double = 0
+  let EY_Ref_var_nom_cons: Double = 0.7
 
   let fix_aux_el = [0.87197586317594244, 0.29314511444598762, -0.49536293286578681, 0.33024195524385674]
   let fix_stby_el = [0.8910127968928524, 0.21455823229400395, -0.31671308756057304, 0.21114205837371655]
@@ -113,20 +113,20 @@ public struct TunOl {
   let MethDist_harmonious_perc_at_PB_nom: Double
   let MethDist_RawMeth_nom_cons: Double
 
-  let MethDist_Ref_fix_cons: Double = 1
+  let MethDist_Ref_fix_cons: Double = 0
   let MethDist_Ref_heat_fix_cons: Double = 0
-  let MethDist_Ref_heat_stby_cons: Double = 1.7
-  let MethDist_Ref_heat_stup_cons: Double = 1.7
+  let MethDist_Ref_heat_stby_cons: Double = 0
+  let MethDist_Ref_heat_stup_cons: Double = 0
   let MethDist_Ref_meth_annual_prod: Double
-  let MethDist_Ref_meth_hour_prod: Double = 13.57
-  let MethDist_Ref_water_hour_prod: Double = 7.17
-  let MethDist_Ref_stby_cons: Double = 1
-  let MethDist_Ref_stup_cons: Double = 1
-  let MethDist_Ref_var_heat_nom_cons: Double = 11.37
-  let MethDist_Ref_var_nom_cons: Double = 1.1000000000000001
+  let MethDist_Ref_meth_hour_prod: Double
+  let MethDist_Ref_water_hour_prod: Double
+  let MethDist_Ref_stby_cons: Double = 0
+  let MethDist_Ref_stup_cons: Double = 0
+  let MethDist_Ref_var_heat_nom_cons: Double
+  let MethDist_Ref_var_nom_cons: Double = 0
   let MethDist_Ref_water_annual_prod: Double
 
-  let MethSynt_annual_outage_days: Double = 32
+  let MethSynt_annual_outage_days: Double = 0
   let MethSynt_cap_min_perc: Double = 0.1
   let MethSynt_CO2_min_cons: Double
   let MethSynt_CO2_nom_cons: Double
@@ -142,18 +142,18 @@ public struct TunOl {
   let MethSynt_var_nom_cons: Double
   let MethSynt_Ref_CO2_annual_cons: Double
 
-  let MethSynt_Ref_fix_cons: Double = 1
+  let MethSynt_Ref_fix_cons: Double = 5.25
   let MethSynt_Ref_Hydrogen_annual_cons: Double
-  let MethSynt_Ref_Hydrogen_hourly_cons: Double = 2.62
-  let MethSynt_Ref_CO2_hour_cons: Double = 19.08
+  let MethSynt_Ref_Hydrogen_hourly_cons: Double
+  let MethSynt_Ref_CO2_hour_cons: Double
   let MethSynt_Ref_heat_fix_prod: Double = 0
-  let MethSynt_Ref_heat_stby_cons: Double = 1
-  let MethSynt_Ref_heat_stup_cons: Double = 1
+  let MethSynt_Ref_heat_stby_cons: Double = 0
+  let MethSynt_Ref_heat_stup_cons: Double = 0
 
-  let MethSynt_Ref_stby_cons: Double = 1.25
-  let MethSynt_Ref_stup_cons: Double = 1
-  let MethSynt_Ref_var_heat_nom_prod: Double = 5.78
-  let MethSynt_Ref_var_nom_cons: Double = 1.4
+  let MethSynt_Ref_stby_cons: Double = 0
+  let MethSynt_Ref_stup_cons: Double = 0
+  let MethSynt_Ref_var_heat_nom_prod: Double = 7
+  let MethSynt_Ref_var_nom_cons: Double = 0
   let MethSynt_stup_duration: Double = 15
 
   let Overall_harmonious_max_perc: Double = 1
@@ -258,10 +258,10 @@ public struct TunOl {
   var Grid_export_max_ud: Double
   var Grid_import_max_ud: Double
   var Grid_export_yes_no_PB_strategy: Double = 1
-  var Grid_import_yes_no_BESS_strategy: Double = 1
-  var Grid_import_yes_no_PB_strategy: Double = 1
-  var Grid_import_yes_no_PB_strategy_outsideharmop: Double = 1
-  var Grid_import_yes_no_BESS_strategy_outsideharmop: Double = 1
+  var Grid_import_yes_no_BESS_strategy: Double = 0
+  var Grid_import_yes_no_PB_strategy: Double = 0
+  var Grid_import_yes_no_PB_strategy_outsideharmop: Double = 0
+  var Grid_import_yes_no_BESS_strategy_outsideharmop: Double = 0
   var Grid_export_yes_no_BESS_strategy: Double = 1
   var Grid_export_yes_no_PB_strategy_outsideharmop: Double = 1
   var Grid_export_yes_no_BESS_strategy_outsideharmop: Double = 1
@@ -289,13 +289,13 @@ public struct TunOl {
     self.Heater_cap_ud = parameter[7]
     self.CCU_CO2_nom_prod_ud = parameter[8]
     self.CO2_storage_cap_ud = parameter[9]
-    self.MethSynt_RawMeth_nom_prod_ud = parameter[10]
-    self.RawMeth_storage_cap_ud = parameter[11]
-    self.MethDist_Meth_nom_prod_ud = parameter[12]
-    self.El_boiler_cap_ud = parameter[13]
-    self.BESS_cap_ud = parameter[14]
-    self.Grid_export_max_ud = parameter[15]
-    self.Grid_import_max_ud = parameter[16]
+    
+    self.RawMeth_storage_cap_ud = parameter[10]
+    self.MethDist_Meth_nom_prod_ud = parameter[11]
+    self.El_boiler_cap_ud = parameter[12]
+    self.BESS_cap_ud = parameter[13]
+    self.Grid_export_max_ud = parameter[14]
+    self.Grid_import_max_ud = parameter[15]
 
     let ac = self.PV_AC_cap_ud
     let dc = self.PV_DC_cap_ud
@@ -318,14 +318,16 @@ public struct TunOl {
 
     let PB_grs_el_cap_min_perc = PB_Ref_25p_gross_cap_max_aux_heat / PB_Ref_nom_gross_cap
     self.CSP_Cold_HTF_T = TES_cold_tank_T + SF_heat_exch_approach_temp
-    let EY_Ref_Hydrogen_hour_nom_prod = 2.62
+    let EY_Ref_Hydrogen_hour_nom_prod = 2.8
     let MethSynt_annual_op_days = 365.25 - MethSynt_annual_outage_days
     let MethSynt_annual_op_hours = MethSynt_annual_op_days * 24
+    self.MethSynt_Ref_Hydrogen_hourly_cons = EY_Ref_Hydrogen_hour_nom_prod
     self.MethSynt_Ref_Hydrogen_annual_cons = MethSynt_annual_op_hours * MethSynt_Ref_Hydrogen_hourly_cons
     self.MethSynt_Ref_Hydrogen_hour_cons = MethSynt_Ref_Hydrogen_annual_cons / MethSynt_annual_op_hours
+    self.MethSynt_Ref_CO2_hour_cons = MethSynt_Ref_Hydrogen_hourly_cons / 200.0 * 1430.0
     self.MethSynt_Ref_CO2_annual_cons = MethSynt_annual_op_hours * MethSynt_Ref_CO2_hour_cons
-    let MethDist_Ref_rawmeth_hour_cons = MethDist_Ref_meth_hour_prod + MethDist_Ref_water_hour_prod
-    self.MethSynt_Ref_rawmeth_hour_prod = MethDist_Ref_rawmeth_hour_cons
+    
+    self.MethSynt_Ref_rawmeth_hour_prod = MethSynt_Ref_Hydrogen_hourly_cons + MethSynt_Ref_CO2_hour_cons
     self.CSP_nonsolar_aux_cons = CSP_night_aux_cons_per_loop * CSP_loop_nr_ud
     self.BESS_chrg_max_cons = BESS_cap_ud * BESS_chrg_max_ratio
     self.EY_fix_cons = EY_var_net_nom_cons_ud / EY_Ref_var_net_nom_cons * EY_Ref_fix_cons
@@ -337,6 +339,7 @@ public struct TunOl {
     self.EY_heat_stby_cons = EY_var_net_nom_cons_ud / EY_Ref_var_net_nom_cons * EY_Ref_heat_stby_cons
     let EY_stup_cons = EY_var_net_nom_cons_ud / EY_Ref_var_net_nom_cons * EY_Ref_stup_cons
     self.EY_heat_stup_cons = EY_var_net_nom_cons_ud / EY_Ref_var_net_nom_cons * EY_Ref_heat_stup_cons
+    self.MethSynt_RawMeth_nom_prod_ud = EY_Ref_var_net_nom_cons / parameter[5] * MethSynt_Ref_rawmeth_hour_prod
     let MethSynt_RawMeth_min_prod = MethSynt_RawMeth_nom_prod_ud * MethSynt_cap_min_perc
     let CCU_CO2_min_prod = CCU_CO2_nom_prod_ud * CCU_cap_min_perc
     self.CCU_fix_heat_cons = CCU_CO2_nom_prod_ud / CCU_Ref_CO2_hour_prod * CCU_Ref_heat_fix_cons
@@ -368,13 +371,17 @@ public struct TunOl {
     let MethSynt_heat_stby_cons = MethSynt_RawMeth_nom_prod_ud / MethSynt_Ref_rawmeth_hour_prod * MethSynt_Ref_heat_stby_cons
     let MethSynt_stup_cons = MethSynt_RawMeth_nom_prod_ud / MethSynt_Ref_rawmeth_hour_prod * MethSynt_Ref_stup_cons
     let MethSynt_heat_stup_cons = MethSynt_RawMeth_nom_prod_ud / MethSynt_Ref_rawmeth_hour_prod * MethSynt_Ref_heat_stup_cons
+    let MethDist_Ref_rawmeth_hourly_cons = MethSynt_Ref_rawmeth_hour_prod
+    self.MethDist_Ref_water_hour_prod = 0.35 * MethDist_Ref_rawmeth_hourly_cons
+    self.MethDist_Ref_meth_hour_prod = MethDist_Ref_rawmeth_hourly_cons - MethDist_Ref_water_hour_prod
     let MethDist_H2O_nom_prod = MethDist_Meth_nom_prod_ud / MethDist_Ref_meth_hour_prod * MethDist_Ref_water_hour_prod
     self.MethDist_Ref_meth_annual_prod = MethSynt_annual_op_hours * MethDist_Ref_meth_hour_prod
     self.MethDist_Ref_water_annual_prod = MethSynt_annual_op_hours * MethDist_Ref_water_hour_prod
-    self.MethDist_RawMeth_nom_cons = MethDist_Meth_nom_prod_ud / MethDist_Ref_meth_hour_prod * MethDist_Ref_rawmeth_hour_cons
+    self.MethDist_RawMeth_nom_cons = MethDist_Meth_nom_prod_ud / MethDist_Ref_meth_hour_prod * self.MethSynt_Ref_rawmeth_hour_prod
     self.MethDist_fix_cons = MethDist_Meth_nom_prod_ud / MethDist_Ref_meth_hour_prod * MethDist_Ref_fix_cons
     let MethDist_heat_fix_cons = MethDist_Meth_nom_prod_ud / MethDist_Ref_meth_hour_prod * MethDist_Ref_heat_fix_cons
     let MethDist_var_nom_cons = MethDist_Meth_nom_prod_ud / MethDist_Ref_meth_hour_prod * MethDist_Ref_var_nom_cons
+    self.MethDist_Ref_var_heat_nom_cons =  0.86 * MethDist_Ref_meth_hour_prod
     let MethDist_var_heat_nom_cons = MethDist_Meth_nom_prod_ud / MethDist_Ref_meth_hour_prod * MethDist_Ref_var_heat_nom_cons
     let MethDist_stby_cons = MethDist_Meth_nom_prod_ud / MethDist_Ref_meth_hour_prod * MethDist_Ref_stby_cons
     let MethDist_heat_stby_cons = MethDist_Meth_nom_prod_ud / MethDist_Ref_meth_hour_prod * MethDist_Ref_heat_stby_cons

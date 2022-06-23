@@ -30,15 +30,18 @@ class SunOlTests: XCTestCase {
     func compare(_ array: [Double], letter: String, start index: Int) {
       let index = index
       let ref = csv_ref[letter]
+      let column = Array(array[index..<index+8760])
       var correct = true
       var counter = 1
       for i in 1..<8700 {
-        if counter > 5 { break }
+        if counter > 11 { break }
         // if !array[index + i].isZero && array[index + i] < 1E-13 { continue }
-        if abs(ref[i - 1] - array[index + i]) / ref[i - 1] > 0.01 {
+        let excel = ref[i - 1]
+        let code = column[i]
+        if abs(excel) - abs(code) > 0.02 {
           counter += 1
           correct = false
-           XCTFail("Calculation \(letter) \(i + 4)   \(ref[i - 1]) != \(array[index + i])  [\(index + i)]")
+           XCTFail("Calculation \(letter) \(i + 5)   \(ref[i - 1]) != \(column[i])  [\(index + i)] \(abs(excel) - abs(code))")
         }
       }
       ()
@@ -52,7 +55,7 @@ class SunOlTests: XCTestCase {
       var counter = 1
       for i in 0..<364 {
         if counter > 5 { break }
-        if abs(ref[i] - array[index + i]) > 0.1 {
+        if abs(ref[i]) - abs(array[index + i]) > 0.2 {
           counter += 1
           correct = false  
            XCTFail("Daily1 \(letter) \(i + 3)   \(ref[i]) != \(array[index + i])  [\(index + i)]")
@@ -69,7 +72,7 @@ class SunOlTests: XCTestCase {
       var counter = 1
       for i in 0..<364 {
         // if counter > 5 { break }
-        if abs(ref[i] - array[index + i]) > 0.1 {
+        if abs(ref[i]) - abs(array[index + i]) > 0.2 {
           counter += 1
           correct = false  
           XCTFail("Daily2 \(letter) \(i + 3)   \(ref[i]) != \(array[index + i])  [\(index + i)]")

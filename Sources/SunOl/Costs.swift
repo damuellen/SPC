@@ -22,13 +22,13 @@ public struct Costs {
     let Heater_system = (basis: 200.0, c1: 4_000_000.0, exp: 0.4, c2: 211728.735839637, factor: 0.9, coeff: 3_500_000.0, range: 200.0...400.0)
     let Thermal_energy_storage = (basis: 26920.0, c1: 2_000_000.0, exp: 0.75, c2: 1.90888818091572E+03, factor: 0.55, coeff: 26_000_000.0)
     let Power_Block = (basis: 50.0, c1: 84_370_000.0, coeff:  466_228.572051, range: 50.0...200.0)
-    let Electrolysis_coeff = 700_000.0 * 1.2
-    let Hydrogen_storage = (basis: 24E-2 * Hydrogen_density, exp: 0.9, coeff: 780_000 * 1.2)
-    let CCU_plant = (basis: 22.890276, exp: 0.7, coeff:  18_292_682.9268293)
-    let CO2_storage = (basis: 226.8, exp: 0.9, coeff: 780_000.0)
-    let MethSynt_plant = (basis: 19.0665095748076, exp: 0.7, coeff:  29_268_292.6829268)
-    let RawMeth_storage = (basis: 1.87680000000000E+02, exp: 0.9, coeff: 694146.8625 / FX_USD)
-    let MethDist_plant = (basis: 1.24750499001996E+01, exp: 0.7, coeff: 60_000_000.0 / FX_USD * 0.6)
+    let Electrolysis_coeff = 700000 * 1.2 * 0 + (2.5 - 0.36) * 1000000 * (model.EY_Ref_var_net_nom_cons + model.EY_Ref_var_nom_cons) / model.EY_Ref_var_net_nom_cons
+    let Hydrogen_storage = (basis: 24E-2 * Hydrogen_density, exp: 0.9, coeff: 780_000 * 1.2 * 0)
+    let CCU_plant = (basis: 22.890276, exp: 0.7, coeff:  18_292_682.9268293 * 0)
+    let CO2_storage = (basis: 226.8, exp: 0.9, coeff: 780_000.0 * 0)
+    let MethSynt_plant = (basis: 19.0665095748076, exp: 0.7, coeff:  29_268_292.6829268 * 0)
+    let RawMeth_storage = (basis: 1.87680000000000E+02, exp: 0.9, coeff: (694146.8625 / FX_USD) * 0)
+    let MethDist_plant = (basis: 1.24750499001996E+01, exp: 1.0, coeff: 0.36*(model.EY_Ref_var_net_nom_cons+model.EY_Ref_var_nom_cons)/model.MethDist_Ref_meth_hour_prod*1000000)
     let Battery_energy_storage = (basis: 50.0, c1: 5317746.25, coeff: 319064.775)
     let Electrical_boiler = (basis: 3.27, exp: 0.7, coeff: 494000 * 1.45 * 1.2)
     let Substation = (basis: 135.0, exp: 0.7, coeff: 2.4E+06)
@@ -89,12 +89,12 @@ public struct Costs {
     let CSP_O_M_Cost = (11.3333 / 3 * 1 / 3 * 1000 * 1000) + (0.00606061 / 3 * 1 / 3 * 1000 * 1000) * model.CSP_loop_nr_ud
     let PV_O_M_Cost = (11.3333 * 1000 * 1000) + (0.00606061 / 100 * 1000 * 1000) * model.PV_DC_cap_ud
     let PB_O_M_Cost = (11.3333 / 3 * 2 / 3 * 1000 * 1000) + (0.00606061 / 3 * 2 / 3 * 1000 * 1000) * model.PB_nom_gross_cap_ud
-
+    let OM_Cost_EY_Methsynt = (MethDist_plant_cost + Electrolysis_cost) * 0.035
     // let CAPEX_ICPH_assembly_hall_csp_sf_dedicated_to_ICPH_PC_DC_PV_AC_Heaters_TES_PB_Substation =
     // Assembly_hall + CSP_SF_cost_dedicated_to_ICPH + PV_DC_Cost + PV_AC_Cost + Heater_Cost + TES_Storage_cost + PB_Cost + Substation_cost_ICPH
 
     // let CAPEX_aux_thermal_energy_csp_sf_cost_dedicated_to_aux_heat = CSP_SF_cost_dedicated_to_aux_heat
-
+    
     // let CAPEX_Hydrogen_ICPH_half_of_loops_dedicated_to_aux_heat_electrolysis_half_of_electrical_boiler_cost =
     //  Assembly_hall + CSP_SF_cost_dedicated_to_Hydrogen + PV_DC_Cost + PV_AC_Cost + Heater_Cost
     //  + TES_Storage_cost + PB_Cost + (Electrical_boiler_cost * aux_Heat_ratio) + Substation_cost + Electrolysis_Cost
@@ -102,7 +102,7 @@ public struct Costs {
       Assembly_hall_cost + CSP_SF_cost_dedicated_to_Methanol + PV_DC_cost + PV_AC_cost + Heater_cost + TES_storage_cost + PB_cost + Electrolysis_cost + Hydrogen_storage_cost + CCU_plant_cost + CO2_storage_cost + MethSynt_plant_cost + RawMeth_storage_cost + MethDist_plant_cost + Battery_storage_cost + Electrical_boiler_cost
       + Substation_cost
 
-    self.Total_OPEX = CSP_O_M_Cost + PV_O_M_Cost + PB_O_M_Cost
+    self.Total_OPEX = CSP_O_M_Cost + PV_O_M_Cost + PB_O_M_Cost + OM_Cost_EY_Methsynt 
   }
   
   var Total_CAPEX: Double
@@ -129,7 +129,8 @@ public struct Costs {
 
   public func LCOM(meth_produced_MTPH: Double, elec_from_grid: Double, elec_to_grid: Double) -> Double {
     // print(meth_produced_MTPH, elec_from_grid, elec_to_grid)
-    let lcom = ((Costs.FCR * Total_CAPEX + Total_OPEX) + (elec_from_grid * Costs.Elec_buy * 1000) - (elec_to_grid * Costs.Elec_sell * 1000)) / meth_produced_MTPH
+    let Overhead_cost_on_Methanol = 1/(1-0.15)
+    let lcom = ((Costs.FCR * Total_CAPEX + Total_OPEX) + (elec_from_grid * Costs.Elec_buy * 1000) - (elec_to_grid * Costs.Elec_sell * 1000)) / meth_produced_MTPH * Overhead_cost_on_Methanol
     return lcom
   }
 }

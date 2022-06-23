@@ -58,8 +58,13 @@ extension TunOl {
 
     /// Corresponding PB net elec output
     let BX = 26280
-    // =IF(BV6=0,0,MAX(PB_net_min_cap,MIN(PB_nom_net_cap,BV6+BW6-BP6)))
-    for i in 1..<8760 { hour2[BX + i] = iff(hour2[BV + i].isZero, .zero, max(PB_net_min_cap, min(PB_nom_net_cap, hour2[BV + i] + hour2[BW + i] - hour1[BP1 + i]))) }
+    // =IF(BV6+BW6-$BP6<=0,0,MAX(PB_net_min_cap,MIN(PB_nom_net_cap,BV6+BW6-$BP6)))
+    for i in 1..<8760 {
+      if 26641 == BX + i {
+        
+      }
+      hour2[BX + i] = iff((hour2[BV + i] + hour2[BW + i] - hour1[BP1 + i]) <= 0, .zero, max(PB_net_min_cap, min(PB_nom_net_cap, hour2[BV + i] + hour2[BW + i] - hour1[BP1 + i]))) 
+    }
 
     /// Corresponding PB gross elec output
     let BY = 35040
@@ -217,8 +222,8 @@ extension TunOl {
 
     /// heat cons due to op outside of harm op period
     let CU = 43800
-    // IF(CT6=0;0;A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons+IF(CQ7=0;0;A_overall_heat_stup_cons))
-    for i in 1..<8760 { hour3[CU + i] = iff(hour3[CT + i].isZero, .zero, overall_var_heat_min_cons[j] + overall_heat_fix_stby_cons[j] + iff(hour3[CQ + i + 1].isZero, 0, overall_heat_stup_cons[j])) }
+    // =IF(OR(CQ6>0,CC6=0),0,A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons+IF(CQ7=0,0,A_overall_heat_stup_cons))
+    for i in 1..<8760 { hour3[CU + i] = iff(or(hour3[CQ + i] > .zero, hour2[CC2 + i].isZero), .zero, overall_var_heat_min_cons[j] + overall_heat_fix_stby_cons[j] + iff(hour3[CQ + i + 1].isZero, 0, overall_heat_stup_cons[j])) }
     let J0 = 26280
     let CJ2 = 131400
     /// Remaining el after min harmonious

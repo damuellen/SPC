@@ -3,7 +3,7 @@ import Utilities
 
 public func fitness(values: [Double]) -> [Double] {
   guard let model = TunOl(values) else { return [Double.infinity] }
-  let costs = Costs(model)
+
 
   let hour0 = model.hour0(TunOl.Q_Sol_MW_thLoop, TunOl.Reference_PV_plant_power_at_inverter_inlet_DC, TunOl.Reference_PV_MV_power_at_transformer_outlet)
   let hour1 = model.hour1(hour0: hour0)
@@ -44,7 +44,7 @@ public func fitness(values: [Double]) -> [Double] {
   var meth_produced_MTPH_sum = Double.zero
   var elec_from_grid_sum = Double.zero
   var elec_to_grid_MTPH_sum = Double.zero
-
+  let costs = Costs(model)
   var meth = [Double]()
   for d in 0..<365 {
     let cases = day.indices.map { i in costs.LCOM(meth_produced_MTPH: day[i][d] * 365.0, elec_from_grid: day[i][d + 365 + 365] * 365.0, elec_to_grid: day[i][d + 365] * 365.0) }
@@ -56,8 +56,10 @@ public func fitness(values: [Double]) -> [Double] {
       elec_to_grid_MTPH_sum += day[best][d + 365]
     }
   }
-  
+
   let LCOM = costs.LCOM(meth_produced_MTPH: meth_produced_MTPH_sum, elec_from_grid: elec_from_grid_sum, elec_to_grid: elec_to_grid_MTPH_sum)
   if !meth.drop(while: { $0 < meth_produced_MTPH_sum / 100 }).isEmpty || LCOM.isInfinite || meth_produced_MTPH_sum.isZero { return [Double.infinity] }
-  return [LCOM, costs.Total_CAPEX, costs.Total_OPEX, meth_produced_MTPH_sum, elec_from_grid_sum, elec_to_grid_MTPH_sum] + model.values
+  let dollar = 40 / model.MethDist_Ref_meth_hour_prod * model.MethSynt_Ref_CO2_hour_cons
+  let Cost_of_CO2 = meth_produced_MTPH_sum * dollar
+  return [LCOM, costs.Total_CAPEX, costs.Total_OPEX + Cost_of_CO2, meth_produced_MTPH_sum, elec_from_grid_sum, elec_to_grid_MTPH_sum] + model.values
 }
