@@ -104,7 +104,6 @@ extension TunOl {
     // =IF(EE6=0,0,MIN(EC6,MAX(CA6,IFERROR((EE6-CC6)/(SUMIF($BO$5:$BO$8764,"="&$BO6,EB$5:EB$8764)+SUMIF($BO$5:$BO$8764,"="&$BO6,EC$5:EC$8764)+SUMIF($BO$5:$BO$8764,"="&$BO6,ED$5:ED$8764)-CC6)*(EC6-CA6),0)+CA6)))
     for i in 1..<8760 {
       hour4[EF + i] = iff(hour4[EE + i].isZero, .zero, min(hour4[EC + i], max(hour2[CA + i], ifFinite((hour4[EE + i] - hour2[CC2 + i]) / (EBsum[i - 1] + ECsum[i - 1] + EDsum[i - 1] - hour2[CC2 + i]) * (hour4[EC + i] - hour2[CA + i]),0) + hour2[CA + i])))
-
     }
 
     let BY2 = 35040
@@ -125,9 +124,9 @@ extension TunOl {
     let CB = 61320
     /// Effective gross heat cons for extraction
     let EI = 113880
-    // =IF(EE6=0,0,MIN(ED6,MAX(CB6,(EE6-CC6)/(SUMIF(BO5:BO8764,"="BO6,EB5:EB8764)+SUMIF(BO5:BO8764,"="BO6,EC5:EC8764)+SUMIF(BO5:BO8764,"="BO6,ED5:ED8764)-CC6)*(ED6-CB6)+CB6)))
+    // =IF(EE6=0,0,MIN(ED6,MAX(CB6,IFERROR((EE6-CC6)/(SUMIF(BO5:BO8764,"="&BO6,EB5:EB8764)+SUMIF(BO5:BO8764,"="&BO6,EC5:EC8764)+SUMIF(BO5:BO8764,"="&BO6,ED5:ED8764)-CC6)*(ED6-CB6),0)+CB6)))
     for i in 1..<8760 { 
-      hour4[EI + i] = iff(hour4[EE + i].isZero, .zero, min(hour4[ED + i], max(hour2[CB + i], (hour4[EE + i] - hour2[CC2 + i]) / (EBsum[i - 1] + ECsum[i - 1] + EDsum[i - 1] - hour2[CC2 + i]) * (hour4[ED + i] - hour2[CB + i]) + hour2[CB + i])))
+      hour4[EI + i] = iff(hour4[EE + i].isZero, .zero, min(hour4[ED + i], max(hour2[CB + i], ifFinite((hour4[EE + i] - hour2[CC2 + i]) / (EBsum[i - 1] + ECsum[i - 1] + EDsum[i - 1] - hour2[CC2 + i]) * (hour4[ED + i] - hour2[CB + i]), 0) + hour2[CB + i])))
     }
     let CT3 = 35040
     // let CTsum = hour3.sum(hours: daysBO, condition: CT)

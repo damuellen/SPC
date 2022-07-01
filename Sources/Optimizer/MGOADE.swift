@@ -232,7 +232,7 @@ extension Range where Bound == Int {
 func pretty(values: [[Double]]) -> String {
   let labels = [
     "Loops", "TES", "PB", "PV_AC", "PV_DC", "EY_cons", "H2_storage", "Heater",
-    "CCU_CO2_prod", "CO2_storage", "Synt_RawMeth", "RawMeth_storage",
+    "CCU_CO2_prod", "CO2_storage", "RawMeth_storage",
     "Dist_Meth", "El_boiler", "BESS", "Grid_export", "Grid_import",
   ]
   if values.count == 1 {

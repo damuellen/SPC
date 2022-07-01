@@ -63,7 +63,7 @@ public struct Costs {
     if TES_storage_cost.isNaN { TES_storage_cost = 0 }
     self.PB_cost = model.PB_nom_gross_cap_ud > 0 ? (Power_Block.c1 + (model.PB_nom_gross_cap_ud - Power_Block.basis) * Power_Block.coeff) : 0
 
-    self.Electrolysis_cost = model.EY_var_net_nom_cons_ud * Electrolysis_coeff + 0.0
+    self.Electrolysis_cost = (model.EY_var_net_nom_cons_ud / 20).rounded(.up) * 20 * Electrolysis_coeff + 0.0
 
     self.Hydrogen_storage_cost = Hydrogen_storage.coeff * ((model.Hydrogen_storage_cap_ud / Hydrogen_storage.basis) ** Hydrogen_storage.exp) + 0.0
     // =IF(I3<=0,"",IFERROR(Specific_Cost!$I$12*(I3/Specific_Cost!$D$12)^Specific_Cost!$F$12+Specific_Cost!$E$12,""))

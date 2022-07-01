@@ -65,23 +65,23 @@ struct Command: ParsableCommand {
       parameter = parameters
     } else {
       parameter = Parameter(
-        BESS_cap_ud: 0...1400,
+        BESS_cap_ud: 0...500,
         CCU_CO2_nom_prod_ud: 30...60,
-        CO2_storage_cap_ud: 0...5000,
-        CSP_loop_nr_ud: 0...250,
-        El_boiler_cap_ud: 0...110,
-        EY_var_net_nom_cons_ud: 140...140,
+        CO2_storage_cap_ud: 10000...10000,
+        CSP_loop_nr_ud: 0...0,
+        El_boiler_cap_ud: 10...120,
+        EY_var_net_nom_cons_ud: 100...240,
         Grid_export_max_ud: 50...50,
         Grid_import_max_ud: 0...0,
         Hydrogen_storage_cap_ud: 0...0,
-        Heater_cap_ud: 0...300,
+        Heater_cap_ud: 0...400,
         MethDist_Meth_nom_prod_ud: 5...40,
         // MethSynt_RawMeth_nom_prod_ud: 10...60,
-        PB_nom_gross_cap_ud: 50...190,
-        PV_AC_cap_ud: 10...1280,
-        PV_DC_cap_ud: 10...1380,
-        RawMeth_storage_cap_ud: 250...350,
-        TES_thermal_cap_ud: 1000...99999)
+        PB_nom_gross_cap_ud: 0...0,
+        PV_AC_cap_ud: 200...800,
+        PV_DC_cap_ud: 500...1000,
+        RawMeth_storage_cap_ud: 30000...30000,
+        TES_thermal_cap_ud: 0...0)
     }
     
     let server = HTTP(handler: respond)
@@ -125,15 +125,17 @@ func writeExcel(results: [[Double]]) -> String {
     "RawMeth_storage_cap", "MethDist_Meth_nom_prod", "El_boiler_cap",
     "BESS_cap", "Grid_export_max", "Grid_import_max",
   ]
+  var lowest = results[0][0]
+  lowest = (lowest / 50).rounded(.down) * 50
   ws.table(range: [0, 0, r, labels.endIndex - 1], header: labels)
   for (column, name) in labels.enumerated() {
     if column < 6 { continue }
-    let chart = wb.addChart(type: .scatter).set(y_axis: 900...1400)
+    let chart = wb.addChart(type: .scatter).set(y_axis: lowest...lowest+250)
     chart.addSeries().set(marker: 5, size: 4)
     .values(sheet: ws, range: [1, 0, r, 0])
     .categories(sheet: ws, range: [1, column, r, column])
-     chart.remove(legends: 0)
-     wb.addChartsheet(name: name).set(chart: chart)
+    chart.remove(legends: 0)
+    wb.addChartsheet(name: name).set(chart: chart)
   }
   wb.close()
   return name
