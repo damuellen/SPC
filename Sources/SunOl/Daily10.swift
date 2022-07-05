@@ -115,7 +115,7 @@ extension TunOl {
   }
 
   func night(case j: Int, d10: inout [Double], hour3: [Double], hour4: [Double]) {
-    let (D, F, H, J, L, N, P, EH, EX) = (365, 1095, 1825, 2555, 3285, 4015, 4745, 105120, 236520)
+    let (F, H, J, L, N, P, EH, EX) = (1095, 1825, 2555, 3285, 4015, 4745, 105120, 236520)
     let daysEZ: [[Int]] = hour4[254041..<(254040 + 8760)].indices.chunked(by: { hour4[$0] == hour4[$1] }).map { $0.map { $0 - 254040 } }
     //  let end = daysEZ.removeLast()
     // daysEZ[0].append(contentsOf: end)

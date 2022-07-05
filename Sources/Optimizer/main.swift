@@ -70,18 +70,19 @@ struct Command: ParsableCommand {
         CO2_storage_cap_ud: 10000...10000,
         CSP_loop_nr_ud: 0...0,
         El_boiler_cap_ud: 10...120,
-        EY_var_net_nom_cons_ud: 100...240,
+        EY_var_net_nom_cons_ud: 160...240,
         Grid_export_max_ud: 50...50,
         Grid_import_max_ud: 0...0,
-        Hydrogen_storage_cap_ud: 0...0,
+        Hydrogen_storage_cap_ud: 0...100,
         Heater_cap_ud: 0...400,
         MethDist_Meth_nom_prod_ud: 5...40,
         // MethSynt_RawMeth_nom_prod_ud: 10...60,
         PB_nom_gross_cap_ud: 0...0,
-        PV_AC_cap_ud: 200...800,
-        PV_DC_cap_ud: 500...1000,
+        PV_AC_cap_ud: 100...800,
+        PV_DC_cap_ud: 400...1000,
         RawMeth_storage_cap_ud: 30000...30000,
-        TES_thermal_cap_ud: 0...0)
+        TES_thermal_cap_ud: 0...0
+      )
     }
     
     let server = HTTP(handler: respond)
@@ -100,14 +101,42 @@ struct Command: ParsableCommand {
     let now = Date()
     let valid = optimizer(SunOl.fitness).filter(\.first!.isFinite)
     print("Elapsed seconds:", -now.timeIntervalSinceNow)
-    let name = writeExcel(results: valid.sorted { $0[0] < $1[0] })
+    let sorted = valid.sorted { $0[0] < $1[0] }
+    let name = writeExcel(results: sorted)
     print(name)
-
+    var best = Array(sorted[0][6...])
+    best.remove(at: 10)
+    let result = SunOl.results(values: best)
+    format(result: result)
     if http { server.stop() }
     #if os(Windows)
     if excel { start(currentDirectoryPath() + "/" + name) }
     #endif
   }
+}
+
+func format(result: ([Double], [Double], [Double], [Double])) {
+  var hour = ""
+  let v1 = result.1
+  for n in 1..<8760 {
+    let row = stride(from: n, to: v1.endIndex, by: 8760).lazy.map { String(v1[$0]) }.joined(separator: "\t")
+    print(row, to: &hour)
+  }
+  try! hour.write(toFile: "out1.csv", atomically: false, encoding: .ascii)
+  hour = ""
+  let v2 = result.2
+  for n in 0..<365 {
+    let row = stride(from: n, to: v2.endIndex, by: 365).lazy.map { String(v2[$0]) }.joined(separator: "\t")
+    print(row, to: &hour)
+  }
+  try! hour.write(toFile: "out2.csv", atomically: false, encoding: .ascii)
+  hour = ""
+  let v3 = result.3
+  for n in 0..<365 {
+    let row = stride(from: n, to: v3.endIndex, by: 365).lazy.map { String(v3[$0]) }.joined(separator: "\t")
+    print(row, to: &hour)
+  }
+  try! hour.write(toFile: "out3.csv", atomically: false, encoding: .ascii)
 }
 
 func writeExcel(results: [[Double]]) -> String {

@@ -24,23 +24,23 @@ public struct Parameter: Codable {
     TES_thermal_cap_ud: ClosedRange<Double>
   ) {
     self.ranges = [
-      CSP_loop_nr_ud,
-      TES_thermal_cap_ud,
-      PB_nom_gross_cap_ud,
-      PV_AC_cap_ud,
-      PV_DC_cap_ud,
-      EY_var_net_nom_cons_ud,
-      Hydrogen_storage_cap_ud,
-      Heater_cap_ud,
-      CCU_CO2_nom_prod_ud,
-      CO2_storage_cap_ud,
+      CSP_loop_nr_ud, // [0]
+      TES_thermal_cap_ud, // [1]
+      PB_nom_gross_cap_ud, // [2]
+      PV_AC_cap_ud, // [3]
+      PV_DC_cap_ud, // [4]
+      EY_var_net_nom_cons_ud, // [5]
+      Hydrogen_storage_cap_ud, // [6]
+      Heater_cap_ud, // [7]
+      CCU_CO2_nom_prod_ud, // [8]
+      CO2_storage_cap_ud, // [9]
       // MethSynt_RawMeth_nom_prod_ud,
-      RawMeth_storage_cap_ud,
-      MethDist_Meth_nom_prod_ud,
-      El_boiler_cap_ud,
-      BESS_cap_ud,
-      Grid_export_max_ud,
-      Grid_import_max_ud
+      RawMeth_storage_cap_ud, // [10]
+      MethDist_Meth_nom_prod_ud, // [11]
+      El_boiler_cap_ud, // [12]
+      BESS_cap_ud, // [13]
+      Grid_export_max_ud, // [14]
+      Grid_import_max_ud // [15]
     ]
   }
 

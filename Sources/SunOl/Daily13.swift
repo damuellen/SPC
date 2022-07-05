@@ -17,8 +17,6 @@ extension TunOl {
     let ddIQ = 0
     // =FS6+GE6-$Z6-MAX(0,$AB6-FV6)/El_boiler_eff-MAX(0,FK6-GG6-GA6*BESS_chrg_eff)/BESS_chrg_eff
     for i in 0..<365 { d13[ddIQ + i] = d11[FS + i] + d11[GE + i] - d10[Z + i] - max(0, d10[AB + i] - d11[FV + i]) / El_boiler_eff - max(0, d11[FK + i] - d11[GG + i] - d11[GA + i] * BESS_chrg_eff) / BESS_chrg_eff }
-
-    let equiv_harmonious_range = (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j])
     
     let HW = 10220
     /// Surplus harm op period electricity after min harm op and max night op prep

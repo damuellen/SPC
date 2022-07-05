@@ -712,7 +712,7 @@ extension TunOl {
     for i in 0..<365 { d23[JV + i] = iff(d23[GZ + i].isZero, .zero, d21[G + i] + (d21[H + i] - d21[G + i]) * d23[ddGZ + i]) }
 
     /// heat from CSP outside of harm op period
-    let JW = 43800
+    // let JW = 43800
     // JW=IF(OR(HS6=0,GZ6=0),0,EG6)
     
 
