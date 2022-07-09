@@ -8,7 +8,6 @@ extension TunOl {
     let BR = 0
     // =COUNTIFS($BO$5:$BO$8764,"="&$BO6,$BM$5:$BM$8764,"<=0")
     for i in 1..<8760 { hour2[BR + i] = BMcountZero[i - 1] }
-
     let AY1 = 26280
     let BF1 = 87600
     let AYsum = hour1.sum(hours: daysBO, condition: AY1)
@@ -60,9 +59,6 @@ extension TunOl {
     let BX = 26280
     // =IF(BV6+BW6-$BP6<=0,0,MAX(PB_net_min_cap,MIN(PB_nom_net_cap,BV6+BW6-$BP6)))
     for i in 1..<8760 {
-      if 26641 == BX + i {
-        
-      }
       hour2[BX + i] = iff((hour2[BV + i] + hour2[BW + i] - hour1[BP1 + i]) <= 0, .zero, max(PB_net_min_cap, min(PB_nom_net_cap, hour2[BV + i] + hour2[BW + i] - hour1[BP1 + i]))) 
     }
 

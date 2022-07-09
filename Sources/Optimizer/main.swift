@@ -6,6 +6,7 @@ import SunOl
 
 let source = DispatchSource.makeSignalSource(signal: SIGINT, queue: .global())
 let semaphore = DispatchSemaphore(value: 0)
+var timeout = Date()
 
 ClearScreen()
 #if os(Windows)
@@ -104,18 +105,28 @@ struct Command: ParsableCommand {
     let sorted = valid.sorted { $0[0] < $1[0] }
     let name = writeExcel(results: sorted)
     print(name)
-    var best = Array(sorted[0][6...])
-    best.remove(at: 10)
-    let result = SunOl.results(values: best)
-    format(result: result)
-    if http { server.stop() }
+    if !source.isCancelled {
+      var best = Array(sorted[0][6...])
+      best.remove(at: 10)
+      let result = SunOl.results(values: best)
+      writeCSV(result: result)
+    }
+    if http {
+      source.cancel()
+      while -timeout.timeIntervalSinceNow < 10 {
+        print("waiting before shutting down")
+        Thread.sleep(until: timeout.addingTimeInterval(10))
+      }
+      Thread.sleep(forTimeInterval: 1)
+      server.stop()
+    }
     #if os(Windows)
     if excel { start(currentDirectoryPath() + "/" + name) }
     #endif
   }
 }
 
-func format(result: ([Double], [Double], [Double], [Double])) {
+func writeCSV(result: ([Double], [Double], [Double], [Double])) {
   var hour = ""
   let v1 = result.1
   for n in 1..<8760 {
@@ -177,6 +188,7 @@ func respond(request: HTTP.Request) -> HTTP.Response {
   } else {
     uri.remove(at: uri.startIndex)
   }
+  timeout = Date()
   let curves = convergenceCurves.map { Array($0.suffix(Int(uri) ?? 10)) }
   if curves[0].count > 1 {
     let m = curves.map(\.last!).map { $0[1] }.min()
