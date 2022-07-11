@@ -38,10 +38,10 @@ class SunOlTests: XCTestCase {
         // if !array[index + i].isZero && array[index + i] < 1E-13 { continue }
         let excel = ref[i - 1]
         let code = column[i]
-        if abs(excel) - abs(code) > 0.02 {
+        if abs(abs(excel) - abs(code)) > 0.02 {
           counter += 1
           correct = false
-           XCTFail("Calculation \(letter) \(i + 5)   \(ref[i - 1]) != \(column[i])  [\(index + i)] \(abs(excel) - abs(code))")
+          XCTFail("Calculation \(letter) \(i + 5)   \(ref[i - 1]) != \(column[i])  [\(index + i)] \(abs(excel) - abs(code))")
         }
       }
       ()
@@ -58,7 +58,7 @@ class SunOlTests: XCTestCase {
         if abs(ref[i]) - abs(array[index + i]) > 0.2 {
           counter += 1
           correct = false  
-           XCTFail("Daily1 \(letter) \(i + 3)   \(ref[i]) != \(array[index + i])  [\(index + i)]")
+          XCTFail("Daily1 \(letter) \(i + 3)   \(ref[i]) != \(array[index + i])  [\(index + i)]")
         }
       }
       if correct {day1.append(letter) }
@@ -81,8 +81,7 @@ class SunOlTests: XCTestCase {
       if correct {day2.append(letter) }
     }
 
-    guard let model = TunOl([120.00,8867.00,190.00,950.00,1350.00,500.00,100.00,300.00,40.00,30000.00,46.00,30000.00,30.00,120.00,1200.00,50.00,0.00,])
-
+    guard let model = TunOl([0.00,400.00,5.20,311.38,584.47,200.00,1000.00,100.00,1221.72,10000.00,30000.00,15.17,10.44,123.63,50.00,0.00,])
     else {
       print("Invalid config")
       return
@@ -1225,8 +1224,7 @@ class SunOlTests: XCTestCase {
 
   func testsCalculation2() {
     guard
-      let model = TunOl([93.45593212,0.0000,0.0000,943.1577,1380.0000,600.0000,75.7355,0.00,43.13,3.6215,46.61,279.4058,30.6744,109.5815,1021.4523,0.00,0.0000,])
-
+      let model = TunOl([0.00,400.00,5.20,311.38,584.47,200.00,1000.00,100.00,1221.72,10000.00,30000.00,15.17,10.44,123.63,50.00,0.00,])
     else {
       print("Invalid config")
       return
@@ -1284,10 +1282,10 @@ class SunOlTests: XCTestCase {
     ]
 
     for d in 0..<365 {
-      if d == 333 { print() }
       let cases = day.indices.map { i in
         costs.LCOM(
-          meth_produced_MTPH: day[i][d] * 365.0, elec_from_grid: day[i][d + 365 + 365] * 365.0,
+          meth_produced_MTPH: day[i][d] * 365.0,
+          elec_from_grid: day[i][d + 365 + 365] * 365.0,
           elec_to_grid: day[i][d + 365] * 365.0)
       }
       let ranked = cases.indices.filter { cases[$0].isFinite }.filter { cases[$0] > 0 }
@@ -1300,26 +1298,51 @@ class SunOlTests: XCTestCase {
     }
 
     let LCOM = costs.LCOM(
-      meth_produced_MTPH: meth_produced_MTPH_sum, elec_from_grid: elec_from_grid_sum,
-      elec_to_grid: elec_to_grid_MTPH_sum)
-    XCTAssertEqual(LCOM, 1193, accuracy: 1, "LCOM")
-    XCTAssertEqual(meth_produced_MTPH_sum, 128806, accuracy: 1, "meth_produced_MTPH_sum")
+      meth_produced_MTPH: meth_produced_MTPH_sum, 
+      elec_from_grid: elec_from_grid_sum,
+      elec_to_grid: elec_to_grid_MTPH_sum
+    )
+    XCTAssertEqual(LCOM, 1261, accuracy: 1, "LCOM")
+    XCTAssertEqual(meth_produced_MTPH_sum, 95911, accuracy: 1, "meth_produced_MTPH_sum")
     XCTAssertEqual(elec_from_grid_sum, 0, accuracy: 1, "elec_from_grid_sum")
-    XCTAssertEqual(elec_to_grid_MTPH_sum, 0, accuracy: 1, "elec_to_grid_MTPH_sum")
+    XCTAssertEqual(elec_to_grid_MTPH_sum, 178408, accuracy: 1, "elec_to_grid_MTPH_sum")
   }
 
   func testsCosts() {
-    let model = TunOl([
-      100.00, 10.00, 50.00, 600.00, 1000.00, 600.00, 5.00, 5.00, 80.00, 3.00, 90.00, 5.00, 60.00, 110.00, 200.00, 0.00,
-      0.00,
-    ])!
+    guard let model = TunOl([
+      0.00,  400.00, 5.20,  311.38, 584.47, 200.00, 1000, 100, 1221.72, 10000, 30000, 15.17, 10.44, 123.63, 50, 0.00])else { return }
+    //  dump(model)
     let costs = Costs(model)
-    var fixtures = [
-      19113593.96, 151300856.2, 465123723.2, 36221243.55, 5753063.152, 2496904, 84_370_000, 504_000_000,
-      2966339.549, 43922259.87, 15901.02011, 86731590.14, 32406.66362, 131_815_026, 69130701.25, 10070885.31,
-      0,
-    ]
+    //dump(costs)
+    var fixtures = [0.0, 0.0, 271850862.5096979, 22885530.347053397, 25708090.216960527, 12437574.020599108, 63482959.972115204, 430140000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 24684376.583671547, 44763724.38325, 1937238.624602197, 1197447.8451534484]
     .makeIterator()
+
+    var meth_produced_MTPH_sum = Double.zero
+    var elec_from_grid_sum = Double.zero
+    var elec_to_grid_MTPH_sum = Double.zero
+    var day = [[Double]]()
+    for d in 0..<365 {
+      let cases = day.indices.map { i in
+        costs.LCOM(
+          meth_produced_MTPH: day[i][d] * 365.0,
+          elec_from_grid: day[i][d + 365 + 365] * 365.0,
+          elec_to_grid: day[i][d + 365] * 365.0)
+      }
+      let ranked = cases.indices.filter { cases[$0].isFinite }.filter { cases[$0] > 0 }
+        .sorted { cases[$0] < cases[$1] }
+      if let best = ranked.first {
+        meth_produced_MTPH_sum += day[best][d]
+        elec_from_grid_sum += day[best][d + 365 + 365]
+        elec_to_grid_MTPH_sum += day[best][d + 365]
+      }
+    }
+
+    let LCOM = costs.LCOM(
+      meth_produced_MTPH: meth_produced_MTPH_sum, 
+      elec_from_grid: elec_from_grid_sum,
+      elec_to_grid: elec_to_grid_MTPH_sum
+    )
+    // dump(LCOM)
     for child in Mirror(reflecting: costs).children.filter({ $0.label?.contains("cost") ?? false }) {
       XCTAssertEqual(child.value as! Double, fixtures.next()!, accuracy: 1, child.label!)
     }
