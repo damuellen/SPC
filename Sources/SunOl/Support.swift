@@ -122,8 +122,38 @@ extension Array where Element == Double {
       }
       .joined())
   }
+}
 
+@available(macOS 10.12, *)
+enum Hours {
+  public static let Jan = Int(DateInterval.Jan.start.timeIntervalSinceReferenceDate / 3600)
+  public static let Feb = Int(DateInterval.Feb.start.timeIntervalSinceReferenceDate / 3600)
+  public static let Mar = Int(DateInterval.Mar.start.timeIntervalSinceReferenceDate / 3600)
+  public static let Apr = Int(DateInterval.Apr.start.timeIntervalSinceReferenceDate / 3600)
+  public static let May = Int(DateInterval.May.start.timeIntervalSinceReferenceDate / 3600)
+  public static let Jun = Int(DateInterval.Jun.start.timeIntervalSinceReferenceDate / 3600)
+  public static let Jul = Int(DateInterval.Jul.start.timeIntervalSinceReferenceDate / 3600)
+  public static let Aug = Int(DateInterval.Aug.start.timeIntervalSinceReferenceDate / 3600)
+  public static let Sep = Int(DateInterval.Sep.start.timeIntervalSinceReferenceDate / 3600)
+  public static let Oct = Int(DateInterval.Oct.start.timeIntervalSinceReferenceDate / 3600)
+  public static let Nov = Int(DateInterval.Nov.start.timeIntervalSinceReferenceDate / 3600)
+  public static let Dec = Int(DateInterval.Dec.start.timeIntervalSinceReferenceDate / 3600)
+}
 
+@available(macOS 10.12, *)
+enum Days {
+  public static let Jan = Int(DateInterval.Jan.start.timeIntervalSinceReferenceDate / 86400)
+  public static let Feb = Int(DateInterval.Feb.start.timeIntervalSinceReferenceDate / 86400)
+  public static let Mar = Int(DateInterval.Mar.start.timeIntervalSinceReferenceDate / 86400)
+  public static let Apr = Int(DateInterval.Apr.start.timeIntervalSinceReferenceDate / 86400)
+  public static let May = Int(DateInterval.May.start.timeIntervalSinceReferenceDate / 86400)
+  public static let Jun = Int(DateInterval.Jun.start.timeIntervalSinceReferenceDate / 86400)
+  public static let Jul = Int(DateInterval.Jul.start.timeIntervalSinceReferenceDate / 86400)
+  public static let Aug = Int(DateInterval.Aug.start.timeIntervalSinceReferenceDate / 86400)
+  public static let Sep = Int(DateInterval.Sep.start.timeIntervalSinceReferenceDate / 86400)
+  public static let Oct = Int(DateInterval.Oct.start.timeIntervalSinceReferenceDate / 86400)
+  public static let Nov = Int(DateInterval.Nov.start.timeIntervalSinceReferenceDate / 86400)
+  public static let Dec = Int(DateInterval.Dec.start.timeIntervalSinceReferenceDate / 86400)
 }
 
 extension Double { var formatted: String { String(format: "%G", self) } }
