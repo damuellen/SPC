@@ -113,11 +113,11 @@ struct Command: ParsableCommand {
     }
     if http {
       source.cancel()
-      while -timeout.timeIntervalSinceNow < 10 {
+      if -timeout.timeIntervalSinceNow < 10 {
         print("waiting before shutting down")
         Thread.sleep(until: timeout.addingTimeInterval(10))
+        Thread.sleep(forTimeInterval: 1)
       }
-      Thread.sleep(forTimeInterval: 1)
       server.stop()
     }
     #if os(Windows)
