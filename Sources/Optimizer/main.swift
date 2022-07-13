@@ -84,6 +84,8 @@ struct Command: ParsableCommand {
         RawMeth_storage_cap_ud: 30000...30000,
         TES_thermal_cap_ud: 0...0
       )
+      let data = try? JSONEncoder().encode(parameter)
+      try? data?.write(to: "parameter.txt")
     }
     
     let server = HTTP(handler: respond)
@@ -91,7 +93,7 @@ struct Command: ParsableCommand {
       server.start()
       print("web server listening on port 9080")
       DispatchQueue.global().asyncAfter(deadline: .now() + 0.5) { 
-        start("http://127.0.0.1:9080") 
+        start("http://127.0.0.1:\(server.port)") 
       }
     }
     TunOl.Q_Sol_MW_thLoop = [0] + csv["csp"]
