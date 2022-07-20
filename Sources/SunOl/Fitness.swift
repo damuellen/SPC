@@ -5,10 +5,6 @@ public func fitness(values: [Double]) -> [Double] {
   guard let model = TunOl(values) else { return [Double.infinity] }
 
   let hour0 = model.hour0(TunOl.Q_Sol_MW_thLoop, TunOl.Reference_PV_plant_power_at_inverter_inlet_DC, TunOl.Reference_PV_MV_power_at_transformer_outlet)
-  let hour1 = model.hour1(hour0: hour0)
-  let day0 = model.day0(hour0: hour0)
-  let d22 = model.d22(hour0: hour0)
-  var day = [[Double]]()
 
   var hour2 = [Double](repeating: .zero, count: 183_960)
   var hour3 = [Double](repeating: .zero, count: 297_840)
@@ -19,25 +15,39 @@ public func fitness(values: [Double]) -> [Double] {
   var d13 = [Double](repeating: .zero, count: 47_085) 
   var d23 = [Double](repeating: .zero, count: 48_545)
   var d21 = [Double](repeating: .zero, count: 9_855)
+  var day = [[Double]]()
   
-  for j in 0..<4 {
-    model.hour2(&hour2, j: j, hour0: hour0, hour1: hour1)
-    model.hour3(&hour3, j: j, hour0: hour0, hour1: hour1, hour2: hour2)
-    model.d10(&d10, case: j, hour2: hour2, hour3: hour3)
-    model.hour4(&hour4, j: j, d1: d10, hour0: hour0, hour1: hour1, hour2: hour2, hour3: hour3)
-    model.night(case: j, d10: &d10, hour3: hour3, hour4: hour4)
-    model.d11(case: j, &d11, hour0: hour0, hour2: hour2, hour3: hour3)
-    model.d12(case: j, &d12, hour0: hour0, hour4: hour4)
-    model.d13(&d13, case: j, d10: d10, d11: d11, d12: d12)
-    model.d14(&d13, case: j, d10: d10, d11: d11, d12: d12)
-    day.append(Array(d13[31755..<32850]))
-    day.append(Array(d13[44165..<45625]))
+  var flip = true
+  let d22 = model.d22(hour0: hour0)
 
-    model.d21(&d21, case: j, day0: day0)
-    model.d23(&d23, case: j, day0: day0, d21: d21, d22: d22)
+  let step = model.Overall_harmonious_max_perc - model.Overall_harmonious_min_perc / 10
+  var reserve = model.Overall_harmonious_min_perc
 
-    day.append(Array(d23[33945..<35040]))
-    day.append(Array(d23[44895..<45990]))
+  while reserve < model.Overall_harmonious_max_perc {
+    reserve += step
+    let hour1 = model.hour1(hour0: hour0, reserved: reserve)
+    let day0 = model.day0(hour0: hour0)
+
+    for j in 0..<4 {
+      model.hour2(&hour2, j: j, hour0: hour0, hour1: hour1)
+      model.hour3(&hour3, j: j, hour0: hour0, hour1: hour1, hour2: hour2)
+      model.d10(&d10, case: j, hour2: hour2, hour3: hour3)
+      model.hour4(&hour4, j: j, d1: d10, hour0: hour0, hour1: hour1, hour2: hour2, hour3: hour3)
+      model.night(case: j, d10: &d10, hour3: hour3, hour4: hour4)
+      model.d11(case: j, &d11, hour0: hour0, hour2: hour2, hour3: hour3)
+      model.d12(case: j, &d12, hour0: hour0, hour4: hour4)
+      model.d13(&d13, case: j, d10: d10, d11: d11, d12: d12)
+      model.d14(&d13, case: j, d10: d10, d11: d11, d12: d12)
+      day.append(Array(d13[31755..<32850]))
+      day.append(Array(d13[44165..<45625]))
+      if flip {
+        model.d21(&d21, case: j, day0: day0)
+        model.d23(&d23, case: j, day0: day0, d21: d21, d22: d22)
+        day.append(Array(d23[33945..<35040]))
+        day.append(Array(d23[44895..<45990]))
+        flip = false
+      }
+    }
   }
 
   var meth_produced_MTPH_sum = Double.zero
@@ -67,7 +77,9 @@ public func results(values: [Double]) -> ([Double], [Double], [Double], [Double]
   guard let model = TunOl(values) else { fatalError("Invalid config") }
 
   let hour0 = model.hour0(TunOl.Q_Sol_MW_thLoop, TunOl.Reference_PV_plant_power_at_inverter_inlet_DC, TunOl.Reference_PV_MV_power_at_transformer_outlet)
-  let hour1 = model.hour1(hour0: hour0)
+  var reserve = model.Overall_harmonious_min_perc
+
+  let hour1 = model.hour1(hour0: hour0, reserved: reserve)
   let day0 = model.day0(hour0: hour0)
   let d22 = model.d22(hour0: hour0)
   var day = [[Double]]()

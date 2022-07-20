@@ -138,8 +138,8 @@ class SunOlTests: XCTestCase {
     // print("Calculation")
     // Array(hour0[61320..<113880]).head(14, steps: 8760)
     // print("Calculation")
-
-    let hour1 = model.hour1(hour0: hour0)
+    var reserve = model.Overall_harmonious_min_perc
+    let hour1 = model.hour1(hour0: hour0, reserved: reserve)
 
     compare(hour1, letter: "AV", start: 0)
     compare(hour1, letter: "AW", start: 8760)
@@ -1236,7 +1236,7 @@ class SunOlTests: XCTestCase {
       TunOl.Q_Sol_MW_thLoop, TunOl.Reference_PV_plant_power_at_inverter_inlet_DC,
       TunOl.Reference_PV_MV_power_at_transformer_outlet)
 
-    let hour1 = model.hour1(hour0: hour0)
+    let hour1 = model.hour1(hour0: hour0, reserved: model.Overall_harmonious_min_perc)
     let day0 = model.day0(hour0: hour0)
     let d22 = model.d22(hour0: hour0)
     var day = [[Double]]()

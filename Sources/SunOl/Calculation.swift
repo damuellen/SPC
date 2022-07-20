@@ -1,6 +1,6 @@
 extension TunOl {
   func hour0(_ Q_Sol_MW_thLoop: [Double], _ Reference_PV_plant_power_at_inverter_inlet_DC: [Double], _ Reference_PV_MV_power_at_transformer_outlet: [Double]) -> [Double] {
-    var hour0 = [Double](repeating: .zero, count: 350_400)
+    var hour0 = [Double](repeating: .zero, count: 3526680)
 
     let maximum = Reference_PV_MV_power_at_transformer_outlet.max() ?? 0
     /// Inverter power fraction -
@@ -251,33 +251,43 @@ extension TunOl {
       // =MIN(IF(AH5>0,Grid_export_yes_no_BESS_strategy,Grid_export_yes_no_BESS_strategy_outsideharmop)*Grid_export_max_ud,AJ5)
       hour0[AT + i] = round(min(iff(hour0[AH + i] > 0, Grid_export_yes_no_BESS_strategy,Grid_export_yes_no_BESS_strategy_outsideharmop) * Grid_export_max_ud, hour0[AJ + i]), 5)
     }
+
+    /// Aux elec for CSP SF and PV Plant MWel
+    let AV = 3500400
+    // IF(J6>0,J6*CSP_var_aux_nom_perc,CSP_nonsolar_aux_cons)+M6
+    for i in 1..<8760 { hour0[AV + i] = iff(hour0[J + i] > .zero, hour0[J + i] * CSP_var_aux_nom_perc, CSP_nonsolar_aux_cons) + hour0[M + i] }
+    /// Available PV power MWel
+    let AW = 3509160
+    // MAX(0,L6-AV6)
+    for i in 1..<8760 { hour0[AW + i] = max(.zero, hour0[L + i] - hour0[AV + i]) }
+
+    /// Not covered aux elec for CSP SF and PV Plant MWel
+    let AX = 3517920
+    // MAX(0,AV6-AW6)
+    for i in 1..<8760 { hour0[AX + i] = max(.zero, hour0[AV + i] - hour0[AW + i]) }
+
     return hour0
   }
 
-  func hour1(hour0: [Double]) -> [Double] {
+  func hour1(hour0: [Double], reserved: Double) -> [Double] {
     let (J, L, M) = (26280, 43800, 52560)
     var hour1 = [Double](repeating: .zero, count: 192_720)
     let daysD: [[Int]] = (0..<365).map { Array(stride(from: 1 + $0 * 24, to: 1 + ($0 + 1) * 24, by: 1)) }
-
-    /// Aux elec for CSP SF and PV Plant MWel
-    let AV = 0
-    // IF(J6>0,J6*CSP_var_aux_nom_perc,CSP_nonsolar_aux_cons)+M6
-    for i in 1..<8760 { hour1[AV + i] = iff(hour0[J + i] > .zero, hour0[J + i] * CSP_var_aux_nom_perc, CSP_nonsolar_aux_cons) + hour0[M + i] }
-    /// Available PV power MWel
-    let AW = 8760
-    // MAX(0,L6-AV6)
-    for i in 1..<8760 { hour1[AW + i] = max(.zero, hour0[L + i] - hour1[AV + i]) }
-
-    /// Not covered aux elec for CSP SF and PV Plant MWel
-    let AX = 17520
-    // MAX(0,AV6-AW6)
-    for i in 1..<8760 { hour1[AX + i] = max(.zero, hour1[AV + i] - hour1[AW + i]) }
-
+    let AW = 3509160
+    let AX = 3517920
     /// Max possible PV elec to TES (considering TES chrg aux)
     let AY = 26280
     // AY=MAX(0,MIN((Grid_import_max_ud*Grid_import_yes_no_PB_strategy+AW6+$J6/Heater_eff-(Overall_harmonious_var_min_cons+Overall_fix_cons)-(Overall_harmonious_var_heat_min_cons+Overall_heat_fix_cons)/Heater_eff-IF(AND(AW6>0,AW7=0),PB_warm_start_heat_req*TES_aux_cons_perc,0)-PB_stby_aux_cons)/(1+1/Ratio_CSP_vs_Heater+Heater_eff*(1+1/Ratio_CSP_vs_Heater)*TES_aux_cons_perc),Heater_cap_ud,$J6*Ratio_CSP_vs_Heater/Heater_eff,(MIN(El_boiler_cap_ud,Grid_import_max_ud*Grid_import_yes_no_PB_strategy+AW6)*El_boiler_eff-(Overall_harmonious_var_heat_min_cons+Overall_heat_fix_cons)+$J6)*Ratio_CSP_vs_Heater/Heater_eff))
     for i in 1..<8760 { 
-      hour1[AY + i] = max(.zero, min((Grid_import_max_ud * Grid_import_yes_no_PB_strategy + hour1[AW + i] + hour0[J + i] / Heater_eff - (Overall_harmonious_var_min_cons + Overall_fix_cons) - (Overall_harmonious_var_heat_min_cons + Overall_heat_fix_cons) / Heater_eff - iff(and(hour1[AW + i] > .zero, hour1[AW + i + 1].isZero), PB_warm_start_heat_req * TES_aux_cons_perc, .zero) - PB_stby_aux_cons) / (1 + 1 / Ratio_CSP_vs_Heater + Heater_eff * (1 + 1 / Ratio_CSP_vs_Heater) * TES_aux_cons_perc), Heater_cap_ud, hour0[J + i] * Ratio_CSP_vs_Heater / Heater_eff, (min(El_boiler_cap_ud, Grid_import_max_ud * Grid_import_yes_no_PB_strategy + hour1[AW + i]) * El_boiler_eff - (Overall_harmonious_var_heat_min_cons + Overall_heat_fix_cons) + hour0[J + i]) * Ratio_CSP_vs_Heater / Heater_eff))
+      hour1[AY + i] = max(
+        0,
+        min(
+          (Grid_import_max_ud * Grid_import_yes_no_PB_strategy + hour0[AW + i] + hour0[J + i] / Heater_eff
+            - iff(reserved < Overall_harmonious_min_perc, 0, reserved * Overall_harmonious_var_max_cons + Overall_fix_cons + (reserved * Overall_harmonious_var_heat_max_cons + Overall_heat_fix_cons) / Heater_eff)
+            - iff(and(hour0[AW + i] > .zero, hour0[AW + i + 1].isZero), PB_warm_start_heat_req * TES_aux_cons_perc, 0) - PB_stby_aux_cons) / (1 + 1 / Ratio_CSP_vs_Heater + Heater_eff * (1 + 1 / Ratio_CSP_vs_Heater) * TES_aux_cons_perc), Heater_cap_ud,
+          hour0[J + i] * Ratio_CSP_vs_Heater / Heater_eff,
+          (min(El_boiler_cap_ud, Grid_import_max_ud * Grid_import_yes_no_PB_strategy + hour0[AW + i]) * El_boiler_eff - iff(reserved < Overall_harmonious_min_perc, 0, reserved * Overall_harmonious_var_heat_max_cons + Overall_heat_fix_cons) + hour0[J + i]) * Ratio_CSP_vs_Heater
+            / Heater_eff))
     }
 
     let AYsum = hour1.sum(hours: daysD, condition: AY)
@@ -316,7 +326,7 @@ extension TunOl {
     for i in 1..<8760 {
       hour1[BE + i] = iff(
         or(hour1[BD + i].isZero, hour1[BC + i].isZero), .zero,
-        max((hour1[AW + i] - hour1[BD + i]) / (hour1[BC + i] / (1 + 1 / Ratio_CSP_vs_Heater) / Heater_eff / BDcountNonZero[i - 1]), (hour0[J + i] - hour1[BD + i] * Heater_eff / Ratio_CSP_vs_Heater) / (hour1[BC + i] / (1 + Ratio_CSP_vs_Heater) / BDcountNonZero[i - 1])) / BDsum[i - 1] * hour1[BD + i])
+        max((hour0[AW + i] - hour1[BD + i]) / (hour1[BC + i] / (1 + 1 / Ratio_CSP_vs_Heater) / Heater_eff / BDcountNonZero[i - 1]), (hour0[J + i] - hour1[BD + i] * Heater_eff / Ratio_CSP_vs_Heater) / (hour1[BC + i] / (1 + Ratio_CSP_vs_Heater) / BDcountNonZero[i - 1])) / BDsum[i - 1] * hour1[BD + i])
     }
     let BEsum = hour1.sum(hours: daysD, condition: BE)
     /// corrected max possible PV elec to TES
@@ -332,12 +342,14 @@ extension TunOl {
     /// Not covered aux elec for TES chrg, CSP SF and PV Plant MWel
     let BH = 105120
     // =MAX(0,ROUND(BF6-AW6,5))
-    for i in 1..<8760 { hour1[BH + i] = max(.zero,round(hour1[BF + i]-hour1[AW + i],5)) }
+    for i in 1..<8760 { hour1[BH + i] = max(.zero, round(hour1[BF + i] - hour0[AW + i], 5)) }
 
     /// Remaining PV after TES chrg
     let BI = 113880
     // =MAX(0,AW6-BF6-(AX6+(BF6*Heater_eff+BG6)*TES_aux_cons_perc))
-    for i in 1..<8760 { hour1[BI + i] = max(.zero,hour1[AW + i]-hour1[BF + i]-(hour1[AX + i]+(hour1[BF + i]*Heater_eff+hour1[BG + i])*TES_aux_cons_perc)) }
+    for i in 1..<8760 { 
+      hour1[BI + i] = max(.zero, hour0[AW + i] - hour1[BF + i] - (hour0[AX + i] + (hour1[BF + i] * Heater_eff + hour1[BG + i]) * TES_aux_cons_perc))
+    }
 
     /// Remaining CSP heat after TES
     let BJ = 122640
@@ -347,7 +359,9 @@ extension TunOl {
     /// Not covered aux elec for TES chrg, CSP SF and PV Plant MWel
     let BK = 131400
     // =MAX(0,-(AW6-BF6-(AX6+(BF6*Heater_eff+BG6)*TES_aux_cons_perc)))
-    for i in 1..<8760 { hour1[BK + i] = max(.zero, -(hour1[AW + i] - hour1[BF + i] - (hour1[AX + i] + (hour1[BF + i] * Heater_eff + hour1[BG + i]) * TES_aux_cons_perc))) }
+    for i in 1..<8760 { 
+      hour1[BK + i] = max(.zero, -(hour0[AW + i] - hour1[BF + i] - (hour0[AX + i] + (hour1[BF + i] * Heater_eff + hour1[BG + i]) * TES_aux_cons_perc))) 
+    }
 
     /// Min harmonious net elec cons not considering grid import
     let BL = 140160
