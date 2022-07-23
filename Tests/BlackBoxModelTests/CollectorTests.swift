@@ -40,11 +40,11 @@ class CollectorTests: XCTestCase {
 
   func testMean() {
     guard 
-      let meteo = try? MeteoDataFileHandler(forReadingAtPath: "/Users/daniel/spc/COM/Midelt.mto"),
-      let meteoData = try? meteo()
+      let file = try? MeteoDataFileHandler(forReadingAtPath: "/Users/daniel/spc/COM/Midelt.mto"),
+      let meteo = try? file()
     else { return }
     
-    let sun = SolarPosition(coords: meteoData.location.coordinates, tz: -1, year: 2017, frequence: .fiveMinutes)
+    let sun = SolarPosition(coords: meteo.location.coordinates, tz: -1, year: 2017, frequence: .fiveMinutes)
     
     let numberOfSCAsInRow = Double(SolarField.parameter.numberOfSCAsInRow)
     let edge1 = SolarField.parameter.distanceSCA / 2 * (1 - 1 / numberOfSCAsInRow) / Collector.parameter.lengthSCA
@@ -64,21 +64,26 @@ class CollectorTests: XCTestCase {
         efficiency.append(.zero)
       }
     }
+
     let values1 = cosTheta.chunks(ofCount: 12)
       .map { perc -> Double in let cosTheta = perc.filter { !$0.isZero }
         if cosTheta.isEmpty { return 0 }
         return statistics(cosTheta).mean
       }
+
     let values2 = efficiency.chunks(ofCount: 12)
       .map { perc -> Double in let efficiency = perc.filter { !$0.isZero }
         if efficiency.isEmpty { return 0 }
         return statistics(efficiency).mean
       }
-    let iter = meteoData.makeIterator()
-    for x in zip(DateGenerator(year: 2017, interval: .hour), zip(values1, values2)) { 
-      let dni = iter.next()!.dni
-      print(DateTime(x.0).description, x.1.0, x.1.1, dni, dni * x.1.0 * x.1.1)
+
+    var out = ""
+    let dates = DateGenerator(year: 2017, interval: .hour).map { $0 }
+    for x in zip(zip(dates, meteo), zip(values1, values2)) { 
+      let dni = x.0.1.dni
+      print(DateTime(x.0.0).description, x.1.0, x.1.1, dni, dni * x.1.0 * x.1.1, to: &out)
     }
+    try? out.write(toFile: "mto.csv", atomically: false, encoding: .utf8)
   }
 
   func testsTracking() {
