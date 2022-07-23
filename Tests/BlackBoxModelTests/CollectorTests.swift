@@ -39,17 +39,23 @@ class CollectorTests: XCTestCase {
   }
 
   func testMean() {
-    let sun1 = SolarPosition(coords: (-26, 35, 0), tz: 0, year: 2017, frequence: .fiveMinutes)
+    guard 
+      let meteo = try? MeteoDataFileHandler(forReadingAtPath: "/Users/daniel/spc/COM/Midelt.mto"),
+      let meteoData = try? meteo()
+    else { return }
+    
+    let sun = SolarPosition(coords: meteoData.location.coordinates, tz: -1, year: 2017, frequence: .fiveMinutes)
+    
     let numberOfSCAsInRow = Double(SolarField.parameter.numberOfSCAsInRow)
-    let edgeFactor1 = SolarField.parameter.distanceSCA / 2 * (1 - 1 / numberOfSCAsInRow) / Collector.parameter.lengthSCA
-    let edgeFactor2 = (1 + 1 / numberOfSCAsInRow) / Collector.parameter.lengthSCA / 2
-    SolarField.parameter.edgeFactor = [edgeFactor1, edgeFactor2]
+    let edge1 = SolarField.parameter.distanceSCA / 2 * (1 - 1 / numberOfSCAsInRow) / Collector.parameter.lengthSCA
+    let edge2 = (1 + 1 / numberOfSCAsInRow) / Collector.parameter.lengthSCA / 2
+    SolarField.parameter.edgeFactor = [edge1, edge2]
     var collector = Plant.initialState.collector
     var cosTheta = [Double]()
     var efficiency = [Double]()
     for date in DateGenerator(year: 2017, interval: .fiveMinutes) {
-      if let sun = sun1[date] {
-        collector.tracking(sun: sun)
+      if let pos = sun[date] {
+        collector.tracking(sun: pos)
         collector.efficiency(ws: 1)
         cosTheta.append(collector.cosTheta)
         efficiency.append(collector.efficiency)
@@ -68,7 +74,11 @@ class CollectorTests: XCTestCase {
         if efficiency.isEmpty { return 0 }
         return statistics(efficiency).mean
       }
-    for x in zip(DateGenerator(year: 2017, interval: .hour), zip(values1, values2)) { print(DateTime(x.0).description, x.1.0, x.1.1) }
+    let iter = meteoData.makeIterator()
+    for x in zip(DateGenerator(year: 2017, interval: .hour), zip(values1, values2)) { 
+      let dni = iter.next()!.dni
+      print(DateTime(x.0).description, x.1.0, x.1.1, dni, dni * x.1.0 * x.1.1)
+    }
   }
 
   func testsTracking() {
