@@ -1,8 +1,8 @@
 import ArgumentParser
 import Foundation
+import SunOl
 import Utilities
 import xlsxwriter
-import SunOl
 
 let source = DispatchSource.makeSignalSource(signal: SIGINT, queue: .global())
 let semaphore = DispatchSemaphore(value: 0)
@@ -26,16 +26,15 @@ Command.main()
 semaphore.signal()
 
 struct Command: ParsableCommand {
-
   @Option(name: .short, help: "Input data file") var file: String?
 
   @Option(name: .short, help: "Parameter file") var json: String?
 
-  @Flag(name: .long, help: "Do not use Multi-group algorithm") var noGroups: Bool = false
+  @Flag(name: .long, help: "Do not use Multi-group algorithm") var noGroups = false
 
-  @Flag(name: .long, help: "Run HTTP server") var http: Bool = false
+  @Flag(name: .long, help: "Run HTTP server") var http = false
   #if os(Windows)
-  @Flag(name: .long, help: "Start excel afterwards") var excel: Bool = false
+  @Flag(name: .long, help: "Start excel afterwards") var excel = false
   #endif
   @Option(name: .short, help: "Population size") var n: Int?
 
@@ -44,52 +43,46 @@ struct Command: ParsableCommand {
   func run() throws {
     let path: String
     #if os(Windows)
-    if let file = file { 
-      path = file
-    } else {
-      path = FileDialog() ?? "input2.txt"  
-    }
+    if let file = file { path = file } else { path = FileDialog() ?? "input2.txt" }
     #else
     path = file ?? "input2.txt"
     #endif
-    guard let csv = CSVReader(atPath: path) else { 
+    guard let csv = CSVReader(atPath: path) else {
       #if os(Windows)
       MessageBox(text: "No input.", caption: "TunOl")
       #else
-      print("No input.");
+      print("No input.")
       #endif
       return
     }
     let parameter: Parameter
-    if let path = json, let data = try? Data(contentsOf: .init(fileURLWithPath: path)), 
-      let parameters = try? JSONDecoder().decode(Parameter.self, from: data) {
+    if let path = json, let data = try? Data(contentsOf: .init(fileURLWithPath: path)), let parameters = try? JSONDecoder().decode(Parameter.self, from: data) {
       parameter = parameters
     } else {
       parameter = Parameter(
-        BESS_cap_ud: 0...500,
-        CCU_CO2_nom_prod_ud: 30...60,
-        CO2_storage_cap_ud: 10000...10000,
-        CSP_loop_nr_ud: 0...0,
-        El_boiler_cap_ud: 10...120,
-        EY_var_net_nom_cons_ud: 160...240,
+        BESS_cap_ud: 0...0,
+        CCU_CO2_nom_prod_ud: 1000...1000,
+        CO2_storage_cap_ud: 100_000...100_000,
+        CSP_loop_nr_ud: 100...400,
+        El_boiler_cap_ud: 0...150,
+        EY_var_net_nom_cons_ud: 200...200,
         Grid_export_max_ud: 50...50,
         Grid_import_max_ud: 0...0,
-        Hydrogen_storage_cap_ud: 0...100,
-        Heater_cap_ud: 0...400,
+        Hydrogen_storage_cap_ud: 100_000...100_000, 
+        Heater_cap_ud: 0...500, 
         MethDist_Meth_nom_prod_ud: 5...40,
         // MethSynt_RawMeth_nom_prod_ud: 10...60,
-        PB_nom_gross_cap_ud: 0...0,
-        PV_AC_cap_ud: 100...800,
-        PV_DC_cap_ud: 400...1000,
-        RawMeth_storage_cap_ud: 30000...30000,
-        TES_thermal_cap_ud: 0...0
-      )
+        PB_nom_gross_cap_ud: 200...300, 
+        PV_AC_cap_ud: 100...1000, 
+        PV_DC_cap_ud: 200...1000, 
+        RawMeth_storage_cap_ud: 100_000...100_000, 
+        TES_thermal_cap_ud: 500...10_000)
       let data = try? JSONEncoder().encode(parameter)
       try? data?.write(to: "parameter.txt")
     }
-    
+
     let server = HTTP(handler: respond)
-    if http { 
+    if http {
       server.start()
       print("web server listening on port \(server.port)")
       DispatchQueue.global().asyncAfter(deadline: .now() + 0.5) { 
@@ -107,12 +100,12 @@ struct Command: ParsableCommand {
     let sorted = valid.sorted { $0[0] < $1[0] }
     let name = writeExcel(results: sorted)
     print(name)
-    if !source.isCancelled {
-      var best = Array(sorted[0][6...])
-      best.remove(at: 10)
-      let result = SunOl.results(values: best)
-      writeCSV(result: result)
-    }
+    // if !source.isCancelled {
+    //   var best = Array(sorted[0][6...])
+    //   best.remove(at: 10)
+    //   let result = SunOl.results(values: best)
+    //   writeCSV(result: result)
+    // }
     if http {
       source.cancel()
       if -timeout.timeIntervalSinceNow < 10 {
@@ -135,21 +128,21 @@ func writeCSV(result: ([Double], [Double], [Double], [Double])) {
     let row = stride(from: n, to: v1.endIndex, by: 8760).lazy.map { String(v1[$0]) }.joined(separator: "\t")
     print(row, to: &hour)
   }
-  try! hour.write(toFile: "out1.csv", atomically: false, encoding: .ascii)
+  try? hour.write(toFile: "out1.csv", atomically: false, encoding: .ascii)
   hour = ""
   let v2 = result.2
   for n in 0..<365 {
     let row = stride(from: n, to: v2.endIndex, by: 365).lazy.map { String(v2[$0]) }.joined(separator: "\t")
     print(row, to: &hour)
   }
-  try! hour.write(toFile: "out2.csv", atomically: false, encoding: .ascii)
+  try? hour.write(toFile: "out2.csv", atomically: false, encoding: .ascii)
   hour = ""
   let v3 = result.3
   for n in 0..<365 {
     let row = stride(from: n, to: v3.endIndex, by: 365).lazy.map { String(v3[$0]) }.joined(separator: "\t")
     print(row, to: &hour)
   }
-  try! hour.write(toFile: "out3.csv", atomically: false, encoding: .ascii)
+  try? hour.write(toFile: "out3.csv", atomically: false, encoding: .ascii)
 }
 
 func writeExcel(results: [[Double]]) -> String {
@@ -157,16 +150,14 @@ func writeExcel(results: [[Double]]) -> String {
   let wb = Workbook(name: name)
   let ws = wb.addWorksheet()
   var r = 0
-  results.forEach { row in r += 1; ws.write(row, row: r) }
+  results.forEach { row in r += 1
+    ws.write(row, row: r)
+  }
   let labels = [
-    "LCOM", "CAPEX", "OPEX", "Methanol", "Import", "Export",
-    "CSP_loop_nr", "TES_thermal_cap_ud", "PB_nom_gross_cap",
-    "PV_AC_cap", "PV_DC_cap", "EY_var_net_nom_cons",
-    "Hydrogen_storage_cap", "Heater_cap", "CCU_CO2_nom_prod",
-    "CO2_storage_cap", "MethSynt_RawMeth_nom_prod",
-    "RawMeth_storage_cap", "MethDist_Meth_nom_prod", "El_boiler_cap",
-    "BESS_cap", "Grid_export_max", "Grid_import_max",
+    "LCOM", "CAPEX", "OPEX", "Methanol", "Import", "Export", "CSP_loop_nr", "TES_thermal_cap_ud", "PB_nom_gross_cap", "PV_AC_cap", "PV_DC_cap", "EY_var_net_nom_cons", "Hydrogen_storage_cap", "Heater_cap", "CCU_CO2_nom_prod", "CO2_storage_cap", "RawMeth_storage_cap",
+    "MethDist_Meth_nom_prod", "El_boiler_cap", "BESS_cap", "Grid_export_max", "Grid_import_max",
   ]
+
   var lowest = results[0][0]
   lowest = (lowest / 50).rounded(.down) * 50
   ws.table(range: [0, 0, r, labels.endIndex - 1], header: labels)
@@ -205,3 +196,4 @@ func respond(request: HTTP.Request) -> HTTP.Response {
   }
   return .init(html: .init(refresh: 10))
 }
+

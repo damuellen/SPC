@@ -270,7 +270,7 @@ extension TunOl {
   }
 
   func hour1(hour0: [Double], reserved: Double) -> [Double] {
-    let (J, L, M) = (26280, 43800, 52560)
+    let J = 26280
     var hour1 = [Double](repeating: .zero, count: 192_720)
     let daysD: [[Int]] = (0..<365).map { Array(stride(from: 1 + $0 * 24, to: 1 + ($0 + 1) * 24, by: 1)) }
     let AW = 3509160

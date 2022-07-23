@@ -9,21 +9,20 @@
 //
 
 import Foundation
-@_exported import Utilities
 @_exported import SunOl
+@_exported import Utilities
 
 public var convergenceCurves = [[[Double]]](repeating: [[Double]](), count: 3)
 public typealias FitnessFunction = ([Double]) -> [Double]
 
 public struct MGOADE {
-
   let group: Bool
   let n: Int
   let maxIter: Int
   let bounds: [ClosedRange<Double>]
- 
+
   let cMax = 1.0
-  let cMin = 0.00004
+  let cMin = 0.000_04
   let cr = 0.4
   let f = 0.9
 
@@ -48,8 +47,7 @@ public struct MGOADE {
 
     // Calculate the fitness of initial grasshoppers
 
-    DispatchQueue.concurrentPerform(iterations: grassHopperPositions.count) { i in 
-      if source.isCancelled { return }
+    DispatchQueue.concurrentPerform(iterations: grassHopperPositions.count) { i in if source.isCancelled { return }
       let result = fitness(grassHopperPositions[i])
       grassHopperFitness[i] = result[0]
     }
@@ -66,10 +64,9 @@ public struct MGOADE {
     }
 
     ClearScreen()
-    print("Population: \(grassHopperPositions.count) ".randomColor(),
-          "Iterations: 0".leftpad(length: 28).randomColor())
+    print("Population: \(grassHopperPositions.count) ".randomColor(), "Iterations: 0".leftpad(length: 28).randomColor())
     print(pretty(values: targetFitness))
-    print(pretty(values: targetPosition))    
+    print(pretty(values: targetPosition))
 
     var pos = 0
     var l = 0
@@ -108,13 +105,10 @@ public struct MGOADE {
         }
       }
 
-      DispatchQueue.concurrentPerform(iterations: grassHopperPositions.count) { i in
-        if source.isCancelled { return }
-        for j in grassHopperPositions[i].indices {
-          grassHopperPositions[i][j].clamp(to: bounds[j])
-        }
+      DispatchQueue.concurrentPerform(iterations: grassHopperPositions.count) { i in if source.isCancelled { return }
+        for j in grassHopperPositions[i].indices { grassHopperPositions[i][j].clamp(to: bounds[j]) }
         let result = fitness(grassHopperPositions[i])
-        targetResults[pos+i] = result
+        targetResults[pos + i] = result
         grassHopperFitness[i] = result[0]
       }
       if source.isCancelled { break }
@@ -177,8 +171,7 @@ public struct MGOADE {
       }
 
       ClearScreen()
-      print("Population: \(grassHopperPositions.count) ".randomColor(),
-            "Iterations: \(l)".leftpad(length: 28).randomColor())
+      print("Population: \(grassHopperPositions.count) ".randomColor(), "Iterations: \(l)".leftpad(length: 28).randomColor())
       print(pretty(values: targetFitness))
       print(pretty(values: targetPosition))
 
@@ -204,23 +197,11 @@ public struct MGOADE {
 typealias Matrix<T> = [[T]]
 typealias Vector<T> = [T]
 
-extension Matrix where Element == Vector<Double> {
-  init(_ x: Int, _ y: Int, _ z: Double = .zero) {
-    self = Matrix(repeating: Vector(y), count: x)
-  }
-}
+extension Matrix where Element == Vector<Double> { init(_ x: Int, _ y: Int, _ z: Double = .zero) { self = Matrix(repeating: Vector(y), count: x) } }
 
-extension Vector where Element == Double {
-  init(_ x: Int,  _ z: Double = .zero) {
-    self = Vector(repeating: z, count: x)
-  }
-}
+extension Vector where Element == Double { init(_ x: Int, _ z: Double = .zero) { self = Vector(repeating: z, count: x) } }
 
-extension Array where Element == ClosedRange<Double> {
-  func randomValues(count: Int) -> [[Double]] {
-    (1...count).map { _ in map { range in Double.random(in: range) } }
-  }
-}
+extension Array where Element == ClosedRange<Double> { func randomValues(count: Int) -> [[Double]] { (1...count).map { _ in map { range in Double.random(in: range) } } } }
 
 extension Range where Bound == Int {
   func split(in parts: Int) -> [Self] {
@@ -230,36 +211,36 @@ extension Range where Bound == Int {
 }
 
 func pretty(values: [[Double]]) -> String {
-  let labels = [
-    "Loops", "TES", "PB", "PV_AC", "PV_DC", "EY_cons", "H2_storage", "Heater",
-    "CCU_CO2_prod", "CO2_storage", "RawMeth_storage",
-    "Dist_Meth", "El_boiler", "BESS", "Grid_export", "Grid_import",
-  ]
+  let labels = ["Loops", "TES", "PB", "PV_AC", "PV_DC", "EY_cons", "H2_storage", "Heater", "CCU_CO2_prod", "CO2_storage", "RawMeth_storage", "MethDist_prod", "El_boiler", "BESS", "Grid_export", "Grid_import"]
   if values.count == 1 {
-    return values[0].indices.map { i in
-    """
-    \(labels[i].leftpad(length: 16).text(.red))\(": ".text(.red))\
-    \(String(format: "%.1f", values[0][i]).leftpad(length: 9).text(.yellow))
-    """
-    }.joined(separator: "\n")
+    return values[0].indices
+      .map { i in
+        """
+        \(labels[i].leftpad(length: 16).text(.red))\(": ".text(.red))\
+        \(String(format: "%.1f", values[0][i]).leftpad(length: 9).text(.yellow))
+        """
+      }
+      .joined(separator: "\n")
   }
-  return values[0].indices.map { i in
-    """
-    \(labels[i].leftpad(length: 16).text(.red))\(": ".text(.red))\
-    \(String(format: "%.1f", values[0][i]).leftpad(length: 9).text(.green))\
-    \(String(format: "%.1f", values[1][i]).leftpad(length: 9).text(.yellow))\
-    \(String(format: "%.1f", values[2][i]).leftpad(length: 9).text(.magenta))
-    """
-  }.joined(separator: "\n")
+  return values[0].indices
+    .map { i in
+      """
+      \(labels[i].leftpad(length: 16).text(.red))\(": ".text(.red))\
+      \(String(format: "%.1f", values[0][i]).leftpad(length: 9).text(.green))\
+      \(String(format: "%.1f", values[1][i]).leftpad(length: 9).text(.yellow))\
+      \(String(format: "%.1f", values[2][i]).leftpad(length: 9).text(.magenta))
+      """
+    }
+    .joined(separator: "\n")
 }
 
 func pretty(values: [Double]) -> String {
   let label = "LCOM"
   if values.count == 1 {
     return """
-    \(label.leftpad(length: 16).text(.red))\(": ".text(.red))\
-    \(String(format: "%.2f", values[0]).leftpad(length: 9).text(.cyan))
-    """
+      \(label.leftpad(length: 16).text(.red))\(": ".text(.red))\
+      \(String(format: "%.2f", values[0]).leftpad(length: 9).text(.cyan))
+      """
   }
   return """
     \(label.leftpad(length: 16).text(.red))\(": ".text(.red))\

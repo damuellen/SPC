@@ -144,7 +144,7 @@ public struct TunOl {
 
   let MethSynt_Ref_fix_cons: Double = 5.25
   let MethSynt_Ref_Hydrogen_annual_cons: Double
-  let MethSynt_Ref_Hydrogen_hourly_cons: Double
+
   let MethSynt_Ref_CO2_hour_cons: Double
   let MethSynt_Ref_heat_fix_prod: Double = 0
   let MethSynt_Ref_heat_stby_cons: Double = 0
@@ -271,9 +271,8 @@ public struct TunOl {
     [
       CSP_loop_nr_ud, TES_thermal_cap_ud, PB_nom_gross_cap_ud, PV_AC_cap_ud, PV_DC_cap_ud,
       EY_var_net_nom_cons_ud, Hydrogen_storage_cap_ud, Heater_cap_ud, CCU_CO2_nom_prod_ud,
-      CO2_storage_cap_ud, MethSynt_RawMeth_nom_prod_ud, RawMeth_storage_cap_ud,
-      MethDist_Meth_nom_prod_ud, El_boiler_cap_ud, BESS_cap_ud, Grid_export_max_ud,
-      Grid_import_max_ud,
+      CO2_storage_cap_ud, RawMeth_storage_cap_ud, MethDist_Meth_nom_prod_ud,
+      El_boiler_cap_ud, BESS_cap_ud, Grid_export_max_ud, Grid_import_max_ud
     ]
   }
 
@@ -321,13 +320,13 @@ public struct TunOl {
     let EY_Ref_Hydrogen_hour_nom_prod = 2.8
     let MethSynt_annual_op_days = 365.25 - MethSynt_annual_outage_days
     let MethSynt_annual_op_hours = MethSynt_annual_op_days * 24
-    self.MethSynt_Ref_Hydrogen_hourly_cons = EY_Ref_Hydrogen_hour_nom_prod
-    self.MethSynt_Ref_Hydrogen_annual_cons = MethSynt_annual_op_hours * MethSynt_Ref_Hydrogen_hourly_cons
-    self.MethSynt_Ref_Hydrogen_hour_cons = MethSynt_Ref_Hydrogen_annual_cons / MethSynt_annual_op_hours
-    self.MethSynt_Ref_CO2_hour_cons = MethSynt_Ref_Hydrogen_hourly_cons / 200.0 * 1430.0
+
+    self.MethSynt_Ref_Hydrogen_hour_cons = EY_Ref_Hydrogen_hour_nom_prod
+    self.MethSynt_Ref_Hydrogen_annual_cons = MethSynt_annual_op_hours * MethSynt_Ref_Hydrogen_hour_cons
+    self.MethSynt_Ref_CO2_hour_cons = MethSynt_Ref_Hydrogen_hour_cons / 200.0 * 1430.0
     self.MethSynt_Ref_CO2_annual_cons = MethSynt_annual_op_hours * MethSynt_Ref_CO2_hour_cons
     
-    self.MethSynt_Ref_rawmeth_hour_prod = MethSynt_Ref_Hydrogen_hourly_cons + MethSynt_Ref_CO2_hour_cons
+    self.MethSynt_Ref_rawmeth_hour_prod = MethSynt_Ref_Hydrogen_hour_cons + MethSynt_Ref_CO2_hour_cons
     self.CSP_nonsolar_aux_cons = CSP_night_aux_cons_per_loop * CSP_loop_nr_ud
     self.BESS_chrg_max_cons = BESS_cap_ud * BESS_chrg_max_ratio
     self.EY_fix_cons = EY_var_net_nom_cons_ud / EY_Ref_var_net_nom_cons * EY_Ref_fix_cons
@@ -371,9 +370,9 @@ public struct TunOl {
     let MethSynt_heat_stby_cons = MethSynt_RawMeth_nom_prod_ud / MethSynt_Ref_rawmeth_hour_prod * MethSynt_Ref_heat_stby_cons
     let MethSynt_stup_cons = MethSynt_RawMeth_nom_prod_ud / MethSynt_Ref_rawmeth_hour_prod * MethSynt_Ref_stup_cons
     let MethSynt_heat_stup_cons = MethSynt_RawMeth_nom_prod_ud / MethSynt_Ref_rawmeth_hour_prod * MethSynt_Ref_heat_stup_cons
-    let MethDist_Ref_rawmeth_hourly_cons = MethSynt_Ref_rawmeth_hour_prod
-    self.MethDist_Ref_water_hour_prod = 0.35 * MethDist_Ref_rawmeth_hourly_cons
-    self.MethDist_Ref_meth_hour_prod = MethDist_Ref_rawmeth_hourly_cons - MethDist_Ref_water_hour_prod
+
+    self.MethDist_Ref_water_hour_prod = 0.35 * MethSynt_Ref_rawmeth_hour_prod
+    self.MethDist_Ref_meth_hour_prod = MethSynt_Ref_rawmeth_hour_prod - MethDist_Ref_water_hour_prod
     let MethDist_H2O_nom_prod = MethDist_Meth_nom_prod_ud / MethDist_Ref_meth_hour_prod * MethDist_Ref_water_hour_prod
     self.MethDist_Ref_meth_annual_prod = MethSynt_annual_op_hours * MethDist_Ref_meth_hour_prod
     self.MethDist_Ref_water_annual_prod = MethSynt_annual_op_hours * MethDist_Ref_water_hour_prod

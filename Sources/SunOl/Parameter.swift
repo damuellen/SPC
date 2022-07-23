@@ -34,10 +34,10 @@ public struct Parameter: Codable {
       Heater_cap_ud, // [7]
       CCU_CO2_nom_prod_ud, // [8]
       CO2_storage_cap_ud, // [9]
-      // MethSynt_RawMeth_nom_prod_ud,
-      RawMeth_storage_cap_ud, // [10]
+      // MethSynt_RawMeth_nom_prod_ud, 
+      RawMeth_storage_cap_ud, // [10] 
       MethDist_Meth_nom_prod_ud, // [11]
-      El_boiler_cap_ud, // [12]
+      El_boiler_cap_ud,  // [12]
       BESS_cap_ud, // [13]
       Grid_export_max_ud, // [14]
       Grid_import_max_ud // [15]

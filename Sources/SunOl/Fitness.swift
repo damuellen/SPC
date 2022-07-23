@@ -20,11 +20,10 @@ public func fitness(values: [Double]) -> [Double] {
   var flip = true
   let d22 = model.d22(hour0: hour0)
 
-  let step = model.Overall_harmonious_max_perc - model.Overall_harmonious_min_perc / 10
+  let step = model.Overall_harmonious_max_perc - model.Overall_harmonious_min_perc / 5
   var reserve = model.Overall_harmonious_min_perc
 
   while reserve < model.Overall_harmonious_max_perc {
-    reserve += step
     let hour1 = model.hour1(hour0: hour0, reserved: reserve)
     let day0 = model.day0(hour0: hour0)
 
@@ -45,9 +44,10 @@ public func fitness(values: [Double]) -> [Double] {
         model.d23(&d23, case: j, day0: day0, d21: d21, d22: d22)
         day.append(Array(d23[33945..<35040]))
         day.append(Array(d23[44895..<45990]))
-        flip = false
       }
     }
+    flip = false
+    reserve += step
   }
 
   var meth_produced_MTPH_sum = Double.zero
