@@ -79,7 +79,7 @@ public final class DateGenerator: Sequence, IteratorProtocol {
     self.valuesPerHour = interval.rawValue
     self.currentDate = self.startDate
     dateComponents.year = year + 1
-    self.endDate = Greenwich.date(from: dateComponents)! - 1
+    self.endDate = Greenwich.date(from: dateComponents)!
   }
 
   public init(range: DateInterval, interval: Interval) {
@@ -96,7 +96,7 @@ public final class DateGenerator: Sequence, IteratorProtocol {
 
     defer { currentDate += interval }
 
-    if currentDate.timeIntervalSince(endDate) > 0 { return nil }
+    if endDate.timeIntervalSince(currentDate) <= 0 { return nil }
 
     return currentDate
   }

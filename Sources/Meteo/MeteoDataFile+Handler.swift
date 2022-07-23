@@ -102,9 +102,9 @@ private struct MET: MeteoDataFile {
     guard lines.endIndex > 10 else { throw MeteoDataFileError.empty }
     self.metadata = lines[0..<10].map { line in
       let line = hasCR ? line.dropLast() : line
-      return String(decoding: line, as: UTF8.self)
+      return String(decoding: line.filter { $0 > separator }, as: UTF8.self)
     }
-    guard let csv = CSVReader(data: lines[10])
+    guard let csv = CSVReader(data: lines[10], separator: ",")
     else { throw MeteoDataFileError.empty }
     self.csv = csv
   }

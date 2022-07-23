@@ -206,7 +206,7 @@ public class MeteoDataProvider: Sequence {
     return AnyIterator<MeteoData> {
       defer { step += 1 }
       if step > 0, cursor < range.last!, step.isMultiple(of: steps) { step = 0; cursor += 1 }
-      if cursor == range.last!, step == lastStep { return nil }
+      if cursor == range.last!, step > lastStep { return nil }
       let r = (cursor..<cursor+2).clamped(to: range)
       let window = Array(data[r])
       let meteo = MeteoData.interpolation(window, step: step, steps: steps)
