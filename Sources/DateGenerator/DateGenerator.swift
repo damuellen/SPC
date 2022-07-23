@@ -19,11 +19,12 @@ public let Greenwich = { calendar -> NSCalendar in
 public final class DateGenerator: Sequence, IteratorProtocol {
 
   public enum Interval: Int, CaseIterable, CustomStringConvertible {
-    case hourly = 1
+    case hour = 1
     case thirtyMinutes = 2
     case fifteenMinutes = 4
     case tenMinutes = 6
     case fiveMinutes = 12
+    case minute = 60
 
     public var fraction: Double {
       return 1 / Double(self.rawValue)

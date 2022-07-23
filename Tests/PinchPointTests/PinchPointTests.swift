@@ -52,4 +52,3 @@ class PinchPointTests: XCTestCase {
     XCTAssertGreaterThan(pp1.superheater.enthalpy.htf.inlet, pp1.superheater.enthalpy.htf.outlet)
   }
 }
-

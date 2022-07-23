@@ -35,7 +35,7 @@ public class MeteoDataProvider: Sequence {
     self.name = name
     self.hourFraction = 8760 / Double(data.count)
     self.valuesPerDay = Int(24 / hourFraction)
-    self.frequence = .init(rawValue: Int(1 / hourFraction)) ?? .hourly
+    self.frequence = .init(rawValue: Int(1 / hourFraction)) ?? .hour
     self.range = data.startIndex..<data.endIndex
     self.statisticsOfDays.reserveCapacity(365)
 
@@ -58,7 +58,7 @@ public class MeteoDataProvider: Sequence {
 
     self.hourFraction = 8760 / Double(self.data.count)
     self.valuesPerDay = Int(24 / hourFraction)
-    self.frequence = .init(rawValue: Int(1 / hourFraction)) ?? .hourly
+    self.frequence = .init(rawValue: Int(1 / hourFraction)) ?? .hour
     self.range = data.startIndex..<data.endIndex
     self.statisticsOfDays.reserveCapacity(365)
 

@@ -156,7 +156,7 @@ public struct SolarPosition {
   }
 
   private static var estimatedDelta_T: Double = 0
-  private static var frequence: DateGenerator.Interval = .hourly
+  private static var frequence: DateGenerator.Interval = .hour
 
   static func spa(input: Input) -> Output {
 
