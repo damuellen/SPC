@@ -29,8 +29,8 @@ class PVPanelTests: XCTestCase {
         "ylabel": "Power", "xlabel": "GTI",
       ]
 
-      try! plot(.png(path: "panel.png"))
-      try! plot(.png(path: "panel2.png"))
+      try! plot(.png("panel.png"))
+      try! plot(.png("panel2.png"))
     }
     let S2 = { evaluate(in: 0...1000, numberOfSamples: 20000, f: $0) }
     let S3 = { evaluate(in: 0.8...1.1, numberOfSamples: 100, f: $0)  }
@@ -41,13 +41,13 @@ class PVPanelTests: XCTestCase {
         xy1s: v,
         titles: "10__I"
       )
-      try! plot3(.pngLarge(path: "panel3.png"))
+      try! plot3(.pngLarge("panel3.png"))
 
       let plot4 = Gnuplot(
         xy1s: i,
         titles: "10__I"
       )
-      try! plot4(.pngLarge(path: "panel4.png"))
+      try! plot4(.pngLarge("panel4.png"))
     }
   }
 }

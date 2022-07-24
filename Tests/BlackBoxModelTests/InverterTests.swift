@@ -57,7 +57,7 @@ class InverterTests: XCTestCase {
          "ylabel 'Efficiency [%]'", "xlabel 'Power [W]'", "ytics nomirror", "yrange [97.6:98.8]"
          ]
 
-         try! plotter.plot(.png(path: "inverter.png"))
+         try! plotter.plot(.png("inverter.png"))
          }
          do {
          let v1 = 1010.0
@@ -80,7 +80,7 @@ class InverterTests: XCTestCase {
          "ylabel 'Efficiency [%]'", "xlabel 'Power [W]'", "ytics nomirror", "yrange [97.4:98.7]"
          ]
 
-         try! plotter.plot(.png(path: "inverter2.png"))
+         try! plotter.plot(.png("inverter2.png"))
          }
          */
   }

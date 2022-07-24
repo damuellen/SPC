@@ -13,7 +13,7 @@ class MeteoTests: XCTestCase {
       let clearSky = MeteoDataProvider.using(sun, model: .special)
       clearSky.setInterval(.fiveMinutes)
       let dni = Array(clearSky.map(\.dni).prefix(24 * 12 * 4))
-      _ = try? Gnuplot(xs: dni)(.pngLarge(path: "dni.png"))
+      _ = try? Gnuplot(xs: dni)(.pngLarge("dni.png"))
     }
 
     let hourly: [(dni: Double, temp: Double, ws: Double)] = [

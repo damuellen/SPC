@@ -56,7 +56,8 @@ struct Command: ParsableCommand {
       return
     }
     let parameter: Parameter
-    if let path = json, let data = try? Data(contentsOf: .init(fileURLWithPath: path)), let parameters = try? JSONDecoder().decode(Parameter.self, from: data) {
+    if let path = json, let data = try? Data(contentsOf: .init(fileURLWithPath: path)),
+     let parameters = try? JSONDecoder().decode(Parameter.self, from: data) {
       parameter = parameters
     } else {
       parameter = Parameter(
@@ -84,7 +85,7 @@ struct Command: ParsableCommand {
     let server = HTTP(handler: respond)
     if http {
       server.start()
-      print("web server listening on port 9080")
+      print("web server listening on port \(server.port)")
       DispatchQueue.global().asyncAfter(deadline: .now() + 0.5) { 
         start("http://127.0.0.1:\(server.port)") 
       }
@@ -180,8 +181,9 @@ func respond(request: HTTP.Request) -> HTTP.Response {
     source.cancel()
   } else {
     uri.remove(at: uri.startIndex)
+    timeout = Date()
   }
-  timeout = Date()
+
   let curves = convergenceCurves.map { Array($0.suffix(Int(uri) ?? 10)) }
   if curves[0].count > 1 {
     let m = curves.map(\.last!).map { $0[1] }.min()
