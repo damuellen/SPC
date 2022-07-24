@@ -84,7 +84,7 @@ struct Command: ParsableCommand {
     let server = HTTP(handler: respond)
     if http {
       server.start()
-      print("web server listening on port \(server.port)")
+      print("web server listening on port 9080")
       DispatchQueue.global().asyncAfter(deadline: .now() + 0.5) { 
         start("http://127.0.0.1:\(server.port)") 
       }
