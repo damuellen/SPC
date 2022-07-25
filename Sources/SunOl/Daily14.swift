@@ -195,9 +195,8 @@ extension TunOl {
 
     /// Balance of electricity outside of harm op period
     let ddLX = 29930
-    // LX=LT6+LU6+LW6+LY6*BESS_chrg_eff-MAX(0,LY6-LV6)-LS6
-    for i in 0..<365 { d13[ddLX + i] = d13[ddLT + i] + d13[ddLU + i] + d13[ddLV + i] + d13[ddLW + i] - d13[ddLS + i] }
-
+    // LX=ROUND(LT6+LU6+LW6+LY6*BESS_chrg_eff-MAX(0,LY6-LV6)-LS6,5)
+    for i in 0..<365 { d13[ddLX + i] = round(d13[ddLT + i] + d13[ddLU + i] + d13[ddLW + i] + d13[ddLY + i] * BESS_chrg_eff - max(0, d13[ddLY + i] - d13[ddLV + i]) - d13[ddLS + i], 5) }
 
     // /// Heat prod by el boiler for harm op outside of harm op period
     // let ddLZ = 30660

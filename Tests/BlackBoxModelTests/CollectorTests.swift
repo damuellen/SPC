@@ -77,11 +77,23 @@ class CollectorTests: XCTestCase {
         return statistics(efficiency).mean
       }
 
+    let values12 = cosTheta.chunks(ofCount: 12)
+      .map { perc -> Double in let cosTheta = perc.filter { !$0.isZero }
+        if cosTheta.isEmpty { return 0 }
+        return statistics(cosTheta).stddev
+      }
+
+    let values22 = efficiency.chunks(ofCount: 12)
+      .map { perc -> Double in let efficiency = perc.filter { !$0.isZero }
+        if efficiency.isEmpty { return 0 }
+        return statistics(efficiency).stddev
+      }
+
     var out = ""
     let dates = DateGenerator(year: 2017, interval: .hour).map { $0 }
-    for x in zip(zip(dates, meteo), zip(values1, values2)) { 
+    for x in zip(zip(dates, meteo), values1.indices) { 
       let dni = x.0.1.dni
-      print(DateTime(x.0.0).description, x.1.0, x.1.1, dni, dni * x.1.0 * x.1.1, to: &out)
+      print(DateTime(x.0.0).description, values12[x.1], values22[x.1], values1[x.1], values2[x.1], dni, dni * values1[x.1] * values2[x.1], to: &out)
     }
     try? out.write(toFile: "mto.csv", atomically: false, encoding: .utf8)
   }

@@ -73,7 +73,7 @@ struct Command: ParsableCommand {
         Heater_cap_ud: 0...500, 
         MethDist_Meth_nom_prod_ud: 5...40,
         // MethSynt_RawMeth_nom_prod_ud: 10...60,
-        PB_nom_gross_cap_ud: 200...300, 
+        PB_nom_gross_cap_ud: 220...300, 
         PV_AC_cap_ud: 100...1000, 
         PV_DC_cap_ud: 200...1000, 
         RawMeth_storage_cap_ud: 100_000...100_000, 

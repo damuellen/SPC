@@ -141,14 +141,16 @@ extension TunOl {
     let Overall_harmonious_range = Overall_harmonious_max_perc - Overall_harmonious_min_perc
     /// Optimal harmonious day prod after min night prep due to prod cap limits
     let ddJP = 8760
-    // JP=IF(OR(IQ6<0,IT6<0,IW6<0,IZ6<0,JC6<0,JF6<0,JI6<0,JL6<0),0,MIN(1,IFERROR(IQ6/MAX(0,IQ6-IS6),1),IFERROR(IT6/MAX(0,IT6-IV6),1),IFERROR(IW6/MAX(0,IW6-IY6),1),IFERROR(IZ6/MAX(0,IZ6-JB6),1),IFERROR(JC6/MAX(0,JC6-JE6),1),IFERROR(JF6/MAX(0,JF6-JH6),1),IFERROR(JI6/MAX(0,JI6-JK6),1),IFERROR(JL6/MAX(0,JL6-JN6),1))*(Overall_harmonious_max_perc-Overall_harmonious_min_perc)+Overall_harmonious_min_perc)
+    // JP=IF(OR(IQ6<0,IT6<0,IW6<0,JF6<0,JI6<0,JL6<0),0,MIN(1,IFERROR(IQ6/MAX(0,IQ6-IS6),1),IFERROR(IT6/MAX(0,IT6-IV6),1),IFERROR(IW6/MAX(0,IW6-IY6),1),IFERROR(JF6/MAX(0,JF6-JH6),1),IFERROR(JI6/MAX(0,JI6-JK6),1),IFERROR(JL6/MAX(0,JL6-JN6),1))*(Overall_harmonious_max_perc-Overall_harmonious_min_perc)+Overall_harmonious_min_perc)
     for i in 0..<365 {
       d13[ddJP + i] = iff(
-        or(d13[ddIQ + i] < .zero, d13[ddIT + i] < .zero, d13[ddIW + i] < .zero, d13[ddIZ + i] < .zero, d13[ddJC + i] < .zero, d13[ddJF + i] < .zero, d13[ddJI + i] < .zero, d13[ddJL + i] < .zero), .zero,
+        or(d13[ddIQ + i] < 0, d13[ddIT + i] < 0, d13[ddIW + i] < 0, d13[ddJF + i] < 0, d13[ddJI + i] < 0, d13[ddJL + i] < 0), 0,
         min(
-          1, ifFinite(d13[ddIQ + i] / max(0, d13[ddIQ + i] - d13[ddIS + i]), 1), ifFinite(d13[ddIT + i] / max(0, d13[ddIT + i] - d13[ddIV + i]), 1), ifFinite(d13[ddIW + i] / max(0, d13[ddIW + i] - d13[ddIY + i]), 1), ifFinite(d13[ddIZ + i] / max(0, d13[ddIZ + i] - d13[ddJB + i]), 1),
-          ifFinite(d13[ddJC + i] / max(0, d13[ddJC + i] - d13[ddJE + i]), 1), ifFinite(d13[ddJF + i] / max(0, d13[ddJF + i] - d13[ddJH + i]), 1), ifFinite(d13[ddJI + i] / max(0, d13[ddJI + i] - d13[ddJK + i]), 1), ifFinite(d13[ddJL + i] / max(0, d13[ddJL + i] - d13[ddJN + i]), 1)) * Overall_harmonious_range + Overall_harmonious_min_perc)
+          1, ifFinite(d13[ddIQ + i] / max(0, d13[ddIQ + i] - d13[ddIS + i]), 1), ifFinite(d13[ddIT + i] / max(0, d13[ddIT + i] - d13[ddIV + i]), 1), ifFinite(d13[ddIW + i] / max(0, d13[ddIW + i] - d13[ddIY + i]), 1),
+          ifFinite(d13[ddJF + i] / max(0, d13[ddJF + i] - d13[ddJH + i]), 1), ifFinite(d13[ddJI + i] / max(0, d13[ddJI + i] - d13[ddJK + i]), 1), ifFinite(d13[ddJL + i] / max(0, d13[ddJL + i] - d13[ddJN + i]), 1)) * (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
+          + Overall_harmonious_min_perc)
     }
+
     let dddJP = 26280  // let ddLN = 26280
     for i in 0..<365 { d13[dddJP + i] = Overall_harmonious_range < 1E-10 ? 1 : (d13[ddJP + i] - Overall_harmonious_min_perc) / Overall_harmonious_range }
 
@@ -288,27 +290,29 @@ extension TunOl {
 
     /// Opt night prep during day prio operation
     let ddKG = 14965
-    // KG=IF(OR($AM6=0,JP6=0,JQ6<0,JS6<0,JU6<0,JW6<0,JY6<0,KA6<0,KC6<0,KE6<0),0,MIN(1,IFERROR(JQ6/MAX(0,JQ6-JR6),1),IFERROR(JS6/MAX(0,JS6-JT6),1),IFERROR(JU6/MAX(0,JU6-JV6),1),IFERROR(JW6/MAX(0,JW6-JX6),1),IFERROR(JY6/MAX(0,JY6-JZ6),1),IFERROR(KA6/MAX(0,KA6-KB6),1),IFERROR(KC6/MAX(0,KC6-KD6),1),IFERROR(KE6/MAX(0,KE6-KF6),1))*($AM6-A_equiv_harmonious_min_perc)+A_equiv_harmonious_min_perc)
+    // KG=IF(OR($AM6=0,JP6=0,JQ6<0,JS6<0,JU6<0,KA6<0,KC6<0,KE6<0),0,MIN(1,IFERROR(JQ6/MAX(0,JQ6-JR6),1),IFERROR(JS6/MAX(0,JS6-JT6),1),IFERROR(JU6/MAX(0,JU6-JV6),1),IFERROR(KA6/MAX(0,KA6-KB6),1),IFERROR(KC6/MAX(0,KC6-KD6),1),IFERROR(KE6/MAX(0,KE6-KF6),1))*($AM6-A_equiv_harmonious_min_perc)+A_equiv_harmonious_min_perc)
     for i in 0..<365 {
       d13[ddKG + i] = iff(
-        or(d10[AM + i].isZero, d13[ddJP + i].isZero, d13[ddJQ + i] < .zero, d13[ddJS + i] < .zero, d13[ddJU + i] < .zero, d13[ddJW + i] < .zero, d13[ddJY + i] < .zero, d13[ddKA + i] < .zero, d13[ddKC + i] < .zero, d13[ddKE + i] < .zero), 0,
+        or(d10[AM + i].isZero, d13[ddJP + i].isZero, d13[ddJQ + i] < 0, d13[ddJS + i] < 0, d13[ddJU + i] < 0, d13[ddKA + i] < 0, d13[ddKC + i] < 0, d13[ddKE + i] < 0), 0,
         min(
-          1, ifFinite(d13[ddJQ + i] / max(0, d13[ddJQ + i] - d13[ddJR + i]), 1), ifFinite(d13[ddJS + i] / max(0, d13[ddJS + i] - d13[ddJT + i]), 1), ifFinite(d13[ddJU + i] / max(0, d13[ddJU + i] - d13[ddJV + i]), 1), ifFinite(d13[ddJW + i] / max(0, d13[ddJW + i] - d13[ddJX + i]), 1),
-          ifFinite(d13[ddJY + i] / max(0, d13[ddJY + i] - d13[ddJZ + i]), 1), ifFinite(d13[ddKA + i] / max(0, d13[ddKA + i] - d13[ddKB + i]), 1), ifFinite(d13[ddKC + i] / max(0, d13[ddKC + i] - d13[ddKD + i]), 1), ifFinite(d13[ddKE + i] / max(0, d13[ddKE + i] - d13[ddKF + i]), 1)) * (d10[AM + i] - equiv_harmonious_min_perc[j])
+          1, ifFinite(d13[ddJQ + i] / max(0, d13[ddJQ + i] - d13[ddJR + i]), 1), ifFinite(d13[ddJS + i] / max(0, d13[ddJS + i] - d13[ddJT + i]), 1), ifFinite(d13[ddJU + i] / max(0, d13[ddJU + i] - d13[ddJV + i]), 1),
+          ifFinite(d13[ddKA + i] / max(0, d13[ddKA + i] - d13[ddKB + i]), 1), ifFinite(d13[ddKC + i] / max(0, d13[ddKC + i] - d13[ddKD + i]), 1), ifFinite(d13[ddKE + i] / max(0, d13[ddKE + i] - d13[ddKF + i]), 1)) * (d10[AM + i] - equiv_harmonious_min_perc[j])
           + equiv_harmonious_min_perc[j])
     }
 
+
     /// min harmonious day prod after opt equiv harmonious night prod due to prod cap limits
     let ddKI = 15330
-    // KI=IF(OR($AM6=0,IQ6<0,IT6<0,IW6<0,IZ6<0,JC6<0,JF6<0,JI6<0,JL6<0),0,MIN(1,IFERROR(IQ6/MAX(0,IQ6-IR6),1),IFERROR(IT6/MAX(0,IT6-IU6),1),IFERROR(IW6/MAX(0,IW6-IX6),1),IFERROR(IZ6/MAX(0,IZ6-JA6),1),IFERROR(JC6/MAX(0,JC6-JD6),1),IFERROR(JF6/MAX(0,JF6-JG6),1),IFERROR(JI6/MAX(0,JI6-JJ6),1),IFERROR(JL6/MAX(0,JL6-JM6),1))*($AM6-A_equiv_harmonious_min_perc)+A_equiv_harmonious_min_perc)
+    // KI=IF(OR($AM6=0,IQ6<0,IT6<0,IW6<0,JF6<0,JI6<0,JL6<0),0,MIN(1,IFERROR(IQ6/MAX(0,IQ6-IR6),1),IFERROR(IT6/MAX(0,IT6-IU6),1),IFERROR(IW6/MAX(0,IW6-IX6),1),IFERROR(JF6/MAX(0,JF6-JG6),1),IFERROR(JI6/MAX(0,JI6-JJ6),1),IFERROR(JL6/MAX(0,JL6-JM6),1))*($AM6-A_equiv_harmonious_min_perc)+A_equiv_harmonious_min_perc)
     for i in 0..<365 {
       d13[ddKI + i] = iff(
-        or(d10[AM + i].isZero, d13[ddIQ + i] < .zero, d13[ddIT + i] < .zero, d13[ddIW + i] < .zero, d13[ddIZ + i] < .zero, d13[ddJC + i] < .zero, d13[ddJF + i] < .zero, d13[ddJI + i] < .zero, d13[ddJL + i] < .zero), 0,
+        or(d10[AM + i].isZero, d13[ddIQ + i] < 0, d13[ddIT + i] < 0, d13[ddIW + i] < 0, d13[ddJF + i] < 0, d13[ddJI + i] < 0, d13[ddJL + i] < 0), 0,
         min(
-          1, ifFinite(d13[ddIQ + i] / max(0, d13[ddIQ + i] - d13[ddIR + i]), 1), ifFinite(d13[ddIT + i] / max(0, d13[ddIT + i] - d13[ddIU + i]), 1), ifFinite(d13[ddIW + i] / max(0, d13[ddIW + i] - d13[ddIX + i]), 1), ifFinite(d13[ddIZ + i] / max(0, d13[ddIZ + i] - d13[ddJA + i]), 1),
-          ifFinite(d13[ddJC + i] / max(0, d13[ddJC + i] - d13[ddJD + i]), 1), ifFinite(d13[ddJF + i] / max(0, d13[ddJF + i] - d13[ddJG + i]), 1), ifFinite(d13[ddJI + i] / max(0, d13[ddJI + i] - d13[ddJJ + i]), 1), ifFinite(d13[ddJL + i] / max(0, d13[ddJL + i] - d13[ddJM + i]), 1)) * (d10[AM + i] - equiv_harmonious_min_perc[j])
+          1, ifFinite(d13[ddIQ + i] / max(0, d13[ddIQ + i] - d13[ddIR + i]), 1), ifFinite(d13[ddIT + i] / max(0, d13[ddIT + i] - d13[ddIU + i]), 1), ifFinite(d13[ddIW + i] / max(0, d13[ddIW + i] - d13[ddIX + i]), 1),
+          ifFinite(d13[ddJF + i] / max(0, d13[ddJF + i] - d13[ddJG + i]), 1), ifFinite(d13[ddJI + i] / max(0, d13[ddJI + i] - d13[ddJJ + i]), 1), ifFinite(d13[ddJL + i] / max(0, d13[ddJL + i] - d13[ddJM + i]), 1)) * (d10[AM + i] - equiv_harmonious_min_perc[j])
           + equiv_harmonious_min_perc[j])
     }
+
     let ddAMKG = 23360  // let ddLF = 23360
    
     let ddAMKI = 38690  // let ddMW = 38690
@@ -398,7 +402,6 @@ extension TunOl {
     let ddKR = 18615
     // KR=IF(KI6=0,0,ROUND((GE6+(IA6-GE6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-MAX(0,-((FS6+(HO6-FS6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-($Z6+($AA6-$Z6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-MAX(0,($AB6+($AC6-$AB6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(FV6+(HR6-FV6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)))/El_boiler_eff-MAX(0,(FK6+(HG6-FK6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(GG6+(IC6-GG6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(GA6+(HW6-GA6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))*BESS_chrg_eff)/BESS_chrg_eff)),5))
     for i in 0..<365 {
-
       d13[ddKR + i] = iff(
         d13[ddKI + i].isZero, 0,
         round(
@@ -460,13 +463,15 @@ extension TunOl {
 
     /// Opt harm op period op during night prio operation
     let ddKZ = 21535
-    // KZ=IF(OR(JP6=0,KJ6<0,KL6<0,KN6<0,KP6<0,KR6<0,KT6<0,KV6<0,KX6<0),0,MIN(1,IFERROR(KJ6/MAX(0,KJ6-KK6),1),IFERROR(KL6/MAX(0,KL6-KM6),1),IFERROR(KN6/MAX(0,KN6-KO6),1),IFERROR(KP6/MAX(0,KP6-KQ6),1),IFERROR(KR6/MAX(0,KR6-KS6),1),IFERROR(KT6/MAX(0,KT6-KU6),1),IFERROR(KV6/MAX(0,KV6-KW6),1),IFERROR(KX6/MAX(0,KX6-KY6),1))*(Overall_harmonious_max_perc-Overall_harmonious_min_perc)+Overall_harmonious_min_perc)
+    // KZ=IF(OR(JP6=0,KJ6<0,KL6<0,KN6<0,KT6<0,KV6<0,KX6<0),0,MIN(1,IFERROR(KJ6/MAX(0,KJ6-KK6),1),IFERROR(KL6/MAX(0,KL6-KM6),1),IFERROR(KN6/MAX(0,KN6-KO6),1),IFERROR(KT6/MAX(0,KT6-KU6),1),IFERROR(KV6/MAX(0,KV6-KW6),1),IFERROR(KX6/MAX(0,KX6-KY6),1))*(Overall_harmonious_max_perc-Overall_harmonious_min_perc)+Overall_harmonious_min_perc)
     for i in 0..<365 {
       d13[ddKZ + i] = iff(
-        or(d13[ddJP + i].isZero, d13[ddKJ + i] < .zero, d13[ddKL + i] < .zero, d13[ddKN + i] < .zero, d13[ddKP + i] < .zero, d13[ddKR + i] < .zero, d13[ddKT + i] < .zero, d13[ddKV + i] < .zero, d13[ddKX + i] < .zero), 0,
+        or(d13[ddJP + i].isZero, d13[ddKJ + i] < 0, d13[ddKL + i] < 0, d13[ddKN + i] < 0, d13[ddKT + i] < 0, d13[ddKV + i] < 0, d13[ddKX + i] < 0), 0,
         min(
-          1, ifFinite(d13[ddKJ + i] / max(0, d13[ddKJ + i] - d13[ddKK + i]), 1), ifFinite(d13[ddKL + i] / max(0, d13[ddKL + i] - d13[ddKM + i]), 1), ifFinite(d13[ddKN + i] / max(0, d13[ddKN + i] - d13[ddKO + i]), 1), ifFinite(d13[ddKP + i] / max(0, d13[ddKP + i] - d13[ddKQ + i]), 1),
-          ifFinite(d13[ddKR + i] / max(0, d13[ddKR + i] - d13[ddKS + i]), 1), ifFinite(d13[ddKT + i] / max(0, d13[ddKT + i] - d13[ddKU + i]), 1), ifFinite(d13[ddKV + i] / max(0, d13[ddKV + i] - d13[ddKW + i]), 1), ifFinite(d13[ddKX + i] / max(0, d13[ddKX + i] - d13[ddKY + i]), 1)) * Overall_harmonious_range + Overall_harmonious_min_perc)
+          1, ifFinite(d13[ddKJ + i] / max(0, d13[ddKJ + i] - d13[ddKK + i]), 1), ifFinite(d13[ddKL + i] / max(0, d13[ddKL + i] - d13[ddKM + i]), 1), ifFinite(d13[ddKN + i] / max(0, d13[ddKN + i] - d13[ddKO + i]), 1),
+          ifFinite(d13[ddKT + i] / max(0, d13[ddKT + i] - d13[ddKU + i]), 1), ifFinite(d13[ddKV + i] / max(0, d13[ddKV + i] - d13[ddKW + i]), 1), ifFinite(d13[ddKX + i] / max(0, d13[ddKX + i] - d13[ddKY + i]), 1)) * (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
+          + Overall_harmonious_min_perc)
     }
+
   }
 }

@@ -193,10 +193,14 @@ extension TunOl {
     let Z = 8030
     // IF(AND(J3=0,F3=0),0,(J3+F3/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_Hydrogen_nom_cons)/EY_Hydrogen_nom_prod*EY_var_gross_nom_cons)+IF(AND(H3=0,F3=0),0,(H3+F3/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_CO2_nom_cons)/CCU_CO2_nom_prod_ud*CCU_var_nom_cons)+IF(F3=0,0,F3/MethSynt_RawMeth_nom_prod_ud*MethSynt_var_nom_cons)
     for i in 0..<365 {
-      d10[Z + i] =
-        iff(and(d10[J + i].isZero, d10[F + i].isZero), .zero, (d10[J + i] + d10[F + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_Hydrogen_nom_cons) / EY_Hydrogen_nom_prod * EY_var_gross_nom_cons)
-        + iff(and(d10[H + i].isZero, d10[F + i].isZero), .zero, (d10[H + i] + d10[F + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_CO2_nom_cons) / CCU_CO2_nom_prod_ud * CCU_var_nom_cons)
-        + iff(d10[F + i].isZero, .zero, d10[F + i] / MethSynt_RawMeth_nom_prod_ud * MethSynt_var_nom_cons)
+      if d10[AM + i].isZero {
+        d10[Z + i] = 0 
+      } else {
+        d10[Z + i] =
+          iff(and(d10[J + i].isZero, d10[F + i].isZero), .zero, (d10[J + i] + d10[F + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_Hydrogen_nom_cons) / EY_Hydrogen_nom_prod * EY_var_gross_nom_cons)
+          + iff(and(d10[H + i].isZero, d10[F + i].isZero), .zero, (d10[H + i] + d10[F + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_CO2_nom_cons) / CCU_CO2_nom_prod_ud * CCU_var_nom_cons)
+          + iff(d10[F + i].isZero, .zero, d10[F + i] / MethSynt_RawMeth_nom_prod_ud * MethSynt_var_nom_cons)
+      }
     }
 
     /// Max el cons during day for night op prep
@@ -213,10 +217,13 @@ extension TunOl {
     let AB = 8760
     // IF(AND(J3=0,F3=0),0,(J3+F3/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_Hydrogen_nom_cons)/EY_Hydrogen_nom_prod*EY_var_heat_nom_cons)+IF(AND(H3=0,F3=0),0,(H3+F3/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_CO2_nom_cons)/CCU_CO2_nom_prod_ud*CCU_var_heat_nom_cons)-IF(F3=0,0,F3/MethSynt_RawMeth_nom_prod_ud*MethSynt_var_heat_nom_prod)
     for i in 0..<365 {
-      d10[AB + i] =
-        iff(and(d10[J + i].isZero, d10[F + i].isZero), .zero, (d10[J + i] + d10[F + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_Hydrogen_nom_cons) / EY_Hydrogen_nom_prod * EY_var_heat_nom_cons)
+      if d10[AM + i].isZero {
+        d10[AB + i] = 0
+      } else {
+        d10[AB + i] = iff(and(d10[J + i].isZero, d10[F + i].isZero), .zero, (d10[J + i] + d10[F + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_Hydrogen_nom_cons) / EY_Hydrogen_nom_prod * EY_var_heat_nom_cons)
         + iff(and(d10[H + i].isZero, d10[F + i].isZero), .zero, (d10[H + i] + d10[F + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_CO2_nom_cons) / CCU_CO2_nom_prod_ud * CCU_var_heat_nom_cons)
         - iff(d10[F + i].isZero, .zero, d10[F + i] / MethSynt_RawMeth_nom_prod_ud * MethSynt_var_heat_nom_prod)
+      }
     }
 
     /// Max heat cons during day for prep of night
@@ -243,15 +250,21 @@ extension TunOl {
     let AI = 11315
     for i in 0..<365 {
       // F6
-      d10[AD + i] = d10[F + i]
+      if d10[AM + i].isZero {
+        d10[AD + i] = 0
+        d10[AF + i] = 0
+        d10[AH + i] = 0
+      } else {
+        d10[AD + i] = d10[F + i]
+        // H6+F6/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_CO2_nom_cons
+        d10[AF + i] = d10[H + i] + d10[F + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_CO2_nom_cons
+        // J6+F6/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_Hydrogen_nom_cons
+        d10[AH + i] = d10[J + i] + d10[F + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_Hydrogen_nom_cons
+      }
       // W6
       d10[AE + i] = d10[W + i]
-      // H6+F6/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_CO2_nom_cons
-      d10[AF + i] = d10[H + i] + d10[F + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_CO2_nom_cons
       // X6+W6/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_CO2_nom_cons
       d10[AG + i] = d10[X + i] + d10[W + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_CO2_nom_cons
-      // J6+F6/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_Hydrogen_nom_cons
-      d10[AH + i] = d10[J + i] + d10[F + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_Hydrogen_nom_cons
       // Y6+W6/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_Hydrogen_nom_cons
       d10[AI + i] = d10[Y + i] + d10[W + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_Hydrogen_nom_cons
     }
