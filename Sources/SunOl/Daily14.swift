@@ -228,8 +228,8 @@ extension TunOl {
 
     /// Grid import
     let ddME = 32485
-    // ME=LI6+LW6+LT6+LJ6+(MAX(0,-LK6)+MAX(0,-LX6))*EDG_elec_cost_factor
-    for i in 0..<365 { d13[ddME + i] = d13[ddLI + i] + d13[ddLT + i] + d13[ddLJ + i] + (max(0,-d13[ddLK + i])+max(0,-d13[ddLX + i])) * EDG_elec_cost_factor }
+    // ME=ROUND(LI6+LW6+LT6+LJ6+(MAX(0,-LK6)+MAX(0,-LX6))*EDG_elec_cost_factor,5)
+    for i in 0..<365 { d13[ddME + i] = round(d13[ddLI + i] + d13[ddLW + i] + d13[ddLT + i] + d13[ddLJ + i] + (max(0, -d13[ddLK + i]) + max(.zero, -d13[ddLX + i])) * EDG_elec_cost_factor, 5) }
 
     /// Outside harmonious operation period hours
     let ddMF = 32850
@@ -489,10 +489,8 @@ extension TunOl {
 
     /// Grid import
     let ddNN = 44895
-    // NN=MR6+NF6+NC6+MS6+(MAX(0,-MT6)+MAX(0,-NG6))*EDG_elec_cost_factor
-    for i in 0..<365 { 
-      d13[ddNN + i] = d13[ddMR + i] + d13[ddNF + i] + d13[ddNC + i] + d13[ddMS + i] + (max(0, -d13[ddMT + i]) + max(0, -d13[ddNG + i])) * EDG_elec_cost_factor
-    }
+    // NN=ROUND(MR6+NF6+NC6+MS6+(MAX(0,-MT6)+MAX(0,-NG6))*EDG_elec_cost_factor,5)
+    for i in 0..<365 { d13[ddNN + i] = round(d13[ddMR + i] + d13[ddNF + i] + d13[ddNC + i] + d13[ddMS + i] + (max(.zero, -13[ddMT + i]) + max(.zero, -d13[ddNG + i])) * EDG_elec_cost_factor, 5) }
 
     /// Outside harmonious operation period hours
     let ddNO = 45260

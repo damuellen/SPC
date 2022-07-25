@@ -609,9 +609,8 @@ extension TunOl {
 
     /// grid import
     let IW = 34675
-    // IW=(MAX(0,-IC6)+MAX(0,-IP6))*EDG_elec_cost_factor+IA6+IB6+IO6
-    for i in 0..<365 { d23[IW + i] = (max(.zero, -d23[IC + i]) + max(.zero, -d23[IP + i])) * EDG_elec_cost_factor + d23[IA + i] + d23[IB + i] + d23[IO + i] }
-
+    // IW=ROUND((MAX(0,-IC6)+MAX(0,-IP6))*EDG_elec_cost_factor+IA6+IB6+IO6,5)
+    for i in 0..<365 { d23[IW + i] = round((max(.zero, -d23[IC + i]) + max(.zero, -d23[IP + i])) * EDG_elec_cost_factor + d23[IA + i] + d23[IB + i] + d23[IO + i], 5) }
 
     /// Checksum
     let IX = 35040
@@ -773,9 +772,9 @@ extension TunOl {
 
     /// grid import
     let KB = 45625
-    // KB=(MAX(0,-JH6)+MAX(0,-JU6))*EDG_elec_cost_factor+JF6+JG6+JT6
+    // KB=ROUND((MAX(0,-JH6)+MAX(0,-JU6))*EDG_elec_cost_factor+JF6+JG6+JT6,5)
     for i in 0..<365 { 
-      d23[KB + i] = (max(.zero, -d23[JH + i]) + max(.zero, -d23[JU + i])) * EDG_elec_cost_factor + d23[JF + i] + d23[JG + i] + d23[JT + i]
+      d23[KB + i] = round((max(.zero, -d23[JH + i]) + max(.zero, -d23[JU + i])) * EDG_elec_cost_factor + d23[JF + i] + d23[JG + i] + d23[JT + i], 5)
     }
 
     /// Checksum

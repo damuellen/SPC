@@ -20,7 +20,7 @@ public func fitness(values: [Double]) -> [Double] {
   var flip = true
   let d22 = model.d22(hour0: hour0)
 
-  let step = model.Overall_harmonious_max_perc - model.Overall_harmonious_min_perc / 5
+  let step = (model.Overall_harmonious_max_perc - model.Overall_harmonious_min_perc) / 5
   var reserve = model.Overall_harmonious_min_perc
 
   while reserve < model.Overall_harmonious_max_perc {
@@ -68,7 +68,7 @@ public func fitness(values: [Double]) -> [Double] {
 
   let LCOM = costs.LCOM(meth_produced_MTPH: meth_produced_MTPH_sum, elec_from_grid: elec_from_grid_sum, elec_to_grid: elec_to_grid_MTPH_sum)
   if !meth.drop(while: { $0 < meth_produced_MTPH_sum / 100 }).isEmpty || LCOM.isInfinite || meth_produced_MTPH_sum.isZero { return [Double.infinity] }
-  let dollar = 40 / model.MethDist_Ref_meth_hour_prod * model.MethSynt_Ref_CO2_hour_cons
+  let dollar = 40.0 / model.MethDist_Ref_meth_hour_prod * model.MethSynt_Ref_rawmeth_hour_prod / model.MethSynt_Ref_rawmeth_hour_prod * model.MethSynt_Ref_CO2_hour_cons
   let Cost_of_CO2 = meth_produced_MTPH_sum * dollar
   return [LCOM, costs.Total_CAPEX, costs.Total_OPEX + Cost_of_CO2, meth_produced_MTPH_sum, elec_from_grid_sum, elec_to_grid_MTPH_sum] + model.values
 }
@@ -137,8 +137,7 @@ public func results(values: [Double]) -> ([Double], [Double], [Double], [Double]
   }
   
   let LCOM = costs.LCOM(meth_produced_MTPH: meth_produced_MTPH_sum, elec_from_grid: elec_from_grid_sum, elec_to_grid: elec_to_grid_MTPH_sum)
-
-  let dollar = 40 / model.MethDist_Ref_meth_hour_prod * model.MethSynt_Ref_CO2_hour_cons
+  let dollar = 40.0 / model.MethDist_Ref_meth_hour_prod * model.MethSynt_Ref_rawmeth_hour_prod / model.MethSynt_Ref_rawmeth_hour_prod * model.MethSynt_Ref_CO2_hour_cons
   let Cost_of_CO2 = meth_produced_MTPH_sum * dollar
   return ([LCOM, costs.Total_CAPEX, costs.Total_OPEX + Cost_of_CO2, meth_produced_MTPH_sum, elec_from_grid_sum, elec_to_grid_MTPH_sum] + model.values, hour, day1, day2)
 }
