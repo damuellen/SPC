@@ -1230,6 +1230,10 @@ class SunOlTests: XCTestCase {
     var d23 = [Double](repeating: .zero, count: 48_545)
     var d21 = [Double](repeating: .zero, count: 9855)
 
+    let GX = 16790
+    let GZ = 17155
+    let HA = 17520
+
     for j in 0..<4 {
       model.hour2(&hour2, j: j, hour0: hour0, hour1: hour1)
       model.hour3(&hour3, j: j, hour0: hour0, hour1: hour1, hour2: hour2)
@@ -1240,14 +1244,14 @@ class SunOlTests: XCTestCase {
       model.d12(case: j, &d12, hour0: hour0, hour4: hour4)
       model.d13(&d13, case: j, d10: d10, d11: d11, d12: d12)
       model.d14(&d13, case: j, d10: d10, d11: d11, d12: d12)
-      day.append(Array(d13[31_755..<32_850]))
-      day.append(Array(d13[44_165..<45_625]))
+      day.append(Array(d13[31755..<33945]))
+      day.append(Array(d13[44165..<46355]))
 
       model.d21(&d21, case: j, day0: day0)
       model.d23(&d23, case: j, day0: day0, d21: d21, d22: d22)
 
-      day.append(Array(d23[33_945..<35_040]))
-      day.append(Array(d23[44_895..<45_990]))
+      day.append(Array(d23[33945..<35040] + day0[365..<1095] + ArraySlice(zip(day0[365..<730], d23[GX..<GZ]).map { $1 > 0 ? $0 : 0})))
+      day.append(Array(d23[44895..<45990] + day0[365..<1095] + ArraySlice(zip(day0[365..<730], d23[GZ..<HA]).map { $1 > 0 ? $0 : 0})))
     }
 
     var meth_produced_MTPH_sum = Double.zero

@@ -542,7 +542,7 @@ func foo1() {
     // let plot1 = Gnuplot(xys: downsample(values: zip(xs,ys).map { ($0.0, $0.1) }, threshold: 540).map { [$0.0, $0.1] }, style: .lines(smooth: true))
     plot1.settings["xdata"] = "time"
     plot1.settings["timefmt"] = "'%s'"
-    try! plot1(.pdf(path: "\(header.filter({$0 != "\""})).pdf"))
+    try! plot1(.pdf("\(header.filter({$0 != "\""})).pdf"))
   }
 }
 foo1()

@@ -17,6 +17,10 @@ public func fitness(values: [Double]) -> [Double] {
   var d21 = [Double](repeating: .zero, count: 9_855)
   var day = [[Double]]()
   
+  let GX = 16790
+  let GZ = 17155
+  let HA = 17520
+
   var flip = true
   let d22 = model.d22(hour0: hour0)
 
@@ -37,13 +41,13 @@ public func fitness(values: [Double]) -> [Double] {
       model.d12(case: j, &d12, hour0: hour0, hour4: hour4)
       model.d13(&d13, case: j, d10: d10, d11: d11, d12: d12)
       model.d14(&d13, case: j, d10: d10, d11: d11, d12: d12)
-      day.append(Array(d13[31755..<32850]))
-      day.append(Array(d13[44165..<45625]))
+      day.append(Array(d13[31755..<33945]))
+      day.append(Array(d13[44165..<46355]))
       if flip {
         model.d21(&d21, case: j, day0: day0)
         model.d23(&d23, case: j, day0: day0, d21: d21, d22: d22)
-        day.append(Array(d23[33945..<35040]))
-        day.append(Array(d23[44895..<45990]))
+        day.append(Array(d23[33945..<35040] + day0[365..<1095] + ArraySlice(zip(day0[365..<730], d23[GX..<GZ]).map { $1 > 0 ? $0 : 0})))
+        day.append(Array(d23[44895..<45990] + day0[365..<1095] + ArraySlice(zip(day0[365..<730], d23[GZ..<HA]).map { $1 > 0 ? $0 : 0})))
       }
     }
     flip = false
@@ -91,10 +95,15 @@ public func results(values: [Double]) -> ([Double], [Double], [Double], [Double]
   var d13 = [Double](repeating: .zero, count: 47_085) 
   var d23 = [Double](repeating: .zero, count: 48_545)
   var d21 = [Double](repeating: .zero, count: 9_855)
-  
+
+  let GX = 16790
+  let GZ = 17155
+  let HA = 17520
+
   var hour = hour0 + hour1
   var day1 = day0 
   var day2 = day0
+
   for j in 0..<4 {
     model.hour2(&hour2, j: j, hour0: hour0, hour1: hour1)
     model.hour3(&hour3, j: j, hour0: hour0, hour1: hour1, hour2: hour2)
@@ -105,14 +114,14 @@ public func results(values: [Double]) -> ([Double], [Double], [Double], [Double]
     model.d12(case: j, &d12, hour0: hour0, hour4: hour4)
     model.d13(&d13, case: j, d10: d10, d11: d11, d12: d12)
     model.d14(&d13, case: j, d10: d10, d11: d11, d12: d12)
-    day.append(Array(d13[31755..<32850]))
-    day.append(Array(d13[44165..<45625]))
+    day.append(Array(d13[31755..<33945]))
+    day.append(Array(d13[44165..<46355]))
 
     model.d21(&d21, case: j, day0: day0)
     model.d23(&d23, case: j, day0: day0, d21: d21, d22: d22)
-
-    day.append(Array(d23[33945..<35040]))
-    day.append(Array(d23[44895..<45990]))
+    
+    day.append(Array(d23[33945..<35040] + day0[365..<1095] + ArraySlice(zip(day0[365..<730], d23[GX..<GZ]).map { $1 > 0 ? $0 : 0})))
+    day.append(Array(d23[44895..<45990] + day0[365..<1095] + ArraySlice(zip(day0[365..<730], d23[GZ..<HA]).map { $1 > 0 ? $0 : 0})))
     hour += hour2 + hour3 + hour4
     day1 += d11 + d12 + d13
     day2 += d21 + d22 + d23 + day.joined()
