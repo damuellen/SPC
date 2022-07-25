@@ -1289,8 +1289,6 @@ class SunOlTests: XCTestCase {
     ]
     .makeIterator()
 
-    let LCOM = costs.LCOM(meth_produced_MTPH: meth_produced_MTPH_sum, elec_from_grid: elec_from_grid_sum, elec_to_grid: elec_to_grid_MTPH_sum)
-    // dump(LCOM)
     for child in Mirror(reflecting: costs).children.filter({ $0.label?.contains("cost") ?? false }) { XCTAssertEqual(child.value as! Double, fixtures.next()!, accuracy: 1, child.label!) }
   }
 }
