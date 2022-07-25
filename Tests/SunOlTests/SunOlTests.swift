@@ -1267,6 +1267,8 @@ class SunOlTests: XCTestCase {
         meth_produced_MTPH_sum += day[best][d]
         elec_from_grid_sum += day[best][d + 365 + 365]
         elec_to_grid_MTPH_sum += day[best][d + 365]
+        let hours1 = day[best][d + 730 + 365]
+        let hours2 = day[best][d + 730 + 730]
       }
     }
 
@@ -1286,20 +1288,6 @@ class SunOlTests: XCTestCase {
       0.0, 0.0, 271_850_862.509_697_9, 22_885_530.347_053_397, 25_708_090.216_960_527, 12_437_574.020_599_108, 63_482_959.972_115_204, 430_140_000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 24_684_376.583_671_547, 44_763_724.383_25, 1_937_238.624_602_197, 1_197_447.845_153_448_4,
     ]
     .makeIterator()
-
-    var meth_produced_MTPH_sum = Double.zero
-    var elec_from_grid_sum = Double.zero
-    var elec_to_grid_MTPH_sum = Double.zero
-    var day = [[Double]]()
-    for d in 0..<365 {
-      let cases = day.indices.map { i in costs.LCOM(meth_produced_MTPH: day[i][d] * 365.0, elec_from_grid: day[i][d + 365 + 365] * 365.0, elec_to_grid: day[i][d + 365] * 365.0) }
-      let ranked = cases.indices.filter { cases[$0].isFinite }.filter { cases[$0] > 0 }.sorted { cases[$0] < cases[$1] }
-      if let best = ranked.first {
-        meth_produced_MTPH_sum += day[best][d]
-        elec_from_grid_sum += day[best][d + 365 + 365]
-        elec_to_grid_MTPH_sum += day[best][d + 365]
-      }
-    }
 
     let LCOM = costs.LCOM(meth_produced_MTPH: meth_produced_MTPH_sum, elec_from_grid: elec_from_grid_sum, elec_to_grid: elec_to_grid_MTPH_sum)
     // dump(LCOM)

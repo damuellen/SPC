@@ -67,6 +67,8 @@ public func fitness(values: [Double]) -> [Double] {
       meth_produced_MTPH_sum += day[best][d]
       elec_from_grid_sum += day[best][d + 365 + 365]
       elec_to_grid_MTPH_sum += day[best][d + 365]
+      let hours1 = day[best][d + 730 + 365]
+      let hours2 = day[best][d + 730 + 730]
     }
   }
 
@@ -79,9 +81,8 @@ public func results(values: [Double]) -> ([Double], [Double], [Double], [Double]
   guard let model = TunOl(values) else { fatalError("Invalid config") }
 
   let hour0 = model.hour0(TunOl.Q_Sol_MW_thLoop, TunOl.Reference_PV_plant_power_at_inverter_inlet_DC, TunOl.Reference_PV_MV_power_at_transformer_outlet)
-  var reserve = model.Overall_harmonious_min_perc
 
-  let hour1 = model.hour1(hour0: hour0, reserved: reserve)
+  let hour1 = model.hour1(hour0: hour0, reserved: model.Overall_harmonious_min_perc)
   let day0 = model.day0(hour0: hour0)
   let d22 = model.d22(hour0: hour0)
   var day = [[Double]]()
