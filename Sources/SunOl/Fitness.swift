@@ -68,9 +68,7 @@ public func fitness(values: [Double]) -> [Double] {
 
   let LCOM = costs.LCOM(meth_produced_MTPH: meth_produced_MTPH_sum, elec_from_grid: elec_from_grid_sum, elec_to_grid: elec_to_grid_MTPH_sum)
   if !meth.drop(while: { $0 < meth_produced_MTPH_sum / 100 }).isEmpty || LCOM.isInfinite || meth_produced_MTPH_sum.isZero { return [Double.infinity] }
-  let dollar = 40.0 / model.MethDist_Ref_meth_hour_prod * model.MethSynt_Ref_rawmeth_hour_prod / model.MethSynt_Ref_rawmeth_hour_prod * model.MethSynt_Ref_CO2_hour_cons
-  let Cost_of_CO2 = meth_produced_MTPH_sum * dollar
-  return [LCOM, costs.Total_CAPEX, costs.Total_OPEX + Cost_of_CO2, meth_produced_MTPH_sum, elec_from_grid_sum, elec_to_grid_MTPH_sum] + model.values
+  return [LCOM, costs.Total_CAPEX, costs.Total_OPEX, meth_produced_MTPH_sum, elec_from_grid_sum, elec_to_grid_MTPH_sum] + model.values
 }
 
 public func results(values: [Double]) -> ([Double], [Double], [Double], [Double]) {
@@ -126,7 +124,9 @@ public func results(values: [Double]) -> ([Double], [Double], [Double], [Double]
   let costs = Costs(model)
   var meth = [Double]()
   for d in 0..<365 {
-    let cases = day.indices.map { i in costs.LCOM(meth_produced_MTPH: day[i][d] * 365.0, elec_from_grid: day[i][d + 365 + 365] * 365.0, elec_to_grid: day[i][d + 365] * 365.0) }
+    let cases = day.indices.map { i in 
+      costs.LCOM(meth_produced_MTPH: day[i][d] * 365.0, elec_from_grid: day[i][d + 365 + 365] * 365.0, elec_to_grid: day[i][d + 365] * 365.0) 
+    }
     let best = cases.indices.filter { cases[$0].isFinite }.filter { cases[$0] > 0 }.sorted { cases[$0] < cases[$1] }.first
     if let best = best {
       meth.append(day[best][d])
@@ -137,7 +137,5 @@ public func results(values: [Double]) -> ([Double], [Double], [Double], [Double]
   }
   
   let LCOM = costs.LCOM(meth_produced_MTPH: meth_produced_MTPH_sum, elec_from_grid: elec_from_grid_sum, elec_to_grid: elec_to_grid_MTPH_sum)
-  let dollar = 40.0 / model.MethDist_Ref_meth_hour_prod * model.MethSynt_Ref_rawmeth_hour_prod / model.MethSynt_Ref_rawmeth_hour_prod * model.MethSynt_Ref_CO2_hour_cons
-  let Cost_of_CO2 = meth_produced_MTPH_sum * dollar
-  return ([LCOM, costs.Total_CAPEX, costs.Total_OPEX + Cost_of_CO2, meth_produced_MTPH_sum, elec_from_grid_sum, elec_to_grid_MTPH_sum] + model.values, hour, day1, day2)
+  return ([LCOM, costs.Total_CAPEX, costs.Total_OPEX, meth_produced_MTPH_sum, elec_from_grid_sum, elec_to_grid_MTPH_sum] + model.values, hour, day1, day2)
 }

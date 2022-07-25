@@ -90,6 +90,7 @@ public struct Costs {
     let PV_O_M_Cost = (11.3333 * 1000 * 1000) + (0.00606061 / 100 * 1000 * 1000) * model.PV_DC_cap_ud
     let PB_O_M_Cost = (11.3333 / 3 * 2 / 3 * 1000 * 1000) + (0.00606061 / 3 * 2 / 3 * 1000 * 1000) * model.PB_nom_gross_cap_ud
     let OM_Cost_EY_Methsynt = (MethDist_plant_cost + Electrolysis_cost) * 0.035
+    self.CO2_Cost = 40.0 / model.MethDist_Ref_meth_hour_prod * model.MethSynt_Ref_rawmeth_hour_prod / model.MethSynt_Ref_rawmeth_hour_prod * model.MethSynt_Ref_CO2_hour_cons
     // let CAPEX_ICPH_assembly_hall_csp_sf_dedicated_to_ICPH_PC_DC_PV_AC_Heaters_TES_PB_Substation =
     // Assembly_hall + CSP_SF_cost_dedicated_to_ICPH + PV_DC_Cost + PV_AC_Cost + Heater_Cost + TES_Storage_cost + PB_Cost + Substation_cost_ICPH
 
@@ -106,7 +107,7 @@ public struct Costs {
   
   var Total_CAPEX: Double
   var Total_OPEX: Double
-
+  var CO2_Cost: Double
   var Assembly_hall_cost: Double
   var CSP_SF_cost_dedicated_to_Methanol: Double
   var PV_DC_cost: Double
@@ -125,11 +126,9 @@ public struct Costs {
   var Electrical_boiler_cost: Double
   var Substation_cost: Double
 
-
   public func LCOM(meth_produced_MTPH: Double, elec_from_grid: Double, elec_to_grid: Double) -> Double {
-    // print(meth_produced_MTPH, elec_from_grid, elec_to_grid)
     let Overhead_cost_on_Methanol = 1 / (1 - 0.15)
-    let lcom = ((Costs.FCR * Total_CAPEX + Total_OPEX) + (elec_from_grid * Costs.Elec_buy * 1000) - (elec_to_grid * Costs.Elec_sell * 1000)) / meth_produced_MTPH * Overhead_cost_on_Methanol
+    let lcom = ((((Costs.FCR * Total_CAPEX + Total_OPEX) + (elec_from_grid * Costs.Elec_buy * 1000) - (elec_to_grid * Costs.Elec_sell * 1000)) / meth_produced_MTPH) + CO2_Cost) * Overhead_cost_on_Methanol
     return lcom
   }
 }
