@@ -34,7 +34,7 @@ public struct MGOADE {
   }
 
   public func callAsFunction(_ fitness: FitnessFunction) -> [[Double]] {
-    var targetResults = Matrix(n * maxIter, bounds.count + 6)
+    var targetResults = Matrix(n * maxIter, bounds.count + 7)
     var targetPosition = Matrix(group ? 3 : 1, bounds.count)
     var targetFitness = Vector(group ? 3 : 1, .infinity)
     let EPSILON = 1E-14

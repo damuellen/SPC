@@ -127,7 +127,7 @@ private struct MET: MeteoDataFile {
 
   func fetchData() throws -> [MeteoData] {
     // Check whether the dataRange matches one year of values.
-    guard csv.dataRows.count.isMultiple(of: 8760)
+    guard csv.dataRows.count.isMultiple(of: 24)
     //  || dataRange.count.isMultiple(of: 8764)
     else { throw MeteoDataFileError.unexpectedRowCount }
     return try zip(csv.dataRows, 11...).map { values, line in

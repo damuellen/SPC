@@ -172,7 +172,7 @@ extension TunOl {
     /// el cons for el boiler for harm op outside of harm op period
     let ddLT = 28470
     // LT=IF(KG6=0,FA6,FA6+(GW6-FA6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc))
-    for i in 0..<365 { d13[ddLT + i] = d13[ddLS + i] - d13[ddLU + i] }
+    for i in 0..<365 { d13[ddLT + i] = iff(d13[ddKG + i].isZero, d11[FA + i], d11[FA + i] + (d12[GW + i] - d11[FA + i]) * d13[ddAMKG + i]) }
     let HQ = 8030
     let FU = 8030
     /// El available outside of harm op period after TES chrg
@@ -228,7 +228,9 @@ extension TunOl {
     /// Grid import
     let ddME = 32485
     // ME=ROUND(LI6+LW6+LT6+LJ6+(MAX(0,-LK6)+MAX(0,-LX6))*EDG_elec_cost_factor,5)
-    for i in 0..<365 { d13[ddME + i] = round(d13[ddLI + i] + d13[ddLW + i] + d13[ddLT + i] + d13[ddLJ + i] + (max(0, -d13[ddLK + i]) + max(.zero, -d13[ddLX + i])) * EDG_elec_cost_factor, 5) }
+    for i in 0..<365 { 
+      d13[ddME + i] = round(d13[ddLI + i] + d13[ddLW + i] + d13[ddLT + i] + d13[ddLJ + i] + (max(0, -d13[ddLK + i]) + max(.zero, -d13[ddLX + i])) * EDG_elec_cost_factor, 5)
+    }
 
     /// Outside harmonious operation period hours
     let ddMF = 32850

@@ -64,16 +64,16 @@ struct Command: ParsableCommand {
         BESS_cap_ud: 0...0,
         CCU_CO2_nom_prod_ud: 1000...1000,
         CO2_storage_cap_ud: 100_000...100_000,
-        CSP_loop_nr_ud: 100...400,
-        El_boiler_cap_ud: 0...150,
+        CSP_loop_nr_ud: 100...300,
+        El_boiler_cap_ud: 0...250,
         EY_var_net_nom_cons_ud: 200...200,
         Grid_export_max_ud: 50...50,
         Grid_import_max_ud: 0...0,
         Hydrogen_storage_cap_ud: 100_000...100_000, 
-        Heater_cap_ud: 0...500, 
+        Heater_cap_ud: 0...600, 
         MethDist_Meth_nom_prod_ud: 5...40,
         // MethSynt_RawMeth_nom_prod_ud: 10...60,
-        PB_nom_gross_cap_ud: 220...300, 
+        PB_nom_gross_cap_ud: 100...300, 
         PV_AC_cap_ud: 100...1000, 
         PV_DC_cap_ud: 200...1000, 
         RawMeth_storage_cap_ud: 100_000...100_000, 
@@ -155,7 +155,7 @@ func writeExcel(results: [[Double]]) -> String {
     ws.write(row, row: r)
   }
   let labels = [
-    "LCOM", "CAPEX", "OPEX", "Methanol", "Import", "Export", "CSP_loop_nr", "TES_thermal_cap_ud", "PB_nom_gross_cap", "PV_AC_cap", "PV_DC_cap", "EY_var_net_nom_cons", "Hydrogen_storage_cap", "Heater_cap", "CCU_CO2_nom_prod", "CO2_storage_cap", "RawMeth_storage_cap",
+    "LCOM", "LCOM2", "CAPEX", "OPEX", "Methanol", "Import", "Export", "Hours", "CSP_loop_nr", "TES_thermal_cap_ud", "PB_nom_gross_cap", "PV_AC_cap", "PV_DC_cap", "EY_var_net_nom_cons", "Hydrogen_storage_cap", "Heater_cap", "CCU_CO2_nom_prod", "CO2_storage_cap", "RawMeth_storage_cap",
     "MethDist_Meth_nom_prod", "El_boiler_cap", "BESS_cap", "Grid_export_max", "Grid_import_max",
   ]
 

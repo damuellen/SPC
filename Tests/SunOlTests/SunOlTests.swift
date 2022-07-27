@@ -1206,7 +1206,7 @@ class SunOlTests: XCTestCase {
   }
 
   func testsCalculation2() {
-    guard let model = TunOl([0.00, 400.00, 5.20, 311.38, 584.47, 200.00, 1000.00, 100.00, 1221.72, 10_000.00, 30_000.00, 15.17, 10.44, 123.63, 50.00, 0.00]) else {
+    guard let model = TunOl([127.8588774,4742.381403,165.6137197,325.468122,688.9309873,200,100000,327.9499092,1000,100000,100000,15.84299421,89.44649724,0,50,0]) else {
       print("Invalid config")
       return
     }
@@ -1259,16 +1259,19 @@ class SunOlTests: XCTestCase {
     var elec_to_grid_MTPH_sum = Double.zero
 
     _ = ["1a day prio", "1a night prio", "2a day prio", "2a night prio", "1b day prio", "1b night prio", "2b day prio", "2b night prio", "1c day prio", "1c night prio", "2c day prio", "2c night prio", "1d day prio", "1d night prio", "2d day prio", "2d night prio"]
-
+    var charts = [Int]()
     for d in 0..<365 {
       let cases = day.indices.map { i in costs.LCOM(meth_produced_MTPH: day[i][d] * 365.0, elec_from_grid: day[i][d + 365 + 365] * 365.0, elec_to_grid: day[i][d + 365] * 365.0) }
       let ranked = cases.indices.filter { cases[$0].isFinite }.filter { cases[$0] > 0 }.sorted { cases[$0] < cases[$1] }
       if let best = ranked.first {
+        charts.append(best)
         meth_produced_MTPH_sum += day[best][d]
-        elec_from_grid_sum += day[best][d + 365 + 365]
+        let from_grid = day[best][d + 365 + 365]
+        elec_from_grid_sum += from_grid
         elec_to_grid_MTPH_sum += day[best][d + 365]
-        let hours1 = day[best][d + 730 + 365]
-        let hours2 = day[best][d + 730 + 730]
+        let hours1 = day[best][d + 730 + 730]
+        let hours2 = day[best][d + 730 + 730 + 365]
+        let hours_sum = hours1 + hours2
       }
     }
 
