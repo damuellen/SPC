@@ -29,8 +29,18 @@ extension TunOl {
 
     /// Optimized min net elec demand outside harm op period
     let BV = 8760
-    // =IF(AND(BU7>0,BU6=0,BU5>0),BU5,BU6)
-    for i in 1..<8760 { hour2[BV + i] = iff(and(hour2[BU + i + 1] > .zero, hour2[BU + i].isZero, hour2[BU + i - 1] > .zero), hour2[BU + i - 1], hour2[BU + i]) }
+    // =IF(OR(AND(BU6>0,BU5=0,BU7=0,BU4=0,BU8=0),AND(BU6=0,BU5>0,BU7>0),AND(BU6>0,OR(AND(BU4=0,BU5>0,BU7=0),AND(BU5=0,BU7>0,BU8=0)))),BU5,BU6)
+    for i in 1..<8760 {
+      let a = hour2[max(BU + i - 2, BU)]
+      let b = hour2[max(BU + i - 1, BU)]
+      let c = hour2[min(BU + i + 1, BV - 1)]
+      let d = hour2[min(BU + i + 2, BV - 1)]
+      hour2[BV + i] = iff(
+        or(
+          and(hour2[BU + i] > 0, b.isZero, c.isZero, a.isZero, d.isZero), and(hour2[BU + i].isZero, b > 0, c > 0),
+          and(hour2[BU + i] > 0, or(and(a.isZero, b > 0, c.isZero), and(b.isZero, c > 0, d.isZero)))), b, hour2[BU + i])
+    }
+
 
     let BO_BFcount = hour1.count(hours: daysBO, range: BF1, predicate: { $0 > 0 })
     /// Outside harm op aux elec for TES dischrg, CSP SF and PV Plant MWel
@@ -57,9 +67,9 @@ extension TunOl {
 
     /// Corresponding PB net elec output
     let BX = 26280
-    // =IF(BV6+BW6-$BP6<=0,0,MAX(PB_net_min_cap,MIN(PB_nom_net_cap,BV6+BW6-$BP6)))
+    // BX=IF(AND(BV6=0,BV6+BW6-$BP6<=0),0,MAX(PB_net_min_cap,MIN(PB_nom_net_cap,BV6+BW6-$BP6)))
     for i in 1..<8760 {
-      hour2[BX + i] = iff((hour2[BV + i] + hour2[BW + i] - hour1[BP1 + i]) <= 0, .zero, max(PB_net_min_cap, min(PB_nom_net_cap, hour2[BV + i] + hour2[BW + i] - hour1[BP1 + i]))) 
+      hour2[BX + i] = iff(and(hour2[BV + i] .isZero, (hour2[BV + i] + hour2[BW + i] - hour1[BP1 + i]) <= 0), .zero, max(PB_net_min_cap, min(PB_nom_net_cap, hour2[BV + i] + hour2[BW + i] - hour1[BP1 + i]))) 
     }
 
     /// Corresponding PB gross elec output

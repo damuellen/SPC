@@ -277,17 +277,56 @@ extension TunOl {
     let AX = 3517920
     /// Max possible PV elec to TES (considering TES chrg aux)
     let AY = 26280
-    // AY=MAX(0,MIN((Grid_import_max_ud*Grid_import_yes_no_PB_strategy+AW6+$J6/Heater_eff-(Overall_harmonious_var_min_cons+Overall_fix_cons)-(Overall_harmonious_var_heat_min_cons+Overall_heat_fix_cons)/Heater_eff-IF(AND(AW6>0,AW7=0),PB_warm_start_heat_req*TES_aux_cons_perc,0)-PB_stby_aux_cons)/(1+1/Ratio_CSP_vs_Heater+Heater_eff*(1+1/Ratio_CSP_vs_Heater)*TES_aux_cons_perc),Heater_cap_ud,$J6*Ratio_CSP_vs_Heater/Heater_eff,(MIN(El_boiler_cap_ud,Grid_import_max_ud*Grid_import_yes_no_PB_strategy+AW6)*El_boiler_eff-(Overall_harmonious_var_heat_min_cons+Overall_heat_fix_cons)+$J6)*Ratio_CSP_vs_Heater/Heater_eff))
-    for i in 1..<8760 { 
+    // AY=MAX(0,MIN((Grid_import_max_ud*Grid_import_yes_no_PB_strategy+AW6+IF(BS6<Overall_harmonious_min_perc,$J6,MAX(0,$J6-BS6*Overall_harmonious_var_heat_max_cons-Overall_heat_fix_cons))/Heater_eff-IF(BS6<Overall_harmonious_min_perc,0,BS6*Overall_harmonious_var_max_cons+Overall_fix_cons+MAX(0,BS6*Overall_harmonious_var_heat_max_cons+Overall_heat_fix_cons-$J6)/El_boiler_eff)-IF(AND(AW6>0,AW7=0),PB_warm_start_heat_req*TES_aux_cons_perc,0)-PB_stby_aux_cons)/(1+1/Ratio_CSP_vs_Heater+Heater_eff*(1+1/Ratio_CSP_vs_Heater)*TES_aux_cons_perc),Heater_cap_ud,($J6-IF(BS6<Overall_harmonious_min_perc,0,BS6*Overall_harmonious_var_heat_max_cons+Overall_heat_fix_cons))*Ratio_CSP_vs_Heater/Heater_eff,(MIN(El_boiler_cap_ud,Grid_import_max_ud*Grid_import_yes_no_PB_strategy+AW6)*El_boiler_eff-IF(BS6<Overall_harmonious_min_perc,0,BS6*Overall_harmonious_var_heat_max_cons+Overall_heat_fix_cons)+$J6)*Ratio_CSP_vs_Heater/Heater_eff,(Grid_import_max_ud*Grid_import_yes_no_PB_strategy+AW6-IF(BS6<Overall_harmonious_min_perc,0,BS6*Overall_harmonious_var_max_cons+Overall_fix_cons+MAX(0,BS6*Overall_harmonious_var_heat_max_cons+Overall_heat_fix_cons-$J6)/El_boiler_eff)-IF(AND(AW6>0,AW7=0),PB_warm_start_heat_req*TES_aux_cons_perc,0)-PB_stby_aux_cons)/(1+Heater_eff*(1+1/Ratio_CSP_vs_Heater)*TES_aux_cons_perc)))
+    for i in 1..<8760 {
       hour1[AY + i] = max(
         0,
         min(
-          (Grid_import_max_ud * Grid_import_yes_no_PB_strategy + hour0[AW + i] + hour0[J + i] / Heater_eff
-            - iff(reserved < Overall_harmonious_min_perc, 0, reserved * Overall_harmonious_var_max_cons + Overall_fix_cons + (reserved * Overall_harmonious_var_heat_max_cons + Overall_heat_fix_cons) / Heater_eff)
-            - iff(and(hour0[AW + i] > .zero, hour0[AW + i + 1].isZero), PB_warm_start_heat_req * TES_aux_cons_perc, 0) - PB_stby_aux_cons) / (1 + 1 / Ratio_CSP_vs_Heater + Heater_eff * (1 + 1 / Ratio_CSP_vs_Heater) * TES_aux_cons_perc), Heater_cap_ud,
-          hour0[J + i] * Ratio_CSP_vs_Heater / Heater_eff,
-          (min(El_boiler_cap_ud, Grid_import_max_ud * Grid_import_yes_no_PB_strategy + hour0[AW + i]) * El_boiler_eff - iff(reserved < Overall_harmonious_min_perc, 0, reserved * Overall_harmonious_var_heat_max_cons + Overall_heat_fix_cons) + hour0[J + i]) * Ratio_CSP_vs_Heater
-            / Heater_eff))
+          (Grid_import_max_ud * Grid_import_yes_no_PB_strategy + hour0[AW + i]
+            + iff(
+              reserved < Overall_harmonious_min_perc, hour0[J + i],
+              max(
+                0,
+                hour0[J + i] - reserved * Overall_harmonious_var_heat_max_cons
+                  - Overall_heat_fix_cons)) / Heater_eff
+            - iff(
+              reserved < Overall_harmonious_min_perc, 0,
+              reserved * Overall_harmonious_var_max_cons + Overall_fix_cons + max(
+                0,
+                reserved * Overall_harmonious_var_heat_max_cons
+                  + Overall_heat_fix_cons - hour0[J + i]) / El_boiler_eff)
+            - iff(
+              and(hour0[AW + i] > .zero, hour0[AW + i + 1].isZero),
+              PB_warm_start_heat_req * TES_aux_cons_perc, 0) - PB_stby_aux_cons)
+            / (1 + 1 / Ratio_CSP_vs_Heater + Heater_eff
+              * (1 + 1 / Ratio_CSP_vs_Heater) * TES_aux_cons_perc),
+          Heater_cap_ud,
+          (hour0[J + i]
+            - iff(
+              reserved < Overall_harmonious_min_perc, 0,
+              reserved * Overall_harmonious_var_heat_max_cons
+                + Overall_heat_fix_cons)) * Ratio_CSP_vs_Heater / Heater_eff,
+          (min(
+            El_boiler_cap_ud,
+            Grid_import_max_ud * Grid_import_yes_no_PB_strategy + hour0[AW + i])
+            * El_boiler_eff
+            - iff(
+              reserved < Overall_harmonious_min_perc, 0,
+              reserved * Overall_harmonious_var_heat_max_cons
+                + Overall_heat_fix_cons) + hour0[J + i]) * Ratio_CSP_vs_Heater
+            / Heater_eff,
+          (Grid_import_max_ud * Grid_import_yes_no_PB_strategy + hour0[AW + i]
+            - iff(
+              reserved < Overall_harmonious_min_perc, 0,
+              reserved * Overall_harmonious_var_max_cons + Overall_fix_cons + max(
+                0,
+                reserved * Overall_harmonious_var_heat_max_cons
+                  + Overall_heat_fix_cons - hour0[J + i]) / El_boiler_eff)
+            - iff(
+              and(hour0[AW + i] > 0, hour0[AW + i + 1].isZero),
+              PB_warm_start_heat_req * TES_aux_cons_perc, 0) - PB_stby_aux_cons)
+            / (1 + Heater_eff * (1 + 1 / Ratio_CSP_vs_Heater) * TES_aux_cons_perc))
+      )
     }
 
     let AYsum = hour1.sum(hours: daysD, condition: AY)

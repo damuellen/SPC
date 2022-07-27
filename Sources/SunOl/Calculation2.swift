@@ -28,9 +28,17 @@ extension TunOl {
 
     /// Optimized max net elec demand outside harm op period
     let DX = 17520
-    // IF(AND(DW7>0,DW6=0,DW5>0),DW5,DW6)
-    for i in 1..<8760 { hour4[DX + i] = iff(and(hour4[DW + i + 1] > .zero, hour4[DW + i].isZero, hour4[DW + i - 1] > .zero), hour4[DW + i - 1], hour4[DW + i]) }
-
+    // =IF(OR(AND(DW6>0,DW5=0,DW7=0,DW4=0,DW8=0),AND(DW6=0,DW5>0,DW7>0),AND(DW6>0,OR(AND(DW4=0,DW5>0,DW7=0),AND(DW5=0,DW7>0,DW8=0)))),DW5,DW6)
+    for i in 1..<8760 { 
+      let a = hour4[max(DW + i - 2, DW)]
+      let b = hour4[max(DW + i - 1, DW)]
+      let c = hour4[min(DW + i + 1, DX - 1)]
+      let d = hour4[min(DW + i + 2, DX - 1)]
+      hour4[DX + i] = iff(
+        or(
+          and(hour4[DW + i] > 0, b.isZero, c.isZero, a.isZero, d.isZero), and(hour4[DW + i].isZero, b > 0, c > 0),
+          and(hour4[DW + i] > 0, or(and(a.isZero, b > 0, c.isZero), and(b.isZero, c > 0, d.isZero)))), b, hour4[DW + i])
+    }
     /// Outside harm op aux elec for TES dischrg, CSP SF and PV Plant MWel
     let DY = 26280
     // =IF(DV6=0,0,IF(OR($BM6>0;PB_nom_gross_cap_ud<=0);0;$BK6+((MIN(PB_nom_net_cap;MAX(PB_net_min_cap;(1+TES_aux_cons_perc)*MAX(0;DX6-$BP6)))+PB_nom_net_cap*PB_nom_var_aux_cons_perc_net*POLY(MIN(PB_nom_net_cap;MAX(PB_net_min_cap;(1+TES_aux_cons_perc)*MAX(0;DX6-$BP6)))/PB_nom_net_cap;PB_n2g_var_aux_el_Coeff)+PB_fix_aux_el)/(PB_gross_min_eff+(PB_nom_gross_eff-PB_gross_min_eff)/(PB_nom_net_cap-PB_net_min_cap)*(MIN(PB_nom_net_cap;MAX(0;DX6-$BP6))-PB_net_min_cap))+MAX(0;(A_overall_var_heat_max_cons-A_overall_var_heat_min_cons)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(DV6-A_equiv_harmonious_min_perc)+A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons-$BQ6)*PB_Ratio_Heat_input_vs_output)*TES_aux_cons_perc+IF(AND(DX6=0;DX7>0);MAX(0;IF(COUNTIF(DX$1:DX6;"0")<PB_warm_start_duration;PB_hot_start_heat_req;PB_warm_start_heat_req)-$BQ6)*TES_aux_cons_perc;0)))
@@ -57,8 +65,8 @@ extension TunOl {
 
     /// Corresponding PB net elec output
     let DZ = 35040
-    // =IF(DX6+DY6-$BP6<=0,0,MAX(PB_net_min_cap,MIN(PB_nom_net_cap,DX6+DY6-$BP6)))
-    for i in 1..<8760 { hour4[DZ + i] = iff((hour4[DX + i] + hour4[DY + i] - hour1[BP1 + i]) <= 0, .zero, max(PB_net_min_cap, min(PB_nom_net_cap, hour4[DX + i] + hour4[DY + i] - hour1[BP1 + i]))) 
+    // =IF(AND(DX6=0,DX6+DY6-$BP6<=0),0,MAX(PB_net_min_cap,MIN(PB_nom_net_cap,DX6+DY6-$BP6)))
+    for i in 1..<8760 { hour4[DZ + i] = iff(and(hour4[DX + i].isZero, (hour4[DX + i] + hour4[DY + i] - hour1[BP1 + i]) <= 0), .zero, max(PB_net_min_cap, min(PB_nom_net_cap, hour4[DX + i] + hour4[DY + i] - hour1[BP1 + i]))) 
     }
 
     /// Corresponding PB gross elec output
