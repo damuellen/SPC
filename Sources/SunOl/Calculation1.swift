@@ -143,8 +143,8 @@ extension TunOl {
     let CHsum = hour2.sum(hours: daysBO, condition: CH)
     /// corrected max possible PV elec to TES
     let CI = 122640
-    // IF(CC6=0,0,CG6-IF(CF6=0,0,CF6/(1+1/Ratio_CSP_vs_Heater)/Heater_eff/SUMIF(BO5:BO8763,"="BO6,CH5:CH8763)*CH6))
-    for i in 1..<8760 { hour2[CI + i] = iff(hour2[CC + i].isZero, .zero, hour2[CG + i] - iff(hour2[CF + i].isZero, .zero, hour2[CF + i] / (1 + 1 / Ratio_CSP_vs_Heater) / Heater_eff / CHsum[i - 1] * hour2[CH + i])) }
+    // =IF(CC6=0,0,MAX(0,CG6-IF(CF6=0,0,CF6/(1+1/Ratio_CSP_vs_Heater)/Heater_eff/SUMIF($BO$5:$BO$8764,"="&$BO6,CH$5:CH$8764)*CH6)))
+    for i in 1..<8760 { hour2[CI + i] = iff(hour2[CC + i].isZero, .zero, max(.zero, hour2[CG + i] - iff(hour2[CF + i].isZero, .zero, hour2[CF + i] / (1 + 1 / Ratio_CSP_vs_Heater) / Heater_eff / CHsum[i - 1] * hour2[CH + i]))) }
 
     /// Max possible CSP heat to TES
     let CJ = 131400
@@ -164,11 +164,11 @@ extension TunOl {
 
     /// Total aux el TES chrg&disch CSP SF, PV, PB stby  MWel
     let CM = 157680
-    //  IF(J6>0,J6*CSP_var_aux_nom_perc,CSP_nonsolar_aux_cons)+M6+(CI6*Heater_eff+CJ6)*TES_aux_cons_perc+IF(OR(CC6=0,AND(BY6=0,BZ6=0)),PB_stby_aux_cons,0)+IF(AND(CC6>0,BZ6>0),PB_stup_aux_cons+BZ6*TES_aux_cons_perc,0)+IF(AND(CC6>0,BY6>0),(BZ6+CA6+CB6)*TES_aux_cons_perc,0)
+    // =ROUNDDOWN(IF(J6>0,J6*CSP_var_aux_nom_perc,CSP_nonsolar_aux_cons)+M6+(CI6*Heater_eff+CJ6)*TES_aux_cons_perc+IF(OR(CC6=0,AND(BY6=0,BZ6=0)),PB_stby_aux_cons,0)+IF(AND(CC6>0,BZ6>0),PB_stup_aux_cons+BZ6*TES_aux_cons_perc,0)+IF(AND(CC6>0,BY6>0),(BZ6+CA6+CB6)*TES_aux_cons_perc,0),2)
     for i in 1..<8760 {
-      hour2[CM + i] =
+      hour2[CM + i] = ((
         iff(hour0[J0 + i] > .zero, hour0[J0 + i] * CSP_var_aux_nom_perc, CSP_nonsolar_aux_cons) + hour0[M0 + i] + (hour2[CI + i] * Heater_eff + hour2[CJ + i]) * TES_aux_cons_perc + iff(or(hour2[CC + i].isZero, and(hour2[BY + i].isZero, hour2[BZ + i].isZero)), PB_stby_aux_cons, .zero)
-        + iff(and(hour2[CC + i] > .zero, hour2[BZ + i] > .zero), PB_stup_aux_cons + hour2[BZ + i] * TES_aux_cons_perc, .zero) + iff(and(hour2[CC + i] > .zero, hour2[BY + i] > .zero), (hour2[BZ + i] + hour2[CA + i] + hour2[CB + i]) * TES_aux_cons_perc, .zero)
+        + iff(and(hour2[CC + i] > .zero, hour2[BZ + i] > .zero), PB_stup_aux_cons + hour2[BZ + i] * TES_aux_cons_perc, .zero) + iff(and(hour2[CC + i] > .zero, hour2[BY + i] > .zero), (hour2[BZ + i] + hour2[CA + i] + hour2[CB + i]) * TES_aux_cons_perc, .zero)) * 100.0).rounded(.down) / 100
     }
   }
 
@@ -176,15 +176,17 @@ extension TunOl {
     let (BX2, CB2, CC2, CK2, CL2, CM2) = (26280, 61320, 70080, 140160, 148920, 157680)
     let CI2 = 122640
     let L0 = 43800
+    let BV2 = 8760
+
     /// Min harmonious net elec cons not considering grid import
     let CP = 0
-    // =IF(MIN(MAX(0,CK6+MAX(0,Grid_import_max_ud*Grid_import_yes_no_PB_strategy-MAX(0,CI6-L6))-CM6-MIN(El_boiler_cap_ud,MAX(0,Overall_harmonious_var_heat_min_cons+Overall_heat_fix_cons-CL6)/El_boiler_eff)),MAX(0,CL6+MIN(El_boiler_cap_ud,MAX(0,CK6+MAX(0,Grid_import_max_ud*Grid_import_yes_no_PB_strategy-MAX(0,CI6-L6))-CM6-Overall_harmonious_var_min_cons-Overall_fix_cons))*El_boiler_eff-Overall_heat_fix_cons)/Overall_harmonious_var_heat_max_cons*Overall_harmonious_var_max_cons+Overall_fix_cons)<Overall_harmonious_var_min_cons+Overall_fix_cons,0,Overall_harmonious_var_min_cons+Overall_fix_cons)
+    // =IF(OR(BV6>0,MIN(CK6+MAX(0,Grid_import_max_ud*Grid_import_yes_no_PB_strategy-MAX(0,CI6-L6))-CM6-MIN(El_boiler_cap_ud,MAX(0,Overall_harmonious_var_heat_min_cons+Overall_heat_fix_cons-CL6)/El_boiler_eff),MAX(0,CL6+MIN(El_boiler_cap_ud,MAX(0,CK6+MAX(0,Grid_import_max_ud*Grid_import_yes_no_PB_strategy-MAX(0,CI6-L6))-CM6-Overall_harmonious_var_min_cons-Overall_fix_cons))*El_boiler_eff-Overall_heat_fix_cons)/Overall_harmonious_var_heat_max_cons*Overall_harmonious_var_max_cons+Overall_fix_cons)<Overall_harmonious_var_min_cons+Overall_fix_cons),0,Overall_harmonious_var_min_cons+Overall_fix_cons)
     for i in 1..<8760 {
-      hour3[CP + i] = iff(
+      hour3[CP + i] = iff(or(hour2[BV2 + i] > 0,
         min(
-          max(.zero, hour2[CK2 + i] + max(.zero, Grid_import_max_ud * Grid_import_yes_no_PB_strategy - hour2[CM2 + i] - max(.zero, hour2[CI2 + i] - hour0[L0 + i])) - min(El_boiler_cap_ud, max(.zero, Overall_harmonious_var_heat_min_cons + Overall_heat_fix_cons - hour2[CL2 + i]) / El_boiler_eff)),
+          hour2[CK2 + i] + max(.zero, Grid_import_max_ud * Grid_import_yes_no_PB_strategy - hour2[CM2 + i] - max(.zero, hour2[CI2 + i] - hour0[L0 + i])) - min(El_boiler_cap_ud, max(.zero, Overall_harmonious_var_heat_min_cons + Overall_heat_fix_cons - hour2[CL2 + i]) / El_boiler_eff),
           max(.zero, hour2[CL2 + i] + min(El_boiler_cap_ud, max(.zero, hour2[CK2 + i] + Grid_import_max_ud * Grid_import_yes_no_PB_strategy - hour2[CM2 + i] - Overall_harmonious_var_min_cons - Overall_fix_cons)) * El_boiler_eff - Overall_heat_fix_cons) / Overall_harmonious_var_heat_max_cons * Overall_harmonious_var_max_cons
-            + Overall_fix_cons) < Overall_harmonious_var_min_cons + Overall_fix_cons, .zero, Overall_harmonious_var_min_cons + Overall_fix_cons)
+            + Overall_fix_cons) < Overall_harmonious_var_min_cons + Overall_fix_cons), .zero, Overall_harmonious_var_min_cons + Overall_fix_cons)
     }
 
     /// Optimized min harmonious net elec cons
@@ -221,10 +223,10 @@ extension TunOl {
     for i in 8748..<8760 { hour3[CS + i] = hour3[CS + i - 1] }
     /// El cons due to op outside of harm op period
     let CT = 35040
-    // =IF(OR(CQ6>0,CC6=0,BX6-CM6<A_overall_var_min_cons+A_overall_fix_stby_cons+IF(CQ7=0,0,A_overall_stup_cons)),0,A_overall_var_min_cons+A_overall_fix_stby_cons+IF(CQ7=0,0,A_overall_stup_cons))
+    // =IF(OR(CQ6>0,CC6=0,BX6+CK6-CM6<A_overall_var_min_cons+A_overall_fix_stby_cons+IF(CQ7=0,0,A_overall_stup_cons)),0,A_overall_var_min_cons+A_overall_fix_stby_cons+IF(CQ7=0,0,A_overall_stup_cons))
     for i in 1..<8760 { 
       hour3[CT + i] = iff(
-        or(hour3[CQ + i] > 0, hour2[CC2 + i].isZero, hour2[BX2 + i] - hour2[CM2 + i] < overall_var_min_cons[j] + overall_fix_stby_cons[j] + iff(hour3[CQ + i + 1].isZero, 0, overall_stup_cons[j])), 0,
+        or(hour3[CQ + i] > 0, hour2[CC2 + i].isZero, hour2[BX2 + i] + hour2[CK2 + i] - hour2[CM2 + i] < overall_var_min_cons[j] + overall_fix_stby_cons[j] + iff(hour3[CQ + i + 1].isZero, 0, overall_stup_cons[j])), 0,
         overall_var_min_cons[j] + overall_fix_stby_cons[j] + iff(hour3[CQ + i + 1].isZero, 0, overall_stup_cons[j]))
     }
     

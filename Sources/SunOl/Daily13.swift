@@ -222,12 +222,12 @@ extension TunOl {
     /// Surplus BESS chrg cap after opt day harm and min night op prep
     let ddJW = 11315
     // JW=IF(JP6=0,0,ROUND((FY6+(FZ6-FY6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc))-MAX(0,FK6-GG6-GA6*BESS_chrg_eff)/BESS_chrg_eff,5))
-    for i in 0..<365 { d13[ddJW + i] = iff(d13[ddJP + i].isZero, .zero, round((d11[FY + i] + (d11[FZ + i] - d11[FY + i]) / Overall_harmonious_range * (d13[ddJP + i] - Overall_harmonious_min_perc)) - max(.zero, d11[FK + i] - d11[GG + i] - d11[GA + i] * BESS_chrg_eff) / BESS_chrg_eff, 5)) }
+    for i in 0..<365 { d13[ddJW + i] = iff(d13[ddJP + i].isZero, .zero, round((d11[FY + i] + (d11[FZ + i] - d11[FY + i]) * d13[dddJP + i]) - max(.zero, d11[FK + i] - d11[GG + i] - d11[GA + i] * BESS_chrg_eff) / BESS_chrg_eff, 5)) }
 
     /// Surplus BESS chrg cap after opt day harm and max night op prep
     let ddJX = 11680
     // JX=IF(JP6=0,0,ROUND((HU6+(HV6-HU6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc))-MAX(0,HG6-IC6-HW6*BESS_chrg_eff)/BESS_chrg_eff,5))
-    for i in 0..<365 { d13[ddJX + i] = iff(d13[ddJP + i].isZero, .zero, round((d12[HU + i] + (d12[HV + i] - d12[HU + i]) / Overall_harmonious_range * (d13[ddJP + i] - Overall_harmonious_min_perc)) - max(.zero, d12[HG + i] - d12[IC + i] - d12[HW + i] * BESS_chrg_eff) / BESS_chrg_eff, 5)) }
+    for i in 0..<365 { d13[ddJX + i] = iff(d13[ddJP + i].isZero, .zero, round((d12[HU + i] + (d12[HV + i] - d12[HU + i]) * d13[dddJP + i]) - max(.zero, d12[HG + i] - d12[IC + i] - d12[HW + i] * BESS_chrg_eff) / BESS_chrg_eff, 5)) }
 
     /// Surplus grid import cap after opt day harm and min night op prep
     let ddJY = 12045
@@ -317,7 +317,6 @@ extension TunOl {
    
     let ddAMKI = 38690  // let ddMW = 38690
     for i in 0..<365 {
-
       d13[ddAMKG + i] = (d10[AM + i] - equiv_harmonious_min_perc[j]) < 1E-10 ? 1 : (d13[ddKG + i] - equiv_harmonious_min_perc[j]) / (d10[AM + i] - equiv_harmonious_min_perc[j])
       d13[ddAMKI + i] = (d10[AM + i] - equiv_harmonious_min_perc[j]) < 1E-10 ? 1 : (d13[ddKI + i] - equiv_harmonious_min_perc[j]) / (d10[AM + i] - equiv_harmonious_min_perc[j])
     }

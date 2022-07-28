@@ -277,7 +277,7 @@ extension TunOl {
     let AX = 3517920
     /// Max possible PV elec to TES (considering TES chrg aux)
     let AY = 26280
-    // AY=MAX(0,MIN((Grid_import_max_ud*Grid_import_yes_no_PB_strategy+AW6+IF(BS6<Overall_harmonious_min_perc,$J6,MAX(0,$J6-BS6*Overall_harmonious_var_heat_max_cons-Overall_heat_fix_cons))/Heater_eff-IF(BS6<Overall_harmonious_min_perc,0,BS6*Overall_harmonious_var_max_cons+Overall_fix_cons+MAX(0,BS6*Overall_harmonious_var_heat_max_cons+Overall_heat_fix_cons-$J6)/El_boiler_eff)-IF(AND(AW6>0,AW7=0),PB_warm_start_heat_req*TES_aux_cons_perc,0)-PB_stby_aux_cons)/(1+1/Ratio_CSP_vs_Heater+Heater_eff*(1+1/Ratio_CSP_vs_Heater)*TES_aux_cons_perc),Heater_cap_ud,($J6-IF(BS6<Overall_harmonious_min_perc,0,BS6*Overall_harmonious_var_heat_max_cons+Overall_heat_fix_cons))*Ratio_CSP_vs_Heater/Heater_eff,(MIN(El_boiler_cap_ud,Grid_import_max_ud*Grid_import_yes_no_PB_strategy+AW6)*El_boiler_eff-IF(BS6<Overall_harmonious_min_perc,0,BS6*Overall_harmonious_var_heat_max_cons+Overall_heat_fix_cons)+$J6)*Ratio_CSP_vs_Heater/Heater_eff,(Grid_import_max_ud*Grid_import_yes_no_PB_strategy+AW6-IF(BS6<Overall_harmonious_min_perc,0,BS6*Overall_harmonious_var_max_cons+Overall_fix_cons+MAX(0,BS6*Overall_harmonious_var_heat_max_cons+Overall_heat_fix_cons-$J6)/El_boiler_eff)-IF(AND(AW6>0,AW7=0),PB_warm_start_heat_req*TES_aux_cons_perc,0)-PB_stby_aux_cons)/(1+Heater_eff*(1+1/Ratio_CSP_vs_Heater)*TES_aux_cons_perc)))
+    // AY=MAX(0,MIN((Grid_import_max_ud*Grid_import_yes_no_PB_strategy+AW6+IF(BS6<Overall_harmonious_min_perc,$J6,MAX(0,$J6-BS6*Overall_harmonious_var_heat_max_cons-Overall_heat_fix_cons))/Heater_eff-IF(BS6<Overall_harmonious_min_perc,0,BS6*Overall_harmonious_var_max_cons+Overall_fix_cons+MAX(0,BS6*Overall_harmonious_var_heat_max_cons+Overall_heat_fix_cons-$J6)/El_boiler_eff)-IF(AND(AW6>0,AW7=0),PB_stup_aux_cons+PB_warm_start_heat_req*TES_aux_cons_perc,0)-PB_stby_aux_cons)/(1+1/Ratio_CSP_vs_Heater+Heater_eff*(1+1/Ratio_CSP_vs_Heater)*TES_aux_cons_perc),Heater_cap_ud,($J6-IF(BS6<Overall_harmonious_min_perc,0,BS6*Overall_harmonious_var_heat_max_cons+Overall_heat_fix_cons))*Ratio_CSP_vs_Heater/Heater_eff,(MIN(El_boiler_cap_ud,Grid_import_max_ud*Grid_import_yes_no_PB_strategy+AW6)*El_boiler_eff-IF(BS6<Overall_harmonious_min_perc,0,BS6*Overall_harmonious_var_heat_max_cons+Overall_heat_fix_cons)+$J6)*Ratio_CSP_vs_Heater/Heater_eff,(Grid_import_max_ud*Grid_import_yes_no_PB_strategy+AW6-IF(BS6<Overall_harmonious_min_perc,0,BS6*Overall_harmonious_var_max_cons+Overall_fix_cons+MAX(0,BS6*Overall_harmonious_var_heat_max_cons+Overall_heat_fix_cons-$J6)/El_boiler_eff)-IF(AND(AW6>0,AW7=0),PB_stup_aux_cons+PB_warm_start_heat_req*TES_aux_cons_perc,0)-PB_stby_aux_cons)/(1+Heater_eff*(1+1/Ratio_CSP_vs_Heater)*TES_aux_cons_perc)))
     for i in 1..<8760 {
       hour1[AY + i] = max(
         0,
@@ -297,7 +297,7 @@ extension TunOl {
                   + Overall_heat_fix_cons - hour0[J + i]) / El_boiler_eff)
             - iff(
               and(hour0[AW + i] > .zero, hour0[AW + i + 1].isZero),
-              PB_warm_start_heat_req * TES_aux_cons_perc, 0) - PB_stby_aux_cons)
+              PB_stup_aux_cons + PB_warm_start_heat_req * TES_aux_cons_perc, 0) - PB_stby_aux_cons)
             / (1 + 1 / Ratio_CSP_vs_Heater + Heater_eff
               * (1 + 1 / Ratio_CSP_vs_Heater) * TES_aux_cons_perc),
           Heater_cap_ud,
@@ -324,7 +324,7 @@ extension TunOl {
                   + Overall_heat_fix_cons - hour0[J + i]) / El_boiler_eff)
             - iff(
               and(hour0[AW + i] > 0, hour0[AW + i + 1].isZero),
-              PB_warm_start_heat_req * TES_aux_cons_perc, 0) - PB_stby_aux_cons)
+              PB_stup_aux_cons + PB_warm_start_heat_req * TES_aux_cons_perc, 0) - PB_stby_aux_cons)
             / (1 + Heater_eff * (1 + 1 / Ratio_CSP_vs_Heater) * TES_aux_cons_perc))
       )
     }
@@ -404,10 +404,10 @@ extension TunOl {
 
     /// Min harmonious net elec cons not considering grid import
     let BL = 140160
-    // =IF(MIN(MAX(0,BI6+MAX(0,Grid_import_max_ud*Grid_import_yes_no_PB_strategy-BH6)-PB_stby_aux_cons-MIN(El_boiler_cap_ud,MAX(0,Overall_harmonious_var_heat_min_cons+Overall_heat_fix_cons-BJ6)/El_boiler_eff)),MAX(0,BJ6+MIN(El_boiler_cap_ud,MAX(0,BI6+MAX(0,Grid_import_max_ud*Grid_import_yes_no_PB_strategy-BH6)-PB_stby_aux_cons-Overall_harmonious_var_min_cons-Overall_fix_cons))*El_boiler_eff-Overall_heat_fix_cons)/Overall_harmonious_var_heat_max_cons*Overall_harmonious_var_max_cons+Overall_fix_cons)<Overall_harmonious_var_min_cons+Overall_fix_cons,0,Overall_harmonious_var_min_cons+Overall_fix_cons)
+    // =IF(MIN(BI6+MAX(0,Grid_import_max_ud*Grid_import_yes_no_PB_strategy-BH6)-PB_stby_aux_cons-MIN(El_boiler_cap_ud,MAX(0,Overall_harmonious_var_heat_min_cons+Overall_heat_fix_cons-BJ6)/El_boiler_eff),MAX(0,BJ6+MIN(El_boiler_cap_ud,MAX(0,BI6+MAX(0,Grid_import_max_ud*Grid_import_yes_no_PB_strategy-BH6)-PB_stby_aux_cons-Overall_harmonious_var_min_cons-Overall_fix_cons))*El_boiler_eff-Overall_heat_fix_cons)/Overall_harmonious_var_heat_max_cons*Overall_harmonious_var_max_cons+Overall_fix_cons)<Overall_harmonious_var_min_cons+Overall_fix_cons,0,Overall_harmonious_var_min_cons+Overall_fix_cons)
     for i in 1..<8760 {
       let min_net_elec = min(
-        max(.zero, hour1[BI + i] + max(.zero, Grid_import_max_ud * Grid_import_yes_no_PB_strategy - hour1[BH + i]) - PB_stby_aux_cons - min(El_boiler_cap_ud, max(.zero, Overall_harmonious_var_heat_min_cons + Overall_heat_fix_cons - hour1[BJ + i]) / El_boiler_eff)),
+        hour1[BI + i] + max(.zero, Grid_import_max_ud * Grid_import_yes_no_PB_strategy - hour1[BH + i]) - PB_stby_aux_cons - min(El_boiler_cap_ud, max(.zero, Overall_harmonious_var_heat_min_cons + Overall_heat_fix_cons - hour1[BJ + i]) / El_boiler_eff),
         max(.zero, hour1[BJ + i] + min(El_boiler_cap_ud, max(.zero, hour1[BI + i] + max(.zero, Grid_import_max_ud * Grid_import_yes_no_PB_strategy - hour1[BH + i]) - PB_stby_aux_cons - Overall_harmonious_var_min_cons - Overall_fix_cons)) * El_boiler_eff - Overall_heat_fix_cons) / Overall_harmonious_var_heat_max_cons * Overall_harmonious_var_max_cons
           + Overall_fix_cons)
       hour1[BL + i] = iff((min_net_elec * 10000).rounded() < ((Overall_harmonious_var_min_cons + Overall_fix_cons) * 10000).rounded(), .zero, Overall_harmonious_var_min_cons + Overall_fix_cons)

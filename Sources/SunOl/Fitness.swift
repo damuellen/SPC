@@ -46,8 +46,8 @@ public func fitness(values: [Double]) -> [Double] {
       if flip {
         model.d21(&d21, case: j, day0: day0)
         model.d23(&d23, case: j, day0: day0, d21: d21, d22: d22)
-        day.append(Array(d23[33945..<35040] + day0[365..<1095] + ArraySlice(zip(day0[365..<730], d23[GX..<GZ]).map { $1 > 0 ? $0 : 0})))
-        day.append(Array(d23[44895..<45990] + day0[365..<1095] + ArraySlice(zip(day0[365..<730], d23[GZ..<HA]).map { $1 > 0 ? $0 : 0})))
+        day.append(Array(d23[33945..<35040] + ArraySlice(zip(day0[365..<730], d23[GX..<GZ]).map { $1 > 0 ? $0 : 0}) + day0[730..<1095]))
+        day.append(Array(d23[44895..<45990] + ArraySlice(zip(day0[365..<730], d23[GZ..<HA]).map { $1 > 0 ? $0 : 0}) + day0[730..<1095]))
       }
     }
     flip = false
@@ -72,8 +72,8 @@ public func fitness(values: [Double]) -> [Double] {
       elec_to_grid_MTPH_sum += day[best][d + 365]
       let hours0 = day[best][d + 730 + 365]
       let hours1 = day[best][d + 730 + 730]
-      let hours2 = day[best][d + 730 + 730 + 365]
-      hours_sum += hours1 + min(hours0, hours2)
+      // let hours2 = day[best][d + 730 + 730 + 365]
+      hours_sum += hours0 + hours1
     }
   }
 

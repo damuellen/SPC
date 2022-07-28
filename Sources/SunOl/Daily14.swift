@@ -18,10 +18,10 @@ extension TunOl {
     let ddKG = 14965
     let ddKI = 15330
     let ddAMKG = 23360  // let ddLF = 23360
-    let dddKI = 25550  // let ddLL = 25550
+
     let ddAMKI = 38690  // let ddMW = 38690
     let ddKZ = 21535
-    let equiv_harmonious_range = (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j])
+
     /// el cons for harm op during harm op period
     let ddLB = 21900
     // LB=IF(FC6=0,0,IF(OR(JP6=0,KG6=0),MAX(0,FD6-MAX(0,FK6/BESS_chrg_eff-FZ6-GA6)),FC6+(GY6-FC6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc)+((FD6+(GZ6-FD6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc))-(FC6+(GY6-FC6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc)))/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc)))
@@ -234,18 +234,18 @@ extension TunOl {
 
     /// Outside harmonious operation period hours
     let ddMF = 32850
-    // MF=IF(KG6=0,$C6,$C6+($T6-$C6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc))
-    for i in 0..<365 { d13[ddMF + i] = iff(d13[ddKG + i].isZero, d10[C + i], d10[C + i] + (d10[T + i] - d10[C + i]) / equiv_harmonious_range * (d13[ddKG + i] - equiv_harmonious_min_perc[j])) }
+    // MF=IF(KG6=0,0,$C6+IFERROR(($T6-$C6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc),0))
+    for i in 0..<365 { d13[ddMF + i] = iff(d13[ddKG + i].isZero, 0, d10[C + i] + (d10[T + i] - d10[C + i]) * d13[ddAMKG + i]) }
 
     /// Harmonious operation period hours
     let ddMG = 33215
-    // MG=IF(KG6=0,$D6,$D6+($U6-$D6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc))
-    for i in 0..<365 { d13[ddMG + i] = iff(d13[ddKG + i].isZero, d10[D + i], d10[D + i] + (d10[U + i] - d10[D + i]) / equiv_harmonious_range * (d13[ddKG + i] - equiv_harmonious_min_perc[j])) }
+    // MG=IF(JP6=0,0,$D6+IFERROR(($U6-$D6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc),0))
+    for i in 0..<365 { d13[ddMG + i] = iff(d13[ddJP + i].isZero, 0, d10[D + i] + (d10[U + i] - d10[D + i]) * d13[ddAMKG + i]) }
 
     /// PB operating hours
     let ddMH = 33580
-    // MH=IF(KG6=0,$E6,$E6+($V6-$E6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc))
-    for i in 0..<365 { d13[ddMH + i] = iff(d13[ddKG + i].isZero, d10[E + i], d10[E + i] + (d10[V + i] - d10[E + i]) / equiv_harmonious_range * (d13[ddKG + i] - equiv_harmonious_min_perc[j])) }
+    // MH=IF(KG6=0,0,$E6+IFERROR(($V6-$E6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc),0))
+    for i in 0..<365 { d13[ddMH + i] = iff(d13[ddKG + i].isZero, 0, d10[E + i] + (d10[V + i] - d10[E + i]) * d13[ddAMKG + i]) }
 
     /// Pure Methanol prod with day priority and resp night op
     let ddMC = 31755
@@ -276,7 +276,7 @@ extension TunOl {
     /// el cons for night prep during harm op period
     let ddML = 34675
     // ML=IF(KI6=0,0,$Z6+($AA6-$Z6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))
-    for i in 0..<365 { d13[ddML + i] = iff(d13[ddKI + i].isZero, .zero, d10[Z + i] + (d10[AA + i] - d10[Z + i]) * d13[dddKI + i]) }
+    for i in 0..<365 { d13[ddML + i] = iff(d13[ddKI + i].isZero, .zero, d10[Z + i] + (d10[AA + i] - d10[Z + i]) * d13[ddAMKI + i]) }
 
     /// el to cover aux cons during harm op period
     // let ddMM = 35040
@@ -340,7 +340,7 @@ extension TunOl {
     /// heat cons for night prep during harm op period
     let ddMV = 38325
     // MV=IF(KI6=0,0,$AB6+($AC6-$AB6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))
-    for i in 0..<365 { d13[ddMV + i] = iff(d13[ddKI + i].isZero, .zero, d10[AB + i] + (d10[AC + i] - d10[AB + i]) * d13[dddKI + i]) }
+    for i in 0..<365 { d13[ddMV + i] = iff(d13[ddKI + i].isZero, .zero, d10[AB + i] + (d10[AC + i] - d10[AB + i]) * d13[ddAMKI + i]) }
 
     // /// heat prod by el boiler for harm op during harm op period
     // let ddMW = 38690
@@ -495,15 +495,15 @@ extension TunOl {
 
     /// Outside harmonious operation period hours
     let ddNO = 45260
-    // NO=IF(KI6=0,$C6,$C6+($T6-$C6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))
+    // NO=IF(KI6=0,0,$C6+IFERROR(($T6-$C6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc),0))
     for i in 0..<365 { 
-      d13[ddNO + i] = iff(d13[ddKI + i].isZero, d10[C + i], d10[C + i] + (d10[T + i] - d10[C + i]) * d13[dddKI + i])
+      d13[ddNO + i] = iff(d13[ddKI + i].isZero, 0, d10[C + i] + (d10[T + i] - d10[C + i]) * d13[ddAMKI + i])
     }
 
     /// Harmonious operation period hours
     let ddNP = 45625
-    // NP=IF(KI6=0,$D6,$D6+($U6-$D6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))
-    for i in 0..<365 { d13[ddNP + i] = iff(d13[ddKI + i].isZero, d10[D + i], d10[D + i] + (d10[U + i] - d10[D + i]) * d13[dddKI + i]) }
+    // NP=IF(KZ6=0,0,$D6+IFERROR(($U6-$D6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc),0))
+    for i in 0..<365 { d13[ddNP + i] = iff(d13[ddKZ + i].isZero, 0, d10[D + i] + (d10[U + i] - d10[D + i]) * d13[ddAMKI + i]) }
 
     /// Pure Methanol prod with night priority and resp day op
     let ddNL = 44165
@@ -515,8 +515,8 @@ extension TunOl {
 
     /// PB operating hours
     let ddNQ = 45990
-    // NQ=IF(KI6=0,$E6,$E6+($V6-$E6)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))
-    for i in 0..<365 { d13[ddNQ + i] = iff(d13[ddKI + i].isZero, d10[E + i], d10[E + i] + (d10[V + i] - d10[E + i]) * d13[dddKI + i]) }
+    // NQ=IF(KI6=0,0,$E6+IFERROR(($V6-$E6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc),0))
+    for i in 0..<365 { d13[ddNQ + i] = iff(d13[ddKI + i].isZero, 0, d10[E + i] + (d10[V + i] - d10[E + i]) * d13[ddAMKI + i]) }
 
     /// Checksum
     let ddNR = 46355
