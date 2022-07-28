@@ -66,7 +66,7 @@ struct Command: ParsableCommand {
         CO2_storage_cap_ud: 100_000...100_000,
         CSP_loop_nr_ud: 20...300,
         El_boiler_cap_ud: 0...250,
-        EY_var_net_nom_cons_ud: 180...180,
+        EY_var_net_nom_cons_ud: 200...200,
         Grid_export_max_ud: 50...50,
         Grid_import_max_ud: 0...0,
         Hydrogen_storage_cap_ud: 100_000...100_000, 

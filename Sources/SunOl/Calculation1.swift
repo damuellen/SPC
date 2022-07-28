@@ -232,11 +232,9 @@ extension TunOl {
     
     /// heat cons due to op outside of harm op period
     let CU = 43800
-    // =IF(OR(CQ6>0,CC6=0,CL6+CB6/PB_Ratio_Heat_input_vs_output+MIN(El_boiler_cap_ud,BX6+CK6-CM6-CT6)*El_boiler_eff-CR6<A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons+IF(CQ7=0,0,A_overall_heat_stup_cons)),0,A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons+IF(CQ7=0,0,A_overall_heat_stup_cons))
+    // =IF(CT6=0,0,A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons+IF(CQ7=0,0,A_overall_heat_stup_cons))
     for i in 1..<8760 {
-      hour3[CU + i] = iff(or(hour3[CQ + i] > 0, hour2[CC2 + i].isZero,
-          hour2[CL2 + i] + hour2[CB2 + i] / PB_Ratio_Heat_input_vs_output + min(El_boiler_cap_ud, hour2[BX2 + i] + hour2[CK2 + i] - hour2[CM2 + i] - hour3[CT + i]) * El_boiler_eff - hour3[CR + i] < overall_var_heat_min_cons[j] + overall_heat_fix_stby_cons[j]
-            + iff(hour3[CQ + i + 1].isZero, 0, overall_heat_stup_cons[j])), 0, overall_var_heat_min_cons[j] + overall_heat_fix_stby_cons[j] + iff(hour3[CQ + i + 1].isZero, 0, overall_heat_stup_cons[j]))
+      hour3[CU + i] = iff(hour3[CT + i].isZero, 0, overall_var_heat_min_cons[j] + overall_heat_fix_stby_cons[j] + iff(hour3[CQ + i + 1].isZero, 0, overall_heat_stup_cons[j]))
     }
 
     let J0 = 26280

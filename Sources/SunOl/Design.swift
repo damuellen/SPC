@@ -539,7 +539,7 @@ public struct TunOl {
       self.PB_heat_min_input = ifFinite(PB_gross_min_cap / (PB_nom_gross_eff * PBeff), .zero)
       self.PB_gross_min_eff = ifFinite(PB_gross_min_cap / PB_heat_min_input, .zero)
 
-      self.PB_Ratio_Heat_input_vs_output = min(1, factor * (no_extraction[0] / PB_Ref_nom_aux_heat_prod) / (gross[0] / steam_extraction[0]))
+      self.PB_Ratio_Heat_input_vs_output = min(1, factor * pow((no_extraction[0] / PB_Ref_nom_aux_heat_prod) / (gross[0] / steam_extraction[0]), 0.1))
       self.PB_n_g_var_aux_el_Coeff = Polynomial.fit(x: net_el_output_factor, y: auxiliary_consumption_factor, order: 4)!.coefficients
       self.PB_var_heat_max_cons = gross[0] + steam_extraction[0] * PB_Ratio_Heat_input_vs_output
       self.PB_nom_var_aux_cons_perc_net = var_aux_cons[0] / net_electrical_output[0]
