@@ -11,7 +11,7 @@ class PVPanelTests: XCTestCase {
     let p = { t in S { P($0, t).power }}
     let I = { t in S { P($0, t).current }}
     let V = { t in S { P($0, t).voltage * 26}}
-    let plotting = false
+    let plotting = true
     if plotting {
       let plot = Gnuplot(
         xy1s: I(10), I(50),
