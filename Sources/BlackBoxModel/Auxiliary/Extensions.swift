@@ -46,3 +46,85 @@ extension Angle {
   public var toRadians: Double { self * .pi / 180 }
   public var toDegrees: Double { self * (180 / .pi) }
 }
+
+public struct RepeatedElementsSequence<Base: Sequence, Element>: Sequence
+where Base.Element == Element {
+
+  @usableFromInline
+  let base: Base
+
+  @usableFromInline
+  var times: Int
+
+  @inlinable
+  init(_ base: Base, times: Int) {
+    self.base = base
+    self.times = times
+  }
+
+  public struct Iterator: IteratorProtocol {
+    @usableFromInline
+    var base: Base.Iterator
+
+    @usableFromInline
+    var times: Int
+
+    @usableFromInline
+    var counter: Int = 0
+
+    @usableFromInline
+    var element: Base.Element?
+
+    @inlinable
+    init(base: Base.Iterator, times: Int) {
+      precondition(times > 0)
+      self.base = base
+      self.times = times
+      self.element = nil
+    }
+
+    @inlinable
+    public mutating func next() -> Element? {
+      defer {
+        counter += 1
+        if counter == times {
+          if let wrapped = base.next() {
+            counter = 0
+            element = wrapped
+          } else {
+            element = nil
+          }
+        } 
+      }
+      if element == nil, let wrapped = base.next() {
+        element = wrapped
+      }
+      return element
+    }
+  }
+
+  @inlinable
+  public func makeIterator() -> Iterator {
+    Iterator(base: base.makeIterator(), times: times)
+  }
+}
+
+extension Collection {
+
+  /// Returns a sequence that repeats every element of this collection the
+  /// specified number of times.
+  ///
+  /// Passing `1` as `times` results in this collection's elements being
+  /// provided a single time.
+  ///
+  /// - Parameter times: The number of times to repeat this sequence. `times`
+  ///   must be one or greater.
+  /// - Returns: A sequence that repeats the elements of this sequence `times`
+  ///   times.
+  ///
+  /// - Complexity: O(1)
+  @inlinable
+  public func repeated(times: Int) -> RepeatedElementsSequence<Self, Element> {
+    RepeatedElementsSequence(self, times: times)
+  }
+}

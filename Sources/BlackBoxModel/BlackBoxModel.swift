@@ -110,11 +110,11 @@ public enum BlackBoxModel {
     // Set initial values
     var status = Plant.initialState
     // PV system setup
- /*   let pv = PV()
+    let pv = PV()
 
     var conditions = [(Temperature, Double, Double)]()
 
-    for (meteo, date) in zip(🌤, timeline(Simulation.time.steps)) {
+    for (meteo, date) in zip(🌤, timeline(.hour)) {
       DateTime.setCurrent(date: date)
       let dt = DateTime.current
       let (temperature, wind) = 
@@ -127,7 +127,7 @@ public enum BlackBoxModel {
         )
         conditions.append((temperature, wind,
           SolarRadiation.effective(
-            ghi: Double(meteo.ghi), dhi: Double(meteo.dhi),
+            ghi: Double(meteo.dni), dhi: Double(meteo.dni),
             surfTilt: panel.surfTilt, incidence: panel.AOI,
             zenith: position.zenith, doy: dt.yearDay)
           )
@@ -136,19 +136,18 @@ public enum BlackBoxModel {
         conditions.append((temperature, wind, .zero))
       }
     }
-    var photovoltaic = conditions.concurrentMap { t, ws, gti -> Double in
+    let photovoltaic = conditions.concurrentMap { t, ws, gti -> Double in
       pv(radiation: gti, ambient: t, windSpeed: ws) / 10.0e6
     }
-    // Makes it easier to use when re-reading the values
-    photovoltaic.reverse()
-*/
+    // Repeat the values to fill the hour
+    var iter = photovoltaic.repeated(times: Simulation.time.steps.rawValue).makeIterator()
     for (meteo, date) in zip(🌤,timeline(Simulation.time.steps)) {
       // Set the date for the calculation step
       DateTime.setCurrent(date: date)
       let dt = DateTime.current
-
-      /// Use the already existing result
-      plant.electricity.photovoltaic = 0// photovoltaic.removeLast()
+      
+      /// Hourly PV result
+      plant.electricity.photovoltaic = iter.next()!
 
       if Maintenance.checkSchedule(date) {
         // No operation is simulated
