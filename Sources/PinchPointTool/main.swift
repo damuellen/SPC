@@ -100,7 +100,7 @@ struct PinchPointTool: ParsableCommand {
     pinchPoint()
 
     if json {
-      try! print(pinchPoint.encodeToJSON())
+      _ = try? print(pinchPoint.encodeToJSON())
     } else {
       print(
         "\nLower HTF temperature:", pinchPoint.mixHTFTemperature,
