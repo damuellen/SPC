@@ -43,7 +43,7 @@ extension TunOl {
     let DY = 26280
     // =IF(DV6=0,0,IF(OR($BM6>0;PB_nom_gross_cap_ud<=0);0;$BK6+((MIN(PB_nom_net_cap;MAX(PB_net_min_cap;(1+TES_aux_cons_perc)*MAX(0;DX6-$BP6)))+PB_nom_net_cap*PB_nom_var_aux_cons_perc_net*POLY(MIN(PB_nom_net_cap;MAX(PB_net_min_cap;(1+TES_aux_cons_perc)*MAX(0;DX6-$BP6)))/PB_nom_net_cap;PB_n2g_var_aux_el_Coeff)+PB_fix_aux_el)/(PB_gross_min_eff+(PB_nom_gross_eff-PB_gross_min_eff)/(PB_nom_net_cap-PB_net_min_cap)*(MIN(PB_nom_net_cap;MAX(0;DX6-$BP6))-PB_net_min_cap))+MAX(0;(A_overall_var_heat_max_cons-A_overall_var_heat_min_cons)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(DV6-A_equiv_harmonious_min_perc)+A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons-$BQ6)*PB_Ratio_Heat_input_vs_output)*TES_aux_cons_perc+IF(AND(DX6=0;DX7>0);MAX(0;IF(COUNTIF(DX$1:DX6;"0")<PB_warm_start_duration;PB_hot_start_heat_req;PB_warm_start_heat_req)-$BQ6)*TES_aux_cons_perc;0)))
     for i in 1..<8760 {
-      hour4[DY + i] = iff(hour4[DV + i].isZero, .zero, iff(
+      hour4[DY + i] = (iff(hour4[DV + i].isZero, .zero, iff(
         hour4[DV + i].isZero, .zero,
         iff(
           or(hour1[BM1 + i] > .zero, PB_nom_gross_cap_ud <= .zero), .zero,
@@ -60,7 +60,7 @@ extension TunOl {
                     .reduce(0) {
                       if $1.isZero { return $0 + 1 }
                       return $0
-                    }) < PB_warm_start_duration, PB_hot_start_heat_req, PB_warm_start_heat_req) - hour1[BQ1 + i]) * TES_aux_cons_perc, .zero))))
+                    }) < PB_warm_start_duration, PB_hot_start_heat_req, PB_warm_start_heat_req) - hour1[BQ1 + i]) * TES_aux_cons_perc, .zero)))) * 10).rounded(.up) / 10
     }
 
     /// Corresponding PB net elec output
