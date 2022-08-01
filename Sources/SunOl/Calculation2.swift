@@ -1,6 +1,6 @@
 extension TunOl {
   func hour4(_ hour4: inout [Double], j: Int, d1 day11: [Double], hour0: [Double], hour1: [Double], hour2: [Double], hour3: [Double]) {
-    let (J0, L0, M0, AW1, BK1, BM1, BP1, BQ1, CC2) = (26280, 43800, 52560, 8760, 131400, 148920, 175200, 183960, 70080)
+    let (J0, L0, M0, BK1, BM1, BP1, BQ1, CC2) = (26280, 43800, 52560, 131400, 148920, 175200, 183960, 70080)
     let BO1 = 166440
     let daysBO: [[Int]] = hour1[BO1 + 1..<(BO1 + 8760)].indices.chunked(by: { hour1[$0] == hour1[$1] }).map { $0.map { $0 - BO1 } }
 
@@ -163,11 +163,12 @@ extension TunOl {
     }
     /// Partitions of PV hour PV to be dedicated to TES chrg
     let EO = 166440
+    let AW0 = 3509160
     let EN_BOcountNonZero = hour4.count(hours: daysBO, range: EN, predicate: { $0 > 0 })
     let ENsum = hour4.sum(hours: daysBO, condition: EN)
     // IF(OR(EN6=0,EM6=0),0,MAX((AW6-EN6)/(EM6/(1+1/Ratio_CSP_vs_Heater)/Heater_eff/COUNTIFS(BO5:BO8763,"="BO6,EN5:EN8763,">0")),(J6-EN6*Heater_eff/Ratio_CSP_vs_Heater)/(EM6/(1+Ratio_CSP_vs_Heater)/COUNTIFS(BO5:BO8763,"="BO6,EN5:EN8763,">0")))/SUMIF(BO5:BO8763,"="BO6,EN5:EN8763)*EN6)
     for i in 1..<8760 {
-      let a = (hour1[AW1 + i] - hour4[EN + i]) / (hour4[EM + i] / (1 + 1 / Ratio_CSP_vs_Heater) / Heater_eff / EN_BOcountNonZero[i - 1])
+      let a = (hour0[AW0 + i] - hour4[EN + i]) / (hour4[EM + i] / (1 + 1 / Ratio_CSP_vs_Heater) / Heater_eff / EN_BOcountNonZero[i - 1])
       let b = (hour0[J0 + i] - hour4[EN + i] * Heater_eff / Ratio_CSP_vs_Heater) / (hour4[EM + i] / (1 + Ratio_CSP_vs_Heater) / EN_BOcountNonZero[i - 1])
       let s = ENsum[i - 1]
       hour4[EO + i] = iff(or(hour4[EN + i].isZero, hour4[EM + i].isZero), .zero, max(a, b) / s * hour4[EN + i])

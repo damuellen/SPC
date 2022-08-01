@@ -113,7 +113,7 @@ public struct TunOl {
   let MethDist_harmonious_perc_at_PB_nom: Double
   let MethDist_RawMeth_nom_cons: Double
 
-  let MethDist_Ref_fix_cons: Double = 0.01
+  let MethDist_Ref_fix_cons: Double = 0
   let MethDist_Ref_heat_fix_cons: Double = 0
   let MethDist_Ref_heat_stby_cons: Double = 0
   let MethDist_Ref_heat_stup_cons: Double = 0
@@ -123,7 +123,7 @@ public struct TunOl {
   let MethDist_Ref_stby_cons: Double = 0
   let MethDist_Ref_stup_cons: Double = 0
   let MethDist_Ref_var_heat_nom_cons: Double
-  let MethDist_Ref_var_nom_cons: Double = 0
+  let MethDist_Ref_var_nom_cons: Double = 0.01
   let MethDist_Ref_water_annual_prod: Double
 
   let MethSynt_annual_outage_days: Double = 0

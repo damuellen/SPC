@@ -24,7 +24,7 @@ public func fitness(values: [Double]) -> [Double] {
   var flip = true
   let d22 = model.d22(hour0: hour0)
 
-  let step = (model.Overall_harmonious_max_perc - model.Overall_harmonious_min_perc) / 5
+  let step = (model.Overall_harmonious_max_perc - model.Overall_harmonious_min_perc) / 4
   var reserve = model.Overall_harmonious_min_perc
 
   while reserve < model.Overall_harmonious_max_perc {
@@ -72,7 +72,6 @@ public func fitness(values: [Double]) -> [Double] {
       elec_to_grid_MTPH_sum += day[best][d + 365]
       let hours0 = day[best][d + 730 + 365]
       let hours1 = day[best][d + 730 + 730]
-      // let hours2 = day[best][d + 730 + 730 + 365]
       hours_sum += hours0 + hours1
     }
   }

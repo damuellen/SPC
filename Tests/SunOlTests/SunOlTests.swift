@@ -17,7 +17,9 @@ class SunOlTests: XCTestCase {
   }
 
   func testsCalculation() {
-    guard let csv_ref = CSVReader(atPath: "calc.csv", separator: "\t"), let csv_ref2 = CSVReader(atPath: "daily1.csv", separator: "\t"), let csv_ref3 = CSVReader(atPath: "daily2.csv", separator: "\t") else {
+    guard let csv_ref = CSVReader(atPath: "calc.csv", separator: "\t"),
+     let csv_ref2 = CSVReader(atPath: "daily1.csv", separator: "\t")//, let csv_ref3 = CSVReader(atPath: "daily2.csv", separator: "\t")
+      else {
       print("No input")
       return
     }
@@ -63,22 +65,22 @@ class SunOlTests: XCTestCase {
 
     var day2 = [String]()
     func compare2Day(_ array: [Double], letter: String, start index: Int) {
-      let index = index
-      let ref = csv_ref3[letter]
-      var correct = true
-      var counter = 1
-      for i in 0..<364 {
-        // if counter > 5 { break }
-        if abs(ref[i]) - abs(array[index + i]) > 0.2 {
-          counter += 1
-          correct = false
-          XCTFail("Daily2 \(letter) \(i + 3)   \(ref[i]) != \(array[index + i])  [\(index + i)]")
-        }
-      }
-      if correct { day2.append(letter) }
+      // let index = index
+      // let ref = csv_ref3[letter]
+      // var correct = true
+      // var counter = 1
+      // for i in 0..<364 {
+      //   // if counter > 5 { break }
+      //   if abs(ref[i]) - abs(array[index + i]) > 0.2 {
+      //     counter += 1
+      //     correct = false
+      //     XCTFail("Daily2 \(letter) \(i + 3)   \(ref[i]) != \(array[index + i])  [\(index + i)]")
+      //   }
+      // }
+      // if correct { day2.append(letter) }
     }
 
-    guard let model = TunOl([0.00, 400.00, 5.20, 311.38, 584.47, 200.00, 1000.00, 100.00, 1221.72, 10_000.00, 30_000.00, 15.17, 10.44, 123.63, 50.00, 0.00]) else {
+    guard let model = TunOl([300.00,5000.00,120.00,1500.00,1700.00,200.00,0.00,500.00,1000.00,100000.00,100000.00,20.00,120.00,0.00,50.00,0.00]) else {
       print("Invalid config")
       return
     }
@@ -126,7 +128,9 @@ class SunOlTests: XCTestCase {
     compare(hour0, letter: "AR", start: 315_360)
     compare(hour0, letter: "AS", start: 324_120)
     compare(hour0, letter: "AT", start: 332_880)
-
+    compare(hour0, letter: "AV", start: 3500400)
+    compare(hour0, letter: "AW", start: 3509160)
+    compare(hour0, letter: "AX", start: 3517920)
     // print("Calculation")
     // Array(hour0[..<61320]).head(6, steps: 8760)
     // print("Calculation")
@@ -135,9 +139,6 @@ class SunOlTests: XCTestCase {
     let reserve = model.Overall_harmonious_min_perc
     let hour1 = model.hour1(hour0: hour0, reserved: reserve)
 
-    compare(hour1, letter: "AV", start: 0)
-    compare(hour1, letter: "AW", start: 8760)
-    compare(hour1, letter: "AX", start: 17_520)
     compare(hour1, letter: "AY", start: 26_280)
     compare(hour1, letter: "AZ", start: 35_040)
     compare(hour1, letter: "BA", start: 43_800)
@@ -1202,11 +1203,12 @@ class SunOlTests: XCTestCase {
       // Array(d27[38690...]).head(242, steps: 365)
     }
     print("Calc", calc.joined(separator: " "))
-    print("Daily1", day1.joined(separator: " "))// print("Daily2", day2.joined(separator: " "))
+    print("Daily1", day1.joined(separator: " "))
+    print("Daily2", day2.joined(separator: " "))
   }
 
   func testsCalculation2() {
-    guard let model = TunOl([127.8588774,4742.381403,165.6137197,325.468122,688.9309873,200,100000,327.9499092,1000,100000,100000,15.84299421,89.44649724,0,50,0]) else {
+    guard let model = TunOl([300.00,5000.00,120.00,1500.00,1700.00,200.00,0.00,500.00,1000.00,100000.00,100000.00,20.00,120.00,0.00,50.00,0.00]) else {
       print("Invalid config")
       return
     }
@@ -1250,8 +1252,8 @@ class SunOlTests: XCTestCase {
       model.d21(&d21, case: j, day0: day0)
       model.d23(&d23, case: j, day0: day0, d21: d21, d22: d22)
 
-      day.append(Array(d23[33945..<35040] + day0[365..<1095] + ArraySlice(zip(day0[365..<730], d23[GX..<GZ]).map { $1 > 0 ? $0 : 0})))
-      day.append(Array(d23[44895..<45990] + day0[365..<1095] + ArraySlice(zip(day0[365..<730], d23[GZ..<HA]).map { $1 > 0 ? $0 : 0})))
+      day.append(Array(d23[33945..<35040] + ArraySlice(zip(day0[365..<730], d23[GX..<GZ]).map { $1 > 0 ? $0 : 0}) + day0[730..<1095]))
+      day.append(Array(d23[44895..<45990] + ArraySlice(zip(day0[365..<730], d23[GZ..<HA]).map { $1 > 0 ? $0 : 0}) + day0[730..<1095]))
     }
 
     var meth_produced_MTPH_sum = Double.zero
@@ -1272,6 +1274,7 @@ class SunOlTests: XCTestCase {
         elec_to_grid_MTPH_sum += day[best][d + 365]
         let hours0 = day[best][d + 730 + 365]
         let hours1 = day[best][d + 730 + 730]
+        print(hours0, hours1)
         hours_sum += hours0 + hours1
       }
     }

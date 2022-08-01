@@ -1,6 +1,6 @@
 extension TunOl {
   func hour2(_ hour2: inout [Double], j: Int, hour0: [Double], hour1: [Double]) {
-    let (J0, L0, M0, AW1, BK1, BM1, BO1, BP1, BQ1) = (26280, 43800, 52560, 8760, 131400, 148920, 166440, 175200, 183960)
+    let (J0, L0, M0, BK1, BM1, BO1, BP1, BQ1) = (26280, 43800, 52560, 131400, 148920, 166440, 175200, 183960)
     let daysBO: [[Int]] = hour1[BO1 + 1..<(BO1 + 8760)].indices.chunked(by: { hour1[$0] == hour1[$1] }).map { $0.map { $0 - BO1 } }
 
     let BMcountZero = hour1.count(hours: daysBO, range: BM1, predicate: { $0 <= 0 })
@@ -132,19 +132,22 @@ extension TunOl {
 
     let CG_BOcountNonZero = hour2.count(hours: daysBO, range: CG, predicate: { $0 > 0 })
     let CGsum = hour2.sum(hours: daysBO, condition: CG)
+    let AW0 = 3509160
     /// Partitions of PV hour PV to be dedicated to TES chrg
     let CH = 113880
-    // IF(OR(CG6=0,CF6=0),0,MAX((AW6-CG6)/(CF6/(1+1/Ratio_CSP_vs_Heater)/Heater_eff/COUNTIFS(BO5:BO8763,"="BO6,CG5:CG8763,">0")),(J6-CG6*Heater_eff/Ratio_CSP_vs_Heater)/(CF6/(1+Ratio_CSP_vs_Heater)/COUNTIFS(BO5:BO8763,"="BO6,CG5:CG8763,">0")))/SUMIF(BO5:BO8763,"="BO6,CG5:CG8763)*CG6)
+    // IF(OR(CG6=0,CF6=0),0,MAX(($AW6-CG6)/(CF6/(1+1/Ratio_CSP_vs_Heater)/Heater_eff/COUNTIFS($BO$5:$BO$8764,"="&$BO6,CG$5:CG$8764,">0")),($J6-CG6*Heater_eff/Ratio_CSP_vs_Heater)/(CF6/(1+Ratio_CSP_vs_Heater)/COUNTIFS($BO$5:$BO$8764,"="&$BO6,CG$5:CG$8764,">0")))/SUMIF($BO$5:$BO$8764,"="&$BO6,CG$5:CG$8764)*CG6)
     for i in 1..<8760 {
       hour2[CH + i] = iff(
         or(hour2[CG + i].isZero, hour2[CF + i].isZero), .zero,
-        max((hour1[AW1 + i] - hour2[CG + i]) / (hour2[CF + i] / (1 + 1 / Ratio_CSP_vs_Heater) / Heater_eff / CG_BOcountNonZero[i - 1]), (hour0[J0 + i] - hour2[CG + i] * Heater_eff / Ratio_CSP_vs_Heater) / (hour2[CF + i] / (1 + Ratio_CSP_vs_Heater) / CG_BOcountNonZero[i - 1])) / CGsum[i - 1] * hour2[CG + i])
+        max((hour0[AW0 + i] - hour2[CG + i]) / (hour2[CF + i] / (1 + 1 / Ratio_CSP_vs_Heater) / Heater_eff / CG_BOcountNonZero[i - 1]), (hour0[J0 + i] - hour2[CG + i] * Heater_eff / Ratio_CSP_vs_Heater) / (hour2[CF + i] / (1 + Ratio_CSP_vs_Heater) / CG_BOcountNonZero[i - 1])) / CGsum[i - 1] * hour2[CG + i])
     }
     let CHsum = hour2.sum(hours: daysBO, condition: CH)
     /// corrected max possible PV elec to TES
     let CI = 122640
     // =IF(CC6=0,0,MAX(0,CG6-IF(CF6=0,0,CF6/(1+1/Ratio_CSP_vs_Heater)/Heater_eff/SUMIF($BO$5:$BO$8764,"="&$BO6,CH$5:CH$8764)*CH6)))
-    for i in 1..<8760 { hour2[CI + i] = iff(hour2[CC + i].isZero, .zero, max(.zero, hour2[CG + i] - iff(hour2[CF + i].isZero, .zero, hour2[CF + i] / (1 + 1 / Ratio_CSP_vs_Heater) / Heater_eff / CHsum[i - 1] * hour2[CH + i]))) }
+    for i in 1..<8760 {
+      hour2[CI + i] = iff(hour2[CC + i].isZero, .zero, max(.zero, hour2[CG + i] - iff(hour2[CF + i].isZero, .zero, hour2[CF + i] / (1 + 1 / Ratio_CSP_vs_Heater) / Heater_eff / CHsum[i - 1] * hour2[CH + i])))
+    }
 
     /// Max possible CSP heat to TES
     let CJ = 131400

@@ -141,10 +141,11 @@ extension TunOl {
     let Overall_harmonious_range = Overall_harmonious_max_perc - Overall_harmonious_min_perc
     /// Optimal harmonious day prod after min night prep due to prod cap limits
     let ddJP = 8760
+    let AM0 = 12775
     // JP=IF(OR(IQ6<0,IT6<0,IW6<0,JF6<0,JI6<0,JL6<0),0,MIN(1,IFERROR(IQ6/MAX(0,IQ6-IS6),1),IFERROR(IT6/MAX(0,IT6-IV6),1),IFERROR(IW6/MAX(0,IW6-IY6),1),IFERROR(JF6/MAX(0,JF6-JH6),1),IFERROR(JI6/MAX(0,JI6-JK6),1),IFERROR(JL6/MAX(0,JL6-JN6),1))*(Overall_harmonious_max_perc-Overall_harmonious_min_perc)+Overall_harmonious_min_perc)
     for i in 0..<365 {
       d13[ddJP + i] = iff(
-        or(d13[ddIQ + i] < 0, d13[ddIT + i] < 0, d13[ddIW + i] < 0, d13[ddJF + i] < 0, d13[ddJI + i] < 0, d13[ddJL + i] < 0), 0,
+        or(d10[AM0 + i].isZero, d13[ddIQ + i] < 0, d13[ddIT + i] < 0, d13[ddIW + i] < 0, d13[ddJF + i] < 0, d13[ddJI + i] < 0, d13[ddJL + i] < 0), 0,
         min(
           1, ifFinite(d13[ddIQ + i] / max(0, d13[ddIQ + i] - d13[ddIS + i]), 1), ifFinite(d13[ddIT + i] / max(0, d13[ddIT + i] - d13[ddIV + i]), 1), ifFinite(d13[ddIW + i] / max(0, d13[ddIW + i] - d13[ddIY + i]), 1),
           ifFinite(d13[ddJF + i] / max(0, d13[ddJF + i] - d13[ddJH + i]), 1), ifFinite(d13[ddJI + i] / max(0, d13[ddJI + i] - d13[ddJK + i]), 1), ifFinite(d13[ddJL + i] / max(0, d13[ddJL + i] - d13[ddJN + i]), 1)) * (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
