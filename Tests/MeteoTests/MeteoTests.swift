@@ -8,7 +8,7 @@ import XCTest
 class MeteoTests: XCTestCase {
   func testsGenerator() {
     let location = Location(longitude: -26, latitude: 35, elevation: 0, timezone: 2)
-    if false {
+    if true {
       let sun = SolarPosition(coords: (-26, 35, 0), tz: 2, year: 2017, frequence: .hour)
       let clearSky = MeteoDataProvider.using(sun, model: .special)
       clearSky.setInterval(.fiveMinutes)
@@ -48,8 +48,8 @@ class MeteoTests: XCTestCase {
     ]
 
     let meteoDataHourly = hourly.map { MeteoData(dni: $0.dni, ghi: 0, dhi: 0, temperature: $0.temp, windSpeed: $0.ws) }
-    let meteoDataGood = goodDay.map { MeteoData(dni: $0.dni, ghi: 0, dhi: 0, temperature: $0.temp, windSpeed: $0.ws) }
-    let meteoDataBad = badDay.map { MeteoData(dni: $0.dni, ghi: 0, dhi: 0, temperature: $0.temp, windSpeed: $0.ws) }
+    _ = goodDay.map { MeteoData(dni: $0.dni, ghi: 0, dhi: 0, temperature: $0.temp, windSpeed: $0.ws) }
+    _ = badDay.map { MeteoData(dni: $0.dni, ghi: 0, dhi: 0, temperature: $0.temp, windSpeed: $0.ws) }
 
     let meteoData = Array(repeatElement(meteoDataHourly, count: 365).joined())
 

@@ -41,7 +41,8 @@ extension TunOl {
     for i in 0..<365 {
       let hours = d10[C + i]
       if RawMeth_storage_cap_ud.isZero {
-        (d10[L + i], d10[M + i]) = (0, 0)
+        d10[L + i] = RawMeth_min_cons[j].isZero ? 1 : 0
+        d10[M + i] = RawMeth_max_cons[j].isZero ? 1 : 0
       } else if hours.isZero {
         (d10[L + i], d10[M + i]) = (1, 1)
       } else {
@@ -50,7 +51,7 @@ extension TunOl {
       }
 
       if CO2_storage_cap_ud.isZero {
-        (d10[N + i], d10[O + i]) = (0, 0)
+        (d10[N + i], d10[O + i]) = (CO2_min_cons[j].isZero ? 1 : 0, CO2_max_cons[j].isZero ? 1 : 0)
       } else if hours.isZero {
         (d10[N + i], d10[O + i]) = (1, 1)
       } else {
@@ -59,7 +60,7 @@ extension TunOl {
       }
 
       if Hydrogen_storage_cap_ud.isZero {
-        (d10[P + i], d10[Q + i]) = (0, 0)
+        (d10[P + i], d10[Q + i]) = (Hydrogen_min_cons[j].isZero ? 1 : 0, Hydrogen_max_cons[j].isZero ? 1 : 0)
       } else if hours.isZero {
         (d10[P + i], d10[Q + i]) = (1, 1)
       } else {
@@ -153,15 +154,15 @@ extension TunOl {
 
     for i in 0..<365 {
       let hours = d10[T + i]
-      if RawMeth_storage_cap_ud.isZero { d10[AJ + i] = 0 } 
+      if RawMeth_storage_cap_ud.isZero { d10[AJ + i] = RawMeth_max_cons[j].isZero ? 1 : 0 } 
       else if hours.isZero { d10[AJ + i] = 1 } 
       else { d10[AJ + i] = 1 - (RawMeth_max_cons[j] * hours / RawMeth_storage_cap_ud) }
 
-      if CO2_storage_cap_ud.isZero { d10[AK + i] = 0 } 
+      if CO2_storage_cap_ud.isZero { d10[AK + i] = CO2_max_cons[j].isZero ? 1 : 0 } 
       else if hours.isZero { d10[AK + i] = 1 }
       else { d10[AK + i] = 1 - (CO2_max_cons[j] * hours / CO2_storage_cap_ud) }
 
-      if Hydrogen_storage_cap_ud.isZero { d10[AL + i] = 0 }
+      if Hydrogen_storage_cap_ud.isZero { d10[AL + i] = Hydrogen_max_cons[j].isZero ? 1 : 0 }
       else if hours.isZero { d10[AL + i] = 1 }
       else { d10[AL + i] = 1 - (Hydrogen_max_cons[j] * hours / Hydrogen_storage_cap_ud) }
     }

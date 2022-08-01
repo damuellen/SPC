@@ -11,7 +11,7 @@ class PVPanelTests: XCTestCase {
     let p = { t in S { P($0, t).power }}
     let I = { t in S { P($0, t).current }}
     let V = { t in S { P($0, t).voltage * 26}}
-    let plotting = false
+    let plotting = true
     if plotting {
       let plot = Gnuplot(
         xy1s: I(10), I(50),
@@ -29,8 +29,8 @@ class PVPanelTests: XCTestCase {
         "ylabel": "Power", "xlabel": "GTI",
       ]
 
-      try! plot(.png("panel.png"))
-      try! plot(.png("panel2.png"))
+      _ = try? plot(.png("panel.png"))
+      _ = try? plot(.png("panel2.png"))
     }
     let S2 = { evaluate(in: 0...1000, numberOfSamples: 20000, f: $0) }
     let S3 = { evaluate(in: 0.8...1.1, numberOfSamples: 100, f: $0)  }
@@ -41,13 +41,13 @@ class PVPanelTests: XCTestCase {
         xy1s: v,
         titles: "10__I"
       )
-      try! plot3(.pngLarge("panel3.png"))
+      _ = try? plot3(.pngLarge("panel3.png"))
 
       let plot4 = Gnuplot(
         xy1s: i,
         titles: "10__I"
       )
-      try! plot4(.pngLarge("panel4.png"))
+      _ = try? plot4(.pngLarge("panel4.png"))
     }
   }
 }
