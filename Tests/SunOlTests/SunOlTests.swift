@@ -132,7 +132,7 @@ class SunOlTests: XCTestCase {
     // print("Calculation")
     // Array(hour0[61320..<113880]).head(14, steps: 8760)
     // print("Calculation")
-    var reserve = model.Overall_harmonious_min_perc
+    let reserve = model.Overall_harmonious_min_perc
     let hour1 = model.hour1(hour0: hour0, reserved: reserve)
 
     compare(hour1, letter: "AV", start: 0)
@@ -1260,6 +1260,7 @@ class SunOlTests: XCTestCase {
 
     _ = ["1a day prio", "1a night prio", "2a day prio", "2a night prio", "1b day prio", "1b night prio", "2b day prio", "2b night prio", "1c day prio", "1c night prio", "2c day prio", "2c night prio", "1d day prio", "1d night prio", "2d day prio", "2d night prio"]
     var charts = [Int]()
+    var hours_sum = 0.0
     for d in 0..<365 {
       let cases = day.indices.map { i in costs.LCOM(meth_produced_MTPH: day[i][d] * 365.0, elec_from_grid: day[i][d + 365 + 365] * 365.0, elec_to_grid: day[i][d + 365] * 365.0) }
       let ranked = cases.indices.filter { cases[$0].isFinite }.filter { cases[$0] > 0 }.sorted { cases[$0] < cases[$1] }
@@ -1269,17 +1270,18 @@ class SunOlTests: XCTestCase {
         let from_grid = day[best][d + 365 + 365]
         elec_from_grid_sum += from_grid
         elec_to_grid_MTPH_sum += day[best][d + 365]
+        let hours0 = day[best][d + 730 + 365]
         let hours1 = day[best][d + 730 + 730]
-        let hours2 = day[best][d + 730 + 730 + 365]
-        let hours_sum = hours1 + hours2
+        hours_sum += hours0 + hours1
       }
     }
 
     let LCOM = costs.LCOM(meth_produced_MTPH: meth_produced_MTPH_sum, elec_from_grid: elec_from_grid_sum, elec_to_grid: elec_to_grid_MTPH_sum)
-    XCTAssertEqual(LCOM, 1261, accuracy: 1, "LCOM")
-    XCTAssertEqual(meth_produced_MTPH_sum, 95_911, accuracy: 1, "meth_produced_MTPH_sum")
-    XCTAssertEqual(elec_from_grid_sum, 0, accuracy: 1, "elec_from_grid_sum")
-    XCTAssertEqual(elec_to_grid_MTPH_sum, 178_408, accuracy: 1, "elec_to_grid_MTPH_sum")
+    XCTAssertEqual(LCOM, 2548, accuracy: 1, "LCOM")
+    XCTAssertEqual(hours_sum, 7741, accuracy: 1, "hours_sum")
+    XCTAssertEqual(meth_produced_MTPH_sum, 83515, accuracy: 1, "meth_produced_MTPH_sum")
+    XCTAssertEqual(elec_from_grid_sum, 18247, accuracy: 1, "elec_from_grid_sum")
+    XCTAssertEqual(elec_to_grid_MTPH_sum, 54231, accuracy: 1, "elec_to_grid_MTPH_sum")
   }
 
   func testsCosts() {
