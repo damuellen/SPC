@@ -1,0 +1,76 @@
+{
+  "configurations": [
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug SPC",
+      "program": ".build/debug/SPC",
+      "args": [],
+      "cwd": "${workspaceFolder:SPC}",
+      "preLaunchTask": "swift: Build Debug SPC"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Release SPC",
+      "program": ".build/release/SPC",
+      "args": [],
+      "cwd": "${workspaceFolder:SPC}",
+      "preLaunchTask": "swift: Build Release SPC"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug PinchPointTool",
+      "program": ".build/debug/PinchPointTool",
+      "args": [],
+      "cwd": "${workspaceFolder:SPC}",
+      "preLaunchTask": "swift: Build Debug PinchPointTool"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Release PinchPointTool",
+      "program": ".build/release/PinchPointTool",
+      "args": [],
+      "cwd": "${workspaceFolder:SPC}",
+      "preLaunchTask": "swift: Build Release PinchPointTool"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug Playground",
+      "program": ".build/debug/Playground",
+      "args": [],
+      "cwd": "${workspaceFolder:SPC}",
+      "preLaunchTask": "swift: Build Debug Playground"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Release Playground",
+      "program": ".build/release/Playground",
+      "args": [],
+      "cwd": "${workspaceFolder:SPC}",
+      "preLaunchTask": "swift: Build Release Playground"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug Optimizer",
+      "program": ".build/debug/Optimizer",
+      "args": [],
+      "cwd": "${workspaceFolder:SPC}",
+      "preLaunchTask": "swift: Build Debug Optimizer"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Release Optimizer",
+      "program": ".build/release/Optimizer",
+      "args": [],
+      "cwd": "${workspaceFolder:SPC}",
+      "preLaunchTask": "swift: Build Release Optimizer"
+    }
+  ]
+}

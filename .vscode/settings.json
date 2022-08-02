@@ -27,5 +27,6 @@
     "debug.openDebug": "neverOpen",
     "debug.onTaskErrors": "showErrors",
     "debug.showInStatusBar": "never",
+    "lldb.library": "/usr/lib/liblldb.so",
 }
  
