@@ -77,7 +77,7 @@ public func fitness(values: [Double]) -> [Double] {
   }
 
   let LCOM = costs.LCOM(meth_produced_MTPH: meth_produced_MTPH_sum, elec_from_grid: elec_from_grid_sum, elec_to_grid: elec_to_grid_MTPH_sum) 
-  let fitness = LCOM * (1 + (abs(min(hours_sum - 8000, 0)) / 1000) * 0.5) * (1 + (abs(min(meth_produced_MTPH_sum - 100000, 0)) / 1000) * 0.1)
+  let fitness = LCOM * (1 + (abs(min(hours_sum - 8000, 0)) / 1000) * 0.5) * (1 + (abs(meth_produced_MTPH_sum - 100000) / 1000) * 0.5)
   if !meth.drop(while: { $0 < meth_produced_MTPH_sum / 100 }).isEmpty || LCOM.isInfinite || meth_produced_MTPH_sum.isZero { return [Double.infinity] }
   return [fitness, LCOM, costs.Total_CAPEX, costs.Total_OPEX, meth_produced_MTPH_sum, elec_from_grid_sum, elec_to_grid_MTPH_sum, hours_sum] + model.values
 }

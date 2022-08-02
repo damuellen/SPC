@@ -16,7 +16,7 @@ public struct Costs {
     //  let RawMeth_density = 782.0
 
     let Solar_field = (basis: 38.0, c1: 1581220.07314946, exp: 0.8, f: 0.71, coeff: 18_000_000.0, range: 19.0...130.0)
-    let Assembly_hall = (c4: -0.0374019773004541, c3: 23.8307642775062, c2: -5296.96337283834, c1: 518074.809368001, c0: 185180.200451687, range: 1.0...270.0)
+    let Assembly_hall = (c1: 41541.19937, c0: 14424543.95)
     let PV_DC_part = (basis: 605.0, coeff: 465123.72321881)
     let PV_AC_part = (basis: 490.0, exp: 0.7, coeff: 64150.294897127, range: 267...778)
     let Heater_system = (basis: 200.0, c1: 4_000_000.0, exp: 0.4, c2: 211728.735839637, factor: 0.9, coeff: 3_500_000.0, range: 200.0...400.0)
@@ -41,7 +41,7 @@ public struct Costs {
     // if (auxLoops <= 0 || factor <= 0) {
     //   auxLoops = 0
     // }
-    self.Assembly_hall_cost = model.CSP_loop_nr_ud > 0 ? Assembly_hall.c4 * Double(model.CSP_loop_nr_ud) ** 4 + Assembly_hall.c3 * Double(model.CSP_loop_nr_ud) ** 3 + Assembly_hall.c2 * Double(model.CSP_loop_nr_ud) ** 2 + Assembly_hall.c1 * Double(model.CSP_loop_nr_ud) ** 1 + Assembly_hall.c0 : 0
+    self.Assembly_hall_cost = Assembly_hall.c1 * Double(model.CSP_loop_nr_ud) ** 1 + Assembly_hall.c0
     // let CSP_SF_cost_dedicated_to_ICPH =
     //   Solar_field.coeff * ((model.CSP_loop_nr_ud - auxLoops) / Solar_field.basis) ** Solar_field.exp + Solar_field.c1 * Solar_field.f
     //   * (model.CSP_loop_nr_ud - auxLoops)
