@@ -22,15 +22,21 @@ class PVPanelTests: XCTestCase {
       plot.settings = [
         "ylabel": "Current [A]", "y2label": "Voltage [V]", "xlabel": "GTI [W]'",
       ]
-      let plot2 = Gnuplot(
+      let plot1 = Gnuplot(
         xy1s: p(10), p(20), p(30), p(40), p(50), p(60), p(70)
       )
-      plot2.settings = [
+      plot1.settings = [
         "ylabel": "Power", "xlabel": "GTI",
       ]
 
       _ = try? plot(.png("panel.png"))
       _ = try? plot(.png("panel2.png"))
+    
+      let plot2 = Gnuplot(
+        xy1s: evaluate(in: 0...20, numberOfSamples: 150, f: lambertW),
+        titles: "lambertW"
+      )
+      _ = try? plot2(.png("lambertW.png"))
     }
     let S2 = { evaluate(in: 0...1000, numberOfSamples: 20000, f: $0) }
     let S3 = { evaluate(in: 0.8...1.1, numberOfSamples: 100, f: $0)  }
@@ -41,6 +47,7 @@ class PVPanelTests: XCTestCase {
         xy1s: v,
         titles: "10__I"
       )
+      plot3.set(yrange: -2000...1000)
       _ = try? plot3(.pngLarge("panel3.png"))
 
       let plot4 = Gnuplot(

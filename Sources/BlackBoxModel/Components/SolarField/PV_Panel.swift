@@ -251,7 +251,7 @@ extension PV {
   }
 }
 
-fileprivate func lambertW(_ z: Double) -> Double {
+func lambertW(_ z: Double) -> Double {
   var tmp: Double
   var c1: Double
   var c2: Double
