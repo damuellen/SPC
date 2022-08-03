@@ -18,23 +18,35 @@ public typealias FitnessFunction = ([Double]) -> [Double]
 public struct MGOADE {
   let group: Bool
   let n: Int
-  let maxIter: Int
+  let maxIterations: Int
   let bounds: [ClosedRange<Double>]
 
   let cMax = 1.0
-  let cMin = 0.000_04
+  let cMin = 0.004
   let cr = 0.4
   let f = 0.9
 
-  public init(group: Bool, n: Int, maxIter: Int, bounds: [ClosedRange<Double>]) {
+  func S_func(r: Double) -> Double {
+    let f = 0.5
+    let l = 1.5
+    return f * exp(-r / l) - exp(-r)  // Eq. (2.3) in the paper
+  }
+
+  func euclideanDistance(a: [Double], b: [Double]) -> Double {
+    var distance = 0.0
+    for i in a.indices { distance += pow((a[i] - b[i]), 2) }
+    return sqrt(distance)
+  }
+
+  public init(group: Bool, n: Int, maxIterations: Int, bounds: [ClosedRange<Double>]) {
     self.group = group
     self.n = n
-    self.maxIter = maxIter
+    self.maxIterations = maxIterations
     self.bounds = bounds
   }
 
   public func callAsFunction(_ fitness: FitnessFunction) -> [[Double]] {
-    var targetResults = Matrix(n * maxIter, bounds.count + 7)
+    var targetResults = Matrix(n * maxIterations, bounds.count + 7)
     var targetPosition = Matrix(group ? 3 : 1, bounds.count)
     var targetFitness = Vector(group ? 3 : 1, .infinity)
     let EPSILON = 1E-14
@@ -69,15 +81,17 @@ public struct MGOADE {
     print(pretty(values: targetPosition))
 
     var pos = 0
-    var l = 0
+    var iteration = 0
 
-    while l < maxIter && !source.isCancelled {
-      l += 1
-      let c = cMax - (Double(l) * ((cMax - cMin) / Double(maxIter)))  // Eq. (2.8) in the paper
-      var S_i = Vector(bounds.count)
-      var r_ij_vec = Vector(bounds.count)
-      var s_ij = Vector(bounds.count)
-      var X_new = Vector(bounds.count)
+    var S_i = Vector(bounds.count)
+    var r_ij_vec = Vector(bounds.count)
+    var s_ij = Vector(bounds.count)
+    var X_new = Vector(bounds.count)
+
+    while iteration < maxIterations && !source.isCancelled {
+      iteration += 1
+      let c = cMax - (Double(iteration) * ((cMax - cMin) / Double(maxIterations)))  // Eq. (2.8) in the paper
+
       for g in groups.indices {
         for i in groups[g].indices {
           for j in 0..<n {
@@ -115,7 +129,7 @@ public struct MGOADE {
 
       var refresh = group
       // Multi-group strategy
-      if group, l.isMultiple(of: 2) {
+      if group, iteration.isMultiple(of: 2) {
         for g in groups.indices {
           // Update the target
           for i in groups[g].indices {
@@ -131,7 +145,7 @@ public struct MGOADE {
             }
           }
         }
-      } else if group {
+      } else if group && false {
         for g in groups.indices {
           var o = [0, 1, 2]
           o.remove(at: g)
@@ -167,30 +181,18 @@ public struct MGOADE {
             targetPosition[g] = grassHopperPositions[i]
           }
         }
-        convergenceCurves[g].append([Double(l), (targetFitness[g] * 100).rounded() / 100])
+        convergenceCurves[g].append([Double(iteration), (targetFitness[g] * 100).rounded() / 100])
       }
 
       ClearScreen()
-      print("Population: \(grassHopperPositions.count) ".randomColor(), "Iterations: \(l)".leftpad(length: 28).randomColor())
+      print("Population: \(grassHopperPositions.count) ".randomColor(), "Iterations: \(iteration)".leftpad(length: 28).randomColor())
       print(pretty(values: targetFitness))
       print(pretty(values: targetPosition))
 
       if (targetFitness.reduce(0, +) / 3) - targetFitness.min()! < 0.001 { break }
     }
-    targetResults.removeLast((maxIter - l) * n)
+    targetResults.removeLast((maxIterations - iteration) * n)
     return targetResults
-  }
-
-  func euclideanDistance(a: [Double], b: [Double]) -> Double {
-    var distance = 0.0
-    for i in a.indices { distance += pow((a[i] - b[i]), 2) }
-    return sqrt(distance)
-  }
-
-  func S_func(r: Double) -> Double {
-    let f = 0.5
-    let l = 1.5
-    return f * exp(-r / l) - exp(-r)  // Eq. (2.3) in the paper
   }
 }
 
