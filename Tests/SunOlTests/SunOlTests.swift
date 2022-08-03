@@ -215,7 +215,16 @@ class SunOlTests: XCTestCase {
         compareDay(d12, letter: "HO", start: 7300)
         compareDay(d12, letter: "HR", start: 8395)
       }
-
+      if j == 1 {
+        compareDay(d12, letter: "ON", start: 7300)
+        compareDay(d12, letter: "OO", start: 7665)
+        compareDay(d12, letter: "OP", start: 8030)
+        compareDay(d12, letter: "OQ", start: 8395)
+        compareDay(d12, letter: "OR", start: 8760)
+        compareDay(d12, letter: "OS", start: 9125)
+        compareDay(d12, letter: "OT", start: 9490)
+        compareDay(d12, letter: "OU", start: 9855)
+      }
       if j == 2 {
         compareDay(d12, letter: "YK", start: 0)
         compareDay(d12, letter: "YL", start: 365)
@@ -288,6 +297,73 @@ class SunOlTests: XCTestCase {
         compareDay(d13, letter: "NL", start: 44_165)
       }
 
+      if j == 1 {
+        compareDay(d13, letter: "RL", start: 0)
+        compareDay(d13, letter: "RM", start: 365)
+        compareDay(d13, letter: "RN", start: 730)
+        compareDay(d13, letter: "RO", start: 1095)
+        compareDay(d13, letter: "RP", start: 1460)
+        compareDay(d13, letter: "RQ", start: 1825)
+        compareDay(d13, letter: "RR", start: 2190)
+        compareDay(d13, letter: "RS", start: 2555)
+        compareDay(d13, letter: "RT", start: 2920)
+        compareDay(d13, letter: "RU", start: 3285)
+        compareDay(d13, letter: "RV", start: 3650)
+        compareDay(d13, letter: "RW", start: 4015)
+        compareDay(d13, letter: "RX", start: 4380)
+        compareDay(d13, letter: "RY", start: 4745)
+        compareDay(d13, letter: "RZ", start: 5110)
+        compareDay(d13, letter: "SA", start: 5475)
+        compareDay(d13, letter: "SB", start: 5840)
+        compareDay(d13, letter: "SC", start: 6205)
+        compareDay(d13, letter: "SD", start: 6570)
+        compareDay(d13, letter: "SE", start: 6935)
+        compareDay(d13, letter: "SF", start: 7300)
+        compareDay(d13, letter: "SG", start: 7665)
+        compareDay(d13, letter: "SH", start: 8030)
+        compareDay(d13, letter: "SI", start: 8395)
+
+        compareDay(d13, letter: "SK", start: 8760)
+        compareDay(d13, letter: "SL", start: 9125)
+        compareDay(d13, letter: "SM", start: 9490)
+        compareDay(d13, letter: "SN", start: 9855)
+        compareDay(d13, letter: "SO", start: 10_220)
+        compareDay(d13, letter: "SP", start: 10_585)
+        compareDay(d13, letter: "SQ", start: 10_950)
+        compareDay(d13, letter: "SR", start: 11_315)
+        compareDay(d13, letter: "SS", start: 11_680)
+        compareDay(d13, letter: "ST", start: 12_045)
+        compareDay(d13, letter: "SU", start: 12_410)
+        compareDay(d13, letter: "SV", start: 12_775)
+        compareDay(d13, letter: "SW", start: 13_140)
+        compareDay(d13, letter: "SX", start: 13_505)
+        compareDay(d13, letter: "SY", start: 13_870)
+        compareDay(d13, letter: "SZ", start: 14_235)
+        compareDay(d13, letter: "TA", start: 14_600)
+        compareDay(d13, letter: "TB", start: 14_965)
+
+        compareDay(d13, letter: "TD", start: 15_330)
+        compareDay(d13, letter: "TE", start: 15_695)
+        compareDay(d13, letter: "TF", start: 16_060)
+        compareDay(d13, letter: "TG", start: 16_425)
+        compareDay(d13, letter: "TH", start: 16_790)
+        compareDay(d13, letter: "TI", start: 17_155)
+        compareDay(d13, letter: "TJ", start: 17_520)
+        compareDay(d13, letter: "TK", start: 17_885)
+        compareDay(d13, letter: "TL", start: 18_250)
+        compareDay(d13, letter: "TM", start: 18_615)
+        compareDay(d13, letter: "TN", start: 18_980)
+        compareDay(d13, letter: "TO", start: 19_345)
+        compareDay(d13, letter: "TP", start: 19_710)
+        compareDay(d13, letter: "TQ", start: 20_075)
+        compareDay(d13, letter: "TR", start: 20_440)
+        compareDay(d13, letter: "TS", start: 20_805)
+        compareDay(d13, letter: "TT", start: 21_170)
+        compareDay(d13, letter: "TU", start: 21_535)
+        compareDay(d13, letter: "UX", start: 31_755)
+        compareDay(d13, letter: "WG", start: 44_165)
+      }
+
       if j == 2 {
         compareDay(d13, letter: "AAG", start: 0)
         compareDay(d13, letter: "AAH", start: 365)
@@ -351,8 +427,15 @@ class SunOlTests: XCTestCase {
         compareDay(d13, letter: "ACN", start: 20_805)
         compareDay(d13, letter: "ACO", start: 21_170)
         compareDay(d13, letter: "ACP", start: 21_535)
+        compareDay(d13, letter: "ADS", start: 31_755)
+        compareDay(d13, letter: "AFB", start: 44_165)
       }
 
+      if j == 3 {
+        compareDay(d13, letter: "AMN", start: 31_755)
+        compareDay(d13, letter: "ANW", start: 44_165)
+      }
+      
       print("Daily21 Case", c)
       model.d21(&d21, case: j, day0: d0)
 
