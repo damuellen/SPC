@@ -190,9 +190,9 @@ extension TunOl {
     let ES = 201480
     for i in 1..<8760 {
       // MAX(0,L6-EP6)
-      hour4[ER + i] = max(.zero, ((hour0[L0 + i] - hour4[EP + i] * 100).rounded(.up) / 100))
+      hour4[ER + i] = max(.zero, roundUp(hour0[L0 + i] - hour4[EP + i]))
       // MAX(0,J6-EQ6)
-      hour4[ES + i] = max(.zero, ((hour0[J0 + i] - hour4[EQ + i] * 100).rounded(.up) / 100))
+      hour4[ES + i] = max(.zero, roundUp(hour0[J0 + i] - hour4[EQ + i]))
     }
 
     /// Total aux el TES chrg&disch CSP SF, PV, PB stby  MWel
