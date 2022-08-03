@@ -64,20 +64,20 @@ struct Command: ParsableCommand {
         BESS_cap_ud: 0...0,
         CCU_CO2_nom_prod_ud: 1000...1000,
         CO2_storage_cap_ud: 100_000...100_000,
-        CSP_loop_nr_ud: 20...500,
-        El_boiler_cap_ud: 0...450,
+        CSP_loop_nr_ud: 20...300,
+        El_boiler_cap_ud: 0...30,
         EY_var_net_nom_cons_ud: 200...200,
-        Grid_export_max_ud: 50...50,
+        Grid_export_max_ud: 0...0,
         Grid_import_max_ud: 0...0,
         Hydrogen_storage_cap_ud: 0...0, 
-        Heater_cap_ud: 0...800, 
+        Heater_cap_ud: 0...600, 
         MethDist_Meth_nom_prod_ud: 5...40,
         // MethSynt_RawMeth_nom_prod_ud: 10...60,
-        PB_nom_gross_cap_ud: 100...400, 
-        PV_AC_cap_ud: 200...1700, 
-        PV_DC_cap_ud: 200...2000, 
+        PB_nom_gross_cap_ud: 10...200, 
+        PV_AC_cap_ud: 100...1500, 
+        PV_DC_cap_ud: 100...1600, 
         RawMeth_storage_cap_ud: 100_000...100_000, 
-        TES_thermal_cap_ud: 500...10_000)
+        TES_thermal_cap_ud: 500...20_000)
       let data = try? JSONEncoder().encode(parameter)
       try? data?.write(to: "parameter.txt")
     }
@@ -94,12 +94,11 @@ struct Command: ParsableCommand {
     TunOl.Reference_PV_plant_power_at_inverter_inlet_DC = [0] + csv["pv"]
     TunOl.Reference_PV_MV_power_at_transformer_outlet = [0] + csv["out"]
 
-    let optimizer = MGOADE(group: !noGroups, n: n ?? 90, maxIter: iterations ?? 30, bounds: parameter.ranges)
+    let optimizer = MGOADE(group: !noGroups, n: n ?? 90, maxIterations: iterations ?? 30, bounds: parameter.ranges)
     let now = Date()
     let valid = optimizer(SunOl.fitness).filter(\.first!.isFinite)
     print("Elapsed seconds:", -now.timeIntervalSinceNow)
-    let sorted = valid.sorted { $0[0] < $1[0] }
-    let name = writeExcel(results: sorted)
+    let name = writeExcel(results: valid)
     print(name)
     // if !source.isCancelled {
     //   var best = Array(sorted[0][6...])
@@ -151,7 +150,11 @@ func writeExcel(results: [[Double]]) -> String {
   let wb = Workbook(name: name)
   let ws = wb.addWorksheet()
   var r = 0
-  results.forEach { row in r += 1
+  var lowest = Double.infinity
+  results.reversed().forEach { row in r += 1
+    if lowest > row[1] {
+      lowest = row[1]
+    }
     ws.write(row, row: r)
   }
   let labels = [
@@ -159,14 +162,13 @@ func writeExcel(results: [[Double]]) -> String {
     "MethDist_Meth_nom_prod", "El_boiler_cap", "BESS_cap", "Grid_export_max", "Grid_import_max",
   ]
 
-  var lowest = results[0][0]
   lowest = (lowest / 50).rounded(.down) * 50
   ws.table(range: [0, 0, r, labels.endIndex - 1], header: labels)
   for (column, name) in labels.enumerated() {
-    if column < 6 { continue }
-    let chart = wb.addChart(type: .scatter).set(y_axis: lowest...lowest+250)
+    if column < 7 { continue }
+    let chart = wb.addChart(type: .scatter).set(y_axis: lowest...lowest+500)
     chart.addSeries().set(marker: 5, size: 4)
-    .values(sheet: ws, range: [1, 0, r, 0])
+    .values(sheet: ws, range: [1, 1, r, 1])
     .categories(sheet: ws, range: [1, column, r, column])
     chart.remove(legends: 0)
     wb.addChartsheet(name: name).set(chart: chart)
