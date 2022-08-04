@@ -1,5 +1,5 @@
 extension TunOl {
-  func day0(hour0: [Double]) -> [Double] {
+  func day0(hour0: [Float]) -> [Float] {
     let daysU: [[Int]] = hour0[113881..<(113880 + 8760)].indices.chunked(by: { hour0[$0] == hour0[$1] }).map { $0.map { $0 - 113880 } }
     // let end = daysU.removeLast()
     // daysU[0].append(contentsOf: end)
@@ -7,7 +7,7 @@ extension TunOl {
 
     let S_UcountZero = hour0.countOf(daysU, condition: hourS, predicate: { $0 <= 0 })
     let S_UcountNonZero = hour0.countOf(daysU, condition: hourS, predicate: { $0 > 0 })
-    var day0 = [Double](repeating: .zero, count: 1_095)
+    var day0 = [Float](repeating: .zero, count: 1_095)
     /// Day
     let A = 0
     // A5+1
@@ -25,7 +25,7 @@ extension TunOl {
     return day0
   }
 
-  func d21(_ d1: inout [Double], case j: Int, day0: [Double]) {
+  func d21(_ d1: inout [Float], case j: Int, day0: [Float]) {
     let B = 365
 
     /// Surplus RawMeth storage cap after night min op  prep

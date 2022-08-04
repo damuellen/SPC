@@ -1,21 +1,21 @@
 import Foundation
 import Utilities
 
-public func fitness(values: [Double]) -> [Double] {
-  guard let model = TunOl(values) else { return [Double.infinity] }
+public func fitness(values: [Float]) -> [Float] {
+  guard let model = TunOl(values) else { return [Float.infinity] }
 
   let hour0 = model.hour0(TunOl.Q_Sol_MW_thLoop, TunOl.Reference_PV_plant_power_at_inverter_inlet_DC, TunOl.Reference_PV_MV_power_at_transformer_outlet)
 
-  var hour2 = [Double](repeating: .zero, count: 183_960)
-  var hour3 = [Double](repeating: .zero, count: 297_840)
-  var hour4 = [Double](repeating: .zero, count: 516_840)
-  var d10 = [Double](repeating: .zero, count: 13_140)
-  var d11 = [Double](repeating: .zero, count: 17_155)
-  var d12 = [Double](repeating: .zero, count: 17_155)
-  var d13 = [Double](repeating: .zero, count: 47_085) 
-  var d23 = [Double](repeating: .zero, count: 48_545)
-  var d21 = [Double](repeating: .zero, count: 9_855)
-  var day = [[Double]]()
+  var hour2 = [Float](repeating: .zero, count: 183_960)
+  var hour3 = [Float](repeating: .zero, count: 297_840)
+  var hour4 = [Float](repeating: .zero, count: 516_840)
+  var d10 = [Float](repeating: .zero, count: 13_140)
+  var d11 = [Float](repeating: .zero, count: 17_155)
+  var d12 = [Float](repeating: .zero, count: 17_155)
+  var d13 = [Float](repeating: .zero, count: 47_085) 
+  var d23 = [Float](repeating: .zero, count: 48_545)
+  var d21 = [Float](repeating: .zero, count: 9_855)
+  var day = [[Float]]()
   
   let GX = 16790
   let GZ = 17155
@@ -27,7 +27,7 @@ public func fitness(values: [Double]) -> [Double] {
   let step = (model.Overall_harmonious_max_perc - model.Overall_harmonious_min_perc) / 4
   var reserve = model.Overall_harmonious_min_perc
 
-  while reserve < model.Overall_harmonious_max_perc {
+  // while reserve < model.Overall_harmonious_max_perc {
     let hour1 = model.hour1(hour0: hour0, reserved: reserve)
     let day0 = model.day0(hour0: hour0)
 
@@ -52,14 +52,14 @@ public func fitness(values: [Double]) -> [Double] {
     }
     flip = false
     reserve += step
-  }
+  // }
 
-  var meth_produced_MTPH_sum = Double.zero
-  var elec_from_grid_sum = Double.zero
-  var elec_to_grid_MTPH_sum = Double.zero
-  var hours_sum = Double.zero
+  var meth_produced_MTPH_sum = Float.zero
+  var elec_from_grid_sum = Float.zero
+  var elec_to_grid_MTPH_sum = Float.zero
+  var hours_sum = Float.zero
   let costs = Costs(model)
-  var meth = [Double]()
+  var meth = [Float]()
 
   for d in 0..<365 {
     let cases = day.indices.map { i in costs.LCOM(meth_produced_MTPH: day[i][d] * 365.0, elec_from_grid: day[i][d + 365 + 365] * 365.0, elec_to_grid: day[i][d + 365] * 365.0) }
@@ -78,11 +78,11 @@ public func fitness(values: [Double]) -> [Double] {
 
   let LCOM = costs.LCOM(meth_produced_MTPH: meth_produced_MTPH_sum, elec_from_grid: elec_from_grid_sum, elec_to_grid: elec_to_grid_MTPH_sum) 
   let fitness = LCOM * (1 + (abs(min(hours_sum - 8000, 0)) / 1000) * 0.5) * (1 + (abs(meth_produced_MTPH_sum - 100000) / 1000) * 0.5)
-  if !meth.drop(while: { $0 < meth_produced_MTPH_sum / 100 }).isEmpty || LCOM.isInfinite || meth_produced_MTPH_sum.isZero { return [Double.infinity] }
+  if !meth.drop(while: { $0 < meth_produced_MTPH_sum / 100 }).isEmpty || LCOM.isInfinite || meth_produced_MTPH_sum.isZero { return [Float.infinity] }
   return [fitness, LCOM, costs.Total_CAPEX, costs.Total_OPEX, meth_produced_MTPH_sum, elec_from_grid_sum, elec_to_grid_MTPH_sum, hours_sum] + model.values
 }
 
-public func results(values: [Double]) -> ([Double], [Double], [Double], [Double]) {
+public func results(values: [Float]) -> ([Float], [Float], [Float], [Float]) {
   guard let model = TunOl(values) else { fatalError("Invalid config") }
 
   let hour0 = model.hour0(TunOl.Q_Sol_MW_thLoop, TunOl.Reference_PV_plant_power_at_inverter_inlet_DC, TunOl.Reference_PV_MV_power_at_transformer_outlet)
@@ -90,17 +90,17 @@ public func results(values: [Double]) -> ([Double], [Double], [Double], [Double]
   let hour1 = model.hour1(hour0: hour0, reserved: model.Overall_harmonious_min_perc)
   let day0 = model.day0(hour0: hour0)
   let d22 = model.d22(hour0: hour0)
-  var day = [[Double]]()
+  var day = [[Float]]()
 
-  var hour2 = [Double](repeating: .zero, count: 183_960)
-  var hour3 = [Double](repeating: .zero, count: 297_840)
-  var hour4 = [Double](repeating: .zero, count: 516_840)
-  var d10 = [Double](repeating: .zero, count: 13_140)
-  var d11 = [Double](repeating: .zero, count: 17_155)
-  var d12 = [Double](repeating: .zero, count: 17_155)
-  var d13 = [Double](repeating: .zero, count: 47_085) 
-  var d23 = [Double](repeating: .zero, count: 48_545)
-  var d21 = [Double](repeating: .zero, count: 9_855)
+  var hour2 = [Float](repeating: .zero, count: 183_960)
+  var hour3 = [Float](repeating: .zero, count: 297_840)
+  var hour4 = [Float](repeating: .zero, count: 516_840)
+  var d10 = [Float](repeating: .zero, count: 13_140)
+  var d11 = [Float](repeating: .zero, count: 17_155)
+  var d12 = [Float](repeating: .zero, count: 17_155)
+  var d13 = [Float](repeating: .zero, count: 47_085) 
+  var d23 = [Float](repeating: .zero, count: 48_545)
+  var d21 = [Float](repeating: .zero, count: 9_855)
 
   let GX = 16790
   let GZ = 17155
@@ -133,11 +133,11 @@ public func results(values: [Double]) -> ([Double], [Double], [Double], [Double]
     day2 += d21 + d22 + d23 + day.joined()
   }
 
-  var meth_produced_MTPH_sum = Double.zero
-  var elec_from_grid_sum = Double.zero
-  var elec_to_grid_MTPH_sum = Double.zero
+  var meth_produced_MTPH_sum = Float.zero
+  var elec_from_grid_sum = Float.zero
+  var elec_to_grid_MTPH_sum = Float.zero
   let costs = Costs(model)
-  var meth = [Double]()
+  var meth = [Float]()
   for d in 0..<365 {
     let cases = day.indices.map { i in 
       costs.LCOM(meth_produced_MTPH: day[i][d] * 365.0, elec_from_grid: day[i][d + 365 + 365] * 365.0, elec_to_grid: day[i][d + 365] * 365.0) 

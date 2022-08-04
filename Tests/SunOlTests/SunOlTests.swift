@@ -11,9 +11,9 @@ class SunOlTests: XCTestCase {
       print("No input")
       return
     }
-    TunOl.Q_Sol_MW_thLoop = [0] + csv["csp"]
-    TunOl.Reference_PV_plant_power_at_inverter_inlet_DC = [0] + csv["pv"]
-    TunOl.Reference_PV_MV_power_at_transformer_outlet = [0] + csv["out"]
+    TunOl.Q_Sol_MW_thLoop = [0] + csv["csp"].map(Float.init)
+    TunOl.Reference_PV_plant_power_at_inverter_inlet_DC = [0] + csv["pv"].map(Float.init)
+    TunOl.Reference_PV_MV_power_at_transformer_outlet = [0] + csv["out"].map(Float.init)
   }
 
   func testsCalculation() {
@@ -26,8 +26,8 @@ class SunOlTests: XCTestCase {
     }
 
     var calc = [String]()
-    func compare(_ array: [Double], letter: String, start index: Int) {
-      let index = index, ref = csv_ref[letter], column = Array(array[index..<index + 8760])
+    func compare(_ array: [Float], letter: String, start index: Int) {
+      let index = index, ref = csv_ref[letter].map(Float.init), column = Array(array[index..<index + 8760])
       var correct = true, counter = 1
       for i in 1..<8700 {
         if counter > 20 { break }
@@ -40,8 +40,8 @@ class SunOlTests: XCTestCase {
     }
 
     var day1 = [String]()
-    func compareDay(_ array: [Double], letter: String, start index: Int) {
-      let index = index, ref = csv_ref2[letter]
+    func compareDay(_ array: [Float], letter: String, start index: Int) {
+      let index = index, ref = csv_ref2[letter].map(Float.init)
       var correct = true, counter = 1
       for i in 0..<364 {
         if counter > 20 { break }
@@ -54,8 +54,8 @@ class SunOlTests: XCTestCase {
     }
 
     var day2 = [String]()
-    func compare2Day(_ array: [Double], letter: String, start index: Int) {
-      // let index = index, ref = csv_ref3[letter]
+    func compare2Day(_ array: [Float], letter: String, start index: Int) {
+      // let index = index, ref = csv_ref3[letter].map(Float.init)
       // var correct = true, counter = 1
       // for i in 0..<364 {
       //   if counter > 20 { break }
@@ -74,15 +74,15 @@ class SunOlTests: XCTestCase {
       return
     }
 
-    var hour2 = [Double](repeating: .zero, count: 183_960)
-    var hour3 = [Double](repeating: .zero, count: 297_840)
-    var hour4 = [Double](repeating: .zero, count: 516_840)
-    var d10 = [Double](repeating: .zero, count: 13_140)
-    var d11 = [Double](repeating: .zero, count: 17_155)
-    var d12 = [Double](repeating: .zero, count: 17_155)
-    var d13 = [Double](repeating: .zero, count: 47_085)
-    var d23 = [Double](repeating: .zero, count: 48_545)
-    var d21 = [Double](repeating: .zero, count: 9855)
+    var hour2 = [Float](repeating: .zero, count: 183_960)
+    var hour3 = [Float](repeating: .zero, count: 297_840)
+    var hour4 = [Float](repeating: .zero, count: 516_840)
+    var d10 = [Float](repeating: .zero, count: 13_140)
+    var d11 = [Float](repeating: .zero, count: 17_155)
+    var d12 = [Float](repeating: .zero, count: 17_155)
+    var d13 = [Float](repeating: .zero, count: 47_085)
+    var d23 = [Float](repeating: .zero, count: 48_545)
+    var d21 = [Float](repeating: .zero, count: 9855)
 
     print("Hour0")
     let hour0 = model.hour0(
@@ -120,6 +120,7 @@ class SunOlTests: XCTestCase {
 
       print("Daily10 Case", c)
       model.d10(&d10, case: j, hour2: hour2, hour3: hour3)
+      if j == 0 { columns10.forEach { key, value in compareDay(d10, letter:key, start:value) } }
 
       print("Hour4 Case", c)
       model.hour4(&hour4, j: j, d1: d10, hour0: hour0, hour1: hour1, hour2: hour2, hour3: hour3)
@@ -128,7 +129,7 @@ class SunOlTests: XCTestCase {
 
       print("Daily10 Case", c)
       model.night(case: j, d10: &d10, hour3: hour3, hour4: hour4)
-      if j == 0 { columns10.forEach { key, value in compareDay(hour4, letter:key, start:value) } }
+
       if j == 2 {
         compareDay(d10, letter: "CX", start: 8030)
         compareDay(d10, letter: "CY", start: 8395)
@@ -914,17 +915,17 @@ class SunOlTests: XCTestCase {
     let hour1 = model.hour1(hour0: hour0, reserved: model.Overall_harmonious_min_perc)
     let day0 = model.day0(hour0: hour0)
     let d22 = model.d22(hour0: hour0)
-    var day = [[Double]]()
+    var day = [[Float]]()
 
-    var hour2 = [Double](repeating: .zero, count: 183_960)
-    var hour3 = [Double](repeating: .zero, count: 297_840)
-    var hour4 = [Double](repeating: .zero, count: 516_840)
-    var d10 = [Double](repeating: .zero, count: 13_140)
-    var d11 = [Double](repeating: .zero, count: 17_155)
-    var d12 = [Double](repeating: .zero, count: 17_155)
-    var d13 = [Double](repeating: .zero, count: 47_085)
-    var d23 = [Double](repeating: .zero, count: 48_545)
-    var d21 = [Double](repeating: .zero, count: 9855)
+    var hour2 = [Float](repeating: .zero, count: 183_960)
+    var hour3 = [Float](repeating: .zero, count: 297_840)
+    var hour4 = [Float](repeating: .zero, count: 516_840)
+    var d10 = [Float](repeating: .zero, count: 13_140)
+    var d11 = [Float](repeating: .zero, count: 17_155)
+    var d12 = [Float](repeating: .zero, count: 17_155)
+    var d13 = [Float](repeating: .zero, count: 47_085)
+    var d23 = [Float](repeating: .zero, count: 48_545)
+    var d21 = [Float](repeating: .zero, count: 9855)
 
     let GX = 16790
     let GZ = 17155
@@ -950,13 +951,13 @@ class SunOlTests: XCTestCase {
       day.append(Array(d23[44895..<45990] + ArraySlice(zip(day0[365..<730], d23[GZ..<HA]).map { $1 > 0 ? $0 : 0}) + day0[730..<1095]))
     }
 
-    var meth_produced_MTPH_sum = Double.zero
-    var elec_from_grid_sum = Double.zero
-    var elec_to_grid_MTPH_sum = Double.zero
+    var meth_produced_MTPH_sum = Float.zero
+    var elec_from_grid_sum = Float.zero
+    var elec_to_grid_MTPH_sum = Float.zero
 
     let name = ["1a day prio", "1a night prio", "2a day prio", "2a night prio", "1b day prio", "1b night prio", "2b day prio", "2b night prio", "1c day prio", "1c night prio", "2c day prio", "2c night prio", "1d day prio", "1d night prio", "2d day prio", "2d night prio"]
     var charts = [Int]()
-    var hours_sum = 0.0
+    var hours_sum = Float.zero
     for d in 0..<365 {
       let cases = day.indices.map { i in costs.LCOM(meth_produced_MTPH: day[i][d] * 365.0, elec_from_grid: day[i][d + 365 + 365] * 365.0, elec_to_grid: day[i][d + 365] * 365.0) }
       let ranked = cases.indices.filter { cases[$0].isFinite }.filter { cases[$0] > 0 }.sorted { cases[$0] < cases[$1] }
@@ -986,12 +987,12 @@ class SunOlTests: XCTestCase {
     //  dump(model)
     let costs = Costs(model)
     // dump(costs)
-    var fixtures = [
+    let fixtures: [Float] = [
       0.0, 0.0, 271_850_862.509_697_9, 22_885_530.347_053_397, 25_708_090.216_960_527, 12_437_574.020_599_108, 63_482_959.972_115_204, 430_140_000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 24_684_376.583_671_547, 44_763_724.383_25, 1_937_238.624_602_197, 1_197_447.845_153_448_4,
     ]
-    .makeIterator()
+    var iter = fixtures.makeIterator()
 
-    for child in Mirror(reflecting: costs).children.filter({ $0.label?.contains("cost") ?? false }) { XCTAssertEqual(child.value as! Double, fixtures.next()!, accuracy: 1, child.label!) }
+    for child in Mirror(reflecting: costs).children.filter({ $0.label?.contains("cost") ?? false }) { XCTAssertEqual(child.value as! Float, iter.next()!, accuracy: 1, child.label!) }
   }
 
   let columns0 = [

@@ -12,44 +12,44 @@ import Foundation
 @_exported import SunOl
 @_exported import Utilities
 
-public var convergenceCurves = [[[Double]]](repeating: [[Double]](), count: 3)
-public typealias FitnessFunction = ([Double]) -> [Double]
+public var convergenceCurves = [[[Float]]](repeating: [[Float]](), count: 3)
+public typealias FitnessFunction = ([Float]) -> [Float]
 
 public struct MGOADE {
   let group: Bool
   let n: Int
   let maxIterations: Int
-  let bounds: [ClosedRange<Double>]
+  let bounds: [ClosedRange<Float>]
 
-  let cMax = 1.0
-  let cMin = 0.004
-  let cr = 0.4
-  let f = 0.9
+  let cMax: Float = 1.0
+  let cMin: Float = 0.004
+  let cr: Float = 0.4
+  let f: Float = 0.9
 
-  func S_func(r: Double) -> Double {
-    let f = 0.5
-    let l = 1.5
+  func S_func(r: Float) -> Float {
+    let f: Float = 0.5
+    let l: Float = 1.5
     return f * exp(-r / l) - exp(-r)  // Eq. (2.3) in the paper
   }
 
-  func euclideanDistance(a: [Double], b: [Double]) -> Double {
-    var distance = 0.0
+  func euclideanDistance(a: [Float], b: [Float]) -> Float {
+    var distance: Float = 0.0
     for i in a.indices { distance += pow((a[i] - b[i]), 2) }
     return sqrt(distance)
   }
 
-  public init(group: Bool, n: Int, maxIterations: Int, bounds: [ClosedRange<Double>]) {
+  public init(group: Bool, n: Int, maxIterations: Int, bounds: [ClosedRange<Float>]) {
     self.group = group
     self.n = n
     self.maxIterations = maxIterations
     self.bounds = bounds
   }
 
-  public func callAsFunction(_ fitness: FitnessFunction) -> [[Double]] {
+  public func callAsFunction(_ fitness: FitnessFunction) -> [[Float]] {
     var targetResults = Matrix(n * maxIterations, bounds.count + 7)
     var targetPosition = Matrix(group ? 3 : 1, bounds.count)
     var targetFitness = Vector(group ? 3 : 1, .infinity)
-    let EPSILON = 1E-14
+    let EPSILON: Float = 1E-14
 
     // Initialize the population of grasshoppers
     var grassHopperPositions = bounds.randomValues(count: n)
@@ -72,7 +72,7 @@ public struct MGOADE {
           targetPosition[g] = grassHopperPositions[i]
         }
       }
-      convergenceCurves[g].append([Double(0), (targetFitness[g] * 100).rounded() / 100])
+      convergenceCurves[g].append([Float(0), (targetFitness[g] * 100).rounded() / 100])
     }
 
     ClearScreen()
@@ -90,7 +90,7 @@ public struct MGOADE {
 
     while iteration < maxIterations && !source.isCancelled {
       iteration += 1
-      let c = cMax - (Double(iteration) * ((cMax - cMin) / Double(maxIterations)))  // Eq. (2.8) in the paper
+      let c = cMax - (Float(iteration) * ((cMax - cMin) / Float(maxIterations)))  // Eq. (2.8) in the paper
 
       for g in groups.indices {
         for i in groups[g].indices {
@@ -138,7 +138,7 @@ public struct MGOADE {
             let r1 = groups[o[0]].indices.randomElement()!
             let r2 = groups[o[1]].indices.randomElement()!
             for j in grassHopperPositions[i].indices {
-              if Double.random(in: 0...1) < cr {
+              if Float.random(in: 0...1) < cr {
                 grassHopperTrialPositions[i][j] = targetPosition[g][j] + f * (.random(in: 0...1) + 0.0001) * (grassHopperPositions[r1][j] - grassHopperPositions[r2][j])
                 grassHopperTrialPositions[i][j].clamp(to: bounds[j])
               }
@@ -181,7 +181,7 @@ public struct MGOADE {
             targetPosition[g] = grassHopperPositions[i]
           }
         }
-        convergenceCurves[g].append([Double(iteration), (targetFitness[g] * 100).rounded() / 100])
+        convergenceCurves[g].append([Float(iteration), (targetFitness[g] * 100).rounded() / 100])
       }
 
       ClearScreen()
@@ -199,11 +199,11 @@ public struct MGOADE {
 typealias Matrix<T> = [[T]]
 typealias Vector<T> = [T]
 
-extension Matrix where Element == Vector<Double> { init(_ x: Int, _ y: Int, _ z: Double = .zero) { self = Matrix(repeating: Vector(y), count: x) } }
+extension Matrix where Element == Vector<Float> { init(_ x: Int, _ y: Int, _ z: Float = .zero) { self = Matrix(repeating: Vector(y), count: x) } }
 
-extension Vector where Element == Double { init(_ x: Int, _ z: Double = .zero) { self = Vector(repeating: z, count: x) } }
+extension Vector where Element == Float { init(_ x: Int, _ z: Float = .zero) { self = Vector(repeating: z, count: x) } }
 
-extension Array where Element == ClosedRange<Double> { func randomValues(count: Int) -> [[Double]] { (1...count).map { _ in map { range in Double.random(in: range) } } } }
+extension Array where Element == ClosedRange<Float> { func randomValues(count: Int) -> [[Float]] { (1...count).map { _ in map { range in Float.random(in: range) } } } }
 
 extension Range where Bound == Int {
   func split(in parts: Int) -> [Self] {
@@ -212,7 +212,7 @@ extension Range where Bound == Int {
   }
 }
 
-func pretty(values: [[Double]]) -> String {
+func pretty(values: [[Float]]) -> String {
   let labels = ["Loops", "TES", "PB", "PV_AC", "PV_DC", "EY_cons", "H2_storage", "Heater", "CCU_CO2_prod", "CO2_storage", "RawMeth_storage", "MethDist_prod", "El_boiler", "BESS", "Grid_export", "Grid_import"]
   if values.count == 1 {
     return values[0].indices
@@ -236,7 +236,7 @@ func pretty(values: [[Double]]) -> String {
     .joined(separator: "\n")
 }
 
-func pretty(values: [Double]) -> String {
+func pretty(values: [Float]) -> String {
   let label = "LCOM"
   if values.count == 1 {
     return """

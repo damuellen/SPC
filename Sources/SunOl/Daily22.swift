@@ -1,5 +1,5 @@
 extension TunOl {
-  func d22(hour0: [Double]) -> [Double] {
+  func d22(hour0: [Float]) -> [Float] {
     let U: [[Int]] = hour0[113881..<(113880 + 8760)].indices.chunked(by: { hour0[$0] == hour0[$1] }).map { $0.map { $0 - 113880 } }
 
     let S = 96360
@@ -74,7 +74,7 @@ extension TunOl {
     let ADsum = hour0.sum(days: U, range: AD)
     let AHsum = hour0.sum(days: U, range: AH)
 
-    var d22 = [Double](repeating: .zero, count: 14235)
+    var d22 = [Float](repeating: .zero, count: 14235)
 
     /// Available day op PV elec after CSP, PB stby aux
     let DM = 13140

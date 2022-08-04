@@ -1,5 +1,5 @@
 extension TunOl {
-  func d23(_ d23: inout [Double], case j: Int, day0: [Double], d21: [Double], d22: [Double]) {
+  func d23(_ d23: inout [Float], case j: Int, day0: [Float], d21: [Float], d22: [Float]) {
     let (B, C, E, F, G, H, O, P, Q, R, S, T, U, V, W, X) = (365, 730, 0, 365, 730, 1095, 3650, 4015, 4380, 4745, 5110, 5475, 5840, 6205, 6570, 6935)
 
     let AE = 9490

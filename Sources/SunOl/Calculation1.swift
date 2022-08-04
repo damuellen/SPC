@@ -1,5 +1,5 @@
 extension TunOl {
-  func hour2(_ hour2: inout [Double], j: Int, hour0: [Double], hour1: [Double]) {
+  func hour2(_ hour2: inout [Float], j: Int, hour0: [Float], hour1: [Float]) {
     let (J0, L0, M0, BK1, BM1, BO1, BP1, BQ1) = (26280, 43800, 52560, 131400, 148920, 166440, 175200, 183960)
     let daysBO: [[Int]] = hour1[BO1 + 1..<(BO1 + 8760)].indices.chunked(by: { hour1[$0] == hour1[$1] }).map { $0.map { $0 - BO1 } }
 
@@ -175,7 +175,7 @@ extension TunOl {
     }
   }
 
-  func hour3(_ hour3: inout [Double], j: Int, hour0: [Double], hour1: [Double], hour2: [Double]) {
+  func hour3(_ hour3: inout [Float], j: Int, hour0: [Float], hour1: [Float], hour2: [Float]) {
     let (BX2, CB2, CC2, CK2, CL2, CM2) = (26280, 61320, 70080, 140160, 148920, 157680)
     let CI2 = 122640
     let L0 = 43800

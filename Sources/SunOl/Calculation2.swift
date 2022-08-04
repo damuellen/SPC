@@ -1,5 +1,5 @@
 extension TunOl {
-  func hour4(_ hour4: inout [Double], j: Int, d1 day11: [Double], hour0: [Double], hour1: [Double], hour2: [Double], hour3: [Double]) {
+  func hour4(_ hour4: inout [Float], j: Int, d1 day11: [Float], hour0: [Float], hour1: [Float], hour2: [Float], hour3: [Float]) {
     let (J0, L0, M0, BK1, BM1, BP1, BQ1, CC2) = (26280, 43800, 52560, 131400, 148920, 175200, 183960, 70080)
     let BO1 = 166440
     let daysBO: [[Int]] = hour1[BO1 + 1..<(BO1 + 8760)].indices.chunked(by: { hour1[$0] == hour1[$1] }).map { $0.map { $0 - BO1 } }
@@ -11,9 +11,9 @@ extension TunOl {
     let day1R = 5475
     let BT2 = 175200
     let BX2 = 26280
-    let hour = daysBO.indices.map { day -> [Double] in
+    let hour = daysBO.indices.map { day -> [Float] in
       let value = day11[(day + day1R)]
-      return [Double](repeating: value, count: daysBO[day].count)
+      return [Float](repeating: value, count: daysBO[day].count)
     }.joined()
     // =IF(BT6=0,0,VLOOKUP($BO6,DailyCalc_1!$A$3:$R$367,COLUMN(DailyCalc_1!R$3)))
     hour4.replaceSubrange(1..<8760, with: hour)

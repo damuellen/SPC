@@ -1,5 +1,5 @@
 extension TunOl {
-  func d14(_ d13: inout [Double], case j: Int, d10: [Double], d11: [Double], d12: [Double]) {
+  func d14(_ d13: inout [Float], case j: Int, d10: [Float], d11: [Float], d12: [Float]) {
     let (C, D, E, T, U, V, Z, AA, AB, AC) = (0, 365, 730, 5840, 6205, 6570, 8030, 8395, 8760, 9125)  // d10
 
     let (EY, EZ, FA, FC, FD, FE, _, _, FR, FS, FT, FV, FW, FY, FZ, GA, GB, GC, GD, GE, GF, GG, GH, GI) = (
@@ -491,7 +491,7 @@ extension TunOl {
     /// Grid import
     let ddNN = 44895
     // NN=ROUND(MR6+NF6+NC6+MS6+(MAX(0,-MT6)+MAX(0,-NG6))*EDG_elec_cost_factor,5)
-    for i in 0..<365 { d13[ddNN + i] = round(d13[ddMR + i] + d13[ddNF + i] + d13[ddNC + i] + d13[ddMS + i] + (max(.zero, -13[ddMT + i]) + max(.zero, -d13[ddNG + i])) * EDG_elec_cost_factor, 5) }
+    for i in 0..<365 { d13[ddNN + i] = round(d13[ddMR + i] + d13[ddNF + i] + d13[ddNC + i] + d13[ddMS + i] + (max(.zero, -d13[ddMT + i]) + max(.zero, -d13[ddNG + i])) * EDG_elec_cost_factor, 5) }
 
     /// Outside harmonious operation period hours
     let ddNO = 45260

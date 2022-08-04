@@ -2,26 +2,26 @@ import Foundation
 import Utilities
 
 public struct Parameter: Codable {
-  public var ranges: [ClosedRange<Double>]
+  public var ranges: [ClosedRange<Float>]
 
   public init(
-    BESS_cap_ud: ClosedRange<Double>,
-    CCU_CO2_nom_prod_ud: ClosedRange<Double>,
-    CO2_storage_cap_ud: ClosedRange<Double>,
-    CSP_loop_nr_ud: ClosedRange<Double>,
-    El_boiler_cap_ud: ClosedRange<Double>,
-    EY_var_net_nom_cons_ud: ClosedRange<Double>,
-    Grid_export_max_ud: ClosedRange<Double>,
-    Grid_import_max_ud: ClosedRange<Double>,
-    Hydrogen_storage_cap_ud: ClosedRange<Double>,
-    Heater_cap_ud: ClosedRange<Double>,
-    MethDist_Meth_nom_prod_ud: ClosedRange<Double>,
-    // MethSynt_RawMeth_nom_prod_ud: ClosedRange<Double>,
-    PB_nom_gross_cap_ud: ClosedRange<Double>,
-    PV_AC_cap_ud: ClosedRange<Double>,
-    PV_DC_cap_ud: ClosedRange<Double>,
-    RawMeth_storage_cap_ud: ClosedRange<Double>,
-    TES_thermal_cap_ud: ClosedRange<Double>
+    BESS_cap_ud: ClosedRange<Float>,
+    CCU_CO2_nom_prod_ud: ClosedRange<Float>,
+    CO2_storage_cap_ud: ClosedRange<Float>,
+    CSP_loop_nr_ud: ClosedRange<Float>,
+    El_boiler_cap_ud: ClosedRange<Float>,
+    EY_var_net_nom_cons_ud: ClosedRange<Float>,
+    Grid_export_max_ud: ClosedRange<Float>,
+    Grid_import_max_ud: ClosedRange<Float>,
+    Hydrogen_storage_cap_ud: ClosedRange<Float>,
+    Heater_cap_ud: ClosedRange<Float>,
+    MethDist_Meth_nom_prod_ud: ClosedRange<Float>,
+    // MethSynt_RawMeth_nom_prod_ud: ClosedRange<Float>,
+    PB_nom_gross_cap_ud: ClosedRange<Float>,
+    PV_AC_cap_ud: ClosedRange<Float>,
+    PV_DC_cap_ud: ClosedRange<Float>,
+    RawMeth_storage_cap_ud: ClosedRange<Float>,
+    TES_thermal_cap_ud: ClosedRange<Float>
   ) {
     self.ranges = [
       CSP_loop_nr_ud, // [0]
@@ -44,7 +44,7 @@ public struct Parameter: Codable {
     ]
   }
 
-  subscript(i: Int) -> ClosedRange<Double> {
+  subscript(i: Int) -> ClosedRange<Float> {
     get { ranges[i] } 
     set { ranges[i] = newValue }
   }

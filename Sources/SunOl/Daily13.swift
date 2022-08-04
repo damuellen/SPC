@@ -1,5 +1,5 @@
 extension TunOl {
-  func d13(_ d13: inout [Double], case j: Int, d10: [Double], d11: [Double], d12: [Double]) {
+  func d13(_ d13: inout [Float], case j: Int, d10: [Float], d11: [Float], d12: [Float]) {
     let (Z, AA, AB, AC, AD, AE, AF, AG, AH, AI, AM) = (8030, 8395, 8760, 9125, 9490, 9855, 10220, 10585, 10950, 11315, 12775)  // d1
 
     let (FS, FT, FV, FW, FY, FZ, GE, GF, GG, GH, GI, GK, GL, GN, GO, GQ, GR) = (

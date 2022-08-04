@@ -1,5 +1,5 @@
 extension TunOl {
-  func d11(case j: Int, _ d11: inout [Double], hour0: [Double], hour2: [Double], hour3: [Double]) {
+  func d11(case j: Int, _ d11: inout [Float], hour0: [Float], hour2: [Float], hour3: [Float]) {
     let (CM, CN, CQ, CR, CS, CT, CU, CV, CW, CX, CY, CZ, DA, DB, DC, DD, DE, DF, DH, DI, DJ, DK, DL, DM, DN, DO, DP, DQ, DR, DS, DT) = (
       157680, 166440, 8760, 17520, 26280, 35040, 43800, 52560, 61320, 70080, 78840, 87600, 96360, 105120, 113880, 122640, 131400, 140160, 157680, 166440, 175200, 183960, 192720, 201480, 210240, 219000, 227760, 236520, 245280, 254040, 262800
     )

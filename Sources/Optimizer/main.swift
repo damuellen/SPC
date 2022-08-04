@@ -90,9 +90,9 @@ struct Command: ParsableCommand {
         start("http://127.0.0.1:\(server.port)") 
       }
     }
-    TunOl.Q_Sol_MW_thLoop = [0] + csv["csp"]
-    TunOl.Reference_PV_plant_power_at_inverter_inlet_DC = [0] + csv["pv"]
-    TunOl.Reference_PV_MV_power_at_transformer_outlet = [0] + csv["out"]
+    TunOl.Q_Sol_MW_thLoop = [0] + csv["csp"].map(Float.init)
+    TunOl.Reference_PV_plant_power_at_inverter_inlet_DC = [0] + csv["pv"].map(Float.init)
+    TunOl.Reference_PV_MV_power_at_transformer_outlet = [0] + csv["out"].map(Float.init)
 
     let optimizer = MGOADE(group: !noGroups, n: n ?? 90, maxIterations: iterations ?? 30, bounds: parameter.ranges)
     let now = Date()
@@ -121,7 +121,7 @@ struct Command: ParsableCommand {
   }
 }
 
-func writeCSV(result: ([Double], [Double], [Double], [Double])) {
+func writeCSV(result: ([Float], [Float], [Float], [Float])) {
   var hour = ""
   let v1 = result.1
   for n in 1..<8760 {
@@ -145,17 +145,17 @@ func writeCSV(result: ([Double], [Double], [Double], [Double])) {
   try? hour.write(toFile: "out3.csv", atomically: false, encoding: .ascii)
 }
 
-func writeExcel(results: [[Double]]) -> String {
+func writeExcel(results: [[Float]]) -> String {
   let name = "SunOl_\(UUID().uuidString.prefix(4)).xlsx"
   let wb = Workbook(name: name)
   let ws = wb.addWorksheet()
   var r = 0
-  var lowest = Double.infinity
+  var lowest = Float.infinity
   results.reversed().forEach { row in r += 1
     if lowest > row[1] {
       lowest = row[1]
     }
-    ws.write(row, row: r)
+    ws.write(row.map(Double.init), row: r)
   }
   let labels = [
     "LCOM", "LCOM2", "CAPEX", "OPEX", "Methanol", "Import", "Export", "Hours", "CSP_loop_nr", "TES_thermal_cap_ud", "PB_nom_gross_cap", "PV_AC_cap", "PV_DC_cap", "EY_var_net_nom_cons", "Hydrogen_storage_cap", "Heater_cap", "CCU_CO2_nom_prod", "CO2_storage_cap", "RawMeth_storage_cap",
@@ -166,7 +166,7 @@ func writeExcel(results: [[Double]]) -> String {
   ws.table(range: [0, 0, r, labels.endIndex - 1], header: labels)
   for (column, name) in labels.enumerated() {
     if column < 7 { continue }
-    let chart = wb.addChart(type: .scatter).set(y_axis: lowest...lowest+500)
+    let chart = wb.addChart(type: .scatter).set(y_axis: Double(lowest)...Double(lowest+500))
     chart.addSeries().set(marker: 5, size: 4)
     .values(sheet: ws, range: [1, 1, r, 1])
     .categories(sheet: ws, range: [1, column, r, column])

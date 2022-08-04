@@ -1,5 +1,5 @@
 extension TunOl {
-  func d12(case j: Int, _ d12: inout [Double], hour0: [Double], hour4: [Double]) {
+  func d12(case j: Int, _ d12: inout [Float], hour0: [Float], hour4: [Float]) {
     let daysEZ: [[Int]] = hour4[254041..<(254040 + 8760)].indices.chunked(by: { hour4[$0] == hour4[$1] }).map { $0.map { $0 - 254040 } }
 
 

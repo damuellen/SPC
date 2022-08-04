@@ -1,6 +1,6 @@
 extension TunOl {
-  func hour0(_ Q_Sol_MW_thLoop: [Double], _ Reference_PV_plant_power_at_inverter_inlet_DC: [Double], _ Reference_PV_MV_power_at_transformer_outlet: [Double]) -> [Double] {
-    var hour0 = [Double](repeating: .zero, count: 3526680)
+  func hour0(_ Q_Sol_MW_thLoop: [Float], _ Reference_PV_plant_power_at_inverter_inlet_DC: [Float], _ Reference_PV_MV_power_at_transformer_outlet: [Float]) -> [Float] {
+    var hour0 = [Float](repeating: .zero, count: 3526680)
 
     let maximum = Reference_PV_MV_power_at_transformer_outlet.max() ?? 0
     /// Inverter power fraction -
@@ -269,9 +269,9 @@ extension TunOl {
     return hour0
   }
 
-  func hour1(hour0: [Double], reserved: Double) -> [Double] {
+  func hour1(hour0: [Float], reserved: Float) -> [Float] {
     let J = 26280
-    var hour1 = [Double](repeating: .zero, count: 192_720)
+    var hour1 = [Float](repeating: .zero, count: 192_720)
     let daysD: [[Int]] = (0..<365).map { Array(stride(from: 1 + $0 * 24, to: 1 + ($0 + 1) * 24, by: 1)) }
     let AW = 3509160
     let AX = 3517920

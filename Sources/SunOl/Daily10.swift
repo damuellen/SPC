@@ -1,5 +1,5 @@
 extension TunOl {
-  func d10(_ d10: inout [Double], case j: Int, hour2: [Double], hour3: [Double]) {
+  func d10(_ d10: inout [Float], case j: Int, hour2: [Float], hour3: [Float]) {
     let BX = 26280
     let CC = 70080
     let CS = 26280
@@ -115,7 +115,7 @@ extension TunOl {
     }
   }
 
-  func night(case j: Int, d10: inout [Double], hour3: [Double], hour4: [Double]) {
+  func night(case j: Int, d10: inout [Float], hour3: [Float], hour4: [Float]) {
     let (F, H, J, L, N, P, EH, EX) = (1095, 1825, 2555, 3285, 4015, 4745, 105120, 236520)
     let daysEZ: [[Int]] = hour4[254041..<(254040 + 8760)].indices.chunked(by: { hour4[$0] == hour4[$1] }).map { $0.map { $0 - 254040 } }
     //  let end = daysEZ.removeLast()
@@ -216,7 +216,7 @@ extension TunOl {
 
     /// Min heat cons during day for night op prep
     let AB = 8760
-    // IF(AND(J3=0,F3=0),0,(J3+F3/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_Hydrogen_nom_cons)/EY_Hydrogen_nom_prod*EY_var_heat_nom_cons)+IF(AND(H3=0,F3=0),0,(H3+F3/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_CO2_nom_cons)/CCU_CO2_nom_prod_ud*CCU_var_heat_nom_cons)-IF(F3=0,0,F3/MethSynt_RawMeth_nom_prod_ud*MethSynt_var_heat_nom_prod)
+    // IF(AM3=0,0,IF(AND(J3=0,F3=0),0,(J3+F3/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_Hydrogen_nom_cons)/EY_Hydrogen_nom_prod*EY_var_heat_nom_cons)+IF(AND(H3=0,F3=0),0,(H3+F3/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_CO2_nom_cons)/CCU_CO2_nom_prod_ud*CCU_var_heat_nom_cons)-IF(F3=0,0,F3/MethSynt_RawMeth_nom_prod_ud*MethSynt_var_heat_nom_prod))
     for i in 0..<365 {
       if d10[AM + i].isZero {
         d10[AB + i] = 0

@@ -1,11 +1,11 @@
 import Foundation
 import Utilities
 
-func POLY(_ value: Double, _ coeffs: [Double]) -> Double { coeffs.reversed().reduce(into: 0.0) { result, coefficient in result = coefficient.addingProduct(result, value) } }
+func POLY(_ value: Float, _ coeffs: [Float]) -> Float { coeffs.reversed().reduce(into: 0.0) { result, coefficient in result = coefficient.addingProduct(result, value) } }
 
-extension Array where Element == Double {
-  func sum(days: [[Int]], range: Int, predicate: (Double) -> Bool) -> [Double] {
-    days.map { day in var sum = 0.0
+extension Array where Element == Float {
+  func sum(days: [[Int]], range: Int, predicate: (Float) -> Bool) -> [Float] {
+    days.map { day in var sum = Float.zero
       day.forEach { d in let value = self[(d + range)]
         if predicate(value) { sum += value }
       }
@@ -13,8 +13,8 @@ extension Array where Element == Double {
     }
   }
 
-  func sum(days: [[Int]], range: Int) -> [Double] {
-    days.map { day in var sum = 0.0
+  func sum(days: [[Int]], range: Int) -> [Float] {
+    days.map { day in var sum = Float.zero
       day.forEach { d in let value = self[(d + range)]
         sum += value
       }
@@ -22,82 +22,82 @@ extension Array where Element == Double {
     }
   }
 
-  func sumOfRanges(_ range: Int, days: [[Int]], range1: [Double], condition: Int, predicate: (Double) -> Bool) -> [Double] {
-    days.map { day in var sum = 0.0
+  func sumOfRanges(_ range: Int, days: [[Int]], range1: [Float], condition: Int, predicate: (Float) -> Bool) -> [Float] {
+    days.map { day in var sum = Float.zero
       day.forEach { d in if predicate(range1[(d + condition)]) { sum += self[(d + range)] } }
       return sum
     }
   }
 
-  func sumOf(_ range: Int, days: [[Int]], condition: Int, predicate: (Double) -> Bool) -> [Double] {
-    days.map { day in var sum = 0.0
+  func sumOf(_ range: Int, days: [[Int]], condition: Int, predicate: (Float) -> Bool) -> [Float] {
+    days.map { day in var sum = Float.zero
       day.forEach { d in if predicate(self[(d + condition)]) { sum += self[(d + range)] } }
       return sum
     }
   }
 
-  func sumOfRanges(_ range: Int, days: [[Int]], range1: [Double], condition1: Int, predicate1: (Double) -> Bool, range2: [Double], condition2: Int, predicate2: (Double) -> Bool) -> [Double] {
-    days.map { day in var sum = 0.0
+  func sumOfRanges(_ range: Int, days: [[Int]], range1: [Float], condition1: Int, predicate1: (Float) -> Bool, range2: [Float], condition2: Int, predicate2: (Float) -> Bool) -> [Float] {
+    days.map { day in var sum = Float.zero
       day.forEach { d in if predicate1(range1[(d + condition1)]), predicate2(range2[(d + condition2)]) { sum += self[(d + range)] } }
       return sum
     }
   }
 
-  func sumOf(_ range: Int, days: [[Int]], condition1: Int, predicate1: (Double) -> Bool, range2: [Double], condition2: Int, predicate2: (Double) -> Bool) -> [Double] {
-    days.map { day in var sum = 0.0
+  func sumOf(_ range: Int, days: [[Int]], condition1: Int, predicate1: (Float) -> Bool, range2: [Float], condition2: Int, predicate2: (Float) -> Bool) -> [Float] {
+    days.map { day in var sum = Float.zero
       day.forEach { d in if predicate1(self[(d + condition1)]), predicate2(range2[(d + condition2)]) { sum += self[(d + range)] } }
       return sum
     }
   }
 
-  func sum(_ range: Int, hours: [[Int]], condition: Int, predicate: (Double) -> Bool) -> [Double] {
+  func sum(_ range: Int, hours: [[Int]], condition: Int, predicate: (Float) -> Bool) -> [Float] {
     Array(
-      hours.map { day -> [Double] in var sum = 0.0
+      hours.map { day -> [Float] in var sum = Float.zero
         day.forEach { d in 
           let value = self[(d + condition)]
           if predicate(value) { sum += self[(d + range)] }
         }
-        return [Double](repeating: sum, count: day.count)
+        return [Float](repeating: sum, count: day.count)
       }
       .joined())
   }
 
-  func sum(_ range: Int, hours: [[Int]], range2: [Double], condition: Int, predicate: (Double) -> Bool) -> [Double] {
+  func sum(_ range: Int, hours: [[Int]], range2: [Float], condition: Int, predicate: (Float) -> Bool) -> [Float] {
     Array(
-      hours.map { day -> [Double] in var sum = 0.0
+      hours.map { day -> [Float] in var sum = Float.zero
         day.forEach { d in 
           let value = range2[(d + condition)]
           if predicate(value) { sum += self[(d + range)] }
         }
-        return [Double](repeating: sum, count: day.count)
+        return [Float](repeating: sum, count: day.count)
       }
       .joined())
   }
 
-  func sum(hours: [[Int]], condition: Int, predicate: (Double) -> Bool) -> [Double] {
+  func sum(hours: [[Int]], condition: Int, predicate: (Float) -> Bool) -> [Float] {
     Array(
-      hours.map { day -> [Double] in var sum = 0.0
+      hours.map { day -> [Float] in var sum = Float.zero
         day.forEach { d in let value = self[(d + condition)]
           if predicate(value) { sum += value }
         }
-        return [Double](repeating: sum, count: day.count)
+        return [Float](repeating: sum, count: day.count)
       }
       .joined())
   }
 
-  func sum(hours: [[Int]], condition: Int) -> [Double] {
+  func sum(hours: [[Int]], condition: Int) -> [Float] {
     Array(
-      hours.map { day -> [Double] in var sum = 0.0
+      hours.map { day -> [Float] in var sum = Float.zero
         day.forEach { d in let value = self[(d + condition)]
           sum += value
         }
-        return [Double](repeating: sum, count: day.count)
+        return [Float](repeating: sum, count: day.count)
       }
       .joined())
   }
 
-  func countOf(_ days: [[Int]], condition: Int, predicate: (Double) -> Bool) -> [Double] {
-    days.map { day in var count = 0.0
+  func countOf(_ days: [[Int]], condition: Int, predicate: (Float) -> Bool) -> [Float] {
+    days.map { day in var count = Float.zero
       day.forEach { d in let value = self[(d + condition)]
         if predicate(value) { count += 1 }
       }
@@ -105,20 +105,20 @@ extension Array where Element == Double {
     }
   }
 
-  func countOf(_ days: [[Int]], condition1: Int, predicate1: (Double) -> Bool, condition2: Int, predicate2: (Double) -> Bool) -> [Double] {
-    days.map { day in var count = 0.0
+  func countOf(_ days: [[Int]], condition1: Int, predicate1: (Float) -> Bool, condition2: Int, predicate2: (Float) -> Bool) -> [Float] {
+    days.map { day in var count = Float.zero
       day.forEach { d in if predicate1(self[(d + condition1)]), predicate2(self[(d + condition2)]) { count += 1 } }
       return count
     }
   }
 
-  func count(hours: [[Int]], range: Int, predicate: (Double) -> Bool) -> [Double] {
+  func count(hours: [[Int]], range: Int, predicate: (Float) -> Bool) -> [Float] {
     Array(
-      hours.map { day -> [Double] in var count = 0.0
+      hours.map { day -> [Float] in var count = Float.zero
         day.forEach { d in let value = self[(d + range)]
           if predicate(value) { count += 1 }
         }
-        return [Double](repeating: count, count: day.count)
+        return [Float](repeating: count, count: day.count)
       }
       .joined())
   }
@@ -156,46 +156,46 @@ enum Days {
   public static let Dec = Int(DateInterval.Dec.start.timeIntervalSinceReferenceDate / 86400)
 }
 
-extension Double { var formatted: String { String(format: "%G", self) } }
+extension Float { var formatted: String { String(format: "%G", self) } }
 
-extension Array where Element == Double {
+extension Array where Element == Float {
   var total: Float { Float(reduce(0.0, +)) }
   var nonZeroCount: Int { reduce(into: 0) { counter, value in if value > 0 { counter += 1 } } }
 
   var readable: [String] { map(\.formatted) }
 }
 
-func round(_ value: Double, _ digits: Double) -> Double { (pow(10, digits) * value).rounded() / pow(10, digits) }
+func round(_ value: Float, _ digits: Float) -> Float { (pow(10, digits) * value).rounded() / pow(10, digits) }
 
-func roundUp(_ value: Double, _ digits: Double = 2) -> Double { (pow(10, digits) * value).rounded(.up) / pow(10, digits) }
+func roundUp(_ value: Float, _ digits: Float = 2) -> Float { (pow(10, digits) * value).rounded(.up) / pow(10, digits) }
 
-func average(_ values: ArraySlice<Double>) -> Double {
+func average(_ values: ArraySlice<Float>) -> Float {
   let sum = values.reduce(into: 0.0) { sum, value in sum += value }
-  return sum / Double(values.count)
+  return sum / Float(values.count)
 }
 
-func sumDay(_ i: Int, _ array: [Double], _ offset: Int) -> Double {
+func sumDay(_ i: Int, _ array: [Float], _ offset: Int) -> Float {
   let offset = offset + i.quotientAndRemainder(dividingBy: 24).quotient
   let slice = array[offset...].prefix(24)
   let sum = slice.reduce(into: 0) { sum, value in sum += value }
   return sum
 }
 
-func countDay(_ i: Int, _ array: [Double], _ offset: Int, _ predicat: (Double) -> Bool) -> Double {
+func countDay(_ i: Int, _ array: [Float], _ offset: Int, _ predicat: (Float) -> Bool) -> Float {
   let offset = offset + i.quotientAndRemainder(dividingBy: 24).quotient
   let slice = array[offset...].prefix(24)
   let count = slice.reduce(into: 0) { counter, value in if predicat(value) { counter += 1 } }
-  return Double(count)
+  return Float(count)
 }
 
-func countiff(_ values: ArraySlice<Double>, _ predicat: (Double) -> Bool) -> Double {
+func countiff(_ values: ArraySlice<Float>, _ predicat: (Float) -> Bool) -> Float {
   let count = values.reduce(into: 0) { counter, value in if predicat(value) { counter += 1 } }
-  return Double(count)
+  return Float(count)
 }
 
-func iff(_ expression: Bool, _ yes: Double, _ no: Double) -> Double { expression ? yes : no }
+func iff(_ expression: Bool, _ yes: Float, _ no: Float) -> Float { expression ? yes : no }
 
-func ifFinite(_ check: Double, _ subs: Double) -> Double { check.isFinite ? check : subs }
+func ifFinite(_ check: Float, _ subs: Float) -> Float { check.isFinite ? check : subs }
 
 func and(_ conditions: Bool...) -> Bool { conditions.allSatisfy { $0 } }
 
