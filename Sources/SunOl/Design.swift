@@ -265,7 +265,7 @@ public struct TunOl {
   var Grid_export_yes_no_BESS_strategy: Double = 1
   var Grid_export_yes_no_PB_strategy_outsideharmop: Double = 1
   var Grid_export_yes_no_BESS_strategy_outsideharmop: Double = 1
-  var EDG_elec_cost_factor: Double = 10
+  var EDG_elec_cost_factor: Double = 1
   
   var values: [Double] {
     [
