@@ -128,7 +128,7 @@ class SunOlTests: XCTestCase {
 
       print("Daily10 Case", c)
       model.night(case: j, d10: &d10, hour3: hour3, hour4: hour4)
-      if j == 0 { columns10.forEach { key, value in compareDay(hour4, letter:key, start:value) } }
+      if j == 0 { columns10.forEach { key, value in compareDay(d10, letter:key, start:value) } }
       if j == 2 {
         compareDay(d10, letter: "CX", start: 8030)
         compareDay(d10, letter: "CY", start: 8395)
