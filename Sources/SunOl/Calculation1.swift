@@ -183,18 +183,28 @@ extension TunOl {
 
     /// Min harmonious net elec cons not considering grid import
     let CP = 0
-    // =IF(OR(BV6>0,MIN(CK6+MAX(0,Grid_import_max_ud*Grid_import_yes_no_PB_strategy-MAX(0,CI6-L6))-CM6-MIN(El_boiler_cap_ud,MAX(0,Overall_harmonious_var_heat_min_cons+Overall_heat_fix_cons-CL6)/El_boiler_eff),MAX(0,CL6+MIN(El_boiler_cap_ud,MAX(0,CK6+MAX(0,Grid_import_max_ud*Grid_import_yes_no_PB_strategy-MAX(0,CI6-L6))-CM6-Overall_harmonious_var_min_cons-Overall_fix_cons))*El_boiler_eff-Overall_heat_fix_cons)/Overall_harmonious_var_heat_max_cons*Overall_harmonious_var_max_cons+Overall_fix_cons)<Overall_harmonious_var_min_cons+Overall_fix_cons),0,Overall_harmonious_var_min_cons+Overall_fix_cons)
+    // =IF(OR(BV6>0,MIN(CK6+MAX(0,Grid_import_max_ud*Grid_import_yes_no_PB_strategy-MAX(0,CI6-$L6))-CM6-MIN(El_boiler_cap_ud,MAX(0,Overall_harmonious_var_heat_min_cons+Overall_heat_fix_cons-CL6)/El_boiler_eff),MAX(0,CL6+MIN(El_boiler_cap_ud,MAX(0,CK6+MAX(0,Grid_import_max_ud*Grid_import_yes_no_PB_strategy-MAX(0,CI6-$L6))-CM6-Overall_harmonious_var_min_cons-Overall_fix_cons))*El_boiler_eff-Overall_heat_fix_cons)/Overall_harmonious_var_heat_max_cons*Overall_harmonious_var_max_cons+Overall_fix_cons)<Overall_harmonious_var_min_cons+Overall_fix_cons),0,Overall_harmonious_var_min_cons+Overall_fix_cons)
     for i in 1..<8760 {
-      hour3[CP + i] = iff(or(hour2[BV2 + i] > 0,
-        min(
-          hour2[CK2 + i] + max(.zero, Grid_import_max_ud * Grid_import_yes_no_PB_strategy - hour2[CM2 + i] - max(.zero, hour2[CI2 + i] - hour0[L0 + i])) - min(El_boiler_cap_ud, max(.zero, Overall_harmonious_var_heat_min_cons + Overall_heat_fix_cons - hour2[CL2 + i]) / El_boiler_eff),
-          max(.zero, hour2[CL2 + i] + min(El_boiler_cap_ud, max(.zero, hour2[CK2 + i] + Grid_import_max_ud * Grid_import_yes_no_PB_strategy - hour2[CM2 + i] - Overall_harmonious_var_min_cons - Overall_fix_cons)) * El_boiler_eff - Overall_heat_fix_cons) / Overall_harmonious_var_heat_max_cons * Overall_harmonious_var_max_cons
-            + Overall_fix_cons) < Overall_harmonious_var_min_cons + Overall_fix_cons), .zero, Overall_harmonious_var_min_cons + Overall_fix_cons)
+      hour3[CP + i] = iff(
+        or(
+          hour2[BV2 + i] > 0,
+          min(
+            hour2[CK2 + i] + max(0, Grid_import_max_ud * Grid_import_yes_no_PB_strategy - max(0, hour2[CI2 + i] - hour0[L0 + i])) - hour2[CM2 + i]
+              - min(El_boiler_cap_ud, max(0, Overall_harmonious_var_heat_min_cons + Overall_heat_fix_cons - hour2[CL2 + i]) / El_boiler_eff),
+            max(
+              0,
+              hour2[CL2 + i] + min(
+                El_boiler_cap_ud,
+                max(
+                  0,
+                  hour2[CK2 + i] + max(0, Grid_import_max_ud * Grid_import_yes_no_PB_strategy - max(0, hour2[CI2 + i] - hour0[L0 + i])) - hour2[CM2 + i] - Overall_harmonious_var_min_cons - Overall_fix_cons)
+              ) * El_boiler_eff - Overall_heat_fix_cons) / Overall_harmonious_var_heat_max_cons * Overall_harmonious_var_max_cons + Overall_fix_cons) < Overall_harmonious_var_min_cons + Overall_fix_cons),
+        0, Overall_harmonious_var_min_cons + Overall_fix_cons)
     }
 
     /// Optimized min harmonious net elec cons
     let CQ = 8760
-    // IF(OR(AND(CP6>0,CP5=0,CP7=0),AND(CP6>0,OR(AND(CP4=0,CP5=0,CP8=0),AND(CP4=0,CP7=0,CP8=0)))),0,CP6)
+    // IF(OR(AND(CP6>0,CP5=0,CP7=0),AND(CP6>0,OR(AND(CP4=0,CP5>0,CP7=0),AND(CP5=0,CP7>0,CP8=0)))),0,CP6)
     for i in 1..<8760 {
       hour3[CQ + i] = iff(or(and(hour3[CP + i] > .zero, hour3[CP + i - 1].isZero, hour3[CP + i + 1].isZero), and(hour3[CP + i] > .zero, or(and(hour3[max(i - 2, 0)].isZero, hour3[max(i - 1, 0)] > 0, hour3[CP + i + 1].isZero), and(hour3[max(i - 1, 0)].isZero, hour3[CP + i + 1] > 0, hour3[CP + i + 2].isZero)))), 0, hour3[CP + i])
     }
@@ -395,14 +405,11 @@ extension TunOl {
       let DR = 245280
 
       // MAX(0,1-((MAX(0,DH6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(MethSynt_harmonious_max_perc-MethSynt_harmonious_min_perc)+MethSynt_harmonious_min_perc))*MethSynt_RawMeth_nom_prod_ud
-      let fraction = (max(.zero, hour3[DH + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons) / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
-      hour3[DP + i] = max(.zero, 1 - (fraction * (MethSynt_harmonious_max_perc - MethSynt_harmonious_min_perc) + MethSynt_harmonious_min_perc)) * MethSynt_RawMeth_nom_prod_ud
-
+      hour3[DP + i] =  max(0,1-((max(0,hour3[DH + i]-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(MethSynt_harmonious_max_perc-MethSynt_harmonious_min_perc)+MethSynt_harmonious_min_perc))*MethSynt_RawMeth_nom_prod_ud
       // MAX(0,1-((MAX(0,DH6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(CCU_harmonious_max_perc-CCU_harmonious_min_perc)+CCU_harmonious_min_perc))*CCU_CO2_nom_prod_ud
-      hour3[DQ + i] = max(.zero, 1 - (fraction * (CCU_harmonious_max_perc - CCU_harmonious_min_perc) + CCU_harmonious_min_perc)) * CCU_CO2_nom_prod_ud
-
+      hour3[DQ + i] = max(0,1-((max(0,hour3[DH + i]-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(CCU_harmonious_max_perc-CCU_harmonious_min_perc)+CCU_harmonious_min_perc))*CCU_CO2_nom_prod_ud
       // MAX(0,1-((MAX(0,DH6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(EY_harmonious_max_perc-EY_harmonious_min_perc)+EY_harmonious_min_perc))*EY_Hydrogen_nom_prod
-      hour3[DR + i] = max(.zero, 1 - (fraction * (EY_harmonious_max_perc - EY_harmonious_min_perc) + EY_harmonious_min_perc)) * EY_Hydrogen_nom_prod
+      hour3[DR + i] = max(0,1-((max(0,hour3[DH + i]-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(EY_harmonious_max_perc-EY_harmonious_min_perc)+EY_harmonious_min_perc))*EY_Hydrogen_nom_prod
     }
 
     /// Max BESS charging after max harmonious cons

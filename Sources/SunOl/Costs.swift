@@ -6,8 +6,8 @@ public struct Costs {
   static let Plant_life = 25.0
   static let Rate_of_return = 0.07
   static let FCR = Rate_of_return * (1 + Rate_of_return) ** Plant_life / ((1 + Rate_of_return) ** Plant_life - 1)
-  static let Elec_buy = 20 * 0.091
-  static let Elec_sell = 0.33 * 0.091
+  static let Elec_buy = 2 * 0.098
+  static let Elec_sell = 0.33 * 0.098
 
   public init(_ model: TunOl) {
     let FX_USD = 0.82
@@ -28,7 +28,7 @@ public struct Costs {
     let CO2_storage = (basis: 226.8, exp: 0.9, coeff: 780_000.0 * 0)
     let MethSynt_plant = (basis: 19.0665095748076, exp: 0.7, coeff:  29_268_292.6829268 * 0)
     let RawMeth_storage = (basis: 1.87680000000000E+02, exp: 0.9, coeff: (694146.8625 / FX_USD) * 0)
-    let MethDist_plant = (basis: 1.24750499001996E+01, exp: 1.0, coeff: (2.5-0.36)*(model.EY_Ref_var_net_nom_cons+model.EY_Ref_var_nom_cons)/model.MethDist_Ref_meth_hour_prod*1000000)
+    let MethDist_plant = (basis: 1.24750499001996E+01, exp: 1.0, coeff: 0.36*(model.EY_Ref_var_net_nom_cons+model.EY_Ref_var_nom_cons)/model.MethDist_Ref_meth_hour_prod*1000000)
     let Battery_energy_storage = (basis: 50.0, c1: 5317746.25, coeff: 319064.775)
     let Electrical_boiler = (basis: 3.27, exp: 0.7, coeff: 494000 * 1.45 * 1.2)
     let Substation = (basis: 135.0, exp: 0.7, coeff: 2.4E+06)
