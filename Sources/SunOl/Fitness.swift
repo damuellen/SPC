@@ -27,7 +27,7 @@ public func fitness(values: [Double]) -> [Double] {
   let step = (model.Overall_harmonious_max_perc - model.Overall_harmonious_min_perc) / 4
   var reserve = model.Overall_harmonious_min_perc
 
-  while reserve < model.Overall_harmonious_max_perc {
+  // while reserve < model.Overall_harmonious_max_perc {
     let hour1 = model.hour1(hour0: hour0, reserved: reserve)
     let day0 = model.day0(hour0: hour0)
 
@@ -52,7 +52,7 @@ public func fitness(values: [Double]) -> [Double] {
     }
     flip = false
     reserve += step
-  }
+  // }
 
   var meth_produced_MTPH_sum = Double.zero
   var elec_from_grid_sum = Double.zero
