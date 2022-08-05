@@ -76,7 +76,7 @@ public struct MGOADE {
     }
 
     ClearScreen()
-    print("Population: \(grassHopperPositions.count) ".randomColor(), "Iterations: 0".leftpad(length: 28).randomColor())
+    print("Population: \(grassHopperPositions.count) ".randomColor(), "Iterations: 0".leftpad(28).randomColor())
     print(pretty(values: targetFitness))
     print(pretty(values: targetPosition))
 
@@ -185,7 +185,7 @@ public struct MGOADE {
       }
 
       ClearScreen()
-      print("Population: \(grassHopperPositions.count) ".randomColor(), "Iterations: \(iteration)".leftpad(length: 28).randomColor())
+      print("Population: \(grassHopperPositions.count) ".randomColor(), "Iterations: \(iteration)".leftpad(28).randomColor())
       print(pretty(values: targetFitness))
       print(pretty(values: targetPosition))
 
@@ -218,8 +218,8 @@ func pretty(values: [[Double]]) -> String {
     return values[0].indices
       .map { i in
         """
-        \(labels[i].leftpad(length: 16).text(.red))\(": ".text(.red))\
-        \(String(format: "%.1f", values[0][i]).leftpad(length: 9).text(.yellow))
+        \(labels[i].leftpad(16).text(.red))\(": ".text(.red))\
+        \(String(format: "%.1f", values[0][i]).leftpad(9).text(.yellow))
         """
       }
       .joined(separator: "\n")
@@ -227,10 +227,10 @@ func pretty(values: [[Double]]) -> String {
   return values[0].indices
     .map { i in
       """
-      \(labels[i].leftpad(length: 16).text(.red))\(": ".text(.red))\
-      \(String(format: "%.1f", values[0][i]).leftpad(length: 9).text(.green))\
-      \(String(format: "%.1f", values[1][i]).leftpad(length: 9).text(.yellow))\
-      \(String(format: "%.1f", values[2][i]).leftpad(length: 9).text(.magenta))
+      \(labels[i].leftpad(16).text(.red))\(": ".text(.red))\
+      \(String(format: "%.1f", values[0][i]).leftpad(9).text(.green))\
+      \(String(format: "%.1f", values[1][i]).leftpad(9).text(.yellow))\
+      \(String(format: "%.1f", values[2][i]).leftpad(9).text(.magenta))
       """
     }
     .joined(separator: "\n")
@@ -240,14 +240,14 @@ func pretty(values: [Double]) -> String {
   let label = "LCOM"
   if values.count == 1 {
     return """
-      \(label.leftpad(length: 16).text(.red))\(": ".text(.red))\
-      \(String(format: "%.2f", values[0]).leftpad(length: 9).text(.cyan))
+      \(label.leftpad(16).text(.red))\(": ".text(.red))\
+      \(String(format: "%.2f", values[0]).leftpad(9).text(.cyan))
       """
   }
   return """
-    \(label.leftpad(length: 16).text(.red))\(": ".text(.red))\
-    \(String(format: "%.2f", values[0]).leftpad(length: 9).text(.green))\
-    \(String(format: "%.2f", values[1]).leftpad(length: 9).text(.yellow))\
-    \(String(format: "%.2f", values[2]).leftpad(length: 9).text(.magenta))
+    \(label.leftpad(16).text(.red))\(": ".text(.red))\
+    \(String(format: "%.2f", values[0]).leftpad(9).text(.green))\
+    \(String(format: "%.2f", values[1]).leftpad(9).text(.yellow))\
+    \(String(format: "%.2f", values[2]).leftpad(9).text(.magenta))
     """
 }
