@@ -53,15 +53,23 @@ public struct MGOADE {
 
     // Initialize the population of grasshoppers
     var grassHopperPositions = bounds.randomValues(count: n)
-    var grassHopperFitness = Vector(n)
+    var grassHopperFitness = Vector(n, .infinity)
     var grassHopperTrialPositions = grassHopperPositions
     let groups = grassHopperFitness.indices.split(in: group ? 3 : 1)
 
     // Calculate the fitness of initial grasshoppers
-
-    DispatchQueue.concurrentPerform(iterations: grassHopperPositions.count) { i in if source.isCancelled { return }
-      let result = fitness(grassHopperPositions[i])
-      grassHopperFitness[i] = result[0]
+    while grassHopperFitness.contains(.infinity) {
+      let invalid = grassHopperFitness.indices.filter { grassHopperFitness[$0].isInfinite }
+      // Replace invalid grasshoppers in the population
+      for (i, position) in zip(invalid, bounds.randomValues(count: invalid.count)) {
+        grassHopperPositions[i] = position
+      }
+      DispatchQueue.concurrentPerform(iterations: invalid.count) { i in let i = invalid[i]
+        if source.isCancelled { return }
+        let result = fitness(grassHopperPositions[i])
+        grassHopperFitness[i] = result[0]
+      }
+      if source.isCancelled { break }
     }
 
     for g in groups.indices {
@@ -188,8 +196,6 @@ public struct MGOADE {
       print("Population: \(grassHopperPositions.count) ".randomColor(), "Iterations: \(iteration)".leftpad(28).randomColor())
       print(pretty(values: targetFitness))
       print(pretty(values: targetPosition))
-
-      if (targetFitness.reduce(0, +) / 3) - targetFitness.min()! < 0.001 { break }
     }
     targetResults.removeLast((maxIterations - iteration) * n)
     return targetResults
