@@ -64,18 +64,18 @@ struct Command: ParsableCommand {
         BESS_cap_ud: 0...0,
         CCU_CO2_nom_prod_ud: 1000...1000,
         CO2_storage_cap_ud: 100_000...100_000,
-        CSP_loop_nr_ud: 20...300,
-        El_boiler_cap_ud: 0...30,
-        EY_var_net_nom_cons_ud: 200...200,
+        CSP_loop_nr_ud: 10...400,
+        El_boiler_cap_ud: 0...50,
+        EY_var_net_nom_cons_ud: 180...180,
         Grid_export_max_ud: 0...0,
         Grid_import_max_ud: 0...0,
         Hydrogen_storage_cap_ud: 0...0, 
-        Heater_cap_ud: 0...600, 
+        Heater_cap_ud: 0...700, 
         MethDist_Meth_nom_prod_ud: 5...40,
         // MethSynt_RawMeth_nom_prod_ud: 10...60,
-        PB_nom_gross_cap_ud: 10...200, 
-        PV_AC_cap_ud: 100...1500, 
-        PV_DC_cap_ud: 100...1600, 
+        PB_nom_gross_cap_ud: 10...400, 
+        PV_AC_cap_ud: 200...1500, 
+        PV_DC_cap_ud: 220...1600, 
         RawMeth_storage_cap_ud: 100_000...100_000, 
         TES_thermal_cap_ud: 500...20_000)
       let data = try? JSONEncoder().encode(parameter)
@@ -96,9 +96,9 @@ struct Command: ParsableCommand {
 
     let optimizer = MGOADE(group: !noGroups, n: n ?? 90, maxIterations: iterations ?? 30, bounds: parameter.ranges)
     let now = Date()
-    let valid = optimizer(SunOl.fitness).filter(\.first!.isFinite)
+    let results = optimizer(SunOl.fitness)
     print("Elapsed seconds:", -now.timeIntervalSinceNow)
-    let name = writeExcel(results: valid)
+    let name = writeExcel(results: results)
     print(name)
     // if !source.isCancelled {
     //   var best = Array(sorted[0][6...])
@@ -159,7 +159,7 @@ func writeExcel(results: [[Double]]) -> String {
   }
   let labels = [
     "LCOM", "LCOM2", "CAPEX", "OPEX", "Methanol", "Import", "Export", "Hours", "CSP_loop_nr", "TES_thermal_cap_ud", "PB_nom_gross_cap", "PV_AC_cap", "PV_DC_cap", "EY_var_net_nom_cons", "Hydrogen_storage_cap", "Heater_cap", "CCU_CO2_nom_prod", "CO2_storage_cap", "RawMeth_storage_cap",
-    "MethDist_Meth_nom_prod", "El_boiler_cap", "BESS_cap", "Grid_export_max", "Grid_import_max",
+    "MethDist_Meth_nom_prod", "El_boiler_cap", "BESS_cap", "Grid_export_max", "Grid_import_max", "Index"
   ]
 
   lowest = (lowest / 50).rounded(.down) * 50
