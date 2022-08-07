@@ -278,7 +278,7 @@ public struct TunOl {
 
   init?(_ parameter: [Double]) {
     let parameter = parameter.map { $0 < 1 ? .zero : $0 }
-    if parameter[3] > parameter[4] {  return nil }
+    if parameter[3] > parameter[4] * 0.99 {  return nil }
     self.CSP_loop_nr_ud = parameter[0]
     self.TES_thermal_cap_ud = parameter[1]
     self.PB_nom_gross_cap_ud = parameter[2]
