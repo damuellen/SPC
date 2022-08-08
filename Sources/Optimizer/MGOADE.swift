@@ -93,19 +93,16 @@ public struct MGOADE {
     print(pretty(values: targetFitness))
     print(pretty(values: targetPosition))
 
-    var pos = 0
-    var iteration = 0
-
-    var S_i = Vector(bounds.count)
-    var r_ij_vec = Vector(bounds.count)
-    var s_ij = Vector(bounds.count)
-    var X_new = Vector(bounds.count)
+    var pos = 0, iteration = 0
+    let dims = bounds.count
+    var r_ij_vec = Vector(dims), s_ij = Vector(dims), X_new = Vector(dims)
 
     while iteration < maxIterations && !source.isCancelled {
       let c1 = cMax - (Double(iteration) * ((cMax - cMin) / Double(maxIterations)))  // Eq. (2.8) in the paper
       let c2 = Double.random(in: cMin...cMax)
       for g in groups.indices {
         for i in groups[g].indices {
+          var S_i = Vector(dims)
           for j in groups[g].indices {
             if i != j {
               // Calculate the distance between two grasshoppers
