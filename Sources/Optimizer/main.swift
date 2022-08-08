@@ -66,7 +66,7 @@ struct Command: ParsableCommand {
         CO2_storage_cap_ud: 100_000...100_000,
         CSP_loop_nr_ud: 10...400,
         El_boiler_cap_ud: 0...50,
-        EY_var_net_nom_cons_ud: 180...180,
+        EY_var_net_nom_cons_ud: 200...200,
         Grid_export_max_ud: 0...0,
         Grid_import_max_ud: 0...0,
         Hydrogen_storage_cap_ud: 0...0, 
@@ -165,12 +165,17 @@ func writeExcel(results: [[Double]]) -> String {
   lowest = (lowest / 50).rounded(.down) * 50
   ws.table(range: [0, 0, r, labels.endIndex - 1], header: labels)
   for (column, name) in labels.enumerated() {
-    if column < 7 { continue }
-    let chart = wb.addChart(type: .scatter).set(y_axis: lowest...lowest+500)
+    if column < 8 { continue }
+    if column > 20 { break }
+    let chart = wb.addChart(type: .scatter).set(y_axis: lowest...lowest+1000)
     chart.addSeries().set(marker: 5, size: 4)
     .values(sheet: ws, range: [1, 1, r, 1])
+    .categories(sheet: ws, range: [1, column, r, column]) 
+    chart.addSeries().set(marker: 6, size: 4)
+    .values(sheet: ws, range: [1, 0, r, 0])
     .categories(sheet: ws, range: [1, column, r, column])
     chart.remove(legends: 0)
+    chart.remove(legends: 1)
     wb.addChartsheet(name: name).set(chart: chart)
   }
   wb.close()
