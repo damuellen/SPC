@@ -22,7 +22,7 @@ public struct MGOADE {
   let bounds: [ClosedRange<Double>]
 
   let cMax = 1.0
-  let cMin = 0.004
+  let cMin = 0.0004
   let cr = 0.4
   let f = 0.9
 
@@ -51,30 +51,23 @@ public struct MGOADE {
   }
 
   public func callAsFunction(_ fitness: FitnessFunction) -> [[Double]] {
-    var targetResults = Matrix(n * maxIterations, bounds.count + 8)
+    var targetResults = Matrix(n * (maxIterations+1), bounds.count + 8)
     var targetPosition = Matrix(group ? 3 : 1, bounds.count)
     var targetFitness = Vector(group ? 3 : 1, .infinity)
     let EPSILON = 1E-14
 
     // Initialize the population of grasshoppers
-    var grassHopperPositions = bounds.randomValues(count: n)
+    var grassHopperPositions = scattered(count: n, bounds: bounds)
     var grassHopperFitness = Vector(n, .infinity)
     var grassHopperTrialPositions = grassHopperPositions
     let groups = grassHopperFitness.indices.split(in: group ? 3 : 1)
 
     // Calculate the fitness of initial grasshoppers
-    while grassHopperFitness.contains(.infinity) {
-      let invalid = grassHopperFitness.indices.filter { grassHopperFitness[$0].isInfinite }
-      // Replace invalid grasshoppers in the population
-      for (i, position) in zip(invalid, bounds.randomValues(count: invalid.count)) {
-        grassHopperPositions[i] = position
-      }
-      DispatchQueue.concurrentPerform(iterations: invalid.count) { i in let i = invalid[i]
-        if source.isCancelled { return }
-        let result = fitness(grassHopperPositions[i])
-        grassHopperFitness[i] = result[0]
-      }
-      if source.isCancelled { break }
+    DispatchQueue.concurrentPerform(iterations: grassHopperPositions.count) { i in
+      if source.isCancelled { return }
+      let result = fitness(grassHopperPositions[i])
+      targetResults[i] = result + [Double(i)]
+      grassHopperFitness[i] = result[0]
     }
 
     for g in groups.indices {
@@ -93,11 +86,11 @@ public struct MGOADE {
     print(pretty(values: targetFitness))
     print(pretty(values: targetPosition))
 
-    var pos = 0, iteration = 0
     let dims = bounds.count
     var r_ij_vec = Vector(dims), s_ij = Vector(dims), X_new = Vector(dims)
-
+    var iteration = 0
     while iteration < maxIterations && !source.isCancelled {
+      iteration += 1
       let c1 = cMax - (Double(iteration) * ((cMax - cMin) / Double(maxIterations)))  // Eq. (2.8) in the paper
       let c2 = Double.random(in: cMin...cMax)
       for g in groups.indices {
@@ -124,16 +117,15 @@ public struct MGOADE {
           grassHopperPositions[i] = X_new
         }
       }
-
+      let start = iteration * grassHopperPositions.count
       DispatchQueue.concurrentPerform(iterations: grassHopperPositions.count) { i in if source.isCancelled { return }
         for j in grassHopperPositions[i].indices { grassHopperPositions[i][j].clamp(to: bounds[j]) }
         let result = fitness(grassHopperPositions[i])
-        targetResults[pos + i] = result + [Double(iteration * n + i)]
+        targetResults[start + i] = result + [Double(iteration * n + i)]
         grassHopperFitness[i] = result[0]
       }
       if source.isCancelled { break }
-
-      // Multi-group strategy
+    // Multi-group strategy
       if group {
         for g in groups.indices {
           let o = groups.indices.filter { $0 != g }
@@ -143,7 +135,8 @@ public struct MGOADE {
           for i in groups[0].indices {
             let i0 = g0[i], i1 = g1[i], i2 = g2[i]
             for j in grassHopperPositions[i].indices where .random(in: 0...1) > cr {
-              grassHopperTrialPositions[i0][j] = targetPosition[g][j] + f * (.random(in: 0...1) + 0.0001) * (grassHopperPositions[i1][j] - grassHopperPositions[i2][j])
+              grassHopperTrialPositions[i0][j] = targetPosition[g][j] 
+              grassHopperTrialPositions[i0][j] += f * .random(in: 1E-4...1) * (grassHopperPositions[i1][j] - grassHopperPositions[i2][j])
               grassHopperTrialPositions[i0][j].clamp(to: bounds[j])
             }
           }
@@ -154,13 +147,11 @@ public struct MGOADE {
           if result[0] < grassHopperFitness[i] {
             grassHopperFitness[i] = result[0]
             grassHopperPositions[i] = grassHopperTrialPositions[i]
-            targetResults[pos + i] = result + [Double(iteration * n + i)]
+            targetResults[start + i] = result + [Double(iteration * n + i)]
           }
         }
       }
       if source.isCancelled { break }
-      iteration += 1
-      pos += grassHopperPositions.count
       for g in groups.indices {
         // Update the target
         for i in groups[g].indices {
@@ -235,4 +226,54 @@ func pretty(values: [Double]) -> String {
     \(String(format: "%.2f", values[1]).leftpad(9).text(.yellow))\
     \(String(format: "%.2f", values[2]).leftpad(9).text(.magenta))
     """
+}
+
+func eratosthenesSieve(to n: Int) -> [Int] {
+  var composite = Array(repeating: false, count: n + 1) // The sieve
+  var primes: [Int] = []
+  let d = Double(n)
+  let upperBound = Int(d / (log(d) - 4))
+  primes.reserveCapacity(upperBound)
+
+  let squareRootN = Int(Double(n).squareRoot())
+  var p = 2
+  while p <= squareRootN {
+    if !composite[p] {
+      primes.append(p)
+      for q in stride(from: p * p, through: n, by: p) {
+        composite[q] = true
+      }
+    }
+    p += 1
+  }
+  while p <= n {
+    if !composite[p] {
+      primes.append(p)
+    }
+    p += 1
+  }
+  return primes
+}
+
+func scattered(count n: Int, bounds b: [ClosedRange<Double>]) -> [[Double]] {
+  let variable: [Int] = b.indices.filter { b[$0].lowerBound < b[$0].upperBound }
+  let N: Int = variable.count
+  let primes = eratosthenesSieve(to: 100 * N)
+  let q: Int = primes.first(where: { $0 >= (2 * N + 3) })!
+  let pos = (1...N).map(Double.init).map { 2 * cos((2 * .pi * $0) / Double(q)) }
+  var M: [[Double]] = (1...n).map { [Double](repeating: Double($0), count: N) }
+  M = zip(M, [[Double]](repeating: pos, count: n)).map { zip($0, $1).map(*) }
+  M = M.map { $0.map { $0 - ($0 / 1).rounded(.down) } }
+  M = M.map { p -> [Double] in var d = 0
+    return b.indices.map { i -> Double in var value: Double
+      if variable.contains(i) {
+        value = b[i].lowerBound + (p[d] * (b[i].upperBound - b[i].lowerBound))
+        d += 1
+      } else {
+        value = b[i].lowerBound
+      }
+      return value
+    }
+  }
+  return M
 }
