@@ -66,7 +66,7 @@ struct Command: ParsableCommand {
         CO2_storage_cap_ud: 100_000...100_000,
         CSP_loop_nr_ud: 10...400,
         El_boiler_cap_ud: 0...50,
-        EY_var_net_nom_cons_ud: 200...200,
+        EY_var_net_nom_cons_ud: 180...180,
         Grid_export_max_ud: 0...0,
         Grid_import_max_ud: 0...0,
         Hydrogen_storage_cap_ud: 0...0, 
@@ -94,7 +94,7 @@ struct Command: ParsableCommand {
     TunOl.Reference_PV_plant_power_at_inverter_inlet_DC = [0] + csv["pv"]
     TunOl.Reference_PV_MV_power_at_transformer_outlet = [0] + csv["out"]
 
-    let optimizer = MGOADE(group: !noGroups, n: n ?? 90, maxIterations: iterations ?? 30, bounds: parameter.ranges)
+    let optimizer = MGOADE(group: !noGroups, n: n ?? 30, maxIterations: iterations ?? 30, bounds: parameter.ranges)
     let now = Date()
     let results = optimizer(SunOl.fitness)
     print("Elapsed seconds:", -now.timeIntervalSinceNow)
@@ -150,32 +150,24 @@ func writeExcel(results: [[Double]]) -> String {
   let wb = Workbook(name: name)
   let ws = wb.addWorksheet()
   var r = 0
-  var lowest = Double.infinity
+
   results.reversed().forEach { row in r += 1
-    if lowest > row[1] {
-      lowest = row[1]
-    }
     ws.write(row, row: r)
+    if row[0].isInfinite {
+      ws.write(["NA"], row: r)
+    }
   }
   let labels = [
     "LCOM", "LCOM2", "CAPEX", "OPEX", "Methanol", "Import", "Export", "Hours", "CSP_loop_nr", "TES_thermal_cap_ud", "PB_nom_gross_cap", "PV_AC_cap", "PV_DC_cap", "EY_var_net_nom_cons", "Hydrogen_storage_cap", "Heater_cap", "CCU_CO2_nom_prod", "CO2_storage_cap", "RawMeth_storage_cap",
     "MethDist_Meth_nom_prod", "El_boiler_cap", "BESS_cap", "Grid_export_max", "Grid_import_max", "Index"
   ]
-
-  lowest = (lowest / 50).rounded(.down) * 50
+  let charting = [8, 9, 10, 11, 12, 15, 19, 20]
   ws.table(range: [0, 0, r, labels.endIndex - 1], header: labels)
-  for (column, name) in labels.enumerated() {
-    if column < 8 { continue }
-    if column > 20 { break }
-    let chart = wb.addChart(type: .scatter).set(y_axis: lowest...lowest+1000)
-    chart.addSeries().set(marker: 5, size: 4)
-    .values(sheet: ws, range: [1, 1, r, 1])
-    .categories(sheet: ws, range: [1, column, r, column]) 
-    chart.addSeries().set(marker: 6, size: 4)
-    .values(sheet: ws, range: [1, 0, r, 0])
-    .categories(sheet: ws, range: [1, column, r, column])
-    chart.remove(legends: 0)
-    chart.remove(legends: 1)
+  for (column, name) in labels.enumerated() where charting.contains(column) {
+    let chart = wb.addChart(type: .scatter).set(y_axis: 1400...2400)
+    chart.addSeries().set(marker: 6, size: 4).values(sheet: ws, range: [1, 0, r, 0]).categories(sheet: ws, range: [1, column, r, column])
+    chart.addSeries().set(marker: 5, size: 4).values(sheet: ws, range: [1, 1, r, 1]).categories(sheet: ws, range: [1, column, r, column])
+    chart.remove(legends: 0, 1)
     wb.addChartsheet(name: name).set(chart: chart)
   }
   wb.close()

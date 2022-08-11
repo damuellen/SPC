@@ -22,7 +22,7 @@ public struct MGOADE {
   let bounds: [ClosedRange<Double>]
 
   let cMax = 1.0
-  let cMin = 0.0004
+  let cMin = 0.000004
   let cr = 0.4
   let f = 0.9
 
@@ -70,14 +70,16 @@ public struct MGOADE {
       grassHopperFitness[i] = result[0]
     }
 
-    for g in groups.indices {
-      // Find the best grasshopper per group (target) in the first population
-      for i in groups[g].indices {
-        if grassHopperFitness[i] < targetFitness[g] {
+    // Find the best grasshopper per group (target) in the first population
+    for i in grassHopperFitness.indices {
+      if grassHopperFitness[i] < targetFitness[0] {
+        for g in groups.indices {
           targetFitness[g] = grassHopperFitness[i]
           targetPosition[g] = grassHopperPositions[i]
         }
       }
+    }
+    for g in groups.indices {
       convergenceCurves[g].append([Double(0), (targetFitness[g] * 100).rounded() / 100])
     }
 
@@ -91,8 +93,11 @@ public struct MGOADE {
     var iteration = 0
     while iteration < maxIterations && !source.isCancelled {
       iteration += 1
-      let c1 = cMax - (Double(iteration) * ((cMax - cMin) / Double(maxIterations)))  // Eq. (2.8) in the paper
-      let c2 = Double.random(in: cMin...cMax)
+      let c = [
+        cMax - (Double(iteration) * ((cMax - cMin) / Double(maxIterations))),  // Eq. (2.8) in the paper
+        cMin * pow(cMax / cMin, 1 / (1 + 2.5 * Double(iteration) / Double(maxIterations))),
+        cMax - (cMax - cMin) * pow(Double(iteration) / Double(maxIterations), 4)
+      ]
       for g in groups.indices {
         for i in groups[g].indices {
           var S_i = Vector(dims)
@@ -106,27 +111,27 @@ public struct MGOADE {
               let xj_xi = 2 + distance.remainder(dividingBy: 2)  // |xjd - xid| in Eq. (2.7)
               for p in r_ij_vec.indices {
                 // The first part inside the big bracket in Eq. (2.7)
-                s_ij[p] = ((bounds[p].upperBound - bounds[p].lowerBound) * c2 / 2) * S_func(r: xj_xi) * r_ij_vec[p]
+                s_ij[p] = ((bounds[p].upperBound - bounds[p].lowerBound) * c[g] / 2) * S_func(r: xj_xi) * r_ij_vec[p]
               }
               for p in S_i.indices { S_i[p] += s_ij[p] }
             }
           }
 
-          for p in S_i.indices { X_new[p] = c1 * S_i[p] + targetPosition[g][p] } // Eq. (2.7) in the paper
+          for p in S_i.indices { X_new[p] = c[g] * S_i[p] + targetPosition[g][p] } // Eq. (2.7) in the paper
           // Update the target
           grassHopperPositions[i] = X_new
         }
       }
-      let start = iteration * grassHopperPositions.count
+      let cursor = iteration * grassHopperPositions.count
       DispatchQueue.concurrentPerform(iterations: grassHopperPositions.count) { i in if source.isCancelled { return }
         for j in grassHopperPositions[i].indices { grassHopperPositions[i][j].clamp(to: bounds[j]) }
         let result = fitness(grassHopperPositions[i])
-        targetResults[start + i] = result + [Double(iteration * n + i)]
+        targetResults[cursor + i] = result + [Double(iteration * n + i)]
         grassHopperFitness[i] = result[0]
       }
       if source.isCancelled { break }
-    // Multi-group strategy
-      if group {
+
+      if group { // Multi-group strategy
         for g in groups.indices {
           let o = groups.indices.filter { $0 != g }
           let g0 = groups[g].indices
@@ -147,7 +152,7 @@ public struct MGOADE {
           if result[0] < grassHopperFitness[i] {
             grassHopperFitness[i] = result[0]
             grassHopperPositions[i] = grassHopperTrialPositions[i]
-            targetResults[start + i] = result + [Double(iteration * n + i)]
+            targetResults[cursor + i] = result + [Double(iteration * n + i)]
           }
         }
       }
