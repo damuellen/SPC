@@ -25,6 +25,8 @@ public struct MGOADE {
   let cMin = 0.000004
   let cr = 0.4
   let f = 0.9
+  let sMax = 6.0
+  let sMin = 0.0
 
   func S_func(r: Double) -> Double {
     let f = 0.5
@@ -44,7 +46,6 @@ public struct MGOADE {
     }
     return sqrt(distance)
   }
-
   public init(group: Bool, n: Int, maxIterations: Int, bounds: [ClosedRange<Double>]) {
     self.group = group
     if group {
@@ -61,12 +62,13 @@ public struct MGOADE {
     var targetResults = Matrix(n * (maxIterations+1), bounds.count + 8)
     var targetPosition = Matrix(group ? 3 : 1, bounds.count)
     var targetFitness = Vector(group ? 3 : 1, .infinity)
+    var worstPosition = Matrix(group ? 3 : 1, bounds.count)
+    var worstFitness = Vector(group ? 3 : 1, .zero)
     let EPSILON = 1E-14
 
     // Initialize the population of grasshoppers
     var grassHopperPositions = scattered(count: n, bounds: bounds)
     var grassHopperFitness = Vector(n, .infinity)
-    var grassHopperTrialPositions = grassHopperPositions
     let groups = grassHopperFitness.indices.split(in: group ? 3 : 1)
 
     // Calculate the fitness of initial grasshoppers
@@ -100,13 +102,19 @@ public struct MGOADE {
     var iteration = 0
     while iteration < maxIterations && !source.isCancelled {
       let c = [
-        cMax - (Double(iteration) * ((cMax - cMin) / Double(maxIterations))),  // Eq. (2.8) in the paper
         cMin * pow(cMax / cMin, 1 / (1 + 2.5 * Double(iteration) / Double(maxIterations))),
+        cMax - (Double(iteration) * ((cMax - cMin) / Double(maxIterations))),  // Eq. (2.8) in the paper
         cMax - (cMax - cMin) * pow(Double(iteration) / Double(maxIterations), 4)
       ]
       iteration += 1
+      if iteration < 3 * maxIterations / 4 { 
+        let randomGrassHoppers = bounds.randomValues(count: n / 3)
+        let worstGrassHoppersIndices = grassHopperFitness.indices.sorted(by: { grassHopperFitness[$0] > grassHopperFitness[$1] }).prefix(n / 3)
+        for (w, r) in zip(worstGrassHoppersIndices, randomGrassHoppers)  { grassHopperPositions[w] = r }
+      }
       for g in groups.indices {
         for i in groups[g].indices {
+          // let s = ((grassHopperFitness[i] - worstFitness[g]) /  (targetFitness[i] - worstFitness[g])) * (sMax - sMin) + sMin
           var S_i = Vector(dims)
           for j in groups[g].indices {
             if i != j {
@@ -139,8 +147,17 @@ public struct MGOADE {
         grassHopperFitness[i] = result[0]
       }
       if source.isCancelled { break }
+     // for i in groups[0].indices {
+     //   for p in grassHopperPositions[i].indices {
+     //     let std = ((bounds[p].upperBound - bounds[p].lowerBound) / 10)
+     //     grassHopperPositions[i][p] += ((Double(maxIterations) - Double(iteration)) / Double(maxIterations)) * (std - 0.001) + std
+     //   }
+     // }
 
-
+      let indices = grassHopperFitness.indices.sorted() { grassHopperFitness[$0] < grassHopperFitness[$1] }
+      grassHopperFitness = indices.map { grassHopperFitness[$0] }
+      grassHopperPositions = indices.map { grassHopperPositions[$0] }
+      if source.isCancelled { break }
       for g in groups.indices {
         // Update the target
         for i in groups[g].indices {
@@ -265,4 +282,16 @@ func scattered(count n: Int, bounds b: [ClosedRange<Double>]) -> [[Double]] {
     }
   }
   return M
+}
+
+struct SimpleRandom: RandomNumberGenerator {
+  var seed: UInt64 = 0 
+  mutating func next() -> UInt64 {
+    seed ^= seed << 13
+    seed ^= seed << 17
+    seed ^= seed << 5
+    seed %= 2 << 31
+    seed /= 7
+    return seed
+  }
 }
