@@ -32,9 +32,16 @@ public struct MGOADE {
     return f * exp(-r / l) - exp(-r)  // Eq. (2.3) in the paper
   }
 
-  func euclideanDistance(a: [Double], b: [Double]) -> Double {
+  func normalized(_ value: Double, _ range: ClosedRange<Double>) -> Double {
+    guard range.lowerBound < range.upperBound else { return .zero }
+    return (value - range.lowerBound) / (range.upperBound - range.lowerBound)
+  }
+
+  func euclideanDistance(x: [Double], y: [Double], range: [ClosedRange<Double>]) -> Double {
     var distance = 0.0
-    for i in a.indices { distance += pow((a[i] - b[i]), 2) }
+    for i in range.indices { 
+      distance += pow(normalized(x[i], range[i]) - normalized(y[i], range[i]), 2)
+    }
     return sqrt(distance)
   }
 
@@ -92,21 +99,23 @@ public struct MGOADE {
     var r_ij_vec = Vector(dims), s_ij = Vector(dims), X_new = Vector(dims)
     var iteration = 0
     while iteration < maxIterations && !source.isCancelled {
-      iteration += 1
       let c = [
         cMax - (Double(iteration) * ((cMax - cMin) / Double(maxIterations))),  // Eq. (2.8) in the paper
         cMin * pow(cMax / cMin, 1 / (1 + 2.5 * Double(iteration) / Double(maxIterations))),
         cMax - (cMax - cMin) * pow(Double(iteration) / Double(maxIterations), 4)
       ]
+      iteration += 1
       for g in groups.indices {
         for i in groups[g].indices {
           var S_i = Vector(dims)
           for j in groups[g].indices {
             if i != j {
-              // Calculate the distance between two grasshoppers
-              let distance = euclideanDistance(a: grassHopperPositions[i], b: grassHopperPositions[j])
+              // Calculate the normalized distance between two grasshoppers
+              let distance = euclideanDistance(x: grassHopperPositions[i], y: grassHopperPositions[j], range: bounds)
               for p in r_ij_vec.indices {
-                r_ij_vec[p] = (grassHopperPositions[j][p] - grassHopperPositions[i][p]) / (distance + EPSILON)  // xj-xi/dij in Eq. (2.7)
+                let xj = normalized(grassHopperPositions[j][p], bounds[p])
+                let xi = normalized(grassHopperPositions[i][p], bounds[p])
+                r_ij_vec[p] = (xj - xi) / (distance + EPSILON)  // xj-xi/dij in Eq. (2.7)
               }
               let xj_xi = 2 + distance.remainder(dividingBy: 2)  // |xjd - xid| in Eq. (2.7)
               for p in r_ij_vec.indices {
@@ -131,32 +140,7 @@ public struct MGOADE {
       }
       if source.isCancelled { break }
 
-      if group { // Multi-group strategy
-        for g in groups.indices {
-          let o = groups.indices.filter { $0 != g }
-          let g0 = groups[g].indices
-          let g1 = groups[o[0]].indices.shuffled()
-          let g2 = groups[o[1]].indices.shuffled()
-          for i in groups[0].indices {
-            let i0 = g0[i], i1 = g1[i], i2 = g2[i]
-            for j in grassHopperPositions[i].indices where .random(in: 0...1) > cr {
-              grassHopperTrialPositions[i0][j] = targetPosition[g][j] 
-              grassHopperTrialPositions[i0][j] += f * .random(in: 1E-4...1) * (grassHopperPositions[i1][j] - grassHopperPositions[i2][j])
-              grassHopperTrialPositions[i0][j].clamp(to: bounds[j])
-            }
-          }
-        }
 
-        DispatchQueue.concurrentPerform(iterations: grassHopperTrialPositions.count) { i in if source.isCancelled { return }
-          let result = fitness(grassHopperTrialPositions[i])
-          if result[0] < grassHopperFitness[i] {
-            grassHopperFitness[i] = result[0]
-            grassHopperPositions[i] = grassHopperTrialPositions[i]
-            targetResults[cursor + i] = result + [Double(iteration * n + i)]
-          }
-        }
-      }
-      if source.isCancelled { break }
       for g in groups.indices {
         // Update the target
         for i in groups[g].indices {
