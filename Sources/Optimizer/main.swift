@@ -45,7 +45,7 @@ struct Command: ParsableCommand {
     #if os(Windows)
     if let file = file { path = file } else { path = FileDialog() ?? "input2.txt" }
     #else
-    path = file ?? "input2.txt"
+    path = file ?? "input3.txt"
     #endif
     guard let csv = CSVReader(atPath: path) else {
       #if os(Windows)
@@ -151,7 +151,7 @@ func writeExcel(results: [[Double]]) -> String {
   let ws = wb.addWorksheet()
   var r = 0
 
-  results.reversed().forEach { row in r += 1
+  results.filter { $0[1] < 2400 }.reversed().forEach { row in r += 1
     ws.write(row, row: r)
     if row[0].isInfinite {
       ws.write(["NA"], row: r)

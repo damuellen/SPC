@@ -102,7 +102,7 @@ public struct TunOl {
   let HL_Coeff: [Double]
   let Inv_eff_Ref_approx_handover: Double  // Inv_Eff!C22
   let LL_Coeff: [Double]
-  let MethDist_cap_min_perc: Double = 0.5
+  let MethDist_cap_min_perc: Double = 0.1
 
   let MethDist_fix_cons: Double
   let MethDist_HydrogenO_min_prod: Double
@@ -227,8 +227,8 @@ public struct TunOl {
   let PB_warm_start_duration: Int = 6
   let PB_warm_start_energyperc: Double = 0.4
   var PB_warm_start_heat_req: Double = 0
-  let PV_Ref_AC_cap: Double = 510  //max(Calculation!G5,G8764)
-  let PV_Ref_DC_cap: Double = 683.4
+
+  let PV_Ref_DC_cap: Double = 800.0
   let Ratio_CSP_vs_Heater: Double
   let SF_heat_exch_approach_temp: Double = 7
   let TES_aux_cons_perc: Double = 0.01
@@ -303,18 +303,20 @@ public struct TunOl {
     self.Grid_import_yes_no_PB_strategy = TunOl.Grid_import_yes_no_PB_strategy
 
     let maximum = TunOl.Reference_PV_MV_power_at_transformer_outlet.max() ?? .zero
-    let Inverter_power_fraction = TunOl.Reference_PV_MV_power_at_transformer_outlet.map { max(.zero, $0 / maximum) }
-    let Inverter_eff = Inverter_power_fraction.indices.map { iff(TunOl.Reference_PV_MV_power_at_transformer_outlet[$0] < maximum, max(TunOl.Reference_PV_MV_power_at_transformer_outlet[$0], .zero) / TunOl.Reference_PV_plant_power_at_inverter_inlet_DC[$0], .zero) }
-    let inverter = zip(Inverter_power_fraction, Inverter_eff).filter { $0.0 > 0 && $0.0 < 1 }.sorted(by: { $0.0 < $1.0 })
+    let Inverter_power_fraction = TunOl.Reference_PV_MV_power_at_transformer_outlet.map { max(.zero, $0 / 600.5) }
+    let Inverter_eff = Inverter_power_fraction.indices.map { 
+      iff(TunOl.Reference_PV_MV_power_at_transformer_outlet[$0] <= maximum, max(TunOl.Reference_PV_MV_power_at_transformer_outlet[$0], .zero) / TunOl.Reference_PV_plant_power_at_inverter_inlet_DC[$0], .zero)
+    }
+    let inverter = zip(Inverter_power_fraction, Inverter_eff).filter { $0.0 > 0.01 }.sorted(by: { $0.0 < $1.0 })
     let chunks = inverter.chunked { Int($0.0 * 100) == Int($1.0 * 100) }
-    let eff1 = chunks.map { bin in bin.reduce(0.0) { $0 + $1.1 } / Double(bin.count) }
-    let s = Array(stride(from: 0.01, through: 1, by: 0.01))
-    let eff2 = zip(s, eff1).map { ac * $0.0 / $0.1 / dc }
+    let eff = chunks.map { bin in bin.reduce(0.0) { $0 + $1.1 } / Double(bin.count) }
+    let s = Array(stride(from: 0.01, through: Inverter_power_fraction.max()!, by: 0.01))
+    let load = zip(s, eff).map { ac * $0.0 / $0.1 / dc }
 
-    self.LL_Coeff = Polynomial.fit(x: Array(eff2[..<20]), y: Array(eff1[..<20]), order: 7)!.coefficients
-    self.HL_Coeff = Polynomial.fit(x: Array(eff2[15...].dropLast(2)), y: Array(eff1[15...].dropLast(2)), order: 3)!.coefficients
+    self.LL_Coeff = Polynomial.fit(x: Array(load[..<20]), y: Array(eff[..<20]), order: 7)!.coefficients
+    self.HL_Coeff = Polynomial.fit(x: Array(load[16...].dropLast(2)), y: Array(eff[16...].dropLast(2)), order: 3)!.coefficients
 
-    self.Inv_eff_Ref_approx_handover = self.PV_AC_cap_ud * s[17] / eff1[17] / self.PV_DC_cap_ud
+    self.Inv_eff_Ref_approx_handover = self.PV_AC_cap_ud * s[17] / eff[17] / self.PV_DC_cap_ud
 
     let PB_grs_el_cap_min_perc = PB_Ref_25p_gross_cap_max_aux_heat / PB_Ref_nom_gross_cap
     self.CSP_Cold_HTF_T = TES_cold_tank_T + SF_heat_exch_approach_temp

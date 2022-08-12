@@ -32,9 +32,9 @@ extension TunOl {
       // F6*PV_DC_cap_ud/PV_Ref_DC_cap
       hour0[K + i] = Reference_PV_plant_power_at_inverter_inlet_DC[i] * PV_DC_cap_ud / PV_Ref_DC_cap
       // MIN(PV_AC_cap_ud,IF(K6/PV_DC_cap_ud>Inv_eff_Ref_approx_handover,K6*POLY(K6/PV_DC_cap_ud,HL_Coeff),IF(K6/PV_DC_cap_ud>0,K6*POLY(K6/PV_DC_cap_ud,LL_Coeff),0)))
-      hour0[L + i] = min(PV_AC_cap_ud, iff(hour0[K + i] / PV_DC_cap_ud > Inv_eff_Ref_approx_handover, hour0[K + i] * POLY(hour0[K + i] / PV_DC_cap_ud, HL_Coeff), iff(hour0[K + i] / PV_DC_cap_ud > .zero, hour0[K + i] * POLY(hour0[K + i] / PV_DC_cap_ud, LL_Coeff), .zero)))
+      hour0[L + i] = iff(hour0[K + i] / PV_DC_cap_ud > Inv_eff_Ref_approx_handover, hour0[K + i] * POLY(hour0[K + i] / PV_DC_cap_ud, HL_Coeff), iff(hour0[K + i] / PV_DC_cap_ud > .zero, hour0[K + i] * POLY(hour0[K + i] / PV_DC_cap_ud, LL_Coeff), .zero))
       // MAX(0,-G6/PV_Ref_AC_cap*PV_AC_cap_ud)
-      let m = max(.zero, -Reference_PV_MV_power_at_transformer_outlet[i] / PV_Ref_AC_cap * PV_AC_cap_ud)
+      let m = max(.zero, -Reference_PV_MV_power_at_transformer_outlet[i] / 600.5 * PV_AC_cap_ud)
       hour0[M + i] = m
       // IF(J6>0,J6*CSP_var_aux_nom_perc,CSP_nonsolar_aux_cons)+M6+PB_stby_aux_cons
       hour0[O + i] = iff(hour0[J + i] > .zero, hour0[J + i] * CSP_var_aux_nom_perc, CSP_nonsolar_aux_cons) + hour0[M + i] + PB_stby_aux_cons
