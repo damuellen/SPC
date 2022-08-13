@@ -13,7 +13,6 @@ import Foundation
 @_exported import Utilities
 
 public struct IGOAIW {
-  let group: Bool
   let n: Int
   let maxIterations: Int
   let bounds: [ClosedRange<Double>]
@@ -42,23 +41,19 @@ public struct IGOAIW {
     }
     return sqrt(distance)
   }
-  public init(group: Bool, n: Int, maxIterations: Int, bounds: [ClosedRange<Double>]) {
-    self.group = group
-    if group {
-      let split = n.quotientAndRemainder(dividingBy: 3)
-      self.n = split.remainder > 0 ? (split.quotient + 1) * 3 : split.quotient * 3
-    } else {
-      self.n = n
-    }
+  
+  public init(n: Int, maxIterations: Int, bounds: [ClosedRange<Double>]) {
+    let split = n.quotientAndRemainder(dividingBy: 3)
+    self.n = split.remainder > 0 ? (split.quotient + 1) * 3 : split.quotient * 3
     self.maxIterations = maxIterations
     self.bounds = bounds
   }
 
   public func callAsFunction(_ fitness: FitnessFunction) -> [[Double]] {
     var targetResults = Matrix(n * (maxIterations+1), bounds.count + 8)
-    var targetPosition = Matrix(group ? 3 : 1, bounds.count)
-    var targetFitness = Vector(group ? 3 : 1, .infinity)
-    var worstFitness = Vector(group ? 3 : 1, .zero)
+    var targetPosition = Matrix(3, bounds.count)
+    var targetFitness = Vector(3, .infinity)
+    var worstFitness = Vector(3, .zero)
     let EPSILON = 1E-14
 
     // Initialize the population of grasshoppers
@@ -66,7 +61,7 @@ public struct IGOAIW {
     var grassHopperFitness = Vector(n, .infinity)
     var weedPositions = Matrix(Int(sMax), bounds.count)
     var weedFitness = Vector(Int(sMax), .infinity)
-    let groups = grassHopperFitness.indices.split(in: group ? 3 : 1)
+    let groups = grassHopperFitness.indices.split(in: 3)
 
     // Calculate the fitness of initial grasshoppers
     DispatchQueue.concurrentPerform(iterations: grassHopperPositions.count) { i in

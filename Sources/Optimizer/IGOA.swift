@@ -15,8 +15,7 @@ import Foundation
 public var convergenceCurves = [[[Double]]](repeating: [[Double]](), count: 3)
 public typealias FitnessFunction = ([Double]) -> [Double]
 
-public struct MGOADE {
-  let group: Bool
+public struct IGOA {
   let n: Int
   let maxIterations: Int
   let bounds: [ClosedRange<Double>]
@@ -43,28 +42,24 @@ public struct MGOADE {
     }
     return sqrt(distance)
   }
-  public init(group: Bool, n: Int, maxIterations: Int, bounds: [ClosedRange<Double>]) {
-    self.group = group
-    if group {
-      let split = n.quotientAndRemainder(dividingBy: 3)
-      self.n = split.remainder > 0 ? (split.quotient + 1) * 3 : split.quotient * 3
-    } else {
-      self.n = n
-    }
+  
+  public init(n: Int, maxIterations: Int, bounds: [ClosedRange<Double>]) {
+    let split = n.quotientAndRemainder(dividingBy: 3)
+    self.n = split.remainder > 0 ? (split.quotient + 1) * 3 : split.quotient * 3
     self.maxIterations = maxIterations
     self.bounds = bounds
   }
 
   public func callAsFunction(_ fitness: FitnessFunction) -> [[Double]] {
     var targetResults = Matrix(n * (maxIterations+1), bounds.count + 8)
-    var targetPosition = Matrix(group ? 3 : 1, bounds.count)
-    var targetFitness = Vector(group ? 3 : 1, .infinity)
+    var targetPosition = Matrix(3, bounds.count)
+    var targetFitness = Vector(3, .infinity)
     let EPSILON = 1E-14
 
     // Initialize the population of grasshoppers
     var grassHopperPositions = scattered(count: n, bounds: bounds)
     var grassHopperFitness = Vector(n, .infinity)
-    let groups = grassHopperFitness.indices.split(in: group ? 3 : 1)
+    let groups = grassHopperFitness.indices.split(in: 3)
 
     // Calculate the fitness of initial grasshoppers
     DispatchQueue.concurrentPerform(iterations: grassHopperPositions.count) { i in
