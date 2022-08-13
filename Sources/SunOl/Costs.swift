@@ -41,7 +41,7 @@ public struct Costs {
     // if (auxLoops <= 0 || factor <= 0) {
     //   auxLoops = 0
     // }
-    self.Assembly_hall_cost = Assembly_hall.c1 * Double(model.CSP_loop_nr_ud) ** 1 + Assembly_hall.c0
+    self.Assembly_hall_cost = Assembly_hall.c1 * Double(model.CSP_loop_nr_ud.rounded(.up)) ** 1 + Assembly_hall.c0
     // let CSP_SF_cost_dedicated_to_ICPH =
     //   Solar_field.coeff * ((model.CSP_loop_nr_ud - auxLoops) / Solar_field.basis) ** Solar_field.exp + Solar_field.c1 * Solar_field.f
     //   * (model.CSP_loop_nr_ud - auxLoops)
@@ -51,7 +51,7 @@ public struct Costs {
     // let CSP_SF_cost_dedicated_to_Hydrogen = Solar_field.coeff * ((model.CSP_loop_nr_ud - auxLoops * aux_Heat_ratio) / Solar_field.basis) ** Solar_field.exp + Solar_field.c1 * Solar_field.f
     //   * (model.CSP_loop_nr_ud - auxLoops * aux_Heat_ratio)
 
-    self.CSP_SF_cost_dedicated_to_Methanol = Solar_field.coeff * (model.CSP_loop_nr_ud / Solar_field.basis) ** Solar_field.exp + Solar_field.c1 * Solar_field.f * model.CSP_loop_nr_ud
+    self.CSP_SF_cost_dedicated_to_Methanol = Solar_field.coeff * (model.CSP_loop_nr_ud.rounded(.up) / Solar_field.basis) ** Solar_field.exp + Solar_field.c1 * Solar_field.f * model.CSP_loop_nr_ud.rounded(.up)
     // let CSP_SF_cost_dedicated_to_aux_heat = AdditionalCostPerLoop * auxLoops
 
     self.PV_DC_cost = model.PV_DC_cap_ud * PV_DC_part.coeff + 0.0
