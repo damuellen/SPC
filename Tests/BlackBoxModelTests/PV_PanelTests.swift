@@ -6,11 +6,11 @@ import XCTest
 class PVPanelTests: XCTestCase {
   func testsPanel() {
     let panel = PV.Panel()
-    let S = { evaluate(in: 50...1050, numberOfSamples: 100, f: $0) }
+    let S = ((50...1050) / 100).numbers
     let P = { panel(radiation: $0, ambient: .init(celsius: $1), windSpeed: 0) }
-    let p = { t in S { P($0, t).power }}
-    let I = { t in S { P($0, t).current }}
-    let V = { t in S { P($0, t).voltage * 26}}
+    let p = { t in S.map { x in [x, P(x, t).power] }}
+    let I = { t in S.map { x in [x, P(x, t).current] }}
+    let V = { t in S.map { x in [x, P(x, t).voltage * 26] }}
     let plotting = true
     if plotting {
       let plot = Gnuplot(
@@ -33,15 +33,17 @@ class PVPanelTests: XCTestCase {
       _ = try? plot(.png("panel2.png"))
     
       let plot2 = Gnuplot(
-        xy1s: evaluate(in: 0...20, numberOfSamples: 150, f: lambertW),
+        xy1s: ((0...20) / 150).numbers.map { x in [x, lambertW(x)] },
         titles: "lambertW"
       )
       _ = try? plot2(.png("lambertW.png"))
     }
-    let S2 = { evaluate(in: 0...1000, numberOfSamples: 20000, f: $0) }
-    let S3 = { evaluate(in: 0.8...1.1, numberOfSamples: 100, f: $0)  }
-    let i = S2 { panel.currentFrom(voltage: $0, radiation: 50, cell_T: .init(celsius: 30)) }
-    let v = S3 { panel.voltageFrom(current: $0, radiation: 50, cell_T: .init(celsius: 30)) }
+    let i = ((0...1000) / 20000).numbers.map { x in
+      [x, panel.currentFrom(voltage: x, radiation: 50, cell_T: .init(celsius: 30))]
+    }
+    let v = ((0.8...1.1) / 100).numbers.map { x in
+      [x, panel.voltageFrom(current: x, radiation: 50, cell_T: .init(celsius: 30))]
+    }
     if plotting {
       let plot3 = Gnuplot(
         xy1s: v,
@@ -57,9 +59,4 @@ class PVPanelTests: XCTestCase {
       _ = try? plot4(.pngLarge("panel4.png"))
     }
   }
-}
-
-func evaluate(in range: ClosedRange<Double>, numberOfSamples: Int = 100, f: (Double)->Double) -> [[Double]] {
-  let step = (range.upperBound - range.lowerBound) / Double(numberOfSamples)
-  return stride(from: range.lowerBound, through: range.upperBound, by: step).map{[$0,f($0)]}
 }

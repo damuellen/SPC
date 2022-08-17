@@ -38,19 +38,14 @@ class InverterTests: XCTestCase {
       zip(inverter.dc_power[2...], inverter.minVoltage[2...]).map { [$0, $1] })
     let l = inverter.voltageLevels
     let r = inverter.dc_power[2]...inverter.dc_power.last!
+    let p = (r / 30000).numbers
     do {
       let v1 = 925.0
-      let xy1 = evaluate(inDomain: r, step: 30000) {
-        inverter(power: $0, voltage: v1)
-      }
+      let xy1 = p.map { [$0, inverter(power: $0, voltage: v1)] }
       let v2 = 980.0
-      let xy2 = evaluate(inDomain: r, step: 30000) {
-        inverter(power: $0, voltage: v2)
-      }
+      let xy2 = p.map { [$0, inverter(power: $0, voltage: v2)] }
       let v3 = 950.0
-      let xy3 = evaluate(inDomain: r, step: 30000) {
-        inverter(power: $0, voltage: v3)
-      }
+      let xy3 = p.map { [$0, inverter(power: $0, voltage: v3)] }
       let plotter = Gnuplot(
         xy1s: nom, min, xy1, xy2, xy3, titles: "\(l[1])", "\(l[2])", "\(v1)",
         "\(v2)", "\(v3)")
@@ -63,17 +58,11 @@ class InverterTests: XCTestCase {
     }
     do {
       let v1 = 1010.0
-      let xy1 = evaluate(inDomain: r, step: 30000) {
-        inverter(power: $0, voltage: v1)
-      }
+      let xy1 = p.map { [$0, inverter(power: $0, voltage: v1)] }
       let v2 = 1180.0
-      let xy2 = evaluate(inDomain: r, step: 30000) {
-        inverter(power: $0, voltage: v2)
-      }
+      let xy2 = p.map { [$0, inverter(power: $0, voltage: v2)] }
       let v3 = 1095.0
-      let xy3 = evaluate(inDomain: r, step: 30000) {
-        inverter(power: $0, voltage: v3)
-      }
+      let xy3 = p.map { [$0, inverter(power: $0, voltage: v3)] }
       let plotter = Gnuplot(
         xy1s: max, nom, xy1, xy2, xy3, titles: "\(l[0])", "\(l[1])", "\(v1)",
         "\(v2)", "\(v3)")
