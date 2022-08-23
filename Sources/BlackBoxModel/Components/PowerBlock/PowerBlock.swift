@@ -153,28 +153,25 @@ public struct PowerBlock: Parameterizable, HeatTransfer {
     return (heatOut, heatToTES)
   }
 
-  mutating func temperatureLoss(wrt solarField: SolarField, _ storage: Storage)
+  mutating func temperatureLoss(wrt components: HeatTransfer...)
   {
     if Design.hasGasTurbine {
       temperatureFromInlet()
     } else {
       let tlpb = 0.0
       // 0.38 * (TpowerBlock.status - meteo.temperature) / 100 * (30 / Design.layout.powerBlock) ** 0.5 // 0.38
+      let massFlowRate = max(0.1, components.map(\.massFlow.rate).reduce(0, +))
+      let inletTemperature = components.map { component in 
+        component.massFlow.rate * component.outlet
+      }.reduce(0, +) / massFlowRate
 
-      let mf = max(0.1, (solarField.massFlow + storage.massFlow).rate)
-      let tin = (solarField.massFlow.rate * solarField.outlet
-        + storage.massFlow.rate * storage.outlet) / mf
-      if tin > 0 {
-        temperature.inlet.kelvin = tin
-      }
+      if inletTemperature > 0 { temperature.inlet.kelvin = inletTemperature }
 
       let sec = Double(period)
       let HTFmass = SolarField.parameter.HTFmass
-      let tout = (massFlow.rate * sec * inlet + outlet
-        * (HTFmass - mf * sec)) / HTFmass - tlpb
-      if tout > 0 {
-        temperature.outlet.kelvin = tout
-      }
+      let outletTemperature = (massFlow.rate * sec * inlet + outlet
+        * (HTFmass - massFlowRate * sec)) / HTFmass - tlpb
+      if outletTemperature > 0 { temperature.outlet.kelvin = outletTemperature }
     }
   }
 }
