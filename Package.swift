@@ -28,7 +28,6 @@ let dependencies: [Package.Dependency] = [
 ]
 
 let platformTargets: [Target] = [
-  .target(name: "Config", swiftSettings: swift),
   .target(name: "DateExtensions", swiftSettings: swift), .target(name: "CPikchr", cSettings: [c]),
   .target(name: "CSPA", cSettings: [c]), .target(name: "CSOLPOS", cSettings: [c]),
   .target(
@@ -45,7 +44,7 @@ let platformTargets: [Target] = [
   .target(
     name: "BlackBoxModel",
     dependencies: [
-      "Config", "Meteo", "SolarPosition", "Utilities",
+      "Meteo", "SolarPosition", "Utilities",
       .product(name: "SQLite", package: "SQLite.swift"),
       .product(name: "xlsxwriter", package: "xlsxwriter.swift"),
     ],
@@ -73,7 +72,7 @@ let platformTargets: [Target] = [
   .target(
     name: "SolarPerformanceCalc",
     dependencies: [
-      "Config", "BlackBoxModel", "Utilities",
+      "BlackBoxModel", "Utilities",
       .product(name: "ArgumentParser", package: "swift-argument-parser"),
       .product(name: "xlsxwriter", package: "xlsxwriter.swift"),
     ],
@@ -107,7 +106,7 @@ let platformTargets: [Target] = [
   .testTarget(name: "PinchPointTests", dependencies: ["PinchPoint"]),
   .testTarget(
     name: "BlackBoxModelTests",
-    dependencies: ["Config", "Meteo", "SolarPosition", "BlackBoxModel"]
+    dependencies: ["Meteo", "SolarPosition", "BlackBoxModel"]
   ),
 ]
 
