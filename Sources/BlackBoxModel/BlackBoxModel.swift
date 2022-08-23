@@ -95,6 +95,7 @@ public enum BlackBoxModel {
     }
 
     🌤.setInterval(Simulation.time.steps)
+    // Check if the simulation time period is adjusted. 
     if let start = Simulation.time.firstDateOfOperation,
       let end = Simulation.time.lastDateOfOperation
     {
@@ -236,24 +237,22 @@ public enum BlackBoxModel {
       }
     }
 
-    //precondition(photovoltaic.isEmpty, "All values must be consumed.")
-
     backgroundQueue.sync {}  // wait for background queue
     return log.finish()
   }
 
   private static func period(with interval: Interval) -> DateSequence
   {
-    let dateGenerator: DateSequence
+    let times: DateSequence
 
     if let start = Simulation.time.firstDateOfOperation,
       let end = Simulation.time.lastDateOfOperation
     {
       let range = DateInterval(start: start, end: end).align(with: interval)
-      dateGenerator = DateSequence(range: range, interval: interval)
+      times = DateSequence(range: range, interval: interval)
     } else {
-      dateGenerator = DateSequence(year: yearOfSimulation, interval: interval)
+      times = DateSequence(year: yearOfSimulation, interval: interval)
     }
-    return dateGenerator
+    return times
   }
 }
