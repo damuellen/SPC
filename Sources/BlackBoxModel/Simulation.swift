@@ -37,7 +37,7 @@ public enum Simulation {
     asAvailableCapacity: 1
   )
 
-  public static var time = Time(
+  public static var time = Year(
     isLeapYear: false,
     firstDateOfOperation: nil,
     lastDateOfOperation: nil,

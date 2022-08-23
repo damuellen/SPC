@@ -14,15 +14,17 @@ import Foundation
 
 public typealias Interval = DateSequence.Interval
 
-public struct Time {
-  var isLeapYear = false
-  public var firstDateOfOperation: Date?
-  public var lastDateOfOperation: Date?
-  let holidays: [Date]
-  public var steps: Interval
+extension Simulation {
+  public struct Year: Codable {
+    var isLeapYear = false
+    public var firstDateOfOperation: Date?
+    public var lastDateOfOperation: Date?
+    let holidays: [Date]
+    public var steps: Interval
+  }
 }
 
-extension Time: TextConfigInitializable {
+extension Simulation.Year: TextConfigInitializable {
   public init(file: TextConfigFile) throws {
     let ln: (Int) throws -> Double = { try file.double(line: $0) }
 
@@ -67,36 +69,3 @@ extension Time: TextConfigInitializable {
   }
 }
 
-extension Time: Codable {
-  enum CodingKeys: String, CodingKey {
-    case firstDateOfOperation
-    case lastDateOfOperation
-    case holidays
-    case steps
-  }
-
-  public init(from decoder: Decoder) throws {
-    let values = try decoder.container(keyedBy: CodingKeys.self)
-    firstDateOfOperation = try values.decodeIfPresent(
-      Date.self, forKey: .firstDateOfOperation
-    )
-    lastDateOfOperation = try values.decodeIfPresent(
-      Date.self, forKey: .lastDateOfOperation
-    )
-    holidays = try values.decode(Array<Date>.self, forKey: .holidays)
-    let steps = try values.decode(Int.self, forKey: .steps)
-    self.steps = DateSequence.Interval(rawValue: steps)!
-  }
-
-  public func encode(to encoder: Encoder) throws {
-    var container = encoder.container(keyedBy: CodingKeys.self)
-    try container.encodeIfPresent(
-      firstDateOfOperation, forKey: .firstDateOfOperation
-    )
-    try container.encodeIfPresent(
-      lastDateOfOperation, forKey: .lastDateOfOperation
-    )
-    try container.encode(holidays, forKey: .holidays)
-    try container.encode(steps.rawValue, forKey: .steps)
-  }
-}
