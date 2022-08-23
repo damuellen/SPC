@@ -10,7 +10,7 @@
 
 import Foundation
 import Meteo
-import DateGenerator
+import DateExtensions
 
 public struct Recording: CustomStringConvertible, Comparable {
 

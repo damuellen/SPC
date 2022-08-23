@@ -1,4 +1,4 @@
-import DateGenerator
+import DateExtensions
 import Meteo
 import Utilities
 import XCTest
@@ -53,7 +53,7 @@ class CollectorTests: XCTestCase {
     var collector = Plant.initialState.collector
     var cosTheta = [Double]()
     var efficiency = [Double]()
-    for date in DateGenerator(year: 2017, interval: .fiveMinutes) {
+    for date in DateSequence(year: 2017, interval: .fiveMinutes) {
       if let pos = sun[date] {
         collector.tracking(sun: pos)
         collector.efficiency(ws: 1)
@@ -90,7 +90,7 @@ class CollectorTests: XCTestCase {
       }
 
     var out = ""
-    let dates = DateGenerator(year: 2017, interval: .hour).map { $0 }
+    let dates = DateSequence(year: 2017, interval: .hour).map { $0 }
     for x in zip(zip(dates, meteo), values1.indices) { 
       let a = x.0.1
       let dni = a.dni

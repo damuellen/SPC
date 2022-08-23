@@ -1,4 +1,4 @@
-import DateGenerator
+import DateExtensions
 import Foundation
 import Meteo
 import SolarPosition

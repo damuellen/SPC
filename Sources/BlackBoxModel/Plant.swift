@@ -8,7 +8,7 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
-import DateGenerator
+import DateExtensions
 import Physics
 
 /// A namespace for the main routines of the simulation.

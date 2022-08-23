@@ -8,7 +8,7 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
-import DateGenerator
+import DateExtensions
 import Foundation
 import Meteo
 #if canImport(SQLite)
@@ -38,7 +38,7 @@ public final class Historian {
     case database
     #endif
     case inMemory, none
-    case custom(interval: DateGenerator.Interval)
+    case custom(interval: DateSequence.Interval)
     case csv
     #if canImport(Cxlsxwriter)
     case excel

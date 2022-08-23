@@ -9,7 +9,7 @@
 //
 
 import Foundation
-import DateGenerator
+import DateExtensions
 import Physics
 
 /// This struct contains the state as well as the functions for mapping the boiler

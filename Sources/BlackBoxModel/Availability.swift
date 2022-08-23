@@ -9,7 +9,7 @@
 //
 
 import Config
-import DateGenerator
+import DateExtensions
 import Utilities
 
 struct Availability: Codable {

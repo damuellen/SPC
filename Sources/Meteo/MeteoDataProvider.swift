@@ -8,7 +8,7 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
-import DateGenerator
+import DateExtensions
 import Foundation
 import SolarPosition
 
@@ -22,7 +22,7 @@ public class MeteoDataProvider: Sequence {
   let hourFraction: Double
 
   private let valuesPerDay: Int
-  private(set) var frequence: DateGenerator.Interval
+  private(set) var frequence: DateSequence.Interval
   private(set) var dateInterval: DateInterval?
 
   public init(
@@ -69,7 +69,7 @@ public class MeteoDataProvider: Sequence {
     data.reduce(into: location.data) { $0 += $1.data }
   }
 
-  public func setInterval(_ frequence: DateGenerator.Interval) {
+  public func setInterval(_ frequence: DateSequence.Interval) {
     self.frequence = frequence
   }
 
@@ -163,7 +163,7 @@ public class MeteoDataProvider: Sequence {
 
     var rng = LinearCongruentialGenerator()
 
-    for d in DateGenerator(year: sun.year, interval: sun.frequence) {
+    for d in DateSequence(year: sun.year, interval: sun.frequence) {
       step += 1
       if step == steps {
         day += 1

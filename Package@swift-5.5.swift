@@ -44,17 +44,17 @@ let dependencies: [Package.Dependency] = [
 
 let platformTargets: [Target] = [
   .target(name: "Config", swiftSettings: swift),
-  .target(name: "DateGenerator", swiftSettings: swift), .target(name: "CPikchr", cSettings: [c]),
+  .target(name: "DateExtensions", swiftSettings: swift), .target(name: "CPikchr", cSettings: [c]),
   .target(name: "CSPA", cSettings: [c]), .target(name: "CSOLPOS", cSettings: [c]),
   .target(
     name: "SolarPosition",
-    dependencies: ["Utilities", "DateGenerator", "CSOLPOS", "CSPA"],
+    dependencies: ["Utilities", "DateExtensions", "CSOLPOS", "CSPA"],
     swiftSettings: swift
   ), .target(name: "PinchPoint", dependencies: ["CPikchr", "Utilities"], swiftSettings: swift),
   .target(name: "ThermalStorage", dependencies: ["Utilities"], swiftSettings: swift),
   .target(
     name: "Meteo",
-    dependencies: ["DateGenerator", "SolarPosition", "Utilities"],
+    dependencies: ["DateExtensions", "SolarPosition", "Utilities"],
     swiftSettings: swift
   ),
   .target(
@@ -115,7 +115,7 @@ let platformTargets: [Target] = [
   ),
   .testTarget(
     name: "MeteoTests",
-    dependencies: ["Utilities", "DateGenerator", "SolarPosition", "Meteo"]
+    dependencies: ["Utilities", "DateExtensions", "SolarPosition", "Meteo"]
   ),
   .testTarget(name: "SunOlTests", dependencies: ["SunOl"]),
   .testTarget(name: "ThermalStorageTests", dependencies: ["ThermalStorage"]),

@@ -9,10 +9,10 @@
 //
 
 import Config
-import DateGenerator
+import DateExtensions
 import Foundation
 
-public typealias Interval = DateGenerator.Interval
+public typealias Interval = DateSequence.Interval
 
 public struct Time {
   var isLeapYear = false
@@ -52,7 +52,7 @@ extension Time: TextConfigInitializable {
     }
 
     self.steps =
-      try DateGenerator.Interval(
+      try DateSequence.Interval(
         rawValue: Int(ln(22))
       ) ?? .fiveMinutes
 
@@ -85,7 +85,7 @@ extension Time: Codable {
     )
     holidays = try values.decode(Array<Date>.self, forKey: .holidays)
     let steps = try values.decode(Int.self, forKey: .steps)
-    self.steps = DateGenerator.Interval(rawValue: steps)!
+    self.steps = DateSequence.Interval(rawValue: steps)!
   }
 
   public func encode(to encoder: Encoder) throws {

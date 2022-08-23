@@ -15,7 +15,7 @@ import Dispatch
 import Foundation
 import Meteo
 import Helpers
-import DateGenerator
+import DateExtensions
 #if os(Windows)
 system("chcp 65001")
 #endif

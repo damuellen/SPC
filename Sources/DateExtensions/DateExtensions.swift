@@ -31,7 +31,7 @@ extension Date {
 
 extension DateInterval {
 
-  public func align(with valuesPerHour: DateGenerator.Interval) -> DateInterval {
+  public func align(with valuesPerHour: DateSequence.Interval) -> DateInterval {
     var start = self.start.getComponents()
     var end = self.end.getComponents()
 

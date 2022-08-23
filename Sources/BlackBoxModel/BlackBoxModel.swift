@@ -9,7 +9,7 @@
 //
 
 import Config
-import DateGenerator
+import DateExtensions
 import Utilities
 import Foundation
 import Meteo
@@ -114,7 +114,7 @@ public enum BlackBoxModel {
 
     var conditions = [(Temperature, Double, Double)]()
 
-    for (meteo, date) in zip(🌤, timeline(.hour)) {
+    for (meteo, date) in zip(🌤, period(with: .hour)) {
       DateTime.setCurrent(date: date)
       let dt = DateTime.current
       let (temperature, wind) = 
@@ -141,7 +141,7 @@ public enum BlackBoxModel {
     }
     // Repeat the values to fill the hour
     var iter = photovoltaic.repeated(times: Simulation.time.steps.rawValue).makeIterator()
-    for (meteo, date) in zip(🌤,timeline(Simulation.time.steps)) {
+    for (meteo, date) in zip(🌤, period(with: Simulation.time.steps)) {
       // Set the date for the calculation step
       DateTime.setCurrent(date: date)
       let dt = DateTime.current
@@ -242,17 +242,17 @@ public enum BlackBoxModel {
     return log.finish()
   }
 
-  private static func timeline(_ interval: Interval) -> DateGenerator
+  private static func period(with interval: Interval) -> DateSequence
   {
-    let dateGenerator: DateGenerator
+    let dateGenerator: DateSequence
 
     if let start = Simulation.time.firstDateOfOperation,
       let end = Simulation.time.lastDateOfOperation
     {
       let range = DateInterval(start: start, end: end).align(with: interval)
-      dateGenerator = DateGenerator(range: range, interval: interval)
+      dateGenerator = DateSequence(range: range, interval: interval)
     } else {
-      dateGenerator = DateGenerator(year: yearOfSimulation, interval: interval)
+      dateGenerator = DateSequence(year: yearOfSimulation, interval: interval)
     }
     return dateGenerator
   }
