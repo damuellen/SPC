@@ -9,6 +9,7 @@
 //
 
 import Foundation
+import Physics
 
 public enum TextConfig {
   /// List of path extension for needed config files.
@@ -35,5 +36,45 @@ public enum TextConfig {
       print("\(error)")
       return []
     }
+  }
+
+  static func loadConfigurations(atPath path: String) throws {
+    let urls = TextConfig.fileSearch(atPath: path)
+    var memory = [FileExtension]()
+    var htf: HeatTransferFluid?
+    for url in urls {
+      guard let e = FileExtension(rawValue: url.pathExtension.uppercased()),
+        !memory.contains(e), let configFile = TextConfigFile(url: url)
+      else { continue }
+      switch e {
+      case .FOS: break
+      case .OPR: break
+      case .DEM: break
+      case .TAR: break // Simulation.tariff = try .init(file: configFile)
+      case .SIM: Simulation.parameter = try .init(file: configFile)
+      case .INI: Simulation.initialValues = try .init(file: configFile)
+      case .TIM: Simulation.time = try .init(file: configFile)
+      case .DES: break
+      case .AVL: Availability.current = try .init(file: configFile)
+      case .LAY: Design.layout = try .init(file: configFile)
+      case .SF: SolarField.parameterize(try .init(file: configFile))
+      case .COL: Collector.parameterize(try .init(file: configFile))
+      case .STO: Storage.parameterize(try .init(file: configFile))
+      case .HR: Heater.parameterize(try .init(file: configFile))
+      case .HTF: htf = try HeatTransferFluid(file: configFile)
+      case .HX: HeatExchanger.parameterize(try .init(file: configFile))
+      case .BO: Boiler.parameterize(try .init(file: configFile))
+      case .WHR: WasteHeatRecovery.parameterize(try .init(file: configFile))
+      case .GT: GasTurbine.parameterize(try .init(file: configFile))
+      case .TB: SteamTurbine.parameterize(try .init(file: configFile))
+      case .PB: PowerBlock.parameterize(try .init(file: configFile))
+      case .PFC:
+        break
+      case .STF: break
+      //  salt = try HeatTransferFluid(file: configFile)
+      }
+      memory.append(e)
+    }
+    if let _ = htf {}// { SolarField.parameter.HTF = htf }
   }
 }

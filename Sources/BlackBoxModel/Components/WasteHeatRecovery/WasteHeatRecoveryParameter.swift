@@ -8,7 +8,6 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
-import Config
 import Utilities
 
 extension WasteHeatRecovery {

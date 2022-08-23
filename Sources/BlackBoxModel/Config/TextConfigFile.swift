@@ -10,6 +10,8 @@
 
 import Foundation
 
+public enum ConfigFormat { case json, text }
+
 public protocol TextConfigInitializable {
   init(file: TextConfigFile) throws
 }

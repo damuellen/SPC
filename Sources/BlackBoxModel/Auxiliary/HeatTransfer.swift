@@ -31,6 +31,22 @@ extension HeatTransferFluid {
   }
 }
 
+extension HeatTransferFluid {
+  public init(file: TextConfigFile) throws {
+    let ln: (Int) throws -> Double = { try file.double(line: $0) }
+    try self.init(
+      name: file.name, 
+      freezeTemperature: ln(10), 
+      heatCapacity: [ln(13), ln(16)], 
+      dens: [ln(19), ln(22), ln(25)],
+      visco: [ln(28), ln(31), ln(34)], 
+      thermCon: [ln(37), ln(40), ln(43)], 
+      maxTemperature: ln(46), 
+      h_T: [], T_h: []
+    )
+  }
+}
+
 protocol HeatTransfer: CustomStringConvertible {
   var name: String { get }
   var massFlow: MassFlow { get set }
