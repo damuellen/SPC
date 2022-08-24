@@ -221,14 +221,14 @@ public enum BlackBoxModel {
         // Calculate the operating state of the salt
         status.storage.calculate(thermal: &plant.heatFlow, status.powerBlock)
         // Calculate the heat loss of the tanks
-        status.storage.heatlosses()
+        status.storage.heatlosses(for: Simulation.time.steps.interval)
       }
 
       plant.electricity.consumption()
 
       let performance = plant.performance
 #if PRINT
-      // print("\u{1B}[H\u{1B}[2J")
+      ClearScreen()
       print(decorated(dt.description), meteo, status, performance)
 #endif
       backgroundQueue.async { [status] in

@@ -153,7 +153,7 @@ public struct PowerBlock: Parameterizable, HeatTransfer {
     return (heatOut, heatToTES)
   }
 
-  mutating func temperatureLoss(wrt components: HeatTransfer...)
+  mutating func temperatureLoss(for period: Double, wrt components: HeatTransfer...)
   {
     if Design.hasGasTurbine {
       temperatureFromInlet()
@@ -167,10 +167,9 @@ public struct PowerBlock: Parameterizable, HeatTransfer {
 
       if inletTemperature > 0 { temperature.inlet.kelvin = inletTemperature }
 
-      let sec = Double(period)
       let HTFmass = SolarField.parameter.HTFmass
-      let outletTemperature = (massFlow.rate * sec * inlet + outlet
-        * (HTFmass - massFlowRate * sec)) / HTFmass - tlpb
+      let outletTemperature = (massFlow.rate * period * inlet + outlet
+        * (HTFmass - massFlowRate * period)) / HTFmass - tlpb
       if outletTemperature > 0 { temperature.outlet.kelvin = outletTemperature }
     }
   }

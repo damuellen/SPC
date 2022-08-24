@@ -292,7 +292,7 @@ extension Storage {
   }
 
   /// Calculates the temperature drop of the tanks with the help of the heat losses
-  mutating func heatlosses() {
+  mutating func heatlosses(for period: Double) {
 
     func tankTemperature(_ specificHeat: Double) -> Temperature {
       let hcap = Storage.parameter.HTF.properties.heatCapacity
@@ -313,7 +313,7 @@ extension Storage {
         * (temperatureTank.cold.kelvin)
         / (parameter.designTemperature.cold.kelvin - 27)
       // enthalpy after cooling down
-      cold -= coldTankHeatLoss * Double(period) / salt.cold.kg
+      cold -= coldTankHeatLoss * period / salt.cold.kg
       // temp after cool down
       temperatureTank.cold = tankTemperature(cold)
     }

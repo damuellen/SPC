@@ -324,7 +324,10 @@ public struct Plant {
         || status.powerBlock.massFlow == .zero // status.storage.operationMode.isFreezeProtection
       {
         if status.heater.operationMode.isFreezeProtection == false {
-          status.powerBlock.temperatureLoss(wrt: status.solarField, status.storage)
+          status.powerBlock.temperatureLoss(
+            for: Simulation.time.steps.interval,
+            wrt: status.solarField, status.storage
+          )
         }
         heatFlow.production = .zero
         heatFlow.heatExchanger = .zero

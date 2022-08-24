@@ -11,7 +11,6 @@
 import Meteo
 import Utilities
 
-let period = 300
 /**
  Heat Collecting Element
  
