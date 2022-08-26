@@ -24,15 +24,23 @@ extension TunOl {
     for i in 1..<8760 {
       hour0[i] = Reference_PV_plant_power_at_inverter_inlet_DC[i]
       // MAX(0,G6/MAX(G5:G8763))
-      hour0[H + i] = max(.zero, Reference_PV_MV_power_at_transformer_outlet[i] / maximum)
+      hour0[H + i] = max(.zero, Reference_PV_MV_power_at_transformer_outlet[i] / 600.5)
       // IFERROR(IF(G6<MAX(G5:G8763),MAX(G6,0)/F6,0),0)
       hour0[I + i] = ifFinite(iff(Reference_PV_MV_power_at_transformer_outlet[i] < maximum, max(Reference_PV_MV_power_at_transformer_outlet[i], .zero) / Reference_PV_plant_power_at_inverter_inlet_DC[i], .zero), .zero)
       // E6*CSP_loop_nr_ud
       hour0[J + i] = Q_Sol_MW_thLoop[i] * CSP_loop_nr_ud
       // F6*PV_DC_cap_ud/PV_Ref_DC_cap
       hour0[K + i] = Reference_PV_plant_power_at_inverter_inlet_DC[i] * PV_DC_cap_ud / PV_Ref_DC_cap
-      // MIN(PV_AC_cap_ud,IF(K6/PV_DC_cap_ud>Inv_eff_Ref_approx_handover,K6*POLY(K6/PV_DC_cap_ud,HL_Coeff),IF(K6/PV_DC_cap_ud>0,K6*POLY(K6/PV_DC_cap_ud,LL_Coeff),0)))
-      hour0[L + i] = iff(hour0[K + i] / PV_DC_cap_ud > Inv_eff_Ref_approx_handover, hour0[K + i] * POLY(hour0[K + i] / PV_DC_cap_ud, HL_Coeff), iff(hour0[K + i] / PV_DC_cap_ud > .zero, hour0[K + i] * POLY(hour0[K + i] / PV_DC_cap_ud, LL_Coeff), .zero))
+      // L=IF(MIN(Inverter_max_DC_input,K5)/PV_DC_cap_ud>Inv_eff_approx_handover,MIN(Inverter_max_DC_input,K5)*POLY(MIN(Inverter_max_DC_input,K5)/PV_DC_cap_ud,HL_Coeff),IF(MIN(Inverter_max_DC_input,K5)/PV_DC_cap_ud>0,MIN(Inverter_max_DC_input,K5)*POLY(MIN(Inverter_max_DC_input,K5)/PV_DC_cap_ud,LL_Coeff),0))
+      hour0[L + i] = iff(
+        min(Inverter_max_DC_input, hour0[K + i]) / PV_DC_cap_ud > Inv_eff_approx_handover,
+        min(Inverter_max_DC_input, hour0[K + i])
+          * POLY(min(Inverter_max_DC_input, hour0[K + i]) / PV_DC_cap_ud, HL_Coeff),
+        iff(
+          min(Inverter_max_DC_input, hour0[K + i]) / PV_DC_cap_ud > 0,
+          min(Inverter_max_DC_input, hour0[K + i])
+            * POLY(min(Inverter_max_DC_input, hour0[K + i]) / PV_DC_cap_ud, LL_Coeff), 0))
+
       // MAX(0,-G6/PV_Ref_AC_cap*PV_AC_cap_ud)
       let m = max(.zero, -Reference_PV_MV_power_at_transformer_outlet[i] / 600.5 * PV_AC_cap_ud)
       hour0[M + i] = m

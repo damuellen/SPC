@@ -32,8 +32,8 @@ public struct TunOl {
   let CCU_Ref_heat_stup_cons: Double = 0
   let CCU_Ref_stby_cons: Double = 0
   let CCU_Ref_stup_cons: Double = 0
-  let CCU_Ref_var_heat_nom_cons: Double = 0
-  let CCU_Ref_var_nom_cons: Double = 0
+  let CCU_Ref_var_heat_nom_cons: Double = 0.001
+  let CCU_Ref_var_nom_cons: Double = 0.001
 
   let CSP_Cold_HTF_T: Double
   let CSP_Hot_HTF_T: Double = 425
@@ -90,7 +90,7 @@ public struct TunOl {
   let EY_Ref_heat_stup_cons: Double = 0
   let EY_Ref_stby_cons: Double = 0
   let EY_Ref_stup_cons: Double = 0
-  let EY_Ref_var_heat_nom_cons: Double = 0
+  let EY_Ref_var_heat_nom_cons: Double = 0.001
   let EY_Ref_var_net_nom_cons: Double = 140
   let EY_Ref_var_nom_cons: Double = 0.7
 
@@ -101,6 +101,7 @@ public struct TunOl {
   let Heater_outlet_T: Double = 565
   let HL_Coeff: [Double]
   let Inv_eff_Ref_approx_handover: Double  // Inv_Eff!C22
+  let Inv_eff_approx_handover: Double
   let LL_Coeff: [Double]
   let MethDist_cap_min_perc: Double = 0.1
 
@@ -123,7 +124,7 @@ public struct TunOl {
   let MethDist_Ref_stby_cons: Double = 0
   let MethDist_Ref_stup_cons: Double = 0
   let MethDist_Ref_var_heat_nom_cons: Double
-  let MethDist_Ref_var_nom_cons: Double = 0.01
+  let MethDist_Ref_var_nom_cons: Double = 0.001
   let MethDist_Ref_water_annual_prod: Double
 
   let MethSynt_annual_outage_days: Double = 0
@@ -153,7 +154,7 @@ public struct TunOl {
   let MethSynt_Ref_stby_cons: Double = 0
   let MethSynt_Ref_stup_cons: Double = 0
   let MethSynt_Ref_var_heat_nom_prod: Double = 7
-  let MethSynt_Ref_var_nom_cons: Double = 0
+  let MethSynt_Ref_var_nom_cons: Double = 0.001
   let MethSynt_stup_duration: Double = 15
 
   let Overall_harmonious_max_perc: Double = 1
@@ -237,7 +238,7 @@ public struct TunOl {
   var TES_salt_mass: Double = 0
   var TES_thermal_cap: Double = 0
   var TES_full_load_hours: Double = 0
-
+  var Inverter_max_DC_input: Double
   var th_Coeff: [Double] = [0]  // PB_Eff!$U3 PB_Eff!$T3 PB_Eff!$S3 PB_Eff!$R3 PB_Eff!$Q3
 
   var CSP_loop_nr_ud: Double
@@ -307,17 +308,21 @@ public struct TunOl {
     let Inverter_eff = Inverter_power_fraction.indices.map { 
       iff(TunOl.Reference_PV_MV_power_at_transformer_outlet[$0] <= maximum, max(TunOl.Reference_PV_MV_power_at_transformer_outlet[$0], .zero) / TunOl.Reference_PV_plant_power_at_inverter_inlet_DC[$0], .zero)
     }
-    let inverter = zip(Inverter_power_fraction, Inverter_eff).filter { $0.0 > 0.01 }.sorted(by: { $0.0 < $1.0 })
+
+    let inverter = zip(Inverter_power_fraction, Inverter_eff).filter { $0.1.isFinite }.filter { $0.1 > 0 }.sorted(by: { $0.0 < $1.0 })
     let chunks = inverter.chunked { Int($0.0 * 100) == Int($1.0 * 100) }
     let eff = chunks.map { bin in bin.reduce(0.0) { $0 + $1.1 } / Double(bin.count) }
     let s = Array(stride(from: 0.01, through: Inverter_power_fraction.max()!, by: 0.01))
-    let load = zip(s, eff).map { ac * $0.0 / $0.1 / dc }
+    let Actual_AC_power = s.map { $0 * ac } 
+    let Actual_DC_power = zip(Actual_AC_power, eff).map { $0 / $1 }
+    self.Inverter_max_DC_input = Actual_DC_power.max()!
+    let load = Actual_DC_power.map { $0 / dc }
 
     self.LL_Coeff = Polynomial.fit(x: Array(load[..<20]), y: Array(eff[..<20]), order: 7)!.coefficients
     self.HL_Coeff = Polynomial.fit(x: Array(load[16...].dropLast(2)), y: Array(eff[16...].dropLast(2)), order: 3)!.coefficients
 
     self.Inv_eff_Ref_approx_handover = self.PV_AC_cap_ud * s[17] / eff[17] / self.PV_DC_cap_ud
-
+    self.Inv_eff_approx_handover = eff[17]
     let PB_grs_el_cap_min_perc = PB_Ref_25p_gross_cap_max_aux_heat / PB_Ref_nom_gross_cap
     self.CSP_Cold_HTF_T = TES_cold_tank_T + SF_heat_exch_approach_temp
     let EY_Ref_Hydrogen_hour_nom_prod = 2.8
