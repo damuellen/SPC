@@ -5,9 +5,9 @@
 /*.csv
 /*.json
 /*.swift
-Package.resolved
-/COM/*.json
-/.sde
+/*.sh
+/*.txt
+/*/*.json
 /.build
 /.swiftpm
 /Packages
