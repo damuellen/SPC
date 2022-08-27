@@ -10,6 +10,9 @@
 
 import Foundation
 import Helpers
+import Meteo
+
+extension Insolation: MeasurementsConvertible {}
 
 protocol MeasurementsConvertible {
   static var columns: [(name: String, unit: String)] { get }

@@ -59,4 +59,20 @@ class PVPanelTests: XCTestCase {
       _ = try? plot4(.pngLarge("panel4.png"))
     }
   }
+
+  func testPV() {
+    let pv = PV()
+
+    var conditions = [(Temperature, Double, Double)]()
+
+    for gti in stride(from: 10.0, to: 1100, by: 10) {
+      conditions.append((Temperature(celsius: 20),0,gti))
+    }
+    let photovoltaic = conditions.concurrentMap { t, ws, gti -> Double in
+      pv(radiation: gti, ambient: t, windSpeed: ws) / 10.0e6
+    }
+
+    let plot = Gnuplot(xs: Array(stride(from: 10.0, to: 1100, by: 10)), ys: photovoltaic)
+    _ = try? plot(.pngLarge("pv.png"))
+  }
 }

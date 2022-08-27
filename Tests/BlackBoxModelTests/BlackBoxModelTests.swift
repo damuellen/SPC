@@ -22,7 +22,6 @@ class BlackBoxModelTests: XCTestCase {
     let log = Historian(mode: .inMemory)
     let result = BlackBoxModel.runModel(with: log)
     let tol = 0.2
-    XCTAssertEqual(result.radiation.ico, 16865.8, accuracy: tol)
     XCTAssertEqual(result.electric.net, 1967.4, accuracy: tol)
     XCTAssertEqual(result.electric.consum, 20.5, accuracy: tol)
     XCTAssertEqual(result.electric.parasitics, 138.4, accuracy: tol)
@@ -64,7 +63,6 @@ class BlackBoxModelTests: XCTestCase {
 
     let result = BlackBoxModel.runModel(with: log)
     let tol = 0.2
-    XCTAssertEqual(result.radiation.ico, 8696.0, accuracy: tol)
     XCTAssertEqual(result.electric.net, 850.4, accuracy: tol)
     XCTAssertEqual(result.electric.consum, 34.4, accuracy: tol)
     XCTAssertEqual(result.electric.parasitics, 73.0, accuracy: tol)

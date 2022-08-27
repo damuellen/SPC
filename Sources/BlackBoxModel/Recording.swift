@@ -18,7 +18,7 @@ public struct Recording: CustomStringConvertible, Comparable {
 
   let performance: PlantPerformance
 
-  let radiation: SolarRadiation
+  let irradiance: Insolation
 
   let performanceHistory: [PlantPerformance]
 
@@ -49,13 +49,13 @@ public struct Recording: CustomStringConvertible, Comparable {
   init(
     startDate: Date,
     performance: PlantPerformance,
-    radiation: SolarRadiation,
+    irradiance: Insolation,
     performanceHistory: [PlantPerformance] = [],
     statusHistory: [Status] = []
   ) {
     self.startDate = startDate
     self.performance = performance
-    self.radiation = radiation
+    self.irradiance = irradiance 
     self.performanceHistory = performanceHistory
     self.statusHistory = statusHistory
   }

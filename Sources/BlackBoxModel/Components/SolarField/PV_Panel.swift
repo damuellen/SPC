@@ -48,29 +48,13 @@ extension PV {
     }
 
     func callAsFunction(
-      radiation: Double, temperature: Temperature
-    ) -> (Double, Double, Double) {
+      radiation: Double, temperature: Temperature) -> (Double, Double, Double) {
       let Iph = photocurrent(radiation: radiation, temperature: temperature)
       let Rsh = Rshunt(radiation: radiation, temperature: temperature)
       let Io = saturationCurrent(temperature: temperature)
       return (Iph, Rsh, Io)
     }
 
-    /// Returns the temperature of the cell.
-    func temperature(
-      radiation: Double, ambient: Temperature, windSpeed: Double,
-      nominalPower: Double, panelArea: Double
-    ) -> Temperature {
-      /// Absorption coefficient of the module
-      let alpha = 0.9
-      let efficiency = nominalPower / (panelArea * Cell.radiation_at_STC)
-      /// Constant heat transfer component
-      let Uc = 20.0
-      /// Convective heat transfer component
-      let Uv = 0.0
-      let U = Uc + Uv * windSpeed
-      return ambient + ((1 / U) * alpha * radiation * (1 - efficiency))
-    }
     /// Returns the radiation equivalent current within the single diode model.
     func photocurrent(radiation: Double, temperature: Temperature) -> Double {
       (radiation / Cell.radiation_at_STC)
@@ -124,6 +108,20 @@ extension PV {
       self.area = 1.972
       self.numberOfCells = 76
     }
+    
+    /// Returns the temperature of the panel.
+    func temperature(
+      radiation: Double, ambient: Temperature, windSpeed: Double) -> Temperature {
+      /// Absorption coefficient of the module
+      let alpha = 0.9
+      let efficiency = nominalPower / (area * Cell.radiation_at_STC)
+      /// Constant heat transfer component
+      let Uc = 20.0
+      /// Convective heat transfer component
+      let Uv = 0.0
+      let U = Uc + Uv * windSpeed
+      return ambient + ((1 / U) * alpha * radiation * (1 - efficiency))
+    }
     /// The voltage from a current point within the I-V curve using the single diode model
     func voltageFrom(current: Double, radiation: Double, cell_T: Temperature) -> Double {
       let nVth =
@@ -168,9 +166,8 @@ extension PV {
     func callAsFunction(
       radiation: Double, ambient: Temperature, windSpeed: Double
     ) -> PowerPoint {
-      let cell_T = cell.temperature(
-        radiation: radiation, ambient: ambient, windSpeed: windSpeed,
-        nominalPower: nominalPower, panelArea: area)
+      let cell_T = temperature(
+        radiation: radiation, ambient: ambient, windSpeed: windSpeed)
       let nVth =
         cell.gamma * Double(numberOfCells) * Cell.k * cell_T.kelvin / Cell.q
 

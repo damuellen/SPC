@@ -6,7 +6,7 @@ import xlsxwriter
 
 class SunOlTests: XCTestCase {
   override func setUp() {
-    let path = "input2.txt"
+    let path = "input3.txt"
     guard let csv = CSVReader(atPath: path) else {
       print("No input")
       return
@@ -68,7 +68,7 @@ class SunOlTests: XCTestCase {
     }
 
     guard let model = TunOl(
-      [226.339,500.000,100.755,341.952,888.434,180.000,0.000,121.753,1000.000,100000.000,100000.000,21.707,10.540,0.000,0.000,0.000]
+      [167.8486379, 13427.64795, 158.9990407, 100, 439.4037645, 200, 0, 111.4985592, 1000, 100000, 100000, 19.1024554, 21.3114923, 0, 0, 0]
       ) else {
       print("Invalid config")
       return

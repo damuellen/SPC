@@ -28,23 +28,22 @@ public struct PV {
     radiation effective: Double, ambient: Temperature, windSpeed: Double
   ) -> Double {
     guard effective > 15 else { return transformer(ac: .zero) }
-    var dc = array(radiation: effective, ambient: ambient, windSpeed: 0.0)
+    var dc = array.mpp(radiation: effective, ambient: ambient, windSpeed: 0.0)
     if dc.power > 0 {
       var efficiency = inverter(power: dc.power, voltage: dc.voltage)
       if efficiency.isNaN {
-        let cell = array.panel.cell.temperature(
-          radiation: effective, ambient: ambient, windSpeed: windSpeed,
-          nominalPower: array.panel.nominalPower, panelArea: array.panel.area)
-                dc = PowerPoint(
-        current: dc.current,
-        voltage: min(dc.voltage, inverter.voltageLevels[0] - 1e-6))
+        let cell_T = array.panel.temperature(
+          radiation: effective, ambient: ambient, windSpeed: windSpeed)
+        dc = PowerPoint(
+          current: dc.current, 
+          voltage: min(dc.voltage, inverter.voltageLevels[0] - 1e-6)
+        )
         let shift = Double(array.panelsPerString) * 1e-6
         var iterations = 0
         while efficiency.isNaN && iterations < 50000 {
           iterations += 1
           //print(dc)
-          dc = array(
-            voltage: dc.voltage + shift, radiation: effective, cell: cell)
+          dc = array(voltage: dc.voltage + shift, radiation: effective, cell: cell_T)
 
           efficiency = inverter(power: dc.power, voltage: dc.voltage)
         }
@@ -83,11 +82,10 @@ public struct PV {
       self.lossAtSTC = 0.43e-3
     }
     /// Calculate the maximum power point of the array.
-    func callAsFunction(
-      radiation: Double, ambient: Temperature, windSpeed: Double
-    ) -> PowerPoint {
-      let mpp = panel(
-        radiation: radiation, ambient: ambient, windSpeed: windSpeed)
+    func mpp(radiation: Double, ambient: Temperature, windSpeed: Double)
+      -> PowerPoint
+    {
+      let mpp = panel(radiation: radiation, ambient: ambient, windSpeed: windSpeed)
       /// Panel losses due to degradation, unavailability and losses in the copper
       let voltageDrop = (mpp.voltage / mpp.current * lossAtSTC) * mpp.current
       let losses = (1 - degradation) * (1 - unavailability)
@@ -100,13 +98,10 @@ public struct PV {
       -> PowerPoint
     {
       let current = panel.currentFrom(
-        voltage: voltage / Double(panelsPerString),
-        radiation: radiation,
-        cell_T: cell)
+        voltage: voltage / Double(panelsPerString), radiation: radiation, cell_T: cell)
 
       return PowerPoint(
-        current: current * Double(strings) * Double(inverters),
-        voltage: voltage)
+        current: current * Double(strings) * Double(inverters), voltage: voltage)
     }
   }
 
@@ -124,9 +119,8 @@ public struct PV {
     /// Calculates power losses in transformer.
     func callAsFunction(ac power: Double) -> Double {
       if power > .zero {
-        return power
-          * (1 - resistiveLossAtSTC)
-          * (1 - injectionLossFractionAtST) - ironLoss
+        return power * (1 - resistiveLossAtSTC) * (1 - injectionLossFractionAtST)
+          - ironLoss
       } else {
         return -ironLoss
       }
@@ -152,7 +146,7 @@ public struct PV {
       self.maxPower = 2550e3
       self.dc_power = [
         12e3, 132.302e3, 260.896e3, 518.503e3, 776.492e3, 1293.49e3, 1941.82e3,
-        2591.46e3
+        2591.46e3,
       ]
       self.voltageLevels = [1200, 990, 915]
 
@@ -171,11 +165,11 @@ public struct PV {
         return (y2 - y) / (y2 - y1) * fxy1 + (y - y1) / (y2 - y1) * fxy2
       }
 
-      guard let p1 = dc_power.lastIndex(where: { $0 <= power }), // lower bound
-      let p2 = dc_power.firstIndex(where: { $0 >= power }) // upper bound
-      else {  return .nan }
-      guard let _ = voltageLevels.first(where: { $0 > voltage }), // Overvoltage
-      let v2 = voltageLevels.first(where: { $0 < voltage }) // Undervoltage
+      guard let p1 = dc_power.lastIndex(where: { $0 <= power }),  // lower bound
+        let p2 = dc_power.firstIndex(where: { $0 >= power })  // upper bound
+      else { return .nan }
+      guard let _ = voltageLevels.first(where: { $0 > voltage }),  // Overvoltage
+        let v2 = voltageLevels.first(where: { $0 < voltage })  // Undervoltage
       else { return .nan }
 
       let v1: Double
@@ -193,10 +187,8 @@ public struct PV {
       }
 
       let efficiency = biInterpolate(
-        dc_power[p1], v1, dc_power[p2], v2,
-        v11[p1], v21[p1], v11[p2], v21[p2],
-        power, voltage
-      )
+        dc_power[p1], v1, dc_power[p2], v2, v11[p1], v21[p1], v11[p2], v21[p2], power,
+        voltage)
       return efficiency
     }
   }

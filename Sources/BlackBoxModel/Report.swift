@@ -58,7 +58,7 @@ extension Recording {
       + "Gas consumption [MWh_el/a]:\n"  // Format(YTarS(0).heatfuel, )"
       + "Solar share [%]:\n"  // Format(SolShare * 100, )"
       + "Annual direct solar insolation [kWh/m²a]:"  //  Format(YTarS(0).NDI,)"
-      * String(format: "%G", radiation.dni / 1_000)
+      * String(format: "%G", irradiance.direct / 1_000)
       + "Total heat from solar field [MWh_el/a]:"  // Format(YTarS(0).heatsol,)"
       * String(format: "%G", performance.thermal.solar.megaWatt)
     d += "\nAVAILABILITIES\n\n"

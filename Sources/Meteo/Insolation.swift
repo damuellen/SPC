@@ -10,53 +10,48 @@
 
 import DateExtensions
 import Libc
-import Meteo
 import SolarPosition
 
-public struct SolarRadiation: MeasurementsConvertible {
+public struct Insolation {
 
-  var dni, ghi, dhi, ico: Double
+  public var direct, global, diffuse: Double
 
-  init() {
-    self.dni = 0.0
-    self.ghi = 0.0
-    self.dhi = 0.0
-    self.ico = 0.0
+  public init() {
+    direct = 0.0
+    global = 0.0
+    diffuse = 0.0
   }
 
-  init(meteo: MeteoData, cosTheta: Double) {
-    self.dni = Double(meteo.dni)
-    self.ghi = Double(meteo.ghi)
-    self.dhi = Double(meteo.dhi)
-    self.ico = Double(meteo.dni) * cosTheta
+  public init(meteo: MeteoData) {
+    direct = Double(meteo.dni)
+    global = Double(meteo.ghi)
+    diffuse = Double(meteo.dhi)
   }
 
-  var numericalForm: [Double] { [dni, ghi, dhi, ico] }
+  public var numericalForm: [Double] { [direct, global, diffuse] }
 
-  static var columns: [(name: String, unit: String)] {
+  public static var columns: [(name: String, unit: String)] {
     [
       ("Solar|DNI", "Wh/m2"), ("Solar|GHI", "Wh/m2"),
-      ("Solar|DHI", "Wh/m2"), ("Solar|ICO", "Wh/m2"),
+      ("Solar|DHI", "Wh/m2")
     ]
   }
 
-  mutating func totalize(_ radiation: SolarRadiation, fraction: Double) {
-    dni += radiation.dni * fraction
-    ghi += radiation.ghi * fraction
-    dhi += radiation.dhi * fraction
-    ico += radiation.ico * fraction
+  public mutating func totalize(_ radiation: Insolation, fraction: Double) {
+    direct += radiation.direct * fraction
+    direct += radiation.global * fraction
+    diffuse += radiation.diffuse * fraction
   }
 
-  mutating func zero() {
-    dni = 0.0
-    ghi = 0.0
-    dhi = 0.0
-    ico = 0.0
+  public mutating func zero() {
+    direct = 0.0
+    global = 0.0
+    diffuse = 0.0
   }
 }
 
 /// Perez’s model coefficient sets
-struct PerezCoefficients {
+public struct PerezCoefficients {
   var f11: Double
   var f12: Double
   var f13: Double
@@ -97,7 +92,7 @@ struct PerezCoefficients {
   ]
 }
 
-enum Albedo: Double {
+public enum Albedo: Double {
   case urban_situation = 0.17
   case grass = 0.2
   case fresh_grass = 0.26
@@ -112,7 +107,7 @@ enum Albedo: Double {
   case very_dirty_galvanised_site = 0.08
 }
 
-extension SolarRadiation {
+extension Insolation {
   public static func effective(
     ghi: Double, dhi: Double, surfTilt: Double, incidence: Double,
     zenith: Double, doy: Int
@@ -124,16 +119,16 @@ extension SolarRadiation {
       beam = 0
       dni = 0
     } else {
-      beam = SolarRadiation.beam(global: ghi, diffuse: dhi, incidence: incidence, zenith: zenith)
-      dni = SolarRadiation.normal(global: ghi, diffuse: dhi, zenith: zenith)
+      beam = Insolation.beam(global: ghi, diffuse: dhi, incidence: incidence, zenith: zenith)
+      dni = Insolation.normal(global: ghi, diffuse: dhi, zenith: zenith)
     }
 
-    let hExtra = SolarRadiation.extra(doy: doy)
+    let hExtra = Insolation.extra(doy: doy)
 
     let AM = Atmosphere.relativeAirMass(
       zenith: zenith, model: .kastenyoung1989)
 
-    let diffuse = SolarRadiation.perez(
+    let diffuse = Insolation.perez(
       surfaceTilt: surfTilt, incidence: incidence, diffuse: dhi, direct: dni,
       hExtra: hExtra, sunZenith: zenith, AM: AM)
 
@@ -187,7 +182,7 @@ extension SolarRadiation {
   }
 
   /// Extraterrestrial radiation from day of year
-  /// - Parameter date: Date whose extraterrestial radiation will be calculated</param>
+  /// - Parameter date: Date whose extraterrestial radiation will be calculated
   /// - Returns: Extraterrestial radiation
   static func extra(doy: Int) -> Double {
     let B = 2.0 * .pi * Double(doy) / 365.0

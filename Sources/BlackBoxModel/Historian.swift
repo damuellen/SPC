@@ -77,21 +77,21 @@ public final class Historian {
   #endif
   /// Totals
   private var annualPerformance = PlantPerformance()
-  private var annualRadiation = SolarRadiation()
+  private var annualRadiation = Insolation()
   /// Volatile subtotals
   private var hourlyPerformance = PlantPerformance()
-  private var hourlyRadiation = SolarRadiation()
+  private var hourlyRadiation = Insolation()
   /// Sum of hourly values
   private var dailyPerformance = PlantPerformance()
-  private var dailyRadiation = SolarRadiation()
+  private var dailyRadiation = Insolation()
 
   private var customIntervalPerformance = PlantPerformance()
-  private var customIntervalRadiation = SolarRadiation()
+  private var customIntervalRadiation = Insolation()
 
   /// All past states of the plant
   private var statusHistory: [Status] = []
   private var performanceHistory: [PlantPerformance] = []
-  private var sunHistory: [SolarRadiation] = []
+  private var sunHistory: [Insolation] = []
 
   public init(mode: Mode) {
     self.mode = mode
@@ -230,8 +230,7 @@ public final class Historian {
   func callAsFunction(
     _ ts: DateTime, meteo: MeteoData, status: Status, energy: PlantPerformance
   ) {
-    let solar = SolarRadiation(
-      meteo: meteo, cosTheta: status.collector.cosTheta)
+    let solar = Insolation(meteo: meteo)
 
     if mode.hasHistory {
       self.statusHistory.append(status)
@@ -312,7 +311,7 @@ public final class Historian {
 
     return Recording(
       startDate: startDate!, performance: annualPerformance,
-      radiation: annualRadiation, performanceHistory: performanceHistory,
+      irradiance: annualRadiation, performanceHistory: performanceHistory,
       statusHistory: statusHistory)
   }
 
@@ -375,7 +374,7 @@ public final class Historian {
     let f2 = wb.addFormat().set(num_format: "0.0")
 
     let statusCaptions =
-      ["Date"] + SolarRadiation.columns.map(\.0) + Status.modes
+      ["Date"] + Insolation.columns.map(\.0) + Status.modes
       + Status.columns.map(\.0)
     let statusCount = statusCaptions.count
     let modesCount = Status.modes.count
@@ -459,11 +458,11 @@ public final class Historian {
   private var headers: (name: String, unit: String, count: Int) {
     #if DEBUG
     let columns = [
-      SolarRadiation.columns, PlantPerformance.columns, Status.columns,
+      Insolation.columns, PlantPerformance.columns, Status.columns,
     ]
     .joined()
     #else
-    let columns = [SolarRadiation.columns, PlantPerformance.columns].joined()
+    let columns = [Insolation.columns, PlantPerformance.columns].joined()
     #endif
     let names: String = columns.map { $0.0 }.joined(separator: ",")
     let units: String = columns.map { $0.1 }.joined(separator: ",")

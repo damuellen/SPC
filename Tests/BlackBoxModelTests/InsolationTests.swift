@@ -3,7 +3,7 @@ import XCTest
 @testable import BlackBoxModel
 @testable import Meteo
 
-class SolarRadiationTests: XCTestCase {
+class InsolationTests: XCTestCase {
 
   func testsBeam() {
     let GHI = [0, 0, 413.82, 90.72]
@@ -15,7 +15,7 @@ class SolarRadiationTests: XCTestCase {
 
     let tol = 0.1
     for i in expected.indices {
-      let dni = SolarRadiation.beam(
+      let dni = Insolation.beam(
         global: GHI[i], diffuse: DHI[i], incidence: AOI[i], zenith: zenith[i]
       )
       XCTAssertEqual(dni, expected[i], accuracy: tol)
@@ -34,7 +34,7 @@ class SolarRadiationTests: XCTestCase {
     let expected = [241.1, 0, 0, 128.2817, 51.3891, 128.4142, 118.4124]
     let tol = 0.1
     for i in expected.indices {
-      let irradiance = SolarRadiation.perez(
+      let irradiance = Insolation.perez(
         surfaceTilt: tilt[i], incidence: AOI[i], diffuse: DHI[i], direct: DNI[i],
         hExtra: hExtra[i], sunZenith: zenith[i], AM: AM[i]
       )

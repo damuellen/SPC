@@ -126,7 +126,7 @@ public enum BlackBoxModel {
           maxAngle: 55, GCR: 0.444
         )
         conditions.append((temperature, wind,
-          SolarRadiation.effective(
+          Insolation.effective(
             ghi: Double(meteo.dni), dhi: Double(meteo.dni),
             surfTilt: panel.surfTilt, incidence: panel.AOI,
             zenith: position.zenith, doy: dt.yearDay)
