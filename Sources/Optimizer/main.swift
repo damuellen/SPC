@@ -146,7 +146,7 @@ func writeCSV(result: ([Double], [Double], [Double], [Double])) {
 }
 
 func writeExcel(results: [[Double]]) -> String {
-  let id = String(Int(Date().timeIntervalSince1970), radix: 32, uppercase: true).suffix(4)
+  let id = String(Int(Date().timeIntervalSince1970), radix: 36, uppercase: true).suffix(4)
   let name = "SunOl_\(id).xlsx"
   let wb = Workbook(name: name)
   let ws = wb.addWorksheet()
