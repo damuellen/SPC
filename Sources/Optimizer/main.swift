@@ -146,7 +146,8 @@ func writeCSV(result: ([Double], [Double], [Double], [Double])) {
 }
 
 func writeExcel(results: [[Double]]) -> String {
-  let name = "SunOl_\(UUID().uuidString.prefix(4)).xlsx"
+  let id = String(Int(Date().timeIntervalSince1970), radix: 32, uppercase: true).suffix(4)
+  let name = "SunOl_\(id).xlsx"
   let wb = Workbook(name: name)
   let ws = wb.addWorksheet()
   var r = 0
@@ -193,4 +194,3 @@ func respond(request: HTTP.Request) -> HTTP.Response {
   }
   return .init(html: .init(refresh: 10))
 }
-
