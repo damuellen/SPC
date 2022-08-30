@@ -3,11 +3,11 @@ import Helpers
 public struct Costs {
   // static let AdditionalCostPerLoop = 762533.1364
 
-  static let Plant_life = 25.0
-  static let Rate_of_return = 0.07
-  static let FCR = Rate_of_return * (1 + Rate_of_return) ** Plant_life / ((1 + Rate_of_return) ** Plant_life - 1)
-  static let Elec_buy = 2 * 0.098
-  static let Elec_sell = 0.33 * 0.098
+  static let Plant_life: Double = 25.0
+  static let Rate_of_return: Double = 0.07
+  static let FCR: Double = Rate_of_return * (1 + Rate_of_return) ** Plant_life / ((1 + Rate_of_return) ** Plant_life - 1)
+  static let Elec_buy: Double = 2 * 0.098
+  static let Elec_sell: Double = 0.33 * 0.098
 
   public init(_ model: TunOl) {
     let FX_USD = 0.82
@@ -57,13 +57,13 @@ public struct Costs {
     self.PV_DC_cost = model.PV_DC_cap_ud * PV_DC_part.coeff + 0.0
     self.PV_AC_cost = (model.PV_AC_cap_ud / PV_AC_part.basis) ** PV_AC_part.exp * PV_AC_part.basis * PV_AC_part.coeff + 0.0
 
-    self.Heater_cost = model.Heater_cap_ud > 0 ? (Heater_system.c1 + Heater_system.coeff * (model.Heater_cap_ud / Heater_system.basis) ** Heater_system.exp + model.Heater_cap_ud * Heater_system.factor * Heater_system.c2) : 0
+    self.Heater_cost = model.Heater_cap_ud > 0.0 ? (Heater_system.c1 + Heater_system.coeff * (model.Heater_cap_ud / Heater_system.basis) ** Heater_system.exp + model.Heater_cap_ud * Heater_system.factor * Heater_system.c2) : 0.0
 
     self.TES_storage_cost = Thermal_energy_storage.c1 + Thermal_energy_storage.coeff * (model.TES_salt_mass / Thermal_energy_storage.basis) ** Thermal_energy_storage.exp + model.TES_salt_mass * Thermal_energy_storage.c2 * Thermal_energy_storage.factor
     if TES_storage_cost.isNaN { TES_storage_cost = 0 }
-    self.PB_cost = model.PB_nom_gross_cap_ud > 0 ? (Power_Block.c1 + (model.PB_nom_gross_cap_ud - Power_Block.basis) * Power_Block.coeff) : 0
+    self.PB_cost = model.PB_nom_gross_cap_ud > 0.0 ? (Power_Block.c1 + (model.PB_nom_gross_cap_ud - Power_Block.basis) * Power_Block.coeff) : 0
 
-    self.Electrolysis_cost = (model.EY_var_net_nom_cons_ud / 20).rounded(.up) * 20 * Electrolysis_coeff + 0.0
+    self.Electrolysis_cost = (model.EY_var_net_nom_cons_ud / 20.0).rounded(.up) * 20 * Electrolysis_coeff + 0.0
 
     self.Hydrogen_storage_cost = Hydrogen_storage.coeff * ((model.Hydrogen_storage_cap_ud / Hydrogen_storage.basis) ** Hydrogen_storage.exp) + 0.0
     // =IF(I3<=0,"",IFERROR(Specific_Cost!$I$12*(I3/Specific_Cost!$D$12)^Specific_Cost!$F$12+Specific_Cost!$E$12,""))
@@ -77,18 +77,18 @@ public struct Costs {
 
     self.MethDist_plant_cost = MethDist_plant.coeff * ((model.MethDist_Meth_nom_prod_ud / MethDist_plant.basis) ** MethDist_plant.exp) + 0.0
 
-    self.Battery_storage_cost = model.BESS_cap_ud * Battery_energy_storage.coeff + (model.BESS_cap_ud > 0 ? Battery_energy_storage.c1 : 0)
+    self.Battery_storage_cost = model.BESS_cap_ud * Battery_energy_storage.coeff + (model.BESS_cap_ud > 0.0 ? Battery_energy_storage.c1 : 0.0)
 
-    self.Electrical_boiler_cost = model.El_boiler_cap_ud > 0 ? (Electrical_boiler.coeff * (model.El_boiler_cap_ud / Electrical_boiler.basis) ** Electrical_boiler.exp) : 0
+    self.Electrical_boiler_cost = model.El_boiler_cap_ud > 0.0 ? (Electrical_boiler.coeff * (model.El_boiler_cap_ud / Electrical_boiler.basis) ** Electrical_boiler.exp) : 0.0
 
     // let Substation_cost_ICPH =
     // Substation_capacity.coeff * Substation_capacity.basis * ((model.Heater_cap_ud + model.EY_var_net_nom_cons_ud  + model.EY_aux_elec_input + model.Meth_nominal_aux_electr_cons) / Substation_capacity.basis) ** Substation_capacity.exp
 
-    self.Substation_cost = max(model.Grid_export_max_ud, model.Grid_import_max_ud) > 0 ? Substation.coeff * (max(model.Grid_export_max_ud, model.Grid_import_max_ud) / Substation.basis) ** Substation.exp : 0
+    self.Substation_cost = max(model.Grid_export_max_ud, model.Grid_import_max_ud) > 0 ? Substation.coeff * (max(model.Grid_export_max_ud, model.Grid_import_max_ud) / Substation.basis) ** Substation.exp : 0.0
 
-    let CSP_O_M_Cost = (11.3333 / 3 * 1 / 3 * 1000 * 1000) + (0.00606061 / 3 * 1 / 3 * 1000 * 1000) * model.CSP_loop_nr_ud
-    let PV_O_M_Cost = (11.3333 * 1000 * 1000) + (0.00606061 / 100 * 1000 * 1000) * model.PV_DC_cap_ud
-    let PB_O_M_Cost = (11.3333 / 3 * 2 / 3 * 1000 * 1000) + (0.00606061 / 3 * 2 / 3 * 1000 * 1000) * model.PB_nom_gross_cap_ud
+    let CSP_O_M_Cost = (11.3333 / 3.0 * 1.0 / 3.0 * 1000.0 * 1000) + (0.00606061 / 3.0 * 1.0 / 3.0 * 1000.0 * 1000.0) * model.CSP_loop_nr_ud
+    let PV_O_M_Cost = (11.3333 * 1000.0 * 1000) + (0.00606061 / 100.0 * 1000.0 * 1000.0) * model.PV_DC_cap_ud
+    let PB_O_M_Cost = (11.3333 / 3.0 * 2.0 / 3.0 * 1000.0 * 1000.0) + (0.00606061 / 3 * 2.0 / 3.0 * 1000.0 * 1000.0) * model.PB_nom_gross_cap_ud
     let OM_Cost_EY_Methsynt = (MethDist_plant_cost + Electrolysis_cost) * 0.035
     self.CO2_Cost = 40.0 / model.MethDist_Ref_meth_hour_prod * model.MethSynt_Ref_rawmeth_hour_prod / model.MethSynt_Ref_rawmeth_hour_prod * model.MethSynt_Ref_CO2_hour_cons
     // let CAPEX_ICPH_assembly_hall_csp_sf_dedicated_to_ICPH_PC_DC_PV_AC_Heaters_TES_PB_Substation =

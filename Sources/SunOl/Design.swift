@@ -21,7 +21,7 @@ public struct TunOl {
   let CCU_fix_heat_cons: Double
   let CCU_harmonious_max_perc: Double
   let CCU_harmonious_min_perc: Double
-
+  let CCU_heat_fix_cons: Double
   let CCU_var_heat_nom_cons: Double
   let CCU_var_nom_cons: Double
 
@@ -64,6 +64,10 @@ public struct TunOl {
   var overall_var_min_cons = [Double](repeating: 0, count: 4)
   var RawMeth_max_cons = [Double](repeating: 0, count: 4)
   var RawMeth_min_cons = [Double](repeating: 0, count: 4)
+
+  var daytime_cons_per_h_of_night_op = [Double](repeating: 0, count: 4)
+  var daytime_heat_cons_per_h_of_night_op = [Double](repeating: 0, count: 4)
+
   let Density_CO2: Double = 945
   let Density_Hydrogen: Double = 5.783
   let El_boiler_eff: Double = 0.99
@@ -312,7 +316,7 @@ public struct TunOl {
     let inverter = zip(Inverter_power_fraction, Inverter_eff).filter { $0.1.isFinite }.filter { $0.1 > 0 }.sorted(by: { $0.0 < $1.0 })
     let chunks = inverter.chunked { Int($0.0 * 100) == Int($1.0 * 100) }
     let eff = chunks.map { bin in bin.reduce(0.0) { $0 + $1.1 } / Double(bin.count) }
-    let s = Array(stride(from: 0.01, through: Inverter_power_fraction.max()!, by: 0.01))
+    let s = Array(stride(from: Inverter_power_fraction.max()! / 115, through: Inverter_power_fraction.max()!, by: Inverter_power_fraction.max()! / 115))
     let Actual_AC_power = s.map { $0 * ac } 
     let Actual_DC_power = zip(Actual_AC_power, eff).map { $0 / $1 }
     self.Inverter_max_DC_input = Actual_DC_power.max()!
@@ -322,7 +326,7 @@ public struct TunOl {
     self.HL_Coeff = Polynomial.fit(x: Array(load[16...].dropLast(2)), y: Array(eff[16...].dropLast(2)), order: 3)!.coefficients
 
     self.Inv_eff_Ref_approx_handover = self.PV_AC_cap_ud * s[17] / eff[17] / self.PV_DC_cap_ud
-    self.Inv_eff_approx_handover = eff[17]
+    self.Inv_eff_approx_handover = load[17]
     let PB_grs_el_cap_min_perc = PB_Ref_25p_gross_cap_max_aux_heat / PB_Ref_nom_gross_cap
     self.CSP_Cold_HTF_T = TES_cold_tank_T + SF_heat_exch_approach_temp
     let EY_Ref_Hydrogen_hour_nom_prod = 2.8
@@ -351,7 +355,7 @@ public struct TunOl {
     let CCU_CO2_min_prod = CCU_CO2_nom_prod_ud * CCU_cap_min_perc
     self.CCU_fix_heat_cons = CCU_CO2_nom_prod_ud / CCU_Ref_CO2_hour_prod * CCU_Ref_heat_fix_cons
     self.CCU_fix_cons = CCU_CO2_nom_prod_ud / CCU_Ref_CO2_hour_prod * CCU_Ref_fix_cons
-    let CCU_heat_fix_cons = CCU_CO2_nom_prod_ud / CCU_Ref_CO2_hour_prod * CCU_Ref_heat_fix_cons
+    self.CCU_heat_fix_cons = CCU_CO2_nom_prod_ud / CCU_Ref_CO2_hour_prod * CCU_Ref_heat_fix_cons
     self.CCU_var_nom_cons = CCU_CO2_nom_prod_ud / CCU_Ref_CO2_hour_prod * CCU_Ref_var_nom_cons
     self.CCU_var_heat_nom_cons = CCU_CO2_nom_prod_ud / CCU_Ref_CO2_hour_prod * CCU_Ref_var_heat_nom_cons
     let CCU_stby_cons = CCU_CO2_nom_prod_ud / CCU_Ref_CO2_hour_prod * CCU_Ref_stby_cons
@@ -470,6 +474,16 @@ public struct TunOl {
       self.CO2_max_cons[j] = round(max(.zero, -CCU_max_perc[j] * CCU_CO2_nom_prod_ud + MethSynt_max_perc[j] * MethSynt_CO2_nom_cons), 5)
       self.Hydrogen_max_cons[j] = round(max(.zero, -EY_max_perc[j] * EY_Hydrogen_nom_prod + MethSynt_max_perc[j] * MethSynt_Hydrogen_nom_cons), 5)
       self.overall_heat_stup_cons[j] = iff(MethDist_min_perc[j] > .zero, .zero, MethDist_heat_stup_cons) + iff(MethSynt_min_perc[j] > .zero, .zero, MethSynt_heat_stup_cons) + iff(CCU_min_perc[j] > .zero, .zero, CCU_heat_stup_cons) + iff(EY_min_perc[j] > .zero, .zero, EY_heat_stup_cons)
+      self.daytime_cons_per_h_of_night_op[j] =
+        RawMeth_max_cons[j] / MethSynt_RawMeth_nom_prod_ud * MethSynt_var_nom_cons
+      self.daytime_cons_per_h_of_night_op[j] += (CO2_max_cons[j] + RawMeth_max_cons[j] / MethSynt_RawMeth_nom_prod_ud * MethSynt_CO2_nom_cons) / CCU_CO2_nom_prod_ud * CCU_var_nom_cons
+      self.daytime_cons_per_h_of_night_op[j] += (Hydrogen_max_cons[j] + RawMeth_max_cons[j] / MethSynt_RawMeth_nom_prod_ud * MethSynt_Hydrogen_nom_cons) / EY_Hydrogen_nom_prod * EY_var_gross_nom_cons          
+      self.daytime_heat_cons_per_h_of_night_op[j] =
+        (-RawMeth_max_cons[j]) / MethSynt_RawMeth_nom_prod_ud * MethSynt_var_heat_nom_prod
+      self.daytime_heat_cons_per_h_of_night_op[j] += (CO2_max_cons[j] + RawMeth_max_cons[j] / MethSynt_RawMeth_nom_prod_ud
+          * MethSynt_CO2_nom_cons) / CCU_CO2_nom_prod_ud * CCU_var_heat_nom_cons
+      self.daytime_heat_cons_per_h_of_night_op[j] += (Hydrogen_max_cons[j] + RawMeth_max_cons[j] / MethSynt_RawMeth_nom_prod_ud
+          * MethSynt_Hydrogen_nom_cons) / EY_Hydrogen_nom_prod * EY_var_heat_nom_cons
     }
 
     self.equiv_harmonious_min_perc[0] = max(
