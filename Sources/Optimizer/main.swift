@@ -151,8 +151,8 @@ func writeExcel(results: [[Double]]) -> String {
   let wb = Workbook(name: name)
   let ws = wb.addWorksheet()
   var r = 0
-  results.filter { !$0[1].isZero }.reversed().forEach { row in r += 1
-    ws.write(row, row: r)
+  results.filter { $0[0].isFinite }.reversed().forEach { row in r += 1
+    ws.write(row.map(round), row: r)
   }
   let labels = [
     "LCOM", "LCOM2", "CAPEX", "OPEX", "Methanol", "Import", "Export", "Hours", "CSP_loop_nr", "TES_thermal_cap_ud", "PB_nom_gross_cap", "PV_AC_cap", "PV_DC_cap", "EY_var_net_nom_cons", "Hydrogen_storage_cap", "Heater_cap", "CCU_CO2_nom_prod", "CO2_storage_cap", "RawMeth_storage_cap",

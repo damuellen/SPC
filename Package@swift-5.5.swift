@@ -80,6 +80,7 @@ let platformTargets: [Target] = [
     name: "Optimizer",
     dependencies: [
       "Utilities", "SunOl",
+      .product(name: "ArgumentParser", package: "swift-argument-parser"),
       .product(name: "xlsxwriter", package: "xlsxwriter.swift")
     ],
     swiftSettings: swift
@@ -97,7 +98,6 @@ let platformTargets: [Target] = [
     name: "SunOl",
     dependencies: [
       "Utilities", 
-      .product(name: "ArgumentParser", package: "swift-argument-parser"),
       .product(name: "xlsxwriter", package: "xlsxwriter.swift"),
     ],
     // .product(name: "SwiftPlot", package: "SwiftPlot")
