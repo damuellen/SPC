@@ -2,11 +2,11 @@ extension TunOl {
   func d14(_ d13: inout [Double], case j: Int, d10: [Double], d11: [Double], d12: [Double]) {
     let (C, D, E, T, U, V, Z, AA, AB, AC) = (0, 365, 730, 5840, 6205, 6570, 8030, 8395, 8760, 9125)  // d10
 
-    let (EY, EZ, FA, FC, FD, FE, _, _, FR, FS, FT, FV, FW, FY, FZ, GA, GB, GC, GD, GE, GF, GG, GH, GI) = (
+    let (EY, EZ, FA, FC, FD, FE, _, _, _, FS, FT, FV, FW, FY, FZ, GA, GB, GC, GD, GE, GF, GG, GH, GI) = (
       0, 365, 730, 1460, 1825, 2190, 2555, 4015, 6935, 7300, 7665, 8395, 8760, 9490, 9855, 10220, 10585, 10950, 11315, 11680, 12045, 12410, 12775, 13140
     )  // d11
 
-    let (GU, GV, GW, GY, GZ, HA, _, _, HN, HO, HP, HR, HS, HU, HV, HW, HX, HY, HZ, IA, IB, IC, ID, IE) = (
+    let (GU, GV, GW, GY, GZ, HA, _, _, _, HO, HP, HR, HS, HU, HV, HW, HX, HY, HZ, IA, IB, IC, ID, IE) = (
       0, 365, 730, 1460, 1825, 2190, 3650, 4015, 6935, 7300, 7665, 8395, 8760, 9490, 9855, 10220, 10585, 10950, 11315, 11680, 12045, 12410, 12775, 13140
     )  // d12
     let FX = 9125
@@ -266,7 +266,7 @@ extension TunOl {
     for i in 0..<365 {
       d13[ddMK + i] = iff(
         d11[FC + i].isZero, .zero,
-        iff(or(d13[ddKI + i].isZero, d13[ddKZ + i].isZero), d11[FD + i], d11[FC + i] + (d12[GY + i] - d11[FC + i]) * d13[ddAMKI + i] + ((d11[FD + i] + (d12[GZ + i] - d11[FD + i]) * d13[ddAMKI + i]) - (d11[FC + i] + (d12[GY + i] - d11[FC + i]) * d13[ddAMKI + i])) / Overall_harmonious_range * (d13[ddKZ + i] - Overall_harmonious_min_perc)))
+        iff(or(d13[ddKI + i].isZero, d13[ddKZ + i].isZero), max(0, d11[FD + i] - max(0, min(BESS_cap_ud, d11[FK + i]) / BESS_chrg_eff - d11[FZ + i] - d11[GA + i])), d11[FC + i] + (d12[GY + i] - d11[FC + i]) * d13[ddAMKI + i] + ((d11[FD + i] + (d12[GZ + i] - d11[FD + i]) * d13[ddAMKI + i]) - (d11[FC + i] + (d12[GY + i] - d11[FC + i]) * d13[ddAMKI + i])) / Overall_harmonious_range * (d13[ddKZ + i] - Overall_harmonious_min_perc)))
     }
 
     /// el cons for night prep during harm op period
@@ -290,10 +290,10 @@ extension TunOl {
     // MN=IF(OR(KI6=0,KZ6=0),MIN(MAX(0,MIN(BESS_cap_ud,FK6)/BESS_chrg_eff-GA6),FZ6),MIN(((FY6+(HU6-FY6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))+((FZ6+(HV6-FZ6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(FY6+(HU6-FY6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)))/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(KZ6-Overall_harmonious_min_perc)),(FK6+(HG6-FK6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))/BESS_chrg_eff))
     for i in 0..<365 {
       d13[ddMN + i] = iff(
-        or(d13[ddKI + i].isZero, d13[ddKZ + i].isZero), min(d11[FK + i] / BESS_chrg_eff, d11[FZ + i]),
+        or(d13[ddKI + i].isZero, d13[ddKZ + i].isZero), min(max(0, min(BESS_cap_ud, d11[FK + i]) / BESS_chrg_eff - d11[GA + i]), d11[FZ + i]),
         min(
           (d11[FY + i] + (d12[HU + i] - d11[FY + i]) * d13[ddAMKI + i] + ((d11[FZ + i] + (d12[HV + i] - d11[FZ + i]) * d13[ddAMKI + i]) - (d11[FY + i] + (d12[HU + i] - d11[FY + i]) * d13[ddAMKI + i])) / Overall_harmonious_range * (d13[ddKZ + i] - Overall_harmonious_min_perc)),
-          (d11[FR + i] + (d12[HN + i] - d11[FR + i]) * d13[ddAMKI + i]) / BESS_chrg_eff))
+          (d11[FK + i] + (d12[HG + i] - d11[FK + i]) * d13[ddAMKI + i]) / BESS_chrg_eff))
     }
 
     /// el cons for el boiler op for harm op during harm op period
@@ -378,7 +378,7 @@ extension TunOl {
     // MQ=IF(OR(KI6=0,KZ6=0),MAX(0,FT6-MAX(0,MIN(BESS_cap_ud,FK6)/BESS_chrg_eff-FZ6-GA6)),FS6+(HO6-FS6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)+((FT6+(HP6-FT6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(FS6+(HO6-FS6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)))/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(KZ6-Overall_harmonious_min_perc))
     for i in 0..<365 {
       d13[ddMQ + i] = iff(
-        or(d13[ddKZ + i].isZero, d13[ddKI + i].isZero), d11[FT + i], d11[FS + i] + (d12[HO + i] - d11[FS + i]) * d13[ddAMKI + i] + ((d11[FT + i] + (d12[HP + i] - d11[FT + i]) * d13[ddAMKI + i]) - (d11[FS + i] + (d12[HO + i] - d11[FS + i]) * d13[ddAMKI + i])) / Overall_harmonious_range * (d13[ddKZ + i] - Overall_harmonious_min_perc))
+        or(d13[ddKZ + i].isZero, d13[ddKI + i].isZero), max(0, d11[FT + i] - max(0, min(BESS_cap_ud, d11[FK + i]) / BESS_chrg_eff - d11[FZ + i] - d11[GA + i])), d11[FS + i] + (d12[HO + i] - d11[FS + i]) * d13[ddAMKI + i] + ((d11[FT + i] + (d12[HP + i] - d11[FT + i]) * d13[ddAMKI + i]) - (d11[FS + i] + (d12[HO + i] - d11[FS + i]) * d13[ddAMKI + i])) / Overall_harmonious_range * (d13[ddKZ + i] - Overall_harmonious_min_perc))
     }
 
     /// Grid import for harm op during harm op period

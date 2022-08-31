@@ -104,7 +104,6 @@ public struct TunOl {
   let Heater_eff: Double = 0.96
   let Heater_outlet_T: Double = 565
   let HL_Coeff: [Double]
-  let Inv_eff_Ref_approx_handover: Double  // Inv_Eff!C22
   let Inv_eff_approx_handover: Double
   let LL_Coeff: [Double]
   let MethDist_cap_min_perc: Double = 0.1
@@ -322,11 +321,10 @@ public struct TunOl {
     self.Inverter_max_DC_input = Actual_DC_power.max()!
     let load = Actual_DC_power.map { $0 / dc }
 
-    self.LL_Coeff = Polynomial.fit(x: Array(load[..<20]), y: Array(eff[..<20]), order: 7)!.coefficients
-    self.HL_Coeff = Polynomial.fit(x: Array(load[16...].dropLast(2)), y: Array(eff[16...].dropLast(2)), order: 3)!.coefficients
+    self.LL_Coeff = Polynomial.fit(x: Array(load[..<19]), y: Array(eff[..<19]), order: 7)!.coefficients
+    self.HL_Coeff = Polynomial.fit(x: Array(load[15...]), y: Array(eff[15...]), order: 3)!.coefficients
 
-    self.Inv_eff_Ref_approx_handover = self.PV_AC_cap_ud * s[17] / eff[17] / self.PV_DC_cap_ud
-    self.Inv_eff_approx_handover = load[17]
+    self.Inv_eff_approx_handover = load[16]
     let PB_grs_el_cap_min_perc = PB_Ref_25p_gross_cap_max_aux_heat / PB_Ref_nom_gross_cap
     self.CSP_Cold_HTF_T = TES_cold_tank_T + SF_heat_exch_approach_temp
     let EY_Ref_Hydrogen_hour_nom_prod = 2.8

@@ -246,7 +246,7 @@ extension TunOl {
         d13[ddJP + i].isZero, 0,
         round(
           (d11[GE + i] + (d11[GF + i] - d11[GE + i]) * d13[dddJP + i])
-            - max(.zero, -((d11[FS + i] + (d11[FT + i] - d11[FS + i]) * d13[dddJP + i]) - d10[Z + i] - max(.zero, d10[AB + i] - (d11[FV + i] + (d11[FW + i] - d11[FV + i]) * d13[dddJP + i])) / El_boiler_eff - min((d11[FY + i] + (d11[FZ + i] - d11[FY + i]) * d13[dddJP + i]), max(.zero, d11[FK + i] - d11[GG + i] - d11[GA + i] * BESS_chrg_eff) / BESS_chrg_eff))), 5))
+            - min(Grid_import_max_ud * Grid_import_yes_no_PB_strategy, max(.zero, -((d11[FS + i] + (d11[FT + i] - d11[FS + i]) * d13[dddJP + i]) - d10[Z + i] - min(El_boiler_cap_ud, max(.zero, d10[AB + i] - (d11[FV + i] + (d11[FW + i] - d11[FV + i]) * d13[dddJP + i])) / El_boiler_eff) - min(BESS_cap_ud, max(.zero, d11[FK + i] - d11[GG + i] - d11[GA + i] * BESS_chrg_eff)) / BESS_chrg_eff))), 5))
     }
 
     /// Surplus grid import cap after opt day harm and max night op prep
@@ -256,12 +256,11 @@ extension TunOl {
       d13[ddJZ + i] = iff(
         d13[ddJP + i].isZero, 0,
         round(
-          (d12[IA + i] + (d12[IB + i] - d12[IA + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (d13[ddJP + i] - Overall_harmonious_min_perc))
-            - max(
+          (d12[IA + i] + (d12[IB + i] - d12[IA + i]) * d13[dddJP + i])
+            - min(Grid_import_max_ud * Grid_import_yes_no_PB_strategy, max(
               0,
-              -((d12[HO + i] + (d12[HP + i] - d12[HO + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (d13[ddJP + i] - Overall_harmonious_min_perc)) - d10[AA + i] - max(
-                0, d10[AC + i] - (d12[HR + i] + (d12[HS + i] - d12[HR + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (d13[ddJP + i] - Overall_harmonious_min_perc))) / El_boiler_eff - max(0, d12[HG + i] - d12[IC + i] - d12[HW + i] * BESS_chrg_eff) / BESS_chrg_eff)
-            ), 5))
+              -((d12[HO + i] + (d12[HP + i] - d12[HO + i]) * d13[dddJP + i]) - d10[AA + i] - min(El_boiler_cap_ud, max(
+                0, d10[AC + i] - (d12[HR + i] + (d12[HS + i] - d12[HR + i]) * d13[dddJP + i])) / El_boiler_eff) - min(BESS_cap_ud, max(0, d12[HG + i] - d12[IC + i] - d12[HW + i] * BESS_chrg_eff)) / BESS_chrg_eff))), 5))
     }
 
     /// Surplus RawMeth prod cap after opt day harm and min night op prep
