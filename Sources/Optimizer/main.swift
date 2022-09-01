@@ -152,7 +152,7 @@ func writeExcel(results: [[Double]]) -> String {
   let ws = wb.addWorksheet()
   var r = 0
   results.filter { $0[0].isFinite }.reversed().forEach { row in r += 1
-    ws.write(row.map(round), row: r)
+    ws.write(row.map { round($0 * 100) / 100 }, row: r)
   }
   let labels = [
     "LCOM", "LCOM2", "CAPEX", "OPEX", "Methanol", "Import", "Export", "Hours", "CSP_loop_nr", "TES_thermal_cap_ud", "PB_nom_gross_cap", "PV_AC_cap", "PV_DC_cap", "EY_var_net_nom_cons", "Hydrogen_storage_cap", "Heater_cap", "CCU_CO2_nom_prod", "CO2_storage_cap", "RawMeth_storage_cap",
@@ -190,7 +190,7 @@ func respond(request: HTTP.Request) -> HTTP.Response {
       .set(title: "Convergence curves")
       .set(xlabel: "Iteration").set(ylabel: "LCoM")
     plot.settings["xtics"] = "1"
-    return .init(html: .init(body: plot.svg!, refresh: source.isCancelled ? 0:10))
+    return .init(html: .init(body: plot.svg(), refresh: source.isCancelled ? 0:10))
   }
   return .init(html: .init(refresh: 10))
 }

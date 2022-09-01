@@ -130,7 +130,7 @@ struct PinchPointTool: ParsableCommand {
       $data i 4 u 1:2:(sprintf("%d°C", $2)) with labels tc ls 18 offset char 3,0 notitle, \
       $data i 5 u 1:2:(sprintf("%d°C", $2)) with labels tc ls 18 offset char 3,0 notitle
       """
-    let svg = plot.svg!
+    let svg = plot.svg()!
 
     let dia = HeatBalanceDiagram(values: pinchPoint)
 
