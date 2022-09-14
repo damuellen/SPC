@@ -15,16 +15,16 @@ import Meteo
 extension Insolation: MeasurementsConvertible {}
 
 protocol MeasurementsConvertible {
-  static var columns: [(name: String, unit: String)] { get }
-  var numericalForm: [Double] { get }
+  static var measurements: [(name: String, unit: String)] { get }
+  var values: [Double] { get }
   var prettyDescription: String { get }
 }
 
 extension MeasurementsConvertible {
-  var values: [String] { numericalForm.map { String(format: "%.2f", $0) } }
+  var formattedValues: [String] { values.map { String(format: "%.2f", $0) } }
 
   var prettyDescription: String {
-    return zip(numericalForm, Self.columns).reduce("\n") { result, tuple in
+    return zip(values, Self.measurements).reduce("\n") { result, tuple in
       let (value, desc) = (String(format: "%.2f", tuple.0), tuple.1)
       if value.hasPrefix("0") { return result }
       return result + (desc.name * (value + " " + desc.unit))
@@ -32,9 +32,9 @@ extension MeasurementsConvertible {
   }
 
   var multiBar: String {
-    let maxValue = numericalForm.max() ?? 0
+    let maxValue = values.max() ?? 0
     let increment = maxValue
-    return zip(numericalForm, Self.columns).reduce("\n") { result, pair in
+    return zip(values, Self.measurements).reduce("\n") { result, pair in
       let (value, desc) = (String(format: "%.2f", pair.0), pair.1.name)
       let c = 34 - desc.count - value.count
       let text = desc + String(repeating: " ", count: c) + value

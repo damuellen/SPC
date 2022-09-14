@@ -29,14 +29,14 @@ extension Storage: CustomStringConvertible {
 }
 
 extension Storage: MeasurementsConvertible {
-  static var columns: [(name: String, unit: String)] {
+  static var measurements: [(name: String, unit: String)] {
     [
       ("Storage|TankCold", "degC"), ("Storage|TankHot", "degC"),
       ("Storage|Charge", "percent")
     ]
   }
 
-  var numericalForm: [Double] {
+  var values: [Double] {
     [temperatureTank.cold.celsius, temperatureTank.hot.celsius, relativeCharge.percentage]
   }
 }

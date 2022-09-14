@@ -12,14 +12,14 @@ import Libc
 import Utilities
 
 extension Storage.Salt: MeasurementsConvertible {
-  static var columns: [(name: String, unit: String)] {
+  static var measurements: [(name: String, unit: String)] {
     [
       ("Storage|MassCold", "kg"), ("Storage|MassHot", "kg"),
       ("Storage|Mass", "kg")
     ]
   }
 
-  var numericalForm: [Double] {
+  var values: [Double] {
     [cold.kg, hot.kg, active.kg]
   }
 }

@@ -392,11 +392,11 @@ public struct SolarField: Parameterizable, HeatTransfer {
 
 extension SolarField: MeasurementsConvertible {
 
-  var numericalForm: [Double] {
+  var values: [Double] {
     [heatLossesHotHeader, heatLossesHCE, inFocus.percentage]
   }
 
-  static var columns: [(name: String, unit: String)] {
+  static var measurements: [(name: String, unit: String)] {
     [("SolarField|Header", "MW th"), ("SolarField|HCE", "MW th"),
      ("SolarField|Focus", "Ratio")]
   }

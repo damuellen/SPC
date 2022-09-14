@@ -28,9 +28,9 @@ public struct Insolation {
     diffuse = Double(meteo.dhi)
   }
 
-  public var numericalForm: [Double] { [direct, global, diffuse] }
+  public var values: [Double] { [direct, global, diffuse] }
 
-  public static var columns: [(name: String, unit: String)] {
+  public static var measurements: [(name: String, unit: String)] {
     [
       ("Solar|DNI", "Wh/m2"), ("Solar|GHI", "Wh/m2"),
       ("Solar|DHI", "Wh/m2")

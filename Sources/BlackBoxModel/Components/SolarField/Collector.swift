@@ -175,11 +175,11 @@ public struct Collector: Parameterizable, CustomStringConvertible {
 
 extension Collector: MeasurementsConvertible {
 
-  var numericalForm: [Double] {
+  var values: [Double] {
     [insolationAbsorber, cosTheta, efficiency * 100, parabolicElevation]
   }
 
-  static var columns: [(name: String, unit: String)] {
+  static var measurements: [(name: String, unit: String)] {
     [("Insolation", "W/sqm"), ("Collector|cosTheta", "Ratio"),
      ("Collector|Eff", "%"), ("Collector|Position", "degree")]
   }

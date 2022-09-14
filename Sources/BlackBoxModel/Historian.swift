@@ -257,8 +257,7 @@ public final class Historian {
         if stride == 1 || intervalCounter % stride == 0 {
           let csv = generateValues()
           #if DEBUG
-          let s = status.numericalForm.map(\.description)
-            .joined(separator: ",")
+          let s = status.formattedValues.joined(separator: ",")
           stringBuffer.append(contentsOf: csv + "," + s + .lineBreak)
           #else
           stringBuffer.append(contentsOf: csv + .lineBreak)
@@ -374,11 +373,11 @@ public final class Historian {
     let f2 = wb.addFormat().set(num_format: "0.0")
 
     let statusCaptions =
-      ["Date"] + Insolation.columns.map(\.0) + Status.modes
-      + Status.columns.map(\.0)
+      ["Date"] + Insolation.measurements.map(\.0) + Status.modes
+      + Status.measurements.map(\.0)
     let statusCount = statusCaptions.count
     let modesCount = Status.modes.count
-    let energyCaptions = ["Date"] + PlantPerformance.columns.map(\.0)
+    let energyCaptions = ["Date"] + PlantPerformance.measurements.map(\.0)
     let energyCount = energyCaptions.count
 
     let ws1 = wb.addWorksheet().column("A:A", width: 12, format: f1)
@@ -394,10 +393,9 @@ public final class Historian {
 
     statusHistory.indices.forEach { i in
       ws1.write(.datetime(date), [i + 1, 0])
-      ws1.write(sunHistory[i].numericalForm, row: i + 1, col: 1)
+      ws1.write(sunHistory[i].formattedValues, row: i + 1, col: 1)
       ws1.write(statusHistory[i].modes, row: i + 1, col: 5)
-      ws1.write(
-        statusHistory[i].numericalForm, row: i + 1, col: 5 + modesCount)
+      ws1.write(statusHistory[i].formattedValues, row: i + 1, col: 5 + modesCount)
       date.addTimeInterval(interval)
     }
 
@@ -406,7 +404,7 @@ public final class Historian {
 
     performanceHistory.indices.forEach { i in
       ws2.write(.datetime(date), [i + 1, 0])
-      ws2.write(performanceHistory[i].numericalForm, row: i + 1, col: 1)
+      ws2.write(performanceHistory[i].formattedValues, row: i + 1, col: 1)
       date.addTimeInterval(interval)
     }
 
@@ -419,31 +417,31 @@ public final class Historian {
   private func storeInDB() {
     guard let db = db else { return }
 
-    func createTable(name: String, columns: [String]) {
+    func createTable(name: String, measurements: [String]) {
       let table = Table(name)
-      let expressions = columns.map { Expression<Double>($0) }
+      let expressions = measurements.map { Expression<Double>($0) }
       try! db.run(table.create { t in expressions.forEach { t.column($0) } })
     }
 
-    let status = Status.columns.map {
-      $0.0.replacingOccurrences(of: "|", with: "_")
+    let status = Status.measurements.map {
+      $0.name.replacingOccurrences(of: "|", with: "_")
     }
-    let energy = PlantPerformance.columns.map {
-      $0.0.replacingOccurrences(of: "|", with: "_")
+    let energy = PlantPerformance.measurements.map {
+      $0.name.replacingOccurrences(of: "|", with: "_")
     }
-    createTable(name: "PerformanceData", columns: status)
-    createTable(name: "Performance", columns: energy)
+    createTable(name: "PerformanceData", measurements: status)
+    createTable(name: "Performance", measurements: energy)
 
     let p1 = repeatElement("?", count: status.count).joined(separator: ",")
     try! db.transaction {
       let stmt = try! db.prepare("INSERT INTO PerformanceData VALUES (\(p1))")
-      for entry in statusHistory { try! stmt.run(entry.numericalForm) }
+      for entry in statusHistory { try! stmt.run(entry.values) }
     }
 
     let p2 = repeatElement("?", count: energy.count).joined(separator: ",")
     try! db.transaction {
       let stmt = try! db.prepare("INSERT INTO Performance VALUES (\(p2))")
-      for entry in performanceHistory { try! stmt.run(entry.numericalForm) }
+      for entry in performanceHistory { try! stmt.run(entry.values) }
     }
   }
   #endif
@@ -457,36 +455,39 @@ public final class Historian {
 
   private var headers: (name: String, unit: String, count: Int) {
     #if DEBUG
-    let columns = [
-      Insolation.columns, PlantPerformance.columns, Status.columns,
+    let measurements = [
+      Insolation.measurements, PlantPerformance.measurements, Status.measurements,
     ]
     .joined()
     #else
-    let columns = [Insolation.columns, PlantPerformance.columns].joined()
+    let measurements = [Insolation.measurements, PlantPerformance.measurements].joined()
     #endif
-    let names: String = columns.map { $0.0 }.joined(separator: ",")
-    let units: String = columns.map { $0.1 }.joined(separator: ",")
-    return ("DateTime," + names, "_," + units, columns.count)
+    let names: String = measurements.map { $0.name }.joined(separator: ",")
+    let units: String = measurements.map { $0.unit }.joined(separator: ",")
+    return ("DateTime," + names, "_," + units, measurements.count)
   }
 
   // MARK: Write Results
 
   private func generateDailyValues() -> String {
-    iso8601_Hourly.prefix(10) + .separator
-      + [dailyRadiation.values, dailyPerformance.values].joined()
-      .joined(separator: .separator)
+    iso8601_Hourly.prefix(10) + .separator + [
+      dailyRadiation.formattedValues,
+      dailyPerformance.formattedValues
+      ].joined().joined(separator: .separator)
   }
 
   private func generateHourlyValues() -> String {
-    iso8601_Hourly + .separator
-      + [hourlyRadiation.values, hourlyPerformance.values].joined()
-      .joined(separator: .separator)
+    iso8601_Hourly + .separator + [
+      hourlyRadiation.formattedValues,
+      hourlyPerformance.formattedValues
+      ].joined().joined(separator: .separator)
   }
 
   private func generateValues() -> String {
-    iso8601_Interval + .separator
-      + [customIntervalRadiation.values, customIntervalPerformance.values]
-      .joined().joined(separator: .separator)
+    iso8601_Interval + .separator + [
+      customIntervalRadiation.formattedValues,
+      customIntervalPerformance.formattedValues
+      ].joined().joined(separator: .separator)
   }
 }
 
