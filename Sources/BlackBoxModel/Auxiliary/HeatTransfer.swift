@@ -111,20 +111,20 @@ extension HeatTransfer {
   }
 
   public var description: String {
-       String(format: "  Mass flow: %3.1f kg/s", massFlow.rate).padding(28)
-      + String(format: " T in: %3.1f degC", temperature.inlet.celsius).padding(20)
-      + String(format: "T out: %3.1f degC", temperature.outlet.celsius).padding(20)
+      "  Mass flow: \(formattedValues[0]) kg/s".padding(28)
+      + " T in: \(formattedValues[1]) degC".padding(20)
+      + "T out: \(formattedValues[2]) degC".padding(20)
   }
 
-  var values: [String] {
+  var formattedValues: [String] {
     [
-      massFlow.rate.description,
-      temperature.inlet.celsius.description,
-      temperature.outlet.celsius.description,
+      String(format: "%3.1f", massFlow.rate),
+      String(format: "%3.1f", temperature.inlet.celsius),
+      String(format: "%3.1f", temperature.outlet.celsius),
     ]
   }
 
-  var numericalForm: [Double] {
+  var values: [Double] {
     [massFlow.rate, temperature.inlet.celsius, temperature.outlet.celsius]
   }
 
@@ -185,6 +185,6 @@ extension HeatTransfer {
 
 extension Collection where Element == HeatTransfer {
   var values: [String] {
-    reduce(into: []) { $0.append(contentsOf: $1.values) }
+    reduce(into: []) { $0.append(contentsOf: $1.formattedValues) }
   }
 }

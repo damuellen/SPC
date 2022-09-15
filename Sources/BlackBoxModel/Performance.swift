@@ -34,14 +34,14 @@ public struct PlantPerformance: MeasurementsConvertible {
     self.electric.totalize(values.electric, fraction: fraction)
   }
 
-  var numericalForm: [Double] {
-    thermal.numericalForm + fuel.numericalForm
-      + parasitics.numericalForm + electric.numericalForm
+  var values: [Double] {
+    thermal.values + fuel.values
+      + parasitics.values + electric.values
   }
 
-  static var columns: [(name: String, unit: String)] {
-    ThermalEnergy.columns + FuelConsumption.columns
-      + Parasitics.columns + ElectricPower.columns
+  static var measurements: [(name: String, unit: String)] {
+    ThermalEnergy.measurements + FuelConsumption.measurements
+      + Parasitics.measurements + ElectricPower.measurements
   }
 }
 
@@ -76,11 +76,11 @@ public struct ElectricPower: Encodable, MeasurementsConvertible {
   internal(set) public var net: Double = .zero
   internal(set) public var consum: Double = .zero
 
-  var numericalForm: [Double] {
+  var values: [Double] {
     [demand, steamTurbineGross, photovoltaic, storage, parasitics, shared, net, consum]
   }
 
-  static var columns: [(name: String, unit: String)] {
+  static var measurements: [(name: String, unit: String)] {
     [
       ("Electric|Demand", "MWh e"),
       ("Electric|SteamTurbineGross", "MWh e"),
@@ -168,11 +168,11 @@ public struct Parasitics: Encodable, MeasurementsConvertible {
   internal(set) public var solarField: Double = .zero
   internal(set) public var storage: Double = .zero
 
-  var numericalForm: [Double] {
+  var values: [Double] {
     [solarField, powerBlock, storage, shared, 0, gasTurbine]
   }
 
-  static var columns: [(name: String, unit: String)] {
+  static var measurements: [(name: String, unit: String)] {
     [
       ("Parasitics|SolarField", "MWh e"), ("Parasitics|PowerBlock", "MWh e"),
       ("Parasitics|Storage", "MWh e"), ("Parasitics|Shared", "MWh e"),
@@ -206,7 +206,7 @@ public struct ThermalEnergy: Encodable, MeasurementsConvertible {
 
   var balance: Power { production - demand }
 
-  var numericalForm: [Double] {
+  var values: [Double] {
     [
       demand.megaWatt, solar.megaWatt, dumping.megaWatt,
       toStorage.megaWatt, storage.megaWatt,
@@ -215,7 +215,7 @@ public struct ThermalEnergy: Encodable, MeasurementsConvertible {
     ]
   }
 
-  static var columns: [(name: String, unit: String)] {
+  static var measurements: [(name: String, unit: String)] {
     [
       ("Thermal|Demand", "MWh th"),
       ("Thermal|Solar", "MWh th"), ("Thermal|Dumping", "MWh th"),
@@ -274,11 +274,11 @@ public struct FuelConsumption: Encodable, MeasurementsConvertible {
     boiler + heater + gasTurbine
   }
 
-  var numericalForm: [Double] {
+  var values: [Double] {
     [backup, boiler, heater, gasTurbine, combined]
   }
 
-  static var columns: [(name: String, unit: String)] {
+  static var measurements: [(name: String, unit: String)] {
     [
       ("FuelConsumption|Backup", "MWh"), ("FuelConsumption|Boiler", "MWh"),
       ("FuelConsumption|Heater", "MWh"), ("FuelConsumption|GasTurbine", "MWh"),

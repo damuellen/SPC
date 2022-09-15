@@ -44,24 +44,24 @@ public struct Status: CustomStringConvertible, MeasurementsConvertible {
     ]
   }
 
-  var numericalForm: [Double] {
-    let values = collector.numericalForm //+ storage.salt.numericalForm
-     + (storage as MeasurementsConvertible).numericalForm
-     + (solarField as MeasurementsConvertible).numericalForm
-    let flows = (storage as HeatTransfer).numericalForm
-     + heater.numericalForm
-     + powerBlock.cycle.numericalForm 
-     + heatExchanger.numericalForm
-     + solarField.header.numericalForm 
-    let loops = solarField.loops.flatMap(\.numericalForm)
+  var values: [Double] {
+    let values = collector.values //+ storage.salt.values
+     + (storage as MeasurementsConvertible).values
+     + (solarField as MeasurementsConvertible).values
+    let flows = (storage as HeatTransfer).values
+     + heater.values
+     + powerBlock.cycle.values 
+     + heatExchanger.values
+     + solarField.header.values 
+    let loops = solarField.loops.flatMap(\.values)
     return values + flows + loops
   }
 
-  static var columns: [(name: String, unit: String)] {
+  static var measurements: [(name: String, unit: String)] {
     let values: [(name: String, unit: String)] =
       [("|Massflow", "kg/s"), ("|Tin", "degC"), ("|Tout", "degC")]
-    return Collector.columns //+ Storage.Salt.columns 
-      + Storage.columns + SolarField.columns + [
+    return Collector.measurements //+ Storage.Salt.measurements 
+      + Storage.measurements + SolarField.measurements + [
       "Storage", "Heater", "PowerBlock", "HeatExchanger", "SolarField",
       "DesignLoop", "NearLoop", "AvgLoop", "FarLoop",
     ].flatMap { name in

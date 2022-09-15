@@ -90,7 +90,7 @@ public struct Recording: CustomStringConvertible, Comparable {
   ) -> [[Double]] {
     if statusHistory.isEmpty { return [] }
     let r = range(of: interval).clamped(to: statusHistory.indices)
-    return statusHistory[r].map { $0[keyPath: keyPath].cycle.numericalForm }
+    return statusHistory[r].map { $0[keyPath: keyPath].cycle.values }
   }
 
   public subscript(_ keyPaths: KeyPath<PlantPerformance, Double>...,
@@ -110,7 +110,7 @@ public struct Recording: CustomStringConvertible, Comparable {
   ) -> [[Double]] {
     if statusHistory.isEmpty { return [] }
     let r = range(of: interval).clamped(to: statusHistory.indices)
-    return statusHistory[r].map { $0[keyPath: keyPath].numericalForm }
+    return statusHistory[r].map { $0[keyPath: keyPath].values }
   }
 
   public func solarFieldHeader(range: DateInterval) -> ([[Double]], [[Double]]) {
