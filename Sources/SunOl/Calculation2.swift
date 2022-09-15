@@ -1,11 +1,11 @@
 extension TunOl {
-  func hour4(_ hour4 h: inout [Double], j: Int, d1: [Double], hour h0: [Double]) {
+  func hour4(_ h: inout [Double], j: Int, d1: [Double], hour h0: [Double]) {
     let (J0, L0, M0, BK, BM, BP, BQ, CC) = (26280, 43800, 52560, 481800, 499320, 525600, 534360, 639480)
     let BO: Int = 516840
     let BOday: [[Int]] = h0[BO + 1..<(BO + 8760)].indices.chunked(by: { h0[$0] == h0[$1] }).map { $0.map { $0 - BO } }
 
     let AY: Int = 376680
-    let AYsum: [Double] = hour.sum(hours: BOday, condition: AY)
+    let AYsum: [Double] = h0.sum(hours: BOday, condition: AY)
     /// Maximum night op perc considering tank sizes
     let DV: Int = 0
     let day1R = 5475
@@ -17,7 +17,7 @@ extension TunOl {
       }
       .joined()
     // =IF(BT6=0,0,VLOOKUP($BO6,DailyCalc_1!$A$3:$R$367,COLUMN(DailyCalc_1!R$3)))
-    hour4.replaceSubrange(1..<8760, with: day)
+    h.replaceSubrange(1..<8760, with: day)
     for i in 1..<8760 where h0[BT2 + i].isZero { h[i] = 0.0 }
 
     /// Max net elec demand outside harm op period
@@ -118,12 +118,12 @@ extension TunOl {
               return $0
             }) < PB_warm_start_duration, PB_hot_start_heat_req, PB_warm_start_heat_req), 0.0)
     }
-    let EBsum: [Double] = hour4.sum(hours: BOday, condition: EB)
+    let EBsum: [Double] = h.sum(hours: BOday, condition: EB)
     /// Corresponding gross heat cons for ST
     let EC: Int = 61320
     // IF(EA6=0,0,EA6/PB_nom_gross_eff/POLY(EA6/PB_nom_gross_cap_ud,el_Coeff))
     for i in 1..<8760 { h[EC + i] = iff(h[EA + i].isZero, 0.0, h[EA + i] / PB_nom_gross_eff / POLY(h[EA + i] / PB_nom_gross_cap_ud, el_Coeff)) }
-    let ECsum: [Double] = hour4.sum(hours: BOday, condition: EC)
+    let ECsum: [Double] = h.sum(hours: BOday, condition: EC)
     /// Corresponding gross heat cons for extraction
     let ED: Int = 70080
     // ED=IF(OR(DV6=0,$BM6>0,PB_nom_gross_cap_ud<=0),0,PB_Ratio_Heat_input_vs_output*MAX(0,MIN(IF(A_overall_var_max_cons=0,1,(MIN(DZ6-DY6+$BP6,DX6)-A_overall_fix_stby_cons-IF($BM7=0,0,A_overall_stup_cons))/A_overall_var_max_cons)*A_overall_var_heat_max_cons,(A_overall_var_heat_max_cons-A_overall_var_heat_min_cons)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(DV6-A_equiv_harmonious_min_perc)+A_overall_var_heat_min_cons)+A_overall_heat_fix_stby_cons+IF($BM7=0,0,A_overall_heat_stup_cons)-$BQ6-MIN(El_boiler_cap_ud,MAX(0,DZ6+$BP6-DX6-DY6)*El_boiler_eff)))
@@ -144,7 +144,7 @@ extension TunOl {
               - min(El_boiler_cap_ud, max(0.0, h[DZ + i] + h0[BP + i] - h[DX + i] - h[DY + i]) * El_boiler_eff)))
     }
 
-    let EDsum: [Double] = hour4.sum(hours: BOday, condition: ED)
+    let EDsum: [Double] = h.sum(hours: BOday, condition: ED)
     let ECEDsum: [Double] = zip(ECsum, EDsum).map { $0 + $1 }
     /// TES energy available if above min op case
     let EE: Int = 78840
@@ -199,7 +199,7 @@ extension TunOl {
     }
     let CT: Int = 788400
     // let CTsum: [Double] = hour.sum(hours: BOday, condition: CT)
-    let DXsum: [Double] = hour4.sum(hours: BOday, condition: DX)
+    let DXsum: [Double] = h.sum(hours: BOday, condition: DX)
 
     /// Surplus TES energy due to op case
     let EK: Int = 131400
@@ -213,7 +213,7 @@ extension TunOl {
       h[EL + i] = iff(
         or(and(h[EK + i] > 0.0, h0[AY + i] > 0.0, h0[AY + i - 1].isZero), and(h[EK + i] > 0.0, h0[AY + i + 1].isZero, h0[AY + i] > 0.0)), h0[AY + i], 0.0)
     }
-    let ELsum: [Double] = hour4.sum(hours: BOday, condition: EL)
+    let ELsum: [Double] = h.sum(hours: BOday, condition: EL)
     /// Surplus energy due to op limit after removal of peripherial hours
     let EM: Int = 148920
     // MAX(0,EK6-SUMIF(BO5:BO8763,"="BO6,EL5:EL8763)*Heater_eff*(1+1/Ratio_CSP_vs_Heater))
@@ -230,8 +230,8 @@ extension TunOl {
     /// Partitions of PV hour PV to be dedicated to TES chrg
     let EO: Int = 166440
     let AW: Int = 359160
-    let EN_BOcountNonZero = hour4.count(hours: BOday, range: EN, predicate: { $0 > 0.0 })
-    let ENsum: [Double] = hour4.sum(hours: BOday, condition: EN)
+    let EN_BOcountNonZero = h.count(hours: BOday, range: EN, predicate: { $0 > 0.0 })
+    let ENsum: [Double] = h.sum(hours: BOday, condition: EN)
     // IF(OR(EN6=0,EM6=0),0,MAX((AW6-EN6)/(EM6/(1+1/Ratio_CSP_vs_Heater)/Heater_eff/COUNTIFS(BO5:BO8763,"="BO6,EN5:EN8763,">0")),(J6-EN6*Heater_eff/Ratio_CSP_vs_Heater)/(EM6/(1+Ratio_CSP_vs_Heater)/COUNTIFS(BO5:BO8763,"="BO6,EN5:EN8763,">0")))/SUMIF(BO5:BO8763,"="BO6,EN5:EN8763)*EN6)
     for i in 1..<8760 {
       let a = (h0[AW + i] - h[EN + i]) / (h[EM + i] / (1 + 1 / Ratio_CSP_vs_Heater) / Heater_eff / EN_BOcountNonZero[i - 1])
@@ -239,7 +239,7 @@ extension TunOl {
       let s = ENsum[i - 1]
       h[EO + i] = iff(or(h[EN + i].isZero, h[EM + i].isZero), 0.0, max(a, b) / s * h[EN + i])
     }
-    let EOsum: [Double] = hour4.sum(hours: BOday, condition: EO)
+    let EOsum: [Double] = h.sum(hours: BOday, condition: EO)
     /// corrected max possible elec to TES
     let EP: Int = 175200
     // EP=IF(EE6=0,0,IF(EK6>0,MAX(0,EN6-IF(EM6=0,0,EM6/(1+1/Ratio_CSP_vs_Heater)/Heater_eff/SUMIF($BO$5:$BO$8764,"="&$BO6,EO$5:EO$8764)*EO6)),$AY6))
@@ -368,9 +368,9 @@ extension TunOl {
                   - iff(h[EX + i + 1].isZero, 0.0, overall_heat_stup_cons[j])) / overall_var_heat_max_cons[j], 1))))
     }
 
-    // let FAsum: [Double] = hour4.sum(hours: BOday, condition: FA)
-    let FA_DXnonZeroSum = hour4.sum(FA, hours: BOday, condition: DX, predicate: { $0 > 0.0 })
-    let CT_DXnonZeroSum = hour.sum(CT, hours: BOday, range2: hour4, condition: DX, predicate: { $0 > 0.0 })
+    // let FAsum: [Double] = h.sum(hours: BOday, condition: FA)
+    let FA_DXnonZeroSum = h.sum(FA, hours: BOday, condition: DX, predicate: { $0 > 0.0 })
+    let CT_DXnonZeroSum = h.sum(CT, hours: BOday, range2: h, condition: DX, predicate: { $0 > 0.0 })
     /// TES energy to fulfil op case if above
     let EJ: Int = 122640
 
