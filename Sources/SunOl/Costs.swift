@@ -21,15 +21,17 @@ public struct Costs {
     let PV_AC_part = (basis: 490.0, exp: 0.7, coeff: 64150.294897127, range: 267...778)
     let Heater_system = (basis: 200.0, c1: 4_000_000.0, exp: 0.4, c2: 211728.735839637, factor: 0.9, coeff: 3_500_000.0, range: 200.0...400.0)
     let Thermal_energy_storage = (basis: 26920.0, c1: 2_000_000.0, exp: 0.75, c2: 1.90888818091572E+03, factor: 0.55, coeff: 26_000_000.0)
-    let Power_Block = (basis: 50.0, c1: 84_370_000.0, coeff:  466_228.572051, range: 50.0...200.0)
-    let Electrolysis_coeff = 700000 * 1.2 * 0 + (2.5 - 0.36) * 1000000 * (model.EY_Ref_var_net_nom_cons + model.EY_Ref_var_nom_cons) / model.EY_Ref_var_net_nom_cons
+    let Power_Block = (basis: 50.0, c1: 84_370_000.0, coeff: 466_228.572051, range: 50.0...200.0)
+    let Electrolysis_coeff = 700000 * 1.2 * 0 + (2.5 - 0.36) * 1_000_000 * (model.EY_Ref_var_net_nom_cons + model.EY_Ref_var_nom_cons) / model.EY_Ref_var_net_nom_cons
     let Hydrogen_storage = (basis: 24E-2 * Hydrogen_density, exp: 0.9, coeff: 780_000 * 1.2 * 0)
-    let CCU_plant = (basis: 22.890276, exp: 0.7, coeff:  18_292_682.9268293 * 0)
+    let CCU_plant = (basis: 22.890276, exp: 0.7, coeff: 18_292_682.9268293 * 0)
     let CO2_storage = (basis: 226.8, exp: 0.9, coeff: 780_000.0 * 0)
-    let MethSynt_plant = (basis: 19.0665095748076, exp: 0.7, coeff:  29_268_292.6829268 * 0)
+    let MethSynt_plant = (basis: 19.0665095748076, exp: 0.7, coeff: 29_268_292.6829268 * 0)
     let RawMeth_storage = (basis: 1.87680000000000E+02, exp: 0.9, coeff: (694146.8625 / FX_USD) * 0)
-    let MethDist_plant = (basis: 1.24750499001996E+01, exp: 1.0, coeff: 0.36*(model.EY_Ref_var_net_nom_cons+model.EY_Ref_var_nom_cons)/model.MethDist_Ref_meth_hour_prod*1000000)
-    let Battery_energy_storage = (basis: 50.0, c1: 5317746.25, coeff: 319064.775)
+    let MethDist_plant = (
+      basis: 1.24750499001996E+01, exp: 1.0, coeff: 0.36 * (model.EY_Ref_var_net_nom_cons + model.EY_Ref_var_nom_cons) / model.MethDist_Ref_meth_hour_prod * 1_000_000
+    )
+    let Battery_energy_storage = (basis: 0.0, c1: 0.0, coeff: 550000.0)
     let Electrical_boiler = (basis: 3.27, exp: 0.7, coeff: 494000 * 1.45 * 1.2)
     let Substation = (basis: 135.0, exp: 0.7, coeff: 2.4E+06)
 
@@ -51,15 +53,20 @@ public struct Costs {
     // let CSP_SF_cost_dedicated_to_Hydrogen = Solar_field.coeff * ((model.CSP_loop_nr_ud - auxLoops * aux_Heat_ratio) / Solar_field.basis) ** Solar_field.exp + Solar_field.c1 * Solar_field.f
     //   * (model.CSP_loop_nr_ud - auxLoops * aux_Heat_ratio)
 
-    self.CSP_SF_cost_dedicated_to_Methanol = Solar_field.coeff * (model.CSP_loop_nr_ud.rounded(.up) / Solar_field.basis) ** Solar_field.exp + Solar_field.c1 * Solar_field.f * model.CSP_loop_nr_ud.rounded(.up)
+    self.CSP_SF_cost_dedicated_to_Methanol = Solar_field.coeff * (model.CSP_loop_nr_ud.rounded(.up) / Solar_field.basis) ** Solar_field.exp + Solar_field.c1 * Solar_field.f
+      * model.CSP_loop_nr_ud.rounded(.up)
     // let CSP_SF_cost_dedicated_to_aux_heat = AdditionalCostPerLoop * auxLoops
 
     self.PV_DC_cost = model.PV_DC_cap_ud * PV_DC_part.coeff + 0.0
     self.PV_AC_cost = (model.PV_AC_cap_ud / PV_AC_part.basis) ** PV_AC_part.exp * PV_AC_part.basis * PV_AC_part.coeff + 0.0
 
-    self.Heater_cost = model.Heater_cap_ud > 0.0 ? (Heater_system.c1 + Heater_system.coeff * (model.Heater_cap_ud / Heater_system.basis) ** Heater_system.exp + model.Heater_cap_ud * Heater_system.factor * Heater_system.c2) : 0.0
+    self.Heater_cost =
+      model.Heater_cap_ud > 0.0
+      ? (Heater_system.c1 + Heater_system.coeff * (model.Heater_cap_ud / Heater_system.basis) ** Heater_system.exp + model.Heater_cap_ud * Heater_system.factor * Heater_system.c2)
+      : 0.0
 
-    self.TES_storage_cost = Thermal_energy_storage.c1 + Thermal_energy_storage.coeff * (model.TES_salt_mass / Thermal_energy_storage.basis) ** Thermal_energy_storage.exp + model.TES_salt_mass * Thermal_energy_storage.c2 * Thermal_energy_storage.factor
+    self.TES_storage_cost = Thermal_energy_storage.c1 + Thermal_energy_storage.coeff * (model.TES_salt_mass / Thermal_energy_storage.basis) ** Thermal_energy_storage.exp
+      + model.TES_salt_mass * Thermal_energy_storage.c2 * Thermal_energy_storage.factor
     if TES_storage_cost.isNaN { TES_storage_cost = 0 }
     self.PB_cost = model.PB_nom_gross_cap_ud > 0.0 ? (Power_Block.c1 + (model.PB_nom_gross_cap_ud - Power_Block.basis) * Power_Block.coeff) : 0
 
@@ -70,7 +77,6 @@ public struct Costs {
     self.CCU_plant_cost = CCU_plant.coeff * (model.CCU_CO2_nom_prod_ud / CCU_plant.basis) ** CCU_plant.exp + 0.0
 
     self.CO2_storage_cost = CO2_storage.coeff * (model.CO2_storage_cap_ud / CO2_storage.basis) ** CO2_storage.exp + 0.0
-
     self.MethSynt_plant_cost = MethSynt_plant.coeff * ((model.MethSynt_RawMeth_nom_prod_ud / MethSynt_plant.basis) ** MethSynt_plant.exp) + 0.0
 
     self.RawMeth_storage_cost = RawMeth_storage.coeff * ((model.RawMeth_storage_cap_ud / RawMeth_storage.basis) ** RawMeth_storage.exp) + 0.0
@@ -84,10 +90,13 @@ public struct Costs {
     // let Substation_cost_ICPH =
     // Substation_capacity.coeff * Substation_capacity.basis * ((model.Heater_cap_ud + model.EY_var_net_nom_cons_ud  + model.EY_aux_elec_input + model.Meth_nominal_aux_electr_cons) / Substation_capacity.basis) ** Substation_capacity.exp
 
-    self.Substation_cost = max(model.Grid_export_max_ud, model.Grid_import_max_ud) > 0 ? Substation.coeff * (max(model.Grid_export_max_ud, model.Grid_import_max_ud) / Substation.basis) ** Substation.exp : 0.0
+    self.Substation_cost =
+      max(model.Grid_export_max_ud, model.Grid_import_max_ud) > 0
+      ? Substation.coeff * (max(model.Grid_export_max_ud, model.Grid_import_max_ud) / Substation.basis) ** Substation.exp : 0.0
 
     let CSP_O_M_Cost = (11.3333 / 3.0 * 1.0 / 3.0 * 1000.0 * 1000) + (0.00606061 / 3.0 * 1.0 / 3.0 * 1000.0 * 1000.0) * model.CSP_loop_nr_ud
-    let PV_O_M_Cost = (11.3333 * 1000.0 * 1000) + (0.00606061 / 100.0 * 1000.0 * 1000.0) * model.PV_DC_cap_ud
+    // let PV_O_M_Cost = (11.3333 * 1000.0 * 1000) + (0.00606061 / 100.0 * 1000.0 * 1000.0) * model.PV_DC_cap_ud
+    let PV_O_M_Cost = (18.01 * 1000 + model.PV_DC_cap_ud * -0.008375 * 1000) * model.PV_DC_cap_ud
     let PB_O_M_Cost = (11.3333 / 3.0 * 2.0 / 3.0 * 1000.0 * 1000.0) + (0.00606061 / 3 * 2.0 / 3.0 * 1000.0 * 1000.0) * model.PB_nom_gross_cap_ud
     let OM_Cost_EY_Methsynt = (MethDist_plant_cost + Electrolysis_cost) * 0.035
     self.CO2_Cost = 40.0 / model.MethDist_Ref_meth_hour_prod * model.MethSynt_Ref_rawmeth_hour_prod / model.MethSynt_Ref_rawmeth_hour_prod * model.MethSynt_Ref_CO2_hour_cons
@@ -99,12 +108,11 @@ public struct Costs {
     //  Assembly_hall + CSP_SF_cost_dedicated_to_Hydrogen + PV_DC_Cost + PV_AC_Cost + Heater_Cost
     //  + TES_Storage_cost + PB_Cost + (Electrical_boiler_cost * aux_Heat_ratio) + Substation_cost + Electrolysis_Cost
     self.Total_CAPEX =
-      Assembly_hall_cost + CSP_SF_cost_dedicated_to_Methanol + PV_DC_cost + PV_AC_cost + Heater_cost + TES_storage_cost + PB_cost + Electrolysis_cost + Hydrogen_storage_cost + CCU_plant_cost + CO2_storage_cost + MethSynt_plant_cost + RawMeth_storage_cost + MethDist_plant_cost + Battery_storage_cost + Electrical_boiler_cost
-      + Substation_cost
+      Assembly_hall_cost + CSP_SF_cost_dedicated_to_Methanol + PV_DC_cost + PV_AC_cost + Heater_cost + TES_storage_cost + PB_cost + Electrolysis_cost + Hydrogen_storage_cost
+      + CCU_plant_cost + CO2_storage_cost + MethSynt_plant_cost + RawMeth_storage_cost + MethDist_plant_cost + Battery_storage_cost + Electrical_boiler_cost + Substation_cost
 
-    self.Total_OPEX = CSP_O_M_Cost + PV_O_M_Cost + PB_O_M_Cost + OM_Cost_EY_Methsynt 
+    self.Total_OPEX = CSP_O_M_Cost + PV_O_M_Cost + PB_O_M_Cost + OM_Cost_EY_Methsynt
   }
-  
   var Total_CAPEX: Double
   var Total_OPEX: Double
   var CO2_Cost: Double
@@ -128,7 +136,9 @@ public struct Costs {
 
   public func LCOM(meth_produced_MTPH: Double, elec_from_grid: Double, elec_to_grid: Double) -> Double {
     let Overhead_cost_on_Methanol = 1 / (1 - 0.15)
-    let lcom = ((((Costs.FCR * Total_CAPEX + Total_OPEX) + (elec_from_grid * Costs.Elec_buy * 1000) - (elec_to_grid * Costs.Elec_sell * 1000)) / meth_produced_MTPH) + CO2_Cost) * Overhead_cost_on_Methanol
+    let lcom =
+      ((((Costs.FCR * Total_CAPEX + Total_OPEX) + (elec_from_grid * Costs.Elec_buy * 1000) - (elec_to_grid * Costs.Elec_sell * 1000)) / meth_produced_MTPH) + CO2_Cost)
+      * Overhead_cost_on_Methanol
     return lcom
   }
 }
