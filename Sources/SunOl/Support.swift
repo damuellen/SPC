@@ -28,6 +28,13 @@ extension Array where Element == Double {
       return sum
     }
   }
+  
+  @inlinable func sumOf(_ range: Int, days: [[Int]], into array: inout [Double], at: Int, condition: Int, predicate: (Double) -> Bool) {
+    for (i, day) in days.enumerated() {
+      array[i + at] = 0.0
+      day.forEach { d in if predicate(self[(d + condition)]) { array[i + at] += self[(d + range)] } }
+    }
+  }
 
   func sumOf(_ range: Int, days: [[Int]], condition: Int, predicate: (Double) -> Bool) -> [Double] {
     days.map { day in var sum = 0.0
