@@ -127,6 +127,7 @@ public struct IGOA {
           }
         }
       }
+      let timer = Date()
       let cursor = iteration * grassHopperPositions.count
       DispatchQueue.concurrentPerform(iterations: grassHopperPositions.count) { i in if source.isCancelled { return }
         for j in grassHopperPositions[i].indices { grassHopperPositions[i][j].clamp(to: bounds[j]) }
@@ -134,6 +135,7 @@ public struct IGOA {
         targetResults[cursor + i] = result + [Double(iteration)]
         grassHopperFitness[i] = result[0]
       }
+      let calculationsPerSecond = 1 / (-timer.timeIntervalSinceNow / Double(grassHopperPositions.count))
       if source.isCancelled { break }
 
       if source.isCancelled { break }
@@ -151,6 +153,7 @@ public struct IGOA {
       print("Population: \(grassHopperPositions.count) ".randomColor(), "Iterations: \(iteration)".leftpad(28).randomColor())
       print(pretty(values: targetFitness))
       print(pretty(values: targetPosition))
+      print("Calculations per Second: \(calculationsPerSecond)")
       let sort = targetFitness.indices.sorted(by:{ targetFitness[$0] < targetFitness[$1] })
       sort.dropFirst().forEach {
         targetFitness[$0] = targetFitness[sort.first!]
