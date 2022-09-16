@@ -153,7 +153,7 @@ public struct IGOA {
       print("Population: \(grassHopperPositions.count) ".randomColor(), "Iterations: \(iteration)".leftpad(28).randomColor())
       print(pretty(values: targetFitness))
       print(pretty(values: targetPosition))
-      print("Calculations per Second: \(calculationsPerSecond)")
+      print("Calculations per Second:", String(format: "%.1f", calculationsPerSecond))
       let sort = targetFitness.indices.sorted(by:{ targetFitness[$0] < targetFitness[$1] })
       sort.dropFirst().forEach {
         targetFitness[$0] = targetFitness[sort.first!]

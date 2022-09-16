@@ -43,19 +43,19 @@ extension Array where Element == Double {
     }
   }
 
-  func sumOfRanges(_ range: Int, days: [[Int]], range1: [Double], condition1: Int, predicate1: (Double) -> Bool, range2: [Double], condition2: Int, predicate2: (Double) -> Bool) -> [Double] {
-    days.map { day in var sum = 0.0
-      day.forEach { d in if predicate1(range1[(d + condition1)]), predicate2(range2[(d + condition2)]) { sum += self[(d + range)] } }
-      return sum
-    }
-  }
+  // func sumOfRanges(_ range: Int, days: [[Int]], range1: [Double], condition1: Int, predicate1: (Double) -> Bool, range2: [Double], condition2: Int, predicate2: (Double) -> Bool) -> [Double] {
+  //   days.map { day in var sum = 0.0
+  //     day.forEach { d in if predicate1(range1[(d + condition1)]), predicate2(range2[(d + condition2)]) { sum += self[(d + range)] } }
+  //     return sum
+  //   }
+  // }
 
-  func sumOf(_ range: Int, days: [[Int]], condition1: Int, predicate1: (Double) -> Bool, range2: [Double], condition2: Int, predicate2: (Double) -> Bool) -> [Double] {
-    days.map { day in var sum = 0.0
-      day.forEach { d in if predicate1(self[(d + condition1)]), predicate2(range2[(d + condition2)]) { sum += self[(d + range)] } }
-      return sum
-    }
-  }
+  // func sumOf(_ range: Int, days: [[Int]], condition1: Int, predicate1: (Double) -> Bool, range2: [Double], condition2: Int, predicate2: (Double) -> Bool) -> [Double] {
+  //   days.map { day in var sum = 0.0
+  //     day.forEach { d in if predicate1(self[(d + condition1)]), predicate2(range2[(d + condition2)]) { sum += self[(d + range)] } }
+  //     return sum
+  //   }
+  // }
 
   func sum(_ range: Int, hours: [[Int]], condition: Int, predicate: (Double) -> Bool) -> [Double] {
     Array(

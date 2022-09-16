@@ -197,7 +197,7 @@ extension TunOl {
             h0[CB + i], ifFinite((h[EE + i] - h0[CC + i]) / (EBsum[i - 1] + ECsum[i - 1] + EDsum[i - 1] - h0[CC + i]) * (h[ED + i] - h0[CB + i]), 0) + h0[CB + i]
           )))
     }
-    let CT: Int = 788400
+
     // let CTsum: [Double] = hour.sum(hours: BOday, condition: CT)
     let DXsum: [Double] = h.sum(hours: BOday, condition: DX)
 
@@ -344,6 +344,7 @@ extension TunOl {
     }
     for i in 8748..<8760 { h[EZ + i] = h[EZ + i - 1] }
     /// El cons due to op outside of harm op period
+    let CT: Int = 788400
     let FA: Int = 262800
     // FA=IF(OR(EE6=0,EX6>0,CT6=0),0,MAX(CT6,A_overall_fix_stby_cons+IF(EX7=0,0,A_overall_stup_cons)+A_overall_var_max_cons*MIN(1,IFERROR((EH6+ER6+MAX(0,Grid_import_yes_no_PB_strategy_outsideharmop*Grid_import_max_ud-EU6)-ET6-EX6-A_overall_fix_stby_cons-IF(EX7=0,0,A_overall_stup_cons)+(ES6+EI6/PB_Ratio_Heat_input_vs_output-EY6-A_overall_heat_fix_stby_cons-IF(EX7=0,0,A_overall_heat_stup_cons))/El_boiler_eff)/(A_overall_var_max_cons+A_overall_var_heat_max_cons/El_boiler_eff),1),IFERROR((EH6+ER6+MAX(0,Grid_import_yes_no_PB_strategy_outsideharmop*Grid_import_max_ud-EU6)-ET6-EX6-A_overall_fix_stby_cons-IF(EX7=0,0,A_overall_stup_cons))/A_overall_var_max_cons,1),IFERROR((ES6+EI6/PB_Ratio_Heat_input_vs_output+El_boiler_cap_ud*El_boiler_eff-EY6-A_overall_heat_fix_stby_cons-IF(EX7=0,0,A_overall_heat_stup_cons))/A_overall_var_heat_max_cons,1))))
     for i in 1..<8760 {
@@ -370,7 +371,7 @@ extension TunOl {
 
     // let FAsum: [Double] = h.sum(hours: BOday, condition: FA)
     let FA_DXnonZeroSum = h.sum(FA, hours: BOday, condition: DX, predicate: { $0 > 0.0 })
-    let CT_DXnonZeroSum = h.sum(CT, hours: BOday, range2: h, condition: DX, predicate: { $0 > 0.0 })
+    let CT_DXnonZeroSum = h0.sum(CT, hours: BOday, range2: h, condition: DX, predicate: { $0 > 0.0 })
     /// TES energy to fulfil op case if above
     let EJ: Int = 122640
 
