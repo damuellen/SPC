@@ -13,19 +13,22 @@ extension Array where Element == Double {
     }
   }
 
-  func sum(days: [[Int]], range: Int) -> [Double] {
-    days.map { day in var sum = 0.0
-      day.forEach { d in let value = self[(d + range)]
-        sum += value
+  func sum(days: [[Int]], range: Int, into array: inout [Double], at: Int) {
+    for (i, day) in days.enumerated() {
+      array[i + at] = 0.0
+      day.forEach { d in
+        let value = self[(d + range)]
+        array[i + at] += value
       }
-      return sum
     }
   }
 
-  func sumOfRanges(_ range: Int, days: [[Int]], range1: [Double], condition: Int, predicate: (Double) -> Bool) -> [Double] {
-    days.map { day in var sum = 0.0
-      day.forEach { d in if predicate(range1[(d + condition)]) { sum += self[(d + range)] } }
-      return sum
+  func sumOfRanges(_ range: Int, days: [[Int]], into array: inout [Double], at: Int, range1: [Double], condition: Int, predicate: (Double) -> Bool) {
+    for (i, day) in days.enumerated() {
+      array[i + at] = 0.0
+      day.forEach { d in
+        if predicate(range1[(d + condition)]) { array[i + at] += self[(d + range)] }
+      }
     }
   }
   
@@ -104,28 +107,28 @@ extension Array where Element == Double {
   }
 
   func countOf(_ days: [[Int]], condition: Int, predicate: (Double) -> Bool) -> [Double] {
-    days.map { day in var count = 0.0
+    days.map { day in var count = 0
       day.forEach { d in let value = self[(d + condition)]
         if predicate(value) { count += 1 }
       }
-      return count
+      return Double(count)
     }
   }
 
   func countOf(_ days: [[Int]], condition1: Int, predicate1: (Double) -> Bool, condition2: Int, predicate2: (Double) -> Bool) -> [Double] {
-    days.map { day in var count = 0.0
+    days.map { day in var count = 0
       day.forEach { d in if predicate1(self[(d + condition1)]), predicate2(self[(d + condition2)]) { count += 1 } }
-      return count
+      return Double(count)
     }
   }
 
   func count(hours: [[Int]], range: Int, predicate: (Double) -> Bool) -> [Double] {
     Array(
-      hours.map { day -> [Double] in var count = 0.0
+      hours.map { day -> [Double] in var count = 0
         day.forEach { d in let value = self[(d + range)]
           if predicate(value) { count += 1 }
         }
-        return [Double](repeating: count, count: day.count)
+        return [Double](repeating: Double(count), count: day.count)
       }
       .joined())
   }

@@ -1,93 +1,52 @@
 extension TunOl {
   func d22(hour: [Double]) -> [Double] {
-    let U: [[Int]] = hour[113881..<(113880 + 8760)].indices.chunked(by: { hour[$0] == hour[$1] }).map { $0.map { $0 - 113880 } }
-
-    let S = 96360
-    let T = 105120
-    let V = 122640
-    let W = 131400
-    let X = 140160
-    let Y = 148920
-    let Z = 157680
-    let AA = 166440
-    let AB = 175200
-    let AC = 183960
-    let AD = 192720
-    let AE = 201480
-    let AF = 210240
-    let AH = 227760
-    let AI = 236520
-    let AJ = 245280
-    let AK = 254040
-    let AL = 262800
-    let AM = 271560
-    let AN = 280320
-    let AO = 289080
-    let AP = 297840
-    let AQ = 306600
-    let AR = 315360
-    let AS = 324120
-    let AT = 332880
+    let U: [[Int]] = hour[113881..<(113880 + 8760)].indices
+      .chunked { hour[$0] == hour[$1] }
+      .map { $0.map { $0 - 113880 } }
+    let (S, T, V, W, X, Y, Z, AA, AB, AC, AD, AE, AF, AH,
+         AI, AJ, AK, AL, AM, AN, AO, AP, AQ, AR, AS, AT) =
+    (96360, 105120, 122640, 131400, 140160, 148920, 157680, 166440, 175200, 183960, 192720, 201480, 210240, 227760,
+     236520, 245280, 254040, 262800, 271560, 280320, 289080, 297840, 306600, 315360, 324120, 332880)
     let notZero: (Double) -> Bool = { $0 > 0.0 }
 
     let N = 341640
-    let S_Nsum = hour.sumOf(N, days: U, condition: S, predicate: notZero)
     let AU = 271560
-    let U_AH_AUsum = hour.sumOf(AU, days: U, condition: AH, predicate: notZero)
-    let Nsum = hour.sum(days: U, range: N)
-
-    let Ssum = hour.sum(days: U, range: S)
-    let Tsum = hour.sum(days: U, range: T)
-    let AIsum = hour.sum(days: U, range: AI)
-    let AFsum = hour.sum(days: U, range: AF)
-    let Xsum = hour.sum(days: U, range: X)
-    let Ysum = hour.sum(days: U, range: Y)
-    let Vsum = hour.sum(days: U, range: V)
-    let Wsum = hour.sum(days: U, range: W)
-
-    let AAsum = hour.sum(days: U, range: AA)
-    let ABsum = hour.sum(days: U, range: AB)
-    let ACsum = hour.sum(days: U, range: AC)
-    let ADsum = hour.sum(days: U, range: AD)
-    let AHsum = hour.sum(days: U, range: AH)
 
     var d22 = [Double](repeating: 0.0, count: 14235)
 
     /// Available day op PV elec after CSP, PB stby aux
     let DM = 13140
     // =SUMIFS(Calculation!$N$5:$N$8764,Calculation!$U$5:$U$8764,"="&$A3,Calculation!$S$5:$S$8764,">0")
-    for i in 0..<365 { d22[DM + i] = S_Nsum[i] }
-
+    hour.sumOf(N, days: U, into: &d22, at: DM, condition: S, predicate: notZero)
     /// Available night op PV elec after CSP, PB stby aux
     let DN = 13505
     // =SUMIFS(Calculation!$AU$5:$AU$8764,Calculation!$U$5:$U$8764,"="&$A3,Calculation!$AH$5:$AH$8764,">0")
-    for i in 0..<365 { d22[DN + i] = U_AH_AUsum[i] }
-
+    hour.sumOf(AU, days: U, into: &d22, at: DN, condition: AH, predicate: notZero)
     /// Available day op  CSP heat
     let DO = 13870
     // =SUMIF(Calculation!$U$5:$U$8764,"="&$A3,Calculation!$N$5:$N$8764)-DM3
-    for i in 0..<365 { d22[DO + i] = Nsum[i] - d22[DM + i] }
+    hour.sum(days: U, range: N, into: &d22, at: DO)
+    for i in 0..<365 { d22[DO + i] -= d22[DM + i] }
 
     /// El cons considering min harm op during harm op period
     let DR = 0
     // SUMIF(CalculationU5:U8763,"="A6,CalculationS5:S8763)
-    for i in 0..<365 { d22[DR + i] = Ssum[i] }
+    hour.sum(days: U, range: S, into: &d22, at: DR)
 
     /// El cons considering max harm op during harm op period
     let DS = 365
     // SUMIF(CalculationU5:U8763,"="A6,CalculationAH5:AH8763)
-    for i in 0..<365 { d22[DS + i] = AHsum[i] }
+    hour.sum(days: U, range: AH, into: &d22, at: DS)
 
     /// Heat cons considering min harm op during harm op period
     let DT = 730
     // SUMIF(CalculationU5:U8763,"="A6,CalculationT5:T8763)
-    for i in 0..<365 { d22[DT + i] = Tsum[i] }
+    hour.sum(days: U, range: T, into: &d22, at: DT)
 
     /// Heat cons considering max harm op during harm op period
     let DU = 1095
     // SUMIF(CalculationU5:U8763,"="A6,CalculationAI5:AI8763)
-    for i in 0..<365 { d22[DU + i] = AIsum[i] }
-
+    hour.sum(days: U, range: AI, into: &d22, at: DU)
     /// Max grid export after min harm op during harm op period
     let DV = 1460
     // SUMIFS(CalculationAF5:AF8763,CalculationU5:U8763,"="A6,CalculationS5:S8763,">0")
@@ -100,7 +59,8 @@ extension TunOl {
     /// Max grid export after min/max harm op outside of harm op period
     let DX = 2190
     // SUMIF(CalculationU5:U8763,"="A6,CalculationAF5:AF8763)-DV6
-    for i in 0..<365 { d22[DX + i] = AFsum[i] - d22[DV + i] }
+    hour.sum(days: U, range: AF, into: &d22, at: DX)
+    for i in 0..<365 { d22[DX + i] -= d22[DV + i] }
 
     /// Grid cons considering min harm op during harm op period
     let DY = 2555
@@ -115,7 +75,8 @@ extension TunOl {
     /// Grid cons considering min/max harm op outside harm op period
     let EA = 3285
     // SUMIF(CalculationU5:U8763,"="A6,CalculationX5:X8763)-DY6
-    for i in 0..<365 { d22[EA + i] = Xsum[i] - d22[DY + i] }
+    hour.sum(days: U, range: X, into: &d22, at: EA)
+    for i in 0..<365 { d22[EA + i] -= d22[DY + i] }
 
     /// Remaining PV el after min harm during harm op period
     let EB = 3650
@@ -130,7 +91,8 @@ extension TunOl {
     /// Remaining PV el after min harm outside harm op period
     let ED = 4380
     // SUMIF(CalculationU5:U8763,"="A6,CalculationV5:V8763)-EB6
-    for i in 0..<365 { d22[ED + i] = Vsum[i] - d22[EB + i] }
+    hour.sum(days: U, range: V, into: &d22, at: ED)
+    for i in 0..<365 { d22[ED + i] -= d22[EB + i] }
 
     /// Remaining CSP heat after min harm during harm op period
     let EE = 4745
@@ -145,7 +107,8 @@ extension TunOl {
     /// Remaining CSP heat after min harm outside harm op period
     let EG = 5475
     // SUMIF(CalculationU5:U8763,"="A6,CalculationW5:W8763)-EE6
-    for i in 0..<365 { d22[EG + i] = Wsum[i] - d22[EE + i] }
+    hour.sum(days: U, range: W, into: &d22, at: EG)
+    for i in 0..<365 { d22[EG + i] -= d22[EE + i] }
 
     /// Remaining grid import cap after min harm during harm op period
     let EH = 5840
@@ -160,7 +123,8 @@ extension TunOl {
     /// Remaining grid import cap after min harm outside harm op period
     let EJ = 6570
     // SUMIF(CalculationU5:U8763,"="A6,CalculationY5:Y8763)-EH6
-    for i in 0..<365 { d22[EJ + i] = Ysum[i] - d22[EH + i] }
+    hour.sum(days: U, range: Y, into: &d22, at: EJ)
+    for i in 0..<365 { d22[EJ + i] -= d22[EH + i] }
 
     /// Max elec to BESS for night prep after min harm op during harm op period
     let EK = 6935
@@ -202,7 +166,8 @@ extension TunOl {
     /// Remaining El boiler cap after min harm outside harm op period
     let ER = 9490
     // SUMIF(CalculationU5:U8763,"="A6,CalculationAA5:AA8763)-EP6
-    for i in 0..<365 { d22[ER + i] = AAsum[i] - d22[EP + i] }
+    hour.sum(days: U, range: AA, into: &d22, at: ER)
+    for i in 0..<365 { d22[ER + i] -= d22[EP + i] }
 
     /// Remaining MethSynt cap after min harm during harm op period
     let ES = 9855
@@ -217,7 +182,8 @@ extension TunOl {
     /// Remaining MethSynt cap after min harm outside of harm op period
     let EU = 10585
     // SUMIF(CalculationU5:U8763,"="A6,CalculationAB5:AB8763)-ES6
-    for i in 0..<365 { d22[EU + i] = ABsum[i] - d22[ES + i] }
+    hour.sum(days: U, range: AB, into: &d22, at: EU)
+    for i in 0..<365 { d22[EU + i] -= d22[ES + i] }
 
     /// Remaining CCU cap after min harm during harm op period
     let EV = 10950
@@ -232,7 +198,8 @@ extension TunOl {
     /// Remaining CCU cap after min harm outside of harm op period
     let EX = 11680
     // SUMIF(CalculationU5:U8763,"="A6,CalculationAC5:AC8763)-EV6
-    for i in 0..<365 { d22[EX + i] = ACsum[i] - d22[EV + i] }
+    hour.sum(days: U, range: AC, into: &d22, at: EX)
+    for i in 0..<365 { d22[EX + i] -= d22[EV + i] }
 
     /// Remaining EY cap after min harm during harm op period
     let EY = 12045
@@ -246,7 +213,8 @@ extension TunOl {
     /// Remaining EY cap after min harm outside of harm op period
     let FA = 12775
     // SUMIF(CalculationU5:U8763,"="A6,CalculationAD5:AD8763)-EY6
-    for i in 0..<365 { d22[FA + i] = ADsum[i] - d22[EY + i] }
+    hour.sum(days: U, range: AD, into: &d22, at: FA)
+    for i in 0..<365 { d22[FA + i] -= d22[EY + i] }
     return d22
   }
 }
