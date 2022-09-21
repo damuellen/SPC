@@ -27,7 +27,7 @@ class SunOlTests: XCTestCase {
     }
 
     var calc = [String]()
-    func compare(_ array: [Double], letter: String, start index: Int) {
+    func calculation(_ array: [Double], _ letter: String, _ index: Int) {
       let index = index, ref = csv_ref[letter], column = Array(array[index..<index + 8760])
       var correct = true, counter = 1
       for i in 1..<8700 {
@@ -41,7 +41,7 @@ class SunOlTests: XCTestCase {
     }
 
     var day1 = [String]()
-    func compareDay(_ array: [Double], letter: String, start index: Int) {
+    func daily1(_ array: [Double], _ letter: String, _ index: Int) {
       let index = index, ref = csv_ref2[letter]
       var correct = true, counter = 1
       for i in 0..<364 {
@@ -55,7 +55,7 @@ class SunOlTests: XCTestCase {
     }
 
     var day2 = [String]()
-    func compare2Day(_ array: [Double], letter: String, start index: Int) {
+    func daily2(_ array: [Double], _ letter: String, _ index: Int) {
       // let index = index, ref = csv_ref3[letter]
       // var correct = true, counter = 1
       // for i in 0..<364 {
@@ -68,16 +68,17 @@ class SunOlTests: XCTestCase {
       // if correct { day1.append(letter) } else { XCTFail("Error in Daily2 Column \(letter)") }
     }
     
-    func foo(count: Int) -> [(String, Int)] {
+    func column(_ i: Int, offset: Int, stride: Int = 365) -> (String, Int) {
       let A = UnicodeScalar("A").value
-      return (150..<150+count).map { i in
-        let num = (i - 155) * 365
-        let i = i.quotientAndRemainder(dividingBy: 26)
-        let q = i.quotient > 0 ? String(UnicodeScalar(A + UInt32(i.quotient-1))!) : ""
-        let key = q + String(UnicodeScalar(A + UInt32(i.remainder))!)
-        return (key, num)
-      }
+      let num = (i - offset) * stride
+      let z = i.quotientAndRemainder(dividingBy: 676)
+      let w = z.quotient > 0 ? String(UnicodeScalar(A + UInt32(z.quotient-1))!) : ""
+      let i = z.remainder.quotientAndRemainder(dividingBy: 26)
+      let q = i.quotient > 0 ? String(UnicodeScalar(A + UInt32(i.quotient-1))!) : ""
+      let key = w + q + String(UnicodeScalar(A + UInt32(i.remainder))!)
+      return (key, num)
     }
+
     let values = [167.8486379, 13427.64795, 158.9990407, 100, 439.4037645, 200, 0, 111.4985592, 1000, 100000, 100000, 19.1024554, 21.3114923, 0, 0, 0]
     guard let model = TunOl(values) else {
       print("Invalid config")
@@ -121,6 +122,21 @@ class SunOlTests: XCTestCase {
         model.d23(&d23, case: j, day0: day0, d21: d21, d22: d22)
         day.append(Array(d23[33945..<35040] + ArraySlice(zip(day0[365..<730], d23[GX..<GZ]).map { $1 > 0 ? $0 : 0 }) + day0[730..<1095]))
         day.append(Array(d23[44895..<45990] + ArraySlice(zip(day0[365..<730], d23[GZ..<HA]).map { $1 > 0 ? $0 : 0 }) + day0[730..<1095]))
+      }
+      if j == 0 {
+        (7..<71).map { column($0, offset: 7, stride: 8760) }.forEach { letter, offset in calculation(hourPre, letter, offset) }
+        (71..<91).map { column($0, offset: 7, stride: 8760) }.forEach { letter, offset in calculation(hourPre, letter, offset) }
+        (91..<124).map { column($0, offset: 7, stride: 8760) }.forEach { letter, offset in calculation(hourPre, letter, offset) }
+        (125..<183).map { column($0, offset: 125, stride: 8760) }.forEach { letter, offset in calculation(hourFinal, letter, offset) }
+      }
+      if j == 1 {
+        (184..<204).map { column($0, offset: 7 - (71 - 184), stride: 8760) }.forEach { letter, offset in calculation(hourPre, letter, offset) }
+      }
+      if j == 2 {
+        (296..<316).map { column($0, offset: 7 - (71 - 296), stride: 8760) }.forEach { letter, offset in calculation(hourPre, letter, offset) }
+      }
+      if j == 3 {
+        (408..<428).map { column($0, offset: 7 - (71 - 408), stride: 8760) }.forEach { letter, offset in calculation(hourPre, letter, offset) }
       }
     }
     flip = false
