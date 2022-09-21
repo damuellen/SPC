@@ -1,5 +1,5 @@
 extension TunOl {
-  func d10(_ d10: inout [Double], case j: Int, hour: [Double]) {
+  func d10(_ d10: inout [Double], hour: [Double], case j: Int) {
     let (BX, CC, CS, CQ) = (595680, 639480, 779640, 762120)
 
     let days: [[Int]] = hour[CS + 1..<(CS + 8760)].indices.chunked(by: { hour[$0] == hour[$1] }).map { $0.map { $0 - CS } }
@@ -115,7 +115,7 @@ extension TunOl {
     }
   }
 
-  func night(case j: Int, d10: inout [Double], hour4: [Double]) {
+  func night(_ d10: inout [Double], hour4: [Double], case j: Int) {
     let (F, H, J, L, N, P, EH, EX) = (1095, 1825, 2555, 3285, 4015, 4745, 105120, 236520)
     let notZero: (Double) -> Bool = { $0 > 0.0 }
     let days: [[Int]] = hour4[254041..<(254040 + 8760)].indices.chunked(by: { hour4[$0] == hour4[$1] }).map { $0.map { $0 - 254040 } }

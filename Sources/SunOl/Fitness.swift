@@ -4,12 +4,9 @@ import Utilities
 public func fitness(values: [Double]) -> [Double] {
   guard let model = TunOl(values) else { return [Double.infinity, 0, 0, 0, 0, 0, 0, 0] + values }
 
-  var hour = [Double](repeating: 0.0, count: 1033680)
-  var hour4 = [Double](repeating: 0.0, count: 516_840)
-  var d10 = [Double](repeating: 0.0, count: 13_140)
-  var d11 = [Double](repeating: 0.0, count: 17_155)
-  var d12 = [Double](repeating: 0.0, count: 17_155)
-  var d13 = [Double](repeating: 0.0, count: 47_085)
+  var hourPre = [Double](repeating: 0.0, count: 1033680)
+  var hourFinal = [Double](repeating: 0.0, count: 516_840)
+  var d10 = [Double](repeating: 0.0, count: 82_490)
   var d23 = [Double](repeating: 0.0, count: 48_545)
   var d21 = [Double](repeating: 0.0, count: 9_855)
   var day = [[Double]]()
@@ -18,28 +15,28 @@ public func fitness(values: [Double]) -> [Double] {
   let HA = 17520
 
   var flip = true
-  model.hour(TunOl.Q_Sol_MW_thLoop, TunOl.Reference_PV_plant_power_at_inverter_inlet_DC, TunOl.Reference_PV_MV_power_at_transformer_outlet, hour: &hour)
-  let d22 = model.d22(hour: hour)
+  model.hour(TunOl.Q_Sol_MW_thLoop, TunOl.Reference_PV_plant_power_at_inverter_inlet_DC, TunOl.Reference_PV_MV_power_at_transformer_outlet, hour: &hourPre)
+  let d22 = model.d22(hour: hourPre)
 
   let step = (model.Overall_harmonious_max_perc - model.Overall_harmonious_min_perc) / 4
   var reserve = model.Overall_harmonious_min_perc
 
   // while reserve < model.Overall_harmonious_max_perc {
-  model.hour1(&hour, reserved: reserve)
-  let day0 = model.day0(hour: hour)
+  model.hour1(&hourPre, reserved: reserve)
+  let day0 = model.day0(hour: hourPre)
 
   for j in 0..<4 {
-    model.hour2(&hour, j: j)
-    model.hour3(&hour, j: j)
-    model.d10(&d10, case: j, hour: hour)
-    model.hour4(&hour4, j: j, d1: d10, hour: hour)
-    model.night(case: j, d10: &d10, hour4: hour4)
-    model.d11(case: j, &d11, hour: hour)
-    model.d12(case: j, &d12, hour: hour, hour4: hour4)
-    model.d13(&d13, case: j, d10: d10, d11: d11, d12: d12)
-    model.d14(&d13, case: j, d10: d10, d11: d11, d12: d12)
-    day.append(Array(d13[31755..<33945]))
-    day.append(Array(d13[44165..<46355]))
+    model.hour2(&hourPre, case: j)
+    model.hour3(&hourPre, case: j)
+    model.d10(&d10, hour: hourPre, case: j)
+    model.hourFinal(&hourFinal, d1: d10, hour: hourPre, case: j)
+    model.night(&d10, hour4: hourFinal, case: j)
+    model.d11(&d10, hour: hourPre, case: j)
+    model.d12(&d10, hourFinal: hourFinal, case: j)
+    model.d13(&d10, case: j)
+    model.d14(&d10, case: j)
+    day.append(Array(d10[67525..<69715]))
+    day.append(Array(d10[80300..<82490]))
     if flip {
       model.d21(&d21, case: j, day0: day0)
       model.d23(&d23, case: j, day0: day0, d21: d21, d22: d22)

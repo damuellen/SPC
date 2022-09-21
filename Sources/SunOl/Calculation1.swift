@@ -430,7 +430,7 @@ extension TunOl {
     for i in 1..<8760 { h[BQ + i] = max(0.0, h[BJ + i] - h[BN + i]) }
   }
 
-  func hour2(_ h: inout [Double], j: Int) {
+  func hour2(_ h: inout [Double], case j: Int) {
 
     let BO: Int = 516840
     let BOday: [[Int]] = h[BO + 1..<(BO + 8760)].indices.chunked(by: { h[$0] == h[$1] }).map { $0.map { $0 - BO } }
@@ -638,7 +638,7 @@ extension TunOl {
         .rounded(.down) / 100
     }
   }
-  func hour3(_ h: inout [Double], j: Int) {
+  func hour3(_ h: inout [Double], case j: Int) {
     let (L, BV, BX, CB, CC, CI, CK, CL, CM) = (35040, 578160, 595680, 630720, 639480, 692040, 709560, 718320, 727080)
 
     /// Min harmonious net elec cons not considering grid import
