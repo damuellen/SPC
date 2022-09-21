@@ -116,9 +116,9 @@ extension TunOl {
   }
 
   func night(_ d10: inout [Double], hour4: [Double], case j: Int) {
-    let (F, H, J, L, N, P, EH, EX) = (1095, 1825, 2555, 3285, 4015, 4745, 105120, 236520)
+    let (F, H, J, L, N, P, EH, EX) = (1095, 1825, 2555, 3285, 4015, 4745, 105120, 245280)
     let notZero: (Double) -> Bool = { $0 > 0.0 }
-    let days: [[Int]] = hour4[254041..<(254040 + 8760)].indices.chunked(by: { hour4[$0] == hour4[$1] }).map { $0.map { $0 - 254040 } }
+    let days: [[Int]] = hour4[262801..<(262800 + 8760)].indices.chunked(by: { hour4[$0] == hour4[$1] }).map { $0.map { $0 - 262800 } }
     //  let end = days.removeLast()
     // days[0].append(contentsOf: end)
     let EX_EZcountZero = hour4.countOf(days, condition: EX, predicate: { $0 <= 0 })
@@ -527,16 +527,16 @@ extension TunOl {
     hour.sum(days: days, range: DD, into: &d11, at: GS)
     for i in 0..<365 { d11[GS + i] -= d11[GQ + i] }
   }
-  
+
   func d12(_ d12: inout [Double], hourFinal: [Double] , case j: Int) {
-    let daysEZ: [[Int]] = hourFinal[254041..<(254040 + 8760)].indices.chunked(by: { hourFinal[$0] == hourFinal[$1] }).map { $0.map { $0 - 254040 } }
+    let daysEZ: [[Int]] = hourFinal[262801..<(262800 + 8760)].indices.chunked(by: { hourFinal[$0] == hourFinal[$1] }).map { $0.map { $0 - 262800 } }
     let notZero: (Double) -> Bool = { $0 > 0.0 }
-    let (ET, EU, EX, EY, FA) = (210240, 219000, 236520, 245280, 262800)
-    let (FB, FC, FD, FE, FF) = (271560, 280320, 289080, 297840, 306600)
-    let (FG, FH, FI, FJ, FK) = (315360, 324120, 332880, 341640, 350400)
-    let (FL, FM, FO, FP, FQ) = (359160, 367920, 385440, 394200, 402960)
-    let (FR, FS, FT, FU, FV) = (411720, 420480, 429240, 438000, 446760)
-    let (FW, FX, FY, FZ, GA) = (455520, 464280, 473040, 481800, 490560)
+    let (ET, EU, EX, EY, FA) = (210240, 219000, 245280, 254040, 271560)
+    let (FB, FC, FD, FE, FF) = (280320, 289080, 297840, 306600, 315360)
+    let (FG, FH, FI, FJ, FK) = (324120, 332880, 341640, 350400, 359160)
+    let (FL, FM, FO, FP, FQ) = (367920, 376680, 394200, 402960, 411720)
+    let (FR, FS, FT, FU, FV) = (420480, 429240, 438000, 446760, 455520)
+    let (FW, FX, FY, FZ, GA) = (464280, 473040, 481800, 490560, 499320)
     let GU: Int = 17155
     /// Available elec after TES chrg outside harm op period
     let GV: Int = 17520

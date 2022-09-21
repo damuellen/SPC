@@ -280,7 +280,7 @@ extension TunOl {
     }
 
     /// Min harmonious net elec cons not considering grid import
-    let EW: Int = 227760
+    let EW: Int = 236520
     // =IF(OR(DX6>0,MIN(MAX(0,ER6+MAX(0,Grid_import_max_ud*Grid_import_yes_no_PB_strategy-MAX(0,EP6-$L6))-ET6-MIN(El_boiler_cap_ud,MAX(0,Overall_harmonious_var_heat_min_cons+Overall_heat_fix_cons-ES6)/El_boiler_eff)),MAX(0,ES6+MIN(El_boiler_cap_ud,MAX(0,ER6+MAX(0,Grid_import_max_ud*Grid_import_yes_no_PB_strategy-MAX(0,EP6-$L6))-ET6-Overall_harmonious_var_min_cons-Overall_fix_cons))*El_boiler_eff-Overall_heat_fix_cons)/Overall_harmonious_var_heat_max_cons*Overall_harmonious_var_max_cons+Overall_fix_cons)<Overall_harmonious_var_min_cons+Overall_fix_cons),0,Overall_harmonious_var_min_cons+Overall_fix_cons)
     for i in 1..<8760 {
       h[EW + i] = iff(
@@ -303,7 +303,7 @@ extension TunOl {
     }
 
     /// Optimized min harmonious net elec cons
-    let EX: Int = 236520
+    let EX: Int = 245280
     // IF(OR(AND(EW6>0,EW5=0,EW7=0),AND(EW6>0,OR(AND(EW4=0,EW5>0,EW7=0),AND(EW5=0,EW7>0,EW8=0)))),0,EW6)
     for i in 1..<8760 {
       h[EX + i] = iff(
@@ -316,7 +316,7 @@ extension TunOl {
     }
 
     /// Min harmonious net heat cons
-    let EY: Int = 245280
+    let EY: Int = 254040
     // MAX(0,(EX6-Overall_fix_cons)/Overall_harmonious_var_max_cons*Overall_harmonious_var_heat_max_cons+Overall_heat_fix_cons)
     for i in 1..<8760 {
       h[EY + i] = iff(
@@ -332,7 +332,7 @@ extension TunOl {
         max(0.0, round(h[EP + i] + h[ET + i] + h[EX + i] + min(El_boiler_cap_ud, max(0.0, h[EY + i] - h[ES + i]) / El_boiler_eff) - h0[L0 + i], 5)))
     }
     /// Harmonious op day
-    let EZ: Int = 254040
+    let EZ: Int = 262800
     // =IF(OR(AND(EX19<=0,EX20>0,SUM(EX10:EX19)=0),AND($F19<=0,$F20>0,SUM(EX10:EX30)=0)),IF(EZ19<364,EZ19+1,0),EZ19)
     for i in 12..<8748 {
       h[EZ + i] = h[EZ + i - 1]
@@ -345,7 +345,7 @@ extension TunOl {
     for i in 8748..<8760 { h[EZ + i] = h[EZ + i - 1] }
     /// El cons due to op outside of harm op period
     let CT: Int = 788400
-    let FA: Int = 262800
+    let FA: Int = 271560
     // FA=IF(OR(EE6=0,EX6>0,CT6=0),0,MAX(CT6,A_overall_fix_stby_cons+IF(EX7=0,0,A_overall_stup_cons)+A_overall_var_max_cons*MIN(1,IFERROR((EH6+ER6+MAX(0,Grid_import_yes_no_PB_strategy_outsideharmop*Grid_import_max_ud-EU6)-ET6-EX6-A_overall_fix_stby_cons-IF(EX7=0,0,A_overall_stup_cons)+(ES6+EI6/PB_Ratio_Heat_input_vs_output-EY6-A_overall_heat_fix_stby_cons-IF(EX7=0,0,A_overall_heat_stup_cons))/El_boiler_eff)/(A_overall_var_max_cons+A_overall_var_heat_max_cons/El_boiler_eff),1),IFERROR((EH6+ER6+MAX(0,Grid_import_yes_no_PB_strategy_outsideharmop*Grid_import_max_ud-EU6)-ET6-EX6-A_overall_fix_stby_cons-IF(EX7=0,0,A_overall_stup_cons))/A_overall_var_max_cons,1),IFERROR((ES6+EI6/PB_Ratio_Heat_input_vs_output+El_boiler_cap_ud*El_boiler_eff-EY6-A_overall_heat_fix_stby_cons-IF(EX7=0,0,A_overall_heat_stup_cons))/A_overall_var_heat_max_cons,1))))
     for i in 1..<8760 {
       h[FA + i] = iff(
@@ -390,7 +390,7 @@ extension TunOl {
     }
     let CU3 = 797160
     /// heat cons due to op outside of harm op period
-    let FB: Int = 271560
+    let FB: Int = 280320
     // =IF(OR(EE6=0,EX6>0,CT6=0),0,MAX(CU6,A_overall_heat_fix_stby_cons+IF(EX7=0,0,A_overall_heat_stup_cons)+A_overall_var_heat_max_cons*MIN(1,IFERROR((EH6+ER6+MAX(0,Grid_import_yes_no_PB_strategy_outsideharmop*Grid_import_max_ud-EU6)-ET6-EX6-A_overall_fix_stby_cons-IF(EX7=0,0,A_overall_stup_cons)+(ES6+EI6/PB_Ratio_Heat_input_vs_output-EY6-A_overall_heat_fix_stby_cons-IF(EX7=0,0,A_overall_heat_stup_cons))/El_boiler_eff)/(A_overall_var_max_cons+A_overall_var_heat_max_cons/El_boiler_eff),1),IFERROR((EH6+ER6+MAX(0,Grid_import_yes_no_PB_strategy_outsideharmop*Grid_import_max_ud-EU6)-ET6-EX6-A_overall_fix_stby_cons-IF(EX7=0,0,A_overall_stup_cons))/A_overall_var_max_cons,1),IFERROR((ES6+EI6/PB_Ratio_Heat_input_vs_output+El_boiler_cap_ud*El_boiler_eff-EY6-A_overall_heat_fix_stby_cons-IF(EX7=0,0,A_overall_heat_stup_cons))/A_overall_var_heat_max_cons,1))))
     for i in 1..<8760 {
       h[FB + i] = iff(
@@ -415,7 +415,7 @@ extension TunOl {
     }
 
     /// Remaining el after min harmonious
-    let FC: Int = 280320
+    let FC: Int = 289080
     // =MAX(0,ROUND($L6+EH6-EP6-ET6-EX6-FA6-MIN(El_boiler_cap_ud,MAX(0,EQ6+EY6+FB6-$J6-EI6/PB_Ratio_Heat_input_vs_output)/El_boiler_eff),5))
     for i in 1..<8760 {
       h[FC + i] = max(
@@ -426,12 +426,12 @@ extension TunOl {
     }
 
     /// Remaining heat after min harmonious
-    let FD: Int = 289080
+    let FD: Int = 297840
     // MAX(0,ES6+EI6/PB_Ratio_Heat_input_vs_output-EY6-FB6)
     for i in 1..<8760 { h[FD + i] = max(0.0, round(h[ES + i] + h[EI + i] / PB_Ratio_Heat_input_vs_output - h[EY + i] - h[FB + i], 5)) }
 
     /// Grid import necessary for min harm
-    let FE: Int = 297840
+    let FE: Int = 306600
     // =MAX(0,-ROUND(EH6+ER6-ET6-EX6-FA6-MIN(El_boiler_cap_ud,MAX(0,(EY6+FB6-EI6/PB_Ratio_Heat_input_vs_output-ES6)/El_boiler_eff)),5))
     for i in 1..<8760 {
       h[FE + i] = max(
@@ -449,30 +449,30 @@ extension TunOl {
     }
 
     /// Remaining grid import capacity after min harm
-    let FF: Int = 306600
+    let FF: Int = 315360
     // =MAX(0,IF(EX6>0,Grid_import_yes_no_PB_strategy,Grid_import_yes_no_PB_strategy_outsideharmop)*Grid_import_max_ud-TB6)
     for i in 1..<8760 {
       h[FF + i] = max(0.0, iff(h[EX + i] > 0.0, Grid_import_yes_no_PB_strategy, Grid_import_yes_no_PB_strategy_outsideharmop) * Grid_import_max_ud - h[TB + i])
     }
 
     /// El boiler op after min harmonious heat cons
-    let FG: Int = 315360
+    let FG: Int = 324120
     // MIN(El_boiler_cap_ud,MAX(0,(EY6+FB6-ES6-EI6/PB_Ratio_Heat_input_vs_output)/El_boiler_eff))
     for i in 1..<8760 {
       h[FG + i] = min(El_boiler_cap_ud, max(0.0, round((h[EY + i] + h[FB + i] - h[ES + i] - h[EI + i] / PB_Ratio_Heat_input_vs_output), 5) / El_boiler_eff))
     }
 
     /// Remaining el boiler cap after min harmonious heat cons
-    let FH: Int = 324120
+    let FH: Int = 332880
     // MAX(0,El_boiler_cap_ud-FG6)
     for i in 1..<8760 { h[FH + i] = max(0.0, round(El_boiler_cap_ud - h[FG + i], 5)) }
 
     /// Remaining MethSynt cap after min harmonious cons
-    let FI: Int = 332880
+    let FI: Int = 341640
     /// Remaining CCU cap after min harmonious cons
-    let FJ: Int = 341640
+    let FJ: Int = 350400
     /// Remaining EY cap after min harmonious cons
-    let FK: Int = 350400
+    let FK: Int = 359160
 
     for i in 1..<8760 {
       // FI=ROUND(MethSynt_RawMeth_nom_prod_ud*IF(AND(EX6=0,MIN(1,MAX(0,1-((MAX(0,EX6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(MethSynt_harmonious_max_perc-MethSynt_harmonious_min_perc)+MethSynt_harmonious_min_perc)),A_RawMeth_max_cons/MethSynt_RawMeth_nom_prod_ud*MIN(IF(A_daytime_cons_per_h_of_night_op+A_daytime_heat_cons_per_h_of_night_op/El_boiler_eff<=0,9999,MAX(0,FC6+FF6+FD6/El_boiler_eff-IF(EX6=0,IF(A_RawMeth_max_cons=0,0,MethSynt_fix_cons-MethSynt_heat_fix_prod/El_boiler_eff)+IF(A_CO2_max_cons+A_RawMeth_max_cons=0,0,CCU_fix_cons+CCU_heat_fix_cons/El_boiler_eff)+IF(A_Hydrogen_max_cons+A_RawMeth_max_cons=0,0,EY_fix_cons+EY_heat_fix_cons/El_boiler_eff)))/(A_daytime_cons_per_h_of_night_op+A_daytime_heat_cons_per_h_of_night_op/El_boiler_eff)),IF(A_daytime_heat_cons_per_h_of_night_op<=0,9999,MAX(0,FF6+FH6*El_boiler_eff-IF(EX6=0,IF(A_RawMeth_max_cons=0,0,-MethSynt_heat_fix_prod)+IF(A_CO2_max_cons+A_RawMeth_max_cons=0,0,CCU_heat_fix_cons)+IF(A_Hydrogen_max_cons+A_RawMeth_max_cons=0,0,EY_heat_fix_cons)))/A_daytime_heat_cons_per_h_of_night_op),IF(A_daytime_cons_per_h_of_night_op<=0,9999,MAX(0,FC6+FF6-IF(EX6=0,IF(A_RawMeth_max_cons=0,0,MethSynt_fix_cons)+IF(A_CO2_max_cons+A_RawMeth_max_cons=0,0,CCU_fix_cons)+IF(A_Hydrogen_max_cons+A_RawMeth_max_cons=0,0,EY_fix_cons)))/A_daytime_cons_per_h_of_night_op)))<MethSynt_cap_min_perc),0,MIN(1,MAX(0,1-((MAX(0,EX6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(MethSynt_harmonious_max_perc-MethSynt_harmonious_min_perc)+MethSynt_harmonious_min_perc)),A_RawMeth_max_cons/MethSynt_RawMeth_nom_prod_ud*MIN(IF(A_daytime_cons_per_h_of_night_op+A_daytime_heat_cons_per_h_of_night_op/El_boiler_eff<=0,9999,MAX(0,FC6+FF6+FD6/El_boiler_eff-IF(EX6=0,IF(A_RawMeth_max_cons=0,0,MethSynt_fix_cons-MethSynt_heat_fix_prod/El_boiler_eff)+IF(A_CO2_max_cons+A_RawMeth_max_cons=0,0,CCU_fix_cons+CCU_heat_fix_cons/El_boiler_eff)+IF(A_Hydrogen_max_cons+A_RawMeth_max_cons=0,0,EY_fix_cons+EY_heat_fix_cons/El_boiler_eff)))/(A_daytime_cons_per_h_of_night_op+A_daytime_heat_cons_per_h_of_night_op/El_boiler_eff)),IF(A_daytime_heat_cons_per_h_of_night_op<=0,9999,MAX(0,FD6+FH6*El_boiler_eff-IF(EX6=0,IF(A_RawMeth_max_cons=0,0,-MethSynt_heat_fix_prod)+IF(A_CO2_max_cons+A_RawMeth_max_cons=0,0,CCU_heat_fix_cons)+IF(A_Hydrogen_max_cons+A_RawMeth_max_cons=0,0,EY_heat_fix_cons)))/A_daytime_heat_cons_per_h_of_night_op),IF(A_daytime_cons_per_h_of_night_op<=0,9999,MAX(0,FC6+FF6-IF(EX6=0,IF(A_RawMeth_max_cons=0,0,MethSynt_fix_cons)+IF(A_CO2_max_cons+A_RawMeth_max_cons=0,0,CCU_fix_cons)+IF(A_Hydrogen_max_cons+A_RawMeth_max_cons=0,0,EY_fix_cons)))/A_daytime_cons_per_h_of_night_op)))),5)
@@ -599,9 +599,9 @@ extension TunOl {
     }
 
     /// Max BESS charging after min harmonious cons
-    let FL: Int = 359160
+    let FL: Int = 367920
     /// Max grid export after TES chrg, min harm, night and aux el  cons
-    let FM: Int = 367920
+    let FM: Int = 376680
     for i in 1..<8760 {
       // MIN(BESS_chrg_max_cons,FC6)
       h[FL + i] = min(BESS_chrg_max_cons, h[FC + i])
@@ -610,7 +610,7 @@ extension TunOl {
     }
 
     /// Max harmonious net elec cons
-    let FN: Int = 376680
+    let FN: Int = 385440
     for i in 1..<8760 {
       // =IF(EX6=0,0,Overall_fix_cons+Overall_harmonious_var_min_cons+(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*MIN(1,MAX(0,ER6+MAX(0,Grid_import_max_ud*Grid_import_yes_no_PB_strategy-MAX(0,EP6-$L6))-ET6-Overall_harmonious_var_min_cons-Overall_fix_cons-MAX(0,Overall_harmonious_var_heat_min_cons+Overall_heat_fix_cons-ES6)/El_boiler_eff)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons+(Overall_harmonious_var_heat_max_cons-Overall_harmonious_var_heat_min_cons)/El_boiler_eff),MAX(0,ES6-Overall_harmonious_var_heat_min_cons-Overall_heat_fix_cons+MAX(0,ER6+MAX(0,Grid_import_max_ud*Grid_import_yes_no_PB_strategy-MAX(0,EP6-$L6))-ET6-Overall_harmonious_var_min_cons-Overall_fix_cons)*El_boiler_eff)/(Overall_harmonious_var_heat_max_cons-Overall_harmonious_var_heat_min_cons+(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*El_boiler_eff),MAX(0,ES6+El_boiler_cap_ud*El_boiler_eff-Overall_harmonious_var_heat_min_cons-Overall_heat_fix_cons)/(Overall_harmonious_var_heat_max_cons-Overall_harmonious_var_heat_min_cons)))
       h[FN + i] = iff(
@@ -637,7 +637,7 @@ extension TunOl {
     }
 
     /// Optimized max harmonious net elec cons
-    let FO: Int = 385440
+    let FO: Int = 394200
     // IF(OR(AND(FN6>0;FN5=0;FN7=0);AND(FN6>0;OR(AND(FN4=0;FN5=0;FN8=0);AND(FN4=0;FN7=0;FN8=0))));0;FN6)
     for i in 1..<8760 {
       h[FO + i] = iff(
@@ -650,7 +650,7 @@ extension TunOl {
     }
 
     /// max harmonious net heat cons
-    let FP: Int = 394200
+    let FP: Int = 402960
     // MAX(0;(FO6-Overall_fix_cons)/Overall_harmonious_var_max_cons*Overall_harmonious_var_heat_max_cons+Overall_heat_fix_cons)
 
     for i in 1..<8760 {
@@ -659,7 +659,7 @@ extension TunOl {
     }
 
     /// Remaining el after max harmonious
-    let FQ: Int = 402960
+    let FQ: Int = 411720
     // =MAX(0,ROUND($L6+EH6-EP6-ET6-FO6-FA6-MIN(El_boiler_cap_ud,MAX(0,EQ6+FP6+FB6-$J6-EI6/PB_Ratio_Heat_input_vs_output)/El_boiler_eff),5))
     for i in 1..<8760 {
       h[FQ + i] = max(
@@ -670,12 +670,12 @@ extension TunOl {
     }
 
     /// Remaining heat after max harmonious
-    let FR: Int = 411720
+    let FR: Int = 420480
     // MAX(0,ES6+EI6/PB_Ratio_Heat_input_vs_output-FP6-FB6)
     for i in 1..<8760 { h[FR + i] = max(0.0, round(h[ES + i] + h[EI + i] / PB_Ratio_Heat_input_vs_output - h[FP + i] - h[FB + i], 5)) }
 
     /// Grid import necessary for max harm
-    let FS: Int = 420480
+    let FS: Int = 429240
     // =MAX(0,-ROUND(EH6+ER6-ET6-FO6-FA6-MIN(El_boiler_cap_ud,MAX(0,(FP6+FB6-EI6/PB_Ratio_Heat_input_vs_output-ES6)/El_boiler_eff)),5))
     for i in 1..<8760 {
       h[FS + i] = max(
@@ -692,30 +692,30 @@ extension TunOl {
       h[TC + i] = min(iff(h[FO + i] > 0.0, Grid_import_yes_no_PB_strategy, Grid_import_yes_no_PB_strategy_outsideharmop) * Grid_import_max_ud, h[FS + i])
     }
     /// Remaining grid import capacity after max harm
-    let FT: Int = 429240
+    let FT: Int = 438000
     // =MAX(0,IF(FO6>0,Grid_import_yes_no_PB_strategy,Grid_import_yes_no_PB_strategy_outsideharmop)*Grid_import_max_ud-TC6)
     for i in 1..<8760 {
       h[FT + i] = max(0.0, iff(h[FO + i] > 0.0, Grid_import_yes_no_PB_strategy, Grid_import_yes_no_PB_strategy_outsideharmop) * Grid_import_max_ud - h[TC + i])
     }
 
     /// El boiler op after max harmonious heat cons
-    let FU: Int = 438000
+    let FU: Int = 446760
     // MIN(El_boiler_cap_ud,MAX(0,(FP6+FB6-ES6-EI6/PB_Ratio_Heat_input_vs_output)/El_boiler_eff))
     for i in 1..<8760 {
       h[FU + i] = min(El_boiler_cap_ud, max(0.0, round((h[FP + i] + h[FB + i] - h[ES + i] - h[EI + i] / PB_Ratio_Heat_input_vs_output), 5) / El_boiler_eff))
     }
 
     /// Remaining el boiler cap after max harmonious heat cons
-    let FV: Int = 446760
+    let FV: Int = 455520
     // MAX(0,El_boiler_cap_ud-FU6)
     for i in 1..<8760 { h[FV + i] = max(0.0, round(El_boiler_cap_ud - h[FU + i], 5)) }
 
     /// Remaining MethSynt cap after max harmonious cons
-    let FW: Int = 455520
+    let FW: Int = 464280
     /// Remaining CCU cap after max harmonious cons
-    let FX: Int = 464280
+    let FX: Int = 473040
     /// Remaining EY cap after max harmonious cons
-    let FY: Int = 473040
+    let FY: Int = 481800
     for i in 1..<8760 {
       // FW=ROUND(MethSynt_RawMeth_nom_prod_ud*IF(AND(FO6=0,MIN(1,MAX(0,1-((MAX(0,FO6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(MethSynt_harmonious_max_perc-MethSynt_harmonious_min_perc)+MethSynt_harmonious_min_perc)),A_RawMeth_max_cons/MethSynt_RawMeth_nom_prod_ud*MIN(IF(A_daytime_cons_per_h_of_night_op+A_daytime_heat_cons_per_h_of_night_op/El_boiler_eff<=0,9999,MAX(0,FQ6+FT6+FR6/El_boiler_eff-IF(FO6=0,IF(A_RawMeth_max_cons=0,0,MethSynt_fix_cons-MethSynt_heat_fix_prod/El_boiler_eff)+IF(A_CO2_max_cons+A_RawMeth_max_cons=0,0,CCU_fix_cons+CCU_heat_fix_cons/El_boiler_eff)+IF(A_Hydrogen_max_cons+A_RawMeth_max_cons=0,0,EY_fix_cons+EY_heat_fix_cons/El_boiler_eff)))/(A_daytime_cons_per_h_of_night_op+A_daytime_heat_cons_per_h_of_night_op/El_boiler_eff)),IF(A_daytime_heat_cons_per_h_of_night_op<=0,9999,MAX(0,FT6+FV6*El_boiler_eff-IF(FO6=0,IF(A_RawMeth_max_cons=0,0,-MethSynt_heat_fix_prod)+IF(A_CO2_max_cons+A_RawMeth_max_cons=0,0,CCU_heat_fix_cons)+IF(A_Hydrogen_max_cons+A_RawMeth_max_cons=0,0,EY_heat_fix_cons)))/A_daytime_heat_cons_per_h_of_night_op),IF(A_daytime_cons_per_h_of_night_op<=0,9999,MAX(0,FQ6+FT6-IF(FO6=0,IF(A_RawMeth_max_cons=0,0,MethSynt_fix_cons)+IF(A_CO2_max_cons+A_RawMeth_max_cons=0,0,CCU_fix_cons)+IF(A_Hydrogen_max_cons+A_RawMeth_max_cons=0,0,EY_fix_cons)))/A_daytime_cons_per_h_of_night_op)))<MethSynt_cap_min_perc),0,MIN(1,MAX(0,1-((MAX(0,FO6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(MethSynt_harmonious_max_perc-MethSynt_harmonious_min_perc)+MethSynt_harmonious_min_perc)),A_RawMeth_max_cons/MethSynt_RawMeth_nom_prod_ud*MIN(IF(A_daytime_cons_per_h_of_night_op+A_daytime_heat_cons_per_h_of_night_op/El_boiler_eff<=0,9999,MAX(0,FQ6+FT6+FR6/El_boiler_eff-IF(FO6=0,IF(A_RawMeth_max_cons=0,0,MethSynt_fix_cons-MethSynt_heat_fix_prod/El_boiler_eff)+IF(A_CO2_max_cons+A_RawMeth_max_cons=0,0,CCU_fix_cons+CCU_heat_fix_cons/El_boiler_eff)+IF(A_Hydrogen_max_cons+A_RawMeth_max_cons=0,0,EY_fix_cons+EY_heat_fix_cons/El_boiler_eff)))/(A_daytime_cons_per_h_of_night_op+A_daytime_heat_cons_per_h_of_night_op/El_boiler_eff)),IF(A_daytime_heat_cons_per_h_of_night_op<=0,9999,MAX(0,FR6+FV6*El_boiler_eff-IF(FO6=0,IF(A_RawMeth_max_cons=0,0,-MethSynt_heat_fix_prod)+IF(A_CO2_max_cons+A_RawMeth_max_cons=0,0,CCU_heat_fix_cons)+IF(A_Hydrogen_max_cons+A_RawMeth_max_cons=0,0,EY_heat_fix_cons)))/A_daytime_heat_cons_per_h_of_night_op),IF(A_daytime_cons_per_h_of_night_op<=0,9999,MAX(0,FQ6+FT6-IF(FO6=0,IF(A_RawMeth_max_cons=0,0,MethSynt_fix_cons)+IF(A_CO2_max_cons+A_RawMeth_max_cons=0,0,CCU_fix_cons)+IF(A_Hydrogen_max_cons+A_RawMeth_max_cons=0,0,EY_fix_cons)))/A_daytime_cons_per_h_of_night_op)))),5)
       h[FW + i] = min(
@@ -840,9 +840,9 @@ extension TunOl {
     }
 
     /// Max BESS charging after max harmonious cons
-    let FZ: Int = 481800
+    let FZ: Int = 490560
     /// Max grid export after TES chrg, min harm, night and aux el cons
-    let GA: Int = 490560
+    let GA: Int = 499320
     for i in 1..<8760 {
       // MIN(BESS_chrg_max_cons,FQ6)
       h[FZ + i] = min(BESS_chrg_max_cons, h[FQ + i])
