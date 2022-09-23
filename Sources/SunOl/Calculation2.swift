@@ -1,6 +1,6 @@
 extension TunOl {
   func hourFinal(_ h: inout [Double], d1: [Double], hour h0: [Double], case j: Int) {
-    let (J0, L0, M0, BK, BM, BP, BQ, CC) = (26280, 43800, 52560, 481800, 499320, 525600, 534360, 639480)
+    let (J0, L0, M0, BK, BM, BP, BQ, CC) = (17520, 35040, 43800, 481800, 499320, 525600, 534360, 639480)
     let BO: Int = 516840
     let BOday: [[Int]] = h0[BO + 1..<(BO + 8760)].indices.chunked(by: { h0[$0] == h0[$1] }).map { $0.map { $0 - BO } }
 
