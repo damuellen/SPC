@@ -205,7 +205,7 @@ else
     fi
 fi
 
-# Add add sudo support for non-root user
+# Add sudo support for non-root user
 if [ "${USERNAME}" != "root" ] && [ "${EXISTING_NON_ROOT_USER}" != "${USERNAME}" ]; then
     echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME
     chmod 0440 /etc/sudoers.d/$USERNAME
@@ -280,9 +280,9 @@ cat << 'EOF' > /usr/local/bin/systemctl
 #!/bin/sh
 set -e
 if [ -d "/run/systemd/system" ]; then
-    exec /bin/systemctl/systemctl "$@"
+    exec /bin/systemctl "$@"
 else
-    echo '\n"systemd" is not running in this container due to its overhead.\nUse the "service" command to start services intead. e.g.: \n\nservice --status-all'
+    echo '\n"systemd" is not running in this container due to its overhead.\nUse the "service" command to start services instead. e.g.: \n\nservice --status-all'
 fi
 EOF
 chmod +x /usr/local/bin/systemctl
@@ -438,15 +438,5 @@ echo -e "\
     EXISTING_NON_ROOT_USER=${EXISTING_NON_ROOT_USER}\n\
     RC_SNIPPET_ALREADY_ADDED=${RC_SNIPPET_ALREADY_ADDED}\n\
     ZSH_ALREADY_INSTALLED=${ZSH_ALREADY_INSTALLED}" > "${MARKER_FILE}"
-
-echo "Install libxlsxwriter"
-cd /tmp
-git clone --single-branch -b RELEASE_1.1.4 https://github.com/jmcnamara/libxlsxwriter --quiet
-cd libxlsxwriter
-make
-sudo make install
-sudo ldconfig
-cd ../
-rm -rf libxlsxwriter
 
 echo "Done!"
