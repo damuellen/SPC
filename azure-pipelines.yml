@@ -9,6 +9,9 @@ trigger:
 pool:
   vmImage: 'windows-latest'
 
+variables:
+  toolchain.directory: $(Pipeline.Workspace)/Library/Developer/Toolchains/unknown-Asserts-development.xctoolchain
+
 steps:
 - task: PowerShell@2
   timeoutInMinutes: 3
@@ -19,6 +22,10 @@ steps:
       Install-Binary -Url "https://download.swift.org/swift-5.7-release/windows10/swift-5.7-RELEASE/swift-5.7-RELEASE-windows10.exe" -Name "installer.exe" -ArgumentList ("-q")
   displayName: Install Swift toolchain
 
+- script: |
+    echo ##vso[task.prependpath]$(toolchain.directory)/usr/bin
+  displayName: Update PATH
+  
 - task: DownloadBuildArtifacts@1
   inputs:
     buildType: 'specific'
