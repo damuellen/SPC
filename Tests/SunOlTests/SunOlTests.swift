@@ -19,8 +19,8 @@ class SunOlTests: XCTestCase {
   func testsCalculation() {
     guard 
     let csv_ref = CSVReader(atPath: "calc.csv", separator: "\t"),
-    let csv_ref2 = CSVReader(atPath: "daily1.csv", separator: "\t")
-    // let csv_ref3 = CSVReader(atPath: "daily2.csv", separator: "\t")
+    let csv_ref2 = CSVReader(atPath: "daily1.csv", separator: "\t"),
+    let csv_ref3 = CSVReader(atPath: "daily2.csv", separator: "\t")
     else {
       print("No input")
       return
@@ -31,7 +31,7 @@ class SunOlTests: XCTestCase {
       var correct = true, counter = 1
       for i in 1..<8700 {
         if counter > 20 { break }
-        if abs(abs(ref[i - 1]) - abs(column[i])) > 0.2 {
+        if abs(abs(ref[i - 1]) - abs(column[i])) > 0.1 {
           counter += 1; correct = false
           print("Calculation \(letter)\(i + 4) proper value: \(String(format: "%.2f", ref[i - 1])) [\(index + i)] \(String(format: "%.2f", column[i]))  div: \(abs(ref[i - 1]) - abs(column[i]))")
         }
@@ -44,7 +44,7 @@ class SunOlTests: XCTestCase {
       var correct = true, counter = 1
       for i in 0..<364 {
         if counter > 20 { break }
-        if abs(ref[i]) - abs(array[index + i]) > 0.2 {
+        if abs(ref[i]) - abs(array[index + i]) > 1 {
           counter += 1; correct = false
           print("Daily1 \(letter)\(i + 3) proper value: \(String(format: "%.2f", ref[i])) [\(index + i)] \(String(format: "%.2f", array[index + i]))  div: \(ref[i] - array[index + i])")
         }
@@ -53,16 +53,16 @@ class SunOlTests: XCTestCase {
     }
 
     func daily2(_ array: [Double], _ letter: String, _ index: Int) {
-      // let index = index, ref = csv_ref3[letter]
-      // var correct = true, counter = 1
-      // for i in 0..<364 {
-      //   if counter > 20 { break }
-      //   if abs(ref[i]) - abs(array[index + i]) > 0.2 {
-      //     counter += 1; correct = false
-      //     print("Daily2 \(letter)\(i + 3) proper value: \(String(format: "%.2f", ref[i])) [\(index + i)] \(String(format: "%.2f", array[index + i]))  div: \(ref[i] - array[index + i])")
-      //   }
-      // }
-      // if correct { print("Daily2 \(letter) is correct") } else { XCTFail("Error in Daily2 Column \(letter)") }
+      let index = index, ref = csv_ref3[letter]
+      var correct = true, counter = 1
+      for i in 0..<364 {
+        if counter > 20 { break }
+        if abs(ref[i]) - abs(array[index + i]) > 1 {
+          counter += 1; correct = false
+          print("Daily2 \(letter)\(i + 3) proper value: \(String(format: "%.2f", ref[i])) [\(index + i)] \(String(format: "%.2f", array[index + i]))  div: \(ref[i] - array[index + i])")
+        }
+      }
+      if correct { print("Daily2 \(letter) is correct") } else { XCTFail("Error in Daily2 Column \(letter)") }
     }
     
     func column(_ i: Int, offset: Int, stride: Int = 365) -> (String, Int) {
@@ -132,7 +132,13 @@ class SunOlTests: XCTestCase {
         (250..<312).map { column($0, offset: 124) }.forEach { letter, offset in daily1(d10, letter, offset) }
         (313..<381).map { column($0, offset: 123) }.forEach { letter, offset in daily1(d10, letter, offset) }
         (4..<30).map { column($0, offset: 4) }.forEach { letter, offset in daily2(d21, letter, offset) }        
-        (158..<288).map { column($0, offset: 158) }.forEach { letter, offset in daily2(d23, letter, offset) }
+        (158..<185).map { column($0, offset: 158) }.forEach { letter, offset in daily2(d23, letter, offset) }
+        (186..<207).map { column($0, offset: 159) }.forEach { letter, offset in daily2(d23, letter, offset) }
+        (207..<228).map { column($0, offset: 160) }.forEach { letter, offset in daily2(d23, letter, offset) }
+        (228..<258).map { column($0, offset: 161) }.forEach { letter, offset in daily2(d23, letter, offset) }
+        (259..<288).map { column($0, offset: 162) }.forEach {
+          letter, offset in daily2(d23, letter, offset)
+        }
       }
       if j == 1 {
         (184..<204).map { column($0, offset: 7 - (72 - 184), stride: 8760) }.forEach { letter, offset in calculation(hourPre, letter, offset) }
@@ -174,7 +180,8 @@ class SunOlTests: XCTestCase {
   }
 
   func testsCalculation2() {
-    let values = [178,6294,220,645,954,200,0.00,421,1000.00,100000.00,100000.00,21,12,0.00,0.00,0.00]
+    let values = [176.00,4000.00,280.00,560.10,733.94,280.00,0.00,0.00,2000.00,200000.00,200000.00,64.96,60.00,0.00,0.00,0.00]
+
     guard let model = TunOl(values) else {
       print("Invalid config")
       return
@@ -183,7 +190,7 @@ class SunOlTests: XCTestCase {
     let costs = Costs(model)
     var hourPre = [Double](repeating: 0.0, count: 1_033_680)
     var hourFinal = [Double](repeating: 0.0, count: 516_840)
-    var d10 = [Double](repeating: 0.0, count: 82_490)
+    var d10 = [Double](repeating: 0.0, count: 94_170)
     var d23 = [Double](repeating: 0.0, count: 48_545)
     var d21 = [Double](repeating: 0.0, count: 9_855)
     var day = [[Double]]()

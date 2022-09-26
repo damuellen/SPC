@@ -79,12 +79,12 @@ extension TunOl {
       d23[FI + i] =
         d22[EE + i] + min(
           d22[EP + i],
-          min(
-            d22[EK + i],
-            max(
-              0.0,
-              d22[EB + i] + d22[EH + i] - max(
-                0.0, d22[EA + i] + d21[E + i] + min(d22[ER + i], max(0.0, d21[G + i] - d22[EG + i]) / El_boiler_eff) - d22[EJ + i] - d22[EM + i] * BESS_chrg_eff) / BESS_chrg_eff)
+          max(
+            0.0,
+            d22[EB + i] + d22[EH + i]
+              - min(
+                d22[EK + i],
+                max(0.0, d22[EA + i] + d21[E + i] + min(d22[ER + i], max(0.0, d21[G + i] - d22[EG + i]) / El_boiler_eff) - d22[EJ + i] - d22[EM + i] * BESS_chrg_eff) / BESS_chrg_eff)
               - d21[O + i])) * El_boiler_eff - d21[Q + i]
     }
 
