@@ -49,13 +49,6 @@ steps:
   displayName: Setup developer environment
 
 - script: |
-    curl -L "https://raw.githubusercontent.com/apple/swift/main/stdlib/public/Platform/ucrt.modulemap" -o "%UniversalCRTSdkDir%\Include\%UCRTVersion%\ucrt\module.modulemap"
-    curl -L "https://raw.githubusercontent.com/apple/swift/main/stdlib/public/Platform/vcruntime.modulemap" -o "%VCToolsInstallDir%\include\module.modulemap"
-    curl -L "https://raw.githubusercontent.com/apple/swift/main/stdlib/public/Platform/vcruntime.apinotes" -o "%VCToolsInstallDir%\include\vcruntime.apinotes"
-    curl -L "https://raw.githubusercontent.com/apple/swift/main/stdlib/public/Platform/winsdk.modulemap" -o "%UniversalCRTSdkDir%\Include\%UCRTVersion%\um\module.modulemap"
-  displayName: Configure SDK
-
-- script: |
     echo ##vso[task.prependpath]$(toolchain.directory)/usr/bin
     echo ##vso[task.prependpath]$(runtime.directory)
     echo ##vso[task.prependpath]$(icu.directory)
@@ -64,6 +57,9 @@ steps:
 - script: |
     swift package update
     swift build -c release -Xlinker /INCREMENTAL:NO -Xlinker /IGNORE:4217 -Xswiftc -gnone -Xswiftc -suppress-warnings -Xswiftc -continue-building-after-errors -Xswiftc -LC:/vcpkg/installed/x64-windows/lib/ -Xcc -IC:/vcpkg/installed/x64-windows/include/
+  env:
+    SDKROOT: C:\Library\Developer\Platforms\Windows.platform\Developer\SDKs\Windows.sdk
+    DEVELOPER_DIR: C:\Library\Developer
   timeoutInMinutes: 15
   continueOnError: true
   displayName: Build Swift package
