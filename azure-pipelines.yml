@@ -10,7 +10,8 @@ pool:
   vmImage: 'windows-latest'
 
 variables:
-  toolchain.directory: $(Pipeline.Workspace)/Library/Developer/Toolchains/unknown-Asserts-development.xctoolchain
+  toolchain.directory: C:/Library/Developer/Toolchains/unknown-Asserts-development.xctoolchain
+  sdk.directory: C:/Library/Developer/Platforms/Windows.platform/Developer/SDKs/Windows.sdk
 
 steps:
 - task: PowerShell@2
@@ -22,10 +23,6 @@ steps:
       Install-Binary -Url "https://download.swift.org/swift-5.7-release/windows10/swift-5.7-RELEASE/swift-5.7-RELEASE-windows10.exe" -Name "installer.exe" -ArgumentList ("-q")
   displayName: Install Swift toolchain
 
-- script: |
-    echo ##vso[task.prependpath]$(toolchain.directory)/usr/bin
-  displayName: Update PATH
-  
 - task: DownloadBuildArtifacts@1
   inputs:
     buildType: 'specific'
@@ -48,6 +45,17 @@ steps:
     arguments: -no_logo -arch=x64 -host_arch=x64
     modifyEnvironment: true
   displayName: Setup developer environment
+
+- script: |
+    curl -L "https://raw.githubusercontent.com/apple/swift/main/stdlib/public/Platform/ucrt.modulemap" -o "%UniversalCRTSdkDir%\Include\%UCRTVersion%\ucrt\module.modulemap"
+    curl -L "https://raw.githubusercontent.com/apple/swift/main/stdlib/public/Platform/vcruntime.modulemap" -o "%VCToolsInstallDir%\include\module.modulemap"
+    curl -L "https://raw.githubusercontent.com/apple/swift/main/stdlib/public/Platform/vcruntime.apinotes" -o "%VCToolsInstallDir%\include\vcruntime.apinotes"
+    curl -L "https://raw.githubusercontent.com/apple/swift/main/stdlib/public/Platform/winsdk.modulemap" -o "%UniversalCRTSdkDir%\Include\%UCRTVersion%\um\module.modulemap"
+  displayName: Configure SDK
+
+- script: |
+    echo ##vso[task.prependpath]$(toolchain.directory)/usr/bin
+  displayName: Update PATH
 
 - script: |
     swift package update

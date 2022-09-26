@@ -26,21 +26,19 @@ class SunOlTests: XCTestCase {
       return
     }
 
-    var calc = [String]()
     func calculation(_ array: [Double], _ letter: String, _ index: Int) {
       let index = index, ref = csv_ref[letter], column = Array(array[index..<index + 8760])
       var correct = true, counter = 1
       for i in 1..<8700 {
         if counter > 20 { break }
-        if abs(abs(ref[i - 1]) - abs(column[i])) > 0.02 {
+        if abs(abs(ref[i - 1]) - abs(column[i])) > 0.2 {
           counter += 1; correct = false
-          print("Calculation \(letter)\(i + 5) proper value: \(String(format: "%.2f", ref[i - 1])) [\(index + i)] \(String(format: "%.2f", column[i]))  div: \(abs(ref[i - 1]) - abs(column[i]))")
+          print("Calculation \(letter)\(i + 4) proper value: \(String(format: "%.2f", ref[i - 1])) [\(index + i)] \(String(format: "%.2f", column[i]))  div: \(abs(ref[i - 1]) - abs(column[i]))")
         }
       }
-      if correct { calc.append(letter) } else { XCTFail("Error in Calculation Column \(letter)") }
+      if correct { print("Calculation \(letter) is correct") } else { XCTFail("Error in Calculation Column \(letter)") }
     }
 
-    var day1 = [String]()
     func daily1(_ array: [Double], _ letter: String, _ index: Int) {
       let index = index, ref = csv_ref2[letter]
       var correct = true, counter = 1
@@ -51,10 +49,9 @@ class SunOlTests: XCTestCase {
           print("Daily1 \(letter)\(i + 3) proper value: \(String(format: "%.2f", ref[i])) [\(index + i)] \(String(format: "%.2f", array[index + i]))  div: \(ref[i] - array[index + i])")
         }
       }
-      if correct { day1.append(letter) } else { XCTFail("Error in Daily1 Column \(letter)") }
+      if correct { print("Daily1 \(letter) is correct") } else { XCTFail("Error in Daily1 Column \(letter)") }
     }
 
-    var day2 = [String]()
     func daily2(_ array: [Double], _ letter: String, _ index: Int) {
       // let index = index, ref = csv_ref3[letter]
       // var correct = true, counter = 1
@@ -65,7 +62,7 @@ class SunOlTests: XCTestCase {
       //     print("Daily2 \(letter)\(i + 3) proper value: \(String(format: "%.2f", ref[i])) [\(index + i)] \(String(format: "%.2f", array[index + i]))  div: \(ref[i] - array[index + i])")
       //   }
       // }
-      // if correct { day1.append(letter) } else { XCTFail("Error in Daily2 Column \(letter)") }
+      // if correct { print("Daily2 \(letter) is correct") } else { XCTFail("Error in Daily2 Column \(letter)") }
     }
     
     func column(_ i: Int, offset: Int, stride: Int = 365) -> (String, Int) {
@@ -79,7 +76,7 @@ class SunOlTests: XCTestCase {
       return (key, num)
     }
 
-    let values = [167.8486379, 13427.64795, 158.9990407, 100, 439.4037645, 200, 0, 111.4985592, 1000, 100000, 100000, 19.1024554, 21.3114923, 0, 0, 0]
+    let values = [176.00,4000.00,280.00,560.10,733.94,280.00,0.00,0.00,2000.00,200000.00,200000.00,64.96,60.00,0.00,0.00,0.00]
     guard let model = TunOl(values) else {
       print("Invalid config")
       return
@@ -87,7 +84,7 @@ class SunOlTests: XCTestCase {
 
     var hourPre = [Double](repeating: 0.0, count: 1_033_680)
     var hourFinal = [Double](repeating: 0.0, count: 516_840)
-    var d10 = [Double](repeating: 0.0, count: 82_490)
+    var d10 = [Double](repeating: 0.0, count: 94_170)
     var d23 = [Double](repeating: 0.0, count: 48_545)
     var d21 = [Double](repeating: 0.0, count: 9_855)
     var day = [[Double]]()
@@ -115,8 +112,8 @@ class SunOlTests: XCTestCase {
       model.d12(&d10, hourFinal: hourFinal, case: j)
       model.d13(&d10, case: j)
       model.d14(&d10, case: j)
-      day.append(Array(d10[67525..<69715]))
-      day.append(Array(d10[80300..<82490]))
+      day.append(Array(d10[79205..<81395]))
+      day.append(Array(d10[91980..<93805]))
       if flip {
         model.d21(&d21, case: j, day0: day0)
         model.d23(&d23, case: j, day0: day0, d21: d21, d22: d22)
@@ -128,15 +125,23 @@ class SunOlTests: XCTestCase {
         (71..<91).map { column($0, offset: 7, stride: 8760) }.forEach { letter, offset in calculation(hourPre, letter, offset) }
         (91..<124).map { column($0, offset: 7, stride: 8760) }.forEach { letter, offset in calculation(hourPre, letter, offset) }
         (125..<183).map { column($0, offset: 125, stride: 8760) }.forEach { letter, offset in calculation(hourFinal, letter, offset) }
+        (2..<11).map { column($0, offset: 2) }.forEach { letter, offset in daily1(d10, letter, offset) }
+        (19..<35).map { column($0, offset:3) }.forEach { letter, offset in daily1(d10, letter, offset) }
+        (154..<201).map { column($0, offset:122) }.forEach { letter, offset in daily1(d10, letter, offset) }
+        (202..<249).map { column($0, offset: 123) }.forEach { letter, offset in daily1(d10, letter, offset) }
+        (250..<312).map { column($0, offset: 124) }.forEach { letter, offset in daily1(d10, letter, offset) }
+        (313..<381).map { column($0, offset: 123) }.forEach { letter, offset in daily1(d10, letter, offset) }
+        (4..<30).map { column($0, offset: 4) }.forEach { letter, offset in daily2(d21, letter, offset) }        
+        (158..<288).map { column($0, offset: 158) }.forEach { letter, offset in daily2(d23, letter, offset) }
       }
       if j == 1 {
-        (184..<204).map { column($0, offset: 7 - (71 - 184), stride: 8760) }.forEach { letter, offset in calculation(hourPre, letter, offset) }
+        (184..<204).map { column($0, offset: 7 - (72 - 184), stride: 8760) }.forEach { letter, offset in calculation(hourPre, letter, offset) }
       }
       if j == 2 {
-        (296..<316).map { column($0, offset: 7 - (71 - 296), stride: 8760) }.forEach { letter, offset in calculation(hourPre, letter, offset) }
+        (296..<316).map { column($0, offset: 7 - (72 - 296), stride: 8760) }.forEach { letter, offset in calculation(hourPre, letter, offset) }
       }
       if j == 3 {
-        (408..<428).map { column($0, offset: 7 - (71 - 408), stride: 8760) }.forEach { letter, offset in calculation(hourPre, letter, offset) }
+        (408..<428).map { column($0, offset: 7 - (72 - 408), stride: 8760) }.forEach { letter, offset in calculation(hourPre, letter, offset) }
       }
     }
     flip = false

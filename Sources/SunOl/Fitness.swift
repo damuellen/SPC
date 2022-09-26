@@ -6,7 +6,7 @@ public func fitness(values: [Double]) -> [Double] {
 
   var hourPre = [Double](repeating: 0.0, count: 1033680)
   var hourFinal = [Double](repeating: 0.0, count: 516_840)
-  var d10 = [Double](repeating: 0.0, count: 82_490)
+  var d10 = [Double](repeating: 0.0, count: 94_170)
   var d23 = [Double](repeating: 0.0, count: 48_545)
   var d21 = [Double](repeating: 0.0, count: 9_855)
   var day = [[Double]]()
@@ -35,8 +35,8 @@ public func fitness(values: [Double]) -> [Double] {
     model.d12(&d10, hourFinal: hourFinal, case: j)
     model.d13(&d10, case: j)
     model.d14(&d10, case: j)
-    day.append(Array(d10[67525..<69715]))
-    day.append(Array(d10[80300..<82490]))
+    day.append(Array(d10[79205..<81395]))
+    day.append(Array(d10[91980..<93805]))
     if flip {
       model.d21(&d21, case: j, day0: day0)
       model.d23(&d23, case: j, day0: day0, d21: d21, d22: d22)
