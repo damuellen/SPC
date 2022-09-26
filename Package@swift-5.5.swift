@@ -14,10 +14,10 @@ let swift: [SwiftSetting] = [
 
 #if os(Linux) || os(iOS)
 var platformProducts: [Product] = [
-  .library(name: "BlackBoxModel", type: .dynamic, targets: ["BlackBoxModel"]),
-  .library(name: "SolarPosition", type: .dynamic, targets: ["SolarPosition"]),
-  .library(name: "PinchPoint", type: .dynamic, targets: ["PinchPoint"]),
-  .library(name: "SunOl", type: .dynamic, targets: ["SunOl"]),
+  // .library(name: "BlackBoxModel", type: .dynamic, targets: ["BlackBoxModel"]),
+  // .library(name: "SolarPosition", type: .dynamic, targets: ["SolarPosition"]),
+  // .library(name: "PinchPoint", type: .dynamic, targets: ["PinchPoint"]),
+  // .library(name: "SunOl", type: .dynamic, targets: ["SunOl"]),
 ]
 #else
 var platformProducts: [Product] = []
@@ -127,7 +127,7 @@ let platformTargets: [Target] = [
 
 let package = Package(
   name: "SPC",
-  platforms: [.macOS(.v10_15)],
+  platforms: [.macOS(.v12)],
   products: platformProducts,
   dependencies: dependencies,
   targets: platformTargets,
