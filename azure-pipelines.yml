@@ -13,6 +13,7 @@ variables:
   toolchain.directory: C:/Library/Developer/Toolchains/unknown-Asserts-development.xctoolchain
   sdk.directory: C:/Library/Developer/Platforms/Windows.platform/Developer/SDKs/Windows.sdk
   runtime.directory: "C:/Program Files/swift/runtime-development/usr/bin"
+  icu.directory: "C:/Program Files/swift/icu-69.1/usr/bin"
 
 steps:
 - task: PowerShell@2
@@ -57,6 +58,7 @@ steps:
 - script: |
     echo ##vso[task.prependpath]$(toolchain.directory)/usr/bin
     echo ##vso[task.prependpath]$(runtime.directory)
+    echo ##vso[task.prependpath]$(icu.directory)
   displayName: Update PATH
 
 - script: |
