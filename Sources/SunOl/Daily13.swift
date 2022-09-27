@@ -273,37 +273,33 @@ extension TunOl {
     }
     /// Surplus grid import cap after opt day harm and min night op prep
     let JY: Int = 58400
-    // JY=IF(JP6=0,0,ROUND((GE6+(GF6-GE6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc))-MIN(Grid_import_max_ud*Grid_import_yes_no_PB_strategy,MAX(0,-((FS6+(FT6-FS6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc))-$Z6-MIN((GH6+(GI6-GH6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc)),MAX(0,$AB6-(FV6+(FW6-FV6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc)))/El_boiler_eff)-MIN(BESS_cap_ud,MAX(0,FK6-GG6-GA6*BESS_chrg_eff))/BESS_chrg_eff))),5))
+    // JY=IF(JP6=0,0,ROUND((GE6+(GF6-GE6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc))-MAX(0,-((FS6+(FT6-FS6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc))-$Z6-MIN((GH6+(GI6-GH6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc)),MAX(0,$AB6-(FV6+(FW6-FV6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc)))/El_boiler_eff)-MIN(BESS_cap_ud,MAX(0,FK6-GG6-GA6*BESS_chrg_eff))/BESS_chrg_eff)),5))
     for i in 0..<365 {
       d13[JY + i] = iff(
         d13[JP + i].isZero, 0,
         round(
           (d13[GE + i] + (d13[GF + i] - d13[GE + i]) * d13[dJP + i])
-            - min(
-              Grid_import_max_ud * Grid_import_yes_no_PB_strategy,
-              max(
+            - max(
                 0.0,
                 -((d13[FS + i] + (d13[FT + i] - d13[FS + i]) * d13[dJP + i]) - d13[Z + i]
                   - min(
                     (d13[GH + i] + (d13[GI + i] - d13[GH + i]) * d13[dJP + i]), max(0.0, d13[AB + i] - (d13[FV + i] + (d13[FW + i] - d13[FV + i]) * d13[dJP + i])) / El_boiler_eff)
-                  - min(BESS_cap_ud, max(0.0, d13[FK + i] - d13[GG + i] - d13[GA + i] * BESS_chrg_eff)) / BESS_chrg_eff))), 5))
+                  - min(BESS_cap_ud, max(0.0, d13[FK + i] - d13[GG + i] - d13[GA + i] * BESS_chrg_eff)) / BESS_chrg_eff)), 5))
     }
     /// Surplus grid import cap after opt day harm and max night op prep
     let JZ: Int = 58765
-    // JZ=IF(JP6=0,0,ROUND((IA6+(IB6-IA6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc))-MIN(Grid_import_max_ud*Grid_import_yes_no_PB_strategy,MAX(0,-((HO6+(HP6-HO6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc))-$AA6-MIN((ID6+(IE6-ID6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc)),MAX(0,$AC6-(HR6+(HS6-HR6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc)))/El_boiler_eff)-MIN(BESS_cap_ud,MAX(0,HG6-IC6-HW6*BESS_chrg_eff))/BESS_chrg_eff))),5))
+    // JZ=IF(JP6=0,0,ROUND((IA6+(IB6-IA6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc))-MAX(0,-((HO6+(HP6-HO6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc))-$AA6-MIN((ID6+(IE6-ID6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc)),MAX(0,$AC6-(HR6+(HS6-HR6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc)))/El_boiler_eff)-MIN(BESS_cap_ud,MAX(0,HG6-IC6-HW6*BESS_chrg_eff))/BESS_chrg_eff)),5))
     for i in 0..<365 {
       d13[JZ + i] = iff(
         d13[JP + i].isZero, 0,
         round(
           (d13[IA + i] + (d13[IB + i] - d13[IA + i]) * d13[dJP + i])
-            - min(
-              Grid_import_max_ud * Grid_import_yes_no_PB_strategy,
-              max(
+            - max(
                 0,
                 -((d13[HO + i] + (d13[HP + i] - d13[HO + i]) * d13[dJP + i]) - d13[AA + i]
                   - min(
                     (d13[ID + i] + (d13[IE + i] - d13[ID + i]) * d13[dJP + i]), max(0, d13[AC + i] - (d13[HR + i] + (d13[HS + i] - d13[HR + i]) * d13[dJP + i])) / El_boiler_eff)
-                  - min(BESS_cap_ud, max(0, d13[HG + i] - d13[IC + i] - d13[HW + i] * BESS_chrg_eff)) / BESS_chrg_eff))), 5))
+                  - min(BESS_cap_ud, max(0, d13[HG + i] - d13[IC + i] - d13[HW + i] * BESS_chrg_eff)) / BESS_chrg_eff)), 5))
     }
     /// Surplus RawMeth prod cap after opt day harm and min night op prep
     let KA: Int = 59130
@@ -515,15 +511,13 @@ extension TunOl {
     }
     /// Surplus grid import cap after min day harmonious and opti night op prep
     let KR: Int = 65335
-    // KR=IF(KI6=0,0,ROUND((GE6+(IA6-GE6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-MIN(Grid_import_max_ud*Grid_import_yes_no_PB_strategy,MAX(0,-((FS6+(HO6-FS6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-($Z6+($AA6-$Z6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-MIN((GH6+(ID6-GH6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)),MAX(0,($AB6+($AC6-$AB6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(FV6+(HR6-FV6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)))/El_boiler_eff)-MIN(BESS_cap_ud,MAX(0,(FK6+(HG6-FK6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(GG6+(IC6-GG6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(GA6+(HW6-GA6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))*BESS_chrg_eff))/BESS_chrg_eff))),5))
+    // KR=IF(KI6=0,0,ROUND((GE6+(IA6-GE6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-MAX(0,-((FS6+(HO6-FS6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-($Z6+($AA6-$Z6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-MIN((GH6+(ID6-GH6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)),MAX(0,($AB6+($AC6-$AB6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(FV6+(HR6-FV6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)))/El_boiler_eff)-MIN(BESS_cap_ud,MAX(0,(FK6+(HG6-FK6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(GG6+(IC6-GG6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(GA6+(HW6-GA6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))*BESS_chrg_eff))/BESS_chrg_eff)),5))
     for i in 0..<365 {
       d13[KR + i] = iff(
         d13[KI + i].isZero, 0,
         round(
           (d13[GE + i] + (d13[IA + i] - d13[GE + i]) * d13[AMKI + i])
-            - min(
-              Grid_import_max_ud * Grid_import_yes_no_PB_strategy,
-              max(
+            - max(
                 0.0,
                 -((d13[FS + i] + (d13[HO + i] - d13[FS + i]) * d13[AMKI + i]) - (d13[Z + i] + (d13[AA + i] - d13[Z + i]) * d13[AMKI + i])
                   - min(
@@ -533,19 +527,17 @@ extension TunOl {
                     max(
                       0,
                       (d13[FK + i] + (d13[HG + i] - d13[FK + i]) * d13[AMKI + i]) - (d13[GG + i] + (d13[IC + i] - d13[GG + i]) * d13[AMKI + i])
-                        - (d13[GA + i] + (d13[HW + i] - d13[GA + i]) * d13[AMKI + i]) * BESS_chrg_eff)) / BESS_chrg_eff))), 5))
+                        - (d13[GA + i] + (d13[HW + i] - d13[GA + i]) * d13[AMKI + i]) * BESS_chrg_eff)) / BESS_chrg_eff)), 5))
     }
     /// Surplus grid import cap after max day harmonious and opti night op prep
     let KS: Int = 65700
-    // KS=IF(KI6=0,0,ROUND((GF6+(IB6-GF6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-MIN(Grid_import_max_ud*Grid_import_yes_no_PB_strategy,MAX(0,-((FT6+(HP6-FT6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-($Z6+($AA6-$Z6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-MIN((GI6+(IE6-GI6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)),MAX(0,($AB6+($AC6-$AB6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(FW6+(HS6-FW6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)))/El_boiler_eff)-MIN(BESS_cap_ud,MAX(0,(FK6+(HG6-FK6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(GG6+(IC6-GG6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(GA6+(HW6-GA6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))*BESS_chrg_eff))/BESS_chrg_eff))),5))
+    // KS=IF(KI6=0,0,ROUND((GF6+(IB6-GF6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-MAX(0,-((FT6+(HP6-FT6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-($Z6+($AA6-$Z6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-MIN((GI6+(IE6-GI6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)),MAX(0,($AB6+($AC6-$AB6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(FW6+(HS6-FW6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)))/El_boiler_eff)-MIN(BESS_cap_ud,MAX(0,(FK6+(HG6-FK6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(GG6+(IC6-GG6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(GA6+(HW6-GA6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))*BESS_chrg_eff))/BESS_chrg_eff)),5))
     for i in 0..<365 {
       d13[KS + i] = iff(
         d13[KI + i].isZero, 0,
         round(
           (d13[GF + i] + (d13[IB + i] - d13[GF + i]) * d13[AMKI + i])
-            - min(
-              Grid_import_max_ud * Grid_import_yes_no_PB_strategy,
-              max(
+            - max(
                 0.0,
                 -((d13[FT + i] + (d13[HP + i] - d13[FT + i]) * d13[AMKI + i]) - (d13[Z + i] + (d13[AA + i] - d13[Z + i]) * d13[AMKI + i])
                   - min(
@@ -555,7 +547,7 @@ extension TunOl {
                     max(
                       0,
                       (d13[FK + i] + (d13[HG + i] - d13[FK + i]) * d13[AMKI + i]) - (d13[GG + i] + (d13[IC + i] - d13[GG + i]) * d13[AMKI + i])
-                        - (d13[GA + i] + (d13[HW + i] - d13[GA + i]) * d13[AMKI + i]) * BESS_chrg_eff)) / BESS_chrg_eff))), 5))
+                        - (d13[GA + i] + (d13[HW + i] - d13[GA + i]) * d13[AMKI + i]) * BESS_chrg_eff)) / BESS_chrg_eff)), 5))
     }
     /// Surplus RawMeth prod cap after min day harmonious and opti night op prep
     let KT: Int = 66065

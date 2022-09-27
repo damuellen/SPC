@@ -201,10 +201,10 @@ extension TunOl {
     let Overall_harmonious_range = Overall_harmonious_max_perc - Overall_harmonious_min_perc
     /// Optimal harmonious day prod after min night prep due to prod cap limits
     let GE = 9855
-    // IF(OR(FC6<0,FF6<0,FI6<0,FL6<0,FO6<0,FR6<0,FU6<0,FX6<0,GA6<0),0,MIN(1,IFERROR(FC6/MAX(0,FC6-FE6),1),IFERROR(FF6/MAX(0,FF6-FH6),1),IFERROR(FI6/MAX(0,FI6-FK6),1),IFERROR(FL6/MAX(0,FL6-FN6),1),IFERROR(FO6/MAX(0,FO6-FQ6),1),IFERROR(FR6/MAX(0,FR6-FT6),1),IFERROR(FU6/MAX(0,FU6-FW6),1),IFERROR(FX6/MAX(0,FX6-FZ6),1),IFERROR(GA6/MAX(0,GA6-GC6),1))*(Overall_harmonious_max_perc-Overall_harmonious_min_perc)+Overall_harmonious_min_perc)
+    // GE=IF(OR($AE6=0,FC6<0,FF6<0,FI6<0,FL6<0,FO6<0,FR6<0,FU6<0,FX6<0,GA6<0),0,MIN(1,IFERROR(FC6/MAX(0,FC6-FE6),1),IFERROR(FF6/MAX(0,FF6-FH6),1),IFERROR(FI6/MAX(0,FI6-FK6),1),IFERROR(FL6/MAX(0,FL6-FN6),1),IFERROR(FO6/MAX(0,FO6-FQ6),1),IFERROR(FR6/MAX(0,FR6-FT6),1),IFERROR(FU6/MAX(0,FU6-FW6),1),IFERROR(FX6/MAX(0,FX6-FZ6),1),IFERROR(GA6/MAX(0,GA6-GC6),1))*(Overall_harmonious_max_perc-Overall_harmonious_min_perc)+Overall_harmonious_min_perc)
     for i in 0..<365 {
       d23[GE + i] = iff(
-        or(
+        or(d21[AE + i].isZero, 
           d23[FC + i] < 0.0, d23[FF + i] < 0.0, d23[FI + i] < 0.0, d23[FL + i] < 0.0, d23[FO + i] < 0.0, d23[FR + i] < 0.0, d23[FU + i] < 0.0, d23[FX + i] < 0.0, d23[GA + i] < 0),
         0.0,
         min(
@@ -399,11 +399,11 @@ extension TunOl {
 
     /// Max harmonious day prod after min night prep due to prod cap limits
     let GX = 16790
-    // =IF(OR($AE6=0,GE6=0,GF6<0,GH6<0,GJ6<0,GL6<0,GN6<0,GP6<0,GR6<0,GT6<0,GV6<0),0,MIN(1,IFERROR(GF6/MAX(0,GF6-GG6),1),IFERROR(GH6/MAX(0,GH6-GI6),1),IFERROR(GJ6/MAX(0,GJ6-GK6),1),IFERROR(GL6/MAX(0,GL6-GM6),1),IFERROR(GN6/MAX(0,GN6-GO6),1),IFERROR(GP6/MAX(0,GP6-GQ6),1),IFERROR(GR6/MAX(0,GR6-GS6),1),IFERROR(GT6/MAX(0,GT6-GU6),1),IFERROR(GV6/MAX(0,GV6-GW6),1))*($AE6-A_equiv_harmonious_min_perc)+A_equiv_harmonious_min_perc)
+    // =IF(OR(GE6=0,GF6<0,GH6<0,GJ6<0,GL6<0,GN6<0,GP6<0,GR6<0,GT6<0,GV6<0),0,MIN(1,IFERROR(GF6/MAX(0,GF6-GG6),1),IFERROR(GH6/MAX(0,GH6-GI6),1),IFERROR(GJ6/MAX(0,GJ6-GK6),1),IFERROR(GL6/MAX(0,GL6-GM6),1),IFERROR(GN6/MAX(0,GN6-GO6),1),IFERROR(GP6/MAX(0,GP6-GQ6),1),IFERROR(GR6/MAX(0,GR6-GS6),1),IFERROR(GT6/MAX(0,GT6-GU6),1),IFERROR(GV6/MAX(0,GV6-GW6),1))*($AE6-A_equiv_harmonious_min_perc)+A_equiv_harmonious_min_perc)
     for i in 0..<365 {
       d23[GX + i] = iff(
         or(
-          d21[AE + i].isZero, d23[GE + i].isZero, d23[GF + i] < 0.0, d23[GH + i] < 0.0, d23[GJ + i] < 0.0, d23[GL + i] < 0.0, d23[GN + i] < 0.0, d23[GP + i] < 0.0,
+          d23[GE + i].isZero, d23[GF + i] < 0.0, d23[GH + i] < 0.0, d23[GJ + i] < 0.0, d23[GL + i] < 0.0, d23[GN + i] < 0.0, d23[GP + i] < 0.0,
           d23[GR + i] < 0.0, d23[GT + i] < 0.0, d23[GV + i] < 0), 0.0,
         min(
           1,
@@ -605,12 +605,12 @@ extension TunOl {
 
     /// Opt harm op period op during night prio operation
     let HS = 24090
-    // =IF(OR(GE6=0,HA6<0,HC6<0,HE6<0,HG6<0,HI6<0,HK6<0,HM6<0,HO6<0,HQ6<0),0,MIN(1,IFERROR(HA6/MAX(0,HA6-HB6),1),IFERROR(HC6/MAX(0,HC6-HD6),1),IFERROR(HE6/MAX(0,HE6-HF6),1),IFERROR(HG6/MAX(0,HG6-HH6),1),IFERROR(HI6/MAX(0,HI6-HJ6),1),IFERROR(HK6/MAX(0,HK6-HL6),1),IFERROR(HM6/MAX(0,HM6-HN6),1),IFERROR(HO6/MAX(0,HO6-HP6),1),IFERROR(HQ6/MAX(0,HQ6-HR6),1))*(Overall_harmonious_max_perc-Overall_harmonious_min_perc)+Overall_harmonious_min_perc)
+    // =IF(OR(GZ6=0,HA6<0,HC6<0,HE6<0,HG6<0,HI6<0,HK6<0,HM6<0,HO6<0,HQ6<0),0,MIN(1,IFERROR(HA6/MAX(0,HA6-HB6),1),IFERROR(HC6/MAX(0,HC6-HD6),1),IFERROR(HE6/MAX(0,HE6-HF6),1),IFERROR(HG6/MAX(0,HG6-HH6),1),IFERROR(HI6/MAX(0,HI6-HJ6),1),IFERROR(HK6/MAX(0,HK6-HL6),1),IFERROR(HM6/MAX(0,HM6-HN6),1),IFERROR(HO6/MAX(0,HO6-HP6),1),IFERROR(HQ6/MAX(0,HQ6-HR6),1))*(Overall_harmonious_max_perc-Overall_harmonious_min_perc)+Overall_harmonious_min_perc)
     for i in 0..<365 {
       if 24255 == i + HS {}
       d23[HS + i] = iff(
         or(
-          d23[GE + i].isZero, d23[HA + i] < 0.0, d23[HC + i] < 0.0, d23[HE + i] < 0.0, d23[HG + i] < 0.0, d23[HI + i] < 0.0, d23[HK + i] < 0.0, d23[HM + i] < 0.0,
+          d23[GZ + i].isZero, d23[HA + i] < 0.0, d23[HC + i] < 0.0, d23[HE + i] < 0.0, d23[HG + i] < 0.0, d23[HI + i] < 0.0, d23[HK + i] < 0.0, d23[HM + i] < 0.0,
           d23[HO + i] < 0.0, d23[HQ + i] < 0), 0.0,
         min(
           1, ifFinite(d23[HA + i] / max(0.0, d23[HA + i] - d23[HB + i]), 1), ifFinite(d23[HC + i] / max(0.0, d23[HC + i] - d23[HD + i]), 1),
