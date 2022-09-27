@@ -14,7 +14,6 @@ public func fitness(values: [Double]) -> [Double] {
   let GZ = 17155
   let HA = 17520
 
-  var flip = true
   model.hour(TunOl.Q_Sol_MW_thLoop, TunOl.Reference_PV_plant_power_at_inverter_inlet_DC, TunOl.Reference_PV_MV_power_at_transformer_outlet, hour: &hourPre)
   let d22 = model.d22(hour: hourPre)
 
@@ -23,7 +22,7 @@ public func fitness(values: [Double]) -> [Double] {
 
   // while reserve < model.Overall_harmonious_max_perc {
   model.hour1(&hourPre, reserved: reserve)
-  let day0 = model.day0(hour: hourPre)
+  let day20 = model.day20(hour: hourPre)
 
   for j in 0..<4 {
     model.hour2(&hourPre, case: j)
@@ -37,14 +36,13 @@ public func fitness(values: [Double]) -> [Double] {
     model.d14(&d10, case: j)
     day.append(Array(d10[79205..<81395]))
     day.append(Array(d10[91980..<93805]))
-    if flip {
-      model.d21(&d21, case: j, day0: day0)
-      model.d23(&d23, case: j, day0: day0, d21: d21, d22: d22)
-      day.append(Array(d23[33945..<35040] + ArraySlice(zip(day0[365..<730], d23[GX..<GZ]).map { $1 > 0 ? $0 : 0 }) + day0[730..<1095]))
-      day.append(Array(d23[44895..<45990] + ArraySlice(zip(day0[365..<730], d23[GZ..<HA]).map { $1 > 0 ? $0 : 0 }) + day0[730..<1095]))
-    }
+
+    model.d21(&d21, case: j, day0: day20)
+    model.d23(&d23, case: j, day0: day20, d21: d21, d22: d22)
+    day.append(Array(d23[33945..<35040] + ArraySlice(zip(day20[365..<730], d23[GX..<GZ]).map { $1 > 0 ? $0 : 0 }) + day20[730..<1095]))
+    day.append(Array(d23[44895..<45990] + ArraySlice(zip(day20[365..<730], d23[GZ..<HA]).map { $1 > 0 ? $0 : 0 }) + day20[730..<1095]))
   }
-  flip = false
+
   reserve += step
   // }
 

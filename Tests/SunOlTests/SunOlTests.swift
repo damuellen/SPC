@@ -44,7 +44,7 @@ class SunOlTests: XCTestCase {
       var correct = true, counter = 1
       for i in 0..<364 {
         if counter > 20 { break }
-        if abs(ref[i]) - abs(array[index + i]) > 1 {
+        if abs(ref[i]) - abs(array[index + i]) > 0.5 {
           counter += 1; correct = false
           print("Daily1 \(letter)\(i + 3) proper value: \(String(format: "%.2f", ref[i])) [\(index + i)] \(String(format: "%.2f", array[index + i]))  div: \(ref[i] - array[index + i])")
         }
@@ -57,7 +57,7 @@ class SunOlTests: XCTestCase {
       var correct = true, counter = 1
       for i in 0..<364 {
         if counter > 20 { break }
-        if abs(ref[i]) - abs(array[index + i]) > 1 {
+        if abs(ref[i]) - abs(array[index + i]) > 0.5 {
           counter += 1; correct = false
           print("Daily2 \(letter)\(i + 3) proper value: \(String(format: "%.2f", ref[i])) [\(index + i)] \(String(format: "%.2f", array[index + i]))  div: \(ref[i] - array[index + i])")
         }
@@ -92,7 +92,6 @@ class SunOlTests: XCTestCase {
     let GZ = 17155
     let HA = 17520
 
-    var flip = true
     model.hour(TunOl.Q_Sol_MW_thLoop, TunOl.Reference_PV_plant_power_at_inverter_inlet_DC, TunOl.Reference_PV_MV_power_at_transformer_outlet, hour: &hourPre)
     let d22 = model.d22(hour: hourPre)
 
@@ -100,7 +99,7 @@ class SunOlTests: XCTestCase {
     var reserve = model.Overall_harmonious_min_perc
 
     model.hour1(&hourPre, reserved: reserve)
-    let day0 = model.day0(hour: hourPre)
+    let day20 = model.day20(hour: hourPre)
 
     for j in 0..<4 {
       model.hour2(&hourPre, case: j)
@@ -114,45 +113,89 @@ class SunOlTests: XCTestCase {
       model.d14(&d10, case: j)
       day.append(Array(d10[79205..<81395]))
       day.append(Array(d10[91980..<93805]))
-      if flip {
-        model.d21(&d21, case: j, day0: day0)
-        model.d23(&d23, case: j, day0: day0, d21: d21, d22: d22)
-        day.append(Array(d23[33945..<35040] + ArraySlice(zip(day0[365..<730], d23[GX..<GZ]).map { $1 > 0 ? $0 : 0 }) + day0[730..<1095]))
-        day.append(Array(d23[44895..<45990] + ArraySlice(zip(day0[365..<730], d23[GZ..<HA]).map { $1 > 0 ? $0 : 0 }) + day0[730..<1095]))
-      }
+
+      model.d21(&d21, case: j, day0: day20)
+      model.d23(&d23, case: j, day0: day20, d21: d21, d22: d22)
+      day.append(Array(d23[33945..<35040] + ArraySlice(zip(day20[365..<730], d23[GX..<GZ]).map { $1 > 0 ? $0 : 0 }) + day20[730..<1095]))
+      day.append(Array(d23[44895..<45990] + ArraySlice(zip(day20[365..<730], d23[GZ..<HA]).map { $1 > 0 ? $0 : 0 }) + day20[730..<1095]))
+
       if j == 0 {
+        print("Case A")
+        // H 0
         (7..<71).map { column($0, offset: 7, stride: 8760) }.forEach { letter, offset in calculation(hourPre, letter, offset) }
+        // BT 560640
         (71..<91).map { column($0, offset: 7, stride: 8760) }.forEach { letter, offset in calculation(hourPre, letter, offset) }
+        // CN 735840
         (91..<124).map { column($0, offset: 7, stride: 8760) }.forEach { letter, offset in calculation(hourPre, letter, offset) }
+        // DV 0
         (125..<183).map { column($0, offset: 125, stride: 8760) }.forEach { letter, offset in calculation(hourFinal, letter, offset) }
+        // C 0
         (2..<11).map { column($0, offset: 2) }.forEach { letter, offset in daily1(d10, letter, offset) }
-        (19..<35).map { column($0, offset:3) }.forEach { letter, offset in daily1(d10, letter, offset) }
-        (154..<201).map { column($0, offset:122) }.forEach { letter, offset in daily1(d10, letter, offset) }
+        // T 5840
+        (19..<35).map { column($0, offset: 3) }.forEach { letter, offset in daily1(d10, letter, offset) }
+        // EY 11680
+        (154..<201).map { column($0, offset: 122) }.forEach { letter, offset in daily1(d10, letter, offset) }
+        // GU 28835
         (202..<249).map { column($0, offset: 123) }.forEach { letter, offset in daily1(d10, letter, offset) }
+        // IQ 45990
         (250..<312).map { column($0, offset: 124) }.forEach { letter, offset in daily1(d10, letter, offset) }
-        (313..<381).map { column($0, offset: 123) }.forEach { letter, offset in daily1(d10, letter, offset) }
-        (4..<30).map { column($0, offset: 4) }.forEach { letter, offset in daily2(d21, letter, offset) }        
+        // LB 69350
+        (313..<348).map { column($0, offset: 123) }.forEach { letter, offset in daily1(d10, letter, offset) }
+        // MK 82125
+        (348..<381).map { column($0, offset: 123) }.forEach { letter, offset in daily1(d10, letter, offset) }
+        // E 0
+        (4..<30).map { column($0, offset: 4) }.forEach { letter, offset in daily2(d21, letter, offset) }
+        // FC 0
         (158..<185).map { column($0, offset: 158) }.forEach { letter, offset in daily2(d23, letter, offset) }
+        // GE 9855
         (186..<207).map { column($0, offset: 159) }.forEach { letter, offset in daily2(d23, letter, offset) }
+        // GZ 17155
         (207..<228).map { column($0, offset: 160) }.forEach { letter, offset in daily2(d23, letter, offset) }
+        // HU 24455 day
         (228..<258).map { column($0, offset: 161) }.forEach { letter, offset in daily2(d23, letter, offset) }
-        (259..<288).map { column($0, offset: 162) }.forEach {
-          letter, offset in daily2(d23, letter, offset)
-        }
+        // IZ 35405 night
+        (259..<288).map { column($0, offset: 162) }.forEach { letter, offset in daily2(d23, letter, offset) } 
       }
       if j == 1 {
+        print("Case B")
+        // GC 569400
         (184..<204).map { column($0, offset: 7 - (72 - 184), stride: 8760) }.forEach { letter, offset in calculation(hourPre, letter, offset) }
+        // TW 69350
+        (542..<577).map { column($0, offset: 352) }.forEach { letter, offset in daily1(d10, letter, offset) }
+        // VF 82125
+        (577..<610).map { column($0, offset: 352) }.forEach { letter, offset in daily1(d10, letter, offset) }
+        // MW 24455
+        (360..<390).map { column($0, offset: 293) }.forEach { letter, offset in daily2(d23, letter, offset) }
+        // OB 35405
+        (391..<420).map { column($0, offset: 294) }.forEach { letter, offset in daily2(d23, letter, offset) }
       }
       if j == 2 {
+        print("Case C")
         (296..<316).map { column($0, offset: 7 - (72 - 296), stride: 8760) }.forEach { letter, offset in calculation(hourPre, letter, offset) }
+        // ACR 69350
+        (771..<806).map { column($0, offset: 581) }.forEach { letter, offset in daily1(d10, letter, offset) }
+        // AEA 82125
+        (806..<839).map { column($0, offset: 581) }.forEach { letter, offset in daily1(d10, letter, offset) }
+        // RY 24455
+        (492..<522).map { column($0, offset: 425) }.forEach { letter, offset in daily2(d23, letter, offset) }
+        // TD 35405
+        (523..<552).map { column($0, offset: 426) }.forEach { letter, offset in daily2(d23, letter, offset) }
       }
       if j == 3 {
+        print("Case D")
         (408..<428).map { column($0, offset: 7 - (72 - 408), stride: 8760) }.forEach { letter, offset in calculation(hourPre, letter, offset) }
+        // ALM 69350
+        (1000..<1034).map { column($0, offset: 810) }.forEach { 
+          letter, offset in daily1(d10, letter, offset)
+        }
+        // AMV 82125
+        (1034..<1067).map { column($0, offset: 810) }.forEach { letter, offset in daily1(d10, letter, offset) }
+        // XA 24455
+        (624..<654).map { column($0, offset: 557) }.forEach { letter, offset in daily2(d23, letter, offset) }
+        // YF 35405
+        (655..<684).map { column($0, offset: 558) }.forEach { letter, offset in daily2(d23, letter, offset) }
       }
     }
-    flip = false
-    reserve += step
-
     var meth_produced_MTPH_sum = Double.zero
     var elec_from_grid_sum = Double.zero
     var elec_to_grid_MTPH_sum = Double.zero
@@ -198,7 +241,6 @@ class SunOlTests: XCTestCase {
     let GZ = 17155
     let HA = 17520
 
-    var flip = true
     model.hour(TunOl.Q_Sol_MW_thLoop, TunOl.Reference_PV_plant_power_at_inverter_inlet_DC, TunOl.Reference_PV_MV_power_at_transformer_outlet, hour: &hourPre)
     let d22 = model.d22(hour: hourPre)
 
@@ -206,7 +248,7 @@ class SunOlTests: XCTestCase {
     var reserve = model.Overall_harmonious_min_perc
 
     model.hour1(&hourPre, reserved: reserve)
-    let day0 = model.day0(hour: hourPre)
+    let day20 = model.day20(hour: hourPre)
 
     for j in 0..<4 {
       model.hour2(&hourPre, case: j)
@@ -220,15 +262,14 @@ class SunOlTests: XCTestCase {
       model.d14(&d10, case: j)
       day.append(Array(d10[67525..<69715]))
       day.append(Array(d10[80300..<82490]))
-      if flip {
-        model.d21(&d21, case: j, day0: day0)
-        model.d23(&d23, case: j, day0: day0, d21: d21, d22: d22)
-        day.append(Array(d23[33945..<35040] + ArraySlice(zip(day0[365..<730], d23[GX..<GZ]).map { $1 > 0 ? $0 : 0 }) + day0[730..<1095]))
-        day.append(Array(d23[44895..<45990] + ArraySlice(zip(day0[365..<730], d23[GZ..<HA]).map { $1 > 0 ? $0 : 0 }) + day0[730..<1095]))
-      }
+
+      model.d21(&d21, case: j, day0: day20)
+      model.d23(&d23, case: j, day0: day20, d21: d21, d22: d22)
+      day.append(Array(d23[33945..<35040] + ArraySlice(zip(day20[365..<730], d23[GX..<GZ]).map { $1 > 0 ? $0 : 0 }) + day20[730..<1095]))
+      day.append(Array(d23[44895..<45990] + ArraySlice(zip(day20[365..<730], d23[GZ..<HA]).map { $1 > 0 ? $0 : 0 }) + day20[730..<1095]))
+
     }
-    flip = false
-    reserve += step
+
 
     var meth_produced_MTPH_sum = Double.zero
     var elec_from_grid_sum = Double.zero
