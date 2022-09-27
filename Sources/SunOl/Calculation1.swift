@@ -669,11 +669,11 @@ extension TunOl {
     for i in 1..<8760 {
       h[CQ + i] = iff(
         or(
-          and(h[CP + i] > 0.0, h[CP + i - 1].isZero, h[CP + i + 1].isZero),
+          and(h[CP + i] > 0.0, h[CP + i - 1].isZero, h[min(CP + i + 1, 770880)].isZero),
           and(
             h[CP + i] > 0.0,
             or(
-              and(h[min(CP + i - 2, CP)].isZero, h[min(CP + i - 1, CP)] > 0.0, h[max(CP + i + 1, 770880)].isZero), and(h[CP + i - 1].isZero, h[max(CP + i + 1, 770880)] > 0.0, h[max(CP + i + 2, 770880)].isZero)
+              and(h[max(CP + i - 2, CP)].isZero, h[CP + i - 1] > 0.0, h[min(CP + i + 1, CQ)].isZero), and(h[CP + i - 1].isZero, h[min(CP + i + 1, CQ)] > 0.0, h[min(CP + i + 2, CQ)].isZero)
             ))), 0, h[CP + i])
     }
     /// Min harmonious net heat cons
