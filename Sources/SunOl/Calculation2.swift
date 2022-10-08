@@ -480,8 +480,8 @@ extension TunOl {
       h[FI + i] = min(
         Double(1.0),
         max(
-          0,
-          1
+          Double.zero,
+          Double(1.0)
             - ((max(Double.zero, h[EX + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons) / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
               * (MethSynt_harmonious_max_perc - MethSynt_harmonious_min_perc) + MethSynt_harmonious_min_perc)),
         RawMeth_max_cons[j] / MethSynt_RawMeth_nom_prod_ud
@@ -521,8 +521,8 @@ extension TunOl {
       h[FJ + i] = min(
         Double(1.0),
         max(
-          0,
-          1
+          Double.zero,
+          Double(1.0)
             - ((max(Double.zero, h[EX + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons) / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
               * (CCU_harmonious_max_perc - CCU_harmonious_min_perc) + CCU_harmonious_min_perc)),
         CO2_max_cons[j] / CCU_CO2_nom_prod_ud
@@ -561,8 +561,8 @@ extension TunOl {
       h[FK + i] = min(
         Double(1.0),
         max(
-          0,
-          1.0
+          Double.zero,
+          Double(1.0)
             - ((max(Double.zero, h[EX + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons) / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
               * (EY_harmonious_max_perc - EY_harmonious_min_perc) + EY_harmonious_min_perc)),
         Hydrogen_max_cons[j] / EY_Hydrogen_nom_prod
@@ -723,7 +723,7 @@ extension TunOl {
         Double(1.0),
         max(
           Double.zero,
-          1.0
+          Double(1.0)
             - ((max(Double.zero, h[FO + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons) / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
               * (MethSynt_harmonious_max_perc - MethSynt_harmonious_min_perc) + MethSynt_harmonious_min_perc)),
         RawMeth_max_cons[j] / MethSynt_RawMeth_nom_prod_ud
@@ -763,7 +763,7 @@ extension TunOl {
         Double(1.0),
         max(
           Double.zero,
-          1.0
+          Double(1.0)
             - ((max(Double.zero, h[FO + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons) / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
               * (CCU_harmonious_max_perc - CCU_harmonious_min_perc) + CCU_harmonious_min_perc)),
         CO2_max_cons[j] / CCU_CO2_nom_prod_ud
@@ -803,7 +803,7 @@ extension TunOl {
         Double(1.0),
         max(
           Double.zero,
-          1.0
+          Double(1.0)
             - ((max(Double.zero, h[FO + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons) / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
               * (EY_harmonious_max_perc - EY_harmonious_min_perc) + EY_harmonious_min_perc)),
         Hydrogen_max_cons[j] / EY_Hydrogen_nom_prod
