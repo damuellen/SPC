@@ -28,7 +28,7 @@ extension TunOl {
       h[I + i] = ifFinite(
         iff(
           Reference_PV_MV_power_at_transformer_outlet[i] < maximum, max(Reference_PV_MV_power_at_transformer_outlet[i], Double.zero) / Reference_PV_plant_power_at_inverter_inlet_DC[i],
-          0.0), Double.zero)
+          Double.zero), Double.zero)
       // E6*CSP_loop_nr_ud
       h[J + i] = Q_Sol_MW_thLoop[i] * CSP_loop_nr_ud
       // F6*PV_DC_cap_ud/PV_Ref_DC_cap
@@ -318,7 +318,7 @@ extension TunOl {
     // IF(OR(AND(BA6>0,AY6>0,AY5=0),AND(BA6>0,AY7=0,AY6>0)),AY6,0)
     for i in 1..<8760 {
       h[BB + i] = iff(
-        or(and(h[BA + i] > Double.zero, h[AY + i] > Double.zero, h[AY + i - 1].isZero), and(h[BA + i] > Double.zero, h[AY + i + 1].isZero, h[AY + i] > 0.0)), h[AY + i], Double.zero)
+        or(and(h[BA + i] > Double.zero, h[AY + i] > Double.zero, h[AY + i - 1].isZero), and(h[BA + i] > Double.zero, h[AY + i + 1].isZero, h[AY + i] > Double.zero)), h[AY + i], Double.zero)
     }
     let BBsum: [Double] = h.sum(hours: daysD, condition: BB)
     /// Surplus energy due to op limit after removal of peripherial hours
@@ -333,7 +333,7 @@ extension TunOl {
         h[AZ + i].isZero, Double.zero,
         h[AY + i] - iff(h[BA + i].isZero, Double.zero, (h[BA + i] - h[BC + i]) / (BBsum[i - 1] * Heater_eff * (1 + 1 / Ratio_CSP_vs_Heater)) * h[BB + i]))
     }
-    let BDcountNonZero = h.count(hours: daysD, range: BD, predicate: { $0 > 0.0 })
+    let BDcountNonZero = h.count(hours: daysD, range: BD, predicate: { $0 > Double.zero })
     let BDsum: [Double] = h.sum(hours: daysD, condition: BD)
     /// Partitions of PV hour PV to be dedicated to TES chrg
     let BE: Int = 429240
@@ -448,7 +448,7 @@ extension TunOl {
     let BP: Int = 525600
     let BQ: Int = 534360
     let AYsum: [Double] = h.sum(hours: BOday, condition: AY)
-    let BFcount = h.count(hours: BOday, range: BF, predicate: { $0 > 0.0 })
+    let BFcount = h.count(hours: BOday, range: BF, predicate: { $0 > Double.zero })
     /// Number of night hours
     // let BLcount = h.count(hours: BOday, range: BL, predicate: { $0 <= 0 })  // BR=COUNTIFS($BO$5:$BO$8764,"="&$BO5,$BL$5:$BL$8764,"<=0")
     /// Minimum night op possible considering tank sizes
@@ -495,7 +495,7 @@ extension TunOl {
     for i in 1..<8760 {
       h[BW + i] =
         (iff(
-          or(h[BT + i].isZero, h[BM + i] > Double.zero, PB_nom_gross_cap_ud <= 0.0), Double.zero,
+          or(h[BT + i].isZero, h[BM + i] > Double.zero, PB_nom_gross_cap_ud <= Double.zero), Double.zero,
           h[BK + i] + max(
             Double.zero,
             (min(PB_nom_net_cap, max(PB_net_min_cap, (1 + TES_aux_cons_perc) * max(Double.zero, h[BV + i] - h[BP + i]))) + PB_nom_net_cap * PB_nom_var_aux_cons_perc_net
@@ -505,7 +505,7 @@ extension TunOl {
                 + (PB_nom_gross_eff - PB_gross_min_eff) / (PB_nom_net_cap - PB_net_min_cap) * (min(PB_nom_net_cap, max(0, h[BV + i] - h[BP + i])) - PB_net_min_cap))
               + (overall_var_heat_min_cons[j] + overall_heat_fix_stby_cons[j]) * PB_Ratio_Heat_input_vs_output
               + iff(
-                and(h[BV + i].isZero, h[BV + i + 1] > 0.0),
+                and(h[BV + i].isZero, h[BV + i + 1] > Double.zero),
                 iff(
                   (h[max(BV + i - 5, BV)...(BV + i)]
                     .reduce(0) {
@@ -538,7 +538,7 @@ extension TunOl {
             if $1.isZero { return $0 + 1 }
             return $0
           })
-      h[BZ + i] = iff(and(h[BY + i].isZero, h[BY + i + 1] > 0.0), iff(count < PB_warm_start_duration, PB_hot_start_heat_req, PB_warm_start_heat_req), Double.zero)
+      h[BZ + i] = iff(and(h[BY + i].isZero, h[BY + i + 1] > Double.zero), iff(count < PB_warm_start_duration, PB_hot_start_heat_req, PB_warm_start_heat_req), Double.zero)
     }
     let BZsum: [Double] = h.sum(hours: BOday, condition: BZ)
     /// Corresponding gross heat cons for ST
@@ -551,7 +551,7 @@ extension TunOl {
     // =IF(OR(BT6=0,$BM6>0,PB_nom_gross_cap_ud<=0),0,PB_Ratio_Heat_input_vs_output*MAX(0,A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons+IF($BM7=0,0,A_overall_heat_stup_cons)-$BQ6-MIN(El_boiler_cap_ud,MAX(0,BX6+$BP6-BW6-BV6)*El_boiler_eff)))
     for i in 1..<8760 {
       h[CB + i] = iff(
-        or(h[BT + i].isZero, h[BM + i] > Double.zero, PB_nom_gross_cap_ud <= 0.0), Double.zero,
+        or(h[BT + i].isZero, h[BM + i] > Double.zero, PB_nom_gross_cap_ud <= Double.zero), Double.zero,
         PB_Ratio_Heat_input_vs_output
           * max(
             Double.zero,
@@ -576,7 +576,7 @@ extension TunOl {
     // IF(OR(AND(CD6>0,AY6>0,AY5=0),AND(CD6>0,AY7=0,AY6>0)),AY6,0)
     for i in 1..<8760 {
       h[CE + i] = iff(
-        or(and(h[CD + i] > Double.zero, h[AY + i] > Double.zero, h[AY + i - 1].isZero), and(h[CD + i] > Double.zero, h[AY + i + 1].isZero, h[AY + i] > 0.0)), h[AY + i], Double.zero)
+        or(and(h[CD + i] > Double.zero, h[AY + i] > Double.zero, h[AY + i - 1].isZero), and(h[CD + i] > Double.zero, h[AY + i + 1].isZero, h[AY + i] > Double.zero)), h[AY + i], Double.zero)
     }
     let CEsum: [Double] = h.sum(hours: BOday, condition: CE)
     /// Surplus energy due to op limit after removal of peripherial hours
@@ -590,7 +590,7 @@ extension TunOl {
       h[CG + i] = iff(
         h[CD + i].isZero, Double.zero, round(h[AY + i] - (h[CD + i] - h[CF + i]) / (CEsum[i - 1] * Heater_eff * (1 + 1 / Ratio_CSP_vs_Heater)) * h[CE + i], 5))
     }
-    let CG_BOcountNonZero = h.count(hours: BOday, range: CG, predicate: { $0 > 0.0 })
+    let CG_BOcountNonZero = h.count(hours: BOday, range: CG, predicate: { $0 > Double.zero })
     let CGsum: [Double] = h.sum(hours: BOday, condition: CG)
     let J: Int = 17520
     let AW: Int = 359160
@@ -635,8 +635,8 @@ extension TunOl {
       h[CM + i] =
         ((iff(h[J + i] > Double.zero, h[J + i] * CSP_var_aux_nom_perc, CSP_nonsolar_aux_cons) + h[M + i] + (h[CI + i] * Heater_eff + h[CJ + i]) * TES_aux_cons_perc
         + iff(or(h[CC + i].isZero, and(h[BY + i].isZero, h[BZ + i].isZero)), PB_stby_aux_cons, Double.zero)
-        + iff(and(h[CC + i] > Double.zero, h[BZ + i] > 0.0), PB_stup_aux_cons + h[BZ + i] * TES_aux_cons_perc, Double.zero)
-        + iff(and(h[CC + i] > Double.zero, h[BY + i] > 0.0), (h[BZ + i] + h[CA + i] + h[CB + i]) * TES_aux_cons_perc, Double.zero)) * 100.0)
+        + iff(and(h[CC + i] > Double.zero, h[BZ + i] > Double.zero), PB_stup_aux_cons + h[BZ + i] * TES_aux_cons_perc, Double.zero)
+        + iff(and(h[CC + i] > Double.zero, h[BY + i] > Double.zero), (h[BZ + i] + h[CA + i] + h[CB + i]) * TES_aux_cons_perc, Double.zero)) * 100.0)
         .rounded(.down) / 100
     }
   }

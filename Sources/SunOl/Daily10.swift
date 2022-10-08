@@ -4,7 +4,7 @@ extension TunOl {
     let (BX, CC, CS, CQ) = (595680, 639480, 779640, 762120)
 
     let days: [[Int]] = hour[CS + 1..<(CS + 8760)].indices.chunked(by: { hour[$0] == hour[$1] }).map { $0.map { $0 - CS } }
-    let notZero: (Double) -> Bool = { $0 > 0.0 }
+    let notZero: (Double) -> Bool = { $0 > Double.zero }
     let CQ_CScountZero = hour.countOf(days, condition: CQ, predicate: { $0 <= 0 })
     let CQ_CScountNonZero = hour.countOf(days, condition: CQ, predicate: notZero)
 
@@ -20,7 +20,7 @@ extension TunOl {
 
     /// Nr of PB op hours after min night prep
     let E: Int = 730
-    let opHours = hour.countOf(days, condition1: BX, predicate1: { $0 > 0.0 }, condition2: CC, predicate2: { $0 > 0.0 })
+    let opHours = hour.countOf(days, condition1: BX, predicate1: { $0 > Double.zero }, condition2: CC, predicate2: { $0 > Double.zero })
     // COUNTIFS(CalculationCS5:CS8763,"="A6,CalculationBX5:BX8763,">0",CalculationCC5:CC8763,">0")
     for i in 0..<365 { d10[E + i] = opHours[i] }
 
@@ -118,11 +118,11 @@ extension TunOl {
   // 5840-11315
   func night(_ d10: inout [Double], hour4: [Double], case j: Int) {
     let (F, H, J, L, N, P, EH, EX) = (1095, 1825, 2555, 3285, 4015, 4745, 105120, 245280)
-    let notZero: (Double) -> Bool = { $0 > 0.0 }
+    let notZero: (Double) -> Bool = { $0 > Double.zero }
     let days: [[Int]] = hour4[262801..<(262800 + 8760)].indices.chunked(by: { hour4[$0] == hour4[$1] }).map { $0.map { $0 - 262800 } }
     //  let end = days.removeLast()
     // days[0].append(contentsOf: end)
-    let EX_EZcountZero = hour4.countOf(days, condition: EX, predicate: { $0 <= 0 })
+    let EX_EZcountZero = hour4.countOf(days, condition: EX, predicate: { $0 <= Double.zero })
     /// Nr of hours outside of harm op period after max night prep
     let T: Int = 5840
     // COUNTIFS(CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,"<=0")
@@ -287,9 +287,9 @@ extension TunOl {
     for i in 0..<365 {
       // F6
       if d10[AM + i].isZero {
-        d10[AD + i] = 0
-        d10[AF + i] = 0
-        d10[AH + i] = 0
+        d10[AD + i] = Double.zero
+        d10[AF + i] = Double.zero
+        d10[AH + i] = Double.zero
       } else {
         d10[AD + i] = d10[F + i]
         // H6+F6/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_CO2_nom_cons
@@ -314,7 +314,7 @@ extension TunOl {
     let (DJ, DK, DL, DM, DN) = (928560, 937320, 946080, 954840, 963600)
     let (DO, DP, DQ, DR, DS, DT) = (972360, 981120, 989880, 998640, 1_007_400, 1_016_160)
     let days: [[Int]] = hour[(CS + 1)..<(CS + 8760)].indices.chunked(by: { hour[$0] == hour[$1] }).map { $0.map { $0 - CS } }
-    let notZero: (Double) -> Bool = { $0 > 0.0 }
+    let notZero: (Double) -> Bool = { $0 > Double.zero }
     /// Grid import for min harm and stby during  harm op
     let EY: Int = 11680
     /// Grid import for max harm and stby during  harm opC
@@ -531,7 +531,7 @@ extension TunOl {
 
   func d12(_ d12: inout [Double], hourFinal: [Double] , case j: Int) {
     let daysEZ: [[Int]] = hourFinal[262801..<(262800 + 8760)].indices.chunked(by: { hourFinal[$0] == hourFinal[$1] }).map { $0.map { $0 - 262800 } }
-    let notZero: (Double) -> Bool = { $0 > 0.0 }
+    let notZero: (Double) -> Bool = { $0 > Double.zero }
     let (ET, EU, EX, EY, FA) = (210240, 219000, 245280, 254040, 271560)
     let (FB, FC, FD, FE, FF) = (280320, 289080, 297840, 306600, 315360)
     let (FG, FH, FI, FJ, FK) = (324120, 332880, 341640, 350400, 359160)

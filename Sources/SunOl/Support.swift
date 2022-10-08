@@ -1,7 +1,7 @@
 import Foundation
 import Utilities
 
-func POLY(_ value: Double, _ coeffs: [Double]) -> Double { coeffs.reversed().reduce(into: 0.0) { result, coefficient in result = coefficient.addingProduct(result, value) } }
+func POLY(_ value: Double, _ coeffs: [Double]) -> Double { coeffs.reversed().reduce(into: Double.zero) { result, coefficient in result = coefficient.addingProduct(result, value) } }
 
 extension Array where Element == Double {
   func sum(days: [[Int]], range: Int, predicate: (Double) -> Bool) -> [Double] {
@@ -180,7 +180,7 @@ func round(_ value: Double, _ digits: Double) -> Double { (pow(10, digits) * val
 func roundUp(_ value: Double, _ digits: Double = 2) -> Double { (pow(10, digits) * value).rounded(.up) / pow(10, digits) }
 
 func average(_ values: ArraySlice<Double>) -> Double {
-  let sum = values.reduce(into: 0.0) { sum, value in sum += value }
+  let sum = values.reduce(into: Double.zero) { sum, value in sum += value }
   return sum / Double(values.count)
 }
 

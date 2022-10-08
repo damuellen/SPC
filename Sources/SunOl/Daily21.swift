@@ -6,7 +6,7 @@ extension TunOl {
     let hourS = 96360
 
     let S_UcountZero = hour.countOf(daysU, condition: hourS, predicate: { $0 <= 0 })
-    let S_UcountNonZero = hour.countOf(daysU, condition: hourS, predicate: { $0 > 0.0 })
+    let S_UcountNonZero = hour.countOf(daysU, condition: hourS, predicate: { $0 > Double.zero })
     var day0 = [Double](repeating: Double.zero, count: 1_095)
     /// Day
     let A = 0

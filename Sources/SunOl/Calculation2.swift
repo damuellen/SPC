@@ -18,7 +18,7 @@ extension TunOl {
       .joined()
     // =IF(BT6=0,0,VLOOKUP($BO6,DailyCalc_1!$A$3:$R$367,COLUMN(DailyCalc_1!R$3)))
     h.replaceSubrange(1..<8760, with: day)
-    for i in 1..<8760 where h0[BT2 + i].isZero { h[i] = 0.0 }
+    for i in 1..<8760 where h0[BT2 + i].isZero { h[i] = Double.zero }
 
     /// Max net elec demand outside harm op period
     let DW: Int = 8760
@@ -67,7 +67,7 @@ extension TunOl {
           iff(
             h[DV + i].isZero, Double.zero,
             iff(
-              or(h0[BM + i] > Double.zero, PB_nom_gross_cap_ud <= 0.0), Double.zero,
+              or(h0[BM + i] > Double.zero, PB_nom_gross_cap_ud <= Double.zero), Double.zero,
               h0[BK + i] + max(
                 Double.zero,
                 ((min(PB_nom_net_cap, max(PB_net_min_cap, (1 + TES_aux_cons_perc) * max(Double.zero, h[DX + i] - h0[BP + i]))) + PB_nom_net_cap * PB_nom_var_aux_cons_perc_net
@@ -78,7 +78,7 @@ extension TunOl {
                   + (overall_var_heat_max_cons[j] - overall_var_heat_min_cons[j]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j])
                   * (h[DV + i] - equiv_harmonious_min_perc[j]) + overall_var_heat_min_cons[j] + overall_heat_fix_stby_cons[j]) * PB_Ratio_Heat_input_vs_output
                   + iff(
-                    and(h[DX + i].isZero, h[DX + i + 1] > 0.0),
+                    and(h[DX + i].isZero, h[DX + i + 1] > Double.zero),
                     iff(
                       (h[max(DX + i - 5, DX)...(DX + i)]
                         .reduce(0) {
@@ -110,13 +110,13 @@ extension TunOl {
     // IF(AND(EA6=0,EA7>0),IF(COUNTIF(EA1:EA6,"0")=PB_warm_start_duration,PB_warm_start_heat_req,PB_hot_start_heat_req),0)
     for i in 1..<8760 {
       h[EB + i] = iff(
-        and(h[EA + i].isZero, h[EA + i + 1] > 0.0),
+        and(h[EA + i].isZero, h[EA + i + 1] > Double.zero),
         iff(
           (h[max(EA + i - 5, EA)...(EA + i)]
             .reduce(0) {
               if $1.isZero { return $0 + 1 }
               return $0
-            }) < PB_warm_start_duration, PB_hot_start_heat_req, PB_warm_start_heat_req), 0.0)
+            }) < PB_warm_start_duration, PB_hot_start_heat_req, PB_warm_start_heat_req), Double.zero)
     }
     let EBsum: [Double] = h.sum(hours: BOday, condition: EB)
     /// Corresponding gross heat cons for ST
@@ -129,7 +129,7 @@ extension TunOl {
     // ED=IF(OR(DV6=0,$BM6>0,PB_nom_gross_cap_ud<=0),0,PB_Ratio_Heat_input_vs_output*MAX(0,MIN(IF(A_overall_var_max_cons=0,1,(MIN(DZ6-DY6+$BP6,DX6)-A_overall_fix_stby_cons-IF($BM7=0,0,A_overall_stup_cons))/A_overall_var_max_cons)*A_overall_var_heat_max_cons,(A_overall_var_heat_max_cons-A_overall_var_heat_min_cons)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(DV6-A_equiv_harmonious_min_perc)+A_overall_var_heat_min_cons)+A_overall_heat_fix_stby_cons+IF($BM7=0,0,A_overall_heat_stup_cons)-$BQ6-MIN(El_boiler_cap_ud,MAX(0,DZ6+$BP6-DX6-DY6)*El_boiler_eff)))
     for i in 1..<8760 {
       h[ED + i] = iff(
-        or(h[DV + i].isZero, h0[BM + i] > Double.zero, PB_nom_gross_cap_ud < 0.0), Double.zero,
+        or(h[DV + i].isZero, h0[BM + i] > Double.zero, PB_nom_gross_cap_ud < Double.zero), Double.zero,
         PB_Ratio_Heat_input_vs_output
           * max(
             Double.zero,
@@ -211,7 +211,7 @@ extension TunOl {
     // IF(OR(AND(EK6>0,AY6>0,AY5=0),AND(EK6>0,AY7=0,AY6>0)),AY6,0)
     for i in 1..<8760 {
       h[EL + i] = iff(
-        or(and(h[EK + i] > Double.zero, h0[AY + i] > Double.zero, h0[AY + i - 1].isZero), and(h[EK + i] > Double.zero, h0[AY + i + 1].isZero, h0[AY + i] > 0.0)), h0[AY + i], 0.0)
+        or(and(h[EK + i] > Double.zero, h0[AY + i] > Double.zero, h0[AY + i - 1].isZero), and(h[EK + i] > Double.zero, h0[AY + i + 1].isZero, h0[AY + i] > Double.zero)), h0[AY + i], Double.zero)
     }
     let ELsum: [Double] = h.sum(hours: BOday, condition: EL)
     /// Surplus energy due to op limit after removal of peripherial hours
@@ -230,7 +230,7 @@ extension TunOl {
     /// Partitions of PV hour PV to be dedicated to TES chrg
     let EO: Int = 166440
     let AW: Int = 359160
-    let EN_BOcountNonZero = h.count(hours: BOday, range: EN, predicate: { $0 > 0.0 })
+    let EN_BOcountNonZero = h.count(hours: BOday, range: EN, predicate: { $0 > Double.zero })
     let ENsum: [Double] = h.sum(hours: BOday, condition: EN)
     // IF(OR(EN6=0,EM6=0),0,MAX((AW6-EN6)/(EM6/(1+1/Ratio_CSP_vs_Heater)/Heater_eff/COUNTIFS(BO5:BO8763,"="BO6,EN5:EN8763,">0")),(J6-EN6*Heater_eff/Ratio_CSP_vs_Heater)/(EM6/(1+Ratio_CSP_vs_Heater)/COUNTIFS(BO5:BO8763,"="BO6,EN5:EN8763,">0")))/SUMIF(BO5:BO8763,"="BO6,EN5:EN8763)*EN6)
     for i in 1..<8760 {
@@ -273,9 +273,9 @@ extension TunOl {
     for i in 1..<8760 {
       h[ET + i] =
         ((iff(h0[J0 + i] > Double.zero, h0[J0 + i] * CSP_var_aux_nom_perc, CSP_nonsolar_aux_cons) + h0[M0 + i] + (h[EP + i] * Heater_eff + h[EQ + i]) * TES_aux_cons_perc
-        + iff(or(h[EE + i].isZero, and(h[EH + i].isZero, h[EB + i].isZero)), PB_stby_aux_cons, 0.0)
-        + iff(and(h[EE + i] > Double.zero, h[EB + i] > 0.0), PB_stup_aux_cons + h[EB + i] * TES_aux_cons_perc, 0.0)
-        + iff(h[EH + i] > Double.zero, (h[EB + i] + h[EF + i] + h[EI + i]) * TES_aux_cons_perc, 0.0)) * 100)
+        + iff(or(h[EE + i].isZero, and(h[EH + i].isZero, h[EB + i].isZero)), PB_stby_aux_cons, Double.zero)
+        + iff(and(h[EE + i] > Double.zero, h[EB + i] > Double.zero), PB_stup_aux_cons + h[EB + i] * TES_aux_cons_perc, Double.zero)
+        + iff(h[EH + i] > Double.zero, (h[EB + i] + h[EF + i] + h[EI + i]) * TES_aux_cons_perc, Double.zero)) * 100)
         .rounded(.down) / 100
     }
 
@@ -370,8 +370,8 @@ extension TunOl {
     }
 
     // let FAsum: [Double] = h.sum(hours: BOday, condition: FA)
-    let FA_DXnonZeroSum = h.sum(FA, hours: BOday, condition: DX, predicate: { $0 > 0.0 })
-    let CT_DXnonZeroSum = h0.sum(CT, hours: BOday, range2: h, condition: DX, predicate: { $0 > 0.0 })
+    let FA_DXnonZeroSum = h.sum(FA, hours: BOday, condition: DX, predicate: { $0 > Double.zero })
+    let CT_DXnonZeroSum = h0.sum(CT, hours: BOday, range2: h, condition: DX, predicate: { $0 > Double.zero })
     /// TES energy to fulfil op case if above
     let EJ: Int = 122640
 
