@@ -12,7 +12,7 @@ extension TunOl {
     let N = 341640
     let AU = 271560
 
-    var d22 = [Double](repeating: 0.0, count: 14235)
+    var d22 = [Double](repeating: Double.zero, count: 14235)
 
     /// Available day op PV elec after CSP, PB stby aux
     let DM = 13140
