@@ -228,7 +228,7 @@ extension TunOl {
     // =IF(GE6=0,0,ROUND((EB6+(EC6-EB6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE6-Overall_harmonious_min_perc))+(EH6+(EI6-EH6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE6-Overall_harmonious_min_perc))-O6-MIN((EK6+(EL6-EK6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE6-Overall_harmonious_min_perc)),MAX(0,EA6+E6+MIN(ER6,MAX(0,G6-EG6)/El_boiler_eff)-EJ6-EM6*BESS_chrg_eff)/BESS_chrg_eff)-MIN((EP6+(EQ6-EP6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE6-Overall_harmonious_min_perc)),MAX(0,Q6-(EE6+(EF6-EE6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE6-Overall_harmonious_min_perc)))/El_boiler_eff),5))
     for i in 0..<365 {
       d23[GF + i] = iff(
-        d23[GE + i].isZero, 0,
+        d23[GE + i].isZero, Double.zero,
         round(
           (d22[EB + i] + (d22[EC + i] - d22[EB + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (d23[GE + i] - Overall_harmonious_min_perc))
             + (d22[EH + i] + (d22[EI + i] - d22[EH + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (d23[GE + i] - Overall_harmonious_min_perc)) - d21[O + i] - min((d22[EK + i] + (d22[EL + i] - d22[EK + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (d23[GE + i] - Overall_harmonious_min_perc)), max(0.0, d22[EA + i] + d21[E + i] + min(d22[ER + i], max(0.0, d21[G + i] - d22[EG + i]) / El_boiler_eff) - d22[EJ + i] - d22[EM + i] * BESS_chrg_eff) / BESS_chrg_eff) - min((d22[EP + i] + (d22[EQ + i] - d22[EP + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (d23[GE + i] - Overall_harmonious_min_perc)), max(
@@ -241,7 +241,7 @@ extension TunOl {
     // =IF(GE6=0,0,ROUND((EB6+(EC6-EB6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE6-Overall_harmonious_min_perc))+(EH6+(EI6-EH6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE6-Overall_harmonious_min_perc))-P6-MIN((EK6+(EL6-EK6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE6-Overall_harmonious_min_perc)),MAX(0,EA6+F6+MIN(ER6,MAX(0,H6-EG6)/El_boiler_eff)-EJ6-EM6*BESS_chrg_eff)/BESS_chrg_eff)-MIN((EP6+(EQ6-EP6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE6-Overall_harmonious_min_perc)),MAX(0,R6-(EE6+(EF6-EE6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE6-Overall_harmonious_min_perc)))/El_boiler_eff),5))
     for i in 0..<365 {
       d23[GG + i] = iff(
-        d23[GE + i].isZero, 0,
+        d23[GE + i].isZero, Double.zero,
         round(
           (d22[EB + i] + (d22[EC + i] - d22[EB + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (d23[GE + i] - Overall_harmonious_min_perc))
             + (d22[EH + i] + (d22[EI + i] - d22[EH + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (d23[GE + i] - Overall_harmonious_min_perc)) - d21[P + i] - min((d22[EK + i] + (d22[EL + i] - d22[EK + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (d23[GE + i] - Overall_harmonious_min_perc)), max(0.0, d22[EA + i] + d21[F + i] + min(d22[ER + i], max(0.0, d21[H + i] - d22[EG + i]) / El_boiler_eff) - d22[EJ + i] - d22[EM + i] * BESS_chrg_eff) / BESS_chrg_eff) - min((d22[EP + i] + (d22[EQ + i] - d22[EP + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (d23[GE + i] - Overall_harmonious_min_perc)), max(
@@ -276,7 +276,7 @@ extension TunOl {
     // =IF(GE6=0,0,ROUND(EE6+(EF6-EE6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE6-Overall_harmonious_min_perc)+MIN(EP6+(EQ6-EP6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE6-Overall_harmonious_min_perc),MAX(0,EB6+(EC6-EB6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE6-Overall_harmonious_min_perc)+EH6+(EI6-EH6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE6-Overall_harmonious_min_perc)-MIN((EK6+(EL6-EK6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE6-Overall_harmonious_min_perc)),MAX(0,EA6+E6+MIN(ER6,MAX(0,G6-EG6)/El_boiler_eff)-EJ6-EM6*BESS_chrg_eff)/BESS_chrg_eff)-O6))*El_boiler_eff-Q6,5))
     for i in 0..<365 {
       d23[GJ + i] = iff(
-        d23[GE + i].isZero, 0,
+        d23[GE + i].isZero, Double.zero,
         round(
           d22[EE + i] + (d22[EF + i] - d22[EE + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (d23[GE + i] - Overall_harmonious_min_perc) + min(
             d22[EP + i] + (d22[EQ + i] - d22[EP + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (d23[GE + i] - Overall_harmonious_min_perc),
@@ -293,7 +293,7 @@ extension TunOl {
     // =IF(GE6=0,0,ROUND(EE6+(EF6-EE6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE6-Overall_harmonious_min_perc)+MIN(EP6+(EQ6-EP6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE6-Overall_harmonious_min_perc),MAX(0,EB6+(EC6-EB6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE6-Overall_harmonious_min_perc)+EH6+(EI6-EH6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE6-Overall_harmonious_min_perc)-MIN((EK6+(EL6-EK6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE6-Overall_harmonious_min_perc)),MAX(0,EA6+F6+MIN(ER6,MAX(0,H6-EG6)/El_boiler_eff)-EJ6-EM6*BESS_chrg_eff)/BESS_chrg_eff)-P6))*El_boiler_eff-R6,5))
     for i in 0..<365 {
       d23[GK + i] = iff(
-        d23[GE + i].isZero, 0,
+        d23[GE + i].isZero, Double.zero,
         round(
           d22[EE + i] + (d22[EF + i] - d22[EE + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (d23[GE + i] - Overall_harmonious_min_perc) + min(
             d22[EP + i] + (d22[EQ + i] - d22[EP + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (d23[GE + i] - Overall_harmonious_min_perc),
@@ -784,12 +784,12 @@ extension TunOl {
     // IU=MAX(0,HU6-C6*Overall_fix_cons)/Overall_harmonious_var_max_cons*MethDist_harmonious_max_perc*MethDist_Meth_nom_prod_ud+IF(IJ6=0,0,IF(A_overall_var_max_cons=0,B6*GX6,MAX(0,IJ6-B6*A_overall_fix_stby_cons)/A_overall_var_max_cons*A_MethDist_max_perc)*MethDist_Meth_nom_prod_ud)
     for i in 0..<365 {
       d23[IU + i] =
-        max(0, d23[HU + i] - day0[C + i] * Overall_fix_cons) / Overall_harmonious_var_max_cons * MethDist_harmonious_max_perc * MethDist_Meth_nom_prod_ud
+        max(Double.zero, d23[HU + i] - day0[C + i] * Overall_fix_cons) / Overall_harmonious_var_max_cons * MethDist_harmonious_max_perc * MethDist_Meth_nom_prod_ud
         + iff(
-          d23[IJ + i].isZero, 0,
+          d23[IJ + i].isZero, Double.zero,
           iff(
             overall_var_max_cons[j].isZero, day0[B + i] * d23[GX + i],
-            max(0, d23[IJ + i] - day0[B + i] * overall_fix_stby_cons[j]) / overall_var_max_cons[j] * MethDist_max_perc[j]) * MethDist_Meth_nom_prod_ud)
+            max(Double.zero, d23[IJ + i] - day0[B + i] * overall_fix_stby_cons[j]) / overall_var_max_cons[j] * MethDist_max_perc[j]) * MethDist_Meth_nom_prod_ud)
     }
 
     /// grid export
@@ -857,8 +857,8 @@ extension TunOl {
     // IZ=IF($DR3=0,0,IF(HS3=0,MAX(0,$DS3-MAX(0,$EA3/BESS_chrg_eff-$EL3-$EM3)),$DR3+($DS3-$DR3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(HS3-Overall_harmonious_min_perc)))
     for i in 0..<365 {
       d23[IZ + i] = iff(
-        d22[DR + i].isZero, 0,
-        iff(d23[HS + i].isZero, max(0, d22[DS + i] - max(0, d22[EA + i] / BESS_chrg_eff - d22[EL + i] - d22[EM + i])), d22[DR + i] + (d22[DS + i] - d22[DR + i]) * d23[ddHS + i]))
+        d22[DR + i].isZero, Double.zero,
+        iff(d23[HS + i].isZero, max(Double.zero, d22[DS + i] - max(Double.zero, d22[EA + i] / BESS_chrg_eff - d22[EL + i] - d22[EM + i])), d22[DR + i] + (d22[DS + i] - d22[DR + i]) * d23[ddHS + i]))
     }
 
     /// el cons for night prep during harm op period
@@ -974,12 +974,12 @@ extension TunOl {
     // JZ=MAX(0,IZ6-C6*Overall_fix_cons)/Overall_harmonious_var_max_cons*MethDist_harmonious_max_perc*MethDist_Meth_nom_prod_ud+IF(JO6=0,0,IF(A_overall_var_max_cons=0,B6*GZ6,MAX(0,JO6-B6*A_overall_fix_stby_cons)/A_overall_var_max_cons*A_MethDist_max_perc)*MethDist_Meth_nom_prod_ud)
     for i in 0..<365 {
       d23[JZ + i] =
-        max(0, d23[IZ + i] - day0[C + i] * Overall_fix_cons) / Overall_harmonious_var_max_cons * MethDist_harmonious_max_perc * MethDist_Meth_nom_prod_ud
+        max(Double.zero, d23[IZ + i] - day0[C + i] * Overall_fix_cons) / Overall_harmonious_var_max_cons * MethDist_harmonious_max_perc * MethDist_Meth_nom_prod_ud
         + iff(
-          d23[JO + i].isZero, 0,
+          d23[JO + i].isZero, Double.zero,
           iff(
             overall_var_max_cons[j].isZero, day0[B + i] * d23[GZ + i],
-            max(0, d23[JO + i] - day0[B + i] * overall_fix_stby_cons[j]) / overall_var_max_cons[j] * MethDist_max_perc[j]) * MethDist_Meth_nom_prod_ud)
+            max(Double.zero, d23[JO + i] - day0[B + i] * overall_fix_stby_cons[j]) / overall_var_max_cons[j] * MethDist_max_perc[j]) * MethDist_Meth_nom_prod_ud)
     }
 
     /// grid export
