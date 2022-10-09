@@ -166,7 +166,10 @@ enum Days {
   public static let Dec = Int(DateInterval.Dec.start.timeIntervalSinceReferenceDate / 86400)
 }
 
-extension Double { var formatted: String { String(format: "%G", self) } }
+extension Double { 
+  var formatted: String { String(format: "%G", self) }
+  static var one: Double { Double(1.0) }
+}
 
 extension Array where Element == Double {
   var total: Float { Float(reduce(0.0, +)) }
