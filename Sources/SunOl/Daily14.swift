@@ -34,7 +34,9 @@ extension TunOl {
     /// el cons for night prep during harm op period
     let LC: Int = 69715
     // LC=IF(KG6=0,0,$Z6+($AA6-$Z6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc))
-    for i in 0..<365 { d14[LC + i] = iff(d14[KG + i].isZero, Double.zero, d14[Z + i] + (d14[AA + i] - d14[Z + i]) * d14[AMKG + i]) }
+    for i in 0..<365 { 
+      d14[LC + i] = iff(d14[KG + i].isZero, Double.zero, d14[Z + i] + (d14[AA + i] - d14[Z + i]) * d14[AMKG + i])
+    }
     /// el to cover aux cons during harm op period
     let LD: Int = 70080
     for i in 0..<365 { d14[LD + i] = 99 }

@@ -206,7 +206,7 @@ func countiff(_ values: ArraySlice<Double>, _ predicat: (Double) -> Bool) -> Dou
   return Double(count)
 }
 
-func iff(_ expression: Bool, _ yes: Double, _ no: Double) -> Double { expression ? yes : no }
+func iff(_ expression: Bool, _ yes: Double, _ no: Double = Double.zero) -> Double { expression ? yes : no }
 
 func ifFinite(_ check: Double, _ subs: Double) -> Double { check.isFinite ? check : subs }
 

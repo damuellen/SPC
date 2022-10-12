@@ -30,8 +30,8 @@ class SunOlTests: XCTestCase {
       let index = index, ref = csv_ref[letter], column = Array(array[index..<index + 8760])
       var correct = true, counter = 1
       for i in 1..<8700 {
-        if counter > 20 { break }
-        if abs(abs(ref[i - 1]) - abs(column[i])) > 0.1 {
+        if counter > 30 { break }
+        if abs(abs(ref[i - 1]) - abs(column[i])) > 0.09 {
           counter += 1; correct = false
           print("Calculation \(letter)\(i + 4) proper value: \(String(format: "%.2f", ref[i - 1])) [\(index + i)] \(String(format: "%.2f", column[i]))  div: \(abs(ref[i - 1]) - abs(column[i]))")
         }
@@ -43,8 +43,8 @@ class SunOlTests: XCTestCase {
       let index = index, ref = csv_ref2[letter]
       var correct = true, counter = 1
       for i in 0..<364 {
-        if counter > 20 { break }
-        if abs(ref[i]) - abs(array[index + i]) > 0.5 {
+        if counter > 3 { break }
+        if abs(ref[i]) - abs(array[index + i]) > 0.09 {
           counter += 1; correct = false
           print("Daily1 \(letter)\(i + 3) proper value: \(String(format: "%.2f", ref[i])) [\(index + i)] \(String(format: "%.2f", array[index + i]))  div: \(ref[i] - array[index + i])")
         }
@@ -56,7 +56,7 @@ class SunOlTests: XCTestCase {
       let index = index, ref = csv_ref3[letter]
       var correct = true, counter = 1
       for i in 0..<364 {
-        if counter > 20 { break }
+        if counter > 3 { break }
         if abs(ref[i]) - abs(array[index + i]) > 0.5 {
           counter += 1; correct = false
           print("Daily2 \(letter)\(i + 3) proper value: \(String(format: "%.2f", ref[i])) [\(index + i)] \(String(format: "%.2f", array[index + i]))  div: \(ref[i] - array[index + i])")
@@ -76,7 +76,7 @@ class SunOlTests: XCTestCase {
       return (key, num)
     }
 
-    let values = [176.00,4000.00,280.00,560.10,733.94,280.00,0.00,0.00,2000.00,200000.00,200000.00,64.96,60.00,0.00,0.00,0.00]
+    let values = [113.00,4664.24,177.26,469.93,702.72,160.00,0.00,343.01,1000.00,100000.00,100000.00,17.41,32.13,0.00,0.00,0.00]
     guard let model = TunOl(values) else {
       print("Invalid config")
       return
@@ -95,10 +95,7 @@ class SunOlTests: XCTestCase {
     model.hour(TunOl.Q_Sol_MW_thLoop, TunOl.Reference_PV_plant_power_at_inverter_inlet_DC, TunOl.Reference_PV_MV_power_at_transformer_outlet, hour: &hourPre)
     let d22 = model.d22(hour: hourPre)
 
-    let step = (model.Overall_harmonious_max_perc - model.Overall_harmonious_min_perc) / 4
-    var reserve = model.Overall_harmonious_min_perc
-
-    model.hour1(&hourPre, reserved: reserve)
+    model.hour1(&hourPre, reserved: model.Overall_harmonious_min_perc)
     let day20 = model.day20(hour: hourPre)
 
     for j in 0..<4 {
@@ -127,12 +124,12 @@ class SunOlTests: XCTestCase {
         (71..<91).map { column($0, offset: 7, stride: 8760) }.forEach { letter, offset in calculation(hourPre, letter, offset) }
         // CN 735840
         (91..<124).map { column($0, offset: 7, stride: 8760) }.forEach { letter, offset in calculation(hourPre, letter, offset) }
-        // DV 0
-        (125..<183).map { column($0, offset: 125, stride: 8760) }.forEach { letter, offset in calculation(hourFinal, letter, offset) }
         // C 0
         (2..<11).map { column($0, offset: 2) }.forEach { letter, offset in daily1(d10, letter, offset) }
         // T 5840
         (19..<35).map { column($0, offset: 3) }.forEach { letter, offset in daily1(d10, letter, offset) }
+        // DV 0
+        (125..<183).map { column($0, offset: 125, stride: 8760) }.forEach { letter, offset in calculation(hourFinal, letter, offset) }
         // EY 11680
         (154..<201).map { column($0, offset: 122) }.forEach { letter, offset in daily1(d10, letter, offset) }
         // GU 28835
@@ -181,7 +178,7 @@ class SunOlTests: XCTestCase {
         // TD 35405
         (523..<552).map { column($0, offset: 426) }.forEach { letter, offset in daily2(d23, letter, offset) }
       }
-      if j == 3 {
+      if j == 3, false {
         print("Case D")
         (408..<428).map { column($0, offset: 7 - (72 - 408), stride: 8760) }.forEach { letter, offset in calculation(hourPre, letter, offset) }
         // ALM 69350
@@ -244,10 +241,7 @@ class SunOlTests: XCTestCase {
     model.hour(TunOl.Q_Sol_MW_thLoop, TunOl.Reference_PV_plant_power_at_inverter_inlet_DC, TunOl.Reference_PV_MV_power_at_transformer_outlet, hour: &hourPre)
     let d22 = model.d22(hour: hourPre)
 
-    let step = (model.Overall_harmonious_max_perc - model.Overall_harmonious_min_perc) / 4
-    var reserve = model.Overall_harmonious_min_perc
-
-    model.hour1(&hourPre, reserved: reserve)
+    model.hour1(&hourPre, reserved: model.Overall_harmonious_min_perc)
     let day20 = model.day20(hour: hourPre)
 
     for j in 0..<4 {

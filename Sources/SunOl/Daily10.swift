@@ -133,7 +133,7 @@ extension TunOl {
     let U: Int = 6205
     // COUNTIFS(CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,">0")
     for i in 0..<365 { d10[U + i] = EX_EZcountNonZero[i] }
-
+    
     let EH_EZcountNonZero = hour4.countOf(days, condition: EH, predicate: notZero)
     /// Nr of PB op hours after max night prep
     let V: Int = 6570
