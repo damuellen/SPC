@@ -30,7 +30,7 @@ class SunOlTests: XCTestCase {
       let index = index, ref = csv_ref[letter], column = Array(array[index..<index + 8760])
       var correct = true, counter = 1
       for i in 1..<8700 {
-        if counter > 30 { break }
+        if counter > 20 { break }
         if abs(abs(ref[i - 1]) - abs(column[i])) > 0.09 {
           counter += 1; correct = false
           print("Calculation \(letter)\(i + 4) proper value: \(String(format: "%.2f", ref[i - 1])) [\(index + i)] \(String(format: "%.2f", column[i]))  div: \(abs(ref[i - 1]) - abs(column[i]))")
@@ -43,7 +43,7 @@ class SunOlTests: XCTestCase {
       let index = index, ref = csv_ref2[letter]
       var correct = true, counter = 1
       for i in 0..<364 {
-        if counter > 3 { break }
+        if counter > 20 { break }
         if abs(ref[i]) - abs(array[index + i]) > 0.09 {
           counter += 1; correct = false
           print("Daily1 \(letter)\(i + 3) proper value: \(String(format: "%.2f", ref[i])) [\(index + i)] \(String(format: "%.2f", array[index + i]))  div: \(ref[i] - array[index + i])")
@@ -56,8 +56,8 @@ class SunOlTests: XCTestCase {
       let index = index, ref = csv_ref3[letter]
       var correct = true, counter = 1
       for i in 0..<364 {
-        if counter > 3 { break }
-        if abs(ref[i]) - abs(array[index + i]) > 0.5 {
+        if counter > 20 { break }
+        if abs(ref[i]) - abs(array[index + i]) > 0.09 {
           counter += 1; correct = false
           print("Daily2 \(letter)\(i + 3) proper value: \(String(format: "%.2f", ref[i])) [\(index + i)] \(String(format: "%.2f", array[index + i]))  div: \(ref[i] - array[index + i])")
         }
@@ -216,11 +216,15 @@ class SunOlTests: XCTestCase {
     }
 
     let LCOM = costs.LCOM(meth_produced_MTPH: meth_produced_MTPH_sum, elec_from_grid: elec_from_grid_sum, elec_to_grid: elec_to_grid_MTPH_sum)
-
+    XCTAssertEqual(LCOM, 1557, accuracy: 1, "LCOM")
+    XCTAssertEqual(hours_sum, 7658.0, accuracy: 1, "hours_sum")
+    XCTAssertEqual(meth_produced_MTPH_sum, 101561, accuracy: 1, "meth_produced_MTPH_sum")
+    XCTAssertEqual(elec_from_grid_sum, 2912, accuracy: 1, "elec_from_grid_sum")
+    XCTAssertEqual(elec_to_grid_MTPH_sum, 0, accuracy: 1, "elec_to_grid_MTPH_sum")
   }
 
   func testsCalculation2() {
-    let values = [176.00,4000.00,280.00,560.10,733.94,280.00,0.00,0.00,2000.00,200000.00,200000.00,64.96,60.00,0.00,0.00,0.00]
+    let values = [117.00,4711.34,179.00,485.43,700.5,160.00,0.00,353.62,1000.00,100000.00,100000.00,21.49,44.66,0.00,0.00,0.00]
 
     guard let model = TunOl(values) else {
       print("Invalid config")
@@ -254,14 +258,12 @@ class SunOlTests: XCTestCase {
       model.d12(&d10, hourFinal: hourFinal, case: j)
       model.d13(&d10, case: j)
       model.d14(&d10, case: j)
-      day.append(Array(d10[67525..<69715]))
-      day.append(Array(d10[80300..<82490]))
-
+      day.append(Array(d10[79205..<81395]))
+      day.append(Array(d10[91980..<93805]))
       model.d21(&d21, case: j, day0: day20)
       model.d23(&d23, case: j, day0: day20, d21: d21, d22: d22)
       day.append(Array(d23[33945..<35040] + ArraySlice(zip(day20[365..<730], d23[GX..<GZ]).map { $1 > 0 ? $0 : 0 }) + day20[730..<1095]))
       day.append(Array(d23[44895..<45990] + ArraySlice(zip(day20[365..<730], d23[GZ..<HA]).map { $1 > 0 ? $0 : 0 }) + day20[730..<1095]))
-
     }
 
 
@@ -294,20 +296,20 @@ class SunOlTests: XCTestCase {
     }
 
     let LCOM = costs.LCOM(meth_produced_MTPH: meth_produced_MTPH_sum, elec_from_grid: elec_from_grid_sum, elec_to_grid: elec_to_grid_MTPH_sum)
-    XCTAssertEqual(LCOM, 1598, accuracy: 1, "LCOM")
-    XCTAssertEqual(hours_sum, 7085.0, accuracy: 1, "hours_sum")
-    XCTAssertEqual(meth_produced_MTPH_sum, 133784, accuracy: 1, "meth_produced_MTPH_sum")
-    XCTAssertEqual(elec_from_grid_sum, 53457, accuracy: 1, "elec_from_grid_sum")
-    XCTAssertEqual(elec_to_grid_MTPH_sum, 5.1, accuracy: 1, "elec_to_grid_MTPH_sum")
+    XCTAssertEqual(LCOM, 1563, accuracy: 1, "LCOM")
+    XCTAssertEqual(hours_sum, 7633.0, accuracy: 1, "hours_sum")
+    XCTAssertEqual(meth_produced_MTPH_sum, 102011, accuracy: 1, "meth_produced_MTPH_sum")
+    XCTAssertEqual(elec_from_grid_sum, 3024, accuracy: 1, "elec_from_grid_sum")
+    XCTAssertEqual(elec_to_grid_MTPH_sum, 0, accuracy: 1, "elec_to_grid_MTPH_sum")
     try? outputStream.write(toFile: "result_days.txt", atomically: false, encoding: .utf8)
   }
 
   func testsCosts() {
-    guard let model = TunOl([178,6294,220,645,954,200,0.00,421,1000.00,100000.00,100000.00,21,12,0.00,0.00,0.00]) else { return }
+    guard let model = TunOl([117.00,4711.34,179.00,485.43,700.5,160.00,0.00,353.62,1000.00,100000.00,100000.00,21.49,44.66,0.00,0.00,0.00]) else { return }
     //  dump(model)
     let costs = Costs(model)
     // dump(costs)
-    var fixtures = [21818877.0, 261_747_561, 443_728_031, 38_102_132, 88_937_793, 117_420_697, 163_628_857, 430_140_000, 0.0, 0.0, 0.0, 0.0, 0.0, 5_748_368, 0.0, 2_135_598, 0]
+    var fixtures = [19284864.0, 175610209, 325819168, 31228139, 75780496, 91164447, 144513485, 344112000, 0.0, 0.0, 0.0, 0.0, 0.0, 5882497, 0.0, 5358409, 0]
       .makeIterator()
     var outputStream = ""
     for child in Mirror(reflecting: model).children.filter({ $0.label?.contains("_ud") ?? false }) { print(child.label!, child.value as! Double, to: &outputStream) }
