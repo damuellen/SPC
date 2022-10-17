@@ -963,7 +963,7 @@ extension TunOl {
 
     let JQ = 41610
     /// el from PV outside of harm op period
-    let JR = 47815
+    let JR = 41975
     /// el from harm op period charged BESS discharging for stby outside of harm op period
     let JS = 42340
     for i in 0..<365 {

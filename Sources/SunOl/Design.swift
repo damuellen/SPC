@@ -569,7 +569,7 @@ public struct TunOl {
       self.el_Coeff = [0]
       self.PB_heat_min_input = 0
       self.PB_gross_min_eff = 0
-      self.PB_Ratio_Heat_input_vs_output = 0
+      self.PB_Ratio_Heat_input_vs_output = 1
       self.PB_n_g_var_aux_el_Coeff = [0]
       self.PB_var_heat_max_cons = 0
       self.PB_nom_var_aux_cons_perc_net = 0

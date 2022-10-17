@@ -129,6 +129,7 @@ extension TunOl {
     /// Max elec to BESS for night prep after min harm op during harm op period
     let EK = 6935
     // MIN(SUMIFS(CalculationAE5:AE8763,CalculationU5:U8763,"="A6,CalculationS5:S8763,">0"),BESS_cap_ud/BESS_chrg_eff)
+    hour.sumOf(AE, days: U, into: &d22, at: EK, condition: S, predicate: notZero)
     for i in 0..<365 { d22[EK + i] = min(d22[EK + i], BESS_cap_ud / BESS_chrg_eff) }
 
     /// Max BESS night prep after max harm cons during harm op period

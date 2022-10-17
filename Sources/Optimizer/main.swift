@@ -61,23 +61,23 @@ struct Command: ParsableCommand {
       parameter = parameters
     } else {
       parameter = Parameter(
-        BESS_cap_ud: 0...0.0,
+        BESS_cap_ud: 30...3000.0,
         CCU_CO2_nom_prod_ud: 1000...1000.0,
         CO2_storage_cap_ud: 100_000...100_000.0,
-        CSP_loop_nr_ud: 10...240.0,
+        CSP_loop_nr_ud: 0...0.0,
         El_boiler_cap_ud: 0...100.0,
         EY_var_net_nom_cons_ud: 180...180.0,
         Grid_export_max_ud: 0...0.0,
         Grid_import_max_ud: 0...0.0,
         Hydrogen_storage_cap_ud: 0...0.0, 
-        Heater_cap_ud: 0...700.0, 
+        Heater_cap_ud: 0...0.0, 
         MethDist_Meth_nom_prod_ud: 5...40.0,
         // MethSynt_RawMeth_nom_prod_ud: 10...60.0,
-        PB_nom_gross_cap_ud: 10...400.0,
+        PB_nom_gross_cap_ud: 0...0.0,
         PV_AC_cap_ud: 200...1500.0,
         PV_DC_cap_ud: 220...1600.0,
         RawMeth_storage_cap_ud: 100_000...100_000.0,
-        TES_thermal_cap_ud: 500...20_000.0)
+        TES_thermal_cap_ud: 0...0.0)
       let data = try? JSONEncoder().encode(parameter)
       try? data?.write(to: "parameter.txt")
     }
