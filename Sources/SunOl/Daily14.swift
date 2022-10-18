@@ -58,10 +58,10 @@ extension TunOl {
     //       * d14[AMKG + i])
     // }
     /// el cons for BESS charging during harm op period
-    // LE=IF(OR(JP6=0,KG6=0),MIN(MAX(0,MIN(BESS_cap_ud,FK6)/BESS_chrg_eff-GA6),FZ6),MIN(((FY6+(HU6-FY6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc))+((FZ6+(HV6-FZ6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc))-(FY6+(HU6-FY6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc)))/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc)),(FK6+(HG6-FK6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc))/BESS_chrg_eff))
+    // LE=IF(OR(JP6=0,KG6=0),MIN(MAX(0,MIN(BESS_cap_ud,FK6)/BESS_chrg_eff-GA6),FZ6+MAX(0;FD6-LB6)),MIN(((FY6+(HU6-FY6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc))+((FZ6+(HV6-FZ6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc))-(FY6+(HU6-FY6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc)))/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc)),(FK6+(HG6-FK6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc))/BESS_chrg_eff))
     for i in 0..<365 {
       d14[LE + i] = iff(
-        or(d14[JP + i].isZero, d14[KG + i].isZero), min(max(Double.zero, min(BESS_cap_ud, d14[FK + i]) / BESS_chrg_eff - d14[GA + i]), d14[FZ + i]),
+        or(d14[JP + i].isZero, d14[KG + i].isZero), min(max(Double.zero, min(BESS_cap_ud, d14[FK + i]) / BESS_chrg_eff - d14[GA + i]), d14[FZ + i] + max(Double.zero, d14[FD + i] - d14[LB + i])),
         min(
           (d14[FY + i] + (d14[HU + i] - d14[FY + i]) * d14[AMKG + i]
             + ((d14[FZ + i] + (d14[HV + i] - d14[FZ + i]) * d14[AMKG + i]) - (d14[FY + i] + (d14[HU + i] - d14[FY + i]) * d14[AMKG + i])) * d14[dJP + i]),
@@ -136,10 +136,10 @@ extension TunOl {
     // LG=LO6/El_boiler_eff
     for i in 0..<365 { d14[LG + i] = d14[LO + i] / El_boiler_eff }
     /// El available during harm op period after TES chrg
-    // LH=IF(OR(JP6=0,KG6=0),MAX(0,FT6-MAX(0,MIN(BESS_cap_ud,FK6)/BESS_chrg_eff-FZ6-GA6)),FS6+(HO6-FS6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc)+((FT6+(HP6-FT6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc))-(FS6+(HO6-FS6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc)))/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc))
+    // LH=IF(OR(JP6=0,KG6=0),MAX(0,FT6+MAX(0,FD6-LB6)),FS6+(HO6-FS6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc)+((FT6+(HP6-FT6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc))-(FS6+(HO6-FS6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc)))/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc))
     for i in 0..<365 {
       d14[LH + i] = iff(
-        or(d14[JP + i].isZero, d14[KG + i].isZero), max(Double.zero, d14[FT + i] - max(Double.zero, min(BESS_cap_ud, d14[FK + i]) / BESS_chrg_eff - d14[FZ + i] - d14[GA + i])),
+        or(d14[JP + i].isZero, d14[KG + i].isZero), max(Double.zero, d14[FT + i] + max(Double.zero, d14[FD + i] - d14[LB + i])),
         d14[FS + i] + (d14[HO + i] - d14[FS + i]) * d14[AMKG + i]
           + ((d14[FT + i] + (d14[HP + i] - d14[FT + i]) * d14[AMKG + i]) - (d14[FS + i] + (d14[HO + i] - d14[FS + i]) * d14[AMKG + i])) * d14[dJP + i])
     }
@@ -271,10 +271,10 @@ extension TunOl {
     //       * d14[AMKI + i])
     // }
     /// el cons for BESS charging during harm op period
-    // MN=IF(OR(KI6=0,KZ6=0),MIN(MAX(0,MIN(BESS_cap_ud,FK6)/BESS_chrg_eff-GA6),FZ6),MIN(((FY6+(HU6-FY6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))+((FZ6+(HV6-FZ6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(FY6+(HU6-FY6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)))/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(KZ6-Overall_harmonious_min_perc)),(FK6+(HG6-FK6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))/BESS_chrg_eff))
+    // MN=IF(OR(KI6=0,KZ6=0),MIN(MAX(0,MIN(BESS_cap_ud,FK6)/BESS_chrg_eff-GA6),FZ6+MAX(0;FD6-MK6)),MIN(((FY6+(HU6-FY6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))+((FZ6+(HV6-FZ6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(FY6+(HU6-FY6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)))/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(KZ6-Overall_harmonious_min_perc)),(FK6+(HG6-FK6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))/BESS_chrg_eff))
     for i in 0..<365 {
       d14[MN + i] = iff(
-        or(d14[KI + i].isZero, d14[KZ + i].isZero), min(max(Double.zero, min(BESS_cap_ud, d14[FK + i]) / BESS_chrg_eff - d14[GA + i]), d14[FZ + i]),
+        or(d14[KI + i].isZero, d14[KZ + i].isZero), min(max(Double.zero, min(BESS_cap_ud, d14[FK + i]) / BESS_chrg_eff - d14[GA + i]), d14[FZ + i] + max(Double.zero, d14[FD + i] - d14[MK + i])),
         min(
           (d14[FY + i] + (d14[HU + i] - d14[FY + i]) * d14[AMKI + i]
             + ((d14[FZ + i] + (d14[HV + i] - d14[FZ + i]) * d14[AMKI + i]) - (d14[FY + i] + (d14[HU + i] - d14[FY + i]) * d14[AMKI + i])) / Overall_harmonious_range
@@ -350,10 +350,10 @@ extension TunOl {
     // MP=MX6/El_boiler_eff
     for i in 0..<365 { d14[MP + i] = d14[MX + i] / El_boiler_eff }
     /// El available during harm op period after TES chrg
-    // MQ=IF(OR(KI6=0,KZ6=0),MAX(0,FT6-MAX(0,MIN(BESS_cap_ud,FK6)/BESS_chrg_eff-FZ6-GA6)),FS6+(HO6-FS6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)+((FT6+(HP6-FT6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(FS6+(HO6-FS6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)))/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(KZ6-Overall_harmonious_min_perc))
+    // MQ=IF(OR(KI6=0,KZ6=0),MAX(0,FT6+MAX(0,FD6-MK6)),FS6+(HO6-FS6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)+((FT6+(HP6-FT6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(FS6+(HO6-FS6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)))/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(KZ6-Overall_harmonious_min_perc))
     for i in 0..<365 {
       d14[MQ + i] = iff(
-        or(d14[KZ + i].isZero, d14[KI + i].isZero), max(Double.zero, d14[FT + i] - max(Double.zero, min(BESS_cap_ud, d14[FK + i]) / BESS_chrg_eff - d14[FZ + i] - d14[GA + i])),
+        or(d14[KZ + i].isZero, d14[KI + i].isZero), max(Double.zero, d14[FT + i] + max(Double.zero, d14[FD + i] - d14[MK + i])),
         d14[FS + i] + (d14[HO + i] - d14[FS + i]) * d14[AMKI + i]
           + ((d14[FT + i] + (d14[HP + i] - d14[FT + i]) * d14[AMKI + i]) - (d14[FS + i] + (d14[HO + i] - d14[FS + i]) * d14[AMKI + i])) / Overall_harmonious_range
           * (d14[KZ + i] - Overall_harmonious_min_perc))

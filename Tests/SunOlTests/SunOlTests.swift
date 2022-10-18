@@ -212,7 +212,7 @@ class SunOlTests: XCTestCase {
     XCTAssertEqual(LCOM, 1820, accuracy: 1, "LCOM")
     XCTAssertEqual(hours_sum, 8680.0, accuracy: 1, "hours_sum")
     XCTAssertEqual(meth_produced_MTPH_sum, 78222, accuracy: 1, "meth_produced_MTPH_sum")
-    XCTAssertEqual(elec_from_grid_sum, 9.4, accuracy: 1, "elec_from_grid_sum")
+    XCTAssertEqual(elec_from_grid_sum, 0, accuracy: 1, "elec_from_grid_sum")
     XCTAssertEqual(elec_to_grid_MTPH_sum, 0, accuracy: 1, "elec_to_grid_MTPH_sum")
   }
 
@@ -288,10 +288,10 @@ class SunOlTests: XCTestCase {
     }
 
     let LCOM = costs.LCOM(meth_produced_MTPH: meth_produced_MTPH_sum, elec_from_grid: elec_from_grid_sum, elec_to_grid: elec_to_grid_MTPH_sum)
-    XCTAssertEqual(LCOM, 1569, accuracy: 1, "LCOM")
+    XCTAssertEqual(LCOM, 1565, accuracy: 1, "LCOM")
     XCTAssertEqual(hours_sum, 7579.0, accuracy: 1, "hours_sum")
-    XCTAssertEqual(meth_produced_MTPH_sum, 101937, accuracy: 1, "meth_produced_MTPH_sum")
-    XCTAssertEqual(elec_from_grid_sum, 5567, accuracy: 1, "elec_from_grid_sum")
+    XCTAssertEqual(meth_produced_MTPH_sum, 101769, accuracy: 1, "meth_produced_MTPH_sum")
+    XCTAssertEqual(elec_from_grid_sum, 2481, accuracy: 1, "elec_from_grid_sum")
     XCTAssertEqual(elec_to_grid_MTPH_sum, 0, accuracy: 1, "elec_to_grid_MTPH_sum")
     try? outputStream.write(toFile: "result_days.txt", atomically: false, encoding: .utf8)
   }
