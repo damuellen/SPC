@@ -6,13 +6,12 @@ public func fitness(values: [Double]) -> [Double] {
 
   var hourPre = [Double](repeating: 0.0, count: 1033680)
   var hourFinal = [Double](repeating: 0.0, count: 516_840)
-  var d10 = [Double](repeating: 0.0, count: 94_170)
+  var d10 = [Double](repeating: 0.0, count: 97_090)
   var d23 = [Double](repeating: 0.0, count: 48_545)
   var d21 = [Double](repeating: 0.0, count: 9_855)
   var day = [[Double]]()
-  let GX = 16790
-  let GZ = 17155
-  let HA = 17520
+  let (GX, GZ, HA) = (16790, 17155, 17520)
+  let (MC, MI, NL, NQ) = (81030, 83220, 93805, 95630)
 
   model.hour(TunOl.Q_Sol_MW_thLoop, TunOl.Reference_PV_plant_power_at_inverter_inlet_DC, TunOl.Reference_PV_MV_power_at_transformer_outlet, hour: &hourPre)
   let d22 = model.d22(hour: hourPre)
@@ -34,8 +33,8 @@ public func fitness(values: [Double]) -> [Double] {
     model.d12(&d10, hourFinal: hourFinal, case: j)
     model.d13(&d10, case: j)
     model.d14(&d10, case: j)
-    day.append(Array(d10[79205..<81395]))
-    day.append(Array(d10[91980..<93805]))
+    day.append(Array(d10[MC..<MI]))
+    day.append(Array(d10[NL..<NQ]))
 
     model.d21(&d21, case: j, day0: day20)
     model.d23(&d23, case: j, day0: day20, d21: d21, d22: d22)
