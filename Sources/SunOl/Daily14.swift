@@ -47,7 +47,7 @@ extension TunOl {
     //       * d14[AMKG + i])
     // }
     /// el cons for BESS charging during harm op period
-    // LE=IF(OR(JP6=0,KG6=0),MIN(MAX(0,MIN(BESS_cap_ud,FK6)/BESS_chrg_eff-GA6),FZ6+MAX(0;FD6-LB6)),MIN(((FY6+(HU6-FY6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc))+((FZ6+(HV6-FZ6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc))-(FY6+(HU6-FY6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc)))/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc)),(FK6+(HG6-FK6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc))/BESS_chrg_eff))
+    // LE=IF(OR(JP6=0,KG6=0),MIN(MAX(0,MIN(BESS_cap_ud,FK6)/BESS_chrg_eff-GA6),FZ6+MAX(0,FD6-LB6)),MIN(((FY6+(HU6-FY6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc))+((FZ6+(HV6-FZ6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc))-(FY6+(HU6-FY6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc)))/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc)),(FK6+(HG6-FK6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc))/BESS_chrg_eff))
     for i in 0..<365 {
       d14[LE + i] = iff(
         or(d14[JP + i].isZero, d14[KG + i].isZero), min(max(Double.zero, min(BESS_cap_ud, d14[FK + i]) / BESS_chrg_eff - d14[GA + i]), d14[FZ + i] + max(Double.zero, d14[FD + i] - d14[LB + i])),
@@ -142,8 +142,8 @@ extension TunOl {
         max(Double.zero, d14[LC + i] - d14[LE + i] - d14[LG + i] - d14[LH + i]))
     }
     /// Balance of electricity during harm op period
-    // LK=ROUND(LH6+LJ6-LC6-LE6-LG6,5)
-    for i in 0..<365 { d14[LK + i] = round(d14[LH + i] + d14[LJ + i] - d14[LC + i] - d14[LE + i] - d14[LG + i], 5) }
+    // LK=LH6+LJ6-LC6-LE6-LG6
+    for i in 0..<365 { d14[LK + i] = d14[LH + i] + d14[LJ + i] - d14[LC + i] - d14[LE + i] - d14[LG + i] }
     /// el cons for harm op outside of harm op period
     // LR=IF(OR(FE6=0,KG6=0),0,FE6+(HA6-FE6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc))
     for i in 0..<365 { d14[LR + i] = iff(or(d14[FE + i].isZero, d14[KG + i].isZero), Double.zero, d14[FE + i] + (d14[HA + i] - d14[FE + i]) * d14[AMKG + i]) }
@@ -166,8 +166,8 @@ extension TunOl {
     // LW=MIN(IF(KG6=0,GG6,GG6+(IC6-GG6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc)),MAX(0,LS6-LT6-LU6-LY6*BESS_chrg_eff))
     for i in 0..<365 { d14[LW + i] = min(iff(d14[KG + i].isZero, d14[GG + i], d14[GG + i] + (d14[IC + i] - d14[GG + i]) * d14[AMKG + i]), max(Double.zero, d14[LS + i] - d14[LT + i] - d14[LU + i] - d14[LY + i] * BESS_chrg_eff)) }
     /// Balance of electricity outside of harm op period
-    // LX=ROUND(LT6+LU6+LW6+LY6*BESS_chrg_eff-MAX(0,LY6-LV6)-LS6,5)
-    for i in 0..<365 { d14[LX + i] = round(d14[LT + i] + d14[LU + i] + d14[LW + i] + d14[LY + i] * BESS_chrg_eff - max(Double.zero, d14[LY + i] - d14[LV + i]) - d14[LS + i], 5) }
+    // LX=LT6+LU6+LW6+LY6*BESS_chrg_eff-MAX(0,LY6-LV6)-LS6
+    for i in 0..<365 { d14[LX + i] = d14[LT + i] + d14[LU + i] + d14[LW + i] + d14[LY + i] * BESS_chrg_eff - max(Double.zero, d14[LY + i] - d14[LV + i]) - d14[LS + i] }
     // /// Heat prod by el boiler for harm op outside of harm op period
     //     // // LZ=IF(OR(JP6=0,KG6=0),0,LT6*El_boiler_eff)
     // for i in 0..<365 {
@@ -181,15 +181,15 @@ extension TunOl {
     // MB=MA6
     for i in 0..<365 { d14[MB + i] = d14[MA + i] }
     /// grid export
-    // MD=MAX(0,MIN(LK6,IF(OR(JP6=0,KG6=0),GC6,GB6+(HX6-GB6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc)+((GC6+(HY6-GC6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc))-(GB6+(HX6-GB6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc)))/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc))))+MAX(0,MIN(LV6-LY6,IF(KG6=0,GD6,GD6+(HZ6-GD6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc))))
+    // MD=ROUND(MAX(0,MIN(LK6,IF(OR(JP6=0,KG6=0),GC6,GB6+(HX6-GB6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc)+((GC6+(HY6-GC6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc))-(GB6+(HX6-GB6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc)))/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc))))+MAX(0,MIN(LV6-LY6,IF(KG6=0,GD6,GD6+(HZ6-GD6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc)))),0)
     for i in 0..<365 {
       d14[MD + i] =
-        min(
+        max(Double.zero, min(
           d14[LK + i],
           iff(
             or(d14[JP + i].isZero, d14[KG + i].isZero), d14[GC + i],
             d14[GB + i] + (d14[HX + i] - d14[GB + i]) * d14[AMKG + i] + ((d14[GC + i] + (d14[HY + i] - d14[GC + i]) * d14[AMKG + i]) - (d14[GB + i] + (d14[HX + i] - d14[GB + i]) * d14[AMKG + i])) * d14[dJP + i]))
-        + max(Double.zero, min(d14[LV + i] - d14[LY + i], iff(d14[KG + i].isZero, d14[GD + i], d14[GD + i] + (d14[HZ + i] - d14[GD + i]) * d14[AMKG + i])))
+        + max(Double.zero, min(d14[LV + i] - d14[LY + i], iff(d14[KG + i].isZero, d14[GD + i], d14[GD + i] + (d14[HZ + i] - d14[GD + i]) * d14[AMKG + i])))).rounded()
     }
     /// Grid import
     // ME=ROUND(LI6+LW6+LT6+LJ6+(MAX(0,-LK6)+MAX(0,-LX6))*EDG_elec_cost_factor,5)
@@ -213,8 +213,8 @@ extension TunOl {
           iff(overall_var_max_cons[j].isZero, d14[MF + i] * d14[KG + i], max(Double.zero, d14[LR + i] - d14[MF + i] * overall_fix_stby_cons[j]) / overall_var_max_cons[j] * MethDist_max_perc[j]) * MethDist_Meth_nom_prod_ud)
     }
     /// Checksum
-    // MI=MAX(0,-LK6)+MAX(0,-LQ6)+MAX(0,-LX6)+MAX(0,-MB6)
-    for i in 0..<365 { d14[MI + i] = max(Double.zero, -d14[LK + i]) + max(Double.zero, -d14[LQ + i]) + max(Double.zero, -d14[LX + i]) + max(Double.zero, -d14[MB + i]) }
+    // MI=ROUND(MAX(0,-LK6)+MAX(0,-LQ6)+MAX(0,-LX6)+MAX(0,-MB6),0)
+    for i in 0..<365 { d14[MI + i] = (max(Double.zero, -d14[LK + i]) + max(Double.zero, -d14[LQ + i]) + max(Double.zero, -d14[LX + i]) + max(Double.zero, -d14[MB + i])).rounded() }
     let Overall_harmonious_range = Overall_harmonious_max_perc - Overall_harmonious_min_perc
     /// el cons for harm op during harm op period
     // MK=IF(FC6=0,0,IF(OR(KI6=0,KZ6=0),MAX(0,FD6-MAX(0,MIN(BESS_cap_ud,FK6)/BESS_chrg_eff-FZ6-GA6)),FC6+(GY6-FC6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)+((FD6+(GZ6-FD6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(FC6+(GY6-FC6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)))/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(KZ6-Overall_harmonious_min_perc)))
@@ -239,7 +239,7 @@ extension TunOl {
     //       * d14[AMKI + i])
     // }
     /// el cons for BESS charging during harm op period
-    // MN=IF(OR(KI6=0,KZ6=0),MIN(MAX(0,MIN(BESS_cap_ud,FK6)/BESS_chrg_eff-GA6),FZ6+MAX(0;FD6-MK6)),MIN(((FY6+(HU6-FY6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))+((FZ6+(HV6-FZ6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(FY6+(HU6-FY6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)))/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(KZ6-Overall_harmonious_min_perc)),(FK6+(HG6-FK6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))/BESS_chrg_eff))
+    // MN=IF(OR(KI6=0,KZ6=0),MIN(MAX(0,MIN(BESS_cap_ud,FK6)/BESS_chrg_eff-GA6),FZ6+MAX(0,FD6-MK6)),MIN(((FY6+(HU6-FY6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))+((FZ6+(HV6-FZ6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(FY6+(HU6-FY6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)))/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(KZ6-Overall_harmonious_min_perc)),(FK6+(HG6-FK6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))/BESS_chrg_eff))
     for i in 0..<365 {
       d14[MN + i] = iff(
         or(d14[KI + i].isZero, d14[KZ + i].isZero), min(max(Double.zero, min(BESS_cap_ud, d14[FK + i]) / BESS_chrg_eff - d14[GA + i]), d14[FZ + i] + max(Double.zero, d14[FD + i] - d14[MK + i])),
@@ -379,20 +379,20 @@ extension TunOl {
     // NK=NJ6
     for i in 0..<365 { d14[NK + i] = d14[NJ + i] }
     /// Grid export
-    // NM=MAX(0,MIN(MT6,IF(OR(KI6=0,KZ6=0),GC6,GB6+(HX6-GB6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)+((GC6+(HY6-GC6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(GB6+(HX6-GB6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)))/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(KZ6-Overall_harmonious_min_perc))))+MAX(0,MIN(NE6-NH6,IF(KI6=0,GD6,GD6+(HZ6-GD6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))))
+    // NM=ROUND(MAX(0,MIN(MT6,IF(OR(KI6=0,KZ6=0),GC6,GB6+(HX6-GB6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)+((GC6+(HY6-GC6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(GB6+(HX6-GB6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)))/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(KZ6-Overall_harmonious_min_perc))))+MAX(0,MIN(NE6-NH6,IF(KI6=0,GD6,GD6+(HZ6-GD6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)))),0)
     for i in 0..<365 {
       d14[NM + i] =
-        max(
+        (max(
           Double.zero,
           min(
             d14[MT + i],
             iff(or(d14[KI + i].isZero, d14[KZ + i].isZero), d14[GC + i], d14[GB + i] + (d14[HX + i] - d14[GB + i]) * d14[AMKI + i])
               + ((d14[GC + i] + (d14[HY + i] - d14[GC + i]) * d14[AMKI + i]) - (d14[GB + i] + (d14[HX + i] - d14[GB + i]) * d14[AMKI + i])) / Overall_harmonious_range * (d14[KZ + i] - Overall_harmonious_min_perc)))
-        + max(Double.zero, min(d14[NE + i] + d14[NH + i], iff(d14[KI + i].isZero, d14[GD + i], d14[GD + i] + (d14[HZ + i] - d14[GD + i]) * d14[AMKI + i])))
+        + max(Double.zero, min(d14[NE + i] + d14[NH + i], iff(d14[KI + i].isZero, d14[GD + i], d14[GD + i] + (d14[HZ + i] - d14[GD + i]) * d14[AMKI + i])))).rounded()
     }
     /// Grid import
-    // NN=ROUND(MR6+NF6+NC6+MS6+(MAX(0,-MT6)+MAX(0,-NG6))*EDG_elec_cost_factor,5)
-    for i in 0..<365 { d14[NN + i] = round(d14[MR + i] + d14[NF + i] + d14[NC + i] + d14[MS + i] + (max(Double.zero, -13[MT + i]) + max(Double.zero, -d14[NG + i])) * EDG_elec_cost_factor, 5) }
+    // NN=ROUND(MR6+NF6+NC6+MS6,0)+ROUND(MAX(0,-MT6)+MAX(0,-NG6),0)*EDG_elec_cost_factor
+    for i in 0..<365 { d14[NN + i] = round(d14[MR + i] + d14[NF + i] + d14[NC + i] + d14[MS + i], 0) + round(max(Double.zero, -13[MT + i]) + max(Double.zero, -d14[NG + i]), 0) * EDG_elec_cost_factor }
     /// Outside harmonious operation period hours
     // NO=IF(NA6=0,0,$C6+IFERROR(($T6-$C6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc),0))
     for i in 0..<365 { d14[NO + i] = iff(d14[NA + i].isZero, Double.zero, d14[C + i] + (d14[T + i] - d14[C + i]) * d14[AMKI + i]) }
