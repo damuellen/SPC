@@ -291,7 +291,7 @@ class SunOlTests: XCTestCase {
     XCTAssertEqual(LCOM, 1565, accuracy: 1, "LCOM")
     XCTAssertEqual(hours_sum, 7579.0, accuracy: 1, "hours_sum")
     XCTAssertEqual(meth_produced_MTPH_sum, 101769, accuracy: 1, "meth_produced_MTPH_sum")
-    XCTAssertEqual(elec_from_grid_sum, 2481, accuracy: 1, "elec_from_grid_sum")
+    XCTAssertEqual(elec_from_grid_sum, 2470, accuracy: 1, "elec_from_grid_sum")
     XCTAssertEqual(elec_to_grid_MTPH_sum, 0, accuracy: 1, "elec_to_grid_MTPH_sum")
     try? outputStream.write(toFile: "result_days.txt", atomically: false, encoding: .utf8)
   }
