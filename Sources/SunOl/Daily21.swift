@@ -63,8 +63,8 @@ extension TunOl {
     for i in 0..<365 {
       d1[AE + i] = iff(
         or(d1[Y + i] <= Double.zero, d1[AA + i] <= Double.zero, d1[AC + i] <= Double.zero), Double.zero,
-        min(1, ifFinite(d1[Y + i] / (d1[Y + i] - d1[Z + i]), 1.0), ifFinite(d1[AA + i] / (d1[AA + i] - d1[AB + i]), 1.0), ifFinite(d1[AC + i] / (d1[AC + i] - d1[AD + i]), 1.0))
-          * (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]) + equiv_harmonious_min_perc[j])
+        min(1, ifFinite(d1[Y + i] / (d1[Y + i] - d1[Z + i]), 1.0), ifFinite(d1[AA + i] / (d1[AA + i] - d1[AB + i]), 1.0), ifFinite(d1[AC + i] / (d1[AC + i] - d1[AD + i]), 1.0)) * (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j])
+          + equiv_harmonious_min_perc[j])
     }
 
     /// Min el cons during night
@@ -128,12 +128,8 @@ extension TunOl {
     // IF(AND(M3=0,I3=0),0,(M3+I3/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_Hydrogen_nom_cons)/EY_Hydrogen_nom_prod*EY_var_gross_nom_cons)+IF(AND(K3=0,I3=0),0,(K3+I3/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_CO2_nom_cons)/CCU_CO2_nom_prod_ud*CCU_var_nom_cons)+IF(I3=0,0,I3/MethSynt_RawMeth_nom_prod_ud*MethSynt_var_nom_cons)
     for i in 0..<365 {
       d1[O + i] =
-        iff(
-          and(d1[M + i].isZero, d1[I + i].isZero), Double.zero,
-          (d1[M + i] + d1[I + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_Hydrogen_nom_cons) / EY_Hydrogen_nom_prod * EY_var_gross_nom_cons)
-        + iff(
-          and(d1[K + i].isZero, d1[I + i].isZero), Double.zero,
-          (d1[K + i] + d1[I + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_CO2_nom_cons) / CCU_CO2_nom_prod_ud * CCU_var_nom_cons)
+        iff(and(d1[M + i].isZero, d1[I + i].isZero), Double.zero, (d1[M + i] + d1[I + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_Hydrogen_nom_cons) / EY_Hydrogen_nom_prod * EY_var_gross_nom_cons)
+        + iff(and(d1[K + i].isZero, d1[I + i].isZero), Double.zero, (d1[K + i] + d1[I + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_CO2_nom_cons) / CCU_CO2_nom_prod_ud * CCU_var_nom_cons)
         + iff(d1[I + i].isZero, Double.zero, d1[I + i] / MethSynt_RawMeth_nom_prod_ud * MethSynt_var_nom_cons)
     }
 
@@ -142,12 +138,8 @@ extension TunOl {
     // IF(AND(N3=0,J3=0),0,(N3+J3/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_Hydrogen_nom_cons)/EY_Hydrogen_nom_prod*EY_var_gross_nom_cons)+IF(AND(L3=0,J3=0),0,(L3+J3/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_CO2_nom_cons)/CCU_CO2_nom_prod_ud*CCU_var_nom_cons)+IF(J3=0,0,J3/MethSynt_RawMeth_nom_prod_ud*MethSynt_var_nom_cons)
     for i in 0..<365 {
       d1[P + i] =
-        iff(
-          and(d1[N + i].isZero, d1[J + i].isZero), Double.zero,
-          (d1[N + i] + d1[J + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_Hydrogen_nom_cons) / EY_Hydrogen_nom_prod * EY_var_gross_nom_cons)
-        + iff(
-          and(d1[L + i].isZero, d1[J + i].isZero), Double.zero,
-          (d1[L + i] + d1[J + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_CO2_nom_cons) / CCU_CO2_nom_prod_ud * CCU_var_nom_cons)
+        iff(and(d1[N + i].isZero, d1[J + i].isZero), Double.zero, (d1[N + i] + d1[J + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_Hydrogen_nom_cons) / EY_Hydrogen_nom_prod * EY_var_gross_nom_cons)
+        + iff(and(d1[L + i].isZero, d1[J + i].isZero), Double.zero, (d1[L + i] + d1[J + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_CO2_nom_cons) / CCU_CO2_nom_prod_ud * CCU_var_nom_cons)
         + iff(d1[J + i].isZero, Double.zero, d1[J + i] / MethSynt_RawMeth_nom_prod_ud * MethSynt_var_nom_cons)
     }
 
@@ -156,12 +148,8 @@ extension TunOl {
     // IF(AND(M3=0,I3=0),0,(M3+I3/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_Hydrogen_nom_cons)/EY_Hydrogen_nom_prod*EY_var_heat_nom_cons)+IF(AND(K3=0,I3=0),0,(K3+I3/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_CO2_nom_cons)/CCU_CO2_nom_prod_ud*CCU_var_heat_nom_cons)-IF(I3=0,0,I3/MethSynt_RawMeth_nom_prod_ud*MethSynt_var_heat_nom_prod)
     for i in 0..<365 {
       d1[Q + i] =
-        iff(
-          and(d1[M + i].isZero, d1[I + i].isZero), Double.zero,
-          (d1[M + i] + d1[I + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_Hydrogen_nom_cons) / EY_Hydrogen_nom_prod * EY_var_heat_nom_cons)
-        + iff(
-          and(d1[K + i].isZero, d1[I + i].isZero), Double.zero,
-          (d1[K + i] + d1[I + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_CO2_nom_cons) / CCU_CO2_nom_prod_ud * CCU_var_heat_nom_cons)
+        iff(and(d1[M + i].isZero, d1[I + i].isZero), Double.zero, (d1[M + i] + d1[I + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_Hydrogen_nom_cons) / EY_Hydrogen_nom_prod * EY_var_heat_nom_cons)
+        + iff(and(d1[K + i].isZero, d1[I + i].isZero), Double.zero, (d1[K + i] + d1[I + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_CO2_nom_cons) / CCU_CO2_nom_prod_ud * CCU_var_heat_nom_cons)
         - iff(d1[I + i].isZero, Double.zero, d1[I + i] / MethSynt_RawMeth_nom_prod_ud * MethSynt_var_heat_nom_prod)
     }
 
@@ -170,12 +158,8 @@ extension TunOl {
     // IF(AND(N3=0,J3=0),0,(N3+J3/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_Hydrogen_nom_cons)/EY_Hydrogen_nom_prod*EY_var_heat_nom_cons)+IF(AND(L3=0,J3=0),0,(L3+J3/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_CO2_nom_cons)/CCU_CO2_nom_prod_ud*CCU_var_heat_nom_cons)-IF(J3=0,0,J3/MethSynt_RawMeth_nom_prod_ud*MethSynt_var_heat_nom_prod)
     for i in 0..<365 {
       d1[R + i] =
-        iff(
-          and(d1[N + i].isZero, d1[J + i].isZero), Double.zero,
-          (d1[N + i] + d1[J + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_Hydrogen_nom_cons) / EY_Hydrogen_nom_prod * EY_var_heat_nom_cons)
-        + iff(
-          and(d1[L + i].isZero, d1[J + i].isZero), Double.zero,
-          (d1[L + i] + d1[J + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_CO2_nom_cons) / CCU_CO2_nom_prod_ud * CCU_var_heat_nom_cons)
+        iff(and(d1[N + i].isZero, d1[J + i].isZero), Double.zero, (d1[N + i] + d1[J + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_Hydrogen_nom_cons) / EY_Hydrogen_nom_prod * EY_var_heat_nom_cons)
+        + iff(and(d1[L + i].isZero, d1[J + i].isZero), Double.zero, (d1[L + i] + d1[J + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_CO2_nom_cons) / CCU_CO2_nom_prod_ud * CCU_var_heat_nom_cons)
         - iff(d1[J + i].isZero, Double.zero, d1[J + i] / MethSynt_RawMeth_nom_prod_ud * MethSynt_var_heat_nom_prod)
     }
 

@@ -272,8 +272,8 @@ public struct TunOl {
   var EDG_elec_cost_factor: Double = 1
   var values: [Double] {
     [
-      CSP_loop_nr_ud, TES_thermal_cap_ud, PB_nom_gross_cap_ud, PV_AC_cap_ud, PV_DC_cap_ud, EY_var_net_nom_cons_ud, Hydrogen_storage_cap_ud, Heater_cap_ud, CCU_CO2_nom_prod_ud,
-      CO2_storage_cap_ud, RawMeth_storage_cap_ud, MethDist_Meth_nom_prod_ud, El_boiler_cap_ud, BESS_cap_ud, Grid_export_max_ud, Grid_import_max_ud,
+      CSP_loop_nr_ud, TES_thermal_cap_ud, PB_nom_gross_cap_ud, PV_AC_cap_ud, PV_DC_cap_ud, EY_var_net_nom_cons_ud, Hydrogen_storage_cap_ud, Heater_cap_ud, CCU_CO2_nom_prod_ud, CO2_storage_cap_ud, RawMeth_storage_cap_ud,
+      MethDist_Meth_nom_prod_ud, El_boiler_cap_ud, BESS_cap_ud, Grid_export_max_ud, Grid_import_max_ud,
     ]
   }
 
@@ -305,9 +305,7 @@ public struct TunOl {
     let maximum: Double = TunOl.Reference_PV_MV_power_at_transformer_outlet.max() ?? 0.0
     let Inverter_power_fraction: [Double] = TunOl.Reference_PV_MV_power_at_transformer_outlet.map { max(0.0, $0 / 600.5) }
     let Inverter_eff: [Double] = Inverter_power_fraction.indices.map {
-      iff(
-        TunOl.Reference_PV_MV_power_at_transformer_outlet[$0] <= maximum,
-        max(TunOl.Reference_PV_MV_power_at_transformer_outlet[$0], Double.zero) / TunOl.Reference_PV_plant_power_at_inverter_inlet_DC[$0], Double.zero)
+      iff(TunOl.Reference_PV_MV_power_at_transformer_outlet[$0] <= maximum, max(TunOl.Reference_PV_MV_power_at_transformer_outlet[$0], Double.zero) / TunOl.Reference_PV_plant_power_at_inverter_inlet_DC[$0], Double.zero)
     }
 
     let inverter = zip(Inverter_power_fraction, Inverter_eff).filter { $0.1.isFinite }.filter { $0.1 > 0 }.sorted(by: { $0.0 < $1.0 })
@@ -357,20 +355,13 @@ public struct TunOl {
     let CCU_heat_stby_cons: Double = CCU_CO2_nom_prod_ud / CCU_Ref_CO2_hour_prod * CCU_Ref_heat_stby_cons
     let CCU_stup_cons: Double = CCU_CO2_nom_prod_ud / CCU_Ref_CO2_hour_prod * CCU_Ref_stup_cons
     let CCU_heat_stup_cons: Double = CCU_CO2_nom_prod_ud / CCU_Ref_CO2_hour_prod * CCU_Ref_heat_stup_cons
-    self.PB_fix_aux_el = iff(
-      PB_nom_gross_cap_ud <= 0.0, 0.0, PB_Ref_nom_gross_cap * PB_fix_aux_elec_cons_perc_of_ref * POLY(PB_nom_gross_cap_ud / PB_Ref_nom_gross_cap, fix_aux_el))
+    self.PB_fix_aux_el = iff(PB_nom_gross_cap_ud <= 0.0, 0.0, PB_Ref_nom_gross_cap * PB_fix_aux_elec_cons_perc_of_ref * POLY(PB_nom_gross_cap_ud / PB_Ref_nom_gross_cap, fix_aux_el))
     self.PB_nom_var_aux_cons = PB_nom_gross_cap_ud * PB_nom_var_aux_cons_perc_gross
 
-    self.PB_stby_aux_cons = iff(
-      PB_nom_gross_cap_ud <= 0.0, 0.0,
-      PB_nom_gross_cap_ud * PB_stby_var_aux_cons_perc + PB_Ref_nom_gross_cap * PB_stby_fix_aux_cons_perc * POLY(PB_nom_gross_cap_ud / PB_Ref_nom_gross_cap, fix_stby_el))
-    self.PB_stup_aux_cons = iff(
-      PB_nom_gross_cap_ud <= 0.0, 0.0,
-      PB_nom_gross_cap_ud * PB_stup_var_aux_elec_cons_perc + PB_Ref_nom_gross_cap * PB_stup_fix_aux_elec_cons_perc * POLY(PB_nom_gross_cap_ud / PB_Ref_nom_gross_cap, fix_stup_el))
+    self.PB_stby_aux_cons = iff(PB_nom_gross_cap_ud <= 0.0, 0.0, PB_nom_gross_cap_ud * PB_stby_var_aux_cons_perc + PB_Ref_nom_gross_cap * PB_stby_fix_aux_cons_perc * POLY(PB_nom_gross_cap_ud / PB_Ref_nom_gross_cap, fix_stby_el))
+    self.PB_stup_aux_cons = iff(PB_nom_gross_cap_ud <= 0.0, 0.0, PB_nom_gross_cap_ud * PB_stup_var_aux_elec_cons_perc + PB_Ref_nom_gross_cap * PB_stup_fix_aux_elec_cons_perc * POLY(PB_nom_gross_cap_ud / PB_Ref_nom_gross_cap, fix_stup_el))
     self.PB_gross_min_cap = PB_nom_gross_cap_ud * PB_grs_el_cap_min_perc
-    self.Ratio_CSP_vs_Heater =
-      (h_SS(Heater_outlet_T) - h_SS(CSP_Hot_HTF_T - SF_heat_exch_approach_temp))
-      / (h_SS(CSP_Hot_HTF_T - SF_heat_exch_approach_temp) - h_SS(CSP_Cold_HTF_T - SF_heat_exch_approach_temp))
+    self.Ratio_CSP_vs_Heater = (h_SS(Heater_outlet_T) - h_SS(CSP_Hot_HTF_T - SF_heat_exch_approach_temp)) / (h_SS(CSP_Hot_HTF_T - SF_heat_exch_approach_temp) - h_SS(CSP_Cold_HTF_T - SF_heat_exch_approach_temp))
     self.EY_var_gross_nom_cons = EY_var_net_nom_cons_ud + EY_var_aux_nom_cons
     self.EY_var_aux_min_cons = (EY_var_net_nom_cons_ud + EY_var_aux_nom_cons) * EY_cap_min_perc
     let EY_Hydrogen_min_prod: Double = EY_Hydrogen_nom_prod * EY_cap_min_perc
@@ -409,27 +400,22 @@ public struct TunOl {
     // let Overall_heat_stby_cons: Double =
     //   MethDist_heat_stby_cons + MethSynt_heat_stby_cons + CCU_heat_stby_cons + EY_heat_stby_cons
     self.MethDist_harmonious_min_perc = max(
-      MethDist_cap_min_perc, MethSynt_RawMeth_min_prod / MethDist_RawMeth_nom_cons,
-      max(MethSynt_cap_min_perc, EY_Hydrogen_min_prod / MethSynt_Hydrogen_nom_cons) * MethSynt_RawMeth_nom_prod_ud / MethDist_RawMeth_nom_cons,
+      MethDist_cap_min_perc, MethSynt_RawMeth_min_prod / MethDist_RawMeth_nom_cons, max(MethSynt_cap_min_perc, EY_Hydrogen_min_prod / MethSynt_Hydrogen_nom_cons) * MethSynt_RawMeth_nom_prod_ud / MethDist_RawMeth_nom_cons,
       max(MethSynt_cap_min_perc, CCU_CO2_min_prod / MethSynt_CO2_nom_cons) * MethSynt_RawMeth_nom_prod_ud / MethDist_RawMeth_nom_cons)
     let MethDist_RawMeth_min_cons: Double = MethDist_RawMeth_nom_cons * MethDist_cap_min_perc
-    self.MethSynt_harmonious_min_perc = max(
-      MethSynt_cap_min_perc, MethDist_RawMeth_min_cons / MethSynt_RawMeth_nom_prod_ud, EY_Hydrogen_min_prod / MethSynt_Hydrogen_nom_cons, CCU_CO2_min_prod / MethSynt_CO2_nom_cons)
+    self.MethSynt_harmonious_min_perc = max(MethSynt_cap_min_perc, MethDist_RawMeth_min_cons / MethSynt_RawMeth_nom_prod_ud, EY_Hydrogen_min_prod / MethSynt_Hydrogen_nom_cons, CCU_CO2_min_prod / MethSynt_CO2_nom_cons)
     self.MethSynt_CO2_min_cons = MethSynt_CO2_nom_cons * MethSynt_cap_min_perc
     self.CCU_harmonious_min_perc = max(
-      CCU_cap_min_perc, MethSynt_CO2_min_cons / CCU_CO2_nom_prod_ud,
-      max(MethSynt_cap_min_perc, EY_Hydrogen_min_prod / MethSynt_Hydrogen_nom_cons) * MethSynt_CO2_nom_cons / CCU_CO2_nom_prod_ud,
+      CCU_cap_min_perc, MethSynt_CO2_min_cons / CCU_CO2_nom_prod_ud, max(MethSynt_cap_min_perc, EY_Hydrogen_min_prod / MethSynt_Hydrogen_nom_cons) * MethSynt_CO2_nom_cons / CCU_CO2_nom_prod_ud,
       max(MethSynt_cap_min_perc, MethDist_RawMeth_min_cons / MethSynt_RawMeth_nom_prod_ud) * MethSynt_CO2_nom_cons / CCU_CO2_nom_prod_ud)
     let MethSynt_Hydrogen_min_cons: Double = MethSynt_Hydrogen_nom_cons * MethSynt_cap_min_perc  // FIXME
     self.EY_harmonious_min_perc = max(
-      EY_cap_min_perc, MethSynt_Hydrogen_min_cons / EY_Hydrogen_nom_prod,
-      max(MethSynt_cap_min_perc, CCU_CO2_min_prod / MethSynt_CO2_nom_cons) * MethSynt_Hydrogen_nom_cons / EY_Hydrogen_nom_prod,
+      EY_cap_min_perc, MethSynt_Hydrogen_min_cons / EY_Hydrogen_nom_prod, max(MethSynt_cap_min_perc, CCU_CO2_min_prod / MethSynt_CO2_nom_cons) * MethSynt_Hydrogen_nom_cons / EY_Hydrogen_nom_prod,
       max(MethSynt_cap_min_perc, MethDist_RawMeth_min_cons / MethSynt_RawMeth_nom_prod_ud) * MethSynt_Hydrogen_nom_cons / EY_Hydrogen_nom_prod)
     self.MethDist_harmonious_max_perc = min(
       1, MethSynt_RawMeth_nom_prod_ud / MethDist_RawMeth_nom_cons, EY_Hydrogen_nom_prod / MethSynt_Hydrogen_nom_cons * MethSynt_RawMeth_nom_prod_ud / MethDist_RawMeth_nom_cons,
       CCU_CO2_nom_prod_ud / MethSynt_CO2_nom_cons * MethSynt_RawMeth_nom_prod_ud / MethDist_RawMeth_nom_cons)
-    self.MethSynt_harmonious_max_perc = min(
-      1, MethDist_RawMeth_nom_cons / MethSynt_RawMeth_nom_prod_ud, EY_Hydrogen_nom_prod / MethSynt_Hydrogen_nom_cons, CCU_CO2_nom_prod_ud / MethSynt_CO2_nom_cons)
+    self.MethSynt_harmonious_max_perc = min(1, MethDist_RawMeth_nom_cons / MethSynt_RawMeth_nom_prod_ud, EY_Hydrogen_nom_prod / MethSynt_Hydrogen_nom_cons, CCU_CO2_nom_prod_ud / MethSynt_CO2_nom_cons)
     self.CCU_harmonious_max_perc = min(
       1, MethSynt_CO2_nom_cons / CCU_CO2_nom_prod_ud, EY_Hydrogen_nom_prod / MethSynt_Hydrogen_nom_cons * MethSynt_CO2_nom_cons / CCU_CO2_nom_prod_ud,
       MethDist_RawMeth_nom_cons / MethSynt_RawMeth_nom_prod_ud * MethSynt_CO2_nom_cons / CCU_CO2_nom_prod_ud)
@@ -437,22 +423,17 @@ public struct TunOl {
       1, MethSynt_Hydrogen_nom_cons / EY_Hydrogen_nom_prod, CCU_CO2_nom_prod_ud / MethSynt_CO2_nom_cons * MethSynt_Hydrogen_nom_cons / EY_Hydrogen_nom_prod,
       MethDist_RawMeth_nom_cons / MethSynt_RawMeth_nom_prod_ud * MethSynt_Hydrogen_nom_cons / EY_Hydrogen_nom_prod)
     self.PB_nom_net_cap = PB_nom_gross_cap_ud - PB_nom_var_aux_cons - PB_fix_aux_el
-    self.PB_net_min_cap = iff(
-      PB_nom_gross_cap_ud <= 0.0, 0.0, PB_gross_min_cap - PB_fix_aux_el - PB_nom_var_aux_cons * POLY(PB_gross_min_cap / PB_nom_gross_cap_ud, PB_g2n_var_aux_el_Coeff))
+    self.PB_net_min_cap = iff(PB_nom_gross_cap_ud <= 0.0, 0.0, PB_gross_min_cap - PB_fix_aux_el - PB_nom_var_aux_cons * POLY(PB_gross_min_cap / PB_nom_gross_cap_ud, PB_g2n_var_aux_el_Coeff))
     self.MethDist_HydrogenO_min_prod = MethDist_H2O_nom_prod * MethDist_cap_min_perc
     self.Overall_harmonious_min_perc = Overall_harmonious_max_perc / MethDist_harmonious_max_perc * MethDist_harmonious_min_perc
     self.Overall_harmonious_var_min_cons =
-      EY_harmonious_min_perc * (EY_var_net_nom_cons_ud + EY_var_aux_nom_cons) + MethSynt_harmonious_min_perc * MethSynt_var_nom_cons + MethDist_harmonious_min_perc
-      * MethDist_var_nom_cons + CCU_harmonious_min_perc * CCU_var_nom_cons
+      EY_harmonious_min_perc * (EY_var_net_nom_cons_ud + EY_var_aux_nom_cons) + MethSynt_harmonious_min_perc * MethSynt_var_nom_cons + MethDist_harmonious_min_perc * MethDist_var_nom_cons + CCU_harmonious_min_perc * CCU_var_nom_cons
     self.Overall_harmonious_var_heat_min_cons =
-      EY_var_heat_nom_cons * EY_harmonious_min_perc + MethDist_var_heat_nom_cons * MethDist_harmonious_min_perc - MethSynt_var_heat_nom_prod * MethSynt_harmonious_min_perc
-      + CCU_var_heat_nom_cons * CCU_harmonious_min_perc
+      EY_var_heat_nom_cons * EY_harmonious_min_perc + MethDist_var_heat_nom_cons * MethDist_harmonious_min_perc - MethSynt_var_heat_nom_prod * MethSynt_harmonious_min_perc + CCU_var_heat_nom_cons * CCU_harmonious_min_perc
     self.Overall_harmonious_var_max_cons =
-      EY_harmonious_max_perc * (EY_var_net_nom_cons_ud + EY_var_aux_nom_cons) + MethSynt_harmonious_max_perc * MethSynt_var_nom_cons + MethDist_harmonious_max_perc
-      * MethDist_var_nom_cons + CCU_harmonious_max_perc * CCU_var_nom_cons
+      EY_harmonious_max_perc * (EY_var_net_nom_cons_ud + EY_var_aux_nom_cons) + MethSynt_harmonious_max_perc * MethSynt_var_nom_cons + MethDist_harmonious_max_perc * MethDist_var_nom_cons + CCU_harmonious_max_perc * CCU_var_nom_cons
     self.Overall_harmonious_var_heat_max_cons =
-      EY_harmonious_max_perc * EY_var_heat_nom_cons + MethDist_harmonious_max_perc * MethDist_var_heat_nom_cons - MethSynt_harmonious_max_perc * MethSynt_var_heat_nom_prod
-      + CCU_harmonious_max_perc * CCU_var_heat_nom_cons
+      EY_harmonious_max_perc * EY_var_heat_nom_cons + MethDist_harmonious_max_perc * MethDist_var_heat_nom_cons - MethSynt_harmonious_max_perc * MethSynt_var_heat_nom_prod + CCU_harmonious_max_perc * CCU_var_heat_nom_cons
     self.MethDist_min_perc[0] = MethDist_cap_min_perc
     self.MethDist_max_perc[0] = 1
     self.MethDist_min_perc[1] = max(MethDist_cap_min_perc, MethSynt_RawMeth_min_prod / MethDist_RawMeth_nom_cons, Double.zero)
@@ -467,11 +448,9 @@ public struct TunOl {
     self.CCU_min_perc[2] = max(
       CCU_cap_min_perc, MethSynt_CO2_min_cons / CCU_CO2_nom_prod_ud, MethSynt_cap_min_perc * MethSynt_CO2_nom_cons / CCU_CO2_nom_prod_ud,
       max(MethSynt_cap_min_perc, MethDist_RawMeth_min_cons / MethSynt_RawMeth_nom_prod_ud) * MethSynt_CO2_nom_cons / CCU_CO2_nom_prod_ud)
-    self.MethDist_max_perc[2] = min(
-      1, MethSynt_RawMeth_nom_prod_ud / MethDist_RawMeth_nom_cons, CCU_CO2_nom_prod_ud / MethSynt_CO2_nom_cons * MethSynt_RawMeth_nom_prod_ud / MethDist_RawMeth_nom_cons)
+    self.MethDist_max_perc[2] = min(1, MethSynt_RawMeth_nom_prod_ud / MethDist_RawMeth_nom_cons, CCU_CO2_nom_prod_ud / MethSynt_CO2_nom_cons * MethSynt_RawMeth_nom_prod_ud / MethDist_RawMeth_nom_cons)
     self.MethSynt_max_perc[2] = min(1, MethDist_RawMeth_nom_cons / MethSynt_RawMeth_nom_prod_ud, CCU_CO2_nom_prod_ud / MethSynt_CO2_nom_cons)
-    self.CCU_max_perc[2] = min(
-      1, MethSynt_CO2_nom_cons / CCU_CO2_nom_prod_ud, MethDist_RawMeth_nom_cons / MethSynt_RawMeth_nom_prod_ud * MethSynt_CO2_nom_cons / CCU_CO2_nom_prod_ud)
+    self.CCU_max_perc[2] = min(1, MethSynt_CO2_nom_cons / CCU_CO2_nom_prod_ud, MethDist_RawMeth_nom_cons / MethSynt_RawMeth_nom_prod_ud * MethSynt_CO2_nom_cons / CCU_CO2_nom_prod_ud)
 
     self.MethDist_min_perc[3] = MethDist_harmonious_min_perc
     self.MethSynt_min_perc[3] = MethSynt_harmonious_min_perc
@@ -482,73 +461,51 @@ public struct TunOl {
     self.CCU_max_perc[3] = CCU_harmonious_max_perc
     self.EY_max_perc[3] = EY_harmonious_max_perc
     let Overall_harmonious_var_cons_at_PB_nom: Double = max(PB_net_min_cap, min(PB_nom_net_cap - Overall_fix_cons, Overall_harmonious_var_max_cons))
-    let Overall_harmonious_perc_at_PB_nom: Double = max(
-      Overall_harmonious_min_perc, min(Overall_harmonious_max_perc, Overall_harmonious_max_perc / Overall_harmonious_var_max_cons * Overall_harmonious_var_cons_at_PB_nom))
+    let Overall_harmonious_perc_at_PB_nom: Double = max(Overall_harmonious_min_perc, min(Overall_harmonious_max_perc, Overall_harmonious_max_perc / Overall_harmonious_var_max_cons * Overall_harmonious_var_cons_at_PB_nom))
 
     for j in 0..<4 {
       self.overall_fix_stby_cons[j] =
-        iff(MethDist_min_perc[j] > 0.0, MethDist_fix_cons, MethDist_stby_cons) + iff(MethSynt_min_perc[j] > 0.0, MethSynt_fix_cons, MethSynt_stby_cons)
-        + iff(CCU_min_perc[j] > 0.0, CCU_fix_cons, CCU_stby_cons) + iff(EY_min_perc[j] > 0.0, EY_fix_cons, EY_stby_cons)
-      self.overall_var_min_cons[j] =
-        EY_min_perc[j] * (EY_var_net_nom_cons_ud + EY_var_aux_nom_cons) + MethSynt_min_perc[j] * MethSynt_var_nom_cons + MethDist_min_perc[j] * MethDist_var_nom_cons
-        + CCU_min_perc[j] * CCU_var_nom_cons
-      self.overall_var_heat_min_cons[j] =
-        EY_var_heat_nom_cons * EY_min_perc[j] + MethDist_var_heat_nom_cons * MethDist_min_perc[j] - MethSynt_var_heat_nom_prod * MethSynt_min_perc[j] + CCU_var_heat_nom_cons
-        * CCU_min_perc[j]
+        iff(MethDist_min_perc[j] > 0.0, MethDist_fix_cons, MethDist_stby_cons) + iff(MethSynt_min_perc[j] > 0.0, MethSynt_fix_cons, MethSynt_stby_cons) + iff(CCU_min_perc[j] > 0.0, CCU_fix_cons, CCU_stby_cons)
+        + iff(EY_min_perc[j] > 0.0, EY_fix_cons, EY_stby_cons)
+      self.overall_var_min_cons[j] = EY_min_perc[j] * (EY_var_net_nom_cons_ud + EY_var_aux_nom_cons) + MethSynt_min_perc[j] * MethSynt_var_nom_cons + MethDist_min_perc[j] * MethDist_var_nom_cons + CCU_min_perc[j] * CCU_var_nom_cons
+      self.overall_var_heat_min_cons[j] = EY_var_heat_nom_cons * EY_min_perc[j] + MethDist_var_heat_nom_cons * MethDist_min_perc[j] - MethSynt_var_heat_nom_prod * MethSynt_min_perc[j] + CCU_var_heat_nom_cons * CCU_min_perc[j]
       self.RawMeth_min_cons[j] = round(max(0.0, -MethSynt_min_perc[j] * MethSynt_RawMeth_nom_prod_ud + MethDist_min_perc[j] * MethDist_RawMeth_nom_cons), 5)
       self.CO2_min_cons[j] = round(max(0.0, -CCU_min_perc[j] * CCU_CO2_nom_prod_ud + MethSynt_min_perc[j] * MethSynt_CO2_nom_cons), 5)
       self.Hydrogen_min_cons[j] = round(max(0.0, -EY_min_perc[j] * EY_Hydrogen_nom_prod + MethSynt_min_perc[j] * MethSynt_Hydrogen_nom_cons), 5)
-      self.overall_stup_cons[j] =
-        iff(MethDist_min_perc[j] > 0.0, 0.0, MethDist_stup_cons) + iff(MethSynt_min_perc[j] > 0.0, 0.0, MethSynt_stup_cons) + iff(CCU_min_perc[j] > 0.0, 0.0, CCU_stup_cons)
-        + iff(EY_min_perc[j] > 0.0, 0.0, EY_stup_cons)
+      self.overall_stup_cons[j] = iff(MethDist_min_perc[j] > 0.0, 0.0, MethDist_stup_cons) + iff(MethSynt_min_perc[j] > 0.0, 0.0, MethSynt_stup_cons) + iff(CCU_min_perc[j] > 0.0, 0.0, CCU_stup_cons) + iff(EY_min_perc[j] > 0.0, 0.0, EY_stup_cons)
       self.equiv_harmonious_max_perc[j] = max(
-        0, ifFinite(Overall_harmonious_max_perc / MethDist_harmonious_max_perc * MethDist_max_perc[j], Double.zero),
-        ifFinite(Overall_harmonious_max_perc / MethSynt_harmonious_max_perc * MethSynt_max_perc[j], Double.zero),
-        ifFinite(Overall_harmonious_max_perc / CCU_harmonious_max_perc * CCU_max_perc[j], Double.zero),
-        ifFinite(Overall_harmonious_max_perc / EY_harmonious_max_perc * EY_max_perc[j], Double.zero))
+        0, ifFinite(Overall_harmonious_max_perc / MethDist_harmonious_max_perc * MethDist_max_perc[j], Double.zero), ifFinite(Overall_harmonious_max_perc / MethSynt_harmonious_max_perc * MethSynt_max_perc[j], Double.zero),
+        ifFinite(Overall_harmonious_max_perc / CCU_harmonious_max_perc * CCU_max_perc[j], Double.zero), ifFinite(Overall_harmonious_max_perc / EY_harmonious_max_perc * EY_max_perc[j], Double.zero))
 
       self.overall_heat_fix_stby_cons[j] =
-        iff(MethDist_max_perc[j] > 0.0, MethDist_heat_fix_cons, MethDist_heat_stby_cons) + iff(MethSynt_max_perc[j] > 0.0, -MethSynt_heat_fix_prod, MethSynt_heat_stby_cons)
-        + iff(CCU_max_perc[j] > 0.0, CCU_heat_fix_cons, CCU_heat_stby_cons) + iff(EY_max_perc[j] > 0.0, EY_heat_fix_cons, EY_heat_stby_cons)
-      self.overall_var_max_cons[j] =
-        EY_max_perc[j] * (EY_var_net_nom_cons_ud + EY_var_aux_nom_cons) + MethSynt_max_perc[j] * MethSynt_var_nom_cons + MethDist_max_perc[j] * MethDist_var_nom_cons
-        + CCU_max_perc[j] * CCU_var_nom_cons
-      self.overall_var_heat_max_cons[j] =
-        EY_var_heat_nom_cons * EY_max_perc[j] + MethDist_var_heat_nom_cons * MethDist_max_perc[j] - MethSynt_var_heat_nom_prod * MethSynt_max_perc[j] + CCU_var_heat_nom_cons
-        * CCU_max_perc[j]
+        iff(MethDist_max_perc[j] > 0.0, MethDist_heat_fix_cons, MethDist_heat_stby_cons) + iff(MethSynt_max_perc[j] > 0.0, -MethSynt_heat_fix_prod, MethSynt_heat_stby_cons) + iff(CCU_max_perc[j] > 0.0, CCU_heat_fix_cons, CCU_heat_stby_cons)
+        + iff(EY_max_perc[j] > 0.0, EY_heat_fix_cons, EY_heat_stby_cons)
+      self.overall_var_max_cons[j] = EY_max_perc[j] * (EY_var_net_nom_cons_ud + EY_var_aux_nom_cons) + MethSynt_max_perc[j] * MethSynt_var_nom_cons + MethDist_max_perc[j] * MethDist_var_nom_cons + CCU_max_perc[j] * CCU_var_nom_cons
+      self.overall_var_heat_max_cons[j] = EY_var_heat_nom_cons * EY_max_perc[j] + MethDist_var_heat_nom_cons * MethDist_max_perc[j] - MethSynt_var_heat_nom_prod * MethSynt_max_perc[j] + CCU_var_heat_nom_cons * CCU_max_perc[j]
       self.RawMeth_max_cons[j] = round(max(0.0, -MethSynt_max_perc[j] * MethSynt_RawMeth_nom_prod_ud + MethDist_max_perc[j] * MethDist_RawMeth_nom_cons), 5)
       self.CO2_max_cons[j] = round(max(0.0, -CCU_max_perc[j] * CCU_CO2_nom_prod_ud + MethSynt_max_perc[j] * MethSynt_CO2_nom_cons), 5)
       self.Hydrogen_max_cons[j] = round(max(0.0, -EY_max_perc[j] * EY_Hydrogen_nom_prod + MethSynt_max_perc[j] * MethSynt_Hydrogen_nom_cons), 5)
       self.overall_heat_stup_cons[j] =
-        iff(MethDist_min_perc[j] > 0.0, 0.0, MethDist_heat_stup_cons) + iff(MethSynt_min_perc[j] > 0.0, 0.0, MethSynt_heat_stup_cons)
-        + iff(CCU_min_perc[j] > 0.0, 0.0, CCU_heat_stup_cons) + iff(EY_min_perc[j] > 0.0, 0.0, EY_heat_stup_cons)
+        iff(MethDist_min_perc[j] > 0.0, 0.0, MethDist_heat_stup_cons) + iff(MethSynt_min_perc[j] > 0.0, 0.0, MethSynt_heat_stup_cons) + iff(CCU_min_perc[j] > 0.0, 0.0, CCU_heat_stup_cons) + iff(EY_min_perc[j] > 0.0, 0.0, EY_heat_stup_cons)
       self.daytime_cons_per_h_of_night_op[j] = RawMeth_max_cons[j] / MethSynt_RawMeth_nom_prod_ud * MethSynt_var_nom_cons
-      self.daytime_cons_per_h_of_night_op[j] +=
-        (CO2_max_cons[j] + RawMeth_max_cons[j] / MethSynt_RawMeth_nom_prod_ud * MethSynt_CO2_nom_cons) / CCU_CO2_nom_prod_ud * CCU_var_nom_cons
-      self.daytime_cons_per_h_of_night_op[j] +=
-        (Hydrogen_max_cons[j] + RawMeth_max_cons[j] / MethSynt_RawMeth_nom_prod_ud * MethSynt_Hydrogen_nom_cons) / EY_Hydrogen_nom_prod * EY_var_gross_nom_cons
+      self.daytime_cons_per_h_of_night_op[j] += (CO2_max_cons[j] + RawMeth_max_cons[j] / MethSynt_RawMeth_nom_prod_ud * MethSynt_CO2_nom_cons) / CCU_CO2_nom_prod_ud * CCU_var_nom_cons
+      self.daytime_cons_per_h_of_night_op[j] += (Hydrogen_max_cons[j] + RawMeth_max_cons[j] / MethSynt_RawMeth_nom_prod_ud * MethSynt_Hydrogen_nom_cons) / EY_Hydrogen_nom_prod * EY_var_gross_nom_cons
       self.daytime_heat_cons_per_h_of_night_op[j] = (-RawMeth_max_cons[j]) / MethSynt_RawMeth_nom_prod_ud * MethSynt_var_heat_nom_prod
-      self.daytime_heat_cons_per_h_of_night_op[j] +=
-        (CO2_max_cons[j] + RawMeth_max_cons[j] / MethSynt_RawMeth_nom_prod_ud * MethSynt_CO2_nom_cons) / CCU_CO2_nom_prod_ud * CCU_var_heat_nom_cons
-      self.daytime_heat_cons_per_h_of_night_op[j] +=
-        (Hydrogen_max_cons[j] + RawMeth_max_cons[j] / MethSynt_RawMeth_nom_prod_ud * MethSynt_Hydrogen_nom_cons) / EY_Hydrogen_nom_prod * EY_var_heat_nom_cons
+      self.daytime_heat_cons_per_h_of_night_op[j] += (CO2_max_cons[j] + RawMeth_max_cons[j] / MethSynt_RawMeth_nom_prod_ud * MethSynt_CO2_nom_cons) / CCU_CO2_nom_prod_ud * CCU_var_heat_nom_cons
+      self.daytime_heat_cons_per_h_of_night_op[j] += (Hydrogen_max_cons[j] + RawMeth_max_cons[j] / MethSynt_RawMeth_nom_prod_ud * MethSynt_Hydrogen_nom_cons) / EY_Hydrogen_nom_prod * EY_var_heat_nom_cons
     }
 
     self.equiv_harmonious_min_perc[0] = max(
-      ifFinite(Overall_harmonious_max_perc / MethDist_harmonious_max_perc * MethDist_min_perc[0], 0),
-      ifFinite(Overall_harmonious_max_perc / MethSynt_harmonious_max_perc * MethSynt_min_perc[0], 0),
+      ifFinite(Overall_harmonious_max_perc / MethDist_harmonious_max_perc * MethDist_min_perc[0], 0), ifFinite(Overall_harmonious_max_perc / MethSynt_harmonious_max_perc * MethSynt_min_perc[0], 0),
       ifFinite(Overall_harmonious_max_perc / CCU_harmonious_max_perc * CCU_min_perc[0], 0), ifFinite(Overall_harmonious_max_perc / EY_harmonious_max_perc * EY_min_perc[0], 0))
     self.equiv_harmonious_min_perc[1] = max(
-      ifFinite(Overall_harmonious_max_perc / MethDist_harmonious_max_perc * MethDist_min_perc[1], 0),
-      ifFinite(Overall_harmonious_max_perc / MethSynt_harmonious_max_perc * MethSynt_min_perc[1], 0),
+      ifFinite(Overall_harmonious_max_perc / MethDist_harmonious_max_perc * MethDist_min_perc[1], 0), ifFinite(Overall_harmonious_max_perc / MethSynt_harmonious_max_perc * MethSynt_min_perc[1], 0),
       ifFinite(Overall_harmonious_max_perc / CCU_harmonious_max_perc * CCU_min_perc[1], 0), ifFinite(Overall_harmonious_max_perc / EY_harmonious_max_perc * EY_min_perc[1], 0))
     self.equiv_harmonious_min_perc[2] = max(
-      ifFinite(Overall_harmonious_max_perc / MethDist_harmonious_max_perc * MethDist_min_perc[2], 0),
-      ifFinite(Overall_harmonious_max_perc / MethSynt_harmonious_max_perc * MethSynt_min_perc[2], 0),
+      ifFinite(Overall_harmonious_max_perc / MethDist_harmonious_max_perc * MethDist_min_perc[2], 0), ifFinite(Overall_harmonious_max_perc / MethSynt_harmonious_max_perc * MethSynt_min_perc[2], 0),
       ifFinite(Overall_harmonious_max_perc / CCU_harmonious_max_perc * CCU_min_perc[2], 0), 0)
     self.equiv_harmonious_min_perc[3] = max(
-      ifFinite(Overall_harmonious_max_perc / MethDist_harmonious_max_perc * MethDist_min_perc[3], 0),
-      ifFinite(Overall_harmonious_max_perc / MethSynt_harmonious_max_perc * MethSynt_min_perc[3], 0),
+      ifFinite(Overall_harmonious_max_perc / MethDist_harmonious_max_perc * MethDist_min_perc[3], 0), ifFinite(Overall_harmonious_max_perc / MethSynt_harmonious_max_perc * MethSynt_min_perc[3], 0),
       ifFinite(Overall_harmonious_max_perc / CCU_harmonious_max_perc * CCU_min_perc[3], 0), ifFinite(Overall_harmonious_max_perc / EY_harmonious_max_perc * EY_min_perc[3], 0), 0)
 
     self.MethDist_harmonious_perc_at_PB_nom = MethDist_harmonious_max_perc / Overall_harmonious_max_perc * Overall_harmonious_perc_at_PB_nom
@@ -556,8 +513,7 @@ public struct TunOl {
     let CCU_harmonious_perc_at_PB_nom: Double = CCU_harmonious_max_perc / Overall_harmonious_max_perc * Overall_harmonious_perc_at_PB_nom
     self.EY_harmonious_perc_at_PB_nom = EY_harmonious_max_perc / Overall_harmonious_max_perc * Overall_harmonious_perc_at_PB_nom
     self.Overall_harmonious_var_heat_cons_at_PB_nom =
-      EY_harmonious_perc_at_PB_nom * EY_var_heat_nom_cons + MethDist_harmonious_perc_at_PB_nom * MethDist_var_heat_nom_cons - MethSynt_harmonious_perc_at_PB_nom
-      * MethSynt_var_heat_nom_prod + CCU_harmonious_perc_at_PB_nom * CCU_var_heat_nom_cons
+      EY_harmonious_perc_at_PB_nom * EY_var_heat_nom_cons + MethDist_harmonious_perc_at_PB_nom * MethDist_var_heat_nom_cons - MethSynt_harmonious_perc_at_PB_nom * MethSynt_var_heat_nom_prod + CCU_harmonious_perc_at_PB_nom * CCU_var_heat_nom_cons
 
     if PB_nom_gross_cap_ud.isZero {
       self.PB_nom_gross_eff = 0
@@ -579,8 +535,8 @@ public struct TunOl {
       let PB_Ref_nom_aux_heat_prod: Double = (23.333 * 2775.4 - 15.167 * 167.6 - 8.167 * 649.6) / 1000
 
       let gross_cap: [Double] = [  // A29-A33
-        PB_Ref_nom_gross_cap, ((((PB_Ref_25p_gross_cap_max_aux_heat + PB_Ref_nom_gross_cap) / 2) + PB_Ref_nom_gross_cap) / 2),
-        ((PB_Ref_25p_gross_cap_max_aux_heat + PB_Ref_nom_gross_cap) / 2), PB_Ref_30p_gross_cap, PB_Ref_25p_gross_cap_max_aux_heat,
+        PB_Ref_nom_gross_cap, ((((PB_Ref_25p_gross_cap_max_aux_heat + PB_Ref_nom_gross_cap) / 2) + PB_Ref_nom_gross_cap) / 2), ((PB_Ref_25p_gross_cap_max_aux_heat + PB_Ref_nom_gross_cap) / 2), PB_Ref_30p_gross_cap,
+        PB_Ref_25p_gross_cap_max_aux_heat,
       ]
       let load_perc: [Double] = gross_cap.map { $0 / PB_Ref_nom_gross_cap }  // B
       let PB_Ref_25p_max_aux_heat_prod: Double = (23.333 * 2775.4 - 15.167 * 167.6 - 8.167 * 649.6) / 1000
@@ -589,10 +545,9 @@ public struct TunOl {
 
       let no_extraction: [Double] = [  // B
         PB_Ref_nom_heat_cons - PB_Ref_nom_aux_heat_prod * factor,
-        ((((PB_Ref_25p_heat_cons + PB_Ref_nom_heat_cons) / 2) + PB_Ref_nom_heat_cons) / 2)
-          - ((((PB_Ref_25p_aux_heat_prod + PB_Ref_nom_aux_heat_prod) / 2) + PB_Ref_nom_aux_heat_prod) / 2) * factor,
-        ((PB_Ref_25p_heat_cons + PB_Ref_nom_heat_cons) / 2) - ((PB_Ref_25p_aux_heat_prod + PB_Ref_nom_aux_heat_prod) / 2) * factor,
-        PB_Ref_30p_heat_cons - PB_Ref_30p_aux_heat_prod * factor, PB_Ref_25p_heat_cons - PB_Ref_25p_aux_heat_prod * factor,
+        ((((PB_Ref_25p_heat_cons + PB_Ref_nom_heat_cons) / 2) + PB_Ref_nom_heat_cons) / 2) - ((((PB_Ref_25p_aux_heat_prod + PB_Ref_nom_aux_heat_prod) / 2) + PB_Ref_nom_aux_heat_prod) / 2) * factor,
+        ((PB_Ref_25p_heat_cons + PB_Ref_nom_heat_cons) / 2) - ((PB_Ref_25p_aux_heat_prod + PB_Ref_nom_aux_heat_prod) / 2) * factor, PB_Ref_30p_heat_cons - PB_Ref_30p_aux_heat_prod * factor,
+        PB_Ref_25p_heat_cons - PB_Ref_25p_aux_heat_prod * factor,
       ]
 
       let ref_eff: [Double] = zip(gross_cap, no_extraction).map(/)  // C
@@ -608,15 +563,12 @@ public struct TunOl {
       self.PB_hot_start_heat_req = PB_nom_heat_cons * PB_hot_start_energyperc
 
       let gross_electrical_output: [Double] = heat_input.map { $0 - PB_fix_aux_el }
-      let net_electrical_output: [Double] = zip(heat_input, gross_electrical_output)
-        .map { iff($0 <= 0, 0, $1 - PB_nom_var_aux_cons_perc_gross * PB_nom_gross_cap_ud * (POLY($0 / PB_nom_gross_cap_ud, PB_g2n_var_aux_el_Coeff))) }
+      let net_electrical_output: [Double] = zip(heat_input, gross_electrical_output).map { iff($0 <= 0, 0, $1 - PB_nom_var_aux_cons_perc_gross * PB_nom_gross_cap_ud * (POLY($0 / PB_nom_gross_cap_ud, PB_g2n_var_aux_el_Coeff))) }
       let net_el_output_factor: [Double] = net_electrical_output.map { $0 / net_electrical_output[0] }
       let var_aux_cons: [Double] = zip(gross_electrical_output, net_electrical_output).map(-)
       let auxiliary_consumption_factor: [Double] = var_aux_cons.map { $0 / var_aux_cons[0] }
 
-      let steam_extraction: [Double] = net_electrical_output.map { output -> Double in
-        return iff(PB_nom_gross_cap_ud.isZero, 0.0, (Overall_harmonious_var_heat_cons_at_PB_nom + Overall_heat_fix_cons) / PB_nom_net_cap * output)
-      }  // F
+      let steam_extraction: [Double] = net_electrical_output.map { output -> Double in return iff(PB_nom_gross_cap_ud.isZero, 0.0, (Overall_harmonious_var_heat_cons_at_PB_nom + Overall_heat_fix_cons) / PB_nom_net_cap * output) }  // F
 
       self.th_Coeff = Polynomial.fit(x: thermal_load_perc, y: eff_factor, order: 4)!.coefficients
       self.el_Coeff = Polynomial.fit(x: load_perc, y: eff_factor, order: 4)!.coefficients

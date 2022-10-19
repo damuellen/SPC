@@ -74,8 +74,8 @@ extension TunOl {
     for i in 0..<365 {
       d10[R + i] = iff(
         or(d10[L + i] <= Double.zero, d10[N + i] <= Double.zero, d10[P + i] <= 0), Double.zero,
-        min(1, ifFinite(d10[L + i] / (d10[L + i] - d10[M + i]), 1.0), ifFinite(d10[N + i] / (d10[N + i] - d10[O + i]), 1.0), ifFinite(d10[P + i] / (d10[P + i] - d10[Q + i]), 1.0))
-          * (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]) + equiv_harmonious_min_perc[j])
+        min(1, ifFinite(d10[L + i] / (d10[L + i] - d10[M + i]), 1.0), ifFinite(d10[N + i] / (d10[N + i] - d10[O + i]), 1.0), ifFinite(d10[P + i] / (d10[P + i] - d10[Q + i]), 1.0)) * (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j])
+          + equiv_harmonious_min_perc[j])
     }
 
     /// Min RawMeth cons during night
@@ -133,7 +133,6 @@ extension TunOl {
     let U: Int = 6205
     // COUNTIFS(CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,">0")
     for i in 0..<365 { d10[U + i] = EX_EZcountNonZero[i] }
-    
     let EH_EZcountNonZero = hour4.countOf(days, condition: EH, predicate: notZero)
     /// Nr of PB op hours after max night prep
     let V: Int = 6570
@@ -156,29 +155,11 @@ extension TunOl {
 
     for i in 0..<365 {
       let hours = d10[T + i]
-      if RawMeth_storage_cap_ud.isZero {
-        d10[AJ + i] = RawMeth_max_cons[j].isZero ? 1.0 : Double.zero
-      } else if hours.isZero {
-        d10[AJ + i] = 1
-      } else {
-        d10[AJ + i] = 1 - (RawMeth_max_cons[j] * hours / RawMeth_storage_cap_ud)
-      }
+      if RawMeth_storage_cap_ud.isZero { d10[AJ + i] = RawMeth_max_cons[j].isZero ? 1.0 : Double.zero } else if hours.isZero { d10[AJ + i] = 1 } else { d10[AJ + i] = 1 - (RawMeth_max_cons[j] * hours / RawMeth_storage_cap_ud) }
 
-      if CO2_storage_cap_ud.isZero {
-        d10[AK + i] = CO2_max_cons[j].isZero ? 1.0 : Double.zero
-      } else if hours.isZero {
-        d10[AK + i] = 1
-      } else {
-        d10[AK + i] = 1 - (CO2_max_cons[j] * hours / CO2_storage_cap_ud)
-      }
+      if CO2_storage_cap_ud.isZero { d10[AK + i] = CO2_max_cons[j].isZero ? 1.0 : Double.zero } else if hours.isZero { d10[AK + i] = 1 } else { d10[AK + i] = 1 - (CO2_max_cons[j] * hours / CO2_storage_cap_ud) }
 
-      if Hydrogen_storage_cap_ud.isZero {
-        d10[AL + i] = Hydrogen_max_cons[j].isZero ? 1.0 : Double.zero
-      } else if hours.isZero {
-        d10[AL + i] = 1
-      } else {
-        d10[AL + i] = 1 - (Hydrogen_max_cons[j] * hours / Hydrogen_storage_cap_ud)
-      }
+      if Hydrogen_storage_cap_ud.isZero { d10[AL + i] = Hydrogen_max_cons[j].isZero ? 1.0 : Double.zero } else if hours.isZero { d10[AL + i] = 1 } else { d10[AL + i] = 1 - (Hydrogen_max_cons[j] * hours / Hydrogen_storage_cap_ud) }
     }
     let EJ: Int = 122640
     /// Max Equiv harmonious night prod due to physical limits
@@ -216,12 +197,8 @@ extension TunOl {
         d10[Z + i] = 0
       } else {
         d10[Z + i] =
-          iff(
-            and(d10[J + i].isZero, d10[F + i].isZero), Double.zero,
-            (d10[J + i] + d10[F + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_Hydrogen_nom_cons) / EY_Hydrogen_nom_prod * EY_var_gross_nom_cons)
-          + iff(
-            and(d10[H + i].isZero, d10[F + i].isZero), Double.zero,
-            (d10[H + i] + d10[F + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_CO2_nom_cons) / CCU_CO2_nom_prod_ud * CCU_var_nom_cons)
+          iff(and(d10[J + i].isZero, d10[F + i].isZero), Double.zero, (d10[J + i] + d10[F + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_Hydrogen_nom_cons) / EY_Hydrogen_nom_prod * EY_var_gross_nom_cons)
+          + iff(and(d10[H + i].isZero, d10[F + i].isZero), Double.zero, (d10[H + i] + d10[F + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_CO2_nom_cons) / CCU_CO2_nom_prod_ud * CCU_var_nom_cons)
           + iff(d10[F + i].isZero, Double.zero, d10[F + i] / MethSynt_RawMeth_nom_prod_ud * MethSynt_var_nom_cons)
       }
     }
@@ -231,12 +208,8 @@ extension TunOl {
     // IF(AND(Y3=0,W3=0),0,(Y3+W3/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_Hydrogen_nom_cons)/EY_Hydrogen_nom_prod*EY_var_gross_nom_cons)+IF(AND(X3=0,W3=0),0,(X3+W3/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_CO2_nom_cons)/CCU_CO2_nom_prod_ud*CCU_var_nom_cons)+IF(W3=0,0,W3/MethSynt_RawMeth_nom_prod_ud*MethSynt_var_nom_cons)
     for i in 0..<365 {
       d10[AA + i] =
-        iff(
-          and(d10[Y + i].isZero, d10[W + i].isZero), Double.zero,
-          (d10[Y + i] + d10[W + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_Hydrogen_nom_cons) / EY_Hydrogen_nom_prod * EY_var_gross_nom_cons)
-        + iff(
-          and(d10[X + i].isZero, d10[W + i].isZero), Double.zero,
-          (d10[X + i] + d10[W + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_CO2_nom_cons) / CCU_CO2_nom_prod_ud * CCU_var_nom_cons)
+        iff(and(d10[Y + i].isZero, d10[W + i].isZero), Double.zero, (d10[Y + i] + d10[W + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_Hydrogen_nom_cons) / EY_Hydrogen_nom_prod * EY_var_gross_nom_cons)
+        + iff(and(d10[X + i].isZero, d10[W + i].isZero), Double.zero, (d10[X + i] + d10[W + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_CO2_nom_cons) / CCU_CO2_nom_prod_ud * CCU_var_nom_cons)
         + iff(d10[W + i].isZero, Double.zero, d10[W + i] / MethSynt_RawMeth_nom_prod_ud * MethSynt_var_nom_cons)
     }
 
@@ -248,12 +221,8 @@ extension TunOl {
         d10[AB + i] = 0
       } else {
         d10[AB + i] =
-          iff(
-            and(d10[J + i].isZero, d10[F + i].isZero), Double.zero,
-            (d10[J + i] + d10[F + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_Hydrogen_nom_cons) / EY_Hydrogen_nom_prod * EY_var_heat_nom_cons)
-          + iff(
-            and(d10[H + i].isZero, d10[F + i].isZero), Double.zero,
-            (d10[H + i] + d10[F + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_CO2_nom_cons) / CCU_CO2_nom_prod_ud * CCU_var_heat_nom_cons)
+          iff(and(d10[J + i].isZero, d10[F + i].isZero), Double.zero, (d10[J + i] + d10[F + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_Hydrogen_nom_cons) / EY_Hydrogen_nom_prod * EY_var_heat_nom_cons)
+          + iff(and(d10[H + i].isZero, d10[F + i].isZero), Double.zero, (d10[H + i] + d10[F + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_CO2_nom_cons) / CCU_CO2_nom_prod_ud * CCU_var_heat_nom_cons)
           - iff(d10[F + i].isZero, Double.zero, d10[F + i] / MethSynt_RawMeth_nom_prod_ud * MethSynt_var_heat_nom_prod)
       }
     }
@@ -263,12 +232,8 @@ extension TunOl {
     // IF(AND(Y3=0,W3=0),0,(Y3+W3/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_Hydrogen_nom_cons)/EY_Hydrogen_nom_prod*EY_var_heat_nom_cons)+IF(AND(X3=0,W3=0),0,(X3+W3/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_CO2_nom_cons)/CCU_CO2_nom_prod_ud*CCU_var_heat_nom_cons)-IF(W3=0,0,W3/MethSynt_RawMeth_nom_prod_ud*MethSynt_var_heat_nom_prod)
     for i in 0..<365 {
       d10[AC + i] =
-        iff(
-          and(d10[Y + i].isZero, d10[W + i].isZero), Double.zero,
-          (d10[Y + i] + d10[W + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_Hydrogen_nom_cons) / EY_Hydrogen_nom_prod * EY_var_heat_nom_cons)
-        + iff(
-          and(d10[X + i].isZero, d10[W + i].isZero), Double.zero,
-          (d10[X + i] + d10[W + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_CO2_nom_cons) / CCU_CO2_nom_prod_ud * CCU_var_heat_nom_cons)
+        iff(and(d10[Y + i].isZero, d10[W + i].isZero), Double.zero, (d10[Y + i] + d10[W + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_Hydrogen_nom_cons) / EY_Hydrogen_nom_prod * EY_var_heat_nom_cons)
+        + iff(and(d10[X + i].isZero, d10[W + i].isZero), Double.zero, (d10[X + i] + d10[W + i] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_CO2_nom_cons) / CCU_CO2_nom_prod_ud * CCU_var_heat_nom_cons)
         - iff(d10[W + i].isZero, Double.zero, d10[W + i] / MethSynt_RawMeth_nom_prod_ud * MethSynt_var_heat_nom_prod)
     }
 
@@ -315,10 +280,12 @@ extension TunOl {
     let (DO, DP, DQ, DR, DS, DT) = (972360, 981120, 989880, 998640, 1_007_400, 1_016_160)
     let days: [[Int]] = hour[(CS + 1)..<(CS + 8760)].indices.chunked(by: { hour[$0] == hour[$1] }).map { $0.map { $0 - CS } }
     let notZero: (Double) -> Bool = { $0 > Double.zero }
-    /// Grid import for min harm and stby during  harm op
-    let (EY, EZ, FA, FB, FC, FD, FE, FF, FG, FH, FI, FJ, FK, FL, FM, FN, FO, FP, FQ, FR, FS, FT, FU, FV, FW, FX, FY, FZ, GA, GB, GC, GD, GE, GF, GG, GH, GI, GJ, GK, GL, GM, GN, GO, GP, GQ, GR, GS) = 
-    (13140, 13505, 13870, 14235, 14600, 14965, 15330, 15695, 16060, 16425, 16790, 17155, 17520, 17885, 18250, 18615, 18980, 19345, 19710, 20075, 20440, 20805, 21170, 21535, 21900, 22265, 22630, 22995, 23360, 23725, 24090, 24455, 24820, 25185, 25550, 25915, 26280, 26645, 27010, 27375, 27740, 28105, 28470, 28835, 29200, 29565, 29930)
-    /// Grid import for max harm and stby during  harm opC
+
+    let (EY, EZ, FA, FB, FC, FD, FE, FF, FG, FH, FI, FJ, FK, FL, FM, FN, FO, FP, FQ, FR, FS, FT, FU, FV, FW, FX, FY, FZ, GA, GB, GC, GD, GE, GF, GG, GH, GI, GJ, GK, GL, GM, GN, GO, GP, GQ, GR, GS) = (
+      13140, 13505, 13870, 14235, 14600, 14965, 15330, 15695, 16060, 16425, 16790, 17155, 17520, 17885, 18250, 18615, 18980, 19345, 19710, 20075, 20440, 20805, 21170, 21535, 21900, 22265, 22630, 22995, 23360, 23725, 24090, 24455, 24820, 25185,
+      25550, 25915, 26280, 26645, 27010, 27375, 27740, 28105, 28470, 28835, 29200, 29565, 29930
+    )
+
     let CO: Int = 271560
     // SUMIFS(Calculation!CO5:CO8764,Calculation!CS$5:CS8764,"="&$A6,Calculation!CQ5:CQ8764,">0")
     hour.sumOf(CO, days: days, into: &d11, at: EY, condition: CQ, predicate: notZero)
@@ -484,7 +451,7 @@ extension TunOl {
     for i in 0..<365 { d11[GS + i] -= d11[GQ + i] }
   }
 
-  func d12(_ d12: inout [Double], hourFinal: [Double] , case j: Int) {
+  func d12(_ d12: inout [Double], hourFinal: [Double], case j: Int) {
     let daysEZ: [[Int]] = hourFinal[262801..<(262800 + 8760)].indices.chunked(by: { hourFinal[$0] == hourFinal[$1] }).map { $0.map { $0 - 262800 } }
     let notZero: (Double) -> Bool = { $0 > Double.zero }
     let (ET, EU, EX, EY, FA) = (210240, 219000, 245280, 254040, 271560)
@@ -493,15 +460,11 @@ extension TunOl {
     let (FL, FM, FO, FP, FQ) = (367920, 376680, 394200, 402960, 411720)
     let (FR, FS, FT, FU, FV) = (420480, 429240, 438000, 446760, 455520)
     let (FW, FX, FY, FZ, GA) = (464280, 473040, 481800, 490560, 499320)
-    let (
-      GU, GV, GW, GX, GY, GZ, HA, HB, HC, HD, HE, HF, HG, HH, HI, HJ, HK, HL, HM, HN, HO, HP, HQ, HR, HS, HT, HU, HV, HW, HX, HY, HZ, IA, IB, IC, ID, IE, IF, IG, IH, II, IJ, IK, IL,
-      IM, IN, IO
-    ) = (
-      30660, 31025, 31390, 31755, 32120, 32485, 32850, 33215, 33580, 33945, 34310, 34675, 35040, 35405, 35770, 36135, 36500, 36865, 37230, 37595, 37960, 38325, 38690, 39055, 39420,
-      39785, 40150, 40515, 40880, 41245, 41610, 41975, 42340, 42705, 43070, 43435, 43800, 44165, 44530, 44895, 45260, 45625, 45990, 46355, 46720, 47085, 47450
+    let (GU, GV, GW, GX, GY, GZ, HA, HB, HC, HD, HE, HF, HG, HH, HI, HJ, HK, HL, HM, HN, HO, HP, HQ, HR, HS, HT, HU, HV, HW, HX, HY, HZ, IA, IB, IC, ID, IE, IF, IG, IH, II, IJ, IK, IL, IM, IN, IO) = (
+      30660, 31025, 31390, 31755, 32120, 32485, 32850, 33215, 33580, 33945, 34310, 34675, 35040, 35405, 35770, 36135, 36500, 36865, 37230, 37595, 37960, 38325, 38690, 39055, 39420, 39785, 40150, 40515, 40880, 41245, 41610, 41975, 42340, 42705,
+      43070, 43435, 43800, 44165, 44530, 44895, 45260, 45625, 45990, 46355, 46720, 47085, 47450
     )
 
-    /// Available elec after TES chrg outside harm op period
     let TB: Int = 508080
     /// Available elec after TES chrg during harm op period
     // SUMIFS(Calculation!$TB$5:$TB$8764,Calculation!$EZ$5:$EZ$8764,"="A6,Calculation!$EX$5:$EX$8764,">0")
