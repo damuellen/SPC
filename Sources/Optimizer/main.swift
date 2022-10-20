@@ -55,32 +55,30 @@ struct Command: ParsableCommand {
       #endif
       return
     }
-    let parameter: Parameter
-    if let path = json, let data = try? Data(contentsOf: .init(fileURLWithPath: path)),
-     let parameters = try? JSONDecoder().decode(Parameter.self, from: data) {
-      parameter = parameters
+    let ranges: [ClosedRange<Double>]
+    if let parameter = try? InputParameter.loadFromJSONIfExists(file: .init(fileURLWithPath: path)) {
+      ranges = parameter.ranges
     } else {
-      parameter = Parameter(
-        BESS_cap_ud: 0...0.0,
-        CCU_CO2_nom_prod_ud: 1000...1000.0,
-        CO2_storage_cap_ud: 100_000...100_000.0,
-        CSP_loop_nr_ud: 0...300.0,
-        El_boiler_cap_ud: 0...100.0,
-        EY_var_net_nom_cons_ud: 180...180,
-        Grid_export_max_ud: 0...0.0,
-        Grid_import_max_ud: 0...0.0,
-        Hydrogen_storage_cap_ud: 0...0.0, 
-        Heater_cap_ud: 0...1000.0, 
-        MethDist_Meth_nom_prod_ud: 5...40.0,
-        // MethSynt_RawMeth_nom_prod_ud: 10...60.0,
-        PB_nom_gross_cap_ud: 0...250.0,
-        PV_AC_cap_ud: 200...1500.0,
-        PV_DC_cap_ud: 220...1600.0,
-        RawMeth_storage_cap_ud: 100_000...100_000.0,
-        TES_thermal_cap_ud: 0...10000.0)
-      let data = try? JSONEncoder().encode(parameter)
-      try? data?.write(to: "parameter.txt")
+      ranges = Parameter(
+        CSP_loop_nr: 0...300.0,
+        TES_thermal_cap: 0...10000.0,
+        PB_nom_gross_cap: 0...250.0,
+        PV_AC_cap: 200...1500.0,
+        PV_DC_cap: 220...1600.0,
+        CCU_CO2_nom_prod: 1000...1000.0,
+        CO2_storage_cap: 100_000...100_000.0,
+        El_boiler_cap: 0...100.0,
+        EY_var_net_nom_cons: 180...180,
+        Hydrogen_storage_cap: 0...0.0, 
+        Heater_cap: 0...1000.0, 
+        MethDist_Meth_nom_prod: 5...40.0,
+        RawMeth_storage_cap: 100_000...100_000.0,
+        BESS_cap: 0...0.0,
+        Grid_export_max: 0...0.0,
+        Grid_import_max: 0...0.0
+      ).ranges
     }
+    try? InputParameter(ranges: ranges).storeToJSON(file: .init(fileURLWithPath: "Parameter.json")) 
 
     let server = HTTP(handler: respond)
     if http {
@@ -94,7 +92,7 @@ struct Command: ParsableCommand {
     TunOl.Reference_PV_plant_power_at_inverter_inlet_DC = [0] + csv["pv"]
     TunOl.Reference_PV_MV_power_at_transformer_outlet = [0] + csv["out"]
 
-    let optimizer = IGOA(n: n ?? 30, maxIterations: iterations ?? 300, bounds: parameter.ranges)
+    let optimizer = IGOA(n: n ?? 30, maxIterations: iterations ?? 300, bounds: ranges)
     let now = Date()
     let results = optimizer(SunOl.fitness)
     print("Elapsed seconds:", -now.timeIntervalSinceNow)
