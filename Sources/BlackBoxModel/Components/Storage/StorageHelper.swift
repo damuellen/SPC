@@ -220,7 +220,9 @@ extension Storage {
        temperature: (inlet: Temperature, outlet: Temperature),
        temperatureTanks: (cold: Temperature, hot: Temperature)
   ) {
-    self.relativeCharge = Ratio(salt.hot.kg / salt.total.kg)
+    self.relativeCharge = salt.total.kg.isZero
+      ? Ratio(0)
+      : Ratio(salt.hot.kg / salt.total.kg)
     self.temperature = temperature
     self.operationMode = operationMode
     self.temperatureTank =
