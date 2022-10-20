@@ -20,8 +20,8 @@ public enum Maintenance {
       calendar: calendar, year: year, month: 1, day: 1, hour: 0, minute: 0
     )
     let start = components.date!
-    let end = calendar.date(byAdding: .day, value: 5, to: start)!
-    ranges = [DateInterval(start: start, end: end)]
+    // let end = calendar.date(byAdding: .day, value: 5, to: start)!
+    ranges = [DateInterval(start: start, end: start + 1)]
   }
 
   @discardableResult
