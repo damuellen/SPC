@@ -109,6 +109,7 @@ public enum BlackBoxModel {
 
     // Set initial values
     var status = Plant.initialState
+    /*
     // PV system setup
     let pv = PV()
 
@@ -141,13 +142,14 @@ public enum BlackBoxModel {
     }
     // Repeat the values to fill the hour
     var iter = photovoltaic.repeated(times: Simulation.time.steps.rawValue).makeIterator()
+    */
     for (meteo, date) in zip(🌤, period(with: Simulation.time.steps)) {
       // Set the date for the calculation step
       DateTime.setCurrent(date: date)
       let dt = DateTime.current
       
       /// Hourly PV result
-      plant.electricity.photovoltaic = iter.next()!
+      // plant.electricity.photovoltaic = iter.next()!
 
       if Maintenance.checkSchedule(date) {
         // No operation is simulated
