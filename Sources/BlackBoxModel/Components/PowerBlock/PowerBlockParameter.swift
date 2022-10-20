@@ -38,7 +38,7 @@ extension PowerBlock.Parameter: CustomStringConvertible {
     + "Parasitic ; Parasitics(Load) = Parasitics(100%)*(c0+c1*load)\n"
     + "c0:" * electricalParasitics[0].description
     + "c1:" * electricalParasitics[1].description
-    + "c2:" * electricalParasitics[2].description
+    // + "c2:" * electricalParasitics[2].description
     + "Parasitics of Cooling Tower for load < 50% [MW]:"
     * electricalParasiticsStep[0].description
     + "Parasitics of Cooling Tower for load > 50% [MW]:"
