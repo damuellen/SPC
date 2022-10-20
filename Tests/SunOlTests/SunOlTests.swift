@@ -6,7 +6,7 @@ import xlsxwriter
 
 class SunOlTests: XCTestCase {
   override func setUp() {
-    let path = "input3.txt"
+    let path = "input4.txt"
     guard let csv = CSVReader(atPath: path) else {
       print("No input")
       return
@@ -76,7 +76,7 @@ class SunOlTests: XCTestCase {
       return (key, num)
     }
 
-    let values = [0.00,0.00,0.00,469.93,702.72,160.00,0.00,343.01,1000.00,100000.00,100000.00,17.41,32.13,500.00,0.00,0.00]
+    let values = [110.0,4713.7,178.91,448.94,684.57,160.0,0,319.20,1000.0,100000.0,100000.0,20.34,64.52,0,0,0]
     guard let model = TunOl(values) else {
       print("Invalid config")
       return
@@ -209,10 +209,10 @@ class SunOlTests: XCTestCase {
     }
 
     let LCOM = costs.LCOM(meth_produced_MTPH: meth_produced_MTPH_sum, elec_from_grid: elec_from_grid_sum, elec_to_grid: elec_to_grid_MTPH_sum)
-    XCTAssertEqual(LCOM, 1820, accuracy: 1, "LCOM")
-    XCTAssertEqual(hours_sum, 8680.0, accuracy: 1, "hours_sum")
-    XCTAssertEqual(meth_produced_MTPH_sum, 78222, accuracy: 1, "meth_produced_MTPH_sum")
-    XCTAssertEqual(elec_from_grid_sum, 0, accuracy: 1, "elec_from_grid_sum")
+    XCTAssertEqual(LCOM, 1513, accuracy: 1, "LCOM")
+    XCTAssertEqual(hours_sum, 7774.0, accuracy: 1, "hours_sum")
+    XCTAssertEqual(meth_produced_MTPH_sum, 103517, accuracy: 1, "meth_produced_MTPH_sum")
+    XCTAssertEqual(elec_from_grid_sum, 2245, accuracy: 1, "elec_from_grid_sum")
     XCTAssertEqual(elec_to_grid_MTPH_sum, 0, accuracy: 1, "elec_to_grid_MTPH_sum")
   }
 
