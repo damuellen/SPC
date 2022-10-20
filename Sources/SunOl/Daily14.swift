@@ -14,7 +14,6 @@ extension TunOl {
     let (JP, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, KG, _, KI) = (57305, 57670, 58035, 58400, 58765, 59130, 59495, 59860, 60225, 60590, 60955, 61320, 61685, 62050, 62415, 62780, 63145, 63510, 63875, 64240)
     let (AMKG, AMKI) = (56940, 63875)
     let dJP: Int = 70810  // LA
-    for i in 0..<365 { d14[dJP + i] = d14[JP + i] - Overall_harmonious_min_perc }
 
     let (
       KZ, LB, LC, LD, LE, _, LG, LH, LI, LJ, LK, _, LM, _, LO, LP, LQ, LR, LS, LT, LU, LV, LW, LX, LY, _, MA, MB, MC, MD, ME, MF, MG, MH, MI, _, MK, ML, _, MN, _, MP, MQ, MR, MS, MT, _, MV, _, MX, MY, MZ, NA, NB, NC, ND, NE, NF, NG, NH, _, NJ,
