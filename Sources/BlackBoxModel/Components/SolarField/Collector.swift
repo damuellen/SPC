@@ -35,7 +35,7 @@ public struct Collector: Parameterizable, CustomStringConvertible {
     efficiency: 0.0, insolationAbsorber: 0
   )
   /// Returns the static parameters.
-  public static var parameter: Parameter = ParameterDefaults.LS3
+  public static var parameter: Parameter = ParameterDefaults.NT_PRO
 
   /// Calculate shading of the HCEs
   static func shadingHCE(cosTheta: Double) -> Double {
