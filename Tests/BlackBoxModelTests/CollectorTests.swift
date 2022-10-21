@@ -35,7 +35,7 @@ class CollectorTests: XCTestCase {
     collector.cosTheta = 0.56
     collector.theta = 55.53
     collector.efficiency(ws: 0)
-    XCTAssertEqual(collector.efficiency, 0.5, accuracy: 0.1)
+    XCTAssertEqual(collector.efficiency, 0.6, accuracy: 0.1)
   }
 
   func testMean() {

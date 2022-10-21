@@ -22,14 +22,14 @@ class BlackBoxModelTests: XCTestCase {
     let log = Historian(mode: .inMemory)
     let result = BlackBoxModel.runModel(with: log)
     let tol = 0.2
-    XCTAssertEqual(result.electric.net, 1967.4, accuracy: tol)
+    XCTAssertEqual(result.electric.net, 2130.2, accuracy: tol)
     XCTAssertEqual(result.electric.consum, 20.5, accuracy: tol)
-    XCTAssertEqual(result.electric.parasitics, 138.4, accuracy: tol)
-    XCTAssertEqual(result.electric.steamTurbineGross, 2085.3, accuracy: tol)
-    XCTAssertEqual(result.thermal.solar.megaWatt, 5180.0, accuracy: tol)
+    XCTAssertEqual(result.electric.parasitics, 156.7, accuracy: tol)
+    XCTAssertEqual(result.electric.steamTurbineGross, 2266.5, accuracy: tol)
+    XCTAssertEqual(result.thermal.solar.megaWatt, 5684.4, accuracy: tol)
    // XCTAssertEqual(result.thermal.startUp.megaWatt, 242.7, accuracy: tol)
-    XCTAssertEqual(result.thermal.production.megaWatt, 5093.6, accuracy: tol)
-    XCTAssertEqual(result.thermal.heatExchanger.megaWatt, 5119.8, accuracy: tol)
+    XCTAssertEqual(result.thermal.production.megaWatt, 5561.9, accuracy: tol)
+    XCTAssertEqual(result.thermal.heatExchanger.megaWatt, 5584.1, accuracy: tol)
     let plotting = false
     if plotting {
       let interval = DateInterval(ofDay: 192, in: 2005)
@@ -63,14 +63,14 @@ class BlackBoxModelTests: XCTestCase {
 
     let result = BlackBoxModel.runModel(with: log)
     let tol = 0.2
-    XCTAssertEqual(result.electric.net, 850.4, accuracy: tol)
-    XCTAssertEqual(result.electric.consum, 34.4, accuracy: tol)
-    XCTAssertEqual(result.electric.parasitics, 73.0, accuracy: tol)
-    XCTAssertEqual(result.electric.steamTurbineGross, 889.1, accuracy: tol)
-    XCTAssertEqual(result.thermal.solar.megaWatt, 2232.3, accuracy: tol)
+    XCTAssertEqual(result.electric.net, 1209.7, accuracy: tol)
+    XCTAssertEqual(result.electric.consum, 38.8, accuracy: tol)
+    XCTAssertEqual(result.electric.parasitics, 105.1, accuracy: tol)
+    XCTAssertEqual(result.electric.steamTurbineGross, 1276.0, accuracy: tol)
+    XCTAssertEqual(result.thermal.solar.megaWatt, 3237.4, accuracy: tol)
     //XCTAssertEqual(result.thermal.startUp.megaWatt, 243.5, accuracy: tol)
-    XCTAssertEqual(result.thermal.production.megaWatt, 2205.8, accuracy: tol)
-    XCTAssertEqual(result.thermal.heatExchanger.megaWatt, 2227.8, accuracy: tol)
+    XCTAssertEqual(result.thermal.production.megaWatt, 3154.5, accuracy: tol)
+    XCTAssertEqual(result.thermal.heatExchanger.megaWatt, 3179.0, accuracy: tol)
     if false {
       let interval = DateInterval(ofDay: 11, in: 2005)
       let y1 = result.massFlows(range: interval)
