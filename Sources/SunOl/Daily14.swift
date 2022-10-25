@@ -391,7 +391,7 @@ extension TunOl {
     }
     /// Grid import
     // NN=ROUND(MR6+NF6+NC6+MS6,0)+ROUND(MAX(0,-MT6)+MAX(0,-NG6),0)*EDG_elec_cost_factor
-    for i in 0..<365 { d14[NN + i] = round(d14[MR + i] + d14[NF + i] + d14[NC + i] + d14[MS + i], 0) + round(max(Double.zero, -13[MT + i]) + max(Double.zero, -d14[NG + i]), 0) * EDG_elec_cost_factor }
+    for i in 0..<365 { d14[NN + i] = round(d14[MR + i] + d14[NF + i] + d14[NC + i] + d14[MS + i], 0) + round(max(Double.zero, -d14[MT + i]) + max(Double.zero, -d14[NG + i]), 0) * EDG_elec_cost_factor }
     /// Outside harmonious operation period hours
     // NO=IF(NA6=0,0,$C6+IFERROR(($T6-$C6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc),0))
     for i in 0..<365 { d14[NO + i] = iff(d14[NA + i].isZero, Double.zero, d14[C + i] + (d14[T + i] - d14[C + i]) * d14[AMKI + i]) }

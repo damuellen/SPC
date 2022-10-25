@@ -176,8 +176,8 @@ extension TunOl {
 
     /// Surplus TES energy due to op case
     let EK: Int = 131400
-    // =IF(EE6=0,0,MAX(0,SUMIF(BO5:BO8764,"="BO6,AY5:AY8764)*Heater_eff*(1+1/Ratio_CSP_vs_Heater)-EE6))
-    for i in 1..<8760 { if h[EE + i].isZero { h[EK + i] = Double.zero } else { h[EK + i] = max(Double.zero, AYsum[i - 1] * Heater_eff * (1 + 1 / Ratio_CSP_vs_Heater) - h[EE + i]) } }
+    // =IF(EE6=0,0,ROUND(MAX(0,SUMIF($BO$5:$BO$8764,"="&$BO6,$AY$5:$AY$8764)*Heater_eff*(1+1/Ratio_CSP_vs_Heater)-EE6),5))
+    for i in 1..<8760 { if h[EE + i].isZero { h[EK + i] = Double.zero } else { h[EK + i] = round(max(Double.zero, AYsum[i - 1] * Heater_eff * (1 + 1 / Ratio_CSP_vs_Heater) - h[EE + i]),5) } }
 
     /// Peripherial PV hour PV to heater
     let EL: Int = 140160
@@ -186,8 +186,8 @@ extension TunOl {
     let ELsum: [Double] = h.sum(hours: BOday, condition: EL)
     /// Surplus energy due to op limit after removal of peripherial hours
     let EM: Int = 148920
-    // MAX(0,EK6-SUMIF(BO5:BO8763,"="BO6,EL5:EL8763)*Heater_eff*(1+1/Ratio_CSP_vs_Heater))
-    for i in 1..<8760 { h[EM + i] = max(Double.zero, h[EK + i] - ELsum[i - 1] * Heater_eff * (1 + 1 / Ratio_CSP_vs_Heater)) }
+    // =ROUND(MAX(0,EK6-SUMIF($BO$5:$BO$8764,"="&$BO6,EL$5:EL$8764)*Heater_eff*(1+1/Ratio_CSP_vs_Heater)),5)
+    for i in 1..<8760 { h[EM + i] = round(max(Double.zero, h[EK + i] - ELsum[i - 1] * Heater_eff * (1 + 1 / Ratio_CSP_vs_Heater)),5) }
 
     /// intermediate resulting PV elec to TES
     let EN: Int = 157680
@@ -211,12 +211,12 @@ extension TunOl {
     let EOsum: [Double] = h.sum(hours: BOday, condition: EO)
     /// corrected max possible elec to TES
     let EP: Int = 175200
-    // EP=IF(EE6=0,0,IF(EK6>0,MAX(0,EN6-IF(EM6=0,0,EM6/(1+1/Ratio_CSP_vs_Heater)/Heater_eff/SUMIF($BO$5:$BO$8764,"="&$BO6,EO$5:EO$8764)*EO6)),$AY6))
+    // EP=IF(EE6=0,0,IF(EK6>0,ROUND(MAX(0,EN6-IF(EM6=0,0,EM6/(1+1/Ratio_CSP_vs_Heater)/Heater_eff/SUMIF($BO$5:$BO$8764,"="&$BO6,EO$5:EO$8764)*EO6)),5),$AY6))
     for i in 1..<8760 {
       if h[EE + i].isZero {
         h[EP + i] = Double.zero
       } else {
-        h[EP + i] = iff(h[EK + i] > Double.zero, max(Double.zero, h[EN + i] - iff(h[EM + i].isZero, Double.zero, h[EM + i] / (1 + 1 / Ratio_CSP_vs_Heater) / Heater_eff / EOsum[i - 1] * h[EO + i])), h0[AY + i])
+        h[EP + i] = iff(h[EK + i] > Double.zero, round(max(Double.zero, h[EN + i] - iff(h[EM + i].isZero, Double.zero, h[EM + i] / (1 + 1 / Ratio_CSP_vs_Heater) / Heater_eff / EOsum[i - 1] * h[EO + i])), 5), h0[AY + i])
       }
     }
 

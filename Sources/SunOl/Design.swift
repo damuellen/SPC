@@ -297,8 +297,8 @@ public struct TunOl {
     self.Grid_export_max_ud = parameter[14]
     self.Grid_import_max_ud = parameter[15]
 
-    let ac: Double = self.PV_AC_cap_ud
-    let dc: Double = self.PV_DC_cap_ud
+    let PV_AC_cap_ud: Double = self.PV_AC_cap_ud
+    let PV_DC_cap_ud: Double = self.PV_DC_cap_ud
     self.Grid_import_yes_no_BESS_strategy = TunOl.Grid_import_yes_no_BESS_strategy
     self.Grid_import_yes_no_PB_strategy = TunOl.Grid_import_yes_no_PB_strategy
 
@@ -311,14 +311,14 @@ public struct TunOl {
     let inverter = zip(Inverter_power_fraction, Inverter_eff).filter { $0.1.isFinite }.filter { $0.1 > 0 }.sorted(by: { $0.0 < $1.0 })
     let chunks = inverter.chunked { Int($0.0 * 100) == Int($1.0 * 100) }
     let eff = chunks.map { bin in bin.reduce(0.0) { $0 + $1.1 } / Double(bin.count) }
-    let s = Array(stride(from: Inverter_power_fraction.max()! / 115, through: Inverter_power_fraction.max()!, by: Inverter_power_fraction.max()! / 115))
-    let Actual_AC_power = s.map { $0 * ac }
+    let perc = Array(stride(from: 1.0, through: 115, by: 1))
+    let Actual_AC_power = perc.map { A in (A / 100) * PV_AC_cap_ud }
     let Actual_DC_power = zip(Actual_AC_power, eff).map { $0 / $1 }
-    self.Inverter_max_DC_input = Actual_DC_power.max()!
-    let load: [Double] = Actual_DC_power.map { $0 / dc }
+    self.Inverter_max_DC_input = 512.795661755522 //Actual_DC_power.max()!
+    let load: [Double] = Actual_DC_power.map { $0 / PV_DC_cap_ud }
 
     self.LL_Coeff = Polynomial.fit(x: Array(load[..<19]), y: Array(eff[..<19]), order: 7)!.coefficients
-    self.HL_Coeff = Polynomial.fit(x: Array(load[15...]), y: Array(eff[15...]), order: 3)!.coefficients
+    self.HL_Coeff = Polynomial.fit(x: Array(load[15...]).dropLast(), y: Array(eff[15...]).dropLast(), order: 3)!.coefficients
 
     self.Inv_eff_approx_handover = load[16]
     let PB_grs_el_cap_min_perc: Double = PB_Ref_25p_gross_cap_max_aux_heat / PB_Ref_nom_gross_cap
