@@ -6,7 +6,7 @@ import xlsxwriter
 
 class SunOlTests: XCTestCase {
   override func setUp() {
-    let path = "input4.txt"
+    let path = "input5.txt"
     guard let csv = CSVReader(atPath: path) else {
       print("No input")
       return
@@ -31,7 +31,7 @@ class SunOlTests: XCTestCase {
       var correct = true, counter = 1
       for i in 1..<8700 {
         if counter > 20 { break }
-        if abs(abs(ref[i - 1]) - abs(column[i])) > 0.11 {
+        if abs(abs(ref[i - 1]) - abs(column[i])) > 0.09 {
           counter += 1; correct = false
           print("Calculation \(letter)\(i + 4) proper value: \(String(format: "%.2f", ref[i - 1])) [\(index + i)] \(String(format: "%.2f", column[i]))  div: \(abs(ref[i - 1]) - abs(column[i]))")
         }
@@ -44,7 +44,7 @@ class SunOlTests: XCTestCase {
       var correct = true, counter = 1
       for i in 0..<364 {
         if counter > 20 { break }
-        if abs(ref[i]) - abs(array[index + i]) > 0.6 {
+        if abs(ref[i]) - abs(array[index + i]) > 0.5 {
           counter += 1; correct = false
           print("Daily1 \(letter)\(i + 3) proper value: \(String(format: "%.2f", ref[i])) [\(index + i)] \(String(format: "%.2f", array[index + i]))  div: \(ref[i] - array[index + i])")
         }
@@ -57,7 +57,7 @@ class SunOlTests: XCTestCase {
       var correct = true, counter = 1
       for i in 0..<364 {
         if counter > 20 { break }
-        if abs(ref[i]) - abs(array[index + i]) > 0.6 {
+        if abs(ref[i]) - abs(array[index + i]) > 0.5 {
           counter += 1; correct = false
           print("Daily2 \(letter)\(i + 3) proper value: \(String(format: "%.2f", ref[i])) [\(index + i)] \(String(format: "%.2f", array[index + i]))  div: \(ref[i] - array[index + i])")
         }
@@ -76,7 +76,7 @@ class SunOlTests: XCTestCase {
       return (key, num)
     }
 
-    let values = [110.0,4713.7,178.91,448.94,684.57,160.0,0,319.20,1000.0,100000.0,100000.0,20.34,64.52,0,0,0]
+    let values = [103.00,4542.18,178.50,431.20,656.70,160.00,0.00,306.63,1000.00,100000.00,100000.00,17.49,38.83,0.00,0.00,0.00]
     guard let model = TunOl(values) else {
       print("Invalid config")
       return
@@ -89,7 +89,7 @@ class SunOlTests: XCTestCase {
     var d21 = [Double](repeating: 0.0, count: 9_855)
     var day = [[Double]]()
     let (GX, GZ, HA) = (16790, 17155, 17520)
-    let (MC, MI, NL, NQ) = (81030, 83220, 93805, 95630)
+    let (MC, MI, NL, NR) = (81030, 83220, 93805, 95995)
 
     model.hour(TunOl.Q_Sol_MW_thLoop, TunOl.Reference_PV_plant_power_at_inverter_inlet_DC, TunOl.Reference_PV_MV_power_at_transformer_outlet, hour: &hourPre)
     let d22 = model.d22(hour: hourPre)
@@ -108,7 +108,7 @@ class SunOlTests: XCTestCase {
       model.d13(&d10, case: j)
       model.d14(&d10, case: j)
       day.append(Array(d10[MC..<MI]))
-      day.append(Array(d10[NL..<NQ]))
+      day.append(Array(d10[NL..<NR]))
 
       model.d21(&d21, case: j, day0: day20)
       model.d23(&d23, case: j, day0: day20, d21: d21, d22: d22)
@@ -209,15 +209,15 @@ class SunOlTests: XCTestCase {
     }
 
     let LCOM = costs.LCOM(meth_produced_MTPH: meth_produced_MTPH_sum, elec_from_grid: elec_from_grid_sum, elec_to_grid: elec_to_grid_MTPH_sum)
-    XCTAssertEqual(LCOM, 1513, accuracy: 1, "LCOM")
-    XCTAssertEqual(hours_sum, 7774.0, accuracy: 1, "hours_sum")
-    XCTAssertEqual(meth_produced_MTPH_sum, 103517, accuracy: 1, "meth_produced_MTPH_sum")
-    XCTAssertEqual(elec_from_grid_sum, 2245, accuracy: 1, "elec_from_grid_sum")
+    XCTAssertEqual(LCOM,  1586.9, accuracy: 1, "LCOM")
+    XCTAssertEqual(hours_sum, 7720.0, accuracy: 1, "hours_sum")
+    XCTAssertEqual(meth_produced_MTPH_sum, 101372, accuracy: 1, "meth_produced_MTPH_sum")
+    XCTAssertEqual(elec_from_grid_sum, 2314, accuracy: 1, "elec_from_grid_sum")
     XCTAssertEqual(elec_to_grid_MTPH_sum, 0, accuracy: 1, "elec_to_grid_MTPH_sum")
   }
 
   func testsCalculation2() {
-    let values = [117.00,4711.34,179.00,485.43,700.5,160.00,0.00,353.62,1000.00,100000.00,100000.00,21.49,44.66,0.00,0.00,0.00]
+    let values = [103.00,4542.18,178.50,431.20,656.70,160.00,0.00,306.63,1000.00,100000.00,100000.00,17.49,38.83,0.00,0.00,0.00]
 
     guard let model = TunOl(values) else {
       print("Invalid config")
@@ -232,7 +232,7 @@ class SunOlTests: XCTestCase {
     var d21 = [Double](repeating: 0.0, count: 9_855)
     var day = [[Double]]()
     let (GX, GZ, HA) = (16790, 17155, 17520)
-    let (MC, MI, NL, NQ) = (81030, 83220, 93805, 95630)
+    let (MC, MI, NL, NR) = (81030, 83220, 93805, 95995)
 
     model.hour(TunOl.Q_Sol_MW_thLoop, TunOl.Reference_PV_plant_power_at_inverter_inlet_DC, TunOl.Reference_PV_MV_power_at_transformer_outlet, hour: &hourPre)
     let d22 = model.d22(hour: hourPre)
@@ -251,7 +251,7 @@ class SunOlTests: XCTestCase {
       model.d13(&d10, case: j)
       model.d14(&d10, case: j)
       day.append(Array(d10[MC..<MI]))
-      day.append(Array(d10[NL..<NQ]))
+      day.append(Array(d10[NL..<NR]))
       model.d21(&d21, case: j, day0: day20)
       model.d23(&d23, case: j, day0: day20, d21: d21, d22: d22)
       day.append(Array(d23[33945..<35040] + ArraySlice(zip(day20[365..<730], d23[GX..<GZ]).map { $1 > 0 ? $0 : 0 }) + day20[730..<1095]))
@@ -288,12 +288,11 @@ class SunOlTests: XCTestCase {
     }
 
     let LCOM = costs.LCOM(meth_produced_MTPH: meth_produced_MTPH_sum, elec_from_grid: elec_from_grid_sum, elec_to_grid: elec_to_grid_MTPH_sum)
-    XCTAssertEqual(LCOM, 1565, accuracy: 1, "LCOM")
-    XCTAssertEqual(hours_sum, 7579.0, accuracy: 1, "hours_sum")
-    XCTAssertEqual(meth_produced_MTPH_sum, 101769, accuracy: 1, "meth_produced_MTPH_sum")
-    XCTAssertEqual(elec_from_grid_sum, 2470, accuracy: 1, "elec_from_grid_sum")
-    XCTAssertEqual(elec_to_grid_MTPH_sum, 0, accuracy: 1, "elec_to_grid_MTPH_sum")
-    try? outputStream.write(toFile: "result_days.txt", atomically: false, encoding: .utf8)
+        XCTAssertEqual(LCOM,  1586.9, accuracy: 1, "LCOM")
+    XCTAssertEqual(hours_sum, 7720.0, accuracy: 1, "hours_sum")
+    XCTAssertEqual(meth_produced_MTPH_sum, 101372, accuracy: 1, "meth_produced_MTPH_sum")
+    XCTAssertEqual(elec_from_grid_sum, 2314, accuracy: 1, "elec_from_grid_sum")
+    try? outputStream.write(toFile: "~/SPC/result_days.txt", atomically: false, encoding: .utf8)
   }
 
   func testsCosts() {
@@ -301,7 +300,7 @@ class SunOlTests: XCTestCase {
     //  dump(model)
     let costs = Costs(model)
     // dump(costs)
-    var fixtures = [19284864.0, 175610209, 325819168, 31228139, 75780496, 91164447, 144513485, 344112000, 0.0, 0.0, 0.0, 0.0, 0.0, 5882497, 0.0, 5358409, 0]
+    var fixtures = [19284864.0, 175610209, 325819168, 31228139, 75780496, 91164447, 144513485, 344112000, 0.0, 0.0, 0.0, 0.0, 0.0, 73384445, 0.0, 5358409, 0]
       .makeIterator()
     var outputStream = ""
     for child in Mirror(reflecting: model).children.filter({ $0.label?.contains("_ud") ?? false }) { print(child.label!, child.value as! Double, to: &outputStream) }
