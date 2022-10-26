@@ -314,7 +314,7 @@ public struct TunOl {
     let perc = Array(stride(from: 1.0, through: 115, by: 1))
     let Actual_AC_power = perc.map { A in (A / 100) * PV_AC_cap_ud }
     let Actual_DC_power = zip(Actual_AC_power, eff).map { $0 / $1 }
-    self.Inverter_max_DC_input = 512.795661755522 //Actual_DC_power.max()!
+    self.Inverter_max_DC_input = Actual_DC_power.max()!
     let load: [Double] = Actual_DC_power.map { $0 / PV_DC_cap_ud }
 
     self.LL_Coeff = Polynomial.fit(x: Array(load[..<19]), y: Array(eff[..<19]), order: 7)!.coefficients

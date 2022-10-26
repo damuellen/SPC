@@ -79,13 +79,12 @@ public struct IGOA {
       }
     }
     for g in groups.indices {
+      convergenceCurves[g].removeAll()
       convergenceCurves[g].append([Double(0), (targetFitness[g] * 100).rounded() / 100])
     }
 
     ClearScreen()
-    print("Population: \(grassHopperPositions.count) ".randomColor(), "Iterations: 0".leftpad(28).randomColor())
-    print(pretty(values: targetFitness))
-    print(pretty(values: targetPosition))
+    print("Population: \(grassHopperPositions.count) ".randomColor() + "Iterations: 0".leftpad(28).randomColor(), pretty(values: targetFitness), pretty(values: targetPosition), separator: "\n")
 
     let dims = bounds.count
     var r_ij_vec = Vector(dims), s_ij = Vector(dims)
@@ -136,6 +135,7 @@ public struct IGOA {
         grassHopperFitness[i] = result[0]
       }
       let calculationsPerSecond = 1 / (-timer.timeIntervalSinceNow / Double(grassHopperPositions.count))
+      let remainingTime = Double((maxIterations - iteration) * grassHopperPositions.count) / calculationsPerSecond
       if source.isCancelled { break }
 
       if source.isCancelled { break }
@@ -153,7 +153,7 @@ public struct IGOA {
       print("Population: \(grassHopperPositions.count) ".randomColor(), "Iterations: \(iteration)".leftpad(28).randomColor())
       print(pretty(values: targetFitness))
       print(pretty(values: targetPosition))
-      print("Calculations per Second:", String(format: "%.1f", calculationsPerSecond))
+      print("Calculations per Second:", String(format: "%.1f", calculationsPerSecond), "Estimated time remaining:", String(format: "%.0f", remainingTime))     
       let sort = targetFitness.indices.sorted(by:{ targetFitness[$0] < targetFitness[$1] })
       sort.dropFirst().forEach {
         targetFitness[$0] = targetFitness[sort.first!]

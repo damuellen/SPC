@@ -5,22 +5,22 @@ public struct Parameter {
   public var ranges: [ClosedRange<Double>]
 
   public init(
-    CSP_loop_nr: ClosedRange<Double>,
-    TES_thermal_cap: ClosedRange<Double>,
-    PB_nom_gross_cap: ClosedRange<Double>,
-    PV_AC_cap: ClosedRange<Double>,
-    PV_DC_cap: ClosedRange<Double>,
-    CCU_CO2_nom_prod: ClosedRange<Double>,
-    CO2_storage_cap: ClosedRange<Double>,
-    El_boiler_cap: ClosedRange<Double>,
-    EY_var_net_nom_cons: ClosedRange<Double>,
-    Hydrogen_storage_cap: ClosedRange<Double>,
-    Heater_cap: ClosedRange<Double>,
-    MethDist_Meth_nom_prod: ClosedRange<Double>,
-    RawMeth_storage_cap: ClosedRange<Double>,
-    BESS_cap: ClosedRange<Double>,
-    Grid_export_max: ClosedRange<Double>,
-    Grid_import_max: ClosedRange<Double>
+    CSP_loop_nr: ClosedRange<Double> = 0...300.0,
+    TES_thermal_cap: ClosedRange<Double> = 0...10000.0,
+    PB_nom_gross_cap: ClosedRange<Double> =  0...250.0,
+    PV_AC_cap: ClosedRange<Double> = 200...1500.0,
+    PV_DC_cap: ClosedRange<Double> = 220...1600.0,
+    CCU_CO2_nom_prod: ClosedRange<Double> = 1000...1000.0,
+    CO2_storage_cap: ClosedRange<Double> = 1000...1000.0,
+    El_boiler_cap: ClosedRange<Double> = 0...100.0,
+    EY_var_net_nom_cons: ClosedRange<Double> = 180...180,
+    Hydrogen_storage_cap: ClosedRange<Double> =  0...0.0, 
+    Heater_cap: ClosedRange<Double> =  0...1000.0, 
+    MethDist_Meth_nom_prod: ClosedRange<Double> = 5...50.0,
+    RawMeth_storage_cap: ClosedRange<Double> = 100_000...100_000.0,
+    BESS_cap: ClosedRange<Double> = 0...0.0,
+    Grid_export_max: ClosedRange<Double> = 0...0.0,
+    Grid_import_max: ClosedRange<Double> = 0...0.0
   ) {
     self.ranges = [
       CSP_loop_nr, // [0]

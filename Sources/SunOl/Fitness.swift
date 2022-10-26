@@ -1,7 +1,9 @@
 import Foundation
 import Utilities
 
-public func fitness(values: [Double]) -> [Double] {
+public func fitness(values: [Double]) -> [Double] { fitness(values: values, penalized: false) }
+public func fitnessPenalized(values: [Double]) -> [Double] { fitness(values: values, penalized: true) }
+func fitness(values: [Double], penalized: Bool) -> [Double] {
   guard let model = TunOl(values) else { return [Double.infinity, 0, 0, 0, 0, 0, 0, 0] + values }
 
   var hourPre = [Double](repeating: 0.0, count: 1033680)
@@ -11,7 +13,7 @@ public func fitness(values: [Double]) -> [Double] {
   var d21 = [Double](repeating: 0.0, count: 9_855)
   var day = [[Double]]()
   let (GX, GZ, HA) = (16790, 17155, 17520)
-  let (MC, MI, NL, NR) = (81030, 83220, 93805, 95995)
+  let (MC, MI, NL, NQ) = (81030, 83220, 93805, 95630)
 
   model.hour(TunOl.Q_Sol_MW_thLoop, TunOl.Reference_PV_plant_power_at_inverter_inlet_DC, TunOl.Reference_PV_MV_power_at_transformer_outlet, hour: &hourPre)
   let d22 = model.d22(hour: hourPre)
@@ -34,7 +36,7 @@ public func fitness(values: [Double]) -> [Double] {
     model.d13(&d10, case: j)
     model.d14(&d10, case: j)
     day.append(Array(d10[MC..<MI]))
-    day.append(Array(d10[NL..<NR]))
+    day.append(Array(d10[NL..<NQ]))
 
     model.d21(&d21, case: j, day0: day20)
     model.d23(&d23, case: j, day0: day20, d21: d21, d22: d22)
@@ -68,7 +70,12 @@ public func fitness(values: [Double]) -> [Double] {
   }
 
   let LCOM = costs.LCOM(meth_produced_MTPH: meth_produced_MTPH_sum, elec_from_grid: elec_from_grid_sum, elec_to_grid: elec_to_grid_MTPH_sum)
-  let fitness = LCOM * (1.0 + (abs(min(hours_sum - 7000.0, 0)) / 1000.0) * 0.3) * (1.0 + (abs(min(meth_produced_MTPH_sum - 100000.0, Double.zero)) / 10000.0) * 0.3)
+  let fitness: Double
+  if penalized {
+   fitness = LCOM * (1.0 + (abs(min(hours_sum - 7000.0, 0)) / 1000.0) * 0.3) * (1.0 + (abs(min(meth_produced_MTPH_sum - 100000.0, Double.zero)) / 10000.0) * 0.3)
+  } else {
+   fitness = LCOM * (1.0 + (abs(min(meth_produced_MTPH_sum - 100000.0, Double.zero)) / 10000.0) * 0.3)
+  }
   if !meth.drop(while: { $0 < meth_produced_MTPH_sum / 100 }).isEmpty || LCOM.isInfinite || meth_produced_MTPH_sum.isZero { return [Double.infinity] }
   return [fitness, LCOM, costs.Total_CAPEX, costs.Total_OPEX, meth_produced_MTPH_sum, elec_from_grid_sum, elec_to_grid_MTPH_sum, hours_sum] + model.values
 }

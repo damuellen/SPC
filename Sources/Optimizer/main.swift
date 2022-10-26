@@ -43,9 +43,9 @@ struct Command: ParsableCommand {
   func run() throws {
     let path: String
     #if os(Windows)
-    if let file = file { path = file } else { path = FileDialog() ?? "input4.txt" }
+    if let file = file { path = file } else { path = FileDialog() ?? "input5.txt" }
     #else
-    path = file ?? "input4.txt"
+    path = file ?? "input5.txt"
     #endif
     guard let csv = CSVReader(atPath: path) else {
       #if os(Windows)
@@ -55,30 +55,9 @@ struct Command: ParsableCommand {
       #endif
       return
     }
-    let ranges: [ClosedRange<Double>]
-    if let parameter = try? InputParameter.loadFromJSONIfExists(file: .init(fileURLWithPath: path)) {
-      ranges = parameter.ranges
-    } else {
-      ranges = Parameter(
-        CSP_loop_nr: 0...300.0,
-        TES_thermal_cap: 0...10000.0,
-        PB_nom_gross_cap: 0...250.0,
-        PV_AC_cap: 200...1500.0,
-        PV_DC_cap: 220...1600.0,
-        CCU_CO2_nom_prod: 1000...1000.0,
-        CO2_storage_cap: 100_000...100_000.0,
-        El_boiler_cap: 0...100.0,
-        EY_var_net_nom_cons: 180...180,
-        Hydrogen_storage_cap: 0...0.0, 
-        Heater_cap: 0...1000.0, 
-        MethDist_Meth_nom_prod: 5...40.0,
-        RawMeth_storage_cap: 100_000...100_000.0,
-        BESS_cap: 0...0.0,
-        Grid_export_max: 0...0.0,
-        Grid_import_max: 0...0.0
-      ).ranges
-    }
-    try? InputParameter(ranges: ranges).storeToJSON(file: .init(fileURLWithPath: "Parameter.json")) 
+    TunOl.Q_Sol_MW_thLoop = [0] + csv["csp"]
+    TunOl.Reference_PV_plant_power_at_inverter_inlet_DC = [0] + csv["pv"]
+    TunOl.Reference_PV_MV_power_at_transformer_outlet = [0] + csv["out"]
 
     let server = HTTP(handler: respond)
     if http {
@@ -88,34 +67,81 @@ struct Command: ParsableCommand {
         start("http://127.0.0.1:\(server.port)") 
       }
     }
-    TunOl.Q_Sol_MW_thLoop = [0] + csv["csp"]
-    TunOl.Reference_PV_plant_power_at_inverter_inlet_DC = [0] + csv["pv"]
-    TunOl.Reference_PV_MV_power_at_transformer_outlet = [0] + csv["out"]
 
-    let optimizer = IGOA(n: n ?? 30, maxIterations: iterations ?? 300, bounds: ranges)
-    let now = Date()
-    let results = optimizer(SunOl.fitness)
-    print("Elapsed seconds:", -now.timeIntervalSinceNow)
-    let name = writeExcel(results: results)
-    print(name)
-    // if !source.isCancelled {
-    //   var best = Array(sorted[0][6...])
-    //   best.remove(at: 10)
-    //   let result = SunOl.results(values: best)
-    //   writeCSV(result: result)
-    // }
-    if http {
-      source.cancel()
-      if -timeout.timeIntervalSinceNow < 10 {
-        print("waiting before shutting down")
-        Thread.sleep(until: timeout.addingTimeInterval(10))
-        Thread.sleep(forTimeInterval: 1)
+    defer {
+      if http {
+        source.cancel()
+        if -timeout.timeIntervalSinceNow < 10 {
+          print("waiting before shutting down")
+          Thread.sleep(until: timeout.addingTimeInterval(10))
+          Thread.sleep(forTimeInterval: 1)
+        }
+        server.stop()
       }
-      server.stop()
     }
-    #if os(Windows)
-    if excel { start(currentDirectoryPath() + "/" + name) }
-    #endif
+
+    if let parameter = try? InputParameter.loadFromJSONIfExists(file: .init(fileURLWithPath: path)) {
+      let worker = IGOA(n: n ?? 30, maxIterations: iterations ?? 300, bounds: parameter.ranges)
+      let past = Date()
+      let results = worker(SunOl.fitness)
+      print("Elapsed seconds:", -past.timeIntervalSinceNow)
+      let id = String(Int(past.timeIntervalSince1970), radix: 36, uppercase: true).suffix(4)
+      let name = "SunOl_\(id).xlsx"
+      writeExcel(name, results: results)    
+      print(name)
+      #if os(Windows)
+      if excel { start(currentDirectoryPath() + "/" + name) }
+      #endif
+    }
+    // try? InputParameter(ranges: ranges).storeToJSON(file: .init(fileURLWithPath: "Parameter.json"))
+    
+    var parameter = Parameter()
+    for EY in stride(from: 120, through: 200, by: 20) {
+      var results = [[Double]]()
+      for _ in 1...1 {
+        parameter.ranges[5] = Double(EY)...Double(EY)
+        let worker = IGOA(n: n ?? 33, maxIterations: iterations ?? 300, bounds: parameter.ranges)
+        results.append(contentsOf: worker(SunOl.fitnessPenalized))
+      }
+      writeExcel("SunOl_\(EY).xlsx", results: results)
+    }
+
+    parameter = Parameter(
+      CSP_loop_nr: 0...0.0,
+      TES_thermal_cap: 0...0.0,
+      PB_nom_gross_cap: 0...0.0,
+      El_boiler_cap: 0...100.0,
+      EY_var_net_nom_cons: 180...180,
+      Heater_cap: 0...0.0, 
+      BESS_cap: 0...5000.0
+    )
+    for EY in stride(from: 120, through: 200, by: 20) {
+      var results = [[Double]]()
+      for _ in 1...1 {
+        parameter.ranges[5] = Double(EY)...Double(EY)
+        let worker = IGOA(n: n ?? 33, maxIterations: iterations ?? 300, bounds: parameter.ranges)
+        results.append(contentsOf: worker(SunOl.fitnessPenalized))
+      }
+      writeExcel("SunOl_\(EY)_BESS.xlsx",results: results)
+    }
+  
+    parameter = Parameter(
+      CSP_loop_nr: 0...0.0,
+      TES_thermal_cap: 0...0.0,
+      PB_nom_gross_cap: 0...0.0,
+      El_boiler_cap: 0...100.0,
+      EY_var_net_nom_cons: 180...180,
+      Heater_cap: 0...0.0
+    )
+    for EY in stride(from: 200, through: 300, by: 20) {
+      var results = [[Double]]()
+      for _ in 1...1 {
+        parameter.ranges[5] = Double(EY)...Double(EY)
+        let worker = IGOA(n: n ?? 33, maxIterations: iterations ?? 300, bounds: parameter.ranges)
+        results.append(contentsOf: worker(SunOl.fitness))
+      }
+      writeExcel("SunOl_\(EY)_PV_only.xlsx",results: results)
+    }
   }
 }
 
@@ -143,13 +169,18 @@ func writeCSV(result: ([Double], [Double], [Double], [Double])) {
   try? hour.write(toFile: "out3.csv", atomically: false, encoding: .ascii)
 }
 
-func writeExcel(results: [[Double]]) -> String {
-  let id = String(Int(Date().timeIntervalSince1970), radix: 36, uppercase: true).suffix(4)
-  let name = "SunOl_\(id).xlsx"
+func writeExcel(_ name: String, results: [[Double]]) {
   let wb = Workbook(name: name)
   let ws = wb.addWorksheet()
   var r = 0
-  results.filter { $0[0].isFinite }.reversed().forEach { row in r += 1
+  func removingNearby(_ results: [[Double]]) -> [[Double]] {
+    var addedDict = [Int:Bool]()
+    return results.filter {
+      addedDict.updateValue(true, forKey: Int($0[1] * 100)) == nil
+    }
+  }
+  let sorted = results.filter { $0[0].isFinite }.sorted { $0[0] < $1[0] }
+  removingNearby(sorted).forEach { row in r += 1
     ws.write(row.map { round($0 * 100) / 100 }, row: r)
   }
   let labels = [
@@ -159,14 +190,13 @@ func writeExcel(results: [[Double]]) -> String {
   let charting = [8, 9, 10, 11, 12, 15, 19, 20]
   ws.table(range: [0, 0, r, labels.endIndex - 1], header: labels)
   for (column, name) in labels.enumerated() where charting.contains(column) {
-    let chart = wb.addChart(type: .scatter).set(y_axis: 1500...1800)
+    let chart = wb.addChart(type: .scatter).set(y_axis: 1400...1900)
     chart.addSeries().set(marker: 6, size: 4).values(sheet: ws, range: [1, 0, r, 0]).categories(sheet: ws, range: [1, column, r, column])
     chart.addSeries().set(marker: 5, size: 4).values(sheet: ws, range: [1, 1, r, 1]).categories(sheet: ws, range: [1, column, r, column])
     chart.remove(legends: 0, 1)
     wb.addChartsheet(name: name).set(chart: chart)
   }
   wb.close()
-  return name
 }
 
 func respond(request: HTTP.Request) -> HTTP.Response {
