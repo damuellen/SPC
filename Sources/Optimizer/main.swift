@@ -96,9 +96,9 @@ struct Command: ParsableCommand {
     // try? InputParameter(ranges: ranges).storeToJSON(file: .init(fileURLWithPath: "Parameter.json"))
     
     var parameter = Parameter()
-    for EY in stride(from: 120, through: 200, by: 20) {
+    for EY in stride(from: 120, through: 200, by: 20) where !source.isCancelled {
       var results = [[Double]]()
-      for _ in 1...1 {
+      for _ in 1...5 where !source.isCancelled {
         parameter.ranges[5] = Double(EY)...Double(EY)
         let worker = IGOA(n: n ?? 33, maxIterations: iterations ?? 300, bounds: parameter.ranges)
         results.append(contentsOf: worker(SunOl.fitnessPenalized))
@@ -115,9 +115,9 @@ struct Command: ParsableCommand {
       Heater_cap: 0...0.0, 
       BESS_cap: 0...5000.0
     )
-    for EY in stride(from: 120, through: 200, by: 20) {
+    for EY in stride(from: 120, through: 200, by: 20) where !source.isCancelled {
       var results = [[Double]]()
-      for _ in 1...1 {
+      for _ in 1...5 where !source.isCancelled {
         parameter.ranges[5] = Double(EY)...Double(EY)
         let worker = IGOA(n: n ?? 33, maxIterations: iterations ?? 300, bounds: parameter.ranges)
         results.append(contentsOf: worker(SunOl.fitnessPenalized))
@@ -133,9 +133,9 @@ struct Command: ParsableCommand {
       EY_var_net_nom_cons: 180...180,
       Heater_cap: 0...0.0
     )
-    for EY in stride(from: 200, through: 300, by: 20) {
+    for EY in stride(from: 200, through: 300, by: 20) where !source.isCancelled {
       var results = [[Double]]()
-      for _ in 1...1 {
+      for _ in 1...5 where !source.isCancelled {
         parameter.ranges[5] = Double(EY)...Double(EY)
         let worker = IGOA(n: n ?? 33, maxIterations: iterations ?? 300, bounds: parameter.ranges)
         results.append(contentsOf: worker(SunOl.fitness))
@@ -189,12 +189,15 @@ func writeExcel(_ name: String, results: [[Double]]) {
   ]
   let charting = [8, 9, 10, 11, 12, 15, 19, 20]
   ws.table(range: [0, 0, r, labels.endIndex - 1], header: labels)
+  var row = 0
   for (column, name) in labels.enumerated() where charting.contains(column) {
     let chart = wb.addChart(type: .scatter).set(y_axis: 1400...1900)
     chart.addSeries().set(marker: 6, size: 4).values(sheet: ws, range: [1, 0, r, 0]).categories(sheet: ws, range: [1, column, r, column])
     chart.addSeries().set(marker: 5, size: 4).values(sheet: ws, range: [1, 1, r, 1]).categories(sheet: ws, range: [1, column, r, column])
     chart.remove(legends: 0, 1)
     wb.addChartsheet(name: name).set(chart: chart)
+    _ = ws.insert(chart: chart, (row: row, col: 21))
+    row += 10
   }
   wb.close()
 }
