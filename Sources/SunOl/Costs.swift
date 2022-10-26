@@ -28,9 +28,7 @@ public struct Costs {
     let CO2_storage = (basis: 226.8, exp: 0.9, coeff: 780_000.0 * 0)
     let MethSynt_plant = (basis: 19.0665095748076, exp: 0.7, coeff: 29_268_292.6829268 * 0)
     let RawMeth_storage = (basis: 1.87680000000000E+02, exp: 0.9, coeff: (694146.8625 / FX_USD) * 0)
-    let MethDist_plant = (
-      basis: 1.24750499001996E+01, exp: 1.0, coeff: 0.36 * (model.EY_Ref_var_net_nom_cons + model.EY_Ref_var_nom_cons) / model.MethDist_Ref_meth_hour_prod * 1_000_000
-    )
+    let MethDist_plant = (exp: 0, coeff: 2.5*7*(20+0.1)*0.36/2.5/14.833*1000*1000)
     let Battery_energy_storage = (basis: 0.0, c1: 0.0, coeff: 550000.0)
     let Electrical_boiler = (basis: 3.27, exp: 0.7, coeff: 494000 * 1.45 * 1.2)
     let Substation = (basis: 135.0, exp: 0.7, coeff: 2.4E+06)
@@ -73,7 +71,7 @@ public struct Costs {
     self.Electrolysis_cost = (model.EY_var_net_nom_cons_ud / 20.0).rounded(.up) * 20.0 * Electrolysis_coeff
 
     self.Hydrogen_storage_cost = Hydrogen_storage.coeff * ((model.Hydrogen_storage_cap_ud / Hydrogen_storage.basis) ** Hydrogen_storage.exp)
-    // =IF(I3<=0,"",IFERROR(Specific_Cost!$I$12*(I3/Specific_Cost!$D$12)^Specific_Cost!$F$12+Specific_Cost!$E$12,""))
+
     self.CCU_plant_cost = CCU_plant.coeff * (model.CCU_CO2_nom_prod_ud / CCU_plant.basis) ** CCU_plant.exp
 
     self.CO2_storage_cost = CO2_storage.coeff * (model.CO2_storage_cap_ud / CO2_storage.basis) ** CO2_storage.exp
@@ -81,7 +79,7 @@ public struct Costs {
 
     self.RawMeth_storage_cost = RawMeth_storage.coeff * ((model.RawMeth_storage_cap_ud / RawMeth_storage.basis) ** RawMeth_storage.exp)
 
-    self.MethDist_plant_cost = MethDist_plant.coeff * ((model.MethDist_Meth_nom_prod_ud / MethDist_plant.basis) ** MethDist_plant.exp)
+    self.MethDist_plant_cost = MethDist_plant.coeff * model.MethDist_Meth_nom_prod_ud
 
     self.Battery_storage_cost = model.BESS_cap_ud * Battery_energy_storage.coeff + (model.BESS_cap_ud > Double.zero ? Battery_energy_storage.c1 : Double.zero)
 
