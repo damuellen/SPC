@@ -307,8 +307,8 @@ public struct TunOl {
     let Inverter_eff: [Double] = Inverter_power_fraction.indices.map {
       iff(TunOl.Reference_PV_MV_power_at_transformer_outlet[$0] <= maximum, max(TunOl.Reference_PV_MV_power_at_transformer_outlet[$0], Double.zero) / TunOl.Reference_PV_plant_power_at_inverter_inlet_DC[$0], Double.zero)
     }
-
-    let inverter = zip(Inverter_power_fraction, Inverter_eff).filter { $0.1.isFinite }.filter { $0.1 > 0 }.sorted(by: { $0.0 < $1.0 })
+    let limit = Inverter_power_fraction.max()!
+    let inverter = zip(Inverter_power_fraction, Inverter_eff).filter { $0.1.isFinite }.filter { $0.0 < limit }.filter { $0.1 > 0 }.sorted(by: { $0.0 < $1.0 })
     let chunks = inverter.chunked { Int($0.0 * 100) == Int($1.0 * 100) }
     let eff = chunks.map { bin in bin.reduce(0.0) { $0 + $1.1 } / Double(bin.count) }
     let perc = Array(stride(from: 1.0, through: 115, by: 1))
@@ -318,7 +318,7 @@ public struct TunOl {
     let load: [Double] = Actual_DC_power.map { $0 / PV_DC_cap_ud }
 
     self.LL_Coeff = Polynomial.fit(x: Array(load[..<19]), y: Array(eff[..<19]), order: 7)!.coefficients
-    self.HL_Coeff = Polynomial.fit(x: Array(load[15...]).dropLast(), y: Array(eff[15...]).dropLast(), order: 3)!.coefficients
+    self.HL_Coeff = Polynomial.fit(x: Array(load[15...]), y: Array(eff[15...]), order: 3)!.coefficients
 
     self.Inv_eff_approx_handover = load[16]
     let PB_grs_el_cap_min_perc: Double = PB_Ref_25p_gross_cap_max_aux_heat / PB_Ref_nom_gross_cap
