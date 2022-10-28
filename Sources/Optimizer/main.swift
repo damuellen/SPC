@@ -99,7 +99,7 @@ struct Command: ParsableCommand {
     var parameter = Parameter()
     for EY in stride(from: 120, through: 200, by: 20) where !source.isCancelled {
       var results = [[Double]]()
-      for _ in 1..10 where !source.isCancelled {
+      for _ in 1...10 where !source.isCancelled {
         parameter.ranges[5] = Double(EY)...Double(EY)
         let worker = IGOA(n: n ?? 30, maxIterations: iterations ?? 240, bounds: parameter.ranges)
         let result = worker(SunOl.fitnessPenalized)

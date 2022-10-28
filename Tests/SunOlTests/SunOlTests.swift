@@ -209,15 +209,15 @@ class SunOlTests: XCTestCase {
     }
 
     let LCOM = costs.LCOM(meth_produced_MTPH: meth_produced_MTPH_sum, elec_from_grid: elec_from_grid_sum, elec_to_grid: elec_to_grid_MTPH_sum)
-    XCTAssertEqual(LCOM,  1586.9, accuracy: 1, "LCOM")
-    XCTAssertEqual(hours_sum, 7720.0, accuracy: 1, "hours_sum")
-    XCTAssertEqual(meth_produced_MTPH_sum, 101372, accuracy: 1, "meth_produced_MTPH_sum")
-    XCTAssertEqual(elec_from_grid_sum, 2314, accuracy: 1, "elec_from_grid_sum")
+    XCTAssertEqual(LCOM, 1584, accuracy: 1, "LCOM")
+    XCTAssertEqual(hours_sum, 7705.0, accuracy: 1, "hours_sum")
+    XCTAssertEqual(meth_produced_MTPH_sum, 101565, accuracy: 1, "meth_produced_MTPH_sum")
+    XCTAssertEqual(elec_from_grid_sum, 2627.0, accuracy: 1, "elec_from_grid_sum")
     XCTAssertEqual(elec_to_grid_MTPH_sum, 0, accuracy: 1, "elec_to_grid_MTPH_sum")
   }
 
   func testsCalculation2() {
-    let values = [103.00,4542.18,178.50,431.20,656.70,160.00,0.00,306.63,1000.00,100000.00,100000.00,17.49,38.83,0.00,0.00,0.00]
+    let values = [128, 5804.06, 223.32, 544, 837.83, 200, 0, 390.6, 1000, 1000, 100000, 21.19, 54.65, 0, 0, 0]
 
     guard let model = TunOl(values) else {
       print("Invalid config")
@@ -258,7 +258,6 @@ class SunOlTests: XCTestCase {
       day.append(Array(d23[44895..<45990] + ArraySlice(zip(day20[365..<730], d23[GZ..<HA]).map { $1 > 0 ? $0 : 0 }) + day20[730..<1095]))
     }
 
-
     var meth_produced_MTPH_sum = Double.zero
     var elec_from_grid_sum = Double.zero
     var elec_to_grid_MTPH_sum = Double.zero
@@ -288,26 +287,34 @@ class SunOlTests: XCTestCase {
     }
 
     let LCOM = costs.LCOM(meth_produced_MTPH: meth_produced_MTPH_sum, elec_from_grid: elec_from_grid_sum, elec_to_grid: elec_to_grid_MTPH_sum)
-        XCTAssertEqual(LCOM,  1586.9, accuracy: 1, "LCOM")
-    XCTAssertEqual(hours_sum, 7720.0, accuracy: 1, "hours_sum")
-    XCTAssertEqual(meth_produced_MTPH_sum, 101372, accuracy: 1, "meth_produced_MTPH_sum")
-    XCTAssertEqual(elec_from_grid_sum, 2314, accuracy: 1, "elec_from_grid_sum")
+    XCTAssertEqual(LCOM, 1535, accuracy: 1, "LCOM")
+    XCTAssertEqual(hours_sum, 7723, accuracy: 1, "hours_sum")
+    XCTAssertEqual(meth_produced_MTPH_sum, 128175, accuracy: 1, "meth_produced_MTPH_sum")
+    XCTAssertEqual(elec_from_grid_sum, 3055, accuracy: 1, "elec_from_grid_sum")
     try? outputStream.write(toFile: "~/SPC/result_days.txt", atomically: false, encoding: .utf8)
   }
 
-  func testsCosts() {
-    guard let model = TunOl([117.00,4711.34,179.00,485.43,700.5,160.00,0.00,353.62,1000.00,100000.00,100000.00,21.49,44.66,0.00,0.00,0.00]) else { return }
-    //  dump(model)
+  func testsCosts1() {
+    let model = TunOl([0, 0, 0, 582.23, 727.03, 200, 0, 0, 1000, 1000, 100000, 18.81, 54.37, 54.03, 0, 0])!
     let costs = Costs(model)
-    // dump(costs)
-    var fixtures = [19284864.0, 175610209, 325819168, 31228139, 75780496, 91164447, 144513485, 344112000, 0.0, 0.0, 0.0, 0.0, 0.0, 73384445, 0.0, 5358409, 0]
+    XCTAssertEqual(costs.Total_CAPEX, 920289177, accuracy: 1, "Total_CAPEX")
+    XCTAssertEqual(costs.Total_OPEX, 25970060, accuracy: 1, "Total_OPEX")
+    var fixtures = [14424543.95, 0.0, 338158900, 35466937, 0.0, 2000000, 0.0, 430140000, 0.0, 0.0, 0.0, 0.0, 0.0, 64232732, 29716500, 6149563, 0]
       .makeIterator()
-    var outputStream = ""
-    for child in Mirror(reflecting: model).children.filter({ $0.label?.contains("_ud") ?? false }) { print(child.label!, child.value as! Double, to: &outputStream) }
     for child in Mirror(reflecting: costs).children.filter({ $0.label?.contains("cost") ?? false }) {
-      print(child.label!, child.value as! Double, to: &outputStream)
       XCTAssertEqual(child.value as! Double, fixtures.next()!, accuracy: 1, child.label!)
     }
-    try? outputStream.write(toFile: "cost.txt", atomically: false, encoding: .utf8)
+  }
+
+  func testsCosts2() {
+    let model = TunOl([128, 5804.06, 223.32, 544, 837.83, 200, 0, 390.6, 1000, 1000, 100000, 21.19, 54.65, 0, 0, 0])!
+    let costs = Costs(model)
+    XCTAssertEqual(costs.Total_CAPEX, 1500734088, accuracy: 1, "Total_CAPEX")
+    XCTAssertEqual(costs.Total_OPEX, 30962640, accuracy: 1, "Total_OPEX")
+    var fixtures = [19741817, 191258187, 389694609, 33820242, 83005675, 109365105, 165176736, 430140000, 0.0, 0.0, 0.0, 0.0, 0.0, 72360000, 0.0, 6171715, 0]
+      .makeIterator()
+    for child in Mirror(reflecting: costs).children.filter({ $0.label?.contains("cost") ?? false }) {
+      XCTAssertEqual(child.value as! Double, fixtures.next()!, accuracy: 1, child.label!)
+    }
   }
 }
