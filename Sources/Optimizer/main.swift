@@ -93,19 +93,24 @@ struct Command: ParsableCommand {
       if excel { start(currentDirectoryPath() + "/" + name) }
       #endif
     }
+
     // try? InputParameter(ranges: ranges).storeToJSON(file: .init(fileURLWithPath: "Parameter.json"))
-    
+    var allResults = [[Double]]()
     var parameter = Parameter()
     for EY in stride(from: 120, through: 200, by: 20) where !source.isCancelled {
       var results = [[Double]]()
-      for _ in 1...5 where !source.isCancelled {
+      for _ in 1..10 where !source.isCancelled {
         parameter.ranges[5] = Double(EY)...Double(EY)
-        let worker = IGOA(n: n ?? 33, maxIterations: iterations ?? 300, bounds: parameter.ranges)
-        results.append(contentsOf: worker(SunOl.fitnessPenalized))
+        let worker = IGOA(n: n ?? 30, maxIterations: iterations ?? 240, bounds: parameter.ranges)
+        let result = worker(SunOl.fitnessPenalized)
+        results.append(contentsOf: result)
       }
+      results = removingNearby(results.filter { $0[0].isFinite }.sorted { $0[0] < $1[0] }) 
       writeExcel("SunOl_\(EY).xlsx", results: results)
+      allResults.append(contentsOf: results)
     }
-
+    writeExcel("SunOl_All.xlsx", results: allResults)
+    allResults.removeAll()
     parameter = Parameter(
       CSP_loop_nr: 0...0.0,
       TES_thermal_cap: 0...0.0,
@@ -119,12 +124,15 @@ struct Command: ParsableCommand {
       var results = [[Double]]()
       for _ in 1...5 where !source.isCancelled {
         parameter.ranges[5] = Double(EY)...Double(EY)
-        let worker = IGOA(n: n ?? 33, maxIterations: iterations ?? 300, bounds: parameter.ranges)
+        let worker = IGOA(n: n ?? 30, maxIterations: iterations ?? 240, bounds: parameter.ranges)
         results.append(contentsOf: worker(SunOl.fitnessPenalized))
       }
-      writeExcel("SunOl_\(EY)_BESS.xlsx",results: results)
+      results = removingNearby(results.filter { $0[0].isFinite }.sorted { $0[0] < $1[0] }) 
+      writeExcel("SunOl_\(EY)_BESS.xlsx", results: results)
+      allResults.append(contentsOf: results)
     }
-  
+    writeExcel("SunOl_All_BESS.xlsx", results: allResults)
+    allResults.removeAll()
     parameter = Parameter(
       CSP_loop_nr: 0...0.0,
       TES_thermal_cap: 0...0.0,
@@ -133,15 +141,18 @@ struct Command: ParsableCommand {
       EY_var_net_nom_cons: 180...180,
       Heater_cap: 0...0.0
     )
-    for EY in stride(from: 200, through: 300, by: 20) where !source.isCancelled {
+    for EY in stride(from: 220, through: 300, by: 20) where !source.isCancelled {
       var results = [[Double]]()
       for _ in 1...5 where !source.isCancelled {
         parameter.ranges[5] = Double(EY)...Double(EY)
-        let worker = IGOA(n: n ?? 33, maxIterations: iterations ?? 300, bounds: parameter.ranges)
+        let worker = IGOA(n: n ?? 30, maxIterations: iterations ?? 240, bounds: parameter.ranges)
         results.append(contentsOf: worker(SunOl.fitness))
       }
-      writeExcel("SunOl_\(EY)_PV_only.xlsx",results: results)
+      results = removingNearby(results.filter { $0[0].isFinite }.sorted { $0[0] < $1[0] }) 
+      writeExcel("SunOl_\(EY)_PV_only.xlsx", results: results)
+      allResults.append(contentsOf: results)
     }
+    writeExcel("SunOl_All_PV_only.xlsx", results: allResults)
   }
 }
 
@@ -169,18 +180,18 @@ func writeCSV(result: ([Double], [Double], [Double], [Double])) {
   try? hour.write(toFile: "out3.csv", atomically: false, encoding: .ascii)
 }
 
+func removingNearby(_ results: [[Double]]) -> [[Double]] {
+  var addedDict = [Int:Bool]()
+  return results.filter {
+    addedDict.updateValue(true, forKey: Int($0[1] * 100)) == nil
+  }
+} 
+
 func writeExcel(_ name: String, results: [[Double]]) {
   let wb = Workbook(name: name)
   let ws = wb.addWorksheet()
   var r = 0
-  func removingNearby(_ results: [[Double]]) -> [[Double]] {
-    var addedDict = [Int:Bool]()
-    return results.filter {
-      addedDict.updateValue(true, forKey: Int($0[1] * 100)) == nil
-    }
-  }
-  let sorted = results.filter { $0[0].isFinite }.sorted { $0[0] < $1[0] }
-  removingNearby(sorted).forEach { row in r += 1
+  results.forEach { row in r += 1
     ws.write(row.map { round($0 * 100) / 100 }, row: r)
   }
   let labels = [
@@ -189,15 +200,13 @@ func writeExcel(_ name: String, results: [[Double]]) {
   ]
   let charting = [8, 9, 10, 11, 12, 15, 19, 20]
   ws.table(range: [0, 0, r, labels.endIndex - 1], header: labels)
-  var row = 0
+
   for (column, name) in labels.enumerated() where charting.contains(column) {
-    let chart = wb.addChart(type: .scatter).set(y_axis: 1400...1900)
+    let chart = wb.addChart(type: .scatter).set(y_axis: 1400...2100)
     chart.addSeries().set(marker: 6, size: 4).values(sheet: ws, range: [1, 0, r, 0]).categories(sheet: ws, range: [1, column, r, column])
     chart.addSeries().set(marker: 5, size: 4).values(sheet: ws, range: [1, 1, r, 1]).categories(sheet: ws, range: [1, column, r, column])
     chart.remove(legends: 0, 1)
     wb.addChartsheet(name: name).set(chart: chart)
-    _ = ws.insert(chart: chart, (row: row, col: 21))
-    row += 10
   }
   wb.close()
 }

@@ -286,10 +286,10 @@ extension TunOl {
       25550, 25915, 26280, 26645, 27010, 27375, 27740, 28105, 28470, 28835, 29200, 29565, 29930
     )
 
-    let CO: Int = 271560
+    let CO: Int = 744600
     // SUMIFS(Calculation!CO5:CO8764,Calculation!CS$5:CS8764,"="&$A6,Calculation!CQ5:CQ8764,">0")
     hour.sumOf(CO, days: days, into: &d11, at: EY, condition: CQ, predicate: notZero)
-    let DU: Int = 280320
+    let DU: Int = 1024920
     // SUMIFS(Calculation!DU5:DU8764,Calculation!CS5:CS8764,"="&$A6,Calculation!DH5:DH8764,">0")
     hour.sumOf(DU, days: days, into: &d11, at: EZ, condition: DH, predicate: notZero)
     /// Grid import for min/max harm and stby outside harm op

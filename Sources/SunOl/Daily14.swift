@@ -192,7 +192,9 @@ extension TunOl {
     }
     /// Grid import
     // ME=ROUND(LI6+LW6+LT6+LJ6,5)+ROUND(MAX(0,-LK6)+MAX(0,-LX6),0)*EDG_elec_cost_factor
-    for i in 0..<365 { d14[ME + i] = round(d14[LI + i] + d14[LW + i] + d14[LT + i] + d14[LJ + i], 5) + round(max(Double.zero, -d14[LK + i]) + max(Double.zero, -d14[LX + i]), 5) * EDG_elec_cost_factor }
+    for i in 0..<365 { 
+      d14[ME + i] = round(d14[LI + i] + d14[LW + i] + d14[LT + i] + d14[LJ + i], 0) + round(max(Double.zero, -d14[LK + i]) + max(Double.zero, -d14[LX + i]), 0) * EDG_elec_cost_factor
+    }
     /// Outside harmonious operation period hours
     // MF=IF(LR6=0,0,$C6+IFERROR(($T6-$C6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc),0))
     for i in 0..<365 { d14[MF + i] = iff(d14[LR + i].isZero, Double.zero, d14[C + i] + (d14[T + i] - d14[C + i]) * d14[AMKG + i]) }

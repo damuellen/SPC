@@ -971,7 +971,9 @@ extension TunOl {
     /// Grid import for max harm and stby
     let DU: Int = 1_024_920
     // =MIN(IF(DH6>0,Grid_import_yes_no_PB_strategy,Grid_import_yes_no_PB_strategy_outsideharmop)*Grid_import_max_ud,DL6)
-    for i in 1..<8760 { h[DU + i] = min(iff(h[DH + i] > Double.zero, Grid_import_yes_no_PB_strategy, Grid_import_yes_no_PB_strategy_outsideharmop) * Grid_import_max_ud, h[DL + i]) }
+    for i in 1..<8760 { 
+      h[DU + i] = min(iff(h[DH + i] > Double.zero, Grid_import_yes_no_PB_strategy, Grid_import_yes_no_PB_strategy_outsideharmop) * Grid_import_max_ud, h[DL + i])
+    }
 
     /// Remaining grid import capacity after max harm
     let DM: Int = 954840

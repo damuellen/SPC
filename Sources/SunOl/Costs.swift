@@ -92,10 +92,10 @@ public struct Costs {
       max(model.Grid_export_max_ud, model.Grid_import_max_ud) > Double.zero
       ? Substation.coeff * (max(model.Grid_export_max_ud, model.Grid_import_max_ud) / Substation.basis) ** Substation.exp : Double.zero
 
-    let CSP_O_M_Cost = (11.3333 / 3.0 * 1.0 / 3.0 * 1000.0 * 1000) + (0.00606061 / 3.0 * 1.0 / 3.0 * 1000.0 * 1000.0) * model.CSP_loop_nr_ud
+    let CSP_O_M_Cost = model.CSP_loop_nr_ud > 0 ? (11.3333 / 3.0 * 1.0 / 3.0 * 1000.0 * 1000) + (0.00606061 / 3.0 * 1.0 / 3.0 * 1000.0 * 1000.0) * model.CSP_loop_nr_ud : Double.zero
     // let PV_O_M_Cost = (11.3333 * 1000.0 * 1000) + (0.00606061 / 100.0 * 1000.0 * 1000.0) * model.PV_DC_cap_ud
     let PV_O_M_Cost = (18.01 * 1000 + model.PV_DC_cap_ud * -0.008375 * 1000) * model.PV_DC_cap_ud
-    let PB_O_M_Cost = (11.3333 / 3.0 * 2.0 / 3.0 * 1000.0 * 1000.0) + (0.00606061 / 3 * 2.0 / 3.0 * 1000.0 * 1000.0) * model.PB_nom_gross_cap_ud
+    let PB_O_M_Cost = model.PB_nom_gross_cap_ud > 0 ?  (11.3333 / 3.0 * 2.0 / 3.0 * 1000.0 * 1000.0) + (0.00606061 / 3 * 2.0 / 3.0 * 1000.0 * 1000.0) * model.PB_nom_gross_cap_ud: Double.zero
     let OM_Cost_EY_Methsynt = (MethDist_plant_cost + Electrolysis_cost) * 0.035
     self.CO2_Cost = 40.0 / model.MethDist_Ref_meth_hour_prod * model.MethSynt_Ref_rawmeth_hour_prod / model.MethSynt_Ref_rawmeth_hour_prod * model.MethSynt_Ref_CO2_hour_cons
     // let CAPEX_ICPH_assembly_hall_csp_sf_dedicated_to_ICPH_PC_DC_PV_AC_Heaters_TES_PB_Substation =

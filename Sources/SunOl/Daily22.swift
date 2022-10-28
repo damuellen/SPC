@@ -6,8 +6,8 @@ extension TunOl {
     )
     let notZero: (Double) -> Bool = { $0 > Double.zero }
 
-    let N = 341640
-    let AU = 271560
+    let N = 52560
+    let AU = 341640
 
     var d22 = [Double](repeating: Double.zero, count: 14235)
 
