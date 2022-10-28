@@ -15,58 +15,44 @@ public struct Costs {
     //  let CO2_density = 945.0
     //  let RawMeth_density = 782.0
 
-    let Solar_field = (basis: 38.0, c1: 1581220.07314946, exp: 0.8, f: 0.71, coeff: 18_000_000.0, range: 19.0...130.0)
-    let Assembly_hall = (c1: 41541.19937, c0: 14424543.95)
-    let PV_DC_part = (basis: 605.0, coeff: 465123.72321881)
-    let PV_AC_part = (basis: 490.0, exp: 0.7, coeff: 64150.294897127, range: 267...778)
-    let Heater_system = (basis: 200.0, c1: 4_000_000.0, exp: 0.4, c2: 211728.735839637, factor: 0.9, coeff: 3_500_000.0, range: 200.0...400.0)
-    let Thermal_energy_storage = (basis: 26920.0, c1: 2_000_000.0, exp: 0.75, c2: 1.90888818091572E+03, factor: 0.55, coeff: 26_000_000.0)
-    let Power_Block = (basis: 50.0, c1: 84_370_000.0, coeff: 466_228.572051, range: 50.0...200.0)
+    let Solar_field = (basis: 38.0, c1: 15000000.0, c2: 2353102.66816456, exp: 0.85, factor: 0.72, coeff: 25000000.0, range: 19.0...130.0)
+    let Assembly_hall = (c1: 87819.8346218374, c0: 4149722.41758168)
+    let PV_DC_part = (basis: 0, coeff: 802184.207438602)
+    let PV_AC_part = (basis: 0, coeff: 134233.234759846)
+    let Heater_system = (basis: 200.0, c1: 7000000.0, exp: 0.45, c2: 309140.303724601, factor: 0.9, coeff: 3600000.0, range: 200.0...400.0)
+    let Thermal_energy_storage = (basis: 26920.0, c1: 114793692.328915, c2: 4029.33117346384, factor: 0.95)
+    let Power_Block = (basis: 50.0, c1: 55_000_000.0, exp: 0.735, coeff: 41_000_000.0)
     let Electrolysis_coeff = 700000 * 1.2 * 0 + (2.5 - 0.36) * 1_000_000 * (model.EY_Ref_var_net_nom_cons + model.EY_Ref_var_nom_cons) / model.EY_Ref_var_net_nom_cons
     let Hydrogen_storage = (basis: 24E-2 * Hydrogen_density, exp: 0.9, coeff: 780_000 * 1.2 * 0)
     let CCU_plant = (basis: 22.890276, exp: 0.7, coeff: 18_292_682.9268293 * 0)
     let CO2_storage = (basis: 226.8, exp: 0.9, coeff: 780_000.0 * 0)
     let MethSynt_plant = (basis: 19.0665095748076, exp: 0.7, coeff: 29_268_292.6829268 * 0)
     let RawMeth_storage = (basis: 1.87680000000000E+02, exp: 0.9, coeff: (694146.8625 / FX_USD) * 0)
-    let MethDist_plant = (exp: 0, coeff: 2.5*7*(20+0.1)*0.36/2.5/14.833*1000*1000)
-    let Battery_energy_storage = (basis: 0.0, c1: 0.0, coeff: 550000.0)
+    let MethDist_plant = (exp: 0, coeff: 2.5 * 7 * (20 + 0.1) * 0.36 / 2.5 / 14.833 * 1000 * 1000)
+    let Battery_energy_storage = (basis: 0.0, coeff: 501579.333846229)
     let Electrical_boiler = (basis: 3.27, exp: 0.7, coeff: 494000 * 1.45 * 1.2)
     let Substation = (basis: 135.0, exp: 0.7, coeff: 2.4E+06)
 
-    // let factor = min(Heat_to_aux_directly_from_CSP_sum + Heat_to_aux_from_PB_sum * model.PB_Ratio_Heat_input_vs_output,
-    //  Q_solar_before_dumping_sum - Total_SF_heat_dumped_sum - TES_thermal_input_by_CSP_sum)
 
-    // var auxLoops = model.CSP_loop_nr_ud > 0 ?
-    //  min(model.CSP_loop_nr_ud, Double(model.CSP_loop_nr_ud * factor / Q_solar_before_dumping_sum)) : 0
-    // if (auxLoops <= 0 || factor <= 0) {
-    //   auxLoops = 0
-    // }
-    self.Assembly_hall_cost = Assembly_hall.c1 * Double(model.CSP_loop_nr_ud.rounded(.up)) ** 1.0 + Assembly_hall.c0
-    // let CSP_SF_cost_dedicated_to_ICPH =
-    //   Solar_field.coeff * ((model.CSP_loop_nr_ud - auxLoops) / Solar_field.basis) ** Solar_field.exp + Solar_field.c1 * Solar_field.f
-    //   * (model.CSP_loop_nr_ud - auxLoops)
 
-    // var aux_Heat_ratio = Double(meth_plant_heatConsumption_sum / (meth_plant_heatConsumption_sum + EY_aux_heatConsumption_sum))
-    // if aux_Heat_ratio.isNaN { aux_Heat_ratio = 0 }
-    // let CSP_SF_cost_dedicated_to_Hydrogen = Solar_field.coeff * ((model.CSP_loop_nr_ud - auxLoops * aux_Heat_ratio) / Solar_field.basis) ** Solar_field.exp + Solar_field.c1 * Solar_field.f
-    //   * (model.CSP_loop_nr_ud - auxLoops * aux_Heat_ratio)
-
-    self.CSP_SF_cost_dedicated_to_Methanol = Solar_field.coeff * (model.CSP_loop_nr_ud.rounded(.up) / Solar_field.basis) ** Solar_field.exp + Solar_field.c1 * Solar_field.f
+    self.Assembly_hall_cost = Assembly_hall.c1 * Double(model.CSP_loop_nr_ud.rounded(.up)) + Assembly_hall.c0
+    self.CSP_SF_cost_dedicated_to_Methanol = Solar_field.c1 + Solar_field.coeff * (model.CSP_loop_nr_ud.rounded(.up) / Solar_field.basis) ** Solar_field.exp + Solar_field.c2 * Solar_field.factor
       * model.CSP_loop_nr_ud.rounded(.up)
     // let CSP_SF_cost_dedicated_to_aux_heat = AdditionalCostPerLoop * auxLoops
 
     self.PV_DC_cost = model.PV_DC_cap_ud * PV_DC_part.coeff
-    self.PV_AC_cost = (model.PV_AC_cap_ud / PV_AC_part.basis) ** PV_AC_part.exp * PV_AC_part.basis * PV_AC_part.coeff
+    self.PV_AC_cost = model.PV_AC_cap_ud * PV_AC_part.coeff
 
     self.Heater_cost =
       model.Heater_cap_ud > Double.zero
       ? (Heater_system.c1 + Heater_system.coeff * (model.Heater_cap_ud / Heater_system.basis) ** Heater_system.exp + model.Heater_cap_ud * Heater_system.factor * Heater_system.c2)
       : Double.zero
 
-    self.TES_storage_cost = Thermal_energy_storage.c1 + Thermal_energy_storage.coeff * (model.TES_salt_mass / Thermal_energy_storage.basis) ** Thermal_energy_storage.exp
-      + model.TES_salt_mass * Thermal_energy_storage.c2 * Thermal_energy_storage.factor
+    self.TES_storage_cost = Thermal_energy_storage.c1 + (model.TES_salt_mass - Thermal_energy_storage.basis) * Thermal_energy_storage.c2 * Thermal_energy_storage.factor
     if TES_storage_cost.isNaN { TES_storage_cost = 0 }
-    self.PB_cost = model.PB_nom_gross_cap_ud > Double.zero ? (Power_Block.c1 + (model.PB_nom_gross_cap_ud - Power_Block.basis) * Power_Block.coeff) : Double.zero
+    self.PB_cost = model.PB_nom_gross_cap_ud > Double.zero 
+      ? Power_Block.c1 + Power_Block.coeff * (model.PB_nom_gross_cap_ud / Power_Block.basis) ** Power_Block.exp
+      : Double.zero
 
     self.Electrolysis_cost = (model.EY_var_net_nom_cons_ud / 20.0).rounded(.up) * 20.0 * Electrolysis_coeff
 
@@ -81,7 +67,7 @@ public struct Costs {
 
     self.MethDist_plant_cost = MethDist_plant.coeff * model.MethDist_Meth_nom_prod_ud
 
-    self.Battery_storage_cost = model.BESS_cap_ud * Battery_energy_storage.coeff + (model.BESS_cap_ud > Double.zero ? Battery_energy_storage.c1 : Double.zero)
+    self.Battery_storage_cost = model.BESS_cap_ud * Battery_energy_storage.coeff
 
     self.Electrical_boiler_cost = model.El_boiler_cap_ud > Double.zero ? (Electrical_boiler.coeff * (model.El_boiler_cap_ud / Electrical_boiler.basis) ** Electrical_boiler.exp) : Double.zero
 
