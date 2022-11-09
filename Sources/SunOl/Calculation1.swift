@@ -15,6 +15,7 @@ extension TunOl {
     /// Not covered aux elec for PB stby, CSP SF and PV Plant MWel
     let Q: Int = 78840
     for i in 1..<8760 {
+      h[i] = Reference_PV_plant_power_at_inverter_inlet_DC[i]
       // E6*CSP_loop_nr_ud
       h[J + i] = Q_Sol_MW_thLoop[i] * CSP_loop_nr_ud
       // F6*PV_DC_cap_ud/PV_Ref_DC_cap
