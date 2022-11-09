@@ -179,7 +179,7 @@ extension Array where Element == Double {
 }
 
 func round(_ value: Double, _ digits: Double) -> Double { (pow(10, digits) * value).rounded() / pow(10, digits) }
-
+func roundDown(_ value: Double, _ digits: Double = 2) -> Double { (pow(10, digits) * value).rounded(.down) / pow(10, digits) }
 func roundUp(_ value: Double, _ digits: Double = 2) -> Double { (pow(10, digits) * value).rounded(.up) / pow(10, digits) }
 
 func average(_ values: ArraySlice<Double>) -> Double {
