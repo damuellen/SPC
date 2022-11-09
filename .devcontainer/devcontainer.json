@@ -14,9 +14,10 @@
 		"lldb.evaluateForHovers": false,
 		"lldb.evaluationTimeout": 30,
   	"lldb.consoleMode": "evaluate",
-		"swiftTest.swift.reloadOnTextSave": false,
 		"editor.defaultFormatter": "vknabel.vscode-apple-swift-format",
-		"editor.inlayHints.enabled": "offUnlessPressed"
+		"editor.inlayHints.enabled": "offUnlessPressed",
+		"swift.disableAutoResolve": true,
+  	"debug.inlineValues": "on"
 	},
 	"extensions": [
 		"sswg.swift-lang",

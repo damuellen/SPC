@@ -1,6 +1,7 @@
 {
     "workbench.editorAssociations": {
-        "*.png": "imagePreview.previewEditor"
+        "*.png": "imagePreview.previewEditor",
+        "*.csv": "default"
     },
 	"terminal.integrated.scrollback": 50000,
     "terminal.integrated.defaultLocation": "editor",
@@ -9,7 +10,10 @@
     "extensions.ignoreRecommendations": true,
     "diffEditor.ignoreTrimWhitespace": false,
     "git.autofetch": true,
-    "debug.terminal.clearBeforeReusing": true,
+    "lldb.launch.expressions": "native",
+    "lldb.evaluateForHovers": false,
+    "lldb.evaluationTimeout": 30,
+    "lldb.consoleMode": "evaluate",
     "task.problemMatchers.neverPrompt": true,
     "editor.fontFamily": "SF Mono, Menlo, Monaco, Consolas, monospace",
     "editor.tabSize": 2,
@@ -23,9 +27,11 @@
     "editor.mouseWheelZoom":true,
     "editor.smoothScrolling":true,
     "editor.tabCompletion":"on",
+    "editor.inlayHints.enabled": "offUnlessPressed",
     "debug.internalConsoleOptions": "neverOpen",
     "debug.openDebug": "neverOpen",
     "debug.onTaskErrors": "showErrors",
     "debug.showInStatusBar": "never",
+    "debug.inlineValues": "on",
 }
  
