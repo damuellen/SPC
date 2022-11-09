@@ -1,7 +1,7 @@
 import XCTest
 
 @testable import BlackBoxModel
-import Physics
+import Units
 
 class StorageTests: XCTestCase {
   func testsParasitics() {

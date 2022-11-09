@@ -8,7 +8,7 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 import Libc
-import Physics
+import Units
 
 extension PV {
   /// Wraps low-level functions for solving the single diode equation.

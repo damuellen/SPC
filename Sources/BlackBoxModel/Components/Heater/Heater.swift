@@ -9,7 +9,7 @@
 //
 
 import DateExtensions
-import Physics
+import Units
 
 /// This struct contains the state as well as the functions for mapping the heater
 public struct Heater: Parameterizable, HeatTransfer {

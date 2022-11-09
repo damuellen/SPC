@@ -8,7 +8,7 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 import Libc
-import Physics
+import Units
 
 /// The PV_System struct wraps the functions of the pv system components.
 ///

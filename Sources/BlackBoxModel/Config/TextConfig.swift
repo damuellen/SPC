@@ -9,7 +9,7 @@
 //
 
 import Foundation
-import Physics
+import Utilities
 
 public enum TextConfig {
   /// List of path extension for needed config files.

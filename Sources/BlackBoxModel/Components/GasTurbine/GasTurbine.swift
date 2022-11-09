@@ -9,7 +9,7 @@
 //
 
 import DateExtensions
-import Physics
+import Units
 
 /// This struct contains the state as well as the functions for mapping the gas turbine
 public struct GasTurbine: Parameterizable {
