@@ -8,7 +8,7 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
-import Physics
+import Utilities
 
 struct HeatExchanger: Codable {
   var massFlow = MassFlow()
