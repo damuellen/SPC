@@ -54,7 +54,7 @@ extension TunOl {
     }
     /// Outside harm op aux elec for TES dischrg, CSP SF and PV Plant MWel
     let DY: Int = 26280
-    // DY=ROUNDUP(IF(DV6=0,0,IF(OR($BM6>0,PB_nom_gross_cap_ud<=0),0,$BK6+MAX(0,(MIN(PB_nom_net_cap,MAX(PB_net_min_cap,(1+TES_aux_cons_perc)*MAX(0,DX6-$BP6)))+PB_nom_net_cap*PB_nom_var_aux_cons_perc_net*POLY(MIN(PB_nom_net_cap,MAX(PB_net_min_cap,(1+TES_aux_cons_perc)*MAX(0,DX6-$BP6)))/PB_nom_net_cap,PB_n2g_var_aux_el_Coeff)+PB_fix_aux_el)/(PB_gross_min_eff+(PB_nom_gross_eff-PB_gross_min_eff)/(PB_nom_net_cap-PB_net_min_cap)*(MIN(PB_nom_net_cap,MAX(0,DX6-$BP6))-PB_net_min_cap))+((A_overall_var_heat_max_cons-A_overall_var_heat_min_cons)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(DV6-A_equiv_harmonious_min_perc)+A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons)*PB_Ratio_Heat_input_vs_output+IF(AND(DX6=0,DX8>0),IF(COUNTIF(DX2:DX6,"0")<PB_warm_start_duration,PB_hot_start_heat_req,PB_warm_start_heat_req),0)-$BQ6)*TES_aux_cons_perc)),1)
+    // DY=IF(DV6=0,0,IF(OR($BM6>0,PB_nom_gross_cap_ud<=0),0,ROUNDUP($BK6+MAX(0,(MIN(PB_nom_net_cap,MAX(PB_net_min_cap,(1+TES_aux_cons_perc)*MAX(0,DX6-$BP6)))+PB_nom_net_cap*PB_nom_var_aux_cons_perc_net*POLY(MIN(PB_nom_net_cap,MAX(PB_net_min_cap,(1+TES_aux_cons_perc)*MAX(0,DX6-$BP6)))/PB_nom_net_cap,PB_n2g_var_aux_el_Coeff)+PB_fix_aux_el)/PB_gross_min_eff+((A_overall_var_heat_max_cons-A_overall_var_heat_min_cons)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(DV6-A_equiv_harmonious_min_perc)+A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons)*PB_Ratio_Heat_input_vs_output+IF(AND(DX6=0,DX7>0),IF(COUNTIF(DX$1:DX6,"0")<PB_warm_start_duration,PB_hot_start_heat_req,PB_warm_start_heat_req),0)-$BQ6)*TES_aux_cons_perc,2)))
     for i in 1..<8760 {
       if h[DV + i].isZero {
         h[DY + i] = Double.zero
@@ -68,8 +68,7 @@ extension TunOl {
             Double.zero,
             (min(PB_nom_net_cap, max(PB_net_min_cap, (1 + TES_aux_cons_perc) * max(Double.zero, h[DX + i] - h0[BP + i]))) + PB_nom_net_cap * PB_nom_var_aux_cons_perc_net
               * POLY(min(PB_nom_net_cap, max(PB_net_min_cap, (1 + TES_aux_cons_perc) * max(Double.zero, h[DX + i] - h0[BP + i]))) / PB_nom_net_cap, PB_n_g_var_aux_el_Coeff) + PB_fix_aux_el)
-              / (PB_gross_min_eff + (PB_nom_gross_eff - PB_gross_min_eff) / (PB_nom_net_cap - PB_net_min_cap) * (min(PB_nom_net_cap, max(Double.zero, h[DX + i] - h0[BP + i])) - PB_net_min_cap))
-              + ((overall_var_heat_max_cons[j] - overall_var_heat_min_cons[j]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]) * (h[DV + i] - equiv_harmonious_min_perc[j]) + overall_var_heat_min_cons[j]
+              / PB_gross_min_eff + ((overall_var_heat_max_cons[j] - overall_var_heat_min_cons[j]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]) * (h[DV + i] - equiv_harmonious_min_perc[j]) + overall_var_heat_min_cons[j]
                 + overall_heat_fix_stby_cons[j]) * PB_Ratio_Heat_input_vs_output
               + iff(
                 and(h[DX + i].isZero, h[DX + i + 1] > Double.zero),
@@ -230,21 +229,21 @@ extension TunOl {
     /// Available heat from CSP after TES
     let ES: Int = 201480
     for i in 1..<8760 {
-      // =MAX(0,ROUNDUP($L6-EP6,2))
-      h[ER + i] = max(Double.zero, roundUp(h0[L0 + i] - h[EP + i]))
-      // =MAX(0,ROUNDUP($J6-EQ6,2))
-      h[ES + i] = max(Double.zero, roundUp(h0[J0 + i] - h[EQ + i]))
+      // =MAX(0,$L6-EP6)
+      h[ER+i]=max(0,h[L0 + i]-h[EP + i])
+      // =MAX(0,$J6-EQ6)
+      h[ES+i]=max(0,h[J0 + i]-h[EQ + i])
     }
 
     /// Total aux el TES chrg&disch CSP SF, PV, PB stby  MWel
     let ET: Int = 210240
-    // =ROUNDDOWN(IF($J6>0,$J6*CSP_var_aux_nom_perc,CSP_nonsolar_aux_cons)+$M6+(EP6*Heater_eff+EQ6)*TES_aux_cons_perc+IF(OR(EE6=0,AND(EH6=0,EB6=0)),PB_stby_aux_cons,0)+IF(AND(EE6>0,EB6>0),PB_stup_aux_cons+EB6*TES_aux_cons_perc,0)+IF(EH6>0,(EB6+EF6+EI6)*TES_aux_cons_perc,0),2)
+    // =IF($J6>0,$J6*CSP_var_aux_nom_perc,CSP_nonsolar_aux_cons)+$M6+(EP6*Heater_eff+EQ6)*TES_aux_cons_perc+IF(OR(EE6=0,AND(EH6=0,EB6=0)),PB_stby_aux_cons,0)+IF(AND(EE6>0,EB6>0),PB_stup_aux_cons+EB6*TES_aux_cons_perc,0)+IF(EH6>0,(EB6+EF6+EI6)*TES_aux_cons_perc,0)
     for i in 1..<8760 {
       h[ET + i] =
-        ((iff(h0[J0 + i] > Double.zero, h0[J0 + i] * CSP_var_aux_nom_perc, CSP_nonsolar_aux_cons) + h0[M0 + i] + (h[EP + i] * Heater_eff + h[EQ + i]) * TES_aux_cons_perc
-        + iff(or(h[EE + i].isZero, and(h[EH + i].isZero, h[EB + i].isZero)), PB_stby_aux_cons, Double.zero) + iff(and(h[EE + i] > Double.zero, h[EB + i] > Double.zero), PB_stup_aux_cons + h[EB + i] * TES_aux_cons_perc, Double.zero)
-        + iff(h[EH + i] > Double.zero, (h[EB + i] + h[EF + i] + h[EI + i]) * TES_aux_cons_perc, Double.zero)) * 100)
-        .rounded(.down) / 100
+        iff(h[J0 + i] > Double.zero, h[J0 + i] * CSP_var_aux_nom_perc, CSP_nonsolar_aux_cons) + h[M0 + i] + (h[EP + i] * Heater_eff + h[EQ + i]) * TES_aux_cons_perc
+        + iff(or(h[EE + i] == Double.zero, and(h[EH + i] == Double.zero, h[EB + i] == Double.zero)), PB_stby_aux_cons, 0)
+        + iff(and(h[EE + i] > Double.zero, h[EB + i] > Double.zero), PB_stup_aux_cons + h[EB + i] * TES_aux_cons_perc, 0)
+        + iff(h[EH + i] > Double.zero, (h[EB + i] + h[EF + i] + h[EI + i]) * TES_aux_cons_perc, 0)
     }
 
     /// Min harmonious net elec cons not considering grid import
@@ -303,26 +302,31 @@ extension TunOl {
     /// El cons due to op outside of harm op period
     let CT: Int = 788400
     let FA: Int = 271560
-    // FA=IF(OR(EE6=0,EX6>0,CT6=0),0,MAX(CT6,A_overall_fix_stby_cons+IF(EX7=0,0,A_overall_stup_cons)+A_overall_var_max_cons*MIN(1,IFERROR((EH6+ER6+MAX(0,Grid_import_yes_no_PB_strategy_outsideharmop*Grid_import_max_ud-EU6)-ET6-EX6-A_overall_fix_stby_cons-IF(EX7=0,0,A_overall_stup_cons)+(ES6+EI6/PB_Ratio_Heat_input_vs_output-EY6-A_overall_heat_fix_stby_cons-IF(EX7=0,0,A_overall_heat_stup_cons))/El_boiler_eff)/(A_overall_var_max_cons+A_overall_var_heat_max_cons/El_boiler_eff),1),IFERROR((EH6+ER6+MAX(0,Grid_import_yes_no_PB_strategy_outsideharmop*Grid_import_max_ud-EU6)-ET6-EX6-A_overall_fix_stby_cons-IF(EX7=0,0,A_overall_stup_cons))/A_overall_var_max_cons,1),IFERROR((ES6+EI6/PB_Ratio_Heat_input_vs_output+El_boiler_cap_ud*El_boiler_eff-EY6-A_overall_heat_fix_stby_cons-IF(EX7=0,0,A_overall_heat_stup_cons))/A_overall_var_heat_max_cons,1))))
+    // FA=IF(OR(EX6>0,EE6=0,MAX(0,IF(EX6>0,Grid_import_yes_no_PB_strategy,Grid_import_yes_no_PB_strategy_outsideharmop)*Grid_import_max_ud-EU6)+EH6+ER6-ET6<A_overall_var_min_cons+A_overall_fix_stby_cons+IF(EX7=0,0,A_overall_stup_cons)),IF(EX6>0,0,IF(EX7=0,Overall_stby_cons,Overall_stup_cons)),MAX(CT6,A_overall_fix_stby_cons+IF(EX7=0,0,A_overall_stup_cons)+A_overall_var_max_cons*MIN(1,IFERROR((EH6+ER6+MAX(0,Grid_import_yes_no_PB_strategy_outsideharmop*Grid_import_max_ud-EU6)-ET6-EX6-A_overall_fix_stby_cons-IF(EX7=0,0,A_overall_stup_cons)+(ES6+EI6/PB_Ratio_Heat_input_vs_output-EY6-A_overall_heat_fix_stby_cons-IF(EX7=0,0,A_overall_heat_stup_cons))/El_boiler_eff)/(A_overall_var_max_cons+A_overall_var_heat_max_cons/El_boiler_eff),1),IFERROR((EH6+ER6+MAX(0,Grid_import_yes_no_PB_strategy_outsideharmop*Grid_import_max_ud-EU6)-ET6-EX6-A_overall_fix_stby_cons-IF(EX7=0,0,A_overall_stup_cons))/A_overall_var_max_cons,1),IFERROR((ES6+EI6/PB_Ratio_Heat_input_vs_output+El_boiler_cap_ud*El_boiler_eff-EY6-A_overall_heat_fix_stby_cons-IF(EX7=0,0,A_overall_heat_stup_cons))/A_overall_var_heat_max_cons,1))))
     for i in 1..<8760 {
-      h[FA + i] = iff(
-        or(h[EE + i].isZero, h[EX + i] > Double.zero, h0[CT + i].isZero), Double.zero,
-        max(
-          h0[CT + i],
-          overall_fix_stby_cons[j] + iff(h[EX + i + 1].isZero, Double.zero, overall_stup_cons[j]) + overall_var_max_cons[j]
-            * min(
-              Double.one,
-              ifFinite(
-                (h[EH + i] + h[ER + i] + max(Double.zero, Grid_import_yes_no_PB_strategy_outsideharmop * Grid_import_max_ud - h[EU + i]) - h[ET + i] - h[EX + i] - overall_fix_stby_cons[j]
-                  - iff(h[EX + i + 1].isZero, Double.zero, overall_stup_cons[j])
-                  + (h[ES + i] + h[EI + i] / PB_Ratio_Heat_input_vs_output - h[EY + i] - overall_heat_fix_stby_cons[j] - iff(h[EX + i + 1].isZero, Double.zero, overall_heat_stup_cons[j])) / El_boiler_eff)
-                  / (overall_var_max_cons[j] + overall_var_heat_max_cons[j] / El_boiler_eff), 1),
-              ifFinite(
-                (h[EH + i] + h[ER + i] + max(Double.zero, Grid_import_yes_no_PB_strategy_outsideharmop * Grid_import_max_ud - h[EU + i]) - h[ET + i] - h[EX + i] - overall_fix_stby_cons[j]
-                  - iff(h[EX + i + 1].isZero, Double.zero, overall_stup_cons[j])) / overall_var_max_cons[j], 1),
-              ifFinite(
-                (h[ES + i] + h[EI + i] / PB_Ratio_Heat_input_vs_output + El_boiler_cap_ud * El_boiler_eff - h[EY + i] - overall_heat_fix_stby_cons[j] - iff(h[EX + i + 1].isZero, Double.zero, overall_heat_stup_cons[j]))
-                  / overall_var_heat_max_cons[j], 1))))
+    h[FA + i] = iff(
+      or(
+        h[EX + i] > Double.zero, h[EE + i] == Double.zero,
+        max(0, iff(h[EX + i] > Double.zero, Grid_import_yes_no_PB_strategy, Grid_import_yes_no_PB_strategy_outsideharmop) * Grid_import_max_ud - h[EU + i])
+          + h[EH + i] + h[ER + i] - h[ET + i] < overall_var_min_cons[j] + overall_fix_stby_cons[j] + iff(h[EX + i + 1] == Double.zero, 0, overall_stup_cons[j])),
+      iff(h[EX + i] > Double.zero, 0, iff(h[EX + i + 1] == Double.zero, Overall_stby_cons, Overall_stup_cons)),
+      max(
+        h0[CT + i],
+        overall_fix_stby_cons[j] + iff(h[EX + i + 1] == Double.zero, 0, overall_stup_cons[j]) + overall_var_max_cons[j]
+          * min(
+            1,
+            ifFinite(
+              (h[EH + i] + h[ER + i] + max(0, Grid_import_yes_no_PB_strategy_outsideharmop * Grid_import_max_ud - h[EU + i]) - h[ET + i] - h[EX + i]
+                - overall_fix_stby_cons[j] - iff(h[EX + i + 1] == Double.zero, 0, overall_stup_cons[j])
+                + (h[ES + i] + h[EI + i] / PB_Ratio_Heat_input_vs_output - h[EY + i] - overall_heat_fix_stby_cons[j]
+                  - iff(h[EX + i + 1] == Double.zero, 0, overall_heat_stup_cons[j])) / El_boiler_eff)
+                / (overall_var_max_cons[j] + overall_var_heat_max_cons[j] / El_boiler_eff), 1),
+            ifFinite(
+              (h[EH + i] + h[ER + i] + max(0, Grid_import_yes_no_PB_strategy_outsideharmop * Grid_import_max_ud - h[EU + i]) - h[ET + i] - h[EX + i]
+                - overall_fix_stby_cons[j] - iff(h[EX + i + 1] == Double.zero, 0, overall_stup_cons[j])) / overall_var_max_cons[j], 1),
+            ifFinite(
+              (h[ES + i] + h[EI + i] / PB_Ratio_Heat_input_vs_output + El_boiler_cap_ud * El_boiler_eff - h[EY + i] - overall_heat_fix_stby_cons[j]
+                - iff(h[EX + i + 1] == Double.zero, 0, overall_heat_stup_cons[j])) / overall_var_heat_max_cons[j], 1))))
     }
 
     // let FAsum: [Double] = h.sum(hours: BOday, condition: FA)
@@ -347,26 +351,34 @@ extension TunOl {
     let CU3 = 797160
     /// heat cons due to op outside of harm op period
     let FB: Int = 280320
-    // =IF(OR(EE6=0,EX6>0,CT6=0),0,MAX(CU6,A_overall_heat_fix_stby_cons+IF(EX7=0,0,A_overall_heat_stup_cons)+A_overall_var_heat_max_cons*MIN(1,IFERROR((EH6+ER6+MAX(0,Grid_import_yes_no_PB_strategy_outsideharmop*Grid_import_max_ud-EU6)-ET6-EX6-A_overall_fix_stby_cons-IF(EX7=0,0,A_overall_stup_cons)+(ES6+EI6/PB_Ratio_Heat_input_vs_output-EY6-A_overall_heat_fix_stby_cons-IF(EX7=0,0,A_overall_heat_stup_cons))/El_boiler_eff)/(A_overall_var_max_cons+A_overall_var_heat_max_cons/El_boiler_eff),1),IFERROR((EH6+ER6+MAX(0,Grid_import_yes_no_PB_strategy_outsideharmop*Grid_import_max_ud-EU6)-ET6-EX6-A_overall_fix_stby_cons-IF(EX7=0,0,A_overall_stup_cons))/A_overall_var_max_cons,1),IFERROR((ES6+EI6/PB_Ratio_Heat_input_vs_output+El_boiler_cap_ud*El_boiler_eff-EY6-A_overall_heat_fix_stby_cons-IF(EX7=0,0,A_overall_heat_stup_cons))/A_overall_var_heat_max_cons,1))))
+    // FB=IF(OR(EX6>0,EE6=0,EI6/PB_Ratio_Heat_input_vs_output+ES6+MIN(El_boiler_cap_ud,MAX(0,IF(EX6>0,Grid_import_yes_no_PB_strategy,Grid_import_yes_no_PB_strategy_outsideharmop)*Grid_import_max_ud-EU6)+EH6+ER6-ET6-FA6)*El_boiler_eff<A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons+IF(EX7=0,0,A_overall_heat_stup_cons)),IF(EX6>0,0,IF(EX7=0,Overall_heat_stby_cons,Overall_heat_stup_cons)),MAX(CU6,A_overall_heat_fix_stby_cons+IF(EX7=0,0,A_overall_heat_stup_cons)+A_overall_var_heat_max_cons*MIN(1,IFERROR((EH6+ER6+MAX(0,Grid_import_yes_no_PB_strategy_outsideharmop*Grid_import_max_ud-EU6)-ET6-EX6-A_overall_fix_stby_cons-IF(EX7=0,0,A_overall_stup_cons)+(ES6+EI6/PB_Ratio_Heat_input_vs_output-EY6-A_overall_heat_fix_stby_cons-IF(EX7=0,0,A_overall_heat_stup_cons))/El_boiler_eff)/(A_overall_var_max_cons+A_overall_var_heat_max_cons/El_boiler_eff),1),IFERROR((EH6+ER6+MAX(0,Grid_import_yes_no_PB_strategy_outsideharmop*Grid_import_max_ud-EU6)-ET6-EX6-A_overall_fix_stby_cons-IF(EX7=0,0,A_overall_stup_cons))/A_overall_var_max_cons,1),IFERROR((ES6+EI6/PB_Ratio_Heat_input_vs_output+El_boiler_cap_ud*El_boiler_eff-EY6-A_overall_heat_fix_stby_cons-IF(EX7=0,0,A_overall_heat_stup_cons))/A_overall_var_heat_max_cons,1))))
     for i in 1..<8760 {
       h[FB + i] = iff(
-        or(h[EE + i].isZero, h[EX + i] > Double.zero, h0[CT + i].isZero), Double.zero,
+        or(
+          h[EX + i] > Double.zero, h[EE + i] == Double.zero,
+          h[EI + i] / PB_Ratio_Heat_input_vs_output + h[ES + i] + min(
+            El_boiler_cap_ud,
+            max(0, iff(h[EX + i] > Double.zero, Grid_import_yes_no_PB_strategy, Grid_import_yes_no_PB_strategy_outsideharmop) * Grid_import_max_ud - h[EU + i])
+              + h[EH + i] + h[ER + i] - h[ET + i] - h[FA + i]) * El_boiler_eff < overall_var_heat_min_cons[j] + overall_heat_fix_stby_cons[j]
+            + iff(h[EX + i + 1] == Double.zero, 0, overall_heat_stup_cons[j])),
+        iff(h[EX + i] > Double.zero, 0, iff(h[EX + i + 1] == Double.zero, Overall_heat_stby_cons, Overall_heat_stup_cons)),
         max(
           h0[CU3 + i],
-          overall_heat_fix_stby_cons[j] + iff(h[EX + i + 1].isZero, Double.zero, overall_heat_stup_cons[j]) + overall_var_heat_max_cons[j]
+          overall_heat_fix_stby_cons[j] + iff(h[EX + i + 1] == Double.zero, 0, overall_heat_stup_cons[j]) + overall_var_heat_max_cons[j]
             * min(
               Double.one,
               ifFinite(
-                (h[EH + i] + h[ER + i] + max(Double.zero, Grid_import_yes_no_PB_strategy_outsideharmop * Grid_import_max_ud - h[EU + i]) - h[ET + i] - h[EX + i] - overall_fix_stby_cons[j]
-                  - iff(h[EX + i + 1].isZero, Double.zero, overall_stup_cons[j])
-                  + (h[ES + i] + h[EI + i] / PB_Ratio_Heat_input_vs_output - h[EY + i] - overall_heat_fix_stby_cons[j] - iff(h[EX + i + 1].isZero, Double.zero, overall_heat_stup_cons[j])) / El_boiler_eff)
+                (h[EH + i] + h[ER + i] + max(0, Grid_import_yes_no_PB_strategy_outsideharmop * Grid_import_max_ud - h[EU + i]) - h[ET + i] - h[EX + i]
+                  - overall_fix_stby_cons[j] - iff(h[EX + i + 1] == Double.zero, 0, overall_stup_cons[j])
+                  + (h[ES + i] + h[EI + i] / PB_Ratio_Heat_input_vs_output - h[EY + i] - overall_heat_fix_stby_cons[j]
+                    - iff(h[EX + i + 1] == Double.zero, 0, overall_heat_stup_cons[j])) / El_boiler_eff)
                   / (overall_var_max_cons[j] + overall_var_heat_max_cons[j] / El_boiler_eff), 1),
               ifFinite(
-                (h[EH + i] + h[ER + i] + max(Double.zero, Grid_import_yes_no_PB_strategy_outsideharmop * Grid_import_max_ud - h[EU + i]) - h[ET + i] - h[EX + i] - overall_fix_stby_cons[j]
-                  - iff(h[EX + i + 1].isZero, Double.zero, overall_stup_cons[j])) / overall_var_max_cons[j], 1),
+                (h[EH + i] + h[ER + i] + max(0, Grid_import_yes_no_PB_strategy_outsideharmop * Grid_import_max_ud - h[EU + i]) - h[ET + i] - h[EX + i]
+                  - overall_fix_stby_cons[j] - iff(h[EX + i + 1] == Double.zero, 0, overall_stup_cons[j])) / overall_var_max_cons[j], 1),
               ifFinite(
-                (h[ES + i] + h[EI + i] / PB_Ratio_Heat_input_vs_output + El_boiler_cap_ud * El_boiler_eff - h[EY + i] - overall_heat_fix_stby_cons[j] - iff(h[EX + i + 1].isZero, Double.zero, overall_heat_stup_cons[j]))
-                  / overall_var_heat_max_cons[j], 1))))
+                (h[ES + i] + h[EI + i] / PB_Ratio_Heat_input_vs_output + El_boiler_cap_ud * El_boiler_eff - h[EY + i] - overall_heat_fix_stby_cons[j]
+                  - iff(h[EX + i + 1] == Double.zero, 0, overall_heat_stup_cons[j])) / overall_var_heat_max_cons[j], 1))))
     }
 
     /// Remaining el after min harmonious

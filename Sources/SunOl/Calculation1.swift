@@ -84,31 +84,34 @@ extension TunOl {
     for i in 8748..<8760 { h[U + i] = h[U + i - 1] }
     /// Remaining PV after min harmonious
     let V: Int = 122640
-    // MAX(0,$P6-$Q6-S6-MIN(El_boiler_cap_ud,MAX(0,(T6-$J6)/El_boiler_eff)))
-    for i in 1..<8760 { h[V + i] = max(Double.zero, h[P + i] - h[Q + i] - h[S + i] - min(El_boiler_cap_ud, max(Double.zero, (h[T + i] - h[J + i]) / El_boiler_eff))) }
+    // V=ROUNDUP(MAX(0,$P5-$Q5-S5-MIN(El_boiler_cap_ud,MAX(0,(T5-$J5)/El_boiler_eff))),5)
+    for i in 1..<8760 { h[V + i] = roundUp(max(0, h[P + i] - h[Q + i] - h[S + i] - min(El_boiler_cap_ud, max(0, (h[T + i] - h[J + i]) / El_boiler_eff))), 5) }
     /// Remaining CSP heat after min harmonious
     let W: Int = 131400
-    // MAX(0,J6-T6)
-    for i in 1..<8760 { h[W + i] = max(Double.zero, h[J + i] - h[T + i]) }
+    // W=ROUNDUP(MAX(0,$J5-T5),5)
+    for i in 1..<8760 { h[W + i] = roundUp(max(0, h[J + i] - h[T + i]), 5) }
     /// Grid import necessary for min harmonious
     let X: Int = 140160
-    // =ROUND(MAX(0,-($P5-$Q5-S5-MIN(El_boiler_cap_ud,MAX(0,(T5-$J5)/El_boiler_eff)))),5)
-    for i in 1..<8760 { h[X + i] = round(max(Double.zero, -(h[P + i] - h[Q + i] - h[S + i] - min(El_boiler_cap_ud, max(Double.zero, (h[T + i] - h[J + i]) / El_boiler_eff)))), 5) }
+    // X=ROUNDDOWN(MAX(0,-($P5-$Q5-S5-MIN(El_boiler_cap_ud,MAX(0,(T5-$J5)/El_boiler_eff)))),5)
+    for i in 1..<8760 { h[X + i] = roundDown(max(0, -(h[P + i] - h[Q + i] - h[S + i] - min(El_boiler_cap_ud, max(0, (h[T + i] - h[J + i]) / El_boiler_eff)))), 5) }
     let N: Int = 52560
     // =MIN(IF(S5>0,Grid_import_yes_no_BESS_strategy,Grid_import_yes_no_BESS_strategy_outsideharmop)*Grid_import_max_ud,X5)
     for i in 1..<8760 { h[N + i] = min(iff(h[S + i] > Double.zero, Grid_import_yes_no_BESS_strategy, Grid_import_yes_no_BESS_strategy_outsideharmop) * Grid_import_max_ud, h[X + i]) }
     /// Remaining grid import capacity after min harmonious
     let Y: Int = 148920
-    // =MAX(0,IF(S5>0,Grid_import_yes_no_BESS_strategy,Grid_import_yes_no_BESS_strategy_outsideharmop)*Grid_import_max_ud-N5)
-    for i in 1..<8760 { h[Y + i] = max(Double.zero, iff(h[S + i] > Double.zero, Grid_import_yes_no_BESS_strategy, Grid_import_yes_no_BESS_strategy_outsideharmop) * Grid_import_max_ud - h[N + i]) }
+    // Y=ROUND(MAX(0,IF(S5>0,Grid_import_yes_no_BESS_strategy,Grid_import_yes_no_BESS_strategy_outsideharmop)*Grid_import_max_ud-N5),5)
+    for i in 1..<8760 {
+      h[Y + i] = round(
+        max(0, iff(h[S + i] > Double.zero, Grid_import_yes_no_BESS_strategy, Grid_import_yes_no_BESS_strategy_outsideharmop) * Grid_import_max_ud - h[N + i]), 5)
+    }
     /// El to el boiler after min harm heat cons
     let Z: Int = 157680
-    // MAX(0,MIN(El_boiler_cap_ud,(T6-$J6)/El_boiler_eff))
-    for i in 1..<8760 { h[Z + i] = max(Double.zero, min(El_boiler_cap_ud, (h[T + i] - h[J + i]) / El_boiler_eff)) }
+    // Z=ROUND(MAX(0,MIN(El_boiler_cap_ud,(T5-$J5)/El_boiler_eff)),5)
+    for i in 1..<8760 { h[Z + i] = round(max(0, min(El_boiler_cap_ud, (h[T + i] - h[J + i]) / El_boiler_eff)), 5) }
     /// Remaining el boiler cap after min harm heat cons
     let AA: Int = 166440
-    // MAX(0,El_boiler_cap_ud-Z6)
-    for i in 1..<8760 { h[AA + i] = max(Double.zero, El_boiler_cap_ud - h[Z + i]) }
+    // AA=ROUND(MAX(0,El_boiler_cap_ud-Z5),5)
+    for i in 1..<8760 { h[AA + i] = round(max(0, El_boiler_cap_ud - h[Z + i]), 5) }
     /// Remaining MethSynt cap after min harm cons
     let AB: Int = 175200
     /// Remaining CCU cap after min harm cons
@@ -116,14 +119,29 @@ extension TunOl {
     /// Remaining EY cap after min harm cons
     let AD: Int = 192720
     for i in 1..<8760 {
-      // MAX(0;1-((MAX(0;S6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(MethSynt_harmonious_max_perc-MethSynt_harmonious_min_perc)+MethSynt_harmonious_min_perc))*MethSynt_RawMeth_nom_prod_ud
-      let fraction = (max(Double.zero, h[S + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons) / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
-      h[AB + i] = max(Double.zero, 1 - (fraction * (MethSynt_harmonious_max_perc - MethSynt_harmonious_min_perc) + MethSynt_harmonious_min_perc)) * MethSynt_RawMeth_nom_prod_ud
-      // MAX(0;1-((MAX(0;S6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(MethSynt_harmonious_max_perc-MethSynt_harmonious_min_perc)+MethSynt_harmonious_min_perc))*MethSynt_RawMeth_nom_prod_ud
-      h[AC + i] = max(Double.zero, 1 - (fraction * (CCU_harmonious_max_perc - CCU_harmonious_min_perc) + CCU_harmonious_min_perc)) * CCU_CO2_nom_prod_ud
-      // MAX(0;1-((MAX(0;S6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(EY_harmonious_max_perc-EY_harmonious_min_perc)+EY_harmonious_min_perc))*EY_Hydrogen_nom_prod
-      h[AD + i] = max(Double.zero, 1 - (fraction * (EY_harmonious_max_perc - EY_harmonious_min_perc) + EY_harmonious_min_perc)) * EY_Hydrogen_nom_prod
+      // AB=ROUND(MAX(0,1-((MAX(0,S5-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(MethSynt_harmonious_max_perc-MethSynt_harmonious_min_perc)+MethSynt_harmonious_min_perc))*MethSynt_RawMeth_nom_prod_ud,5)
+      h[AB + i] = round(
+        max(
+          0,
+          1
+            - ((max(0, h[S + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons) / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
+              * (MethSynt_harmonious_max_perc - MethSynt_harmonious_min_perc) + MethSynt_harmonious_min_perc)) * MethSynt_RawMeth_nom_prod_ud, 5)
+      // AC=ROUND(MAX(0,1-((MAX(0,S5-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(CCU_harmonious_max_perc-CCU_harmonious_min_perc)+CCU_harmonious_min_perc))*CCU_CO2_nom_prod_ud,5)
+      h[AC + i] = round(
+        max(
+          0,
+          1
+            - ((max(0, h[S + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons) / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
+              * (CCU_harmonious_max_perc - CCU_harmonious_min_perc) + CCU_harmonious_min_perc)) * CCU_CO2_nom_prod_ud, 5)
+      // AD=ROUND(MAX(0,1-((MAX(0,S5-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(EY_harmonious_max_perc-EY_harmonious_min_perc)+EY_harmonious_min_perc))*EY_Hydrogen_nom_prod,5)
+      h[AD + i] = round(
+        max(
+          0,
+          1
+            - ((max(0, h[S + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons) / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
+              * (EY_harmonious_max_perc - EY_harmonious_min_perc) + EY_harmonious_min_perc)) * EY_Hydrogen_nom_prod, 5)
     }
+
     /// Max BESS charging after min harm cons
     let AE: Int = 201480
     /// Max grid export after min harm cons
@@ -168,16 +186,18 @@ extension TunOl {
     for i in 1..<8760 { h[AI + i] = iff(h[AH + i].isZero, Double.zero, max(Double.zero, (h[AH + i] - Overall_fix_cons) / Overall_harmonious_var_max_cons * Overall_harmonious_var_heat_max_cons + Overall_heat_fix_cons)) }
     /// Remaining PV after max harm
     let AJ: Int = 245280
-    // MAX(0,$P6-$Q6-AH6-MIN(El_boiler_cap_ud,MAX(0,(AI6-$J6)/El_boiler_eff)))
-    for i in 1..<8760 { h[AJ + i] = round(max(Double.zero, h[P + i] - h[Q + i] - h[AH + i] - min(El_boiler_cap_ud, max(Double.zero, (h[AI + i] - h[J + i]) / El_boiler_eff))), 5) }
+    // AJ=ROUNDUP(MAX(0,$P5-$Q5-AH5-MIN(El_boiler_cap_ud,MAX(0,(AI5-$J5)/El_boiler_eff))),5)
+    for i in 1..<8760 { h[AJ + i] = roundUp(max(0, h[P + i] - h[Q + i] - h[AH + i] - min(El_boiler_cap_ud, max(0, (h[AI + i] - h[J + i]) / El_boiler_eff))), 5) }
     /// Remaining CSP heat after max harm
     let AK: Int = 254040
-    // MAX(0,J6-AI6)
-    for i in 1..<8760 { h[AK + i] = max(Double.zero, h[J + i] - h[AI + i]) }
+    // AK=ROUNDUP(MAX(0,$J5-AI5),5)
+    for i in 1..<8760 { h[AK + i] = roundUp(max(0, h[J + i] - h[AI + i]), 5) }
     /// Grid import necessary for max harm
     let AL: Int = 262800
-    // =ROUND(MAX(0,-($P6-$Q6-AH6-MIN(El_boiler_cap_ud,MAX(0,(AI6-$J6)/El_boiler_eff)))),5)
-    for i in 1..<8760 { h[AL + i] = round(max(Double.zero, -(h[P + i] - h[Q + i] - h[AH + i] - min(El_boiler_cap_ud, max(Double.zero, (h[AI + i] - h[J + i]) / El_boiler_eff)))), 5) }
+    // AL=ROUNDDOWN(MAX(0,-($P5-$Q5-AH5-MIN(El_boiler_cap_ud,MAX(0,(AI5-$J5)/El_boiler_eff)))),5)
+    for i in 1..<8760 {
+      h[AL + i] = roundDown(max(0, -(h[P + i] - h[Q + i] - h[AH + i] - min(El_boiler_cap_ud, max(0, (h[AI + i] - h[J + i]) / El_boiler_eff)))), 5)
+    }
     let AU: Int = 341640
     // =MIN(IF(AH6>0,Grid_import_yes_no_BESS_strategy,Grid_import_yes_no_BESS_strategy_outsideharmop)*Grid_import_max_ud,AL6)
     for i in 1..<8760 { h[AU + i] = min(iff(h[AH + i] > Double.zero, Grid_import_yes_no_BESS_strategy, Grid_import_yes_no_BESS_strategy_outsideharmop) * Grid_import_max_ud, h[AL + i]) }
@@ -415,26 +435,25 @@ extension TunOl {
     }
     /// Outside harm op aux elec for TES dischrg, CSP SF and PV Plant MWel
     let BW: Int = 586920
-    // =ROUNDUP(IF(OR(BT7=0,$BM7>0,PB_nom_gross_cap_ud<=0),0,$BK7+MAX(0,(MIN(PB_nom_net_cap,MAX(PB_net_min_cap,(1+TES_aux_cons_perc)*MAX(0,BV7-$BP7)))+PB_nom_net_cap*PB_nom_var_aux_cons_perc_net*POLY(MIN(PB_nom_net_cap,MAX(PB_net_min_cap,(1+TES_aux_cons_perc)*MAX(0,BV7-$BP7)))/PB_nom_net_cap,PB_n2g_var_aux_el_Coeff)+PB_fix_aux_el)/(PB_gross_min_eff+(PB_nom_gross_eff-PB_gross_min_eff)/(PB_nom_net_cap-PB_net_min_cap)*(MIN(PB_nom_net_cap,MAX(0,BV7-$BP7))-PB_net_min_cap))+(A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons)*PB_Ratio_Heat_input_vs_output+IF(AND(BV7=0,BV8>0),IF(COUNTIF(BV:BV7,"0")<PB_warm_start_duration,PB_hot_start_heat_req,PB_warm_start_heat_req),0)-$BQ7)*TES_aux_cons_perc),1)
+    // =IF(OR(BT6=0,$BM6>0,PB_nom_gross_cap_ud<=0),0,ROUNDUP($BK6+MAX(0,(MIN(PB_nom_net_cap,MAX(PB_net_min_cap,(1+TES_aux_cons_perc)*MAX(0,BV6-$BP6)))+PB_nom_net_cap*PB_nom_var_aux_cons_perc_net*POLY(MIN(PB_nom_net_cap,MAX(PB_net_min_cap,(1+TES_aux_cons_perc)*MAX(0,BV6-$BP6)))/PB_nom_net_cap,PB_n2g_var_aux_el_Coeff)+PB_fix_aux_el)/PB_gross_min_eff+(A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons)*PB_Ratio_Heat_input_vs_output+IF(AND(BV6=0,BV7>0),IF(COUNTIF(BV$1:BV6,"0")<PB_warm_start_duration,PB_hot_start_heat_req,PB_warm_start_heat_req),0)-$BQ6)*TES_aux_cons_perc,2))
     for i in 1..<8760 {
-      h[BW + i] =
-        (iff(
-          or(h[BT + i].isZero, h[BM + i] > Double.zero, PB_nom_gross_cap_ud <= Double.zero), Double.zero,
+      h[BW + i] = iff(
+        or(h[BT + i] == Double.zero, h[BM + i] > Double.zero, PB_nom_gross_cap_ud <= Double.zero), 0,
+        roundUp(
           h[BK + i] + max(
-            Double.zero,
-            (min(PB_nom_net_cap, max(PB_net_min_cap, (1 + TES_aux_cons_perc) * max(Double.zero, h[BV + i] - h[BP + i]))) + PB_nom_net_cap * PB_nom_var_aux_cons_perc_net
-              * POLY(min(PB_nom_net_cap, max(PB_net_min_cap, (1 + TES_aux_cons_perc) * max(Double.zero, h[BV + i] - h[BP + i]))) / PB_nom_net_cap, PB_n_g_var_aux_el_Coeff) + PB_fix_aux_el)
-              / (PB_gross_min_eff + (PB_nom_gross_eff - PB_gross_min_eff) / (PB_nom_net_cap - PB_net_min_cap) * (min(PB_nom_net_cap, max(Double.zero, h[BV + i] - h[BP + i])) - PB_net_min_cap))
-              + (overall_var_heat_min_cons[j] + overall_heat_fix_stby_cons[j]) * PB_Ratio_Heat_input_vs_output
+            0,
+            (min(PB_nom_net_cap, max(PB_net_min_cap, (1 + TES_aux_cons_perc) * max(0, h[BV + i] - h[BP + i]))) + PB_nom_net_cap * PB_nom_var_aux_cons_perc_net
+              * POLY(min(PB_nom_net_cap, max(PB_net_min_cap, (1 + TES_aux_cons_perc) * max(0, h[BV + i] - h[BP + i]))) / PB_nom_net_cap, PB_n_g_var_aux_el_Coeff)
+              + PB_fix_aux_el) / PB_gross_min_eff + (overall_var_heat_min_cons[j] + overall_heat_fix_stby_cons[j]) * PB_Ratio_Heat_input_vs_output
               + iff(
-                and(h[BV + i].isZero, h[BV + i + 1] > Double.zero),
-                iff(
-                  (h[max(BV + i - 5, BV)...(BV + i)]
+                and(h[BV + i] == Double.zero, h[BV + i + 1] > Double.zero),
+                iff((h[max(BV + i - 5, BV)...(BV + i)]
                     .reduce(0) {
                       if $1.isZero { return $0 + 1 }
                       return $0
-                    }) < PB_warm_start_duration, PB_hot_start_heat_req, PB_warm_start_heat_req), 0) - h[BQ + i]) * TES_aux_cons_perc) * 10)
-        .rounded(.up) / 10
+                    }) < PB_warm_start_duration, PB_hot_start_heat_req, PB_warm_start_heat_req), 0) - h[BQ + i]) * TES_aux_cons_perc, 2))
+
+
     }
     /// Corresponding PB net elec output
     let BX: Int = 595680
@@ -525,21 +544,21 @@ extension TunOl {
     let CL: Int = 718320
     let L: Int = 35040
     for i in 1..<8760 {
-      // MAX(0,L6-CI6)
-      h[CK + i] = max(Double.zero, roundUp(h[L + i] - h[CI + i]))
-      // MAX(0,J6-CJ6)
-      h[CL + i] = max(Double.zero, roundUp(h[J + i] - h[CJ + i]))
+      // =MAX(0,$L6-CI6)
+      h[CK + i] = max(0, h[L + i] - h[CI + i])
+      // =MAX(0,$J6-CJ6)
+      h[CL + i] = max(0, h[J + i] - h[CJ + i])
     }
     let M: Int = 43800
     /// Total aux el TES chrg&disch CSP SF, PV, PB stby  MWel
     let CM: Int = 727080
-    // =ROUNDDOWN(IF(J6>0,J6*CSP_var_aux_nom_perc,CSP_nonsolar_aux_cons)+M6+(CI6*Heater_eff+CJ6)*TES_aux_cons_perc+IF(OR(CC6=0,AND(BY6=0,BZ6=0)),PB_stby_aux_cons,0)+IF(AND(CC6>0,BZ6>0),PB_stup_aux_cons+BZ6*TES_aux_cons_perc,0)+IF(AND(CC6>0,BY6>0),(BZ6+CA6+CB6)*TES_aux_cons_perc,0),2)
+    // =IF($J6>0,$J6*CSP_var_aux_nom_perc,CSP_nonsolar_aux_cons)+$M6+(CI6*Heater_eff+CJ6)*TES_aux_cons_perc+IF(OR(CC6=0,AND(BY6=0,BZ6=0)),PB_stby_aux_cons,0)+IF(AND(CC6>0,BZ6>0),PB_stup_aux_cons+BZ6*TES_aux_cons_perc,0)+IF(AND(CC6>0,BY6>0),(BZ6+CA6+CB6)*TES_aux_cons_perc,0)
     for i in 1..<8760 {
       h[CM + i] =
-        ((iff(h[J + i] > Double.zero, h[J + i] * CSP_var_aux_nom_perc, CSP_nonsolar_aux_cons) + h[M + i] + (h[CI + i] * Heater_eff + h[CJ + i]) * TES_aux_cons_perc
-        + iff(or(h[CC + i].isZero, and(h[BY + i].isZero, h[BZ + i].isZero)), PB_stby_aux_cons, Double.zero) + iff(and(h[CC + i] > Double.zero, h[BZ + i] > Double.zero), PB_stup_aux_cons + h[BZ + i] * TES_aux_cons_perc, Double.zero)
-        + iff(and(h[CC + i] > Double.zero, h[BY + i] > Double.zero), (h[BZ + i] + h[CA + i] + h[CB + i]) * TES_aux_cons_perc, Double.zero)) * 100.0)
-        .rounded(.down) / 100.0
+        iff(h[J + i] > Double.zero, h[J + i] * CSP_var_aux_nom_perc, CSP_nonsolar_aux_cons) + h[M + i] + (h[CI + i] * Heater_eff + h[CJ + i]) * TES_aux_cons_perc
+        + iff(or(h[CC + i] == Double.zero, and(h[BY + i] == Double.zero, h[BZ + i] == Double.zero)), PB_stby_aux_cons, 0)
+        + iff(and(h[CC + i] > Double.zero, h[BZ + i] > Double.zero), PB_stup_aux_cons + h[BZ + i] * TES_aux_cons_perc, 0)
+        + iff(and(h[CC + i] > Double.zero, h[BY + i] > Double.zero), (h[BZ + i] + h[CA + i] + h[CB + i]) * TES_aux_cons_perc, 0)
     }
   }
   func hour3(_ h: inout [Double], case j: Int) {
@@ -594,16 +613,33 @@ extension TunOl {
     for i in 8748..<8760 { h[CS + i] = h[CS + i - 1] }
     /// El cons due to op outside of harm op period
     let CT: Int = 788400
-    // =IF(OR(CQ6>0,CC6=0,BX6+CK6-CM6<A_overall_var_min_cons+A_overall_fix_stby_cons+IF(CQ7=0,0,A_overall_stup_cons)),0,A_overall_var_min_cons+A_overall_fix_stby_cons+IF(CQ7=0,0,A_overall_stup_cons))
+    // =IF(OR(CQ6>0,CC6=0,MAX(0,IF(CQ6>0,Grid_import_yes_no_PB_strategy,Grid_import_yes_no_PB_strategy_outsideharmop)*Grid_import_max_ud-CN6)+BX6+CK6-CM6<A_overall_var_min_cons+A_overall_fix_stby_cons+IF(CQ7=0,0,A_overall_stup_cons)),IF(CQ6>0,0,IF(CQ7=0,Overall_stby_cons,Overall_stup_cons)),A_overall_var_min_cons+A_overall_fix_stby_cons+IF(CQ7=0,0,A_overall_stup_cons))
     for i in 1..<8760 {
       h[CT + i] = iff(
-        or(h[CQ + i] > Double.zero, h[CC + i].isZero, h[BX + i] + h[CK + i] - h[CM + i] < overall_var_min_cons[j] + overall_fix_stby_cons[j] + iff(h[CQ + i + 1].isZero, Double.zero, overall_stup_cons[j])), Double.zero,
-        overall_var_min_cons[j] + overall_fix_stby_cons[j] + iff(h[CQ + i + 1].isZero, Double.zero, overall_stup_cons[j]))
+        or(
+          h[CQ + i] > Double.zero, h[CC + i] == Double.zero,
+          max(0, iff(h[CQ + i] > Double.zero, Grid_import_yes_no_PB_strategy, Grid_import_yes_no_PB_strategy_outsideharmop) * Grid_import_max_ud - h[CN + i])
+            + h[BX + i] + h[CK + i] - h[CM + i] < overall_var_min_cons[j] + overall_fix_stby_cons[j] + iff(h[CQ + i + 1] == Double.zero, 0, overall_stup_cons[j])),
+        iff(h[CQ + i] > Double.zero, 0, iff(h[CQ + i + 1] == Double.zero, Overall_stby_cons, Overall_stup_cons)),
+        overall_var_min_cons[j] + overall_fix_stby_cons[j] + iff(h[CQ + i + 1] == Double.zero, 0, overall_stup_cons[j]))
     }
+
     /// heat cons due to op outside of harm op period
     let CU: Int = 797160
-    // =IF(CT6=0,0,A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons+IF(CQ7=0,0,A_overall_heat_stup_cons))
-    for i in 1..<8760 { h[CU + i] = iff(h[CT + i].isZero, Double.zero, overall_var_heat_min_cons[j] + overall_heat_fix_stby_cons[j] + iff(h[CQ + i + 1].isZero, Double.zero, overall_heat_stup_cons[j])) }
+    // =IF(OR(CR6>0,CC6=0,CB6/PB_Ratio_Heat_input_vs_output+CL6+MIN(El_boiler_cap_ud,MAX(0,IF(CQ6>0,Grid_import_yes_no_PB_strategy,Grid_import_yes_no_PB_strategy_outsideharmop)*Grid_import_max_ud-CN6)+BX6+CK6-CM6-CT6)*El_boiler_eff<A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons+IF(CR7=0,0,A_overall_heat_stup_cons)),IF(CQ6>0,0,IF(CQ7=0,Overall_heat_stby_cons,Overall_heat_stup_cons)),A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons+IF(CR7=0,0,A_overall_heat_stup_cons))
+    for i in 1..<8760 {
+      h[CU + i] = iff(
+        or(
+          h[CR + i] > Double.zero, h[CC + i] == Double.zero,
+          h[CB + i] / PB_Ratio_Heat_input_vs_output + h[CL + i] + min(
+            El_boiler_cap_ud,
+            max(0, iff(h[CQ + i] > Double.zero, Grid_import_yes_no_PB_strategy, Grid_import_yes_no_PB_strategy_outsideharmop) * Grid_import_max_ud - h[CN + i])
+              + h[BX + i] + h[CK + i] - h[CM + i] - h[CT + i]) * El_boiler_eff < overall_var_heat_min_cons[j] + overall_heat_fix_stby_cons[j]
+            + iff(h[CR + i + 1] == Double.zero, 0, overall_heat_stup_cons[j])),
+        iff(h[CQ + i] > Double.zero, 0, iff(h[CQ + i + 1] == Double.zero, Overall_heat_stby_cons, Overall_heat_stup_cons)),
+        overall_var_heat_min_cons[j] + overall_heat_fix_stby_cons[j] + iff(h[CR + i + 1] == Double.zero, 0, overall_heat_stup_cons[j]))
+    }
+
     let J: Int = 17520
     let CJ: Int = 700800
     /// Remaining el after min harmonious
