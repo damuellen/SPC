@@ -274,14 +274,14 @@ extension TunOl {
   func d11(_ d11: inout [Double], hour: [Double], case j: Int) {
     let (CM, CN, CQ, CR, CS) = (727080, 735840, 762120, 770880, 779640)
     let (CT, CU, CV, CW, CX) = (788400, 797160, 805920, 814680, 823440)
-    let (CY, CZ, DA, DB, DC) = (832200, 840960, 849720, 858480, 867240)
+    let (CY, TH, DA, DB, DC) = (832200, 840960, 849720, 858480, 867240)
     let (DD, DE, DF, DH, DI) = (876000, 884760, 893520, 911040, 919800)
-    let (DJ, DK, DL, DM, DN) = (928560, 937320, 946080, 954840, 963600)
+    let (DJ, DK, DL, DM, TI) = (928560, 937320, 946080, 954840, 963600)
     let (DO, DP, DQ, DR, DS, DT) = (972360, 981120, 989880, 998640, 1_007_400, 1_016_160)
     let days: [[Int]] = hour[(CS + 1)..<(CS + 8760)].indices.chunked(by: { hour[$0] == hour[$1] }).map { $0.map { $0 - CS } }
     let notZero: (Double) -> Bool = { $0 > Double.zero }
 
-    let (EY, EZ, FA, FB, FC, FD, FE, FF, FG, FH, FI, FJ, FK, FL, FM, FN, FO, FP, FQ, FR, FS, FT, FU, FV, FW, FX, FY, FZ, GA, GB, GC, GD, GE, GF, GG, GH, GI, GJ, GK, GL, GM, GN, GO, GP, GQ, GR, GS) = (
+    let (EY, EZ, FA, FB, FC, FD, FE, FF, FG, FH, FI, FJ, FK, FL, FM, _, FO, FP, FQ, FR, FS, FT, FU, FV, FW, FX, FY, FZ, GA, GB, GC, GD, GE, GF, GG, GH, GI, GJ, GK, GL, GM, GN, GO, GP, GQ, GR, GS) = (
       13140, 13505, 13870, 14235, 14600, 14965, 15330, 15695, 16060, 16425, 16790, 17155, 17520, 17885, 18250, 18615, 18980, 19345, 19710, 20075, 20440, 20805, 21170, 21535, 21900, 22265, 22630, 22995, 23360, 23725, 24090, 24455, 24820, 25185,
       25550, 25915, 26280, 26645, 27010, 27375, 27740, 28105, 28470, 28835, 29200, 29565, 29930
     )
@@ -307,8 +307,9 @@ extension TunOl {
     // SUMIF(CalculationCS5:CS8763,"="A6,CalculationDH5:DH8763)+SUMIFS(CalculationCT5:CT8763,CalculationCS5:CS8763,"="A6,CalculationDH5:DH8763,">0")
     for i in 0..<365 { d11[FD + i] += d11[FB + i] }
     /// El cons considering min/max harm op outside  harm op period including grid import (if any)
-    hour.sumOf(CT, days: days, into: &d11, at: FE, condition: CQ, predicate: { $0.isZero })
-    // =MAX(0,SUMIFS(Calculation!$CT$5:$CT$8764,Calculation!$CS$5:$CS$8764,"="&$A6,Calculation!$CQ$5:$CQ$8764,"=0")-A_overall_stup_cons)
+    let CC: Int = 639480
+    hour.sumOf(CT, days: days, into: &d11, at: FE, condition1: CQ, predicate1: { $0.isZero }, condition2: CC, predicate2: notZero)
+    // FE=MAX(0,SUMIFS(Calculation!$CT$5:$CT$8764,Calculation!$CS$5:$CS$8764,"="&$A3,Calculation!$CQ$5:$CQ$8764,"=0",Calculation!$CC$5:$CC$8764,">0")-A_overall_stup_cons)
     for i in 0..<365 { d11[FE + i] = max(Double.zero, d11[FE + i] - overall_stup_cons[j]) }
     /// Harm heat cons considering min harm op during harm op period
     hour.sum(days: days, range: CR, into: &d11, at: FB)
@@ -334,15 +335,14 @@ extension TunOl {
     hour.sum(days: days, range: CX, into: &d11, at: FK)
     for i in 0..<365 { d11[FK + i] -= d11[FI + i] }
     /// El boiler op considering min harm op during harm op period
-    // SUMIFS(CalculationCZ5:CZ8763,CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,">0")
-    hour.sumOf(CZ, days: days, into: &d11, at: FL, condition: CQ, predicate: notZero)
+    // // FL=SUMIFS(Calculation!$TH$5:$TH$8764,Calculation!$CS$5:$CS$8764,"="&$A3,Calculation!$CQ$5:$CQ$8764,">0")
+    hour.sumOf(TH, days: days, into: &d11, at: FL, condition: CQ, predicate: notZero)
     /// El boiler op considering max harm op during harm op period
-    // SUMIFS(CalculationDN5:DN8763,CalculationCS5:CS8763,"="A6,CalculationDH5:DH8763,">0")
-    hour.sumOf(DN, days: days, into: &d11, at: FM, condition: DH, predicate: notZero)
+    // FM=SUMIFS(Calculation!$TI$5:$TI$8764,Calculation!$CS$5:$CS$8764,"="&$A3,Calculation!$DH$5:$DH$8764,">0")
+    hour.sumOf(TI, days: days, into: &d11, at: FM, condition: DH, predicate: notZero)
     /// El boiler op outside harm op period
-    // SUMIF(CalculationCS5:CS8763,"="A6,CalculationCZ5:CZ8763)-FL6
-    hour.sum(days: days, range: CZ, into: &d11, at: FN)
-    for i in 0..<365 { d11[FN + i] -= d11[FL + i] }
+    // FN=SUMIFS(Calculation!$TH$5:$TH$8764,Calculation!$CS$5:$CS$8764,"="&$A3,Calculation!$CQ$5:$CQ$8764,"=0")
+    hour.sumOf(TH, days: days, into: &d11, at: FL, condition: CQ, predicate: { $0.isZero })
     /// Total aux cons during harm op period
     // SUMIFS(CalculationCM5:CM8763,CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,">0")
     hour.sumOfRanges(CM, days: days, into: &d11, at: FO, range1: hour, condition: CQ, predicate: notZero)
@@ -456,9 +456,9 @@ extension TunOl {
     let notZero: (Double) -> Bool = { $0 > Double.zero }
     let (ET, EU, EX, EY, FA) = (210240, 219000, 245280, 254040, 271560)
     let (FB, FC, FD, FE, FF) = (280320, 289080, 297840, 306600, 315360)
-    let (FG, FH, FI, FJ, FK) = (324120, 332880, 341640, 350400, 359160)
+    let (TJ, FH, FI, FJ, FK) = (324120, 332880, 341640, 350400, 359160)
     let (FL, FM, FO, FP, FQ) = (367920, 376680, 394200, 402960, 411720)
-    let (FR, FS, FT, FU, FV) = (420480, 429240, 438000, 446760, 455520)
+    let (FR, FS, FT, TK, FV) = (420480, 429240, 438000, 446760, 455520)
     let (FW, FX, FY, FZ, GA) = (464280, 473040, 481800, 490560, 499320)
     let (GU, GV, GW, GX, GY, GZ, HA, HB, HC, HD, HE, HF, HG, HH, HI, HJ, HK, HL, HM, HN, HO, HP, HQ, HR, HS, HT, HU, HV, HW, HX, HY, HZ, IA, IB, IC, ID, IE, IF, IG, IH, II, IJ, IK, IL, IM, IN, IO) = (
       30660, 31025, 31390, 31755, 32120, 32485, 32850, 33215, 33580, 33945, 34310, 34675, 35040, 35405, 35770, 36135, 36500, 36865, 37230, 37595, 37960, 38325, 38690, 39055, 39420, 39785, 40150, 40515, 40880, 41245, 41610, 41975, 42340, 42705,
@@ -487,8 +487,9 @@ extension TunOl {
     // SUMIF(Calculation!$EZ$5:$EZ$8764,"="A6,Calculation!$FO$5:$FO$8764)+SUMIFS(Calculation!$FA$5:$FA$8764,Calculation!$EZ$5:$EZ$8764,"="A6,Calculation!$FO$5:$FO$8764,">0")
     for i in 0..<365 { d12[GZ + i] += d12[GX + i] }
     /// Harm el cons outside of harm op period
-    hourFinal.sumOf(FA, days: daysEZ, into: &d12, at: HA, condition: EX, predicate: { $0.isZero })
-    // MAX(0,SUMIFS(Calculation!$FA$5:$FA$8764,Calculation!$EZ$5:$EZ$8764,"="A6,Calculation!$EX$5:$EX$8764,"=0")-A_overall_stup_cons)
+    let EJ: Int = 122640
+    hourFinal.sumOf(FA, days: daysEZ, into: &d12, at: HA, condition1: EX, predicate1: { $0.isZero }, condition2: EJ, predicate2: notZero)
+    // HA=MAX(0,SUMIFS(Calculation!$FA$5:$FA$8764,Calculation!$EZ$5:$EZ$8764,"="&$A3,Calculation!$EX$5:$EX$8764,"=0",Calculation!$EJ$5:$EJ$8764,">0")-A_overall_stup_cons)
     for i in 0..<365 { d12[HA + i] = max(Double.zero, d12[HA + i] - overall_stup_cons[j]) }
     /// Harm heat cons considering min harm op during harm op period
     hourFinal.sum(days: daysEZ, range: EY, into: &d12, at: GX)
@@ -514,15 +515,14 @@ extension TunOl {
     hourFinal.sum(days: daysEZ, range: FE, into: &d12, at: HG)
     for i in 0..<365 { d12[HG + i] -= d12[HE + i] }
     /// El boiler op considering min harm op during harm op period
-    // SUMIFS(CalculationFG5:FG8763,CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,">0")
-    hourFinal.sumOf(FG, days: daysEZ, into: &d12, at: HH, condition: EX, predicate: notZero)
+    // HH=SUMIFS(Calculation!$TJ$5:$TJ$8764,Calculation!$EZ$5:$EZ$8764,"="&$A3,Calculation!$EX$5:$EX$8764,">0")
+    hourFinal.sumOf(TJ, days: daysEZ, into: &d12, at: HH, condition: EX, predicate: notZero)
     /// El boiler op considering max harm op during harm op period
-    // SUMIFS(CalculationFU5:FU8763,CalculationEZ5:EZ8763,"="A6,CalculationFO5:FO8763,">0")
-    hourFinal.sumOf(FU, days: daysEZ, into: &d12, at: HI, condition: FO, predicate: notZero)
+    // HI=SUMIFS(Calculation!$TK$5:$TK$8764,Calculation!$EZ$5:$EZ$8764,"="&$A3,Calculation!$FO$5:$FO$8764,">0")
+    hourFinal.sumOf(TK, days: daysEZ, into: &d12, at: HI, condition: FO, predicate: notZero)
     /// El boiler op outside harm op period
-    // SUMIF(CalculationEZ5:EZ8763,"="A6,CalculationFG5:FG8763)-HH6
-    hourFinal.sum(days: daysEZ, range: FG, into: &d12, at: HJ)
-    for i in 0..<365 { d12[HJ + i] -= d12[HH + i] }
+    // HJ=SUMIFS(Calculation!$TJ$5:$TJ$8764,Calculation!$EZ$5:$EZ$8764,"="&$A3,Calculation!$EX$5:$EX$8764,"=0")
+    hourFinal.sumOf(TJ, days: daysEZ, into: &d12, at: HJ, condition: EX, predicate: { $0.isZero })
     /// Total aux cons during harm op period
     // SUMIFS(CalculationET5:ET8763,CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,">0")
     hourFinal.sumOf(ET, days: daysEZ, into: &d12, at: HK, condition: EX, predicate: notZero)

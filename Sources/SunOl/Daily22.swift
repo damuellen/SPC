@@ -1,7 +1,7 @@
 extension TunOl {
   func d22(hour: [Double]) -> [Double] {
     let U: [[Int]] = hour[113881..<(113880 + 8760)].indices.chunked { hour[$0] == hour[$1] }.map { $0.map { $0 - 113880 } }
-    let (S, T, V, W, X, Y, Z, AA, AB, AC, AD, AE, AF, AH, AI, AJ, AK, AL, AM, AN, AO, AP, AQ, AR, AS, AT) = (
+    let (S, T, V, W, X, Y, Z, AA, AB, AC, AD, AE, AF, AH, AI, AJ, AK, _, AM, AN, AO, AP, AQ, AR, AS, AT) = (
       96360, 105120, 122640, 131400, 140160, 148920, 157680, 166440, 175200, 183960, 192720, 201480, 210240, 227760, 236520, 245280, 254040, 262800, 271560, 280320, 289080, 297840, 306600, 315360, 324120, 332880
     )
     let notZero: (Double) -> Bool = { $0 > Double.zero }
@@ -58,22 +58,19 @@ extension TunOl {
     // SUMIF(CalculationU5:U8763,"="A6,CalculationAF5:AF8763)-DV6
     hour.sum(days: U, range: AF, into: &d22, at: DX)
     for i in 0..<365 { d22[DX + i] -= d22[DV + i] }
-
+    let B = 365
     /// Grid cons considering min harm op during harm op period
     let DY = 2555
-    // SUMIFS(CalculationX5:X8763,CalculationU5:U8763,"="A6,CalculationS5:S8763,">0")
-    hour.sumOf(X, days: U, into: &d22, at: DY, condition: S, predicate: notZero)
-
+    // DY=$B3*Overall_stby_cons
+    for i in 0..<365 { d22[DY + i] = d22[B + i] * Overall_stby_cons }
     /// Grid cons considering max harm op during harm op period
     let DZ = 2920
-    // SUMIFS(CalculationAL5:AL8763,CalculationU5:U8763,"="A6,CalculationAH5:AH8763,">0")
-    hour.sumOf(AL, days: U, into: &d22, at: DZ, condition: AH, predicate: notZero)
-
+    // DZ=$B3*Overall_heat_stby_cons
+    for i in 0..<365 { d22[DZ + i] = d22[B + i] * Overall_heat_stby_cons }
     /// Grid cons considering min/max harm op outside harm op period
     let EA = 3285
-    // SUMIF(CalculationU5:U8763,"="A6,CalculationX5:X8763)-DY6
-    hour.sum(days: U, range: X, into: &d22, at: EA)
-    for i in 0..<365 { d22[EA + i] -= d22[DY + i] }
+    // EA=SUMIFS(Calculation!$X$5:$X$8764,Calculation!$U$5:$U$8764,"="&$A3,Calculation!$S$5:$S$8764,"=0")
+    hour.sumOf(X, days: U, into: &d22, at: EA, condition: S, predicate: notZero)
 
     /// Remaining PV el after min harm during harm op period
     let EB = 3650

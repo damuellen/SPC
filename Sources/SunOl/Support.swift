@@ -39,10 +39,10 @@ extension Array where Element == Double {
     }
   }
 
-  func sumOf(_ range: Int, days: [[Int]], condition: Int, predicate: (Double) -> Bool) -> [Double] {
-    days.map { day in var sum = 0.0
-      day.forEach { d in if predicate(self[(d + condition)]) { sum += self[(d + range)] } }
-      return sum
+  @inlinable func sumOf(_ range: Int, days: [[Int]], into array: inout [Double], at: Int, condition1: Int, predicate1: (Double) -> Bool, condition2: Int, predicate2: (Double) -> Bool) {
+    for (i, day) in days.enumerated() {
+      array[i + at] = 0.0
+      day.forEach { d in if predicate1(self[(d + condition1)]) && predicate2(self[(d + condition2)]) { array[i + at] += self[(d + range)] } }
     }
   }
 
