@@ -611,10 +611,18 @@ extension TunOl {
     // MIN(El_boiler_cap_ud,MAX(0,(FP6+FB6-ES6-EI6/PB_Ratio_Heat_input_vs_output)/El_boiler_eff))
     for i in 1..<8760 { h[FU + i] = min(El_boiler_cap_ud, max(Double.zero, round((h[FP + i] + h[FB + i] - h[ES + i] - h[EI + i] / PB_Ratio_Heat_input_vs_output), 5) / El_boiler_eff)) }
 
+    let TJ: Int = FG
+    // TJ=MAX(0,-ROUND(ES5+EI5/PB_Ratio_Heat_input_vs_output+FG5*El_boiler_eff-EY5-FB5,5))
+    for i in 1..<8760 { h[TJ + i] = max(0, -round(h[ES + i] + h[EI + i] / PB_Ratio_Heat_input_vs_output + h[FG + i] * El_boiler_eff - h[EY + i] - h[FB + i], 5)) }
+
     /// Remaining el boiler cap after max harmonious heat cons
     let FV: Int = 455520
     // MAX(0,El_boiler_cap_ud-FU6)
     for i in 1..<8760 { h[FV + i] = max(Double.zero, round(El_boiler_cap_ud - h[FU + i], 5)) }
+
+    let TK: Int = FU
+    // TK=MAX(0,-ROUND(ES5+EI5/PB_Ratio_Heat_input_vs_output+FU5*El_boiler_eff-FP5-FB5,5))
+    for i in 1..<8760 { h[TK + i] = max(0, -round(h[ES + i] + h[EI + i] / PB_Ratio_Heat_input_vs_output + h[FU + i] * El_boiler_eff - h[FP + i] - h[FB + i], 5)) }
 
     /// Remaining MethSynt cap after max harmonious cons
     let FW: Int = 464280

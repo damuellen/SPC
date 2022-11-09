@@ -1,10 +1,5 @@
 extension TunOl {
   func hour(_ Q_Sol_MW_thLoop: [Double], _ Reference_PV_plant_power_at_inverter_inlet_DC: [Double], _ Reference_PV_MV_power_at_transformer_outlet: [Double], hour h: inout [Double]) {
-    let maximum = Reference_PV_MV_power_at_transformer_outlet.max() ?? 0
-    /// Inverter power fraction -
-    let H: Int = 0
-    /// Inverter efficiency -
-    let I: Int = 8760
     /// Q_solar (before dumping) MWth
     let J: Int = 17520
     /// E_PV_Total _Scaled MWel_DC
@@ -20,11 +15,6 @@ extension TunOl {
     /// Not covered aux elec for PB stby, CSP SF and PV Plant MWel
     let Q: Int = 78840
     for i in 1..<8760 {
-      h[i] = Reference_PV_plant_power_at_inverter_inlet_DC[i]
-      // MAX(0,G6/MAX(G5:G8763))
-      h[H + i] = max(Double.zero, Reference_PV_MV_power_at_transformer_outlet[i] / 600.5)
-      // IFERROR(IF(G6<MAX(G5:G8763),MAX(G6,0)/F6,0),0)
-      h[I + i] = ifFinite(iff(Reference_PV_MV_power_at_transformer_outlet[i] < maximum, max(Reference_PV_MV_power_at_transformer_outlet[i], Double.zero) / Reference_PV_plant_power_at_inverter_inlet_DC[i], Double.zero), Double.zero)
       // E6*CSP_loop_nr_ud
       h[J + i] = Q_Sol_MW_thLoop[i] * CSP_loop_nr_ud
       // F6*PV_DC_cap_ud/PV_Ref_DC_cap
@@ -1019,10 +1009,20 @@ extension TunOl {
     let DN: Int = 963600
     // MIN(El_boiler_cap_ud,MAX(0,(DI6+CU6-CL6-IF(CC6>0,CB6/PB_Ratio_Heat_input_vs_output,0))/El_boiler_eff))
     for i in 1..<8760 { h[DN + i] = min(El_boiler_cap_ud, max(Double.zero, round((h[DI + i] + h[CU + i] - h[CL + i] - iff(h[CC + i] > Double.zero, h[CB + i] / PB_Ratio_Heat_input_vs_output, Double.zero)), 5) / El_boiler_eff)) }
+    
+    let TH: Int = CZ
+    // TH=MAX(0,-ROUND(CL5+CB5/PB_Ratio_Heat_input_vs_output+CZ5*El_boiler_eff-CR5-CU5,5))
+    for i in 1..<8760 { h[TH + i] = max(0, -round(h[CL + i] + h[CB + i] / PB_Ratio_Heat_input_vs_output + h[CZ + i] * El_boiler_eff - h[CR + i] - h[CU + i], 5)) }
+
     /// Remaining el boiler cap after max harmonious heat cons
     let DO: Int = 972360
     // MAX(0,El_boiler_cap_ud-DN6)
     for i in 1..<8760 { h[DO + i] = max(Double.zero, round(El_boiler_cap_ud - h[DN + i], 5)) }
+
+    let TI: Int = DN
+    // TI=MAX(0,-ROUND(CL5+CB5/PB_Ratio_Heat_input_vs_output+DN5*El_boiler_eff-DI5-CU5,5))
+    for i in 1..<8760 { h[TI + i] = max(0, -round(h[CL + i] + h[CB + i] / PB_Ratio_Heat_input_vs_output + h[DN + i] * El_boiler_eff - h[DI + i] - h[CU + i], 5)) }
+    
     for i in 1..<8760 {
       /// Remaining MethSynt cap after max harmonious cons
       let DP: Int = 981120
