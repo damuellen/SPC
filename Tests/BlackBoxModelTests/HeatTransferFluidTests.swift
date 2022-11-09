@@ -1,7 +1,7 @@
 import XCTest
 
 @testable import BlackBoxModel
-import Units
+import Utilities
 
 class HeatTransferFluidTests: XCTestCase {
   let htf = HeatTransferFluid(
