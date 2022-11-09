@@ -80,13 +80,12 @@ struct Command: ParsableCommand {
         server.stop()
       }
     }
-
+    let past = Date()
+    let id = String(Int(past.timeIntervalSince1970), radix: 36, uppercase: true).suffix(4)
     if let parameter = try? InputParameter.loadFromJSONIfExists(file: .init(fileURLWithPath: path)) {
       let worker = IGOA(n: n ?? 30, maxIterations: iterations ?? 300, bounds: parameter.ranges)
-      let past = Date()
       let results = worker(SunOl.fitness)
       print("Elapsed seconds:", -past.timeIntervalSinceNow)
-      let id = String(Int(past.timeIntervalSince1970), radix: 36, uppercase: true).suffix(4)
       let name = "SunOl_\(id).xlsx"
       writeExcel(name, results: [Int(parameter.ranges[5].lowerBound):results])    
       print(name)
@@ -109,7 +108,7 @@ struct Command: ParsableCommand {
       results = removingNearby(results.filter { $0[0].isFinite }.sorted { $0[0] < $1[0] })
       resultsA[EY] = Array(results.prefix(1000))
     }
-    writeExcel("SunOl.xlsx", results: resultsA)
+    writeExcel("SunOl_\(id).xlsx", results: resultsA)
 
     parameter = Parameter(
       CSP_loop_nr: 0...0.0,
@@ -131,29 +130,8 @@ struct Command: ParsableCommand {
       results = removingNearby(results.filter { $0[0].isFinite }.sorted { $0[0] < $1[0] })
       resultsB[EY] = Array(results.prefix(1000))
     }
-    writeExcel("SunOl_BESS.xlsx", results: resultsB)
-
-    parameter = Parameter(
-      CSP_loop_nr: 0...0.0,
-      TES_thermal_cap: 0...0.0,
-      PB_nom_gross_cap: 0...0.0,
-      El_boiler_cap: 0...100.0,
-      EY_var_net_nom_cons: 180...180,
-      Heater_cap: 0...0.0
-    )
-    var resultsC = Tables()
-    for EY in stride(from: 220, through: 300, by: 20) where !source.isCancelled {
-      var results = Table()
-      for _ in 1...5 where !source.isCancelled {
-        parameter.ranges[5] = Double(EY)...Double(EY)
-        let worker = IGOA(n: n ?? 30, maxIterations: iterations ?? 270, bounds: parameter.ranges)
-        results.append(contentsOf: worker(SunOl.fitness))
-      }
-      results = removingNearby(results.filter { $0[0].isFinite }.sorted { $0[0] < $1[0] })
-      resultsC[EY] = Array(results.prefix(1000))
-    }
-    writeExcel("SunOl_PV_only.xlsx", results: resultsC)
-    writeExcel("SunOl_All.xlsx", results: resultsA, resultsB, resultsC)
+    writeExcel("SunOl_\(id)_BESS.xlsx", results: resultsB)
+    writeExcel("SunOl_\(id)_All.xlsx", results: resultsA, resultsB)
   }
 }
 
@@ -184,7 +162,7 @@ func writeCSV(result: ([Double], [Double], [Double], [Double])) {
 func removingNearby(_ results: Table) -> Table {
   var addedDict = [Int:Bool]()
   return results.filter {
-    addedDict.updateValue(true, forKey: Int($0[1] * 100)) == nil
+    addedDict.updateValue(true, forKey: Int($0[1] * 20)) == nil
   }
 } 
 

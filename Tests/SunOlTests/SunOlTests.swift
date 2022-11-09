@@ -209,9 +209,9 @@ class SunOlTests: XCTestCase {
     }
 
     let LCOM = costs.LCOM(meth_produced_MTPH: meth_produced_MTPH_sum, elec_from_grid: elec_from_grid_sum, elec_to_grid: elec_to_grid_MTPH_sum)
-    XCTAssertEqual(LCOM, 1584, accuracy: 1, "LCOM")
+    XCTAssertEqual(LCOM, 2062, accuracy: 1, "LCOM")
     XCTAssertEqual(hours_sum, 7705.0, accuracy: 1, "hours_sum")
-    XCTAssertEqual(meth_produced_MTPH_sum, 101565, accuracy: 1, "meth_produced_MTPH_sum")
+    XCTAssertEqual(meth_produced_MTPH_sum, 101559, accuracy: 1, "meth_produced_MTPH_sum")
     XCTAssertEqual(elec_from_grid_sum, 2627.0, accuracy: 1, "elec_from_grid_sum")
     XCTAssertEqual(elec_to_grid_MTPH_sum, 0, accuracy: 1, "elec_to_grid_MTPH_sum")
   }
