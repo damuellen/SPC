@@ -137,7 +137,6 @@ public struct IGOA {
       }
       let calculationsPerSecond = 1 / (-timer.timeIntervalSinceNow / Double(grassHopperPositions.count))
       let remainingTime = Double((maxIterations - iteration) * grassHopperPositions.count) / calculationsPerSecond
-      let (minutes, seconds) = (Int(remainingTime / 60), Int(remainingTime.remainder(dividingBy: 60)))
       if source.isCancelled { break }
 
       if source.isCancelled { break }
@@ -156,7 +155,7 @@ public struct IGOA {
         "Population: \(grassHopperPositions.count) ".randomColor() + "Iterations: \(iteration)".leftpad(28).randomColor(),
         pretty(values: targetFitness), pretty(values: targetPosition),
         String(format: "Calculations per Second: %.1f", calculationsPerSecond),
-        "Estimated time remaining: \(minutes):\(seconds)", separator: "\n")
+        "Estimated time remaining: \(Int(remainingTime / 60)) min", separator: "\n")
 
       let sort = targetFitness.indices.sorted(by:{ targetFitness[$0] < targetFitness[$1] })
       sort.dropFirst().forEach {

@@ -410,7 +410,9 @@ extension TunOl {
           h[BT + i].isZero, and(h[BM + i] > Double.zero, h[BM + i + 1] > Double.zero),
           and(
             overall_var_min_cons[j] + overall_fix_stby_cons[j] + iff(h[BM + i + 1].isZero, Double.zero, overall_stup_cons[j])
-              + min(El_boiler_cap_ud, max(Double.zero, overall_var_heat_min_cons[j] + overall_heat_fix_stby_cons[j] + iff(h[BM + i + 1].isZero, Double.zero, overall_heat_stup_cons[j]) - h[BQ + i]) / El_boiler_eff) < h[BP + i] - iff(and(h[BM + i] > 0, h[BM + i + 1].isZero, h[BU + i - 1].isZero),PB_stby_aux_cons + PB_warm_start_heat_req * TES_aux_cons_perc),
+              + min(El_boiler_cap_ud, max(Double.zero, overall_var_heat_min_cons[j] + overall_heat_fix_stby_cons[j] 
+              + iff(h[BM + i + 1].isZero, Double.zero, overall_heat_stup_cons[j]) - h[BQ + i]) / El_boiler_eff) < h[BP + i] 
+              - iff(and(h[BM + i] > 0, h[BM + i + 1].isZero, h[BU + i - 1].isZero),PB_stby_aux_cons, PB_stup_aux_cons + PB_warm_start_heat_req * TES_aux_cons_perc),
             overall_var_heat_min_cons[j] + overall_heat_fix_stby_cons[j] + iff(h[BM + i + 1].isZero, Double.zero, overall_heat_stup_cons[j]) < El_boiler_cap_ud * El_boiler_eff + h[BQ + i])), Double.zero,
         overall_var_min_cons[j] + overall_fix_stby_cons[j] + iff(h[BM + i + 1].isZero, Double.zero, overall_stup_cons[j]))
     }
@@ -667,8 +669,13 @@ extension TunOl {
     for i in 1..<8760 { h[CY + i] = max(0, iff(h[CQ + i] > Double.zero, Grid_import_yes_no_PB_strategy, Grid_import_yes_no_PB_strategy_outsideharmop) * Grid_import_max_ud - h[CO + i]) }
     /// El boiler op after min harmonious heat cons
     let CZ: Int = 840960
-    // MIN(El_boiler_cap_ud,MAX(0,(CR6+CU6-CL6-IF(CC6>0,CB6/PB_Ratio_Heat_input_vs_output,0))/El_boiler_eff))
-    for i in 1..<8760 { h[CZ + i] = min(El_boiler_cap_ud, max(Double.zero, round((h[CR + i] + h[CU + i] - h[CL + i] - iff(h[CC + i] > Double.zero, h[CB + i] / PB_Ratio_Heat_input_vs_output, Double.zero)), 5) / El_boiler_eff)) }
+    // =MIN(El_boiler_cap_ud,MAX(0,ROUND(CR6+CU6-CL6-IF(CC6>0,CB6/PB_Ratio_Heat_input_vs_output,0),5)/El_boiler_eff))
+    for i in 1..<8760 { 
+      h[CZ + i] = min(El_boiler_cap_ud, 
+      max(Double.zero, round((h[CR + i] + h[CU + i] - h[CL + i]
+       - iff(h[CC + i] > Double.zero, h[CB + i] / PB_Ratio_Heat_input_vs_output, Double.zero)), 5)
+        / El_boiler_eff))
+     }
     /// Remaining el boiler cap after min harmonious heat cons
     let DA: Int = 849720
     // MAX(0,El_boiler_cap_ud-CZ6)

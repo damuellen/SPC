@@ -230,9 +230,9 @@ extension TunOl {
     let ES: Int = 201480
     for i in 1..<8760 {
       // =MAX(0,$L6-EP6)
-      h[ER+i]=max(0,h[L0 + i]-h[EP + i])
+      h[ER + i] = max(0, h0[L0 + i] - h[EP + i])
       // =MAX(0,$J6-EQ6)
-      h[ES+i]=max(0,h[J0 + i]-h[EQ + i])
+      h[ES + i] = max(0, h0[J0 + i] - h[EQ + i])
     }
 
     /// Total aux el TES chrg&disch CSP SF, PV, PB stby  MWel
@@ -240,7 +240,7 @@ extension TunOl {
     // =IF($J6>0,$J6*CSP_var_aux_nom_perc,CSP_nonsolar_aux_cons)+$M6+(EP6*Heater_eff+EQ6)*TES_aux_cons_perc+IF(OR(EE6=0,AND(EH6=0,EB6=0)),PB_stby_aux_cons,0)+IF(AND(EE6>0,EB6>0),PB_stup_aux_cons+EB6*TES_aux_cons_perc,0)+IF(EH6>0,(EB6+EF6+EI6)*TES_aux_cons_perc,0)
     for i in 1..<8760 {
       h[ET + i] =
-        iff(h[J0 + i] > Double.zero, h[J0 + i] * CSP_var_aux_nom_perc, CSP_nonsolar_aux_cons) + h[M0 + i] + (h[EP + i] * Heater_eff + h[EQ + i]) * TES_aux_cons_perc
+        iff(h0[J0 + i] > Double.zero, h0[J0 + i] * CSP_var_aux_nom_perc, CSP_nonsolar_aux_cons) + h0[M0 + i] + (h[EP + i] * Heater_eff + h[EQ + i]) * TES_aux_cons_perc
         + iff(or(h[EE + i] == Double.zero, and(h[EH + i] == Double.zero, h[EB + i] == Double.zero)), PB_stby_aux_cons, 0)
         + iff(and(h[EE + i] > Double.zero, h[EB + i] > Double.zero), PB_stup_aux_cons + h[EB + i] * TES_aux_cons_perc, 0)
         + iff(h[EH + i] > Double.zero, (h[EB + i] + h[EF + i] + h[EI + i]) * TES_aux_cons_perc, 0)
@@ -261,8 +261,12 @@ extension TunOl {
             max(
               Double.zero,
               h[ES + i] + min(
-                El_boiler_cap_ud, max(Double.zero, h[ER + i] + max(Double.zero, Grid_import_max_ud * Grid_import_yes_no_PB_strategy - max(Double.zero, h[EP + i] - h0[L0 + i])) - h[ET + i] - Overall_harmonious_var_min_cons - Overall_fix_cons))
-                * El_boiler_eff - Overall_heat_fix_cons) / Overall_harmonious_var_heat_max_cons * Overall_harmonious_var_max_cons + Overall_fix_cons) < Overall_harmonious_var_min_cons + Overall_fix_cons), Double.zero,
+                El_boiler_cap_ud,
+                max(
+                  Double.zero,
+                  h[ER + i] + max(Double.zero, Grid_import_max_ud * Grid_import_yes_no_PB_strategy - max(Double.zero, h[EP + i] - h0[L0 + i])) - h[ET + i]
+                    - Overall_harmonious_var_min_cons - Overall_fix_cons)) * El_boiler_eff - Overall_heat_fix_cons) / Overall_harmonious_var_heat_max_cons
+              * Overall_harmonious_var_max_cons + Overall_fix_cons) < Overall_harmonious_var_min_cons + Overall_fix_cons), Double.zero,
         Overall_harmonious_var_min_cons + Overall_fix_cons)
     }
 

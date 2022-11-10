@@ -97,7 +97,7 @@ struct Command: ParsableCommand {
     // try? InputParameter(ranges: ranges).storeToJSON(file: .init(fileURLWithPath: "Parameter.json"))
     var parameter = Parameter()
     var resultsA = Tables()
-    for EY in stride(from: 120, through: 200, by: 20) where !source.isCancelled {
+    for EY in stride(from: 140, through: 180, by: 20) where !source.isCancelled {
       var results = Table()
       for _ in 1...5 where !source.isCancelled {
         parameter.ranges[5] = Double(EY)...Double(EY)
@@ -120,7 +120,7 @@ struct Command: ParsableCommand {
       BESS_cap: 0...5000.0
     )
     var resultsB = Tables()
-    for EY in stride(from: 120, through: 200, by: 20) where !source.isCancelled {
+    for EY in stride(from: 140, through: 180, by: 20) where !source.isCancelled {
       var results = Table()
       for _ in 1...5 where !source.isCancelled {
         parameter.ranges[5] = Double(EY)...Double(EY)
