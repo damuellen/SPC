@@ -18,9 +18,9 @@ class SunOlTests: XCTestCase {
 
   func testsCalculation() {
     guard 
-    let csv_ref = CSVReader(atPath: "calc.csv", separator: "\t"),
-    let csv_ref2 = CSVReader(atPath: "daily1.csv", separator: "\t"),
-    let csv_ref3 = CSVReader(atPath: "daily2.csv", separator: "\t")
+    let csv_ref = CSVReader(atPath: "COM/calc.csv"),
+    let csv_ref2 = CSVReader(atPath: "COM/daily1.csv"),
+    let csv_ref3 = CSVReader(atPath: "COM/daily2.csv")
     else {
       print("No input")
       return
@@ -76,7 +76,7 @@ class SunOlTests: XCTestCase {
       return (key, num)
     }
 
-    let values = [103.00,4542.18,178.50,431.20,656.70,160.00,0.00,306.63,1000.00,100000.00,100000.00,17.49,38.83,0.00,0.00,0.00]
+    let values = [107.00,5128.89,208.11,477.67,750.73,200.00,0.00,322.57,1000.00,100000.00,100000.00,21.20,36.10,0.00,0.00,0.00,]
     guard let model = TunOl(values) else {
       print("Invalid config")
       return
@@ -118,7 +118,7 @@ class SunOlTests: XCTestCase {
       if j == 0 {
         print("Case A")
         // H 0
-        (7..<71).map { column($0, offset: 7, stride: 8760) }.forEach { letter, offset in calculation(hourPre, letter, offset) }
+        (9..<71).map { column($0, offset: 7, stride: 8760) }.forEach { letter, offset in calculation(hourPre, letter, offset) }
         // BT 560640
         (71..<91).map { column($0, offset: 7, stride: 8760) }.forEach { letter, offset in calculation(hourPre, letter, offset) }
         // CN 735840
