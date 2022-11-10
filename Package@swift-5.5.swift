@@ -2,13 +2,15 @@
 import PackageDescription
 
 let c: CSetting = .unsafeFlags(["-ffast-math", "-O3", "-fomit-frame-pointer", "-funroll-loops"])
-var flags = ["-cross-module-optimization", "-Ounchecked", "-enforce-exclusivity=unchecked"]
+var flags = ["-cross-module-optimization", "-Ounchecked", "-enforce-exclusivity=unchecked", "-remove-runtime-asserts"]
+
 #if os(Windows)
 //flags += ["-Xfrontend", "-entry-point-function-name", "-Xfrontend", "wWinMain"]
 #endif
 let posix: TargetDependencyCondition = .when(platforms: [.linux, .macOS])
 let swift: [SwiftSetting] = [
   .unsafeFlags(flags, .when(configuration: .release)),
+  .unsafeFlags(["-enable-incremental-imports"], .when(configuration: .debug)),
   .define("DEBUG", .when(configuration: .debug)),
 ]
 
