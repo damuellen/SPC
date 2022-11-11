@@ -79,7 +79,7 @@ extension TunOl {
                       return $0
                     }) < PB_warm_start_duration, PB_hot_start_heat_req, PB_warm_start_heat_req), 0) - h0[BQ + i]) * TES_aux_cons_perc
       }
-      h[DY + i] = (h[DY + i] * 10).rounded(.up) / 10
+      h[DY + i] = (h[DY + i] * 100).rounded(.up) / 100
     }
 
     /// Corresponding PB net elec output
@@ -162,12 +162,19 @@ extension TunOl {
       }
     }
 
-    let CB: Int = 61320
+    let CB: Int = 630720
     /// Effective gross heat cons for extraction
     let EI: Int = 113880
     // =IF(EE6=0,0,MIN(ED6,MAX(CB6,IFERROR((EE6-CC6)/(SUMIF(BO5:BO8764,"="&BO6,EB5:EB8764)+SUMIF(BO5:BO8764,"="&BO6,EC5:EC8764)+SUMIF(BO5:BO8764,"="&BO6,ED5:ED8764)-CC6)*(ED6-CB6),0)+CB6)))
     for i in 1..<8760 {
-      if h[EE + i].isZero { h[EI + i] = Double.zero } else { h[EI + i] = min(h[ED + i], max(h0[CB + i], ifFinite((h[EE + i] - h0[CC + i]) / (EBsum[i - 1] + ECsum[i - 1] + EDsum[i - 1] - h0[CC + i]) * (h[ED + i] - h0[CB + i]), 0) + h0[CB + i])) }
+      if h[EE + i].isZero {
+        h[EI + i] = Double.zero
+      } else {
+        h[EI + i] = min(
+          h[ED + i],
+          max(
+            h0[CB + i], ifFinite((h[EE + i] - h0[CC + i]) / (EBsum[i - 1] + ECsum[i - 1] + EDsum[i - 1] - h0[CC + i]) * (h[ED + i] - h0[CB + i]), 0) + h0[CB + i]))
+      }
     }
 
     // let CTsum: [Double] = hour.sum(hours: BOday, condition: CT)
@@ -193,7 +200,6 @@ extension TunOl {
     // IF(EK6=0;0;ROUND($AY6-(EK6-EM6)/(SUMIF($BO$5:$BO$8764;"="&$BO6;EL$5:EL$8764)*Heater_eff*(1+1/Ratio_CSP_vs_Heater))*EL6;5))
     for i in 1..<8760 {
       h[EN + i] = iff(h[EK + i].isZero, Double.zero, round(h0[AY + i] - (h[EK + i] - h[EM + i]) / (ELsum[i - 1] * Heater_eff * (1 + 1 / Ratio_CSP_vs_Heater)) * h[EL + i], 5))
-      if h[EN + i] < 1 { h[EN + i] = 0 }
     }
     /// Partitions of PV hour PV to be dedicated to TES chrg
     let EO: Int = 166440

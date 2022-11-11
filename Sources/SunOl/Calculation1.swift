@@ -445,8 +445,6 @@ extension TunOl {
                       if $1.isZero { return $0 + 1 }
                       return $0
                     }) < PB_warm_start_duration, PB_hot_start_heat_req, PB_warm_start_heat_req), 0) - h[BQ + i]) * TES_aux_cons_perc, 2))
-
-
     }
     /// Corresponding PB net elec output
     let BX: Int = 595680
