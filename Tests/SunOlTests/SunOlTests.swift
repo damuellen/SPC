@@ -31,7 +31,7 @@ class SunOlTests: XCTestCase {
       var correct = true, counter = 1
       for i in 1..<8700 {
         if counter > 20 { break }
-        if abs(abs(ref[i - 1]) - abs(column[i])) > 0.09 {
+        if abs(abs(ref[i - 1]) - abs(column[i])) > max(abs(ref[i - 1]) * 0.01, 0.01) {
           counter += 1; correct = false
           print("Calculation \(letter)\(i + 4) proper value: \(String(format: "%.2f", ref[i - 1])) [\(index + i)] \(String(format: "%.2f", column[i]))  div: \(abs(ref[i - 1]) - abs(column[i]))")
         }
@@ -44,7 +44,7 @@ class SunOlTests: XCTestCase {
       var correct = true, counter = 1
       for i in 0..<364 {
         if counter > 20 { break }
-        if abs(ref[i]) - abs(array[index + i]) > 0.5 {
+        if abs(ref[i]) - abs(array[index + i]) > max(abs(ref[i]) * 0.01, 0.01) {
           counter += 1; correct = false
           print("Daily1 \(letter)\(i + 3) proper value: \(String(format: "%.2f", ref[i])) [\(index + i)] \(String(format: "%.2f", array[index + i]))  div: \(ref[i] - array[index + i])")
         }
@@ -57,7 +57,7 @@ class SunOlTests: XCTestCase {
       var correct = true, counter = 1
       for i in 0..<364 {
         if counter > 20 { break }
-        if abs(ref[i]) - abs(array[index + i]) > 0.5 {
+        if abs(ref[i]) - abs(array[index + i]) > max(abs(ref[i]) * 0.01, 0.01)  {
           counter += 1; correct = false
           print("Daily2 \(letter)\(i + 3) proper value: \(String(format: "%.2f", ref[i])) [\(index + i)] \(String(format: "%.2f", array[index + i]))  div: \(ref[i] - array[index + i])")
         }
@@ -209,10 +209,10 @@ class SunOlTests: XCTestCase {
     }
 
     let LCOM = costs.LCOM(meth_produced_MTPH: meth_produced_MTPH_sum, elec_from_grid: elec_from_grid_sum, elec_to_grid: elec_to_grid_MTPH_sum)
-    XCTAssertEqual(LCOM, 2062, accuracy: 1, "LCOM")
-    XCTAssertEqual(hours_sum, 7705.0, accuracy: 1, "hours_sum")
-    XCTAssertEqual(meth_produced_MTPH_sum, 101559, accuracy: 1, "meth_produced_MTPH_sum")
-    XCTAssertEqual(elec_from_grid_sum, 2627.0, accuracy: 1, "elec_from_grid_sum")
+    XCTAssertEqual(LCOM, 2290, accuracy: 1, "LCOM")
+    XCTAssertEqual(hours_sum, 7642.0, accuracy: 1, "hours_sum")
+    XCTAssertEqual(meth_produced_MTPH_sum, 109375, accuracy: 1, "meth_produced_MTPH_sum")
+    XCTAssertEqual(elec_from_grid_sum, 57125.0, accuracy: 1, "elec_from_grid_sum")
     XCTAssertEqual(elec_to_grid_MTPH_sum, 0, accuracy: 1, "elec_to_grid_MTPH_sum")
   }
 
