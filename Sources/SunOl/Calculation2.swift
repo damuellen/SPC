@@ -25,7 +25,7 @@ extension TunOl {
     for i in 1..<8760 {
       h[DW + i] = iff(
         or(
-          h0[BX + i].isZero, h[DV + i].isZero, and(h[BM + i] > Double.zero, h[BM + i + 1] > Double.zero),
+          h0[BX + i].isZero, h[DV + i].isZero, and(h0[BM + i] > Double.zero, h0[BM + i + 1] > Double.zero),
           and(
             (overall_var_max_cons[j] - overall_var_min_cons[j]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]) * (h[DV + i] - equiv_harmonious_min_perc[j]) + overall_var_min_cons[j] + overall_fix_stby_cons[j]
               + iff(h0[BM + i + 1].isZero, Double.zero, overall_stup_cons[j])
@@ -35,7 +35,7 @@ extension TunOl {
                   Double.zero,
                   (overall_var_heat_max_cons[j] - overall_var_heat_min_cons[j]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]) * (h[DV + i] - equiv_harmonious_min_perc[j]) + overall_var_heat_min_cons[j]
                     + overall_heat_fix_stby_cons[j] + iff(h0[BM + i + 1].isZero, Double.zero, overall_heat_stup_cons[j]) - h0[BQ + i]) / El_boiler_eff) < h0[BP + i] - iff(and(h0[BM + i] > 0 , h0[BM + i + 1].isZero, h[DW + i - 1].isZero), PB_stby_aux_cons, PB_stup_aux_cons + PB_warm_start_heat_req * TES_aux_cons_perc)
-              - iff(h[BM + i + 1].isZero, Double.zero, PB_warm_start_heat_req * TES_aux_cons_perc),
+              - iff(h0[BM + i + 1].isZero, Double.zero, PB_warm_start_heat_req * TES_aux_cons_perc),
             (overall_var_heat_max_cons[j] - overall_var_heat_min_cons[j]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]) * (h[DV + i] - equiv_harmonious_min_perc[j]) + overall_var_heat_min_cons[j] + overall_heat_fix_stby_cons[j]
               + iff(h0[BM + i + 1].isZero, Double.zero, overall_heat_stup_cons[j]) < El_boiler_cap_ud * El_boiler_eff + h0[BQ + i])), Double.zero,
         ((overall_var_max_cons[j] - overall_var_min_cons[j]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]) * (h[DV + i] - equiv_harmonious_min_perc[j]) + overall_var_min_cons[j]) + overall_fix_stby_cons[j]
@@ -54,32 +54,28 @@ extension TunOl {
     }
     /// Outside harm op aux elec for TES dischrg, CSP SF and PV Plant MWel
     let DY: Int = 26280
-    // DY=IF(DV6=0,0,IF(OR($BM6>0,PB_nom_gross_cap_ud<=0),0,ROUNDUP($BK6+MAX(0,(MIN(PB_nom_net_cap,MAX(PB_net_min_cap,(1+TES_aux_cons_perc)*MAX(0,DX6-$BP6)))+PB_nom_net_cap*PB_nom_var_aux_cons_perc_net*POLY(MIN(PB_nom_net_cap,MAX(PB_net_min_cap,(1+TES_aux_cons_perc)*MAX(0,DX6-$BP6)))/PB_nom_net_cap,PB_n2g_var_aux_el_Coeff)+PB_fix_aux_el)/PB_gross_min_eff+((A_overall_var_heat_max_cons-A_overall_var_heat_min_cons)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(DV6-A_equiv_harmonious_min_perc)+A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons)*PB_Ratio_Heat_input_vs_output+IF(AND(DX6=0,DX7>0),IF(COUNTIF(DX$1:DX6,"0")<PB_warm_start_duration,PB_hot_start_heat_req,PB_warm_start_heat_req),0)-$BQ6)*TES_aux_cons_perc,2)))
+    // DY=IF(DV6=0,0,IF(OR($BM6>0,PB_nom_gross_cap_ud<=0),0,$BK6+MAX(0,(MIN(PB_nom_net_cap,MAX(PB_net_min_cap,(1+TES_aux_cons_perc)*MAX(0,$BK6+DX6-$BP6)))+PB_nom_net_cap*PB_nom_var_aux_cons_perc_net*POLY(MIN(PB_nom_net_cap,MAX(PB_net_min_cap,(1+TES_aux_cons_perc)*MAX(0,$BK6+DX6-$BP6)))/PB_nom_net_cap,PB_n2g_var_aux_el_Coeff)+PB_fix_aux_el)/PB_gross_min_eff+((A_overall_var_heat_max_cons-A_overall_var_heat_min_cons)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(DV6-A_equiv_harmonious_min_perc)+A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons)*PB_Ratio_Heat_input_vs_output+IF(AND(DX6=0,DX7>0),IF(COUNTIF(DX$1:DX6,"0")<PB_warm_start_duration,PB_hot_start_heat_req,PB_warm_start_heat_req),0)-$BQ6)*TES_aux_cons_perc))
     for i in 1..<8760 {
-      if h[DV + i].isZero {
-        h[DY + i] = Double.zero
-      } else if h[DV + i].isZero {
-        h[DY + i] = Double.zero
-      } else if or(h0[BM + i] > Double.zero, PB_nom_gross_cap_ud <= Double.zero) {
-        h[DY + i] = Double.zero
-      } else {
-        h[DY + i] =
+      h[DY + i] = iff(
+        h[DV + i] == Double.zero, 0,
+        iff(
+          or(h0[BM + i] > Double.zero, PB_nom_gross_cap_ud <= Double.zero), 0,
           h0[BK + i] + max(
-            Double.zero,
-            (min(PB_nom_net_cap, max(PB_net_min_cap, (1 + TES_aux_cons_perc) * max(Double.zero, h[DX + i] - h0[BP + i]))) + PB_nom_net_cap * PB_nom_var_aux_cons_perc_net
-              * POLY(min(PB_nom_net_cap, max(PB_net_min_cap, (1 + TES_aux_cons_perc) * max(Double.zero, h[DX + i] - h0[BP + i]))) / PB_nom_net_cap, PB_n_g_var_aux_el_Coeff) + PB_fix_aux_el)
-              / PB_gross_min_eff + ((overall_var_heat_max_cons[j] - overall_var_heat_min_cons[j]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]) * (h[DV + i] - equiv_harmonious_min_perc[j]) + overall_var_heat_min_cons[j]
-                + overall_heat_fix_stby_cons[j]) * PB_Ratio_Heat_input_vs_output
+            0,
+            (min(PB_nom_net_cap, max(PB_net_min_cap, (1 + TES_aux_cons_perc) * max(0, h0[BK + i] + h[DX + i] - h0[BP + i]))) + PB_nom_net_cap
+              * PB_nom_var_aux_cons_perc_net
+              * POLY(
+                min(PB_nom_net_cap, max(PB_net_min_cap, (1 + TES_aux_cons_perc) * max(0, h0[BK + i] + h[DX + i] - h0[BP + i]))) / PB_nom_net_cap,
+                PB_n_g_var_aux_el_Coeff) + PB_fix_aux_el) / PB_gross_min_eff
+              + ((overall_var_heat_max_cons[j] - overall_var_heat_min_cons[j]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j])
+                * (h[DV + i] - equiv_harmonious_min_perc[j]) + overall_var_heat_min_cons[j] + overall_heat_fix_stby_cons[j]) * PB_Ratio_Heat_input_vs_output
               + iff(
-                and(h[DX + i].isZero, h[DX + i + 1] > Double.zero),
-                iff(
-                  (h[max(DX + i - 5, DX)...(DX + i)]
+                and(h[DX + i] == Double.zero, h[DX + i + 1] > Double.zero),
+                iff((h[max(DX + i - 5, DX)...(DX + i)]
                     .reduce(0) {
                       if $1.isZero { return $0 + 1 }
                       return $0
-                    }) < PB_warm_start_duration, PB_hot_start_heat_req, PB_warm_start_heat_req), 0) - h0[BQ + i]) * TES_aux_cons_perc
-      }
-      h[DY + i] = (h[DY + i] * 100).rounded(.up) / 100
+                    }) < PB_warm_start_duration, PB_hot_start_heat_req, PB_warm_start_heat_req), 0) - h0[BQ + i]) * TES_aux_cons_perc))
     }
 
     /// Corresponding PB net elec output
@@ -135,31 +131,41 @@ extension TunOl {
     /// TES energy available if above min op case
     let EE: Int = 78840
     // IF(CC6=0,0,MIN(SUMIF(BO5:BO8763,"="BO6,AY5:AY8763)*Heater_eff*(1+1/Ratio_CSP_vs_Heater),TES_thermal_cap,SUMIF(BO5:BO8763,"="BO6,EB5:EB8763)+SUMIF(BO5:BO8763,"="BO6,EC5:EC8763)+SUMIF(BO5:BO8763,"="BO6,ED5:ED8763)))
-    for i in 1..<8760 { if h0[CC + i].isZero { h[EE + i] = Double.zero } else { h[EE + i] = min(AYsum[i - 1] * Heater_eff * (1 + 1 / Ratio_CSP_vs_Heater), TES_thermal_cap, EBsum[i - 1] + ECEDsum[i - 1]) } }
+    for i in 1..<8760 {
+      if h0[CC + i].isZero {
+        h[EE + i] = Double.zero
+      } else {
+        h[EE + i] = min(AYsum[i - 1] * Heater_eff * (1 + 1 / Ratio_CSP_vs_Heater), TES_thermal_cap, EBsum[i - 1] + ECEDsum[i - 1])
+      }
+    }
 
     let CA: Int = 621960
     /// Effective gross heat cons for ST
     let EF: Int = 87600
-    // =IF(EE6=0,0,MIN(EC6,MAX(CA6,IFERROR((EE6-CC6)/(SUMIF($BO$5:$BO$8764,"="&$BO6,EB$5:EB$8764)+SUMIF($BO$5:$BO$8764,"="&$BO6,EC$5:EC$8764)+SUMIF($BO$5:$BO$8764,"="&$BO6,ED$5:ED$8764)-CC6)*(EC6-CA6),0)+CA6)))
+    // EF=IF(EE6=0,0,MAX(CA6,IFERROR((EE6-CC6)/(SUMIF($BO$5:$BO$8764,"="&$BO6,EB$5:EB$8764)+SUMIF($BO$5:$BO$8764,"="&$BO6,EC$5:EC$8764)+SUMIF($BO$5:$BO$8764,"="&$BO6,ED$5:ED$8764)-CC6)*(EC6-CA6),0)+CA6))
     for i in 1..<8760 {
-      if h[EE + i].isZero { h[EF + i] = Double.zero } else { h[EF + i] = min(h[EC + i], max(h0[CA + i], ifFinite((h[EE + i] - h0[CC + i]) / (EBsum[i - 1] + ECsum[i - 1] + EDsum[i - 1] - h0[CC + i]) * (h[EC + i] - h0[CA + i]), 0) + h0[CA + i])) }
+      h[EF + i] = iff(
+        h[EE + i] == Double.zero, 0,
+        max(
+          h0[CA + i],
+          ifFinite(
+            (h[EE + i] - h0[CC + i])
+              / (EBsum[i - 1] + ECsum[i - 1] + EDsum[i - 1] - h0[CC + i])
+              * (h[EC + i] - h0[CA + i]), 0) + h0[CA + i]))
     }
 
     let BY2 = 604440
     /// Effective PB gross elec output
     let EG: Int = 96360
-    // =IF(EF6=0,0,MIN(EA6,MAX(BY6,EF6*PB_nom_gross_eff*POLY(EF6/PB_nom_heat_cons,th_Coeff))))
-    for i in 1..<8760 { if h[EF + i].isZero { h[EG + i] = Double.zero } else { h[EG + i] = min(h[EA + i], max(h0[BY2 + i], h[EF + i] * PB_nom_gross_eff * POLY(h[EF + i] / PB_nom_heat_cons, th_Coeff))) } }
-
+    // EG=IF(EF6=0,0,MAX(BY6,EF6*PB_nom_gross_eff*POLY(EF6/PB_nom_heat_cons,th_Coeff)))
+    for i in 1..<8760 { h[EG + i] = iff(h[EF + i] == Double.zero, 0, max(h0[BY2 + i], h[EF + i] * PB_nom_gross_eff * POLY(h[EF + i] / PB_nom_heat_cons, th_Coeff))) }
     /// Effective PB net elec output
     let EH: Int = 105120
-    // =IF(EG6=0,0,MIN(DZ6,MAX(BX6,EG6-PB_nom_net_cap*PB_nom_var_aux_cons_perc_net*POLY(EG6/PB_nom_gross_cap_ud,PB_g2n_var_aux_el_Coeff)-PB_fix_aux_el)))
+    // EH=IF(EG6=0,0,MAX(BX6,EG6-PB_nom_net_cap*PB_nom_var_aux_cons_perc_net*POLY(EG6/PB_nom_gross_cap_ud,PB_g2n_var_aux_el_Coeff)-PB_fix_aux_el))
     for i in 1..<8760 {
-      if h[EG + i].isZero {
-        h[EH + i] = Double.zero
-      } else {
-        h[EH + i] = min(h[EG + i], max(h0[BX + i], h[EG + i] - PB_nom_net_cap * PB_nom_var_aux_cons_perc_net * POLY(h[EG + i] / PB_nom_gross_cap_ud, PB_g2n_var_aux_el_Coeff) - PB_fix_aux_el))
-      }
+      h[EH + i] = iff(
+        h[EG + i] == Double.zero, 0,
+        max(h[BX + i], h[EG + i] - PB_nom_net_cap * PB_nom_var_aux_cons_perc_net * POLY(h[EG + i] / PB_nom_gross_cap_ud, PB_g2n_var_aux_el_Coeff) - PB_fix_aux_el))
     }
 
     let CB: Int = 630720
