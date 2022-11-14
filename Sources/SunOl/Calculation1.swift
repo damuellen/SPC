@@ -326,19 +326,26 @@ extension TunOl {
     let BK: Int = 481800
     // =MAX(0,-(AW6-BF6-(AX6+(BF6*Heater_eff+BG6)*TES_aux_cons_perc)))
     for i in 1..<8760 { h[BK + i] = max(Double.zero, -(h[AW + i] - h[BF + i] - (h[AX + i] + (h[BF + i] * Heater_eff + h[BG + i]) * TES_aux_cons_perc))) }
-    /// Min harmonious net elec cons not considering grid import
+    /// Min harmonious net elec cons
     let BL: Int = 490560
-    // =IF(ROUND(MIN(BI6+MAX(0,Grid_import_max_ud*Grid_import_yes_no_PB_strategy-BH6)-PB_stby_aux_cons-MIN(El_boiler_cap_ud,MAX(0,Overall_harmonious_var_heat_min_cons+Overall_heat_fix_cons-BJ6)/El_boiler_eff),MAX(0,BJ6+MIN(El_boiler_cap_ud,MAX(0,BI6+MAX(0,Grid_import_max_ud*Grid_import_yes_no_PB_strategy-BH6)-PB_stby_aux_cons-Overall_harmonious_var_min_cons-Overall_fix_cons))*El_boiler_eff-Overall_heat_fix_cons)/Overall_harmonious_var_heat_max_cons*Overall_harmonious_var_max_cons+Overall_fix_cons),5)<ROUND(Overall_harmonious_var_min_cons+Overall_fix_cons,5),0,Overall_harmonious_var_min_cons+Overall_fix_cons)
+    // BL=IF(ROUNDUP(MIN(BI6+MAX(0,Grid_import_max_ud*Grid_import_yes_no_PB_strategy-BH6)-PB_stby_aux_cons-MIN(El_boiler_cap_ud,MAX(0,Overall_harmonious_var_heat_min_cons+Overall_heat_fix_cons-BJ6)/El_boiler_eff),MAX(0,BJ6+MIN(El_boiler_cap_ud,MAX(0,BI6+MAX(0,Grid_import_max_ud*Grid_import_yes_no_PB_strategy-BH6)-PB_stby_aux_cons-Overall_harmonious_var_min_cons-Overall_fix_cons))*El_boiler_eff-Overall_heat_fix_cons)/Overall_harmonious_var_heat_max_cons*Overall_harmonious_var_max_cons+Overall_fix_cons),5)<ROUNDDOWN(Overall_harmonious_var_min_cons+Overall_fix_cons,5),0,Overall_harmonious_var_min_cons+Overall_fix_cons)
     for i in 1..<8760 {
-      let min_net_elec = round(min(
-        h[BI + i] + max(Double.zero, Grid_import_max_ud * Grid_import_yes_no_PB_strategy - h[BH + i]) - PB_stby_aux_cons
-          - min(El_boiler_cap_ud, max(Double.zero, Overall_harmonious_var_heat_min_cons + Overall_heat_fix_cons - h[BJ + i]) / El_boiler_eff),
-        max(
-          Double.zero,
-          h[BJ + i] + min(El_boiler_cap_ud, max(Double.zero, h[BI + i] + max(Double.zero, Grid_import_max_ud * Grid_import_yes_no_PB_strategy - h[BH + i]) - PB_stby_aux_cons - Overall_harmonious_var_min_cons - Overall_fix_cons)) * El_boiler_eff
-            - Overall_heat_fix_cons) / Overall_harmonious_var_heat_max_cons * Overall_harmonious_var_max_cons + Overall_fix_cons),5)
-      h[BL + i] = iff(min_net_elec < round(Overall_harmonious_var_min_cons + Overall_fix_cons,5), Double.zero, Overall_harmonious_var_min_cons + Overall_fix_cons)
+      h[BL + i] = iff(
+        roundUp(
+          min(
+            h[BI + i] + max(0, Grid_import_max_ud * Grid_import_yes_no_PB_strategy - h[BH + i]) - PB_stby_aux_cons
+              - min(El_boiler_cap_ud, max(0, Overall_harmonious_var_heat_min_cons + Overall_heat_fix_cons - h[BJ + i]) / El_boiler_eff),
+            max(
+              0,
+              h[BJ + i] + min(
+                El_boiler_cap_ud,
+                max(
+                  0,
+                  h[BI + i] + max(0, Grid_import_max_ud * Grid_import_yes_no_PB_strategy - h[BH + i]) - PB_stby_aux_cons - Overall_harmonious_var_min_cons
+                    - Overall_fix_cons)) * El_boiler_eff - Overall_heat_fix_cons) / Overall_harmonious_var_heat_max_cons * Overall_harmonious_var_max_cons
+              + Overall_fix_cons), 5) < roundDown(Overall_harmonious_var_min_cons + Overall_fix_cons, 5), 0, Overall_harmonious_var_min_cons + Overall_fix_cons)
     }
+
     /// Optimized min harmonious net elec cons
     let BM: Int = 499320
     // IF(OR(AND(BL6>0,BL5=0,BL7=0),AND(BL6>0,OR(AND(BL4=0,BL5=0,BL8=0),AND(BL4=0,BL7=0,BL8=0)))),0,BL6)
@@ -560,22 +567,29 @@ extension TunOl {
   func hour3(_ h: inout [Double], case j: Int) {
     let (L, BV, BX, CB, CC, CI, CK, CL, CM) = (35040, 578160, 595680, 630720, 639480, 692040, 709560, 718320, 727080)
 
-    /// Min harmonious net elec cons not considering grid import
+    /// Min harm net elec cons
     let CP: Int = 753360
-    // =IF(OR(BV6>0,MIN(CK6+MAX(0,Grid_import_max_ud*Grid_import_yes_no_PB_strategy-MAX(0,CI6-$L6))-CM6-MIN(El_boiler_cap_ud,MAX(0,Overall_harmonious_var_heat_min_cons+Overall_heat_fix_cons-CL6)/El_boiler_eff),MAX(0,CL6+MIN(El_boiler_cap_ud,MAX(0,CK6+MAX(0,Grid_import_max_ud*Grid_import_yes_no_PB_strategy-MAX(0,CI6-$L6))-CM6-Overall_harmonious_var_min_cons-Overall_fix_cons))*El_boiler_eff-Overall_heat_fix_cons)/Overall_harmonious_var_heat_max_cons*Overall_harmonious_var_max_cons+Overall_fix_cons)<Overall_harmonious_var_min_cons+Overall_fix_cons),0,Overall_harmonious_var_min_cons+Overall_fix_cons)
+    // CP=IF(OR(AND(BV6>0,CC6>0),ROUNDUP(MIN(CK6+MAX(0,Grid_import_max_ud*Grid_import_yes_no_PB_strategy-MAX(0,CI6-$L6))-CM6-MIN(El_boiler_cap_ud,MAX(0,Overall_harmonious_var_heat_min_cons+Overall_heat_fix_cons-CL6)/El_boiler_eff),MAX(0,CL6+MIN(El_boiler_cap_ud,MAX(0,CK6+MAX(0,Grid_import_max_ud*Grid_import_yes_no_PB_strategy-MAX(0,CI6-$L6))-CM6-Overall_harmonious_var_min_cons-Overall_fix_cons))*El_boiler_eff-Overall_heat_fix_cons)/Overall_harmonious_var_heat_max_cons*Overall_harmonious_var_max_cons+Overall_fix_cons),5)<ROUNDDOWN(Overall_harmonious_var_min_cons+Overall_fix_cons,5)),0,Overall_harmonious_var_min_cons+Overall_fix_cons)
     for i in 1..<8760 {
       h[CP + i] = iff(
         or(
-          h[BV + i] > Double.zero,
-          min(
-            h[CK + i] + max(0, Grid_import_max_ud * Grid_import_yes_no_PB_strategy - max(Double.zero, h[CI + i] - h[L + i])) - h[CM + i]
-              - min(El_boiler_cap_ud, max(0, Overall_harmonious_var_heat_min_cons + Overall_heat_fix_cons - h[CL + i]) / El_boiler_eff),
-            max(
-              Double.zero,
-              h[CL + i] + min(El_boiler_cap_ud, max(Double.zero, h[CK + i] + max(0, Grid_import_max_ud * Grid_import_yes_no_PB_strategy - max(Double.zero, h[CI + i] - h[L + i])) - h[CM + i] - Overall_harmonious_var_min_cons - Overall_fix_cons))
-                * El_boiler_eff - Overall_heat_fix_cons) / Overall_harmonious_var_heat_max_cons * Overall_harmonious_var_max_cons + Overall_fix_cons) < Overall_harmonious_var_min_cons + Overall_fix_cons), Double.zero,
+          and(h[BV + i] > Double.zero, h[CC + i] > Double.zero),
+          roundUp(
+            min(
+              h[CK + i] + max(0, Grid_import_max_ud * Grid_import_yes_no_PB_strategy - max(0, h[CI + i] - h[L + i])) - h[CM + i]
+                - min(El_boiler_cap_ud, max(0, Overall_harmonious_var_heat_min_cons + Overall_heat_fix_cons - h[CL + i]) / El_boiler_eff),
+              max(
+                0,
+                h[CL + i] + min(
+                  El_boiler_cap_ud,
+                  max(
+                    0,
+                    h[CK + i] + max(0, Grid_import_max_ud * Grid_import_yes_no_PB_strategy - max(0, h[CI + i] - h[L + i])) - h[CM + i]
+                      - Overall_harmonious_var_min_cons - Overall_fix_cons)) * El_boiler_eff - Overall_heat_fix_cons) / Overall_harmonious_var_heat_max_cons
+                * Overall_harmonious_var_max_cons + Overall_fix_cons), 5) < roundDown(Overall_harmonious_var_min_cons + Overall_fix_cons, 5)), 0,
         Overall_harmonious_var_min_cons + Overall_fix_cons)
     }
+
     /// Optimized min harmonious net elec cons
     let CQ: Int = 762120
     // IF(OR(AND(CP6>0,CP5=0,CP7=0),AND(CP6>0,OR(AND(CP4=0,CP5>0,CP7=0),AND(CP5=0,CP7>0,CP8=0)))),0,CP6)
