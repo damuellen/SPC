@@ -71,25 +71,35 @@ extension TunOl {
     /// Surplus Grid input cap after min harm op and min night op prep
     /// =IF(Grid_import_max_ud*Grid_import_yes_no_PB_strategy=0,0,GE6-MAX(0,-(FS6-$Z6-MIN(GH6,MAX(0,$AB6-FV6)/El_boiler_eff)-MIN(BESS_cap_ud,MAX(0,FK6-GG6-GA6*BESS_chrg_eff))/BESS_chrg_eff)))
     for i in 0..<365 {
-      d13[JC + i] =
+      d13[JC + i] = iff(
+        Grid_import_max_ud * Grid_import_yes_no_PB_strategy == Double.zero, 0,
         d13[GE + i]
-        - max(Double.zero, -(d13[FS + i] - d13[Z + i] - min(d13[GH + i], max(Double.zero, d13[AB + i] - d13[FV + i]) / El_boiler_eff) - min(BESS_cap_ud, max(Double.zero, d13[FK + i] - d13[GG + i] - d13[GA + i] * BESS_chrg_eff)) / BESS_chrg_eff))
+          - max(
+            0,
+            -(d13[FS + i] - d13[Z + i] - min(d13[GH + i], max(0, d13[AB + i] - d13[FV + i]) / El_boiler_eff) - min(
+              BESS_cap_ud, max(0, d13[FK + i] - d13[GG + i] - d13[GA + i] * BESS_chrg_eff)) / BESS_chrg_eff)))
     }
     /// Surplus grid import cap after min harm op and max night op prep
     /// =IF(Grid_import_max_ud*Grid_import_yes_no_PB_strategy=0,0,IA6-MAX(0,-(HO6-$AA6-MIN(ID6,MAX(0,$AC6-HR6)/El_boiler_eff)-MIN(BESS_cap_ud,MAX(0,HG6-IC6-HW6*BESS_chrg_eff))/BESS_chrg_eff)))
     for i in 0..<365 {
-      //  let equiv_harmonious = equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]
-      d13[JD + i] =
+      d13[JD + i] = iff(
+        Grid_import_max_ud * Grid_import_yes_no_PB_strategy == Double.zero, 0,
         d13[IA + i]
-        - max(
-          Double.zero, -(d13[HO + i] + d13[AA + i] - min(d13[ID + i], max(Double.zero, d13[AC + i] - d13[HR + i]) / El_boiler_eff) - min(BESS_cap_ud, max(Double.zero, d13[HG + i] - d13[IC + i] - d13[HW + i] * BESS_chrg_eff)) / BESS_chrg_eff))
+          - max(
+            0,
+            -(d13[HO + i] - d13[AA + i] - min(d13[ID + i], max(0, d13[AC + i] - d13[HR + i]) / El_boiler_eff) - min(
+              BESS_cap_ud, max(0, d13[HG + i] - d13[IC + i] - d13[HW + i] * BESS_chrg_eff)) / BESS_chrg_eff)))
     }
     /// Surplus grid import cap after max harm op and min night op prep
     /// =IF(Grid_import_max_ud*Grid_import_yes_no_PB_strategy=0,0,GF6-MAX(0,-(FT6-$Z6-MIN(GI6,MAX(0,$AB6-FW6)/El_boiler_eff)-MIN(BESS_cap_ud,MAX(0,FK6-GG6-GA6*BESS_chrg_eff))/BESS_chrg_eff)))
     for i in 0..<365 {
-      d13[JE + i] =
+      d13[JE + i] = iff(
+        Grid_import_max_ud * Grid_import_yes_no_PB_strategy == Double.zero, 0,
         d13[GF + i]
-        - max(Double.zero, -(d13[FT + i] - d13[Z + i] - min(d13[GI + i], max(Double.zero, d13[AB + i] - d13[FW + i]) / El_boiler_eff) - min(BESS_cap_ud, max(Double.zero, d13[FK + i] - d13[GG + i] - d13[GA + i] * BESS_chrg_eff)) / BESS_chrg_eff))
+          - max(
+            0,
+            -(d13[FT + i] - d13[Z + i] - min(d13[GI + i], max(0, d13[AB + i] - d13[FW + i]) / El_boiler_eff) - min(
+              BESS_cap_ud, max(0, d13[FK + i] - d13[GG + i] - d13[GA + i] * BESS_chrg_eff)) / BESS_chrg_eff)))
     }
     /// Surplus RawMeth prod cap after min harm op and min night op prep
     // JF=GK6-$AD6
@@ -122,6 +132,9 @@ extension TunOl {
     /// Optimal harmonious day prod after min night prep due to prod cap limits
     // JP=IF(OR($AM6=0,IQ6<0,IT6<0,IW6<0,IZ6<0,JC6<0,JF6<0,JI6<0,JL6<0),0,MIN(1,IFERROR(IQ6/MAX(0,IQ6-IS6),1),IFERROR(IT6/MAX(0,IT6-IV6),1),IFERROR(IW6/MAX(0,IW6-IY6),1),IFERROR(IZ6/MAX(0,IZ6-JB6),1),IFERROR(JC6/MAX(0,JC6-JE6),1),IFERROR(JF6/MAX(0,JF6-JH6),1),IFERROR(JI6/MAX(0,JI6-JK6),1),IFERROR(JL6/MAX(0,JL6-JN6),1))*(Overall_harmonious_max_perc-Overall_harmonious_min_perc)+Overall_harmonious_min_perc)
     for i in 0..<365 {
+      if i + JP  == 57614 {
+        
+      }
       d13[JP + i] = iff(
         or(d13[AM + i].isZero, d13[IQ + i] < Double.zero, d13[IT + i] < Double.zero, d13[IW + i] < Double.zero, d13[IZ + i] < Double.zero, d13[JC + i] < Double.zero, d13[JF + i] < Double.zero, d13[JI + i] < Double.zero, d13[JL + i] < 0),
         Double.zero,

@@ -70,7 +70,7 @@ extension TunOl {
     /// Grid cons considering min/max harm op outside harm op period
     let EA = 3285
     // EA=SUMIFS(Calculation!$X$5:$X$8764,Calculation!$U$5:$U$8764,"="&$A3,Calculation!$S$5:$S$8764,"=0")
-    hour.sumOf(X, days: U, into: &d22, at: EA, condition: S, predicate: notZero)
+    hour.sumOf(X, days: U, into: &d22, at: EA, condition: S, predicate: { $0.isZero })
 
     /// Remaining PV el after min harm during harm op period
     let EB = 3650
