@@ -40,9 +40,11 @@ func fitness(values: [Double], penalized: Bool) -> [Double] {
 
     model.d21(&d21, case: j, day0: day20)
     model.d23(&d23, case: j, day0: day20, d21: d21, d22: d22)
-    day.append(Array(d23[33945..<35040] + ArraySlice(zip(day20[365..<730], d23[GX..<GZ]).map { $1 > 0 ? $0 : 0 }) + day20[730..<1095]))
-    day.append(Array(d23[44895..<45990] + ArraySlice(zip(day20[365..<730], d23[GZ..<HA]).map { $1 > 0 ? $0 : 0 }) + day20[730..<1095]))
-  }
+    let a = zip(day20[365..<730], d23[GX..<GZ]).map { $1 > 0 ? $0 : 0 }
+    day.append(Array(d23[33945..<35040] + ArraySlice(a) + day20[730..<1095]))
+    let b = zip(day20[365..<730], d23[GZ..<HA]).map { $1 > 0 ? $0 : 0 }
+    day.append(Array(d23[44895..<45990] + ArraySlice(b) + day20[730..<1095]))
+ }
 
   reserve += step
   // }
