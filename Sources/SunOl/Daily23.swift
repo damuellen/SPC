@@ -832,13 +832,13 @@ extension TunOl {
 
     /// Pure Methanol prod with min night prep and resp day op
     let IU = 33945
-    // IU=MAX(0,HU6-C6*Overall_fix_cons)/Overall_harmonious_var_max_cons*MethDist_harmonious_max_perc*MethDist_Meth_nom_prod_ud+IF(IJ6=0,0,IF(A_overall_var_max_cons=0,B6*GX6,MAX(0,IJ6-B6*A_overall_fix_stby_cons)/A_overall_var_max_cons*A_MethDist_max_perc)*MethDist_Meth_nom_prod_ud)
+    // IU=MAX(0,HU6-C6*Overall_fix_cons)/Overall_harmonious_var_max_cons*MethDist_harmonious_max_perc*MethDist_Meth_nom_prod_ud+IF(IJ6=0,0,IF(A_overall_var_max_cons=0,B6*GX6,MAX(0,IJ6-B6*A_overall_fix_stby_cons-A_overall_stup_cons)/A_overall_var_max_cons*A_MethDist_max_perc)*MethDist_Meth_nom_prod_ud)
     for i in 0..<365 {
       d23[IU + i] =
         max(Double.zero, d23[HU + i] - day0[C + i] * Overall_fix_cons) / Overall_harmonious_var_max_cons * MethDist_harmonious_max_perc * MethDist_Meth_nom_prod_ud
         + iff(
           d23[IJ + i].isZero, Double.zero,
-          iff(overall_var_max_cons[j].isZero, day0[B + i] * d23[GX + i], max(Double.zero, d23[IJ + i] - day0[B + i] * overall_fix_stby_cons[j]) / overall_var_max_cons[j] * MethDist_max_perc[j]) * MethDist_Meth_nom_prod_ud)
+          iff(overall_var_max_cons[j].isZero, day0[B + i] * d23[GX + i], max(Double.zero, d23[IJ + i] - day0[B + i] * overall_fix_stby_cons[j] - overall_stup_cons[j]) / overall_var_max_cons[j] * MethDist_max_perc[j]) * MethDist_Meth_nom_prod_ud)
     }
 
     /// grid export
@@ -1019,13 +1019,13 @@ extension TunOl {
 
     /// Pure Methanol prod with min night prep and resp day op
     let JZ = 44895
-    // JZ=MAX(0,IZ6-C6*Overall_fix_cons)/Overall_harmonious_var_max_cons*MethDist_harmonious_max_perc*MethDist_Meth_nom_prod_ud+IF(JO6=0,0,IF(A_overall_var_max_cons=0,B6*GZ6,MAX(0,JO6-B6*A_overall_fix_stby_cons)/A_overall_var_max_cons*A_MethDist_max_perc)*MethDist_Meth_nom_prod_ud)
+    // JZ=MAX(0,IZ6-C6*Overall_fix_cons)/Overall_harmonious_var_max_cons*MethDist_harmonious_max_perc*MethDist_Meth_nom_prod_ud+IF(JO6=0,0,IF(A_overall_var_max_cons=0,B6*GZ6,MAX(0,JO6-B6*A_overall_fix_stby_cons-A_overall_stup_cons)/A_overall_var_max_cons*A_MethDist_max_perc)*MethDist_Meth_nom_prod_ud)
     for i in 0..<365 {
       d23[JZ + i] =
         max(Double.zero, d23[IZ + i] - day0[C + i] * Overall_fix_cons) / Overall_harmonious_var_max_cons * MethDist_harmonious_max_perc * MethDist_Meth_nom_prod_ud
         + iff(
           d23[JO + i].isZero, Double.zero,
-          iff(overall_var_max_cons[j].isZero, day0[B + i] * d23[GZ + i], max(Double.zero, d23[JO + i] - day0[B + i] * overall_fix_stby_cons[j]) / overall_var_max_cons[j] * MethDist_max_perc[j]) * MethDist_Meth_nom_prod_ud)
+          iff(overall_var_max_cons[j].isZero, day0[B + i] * d23[GZ + i], max(Double.zero, d23[JO + i] - day0[B + i] * overall_fix_stby_cons[j] - overall_stup_cons[j]) / overall_var_max_cons[j] * MethDist_max_perc[j]) * MethDist_Meth_nom_prod_ud)
     }
 
     /// grid export
