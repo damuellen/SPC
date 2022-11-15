@@ -16,15 +16,15 @@ func fitness(values: [Double], penalized: Bool) -> [Double] {
   let (MC, MI, NL, NR) = (81030, 83220, 93805, 95995)
 
   model.hour(TunOl.Q_Sol_MW_thLoop, TunOl.Reference_PV_plant_power_at_inverter_inlet_DC, TunOl.Reference_PV_MV_power_at_transformer_outlet, hour: &hourPre)
-  let d22 = model.d22(hour: hourPre)
+  let day20 = model.day20(hour: hourPre)
+  let d22 = model.d22(hour: hourPre, d20: day20)
 
   let step = (model.Overall_harmonious_max_perc - model.Overall_harmonious_min_perc) / 4
   var reserve = model.Overall_harmonious_min_perc
 
   // while reserve < model.Overall_harmonious_max_perc {
   model.hour1(&hourPre, reserved: reserve)
-  let day20 = model.day20(hour: hourPre)
-
+  
   for j in 0..<4 {
     model.hour2(&hourPre, case: j)
     model.hour3(&hourPre, case: j)

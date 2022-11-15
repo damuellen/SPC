@@ -1,5 +1,5 @@
 extension TunOl {
-  func d22(hour: [Double]) -> [Double] {
+  func d22(hour: [Double], d20: [Double]) -> [Double] {
     let U: [[Int]] = hour[113881..<(113880 + 8760)].indices.chunked { hour[$0] == hour[$1] }.map { $0.map { $0 - 113880 } }
     let (S, T, V, W, X, Y, Z, AA, AB, AC, AD, AE, AF, AH, AI, AJ, AK, _, AM, AN, AO, AP, AQ, AR, AS, AT) = (
       96360, 105120, 122640, 131400, 140160, 148920, 157680, 166440, 175200, 183960, 192720, 201480, 210240, 227760, 236520, 245280, 254040, 262800, 271560, 280320, 289080, 297840, 306600, 315360, 324120, 332880
@@ -62,11 +62,11 @@ extension TunOl {
     /// Grid cons considering min harm op during harm op period
     let DY = 2555
     // DY=$B3*Overall_stby_cons
-    for i in 0..<365 { d22[DY + i] = d22[B + i] * Overall_stby_cons }
+    for i in 0..<365 { d22[DY + i] = d20[B + i] * Overall_stby_cons }
     /// Grid cons considering max harm op during harm op period
     let DZ = 2920
     // DZ=$B3*Overall_heat_stby_cons
-    for i in 0..<365 { d22[DZ + i] = d22[B + i] * Overall_heat_stby_cons }
+    for i in 0..<365 { d22[DZ + i] = d20[B + i] * Overall_heat_stby_cons }
     /// Grid cons considering min/max harm op outside harm op period
     let EA = 3285
     // EA=SUMIFS(Calculation!$X$5:$X$8764,Calculation!$U$5:$U$8764,"="&$A3,Calculation!$S$5:$S$8764,"=0")

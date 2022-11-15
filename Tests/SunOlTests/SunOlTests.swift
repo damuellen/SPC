@@ -76,7 +76,7 @@ class SunOlTests: XCTestCase {
       return (key, num)
     }
 
-    let values = [107.00,5128.89,208.11,477.67,750.73,200.00,0.00,322.57,1000.00,100000.00,100000.00,21.20,36.10,0.00,0.00,0.00,]
+    let values = [0.00,0.00,0.00,599.32,803.41,180.00,0.00,0.00,1000.00,100000.00,100000.00,17.56,15.72,451.42,0.00,0.00,]
     guard let model = TunOl(values) else {
       print("Invalid config")
       return
@@ -92,10 +92,10 @@ class SunOlTests: XCTestCase {
     let (MC, MI, NL, NR) = (81030, 83220, 93805, 95995)
 
     model.hour(TunOl.Q_Sol_MW_thLoop, TunOl.Reference_PV_plant_power_at_inverter_inlet_DC, TunOl.Reference_PV_MV_power_at_transformer_outlet, hour: &hourPre)
-    let d22 = model.d22(hour: hourPre)
+    let day20 = model.day20(hour: hourPre)
+    let d22 = model.d22(hour: hourPre, d20: day20)
 
     model.hour1(&hourPre, reserved: model.Overall_harmonious_min_perc)
-    let day20 = model.day20(hour: hourPre)
 
     for j in 0..<4 {
       model.hour2(&hourPre, case: j)
@@ -235,10 +235,10 @@ class SunOlTests: XCTestCase {
     let (MC, MI, NL, NR) = (81030, 83220, 93805, 95995)
 
     model.hour(TunOl.Q_Sol_MW_thLoop, TunOl.Reference_PV_plant_power_at_inverter_inlet_DC, TunOl.Reference_PV_MV_power_at_transformer_outlet, hour: &hourPre)
-    let d22 = model.d22(hour: hourPre)
+    let day20 = model.day20(hour: hourPre)
+    let d22 = model.d22(hour: hourPre, d20: day20)
 
     model.hour1(&hourPre, reserved: model.Overall_harmonious_min_perc)
-    let day20 = model.day20(hour: hourPre)
 
     for j in 0..<4 {
       model.hour2(&hourPre, case: j)
