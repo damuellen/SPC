@@ -1,1052 +1,1592 @@
 extension TunOl {
   func d23(_ d23: inout [Double], case j: Int, day0: [Double], d21: [Double], d22: [Double]) {
-    let (B, C, E, F, G, H, O, P, Q, R, S, T, U, V, W, X) = (365, 730, 0, 365, 730, 1095, 3650, 4015, 4380, 4745, 5110, 5475, 5840, 6205, 6570, 6935)
-    let AE = 9490
-    let (EA, EB, EC, EE, EF, EG, EH, EI, EJ, EK, EL, EM, EN, EO, EP, EQ, ER, ES, ET, EV, EW, EY, EZ) = (
-      3285, 3650, 4015, 4745, 5110, 5475, 5840, 6205, 6570, 6935, 7300, 7665, 8030, 8395, 8760, 9125, 9490, 9855, 10220, 10950, 11315, 12045, 12410
+    let (B, C, E, F, G, H, O, P, Q, R, S, T, U, V, W, X) = (
+      365, 730, 0, 365, 730, 1095, 3650, 4015, 4380, 4745, 5110, 5475, 5840, 6205, 6570, 6935
     )
-    let (DR, DS, DT, DU, DV, DW, DX) = (0, 365, 730, 1095, 1460, 1825, 2190)
+    let AE = 9490
+    let (EA, EB, EC, _, EE, EF, EG, EH, EI, EJ, EK, EL, EM, EN, EO, EP, EQ, ER, ES, ET, EV, EW, EY, EZ) = (
+      3285, 3650, 4015, 4380, 4745, 5110, 5475, 5840, 6205, 6570, 6935, 7300, 7665, 8030, 8395, 8760, 9125, 9490, 9855,
+      10220, 10950, 11315, 12045, 12410
+    )
+
+    let (DM, DN, DO) = (13140, 13505, 13870)
+    let (DR, DS, DT, DU, DV, DW, DX, DY, DZ) = (0, 365, 730, 1095, 1460, 1825, 2190, 2555, 2920)
 
     /// Surplus harm op period el after min day harm op and min night op prep
     let FC = 0
-    // FC=$EB3+$EH3-$O3-MIN(BESS_cap_ud,MAX(0,$EA3+$E3+MIN($ER3,MAX(0,$G3-$EG3)/El_boiler_eff)-$EJ3-$EM3*BESS_chrg_eff))/BESS_chrg_eff-MIN($EP3,MAX(0,$Q3-$EE3)/El_boiler_eff)
+    // FC=$EB3+$EH3-$O3-MAX(0,$EA3+$E3+MAX(0,$G3-$EG3)/El_boiler_eff-$EJ3-$EM3*BESS_chrg_eff)/BESS_chrg_eff-MAX(0,$Q3-$EE3)/El_boiler_eff
     for i in 0..<365 {
       d23[FC + i] =
-        d22[EB + i] + d22[EH + i] - d21[O + i] - min(
-          BESS_cap_ud,
-          max(0, d22[EA + i] + d21[E + i] + min(d22[ER + i], max(0, d21[G + i] - d22[EG + i]) / El_boiler_eff) - d22[EJ + i] - d22[EM + i] * BESS_chrg_eff))
-        / BESS_chrg_eff - min(d22[EP + i], max(0, d21[Q + i] - d22[EE + i]) / El_boiler_eff)
+        d22[EB + i] + d22[EH + i] - d21[O + i] - max(
+          0,
+          d22[EA + i] + d21[E + i] + max(0, d21[G + i] - d22[EG + i]) / El_boiler_eff - d22[EJ + i] - d22[EM + i]
+            * BESS_chrg_eff) / BESS_chrg_eff - max(0, d21[Q + i] - d22[EE + i]) / El_boiler_eff
     }
-
 
     /// Surplus harm op period el after min day harm op and max night op prep
     let FD = 365
-    // FD=$EB3+$EH3-$P3-MIN(BESS_cap_ud,MAX(0,$EA3+$F3+MIN($ER3,MAX(0,$H3-$EG3)/El_boiler_eff)-$EJ3-$EM3*BESS_chrg_eff))/BESS_chrg_eff-MIN($EP3,MAX(0,$R3-$EE3)/El_boiler_eff)
+    // FD=$EB3+$EH3-$P3-MAX(0,$EA3+$F3+MAX(0,$H3-$EG3)/El_boiler_eff-$EJ3-$EM3*BESS_chrg_eff)/BESS_chrg_eff-MAX(0,$R3-$EE3)/El_boiler_eff
     for i in 0..<365 {
       d23[FD + i] =
-        d22[EB + i] + d22[EH + i] - d21[P + i] - min(
-          BESS_cap_ud,
-          max(0, d22[EA + i] + d21[F + i] + min(d22[ER + i], max(0, d21[H + i] - d22[EG + i]) / El_boiler_eff) - d22[EJ + i] - d22[EM + i] * BESS_chrg_eff))
-        / BESS_chrg_eff - min(d22[EP + i], max(0, d21[R + i] - d22[EE + i]) / El_boiler_eff)
+        d22[EB + i] + d22[EH + i] - d21[P + i] - max(
+          0,
+          d22[EA + i] + d21[F + i] + max(0, d21[H + i] - d22[EG + i]) / El_boiler_eff - d22[EJ + i] - d22[EM + i]
+            * BESS_chrg_eff) / BESS_chrg_eff - max(0, d21[R + i] - d22[EE + i]) / El_boiler_eff
     }
 
     /// Surplus harm op period el after max day harm op and min night op prep
     let FE = 730
-    // FE=$EC3+$EI3-$O3-MIN(BESS_cap_ud,MAX(0,$EA3+$E3+MIN($ER3,MAX(0,$G3-$EG3)/El_boiler_eff)-$EJ3-$EM3*BESS_chrg_eff))/BESS_chrg_eff-MIN($EQ3,MAX(0,$Q3-$EF3)/El_boiler_eff)
+    // FE=$EC3+$EI3-$O3-MAX(0,$EA3+$E3+MAX(0,$G3-$EG3)/El_boiler_eff-$EJ3-$EM3*BESS_chrg_eff)/BESS_chrg_eff-MAX(0,$Q3-$EF3)/El_boiler_eff
     for i in 0..<365 {
       d23[FE + i] =
-        d22[EC + i] + d22[EI + i] - d21[O + i] - min(
-          BESS_cap_ud,
-          max(0, d22[EA + i] + d21[E + i] + min(d22[ER + i], max(0, d21[G + i] - d22[EG + i]) / El_boiler_eff) - d22[EJ + i] - d22[EM + i] * BESS_chrg_eff))
-        / BESS_chrg_eff - min(d22[EQ + i], max(0, d21[Q + i] - d22[EF + i]) / El_boiler_eff)
+        d22[EC + i] + d22[EI + i] - d21[O + i] - max(
+          0,
+          d22[EA + i] + d21[E + i] + max(0, d21[G + i] - d22[EG + i]) / El_boiler_eff - d22[EJ + i] - d22[EM + i]
+            * BESS_chrg_eff) / BESS_chrg_eff - max(0, d21[Q + i] - d22[EF + i]) / El_boiler_eff
     }
 
-    /// Surplus outside harm op period el after min day harm and min night op prep; comment: it is assumed that PV during off-harmonious period is not well distributed and must therefore be channelled during the BESS to be used
+    /// Surplus outside harm op period el after min day harm and min night op prep
     let FF = 1095
-    // =(EK6+EM6)*BESS_chrg_eff+EJ6-EA6-E6-MIN(ER6,MAX(0,G6-EG6)/El_boiler_eff)
-    for i in 0..<365 { d23[FF + i] = (d22[EK + i] + d22[EM + i]) * BESS_chrg_eff + d22[EJ + i] - d22[EA + i] - d21[E + i] - min(d22[ER + i], max(.zero, d21[G + i] - d22[EG + i]) / El_boiler_eff) }
+    // FF=($EK3+$EM3)*BESS_chrg_eff+$EJ3-$EA3-$E3-MAX(0,$G3-$EG3)/El_boiler_eff
+    for i in 0..<365 {
+      d23[FF + i] =
+        (d22[EK + i] + d22[EM + i]) * BESS_chrg_eff + d22[EJ + i] - d22[EA + i] - d21[E + i] - max(
+          0, d21[G + i] - d22[EG + i]) / El_boiler_eff
+    }
 
-    /// Surplus outside harm op period el after min day harm and max night op prep; comment: it is assumed that PV during off-harmonious period is not well distributed and must therefore be channelled during the BESS to be used
+    /// Surplus outside harm op period el after min day harm and max night op prep
     let FG = 1460
-    // =(EK6+EM6)*BESS_chrg_eff+EJ6-EA6-F6-MIN(ER6,MAX(0,H6-EG6)/El_boiler_eff)
-    for i in 0..<365 { d23[FG + i] = (d22[EK + i] + d22[EM + i]) * BESS_chrg_eff + d22[EJ + i] - d22[EA + i] - d21[F + i] - min(d22[ER + i], max(0.0, d21[H + i] - d22[EG + i]) / El_boiler_eff) }
+    // FG=($EK3+$EM3)*BESS_chrg_eff+$EJ3-$EA3-$F3-MAX(0,$H3-$EG3)/El_boiler_eff
+    for i in 0..<365 {
+      d23[FG + i] =
+        (d22[EK + i] + d22[EM + i]) * BESS_chrg_eff + d22[EJ + i] - d22[EA + i] - d21[F + i] - max(
+          0, d21[H + i] - d22[EG + i]) / El_boiler_eff
+    }
 
-    /// Surplus outside harm op period el after max day harm and min night op prep; comment: it is assumed that PV during off-harmonious period is not well distributed and must therefore be channelled during the BESS to be used
+    /// Surplus outside harm op period el after max day harm and min night op prep
     let FH = 1825
-    // =(EL6+EM6)*BESS_chrg_eff+EJ6-EA6-E6-MIN(ER6,MAX(0,G6-EG6)/El_boiler_eff)
-    for i in 0..<365 { d23[FH + i] = (d22[EL + i] + d22[EM + i]) * BESS_chrg_eff + d22[EJ + i] - d22[EA + i] - d21[E + i] - min(d22[ER + i], max(0.0, d21[G + i] - d22[EG + i]) / El_boiler_eff) }
+    // FH=($EL3+$EM3)*BESS_chrg_eff+$EJ3-$EA3-$E3-MAX(0,$G3-$EG3)/El_boiler_eff
+    for i in 0..<365 {
+      d23[FH + i] =
+        (d22[EL + i] + d22[EM + i]) * BESS_chrg_eff + d22[EJ + i] - d22[EA + i] - d21[E + i] - max(
+          0, d21[G + i] - d22[EG + i]) / El_boiler_eff
+    }
 
-    /// Surplus harm op heat after min day harm and min night op prep; Comment: it is assumed that PV electricity from outside harmonious period is used to charge BESS
+    /// Surplus harm op heat after min day harm and min night op prep
     let FI = 2190
-    // FI=$EE3+MIN($EP3,MAX(0,$EB3+$EH3-MIN(BESS_cap_ud,MAX(0,$EA3+$E3+MIN($ER3,MAX(0,$G3-$EG3)/El_boiler_eff)-$EJ3-$EM3*BESS_chrg_eff))/BESS_chrg_eff-$O3))*El_boiler_eff-$Q3
+    // FI=$EE3+MAX(0,$EB3+$EH3-MAX(0,$EA3+$E3+MAX(0,$G3-$EG3)/El_boiler_eff-$EJ3-$EM3*BESS_chrg_eff)/BESS_chrg_eff-$O3)*El_boiler_eff-$Q3
     for i in 0..<365 {
       d23[FI + i] =
-        d22[EE + i] + min(
-          d22[EP + i],
-          max(
+        d22[EE + i] + max(
+          0,
+          d22[EB + i] + d22[EH + i] - max(
             0,
-            d22[EB + i] + d22[EH + i] - min(
-              BESS_cap_ud,
-              max(0, d22[EA + i] + d21[E + i] + min(d22[ER + i], max(0, d21[G + i] - d22[EG + i]) / El_boiler_eff) - d22[EJ + i] - d22[EM + i] * BESS_chrg_eff))
-              / BESS_chrg_eff - d21[O + i])) * El_boiler_eff - d21[Q + i]
+            d22[EA + i] + d21[E + i] + max(0, d21[G + i] - d22[EG + i]) / El_boiler_eff - d22[EJ + i] - d22[EM + i]
+              * BESS_chrg_eff) / BESS_chrg_eff - d21[O + i]) * El_boiler_eff - d21[Q + i]
     }
 
-    /// Surplus harm op heat after min day harm and max night op prep; Comment: it is assumed that PV electricity from outside harmonious period is used to charge BESS
+    /// Surplus harm op heat after min day harm and max night op prep
     let FJ = 2555
-    // FJ=$EE3+MIN($EP3,MAX(0,$EB3+$EH3-MIN(BESS_cap_ud,MAX(0,$EA3+$F3+MIN($ER3,MAX(0,$H3-$EG3)/El_boiler_eff)-$EJ3-$EM3*BESS_chrg_eff))/BESS_chrg_eff-$P3))*El_boiler_eff-$R3
+    // FJ=$EE3+MAX(0,$EB3+$EH3-MAX(0,$EA3+$F3+MAX(0,$H3-$EG3)/El_boiler_eff-$EJ3-$EM3*BESS_chrg_eff)/BESS_chrg_eff-$P3)*El_boiler_eff-$R3
     for i in 0..<365 {
       d23[FJ + i] =
-        d22[EE + i] + min(
-          d22[EP + i],
-          max(
+        d22[EE + i] + max(
+          0,
+          d22[EB + i] + d22[EH + i] - max(
             0,
-            d22[EB + i] + d22[EH + i] - min(
-              BESS_cap_ud,
-              max(0, d22[EA + i] + d21[F + i] + min(d22[ER + i], max(0, d21[H + i] - d22[EG + i]) / El_boiler_eff) - d22[EJ + i] - d22[EM + i] * BESS_chrg_eff))
-              / BESS_chrg_eff - d21[P + i])) * El_boiler_eff - d21[R + i]
+            d22[EA + i] + d21[F + i] + max(0, d21[H + i] - d22[EG + i]) / El_boiler_eff - d22[EJ + i] - d22[EM + i]
+              * BESS_chrg_eff) / BESS_chrg_eff - d21[P + i]) * El_boiler_eff - d21[R + i]
     }
 
-    /// Surplus harm op heat after max day harm and min night op prep; Comment: it is assumed that PV electricity from outside harmonious period is used to charge BESS
+    /// Surplus harm op heat after max day harm and min night op prep
     let FK = 2920
-    // FK=$EF3+MIN($EQ3,MAX(0,$EC3+$EI3-MIN(BESS_cap_ud,MAX(0,$EA3+$E3+MIN($ER3,MAX(0,$G3-$EG3)/El_boiler_eff)-$EJ3-$EM3*BESS_chrg_eff))/BESS_chrg_eff-$O3))*El_boiler_eff-$Q3
+    // FK=$EF3+MAX(0,$EC3+$EI3-MAX(0,$EA3+$E3+MAX(0,$G3-$EG3)/El_boiler_eff-$EJ3-$EM3*BESS_chrg_eff)/BESS_chrg_eff-$O3)*El_boiler_eff-$Q3
     for i in 0..<365 {
       d23[FK + i] =
-        d22[EF + i] + min(
-          d22[EQ + i],
-          max(
+        d22[EF + i] + max(
+          0,
+          d22[EC + i] + d22[EI + i] - max(
             0,
-            d22[EC + i] + d22[EI + i] - min(
-              BESS_cap_ud,
-              max(0, d22[EA + i] + d21[E + i] + min(d22[ER + i], max(0, d21[G + i] - d22[EG + i]) / El_boiler_eff) - d22[EJ + i] - d22[EM + i] * BESS_chrg_eff))
-              / BESS_chrg_eff - d21[O + i])) * El_boiler_eff - d21[Q + i]
+            d22[EA + i] + d21[E + i] + max(0, d21[G + i] - d22[EG + i]) / El_boiler_eff - d22[EJ + i] - d22[EM + i]
+              * BESS_chrg_eff) / BESS_chrg_eff - d21[O + i]) * El_boiler_eff - d21[Q + i]
     }
 
     /// Surplus outside harm op heat after min day harm and min night op prep
     let FL = 3285
+    // FL=$EG3+MAX(0,($EK3+$EM3)*BESS_chrg_eff+$EJ3-$EA3-$E3)*El_boiler_eff-$G3
+    for i in 0..<365 {
+      d23[FL + i] =
+        d22[EG + i] + max(0, (d22[EK + i] + d22[EM + i]) * BESS_chrg_eff + d22[EJ + i] - d22[EA + i] - d21[E + i])
+        * El_boiler_eff - d21[G + i]
+    }
+
     /// Surplus outside harm op heat after min day harm and max night op prep
     let FM = 3650
+    // FM=$EG3+MAX(0,($EK3+$EM3)*BESS_chrg_eff+$EJ3-$EA3-$F3)*El_boiler_eff-$H3
+    for i in 0..<365 {
+      d23[FM + i] =
+        d22[EG + i] + max(0, (d22[EK + i] + d22[EM + i]) * BESS_chrg_eff + d22[EJ + i] - d22[EA + i] - d21[F + i])
+        * El_boiler_eff - d21[H + i]
+    }
+
     /// Surplus outside harm op heat after max day harm and min night op prep
     let FN = 4015
-    /// Surplus el boiler cap after min harm op and min night op prep during harm op period
-    let FO = 4380
-    /// Surplus el boiler cap after min harm op and max night op prep during harm op period
-    let FP = 4745
-    /// Surplus el boiler cap after max harm op and min night op prep during harm op period
-    let FQ = 5110
-    /// Surplus el boiler cap after min harm op and min night op prep outside of harm op period
-    let FR = 5475
-    /// Surplus el boiler cap after min harm op and max night op prep outside of harm op period
-    let FS = 5840
+    // FN=$EG3+MAX(0,($EL3+$EM3)*BESS_chrg_eff+$EJ3-$EA3-$E3)*El_boiler_eff-$G3
     for i in 0..<365 {
-      // =$EG6+MIN($ER6,MAX(0,($EK6+$EM6)*BESS_chrg_eff+$EJ6-$EA6-$E6))*El_boiler_eff-$G6
-      d23[FL + i] = d22[EG + i] + min(d22[ER + i], max(0.0, (d22[EK + i] + d22[EM + i]) * BESS_chrg_eff + d22[EJ + i] - d22[EA + i] - d21[E + i])) * El_boiler_eff - d21[G + i]
-      // =EG6+MIN(ER6,MAX(0,(EK6+EM6)*BESS_chrg_eff+EJ6-EA6-F6))*El_boiler_eff-H6
-      d23[FM + i] = d22[EG + i] + min(d22[ER + i], max(0.0, (d22[EK + i] + d22[EM + i]) * BESS_chrg_eff + d22[EJ + i] - d22[EA + i] - d21[F + i])) * El_boiler_eff - d21[H + i]
-      // =EG6+MIN(ER6,MAX(0,(EL6+EM6)*BESS_chrg_eff+EJ6-EA6-E6))*El_boiler_eff-G6
-      d23[FN + i] = d22[EG + i] + min(d22[ER + i], max(0.0, (d22[EL + i] + d22[EM + i]) * BESS_chrg_eff + d22[EJ + i] - d22[EA + i] - d21[E + i])) * El_boiler_eff - d21[G + i]
-      // =IF(El_boiler_cap_ud=0,0,$EP6-MAX(0,$Q6-$EE6)/El_boiler_eff)
-      if El_boiler_cap_ud.isZero {
-        d23[FO + i] = Double.zero
-        d23[FP + i] = Double.zero
-        d23[FQ + i] = Double.zero
-        d23[FR + i] = Double.zero
-        d23[FS + i] = Double.zero
-      } else {
-        d23[FO + i] = d22[EP + i] - max(0.0, d21[Q + i] - d22[EE + i]) / El_boiler_eff
-        // =IF(El_boiler_cap_ud=0,0,$EP6-MAX(0,$R6-$EE6)/El_boiler_eff)
-        d23[FP + i] = d22[EP + i] - max(0.0, d21[R + i] - d22[EE + i]) / El_boiler_eff
-        // =IF(El_boiler_cap_ud=0,0,$EQ6-MAX(0,$Q6-$EF6)/El_boiler_eff)
-        d23[FQ + i] = d22[EQ + i] - max(0.0, d21[Q + i] - d22[EF + i]) / El_boiler_eff
-        // =IF(El_boiler_cap_ud=0,0,$ER6-MAX(0,$G6-$EG6)/El_boiler_eff)
-        d23[FR + i] = d22[ER + i] - max(0.0, d21[G + i] - d22[EG + i]) / El_boiler_eff
-        // =IF(El_boiler_cap_ud=0,0,$ER6-MAX(0,$H6-$EG6)/El_boiler_eff)
-        d23[FS + i] = d22[ER + i] - max(0.0, d21[H + i] - d22[EG + i]) / El_boiler_eff
-      }
+      d23[FN + i] =
+        d22[EG + i] + max(0, (d22[EL + i] + d22[EM + i]) * BESS_chrg_eff + d22[EJ + i] - d22[EA + i] - d21[E + i])
+        * El_boiler_eff - d21[G + i]
+    }
+
+    /// Surplus BESS cap after min harm op and min night op prep during harm op period
+    let FO = 4380
+    // FO=$EK3-MAX(0,$EA3+$E3+MIN($ER3,MAX(0,$G3-$EG3)/El_boiler_eff)-$EJ3-$EM3*BESS_chrg_eff)/BESS_chrg_eff
+    for i in 0..<365 {
+      d23[FO + i] =
+        d22[EK + i] - max(
+          0,
+          d22[EA + i] + d21[E + i] + min(d22[ER + i], max(0, d21[G + i] - d22[EG + i]) / El_boiler_eff) - d22[EJ + i]
+            - d22[EM + i] * BESS_chrg_eff) / BESS_chrg_eff
+    }
+
+    /// Surplus BESS cap after min harm op and max night op prep during harm op period
+    let FP = 4745
+    // FP=$EK3-MAX(0,$EA3+$F3+MIN($ER3,MAX(0,$H3-$EG3)/El_boiler_eff)-$EJ3-$EM3*BESS_chrg_eff)/BESS_chrg_eff
+    for i in 0..<365 {
+      d23[FP + i] =
+        d22[EK + i] - max(
+          0,
+          d22[EA + i] + d21[F + i] + min(d22[ER + i], max(0, d21[H + i] - d22[EG + i]) / El_boiler_eff) - d22[EJ + i]
+            - d22[EM + i] * BESS_chrg_eff) / BESS_chrg_eff
+    }
+
+    /// Surplus BESS cap after max harm op and min night op prep during harm op period
+    let FQ = 5110
+    // FQ=$EL3-MAX(0,$EA3+$E3+MIN($ER3,MAX(0,$G3-$EG3)/El_boiler_eff)-$EJ3-$EM3*BESS_chrg_eff)/BESS_chrg_eff
+    for i in 0..<365 {
+      d23[FQ + i] =
+        d22[EL + i] - max(
+          0,
+          d22[EA + i] + d21[E + i] + min(d22[ER + i], max(0, d21[G + i] - d22[EG + i]) / El_boiler_eff) - d22[EJ + i]
+            - d22[EM + i] * BESS_chrg_eff) / BESS_chrg_eff
+    }
+
+    /// Surplus el boiler cap after min harm op and min night op prep during harm op period
+    let FR = 5475
+    // FR=IF(El_boiler_cap_ud=0,0,$EP3-MAX(0,$Q3-$EE3)/El_boiler_eff)
+    for i in 0..<365 {
+      d23[FR + i] = iff(El_boiler_cap_ud == 0.0, 0, d22[EP + i] - max(0, d21[Q + i] - d22[EE + i]) / El_boiler_eff)
+    }
+
+    /// Surplus el boiler cap after min harm op and max night op prep during harm op period
+    let FS = 5840
+    // FS=IF(El_boiler_cap_ud=0,0,$EP3-MAX(0,$R3-$EE3)/El_boiler_eff)
+    for i in 0..<365 {
+      d23[FS + i] = iff(El_boiler_cap_ud == 0.0, 0, d22[EP + i] - max(0, d21[R + i] - d22[EE + i]) / El_boiler_eff)
+    }
+
+    /// Surplus el boiler cap after max harm op and min night op prep during harm op period
+    let FT = 6205
+    // FT=IF(El_boiler_cap_ud=0,0,$EQ3-MAX(0,$Q3-$EF3)/El_boiler_eff)
+    for i in 0..<365 {
+      d23[FT + i] = iff(El_boiler_cap_ud == 0.0, 0, d22[EQ + i] - max(0, d21[Q + i] - d22[EF + i]) / El_boiler_eff)
+    }
+
+    /// Surplus el boiler cap after min harm op and min night op prep outside of harm op period
+    let FU = 6570
+    // FU=IF(El_boiler_cap_ud=0,0,$ER3-MAX(0,$G3-$EG3)/El_boiler_eff)
+    for i in 0..<365 {
+      d23[FU + i] = iff(El_boiler_cap_ud == 0.0, 0, d22[ER + i] - max(0, d21[G + i] - d22[EG + i]) / El_boiler_eff)
+    }
+
+    /// Surplus el boiler cap after min harm op and max night op prep outside of harm op period
+    let FV = 6935
+    // FV=IF(El_boiler_cap_ud=0,0,$ER3-MAX(0,$H3-$EG3)/El_boiler_eff)
+    for i in 0..<365 {
+      d23[FV + i] = iff(El_boiler_cap_ud == 0.0, 0, d22[ER + i] - max(0, d21[H + i] - d22[EG + i]) / El_boiler_eff)
     }
 
     /// Surplus el boiler cap after max harm op and min night op prep outside of harm op period
-    let FT = 6205
-    /// Surplus RawMeth prod cap after min day harm and min night op prep
-    let FU = 6570
-    /// Surplus RawMeth prod cap after min day harm and max night op prep
-    let FV = 6935
-    /// Surplus RawMeth prod cap after max day harm and min night op prep
     let FW = 7300
-    /// Surplus CO2 prod cap after min day harm and min night op prep
+    // FW=IF(El_boiler_cap_ud=0,0,$ER3-MAX(0,$G3-$EG3)/El_boiler_eff)
+    for i in 0..<365 {
+      d23[FW + i] = iff(El_boiler_cap_ud == 0.0, 0, d22[ER + i] - max(0, d21[G + i] - d22[EG + i]) / El_boiler_eff)
+    }
+
+    /// Surplus RawMeth prod cap after min day harm and min night op prep
     let FX = 7665
-    /// Surplus CO2 prod cap after min day harm and max night op prep
+    // FX=$ES3-$S3
+    for i in 0..<365 { d23[FX + i] = d22[ES + i] - d21[S + i] }
+
+    /// Surplus RawMeth prod cap after min day harm and max night op prep
     let FY = 8030
-    /// Surplus CO2 prod cap after max day harm and min night op prep
+    // FY=$ES3-$T3
+    for i in 0..<365 { d23[FY + i] = d22[ES + i] - d21[T + i] }
+
+    /// Surplus RawMeth prod cap after max day harm and min night op prep
     let FZ = 8395
-    /// Surplus H2 prod cap after min day harm and min night op prep
+    // FZ=$ET3-$S3
+    for i in 0..<365 { d23[FZ + i] = d22[ET + i] - d21[S + i] }
+
+    /// Surplus CO2 prod cap after min day harm and min night op prep
     let GA = 8760
-    /// Surplus H2 prod cap after min day harm and max night op prep
+    // GA=$EV3-$U3
+    for i in 0..<365 { d23[GA + i] = d22[EV + i] - d21[U + i] }
+
+    /// Surplus CO2 prod cap after min day harm and max night op prep
     let GB = 9125
-    /// Surplus H2 prod cap after max day harm and min night op prep
+    // GB=$EV3-$V3
+    for i in 0..<365 { d23[GB + i] = d22[EV + i] - d21[V + i] }
+
+    /// Surplus CO2 prod cap after max day harm and min night op prep
     let GC = 9490
+    // GC=$EW3-$U3
+    for i in 0..<365 { d23[GC + i] = d22[EW + i] - d21[U + i] }
 
-    for i in 0..<365 {
-      // =IF(El_boiler_cap_ud=0,0,$ER6-MAX(0,$G6-$EG6)/El_boiler_eff)
-      if El_boiler_cap_ud.isZero { d23[FT + i] = Double.zero } else { d23[FT + i] = d22[ER + i] - max(0.0, d21[G + i] - d22[EG + i]) / El_boiler_eff }
-      // ES6-S6
-      d23[FU + i] = d22[ES + i] - d21[S + i]
-      // =ES6-T6
-      d23[FV + i] = d22[ES + i] - d21[T + i]
-      // ET6-S6
-      d23[FW + i] = d22[ET + i] - d21[S + i]
-      // EV6-U6
-      d23[FX + i] = d22[EV + i] - d21[U + i]
-      // =EV6-V6
-      d23[FY + i] = d22[EV + i] - d21[V + i]
-      // EW6-U6
-      d23[FZ + i] = d22[EW + i] - d21[U + i]
-      // EY6-W6
-      d23[GA + i] = d22[EY + i] - d21[W + i]
-      // =EY6-X6
-      d23[GB + i] = d22[EY + i] - d21[X + i]
-      // EZ6-W6
-      d23[GC + i] = d22[EZ + i] - d21[W + i]
-    }
-    let Overall_harmonious_range = Overall_harmonious_max_perc - Overall_harmonious_min_perc
+    /// Surplus H2 prod cap after min day harm and min night op prep
+    let GD = 9855
+    // GD=$EY3-$W3
+    for i in 0..<365 { d23[GD + i] = d22[EY + i] - d21[W + i] }
+
+    /// Surplus H2 prod cap after min day harm and max night op prep
+    let GE = 10220
+    // GE=$EY3-$X3
+    for i in 0..<365 { d23[GE + i] = d22[EY + i] - d21[X + i] }
+
+    /// Surplus H2 prod cap after max day harm and min night op prep
+    let GF = 10585
+    // GF=$EZ3-$W3
+    for i in 0..<365 { d23[GF + i] = d22[EZ + i] - d21[W + i] }
+
     /// Optimal harmonious day prod after min night prep due to prod cap limits
-    let GE = 9855
-    // GE=IF(OR($AE6=0,FC6<0,FF6<0,FI6<0,FL6<0,FO6<0,FR6<0,FU6<0,FX6<0,GA6<0),0,MIN(1,IFERROR(FC6/MAX(0,FC6-FE6),1),IFERROR(FF6/MAX(0,FF6-FH6),1),IFERROR(FI6/MAX(0,FI6-FK6),1),IFERROR(FL6/MAX(0,FL6-FN6),1),IFERROR(FO6/MAX(0,FO6-FQ6),1),IFERROR(FR6/MAX(0,FR6-FT6),1),IFERROR(FU6/MAX(0,FU6-FW6),1),IFERROR(FX6/MAX(0,FX6-FZ6),1),IFERROR(GA6/MAX(0,GA6-GC6),1))*(Overall_harmonious_max_perc-Overall_harmonious_min_perc)+Overall_harmonious_min_perc)
-    for i in 0..<365 {
-      d23[GE + i] = iff(
-        or(d21[AE + i].isZero, d23[FC + i] < 0.0, d23[FF + i] < 0.0, d23[FI + i] < 0.0, d23[FL + i] < 0.0, d23[FO + i] < 0.0, d23[FR + i] < 0.0, d23[FU + i] < 0.0, d23[FX + i] < 0.0, d23[GA + i] < 0), 0.0,
-        min(
-          1, ifFinite(d23[FC + i] / (d23[FC + i] - d23[FE + i]), 1), ifFinite(d23[FF + i] / max(0.0, d23[FF + i] - d23[FH + i]), 1), ifFinite(d23[FI + i] / max(0.0, d23[FI + i] - d23[FK + i]), 1),
-          ifFinite(d23[FL + i] / max(0.0, d23[FL + i] - d23[FN + i]), 1), ifFinite(d23[FO + i] / max(0.0, d23[FO + i] - d23[FQ + i]), 1), ifFinite(d23[FR + i] / max(0.0, d23[FR + i] - d23[FT + i]), 1),
-          ifFinite(d23[FU + i] / max(0.0, d23[FU + i] - d23[FW + i]), 1), ifFinite(d23[FX + i] / max(0.0, d23[FX + i] - d23[FZ + i]), 1), ifFinite(d23[GA + i] / max(0.0, d23[GA + i] - d23[GC + i]), 1)) * Overall_harmonious_range
-          + Overall_harmonious_min_perc)
-    }
-
-    let ddGE = 46355
-    for i in 0..<365 { d23[ddGE + i] = Overall_harmonious_range < 1E-10 ? 1 : (d23[GE + i] - Overall_harmonious_min_perc) / Overall_harmonious_range }
-
-    /// Surplus harm op period el after opt day harm op and min night op prep
-    let GF = 10220
-    // GF=IF(GE3=0,0,ROUND(($EB3+($EC3-$EB3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE3-Overall_harmonious_min_perc))+($EH3+($EI3-$EH3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE3-Overall_harmonious_min_perc))-$O3-MIN(BESS_cap_ud,MAX(0,$EA3+$E3+MIN($ER3,MAX(0,$G3-$EG3)/El_boiler_eff)-$EJ3-$EM3*BESS_chrg_eff))/BESS_chrg_eff-MIN(($EP3+($EQ3-$EP3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE3-Overall_harmonious_min_perc)),MAX(0,$Q3-($EE3+($EF3-$EE3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE3-Overall_harmonious_min_perc)))/El_boiler_eff),5))
-    for i in 0..<365 {
-      d23[GF + i] = iff(
-        d23[GE + i].isZero, Double.zero,
-        round(
-          (d22[EB + i] + (d22[EC + i] - d22[EB + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (d23[GE + i] - Overall_harmonious_min_perc))
-            + (d22[EH + i]
-              + (d22[EI + i] - d22[EH + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (d23[GE + i] - Overall_harmonious_min_perc))
-            - d21[O + i]
-            - min(
-              (d22[EK + i]
-                + (d22[EL + i] - d22[EK + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (d23[GE + i] - Overall_harmonious_min_perc)),
-              max(0.0, d22[EA + i] + d21[E + i] + min(d22[ER + i], max(0.0, d21[G + i] - d22[EG + i]) / El_boiler_eff) - d22[EJ + i] - d22[EM + i] * BESS_chrg_eff)
-                / BESS_chrg_eff)
-            - min(
-              (d22[EP + i]
-                + (d22[EQ + i] - d22[EP + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (d23[GE + i] - Overall_harmonious_min_perc)),
-              max(
-                0.0,
-                d21[Q + i]
-                  - (d22[EE + i]
-                    + (d22[EF + i] - d22[EE + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (d23[GE + i] - Overall_harmonious_min_perc)))
-                / El_boiler_eff), 5))
-    }
-
-
-    /// Surplus harm op period el after opt day harm op and max night op prep
-    let GG = 10585
-    // GG=IF(GE3=0,0,ROUND(($EB3+($EC3-$EB3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE3-Overall_harmonious_min_perc))+($EH3+($EI3-$EH3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE3-Overall_harmonious_min_perc))-$P3-MIN(BESS_cap_ud,MAX(0,$EA3+$F3+MIN($ER3,MAX(0,$H3-$EG3)/El_boiler_eff)-$EJ3-$EM3*BESS_chrg_eff))/BESS_chrg_eff-MIN(($EP3+($EQ3-$EP3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE3-Overall_harmonious_min_perc)),MAX(0,$R3-($EE3+($EF3-$EE3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE3-Overall_harmonious_min_perc)))/El_boiler_eff),5))
-    for i in 0..<365 {
-      d23[GG + i] = iff(
-        d23[GE + i] == Double.zero, 0,
-        round(
-          (d22[EB + i] + (d22[EC + i] - d22[EB + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (d23[GE + i] - Overall_harmonious_min_perc))
-            + (d22[EH + i]
-              + (d22[EI + i] - d22[EH + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (d23[GE + i] - Overall_harmonious_min_perc))
-            - d21[P + i] - min(
-              BESS_cap_ud,
-              max(0, d22[EA + i] + d21[F + i] + min(d22[ER + i], max(0, d21[H + i] - d22[EG + i]) / El_boiler_eff) - d22[EJ + i] - d22[EM + i] * BESS_chrg_eff))
-            / BESS_chrg_eff
-            - min(
-              (d22[EP + i]
-                + (d22[EQ + i] - d22[EP + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (d23[GE + i] - Overall_harmonious_min_perc)),
-              max(
-                0,
-                d21[R + i]
-                  - (d22[EE + i]
-                    + (d22[EF + i] - d22[EE + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (d23[GE + i] - Overall_harmonious_min_perc)))
-                / El_boiler_eff), 5))
-    }
-
-    /// Surplus outside harm op period el after opt day harm and min night op prep; comment: it is assumed that PV during off-harmonious period is not well distributed and must therefore be channelled during the BESS to be used
     let GH = 10950
-    // =IF(GE6=0,0,ROUND(((EK6+(EL6-EK6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE6-Overall_harmonious_min_perc))+EM6)*BESS_chrg_eff+EJ6-EA6-E6-MIN(ER6,MAX(0,G6-EG6)/El_boiler_eff),5))
+    // GH=IF(OR($AE3=0,FC3<0,FF3<0,FI3<0,FL3<0,FO3<0,FR3<0,FU3<0,FX3<0,GA3<0,GD3<0),0,MIN(1,IFERROR(FC3/MAX(0,FC3-FE3),1),IFERROR(FF3/MAX(0,FF3-FH3),1),IFERROR(FI3/MAX(0,FI3-FK3),1),IFERROR(FL3/MAX(0,FL3-FN3),1),IFERROR(FO3/MAX(0,FO3-FQ3),1),IFERROR(FR3/MAX(0,FR3-FT3),1),IFERROR(FU3/MAX(0,FU3-FW3),1),IFERROR(FX3/MAX(0,FX3-FZ3),1),IFERROR(GA3/MAX(0,GA3-GC3),1),IFERROR(GD3/MAX(0,GD3-GF3),1))*(Overall_harmonious_max_perc-Overall_harmonious_min_perc)+Overall_harmonious_min_perc)
     for i in 0..<365 {
       d23[GH + i] = iff(
-        d23[GE + i].isZero, 0.0,
-        round(((d22[EK + i] + (d22[EL + i] - d22[EK + i]) * d23[ddGE + i]) + d22[EM + i]) * BESS_chrg_eff + d22[EJ + i] - d22[EA + i] - d21[E + i] - min(d22[ER + i], max(0.0, d21[G + i] - d22[EG + i]) / El_boiler_eff), 5))
+        or(
+          d21[AE + i] == 0.0, d23[FC + i] < 0, d23[FF + i] < 0, d23[FI + i] < 0, d23[FL + i] < 0, d23[FO + i] < 0,
+          d23[FR + i] < 0, d23[FU + i] < 0, d23[FX + i] < 0, d23[GA + i] < 0, d23[GD + i] < 0), 0,
+        min(
+          1, ifFinite(d23[FC + i] / max(0, d23[FC + i] - d23[FE + i]), 1),
+          ifFinite(d23[FF + i] / max(0, d23[FF + i] - d23[FH + i]), 1),
+          ifFinite(d23[FI + i] / max(0, d23[FI + i] - d23[FK + i]), 1),
+          ifFinite(d23[FL + i] / max(0, d23[FL + i] - d23[FN + i]), 1),
+          ifFinite(d23[FO + i] / max(0, d23[FO + i] - d23[FQ + i]), 1),
+          ifFinite(d23[FR + i] / max(0, d23[FR + i] - d23[FT + i]), 1),
+          ifFinite(d23[FU + i] / max(0, d23[FU + i] - d23[FW + i]), 1),
+          ifFinite(d23[FX + i] / max(0, d23[FX + i] - d23[FZ + i]), 1),
+          ifFinite(d23[GA + i] / max(0, d23[GA + i] - d23[GC + i]), 1),
+          ifFinite(d23[GD + i] / max(0, d23[GD + i] - d23[GF + i]), 1))
+          * (Overall_harmonious_max_perc - Overall_harmonious_min_perc) + Overall_harmonious_min_perc)
     }
 
-    /// Surplus outside harm op period el after opt day harm and max night op prep; comment: it is assumed that PV during off-harmonious period is not well distributed and must therefore be channelled during the BESS to be used
+    /// Surplus harm op period el after opt day harm op and min night op prep
     let GI = 11315
-    // =IF(GE6=0,0,ROUND(((EK6+(EL6-EK6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE6-Overall_harmonious_min_perc))+EM6)*BESS_chrg_eff+EJ6-EA6-F6-MIN(ER6,MAX(0,H6-EG6)/El_boiler_eff),5))
+    // GI=IF(GH3=0,0,ROUND(($EB3+($EC3-$EB3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GH3-Overall_harmonious_min_perc))+($EH3+($EI3-$EH3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GH3-Overall_harmonious_min_perc))-$O3-MAX(0,$EA3+$E3+MAX(0,$G3-$EG3)/El_boiler_eff-$EJ3-$EM3*BESS_chrg_eff)/BESS_chrg_eff-MAX(0,$Q3-($EE3+($EF3-$EE3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GH3-Overall_harmonious_min_perc)))/El_boiler_eff,5))
     for i in 0..<365 {
       d23[GI + i] = iff(
-        d23[GE + i].isZero, 0.0,
-        round(((d22[EK + i] + (d22[EL + i] - d22[EK + i]) * d23[ddGE + i]) + d22[EM + i]) * BESS_chrg_eff + d22[EJ + i] - d22[EA + i] - d21[F + i] - min(d22[ER + i], max(0.0, d21[H + i] - d22[EG + i]) / El_boiler_eff), 5))
+        d23[GH + i] == 0.0, 0,
+        round(
+          (d22[EB + i]
+            + (d22[EC + i] - d22[EB + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
+              * (d23[GH + i] - Overall_harmonious_min_perc))
+            + (d22[EH + i]
+              + (d22[EI + i] - d22[EH + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
+                * (d23[GH + i] - Overall_harmonious_min_perc))
+            - d21[O + i] - max(
+              0,
+              d22[EA + i] + d21[E + i] + max(0, d21[G + i] - d22[EG + i]) / El_boiler_eff - d22[EJ + i] - d22[EM + i]
+                * BESS_chrg_eff) / BESS_chrg_eff - max(
+              0,
+              d21[Q + i]
+                - (d22[EE + i]
+                  + (d22[EF + i] - d22[EE + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
+                    * (d23[GH + i] - Overall_harmonious_min_perc))
+            ) / El_boiler_eff, 5))
     }
 
-    /// Surplus harm op heat after opt day harm and min night op prep; Comment: it is assumed that PV electricity from outside harmonious period is used to charge BESS
+    /// Surplus harm op period el after opt day harm op and max night op prep
     let GJ = 11680
-    // GJ=IF(GE3=0,0,ROUND($EE3+($EF3-$EE3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE3-Overall_harmonious_min_perc)+MIN($EP3+($EQ3-$EP3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE3-Overall_harmonious_min_perc),MAX(0,$EB3+($EC3-$EB3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE3-Overall_harmonious_min_perc)+$EH3+($EI3-$EH3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE3-Overall_harmonious_min_perc)-MIN(BESS_cap_ud,MAX(0,$EA3+$E3+MIN($ER3,MAX(0,$G3-$EG3)/El_boiler_eff)-$EJ3-$EM3*BESS_chrg_eff))/BESS_chrg_eff-$O3))*El_boiler_eff-$Q3,5))
+    // GJ=IF(GH3=0,0,ROUND(($EB3+($EC3-$EB3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GH3-Overall_harmonious_min_perc))+($EH3+($EI3-$EH3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GH3-Overall_harmonious_min_perc))-$P3-MAX(0,$EA3+$F3+MAX(0,$H3-$EG3)/El_boiler_eff-$EJ3-$EM3*BESS_chrg_eff)/BESS_chrg_eff-MAX(0,$R3-($EE3+($EF3-$EE3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GH3-Overall_harmonious_min_perc)))/El_boiler_eff,5))
     for i in 0..<365 {
       d23[GJ + i] = iff(
-        d23[GE + i] == Double.zero, 0,
+        d23[GH + i] == 0.0, 0,
         round(
-          d22[EE + i] + (d22[EF + i] - d22[EE + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (d23[GE + i] - Overall_harmonious_min_perc)
-            + min(
-              d22[EP + i] + (d22[EQ + i] - d22[EP + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (d23[GE + i] - Overall_harmonious_min_perc),
-              max(
-                0,
-                d22[EB + i] + (d22[EC + i] - d22[EB + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
-                  * (d23[GE + i] - Overall_harmonious_min_perc) + d22[EH + i] + (d22[EI + i] - d22[EH + i])
-                  / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (d23[GE + i] - Overall_harmonious_min_perc) - min(
-                    BESS_cap_ud,
-                    max(
-                      0, d22[EA + i] + d21[E + i] + min(d22[ER + i], max(0, d21[G + i] - d22[EG + i]) / El_boiler_eff) - d22[EJ + i] - d22[EM + i] * BESS_chrg_eff))
-                  / BESS_chrg_eff - d21[O + i])) * El_boiler_eff - d21[Q + i], 5))
+          (d22[EB + i]
+            + (d22[EC + i] - d22[EB + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
+              * (d23[GH + i] - Overall_harmonious_min_perc))
+            + (d22[EH + i]
+              + (d22[EI + i] - d22[EH + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
+                * (d23[GH + i] - Overall_harmonious_min_perc))
+            - d21[P + i] - max(
+              0,
+              d22[EA + i] + d21[F + i] + max(0, d21[H + i] - d22[EG + i]) / El_boiler_eff - d22[EJ + i] - d22[EM + i]
+                * BESS_chrg_eff) / BESS_chrg_eff - max(
+              0,
+              d21[R + i]
+                - (d22[EE + i]
+                  + (d22[EF + i] - d22[EE + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
+                    * (d23[GH + i] - Overall_harmonious_min_perc))
+            ) / El_boiler_eff, 5))
     }
 
-    /// Surplus harm op heat after opt day harm and max night op prep; Comment: it is assumed that PV electricity from outside harmonious period is used to charge BESS
+    /// Surplus outside harm op period el after opt day harm and min night op prep
     let GK = 12045
-    // GK=IF(GE3=0,0,ROUND($EE3+($EF3-$EE3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE3-Overall_harmonious_min_perc)+MIN($EP3+($EQ3-$EP3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE3-Overall_harmonious_min_perc),MAX(0,$EB3+($EC3-$EB3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE3-Overall_harmonious_min_perc)+$EH3+($EI3-$EH3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE3-Overall_harmonious_min_perc)-MIN(BESS_cap_ud,MAX(0,$EA3+$F3+MIN($ER3,MAX(0,$H3-$EG3)/El_boiler_eff)-$EJ3-$EM3*BESS_chrg_eff))/BESS_chrg_eff-$P3))*El_boiler_eff-$R3,5))
+    // GK=IF(GH3=0,0,ROUND((($EK3+($EL3-$EK3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GH3-Overall_harmonious_min_perc))+$EM3)*BESS_chrg_eff+$EJ3-$EA3-$E3-MAX(0,$G3-$EG3)/El_boiler_eff,5))
     for i in 0..<365 {
       d23[GK + i] = iff(
-        d23[GE + i] == Double.zero, 0,
+        d23[GH + i] == 0.0, 0,
         round(
-          d22[EE + i] + (d22[EF + i] - d22[EE + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (d23[GE + i] - Overall_harmonious_min_perc)
-            + min(
-              d22[EP + i] + (d22[EQ + i] - d22[EP + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (d23[GE + i] - Overall_harmonious_min_perc),
-              max(
-                0,
-                d22[EB + i] + (d22[EC + i] - d22[EB + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
-                  * (d23[GE + i] - Overall_harmonious_min_perc) + d22[EH + i] + (d22[EI + i] - d22[EH + i])
-                  / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (d23[GE + i] - Overall_harmonious_min_perc) - min(
-                    BESS_cap_ud,
-                    max(
-                      0, d22[EA + i] + d21[F + i] + min(d22[ER + i], max(0, d21[H + i] - d22[EG + i]) / El_boiler_eff) - d22[EJ + i] - d22[EM + i] * BESS_chrg_eff))
-                  / BESS_chrg_eff - d21[P + i])) * El_boiler_eff - d21[R + i], 5))
+          ((d22[EK + i]
+            + (d22[EL + i] - d22[EK + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
+              * (d23[GH + i] - Overall_harmonious_min_perc))
+            + d22[EM + i]) * BESS_chrg_eff + d22[EJ + i] - d22[EA + i] - d21[E + i] - max(0, d21[G + i] - d22[EG + i])
+            / El_boiler_eff, 5))
+    }
+
+    /// Surplus outside harm op period el after opt day harm and max night op prep
+    let GL = 12410
+    // GL=IF(GH3=0,0,ROUND((($EK3+($EL3-$EK3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GH3-Overall_harmonious_min_perc))+$EM3)*BESS_chrg_eff+$EJ3-$EA3-$F3-MAX(0,$H3-$EG3)/El_boiler_eff,5))
+    for i in 0..<365 {
+      d23[GL + i] = iff(
+        d23[GH + i] == 0.0, 0,
+        round(
+          ((d22[EK + i]
+            + (d22[EL + i] - d22[EK + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
+              * (d23[GH + i] - Overall_harmonious_min_perc))
+            + d22[EM + i]) * BESS_chrg_eff + d22[EJ + i] - d22[EA + i] - d21[F + i] - max(0, d21[H + i] - d22[EG + i])
+            / El_boiler_eff, 5))
+    }
+
+    /// Surplus harm op heat after opt day harm and min night op prep
+    let GM = 12775
+    // GM=IF(GH3=0,0,ROUND($EE3+($EF3-$EE3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GH3-Overall_harmonious_min_perc)+MAX(0,$EB3+($EC3-$EB3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GH3-Overall_harmonious_min_perc)+$EH3+($EI3-$EH3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GH3-Overall_harmonious_min_perc)-MAX(0,$EA3+$E3+MAX(0,$G3-$EG3)/El_boiler_eff-$EJ3-$EM3*BESS_chrg_eff)/BESS_chrg_eff-$O3)*El_boiler_eff-$Q3,5))
+    for i in 0..<365 {
+      d23[GM + i] = iff(
+        d23[GH + i] == 0.0, 0,
+        round(
+          d22[EE + i] + (d22[EF + i] - d22[EE + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
+            * (d23[GH + i] - Overall_harmonious_min_perc) + max(
+              0,
+              d22[EB + i] + (d22[EC + i] - d22[EB + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
+                * (d23[GH + i] - Overall_harmonious_min_perc) + d22[EH + i] + (d22[EI + i] - d22[EH + i])
+                / (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
+                * (d23[GH + i] - Overall_harmonious_min_perc) - max(
+                  0,
+                  d22[EA + i] + d21[E + i] + max(0, d21[G + i] - d22[EG + i]) / El_boiler_eff - d22[EJ + i]
+                    - d22[EM + i] * BESS_chrg_eff) / BESS_chrg_eff - d21[O + i]) * El_boiler_eff - d21[Q + i], 5))
+    }
+
+    /// Surplus harm op heat after opt day harm and max night op prep
+    let GN = 13140
+    // GN=IF(GH3=0,0,ROUND($EE3+($EF3-$EE3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GH3-Overall_harmonious_min_perc)+MAX(0,$EB3+($EC3-$EB3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GH3-Overall_harmonious_min_perc)+$EH3+($EI3-$EH3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GH3-Overall_harmonious_min_perc)-MAX(0,$EA3+$F3+MAX(0,$H3-$EG3)/El_boiler_eff-$EJ3-$EM3*BESS_chrg_eff)/BESS_chrg_eff-$P3)*El_boiler_eff-$R3,5))
+    for i in 0..<365 {
+      d23[GN + i] = iff(
+        d23[GH + i] == 0.0, 0,
+        round(
+          d22[EE + i] + (d22[EF + i] - d22[EE + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
+            * (d23[GH + i] - Overall_harmonious_min_perc) + max(
+              0,
+              d22[EB + i] + (d22[EC + i] - d22[EB + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
+                * (d23[GH + i] - Overall_harmonious_min_perc) + d22[EH + i] + (d22[EI + i] - d22[EH + i])
+                / (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
+                * (d23[GH + i] - Overall_harmonious_min_perc) - max(
+                  0,
+                  d22[EA + i] + d21[F + i] + max(0, d21[H + i] - d22[EG + i]) / El_boiler_eff - d22[EJ + i]
+                    - d22[EM + i] * BESS_chrg_eff) / BESS_chrg_eff - d21[P + i]) * El_boiler_eff - d21[R + i], 5))
     }
 
     /// Surplus outside harm op heat after opt day harm and min night op prep
-    let GL = 12410
-    // =IF(GE6=0,0,ROUND(EG6+MIN(ER6,MAX(0,(EK6+(EL6-EK6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE6-Overall_harmonious_min_perc)+EM6)*BESS_chrg_eff+EJ6-EA6-E6))*El_boiler_eff-G6,5))
+    let GO = 13505
+    // GO=IF(GH3=0,0,ROUND($EG3+MAX(0,($EK3+($EL3-$EK3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GH3-Overall_harmonious_min_perc)+$EM3)*BESS_chrg_eff+$EJ3-$EA3-$E3)*El_boiler_eff-$G3,5))
     for i in 0..<365 {
-      d23[GL + i] = iff(
-        d23[GE + i].isZero, 0.0,
+      d23[GO + i] = iff(
+        d23[GH + i] == 0.0, 0,
         round(
-          d22[EG + i] + min(
-            d22[ER + i],
-            max(0.0, (d22[EK + i] + (d22[EL + i] - d22[EK + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (d23[GE + i] - Overall_harmonious_min_perc) + d22[EM + i]) * BESS_chrg_eff + d22[EJ + i] - d22[EA + i] - d21[E + i]))
-            * El_boiler_eff - d21[G + i], 5))
+          d22[EG + i] + max(
+            0,
+            (d22[EK + i] + (d22[EL + i] - d22[EK + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
+              * (d23[GH + i] - Overall_harmonious_min_perc) + d22[EM + i]) * BESS_chrg_eff + d22[EJ + i] - d22[EA + i]
+              - d21[E + i]) * El_boiler_eff - d21[G + i], 5))
     }
 
     /// Surplus outside harm op heat after opt day harm and max night op prep
-    let GM = 12775
-    // =IF(GE6=0,0,ROUND(EG6+MIN(ER6,MAX(0,(EK6+(EL6-EK6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE6-Overall_harmonious_min_perc)+EM6)*BESS_chrg_eff+EJ6-EA6-F6))*El_boiler_eff-H6,5))
+    let GP = 13870
+    // GP=IF(GH3=0,0,ROUND($EG3+MAX(0,($EK3+($EL3-$EK3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GH3-Overall_harmonious_min_perc)+$EM3)*BESS_chrg_eff+$EJ3-$EA3-$F3)*El_boiler_eff-$H3,5))
     for i in 0..<365 {
-      d23[GM + i] = iff(
-        d23[GE + i].isZero, 0.0,
+      d23[GP + i] = iff(
+        d23[GH + i] == 0.0, 0,
         round(
-          d22[EG + i] + min(
-            d22[ER + i],
-            max(0.0, (d22[EK + i] + (d22[EL + i] - d22[EK + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (d23[GE + i] - Overall_harmonious_min_perc) + d22[EM + i]) * BESS_chrg_eff + d22[EJ + i] - d22[EA + i] - d21[F + i]))
-            * El_boiler_eff - d21[H + i], 5))
+          d22[EG + i] + max(
+            0,
+            (d22[EK + i] + (d22[EL + i] - d22[EK + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
+              * (d23[GH + i] - Overall_harmonious_min_perc) + d22[EM + i]) * BESS_chrg_eff + d22[EJ + i] - d22[EA + i]
+              - d21[F + i]) * El_boiler_eff - d21[H + i], 5))
+    }
+
+    /// Surplus BESS cap after opt harm op and min night op prep during harm op period
+    let GQ = 14235
+    // GQ=IF(GH3=0,0,ROUND(($EK3+($EL3-$EK3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GH3-Overall_harmonious_min_perc))-MAX(0,$EA3+$E3+MIN($ER3,MAX(0,$G3-$EG3)/El_boiler_eff)-$EJ3-$EM3*BESS_chrg_eff)/BESS_chrg_eff,5))
+    for i in 0..<365 {
+      d23[GQ + i] = iff(
+        d23[GH + i] == 0.0, 0,
+        round(
+          (d22[EK + i]
+            + (d22[EL + i] - d22[EK + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
+              * (d23[GH + i] - Overall_harmonious_min_perc))
+            - max(
+              0,
+              d22[EA + i] + d21[E + i] + min(d22[ER + i], max(0, d21[G + i] - d22[EG + i]) / El_boiler_eff)
+                - d22[EJ + i] - d22[EM + i] * BESS_chrg_eff) / BESS_chrg_eff, 5))
+    }
+
+    /// Surplus BESS cap after opt harm op and max night op prep during harm op period
+    let GR = 14600
+    // GR=IF(GH3=0,0,ROUND(($EK3+($EL3-$EK3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GH3-Overall_harmonious_min_perc))-MAX(0,$EA3+$F3+MIN($ER3,MAX(0,$H3-$EG3)/El_boiler_eff)-$EJ3-$EM3*BESS_chrg_eff)/BESS_chrg_eff,5))
+    for i in 0..<365 {
+      d23[GR + i] = iff(
+        d23[GH + i] == 0.0, 0,
+        round(
+          (d22[EK + i]
+            + (d22[EL + i] - d22[EK + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
+              * (d23[GH + i] - Overall_harmonious_min_perc))
+            - max(
+              0,
+              d22[EA + i] + d21[F + i] + min(d22[ER + i], max(0, d21[H + i] - d22[EG + i]) / El_boiler_eff)
+                - d22[EJ + i] - d22[EM + i] * BESS_chrg_eff) / BESS_chrg_eff, 5))
     }
 
     /// Surplus el boiler cap after opt harm op and min night op prep during harm op period
-    let GN = 13140
-    // =IF(OR(GE6=0,El_boiler_cap_ud=0),0,ROUND((EP6+(EQ6-EP6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE6-Overall_harmonious_min_perc))-MAX(0,Q6-(EE6+(EF6-EE6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE6-Overall_harmonious_min_perc)))/El_boiler_eff,5))
+    let GS = 14965
+    // GS=IF(OR(GH3=0,El_boiler_cap_ud=0),0,ROUND(($EP3+($EQ3-$EP3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GH3-Overall_harmonious_min_perc))-MAX(0,$Q3-($EE3+($EF3-$EE3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GH3-Overall_harmonious_min_perc)))/El_boiler_eff,5))
     for i in 0..<365 {
-      d23[GN + i] = iff(
-        or(d23[GE + i].isZero, El_boiler_cap_ud.isZero), 0.0, round((d22[EP + i] + (d22[EQ + i] - d22[EP + i]) * d23[ddGE + i]) - max(0.0, d21[Q + i] - (d22[EE + i] + (d22[EF + i] - d22[EE + i]) * d23[ddGE + i])) / El_boiler_eff, 5))
+      d23[GS + i] = iff(
+        or(d23[GH + i] == 0.0, El_boiler_cap_ud == 0.0), 0,
+        round(
+          (d22[EP + i]
+            + (d22[EQ + i] - d22[EP + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
+              * (d23[GH + i] - Overall_harmonious_min_perc))
+            - max(
+              0,
+              d21[Q + i]
+                - (d22[EE + i]
+                  + (d22[EF + i] - d22[EE + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
+                    * (d23[GH + i] - Overall_harmonious_min_perc))
+            ) / El_boiler_eff, 5))
     }
 
     /// Surplus el boiler cap after opt harm op and max night op prep during harm op period
-    let GO = 13505
-    // =IF(OR(GE6=0,El_boiler_cap_ud=0),0,ROUND((EP6+(EQ6-EP6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE6-Overall_harmonious_min_perc))-MAX(0,R6-(EE6+(EF6-EE6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE6-Overall_harmonious_min_perc)))/El_boiler_eff,5))
+    let GT = 15330
+    // GT=IF(OR(GH3=0,El_boiler_cap_ud=0),0,ROUND(($EP3+($EQ3-$EP3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GH3-Overall_harmonious_min_perc))-MAX(0,$R3-($EE3+($EF3-$EE3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GH3-Overall_harmonious_min_perc)))/El_boiler_eff,5))
     for i in 0..<365 {
-      d23[GO + i] = iff(
-        or(d23[GE + i].isZero, El_boiler_cap_ud.isZero), 0.0,
+      d23[GT + i] = iff(
+        or(d23[GH + i] == 0.0, El_boiler_cap_ud == 0.0), 0,
         round(
-          (d22[EP + i] + (d22[EQ + i] - d22[EP + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (d23[GE + i] - Overall_harmonious_min_perc)) - max(
-            0.0, d21[R + i] - (d22[EE + i] + (d22[EF + i] - d22[EE + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (d23[GE + i] - Overall_harmonious_min_perc))) / El_boiler_eff, 5))
+          (d22[EP + i]
+            + (d22[EQ + i] - d22[EP + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
+              * (d23[GH + i] - Overall_harmonious_min_perc))
+            - max(
+              0,
+              d21[R + i]
+                - (d22[EE + i]
+                  + (d22[EF + i] - d22[EE + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
+                    * (d23[GH + i] - Overall_harmonious_min_perc))
+            ) / El_boiler_eff, 5))
     }
 
     /// Surplus el boiler cap after opt harm op and min night op prep outside of harm op period
-    let GP = 13870
-    // =IF(OR(GE6=0,El_boiler_cap_ud=0),0,ROUND(ER6-MAX(0,G6-EG6)/El_boiler_eff,5))
-    for i in 0..<365 { d23[GP + i] = iff(or(d23[GE + i].isZero, El_boiler_cap_ud.isZero), 0.0, round(d22[ER + i] - max(0.0, d21[G + i] - d22[EG + i]) / El_boiler_eff, 5)) }
+    let GU = 15695
+    // GU=IF(OR(GH3=0,El_boiler_cap_ud=0),0,ROUND($ER3-MAX(0,$G3-$EG3)/El_boiler_eff,5))
+    for i in 0..<365 {
+      d23[GU + i] = iff(
+        or(d23[GH + i] == 0.0, El_boiler_cap_ud == 0.0), 0,
+        round(d22[ER + i] - max(0, d21[G + i] - d22[EG + i]) / El_boiler_eff, 5))
+    }
 
     /// Surplus el boiler cap after opt harm op and max night op prep outside of harm op period
-    let GQ = 14235
-    // =IF(OR(GE6=0,El_boiler_cap_ud=0),0,ROUND(ER6-MAX(0,H6-EG6)/El_boiler_eff,5))
-    for i in 0..<365 { d23[GQ + i] = iff(or(d23[GE + i].isZero, El_boiler_cap_ud.isZero), 0.0, round(d22[ER + i] - max(0.0, d21[H + i] - d22[EG + i]) / El_boiler_eff, 5)) }
+    let GV = 16060
+    // GV=IF(OR(GH3=0,El_boiler_cap_ud=0),0,ROUND($ER3-MAX(0,$H3-$EG3)/El_boiler_eff,5))
+    for i in 0..<365 {
+      d23[GV + i] = iff(
+        or(d23[GH + i] == 0.0, El_boiler_cap_ud == 0.0), 0,
+        round(d22[ER + i] - max(0, d21[H + i] - d22[EG + i]) / El_boiler_eff, 5))
+    }
 
     /// Surplus RawMeth prod cap after opt day harm and min night op prep
-    let GR = 14600
-    // IF(GE6=0,0,ROUND((ES6+(ET6-ES6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE6-Overall_harmonious_min_perc))-S6,5))
-    for i in 0..<365 { d23[GR + i] = iff(d23[GE + i].isZero, 0.0, round((d22[ES + i] + (d22[ET + i] - d22[ES + i]) * d23[ddGE + i]) - d21[S + i], 5)) }
+    let GW = 16425
+    // GW=IF(GH3=0,0,ROUND(($ES3+($ET3-$ES3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GH3-Overall_harmonious_min_perc))-$S3,5))
+    for i in 0..<365 {
+      d23[GW + i] = iff(
+        d23[GH + i] == 0.0, 0,
+        round(
+          (d22[ES + i]
+            + (d22[ET + i] - d22[ES + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
+              * (d23[GH + i] - Overall_harmonious_min_perc))
+            - d21[S + i], 5))
+    }
 
     /// Surplus RawMeth prod cap after opt day harm and max night op prep
-    let GS = 14965
-    // =IF(GE6=0,0,ROUND((ES6+(ET6-ES6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE6-Overall_harmonious_min_perc))-T6,5))
-    for i in 0..<365 { d23[GS + i] = iff(d23[GE + i].isZero, 0.0, round((d22[ES + i] + (d22[ET + i] - d22[ES + i]) * d23[ddGE + i]) - d21[T + i], 5)) }
-
-    /// Surplus CO2 prod cap after opt day harm and min night op prep
-    let GT = 15330
-    // IF(GE6=0,0,ROUND((EV6+(EW6-EV6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE6-Overall_harmonious_min_perc))-U6,5))
-    for i in 0..<365 { d23[GT + i] = iff(d23[GE + i].isZero, 0.0, round((d22[EV + i] + (d22[EW + i] - d22[EV + i]) * d23[ddGE + i]) - d21[U + i], 5)) }
-
-    /// Surplus CO2 prod cap after opt day harm and max night op prep
-    let GU = 15695
-    // =IF(GE6=0,0,ROUND((EV6+(EW6-EV6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE6-Overall_harmonious_min_perc))-V6,5))
-    for i in 0..<365 { d23[GU + i] = iff(d23[GE + i].isZero, 0.0, round((d22[EV + i] + (d22[EW + i] - d22[EV + i]) * d23[ddGE + i]) - d21[V + i], 5)) }
-
-    /// Surplus H2 prod cap after opt day harm and min night op prep
-    let GV = 16060
-    // IF(GE6=0,0,ROUND((EY6+(EZ6-EY6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE6-Overall_harmonious_min_perc))-W6,5))
-    for i in 0..<365 { d23[GV + i] = iff(d23[GE + i].isZero, 0.0, round((d22[EY + i] + (d22[EZ + i] - d22[EY + i]) * d23[ddGE + i]) - d21[W + i], 5)) }
-
-    /// Surplus H2 prod cap after opt day harm and max night op prep
-    let GW = 16425
-    // =IF(GE6=0,0,ROUND((EY6+(EZ6-EY6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE6-Overall_harmonious_min_perc))-X6,5))
-    for i in 0..<365 { d23[GW + i] = iff(d23[GE + i].isZero, 0.0, round((d22[EY + i] + (d22[EZ + i] - d22[EY + i]) * d23[ddGE + i]) - d21[X + i], 5)) }
-
-    /// Max harmonious day prod after min night prep due to prod cap limits
     let GX = 16790
-    // =IF(OR(GE6=0,GF6<0,GH6<0,GJ6<0,GL6<0,GN6<0,GP6<0,GR6<0,GT6<0,GV6<0),0,MIN(1,IFERROR(GF6/MAX(0,GF6-GG6),1),IFERROR(GH6/MAX(0,GH6-GI6),1),IFERROR(GJ6/MAX(0,GJ6-GK6),1),IFERROR(GL6/MAX(0,GL6-GM6),1),IFERROR(GN6/MAX(0,GN6-GO6),1),IFERROR(GP6/MAX(0,GP6-GQ6),1),IFERROR(GR6/MAX(0,GR6-GS6),1),IFERROR(GT6/MAX(0,GT6-GU6),1),IFERROR(GV6/MAX(0,GV6-GW6),1))*($AE6-A_equiv_harmonious_min_perc)+A_equiv_harmonious_min_perc)
+    // GX=IF(GH3=0,0,ROUND(($ES3+($ET3-$ES3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GH3-Overall_harmonious_min_perc))-$T3,5))
     for i in 0..<365 {
       d23[GX + i] = iff(
-        or(d23[GE + i].isZero, d23[GF + i] < 0.0, d23[GH + i] < 0.0, d23[GJ + i] < 0.0, d23[GL + i] < 0.0, d23[GN + i] < 0.0, d23[GP + i] < 0.0, d23[GR + i] < 0.0, d23[GT + i] < 0.0, d23[GV + i] < 0), 0.0,
+        d23[GH + i] == 0.0, 0,
+        round(
+          (d22[ES + i]
+            + (d22[ET + i] - d22[ES + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
+              * (d23[GH + i] - Overall_harmonious_min_perc))
+            - d21[T + i], 5))
+    }
+
+    /// Surplus CO2 prod cap after opt day harm and min night op prep
+    let GY = 17155
+    // GY=IF(GH3=0,0,ROUND(($EV3+($EW3-$EV3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GH3-Overall_harmonious_min_perc))-$U3,5))
+    for i in 0..<365 {
+      d23[GY + i] = iff(
+        d23[GH + i] == 0.0, 0,
+        round(
+          (d22[EV + i]
+            + (d22[EW + i] - d22[EV + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
+              * (d23[GH + i] - Overall_harmonious_min_perc))
+            - d21[U + i], 5))
+    }
+
+    /// Surplus CO2 prod cap after opt day harm and max night op prep
+    let GZ = 17520
+    // GZ=IF(GH3=0,0,ROUND(($EV3+($EW3-$EV3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GH3-Overall_harmonious_min_perc))-$V3,5))
+    for i in 0..<365 {
+      d23[GZ + i] = iff(
+        d23[GH + i] == 0.0, 0,
+        round(
+          (d22[EV + i]
+            + (d22[EW + i] - d22[EV + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
+              * (d23[GH + i] - Overall_harmonious_min_perc))
+            - d21[V + i], 5))
+    }
+
+    /// Surplus H2 prod cap after opt day harm and min night op prep
+    let HA = 17885
+    // HA=IF(GH3=0,0,ROUND(($EY3+($EZ3-$EY3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GH3-Overall_harmonious_min_perc))-$W3,5))
+    for i in 0..<365 {
+      d23[HA + i] = iff(
+        d23[GH + i] == 0.0, 0,
+        round(
+          (d22[EY + i]
+            + (d22[EZ + i] - d22[EY + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
+              * (d23[GH + i] - Overall_harmonious_min_perc))
+            - d21[W + i], 5))
+    }
+
+    /// Surplus H2 prod cap after opt day harm and max night op prep
+    let HB = 18250
+    // HB=IF(GH3=0,0,ROUND(($EY3+($EZ3-$EY3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GH3-Overall_harmonious_min_perc))-$X3,5))
+    for i in 0..<365 {
+      d23[HB + i] = iff(
+        d23[GH + i] == 0.0, 0,
+        round(
+          (d22[EY + i]
+            + (d22[EZ + i] - d22[EY + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
+              * (d23[GH + i] - Overall_harmonious_min_perc))
+            - d21[X + i], 5))
+    }
+
+    /// Max harmonious day prod after min night prep due to prod cap limits
+    let HC = 18615
+    // HC=IF(OR(GH3=0,GI3<0,GK3<0,GM3<0,GO3<0,GQ3<0,GS3<0,GU3<0,GW3<0,GY3<0,HA3<0),0,MIN(1,IFERROR(GI3/MAX(0,GI3-GJ3),1),IFERROR(GK3/MAX(0,GK3-GL3),1),IFERROR(GM3/MAX(0,GM3-GN3),1),IFERROR(GO3/MAX(0,GO3-GP3),1),IFERROR(GQ3/MAX(0,GQ3-GR3),1),IFERROR(GS3/MAX(0,GS3-GT3),1),IFERROR(GU3/MAX(0,GU3-GV3),1),IFERROR(GW3/MAX(0,GW3-GX3),1),IFERROR(GY3/MAX(0,GY3-GZ3),1),IFERROR(HA3/MAX(0,HA3-HB3),1))*($AE3-A_equiv_harmonious_min_perc)+A_equiv_harmonious_min_perc)
+    for i in 0..<365 {
+      d23[HC + i] = iff(
+        or(
+          d23[GH + i] == 0.0, d23[GI + i] < 0, d23[GK + i] < 0, d23[GM + i] < 0, d23[GO + i] < 0, d23[GQ + i] < 0,
+          d23[GS + i] < 0, d23[GU + i] < 0, d23[GW + i] < 0, d23[GY + i] < 0, d23[HA + i] < 0), 0,
         min(
-          1, ifFinite(d23[GF + i] / max(0.0, d23[GF + i] - d23[GG + i]), 1), ifFinite(d23[GH + i] / max(0.0, d23[GH + i] - d23[GI + i]), 1), ifFinite(d23[GJ + i] / max(0.0, d23[GJ + i] - d23[GK + i]), 1),
-          ifFinite(d23[GL + i] / max(0.0, d23[GL + i] - d23[GM + i]), 1), ifFinite(d23[GN + i] / max(0.0, d23[GN + i] - d23[GO + i]), 1), ifFinite(d23[GP + i] / max(0.0, d23[GP + i] - d23[GQ + i]), 1),
-          ifFinite(d23[GR + i] / max(0.0, d23[GR + i] - d23[GS + i]), 1), ifFinite(d23[GT + i] / max(0.0, d23[GT + i] - d23[GU + i]), 1), ifFinite(d23[GV + i] / max(0.0, d23[GV + i] - d23[GW + i]), 1))
-          * (d21[AE + i] - equiv_harmonious_min_perc[j]) + equiv_harmonious_min_perc[j])
+          1, ifFinite(d23[GI + i] / max(0, d23[GI + i] - d23[GJ + i]), 1),
+          ifFinite(d23[GK + i] / max(0, d23[GK + i] - d23[GL + i]), 1),
+          ifFinite(d23[GM + i] / max(0, d23[GM + i] - d23[GN + i]), 1),
+          ifFinite(d23[GO + i] / max(0, d23[GO + i] - d23[GP + i]), 1),
+          ifFinite(d23[GQ + i] / max(0, d23[GQ + i] - d23[GR + i]), 1),
+          ifFinite(d23[GS + i] / max(0, d23[GS + i] - d23[GT + i]), 1),
+          ifFinite(d23[GU + i] / max(0, d23[GU + i] - d23[GV + i]), 1),
+          ifFinite(d23[GW + i] / max(0, d23[GW + i] - d23[GX + i]), 1),
+          ifFinite(d23[GY + i] / max(0, d23[GY + i] - d23[GZ + i]), 1),
+          ifFinite(d23[HA + i] / max(0, d23[HA + i] - d23[HB + i]), 1)) * (d21[AE + i] - equiv_harmonious_min_perc[j])
+          + equiv_harmonious_min_perc[j])
     }
 
     /// Max Equiv harmonious night prod due to prod cap limits
-    let GZ = 17155
-    // =IF(OR($AE6=0,FC6<0,FF6<0,FI6<0,FL6<0,FO6<0,FR6<0,FU6<0,FX6<0,GA6<0),0,MIN(1,IFERROR(FC6/MAX(0,FC6-FD6),1),IFERROR(FF6/MAX(0,FF6-FG6),1),IFERROR(FI6/MAX(0,FI6-FJ6),1),IFERROR(FL6/MAX(0,FL6-FM6),1),IFERROR(FO6/MAX(0,FO6-FP6),1),IFERROR(FR6/MAX(0,FR6-FS6),1),IFERROR(FU6/MAX(0,FU6-FV6),1),IFERROR(FX6/MAX(0,FX6-FY6),1),IFERROR(GA6/MAX(0,GA6-GB6),1))*($AE6-A_equiv_harmonious_min_perc)+A_equiv_harmonious_min_perc)
+    let HE = 18980
+    // HE=IF(OR($AE3=0,FC3<0,FF3<0,FI3<0,FL3<0,FO3<0,FR3<0,FU3<0,FX3<0,GA3<0,GD3<0),0,MIN(1,IFERROR(FC3/MAX(0,FC3-FD3),1),IFERROR(FF3/MAX(0,FF3-FG3),1),IFERROR(FI3/MAX(0,FI3-FJ3),1),IFERROR(FL3/MAX(0,FL3-FM3),1),IFERROR(FO3/MAX(0,FO3-FP3),1),IFERROR(FR3/MAX(0,FR3-FS3),1),IFERROR(FU3/MAX(0,FU3-FV3),1),IFERROR(FX3/MAX(0,FX3-FY3),1),IFERROR(GA3/MAX(0,GA3-GB3),1),IFERROR(GD3/MAX(0,GD3-GE3),1))*($AE3-A_equiv_harmonious_min_perc)+A_equiv_harmonious_min_perc)
     for i in 0..<365 {
-      d23[GZ + i] = iff(
-        or(d21[AE + i].isZero, d23[FC + i] < 0.0, d23[FF + i] < 0.0, d23[FI + i] < 0.0, d23[FL + i] < 0.0, d23[FO + i] < 0.0, d23[FR + i] < 0.0, d23[FU + i] < 0.0, d23[FX + i] < 0.0, d23[GA + i] < 0), 0.0,
+      d23[HE + i] = iff(
+        or(
+          d21[AE + i] == 0.0, d23[FC + i] < 0, d23[FF + i] < 0, d23[FI + i] < 0, d23[FL + i] < 0, d23[FO + i] < 0,
+          d23[FR + i] < 0, d23[FU + i] < 0, d23[FX + i] < 0, d23[GA + i] < 0, d23[GD + i] < 0), 0,
         min(
-          1, ifFinite(d23[FC + i] / max(0.0, d23[FC + i] - d23[FD + i]), 1), ifFinite(d23[FF + i] / max(0.0, d23[FF + i] - d23[FG + i]), 1), ifFinite(d23[FI + i] / max(0.0, d23[FI + i] - d23[FJ + i]), 1),
-          ifFinite(d23[FL + i] / max(0.0, d23[FL + i] - d23[FM + i]), 1), ifFinite(d23[FO + i] / max(0.0, d23[FO + i] - d23[FP + i]), 1), ifFinite(d23[FR + i] / max(0.0, d23[FR + i] - d23[FS + i]), 1),
-          ifFinite(d23[FU + i] / max(0.0, d23[FU + i] - d23[FV + i]), 1), ifFinite(d23[FX + i] / max(0.0, d23[FX + i] - d23[FY + i]), 1), ifFinite(d23[GA + i] / max(0.0, d23[GA + i] - d23[GB + i]), 1))
-          * (d21[AE + i] - equiv_harmonious_min_perc[j]) + equiv_harmonious_min_perc[j])
+          1, ifFinite(d23[FC + i] / max(0, d23[FC + i] - d23[FD + i]), 1),
+          ifFinite(d23[FF + i] / max(0, d23[FF + i] - d23[FG + i]), 1),
+          ifFinite(d23[FI + i] / max(0, d23[FI + i] - d23[FJ + i]), 1),
+          ifFinite(d23[FL + i] / max(0, d23[FL + i] - d23[FM + i]), 1),
+          ifFinite(d23[FO + i] / max(0, d23[FO + i] - d23[FP + i]), 1),
+          ifFinite(d23[FR + i] / max(0, d23[FR + i] - d23[FS + i]), 1),
+          ifFinite(d23[FU + i] / max(0, d23[FU + i] - d23[FV + i]), 1),
+          ifFinite(d23[FX + i] / max(0, d23[FX + i] - d23[FY + i]), 1),
+          ifFinite(d23[GA + i] / max(0, d23[GA + i] - d23[GB + i]), 1),
+          ifFinite(d23[GD + i] / max(0, d23[GD + i] - d23[GE + i]), 1)) * (d21[AE + i] - equiv_harmonious_min_perc[j])
+          + equiv_harmonious_min_perc[j])
     }
 
     /// Surplus harm op period el after min day harm op and opt night op prep
-    let HA = 17520
-    /// Surplus harm op period el after max day harm op and opt night op prep
-    let HB = 17885
-    /// Surplus outside harm op period el after min day harm and opt night op prep; comment: it is assumed that PV during off-harmonious period is not well distributed and must therefore be channelled during the BESS to be used
-    let HC = 18250
-    /// Surplus outside harm op period el after max day harm and opt night op prep; comment: it is assumed that PV during off-harmonious period is not well distributed and must therefore be channelled during the BESS to be used
-    let HD = 18615
-    /// Surplus harm op heat after min day harm and opt night op prep; Comment: it is assumed that PV electricity from outside harmonious period is used to charge BESS
-    let HE = 18980
-    /// Surplus harm op heat after max day harm and opt night op prep; Comment: it is assumed that PV electricity from outside harmonious period is used to charge BESS
     let HF = 19345
-    /// Surplus outside harm op heat after min day harm and opt night op prep
-    let HG = 19710
-    /// Surplus outside harm op heat after max day harm and opt night op prep
-    let HH = 20075
-    /// Surplus el boiler cap after min harm op and opt night op prep during harm op period
-    let HI = 20440
-    /// Surplus el boiler cap after max harm op and opt night op prep during harm op period
-    let HJ = 20805
-    /// Surplus el boiler cap after min harm op and opt night op prep outside of harm op period
-    let HK = 21170
-    /// Surplus el boiler cap after max harm op and opt night op prep outside of harm op period
-    let HL = 21535
-    /// Surplus RawMeth prod cap after min day harm and opt night op prep
-    let HM = 21900
-    /// Surplus RawMeth prod cap after max day harm and opt night op prep
-    let HN = 22265
-    /// Surplus CO2 prod cap after min day harm and opt night op prep
-    let HO = 22630
-    /// Surplus CO2 prod cap after max day harm and opt night op prep
-    let HP = 22995
-    /// Surplus H2 prod cap after min day harm and opt night op prep
-    let HQ = 23360
-    /// Surplus H2 prod cap after min day harm and opt night op prep
-    let HR = 23725
-
-    let ddGZ = 47085
-
+    // HF=IF(HE3=0,0,ROUND($EB3+$EH3-($O3+($P3-$O3)/($AE3-A_equiv_harmonious_min_perc)*(HE3-A_equiv_harmonious_min_perc))-MAX(0,$EA3+($E3+($F3-$E3)/($AE3-A_equiv_harmonious_min_perc)*(HE3-A_equiv_harmonious_min_perc))+MAX(0,$G3+($H3-$G3)/($AE3-A_equiv_harmonious_min_perc)*(HE3-A_equiv_harmonious_min_perc)-$EG3)/El_boiler_eff-$EJ3-$EM3*BESS_chrg_eff)/BESS_chrg_eff-MAX(0,$Q3+($R3-$Q3)/($AE3-A_equiv_harmonious_min_perc)*(HE3-A_equiv_harmonious_min_perc)-$EE3)/El_boiler_eff,5))
     for i in 0..<365 {
-      if d23[GZ + i].isZero {
-        d23[HA + i] = 0.0
-        d23[HB + i] = 0.0
-        d23[HC + i] = 0.0
-        d23[HD + i] = 0.0
-        d23[HE + i] = 0.0
-        d23[HF + i] = 0.0
-        d23[HG + i] = 0.0
-        d23[HH + i] = 0.0
-        d23[HI + i] = 0.0
-        d23[HJ + i] = 0.0
-        d23[HK + i] = 0.0
-        d23[HL + i] = 0.0
-        d23[HM + i] = 0.0
-        d23[HN + i] = 0.0
-        d23[HO + i] = 0.0
-        d23[HP + i] = 0.0
-        d23[HQ + i] = 0.0
-        d23[HR + i] = 0.0
-        continue
-      }
-      d23[ddGZ + i] = (d23[GZ + i] - equiv_harmonious_min_perc[j]) / (d21[AE + i] - equiv_harmonious_min_perc[j])
-
-      // HA=IF(GZ3=0,0,ROUND($EB3+$EH3-($O3+($P3-$O3)/($AE3-A_equiv_harmonious_min_perc)*(GZ3-A_equiv_harmonious_min_perc))-MIN(BESS_cap_ud,MAX(0,$EA3+($E3+($F3-$E3)/($AE3-A_equiv_harmonious_min_perc)*(GZ3-A_equiv_harmonious_min_perc))+MIN($ER3,MAX(0,$G3+($H3-$G3)/($AE3-A_equiv_harmonious_min_perc)*(GZ3-A_equiv_harmonious_min_perc)-$EG3)/El_boiler_eff)-$EJ3-$EM3*BESS_chrg_eff))/BESS_chrg_eff-MIN($EP3,MAX(0,$Q3+($R3-$Q3)/($AE3-A_equiv_harmonious_min_perc)*(GZ3-A_equiv_harmonious_min_perc)-$EE3)/El_boiler_eff),5))
-      for i in 0..<365 {
-        d23[HA + i] = iff(
-          d23[GZ + i] == Double.zero, 0,
-          round(
-            d22[EB + i] + d22[EH + i]
-              - (d21[O + i] + (d21[P + i] - d21[O + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j]) * (d23[GZ + i] - equiv_harmonious_min_perc[j])) - min(
-                BESS_cap_ud,
-                max(
-                  0,
-                  d22[EA + i] + (d21[E + i] + (d21[F + i] - d21[E + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j]) * (d23[GZ + i] - equiv_harmonious_min_perc[j]))
-                    + min(
-                      d22[ER + i],
-                      max(
-                        0,
-                        d21[G + i] + (d21[H + i] - d21[G + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j]) * (d23[GZ + i] - equiv_harmonious_min_perc[j])
-                          - d22[EG + i]) / El_boiler_eff) - d22[EJ + i] - d22[EM + i] * BESS_chrg_eff)) / BESS_chrg_eff
-              - min(
-                d22[EP + i],
-                max(
-                  0,
-                  d21[Q + i] + (d21[R + i] - d21[Q + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j]) * (d23[GZ + i] - equiv_harmonious_min_perc[j]) - d22[EE + i])
-                  / El_boiler_eff), 5))
-      }
-
-      // HB=IF(GZ3=0,0,ROUND($EC3+$EI3-($O3+($P3-$O3)/($AE3-A_equiv_harmonious_min_perc)*(GZ3-A_equiv_harmonious_min_perc))-MIN(BESS_cap_ud,MAX(0,$EA3+($E3+($F3-$E3)/($AE3-A_equiv_harmonious_min_perc)*(GZ3-A_equiv_harmonious_min_perc))+MIN($ER3,MAX(0,$G3+($H3-$G3)/($AE3-A_equiv_harmonious_min_perc)*(GZ3-A_equiv_harmonious_min_perc)-$EG3)/El_boiler_eff)-$EJ3-$EM3*BESS_chrg_eff))/BESS_chrg_eff-MIN($EQ3,MAX(0,$Q3+($R3-$Q3)/($AE3-A_equiv_harmonious_min_perc)*(GZ3-A_equiv_harmonious_min_perc)-$EF3)/El_boiler_eff),5))
-      for i in 0..<365 {
-        d23[HB + i] = iff(
-          d23[GZ + i] == Double.zero, 0,
-          round(
-            d22[EC + i] + d22[EI + i]
-              - (d21[O + i] + (d21[P + i] - d21[O + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j]) * (d23[GZ + i] - equiv_harmonious_min_perc[j])) - min(
-                BESS_cap_ud,
-                max(
-                  0,
-                  d22[EA + i] + (d21[E + i] + (d21[F + i] - d21[E + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j]) * (d23[GZ + i] - equiv_harmonious_min_perc[j]))
-                    + min(
-                      d22[ER + i],
-                      max(
-                        0,
-                        d21[G + i] + (d21[H + i] - d21[G + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j]) * (d23[GZ + i] - equiv_harmonious_min_perc[j])
-                          - d22[EG + i]) / El_boiler_eff) - d22[EJ + i] - d22[EM + i] * BESS_chrg_eff)) / BESS_chrg_eff
-              - min(
-                d22[EQ + i],
-                max(
-                  0,
-                  d21[Q + i] + (d21[R + i] - d21[Q + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j]) * (d23[GZ + i] - equiv_harmonious_min_perc[j]) - d22[EF + i])
-                  / El_boiler_eff), 5))
-      }
-
-
-      // =IF(GZ6=0,0,ROUND((EK6+EM6)*BESS_chrg_eff+EJ6-EA6-(E6+(F6-E6)/(AE6-A_equiv_harmonious_min_perc)*(GZ6-A_equiv_harmonious_min_perc))-MIN(ER6,MAX(0,G6+(H6-G6)/(AE6-A_equiv_harmonious_min_perc)*(GZ6-A_equiv_harmonious_min_perc)-EG6)/El_boiler_eff),5))
-
-      d23[HC + i] = round(
-        (d22[EK + i] + d22[EM + i]) * BESS_chrg_eff + d22[EJ + i] - d22[EA + i] - (d21[E + i] + (d21[F + i] - d21[E + i]) * d23[ddGZ + i])
-          - min(d22[ER + i], max(0.0, d21[G + i] + (d21[H + i] - d21[G + i]) * d23[ddGZ + i] - d22[EG + i]) / El_boiler_eff), 5)
-      // =IF(GZ6=0,0,ROUND((EL6+EM6)*BESS_chrg_eff+EJ6-EA6-(E6+(F6-E6)/(AE6-A_equiv_harmonious_min_perc)*(GZ6-A_equiv_harmonious_min_perc))-MIN(ER6,MAX(0,G6+(H6-G6)/(AE6-A_equiv_harmonious_min_perc)*(GZ6-A_equiv_harmonious_min_perc)-EG6)/El_boiler_eff),5))
-
-      d23[HD + i] = round(
-        (d22[EL + i] + d22[EM + i]) * BESS_chrg_eff + d22[EJ + i] - d22[EA + i] - (d21[E + i] + (d21[F + i] - d21[E + i]) * d23[ddGZ + i])
-          - min(d22[ER + i], max(0.0, d21[G + i] + (d21[H + i] - d21[G + i]) * d23[ddGZ + i] - d22[EG + i]) / El_boiler_eff), 5)
-      // HE=IF(GZ3=0,0,ROUND($EE3+MIN($EP3,MAX(0,$EB3+$EH3-MIN(BESS_cap_ud,MAX(0,$EA3+$E3+($F3-$E3)/($AE3-A_equiv_harmonious_min_perc)*(GZ3-A_equiv_harmonious_min_perc)+MIN($ER3,MAX(0,$G3+($H3-$G3)/($AE3-A_equiv_harmonious_min_perc)*(GZ3-A_equiv_harmonious_min_perc)-$EG3)/El_boiler_eff)-$EJ3-$EM3*BESS_chrg_eff))/BESS_chrg_eff-($O3+($P3-$O3)/($AE3-A_equiv_harmonious_min_perc)*(GZ3-A_equiv_harmonious_min_perc))))*El_boiler_eff-($Q3+($R3-$Q3)/($AE3-A_equiv_harmonious_min_perc)*(GZ3-A_equiv_harmonious_min_perc)),5))
-      d23[HE + i] = iff(
-        d23[GZ + i] == Double.zero, 0,
-        round(
-          d22[EE + i] + min(
-            d22[EP + i],
-            max(
-              0,
-              d22[EB + i] + d22[EH + i] - min(
-                BESS_cap_ud,
-                max(
-                  0,
-                  d22[EA + i] + d21[E + i] + (d21[F + i] - d21[E + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j]) * (d23[GZ + i] - equiv_harmonious_min_perc[j])
-                    + min(
-                      d22[ER + i],
-                      max(
-                        0,
-                        d21[G + i] + (d21[H + i] - d21[G + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j]) * (d23[GZ + i] - equiv_harmonious_min_perc[j])
-                          - d22[EG + i]) / El_boiler_eff) - d22[EJ + i] - d22[EM + i] * BESS_chrg_eff)) / BESS_chrg_eff
-                - (d21[O + i] + (d21[P + i] - d21[O + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j]) * (d23[GZ + i] - equiv_harmonious_min_perc[j]))))
-            * El_boiler_eff - (d21[Q + i] + (d21[R + i] - d21[Q + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j]) * (d23[GZ + i] - equiv_harmonious_min_perc[j])),
-          5))
-
-      // HF=IF(GZ3=0,0,ROUND($EF3+MIN($EQ3,MAX(0,$EC3+$EI3-MIN(BESS_cap_ud,MAX(0,$EA3+$E3+($F3-$E3)/($AE3-A_equiv_harmonious_min_perc)*(GZ3-A_equiv_harmonious_min_perc)+MIN($ER3,MAX(0,$G3+($H3-$G3)/($AE3-A_equiv_harmonious_min_perc)*(GZ3-A_equiv_harmonious_min_perc)-$EG3)/El_boiler_eff)-$EJ3-$EM3*BESS_chrg_eff))/BESS_chrg_eff-($O3+($P3-$O3)/($AE3-A_equiv_harmonious_min_perc)*(GZ3-A_equiv_harmonious_min_perc))))*El_boiler_eff-($Q3+($R3-$Q3)/($AE3-A_equiv_harmonious_min_perc)*(GZ3-A_equiv_harmonious_min_perc)),5))
       d23[HF + i] = iff(
-        d23[GZ + i] == Double.zero, 0,
+        d23[HE + i] == 0.0, 0,
         round(
-          d22[EF + i] + min(
-            d22[EQ + i],
-            max(
+          d22[EB + i] + d22[EH + i]
+            - (d21[O + i]
+              + (d21[P + i] - d21[O + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j])
+                * (d23[HE + i] - equiv_harmonious_min_perc[j]))
+            - max(
               0,
-              d22[EC + i] + d22[EI + i] - min(
-                BESS_cap_ud,
+              d22[EA + i]
+                + (d21[E + i]
+                  + (d21[F + i] - d21[E + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j])
+                    * (d23[HE + i] - equiv_harmonious_min_perc[j]))
+                + max(
+                  0,
+                  d21[G + i] + (d21[H + i] - d21[G + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j])
+                    * (d23[HE + i] - equiv_harmonious_min_perc[j]) - d22[EG + i]) / El_boiler_eff - d22[EJ + i]
+                - d22[EM + i] * BESS_chrg_eff) / BESS_chrg_eff - max(
+              0,
+              d21[Q + i] + (d21[R + i] - d21[Q + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j])
+                * (d23[HE + i] - equiv_harmonious_min_perc[j]) - d22[EE + i]) / El_boiler_eff, 5))
+    }
+
+    /// Surplus harm op period el after max day harm op and opt night op prep
+    let HG = 19710
+    // HG=IF(HE3=0,0,ROUND($EC3+$EI3-($O3+($P3-$O3)/($AE3-A_equiv_harmonious_min_perc)*(HE3-A_equiv_harmonious_min_perc))-MAX(0,$EA3+($E3+($F3-$E3)/($AE3-A_equiv_harmonious_min_perc)*(HE3-A_equiv_harmonious_min_perc))+MAX(0,$G3+($H3-$G3)/($AE3-A_equiv_harmonious_min_perc)*(HE3-A_equiv_harmonious_min_perc)-$EG3)/El_boiler_eff-$EJ3-$EM3*BESS_chrg_eff)/BESS_chrg_eff-MAX(0,$Q3+($R3-$Q3)/($AE3-A_equiv_harmonious_min_perc)*(HE3-A_equiv_harmonious_min_perc)-$EF3)/El_boiler_eff,5))
+    for i in 0..<365 {
+      d23[HG + i] = iff(
+        d23[HE + i] == 0.0, 0,
+        round(
+          d22[EC + i] + d22[EI + i]
+            - (d21[O + i]
+              + (d21[P + i] - d21[O + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j])
+                * (d23[HE + i] - equiv_harmonious_min_perc[j]))
+            - max(
+              0,
+              d22[EA + i]
+                + (d21[E + i]
+                  + (d21[F + i] - d21[E + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j])
+                    * (d23[HE + i] - equiv_harmonious_min_perc[j]))
+                + max(
+                  0,
+                  d21[G + i] + (d21[H + i] - d21[G + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j])
+                    * (d23[HE + i] - equiv_harmonious_min_perc[j]) - d22[EG + i]) / El_boiler_eff - d22[EJ + i]
+                - d22[EM + i] * BESS_chrg_eff) / BESS_chrg_eff - max(
+              0,
+              d21[Q + i] + (d21[R + i] - d21[Q + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j])
+                * (d23[HE + i] - equiv_harmonious_min_perc[j]) - d22[EF + i]) / El_boiler_eff, 5))
+    }
+
+    /// Surplus outside harm op period el after min day harm and opt night op prep
+    let HH = 20075
+    // HH=IF(HE3=0,0,ROUND(($EK3+$EM3)*BESS_chrg_eff+$EJ3-$EA3-($E3+($F3-$E3)/($AE3-A_equiv_harmonious_min_perc)*(HE3-A_equiv_harmonious_min_perc))-MAX(0,$G3+($H3-$G3)/($AE3-A_equiv_harmonious_min_perc)*(HE3-A_equiv_harmonious_min_perc)-$EG3)/El_boiler_eff,5))
+    for i in 0..<365 {
+      d23[HH + i] = iff(
+        d23[HE + i] == 0.0, 0,
+        round(
+          (d22[EK + i] + d22[EM + i]) * BESS_chrg_eff + d22[EJ + i] - d22[EA + i]
+            - (d21[E + i]
+              + (d21[F + i] - d21[E + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j])
+                * (d23[HE + i] - equiv_harmonious_min_perc[j]))
+            - max(
+              0,
+              d21[G + i] + (d21[H + i] - d21[G + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j])
+                * (d23[HE + i] - equiv_harmonious_min_perc[j]) - d22[EG + i]) / El_boiler_eff, 5))
+    }
+
+    /// Surplus outside harm op period el after max day harm and opt night op prep
+    let HI = 20440
+    // HI=IF(HE3=0,0,ROUND(($EL3+$EM3)*BESS_chrg_eff+$EJ3-$EA3-($E3+($F3-$E3)/($AE3-A_equiv_harmonious_min_perc)*(HE3-A_equiv_harmonious_min_perc))-MAX(0,$G3+($H3-$G3)/($AE3-A_equiv_harmonious_min_perc)*(HE3-A_equiv_harmonious_min_perc)-$EG3)/El_boiler_eff,5))
+    for i in 0..<365 {
+      d23[HI + i] = iff(
+        d23[HE + i] == 0.0, 0,
+        round(
+          (d22[EL + i] + d22[EM + i]) * BESS_chrg_eff + d22[EJ + i] - d22[EA + i]
+            - (d21[E + i]
+              + (d21[F + i] - d21[E + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j])
+                * (d23[HE + i] - equiv_harmonious_min_perc[j]))
+            - max(
+              0,
+              d21[G + i] + (d21[H + i] - d21[G + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j])
+                * (d23[HE + i] - equiv_harmonious_min_perc[j]) - d22[EG + i]) / El_boiler_eff, 5))
+    }
+
+    /// Surplus harm op heat after min day harm and opt night op prep
+    let HJ = 20805
+    // HJ=IF(HE3=0,0,ROUND($EE3+MAX(0,$EB3+$EH3-MAX(0,$EA3+$E3+($F3-$E3)/($AE3-A_equiv_harmonious_min_perc)*(HE3-A_equiv_harmonious_min_perc)+MAX(0,$G3+($H3-$G3)/($AE3-A_equiv_harmonious_min_perc)*(HE3-A_equiv_harmonious_min_perc)-$EG3)/El_boiler_eff-$EJ3-$EM3*BESS_chrg_eff)/BESS_chrg_eff-($O3+($P3-$O3)/($AE3-A_equiv_harmonious_min_perc)*(HE3-A_equiv_harmonious_min_perc)))*El_boiler_eff-($Q3+($R3-$Q3)/($AE3-A_equiv_harmonious_min_perc)*(HE3-A_equiv_harmonious_min_perc)),5))
+    for i in 0..<365 {
+      d23[HJ + i] = iff(
+        d23[HE + i] == 0.0, 0,
+        round(
+          d22[EE + i] + max(
+            0,
+            d22[EB + i] + d22[EH + i] - max(
+              0,
+              d22[EA + i] + d21[E + i] + (d21[F + i] - d21[E + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j])
+                * (d23[HE + i] - equiv_harmonious_min_perc[j]) + max(
+                  0,
+                  d21[G + i] + (d21[H + i] - d21[G + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j])
+                    * (d23[HE + i] - equiv_harmonious_min_perc[j]) - d22[EG + i]) / El_boiler_eff - d22[EJ + i]
+                - d22[EM + i] * BESS_chrg_eff) / BESS_chrg_eff
+              - (d21[O + i]
+                + (d21[P + i] - d21[O + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j])
+                  * (d23[HE + i] - equiv_harmonious_min_perc[j]))
+          ) * El_boiler_eff
+            - (d21[Q + i]
+              + (d21[R + i] - d21[Q + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j])
+                * (d23[HE + i] - equiv_harmonious_min_perc[j])),
+          5))
+    }
+
+    /// Surplus harm op heat after max day harm and opt night op prep
+    let HK = 21170
+    // HK=IF(HE3=0,0,ROUND($EF3+MAX(0,$EC3+$EI3-MAX(0,$EA3+$E3+($F3-$E3)/($AE3-A_equiv_harmonious_min_perc)*(HE3-A_equiv_harmonious_min_perc)+MAX(0,$G3+($H3-$G3)/($AE3-A_equiv_harmonious_min_perc)*(HE3-A_equiv_harmonious_min_perc)-$EG3)/El_boiler_eff-$EJ3-$EM3*BESS_chrg_eff)/BESS_chrg_eff-($O3+($P3-$O3)/($AE3-A_equiv_harmonious_min_perc)*(HE3-A_equiv_harmonious_min_perc)))*El_boiler_eff-($Q3+($R3-$Q3)/($AE3-A_equiv_harmonious_min_perc)*(HE3-A_equiv_harmonious_min_perc)),5))
+    for i in 0..<365 {
+      d23[HK + i] = iff(
+        d23[HE + i] == 0.0, 0,
+        round(
+          d22[EF + i] + max(
+            0,
+            d22[EC + i] + d22[EI + i] - max(
+              0,
+              d22[EA + i] + d21[E + i] + (d21[F + i] - d21[E + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j])
+                * (d23[HE + i] - equiv_harmonious_min_perc[j]) + max(
+                  0,
+                  d21[G + i] + (d21[H + i] - d21[G + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j])
+                    * (d23[HE + i] - equiv_harmonious_min_perc[j]) - d22[EG + i]) / El_boiler_eff - d22[EJ + i]
+                - d22[EM + i] * BESS_chrg_eff) / BESS_chrg_eff
+              - (d21[O + i]
+                + (d21[P + i] - d21[O + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j])
+                  * (d23[HE + i] - equiv_harmonious_min_perc[j]))
+          ) * El_boiler_eff
+            - (d21[Q + i]
+              + (d21[R + i] - d21[Q + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j])
+                * (d23[HE + i] - equiv_harmonious_min_perc[j])),
+          5))
+    }
+
+    /// Surplus outside harm op heat after min day harm and opt night op prep
+    let HL = 21535
+    // HL=IF(HE3=0,0,ROUND($EG3+MAX(0,($EK3+$EM3)*BESS_chrg_eff+$EJ3-$EA3-($E3+($F3-$E3)/($AE3-A_equiv_harmonious_min_perc)*(HE3-A_equiv_harmonious_min_perc)))*El_boiler_eff-($G3+($H3-$G3)/($AE3-A_equiv_harmonious_min_perc)*(HE3-A_equiv_harmonious_min_perc)),5))
+    for i in 0..<365 {
+      d23[HL + i] = iff(
+        d23[HE + i] == 0.0, 0,
+        round(
+          d22[EG + i] + max(
+            0,
+            (d22[EK + i] + d22[EM + i]) * BESS_chrg_eff + d22[EJ + i] - d22[EA + i]
+              - (d21[E + i]
+                + (d21[F + i] - d21[E + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j])
+                  * (d23[HE + i] - equiv_harmonious_min_perc[j]))
+          ) * El_boiler_eff
+            - (d21[G + i]
+              + (d21[H + i] - d21[G + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j])
+                * (d23[HE + i] - equiv_harmonious_min_perc[j])),
+          5))
+    }
+
+    /// Surplus outside harm op heat after max day harm and opt night op prep
+    let HM = 21900
+    // HM=IF(HE3=0,0,ROUND($EG3+MAX(0,($EL3+$EM3)*BESS_chrg_eff+$EJ3-$EA3-($E3+($F3-$E3)/($AE3-A_equiv_harmonious_min_perc)*(HE3-A_equiv_harmonious_min_perc)))*El_boiler_eff-($G3+($H3-$G3)/($AE3-A_equiv_harmonious_min_perc)*(HE3-A_equiv_harmonious_min_perc)),5))
+    for i in 0..<365 {
+      d23[HM + i] = iff(
+        d23[HE + i] == 0.0, 0,
+        round(
+          d22[EG + i] + max(
+            0,
+            (d22[EL + i] + d22[EM + i]) * BESS_chrg_eff + d22[EJ + i] - d22[EA + i]
+              - (d21[E + i]
+                + (d21[F + i] - d21[E + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j])
+                  * (d23[HE + i] - equiv_harmonious_min_perc[j]))
+          ) * El_boiler_eff
+            - (d21[G + i]
+              + (d21[H + i] - d21[G + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j])
+                * (d23[HE + i] - equiv_harmonious_min_perc[j])),
+          5))
+    }
+
+    /// Surplus BESS cap after min harm op and opt night op prep during harm op period
+    let HN = 22265
+    // HN=IF(HE3=0,0,ROUND($EK3-MAX(0,$EA3+($E3+($F3-$E3)/($AE3-A_equiv_harmonious_min_perc)*(HE3-A_equiv_harmonious_min_perc))+MIN($ER3,MAX(0,($G3+($H3-$G3)/($AE3-A_equiv_harmonious_min_perc)*(HE3-A_equiv_harmonious_min_perc))-$EG3)/El_boiler_eff)-$EJ3-$EM3*BESS_chrg_eff)/BESS_chrg_eff,5))
+    for i in 0..<365 {
+      d23[HN + i] = iff(
+        d23[HE + i] == 0.0, 0,
+        round(
+          d22[EK + i] - max(
+            0,
+            d22[EA + i]
+              + (d21[E + i]
+                + (d21[F + i] - d21[E + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j])
+                  * (d23[HE + i] - equiv_harmonious_min_perc[j]))
+              + min(
+                d22[ER + i],
                 max(
                   0,
-                  d22[EA + i] + d21[E + i] + (d21[F + i] - d21[E + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j]) * (d23[GZ + i] - equiv_harmonious_min_perc[j])
-                    + min(
-                      d22[ER + i],
-                      max(
-                        0,
-                        d21[G + i] + (d21[H + i] - d21[G + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j]) * (d23[GZ + i] - equiv_harmonious_min_perc[j])
-                          - d22[EG + i]) / El_boiler_eff) - d22[EJ + i] - d22[EM + i] * BESS_chrg_eff)) / BESS_chrg_eff
-                - (d21[O + i] + (d21[P + i] - d21[O + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j]) * (d23[GZ + i] - equiv_harmonious_min_perc[j]))))
-            * El_boiler_eff - (d21[Q + i] + (d21[R + i] - d21[Q + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j]) * (d23[GZ + i] - equiv_harmonious_min_perc[j])),
-          5))
+                  (d21[G + i]
+                    + (d21[H + i] - d21[G + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j])
+                      * (d23[HE + i] - equiv_harmonious_min_perc[j]))
+                    - d22[EG + i]) / El_boiler_eff) - d22[EJ + i] - d22[EM + i] * BESS_chrg_eff) / BESS_chrg_eff, 5))
+    }
 
-      // HG=IF(GZ3=0,0,ROUND($EG3+MIN($ER3,MAX(0,($EK3+$EM3)*BESS_chrg_eff+$EJ3-$EA3-($E3+($F3-$E3)/($AE3-A_equiv_harmonious_min_perc)*(GZ3-A_equiv_harmonious_min_perc))))*El_boiler_eff-($G3+($H3-$G3)/($AE3-A_equiv_harmonious_min_perc)*(GZ3-A_equiv_harmonious_min_perc)),5))
-      d23[HG + i] = iff(
-        d23[GZ + i] == Double.zero, 0,
+    /// Surplus BESS cap after max harm op and opt night op prep during harm op period
+    let HO = 22630
+    // HO=IF(HE3=0,0,ROUND($EL3-MAX(0,$EA3+($E3+($F3-$E3)/($AE3-A_equiv_harmonious_min_perc)*(HE3-A_equiv_harmonious_min_perc))+MIN($ER3,MAX(0,($G3+($H3-$G3)/($AE3-A_equiv_harmonious_min_perc)*(HE3-A_equiv_harmonious_min_perc))-$EG3)/El_boiler_eff)-$EJ3-$EM3*BESS_chrg_eff)/BESS_chrg_eff,5))
+    for i in 0..<365 {
+      d23[HO + i] = iff(
+        d23[HE + i] == 0.0, 0,
         round(
-          d22[EG + i] + min(
-            d22[ER + i],
-            max(
-              0,
-              (d22[EK + i] + d22[EM + i]) * BESS_chrg_eff + d22[EJ + i] - d22[EA + i]
-                - (d21[E + i] + (d21[F + i] - d21[E + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j]) * (d23[GZ + i] - equiv_harmonious_min_perc[j]))))
-            * El_boiler_eff - (d21[G + i] + (d21[H + i] - d21[G + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j]) * (d23[GZ + i] - equiv_harmonious_min_perc[j])),
-          5))
+          d22[EL + i] - max(
+            0,
+            d22[EA + i]
+              + (d21[E + i]
+                + (d21[F + i] - d21[E + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j])
+                  * (d23[HE + i] - equiv_harmonious_min_perc[j]))
+              + min(
+                d22[ER + i],
+                max(
+                  0,
+                  (d21[G + i]
+                    + (d21[H + i] - d21[G + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j])
+                      * (d23[HE + i] - equiv_harmonious_min_perc[j]))
+                    - d22[EG + i]) / El_boiler_eff) - d22[EJ + i] - d22[EM + i] * BESS_chrg_eff) / BESS_chrg_eff, 5))
+    }
 
-      // HH=IF(GZ3=0,0,ROUND($EG3+MIN($ER3,MAX(0,($EL3+$EM3)*BESS_chrg_eff+$EJ3-$EA3-($E3+($F3-$E3)/($AE3-A_equiv_harmonious_min_perc)*(GZ3-A_equiv_harmonious_min_perc))))*El_boiler_eff-($G3+($H3-$G3)/($AE3-A_equiv_harmonious_min_perc)*(GZ3-A_equiv_harmonious_min_perc)),5))
-      d23[HH + i] = iff(
-        d23[GZ + i] == Double.zero, 0,
+    /// Surplus el boiler cap after min harm op and opt night op prep during harm op period
+    let HP = 22995
+    // HP=IF(OR(El_boiler_cap_ud=0,HE3=0),0,ROUND($EP3-MAX(0,($Q3+($R3-$Q3)/($AE3-A_equiv_harmonious_min_perc)*(HE3-A_equiv_harmonious_min_perc))-$EE3)/El_boiler_eff,5))
+    for i in 0..<365 {
+      d23[HP + i] = iff(
+        or(El_boiler_cap_ud == 0.0, d23[HE + i] == 0.0), 0,
         round(
-          d22[EG + i] + min(
-            d22[ER + i],
-            max(
-              0,
-              (d22[EL + i] + d22[EM + i]) * BESS_chrg_eff + d22[EJ + i] - d22[EA + i]
-                - (d21[E + i] + (d21[F + i] - d21[E + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j]) * (d23[GZ + i] - equiv_harmonious_min_perc[j]))))
-            * El_boiler_eff - (d21[G + i] + (d21[H + i] - d21[G + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j]) * (d23[GZ + i] - equiv_harmonious_min_perc[j])),
+          d22[EP + i] - max(
+            0,
+            (d21[Q + i]
+              + (d21[R + i] - d21[Q + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j])
+                * (d23[HE + i] - equiv_harmonious_min_perc[j]))
+              - d22[EE + i]) / El_boiler_eff, 5))
+    }
+
+    /// Surplus el boiler cap after max harm op and opt night op prep during harm op period
+    let HQ = 23360
+    // HQ=IF(OR(El_boiler_cap_ud=0,HE3=0),0,ROUND($EQ3-MAX(0,($Q3+($R3-$Q3)/($AE3-A_equiv_harmonious_min_perc)*(HE3-A_equiv_harmonious_min_perc))-$EF3)/El_boiler_eff,5))
+    for i in 0..<365 {
+      d23[HQ + i] = iff(
+        or(El_boiler_cap_ud == 0.0, d23[HE + i] == 0.0), 0,
+        round(
+          d22[EQ + i] - max(
+            0,
+            (d21[Q + i]
+              + (d21[R + i] - d21[Q + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j])
+                * (d23[HE + i] - equiv_harmonious_min_perc[j]))
+              - d22[EF + i]) / El_boiler_eff, 5))
+    }
+
+    /// Surplus el boiler cap after min harm op and opt night op prep outside of harm op period
+    let HR = 23725
+    // HR=IF(OR(El_boiler_cap_ud=0,HE3=0),0,ROUND($ER3-MAX(0,($G3+($H3-$G3)/($AE3-A_equiv_harmonious_min_perc)*(HE3-A_equiv_harmonious_min_perc))-$EG3)/El_boiler_eff,5))
+    for i in 0..<365 {
+      d23[HR + i] = iff(
+        or(El_boiler_cap_ud == 0.0, d23[HE + i] == 0.0), 0,
+        round(
+          d22[ER + i] - max(
+            0,
+            (d21[G + i]
+              + (d21[H + i] - d21[G + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j])
+                * (d23[HE + i] - equiv_harmonious_min_perc[j]))
+              - d22[EG + i]) / El_boiler_eff, 5))
+    }
+
+    /// Surplus el boiler cap after max harm op and opt night op prep outside of harm op period
+    let HS = 24090
+    // HS=IF(OR(El_boiler_cap_ud=0,HE3=0),0,ROUND($ER3-MAX(0,($G3+($H3-$G3)/($AE3-A_equiv_harmonious_min_perc)*(HE3-A_equiv_harmonious_min_perc))-$EG3)/El_boiler_eff,5))
+    for i in 0..<365 {
+      d23[HS + i] = iff(
+        or(El_boiler_cap_ud == 0.0, d23[HE + i] == 0.0), 0,
+        round(
+          d22[ER + i] - max(
+            0,
+            (d21[G + i]
+              + (d21[H + i] - d21[G + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j])
+                * (d23[HE + i] - equiv_harmonious_min_perc[j]))
+              - d22[EG + i]) / El_boiler_eff, 5))
+    }
+
+    /// Surplus RawMeth prod cap after min day harm and opt night op prep
+    let HT = 24455
+    // HT=IF(HE3=0,0,ROUND($ES3-($S3+($T3-$S3)/($AE3-A_equiv_harmonious_min_perc)*(HE3-A_equiv_harmonious_min_perc)),5))
+    for i in 0..<365 {
+      d23[HT + i] = iff(
+        d23[HE + i] == 0.0, 0,
+        round(
+          d22[ES + i]
+            - (d21[S + i]
+              + (d21[T + i] - d21[S + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j])
+                * (d23[HE + i] - equiv_harmonious_min_perc[j])),
           5))
+    }
 
-      if El_boiler_cap_ud.isZero {
-        d23[HI + i] = Double.zero
-        d23[HJ + i] = Double.zero
-        d23[HK + i] = Double.zero
-        d23[HL + i] = Double.zero
-      } else {
-        // =IF(OR(El_boiler_cap_ud=0,GZ6=0),0,ROUND($EP6-MAX(0,($Q6+($R6-$Q6)/($AE6-A_equiv_harmonious_min_perc)*(GZ6-A_equiv_harmonious_min_perc))-$EE6)/El_boiler_eff,5))
-        d23[HI + i] = round(d22[EP + i] - max(0.0, (d21[Q + i] + (d21[R + i] - d21[Q + i]) * d23[ddGZ + i]) - d22[EE + i]) / El_boiler_eff, 5)
-        // =IF(OR(El_boiler_cap_ud=0,GZ6=0),0,ROUND($EQ6-MAX(0,($Q6+($R6-$Q6)/($AE6-A_equiv_harmonious_min_perc)*(GZ6-A_equiv_harmonious_min_perc))-$EF6)/El_boiler_eff,5))
-        d23[HJ + i] = round(d22[EQ + i] - max(0.0, (d21[Q + i] + (d21[R + i] - d21[Q + i]) * d23[ddGZ + i]) - d22[EF + i]) / El_boiler_eff, 5)
-        // =IF(OR(El_boiler_cap_ud=0,GZ6=0),0,ROUND($ER6-MAX(0,($G6+($H6-$G6)/($AE6-A_equiv_harmonious_min_perc)*(GZ6-A_equiv_harmonious_min_perc))-$EG6)/El_boiler_eff,5))
-        d23[HK + i] = round(d22[ER + i] - max(0.0, (d21[G + i] + (d21[H + i] - d21[G + i]) * d23[ddGZ + i]) - d22[EG + i]) / El_boiler_eff, 5)
-        // =IF(OR(El_boiler_cap_ud=0,GZ6=0),0,ROUND($ER6-MAX(0,($G6+($H6-$G6)/($AE6-A_equiv_harmonious_min_perc)*(GZ6-A_equiv_harmonious_min_perc))-$EG6)/El_boiler_eff,5))
-        d23[HL + i] = round(d22[ER + i] - max(0.0, (d21[G + i] + (d21[H + i] - d21[G + i]) * d23[ddGZ + i]) - d22[EG + i]) / El_boiler_eff, 5)
-      }
+    /// Surplus RawMeth prod cap after max day harm and opt night op prep
+    let HU = 24820
+    // HU=IF(HE3=0,0,ROUND($ET3-($S3+($T3-$S3)/($AE3-A_equiv_harmonious_min_perc)*(HE3-A_equiv_harmonious_min_perc)),5))
+    for i in 0..<365 {
+      d23[HU + i] = iff(
+        d23[HE + i] == 0.0, 0,
+        round(
+          d22[ET + i]
+            - (d21[S + i]
+              + (d21[T + i] - d21[S + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j])
+                * (d23[HE + i] - equiv_harmonious_min_perc[j])),
+          5))
+    }
 
-      // =IF(GZ6=0,0,ROUND(ES6-(S6+(T6-S6)/(AE6-A_equiv_harmonious_min_perc)*(GZ6-A_equiv_harmonious_min_perc)),5))
-      d23[HM + i] = round(d22[ES + i] - (d21[S + i] + (d21[T + i] - d21[S + i]) * d23[ddGZ + i]), 5)
+    /// Surplus CO2 prod cap after min day harm and opt night op prep
+    let HV = 25185
+    // HV=IF(HE3=0,0,ROUND($EV3-($U3+($V3-$U3)/($AE3-A_equiv_harmonious_min_perc)*(HE3-A_equiv_harmonious_min_perc)),5))
+    for i in 0..<365 {
+      d23[HV + i] = iff(
+        d23[HE + i] == 0.0, 0,
+        round(
+          d22[EV + i]
+            - (d21[U + i]
+              + (d21[V + i] - d21[U + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j])
+                * (d23[HE + i] - equiv_harmonious_min_perc[j])),
+          5))
+    }
 
-      // =IF(GZ6=0,0,ROUND(ET6-(S6+(T6-S6)/(AE6-A_equiv_harmonious_min_perc)*(GZ6-A_equiv_harmonious_min_perc)),5))
-      d23[HN + i] = round(d22[ET + i] - (d21[S + i] + (d21[T + i] - d21[S + i]) * d23[ddGZ + i]), 5)
+    /// Surplus CO2 prod cap after max day harm and opt night op prep
+    let HW = 25550
+    // HW=IF(HE3=0,0,ROUND($EW3-($U3+($V3-$U3)/($AE3-A_equiv_harmonious_min_perc)*(HE3-A_equiv_harmonious_min_perc)),5))
+    for i in 0..<365 {
+      d23[HW + i] = iff(
+        d23[HE + i] == 0.0, 0,
+        round(
+          d22[EW + i]
+            - (d21[U + i]
+              + (d21[V + i] - d21[U + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j])
+                * (d23[HE + i] - equiv_harmonious_min_perc[j])),
+          5))
+    }
 
-      // =IF(GZ6=0,0,ROUND(EV6-(U6+(V6-U6)/(AE6-A_equiv_harmonious_min_perc)*(GZ6-A_equiv_harmonious_min_perc)),5))
-      d23[HO + i] = round(d22[EV + i] - (d21[U + i] + (d21[V + i] - d21[U + i]) * d23[ddGZ + i]), 5)
+    /// Surplus H2 prod cap after min day harm and opt night op prep
+    let HX = 25915
+    // HX=IF(HE3=0,0,ROUND($EY3-($W3+($X3-$W3)/($AE3-A_equiv_harmonious_min_perc)*(HE3-A_equiv_harmonious_min_perc)),5))
+    for i in 0..<365 {
+      d23[HX + i] = iff(
+        d23[HE + i] == 0.0, 0,
+        round(
+          d22[EY + i]
+            - (d21[W + i]
+              + (d21[X + i] - d21[W + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j])
+                * (d23[HE + i] - equiv_harmonious_min_perc[j])),
+          5))
+    }
 
-      // =IF(GZ6=0,0,ROUND(EW6-(U6+(V6-U6)/(AE6-A_equiv_harmonious_min_perc)*(GZ6-A_equiv_harmonious_min_perc)),5))
-      d23[HP + i] = round(d22[EW + i] - (d21[U + i] + (d21[V + i] - d21[U + i]) * d23[ddGZ + i]), 5)
-
-      // =IF(GZ6=0,0,ROUND(EY6-(W6+(X6-W6)/(AE6-A_equiv_harmonious_min_perc)*(GZ6-A_equiv_harmonious_min_perc)),5))
-      d23[HQ + i] = round(d22[EY + i] - (d21[W + i] + (d21[X + i] - d21[W + i]) * d23[ddGZ + i]), 5)
-
-      // =IF(GZ6=0,0,ROUND(EZ6-(W6+(X6-W6)/(AE6-A_equiv_harmonious_min_perc)*(GZ6-A_equiv_harmonious_min_perc)),5))
-      d23[HR + i] = round(d22[EZ + i] - (d21[W + i] + (d21[X + i] - d21[W + i]) * d23[ddGZ + i]), 5)
+    /// Surplus H2 prod cap after min day harm and opt night op prep
+    let HY = 26280
+    // HY=IF(HE3=0,0,ROUND($EZ3-($W3+($X3-$W3)/($AE3-A_equiv_harmonious_min_perc)*(HE3-A_equiv_harmonious_min_perc)),5))
+    for i in 0..<365 {
+      d23[HY + i] = iff(
+        d23[HE + i] == 0.0, 0,
+        round(
+          d22[EZ + i]
+            - (d21[W + i]
+              + (d21[X + i] - d21[W + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j])
+                * (d23[HE + i] - equiv_harmonious_min_perc[j])),
+          5))
     }
 
     /// Opt harm op period op during night prio operation
-    let HS = 24090
-    // =IF(OR(GZ6=0,HA6<0,HC6<0,HE6<0,HG6<0,HI6<0,HK6<0,HM6<0,HO6<0,HQ6<0),0,MIN(1,IFERROR(HA6/MAX(0,HA6-HB6),1),IFERROR(HC6/MAX(0,HC6-HD6),1),IFERROR(HE6/MAX(0,HE6-HF6),1),IFERROR(HG6/MAX(0,HG6-HH6),1),IFERROR(HI6/MAX(0,HI6-HJ6),1),IFERROR(HK6/MAX(0,HK6-HL6),1),IFERROR(HM6/MAX(0,HM6-HN6),1),IFERROR(HO6/MAX(0,HO6-HP6),1),IFERROR(HQ6/MAX(0,HQ6-HR6),1))*(Overall_harmonious_max_perc-Overall_harmonious_min_perc)+Overall_harmonious_min_perc)
+    let HZ = 26645
+    // HZ=IF(OR(HE3=0,HF3<0,HH3<0,HJ3<0,HL3<0,HN3<0,HP3<0,HR3<0,HT3<0,HV3<0,HX3<0),0,MIN(1,IFERROR(HF3/MAX(0,HF3-HG3),1),IFERROR(HH3/MAX(0,HH3-HI3),1),IFERROR(HJ3/MAX(0,HJ3-HK3),1),IFERROR(HL3/MAX(0,HL3-HM3),1),IFERROR(HN3/MAX(0,HN3-HO3),1),IFERROR(HP3/MAX(0,HP3-HQ3),1),IFERROR(HR3/MAX(0,HR3-HS3),1),IFERROR(HT3/MAX(0,HT3-HU3),1),IFERROR(HV3/MAX(0,HV3-HW3),1),IFERROR(HX3/MAX(0,HX3-HY3),1))*(Overall_harmonious_max_perc-Overall_harmonious_min_perc)+Overall_harmonious_min_perc)
     for i in 0..<365 {
-      if 24255 == i + HS {}
-      d23[HS + i] = iff(
-        or(d23[GZ + i].isZero, d23[HA + i] < 0.0, d23[HC + i] < 0.0, d23[HE + i] < 0.0, d23[HG + i] < 0.0, d23[HI + i] < 0.0, d23[HK + i] < 0.0, d23[HM + i] < 0.0, d23[HO + i] < 0.0, d23[HQ + i] < 0), 0.0,
+      d23[HZ + i] = iff(
+        or(
+          d23[HE + i] == 0.0, d23[HF + i] < 0, d23[HH + i] < 0, d23[HJ + i] < 0, d23[HL + i] < 0, d23[HN + i] < 0,
+          d23[HP + i] < 0, d23[HR + i] < 0, d23[HT + i] < 0, d23[HV + i] < 0, d23[HX + i] < 0), 0,
         min(
-          1, ifFinite(d23[HA + i] / max(0.0, d23[HA + i] - d23[HB + i]), 1), ifFinite(d23[HC + i] / max(0.0, d23[HC + i] - d23[HD + i]), 1), ifFinite(d23[HE + i] / max(0.0, d23[HE + i] - d23[HF + i]), 1),
-          ifFinite(d23[HG + i] / max(0.0, d23[HG + i] - d23[HH + i]), 1), ifFinite(d23[HI + i] / max(0.0, d23[HI + i] - d23[HJ + i]), 1), ifFinite(d23[HK + i] / max(0.0, d23[HK + i] - d23[HL + i]), 1),
-          ifFinite(d23[HM + i] / max(0.0, d23[HM + i] - d23[HN + i]), 1), ifFinite(d23[HO + i] / max(0.0, d23[HO + i] - d23[HP + i]), 1), ifFinite(d23[HQ + i] / max(0.0, d23[HQ + i] - d23[HR + i]), 1)) * Overall_harmonious_range
-          + Overall_harmonious_min_perc)
+          1, ifFinite(d23[HF + i] / max(0, d23[HF + i] - d23[HG + i]), 1),
+          ifFinite(d23[HH + i] / max(0, d23[HH + i] - d23[HI + i]), 1),
+          ifFinite(d23[HJ + i] / max(0, d23[HJ + i] - d23[HK + i]), 1),
+          ifFinite(d23[HL + i] / max(0, d23[HL + i] - d23[HM + i]), 1),
+          ifFinite(d23[HN + i] / max(0, d23[HN + i] - d23[HO + i]), 1),
+          ifFinite(d23[HP + i] / max(0, d23[HP + i] - d23[HQ + i]), 1),
+          ifFinite(d23[HR + i] / max(0, d23[HR + i] - d23[HS + i]), 1),
+          ifFinite(d23[HT + i] / max(0, d23[HT + i] - d23[HU + i]), 1),
+          ifFinite(d23[HV + i] / max(0, d23[HV + i] - d23[HW + i]), 1),
+          ifFinite(d23[HX + i] / max(0, d23[HX + i] - d23[HY + i]), 1))
+          * (Overall_harmonious_max_perc - Overall_harmonious_min_perc) + Overall_harmonious_min_perc)
     }
 
-    /// Heat cons for harm op during harm op period
+    /// el cons for harm op during harm op period incl grid import
+    let IB = 27010
+    // IB=IF($DR3=0,0,IF(HC3=0,MIN($DS3,MAX(0,$DS3+$EC3-MIN(BESS_cap_ud/BESS_chrg_eff,MAX(0,$EA3+$DU3-$EJ3+$DZ3/El_boiler_eff)/BESS_chrg_eff))),$DR3+($DS3-$DR3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GH3-Overall_harmonious_min_perc)))
+    for i in 0..<365 {
+      d23[IB + i] = iff(
+        d22[DR + i] == 0.0, 0,
+        iff(
+          d23[HC + i] == 0.0,
+          min(
+            d22[DS + i],
+            max(
+              0,
+              d22[DS + i] + d22[EC + i]
+                - min(
+                  BESS_cap_ud / BESS_chrg_eff,
+                  max(0, d22[EA + i] + d22[DU + i] - d22[EJ + i] + d22[DZ + i] / El_boiler_eff) / BESS_chrg_eff))),
+          d22[DR + i] + (d22[DS + i] - d22[DR + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
+            * (d23[GH + i] - Overall_harmonious_min_perc)))
+    }
+
+    /// el cons for night prep during harm op period
+    let IC = 27375
+    // IC=IF(HC3=0,0,($O3+($P3-$O3)/($AE3-A_equiv_harmonious_min_perc)*(HC3-A_equiv_harmonious_min_perc)))
+    for i in 0..<365 {
+      d23[IC + i] = iff(
+        d23[HC + i] == 0.0, 0,
+        (d21[O + i]
+          + (d21[P + i] - d21[O + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j])
+            * (d23[HC + i] - equiv_harmonious_min_perc[j]))
+      )
+    }
+
+    /// el cons for BESS charging during harm op period
     let ID = 27740
+    // ID=IF(OR(GH3=0,HC3=0),MIN(BESS_cap_ud/BESS_chrg_eff,MAX(0,$EA3+$DU3-$EJ3+$DZ3/El_boiler_eff)/BESS_chrg_eff,MIN($DS3,MAX(0,$DS3+$EC3-IB3))),MIN($EK3+($EL3-$EK3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GH3-Overall_harmonious_min_perc),MAX(0,$EA3+$E3+($F3-$E3)/($AE3-A_equiv_harmonious_min_perc)*(HC3-A_equiv_harmonious_min_perc)+MIN($ER3,MAX(0,$G3+($H3-$G3)/($AE3-A_equiv_harmonious_min_perc)*(HC3-A_equiv_harmonious_min_perc)-$EG3)/El_boiler_eff)-$EJ3-$EM3*BESS_chrg_eff)/BESS_chrg_eff))
+    for i in 0..<365 {
+      d23[ID + i] = iff(
+        or(d23[GH + i] == 0.0, d23[HC + i] == 0.0),
+        min(
+          BESS_cap_ud / BESS_chrg_eff,
+          max(0, d22[EA + i] + d22[DU + i] - d22[EJ + i] + d22[DZ + i] / El_boiler_eff) / BESS_chrg_eff,
+          min(d22[DS + i], max(0, d22[DS + i] + d22[EC + i] - d23[IB + i]))),
+        min(
+          d22[EK + i]
+            + (d22[EL + i] - d22[EK + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
+              * (d23[GH + i] - Overall_harmonious_min_perc),
+          max(
+            0,
+            d22[EA + i] + d21[E + i] + (d21[F + i] - d21[E + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j])
+              * (d23[HC + i] - equiv_harmonious_min_perc[j])
+              + min(
+                d22[ER + i],
+                max(
+                  0,
+                  d21[G + i] + (d21[H + i] - d21[G + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j])
+                    * (d23[HC + i] - equiv_harmonious_min_perc[j]) - d22[EG + i]) / El_boiler_eff) - d22[EJ + i]
+              - d22[EM + i] * BESS_chrg_eff) / BESS_chrg_eff))
+    }
+
     /// Heat cons for night prep during harm op period
     let IE = 28105
+    // IE=IF(HC3=0,0,($Q3+($R3-$Q3)/($AE3-A_equiv_harmonious_min_perc)*(HC3-A_equiv_harmonious_min_perc)))
+    for i in 0..<365 {
+      d23[IE + i] = iff(
+        d23[HC + i] == 0.0, 0,
+        (d21[Q + i]
+          + (d21[R + i] - d21[Q + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j])
+            * (d23[HC + i] - equiv_harmonious_min_perc[j]))
+      )
+    }
+
     /// CSP heat available after harm op during harm op period
     let IF = 28470
-    /// El boiler heat prod for harm op during harm op period
-    let IG = 28835
-    /// El boiler heat prod for night prep during harm op period
-    let IH = 29200
-    /// el cons for harm op during harm op period
-    let HU = 24455
-    /// Balance of heat during harm op period
-    let II = 29565
-    /// el cons for night prep during harm op period
-    let HV = 24820
-    /// el cons for BESS charging during harm op period
-    let HW = 25185
-    /// el cons of el boiler for harm op during harm op period
-    let HX = 25550
-    /// el cons of el boiler for night prep during harm op period
-    let HY = 25915
-    /// PV available after harm op during harm op period
-    let HZ = 26280
-    /// grid input for harm op during harm op period
-    let IA = 26645
-
-    let DM = 13140
-    let DN = 13505
-    let DO = 13870
-    let ddGX = 46720
-    // ID=IF(DT6=0,0,IF(GE6=0,DU6,DT6+(DU6-DT6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE6-Overall_harmonious_min_perc)))
+    // IF=IF(GH3=0,$EF3,$EE3+($EF3-$EE3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GH3-Overall_harmonious_min_perc))
     for i in 0..<365 {
-      d23[ddGX + i] = (d23[GX + i] - equiv_harmonious_min_perc[j]) / (d21[AE + i] - equiv_harmonious_min_perc[j])
-      d23[ID + i] = iff(d22[DT + i].isZero, 0.0, iff(d23[GE + i].isZero, d22[DU + i], d22[DT + i] + (d22[DU + i] - d22[DT + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (d23[GE + i] - Overall_harmonious_min_perc)))
+      d23[IF + i] = iff(
+        d23[GH + i] == 0.0, d22[EF + i],
+        d22[EE + i] + (d22[EF + i] - d22[EE + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
+          * (d23[GH + i] - Overall_harmonious_min_perc))
+    }
 
-      // =IF(GX6=0,0,(Q6+(R6-Q6)/(AE6-A_equiv_harmonious_min_perc)*(GX6-A_equiv_harmonious_min_perc)))
-      d23[IE + i] = iff(d23[GX + i].isZero, 0.0, (d21[Q + i] + (d21[R + i] - d21[Q + i]) * d23[ddGX + i]))
-
-      // IF=IF(GE6=0,EF6,EE6+(EF6-EE6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE6-Overall_harmonious_min_perc))
-      d23[IF + i] = iff(d23[GE + i].isZero, d22[EF + i], d22[EE + i] + (d22[EF + i] - d22[EE + i]) * d23[ddGE + i])
-
-      // IG=IF(GE6=0,EO6,(EN6+(EO6-EN6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE6-Overall_harmonious_min_perc))*El_boiler_eff)
-      d23[IG + i] = iff(d23[GE + i].isZero, d22[EO + i], (d22[EN + i] + (d22[EO + i] - d22[EN + i]) * d23[ddGE + i]) * El_boiler_eff)
-
-      // IF(GE6=0,0,MIN((EP6+(EQ6-EP6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE6-Overall_harmonious_min_perc))*El_boiler_eff,MAX(0,IE6-IF6)))
-      d23[IH + i] = iff(d23[GE + i].isZero, 0.0, min((d22[EP + i] + (d22[EQ + i] - d22[EP + i]) * d23[ddGE + i]) * El_boiler_eff, max(0.0, d23[IE + i] - d23[IF + i])))
-
-      // IF6+IH6-IE6
-      d23[II + i] = d23[IF + i] + d23[IH + i] - d23[IE + i]
-
-      // HU=IF($DR3=0,0,IF(GE3=0,MAX(0,$DS3-MIN(BESS_cap_ud/BESS_chrg_eff,MAX(0,$EA3/BESS_chrg_eff-$EM3-$EL3))),$DR3+($DS3-$DR3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE3-Overall_harmonious_min_perc)))
-      if d22[DR + i].isZero {
-        d23[HU + i] = 0.0
-      } else if d23[GE + i].isZero {
-        d23[HU + i] = max(0, d22[DS + i] - min(BESS_cap_ud / BESS_chrg_eff, max(0, d22[EA + i] / BESS_chrg_eff - d22[EM + i] - d22[EL + i])))
-      } else {
-        d23[HU + i] = d22[DR + i] + (d22[DS + i] - d22[DR + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (d23[GE + i] - Overall_harmonious_min_perc)
-      }
-
-      // HV=IF(GX6=0,0,($O6+($P6-$O6)/($AE6-A_equiv_harmonious_min_perc)*(GX6-A_equiv_harmonious_min_perc)))
-      d23[HV + i] = iff(d23[GX + i].isZero, 0.0, (d21[O + i] + (d21[P + i] - d21[O + i]) * d23[ddGX + i]))
-
-      // HW=IF(OR(GE6=0,GX6=0),MIN(BESS_cap_ud/BESS_chrg_eff,MAX(0,EA6/BESS_chrg_eff-EM6),EL6+MAX(0,DS6-HU6)),MIN(EK6+(EL6-EK6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(QI6-Overall_harmonious_min_perc),MAX(0,EA6+E6+(F6-E6)/(AE6-A_equiv_harmonious_min_perc)*(GX6-A_equiv_harmonious_min_perc)+MIN(ER6,MAX(0,G6+(H6-G6)/(AE6-A_equiv_harmonious_min_perc)*(GX6-A_equiv_harmonious_min_perc)-EG6)/El_boiler_eff)-EJ6-EM6*BESS_chrg_eff)/BESS_chrg_eff))
-      d23[HW + i] = iff(
-        or(d23[GE + i].isZero, d23[GX + i].isZero), min(BESS_cap_ud / BESS_chrg_eff, max(0.0, d22[EA + i] / BESS_chrg_eff - d22[EM + i]), d22[EL + i] + max(Double.zero, d22[DS + i] - d23[HU + i])),
+    /// El boiler heat prod for night prep during harm op period
+    let IG = 28835
+    // IG=IF(GH3=0,0,MIN(($EP3+($EQ3-$EP3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GH3-Overall_harmonious_min_perc))*El_boiler_eff,MAX(0,IE3-IF3)))
+    for i in 0..<365 {
+      d23[IG + i] = iff(
+        d23[GH + i] == 0.0, 0,
         min(
-          d22[EK + i] + (d22[EL + i] - d22[EK + i]) * d23[ddGE + i],
-          max(
-            0.0,
-            d22[EA + i] + (d21[E + i] + (d21[F + i] - d21[E + i]) * d23[ddGX + i]) + min(d22[ER + i], max(0.0, (d21[G + i] + (d21[H + i] - d21[G + i]) * d23[ddGX + i]) - d22[EG + i]) / El_boiler_eff) - d22[EJ + i] - d22[EM + i] * BESS_chrg_eff)
-            / BESS_chrg_eff))
+          (d22[EP + i]
+            + (d22[EQ + i] - d22[EP + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
+              * (d23[GH + i] - Overall_harmonious_min_perc))
+            * El_boiler_eff, max(0, d23[IE + i] - d23[IF + i])))
+    }
 
-      // IF(GE6=0,EO6,EN6+(EO6-EN6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE6-Overall_harmonious_min_perc))
-      d23[HX + i] = iff(d23[GE + i].isZero, d22[EO + i], d22[EN + i] + (d22[EO + i] - d22[EN + i]) * d23[ddGE + i])
+    /// el cons of el boiler for night prep during harm op period
+    let IH = 29200
+    // IH=IG3/El_boiler_eff
+    for i in 0..<365 { d23[IH + i] = d23[IG + i] / El_boiler_eff }
 
-      // IH6/El_boiler_eff
-      d23[HY + i] = d23[IH + i] / El_boiler_eff
+    /// PV available after harm op and stby during harm op period
+    let II = 29565
+    // II=IF(GH3=0,MAX(0,$EC3+MAX(0,$DS3-IB3)),$EB3+($EC3-$EB3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GH3-Overall_harmonious_min_perc))
+    for i in 0..<365 {
+      d23[II + i] = iff(
+        d23[GH + i] == 0.0, max(0, d22[EC + i] + max(0, d22[DS + i] - d23[IB + i])),
+        d22[EB + i] + (d22[EC + i] - d22[EB + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
+          * (d23[GH + i] - Overall_harmonious_min_perc))
+    }
 
-      // HZ=IF(GE6=0,MAX(0,EC6+MAX(0;DS6-HU6)),EB6+(EC6-EB6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE6-Overall_harmonious_min_perc))
-      d23[HZ + i] = iff(d23[GE + i].isZero, max(Double.zero, d22[EC + i] + max(Double.zero, d22[DS + i] - d23[HU + i])), d22[EB + i] + (d22[EC + i] - d22[EB + i]) * d23[ddGE + i])
-      // IA=IF(GE6=0,DN6,DM6+(DN6-DM6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE6-Overall_harmonious_min_perc))
-      d23[IA + i] = iff(d23[GE + i].isZero, d22[DN + i], d22[DM + i] + (d22[DM + i] - d22[DN + i]) * d23[ddGE + i])
+    /// grid input for harm op and stby during harm op period
+    let IJ = 29930
+    // IJ=IF(GH3=0,$DN3,$DM3+($DN3-$DM3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GH3-Overall_harmonious_min_perc))
+    for i in 0..<365 {
+      d23[IJ + i] = iff(
+        d23[GH + i] == 0.0, d22[DN + i],
+        d22[DM + i] + (d22[DN + i] - d22[DM + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
+          * (d23[GH + i] - Overall_harmonious_min_perc))
     }
 
     /// grid input for night prep during harm op period
-    let IB = 27010
-    // IB=MIN(IF(GE6=0,0,EH6+(EI6-EH6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE6-Overall_harmonious_min_perc)),MAX(0,-(HZ6-HV6-HW6-HY6)))
-    for i in 0..<365 { d23[IB + i] = min(iff(d23[GE + i].isZero, 0.0, d22[EH + i] + (d22[EI + i] - d22[EH + i]) * d23[ddGE + i]), max(0.0, -(d23[HZ + i] - d23[HV + i] - d23[HW + i] - d23[HY + i]))) }
+    let IK = 30295
+    // IK=MIN(IF(GH3=0,0,$EH3+($EI3-$EH3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GH3-Overall_harmonious_min_perc)),MAX(0,-(II3-IC3-ID3-IH3)))
+    for i in 0..<365 {
+      d23[IK + i] = min(
+        iff(
+          d23[GH + i] == 0.0, 0,
+          d22[EH + i] + (d22[EI + i] - d22[EH + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
+            * (d23[GH + i] - Overall_harmonious_min_perc)),
+        max(0, -(d23[II + i] - d23[IC + i] - d23[ID + i] - d23[IH + i])))
+    }
 
     /// Balance of electricity during harm op period
-    let IC = 27375
-    // =HZ6+IB6-HV6-HW6-HY6
-    for i in 0..<365 { d23[IC + i] = d23[HZ + i] + d23[IB + i] - d23[HV + i] - d23[HW + i] - d23[HY + i] }
+    let IL = 30660
+    // IL=II3+IK3-IC3-ID3-IH3
+    for i in 0..<365 { d23[IL + i] = d23[II + i] + d23[IK + i] - d23[IC + i] - d23[ID + i] - d23[IH + i] }
 
-    /// heat cons for harm op outside of harm op period
-    let IQ = 32485
-    let DZ = 2920
-    // IQ=IF(GX3=0,$DZ3,$G3+($H3-$G3)/($AE3-A_equiv_harmonious_min_perc)*(GX3-A_equiv_harmonious_min_perc))
+    /// Balance of heat during harm op period
+    let IM = 31025
+    // IM=IF3+IG3-IE3
+    for i in 0..<365 { d23[IM + i] = d23[IF + i] + d23[IG + i] - d23[IE + i] }
+
+    /// el cons for harm op outside of harm op period
+    let IN = 31390
+    // IN=IF(HC3=0,0,$E3+($F3-$E3)/($AE3-A_equiv_harmonious_min_perc)*(HC3-A_equiv_harmonious_min_perc))
     for i in 0..<365 {
-      d23[IQ + i] = iff(
-        d23[GX + i] == Double.zero, d22[DZ + i],
-        d21[G + i] + (d21[H + i] - d21[G + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j]) * (d23[GX + i] - equiv_harmonious_min_perc[j]))
+      d23[IN + i] = iff(
+        d23[HC + i] == 0.0, 0,
+        d21[E + i] + (d21[F + i] - d21[E + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j])
+          * (d23[HC + i] - equiv_harmonious_min_perc[j]))
+    }
+
+    /// heat cons for harm op and stby outside of harm op period
+    let IO = 31755
+    // IO=IF(HC3=0,IF(GH3=0,$DZ3,$DY3+($DZ3-$DY3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GH3-Overall_harmonious_min_perc)),$G3+($H3-$G3)/($AE3-A_equiv_harmonious_min_perc)*(HC3-A_equiv_harmonious_min_perc))
+    for i in 0..<365 {
+      d23[IO + i] = iff(
+        d23[HC + i] == 0.0,
+        iff(
+          d23[GH + i] == 0.0, d22[DZ + i],
+          d22[DY + i] + (d22[DZ + i] - d22[DY + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
+            * (d23[GH + i] - Overall_harmonious_min_perc)),
+        d21[G + i] + (d21[H + i] - d21[G + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j])
+          * (d23[HC + i] - equiv_harmonious_min_perc[j]))
     }
 
     /// heat from CSP outside of harm op period
-    let IR = 32850
-    // IR=EG6
-    for i in 0..<365 { d23[IR + i] = d22[EG + i] }
+    let IP = 32120
+    // IP=IF(HC3=0,0,$EG3)
+    for i in 0..<365 { d23[IP + i] = iff(d23[HC + i] == 0.0, 0, d22[EG + i]) }
 
     /// heat from el boiler outside of harm op period
-    let IS = 33215
-    // IS=MIN($ER3*El_boiler_eff,MAX(0,IQ3-IR3))
-    for i in 0..<365 { d23[IS + i] = min(d22[ER + i] * El_boiler_eff, max(0, d23[IQ + i] - d23[IR + i])) }
-
-    /// Balance of heat outside of harm op period
-    let IT = 33580
-    // IR6+IS6-IQ6
-    for i in 0..<365 { d23[IT + i] = d23[IR + i] + d23[IS + i] - d23[IQ + i] }
-
-    /// el cons for harm op outside of harm op period
-    let IJ = 29930
-    // IJ=IF(GX6=0,0,E6+(F6-E6)/(AE6-A_equiv_harmonious_min_perc)*(GX6-A_equiv_harmonious_min_perc))
-    for i in 0..<365 { d23[IJ + i] = iff(d23[GX + i].isZero, 0.0, d21[E + i] + (d21[F + i] - d21[E + i]) * d23[ddGX + i]) }
+    let IQ = 32485
+    // IQ=MIN($ER3*El_boiler_eff,MAX(0,IO3-IP3))
+    for i in 0..<365 { d23[IQ + i] = min(d22[ER + i] * El_boiler_eff, max(0, d23[IO + i] - d23[IP + i])) }
 
     /// el cons by el boiler outside of harm op period
-    let IK = 30295
-    // IS6/El_boiler_eff
-    for i in 0..<365 { d23[IK + i] = d23[IS + i] / El_boiler_eff }
+    let IR = 32850
+    // IR=IQ3/El_boiler_eff
+    for i in 0..<365 { d23[IR + i] = d23[IQ + i] / El_boiler_eff }
 
-    /// el cons for aux cons outside of harm op period
-    let IL = 30660
-    let DY = 2555
-    let ED = 4380
-    // IL=$EA3+IF(GX3>0,0,$DY3-MIN(Overall_stby_cons,$ED3))
-    for i in 0..<365 { d23[IL + i] = d22[EA + i] + iff(d23[GX + i] > Double.zero, 0, d22[DY + i] - min(Overall_stby_cons, d22[ED + i])) }
-
-    /// el from BESS outside of harm op period
-    let IN = 31390
-    // HW6*BESS_chrg_eff
-    for i in 0..<365 { d23[IN + i] = d23[HW + i] * BESS_chrg_eff }
-
-    /// el from PV outside of harm op period
-    let IM = 31025
-    // IM=MIN(MAX(0,IL3+IK3+IJ3-IN3)/BESS_chrg_eff,MAX(0,$EM3-MAX(0,$EA3+$DY3-IL3)))
+    /// el cons not covered by PV outside of harm op period
+    let IS = 33215
+    // IS=$EA3+IF(HC3>0,0,IF(GH3=0,$DU3,$DT3+($DU3-$DT3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GH3-Overall_harmonious_min_perc)))
     for i in 0..<365 {
-      d23[IM + i] = min(
-        max(0, d23[IL + i] + d23[IK + i] + d23[IJ + i] - d23[IN + i]) / BESS_chrg_eff, max(0, d22[EM + i] - max(0, d22[EA + i] + d22[DY + i] - d23[IL + i])))
+      d23[IS + i] =
+        d22[EA + i]
+        + iff(
+          d23[HC + i] > 0.0, 0,
+          iff(
+            d23[GH + i] == 0.0, d22[DU + i],
+            d22[DT + i] + (d22[DU + i] - d22[DT + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
+              * (d23[GH + i] - Overall_harmonious_min_perc)))
     }
 
-    /// grid input outside of harm op period
-    let IO = 31755
-    // IO=MIN(DO6+EJ6,MAX(0,-IM6*BESS_chrg_eff-IN6+IJ6+IK6+IL6))
-    for i in 0..<365 { d23[IO + i] = min(d22[DO + i] + d22[EJ + i], max(0.0, -d23[IM + i] * BESS_chrg_eff - d23[IN + i] + d23[IJ + i] + d23[IK + i] + d23[IL + i])) }
+    /// el from harm op period charged BESS discharging for stby outside of harm op period
+    let IU = 33945
+    // IU=ID3*BESS_chrg_eff
+    for i in 0..<365 { d23[IU + i] = d23[ID + i] * BESS_chrg_eff }
+
+    /// El to BESS charging outside harm op period
+    let IT = 33580
+    // IT=MIN(MAX(0,IS3+IR3+IN3-IU3)/BESS_chrg_eff,IF(HC3>0,$EM3,IF(GH3=0,$EO3,$EN3+($EO3-$EN3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GH3-Overall_harmonious_min_perc))))
+    for i in 0..<365 {
+      d23[IT + i] = min(
+        max(0, d23[IS + i] + d23[IR + i] + d23[IN + i] - d23[IU + i]) / BESS_chrg_eff,
+        iff(
+          d23[HC + i] > 0.0, d22[EM + i],
+          iff(
+            d23[GH + i] == 0.0, d22[EO + i],
+            d22[EN + i] + (d22[EO + i] - d22[EN + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
+              * (d23[GH + i] - Overall_harmonious_min_perc))))
+    }
+
+    /// max possible grid input outside of harm op period
+    let IV = 34310
+    // IV=MIN($DO3+$EJ3,MAX(0,-IT3*BESS_chrg_eff-IU3+IN3+IR3+IS3))
+    for i in 0..<365 {
+      d23[IV + i] = min(
+        d22[DO + i] + d22[EJ + i],
+        max(0, -d23[IT + i] * BESS_chrg_eff - d23[IU + i] + d23[IN + i] + d23[IR + i] + d23[IS + i]))
+    }
 
     /// Balance of electricity outside of harm op period
-    let IP = 32120
-    // IP=IM6*BESS_chrg_eff+IN6+IO6-IJ6-IK6-IL6
-    for i in 0..<365 { d23[IP + i] = d23[IM + i] * BESS_chrg_eff + d23[IN + i] + d23[IO + i] - d23[IJ + i] - d23[IK + i] - d23[IL + i] }
+    let IW = 34675
+    // IW=IT3*BESS_chrg_eff+IU3+IV3-IN3-IR3-IS3
+    for i in 0..<365 {
+      d23[IW + i] = d23[IT + i] * BESS_chrg_eff + d23[IU + i] + d23[IV + i] - d23[IN + i] - d23[IR + i] - d23[IS + i]
+    }
+
+    /// Balance of heat outside of harm op period
+    let IX = 35040
+    // IX=IP3+IQ3-IO3
+    for i in 0..<365 { d23[IX + i] = d23[IP + i] + d23[IQ + i] - d23[IO + i] }
 
     /// Pure Methanol prod with min night prep and resp day op
-    let IU = 33945
-    // IU=MAX(0,HU6-C6*Overall_fix_cons)/Overall_harmonious_var_max_cons*MethDist_harmonious_max_perc*MethDist_Meth_nom_prod_ud+IF(IJ6=0,0,IF(A_overall_var_max_cons=0,B6*GX6,MAX(0,IJ6-B6*A_overall_fix_stby_cons-A_overall_stup_cons)/A_overall_var_max_cons*A_MethDist_max_perc)*MethDist_Meth_nom_prod_ud)
+    let IY = 35405
+    // IY=MAX(0,IB3-$C3*Overall_fix_cons)/Overall_harmonious_var_max_cons*MethDist_harmonious_max_perc*MethDist_Meth_nom_prod_ud+IF(IN3=0,0,IF(A_overall_var_max_cons=0,$B3*HC3,MAX(0,IN3-$B3*A_overall_fix_stby_cons-A_overall_stup_cons)/A_overall_var_max_cons*A_MethDist_max_perc)*MethDist_Meth_nom_prod_ud)
     for i in 0..<365 {
-      d23[IU + i] =
-        max(Double.zero, d23[HU + i] - day0[C + i] * Overall_fix_cons) / Overall_harmonious_var_max_cons * MethDist_harmonious_max_perc * MethDist_Meth_nom_prod_ud
+      d23[IY + i] =
+        max(0, d23[IB + i] - day0[C + i] * Overall_fix_cons) / Overall_harmonious_var_max_cons
+        * MethDist_harmonious_max_perc * MethDist_Meth_nom_prod_ud
         + iff(
-          d23[IJ + i].isZero, Double.zero,
-          iff(overall_var_max_cons[j].isZero, day0[B + i] * d23[GX + i], max(Double.zero, d23[IJ + i] - day0[B + i] * overall_fix_stby_cons[j] - overall_stup_cons[j]) / overall_var_max_cons[j] * MethDist_max_perc[j]) * MethDist_Meth_nom_prod_ud)
+          d23[IN + i] == 0.0, 0,
+          iff(
+            overall_var_max_cons[j] == 0.0, day0[B + i] * d23[HC + i],
+            max(0, d23[IN + i] - day0[B + i] * overall_fix_stby_cons[j] - overall_stup_cons[j])
+              / overall_var_max_cons[j] * MethDist_max_perc[j]) * MethDist_Meth_nom_prod_ud)
     }
+
+    /// Missing heat
+    let IZ = 35770
+    // IZ=ROUND(MAX(0,-IM3)+MAX(0,-IX3),0)
+    for i in 0..<365 { d23[IZ + i] = round(max(0, -d23[IM + i]) + max(0, -d23[IX + i]), 0) }
 
     /// grid export
-    let IV = 34310
-    // IV=ROUND(MAX(0,MIN(IC6,IF(GE6=0,DW6,(DV6+(DW6-DV6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GE6-Overall_harmonious_min_perc)))))+MAX(0,MIN(IP6,IF(OR(GE6=0,GX6=0),0,DX6))),0)
+    let JA = 36135
+    // JA=ROUND(MAX(0,MIN(IL3,IF(GH3=0,$DW3,($DV3+($DW3-$DV3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GH3-Overall_harmonious_min_perc)))))+MAX(0,MIN(IW3,IF(OR(GH3=0,HC3=0),0,$DX3))),0)
     for i in 0..<365 {
-      d23[IV + i] = round(
-        max(0.0, min(d23[IC + i], iff(or(d23[GE + i].isZero, d23[GX + i].isZero), d22[DW + i], (d22[DV + i] + (d22[DW + i] - d22[DV + i]) * d23[ddGE + i]))) + min(d23[IP + i], iff(or(d23[GE + i].isZero, d23[GX + i].isZero), 0.0, d22[DX + i]))),
-        0)
-    }
-
-    /// Checksum
-    let IX = 35040
-    // IX=ROUND(MAX(0,-II3)+MAX(0,-IT3),0)
-    for i in 0..<365 {
-      d23[IX + i] = round(max(0,-d23[II + i])+max(0,-d23[IT + i]),0)
+      d23[JA + i] = round(
+        max(
+          0,
+          min(
+            d23[IL + i],
+            iff(
+              d23[GH + i] == 0.0, d22[DW + i],
+              (d22[DV + i]
+                + (d22[DW + i] - d22[DV + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
+                  * (d23[GH + i] - Overall_harmonious_min_perc))
+            ))) + max(0, min(d23[IW + i], iff(or(d23[GH + i] == 0.0, d23[HC + i] == 0.0), 0, d22[DX + i]))), 0)
     }
 
     /// grid import
-    let IW = 34675
-    // IW=ROUND(MAX(0,-IC3)+MAX(0,-IP3)+IX3/El_boiler_eff,0)*EDG_elec_cost_factor+ROUND(IA3+IB3+IO3,0)
+    let JB = 36500
+    // JB=ROUND(MAX(0,-IL3)+MAX(0,-IW3)+IZ3/El_boiler_eff,0)*EDG_elec_cost_factor+ROUND(IJ3+IK3+IV3,0)
     for i in 0..<365 {
-      d23[IW + i] =
-        round(max(0, -d23[IC + i]) + max(0, -d23[IP + i]) + d23[IX + i] / El_boiler_eff, 0) * EDG_elec_cost_factor
-        + round(d23[IA + i] + d23[IB + i] + d23[IO + i], 0)
+      d23[JB + i] =
+        round(max(0, -d23[IL + i]) + max(0, -d23[IW + i]) + d23[IZ + i] / El_boiler_eff, 0) * EDG_elec_cost_factor
+        + round(d23[IJ + i] + d23[IK + i] + d23[IV + i], 0)
     }
-
-    let ddHS = 47450
-    for i in 0..<365 { d23[ddHS + i] = Overall_harmonious_range < 1E-10 ? 1 : (d23[HS + i] - Overall_harmonious_min_perc) / Overall_harmonious_range }
-
-    /// Heat cons for harm op during harm op period
-    let JI = 38690
-    // JI=IF(DT6=0,0,IF(HS6=0,DU6,DT6+(DU6-DT6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(HS7-Overall_harmonious_min_perc)))
-    for i in 0..<365 { d23[JI + i] = iff(d22[DT + i].isZero, Double.zero, iff(d23[HS + i].isZero, d22[DU + i], d22[DT + i] + (d22[DU + i] - d22[DT + i]) * d23[ddHS + i])) }
-
-    /// Heat cons for night prep during harm op period
-    let JJ = 39055
-    // JJ=IF(GZ6=0,0,(Q6+(R6-Q6)/(AE6-A_equiv_harmonious_min_perc)*(GZ6-A_equiv_harmonious_min_perc)))
-    for i in 0..<365 { 
-      d23[JJ + i] = iff(or(d23[HS + i].isZero, d23[GZ + i].isZero), Double.zero, (d21[Q + i] + (d21[R + i] - d21[Q + i]) * d23[ddGZ + i]))
-    }
-
-    /// CSP heat available after harm op during harm op period
-    let JK = 39420
-    // JK=IF(HS6=0,EF6,EE6+(EF6-EE6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(HS7-Overall_harmonious_min_perc))
-    for i in 0..<365 { d23[JK + i] = iff(d23[HS + i].isZero, d22[EF + i], d22[EE + i] + (d22[EF + i] - d22[EE + i]) * d23[ddHS + i]) }
-
-    /// El boiler heat prod for harm op during harm op period
-    let JL = 39785
-    // JL=IF(HS6=0,EO6,(EN6+(EO6-EN6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(HS7-Overall_harmonious_min_perc))*El_boiler_eff)
-    for i in 0..<365 { d23[JL + i] = iff(d23[HS + i].isZero, d22[EO + i], (d22[EN + i] + (d22[EO + i] - d22[EN + i]) * d23[ddHS + i]) * El_boiler_eff) }
-
-    /// El boiler heat prod for night prep during harm op period
-    let JM = 40150
-    // JM=IF(HS6=0,0,MIN((EP6+(EQ6-EP6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(HS7-Overall_harmonious_min_perc))*El_boiler_eff,MAX(0,JJ6-JK6)))
-    for i in 0..<365 { d23[JM + i] = iff(d23[HS + i].isZero, Double.zero, min((d22[EP + i] + (d22[EQ + i] - d22[EP + i]) * d23[ddHS + i]) * El_boiler_eff, max(0.0, d23[JJ + i] - d23[JK + i]))) }
-
-    /// Balance of heat during harm op period
-    let JN = 40515
-    // JK6+JM6-JJ6
-    for i in 0..<365 { d23[JN + i] = d23[JK + i] + d23[JM + i] - d23[JJ + i] }
 
     /// el cons for harm op during harm op period
-    let IZ = 35405
-    // IZ=IF($DR3=0,0,IF(HS3=0,MAX(0,$DS3-MIN(BESS_cap_ud/BESS_chrg_eff,MAX(0,$EA3/BESS_chrg_eff-$EL3-$EM3))),$DR3+($DS3-$DR3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(HS3-Overall_harmonious_min_perc)))
+    let JD = 36865
+    // JD=IF($DR3=0,0,IF(HZ3=0,MIN($DS3,MAX(0,$DS3+$EC3-MIN(BESS_cap_ud/BESS_chrg_eff,MAX(0,$EA3+$DU3-$EJ3+$DZ3/El_boiler_eff)/BESS_chrg_eff))),$DR3+($DS3-$DR3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(HZ3-Overall_harmonious_min_perc)))
     for i in 0..<365 {
-      d23[IZ + i] = iff(
-        d22[DR + i] == Double.zero, 0,
+      d23[JD + i] = iff(
+        d22[DR + i] == 0.0, 0,
         iff(
-          d23[HS + i] == Double.zero, max(0, d22[DS + i] - min(BESS_cap_ud / BESS_chrg_eff, max(0, d22[EA + i] / BESS_chrg_eff - d22[EL + i] - d22[EM + i]))),
-          d22[DR + i] + (d22[DS + i] - d22[DR + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (d23[HS + i] - Overall_harmonious_min_perc)))
+          d23[HZ + i] == 0.0,
+          min(
+            d22[DS + i],
+            max(
+              0,
+              d22[DS + i] + d22[EC + i]
+                - min(
+                  BESS_cap_ud / BESS_chrg_eff,
+                  max(0, d22[EA + i] + d22[DU + i] - d22[EJ + i] + d22[DZ + i] / El_boiler_eff) / BESS_chrg_eff))),
+          d22[DR + i] + (d22[DS + i] - d22[DR + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
+            * (d23[HZ + i] - Overall_harmonious_min_perc)))
     }
 
     /// el cons for night prep during harm op period
-    let JA = 35770
-    // JA=IF(GZ6=0,0,(O6+(P6-O6)/(AE6-A_equiv_harmonious_min_perc)*(GZ6-A_equiv_harmonious_min_perc)))
-    for i in 0..<365 { d23[JA + i] = iff(d23[GZ + i].isZero, Double.zero, (d21[O + i] + (d21[P + i] - d21[O + i]) * d23[ddGZ + i])) }
-
-    /// el cons for BESS charging during harm op period
-    let JB = 36135
-    // JB=IF(OR(GZ6=0,HS6=0),MIN(BESS_cap_ud/BESS_chrg_eff,MAX(0,EA6/BESS_chrg_eff-EM6),EL6+MAX(0,$DS6-IZ6));MIN(EK6+(EL6-EK6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(RW6-Overall_harmonious_min_perc),MAX(0,EA6+E6+(F6-E6)/(AE6-A_equiv_harmonious_min_perc)*(GZ6-A_equiv_harmonious_min_perc)+MIN(ER6,MAX(0,G6+(H6-G6)/(AE6-A_equiv_harmonious_min_perc)*(GZ6-A_equiv_harmonious_min_perc)-EG6)/El_boiler_eff)-EJ6-EM6*BESS_chrg_eff)/BESS_chrg_eff))
-    for i in 0..<365 {
-      d23[JB + i] = iff(
-        or(d23[HS + i].isZero, d23[GZ + i].isZero), min(BESS_cap_ud / BESS_chrg_eff, max(Double.zero, d22[EA + i] / BESS_chrg_eff - d22[EM + i]), d22[EL + i] + max(Double.zero, d22[DS + i] - d23[IZ + i])),
-        min(
-          d22[EK + i] + (d22[EL + i] - d22[EK + i]) * d23[ddHS + i],
-          max(
-            0.0,
-            d22[EA + i] + (d21[E + i] + (d21[F + i] - d21[E + i]) * d23[ddGZ + i]) + min(d22[ER + i], max(Double.zero, (d21[G + i] + (d21[H + i] - d21[G + i]) * d23[ddGZ + i]) - d22[EG + i]) / El_boiler_eff) - d22[EJ + i] - d22[EM + i] * BESS_chrg_eff)
-            / BESS_chrg_eff))
-    }
-
-    /// el cons of el boiler for harm op during harm op period
-    let JC = 36500
-    // JC=IF(HS6=0,EO6,EN6+(EO6-EN6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(HS7-Overall_harmonious_min_perc))
-    for i in 0..<365 { d23[JC + i] = iff(d23[HS + i].isZero, d22[EO + i], d22[EN + i] + (d22[EO + i] - d22[EN + i]) * d23[ddHS + i]) }
-
-    /// el cons of el boiler for night prep during harm op period
-    let JD = 36865
-    // JM6/El_boiler_eff
-    for i in 0..<365 { d23[JD + i] = d23[JM + i] / El_boiler_eff }
-
-    /// PV available after harm op during harm op period
     let JE = 37230
-    // JE=IF(HS6=0,MAX(0,EC6+MAX(0,DS6-IZ6)),EB6+(EC6-EB6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(HS6-Overall_harmonious_min_perc))
+    // JE=IF(HE3=0,0,($O3+($P3-$O3)/($AE3-A_equiv_harmonious_min_perc)*(HE3-A_equiv_harmonious_min_perc)))
     for i in 0..<365 {
       d23[JE + i] = iff(
-        d23[HS + i].isZero, max(Double.zero, d22[EC + i] + max(Double.zero, d22[DS + i] - d23[IZ + i])),
-        d22[EB + i] + (d22[EC + i] - d22[EB + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (d23[HS + i] - Overall_harmonious_min_perc))
+        d23[HE + i] == 0.0, 0,
+        (d21[O + i]
+          + (d21[P + i] - d21[O + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j])
+            * (d23[HE + i] - equiv_harmonious_min_perc[j]))
+      )
     }
 
-    /// grid input for harm op during harm op period
+    /// el cons for BESS charging during harm op period
     let JF = 37595
-    // JF=IF(HS6=0,DN6,DM6+(DN6-DM6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(HS6-Overall_harmonious_min_perc))
-    for i in 0..<365 { d23[JF + i] = iff(or(d23[HS + i].isZero, d23[GZ + i].isZero), d22[DN + i], d22[DN + i] + (d22[DN + i] - d22[DM + i]) * d23[ddHS + i]) }
+    // JF=IF(OR(HE3=0,HZ3=0),MIN(BESS_cap_ud/BESS_chrg_eff,MAX(0,$EA3+$DU3-$EJ3+$DZ3/El_boiler_eff)/BESS_chrg_eff,MIN($DS3,MAX(0,$DS3+$EC3-IB3))),MIN($EK3+($EL3-$EK3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(HZ3-Overall_harmonious_min_perc),MAX(0,$EA3+$E3+($F3-$E3)/($AE3-A_equiv_harmonious_min_perc)*(HE3-A_equiv_harmonious_min_perc)+MIN($ER3,MAX(0,$G3+($H3-$G3)/($AE3-A_equiv_harmonious_min_perc)*(HE3-A_equiv_harmonious_min_perc)-$EG3)/El_boiler_eff)-$EJ3-$EM3*BESS_chrg_eff)/BESS_chrg_eff))
+    for i in 0..<365 {
+      d23[JF + i] = iff(
+        or(d23[HE + i] == 0.0, d23[HZ + i] == 0.0),
+        min(
+          BESS_cap_ud / BESS_chrg_eff,
+          max(0, d22[EA + i] + d22[DU + i] - d22[EJ + i] + d22[DZ + i] / El_boiler_eff) / BESS_chrg_eff,
+          min(d22[DS + i], max(0, d22[DS + i] + d22[EC + i] - d23[IB + i]))),
+        min(
+          d22[EK + i]
+            + (d22[EL + i] - d22[EK + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
+              * (d23[HZ + i] - Overall_harmonious_min_perc),
+          max(
+            0,
+            d22[EA + i] + d21[E + i] + (d21[F + i] - d21[E + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j])
+              * (d23[HE + i] - equiv_harmonious_min_perc[j])
+              + min(
+                d22[ER + i],
+                max(
+                  0,
+                  d21[G + i] + (d21[H + i] - d21[G + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j])
+                    * (d23[HE + i] - equiv_harmonious_min_perc[j]) - d22[EG + i]) / El_boiler_eff) - d22[EJ + i]
+              - d22[EM + i] * BESS_chrg_eff) / BESS_chrg_eff))
+    }
+
+    /// Heat cons for night prep during harm op period
+    let JG = 37960
+    // JG=IF(HE3=0,0,($Q3+($R3-$Q3)/($AE3-A_equiv_harmonious_min_perc)*(HE3-A_equiv_harmonious_min_perc)))
+    for i in 0..<365 {
+      d23[JG + i] = iff(
+        d23[HE + i] == 0.0, 0,
+        (d21[Q + i]
+          + (d21[R + i] - d21[Q + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j])
+            * (d23[HE + i] - equiv_harmonious_min_perc[j]))
+      )
+    }
+
+    /// CSP heat available after harm op during harm op period
+    let JH = 38325
+    // JH=IF(HZ3=0,$EF3,$EE3+($EF3-$EE3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(HZ3-Overall_harmonious_min_perc))
+    for i in 0..<365 {
+      d23[JH + i] = iff(
+        d23[HZ + i] == 0.0, d22[EF + i],
+        d22[EE + i] + (d22[EF + i] - d22[EE + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
+          * (d23[HZ + i] - Overall_harmonious_min_perc))
+    }
+
+    /// El boiler heat prod for night prep during harm op period
+    let JI = 38690
+    // JI=IF(HZ3=0,0,MIN(($EP3+($EQ3-$EP3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(HZ3-Overall_harmonious_min_perc))*El_boiler_eff,MAX(0,JG3-JH3)))
+    for i in 0..<365 {
+      d23[JI + i] = iff(
+        d23[HZ + i] == 0.0, 0,
+        min(
+          (d22[EP + i]
+            + (d22[EQ + i] - d22[EP + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
+              * (d23[HZ + i] - Overall_harmonious_min_perc))
+            * El_boiler_eff, max(0, d23[JG + i] - d23[JH + i])))
+    }
+
+    /// el cons of el boiler for night prep during harm op period
+    let JJ = 39055
+    // JJ=JI3/El_boiler_eff
+    for i in 0..<365 { d23[JJ + i] = d23[JI + i] / El_boiler_eff }
+
+    /// PV available after harm op and stby during harm op period
+    let JK = 39420
+    // JK=IF(HZ3=0,MAX(0,$EC3+MAX(0,$DS3-JD3)),$EB3+($EC3-$EB3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(HZ3-Overall_harmonious_min_perc))
+    for i in 0..<365 {
+      d23[JK + i] = iff(
+        d23[HZ + i] == 0.0, max(0, d22[EC + i] + max(0, d22[DS + i] - d23[JD + i])),
+        d22[EB + i] + (d22[EC + i] - d22[EB + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
+          * (d23[HZ + i] - Overall_harmonious_min_perc))
+    }
+
+    /// grid input for harm op and stby during harm op period
+    let JL = 39785
+    // JL=IF(HZ3=0,$DN3,$DM3+($DN3-$DM3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(HZ3-Overall_harmonious_min_perc))
+    for i in 0..<365 {
+      d23[JL + i] = iff(
+        d23[HZ + i] == 0.0, d22[DN + i],
+        d22[DM + i] + (d22[DN + i] - d22[DM + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
+          * (d23[HZ + i] - Overall_harmonious_min_perc))
+    }
 
     /// grid input for night prep during harm op period
-    let JG = 37960
-    // JG=MIN(IF(HS6=0,0,EH6+(EI6-EH6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(HS6-Overall_harmonious_min_perc)),MAX(0,-(JE6-JA6-JB6-JD6)))
-    for i in 0..<365 { d23[JG + i] = min(iff(d23[HS + i].isZero, Double.zero, d22[EH + i] + (d22[EI + i] - d22[EH + i]) * d23[ddHS + i]), max(Double.zero, -(d23[JE + i] - d23[JA + i] - d23[JB + i] - d23[JD + i]))) }
+    let JM = 40150
+    // JM=MIN(IF(HZ3=0,0,$EH3+($EI3-$EH3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(HZ3-Overall_harmonious_min_perc)),MAX(0,-(JK3-JE3-JF3-JJ3)))
+    for i in 0..<365 {
+      d23[JM + i] = min(
+        iff(
+          d23[HZ + i] == 0.0, 0,
+          d22[EH + i] + (d22[EI + i] - d22[EH + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
+            * (d23[HZ + i] - Overall_harmonious_min_perc)),
+        max(0, -(d23[JK + i] - d23[JE + i] - d23[JF + i] - d23[JJ + i])))
+    }
 
     /// Balance of electricity during harm op period
-    let JH = 38325
-    // =JE6+JG6-JA6-JB6-JD6
-    for i in 0..<365 { d23[JH + i] = d23[JE + i] + d23[JG + i] - d23[JA + i] - d23[JB + i] - d23[JD + i] }
+    let JN = 40515
+    // JN=JK3+JM3-JE3-JF3-JJ3
+    for i in 0..<365 { d23[JN + i] = d23[JK + i] + d23[JM + i] - d23[JE + i] - d23[JF + i] - d23[JJ + i] }
 
-    /// heat cons for harm op outside of harm op period
-    let JV = 43435
-    // JV=IF(GZ3=0,$DZ3,$G3+($H3-$G3)/($AE3-A_equiv_harmonious_min_perc)*(GZ3-A_equiv_harmonious_min_perc))
-    for i in 0..<365 { d23[JV + i] = iff(d23[GZ + i] == Double.zero,d22[DZ + i],d21[G + i]+(d21[H + i]-d21[G + i])/(d21[AE + i]-equiv_harmonious_min_perc[j])*(d23[GZ + i]-equiv_harmonious_min_perc[j])) }
-
-    /// heat from CSP outside of harm op period
-    let JW = 43800
-    // JW=IF(OR(HS6=0,GZ6=0),0,EG6)
-    for i in 0..<365 { d23[JW + i] = d22[EG + i] }
-    /// heat from el boiler outside of harm op period
-    let JX = 44165
-    // JX=MIN($ER3*El_boiler_eff,MAX(0,JV3-JW3))
-    for i in 0..<365 { d23[JX + i] = min(d22[ER + i]*El_boiler_eff,max(0,d23[JV + i]-d23[JW + i])) }
-
-    /// Balance of heat outside of harm op period
-    let JY = 44530
-    // JW6+JX6-JV6
-    for i in 0..<365 { d23[JY + i] = d22[EG + i] + d23[JX + i] - d23[JV + i] }
+    /// Balance of heat during harm op period
+    let JO = 40880
+    // JO=JH3+JI3-JG3
+    for i in 0..<365 { d23[JO + i] = d23[JH + i] + d23[JI + i] - d23[JG + i] }
 
     /// el cons for harm op outside of harm op period
-    let JO = 40880
-    // JO=IF(GZ6=0,0,E6+(F6-E6)/(AE6-A_equiv_harmonious_min_perc)*(GZ6-A_equiv_harmonious_min_perc))
-    for i in 0..<365 { d23[JO + i] = iff(d23[GZ + i].isZero, Double.zero, d21[E + i] + (d21[F + i] - d21[E + i]) * d23[ddGZ + i]) }
+    let JP = 41245
+    // JP=IF(HE3=0,0,$E3+($F3-$E3)/($AE3-A_equiv_harmonious_min_perc)*(HE3-A_equiv_harmonious_min_perc))
+    for i in 0..<365 {
+      d23[JP + i] = iff(
+        d23[HE + i] == 0.0, 0,
+        d21[E + i] + (d21[F + i] - d21[E + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j])
+          * (d23[HE + i] - equiv_harmonious_min_perc[j]))
+    }
+
+    /// heat cons for harm op and stby outside of harm op period
+    let JQ = 41610
+    // JQ=IF(HE3=0,IF(HZ3=0,$DZ3,$DY3+($DZ3-$DY3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(HZ3-Overall_harmonious_min_perc)),$G3+($H3-$G3)/($AE3-A_equiv_harmonious_min_perc)*(HE3-A_equiv_harmonious_min_perc))
+    for i in 0..<365 {
+      d23[JQ + i] = iff(
+        d23[HE + i] == 0.0,
+        iff(
+          d23[HZ + i] == 0.0, d22[DZ + i],
+          d22[DY + i] + (d22[DZ + i] - d22[DY + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
+            * (d23[HZ + i] - Overall_harmonious_min_perc)),
+        d21[G + i] + (d21[H + i] - d21[G + i]) / (d21[AE + i] - equiv_harmonious_min_perc[j])
+          * (d23[HE + i] - equiv_harmonious_min_perc[j]))
+    }
+
+    /// heat from CSP outside of harm op period
+    let JR = 41975
+    // JR=IF(HE3=0,0,$EG3)
+    for i in 0..<365 { d23[JR + i] = iff(d23[HE + i] == 0.0, 0, d22[EG + i]) }
+
+    /// heat from el boiler outside of harm op period
+    let JS = 42340
+    // JS=MIN($ER3*El_boiler_eff,MAX(0,JQ3-JR3))
+    for i in 0..<365 { d23[JS + i] = min(d22[ER + i] * El_boiler_eff, max(0, d23[JQ + i] - d23[JR + i])) }
 
     /// el cons by el boiler outside of harm op period
-    let JP = 41245
+    let JT = 42705
+    // JT=JS3/El_boiler_eff
+    for i in 0..<365 { d23[JT + i] = d23[JS + i] / El_boiler_eff }
 
-    let JQ = 41610
-    /// el from PV outside of harm op period
-    let JR = 41975
-    /// el from harm op period charged BESS discharging for stby outside of harm op period
-    let JS = 42340
+    /// el cons not covered by PV outside of harm op period
+    let JU = 43070
+    // JU=$EA3+IF(HE3>0,0,IF(HZ3=0,$DU3,$DT3+($DU3-$DT3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(HZ3-Overall_harmonious_min_perc)))
     for i in 0..<365 {
-      // JX6/El_boiler_eff
-      d23[JP + i] = d23[JX + i] / El_boiler_eff
-      // JQ=$EA3+IF(GZ3>0,0,$DY3-MIN(Overall_stby_cons,$ED3))
-      d23[JQ + i] = d22[EA + i] + iff(d23[GZ + i] > Double.zero, 0, d22[DY + i] - min(Overall_stby_cons, d22[ED + i]))
-      // =JB6*BESS_chrg_eff
-      d23[JS + i] = d23[JB + i] * BESS_chrg_eff
-      // JR=MIN(MAX(0,JQ3+JP3+JO3-JS3)/BESS_chrg_eff,MAX(0,$EM3-MAX(0,$EA3+$DY3-JQ3)))
-      d23[JR + i] = min(
-        max(0, d23[JQ + i] + d23[JP + i] + d23[JO + i] - d23[JS + i]) / BESS_chrg_eff, max(0, d22[EM + i] - max(0, d22[EA + i] + d22[DY + i] - d23[JQ + i])))
+      d23[JU + i] =
+        d22[EA + i]
+        + iff(
+          d23[HE + i] > 0.0, 0,
+          iff(
+            d23[HZ + i] == 0.0, d22[DU + i],
+            d22[DT + i] + (d22[DU + i] - d22[DT + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
+              * (d23[HZ + i] - Overall_harmonious_min_perc)))
     }
 
-    /// grid input outside of harm op period
-    let JT = 42705
-    // JT=MIN(DO6+EJ6,MAX(0,-JR6*BESS_chrg_eff-JS6+JO6+JP6+JQ6))
-    for i in 0..<365 { d23[JT + i] = min(d22[DO + i] + d22[EJ + i], max(Double.zero, -d23[JR + i] * BESS_chrg_eff - d23[JS + i] + d23[JO + i] + d23[JP + i] + d22[EA + i])) }
+    /// el from harm op period charged BESS discharging for stby outside of harm op period
+    let JW = 43800
+    // JW=JF3*BESS_chrg_eff
+    for i in 0..<365 { d23[JW + i] = d23[JF + i] * BESS_chrg_eff }
+
+    /// El to BESS charging outside harm op period
+    let JV = 43435
+    // JV=MIN(MAX(0,JU3+JT3+JP3-JW3)/BESS_chrg_eff,IF(HE3>0,$EM3,IF(HZ3=0,$EO3,$EN3+($EO3-$EN3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(HZ3-Overall_harmonious_min_perc))))
+    for i in 0..<365 {
+      d23[JV + i] = min(
+        max(0, d23[JU + i] + d23[JT + i] + d23[JP + i] - d23[JW + i]) / BESS_chrg_eff,
+        iff(
+          d23[HE + i] > 0.0, d22[EM + i],
+          iff(
+            d23[HZ + i] == 0.0, d22[EO + i],
+            d22[EN + i] + (d22[EO + i] - d22[EN + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
+              * (d23[HZ + i] - Overall_harmonious_min_perc))))
+    }
+
+
+    /// max possible grid input outside of harm op period
+    let JX = 44165
+    // JX=MIN($DO3+$EJ3,MAX(0,-JV3*BESS_chrg_eff-JW3+JP3+JT3+JU3))
+    for i in 0..<365 {
+      d23[JX + i] = min(
+        d22[DO + i] + d22[EJ + i],
+        max(0, -d23[JV + i] * BESS_chrg_eff - d23[JW + i] + d23[JP + i] + d23[JT + i] + d23[JU + i]))
+    }
 
     /// Balance of electricity outside of harm op period
-    let JU = 43070
-    // JU=ROUND(JR6*BESS_chrg_eff+JS6+JT6-JO6-JP6-JQ6,5)
-    for i in 0..<365 { 
-      d23[JU + i] = round(d23[JR + i] * BESS_chrg_eff + d23[JS + i] + d23[JT + i] - d23[JO + i] - d23[JP + i] - d22[EA + i], 5)
+    let JY = 44530
+    // JY=JV3*BESS_chrg_eff+JW3+JX3-JP3-JT3-JU3
+    for i in 0..<365 {
+      d23[JY + i] = d23[JV + i] * BESS_chrg_eff + d23[JW + i] + d23[JX + i] - d23[JP + i] - d23[JT + i] - d23[JU + i]
     }
+
+    /// Balance of heat outside of harm op period
+    let JZ = 44895
+    // JZ=JR3+JS3-JQ3
+    for i in 0..<365 { d23[JZ + i] = d23[JR + i] + d23[JS + i] - d23[JQ + i] }
 
     /// Pure Methanol prod with min night prep and resp day op
-    let JZ = 44895
-    // JZ=MAX(0,IZ6-C6*Overall_fix_cons)/Overall_harmonious_var_max_cons*MethDist_harmonious_max_perc*MethDist_Meth_nom_prod_ud+IF(JO6=0,0,IF(A_overall_var_max_cons=0,B6*GZ6,MAX(0,JO6-B6*A_overall_fix_stby_cons-A_overall_stup_cons)/A_overall_var_max_cons*A_MethDist_max_perc)*MethDist_Meth_nom_prod_ud)
+    let KA = 45260
+    // KA=MAX(0,JD3-$C3*Overall_fix_cons)/Overall_harmonious_var_max_cons*MethDist_harmonious_max_perc*MethDist_Meth_nom_prod_ud+IF(JP3=0,0,IF(A_overall_var_max_cons=0,$B3*HE3,MAX(0,JP3-$B3*A_overall_fix_stby_cons-A_overall_stup_cons)/A_overall_var_max_cons*A_MethDist_max_perc)*MethDist_Meth_nom_prod_ud)
     for i in 0..<365 {
-      d23[JZ + i] =
-        max(Double.zero, d23[IZ + i] - day0[C + i] * Overall_fix_cons) / Overall_harmonious_var_max_cons * MethDist_harmonious_max_perc * MethDist_Meth_nom_prod_ud
+      d23[KA + i] =
+        max(0, d23[JD + i] - day0[C + i] * Overall_fix_cons) / Overall_harmonious_var_max_cons
+        * MethDist_harmonious_max_perc * MethDist_Meth_nom_prod_ud
         + iff(
-          d23[JO + i].isZero, Double.zero,
-          iff(overall_var_max_cons[j].isZero, day0[B + i] * d23[GZ + i], max(Double.zero, d23[JO + i] - day0[B + i] * overall_fix_stby_cons[j] - overall_stup_cons[j]) / overall_var_max_cons[j] * MethDist_max_perc[j]) * MethDist_Meth_nom_prod_ud)
+          d23[JP + i] == 0.0, 0,
+          iff(
+            overall_var_max_cons[j] == 0.0, day0[B + i] * d23[HE + i],
+            max(0, d23[JP + i] - day0[B + i] * overall_fix_stby_cons[j] - overall_stup_cons[j])
+              / overall_var_max_cons[j] * MethDist_max_perc[j]) * MethDist_Meth_nom_prod_ud)
     }
 
+    /// Missing heat
+    let KB = 45625
+    // KB=ROUND(MAX(0,-JO3)+MAX(0,-JZ3),0)
+    for i in 0..<365 { d23[KB + i] = round(max(0, -d23[JO + i]) + max(0, -d23[JZ + i]), 0) }
+
     /// grid export
-    let KA = 45260
-    // KA=ROUND(MAX(0,MIN(JH6,IF(HS6=0,DW6,(DV6+(DW6-DV6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(HS6-Overall_harmonious_min_perc)))))+MAX(0,MIN(JU6,IF(OR(HS6=0,GZ6=0),0,DX6))),0)
+    let KC = 45990
+    // KC=ROUND(MAX(0,MIN(JN3,IF(HZ3=0,$DW3,($DV3+($DW3-$DV3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(HZ3-Overall_harmonious_min_perc)))))+MAX(0,MIN(JY3,IF(OR(HZ3=0,HE3=0),0,$DX3))),0)
     for i in 0..<365 {
-      d23[KA + i] = round(
-        max(0.0, min(d23[JH + i], iff(or(d23[HS + i].isZero, d23[GZ + i].isZero), d22[DW + i], (d22[DV + i] + (d22[DW + i] - d22[DV + i]) * d23[ddHS + i]))))
-          + max(0.0, min(d23[JU + i], iff(or(d23[HS + i].isZero, d23[GZ + i].isZero), Double.zero, d22[DX + i]))), 0)
+      d23[KC + i] = round(
+        max(
+          0,
+          min(
+            d23[JN + i],
+            iff(
+              d23[HZ + i] == 0.0, d22[DW + i],
+              (d22[DV + i]
+                + (d22[DW + i] - d22[DV + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
+                  * (d23[HZ + i] - Overall_harmonious_min_perc))
+            ))) + max(0, min(d23[JY + i], iff(or(d23[HZ + i] == 0.0, d23[HE + i] == 0.0), 0, d22[DX + i]))), 0)
     }
 
     /// grid import
-    let KB = 45625
-    // KB=ROUND(MAX(0,-JH3)+MAX(0,-JU3)+KC3/El_boiler_eff,0)*EDG_elec_cost_factor+ROUND(JF3+JG3+JT3,0)
-    for i in 0..<365 { d23[KB + i] = round(max(Double.zero, -d23[JH + i]) + max(Double.zero, -d23[JU + i]),0) * EDG_elec_cost_factor + round(d23[JF + i] + d23[JG + i] + d23[JT + i], 0) }
+    let KD = 46355
+    // KD=ROUND(MAX(0,-JN3)+MAX(0,-JY3)+KB3/El_boiler_eff,0)*EDG_elec_cost_factor+ROUND(JL3+JM3+JX3,0)
+    for i in 0..<365 {
+      d23[KD + i] =
+        round(max(0, -d23[JN + i]) + max(0, -d23[JY + i]) + d23[KB + i] / El_boiler_eff, 0) * EDG_elec_cost_factor
+        + round(d23[JL + i] + d23[JM + i] + d23[JX + i], 0)
+    }
   }
 }

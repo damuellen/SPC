@@ -8,7 +8,8 @@ extension TunOl {
 
     let N = 52560
     let AU = 341640
-
+    let (TX, TY, TZ) = (1033680, 1042440, 1051200)
+    let (UB, UC, UD) = (1059960, 1059960, 1059960)
     var d22 = [Double](repeating: Double.zero, count: 14235)
 
     /// Available day op PV elec after CSP, PB stby aux
@@ -35,15 +36,15 @@ extension TunOl {
     // SUMIF(CalculationU5:U8763,"="A6,CalculationAH5:AH8763)
     hour.sum(days: U, range: AH, into: &d22, at: DS)
 
-    /// Heat cons considering min harm op during harm op period
+    /// El demand outside min harm op during standby
     let DT = 730
-    // SUMIF(CalculationU5:U8763,"="A6,CalculationT5:T8763)
-    hour.sum(days: U, range: T, into: &d22, at: DT)
+    // DT=SUMIFS(Calculation!$TX$5:$TX$8764,Calculation!$U$5:$U$8764,"="&$A3,Calculation!$S$5:$S$8764,"=0")
+    hour.sumOf(TX, days: U, into: &d22, at: DT, condition: S, predicate: { $0.isZero })
 
-    /// Heat cons considering max harm op during harm op period
+    /// El demand outside max harm op during standby
     let DU = 1095
-    // SUMIF(CalculationU5:U8763,"="A6,CalculationAI5:AI8763)
-    hour.sum(days: U, range: AI, into: &d22, at: DU)
+    // DU=SUMIFS(Calculation!$UB$5:$UB$8764,Calculation!$U$5:$U$8764,"="&$A3,Calculation!$AH$5:$AH$8764,"=0")
+    hour.sumOf(UB, days: U, into: &d22, at: DU, condition: AH, predicate: { $0.isZero })
     /// Max grid export after min harm op during harm op period
     let DV = 1460
     // SUMIFS(CalculationAF5:AF8763,CalculationU5:U8763,"="A6,CalculationS5:S8763,">0")
@@ -58,15 +59,15 @@ extension TunOl {
     // SUMIF(CalculationU5:U8763,"="A6,CalculationAF5:AF8763)-DV6
     hour.sum(days: U, range: AF, into: &d22, at: DX)
     for i in 0..<365 { d22[DX + i] -= d22[DV + i] }
-    let B = 365
-    /// Grid cons considering min harm op during harm op period
+
+    /// Heat demand outside min harm op during standby
     let DY = 2555
-    // DY=$B3*Overall_stby_cons
-    for i in 0..<365 { d22[DY + i] = d20[B + i] * Overall_stby_cons }
-    /// Grid cons considering max harm op during harm op period
+    // DY=SUMIFS(Calculation!$TY$5:$TY$8764,Calculation!$U$5:$U$8764,"="&$A3,Calculation!$S$5:$S$8764,"=0")
+    hour.sumOf(TY, days: U, into: &d22, at: DY, condition: S, predicate: { $0.isZero })
+    /// Heat demand outside max harm op during standby
     let DZ = 2920
-    // DZ=$B3*Overall_heat_stby_cons
-    for i in 0..<365 { d22[DZ + i] = d20[B + i] * Overall_heat_stby_cons }
+    // DZ=SUMIFS(Calculation!$UC$5:$UC$8764,Calculation!$U$5:$U$8764,"="&$A3,Calculation!$AH$5:$AH$8764,"=0")
+    hour.sumOf(UC, days: U, into: &d22, at: DZ, condition: AH, predicate: { $0.isZero })
     /// Grid cons considering min/max harm op outside harm op period
     let EA = 3285
     // EA=SUMIFS(Calculation!$X$5:$X$8764,Calculation!$U$5:$U$8764,"="&$A3,Calculation!$S$5:$S$8764,"=0")
@@ -138,15 +139,15 @@ extension TunOl {
     // MIN(SUMIFS(CalculationAE5:AE8763,CalculationU5:U8763,"="A6,CalculationS5:S8763,"=0"),BESS_cap_ud/BESS_chrg_eff)
     for i in 0..<365 { d22[EM + i] = min(d22[EM + i], BESS_cap_ud / BESS_chrg_eff) }
 
-    /// El boiler op for min harm during harm op period
+    /// Remaining PV el outside min harm during standby
     let EN = 8030
-    // SUMIFS(CalculationZ5:Z8763,CalculationU5:U8763,"="A6,CalculationS5:S8763,">0")
-    hour.sumOf(Z, days: U, into: &d22, at: EN, condition: S, predicate: notZero)
+    // =SUMIFS(Calculation!$TZ$5:$TZ$8764,Calculation!$U$5:$U$8764,"="&$A3,Calculation!$S$5:$S$8764,"=0")
+    hour.sumOf(TZ, days: U, into: &d22, at: EN, condition: S, predicate: { $0.isZero })
 
-    /// El boiler op for max harm during harm op period
+    /// Remaining PV el outside max harm during standby
     let EO = 8395
-    // SUMIFS(CalculationAN5:AN8763,CalculationU5:U8763,"="A6,CalculationS5:S8763,">0")
-    hour.sumOf(AN, days: U, into: &d22, at: EO, condition: S, predicate: notZero)
+    // =SUMIFS(Calculation!$UD$5:$UD$8764,Calculation!$U$5:$U$8764,"="&$A3,Calculation!$AH$5:$AH$8764,"=0")
+    hour.sumOf(UD, days: U, into: &d22, at: EO, condition: AH, predicate: { $0.isZero })
 
     /// Remaining El boiler cap after min harm during harm op period
     let EP = 8760
