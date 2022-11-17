@@ -9,9 +9,9 @@ class StorageTests: XCTestCase {
     var powerBlock = Plant.initialState.powerBlock
     var solarField = Plant.initialState.solarField
     var steamTurbine = Plant.initialState.steamTurbine
-    var heater = Plant.initialState.heater
+    _ = Plant.initialState.heater
     let parasitics = Storage.parasitics(storage)
-    let fuel = 0.0
+
     var plant = Plant.setup()
 
     let demand = SteamTurbine.parameter.power.max
@@ -24,7 +24,7 @@ class StorageTests: XCTestCase {
       storage: storage, powerBlock: &powerBlock, heatFlow: plant.heatFlow
     )
     
-    let energy = Storage.perform(
+    _ = Storage.perform(
       storage: &storage,
       solarField: &solarField,
       steamTurbine: &steamTurbine,
@@ -36,12 +36,12 @@ class StorageTests: XCTestCase {
  //   storage.operationMode = .discharge
  //   storage.massFlow.rate = 200.0
  //   storage.temperature.outlet = Temperature(celsius: 380.0)
-    var thermal = storage.massFlow.rate * storage.heat / 1_000
+    _ = storage.massFlow.rate * storage.heat / 1_000
 
     storage.calculate(thermal: &plant.heatFlow, powerBlock)
 
     storage.operationMode = .charge(load: 1.0)
-    thermal = storage.massFlow.rate
+    _ = storage.massFlow.rate
       * SolarField.parameter.HTF.heatContent(storage) / 1_000
   //  storage.calculate(thermal: &plant.heatFlow, powerBlock)
   }

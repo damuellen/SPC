@@ -6,7 +6,7 @@ import Units
 class SteamTurbineTests: XCTestCase {
   func testsPerfomance() {
     var status = Plant.initialState
-    let plant = Plant()
+    _ = Plant()
     let ambientTemperature = Temperature(celsius: 20.0)
     let heatExchanger = Temperature(celsius: 350.0)
     var (maxLoad, efficiency) = SteamTurbine.perform(load: Ratio(1),
