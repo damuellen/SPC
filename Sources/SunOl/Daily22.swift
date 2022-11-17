@@ -9,7 +9,7 @@ extension TunOl {
     let N = 52560
     let AU = 341640
     let (TX, TY, TZ) = (1033680, 1042440, 1051200)
-    let (UB, UC, UD) = (1059960, 1059960, 1059960)
+    let (UB, UC, UD) = (1059960, 1068720, 1077480)
     var d22 = [Double](repeating: Double.zero, count: 14235)
 
     /// Available day op PV elec after CSP, PB stby aux

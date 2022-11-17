@@ -195,8 +195,7 @@ extension TunOl {
     // AK=ROUNDUP(MAX(0,$J5-AI5),5)
     for i in 1..<8760 { h[AK + i] = roundUp(max(0, h[J + i] - h[AI + i]), 5) }
 
-    let (UB, UC, UD) = (1059960, 1059960, 1059960)
-
+    let (UB, UC, UD) = (1059960, 1068720, 1077480)
     // UB=MAX(0,IF(AH6>0,0,Overall_stby_cons+IF(AH7=0,0,Overall_stup_cons)-AJ6))
     // UC=MAX(0,IF(AH6>0,0,Overall_heat_stby_cons+IF(AH7=0,0,Overall_heat_stup_cons)-AK6))
     // UD=MAX(0,IF(AH6>0,0,-Overall_stby_cons-IF(AH7=0,0,Overall_stup_cons))+AJ6)

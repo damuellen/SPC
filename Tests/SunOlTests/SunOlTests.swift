@@ -36,7 +36,7 @@ class SunOlTests: XCTestCase {
           print("Calculation \(letter)\(i + 4) proper value: \(String(format: "%.2f", ref[i - 1])) [\(index + i)] \(String(format: "%.2f", column[i]))  div: \(abs(ref[i - 1]) - abs(column[i]))")
         }
       }
-      if correct { print("Calculation \(letter) is correct") } else { XCTFail("Error in Calculation Column \(letter)") }
+      if !correct { XCTFail("Error in Calculation Column \(letter)") }
     }
 
     func daily1(_ array: [Double], _ letter: String, _ index: Int) {
@@ -49,7 +49,7 @@ class SunOlTests: XCTestCase {
           print("Daily1 \(letter)\(i + 3) proper value: \(String(format: "%.2f", ref[i])) [\(index + i)] \(String(format: "%.2f", array[index + i]))  div: \(ref[i] - array[index + i])")
         }
       }
-      if correct { print("Daily1 \(letter) is correct") } else { XCTFail("Error in Daily1 Column \(letter)") }
+      if !correct { XCTFail("Error in Daily1 Column \(letter)") }
     }
 
     func daily2(_ array: [Double], _ letter: String, _ index: Int) {
@@ -57,12 +57,12 @@ class SunOlTests: XCTestCase {
       var correct = true, counter = 1
       for i in 0..<364 {
         if counter > 20 { break }
-        if abs(ref[i]) - abs(array[index + i]) > max(abs(ref[i]) * 0.01, 0.01)  {
+        if abs(abs(ref[i]) - abs(array[index + i])) > max(abs(ref[i]) * 0.01, 0.01)  {
           counter += 1; correct = false
           print("Daily2 \(letter)\(i + 3) proper value: \(String(format: "%.2f", ref[i])) [\(index + i)] \(String(format: "%.2f", array[index + i]))  div: \(ref[i] - array[index + i])")
         }
       }
-      if correct { print("Daily2 \(letter) is correct") } else { XCTFail("Error in Daily2 Column \(letter)") }
+      if !correct { XCTFail("Error in Daily2 Column \(letter)") }
     }
     
     func column(_ i: Int, offset: Int, stride: Int = 365) -> (String, Int) {
@@ -88,7 +88,8 @@ class SunOlTests: XCTestCase {
     var d23 = [Double](repeating: 0.0, count: 48_545)
     var d21 = [Double](repeating: 0.0, count: 9_855)
     var day = [[Double]]()
-    let (GX, GZ, HA) = (16790, 17155, 17520)
+    let (HC, HE, HF) = (18615, 18980, 19345)
+    let (IY, KA) = (35405, 45260)
     let (MC, MI, NL, NR) = (81030, 83220, 93805, 95995)
 
     model.hour(TunOl.Q_Sol_MW_thLoop, TunOl.Reference_PV_plant_power_at_inverter_inlet_DC, TunOl.Reference_PV_MV_power_at_transformer_outlet, hour: &hourPre)
@@ -112,8 +113,10 @@ class SunOlTests: XCTestCase {
 
       model.d21(&d21, case: j, day0: day20)
       model.d23(&d23, case: j, day0: day20, d21: d21, d22: d22)
-      day.append(Array(d23[33945..<35040] + ArraySlice(zip(day20[365..<730], d23[GX..<GZ]).map { $1 > 0 ? $0 : 0 }) + day20[730..<1095]))
-      day.append(Array(d23[44895..<45990] + ArraySlice(zip(day20[365..<730], d23[GZ..<HA]).map { $1 > 0 ? $0 : 0 }) + day20[730..<1095]))
+      let a = zip(day20[365..<730], d23[HC..<HE]).map { $1 > 0 ? $0 : 0 }
+      day.append(Array(d23[IY..<IY+1095] + ArraySlice(a) + day20[730..<1095]))
+      let b = zip(day20[365..<730], d23[HE..<HF]).map { $1 > 0 ? $0 : 0 }
+      day.append(Array(d23[KA..<KA+1095] + ArraySlice(b) + day20[730..<1095]))
 
       if j == 0 {
         print("Case A")
@@ -140,25 +143,16 @@ class SunOlTests: XCTestCase {
         // MK 83950
         (348..<381).map { column($0, offset: 118) }.forEach { letter, offset in daily1(d10, letter, offset) }
         // E 0
-        (4..<30).map { column($0, offset: 4) }.forEach { letter, offset in daily2(d21, letter, offset) }
+        (4..<31).map { column($0, offset: 4) }.forEach { letter, offset in daily2(d21, letter, offset) }
+        (121..<150).map { column($0, offset: 121) }.forEach { letter, offset in daily2(d22, letter, offset) }
         // FC 0
         (158..<188).map { column($0, offset: 158) }.forEach { letter, offset in daily2(d23, letter, offset) }
         // GH 10950
-        (189..<211).map { column($0, offset: 159) }.forEach { 
-          letter, offset in daily2(d23, letter, offset) 
-        }
-
-        (212..<234).map { column($0, offset: 160) }.forEach { 
-          letter, offset in daily2(d23, letter, offset) 
-        }
-
-        (235..<262).map { column($0, offset: 161) }.forEach { 
-          letter, offset in daily2(d23, letter, offset) 
-        }
+        (189..<211).map { column($0, offset: 159) }.forEach { letter, offset in daily2(d23, letter, offset) }
+        (212..<234).map { column($0, offset: 160) }.forEach { letter, offset in daily2(d23, letter, offset) }
+        (235..<262).map { column($0, offset: 161) }.forEach { letter, offset in daily2(d23, letter, offset) }
         // JD 36865
-        (263..<290).map { column($0, offset: 162) }.forEach {
-          letter, offset in daily2(d23, letter, offset) 
-        }
+        (263..<288).map { column($0, offset: 162) }.forEach { letter, offset in daily2(d23, letter, offset) }
       }
       if j == 1 {
         print("Case B")
@@ -168,6 +162,8 @@ class SunOlTests: XCTestCase {
         (542..<577).map { column($0, offset: 347) }.forEach { letter, offset in daily1(d10, letter, offset) }
         // VF 83950
         (577..<610).map { column($0, offset: 347) }.forEach { letter, offset in daily1(d10, letter, offset) }
+        daily2(d23, "OB", 35405)
+        daily2(d23, "PD", 45260)
       }
       if j == 2 {
         print("Case C")
@@ -176,6 +172,8 @@ class SunOlTests: XCTestCase {
         (771..<806).map { column($0, offset: 576) }.forEach { letter, offset in daily1(d10, letter, offset) }
         // AEA 83950
         (806..<839).map { column($0, offset: 576) }.forEach { letter, offset in daily1(d10, letter, offset) }
+        daily2(d23, "TE", 35405)
+        daily2(d23, "UG", 45260)
       }
       if j == 3 {
         print("Case D")
@@ -184,6 +182,7 @@ class SunOlTests: XCTestCase {
         (1000..<1034).map { column($0, offset: 805) }.forEach { letter, offset in daily1(d10, letter, offset) }
         // AMV 83950
         (1034..<1067).map { column($0, offset: 805) }.forEach { letter, offset in daily1(d10, letter, offset) }
+        daily2(d23, "YH", 35405)
       }
     }
     var meth_produced_MTPH_sum = Double.zero
@@ -231,9 +230,9 @@ class SunOlTests: XCTestCase {
     var d23 = [Double](repeating: 0.0, count: 48_545)
     var d21 = [Double](repeating: 0.0, count: 9_855)
     var day = [[Double]]()
-  let (HC, HE, HF) = (18615, 18980, 19345)
-  let (IX, KA) = (35405, 45260)
-  let (MC, MI, NL, NR) = (81030, 83220, 93805, 95995)
+    let (HC, HE, HF) = (18615, 18980, 19345)
+    let (IY, KA) = (35405, 45260)
+    let (MC, MI, NL, NR) = (81030, 83220, 93805, 95995)
 
     model.hour(TunOl.Q_Sol_MW_thLoop, TunOl.Reference_PV_plant_power_at_inverter_inlet_DC, TunOl.Reference_PV_MV_power_at_transformer_outlet, hour: &hourPre)
     let day20 = model.day20(hour: hourPre)
@@ -256,7 +255,7 @@ class SunOlTests: XCTestCase {
       model.d21(&d21, case: j, day0: day20)
       model.d23(&d23, case: j, day0: day20, d21: d21, d22: d22)
       let a = zip(day20[365..<730], d23[HC..<HE]).map { $1 > 0 ? $0 : 0 }
-      day.append(Array(d23[IX..<IX+1095] + ArraySlice(a) + day20[730..<1095]))
+      day.append(Array(d23[IY..<IY+1095] + ArraySlice(a) + day20[730..<1095]))
       let b = zip(day20[365..<730], d23[HE..<HF]).map { $1 > 0 ? $0 : 0 }
       day.append(Array(d23[KA..<KA+1095] + ArraySlice(b) + day20[730..<1095]))
     }
@@ -284,7 +283,7 @@ class SunOlTests: XCTestCase {
         elec_to_grid_MTPH_sum += day[best][d + 365]
         let hours0 = day[best][d + 730 + 365]
         let hours1 = day[best][d + 730 + 730]
-        print(d, name[best], day[best][d], hours0, hours1, to: &outputStream)
+        print(d, name[best], day[best][d], elec_to_grid_MTPH_sum, from_grid, hours0, hours1, to: &outputStream)
         hours_sum += hours0 + hours1
       }
     }
@@ -294,7 +293,7 @@ class SunOlTests: XCTestCase {
     XCTAssertEqual(hours_sum, 7723, accuracy: 1, "hours_sum")
     XCTAssertEqual(meth_produced_MTPH_sum, 128175, accuracy: 1, "meth_produced_MTPH_sum")
     XCTAssertEqual(elec_from_grid_sum, 3055, accuracy: 1, "elec_from_grid_sum")
-    try? outputStream.write(toFile: "~/SPC/result_days.txt", atomically: false, encoding: .utf8)
+    try! outputStream.write(toFile: "result_days.txt", atomically: false, encoding: .utf8)
   }
 
   func testsCosts1() {

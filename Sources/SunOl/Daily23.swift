@@ -1278,12 +1278,12 @@ extension TunOl {
     }
 
     /// Missing heat
-    let IZ = 35770
+    let IZ = 36500
     // IZ=ROUND(MAX(0,-IM3)+MAX(0,-IX3),0)
     for i in 0..<365 { d23[IZ + i] = round(max(0, -d23[IM + i]) + max(0, -d23[IX + i]), 0) }
 
     /// grid export
-    let JA = 36135
+    let JA = 35770 
     // JA=ROUND(MAX(0,MIN(IL3,IF(GH3=0,$DW3,($DV3+($DW3-$DV3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GH3-Overall_harmonious_min_perc)))))+MAX(0,MIN(IW3,IF(OR(GH3=0,HC3=0),0,$DX3))),0)
     for i in 0..<365 {
       d23[JA + i] = round(
@@ -1300,7 +1300,7 @@ extension TunOl {
     }
 
     /// grid import
-    let JB = 36500
+    let JB = 36135
     // JB=ROUND(MAX(0,-IL3)+MAX(0,-IW3)+IZ3/El_boiler_eff,0)*EDG_elec_cost_factor+ROUND(IJ3+IK3+IV3,0)
     for i in 0..<365 {
       d23[JB + i] =
@@ -1559,12 +1559,12 @@ extension TunOl {
     }
 
     /// Missing heat
-    let KB = 45625
+    let KB = 46355
     // KB=ROUND(MAX(0,-JO3)+MAX(0,-JZ3),0)
     for i in 0..<365 { d23[KB + i] = round(max(0, -d23[JO + i]) + max(0, -d23[JZ + i]), 0) }
 
     /// grid export
-    let KC = 45990
+    let KC = 45625 
     // KC=ROUND(MAX(0,MIN(JN3,IF(HZ3=0,$DW3,($DV3+($DW3-$DV3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(HZ3-Overall_harmonious_min_perc)))))+MAX(0,MIN(JY3,IF(OR(HZ3=0,HE3=0),0,$DX3))),0)
     for i in 0..<365 {
       d23[KC + i] = round(
@@ -1581,7 +1581,7 @@ extension TunOl {
     }
 
     /// grid import
-    let KD = 46355
+    let KD = 45990 
     // KD=ROUND(MAX(0,-JN3)+MAX(0,-JY3)+KB3/El_boiler_eff,0)*EDG_elec_cost_factor+ROUND(JL3+JM3+JX3,0)
     for i in 0..<365 {
       d23[KD + i] =
