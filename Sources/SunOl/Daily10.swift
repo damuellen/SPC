@@ -103,15 +103,15 @@ extension TunOl {
       } else {
         d10[F + i] = RawMeth_min_cons[j] * d10[C + i]
         // A_RawMeth_max_cons*C6
-        d10[G + i] = RawMeth_max_cons[j] * d10[C + i]
+        // d10[G + i] = RawMeth_max_cons[j] * d10[C + i]
         // A_CO2_min_cons*C6
         d10[H + i] = CO2_min_cons[j] * d10[C + i]
         // A_CO2_max_cons*C6
-        d10[I + i] = CO2_max_cons[j] * d10[C + i]
+        // d10[I + i] = CO2_max_cons[j] * d10[C + i]
         // A_Hydrogen_min_cons*C6
         d10[J + i] = Hydrogen_min_cons[j] * d10[C + i]
         // A_Hydrogen_max_cons*C6
-        d10[K + i] = Hydrogen_max_cons[j] * d10[C + i]
+        // d10[K + i] = Hydrogen_max_cons[j] * d10[C + i]
       }
     }
   }
@@ -281,7 +281,7 @@ extension TunOl {
     let days: [[Int]] = hour[(CS + 1)..<(CS + 8760)].indices.chunked(by: { hour[$0] == hour[$1] }).map { $0.map { $0 - CS } }
     let notZero: (Double) -> Bool = { $0 > Double.zero }
 
-    let (EY, EZ, FA, FB, FC, FD, FE, FF, FG, FH, FI, FJ, FK, FL, FM, _, FO, FP, FQ, FR, FS, FT, FU, FV, FW, FX, FY, FZ, GA, GB, GC, GD, GE, GF, GG, GH, GI, GJ, GK, GL, GM, GN, GO, GP, GQ, GR, GS) = (
+    let (EY, EZ, FA, FB, FC, FD, FE, _, _, _, _, _, FK, FL, FM, _, _, _, _, _, FS, FT, FU, FV, FW, FX, FY, FZ, GA, GB, GC, GD, GE, GF, GG, GH, GI, GJ, GK, GL, GM, GN, GO, GP, GQ, GR, GS) = (
       13140, 13505, 13870, 14235, 14600, 14965, 15330, 15695, 16060, 16425, 16790, 17155, 17520, 17885, 18250, 18615, 18980, 19345, 19710, 20075, 20440, 20805, 21170, 21535, 21900, 22265, 22630, 22995, 23360, 23725, 24090, 24455, 24820, 25185,
       25550, 25915, 26280, 26645, 27010, 27375, 27740, 28105, 28470, 28835, 29200, 29565, 29930
     )
@@ -305,35 +305,34 @@ extension TunOl {
     hour.sum(days: days, range: DH, into: &d11, at: FB)
     hour.sumOf(CT, days: days, into: &d11, at: FD, condition: DH, predicate: notZero)
     // SUMIF(CalculationCS5:CS8763,"="A6,CalculationDH5:DH8763)+SUMIFS(CalculationCT5:CT8763,CalculationCS5:CS8763,"="A6,CalculationDH5:DH8763,">0")
-    for i in 0..<365 { d11[FD + i] += d11[FB + i] }
+    for i in 0..<365 { d11[FD + i] += d11[FB + i]; d11[FB + i] = 0 }
     /// El cons considering min/max harm op outside  harm op period including grid import (if any)
     let CC: Int = 639480
     hour.sumOf(CT, days: days, into: &d11, at: FE, condition1: CQ, predicate1: { $0.isZero }, condition2: CC, predicate2: notZero)
     // FE=MAX(0,SUMIFS(Calculation!$CT$5:$CT$8764,Calculation!$CS$5:$CS$8764,"="&$A3,Calculation!$CQ$5:$CQ$8764,"=0",Calculation!$CC$5:$CC$8764,">0")-A_overall_stup_cons)
     for i in 0..<365 { d11[FE + i] = max(Double.zero, d11[FE + i] - overall_stup_cons[j]) }
     /// Harm heat cons considering min harm op during harm op period
-    hour.sum(days: days, range: CR, into: &d11, at: FB)
-    hour.sumOf(CU, days: days, into: &d11, at: FF, condition: CQ, predicate: notZero)
+    // hour.sum(days: days, range: CR, into: &d11, at: FB)
+    // hour.sumOf(CU, days: days, into: &d11, at: FF, condition: CQ, predicate: notZero)
     // SUMIF(CalculationCS5:CS8763,"="A6,CalculationCR5:CR8763)+SUMIFS(CalculationCU5:CU8763,CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,">0")
-    for i in 0..<365 { d11[FF + i] += d11[FB + i] }
+    // for i in 0..<365 { d11[FF + i] += d11[FB + i]; d11[FB + i] = 0 }
     /// Harm heat cons considering max harm op during harm op period
     // SUMIF(CalculationCS5:CS8763,"="A6,CalculationDI5:DI8763)+SUMIFS(CalculationCU5:CU8763,CalculationCS5:CS8763,"="A6,CalculationDH5:DH8763,">0")
-    hour.sum(days: days, range: DI, into: &d11, at: FB)
-    hour.sumOf(CU, days: days, into: &d11, at: FG, condition: DH, predicate: notZero)
-    for i in 0..<365 { d11[FG + i] += d11[FB + i] }
+    // hour.sum(days: days, range: DI, into: &d11, at: FB)
+    // hour.sumOf(CU, days: days, into: &d11, at: FG, condition: DH, predicate: notZero)
+    // for i in 0..<365 { d11[FG + i] += d11[FB + i]; d11[FB + i] = 0 }
     /// Harm heat cons outside of harm op period
     // SUMIFS(CalculationCU5:CU8763,CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,"=0")
-    hour.sumOf(CU, days: days, into: &d11, at: FH, condition: CQ, predicate: { $0.isZero })
+    // hour.sumOf(CU, days: days, into: &d11, at: FH, condition: CQ, predicate: { $0.isZero })
     /// Electr demand not covered after min harm and stby during harm op period
     // SUMIFS(CalculationCX5:CX8763,CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,">0")
-    hour.sumOf(CX, days: days, into: &d11, at: FI, condition: CQ, predicate: notZero)
+    // hour.sumOf(CX, days: days, into: &d11, at: FI, condition: CQ, predicate: notZero)
     /// Electr demand not covered after max harm and stby during harm op period
     // SUMIFS(CalculationDL5:DL8763,CalculationCS5:CS8763,"="A6,CalculationDH5:DH8763,">0")
-    hour.sumOf(DL, days: days, into: &d11, at: FJ, condition: DH, predicate: notZero)
+    // hour.sumOf(DL, days: days, into: &d11, at: FJ, condition: DH, predicate: notZero)
     /// Electr demand not covered after min/max harm and stby outside harm op period
-    // SUMIF(CalculationCS5:CS8763,"="A6,CalculationCX5:CX8763)-FI6
-    hour.sum(days: days, range: CX, into: &d11, at: FK)
-    for i in 0..<365 { d11[FK + i] -= d11[FI + i] }
+    // =SUMIFS(Calculation!$CX$5:$CX$8764,Calculation!$CS$5:$CS$8764,"="&$A3,Calculation!$CQ$5:$CQ$8764,"=0")
+    hour.sumOf(CX, days: days, into: &d11, at: FK, condition: CQ, predicate: { $0.isZero })
     /// El boiler op considering min harm op during harm op period
     // // FL=SUMIFS(Calculation!$TH$5:$TH$8764,Calculation!$CS$5:$CS$8764,"="&$A3,Calculation!$CQ$5:$CQ$8764,">0")
     hour.sumOf(TH, days: days, into: &d11, at: FL, condition: CQ, predicate: notZero)
@@ -345,18 +344,18 @@ extension TunOl {
     hour.sumOf(TH, days: days, into: &d11, at: FL, condition: CQ, predicate: { $0.isZero })
     /// Total aux cons during harm op period
     // SUMIFS(CalculationCM5:CM8763,CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,">0")
-    hour.sumOfRanges(CM, days: days, into: &d11, at: FO, range1: hour, condition: CQ, predicate: notZero)
+    // hour.sumOfRanges(CM, days: days, into: &d11, at: FO, range1: hour, condition: CQ, predicate: notZero)
     /// Total aux cons outside of harm op period
     // SUMIF(CalculationCS5:CS8763,"="A6,CalculationCM5:CM8763)-FO6
-    hour.sum(days: days, range: CM, into: &d11, at: FP)
-    for i in 0..<365 { d11[FP + i] -= d11[FO + i] }
+    // hour.sum(days: days, range: CM, into: &d11, at: FP)
+    // for i in 0..<365 { d11[FP + i] -= d11[FO + i] }
     /// El cons not covered during harm op period
     // SUMIFS(CalculationCN5:CN8763,CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,">0")
-    hour.sumOfRanges(CN, days: days, into: &d11, at: FQ, range1: hour, condition: CQ, predicate: notZero)
+    // hour.sumOfRanges(CN, days: days, into: &d11, at: FQ, range1: hour, condition: CQ, predicate: notZero)
     /// El cons not covered outside of harm op period
     // SUMIF(CalculationCS5:CS8763,"="A6,CalculationCN5:CN8763)-FQ6
-    hour.sum(days: days, range: CN, into: &d11, at: FR)
-    for i in 0..<365 { d11[FR + i] -= d11[FQ + i] }
+    // hour.sum(days: days, range: CN, into: &d11, at: FR)
+    // for i in 0..<365 { d11[FR + i] -= d11[FQ + i] }
     /// Remaining PV el after TES chrg&min harm&aux during harm op period
     // SUMIFS(CalculationCV5:CV8763,CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,">0")
     hour.sumOf(CV, days: days, into: &d11, at: FS, condition: CQ, predicate: notZero)
@@ -417,8 +416,8 @@ extension TunOl {
     hour.sumOf(DO, days: days, into: &d11, at: GI, condition: DH, predicate: notZero)
     /// Remaining El boiler cap outside of harm op period
     // SUMIF(CalculationCS5:CS8763,"="A6,CalculationDA5:DA8763)-GH6
-    hour.sum(days: days, range: DA, into: &d11, at: GJ)
-    for i in 0..<365 { d11[GJ + i] -= d11[GH + i] }
+    //  hour.sum(days: days, range: DA, into: &d11, at: GJ)
+    // for i in 0..<365 { d11[GJ + i] -= d11[GH + i] }
     /// Remaining MethSynt cap during harm op after min harm op
     // SUMIFS(CalculationDB5:DB8763,CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,">0")
     hour.sumOf(DB, days: days, into: &d11, at: GK, condition: CQ, predicate: notZero)
@@ -427,8 +426,8 @@ extension TunOl {
     hour.sumOf(DP, days: days, into: &d11, at: GL, condition: DH, predicate: notZero)
     /// Remaining MethSynt cap outside of harm op period
     // SUMIF(CalculationCS5:CS8763,"="A6,CalculationDB5:DB8763)-GK6
-    hour.sum(days: days, range: DB, into: &d11, at: GM)
-    for i in 0..<365 { d11[GM + i] -= d11[GK + i] }
+    // hour.sum(days: days, range: DB, into: &d11, at: GM)
+    // for i in 0..<365 { d11[GM + i] -= d11[GK + i] }
     /// Remaining CCU cap during harm op after min harm
     // SUMIFS(CalculationDC5:DC8763,CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,">0")
     hour.sumOf(DC, days: days, into: &d11, at: GN, condition: CQ, predicate: notZero)
@@ -437,8 +436,8 @@ extension TunOl {
     hour.sumOf(DQ, days: days, into: &d11, at: GO, condition: DH, predicate: notZero)
     /// Remaining CCU cap outside of harm op after min harm
     // SUMIF(CalculationCS5:CS8763,"="A6,CalculationDC5:DC8763)-GN6
-    hour.sum(days: days, range: DC, into: &d11, at: GP)
-    for i in 0..<365 { d11[GP + i] -= d11[GN + i] }
+    // hour.sum(days: days, range: DC, into: &d11, at: GP)
+    // for i in 0..<365 { d11[GP + i] -= d11[GN + i] }
     /// Remaining EY cap during harm op after min harm
     // SUMIFS(CalculationDD5:DD8763,CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,">0")
     hour.sumOf(DD, days: days, into: &d11, at: GQ, condition: CQ, predicate: notZero)
@@ -447,8 +446,8 @@ extension TunOl {
     hour.sumOf(DR, days: days, into: &d11, at: GR, condition: DH, predicate: notZero)
     /// Remaining EY cap outside of harm op period
     // SUMIF(CalculationCS5:CS8763,"="A6,CalculationDD5:DD8763)-GQ6
-    hour.sum(days: days, range: DD, into: &d11, at: GS)
-    for i in 0..<365 { d11[GS + i] -= d11[GQ + i] }
+    // hour.sum(days: days, range: DD, into: &d11, at: GS)
+    // for i in 0..<365 { d11[GS + i] -= d11[GQ + i] }
   }
 
   func d12(_ d12: inout [Double], hourFinal: [Double], case j: Int) {

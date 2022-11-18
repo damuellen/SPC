@@ -44,7 +44,7 @@ class SunOlTests: XCTestCase {
       var correct = true, counter = 1
       for i in 0..<364 {
         if counter > 20 { break }
-        if abs(ref[i]) - abs(array[index + i]) > max(abs(ref[i]) * 0.01, 0.01) {
+        if abs(abs(ref[i]) - abs(array[index + i])) > max(abs(ref[i]) * 0.01, 0.01) {
           counter += 1; correct = false
           print("Daily1 \(letter)\(i + 3) proper value: \(String(format: "%.2f", ref[i])) [\(index + i)] \(String(format: "%.2f", array[index + i]))  div: \(ref[i] - array[index + i])")
         }
@@ -143,8 +143,7 @@ class SunOlTests: XCTestCase {
         // MK 83950
         (348..<381).map { column($0, offset: 118) }.forEach { letter, offset in daily1(d10, letter, offset) }
         // E 0
-        (4..<31).map { column($0, offset: 4) }.forEach { letter, offset in daily2(d21, letter, offset) }
-        (121..<150).map { column($0, offset: 121) }.forEach { letter, offset in daily2(d22, letter, offset) }
+        (4..<30).map { column($0, offset: 4) }.forEach { letter, offset in daily2(d21, letter, offset) }
         // FC 0
         (158..<188).map { column($0, offset: 158) }.forEach { letter, offset in daily2(d23, letter, offset) }
         // GH 10950
@@ -153,6 +152,7 @@ class SunOlTests: XCTestCase {
         (235..<262).map { column($0, offset: 161) }.forEach { letter, offset in daily2(d23, letter, offset) }
         // JD 36865
         (263..<288).map { column($0, offset: 162) }.forEach { letter, offset in daily2(d23, letter, offset) }
+
       }
       if j == 1 {
         print("Case B")

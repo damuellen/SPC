@@ -36,7 +36,7 @@ extension TunOl {
       // MAX(0,L6-O6)
       h[P + i] = max(Double.zero, h[L + i] - h[O + i])
       // MAX(0,O6-P6)
-      h[Q + i] = max(Double.zero, h[O + i] - h[P + i])
+      h[Q + i] = max(Double.zero, h[O + i] - h[L + i])
     }
     /// Min harmonious net elec cons
     let R: Int = 87600
@@ -87,9 +87,9 @@ extension TunOl {
     // TY=MAX(0,IF(S6>0,0,Overall_heat_stby_cons+IF(S7=0,0,Overall_heat_stup_cons)-W6))
     // TZ=MAX(0,IF(S6>0,0,-Overall_stby_cons-IF(S7=0,0,Overall_stup_cons))+V6)
     for i in 1..<8760 {
-      h[TX + i] = max(0, iff(h[S + i] > Double.zero, 0, Overall_stby_cons + iff(h[S + i + 1] == Double.zero, 0, Overall_stup_cons) - h[V + i]))
-      h[TY + i] = max(0, iff(h[S + i] > Double.zero, 0, Overall_heat_stby_cons + iff(h[S + i + 1] == Double.zero, 0, Overall_heat_stup_cons) - h[W + i]))
-      h[TZ + i] = max(0, iff(h[S + i] > Double.zero, 0, -Overall_stby_cons - iff(h[S + i + 1] == Double.zero, 0, Overall_stup_cons)) + h[V + i])
+      h[TX + i] = max(0, iff(h[S + i] > Double.zero, 0, iff(h[S + i + 1] == Double.zero, Overall_stby_cons, Overall_stup_cons) - h[V + i]))
+      h[TY + i] = max(0, iff(h[S + i] > Double.zero, 0, iff(h[S + i + 1] == Double.zero, Overall_heat_stby_cons, Overall_heat_stup_cons) - h[W + i]))
+      h[TZ + i] = max(0, iff(h[S + i] > Double.zero, 0, iff(h[S + i + 1] == Double.zero, -Overall_stby_cons, -Overall_stup_cons)) + h[V + i])
     }
 
     /// Grid import necessary for min harmonious
@@ -200,9 +200,9 @@ extension TunOl {
     // UC=MAX(0,IF(AH6>0,0,Overall_heat_stby_cons+IF(AH7=0,0,Overall_heat_stup_cons)-AK6))
     // UD=MAX(0,IF(AH6>0,0,-Overall_stby_cons-IF(AH7=0,0,Overall_stup_cons))+AJ6)
     for i in 1..<8760 {
-      h[UB + i] = max(0, iff(h[AH + i] > Double.zero, 0, Overall_stby_cons + iff(h[AH + i + 1] == Double.zero, 0, Overall_stup_cons) - h[AJ + i]))
-      h[UC + i] = max(0, iff(h[AH + i] > Double.zero, 0, Overall_heat_stby_cons + iff(h[AH + i + 1] == Double.zero, 0, Overall_heat_stup_cons) - h[AK + i]))
-      h[UD + i] = max(0, iff(h[AH + i] > Double.zero, 0, -Overall_stby_cons - iff(h[AH + i + 1] == Double.zero, 0, Overall_stup_cons)) + h[AJ + i])
+      h[UB + i] = max(0, iff(h[AH + i] > Double.zero, 0, iff(h[AH + i + 1] == Double.zero, Overall_stby_cons, Overall_stup_cons) - h[AJ + i]))
+      h[UC + i] = max(0, iff(h[AH + i] > Double.zero, 0, iff(h[AH + i + 1] == Double.zero, Overall_heat_stby_cons, Overall_heat_stup_cons) - h[AK + i]))
+      h[UD + i] = max(0, iff(h[AH + i] > Double.zero, 0, iff(h[AH + i + 1] == Double.zero, -Overall_stby_cons, -Overall_stup_cons)) + h[AJ + i])
     }
 
     /// Grid import necessary for max harm
