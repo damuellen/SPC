@@ -152,7 +152,8 @@ class SunOlTests: XCTestCase {
         (235..<262).map { column($0, offset: 161) }.forEach { letter, offset in daily2(d23, letter, offset) }
         // JD 36865
         (263..<288).map { column($0, offset: 162) }.forEach { letter, offset in daily2(d23, letter, offset) }
-
+        daily2(d23, "JB", 36135)
+        daily2(d23, "KD", 45990)
       }
       if j == 1 {
         print("Case B")
@@ -164,6 +165,8 @@ class SunOlTests: XCTestCase {
         (577..<610).map { column($0, offset: 347) }.forEach { letter, offset in daily1(d10, letter, offset) }
         daily2(d23, "OB", 35405)
         daily2(d23, "PD", 45260)
+        daily2(d23, "OE", 36135)
+        daily2(d23, "PG", 45990)
       }
       if j == 2 {
         print("Case C")
@@ -174,6 +177,8 @@ class SunOlTests: XCTestCase {
         (806..<839).map { column($0, offset: 576) }.forEach { letter, offset in daily1(d10, letter, offset) }
         daily2(d23, "TE", 35405)
         daily2(d23, "UG", 45260)
+        daily2(d23, "TH", 36135)
+        daily2(d23, "UJ", 45990)
       }
       if j == 3 {
         print("Case D")
@@ -183,6 +188,9 @@ class SunOlTests: XCTestCase {
         // AMV 83950
         (1034..<1067).map { column($0, offset: 805) }.forEach { letter, offset in daily1(d10, letter, offset) }
         daily2(d23, "YH", 35405)
+        daily2(d23, "ZI", 45260)
+        daily2(d23, "YK", 36135)
+        daily2(d23, "ZM", 45990)
       }
     }
     var meth_produced_MTPH_sum = Double.zero
@@ -194,7 +202,7 @@ class SunOlTests: XCTestCase {
 
     for d in 0..<365 {
       let cases = day.indices.map { i in costs.LCOM(meth_produced_MTPH: day[i][d] * 365.0, elec_from_grid: day[i][d + 365 + 365] * 365.0, elec_to_grid: day[i][d + 365] * 365.0) }
-      let best = cases.indices.filter { cases[$0].isFinite }.filter { cases[$0] > 0 }.sorted { cases[$0] < cases[$1] }.first
+      let best = cases.indices.sorted { cases[$0] < cases[$1] }.first
       if let best = best {
         meth.append(day[best][d])
         meth_produced_MTPH_sum += day[best][d]
@@ -216,7 +224,7 @@ class SunOlTests: XCTestCase {
   }
 
   func testsCalculation2() {
-    let values = [128, 5804.06, 223.32, 544, 837.83, 200, 0, 390.6, 1000, 1000, 100000, 21.19, 54.65, 0, 0, 0]
+    let values = [0.00,0.00,0.00,599.32,803.41,180.00,0.00,0.00,1000.00,100000.00,100000.00,17.56,15.72,451.42,0.00,0.00,]
 
     guard let model = TunOl(values) else {
       print("Invalid config")
@@ -268,22 +276,29 @@ class SunOlTests: XCTestCase {
       "1a day prio", "1a night prio", "2a day prio", "2a night prio", "1b day prio", "1b night prio", "2b day prio", "2b night prio", "1c day prio", "1c night prio",
       "2c day prio", "2c night prio", "1d day prio", "1d night prio", "2d day prio", "2d night prio",
     ]
-    var charts = [Int]()
+
     var hours_sum = 0.0
     var outputStream = ""
     for child in Mirror(reflecting: model).children.filter({ $0.label?.contains("_ud") ?? false }) { print(child.label!, child.value as! Double, to: &outputStream) }
     for d in 0..<365 {
-      let cases = day.indices.map { i in costs.LCOM(meth_produced_MTPH: day[i][d] * 365.0, elec_from_grid: day[i][d + 365 + 365] * 365.0, elec_to_grid: day[i][d + 365] * 365.0) }
-      let ranked = cases.indices.filter { cases[$0].isFinite }.filter { cases[$0] > 0 }.sorted { cases[$0] < cases[$1] }
+      let cases = day.map { values in 
+        costs.LCOM(meth_produced_MTPH: values[d] * 365.0, elec_from_grid: values[d + 730] * 365.0, elec_to_grid: values[d + 365] * 365.0)
+      }
+      let ranked = cases.indices.sorted { cases[$0] < cases[$1] }
+
       if let best = ranked.first {
-        charts.append(best)
-        meth_produced_MTPH_sum += day[best][d]
-        let from_grid = day[best][d + 365 + 365]
+        let meth_produced_MTPH = day[best][d]
+        print(meth_produced_MTPH)
+        meth_produced_MTPH_sum += meth_produced_MTPH
+        let to_grid = day[best][d + 365]
+        elec_to_grid_MTPH_sum += to_grid
+        print(to_grid)
+        let from_grid = day[best][d + 730]
         elec_from_grid_sum += from_grid
-        elec_to_grid_MTPH_sum += day[best][d + 365]
-        let hours0 = day[best][d + 730 + 365]
-        let hours1 = day[best][d + 730 + 730]
-        print(d, name[best], day[best][d], elec_to_grid_MTPH_sum, from_grid, hours0, hours1, to: &outputStream)
+        print(from_grid)
+        let hours0 = day[best][d + 1095]
+        let hours1 = day[best][d + 1460]
+        print(d, name[best], "Meth: \(day[best][d])", "To: \(to_grid)", "From: \(from_grid)", hours0, hours1, to: &outputStream)
         hours_sum += hours0 + hours1
       }
     }

@@ -40,26 +40,28 @@ func fitness(values: [Double], penalized: Bool) -> [Double] {
     day.append(Array(d23[IY..<IY+1095] + ArraySlice(a) + day20[730..<1095]))
     let b = zip(day20[365..<730], d23[HE..<HF]).map { $1 > 0 ? $0 : 0 }
     day.append(Array(d23[KA..<KA+1095] + ArraySlice(b) + day20[730..<1095]))
- }
+  }
 
   var meth_produced_MTPH_sum = Double.zero
   var elec_from_grid_sum = Double.zero
   var elec_to_grid_MTPH_sum = Double.zero
   var hours_sum = Double.zero
   let costs = Costs(model)
-  var meth = [Double]()
 
   for d in 0..<365 {
-    let cases = day.indices.map { i in costs.LCOM(meth_produced_MTPH: day[i][d] * 365.0, elec_from_grid: day[i][d + 365 + 365] * 365.0, elec_to_grid: day[i][d + 365] * 365.0) }
-    let best = cases.indices.filter { cases[$0].isFinite }.filter { cases[$0] > 0 }.sorted { cases[$0] < cases[$1] }.first
-    if let best = best {
-      meth.append(day[best][d])
-      meth_produced_MTPH_sum += day[best][d]
-      let from_grid = day[best][d + 365 + 365]
+    let cases = day.map { values in 
+      costs.LCOM(meth_produced_MTPH: values[d] * 365.0, elec_from_grid: values[d + 730] * 365.0, elec_to_grid: values[d + 365] * 365.0)
+    }
+    let ranked = cases.indices.sorted { cases[$0] < cases[$1] }
+    if let best = ranked.first {
+      let meth_produced_MTPH = day[best][d]
+      meth_produced_MTPH_sum += meth_produced_MTPH
+      let to_grid = day[best][d + 365]
+      elec_to_grid_MTPH_sum += to_grid
+      let from_grid = day[best][d + 730]
       elec_from_grid_sum += from_grid
-      elec_to_grid_MTPH_sum += day[best][d + 365]
-      let hours0 = day[best][d + 730 + 365]
-      let hours1 = day[best][d + 730 + 730]
+      let hours0 = day[best][d + 1095]
+      let hours1 = day[best][d + 1460]
       hours_sum += hours0 + hours1
     }
   }
@@ -71,6 +73,6 @@ func fitness(values: [Double], penalized: Bool) -> [Double] {
   } else {
    fitness = LCOM * (1.0 + (abs(min(meth_produced_MTPH_sum - 100000.0, Double.zero)) / 10000.0) * 0.3)
   }
-  if !meth.drop(while: { $0 < meth_produced_MTPH_sum / 100 }).isEmpty || LCOM.isInfinite || meth_produced_MTPH_sum.isZero { return [Double.infinity] }
+  if LCOM.isInfinite || meth_produced_MTPH_sum.isZero { return [Double.infinity] }
   return [fitness, LCOM, costs.Total_CAPEX, costs.Total_OPEX, meth_produced_MTPH_sum, elec_from_grid_sum, elec_to_grid_MTPH_sum, hours_sum] + model.values
 }
