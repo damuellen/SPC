@@ -97,9 +97,9 @@ struct Command: ParsableCommand {
     // try? InputParameter(ranges: ranges).storeToJSON(file: .init(fileURLWithPath: "Parameter.json"))
     var parameter = Parameter()
     var resultsA = Tables()
-    for EY in stride(from: 140, through: 180, by: 20) where !source.isCancelled {
+    for EY in stride(from: 120, through: 200, by: 20) where !source.isCancelled {
       var results = Table()
-      for _ in 1...5 where !source.isCancelled {
+      for _ in 1...3 where !source.isCancelled {
         parameter.ranges[5] = Double(EY)...Double(EY)
         let worker = IGOA(n: n ?? 30, maxIterations: iterations ?? 270, bounds: parameter.ranges)
         let result = worker(SunOl.fitnessPenalized)
@@ -120,15 +120,36 @@ struct Command: ParsableCommand {
       BESS_cap: 0...5000.0
     )
     var resultsB = Tables()
-    for EY in stride(from: 140, through: 180, by: 20) where !source.isCancelled {
+    for EY in stride(from: 120, through: 200, by: 20) where !source.isCancelled {
       var results = Table()
-      for _ in 1...5 where !source.isCancelled {
+      for _ in 1...3 where !source.isCancelled {
         parameter.ranges[5] = Double(EY)...Double(EY)
         let worker = IGOA(n: n ?? 30, maxIterations: iterations ?? 270, bounds: parameter.ranges)
         results.append(contentsOf: worker(SunOl.fitnessPenalized))
       }
       results = removingNearby(results.filter { $0[0].isFinite }.sorted { $0[0] < $1[0] })
       resultsB[EY] = Array(results.prefix(1000))
+    }
+    writeExcel("SunOl_\(id)_BESS.xlsx", results: resultsB)
+
+    parameter = Parameter(
+      CSP_loop_nr: 0...0.0,
+      TES_thermal_cap: 0...0.0,
+      PB_nom_gross_cap: 0...0.0,
+      El_boiler_cap: 0...100.0,
+      EY_var_net_nom_cons: 180...180,
+      Heater_cap: 0...0.0
+    )
+    var resultsC = Tables()
+    for EY in stride(from: 220, through: 300, by: 20) where !source.isCancelled {
+      var results = Table()
+      for _ in 1...3 where !source.isCancelled {
+        parameter.ranges[5] = Double(EY)...Double(EY)
+        let worker = IGOA(n: n ?? 30, maxIterations: iterations ?? 270, bounds: parameter.ranges)
+        results.append(contentsOf: worker(SunOl.fitness))
+      }
+      results = removingNearby(results.filter { $0[0].isFinite }.sorted { $0[0] < $1[0] })
+      resultsC[EY] = Array(results.prefix(1000))
     }
     writeExcel("SunOl_\(id)_BESS.xlsx", results: resultsB)
     writeExcel("SunOl_\(id)_All.xlsx", results: resultsA, resultsB)
@@ -182,7 +203,7 @@ func writeExcel(_ name: String, results: Tables...) {
   ]
   ws.table(range: [0, 0, cursor-1, labels.endIndex - 1], header: labels)
 
-  let charting = [2, 4, 7, 8, 9, 10, 11, 12, 15, 19, 20]
+  let charting = [2, 4, 7, 8, 9, 10, 11, 12, 15, 19, 20, 21]
   for (column, name) in labels.enumerated() where charting.contains(column) {
     let chart = wb.addChart(type: .scatter) // .set(y_axis: 1400...2100)
     var start = 1

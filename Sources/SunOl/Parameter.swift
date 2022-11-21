@@ -11,7 +11,7 @@ public struct Parameter {
     PV_AC_cap: ClosedRange<Double> = 200...1500.0,
     PV_DC_cap: ClosedRange<Double> = 220...1600.0,
     CCU_CO2_nom_prod: ClosedRange<Double> = 1000...1000.0,
-    CO2_storage_cap: ClosedRange<Double> = 1000...1000.0,
+    CO2_storage_cap: ClosedRange<Double> = 10000...10000.0,
     El_boiler_cap: ClosedRange<Double> = 0...200.0,
     EY_var_net_nom_cons: ClosedRange<Double> = 180...180,
     Hydrogen_storage_cap: ClosedRange<Double> =  0...0.0, 
