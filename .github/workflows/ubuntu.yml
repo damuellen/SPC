@@ -10,10 +10,10 @@ jobs:
     steps:
 
     - name: Checkout sources
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Checkout libxlsxwriter
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with: 
         repository: jmcnamara/libxlsxwriter
         ref: 'RELEASE_1.1.4'
@@ -21,7 +21,7 @@ jobs:
 
     - name: Cache libxlsxwriter
       id: cache-libxlsxwriter
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: ./libxlsxwriter
         key: ${{ runner.os }}-libxlsxwriter
