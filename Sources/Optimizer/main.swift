@@ -97,9 +97,9 @@ struct Command: ParsableCommand {
     // try? InputParameter(ranges: ranges).storeToJSON(file: .init(fileURLWithPath: "Parameter.json"))
     var parameter = Parameter()
     var resultsA = Tables()
-    for EY in stride(from: 120, through: 200, by: 20) where !source.isCancelled {
+    for EY in stride(from: 140, through: 200, by: 20) where !source.isCancelled {
       var results = Table()
-      for _ in 1...3 where !source.isCancelled {
+      for _ in 1...10 where !source.isCancelled {
         parameter.ranges[5] = Double(EY)...Double(EY)
         let worker = IGOA(n: n ?? 30, maxIterations: iterations ?? 270, bounds: parameter.ranges)
         let result = worker(SunOl.fitnessPenalized)
@@ -120,9 +120,9 @@ struct Command: ParsableCommand {
       BESS_cap: 0...5000.0
     )
     var resultsB = Tables()
-    for EY in stride(from: 120, through: 200, by: 20) where !source.isCancelled {
+    for EY in stride(from: 140, through: 200, by: 20) where !source.isCancelled {
       var results = Table()
-      for _ in 1...3 where !source.isCancelled {
+      for _ in 1...10 where !source.isCancelled {
         parameter.ranges[5] = Double(EY)...Double(EY)
         let worker = IGOA(n: n ?? 30, maxIterations: iterations ?? 270, bounds: parameter.ranges)
         results.append(contentsOf: worker(SunOl.fitnessPenalized))
@@ -143,7 +143,7 @@ struct Command: ParsableCommand {
     var resultsC = Tables()
     for EY in stride(from: 220, through: 300, by: 20) where !source.isCancelled {
       var results = Table()
-      for _ in 1...3 where !source.isCancelled {
+      for _ in 1...5 where !source.isCancelled {
         parameter.ranges[5] = Double(EY)...Double(EY)
         let worker = IGOA(n: n ?? 30, maxIterations: iterations ?? 270, bounds: parameter.ranges)
         results.append(contentsOf: worker(SunOl.fitness))
@@ -151,8 +151,8 @@ struct Command: ParsableCommand {
       results = removingNearby(results.filter { $0[0].isFinite }.sorted { $0[0] < $1[0] })
       resultsC[EY] = Array(results.prefix(1000))
     }
-    writeExcel("SunOl_\(id)_BESS.xlsx", results: resultsB)
-    writeExcel("SunOl_\(id)_All.xlsx", results: resultsA, resultsB)
+    writeExcel("SunOl_\(id)_PV_only.xlsx", results: resultsC)
+    writeExcel("SunOl_\(id)_All.xlsx", results: resultsA, resultsB, resultsC)
   }
 }
 
