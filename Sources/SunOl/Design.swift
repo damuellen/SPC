@@ -272,7 +272,7 @@ public struct TunOl {
   var Grid_export_yes_no_BESS_strategy: Double = 1
   var Grid_export_yes_no_PB_strategy_outsideharmop: Double = 1
   var Grid_export_yes_no_BESS_strategy_outsideharmop: Double = 1
-  var EDG_elec_cost_factor: Double = 2000.0 / 5.5 / 1000.0 / 0.19
+  var EDG_elec_cost_factor: Double = 2000.0 / 5.5 / 1000.0 / 0.19 / 0.3
   var values: [Double] {
     [
       CSP_loop_nr_ud, TES_thermal_cap_ud, PB_nom_gross_cap_ud, PV_AC_cap_ud, PV_DC_cap_ud, EY_var_net_nom_cons_ud, Hydrogen_storage_cap_ud, Heater_cap_ud, CCU_CO2_nom_prod_ud, CO2_storage_cap_ud, RawMeth_storage_cap_ud,
