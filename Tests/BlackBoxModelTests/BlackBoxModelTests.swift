@@ -30,8 +30,7 @@ class BlackBoxModelTests: XCTestCase {
    // XCTAssertEqual(result.thermal.startUp.megaWatt, 242.7, accuracy: tol)
     XCTAssertEqual(result.thermal.production.megaWatt, 5561.9, accuracy: tol)
     XCTAssertEqual(result.thermal.heatExchanger.megaWatt, 5584.1, accuracy: tol)
-    let plotting = false
-    if plotting {
+    do {
       let interval = DateInterval(ofDay: 192, in: 2005)
       let y1 = result.massFlows(range: interval)
       let y2 = result.power(range: interval)
@@ -40,7 +39,7 @@ class BlackBoxModelTests: XCTestCase {
       plot.y2Titles = ["solar", "toStorage", "production", "storage", "gross", "net", "consum"]
       _ = try? plot(toFile: "PowerSummer3")
     }
-    if plotting {
+    do {
       let interval = DateInterval(ofDay: 193, in: 2005)
       let y1 = result.massFlows(range: interval)
       let y2 = result.power(range: interval)
@@ -71,7 +70,7 @@ class BlackBoxModelTests: XCTestCase {
     //XCTAssertEqual(result.thermal.startUp.megaWatt, 243.5, accuracy: tol)
     XCTAssertEqual(result.thermal.production.megaWatt, 3154.5, accuracy: tol)
     XCTAssertEqual(result.thermal.heatExchanger.megaWatt, 3179.0, accuracy: tol)
-    if false {
+    do {
       let interval = DateInterval(ofDay: 11, in: 2005)
       let y1 = result.massFlows(range: interval)
       let y2 = result.power(range: interval)
