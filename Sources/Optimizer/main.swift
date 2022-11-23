@@ -99,7 +99,7 @@ struct Command: ParsableCommand {
     var resultsA = Tables()
     for EY in stride(from: 140, through: 200, by: 20) where !source.isCancelled {
       var results = Table()
-      for _ in 1...10 where !source.isCancelled {
+      for _ in 1...9 where !source.isCancelled {
         parameter.ranges[5] = Double(EY)...Double(EY)
         let worker = IGOA(n: n ?? 30, maxIterations: iterations ?? 270, bounds: parameter.ranges)
         let result = worker(SunOl.fitnessPenalized)
@@ -122,7 +122,7 @@ struct Command: ParsableCommand {
     var resultsB = Tables()
     for EY in stride(from: 140, through: 200, by: 20) where !source.isCancelled {
       var results = Table()
-      for _ in 1...10 where !source.isCancelled {
+      for _ in 1...9 where !source.isCancelled {
         parameter.ranges[5] = Double(EY)...Double(EY)
         let worker = IGOA(n: n ?? 30, maxIterations: iterations ?? 270, bounds: parameter.ranges)
         results.append(contentsOf: worker(SunOl.fitnessPenalized))
@@ -246,3 +246,4 @@ func respond(request: HTTP.Request) -> HTTP.Response {
 typealias Row = [Double]
 typealias Table = [Row]
 typealias Tables = [Int:Table]
+

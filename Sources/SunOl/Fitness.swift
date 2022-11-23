@@ -1,45 +1,40 @@
 import Foundation
 import Utilities
 
-public func fitness(values: [Double]) -> [Double] { fitness(values: values, penalized: false) }
-public func fitnessPenalized(values: [Double]) -> [Double] { fitness(values: values, penalized: true) }
-func fitness(values: [Double], penalized: Bool) -> [Double] {
+public func fitness(buffer: UnsafeMutableBufferPointer<Double>, values: [Double]) -> [Double] { fitness(buffer: buffer, values: values, penalized: false) }
+public func fitnessPenalized(buffer: UnsafeMutableBufferPointer<Double>, values: [Double]) -> [Double] { fitness(buffer: buffer, values: values, penalized: true) }
+func fitness(buffer: UnsafeMutableBufferPointer<Double>, values: [Double], penalized: Bool) -> [Double] {
   guard let model = TunOl(values) else { return [Double.infinity, 0, 0, 0, 0, 0, 0, 0] + values }
 
-  var hourPre = [Double](repeating: 0.0, count: 1_086_240)
-  var hourFinal = [Double](repeating: 0.0, count: 516_840)
-  var d10 = [Double](repeating: 0.0, count: 97_090)
-  var d23 = [Double](repeating: 0.0, count: 48_545)
-  var d21 = [Double](repeating: 0.0, count: 9_855)
   var day = [[Double]]()
   let (HC, HE, HF) = (18615, 18980, 19345)
   let (IY, KA) = (35405, 45260)
   let (MC, MI, NL, NR) = (81030, 83220, 93805, 95995)
 
-  model.hour(TunOl.Q_Sol_MW_thLoop, TunOl.Reference_PV_plant_power_at_inverter_inlet_DC, TunOl.Reference_PV_MV_power_at_transformer_outlet, hour: &hourPre)
-  let day20 = model.day20(hour: hourPre)
-  let d22 = model.d22(hour: hourPre, d20: day20)
+  model.hour(buffer, TunOl.Q_Sol_MW_thLoop, TunOl.Reference_PV_plant_power_at_inverter_inlet_DC, TunOl.Reference_PV_MV_power_at_transformer_outlet)
+  model.day20(buffer)
+  model.d22(buffer)
 
-  model.hour1(&hourPre, reserved: model.Overall_harmonious_min_perc)
+  model.hour1(buffer, reserved: model.Overall_harmonious_min_perc)
   
   for j in 0..<4 {
-    model.hour2(&hourPre, case: j)
-    model.hour3(&hourPre, case: j)
-    model.d10(&d10, hour: hourPre, case: j)
-    model.hourFinal(&hourFinal, d1: d10, hour: hourPre, case: j)
-    model.night(&d10, hour4: hourFinal, case: j)
-    model.d11(&d10, hour: hourPre, case: j)
-    model.d12(&d10, hourFinal: hourFinal, case: j)
-    model.d13(&d10, case: j)
-    model.d14(&d10, case: j)
-    day.append(Array(d10[MC..<MI]))
-    day.append(Array(d10[NL..<NR]))
-    model.d21(&d21, case: j, day0: day20)
-    model.d23(&d23, case: j, day0: day20, d21: d21, d22: d22)
-    let a = zip(day20[365..<730], d23[HC..<HE]).map { $1 > 0 ? $0 : 0 }
-    day.append(Array(d23[IY..<IY+1095] + ArraySlice(a) + day20[730..<1095]))
-    let b = zip(day20[365..<730], d23[HE..<HF]).map { $1 > 0 ? $0 : 0 }
-    day.append(Array(d23[KA..<KA+1095] + ArraySlice(b) + day20[730..<1095]))
+    model.hour2(buffer, case: j)
+    model.hour3(buffer, case: j)
+    model.d10(buffer, case: j)
+    model.hourFinal(buffer, case: j)
+    model.night(buffer, case: j)
+    model.d11(buffer, case: j)
+    model.d12(buffer, case: j)
+    model.d13(buffer, case: j)
+    model.d14(buffer, case: j)
+    day.append(Array(buffer[MC..<MI]))
+    day.append(Array(buffer[NL..<NR]))
+    model.d21(buffer, case: j)
+    model.d23(buffer, case: j)
+    let a = zip(buffer[365..<730], buffer[HC..<HE]).map { $1 > 0 ? $0 : 0 }
+    day.append(Array(buffer[IY..<IY+1095] + ArraySlice(a) + buffer[730..<1095]))
+    let b = zip(buffer[365..<730], buffer[HE..<HF]).map { $1 > 0 ? $0 : 0 }
+    day.append(Array(buffer[KA..<KA+1095] + ArraySlice(b) + buffer[730..<1095]))
   }
 
   var meth_produced_MTPH_sum = Double.zero
