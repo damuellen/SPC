@@ -13,11 +13,9 @@ import Foundation
 @_exported import Utilities
 
 public var convergenceCurves = [[[Double]]](repeating: [[Double]](), count: 3)
-public typealias FitnessFunction = (UnsafeMutableBufferPointer<Double>, [Double]) -> [Double]
+public typealias FitnessFunction = ([Double]) -> [Double]
 
 public struct IGOA {
-  let memory: [UnsafeMutableBufferPointer<Double>]
-
   let n: Int
   let maxIterations: Int
   let bounds: [ClosedRange<Double>]
@@ -50,9 +48,6 @@ public struct IGOA {
     self.n = split.remainder > 0 ? (split.quotient + 1) * 3 : split.quotient * 3
     self.maxIterations = maxIterations
     self.bounds = bounds
-    let buffer = UnsafeMutableBufferPointer<Double>.allocate(capacity: 1804560)
-    buffer.initialize(repeating: 0)
-    self.memory = .init(repeating: buffer, count: 8)
   }
   
   public func callAsFunction(_ fitness: FitnessFunction) -> [[Double]] {
@@ -69,7 +64,7 @@ public struct IGOA {
     // Calculate the fitness of initial grasshoppers
     DispatchQueue.concurrentPerform(iterations: grassHopperPositions.count) { i in
       if source.isCancelled { return }
-      let result = fitness(self.memory[i % 8], grassHopperPositions[i])
+      let result = fitness(grassHopperPositions[i])
       targetResults[i] = result + [0]
       grassHopperFitness[i] = result[0]
     }
@@ -134,9 +129,10 @@ public struct IGOA {
       }
       let timer = Date()
       let cursor = iteration * grassHopperPositions.count
-      DispatchQueue.concurrentPerform(iterations: grassHopperPositions.count) { i in if source.isCancelled { return }
+      DispatchQueue.concurrentPerform(iterations: grassHopperPositions.count) { i in 
+        if source.isCancelled { return }
         for j in grassHopperPositions[i].indices { grassHopperPositions[i][j].clamp(to: bounds[j]) }
-        let result = fitness(self.memory[i % 8], grassHopperPositions[i])
+        let result = fitness(grassHopperPositions[i])
         targetResults[cursor + i] = result + [Double(iteration)]
         grassHopperFitness[i] = result[0]
       }

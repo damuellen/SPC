@@ -1,5 +1,5 @@
 extension TunOl {
-  func d14(_ h: UnsafeMutableBufferPointer<Double>, case j: Int) {
+  func d14(_ h: inout [Double], case j: Int) {
     // d10
     let (C, D, E, T, U, V, Z, AA, AB, AC, AM) = (
       0, 365, 730, 5840, 6205, 6570, 8030, 8395, 8760, 9125, 12775
@@ -26,9 +26,9 @@ extension TunOl {
       57305, 57670, 58035, 58400, 58765, 59130, 59495, 59860, 60225, 60590, 60955,
       61320, 61685, 62050, 62415, 62780, 63145, 63510, 63875, 64240
     )
-    let (AMKG, AMKI) = (56940, 63875)
+    let (AMKG, AMKI) = (64240+365, 64240+730)
     // LA
-    let dJP: Int = 70810
+    let dJP: Int = 64240+1095
 
     let (
       KZ, LB, LC, LD, LE, _, LG, LH, LI, LJ, LK, _, LM, LN, LO, LP, LQ, LR, LS, LT,

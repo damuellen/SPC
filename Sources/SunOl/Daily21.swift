@@ -1,11 +1,11 @@
 extension TunOl {
-  func day20(_ h: UnsafeMutableBufferPointer<Double>) {
-    let daysU: [[Int]] = h[U+1..<V].indices.chunked(by: { h[$0] == h[$1] }).map { $0.map { $0 - U } }
-    // let end = daysU.removeLast()
-    // daysU[0].append(contentsOf: end)
+  func day20(_ h: inout [Double]) {
+    let days: [[Int]] = h[U+1..<V].indices.chunked(by: { h[$0] == h[$1] }).map { $0.map { $0 - U } }
+    // let end = days.removeLast()
+    // days[0].append(contentsOf: end)
     let (A, B, C) = (96725, 97090, 97455)
-    let S_UcountZero = h.countOf(daysU, condition: S, predicate: { $0 <= 0 })
-    let S_UcountNonZero = h.countOf(daysU, condition: S, predicate: { $0 > Double.zero })
+    let S_UcountZero = h.countOf(days, condition: S, predicate: { $0 <= 0 })
+    let S_UcountNonZero = h.countOf(days, condition: S, predicate: { $0 > Double.zero })
     /// Day
     // A5+1
     for i in 1..<365 { h[A + i] = h[A + i - 1] + 1 }
@@ -19,7 +19,7 @@ extension TunOl {
     for i in 0..<365 { h[C + i] = S_UcountNonZero[i] }
   }
 
-  func d21(_ h: UnsafeMutableBufferPointer<Double>, case j: Int) {
+  func d21(_ h: inout [Double], case j: Int) {
     let (A, B, C) = (96725, 97090, 97455)
       let (
     E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z, AA, AB, AC,

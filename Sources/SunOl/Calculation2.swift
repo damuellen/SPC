@@ -1,17 +1,19 @@
 extension TunOl {
-  func hourFinal(_ h: UnsafeMutableBufferPointer<Double>, case j: Int) {
+  func hourFinal(_ h: inout [Double], case j: Int) {
     let BOday: [[Int]] = h[(BO + 1)..<BP].indices.chunked(by: { h[$0] == h[$1] }).map { $0.map { $0 - BO } }
     let AYsum: [Double] = h.sum(hours: BOday, condition: AY)
     /// Maximum night op perc considering tank sizes
     let day1R = 5475
-    let day = BOday.indices
-      .map { day -> [Double] in let value = h[(day + day1R)]
-        return [Double](repeating: value, count: BOday[day].count)
+    var i = 0
+    for day in BOday.indices {
+      for _ in 0..<BOday[day].count {
+        i += 1
+        if h[BT + i].isZero { h[DV + i] = Double.zero } else {
+          h[DV + i] = h[(day + day1R)]
+        }
       }
-      .joined()
+    }
     // =IF(BT6=0,0,VLOOKUP($BO6,DailyCalc_1!$A$3:$R$367,COLUMN(DailyCalc_1!R$3)))
-    //h.replaceSubrange(1..<8760, with: day)
-    for i in 1..<8760 where h[BT + i].isZero { h[i] = Double.zero }
 
     /// Max net elec demand outside harm op period
     // DW=IF(OR(BX6=0,DV6=0,AND($BM6>0,$BM7>0),AND((A_overall_var_max_cons-A_overall_var_min_cons)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(DV6-A_equiv_harmonious_min_perc)+A_overall_var_min_cons+A_overall_fix_stby_cons+IF($BM7=0,0,A_overall_stup_cons)+MIN(El_boiler_cap_ud,MAX(0,(A_overall_var_heat_max_cons-A_overall_var_heat_min_cons)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(DV6-A_equiv_harmonious_min_perc)+A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons+IF($BM7=0,0,A_overall_heat_stup_cons)-$BQ6)/El_boiler_eff)<$BP6-IF(AND(BM6>0,BM7=0,DW5=0),PB_stby_aux_cons,PB_stup_aux_cons+PB_warm_start_heat_req*TES_aux_cons_perc)-IF($BM7=0,0,PB_warm_start_heat_req*TES_aux_cons_perc),(A_overall_var_heat_max_cons-A_overall_var_heat_min_cons)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(DV6-A_equiv_harmonious_min_perc)+A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons+IF($BM7=0,0,A_overall_heat_stup_cons)<El_boiler_cap_ud*El_boiler_eff+$BQ6)),0,((A_overall_var_max_cons-A_overall_var_min_cons)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(DV6-A_equiv_harmonious_min_perc)+A_overall_var_min_cons)+A_overall_fix_stby_cons+IF($BM7=0,0,A_overall_stup_cons))

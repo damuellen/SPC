@@ -1,36 +1,36 @@
 import Foundation
 import Utilities
 
-public func fitness(buffer: UnsafeMutableBufferPointer<Double>, values: [Double]) -> [Double] { fitness(buffer: buffer, values: values, penalized: false) }
-public func fitnessPenalized(buffer: UnsafeMutableBufferPointer<Double>, values: [Double]) -> [Double] { fitness(buffer: buffer, values: values, penalized: true) }
-func fitness(buffer: UnsafeMutableBufferPointer<Double>, values: [Double], penalized: Bool) -> [Double] {
+public func fitness(values: [Double]) -> [Double] { fitness(values: values, penalized: false) }
+public func fitnessPenalized(values: [Double]) -> [Double] { fitness(values: values, penalized: true) }
+func fitness(values: [Double], penalized: Bool) -> [Double] {
   guard let model = TunOl(values) else { return [Double.infinity, 0, 0, 0, 0, 0, 0, 0] + values }
-
+var buffer = [Double](repeating: 0, count: 1804560)
   var day = [[Double]]()
   let (HC, HE, HF) = (18615, 18980, 19345)
   let (IY, KA) = (35405, 45260)
   let (MC, MI, NL, NR) = (81030, 83220, 93805, 95995)
 
-  model.hour(buffer, TunOl.Q_Sol_MW_thLoop, TunOl.Reference_PV_plant_power_at_inverter_inlet_DC, TunOl.Reference_PV_MV_power_at_transformer_outlet)
-  model.day20(buffer)
-  model.d22(buffer)
+  model.hour(&buffer, TunOl.Q_Sol_MW_thLoop, TunOl.Reference_PV_plant_power_at_inverter_inlet_DC, TunOl.Reference_PV_MV_power_at_transformer_outlet)
+  model.day20(&buffer)
+  model.d22(&buffer)
 
-  model.hour1(buffer, reserved: model.Overall_harmonious_min_perc)
+  model.hour1(&buffer, reserved: model.Overall_harmonious_min_perc)
   
   for j in 0..<4 {
-    model.hour2(buffer, case: j)
-    model.hour3(buffer, case: j)
-    model.d10(buffer, case: j)
-    model.hourFinal(buffer, case: j)
-    model.night(buffer, case: j)
-    model.d11(buffer, case: j)
-    model.d12(buffer, case: j)
-    model.d13(buffer, case: j)
-    model.d14(buffer, case: j)
+    model.hour2(&buffer, case: j)
+    model.hour3(&buffer, case: j)
+    model.d10(&buffer, case: j)
+    model.hourFinal(&buffer, case: j)
+    model.night(&buffer, case: j)
+    model.d11(&buffer, case: j)
+    model.d12(&buffer, case: j)
+    model.d13(&buffer, case: j)
+    model.d14(&buffer, case: j)
     day.append(Array(buffer[MC..<MI]))
     day.append(Array(buffer[NL..<NR]))
-    model.d21(buffer, case: j)
-    model.d23(buffer, case: j)
+    model.d21(&buffer, case: j)
+    model.d23(&buffer, case: j)
     let a = zip(buffer[365..<730], buffer[HC..<HE]).map { $1 > 0 ? $0 : 0 }
     day.append(Array(buffer[IY..<IY+1095] + ArraySlice(a) + buffer[730..<1095]))
     let b = zip(buffer[365..<730], buffer[HE..<HF]).map { $1 > 0 ? $0 : 0 }

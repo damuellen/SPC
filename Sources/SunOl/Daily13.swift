@@ -1,5 +1,5 @@
 extension TunOl {
-  func d13(_ h: UnsafeMutableBufferPointer<Double>, case j: Int) {
+  func d13(_ h: inout [Double], case j: Int) {
     let (
       Z, AA, AB, AC, AD, AE, AF, AG, AH, AI, AM, _, _, _, _, _, _, _, _, _, _, _,
       _, FK, _, _, _, _, _, _, _, FS, FT, _, FV, FW, _, FY, FZ, GA, _, _, _, GE,
@@ -316,7 +316,7 @@ extension TunOl {
           ifFinite(h[JI + i] / max(Double.zero, h[JI + i] - h[JJ + i]), 1.0), ifFinite(h[JL + i] / max(Double.zero, h[JL + i] - h[JM + i]), 1.0)) * (h[AM + i] - equiv_harmonious_min_perc[j]) + equiv_harmonious_min_perc[j])
     }
 
-    let (AMKG, AMKI) = (56940, 63875)
+    let (AMKG, AMKI) = (64240+365, 64240+730)
     for i in 0..<365 {
       h[AMKG + i] = (h[AM + i] - equiv_harmonious_min_perc[j]) < 1E-10 ? 1 : (h[KG + i] - equiv_harmonious_min_perc[j]) / (h[AM + i] - equiv_harmonious_min_perc[j])
       h[AMKI + i] = (h[AM + i] - equiv_harmonious_min_perc[j]) < 1E-10 ? 1 : (h[KI + i] - equiv_harmonious_min_perc[j]) / (h[AM + i] - equiv_harmonious_min_perc[j])

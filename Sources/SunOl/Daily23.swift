@@ -1,5 +1,5 @@
 extension TunOl {
-  func d23(_ h: UnsafeMutableBufferPointer<Double>, case j: Int) {
+  func d23(_ h: inout [Double], case j: Int) {
   let (A, B, C) = (96725, 97090, 97455)
   let (
     E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z, AA, AB, AC, AD, AE

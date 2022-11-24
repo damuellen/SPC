@@ -2,7 +2,7 @@ import Foundation
 import Utilities
 
 func POLY(_ value: Double, _ coeffs: [Double]) -> Double { coeffs.reversed().reduce(into: Double.zero) { result, coefficient in result = coefficient.addingProduct(result, value) } }
-extension UnsafeMutableBufferPointer where Element == Double {
+extension Array where Element == Double {
   func sum(days: [[Int]], range: Int, predicate: (Double) -> Bool) -> [Double] {
     days.map { day in var sum = 0.0
       day.forEach { d in let value = self[(d + range)]
@@ -12,7 +12,7 @@ extension UnsafeMutableBufferPointer where Element == Double {
     }
   }
 
-  func sum(days: [[Int]], range: Int, at: Int) {
+  mutating func sum(days: [[Int]], range: Int, at: Int) {
     for (i, day) in days.enumerated() {
       self[i + at] = 0.0
       day.forEach { d in
@@ -22,7 +22,7 @@ extension UnsafeMutableBufferPointer where Element == Double {
     }
   }
 
-  func sumOfRanges(_ range: Int, days: [[Int]], at: Int, range1: [Double], condition: Int, predicate: (Double) -> Bool) {
+  mutating func sumOfRanges(_ range: Int, days: [[Int]], at: Int, range1: [Double], condition: Int, predicate: (Double) -> Bool) {
     for (i, day) in days.enumerated() {
       self[i + at] = 0.0
       day.forEach { d in
@@ -31,14 +31,14 @@ extension UnsafeMutableBufferPointer where Element == Double {
     }
   }
   
-  @inlinable func sumOf(_ range: Int, days: [[Int]], at: Int, condition: Int, predicate: (Double) -> Bool) {
+  @inlinable mutating func sumOf(_ range: Int, days: [[Int]], at: Int, condition: Int, predicate: (Double) -> Bool) {
     for (i, day) in days.enumerated() {
       self[i + at] = 0.0
       day.forEach { d in if predicate(self[(d + condition)]) { self[i + at] += self[(d + range)] } }
     }
   }
 
-  @inlinable func sumOf(_ range: Int, days: [[Int]], at: Int, condition1: Int, predicate1: (Double) -> Bool, condition2: Int, predicate2: (Double) -> Bool) {
+  @inlinable mutating func sumOf(_ range: Int, days: [[Int]], at: Int, condition1: Int, predicate1: (Double) -> Bool, condition2: Int, predicate2: (Double) -> Bool) {
     for (i, day) in days.enumerated() {
       self[i + at] = 0.0
       day.forEach { d in if predicate1(self[(d + condition1)]) && predicate2(self[(d + condition2)]) { self[i + at] += self[(d + range)] } }
@@ -59,7 +59,7 @@ extension UnsafeMutableBufferPointer where Element == Double {
   //   }
   // }
 
-  func sum(_ range: Int, hours: [[Int]], condition: Int, predicate: (Double) -> Bool) -> [Double] {
+  mutating func sum(_ range: Int, hours: [[Int]], condition: Int, predicate: (Double) -> Bool) -> [Double] {
     Array(
       hours.map { day -> [Double] in var sum = 0.0
         day.forEach { d in 
@@ -71,7 +71,7 @@ extension UnsafeMutableBufferPointer where Element == Double {
       .joined())
   }
 
-  func sum(hours: [[Int]], condition: Int, predicate: (Double) -> Bool) -> [Double] {
+  mutating func sum(hours: [[Int]], condition: Int, predicate: (Double) -> Bool) -> [Double] {
     Array(
       hours.map { day -> [Double] in var sum = 0.0
         day.forEach { d in let value = self[(d + condition)]
@@ -82,7 +82,7 @@ extension UnsafeMutableBufferPointer where Element == Double {
       .joined())
   }
 
-  func sum(hours: [[Int]], condition: Int) -> [Double] {
+  mutating func sum(hours: [[Int]], condition: Int) -> [Double] {
     Array(
       hours.map { day -> [Double] in var sum = 0.0
         day.forEach { d in let value = self[(d + condition)]
@@ -93,7 +93,7 @@ extension UnsafeMutableBufferPointer where Element == Double {
       .joined())
   }
 
-  func countOf(_ days: [[Int]], condition: Int, predicate: (Double) -> Bool) -> [Double] {
+  mutating func countOf(_ days: [[Int]], condition: Int, predicate: (Double) -> Bool) -> [Double] {
     days.map { day in var count = 0
       day.forEach { d in let value = self[(d + condition)]
         if predicate(value) { count += 1 }
