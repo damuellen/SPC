@@ -296,7 +296,6 @@ public struct HeatBalanceDiagram {
     circle "G" big big
     """
     let svg = diagram.withCString { String(cString: pikchr($0, "c", 0, nil, nil)) }
-    let style = #"<style media="print">svg.c {width: 28cm; height: 20cm; margin-left: 0.5cm; font-family: sans-serif;}</style>"#
-    return style + svg
+    return svg
   }
 }

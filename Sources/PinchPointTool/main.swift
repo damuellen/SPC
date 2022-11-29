@@ -143,7 +143,8 @@ struct PinchPointTool: ParsableCommand {
 
     if pdf {
       try plot(.pdf("plot.pdf"))
-      let html = HTML(body: dia.svg)
+      var html = HTML(body: dia.svg)
+      html.add(body: #"<style media="print">svg.c {width: 28cm; height: 20cm; margin-left: 0.5cm; font-family: sans-serif;}</style>"#)
       try html.pdf(toFile: "diagram.pdf")
     }
 
