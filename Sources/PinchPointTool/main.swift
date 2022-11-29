@@ -112,7 +112,7 @@ struct PinchPointTool: ParsableCommand {
     guard pdf || html else { return }
     let plot = Gnuplot(data: pinchPoint.temperatures())
     plot.settings.merge(
-      ["term": "svg size 1280,800", "encoding": "utf8",
+      ["encoding": "utf8",
       "xtics": "10", "ytics": "10",
       "xlabel": "'Q̇ [MW]' textcolor rgb 'black'",
       "ylabel": "'Temperatures [°C]' textcolor rgb 'black'"]
@@ -130,7 +130,7 @@ struct PinchPointTool: ParsableCommand {
       $data i 4 u 1:2:(sprintf("%d°C", $2)) with labels tc ls 18 offset char 3,0 notitle, \
       $data i 5 u 1:2:(sprintf("%d°C", $2)) with labels tc ls 18 offset char 3,0 notitle
       """
-    let svg = plot.svg()!
+    let svg = plot.svg(width: 1440, height: 900)!
 
     let dia = HeatBalanceDiagram(values: pinchPoint)
 
