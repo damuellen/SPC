@@ -141,10 +141,7 @@ struct PinchPointTool: ParsableCommand {
       start("pinchpoint.xlsx")
     }
 
-    if pdf {
-      try plot(.pdf("plot.pdf"))
-      var html = HTML(body: dia.svg)
-      html.add(body: """
+    let style = """
       <style media="print">
       svg.c {
         width: 28cm; height: 20cm; margin-left: 1cm;
@@ -156,12 +153,16 @@ struct PinchPointTool: ParsableCommand {
         user-select: none; display: block;
       }
       </style>
-      """)
+      """
+
+    if pdf {
+      try plot(.pdf("plot.pdf"))
+      let html = HTML(body: style + dia.svg)
       try html.pdf(toFile: "diagram.pdf")
     }
 
     if html {
-      var html = HTML(body: dia.svg + svg)
+      var html = HTML(body: style + dia.svg + svg)
       if json {
         html.json = try pinchPoint.encodeToJSON()
       }
