@@ -11,7 +11,7 @@
 import Meteo
 import Utilities
 
-public enum Simulation {
+public enum Simulation: Parameterizable {
   static var isStart = true
 
   static var startTemperature =

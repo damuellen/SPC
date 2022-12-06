@@ -14,8 +14,6 @@ protocol Parameterizable {
   associatedtype Parameter: Codable
   
   static var parameter: Parameter { get set }
-
-  static func parameterize(_ parameter: Parameter)
 }
 
 extension Parameterizable {
@@ -23,13 +21,9 @@ extension Parameterizable {
     let decoder = JSONDecoder()
     decoder.dateDecodingStrategy = .iso8601   
     do {
-      try parameterize(decoder.decode(Parameter.self, from: data))
+      try parameter = decoder.decode(Parameter.self, from: data)
     } catch {
       print(error.localizedDescription)
     }
-  }
-
-  static func parameterize(_ parameter: Parameter) {
-    self.parameter = parameter
   }
 }
