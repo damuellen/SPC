@@ -62,7 +62,6 @@ struct LocationInfo: ParsableArguments {
 }
 
 struct SolarPerformanceCalculator: ParsableCommand {
-
   static var result: Recording!
 #if os(Windows)
   static let cwd = currentDirectoryPath()
@@ -70,7 +69,7 @@ struct SolarPerformanceCalculator: ParsableCommand {
   static let cwd = FileManager.default.currentDirectoryPath
 #endif
   @Option(name: .shortAndLong, help: "The search path for meteofile.")
-  var meteofilePath: String?
+  var meteofilePath: String = "COM/Midelt.mto"
   @Option(name: .shortAndLong, help: "The search path for config files.")
   var configPath: String = cwd
   @Option(name: .shortAndLong, help: "Destination path for result files.")
@@ -130,7 +129,7 @@ struct SolarPerformanceCalculator: ParsableCommand {
  #endif
     }
 
-    if parameter {
+    if true {
       print(ParameterSet())
       try JSONConfig.saveConfiguration(toPath: configPath)
       return
@@ -175,7 +174,8 @@ struct SolarPerformanceCalculator: ParsableCommand {
 
   static var configuration = CommandConfiguration(
     commandName: "Solar Performance Calculator",
-    abstract: "Simulates the performance of entire solar thermal power plants."
+    abstract: "Simulates the performance of entire solar thermal power plants.",
+    shouldPromptForMissing: true
   )
 
   func plot(interval: DateInterval) {

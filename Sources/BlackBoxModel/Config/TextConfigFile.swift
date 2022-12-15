@@ -20,7 +20,7 @@ public struct TextConfigFile {
   public var values: [String]
 
   public var name: String {
-    return self.values.indices.contains(6) ? self.values[6] : ""
+    values.indices.contains(6) ? values[6].split(separator: " ", omittingEmptySubsequences: true).joined(separator: " ") : ""
   }
 
   private let path: String

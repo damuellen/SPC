@@ -19,7 +19,6 @@ import xlsxwriter
 PinchPointTool.main()
 
 struct PinchPointTool: ParsableCommand {
-
   @Argument(help: "")
   var input: [Double] = []
 
@@ -27,7 +26,7 @@ struct PinchPointTool: ParsableCommand {
   var htfFluid: String = "ThVP1"
 
   @Option(name: .customLong("case", withSingleDash: true), help: "")
-  var hexCase: Int = 2
+  var hexCase: Int
 
   @Flag(name: .customLong("hex", withSingleDash: true), help: "")
   var hexValues: Bool = false
@@ -47,6 +46,7 @@ struct PinchPointTool: ParsableCommand {
   func run() throws {
     var input = input
     let parameter: HeatExchangerParameter
+    print(input)
     if hexValues {
       let values = Array(input.dropFirst(11))
       if let hex = HeatExchangerParameter(values: values) {
