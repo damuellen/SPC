@@ -26,6 +26,8 @@ public final class Historian {
   #endif
   /// Number of values per hour
   private let interval = Simulation.time.steps
+  private var intervalCounter: Int = 1
+  private var hourCounter: Int = 1
   /// Changes the resolution of the output
   private let stride: Int
   /// Specifies what the output is
@@ -187,8 +189,7 @@ public final class Historian {
         + startTime + .lineBreak + intervalTime + .lineBreak + headers.unit
         + .lineBreak
 
-      let resultsURL = urlDir.appendingPathComponent(
-        "\(name)\(suffix)_\(i).csv")
+      let resultsURL = urlDir.appendingPathComponent("\(name)\(suffix)_\(i).csv")
 
       customIntervalStream = OutputStream(url: resultsURL, append: false)
       stringBuffer.reserveCapacity(200 * 8760 * i.rawValue)
@@ -240,8 +241,6 @@ public final class Historian {
 
     if mode.hasFileOutput {
 
-      defer { intervalCounter += 1 }
-
       if intervalCounter == 1 {
         iso8601_Hourly = String(ts.description.dropFirst(3))
       }
@@ -270,7 +269,39 @@ public final class Historian {
       }
     }
 
+    intervalCounter += 1
+
     if case .csv = mode {
+      if intervalCounter > interval.rawValue {
+        dailyPerformance.totalize(hourlyPerformance, fraction: 1)
+        dailyRadiation.totalize(hourlyRadiation, fraction: 1)
+
+        let csv = generateHourlyValues() + .lineBreak
+        // Will be written together with the daily results
+        stringBuffer.append(contentsOf: csv)
+
+        hourlyPerformance.zero()
+        hourlyRadiation.zero()
+
+        hourCounter += 1
+        intervalCounter = 1
+      }
+
+      if hourCounter > 24 {
+        annualPerformance.totalize(dailyPerformance, fraction: 1)
+        annualRadiation.totalize(dailyRadiation, fraction: 1)
+
+        let csv = generateDailyValues() + .lineBreak
+        dailyResultsStream?.write(csv)
+
+        hourlyResultsStream?.write(stringBuffer)
+        stringBuffer.removeAll(keepingCapacity: true)
+
+        dailyPerformance.zero()
+        dailyRadiation.zero()
+
+        hourCounter = 1
+      }
       hourlyRadiation.totalize(solar, fraction: interval.fraction)
       hourlyPerformance.totalize(energy, fraction: interval.fraction)  // Daily and annual sum calculations see counters
     } else {
@@ -328,44 +359,6 @@ public final class Historian {
       }
   }
 
-  private var hourCounter: Int = 1 {
-    didSet {
-      if case .csv = mode, hourCounter > 24 {
-        annualPerformance.totalize(dailyPerformance, fraction: 1)
-        annualRadiation.totalize(dailyRadiation, fraction: 1)
-
-        let csv = generateDailyValues() + .lineBreak
-        dailyResultsStream?.write(csv)
-
-        hourlyResultsStream?.write(stringBuffer)
-        stringBuffer.removeAll(keepingCapacity: true)
-
-        dailyPerformance.zero()
-        dailyRadiation.zero()
-
-        hourCounter = 1
-      }
-    }
-  }
-
-  private var intervalCounter: Int = 1 {
-    didSet {
-      if case .csv = mode, intervalCounter > interval.rawValue {
-        dailyPerformance.totalize(hourlyPerformance, fraction: 1)
-        dailyRadiation.totalize(hourlyRadiation, fraction: 1)
-
-        let csv = generateHourlyValues() + .lineBreak
-        // Will be written together with the daily results
-        stringBuffer.append(contentsOf: csv)
-
-        hourlyPerformance.zero()
-        hourlyRadiation.zero()
-
-        hourCounter += 1
-        intervalCounter = 1
-      }
-    }
-  }
   #if canImport(Cxlsxwriter)
   private func writeExcel() {
     guard let wb = xlsx else { return }
