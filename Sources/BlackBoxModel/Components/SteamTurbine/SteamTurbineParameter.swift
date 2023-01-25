@@ -65,7 +65,7 @@ extension SteamTurbine.Parameter: CustomStringConvertible {
 
 extension SteamTurbine.Parameter: TextConfigInitializable {
   public init(file: TextConfigFile) throws {
-    let ln: (Int) throws -> Double = { try file.double(line: $0) }
+    let ln: (Int) throws -> Double = { try file.readDouble(lineNumber: $0) }
     name = file.name
     power = try .init(range: ln(13)...ln(10), nom: 0)
     efficiencyNominal = try ln(32) / 100

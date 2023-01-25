@@ -106,7 +106,7 @@ extension HeatExchanger.Parameter: CustomStringConvertible {
 
 extension HeatExchanger.Parameter: TextConfigInitializable {
   public init(file: TextConfigFile) throws {
-    let ln: (Int) throws -> Double = { try file.double(line: $0) }
+    let ln: (Int) throws -> Double = { try file.readDouble(lineNumber: $0) }
     name = file.name
     efficiency = try ln(10) / 100
     temperature = try Temperatures(

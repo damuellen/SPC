@@ -33,7 +33,7 @@ extension HeatTransferFluid {
 
 extension HeatTransferFluid {
   public init(file: TextConfigFile) throws {
-    let ln: (Int) throws -> Double = { try file.double(line: $0) }
+    let ln: (Int) throws -> Double = { try file.readDouble(lineNumber: $0) }
     try self.init(
       name: file.name, 
       freezeTemperature: ln(10), 

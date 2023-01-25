@@ -70,7 +70,7 @@ extension Simulation.Parameter: CustomStringConvertible {
 
 extension Simulation.Parameter: TextConfigInitializable {
   public init(file: TextConfigFile) throws {
-    let ln: (Int) throws -> Double = { try file.double(line: $0) }
+    let ln: (Int) throws -> Double = { try file.readDouble(lineNumber: $0) }
     let adjustmentFactor = try Simulation.AdjustmentFactors(
       efficiencySolarField: ln(34),
       efficiencyTurbine: ln(46),

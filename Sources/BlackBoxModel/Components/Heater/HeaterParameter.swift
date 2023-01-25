@@ -44,7 +44,7 @@ extension Heater.Parameter: CustomStringConvertible {
 
 extension Heater.Parameter: TextConfigInitializable {
   public init(file: TextConfigFile) throws {
-    let ln: (Int) throws -> Double = { try file.double(line: $0) }
+    let ln: (Int) throws -> Double = { try file.readDouble(lineNumber: $0) }
     self = try .init(
       name: file.name,
       efficiency: Ratio(ln(10) / 100),

@@ -25,7 +25,7 @@ extension Simulation {
 
 extension Simulation.Year: TextConfigInitializable {
   public init(file: TextConfigFile) throws {
-    let ln: (Int) throws -> Double = { try file.double(line: $0) }
+    let ln: (Int) throws -> Double = { try file.readDouble(lineNumber: $0) }
 
     let getDate: (String) -> Date? = { dateString in
       let dateFormatter = DateFormatter()

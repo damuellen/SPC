@@ -19,9 +19,7 @@ public protocol TextConfigInitializable {
 public struct TextConfigFile {
   public var values: [String]
 
-  public var name: String {
-    return self.values.indices.contains(6) ? self.values[6] : ""
-  }
+  public var name: String { values.indices.contains(6) ? self.values[6] : "" }
 
   private let path: String
 
@@ -53,34 +51,32 @@ public struct TextConfigFile {
   }
 
   public subscript(_ idx: Int) -> String? {
-    guard self.values.indices.contains(idx) else {
-      return nil
-    }
+    guard self.values.indices.contains(idx) else { return nil }
     return self.values[idx].trimWhitespace()
   }
 
-  public func string(_ line: Int) throws -> String {
-    guard let string = self[line - 1], string.count > 0 else {
-      throw ReadError.missingValueInLine(line, self.path)
+  public func readString(_ lineNumber: Int) throws -> String {
+    guard let string = self[lineNumber - 1], string.count > 0 else {
+      throw ReadError.missingValueInLine(lineNumber, self.path)
     }
     return string
   }
 
-  public func double(line: Int) throws -> Double {
-    let value = try string(line)
+  public func readDouble(lineNumber: Int) throws -> Double {
+    let value = try readString(lineNumber)
     if let value = Double(value) {
       return value
     } else {
-      throw ReadError.invalidValueInLine(line, self.path)
+      throw ReadError.invalidValueInLine(lineNumber, self.path)
     }
   }
 
-  public func integer(line: Int) throws -> Int {
-    let value = try string(line)
+  public func readInteger(lineNumber: Int) throws -> Int {
+    let value = try readString(lineNumber)
     if let value = Int(value) {
       return value
     } else {
-      throw ReadError.invalidValueInLine(line, self.path)
+      throw ReadError.invalidValueInLine(lineNumber, self.path)
     }
   }
 }

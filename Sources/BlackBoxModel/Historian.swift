@@ -303,7 +303,7 @@ public final class Historian {
         hourCounter = 1
       }
       hourlyRadiation.totalize(solar, fraction: interval.fraction)
-      hourlyPerformance.totalize(energy, fraction: interval.fraction)  // Daily and annual sum calculations see counters
+      hourlyPerformance.totalize(energy, fraction: interval.fraction)
     } else {
       // Only the annual sums are calculated.
       annualRadiation.totalize(solar, fraction: interval.fraction)
@@ -455,8 +455,8 @@ public final class Historian {
     #else
     let measurements = [Insolation.measurements, PlantPerformance.measurements].joined()
     #endif
-    let names: String = measurements.map { $0.name }.joined(separator: ",")
-    let units: String = measurements.map { $0.unit }.joined(separator: ",")
+    let names: String = measurements.map(\.name).joined(separator: .separator)
+    let units: String = measurements.map(\.unit).joined(separator: .separator)
     return ("DateTime," + names, "_," + units, measurements.count)
   }
 

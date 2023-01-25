@@ -151,7 +151,7 @@ extension SolarField.Parameter: CustomStringConvertible {
 
 extension SolarField.Parameter: TextConfigInitializable {
   public init(file: TextConfigFile) throws {
-    let ln: (Int) throws -> Double = { try file.double(line: $0) }
+    let ln: (Int) throws -> Double = { try file.readDouble(lineNumber: $0) }
     maxWind = Float(try ln(10))
     numberOfSCAsInRow = Int(try ln(13))
     rowDistance = try ln(16)

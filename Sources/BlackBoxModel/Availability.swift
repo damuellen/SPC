@@ -52,7 +52,7 @@ struct Availability: Codable {
 
 extension Availability {
   public init(file: TextConfigFile) throws {
-    let ln: (Int) throws -> Double = { try file.double(line: $0) }
+    let ln: (Int) throws -> Double = { try file.readDouble(lineNumber: $0) }
     var data = [Availability.defaults]
     for n in 0..<12 {
       let offset = 3 * n

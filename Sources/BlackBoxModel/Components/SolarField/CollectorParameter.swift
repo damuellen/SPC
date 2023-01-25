@@ -76,7 +76,7 @@ extension Collector.Parameter: CustomStringConvertible {
 
 extension Collector.Parameter: TextConfigInitializable {
   public init(file: TextConfigFile) throws {
-    let ln: (Int) throws -> Double = { try file.double(line: $0) }
+    let ln: (Int) throws -> Double = { try file.readDouble(lineNumber: $0) }
     name = file.name
     aperture = try ln(10)
     lengthSCA = try ln(13)

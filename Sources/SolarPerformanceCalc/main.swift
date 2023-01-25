@@ -1,5 +1,5 @@
 //
-//  Copyright 2017 Daniel Müllenborn
+//  Copyright 2023 Daniel Müllenborn
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -17,16 +17,16 @@ import Meteo
 import Helpers
 
 #if os(Windows)
-system("chcp 65001")
+import WinSDK
+_ = SetConsoleOutputCP(UINT(CP_UTF8))
 #endif
 
-let start = DispatchTime.now().uptimeNanoseconds
+let now = Date()
 
 SolarPerformanceCalculator.main()
 //print(SolarPerformanceCalculator.result!)
 
-let end = DispatchTime.now().uptimeNanoseconds
-let time = String((end - start) / 1_000_000) +  " ms"
+let time = String(Int(-now.timeIntervalSinceNow * 1000)) +  " ms"
 print("elapsed time:", time)
 
 #if os(Windows)
@@ -146,8 +146,8 @@ struct SolarPerformanceCalculator: ParsableCommand {
 
     if let coords = location.coords,
      let tz = location.timezone {
-      let loc = Location(coords, timezone: tz)
-      BlackBoxModel.configure(location: loc)
+      let location = Location(coords, timezone: tz)
+      BlackBoxModel.configure(location: location)
     }
 
     let mode: Historian.Mode
@@ -163,14 +163,14 @@ struct SolarPerformanceCalculator: ParsableCommand {
       mode = .csv
     }
 
-    let log = Historian(
+    let report = Historian(
       customName: nameResults, customPath: resultsPath, outputMode: mode
     )
 
-    SolarPerformanceCalculator.result = BlackBoxModel.runModel(with: log)
+    SolarPerformanceCalculator.result = BlackBoxModel.runModel(with: report)
 
     // plot(interval: DateInterval(ofWeek: 17, in: BlackBoxModel.yearOfSimulation))
-    log.clearResults()
+    // report.clearResults()
   }
 
   static var configuration = CommandConfiguration(
@@ -198,27 +198,3 @@ struct SolarPerformanceCalculator: ParsableCommand {
     }
   }
 }
-/*
-
-SolarField.parameter.maxMassFlow.max = 2500.0
-Design.layout.powerBlock = 73
-Design.layout.solarField = 98
-Design.layout.heatExchanger = 98
-
-let gp = GeneticParameters(populationSize: 8, numberOfGenerations: 8, mutationRate: 0.5)
-
-let ga = GeneticAlgorithm(parameters: gp)
-
-ga.simulateNGenerations()
-
-let df = DateFormatter()
-df.timeZone = TimeZone(secondsFromGMT: 0)
-df.dateFormat = "dd.MM.yyyy"
-//Simulation.time.firstDateOfOperation = df.date(from: "02.01.2005")!
-//Simulation.time.lastDateOfOperation = df.date(from: "04.01.2005")!
-
-
-let log = Historian(
-  customNaming: "Result_\(lastRun + Int(1))"
-)
-*/
