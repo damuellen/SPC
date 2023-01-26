@@ -11,13 +11,10 @@
 import DateExtensions
 import Foundation
 import Meteo
-#if canImport(SQLite)
 import SQLite
-#endif
-#if canImport(Cxlsxwriter)
 import xlsxwriter
-#endif
-/// A class that creates a recording of performance data.
+
+/// A class that creates a recording of the performance data.
 public final class Historian {
 
   #if DEBUG && !os(Windows)
@@ -36,15 +33,11 @@ public final class Historian {
   var startDate: Date? = Simulation.time.firstDateOfOperation
 
   public enum Mode {
-    #if canImport(CSQLite)
     case database
-    #endif
     case inMemory, none
     case custom(interval: DateSequence.Interval)
     case csv
-    #if canImport(Cxlsxwriter)
     case excel
-    #endif
     var hasFileOutput: Bool {
       if case .none = self { return false }
       if case .inMemory = self { return false }
@@ -55,12 +48,8 @@ public final class Historian {
       #if DEBUG && !os(Windows)
       return true
       #else
-      #if canImport(Cxlsxwriter)
       if case .excel = self { return true }
-      #endif
-      #if canImport(CSQLite)
       if case .database = self { return true }
-      #endif
       if case .inMemory = self { return true }
       return false
       #endif
@@ -70,13 +59,11 @@ public final class Historian {
   private var iso8601_Hourly: String = ""
   private var iso8601_Interval: String = ""
   private var stringBuffer: String = ""
-  #if canImport(CSQLite)
+
   /// sqlite file
   private var db: Connection? = nil
-  #endif
-  #if canImport(Cxlsxwriter)
+
   private var xlsx: Workbook? = nil
-  #endif
   /// Totals
   private var annualPerformance = PlantPerformance()
   private var annualRadiation = Insolation()
@@ -146,20 +133,16 @@ public final class Historian {
     }
 
     var urls = [URL]()
-    #if canImport(Cxlsxwriter)
     if case .excel = outputMode {
       let url = urlDir.appendingPathComponent("\(name)\(suffix).xlsx")
       self.xlsx = Workbook(name: url.path)
       urls = [url]
     }
-    #endif
-    #if canImport(CSQLite)
     if case .database = outputMode {
       let url = urlDir.appendingPathComponent("\(name)\(suffix).sqlite3")
       self.db = try! Connection(url.path)
       urls = [url]
     }
-    #endif
     if case .csv = outputMode {
       let tableHeader = headers.name + .lineBreak + headers.unit + .lineBreak
       let dailyResultsURL = urlDir.appendingPathComponent(
@@ -332,12 +315,8 @@ public final class Historian {
       stringBuffer.removeAll()
     }
 
-    #if canImport(CSQLite)
     if case .database = mode { storeInDB() }
-    #endif
-    #if canImport(Cxlsxwriter)
     if case .excel = mode { writeExcel() }
-    #endif
 
     return Recording(
       startDate: startDate!, performance: annualPerformance,
@@ -359,7 +338,6 @@ public final class Historian {
       }
   }
 
-  #if canImport(Cxlsxwriter)
   private func writeExcel() {
     guard let wb = xlsx else { return }
     let f1 = wb.addFormat().set(num_format: "d mmm hh:mm")
@@ -404,8 +382,6 @@ public final class Historian {
     ws2.autofilter(range: [0, 0, performanceHistory.count + 1, energyCount])
     wb.close()
   }
-  #endif
-  #if canImport(CSQLite)
   // MARK: Output database
   private func storeInDB() {
     guard let db = db else { return }
@@ -437,7 +413,6 @@ public final class Historian {
       for entry in performanceHistory { try! stmt.run(entry.values) }
     }
   }
-  #endif
   // MARK: Output Streams
 
   private var customIntervalStream: OutputStream?

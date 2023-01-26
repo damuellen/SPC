@@ -154,11 +154,10 @@ struct SolarPerformanceCalculator: ParsableCommand {
     if let steps = outputValues {
       mode = .custom(interval: Interval[steps])
     } else if database {
-      #if canImport(CSQLite)
-      mode = .database
-      #else
-      mode = .csv
-      #endif    
+      if excel { print("Using both options at the same time is not supported.") }
+      mode = .database 
+    } else if excel {
+      mode = .excel 
     } else {
       mode = .csv
     }
@@ -168,7 +167,6 @@ struct SolarPerformanceCalculator: ParsableCommand {
     )
 
     SolarPerformanceCalculator.result = BlackBoxModel.runModel(with: report)
-
     // plot(interval: DateInterval(ofWeek: 17, in: BlackBoxModel.yearOfSimulation))
     // report.clearResults()
   }
