@@ -176,7 +176,7 @@ public struct Collector: Parameterizable, CustomStringConvertible {
 extension Collector: MeasurementsConvertible {
 
   var values: [Double] {
-    [insolationAbsorber, cosTheta, efficiency * 100, parabolicElevation]
+    [insolationAbsorber, cosTheta, efficiency, parabolicElevation]
   }
 
   static var measurements: [(name: String, unit: String)] {

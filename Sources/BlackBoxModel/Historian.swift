@@ -340,46 +340,55 @@ public final class Historian {
 
   private func writeExcel() {
     guard let wb = xlsx else { return }
-    let f1 = wb.addFormat().set(num_format: "d mmm hh:mm")
+    let f1 = wb.addFormat().set(num_format: "hh:mm  dd.mm")
+    let f0 = wb.addFormat().set(num_format: "0")
     let f2 = wb.addFormat().set(num_format: "0.0")
-
+    let f3 = wb.addFormat().set(num_format: "0.00")
+    let f4 = wb.addFormat().set(num_format: 10)
     let statusCaptions =
-      ["Date"] + Insolation.measurements.map(\.0) + Status.modes
+      ["Time  Date"] + Insolation.measurements.map(\.0) + Status.modes
       + Status.measurements.map(\.0)
     let statusCount = statusCaptions.count
     let modesCount = Status.modes.count
     let energyCaptions = ["Date"] + PlantPerformance.measurements.map(\.0)
     let energyCount = energyCaptions.count
 
-    let ws1 = wb.addWorksheet().column("A:A", width: 12, format: f1)
-      .column([1, statusCount], width: 8, format: f2)
-      .hide_columns(statusCount + 1).write(statusCaptions, row: 0)
+    let ws1 = wb.addWorksheet(name: "Status")
+      .column("A:A", width: 13, format: f1)
+      .column("B:D", width: 6, format: f0)
+      .column("E:G", width: 17, format: f3)
+      .column("H:H", width: 6, format: f0)
+      .column("I:I", width: 6, format: f3)
+      .column("J:J", width: 11, format: f4)
+      .column([10, statusCount], width: 15, format: f2)
+      .hide_columns(statusCount)
+      .write(statusCaptions, row: 0)
 
-    let ws2 = wb.addWorksheet().column("A:A", width: 12, format: f1)
-      .column([1, energyCount], width: 8, format: f2)
-      .hide_columns(energyCount + 1).write(energyCaptions, row: 0)
+    let ws2 = wb.addWorksheet(name: "Performance")
+      .column("A:A", width: 13, format: f1)
+      .column([1, energyCount], width: 6, format: f2)
+      .hide_columns(energyCount)
+      .write(energyCaptions, row: 0)
 
     let interval = Simulation.time.steps.interval
     var date = Simulation.time.firstDateOfOperation!
 
     statusHistory.indices.forEach { i in
       ws1.write(.datetime(date), [i + 1, 0])
-      ws1.write(sunHistory[i].formattedValues, row: i + 1, col: 1)
-      ws1.write(statusHistory[i].modes, row: i + 1, col: 5)
-      ws1.write(statusHistory[i].formattedValues, row: i + 1, col: 5 + modesCount)
+      ws1.write(sunHistory[i].values, row: i + 1, col: 1)
+      ws1.write(statusHistory[i].modes, row: i + 1, col: 4)
+      ws1.write(statusHistory[i].values, row: i + 1, col: 4 + modesCount)
       date.addTimeInterval(interval)
     }
 
     date = Simulation.time.firstDateOfOperation!
-    ws1.autofilter(range: [0, 0, statusHistory.count + 1, statusCount])
 
     performanceHistory.indices.forEach { i in
       ws2.write(.datetime(date), [i + 1, 0])
-      ws2.write(performanceHistory[i].formattedValues, row: i + 1, col: 1)
+      ws2.write(performanceHistory[i].values, row: i + 1, col: 1)
       date.addTimeInterval(interval)
     }
 
-    ws2.autofilter(range: [0, 0, performanceHistory.count + 1, energyCount])
     wb.close()
   }
   // MARK: Output database
