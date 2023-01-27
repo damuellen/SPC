@@ -344,7 +344,7 @@ public final class Historian {
     let f0 = wb.addFormat().set(num_format: "0")
     let f2 = wb.addFormat().set(num_format: "0.0")
     let f3 = wb.addFormat().set(num_format: "0.00")
-    let f4 = wb.addFormat().set(num_format: 10)
+    let f4 = wb.addFormat().set(num_format: 9)
     let statusCaptions =
       ["Time  Date"] + Insolation.measurements.map(\.0) + Status.modes
       + Status.measurements.map(\.0)
