@@ -353,7 +353,7 @@ extension Storage {
     var fittedTemperature = 0.0
     if Storage.parameter.temperatureCharge[1] > 0 {
       if Storage.parameter.temperatureDischarge.indices.contains(2) {
-        storage.temperatureFromInlet()
+        storage.uniformTemperature()
       } else {
         fittedTemperature = storage.relativeCharge > 0.5
           ? 1 : Storage.parameter.temperatureCharge2(storage.relativeCharge)

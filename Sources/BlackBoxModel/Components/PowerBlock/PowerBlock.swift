@@ -156,7 +156,7 @@ public struct PowerBlock: Parameterizable, HeatTransfer {
   mutating func temperatureLoss(for period: Double, wrt components: HeatTransfer...)
   {
     if Design.hasGasTurbine {
-      temperatureFromInlet()
+      uniformTemperature()
     } else {
       let tlpb = 0.0
       // 0.38 * (TpowerBlock.status - meteo.temperature) / 100 * (30 / Design.layout.powerBlock) ** 0.5 // 0.38

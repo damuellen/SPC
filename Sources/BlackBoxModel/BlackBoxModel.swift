@@ -195,9 +195,9 @@ public enum BlackBoxModel {
 
       if Design.hasStorage {
         // Increasing the mass flow allowed in the solar field
-        status.solarField.requiredMassFlow(storage: status.storage)
+        status.solarField.requiredMassFlow(from: status.storage)
         // Sets the temperature when the storage does freeze protection
-        status.solarField.inletTemperature(storage: status.storage)
+        status.solarField.inletTemperature(from: status.storage)
       }
 
       // Calculate outlet temperature and mass flow
