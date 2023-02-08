@@ -1,7 +1,8 @@
 // swift-tools-version:5.5
 import PackageDescription
+import class Foundation.ProcessInfo
 
-let c: CSetting = .unsafeFlags(["-ffast-math", "-O3", "-fomit-frame-pointer", "-funroll-loops"])
+let c: [CSetting] = [.unsafeFlags(["-ffast-math", "-O3", "-fomit-frame-pointer", "-funroll-loops"])]
 var flags = ["-cross-module-optimization", "-Ounchecked", "-enforce-exclusivity=unchecked", "-remove-runtime-asserts"]
 
 #if os(Windows)
@@ -37,18 +38,19 @@ platformProducts.append(contentsOf: [
 let dependencies: [Package.Dependency] = [
   .package(url: "https://github.com/damuellen/swift-argument-parser.git", branch: "main"),
   .package(url: "https://github.com/damuellen/Utilities.git", branch: "main"),
-  .package(url: "https://github.com/damuellen/xlsxwriter.swift.git", branch: "SPM"),
+  .package(url: "https://github.com/damuellen/xlsxwriter.swift.git", branch: "WIN"),
 ]
 #else
+let branch = (ProcessInfo.processInfo.environment["SPM"] != nil) ? "SPM" : "main"
 let dependencies: [Package.Dependency] = [
   .package(url: "https://github.com/damuellen/swift-argument-parser.git", branch: "main"),
   .package(url: "https://github.com/damuellen/Utilities.git", branch: "main"),
-  .package(url: "https://github.com/damuellen/xlsxwriter.swift.git", branch: "main"),
+  .package(url: "https://github.com/damuellen/xlsxwriter.swift.git", branch: branch),
 ]
 #endif
 let platformTargets: [Target] = [
-  .target(name: "DateExtensions", swiftSettings: swift), .target(name: "CPikchr", cSettings: [c]),
-  .target(name: "CSPA", cSettings: [c]), .target(name: "CSOLPOS", cSettings: [c]),
+  .target(name: "DateExtensions", swiftSettings: swift), .target(name: "CPikchr", cSettings: c),
+  .target(name: "CSPA", cSettings: c), .target(name: "CSOLPOS", cSettings: c),
   .target(
     name: "SolarPosition",
     dependencies: ["Utilities", "DateExtensions", "CSOLPOS", "CSPA"],
@@ -58,7 +60,8 @@ let platformTargets: [Target] = [
   .target(
     name: "Meteo",
     dependencies: ["DateExtensions", "SolarPosition", "Utilities"],
-    swiftSettings: swift
+    cSettings: [(.define("_CRT_SECURE_NO_WARNINGS", .when(platforms: [.windows])))],
+    swiftSettings: swift     
   ),
   .target(
     name: "BlackBoxModel",

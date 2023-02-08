@@ -1,0 +1,24 @@
+name: CI – Ubuntu
+
+on: workflow_dispatch
+
+jobs:
+  continuous-integration:
+    timeout-minutes: 5
+    runs-on: [ubuntu-22.04]
+
+    steps:
+
+    - name: Checkout sources
+      uses: actions/checkout@v3
+
+    - name: Update package dependencies
+      run: swift package update
+
+    - name: Build tests
+      env: 
+        SPM: spm
+      run: swift build --build-tests -Xswiftc -suppress-warnings
+
+    - name: Run tests
+      run: swift test -Xswiftc -suppress-warnings
