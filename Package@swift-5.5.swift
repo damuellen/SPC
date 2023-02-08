@@ -35,7 +35,7 @@ platformProducts.append(contentsOf: [
 
 let dependencies: [Package.Dependency] = [
   .package(url: "https://github.com/damuellen/swift-argument-parser.git", branch: "main"),
-  .package(url: "https://github.com/damuellen/SQLite.swift.git", branch: "master"),
+  // .package(url: "https://github.com/damuellen/SQLite.swift.git", branch: "master"),
   .package(url: "https://github.com/damuellen/Utilities.git", branch: "main"),
   .package(url: "https://github.com/damuellen/xlsxwriter.swift.git", branch: "main"),
   // .package(url: "https://github.com/damuellen/SolarFieldPiping.git", branch: "main"),
@@ -62,7 +62,7 @@ let platformTargets: [Target] = [
     name: "BlackBoxModel",
     dependencies: [
       "Meteo", "SolarPosition", "Utilities",
-      .product(name: "SQLite", package: "SQLite.swift"),
+      // .product(name: "SQLite", package: "SQLite.swift"),
       .product(name: "xlsxwriter", package: "xlsxwriter.swift"),
     ],
     swiftSettings: swift

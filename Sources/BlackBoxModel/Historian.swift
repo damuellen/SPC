@@ -11,7 +11,7 @@
 import DateExtensions
 import Foundation
 import Meteo
-import SQLite
+// import SQLite
 import xlsxwriter
 
 /// A class that creates a recording of the performance data.
@@ -61,7 +61,7 @@ public final class Historian {
   private var stringBuffer: String = ""
 
   /// sqlite file
-  private var db: Connection? = nil
+  // private var db: Connection? = nil
 
   private var xlsx: Workbook? = nil
   /// Totals
@@ -138,11 +138,11 @@ public final class Historian {
       self.xlsx = Workbook(name: url.path)
       urls = [url]
     }
-    if case .database = outputMode {
-      let url = urlDir.appendingPathComponent("\(name)\(suffix).sqlite3")
-      self.db = try! Connection(url.path)
-      urls = [url]
-    }
+    // if case .database = outputMode {
+    //   let url = urlDir.appendingPathComponent("\(name)\(suffix).sqlite3")
+    //   self.db = try! Connection(url.path)
+    //   urls = [url]
+    // }
     if case .csv = outputMode {
       let tableHeader = headers.name + .lineBreak + headers.unit + .lineBreak
       let dailyResultsURL = urlDir.appendingPathComponent(
@@ -393,34 +393,34 @@ public final class Historian {
   }
   // MARK: Output database
   private func storeInDB() {
-    guard let db = db else { return }
+    // guard let db = db else { return }
 
-    func createTable(name: String, measurements: [String]) {
-      let table = Table(name)
-      let expressions = measurements.map { Expression<Double>($0) }
-      try! db.run(table.create { t in expressions.forEach { t.column($0) } })
-    }
+    // func createTable(name: String, measurements: [String]) {
+    //   let table = Table(name)
+    //   let expressions = measurements.map { Expression<Double>($0) }
+    //   try! db.run(table.create { t in expressions.forEach { t.column($0) } })
+    // }
 
-    let status = Status.measurements.map {
-      $0.name.replacingOccurrences(of: "|", with: "_")
-    }
-    let energy = PlantPerformance.measurements.map {
-      $0.name.replacingOccurrences(of: "|", with: "_")
-    }
-    createTable(name: "PerformanceData", measurements: status)
-    createTable(name: "Performance", measurements: energy)
+    // let status = Status.measurements.map {
+    //   $0.name.replacingOccurrences(of: "|", with: "_")
+    // }
+    // let energy = PlantPerformance.measurements.map {
+    //   $0.name.replacingOccurrences(of: "|", with: "_")
+    // }
+    // createTable(name: "PerformanceData", measurements: status)
+    // createTable(name: "Performance", measurements: energy)
 
-    let p1 = repeatElement("?", count: status.count).joined(separator: ",")
-    try! db.transaction {
-      let stmt = try! db.prepare("INSERT INTO PerformanceData VALUES (\(p1))")
-      for entry in statusHistory { try! stmt.run(entry.values) }
-    }
+    // let p1 = repeatElement("?", count: status.count).joined(separator: ",")
+    // try! db.transaction {
+    //   let stmt = try! db.prepare("INSERT INTO PerformanceData VALUES (\(p1))")
+    //   for entry in statusHistory { try! stmt.run(entry.values) }
+    // }
 
-    let p2 = repeatElement("?", count: energy.count).joined(separator: ",")
-    try! db.transaction {
-      let stmt = try! db.prepare("INSERT INTO Performance VALUES (\(p2))")
-      for entry in performanceHistory { try! stmt.run(entry.values) }
-    }
+    // let p2 = repeatElement("?", count: energy.count).joined(separator: ",")
+    // try! db.transaction {
+    //   let stmt = try! db.prepare("INSERT INTO Performance VALUES (\(p2))")
+    //   for entry in performanceHistory { try! stmt.run(entry.values) }
+    // }
   }
   // MARK: Output Streams
 
