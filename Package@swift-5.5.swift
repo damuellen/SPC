@@ -33,17 +33,19 @@ platformProducts.append(contentsOf: [
 ])
 #endif
 
+#if os(Windows)
 let dependencies: [Package.Dependency] = [
   .package(url: "https://github.com/damuellen/swift-argument-parser.git", branch: "main"),
-  // .package(url: "https://github.com/damuellen/SQLite.swift.git", branch: "master"),
+  .package(url: "https://github.com/damuellen/Utilities.git", branch: "main"),
+  .package(url: "https://github.com/damuellen/xlsxwriter.swift.git", branch: "SPM"),
+]
+#else
+let dependencies: [Package.Dependency] = [
+  .package(url: "https://github.com/damuellen/swift-argument-parser.git", branch: "main"),
   .package(url: "https://github.com/damuellen/Utilities.git", branch: "main"),
   .package(url: "https://github.com/damuellen/xlsxwriter.swift.git", branch: "main"),
-  // .package(url: "https://github.com/damuellen/SolarFieldPiping.git", branch: "main"),
-  // .package(url: "https://github.com/damuellen/Numerical.git", branch: "master"),
-  // .package(url: "https://github.com/google/swift-benchmark", branch: "main"),
-  // .package(url: "https://github.com/pvieito/PythonKit.git", branch: "master"),
 ]
-
+#endif
 let platformTargets: [Target] = [
   .target(name: "DateExtensions", swiftSettings: swift), .target(name: "CPikchr", cSettings: [c]),
   .target(name: "CSPA", cSettings: [c]), .target(name: "CSOLPOS", cSettings: [c]),
@@ -67,9 +69,6 @@ let platformTargets: [Target] = [
     ],
     swiftSettings: swift
   ),
-  // .executableTarget(name: "Benchmarking",
-  //   dependencies: ["Meteo", "Benchmark", "BlackBoxModel"],
-  //   swiftSettings: swift),
   .executableTarget(
     name: "Playground",
     dependencies: [
@@ -102,7 +101,6 @@ let platformTargets: [Target] = [
       "Utilities", 
       .product(name: "xlsxwriter", package: "xlsxwriter.swift"),
     ],
-    // .product(name: "SwiftPlot", package: "SwiftPlot")
     swiftSettings: swift
   ),
   .executableTarget(
