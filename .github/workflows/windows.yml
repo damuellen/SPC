@@ -18,8 +18,17 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v3
 
+      - name: Create directory
+        run: mkdir ${{github.workspace}}\build
+        shell: cmd
+
+      - name: Install zlib
+        working-directory: ${{github.workspace}}/build
+        run: ./install_zlib.bat
+        shell: cmd
+
       - name: Build Release Mode
-        run: swift build -c release -Xlinker /INCREMENTAL:NO -Xlinker /IGNORE:4217 -Xswiftc -gnone -Xswiftc -suppress-warnings -Xswiftc -continue-building-after-errors
+        run: swift build -c release -Xlinker /INCREMENTAL:NO -Xlinker /IGNORE:4217 -Xswiftc -gnone -Xswiftc -suppress-warnings -Xswiftc -continue-building-after-errors -Xswiftc -L%PROGRAMFILES%\zlib\lib -Xcc -I%PROGRAMFILES%\zlib\include\ 
         continue-on-error: true
 
       - name: Upload build artifacts
