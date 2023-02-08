@@ -24,7 +24,7 @@ jobs:
 
       - name: Install zlib
         working-directory: ${{github.workspace}}/build
-        run: ./install_zlib.bat
+        run: ./.github/workflows/install_zlib.bat
         shell: cmd
 
       - name: Build Release Mode
