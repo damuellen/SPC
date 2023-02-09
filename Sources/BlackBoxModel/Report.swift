@@ -1,7 +1,7 @@
 // Copyright Daniel Müllenborn
 // SPDX-License-Identifier: Apache-2.0
 
-import struct Foundation.Date
+import DateExtensions
 import Utilities
 
 extension Recording {
@@ -105,21 +105,17 @@ extension Recording {
     //      + "Power Block Availability [%]:" * Availability.current[0).powerBlock * 100)"
     //        + "Transmission Losses [%]:" * Simulation.parameter.TransLoss * 100)"
     d += decorated("OPERATION")
-    let s1 = "First Date of Operation [MM-dd HH:mm]:"
+    let s1 = "First Date of Operation:"
     if let firstDateOfOperation = Simulation.time.firstDateOfOperation {
-      d += s1 * String(
-        String(describing: firstDateOfOperation).dropFirst(5).dropLast(9)
-      )
+      d += s1 * DateTime(firstDateOfOperation).date
     } else {
-      d += s1 * "01-01  00:00"
+      d += s1 * "New Year"
     }
-    let s2 = "Last Date of Operation [MM.dd HH:mm]:"
+    let s2 = "Last Date of Operation:"
     if let lastDateOfOperation = Simulation.time.lastDateOfOperation {
-      d += s2 * String(
-        String(describing: lastDateOfOperation).dropFirst(5).dropLast(9)
-      )
+      d += s2 * DateTime(lastDateOfOperation).date
     } else {
-      d += s2 * "12-31  23:59"
+      d += s2 * "New Year"
     }
     d += Simulation.initialValues.description
     d += "Delta T for Start-Up of Anti-Freeze Pumping:"

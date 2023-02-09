@@ -14,12 +14,28 @@ import Foundation
 public typealias Interval = DateSequence.Interval
 
 extension Simulation {
-  public struct Year: Codable {
+  public struct Year: Codable, CustomStringConvertible {
     var isLeapYear = false
     public var firstDateOfOperation: Date?
     public var lastDateOfOperation: Date?
     let holidays: [Date]
     public var steps: Interval
+
+    public var description: String {
+      """
+      Weekday of 1st January:                         Fr
+      Number of Days in February:                      28 
+      First Day of Operation:               \(firstDateOfOperation!)
+      Last Day of Operation:                \(lastDateOfOperation!)
+      Time Step for Report (H/D/M/Y) :                 H
+      If hourly based; number of steps for detailed Report (TC) :
+                                                        12 
+      First Day of Daylight Saving time [MM.DD] :       0 
+      Last Day of Daylight Saving time [MM.DD] :        1.01 
+      Holidays [MM.DD] : \(holidays.map(DateTime.init(_:)).map(\.date).joined(separator: " "))
+
+      """
+    }
   }
 }
 
