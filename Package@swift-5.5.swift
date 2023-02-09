@@ -34,11 +34,7 @@ platformProducts.append(contentsOf: [
 ])
 #endif
 
-#if os(Windows)
-let branch = "Fork"
-#else
 let branch = (ProcessInfo.processInfo.environment["SPM"] != nil) ? "SPM" : "main"
-#endif
 let dependencies: [Package.Dependency] = [
   .package(url: "https://github.com/damuellen/swift-argument-parser.git", branch: "main"),
   .package(url: "https://github.com/damuellen/Utilities.git", branch: "main"),

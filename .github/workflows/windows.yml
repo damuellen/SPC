@@ -1,6 +1,6 @@
 name: CI – Windows
 
-on: push
+on: workflow_dispatch
 
 jobs:
   continuous-integration:
@@ -18,13 +18,22 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v3
 
-      - name: vcpkg install zlib
-        run: vcpkg install zlib:x86-windows
+      - name: vcpkg install libxlsxwriter
+        run: vcpkg install libxlsxwriter:x64-windows
+        continue-on-error: true
+
+      - name: vcpkg install sqlite3
+        run: vcpkg install sqlite3:x64-windows
         continue-on-error: true
 
       - name: Build Release Mode
         run: swift build -c release -Xlinker /INCREMENTAL:NO -Xlinker /IGNORE:4217 -Xswiftc -gnone -Xswiftc -suppress-warnings -Xswiftc -continue-building-after-errors -Xswiftc -LC:/vcpkg/installed/x86-windows/lib/ -Xcc -IC:/vcpkg/installed/x86-windows/include/
         continue-on-error: true
+
+      - name: Copy libs to build folder
+        run: Copy-Item -Path "C:\vcpkg\installed\x64-windows\bin\*.dll" -Destination "D:\a\SPC\SPC\.build\x86_64-unknown-windows-msvc\release" -Recurse
+        continue-on-error: true
+        shell: powershell
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
