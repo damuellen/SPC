@@ -35,7 +35,7 @@ platformProducts.append(contentsOf: [
 #endif
 
 #if os(Windows)
-let branch = "SPM"
+let branch = "Fork"
 #else
 let branch = (ProcessInfo.processInfo.environment["SPM"] != nil) ? "SPM" : "main"
 #endif
