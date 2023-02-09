@@ -1,7 +1,8 @@
-name: CI – Ubuntu
+name: CI – Ubuntu 2
 
 on: workflow_dispatch
-
+env: 
+  SPM: spm
 jobs:
   continuous-integration:
     timeout-minutes: 5
@@ -16,8 +17,6 @@ jobs:
       run: swift package update
 
     - name: Build tests
-      env: 
-        SPM: spm
       run: swift build --build-tests -Xswiftc -suppress-warnings
 
     - name: Run tests
