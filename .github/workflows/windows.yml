@@ -18,12 +18,12 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v3
 
-      - name: Create directory
-        run: mkdir ${{github.workspace}}\build
-        shell: cmd
+      - name: vcpkg install zlib
+        run: vcpkg install zlib:x64-windows
+        continue-on-error: true
 
       - name: Build Release Mode
-        run: swift build -c release -Xlinker /INCREMENTAL:NO -Xlinker /IGNORE:4217 -Xswiftc -gnone -Xswiftc -suppress-warnings -Xswiftc -continue-building-after-errors
+        run: swift build -c release -Xlinker /INCREMENTAL:NO -Xlinker /IGNORE:4217 -Xswiftc -gnone -Xswiftc -suppress-warnings -Xswiftc -continue-building-after-errors -LC:/vcpkg/installed/x64-windows/lib/ -Xcc -IC:/vcpkg/installed/x64-windows/include/
         continue-on-error: true
 
       - name: Upload build artifacts
