@@ -33,7 +33,7 @@ extension HeatTransferFluid {
 
 extension HeatTransferFluid {
   public init(file: TextConfigFile) throws {
-    let ln: (Int) throws -> Double = { try file.double(line: $0) }
+    let ln: (Int) throws -> Double = { try file.readDouble(lineNumber: $0) }
     try self.init(
       name: file.name, 
       freezeTemperature: ln(10), 
@@ -128,32 +128,28 @@ extension HeatTransfer {
     [massFlow.rate, temperature.inlet.celsius, temperature.outlet.celsius]
   }
 
-  mutating func connectTo(_ c1: HeatTransfer, _ c2: HeatTransfer) {
+  mutating func heatTransfer(from c1: HeatTransfer, and c2: HeatTransfer) {
     temperature.inlet = medium.mixingOutlets(c1, c2)
     massFlow = c1.massFlow + c2.massFlow
   }
-
-  mutating func merge(_ c1: HeatTransfer) {
+  
+  mutating func heatTransfer(from c1: HeatTransfer) {
     temperature.inlet = medium.mixingOutlets(self, c1)
     massFlow += c1.massFlow
   }
-
-  mutating func temperatureFromOutlet() {
-    temperature.inlet = temperature.outlet
-  }
-
-  mutating func temperatureFromInlet() {
+  /// Set the outlet temperature equal to the inlet temperature.
+  mutating func uniformTemperature() {
     temperature.outlet = temperature.inlet
   }
-
+  /// Set the inlet temperature to the given temperature.
   mutating func setTemperature(inlet: Temperature) {
     temperature.inlet = inlet
   }
-
+  /// Set the outlet temperature to the given temperature.
   mutating func setTemperature(outlet: Temperature) {
     temperature.outlet = outlet
   }
-
+  /// Set the outlet temperature to the given value.
   mutating func outletTemperature(kelvin: Double) {
     temperature.outlet = Temperature(kelvin)
     assert(temperature.outlet > medium.freezeTemperature,

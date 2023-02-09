@@ -62,7 +62,7 @@ extension PowerBlock.Parameter: TextConfigInitializable {
     var spacing = 3
     func parse() throws -> Double {
       defer { line += spacing }
-      return try file.double(line: line)
+      return try file.readDouble(lineNumber: line)
     }
     name = file.name
     fixElectricalParasitics = try parse()

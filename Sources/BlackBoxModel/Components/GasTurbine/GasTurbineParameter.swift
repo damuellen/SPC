@@ -41,7 +41,7 @@ extension GasTurbine.Parameter: CustomStringConvertible {
 
 extension GasTurbine.Parameter: TextConfigInitializable {
   public init(file: TextConfigFile) throws {
-    let ln: (Int) throws -> Double = { try file.double(line: $0) }
+    let ln: (Int) throws -> Double = { try file.readDouble(lineNumber: $0) }
     self = try .init(
       name: file.name,
       powerGross: ln(10),

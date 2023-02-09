@@ -20,3 +20,7 @@ struct TariffSeason {
   let v1PfD, v1PlD, v2PfD, v2PlD: Int
   let weekday, saturday, holyday: [Int]
 }
+
+extension Tariff: CustomStringConvertible {
+  public var description: String { name + .lineBreak }
+}

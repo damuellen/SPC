@@ -160,7 +160,7 @@ public struct Heater: Parameterizable, HeatTransfer {
       //  if isMaintained {
       //   operationMode = .maintenance
       //  }
-      temperatureFromInlet()
+      uniformTemperature()
       thermalPower = .zero
     } else if case .maintenance = operationMode {
       // operation is requested
@@ -171,7 +171,7 @@ public struct Heater: Parameterizable, HeatTransfer {
         """)
       operationMode = .noOperation
       massFlow = .zero
-      temperatureFromInlet()
+      uniformTemperature()
       thermalPower = .zero
     } else {
       // Normal operation requested  The fuel flow needed [MW]

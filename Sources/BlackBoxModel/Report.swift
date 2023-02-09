@@ -1,11 +1,11 @@
 // Copyright Daniel Müllenborn
 // SPDX-License-Identifier: Apache-2.0
 
-import struct Foundation.Date
+import DateExtensions
 import Utilities
 
 extension Recording {
-
+  func scientificForm(_ value: Double) -> String { String(format: "%G", value) }
   func report() -> String {
     let solarField = designParameter.solarField
     let gasTurbine = designParameter.gasTurbine
@@ -14,17 +14,17 @@ extension Recording {
     let layout = designParameter.layout
     let aperture = layout.solarField * 2 * collector.areaSCAnet
       * Double(solarField.numberOfSCAsInRow)
-    var d = decorated("PERFORMANCE RUN")
+    var d: String = decorated("PERFORMANCE RUN")
       + "\nSOLAR FIELD\n"
       + "    No of Loops:" * layout.solarField.description
       + "    Collector Type:" * collector.name.description
-      + "    Aperture [m²]:" * String(format: "%G", aperture)
-      + "    Massflow [kg/s]:" * String(format: "%G", solarField.maxMassFlow.rate)
+      + "    Aperture [m²]:" * scientificForm(aperture)
+      + "    Massflow [kg/s]:" * scientificForm(solarField.maxMassFlow.rate)
       + "    Elevation [ø]:  " + "\(solarField.elevation)\t Azimut [ø]:  "
       + "\(solarField.azimut)\n"
       + "\nSTORAGE\n"
       + "    Capacity [MWH,th]:"
-      * String(format: "%G", layout.storage * steamTurbine.power.max / steamTurbine.efficiencyNominal)
+      * scientificForm(layout.storage * steamTurbine.power.max / steamTurbine.efficiencyNominal)
       + "\nSTEAM TURBINE\n"
       + "    Gross Output [MW]:" * steamTurbine.power.max.description
       + "    Efficiency [%] :" * (steamTurbine.efficiencyNominal * 100).description
@@ -49,18 +49,18 @@ extension Recording {
       + "\n\n"
     d += decorated("Annual Results")
       + "Gross electricty producution [MWh_el/a]:"
-      * String(format: "%G", performance.electric.gross)
+      * scientificForm(performance.electric.gross)
     //  Format((YTarS(0).EgrsST + YTarS(0).EgrsGasTurbine) * (1 - Simulation.parameter.UnSchedMain) * (1 - Simulation.parameter.TransLoss), )"
-      + "Parasitic consumption [MWh_el/a]:" * String(format: "%G", performance.parasitics.shared)
+      + "Parasitic consumption [MWh_el/a]:" * scientificForm(performance.parasitics.shared)
     // Format(YTarS(0).electricalParasitics * (1 - Simulation.parameter.UnSchedMain) * (1 - Simulation.parameter.TransLoss), )"
-      + "Net electricty producution [MWh_el/a]:" * String(format: "%G", performance.electric.net)
+      + "Net electricty producution [MWh_el/a]:" * scientificForm(performance.electric.net)
     // Format(YTarS(0).Enet * (1 - Simulation.parameter.UnSchedMain) * (1 - Simulation.parameter.TransLoss), )"
       + "Gas consumption [MWh_el/a]:\n"  // Format(YTarS(0).heatfuel, )"
       + "Solar share [%]:\n"  // Format(SolShare * 100, )"
       + "Annual direct solar insolation [kWh/m²a]:"  //  Format(YTarS(0).NDI,)"
-      * String(format: "%G", irradiance.direct / 1_000)
+      * scientificForm(irradiance.direct / 1_000)
       + "Total heat from solar field [MWh_el/a]:"  // Format(YTarS(0).heatsol,)"
-      * String(format: "%G", performance.thermal.solar.megaWatt)
+      * scientificForm(performance.thermal.solar.megaWatt)
     d += "\nAVAILABILITIES\n\n"
       + "Plant Availability [%]:\n"  // * Simulation.parameter.PlantAvail * 100, )"
       + "Plant Degradation [%]:\n"  // * Simulation.parameter.PlantDegrad,)"
@@ -71,9 +71,6 @@ extension Recording {
       * String(format: "longitude: %G, latitude: %G",
         BlackBoxModel.meteoData!.location.longitude,
         BlackBoxModel.meteoData!.location.latitude)
-    //   + "Position of Wet Bulb Temp. in mto-file [row]:" * Simulation.parameter.WBTpos)"
-   //    + "Position of Wind Direction in mto-file [row]:" * Simulation.parameter.WDpos)"
-   //    + "Pos. of Global Direct Irr. in mto-file [row]:" * Simulation.parameter.GHI)"
        + "\n"
        + "Use Fuel Data from Typical Year [1: YES, 0: NO]: PFCsource\n"
      //Jn = InStrRev(Filespec.PFC, "\")
@@ -108,21 +105,17 @@ extension Recording {
     //      + "Power Block Availability [%]:" * Availability.current[0).powerBlock * 100)"
     //        + "Transmission Losses [%]:" * Simulation.parameter.TransLoss * 100)"
     d += decorated("OPERATION")
-    let s1 = "First Date of Operation [MM-dd HH:mm]:"
+    let s1 = "First Date of Operation:"
     if let firstDateOfOperation = Simulation.time.firstDateOfOperation {
-      d += s1 * String(
-        String(describing: firstDateOfOperation).dropFirst(5).dropLast(9)
-      )
+      d += s1 * DateTime(firstDateOfOperation).date
     } else {
-      d += s1 * "01-01  00:00"
+      d += s1 * "New Year"
     }
-    let s2 = "Last Date of Operation [MM.dd HH:mm]:"
+    let s2 = "Last Date of Operation:"
     if let lastDateOfOperation = Simulation.time.lastDateOfOperation {
-      d += s2 * String(
-        String(describing: lastDateOfOperation).dropFirst(5).dropLast(9)
-      )
+      d += s2 * DateTime(lastDateOfOperation).date
     } else {
-      d += s2 * "12-31  23:59"
+      d += s2 * "New Year"
     }
     d += Simulation.initialValues.description
     d += "Delta T for Start-Up of Anti-Freeze Pumping:"

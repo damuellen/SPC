@@ -91,7 +91,7 @@ public struct SolarField: Parameterizable, HeatTransfer {
   /// Returns the static parameters.
   public static var parameter: Parameter = ParameterDefaults.sf
 
-  mutating func requiredMassFlow(storage: Storage) {
+  mutating func requiredMassFlow(from storage: Storage) {
     if storage.relativeCharge < Storage.parameter.chargeTo {
       maxMassFlow += storage.designMassFlow
     } else if Design.hasGasTurbine {
@@ -136,7 +136,7 @@ public struct SolarField: Parameterizable, HeatTransfer {
   }
   /// Determines the inlet temperature of the solar field
   /// depending on the operating mode of the storage
-  mutating func inletTemperature(storage: Storage) {
+  mutating func inletTemperature(from storage: Storage) {
     switch storage.operationMode {
     case .freezeProtection:
       if Storage.parameter.temperatureCharge[1] > 0 {

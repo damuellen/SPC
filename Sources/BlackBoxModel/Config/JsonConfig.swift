@@ -58,7 +58,8 @@ public enum JSONConfig {
       return []
     }
   }
-    static func load(_ url: URL) throws {
+  
+  static func load(_ url: URL) throws {
     let data = try Data(contentsOf: url)
     let decoder = JSONDecoder()
     decoder.dateDecodingStrategy = .iso8601

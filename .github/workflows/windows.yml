@@ -5,9 +5,18 @@ on: workflow_dispatch
 jobs:
   continuous-integration:
     timeout-minutes: 15
-    runs-on: [windows-2019]
+    runs-on: [windows-2022]
 
     steps:
+
+      - name: Setup Swift compiler
+        uses: compnerd/gha-setup-swift@main
+        with:
+          branch: swift-5.7.3-release
+          tag: 5.7.3-RELEASE
+
+      - name: Checkout sources
+        uses: actions/checkout@v3
 
       - name: vcpkg install libxlsxwriter
         run: vcpkg install libxlsxwriter:x64-windows
@@ -16,15 +25,6 @@ jobs:
       - name: vcpkg install sqlite3
         run: vcpkg install sqlite3:x64-windows
         continue-on-error: true
-
-      - name: Setup Swift compiler
-        uses: compnerd/gha-setup-swift@main
-        with:
-          branch: swift-5.6-release
-          tag: 5.6-RELEASE
-
-      - name: Checkout sources
-        uses: actions/checkout@v2
 
       - name: Build Release Mode
         run: swift build -c release -Xlinker /INCREMENTAL:NO -Xlinker /IGNORE:4217 -Xswiftc -gnone -Xswiftc -suppress-warnings -Xswiftc -continue-building-after-errors -Xswiftc -LC:/vcpkg/installed/x64-windows/lib/ -Xcc -IC:/vcpkg/installed/x64-windows/include/
@@ -35,24 +35,8 @@ jobs:
         continue-on-error: true
         shell: powershell
 
-      - name: Compress exe binaries 
-        uses: damuellen/upx-action@master
-        continue-on-error: true
-        with:
-          file: .build\x86_64-unknown-windows-msvc\release\*.exe
-          args: -9
-          strip: false
-
-      - name: Compress dll binaries 
-        uses: damuellen/upx-action@master
-        continue-on-error: true
-        with:
-          file: .build\x86_64-unknown-windows-msvc\release\*.dll
-          args: -9
-          strip: false
-
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         continue-on-error: true
         with:
           name: SPC-win32-x64

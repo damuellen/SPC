@@ -163,8 +163,8 @@ extension Storage.Parameter: CustomStringConvertible {
 extension Storage.Parameter: TextConfigInitializable {
   public init(file: TextConfigFile) throws {
     typealias T = Temperature
-    let ln: (Int) throws -> Double = { try file.double(line: $0) }
-    let l2: (Int) throws -> Int = { try file.integer(line: $0) }
+    let ln: (Int) throws -> Double = { try file.readDouble(lineNumber: $0) }
+    let l2: (Int) throws -> Int = { try file.readInteger(lineNumber: $0) }
     name = file.name
     chargeTo = try Ratio(ln(10))
     dischargeToTurbine = try Ratio(ln(13))

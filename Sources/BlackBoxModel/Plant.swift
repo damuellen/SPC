@@ -292,7 +292,7 @@ public struct Plant {
         // Adjustment of the powerblock mass flow
         switch (solarField, storage) {
           case (.track, .discharge), (.defocus(_), .discharge):
-            status.powerBlock.connectTo(status.solarField, status.storage)
+            status.powerBlock.heatTransfer(from: status.solarField, and: status.storage)
           case (_, .discharge):
             status.powerBlock.massFlow(outlet: status.storage)
           case (_, .charge):
@@ -401,7 +401,7 @@ public struct Plant {
 
       add(heater: performance)
 
-      powerBlock.merge(heater)
+      powerBlock.heatTransfer(from: heater)
     } else if case .noOperation = gasTurbine.operationMode {
       // GasTurbine does not update at all (Load<Min?)
       heater.inletTemperature(outlet: solarField)
@@ -415,7 +415,7 @@ public struct Plant {
 
       add(heater: performance)
 
-      powerBlock.connectTo(solarField, heater)
+      powerBlock.heatTransfer(from: solarField, and: heater)
     }
   }
 
@@ -472,7 +472,7 @@ public struct Plant {
             heatFlow: &heatFlow
           )
 
-          powerBlock.connectTo(solarField, storage)
+          powerBlock.heatTransfer(from: solarField, and: storage)
         }  // STORAGE: dischargeToHeater < Qrel < dischargeToTurbine; Fuel/NoFuel
 
         heatFlow.storage = supply
@@ -505,7 +505,7 @@ public struct Plant {
 
         add(heater: performance)
 
-        powerBlock.connectTo(solarField, heater)
+        powerBlock.heatTransfer(from: solarField, and: heater)
       }
 
     } else {
@@ -529,7 +529,7 @@ public struct Plant {
 
       add(heater: performance)
 
-      powerBlock.connectTo(solarField, heater)
+      powerBlock.heatTransfer(from: solarField, and: heater)
     }
 
     if heater.massFlow.isZero == false {

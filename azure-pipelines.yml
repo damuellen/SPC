@@ -3,8 +3,7 @@
 # Add steps that build, run tests, deploy, and more:
 # https://aka.ms/yaml
 
-trigger:
-- master
+trigger: none
 
 pool:
   vmImage: 'windows-latest'
@@ -22,7 +21,7 @@ steps:
   inputs:
     targetType: 'inline'
     script: |
-      Install-Binary -Url "https://download.swift.org/swift-5.7-release/windows10/swift-5.7-RELEASE/swift-5.7-RELEASE-windows10.exe" -Name "installer.exe" -ArgumentList ("-q")
+      Install-Binary -Url "https://download.swift.org/swift-5.7.3-release/windows10/swift-5.7.3-RELEASE/swift-5.7.3-RELEASE-windows10.exe" -Name "installer.exe" -ArgumentList ("-q")
   displayName: Install Swift toolchain
 
 - task: DownloadBuildArtifacts@1

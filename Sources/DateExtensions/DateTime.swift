@@ -41,12 +41,12 @@ public struct DateTime: CustomStringConvertible {
   private let second: Int
 
   public var description: String {
-    let ds = String(
-      format: "%04d-%02d-%02dT%02d:%02d:%02dZ",
-      year, month, day, hour, minute, second)
-    //let symbol = isDaytime ? " 🌞 " : " 🌑 "
-    return ds
+    String(format: "%04d-%02d-%02dT%02d:%02d:%02dZ", year, month, day, hour, minute, second)
   }
+
+  public var date: String { String(format: "%02d-%02d", month, day) }
+
+  public var time: String { String(format: "%02d:%02d", hour, minute) }
 
   public static func setCurrent(date: Date) {
     nightfall = current.isDaytime

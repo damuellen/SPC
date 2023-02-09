@@ -1,7 +1,5 @@
 # Performance Model of Parabolic Trough Solar Power Plants
 
-  ![CI – Windows](https://github.com/damuellen/SPC/workflows/CI%20%E2%80%93%20Windows/badge.svg)   ![CI – Ubuntu](https://github.com/damuellen/SPC/workflows/CI%20%E2%80%93%20Ubuntu/badge.svg)
-
 ## Overview
 
 The performance model, SPM, is a computer program that simulates
