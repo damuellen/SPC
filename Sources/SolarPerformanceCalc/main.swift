@@ -26,8 +26,8 @@ let now = Date()
 SolarPerformanceCalculator.main()
 //print(SolarPerformanceCalculator.result!)
 
-let time = String(Int(-now.timeIntervalSinceNow * 1000)) +  " ms"
-print("elapsed time:", time)
+let time = String(format: "%.2f seconds", -now.timeIntervalSinceNow)
+print("Wall time:", time)
 
 #if os(Windows)
   MessageBox(text: time, caption: "")

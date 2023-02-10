@@ -35,8 +35,7 @@ public struct PlantPerformance: MeasurementsConvertible {
   }
 
   var values: [Double] {
-    thermal.values + fuel.values
-      + parasitics.values + electric.values
+    thermal.values + fuel.values + parasitics.values + electric.values
   }
 
   static var measurements: [(name: String, unit: String)] {

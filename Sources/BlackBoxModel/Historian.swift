@@ -340,6 +340,8 @@ public final class Historian {
 
   private func writeExcel() {
     guard let wb = xlsx else { return }
+    print("Excel file creation started.")
+    let now = Date()
     let f1 = wb.addFormat().set(num_format: "hh:mm  dd.mm")
     let f0 = wb.addFormat().set(num_format: "0")
     let f2 = wb.addFormat().set(num_format: "0.0")
@@ -388,8 +390,8 @@ public final class Historian {
       ws2.write(performanceHistory[i].values, row: i + 1, col: 1)
       date.addTimeInterval(interval)
     }
-
     wb.close()
+    print("Excel file creation took \((-now.timeIntervalSinceNow).asString()) seconds.")
   }
   // MARK: Output database
   private func storeInDB() {
