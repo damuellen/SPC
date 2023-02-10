@@ -15,7 +15,7 @@
     "lldb.evaluationTimeout": 30,
     "lldb.consoleMode": "evaluate",
     "task.problemMatchers.neverPrompt": true,
-    "editor.fontFamily": "SF Mono, Menlo, Monaco, Consolas, monospace",
+    "editor.fontFamily": "SF Mono, 'Cascadia Code', Menlo, Monaco, monospace",
     "editor.tabSize": 2,
     "editor.suggestSelection": "first",
     "editor.quickSuggestionsDelay": 50,
