@@ -22,7 +22,7 @@ public enum Design {
   /// The design has a gas turbine
   static let hasGasTurbine = layout.gasTurbine > 0
   /// The design has a thermal storage
-  static let hasStorage = layout.storage > 0
+  static let hasStorage = max(layout.storage, layout.storage_cap, layout.storage_ton) > 0
 }
 
 /// Layout of the plant
