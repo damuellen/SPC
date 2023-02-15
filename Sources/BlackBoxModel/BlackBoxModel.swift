@@ -233,7 +233,7 @@ public enum BlackBoxModel {
       plant.electricity.consumption()
 
       let performance = plant.performance
-#if DEBUG      
+#if PRINT      
       print(decorated(dt.description), meteo, status, performance)
       ClearScreen()
 #endif
