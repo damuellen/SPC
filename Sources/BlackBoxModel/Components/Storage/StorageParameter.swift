@@ -46,8 +46,8 @@ extension Storage {
     let prefChargeToTurbine: Double
     let exception: ClosedRange<Int>
     let HTF: StorageMedium
-    
-    let FP, FC, heatdiff, dSRise: Double
+    let freezeProtection, fossilCharging: Bool
+    let heatdiff, dSRise: Double
     
     let minDischargeLoad, fixedDischargeLoad: Ratio
     
@@ -59,7 +59,7 @@ extension Storage {
     var auxConsumptionCurve = false
     var heatExchangerRestrictedMax = false
 
-    var definedBy: Definition = .hours
+    var definedBy: Definition = .cap
 
     let designTemperature: (cold: Temperature, hot: Temperature)
     
@@ -140,7 +140,7 @@ extension Storage.Parameter: CustomStringConvertible {
     * (startLoad.cold * 100).description
     + "Load of Hot Tank at Program Start [%]:"
     * (startLoad.hot * 100).description
-    + "Charging of Storage during Night by HTF-heater (0=YES; -1=NO): \(FC)\n"
+    + "Charging of Storage during Night by HTF-heater: \(fossilCharging)\n"
     + "Stop charging strategy at day:" * stopFossilCharging.day.description
     + "Stop charging strategy at month:" * stopFossilCharging.month.description
     + "Start charging strategy at day:" * startFossilCharging.day.description
@@ -189,14 +189,14 @@ extension Storage.Parameter: TextConfigInitializable {
     prefChargeToTurbine = try ln(174)
     exception = try l2(175)...l2(176)
     HTF = .solarSalt //try ln(177)
-    FP = try ln(178)
-    FC = try ln(179)
+    freezeProtection = try l2(178) == -1
+    fossilCharging = try l2(179) == -1
     stopFossilCharging = try (l2(180), l2(181))
     startFossilCharging = try (l2(182), l2(183))
-    heatExchangerRestrictedMax = try l2(186) == 1 ? true:false
+    heatExchangerRestrictedMax = try l2(186) == -1
     heatExchangerCapacity = try ln(189)
   //  Qfldif = try ln(192)
-    isVariable = try l2(194) == 1 ? true:false
+    isVariable = try l2(194) == -1
     dSRise = try ln(196)
     minDischargeLoad = try Ratio(ln(198))
     fixedDischargeLoad = try Ratio(ln(200))
@@ -209,12 +209,12 @@ extension Storage.Parameter: TextConfigInitializable {
    // TempHeatTracing = try ln(211)
   //  HTc_Temp = try ln(_)
   //  HTe_pow = try ln(_ )
-    heatExchangerRestrictedMin = try l2(217) == 1 ? true:false
+    heatExchangerRestrictedMin = try l2(217) == -1 
     heatExchangerMinCapacity = try ln(218)
     dischargeParasitcsFactor = try ln(220)
     stopFossilCharging2 = try (l2(222), l2(223))
     startFossilCharging2 = try (l2(224),l2(225))
-    auxConsumptionCurve = try l2(227) == 1 ? true:false
+    auxConsumptionCurve = try l2(227) == -1 
     DesAuxIN = try ln(228)
     DesAuxEX = try ln(229)
     heatProductionLoadWinter = try Ratio(ln(233))

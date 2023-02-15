@@ -22,15 +22,15 @@ public struct Storage: Parameterizable, HeatTransfer {
   /// Returns the operating state
   public internal(set) var operationMode: OperationMode
 
-  var dT_HTFsalt: (cold: Double, hot: Double)
+  public internal(set) var dT_HTFsalt: (cold: Double, hot: Double)
 
-  public internal(set)  var temperatureTank: Temperatures
+  public internal(set) var temperatureTank: Temperatures
 
-  var antiFreezeTemperature: Double = 270.0
+  public internal(set) var antiFreezeTemperature: Double = 270.0
 
   public internal(set) var salt = Salt()
 
-  public internal(set)  var relativeCharge: Ratio
+  public internal(set) var relativeCharge: Ratio
 
 //  var massOfSalt: Double = Storage.defineSaltMass()
   /// Returns the fixed initial state.

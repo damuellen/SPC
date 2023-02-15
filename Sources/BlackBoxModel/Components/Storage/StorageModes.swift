@@ -375,6 +375,7 @@ extension Storage.OperationMode: CustomStringConvertible {
       case .noOperation: return "No operation"
       case .charge(_): return "Charging"
       case .discharge(let load): return "Discharge \(load.singleBar)"
+      case .freezeProtection: return "Freeze protection"
       default: return "No description"
     }
   }

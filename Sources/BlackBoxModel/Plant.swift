@@ -603,7 +603,7 @@ public struct Plant {
     let time = DateTime.current
 
     // energy can only be provided with heater on
-    if (parameter.FC == 0 && DateTime.current.isNighttime
+    if (parameter.fossilCharging && DateTime.current.isNighttime
       && status.storage.relativeCharge < parameter.chargeTo
       && status.powerBlock.inlet > 665
       && Storage.isFossilChargingAllowed(at: time)
@@ -633,7 +633,7 @@ public struct Plant {
     }
 
     if status.solarField.operationMode.isFreezeProtection,
-      status.storage.relativeCharge > 0.35, parameter.FP == 0
+      status.storage.relativeCharge > 0.35, parameter.freezeProtection
     {
       status.storage.operationMode = .freezeProtection
     }
