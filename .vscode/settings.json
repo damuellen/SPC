@@ -5,7 +5,7 @@
     },
 	"terminal.integrated.scrollback": 50000,
     "terminal.integrated.defaultLocation": "editor",
-    "terminal.integrated.fontSize": 16,
+    "terminal.integrated.fontSize": 14,
     "terminal.integrated.confirmOnKill": "never",
     "extensions.ignoreRecommendations": true,
     "diffEditor.ignoreTrimWhitespace": false,
