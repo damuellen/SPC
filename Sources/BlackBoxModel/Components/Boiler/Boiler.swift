@@ -31,6 +31,9 @@ public struct Boiler: Parameterizable {
     case SI, NI, startUp, scheduledMaintenance,
       coldStartUp, warmStartUp, operating, unknown
   }
+
+  struct Consumptions { var heatFlow, electric, fuel: Double }
+
   /// Returns the fixed initial state.
   static let initialState = Boiler(
     operationMode: .noOperation(hours: 0),
@@ -60,7 +63,7 @@ public struct Boiler: Parameterizable {
 
   mutating func callAsFunction(
     demand: Double, Qsf_load: Double, fuelAvailable: Double)
-    -> Plant.Performance<Boiler>
+    -> Consumptions
   {
     let parameter = Boiler.parameter
 
@@ -75,13 +78,13 @@ public struct Boiler: Parameterizable {
       if isMaintained {
 
         operationMode = .scheduledMaintenance
-        return Plant.Performance(
+        return Consumptions(
           heatFlow: thermalPower, electric: parasitics, fuel: fuel
         )
       }
 
       let fuel = Boiler.noOperation(&self, fuelAvailable: fuelAvailable)
-      return Plant.Performance(
+      return Consumptions(
         heatFlow: thermalPower, electric: parasitics, fuel: fuel
       )
     }
@@ -105,7 +108,7 @@ public struct Boiler: Parameterizable {
 
       let fuel = Boiler.noOperation(&self, fuelAvailable: fuelAvailable)
 
-      return Plant.Performance(
+      return Consumptions(
         heatFlow: thermalPower, electric: parasitics, fuel: fuel
       )
     }
@@ -120,7 +123,7 @@ public struct Boiler: Parameterizable {
 
       let fuel = Boiler.noOperation(&self, fuelAvailable: fuelAvailable)
 
-      return Plant.Performance(
+      return Consumptions(
         heatFlow: thermalPower, electric: parasitics, fuel: fuel
       )
     }
@@ -188,7 +191,7 @@ public struct Boiler: Parameterizable {
           """)
         let fuel = Boiler.noOperation(&self, fuelAvailable: fuelAvailable)
 
-        return Plant.Performance(
+        return Consumptions(
           heatFlow: thermalPower, electric: parasitics, fuel: fuel
         )
       }
@@ -211,7 +214,7 @@ public struct Boiler: Parameterizable {
 
     parasitics = Boiler.parasitics(estimateFrom: load)
 
-    return Plant.Performance(
+    return Consumptions(
       heatFlow: thermalPower, electric: parasitics, fuel: fuel
     )
   }

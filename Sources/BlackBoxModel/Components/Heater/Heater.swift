@@ -45,6 +45,9 @@ public struct Heater: Parameterizable, HeatTransfer {
       }
     }
   }
+
+  struct Consumptions { var heatFlow, electric, fuel: Double }
+
   /// working conditions of the heater at start
   static let initialState = Heater(
     temperature: Simulation.startTemperature,
@@ -73,7 +76,7 @@ public struct Heater: Parameterizable, HeatTransfer {
     fuelAvailable: Double,
     heatFlow: ThermalEnergy
   )
-    -> Plant.Performance<Heater>
+    -> Heater.Consumptions
   {
     let htf = SolarField.parameter.HTF
     let parameter = Heater.parameter
@@ -105,7 +108,7 @@ public struct Heater: Parameterizable, HeatTransfer {
           operationMode = .noOperation
           massFlow = 0.0
           thermalPower = .zero
-          let energy = Plant.Performance<Heater>(
+          let energy = Heater.Consumptions(
             heatFlow: thermalPower.megaWatt, electric: parasitics, fuel: fuel
           )
           return energy
@@ -212,7 +215,7 @@ public struct Heater: Parameterizable, HeatTransfer {
       }
     }
     parasitics = load > .zero ? Heater.parasitics(estimateFrom: load) : 0
-    let energy = Plant.Performance<Heater>(
+    let energy = Heater.Consumptions(
       heatFlow: thermalPower.megaWatt, electric: parasitics, fuel: fuel
     )
     return energy
