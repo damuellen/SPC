@@ -54,18 +54,18 @@ public struct SolarField: Parameterizable, HeatTransfer {
     set { header.massFlow = newValue }
   }
 
-  public let area = Design.layout.solarField * Collector.parameter.areaSCAnet
+  let area = Design.layout.solarField * Collector.parameter.areaSCAnet
     * 2 * Double(SolarField.parameter.numberOfSCAsInRow)
 
-  public let minMassFlow = MassFlow(
+  let minMassFlow = MassFlow(
     SolarField.parameter.minFlow.quotient * SolarField.parameter.maxMassFlow.rate
   )
 
-  public let antiFreezeFlow = MassFlow(
+  let antiFreezeFlow = MassFlow(
       SolarField.parameter.antiFreezeFlow.quotient * SolarField.parameter.maxMassFlow.rate
   )
 
-  public var maxMassFlow: MassFlow = .zero
+  var requiredMassFlow: MassFlow = .zero
 
   public enum OperationMode {
     case startUp
@@ -93,14 +93,17 @@ public struct SolarField: Parameterizable, HeatTransfer {
 
   mutating func requiredMassFlow(from storage: Storage) {
     if storage.relativeCharge < Storage.parameter.chargeTo {
-      maxMassFlow += storage.designMassFlow
+      requiredMassFlow += MassFlow(
+      (1 - Storage.parameter.massFlowShare.quotient)
+        * SolarField.parameter.maxMassFlow.rate
+      )
     } else if Design.hasGasTurbine {
-      maxMassFlow = HeatExchanger.parameter.massFlowHTF
+      requiredMassFlow = HeatExchanger.parameter.massFlowHTF
     }
-    if massFlow > maxMassFlow {
-      massFlow = maxMassFlow
+    if massFlow > requiredMassFlow {
+      massFlow = requiredMassFlow
     }
-    assert(maxMassFlow <= SolarField.parameter.maxMassFlow)
+    assert(requiredMassFlow <= SolarField.parameter.maxMassFlow)
   }
 
   static func pipeHeatLoss(pipe: Temperature, ambient: Temperature) -> Double {
@@ -328,11 +331,11 @@ public struct SolarField: Parameterizable, HeatTransfer {
         operationMode = elevation.isZero ? .stow : .follow
         header.massFlow = .zero
       }
-    case let massFlow where massFlow > maxMassFlow:
-      let ratio = Ratio(maxMassFlow.rate / massFlow.rate)
+    case let massFlow where massFlow > requiredMassFlow:
+      let ratio = Ratio(requiredMassFlow.rate / massFlow.rate)
       operationMode = .defocus(ratio)
       // Set maximum flow
-      header.massFlow = maxMassFlow
+      header.massFlow = requiredMassFlow
     case let massFlow where massFlow < minMassFlow:
       operationMode = .follow
       header.massFlow = minMassFlow

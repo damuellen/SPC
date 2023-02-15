@@ -20,8 +20,8 @@ class StorageTests: XCTestCase {
       (demand / 0.39),
         HeatExchanger.parameter.heatFlowHTF)
 
-    plant.heatFlow = Storage.demandStrategy(
-      storage: storage, powerBlock: &powerBlock, heatFlow: plant.heatFlow
+    plant.heatFlow = storage.demandStrategy(
+      powerBlock: &powerBlock, heatFlow: plant.heatFlow
     )
     
     _ = Storage.perform(
@@ -38,7 +38,7 @@ class StorageTests: XCTestCase {
  //   storage.temperature.outlet = Temperature(celsius: 380.0)
     _ = storage.massFlow.rate * storage.heat / 1_000
 
-    storage.calculate(thermal: &plant.heatFlow, powerBlock)
+    _ = storage.calculate(heat: plant.heatFlow.storage, powerBlock: powerBlock)
 
     storage.operationMode = .charge(load: 1.0)
     _ = storage.massFlow.rate

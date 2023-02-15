@@ -262,33 +262,36 @@ extension Storage {
     }
   }
 
-  mutating func calculate(thermal: inout ThermalEnergy, _ powerBlock: PowerBlock) {
+  mutating func calculate(output: inout Power, input: Power, powerBlock: PowerBlock) {
+    assert(
+      (salt.minimum.kg + salt.total.kg) - (salt.cold.kg + salt.hot.kg) < 0.1,
+      "Salt quantity in the tanks does not match."
+    )
     switch operationMode {
     case .charge:
       switch Storage.parameter.type {
       case .indirect:
-        indirectCharging(thermal: thermal.toStorage.kiloWatt)
+        indirectCharging(thermal: input.kiloWatt)
       case .direct:
-        directCharging(thermal: thermal.toStorage.kiloWatt)
+        directCharging(thermal: input.kiloWatt)
       }
     case .fossilCharge:
-      fossilCharging(thermal: thermal.toStorage.kiloWatt)
+      fossilCharging(thermal: input.kiloWatt)
     case .discharge:
       switch Storage.parameter.type {
       case .indirect:
-        thermal.storage.kiloWatt = indirectDischarging(thermal: thermal.storage.kiloWatt)
+        return output.kiloWatt = indirectDischarging(thermal: output.kiloWatt)
       case .direct:
-        thermal.storage.kiloWatt = directDischarging(thermal: thermal.storage.kiloWatt)
+        return output.kiloWatt = directDischarging(thermal: output.kiloWatt)
       }
     case .preheat:
-      preheating(thermal: thermal.storage.kiloWatt)
+      preheating(thermal: output.kiloWatt)
     case .freezeProtection:
       freezeProtection(powerBlock: powerBlock)
     // powerBlock.temperature.outlet = storage.temperatureTank.cold
     case .noOperation:
       noOperation(powerBlock: powerBlock)
     }
-    assert((salt.minimum.kg + salt.total.kg) - (salt.cold.kg + salt.hot.kg) < 0.1)
   }
 
   /// Calculates the temperature drop of the tanks with the help of the heat losses

@@ -39,7 +39,6 @@ extension Storage {
       thermalPower = storageCharge(
         storage: &storage,
         solarField: &solarField,
-        powerBlock: powerBlock,
         heatFlow: &heatFlow
       )
       parasitics = Storage.parasitics(storage)
@@ -111,28 +110,26 @@ extension Storage {
   }
 
   private mutating func massFlow(
-    powerBlock: PowerBlock,
     solarField: SolarField)
   {
     let dischargeLoad = operationMode.dischargeLoad.quotient
     let eff = Storage.parameter.heatExchangerEfficiency
     switch solarField.operationMode {
     case .track, .defocus(_):
-      massFlow.rate = (powerBlock.designMassFlow.rate / eff) - solarField.massFlow.rate
+      massFlow.rate = (HeatExchanger.designMassFlow.rate / eff) - solarField.massFlow.rate
     default:
-      massFlow.rate = dischargeLoad * powerBlock.designMassFlow.rate / eff
+      massFlow.rate = dischargeLoad * HeatExchanger.designMassFlow.rate / eff
     }
   }
 
   private static func storageCharge(
     storage: inout Storage,
     solarField: inout SolarField,
-    powerBlock: PowerBlock,
     heatFlow: inout ThermalEnergy)
     -> Power
   {
     storage.massFlow(outlet: solarField)
-    storage.massFlow -= PowerBlock.requiredMassFlow()
+    storage.massFlow -= HeatExchanger.designMassFlow
 
     storage.massFlow.adjust(factor: parameter.heatExchangerEfficiency)
     let heatExchanger = HeatExchanger.parameter
@@ -178,7 +175,7 @@ extension Storage {
       }
       
       // reduce HTF massflow in solarfield
-      solarField.massFlow = powerBlock.designMassFlow + storage.massFlow
+      solarField.massFlow = HeatExchanger.designMassFlow + storage.massFlow
       
       heatFlow.solar.kiloWatt = solarField.massFlow.rate * solarField.heat
       
@@ -235,7 +232,7 @@ extension Storage {
   {
     // used for parasitics
     storage.inletTemperature(outlet: powerBlock)
-    storage.massFlow = powerBlock.designMassFlow - powerBlock.massFlow
+    storage.massFlow = HeatExchanger.designMassFlow - powerBlock.massFlow
     storage.massFlow.rate *= storage.operationMode.dischargeLoad.quotient
     storage.temperature.outlet = outletTemperature(storage)
 
@@ -288,7 +285,7 @@ extension Storage {
 
         parasitics = Storage.parasitics(storage)
         break
-      } else if storage.massFlow.rate <= 0.05 * powerBlock.designMassFlow.rate {
+      } else if storage.massFlow.rate <= 0.05 * HeatExchanger.designMassFlow.rate {
         thermalPower = 0.0
         storage.operationMode = .noOperation
         parasitics = .zero

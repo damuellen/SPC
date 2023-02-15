@@ -20,10 +20,6 @@ public struct PowerBlock: Parameterizable, HeatTransfer {
 
   public internal(set) var temperature: (inlet: Temperature, outlet: Temperature)
 
-  var designMassFlow = MassFlow(
-    HeatExchanger.parameter.heatFlowHTF * 1_000 / HeatExchanger.capacity
-  )
-
   public enum OperationMode {
     case scheduledMaintenance
   }
@@ -33,11 +29,6 @@ public struct PowerBlock: Parameterizable, HeatTransfer {
   )
   /// Returns the static parameters
   public static var parameter: Parameter = ParameterDefaults.pb
-
-  static func requiredMassFlow() -> MassFlow {
-    MassFlow(GridDemand.current.ratio
-      * HeatExchanger.parameter.heatFlowHTF * 1_000 / HeatExchanger.capacity)
-  }
 
   mutating func temperatureOutlet(
     heatExchanger: inout HeatExchanger, mode: Storage.OperationMode

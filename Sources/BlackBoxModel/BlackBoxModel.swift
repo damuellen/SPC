@@ -175,14 +175,14 @@ public enum BlackBoxModel {
       {()}
       if DateTime.isSunSet
       {()}
-      if DateTime.at(minute: 10, hour: 6, day: 6, month: 1)
+      if DateTime.at(minute: 40, hour: 8, day: 1, month: 1)
       {()}
 #endif
       // Used when calculating the heat losses and the efficiency
       let temperature = Temperature(celsius: Double(meteo.temperature))
 
       // Setting the mass flow required by the power block in the solar field
-      status.solarField.maxMassFlow = PowerBlock.requiredMassFlow()
+      status.solarField.requiredMassFlow = HeatExchanger.designMassFlow
       if status.solarField.massFlow > .zero {
         status.solarField.inletTemperature(outlet: status.powerBlock)
       } else {
@@ -221,7 +221,11 @@ public enum BlackBoxModel {
 
       if Design.hasStorage {
         // Calculate the operating state of the salt
-        status.storage.calculate(thermal: &plant.heatFlow, status.powerBlock)
+        status.storage.calculate(
+          output: &plant.heatFlow.storage,
+          input: plant.heatFlow.toStorage,          
+          powerBlock: status.powerBlock
+        )
         // Calculate the heat loss of the tanks
         status.storage.heatlosses(for: Simulation.time.steps.interval)
       }
@@ -229,9 +233,9 @@ public enum BlackBoxModel {
       plant.electricity.consumption()
 
       let performance = plant.performance
-#if PRINT
-      ClearScreen()
+#if DEBUG      
       print(decorated(dt.description), meteo, status, performance)
+      ClearScreen()
 #endif
       backgroundQueue.async { [status] in
         log(dt, meteo: meteo, status: status, energy: performance)

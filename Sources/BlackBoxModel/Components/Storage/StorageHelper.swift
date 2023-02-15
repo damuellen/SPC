@@ -117,12 +117,16 @@ extension Storage {
       /// Fluid properties
       let htf = SolarField.parameter.HTF
       let t = Simulation.time.steps.fraction
+      let designMassFlow = MassFlow(
+        (1 - Storage.parameter.massFlowShare.quotient)
+          * SolarField.parameter.maxMassFlow.rate
+      )
       if case .discharge = status.operationMode {
         let load = parameter.fixedDischargeLoad.isZero
           ? 0.97 : parameter.fixedDischargeLoad.quotient
-        
+
         let designDischarge = (((
-          (solarField.maxMassFlow - status.designMassFlow).rate * load)
+          (solarField.maxMassFlow - designMassFlow).rate * load)
           / parameter.heatExchangerEfficiency) * htf.heatContent(
             parameter.designTemperature.hot - status.dT_HTFsalt.hot,
             parameter.designTemperature.cold - status.dT_HTFsalt.cold) / 1_000)
@@ -142,7 +146,7 @@ extension Storage {
         /// Fluid properties
         let htf = SolarField.parameter.HTF
         
-        let designCharge = (status.designMassFlow.rate * htf.heatContent(
+        let designCharge = (designMassFlow.rate * htf.heatContent(
           parameter.designTemperature.hot + status.dT_HTFsalt.hot,
           parameter.designTemperature.cold + status.dT_HTFsalt.cold) / 1_000)
           * parameter.heatExchangerEfficiency

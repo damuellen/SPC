@@ -19,11 +19,6 @@ public struct Storage: Parameterizable, HeatTransfer {
 
   public internal(set) var massFlow: MassFlow = .zero
 
-  var designMassFlow = MassFlow(
-    (1 - Storage.parameter.massFlowShare.quotient)
-      * SolarField.parameter.maxMassFlow.rate
-  )
-
   /// Returns the operating state
   public internal(set) var operationMode: OperationMode
 
@@ -84,45 +79,43 @@ public struct Storage: Parameterizable, HeatTransfer {
 
   /// Adjusts the design mass flow in the power block,
   /// and determines the heat flow to the storage.
-  static func demandStrategy(
-    storage: Storage,
+  func demandStrategy(
     powerBlock: inout PowerBlock,
     heatFlow: ThermalEnergy) -> ThermalEnergy
   {
-   // var demand = DateTime.current.isDaytime ? 0.5 : heatFlow.demand.megaWatt
-    switch parameter.strategy {
+    // var demand = DateTime.current.isDaytime ? 0.5 : heatFlow.demand.megaWatt
+    switch Storage.parameter.strategy {
     case .always: return strategyAlways(
-      storage: storage,
       powerBlock: &powerBlock,
       heatFlow: heatFlow)
     case .demand: return strategyDemand(
-      storage: storage,
       powerBlock: &powerBlock,
       heatFlow: heatFlow)
     // parameter.strategy = "Ful" // Booster or Shifter
     case .shifter: return strategyShifter(
-      storage: storage,
       powerBlock: &powerBlock,
       heatFlow: heatFlow)
     }
   }
   /// Power Block delivers Power to Grid according to Demand in Grid
-  static func strategyDemand(
-    storage: Storage,
+  func strategyDemand(
     powerBlock: inout PowerBlock,
     heatFlow: ThermalEnergy) -> ThermalEnergy
   {
     var heatFlow = heatFlow
     heatFlow.storage = heatFlow.balance  // [MW]
 
-    if parameter.heatExchangerRestrictedMin {
+    if Storage.parameter.heatExchangerRestrictedMin {
       // avoiding input to storage lower than minimal HXs capacity
       let maxMassFlow = SolarField.parameter.maxMassFlow.rate
-
-      heatFlow.toStorageMin.megaWatt = parameter.heatExchangerMinCapacity
+      let massFlow = MassFlow(
+        (1 - Storage.parameter.massFlowShare.quotient)
+          * SolarField.parameter.maxMassFlow.rate
+      )
+      heatFlow.toStorageMin.megaWatt = Storage.parameter.heatExchangerMinCapacity
         * HeatExchanger.parameter.heatFlowHTF
-        * (1 - storage.designMassFlow.rate / maxMassFlow)
-        / (storage.designMassFlow.rate / maxMassFlow)
+        * (1 - massFlow.rate / maxMassFlow)
+        / (massFlow.rate / maxMassFlow)
 
       if case 0..<heatFlow.toStorageMin.megaWatt = heatFlow.storage.megaWatt {
         heatFlow.demand -= heatFlow.toStorageMin - heatFlow.storage
@@ -134,8 +127,7 @@ public struct Storage: Parameterizable, HeatTransfer {
   }
 
   /// Power Block delivers always design Power to Grid
-  static func strategyAlways(
-    storage: Storage,
+  func strategyAlways(
     powerBlock: inout PowerBlock,
     heatFlow: ThermalEnergy) -> ThermalEnergy
   {
@@ -143,14 +135,17 @@ public struct Storage: Parameterizable, HeatTransfer {
 
     heatFlow.storage = heatFlow.balance // [MW]
 
-    if parameter.heatExchangerRestrictedMin {
+    if Storage.parameter.heatExchangerRestrictedMin {
       // avoiding input to storage lower than minimal HXs capacity
       let maxMassFlow = SolarField.parameter.maxMassFlow.rate
       let heatFlowRate = HeatExchanger.parameter.heatFlowHTF
-
+      let massFlow = MassFlow(
+        (1 - Storage.parameter.massFlowShare.quotient)
+          * SolarField.parameter.maxMassFlow.rate
+      )
       heatFlow.toStorageMin.megaWatt = heatFlowRate
-        * (1 - storage.designMassFlow.rate / maxMassFlow)
-        / (storage.designMassFlow.rate / maxMassFlow)
+        * (1 - massFlow.rate / maxMassFlow)
+        / (massFlow.rate / maxMassFlow)
 
       if case 0..<heatFlow.toStorageMin.megaWatt = heatFlow.storage.megaWatt {
         powerBlock.massFlow.rate = (heatFlowRate
@@ -163,8 +158,7 @@ public struct Storage: Parameterizable, HeatTransfer {
     return heatFlow
   }
 
-  static func strategyShifter(
-    storage: Storage,
+  func strategyShifter(
     powerBlock: inout PowerBlock,
     heatFlow: ThermalEnergy) -> ThermalEnergy
   {
@@ -176,15 +170,15 @@ public struct Storage: Parameterizable, HeatTransfer {
     let dniDay = BlackBoxModel.meteoData!.currentDay.sum
     var heatProductionLoad: Ratio = 0.0
 
-    if parameter.exception.contains(DateTime.current.month) {
-      heatProductionLoad = parameter.heatProductionLoadSummer
-      if dniDay > parameter.badDNIsummer * 1_000 {
+    if Storage.parameter.exception.contains(DateTime.current.month) {
+      heatProductionLoad = Storage.parameter.heatProductionLoadSummer
+      if dniDay > Storage.parameter.badDNIsummer * 1_000 {
         // sunny day, TES can be fully charged also by running TB at full load
         heatProductionLoad = 1.0
       }
     } else {
-      heatProductionLoad = parameter.heatProductionLoadWinter
-      if dniDay > parameter.badDNIwinter * 1_000 {
+      heatProductionLoad = Storage.parameter.heatProductionLoadWinter
+      if dniDay > Storage.parameter.badDNIwinter * 1_000 {
         // sunny day, TES can be fully charged also by running TB at full load
         heatProductionLoad = 1.0
       }
@@ -192,10 +186,10 @@ public struct Storage: Parameterizable, HeatTransfer {
     // Not enough production for POB demand load (e.g. at the beginning of the day)
     if heatFlow.production > .zero { // heatFlow.solar > 0
       if heatFlow.production < heatFlow.demand,
-        storage.relativeCharge < parameter.chargeTo,
+        relativeCharge < Storage.parameter.chargeTo,
         DateTime.isDaytime
       {
-        powerBlock.designMassFlow.rate =
+        powerBlock.massFlow.rate =
           min(heatProductionLoad.quotient * heatFlow.demand.kiloWatt, heatFlow.production.kiloWatt)
            / HeatExchanger.capacity
 
@@ -208,16 +202,16 @@ public struct Storage: Parameterizable, HeatTransfer {
         Storage.heatExchangerRestrictedMax(heatFlow: &heatFlow.storage)
 
       } else if heatFlow.production < heatFlow.demand,
-        storage.relativeCharge >= parameter.chargeTo
+        relativeCharge >= Storage.parameter.chargeTo
       {
         // Qsol not enough for POB demand load (e.g. at the end of the day) and TES is full
-        powerBlock.designMassFlow.rate = heatFlow.demand.kiloWatt / HeatExchanger.capacity
+        powerBlock.massFlow.rate = heatFlow.demand.kiloWatt / HeatExchanger.capacity
         // send all to POB and if needed discharge TES
         heatFlow.storage = heatFlow.balance // [MW]
 
-        if parameter.heatExchangerRestrictedMax {
+        if Storage.parameter.heatExchangerRestrictedMax {
           heatFlow.storage.megaWatt = max(
-            heatFlow.storage.megaWatt, -parameter.heatExchangerCapacity
+            heatFlow.storage.megaWatt, -Storage.parameter.heatExchangerCapacity
           )
         } else {
           let value = steamTurbine.power.max
@@ -230,24 +224,24 @@ public struct Storage: Parameterizable, HeatTransfer {
         }
 
       } else if heatFlow.production > heatFlow.demand,
-        storage.relativeCharge < parameter.chargeTo,
-        powerBlock.massFlow >= powerBlock.designMassFlow
+        relativeCharge < Storage.parameter.chargeTo,
+        powerBlock.massFlow >= HeatExchanger.designMassFlow
       {
         // more Qsol than needed by POB and TES is not full
         heatFlow.demand *= heatProductionLoad.quotient
-        powerBlock.designMassFlow.rate = heatFlow.demand.kiloWatt / HeatExchanger.capacity
+        powerBlock.massFlow.rate = heatFlow.demand.kiloWatt / HeatExchanger.capacity
 
         heatFlow.storage = heatFlow.balance  // [MW]
         // TES gets the rest available
 
-        if parameter.heatExchangerRestrictedMax,
-          heatFlow.storage.megaWatt > parameter.heatExchangerCapacity {
+        if Storage.parameter.heatExchangerRestrictedMax,
+          heatFlow.storage.megaWatt > Storage.parameter.heatExchangerCapacity {
           // rest heat to TES is too high, use more heat to POB
-          powerBlock.designMassFlow.rate =
-            (heatFlow.production.megaWatt - parameter.heatExchangerCapacity)
+          powerBlock.massFlow.rate =
+            (heatFlow.production.megaWatt - Storage.parameter.heatExchangerCapacity)
               / HeatExchanger.capacity
 
-          heatFlow.storage.megaWatt = parameter.heatExchangerCapacity
+          heatFlow.storage.megaWatt = Storage.parameter.heatExchangerCapacity
         }
       }
     }
