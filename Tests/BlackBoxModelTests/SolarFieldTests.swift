@@ -43,7 +43,7 @@ class SolarFieldTests: XCTestCase {
       solarField.temperature.outlet =
       Temperature(celsius: SolarField.parameter.designTemperature.outlet)
     let maxFlow = SolarField.parameter.maxMassFlow
-    solarField.maxMassFlow = maxFlow
+    solarField.requiredMassFlow = maxFlow
 
     for i in solarField.loops.indices {
       solarField.loops[i].temperature = solarField.temperature
@@ -83,7 +83,7 @@ class SolarFieldTests: XCTestCase {
     let parasitics = solarField.parasitics()
     XCTAssertEqual(parasitics, 3.8, accuracy: 0.1)
 
-    solarField.maxMassFlow.rate = maxFlow.rate / 2
+    solarField.requiredMassFlow.rate = maxFlow.rate / 2
 
     for i in solarField.loops.indices {
       solarField.loops[i].temperature = solarField.temperature

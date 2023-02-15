@@ -38,7 +38,11 @@ class StorageTests: XCTestCase {
  //   storage.temperature.outlet = Temperature(celsius: 380.0)
     _ = storage.massFlow.rate * storage.heat / 1_000
 
-    _ = storage.calculate(heat: plant.heatFlow.storage, powerBlock: powerBlock)
+    storage.calculate(
+      output: &plant.heatFlow.storage,
+      input: plant.heatFlow.toStorage,
+      powerBlock: powerBlock
+    )
 
     storage.operationMode = .charge(load: 1.0)
     _ = storage.massFlow.rate
