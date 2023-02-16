@@ -4,7 +4,7 @@ public struct Costs {
   // static let AdditionalCostPerLoop = 762533.1364
 
   static let Plant_life: Double = 25.0
-  static let Rate_of_return: Double = 0.07
+  static let Rate_of_return: Double = 0.03 * 0.7 + 0.13 * 0.3
   static let FCR: Double = Rate_of_return * (1 + Rate_of_return) ** Plant_life / ((1 + Rate_of_return) ** Plant_life - 1)
   static let Elec_buy: Double = 2 * 0.098
   static let Elec_sell: Double = 0.33 * 0.098
@@ -22,13 +22,13 @@ public struct Costs {
     let Heater_system = (basis: 200.0, c1: 7000000.0, exp: 0.45, c2: 309140.303724601, factor: 0.9, coeff: 3600000.0, range: 200.0...400.0)
     let Thermal_energy_storage = (basis: 26920.0, c1: 114793692.328915, c2: 4029.33117346384, factor: 0.95)
     let Power_Block = (basis: 50.0, c1: 55_000_000.0, exp: 0.735, coeff: 41_000_000.0)
-    let Electrolysis_coeff = 700000 * 1.2 * 0 + (2.5 - 0.36) * 1_000_000 * (model.EY_Ref_var_net_nom_cons + model.EY_Ref_var_nom_cons) / model.EY_Ref_var_net_nom_cons
+    let Electrolysis_coeff = 700000 * 1.2 * 0 + (0.87 + 1.15) * 1_000_000 / FX_USD * (model.EY_Ref_var_net_nom_cons + model.EY_Ref_var_nom_cons) / model.EY_Ref_var_net_nom_cons
     let Hydrogen_storage = (basis: 24E-2 * Hydrogen_density, exp: 0.9, coeff: 780_000 * 1.2 * 0)
     let CCU_plant = (basis: 22.890276, exp: 0.7, coeff: 18_292_682.9268293 * 0)
     let CO2_storage = (basis: 226.8, exp: 0.9, coeff: 780_000.0 * 0)
     let MethSynt_plant = (basis: 19.0665095748076, exp: 0.7, coeff: 29_268_292.6829268 * 0)
     let RawMeth_storage = (basis: 1.87680000000000E+02, exp: 0.9, coeff: (694146.8625 / FX_USD) * 0)
-    let MethDist_plant = (exp: 0, coeff: 0.36*1000000*(model.EY_Ref_var_net_nom_cons+model.EY_Ref_var_nom_cons)/model.MethDist_Ref_meth_hour_prod )
+    let MethDist_plant = (exp: 0, coeff: 0.36*1000000*(model.EY_Ref_var_net_nom_cons+model.EY_Ref_var_nom_cons)/model.MethDist_Ref_meth_hour_prod / FX_USD)
     let Battery_energy_storage = (basis: 0.0, coeff: 501579.333846229)
     let Electrical_boiler = (basis: 3.27, exp: 0.7, coeff: 494000 * 1.45 * 1.2)
     let Substation = (basis: 135.0, exp: 0.7, coeff: 2.4E+06)
@@ -122,9 +122,10 @@ public struct Costs {
   var Substation_cost: Double
 
   public func LCOM(meth_produced_MTPH: Double, elec_from_grid: Double, elec_to_grid: Double) -> Double {
-    let Overhead_cost_on_Methanol = 1 / (1 - 0.15)
+    let Overhead_cost_on_Methanol = 1.0
+    let Overhead_cost = 50.0
     let lcom =
-      ((((Costs.FCR * Total_CAPEX + Total_OPEX) + (elec_from_grid * Costs.Elec_buy * 1000.0) - (elec_to_grid * Costs.Elec_sell * 1000.0)) / meth_produced_MTPH) + CO2_Cost)
+      ((((Costs.FCR * Total_CAPEX + Total_OPEX) + (elec_from_grid * Costs.Elec_buy * 1000.0) - (elec_to_grid * Costs.Elec_sell * 1000.0)) / meth_produced_MTPH) + CO2_Cost + Overhead_cost)
       * Overhead_cost_on_Methanol
     return lcom
   }

@@ -272,7 +272,7 @@ public struct TunOl {
   var Grid_export_yes_no_BESS_strategy: Double = 1
   var Grid_export_yes_no_PB_strategy_outsideharmop: Double = 1
   var Grid_export_yes_no_BESS_strategy_outsideharmop: Double = 1
-  var EDG_elec_cost_factor: Double = 2000.0 / 5.5 / 1000.0 / 0.19 / 0.3
+  var EDG_elec_cost_factor: Double = 0.5 // 2000.0 / 5.5 / 1000.0 / 0.19 / 0.3
   var values: [Double] {
     [
       CSP_loop_nr_ud, TES_thermal_cap_ud, PB_nom_gross_cap_ud, PV_AC_cap_ud, PV_DC_cap_ud, EY_var_net_nom_cons_ud, Hydrogen_storage_cap_ud, Heater_cap_ud, CCU_CO2_nom_prod_ud, CO2_storage_cap_ud, RawMeth_storage_cap_ud,
@@ -342,13 +342,13 @@ public struct TunOl {
     let EY_var_aux_nom_cons: Double = EY_var_net_nom_cons_ud / EY_Ref_var_net_nom_cons * EY_Ref_var_nom_cons
     self.EY_var_heat_nom_cons = EY_Ref_var_heat_nom_cons * EY_var_net_nom_cons_ud / EY_Ref_var_net_nom_cons
     self.EY_Hydrogen_nom_prod = EY_Ref_Hydrogen_hour_nom_prod / EY_Ref_var_net_nom_cons * EY_var_net_nom_cons_ud
-    self.EY_Ref_stby_cons = EY_Ref_fix_cons+(EY_Ref_var_net_nom_cons+EY_Ref_var_nom_cons)*EY_cap_min_perc
+    self.EY_Ref_stby_cons = 0 // EY_Ref_fix_cons+(EY_Ref_var_net_nom_cons+EY_Ref_var_nom_cons)*EY_cap_min_perc
     let EY_stby_cons: Double = EY_var_net_nom_cons_ud / EY_Ref_var_net_nom_cons * EY_Ref_stby_cons
-    self.EY_Ref_heat_stby_cons = EY_Ref_heat_fix_cons+EY_Ref_var_heat_nom_cons*EY_cap_min_perc
+    self.EY_Ref_heat_stby_cons = 0 // EY_Ref_heat_fix_cons+EY_Ref_var_heat_nom_cons*EY_cap_min_perc
     self.EY_heat_stby_cons = EY_var_net_nom_cons_ud / EY_Ref_var_net_nom_cons * EY_Ref_heat_stby_cons
-    self.EY_Ref_stup_cons = EY_Ref_stby_cons
+    self.EY_Ref_stup_cons = 0 // EY_Ref_stby_cons
     let EY_stup_cons: Double = EY_var_net_nom_cons_ud / EY_Ref_var_net_nom_cons * EY_Ref_stup_cons
-    self.EY_Ref_heat_stup_cons = EY_Ref_heat_stby_cons
+    self.EY_Ref_heat_stup_cons = 0 // EY_Ref_heat_stby_cons
     self.EY_heat_stup_cons = EY_var_net_nom_cons_ud / EY_Ref_var_net_nom_cons * EY_Ref_heat_stup_cons
     self.MethSynt_RawMeth_nom_prod_ud = parameter[5] / EY_Ref_var_net_nom_cons * MethSynt_Ref_rawmeth_hour_prod
     let MethSynt_RawMeth_min_prod: Double = MethSynt_RawMeth_nom_prod_ud * MethSynt_cap_min_perc
@@ -378,13 +378,13 @@ public struct TunOl {
     self.MethSynt_heat_fix_prod = MethSynt_RawMeth_nom_prod_ud / MethSynt_Ref_rawmeth_hour_prod * MethSynt_Ref_heat_fix_prod
     self.MethSynt_var_nom_cons = MethSynt_RawMeth_nom_prod_ud / MethSynt_Ref_rawmeth_hour_prod * MethSynt_Ref_var_nom_cons
     self.MethSynt_var_heat_nom_prod = MethSynt_RawMeth_nom_prod_ud / MethSynt_Ref_rawmeth_hour_prod * MethSynt_Ref_var_heat_nom_prod
-    self.MethSynt_Ref_stby_cons = MethSynt_Ref_fix_cons+MethSynt_cap_min_perc*MethSynt_Ref_var_nom_cons
+    self.MethSynt_Ref_stby_cons = 0 // MethSynt_Ref_fix_cons+MethSynt_cap_min_perc*MethSynt_Ref_var_nom_cons
     let MethSynt_stby_cons: Double = MethSynt_RawMeth_nom_prod_ud / MethSynt_Ref_rawmeth_hour_prod * MethSynt_Ref_stby_cons
-    self.MethSynt_Ref_heat_stby_cons = MethSynt_Ref_heat_fix_prod+MethSynt_Ref_var_heat_nom_prod*MethSynt_cap_min_perc
+    self.MethSynt_Ref_heat_stby_cons = 0 // MethSynt_Ref_heat_fix_prod+MethSynt_Ref_var_heat_nom_prod*MethSynt_cap_min_perc
     let MethSynt_heat_stby_cons: Double = MethSynt_RawMeth_nom_prod_ud / MethSynt_Ref_rawmeth_hour_prod * MethSynt_Ref_heat_stby_cons
-    self.MethSynt_Ref_stup_cons = MethSynt_Ref_stby_cons
+    self.MethSynt_Ref_stup_cons = 0 // MethSynt_Ref_stby_cons
     let MethSynt_stup_cons: Double = MethSynt_RawMeth_nom_prod_ud / MethSynt_Ref_rawmeth_hour_prod * MethSynt_Ref_stup_cons
-    self.MethSynt_Ref_heat_stup_cons = MethSynt_Ref_heat_stby_cons
+    self.MethSynt_Ref_heat_stup_cons = 0 // MethSynt_Ref_heat_stby_cons
     let MethSynt_heat_stup_cons: Double = MethSynt_RawMeth_nom_prod_ud / MethSynt_Ref_rawmeth_hour_prod * MethSynt_Ref_heat_stup_cons
 
     self.MethDist_Ref_water_hour_prod = 7*1.0219
@@ -398,11 +398,11 @@ public struct TunOl {
     let MethDist_var_nom_cons: Double = MethDist_Meth_nom_prod_ud / MethDist_Ref_meth_hour_prod * MethDist_Ref_var_nom_cons
     self.MethDist_Ref_var_heat_nom_cons = 1.563*7
     let MethDist_var_heat_nom_cons: Double = MethDist_Meth_nom_prod_ud / MethDist_Ref_meth_hour_prod * MethDist_Ref_var_heat_nom_cons
-    self.MethDist_Ref_stby_cons = MethDist_Ref_fix_cons+MethDist_Ref_var_nom_cons*MethDist_cap_min_perc
+    self.MethDist_Ref_stby_cons = 0 // MethDist_Ref_fix_cons+MethDist_Ref_var_nom_cons*MethDist_cap_min_perc
     let MethDist_stby_cons: Double = MethDist_Meth_nom_prod_ud / MethDist_Ref_meth_hour_prod * MethDist_Ref_stby_cons
-    self.MethDist_Ref_heat_stby_cons = MethDist_Ref_heat_fix_cons+MethDist_Ref_var_heat_nom_cons*MethDist_cap_min_perc
-    let MethDist_heat_stby_cons: Double = MethDist_Meth_nom_prod_ud / MethDist_Ref_meth_hour_prod * MethDist_Ref_heat_stby_cons
-    self.MethDist_Ref_stup_cons = MethDist_Ref_stby_cons
+    self.MethDist_Ref_heat_stby_cons = 0 // MethDist_Ref_heat_fix_cons+MethDist_Ref_var_heat_nom_cons*MethDist_cap_min_perc
+    let MethDist_heat_stby_cons: Double = 0 // MethDist_Meth_nom_prod_ud / MethDist_Ref_meth_hour_prod * MethDist_Ref_heat_stby_cons
+    self.MethDist_Ref_stup_cons = 0 // MethDist_Ref_stby_cons
     let MethDist_stup_cons: Double = MethDist_Meth_nom_prod_ud / MethDist_Ref_meth_hour_prod * MethDist_Ref_stup_cons
     self.MethDist_Ref_heat_stup_cons = MethDist_Ref_heat_stby_cons
     let MethDist_heat_stup_cons: Double = MethDist_Meth_nom_prod_ud / MethDist_Ref_meth_hour_prod * MethDist_Ref_heat_stup_cons
@@ -590,7 +590,7 @@ public struct TunOl {
       self.PB_gross_min_eff = ifFinite(PB_gross_min_cap / PB_heat_min_input, Double.zero)
 
       self.PB_Ratio_Heat_input_vs_output = min(1, factor * pow((no_extraction[0] / PB_Ref_nom_aux_heat_prod) / (gross[0] / steam_extraction[0]), 0.1))
-      self.PB_n_g_var_aux_el_Coeff = Polynomial.fit(x: net_el_output_factor, y: auxiliary_consumption_factor, order: 4)!.coefficients
+      self.PB_n_g_var_aux_el_Coeff = Polynomial.fit(x: net_el_output_factor, y: auxiliary_consumption_factor, order: 5)!.coefficients
       self.PB_var_heat_max_cons = gross[0] + steam_extraction[0] * PB_Ratio_Heat_input_vs_output
       self.PB_nom_var_aux_cons_perc_net = var_aux_cons[0] / net_electrical_output[0]
     }
