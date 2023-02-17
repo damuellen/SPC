@@ -272,7 +272,7 @@ public struct TunOl {
   var Grid_export_yes_no_BESS_strategy: Double = 1
   var Grid_export_yes_no_PB_strategy_outsideharmop: Double = 1
   var Grid_export_yes_no_BESS_strategy_outsideharmop: Double = 1
-  var EDG_elec_cost_factor: Double = 0.5 // 2000.0 / 5.5 / 1000.0 / 0.19 / 0.3
+  var EDG_elec_cost_factor: Double = 1.0 // 2000.0 / 5.5 / 1000.0 / 0.19 / 0.3
   var values: [Double] {
     [
       CSP_loop_nr_ud, TES_thermal_cap_ud, PB_nom_gross_cap_ud, PV_AC_cap_ud, PV_DC_cap_ud, EY_var_net_nom_cons_ud, Hydrogen_storage_cap_ud, Heater_cap_ud, CCU_CO2_nom_prod_ud, CO2_storage_cap_ud, RawMeth_storage_cap_ud,
@@ -590,7 +590,7 @@ public struct TunOl {
       self.PB_gross_min_eff = ifFinite(PB_gross_min_cap / PB_heat_min_input, Double.zero)
 
       self.PB_Ratio_Heat_input_vs_output = min(1, factor * pow((no_extraction[0] / PB_Ref_nom_aux_heat_prod) / (gross[0] / steam_extraction[0]), 0.1))
-      self.PB_n_g_var_aux_el_Coeff = Polynomial.fit(x: net_el_output_factor, y: auxiliary_consumption_factor, order: 5)!.coefficients
+      self.PB_n_g_var_aux_el_Coeff = Polynomial.fit(x: net_el_output_factor, y: auxiliary_consumption_factor, order: 4)!.coefficients
       self.PB_var_heat_max_cons = gross[0] + steam_extraction[0] * PB_Ratio_Heat_input_vs_output
       self.PB_nom_var_aux_cons_perc_net = var_aux_cons[0] / net_electrical_output[0]
     }
