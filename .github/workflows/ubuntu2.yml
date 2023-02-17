@@ -27,4 +27,6 @@ jobs:
       continue-on-error: true
       with:
         name: Test_Results
-        path: *.png
+        path: |
+          *.png
+
