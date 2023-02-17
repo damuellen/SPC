@@ -27,13 +27,13 @@ public enum Simulation {
   static var tariff = Tariff(
     name: "",
     abbreviation: "",
-    energyPayment: 1,
-    energieCost: 1,
-    capacityPaymentPercent: 1,
-    capacityPayment: 1,
-    bonusPaymentPercent: 1,
-    bonusPayment: 1,
-    asAvailableCapacity: 1
+    energyPayment: 1.0,
+    energieCost: 1.0,
+    capacityPaymentPercent: 1.0,
+    capacityPayment: 1.0,
+    bonusPaymentPercent: 1.0,
+    bonusPayment: 1.0,
+    asAvailableCapacity: 1.0
   )
 
   public static var time = Year(
@@ -49,24 +49,26 @@ public enum Simulation {
     dfreezeTemperatureHeat: 40.0,
     minTemperatureRaiseStartUp: 1.0,
     tempTolerance: 1.0,
-    minInsolationRaiseStartUp: 1,
+    minInsolationRaiseStartUp: 1.0,
     heatTolerance: 4,
-    timeTolerance: 1,
+    timeTolerance: 1.0,
     massTolerance: 0.5,
-    minInsolation: 200,
+    minInsolation: 150,
     maxToPowerBlock: 0,
     minInsolationForBoiler: 0,
     electricalTolerance: 0.5,
     electricalParasitics: 8.5 / 100,
-    HLtempTolerance: 0.2,
+    HLtempTolerance: 0.5,
     adjustmentFactor: adjustmentFactor
   )
 
   public static var adjustmentFactor = Simulation.AdjustmentFactors(
-    efficiencySolarField: 1, efficiencyTurbine: 1,
-    efficiencyHeater: 1, efficiencyBoiler: 1,
-    heatLossHCE: 1, heatLossHTF: 1, heatLossH2O: 1,
-    electricalParasitics: 1
+    efficiencySolarField: 1.0,
+    efficiencyTurbine: 1.0,
+    efficiencyHeater: 1.0,
+    efficiencyBoiler: 1.0,
+    heatLossHCE: 1.0, heatLossHTF: 1.0, heatLossH2O: 1.0,
+    electricalParasitics: 1.0
   )
 }
 

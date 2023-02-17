@@ -21,3 +21,10 @@ jobs:
 
     - name: Run tests
       run: swift test -Xswiftc -suppress-warnings
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      continue-on-error: true
+      with:
+        name: Test_Results
+        path: *.png

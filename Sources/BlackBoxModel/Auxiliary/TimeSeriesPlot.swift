@@ -66,8 +66,8 @@ public final class TimeSeriesPlot {
     var code: String = ""
     if let file = toFile {
       code = """
-        set terminal svg size 1573,960 font 'Sans,9';
-        set output '\(file).svg'\n;
+        set terminal png size 1573,960 font 'Sans,9';
+        set output '\(file).png'\n;
         """
     }
     code += settings.concatenated + datablock + plot() + "\n"
