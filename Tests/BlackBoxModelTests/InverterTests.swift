@@ -54,7 +54,7 @@ class InverterTests: XCTestCase {
       plotter.settings["yrange"] = "[97.6:98.8]"
       plotter.settings["ytics"] = "nomirror"
 
-      _ = try? plotter(.png("inverter.png"))
+      _ = try? plotter(.png("./inverter.png"))
     }
     do {
       let v1 = 1010.0
@@ -71,7 +71,7 @@ class InverterTests: XCTestCase {
       plotter.settings["yrange"] = "[97.4:98.7]"
       plotter.settings["ytics"] = "nomirror"
 
-      _ = try? plotter(.png("inverter2.png"))
+      _ = try? plotter(.png("./inverter2.png"))
     }
   }
 }
