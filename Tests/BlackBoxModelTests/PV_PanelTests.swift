@@ -6,11 +6,11 @@ import XCTest
 class PVPanelTests: XCTestCase {
   func testsPanel() {
     let panel = PV.Panel()
-    let S = ((50...1050) / 100).numbers
+    let iter = ((50...1050) / 100).iteration
     let P = { panel(radiation: $0, ambient: .init(celsius: $1), windSpeed: 0) }
-    let p = { t in S.map { x in [x, P(x, t).power] }}
-    let I = { t in S.map { x in [x, P(x, t).current] }}
-    let V = { t in S.map { x in [x, P(x, t).voltage * 26] }}
+    let p = { t in iter.map { x in [x, P(x, t).power] }}
+    let I = { t in iter.map { x in [x, P(x, t).current] }}
+    let V = { t in iter.map { x in [x, P(x, t).voltage * 26] }}
     let plotting = true
     if plotting {
       let plot = Gnuplot(
@@ -33,7 +33,7 @@ class PVPanelTests: XCTestCase {
       _ = try? plot(.png(".plots/panel2.png"))
     
       let plot2 = Gnuplot(
-        xy1s: ((0...20) / 150).numbers.map { x in [x, lambertW(x)] },
+        xy1s: ((0...20) / 150).iteration.map { x in [x, lambertW(x)] },
         titles: "lambertW"
       )
       _ = try? plot2(.png(".plots/lambertW.png"))
