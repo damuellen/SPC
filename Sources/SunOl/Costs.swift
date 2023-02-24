@@ -10,7 +10,7 @@ public struct Costs {
   static let Elec_sell: Double = 0.33 * 0.098
 
   public init(_ model: TunOl) {
-    let FX_USD = 0.82
+    let FX_USD = 1 / 0.92 // 0.82
     let Hydrogen_density = 5.783
     //  let CO2_density = 945.0
     //  let RawMeth_density = 782.0
@@ -52,12 +52,12 @@ public struct Costs {
       : Double.zero
 
     self.TES_storage_cost = Thermal_energy_storage.c1 + (model.TES_salt_mass - Thermal_energy_storage.basis) * Thermal_energy_storage.c2 * Thermal_energy_storage.factor
-    if TES_storage_cost.isNaN { TES_storage_cost = 0 }
+    if model.TES_salt_mass.isZero { TES_storage_cost = 0 }
     self.PB_cost = model.PB_nom_gross_cap_ud > Double.zero 
       ? Power_Block.c1 + Power_Block.coeff * (model.PB_nom_gross_cap_ud / Power_Block.basis) ** Power_Block.exp
       : Double.zero
 
-    self.Electrolysis_cost = (model.EY_var_net_nom_cons_ud / 20.0).rounded(.up) * 20.0 * Electrolysis_coeff
+    self.Electrolysis_cost = model.EY_var_net_nom_cons_ud * Electrolysis_coeff
 
     self.Hydrogen_storage_cost = Hydrogen_storage.coeff * ((model.Hydrogen_storage_cap_ud / Hydrogen_storage.basis) ** Hydrogen_storage.exp)
 

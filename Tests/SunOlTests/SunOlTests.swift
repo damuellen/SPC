@@ -224,7 +224,7 @@ class SunOlTests: XCTestCase {
   }
 
   func testsCalculation2() {
-    let values = [0.00,0.00,0.00,599.32,803.41,180.00,0.00,0.00,1000.00,100000.00,100000.00,17.56,15.72,451.42,0.00,0.00,]
+    let values = [0.00,0.00,0.00,605.01,791.22,200.00,0.00,198.30,1000.00,100000.00,100000.00,24.03,9.23,1010.87,0.00,0.00,]
 
     guard let model = TunOl(values) else {
       print("Invalid config")
@@ -300,19 +300,19 @@ class SunOlTests: XCTestCase {
     }
 
     let LCOM = costs.LCOM(meth_produced_MTPH: meth_produced_MTPH_sum, elec_from_grid: elec_from_grid_sum, elec_to_grid: elec_to_grid_MTPH_sum)
-    XCTAssertEqual(LCOM, 2299, accuracy: 1, "LCOM")
-    XCTAssertEqual(hours_sum, 8626, accuracy: 1, "hours_sum")
-    XCTAssertEqual(meth_produced_MTPH_sum, 77267, accuracy: 1, "meth_produced_MTPH_sum")
-    XCTAssertEqual(elec_from_grid_sum, 491, accuracy: 1, "elec_from_grid_sum")
+    XCTAssertEqual(LCOM, 1722, accuracy: 1, "LCOM")
+    XCTAssertEqual(hours_sum, 8663, accuracy: 1, "hours_sum")
+    XCTAssertEqual(meth_produced_MTPH_sum, 100000, accuracy: 1, "meth_produced_MTPH_sum")
+    XCTAssertEqual(elec_from_grid_sum, 0, accuracy: 1, "elec_from_grid_sum")
     try! outputStream.write(toFile: "result_days.txt", atomically: false, encoding: .utf8)
   }
 
   func testsCosts1() {
     let model = TunOl([0, 0, 0, 582.23, 727.03, 200, 0, 0, 1000, 1000, 100000, 18.81, 54.37, 54.03, 0, 0])!
     let costs = Costs(model)
-    XCTAssertEqual(costs.Total_CAPEX, 1205498060, accuracy: 1, "Total_CAPEX")
-    XCTAssertEqual(costs.Total_OPEX, 26136704, accuracy: 1, "Total_OPEX")
-    var fixtures = [0.0, 0, 583211984, 78154616, 0, 11747576, 0, 428000000, 0, 0, 0, 0, 0, 71133988, 27100331, 6149563, 0]
+    XCTAssertEqual(costs.Total_CAPEX, 1131739764, accuracy: 1, "Total_CAPEX")
+    XCTAssertEqual(costs.Total_OPEX, 23966329, accuracy: 1, "Total_OPEX")
+    var fixtures = [0.0, 0, 583211984, 78154616, 0, 0, 0, 371680000, 0, 0, 0, 0, 0, 65443269, 27100331, 6149563, 0]
       .makeIterator()
     for child in Mirror(reflecting: costs).children.filter({ $0.label?.contains("cost") ?? false }) {
       XCTAssertEqual(child.value as! Double, fixtures.next()!, accuracy: 1, child.label!)
@@ -322,9 +322,9 @@ class SunOlTests: XCTestCase {
   func testsCosts2() {
     let model = TunOl([128, 5804.06, 223.32, 544, 837.83, 200, 0, 390.6, 1000, 1000, 100000, 21.19, 54.65, 0, 0, 0])!
     let costs = Costs(model)
-    XCTAssertEqual(costs.Total_CAPEX, 2109881015, accuracy: 1, "Total_CAPEX")
-    XCTAssertEqual(costs.Total_OPEX, 31159846, accuracy: 1, "Total_OPEX")
-    var fixtures = [15390661, 302048254, 672093994, 73022879, 120540581, 234309102, 178169365, 428000000, 0.0, 0.0, 0.0, 0.0, 0.0, 80134460, 0.0, 6171715, 0]
+    XCTAssertEqual(costs.Total_CAPEX, 2047150258, accuracy: 1, "Total_CAPEX")
+    XCTAssertEqual(costs.Total_OPEX, 28964270, accuracy: 1, "Total_OPEX")
+    var fixtures = [15390661, 302048254, 672093994, 73022879, 120540581, 234309102, 178169365, 371680000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 73723703, 0.0, 6171715, 0]
       .makeIterator()
     for child in Mirror(reflecting: costs).children.filter({ $0.label?.contains("cost") ?? false }) {
       XCTAssertEqual(child.value as! Double, fixtures.next()!, accuracy: 1, child.label!)
