@@ -30,23 +30,14 @@ class BlackBoxModelTests: XCTestCase {
     XCTAssertEqual(result.thermal.startUp.megaWatt, 102, accuracy: tol, "thermal.startUp")
     XCTAssertEqual(result.thermal.production.megaWatt, 5572, accuracy: tol, "thermal.production")
     XCTAssertEqual(result.thermal.heatExchanger.megaWatt, 5606, accuracy: tol, "thermal.heatExchanger")
-    do {
-      let interval = DateInterval(ofDay: 192, in: 2005)
+    for day in 192...193 {
+      let interval = DateInterval(ofDay: day, in: 2005)
       let y1 = result.massFlows(range: interval)
       let y2 = result.power(range: interval)
       let plot = TimeSeriesPlot(y1: y1, y2: y2, range: interval, style: .impulses)
       plot.y1Titles = ["solarfield", "powerblock", "storage"]
       plot.y2Titles = ["solar", "toStorage", "production", "storage", "gross", "net", "consum"]
-      _ = try? plot(toFile: "PowerSummer3")
-    }
-    do {
-      let interval = DateInterval(ofDay: 193, in: 2005)
-      let y1 = result.massFlows(range: interval)
-      let y2 = result.power(range: interval)
-      let plot = TimeSeriesPlot(y1: y1, y2: y2, range: interval, style: .impulses)
-      plot.y1Titles = ["solarfield", "powerblock", "storage"]
-      plot.y2Titles = ["solar", "toStorage", "production", "storage", "gross", "net", "consum"]
-      _ = try? plot(toFile: "PowerSummer")
+      _ = try? plot(toFile: "Day_\(day)_Summer")
     }
   }
 
@@ -70,14 +61,14 @@ class BlackBoxModelTests: XCTestCase {
     XCTAssertEqual(result.thermal.startUp.megaWatt, 99, accuracy: tol, "thermal.startUp")
     XCTAssertEqual(result.thermal.production.megaWatt, 3167, accuracy: tol, "thermal.production")
     XCTAssertEqual(result.thermal.heatExchanger.megaWatt, 3202, accuracy: tol, "thermal.heatExchanger")
-    do {
-      let interval = DateInterval(ofDay: 11, in: 2005)
+    for day in 11...12 {
+      let interval = DateInterval(ofDay: day, in: 2005)
       let y1 = result.massFlows(range: interval)
       let y2 = result.power(range: interval)
       let plot = TimeSeriesPlot(y1: y1, y2: y2, range: interval, style: .impulses)
       plot.y1Titles = ["solarfield", "powerblock", "storage"]
       plot.y2Titles = ["solar", "toStorage", "production", "storage", "gross", "net", "consum"]
-      _ = try? plot(toFile: "PowerWinter")
+      _ = try? plot(toFile: "Day_\(day)_Winter")
     }
   }
 }
