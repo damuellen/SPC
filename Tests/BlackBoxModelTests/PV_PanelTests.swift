@@ -29,14 +29,14 @@ class PVPanelTests: XCTestCase {
         "ylabel": "Power", "xlabel": "GTI",
       ]
 
-      _ = try? plot(.png("./panel.png"))
-      _ = try? plot(.png("./panel2.png"))
+      _ = try? plot(.png(".plots/panel.png"))
+      _ = try? plot(.png(".plots/panel2.png"))
     
       let plot2 = Gnuplot(
         xy1s: ((0...20) / 150).numbers.map { x in [x, lambertW(x)] },
         titles: "lambertW"
       )
-      _ = try? plot2(.png("./lambertW.png"))
+      _ = try? plot2(.png(".plots/lambertW.png"))
     }
     let i = ((0...1000) / 20000).numbers.map { x in
       [x, panel.currentFrom(voltage: x, radiation: 50, cell_T: .init(celsius: 30))]
@@ -50,13 +50,13 @@ class PVPanelTests: XCTestCase {
         titles: "10__I"
       )
       plot3.set(yrange: -2000...1000)
-      _ = try? plot3(.pngLarge("./panel3.png"))
+      _ = try? plot3(.pngLarge(".plots/panel3.png"))
 
       let plot4 = Gnuplot(
         xy1s: i,
         titles: "10__I"
       )
-      _ = try? plot4(.pngLarge("./panel4.png"))
+      _ = try? plot4(.pngLarge(".plots/panel4.png"))
     }
   }
 
@@ -73,6 +73,6 @@ class PVPanelTests: XCTestCase {
     }
 
     let plot = Gnuplot(xs: Array(stride(from: 10.0, to: 1100, by: 10)), ys: photovoltaic)
-    _ = try? plot(.pngLarge("./pv.png"))
+    _ = try? plot(.pngLarge(".plots/pv.png"))
   }
 }

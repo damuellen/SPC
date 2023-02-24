@@ -19,17 +19,21 @@ jobs:
     - name: Build tests
       run: swift build --build-tests -Xswiftc -suppress-warnings
 
+    - name: Install gnuplot
+      run: sudo apt-get -y install --no-install-recommends gnuplot-nox
+
+    - name: Create plot folder
+      run: mkdir .plots
+
     - name: Run tests
       run: swift test -Xswiftc -suppress-warnings
 
-    - name: Path Info
-      run: pwd && ls -l
-
-    - name: Upload artifacts
+    - name: Upload plots
       uses: actions/upload-artifact@v3
       continue-on-error: true
       with:
-        name: Test_Results
+        name: Test_Plots
         path: |
-          *.png
+          .plots/*.png
+
 
