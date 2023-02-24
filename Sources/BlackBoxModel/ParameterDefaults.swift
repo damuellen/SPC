@@ -70,21 +70,8 @@ public enum ParameterDefaults {
     pumpParasticsFullLoad: 3.607,
     antiFreezeFlow: 0.12,
     HTFmass: 396_359.0,
-    HTF: HTF,
+    HTF: HeatTransferFluid.VP1,
     edgeFactor: []
-  )
-
-  public static let HTF = HeatTransferFluid(
-    name: "Therminol",
-    freezeTemperature: 12,
-    heatCapacity: [1.4856, 0.0028],
-    dens: [1074.964, -0.6740513, -0.000650017],
-    visco: [-0.000201537, 0.1273247, -0.7167957],
-    thermCon: [0.1378081, -8.41485e-05, -1.788e-07],
-    maxTemperature: 393.0,
-    h_T: [-0.62677, 1.51129, 0.0012941, 1.23697e-07, 0],
-    T_h: [0.58315, 0.65556, -0.00032293, 1.9425e-07, -6.1133e-11],
-    useEnthalpy: false
   )
 
   static let st = Storage.Parameter(

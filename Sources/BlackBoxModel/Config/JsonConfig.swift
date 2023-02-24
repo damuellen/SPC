@@ -9,6 +9,7 @@
 //
 
 import Foundation
+import Utilities
 
 public enum JSONConfig {
 
@@ -164,7 +165,7 @@ public enum JSONConfig {
     case .COL: return try encoder.encode(Collector.parameter)
     case .STO: break //return try encoder.encode(Storage.parameter)
     case .HR: return try encoder.encode(Heater.parameter)
-    case .HTF: return try encoder.encode(ParameterDefaults.HTF)
+    case .HTF: return try encoder.encode(HeatTransferFluid.VP1)
     case .HX: return try encoder.encode(HeatExchanger.parameter)
     case .BO: return try encoder.encode(Boiler.parameter)
     case .WHR: return try encoder.encode(WasteHeatRecovery.parameter)

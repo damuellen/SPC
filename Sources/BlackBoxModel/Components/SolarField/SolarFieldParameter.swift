@@ -166,7 +166,7 @@ extension SolarField.Parameter: TextConfigInitializable {
     minFlow = try Ratio(ln(52) / 100)
     antiFreezeFlow = try Ratio(ln(55) / 100)
     HTFmass = try ln(58)
-    HTF = ParameterDefaults.HTF
+    HTF = HeatTransferFluid.VP1
     heatLossHotHeader = try [ln(66), ln(67), ln(68)]
     imbalanceDesign = try [ln(72), ln(73), ln(74)]
     imbalanceMin = try [ln(75), ln(76), ln(77)]
@@ -228,7 +228,7 @@ extension SolarField.Parameter: Codable {
       try values.decode(Ratio.self, forKey: .minMassFlow)
     antiFreezeFlow = try values.decode(Ratio.self, forKey: .antiFreezeFlow)
     HTFmass = try values.decode(Double.self, forKey: .HTFmass)
-    HTF = ParameterDefaults.HTF
+    HTF = HeatTransferFluid.VP1
     imbalanceDesign = [
       try values.decode(Double.self, forKey: .imbalanceDesignNear),
       try values.decode(Double.self, forKey: .imbalanceDesignAverage),
