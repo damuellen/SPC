@@ -69,23 +69,21 @@ extension SolarField {
 extension SolarField.Parameter {
 
   mutating func wayLength() {
-    let designWay =
-      Double(numberOfSCAsInRow)
-      * (Collector.parameter.lengthSCA + distanceSCA) * 2.0 + rowDistance
+    let multiplier = Double(numberOfSCAsInRow)
+    let designWay = multiplier * (Collector.parameter.lengthSCA + distanceSCA) * 2.0 + rowDistance
 
-    var nearWay =
-      Double(numberOfSCAsInRow)
-      * (Collector.parameter.lengthSCA + distanceSCA)
-    nearWay = layout ~= .I
-      ? nearWay : nearWay * 2 + rowDistance + 0.5
+    var nearWay = multiplier * (Collector.parameter.lengthSCA + distanceSCA)
 
     var avgWay = Design.layout.solarField / 4 * rowDistance / 2
-    avgWay = layout ~= .I
-      ? avgWay + 0.5 : avgWay + nearWay
-
     var farWay: Double = (2 * (Design.layout.solarField / 4 * rowDistance / 2))
-    farWay = layout ~= .I
-      ? farWay : farWay + nearWay
+
+    if layout ~= .I {
+      avgWay = avgWay + 0.5 
+    } else {
+      nearWay = nearWay * 2 + rowDistance + 0.5
+      avgWay += nearWay
+      farWay += nearWay
+    }
 
     self.loopWays = [designWay, nearWay, avgWay, farWay]
     self.distRatio = pipeWay / (2 * loopWays[1])
