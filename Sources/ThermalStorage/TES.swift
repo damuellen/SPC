@@ -4,7 +4,7 @@ import Utilities
 struct TES {
   enum Mode { case charge, discharge }
   let salt = StorageMedium.solarSalt.properties
-  let htf = VP1
+  let htf = HeatTransferFluid.VP1
 
   let min_salt_mass_flow_per_pump__kg_s = 260.0
   let low_salt_mass_flow__kg_s = 420.0
