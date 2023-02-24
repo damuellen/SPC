@@ -17,7 +17,7 @@ public struct Calculation: Codable {
     self.parameter = parameter
   }
 
-  public var HTF: HeatTransferFluid = VP1
+  public var HTF = HeatTransferFluid.VP1
 
   public var mixHTFMassflow = 0.0
   public var mixHTFAbsoluteEnthalpy = 0.0

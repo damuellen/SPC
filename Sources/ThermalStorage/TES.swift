@@ -1130,7 +1130,7 @@ infix operator **: ExponentiationPrecedence
 infix operator **=: AssignmentPrecedence
 
 extension Double {
-  static func ** (lhs: Double, rhs: Double) -> Double { return pow(lhs, rhs) }
+  static func ** (lhs: Double, rhs: Double) -> Double { pow(lhs, rhs) }
 
   static func **= (lhs: inout Double, rhs: Double) { lhs = lhs ** rhs }
 }
