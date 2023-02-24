@@ -67,7 +67,7 @@ struct PinchPointTool: ParsableCommand {
     var pinchPoint = PinchPoint.Calculation(parameter: parameter)
 
     if htfFluid == "Hel_XLP" {
-      pinchPoint.HTF = HELISOL_XLP
+      pinchPoint.HTF = HeatTransferFluid.XLP
     }
 
     if input.count == 11, (input.min() ?? 0) > .zero {
