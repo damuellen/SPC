@@ -38,10 +38,10 @@ class PVPanelTests: XCTestCase {
       )
       _ = try? plot2(.png(".plots/lambertW.png"))
     }
-    let i = ((0...1000) / 20000).numbers.map { x in
+    let i = ((0...1000) / 100).iteration.map { x in
       [x, panel.currentFrom(voltage: x, radiation: 50, cell_T: .init(celsius: 30))]
     }
-    let v = ((0.8...1.1) / 100).numbers.map { x in
+    let v = ((0.8...1.1) / 100).iteration.map { x in
       [x, panel.voltageFrom(current: x, radiation: 50, cell_T: .init(celsius: 30))]
     }
     if plotting {
