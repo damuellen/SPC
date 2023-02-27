@@ -34,15 +34,16 @@ extension Storage {
     public internal(set) var total: Mass
 
     init() {
-      let parameter = Storage.parameter
-      let specificHeat = parameter.HTF.properties.specificHeat
-      let dischargeToTurbine = parameter.dischargeToTurbine.quotient
-      let cold = specificHeat(parameter.designTemperature.cold)
-      let hot = specificHeat(parameter.designTemperature.hot)
-      let startLoad = parameter.startLoad
+      let availability = Availability.current.value.storage.quotient
+      let dischargeToTurbine = Storage.parameter.dischargeToTurbine.quotient
+      let designTemperature = Storage.parameter.designTemperature
+      let salt = Storage.parameter.HTF.properties
+      let cold = salt.specificHeat(designTemperature.cold)
+      let hot = salt.specificHeat(designTemperature.hot)
+      let startLoad = Storage.parameter.startLoad
       precondition(hot > cold, "No usable heat content")
       precondition(parameter.startLoad.hot + parameter.startLoad.cold == 1)
-      let mass: Double
+      var mass: Double
       switch parameter.definedBy {
       case .hours:
         let heatFlowRate = HeatExchanger.parameter.heatFlowHTF
@@ -53,6 +54,7 @@ extension Storage {
         mass = Design.layout.storage_ton * dischargeToTurbine
       }
       precondition(mass > .zero, "Salt mass not specified")
+      mass *= availability
       self.minimum = Mass(ton: dischargeToTurbine * mass)
       self.hot = Mass(ton: (startLoad.hot + dischargeToTurbine) * mass)
       self.cold = Mass(ton: (startLoad.cold + dischargeToTurbine) * mass)
@@ -336,29 +338,5 @@ extension Storage {
       // temp after cool down
       temperatureTank.hot = tankTemperature(hot)
     }    
-  }
-
-  static func defineSaltMass() -> Double {
-    let availability = Availability.current.value.storage.quotient
-    let dischargeToTurbine = Storage.parameter.dischargeToTurbine.quotient
-    let designTemperature = Storage.parameter.designTemperature
-    let salt = Storage.parameter.HTF.properties
-    let cold = salt.specificHeat(designTemperature.cold)
-    let hot = salt.specificHeat(designTemperature.hot)
-    precondition(hot > cold, "No usable heat content")
-    switch Storage.parameter.definedBy {
-    case .hours:
-      let heatFlowRate = HeatExchanger.parameter.heatFlowHTF
-      return Design.layout.storage
-        * availability * (1 + dischargeToTurbine)
-        * heatFlowRate * 1_000 * 3_600 / (hot - cold)
-    case .cap:
-      return Design.layout.storage_cap
-        * availability * (1 + dischargeToTurbine) 
-        * 1_000 * 3_600 / (hot - cold)
-    case .ton:
-      return Design.layout.storage_ton
-        * availability * (1 + dischargeToTurbine) * 1_000
-    }
   }
 }

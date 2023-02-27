@@ -32,7 +32,6 @@ public struct Storage: Parameterizable, HeatTransfer {
 
   public internal(set) var relativeCharge: Ratio
 
-//  var massOfSalt: Double = Storage.defineSaltMass()
   /// Returns the fixed initial state.
   static let initialState = Storage(
     operationMode: .noOperation,
