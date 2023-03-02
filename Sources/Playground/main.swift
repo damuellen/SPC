@@ -28,23 +28,6 @@ func dd(_ dateString: Substring) -> Double? {
   return Double(mktime(&info))
 }
 
-
-var store = [Double:Double]()
-var nn = 0
-let files = try! fm.contentsOfDirectory(atPath: CommandLine.arguments[1])
-for file in files {
-  if file.hasSuffix(".csv") {
-    nn += 1
-    let content = try! String(contentsOfFile: CommandLine.arguments[1] + "/" + file)
-    for line in content.split(separator: "\r\n") {
-      if let date = dd(line), 
-        let value = Double(line.split(separator: ",", maxSplits: 1).last!.replacingOccurrences(of: " ", with: "").replacingOccurrences(of: ",", with: ".")) {
-          store[date] = value
-      }
-    }    
-  }
-}
-
 func downsample(values: [(x:Double, y: Double)], threshold: Int) -> [(x:Double,y: Double)] {
 
   guard values.count > threshold && values.count > 2 else { return values }
@@ -115,16 +98,46 @@ func unixtime_to_excel_date(_ unixtime: Double, date_1904: Bool = false) -> Doub
   return excel_datetime;
 }
 
+let path: String
+if CommandLine.argc > 1 {
+  path = CommandLine.arguments[1]
+} else {
+  path = CommandLine.arguments[0].split(separator: "/").dropLast().joined(separator: "/")
+}
+
 var bucket = [(Double, Double)]()
+var store = [Double:Double]()
+var nn = 0
+let files = try! fm.contentsOfDirectory(atPath: path)
+for file in files {
+  if file.hasSuffix(".csv") {
+    nn += 1
+    let content = try! String(contentsOfFile: path + "/" + file)
+    for line in content.split(separator: "\r\n") {
+      if let date = dd(line), 
+        let value = Double(line.split(separator: ",", maxSplits: 1).last!.replacingOccurrences(of: " ", with: "").replacingOccurrences(of: ",", with: ".")) {
+          store[date] = value
+      }
+    }    
+  }
+}
 
 for date in store.keys.sorted() {
   let value = store[date]!
   bucket.append((date, value > 1 ? value : 0))
 }
 
-for line in downsample(values: bucket, threshold: nn * 24 * 6) {
-  print("\(unixtime_to_excel_date(line.0))\t\(line.1)", terminator: "\r\n")
+let threshold: Int
+if CommandLine.argc > 3 {
+  threshold = Int(CommandLine.arguments[3]) ?? nn * 24 * 6
+} else {
+  threshold = nn * 24 * 6
 }
+
+for line in downsample(values: bucket, threshold: threshold) {
+  print("\(unixtime_to_excel_date(line.0))\t\(line.1)")
+}
+
 if CommandLine.argc > 2 {
   let plot1 = Gnuplot(xs: bucket.map(\.0), ys: bucket.map(\.1), style: .lines(smooth: true))
 
