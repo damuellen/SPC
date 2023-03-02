@@ -130,4 +130,4 @@ let plot1 = Gnuplot(xs: bucket.map(\.0), ys: bucket.map(\.1), style: .lines(smoo
 
 plot1.settings["xdata"] = "time"
 plot1.settings["timefmt"] = "'%s'"
-try! plot1(.pngLarge(("Plot.png"))
+try! plot1(.pngLarge("Plot.png"))
