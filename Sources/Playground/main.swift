@@ -31,11 +31,11 @@ func dd(_ dateString: Substring) -> Double? {
 
 var store = [Double:Double]()
 var nn = 0
-let files = try! fm.contentsOfDirectory(atPath: "Shagaya")
+let files = try! fm.contentsOfDirectory(atPath: CommandLine.arguments[1])
 for file in files {
   if file.hasSuffix(".csv") {
     nn += 1
-    let content = try! String(contentsOfFile: "Shagaya/" + file)
+    let content = try! String(contentsOfFile: CommandLine.arguments[1] + "/" + file)
     for line in content.split(separator: "\r\n") {
       if let date = dd(line), 
         let value = Double(line.split(separator: ",", maxSplits: 1).last!.replacingOccurrences(of: " ", with: "").replacingOccurrences(of: ",", with: ".")) {
@@ -123,11 +123,12 @@ for date in store.keys.sorted() {
 }
 
 for line in downsample(values: bucket, threshold: nn * 24 * 6) {
-  print("\(unixtime_to_excel_date(line.0)), \(line.1)", separator: "\t", terminator: "\r\n")
+  print("\(unixtime_to_excel_date(line.0))\t\(line.1)", terminator: "\r\n")
 }
+if CommandLine.argc > 2 {
+  let plot1 = Gnuplot(xs: bucket.map(\.0), ys: bucket.map(\.1), style: .lines(smooth: true))
 
-let plot1 = Gnuplot(xs: bucket.map(\.0), ys: bucket.map(\.1), style: .lines(smooth: true))
-
-plot1.settings["xdata"] = "time"
-plot1.settings["timefmt"] = "'%s'"
-try! plot1(.pngLarge("Plot.png"))
+  plot1.settings["xdata"] = "time"
+  plot1.settings["timefmt"] = "'%s'"
+  try! plot1(.pngLarge(CommandLine.arguments[2] + ".png"))
+}
