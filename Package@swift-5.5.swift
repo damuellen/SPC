@@ -68,7 +68,7 @@ let platformTargets: [Target] = [
   .executableTarget(
     name: "Playground",
     dependencies: [
-      "Utilities",
+      "Utilities", "DateExtensions",
       .product(name: "xlsxwriter", package: "xlsxwriter.swift")
     ],
     swiftSettings: swift
