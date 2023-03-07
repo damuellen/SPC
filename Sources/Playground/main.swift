@@ -1,14 +1,16 @@
 import Foundation
 import Utilities
 
-let path: String
+print(CommandLine.arguments)
+
+let path: URL
 #if os(Windows)
 guard let file = FileDialog() else { fatalError("Invalid file path.")}
-path = file
+path = URL(fileURLWithPath: file)
 #else
-path = CommandLine.arguments[2]
+path = URL(fileURLWithPath:CommandLine.arguments[2])
 #endif
-
+print("read:", path.absoluteString)
 let newLine = UInt8(ascii: "\n")
 let cr = UInt8(ascii: "\r")
 let comma = UInt8(ascii: ",")
@@ -16,8 +18,9 @@ let point = UInt8(ascii: ".")
 let separator = UInt8(ascii: ";")
 
 let steps = Int(CommandLine.arguments[1])!
-let data = try! Data(contentsOf: URL(fileURLWithPath: path))
-var lines = data.filter({ $0 != cr }).split(separator: newLine, maxSplits: 13, omittingEmptySubsequences: false)
+let data = try! Data(contentsOf: path)
+let lines = data.filter({ $0 != cr }).split(separator: newLine, maxSplits: 13, omittingEmptySubsequences: false)
+guard let _  = String(data: lines[0], encoding: .utf8)?.contains("PVSYST") else { fatalError("Invalid file content.")}
 let csv = CSVReader(data: Data(lines[10] + [newLine] + lines[13].map { $0 == comma ? point : $0 }), separator: ";")
 
 var buffer = [[Double]]()
@@ -31,7 +34,7 @@ let fileURL = url.deletingLastPathComponent().appendingPathComponent("\(steps)" 
 #else
 let fileURL = URL(fileURLWithPath: CommandLine.arguments[3])
 #endif
-
+print("write:", fileURL.absoluteString)
 do {
     try Data((csv!.headerRow!.joined(separator: ",") + "\n").utf8).write(to: fileURL)
     let fileHandle = try FileHandle(forWritingTo: fileURL)
