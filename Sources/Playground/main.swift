@@ -10,7 +10,7 @@ path = URL(fileURLWithPath: file)
 #else
 path = URL(fileURLWithPath:CommandLine.arguments[2])
 #endif
-print("read:", path.absoluteString)
+print("Input path:", path.absoluteString)
 let newLine = UInt8(ascii: "\n")
 let cr = UInt8(ascii: "\r")
 let comma = UInt8(ascii: ",")
@@ -18,11 +18,13 @@ let point = UInt8(ascii: ".")
 let separator = UInt8(ascii: ";")
 
 let steps = Int(CommandLine.arguments[1])!
-let data = try! Data(contentsOf: path)
+guard let data = try? Data(contentsOf: path) else { fatalError("Read error.")}
 let lines = data.filter({ $0 != cr }).split(separator: newLine, maxSplits: 13, omittingEmptySubsequences: false)
 guard let _  = String(data: lines[0], encoding: .utf8)?.contains("PVSYST") else { fatalError("Invalid file content.")}
-let csv = CSVReader(data: Data(lines[10] + [newLine] + lines[13].map { $0 == comma ? point : $0 }), separator: ";")
-
+let goodData = Data(lines[10] + [newLine] + lines[13].map { $0 == comma ? point : $0 })
+print("Reading succeeded.")
+let csv = CSVReader(data: goodData, separator: ";")
+print("Parsing succeeded.")
 var buffer = [[Double]]()
 var count = 0 
 let increment = 1 / (Double(steps) + 1)
@@ -38,23 +40,23 @@ for column in csv!.dataRows.transposed() {
   }
   count += 1
 }
-
+print("Interpolation succeeded.")
 #if os(Windows)
 let fileURL = path.deletingLastPathComponent().appendingPathComponent("\(steps)" + path.lastPathComponent)
 #else
 let fileURL = URL(fileURLWithPath: CommandLine.arguments[3])
 #endif
-print("write:", fileURL.absoluteString)
+print("Output path:", fileURL.absoluteString)
 do {
-    try Data((csv!.headerRow!.joined(separator: ",") + "\n").utf8).write(to: fileURL)
-    let fileHandle = try FileHandle(forWritingTo: fileURL)
-    fileHandle.seekToEndOfFile()
-    for row in buffer.transposed() {
-      fileHandle.write(Data((row.map(\.description).joined(separator: ",")  + "\n").utf8))
-    }
-    fileHandle.closeFile()
-    print(fileURL.absoluteString)
+  try Data((csv!.headerRow!.joined(separator: ",") + "\n").utf8).write(to: fileURL)
+  let fileHandle = try FileHandle(forWritingTo: fileURL)
+  fileHandle.seekToEndOfFile()
+  for row in buffer.transposed() {
+    fileHandle.write(Data((row.map(\.description).joined(separator: ",")  + "\n").utf8))
+  }
+  fileHandle.closeFile()
+  print("Finished.")
 } catch {
-    print(error)
+  print(error)
 }
 
