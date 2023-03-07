@@ -27,7 +27,7 @@ for column in csv!.dataRows.transposed() {
 
 #if os(Windows)
 let url = URL(fileURLWithPath: path)
-let fileURL = url.deletingLastPathComponent().appendingPathComponent(pathComponent: "\(steps)" + url.lastPathComponent)
+let fileURL = url.deletingLastPathComponent().appendingPathComponent("\(steps)" + url.lastPathComponent)
 #else
 let fileURL = URL(fileURLWithPath: CommandLine.arguments[3])
 #endif
