@@ -17,9 +17,11 @@ let comma = UInt8(ascii: ",")
 let point = UInt8(ascii: ".")
 let separator = UInt8(ascii: ";")
 
-let steps = Int(CommandLine.arguments[1])!
+guard let steps = Int(CommandLine.arguments[1]) else { fatalError("Missing parameter.")}
 guard let data = try? Data(contentsOf: path) else { fatalError("Read error.")}
+print("Reading succeeded.")
 let lines = data.filter({ $0 != cr }).split(separator: newLine, maxSplits: 13, omittingEmptySubsequences: false)
+print("\(lines.count) lines splited.")
 guard let _  = String(data: lines[0], encoding: .utf8)?.contains("PVSYST") else { fatalError("Invalid file content.")}
 let goodData = Data(lines[10] + [newLine] + lines[13].map { $0 == comma ? point : $0 })
 print("Reading succeeded.")

@@ -1,6 +1,6 @@
 name: CI – Ubuntu 2
 
-on: push
+on: workflow_dispatch
 env: 
   SPM: spm
 jobs:

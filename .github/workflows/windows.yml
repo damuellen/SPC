@@ -1,6 +1,6 @@
 name: CI – Windows
 
-on: workflow_dispatch
+on: push
 
 jobs:
   continuous-integration:
