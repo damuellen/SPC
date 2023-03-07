@@ -24,13 +24,23 @@ guard let _  = String(data: lines[0], encoding: .utf8)?.contains("PVSYST") else 
 let csv = CSVReader(data: Data(lines[10] + [newLine] + lines[13].map { $0 == comma ? point : $0 }), separator: ";")
 
 var buffer = [[Double]]()
+var count = 0 
+let increment = 1 / (Double(steps) + 1)
 for column in csv!.dataRows.transposed() {
-  buffer.append(column.interpolate(steps: steps))
+  if count == 2 { 
+    let c = column.dropLast().map( { Array(stride(from: $0, to: $0 + 1, by: increment)) }).joined() + [column.last!]
+    buffer.append(Array(c))
+  } else if count < 2 { 
+    let c = column.dropLast().map( { Array(repeating: $0, count: steps + 1) }).joined() + [column.last!]
+    buffer.append(Array(c))
+  } else { 
+    buffer.append(column.interpolate(steps: steps))
+  }
+  count += 1
 }
 
 #if os(Windows)
-let url = URL(fileURLWithPath: path)
-let fileURL = url.deletingLastPathComponent().appendingPathComponent("\(steps)" + url.lastPathComponent)
+let fileURL = path.deletingLastPathComponent().appendingPathComponent("\(steps)" + path.lastPathComponent)
 #else
 let fileURL = URL(fileURLWithPath: CommandLine.arguments[3])
 #endif
