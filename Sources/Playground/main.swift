@@ -3,7 +3,8 @@ import Utilities
 
 let path: String
 #if os(Windows)
-path = FileDialog()
+guard let file = FileDialog() else { fatalError("Invalid file path.")}
+path = file
 #else
 path = CommandLine.arguments[2]
 #endif
