@@ -6,34 +6,15 @@ let path: URL
 guard let file = FileDialog() else { fatalError("Invalid file path.")}
 path = URL(fileURLWithPath: file)
 #else
-path = URL(fileURLWithPath:CommandLine.arguments[2])
+path = URL(fileURLWithPath:CommandLine.arguments[3])
 #endif
-let newLine = UInt8(ascii: "\n")
-let cr = UInt8(ascii: "\r")
-let comma = UInt8(ascii: ",")
-let point = UInt8(ascii: ".")
-let separator = UInt8(ascii: ";")
-
 guard let steps = Int(CommandLine.arguments[1]) else { fatalError("Missing parameter.")}
+let separator = CommandLine.arguments[2]
 guard let data = try? Data(contentsOf: path) else { fatalError("Read error.")}
-let lines = data.filter({ $0 != cr }).split(separator: newLine, maxSplits: 13, omittingEmptySubsequences: false)
-guard let _  = String(data: lines[0], encoding: .utf8)?.contains("PVSYST") else { fatalError("Invalid file content.")}
-let goodData = Data(lines[10] + [newLine] + lines[13].map { $0 == comma ? point : $0 })
-let csv = CSVReader(data: goodData, separator: ";")
+let csv = CSVReader(data: data, separator: separator.unicodeScalars.first!)
 var buffer = [[Double]]()
-var count = 0 
-let increment = 1 / (Double(steps) + 1)
 for column in csv!.dataRows.transposed() {
-  if count == 2 { 
-    let c = column.dropLast().map( { Array(stride(from: $0, to: $0 + 1, by: increment)) }).joined() + [column.last!]
-    buffer.append(Array(c))
-  } else if count < 2 { 
-    let c = column.dropLast().map( { Array(repeating: $0, count: steps + 1) }).joined() + [column.last!]
-    buffer.append(Array(c))
-  } else { 
     buffer.append(column.interpolate(steps: steps))
-  }
-  count += 1
 }
 #if os(Windows)
 setClipboard(
