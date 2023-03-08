@@ -12,7 +12,12 @@ path = URL(fileURLWithPath: file)
 path = URL(fileURLWithPath:CommandLine.arguments[3])
 #endif
 guard let steps = Int(CommandLine.arguments[1]) else { fatalError("Missing parameter.")}
-let separator = CommandLine.arguments[2]
+let separator: String
+if CommandLine.argc > 2 {
+  separator = CommandLine.arguments[2]
+} else {
+  separator = "\t"
+}
 guard let data = try? Data(contentsOf: path) else { fatalError("Read error.")}
 var buffer = [[Double]]()
 let lines = data.split(separator: newLine, maxSplits: 13, omittingEmptySubsequences: false)
@@ -34,10 +39,11 @@ if steps < 0 {
   #if os(Windows)
   setClipboard(
     csv!.headerRow!.joined(separator: "\t") + "\n"
-    + stride(from: 0, to: csv!.dataRows, by: -steps).map {
+    + stride(from: 0, to: csv!.dataRows.count, by: -steps).map {
       csv!.dataRows[$0].map(\.description).joined(separator: "\t") 
     }.joined(separator: "\n")
   )
+  MessageBox(text: "Check Clipboard", caption: "")
   #endif
 } else {
   if pvsyst || date {
