@@ -41,7 +41,7 @@ public enum BlackBoxModel {
     }
   }
 
-  public static func configure(meteoFilePath: String? = nil, convert: Bool) throws {
+  public static func configure(meteoFilePath: String? = nil) throws {
     let path = meteoFilePath ?? FileManager.default.currentDirectoryPath
     // Search for the meteo data file
     let handler = try MeteoDataFileHandler(forReadingAtPath: path)
@@ -63,13 +63,6 @@ public enum BlackBoxModel {
       year: yearOfSimulation,
       frequence: Simulation.time.steps
     )
-
-    if convert, !handler.isBinaryFile {
-      // Create a binary format file
-      let data = meteoData?.serialized()
-      let url = handler.url.deletingPathExtension().appendingPathExtension("bin")
-      FileManager.default.createFile(atPath: url.path, contents: data)
-    }
   }
 
   public static func loadConfigurations(

@@ -91,8 +91,6 @@ struct SolarPerformanceCalculator: ParsableCommand {
   var parameter: Bool = false
   @Flag(help: "Output performance data to excel.")
   var excel: Bool = false
-  @Flag(help: "Convert meteofile to binary format")
-  var convert: Bool = false
 
   func run() throws {
     let name = "Solar Performance Calculator"
@@ -101,12 +99,12 @@ struct SolarPerformanceCalculator: ParsableCommand {
     let path = meteofilePath ?? configPath
 
     do {
-      try BlackBoxModel.configure(meteoFilePath: path, convert: convert) } catch {
+      try BlackBoxModel.configure(meteoFilePath: path) } catch {
 #if os(Windows)
       if case MeteoDataFileError.fileNotFound = error {
         guard let path = FileDialog() else { return }
         do {
-          try BlackBoxModel.configure(meteoFilePath: path, convert: convert) } catch {
+          try BlackBoxModel.configure(meteoFilePath: path) } catch {
           MessageBox(text: (error as! MeteoDataFileError).description, caption: name)
           return
         }

@@ -49,10 +49,6 @@ public struct MeteoDataFileHandler {
   }
 
   public func callAsFunction() throws -> MeteoDataProvider {
-    if isBinaryFile, let data = try? Data(contentsOf: url) {
-      return MeteoDataProvider(data: data)
-    }
-
     let file: MeteoDataFile = try url.pathExtension == "mto"
       ? MET(url) : TMY(url)
     let metaData = try file.fetchInfo()
