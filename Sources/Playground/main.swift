@@ -55,27 +55,27 @@ if steps < 0 {
       }
       count += 1
     }
-  } 
-}
-#if os(Windows)
-setClipboard(
-  csv!.headerRow!.joined(separator: "\t") + "\n"
-  + buffer.transposed().map { row in 
-  row.map(\.description).joined(separator: "\t") 
-  }.joined(separator: "\n")
-)
-MessageBox(text: "Check Clipboard", caption: "")
-#else
-let fileURL = URL(fileURLWithPath: CommandLine.arguments[3])
-do {
-  try Data((csv!.headerRow!.joined(separator: ",") + "\n").utf8).write(to: fileURL)
-  let fileHandle = try FileHandle(forWritingTo: fileURL)
-  fileHandle.seekToEndOfFile()
-  for row in buffer.transposed() {
-    fileHandle.write(Data((row.map(\.description).joined(separator: ",")  + "\n").utf8))
   }
-  fileHandle.closeFile()
-} catch {
-  print(error)
+  #if os(Windows)
+  setClipboard(
+    csv!.headerRow!.joined(separator: "\t") + "\n"
+    + buffer.transposed().map { row in 
+    row.map(\.description).joined(separator: "\t") 
+    }.joined(separator: "\n")
+  )
+  MessageBox(text: "Check Clipboard", caption: "")
+  #else
+  let fileURL = URL(fileURLWithPath: CommandLine.arguments[3])
+  do {
+    try Data((csv!.headerRow!.joined(separator: ",") + "\n").utf8).write(to: fileURL)
+    let fileHandle = try FileHandle(forWritingTo: fileURL)
+    fileHandle.seekToEndOfFile()
+    for row in buffer.transposed() {
+      fileHandle.write(Data((row.map(\.description).joined(separator: ",")  + "\n").utf8))
+    }
+    fileHandle.closeFile()
+  } catch {
+    print(error)
+  }
+  #endif
 }
-#endif
