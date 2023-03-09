@@ -14,7 +14,7 @@ import Foundation
 public enum Maintenance {
   static var ranges: [DateInterval] = []
 
-  static func setDefaultSchedule(for year: Int) {
+  public static func setDefaultSchedule(for year: Int) {
     let calendar = Calendar(identifier: .gregorian)
     let components = DateComponents(
       calendar: calendar, year: year, month: 1, day: 1, hour: 0, minute: 0

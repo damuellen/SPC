@@ -166,7 +166,7 @@ public struct Storage: Parameterizable, HeatTransfer {
 
     let heatExchanger = HeatExchanger.parameter
 
-    let dniDay = BlackBoxModel.meteoData!.currentDay.sum
+    let dniDay = 0.0 //BlackBoxModel.meteoData!.currentDay.sum
     var heatProductionLoad: Ratio = 0.0
 
     if Storage.parameter.exception.contains(DateTime.current.month) {

@@ -8,6 +8,7 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
+import SolarPosition
 import Foundation
 import Helpers
 
@@ -16,9 +17,8 @@ public struct MeteoDataFileHandler {
 
   let 💾 = FileManager.default
 
-  public let isBinaryFile: Bool
-
   public private(set) var url: URL
+  private let file: MeteoDataFile
 
   public init(forReadingAtPath path: String) throws {
 
@@ -34,26 +34,21 @@ public struct MeteoDataFileHandler {
           throw MeteoDataFileError.fileNotFound(path)
       }
       url.appendPathComponent(fileName)
-      isBinaryFile = false
-    } else {
-      let newUrl = url.deletingPathExtension().appendingPathExtension("bin")
-      let path = newUrl.path
-      if 💾.fileExists(atPath: path) {
-        url = newUrl
-        isBinaryFile = true
-      } else {
-        isBinaryFile = false
-      }
     }
     print("Meteo file in use:\n  \(url.path)\n")
+    self.file = try url.pathExtension == "mto" ? MET(url) : TMY(url)
   }
 
-  public func callAsFunction() throws -> MeteoDataProvider {
-    let file: MeteoDataFile = try url.pathExtension == "mto"
-      ? MET(url) : TMY(url)
-    let metaData = try file.fetchInfo()
+  public func metaData() throws -> (year: Int, location: Location)  { 
+    try file.fetchInfo()
+  }
+
+  public func data(valuesPerHour: Int) throws -> [MeteoData] { 
     let data = try file.fetchData()
-    return MeteoDataProvider(name: file.name, data: data, metaData)
+    var steps = data.count / 8760
+    steps = valuesPerHour / steps
+    steps -= 1
+    return data.interpolate(steps: steps)
   }
 }
 
@@ -116,7 +111,7 @@ private struct MET: MeteoDataFile {
 
     let timezone = -lat_tz / 15
     let location = Location(
-      (-longitude, latitude, 0), timezone: timezone
+      (-longitude, latitude, 0), tz: timezone
     )
     return (year, location)
   }
@@ -191,7 +186,7 @@ private struct TMY: MeteoDataFile {
     let elevation = values[3]
     let tz = fetchTimeZone()
     return Location(
-      (longitude,  latitude,  elevation), timezone: tz
+      (longitude,  latitude,  elevation), tz: tz
     )
   }
 

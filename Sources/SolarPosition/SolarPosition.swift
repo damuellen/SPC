@@ -7,6 +7,28 @@ import Utilities
 typealias FractionalTime = Double
 typealias Algorithm = (SolarPosition.Input) -> SolarPosition.Output
 
+/// A struct for latitude, longitude, timezone, and altitude data associated with a particular geographic location.
+public struct Location: Equatable {
+
+  public var longitude: Double
+  public var latitude: Double
+  public var elevation: Double
+  public var timezone: Int
+
+  public var coordinates: (longitude: Double, latitude: Double, elevation: Double) {
+    return (longitude, latitude, elevation)
+  }
+}
+
+extension Location {
+  public init(_ coords: (Double, Double, Double), tz: Int) {
+    self.longitude = coords.0
+    self.latitude = coords.1
+    self.elevation = coords.2
+    self.timezone = tz
+  }
+}
+
 /// A struct containing values where the sun is above the horizon.
 ///
 /// Look up values using date-based subscript. Otherwise returns nil.
@@ -35,26 +57,7 @@ public struct SolarPosition {
     var sunrise: FractionalTime
     var sunset: FractionalTime
   }
-  /// A struct for latitude, longitude, timezone, and altitude data associated with a particular geographic location.
-  public struct Location {
-
-    var longitude: Double
-    var latitude: Double
-    var elevation: Double
-    public var timezone: Int
-
-    public var coords: (longitude: Double, latitude: Double, elevation: Double) {
-      return (longitude, latitude, elevation)
-    }
-
-    init(_ coords: (Double, Double, Double), tz: Int) {
-      self.longitude = coords.0
-      self.latitude = coords.1
-      self.elevation = coords.2
-      self.timezone = tz
-    }
-  }
-
+  
   public var year: Int
   public var location: Location
 

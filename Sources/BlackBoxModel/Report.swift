@@ -65,12 +65,11 @@ extension Recording {
       + "Plant Availability [%]:\n"  // * Simulation.parameter.PlantAvail * 100, )"
       + "Plant Degradation [%]:\n"  // * Simulation.parameter.PlantDegrad,)"
       + decorated("Files and Parameter")
-      + "METEODATA  \(BlackBoxModel.meteoData!.name)\n"
       + "Meteodata of a leap year" * (Simulation.time.isLeapYear ? "YES" : "NO")
       + "Location:"
       * String(format: "longitude: %G, latitude: %G",
-        BlackBoxModel.meteoData!.location.longitude,
-        BlackBoxModel.meteoData!.location.latitude)
+        BlackBoxModel.sun!.location.longitude,
+        BlackBoxModel.sun!.location.latitude)
        + "\n"
        + "Use Fuel Data from Typical Year [1: YES, 0: NO]: PFCsource\n"
      //Jn = InStrRev(Filespec.PFC, "\")

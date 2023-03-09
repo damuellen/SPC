@@ -9,6 +9,7 @@
 //
 
 import ArgumentParser
+import SolarPosition
 import BlackBoxModel
 import DateExtensions
 import Dispatch
@@ -96,7 +97,24 @@ struct SolarPerformanceCalculator: ParsableCommand {
     let name = "Solar Performance Calculator"
     print(decorated(name), "")
 
+    if let steps = stepsCalculation {
+      Simulation.time.steps = Interval[steps]
+    } else {
+      Simulation.time.steps = .fiveMinutes
+    }
+    
     let path = meteofilePath ?? configPath
+
+    do {
+      try BlackBoxModel.loadConfigurations(atPath: configPath, format: .text)
+    } catch {
+ #if os(Windows)
+      if let message = (error as? TextConfigFile.ReadError)?.description {
+        MessageBox(text: message, caption: name)
+      }
+      return
+ #endif
+    }
 
     do {
       try BlackBoxModel.configure(meteoFilePath: path) } catch {
@@ -117,36 +135,22 @@ struct SolarPerformanceCalculator: ParsableCommand {
 #endif
     }
 
-    do {
-      try BlackBoxModel.loadConfigurations(atPath: configPath, format: .text)
-    } catch {
- #if os(Windows)
-      if let message = (error as? TextConfigFile.ReadError)?.description {
-        MessageBox(text: message, caption: name)
-      }
-      return
- #endif
-    }
-
     if parameter {
       print(ParameterSet())
       try JSONConfig.saveConfiguration(toPath: configPath)
       return
     }
 
-    if let steps = stepsCalculation {
-      Simulation.time.steps = Interval[steps]
-    } else {
-      Simulation.time.steps = .fiveMinutes
-    }
-
     BlackBoxModel.configure(year: year ?? BlackBoxModel.yearOfSimulation)
-
+    
+    
     if let coords = location.coords,
      let tz = location.timezone {
-      let location = Location(coords, timezone: tz)
+      let location = Location(coords, tz: tz)
       BlackBoxModel.configure(location: location)
     }
+
+    Maintenance.setDefaultSchedule(for: BlackBoxModel.yearOfSimulation)
 
     let mode: Historian.Mode
     if let steps = outputValues {

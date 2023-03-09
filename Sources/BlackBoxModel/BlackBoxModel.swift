@@ -20,14 +20,14 @@ public enum BlackBoxModel {
   /// The apparent solar position based on date, time, and location.
   public private(set) static var sun: SolarPosition?
   /// Solar radiation and meteorological elements for a 1-year period.
-  public private(set) static var meteoData: MeteoDataProvider?
+  public private(set) static var meteoData: [MeteoData]?
 
   public static func configure(year: Int) {
     yearOfSimulation = year
   }
 
   public static func configure(location: Location) {
-    if let sun = sun, sun.location.coords == location.coordinates {
+    if let sun = sun, sun.location == location {
       return
     }
     // Calculate sun angles for location
@@ -37,7 +37,7 @@ public enum BlackBoxModel {
     )
 
     if meteoData == nil {
-      meteoData = MeteoDataProvider.using(sun!, model: .special, clouds: false)
+      meteoData = MeteoData.using(sun!, model: .special, clouds: false)
     }
   }
 
@@ -46,20 +46,21 @@ public enum BlackBoxModel {
     // Search for the meteo data file
     let handler = try MeteoDataFileHandler(forReadingAtPath: path)
     // Read the content meteo data file
-    meteoData = try handler()
+    meteoData = try handler.data(valuesPerHour: Simulation.time.steps.rawValue)
 
-    yearOfSimulation = meteoData!.year ?? yearOfSimulation
+    let metaData = try handler.metaData()
+
+    yearOfSimulation = metaData.year
     // Check if the sun angles for the location have already been calculated
-    if let sun = sun, let coords = meteoData?.location.coordinates,
-      coords == sun.location.coords
+    if let sun = sun, metaData.location == sun.location
     {
       return
     }
 
     // Calculate sun angles for location
     sun = SolarPosition(
-      coords: meteoData!.location.coordinates,
-      tz: meteoData!.location.timezone,
+      coords: metaData.location.coordinates,
+      tz: metaData.location.timezone,
       year: yearOfSimulation,
       frequence: Simulation.time.steps
     )
@@ -85,17 +86,6 @@ public enum BlackBoxModel {
       print("We need the sun.")
       exit(1)
     }
-
-    🌤.setInterval(Simulation.time.steps)
-    // Check if the simulation time period is adjusted. 
-    if let start = Simulation.time.firstDateOfOperation,
-      let end = Simulation.time.lastDateOfOperation
-    {
-      🌤.setRange(.init(start: start, end: end)
-        .align(with: Simulation.time.steps))
-    }
-
-    Maintenance.setDefaultSchedule(for: yearOfSimulation)
 
     // Preparation of the plant parameters
     var plant = Plant.setup()
