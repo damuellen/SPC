@@ -7,11 +7,9 @@ import XCTest
 
 class MeteoTests: XCTestCase {
   func testsGenerator() {
-    let location = Location(longitude: -26, latitude: 35, elevation: 0, timezone: 2)
     if true {
-      let sun = SolarPosition(coords: (-26, 35, 0), tz: 2, year: 2017, frequence: .hour)
-      let clearSky = MeteoDataProvider.using(sun, model: .special)
-      clearSky.setInterval(.fiveMinutes)
+      let sun = SolarPosition(coords: (-26, 35, 0), tz: 2, year: 2017, frequence: .fiveMinutes)
+      let clearSky = MeteoData.using(sun, model: .special)
       let dni = Array(clearSky.map(\.dni).prefix(24 * 12 * 4))
       _ = try? Gnuplot(xs: dni)(.pngLarge(".plots/dni.png"))
     }
@@ -53,12 +51,5 @@ class MeteoTests: XCTestCase {
 
     let meteoData = Array(repeatElement(meteoDataHourly, count: 365).joined())
 
-    let m = MeteoDataProvider(name: "", data: meteoData, (2017, location))
-    m.setInterval(.fiveMinutes)
-    XCTAssertEqual(Array(m).count, 105_120)
-    m.setInterval(.tenMinutes)
-    XCTAssertEqual(Array(m).count, 52_560)
-    m.setInterval(.fifteenMinutes)
-    XCTAssertEqual(Array(m).count, 35_040)
   }
 }

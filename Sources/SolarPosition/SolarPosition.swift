@@ -21,10 +21,10 @@ public struct Location: Equatable {
 }
 
 extension Location {
-  public init(_ coords: (Double, Double, Double), tz: Int) {
-    self.longitude = coords.0
-    self.latitude = coords.1
-    self.elevation = coords.2
+  public init(_ coords: (longitude: Double, latitude: Double, elevation: Double), tz: Int) {
+    self.longitude = coords.longitude
+    self.latitude = coords.latitude
+    self.elevation = coords.elevation
     self.timezone = tz
   }
 }

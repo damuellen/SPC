@@ -41,10 +41,11 @@ class CollectorTests: XCTestCase {
   func testMean() {
     guard 
       let file = try? MeteoDataFileHandler(forReadingAtPath: "/Users/daniel/spc/COM/Tunol.mto"),
-      let meteo = try? file()
+      let meteo = try? file.data(valuesPerHour: 12),
+      let location = try? file.metaData().location
     else { return }
     
-    let sun = SolarPosition(coords: meteo.location.coordinates, tz: -1, year: 2017, frequence: .fiveMinutes)
+    let sun = SolarPosition(coords: location.coordinates, tz: -1, year: 2017, frequence: .fiveMinutes)
     
     let numberOfSCAsInRow = Double(SolarField.parameter.numberOfSCAsInRow)
     let edge1 = SolarField.parameter.distanceSCA / 2 * (1 - 1 / numberOfSCAsInRow) / Collector.parameter.lengthSCA

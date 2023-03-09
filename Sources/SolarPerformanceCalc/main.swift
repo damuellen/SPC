@@ -53,7 +53,7 @@ struct LocationInfo: ParsableArguments {
     help: "Elevation (meters)")
   var elevation: Double?
 
-  var coords: (long: Double, lat: Double, ele: Double)? {
+  var coords: (longitude: Double, latitude: Double, elevation: Double)? {
     if let long = longitude, let lat = latitude, let ele = elevation {
       return (long, lat, ele)
     } else {

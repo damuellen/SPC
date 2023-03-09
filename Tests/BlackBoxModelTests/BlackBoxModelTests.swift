@@ -2,6 +2,7 @@ import XCTest
 
 @testable import BlackBoxModel
 @testable import Meteo
+@testable import SolarPosition
 
 class BlackBoxModelTests: XCTestCase {
   let df = DateFormatter()
@@ -14,7 +15,7 @@ class BlackBoxModelTests: XCTestCase {
   func testsSummer() {
     Simulation.time.firstDateOfOperation = df.date(from: "11.07.2005")!
     Simulation.time.lastDateOfOperation = df.date(from: "13.07.2005")!
-    var location = Location(longitude: 47.73, latitude: 29, elevation: 0, timezone: 2)
+    var location = Location((47.73, 29, 0), tz: 2)
     location.timezone = 2
 
     BlackBoxModel.configure(year: 2005)
@@ -44,7 +45,7 @@ class BlackBoxModelTests: XCTestCase {
   func testsWinter() {
     Simulation.time.firstDateOfOperation = df.date(from: "11.01.2005")!
     Simulation.time.lastDateOfOperation = df.date(from: "13.01.2005")!
-    var location = Location(longitude: 47.73, latitude: 29, elevation: 0, timezone: 2)
+    var location = Location((47.73, 29, 0), tz: 2)
     location.timezone = 2
     BlackBoxModel.configure(year: 2005)
     BlackBoxModel.configure(location: location)
