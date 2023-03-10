@@ -82,7 +82,7 @@ public enum BlackBoxModel {
   /// - Attention: `configure()` must called before this.
   public static func runModel(with log: Historian) -> Recording {
 
-    guard let 🌞 = sun, let 🌤 = meteoData else {
+    guard let 🌞 = sun else {
       print("We need the sun.")
       exit(1)
     }
@@ -126,7 +126,7 @@ public enum BlackBoxModel {
     // Repeat the values to fill the hour
     var iter = photovoltaic.repeated(times: Simulation.time.steps.rawValue).makeIterator()
     */
-    for (meteo, date) in zip(🌤, period(with: Simulation.time.steps)) {
+    for (meteo, date) in simulationPeriod() {
       // Set the date for the calculation step
       DateTime.setCurrent(date: date)
       let dt = DateTime.current
@@ -229,18 +229,19 @@ public enum BlackBoxModel {
     return log.finish()
   }
 
-  private static func period(with interval: Interval) -> DateSequence
+  private static func simulationPeriod() -> Zip2Sequence<ArraySlice<MeteoData>, DateSequence> 
   {
     let times: DateSequence
-
-    if let start = Simulation.time.firstDateOfOperation,
-      let end = Simulation.time.lastDateOfOperation
+    let meteo: ArraySlice<MeteoData>
+    if let dateInterval = Simulation.time.dateInterval
     {
-      let range = DateInterval(start: start, end: end).align(with: interval)
-      times = DateSequence(range: range, interval: interval)
+      let range = dateInterval.align(with: Simulation.time.steps)
+      times = DateSequence(range: range, interval: Simulation.time.steps)
+      meteo = meteoData![meteoData!.range(for: range)]
     } else {
-      times = DateSequence(year: yearOfSimulation, interval: interval)
+      times = DateSequence(year: yearOfSimulation, interval: Simulation.time.steps)
+      meteo = meteoData![...]
     }
-    return times
+    return zip(meteo, times)
   }
 }

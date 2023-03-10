@@ -38,8 +38,7 @@ public enum Simulation {
 
   public static var time = Year(
     isLeapYear: false,
-    firstDateOfOperation: nil,
-    lastDateOfOperation: nil,
+    dateInterval: nil,
     holidays: [],
     steps: .fiveMinutes
   )

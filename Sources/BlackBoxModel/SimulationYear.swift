@@ -16,8 +16,8 @@ public typealias Interval = DateSequence.Interval
 extension Simulation {
   public struct Year: Codable, CustomStringConvertible {
     var isLeapYear = false
-    public var firstDateOfOperation: Date?
-    public var lastDateOfOperation: Date?
+    /// Simulated date interval
+    public var dateInterval: DateInterval?
     let holidays: [Date]
     public var steps: Interval
 
@@ -25,8 +25,8 @@ extension Simulation {
       """
       Weekday of 1st January:                         Fr
       Number of Days in February:                      28 
-      First Day of Operation:               \(firstDateOfOperation!)
-      Last Day of Operation:                \(lastDateOfOperation!)
+      First Day of Operation:               \(dateInterval!.start)
+      Last Day of Operation:                \(dateInterval!.end)
       Time Step for Report (H/D/M/Y) :                 H
       If hourly based; number of steps for detailed Report (TC) :
                                                         12 
@@ -52,20 +52,18 @@ extension Simulation.Year: TextConfigInitializable {
       )
     }
 
-    if let firstDayOfOperation = getDate(file.values[12]) {
-      let hours = try ln(14) * 3600
-      let minutes = try ln(15) * 60
-      let timeInterval = hours + minutes
-      let date = firstDayOfOperation.addingTimeInterval(timeInterval)
-      firstDateOfOperation = date
-    }
+    if let firstDayOfOperation = getDate(file.values[12]),
+      let lastDayOfOperation = getDate(file.values[15]) {
+      let hoursFirst = try ln(14) * 3600
+      let minutesFirst = try ln(15) * 60
+      let timeIntervalFirst = hoursFirst + minutesFirst
+      let firstDateOfOperation = firstDayOfOperation.addingTimeInterval(timeIntervalFirst)
 
-    if let lastDayOfOperation = getDate(file.values[15]) {
-      let hours = try ln(17) * 3600
-      let minutes = try ln(18) * 60
-      let timeInterval = hours + minutes
-      let date = lastDayOfOperation.addingTimeInterval(timeInterval)
-      lastDateOfOperation = date
+      let hoursLast = try ln(17) * 3600
+      let minutesLast = try ln(18) * 60
+      let timeIntervalLast = hoursLast + minutesLast
+      let lastDateOfOperation = lastDayOfOperation.addingTimeInterval(timeIntervalLast)
+      self.dateInterval = DateInterval(start: firstDateOfOperation, end: lastDateOfOperation)
     }
 
     self.steps =

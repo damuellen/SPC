@@ -105,13 +105,13 @@ extension Recording {
     //        + "Transmission Losses [%]:" * Simulation.parameter.TransLoss * 100)"
     d += decorated("OPERATION")
     let s1 = "First Date of Operation:"
-    if let firstDateOfOperation = Simulation.time.firstDateOfOperation {
+    if let firstDateOfOperation = Simulation.time.dateInterval?.start {
       d += s1 * DateTime(firstDateOfOperation).date
     } else {
       d += s1 * "New Year"
     }
     let s2 = "Last Date of Operation:"
-    if let lastDateOfOperation = Simulation.time.lastDateOfOperation {
+    if let lastDateOfOperation = Simulation.time.dateInterval?.end {
       d += s2 * DateTime(lastDateOfOperation).date
     } else {
       d += s2 * "New Year"

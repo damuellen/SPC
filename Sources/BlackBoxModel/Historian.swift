@@ -30,7 +30,7 @@ public final class Historian {
   /// Specifies what the output is
   let mode: Mode
 
-  var startDate: Date? = Simulation.time.firstDateOfOperation
+  var startDate: Date? = Simulation.time.dateInterval?.start
 
   public enum Mode {
     case database
@@ -373,7 +373,7 @@ public final class Historian {
       .write(energyCaptions, row: 0)
 
     let interval = Simulation.time.steps.interval
-    var date = Simulation.time.firstDateOfOperation!
+    var date = Simulation.time.dateInterval!.start
 
     statusHistory.indices.forEach { i in
       ws1.write(.datetime(date), [i + 1, 0])
@@ -383,7 +383,7 @@ public final class Historian {
       date.addTimeInterval(interval)
     }
 
-    date = Simulation.time.firstDateOfOperation!
+    date = Simulation.time.dateInterval!.start
 
     performanceHistory.indices.forEach { i in
       ws2.write(.datetime(date), [i + 1, 0])
