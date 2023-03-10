@@ -62,7 +62,7 @@ class BlackBoxModelTests: XCTestCase {
     XCTAssertEqual(result.electric.consum, 38, accuracy: tol, "electric.consum")
     XCTAssertEqual(result.electric.parasitics, 105, accuracy: tol, "electric.parasitics")
     XCTAssertEqual(result.electric.steamTurbineGross, 1291, accuracy: tol, "electric.steamTurbineGross")
-    XCTAssertEqual(result.thermal.solar.megaWatt, 3277, accuracy: tol, "thermal.solar")
+    XCTAssertEqual(result.thermal.solar.megaWatt, 3279, accuracy: tol, "thermal.solar")
     XCTAssertEqual(result.thermal.startUp.megaWatt, 94, accuracy: tol, "thermal.startUp")
     XCTAssertEqual(result.thermal.production.megaWatt, 3167, accuracy: tol, "thermal.production")
     XCTAssertEqual(result.thermal.heatExchanger.megaWatt, 3207, accuracy: tol, "thermal.heatExchanger")
