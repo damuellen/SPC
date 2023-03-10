@@ -35,9 +35,7 @@ extension MeteoData {
         step = 0
       }
       if let pos = sun[d], pos.zenith < 90 {
-        if (step * 2) % steps == 0 {
-          isCloudy = clouds && (rng.random() < 0.2)
-        }
+        isCloudy = clouds && (rng.random() < (isCloudy ? 0.5 : 0.1))
         let dni = calculate(zenith: pos.zenith, day: day, model: model)
           * (isCloudy ? rng.random() : 1)
         data.append(MeteoData(dni: dni, temperature: 20))
