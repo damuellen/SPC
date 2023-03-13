@@ -11,15 +11,15 @@
 import DateExtensions
 import Foundation
 
-public typealias Interval = DateSequence.Interval
+public typealias Frequence = DateSequence.Frequence
 
 extension Simulation {
-  public struct Year: Codable, CustomStringConvertible {
+  public struct Period: Codable, CustomStringConvertible {
     var isLeapYear = false
     /// Simulated date interval
     public var dateInterval: DateInterval?
-    let holidays: [Date]
-    public var steps: Interval
+    public let holidays: [DateInterval]
+    public var steps: Frequence
 
     public var description: String {
       """
@@ -32,14 +32,14 @@ extension Simulation {
                                                         12 
       First Day of Daylight Saving time [MM.DD] :       0 
       Last Day of Daylight Saving time [MM.DD] :        1.01 
-      Holidays [MM.DD] : \(holidays.map(DateTime.init(_:)).map(\.date).joined(separator: " "))
+      Holidays [MM.DD] : \(holidays.map(\.start).map(DateTime.init(_:)).map(\.date).joined(separator: " "))
 
       """
     }
   }
 }
 
-extension Simulation.Year: TextConfigInitializable {
+extension Simulation.Period: TextConfigInitializable {
   public init(file: TextConfigFile) throws {
     let ln: (Int) throws -> Double = { try file.readDouble(lineNumber: $0) }
 
@@ -66,10 +66,7 @@ extension Simulation.Year: TextConfigInitializable {
       self.dateInterval = DateInterval(start: firstDateOfOperation, end: lastDateOfOperation)
     }
 
-    self.steps =
-      try DateSequence.Interval(
-        rawValue: Int(ln(22))
-      ) ?? .fiveMinutes
+    self.steps = try .init(rawValue: Int(ln(22))) ?? .fiveMinutes
 
     var dates = [Date]()
     for row in stride(from: 38, through: 95, by: 3) {
@@ -78,7 +75,7 @@ extension Simulation.Year: TextConfigInitializable {
       guard let date = getDate(dateString) else { continue }
       dates.append(date)
     }
-    self.holidays = dates
+    self.holidays = dates.map{ DateInterval(start: $0, duration: 86_400) }
   }
 }
 

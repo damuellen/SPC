@@ -61,7 +61,7 @@ public struct SolarPosition {
   public var year: Int
   public var location: Location
 
-  public var frequence: DateSequence.Interval
+  public var frequence: DateSequence.Frequence
 
   /// Creates a struct with precalculated sun position
   /// for the given location and year at the predetermined times.
@@ -72,7 +72,7 @@ public struct SolarPosition {
   /// - parameter frequence: Time interval for the calculations
   public init(
     coords: (Double, Double, Double), tz: Int,
-    year: Int, frequence: DateSequence.Interval
+    year: Int, frequence: DateSequence.Frequence
   ) {
     SolarPosition.estimatedDelta_T = SolarPosition.estimateDelta_T(year: year)
     SolarPosition.frequence = frequence
@@ -159,7 +159,7 @@ public struct SolarPosition {
   }
 
   private static var estimatedDelta_T: Double = 0
-  private static var frequence: DateSequence.Interval = .hour
+  private static var frequence: DateSequence.Frequence = .hour
 
   static func spa(input: Input) -> Output {
 

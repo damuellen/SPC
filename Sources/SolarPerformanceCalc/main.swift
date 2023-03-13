@@ -97,12 +97,6 @@ struct SolarPerformanceCalculator: ParsableCommand {
     let name = "Solar Performance Calculator"
     print(decorated(name), "")
 
-    if let steps = stepsCalculation {
-      Simulation.time.steps = Interval[steps]
-    } else {
-      Simulation.time.steps = .fiveMinutes
-    }
-    
     let path = meteofilePath ?? configPath
 
     do {
@@ -116,6 +110,12 @@ struct SolarPerformanceCalculator: ParsableCommand {
  #endif
     }
 
+    if let steps = stepsCalculation {
+      Simulation.time.steps = Frequence[steps]
+    } else {
+      Simulation.time.steps = .fiveMinutes
+    }
+    
     do {
       try BlackBoxModel.configure(meteoFilePath: path) } catch {
 #if os(Windows)
@@ -141,8 +141,7 @@ struct SolarPerformanceCalculator: ParsableCommand {
       return
     }
 
-    BlackBoxModel.configure(year: year ?? BlackBoxModel.yearOfSimulation)
-    
+    BlackBoxModel.configure(year: year ?? BlackBoxModel.sun!.year)
     
     if let coords = location.coords,
      let tz = location.timezone {
@@ -154,7 +153,7 @@ struct SolarPerformanceCalculator: ParsableCommand {
 
     let mode: Historian.Mode
     if let steps = outputValues {
-      mode = .custom(interval: Interval[steps])
+      mode = .custom(interval: Frequence[steps])
     } else if database {
       if excel { print("Using both options at the same time is not supported.") }
       mode = .database 

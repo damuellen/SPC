@@ -18,7 +18,7 @@ public let Greenwich = { calendar -> NSCalendar in
 /// A type that supplies a sequence of dates with a fixed interval.
 public final class DateSequence: Sequence, IteratorProtocol {
 
-  public enum Interval: Int, Codable, CaseIterable, CustomStringConvertible {
+  public enum Frequence: Int, Codable, CaseIterable, CustomStringConvertible {
     case hour = 1
     case thirtyMinutes = 2
     case fifteenMinutes = 4
@@ -46,15 +46,13 @@ public final class DateSequence: Sequence, IteratorProtocol {
 
     public var description: String { "\(60 / rawValue)min" }
 
-    public func isMultiple(of other: Interval) -> Bool {
+    public func isMultiple(of other: Frequence) -> Bool {
       other.denominators.contains(rawValue)
     }
 
-    public static subscript(value: Int) -> Interval {
-      if 0 == 60 % value {
-        return Interval(rawValue: value)!
-      }
-      return Interval(rawValue: 1)!
+    public static subscript(value: Int) -> Frequence {
+      if 0 == 60 % value { return Frequence(rawValue: value)! }
+      return Frequence(rawValue: 1)!
     }
   }
 
@@ -64,7 +62,7 @@ public final class DateSequence: Sequence, IteratorProtocol {
 
   var currentDate: Date
 
-  public init(year: Int, interval: Interval) {
+  public init(year: Int, interval: Frequence) {
 
     precondition(
       year > 1950 && year < 2050,
@@ -82,7 +80,7 @@ public final class DateSequence: Sequence, IteratorProtocol {
     self.endDate = Greenwich.date(from: dateComponents)!
   }
 
-  public init(range: DateInterval, interval: Interval) {
+  public init(range: DateInterval, interval: Frequence) {
     self.startDate = range.start
     self.valuesPerHour = interval.rawValue
     self.currentDate = self.startDate

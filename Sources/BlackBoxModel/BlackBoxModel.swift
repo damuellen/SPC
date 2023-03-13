@@ -20,10 +20,21 @@ public enum BlackBoxModel {
   /// The apparent solar position based on date, time, and location.
   public private(set) static var sun: SolarPosition?
   /// Solar radiation and meteorological elements for a 1-year period.
-  public private(set) static var meteoData: [MeteoData]?
+  public private(set) static var meteoData: [MeteoData] = []
 
   public static func configure(year: Int) {
-    yearOfSimulation = year
+    if yearOfSimulation != year, Simulation.time.dateInterval != nil {
+      Simulation.time.dateInterval!.start = Greenwich.date(
+        byAdding: .year, value: year - yearOfSimulation,
+        to: Simulation.time.dateInterval!.start)!
+      yearOfSimulation = year
+    }
+    if let sun = BlackBoxModel.sun, yearOfSimulation != sun.year {
+      BlackBoxModel.sun = SolarPosition(
+        coords: sun.location.coordinates, tz: sun.location.timezone,
+        year: yearOfSimulation, frequence: Simulation.time.steps
+      )
+    }
   }
 
   public static func configure(location: Location) {
@@ -36,7 +47,7 @@ public enum BlackBoxModel {
       year: yearOfSimulation, frequence: Simulation.time.steps
     )
 
-    if meteoData == nil {
+    if meteoData.isEmpty {
       meteoData = MeteoData.using(sun!, model: .special, clouds: false)
     }
   }
@@ -50,18 +61,14 @@ public enum BlackBoxModel {
 
     let metaData = try handler.metaData()
 
-    yearOfSimulation = metaData.year
     // Check if the sun angles for the location have already been calculated
-    if let sun = sun, metaData.location == sun.location
-    {
-      return
-    }
+    if let sun = sun, metaData.location == sun.location { return }
 
     // Calculate sun angles for location
     sun = SolarPosition(
       coords: metaData.location.coordinates,
       tz: metaData.location.timezone,
-      year: yearOfSimulation,
+      year: metaData.year,
       frequence: Simulation.time.steps
     )
   }
@@ -98,7 +105,7 @@ public enum BlackBoxModel {
 
     var conditions = [(Temperature, Double, Double)]()
 
-    for (meteo, date) in zip(🌤, period(with: .hour)) {
+    for (meteo, date) in simulationPeriod(.hour) {
       DateTime.setCurrent(date: date)
       let dt = DateTime.current
       let (temperature, wind) = 
@@ -229,18 +236,29 @@ public enum BlackBoxModel {
     return log.finish()
   }
 
-  private static func simulationPeriod() -> Zip2Sequence<ArraySlice<MeteoData>, DateSequence> 
+  private static func simulationPeriod(
+    _ valuesPerHour: DateSequence.Frequence? = nil
+  ) -> Zip2Sequence<ArraySlice<MeteoData>, DateSequence> 
   {
     let times: DateSequence
-    let meteo: ArraySlice<MeteoData>
+    var meteo: ArraySlice<MeteoData>
+    let interval = Simulation.time.steps
     if let dateInterval = Simulation.time.dateInterval
     {
-      let range = dateInterval.align(with: Simulation.time.steps)
-      times = DateSequence(range: range, interval: Simulation.time.steps)
-      meteo = meteoData![meteoData!.range(for: range)]
+      let range = dateInterval.align(with: interval)
+      times = DateSequence(range: range, interval: interval)
+      let values: [MeteoData] 
+      if let steps = valuesPerHour, interval.rawValue > steps.rawValue {
+        values = stride(
+          from: meteoData.startIndex, to: meteoData.endIndex, by: interval.rawValue
+        ).map { meteoData[$0] }
+      } else {
+        values = meteoData
+      }
+      meteo = values[values.range(for: range)]
     } else {
-      times = DateSequence(year: yearOfSimulation, interval: Simulation.time.steps)
-      meteo = meteoData![...]
+      times = DateSequence(year: yearOfSimulation, interval: interval)
+      meteo = meteoData[...]
     }
     return zip(meteo, times)
   }

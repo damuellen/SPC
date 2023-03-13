@@ -36,7 +36,7 @@ public enum Simulation {
     asAvailableCapacity: 1.0
   )
 
-  public static var time = Year(
+  public static var time = Period(
     isLeapYear: false,
     dateInterval: nil,
     holidays: [],

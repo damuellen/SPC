@@ -35,7 +35,7 @@ public final class Historian {
   public enum Mode {
     case database
     case inMemory, none
-    case custom(interval: DateSequence.Interval)
+    case custom(interval: DateSequence.Frequence)
     case csv
     case excel
     var hasFileOutput: Bool {
