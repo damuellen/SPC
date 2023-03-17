@@ -35,7 +35,7 @@ public final class Historian {
   public enum Mode {
     case database
     case inMemory, none
-    case custom(interval: DateSequence.Frequence)
+    case custom(interval: DateSeries.Frequence)
     case csv
     case excel
     var hasFileOutput: Bool {
@@ -100,7 +100,7 @@ public final class Historian {
     self.parent = customPath ?? ""
 
     #if DEBUG
-    let outputMode = Mode.custom(interval: interval)
+    // let outputMode = Mode.custom(interval: interval)
     #endif
 
     if case .inMemory = outputMode {
@@ -225,7 +225,7 @@ public final class Historian {
     if mode.hasFileOutput {
 
       if intervalCounter == 1 {
-        iso8601_Hourly = String(ts.description.dropFirst(3))
+        iso8601_Hourly = String(ts.description)
       }
 
       if case .custom(_) = mode {

@@ -61,7 +61,7 @@ public struct SolarPosition {
   public var year: Int
   public var location: Location
 
-  public var frequence: DateSequence.Frequence
+  public var frequence: DateSeries.Frequence
 
   /// Creates a struct with precalculated sun position
   /// for the given location and year at the predetermined times.
@@ -72,7 +72,7 @@ public struct SolarPosition {
   /// - parameter frequence: Time interval for the calculations
   public init(
     coords: (Double, Double, Double), tz: Int,
-    year: Int, frequence: DateSequence.Frequence
+    year: Int, frequence: DateSeries.Frequence
   ) {
     SolarPosition.estimatedDelta_T = SolarPosition.estimateDelta_T(year: year)
     SolarPosition.frequence = frequence
@@ -89,7 +89,7 @@ public struct SolarPosition {
       $0.align(with: SolarPosition.frequence)
     }
     let dates = sunHoursPeriod.flatMap {
-      DateSequence(range: $0, interval: SolarPosition.frequence)
+      DateSeries(range: $0, interval: SolarPosition.frequence)
     }
     lookupDates = Dictionary(uniqueKeysWithValues: zip(dates, 0...))
     let offset = 0.0 //frequence.interval / 2
@@ -159,7 +159,7 @@ public struct SolarPosition {
   }
 
   private static var estimatedDelta_T: Double = 0
-  private static var frequence: DateSequence.Frequence = .hour
+  private static var frequence: DateSeries.Frequence = .hour
 
   static func spa(input: Input) -> Output {
 
@@ -250,7 +250,7 @@ extension SolarPosition: CustomStringConvertible {
     print(
       "month", "day", "hour", "minute", SolarPosition.Output.labels,
       separator: ",", to: &description)
-    for date in DateSequence(year: year, interval: frequence) {
+    for date in DateSeries(year: year, interval: frequence) {
       let time = DateTime(date)
       if let pos = self[date] {
         print(

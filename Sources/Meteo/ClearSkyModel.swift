@@ -28,7 +28,7 @@ extension MeteoData {
 
     var rng = LinearCongruentialGenerator()
 
-    for d in DateSequence(year: sun.year, interval: sun.frequence) {
+    for d in DateSeries(year: sun.year, interval: sun.frequence) {
       step += 1
       if step == steps {
         day += 1
@@ -57,7 +57,7 @@ fileprivate func calculate(zenith: Double, day: Int, model: ClearSkyModel) -> Do
    + 0.034221 * cos(B) + 0.00128 * sin(B)
    + 0.000719 * cos(2 * B) + 0.000077 * sin(2 * B)
 
-  let dni_des = 930.0 * roverR0sqrd
+  let dni_des = 1130.0 * roverR0sqrd
 
   let cz = cos(zenith * .pi / 180)
   let al = 0.1 / 1000.0

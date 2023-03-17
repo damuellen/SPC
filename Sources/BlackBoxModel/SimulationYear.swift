@@ -11,7 +11,7 @@
 import DateExtensions
 import Foundation
 
-public typealias Frequence = DateSequence.Frequence
+public typealias Frequence = DateSeries.Frequence
 
 extension Simulation {
   public struct Period: Codable, CustomStringConvertible {

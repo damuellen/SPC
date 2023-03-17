@@ -237,16 +237,16 @@ public enum BlackBoxModel {
   }
 
   private static func simulationPeriod(
-    _ valuesPerHour: DateSequence.Frequence? = nil
-  ) -> Zip2Sequence<ArraySlice<MeteoData>, DateSequence> 
+    _ valuesPerHour: DateSeries.Frequence? = nil
+  ) -> Zip2Sequence<ArraySlice<MeteoData>, DateSeries> 
   {
-    let times: DateSequence
+    let times: DateSeries
     var meteo: ArraySlice<MeteoData>
     let interval = Simulation.time.steps
     if let dateInterval = Simulation.time.dateInterval
     {
       let range = dateInterval.align(with: interval)
-      times = DateSequence(range: range, interval: interval)
+      times = DateSeries(range: range, interval: interval)
       let values: [MeteoData] 
       if let steps = valuesPerHour, interval.rawValue > steps.rawValue {
         values = stride(
@@ -257,7 +257,7 @@ public enum BlackBoxModel {
       }
       meteo = values[values.range(for: range)]
     } else {
-      times = DateSequence(year: yearOfSimulation, interval: interval)
+      times = DateSeries(year: yearOfSimulation, interval: interval)
       meteo = meteoData[...]
     }
     return zip(meteo, times)

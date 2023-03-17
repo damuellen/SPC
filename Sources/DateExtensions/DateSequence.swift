@@ -16,7 +16,7 @@ public let Greenwich = { calendar -> NSCalendar in
 }(NSCalendar(identifier: .gregorian)!)
 
 /// A type that supplies a sequence of dates with a fixed interval.
-public final class DateSequence: Sequence, IteratorProtocol {
+public final class DateSeries: Sequence, IteratorProtocol {
 
   public enum Frequence: Int, Codable, CaseIterable, CustomStringConvertible {
     case hour = 1
