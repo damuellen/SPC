@@ -82,10 +82,6 @@ public final class Historian {
   ) {
     self.parent = customPath ?? ""
 
-    #if DEBUG
-    // let outputMode = Mode.custom(interval: interval)
-    #endif
-
     status.reserveCapacity(8760 * interval.rawValue)
     performance.reserveCapacity(8760 * interval.rawValue)
     sun.reserveCapacity(8760 * interval.rawValue)
@@ -199,6 +195,9 @@ public final class Historian {
     print(clearLineString, terminator: "\r")
     fflush(stdout)
     #endif
+    annualRadiation = sun.hourly(fraction: interval.fraction)
+    annualPerformance.totalize(performance, fraction: interval.fraction)    
+    printResult()
 
     if case .custom(let custom) = mode {
       let s = interval.rawValue / custom.rawValue
@@ -229,12 +228,10 @@ public final class Historian {
         _ = resultsStream?.write(row, maxLength: row.count)
       }
     }
-    annualPerformance.totalize(performance, fraction: interval.fraction)
-    annualRadiation = sun.hourly(fraction: interval.fraction)
+
     if case .database = mode { storeInDB() }
     if case .excel = mode { writeExcel() }
 
-    printResult()
     return Recording(
       startDate: range.start, performance: annualPerformance,
       irradiance: annualRadiation, performanceHistory: performance,
