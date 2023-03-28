@@ -49,7 +49,7 @@ extension RangeReplaceableCollection where Element==Insolation {
     var result = Insolation()
     for radiation in self {
       result.direct += radiation.direct * fraction
-      result.direct += radiation.global * fraction
+      result.global += radiation.global * fraction
       result.diffuse += radiation.diffuse * fraction
     }
     return result

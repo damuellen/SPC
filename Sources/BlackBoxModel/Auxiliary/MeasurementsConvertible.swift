@@ -22,7 +22,7 @@ protocol MeasurementsConvertible {
 
 extension MeasurementsConvertible {
   var commaSeparatedValues: String { 
-    values.map { String(format: "%.2f", $0) }.joined(separator: ",")
+    values.map { $0 > 0 ? String(format: "%.2f", $0) : "0" }.joined(separator: ",")
   }
 
   var prettyDescription: String {
