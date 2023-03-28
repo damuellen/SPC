@@ -37,16 +37,22 @@ public struct Insolation {
     ]
   }
 
-  public mutating func totalize(_ radiation: Insolation, fraction: Double) {
-    direct += radiation.direct * fraction
-    direct += radiation.global * fraction
-    diffuse += radiation.diffuse * fraction
-  }
-
   public mutating func zero() {
     direct = 0.0
     global = 0.0
     diffuse = 0.0
+  }
+}
+
+extension RangeReplaceableCollection where Element==Insolation {
+  public func hourly(fraction: Double) -> Insolation {
+    var result = Insolation()
+    for radiation in self {
+      result.direct += radiation.direct * fraction
+      result.direct += radiation.global * fraction
+      result.diffuse += radiation.diffuse * fraction
+    }
+    return result
   }
 }
 

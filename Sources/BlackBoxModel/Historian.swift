@@ -23,14 +23,10 @@ public final class Historian {
   #endif
   /// Number of values per hour
   private let interval = Simulation.time.steps
-  private var intervalCounter: Int = 1
-  private var hourCounter: Int = 1
-  /// Changes the resolution of the output
-  private let stride: Int
   /// Specifies what the output is
   let mode: Mode
 
-  var startDate: Date? = Simulation.time.dateInterval?.start
+  var range: DateInterval = Simulation.time.dateInterval!
 
   public enum Mode {
     case database
@@ -56,10 +52,6 @@ public final class Historian {
     }
   }
 
-  private var iso8601_Hourly: String = ""
-  private var iso8601_Interval: String = ""
-  private var stringBuffer: String = ""
-
   /// sqlite file
   // private var db: Connection? = nil
 
@@ -67,24 +59,16 @@ public final class Historian {
   /// Totals
   private var annualPerformance = PlantPerformance()
   private var annualRadiation = Insolation()
-  /// Volatile subtotals
-  private var hourlyPerformance = PlantPerformance()
-  private var hourlyRadiation = Insolation()
   /// Sum of hourly values
-  private var dailyPerformance = PlantPerformance()
-  private var dailyRadiation = Insolation()
-
-  private var customIntervalPerformance = PlantPerformance()
-  private var customIntervalRadiation = Insolation()
+  private var hourlyPerformance = PlantPerformance()
 
   /// All past states of the plant
-  private var statusHistory: [Status] = []
-  private var performanceHistory: [PlantPerformance] = []
-  private var sunHistory: [Insolation] = []
+  private var status: [Status] = []
+  private var performance: [PlantPerformance] = []
+  private var sun: [Insolation] = []
 
   public init(mode: Mode) {
     self.mode = mode
-    self.stride = 1
     self.parent = ""
   }
   /// Common prefix of output
@@ -104,17 +88,15 @@ public final class Historian {
     #endif
 
     if case .inMemory = outputMode {
-      statusHistory.reserveCapacity(8760 * interval.rawValue)
-      performanceHistory.reserveCapacity(8760 * interval.rawValue)
-      sunHistory.reserveCapacity(8760 * interval.rawValue)
+      status.reserveCapacity(8760 * interval.rawValue)
+      performance.reserveCapacity(8760 * interval.rawValue)
+      sun.reserveCapacity(8760 * interval.rawValue)
     }
 
     if case .custom(let i) = outputMode, i.isMultiple(of: interval) {
-      self.stride = interval.rawValue / i.rawValue
       self.mode = outputMode
     } else {
       self.mode = outputMode
-      self.stride = 1
     }
 
     let urlDir = URL(fileURLWithPath: parent)
@@ -144,40 +126,35 @@ public final class Historian {
     //   urls = [url]
     // }
     if case .csv = outputMode {
-      let tableHeader = headers.name + .lineBreak + headers.unit + .lineBreak
-      let dailyResultsURL = urlDir.appendingPathComponent(
-        "\(name)\(suffix)_daily.csv")
-      let hourlyResultsURL = urlDir.appendingPathComponent(
+      let tableHeader: [UInt8] = [UInt8](headers.name.utf8) 
+        + ln + [UInt8](headers.unit.utf8) + ln
+      let resultsURL = urlDir.appendingPathComponent(
         "\(name)\(suffix)_hourly.csv")
-      self.dailyResultsStream = OutputStream(
-        url: dailyResultsURL, append: false)
-      self.hourlyResultsStream = OutputStream(
-        url: hourlyResultsURL, append: false)
-      self.dailyResultsStream?.open()
-      self.hourlyResultsStream?.open()
-      self.dailyResultsStream?.write(tableHeader)
-      self.hourlyResultsStream?.write(tableHeader)
+      resultsStream = OutputStream(url: resultsURL, append: false)
+      resultsStream?.open()
+      _ = resultsStream?.write(tableHeader, maxLength: tableHeader.count)
 
-      urls = [dailyResultsURL, hourlyResultsURL]
+      urls = [resultsURL]
     }
 
     if case .custom(let i) = mode {
       let startTime = repeatElement("0", count: headers.count + 1)
-        .joined(separator: .separator)
+        .joined(separator: ",")
       let fraction = String(format: "%.5f", i.fraction)
       let intervalTime = repeatElement(fraction, count: headers.count + 1)
-        .joined(separator: .separator)
-      let tableHeader =
-        "wxDVFileHeaderVer.1" + .lineBreak + headers.name + .lineBreak
-        + startTime + .lineBreak + intervalTime + .lineBreak + headers.unit
-        + .lineBreak
+        .joined(separator: ",")
+      let tableHeader: [UInt8] =
+        [UInt8]("wxDVFileHeaderVer.1".utf8) + ln 
+        + [UInt8](headers.name.utf8) + ln
+        + [UInt8](startTime.utf8) + ln
+        + [UInt8](intervalTime.utf8) + ln
+        + [UInt8](headers.unit.utf8) + ln
 
       let resultsURL = urlDir.appendingPathComponent("\(name)\(suffix)_\(i).csv")
 
       customIntervalStream = OutputStream(url: resultsURL, append: false)
-      stringBuffer.reserveCapacity(200 * 8760 * i.rawValue)
       customIntervalStream?.open()
-      customIntervalStream?.write(tableHeader)
+      _ = customIntervalStream?.write(tableHeader, maxLength: tableHeader.count)
       urls = [resultsURL]
     }
     if !mode.hasFileOutput { return }
@@ -188,20 +165,14 @@ public final class Historian {
   }
 
   deinit {
-    dailyResultsStream?.close()
-    hourlyResultsStream?.close()
+    resultsStream?.close()
     customIntervalStream?.close()
   }
 
   public func clearResults() {
-    annualPerformance.zero()
-    annualRadiation.zero()
-    dailyPerformance.zero()
-    dailyRadiation.zero()
-    hourlyPerformance.zero()
-    hourlyRadiation.zero()
-    performanceHistory.removeAll(keepingCapacity: true)
-    statusHistory.removeAll(keepingCapacity: true)
+    performance.removeAll(keepingCapacity: true)
+    status.removeAll(keepingCapacity: true)
+    sun.removeAll(keepingCapacity: true)
   }
 
   func printResult() {
@@ -214,84 +185,9 @@ public final class Historian {
   func callAsFunction(
     _ ts: DateTime, meteo: MeteoData, status: Status, energy: PlantPerformance
   ) {
-    let solar = Insolation(meteo: meteo)
-
-    if mode.hasHistory {
-      self.statusHistory.append(status)
-      self.performanceHistory.append(energy)
-      self.sunHistory.append(solar)
-    }
-
-    if mode.hasFileOutput {
-
-      if intervalCounter == 1 {
-        iso8601_Hourly = String(ts.description)
-      }
-
-      if case .custom(_) = mode {
-        if stride == 1 || intervalCounter % stride == 1 {
-          iso8601_Interval = ts.description
-        }
-        let fraction = 1 / Double(stride)
-        customIntervalRadiation.totalize(solar, fraction: fraction)
-        customIntervalPerformance.totalize(energy, fraction: fraction)
-
-        if stride == 1 || intervalCounter % stride == 0 {
-          let csv = generateValues()
-          #if DEBUG
-          let s = status.formattedValues.joined(separator: ",")
-          stringBuffer.append(contentsOf: csv + "," + s + .lineBreak)
-          #else
-          stringBuffer.append(contentsOf: csv + .lineBreak)
-          #endif
-          customIntervalStream?.write(stringBuffer)
-          stringBuffer.removeAll()
-          customIntervalRadiation.zero()
-          customIntervalPerformance.zero()
-        }
-      }
-    }
-
-    intervalCounter += 1
-
-    if case .csv = mode {
-      if intervalCounter > interval.rawValue {
-        dailyPerformance.totalize(hourlyPerformance, fraction: 1)
-        dailyRadiation.totalize(hourlyRadiation, fraction: 1)
-
-        let csv = generateHourlyValues() + .lineBreak
-        // Will be written together with the daily results
-        stringBuffer.append(contentsOf: csv)
-
-        hourlyPerformance.zero()
-        hourlyRadiation.zero()
-
-        hourCounter += 1
-        intervalCounter = 1
-      }
-
-      if hourCounter > 24 {
-        annualPerformance.totalize(dailyPerformance, fraction: 1)
-        annualRadiation.totalize(dailyRadiation, fraction: 1)
-
-        let csv = generateDailyValues() + .lineBreak
-        dailyResultsStream?.write(csv)
-
-        hourlyResultsStream?.write(stringBuffer)
-        stringBuffer.removeAll(keepingCapacity: true)
-
-        dailyPerformance.zero()
-        dailyRadiation.zero()
-
-        hourCounter = 1
-      }
-      hourlyRadiation.totalize(solar, fraction: interval.fraction)
-      hourlyPerformance.totalize(energy, fraction: interval.fraction)
-    } else {
-      // Only the annual sums are calculated.
-      annualRadiation.totalize(solar, fraction: interval.fraction)
-      annualPerformance.totalize(energy, fraction: interval.fraction)
-    }
+    self.status.append(status)
+    self.performance.append(energy)
+    self.sun.append(Insolation(meteo: meteo))
 
     #if DEBUG && !os(Windows)
     if progress != ts.month {
@@ -308,20 +204,30 @@ public final class Historian {
     print(clearLineString, terminator: "\r")
     fflush(stdout)
     #endif
-    printResult()
 
-    if case .custom(_) = mode {
-      customIntervalStream?.write(stringBuffer)
-      stringBuffer.removeAll()
+    let s = interval.rawValue
+    
+    for (date, i) in zip(DateSeries(range: range, interval: .hour),
+      stride(from: 0, to: performance.count-s, by: s)) {
+      hourlyPerformance.totalize(performance[i..<i+s], fraction: interval.fraction)
+      let hourlyRadiation = sun[i..<i+s].hourly(fraction: interval.fraction)
+      let row = [UInt8](DateTime(date).commaSeparatedValues.utf8) 
+        + comma + [UInt8](hourlyRadiation.commaSeparatedValues.utf8)
+        + comma + [UInt8](hourlyPerformance.commaSeparatedValues.utf8) 
+        + ln
+      _ = resultsStream?.write(row, maxLength: row.count)
     }
-
+   
+    annualPerformance.totalize(performance, fraction: interval.fraction)
+    annualRadiation = sun.hourly(fraction: interval.fraction)
     if case .database = mode { storeInDB() }
     if case .excel = mode { writeExcel() }
 
+    printResult()
     return Recording(
-      startDate: startDate!, performance: annualPerformance,
-      irradiance: annualRadiation, performanceHistory: performanceHistory,
-      statusHistory: statusHistory)
+      startDate: range.start, performance: annualPerformance,
+      irradiance: annualRadiation, performanceHistory: performance,
+      statusHistory: status)
   }
 
   private func checkForResults(atPath path: String) -> [Int]? {
@@ -375,19 +281,19 @@ public final class Historian {
     let interval = Simulation.time.steps.interval
     var date = Simulation.time.dateInterval!.start
 
-    statusHistory.indices.forEach { i in
+    status.indices.forEach { i in
       ws1.write(.datetime(date), [i + 1, 0])
-      ws1.write(sunHistory[i].values, row: i + 1, col: 1)
-      ws1.write(statusHistory[i].modes, row: i + 1, col: 4)
-      ws1.write(statusHistory[i].values, row: i + 1, col: 4 + modesCount)
+      ws1.write(sun[i].values, row: i + 1, col: 1)
+      ws1.write(status[i].modes, row: i + 1, col: 4)
+      ws1.write(status[i].values, row: i + 1, col: 4 + modesCount)
       date.addTimeInterval(interval)
     }
 
     date = Simulation.time.dateInterval!.start
 
-    performanceHistory.indices.forEach { i in
+    performance.indices.forEach { i in
       ws2.write(.datetime(date), [i + 1, 0])
-      ws2.write(performanceHistory[i].values, row: i + 1, col: 1)
+      ws2.write(performance[i].values, row: i + 1, col: 1)
       date.addTimeInterval(interval)
     }
     wb.close()
@@ -427,8 +333,7 @@ public final class Historian {
   // MARK: Output Streams
 
   private var customIntervalStream: OutputStream?
-  private var dailyResultsStream: OutputStream?
-  private var hourlyResultsStream: OutputStream?
+  private var resultsStream: OutputStream?
 
   // MARK: Table headers
 
@@ -441,38 +346,18 @@ public final class Historian {
     #else
     let measurements = [Insolation.measurements, PlantPerformance.measurements].joined()
     #endif
-    let names: String = measurements.map(\.name).joined(separator: .separator)
-    let units: String = measurements.map(\.unit).joined(separator: .separator)
-    return ("DateTime," + names, "_," + units, measurements.count)
+    let names: String = measurements.map(\.name).joined(separator: ",")
+    let units: String = measurements.map(\.unit).joined(separator: ",")
+    return ("Month,Day,Hour," + names, "_,_,_," + units, measurements.count)
   }
 
-  // MARK: Write Results
 
-  private func generateDailyValues() -> String {
-    iso8601_Hourly.prefix(10) + .separator + [
-      dailyRadiation.formattedValues,
-      dailyPerformance.formattedValues
-      ].joined().joined(separator: .separator)
-  }
-
-  private func generateHourlyValues() -> String {
-    iso8601_Hourly + .separator + [
-      hourlyRadiation.formattedValues,
-      hourlyPerformance.formattedValues
-      ].joined().joined(separator: .separator)
-  }
-
-  private func generateValues() -> String {
-    iso8601_Interval + .separator + [
-      customIntervalRadiation.formattedValues,
-      customIntervalPerformance.formattedValues
-      ].joined().joined(separator: .separator)
-  }
 }
 
-extension OutputStream {
-  @_transparent func write(_ string: String) {
-    let bytes = [UInt8](string.utf8)
-    let _ = write(bytes, maxLength: bytes.count)
-  }
-}
+#if os(Windows)
+fileprivate let ln: [UInt8] = [UInt8(ascii: "\r"), UInt8(ascii: "\n")] 
+#else
+fileprivate let ln: [UInt8] = [UInt8(ascii: "\n")] 
+#endif  
+fileprivate let comma: [UInt8] = [UInt8(ascii: ",")] 
+

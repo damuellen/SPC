@@ -27,11 +27,11 @@ public struct PlantPerformance: MeasurementsConvertible {
     self.electric = ElectricPower()
   }
 
-  mutating func totalize(_ values: PlantPerformance, fraction: Double) {
-    self.thermal.totalize(values.thermal, fraction: fraction)
-    self.fuel.totalize(values.fuel, fraction: fraction)
-    self.parasitics.totalize(values.parasitics, fraction: fraction)
-    self.electric.totalize(values.electric, fraction: fraction)
+  mutating func totalize(_ performance: some RangeReplaceableCollection<PlantPerformance>, fraction: Double) {
+    self.thermal = performance.map(\.thermal).totalize(fraction: fraction)
+    self.fuel = performance.map(\.fuel).totalize(fraction: fraction)
+    self.parasitics = performance.map(\.parasitics).totalize(fraction: fraction)
+    self.electric = performance.map(\.electric).totalize(fraction: fraction)
   }
 
   var values: [Double] {
@@ -142,19 +142,25 @@ public struct ElectricPower: Encodable, MeasurementsConvertible {
       consum = .zero
     }
   }
+}
 
-  mutating func totalize(_ values: ElectricPower, fraction: Double) {
-    self.demand += values.demand * fraction
-    self.gross += values.gross * fraction
-    self.steamTurbineGross += values.steamTurbineGross * fraction
-   // self.gasTurbineGross += values.gasTurbineGross * fraction
-    self.photovoltaic += values.photovoltaic * fraction
-    self.shared += values.shared * fraction
-    self.solarField += values.solarField * fraction
-    self.parasitics += values.parasitics * fraction
-    self.storage += values.storage * fraction
-    self.net += values.net * fraction
-    self.consum += values.consum * fraction
+extension RangeReplaceableCollection where Element==ElectricPower {
+  func totalize(fraction: Double) -> ElectricPower {
+    var result = ElectricPower()
+    for values in self {
+      result.demand += values.demand * fraction
+      result.gross += values.gross * fraction
+      result.steamTurbineGross += values.steamTurbineGross * fraction
+      // self.gasTurbineGross += values.gasTurbineGross * fraction
+      result.photovoltaic += values.photovoltaic * fraction
+      result.shared += values.shared * fraction
+      result.solarField += values.solarField * fraction
+      result.parasitics += values.parasitics * fraction
+      result.storage += values.storage * fraction
+      result.net += values.net * fraction
+      result.consum += values.consum * fraction
+    }
+    return result
   }
 }
 
@@ -178,14 +184,20 @@ public struct Parasitics: Encodable, MeasurementsConvertible {
       ("Parasitics|Backup", "MWh e"), ("Parasitics|GasTurbine", "MWh e"),
     ]
   }
+}
 
-  mutating func totalize(_ values: Parasitics, fraction: Double) {
-    self.solarField += values.solarField * fraction
-    self.powerBlock += values.powerBlock * fraction
-    self.storage += values.storage * fraction
-    self.shared += values.shared * fraction
+extension RangeReplaceableCollection where Element==Parasitics {
+  func totalize(fraction: Double) -> Parasitics {
+    var result = Parasitics()
+    for values in self {
+      result.solarField += values.solarField * fraction
+      result.powerBlock += values.powerBlock * fraction
+      result.storage += values.storage * fraction
+      result.shared += values.shared * fraction
     // parasiticsBackup += electricalParasitics
-    self.gasTurbine += values.gasTurbine * fraction
+      result.gasTurbine += values.gasTurbine * fraction
+    }
+    return result
   }
 }
 
@@ -244,18 +256,24 @@ public struct ThermalEnergy: Encodable, MeasurementsConvertible {
       dumping = .zero
     }
   }
+}
 
-  mutating func totalize(_ values: ThermalEnergy, fraction: Double) {
-    solar += values.solar * fraction
-    toStorage += values.toStorage * fraction
-    storage += values.storage * fraction
-    heater += values.heater * fraction
-    heatExchanger += values.heatExchanger * fraction
-    startUp += values.startUp * fraction
-    wasteHeatRecovery += values.wasteHeatRecovery * fraction
-    boiler += values.boiler * fraction
-    dumping += values.dumping * fraction
-    production += values.production * fraction
+extension RangeReplaceableCollection where Element==ThermalEnergy {
+  func totalize(fraction: Double) -> ThermalEnergy {
+    var result = ThermalEnergy()
+    for values in self {
+      result.solar += values.solar * fraction
+      result.toStorage += values.toStorage * fraction
+      result.storage += values.storage * fraction
+      result.heater += values.heater * fraction
+      result.heatExchanger += values.heatExchanger * fraction
+      result.startUp += values.startUp * fraction
+      result.wasteHeatRecovery += values.wasteHeatRecovery * fraction
+      result.boiler += values.boiler * fraction
+      result.dumping += values.dumping * fraction
+      result.production += values.production * fraction
+    }
+    return result
   }
 }
 
@@ -284,12 +302,18 @@ public struct FuelConsumption: Encodable, MeasurementsConvertible {
       ("FuelConsumption|Combined", "MWh"),
     ]
   }
+}
 
-  mutating func totalize(_ fuel: FuelConsumption, fraction: Double) {
-    backup += fuel.backup * fraction
-    boiler += fuel.boiler * fraction
-    heater += fuel.heater * fraction
-    gasTurbine += fuel.gasTurbine * fraction
+extension RangeReplaceableCollection where Element==FuelConsumption {
+  func totalize(fraction: Double) -> FuelConsumption {
+    var result = FuelConsumption()
+    for fuel in self {
+      result.backup += fuel.backup * fraction
+      result.boiler += fuel.boiler * fraction
+      result.heater += fuel.heater * fraction
+      result.gasTurbine += fuel.gasTurbine * fraction
+    }
+    return result
   }
 }
 
