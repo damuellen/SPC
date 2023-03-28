@@ -245,7 +245,7 @@ public enum BlackBoxModel {
     let interval = Simulation.time.steps
     if let dateInterval = Simulation.time.dateInterval
     {
-      let range = dateInterval.align(with: interval)
+      let range = dateInterval.aligned(to: interval)
       times = DateSeries(range: range, interval: interval)
       let values: [MeteoData] 
       if let steps = valuesPerHour, interval.rawValue > steps.rawValue {
@@ -255,7 +255,8 @@ public enum BlackBoxModel {
       } else {
         values = meteoData
       }
-      meteo = values[values.range(for: range)]
+      let indices = values.range(for: range)
+      meteo = values[indices]
     } else {
       times = DateSeries(year: yearOfSimulation, interval: interval)
       meteo = meteoData[...]

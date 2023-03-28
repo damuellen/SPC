@@ -111,9 +111,9 @@ extension HeatTransfer {
   }
 
   public var description: String {
-      "  Mass flow: \(formattedValues[0]) kg/s".padding(28)
-      + " T in: \(formattedValues[1]) degC".padding(20)
-      + "T out: \(formattedValues[2]) degC".padding(20)
+      "  Mass flow: \(massFlow.rate) kg/s".padding(28)
+      + " T in: \(temperature.inlet.celsius) degC".padding(20)
+      + "T out: \(temperature.outlet.celsius) degC".padding(20)
   }
 
   var formattedValues: [String] {

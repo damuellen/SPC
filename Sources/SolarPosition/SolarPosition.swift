@@ -86,7 +86,7 @@ public struct SolarPosition {
       location: location, year: year
     )
     let sunHoursPeriod = sunHours.map {
-      $0.align(with: SolarPosition.frequence)
+      $0.aligned(to: SolarPosition.frequence)
     }
     let dates = sunHoursPeriod.flatMap {
       DateSeries(range: $0, interval: SolarPosition.frequence)

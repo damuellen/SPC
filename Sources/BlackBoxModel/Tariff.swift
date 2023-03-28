@@ -22,5 +22,5 @@ struct TariffSeason {
 }
 
 extension Tariff: CustomStringConvertible {
-  public var description: String { name + .lineBreak }
+  public var description: String { name }
 }

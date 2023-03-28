@@ -21,7 +21,9 @@ protocol MeasurementsConvertible {
 }
 
 extension MeasurementsConvertible {
-  var formattedValues: [String] { values.map { String(format: "%.2f", $0) } }
+  var commaSeparatedValues: String { 
+    values.map { String(format: "%.2f", $0) }.joined(separator: ",")
+  }
 
   var prettyDescription: String {
     return zip(values, Self.measurements).reduce("\n") { result, tuple in
@@ -46,18 +48,18 @@ extension MeasurementsConvertible {
       let fractionalPart = remainder > 0
         ? String(UnicodeScalar(full + UInt32(8 - remainder))!) : ""
       return r + String(repeating: "█", count: bar_chunks)
-        + fractionalPart + .lineBreak
+        + fractionalPart + "\n"
     }
   }
 }
 
 extension String {
 #if os(Windows)
-  static var lineBreak: String { "\r\n" }
+  static var DateSeries: [UInt8] { [UInt8(ascii: "\r"), UInt8(ascii: "\n")] }
 #else
-  static var lineBreak: String { "\n" }
+  static var DateSeries: [UInt8] { [UInt8(ascii: "\n")] }
 #endif  
-  static var separator: String { ", " }
+  // static var separator: String { [UInt8(ascii: ",")] }
 }
 
 let backgroundQueue = DispatchQueue(label: "serial.queue")

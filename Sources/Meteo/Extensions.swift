@@ -71,7 +71,7 @@ extension Array where Element == MeteoData {
     let endMinute = Greenwich.ordinality(of: .minute, in: .hour, for: end)
 
     let startIndex = ((startHour - 1) * hourFraction) + (startMinute / fraction)
-    let lastIndex = ((endHour - 1) * hourFraction) + (endMinute / fraction)
+    let lastIndex = ((endHour - 1) * hourFraction) + (endMinute / fraction) + 1
 
     return startIndex..<lastIndex
   }

@@ -11,17 +11,17 @@
 extension Storage: CustomStringConvertible {
   public var description: String {
     "  Mode:".padding(20) + "\(operationMode)".padding(20)
-    + relativeCharge.multiBar + .lineBreak + .lineBreak
+    + relativeCharge.multiBar + "\n\n"
     + String(format: "  Mass flow: %3.1f kg/s", massFlow.rate).padding(28) 
     + String(format: " T in: %3.1f degC", temperature.inlet.celsius).padding(20) 
     + String(format: "T out: %3.1f degC", temperature.outlet.celsius).padding(20) 
-    + .lineBreak + "  Temperature tanks".padding(28)
+    + "," + "  Temperature tanks".padding(28)
     + String(format: " cold: %3.1f degC", temperatureTank.cold.celsius).padding(20)
     + String(format: "  hot: %3.1f degC", temperatureTank.hot.celsius).padding(20)
-    + .lineBreak + "  Salt mass".padding(28)
+    + "," + "  Salt mass".padding(28)
     + String(format: " cold: %3.0f t", salt.cold.kg / 1000).padding(20)
     + String(format: "  hot: %3.0f t", salt.hot.kg / 1000 ).padding(20)
-    + .lineBreak 
+    + ","
     + String(format: "  total: %3.0f t", salt.total.kg / 1000).padding(27)
     + String(format: "  active: %3.0f t", salt.active.kg / 1000).padding(21)
     + String(format: "  min: %3.0f t", salt.minimum.kg / 1000) .padding(20)

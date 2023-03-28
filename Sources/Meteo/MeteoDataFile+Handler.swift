@@ -43,12 +43,17 @@ public struct MeteoDataFileHandler {
     try file.fetchInfo()
   }
 
-  public func data(valuesPerHour: Int) throws -> [MeteoData] { 
+  public func data(valuesPerHour: Int) throws -> [MeteoData] {
     let data = try file.fetchData()
     var steps = data.count / 8760
     steps = valuesPerHour / steps
+    let half = steps / 2
     steps -= 1
-    return data.interpolate(steps: steps)
+    if steps > 1 {
+      let wrapped = [data.last!] + data + [data.first!]
+      return wrapped.interpolate(steps: steps).dropFirst(half).dropLast(half)
+    }
+    return data
   }
 }
 
