@@ -61,5 +61,3 @@ extension String {
 #endif  
   // static var separator: String { [UInt8(ascii: ",")] }
 }
-
-let backgroundQueue = DispatchQueue(label: "serial.queue")

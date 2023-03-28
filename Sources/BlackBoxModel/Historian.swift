@@ -30,12 +30,11 @@ public final class Historian {
 
   public enum Mode {
     case database
-    case inMemory, none
+    case inMemory
     case custom(interval: DateSeries.Frequence)
     case csv
     case excel
     var hasFileOutput: Bool {
-      if case .none = self { return false }
       if case .inMemory = self { return false }
       return true
     }
@@ -87,17 +86,11 @@ public final class Historian {
     // let outputMode = Mode.custom(interval: interval)
     #endif
 
-    if case .inMemory = outputMode {
-      status.reserveCapacity(8760 * interval.rawValue)
-      performance.reserveCapacity(8760 * interval.rawValue)
-      sun.reserveCapacity(8760 * interval.rawValue)
-    }
+    status.reserveCapacity(8760 * interval.rawValue)
+    performance.reserveCapacity(8760 * interval.rawValue)
+    sun.reserveCapacity(8760 * interval.rawValue)
 
-    if case .custom(let i) = outputMode, i.isMultiple(of: interval) {
-      self.mode = outputMode
-    } else {
-      self.mode = outputMode
-    }
+    self.mode = outputMode
 
     let urlDir = URL(fileURLWithPath: parent)
 
@@ -126,8 +119,9 @@ public final class Historian {
     //   urls = [url]
     // }
     if case .csv = outputMode {
-      let tableHeader: [UInt8] = [UInt8](headers.name.utf8) 
-        + ln + [UInt8](headers.unit.utf8) + ln
+      let header = headers()
+      let tableHeader: [UInt8] = [UInt8](header.name.utf8) + lineBreak 
+        + [UInt8](header.unit.utf8) + lineBreak
       let resultsURL = urlDir.appendingPathComponent(
         "\(name)\(suffix)_hourly.csv")
       resultsStream = OutputStream(url: resultsURL, append: false)
@@ -138,17 +132,18 @@ public final class Historian {
     }
 
     if case .custom(let i) = mode {
-      let startTime = repeatElement("0", count: headers.count + 1)
+      let header = headers(minutes: true)
+      let startTime = repeatElement("0", count: header.count + 1)
         .joined(separator: ",")
       let fraction = String(format: "%.5f", i.fraction)
-      let intervalTime = repeatElement(fraction, count: headers.count + 1)
+      let intervalTime = repeatElement(fraction, count: header.count + 1)
         .joined(separator: ",")
       let tableHeader: [UInt8] =
-        [UInt8]("wxDVFileHeaderVer.1".utf8) + ln 
-        + [UInt8](headers.name.utf8) + ln
-        + [UInt8](startTime.utf8) + ln
-        + [UInt8](intervalTime.utf8) + ln
-        + [UInt8](headers.unit.utf8) + ln
+        [UInt8]("wxDVFileHeaderVer.1".utf8) + lineBreak 
+        + [UInt8](header.name.utf8) + lineBreak
+        + [UInt8](startTime.utf8) + lineBreak
+        + [UInt8](intervalTime.utf8) + lineBreak
+        + [UInt8](header.unit.utf8) + lineBreak
 
       let resultsURL = urlDir.appendingPathComponent("\(name)\(suffix)_\(i).csv")
 
@@ -205,19 +200,35 @@ public final class Historian {
     fflush(stdout)
     #endif
 
-    let s = interval.rawValue
-    
-    for (date, i) in zip(DateSeries(range: range, interval: .hour),
-      stride(from: 0, to: performance.count-s, by: s)) {
-      hourlyPerformance.totalize(performance[i..<i+s], fraction: interval.fraction)
-      let hourlyRadiation = sun[i..<i+s].hourly(fraction: interval.fraction)
-      let row = [UInt8](DateTime(date).commaSeparatedValues.utf8) 
-        + comma + [UInt8](hourlyRadiation.commaSeparatedValues.utf8)
-        + comma + [UInt8](hourlyPerformance.commaSeparatedValues.utf8) 
-        + ln
-      _ = resultsStream?.write(row, maxLength: row.count)
+    if case .custom(let custom) = mode {
+      let s = interval.rawValue / custom.rawValue
+      for (date, i) in zip(DateSeries(range: range, interval: custom),
+        stride(from: 0, to: performance.count-s, by: s)) {
+        hourlyPerformance.totalize(performance[i..<i+s], fraction: 1 / Double(s))
+        let hourlyRadiation = sun[i..<i+s].hourly(fraction: 1 / Double(s))
+        let date = DateTime(date)
+        let row = [UInt8](date.commaSeparatedValues.utf8) 
+          + comma + [UInt8]("\(date.minute)".utf8)
+          + comma + [UInt8](hourlyRadiation.commaSeparatedValues.utf8)
+          + comma + [UInt8](hourlyPerformance.commaSeparatedValues.utf8) 
+          + lineBreak
+        _ = customIntervalStream?.write(row, maxLength: row.count)
+      }
     }
-   
+
+    if case .csv = mode {
+      let s = interval.rawValue
+      for (date, i) in zip(DateSeries(range: range, interval: .hour),
+        stride(from: 0, to: performance.count-s, by: s)) {
+        hourlyPerformance.totalize(performance[i..<i+s], fraction: interval.fraction)
+        let hourlyRadiation = sun[i..<i+s].hourly(fraction: interval.fraction)
+        let row = [UInt8](DateTime(date).commaSeparatedValues.utf8) 
+          + comma + [UInt8](hourlyRadiation.commaSeparatedValues.utf8)
+          + comma + [UInt8](hourlyPerformance.commaSeparatedValues.utf8) 
+          + lineBreak
+        _ = resultsStream?.write(row, maxLength: row.count)
+      }
+    }
     annualPerformance.totalize(performance, fraction: interval.fraction)
     annualRadiation = sun.hourly(fraction: interval.fraction)
     if case .database = mode { storeInDB() }
@@ -337,7 +348,7 @@ public final class Historian {
 
   // MARK: Table headers
 
-  private var headers: (name: String, unit: String, count: Int) {
+  private func headers(minutes: Bool = false) -> (name: String, unit: String, count: Int) {
     #if DEBUG
     let measurements = [
       Insolation.measurements, PlantPerformance.measurements, Status.measurements,
@@ -348,6 +359,9 @@ public final class Historian {
     #endif
     let names: String = measurements.map(\.name).joined(separator: ",")
     let units: String = measurements.map(\.unit).joined(separator: ",")
+    if minutes { 
+      return ("Month,Day,Hour,Minute," + names, "_,_,_,_," + units, measurements.count) 
+    }
     return ("Month,Day,Hour," + names, "_,_,_," + units, measurements.count)
   }
 
@@ -355,9 +369,9 @@ public final class Historian {
 }
 
 #if os(Windows)
-fileprivate let ln: [UInt8] = [UInt8(ascii: "\r"), UInt8(ascii: "\n")] 
+fileprivate let lineBreak: [UInt8] = [UInt8(ascii: "\r"), UInt8(ascii: "\n")] 
 #else
-fileprivate let ln: [UInt8] = [UInt8(ascii: "\n")] 
+fileprivate let lineBreak: [UInt8] = [UInt8(ascii: "\n")] 
 #endif  
 fileprivate let comma: [UInt8] = [UInt8(ascii: ",")] 
 
