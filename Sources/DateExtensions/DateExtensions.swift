@@ -40,7 +40,7 @@ extension DateInterval {
 
     let interval = 60.0 / Double(valuesPerHour.rawValue)
     start.minute = (Int(Double(start.minute!) / interval)) * Int(interval)
-    end.minute = (Int(Double(end.minute!) / interval)) * Int(interval)
+    end.minute = Int((Double(end.minute!) / interval).rounded(.up)) * Int(interval)
 
     return DateInterval(start: Greenwich.date(from: start)!, end: Greenwich.date(from: end)!)
   }

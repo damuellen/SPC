@@ -129,10 +129,10 @@ public final class Historian {
 
     if case .custom(let i) = mode {
       let header = headers(minutes: true)
-      let startTime = repeatElement("0", count: header.count + 1)
+      let startTime = repeatElement("0", count: header.count + 4)
         .joined(separator: ",")
       let fraction = String(format: "%.5f", i.fraction)
-      let intervalTime = repeatElement(fraction, count: header.count + 1)
+      let intervalTime = repeatElement(fraction, count: header.count + 4)
         .joined(separator: ",")
       let tableHeader: [UInt8] =
         [UInt8]("wxDVFileHeaderVer.1".utf8) + lineBreak 
@@ -202,7 +202,7 @@ public final class Historian {
     if case .custom(let custom) = mode {
       let s = interval.rawValue / custom.rawValue
       for (date, i) in zip(DateSeries(range: range, interval: custom),
-        stride(from: 0, to: performance.count-s, by: s)) {
+        stride(from: 0, to: performance.count, by: s)) {
         hourlyPerformance.totalize(performance[i..<i+s], fraction: 1 / Double(s))
         let hourlyRadiation = sun[i..<i+s].hourly(fraction: 1 / Double(s))
         let date = DateTime(date)
@@ -218,7 +218,7 @@ public final class Historian {
     if case .csv = mode {
       let s = interval.rawValue
       for (date, i) in zip(DateSeries(range: range, interval: .hour),
-        stride(from: 0, to: performance.count-s, by: s)) {
+        stride(from: 0, to: performance.count, by: s)) {
         hourlyPerformance.totalize(performance[i..<i+s], fraction: interval.fraction)
         let hourlyRadiation = sun[i..<i+s].hourly(fraction: interval.fraction)
         let row = [UInt8](DateTime(date).commaSeparatedValues.utf8) 

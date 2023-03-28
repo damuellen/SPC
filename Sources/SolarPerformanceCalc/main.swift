@@ -34,9 +34,6 @@ print("Wall time:", time)
   MessageBox(text: time, caption: "")
 #endif
 
-#if os(Windows)
-system("pause")
-#endif
 struct LocationInfo: ParsableArguments {
   @Option(name: [.customShort("z"), .long], help: "Time zone")
   var timezone: Int?

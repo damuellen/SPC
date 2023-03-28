@@ -66,13 +66,16 @@ extension Array where Element == MeteoData {
     let hourFraction = self.count / 8760
     let fraction = 60 / hourFraction 
     let startHour = Greenwich.ordinality(of: .hour, in: .year, for: start)
-    let startMinute = Greenwich.ordinality(of: .minute, in: .hour, for: start) 
-    let endHour = Greenwich.ordinality(of: .hour, in: .year, for: end)
-    let endMinute = Greenwich.ordinality(of: .minute, in: .hour, for: end)
-
+    let startMinute = Greenwich.ordinality(of: .minute, in: .hour, for: start)
+    let lastIndex: Int
+    if Greenwich.compare(start, to: end, toUnitGranularity: .year) ~= .orderedSame {
+      let endHour = Greenwich.ordinality(of: .hour, in: .year, for: end)
+      let endMinute = Greenwich.ordinality(of: .minute, in: .hour, for: end)
+      lastIndex = ((endHour - 1) * hourFraction) + (endMinute / fraction) + 1
+    } else {
+      lastIndex = self.endIndex
+    }
     let startIndex = ((startHour - 1) * hourFraction) + (startMinute / fraction)
-    let lastIndex = ((endHour - 1) * hourFraction) + (endMinute / fraction) + 1
-
     return startIndex..<lastIndex
   }
 }
