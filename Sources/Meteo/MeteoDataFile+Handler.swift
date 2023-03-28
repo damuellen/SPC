@@ -51,7 +51,8 @@ public struct MeteoDataFileHandler {
     steps -= 1
     if steps > 1 {
       let wrapped = [data.last!] + data + [data.first!]
-      return wrapped.interpolate(steps: steps).dropFirst(half).dropLast(half)
+      let interpolated = wrapped.interpolate(steps: steps)
+      return interpolated.dropFirst(half).dropLast(half+1)
     }
     return data
   }
