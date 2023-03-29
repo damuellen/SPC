@@ -18,7 +18,7 @@ import xlsxwriter
 public final class Historian {
 
   #if DEBUG && !os(Windows)
-  /// Tracking the month
+  /// Tracking the day
   private var progress: Int = 0
   #endif
   /// Number of values per hour
@@ -53,61 +53,51 @@ public final class Historian {
 
   /// sqlite file
   // private var db: Connection? = nil
-
+  private var fileStream: OutputStream?
   private var xlsx: Workbook? = nil
   /// Totals
-  private var annualPerformance = PlantPerformance()
-  private var annualRadiation = Insolation()
-  /// Sum of hourly values
-  private var hourlyPerformance = PlantPerformance()
+  private(set) var annualPerformance = PlantPerformance()
+  private(set) var annualRadiation = Insolation()
 
   /// All past states of the plant
-  private var status: [Status] = []
-  private var performance: [PlantPerformance] = []
-  private var sun: [Insolation] = []
+  private(set) var status: [Status] = []
+  private(set) var performance: [PlantPerformance] = []
+  private(set) var sun: [Insolation] = []
 
-  public init(mode: Mode) {
-    self.mode = mode
-    self.parent = ""
-  }
   /// Common prefix of output
   var name = "Results_"
-  /// Directory path of output
-  private let parent: String
-  /// Output name suffix
-  private var suffix: String = "001"
 
   public init(
     customName: String? = nil, customPath: String? = nil, outputMode: Mode
   ) {
-    self.parent = customPath ?? ""
-
     status.reserveCapacity(8760 * interval.rawValue)
     performance.reserveCapacity(8760 * interval.rawValue)
     sun.reserveCapacity(8760 * interval.rawValue)
 
     self.mode = outputMode
 
-    let urlDir = URL(fileURLWithPath: parent)
+    var url = URL(fileURLWithPath: customPath ?? "")
 
-    if outputMode.hasFileOutput, !urlDir.hasDirectoryPath {
-      print("Invalid path for results: \(urlDir.path)\n")
+    if outputMode.hasFileOutput, !url.hasDirectoryPath {
+      print("Invalid path for results: \(url.path)\n")
       print("There will be no output files.\n")
     }
-
+    let suffix: String
     if let name = customName {
       self.name = name
+      suffix = "001"
     } else {
-      let numbers = checkForResults(atPath: urlDir.path)
+      let numbers = checkForResults(atPath: url.path)
       let n = (numbers?.max() ?? 0) + 1
-      self.suffix = String(format: "%03d", n)
+      suffix = String(format: "%03d", n)
     }
 
-    var urls = [URL]()
+    var buffer = [UInt8]()
+
+
     if case .excel = outputMode {
-      let url = urlDir.appendingPathComponent("\(name)\(suffix).xlsx")
+      url = url.appendingPathComponent("\(name)\(suffix).xlsx")
       self.xlsx = Workbook(name: url.path)
-      urls = [url]
     }
     // if case .database = outputMode {
     //   let url = urlDir.appendingPathComponent("\(name)\(suffix).sqlite3")
@@ -116,15 +106,13 @@ public final class Historian {
     // }
     if case .csv = outputMode {
       let header = headers()
-      let tableHeader: [UInt8] = [UInt8](header.name.utf8) + lineBreak 
+      buffer = [UInt8](header.name.utf8) + lineBreak 
         + [UInt8](header.unit.utf8) + lineBreak
-      let resultsURL = urlDir.appendingPathComponent(
+      url = url.appendingPathComponent(
         "\(name)\(suffix)_hourly.csv")
-      resultsStream = OutputStream(url: resultsURL, append: false)
-      resultsStream?.open()
-      _ = resultsStream?.write(tableHeader, maxLength: tableHeader.count)
-
-      urls = [resultsURL]
+      fileStream = OutputStream(url: url, append: false)
+      fileStream?.open()
+      _ = fileStream?.write(buffer, maxLength: buffer.count)
     }
 
     if case .custom(let i) = mode {
@@ -134,30 +122,27 @@ public final class Historian {
       let fraction = String(format: "%.5f", i.fraction)
       let intervalTime = repeatElement(fraction, count: header.count + 4)
         .joined(separator: ",")
-      let tableHeader: [UInt8] =
+      buffer =
         [UInt8]("wxDVFileHeaderVer.1".utf8) + lineBreak 
         + [UInt8](header.name.utf8) + lineBreak
         + [UInt8](startTime.utf8) + lineBreak
         + [UInt8](intervalTime.utf8) + lineBreak
         + [UInt8](header.unit.utf8) + lineBreak
 
-      let resultsURL = urlDir.appendingPathComponent("\(name)\(suffix)_\(i).csv")
+      url = url.appendingPathComponent("\(name)\(suffix)_\(i).csv")
 
-      customIntervalStream = OutputStream(url: resultsURL, append: false)
-      customIntervalStream?.open()
-      _ = customIntervalStream?.write(tableHeader, maxLength: tableHeader.count)
-      urls = [resultsURL]
+      fileStream = OutputStream(url: url, append: false)
+      fileStream?.open()
+      _ = fileStream?.write(buffer, maxLength: buffer.count)
     }
     if !mode.hasFileOutput { return }
-    print("Results: \(urlDir.path)/")
-    urls.map(\.lastPathComponent).enumerated()
-      .forEach { print("  \($0.offset+1).\t", $0.element) }
+    print("File output to: \(url.deletingLastPathComponent().path)")
+    print("  \(url.lastPathComponent)")
     print()
   }
 
   deinit {
-    resultsStream?.close()
-    customIntervalStream?.close()
+    fileStream?.close()
   }
 
   public func clearResults() {
@@ -181,9 +166,9 @@ public final class Historian {
     self.sun.append(Insolation(meteo: meteo))
 
     #if DEBUG && !os(Windows)
-    if progress != ts.month {
-      progress = ts.month
-      print(" [\(progress)/\(12)] recording month…", terminator: "\r")
+    if progress != ts.yearDay {
+      progress = ts.yearDay
+      print(" [\(progress)/\(365)] recording month…", terminator: "\r")
       fflush(stdout)
     }
     #endif
@@ -198,20 +183,23 @@ public final class Historian {
     annualRadiation = sun.hourly(fraction: interval.fraction)
     annualPerformance.totalize(performance, fraction: interval.fraction)    
     printResult()
-
+    var buffer = [UInt8]()
+      /// Sum of hourly values
+    var hourlyPerformance = PlantPerformance()
+    var hourlyRadiation = Insolation()
     if case .custom(let custom) = mode {
       let s = interval.rawValue / custom.rawValue
       for (date, i) in zip(DateSeries(range: range, interval: custom),
         stride(from: 0, to: performance.count, by: s)) {
         hourlyPerformance.totalize(performance[i..<i+s], fraction: 1 / Double(s))
-        let hourlyRadiation = sun[i..<i+s].hourly(fraction: 1 / Double(s))
+        hourlyRadiation = sun[i..<i+s].hourly(fraction: 1 / Double(s))
         let date = DateTime(date)
-        let row = [UInt8](date.commaSeparatedValues.utf8) 
+        buffer = [UInt8](date.commaSeparatedValues.utf8) 
           + comma + [UInt8]("\(date.minute)".utf8)
           + comma + [UInt8](hourlyRadiation.commaSeparatedValues.utf8)
           + comma + [UInt8](hourlyPerformance.commaSeparatedValues.utf8) 
           + lineBreak
-        _ = customIntervalStream?.write(row, maxLength: row.count)
+        _ = fileStream?.write(buffer, maxLength: buffer.count)
       }
     }
 
@@ -220,12 +208,12 @@ public final class Historian {
       for (date, i) in zip(DateSeries(range: range, interval: .hour),
         stride(from: 0, to: performance.count, by: s)) {
         hourlyPerformance.totalize(performance[i..<i+s], fraction: interval.fraction)
-        let hourlyRadiation = sun[i..<i+s].hourly(fraction: interval.fraction)
-        let row = [UInt8](DateTime(date).commaSeparatedValues.utf8) 
+        hourlyRadiation = sun[i..<i+s].hourly(fraction: interval.fraction)
+        buffer = [UInt8](DateTime(date).commaSeparatedValues.utf8) 
           + comma + [UInt8](hourlyRadiation.commaSeparatedValues.utf8)
           + comma + [UInt8](hourlyPerformance.commaSeparatedValues.utf8) 
           + lineBreak
-        _ = resultsStream?.write(row, maxLength: row.count)
+        _ = fileStream?.write(buffer, maxLength: buffer.count)
       }
     }
 
@@ -338,13 +326,9 @@ public final class Historian {
     //   for entry in performanceHistory { try! stmt.run(entry.values) }
     // }
   }
-  // MARK: Output Streams
 
-  private var customIntervalStream: OutputStream?
-  private var resultsStream: OutputStream?
 
-  // MARK: Table headers
-
+  /// Returns the headers for the table
   private func headers(minutes: Bool = false) -> (name: String, unit: String, count: Int) {
     #if DEBUG
     let measurements = [
