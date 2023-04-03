@@ -71,7 +71,7 @@ func fitness(values: [Double], penalized: Bool) -> [Double] {
   if penalized {
    fitness = LCOM * (1.0 + (abs(min(hours_sum - 7000.0, 0)) / 1000.0) * 0.3) * (1.0 + (abs(min(meth_produced_MTPH_sum - 100000.0, Double.zero)) / 10000.0) * 0.3)
   } else {
-   fitness = LCOM * (1.0 + (abs(meth_produced_MTPH_sum - 100000.0) / 10000.0) * 0.3)
+   fitness = LCOM * (1.0 + (pow(meth_produced_MTPH_sum / 100000.0 - 1, 2) * 2))
   }
   if LCOM.isInfinite || meth_produced_MTPH_sum.isZero { return [Double.infinity] }
   return [fitness, LCOM, costs.Total_CAPEX, costs.Total_OPEX, meth_produced_MTPH_sum, elec_from_grid_sum, elec_to_grid_MTPH_sum, hours_sum] + model.values

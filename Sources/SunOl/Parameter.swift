@@ -5,11 +5,11 @@ public struct Parameter {
   public var ranges: [ClosedRange<Double>]
 
   public init(
-    CSP_loop_nr: ClosedRange<Double> = 0...300.0,
-    TES_thermal_cap: ClosedRange<Double> = 0...10000.0,
+    CSP_loop_nr: ClosedRange<Double> = 0...200.0,
+    TES_thermal_cap: ClosedRange<Double> = 0...8000.0,
     PB_nom_gross_cap: ClosedRange<Double> =  0...250.0,
-    PV_AC_cap: ClosedRange<Double> = 200...1500.0,
-    PV_DC_cap: ClosedRange<Double> = 220...1600.0,
+    PV_AC_cap: ClosedRange<Double> = 300...800.0,
+    PV_DC_cap: ClosedRange<Double> = 500...1000.0,
     CCU_CO2_nom_prod: ClosedRange<Double> = 1000...1000.0,
     CO2_storage_cap: ClosedRange<Double> = 10000...10000.0,
     El_boiler_cap: ClosedRange<Double> = 0...200.0,

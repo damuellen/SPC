@@ -86,7 +86,8 @@ public struct Costs {
     let PV_O_M_Cost = (18.01 * 1000 + model.PV_DC_cap_ud * -0.008375 * 1000) * model.PV_DC_cap_ud
     let PB_O_M_Cost = model.PB_nom_gross_cap_ud > 0 ?  (11.3333 / 3.0 * 2.0 / 3.0 * 1000.0 * 1000.0) + (0.00606061 / 3 * 2.0 / 3.0 * 1000.0 * 1000.0) * model.PB_nom_gross_cap_ud: Double.zero
     let OM_Cost_EY_Methsynt = (MethDist_plant_cost + Electrolysis_cost) * 0.035
-    self.CO2_Cost = 40.0 / model.MethDist_Ref_meth_hour_prod * model.MethSynt_Ref_rawmeth_hour_prod / model.MethSynt_Ref_rawmeth_hour_prod * model.MethSynt_Ref_CO2_hour_cons
+    self.CO2_Cost = 200.0 / model.MethDist_Ref_meth_hour_prod * model.MethSynt_Ref_rawmeth_hour_prod / model.MethSynt_Ref_rawmeth_hour_prod * model.MethSynt_Ref_CO2_hour_cons
+    let BESS_OM_Cost = model.BESS_cap_ud > 0 ? model.BESS_cap_ud * 501579.333846229 / 25 : 0
     // let CAPEX_ICPH_assembly_hall_csp_sf_dedicated_to_ICPH_PC_DC_PV_AC_Heaters_TES_PB_Substation =
     // Assembly_hall + CSP_SF_cost_dedicated_to_ICPH + PV_DC_Cost + PV_AC_Cost + Heater_Cost + TES_Storage_cost + PB_Cost + Substation_cost_ICPH
 
@@ -98,7 +99,7 @@ public struct Costs {
       Assembly_hall_cost + CSP_SF_cost_dedicated_to_Methanol + PV_DC_cost + PV_AC_cost + Heater_cost + TES_storage_cost + PB_cost + Electrolysis_cost + Hydrogen_storage_cost
       + CCU_plant_cost + CO2_storage_cost + MethSynt_plant_cost + RawMeth_storage_cost + MethDist_plant_cost + Battery_storage_cost + Electrical_boiler_cost + Substation_cost
 
-    self.Total_OPEX = CSP_O_M_Cost + PV_O_M_Cost + PB_O_M_Cost + OM_Cost_EY_Methsynt
+    self.Total_OPEX = CSP_O_M_Cost + PV_O_M_Cost + PB_O_M_Cost + OM_Cost_EY_Methsynt + BESS_OM_Cost
   }
   var Total_CAPEX: Double
   var Total_OPEX: Double
