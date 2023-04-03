@@ -12,8 +12,8 @@ jobs:
       - name: Setup Swift compiler
         uses: compnerd/gha-setup-swift@main
         with:
-          branch: swift-5.7.3-release
-          tag: 5.7.3-RELEASE
+          branch: swift-5.8-release
+          tag: 5.8-RELEASE
 
       - name: Checkout sources
         uses: actions/checkout@v3
