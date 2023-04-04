@@ -16,7 +16,7 @@ import Utilities
 
 public enum BlackBoxModel {
 
-  public private(set) static var simulatedYear = 2019
+  public private(set) static var simulatedYear = 2001
   /// The apparent solar position based on date, time, and location.
   public private(set) static var sun: SolarPosition?
   /// Solar radiation and meteorological elements for a 1-year period.
