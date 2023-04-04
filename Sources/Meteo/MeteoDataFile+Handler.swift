@@ -13,11 +13,14 @@ import Foundation
 import Helpers
 
 /// Handles the import of files with meteorological data.
-public struct MeteoDataFileHandler {
+public class MeteoDataFileHandler {
 
   let 💾 = FileManager.default
 
   public private(set) var url: URL
+
+  public var interpolation = true
+
   private let file: MeteoDataFile
 
   public init(forReadingAtPath path: String) throws {
@@ -47,14 +50,16 @@ public struct MeteoDataFileHandler {
     let data = try file.fetchData()
     var steps = data.count / 8760
     steps = valuesPerHour / steps
-    let half = steps / 2
-    steps -= 1
-    if steps > 1 {
+    if steps == 1 { return data }
+    if interpolation {
+      let half = steps / 2
+      steps -= 1
       let wrapped = [data.last!] + data + [data.first!]
       let interpolated = wrapped.interpolate(steps: steps)
       return interpolated.dropFirst(half).dropLast(half+1)
+    } else {
+      return data.reduce(into: []) { $0 += repeatElement($1, count: steps) }
     }
-    return data
   }
 }
 
