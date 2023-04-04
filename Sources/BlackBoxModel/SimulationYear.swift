@@ -47,8 +47,7 @@ extension Simulation.Period: TextConfigInitializable {
       let dateFormatter = DateFormatter()
       dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
       dateFormatter.dateFormat = "MM.dd yyyy"
-      return dateFormatter.date(from:
-        dateString + "\(BlackBoxModel.yearOfSimulation)"
+      return dateFormatter.date(from: dateString + "\(BlackBoxModel.simulatedYear)"
       )
     }
 

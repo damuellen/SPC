@@ -146,7 +146,7 @@ struct SolarPerformanceCalculator: ParsableCommand {
       BlackBoxModel.configure(location: location)
     }
 
-    Maintenance.setDefaultSchedule(for: BlackBoxModel.yearOfSimulation)
+    Maintenance.setDefaultSchedule(for: BlackBoxModel.simulatedYear)
 
     let mode: Historian.Mode
     if let steps = outputValues {
@@ -169,7 +169,7 @@ struct SolarPerformanceCalculator: ParsableCommand {
     )
 
     SolarPerformanceCalculator.result = BlackBoxModel.runModel(with: report)
-    // plot(interval: DateInterval(ofWeek: 17, in: BlackBoxModel.yearOfSimulation))
+    // plot(interval: DateInterval(ofWeek: 17, in: BlackBoxModel.simulatedYear))
     // report.clearResults()
   }
 
@@ -187,7 +187,7 @@ struct SolarPerformanceCalculator: ParsableCommand {
     let formatter = DateFormatter()
     formatter.dateFormat = "MM_dd"
     for i in 1...365 {
-      let interval = DateInterval(ofDay: i, in: BlackBoxModel.yearOfSimulation)
+      let interval = DateInterval(ofDay: i, in: BlackBoxModel.simulatedYear)
       let y1 = SolarPerformanceCalculator.result.massFlows(range: interval)
       let y2 = SolarPerformanceCalculator.result.power(range: interval)
       let plot = TimeSeriesPlot(y1: y1, y2: y2, range: interval, style: .impulses)

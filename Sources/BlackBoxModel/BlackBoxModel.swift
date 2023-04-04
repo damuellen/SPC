@@ -9,43 +9,41 @@
 //
 
 import DateExtensions
-import Utilities
 import Foundation
 import Meteo
 import SolarPosition
+import Utilities
 
 public enum BlackBoxModel {
 
-  public private(set) static var yearOfSimulation = 2019
+  public private(set) static var simulatedYear = 2019
   /// The apparent solar position based on date, time, and location.
   public private(set) static var sun: SolarPosition?
   /// Solar radiation and meteorological elements for a 1-year period.
   public private(set) static var meteoData: [MeteoData] = []
 
   public static func configure(year: Int) {
-    if yearOfSimulation != year, Simulation.time.dateInterval != nil {
-      Simulation.time.dateInterval!.start = Greenwich.date(
-        byAdding: .year, value: year - yearOfSimulation,
-        to: Simulation.time.dateInterval!.start)!
-      yearOfSimulation = year
+    simulatedYear = year
+    if let dateInterval = Simulation.time.dateInterval,
+      let newStart = Greenwich.date(
+        bySettingUnit: .year, value: year, of: dateInterval.start)
+    {
+      Simulation.time.dateInterval = DateInterval(
+        start: newStart, duration: dateInterval.duration)
     }
-    if let sun = BlackBoxModel.sun, yearOfSimulation != sun.year {
+    if let sun = BlackBoxModel.sun, simulatedYear != sun.year {
       BlackBoxModel.sun = SolarPosition(
         coords: sun.location.coordinates, tz: sun.location.timezone,
-        year: yearOfSimulation, frequence: Simulation.time.steps
-      )
+        year: simulatedYear, frequence: Simulation.time.steps)
     }
   }
 
   public static func configure(location: Location) {
-    if let sun = sun, sun.location == location {
-      return
-    }
+    if let sun = sun, sun.location == location { return }
     // Calculate sun angles for location
     sun = SolarPosition(
       coords: location.coordinates, tz: location.timezone,
-      year: yearOfSimulation, frequence: Simulation.time.steps
-    )
+      year: simulatedYear, frequence: Simulation.time.steps)
 
     if meteoData.isEmpty {
       meteoData = MeteoData.using(sun!, model: .special, clouds: false)
@@ -67,22 +65,17 @@ public enum BlackBoxModel {
 
     // Calculate sun angles for location
     sun = SolarPosition(
-      coords: metaData.location.coordinates,
-      tz: metaData.location.timezone,
-      year: metaData.year,
-      frequence: Simulation.time.steps
-    )
+      coords: metaData.location.coordinates, tz: metaData.location.timezone,
+      year: metaData.year, frequence: Simulation.time.steps)
   }
 
   public static func loadConfigurations(
     atPath path: String, format: ConfigFormat = .json
   ) throws {
     switch format {
-    case .json:
-      break//let urls = JSONConfig.fileSearch(atPath: path)
-      //try JSONConfig.loadConfiguration(urls.first!)
-    case .text:
-      try TextConfig.loadConfigurations(atPath: path)
+    case .json: break  //let urls = JSONConfig.fileSearch(atPath: path)
+    //try JSONConfig.loadConfiguration(urls.first!)
+    case .text: try TextConfig.loadConfigurations(atPath: path)
     }
   }
 
@@ -100,7 +93,6 @@ public enum BlackBoxModel {
 
     // Set initial values
     var status = Plant.initialState
-    
     // PV system setup
     let pv = PV()
 
@@ -109,21 +101,22 @@ public enum BlackBoxModel {
     for (meteo, date) in simulationPeriod(.hour) {
       DateTime.setCurrent(date: date)
       let dt = DateTime.current
-      let (temperature, wind) = 
-        (Temperature(celsius: Double(meteo.temperature)), Double(meteo.windSpeed))
+      let (temperature, wind) = (
+        Temperature(celsius: Double(meteo.temperature)),
+        Double(meteo.windSpeed)
+      )
       if let position = 🌞[date] {
         let panel = singleAxisTracker(
-          apparentZenith: position.zenith,
-          apparentAzimuth: position.azimuth,
-          maxAngle: 55, GCR: 0.444
-        )
-        conditions.append((temperature, wind,
-          Insolation.effective(
-            ghi: Double(meteo.dni), dhi: Double(meteo.dni),
-            surfTilt: panel.surfTilt, incidence: panel.AOI,
-            zenith: position.zenith, doy: dt.yearDay)
-          )
-        )
+          apparentZenith: position.zenith, apparentAzimuth: position.azimuth,
+          maxAngle: 55, GCR: 0.444)
+        conditions.append(
+          (
+            temperature, wind,
+            Insolation.effective(
+              ghi: Double(meteo.dni), dhi: Double(meteo.dni),
+              surfTilt: panel.surfTilt, incidence: panel.AOI,
+              zenith: position.zenith, doy: dt.yearDay)
+          ))
       } else {
         conditions.append((temperature, wind, .zero))
       }
@@ -133,12 +126,10 @@ public enum BlackBoxModel {
     }
     // Repeat the values to fill the hour
     var iter = photovoltaic.repeated(times: Simulation.time.steps.rawValue).makeIterator()
-    
     for (meteo, date) in simulationPeriod() {
       // Set the date for the calculation step
       DateTime.setCurrent(date: date)
       let dt = DateTime.current
-      
       /// Hourly PV result
       plant.electricity.photovoltaic = iter.next()!
 
@@ -152,7 +143,7 @@ public enum BlackBoxModel {
 
       if let position = 🌞[date] {
         // Only when the sun is above the horizon.
-        status.collector.tracking(sun: position) // cosTheta
+        status.collector.tracking(sun: position)  // cosTheta
         status.collector.efficiency(ws: meteo.windSpeed)
         status.collector.irradiation(dni: meteo.dni)
       } else {
@@ -178,8 +169,7 @@ public enum BlackBoxModel {
         // Calculate the heat losses in the cold header
         status.solarField.temperature.inlet = status.solarField.heatLosses(
           header: status.solarField.header.temperature.inlet,
-          ambient: temperature
-        )
+          ambient: temperature)
       }
 
       if Design.hasStorage {
@@ -191,8 +181,7 @@ public enum BlackBoxModel {
 
       // Calculate outlet temperature and mass flow
       status.solarField.calculate(
-        collector: status.collector, ambient: temperature
-      )
+        collector: status.collector, ambient: temperature)
 
       // Determine the current efficiency of the solar field
       status.solarField.eta(collector: status.collector)
@@ -200,8 +189,7 @@ public enum BlackBoxModel {
       // Calculate the heat losses in the hot header
       status.solarField.temperature.outlet = status.solarField.heatLosses(
         header: status.solarField.header.temperature.outlet,
-        ambient: temperature
-      )
+        ambient: temperature)
       // Calculate power consumption of the pumps
       plant.electricalParasitics.solarField = status.solarField.parasitics()
 
@@ -212,9 +200,8 @@ public enum BlackBoxModel {
         // Calculate the operating state of the salt
         status.storage.calculate(
           output: &plant.heatFlow.storage,
-          input: plant.heatFlow.toStorage,          
-          powerBlock: status.powerBlock
-        )
+          input: plant.heatFlow.toStorage,
+          powerBlock: status.powerBlock)
         // Calculate the heat loss of the tanks
         status.storage.heatlosses(for: Simulation.time.steps.interval)
       }
@@ -222,10 +209,10 @@ public enum BlackBoxModel {
       plant.electricity.consumption()
 
       let performance = plant.performance
-#if PRINT      
+      #if PRINT
       print(decorated(dt.description), meteo, status, performance)
       ClearScreen()
-#endif
+      #endif
       recorder(dt, meteo: meteo, status: status, energy: performance)
     }
 
@@ -234,19 +221,18 @@ public enum BlackBoxModel {
 
   private static func simulationPeriod(
     _ valuesPerHour: DateSeries.Frequence? = nil
-  ) -> Zip2Sequence<ArraySlice<MeteoData>, DateSeries> 
-  {
+  ) -> Zip2Sequence<ArraySlice<MeteoData>, DateSeries> {
     let times: DateSeries
     var meteo: ArraySlice<MeteoData>
     let interval = Simulation.time.steps
-    if let dateInterval = Simulation.time.dateInterval
-    {
+    if let dateInterval = Simulation.time.dateInterval {
       let range = dateInterval.aligned(to: interval)
       times = DateSeries(range: range, interval: interval)
-      let values: [MeteoData] 
+      let values: [MeteoData]
       if let steps = valuesPerHour, interval.rawValue > steps.rawValue {
         values = stride(
-          from: meteoData.startIndex, to: meteoData.endIndex, by: interval.rawValue
+          from: meteoData.startIndex, to: meteoData.endIndex,
+          by: interval.rawValue
         ).map { meteoData[$0] }
       } else {
         values = meteoData
@@ -254,7 +240,7 @@ public enum BlackBoxModel {
       let indices = values.range(for: range)
       meteo = values[indices]
     } else {
-      times = DateSeries(year: yearOfSimulation, interval: interval)
+      times = DateSeries(year: simulatedYear, interval: interval)
       meteo = meteoData[...]
     }
     return zip(meteo, times)
