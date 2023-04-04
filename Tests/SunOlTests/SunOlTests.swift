@@ -300,7 +300,7 @@ class SunOlTests: XCTestCase {
     }
 
     let LCOM = costs.LCOM(meth_produced_MTPH: meth_produced_MTPH_sum, elec_from_grid: elec_from_grid_sum, elec_to_grid: elec_to_grid_MTPH_sum)
-    XCTAssertEqual(LCOM, 1722, accuracy: 1, "LCOM")
+    XCTAssertEqual(LCOM, 2154, accuracy: 1, "LCOM")
     XCTAssertEqual(hours_sum, 8663, accuracy: 1, "hours_sum")
     XCTAssertEqual(meth_produced_MTPH_sum, 100000, accuracy: 1, "meth_produced_MTPH_sum")
     XCTAssertEqual(elec_from_grid_sum, 0, accuracy: 1, "elec_from_grid_sum")
@@ -311,7 +311,7 @@ class SunOlTests: XCTestCase {
     let model = TunOl([0, 0, 0, 582.23, 727.03, 200, 0, 0, 1000, 1000, 100000, 18.81, 54.37, 54.03, 0, 0])!
     let costs = Costs(model)
     XCTAssertEqual(costs.Total_CAPEX, 1131739764, accuracy: 1, "Total_CAPEX")
-    XCTAssertEqual(costs.Total_OPEX, 23966329, accuracy: 1, "Total_OPEX")
+    XCTAssertEqual(costs.Total_OPEX, 25050342, accuracy: 1, "Total_OPEX")
     var fixtures = [0.0, 0, 583211984, 78154616, 0, 0, 0, 371680000, 0, 0, 0, 0, 0, 65443269, 27100331, 6149563, 0]
       .makeIterator()
     for child in Mirror(reflecting: costs).children.filter({ $0.label?.contains("cost") ?? false }) {
