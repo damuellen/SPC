@@ -26,7 +26,10 @@ public final class Historian {
   /// Specifies what the output is
   let mode: Mode
 
-  var range: DateInterval = Simulation.time.dateInterval!
+  var startDate: Date { 
+    Simulation.time.dateInterval?.start 
+    ?? Greenwich.date(from: .init(year: BlackBoxModel.simulatedYear))!
+  }
 
   public enum Mode {
     case database
@@ -93,7 +96,6 @@ public final class Historian {
     }
 
     var buffer = [UInt8]()
-
 
     if case .excel = outputMode {
       url = url.appendingPathComponent("\(name)\(suffix).xlsx")
@@ -189,30 +191,32 @@ public final class Historian {
     var hourlyRadiation = Insolation()
     if case .custom(let custom) = mode {
       let s = interval.rawValue / custom.rawValue
-      for (date, i) in zip(DateSeries(range: range, interval: custom),
-        stride(from: 0, to: performance.count, by: s)) {
+      var date = startDate
+      for i in stride(from: 0, to: performance.count, by: s) {
         hourlyPerformance.totalize(performance[i..<i+s], fraction: 1 / Double(s))
         hourlyRadiation = sun[i..<i+s].hourly(fraction: 1 / Double(s))
-        let date = DateTime(date)
-        buffer = [UInt8](date.commaSeparatedValues.utf8) 
-          + comma + [UInt8]("\(date.minute)".utf8)
+        let time = DateTime(date)
+        buffer = [UInt8](time.commaSeparatedValues.utf8) 
+          + comma + [UInt8]("\(time.minute)".utf8)
           + comma + [UInt8](hourlyRadiation.commaSeparatedValues.utf8)
           + comma + [UInt8](hourlyPerformance.commaSeparatedValues.utf8) 
           + lineBreak
+        date.addTimeInterval(interval.interval)
         _ = fileStream?.write(buffer, maxLength: buffer.count)
       }
     }
 
     if case .csv = mode {
       let s = interval.rawValue
-      for (date, i) in zip(DateSeries(range: range, interval: .hour),
-        stride(from: 0, to: performance.count, by: s)) {
+      var date = startDate
+      for i in stride(from: 0, to: performance.count, by: s) {
         hourlyPerformance.totalize(performance[i..<i+s], fraction: interval.fraction)
         hourlyRadiation = sun[i..<i+s].hourly(fraction: interval.fraction)
         buffer = [UInt8](DateTime(date).commaSeparatedValues.utf8) 
           + comma + [UInt8](hourlyRadiation.commaSeparatedValues.utf8)
           + comma + [UInt8](hourlyPerformance.commaSeparatedValues.utf8) 
           + lineBreak
+        date.addTimeInterval(interval.interval)
         _ = fileStream?.write(buffer, maxLength: buffer.count)
       }
     }
@@ -221,7 +225,7 @@ public final class Historian {
     if case .excel = mode { writeExcel() }
 
     return Recording(
-      startDate: range.start, performance: annualPerformance,
+      startDate: startDate, performance: annualPerformance,
       irradiance: annualRadiation, performanceHistory: performance,
       statusHistory: status)
   }
@@ -275,7 +279,7 @@ public final class Historian {
       .write(energyCaptions, row: 0)
 
     let interval = Simulation.time.steps.interval
-    var date = Simulation.time.dateInterval!.start
+    var date = startDate
 
     status.indices.forEach { i in
       ws1.write(.datetime(date), [i + 1, 0])
@@ -285,7 +289,7 @@ public final class Historian {
       date.addTimeInterval(interval)
     }
 
-    date = Simulation.time.dateInterval!.start
+    date = startDate
 
     performance.indices.forEach { i in
       ws2.write(.datetime(date), [i + 1, 0])
