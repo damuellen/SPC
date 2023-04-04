@@ -8,6 +8,11 @@ jobs:
     runs-on: [windows-2022]
 
     steps:
+      - name: vcpkg install libxlsxwriter
+        run: vcpkg install libxlsxwriter:x64-windows
+
+      - name: vcpkg install sqlite3
+        run: vcpkg install sqlite3:x64-windows
 
       - name: Setup Swift compiler
         uses: compnerd/gha-setup-swift@main
@@ -17,14 +22,6 @@ jobs:
 
       - name: Checkout sources
         uses: actions/checkout@v3
-
-      - name: vcpkg install libxlsxwriter
-        run: vcpkg install libxlsxwriter:x64-windows
-        continue-on-error: true
-
-      - name: vcpkg install sqlite3
-        run: vcpkg install sqlite3:x64-windows
-        continue-on-error: true
 
       - name: Build Release Mode
         run: swift build -c release -Xlinker /INCREMENTAL:NO -Xlinker /IGNORE:4217 -Xswiftc -gnone -Xswiftc -suppress-warnings -Xswiftc -continue-building-after-errors -Xswiftc -LC:/vcpkg/installed/x64-windows/lib/ -Xcc -IC:/vcpkg/installed/x64-windows/include/
