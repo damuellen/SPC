@@ -34,7 +34,7 @@ extension String {
 
 /// Generates the title with border
 public func decorated(_ title: String, width: Int = terminalWidth()) -> String {
-  let width = median(70, width, 100)
+  let width = median(80, width, 110)
   let half = (width - title.count - 8) / 2
   let line = String(repeating: "─", count: half)
   return line + "┤   " + title + "   ├" + line

@@ -11,6 +11,12 @@
 import DateExtensions
 import Units
 
+extension Heater: CustomStringConvertible {  
+  public var description: String {
+    "  Mode:".padding(30) + "\(operationMode)\n" + "\(self.cycle)"
+  }
+}
+
 /// This struct contains the state as well as the functions for mapping the heater
 public struct Heater: Parameterizable, HeatTransfer {
 

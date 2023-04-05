@@ -10,6 +10,12 @@
 
 import Utilities
 
+extension HeatExchanger: CustomStringConvertible {
+  public var description: String {
+    "\(self.cycle)"
+  }
+}
+
 /// This struct contains the state as well as the functions for mapping the heat exchanger
 public struct HeatExchanger: Parameterizable, HeatTransfer {
 

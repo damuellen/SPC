@@ -9,10 +9,10 @@
 //
 
 public struct ParameterSet: Codable {
-  var tariff = Simulation.tariff
   var simulation = Simulation.parameter
   var initialValues = Simulation.initialValues
   var time = Simulation.time
+  var tariff = Simulation.tariff
  // var availability = Availability.current
   var layout = Design.layout
   var solarField = SolarField.parameter
@@ -29,10 +29,10 @@ public struct ParameterSet: Codable {
   public init() {}
   
   func callAsFunction() {
-    Simulation.tariff = tariff
     Simulation.parameter = simulation
     Simulation.initialValues = initialValues
     Simulation.time = time
+    Simulation.tariff = tariff
   //  Availability.current = availability
     Design.layout = layout
     SolarField.parameter = solarField
@@ -45,5 +45,26 @@ public struct ParameterSet: Codable {
     GasTurbine.parameter = gasTurbine
     SteamTurbine.parameter = steamTurbine
     PowerBlock.parameter = powerBlock
+  }
+}
+
+extension ParameterSet: CustomStringConvertible {
+  public var description: String {
+	  """
+    \(simulation)
+    \(initialValues)
+    \(time)
+    \(tariff)
+    \(layout)
+    \(solarField)
+    \(collector)
+    \(heater)
+    \(heatExchanger)
+    \(boiler)
+    \(wasteHeatRecovery)
+    \(gasTurbine)
+    \(steamTurbine)
+    \(powerBlock)
+    """
   }
 }

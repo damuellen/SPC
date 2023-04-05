@@ -11,6 +11,10 @@
 import Meteo
 import Utilities
 
+extension PowerBlock: CustomStringConvertible {
+  public var description: String { cycle.description  }
+}
+
 /// This struct contains the state as well as the functions for mapping the power block
 public struct PowerBlock: Parameterizable, HeatTransfer {
 

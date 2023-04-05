@@ -11,6 +11,14 @@
 import DateExtensions
 import Units
 
+extension GasTurbine: CustomStringConvertible {
+  public var description: String {
+    "\(operationMode),\n"
+      + "Maintenance: \(isMaintained ? "Yes" : "No"), "
+      + "Load: \(load)"
+  }
+}
+
 /// This struct contains the state as well as the functions for mapping the gas turbine
 public struct GasTurbine: Parameterizable {
 

@@ -11,6 +11,25 @@
 import DateExtensions
 import Meteo
 import Utilities
+
+extension SteamTurbine: CustomStringConvertible {
+  public var description: String {
+    "  Mode:".padding(20) + "\(operationMode)".padding(30) + "\(efficiency)"
+  }
+}
+
+extension SteamTurbine.OperationMode: CustomStringConvertible {
+  public var description: String {
+    switch self {
+      case .noOperation(let minutes): return "No Operation \(minutes)min "
+      case .operating(let load): return "Operation \(load.singleBar)"
+      case .startUp(let minutes, energy: let energy):
+       return "Start up \(minutes)min energy: \(energy)"
+      case .scheduledMaintenance: return "Scheduled Maintenance"
+    }
+  }
+}
+
 /// This struct contains the state as well as the functions for mapping the steam turbine
 public struct SteamTurbine: Parameterizable {
   
