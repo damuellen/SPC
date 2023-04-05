@@ -96,42 +96,36 @@ public enum BlackBoxModel {
     // PV system setup
     let pv = PV()
 
-    var conditions = [(Temperature, Double, Double)]()
+    var inputs = [(solar: Double, ambient: Temperature, windSpeed: Double)]()
 
     for (meteo, date) in simulationPeriod(.hour) {
-      DateTime.setCurrent(date: date)
-      let dt = DateTime.current
-      let (temperature, wind) = (
-        Temperature(celsius: Double(meteo.temperature)),
-        Double(meteo.windSpeed)
-      )
+      let solar: Double
       if let position = 🌞[date] {
         let panel = singleAxisTracker(
-          apparentZenith: position.zenith, apparentAzimuth: position.azimuth,
+          apparentZenith: position.zenith, 
+          apparentAzimuth: position.azimuth,
           maxAngle: 55, GCR: 0.444)
-        conditions.append(
-          (
-            temperature, wind,
-            Insolation.effective(
-              ghi: Double(meteo.dni), dhi: Double(meteo.dni),
-              surfTilt: panel.surfTilt, incidence: panel.AOI,
-              zenith: position.zenith, doy: dt.yearDay)
-          ))
+        solar = Insolation(meteo: meteo).effective(
+          surfTilt: panel.surfTilt, incidence: panel.AOI,
+          zenith: position.zenith, doy: DateTime(date).yearDay)
       } else {
-        conditions.append((temperature, wind, .zero))
+        solar = .zero
       }
+      inputs.append(
+        (solar, Temperature(celsius: meteo.temperature), meteo.windSpeed)
+      )
     }
-    let photovoltaic = conditions.concurrentMap { t, ws, gti -> Double in
-      pv(radiation: gti, ambient: t, windSpeed: ws) / 10.0e6
+    let count = Simulation.time.steps.rawValue
+    var photovoltaic = inputs.reversed().reduce(into: []) { result, point in
+      result += repeatElement(pv(point) / 10.0e6, count: count)
     }
-    // Repeat the values to fill the hour
-    var iter = photovoltaic.repeated(times: Simulation.time.steps.rawValue).makeIterator()
+    
     for (meteo, date) in simulationPeriod() {
       // Set the date for the calculation step
       DateTime.setCurrent(date: date)
       let dt = DateTime.current
       /// Hourly PV result
-      plant.electricity.photovoltaic = iter.next()!
+      plant.electricity.photovoltaic = photovoltaic.removeLast()
 
       if Maintenance.checkSchedule(date) {
         // No operation is simulated
@@ -227,14 +221,15 @@ public enum BlackBoxModel {
     let interval = Simulation.time.steps
     if let dateInterval = Simulation.time.dateInterval {
       let range = dateInterval.aligned(to: interval)
-      times = DateSeries(range: range, interval: interval)
       let values: [MeteoData]
       if let steps = valuesPerHour, interval.rawValue > steps.rawValue {
+        times = DateSeries(range: range, interval: steps)
         values = stride(
           from: meteoData.startIndex, to: meteoData.endIndex,
           by: interval.rawValue
         ).map { meteoData[$0] }
       } else {
+        times = DateSeries(range: range, interval: interval)
         values = meteoData
       }
       let indices = values.range(for: range)

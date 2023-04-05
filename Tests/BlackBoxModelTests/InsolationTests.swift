@@ -14,10 +14,11 @@ class InsolationTests: XCTestCase {
     let expected =  [0, 0, 487.1496, 88.6937]
 
     let tol = 0.1
+    var insolation = Insolation()
     for i in expected.indices {
-      let dni = Insolation.beam(
-        global: GHI[i], diffuse: DHI[i], incidence: AOI[i], zenith: zenith[i]
-      )
+      insolation.global = GHI[i]
+      insolation.diffuse = DHI[i]
+      let dni = insolation.beam(incidence: AOI[i], zenith: zenith[i])
       XCTAssertEqual(dni, expected[i], accuracy: tol)
     }
   }
@@ -33,11 +34,13 @@ class InsolationTests: XCTestCase {
 
     let expected = [241.1, 0, 0, 128.2817, 51.3891, 128.4142, 118.4124]
     let tol = 0.1
+    var insolation = Insolation()
     for i in expected.indices {
-      let irradiance = Insolation.perez(
-        surfaceTilt: tilt[i], incidence: AOI[i], diffuse: DHI[i], direct: DNI[i],
-        hExtra: hExtra[i], sunZenith: zenith[i], AM: AM[i]
-      )
+      insolation.direct = DNI[i]
+      insolation.diffuse = DHI[i]
+      let irradiance = insolation.perez(
+        surfaceTilt: tilt[i], incidence: AOI[i], hExtra: hExtra[i],
+        sunZenith: zenith[i], AM: AM[i])
       XCTAssertEqual(irradiance, expected[i], accuracy: tol)
     }
   }

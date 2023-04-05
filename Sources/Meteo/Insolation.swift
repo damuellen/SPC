@@ -114,32 +114,25 @@ public enum Albedo: Double {
 }
 
 extension Insolation {
-  public static func effective(
-    ghi: Double, dhi: Double, surfTilt: Double, incidence: Double,
-    zenith: Double, doy: Int
+  public func effective(
+    surfTilt: Double, incidence: Double, zenith: Double, doy: Int
   ) -> Double {
-    if incidence >= 90 || incidence <= 0 { if ghi < 10.0 { return 0 } }
-    let beam: Double
-    let dni: Double
-    if zenith > 89 {
-      beam = 0
-      dni = 0
-    } else {
-      beam = Insolation.beam(global: ghi, diffuse: dhi, incidence: incidence, zenith: zenith)
-      dni = Insolation.normal(global: ghi, diffuse: dhi, zenith: zenith)
+    var radiation = self
+    if incidence >= 90 || incidence <= 0 { if global < 10.0 { return 0 } }
+    if zenith < 90 {
+      radiation.direct = normal(zenith: zenith)
     }
 
-    let hExtra = Insolation.extra(doy: doy)
+    let hExtra = extra(doy: doy)
 
-    let AM = Atmosphere.relativeAirMass(
-      zenith: zenith, model: .kastenyoung1989)
+    let AM = Atmosphere.relativeAirMass(zenith: zenith, model: .kastenyoung1989)
 
-    let diffuse = Insolation.perez(
-      surfaceTilt: surfTilt, incidence: incidence, diffuse: dhi, direct: dni,
+    radiation.diffuse = radiation.perez(
+      surfaceTilt: surfTilt, incidence: incidence,
       hExtra: hExtra, sunZenith: zenith, AM: AM)
 
-    //var albedoInc = groundDiffuse(angles.SurfTilt, GHI, context.Albedo)
-    return beam + diffuse
+    //var albedoInc = groundDiffuse(angles.SurfTilt, context.Albedo)
+    return radiation.beam(incidence: incidence, zenith: zenith) + radiation.diffuse
   }
 
   /// Determine diffuse irradiance from the sky on a tilted surface using the Perez model
@@ -150,9 +143,7 @@ extension Insolation {
   /// - Parameter hExtra: Extraterrestial normal irradiance
   /// - Parameter sunZenith: Sun zenith angle in degrees
   /// - Parameter AM: Relative airmass
-  static func perez(
-    surfaceTilt: Angle, incidence: Angle, diffuse: Double, direct: Double,
-    hExtra: Double, sunZenith: Angle, AM: Double
+  func perez(surfaceTilt: Angle, incidence: Angle, hExtra: Double, sunZenith: Angle, AM: Double
   ) -> Double {
     let k = 5.535e-6
     let e = diffuse > .zero
@@ -176,13 +167,13 @@ extension Insolation {
         * sin(surfaceTilt.toRadians))
   }
 
-  static func beam(global: Double, diffuse: Double, incidence: Double, zenith: Double) -> Double {
+  func beam(incidence: Double, zenith: Double) -> Double {
     if incidence > 89 { return 0.0 }
     let beam = global - diffuse
     return beam * cos(incidence * .pi / 180) / cos(zenith * .pi / 180)
   }
 
-  static func normal(global: Double, diffuse: Double, zenith: Double) -> Double {
+  func normal(zenith: Double) -> Double {
     let beam = global - diffuse
     return beam / cos(zenith * .pi / 180)
   }
@@ -190,7 +181,7 @@ extension Insolation {
   /// Extraterrestrial radiation from day of year
   /// - Parameter date: Date whose extraterrestial radiation will be calculated
   /// - Returns: Extraterrestial radiation
-  static func extra(doy: Int) -> Double {
+  func extra(doy: Int) -> Double {
     let B = 2.0 * .pi * Double(doy) / 365.0
     let roverR0sqrd = 1.00011
       + 0.034221 * cos(B)
@@ -201,7 +192,7 @@ extension Insolation {
     return 1367.0 * roverR0sqrd
   }
 
-  static func groundDiffuse(surfTilt: Double, GHI: Double, albedo: Double) -> Double {
-    GHI * albedo * (1 - cos(surfTilt.toRadians)) * 0.5
+  func groundDiffuse(surfTilt: Double, albedo: Double) -> Double {
+    global * albedo * (1 - cos(surfTilt.toRadians)) * 0.5
   }
 }

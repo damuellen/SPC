@@ -19,39 +19,31 @@ public struct PV {
   public var inverter = Inverter()
   public var transformer = Transformer()
 
-  /// Net output of the pv system.
-  ///
-  /// - Parameter radiation: Effective solar irradiation
-  /// - Parameter ambient: Temperature of the environment
-  /// - Parameter windSpeed: Apparent speed of wind
+  /// Calculate net output of the pv system.
   func callAsFunction(
-    radiation effective: Double, ambient: Temperature, windSpeed: Double
+    _ input: (solar: Double, ambient: Temperature, windSpeed: Double)
   ) -> Double {
-    guard effective > 15 else { return transformer(ac: .zero) }
-    var dc = array.mpp(radiation: effective, ambient: ambient, windSpeed: 0.0)
-    if dc.power > 0 {
+    guard input.solar > 15 else { return transformer(ac: .zero) }
+    var dc = array.mpp(
+      radiation: input.solar, ambient: input.ambient, windSpeed: input.windSpeed)
+    if dc.power > inverter.dc_power[0] {
       var efficiency = inverter(power: dc.power, voltage: dc.voltage)
       if efficiency.isNaN {
         let cell_T = array.panel.temperature(
-          radiation: effective, ambient: ambient, windSpeed: windSpeed)
-        dc = PowerPoint(
-          current: dc.current, 
-          voltage: min(dc.voltage, inverter.voltageLevels[0] - 1e-6)
-        )
-        let shift = Double(array.panelsPerString) * 1e-6
-        var iterations = 0
-        while efficiency.isNaN && iterations < 50000 {
-          iterations += 1
-          //print(dc)
-          dc = array(voltage: dc.voltage + shift, radiation: effective, cell: cell_T)
-
-          efficiency = inverter(power: dc.power, voltage: dc.voltage)
+          radiation: input.solar, ambient: input.ambient,
+          windSpeed: input.windSpeed)
+        var count = 0
+        while efficiency.isNaN {
+          count += 1
+          dc = array(
+            voltage: dc.voltage.clamped(to: inverter.voltageRange) - 1E-6,
+            radiation: input.solar, cell: cell_T)
+          efficiency = inverter(
+            power: min(inverter.maxPower, dc.power), voltage: dc.voltage)
         }
-        if efficiency.isNaN { efficiency = 0 }
       }
 
-      let ratio = Ratio(percent: efficiency)
-      let power = min(dc.power * ratio.quotient, inverter.maxPower)
+      let power = min(inverter.maxPower, dc.power) * (efficiency / 100)
       return transformer(ac: power)
     } else {
       return transformer(ac: .zero)
