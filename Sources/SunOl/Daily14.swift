@@ -177,7 +177,7 @@ extension TunOl {
     for i in 0..<365 { d14[LV + i] = iff(d14[KG + i].isZero, d14[FU + i], d14[FU + i] + (d14[HQ + i] - d14[FU + i]) * d14[AMKG + i]) }
     /// heat cons for harm op outside of harm op period
     // LY=IF(LU6>=LS6,0,MIN((LS6-LU6)/BESS_chrg_eff,IF(KG6=0,GA6,GA6+(HW6-GA6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc))))
-    for i in 0..<365 { d14[LY + i] = iff(d14[LU + i] >= d14[LS + i], Double.zero, min((d14[LS + i] - d14[LU + i]) / BESS_chrg_eff, iff(d14[KG + i].isZero, d14[GA + i], d14[GA + i] + (d14[HW + i] - d14[GA + i]) * d14[AMKG + i]))) }
+    for i in 0..<365 { d14[LY + i] = iff(d14[LU + i] >= d14[LS + i], Double.zero, min(BESS_cap_ud / BESS_chrg_eff, (d14[LS + i] - d14[LU + i]) / BESS_chrg_eff, iff(d14[KG + i].isZero, d14[GA + i], d14[GA + i] + (d14[HW + i] - d14[GA + i]) * d14[AMKG + i]))) }
     /// Grid import needed outside of harm op period
     // LW=MIN(IF(KG6=0,GG6,GG6+(IC6-GG6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc)),MAX(0,LS6-LT6-LU6-LY6*BESS_chrg_eff))
     for i in 0..<365 { d14[LW + i] = min(iff(d14[KG + i].isZero, d14[GG + i], d14[GG + i] + (d14[IC + i] - d14[GG + i]) * d14[AMKG + i]), max(Double.zero, d14[LS + i] - d14[LT + i] - d14[LU + i] - d14[LY + i] * BESS_chrg_eff)) }
@@ -394,7 +394,7 @@ extension TunOl {
     for i in 0..<365 { d14[NE + i] = iff(d14[KI + i].isZero, d14[FU + i], d14[FU + i] + (d14[HQ + i] - d14[FU + i]) * d14[AMKI + i]) }
     // /// heat cons for harm op outside of harm op period
     // NH=IF(ND6>=NB6,0,MIN((NB6-ND6)/BESS_chrg_eff,IF(KI6=0,GA6,GA6+(HW6-GA6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))))
-    for i in 0..<365 { d14[NH + i] = iff(d14[ND + i] >= d14[NB + i], Double.zero, min((d14[NB + i] - d14[ND + i]) / BESS_chrg_eff, iff(d14[KI + i].isZero, d14[GA + i], d14[GA + i] + (d14[HW + i] - d14[GA + i]) * d14[AMKI + i]))) }
+    for i in 0..<365 { d14[NH + i] = iff(d14[ND + i] >= d14[NB + i], Double.zero, min(BESS_cap_ud / BESS_chrg_eff, (d14[NB + i] - d14[ND + i]) / BESS_chrg_eff, iff(d14[KI + i].isZero, d14[GA + i], d14[GA + i] + (d14[HW + i] - d14[GA + i]) * d14[AMKI + i]))) }
     /// Grid import needed outside of harm op period
     // NF=MIN(IF(KI6=0,GG6,GG6+(IC6-GG6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)),MAX(0,NB6-NC6-ND6-NH6*BESS_chrg_eff))
     for i in 0..<365 { d14[NF + i] = min(iff(d14[KI + i].isZero, d14[GG + i], d14[GG + i] + (d14[IC + i] - d14[GG + i]) * d14[AMKI + i]), max(Double.zero, d14[NB + i] - d14[NC + i] - d14[ND + i] - d14[NH + i] * BESS_chrg_eff)) }

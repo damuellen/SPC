@@ -6,11 +6,11 @@ public struct Costs {
   static let Plant_life: Double = 25.0
   static let Rate_of_return: Double = 0.03 * 0.7 + 0.13 * 0.3
   static let FCR: Double = Rate_of_return * (1 + Rate_of_return) ** Plant_life / ((1 + Rate_of_return) ** Plant_life - 1)
-  static let Elec_buy: Double = 2 * 0.098
-  static let Elec_sell: Double = 0.33 * 0.098
+  static let Elec_buy: Double = 0.19 / 1.08696
+  static let Elec_sell: Double = 0.19 / 2 * 0.33 / 1.08696
 
   public init(_ model: TunOl) {
-    let FX_USD = 1 / 0.92 // 0.82
+    let FX_USD = 1.08696 // 0.82
     let Hydrogen_density = 5.783
     //  let CO2_density = 945.0
     //  let RawMeth_density = 782.0
@@ -87,7 +87,7 @@ public struct Costs {
     let PB_O_M_Cost = model.PB_nom_gross_cap_ud > 0 ?  (11.3333 / 3.0 * 2.0 / 3.0 * 1000.0 * 1000.0) + (0.00606061 / 3 * 2.0 / 3.0 * 1000.0 * 1000.0) * model.PB_nom_gross_cap_ud: Double.zero
     let OM_Cost_EY_Methsynt = (MethDist_plant_cost + Electrolysis_cost) * 0.035
     self.CO2_Cost = 200.0 / model.MethDist_Ref_meth_hour_prod * model.MethSynt_Ref_rawmeth_hour_prod / model.MethSynt_Ref_rawmeth_hour_prod * model.MethSynt_Ref_CO2_hour_cons
-    let BESS_OM_Cost = model.BESS_cap_ud > 0 ? model.BESS_cap_ud * 501579.333846229 / 25 : 0
+    let BESS_OM_Cost = model.BESS_cap_ud > 0 ? model.BESS_cap_ud * Battery_energy_storage.coeff * (Costs.Plant_life / 10.0).rounded(.down) / Costs.Plant_life : 0
     // let CAPEX_ICPH_assembly_hall_csp_sf_dedicated_to_ICPH_PC_DC_PV_AC_Heaters_TES_PB_Substation =
     // Assembly_hall + CSP_SF_cost_dedicated_to_ICPH + PV_DC_Cost + PV_AC_Cost + Heater_Cost + TES_Storage_cost + PB_Cost + Substation_cost_ICPH
 

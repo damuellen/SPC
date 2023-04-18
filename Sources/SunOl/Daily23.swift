@@ -1231,7 +1231,7 @@ extension TunOl {
     let IT = 33580
     // IT=MIN(MAX(0,IS3+IR3+IN3-IU3)/BESS_chrg_eff,IF(HC3>0,$EM3,IF(GH3=0,$EO3,$EN3+($EO3-$EN3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GH3-Overall_harmonious_min_perc))))
     for i in 0..<365 {
-      d23[IT + i] = min(
+      d23[IT + i] = min(BESS_cap_ud / BESS_chrg_eff,
         max(0, d23[IS + i] + d23[IR + i] + d23[IN + i] - d23[IU + i]) / BESS_chrg_eff,
         iff(
           d23[HC + i] > 0.0, d22[EM + i],
@@ -1511,7 +1511,7 @@ extension TunOl {
     let JV = 43435
     // JV=MIN(MAX(0,JU3+JT3+JP3-JW3)/BESS_chrg_eff,IF(HE3>0,$EM3,IF(HZ3=0,$EO3,$EN3+($EO3-$EN3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(HZ3-Overall_harmonious_min_perc))))
     for i in 0..<365 {
-      d23[JV + i] = min(
+      d23[JV + i] = min(BESS_cap_ud / BESS_chrg_eff,
         max(0, d23[JU + i] + d23[JT + i] + d23[JP + i] - d23[JW + i]) / BESS_chrg_eff,
         iff(
           d23[HE + i] > 0.0, d22[EM + i],
