@@ -23,7 +23,7 @@ extension TunOl {
       83220, 83585, 83950, 84315, 84680, 85045, 85410, 85775, 86140, 86505, 86870, 87235, 87600, 87965, 88330, 88695, 89060, 89425, 89790, 90155, 90520, 90885, 91250, 91615, 91980, 92345, 92710, 93075, 93440, 93805, 94170, 94535, 94900, 95265,
       95630
     )
-
+    let G: Int = 1460
     /// el cons for harm op during harm op period
     // LB=IF(FC3=0,0,IF(OR(JP3=0,KG3=0),MAX(0,FD3-MIN(BESS_cap_ud/BESS_chrg_eff,MAX(0,($G3+FK3)/BESS_chrg_eff-FZ3-GA3))),FC3+(GY3-FC3)/($AM3-A_equiv_harmonious_min_perc)*(KG3-A_equiv_harmonious_min_perc)+((FD3+(GZ3-FD3)/($AM3-A_equiv_harmonious_min_perc)*(KG3-A_equiv_harmonious_min_perc))-(FC3+(GY3-FC3)/($AM3-A_equiv_harmonious_min_perc)*(KG3-A_equiv_harmonious_min_perc)))/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP3-Overall_harmonious_min_perc)))
     for i in 0..<365 {
@@ -31,13 +31,13 @@ extension TunOl {
         d14[FC + i] == Double.zero, 0,
         iff(
           or(d14[JP + i] == Double.zero, d14[KG + i] == Double.zero),
-          max(0, d14[FD + i] - min(BESS_cap_ud / BESS_chrg_eff, max(0, d14[FK + i] / BESS_chrg_eff - d14[FZ + i] - d14[GA + i]))),
+          max(0, d14[FD + i] - min(BESS_cap_ud / BESS_chrg_eff, max(0, (d14[G + i], d14[FK + i]) / BESS_chrg_eff - d14[FZ + i] - d14[GA + i]))),
           d14[FC + i] + (d14[GY + i] - d14[FC + i]) / (d14[AM + i] - equiv_harmonious_min_perc[j]) * (d14[KG + i] - equiv_harmonious_min_perc[j])
             + ((d14[FD + i] + (d14[GZ + i] - d14[FD + i]) / (d14[AM + i] - equiv_harmonious_min_perc[j]) * (d14[KG + i] - equiv_harmonious_min_perc[j]))
               - (d14[FC + i] + (d14[GY + i] - d14[FC + i]) / (d14[AM + i] - equiv_harmonious_min_perc[j]) * (d14[KG + i] - equiv_harmonious_min_perc[j])))
             / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (d14[JP + i] - Overall_harmonious_min_perc)))
     }
-    let G: Int = 1460
+    
     /// el cons for night prep during harm op period
     // LC=IF(KG6=0,0,$Z6+($AA6-$Z6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc))
     for i in 0..<365 { d14[LC + i] = iff(d14[KG + i].isZero, Double.zero, d14[Z + i] + (d14[AA + i] - d14[Z + i]) * d14[AMKG + i]) }

@@ -65,6 +65,8 @@ public struct TunOl {
   var RawMeth_max_cons = [Double](repeating: 0, count: 4)
   var RawMeth_min_cons = [Double](repeating: 0, count: 4)
 
+  let (EY_stby_allowed, Methsynt_stby_allowed, Methdist_stby_allowed, CCU_stby_allowed) = (0, 0, 0, 0)
+
   var daytime_cons_per_h_of_night_op = [Double](repeating: 0, count: 4)
   var daytime_heat_cons_per_h_of_night_op = [Double](repeating: 0, count: 4)
 
@@ -449,10 +451,23 @@ public struct TunOl {
       EY_harmonious_max_perc * EY_var_heat_nom_cons + MethDist_harmonious_max_perc * MethDist_var_heat_nom_cons - MethSynt_harmonious_max_perc * MethSynt_var_heat_nom_prod + CCU_harmonious_max_perc * CCU_var_heat_nom_cons
     self.MethDist_min_perc[0] = MethDist_cap_min_perc
     self.MethDist_max_perc[0] = 1
+    self.MethSynt_min_perc[0] = Methsynt_stby_allowed > 0 ? 0 : MethSynt_cap_min_perc
+    self.CCU_min_perc[0] = CCU_stby_allowed > 0 ? 0 : CCU_cap_min_perc
+    self.EY_min_perc[0] = EY_stby_allowed > 0 ? 0 : EY_cap_min_perc
+    self.MethSynt_max_perc[0] = Methsynt_stby_allowed > 0 ? 0 : MethSynt_cap_min_perc
+    self.CCU_max_perc[0] = CCU_stby_allowed > 0 ? 0 : CCU_cap_min_perc
+    self.EY_max_perc[0] = EY_stby_allowed > 0 ? 0 : EY_cap_min_perc
     self.MethDist_min_perc[1] = max(MethDist_cap_min_perc, MethSynt_RawMeth_min_prod / MethDist_RawMeth_nom_cons, Double.zero)
     self.MethSynt_min_perc[1] = max(MethSynt_cap_min_perc, MethDist_RawMeth_min_cons / MethSynt_RawMeth_nom_prod_ud, Double.zero)
     self.MethDist_max_perc[1] = min(1, MethSynt_RawMeth_nom_prod_ud / MethDist_RawMeth_nom_cons)
     self.MethSynt_max_perc[1] = min(1, MethDist_RawMeth_nom_cons / MethSynt_RawMeth_nom_prod_ud)
+    self.CCU_min_perc[1] = CCU_stby_allowed > 0 ? 0 : CCU_cap_min_perc
+    self.EY_min_perc[1] = EY_stby_allowed > 0 ? 0 : EY_cap_min_perc
+    self.CCU_max_perc[1] = CCU_stby_allowed > 0 ? 0 : CCU_cap_min_perc
+    self.EY_max_perc[1] = EY_stby_allowed > 0 ? 0 : EY_cap_min_perc
+    self.EY_min_perc[2] = EY_stby_allowed > 0 ? 0 : EY_cap_min_perc
+    self.EY_max_perc[2] = EY_stby_allowed > 0 ? 0 : EY_cap_min_perc
+
     self.MethDist_min_perc[2] = max(
       MethDist_cap_min_perc, MethSynt_RawMeth_min_prod / MethDist_RawMeth_nom_cons, MethSynt_cap_min_perc * MethSynt_RawMeth_nom_prod_ud / MethDist_RawMeth_nom_cons,
       max(MethSynt_cap_min_perc, CCU_CO2_min_prod / MethSynt_CO2_nom_cons) * MethSynt_RawMeth_nom_prod_ud / MethDist_RawMeth_nom_cons)
