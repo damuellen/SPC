@@ -80,12 +80,8 @@ extension TunOl {
 
     /// Min RawMeth cons during night
     let F: Int = 1095
-    /// Max RawMeth cons during night
-    let G: Int = 1460
     /// Min CO2 cons during night
     let H: Int = 1825
-    /// Max CO2 cons during night
-    let I: Int = 2190
     /// Min H2 cons during night
     let J: Int = 2555
     /// Max H2 cons during night
@@ -95,19 +91,13 @@ extension TunOl {
     for i in 0..<365 {
       if d10[R + i].isZero {
         d10[F + i] = Double.zero
-        d10[G + i] = Double.zero
         d10[H + i] = Double.zero
-        d10[I + i] = Double.zero
         d10[J + i] = Double.zero
         d10[K + i] = Double.zero
       } else {
         d10[F + i] = RawMeth_min_cons[j] * d10[C + i]
-        // A_RawMeth_max_cons*C6
-        // d10[G + i] = RawMeth_max_cons[j] * d10[C + i]
         // A_CO2_min_cons*C6
         d10[H + i] = CO2_min_cons[j] * d10[C + i]
-        // A_CO2_max_cons*C6
-        // d10[I + i] = CO2_max_cons[j] * d10[C + i]
         // A_Hydrogen_min_cons*C6
         d10[J + i] = Hydrogen_min_cons[j] * d10[C + i]
         // A_Hydrogen_max_cons*C6
@@ -138,7 +128,16 @@ extension TunOl {
     let V: Int = 6570
     // COUNTIFS(CalculationEZ5:EZ8763,"="A6,CalculationEH5:EH8763,">0")
     for i in 0..<365 { d10[V + i] = EH_EZcountNonZero[i] }
-
+    /// Max CO2 cons during night
+    let I: Int = 2190
+    /// Max RawMeth cons during night
+    let G: Int = 1460
+    for i in 0..<365 {
+      // G=(A_overall_var_min_cons+A_overall_fix_stby_cons)*$T3+A_overall_stup_cons
+      d10[G + i] = (overall_var_min_cons[j] + overall_fix_stby_cons[j]) * d10[T + i] + overall_stup_cons[j]
+      // I=(A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons)*$T3+A_overall_heat_stup_cons
+      d10[I + i] = (overall_var_heat_min_cons[j] + overall_heat_fix_stby_cons[j]) * d10[T + i] + overall_heat_stup_cons[j]
+    }
     /// Max RawMeth cons during night
     let W: Int = 6935
     /// Max CO2 cons during night

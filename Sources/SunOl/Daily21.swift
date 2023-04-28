@@ -100,13 +100,13 @@ extension TunOl {
         d1[M + i] = Double.zero
         d1[N + i] = Double.zero
       } else {
-        // (A_overall_var_min_cons+A_overall_fix_stby_cons)*B6+A_overall_stup_cons
+        // E=(A_overall_var_min_cons+A_overall_fix_stby_cons)*$B3+A_overall_stup_cons
         d1[E + i] = (overall_var_min_cons[j] + overall_fix_stby_cons[j]) * day0[B + i] + overall_stup_cons[j]
-        // (AE3*A_overall_var_max_cons+A_overall_fix_stby_cons)*$B3+A_overall_stup_cons
+        // F=(AE3*A_overall_var_max_cons+A_overall_fix_stby_cons)*$B3+A_overall_stup_cons
         d1[F + i] = (d1[AE + i] * overall_var_max_cons[j] + overall_fix_stby_cons[j]) * day0[B + i] + overall_stup_cons[j]
-        // (A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons)*B6+A_overall_heat_stup_cons
+        // G=(A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons)*$B6+A_overall_heat_stup_cons
         d1[G + i] = (overall_var_heat_min_cons[j] + overall_heat_fix_stby_cons[j]) * day0[B + i] + overall_heat_stup_cons[j]
-        // (AE3*A_overall_var_heat_max_cons+A_overall_heat_fix_stby_cons)*$B3+A_overall_heat_stup_cons
+        // H=(AE3*A_overall_var_heat_max_cons+A_overall_heat_fix_stby_cons)*$B3+A_overall_heat_stup_cons
         d1[H + i] = (d1[AE + i] * overall_var_heat_max_cons[j] + overall_heat_fix_stby_cons[j]) * day0[B + i] + overall_heat_stup_cons[j]
         // A_RawMeth_min_cons*B6
         d1[I + i] = RawMeth_min_cons[j] * day0[B + i]

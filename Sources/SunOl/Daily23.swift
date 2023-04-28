@@ -1062,13 +1062,13 @@ extension TunOl {
 
     /// el cons for BESS charging during harm op period
     let ID = 27740
-    // ID=IF(OR(GH3=0,HC3=0),MIN(BESS_cap_ud/BESS_chrg_eff,MAX(0,$EA3+$DU3-$EJ3+$DZ3/El_boiler_eff)/BESS_chrg_eff,MIN($DS3,MAX(0,$DS3+$EC3-IB3))),MIN($EK3+($EL3-$EK3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GH3-Overall_harmonious_min_perc),MAX(0,$EA3+$E3+($F3-$E3)/($AE3-A_equiv_harmonious_min_perc)*(HC3-A_equiv_harmonious_min_perc)+MIN($ER3,MAX(0,$G3+($H3-$G3)/($AE3-A_equiv_harmonious_min_perc)*(HC3-A_equiv_harmonious_min_perc)-$EG3)/El_boiler_eff)-$EJ3-$EM3*BESS_chrg_eff)/BESS_chrg_eff))
+    // ID=IF(OR(GH3=0,HC3=0),MIN(BESS_cap_ud/BESS_chrg_eff,MAX(0,$E3+$EA3+$DU3-$EJ3+($G3+$DZ3)/El_boiler_eff)/BESS_chrg_eff,MIN($DS3,MAX(0,$DS3+$EC3-IB3))),MIN($EK3+($EL3-$EK3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GH3-Overall_harmonious_min_perc),MAX(0,$EA3+$E3+($F3-$E3)/($AE3-A_equiv_harmonious_min_perc)*(HC3-A_equiv_harmonious_min_perc)+MIN($ER3,MAX(0,$G3+($H3-$G3)/($AE3-A_equiv_harmonious_min_perc)*(HC3-A_equiv_harmonious_min_perc)-$EG3)/El_boiler_eff)-$EJ3-$EM3*BESS_chrg_eff)/BESS_chrg_eff))
     for i in 0..<365 {
       d23[ID + i] = iff(
         or(d23[GH + i] == 0.0, d23[HC + i] == 0.0),
         min(
           BESS_cap_ud / BESS_chrg_eff,
-          max(0, d22[EA + i] + d22[DU + i] - d22[EJ + i] + d22[DZ + i] / El_boiler_eff) / BESS_chrg_eff,
+          max(0, d21[E + i] + d22[EA + i] + d22[DU + i] - d22[EJ + i] + (d21[G + i] + d22[DZ + i]) / El_boiler_eff) / BESS_chrg_eff,
           min(d22[DS + i], max(0, d22[DS + i] + d22[EC + i] - d23[IB + i]))),
         min(
           d22[EK + i]
@@ -1200,8 +1200,8 @@ extension TunOl {
 
     /// heat from el boiler outside of harm op period
     let IQ = 32485
-    // IQ=MIN($ER3*El_boiler_eff,MAX(0,IO3-IP3))
-    for i in 0..<365 { d23[IQ + i] = min(d22[ER + i] * El_boiler_eff, max(0, d23[IO + i] - d23[IP + i])) }
+    // IQ=MIN($ER3*El_boiler_eff,MAX(0,IO3+IF(HC3=0,$G3,0)-IP3))
+    for i in 0..<365 { d23[IQ + i] = min(d22[ER + i] * El_boiler_eff, max(0, d23[IO + i] + iff(d23[HC + i].isZero, d21[G + i], 0) - d23[IP + i])) }
 
     /// el cons by el boiler outside of harm op period
     let IR = 32850
@@ -1229,10 +1229,10 @@ extension TunOl {
 
     /// El to BESS charging outside harm op period
     let IT = 33580
-    // IT=MIN(MAX(0,IS3+IR3+IN3-IU3)/BESS_chrg_eff,IF(HC3>0,$EM3,IF(GH3=0,$EO3,$EN3+($EO3-$EN3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GH3-Overall_harmonious_min_perc))))
+    // IT=MIN(BESS_cap_ud/BESS_chrg_eff,MAX(0,IS3+IR3+IF(HC3=0,$E3,0)+IN3-IU3)/BESS_chrg_eff,IF(HC3>0,$EM3,IF(GH3=0,$EO3,$EN3+($EO3-$EN3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GH3-Overall_harmonious_min_perc))))
     for i in 0..<365 {
       d23[IT + i] = min(BESS_cap_ud / BESS_chrg_eff,
-        max(0, d23[IS + i] + d23[IR + i] + d23[IN + i] - d23[IU + i]) / BESS_chrg_eff,
+        max(0, d23[IS + i] + d23[IR + i] + iff(d23[HC + i].isZero,d21[E + i], 0) + d23[IN + i] - d23[IU + i]) / BESS_chrg_eff,
         iff(
           d23[HC + i] > 0.0, d22[EM + i],
           iff(
@@ -1243,24 +1243,24 @@ extension TunOl {
 
     /// max possible grid input outside of harm op period
     let IV = 34310
-    // IV=MIN($DO3+$EJ3,MAX(0,-IT3*BESS_chrg_eff-IU3+IN3+IR3+IS3))
+    // IV=MIN($DO3+$EJ3,MAX(0,-IT3*BESS_chrg_eff-IU3+IN3+IF(HC3=0,$E3,0)+IR3+IS3))
     for i in 0..<365 {
       d23[IV + i] = min(
         d22[DO + i] + d22[EJ + i],
-        max(0, -d23[IT + i] * BESS_chrg_eff - d23[IU + i] + d23[IN + i] + d23[IR + i] + d23[IS + i]))
+        max(0, -d23[IT + i] * BESS_chrg_eff - d23[IU + i] + d23[IN + i] + iff(d23[HC + i].isZero,d21[E + i], 0) + d23[IR + i] + d23[IS + i]))
     }
 
     /// Balance of electricity outside of harm op period
     let IW = 34675
-    // IW=IT3*BESS_chrg_eff+IU3+IV3-IN3-IR3-IS3
+    // IW=IT3*BESS_chrg_eff+IU3+IV3-IN3-IF(HC3=0,$E3,0)-IR3-IS3
     for i in 0..<365 {
-      d23[IW + i] = d23[IT + i] * BESS_chrg_eff + d23[IU + i] + d23[IV + i] - d23[IN + i] - d23[IR + i] - d23[IS + i]
+      d23[IW + i] = d23[IT + i] * BESS_chrg_eff + d23[IU + i] + d23[IV + i] - d23[IN + i] - iff(d23[HE + i].isZero, d21[E + i], 0) - d23[IR + i] - d23[IS + i]
     }
 
     /// Balance of heat outside of harm op period
     let IX = 35040
-    // IX=IP3+IQ3-IO3
-    for i in 0..<365 { d23[IX + i] = d23[IP + i] + d23[IQ + i] - d23[IO + i] }
+    // IX=IP3+IQ3-IF(HC3=0,$G3,0)-IO3
+    for i in 0..<365 { d23[IX + i] = d23[IP + i] + d23[IQ + i] - iff(d23[HC + i].isZero, d21[G + i], 0) - d23[IO + i] }
 
     /// Pure Methanol prod with min night prep and resp day op
     let IY = 35405
@@ -1342,13 +1342,13 @@ extension TunOl {
 
     /// el cons for BESS charging during harm op period
     let JF = 37595
-    // JF=IF(OR(HE3=0,HZ3=0),MIN(BESS_cap_ud/BESS_chrg_eff,MAX(0,$EA3+$DU3-$EJ3+$DZ3/El_boiler_eff)/BESS_chrg_eff,MIN($DS3,MAX(0,$DS3+$EC3-IB3))),MIN($EK3+($EL3-$EK3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(HZ3-Overall_harmonious_min_perc),MAX(0,$EA3+$E3+($F3-$E3)/($AE3-A_equiv_harmonious_min_perc)*(HE3-A_equiv_harmonious_min_perc)+MIN($ER3,MAX(0,$G3+($H3-$G3)/($AE3-A_equiv_harmonious_min_perc)*(HE3-A_equiv_harmonious_min_perc)-$EG3)/El_boiler_eff)-$EJ3-$EM3*BESS_chrg_eff)/BESS_chrg_eff))
+    // JF=IF(OR(HE3=0,HZ3=0),MIN(BESS_cap_ud/BESS_chrg_eff,MAX(0,$E3+$EA3+$DU3-$EJ3+($G3+$DZ3)/El_boiler_eff)/BESS_chrg_eff,MIN($DS3,MAX(0,$DS3+$EC3-IB3))),MIN($EK3+($EL3-$EK3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(HZ3-Overall_harmonious_min_perc),MAX(0,$EA3+$E3+($F3-$E3)/($AE3-A_equiv_harmonious_min_perc)*(HE3-A_equiv_harmonious_min_perc)+MIN($ER3,MAX(0,$G3+($H3-$G3)/($AE3-A_equiv_harmonious_min_perc)*(HE3-A_equiv_harmonious_min_perc)-$EG3)/El_boiler_eff)-$EJ3-$EM3*BESS_chrg_eff)/BESS_chrg_eff))
     for i in 0..<365 {
       d23[JF + i] = iff(
         or(d23[HE + i] == 0.0, d23[HZ + i] == 0.0),
         min(
           BESS_cap_ud / BESS_chrg_eff,
-          max(0, d22[EA + i] + d22[DU + i] - d22[EJ + i] + d22[DZ + i] / El_boiler_eff) / BESS_chrg_eff,
+          max(0, d21[E + i] + d22[EA + i] + d22[DU + i] - d22[EJ + i] + (d21[G + i] + d22[DZ + i]) / El_boiler_eff) / BESS_chrg_eff,
           min(d22[DS + i], max(0, d22[DS + i] + d22[EC + i] - d23[IB + i]))),
         min(
           d22[EK + i]
@@ -1480,8 +1480,8 @@ extension TunOl {
 
     /// heat from el boiler outside of harm op period
     let JS = 42340
-    // JS=MIN($ER3*El_boiler_eff,MAX(0,JQ3-JR3))
-    for i in 0..<365 { d23[JS + i] = min(d22[ER + i] * El_boiler_eff, max(0, d23[JQ + i] - d23[JR + i])) }
+    // JS=MIN($ER3*El_boiler_eff,MAX(0,JQ3+IF(HE3=0,$G3,0)-JR3))
+    for i in 0..<365 { d23[JS + i] = min(d22[ER + i] * El_boiler_eff, max(0, d23[JQ + i] + iff(d23[HE + i].isZero, d21[G + i], 0) - d23[JR + i])) }
 
     /// el cons by el boiler outside of harm op period
     let JT = 42705
@@ -1524,24 +1524,30 @@ extension TunOl {
 
     /// max possible grid input outside of harm op period
     let JX = 44165
-    // JX=MIN($DO3+$EJ3,MAX(0,-JV3*BESS_chrg_eff-JW3+JP3+JT3+JU3))
+    // JX=MIN(BESS_cap_ud/BESS_chrg_eff,MAX(0,JU3+JT3+JP3+IF(HE3=0,$E3,0)-JW3)/BESS_chrg_eff,IF(HE3>0,$EM3,IF(HZ3=0,$EO3,$EN3+($EO3-$EN3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(HZ3-Overall_harmonious_min_perc))))
     for i in 0..<365 {
       d23[JX + i] = min(
-        d22[DO + i] + d22[EJ + i],
-        max(0, -d23[JV + i] * BESS_chrg_eff - d23[JW + i] + d23[JP + i] + d23[JT + i] + d23[JU + i]))
+        BESS_cap_ud / BESS_chrg_eff,
+        max(0, d23[JU + i] + d23[JT + i] + d23[JP + i]
+            + iff(d23[HE + i].isZero, d21[E + i], 0) - d23[JW + i]) / BESS_chrg_eff,
+        iff(d23[HE + i] > 0, d23[EM + i],
+          iff(d23[HZ + i].isZero, d23[EO + i],
+            d23[EN + i] + (d23[EO + i] - d23[EN + i])
+              / (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
+              * (d23[HZ + i] - Overall_harmonious_min_perc))))
     }
 
     /// Balance of electricity outside of harm op period
     let JY = 44530
-    // JY=JV3*BESS_chrg_eff+JW3+JX3-JP3-JT3-JU3
+    // JY=JV3*BESS_chrg_eff+JW3+JX3-JP3-IF(HE3=0,$E3,0)-JT3-JU3
     for i in 0..<365 {
-      d23[JY + i] = d23[JV + i] * BESS_chrg_eff + d23[JW + i] + d23[JX + i] - d23[JP + i] - d23[JT + i] - d23[JU + i]
+      d23[JY + i] = d23[JV + i] * BESS_chrg_eff + d23[JW + i] + d23[JX + i] - d23[JP + i] - iff(d23[HE + i].isZero, d21[E + i], 0) - d23[JT + i] - d23[JU + i]
     }
 
     /// Balance of heat outside of harm op period
     let JZ = 44895
-    // JZ=JR3+JS3-JQ3
-    for i in 0..<365 { d23[JZ + i] = d23[JR + i] + d23[JS + i] - d23[JQ + i] }
+    // JZ=JR3+JS3-JQ3-IF(HE3=0,$G3,0)
+    for i in 0..<365 { d23[JZ + i] = d23[JR + i] + d23[JS + i] - d23[JQ + i] - iff(d23[HE + i].isZero,d21[G + i], 0) }
 
     /// Pure Methanol prod with min night prep and resp day op
     let KA = 45260
