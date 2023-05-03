@@ -369,7 +369,7 @@ extension TunOl {
     for i in 0..<365 { d14[NA + i] = iff(or(d14[FE + i].isZero, d14[KI + i].isZero), Double.zero, d14[FE + i] + (d14[HA + i] - d14[FE + i]) * d14[AMKI + i]) }
     /// el to cover aux cons outside of harm op period
     // NB=IF(KI3=0,$G3+FK3,FK3+(HG3-FK3)/($AM3-A_equiv_harmonious_min_perc)*(KI3-A_equiv_harmonious_min_perc))
-    for i in 0..<365 { d14[NB + i] = iff(d14[KI + i].isZero, d14[FK + i], d14[FK + i] + (d14[HG + i] - d14[FK + i]) * d14[AMKI + i]) }
+    for i in 0..<365 { d14[NB + i] = iff(d14[KI + i].isZero, d14[G + i] + d14[FK + i], d14[FK + i] + (d14[HG + i] - d14[FK + i]) * d14[AMKI + i]) }
     /// el from BESS discharging outside of harm op period
     // ND=MN6*BESS_chrg_eff
     for i in 0..<365 { d14[ND + i] = d14[MN + i] * BESS_chrg_eff }
@@ -392,7 +392,7 @@ extension TunOl {
     // NI=IF(KI3=0;$I3+FN3;FN3+(HJ3-FN3)/($AM3-A_equiv_harmonious_min_perc)*(KI3-A_equiv_harmonious_min_perc))
     for i in 0..<365 {
       d14[NI + i] = iff(
-        d14[KI + i] == Double.zero, d14[FN + i] + d14[FN + i],
+        d14[KI + i] == Double.zero, d14[I + i] + d14[FN + i],
         d14[FN + i] + (d14[HJ + i] - d14[FN + i]) / (d14[AM + i] - equiv_harmonious_min_perc[j]) * (d14[KI + i] - equiv_harmonious_min_perc[j]))
     }
 
