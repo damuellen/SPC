@@ -386,7 +386,7 @@ extension TunOl {
     // NF=MIN(IF(KI6=0,GG6,GG6+(IC6-GG6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)),MAX(0,NB6-NC6-ND6-NH6*BESS_chrg_eff))
     for i in 0..<365 { d14[NF + i] = min(iff(d14[KI + i].isZero, d14[GG + i], d14[GG + i] + (d14[IC + i] - d14[GG + i]) * d14[AMKI + i]), max(Double.zero, d14[NB + i] - d14[NC + i] - d14[ND + i] - d14[NH + i] * BESS_chrg_eff)) }
     /// Balance of electricity outside of harm op period
-    // NG=NC6+ND6+NF6+NH6*BESS_chrg_eff-MAX(0,NH6-NE6)-NB6-MM3
+    // NG=NC6+ND6+NF6+NH6*BESS_chrg_eff-MAX(0,NH6-NE6)-NB6-MM6
     for i in 0..<365 { d14[NG + i] = d14[NC + i] + d14[ND + i] + d14[NF + i] + d14[NH + i] * BESS_chrg_eff - max(Double.zero, d14[NH + i] - d14[NE + i]) - d14[NB + i] - d14[MM + i] }
     // /// Heat prod by el boiler for harm op outside of harm op period
     // NI=IF(KI3=0;$I3+FN3;FN3+(HJ3-FN3)/($AM3-A_equiv_harmonious_min_perc)*(KI3-A_equiv_harmonious_min_perc))
@@ -419,7 +419,7 @@ extension TunOl {
     // NR=ROUND(MAX(0,-MZ3)+MAX(0,-NK3),0)
    
     /// Grid import
-    // NN=ROUND(MR3+NF3+NC3+MS3,0)+ROUND(MAX(0,-MT3)+MAX(0,-NG3)+NR3/El_boiler_eff,0)*EDG_elec_cost_factor
+    // NN=ROUND(MR6+NF6+NC6+MS6,0)+ROUND(MAX(0,-MT6)+MAX(0,-NG6)+NR6/El_boiler_eff,0)*EDG_elec_cost_factor
     for i in 0..<365 {
       d14[NN + i] =
         round(d14[MR + i] + d14[NF + i] + d14[NC + i] + d14[MS + i], 0) + round(max(0, -d14[MT + i]) + max(0, -d14[NG + i]) + round(max(0, -d14[MZ + i]) + max(0, -d14[NK + i]), 0) / El_boiler_eff, 0)

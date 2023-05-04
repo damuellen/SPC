@@ -1254,7 +1254,7 @@ extension TunOl {
     let IW = 34675
     // IW=IT3*BESS_chrg_eff+IU3+IV3-IN3-IF(HC3=0,$E3,0)-IR3-IS3
     for i in 0..<365 {
-      d23[IW + i] = d23[IT + i] * BESS_chrg_eff + d23[IU + i] + d23[IV + i] - d23[IN + i] - iff(d23[HE + i].isZero, d21[E + i], 0) - d23[IR + i] - d23[IS + i]
+      d23[IW + i] = d23[IT + i] * BESS_chrg_eff + d23[IU + i] + d23[IV + i] - d23[IN + i] - iff(d23[HC + i].isZero, d21[E + i], 0) - d23[IR + i] - d23[IS + i]
     }
 
     /// Balance of heat outside of harm op period
