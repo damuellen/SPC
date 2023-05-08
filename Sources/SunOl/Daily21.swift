@@ -88,11 +88,15 @@ extension TunOl {
     /// Max H2 cons during night
     let N = 3285
     for i in 0..<365 {
+      // E=(A_overall_var_min_cons+A_overall_fix_stby_cons)*$B3+A_overall_stup_cons
+      d1[E + i] = (overall_var_min_cons[j] + overall_fix_stby_cons[j]) * day0[B + i] + overall_stup_cons[j]
+      // F=(AE3*A_overall_var_max_cons+A_overall_fix_stby_cons)*$B3+A_overall_stup_cons
+      d1[F + i] = (d1[AE + i] * overall_var_max_cons[j] + overall_fix_stby_cons[j]) * day0[B + i] + overall_stup_cons[j]
+      // G=(A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons)*$B6+A_overall_heat_stup_cons
+      d1[G + i] = (overall_var_heat_min_cons[j] + overall_heat_fix_stby_cons[j]) * day0[B + i] + overall_heat_stup_cons[j]
+      // H=(AE3*A_overall_var_heat_max_cons+A_overall_heat_fix_stby_cons)*$B3+A_overall_heat_stup_cons
+      d1[H + i] = (d1[AE + i] * overall_var_heat_max_cons[j] + overall_heat_fix_stby_cons[j]) * day0[B + i] + overall_heat_stup_cons[j]
       if d1[AE + i].isZero {
-        d1[E + i] = Double.zero
-        d1[F + i] = Double.zero
-        d1[G + i] = Double.zero
-        d1[H + i] = Double.zero
         d1[I + i] = Double.zero
         d1[J + i] = Double.zero
         d1[K + i] = Double.zero
@@ -100,14 +104,6 @@ extension TunOl {
         d1[M + i] = Double.zero
         d1[N + i] = Double.zero
       } else {
-        // E=(A_overall_var_min_cons+A_overall_fix_stby_cons)*$B3+A_overall_stup_cons
-        d1[E + i] = (overall_var_min_cons[j] + overall_fix_stby_cons[j]) * day0[B + i] + overall_stup_cons[j]
-        // F=(AE3*A_overall_var_max_cons+A_overall_fix_stby_cons)*$B3+A_overall_stup_cons
-        d1[F + i] = (d1[AE + i] * overall_var_max_cons[j] + overall_fix_stby_cons[j]) * day0[B + i] + overall_stup_cons[j]
-        // G=(A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons)*$B6+A_overall_heat_stup_cons
-        d1[G + i] = (overall_var_heat_min_cons[j] + overall_heat_fix_stby_cons[j]) * day0[B + i] + overall_heat_stup_cons[j]
-        // H=(AE3*A_overall_var_heat_max_cons+A_overall_heat_fix_stby_cons)*$B3+A_overall_heat_stup_cons
-        d1[H + i] = (d1[AE + i] * overall_var_heat_max_cons[j] + overall_heat_fix_stby_cons[j]) * day0[B + i] + overall_heat_stup_cons[j]
         // A_RawMeth_min_cons*B6
         d1[I + i] = RawMeth_min_cons[j] * day0[B + i]
         // AE3*A_RawMeth_max_cons*$B3
