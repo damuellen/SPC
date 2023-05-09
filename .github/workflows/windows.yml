@@ -10,9 +10,11 @@ jobs:
     steps:
       - name: vcpkg install libxlsxwriter
         run: vcpkg install libxlsxwriter:x64-windows
+        continue-on-error: true
 
       - name: vcpkg install sqlite3
         run: vcpkg install sqlite3:x64-windows
+        continue-on-error: true
 
       - name: Setup Swift compiler
         uses: compnerd/gha-setup-swift@main
