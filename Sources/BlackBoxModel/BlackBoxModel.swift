@@ -81,8 +81,7 @@ public enum BlackBoxModel {
 
   /// - Parameter with: Creates the log and write results to file.
   /// - Attention: `configure()` must called before this.
-  public static func runModel(with recorder: Historian) -> Recording {
-
+  public static func runModel(with record: Historian) {
     guard let 🌞 = sun else {
       print("We need the sun.")
       exit(1)
@@ -131,7 +130,7 @@ public enum BlackBoxModel {
         // No operation is simulated
         let status = Plant.initialState
         let energy = PlantPerformance()
-        recorder(dt, meteo: meteo, status: status, energy: energy)
+        record(dt, meteo: meteo, status: status, energy: energy)
         continue
       }
 
@@ -201,16 +200,8 @@ public enum BlackBoxModel {
       }
 
       plant.electricity.consumption()
-
-      let performance = plant.performance
-      #if PRINT
-      print(decorated(dt.description), meteo, status, performance)
-      ClearScreen()
-      #endif
-      recorder(dt, meteo: meteo, status: status, energy: performance)
+      record(dt, meteo: meteo, status: status, energy: plant.performance)
     }
-
-    return recorder.finish()
   }
 
   private static func simulationPeriod(

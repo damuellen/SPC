@@ -20,13 +20,6 @@ public struct PlantPerformance: MeasurementsConvertible {
 
   internal(set) public var parasitics: Parasitics
 
-  mutating func zero() {
-    self.thermal = ThermalEnergy()
-    self.fuel = FuelConsumption()
-    self.parasitics = Parasitics()
-    self.electric = ElectricPower()
-  }
-
   mutating func totalize(_ performance: some RangeReplaceableCollection<PlantPerformance>, fraction: Double) {
     self.thermal = performance.map(\.thermal).totalize(fraction: fraction)
     self.fuel = performance.map(\.fuel).totalize(fraction: fraction)
