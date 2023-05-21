@@ -42,7 +42,7 @@ public class MeteoDataFileHandler {
     self.file = try url.pathExtension == "mto" ? MET(url) : TMY(url)
   }
 
-  public func metaData() throws -> (year: Int, location: Location)  { 
+  public func metadata() throws -> (year: Int, location: Location)  { 
     try file.fetchInfo()
   }
 

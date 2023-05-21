@@ -24,8 +24,8 @@ extension MeasurementsConvertible {
   var commaSeparatedValues: String {
     values.map { 
       if $0.magnitude < 0.005 { return "0" }
-      let f = Int($0 * 100 + 0.5) % 100
-      return "\($0 < 0 ? "-" : "")\(Int($0)).\(f < 10 ? "0" : "")\(f)"
+      let (q, r) = Int($0 * 100 + 0.5).quotientAndRemainder(dividingBy: 100)
+      return "\($0 < 0 ? "-" : "")\(q).\(r < 10 ? "0" : "")\(r)"
     }.joined(separator: ",")
   }
 
