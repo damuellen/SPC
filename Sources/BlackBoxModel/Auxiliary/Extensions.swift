@@ -11,12 +11,6 @@
 import Foundation 
 import Helpers
 
-extension Double {
-  @inline(__always)
-  func asString(precision: Int = 2) -> String {
-    String(format: "%.\(precision)f", self)
-  }
-}
 
 func formatting(_ values: [Double], _ labels: [String]) -> String {
   let pairs = zip(    

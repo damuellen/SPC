@@ -21,8 +21,12 @@ protocol MeasurementsConvertible {
 }
 
 extension MeasurementsConvertible {
-  var commaSeparatedValues: String { 
-    values.map { $0 > 0 ? String(format: "%.2f", $0) : "0" }.joined(separator: ",")
+  var commaSeparatedValues: String {
+    values.map { 
+      if $0.magnitude < 0.005 { return "0" }
+      let (q, r) = Int($0 * 100 + 0.5).quotientAndRemainder(dividingBy: 100)
+      return "\($0 < 0 ? "-" : "")\(q).\(r < 10 ? "0" : "")\(r)"
+    }.joined(separator: ",")
   }
 
   var prettyDescription: String {
@@ -51,13 +55,4 @@ extension MeasurementsConvertible {
         + fractionalPart + "\n"
     }
   }
-}
-
-extension String {
-#if os(Windows)
-  static var DateSeries: [UInt8] { [UInt8(ascii: "\r"), UInt8(ascii: "\n")] }
-#else
-  static var DateSeries: [UInt8] { [UInt8(ascii: "\n")] }
-#endif  
-  // static var separator: String { [UInt8(ascii: ",")] }
 }

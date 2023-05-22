@@ -46,15 +46,23 @@ public struct Recording: CustomStringConvertible, Comparable {
 
   private let startDate: Date
 
+  public func print() {
+    Swift.print("")
+    Swift.print(decorated("Annual results"))
+    Swift.print(irradiance.prettyDescription)
+    Swift.print(performance.prettyDescription)
+  }
+
   init(
     startDate: Date,
-    performance: PlantPerformance,
     irradiance: Insolation,
     performanceHistory: [PlantPerformance] = [],
     statusHistory: [Status] = []
   ) {
     self.startDate = startDate
-    self.performance = performance
+    var annualPerformance = PlantPerformance()
+    annualPerformance.totalize(performanceHistory, fraction: interval.fraction)
+    self.performance = annualPerformance
     self.irradiance = irradiance 
     self.performanceHistory = performanceHistory
     self.statusHistory = statusHistory

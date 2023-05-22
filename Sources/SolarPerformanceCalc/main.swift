@@ -22,17 +22,7 @@ import WinSDK
 _ = SetConsoleOutputCP(UINT(CP_UTF8))
 #endif
 
-let now = Date()
-
 SolarPerformanceCalculator.main()
-//print(SolarPerformanceCalculator.result!)
-
-let time = String(format: "%.2f seconds", -now.timeIntervalSinceNow)
-print("Wall time:", time)
-
-#if os(Windows)
-  MessageBox(text: time, caption: "")
-#endif
 
 struct LocationInfo: ParsableArguments {
   @Option(name: [.customShort("z"), .long], help: "Time zone")
@@ -61,7 +51,6 @@ struct LocationInfo: ParsableArguments {
 
 struct SolarPerformanceCalculator: ParsableCommand {
 
-  static var result: Recording!
 #if os(Windows)
   static let cwd = currentDirectoryPath()
 #else
@@ -91,6 +80,7 @@ struct SolarPerformanceCalculator: ParsableCommand {
   var excel: Bool = false
 
   func run() throws {
+    let now = Date()
     let name = "Solar Performance Calculator"
     print(decorated(name), "")
 
@@ -164,32 +154,42 @@ struct SolarPerformanceCalculator: ParsableCommand {
       mode = .csv
     }
 
-    let report = Historian(
+    let recording = Historian(
       customName: nameResults, customPath: resultsPath, outputMode: mode
     )
 
-    SolarPerformanceCalculator.result = BlackBoxModel.runModel(with: report)
-    // plot(interval: DateInterval(ofWeek: 17, in: BlackBoxModel.simulatedYear))
-    // report.clearResults()
+    let start = Date()
+
+    BlackBoxModel.runModel(with: recording)
+
+    let t = (start.timeIntervalSince(now), -start.timeIntervalSinceNow)
+
+    let result = recording.finish()
+
+    let t2 = -now.timeIntervalSinceNow
+    print("Preparing:", String(format: "%.2f seconds", t.0))
+    print("Computing:", String(format: "%.2f seconds", t.1))
+    print("Wall time:", String(format: "%.2f seconds", t2))
+    result.print()
   }
 
   static var configuration = CommandConfiguration(
     commandName: "Solar Performance Calculator",
-    abstract: "Simulates the performance of entire solar thermal power plants."
+    abstract: "Calculates the annual production of a solar thermal power plant."
   )
 
-  func plot(interval: DateInterval) {
-    let steamTurbine = SolarPerformanceCalculator.result.annual(\.steamTurbine.load.quotient)
-    let parabolicElevation = SolarPerformanceCalculator.result.annual(\.collector.parabolicElevation)
+  func plot(_ result: Recording) {
+    let steamTurbine = result.annual(\.steamTurbine.load.quotient)
+    let parabolicElevation = result.annual(\.collector.parabolicElevation)
     _ = try? Gnuplot(y1s: steamTurbine, y2s: parabolicElevation)(.pdf("parabolicElevation.pdf"))
-    let electric = SolarPerformanceCalculator.result.annual(\.thermal.storage.megaWatt)
+    let electric = result.annual(\.thermal.storage.megaWatt)
     _ = try? Gnuplot(y1s: steamTurbine, y2s: electric)(.pdf("thermal.pdf"))
     let formatter = DateFormatter()
     formatter.dateFormat = "MM_dd"
     for i in 1...365 {
       let interval = DateInterval(ofDay: i, in: BlackBoxModel.simulatedYear)
-      let y1 = SolarPerformanceCalculator.result.massFlows(range: interval)
-      let y2 = SolarPerformanceCalculator.result.power(range: interval)
+      let y1 = result.massFlows(range: interval)
+      let y2 = result.power(range: interval)
       let plot = TimeSeriesPlot(y1: y1, y2: y2, range: interval, style: .impulses)
       plot.y1Titles = ["solarfield", "powerblock", "storage"]
       plot.y2Titles = ["solar", "toStorage", "production", "storage", "gross", "net", "consum"]

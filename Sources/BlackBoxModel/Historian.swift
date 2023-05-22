@@ -9,6 +9,7 @@
 //
 
 import DateExtensions
+import Utilities
 import Foundation
 import Meteo
 // import SQLite
@@ -22,7 +23,7 @@ public final class Historian {
   private var progress: Int = 0
   #endif
   /// Number of values per hour
-  private let interval = Simulation.time.steps
+  private let frequency = Simulation.time.steps
   /// Specifies what the output is
   let mode: Mode
 
@@ -58,9 +59,6 @@ public final class Historian {
   // private var db: Connection? = nil
   private var fileStream: OutputStream?
   private var xlsx: Workbook? = nil
-  /// Totals
-  private(set) var annualPerformance = PlantPerformance()
-  private(set) var annualRadiation = Insolation()
 
   /// All past states of the plant
   private(set) var status: [Status] = []
@@ -73,9 +71,9 @@ public final class Historian {
   public init(
     customName: String? = nil, customPath: String? = nil, outputMode: Mode
   ) {
-    status.reserveCapacity(8760 * interval.rawValue)
-    performance.reserveCapacity(8760 * interval.rawValue)
-    sun.reserveCapacity(8760 * interval.rawValue)
+    status.reserveCapacity(8760 * frequency.rawValue)
+    performance.reserveCapacity(8760 * frequency.rawValue)
+    sun.reserveCapacity(8760 * frequency.rawValue)
 
     self.mode = outputMode
 
@@ -153,23 +151,18 @@ public final class Historian {
     sun.removeAll(keepingCapacity: true)
   }
 
-  func printResult() {
-    print("")
-    print(decorated("Annual results"))
-    print(annualRadiation.prettyDescription)
-    print(annualPerformance.prettyDescription)
-  }
-
   func callAsFunction(
-    _ ts: DateTime, meteo: MeteoData, status: Status, energy: PlantPerformance
+    _ time: DateTime, meteo: MeteoData, status: Status, energy: PlantPerformance
   ) {
     self.status.append(status)
     self.performance.append(energy)
     self.sun.append(Insolation(meteo: meteo))
-
-    #if DEBUG && !os(Windows)
-    if progress != ts.yearDay {
-      progress = ts.yearDay
+    #if PRINT
+    print(decorated(time.description), meteo, status, energy)
+    ClearScreen()
+    #elseif DEBUG && !os(Windows)
+    if progress != time.yearDay {
+      progress = time.yearDay
       print(" [\(progress)/\(365)] recording month…", terminator: "\r")
       fflush(stdout)
     }
@@ -182,41 +175,38 @@ public final class Historian {
     print(clearLineString, terminator: "\r")
     fflush(stdout)
     #endif
-    annualRadiation = sun.hourly(fraction: interval.fraction)
-    annualPerformance.totalize(performance, fraction: interval.fraction)    
-    printResult()
     var buffer = [UInt8]()
       /// Sum of hourly values
     var hourlyPerformance = PlantPerformance()
     var hourlyRadiation = Insolation()
     if case .custom(let custom) = mode {
-      let s = interval.rawValue / custom.rawValue
+      let f = frequency.rawValue / custom.rawValue
       var date = startDate
-      for i in stride(from: 0, to: performance.count, by: s) {
-        hourlyPerformance.totalize(performance[i..<i+s], fraction: 1 / Double(s))
-        hourlyRadiation = sun[i..<i+s].hourly(fraction: 1 / Double(s))
+      for i in stride(from: 0, to: performance.count, by: f) {
+        hourlyPerformance.totalize(performance[i..<i+f], fraction: 1 / Double(f))
+        hourlyRadiation = sun[i..<i+f].hourly(fraction: 1 / Double(f))
         let time = DateTime(date)
         buffer = [UInt8](time.commaSeparatedValues.utf8) 
           + comma + [UInt8]("\(time.minute)".utf8)
           + comma + [UInt8](hourlyRadiation.commaSeparatedValues.utf8)
           + comma + [UInt8](hourlyPerformance.commaSeparatedValues.utf8) 
           + lineBreak
-        date.addTimeInterval(interval.interval)
+        date.addTimeInterval(frequency.interval)
         _ = fileStream?.write(buffer, maxLength: buffer.count)
       }
     }
 
     if case .csv = mode {
-      let s = interval.rawValue
+      let f = frequency.rawValue
       var date = startDate
-      for i in stride(from: 0, to: performance.count, by: s) {
-        hourlyPerformance.totalize(performance[i..<i+s], fraction: interval.fraction)
-        hourlyRadiation = sun[i..<i+s].hourly(fraction: interval.fraction)
+      for i in stride(from: 0, to: performance.count, by: f) {
+        hourlyPerformance.totalize(performance[i..<i+f], fraction: frequency.fraction)
+        hourlyRadiation = sun[i..<i+f].hourly(fraction: frequency.fraction)
         buffer = [UInt8](DateTime(date).commaSeparatedValues.utf8) 
           + comma + [UInt8](hourlyRadiation.commaSeparatedValues.utf8)
           + comma + [UInt8](hourlyPerformance.commaSeparatedValues.utf8) 
           + lineBreak
-        date.addTimeInterval(interval.interval)
+        date.addTimeInterval(frequency.interval)
         _ = fileStream?.write(buffer, maxLength: buffer.count)
       }
     }
@@ -224,9 +214,11 @@ public final class Historian {
     if case .database = mode { storeInDB() }
     if case .excel = mode { writeExcel() }
 
+    let irradiance = sun.hourly(fraction: frequency.fraction)
+
     return Recording(
-      startDate: startDate, performance: annualPerformance,
-      irradiance: annualRadiation, performanceHistory: performance,
+      startDate: startDate, irradiance: irradiance, 
+      performanceHistory: performance,
       statusHistory: status)
   }
 
@@ -297,7 +289,7 @@ public final class Historian {
       date.addTimeInterval(interval)
     }
     wb.close()
-    print("Excel file creation took \((-now.timeIntervalSinceNow).asString()) seconds.")
+    print("Excel file creation took \(Int(-now.timeIntervalSinceNow)) seconds.")
   }
   // MARK: Output database
   private func storeInDB() {
