@@ -27,10 +27,10 @@ jobs:
 
 
       - name: CMake libxlsxwriter
-        shell: cmd
+        shell: cmd"C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
         run: |
           cd libxlsxwriter/cmake
-          call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+          call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
           cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DUSE_DTOA_LIBRARY=ON -DUSE_NO_MD5=ON -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -A x64
           cmake --build . --config Release
         continue-on-error: true
