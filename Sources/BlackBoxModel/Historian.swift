@@ -191,7 +191,7 @@ public final class Historian {
           + comma + [UInt8](hourlyRadiation.commaSeparatedValues.utf8)
           + comma + [UInt8](hourlyPerformance.commaSeparatedValues.utf8) 
           + lineBreak
-        date.addTimeInterval(frequency.interval)
+        date.addTimeInterval(custom.interval)
         _ = fileStream?.write(buffer, maxLength: buffer.count)
       }
     }

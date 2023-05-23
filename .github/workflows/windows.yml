@@ -1,19 +1,24 @@
 name: CI – Windows
 
 on: workflow_dispatch
-
+env:
+  PKG_CONFIG_PATH: C:\vcpkg\installed\x64-windows\lib\pkgconfig
 jobs:
   continuous-integration:
     timeout-minutes: 15
     runs-on: [windows-2022]
 
     steps:
+      - name: vcpkg upgrade
+        run: vcpkg upgrade
+        continue-on-error: true
+
       - name: vcpkg install libxlsxwriter
-        run: vcpkg install libxlsxwriter:x64-windows
+        run: vcpkg install libxlsxwriter:x64-windows-static
         continue-on-error: true
 
       - name: vcpkg install sqlite3
-        run: vcpkg install sqlite3:x64-windows
+        run: vcpkg install sqlite3:x64-windows-static
         continue-on-error: true
 
       - name: Setup Swift compiler
@@ -27,8 +32,6 @@ jobs:
 
       - name: Build Release Mode
         run: swift build -c release -Xlinker /INCREMENTAL:NO -Xlinker /IGNORE:4217 -Xswiftc -gnone -Xswiftc -suppress-warnings -Xswiftc -continue-building-after-errors
-        env:
-          PKG_CONFIG_PATH: C:\vcpkg\installed\x64-windows\lib\pkgconfig
         continue-on-error: true
 
       - name: Copy libs to build folder
