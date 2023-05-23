@@ -84,7 +84,7 @@ public struct IGOA {
     }
 
     ClearScreen()
-    print("Population: \(grassHopperPositions.count) ".randomColor() + "Iterations: 0".leftpad(28).randomColor(),
+    print("Population: \(grassHopperPositions.count) ".colored() + "Iterations: 0".leftpad(28).colored(),
      pretty(values: targetFitness), pretty(values: targetPosition), separator: "\n")
 
     let dims = bounds.count
@@ -152,7 +152,7 @@ public struct IGOA {
       }
       ClearScreen()
       print(
-        "Population: \(grassHopperPositions.count) ".randomColor() + "Iterations: \(iteration)".leftpad(28).randomColor(),
+        "Population: \(grassHopperPositions.count) ".colored() + "Iterations: \(iteration)".leftpad(28).colored(),
         pretty(values: targetFitness), pretty(values: targetPosition),
         String(format: "Calculations per Second: %.1f", calculationsPerSecond),
         "Estimated time remaining: \(Int(remainingTime / 60)) min", separator: "\n")
@@ -192,8 +192,8 @@ func pretty(values: [[Double]]) -> String {
     return values[0].indices
       .map { i in
         """
-        \(labels[i].leftpad(16).text(.red))\(": ".text(.red))\
-        \(String(format: "%.1f", values[0][i]).leftpad(9).text(.yellow))
+        \(labels[i].leftpad(16).colored(.red))\(": ".colored(.red))\
+        \(String(format: "%.1f", values[0][i]).leftpad(9).colored(.yellow))
         """
       }
       .joined(separator: "\n")
@@ -201,10 +201,10 @@ func pretty(values: [[Double]]) -> String {
   return values[0].indices
     .map { i in
       """
-      \(labels[i].leftpad(16).text(.red))\(": ".text(.red))\
-      \(String(format: "%.1f", values[0][i]).leftpad(9).text(.green))\
-      \(String(format: "%.1f", values[1][i]).leftpad(9).text(.yellow))\
-      \(String(format: "%.1f", values[2][i]).leftpad(9).text(.magenta))
+      \(labels[i].leftpad(16).colored(.red))\(": ".colored(.red))\
+      \(String(format: "%.1f", values[0][i]).leftpad(9).colored(.green))\
+      \(String(format: "%.1f", values[1][i]).leftpad(9).colored(.yellow))\
+      \(String(format: "%.1f", values[2][i]).leftpad(9).colored(.magenta))
       """
     }
     .joined(separator: "\n")
@@ -214,15 +214,15 @@ func pretty(values: [Double]) -> String {
   let label = "LCOM"
   if values.count == 1 {
     return """
-      \(label.leftpad(16).text(.red))\(": ".text(.red))\
-      \(String(format: "%.2f", values[0]).leftpad(9).text(.cyan))
+      \(label.leftpad(16).colored(.red))\(": ".colored(.red))\
+      \(String(format: "%.2f", values[0]).leftpad(9).colored(.cyan))
       """
   }
   return """
-    \(label.leftpad(16).text(.red))\(": ".text(.red))\
-    \(String(format: "%.2f", values[0]).leftpad(9).text(.green))\
-    \(String(format: "%.2f", values[1]).leftpad(9).text(.yellow))\
-    \(String(format: "%.2f", values[2]).leftpad(9).text(.magenta))
+    \(label.leftpad(16).colored(.red))\(": ".colored(.red))\
+    \(String(format: "%.2f", values[0]).leftpad(9).colored(.green))\
+    \(String(format: "%.2f", values[1]).leftpad(9).colored(.yellow))\
+    \(String(format: "%.2f", values[2]).leftpad(9).colored(.magenta))
     """
 }
 

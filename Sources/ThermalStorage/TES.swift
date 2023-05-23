@@ -6,65 +6,65 @@ struct TES {
   let salt = StorageMedium.solarSalt.properties
   let htf = HeatTransferFluid.VP1
 
-  let min_salt_mass_flow_per_pump__kg_s = 260.0
-  let low_salt_mass_flow__kg_s = 420.0
-  let min_level_at_low_salt_mass_flow = 0.6
-  let max_salt_mass_flow_per_pump__kg_s = 1000.0
-  let min_level_at_max_salt_mass_flow = 1.5
-  let max_pumps_per_tank = 4.0
-  let p_th_max_per_trainW_th = 130.0
-  let maximum_train_quant_Per_2_tank_system = 4.0
-  let max_active_tank_height = 15.0
-  let max_tank_diameter = 38.5
-  let requested_minimum_possible_part_load_charge = 0.2
-  let max_turn_down_ratio_per_HEX_train = 0.3
-  let tes_design_total_head_at_highest_salt_flow = 63.0
-  let tank_height_diameter_ratio_of_active_salt_volume = 0.3506
-  let free_Board_Allowance = 0.35
-  let pump_suction_clearance__distance_suction_inlet_to_tank_floor = 0.257
-  let tank_roof_radius_factor__radius__factor__tank_diameter = 1.5
-  let horizontal_distance__pump__tank_wall = 2.5
-  let vert_distance_tank_roof_pump_mounting_plate = 2.5
-  let vertical_distance_between_HEX_level_and_pump_mount_level = 0.0
-  let pressure_drop_piping_and_valves_design_charge_mass_flow = 0.500
-  let pressure_drop_hot_tank_sparger_eductor_system = 1.7
-  let pressure_drop_cold_tank_sparger_eductor_system = 2.0
-  let function_of_pressure_drop_vs_mass_flow = 2.0
-  let default_salt_pump_efficiency = 73.0
-  let pump_aux_resolution_interval = 10.0
+  let minSaltMassFlowPerPump_KgS = 260.0
+  let lowSaltMassFlow_KgS = 420.0
+  let minLevelAtLowSaltMassFlow = 0.6
+  let maxSaltMassFlowPerPump_KgS = 1000.0
+  let minLevelAtMaxSaltMassFlow = 1.5
+  let maxPumpsPerTank = 4.0
+  let pThMaxPerTrainWTh = 130.0
+  let maximumTrainQuant_Per_2TankSystem = 4.0
+  let maxActiveTankHeight = 15.0
+  let maxTankDiameter = 38.5
+  let requestedMinimumPossiblePartLoadCharge = 0.2
+  let maxTurnDownRatioPer_HEXTrain = 0.3
+  let tesDesignTotalHeadAtHighestSaltFlow = 63.0
+  let tankHeightDiameterRatioOfActiveSaltVolume = 0.3506
+  let freeBoardAllowance = 0.35
+  let pumpSuctionClearance_DistanceSuctionInletToTankFloor = 0.257
+  let tankRoofRadiusFactor_Radius_Factor_TankDiameter = 1.5
+  let horizontalDistance_Pump_TankWall = 2.5
+  let vertDistanceTankRoofPumpMountingPlate = 2.5
+  let verticalDistanceBetween_HEXLevelAndPumpMountLevel = 0.0
+  let pressureDropPipingAndValvesDesignChargeMassFlow = 0.500
+  let pressureDropHotTankSpargerEductorSystem = 1.7
+  let pressureDropColdTankSpargerEductorSystem = 2.0
+  let functionOfPressureDropVsMassFlow = 2.0
+  let defaultSaltPumpEfficiency = 73.0
+  let pumpAuxResolutionInterval = 10.0
 
-  let pump_characteristics = Polynomial([
+  let pumpCharacteristics = Polynomial([
     58.0392873368767, 0.00543837439333072, -3.55755682196363E-07,
   ])
 
   // Heat loss parameters
-  let alpha_insulation_to_air = 20.0
-  let lambda_insulation_calculation_coefficient_a_cold_tank = 0.000
-  let lambda_insulation_calculation_coefficient_b_cold_tank = 0.031
-  let thickness_tank_shell_insulation_cold_tank = 0.300
-  let thickness_tank_roof_insulation_cold_tank = 0.300
-  let lambda_foundation_cold_tank = 0.411
-  let thickness_foundation_cold_tank = 2.400
+  let alphaInsulationToAir = 20.0
+  let lambdaInsulationCalculationCoefficientAColdTank = 0.000
+  let lambdaInsulationCalculationCoefficientBColdTank = 0.031
+  let thicknessTankShellInsulationColdTank = 0.300
+  let thicknessTankRoofInsulationColdTank = 0.300
+  let lambdaFoundationColdTank = 0.411
+  let thicknessFoundationColdTank = 2.400
 
-  let lambda_insulation_calculation_coefficient_a_hot_tank = 0.000
-  let lambda_insulation_calculation_coefficient_b_hot_tank = 0.031
-  let thickness_tank_shell_insulation_hot_tank = 0.400
-  let thickness_tank_roof_insulation_hot_tank = 0.400
-  let lambda_foundation_hot_tank = 0.398
-  let thickness_foundation_hot_tank = 2.400
+  let lambdaInsulationCalculationCoefficientAHotTank = 0.000
+  let lambdaInsulationCalculationCoefficientBHotTank = 0.031
+  let thicknessTankShellInsulationHotTank = 0.400
+  let thicknessTankRoofInsulationHotTank = 0.400
+  let lambdaFoundationHotTank = 0.398
+  let thicknessFoundationHotTank = 2.400
 
-  let factor_thermal_bridges_roof_and_shell = 15.0
-  let factor_thermal_bridges_bottom = 10.0
+  let factorThermalBridgesRoofAndShell = 15.0
+  let factorThermalBridgesBottom = 10.0
 
-  let estimated_average_ambient_temperature = Temperature(celsius: 15.0)
-  let estimated_average_Soil_temperature = Temperature(celsius: 10.0)
+  let estimatedAverageAmbientTemperature = Temperature(celsius: 15.0)
+  let estimatedAverage_SoilTemperature = Temperature(celsius: 10.0)
 
   // Standard TES Mode Conditions
-  let salt_mass_safety_margin = 3.0
-  let temp_loss_charge = 7.0
-  let temp_loss_discharge = 7.0
-  let salt_p_drop_100 = 4.62
-  let TES_HX_p_loss_100 = 5.0
+  let saltMassSafetyMargin = 3.0
+  let tempLossCharge = 7.0
+  let tempLossDischarge = 7.0
+  let saltPDrop_100 = 4.62
+  let TES_HXPLoss_100 = 5.0
 
   let temperatureLossCharge = 7.0
   let temperatureLossDischarge = 7.0
@@ -245,23 +245,21 @@ struct TES {
 
     let totalActiveSaltMass = 0.0  //C246
     // let decisiveCaseForTesDesign = 0.0  //C249
-    let nominalChargeSaltMassFlow = chargeSaltMassFlow
-    let nominalDischargeSaltMassFlow = dischargeSaltMassFlow
 
     // tesHexsDesignValues(Total)
-    let p_Th_MaxPerTesHexTrain = p_th_max_per_trainW_th
+    let p_Th_MaxPerTesHexTrain = pThMaxPerTrainWTh
     let maximumTrainQuantPerTwoTankSystem =
-      maximum_train_quant_Per_2_tank_system
+      maximumTrainQuant_Per_2TankSystem
     let requestedMinimumPossiblePartLoadCharge =
-      requested_minimum_possible_part_load_charge
-    let maxTurnDownRatioPerHexTrain = max_turn_down_ratio_per_HEX_train
+      requestedMinimumPossiblePartLoadCharge
+    let maxTurnDownRatioPerHexTrain = maxTurnDownRatioPer_HEXTrain
 
     let thermalPbPowerDischarging = p_Th_Tes_DischargeNominal
 
     let designTotalThermalTesHexsPower = max(
       thermalPbPowerDischarging, p_Th_Tes_ChargeNominal)
     let designTotalSaltMassFlow = max(
-      nominalChargeSaltMassFlow, nominalDischargeSaltMassFlow)
+      chargeSaltMassFlow, dischargeSaltMassFlow)
 
     let necessaryTrainsFromMaxDuty =
       designTotalThermalTesHexsPower / p_Th_MaxPerTesHexTrain
@@ -283,8 +281,6 @@ struct TES {
       tankSystemsInParallelFromPartLoadRequir,
       tankSystemsInParallelFromHexMaxDuty)
 
-    let designSaltMassFlow = designTotalSaltMassFlow
-
     let maxSaltMassFlowPerTwoTankSystem = 0.0  // C293 * C291
     let tankSystemsInParallelFromPumpConditions = 0.0  //(C295 / C298).rounded(up)
 
@@ -292,8 +288,8 @@ struct TES {
 
     //let tesTankDesignValues(PreliminaryForSizeEstimation)
 
-    let maxActiveTankHeight = max_active_tank_height
-    let maxTankDiameter = max_tank_diameter
+    let maxActiveTankHeight = maxActiveTankHeight
+    let maxTankDiameter = maxTankDiameter
 
     let activeSaltMassSafetyMargin = 0.0  //C118
     let totalActiveSaltMassForPerformanceCalculation = 0.0  //Act_Salt_Mass
@@ -361,23 +357,23 @@ struct TES {
     //   / tesHexTrainsPerTwoTankSystemInActionDuringDischarge
     //   / (totalNumberOfTanks / 2)
 
-    let possibleNumberOfPumpsTotal = totalNumberOfTanks * max_pumps_per_tank
+    let possibleNumberOfPumpsTotal = totalNumberOfTanks * maxPumpsPerTank
     let necessaryNumberOfPumpsPerColdTankCharging = 1.0  //If(Rounddown(C357 / (totalNumberOfTanks / 2) / minSaltMassFlowPerPump,0)<=1,1,If(Rounddown(chargeSaltMassFlow / (totalNumberOfTanks / 2) / minSaltMassFlowPerPump,0)<(C354 + 1),Rounddown(let c357 / (C385 / 2) / minSaltMassFlowPerPump,0),C354))
     let flowPerColdTankPumpCharging =
       chargeSaltMassFlow
       / (necessaryNumberOfPumpsPerColdTankCharging
         * (totalNumberOfTanks / 2.0))
-    var minTankLevelInColdTankCharging = low_salt_mass_flow__kg_s
+    var minTankLevelInColdTankCharging = lowSaltMassFlow_KgS
     let C363 = 0.0
-    let lowSaltMassFlow = low_salt_mass_flow__kg_s
-    let minSaltMassFlowPerPump = min_salt_mass_flow_per_pump__kg_s
-    let maxSaltMassFlowPerPump = max_salt_mass_flow_per_pump__kg_s
-    let minLevelAtMaxSaltMassFlow = min_level_at_max_salt_mass_flow
+    let lowSaltMassFlow = lowSaltMassFlow_KgS
+    let minSaltMassFlowPerPump = minSaltMassFlowPerPump_KgS
+    let maxSaltMassFlowPerPump = maxSaltMassFlowPerPump_KgS
+    let minLevelAtMaxSaltMassFlow = minLevelAtMaxSaltMassFlow
     if C363 > lowSaltMassFlow {
       minTankLevelInColdTankCharging +=
         (flowPerColdTankPumpCharging - lowSaltMassFlow)
         / (maxSaltMassFlowPerPump - lowSaltMassFlow)
-        * (minLevelAtMaxSaltMassFlow - low_salt_mass_flow__kg_s)
+        * (minLevelAtMaxSaltMassFlow - lowSaltMassFlow_KgS)
     }
     let totalSaltMassFlowDischarging = dischargeSaltMassFlow
     let C354 = 0.0
@@ -391,11 +387,11 @@ struct TES {
       dischargeSaltMassFlow / numberOfPumpsPerHotTankDischarging
       / (totalNumberOfTanks / 2)
     let minTankLevelInHotTankDischarging =
-      low_salt_mass_flow__kg_s
+      lowSaltMassFlow_KgS
       + (flowPerHotTankPumpDischarging > lowSaltMassFlow
         ? (flowPerHotTankPumpDischarging - lowSaltMassFlow)
           / (maxSaltMassFlowPerPump - lowSaltMassFlow)
-          * (minLevelAtMaxSaltMassFlow - low_salt_mass_flow__kg_s) : 0)
+          * (minLevelAtMaxSaltMassFlow - lowSaltMassFlow_KgS) : 0)
 
     // let numberOfPumpsPerColdTankCharging = necessaryNumberOfPumpsPerColdTankCharging
     // let numberOfPumpsPerHotTankDischarging = numberOfPumpsPerHotTankDischarging
@@ -422,7 +418,7 @@ struct TES {
         twoTankActiveSaltVolumeInclSafetyMargin / maxActiveTankHeight
           * (4.0 / .pi))
     let setActiveHeightRatioDiameterRatio =
-      tank_height_diameter_ratio_of_active_salt_volume
+      tankHeightDiameterRatioOfActiveSaltVolume
     let actualTankDiameter =
       ((4 / .pi) * twoTankActiveSaltVolumeInclSafetyMargin
         / setActiveHeightRatioDiameterRatio) ** (1.0 / 3.0)
@@ -500,14 +496,14 @@ struct TES {
     //let totalSaltMass[T](ToBeBought) = totalSaltMassToBeBought
     // let fraction = fractionTotalDeadSaltMassVsTotalActiveSaltMassForPct
 
-    let freeBoardAllowance = free_Board_Allowance
+    let freeBoardAllowance = freeBoardAllowance
     let pumpSuctionClearance =
-      pump_suction_clearance__distance_suction_inlet_to_tank_floor
+      pumpSuctionClearance_DistanceSuctionInletToTankFloor
     let tankRoofRadiusFactor =
-      tank_roof_radius_factor__radius__factor__tank_diameter
-    let horizontalDistancePumpTankWall = horizontal_distance__pump__tank_wall
+      tankRoofRadiusFactor_Radius_Factor_TankDiameter
+    let horizontalDistancePumpTankWall = horizontalDistance_Pump_TankWall
     let distanceBetweenTankRoofAndPumpMountingPlate =
-      vert_distance_tank_roof_pump_mounting_plate
+      vertDistanceTankRoofPumpMountingPlate
 
     // let tankDiameter = Tank_Diam
     //let maximumFillLevelOfTanks(InitialFill) = maximumDesignFillLevelInTank
@@ -542,17 +538,17 @@ struct TES {
     //  TesPressureDrops,SaltHeadsAndAuxiliaries
     //let tesHexSaltPressureDropDuringDesignMode = 'In - OutputSummary'!C29
     let verticalDistanceBetweenHexLevelAndPumpMountLevel =
-      vertical_distance_between_HEX_level_and_pump_mount_level
+      verticalDistanceBetween_HEXLevelAndPumpMountLevel
     let pumpSuctionClearanceDistanceSuctionInletToTankFloor =
-      pump_suction_clearance__distance_suction_inlet_to_tank_floor
+      pumpSuctionClearance_DistanceSuctionInletToTankFloor
     let pressureDropPipingAndValvesDesignChargeMassFlow =
-      pressure_drop_piping_and_valves_design_charge_mass_flow
+      pressureDropPipingAndValvesDesignChargeMassFlow
     let pressureDropHotTankSpargerAtDesignChargeMassFlow =
-      pressure_drop_hot_tank_sparger_eductor_system
+      pressureDropHotTankSpargerEductorSystem
     let pressureDropColdTankSpargerAtDesignDischargeMassFlow =
-      pressure_drop_cold_tank_sparger_eductor_system
+      pressureDropColdTankSpargerEductorSystem
     let functionOfPressureDropVsMassFlow =
-      function_of_pressure_drop_vs_mass_flow
+      functionOfPressureDropVsMassFlow
     let coldSaltDensity = salt.density(coldTankTemperature)  // [Kg / M³]
     let hotSaltDensity = salt.density(hotTankTemperature)
     let minimumTankLevelInColdTank = 0.0
@@ -572,7 +568,7 @@ struct TES {
     // let flowPerColdTankPumpCharging = C374  //  [Kg / S]
     // let flowPerHotTankPumpDischarging = C375  //  [Kg / S]
 
-    // let designSaltMassFlow = C282  //  [Kg / S]
+    // let designTotalSaltMassFlow = C282  //  [Kg / S]
     let totalChargeSaltMassFlow = 0.0  // C256  //  [Kg / S]
     // let dischargeSaltMassFlow = C257  //  [Kg / S]
 
@@ -589,15 +585,15 @@ struct TES {
 
       let actualTesHexSaltPressureDropDuringDesignCharge =
         tesHexSaltPressureDropDuringDesignMode
-        * (actualTotalChargeMassFlow / designSaltMassFlow)
+        * (actualTotalChargeMassFlow / designTotalSaltMassFlow)
         ** functionOfPressureDropVsMassFlow
       let actualPressureDropPipingAndValvesDesignChargeMassFlow =
         pressureDropPipingAndValvesDesignChargeMassFlow
-        * (actualTotalChargeMassFlow / designSaltMassFlow)
+        * (actualTotalChargeMassFlow / designTotalSaltMassFlow)
         ** functionOfPressureDropVsMassFlow
       let actualPressureDropHotTankSparger =
         pressureDropHotTankSpargerAtDesignChargeMassFlow
-        * (actualTotalChargeMassFlow / designSaltMassFlow)
+        * (actualTotalChargeMassFlow / designTotalSaltMassFlow)
         ** functionOfPressureDropVsMassFlow
 
       // (0) - >(1)
@@ -670,7 +666,7 @@ struct TES {
       let volumeFlowPerPump =
         actualFlowPerColdTankPumpCharging / hotSaltDensity * 3_600.0  // [M³ / H]
       // let A = Vflow2 / H = volumeFlowPerPump ** 2 / totalHeadForPumps
-      let pumpEfficiencyΗ = default_salt_pump_efficiency
+      let pumpEfficiencyΗ = defaultSaltPumpEfficiency
       let requiredMechanicalPowerP_MPerPump =
         flowPerColdTankPumpCharging * totalHeadForPumps * 9.81 / 1_000.0
       let powerConsumptionP_ElPerPump =
@@ -686,15 +682,15 @@ struct TES {
         / (numberOfPumpsPerHotTankDischarging * totalNumberOfTanks / 2.0)
       let actualTesHexSaltPressureDropDuringNominalDischarge =
         tesHexSaltPressureDropDuringDesignMode
-        * (actualTotalDischargeMassFlow / designSaltMassFlow)
+        * (actualTotalDischargeMassFlow / designTotalSaltMassFlow)
         ** functionOfPressureDropVsMassFlow
       let actualPressureDropPipingAndValvesNominalDischargeMassFlow =
         pressureDropPipingAndValvesDesignChargeMassFlow
-        * (actualTotalDischargeMassFlow / designSaltMassFlow)
+        * (actualTotalDischargeMassFlow / designTotalSaltMassFlow)
         ** functionOfPressureDropVsMassFlow
       let actualPressureDropColdTankSpargerDischargeMassFlow =
         pressureDropColdTankSpargerAtDesignDischargeMassFlow
-        * (actualTotalDischargeMassFlow / designSaltMassFlow)
+        * (actualTotalDischargeMassFlow / designTotalSaltMassFlow)
         ** functionOfPressureDropVsMassFlow
 
       // (0) - >(1)
@@ -767,7 +763,7 @@ struct TES {
       let volumeFlowPerPump =
         actualFlowPerHotTankPumpDischarging / hotSaltDensity * 3_600.0
       let _ = volumeFlowPerPump ** 2.0 / totalHeadForPumps
-      let pumpEfficiencyΗ = 0.0  // default_salt_pump_efficiency
+      let pumpEfficiencyΗ = 0.0  // defaultSaltPumpEfficiency
       let requiredMechanicalPowerP_MPerPump =
         flowPerHotTankPumpDischarging * totalHeadForPumps * 9.81 / 1_000.0
       let powerConsumptionP_ElPerPump =
@@ -775,8 +771,8 @@ struct TES {
       let saltSideAuxiliaryPowerConsumptionForNominalDischarge =
         100_000 * numberOfPumpsPerHotTankDischarging * totalNumberOfTanks / 2.0
 
-      let massFlowResolutionInterval = pump_aux_resolution_interval  // =10(Caution:Max.100)
-      let chargeLevelResolutionInterval = pump_aux_resolution_interval  // =10(Caution:Max.100)
+      let massFlowResolutionInterval = pumpAuxResolutionInterval  // =10(Caution:Max.100)
+      let chargeLevelResolutionInterval = pumpAuxResolutionInterval  // =10(Caution:Max.100)
 
       let verticalDistanceBetweenHexLevelAndPumpMountLevel = 0.0  //C486
       // let pumpShaftLengthPumpMountToSuctionInlet = pumpShaftLengthPumpMountToSuctionInlet
@@ -817,7 +813,7 @@ struct TES {
       let tesHexHtfPressureDropAtDesignMassFlowOfDecisiveCase = 1.0  //'In - OutputSummary'!C30
       let htfPressureDropInPbHexAt100_SolarMode = 1.0  //'In - OutputSummary'!C31
       let functionOfPressureDropVsMassFlow =
-        function_of_pressure_drop_vs_mass_flow
+        functionOfPressureDropVsMassFlow
 
       let sfInletTemperatureAtSfToPbTesMode = sfInletTemperature
       let htfPbHexOutletTemperatureDischarging = Temperature()  // pbHexHtfOutletTemperatureDischarging
@@ -887,36 +883,34 @@ struct TES {
     }
     //  HeatLosses Tes Tanks
     do {
-      let alphaInsulationToAir = alpha_insulation_to_air
-
       let lambdaInsulationCalculationCoefficientAColdTank =
-        lambda_insulation_calculation_coefficient_a_cold_tank  // [W / (M * K * °C)]
+        lambdaInsulationCalculationCoefficientAColdTank  // [W / (M * K * °C)]
       let lambdaInsulationCalculationCoefficientBColdTank =
-        lambda_insulation_calculation_coefficient_b_cold_tank  // [W / (M * K)]
+        lambdaInsulationCalculationCoefficientBColdTank  // [W / (M * K)]
       let thicknessTankShellInsulationColdTank =
-        thickness_tank_shell_insulation_cold_tank
+        thicknessTankShellInsulationColdTank
       let thicknessTankRoofInsulationColdTank =
-        thickness_tank_roof_insulation_cold_tank
-      let lambdaFoundationColdTank = lambda_foundation_cold_tank  // [W / M * K]
-      let thicknessFoundationColdTank = thickness_foundation_cold_tank
+        thicknessTankRoofInsulationColdTank
+      let lambdaFoundationColdTank = lambdaFoundationColdTank  // [W / M * K]
+      let thicknessFoundationColdTank = thicknessFoundationColdTank
 
       let lambdaInsulationCalculationCoefficientAHotTank =
-        lambda_insulation_calculation_coefficient_a_hot_tank  // [W / (M * K * °C)]
+        lambdaInsulationCalculationCoefficientAHotTank  // [W / (M * K * °C)]
       let lambdaInsulationCalculationCoefficientBHotTank =
-        lambda_insulation_calculation_coefficient_b_hot_tank  // [W / (M * K)]
+        lambdaInsulationCalculationCoefficientBHotTank  // [W / (M * K)]
       let thicknessTankShellInsulationHotTank =
-        thickness_tank_shell_insulation_hot_tank
+        thicknessTankShellInsulationHotTank
       let thicknessTankRoofInsulationHotTank =
-        thickness_tank_roof_insulation_hot_tank
-      let lambdaFoundationHotTank = lambda_foundation_hot_tank  // [W / M * K]
-      let thicknessFoundationHotTank = thickness_foundation_hot_tank
+        thicknessTankRoofInsulationHotTank
+      let lambdaFoundationHotTank = lambdaFoundationHotTank  // [W / M * K]
+      let thicknessFoundationHotTank = thicknessFoundationHotTank
 
       let factorThermalBridgesRoofAndShell =
-        factor_thermal_bridges_roof_and_shell
-      let factorThermalBridgesBottom = factor_thermal_bridges_bottom
+        factorThermalBridgesRoofAndShell
+      let factorThermalBridgesBottom = factorThermalBridgesBottom
 
-      let ambientTemperature = estimated_average_ambient_temperature.celsius
-      let soilTemperature = estimated_average_Soil_temperature.celsius
+      let ambientTemperature = estimatedAverageAmbientTemperature.celsius
+      let soilTemperature = estimatedAverage_SoilTemperature.celsius
 
       let tankHeightBottomRim = 0.0  //Iferror(C478, 14)
       let tankDiameter = 0.0  //Iferror(C400, 38)
@@ -1067,7 +1061,7 @@ struct TES {
       // let heatLossesAllHotTanks = heatLossesAllHotTanks
     }
     do {
-      let storagePumpEff = default_salt_pump_efficiency
+      let storagePumpEff = defaultSaltPumpEfficiency
 
       let htfTemperatureAtTesHexInletDuringCharge = htfPbHexInletTemperature
 
