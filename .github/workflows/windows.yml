@@ -19,7 +19,6 @@ jobs:
           path: libxlsxwriter
 
       - name: Install dependencies
-        working-directory: libxlsxwriter
         shell: cmd
         run: |
           vcpkg.exe install zlib:x64-windows sqlite3:x64-windows
@@ -28,10 +27,9 @@ jobs:
 
 
       - name: CMake libxlsxwriter
-        working-directory: libxlsxwriter
         shell: cmd
         run: |
-          cd cmake
+          cd libxlsxwriter/cmake
           call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
           cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DUSE_DTOA_LIBRARY=ON -DUSE_NO_MD5=ON -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -A x64
           cmake --build . --config Release
@@ -46,7 +44,7 @@ jobs:
 
       - name: Build Release Mode
         working-directory: ${{env.GITHUB_WORKSPACE}}
-        run: swift build -c release -Xlinker /INCREMENTAL:NO -Xlinker /IGNORE:4217 -Xcc -Llibxlsxwriter/include -Xswiftc -gnone -Xswiftc -suppress-warnings -Xswiftc -continue-building-after-errors
+        run: swift build -c release -Xlinker /INCREMENTAL:NO -Xlinker /IGNORE:4217 -Xcc -I./libxlsxwriter/include -Xswiftc -gnone -Xswiftc -suppress-warnings -Xswiftc -continue-building-after-errors
         continue-on-error: true
 
       - name: Copy libs to build folder
