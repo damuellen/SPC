@@ -27,6 +27,8 @@ jobs:
 
       - name: Build Release Mode
         run: swift build -c release -Xlinker /INCREMENTAL:NO -Xlinker /IGNORE:4217 -Xswiftc -gnone -Xswiftc -suppress-warnings -Xswiftc -continue-building-after-errors
+        env:
+          PKG_CONFIG_PATH: C:\vcpkg\installed\x64-windows\lib\pkgconfig
         continue-on-error: true
 
       - name: Copy libs to build folder

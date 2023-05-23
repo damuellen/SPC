@@ -217,48 +217,6 @@ func or(_ conditions: Bool...) -> Bool { conditions.contains(true) }
 protocol Labeled { var labels: [String] { get } }
 extension Labeled { var labels: [String] { Mirror(reflecting: self).children.compactMap(\.label) } }
 
-extension String {
-  func ansi(_ ansi: ANSI) -> String {
-    #if os(Windows)
-    return self
-    #else
-    let reset = ANSI.style(.reset).escapeCode
-    return "\(ansi.escapeCode)\(self)\(reset)"
-    #endif
-  }
-  public func style(_ style: ANSIStyle) -> String { ansi(.style(style)) }
-  public func randomColor() -> String {
-    let color = ANSIColor(rawValue: Int.random(in: 31...36))!
-    return ansi(.text(color: color))
-  }
-  public func text(_ color: ANSIColor) -> String { ansi(.text(color: color)) }
-  public func background(_ color: ANSIColor) -> String { ansi(.background(color: color)) }
-}
-
-public enum ANSIColor: Int {
-  case black = 30
-  case red, green, yellow, blue, magenta, cyan, white
-}
-
-public enum ANSIStyle: Int {
-  case reset = 0
-  case bold, italic, underline, blink, inverse, strikethrough
-}
-
-public enum ANSI {
-  case text(color: ANSIColor)
-  case background(color: ANSIColor)
-  case style(_ style: ANSIStyle)
-  var escapeCode: String {
-    var code = ANSIStyle.reset.rawValue
-    switch self {
-    case .text(let color): code = color.rawValue
-    case .background(let color): code = color.rawValue + 10
-    case .style(let style): code = style.rawValue
-    }
-    return "\u{001B}[\(code)m"
-  }
-}
 
 public let tunol = """
   ████████╗██╗   ██╗███╗   ██╗ ██████╗ ██╗         
@@ -268,4 +226,4 @@ public let tunol = """
      ██║   ╚██████╔╝██║ ╚████║╚██████╔╝███████╗    
      ╚═╝    ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝ ╚══════╝    
   """
-  .randomColor()
+  .colored()
