@@ -8,11 +8,8 @@ jobs:
     runs-on: [windows-2022]
 
     steps:
-      - name: Install dependencies
-        shell: cmd
-        run: |
-          vcpkg.exe install zlib:x64-windows sqlite3:x64-windows
-          vcpkg.exe integrate install
+      - name: Checkout sources
+        uses: actions/checkout@v3
 
       - name: Checkout libxlsxwriter
         uses: actions/checkout@v3
@@ -21,31 +18,31 @@ jobs:
           ref: 'RELEASE_1.1.5'
           path: libxlsxwriter
 
-      - name: Configure CMake
+      - name: Install dependencies
+        working-directory: libxlsxwriter
+        shell: cmd
+        run: |
+          vcpkg.exe install zlib:x64-windows sqlite3:x64-windows
+          vcpkg.exe integrate install
+
+
+
+      - name: CMake libxlsxwriter
         working-directory: libxlsxwriter
         shell: cmd
         run: |
           cd cmake
           call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
           cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DUSE_DTOA_LIBRARY=ON -DUSE_NO_MD5=ON -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -A x64
-
-      - name: Build
-        working-directory: libxlsxwriter
-        shell: cmd
-        run: |
-          cd cmake
-          call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
           cmake --build . --config Release
-
         continue-on-error: true
+
       - name: Setup Swift compiler
         uses: compnerd/gha-setup-swift@main
         with:
           branch: swift-5.8-release
           tag: 5.8-RELEASE
 
-      - name: Checkout sources
-        uses: actions/checkout@v3
 
       - name: Build Release Mode
         working-directory: ${{env.GITHUB_WORKSPACE}}
