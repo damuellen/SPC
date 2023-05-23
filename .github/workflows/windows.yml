@@ -1,26 +1,43 @@
 name: CI – Windows
 
 on: workflow_dispatch
-env:
-  PKG_CONFIG_PATH: C:\vcpkg\installed\x64-windows\lib\pkgconfig
+
 jobs:
   continuous-integration:
     timeout-minutes: 15
     runs-on: [windows-2022]
 
     steps:
-      - name: vcpkg upgrade
-        run: vcpkg upgrade
-        continue-on-error: true
+      - name: Install dependencies
+        shell: cmd
+        run: |
+          vcpkg.exe install zlib:x64-windows minizip:x64-windows openssl:x64-windows sqlite3:x64-windows
+          vcpkg.exe integrate install
 
-      - name: vcpkg install libxlsxwriter
-        run: vcpkg install libxlsxwriter:x64-windows-static
-        continue-on-error: true
+      - name: Checkout libxlsxwriter
+        uses: actions/checkout@v3
+        with: 
+          repository: jmcnamara/libxlsxwriter
+          ref: 'RELEASE_1.1.5'
+          path: libxlsxwriter
 
-      - name: vcpkg install sqlite3
-        run: vcpkg install sqlite3:x64-windows-static
-        continue-on-error: true
+      - name: Configure CMake
+        working-directory: libxlsxwriter
+        shell: cmd
+        run: |
+          cd cmake
+          call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+          cmake .. -DCMAKE_BUILD_TYPE=Release -DUSE_DTOA_LIBRARY=ON -DUSE_OPENSSL_MD5=ON -DUSE_SYSTEM_MINIZIP=ON -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -A x64
 
+      - name: Build
+        working-directory: libxlsxwriter
+        shell: cmd
+        run: |
+          cd cmake
+          call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+          cmake --build . --config Release
+
+        continue-on-error: true
       - name: Setup Swift compiler
         uses: compnerd/gha-setup-swift@main
         with:
@@ -31,7 +48,8 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Build Release Mode
-        run: swift build -c release -Xlinker /INCREMENTAL:NO -Xlinker /IGNORE:4217 -Xswiftc -gnone -Xswiftc -suppress-warnings -Xswiftc -continue-building-after-errors
+        working-directory: ${{env.GITHUB_WORKSPACE}}
+        run: swift build -c release -Xlinker /INCREMENTAL:NO -Xlinker /IGNORE:4217 -Xcc -Llibxlsxwriter/include -Xswiftc -gnone -Xswiftc -suppress-warnings -Xswiftc -continue-building-after-errors
         continue-on-error: true
 
       - name: Copy libs to build folder
