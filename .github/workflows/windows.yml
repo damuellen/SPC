@@ -11,7 +11,7 @@ jobs:
       - name: Install dependencies
         shell: cmd
         run: |
-          vcpkg.exe install zlib:x64-windows minizip:x64-windows openssl:x64-windows sqlite3:x64-windows
+          vcpkg.exe install zlib:x64-windows sqlite3:x64-windows
           vcpkg.exe integrate install
 
       - name: Checkout libxlsxwriter
@@ -27,7 +27,7 @@ jobs:
         run: |
           cd cmake
           call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
-          cmake .. -DCMAKE_BUILD_TYPE=Release -DUSE_DTOA_LIBRARY=ON -DUSE_OPENSSL_MD5=ON -DUSE_SYSTEM_MINIZIP=ON -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -A x64
+          cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DUSE_DTOA_LIBRARY=ON -DUSE_NO_MD5=ON -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -A x64
 
       - name: Build
         working-directory: libxlsxwriter
