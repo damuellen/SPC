@@ -24,16 +24,6 @@ jobs:
           vcpkg.exe install zlib:x64-windows sqlite3:x64-windows
           vcpkg.exe integrate install
 
-      - name: CMake libxlsxwriter
-        working-directory: libxlsxwriter
-        shell: cmd
-        run: |
-          call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
-          mkdir build
-          cd build
-          cmake .. -DCMAKE_BUILD_TYPE=Release -DUSE_DTOA_LIBRARY=ON -DUSE_NO_MD5=ON -DCMAKE_INSTALL_PREFIX:PATH="C:\vcpkg\installed\x64-windows" -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -A x64
-          cmake --build . --config Release --target install
-        continue-on-error: true
 
       - name: Setup Swift compiler
         uses: compnerd/gha-setup-swift@main
@@ -41,10 +31,19 @@ jobs:
           branch: swift-5.8-release
           tag: 5.8-RELEASE
 
+      - name: CMake libxlsxwriter
+        working-directory: libxlsxwriter
+        shell: cmd
+        run: |
+          mkdir build
+          cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release -DUSE_DTOA_LIBRARY=ON -DUSE_NO_MD5=ON -DCMAKE_INSTALL_PREFIX:PATH="C:/vcpkg/installed/x64-windows" -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -A x64
+          cmake --build . --config Release --target install
+        continue-on-error: true
 
       - name: Build Release Mode
         working-directory: ${{env.GITHUB_WORKSPACE}}
-        run: swift build -c release -Xlinker /INCREMENTAL:NO -Xlinker /IGNORE:4217 -Xcc -IC:\vcpkg\installed\x64-windows\include -Xlinker -IC:\vcpkg\installed\x64-windows\lib -Xswiftc -gnone -Xswiftc -suppress-warnings -Xswiftc -continue-building-after-errors
+        run: swift build -c release -Xlinker /INCREMENTAL:NO -Xlinker /IGNORE:4217 -Xswiftc -IC:\vcpkg\installed\x64-windows\include -Xlinker -LC:\vcpkg\installed\x64-windows\lib -Xswiftc -gnone -Xswiftc -suppress-warnings -Xswiftc -continue-building-after-errors
         continue-on-error: true
 
       - name: Copy libs to build folder
