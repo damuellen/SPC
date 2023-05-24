@@ -11,45 +11,15 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v3
 
-      - name: Checkout libxlsxwriter
-        uses: actions/checkout@v3
-        with: 
-          repository: jmcnamara/libxlsxwriter
-          ref: 'RELEASE_1.1.5'
-          path: libxlsxwriter
-
-      - name: Install dependencies
-        shell: cmd
-        run: |
-          vcpkg.exe install zlib:x64-windows sqlite3:x64-windows
-          vcpkg.exe integrate install
-
-
       - name: Setup Swift compiler
         uses: compnerd/gha-setup-swift@main
         with:
           branch: swift-5.8-release
           tag: 5.8-RELEASE
 
-      - name: CMake libxlsxwriter
-        working-directory: libxlsxwriter
-        shell: cmd
-        run: |
-          mkdir build
-          cd build
-          cmake .. -DCMAKE_BUILD_TYPE=Release -DUSE_DTOA_LIBRARY=ON -DUSE_NO_MD5=ON -DCMAKE_INSTALL_PREFIX:PATH="C:/vcpkg/installed/x64-windows" -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -A x64
-          cmake --build . --config Release --target install
-        continue-on-error: true
-
       - name: Build Release Mode
-        working-directory: ${{env.GITHUB_WORKSPACE}}
-        run: swift build -c release -Xlinker /INCREMENTAL:NO -Xlinker /IGNORE:4217 -Xswiftc -IC:\vcpkg\installed\x64-windows\include -Xlinker -LC:\vcpkg\installed\x64-windows\lib -Xswiftc -gnone -Xswiftc -suppress-warnings -Xswiftc -continue-building-after-errors
+        run: swift build -c release -Xlinker /INCREMENTAL:NO -Xlinker /IGNORE:4217 -Xswiftc -I.\libxlsxwriter\include -Xlinker -L.\libxlsxwriter\lib -Xswiftc -gnone -Xswiftc -suppress-warnings -Xswiftc -continue-building-after-errors
         continue-on-error: true
-
-      - name: Copy libs to build folder
-        run: Copy-Item -Path "C:\vcpkg\installed\x64-windows\bin\*.dll" -Destination "D:\a\SPC\SPC\.build\x86_64-unknown-windows-msvc\release" -Recurse
-        continue-on-error: true
-        shell: powershell
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
