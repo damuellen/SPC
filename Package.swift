@@ -85,7 +85,6 @@ let platformTargets: [Target] = [
       "Utilities", 
       .product(name: "xlsxwriter", package: "xlsxwriter.swift"),
     ],
-    // .product(name: "SwiftPlot", package: "SwiftPlot")
     swiftSettings: swift
   ),
   .target(
@@ -101,7 +100,7 @@ let platformTargets: [Target] = [
     name: "MeteoTests",
     dependencies: ["Utilities", "DateExtensions", "SolarPosition", "Meteo"]
   ),
-  // .testTarget(name: "SunOlTests", dependencies: ["SunOl"]),
+  .testTarget(name: "SunOlTests", dependencies: ["SunOl"]),
   .testTarget(name: "ThermalStorageTests", dependencies: ["ThermalStorage"]),
   .testTarget(name: "PinchPointTests", dependencies: ["PinchPoint"]),
   .testTarget(

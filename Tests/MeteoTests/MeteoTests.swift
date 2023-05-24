@@ -45,11 +45,8 @@ class MeteoTests: XCTestCase {
       (0, 20.4, 4.9), (0, 19.9, 3.9), (0, 19.7, 4.0), (0, 19.6, 4.0), (0, 19.5, 4.2), (0, 19.3, 4.5),
     ]
 
-    let meteoDataHourly = hourly.map { MeteoData(dni: $0.dni, ghi: 0, dhi: 0, temperature: $0.temp, windSpeed: $0.ws) }
+    _ = hourly.map { MeteoData(dni: $0.dni, ghi: 0, dhi: 0, temperature: $0.temp, windSpeed: $0.ws) }
     _ = goodDay.map { MeteoData(dni: $0.dni, ghi: 0, dhi: 0, temperature: $0.temp, windSpeed: $0.ws) }
     _ = badDay.map { MeteoData(dni: $0.dni, ghi: 0, dhi: 0, temperature: $0.temp, windSpeed: $0.ws) }
-
-    let meteoData = Array(repeatElement(meteoDataHourly, count: 365).joined())
-
   }
 }

@@ -224,14 +224,16 @@ class SunOlTests: XCTestCase {
   }
 
   func testsCalculation2() {
-    let values = [0.00,0.00,0.00,605.01,791.22,200.00,0.00,198.30,1000.00,100000.00,100000.00,24.03,9.23,1010.87,0.00,0.00,]
+    _ = [0.0,0.0,0.0,605.01,791.22,200.0,0.0,198.30,1000.00,100000.0,100000.0,24.03,9.23,1010.87,0.0,0.0]
+    let values = [10,535.41,10.36,365.27,400,160,0,56.36,1000,10000,100000,14.05,36.66,0,0,0]
 
     guard let model = TunOl(values) else {
       print("Invalid config")
       return
     }
-
+    dump(model)
     let costs = Costs(model)
+    dump(costs)
     var hourPre = [Double](repeating: 0.0, count: 1_086_240)
     var hourFinal = [Double](repeating: 0.0, count: 516_840)
     var d10 = [Double](repeating: 0.0, count: 97_090)
@@ -293,6 +295,7 @@ class SunOlTests: XCTestCase {
         elec_to_grid_MTPH_sum += to_grid
         let from_grid = day[best][d + 730]
         elec_from_grid_sum += from_grid
+        outputStream.append(contentsOf: "\(name[best]) \(from_grid)\n")
         let hours0 = day[best][d + 1095]
         let hours1 = day[best][d + 1460]
         hours_sum += hours0 + hours1
@@ -300,6 +303,7 @@ class SunOlTests: XCTestCase {
     }
 
     let LCOM = costs.LCOM(meth_produced_MTPH: meth_produced_MTPH_sum, elec_from_grid: elec_from_grid_sum, elec_to_grid: elec_to_grid_MTPH_sum)
+    dump(LCOM)
     XCTAssertEqual(LCOM, 2154, accuracy: 1, "LCOM")
     XCTAssertEqual(hours_sum, 8663, accuracy: 1, "hours_sum")
     XCTAssertEqual(meth_produced_MTPH_sum, 100000, accuracy: 1, "meth_produced_MTPH_sum")

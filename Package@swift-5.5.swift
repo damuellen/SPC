@@ -49,7 +49,7 @@ let platformTargets: [Target] = [
     dependencies: ["Utilities", "DateExtensions", "CSOLPOS", "CSPA"],
     swiftSettings: swift
   ), .target(name: "PinchPoint", dependencies: ["CPikchr", "Utilities"], swiftSettings: swift),
-  .target(name: "ThermalStorage", dependencies: ["Utilities"], swiftSettings: swift),
+  // .target(name: "ThermalStorage", dependencies: ["Utilities"], swiftSettings: swift),
   .target(
     name: "Meteo",
     dependencies: ["DateExtensions", "SolarPosition", "Utilities"],
@@ -113,7 +113,7 @@ let platformTargets: [Target] = [
     dependencies: ["Utilities", "DateExtensions", "SolarPosition", "Meteo"]
   ),
   .testTarget(name: "SunOlTests", dependencies: ["SunOl"]),
-  .testTarget(name: "ThermalStorageTests", dependencies: ["ThermalStorage"]),
+  // .testTarget(name: "ThermalStorageTests", dependencies: ["ThermalStorage"]),
   .testTarget(name: "PinchPointTests", dependencies: ["PinchPoint"]),
   .testTarget(
     name: "BlackBoxModelTests",
