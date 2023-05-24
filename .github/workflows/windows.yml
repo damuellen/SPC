@@ -18,7 +18,7 @@ jobs:
           tag: 5.8-RELEASE
 
       - name: Build Release Mode
-        run: swift build -c release -Xlinker /INCREMENTAL:NO -Xlinker /IGNORE:4217 -Xswiftc -I.\libxlsxwriter\include -Xlinker -L.\libxlsxwriter\lib -Xswiftc -gnone -Xswiftc -suppress-warnings -Xswiftc -continue-building-after-errors
+        run: swift build -c release -Xlinker /INCREMENTAL:NO -Xlinker /IGNORE:4217 -Xswiftc -Ilibxlsxwriter\include -Xlinker -Llibxlsxwriter\lib -Xswiftc -gnone -Xswiftc -suppress-warnings -Xswiftc -continue-building-after-errors
         continue-on-error: true
 
       - name: Upload build artifacts
