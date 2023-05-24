@@ -23,7 +23,8 @@ class BlackBoxModelTests: XCTestCase {
     BlackBoxModel.configure(year: 2005)
     BlackBoxModel.configure(location: location)
     let log = Historian(outputMode: .inMemory)
-    let result = BlackBoxModel.runModel(with: log)
+    BlackBoxModel.runModel(with: log)
+    let result = log.finish()
     let tol = 1.0
     XCTAssertEqual(result.electric.net, 2209, accuracy: tol, "electric.net")
     XCTAssertEqual(result.electric.consum, 19, accuracy: tol, "electric.consum")
@@ -55,8 +56,9 @@ class BlackBoxModelTests: XCTestCase {
     BlackBoxModel.configure(location: location)
 
     let log = Historian(outputMode: .inMemory)
+    BlackBoxModel.runModel(with: log)
 
-    let result = BlackBoxModel.runModel(with: log)
+    let result = log.finish()
     let tol = 1.0
     XCTAssertEqual(result.electric.net, 1519, accuracy: tol, "electric.net")
     XCTAssertEqual(result.electric.consum, 33, accuracy: tol, "electric.consum")

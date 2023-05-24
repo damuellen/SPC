@@ -42,7 +42,7 @@ class CollectorTests: XCTestCase {
     guard 
       let file = try? MeteoDataFileHandler(forReadingAtPath: "/Users/daniel/spc/COM/Tunol.mto"),
       let meteo = try? file.data(valuesPerHour: 12),
-      let location = try? file.metaData().location
+      let location = try? file.metadata().location
     else { return }
     
     let sun = SolarPosition(coords: location.coordinates, tz: -1, year: 2017, frequence: .fiveMinutes)
