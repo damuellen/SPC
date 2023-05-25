@@ -3,7 +3,7 @@ echo "Install libxlsxwriter"
 cd /tmp
 git clone --single-branch -b RELEASE_1.1.4 https://github.com/jmcnamara/libxlsxwriter --quiet
 cd libxlsxwriter
-make USE_DTOA_LIBRARY=1 USE_MEM_FILE
+make USE_DTOA_LIBRARY=1 USE_NO_MD5=1 USE_MEM_FILE=1
 sudo make install
 sudo ldconfig
 cd ../
