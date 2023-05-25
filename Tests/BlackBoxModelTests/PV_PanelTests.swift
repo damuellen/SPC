@@ -28,7 +28,7 @@ class PVPanelTests: XCTestCase {
       plot1.settings = [
         "ylabel": "Power", "xlabel": "GTI",
       ]
-
+      _ = try? FileManager.default.createDirectory(atPath: ".plots", withIntermediateDirectories: true)
       _ = try? plot(.png(".plots/panel.png"))
       _ = try? plot(.png(".plots/panel2.png"))
     
@@ -71,7 +71,7 @@ class PVPanelTests: XCTestCase {
     let photovoltaic = conditions.map { step -> Double in
       pv(step) / 10.0e6
     }
-
+    _ = try? FileManager.default.createDirectory(atPath: ".plots", withIntermediateDirectories: true)
     let plot = Gnuplot(xs: Array(stride(from: 10.0, to: 1300, by: 10)), ys: photovoltaic)
     _ = try? plot(.pngLarge(".plots/pv.png"))
   }

@@ -8,6 +8,7 @@ class BlackBoxModelTests: XCTestCase {
   let df = DateFormatter()
 
   override func setUp() {
+    _ = try? FileManager.default.createDirectory(atPath: ".plots", withIntermediateDirectories: true)
     df.timeZone = TimeZone(secondsFromGMT: 0)
     df.dateFormat = "dd.MM.yyyy"
   }

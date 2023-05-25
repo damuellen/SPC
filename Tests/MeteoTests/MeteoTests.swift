@@ -11,6 +11,7 @@ class MeteoTests: XCTestCase {
       let sun = SolarPosition(coords: (-26, 35, 0), tz: 2, year: 2017, frequence: .fiveMinutes)
       let clearSky = MeteoData.using(sun, model: .special)
       let dni = Array(clearSky.map(\.dni).prefix(24 * 12 * 4))
+      _ = try? FileManager.default.createDirectory(atPath: ".plots", withIntermediateDirectories: true)
       _ = try? Gnuplot(xs: dni)(.pngLarge(".plots/dni.png"))
     }
 
