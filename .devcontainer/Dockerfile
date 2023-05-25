@@ -16,8 +16,8 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
 COPY library-scripts/libxlsxwriter.sh /tmp/library-scripts/
 COPY library-scripts/swift-format.sh /tmp/library-scripts/
 
-RUN wget https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-2/wkhtmltox_0.12.6.1-2.jammy_amd64.deb \
-    && sudo apt install -f ./wkhtmltox_0.12.6.1-2.jammy_amd64.deb && rm ./wkhtmltox_0.12.6.1-2.jammy_amd64.deb
+RUN wget https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-2/wkhtmltox_0.12.6.1-2.jammy_amd64.deb -o /tmp/wkhtmltox.deb \
+    && sudo apt-get install -f /tmp/wkhtmltox.deb && rm /tmp/wkhtmltox.deb
 
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
     && apt-get -y install --no-install-recommends libsqlite3-dev gnuplot-nox \
