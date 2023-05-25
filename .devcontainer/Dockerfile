@@ -1,4 +1,4 @@
-FROM swift:5.7-focal
+FROM swift:5.8
 
 # [Option] Install zsh
 ARG INSTALL_ZSH="false"
