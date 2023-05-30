@@ -177,19 +177,19 @@ public final class Historian {
     #endif
     var buffer = [UInt8]()
       /// Sum of hourly values
-    var hourlyPerformance = PlantPerformance()
-    var hourlyRadiation = Insolation()
+    var accumulate = PlantPerformance()
+    var insolation = Insolation()
     if case .custom(let custom) = mode {
       let f = frequency.rawValue / custom.rawValue
       var date = startDate
       for i in stride(from: 0, to: performance.count, by: f) {
-        hourlyPerformance.totalize(performance[i..<i+f], fraction: 1 / Double(f))
-        hourlyRadiation = sun[i..<i+f].hourly(fraction: 1 / Double(f))
+        accumulate(performance[i..<i+f], fraction: 1 / Double(f))
+        insolation = sun[i..<i+f].hourly(fraction: 1 / Double(f))
         let time = DateTime(date)
         buffer = [UInt8](time.commaSeparatedValues.utf8) 
           + comma + [UInt8]("\(time.minute)".utf8)
-          + comma + [UInt8](hourlyRadiation.commaSeparatedValues.utf8)
-          + comma + [UInt8](hourlyPerformance.commaSeparatedValues.utf8) 
+          + comma + [UInt8](insolation.commaSeparatedValues.utf8)
+          + comma + [UInt8](accumulate.commaSeparatedValues.utf8) 
           + lineBreak
         date.addTimeInterval(custom.interval)
         _ = fileStream?.write(buffer, maxLength: buffer.count)
@@ -200,13 +200,14 @@ public final class Historian {
       let f = frequency.rawValue
       var date = startDate
       for i in stride(from: 0, to: performance.count, by: f) {
-        hourlyPerformance.totalize(performance[i..<i+f], fraction: frequency.fraction)
-        hourlyRadiation = sun[i..<i+f].hourly(fraction: frequency.fraction)
+        let fraction = frequency.fraction
+        accumulate(performance[i..<i+f], fraction: fraction)
+        insolation = sun[i..<i+f].hourly(fraction: fraction)
         buffer = [UInt8](DateTime(date).commaSeparatedValues.utf8) 
-          + comma + [UInt8](hourlyRadiation.commaSeparatedValues.utf8)
-          + comma + [UInt8](hourlyPerformance.commaSeparatedValues.utf8) 
+          + comma + [UInt8](insolation.commaSeparatedValues.utf8)
+          + comma + [UInt8](accumulate.commaSeparatedValues.utf8) 
           + lineBreak
-        date.addTimeInterval(frequency.interval)
+        date.addTimeInterval(DateSeries.Frequence.hour.interval)
         _ = fileStream?.write(buffer, maxLength: buffer.count)
       }
     }

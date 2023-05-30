@@ -61,7 +61,7 @@ public struct Recording: CustomStringConvertible, Comparable {
   ) {
     self.startDate = startDate
     var annualPerformance = PlantPerformance()
-    annualPerformance.totalize(performanceHistory, fraction: interval.fraction)
+    annualPerformance(performanceHistory, fraction: interval.fraction)
     self.performance = annualPerformance
     self.irradiance = irradiance 
     self.performanceHistory = performanceHistory

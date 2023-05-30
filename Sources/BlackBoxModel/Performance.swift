@@ -20,11 +20,11 @@ public struct PlantPerformance: MeasurementsConvertible {
 
   internal(set) public var parasitics: Parasitics
 
-  mutating func totalize(_ performance: some RangeReplaceableCollection<PlantPerformance>, fraction: Double) {
-    self.thermal = performance.map(\.thermal).totalize(fraction: fraction)
-    self.fuel = performance.map(\.fuel).totalize(fraction: fraction)
-    self.parasitics = performance.map(\.parasitics).totalize(fraction: fraction)
-    self.electric = performance.map(\.electric).totalize(fraction: fraction)
+  mutating func callAsFunction(_ performance: some RangeReplaceableCollection<PlantPerformance>, fraction: Double) {
+    self.thermal = performance.map(\.thermal).added(fraction: fraction)
+    self.fuel = performance.map(\.fuel).added(fraction: fraction)
+    self.parasitics = performance.map(\.parasitics).added(fraction: fraction)
+    self.electric = performance.map(\.electric).added(fraction: fraction)
   }
 
   var values: [Double] {
@@ -138,7 +138,7 @@ public struct ElectricPower: Encodable, MeasurementsConvertible {
 }
 
 extension RangeReplaceableCollection where Element==ElectricPower {
-  func totalize(fraction: Double) -> ElectricPower {
+  func added(fraction: Double) -> ElectricPower {
     var result = ElectricPower()
     for values in self {
       result.demand += values.demand * fraction
@@ -180,7 +180,7 @@ public struct Parasitics: Encodable, MeasurementsConvertible {
 }
 
 extension RangeReplaceableCollection where Element==Parasitics {
-  func totalize(fraction: Double) -> Parasitics {
+  func added(fraction: Double) -> Parasitics {
     var result = Parasitics()
     for values in self {
       result.solarField += values.solarField * fraction
@@ -252,7 +252,7 @@ public struct ThermalEnergy: Encodable, MeasurementsConvertible {
 }
 
 extension RangeReplaceableCollection where Element==ThermalEnergy {
-  func totalize(fraction: Double) -> ThermalEnergy {
+  func added(fraction: Double) -> ThermalEnergy {
     var result = ThermalEnergy()
     for values in self {
       result.solar += values.solar * fraction
@@ -298,7 +298,7 @@ public struct FuelConsumption: Encodable, MeasurementsConvertible {
 }
 
 extension RangeReplaceableCollection where Element==FuelConsumption {
-  func totalize(fraction: Double) -> FuelConsumption {
+  func added(fraction: Double) -> FuelConsumption {
     var result = FuelConsumption()
     for fuel in self {
       result.backup += fuel.backup * fraction
