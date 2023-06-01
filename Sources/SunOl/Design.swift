@@ -524,17 +524,17 @@ public struct TunOl {
     }
 
     self.equiv_harmonious_min_perc[0] = max(
-      ifFinite(Overall_harmonious_max_perc / MethDist_harmonious_max_perc * MethDist_min_perc[0], 0), ifFinite(Overall_harmonious_max_perc / MethSynt_harmonious_max_perc * MethSynt_min_perc[0], 0),
-      ifFinite(Overall_harmonious_max_perc / CCU_harmonious_max_perc * CCU_min_perc[0], 0), ifFinite(Overall_harmonious_max_perc / EY_harmonious_max_perc * EY_min_perc[0], 0))
+      ifFinite(Overall_harmonious_max_perc / MethDist_harmonious_max_perc * MethDist_min_perc[0], Double.zero), ifFinite(Overall_harmonious_max_perc / MethSynt_harmonious_max_perc * MethSynt_min_perc[0], Double.zero),
+      ifFinite(Overall_harmonious_max_perc / CCU_harmonious_max_perc * CCU_min_perc[0], Double.zero), ifFinite(Overall_harmonious_max_perc / EY_harmonious_max_perc * EY_min_perc[0], Double.zero))
     self.equiv_harmonious_min_perc[1] = max(
-      ifFinite(Overall_harmonious_max_perc / MethDist_harmonious_max_perc * MethDist_min_perc[1], 0), ifFinite(Overall_harmonious_max_perc / MethSynt_harmonious_max_perc * MethSynt_min_perc[1], 0),
-      ifFinite(Overall_harmonious_max_perc / CCU_harmonious_max_perc * CCU_min_perc[1], 0), ifFinite(Overall_harmonious_max_perc / EY_harmonious_max_perc * EY_min_perc[1], 0))
+      ifFinite(Overall_harmonious_max_perc / MethDist_harmonious_max_perc * MethDist_min_perc[1], Double.zero), ifFinite(Overall_harmonious_max_perc / MethSynt_harmonious_max_perc * MethSynt_min_perc[1], Double.zero),
+      ifFinite(Overall_harmonious_max_perc / CCU_harmonious_max_perc * CCU_min_perc[1], Double.zero), ifFinite(Overall_harmonious_max_perc / EY_harmonious_max_perc * EY_min_perc[1], Double.zero))
     self.equiv_harmonious_min_perc[2] = max(
-      ifFinite(Overall_harmonious_max_perc / MethDist_harmonious_max_perc * MethDist_min_perc[2], 0), ifFinite(Overall_harmonious_max_perc / MethSynt_harmonious_max_perc * MethSynt_min_perc[2], 0),
-      ifFinite(Overall_harmonious_max_perc / CCU_harmonious_max_perc * CCU_min_perc[2], 0), 0)
+      ifFinite(Overall_harmonious_max_perc / MethDist_harmonious_max_perc * MethDist_min_perc[2], Double.zero), ifFinite(Overall_harmonious_max_perc / MethSynt_harmonious_max_perc * MethSynt_min_perc[2], Double.zero),
+      ifFinite(Overall_harmonious_max_perc / CCU_harmonious_max_perc * CCU_min_perc[2], Double.zero), 0)
     self.equiv_harmonious_min_perc[3] = max(
-      ifFinite(Overall_harmonious_max_perc / MethDist_harmonious_max_perc * MethDist_min_perc[3], 0), ifFinite(Overall_harmonious_max_perc / MethSynt_harmonious_max_perc * MethSynt_min_perc[3], 0),
-      ifFinite(Overall_harmonious_max_perc / CCU_harmonious_max_perc * CCU_min_perc[3], 0), ifFinite(Overall_harmonious_max_perc / EY_harmonious_max_perc * EY_min_perc[3], 0), 0)
+      ifFinite(Overall_harmonious_max_perc / MethDist_harmonious_max_perc * MethDist_min_perc[3], Double.zero), ifFinite(Overall_harmonious_max_perc / MethSynt_harmonious_max_perc * MethSynt_min_perc[3], Double.zero),
+      ifFinite(Overall_harmonious_max_perc / CCU_harmonious_max_perc * CCU_min_perc[3], Double.zero), ifFinite(Overall_harmonious_max_perc / EY_harmonious_max_perc * EY_min_perc[3], Double.zero), 0)
 
     self.MethDist_harmonious_perc_at_PB_nom = MethDist_harmonious_max_perc / Overall_harmonious_max_perc * Overall_harmonious_perc_at_PB_nom
     let MethSynt_harmonious_perc_at_PB_nom: Double = MethSynt_harmonious_max_perc / Overall_harmonious_max_perc * Overall_harmonious_perc_at_PB_nom
@@ -591,7 +591,7 @@ public struct TunOl {
       self.PB_hot_start_heat_req = PB_nom_heat_cons * PB_hot_start_energyperc
 
       let gross_electrical_output: [Double] = heat_input.map { $0 - PB_fix_aux_el }
-      let net_electrical_output: [Double] = zip(heat_input, gross_electrical_output).map { iff($0 <= 0, 0, $1 - PB_nom_var_aux_cons_perc_gross * PB_nom_gross_cap_ud * (POLY($0 / PB_nom_gross_cap_ud, PB_g2n_var_aux_el_Coeff))) }
+      let net_electrical_output: [Double] = zip(heat_input, gross_electrical_output).map { iff($0 <= Double.zero, Double.zero, $1 - PB_nom_var_aux_cons_perc_gross * PB_nom_gross_cap_ud * (POLY($0 / PB_nom_gross_cap_ud, PB_g2n_var_aux_el_Coeff))) }
       let net_el_output_factor: [Double] = net_electrical_output.map { $0 / net_electrical_output[0] }
       let var_aux_cons: [Double] = zip(gross_electrical_output, net_electrical_output).map(-)
       let auxiliary_consumption_factor: [Double] = var_aux_cons.map { $0 / var_aux_cons[0] }
@@ -612,7 +612,7 @@ public struct TunOl {
 
     let TES_cold_tank_T: Double = 304.55
     let TES_dead_mass_ratio: Double = 0.1
-    if PB_var_heat_max_cons > 0 {
+    if PB_var_heat_max_cons > Double.zero {
       self.TES_full_load_hours = TES_thermal_cap_ud / PB_var_heat_max_cons
       self.TES_thermal_cap = TES_full_load_hours * PB_var_heat_max_cons
       self.TES_salt_mass = TES_thermal_cap * 1000 * 3600 / (h_SS(Heater_outlet_T) - h_SS(TES_cold_tank_T)) / 1000 * (1 + TES_dead_mass_ratio)

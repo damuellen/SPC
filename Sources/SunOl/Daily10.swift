@@ -73,7 +73,7 @@ extension TunOl {
     // IF(OR(L6<=0,N6<=0,P6<=0),0,MIN(1,IFERROR(L6/(L6-M6),1),IFERROR(N6/(N6-O6),1),IFERROR(P6/(P6-Q6),1))*(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)+A_equiv_harmonious_min_perc)
     for i in 0..<365 {
       d10[R + i] = iff(
-        or(d10[L + i] <= Double.zero, d10[N + i] <= Double.zero, d10[P + i] <= 0), Double.zero,
+        or(d10[L + i] <= Double.zero, d10[N + i] <= Double.zero, d10[P + i] <= Double.zero), Double.zero,
         min(1, ifFinite(d10[L + i] / (d10[L + i] - d10[M + i]), 1.0), ifFinite(d10[N + i] / (d10[N + i] - d10[O + i]), 1.0), ifFinite(d10[P + i] / (d10[P + i] - d10[Q + i]), 1.0)) * (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j])
           + equiv_harmonious_min_perc[j])
     }
@@ -168,7 +168,7 @@ extension TunOl {
       d10[AM + i] = min(
         hour4[days[i][0] + EJ],
         iff(
-          or(d10[L + i] <= Double.zero, d10[N + i] <= Double.zero, d10[P + i] <= 0), Double.zero,
+          or(d10[L + i] <= Double.zero, d10[N + i] <= Double.zero, d10[P + i] <= Double.zero), Double.zero,
           min(1, ifFinite(d10[L + i] / (d10[L + i] - d10[AJ + i]), 1.0), ifFinite(d10[N + i] / (d10[N + i] - d10[AK + i]), 1.0), ifFinite(d10[P + i] / (d10[P + i] - d10[AL + i]), 1.0))
             * (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]) + equiv_harmonious_min_perc[j]))
     }

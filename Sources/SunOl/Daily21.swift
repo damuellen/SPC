@@ -46,42 +46,42 @@ extension TunOl {
     // Y=IF(AND(A_RawMeth_min_cons=0,A_RawMeth_max_cons=0),1,1-ifFinite(A_RawMeth_min_cons*$B3/RawMeth_storage_cap_ud,2))
     for i in 0..<365 {
       d1[Y + i] = iff(
-        and(RawMeth_min_cons[j] == Double.zero, RawMeth_max_cons[j] == Double.zero), 1,
+        and(RawMeth_min_cons[j].isZero, RawMeth_max_cons[j].isZero), 1,
         1 - ifFinite(RawMeth_min_cons[j] * d1[B + i] / RawMeth_storage_cap_ud, 2))
     }
     // Surplus RawMeth storage cap after max night op prep
     // Z=IF(AND(A_RawMeth_min_cons=0,A_RawMeth_max_cons=0),1,1-ifFinite(A_RawMeth_max_cons*$B3/RawMeth_storage_cap_ud,2))
     for i in 0..<365 {
       d1[Z + i] = iff(
-        and(RawMeth_min_cons[j] == Double.zero, RawMeth_max_cons[j] == Double.zero), 1,
+        and(RawMeth_min_cons[j].isZero, RawMeth_max_cons[j].isZero), 1,
         1 - ifFinite(RawMeth_max_cons[j] * d1[B + i] / RawMeth_storage_cap_ud, 2))
     }
     // Surplus CO2 storage cap after min night op prep
     // AA=IF(AND(A_CO2_min_cons=0,A_CO2_max_cons=0),1,1-ifFinite(A_CO2_min_cons*$B3/CO2_storage_cap_ud,2))
     for i in 0..<365 {
       d1[AA + i] = iff(
-        and(CO2_min_cons[j] == Double.zero, CO2_max_cons[j] == Double.zero), 1,
+        and(CO2_min_cons[j].isZero, CO2_max_cons[j].isZero), 1,
         1 - ifFinite(CO2_min_cons[j] * d1[B + i] / CO2_storage_cap_ud, 2))
     }
     // Surplus CO2 storage cap after max night op prep
     // AB=IF(AND(A_CO2_min_cons=0,A_CO2_max_cons=0),1,1-ifFinite(A_CO2_max_cons*$B3/CO2_storage_cap_ud,2))
     for i in 0..<365 {
       d1[AB + i] = iff(
-        and(CO2_min_cons[j] == Double.zero, CO2_max_cons[j] == Double.zero), 1,
+        and(CO2_min_cons[j].isZero, CO2_max_cons[j].isZero), 1,
         1 - ifFinite(CO2_max_cons[j] * d1[B + i] / CO2_storage_cap_ud, 2))
     }
     // Surplus H2 storage cap after min night op prep
     // AC=IF(AND(A_Hydrogen_max_cons=0,A_Hydrogen_min_cons=0),1,1-ifFinite(A_Hydrogen_min_cons*$B3/Hydrogen_storage_cap_ud,2))
     for i in 0..<365 {
       d1[AC + i] = iff(
-        and(Hydrogen_max_cons[j] == Double.zero, Hydrogen_min_cons[j] == Double.zero), 1,
+        and(Hydrogen_max_cons[j].isZero, Hydrogen_min_cons[j].isZero), 1,
         1 - ifFinite(Hydrogen_min_cons[j] * d1[B + i] / Hydrogen_storage_cap_ud, 2))
     }
     // Surplus H2 storage cap after max night op prep
     // AD=IF(AND(A_Hydrogen_max_cons=0,A_Hydrogen_min_cons=0),1,1-ifFinite(A_Hydrogen_max_cons*$B3/Hydrogen_storage_cap_ud,2))
     for i in 0..<365 {
       d1[AD + i] = iff(
-        and(Hydrogen_max_cons[j] == Double.zero, Hydrogen_min_cons[j] == Double.zero), 1,
+        and(Hydrogen_max_cons[j].isZero, Hydrogen_min_cons[j].isZero), 1,
         1 - ifFinite(Hydrogen_max_cons[j] * d1[B + i] / Hydrogen_storage_cap_ud, 2))
     }
     // Max Equiv harmonious night prod due to physical limits
