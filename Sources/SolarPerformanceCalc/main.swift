@@ -83,11 +83,10 @@ struct SolarPerformanceCalculator: ParsableCommand {
     let now = Date()
     let name = "Solar Performance Calculator"
     print(decorated(name), "")
-
-    let path = meteofilePath ?? configPath
-
+    var path: String! = nil
     do {
-      try BlackBoxModel.loadConfigurations(atPath: configPath, format: .text)
+      path = try BlackBoxModel.loadConfigurations(atPath: configPath)
+      if path == nil { path = meteofilePath ?? configPath }
     } catch {
  #if os(Windows)
       if let message = (error as? TextConfigFile.ReadError)?.description {

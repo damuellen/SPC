@@ -21,14 +21,13 @@ public struct TextConfigFile {
 
   public var name: String { values.indices.contains(6) ? self.values[6] : "" }
 
-  private let path: String
-
+  public let url: URL
   // Returns a String, which contains the content of needed config file.
   public init?(url: URL) {
-    let path = url.path
+    guard TextConfig.FileExtension.isValid(url: url) else { return nil }
     do {
       let content = try String(contentsOf: url, encoding: .windowsCP1252)
-      self = .init(content: content, path: path)
+      self = .init(content: content, url: url)
     } catch let error {
       print(error.localizedDescription)
       print("  " + url.path)
@@ -36,8 +35,8 @@ public struct TextConfigFile {
     }
   }
 
-  init(content: String, path: String) {
-    self.path = path
+  init(content: String, url: URL) {
+    self.url = url
     let separator: Character = content.contains("\r\n") ? "\r\n" : "\n"
     values = content.split(
       separator: separator, omittingEmptySubsequences: false
@@ -57,7 +56,7 @@ public struct TextConfigFile {
 
   public func readString(_ lineNumber: Int) throws -> String {
     guard let string = self[lineNumber - 1], string.count > 0 else {
-      throw ReadError.missingValueInLine(lineNumber, self.path)
+      throw ReadError.missingValueInLine(lineNumber, self.url.path)
     }
     return string
   }
@@ -67,7 +66,7 @@ public struct TextConfigFile {
     if let value = Double(value) {
       return value
     } else {
-      throw ReadError.invalidValueInLine(lineNumber, self.path)
+      throw ReadError.invalidValueInLine(lineNumber, self.url.path)
     }
   }
 
@@ -76,7 +75,7 @@ public struct TextConfigFile {
     if let value = Int(value) {
       return value
     } else {
-      throw ReadError.invalidValueInLine(lineNumber, self.path)
+      throw ReadError.invalidValueInLine(lineNumber, self.url.path)
     }
   }
 }

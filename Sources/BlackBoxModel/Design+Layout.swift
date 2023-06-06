@@ -38,9 +38,9 @@ public struct Layout: Codable, Equatable, Hashable, CustomStringConvertible {
   /// Thermal power of the gas turbine
   public var gasTurbine = 0.0
   /// Thermal power of the power block
-  public var powerBlock = 80.0
+  public var powerBlock = 70.0
   /// Storage capacity in hours
-  public var storage = 5.0
+  public var storage = 0.0
   /// Storage capacity in energy
   public var storage_cap = 0.0
   /// Storage capacity in mass
@@ -61,13 +61,11 @@ public struct Layout: Codable, Equatable, Hashable, CustomStringConvertible {
 
 extension Layout: TextConfigInitializable {
   public init(file: TextConfigFile) throws {
-    let values: [String] = file.values.filter { !$0.isEmpty }
-    let first = values.compactMap { $0.split(separator: " ").first }
-    let trimmed = first.map {
-      String($0).trimmingCharacters(in: .whitespaces)
+    let values: [String] = file.values.filter { !$0.isEmpty }.map { value in
+      String(value.prefix(while: {!$0.isWhitespace})) 
     }
 
-    for (count, value) in zip(1..., trimmed) {
+    for (count, value) in zip(1..., values) {
       if count == 9, let definition = Storage.Definition(rawValue: value) {
         Storage.parameter.definedBy = definition
       }
@@ -82,6 +80,7 @@ extension Layout: TextConfigInitializable {
       case 6: self.powerBlock = value
       case 7: self.heatExchanger = value
       case 8: break // NDI
+      case 9: break
       case 10: self.storage_cap = value
       case 11: self.storage_ton = value
       case 12: break // Through

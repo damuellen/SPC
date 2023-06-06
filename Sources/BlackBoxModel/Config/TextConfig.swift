@@ -14,8 +14,8 @@ import Utilities
 public enum TextConfig {
   /// List of path extension for needed config files.
   public enum FileExtension: String, CaseIterable {
-    case FOS, OPR, DEM, TAR, SIM, INI, TIM, DES, AVL,
-      LAY, SF, COL, STO, HR, HTF, STF, HX, BO, WHR, GT, TB, PB, PFC
+    case FOS, OPR, DEM, TAR, SIM, INI, TIM, DES, AVL, LAY, SF,
+      COL, STO, HR, HTF, STF, HX, BO, WHR, GT, TB, PB, PFC
 
     static func isValid(url: URL) -> Bool {
       if let _ = FileExtension(rawValue: url.pathExtension.uppercased()) {
@@ -26,31 +26,50 @@ public enum TextConfig {
     }
   }
 
-  public static func fileSearch(atPath path: String) -> [URL] {
-    do {
-      let pathUrl = URL(fileURLWithPath: path)
-      let files = try FileManager.default.subpathsOfDirectory(atPath: path)
-      let urls = files.map { file in pathUrl.appendingPathComponent(file) }
-      return urls.filter(FileExtension.isValid)
-    } catch let error {
-      print("\(error)")
-      return []
-    }
-  }
+  static func loadConfigurations(atPath path: String) throws -> URL? {
+    var urls = [URL]()
+    let pathUrl = URL(fileURLWithPath: path)
+    let fm = FileManager.default
 
-  static func loadConfigurations(atPath path: String) throws {
-    let urls = TextConfig.fileSearch(atPath: path)
-    var memory = [FileExtension]()
+    if pathUrl.hasDirectoryPath {
+      let files = try fm.contentsOfDirectory(atPath: path)
+      urls = files.map { file in pathUrl.appendingPathComponent(file) }
+    } else {
+      let content = try String(contentsOf: pathUrl, encoding: .utf8)
+      let filePaths = content.split(whereSeparator: \.isWhitespace)
+      let unchecked = filePaths.map { $0.split(separator: "\\").map(String.init) }
+      let folder = pathUrl.deletingLastPathComponent()
+      let contents = try fm.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil)
+
+      for dir in contents.filter(\.hasDirectoryPath) {
+        for i in unchecked.indices {
+          var fileURL = dir
+          let search = fileURL.lastPathComponent
+          if let pos = unchecked[i].firstIndex(of: search) {
+            for component in unchecked[i].dropFirst(pos + 1) {
+              fileURL.appendPathComponent(component)  
+            }
+            urls.append(fileURL)
+          }
+        }
+      }
+    }
+    
     var htf: HeatTransferFluid?
+    let mto = urls.first(where: { $0.pathExtension.lowercased() == "mto" })
+    var identified = [FileExtension]()
+
     for url in urls {
-      guard let e = FileExtension(rawValue: url.pathExtension.uppercased()),
-        !memory.contains(e), let configFile = TextConfigFile(url: url)
+      guard let configFile = TextConfigFile(url: url),
+        let fileExtension = FileExtension(rawValue: configFile.url.pathExtension),
+        !identified.contains(fileExtension)
       else { continue }
-      switch e {
+      identified.append(fileExtension)
+      switch fileExtension {
       case .FOS: break
       case .OPR: break
       case .DEM: break
-      case .TAR: break // Simulation.tariff = try .init(file: configFile)
+      case .TAR: break  // Simulation.tariff = try .init(file: configFile)
       case .SIM: Simulation.parameter = try .init(file: configFile)
       case .INI: Simulation.initialValues = try .init(file: configFile)
       case .TIM: Simulation.time = try .init(file: configFile)
@@ -68,13 +87,12 @@ public enum TextConfig {
       case .GT: GasTurbine.parameterize(try .init(file: configFile))
       case .TB: SteamTurbine.parameterize(try .init(file: configFile))
       case .PB: PowerBlock.parameterize(try .init(file: configFile))
-      case .PFC:
-        break
+      case .PFC: break
       case .STF: break
       //  salt = try HeatTransferFluid(file: configFile)
       }
-      memory.append(e)
     }
-    if let _ = htf {}// { SolarField.parameter.HTF = htf }
+    if let _ = htf {}  // { SolarField.parameter.HTF = htf }
+    return mto
   }
 }

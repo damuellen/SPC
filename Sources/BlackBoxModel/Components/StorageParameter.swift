@@ -199,7 +199,11 @@ extension Storage.Parameter: TextConfigInitializable {
     isVariable = try l2(194) == -1
     dSRise = try ln(196)
     minDischargeLoad = try Ratio(ln(198))
-    fixedDischargeLoad = try Ratio(ln(200))
+    if file.values[199].contains("NO_TES (= no input required)") {
+      fixedDischargeLoad = .zero
+    } else {
+      fixedDischargeLoad = try Ratio(ln(200))
+    }
     heatTracingTime = try [ln(202), ln(205), ln(208)]
     heatTracingPower = try [ln(203), ln(206), ln(209)]
  //   HTb_time = try ln(205)

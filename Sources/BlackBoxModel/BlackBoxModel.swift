@@ -70,12 +70,14 @@ public enum BlackBoxModel {
   }
 
   public static func loadConfigurations(
-    atPath path: String, format: ConfigFormat = .json
-  ) throws {
+    atPath path: String, format: ConfigFormat = .text
+  ) throws -> String? {
     switch format {
-    case .json: break  //let urls = JSONConfig.fileSearch(atPath: path)
-    //try JSONConfig.loadConfiguration(urls.first!)
-    case .text: try TextConfig.loadConfigurations(atPath: path)
+    case .json: return nil  
+    // let urls = JSONConfig.fileSearch(atPath: path)
+    // try JSONConfig.loadConfiguration(urls.first!)
+    case .text: 
+      return try TextConfig.loadConfigurations(atPath: path)?.path
     }
   }
 
