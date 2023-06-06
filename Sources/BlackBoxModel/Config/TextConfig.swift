@@ -32,21 +32,22 @@ public enum TextConfig {
     let fm = FileManager.default
 
     if pathUrl.hasDirectoryPath {
-      let files = try fm.contentsOfDirectory(atPath: path)
-      urls = files.map { file in pathUrl.appendingPathComponent(file) }
+      let fileList = try fm.contentsOfDirectory(atPath: path)
+      urls = fileList.map { file in pathUrl.appendingPathComponent(file) }
     } else {
-      let content = try String(contentsOf: pathUrl, encoding: .utf8)
-      let filePaths = content.split(whereSeparator: \.isWhitespace)
-      let unchecked = filePaths.map { $0.split(separator: "\\").map(String.init) }
+      let fileContent = try String(contentsOf: pathUrl, encoding: .utf8)
+      let filePaths = fileContent.split(whereSeparator: \.isWhitespace)
+      let separated = filePaths.map { $0.split(separator: "\\").map(String.init) }
       let folder = pathUrl.deletingLastPathComponent()
-      let contents = try fm.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil)
-
-      for dir in contents.filter(\.hasDirectoryPath) {
-        for i in unchecked.indices {
+      var list = try fm.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil)
+      list.append(folder)
+      for dir in list.filter(\.hasDirectoryPath) {
+        if urls.isEmpty == false { break }
+        for components in separated {
           var fileURL = dir
           let search = fileURL.lastPathComponent
-          if let pos = unchecked[i].firstIndex(of: search) {
-            for component in unchecked[i].dropFirst(pos + 1) {
+          if let pos = components.firstIndex(of: search) {
+            for component in component.dropFirst(pos + 1) {
               fileURL.appendPathComponent(component)  
             }
             urls.append(fileURL)
