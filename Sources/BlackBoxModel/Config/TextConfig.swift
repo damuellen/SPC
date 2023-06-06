@@ -47,7 +47,7 @@ public enum TextConfig {
           var fileURL = dir
           let search = fileURL.lastPathComponent
           if let pos = components.firstIndex(of: search) {
-            for component in component.dropFirst(pos + 1) {
+            for component in components.dropFirst(pos + 1) {
               fileURL.appendPathComponent(component)  
             }
             urls.append(fileURL)
