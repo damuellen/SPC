@@ -27,21 +27,22 @@ public enum TextConfig {
   }
 
   static func loadConfigurations(atPath path: String) throws -> URL? {
+    let url = URL(fileURLWithPath: path)
     var urls = [URL]()
-    let pathUrl = URL(fileURLWithPath: path)
     let fm = FileManager.default
 
-    if pathUrl.hasDirectoryPath {
+    if url.hasDirectoryPath {
       let fileList = try fm.contentsOfDirectory(atPath: path)
-      urls = fileList.map { file in pathUrl.appendingPathComponent(file) }
-    } else {
-      let fileContent = try String(contentsOf: pathUrl, encoding: .utf8)
+      urls = fileList.map { file in url.appendingPathComponent(file) }
+    } else if url.pathExtension.lowercased().contains("pdd") {
+      let fileContent = try String(contentsOf: url, encoding: .utf8)
       let filePaths = fileContent.split(whereSeparator: \.isWhitespace)
       let separated = filePaths.map { $0.split(separator: "\\").map(String.init) }
-      let folder = pathUrl.deletingLastPathComponent()
+      let folder = url.deletingLastPathComponent()
       var list = try fm.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil)
-      list.append(folder)
-      for dir in list.filter(\.hasDirectoryPath) {
+      list = list.filter(\.hasDirectoryPath)
+      if list.isEmpty { list.append(folder) }
+      for dir in list {
         if urls.isEmpty == false { break }
         for components in separated {
           var fileURL = dir

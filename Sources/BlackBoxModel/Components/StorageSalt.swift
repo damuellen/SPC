@@ -53,7 +53,7 @@ extension Storage {
       case .ton:
         mass = Design.layout.storage_ton * dischargeToTurbine
       }
-      precondition(mass > .zero, "Salt mass not specified")
+      if Design.hasStorage { precondition(mass > .zero, "Salt mass not specified") }
       mass *= availability
       self.minimum = Mass(ton: dischargeToTurbine * mass)
       self.hot = Mass(ton: (startLoad.hot + dischargeToTurbine) * mass)
