@@ -35,9 +35,9 @@ public enum TextConfig {
       let fileList = try fm.contentsOfDirectory(atPath: path)
       urls = fileList.map { file in url.appendingPathComponent(file) }
     } else if url.pathExtension.lowercased().contains("pdd") {
-      let fileContent = try String(contentsOf: url, encoding: .utf8)
-      let filePaths = fileContent.split(whereSeparator: \.isWhitespace)
-      let separated = filePaths.map { $0.split(separator: "\\").map(String.init) }
+      let file = try TextConfigFile(url: url)
+      let paths = file.lines.drop(while: \.isEmpty)
+      let separated = paths.map { $0.split(separator: "\\").map(String.init) }
       let folder = url.deletingLastPathComponent()
       var list = try fm.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil)
       list = list.filter(\.hasDirectoryPath)

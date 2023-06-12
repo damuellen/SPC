@@ -9,53 +9,55 @@
 //
 
 public struct ParameterSet: Codable {
+  var layout = Design.layout
   var simulation = Simulation.parameter
   var initialValues = Simulation.initialValues
   var time = Simulation.time
   var tariff = Simulation.tariff
- // var availability = Availability.current
-  var layout = Design.layout
+  var availability = Availability.current
+  var heatTransferFluid = [SolarField.parameter.HTF, Storage.parameter.HTF.properties]
   var solarField = SolarField.parameter
   var collector = Collector.parameter
   var heater = Heater.parameter
-//  var heatTransferFluid = HeatTransferFluid.parameter
   var heatExchanger = HeatExchanger.parameter
   var boiler = Boiler.parameter
   var wasteHeatRecovery = WasteHeatRecovery.parameter
   var gasTurbine = GasTurbine.parameter
   var steamTurbine = SteamTurbine.parameter
   var powerBlock = PowerBlock.parameter
-
+  var storage = Storage.parameter
   public init() {}
   
   func callAsFunction() {
+    Design.layout = layout
     Simulation.parameter = simulation
     Simulation.initialValues = initialValues
     Simulation.time = time
     Simulation.tariff = tariff
-  //  Availability.current = availability
-    Design.layout = layout
+    // Availability.current = availability
     SolarField.parameter = solarField
     Collector.parameter = collector
     Heater.parameter = heater
- //   HeatTransferFluid.parameter = heatTransferFluid
     HeatExchanger.parameter = heatExchanger
     Boiler.parameter = boiler
     WasteHeatRecovery.parameter = wasteHeatRecovery
     GasTurbine.parameter = gasTurbine
     SteamTurbine.parameter = steamTurbine
     PowerBlock.parameter = powerBlock
+    Storage.parameter = storage
+    SolarField.parameter.HTF = heatTransferFluid[0]
   }
 }
 
 extension ParameterSet: CustomStringConvertible {
   public var description: String {
 	  """
+    \(layout)
     \(simulation)
     \(initialValues)
     \(time)
     \(tariff)
-    \(layout)
+    \(availability)
     \(solarField)
     \(collector)
     \(heater)
@@ -65,6 +67,9 @@ extension ParameterSet: CustomStringConvertible {
     \(gasTurbine)
     \(steamTurbine)
     \(powerBlock)
+    \(storage)
+    \(heatTransferFluid[0])
+    \(heatTransferFluid[1])
     """
   }
 }

@@ -207,10 +207,9 @@ extension Storage {
   }
   
   static func isFossilChargingAllowed(at time: DateTime) -> Bool {
-    return time.isWithin(start: parameter.startFossilCharging,
-                         stop: parameter.stopFossilCharging)
-        || time.isWithin(start: parameter.startFossilCharging2,
-                         stop: parameter.stopFossilCharging2)
+    let set = parameter.fossilChargingTime
+    return time.isWithin(start: (set[2], set[3]), stop: (set[0], set[1]))
+        || time.isWithin(start: (set[6], set[7]), stop: (set[4], set[5]))
   }
 }
 

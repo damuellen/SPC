@@ -90,10 +90,10 @@ extension InitValues {
 extension InitValues: CustomStringConvertible {
   public var description: String {
     "HTF Temperature in Header [°C]:"
-    * temperatureOfHTFinPipes.celsius.description
+    * String(format: "%.1f", temperatureOfHTFinPipes.celsius)
     + "HTF Temperature in Collector [°C]:"
-    * temperatureOfHTFinHCE.celsius.description
+    * String(format: "%.1f", temperatureOfHTFinHCE.celsius)
     + "Mass Flow in Solar Field [kg/s]:"
-    * massFlowInSolarField.rate.description
+    * String(format: "%.1f", massFlowInSolarField.rate)
   }
 }

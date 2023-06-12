@@ -76,16 +76,16 @@ extension Availability {
 extension Availability: CustomStringConvertible {
   public var description: String {
     "Annual Average Solar Field Availability [%]:"
-    * values.solarField.percentage.description
+    * String(format: "%.1f", values.solarField.percentage)
     + "Average Percentage of Broken HCE [%]:"
-    * values.breakHCE.percentage.description
+    * String(format: "%.1f", values.breakHCE.percentage)
     + "Average Percentage of HCE with Lost Vacuum [%]:"
-    * values.airHCE.percentage.description
+    * String(format: "%.1f", values.airHCE.percentage)
     + "Average Percentage of Flourescent HCE [%]:"
-    * values.fluorHCE.percentage.description
+    * String(format: "%.1f", values.fluorHCE.percentage)
     + "Average Mirror Reflectivity [%]:"
-    * values.reflMirror.percentage.description
+    * String(format: "%.1f", values.reflMirror.percentage)
     + "Broken Mirrors [%]:"
-    * values.missgMirror.percentage.description
+    * String(format: "%.1f", values.missgMirror.percentage)
   }
 }

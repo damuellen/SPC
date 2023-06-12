@@ -31,7 +31,8 @@ extension Boiler {
 
 extension Boiler.Parameter: CustomStringConvertible {
   public var description: String {
-    "Nominal Outlet Temperature [°]:" * nominalTemperatureOut.description
+    "Description:" * name 
+    + "Nominal Outlet Temperature [°]:" * nominalTemperatureOut.description
     + "Minimum Load [%]:" * (minLoad * 100).description
     + "Cold Start-up necessary after [h]:" * start.hours.cold.description
     + "Performance needed for Cold Start-up [MWh]:" * start.energy.cold.description

@@ -17,7 +17,12 @@ public protocol TextConfigInitializable {
 public struct TextConfigFile {
   public var lines: [String]
 
-  public var name: String { lines.count > 6 ? lines[6] : "" }
+  public var name: String {
+    if lines.count > 6, !lines[6].isEmpty {
+      return lines[6]
+    }
+    return url.lastPathComponent
+  }
 
   public let url: URL
   

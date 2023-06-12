@@ -19,7 +19,7 @@ extension Storage {
     case indirect, direct
   }
   
-  public struct Parameter {
+  public struct Parameter: Codable {
     let name: String
     let chargeTo, dischargeToTurbine, dischargeToHeater: Ratio
     let stepSizeIteration, heatStoredrel: Double
@@ -29,8 +29,8 @@ extension Storage {
     var pumpEfficiency, pressureLoss: Double
     var massFlowShare: Ratio
 
-    let startTemperature: (cold: Temperature, hot: Temperature) // TurbTL(0) TurbTL(1)
-    let startLoad: (cold: Double, hot: Double) // TurbTL(2) TurbTL(3)
+    let startTemperature: Sides<Temperature> // TurbTL(0) TurbTL(1)
+    let startLoad: Sides<Double> // TurbTL(2) TurbTL(3)
 
     public enum Strategy: String, Codable {
       case always, demand, shifter
@@ -61,12 +61,11 @@ extension Storage {
 
     var definedBy: Definition = .cap
 
-    let designTemperature: (cold: Temperature, hot: Temperature)
+    let designTemperature: Sides<Temperature>
     
-    let heatLoss: (hot: Double, cold: Double)
+    let heatLoss: Sides<Double>
     
-    let startFossilCharging, stopFossilCharging: (day: Int, month: Int)
-    let startFossilCharging2, stopFossilCharging2: (day: Int, month: Int)
+    let fossilChargingTime: [Int]
     
     let heatExchangerEfficiency: Double
     let heatExchangerCapacity: Double // (oil to salt) in MWt
@@ -141,10 +140,10 @@ extension Storage.Parameter: CustomStringConvertible {
     + "Load of Hot Tank at Program Start [%]:"
     * (startLoad.hot * 100).description
     + "Charging of Storage during Night by HTF-heater: \(fossilCharging)\n"
-    + "Stop charging strategy at day:" * stopFossilCharging.day.description
-    + "Stop charging strategy at month:" * stopFossilCharging.month.description
-    + "Start charging strategy at day:" * startFossilCharging.day.description
-    + "Start charging strategy at month:" * startFossilCharging.month.description
+    + "Stop charging strategy at day:" * fossilChargingTime[0].description
+    + "Stop charging strategy at month:" * fossilChargingTime[1].description
+    + "Start charging strategy at day:" * fossilChargingTime[2].description
+    + "Start charging strategy at month:" * fossilChargingTime[3].description
     + "Charge Storage up to relative Load before Start-up of Turbine:"
     * prefChargeToTurbine.description
     + "Definition of Summer from Month:" * exception.lowerBound.description
@@ -184,8 +183,8 @@ extension Storage.Parameter: TextConfigInitializable {
     pumpEfficiency = try ln(146) / 100
     pressureLoss = try ln(149)
     massFlowShare = try .init(ln(152) / 100) 
-    startTemperature = try (T(celsius: ln(162)), T(celsius:ln(165)))
-    startLoad = try (ln(168), ln(171))
+    startTemperature = try .init(T(celsius: ln(162)), T(celsius:ln(165)))
+    startLoad = try .init(ln(168), ln(171))
   //  HX = try ln(172) //bool
 
     //file.values[172]
@@ -195,8 +194,7 @@ extension Storage.Parameter: TextConfigInitializable {
     HTF = .solarSalt //try ln(177)
     freezeProtection = try l2(178) == -1
     fossilCharging = try l2(179) == -1
-    stopFossilCharging = try (l2(180), l2(181))
-    startFossilCharging = try (l2(182), l2(183))
+    fossilChargingTime = try [l2(180), l2(181), l2(182), l2(183), l2(222), l2(223), l2(224),l2(225)]
     heatExchangerRestrictedMax = try l2(186) == -1
     heatExchangerCapacity = try ln(189)
   //  Qfldif = try ln(192)
@@ -220,8 +218,6 @@ extension Storage.Parameter: TextConfigInitializable {
     heatExchangerRestrictedMin = try l2(217) == -1 
     heatExchangerMinCapacity = try ln(218)
     dischargeParasitcsFactor = try ln(220)
-    stopFossilCharging2 = try (l2(222), l2(223))
-    startFossilCharging2 = try (l2(224),l2(225))
     auxConsumptionCurve = try l2(227) == -1 
     DesAuxIN = try ln(228)
     DesAuxEX = try ln(229)
@@ -232,21 +228,38 @@ extension Storage.Parameter: TextConfigInitializable {
     badDNIwinter = try ln(238)
     badDNIsummer = try ln(239)
     type = .indirect // try ln(241)
-    designTemperature = try (T(celsius: ln(118)), T(celsius: ln(121)))
+    designTemperature = try .init(T(celsius: ln(118)), T(celsius: ln(121)))
     heatdiff = 0.25
-    heatLoss = (0,0)
+    heatLoss = .init(0,0)
     heatExchangerEfficiency = 1
     heatProductionLoad = 0
   }  
 }
 
-extension Storage.Parameter: Codable {
+public enum StorageMedium: String, Codable {
+  case hiXL = "HitecXL"
+  case xlt600 = "XLT600"
+  case th66 = "TH66"
+  case solarSalt = "SolarSalt"
 
-  public init(from decoder: Decoder) throws {
-    fatalError()
-  }
+  static var ss = HeatTransferFluid(
+    name: "Solar Salt",
+    freezeTemperature: 240.0,
+    heatCapacity: [1.44657, 0.000171715],
+    dens: [1969.9, -0.603505, 0],
+    visco: [0.0175373, -7.01716e-05, 7.62774e-08],
+    thermCon: [0.44152, 0.00019, 0],
+    maxTemperature: 400.0,
+    h_T: [], T_h: [],
+    useEnthalpy: false
+  )
 
-  public func encode(to encoder: Encoder) throws {
-   fatalError()
+  public var properties: HeatTransferFluid {
+    switch self {
+    case .solarSalt:
+      return StorageMedium.ss
+    default:
+      fatalError()
+    }
   }
 }

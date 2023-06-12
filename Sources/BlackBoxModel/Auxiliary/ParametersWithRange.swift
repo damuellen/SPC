@@ -50,3 +50,13 @@ extension PowerRange: Codable {
     try container.encode(max, forKey: .max)
   }
 }
+
+public struct Sides<T>: Codable where T: Codable {
+  public var cold: T
+  public var hot: T
+
+  public init(_ cold: T, _ hot: T) {
+    self.cold = cold
+    self.hot = hot
+  }
+}

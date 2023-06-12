@@ -22,18 +22,25 @@ extension Simulation {
     public var steps: Frequence
 
     public var description: String {
-      """
-      Weekday of 1st January:                         Fr
-      Number of Days in February:                      28 
-      First Day of Operation:               \(dateInterval!.start)
-      Last Day of Operation:                \(dateInterval!.end)
-      Time Step for Report (H/D/M/Y) :                 H
+      let dateFormatter = DateFormatter()
+      dateFormatter.timeZone = Greenwich.timeZone
+      dateFormatter.dateFormat = "EEEE"
+      let weekday = dateFormatter.string(from: dateInterval!.start)
+      dateFormatter.dateFormat = "MM-dd"
+      let first = dateFormatter.string(from: dateInterval!.start)
+      let last = dateFormatter.string(from: dateInterval!.end)
+      return """
+      Weekday of 1st January:                           \(weekday)
+      Number of Days in February:                       28 
+      First Day of Operation [MM-DD]:                   \(first)
+      Last Day of Operation [MM-DD]:                    \(last)
+      Time Step for Report (H/D/M/Y) :                  \(steps.rawValue)
       If hourly based; number of steps for detailed Report (TC) :
                                                         12 
       First Day of Daylight Saving time [MM.DD] :       0 
       Last Day of Daylight Saving time [MM.DD] :        1.01 
-      Holidays [MM.DD] : \(holidays.map(\.start).map(DateTime.init(_:)).map(\.date).joined(separator: " "))
-
+      Holidays [MM-DD]: 
+        \(holidays.map(\.start).map(DateTime.init(_:)).map(\.date).joined(separator: ", "))
       """
     }
   }
@@ -47,7 +54,7 @@ extension Simulation.Period: TextConfigInitializable {
       let dateFormatter = DateFormatter()
       dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
       dateFormatter.dateFormat = "MM.dd yyyy"
-      return dateFormatter.date(from: dateString + "\(BlackBoxModel.simulatedYear)"
+      return dateFormatter.date(from: dateString + " \(BlackBoxModel.simulatedYear)"
       )
     }
 

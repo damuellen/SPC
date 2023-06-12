@@ -27,7 +27,8 @@ extension PowerBlock {
 
 extension PowerBlock.Parameter: CustomStringConvertible {
   public var description: String {
-    "Fixed Parasitics for Load = 0 [MW]:"
+    "Description:" * name
+    + "Fixed Parasitics for Load = 0 [MW]:"
     * fixElectricalParasitics0.description
     + "Parasitics during PB Start-Up [MW]:"
     * startUpElectricalParasitics.description
