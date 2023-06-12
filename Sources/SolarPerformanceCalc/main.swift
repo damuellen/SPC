@@ -96,6 +96,12 @@ struct SolarPerformanceCalculator: ParsableCommand {
  #endif
     }
 
+    if parameter {
+      print(ParameterSet())
+      try JSONConfig.saveConfiguration(toPath: configPath)
+      return
+    }
+    
     if let steps = stepsCalculation {
       Simulation.time.steps = Frequence[steps]
     } else {
@@ -119,12 +125,6 @@ struct SolarPerformanceCalculator: ParsableCommand {
 #else
       fatalError((error as! MeteoDataFileError).description)
 #endif
-    }
-
-    if parameter {
-      print(ParameterSet())
-      try JSONConfig.saveConfiguration(toPath: configPath)
-      return
     }
 
     BlackBoxModel.configure(year: year ?? BlackBoxModel.sun!.year)
