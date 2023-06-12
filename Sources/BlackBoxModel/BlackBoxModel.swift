@@ -69,15 +69,12 @@ public enum BlackBoxModel {
       year: metadata.year, frequence: Simulation.time.steps)
   }
 
-  public static func loadConfigurations(
-    atPath path: String, format: ConfigFormat = .text
-  ) throws -> String? {
+  public static func loadConfigurations(atPath path: String) throws -> String? {
+    let format: ConfigFormat
+    if path.contains("json") { format = .json } else { format = .text }
     switch format {
-    case .json: return nil  
-    // let urls = JSONConfig.fileSearch(atPath: path)
-    // try JSONConfig.loadConfiguration(urls.first!)
-    case .text: 
-      return try TextConfig.loadConfigurations(atPath: path)?.path
+    case .json: return try JSONConfig.loadConfiguration(atPath: path)?.path
+    case .text: return try TextConfig.loadConfiguration(atPath: path)?.path
     }
   }
 

@@ -23,16 +23,9 @@ public struct TextConfigFile {
 
   public let url: URL
   // Returns a String, which contains the content of needed config file.
-  public init?(url: URL) {
-    guard TextConfig.FileExtension.isValid(url: url) else { return nil }
-    do {
-      let content = try String(contentsOf: url, encoding: .windowsCP1252)
-      self = .init(content: content, url: url)
-    } catch let error {
-      print(error.localizedDescription)
-      print("  " + url.path)
-      return nil
-    }
+  public init(url: URL) throws {
+    let content = try String(contentsOf: url, encoding: .windowsCP1252)
+    self = .init(content: content, url: url)
   }
 
   init(content: String, url: URL) {

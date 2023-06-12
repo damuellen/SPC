@@ -38,36 +38,45 @@ public enum JSONConfig {
     case PB = "PowerBlock"
     case PFC = "Predefined_Fuel_Consumption"
 
-    static func match(url: URL) -> Bool {
-      guard url.lastPathComponent.hasSuffix(".json") else { return false }
+    init?(url: URL) {
       let file = url.deletingPathExtension().lastPathComponent
-      return Name.allCases.reduce(false) { $0 || file.contains($1.rawValue) }   
+      for name in Name.allCases {
+        if file.contains(name.rawValue) { 
+          self = name
+          return
+        }
+      }
+      return nil
     }
   }
 
-  public static func fileSearch(atPath path: String) -> [URL] {
-    do {
-      guard let pathUrl = URL(string: path)
-      else { preconditionFailure("Invalid path") }
-
-      let files = try FileManager.default.subpathsOfDirectory(atPath: path)
+  public static func loadConfiguration(atPath path: String) throws -> URL? {
+    guard let pathUrl = URL(string: path)
+    else { preconditionFailure("Invalid path") }
+    if pathUrl.hasDirectoryPath {
+      let files = try FileManager.default.contentsOfDirectory(atPath: path)
       let urls = files.map { file in pathUrl.appendingPathComponent(file) }
-
-      return urls.filter(Name.match)
-    } catch let error {
-      print("\(error)")
-      return []
+      for url in urls {
+        if let type = JSONConfig.Name(url: url) {
+          try loadConfiguration(of: type, url)
+        }
+      }
+      return urls.first(where: { $0.pathExtension.lowercased() == "mto" })
+    } else {
+      try loadConfiguration(pathUrl)
+      return nil
     }
   }
   
-  static func load(_ url: URL) throws {
+  static func loadConfiguration(_ url: URL) throws {
     let data = try Data(contentsOf: url)
     let decoder = JSONDecoder()
     decoder.dateDecodingStrategy = .iso8601
     try decoder.decode(ParameterSet.self, from: data)()
   }
 
-  public static func loadConfiguration(_ type: JSONConfig.Name, data: Data) throws {
+  static func loadConfiguration(of type: JSONConfig.Name, _ url: URL) throws {
+    let data = try Data(contentsOf: url)
     let decoder = JSONDecoder()
     decoder.dateDecodingStrategy = .iso8601
     decoder.keyDecodingStrategy = .convertFromSnakeCase

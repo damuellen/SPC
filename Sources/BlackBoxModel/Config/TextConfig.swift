@@ -17,16 +17,16 @@ public enum TextConfig {
     case FOS, OPR, DEM, TAR, SIM, INI, TIM, DES, AVL, LAY, SF,
       COL, STO, HR, HTF, STF, HX, BO, WHR, GT, TB, PB, PFC
 
-    static func isValid(url: URL) -> Bool {
-      if let _ = FileExtension(rawValue: url.pathExtension.uppercased()) {
-        return true
+    init?(url: URL) {
+      if let valid = FileExtension(rawValue: url.pathExtension.uppercased()) {
+        self = valid
       } else {
-        return false
+        return nil
       }
     }
   }
 
-  static func loadConfigurations(atPath path: String) throws -> URL? {
+  static func loadConfiguration(atPath path: String) throws -> URL? {
     let url = URL(fileURLWithPath: path)
     var urls = [URL]()
     let fm = FileManager.default
@@ -62,11 +62,10 @@ public enum TextConfig {
     var identified = [FileExtension]()
 
     for url in urls {
-      guard let configFile = TextConfigFile(url: url),
-        let fileExtension = FileExtension(rawValue: configFile.url.pathExtension),
-        !identified.contains(fileExtension)
-      else { continue }
+      guard let fileExtension = FileExtension(url: url),
+        !identified.contains(fileExtension) else { continue }
       identified.append(fileExtension)
+      let configFile = try TextConfigFile(url: url)
       switch fileExtension {
       case .FOS: break
       case .OPR: break

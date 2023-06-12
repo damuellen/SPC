@@ -91,6 +91,8 @@ struct SolarPerformanceCalculator: ParsableCommand {
  #if os(Windows)
       if let message = (error as? TextConfigFile.ReadError)?.description {
         MessageBox(text: message, caption: name)
+      } else {
+        MessageBox(text: error.localizedDescription, caption: name)
       }
       return
  #endif
