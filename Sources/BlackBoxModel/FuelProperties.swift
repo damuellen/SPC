@@ -20,7 +20,7 @@ extension FuelParameter {
   public init(file: TextConfigFile) throws {
     let ln: (Int) throws -> Double = { try file.readDouble(lineNumber: $0) }
     self.name = file.name
-    self.measurementUnit = file.values[9]
+    self.measurementUnit = file.lines[9]
     self.LHV = try ln(13)
     self.price = try ln(16)
     self.density = try ln(19)

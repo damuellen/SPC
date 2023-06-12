@@ -17,12 +17,12 @@ public protocol TextConfigInitializable {
 }
 
 public struct TextConfigFile {
-  public var values: [String]
+  public var lines: [String]
 
-  public var name: String { values.indices.contains(6) ? self.values[6] : "" }
+  public var name: String { lines.count > 6 ? lines[6] : "" }
 
   public let url: URL
-  // Returns a String, which contains the content of needed config file.
+  
   public init(url: URL) throws {
     let content = try String(contentsOf: url, encoding: .windowsCP1252)
     self = .init(content: content, url: url)
@@ -31,9 +31,9 @@ public struct TextConfigFile {
   init(content: String, url: URL) {
     self.url = url
     let separator: Character = content.contains("\r\n") ? "\r\n" : "\n"
-    values = content.split(
+    lines = content.split(
       separator: separator, omittingEmptySubsequences: false
-    ).map(String.init)
+    ).map(\.trimmed)
   }
 
   public enum ReadError: Error {
@@ -42,20 +42,20 @@ public struct TextConfigFile {
     case invalidValueInLine(Int, String)
   }
 
-  public subscript(_ idx: Int) -> String? {
-    guard self.values.indices.contains(idx) else { return nil }
-    return self.values[idx].trimWhitespace()
-  }
-
-  public func readString(_ lineNumber: Int) throws -> String {
-    guard let string = self[lineNumber - 1], string.count > 0 else {
+  public func readString(lineNumber: Int) throws -> String {
+    let index = lineNumber - 1
+    guard lines.indices.contains(index) else {
+      throw ReadError.unexpectedEndOfFile(lineNumber, self.url.path)
+    }
+    let string = lines[lineNumber - 1]
+    guard string.count > 0 else {
       throw ReadError.missingValueInLine(lineNumber, self.url.path)
     }
     return string
   }
 
   public func readDouble(lineNumber: Int) throws -> Double {
-    let value = try readString(lineNumber)
+    let value = try readString(lineNumber: lineNumber)
     if let value = Double(value) {
       return value
     } else {
@@ -64,7 +64,7 @@ public struct TextConfigFile {
   }
 
   public func readInteger(lineNumber: Int) throws -> Int {
-    let value = try readString(lineNumber)
+    let value = try readString(lineNumber: lineNumber)
     if let value = Int(value) {
       return value
     } else {
@@ -86,21 +86,15 @@ extension TextConfigFile.ReadError: CustomStringConvertible {
   }
 }
 
-extension Character {
-  fileprivate var isASCIIWhitespace: Bool {
-    self == " " || self == "\t"
-  }
-}
-
-extension String {
-  fileprivate func trimWhitespace() -> String {
-    var me = Substring(self)
-    while me.first?.isASCIIWhitespace == .some(true) {
-      me = me.dropFirst()
+extension Substring {
+  fileprivate var trimmed: String {
+    var trimmed = self
+    while trimmed.first?.isWhitespace == .some(true) {
+      trimmed = trimmed.dropFirst()
     }
-    while me.last?.isASCIIWhitespace == .some(true) {
-      me = me.dropLast()
+    while trimmed.last?.isWhitespace == .some(true) {
+      trimmed = trimmed.dropLast()
     }
-    return String(me)
+    return String(trimmed)
   }
 }

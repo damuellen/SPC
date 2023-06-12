@@ -165,7 +165,7 @@ extension Storage.Parameter: TextConfigInitializable {
     typealias T = Temperature
     let ln: (Int) throws -> Double = { try file.readDouble(lineNumber: $0) }
     let l2: (Int) throws -> Int = { try file.readInteger(lineNumber: $0) }
-    if file.values[6].contains("no TES") { 
+    if file.lines[6].contains("no TES") { 
       self = ParameterDefaults.st
       return
     }
@@ -203,7 +203,7 @@ extension Storage.Parameter: TextConfigInitializable {
     isVariable = try l2(194) == -1
     dSRise = try ln(196)
     minDischargeLoad = try Ratio(ln(198))
-    if file.values[199].contains("NO_TES (= no input required)") {
+    if file.lines[199].contains("NO_TES (= no input required)") {
       fixedDischargeLoad = .zero
     } else {
       fixedDischargeLoad = try Ratio(ln(200))

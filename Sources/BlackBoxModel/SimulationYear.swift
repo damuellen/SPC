@@ -51,8 +51,8 @@ extension Simulation.Period: TextConfigInitializable {
       )
     }
 
-    if let firstDayOfOperation = getDate(file.values[12]),
-      let lastDayOfOperation = getDate(file.values[15]) {
+    if let firstDayOfOperation = getDate(file.lines[12]),
+      let lastDayOfOperation = getDate(file.lines[15]) {
       let hoursFirst = try ln(14) * 3600
       let minutesFirst = try ln(15) * 60
       let timeIntervalFirst = hoursFirst + minutesFirst
@@ -70,7 +70,7 @@ extension Simulation.Period: TextConfigInitializable {
     var dates = [Date]()
     for row in stride(from: 38, through: 95, by: 3) {
       let idx = row - 1
-      let dateString = file.values[idx]
+      let dateString = file.lines[idx]
       guard let date = getDate(dateString) else { continue }
       dates.append(date)
     }

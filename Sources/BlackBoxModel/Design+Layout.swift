@@ -61,7 +61,7 @@ public struct Layout: Codable, Equatable, Hashable, CustomStringConvertible {
 
 extension Layout: TextConfigInitializable {
   public init(file: TextConfigFile) throws {
-    let values: [String] = file.values.filter { !$0.isEmpty }.map { value in
+    let values: [String] = file.lines.filter { !$0.isEmpty }.map { value in
       String(value.prefix(while: {!$0.isWhitespace})) 
     }
 
