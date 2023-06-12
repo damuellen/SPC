@@ -70,12 +70,19 @@ public enum BlackBoxModel {
   }
 
   public static func loadConfigurations(atPath path: String) throws -> String? {
-    let format: ConfigFormat
-    if path.contains("json") { format = .json } else { format = .text }
-    switch format {
-    case .json: return try JSONConfig.loadConfiguration(atPath: path)?.path
-    case .text: return try TextConfig.loadConfiguration(atPath: path)?.path
+    let url = URL(fileURLWithPath: path)
+    if url.hasDirectoryPath {
+      let files = try FileManager.default.contentsOfDirectory(atPath: path)
+      let json = files.filter { $0.hasSuffix("json") }
+      let check = JSONConfig.Name.detectFile(name:)
+      if let file = json.drop(while: { file in check(file) }).first {
+        _ = try JSONConfig.loadConfiguration(atPath: path + "/" + file)
+        return files.first(where: { $0.hasSuffix("mto") })
+      }
+    } else if url.pathExtension.contains("json") {
+      return try JSONConfig.loadConfiguration(atPath: path)?.path
     }
+    return try TextConfig.loadConfiguration(atPath: path)?.path
   }
 
   /// - Parameter with: Creates the log and write results to file.

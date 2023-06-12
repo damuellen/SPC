@@ -48,6 +48,10 @@ public enum JSONConfig {
       }
       return nil
     }
+
+    public static func detectFile(name: String) -> Bool {
+      allCases.reduce(false) { $0 || name.contains($1.rawValue) } 
+    }
   }
 
   public static func loadConfiguration(atPath path: String) throws -> URL? {
@@ -69,6 +73,7 @@ public enum JSONConfig {
   }
   
   static func loadConfiguration(_ url: URL) throws {
+    guard url.isFileURL else { return }
     let data = try Data(contentsOf: url)
     let decoder = JSONDecoder()
     decoder.dateDecodingStrategy = .iso8601
@@ -76,6 +81,7 @@ public enum JSONConfig {
   }
 
   static func loadConfiguration(of type: JSONConfig.Name, _ url: URL) throws {
+    guard url.isFileURL else { return }
     let data = try Data(contentsOf: url)
     let decoder = JSONDecoder()
     decoder.dateDecodingStrategy = .iso8601
