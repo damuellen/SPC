@@ -112,15 +112,21 @@ public enum JSONConfig {
   }
 
   public static func saveConfiguration(toPath path: String) throws {
-    let directoryURL = URL(fileURLWithPath: path, isDirectory: true)
+    var url = URL(fileURLWithPath: path)
+    if url.hasDirectoryPath {
+      url = URL(fileURLWithPath: "Parameter.json",
+                isDirectory: false, relativeTo: url)
+    } else {
+      url.deletePathExtension()
+      url.appendPathExtension("json")
+    }
     let json = try generateJSON()
-    let url = URL(fileURLWithPath: "Parameter.txt",
-                  isDirectory: false, relativeTo: directoryURL)
     try json.write(to: url)
   }
 
   public static func saveConfigurations(toPath path: String) throws {
-    let directoryURL = URL(fileURLWithPath: path, isDirectory: true)
+    var directoryURL = URL(fileURLWithPath: path)
+    if !directoryURL.hasDirectoryPath { directoryURL.deleteLastPathComponent() }
     let cases = JSONConfig.Name.allCases
     let json = try cases.map(generate)
 
@@ -137,11 +143,6 @@ public enum JSONConfig {
     encoder.dateEncodingStrategy = .iso8601
     encoder.keyEncodingStrategy = .convertToSnakeCase
     return try encoder.encode(ParameterSet())
-  }
-
-  public static func generateYAML() throws -> String {
-    // let encoder = YAMLEncoder()
-    return "" // try encoder.encode(ParameterSet())
   }
 
   public static func generate(type: JSONConfig.Name) throws -> Data {
