@@ -36,8 +36,7 @@ extension Storage {
       case always, demand, shifter
 
       init?(string: String) {
-        let string = string.trimmingCharacters(in: .whitespaces).lowercased()
-        self.init(rawValue: string)
+        self.init(rawValue: string.lowercased())
       }
     }
 
@@ -140,10 +139,10 @@ extension Storage.Parameter: CustomStringConvertible {
     + "Load of Hot Tank at Program Start [%]:"
     * (startLoad.hot * 100).description
     + "Charging of Storage during Night by HTF-heater: \(fossilCharging)\n"
-    + "Stop charging strategy at day:" * fossilChargingTime[0].description
-    + "Stop charging strategy at month:" * fossilChargingTime[1].description
-    + "Start charging strategy at day:" * fossilChargingTime[2].description
-    + "Start charging strategy at month:" * fossilChargingTime[3].description
+    + "Stop charging strategy at day:" * fossilChargingTime[1].description
+    + "Stop charging strategy at month:" * fossilChargingTime[0].description
+    + "Start charging strategy at day:" * fossilChargingTime[3].description
+    + "Start charging strategy at month:" * fossilChargingTime[2].description
     + "Charge Storage up to relative Load before Start-up of Turbine:"
     * prefChargeToTurbine.description
     + "Definition of Summer from Month:" * exception.lowerBound.description

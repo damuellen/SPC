@@ -90,7 +90,7 @@ public enum ParameterDefaults {
     pumpEfficiency: 0.73,
     pressureLoss: 776000,
     massFlowShare: 0.7,
-    startTemperature: .init(288.0, 288.0),
+    startTemperature: .init(.init(celsius:288.0), .init(celsius:288.0)),
     startLoad: .init(1, 0),
     strategy: .demand, prefChargeToTurbine: 0.83,
     exception: 4...8,
