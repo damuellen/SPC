@@ -88,9 +88,9 @@ public enum BlackBoxModel {
   /// - Parameter with: Creates the log and write results to file.
   /// - Attention: `configure()` must called before this.
   public static func runModel(with record: Historian) {
-    guard let 🌞 = sun else {
-      print("We need the sun.")
-      exit(1)
+    let insolation = meteoDataDiagnose()
+    guard let 🌞 = sun, insolation.direct else { 
+      print("Missing sunshine."); exit(1)
     }
 
     // Preparation of the plant parameters
@@ -99,8 +99,7 @@ public enum BlackBoxModel {
     // Set initial values
     var status = Plant.initialState
     var photovoltaic = [Double]()
-    let insolation = meteoDataDiagnose()
-    guard insolation.direct else { return }
+
     if insolation.global { 
       let pv = PV()
 
@@ -216,15 +215,10 @@ public enum BlackBoxModel {
   }
 
   private static func meteoDataDiagnose() -> (direct: Bool, global: Bool) {
-    var direct: Bool = false
-    var global: Bool = false
     // Check the first 12 hours of the year for insolation
-    for values in meteoData.prefix(meteoData.count / 730) {
-      if values.dni > 0 { direct = true } 
-      if values.ghi > 0, values.dhi > 0 { global = true }
-      if direct && global { break }
-    }
-    return (direct, global)
+    let am = meteoData.prefix(meteoData.count / 730)
+    return (!am.isEmpty && !am.map(\.dni).max()!.isZero,
+     !am.isEmpty && !am.map(\.ghi).max()!.isZero && !am.map(\.dhi).max()!.isZero)
   }
 
   private static func simulationPeriod(
