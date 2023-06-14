@@ -129,7 +129,9 @@ public enum JSONConfig {
   public static func saveConfiguration(toPath path: String) throws {
     var url = URL(fileURLWithPath: path)
     if url.hasDirectoryPath {
-      url = URL(fileURLWithPath: "Parameter.json",
+      let now = Date().timeIntervalSinceReferenceDate
+      let id = String(Int(now), radix: 36, uppercase: true).suffix(6)
+      url = URL(fileURLWithPath: "CFG_\(id).json",
                 isDirectory: false, relativeTo: url)
     } else {
       url.deletePathExtension()
