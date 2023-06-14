@@ -218,13 +218,11 @@ public enum BlackBoxModel {
   private static func meteoDataDiagnose() -> (direct: Bool, global: Bool) {
     var direct: Bool = false
     var global: Bool = false
-    for values in meteoData {
-      if values.dni > 0, values.ghi.isZero || values.dhi.isZero {
-        direct = true
-      } else if values.ghi > 0, values.dhi > 0 {
-        global = true
-      }
-      if direct || global { break }
+    // Check the first 12 hours of the year for insolation
+    for values in meteoData.prefix(meteoData.count / 730) {
+      if values.dni > 0 { direct = true } 
+      if values.ghi > 0, values.dhi > 0 { global = true }
+      if direct && global { break }
     }
     return (direct, global)
   }
