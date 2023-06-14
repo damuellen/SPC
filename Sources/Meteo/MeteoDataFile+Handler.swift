@@ -66,8 +66,7 @@ public class MeteoDataFileHandler {
 public enum MeteoDataFileError: Error {
   case fileNotFound(String)
   case missingValueInLine(Int)
-  case unexpectedRowCount, empty,
-       unknownLocation, unknownDelimeter
+  case unexpectedRowCount, empty, unknownLocation, unknownDelimeter, missingHeaders
 }
 
 protocol MeteoDataFile {
@@ -80,6 +79,7 @@ private struct MET: MeteoDataFile {
   let name: String
   let metadata: [String]
   let csv: CSVReader
+  let order: [Int?]
 
   init(_ url: URL) throws {
     let rawData = try Data(contentsOf: url, options: [.mappedIfSafe, .uncached])
@@ -106,6 +106,18 @@ private struct MET: MeteoDataFile {
       let line = hasCR ? line.dropLast() : line
       return String(decoding: line.filter { $0 > separator }, as: UTF8.self)
     }
+    guard let header = String(data: lines[8], encoding: .utf8) else {
+      throw MeteoDataFileError.missingHeaders
+    }
+
+    let lc = header.split(separator: ",").map { $0.lowercased() }
+    self.order = [
+      lc.firstIndex { $0.contains("dni") || (!$0.contains("wind") && $0.contains("dir")) },
+      lc.firstIndex { $0.contains("temp") || $0.contains("tamb") },
+      lc.firstIndex { $0.contains("ws") || ($0.contains("wind") && !$0.contains("dir")) },
+      lc.firstIndex { $0.contains("ghi") || $0.contains("glo") },
+      lc.firstIndex { $0.contains("dhi") || $0.contains("dif") },
+    ]
     guard let csv = CSVReader(data: lines[10], separator: ",")
     else { throw MeteoDataFileError.empty }
     self.csv = csv
@@ -132,10 +144,12 @@ private struct MET: MeteoDataFile {
     guard csv.dataRows.count.isMultiple(of: 24)
     //  || dataRange.count.isMultiple(of: 8764)
     else { throw MeteoDataFileError.unexpectedRowCount }
+    let lastIndex = order.reduce(0, { max($0, $1 ?? 0) })
     return try zip(csv.dataRows, 11...).map { values, line in
-      guard values.count >= 6 // Day,Hour,Min,DNI,Temperature,Windspeed
-      else { throw MeteoDataFileError.missingValueInLine(line) }
-      return MeteoData(meteo: Array(values[3...]))
+      guard values.endIndex > lastIndex else {
+        throw MeteoDataFileError.missingValueInLine(line)
+      }
+      return MeteoData(values, order: order)
     }
   }
 }
@@ -155,6 +169,8 @@ extension MeteoDataFileError: CustomStringConvertible {
       return "Meteo file unknown delimeter for values."
     case .empty:
       return "Meteo file does not contain data."
+    case .missingHeaders:
+      return "Meteo file does not contain headers."
     }
   }
 }
@@ -238,7 +254,7 @@ private struct TMY: MeteoDataFile {
       guard data.endIndex > last else {
         throw MeteoDataFileError.missingValueInLine(line)
       }
-      return MeteoData(tmy: data, order: order)
+      return MeteoData(data, order: order)
     }
   }
 }

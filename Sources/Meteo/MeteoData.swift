@@ -29,14 +29,6 @@ public struct MeteoData: CustomStringConvertible {
     self.windSpeed = windSpeed
   }
 
-  public init(meteo: [Double]) {
-    self.dni = meteo[0]
-    self.temperature = meteo[1]
-    self.windSpeed = meteo[2]
-    self.ghi = meteo.count > 4 ? meteo[4] : 0
-    self.dhi = meteo.count > 5 ? meteo[5] : 0
-  }
-
   public init(insolation: [Double], conditions: [Double]) {
     self.temperature = conditions[0]
     self.dni = insolation[0]
@@ -45,12 +37,12 @@ public struct MeteoData: CustomStringConvertible {
     self.windSpeed = conditions[1]
   }
 
-  public init(tmy values: [Double], order: [Int]) {
-    self.dni = values[order[0]]
-    self.temperature = values[order[1]]
-    self.windSpeed = values[order[2]]
-    self.ghi = values[order[3]]
-    self.dhi = values[order[4]]
+  public init(_ values: [Double], order: [Int?]) {
+    if let i = order[0] { self.dni = values[i] } else { self.dni = .zero }
+    if let i = order[1] { self.temperature = values[i] } else { self.temperature = .zero }
+    if let i = order[2] { self.windSpeed = values[i] } else { self.windSpeed = .zero }
+    if let i = order[3] { self.ghi = values[i] } else { self.ghi = .zero }
+    if let i = order[4] { self.dhi = values[i] } else { self.dhi = .zero }
   }
 
   public var description: String {

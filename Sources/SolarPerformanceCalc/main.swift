@@ -74,8 +74,10 @@ struct SolarPerformanceCalculator: ParsableCommand {
   var outputValues: Int?
   @Flag(help: "Output performance data to sqlite.")
   var database: Bool = false
-  @Flag(help: "Output of the model parameter.")
+  @Flag(help: "Print the model parameter. No calculation.")
   var parameter: Bool = false
+  @Flag(help: "Save the model parameter in json file format.")
+  var json: Bool = false
   @Flag(help: "Output performance data to excel.")
   var excel: Bool = false
 
@@ -87,6 +89,8 @@ struct SolarPerformanceCalculator: ParsableCommand {
     do {
       path = try BlackBoxModel.loadConfigurations(atPath: configPath)
       if path == nil { path = meteofilePath ?? configPath }
+      if parameter { print(ParameterSet()); return }
+      if json { try JSONConfig.saveConfiguration(toPath: configPath); return }
     } catch {
  #if os(Windows)
       if let message = (error as? TextConfigFile.ReadError)?.description {
@@ -98,12 +102,6 @@ struct SolarPerformanceCalculator: ParsableCommand {
  #endif
     }
 
-    if parameter {
-      print(ParameterSet())
-      try JSONConfig.saveConfiguration(toPath: configPath)
-      return
-    }
-    
     if let steps = stepsCalculation {
       Simulation.time.steps = Frequence[steps]
     } else {
