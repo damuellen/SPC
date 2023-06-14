@@ -98,40 +98,45 @@ public enum BlackBoxModel {
 
     // Set initial values
     var status = Plant.initialState
-    // PV system setup
-    let pv = PV()
+    var photovoltaic = [Double]()
+    let insolation = meteoDataDiagnose()
+    guard insolation.direct else { return }
+    if insolation.global { 
+      let pv = PV()
 
-    var inputs = [(solar: Double, ambient: Temperature, windSpeed: Double)]()
+      var inputs = [(solar: Double, ambient: Temperature, windSpeed: Double)]()
 
-    for (meteo, date) in simulationPeriod(.hour) {
-      let solar: Double
-      if let position = 🌞[date] {
-        let panel = singleAxisTracker(
-          apparentZenith: position.zenith, 
-          apparentAzimuth: position.azimuth,
-          maxAngle: 55, GCR: 0.444)
-        solar = Insolation(meteo: meteo).effective(
-          surfTilt: panel.surfTilt, incidence: panel.AOI,
-          zenith: position.zenith, doy: DateTime(date).yearDay)
-      } else {
-        solar = .zero
+      for (meteo, date) in simulationPeriod(.hour) {
+        let solar: Double
+        if let position = 🌞[date] {
+          let panel = singleAxisTracker(
+            apparentZenith: position.zenith, 
+            apparentAzimuth: position.azimuth,
+            maxAngle: 55, GCR: 0.444)
+          solar = Insolation(meteo: meteo).effective(
+            surfTilt: panel.surfTilt, incidence: panel.AOI,
+            zenith: position.zenith, doy: DateTime(date).yearDay)
+        } else {
+          solar = .zero
+        }
+        inputs.append(
+          (solar, Temperature(celsius: meteo.temperature), meteo.windSpeed)
+        )
       }
-      inputs.append(
-        (solar, Temperature(celsius: meteo.temperature), meteo.windSpeed)
-      )
+      let count = Simulation.time.steps.rawValue
+      photovoltaic = inputs.reversed().reduce(into: []) { result, point in
+        result += repeatElement(pv(point) / 10.0e6, count: count)
+      }
     }
-    let count = Simulation.time.steps.rawValue
-    var photovoltaic = inputs.reversed().reduce(into: []) { result, point in
-      result += repeatElement(pv(point) / 10.0e6, count: count)
-    }
-    
+
     for (meteo, date) in simulationPeriod() {
       // Set the date for the calculation step
       DateTime.setCurrent(date: date)
       let dt = DateTime.current
       /// Hourly PV result
-      plant.electricity.photovoltaic = photovoltaic.removeLast()
-
+      if !photovoltaic.isEmpty {
+        plant.electricity.photovoltaic = photovoltaic.removeLast()
+      }
       if Maintenance.checkSchedule(date) {
         // No operation is simulated
         let status = Plant.initialState
@@ -208,6 +213,20 @@ public enum BlackBoxModel {
       plant.electricity.consumption()
       record(dt, meteo: meteo, status: status, energy: plant.performance)
     }
+  }
+
+  private static func meteoDataDiagnose() -> (direct: Bool, global: Bool) {
+    var direct: Bool = false
+    var global: Bool = false
+    for values in meteoData {
+      if values.dni > 0, values.ghi.isZero || values.dhi.isZero {
+        direct = true
+      } else if values.ghi > 0, values.dhi > 0 {
+        global = true
+      }
+      if direct || global { break }
+    }
+    return (direct, global)
   }
 
   private static func simulationPeriod(
