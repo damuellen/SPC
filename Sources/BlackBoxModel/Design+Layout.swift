@@ -40,7 +40,7 @@ public struct Layout: Codable, Equatable, Hashable, CustomStringConvertible {
   /// Thermal power of the power block
   public var powerBlock = 70.0
   /// Storage capacity in hours
-  public var storageHours = 0.0
+  public var storageHours = 5.0
   /// Storage capacity in energy
   public var storageCapacity = 0.0
   /// Storage capacity in mass

@@ -23,7 +23,7 @@ class BlackBoxModelTests: XCTestCase {
 
     BlackBoxModel.configure(year: 2005)
     BlackBoxModel.configure(location: location)
-    let log = Historian(outputMode: .inMemory)
+    let log = Historian(mode: .inMemory)
     BlackBoxModel.runModel(with: log)
     let result = log.finish()
     let tol = 1.0
@@ -56,7 +56,7 @@ class BlackBoxModelTests: XCTestCase {
     BlackBoxModel.configure(year: 2005)
     BlackBoxModel.configure(location: location)
 
-    let log = Historian(outputMode: .inMemory)
+    let log = Historian(mode: .inMemory)
     BlackBoxModel.runModel(with: log)
 
     let result = log.finish()

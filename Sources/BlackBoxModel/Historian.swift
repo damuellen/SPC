@@ -87,7 +87,7 @@ public final class Historian {
       url = url.appendingPathComponent("\(self.name)_\(no)_\(frequency).xlsx")
       self.xlsx = Workbook(name: url.path)
     }
-    // if case .database = outputMode {
+    // if case .database = mode {
     //   let url = urlDir.appendingPathComponent("\(name)\(suffix).sqlite3")
     //   self.db = try! Connection(url.path)
     //   urls = [url]
