@@ -90,7 +90,7 @@ extension TextConfigFile.ReadError: CustomStringConvertible {
 }
 
 extension Substring {
-  fileprivate var trimmed: String {
+  var trimmed: String {
     var trimmed = self
     while trimmed.first?.isWhitespace == .some(true) {
       trimmed = trimmed.dropFirst()

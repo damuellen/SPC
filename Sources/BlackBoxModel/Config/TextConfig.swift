@@ -69,7 +69,7 @@ public enum TextConfig {
       switch fileExtension {
       case .FOS: break
       case .OPR: break
-      case .DEM: break
+      case .DEM: GridDemand.current = try .init(file: configFile)
       case .TAR: break  // Simulation.tariff = try .init(file: configFile)
       case .SIM: Simulation.parameter = try .init(file: configFile)
       case .INI: Simulation.initialValues = try .init(file: configFile)

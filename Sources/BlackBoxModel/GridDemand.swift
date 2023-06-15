@@ -11,25 +11,29 @@
 import DateExtensions
 import Units
 
-struct GridDemand: Codable {
+public struct GridDemand: Codable {
 
   static var current = GridDemand()
 
-  private var index: Int { return DateTime.indexMonth }
+  private var index: (Int) { (DateTime.indexHour * 12 + DateTime.indexMonth) }
 
   private let data: [Ratio]
 
-  init(_ data: [Ratio]) {
-    self.data = data
-  }
+  init(_ data: [Ratio]) { self.data = data }
 
-  var ratio: Double {
-    if index < 0 { return self.data[0].quotient }
-    return self.data[index].quotient
-  }
+  var ratio: Double { self.data[index].quotient }
 
-  private init() {
-    self = GridDemand(Array(repeatElement(Ratio(1), count: 12)))
+  private init() { data = Array(repeatElement(Ratio(1), count: 12 * 24)) }
+}
+
+extension GridDemand {
+  public init(file: TextConfigFile) throws {
+    let table = file.lines[5..<29].map { $0.split(separator: ",").map(\.trimmed) }
+    var data = [Ratio]()
+    for row in table {
+      data.append(contentsOf: row.compactMap(Double.init).map(Ratio.init(percent:)))
+    }
+    self.init(data)
   }
 }
 
