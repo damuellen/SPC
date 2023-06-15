@@ -77,8 +77,8 @@ public enum JSONConfig {
     if let data = try fileHandle.readToEnd() {
       let decoder = JSONDecoder()
       decoder.dateDecodingStrategy = .iso8601
-      let setParameter = try! decoder.decode(ParameterSet.self, from: data)
-      setParameter()
+      let setParameters = try decoder.decode(Parameters.self, from: data)
+      setParameters()
     }
     try fileHandle.close()
   }
@@ -163,7 +163,7 @@ public enum JSONConfig {
     encoder.outputFormatting = [.sortedKeys, .prettyPrinted]
     encoder.dateEncodingStrategy = .iso8601
     // encoder.keyEncodingStrategy = .convertToSnakeCase
-    return try encoder.encode(ParameterSet())
+    return try encoder.encode(Parameters())
   }
 
   public static func generate(type: JSONConfig.Name) throws -> Data {

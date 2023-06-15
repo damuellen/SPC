@@ -43,7 +43,7 @@ public struct Boiler: Parameterizable {
   )
   // startEnergyOld: 0.0)
   /// Returns the static parameters
-  public static var parameter: Parameter = ParameterDefaults.bo
+  public static var parameter: Parameter = Parameters.bo
 
   /// Calculates the efficiency of the boiler which only depends on his current load
   static func efficiency(at load: Ratio) -> Double {

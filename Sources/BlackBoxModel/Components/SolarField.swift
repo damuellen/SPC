@@ -115,7 +115,7 @@ public struct SolarField: Parameterizable, HeatTransfer {
     loops: Loop.names.map { name in Cycle(loop: name) }
   )
   /// Returns the static parameters.
-  public static var parameter: Parameter = ParameterDefaults.sf
+  public static var parameter: Parameter = Parameters.sf
 
   mutating func requiredMassFlow(from storage: Storage) {
     if storage.relativeCharge < Storage.parameter.chargeTo {

@@ -32,7 +32,7 @@ public struct PowerBlock: Parameterizable, HeatTransfer {
     temperature: Simulation.startTemperature
   )
   /// Returns the static parameters
-  public static var parameter: Parameter = ParameterDefaults.pb
+  public static var parameter: Parameter = Parameters.pb
 
   mutating func temperatureOutlet(
     heatExchanger: inout HeatExchanger, mode: Storage.OperationMode

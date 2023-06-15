@@ -164,7 +164,7 @@ extension Storage.Parameter: TextConfigInitializable {
     let ln: (Int) throws -> Double = { try file.readDouble(lineNumber: $0) }
     let l2: (Int) throws -> Int = { try file.readInteger(lineNumber: $0) }
     if file.lines[6].contains("no TES") { 
-      self = ParameterDefaults.st
+      self = Parameters.st
       return
     }
     name = file.name

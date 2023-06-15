@@ -69,7 +69,7 @@ public enum BlackBoxModel {
       year: metadata.year, frequence: Simulation.time.steps)
   }
 
-  public static func loadConfigurations(atPath path: String) throws -> String? {
+  public static func loadConfiguration(atPath path: String) throws -> String? {
     let url = URL(fileURLWithPath: path)
     if url.hasDirectoryPath {
       let files = try FileManager.default.contentsOfDirectory(atPath: path)

@@ -65,7 +65,7 @@ public struct SteamTurbine: Parameterizable {
 
   static let initialState = SteamTurbine(operationMode: .noOperation(time: 0))
 
-  public static var parameter: Parameter = ParameterDefaults.tb
+  public static var parameter: Parameter = Parameters.tb
 
   /// Used to sum time only when time step has changed
   static private var oldMinute = 0

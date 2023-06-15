@@ -14,7 +14,7 @@ import DateExtensions
 
 public struct Recording: CustomStringConvertible, Comparable {
 
-  let designParameter = ParameterSet()
+  let designParameter = Parameters()
 
   let performance: PlantPerformance
 

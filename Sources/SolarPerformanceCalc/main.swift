@@ -87,8 +87,8 @@ struct SolarPerformanceCalculator: ParsableCommand {
     print(decorated(name), "")
     var path: String! = nil
     do {
-      path = try BlackBoxModel.loadConfigurations(atPath: configPath)
-      if parameter { print(ParameterSet()); return }
+      path = try BlackBoxModel.loadConfiguration(atPath: configPath)
+      if parameter { print(Parameters()); return }
       if json { try JSONConfig.saveConfiguration(toPath: configPath); return }
     } catch {
  #if os(Windows)

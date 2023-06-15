@@ -73,7 +73,7 @@ public struct Storage: Parameterizable, HeatTransfer {
     temperatureTanks: (566.0, 666.0)
   )
   /// Returns the static parameters.
-  public static var parameter: Parameter = ParameterDefaults.st
+  public static var parameter: Parameter = Parameters.st
 
   fileprivate static func heatExchangerRestrictedMax(heatFlow: inout Power) {
     let steamTurbine = SteamTurbine.parameter

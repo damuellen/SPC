@@ -8,13 +8,14 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
-public struct ParameterSet: Codable {
-  var layout = Design.layout
+public struct Parameters: Codable {
+
+  var availability = Availability.current
   var simulation = Simulation.parameter
   var initialValues = Simulation.initialValues
   var time = Simulation.time
   var tariff = Simulation.tariff
-  var availability = Availability.current
+  var layout = Design.layout
   var heatTransferFluid = [SolarField.parameter.HTF, Storage.parameter.HTF.properties]
   var solarField = SolarField.parameter
   var collector = Collector.parameter
@@ -26,15 +27,16 @@ public struct ParameterSet: Codable {
   var steamTurbine = SteamTurbine.parameter
   var powerBlock = PowerBlock.parameter
   var storage = Storage.parameter
+
   public init() {}
   
   func callAsFunction() {
+    Availability.current = availability
     Simulation.parameter = simulation
     Simulation.initialValues = initialValues
     Simulation.time = time
     Simulation.tariff = tariff
     Design.layout = layout
-    Availability.current = availability
     SolarField.parameter = solarField
     Collector.parameter = collector
     Heater.parameter = heater
@@ -49,9 +51,9 @@ public struct ParameterSet: Codable {
   }
 }
 
-extension ParameterSet: CustomStringConvertible {
+extension Parameters: CustomStringConvertible {
   public var description: String {
-	  """
+    """
     \(layout)
     \(simulation)
     \(initialValues)

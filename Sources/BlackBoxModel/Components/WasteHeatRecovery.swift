@@ -18,7 +18,7 @@ public enum WasteHeatRecovery: Parameterizable {
   /// Returns the fixed initial state.
   static let initialState = PerformanceData(maintained: true)
   /// Returns the static parameters.
-  public static var parameter: Parameter = ParameterDefaults.whr
+  public static var parameter: Parameter = Parameters.whr
 
   /// Returns the efficiency of the waste heat recovery based on working conditions of the gas turbine
   static func efficiencyFor(gasTurbineLoad: Ratio, heatSolar: Double, gasTurbineGross: Double)

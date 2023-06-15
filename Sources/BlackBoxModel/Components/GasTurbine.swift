@@ -37,7 +37,7 @@ public struct GasTurbine: Parameterizable {
     operationMode: .free, isMaintained: false, load: 0.0
   )
   /// Returns the static parameters.
-  public static var parameter: Parameter = ParameterDefaults.gt
+  public static var parameter: Parameter = Parameters.gt
 
   /// Calculates the efficiency of the gas turbine which only depends on its own load.
   static func efficiency(at load: Ratio) -> Double {

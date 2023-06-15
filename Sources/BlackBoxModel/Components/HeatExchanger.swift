@@ -39,7 +39,7 @@ public struct HeatExchanger: Parameterizable, HeatTransfer {
     heatOut: 0.0, heatToTES: 0.0
   )
   /// Returns the static parameters.
-  public static var parameter: Parameter = ParameterDefaults.hx
+  public static var parameter: Parameter = Parameters.hx
 
   /// power function based on MAN-Turbo and OHL data with pinch point tool
   static func temperatureFactor(

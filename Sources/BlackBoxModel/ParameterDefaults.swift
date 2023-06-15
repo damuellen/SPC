@@ -11,7 +11,7 @@
 import Units
 import Utilities
 
-public enum ParameterDefaults {
+extension Parameters {
 
   static let hx = HeatExchanger.Parameter(
     name: "",

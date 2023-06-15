@@ -60,7 +60,7 @@ public struct Heater: Parameterizable, HeatTransfer {
     operationMode: .noOperation
   )
   ///
-  public static var parameter: Parameter = ParameterDefaults.hr
+  public static var parameter: Parameter = Parameters.hr
 
   /// Returns the parasitics of the heater.
   /// - Parameter load: Depends on the current load.
