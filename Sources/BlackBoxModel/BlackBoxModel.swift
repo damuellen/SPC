@@ -123,8 +123,8 @@ public enum BlackBoxModel {
         )
       }
       let count = Simulation.time.steps.rawValue
-      photovoltaic = inputs.reversed().reduce(into: []) { result, point in
-        result += repeatElement(pv(point) / 10.0e6, count: count)
+      photovoltaic = inputs.reversed().reduce(into: []) { result, input in
+        result += repeatElement(pv(input) / 10.0e6, count: count)
       }
     }
 
