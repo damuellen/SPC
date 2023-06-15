@@ -82,6 +82,7 @@ private struct MET: MeteoDataFile {
   let order: [Int?]
 
   init(_ url: URL) throws {
+    guard url.isFileURL else { throw MeteoDataFileError.fileNotFound(url.path) }
     let rawData = try Data(contentsOf: url, options: [.mappedIfSafe, .uncached])
     self.name = url.lastPathComponent
 
@@ -181,6 +182,7 @@ private struct TMY: MeteoDataFile {
   let csv: CSVReader
 
   init(_ url: URL) throws {
+    guard url.isFileURL else { throw MeteoDataFileError.fileNotFound(url.path) }
     let rawData = try Data(contentsOf: url, options: [.mappedIfSafe, .uncached])
     self.name = url.lastPathComponent
 
