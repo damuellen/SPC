@@ -46,11 +46,12 @@ public struct Recording: CustomStringConvertible, Comparable {
 
   private let startDate: Date
 
-  public func print() {
+  public func print(verbose: Bool) {
     Swift.print("")
     Swift.print(decorated("Annual results"))
     Swift.print(irradiance.prettyDescription)
     Swift.print(performance.prettyDescription)
+    if verbose { Swift.print(designParameter) }
   }
 
   init(

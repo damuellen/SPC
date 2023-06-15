@@ -74,8 +74,8 @@ struct SolarPerformanceCalculator: ParsableCommand {
   var outputValues: Int?
   @Flag(help: "Output performance data as sqlite db.")
   var database: Bool = false
-  @Flag(help: "Print the model parameter. No calculation.")
-  var printing: Bool = false
+  @Flag(name: .shortAndLong, help: "Detail overview of the model parameter.")
+  var verbose: Bool = false
   @Flag(help: "Save the model parameter in json file format.")
   var json: Bool = false
   @Flag(help: "Output performance data as excel file.")
@@ -90,7 +90,6 @@ struct SolarPerformanceCalculator: ParsableCommand {
     var path: String! = nil
     do {
       path = try BlackBoxModel.loadConfiguration(atPath: configPath)
-      if printing { print(Parameters()); return }
       if json { try JSONConfig.saveConfiguration(toPath: configPath); return }
     } catch {
  #if os(Windows)
@@ -115,8 +114,7 @@ struct SolarPerformanceCalculator: ParsableCommand {
 #if os(Windows)
       if case MeteoDataFileError.fileNotFound = error {
         guard let path = FileDialog() else { return }
-        do {
-          try BlackBoxModel.configure(meteoFilePath: path) } catch {
+        do { try BlackBoxModel.configure(meteoFilePath: path) } catch {
           MessageBox(text: (error as! MeteoDataFileError).description, caption: name)
           return
         }
@@ -169,7 +167,7 @@ struct SolarPerformanceCalculator: ParsableCommand {
     print("Preparing:", String(format: "%.2f seconds", t.0))
     print("Computing:", String(format: "%.2f seconds", t.1))
     print("Wall time:", String(format: "%.2f seconds", t2))
-    result.print()
+    result.print(verbose: verbose)
   }
 
   static var configuration = CommandConfiguration(
