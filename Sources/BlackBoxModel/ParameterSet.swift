@@ -29,12 +29,12 @@ public struct ParameterSet: Codable {
   public init() {}
   
   func callAsFunction() {
-    Design.layout = layout
     Simulation.parameter = simulation
     Simulation.initialValues = initialValues
     Simulation.time = time
     Simulation.tariff = tariff
-    // Availability.current = availability
+    Design.layout = layout
+    Availability.current = availability
     SolarField.parameter = solarField
     Collector.parameter = collector
     Heater.parameter = heater

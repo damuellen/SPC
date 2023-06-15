@@ -88,7 +88,6 @@ struct SolarPerformanceCalculator: ParsableCommand {
     var path: String! = nil
     do {
       path = try BlackBoxModel.loadConfigurations(atPath: configPath)
-      if path == nil { path = meteofilePath ?? configPath }
       if parameter { print(ParameterSet()); return }
       if json { try JSONConfig.saveConfiguration(toPath: configPath); return }
     } catch {
@@ -109,6 +108,7 @@ struct SolarPerformanceCalculator: ParsableCommand {
     }
     
     do {
+      if path == nil { path = meteofilePath ?? configPath }
       try BlackBoxModel.configure(meteoFilePath: path) } catch {
 #if os(Windows)
       if case MeteoDataFileError.fileNotFound = error {

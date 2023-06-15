@@ -73,16 +73,20 @@ public enum JSONConfig {
   }
   
   static func loadConfiguration(_ url: URL) throws {
-    guard url.isFileURL else { return }
-    let data = try Data(contentsOf: url)
-    let decoder = JSONDecoder()
-    decoder.dateDecodingStrategy = .iso8601
-    try decoder.decode(ParameterSet.self, from: data)()
+    let fileHandle = try FileHandle(forReadingFrom: url)
+    if let data = try fileHandle.readToEnd() {
+      let decoder = JSONDecoder()
+      decoder.dateDecodingStrategy = .iso8601
+      try decoder.decode(ParameterSet.self, from: data)()
+    }
+    try fileHandle.close()
   }
 
   static func loadConfiguration(of type: JSONConfig.Name, _ url: URL) throws {
-    guard url.isFileURL else { return }
-    let data = try Data(contentsOf: url)
+    let fileHandle = try FileHandle(forReadingFrom: url)
+    let data = try fileHandle.readToEnd()
+    try fileHandle.close()
+    guard let data = data else { return }
     let decoder = JSONDecoder()
     decoder.dateDecodingStrategy = .iso8601
     decoder.keyDecodingStrategy = .convertFromSnakeCase
@@ -109,7 +113,7 @@ public enum JSONConfig {
       Design.layout = try decoder.decode(Layout.self, from: data)
     case .SF: SolarField.decode(data)
     case .COL: Collector.decode(data)
-    case .STO: break
+    case .STO: Storage.decode(data)
     case .HR: Heater.decode(data)
     case .HTF: break
      // htf = try decoder.decode(HeatTransferFluid.self, from: data)
@@ -181,7 +185,7 @@ public enum JSONConfig {
     case .LAY: return try encoder.encode(Design.layout)
     case .SF: return try encoder.encode(SolarField.parameter)
     case .COL: return try encoder.encode(Collector.parameter)
-    case .STO: break //return try encoder.encode(Storage.parameter)
+    case .STO: return try encoder.encode(Storage.parameter)
     case .HR: return try encoder.encode(Heater.parameter)
     case .HTF: return try encoder.encode(HeatTransferFluid.VP1)
     case .HX: return try encoder.encode(HeatExchanger.parameter)

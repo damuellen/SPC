@@ -82,25 +82,27 @@ private struct MET: MeteoDataFile {
   let order: [Int?]
 
   init(_ url: URL) throws {
-    guard url.isFileURL else { throw MeteoDataFileError.fileNotFound(url.path) }
-    let rawData = try Data(contentsOf: url, options: [.mappedIfSafe, .uncached])
+    let fileHandle = try FileHandle(forReadingFrom: url)
+    let data = try fileHandle.readToEnd()
+    try fileHandle.close()
+    guard let data = data else { throw MeteoDataFileError.empty }
     self.name = url.lastPathComponent
 
     let newLine = UInt8(ascii: "\n")
     let cr = UInt8(ascii: "\r")
     let separator = UInt8(ascii: ",")
 
-    guard let firstNewLine = rawData.firstIndex(of: newLine) else {
+    guard let firstNewLine = data.firstIndex(of: newLine) else {
       throw MeteoDataFileError.empty
     }
 
-    guard let _ = rawData.firstIndex(of: separator) else {
+    guard let _ = data.firstIndex(of: separator) else {
       throw MeteoDataFileError.unknownDelimeter
     }
 
-    let hasCR = rawData[rawData.index(before: firstNewLine)] == cr
+    let hasCR = data[data.index(before: firstNewLine)] == cr
 
-    let lines = rawData.split(separator: newLine, maxSplits: 10,
+    let lines = data.split(separator: newLine, maxSplits: 10,
                               omittingEmptySubsequences: false)
     guard lines.endIndex > 10 else { throw MeteoDataFileError.empty }
     self.metadata = lines[0..<10].map { line in
@@ -182,22 +184,24 @@ private struct TMY: MeteoDataFile {
   let csv: CSVReader
 
   init(_ url: URL) throws {
-    guard url.isFileURL else { throw MeteoDataFileError.fileNotFound(url.path) }
-    let rawData = try Data(contentsOf: url, options: [.mappedIfSafe, .uncached])
+    let fileHandle = try FileHandle(forReadingFrom: url)
+    let data = try fileHandle.readToEnd()
+    try fileHandle.close()
+    guard let data = data else { throw MeteoDataFileError.empty }
     self.name = url.lastPathComponent
 
     let newLine = UInt8(ascii: "\n")
     let separator = UInt8(ascii: ",")
 
-    guard let _ = rawData.firstIndex(of: newLine) else {
+    guard let _ = data.firstIndex(of: newLine) else {
       throw MeteoDataFileError.empty
     }
 
-    guard let _ = rawData.firstIndex(of: separator) else {
+    guard let _ = data.firstIndex(of: separator) else {
       throw MeteoDataFileError.unknownDelimeter
     }
 
-    let lines = rawData.split(separator: newLine, maxSplits: 1)
+    let lines = data.split(separator: newLine, maxSplits: 1)
     guard lines.endIndex > 1,
           let metadata = CSVReader(data: lines[0])?.dataRows[0],
           let csv = CSVReader(data: lines[1])
