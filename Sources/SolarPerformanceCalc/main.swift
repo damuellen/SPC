@@ -61,9 +61,9 @@ struct SolarPerformanceCalculator: ParsableCommand {
   @Option(name: .shortAndLong, help: "The search path for config files.")
   var configPath: String = cwd
   @Option(name: .shortAndLong, help: "Destination path for result files.")
-  var resultsPath: String = cwd
-  @Option(name: .shortAndLong, help: "Custom name, otherwise they are numbered with 3 digits.")
-  var nameResults: String?
+  var pathForResult: String = cwd
+  @Option(name: .shortAndLong, help: "Custom name, otherwise they are numbered with 2 digits.")
+  var resultName: String?
   @Option(name: .shortAndLong, help: "Year of simulation.")
   var year: Int?
   @OptionGroup()
@@ -72,14 +72,16 @@ struct SolarPerformanceCalculator: ParsableCommand {
   var stepsCalculation: Int?
   @Option(name: .shortAndLong, help: "Values per hour output file.")
   var outputValues: Int?
-  @Flag(help: "Output performance data to sqlite.")
+  @Flag(help: "Output performance data as sqlite db.")
   var database: Bool = false
   @Flag(help: "Print the model parameter. No calculation.")
-  var parameter: Bool = false
+  var printing: Bool = false
   @Flag(help: "Save the model parameter in json file format.")
   var json: Bool = false
-  @Flag(help: "Output performance data to excel.")
+  @Flag(help: "Output performance data as excel file.")
   var excel: Bool = false
+  @Flag(help: "Open result file after calculation.")
+  var open: Bool = false
 
   func run() throws {
     let now = Date()
@@ -88,7 +90,7 @@ struct SolarPerformanceCalculator: ParsableCommand {
     var path: String! = nil
     do {
       path = try BlackBoxModel.loadConfiguration(atPath: configPath)
-      if parameter { print(Parameters()); return }
+      if printing { print(Parameters()); return }
       if json { try JSONConfig.saveConfiguration(toPath: configPath); return }
     } catch {
  #if os(Windows)
@@ -153,9 +155,7 @@ struct SolarPerformanceCalculator: ParsableCommand {
       mode = .csv
     }
 
-    let recording = Historian(
-      customName: nameResults, customPath: resultsPath, outputMode: mode
-    )
+    let recording = Historian(name: resultName, path: pathForResult, mode: mode)
 
     let start = Date()
 
@@ -163,7 +163,7 @@ struct SolarPerformanceCalculator: ParsableCommand {
 
     let t = (start.timeIntervalSince(now), -start.timeIntervalSinceNow)
 
-    let result = recording.finish()
+    let result = recording.finish(open: open)
 
     let t2 = -now.timeIntervalSinceNow
     print("Preparing:", String(format: "%.2f seconds", t.0))

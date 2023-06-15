@@ -59,44 +59,32 @@ public final class Historian {
   // private var db: Connection? = nil
   private var fileStream: OutputStream?
   private var xlsx: Workbook? = nil
-
+  private var url: URL
   /// All past states of the plant
   private(set) var status: [Status] = []
   private(set) var performance: [PlantPerformance] = []
   private(set) var sun: [Insolation] = []
 
   /// Common prefix of output
-  var name = "Results_"
+  var name = "Run"
 
-  public init(
-    customName: String? = nil, customPath: String? = nil, outputMode: Mode
-  ) {
+  public init(name: String? = nil, path: String? = nil, mode: Mode) {
     status.reserveCapacity(8760 * frequency.rawValue)
     performance.reserveCapacity(8760 * frequency.rawValue)
     sun.reserveCapacity(8760 * frequency.rawValue)
 
-    self.mode = outputMode
-
-    var url = URL(fileURLWithPath: customPath ?? "")
-
-    if outputMode.hasFileOutput, !url.hasDirectoryPath {
+    self.url = URL(fileURLWithPath: path ?? "")
+    self.mode = mode
+    if mode.hasFileOutput, !url.hasDirectoryPath {
       print("Invalid path for results: \(url.path)\n")
       print("There will be no output files.\n")
     }
-    let suffix: String
-    if let name = customName {
-      self.name = name
-      suffix = "001"
-    } else {
-      let numbers = checkForResults(atPath: url.path)
-      let n = (numbers?.max() ?? 0) + 1
-      suffix = String(format: "%03d", n)
-    }
 
-    var buffer = [UInt8]()
+    if let name = name { self.name = name } 
+    let no = sequenceNumber(atPath: url.path)
 
-    if case .excel = outputMode {
-      url = url.appendingPathComponent("\(name)\(suffix).xlsx")
+    if case .excel = mode {
+      url = url.appendingPathComponent("\(self.name)_\(no)_\(frequency).xlsx")
       self.xlsx = Workbook(name: url.path)
     }
     // if case .database = outputMode {
@@ -104,18 +92,21 @@ public final class Historian {
     //   self.db = try! Connection(url.path)
     //   urls = [url]
     // }
-    if case .csv = outputMode {
+    
+    if case .csv = mode {
+      var buffer = [UInt8]()
       let header = headers()
       buffer = [UInt8](header.name.utf8) + lineBreak 
         + [UInt8](header.unit.utf8) + lineBreak
       url = url.appendingPathComponent(
-        "\(name)\(suffix)_hourly.csv")
+        "\(self.name)_\(no)_hourly.csv")
       fileStream = OutputStream(url: url, append: false)
       fileStream?.open()
       _ = fileStream?.write(buffer, maxLength: buffer.count)
     }
 
     if case .custom(let i) = mode {
+      var buffer = [UInt8]()
       let header = headers(minutes: true)
       let startTime = repeatElement("0", count: header.count + 4)
         .joined(separator: ",")
@@ -129,7 +120,7 @@ public final class Historian {
         + [UInt8](intervalTime.utf8) + lineBreak
         + [UInt8](header.unit.utf8) + lineBreak
 
-      url = url.appendingPathComponent("\(name)\(suffix)_\(i).csv")
+      url = url.appendingPathComponent("\(self.name)_\(no)_\(i).csv")
 
       fileStream = OutputStream(url: url, append: false)
       fileStream?.open()
@@ -169,7 +160,7 @@ public final class Historian {
     #endif
   }
 
-  public func finish() -> Recording {
+  public func finish(open: Bool = false) -> Recording {
     #if DEBUG && !os(Windows)
     let clearLineString = "\u{001B}[2K"
     print(clearLineString, terminator: "\r")
@@ -216,25 +207,26 @@ public final class Historian {
     if case .excel = mode { writeExcel() }
 
     let irradiance = sun.hourly(fraction: frequency.fraction)
-
+    if mode.hasFileOutput, open { start(url.path) }
+    fileStream?.close()
+    fileStream = nil
     return Recording(
       startDate: startDate, irradiance: irradiance, 
       performanceHistory: performance,
       statusHistory: status)
   }
 
-  private func checkForResults(atPath path: String) -> [Int]? {
+  /// Determines the sequence number by checking the existing files in the path.
+  private func sequenceNumber(atPath path: String) -> String {
     let 💾 = FileManager.default
-
     let contents = try? 💾.contentsOfDirectory(atPath: path)
-
     let results = contents?.filter { $0.hasPrefix(name) }
-
-    return results?
-      .compactMap { filename in
-        let name = filename.split(separator: "_").dropLast().joined()
-        return Int(name.filter(\.isWholeNumber))
-      }
+    let last = results?.compactMap { filename in
+      let splited = filename.split(separator: "_")
+      let idx = min(1,splited.endIndex - 1)
+      return Int(splited[idx].filter(\.isWholeNumber))
+    }.max() 
+    return String(format: "%02d", (last ?? 0) + 1)
   }
 
   private func writeExcel() {

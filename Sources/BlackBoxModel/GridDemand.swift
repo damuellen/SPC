@@ -15,7 +15,7 @@ public struct GridDemand: Codable {
 
   static var current = GridDemand()
 
-  private var index: (Int) { (DateTime.indexHour * 12 + DateTime.indexMonth) }
+  private var index: Int { (DateTime.indexHour * 12 + DateTime.indexMonth) }
 
   private let data: [Ratio]
 

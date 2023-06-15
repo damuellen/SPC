@@ -26,19 +26,17 @@ struct Availability: Codable {
     reflMirror: 0.93, missgMirror: 0.0005, powerBlock: 1.0, storage: 1.0
   )
 
-  init(_ data: [Values]) {
-    self.data = data
-  }
+  init(_ data: [Values]) { self.data = data }
 
   public struct Values: Codable {
-    var solarField,
-      breakHCE,
-      airHCE,
-      fluorHCE,
-      reflMirror,
-      missgMirror,
-      powerBlock,
-      storage: Ratio
+    var solarField: Ratio
+    var breakHCE: Ratio
+    var airHCE: Ratio
+    var fluorHCE: Ratio
+    var reflMirror: Ratio
+    var missgMirror: Ratio
+    var powerBlock: Ratio
+    var storage: Ratio
   }
 
   var value: Values { self.data[index] }
