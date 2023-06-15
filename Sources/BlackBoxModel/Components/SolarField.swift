@@ -311,7 +311,7 @@ public struct SolarField: Parameterizable, HeatTransfer {
         newTemp = htf.temperature(heatPerKg - deltaHeatPerKg, ambient)
       }
       newTemp.limit(to: parameter.HTF.maxTemperature)
-    } while abs(newTemp.kelvin - oldTemp.kelvin) > Simulation.parameter.HLtempTolerance
+    } while abs(newTemp.kelvin - oldTemp.kelvin) > Simulation.parameter.heatlossTempTolerance
     return newTemp
   }
 

@@ -170,10 +170,10 @@ extension Storage {
     switch parameter.definedBy {
     case .hours:
       storedHeat = relativeCharge.quotient
-        * Design.layout.storage * steamTurbine.power.max
+        * Design.layout.storageHours * steamTurbine.power.max
         / steamTurbine.efficiencyNominal
     case .cap:
-      storedHeat = relativeCharge.quotient * Design.layout.storage_cap
+      storedHeat = relativeCharge.quotient * Design.layout.storageCapacity
     case .ton:
       storedHeat = defindedByTonnage()
     }
@@ -188,7 +188,7 @@ extension Storage {
     let dT = (t.hot - t.cold).kelvin
     
     return relativeCharge.quotient
-      * Design.layout.storage_ton * (hot - cold) * dT / 3_600
+      * Design.layout.storageTonnage * (hot - cold) * dT / 3_600
   }
   
   // calculate discharge rate only once per day, directly after sunset   

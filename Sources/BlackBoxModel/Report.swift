@@ -24,7 +24,7 @@ extension Recording {
       + "\(solarField.azimut)\n"
       + "\nSTORAGE\n"
       + "    Capacity [MWH,th]:"
-      * scientificForm(layout.storage * steamTurbine.power.max / steamTurbine.efficiencyNominal)
+      * scientificForm(layout.storageHours * steamTurbine.power.max / steamTurbine.efficiencyNominal)
       + "\nSTEAM TURBINE\n"
       + "    Gross Output [MW]:" * steamTurbine.power.max.description
       + "    Efficiency [%] :" * (steamTurbine.efficiencyNominal * 100).description

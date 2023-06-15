@@ -39,9 +39,9 @@ class SolarFieldTests: XCTestCase {
     collector.theta = 29.18
     collector.efficiency(ws: 0) // 0.90
     solarField.temperature.inlet =
-      Temperature(celsius: SolarField.parameter.designTemperature.inlet)
+      Temperature(celsius: SolarField.parameter.designTemperatureInlet)
       solarField.temperature.outlet =
-      Temperature(celsius: SolarField.parameter.designTemperature.outlet)
+      Temperature(celsius: SolarField.parameter.designTemperatureOutlet)
     let maxFlow = SolarField.parameter.maxMassFlow
     solarField.requiredMassFlow = maxFlow
 

@@ -77,7 +77,8 @@ public enum JSONConfig {
     if let data = try fileHandle.readToEnd() {
       let decoder = JSONDecoder()
       decoder.dateDecodingStrategy = .iso8601
-      try decoder.decode(ParameterSet.self, from: data)()
+      let setParameter = try! decoder.decode(ParameterSet.self, from: data)
+      setParameter()
     }
     try fileHandle.close()
   }
@@ -89,7 +90,6 @@ public enum JSONConfig {
     guard let data = data else { return }
     let decoder = JSONDecoder()
     decoder.dateDecodingStrategy = .iso8601
-    decoder.keyDecodingStrategy = .convertFromSnakeCase
     switch type {
     case .FOS: break
     case .OPR: break
@@ -162,7 +162,7 @@ public enum JSONConfig {
     let encoder = JSONEncoder()
     encoder.outputFormatting = [.sortedKeys, .prettyPrinted]
     encoder.dateEncodingStrategy = .iso8601
-    encoder.keyEncodingStrategy = .convertToSnakeCase
+    // encoder.keyEncodingStrategy = .convertToSnakeCase
     return try encoder.encode(ParameterSet())
   }
 
@@ -170,7 +170,7 @@ public enum JSONConfig {
     let encoder = JSONEncoder()
     encoder.outputFormatting = [.sortedKeys, .prettyPrinted]
     encoder.dateEncodingStrategy = .iso8601
-    encoder.keyEncodingStrategy = .convertToSnakeCase
+    // encoder.keyEncodingStrategy = .convertToSnakeCase
 
     switch type {
     case .FOS: break

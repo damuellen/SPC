@@ -22,7 +22,7 @@ public enum Design {
   /// The design has a gas turbine
   static let hasGasTurbine = layout.gasTurbine > 0
   /// The design has a thermal storage
-  static let hasStorage = max(layout.storage, layout.storage_cap, layout.storage_ton) > 0
+  static let hasStorage = max(layout.storageHours, layout.storageCapacity, layout.storageTonnage) > 0
 }
 
 /// Layout of the plant
@@ -40,11 +40,11 @@ public struct Layout: Codable, Equatable, Hashable, CustomStringConvertible {
   /// Thermal power of the power block
   public var powerBlock = 70.0
   /// Storage capacity in hours
-  public var storage = 0.0
+  public var storageHours = 0.0
   /// Storage capacity in energy
-  public var storage_cap = 0.0
+  public var storageCapacity = 0.0
   /// Storage capacity in mass
-  public var storage_ton = 0.0
+  public var storageTonnage = 0.0
   
   public var description: String {
     "Layout|SolarField " * "\(Int(solarField)) loops"
@@ -53,9 +53,9 @@ public struct Layout: Codable, Equatable, Hashable, CustomStringConvertible {
 //  + "Layout|Boiler " * "\(Int(boiler)) MW"
 //  + "Layout|GasTurbine " * "\(Int(gasTurbine)) MW"
     + "Layout|PowerBlock " * "\(Int(powerBlock)) MW"
-    + "Layout|Storage " * "\(Int(storage)) h"
-//  + "Layout|Storage_cap " * "\(Int(storage_cap)) MWh"
-//  + "Layout|Storage_ton " * "\(Int(storage_ton)) t"
+    + "Layout|Storage " * "\(Int(storageHours)) h"
+//  + "Layout|Storage_cap " * "\(Int(storageCapacity)) MWh"
+//  + "Layout|Storage_ton " * "\(Int(storageTonnage)) t"
   }
 }
 
@@ -73,7 +73,7 @@ extension Layout: TextConfigInitializable {
       else { continue }
       switch count {
       case 1: self.solarField = value
-      case 2: self.storage = value
+      case 2: self.storageHours = value
       case 3: self.heater = value
       case 4: self.boiler = value
       case 5: self.gasTurbine = value
@@ -81,8 +81,8 @@ extension Layout: TextConfigInitializable {
       case 7: self.heatExchanger = value
       case 8: break // NDI
       case 9: break
-      case 10: self.storage_cap = value
-      case 11: self.storage_ton = value
+      case 10: self.storageCapacity = value
+      case 11: self.storageTonnage = value
       case 12: break // Through
       default: throw TextConfigFile.ReadError.unexpectedEndOfFile(count,"")
       }

@@ -16,7 +16,7 @@ extension Simulation {
       minTemperatureRaiseStartUp, tempTolerance,
       minInsolationRaiseStartUp, heatTolerance, timeTolerance, massTolerance,
       minInsolation, maxToPowerBlock, minInsolationForBoiler,
-      electricalTolerance, electricalParasitics, HLtempTolerance: Double
+      electricalTolerance, electricalParasitics, heatlossTempTolerance: Double
     public var adjustmentFactor: AdjustmentFactors
   }
 
@@ -64,7 +64,7 @@ extension Simulation.Parameter: CustomStringConvertible {
     + "Iteration Start Value for Parasitics [% of production]:"
     * "\(electricalParasitics * 100)"
     + "Tolerance for Temperature Drop in Hot Header Iteration [K]:"
-    * HLtempTolerance.description
+    * heatlossTempTolerance.description
   }
 }
 
@@ -96,7 +96,7 @@ extension Simulation.Parameter: TextConfigInitializable {
       minInsolationForBoiler: ln(16),
       electricalTolerance: ln(58),
       electricalParasitics: ln(19),
-      HLtempTolerance: 0.1,
+      heatlossTempTolerance: 0.1,
       adjustmentFactor: adjustmentFactor
     )
   }

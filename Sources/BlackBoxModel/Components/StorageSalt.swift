@@ -47,11 +47,11 @@ extension Storage {
       switch parameter.definedBy {
       case .hours:
         let heatFlowRate = HeatExchanger.parameter.heatFlowHTF
-        mass = Design.layout.storage * heatFlowRate * 3_600 / (hot - cold)
+        mass = Design.layout.storageHours * heatFlowRate * 3_600 / (hot - cold)
       case .cap:
-        mass = Design.layout.storage_cap * dischargeToTurbine * 3_600 / (hot - cold)
+        mass = Design.layout.storageCapacity * dischargeToTurbine * 3_600 / (hot - cold)
       case .ton:
-        mass = Design.layout.storage_ton * dischargeToTurbine
+        mass = Design.layout.storageTonnage * dischargeToTurbine
       }
       if Design.hasStorage { precondition(mass > .zero, "Salt mass not specified") }
       mass *= availability

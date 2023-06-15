@@ -57,7 +57,7 @@ public enum Simulation {
     minInsolationForBoiler: 0,
     electricalTolerance: 0.5,
     electricalParasitics: 8.5 / 100,
-    HLtempTolerance: 0.5,
+    heatlossTempTolerance: 0.5,
     adjustmentFactor: adjustmentFactor
   )
 

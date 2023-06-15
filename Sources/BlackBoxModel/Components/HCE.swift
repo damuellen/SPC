@@ -325,10 +325,10 @@ enum HCE {
   static func factorHeatLossHTF(solarField: inout SolarField, inFocus: Double) {
     let sof = SolarField.parameter
     let factorHeatLossHTF = Simulation.adjustmentFactor.heatLossHTF
-    if sof.HLDump == false, sof.HLDumpQuad == false {
+    if sof.heatlossDump == false, sof.heatlossDumpQuad == false {
       solarField.heatLosses *= factorHeatLossHTF * inFocus
     } else {
-      if sof.HLDumpQuad == false {
+      if sof.heatlossDumpQuad == false {
         solarField.heatLosses *= factorHeatLossHTF
       } else if case .H = sof.layout {
         if inFocus > 0.75 { // between 0% and 25% dumping

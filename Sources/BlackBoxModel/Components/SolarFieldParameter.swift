@@ -11,9 +11,7 @@
 import Utilities
 
 extension SolarField {
-  enum Layout: String, Equatable {
-    case I, H
-  }
+  enum Layout: String, Equatable, Codable { case I, H  }
 
   /**
    A struct with the assigned details of the solar field.
@@ -30,27 +28,28 @@ extension SolarField {
    - “freeze protection” HTF flow and minimal HTF flow
    - parasitic power as a function of HTF flow
    */
-  public struct Parameter {
-    let HLDump = true
-    let layout = SolarField.Layout.H
-    let EtaWind = false
+  public struct Parameter: Codable {
+    var heatlossDump = true
+    var layout = SolarField.Layout.H
+    var etaWind = false
     /// Pipe heat losses in tested area [W/sqm]
-    let SSFHL: Double = 0.0
+    var SSFHL: Double = 0.0
     var heatLossHotHeader: [Double]
-    let HLDumpQuad = true
+    var heatlossDumpQuad = true
     var imbalanceDesign: [Double] = [1.0, 1.0, 1.0]
     var imbalanceMin: [Double] = [1.03, 1.0, 0.97]
     var windCoefficients: Polynomial = [0.0]
     var useReferenceAmbientTemperature = true
     var referenceAmbientTemperature: Double = 0.0
-    var designTemperature: (inlet: Double, outlet: Double) = (0.0, 0.0)
+    var designTemperatureInlet: Double = 0.0
+    var designTemperatureOutlet: Double = 0.0
     /// Maximum windspeed for operation [m/sec]
     let maxWind: Float
     let numberOfSCAsInRow: Int
     public var rowDistance, distanceSCA, pipeHeatLosses: Double
     public var azimut, elevation: Double
-    let antiFreezeParastics: Double
-    let pumpParastics: Polynomial
+    var antiFreezeParastics: Double
+    var pumpParastics: Polynomial
     var maxMassFlow: MassFlow
     var minFlow: Ratio 
     var pumpParasticsFullLoad: Double
@@ -117,11 +116,11 @@ extension SolarField.Parameter: CustomStringConvertible {
     + "Anti-Freeze Mass Flow [%]:" * antiFreezeFlow.percentage.description
     + "Total Mass of HTF in System [kg]:"
     * String(format: "%.1f", HTFmass)
-    + "Consider HL of ANY Dump. Collectors:" * (HLDump ? "YES" : "NO ")
+    + "Consider HL of ANY Dump. Collectors:" * (heatlossDump ? "YES" : "NO ")
     + "Consider HL of Dump. Col. for operating quadrant:"
-    * (HLDumpQuad ? "YES" : "NO ")
+    * (heatlossDumpQuad ? "YES" : "NO ")
     + "Consider SKAL-ET DemoLoop Effect of Wind Speed.:"
-    * (EtaWind ? "YES" : "NO ")
+    * (etaWind ? "YES" : "NO ")
     + (windCoefficients.isEmpty == false ?
     "Collector efficiency vs Wind Speed c0+c1*WS+c2*WS^2+c3*WS^3+c4*WS^4+c5*WS^5"
     + "\n\(windCoefficients)" : "")
@@ -134,9 +133,9 @@ extension SolarField.Parameter: CustomStringConvertible {
     + "Use Reference T_amb from Solpipe:"
     * (useReferenceAmbientTemperature ? "YES" : "NO ")
     + "Design SOF T_inlet [°C]:"
-    * String(format: "%G", designTemperature.inlet)
+    * String(format: "%G", designTemperatureInlet)
     + "Design SOF T_outlet [°C]:"
-    * String(format: "%G", designTemperature.outlet)
+    * String(format: "%G", designTemperatureOutlet)
     + "HTF Flow Imbalance\n"
     + "Near, Design:" * imbalanceDesign[0].description
     + "Average, Design:" * imbalanceDesign[1].description
@@ -172,155 +171,8 @@ extension SolarField.Parameter: TextConfigInitializable {
       try [ln(79), ln(80), ln(81), ln(82), ln(83), ln(84)]
     useReferenceAmbientTemperature = try ln(86) > 0 ? true : false
     referenceAmbientTemperature = try ln(87)
-    designTemperature = (try ln(89), try ln(90))
+    designTemperatureInlet = try ln(89)
+    designTemperatureOutlet = try ln(90)
     heatlosses = try [ln(93), ln(96), ln(99), ln(102), ln(105)]
-  }
-}
-
-extension SolarField.Parameter: Codable {
-  enum CodingKeys: String, CodingKey {
-    case name
-    case maxWind
-    case numberOfSCAsInRow
-    case rowDistance
-    case distanceSCA
-    case pipeHL, heatLossHotHeader
-    case azimut, elevation
-    case pumpParasticsFullLoad, antiFreezeParastics, pumpParastics
-    case maxMassFlow, minMassFlow
-    case antiFreezeFlow
-    case HTFmass
-    case imbalanceDesignNear, imbalanceDesignAverage, imbalanceDesignFar
-    case imbalanceMinNear, imbalanceMinAverage, imbalanceMinFar
-    case windCoefficients
-    case useReferenceAmbientTemperature
-    case referenceAmbientTemperature
-    case inletDesignTemperature, outletDesignTemperature
-    case heatlosses
-  }
-
-  public init(from decoder: Decoder) throws {
-    let values = try decoder.container(keyedBy: CodingKeys.self)
-    maxWind = try values.decode(Float.self, forKey: .maxWind)
-    numberOfSCAsInRow = try values.decode(
-      Int.self, forKey: .numberOfSCAsInRow
-    )
-    rowDistance = try values.decode(Double.self, forKey: .rowDistance)
-    distanceSCA = try values.decode(Double.self, forKey: .distanceSCA)
-    pipeHeatLosses = try values.decode(Double.self, forKey: .pipeHL)
-    heatLossHotHeader = try values.decode(Array<Double>.self, forKey: .heatLossHotHeader)
-    azimut = try values.decode(Double.self, forKey: .elevation)
-    elevation = try values.decode(Double.self, forKey: .elevation)
-    pumpParasticsFullLoad = try values.decode(
-      Double.self, forKey: .pumpParasticsFullLoad
-    )
-    antiFreezeParastics = try values.decode(
-      Double.self, forKey: .antiFreezeParastics
-    )
-    pumpParastics = try values.decode(
-      Polynomial.self, forKey: .pumpParastics
-    )
-    maxMassFlow = 
-      try values.decode(MassFlow.self, forKey: .maxMassFlow)      
-    minFlow = 
-      try values.decode(Ratio.self, forKey: .minMassFlow)
-    antiFreezeFlow = try values.decode(Ratio.self, forKey: .antiFreezeFlow)
-    HTFmass = try values.decode(Double.self, forKey: .HTFmass)
-    HTF = HeatTransferFluid.VP1
-    imbalanceDesign = [
-      try values.decode(Double.self, forKey: .imbalanceDesignNear),
-      try values.decode(Double.self, forKey: .imbalanceDesignAverage),
-      try values.decode(Double.self, forKey: .imbalanceDesignFar),
-    ]
-    imbalanceMin = [
-      try values.decode(Double.self, forKey: .imbalanceMinNear),
-      try values.decode(Double.self, forKey: .imbalanceMinAverage),
-      try values.decode(Double.self, forKey: .imbalanceMinFar),
-    ]
-    windCoefficients = try values.decode(
-      Polynomial.self, forKey: .windCoefficients
-    )
-    useReferenceAmbientTemperature = try values.decode(
-      Bool.self, forKey: .useReferenceAmbientTemperature
-    )
-    referenceAmbientTemperature = try values.decode(
-      Double.self, forKey: .referenceAmbientTemperature
-    )
-    designTemperature = (
-      try values.decode(Double.self, forKey: .inletDesignTemperature),
-      try values.decode(Double.self, forKey: .outletDesignTemperature)
-    )
-    heatlosses = try values.decode(Array<Double>.self, forKey: .heatlosses)
-  }
-
-  public func encode(to encoder: Encoder) throws {
-    var container = encoder.container(keyedBy: CodingKeys.self)
-    try container.encode(maxWind, forKey: .maxWind)
-    try container.encode(numberOfSCAsInRow, forKey: .numberOfSCAsInRow)
-    try container.encode(rowDistance, forKey: .rowDistance)
-    try container.encode(distanceSCA, forKey: .distanceSCA)
-    try container.encode(pipeHeatLosses, forKey: .pipeHL)
-    try container.encode(azimut, forKey: .azimut)
-    try container.encode(elevation, forKey: .elevation)
-    try container.encode(pumpParasticsFullLoad, forKey: .pumpParasticsFullLoad)
-    try container.encode(antiFreezeParastics, forKey: .antiFreezeParastics)
-    try container.encode(pumpParastics, forKey: .pumpParastics)
-    try container.encode(maxMassFlow, forKey: .maxMassFlow)
-    try container.encode(minFlow, forKey: .minMassFlow)
-    try container.encode(antiFreezeFlow, forKey: .antiFreezeFlow)
-    try container.encode(HTFmass, forKey: .HTFmass)
-    try container.encode(imbalanceDesign[0], forKey: .imbalanceDesignNear)
-    try container.encode(imbalanceDesign[1], forKey: .imbalanceDesignAverage)
-    try container.encode(imbalanceDesign[2], forKey: .imbalanceDesignFar)
-    try container.encode(imbalanceMin[0], forKey: .imbalanceMinNear)
-    try container.encode(imbalanceMin[1], forKey: .imbalanceMinAverage)
-    try container.encode(imbalanceMin[2], forKey: .imbalanceMinFar)
-    try container.encode(windCoefficients, forKey: .windCoefficients)
-    try container.encode(
-      useReferenceAmbientTemperature,
-      forKey: .useReferenceAmbientTemperature)
-    try container.encode(
-      referenceAmbientTemperature,
-      forKey: .referenceAmbientTemperature)
-    try container.encode(designTemperature.inlet, forKey: .inletDesignTemperature)
-    try container.encode(designTemperature.outlet, forKey: .outletDesignTemperature)
-    try container.encode(heatlosses, forKey: .heatlosses)
-  }
-}
-
-extension SolarField.Parameter: Equatable {
-  public static func == (lhs: SolarField.Parameter, rhs: SolarField.Parameter) -> Bool {
-    return lhs.HLDump == rhs.HLDump
-      && lhs.layout == rhs.layout
-      && lhs.EtaWind == rhs.EtaWind
-      /// Pipe heat losses in tested area [W/sqm]
-      && lhs.SSFHL == rhs.SSFHL
-      && lhs.heatLossHotHeader == rhs.heatLossHotHeader
-      && lhs.HLDumpQuad == rhs.HLDumpQuad
-      && lhs.imbalanceDesign == rhs.imbalanceDesign
-      && lhs.imbalanceMin == rhs.imbalanceMin
-      && lhs.windCoefficients == rhs.windCoefficients
-      && lhs.useReferenceAmbientTemperature == rhs.useReferenceAmbientTemperature
-      && lhs.referenceAmbientTemperature == rhs.referenceAmbientTemperature
-      && lhs.heatlosses == rhs.heatlosses
-      && lhs.designTemperature.inlet == rhs.designTemperature.inlet
-      && lhs.designTemperature.outlet == rhs.designTemperature.outlet
-      /// Maximum windspeed for operation [m/sec]
-      && lhs.maxWind == rhs.maxWind
-      && lhs.numberOfSCAsInRow == rhs.numberOfSCAsInRow
-      && lhs.rowDistance == rhs.rowDistance
-      && lhs.distanceSCA == rhs.distanceSCA
-      && lhs.pipeHeatLosses == rhs.pipeHeatLosses
-      && lhs.azimut == rhs.azimut
-      && rhs.elevation == rhs.elevation
-      && lhs.antiFreezeParastics == rhs.antiFreezeParastics
-      && lhs.pumpParastics == rhs.pumpParastics
-      && lhs.maxMassFlow == rhs.maxMassFlow
-      && lhs.minFlow == rhs.minFlow
-      && lhs.pumpParasticsFullLoad == rhs.pumpParasticsFullLoad
-      && lhs.antiFreezeFlow == rhs.antiFreezeFlow
-      && lhs.HTFmass == rhs.HTFmass
-      && lhs.HTF == rhs.HTF
-      && lhs.edgeFactor == rhs.edgeFactor
   }
 }
