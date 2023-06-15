@@ -72,20 +72,37 @@ extension Availability {
     self.init(data)
   }
 }
-
 extension Availability: CustomStringConvertible {
   public var description: String {
-    "Annual Average Solar Field Availability [%]:"
-    * String(format: "%.1f", values.solarField.percentage)
-    + "Average Percentage of Broken HCE [%]:"
-    * String(format: "%.1f", values.breakHCE.percentage)
-    + "Average Percentage of HCE with Lost Vacuum [%]:"
-    * String(format: "%.1f", values.airHCE.percentage)
-    + "Average Percentage of Flourescent HCE [%]:"
-    * String(format: "%.1f", values.fluorHCE.percentage)
-    + "Average Mirror Reflectivity [%]:"
-    * String(format: "%.1f", values.reflMirror.percentage)
-    + "Broken Mirrors [%]:"
-    * String(format: "%.1f", values.missgMirror.percentage)
+    let year = [
+      "January", "February ", "March", "April", "Mai", "June", "July", "August",
+      "September", "October", "November", "December",
+    ]
+    let month = "or individually for every Month [%]:\n"
+    return "Annual Average Solar Field Availability [%]:"
+      * String(format: "%.1f", values.solarField.percentage)
+      + year.enumerated().reduce(into: month) {
+        $0 += $1.1 * String(format: "%.1f", data[$1.0+1].solarField.percentage)
+      } + "Average Percentage of Broken HCE [%]:"
+      * String(format: "%.1f", values.breakHCE.percentage)
+      + year.enumerated().reduce(into: month) {
+        $0 += $1.1 * String(format: "%.1f", data[$1.0+1].airHCE.percentage)
+      } + "Average Percentage of HCE with Lost Vacuum [%]:"
+      * String(format: "%.1f", values.airHCE.percentage)
+      + year.enumerated().reduce(into: month) {
+        $0 += $1.1 * String(format: "%.1f", data[$1.0+1].airHCE.percentage)
+      } + "Average Percentage of Flourescent HCE [%]:"
+      * String(format: "%.1f", values.fluorHCE.percentage)
+      + year.enumerated().reduce(into: month) {
+        $0 += $1.1 * String(format: "%.1f", data[$1.0+1].fluorHCE.percentage)
+      } + "Average Mirror Reflectivity [%]:"
+      * String(format: "%.1f", values.reflMirror.percentage)
+      + year.enumerated().reduce(into: month) {
+        $0 += $1.1 * String(format: "%.1f", data[$1.0+1].reflMirror.percentage)
+      } + "Broken Mirrors [%]:" 
+      * String(format: "%.1f", values.missgMirror.percentage)
+      + year.enumerated().reduce(into: month) {
+        $0 += $1.1 * String(format: "%.1f", data[$1.0+1].missgMirror.percentage)
+      }
   }
 }
