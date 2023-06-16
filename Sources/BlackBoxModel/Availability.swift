@@ -17,7 +17,7 @@ struct Availability: Codable {
 
   static var fuel: Double = 5
 
-  private var index: Int { DateTime.current.month + 1 }
+  private var index: Int { DateTime.indexMonth + 1 }
 
   private let data: [Values]
 
