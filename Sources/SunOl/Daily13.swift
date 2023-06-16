@@ -129,333 +129,471 @@ extension TunOl {
     // JN=GR6-$AH6
     for i in 0..<365 { d13[JN + i] = d13[GR + i] - d13[AH + i] }
     let Overall_harmonious_range = Overall_harmonious_max_perc - Overall_harmonious_min_perc
-    /// Optimal harmonious day prod after min night prep due to prod cap limits
-    // JP=IF(OR($AM6=0,IQ6<0,IT6<0,IW6<0,IZ6<0,JC6<0,JF6<0,JI6<0,JL6<0),0,MIN(1,IFERROR(IQ6/MAX(0,IQ6-IS6),1),IFERROR(IT6/MAX(0,IT6-IV6),1),IFERROR(IW6/MAX(0,IW6-IY6),1),IFERROR(IZ6/MAX(0,IZ6-JB6),1),IFERROR(JC6/MAX(0,JC6-JE6),1),IFERROR(JF6/MAX(0,JF6-JH6),1),IFERROR(JI6/MAX(0,JI6-JK6),1),IFERROR(JL6/MAX(0,JL6-JN6),1))*(Overall_harmonious_max_perc-Overall_harmonious_min_perc)+Overall_harmonious_min_perc)
+    // Optimal harmonious day prod after min night prep due to prod cap limits
+    // JP=IF(OR($AM3=0,IQ3<0,IT3<0,IW3<0,IZ3<0,JC3<0,JF3<0,JI3<0,JL3<0),-1,MIN(1,IFERROR(IQ3/MAX(0,IQ3-IS3),1),IFERROR(IT3/MAX(0,IT3-IV3),1),IFERROR(IW3/MAX(0,IW3-IY3),1),IFERROR(IZ3/MAX(0,IZ3-JB3),1),IFERROR(JC3/MAX(0,JC3-JE3),1),IFERROR(JF3/MAX(0,JF3-JH3),1),IFERROR(JI3/MAX(0,JI3-JK3),1),IFERROR(JL3/MAX(0,JL3-JN3),1)))
     for i in 0..<365 {
-      if i + JP  == 57614 {
-        
-      }
       d13[JP + i] = iff(
-        or(d13[AM + i].isZero, d13[IQ + i] < Double.zero, d13[IT + i] < Double.zero, d13[IW + i] < Double.zero, d13[IZ + i] < Double.zero, d13[JC + i] < Double.zero, d13[JF + i] < Double.zero, d13[JI + i] < Double.zero, d13[JL + i] < 0),
-        Double.zero,
+        or(
+          d13[AM + i] == Double.zero, d13[IQ + i] < 0, d13[IT + i] < 0, d13[IW + i] < 0, d13[IZ + i] < 0, d13[JC + i] < 0,
+          d13[JF + i] < 0, d13[JI + i] < 0, d13[JL + i] < 0), -1,
         min(
-          1, ifFinite(d13[IQ + i] / max(Double.zero, d13[IQ + i] - d13[IS + i]), 1.0), ifFinite(d13[IT + i] / max(Double.zero, d13[IT + i] - d13[IV + i]), 1.0), ifFinite(d13[IW + i] / max(Double.zero, d13[IW + i] - d13[IY + i]), 1.0),
-          ifFinite(d13[IZ + i] / max(Double.zero, d13[IZ + i] - d13[JB + i]), 1.0), ifFinite(d13[JC + i] / max(Double.zero, d13[JC + i] - d13[JE + i]), 1.0), ifFinite(d13[JF + i] / max(Double.zero, d13[JF + i] - d13[JH + i]), 1.0),
-          ifFinite(d13[JI + i] / max(Double.zero, d13[JI + i] - d13[JK + i]), 1.0), ifFinite(d13[JL + i] / max(Double.zero, d13[JL + i] - d13[JN + i]), 1.0)) * (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
-          + Overall_harmonious_min_perc)
+          1, ifFinite(d13[IQ + i] / max(0, d13[IQ + i] - d13[IS + i]), 1),
+          ifFinite(d13[IT + i] / max(0, d13[IT + i] - d13[IV + i]), 1),
+          ifFinite(d13[IW + i] / max(0, d13[IW + i] - d13[IY + i]), 1),
+          ifFinite(d13[IZ + i] / max(0, d13[IZ + i] - d13[JB + i]), 1),
+          ifFinite(d13[JC + i] / max(0, d13[JC + i] - d13[JE + i]), 1),
+          ifFinite(d13[JF + i] / max(0, d13[JF + i] - d13[JH + i]), 1),
+          ifFinite(d13[JI + i] / max(0, d13[JI + i] - d13[JK + i]), 1),
+          ifFinite(d13[JL + i] / max(0, d13[JL + i] - d13[JN + i]), 1)))
     }
     let dJP: Int = 70810  // LA
-    for i in 0..<365 { d13[dJP + i] = Overall_harmonious_range < 1E-10 ? 1 : (d13[JP + i] - Overall_harmonious_min_perc) / Overall_harmonious_range }
-    /// Surplus harm op period electricity after opt harmonious and min night op prep
-    // JQ=IF(JP6=0,0,ROUND((FS6+(FT6-FS6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc))+(GE6+(GF6-GE6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc))-$Z6-MIN((GH6+(GI6-GH6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc)),MAX(0,$AB6-(FV6+(FW6-FV6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc)))/El_boiler_eff)-MIN(BESS_cap_ud,MAX(0,FK6-GG6-GA6*BESS_chrg_eff))/BESS_chrg_eff,5))
+    for i in 0..<365 {
+      d13[dJP + i] =
+        Overall_harmonious_range < 1E-10 ? 1 : (d13[JP + i] - Overall_harmonious_min_perc) / Overall_harmonious_range
+    }
+    // Surplus harm op period electricity after opt harmonious and min night op prep
+    // JQ=IF(JP3<0,0,ROUND((FS3+(FT3-FS3)*JP3)+(GE3+(GF3-GE3)*JP3)-$Z3-MIN((GH3+(GI3-GH3)*JP3),MAX(0,$AB3-(FV3+(FW3-FV3)*JP3))/El_boiler_eff)-MIN(BESS_cap_ud,MAX(0,FK3-GG3-GA3*BESS_chrg_eff))/BESS_chrg_eff,5))
     for i in 0..<365 {
       d13[JQ + i] = iff(
-        d13[JP + i].isZero, Double.zero,
+        d13[JP + i] < 0, 0,
         round(
-          (d13[FS + i] + (d13[FT + i] - d13[FS + i]) * d13[dJP + i]) + (d13[GE + i] + (d13[GF + i] - d13[GE + i]) * d13[dJP + i]) - d13[Z + i]
-            - min((d13[GH + i] + (d13[GI + i] - d13[GH + i]) * d13[dJP + i]), max(Double.zero, d13[AB + i] - (d13[FV + i] + (d13[FW + i] - d13[FV + i]) * d13[dJP + i])) / El_boiler_eff) - min(
-              BESS_cap_ud, max(Double.zero, d13[FK + i] - d13[GG + i] - d13[GA + i] * BESS_chrg_eff)) / BESS_chrg_eff, 5))
+          (d13[FS + i] + (d13[FT + i] - d13[FS + i]) * d13[JP + i]) + (d13[GE + i] + (d13[GF + i] - d13[GE + i]) * d13[JP + i])
+            - d13[Z + i]
+            - min(
+              (d13[GH + i] + (d13[GI + i] - d13[GH + i]) * d13[JP + i]),
+              max(0, d13[AB + i] - (d13[FV + i] + (d13[FW + i] - d13[FV + i]) * d13[JP + i])) / El_boiler_eff) - min(
+              BESS_cap_ud, max(0, d13[FK + i] - d13[GG + i] - d13[GA + i] * BESS_chrg_eff)) / BESS_chrg_eff, 5))
     }
-    /// Surplus harm op period electricity after opt harmonious and max night op prep
-    // JR=IF(JP6=0,0,ROUND((HO6+(HP6-HO6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc))+(IA6+(IB6-IA6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc))-$AA6-MIN((ID6+(IE6-ID6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc)),MAX(0,$AC6-(HR6+(HS6-HR6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc)))/El_boiler_eff)-MIN(BESS_cap_ud,MAX(0,HG6-IC6-HW6*BESS_chrg_eff))/BESS_chrg_eff,5))
+    // Surplus harm op period electricity after opt harmonious and max night op prep
+    // JR=IF(JP3<0,0,ROUND((HO3+(HP3-HO3)*JP3)+(IA3+(IB3-IA3)*JP3)-$AA3-MIN((ID3+(IE3-ID3)*JP3),MAX(0,$AC3-(HR3+(HS3-HR3)*JP3))/El_boiler_eff)-MIN(BESS_cap_ud,MAX(0,HG3-IC3-HW3*BESS_chrg_eff))/BESS_chrg_eff,5))
     for i in 0..<365 {
       d13[JR + i] = iff(
-        d13[JP + i].isZero, Double.zero,
+        d13[JP + i] < 0, 0,
         round(
-          (d13[HO + i] + (d13[HP + i] - d13[HO + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (d13[JP + i] - Overall_harmonious_min_perc))
-            + (d13[IA + i] + (d13[IB + i] - d13[IA + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (d13[JP + i] - Overall_harmonious_min_perc)) - d13[AA + i]
+          (d13[HO + i] + (d13[HP + i] - d13[HO + i]) * d13[JP + i]) + (d13[IA + i] + (d13[IB + i] - d13[IA + i]) * d13[JP + i])
+            - d13[AA + i]
             - min(
-              (d13[ID + i] + (d13[IE + i] - d13[ID + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (d13[JP + i] - Overall_harmonious_min_perc)),
-              max(Double.zero, d13[AC + i] - (d13[HR + i] + (d13[HS + i] - d13[HR + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (d13[JP + i] - Overall_harmonious_min_perc))) / El_boiler_eff) - min(
-              BESS_cap_ud, max(Double.zero, d13[HG + i] - d13[IC + i] - d13[HW + i] * BESS_chrg_eff)) / BESS_chrg_eff, 5))
+              (d13[ID + i] + (d13[IE + i] - d13[ID + i]) * d13[JP + i]),
+              max(0, d13[AC + i] - (d13[HR + i] + (d13[HS + i] - d13[HR + i]) * d13[JP + i])) / El_boiler_eff) - min(
+              BESS_cap_ud, max(0, d13[HG + i] - d13[IC + i] - d13[HW + i] * BESS_chrg_eff)) / BESS_chrg_eff, 5))
     }
-    /// Surplus harm op csp steam+boiler prod cap after opt day harm and min night op prep
-    // JS=IF(JP6=0,0,ROUND((FV6+(FW6-FV6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc))+MIN((GH6+(GI6-GH6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc)),MAX(0,(FS6+(FT6-FS6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc))+(GE6+(GF6-GE6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc))-$Z6-MIN(BESS_cap_ud,MAX(0,FK6-GG6-GA6*BESS_chrg_eff))/BESS_chrg_eff))*El_boiler_eff-$AB6,5))
+    // Surplus harm op csp steam+boiler prod cap after opt day harm and min night op prep
+    // JS=IF(JP3<0,0,ROUND((FV3+(FW3-FV3)*JP3)+MIN((GH3+(GI3-GH3)*JP3),MAX(0,(FS3+(FT3-FS3)*JP3)+(GE3+(GF3-GE3)*JP3)-$Z3-MIN(BESS_cap_ud,MAX(0,FK3-GG3-GA3*BESS_chrg_eff))/BESS_chrg_eff))*El_boiler_eff-$AB3,5))
     for i in 0..<365 {
       d13[JS + i] = iff(
-        d13[JP + i].isZero, Double.zero,
+        d13[JP + i] < 0, 0,
         round(
-          (d13[FV + i] + (d13[FW + i] - d13[FV + i]) * d13[dJP + i]) + min(
-            (d13[GH + i] + (d13[GI + i] - d13[GH + i]) * d13[dJP + i]),
-            max(Double.zero, (d13[FS + i] + (d13[FT + i] - d13[FS + i]) * d13[dJP + i]) + (d13[GE + i] + (d13[GF + i] - d13[GE + i]) * d13[dJP + i]) - d13[Z + i]) * El_boiler_eff
-              - min((d13[FY + i] + (d13[FZ + i] - d13[FY + i]) * d13[dJP + i]), min(BESS_cap_ud, max(Double.zero, d13[FK + i] - d13[GG + i] - d13[GA + i] * BESS_chrg_eff)) / BESS_chrg_eff)) * El_boiler_eff - d13[AB + i], 5))
+          (d13[FV + i] + (d13[FW + i] - d13[FV + i]) * d13[JP + i]) + min(
+            (d13[GH + i] + (d13[GI + i] - d13[GH + i]) * d13[JP + i]),
+            max(
+              0,
+              (d13[FS + i] + (d13[FT + i] - d13[FS + i]) * d13[JP + i])
+                + (d13[GE + i] + (d13[GF + i] - d13[GE + i]) * d13[JP + i]) - d13[Z + i] - min(
+                  BESS_cap_ud, max(0, d13[FK + i] - d13[GG + i] - d13[GA + i] * BESS_chrg_eff)) / BESS_chrg_eff)) * El_boiler_eff
+            - d13[AB + i], 5))
     }
-    /// Surplus harm op csp steam+boiler prod cap after opt day harm and max night op prep
-    // JT=IF(JP6=0,0,ROUND((HR6+(HS6-HR6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc))+MIN((ID6+(IE6-ID6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc)),MAX(0,(HO6+(HP6-HO6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc))+(IA6+(IB6-IA6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc))-$AA6-MIN(BESS_cap_ud,MAX(0,HG6-IC6-HW6*BESS_chrg_eff))/BESS_chrg_eff))*El_boiler_eff-$AC6,5))
+    // Surplus harm op csp steam+boiler prod cap after opt day harm and max night op prep
+    // JT=IF(JP3<0,0,ROUND((HR3+(HS3-HR3)*JP3)+MIN((ID3+(IE3-ID3)*JP3),MAX(0,(HO3+(HP3-HO3)*JP3)+(IA3+(IB3-IA3)*JP3)-$AA3-MIN(BESS_cap_ud,MAX(0,HG3-IC3-HW3*BESS_chrg_eff))/BESS_chrg_eff))*El_boiler_eff-$AC3,5))
     for i in 0..<365 {
       d13[JT + i] = iff(
-        d13[JP + i].isZero, Double.zero,
+        d13[JP + i] < 0, 0,
         round(
-          (d13[HR + i] + (d13[HS + i] - d13[HR + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (d13[JP + i] - Overall_harmonious_min_perc)) + min(
-            d13[ID + i] + (d13[IE + i] - d13[ID + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (d13[JP + i] - Overall_harmonious_min_perc),
+          (d13[HR + i] + (d13[HS + i] - d13[HR + i]) * d13[JP + i]) + min(
+            (d13[ID + i] + (d13[IE + i] - d13[ID + i]) * d13[JP + i]),
             max(
-              Double.zero,
-              (d13[HO + i] + (d13[HP + i] - d13[HO + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (d13[JP + i] - Overall_harmonious_min_perc))
-                + (d13[IA + i] + (d13[IB + i] - d13[IA + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (d13[JP + i] - Overall_harmonious_min_perc)) - d13[AA + i] - min(
-                  BESS_cap_ud, max(Double.zero, d13[HG + i] - d13[IC + i] - d13[HW + i] * BESS_chrg_eff)) / BESS_chrg_eff)) * El_boiler_eff - d13[AC + i], 5))
+              0,
+              (d13[HO + i] + (d13[HP + i] - d13[HO + i]) * d13[JP + i])
+                + (d13[IA + i] + (d13[IB + i] - d13[IA + i]) * d13[JP + i]) - d13[AA + i] - min(
+                  BESS_cap_ud, max(0, d13[HG + i] - d13[IC + i] - d13[HW + i] * BESS_chrg_eff)) / BESS_chrg_eff)) * El_boiler_eff
+            - d13[AC + i], 5))
     }
-    /// Surplus el boiler cap after opt day harm and min night op prep
-    // JU=IF(OR(JP6=0,El_boiler_cap_ud=0),0,ROUND((GH6+(GI6-GH6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc))-MAX(0,$AB6-(FV6+(FW6-FV6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc)))/El_boiler_eff,5))
+    // Surplus el boiler cap after opt day harm and min night op prep
+    // JU=IF(OR(JP3<0,El_boiler_cap_ud=0),0,ROUND((GH3+(GI3-GH3)*JP3)-MAX(0,$AB3-(FV3+(FW3-FV3)*JP3))/El_boiler_eff,5))
     for i in 0..<365 {
       d13[JU + i] = iff(
-        or(d13[JP + i].isZero, El_boiler_cap_ud.isZero), Double.zero,
-        round((d13[GH + i] + (d13[GI + i] - d13[GH + i]) * d13[dJP + i]) - max(Double.zero, d13[AB + i] - (d13[FV + i] + (d13[FW + i] - d13[FV + i]) * d13[dJP + i])) / El_boiler_eff, 5))
+        or(d13[JP + i] < 0, El_boiler_cap_ud == Double.zero), 0,
+        round(
+          (d13[GH + i] + (d13[GI + i] - d13[GH + i]) * d13[JP + i]) - max(
+            0, d13[AB + i] - (d13[FV + i] + (d13[FW + i] - d13[FV + i]) * d13[JP + i])) / El_boiler_eff, 5))
     }
-    /// Surplus el boiler cap after opt day harm and max night op prep
-    // JV=IF(OR(JP6=0,El_boiler_cap_ud=0),0,ROUND((ID6+(IE6-ID6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc))-MAX(0,$AC6-(HR6+(HS6-HR6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc)))/El_boiler_eff,5))
+    // Surplus el boiler cap after opt day harm and max night op prep
+    // JV=IF(OR(JP3<0,El_boiler_cap_ud=0),0,ROUND((ID3+(IE3-ID3)*JP3)-MAX(0,$AC3-(HR3+(HS3-HR3)*JP3))/El_boiler_eff,5))
     for i in 0..<365 {
       d13[JV + i] = iff(
-        or(d13[JP + i].isZero, El_boiler_cap_ud.isZero), Double.zero,
+        or(d13[JP + i] < 0, El_boiler_cap_ud == Double.zero), 0,
         round(
-          (d13[ID + i] + (d13[IE + i] - d13[ID + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (d13[JP + i] - Overall_harmonious_min_perc)) - max(
-            Double.zero, d13[AC + i] - (d13[HR + i] + (d13[HS + i] - d13[HR + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (d13[JP + i] - Overall_harmonious_min_perc))) / El_boiler_eff, 5))
+          (d13[ID + i] + (d13[IE + i] - d13[ID + i]) * d13[JP + i]) - max(
+            0, d13[AC + i] - (d13[HR + i] + (d13[HS + i] - d13[HR + i]) * d13[JP + i])) / El_boiler_eff, 5))
     }
-    /// Surplus BESS chrg cap after opt day harm and min night op prep
-    // JW=IF(OR(JP6=0,BESS_cap_ud=0),0,ROUND((FY6+(FZ6-FY6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc))-MAX(0,FK6-GG6-GA6*BESS_chrg_eff)/BESS_chrg_eff,5))
+    // Surplus BESS chrg cap after opt day harm and min night op prep
+    // JW=IF(OR(JP3<0,BESS_cap_ud=0),0,ROUND((FY3+(FZ3-FY3)*JP3)-MAX(0,FK3-GG3-GA3*BESS_chrg_eff)/BESS_chrg_eff,5))
     for i in 0..<365 {
       d13[JW + i] = iff(
-        or(d13[JP + i].isZero, BESS_cap_ud.isZero), Double.zero,
-        round((d13[FY + i] + (d13[FZ + i] - d13[FY + i]) * d13[dJP + i]) - min(El_boiler_cap_ud, max(Double.zero, d13[FK + i] - d13[GG + i] - d13[GA + i] * BESS_chrg_eff)) / BESS_chrg_eff, 5))
+        or(d13[JP + i] < 0, BESS_cap_ud == Double.zero), 0,
+        round(
+          (d13[FY + i] + (d13[FZ + i] - d13[FY + i]) * d13[JP + i]) - max(
+            0, d13[FK + i] - d13[GG + i] - d13[GA + i] * BESS_chrg_eff) / BESS_chrg_eff, 5))
     }
-    /// Surplus BESS chrg cap after opt day harm and max night op prep
-    // JX=IF(OR(JP6=0,BESS_cap_ud=0),0,ROUND((HU6+(HV6-HU6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc))-MAX(0,HG6-IC6-HW6*BESS_chrg_eff)/BESS_chrg_eff,5))
+    // Surplus BESS chrg cap after opt day harm and max night op prep
+    // JX=IF(OR(JP3<0,BESS_cap_ud=0),0,ROUND((HU3+(HV3-HU3)*JP3)-MAX(0,HG3-IC3-HW3*BESS_chrg_eff)/BESS_chrg_eff,5))
     for i in 0..<365 {
       d13[JX + i] = iff(
-        or(d13[JP + i].isZero, BESS_cap_ud.isZero), Double.zero,
-        round((d13[HU + i] + (d13[HV + i] - d13[HU + i]) * d13[dJP + i]) - min(El_boiler_cap_ud, max(Double.zero, d13[HG + i] - d13[IC + i] - d13[HW + i] * BESS_chrg_eff)) / BESS_chrg_eff, 5))
+        or(d13[JP + i] < 0, BESS_cap_ud == Double.zero), 0,
+        round(
+          (d13[HU + i] + (d13[HV + i] - d13[HU + i]) * d13[JP + i]) - max(
+            0, d13[HG + i] - d13[IC + i] - d13[HW + i] * BESS_chrg_eff) / BESS_chrg_eff, 5))
     }
-    /// Surplus grid import cap after opt day harm and min night op prep
-    // JY=IF(OR(JP6=0,Grid_import_max_ud*Grid_import_yes_no_PB_strategy=0),0,ROUND((GE6+(GF6-GE6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc))-MAX(0,-((FS6+(FT6-FS6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc))-$Z6-MIN((GH6+(GI6-GH6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc)),MAX(0,$AB6-(FV6+(FW6-FV6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc)))/El_boiler_eff)-MIN(BESS_cap_ud,MAX(0,FK6-GG6-GA6*BESS_chrg_eff))/BESS_chrg_eff)),5))
+    // Surplus grid import cap after opt day harm and min night op prep
+    // JY=IF(OR(JP3<0,Grid_import_max_ud*Grid_import_yes_no_PB_strategy=0),0,ROUND((GE3+(GF3-GE3)*JP3)-MAX(0,-((FS3+(FT3-FS3)*JP3)-$Z3-MIN((GH3+(GI3-GH3)*JP3),MAX(0,$AB3-(FV3+(FW3-FV3)*JP3))/El_boiler_eff)-MIN(BESS_cap_ud,MAX(0,FK3-GG3-GA3*BESS_chrg_eff))/BESS_chrg_eff)),5))
     for i in 0..<365 {
       d13[JY + i] = iff(
-        or(d13[JP + i].isZero, (Grid_import_max_ud * Grid_import_yes_no_PB_strategy).isZero), Double.zero,
+        or(d13[JP + i] < 0, Grid_import_max_ud * Grid_import_yes_no_PB_strategy == Double.zero), 0,
         round(
-          (d13[GE + i] + (d13[GF + i] - d13[GE + i]) * d13[dJP + i])
+          (d13[GE + i] + (d13[GF + i] - d13[GE + i]) * d13[JP + i])
             - max(
-              Double.zero,
-              -((d13[FS + i] + (d13[FT + i] - d13[FS + i]) * d13[dJP + i]) - d13[Z + i]
-                - min((d13[GH + i] + (d13[GI + i] - d13[GH + i]) * d13[dJP + i]), max(Double.zero, d13[AB + i] - (d13[FV + i] + (d13[FW + i] - d13[FV + i]) * d13[dJP + i])) / El_boiler_eff) - min(
-                  BESS_cap_ud, max(Double.zero, d13[FK + i] - d13[GG + i] - d13[GA + i] * BESS_chrg_eff)) / BESS_chrg_eff)), 5))
+              0,
+              -((d13[FS + i] + (d13[FT + i] - d13[FS + i]) * d13[JP + i]) - d13[Z + i]
+                - min(
+                  (d13[GH + i] + (d13[GI + i] - d13[GH + i]) * d13[JP + i]),
+                  max(0, d13[AB + i] - (d13[FV + i] + (d13[FW + i] - d13[FV + i]) * d13[JP + i])) / El_boiler_eff) - min(
+                  BESS_cap_ud, max(0, d13[FK + i] - d13[GG + i] - d13[GA + i] * BESS_chrg_eff)) / BESS_chrg_eff)), 5))
     }
-    /// Surplus grid import cap after opt day harm and max night op prep
-    // JZ=IF(OR(JP6=0,Grid_import_max_ud*Grid_import_yes_no_PB_strategy=0),0,ROUND((IA6+(IB6-IA6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc))-MAX(0,-((HO6+(HP6-HO6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc))-$AA6-MIN((ID6+(IE6-ID6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc)),MAX(0,$AC6-(HR6+(HS6-HR6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc)))/El_boiler_eff)-MIN(BESS_cap_ud,MAX(0,HG6-IC6-HW6*BESS_chrg_eff))/BESS_chrg_eff)),5))
+    // Surplus grid import cap after opt day harm and max night op prep
+    // JZ=IF(OR(JP3<0,Grid_import_max_ud*Grid_import_yes_no_PB_strategy=0),0,ROUND((IA3+(IB3-IA3)*JP3)-MAX(0,-((HO3+(HP3-HO3)*JP3)-$AA3-MIN((ID3+(IE3-ID3)*JP3),MAX(0,$AC3-(HR3+(HS3-HR3)*JP3))/El_boiler_eff)-MIN(BESS_cap_ud,MAX(0,HG3-IC3-HW3*BESS_chrg_eff))/BESS_chrg_eff)),5))
     for i in 0..<365 {
       d13[JZ + i] = iff(
-        or(d13[JP + i].isZero, (Grid_import_max_ud * Grid_import_yes_no_PB_strategy).isZero), Double.zero,
+        or(d13[JP + i] < 0, Grid_import_max_ud * Grid_import_yes_no_PB_strategy == Double.zero), 0,
         round(
-          (d13[IA + i] + (d13[IB + i] - d13[IA + i]) * d13[dJP + i])
+          (d13[IA + i] + (d13[IB + i] - d13[IA + i]) * d13[JP + i])
             - max(
-              Double.zero,
-              -((d13[HO + i] + (d13[HP + i] - d13[HO + i]) * d13[dJP + i]) - d13[AA + i]
-                - min((d13[ID + i] + (d13[IE + i] - d13[ID + i]) * d13[dJP + i]), max(Double.zero, d13[AC + i] - (d13[HR + i] + (d13[HS + i] - d13[HR + i]) * d13[dJP + i])) / El_boiler_eff) - min(
-                  BESS_cap_ud, max(Double.zero, d13[HG + i] - d13[IC + i] - d13[HW + i] * BESS_chrg_eff)) / BESS_chrg_eff)), 5))
+              0,
+              -((d13[HO + i] + (d13[HP + i] - d13[HO + i]) * d13[JP + i]) - d13[AA + i]
+                - min(
+                  (d13[ID + i] + (d13[IE + i] - d13[ID + i]) * d13[JP + i]),
+                  max(0, d13[AC + i] - (d13[HR + i] + (d13[HS + i] - d13[HR + i]) * d13[JP + i])) / El_boiler_eff) - min(
+                  BESS_cap_ud, max(0, d13[HG + i] - d13[IC + i] - d13[HW + i] * BESS_chrg_eff)) / BESS_chrg_eff)), 5))
     }
-    /// Surplus RawMeth prod cap after opt day harm and min night op prep
-    // KA=IF(JP6=0,0,ROUND(GK6+(GL6-GK6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc)-$AD6,5))
+    // Surplus RawMeth prod cap after opt day harm and min night op prep
+    // KA=IF(JP3<0,0,ROUND(GK3+(GL3-GK3)*JP3-$AD3,5))
     for i in 0..<365 {
-      d13[KA + i] = iff(d13[JP + i].isZero, Double.zero, round(d13[GK + i] + (d13[GL + i] - d13[GK + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (d13[JP + i] - Overall_harmonious_min_perc) - d13[AD + i], 5))
+      d13[KA + i] = iff(d13[JP + i] < 0, 0, round(d13[GK + i] + (d13[GL + i] - d13[GK + i]) * d13[JP + i] - d13[AD + i], 5))
     }
-    /// Surplus RawMeth prod cap after opt day harm and max night op prep
-    // KB=IF(JP6=0,0,ROUND(IG6+(IH6-IG6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc)-$AE6,5))
+
+    // Surplus RawMeth prod cap after opt day harm and max night op prep
+    // KB=IF(JP3<0,0,ROUND(IG3+(IH3-IG3)*JP3-$AE3,5))
     for i in 0..<365 {
-      d13[KB + i] = iff(d13[JP + i].isZero, Double.zero, round(d13[IG + i] + (d13[IH + i] - d13[IG + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (d13[JP + i] - Overall_harmonious_min_perc) - d13[AE + i], 5))
+      d13[KB + i] = iff(d13[JP + i] < 0, 0, round(d13[IG + i] + (d13[IH + i] - d13[IG + i]) * d13[JP + i] - d13[AE + i], 5))
     }
-    /// Surplus CO2 prod cap after opt day harm and min night op prep
-    // KC=IF(JP6=0,0,ROUND(GN6+(GO6-GN6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc)-$AF6,5))
+    // Surplus CO2 prod cap after opt day harm and min night op prep
+    // KC=IF(JP3<0,0,ROUND(GN3+(GO3-GN3)*JP3-$AF3,5))
     for i in 0..<365 {
-      d13[KC + i] = iff(d13[JP + i].isZero, Double.zero, round(d13[GN + i] + (d13[GO + i] - d13[GN + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (d13[JP + i] - Overall_harmonious_min_perc) - d13[AF + i], 5))
+      d13[KC + i] = iff(d13[JP + i] < 0, 0, round(d13[GN + i] + (d13[GO + i] - d13[GN + i]) * d13[JP + i] - d13[AF + i], 5))
     }
-    /// Surplus CO2 prod cap after opt day harm and max night op prep
-    // KD=IF(JP6=0,0,ROUND(IJ6+(IK6-IJ6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc)-$AG6,5))
+    // Surplus CO2 prod cap after opt day harm and max night op prep
+    // KD=IF(JP3<0,0,ROUND(IJ3+(IK3-IJ3)*JP3-$AG3,5))
     for i in 0..<365 {
-      d13[KD + i] = iff(d13[JP + i].isZero, Double.zero, round(d13[IJ + i] + (d13[IK + i] - d13[IJ + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc) * (d13[JP + i] - Overall_harmonious_min_perc) - d13[AG + i], 5))
+      d13[KD + i] = iff(d13[JP + i] < 0, 0, round(d13[IJ + i] + (d13[IK + i] - d13[IJ + i]) * d13[JP + i] - d13[AG + i], 5))
     }
-    /// Surplus H2 prod cap after opt day harm and min night op prep
-    // KE=IF(JP6=0,0,ROUND(GQ6+(GR6-GQ6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc)-$AH6,5))
-    for i in 0..<365 { d13[KE + i] = iff(d13[JP + i].isZero, Double.zero, round((d13[GQ + i] + (d13[GR + i] - d13[GQ + i]) * d13[dJP + i]) - d13[AH + i], 5)) }
-    /// Surplus H2 prod cap after opt day harm and max night op prep
-    // KF=IF(JP6=0,0,ROUND(IM6+(IN6-IM6)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(JP6-Overall_harmonious_min_perc)-$AI6,5))
-    for i in 0..<365 { d13[KF + i] = iff(d13[JP + i].isZero, Double.zero, round(d13[IM + i] + (d13[IN + i] - d13[IM + i]) * d13[dJP + i] - d13[AI + i], 5)) }
-    /// Opt night prep during day prio operation
-    // KG=IF(OR($AM6=0,JP6=0,JQ6<0,JS6<0,JU6<0,JW6<0,JY6<0,KA6<0,KC6<0,KE6<0),0,MIN(1,IFERROR(JQ6/MAX(0,JQ6-JR6),1),IFERROR(JS6/MAX(0,JS6-JT6),1),IFERROR(JU6/MAX(0,JU6-JV6),1),IFERROR(JW6/MAX(0,JW6-JX6),1),IFERROR(JY6/MAX(0,JY6-JZ6),1),IFERROR(KA6/MAX(0,KA6-KB6),1),IFERROR(KC6/MAX(0,KC6-KD6),1),IFERROR(KE6/MAX(0,KE6-KF6),1))*($AM6-A_equiv_harmonious_min_perc)+A_equiv_harmonious_min_perc)
+    // Surplus H2 prod cap after opt day harm and min night op prep
+    // KE=IF(JP3<0,0,ROUND(GQ3+(GR3-GQ3)*JP3-$AH3,5))
+    for i in 0..<365 {
+      d13[KE + i] = iff(d13[JP + i] < 0, 0, round(d13[GQ + i] + (d13[GR + i] - d13[GQ + i]) * d13[JP + i] - d13[AH + i], 5))
+    }
+    // Surplus H2 prod cap after opt day harm and max night op prep
+    // KF=IF(JP3<0,0,ROUND(IM3+(IN3-IM3)*JP3-$AI3,5))
+    for i in 0..<365 {
+      d13[KF + i] = iff(d13[JP + i] < 0, 0, round(d13[IM + i] + (d13[IN + i] - d13[IM + i]) * d13[JP + i] - d13[AI + i], 5))
+    }
+    // Opt night prep during day prio operation
+    // KG=IF(OR(JP3<0,JQ3<0,JS3<0,JU3<0,JW3<0,JY3<0,KA3<0,KC3<0,KE3<0),-1,MIN(1,IFERROR(JQ3/MAX(0,JQ3-JR3),1),IFERROR(JS3/MAX(0,JS3-JT3),1),IFERROR(JU3/MAX(0,JU3-JV3),1),IFERROR(JW3/MAX(0,JW3-JX3),1),IFERROR(JY3/MAX(0,JY3-JZ3),1),IFERROR(KA3/MAX(0,KA3-KB3),1),IFERROR(KC3/MAX(0,KC3-KD3),1),IFERROR(KE3/MAX(0,KE3-KF3),1)))
     for i in 0..<365 {
       d13[KG + i] = iff(
         or(
-          d13[AM + i].isZero, d13[JP + i].isZero, d13[JQ + i] < Double.zero, d13[JS + i] < Double.zero, d13[JU + i] < Double.zero, d13[JW + i] < Double.zero, d13[JY + i] < Double.zero, d13[KA + i] < Double.zero, d13[KC + i] < Double.zero,
-          d13[KE + i] < Double.zero), Double.zero,
+          d13[JP + i] < 0, d13[JQ + i] < 0, d13[JS + i] < 0, d13[JU + i] < 0, d13[JW + i] < 0, d13[JY + i] < 0, d13[KA + i] < 0,
+          d13[KC + i] < 0, d13[KE + i] < 0), -1,
         min(
-          1, ifFinite(d13[JQ + i] / max(Double.zero, d13[JQ + i] - d13[JR + i]), 1.0), ifFinite(d13[JS + i] / max(Double.zero, d13[JS + i] - d13[JT + i]), 1.0), ifFinite(d13[JU + i] / max(Double.zero, d13[JU + i] - d13[JV + i]), 1.0),
-          ifFinite(d13[JW + i] / max(Double.zero, d13[JW + i] - d13[JX + i]), 1.0), ifFinite(d13[JY + i] / max(Double.zero, d13[JY + i] - d13[JZ + i]), 1.0), ifFinite(d13[KA + i] / max(Double.zero, d13[KA + i] - d13[KB + i]), 1.0),
-          ifFinite(d13[KC + i] / max(Double.zero, d13[KC + i] - d13[KD + i]), 1.0), ifFinite(d13[KE + i] / max(Double.zero, d13[KE + i] - d13[KF + i]), 1.0)) * (d13[AM + i] - equiv_harmonious_min_perc[j]) + equiv_harmonious_min_perc[j])
+          1, ifFinite(d13[JQ + i] / max(0, d13[JQ + i] - d13[JR + i]), 1),
+          ifFinite(d13[JS + i] / max(0, d13[JS + i] - d13[JT + i]), 1),
+          ifFinite(d13[JU + i] / max(0, d13[JU + i] - d13[JV + i]), 1),
+          ifFinite(d13[JW + i] / max(0, d13[JW + i] - d13[JX + i]), 1),
+          ifFinite(d13[JY + i] / max(0, d13[JY + i] - d13[JZ + i]), 1),
+          ifFinite(d13[KA + i] / max(0, d13[KA + i] - d13[KB + i]), 1),
+          ifFinite(d13[KC + i] / max(0, d13[KC + i] - d13[KD + i]), 1),
+          ifFinite(d13[KE + i] / max(0, d13[KE + i] - d13[KF + i]), 1)))
     }
-    /// min harmonious day prod after opt equiv harmonious night prod due to prod cap limits
-    // KI=IF(OR($AM6=0,IQ6<0,IT6<0,IW6<0,IZ6<0,JC6<0,JF6<0,JI6<0,JL6<0),0,MIN(1,IFERROR(IQ6/MAX(0,IQ6-IR6),1),IFERROR(IT6/MAX(0,IT6-IU6),1),IFERROR(IW6/MAX(0,IW6-IX6),1),IFERROR(IZ6/MAX(0,IZ6-JA6),1),IFERROR(JC6/MAX(0,JC6-JD6),1),IFERROR(JF6/MAX(0,JF6-JG6),1),IFERROR(JI6/MAX(0,JI6-JJ6),1),IFERROR(JL6/MAX(0,JL6-JM6),1))*($AM6-A_equiv_harmonious_min_perc)+A_equiv_harmonious_min_perc)
+    // min harmonious day prod after opt equiv harmonious night prod due to prod cap limits
+    // KI=IF(OR($AM3=0,IQ3<0,IT3<0,IW3<0,IZ3<0,JC3<0,JF3<0,JI3<0,JL3<0),-1,MIN(1,IFERROR(IQ3/MAX(0,IQ3-IR3),1),IFERROR(IT3/MAX(0,IT3-IU3),1),IFERROR(IW3/MAX(0,IW3-IX3),1),IFERROR(IZ3/MAX(0,IZ3-JA3),1),IFERROR(JC3/MAX(0,JC3-JD3),1),IFERROR(JF3/MAX(0,JF3-JG3),1),IFERROR(JI3/MAX(0,JI3-JJ3),1),IFERROR(JL3/MAX(0,JL3-JM3),1)))
     for i in 0..<365 {
       d13[KI + i] = iff(
-        or(d13[AM + i].isZero, d13[IQ + i] < Double.zero, d13[IT + i] < Double.zero, d13[IW + i] < Double.zero, d13[IZ + i] < Double.zero, d13[JC + i] < Double.zero, d13[JF + i] < Double.zero, d13[JI + i] < Double.zero, d13[JL + i] < 0),
-        Double.zero,
+        or(
+          d13[AM + i] == Double.zero, d13[IQ + i] < 0, d13[IT + i] < 0, d13[IW + i] < 0, d13[IZ + i] < 0, d13[JC + i] < 0,
+          d13[JF + i] < 0, d13[JI + i] < 0, d13[JL + i] < 0), -1,
         min(
-          1, ifFinite(d13[IQ + i] / max(Double.zero, d13[IQ + i] - d13[IR + i]), 1.0), ifFinite(d13[IT + i] / max(Double.zero, d13[IT + i] - d13[IU + i]), 1.0), ifFinite(d13[IW + i] / max(Double.zero, d13[IW + i] - d13[IX + i]), 1.0),
-          ifFinite(d13[IZ + i] / max(Double.zero, d13[IZ + i] - d13[JA + i]), 1.0), ifFinite(d13[JC + i] / max(Double.zero, d13[JC + i] - d13[JD + i]), 1.0), ifFinite(d13[JF + i] / max(Double.zero, d13[JF + i] - d13[JG + i]), 1.0),
-          ifFinite(d13[JI + i] / max(Double.zero, d13[JI + i] - d13[JJ + i]), 1.0), ifFinite(d13[JL + i] / max(Double.zero, d13[JL + i] - d13[JM + i]), 1.0)) * (d13[AM + i] - equiv_harmonious_min_perc[j]) + equiv_harmonious_min_perc[j])
+          1, ifFinite(d13[IQ + i] / max(0, d13[IQ + i] - d13[IR + i]), 1),
+          ifFinite(d13[IT + i] / max(0, d13[IT + i] - d13[IU + i]), 1),
+          ifFinite(d13[IW + i] / max(0, d13[IW + i] - d13[IX + i]), 1),
+          ifFinite(d13[IZ + i] / max(0, d13[IZ + i] - d13[JA + i]), 1),
+          ifFinite(d13[JC + i] / max(0, d13[JC + i] - d13[JD + i]), 1),
+          ifFinite(d13[JF + i] / max(0, d13[JF + i] - d13[JG + i]), 1),
+          ifFinite(d13[JI + i] / max(0, d13[JI + i] - d13[JJ + i]), 1),
+          ifFinite(d13[JL + i] / max(0, d13[JL + i] - d13[JM + i]), 1)))
     }
 
-    let (AMKG, AMKI) = (56940, 63875)
-    for i in 0..<365 {
-      d13[AMKG + i] = (d13[AM + i] - equiv_harmonious_min_perc[j]) < 1E-10 ? 1 : (d13[KG + i] - equiv_harmonious_min_perc[j]) / (d13[AM + i] - equiv_harmonious_min_perc[j])
-      d13[AMKI + i] = (d13[AM + i] - equiv_harmonious_min_perc[j]) < 1E-10 ? 1 : (d13[KI + i] - equiv_harmonious_min_perc[j]) / (d13[AM + i] - equiv_harmonious_min_perc[j])
-    }
-    /// Surplus harm op period electricity after min day harmonious and opti night op prep
-    // KJ=IF(KI6=0,0,ROUND((FS6+(HO6-FS6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))+(GE6+(IA6-GE6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-($Z6+($AA6-$Z6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-MIN((GH6+(ID6-GH6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)),MAX(0,($AB6+($AC6-$AB6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(FV6+(HR6-FV6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)))/El_boiler_eff)-MIN(BESS_cap_ud,MAX(0,(FK6+(HG6-FK6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(GG6+(IC6-GG6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(GA6+(HW6-GA6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))*BESS_chrg_eff))/BESS_chrg_eff,5))
+    // let (AMKG, AMKI) = (56940, 63875)
+    // for i in 0..<365 {
+    //   d13[AMKG + i] = (d13[AM + i] - equiv_harmonious_min_perc[j]) < 1E-10 ? 1 : (d13[KG + i] - equiv_harmonious_min_perc[j]) / (d13[AM + i] - equiv_harmonious_min_perc[j])
+    //   d13[AMKI + i] = (d13[AM + i] - equiv_harmonious_min_perc[j]) < 1E-10 ? 1 : (d13[KI + i] - equiv_harmonious_min_perc[j]) / (d13[AM + i] - equiv_harmonious_min_perc[j])
+    // }
+    // Surplus harm op period electricity after min day harmonious and opti night op prep
+    // KJ=IF(KI3<0,0,ROUND((FS3+(HO3-FS3)*KI3)+(GE3+(IA3-GE3)*KI3)-($Z3+($AA3-$Z3)*KI3)-MIN((GH3+(ID3-GH3)*KI3),MAX(0,($AB3+($AC3-$AB3)*KI3)-(FV3+(HR3-FV3)*KI3))/El_boiler_eff)-MIN(BESS_cap_ud,MAX(0,(FK3+(HG3-FK3)*KI3)-(GG3+(IC3-GG3)*KI3)-(GA3+(HW3-GA3)*KI3)*BESS_chrg_eff))/BESS_chrg_eff,5))
     for i in 0..<365 {
       d13[KJ + i] = iff(
-        d13[KI + i].isZero, Double.zero,
+        d13[KI + i] < 0, 0,
         round(
-          (d13[FS + i] + (d13[HO + i] - d13[FS + i]) * d13[AMKI + i]) + (d13[GE + i] + (d13[IA + i] - d13[GE + i]) * d13[AMKI + i]) - (d13[Z + i] + (d13[AA + i] - d13[Z + i]) * d13[AMKI + i])
-            - min((d13[GH + i] + (d13[ID + i] - d13[GH + i]) * d13[AMKI + i]), max(Double.zero, (d13[AB + i] + (d13[AC + i] - d13[AB + i]) * d13[AMKI + i]) - (d13[FV + i] + (d13[HR + i] - d13[FV + i]) * d13[AMKI + i])) / El_boiler_eff) - min(
-              BESS_cap_ud, max(Double.zero, (d13[FK + i] + (d13[HG + i] - d13[FK + i]) * d13[AMKI + i]) - (d13[GG + i] + (d13[IC + i] - d13[GG + i]) * d13[AMKI + i]) - (d13[GA + i] + (d13[HW + i] - d13[GA + i])) * BESS_chrg_eff))
-            / BESS_chrg_eff, 5))
+          (d13[FS + i] + (d13[HO + i] - d13[FS + i]) * d13[KI + i]) + (d13[GE + i] + (d13[IA + i] - d13[GE + i]) * d13[KI + i])
+            - (d13[Z + i] + (d13[AA + i] - d13[Z + i]) * d13[KI + i])
+            - min(
+              (d13[GH + i] + (d13[ID + i] - d13[GH + i]) * d13[KI + i]),
+              max(
+                0,
+                (d13[AB + i] + (d13[AC + i] - d13[AB + i]) * d13[KI + i])
+                  - (d13[FV + i] + (d13[HR + i] - d13[FV + i]) * d13[KI + i])) / El_boiler_eff) - min(
+              BESS_cap_ud,
+              max(
+                0,
+                (d13[FK + i] + (d13[HG + i] - d13[FK + i]) * d13[KI + i])
+                  - (d13[GG + i] + (d13[IC + i] - d13[GG + i]) * d13[KI + i])
+                  - (d13[GA + i] + (d13[HW + i] - d13[GA + i]) * d13[KI + i]) * BESS_chrg_eff)) / BESS_chrg_eff, 5))
     }
-    /// Surplus harm op period electricity after max day harmonious and opti night op prep
-    // KK=IF(KI6=0,0,ROUND((FT6+(HP6-FT6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))+(GF6+(IB6-GF6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-($Z6+($AA6-$Z6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-MIN((GI6+(IE6-GI6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)),MAX(0,($AB6+($AC6-$AB6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(FW6+(HS6-FW6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)))/El_boiler_eff)-MIN(BESS_cap_ud,MAX(0,(FK6+(HG6-FK6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(GG6+(IC6-GG6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(GA6+(HW6-GA6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))*BESS_chrg_eff))/BESS_chrg_eff,5))
+    // Surplus harm op period electricity after max day harmonious and opti night op prep
+    // KK=IF(KI3<0,0,ROUND((FT3+(HP3-FT3)*KI3)+(GF3+(IB3-GF3)*KI3)-($Z3+($AA3-$Z3)*KI3)-MIN((GI3+(IE3-GI3)*KI3),MAX(0,($AB3+($AC3-$AB3)*KI3)-(FW3+(HS3-FW3)*KI3))/El_boiler_eff)-MIN(BESS_cap_ud,MAX(0,(FK3+(HG3-FK3)*KI3)-(GG3+(IC3-GG3)*KI3)-(GA3+(HW3-GA3)*KI3)*BESS_chrg_eff))/BESS_chrg_eff,5))
     for i in 0..<365 {
       d13[KK + i] = iff(
-        d13[KI + i].isZero, Double.zero,
+        d13[KI + i] < 0, 0,
         round(
-          (d13[FT + i] + (d13[HP + i] - d13[FT + i]) * d13[AMKI + i]) + (d13[GF + i] + (d13[IB + i] - d13[GF + i]) * d13[AMKI + i]) - (d13[Z + i] + (d13[AA + i] - d13[Z + i]) * d13[AMKI + i])
-            - min((d13[GH + i] + (d13[ID + i] - d13[GH + i]) * d13[AMKI + i]), max(Double.zero, (d13[AB + i] + (d13[AC + i] - d13[AB + i]) * d13[AMKI + i]) - (d13[FW + i] + (d13[HS + i] - d13[FW + i]) * d13[AMKI + i])) / El_boiler_eff) - min(
-              BESS_cap_ud, max(Double.zero, (d13[FK + i] + (d13[HG + i] - d13[FK + i]) * d13[AMKI + i]) - (d13[GG + i] + (d13[IC + i] - d13[GG + i]) * d13[AMKI + i]) - (d13[GA + i] + (d13[HW + i] - d13[GA + i])) * BESS_chrg_eff))
-            / BESS_chrg_eff, 5))
+          (d13[FT + i] + (d13[HP + i] - d13[FT + i]) * d13[KI + i]) + (d13[GF + i] + (d13[IB + i] - d13[GF + i]) * d13[KI + i])
+            - (d13[Z + i] + (d13[AA + i] - d13[Z + i]) * d13[KI + i])
+            - min(
+              (d13[GI + i] + (d13[IE + i] - d13[GI + i]) * d13[KI + i]),
+              max(
+                0,
+                (d13[AB + i] + (d13[AC + i] - d13[AB + i]) * d13[KI + i])
+                  - (d13[FW + i] + (d13[HS + i] - d13[FW + i]) * d13[KI + i])) / El_boiler_eff) - min(
+              BESS_cap_ud,
+              max(
+                0,
+                (d13[FK + i] + (d13[HG + i] - d13[FK + i]) * d13[KI + i])
+                  - (d13[GG + i] + (d13[IC + i] - d13[GG + i]) * d13[KI + i])
+                  - (d13[GA + i] + (d13[HW + i] - d13[GA + i]) * d13[KI + i]) * BESS_chrg_eff)) / BESS_chrg_eff, 5))
     }
-    /// Surplus harmonious op csp steam+boiler prod cap after min day harmonious and opti night op prep
-    // KL=IF(KI6=0,0,ROUND((FV6+(HR6-FV6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))+MIN((GH6+(ID6-GH6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)),MAX(0,(FS6+(HO6-FS6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))+(GE6+(IA6-GE6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-($Z6+($AA6-$Z6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-MIN(BESS_cap_ud,MAX(0,(FK6+(HG6-FK6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(GG6+(IC6-GG6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(GA6+(HW6-GA6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))*BESS_chrg_eff))/BESS_chrg_eff))*El_boiler_eff-($AB6+($AC6-$AB6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)),5))
+    // Surplus harmonious op csp steam+boiler prod cap after min day harmonious and opti night op prep
+    // KL=IF(KI3<0,0,ROUND((FV3+(HR3-FV3)*KI3)+MIN((GH3+(ID3-GH3)*KI3),MAX(0,(FS3+(HO3-FS3)*KI3)+(GE3+(IA3-GE3)*KI3)-($Z3+($AA3-$Z3)*KI3)-MIN(BESS_cap_ud,MAX(0,(FK3+(HG3-FK3)*KI3)-(GG3+(IC3-GG3)*KI3)-(GA3+(HW3-GA3)*KI3)*BESS_chrg_eff))/BESS_chrg_eff))*El_boiler_eff-($AB3+($AC3-$AB3)*KI3),5))
     for i in 0..<365 {
       d13[KL + i] = iff(
-        d13[KI + i].isZero, Double.zero,
+        d13[KI + i] < 0, 0,
         round(
-          (d13[FV + i] + (d13[HR + i] - d13[FV + i]) * d13[AMKI + i])
-            + min(
-              (d13[GH + i] + (d13[ID + i] - d13[GH + i]) * d13[AMKI + i]),
-              (max(Double.zero, (d13[FS + i] + (d13[HO + i] - d13[FS + i]) * d13[AMKI + i]) + (d13[GE + i] + (d13[IA + i] - d13[GE + i]) * d13[AMKI + i]) - (d13[Z + i] + (d13[AA + i] - d13[Z + i]) * d13[AMKI + i]))) * El_boiler_eff)
-            - min(
-              (d13[FY + i] + (d13[HU + i] - d13[FY + i]) * d13[AMKI + i]),
-              min(BESS_cap_ud, max(Double.zero, (d13[FK + i] + (d13[HG + i] - d13[FK + i]) * d13[AMKI + i]) - (d13[GG + i] + (d13[IC + i] - d13[GG + i]) * d13[AMKI + i])) / BESS_chrg_eff))
-            - (d13[AB + i] + (d13[AC + i] - d13[AB + i]) * d13[AMKI + i]), 5))
+          (d13[FV + i] + (d13[HR + i] - d13[FV + i]) * d13[KI + i]) + min(
+            (d13[GH + i] + (d13[ID + i] - d13[GH + i]) * d13[KI + i]),
+            max(
+              0,
+              (d13[FS + i] + (d13[HO + i] - d13[FS + i]) * d13[KI + i])
+                + (d13[GE + i] + (d13[IA + i] - d13[GE + i]) * d13[KI + i])
+                - (d13[Z + i] + (d13[AA + i] - d13[Z + i]) * d13[KI + i]) - min(
+                  BESS_cap_ud,
+                  max(
+                    0,
+                    (d13[FK + i] + (d13[HG + i] - d13[FK + i]) * d13[KI + i])
+                      - (d13[GG + i] + (d13[IC + i] - d13[GG + i]) * d13[KI + i])
+                      - (d13[GA + i] + (d13[HW + i] - d13[GA + i]) * d13[KI + i]) * BESS_chrg_eff)) / BESS_chrg_eff))
+            * El_boiler_eff - (d13[AB + i] + (d13[AC + i] - d13[AB + i]) * d13[KI + i]), 5))
     }
-    /// Surplus harmonious op csp steam+boiler prod cap after max day harmonious and opti night op prep
-    // KM=IF(KI6=0,0,ROUND((FW6+(HS6-FW6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))+MIN((GI6+(IE6-GI6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)),MAX(0,(FT6+(HP6-FT6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))+(GF6+(IB6-GF6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-($Z6+($AA6-$Z6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-MIN(BESS_cap_ud,MAX(0,(FK6+(HG6-FK6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(GG6+(IC6-GG6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(GA6+(HW6-GA6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))*BESS_chrg_eff))/BESS_chrg_eff))*El_boiler_eff-($AB6+($AC6-$AB6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)),5))
+    // Surplus harmonious op csp steam+boiler prod cap after max day harmonious and opti night op prep
+    // KM=IF(KI3<0,0,ROUND((FW3+(HS3-FW3)*KI3)+MIN((GI3+(IE3-GI3)*KI3),MAX(0,(FT3+(HP3-FT3)*KI3)+(GF3+(IB3-GF3)*KI3)-($Z3+($AA3-$Z3)*KI3)-MIN(BESS_cap_ud,MAX(0,(FK3+(HG3-FK3)*KI3)-(GG3+(IC3-GG3)*KI3)-(GA3+(HW3-GA3)*KI3)*BESS_chrg_eff))/BESS_chrg_eff))*El_boiler_eff-($AB3+($AC3-$AB3)*KI3),5))
     for i in 0..<365 {
       d13[KM + i] = iff(
-        d13[KI + i].isZero, Double.zero,
+        d13[KI + i] < 0, 0,
         round(
-          (d13[FW + i] + (d13[HS + i] - d13[FW + i]) * d13[AMKI + i])
-            + min(
-              (d13[GH + i] + (d13[ID + i] - d13[GH + i]) * d13[AMKI + i]),
-              (max(Double.zero, (d13[FT + i] + (d13[HP + i] - d13[FT + i]) * d13[AMKI + i]) + (d13[GF + i] + (d13[IB + i] - d13[GF + i]) * d13[AMKI + i]) - (d13[Z + i] + (d13[AA + i] - d13[Z + i]) * d13[AMKI + i]))) * El_boiler_eff
-                - min(
-                  (d13[FZ + i] + (d13[HV + i] - d13[FZ + i]) * d13[AMKI + i]),
-                  min(BESS_cap_ud, max(Double.zero, (d13[FK + i] + (d13[HG + i] - d13[FK + i]) * d13[AMKI + i]) - (d13[GG + i] + (d13[IC + i] - d13[GG + i]) * d13[AMKI + i]))) / BESS_chrg_eff))
-            - (d13[AB + i] + (d13[AC + i] - d13[AB + i]) * d13[AMKI + i]), 5))
+          (d13[FW + i] + (d13[HS + i] - d13[FW + i]) * d13[KI + i]) + min(
+            (d13[GI + i] + (d13[IE + i] - d13[GI + i]) * d13[KI + i]),
+            max(
+              0,
+              (d13[FT + i] + (d13[HP + i] - d13[FT + i]) * d13[KI + i])
+                + (d13[GF + i] + (d13[IB + i] - d13[GF + i]) * d13[KI + i])
+                - (d13[Z + i] + (d13[AA + i] - d13[Z + i]) * d13[KI + i]) - min(
+                  BESS_cap_ud,
+                  max(
+                    0,
+                    (d13[FK + i] + (d13[HG + i] - d13[FK + i]) * d13[KI + i])
+                      - (d13[GG + i] + (d13[IC + i] - d13[GG + i]) * d13[KI + i])
+                      - (d13[GA + i] + (d13[HW + i] - d13[GA + i]) * d13[KI + i]) * BESS_chrg_eff)) / BESS_chrg_eff))
+            * El_boiler_eff - (d13[AB + i] + (d13[AC + i] - d13[AB + i]) * d13[KI + i]), 5))
     }
-    /// Surplus el boiler cap after min day harmonious and opti night op prep
-    // KN=IF(OR(KI6=0,El_boiler_cap_ud=0),0,ROUND((GH6+(ID6-GH6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-MAX(0,($AB6+($AC6-$AB6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(FV6+(HR6-FV6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)))/El_boiler_eff,5))
+    // Surplus el boiler cap after min day harmonious and opti night op prep
+    // KN=IF(OR(KI3<0,El_boiler_cap_ud=0),0,ROUND((GH3+(ID3-GH3)*KI3)-MAX(0,($AB3+($AC3-$AB3)*KI3)-(FV3+(HR3-FV3)*KI3))/El_boiler_eff,5))
     for i in 0..<365 {
       d13[KN + i] = iff(
-        or(d13[KI + i].isZero, El_boiler_cap_ud.isZero), Double.zero,
-        round((d13[GH + i] + (d13[ID + i] - d13[GH + i]) * d13[AMKI + i]) - max(Double.zero, (d13[AB + i] + (d13[AC + i] - d13[AB + i]) * d13[AMKI + i]) - (d13[FV + i] + (d13[HR + i] - d13[FV + i]) * d13[AMKI + i])) / El_boiler_eff, 5))
+        or(d13[KI + i] < 0, El_boiler_cap_ud == Double.zero), 0,
+        round(
+          (d13[GH + i] + (d13[ID + i] - d13[GH + i]) * d13[KI + i]) - max(
+            0,
+            (d13[AB + i] + (d13[AC + i] - d13[AB + i]) * d13[KI + i]) - (d13[FV + i] + (d13[HR + i] - d13[FV + i]) * d13[KI + i])
+          ) / El_boiler_eff, 5))
     }
-    /// Surplus el boiler cap after max day harmonious and opti night op prep
-    // KO=IF(OR(KI6=0,El_boiler_cap_ud=0),0,ROUND((GI6+(IE6-GI6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-MAX(0,($AB6+($AC6-$AB6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(FW6+(HS6-FW6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)))/El_boiler_eff,5))
+    // Surplus el boiler cap after max day harmonious and opti night op prep
+    // KO=IF(OR(KI3<0,El_boiler_cap_ud=0),0,ROUND((GI3+(IE3-GI3)*KI3)-MAX(0,($AB3+($AC3-$AB3)*KI3)-(FW3+(HS3-FW3)*KI3))/El_boiler_eff,5))
     for i in 0..<365 {
       d13[KO + i] = iff(
-        or(d13[KI + i].isZero, El_boiler_cap_ud.isZero), Double.zero,
-        round((d13[GI + i] + (d13[IE + i] - d13[GI + i]) * d13[AMKI + i]) - max(Double.zero, (d13[AB + i] + (d13[AC + i] - d13[AB + i]) * d13[AMKI + i]) - (d13[FW + i] + (d13[HS + i] - d13[FW + i]) * d13[AMKI + i])) / El_boiler_eff, 5))
+        or(d13[KI + i] < 0, El_boiler_cap_ud == Double.zero), 0,
+        round(
+          (d13[GI + i] + (d13[IE + i] - d13[GI + i]) * d13[KI + i]) - max(
+            0,
+            (d13[AB + i] + (d13[AC + i] - d13[AB + i]) * d13[KI + i]) - (d13[FW + i] + (d13[HS + i] - d13[FW + i]) * d13[KI + i])
+          ) / El_boiler_eff, 5))
     }
-    /// Surplus BESS cap after min day harmonious and opti night op prep
-    // KP=IF(OR(KI6=0,BESS_cap_ud=0),0,ROUND((FY6+(HU6-FY6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-MAX(0,(FK6+(HG6-FK6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(GG6+(IC6-GG6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(GA6+(HW6-GA6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))*BESS_chrg_eff)/BESS_chrg_eff,5))
+    // Surplus BESS cap after min day harmonious and opti night op prep
+    // KP=IF(OR(KI3<0,BESS_cap_ud=0),0,ROUND((FY3+(HU3-FY3)*KI3)-MAX(0,(FK3+(HG3-FK3)*KI3)-(GG3+(IC3-GG3)*KI3)-(GA3+(HW3-GA3)*KI3)*BESS_chrg_eff)/BESS_chrg_eff,5))
     for i in 0..<365 {
       d13[KP + i] = iff(
-        or(d13[KI + i].isZero, BESS_cap_ud.isZero), Double.zero,
+        or(d13[KI + i] < 0, BESS_cap_ud == Double.zero), 0,
         round(
-          (d13[FY + i] + (d13[HU + i] - d13[FY + i]) / (d13[AM + i] - equiv_harmonious_min_perc[j]) * (d13[KI + i] - equiv_harmonious_min_perc[j])) - max(
-            Double.zero,
-            (d13[FK + i] + (d13[HG + i] - d13[FK + i]) / (d13[AM + i] - equiv_harmonious_min_perc[j]) * (d13[KI + i] - equiv_harmonious_min_perc[j]))
-              - min(BESS_cap_ud, (d13[GG + i] + (d13[IC + i] - d13[GG + i]) / (d13[AM + i] - equiv_harmonious_min_perc[j]) * (d13[KI + i] - equiv_harmonious_min_perc[j])) - (d13[GA + i] + (d13[HW + i] - d13[GA + i])) * BESS_chrg_eff))
-            / BESS_chrg_eff, 5))
+          (d13[FY + i] + (d13[HU + i] - d13[FY + i]) * d13[KI + i]) - max(
+            0,
+            (d13[FK + i] + (d13[HG + i] - d13[FK + i]) * d13[KI + i]) - (d13[GG + i] + (d13[IC + i] - d13[GG + i]) * d13[KI + i])
+              - (d13[GA + i] + (d13[HW + i] - d13[GA + i]) * d13[KI + i]) * BESS_chrg_eff) / BESS_chrg_eff, 5))
     }
-    /// Surplus BESS cap after max day harmonious and opti night op prep
-    // KQ=IF(OR(KI6=0,BESS_cap_ud=0),0,ROUND((FZ6+(HV6-FZ6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-MAX(0,(FK6+(HG6-FK6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(GG6+(IC6-GG6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(GA6+(HW6-GA6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))*BESS_chrg_eff)/BESS_chrg_eff,5))
+    // Surplus BESS cap after max day harmonious and opti night op prep
+    // KQ=IF(OR(KI3<0,BESS_cap_ud=0),0,ROUND((FZ3+(HV3-FZ3)*KI3)-MAX(0,(FK3+(HG3-FK3)*KI3)-(GG3+(IC3-GG3)*KI3)-(GA3+(HW3-GA3)*KI3)*BESS_chrg_eff)/BESS_chrg_eff,5))
     for i in 0..<365 {
       d13[KQ + i] = iff(
-        or(d13[KI + i].isZero, BESS_cap_ud.isZero), Double.zero,
+        or(d13[KI + i] < 0, BESS_cap_ud == Double.zero), 0,
         round(
-          (d13[FZ + i] + (d13[HV + i] - d13[FZ + i]) / (d13[AM + i] - equiv_harmonious_min_perc[j]) * (d13[KI + i] - equiv_harmonious_min_perc[j])) - max(
-            Double.zero,
-            (d13[FK + i] + (d13[HG + i] - d13[FK + i]) / (d13[AM + i] - equiv_harmonious_min_perc[j]) * (d13[KI + i] - equiv_harmonious_min_perc[j]))
-              - min(BESS_cap_ud, (d13[GG + i] + (d13[IC + i] - d13[GG + i]) / (d13[AM + i] - equiv_harmonious_min_perc[j]) * (d13[KI + i] - equiv_harmonious_min_perc[j])) - (d13[GA + i] + (d13[HW + i] - d13[GA + i])) * BESS_chrg_eff))
-            / BESS_chrg_eff, 5))
+          (d13[FZ + i] + (d13[HV + i] - d13[FZ + i]) * d13[KI + i]) - max(
+            0,
+            (d13[FK + i] + (d13[HG + i] - d13[FK + i]) * d13[KI + i]) - (d13[GG + i] + (d13[IC + i] - d13[GG + i]) * d13[KI + i])
+              - (d13[GA + i] + (d13[HW + i] - d13[GA + i]) * d13[KI + i]) * BESS_chrg_eff) / BESS_chrg_eff, 5))
     }
-    /// Surplus grid import cap after min day harmonious and opti night op prep
-    // KR=IF(OR(KI6=0,Grid_import_max_ud*Grid_import_yes_no_PB_strategy=0),0,ROUND((GE6+(IA6-GE6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-MAX(0,-((FS6+(HO6-FS6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-($Z6+($AA6-$Z6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-MIN((GH6+(ID6-GH6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)),MAX(0,($AB6+($AC6-$AB6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(FV6+(HR6-FV6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)))/El_boiler_eff)-MIN(BESS_cap_ud,MAX(0,(FK6+(HG6-FK6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(GG6+(IC6-GG6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(GA6+(HW6-GA6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))*BESS_chrg_eff))/BESS_chrg_eff)),5))
+    // Surplus grid import cap after min day harmonious and opti night op prep
+    // KR=IF(OR(KI3<0,Grid_import_max_ud*Grid_import_yes_no_PB_strategy=0),0,ROUND((GE3+(IA3-GE3)*KI3)-MAX(0,-((FS3+(HO3-FS3)*KI3)-($Z3+($AA3-$Z3)*KI3)-MIN((GH3+(ID3-GH3)*KI3),MAX(0,($AB3+($AC3-$AB3)*KI3)-(FV3+(HR3-FV3)*KI3))/El_boiler_eff)-MIN(BESS_cap_ud,MAX(0,(FK3+(HG3-FK3)*KI3)-(GG3+(IC3-GG3)*KI3)-(GA3+(HW3-GA3)*KI3)*BESS_chrg_eff))/BESS_chrg_eff)),5))
     for i in 0..<365 {
       d13[KR + i] = iff(
-        or(d13[KI + i].isZero, (Grid_import_max_ud * Grid_import_yes_no_PB_strategy).isZero), Double.zero,
+        or(d13[KI + i] < 0, Grid_import_max_ud * Grid_import_yes_no_PB_strategy == Double.zero), 0,
         round(
-          (d13[GE + i] + (d13[IA + i] - d13[GE + i]) * d13[AMKI + i])
+          (d13[GE + i] + (d13[IA + i] - d13[GE + i]) * d13[KI + i])
             - max(
-              Double.zero,
-              -((d13[FS + i] + (d13[HO + i] - d13[FS + i]) * d13[AMKI + i]) - (d13[Z + i] + (d13[AA + i] - d13[Z + i]) * d13[AMKI + i])
-                - min((d13[GH + i] + (d13[ID + i] - d13[GH + i]) * d13[AMKI + i]), max(Double.zero, (d13[AB + i] + (d13[AC + i] - d13[AB + i]) * d13[AMKI + i]) - (d13[FV + i] + (d13[HR + i] - d13[FV + i]) * d13[AMKI + i])) / El_boiler_eff)
+              0,
+              -((d13[FS + i] + (d13[HO + i] - d13[FS + i]) * d13[KI + i])
+                - (d13[Z + i] + (d13[AA + i] - d13[Z + i]) * d13[KI + i])
                 - min(
+                  (d13[GH + i] + (d13[ID + i] - d13[GH + i]) * d13[KI + i]),
+                  max(
+                    0,
+                    (d13[AB + i] + (d13[AC + i] - d13[AB + i]) * d13[KI + i])
+                      - (d13[FV + i] + (d13[HR + i] - d13[FV + i]) * d13[KI + i])) / El_boiler_eff) - min(
                   BESS_cap_ud,
-                  max(Double.zero, (d13[FK + i] + (d13[HG + i] - d13[FK + i]) * d13[AMKI + i]) - (d13[GG + i] + (d13[IC + i] - d13[GG + i]) * d13[AMKI + i]) - (d13[GA + i] + (d13[HW + i] - d13[GA + i]) * d13[AMKI + i]) * BESS_chrg_eff))
-                / BESS_chrg_eff)), 5))
+                  max(
+                    0,
+                    (d13[FK + i] + (d13[HG + i] - d13[FK + i]) * d13[KI + i])
+                      - (d13[GG + i] + (d13[IC + i] - d13[GG + i]) * d13[KI + i])
+                      - (d13[GA + i] + (d13[HW + i] - d13[GA + i]) * d13[KI + i]) * BESS_chrg_eff)) / BESS_chrg_eff)), 5))
     }
-    /// Surplus grid import cap after max day harmonious and opti night op prep
-    // KS=IF(OR(KI6=0,Grid_import_max_ud*Grid_import_yes_no_PB_strategy=0),0,ROUND((GF6+(IB6-GF6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-MAX(0,-((FT6+(HP6-FT6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-($Z6+($AA6-$Z6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-MIN((GI6+(IE6-GI6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)),MAX(0,($AB6+($AC6-$AB6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(FW6+(HS6-FW6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)))/El_boiler_eff)-MIN(BESS_cap_ud,MAX(0,(FK6+(HG6-FK6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(GG6+(IC6-GG6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-(GA6+(HW6-GA6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))*BESS_chrg_eff))/BESS_chrg_eff)),5))
+    // Surplus grid import cap after max day harmonious and opti night op prep
+    // KS=IF(OR(KI3<0,Grid_import_max_ud*Grid_import_yes_no_PB_strategy=0),0,ROUND((GF3+(IB3-GF3)*KI3)-MAX(0,-((FT3+(HP3-FT3)*KI3)-($Z3+($AA3-$Z3)*KI3)-MIN((GI3+(IE3-GI3)*KI3),MAX(0,($AB3+($AC3-$AB3)*KI3)-(FW3+(HS3-FW3)*KI3))/El_boiler_eff)-MIN(BESS_cap_ud,MAX(0,(FK3+(HG3-FK3)*KI3)-(GG3+(IC3-GG3)*KI3)-(GA3+(HW3-GA3)*KI3)*BESS_chrg_eff))/BESS_chrg_eff)),5))
     for i in 0..<365 {
       d13[KS + i] = iff(
-        or(d13[KI + i].isZero, (Grid_import_max_ud * Grid_import_yes_no_PB_strategy).isZero), Double.zero,
+        or(d13[KI + i] < 0, Grid_import_max_ud * Grid_import_yes_no_PB_strategy == Double.zero), 0,
         round(
-          (d13[GF + i] + (d13[IB + i] - d13[GF + i]) * d13[AMKI + i])
+          (d13[GF + i] + (d13[IB + i] - d13[GF + i]) * d13[KI + i])
             - max(
-              Double.zero,
-              -((d13[FT + i] + (d13[HP + i] - d13[FT + i]) * d13[AMKI + i]) - (d13[Z + i] + (d13[AA + i] - d13[Z + i]) * d13[AMKI + i])
-                - min((d13[GI + i] + (d13[IR + i] - d13[GI + i]) * d13[AMKI + i]), max(Double.zero, (d13[AB + i] + (d13[AC + i] - d13[AB + i]) * d13[AMKI + i]) - (d13[FW + i] + (d13[HS + i] - d13[FW + i]) * d13[AMKI + i])) / El_boiler_eff)
+              0,
+              -((d13[FT + i] + (d13[HP + i] - d13[FT + i]) * d13[KI + i])
+                - (d13[Z + i] + (d13[AA + i] - d13[Z + i]) * d13[KI + i])
                 - min(
+                  (d13[GI + i] + (d13[IE + i] - d13[GI + i]) * d13[KI + i]),
+                  max(
+                    0,
+                    (d13[AB + i] + (d13[AC + i] - d13[AB + i]) * d13[KI + i])
+                      - (d13[FW + i] + (d13[HS + i] - d13[FW + i]) * d13[KI + i])) / El_boiler_eff) - min(
                   BESS_cap_ud,
-                  max(Double.zero, (d13[FK + i] + (d13[HG + i] - d13[FK + i]) * d13[AMKI + i]) - (d13[GG + i] + (d13[IC + i] - d13[GG + i]) * d13[AMKI + i]) - (d13[GA + i] + (d13[HW + i] - d13[GA + i]) * d13[AMKI + i]) * BESS_chrg_eff))
-                / BESS_chrg_eff)), 5))
+                  max(
+                    0,
+                    (d13[FK + i] + (d13[HG + i] - d13[FK + i]) * d13[KI + i])
+                      - (d13[GG + i] + (d13[IC + i] - d13[GG + i]) * d13[KI + i])
+                      - (d13[GA + i] + (d13[HW + i] - d13[GA + i]) * d13[KI + i]) * BESS_chrg_eff)) / BESS_chrg_eff)), 5))
     }
-    /// Surplus RawMeth prod cap after min day harmonious and opti night op prep
-    // KT=IF(KI6=0,0,ROUND((GK6+(IG6-GK6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-($AD6+($AE6-$AD6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)),5))
-    for i in 0..<365 { d13[KT + i] = iff(d13[KI + i].isZero, Double.zero, round((d13[GK + i] + (d13[IG + i] - d13[GK + i]) * d13[AMKI + i]) - (d13[AD + i] + (d13[AE + i] - d13[AD + i]) * d13[AMKI + i]), 5)) }
-    /// Surplus RawMeth prod cap after max day harmonious and opti night op prep
-    // KU=IF(KI6=0,0,ROUND((GL6+(IH6-GL6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-($AD6+($AE6-$AD6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)),5))
-    for i in 0..<365 { d13[KU + i] = iff(d13[KI + i].isZero, Double.zero, round((d13[GL + i] + (d13[IH + i] - d13[GL + i]) * d13[AMKI + i]) - (d13[AD + i] + (d13[AE + i] - d13[AD + i]) * d13[AMKI + i]), 5)) }
-    /// Surplus CO2 prod cap after min day harmonious and opti night op prep
-    // KV=IF(KI6=0,0,ROUND((GN6+(IJ6-GN6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-($AF6+($AG6-$AF6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)),5))
-    for i in 0..<365 { d13[KV + i] = iff(d13[KI + i].isZero, Double.zero, round((d13[GN + i] + (d13[IJ + i] - d13[GN + i]) * d13[AMKI + i]) - (d13[AF + i] + (d13[AG + i] - d13[AF + i]) * d13[AMKI + i]), 5)) }
-    /// Surplus CO2 prod cap after max day harmonious and opti night op prep
-    // KW=IF(KI6=0,0,ROUND((GO6+(IK6-GO6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-($AF6+($AG6-$AF6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)),5))
-    for i in 0..<365 { d13[KW + i] = iff(d13[KI + i].isZero, Double.zero, round((d13[GO + i] + (d13[IK + i] - d13[GO + i]) * d13[AMKI + i]) - (d13[AF + i] + (d13[AG + i] - d13[AF + i]) * d13[AMKI + i]), 5)) }
-    /// Surplus H2 prod cap after min day harmonious and opti night op prep
-    // KX=IF(KI6=0,0,ROUND((GQ6+(IM6-GQ6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-($AH6+($AI6-$AH6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)),5))
-    for i in 0..<365 { d13[KX + i] = iff(d13[KI + i].isZero, Double.zero, round((d13[GQ + i] + (d13[IM + i] - d13[GQ + i]) * d13[AMKI + i]) - (d13[AH + i] + (d13[AI + i] - d13[AH + i]) * d13[AMKI + i]), 5)) }
-    /// Surplus H2 prod cap after max day harmonious and opti night op prep
-    // KY=IF(KI6=0,0,ROUND((GR6+(IN6-GR6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc))-($AH6+($AI6-$AH6)/($AM6-A_equiv_harmonious_min_perc)*(KI6-A_equiv_harmonious_min_perc)),5))
-    for i in 0..<365 { d13[KY + i] = iff(d13[KI + i].isZero, Double.zero, round((d13[GR + i] + (d13[IN + i] - d13[GR + i]) * d13[AMKI + i]) - (d13[AH + i] + (d13[AI + i] - d13[AH + i]) * d13[AMKI + i]), 5)) }
-    /// Opt harm op period op during night prio operation
-    // KZ=IF(OR(JP6=0,KJ6<0,KL6<0,KN6<0,KP6<0,KR6<0,KT6<0,KV6<0,KX6<0),0,MIN(1,IFERROR(KJ6/MAX(0,KJ6-KK6),1),IFERROR(KL6/MAX(0,KL6-KM6),1),IFERROR(KN6/MAX(0,KN6-KO6),1),IFERROR(KP6/MAX(0,KP6-KQ6),1),IFERROR(KR6/MAX(0,KR6-KS6),1),IFERROR(KT6/MAX(0,KT6-KU6),1),IFERROR(KV6/MAX(0,KV6-KW6),1),IFERROR(KX6/MAX(0,KX6-KY6),1))*(Overall_harmonious_max_perc-Overall_harmonious_min_perc)+Overall_harmonious_min_perc)
+    // Surplus RawMeth prod cap after min day harmonious and opti night op prep
+    // KT=IF(KI3<0,0,ROUND((GK3+(IG3-GK3)*KI3)-($AD3+($AE3-$AD3)*KI3),5))
+    for i in 0..<365 {
+      d13[KT + i] = iff(
+        d13[KI + i] < 0, 0,
+        round(
+          (d13[GK + i] + (d13[IG + i] - d13[GK + i]) * d13[KI + i]) - (d13[AD + i] + (d13[AE + i] - d13[AD + i]) * d13[KI + i]),
+          5))
+    }
+
+    // Surplus RawMeth prod cap after max day harmonious and opti night op prep
+    // KU=IF(KI3<0,0,ROUND((GL3+(IH3-GL3)*KI3)-($AD3+($AE3-$AD3)*KI3),5))
+    for i in 0..<365 {
+      d13[KU + i] = iff(
+        d13[KI + i] < 0, 0,
+        round(
+          (d13[GL + i] + (d13[IH + i] - d13[GL + i]) * d13[KI + i]) - (d13[AD + i] + (d13[AE + i] - d13[AD + i]) * d13[KI + i]),
+          5))
+    }
+
+    // Surplus CO2 prod cap after min day harmonious and opti night op prep
+    // KV=IF(KI3<0,0,ROUND((GN3+(IJ3-GN3)*KI3)-($AF3+($AG3-$AF3)*KI3),5))
+    for i in 0..<365 {
+      d13[KV + i] = iff(
+        d13[KI + i] < 0, 0,
+        round(
+          (d13[GN + i] + (d13[IJ + i] - d13[GN + i]) * d13[KI + i]) - (d13[AF + i] + (d13[AG + i] - d13[AF + i]) * d13[KI + i]),
+          5))
+    }
+
+    // Surplus CO2 prod cap after max day harmonious and opti night op prep
+    // KW=IF(KI3<0,0,ROUND((GO3+(IK3-GO3)*KI3)-($AF3+($AG3-$AF3)*KI3),5))
+    for i in 0..<365 {
+      d13[KW + i] = iff(
+        d13[KI + i] < 0, 0,
+        round(
+          (d13[GO + i] + (d13[IK + i] - d13[GO + i]) * d13[KI + i]) - (d13[AF + i] + (d13[AG + i] - d13[AF + i]) * d13[KI + i]),
+          5))
+    }
+
+    // Surplus H2 prod cap after min day harmonious and opti night op prep
+    // KX=IF(KI3<0,0,ROUND((GQ3+(IM3-GQ3)*KI3)-($AH3+($AI3-$AH3)*KI3),5))
+    for i in 0..<365 {
+      d13[KX + i] = iff(
+        d13[KI + i] < 0, 0,
+        round(
+          (d13[GQ + i] + (d13[IM + i] - d13[GQ + i]) * d13[KI + i]) - (d13[AH + i] + (d13[AI + i] - d13[AH + i]) * d13[KI + i]),
+          5))
+    }
+    // Surplus H2 prod cap after max day harmonious and opti night op prep
+    // KY=IF(KI3<0,0,ROUND((GR3+(IN3-GR3)*KI3)-($AH3+($AI3-$AH3)*KI3),5))
+    for i in 0..<365 {
+      d13[KY + i] = iff(
+        d13[KI + i] < 0, 0,
+        round(
+          (d13[GR + i] + (d13[IN + i] - d13[GR + i]) * d13[KI + i]) - (d13[AH + i] + (d13[AI + i] - d13[AH + i]) * d13[KI + i]),
+          5))
+    }
+    // Opt harm op period op during night prio operation
+    // KZ=IF(OR(KI3<0,KJ3<0,KL3<0,KN3<0,KP3<0,KR3<0,KT3<0,KV3<0,KX3<0),-1,MIN(1,IFERROR(KJ3/MAX(0,KJ3-KK3),1),IFERROR(KL3/MAX(0,KL3-KM3),1),IFERROR(KN3/MAX(0,KN3-KO3),1),IFERROR(KP3/MAX(0,KP3-KQ3),1),IFERROR(KR3/MAX(0,KR3-KS3),1),IFERROR(KT3/MAX(0,KT3-KU3),1),IFERROR(KV3/MAX(0,KV3-KW3),1),IFERROR(KX3/MAX(0,KX3-KY3),1)))
     for i in 0..<365 {
       d13[KZ + i] = iff(
-        or(d13[JP + i].isZero, d13[KJ + i] < Double.zero, d13[KL + i] < Double.zero, d13[KN + i] < Double.zero, d13[KP + i] < Double.zero, d13[KR + i] < Double.zero, d13[KT + i] < Double.zero, d13[KV + i] < Double.zero, d13[KX + i] < 0),
-        Double.zero,
+        or(
+          d13[KI + i] < 0, d13[KJ + i] < 0, d13[KL + i] < 0, d13[KN + i] < 0, d13[KP + i] < 0, d13[KR + i] < 0, d13[KT + i] < 0,
+          d13[KV + i] < 0, d13[KX + i] < 0), -1,
         min(
-          1, ifFinite(d13[KJ + i] / max(Double.zero, d13[KJ + i] - d13[KK + i]), 1.0), ifFinite(d13[KL + i] / max(Double.zero, d13[KL + i] - d13[KM + i]), 1.0), ifFinite(d13[KN + i] / max(Double.zero, d13[KN + i] - d13[KO + i]), 1.0),
-          ifFinite(d13[KP + i] / max(Double.zero, d13[KP + i] - d13[KQ + i]), 1.0), ifFinite(d13[KR + i] / max(Double.zero, d13[KR + i] - d13[KS + i]), 1.0), ifFinite(d13[KT + i] / max(Double.zero, d13[KT + i] - d13[KU + i]), 1.0),
-          ifFinite(d13[KV + i] / max(Double.zero, d13[KV + i] - d13[KW + i]), 1.0), ifFinite(d13[KX + i] / max(Double.zero, d13[KX + i] - d13[KY + i]), 1.0)) * (Overall_harmonious_max_perc - Overall_harmonious_min_perc)
-          + Overall_harmonious_min_perc)
+          1, ifFinite(d13[KJ + i] / max(0, d13[KJ + i] - d13[KK + i]), 1),
+          ifFinite(d13[KL + i] / max(0, d13[KL + i] - d13[KM + i]), 1),
+          ifFinite(d13[KN + i] / max(0, d13[KN + i] - d13[KO + i]), 1),
+          ifFinite(d13[KP + i] / max(0, d13[KP + i] - d13[KQ + i]), 1),
+          ifFinite(d13[KR + i] / max(0, d13[KR + i] - d13[KS + i]), 1),
+          ifFinite(d13[KT + i] / max(0, d13[KT + i] - d13[KU + i]), 1),
+          ifFinite(d13[KV + i] / max(0, d13[KV + i] - d13[KW + i]), 1),
+          ifFinite(d13[KX + i] / max(0, d13[KX + i] - d13[KY + i]), 1)))
     }
   }
 }

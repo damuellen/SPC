@@ -830,21 +830,24 @@ extension TunOl {
 
     /// el cons for harm op during harm op period incl grid import
     let IB = 27010
-    // IB=IF($DR3=0,0,IF(HC3<0,MIN($DS3,MAX(0,$DS3+$EC3-MIN(BESS_cap_ud/BESS_chrg_eff,MAX(0,$EA3+$DU3-$EJ3+$DZ3/El_boiler_eff)/BESS_chrg_eff))),($DR3+($DS3-$DR3)*GH3)))
+    // IB=IF($DR3=0,0,IF(HC3<0,MIN($DS3,MAX($DR3,$DS3+$EC3-MIN(BESS_cap_ud/BESS_chrg_eff,$EK3,MAX(0,$E3+$EA3+$DU3-$EJ3+MIN($ER3,($DZ3+$G3)/El_boiler_eff))/BESS_chrg_eff))),$DR3+($DS3-$DR3)*GH3))
     for i in 0..<365 {
       d23[IB + i] = iff(
-        d22[DR + i].isZero, 0,
+        d22[DR + i] == Double.zero, 0,
         iff(
           d23[HC + i] < 0,
           min(
             d22[DS + i],
             max(
-              0,
+              d22[DR + i],
               d22[DS + i] + d22[EC + i]
                 - min(
-                  BESS_cap_ud / BESS_chrg_eff,
-                  max(Double.zero, d22[EA + i] + d22[DU + i] - d22[EJ + i] + d22[DZ + i] / El_boiler_eff)
-                    / BESS_chrg_eff))), (d22[DR + i] + (d22[DS + i] - d22[DR + i]) * d23[GH + i])))
+                  BESS_cap_ud / BESS_chrg_eff, d22[EK + i],
+                  max(
+                    0,
+                    d21[E + i] + d22[EA + i] + d22[DU + i] - d22[EJ + i]
+                      + min(d22[ER + i], (d22[DZ + i] + d21[G + i]) / El_boiler_eff)) / BESS_chrg_eff))),
+          d22[DR + i] + (d22[DS + i] - d22[DR + i]) * d23[GH + i]))
     }
 
     /// el cons for night prep during harm op period
@@ -856,24 +859,22 @@ extension TunOl {
 
     /// el cons for BESS charging during harm op period
     let ID = 27740
-    // ID=IF(OR(GH3<0,HC3<0),MIN(BESS_cap_ud/BESS_chrg_eff,MAX(0,$E3+$EA3+$DU3-$EJ3+($G3+$DZ3)/El_boiler_eff)/BESS_chrg_eff,MIN($DS3,MAX(0,$DS3+$EC3-IB3))),MIN(($EK3+($EL3-$EK3)*GH3),MAX(0,$EA3+($E3+($F3-$E3)*HC3)+MIN($ER3,MAX(0,($G3+($H3-$G3)*HC3)-$EG3)/El_boiler_eff)-$EJ3-$EM3*BESS_chrg_eff)/BESS_chrg_eff))
+    // ID=IF(OR(GH3<0,HC3<0),MIN(BESS_cap_ud/BESS_chrg_eff,$EK3,MAX($DR3,$E3+$EA3+$DU3-$EJ3+MIN($ER3,($G3+$DZ3)/El_boiler_eff))/BESS_chrg_eff,MIN($DS3,MAX(0,$DS3+$EC3-IB3))),MIN(($EK3+($EL3-$EK3)*GH3),MAX(0,$EA3+($E3+($F3-$E3)*HC3)+MIN($ER3,MAX(0,($G3+($H3-$G3)*HC3)-$EG3)/El_boiler_eff)-$EJ3-$EM3*BESS_chrg_eff)/BESS_chrg_eff))
     for i in 0..<365 {
       d23[ID + i] = iff(
-        or(d23[GH + i] < 0, d23[HC + i] < Double.zero),
+        or(d23[GH + i] < 0, d23[HC + i] < 0),
         min(
-          BESS_cap_ud / BESS_chrg_eff,
+          BESS_cap_ud / BESS_chrg_eff, d22[EK + i],
           max(
-            0,
-            d21[E + i] + d22[EA + i] + d22[DU + i] - d22[EJ + i] + (d21[G + i] + d22[DZ + i]) / El_boiler_eff
-          ) / BESS_chrg_eff, min(d22[DS + i], max(Double.zero, d22[DS + i] + d22[EC + i] - d23[IB + i]))),
+            d22[DR + i],
+            d21[E + i] + d22[EA + i] + d22[DU + i] - d22[EJ + i] + min(d22[ER + i], (d21[G + i] + d22[DZ + i]) / El_boiler_eff))
+            / BESS_chrg_eff, min(d22[DS + i], max(0, d22[DS + i] + d22[EC + i] - d23[IB + i]))),
         min(
           (d22[EK + i] + (d22[EL + i] - d22[EK + i]) * d23[GH + i]),
           max(
             0,
             d22[EA + i] + (d21[E + i] + (d21[F + i] - d21[E + i]) * d23[HC + i])
-              + min(
-                d22[ER + i],
-                max(Double.zero, (d21[G + i] + (d21[H + i] - d21[G + i]) * d23[HC + i]) - d22[EG + i]) / El_boiler_eff)
+              + min(d22[ER + i], max(0, (d21[G + i] + (d21[H + i] - d21[G + i]) * d23[HC + i]) - d22[EG + i]) / El_boiler_eff)
               - d22[EJ + i] - d22[EM + i] * BESS_chrg_eff) / BESS_chrg_eff))
     }
 
@@ -1054,51 +1055,49 @@ extension TunOl {
               * (MethDist_max_perc[j] - MethDist_min_perc[j]) + day0[B + i] * MethDist_min_perc[j]))
         * MethDist_Meth_nom_prod_ud
     }
-
     /// Missing heat
     let IZ = 36500
-    // IZ=ROUND(MAX(0,-IM3)+MAX(0,-IX3),0)
-    for i in 0..<365 { d23[IZ + i] = round(max(Double.zero, -d23[IM + i]) + max(Double.zero, -d23[IX + i]), Double.zero) }
+    // IZ=MAX(0,-IM3)+MAX(0,-IX3)
+    for i in 0..<365 { d23[IZ + i] = max(0, -d23[IM + i]) + max(0, -d23[IX + i]) }
 
     /// grid export
     let JA = 35770
-    // JA=ROUND(MAX(0,MIN(IL3,IF(GH3<0,$DW3,($DV3+($DW3-$DV3)*GH3))))+MAX(0,MIN(IW3,IF(OR(GH3<0,HC3<0),0,$DX3))),0)
+    // JA=MAX(0,MIN(IL3,IF(GH3<0,$DW3,($DV3+($DW3-$DV3)*GH3))))+MAX(0,MIN(IW3,IF(OR(GH3<0,HC3<0),0,$DX3)))
     for i in 0..<365 {
-      d23[JA + i] = round(
-        max(
-          0,
-          min(
-            d23[IL + i],
-            iff(d23[GH + i] < 0, d22[DW + i], (d22[DV + i] + (d22[DW + i] - d22[DV + i]) * d23[GH + i]))))
-          + max(Double.zero, min(d23[IW + i], iff(or(d23[GH + i] < 0, d23[HC + i] < Double.zero), Double.zero, d22[DX + i]))), Double.zero)
+      d23[JA + i] =
+        max(0, min(d23[IL + i], iff(d23[GH + i] < 0, d22[DW + i], (d22[DV + i] + (d22[DW + i] - d22[DV + i]) * d23[GH + i]))))
+        + max(0, min(d23[IW + i], iff(or(d23[GH + i] < 0, d23[HC + i] < 0), 0, d22[DX + i])))
     }
 
     /// grid import
     let JB = 36135
-    // JB=ROUND(MAX(0,-IL3)+MAX(0,-IW3)+IZ3/El_boiler_eff,0)*EDG_elec_cost_factor+ROUND(IJ3+IK3+IV3,0)
+    // JB=(MAX(0,-IL3)+MAX(0,-IW3)+IZ3/El_boiler_eff)*EDG_elec_cost_factor+IJ3+IK3+IV3
     for i in 0..<365 {
       d23[JB + i] =
-        round(max(Double.zero, -d23[IL + i]) + max(Double.zero, -d23[IW + i]) + d23[IZ + i] / El_boiler_eff, Double.zero)
-        * EDG_elec_cost_factor + round(d23[IJ + i] + d23[IK + i] + d23[IV + i], Double.zero)
+        (max(0, -d23[IL + i]) + max(0, -d23[IW + i]) + d23[IZ + i] / El_boiler_eff) * EDG_elec_cost_factor + d23[IJ + i]
+        + d23[IK + i] + d23[IV + i]
     }
 
     /// el cons for harm op during harm op period
     let JD = 36865
-    // JD=IF($DR3=0,0,IF(HZ3<0,MIN($DS3,MAX(0,$DS3+$EC3-MIN(BESS_cap_ud/BESS_chrg_eff,MAX(0,$EA3+$DU3-$EJ3+$DZ3/El_boiler_eff)/BESS_chrg_eff))),($DR3+($DS3-$DR3)*HZ3)))
+    // JD=IF($DR3=0,0,IF(HZ3<0,MIN($DS3,MAX($DR3,$DS3+$EC3-MIN(BESS_cap_ud/BESS_chrg_eff,$EK3,MAX(0,$E3+$EA3+$DU3-$EJ3+MIN($ER3,($DZ3+$G3)/El_boiler_eff))/BESS_chrg_eff))),($DR3+($DS3-$DR3)*HZ3)))
     for i in 0..<365 {
       d23[JD + i] = iff(
-        d22[DR + i].isZero, Double.zero,
+        d22[DR + i] == Double.zero, 0,
         iff(
-          d23[HZ + i] < Double.zero,
+          d23[HZ + i] < 0,
           min(
             d22[DS + i],
             max(
-              0,
+              d22[DR + i],
               d22[DS + i] + d22[EC + i]
                 - min(
-                  BESS_cap_ud / BESS_chrg_eff,
-                  max(Double.zero, d22[EA + i] + d22[DU + i] - d22[EJ + i] + d22[DZ + i] / El_boiler_eff)
-                    / BESS_chrg_eff))), (d22[DR + i] + (d22[DS + i] - d22[DR + i]) * d23[HZ + i])))
+                  BESS_cap_ud / BESS_chrg_eff, d22[EK + i],
+                  max(
+                    0,
+                    d21[E + i] + d22[EA + i] + d22[DU + i] - d22[EJ + i]
+                      + min(d22[ER + i], (d22[DZ + i] + d21[G + i]) / El_boiler_eff)) / BESS_chrg_eff))),
+          (d22[DR + i] + (d22[DS + i] - d22[DR + i]) * d23[HZ + i])))
     }
 
     /// el cons for night prep during harm op period
@@ -1110,24 +1109,22 @@ extension TunOl {
 
     /// el cons for BESS charging during harm op period
     let JF = 37595
-    // JF=IF(OR(HE3<0,HZ3<0),MIN(BESS_cap_ud/BESS_chrg_eff,MAX(0,$E3+$EA3+$DU3-$EJ3+($G3+$DZ3)/El_boiler_eff)/BESS_chrg_eff,MIN($DS3,MAX(0,$DS3+$EC3-IB3))),MIN(($EK3+($EL3-$EK3)*HZ3),MAX(0,$EA3+($E3+($F3-$E3)*HE3)+MIN($ER3,MAX(0,($G3+($H3-$G3)*HE3)-$EG3)/El_boiler_eff)-$EJ3-$EM3*BESS_chrg_eff)/BESS_chrg_eff))
+    // JF=IF(OR(HE3<0,HZ3<0),MIN(BESS_cap_ud/BESS_chrg_eff,$EK3,MAX($DR3,$E3+$EA3+$DU3-$EJ3+MIN($ER3,($G3+$DZ3)/El_boiler_eff))/BESS_chrg_eff,MIN($DS3,MAX(0,$DS3+$EC3-IB3))),MIN(($EK3+($EL3-$EK3)*HZ3),MAX(0,$EA3+($E3+($F3-$E3)*HE3)+MIN($ER3,MAX(0,($G3+($H3-$G3)*HE3)-$EG3)/El_boiler_eff)-$EJ3-$EM3*BESS_chrg_eff)/BESS_chrg_eff))
     for i in 0..<365 {
       d23[JF + i] = iff(
-        or(d23[HE + i] < 0, d23[HZ + i] < Double.zero),
+        or(d23[HE + i] < 0, d23[HZ + i] < 0),
         min(
-          BESS_cap_ud / BESS_chrg_eff,
+          BESS_cap_ud / BESS_chrg_eff, d22[EK + i],
           max(
-            0,
-            d21[E + i] + d22[EA + i] + d22[DU + i] - d22[EJ + i] + (d21[G + i] + d22[DZ + i]) / El_boiler_eff
-          ) / BESS_chrg_eff, min(d22[DS + i], max(Double.zero, d22[DS + i] + d22[EC + i] - d23[IB + i]))),
+            d22[DR + i],
+            d21[E + i] + d22[EA + i] + d22[DU + i] - d22[EJ + i] + min(d22[ER + i], (d21[G + i] + d22[DZ + i]) / El_boiler_eff))
+            / BESS_chrg_eff, min(d22[DS + i], max(0, d22[DS + i] + d22[EC + i] - d23[IB + i]))),
         min(
           (d22[EK + i] + (d22[EL + i] - d22[EK + i]) * d23[HZ + i]),
           max(
             0,
             d22[EA + i] + (d21[E + i] + (d21[F + i] - d21[E + i]) * d23[HE + i])
-              + min(
-                d22[ER + i],
-                max(Double.zero, (d21[G + i] + (d21[H + i] - d21[G + i]) * d23[HE + i]) - d22[EG + i]) / El_boiler_eff)
+              + min(d22[ER + i], max(0, (d21[G + i] + (d21[H + i] - d21[G + i]) * d23[HE + i]) - d22[EG + i]) / El_boiler_eff)
               - d22[EJ + i] - d22[EM + i] * BESS_chrg_eff) / BESS_chrg_eff))
     }
 
@@ -1251,14 +1248,13 @@ extension TunOl {
 
     /// El to BESS charging outside harm op period
     let JV = 43435
-    // JV=MIN(BESS_cap_ud/BESS_chrg_eff,MAX(0,JU3+JT3+JP3+IF(HE3=0,$E3,0)-JW3)/BESS_chrg_eff,IF(HE3>=0,$EM3,IF(HZ3<0,$EO3,$EN3+($EO3-$EN3)*HZ3)))
+    // JV=MIN(BESS_cap_ud/BESS_chrg_eff,MAX(0,JU3+JT3+JP3+IF(HE3<0,$E3,0)-JW3)/BESS_chrg_eff,IF(HE3>=0,$EM3,IF(HZ3<0,$EO3,$EN3+($EO3-$EN3)*HZ3)))
     for i in 0..<365 {
       d23[JV + i] = min(
         BESS_cap_ud / BESS_chrg_eff,
-        max(Double.zero, d23[JU + i] + d23[JT + i] + d23[JP + i] + iff(d23[HE + i].isZero, d21[E + i], Double.zero) - d23[JW + i])
-          / BESS_chrg_eff,
+        max(0, d23[JU + i] + d23[JT + i] + d23[JP + i] + iff(d23[HE + i] < 0, d21[E + i], 0) - d23[JW + i]) / BESS_chrg_eff,
         iff(
-          d23[HE + i] >= 0, d22[EM + i],
+          d23[HE + i] >= Double.zero, d22[EM + i],
           iff(d23[HZ + i] < 0, d22[EO + i], d22[EN + i] + (d22[EO + i] - d22[EN + i]) * d23[HZ + i])))
     }
 
@@ -1297,43 +1293,36 @@ extension TunOl {
       d23[KA + i] =
         (max(Double.zero, d23[JD + i] - day0[C + i] * (Overall_fix_cons + Overall_harmonious_var_min_cons))
           / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
-          * (MethDist_harmonious_max_perc - MethDist_harmonious_min_perc) + day0[C + i]
-          * MethDist_harmonious_min_perc
+          * (MethDist_harmonious_max_perc - MethDist_harmonious_min_perc) + day0[C + i] * MethDist_harmonious_min_perc
           + iff(
             d23[JP + i].isZero, 0,
             iff(
-              overall_var_max_cons[j].isZero,
-              d23[HE + i] / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]),
+              overall_var_max_cons[j].isZero, d23[HE + i] / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]),
               max(Double.zero, d23[JP + i] - day0[B + i] * (overall_fix_stby_cons[j] + overall_var_min_cons[j]))
-                / (overall_var_max_cons[j] - overall_var_min_cons[j]))
-              * (MethDist_max_perc[j] - MethDist_min_perc[j]) + day0[B + i] * MethDist_min_perc[j]))
-        * MethDist_Meth_nom_prod_ud
+                / (overall_var_max_cons[j] - overall_var_min_cons[j])) * (MethDist_max_perc[j] - MethDist_min_perc[j]) + day0[
+                B + i] * MethDist_min_perc[j])) * MethDist_Meth_nom_prod_ud
     }
     /// Missing heat
     let KB = 46355
-    // KB=ROUND(MAX(0,-JO3)+MAX(0,-JZ3),0)
-    for i in 0..<365 { d23[KB + i] = round(max(Double.zero, -d23[JO + i]) + max(Double.zero, -d23[JZ + i]), Double.zero) }
+    // KB=MAX(0,-JO3)+MAX(0,-JZ3)
+    for i in 0..<365 { d23[KB + i] = max(0, -d23[JO + i]) + max(0, -d23[JZ + i]) }
 
     /// grid export
     let KC = 45625
-    // KC=ROUND(MAX(0,MIN(JN3,IF(HZ3<0,$DW3,($DV3+($DW3-$DV3)*HZ3))))+MAX(0,MIN(JY3,IF(OR(HZ3<0,HE3<0),0,$DX3))),0)
+    // KC=MAX(0,MIN(JN3,IF(HZ3<0,$DW3,($DV3+($DW3-$DV3)*HZ3))))+MAX(0,MIN(JY3,IF(OR(HZ3<0,HE3<0),0,$DX3)))
     for i in 0..<365 {
-      d23[KC + i] = round(
-        max(
-          Double.zero,
-          min(
-            d23[JN + i],
-            iff(d23[HZ + i] < 0, d22[DW + i], (d22[DV + i] + (d22[DW + i] - d22[DV + i]) * d23[HZ + i]))))
-          + max(Double.zero, min(d23[JY + i], iff(or(d23[HZ + i] < 0, d23[HE + i] < Double.zero), Double.zero, d22[DX + i]))), Double.zero)
+      d23[KC + i] =
+        max(0, min(d23[JN + i], iff(d23[HZ + i] < 0, d22[DW + i], (d22[DV + i] + (d22[DW + i] - d22[DV + i]) * d23[HZ + i]))))
+        + max(0, min(d23[JY + i], iff(or(d23[HZ + i] < 0, d23[HE + i] < 0), 0, d22[DX + i])))
     }
 
     /// grid import
     let KD = 45990
-    // KD=ROUND(MAX(0,-JN3)+MAX(0,-JY3)+KB3/El_boiler_eff,0)*EDG_elec_cost_factor+ROUND(JL3+JM3+JX3,0)
+    // KD=(MAX(0,-JN3)+MAX(0,-JY3)+KB3/El_boiler_eff)*EDG_elec_cost_factor+JL3+JM3+JX3
     for i in 0..<365 {
       d23[KD + i] =
-        round(max(Double.zero, -d23[JN + i]) + max(Double.zero, -d23[JY + i]) + d23[KB + i] / El_boiler_eff, Double.zero)
-        * EDG_elec_cost_factor + round(d23[JL + i] + d23[JM + i] + d23[JX + i], Double.zero)
+        (max(0, -d23[JN + i]) + max(0, -d23[JY + i]) + d23[KB + i] / El_boiler_eff) * EDG_elec_cost_factor + d23[JL + i]
+        + d23[JM + i] + d23[JX + i]
     }
   }
 }

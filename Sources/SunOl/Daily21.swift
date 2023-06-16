@@ -1,6 +1,7 @@
 extension TunOl {
   func day20(hour: [Double]) -> [Double] {
-    let daysU: [[Int]] = hour[113881..<(113880 + 8760)].indices.chunked(by: { hour[$0] == hour[$1] }).map { $0.map { $0 - 113880 } }
+    let daysU: [[Int]] = hour[113881..<(113880 + 8760)].indices.chunked(by: { hour[$0] == hour[$1] })
+      .map { $0.map { $0 - 113880 } }
     // let end = daysU.removeLast()
     // daysU[0].append(contentsOf: end)
     let hourS = 96360
@@ -60,15 +61,15 @@ extension TunOl {
     // AA=IF(AND(A_CO2_min_cons=0,A_CO2_max_cons=0),1,1-ifFinite(A_CO2_min_cons*$B3/CO2_storage_cap_ud,2))
     for i in 0..<365 {
       d1[AA + i] = iff(
-        and(CO2_min_cons[j].isZero, CO2_max_cons[j].isZero), 1,
-        1 - ifFinite(CO2_min_cons[j] * d1[B + i] / CO2_storage_cap_ud, 2))
+        and(CO2_min_cons[j].isZero, CO2_max_cons[j].isZero), 1, 1 - ifFinite(CO2_min_cons[j] * d1[B + i] / CO2_storage_cap_ud, 2)
+      )
     }
     // Surplus CO2 storage cap after max night op prep
     // AB=IF(AND(A_CO2_min_cons=0,A_CO2_max_cons=0),1,1-ifFinite(A_CO2_max_cons*$B3/CO2_storage_cap_ud,2))
     for i in 0..<365 {
       d1[AB + i] = iff(
-        and(CO2_min_cons[j].isZero, CO2_max_cons[j].isZero), 1,
-        1 - ifFinite(CO2_max_cons[j] * d1[B + i] / CO2_storage_cap_ud, 2))
+        and(CO2_min_cons[j].isZero, CO2_max_cons[j].isZero), 1, 1 - ifFinite(CO2_max_cons[j] * d1[B + i] / CO2_storage_cap_ud, 2)
+      )
     }
     // Surplus H2 storage cap after min night op prep
     // AC=IF(AND(A_Hydrogen_max_cons=0,A_Hydrogen_min_cons=0),1,1-ifFinite(A_Hydrogen_min_cons*$B3/Hydrogen_storage_cap_ud,2))
@@ -85,14 +86,14 @@ extension TunOl {
         1 - ifFinite(Hydrogen_max_cons[j] * d1[B + i] / Hydrogen_storage_cap_ud, 2))
     }
     // Max Equiv harmonious night prod due to physical limits
-    // AE=IF(OR(Y3<=0,AA3<=0,AC3<=0),0,MIN(1,ifFinite(Y3/(Y3-Z3),1),ifFinite(AA3/(AA3-AB3),1),ifFinite(AC3/(AC3-AD3),1)))
+    // AE=IF(OR(Y3<=0,AA3<=0,AC3<=0),0,MIN(1,IFERROR(Y3/(Y3-Z3),1),IFERROR(AA3/(AA3-AB3),1),IFERROR(AC3/(AC3-AD3),1))*(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)+A_equiv_harmonious_min_perc)
     for i in 0..<365 {
       d1[AE + i] = iff(
         or(d1[Y + i] <= Double.zero, d1[AA + i] <= Double.zero, d1[AC + i] <= Double.zero), 0,
         min(
-          1, ifFinite(d1[Y + i] / (d1[Y + i] - d1[Z + i]), 1),
-          ifFinite(d1[AA + i] / (d1[AA + i] - d1[AB + i]), 1),
-          ifFinite(d1[AC + i] / (d1[AC + i] - d1[AD + i]), 1)))
+          1, ifFinite(d1[Y + i] / (d1[Y + i] - d1[Z + i]), 1), ifFinite(d1[AA + i] / (d1[AA + i] - d1[AB + i]), 1),
+          ifFinite(d1[AC + i] / (d1[AC + i] - d1[AD + i]), 1)) * (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j])
+          + equiv_harmonious_min_perc[j])
     }
 
     /// Min el cons during night
@@ -118,15 +119,18 @@ extension TunOl {
     for i in 0..<365 {
       // E=(A_overall_var_min_cons+A_overall_fix_stby_cons)*$B3+A_overall_stup_cons
       d1[E + i] = (overall_var_min_cons[j] + overall_fix_stby_cons[j]) * day0[B + i] + overall_stup_cons[j]
-      // F=(AE3*A_overall_var_max_cons+A_overall_fix_stby_cons)*$B3+A_overall_stup_cons
-      d1[F + i] = (d1[AE + i] * overall_var_max_cons[j] + overall_fix_stby_cons[j]) * day0[B + i] + overall_stup_cons[j]
-      // G=(A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons)*$B6+A_overall_heat_stup_cons
+      // F=(MAX(0,AE3-A_equiv_harmonious_min_perc)*(A_overall_var_max_cons-A_overall_var_min_cons)+A_overall_var_min_cons+A_overall_fix_stby_cons)*$B3+A_overall_stup_cons
+      for i in 0..<365 { d1[F + i] = (max(0, d1[AE + i] - equiv_harmonious_min_perc[j]) * (overall_var_max_cons[j] - overall_var_min_cons[j]) + overall_var_min_cons[j] + overall_fix_stby_cons[j]) * d1[B + i] + overall_stup_cons[j] }
+
       d1[G + i] = (overall_var_heat_min_cons[j] + overall_heat_fix_stby_cons[j]) * day0[B + i] + overall_heat_stup_cons[j]
-      // H=(AE3*A_overall_var_heat_max_cons+A_overall_heat_fix_stby_cons)*$B3+A_overall_heat_stup_cons
-      d1[H + i] = (d1[AE + i] * overall_var_heat_max_cons[j] + overall_heat_fix_stby_cons[j]) * day0[B + i] + overall_heat_stup_cons[j]
+      // Max heat cons during night
+      // H=(MAX(0,AE3-A_equiv_harmonious_min_perc)*(A_overall_var_heat_max_cons-A_overall_var_heat_min_cons)+A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons)*$B3+A_overall_heat_stup_cons
+      for i in 0..<365 {
+        d1[H + i] = (max(0, d1[AE + i] - equiv_harmonious_min_perc[j]) * (overall_var_heat_max_cons[j] - overall_var_heat_min_cons[j]) + overall_var_heat_min_cons[j] + overall_heat_fix_stby_cons[j]) * d1[B + i] + overall_heat_stup_cons[j]
+      }
+
       if d1[AE + i].isZero {
         d1[I + i] = Double.zero
-        d1[J + i] = Double.zero
         d1[K + i] = Double.zero
         d1[L + i] = Double.zero
         d1[M + i] = Double.zero
@@ -134,8 +138,6 @@ extension TunOl {
       } else {
         // A_RawMeth_min_cons*B6
         d1[I + i] = RawMeth_min_cons[j] * day0[B + i]
-        // AE3*A_RawMeth_max_cons*$B3
-        d1[J + i] = d1[AE + i] * RawMeth_max_cons[j] * day0[B + i]
         // A_CO2_min_cons*B6
         d1[K + i] = CO2_min_cons[j] * day0[B + i]
         // AE3*A_CO2_max_cons*$B3
@@ -146,6 +148,18 @@ extension TunOl {
         d1[N + i] = d1[AE + i] * Hydrogen_max_cons[j] * day0[B + i]
       }
     }
+    // Max RawMeth cons during night
+    // J=(MAX(0,AE3-A_equiv_harmonious_min_perc)*(A_RawMeth_max_cons-A_RawMeth_min_cons)+A_RawMeth_min_cons)*$B3
+    for i in 0..<365 { d1[J + i] = (max(0, d1[AE + i] - equiv_harmonious_min_perc[j]) * (RawMeth_max_cons[j] - RawMeth_min_cons[j]) + RawMeth_min_cons[j]) * d1[B + i] }
+
+    // Max CO2 cons during night
+    // L=(MAX(0,AE3-A_equiv_harmonious_min_perc)*(A_CO2_max_cons-A_CO2_min_cons)+A_CO2_min_cons)*$B3
+    for i in 0..<365 { d1[L + i] = (max(0, d1[AE + i] - equiv_harmonious_min_perc[j]) * (CO2_max_cons[j] - CO2_min_cons[j]) + CO2_min_cons[j]) * d1[B + i] }
+
+    // Max H2 cons during night
+    // N=(MAX(0,AE3-A_equiv_harmonious_min_perc)*(A_Hydrogen_max_cons-A_Hydrogen_min_cons)+A_Hydrogen_min_cons)*$B3
+    for i in 0..<365 { d1[N + i] = (max(0, d1[AE + i] - equiv_harmonious_min_perc[j]) * (Hydrogen_max_cons[j] - Hydrogen_min_cons[j]) + Hydrogen_min_cons[j]) * d1[B + i] }
+
 
     /// Min el cons during day for night op prep
     let O = 3650
