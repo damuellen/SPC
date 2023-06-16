@@ -162,7 +162,7 @@ public enum BlackBoxModel {
       {()}
 #endif
       // Used when calculating the heat losses and the efficiency
-      let temperature = Temperature(celsius: Double(meteo.temperature))
+      let temperature = Temperature(celsius: meteo.temperature)
 
       // Setting the mass flow required by the power block in the solar field
       status.solarField.requiredMassFlow = HeatExchanger.designMassFlow
