@@ -102,11 +102,7 @@ struct SolarPerformanceCalculator: ParsableCommand {
  #endif
     }
 
-    if let steps = stepsCalculation {
-      Simulation.time.steps = Frequence[steps]
-    } else {
-      Simulation.time.steps = .fiveMinutes
-    }
+    if let s = stepsCalculation { Simulation.time.steps = Frequence[s] }
     
     do {
       if path == nil { path = meteofilePath ?? configPath }
