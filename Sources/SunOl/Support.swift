@@ -278,7 +278,7 @@ func iff(_ expression: Bool, _ yes: Double, _ no: Double = Double.zero)
   -> Double
 { expression ? yes : no }
 
-func ifFinite(_ check: Double, _ subs: Double) -> Double {
+func ifFinite(_ check: Double, _ subs: Double = 0) -> Double {
   check.isFinite ? check : subs
 }
 

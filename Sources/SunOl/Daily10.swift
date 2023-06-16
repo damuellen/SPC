@@ -2,16 +2,21 @@ extension TunOl {
   /// 0-5110
   func d10(_ d10: inout [Double], hour: [Double], case j: Int) {
     let (BX, CC, CS, CQ) = (595680, 639480, 779640, 762120)
-
+    let CT  = 788400
     let days: [[Int]] = hour[CS + 1..<(CS + 8760)].indices.chunked(by: { hour[$0] == hour[$1] }).map { $0.map { $0 - CS } }
     let notZero: (Double) -> Bool = { $0 > Double.zero }
     let CQ_CScountZero = hour.countOf(days, condition: CQ, predicate: { $0 <= 0 })
     let CQ_CScountNonZero = hour.countOf(days, condition: CQ, predicate: notZero)
 
-    /// Nr of hours outside of harm op period after min night prep
+    let CT_CS_countNonZero = hour.countOf(days, condition: CT, predicate: { 
+      $0 > 0 && $0 != Overall_stup_cons && $0 != Overall_stby_cons
+    })
+    /// Nr of outside harm op period op hours after min outside harm op period prep
     let C: Int = 0
-    // COUNTIFS(CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,"<=0")
-    for i in 0..<365 { d10[C + i] = CQ_CScountZero[i] }
+    // C=MIN(COUNTIFS(Calculation!$CS$5:$CS$8764,"="&$A3,Calculation!$CT$5:$CT$8764,">0",Calculation!$CT$5:$CT$8764,"<>"&INDEX(Overall_stup_cons,1),Calculation!$CT$5:$CT$8764,"<>"&INDEX(Overall_stby_cons,1)),COUNTIFS(Calculation!$CS$5:$CS$8764,"="&$A3,Calculation!$CQ$5:$CQ$8764,"<=0"))
+    for i in 0..<365 {
+      d10[C + i] = min(CT_CS_countNonZero[i], CQ_CScountZero[i])
+    }
 
     /// Nr of harm op period hours after min night prep
     let D: Int = 365
@@ -24,57 +29,70 @@ extension TunOl {
     // COUNTIFS(CalculationCS5:CS8763,"="A6,CalculationBX5:BX8763,">0",CalculationCC5:CC8763,">0")
     for i in 0..<365 { d10[E + i] = opHours[i] }
 
-    /// Surplus RawMeth storage cap after night min op  prep
     let L: Int = 3285
-    /// Surplus RawMeth storage cap after max night op prep
     let M: Int = 3650
-    /// Surplus CO2 storage cap after min night op prep
     let N: Int = 4015
-    /// Surplus CO2 storage cap after max night op prep
     let O: Int = 4380
-    /// Surplus H2 storage cap after min night op prep
     let P: Int = 4745
-    /// Surplus H2 storage cap after max night op prep
     let Q: Int = 5110
 
+    // Surplus RawMeth storage cap after min outside harm op period prep
+    // L=IF(AND(A_RawMeth_min_cons=0,A_RawMeth_max_cons=0),1,1-IFERROR(A_RawMeth_min_cons*C3/RawMeth_storage_cap_ud,2))
     for i in 0..<365 {
-      let hours = d10[C + i]
-      if RawMeth_storage_cap_ud.isZero {
-        d10[L + i] = RawMeth_min_cons[j].isZero ? 1.0 : Double.zero
-        d10[M + i] = RawMeth_max_cons[j].isZero ? 1.0 : Double.zero
-      } else if hours.isZero {
-        (d10[L + i], d10[M + i]) = (1.0, 1.0)
-      } else {
-        d10[L + i] = 1 - (RawMeth_min_cons[j] * hours / RawMeth_storage_cap_ud)
-        d10[M + i] = 1 - (RawMeth_max_cons[j] * hours / RawMeth_storage_cap_ud)
-      }
-
-      if CO2_storage_cap_ud.isZero {
-        (d10[N + i], d10[O + i]) = (CO2_min_cons[j].isZero ? 1.0 : Double.zero, CO2_max_cons[j].isZero ? 1.0 : Double.zero)
-      } else if hours.isZero {
-        (d10[N + i], d10[O + i]) = (1, 1.0)
-      } else {
-        d10[N + i] = 1 - (CO2_min_cons[j] * hours / CO2_storage_cap_ud)
-        d10[O + i] = 1 - (CO2_max_cons[j] * hours / CO2_storage_cap_ud)
-      }
-
-      if Hydrogen_storage_cap_ud.isZero {
-        (d10[P + i], d10[Q + i]) = (Hydrogen_min_cons[j].isZero ? 1.0 : Double.zero, Hydrogen_max_cons[j].isZero ? 1.0 : Double.zero)
-      } else if hours.isZero {
-        (d10[P + i], d10[Q + i]) = (1, 1.0)
-      } else {
-        d10[P + i] = 1 - (Hydrogen_min_cons[j] * hours / Hydrogen_storage_cap_ud)
-        d10[Q + i] = 1 - (Hydrogen_max_cons[j] * hours / Hydrogen_storage_cap_ud)
-      }
+      d10[L + i] = iff(
+        and(RawMeth_min_cons[j] == Double.zero, RawMeth_max_cons[j] == Double.zero), 1,
+        1 - ifFinite(RawMeth_min_cons[j] * d10[C + i] / RawMeth_storage_cap_ud, 2))
     }
 
-    /// Max Equiv harmonious night prod due to physical limits
+    // Surplus RawMeth storage cap after max outside harm op period prep
+    // M=IF(AND(A_RawMeth_min_cons=0,A_RawMeth_max_cons=0),1,1-IFERROR(A_RawMeth_max_cons*C3/RawMeth_storage_cap_ud,2))
+    for i in 0..<365 {
+      d10[M + i] = iff(
+        and(RawMeth_min_cons[j] == Double.zero, RawMeth_max_cons[j] == Double.zero), 1,
+        1 - ifFinite(RawMeth_max_cons[j] * d10[C + i] / RawMeth_storage_cap_ud, 2))
+    }
+
+    // Surplus CO2 storage cap after min outside harm op period prep
+    // N=IF(AND(A_CO2_min_cons=0,A_CO2_max_cons=0),1,1-IFERROR(A_CO2_min_cons*C3/CO2_storage_cap_ud,2))
+    for i in 0..<365 {
+      d10[N + i] = iff(
+        and(CO2_min_cons[j] == Double.zero, CO2_max_cons[j] == Double.zero), 1,
+        1 - ifFinite(CO2_min_cons[j] * d10[C + i] / CO2_storage_cap_ud, 2))
+    }
+
+    // Surplus CO2 storage cap after max outside harm op period prep
+    // O=IF(AND(A_CO2_min_cons=0,A_CO2_max_cons=0),1,1-IFERROR(A_CO2_max_cons*C3/CO2_storage_cap_ud,2))
+    for i in 0..<365 {
+      d10[O + i] = iff(
+        and(CO2_min_cons[j] == Double.zero, CO2_max_cons[j] == Double.zero), 1,
+        1 - ifFinite(CO2_max_cons[j] * d10[C + i] / CO2_storage_cap_ud, 2))
+    }
+
+    // Surplus H2 storage cap after min outside harm op period prep
+    // P=IF(AND(A_Hydrogen_min_cons=0,A_Hydrogen_max_cons=0),1,1-IFERROR(A_Hydrogen_min_cons*C3/Hydrogen_storage_cap_ud,2))
+    for i in 0..<365 {
+      d10[P + i] = iff(
+        and(Hydrogen_min_cons[j] == Double.zero, Hydrogen_max_cons[j] == Double.zero), 1,
+        1 - ifFinite(Hydrogen_min_cons[j] * d10[C + i] / Hydrogen_storage_cap_ud, 2))
+    }
+
+    // Surplus H2 storage cap after max outside harm op period prep
+    // Q=IF(AND(A_Hydrogen_min_cons=0,A_Hydrogen_max_cons=0),1,1-IFERROR(A_Hydrogen_max_cons*C3/Hydrogen_storage_cap_ud,2))
+    for i in 0..<365 {
+      d10[Q + i] = iff(
+        and(Hydrogen_min_cons[j] == Double.zero, Hydrogen_max_cons[j] == Double.zero), 1,
+        1 - ifFinite(Hydrogen_max_cons[j] * d10[C + i] / Hydrogen_storage_cap_ud, 2))
+    }
+
     let R: Int = 5475
-    // IF(OR(L6<=0,N6<=0,P6<=0),0,MIN(1,IFERROR(L6/(L6-M6),1),IFERROR(N6/(N6-O6),1),IFERROR(P6/(P6-Q6),1))*(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)+A_equiv_harmonious_min_perc)
+    // Max equiv harm op outside harm op period prod due to physical limits
+    // R=IF(OR(C3=0,L3<=0,N3<=0,P3<=0),0,MIN(1,IFERROR(L3/(L3-M3),1),IFERROR(N3/(N3-O3),1),IFERROR(P3/(P3-Q3),1))*(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)+A_equiv_harmonious_min_perc)
     for i in 0..<365 {
       d10[R + i] = iff(
-        or(d10[L + i] <= Double.zero, d10[N + i] <= Double.zero, d10[P + i] <= Double.zero), Double.zero,
-        min(1, ifFinite(d10[L + i] / (d10[L + i] - d10[M + i]), 1.0), ifFinite(d10[N + i] / (d10[N + i] - d10[O + i]), 1.0), ifFinite(d10[P + i] / (d10[P + i] - d10[Q + i]), 1.0)) * (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j])
+        or(d10[C + i] == Double.zero, d10[L + i] <= Double.zero, d10[N + i] <= Double.zero, d10[P + i] <= Double.zero), 0,
+        min(
+          1, ifFinite(d10[L + i] / (d10[L + i] - d10[M + i]), 1), ifFinite(d10[N + i] / (d10[N + i] - d10[O + i]), 1),
+          ifFinite(d10[P + i] / (d10[P + i] - d10[Q + i]), 1)) * (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j])
           + equiv_harmonious_min_perc[j])
     }
 
@@ -99,8 +117,7 @@ extension TunOl {
         // A_CO2_min_cons*C6
         d10[H + i] = CO2_min_cons[j] * d10[C + i]
         // A_Hydrogen_min_cons*C6
-        d10[J + i] = Hydrogen_min_cons[j] * d10[C + i]
-        // A_Hydrogen_max_cons*C6
+        d10[J + i] = Hydrogen_min_cons[j] * d10[C + i]  // A_Hydrogen_max_cons*C6
         // d10[K + i] = Hydrogen_max_cons[j] * d10[C + i]
       }
     }
@@ -109,14 +126,24 @@ extension TunOl {
   func night(_ d10: inout [Double], hour4: [Double], case j: Int) {
     let (F, H, J, L, N, P, EH, EX) = (1095, 1825, 2555, 3285, 4015, 4745, 105120, 245280)
     let notZero: (Double) -> Bool = { $0 > Double.zero }
-    let days: [[Int]] = hour4[262801..<(262800 + 8760)].indices.chunked(by: { hour4[$0] == hour4[$1] }).map { $0.map { $0 - 262800 } }
+    let days: [[Int]] = hour4[262801..<(262800 + 8760)].indices.chunked(by: { hour4[$0] == hour4[$1] })
+      .map { $0.map { $0 - 262800 } }
     //  let end = days.removeLast()
     // days[0].append(contentsOf: end)
+    let FA: Int = 271560
     let EX_EZcountZero = hour4.countOf(days, condition: EX, predicate: { $0 <= Double.zero })
+    let FA_EZcountNonZero = hour4.countOf(days, condition: FA, predicate: { $0 > Double.zero })
+
+    let FA_EZ_countNonZero = hour4.countOf(days, condition: FA, predicate: { 
+      $0 > 0 && $0 != Overall_stup_cons && $0 != Overall_stby_cons
+    })
     /// Nr of hours outside of harm op period after max night prep
     let T: Int = 5840
-    // COUNTIFS(CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,"<=0")
-    for i in 0..<365 { d10[T + i] = EX_EZcountZero[i] }
+    // Nr of outside harm op period op hours after max outside harm op period prep
+    // T=MIN(COUNTIFS(Calculation!$EZ$5:$EZ$8764,"="&$A3,Calculation!$FA$5:$FA$8764,">0",Calculation!$FA$5:$FA$8764,"<>"&INDEX(A_overall_stup_cons,1),Calculation!$FA$5:$FA$8764,"<>"&INDEX(A_overall_fix_stby_cons,1)),COUNTIFS(Calculation!$EZ$5:$EZ$8764,"="&$A3,Calculation!$EX$5:$EX$8764,"<=0"))
+    for i in 0..<365 {
+      d10[T + i] = min(FA_EZ_countNonZero[i], EX_EZcountZero[i])
+    }
 
     let EX_EZcountNonZero = hour4.countOf(days, condition: EX, predicate: notZero)
     /// Nr of harm op period hours after max night prep
@@ -128,15 +155,16 @@ extension TunOl {
     let V: Int = 6570
     // COUNTIFS(CalculationEZ5:EZ8763,"="A6,CalculationEH5:EH8763,">0")
     for i in 0..<365 { d10[V + i] = EH_EZcountNonZero[i] }
-    /// Max CO2 cons during night
+    /// Heat consumption outside harm op period in case no op outside harm op period. After column V
     let I: Int = 2190
-    /// Max RawMeth cons during night
+    /// Electricity consumption outside harm op period in case no op outside harm op period. After column V
     let G: Int = 1460
+    let EX_EZbelowZero = hour4.countOf(days, condition: EX, predicate: { $0 <= 0 })
     for i in 0..<365 {
-      // G=(A_overall_var_min_cons+A_overall_fix_stby_cons)*$T3+A_overall_stup_cons
-      d10[G + i] = (overall_var_min_cons[j] + overall_fix_stby_cons[j]) * d10[T + i] + overall_stup_cons[j]
-      // I=(A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons)*$T3+A_overall_heat_stup_cons
-      d10[I + i] = (overall_var_heat_min_cons[j] + overall_heat_fix_stby_cons[j]) * d10[T + i] + overall_heat_stup_cons[j]
+      // G=(A_overall_var_min_cons+A_overall_fix_stby_cons)*IF(T3>0,T3,COUNTIFS(Calculation!$EZ$5:$EZ$8764,"="&$A3,Calculation!$EX$5:$EX$8764,"<=0"))+A_overall_stup_cons
+      d10[G + i] = (overall_var_min_cons[j] + overall_fix_stby_cons[j]) * iff(d10[T + i] > Double.zero,d10[T + i], EX_EZbelowZero[i]) + overall_stup_cons[j]
+      // I=(A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons)*IF(T3>0,T3,COUNTIFS(Calculation!$EZ$5:$EZ$8764,"="&$A3,Calculation!$EX$5:$EX$8764,"<=0"))+A_overall_heat_stup_cons
+      d10[I + i] = (overall_var_heat_min_cons[j] + overall_heat_fix_stby_cons[j]) * iff(d10[T + i] > Double.zero,d10[T + i], EX_EZbelowZero[i]) + overall_heat_stup_cons[j]
     }
     /// Max RawMeth cons during night
     let W: Int = 6935
@@ -154,12 +182,55 @@ extension TunOl {
 
     for i in 0..<365 {
       let hours = d10[T + i]
-      if RawMeth_storage_cap_ud.isZero { d10[AJ + i] = RawMeth_max_cons[j].isZero ? 1.0 : Double.zero } else if hours.isZero { d10[AJ + i] = 1 } else { d10[AJ + i] = 1 - (RawMeth_max_cons[j] * hours / RawMeth_storage_cap_ud) }
+      if RawMeth_storage_cap_ud.isZero {
+        d10[AJ + i] = RawMeth_max_cons[j].isZero ? 1.0 : Double.zero
+      } else if hours.isZero {
+        d10[AJ + i] = 1
+      } else {
+        d10[AJ + i] = 1 - (RawMeth_max_cons[j] * hours / RawMeth_storage_cap_ud)
+      }
 
-      if CO2_storage_cap_ud.isZero { d10[AK + i] = CO2_max_cons[j].isZero ? 1.0 : Double.zero } else if hours.isZero { d10[AK + i] = 1 } else { d10[AK + i] = 1 - (CO2_max_cons[j] * hours / CO2_storage_cap_ud) }
+      if CO2_storage_cap_ud.isZero {
+        d10[AK + i] = CO2_max_cons[j].isZero ? 1.0 : Double.zero
+      } else if hours.isZero {
+        d10[AK + i] = 1
+      } else {
+        d10[AK + i] = 1 - (CO2_max_cons[j] * hours / CO2_storage_cap_ud)
+      }
 
-      if Hydrogen_storage_cap_ud.isZero { d10[AL + i] = Hydrogen_max_cons[j].isZero ? 1.0 : Double.zero } else if hours.isZero { d10[AL + i] = 1 } else { d10[AL + i] = 1 - (Hydrogen_max_cons[j] * hours / Hydrogen_storage_cap_ud) }
+      if Hydrogen_storage_cap_ud.isZero {
+        d10[AL + i] = Hydrogen_max_cons[j].isZero ? 1.0 : Double.zero
+      } else if hours.isZero {
+        d10[AL + i] = 1
+      } else {
+        d10[AL + i] = 1 - (Hydrogen_max_cons[j] * hours / Hydrogen_storage_cap_ud)
+      }
     }
+
+    // Surplus RawMeth storage cap after max outside harm op period prep
+    // AJ=IF(AND(A_RawMeth_min_cons=0,A_RawMeth_max_cons=0),1,1-IFERROR(A_RawMeth_max_cons*T3/RawMeth_storage_cap_ud,2))
+    for i in 0..<365 {
+      d10[AJ + i] = iff(
+        and(RawMeth_min_cons[j] == Double.zero, RawMeth_max_cons[j] == Double.zero), 1,
+        1 - ifFinite(RawMeth_max_cons[j] * d10[T + i] / RawMeth_storage_cap_ud, 2))
+    }
+
+    // Surplus CO2 storage cap after max outside harm op period prep
+    // AK=IF(AND(A_CO2_min_cons=0,A_CO2_max_cons=0),1,1-IFERROR(A_CO2_max_cons*T3/CO2_storage_cap_ud,2))
+    for i in 0..<365 {
+      d10[AK + i] = iff(
+        and(CO2_min_cons[j] == Double.zero, CO2_max_cons[j] == Double.zero), 1,
+        1 - ifFinite(CO2_max_cons[j] * d10[T + i] / CO2_storage_cap_ud, 2))
+    }
+
+    // Surplus H2 storage cap after max outside harm op period prep
+    // AL=IF(AND(A_Hydrogen_min_cons=0,A_Hydrogen_max_cons=0),1,1-IFERROR(A_Hydrogen_max_cons*T3/Hydrogen_storage_cap_ud,2))
+    for i in 0..<365 {
+      d10[AL + i] = iff(
+        and(Hydrogen_min_cons[j] == Double.zero, Hydrogen_max_cons[j] == Double.zero), 1,
+        1 - ifFinite(Hydrogen_max_cons[j] * d10[T + i] / Hydrogen_storage_cap_ud, 2))
+    }
+
     let EJ: Int = 122640
     /// Max Equiv harmonious night prod due to physical limits
     let AM: Int = 12775
@@ -169,7 +240,9 @@ extension TunOl {
         hour4[days[i][0] + EJ],
         iff(
           or(d10[L + i] <= Double.zero, d10[N + i] <= Double.zero, d10[P + i] <= Double.zero), Double.zero,
-          min(1, ifFinite(d10[L + i] / (d10[L + i] - d10[AJ + i]), 1.0), ifFinite(d10[N + i] / (d10[N + i] - d10[AK + i]), 1.0), ifFinite(d10[P + i] / (d10[P + i] - d10[AL + i]), 1.0))
+          min(
+            1, ifFinite(d10[L + i] / (d10[L + i] - d10[AJ + i]), 1.0), ifFinite(d10[N + i] / (d10[N + i] - d10[AK + i]), 1.0),
+            ifFinite(d10[P + i] / (d10[P + i] - d10[AL + i]), 1.0))
             * (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]) + equiv_harmonious_min_perc[j]))
     }
 
@@ -186,6 +259,32 @@ extension TunOl {
         // A_Hydrogen_max_cons*T6
         d10[Y + i] = Hydrogen_max_cons[j] * d10[T + i] * d10[AM + i]
       }
+    }
+
+    // Max RawMeth cons during outside harm op period
+    // W=IF(AM3=0,0,((AM3-A_equiv_harmonious_min_perc)*(A_RawMeth_max_cons-A_RawMeth_min_cons)+A_RawMeth_min_cons)*T3)
+    for i in 0..<365 {
+      d10[W + i] = iff(
+        d10[AM + i] == Double.zero, 0,
+        ((d10[AM + i] - equiv_harmonious_min_perc[j]) * (RawMeth_max_cons[j] - RawMeth_min_cons[j]) + RawMeth_min_cons[j])
+          * d10[T + i])
+    }
+
+    // Max CO2 cons during outside harm op period
+    // X=IF(AM3=0,0,((AM3-A_equiv_harmonious_min_perc)*(A_CO2_max_cons-A_CO2_min_cons)+A_CO2_min_cons)*T3)
+    for i in 0..<365 {
+      d10[X + i] = iff(
+        d10[AM + i] == Double.zero, 0,
+        ((d10[AM + i] - equiv_harmonious_min_perc[j]) * (CO2_max_cons[j] - CO2_min_cons[j]) + CO2_min_cons[j]) * d10[T + i])
+    }
+
+    // Max H2 cons during outside harm op period
+    // Y=IF(AM3=0,0,((AM3-A_equiv_harmonious_min_perc)*(A_Hydrogen_max_cons-A_Hydrogen_min_cons)+A_Hydrogen_min_cons)*T3)
+    for i in 0..<365 {
+      d10[Y + i] = iff(
+        d10[AM + i] == Double.zero, 0,
+        ((d10[AM + i] - equiv_harmonious_min_perc[j]) * (Hydrogen_max_cons[j] - Hydrogen_min_cons[j]) + Hydrogen_min_cons[j])
+          * d10[T + i])
     }
 
     /// Min el cons during day for night op prep
@@ -288,7 +387,7 @@ extension TunOl {
     let CO: Int = 744600
     // SUMIFS(Calculation!CO5:CO8764,Calculation!CS$5:CS8764,"="&$A6,Calculation!CQ5:CQ8764,">0")
     hour.sumOf(CO, days: days, into: &d11, at: EY, condition: CQ, predicate: notZero)
-    let DU: Int = 1024920
+    let DU: Int = 1_024_920
     // SUMIFS(Calculation!DU5:DU8764,Calculation!CS5:CS8764,"="&$A6,Calculation!DH5:DH8764,">0")
     hour.sumOf(DU, days: days, into: &d11, at: EZ, condition: DH, predicate: notZero)
     /// Grid import for min/max harm and stby outside harm op
@@ -303,8 +402,7 @@ extension TunOl {
     /// El cons considering max harm op during harm op period including grid import
     hour.sum(days: days, range: DH, into: &d11, at: FB)
     hour.sumOf(CT, days: days, into: &d11, at: FD, condition: DH, predicate: notZero)
-    // SUMIF(CalculationCS5:CS8763,"="A6,CalculationDH5:DH8763)+SUMIFS(CalculationCT5:CT8763,CalculationCS5:CS8763,"="A6,CalculationDH5:DH8763,">0")
-    for i in 0..<365 { d11[FD + i] += d11[FB + i]; d11[FB + i] = 0 }
+    // SUMIF(CalculationCS5:CS8763,"="A6,CalculationDH5:DH8763)+SUMIFS(CalculationCT5:CT8763,CalculationCS5:CS8763,    for i in 0..<365 { d11[FD + i] += d11[FB + i]; d11[FB + i] = 0 }
     /// El cons considering min/max harm op outside  harm op period including grid import (if any)
     let CC: Int = 639480
     hour.sumOf(CT, days: days, into: &d11, at: FE, condition1: CQ, predicate1: { $0.isZero }, condition2: CC, predicate2: notZero)
