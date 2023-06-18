@@ -173,7 +173,7 @@ public final class Historian {
         buffer = time.commaSeparatedValues.encoded + comma
           + "\(time.minute)".encoded + comma
           + insolation.commaSeparatedValues.encoded + comma
-          + accumulate.commaSeparatedValues.encoded + newLines
+          + accumulate.commaSeparatedValues.encoded + newLine
         date.addTimeInterval(custom.interval)
         _ = fileStream?.write(buffer, maxLength: buffer.count)
       }
