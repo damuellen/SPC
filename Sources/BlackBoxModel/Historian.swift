@@ -94,31 +94,24 @@ public final class Historian {
     // }
     
     if case .csv = mode {
-      var buffer = [UInt8]()
       let header = headers()
-      buffer = [UInt8](header.name.utf8) + lineBreak 
-        + [UInt8](header.unit.utf8) + lineBreak
-      url = url.appendingPathComponent(
-        "\(self.name)_\(no)_hourly.csv")
+      let buffer = header.name.encoded + newLine + header.unit.encoded + newLine
+      url = url.appendingPathComponent("\(self.name)_\(no)_hourly.csv")
       fileStream = OutputStream(url: url, append: false)
       fileStream?.open()
       _ = fileStream?.write(buffer, maxLength: buffer.count)
     }
 
     if case .custom(let i) = mode {
-      var buffer = [UInt8]()
       let header = headers(minutes: true)
       let startTime = repeatElement("0", count: header.count + 4)
         .joined(separator: ",")
       let fraction = String(format: "%.5f", i.fraction)
-      let intervalTime = repeatElement(fraction, count: header.count + 4)
+      let frequence = repeatElement(fraction, count: header.count + 4)
         .joined(separator: ",")
-      buffer =
-        [UInt8]("wxDVFileHeaderVer.1".utf8) + lineBreak 
-        + [UInt8](header.name.utf8) + lineBreak
-        + [UInt8](startTime.utf8) + lineBreak
-        + [UInt8](intervalTime.utf8) + lineBreak
-        + [UInt8](header.unit.utf8) + lineBreak
+      let buffer = "wxDVFileHeaderVer.1".encoded + newLine 
+        + header.name.encoded + newLine + startTime.encoded + newLine
+        + frequence.encoded + newLine + header.unit.encoded + newLine
 
       url = url.appendingPathComponent("\(self.name)_\(no)_\(i).csv")
 
@@ -177,11 +170,10 @@ public final class Historian {
         accumulate(performance[i..<i+f], fraction: 1 / Double(f))
         insolation = sun[i..<i+f].hourly(fraction: 1 / Double(f))
         let time = DateTime(date)
-        buffer = [UInt8](time.commaSeparatedValues.utf8) 
-          + comma + [UInt8]("\(time.minute)".utf8)
-          + comma + [UInt8](insolation.commaSeparatedValues.utf8)
-          + comma + [UInt8](accumulate.commaSeparatedValues.utf8) 
-          + lineBreak
+        buffer = time.commaSeparatedValues.encoded + comma
+          + "\(time.minute)".encoded + comma
+          + insolation.commaSeparatedValues.encoded + comma
+          + accumulate.commaSeparatedValues.encoded + newLines
         date.addTimeInterval(custom.interval)
         _ = fileStream?.write(buffer, maxLength: buffer.count)
       }
@@ -194,10 +186,9 @@ public final class Historian {
         let fraction = frequency.fraction
         accumulate(performance[i..<i+f], fraction: fraction)
         insolation = sun[i..<i+f].hourly(fraction: fraction)
-        buffer = [UInt8](DateTime(date).commaSeparatedValues.utf8) 
-          + comma + [UInt8](insolation.commaSeparatedValues.utf8)
-          + comma + [UInt8](accumulate.commaSeparatedValues.utf8) 
-          + lineBreak
+        buffer = DateTime(date).commaSeparatedValues.encoded + comma
+          + insolation.commaSeparatedValues.encoded + comma
+          + accumulate.commaSeparatedValues.encoded + newLine
         date.addTimeInterval(DateSeries.Frequence.hour.interval)
         _ = fileStream?.write(buffer, maxLength: buffer.count)
       }
@@ -320,28 +311,21 @@ public final class Historian {
   /// Returns the headers for the table
   private func headers(minutes: Bool = false) -> (name: String, unit: String, count: Int) {
     #if DEBUG
-    let measurements = [
-      Insolation.measurements, PlantPerformance.measurements, Status.measurements,
-    ]
-    .joined()
+    let m = Insolation.measurements + PlantPerformance.measurements + Status.measurements
     #else
-    let measurements = [Insolation.measurements, PlantPerformance.measurements].joined()
+    let m = Insolation.measurements + PlantPerformance.measurements
     #endif
-    let names: String = measurements.map(\.name).joined(separator: ",")
-    let units: String = measurements.map(\.unit).joined(separator: ",")
-    if minutes { 
-      return ("Month,Day,Hour,Minute," + names, "_,_,_,_," + units, measurements.count) 
-    }
-    return ("Month,Day,Hour," + names, "_,_,_," + units, measurements.count)
+    let name: String = m.map(\.name).joined(separator: ",")
+    let unit: String = m.map(\.unit).joined(separator: ",")
+    if minutes { return ("Month,Day,Hour,Minute," + name, "_,_,_,_," + unit, m.count) }
+    return ("Month,Day,Hour," + name, "_,_,_," + unit, m.count)
   }
-
-
 }
 
+extension String { fileprivate var encoded: [UInt8] { [UInt8](self.utf8) } }
 #if os(Windows)
-fileprivate let lineBreak: [UInt8] = [UInt8(ascii: "\r"), UInt8(ascii: "\n")] 
+fileprivate let newLine: [UInt8] = [UInt8(ascii: "\r"), UInt8(ascii: "\n")] 
 #else
-fileprivate let lineBreak: [UInt8] = [UInt8(ascii: "\n")] 
-#endif  
+fileprivate let newLine: [UInt8] = [UInt8(ascii: "\n")] 
+#endif
 fileprivate let comma: [UInt8] = [UInt8(ascii: ",")] 
-
