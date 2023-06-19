@@ -286,10 +286,10 @@ public final class Historian {
     // }
 
     // let status = Status.measurements.map {
-    //   $0.name.replacingOccurrences(of: "|", with: "_")
+    //   $0.name.replacing("|", with: "_")
     // }
     // let energy = PlantPerformance.measurements.map {
-    //   $0.name.replacingOccurrences(of: "|", with: "_")
+    //   $0.name.replacing("|", with: "_")
     // }
     // createTable(name: "PerformanceData", measurements: status)
     // createTable(name: "Performance", measurements: energy)
