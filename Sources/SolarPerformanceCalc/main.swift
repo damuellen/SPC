@@ -135,19 +135,11 @@ struct SolarPerformanceCalculator: ParsableCommand {
 
     let mode: Historian.Mode
     if let steps = outputValues {
-      if steps == 0 { 
-        mode = .inMemory
-      } else {
-        mode = .custom(interval: Frequence[steps])
-      }
-    } else if database {
-      if excel { print("Using both options at the same time is not supported.") }
-      mode = .database 
-    } else if excel {
-      mode = .excel 
-    } else {
-      mode = .csv
+      mode = steps == 0 ? .inMemory : .custom(interval: Frequence[steps])
     }
+    else if database { mode = .database } 
+    else if excel { mode = .excel }
+    else { mode = .csv }
 
     let recording = Historian(name: resultName, path: pathForResult, mode: mode)
 

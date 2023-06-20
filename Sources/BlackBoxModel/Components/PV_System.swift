@@ -19,10 +19,14 @@ public struct PV {
   public var inverter = Inverter()
   public var transformer = Transformer()
 
+  public struct InputValues {
+    public let solar: Double
+    public let ambient: Temperature
+    public let windSpeed: Double
+  }
+
   /// Calculate net output of the pv system.
-  func callAsFunction(
-    _ input: (solar: Double, ambient: Temperature, windSpeed: Double)
-  ) -> Double {
+  func callAsFunction(_ input: InputValues) -> Double {
     guard input.solar > 15 else { return transformer(ac: .zero) }
     var dc = array.mpp(
       radiation: input.solar, ambient: input.ambient, windSpeed: input.windSpeed)

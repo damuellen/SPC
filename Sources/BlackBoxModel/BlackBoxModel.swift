@@ -103,9 +103,10 @@ public enum BlackBoxModel {
     if insolation.global { 
       let pv = PV()
 
-      var inputs = [(solar: Double, ambient: Temperature, windSpeed: Double)]()
+      var inputs = [PV.InputValues]()
 
       for (meteo, date) in simulationPeriod(.hour) {
+        let (t, ws) = (Temperature(celsius: meteo.temperature), meteo.windSpeed)
         let solar: Double
         if let position = 🌞[date] {
           let panel = singleAxisTracker(
@@ -118,9 +119,7 @@ public enum BlackBoxModel {
         } else {
           solar = .zero
         }
-        inputs.append(
-          (solar, Temperature(celsius: meteo.temperature), meteo.windSpeed)
-        )
+        inputs.append(.init(solar: solar, ambient: t, windSpeed: ws))        
       }
       let count = Simulation.time.steps.rawValue
       photovoltaic = inputs.reversed().reduce(into: []) { result, input in
