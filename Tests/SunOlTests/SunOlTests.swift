@@ -18,9 +18,9 @@ class SunOlTests: XCTestCase {
 
   func testsCalculation() {
     guard 
-    let csv_ref = CSVReader(atPath: "COM/calc.csv"),
-    let csv_ref2 = CSVReader(atPath: "COM/daily1.csv"),
-    let csv_ref3 = CSVReader(atPath: "COM/daily2.csv")
+    let csv_ref = CSVReader(atPath: "calc.csv"),
+    let csv_ref2 = CSVReader(atPath: "daily1.csv"),
+    let csv_ref3 = CSVReader(atPath: "daily2.csv")
     else {
       print("No input")
       return
@@ -30,39 +30,38 @@ class SunOlTests: XCTestCase {
       let index = index, ref = csv_ref[letter], column = Array(array[index..<index + 8760])
       var correct = true, counter = 1
       for i in 1..<8700 {
-        if counter > 20 { break }
+
         if abs(abs(ref[i - 1]) - abs(column[i])) > max(abs(ref[i - 1]) * 0.01, 0.01) {
           counter += 1; correct = false
-          print("Calculation \(letter)\(i + 4) proper value: \(String(format: "%.2f", ref[i - 1])) [\(index + i)] \(String(format: "%.2f", column[i]))  div: \(abs(ref[i - 1]) - abs(column[i]))")
+          if counter == 2 { print("Calculation \(letter)\(i + 4) proper value: \(String(format: "%.3f", ref[i - 1])) is \(String(format: "%.3", column[i])) [\(index + i)] \(i) div: \(String(format: "%.3f", abs(ref[i - 1]) - abs(column[i])))") }
         }
       }
-      if !correct { XCTFail("Error in Calculation Column \(letter)") }
+      if !correct { XCTFail("Calculation \(letter)\n") }
     }
 
     func daily1(_ array: [Double], _ letter: String, _ index: Int) {
       let index = index, ref = csv_ref2[letter]
       var correct = true, counter = 1
       for i in 0..<364 {
-        if counter > 20 { break }
+
         if abs(abs(ref[i]) - abs(array[index + i])) > max(abs(ref[i]) * 0.01, 0.01) {
           counter += 1; correct = false
-          print("Daily1 \(letter)\(i + 3) proper value: \(String(format: "%.2f", ref[i])) [\(index + i)] \(String(format: "%.2f", array[index + i]))  div: \(ref[i] - array[index + i])")
+          if counter == 2 { print("Daily1 \(letter)\(i + 3) proper value: \(String(format: "%.3f", ref[i])) is \(String(format: "%.3f", array[index + i])) [\(index + i)] \(i) div: \(ref[i] - array[index + i])") }
         }
       }
-      if !correct { XCTFail("Error in Daily1 Column \(letter)") }
+      if !correct { XCTFail("Daily1 \(letter)\n") }
     }
 
     func daily2(_ array: [Double], _ letter: String, _ index: Int) {
       let index = index, ref = csv_ref3[letter]
       var correct = true, counter = 1
       for i in 0..<364 {
-        if counter > 20 { break }
         if abs(abs(ref[i]) - abs(array[index + i])) > max(abs(ref[i]) * 0.01, 0.01)  {
           counter += 1; correct = false
-          print("Daily2 \(letter)\(i + 3) proper value: \(String(format: "%.2f", ref[i])) [\(index + i)] \(String(format: "%.2f", array[index + i]))  div: \(ref[i] - array[index + i])")
+          if counter == 2 { print("Daily2 \(letter)\(i + 3) proper value: \(String(format: "%.3f", ref[i])) is \(String(format: "%.3f", array[index + i])) [\(index + i)] \(i) div: \(ref[i] - array[index + i])") }
         }
       }
-      if !correct { XCTFail("Error in Daily2 Column \(letter)") }
+      if !correct { XCTFail("Daily2 \(letter)\n") }
     }
     
     func column(_ i: Int, offset: Int, stride: Int = 365) -> (String, Int) {
@@ -76,7 +75,10 @@ class SunOlTests: XCTestCase {
       return (key, num)
     }
 
-    let values = [0.00,0.00,0.00,599.32,803.41,180.00,0.00,0.00,1000.00,100000.00,100000.00,17.56,15.72,451.42,0.00,0.00,]
+    let values = [
+      123.79, 5032.58, 203.6, 497.95, 773.8, 180, 0, 358.26, 1000, 10000, 100000, 17.14, 108.11, 0, 0, 0,
+    ]
+
     guard let model = TunOl(values) else {
       print("Invalid config")
       return
@@ -121,48 +123,48 @@ class SunOlTests: XCTestCase {
       if j == 0 {
         print("Case A")
         // H 0
-        (9..<71).map { column($0, offset: 7, stride: 8760) }.forEach { letter, offset in calculation(hourPre, letter, offset) }
+        (9..<71).map { column($0, offset: 7, stride: 8760) }.forEach { l, n in calculation(hourPre, l, n) }
         // BT 560640
-        (71..<91).map { column($0, offset: 7, stride: 8760) }.forEach { letter, offset in calculation(hourPre, letter, offset) }
+        (71..<91).map { column($0, offset: 7, stride: 8760) }.forEach { l, n in calculation(hourPre, l, n) }
         // CN 735840
-        (91..<124).map { column($0, offset: 7, stride: 8760) }.forEach { letter, offset in calculation(hourPre, letter, offset) }
+        (91..<124).map { column($0, offset: 7, stride: 8760) }.forEach { l, n in calculation(hourPre, l, n) }
         // C 0
-        (2..<11).map { column($0, offset: 2) }.forEach { letter, offset in daily1(d10, letter, offset) }
+        (2..<11).map { column($0, offset: 2) }.forEach { l, n in daily1(d10, l, n) }
         // T 5840
-        (19..<35).map { column($0, offset: 3) }.forEach { letter, offset in daily1(d10, letter, offset) }
+        (19..<35).map { column($0, offset: 3) }.forEach { l, n in daily1(d10, l, n) }
         // DV 0
-        (125..<183).map { column($0, offset: 125, stride: 8760) }.forEach { letter, offset in calculation(hourFinal, letter, offset) }
+        (125..<183).map { column($0, offset: 125, stride: 8760) }.forEach { l, n in calculation(hourFinal, l, n) }
         // EY 13140
-        (154..<201).map { column($0, offset: 118) }.forEach { letter, offset in daily1(d10, letter, offset) }
+        (154..<201).map { column($0, offset: 118) }.forEach { l, n in daily1(d10, l, n) }
         // GU 30660
-        (202..<249).map { column($0, offset: 118) }.forEach { letter, offset in daily1(d10, letter, offset) }
+        (202..<249).map { column($0, offset: 118) }.forEach { l, n in daily1(d10, l, n) }
         // IQ 48180
-        (250..<312).map { column($0, offset: 118) }.forEach { letter, offset in daily1(d10, letter, offset) }
+        (250..<312).map { column($0, offset: 118) }.forEach { l, n in daily1(d10, l, n) }
         // LB 71175
-        (313..<348).map { column($0, offset: 118) }.forEach { letter, offset in daily1(d10, letter, offset) }
+        (313..<348).map { column($0, offset: 118) }.forEach { l, n in daily1(d10, l, n) }
         // MK 83950
-        (348..<381).map { column($0, offset: 118) }.forEach { letter, offset in daily1(d10, letter, offset) }
+        (348..<381).map { column($0, offset: 118) }.forEach { l, n in daily1(d10, l, n) }
         // E 0
-        (4..<30).map { column($0, offset: 4) }.forEach { letter, offset in daily2(d21, letter, offset) }
+        (4..<30).map { column($0, offset: 4) }.forEach { l, n in daily2(d21, l, n) }
         // FC 0
-        (158..<188).map { column($0, offset: 158) }.forEach { letter, offset in daily2(d23, letter, offset) }
+        (158..<188).map { column($0, offset: 158) }.forEach { l, n in daily2(d23, l, n) }
         // GH 10950
-        (189..<211).map { column($0, offset: 159) }.forEach { letter, offset in daily2(d23, letter, offset) }
-        (212..<234).map { column($0, offset: 160) }.forEach { letter, offset in daily2(d23, letter, offset) }
-        (235..<262).map { column($0, offset: 161) }.forEach { letter, offset in daily2(d23, letter, offset) }
+        (189..<211).map { column($0, offset: 159) }.forEach { l, n in daily2(d23, l, n) }
+        (212..<234).map { column($0, offset: 160) }.forEach { l, n in daily2(d23, l, n) }
+        (235..<262).map { column($0, offset: 161) }.forEach { l, n in daily2(d23, l, n) }
         // JD 36865
-        (263..<288).map { column($0, offset: 162) }.forEach { letter, offset in daily2(d23, letter, offset) }
+        (263..<288).map { column($0, offset: 162) }.forEach { l, n in daily2(d23, l, n) }
         daily2(d23, "JB", 36135)
         daily2(d23, "KD", 45990)
       }
       if j == 1 {
         print("Case B")
         // GC 569400
-        (184..<204).map { column($0, offset: 7 - (72 - 184), stride: 8760) }.forEach { letter, offset in calculation(hourPre, letter, offset) }
+        (184..<204).map { column($0, offset: 7 - (72 - 184), stride: 8760) }.forEach { l, n in calculation(hourPre, l, n) }
         // TW 71175
-        (542..<577).map { column($0, offset: 347) }.forEach { letter, offset in daily1(d10, letter, offset) }
+        (542..<577).map { column($0, offset: 347) }.forEach { l, n in daily1(d10, l, n) }
         // VF 83950
-        (577..<610).map { column($0, offset: 347) }.forEach { letter, offset in daily1(d10, letter, offset) }
+        (577..<610).map { column($0, offset: 347) }.forEach { l, n in daily1(d10, l, n) }
         daily2(d23, "OB", 35405)
         daily2(d23, "PD", 45260)
         daily2(d23, "OE", 36135)
@@ -170,11 +172,11 @@ class SunOlTests: XCTestCase {
       }
       if j == 2 {
         print("Case C")
-        (296..<316).map { column($0, offset: 7 - (72 - 296), stride: 8760) }.forEach { letter, offset in calculation(hourPre, letter, offset) }
+        (296..<316).map { column($0, offset: 7 - (72 - 296), stride: 8760) }.forEach { l, n in calculation(hourPre, l, n) }
         // ACR 71175
-        (771..<806).map { column($0, offset: 576) }.forEach { letter, offset in daily1(d10, letter, offset) }
+        (771..<806).map { column($0, offset: 576) }.forEach { l, n in daily1(d10, l, n) }
         // AEA 83950
-        (806..<839).map { column($0, offset: 576) }.forEach { letter, offset in daily1(d10, letter, offset) }
+        (806..<839).map { column($0, offset: 576) }.forEach { l, n in daily1(d10, l, n) }
         daily2(d23, "TE", 35405)
         daily2(d23, "UG", 45260)
         daily2(d23, "TH", 36135)
@@ -182,11 +184,11 @@ class SunOlTests: XCTestCase {
       }
       if j == 3 {
         print("Case D")
-        (408..<428).map { column($0, offset: 7 - (72 - 408), stride: 8760) }.forEach { letter, offset in calculation(hourPre, letter, offset) }
+        (408..<428).map { column($0, offset: 7 - (72 - 408), stride: 8760) }.forEach { l, n in calculation(hourPre, l, n) }
         // ALM 71175
-        (1000..<1034).map { column($0, offset: 805) }.forEach { letter, offset in daily1(d10, letter, offset) }
+        (1000..<1034).map { column($0, offset: 805) }.forEach { l, n in daily1(d10, l, n) }
         // AMV 83950
-        (1034..<1067).map { column($0, offset: 805) }.forEach { letter, offset in daily1(d10, letter, offset) }
+        (1034..<1067).map { column($0, offset: 805) }.forEach { l, n in daily1(d10, l, n) }
         daily2(d23, "YH", 35405)
         daily2(d23, "ZI", 45260)
         daily2(d23, "YK", 36135)

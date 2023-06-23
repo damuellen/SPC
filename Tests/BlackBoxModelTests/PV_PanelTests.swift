@@ -63,10 +63,10 @@ class PVPanelTests: XCTestCase {
   func testPV() {
     let pv = PV()
 
-    var conditions = [(Double, Temperature, Double)]()
+    var conditions = [PV.InputValues]()
 
     for gti in stride(from: 10.0, to: 1300, by: 10) {
-      conditions.append((gti, Temperature(celsius: 20), 0))
+      conditions.append(.init(solar: gti, ambient: Temperature(celsius: 20), windSpeed: 0))
     }
     let photovoltaic = conditions.map { step -> Double in
       pv(step) / 10.0e6
