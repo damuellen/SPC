@@ -101,6 +101,18 @@ public final class DateSeries: Sequence, IteratorProtocol {
 }
 
 extension DateInterval {
+  public init(ofYear: Int) {
+    var dateComponents = DateComponents()
+    dateComponents.timeZone = Greenwich.timeZone
+    dateComponents.day = 1
+    dateComponents.month = 1
+    dateComponents.year = ofYear
+    let start = Greenwich.date(from: dateComponents)!
+    dateComponents.year! += 1
+    let end = Greenwich.date(from: dateComponents)! - 1
+    self = .init(start: start, end: end)
+  }
+
   public init(ofMonth month: Int, in year: Int) {
     var dateComponents = DateComponents()
     dateComponents.timeZone = Greenwich.timeZone

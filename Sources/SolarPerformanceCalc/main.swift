@@ -167,23 +167,28 @@ struct SolarPerformanceCalculator: ParsableCommand {
   )
 
   func plotter(_ result: Recording) {
+    terminalHideCursor()
+    defer { terminalShowCursor() }
     // let steamTurbine = result.annual(\.steamTurbine.load.quotient)
     // let parabolicElevation = result.annual(\.collector.parabolicElevation)
     // _ = try? Gnuplot(y1s: steamTurbine, y2s: parabolicElevation)(.pdf("parabolicElevation.pdf"))
     // let electric = result.annual(\.thermal.storage.megaWatt)
     // _ = try? Gnuplot(y1s: steamTurbine, y2s: electric)(.pdf("thermal.pdf"))
-    let formatter = DateFormatter()
-    formatter.dateFormat = "MM_dd"
+    let year = DateInterval(ofYear: BlackBoxModel.simulatedYear)
+    let yRange = (
+      (result.massFlows(range: year).joined().max()! / 100).rounded(.up) * 100,
+      (result.power(range: year).joined().max()! / 100).rounded(.up) * 100)
     for i in 1...365 {
-      let interval = DateInterval(ofDay: i, in: BlackBoxModel.simulatedYear)
-      let y1 = result.massFlows(range: interval)
-      let y2 = result.power(range: interval)
-      let plot = TimeSeriesPlot(y1: y1, y2: y2, range: interval, style: .impulses)
+      print("Plotting [\(i)/365]".background(.white), terminator: "\r")
+      fflush(stdout)
+      let day = DateInterval(ofDay: i, in: BlackBoxModel.simulatedYear)
+      let y1 = result.massFlows(range: day)
+      let y2 = result.power(range: day)
+      let plot = TimeSeriesPlot(y1: y1, y2: y2, range: day, yRange: yRange, style: .impulses)
       plot.y1Titles = ["solarfield", "powerblock", "storage"]
       plot.y2Titles = ["solar", "toStorage", "production", "storage", "gross", "net", "consum"]
       try? FileManager.default.createDirectory(atPath: ".plots", withIntermediateDirectories: true)
-      let date = formatter.string(from: interval.start)
-      try? plot(toFile: ".plots/\(BlackBoxModel.simulatedYear)_\(date)")
+      try? plot(toFile: String(format: ".plots/day%03d", i))
     }
   }
 }

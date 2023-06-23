@@ -27,7 +27,7 @@ public final class TimeSeriesPlot {
   public var y1Label: String = ""
   public var y2Label: String = ""
 
-  public init(y1: [[Double]], y2: [[Double]] = [], range: DateInterval, style: Style = .steps) {
+  public init(y1: [[Double]], y2: [[Double]] = [], range: DateInterval, yRange: (Double,Double)? = nil, style: Style = .steps) {
     self.y1 = y1
     self.y2 = y2
     self.range = range
@@ -36,6 +36,14 @@ public final class TimeSeriesPlot {
 
     self.freq = Simulation.time.steps.interval
     self.xr = (range.start.timeIntervalSince1970, range.end.timeIntervalSince1970)
+    if let yRange = yRange {
+      self.yr = yRange
+    } else {
+      self.yr = (
+        (y1.joined().max()! / 100).rounded(.up) * 100,
+        (y2.joined().max()! / 100).rounded(.up) * 100
+      )
+    }
     self.style = style
     let secondsPerDay: Double = 86400
     if range.duration > secondsPerDay * 7 {
@@ -78,6 +86,7 @@ public final class TimeSeriesPlot {
   }
 
   private let xr: (start: Double, end: Double)
+  private let yr: (Double, Double)
   private let x: (tics: Double, format: String, label: String)
   private let freq: Double
   private let style: Style
@@ -94,11 +103,12 @@ public final class TimeSeriesPlot {
     "timefmt '%s'",
     "format x \(x.format)",
     "xrange [\(xr.start):\(xr.end)]",
-    "yrange [0:300]",
-    "y2range [0:1500]",
+    "yrange [0:\(Int(yr.0))]",
+    "y2range [0:\(Int(yr.1))]",
     "xtics \(x.tics)",
     "xtics rotate",
     "ytics nomirror 10",
+    "ytics 100",
     "y2tics 100",
     "style line 1 lt 1 lw 2 lc rgb '#FC8D62'",
     "style line 2 lt 1 lw 2 lc rgb '#8DA0CB'",
@@ -119,9 +129,9 @@ public final class TimeSeriesPlot {
     switch style {
     case .impulses:
       return "\nplot " + y1.indices.map { i in
-        "$data i 0 u ($0*\(freq)+\(xr.start)):\(i+1) t '\(y1Titles[i])' axes x1y2 with i ls \(i+1)"
+        "$data i 0 u ($0*\(freq)+\(xr.start)):\(i+1) t '\(y1Titles[i])' axes x1y1 with i ls \(i+1)"
       }.joined(separator: ", ") + ", " + y2.indices.map { i in
-        "$data i 1 u ($0*\(freq)+\(xr.start)):\(i+1) t '\(y2Titles[i])' axes x1y1 with steps ls \(i+11)"
+        "$data i 1 u ($0*\(freq)+\(xr.start)):\(i+1) t '\(y2Titles[i])' axes x1y2 with steps ls \(i+11)"
       }.joined(separator: ", ")
     case .steps:
       return "\nplot " + y1.indices.map { i in
