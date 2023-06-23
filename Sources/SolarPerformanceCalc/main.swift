@@ -167,8 +167,12 @@ struct SolarPerformanceCalculator: ParsableCommand {
   )
 
   func plotter(_ result: Recording) {
+    let source = DispatchSource.makeSignalSource(signal: SIGINT, queue: .global())
+    signal(SIGINT, SIG_IGN)
+    source.setEventHandler { source.cancel() }
+    source.resume()
     terminalHideCursor()
-    defer { terminalShowCursor() }
+    defer { terminalShowCursor(clearLine: source.isCancelled) }
     // let steamTurbine = result.annual(\.steamTurbine.load.quotient)
     // let parabolicElevation = result.annual(\.collector.parabolicElevation)
     // _ = try? Gnuplot(y1s: steamTurbine, y2s: parabolicElevation)(.pdf("parabolicElevation.pdf"))
@@ -179,6 +183,7 @@ struct SolarPerformanceCalculator: ParsableCommand {
       (result.massFlows(range: year).joined().max()! / 100).rounded(.up) * 100,
       (result.power(range: year).joined().max()! / 100).rounded(.up) * 100)
     for i in 1...365 {
+      if source.isCancelled { break }
       print("Plotting [\(i)/365]".background(.white), terminator: "\r")
       fflush(stdout)
       let day = DateInterval(ofDay: i, in: BlackBoxModel.simulatedYear)
