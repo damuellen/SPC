@@ -82,6 +82,8 @@ struct SolarPerformanceCalculator: ParsableCommand {
   var excel: Bool = false
   @Flag(help: "Open result file after calculation.")
   var open: Bool = false
+  @Flag(help: "Use result to create time series charts with gnuplot.")
+  var plot: Bool = false
 
   func run() throws {
     let now = Date()
@@ -156,6 +158,7 @@ struct SolarPerformanceCalculator: ParsableCommand {
     print("Computing:", String(format: "%.2f seconds", t.1))
     print("Wall time:", String(format: "%.2f seconds", t2))
     result.print(verbose: verbose)
+    if plot { plotter(result) }
   }
 
   static var configuration = CommandConfiguration(
@@ -163,12 +166,12 @@ struct SolarPerformanceCalculator: ParsableCommand {
     abstract: "Calculates the annual production of a solar thermal power plant."
   )
 
-  func plot(_ result: Recording) {
-    let steamTurbine = result.annual(\.steamTurbine.load.quotient)
-    let parabolicElevation = result.annual(\.collector.parabolicElevation)
-    _ = try? Gnuplot(y1s: steamTurbine, y2s: parabolicElevation)(.pdf("parabolicElevation.pdf"))
-    let electric = result.annual(\.thermal.storage.megaWatt)
-    _ = try? Gnuplot(y1s: steamTurbine, y2s: electric)(.pdf("thermal.pdf"))
+  func plotter(_ result: Recording) {
+    // let steamTurbine = result.annual(\.steamTurbine.load.quotient)
+    // let parabolicElevation = result.annual(\.collector.parabolicElevation)
+    // _ = try? Gnuplot(y1s: steamTurbine, y2s: parabolicElevation)(.pdf("parabolicElevation.pdf"))
+    // let electric = result.annual(\.thermal.storage.megaWatt)
+    // _ = try? Gnuplot(y1s: steamTurbine, y2s: electric)(.pdf("thermal.pdf"))
     let formatter = DateFormatter()
     formatter.dateFormat = "MM_dd"
     for i in 1...365 {
@@ -178,8 +181,9 @@ struct SolarPerformanceCalculator: ParsableCommand {
       let plot = TimeSeriesPlot(y1: y1, y2: y2, range: interval, style: .impulses)
       plot.y1Titles = ["solarfield", "powerblock", "storage"]
       plot.y2Titles = ["solar", "toStorage", "production", "storage", "gross", "net", "consum"]
-      
-      try? plot(toFile: "/workspaces/SPC/res/Power_\(formatter.string(from: interval.start))")
+      try? FileManager.default.createDirectory(atPath: ".plots", withIntermediateDirectories: true)
+      let date = formatter.string(from: interval.start)
+      try? plot(toFile: ".plots/\(BlackBoxModel.simulatedYear)_\(date)")
     }
   }
 }
