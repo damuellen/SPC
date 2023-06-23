@@ -246,21 +246,6 @@ extension TunOl {
             * (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]) + equiv_harmonious_min_perc[j]))
     }
 
-    for i in 0..<365 {
-      if d10[AM + i].isZero {
-        d10[W + i] = Double.zero
-        d10[X + i] = Double.zero
-        d10[Y + i] = Double.zero
-      } else {
-        // A_RawMeth_max_cons*T6
-        d10[W + i] = RawMeth_max_cons[j] * d10[T + i] * d10[AM + i]
-        // A_CO2_max_cons*T6
-        d10[X + i] = CO2_max_cons[j] * d10[T + i] * d10[AM + i]
-        // A_Hydrogen_max_cons*T6
-        d10[Y + i] = Hydrogen_max_cons[j] * d10[T + i] * d10[AM + i]
-      }
-    }
-
     // Max RawMeth cons during outside harm op period
     // W=IF(AM3=0,0,((AM3-A_equiv_harmonious_min_perc)*(A_RawMeth_max_cons-A_RawMeth_min_cons)+A_RawMeth_min_cons)*T3)
     for i in 0..<365 {
@@ -572,7 +557,7 @@ extension TunOl {
     // SUMIF(Calculation!$EZ$5:$EZ$8764,"="A6,Calculation!$TB$5:$TB$8764)-GU6
     hourFinal.sum(days: daysEZ, range: TB, into: &d12, at: GW)
     // SUMIFS(CalculationJ5:J8763,CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,"=0")+SUMIFS(CalculationEI5:EI8763,CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,"=0")/PB_Ratio_Heat_input_vs_output-SUMIFS(CalculationEQ5:EQ8763,CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,"=0")
-    // for i in 0..<365 { d12[GX + i] = EZ_EX_Jsum[i] + EZ_EX_EIsum[i] / PB_Ratio_Heat_input_vs_output - EZ_EX_EQsum[i] }
+    // for i in 0..<365 { d12[GX + i] = EZ_EX_Jsum[i - 1] + EZ_EX_EIsum[i - 1] / PB_Ratio_Heat_input_vs_output - EZ_EX_EQsum[i - 1] }
     /// Harm el cons considering min harm op during harm op period
     hourFinal.sumOf(FA, days: daysEZ, into: &d12, at: GY, condition: EX, predicate: notZero)
     // SUMIF(Calculation!EZ$5:EZ8764,"="A6,Calculation!$EX$5:$EX$8764)+SUMIFS(Calculation!FA5:FA8764,Calculation!$EZ$5:$EZ$8764,"="A6,Calculation!$EX$5:$EX$8764,">0")
