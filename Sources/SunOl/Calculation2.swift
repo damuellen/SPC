@@ -59,7 +59,7 @@ extension TunOl {
         h[DV + i].isZero, 0,
         iff(
           or(h0[BM0 + i] > Double.zero, PB_nom_gross_cap_ud <= Double.zero), 0,
-          h0[BK0 + i] + max(
+          roundUp(h0[BK0 + i] + max(
             0,
             (min(PB_nom_net_cap, max(PB_net_min_cap, (1 + TES_aux_cons_perc) * max(Double.zero, h0[BK0 + i] + h[DX + i] - h0[BP0 + i]))) + PB_nom_net_cap * PB_nom_var_aux_cons_perc_net
               * POLY(min(PB_nom_net_cap, max(PB_net_min_cap, (1 + TES_aux_cons_perc) * max(Double.zero, h0[BK0 + i] + h[DX + i] - h0[BP0 + i]))) / PB_nom_net_cap, PB_n_g_var_aux_el_Coeff) + PB_fix_aux_el) / PB_gross_min_eff
@@ -72,7 +72,7 @@ extension TunOl {
                     .reduce(0) {
                       if $1.isZero { return $0 + 1 }
                       return $0
-                    }) < PB_warm_start_duration, PB_hot_start_heat_req, PB_warm_start_heat_req), Double.zero) - h0[BQ0 + i]) * TES_aux_cons_perc))
+                    }) < PB_warm_start_duration, PB_hot_start_heat_req, PB_warm_start_heat_req), Double.zero) - h0[BQ0 + i]) * TES_aux_cons_perc,1)))
     }
 
     /// Corresponding PB net elec output
@@ -175,7 +175,7 @@ extension TunOl {
     /// Surplus TES energy due to op case
     let EK: Int = 131400
     // =IF(EE6=0,0,ROUND(MAX(0,SUMIF($BO$5:$BO$8764,"="&$BO6,$AY$5:$AY$8764)*Heater_eff*(1+1/Ratio_CSP_vs_Heater)-EE6),5))
-    for i in 1..<8760 { if h[EE + i].isZero { h[EK + i] = Double.zero } else { h[EK + i] = round(max(Double.zero, AYsum[i - 1] * Heater_eff * (1 + 1 / Ratio_CSP_vs_Heater) - h[EE + i]),5) } }
+    for i in 1..<8760 { if h[EE + i].isZero { h[EK + i] = Double.zero } else { h[EK + i] = max(Double.zero, AYsum[i - 1] * Heater_eff * (1 + 1 / Ratio_CSP_vs_Heater) - h[EE + i]) } }
 
     /// Peripherial PV hour PV to heater
     let EL: Int = 140160
@@ -415,7 +415,7 @@ extension TunOl {
     let FE: Int = 306600
     // =MAX(0,-ROUND(EH6+ER6-ET6-EX6-FA6-MIN(El_boiler_cap_ud,MAX(0,(EY6+FB6-EI6/PB_Ratio_Heat_input_vs_output-ES6)/El_boiler_eff)),5))
     for i in 1..<8760 {
-      h[FE + i] = max(Double.zero, round(-(h[EH + i] + h[ER + i] - h[ET + i] - h[EX + i] - h[FA + i] - min(El_boiler_cap_ud, max(Double.zero, (h[EY + i] + h[FB + i] - h[EI + i] / PB_Ratio_Heat_input_vs_output - h[ES + i]) / El_boiler_eff))), 5))
+      h[FE + i] = max(Double.zero, -(h[EH + i] + h[ER + i] - h[ET + i] - h[EX + i] - h[FA + i] - min(El_boiler_cap_ud, max(Double.zero, (h[EY + i] + h[FB + i] - h[EI + i] / PB_Ratio_Heat_input_vs_output - h[ES + i]) / El_boiler_eff))))
     }
 
     /// Grid import for min harm and stby
@@ -652,11 +652,11 @@ extension TunOl {
     /// Remaining el boiler cap after max harmonious heat cons
     let FV: Int = 455520
     // MAX(0,El_boiler_cap_ud-FU6)
-    for i in 1..<8760 { h[FV + i] = max(Double.zero, round(El_boiler_cap_ud - h[FU + i], 5)) }
+    for i in 1..<8760 { h[FV + i] = max(Double.zero, El_boiler_cap_ud - h[FU + i]) }
 
     let TK: Int = FU
     // TK=MAX(0,-ROUND(ES5+EI5/PB_Ratio_Heat_input_vs_output+FU5*El_boiler_eff-FP5-FB5,5))
-    for i in 1..<8760 { h[TK + i] = max(Double.zero, -round(h[ES + i] + h[EI + i] / PB_Ratio_Heat_input_vs_output + h[FU + i] * El_boiler_eff - h[FP + i] - h[FB + i], 5)) }
+    for i in 1..<8760 { h[TK + i] = max(Double.zero, -(h[ES + i] + h[EI + i] / PB_Ratio_Heat_input_vs_output + h[FU + i] * El_boiler_eff - h[FP + i] - h[FB + i])) }
 
     /// Remaining MethSynt cap after max harmonious cons
     let FW: Int = 464280

@@ -569,7 +569,7 @@ public struct TunOl {
       let load_perc: [Double] = gross_cap.map { $0 / PB_Ref_nom_gross_cap }  // B
       let PB_Ref_25p_max_aux_heat_prod: Double = (23.333 * 2775.4 - 15.167 * 167.6 - 8.167 * 649.6) / 1000
       let heat_input: [Double] = load_perc.map { $0 * PB_nom_gross_cap_ud }  // D
-      let factor: Double = seek(goal: 0) { (PB_Ref_25p_heat_cons - PB_Ref_25p_aux_heat_prod * $0) - (PB_Ref_25p_heat_cons_max_aux_heat - PB_Ref_25p_max_aux_heat_prod * $0) }  // 0.68792724609375
+      let factor: Double = 0.687976804366124 // seek(goal: 0) { (PB_Ref_25p_heat_cons - PB_Ref_25p_aux_heat_prod * $0) - (PB_Ref_25p_heat_cons_max_aux_heat - PB_Ref_25p_max_aux_heat_prod * $0) }  
 
       let no_extraction: [Double] = [  // B
         PB_Ref_nom_heat_cons - PB_Ref_nom_aux_heat_prod * factor,
@@ -596,7 +596,7 @@ public struct TunOl {
       let var_aux_cons: [Double] = zip(gross_electrical_output, net_electrical_output).map(-)
       let auxiliary_consumption_factor: [Double] = var_aux_cons.map { $0 / var_aux_cons[0] }
 
-      let steam_extraction: [Double] = net_electrical_output.map { output -> Double in return iff(PB_nom_gross_cap_ud.isZero, 0.0, (Overall_harmonious_var_heat_cons_at_PB_nom + Overall_heat_fix_cons) / PB_nom_net_cap * output) }  // F
+      let steam_extraction: [Double] = net_electrical_output.map { iff(PB_nom_gross_cap_ud.isZero, 0.0, (Overall_harmonious_var_heat_cons_at_PB_nom + Overall_heat_fix_cons) / PB_nom_net_cap * $0) }  // F
 
       self.th_Coeff = Polynomial.fit(x: thermal_load_perc, y: eff_factor, order: 4)!.coefficients
       self.el_Coeff = Polynomial.fit(x: load_perc, y: eff_factor, order: 4)!.coefficients

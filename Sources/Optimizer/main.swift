@@ -97,62 +97,56 @@ struct Command: ParsableCommand {
     // try? InputParameter(ranges: ranges).storeToJSON(file: .init(fileURLWithPath: "Parameter.json"))
     var parameter = Parameter()
     var resultsA = Tables()
-    for EY in stride(from: 140, through: 200, by: 20) where !source.isCancelled {
+    for EY in stride(from: 180, through: 180, by: 20) where !source.isCancelled {
       var results = Table()
-      for _ in 1...10 where !source.isCancelled {
+      for _ in 1...1 where !source.isCancelled {
         parameter.ranges[5] = Double(EY)...Double(EY)
-        let worker = IGOA(n: n ?? 30, maxIterations: iterations ?? 270, bounds: parameter.ranges)
+        let worker = IGOA(n: n ?? 20, maxIterations: iterations ?? 100, bounds: parameter.ranges)
         let result = worker(SunOl.fitnessPenalized)
         results.append(contentsOf: result)
       }
       results = removingNearby(results.filter { $0[0].isFinite }.sorted { $0[0] < $1[0] })
       resultsA[EY] = Array(results.prefix(1000))
     }
-    writeExcel("SunOl_\(id).xlsx", results: resultsA)
 
-    parameter = Parameter(
-      CSP_loop_nr: 0...0.0,
-      TES_thermal_cap: 0...0.0,
-      PB_nom_gross_cap: 0...0.0,
-      El_boiler_cap: 0...100.0,
-      EY_var_net_nom_cons: 180...180,
-      Heater_cap: 0...0.0, 
-      BESS_cap: 0...5000.0
-    )
+    writeExcel("SunOl_\(id).xlsx", results: resultsA)
+/*
     var resultsB = Tables()
-    for EY in stride(from: 140, through: 200, by: 20) where !source.isCancelled {
+    for EY in stride(from: 140, through: 280, by: 20) where !source.isCancelled {
       var results = Table()
       for _ in 1...10 where !source.isCancelled {
         parameter.ranges[5] = Double(EY)...Double(EY)
-        let worker = IGOA(n: n ?? 30, maxIterations: iterations ?? 270, bounds: parameter.ranges)
-        results.append(contentsOf: worker(SunOl.fitnessPenalized))
+        let worker = IGOA(n: n ?? 60, maxIterations: iterations ?? 270, bounds: parameter.ranges)
+        let result = worker(SunOl.fitnessPenalized)
+        results.append(contentsOf: result)
       }
       results = removingNearby(results.filter { $0[0].isFinite }.sorted { $0[0] < $1[0] })
       resultsB[EY] = Array(results.prefix(1000))
     }
-    writeExcel("SunOl_\(id)_BESS.xlsx", results: resultsB)
-
-    parameter = Parameter(
-      CSP_loop_nr: 0...0.0,
-      TES_thermal_cap: 0...0.0,
-      PB_nom_gross_cap: 0...0.0,
-      El_boiler_cap: 0...100.0,
-      EY_var_net_nom_cons: 180...180,
-      Heater_cap: 0...0.0
-    )
-    var resultsC = Tables()
-    for EY in stride(from: 220, through: 300, by: 20) where !source.isCancelled {
-      var results = Table()
-      for _ in 1...5 where !source.isCancelled {
-        parameter.ranges[5] = Double(EY)...Double(EY)
-        let worker = IGOA(n: n ?? 30, maxIterations: iterations ?? 270, bounds: parameter.ranges)
-        results.append(contentsOf: worker(SunOl.fitness))
-      }
-      results = removingNearby(results.filter { $0[0].isFinite }.sorted { $0[0] < $1[0] })
-      resultsC[EY] = Array(results.prefix(1000))
-    }
-    writeExcel("SunOl_\(id)_PV_only.xlsx", results: resultsC)
-    writeExcel("SunOl_\(id)_All.xlsx", results: resultsA, resultsB, resultsC)
+    
+    writeExcel("SunOl_\(id).xlsx", results: resultsB)
+*/
+    // parameter = Parameter(
+    //   CSP_loop_nr: 0...0.0,
+    //   TES_thermal_cap: 0...0.0,
+    //   PB_nom_gross_cap: 0...0.0,
+    //   El_boiler_cap: 0...100.0,
+    //   EY_var_net_nom_cons: 180...180,
+    //   Heater_cap: 0...0.0
+    // )
+    // var resultsC = Tables()
+    // for EY in stride(from: 220, through: 300, by: 20) where !source.isCancelled {
+    //   var results = Table()
+    //   for _ in 1...5 where !source.isCancelled {
+    //     parameter.ranges[5] = Double(EY)...Double(EY)
+    //     let worker = IGOA(n: n ?? 30, maxIterations: iterations ?? 270, bounds: parameter.ranges)
+    //     results.append(contentsOf: worker(SunOl.fitness))
+    //   }
+    //   results = removingNearby(results.filter { $0[0].isFinite }.sorted { $0[0] < $1[0] })
+    //   resultsC[EY] = Array(results.prefix(1000))
+    // }
+    // writeExcel("SunOl_\(id)_PV_only.xlsx", results: resultsC)
+    // writeExcel("SunOl_\(id)_All.xlsx", results: resultsA, resultsB, resultsC)
   }
 }
 
@@ -191,26 +185,32 @@ func writeExcel(_ name: String, results: Tables...) {
   let wb = Workbook(name: name)
   let ws = wb.addWorksheet()
   var cursor = 1
+  var smallest = Double.infinity
   for r in results {
     let result = Array(r.keys.sorted().map { r[$0]! }.joined())
-    for (row, n) in zip(result, cursor...) { ws.write(row.map { round($0 * 100) / 100 }, row: n) }
+    for (row, n) in zip(result, cursor...) { 
+      ws.write(row.map { round($0 * 100) / 100 }, row: n)
+      smallest = min(smallest, row[0])
+    }
     cursor += result.count
   }
-
+  smallest = (smallest / 50).rounded(.down) * 50
   let labels = [
     "LCOM", "LCOM2", "CAPEX", "OPEX", "Methanol", "Import", "Export", "Hours", "CSP_loop_nr", "TES_thermal_cap_ud", "PB_nom_gross_cap", "PV_AC_cap", "PV_DC_cap", "EY_var_net_nom_cons", "Hydrogen_storage_cap", "Heater_cap", "CCU_CO2_nom_prod", "CO2_storage_cap", "RawMeth_storage_cap",
     "MethDist_Meth_nom_prod", "El_boiler_cap", "BESS_cap", "Grid_export_max", "Grid_import_max", "Iteration"
   ]
   ws.table(range: [0, 0, cursor-1, labels.endIndex - 1], header: labels)
 
-  let charting = [2, 4, 7, 8, 9, 10, 11, 12, 15, 19, 20, 21]
+  let charting = [2, 4, 7, 8, 9, 10, 11, 12, 13, 15, 19, 20, 21]
   for (column, name) in labels.enumerated() where charting.contains(column) {
-    let chart = wb.addChart(type: .scatter) // .set(y_axis: 1400...2100)
+    let chart = wb.addChart(type: .scatter)
+      .set(y_axis: smallest...(smallest*1.20))
+      .major_unit(.Y, 10.0)
     var start = 1
     for r in results {
       let end = start + r.keys.sorted().map { r[$0]!.count }.reduce(-1, +)
-      // chart.addSeries().set(marker: 6, size: 4).values(sheet: ws, range: [a, 0, z, 0]).categories(sheet: ws, range: [a, column, z, column])
-      chart.addSeries().set(marker: 5, size: 4).values(sheet: ws, range: [start, 1, end, 1]).categories(sheet: ws, range: [start, column, end, column])
+      chart.addSeries().set(marker: 6, size: 4).values(sheet: ws, range: [start, 1, end, 1]).categories(sheet: ws, range: [start, column, end, column])
+      chart.addSeries().set(marker: 5, size: 4).values(sheet: ws, range: [start, 0, end, 0]).categories(sheet: ws, range: [start, column, end, column])
       start = end + 1
     }
     chart.remove(legends: 0, 1, 2)
