@@ -377,7 +377,7 @@ extension TunOl {
     }
     /// Balance of heat during harm op period
     // MZ=IF(MW3=0,MX3+MY3-MV3,-MW3)
-    for i in 0..<365 { d14[MZ + i] = iff(d14[MW + i].isZero, d14[MX + i] + d14[MY + i] - d14[MV + i], -d14[MW + i]) }
+    for i in 0..<365 { d14[MZ + i] = iff(d14[MW + i] < 0.000001, d14[MX + i] + d14[MY + i] - d14[MV + i], -d14[MW + i]) }
 
     /// el cons for el boiler op for night prep during harm op period
     // MP=MX6/El_boiler_eff
