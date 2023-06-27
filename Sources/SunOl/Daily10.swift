@@ -4,7 +4,7 @@ extension TunOl {
     let (BX, CC, CS, CQ) = (595680, 639480, 779640, 762120)
     let CT  = 788400
     let days: [[Int]] = hour[CS + 1..<(CS + 8760)].indices.chunked(by: { hour[$0] == hour[$1] }).map { $0.map { $0 - CS } }
-    let notZero: (Double) -> Bool = { $0 > Double.zero }
+    let notZero: (Double) -> Bool = { $0 > 0.00001 }
     let CQ_CScountZero = hour.countOf(days, condition: CQ, predicate: { $0 <= 0 })
     let CQ_CScountNonZero = hour.countOf(days, condition: CQ, predicate: notZero)
 
@@ -25,7 +25,7 @@ extension TunOl {
 
     /// Nr of PB op hours after min night prep
     let E: Int = 730
-    let opHours = hour.countOf(days, condition1: BX, predicate1: { $0 > Double.zero }, condition2: CC, predicate2: { $0 > Double.zero })
+    let opHours = hour.countOf(days, condition1: BX, predicate1: notZero, condition2: CC, predicate2: notZero)
     // COUNTIFS(CalculationCS5:CS8763,"="A6,CalculationBX5:BX8763,">0",CalculationCC5:CC8763,">0")
     for i in 0..<365 { d10[E + i] = opHours[i] }
 
@@ -125,14 +125,13 @@ extension TunOl {
   // 5840-11315
   func night(_ d10: inout [Double], hour4: [Double], case j: Int) {
     let (F, H, J, L, N, P, EH, EX) = (1095, 1825, 2555, 3285, 4015, 4745, 105120, 245280)
-    let notZero: (Double) -> Bool = { $0 > Double.zero }
+    let notZero: (Double) -> Bool = { $0 > 0.000001 }
     let days: [[Int]] = hour4[262801..<(262800 + 8760)].indices.chunked(by: { hour4[$0] == hour4[$1] })
       .map { $0.map { $0 - 262800 } }
-    //  let end = days.removeLast()
-    // days[0].append(contentsOf: end)
+
     let FA: Int = 271560
     let EX_EZcountZero = hour4.countOf(days, condition: EX, predicate: { $0 <= Double.zero })
-    let FA_EZcountNonZero = hour4.countOf(days, condition: FA, predicate: { $0 > Double.zero })
+    let FA_EZcountNonZero = hour4.countOf(days, condition: FA, predicate: notZero)
 
     let FA_EZ_countNonZero = hour4.countOf(days, condition: FA, predicate: { 
       $0 > 0 && $0 != Overall_stup_cons && $0 != Overall_stby_cons
@@ -386,7 +385,10 @@ extension TunOl {
     for i in 0..<365 { d11[FC + i] += d11[FB + i] }
     /// El cons considering max harm op during harm op period including grid import
     hour.sum(days: days, range: DH, into: &d11, at: FB)
+
     hour.sumOf(CT, days: days, into: &d11, at: FD, condition: DH, predicate: notZero)
+    for i in 0..<365 { d11[FD + i] += d11[FB + i] }
+    for i in 0..<365 { d11[FB + i] = 0 }
     // SUMIF(CalculationCS5:CS8763,"="A6,CalculationDH5:DH8763)+SUMIFS(CalculationCT5:CT8763,CalculationCS5:CS8763,    for i in 0..<365 { d11[FD + i] += d11[FB + i]; d11[FB + i] = 0 }
     /// El cons considering min/max harm op outside  harm op period including grid import (if any)
     let CC: Int = 639480
@@ -582,6 +584,8 @@ extension TunOl {
     hourFinal.sumOf(FB, days: daysEZ, into: &d12, at: HC, condition: FO, predicate: notZero)
     // SUMIF(CalculationEZ5:EZ8763,"="A6,CalculationFP5:FP8763)+SUMIFS(CalculationFB5:FB8763,CalculationEZ5:EZ8763,"="A6,CalculationFO5:FO8763,">0")
     for i in 0..<365 { d12[HC + i] += d12[GX + i] }
+
+    for i in 0..<365 { d12[GX + i] = 0 }
     /// Harm heat cons outside of harm op period
     // SUMIFS(CalculationFB5:FB8763,CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,"=0")
     hourFinal.sumOf(FB, days: daysEZ, into: &d12, at: HD, condition: EX, predicate: { $0.isZero })

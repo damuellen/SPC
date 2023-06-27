@@ -451,7 +451,7 @@ extension TunOl {
     let BO: Int = 516840
     let BOday: [[Int]] = h[BO + 1..<(BO + 8760)].indices.chunked(by: { h[$0] == h[$1] }).map { $0.map { $0 - BO } }
     let BM: Int = 499320
-    let BMcountZero = h.count(hours: BOday, range: BM, predicate: { $0 <= 0 })
+    let BMcountZero = h.count(hours: BOday, range: BM, predicate: { $0 <= 0.000001 })
     /// Number of outside harm op period hours
     let BR: Int = 543120
     // =COUNTIFS($BO$5:$BO$8764,"="&$BO6,$BM$5:$BM$8764,"<=0")
@@ -462,12 +462,12 @@ extension TunOl {
     let BP: Int = 525600
     let BQ: Int = 534360
     let AYsum: [Double] = h.sum(hours: BOday, condition: AY)
-    let BFcount = h.count(hours: BOday, range: BF, predicate: { $0 > Double.zero })
+    let BFcount = h.count(hours: BOday, range: BF, predicate: { $0 > 0.000001 })
     /// Number of night hours
     // let BLcount = h.count(hours: BOday, range: BL, predicate: { $0 <= 0 })  // BR=COUNTIFS($BO$5:$BO$8764,"="&$BO5,$BL$5:$BL$8764,"<=0")
     /// Minimum night op possible considering tank sizes
     let BT: Int = 560640
-    // BT=IF(OR($BR6*A_RawMeth_min_cons>RawMeth_storage_cap_ud,$BR6*A_CO2_min_cons>CO2_storage_cap_ud,$BR6*A_Hydrogen_min_cons>Hydrogen_storage_cap_ud,COUNTIFS($BO$5:$BO$8764,"="&$BO6,$BF$5:$BF$8764,">0")=0),0,1)
+    // BT=IF(OR($BR6*A_RawMeth_min_cons>RawMeth_storage_cap_ud,$BR6*A_CO2_min_cons>CO2_storage_cap_ud,$BR6*A_Hydrogen_min_cons>Hydrogen_storage_cap_ud,COUNTIFS($BO$5:$BO$8764,"="&$BO6,$BF$5:$BF$8764,">1E-10")=0),0,1)
     for i in 1..<8760 {
       h[BT + i] = iff(
         or(BMcountZero[i - 1] * RawMeth_min_cons[j] > RawMeth_storage_cap_ud, BMcountZero[i - 1] * CO2_min_cons[j] > CO2_storage_cap_ud, BMcountZero[i - 1] * Hydrogen_min_cons[j] > Hydrogen_storage_cap_ud, BFcount[i - 1].isZero), Double.zero, 1.0)
@@ -531,7 +531,7 @@ extension TunOl {
       let count: Int =
         (h[max(BY + i - 5, BY)...(BY + i)]
           .reduce(0) {
-            if $1.isZero { return $0 + 1 }
+            if $1 < 0.000001 { return $0 + 1 }
             return $0
           })
       h[BZ + i] = iff(and(h[BY + i].isZero, h[BY + i + 1] > Double.zero), iff(count < PB_warm_start_duration, PB_hot_start_heat_req, PB_warm_start_heat_req), Double.zero)
@@ -576,7 +576,7 @@ extension TunOl {
     let CG: Int = 674520
     // IF(CD6=0;0;ROUND($AY6-(CD6-CF6)/(SUMIF($BO$5:$BO$8764;"="&$BO6;CE$5:CE$8764)*Heater_eff*(1+1/Ratio_CSP_vs_Heater))*CE6;5))
     for i in 1..<8760 { h[CG + i] = iff(h[CD + i].isZero, Double.zero, round(h[AY + i] - (h[CD + i] - h[CF + i]) / (CEsum[i - 1] * Heater_eff * (1 + 1 / Ratio_CSP_vs_Heater)) * h[CE + i], 5)) }
-    let CG_BOcountNonZero = h.count(hours: BOday, range: CG, predicate: { $0 > Double.zero })
+    let CG_BOcountNonZero = h.count(hours: BOday, range: CG, predicate: { $0 > 0.000001 })
     let CGsum: [Double] = h.sum(hours: BOday, condition: CG)
     let J: Int = 17520
     let AW: Int = 359160

@@ -504,7 +504,7 @@ extension TunOl {
     // HA=IF(GH3=0,0,ROUND(($EY3+($EZ3-$EY3)/(Overall_harmonious_max_perc-Overall_harmonious_min_perc)*(GH3-Overall_harmonious_min_perc))-$W3,5))
     for i in 0..<365 {
       d23[HA + i] = iff(
-        d23[GH + i].isZero, 0,
+        d23[GH + i] < Double.zero, 0,
         round(
           (d22[EY + i]
             + (d22[EZ + i] - d22[EY + i]) / (Overall_harmonious_max_perc - Overall_harmonious_min_perc)

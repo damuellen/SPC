@@ -56,7 +56,7 @@ extension TunOl {
     // LC=IF(KG3<0,0,$Z3+($AA3-$Z3)*KG3)
     for i in 0..<365 { d14[LC + i] = iff(d14[KG + i] < 0, 0, d14[Z + i] + (d14[AA + i] - d14[Z + i]) * d14[KG + i]) }
     /// el to cover aux cons during harm op period
-    for i in 0..<365 { d14[LD + i] = 99 }
+
     // el cons for BESS charging during harm op period for stby covered by plant
     // LE=IF(OR(JP3<0,KG3<0),MIN(BESS_cap_ud/BESS_chrg_eff,MAX(0,($G3+FK3)/BESS_chrg_eff-GA3),FZ3+MAX(0,FD3-LB3)),MIN(((FY3+(HU3-FY3)*KG3)+((FZ3+(HV3-FZ3)*KG3)-(FY3+(HU3-FY3)*KG3))*JP3),(FK3+(HG3-FK3)*KG3)/BESS_chrg_eff))
     for i in 0..<365 {
@@ -96,8 +96,6 @@ extension TunOl {
     // heat cons for night prep during harm op period
     // LM=IF(KG3<0,0,$AB3+($AC3-$AB3)*KG3)
     for i in 0..<365 { d14[LM + i] = iff(d14[KG + i] < 0, 0, d14[AB + i] + (d14[AC + i] - d14[AB + i]) * d14[KG + i]) }
-    // LD=LL3/El_boiler_eff
-    for i in 0..<365 { d14[LD + i] = d14[LL + i] / El_boiler_eff }
 
     // heat cons not covered during harm op period
     // LN=IF(OR(JP3<0,KG3<0),FM3,(FL3+(HH3-FL3)*KG3)+((FM3+(HI3-FM3)*KG3)-(FL3+(HH3-FL3)*KG3))*JP3)
@@ -131,7 +129,7 @@ extension TunOl {
     }
     /// Balance of heat during harm op period
     // LQ=IF(LN3=0,LO3+LP3-LM3,-LN3)
-    for i in 0..<365 { d14[LQ + i] = iff(d14[LN + i].isZero, d14[LO + i] + d14[LP + i] - d14[LM + i], -d14[LN + i]) }
+    for i in 0..<365 { d14[LQ + i] = iff(d14[LN + i] < 0.000001, d14[LO + i] + d14[LP + i] - d14[LM + i], -d14[LN + i]) }
 
     /// el cons for el boiler op for night prep during harm op period
     // LG=LO6/El_boiler_eff
@@ -209,13 +207,7 @@ extension TunOl {
         iff(d14[KG + i] < 0, d14[GG + i], d14[GG + i] + (d14[IC + i] - d14[GG + i]) * d14[KG + i]),
         max(0, d14[LS + i] - d14[LT + i] - d14[LU + i] - d14[LY + i] * BESS_chrg_eff))
     }
-    /// Balance of electricity outside of harm op period
-    // LX=LT6+LU6+LW6+LY6*BESS_chrg_eff-MAX(0,LY6-LV6)-LS6-LD6
-    for i in 0..<365 {
-      d14[LX + i] =
-        d14[LT + i] + d14[LU + i] + d14[LW + i] + d14[LY + i] * BESS_chrg_eff
-        - max(Double.zero, d14[LY + i] - d14[LV + i]) - d14[LS + i] - d14[LD + i]
-    }
+
     let I: Int = 2190
     // heat cons not covered outside harm op period
     // LZ=IF(KG3<0,$I3+FN3,FN3+(HJ3-FN3)*KG3)
@@ -224,13 +216,18 @@ extension TunOl {
         d14[KG + i] < 0, d14[I + i] + d14[FN + i], d14[FN + i] + (d14[HJ + i] - d14[FN + i]) * d14[KG + i])
     }
 
-    /// Heat available outside of harm op period after TES chrg
-    // MA=IF(KG6=0,FX6,FX6+(HT6-FX6)/($AM6-A_equiv_harmonious_min_perc)*(KG6-A_equiv_harmonious_min_perc))
+    for i in 0..<365 { d14[LL + i] = min(El_boiler_cap_ud*El_boiler_eff, max(0, d14[LZ + i] - d14[MA + i])) }
+    // LD=LL3/El_boiler_eff
+    for i in 0..<365 { d14[LD + i] = d14[LL + i] / El_boiler_eff }
+
+    /// Balance of electricity outside of harm op period
+    // LX=LT6+LU6+LW6+LY6*BESS_chrg_eff-MAX(0,LY6-LV6)-LS6-LD6
     for i in 0..<365 {
-      d14[MA + i] = iff(
-        or(d14[JP + i].isZero, d14[KG + i].isZero), d14[FX + i],
-        d14[FX + i] + (d14[HT + i] - d14[FX + i]) * d14[AMKG + i])
+      d14[LX + i] =
+        d14[LT + i] + d14[LU + i] + d14[LW + i] + d14[LY + i] * BESS_chrg_eff
+        - max(Double.zero, d14[LY + i] - d14[LV + i]) - d14[LS + i] - d14[LD + i]
     }
+
     /// Balance of heat outside of harm op period
     // MB=MA3+LL3-LZ3
     for i in 0..<365 { d14[MB + i] = d14[MA + i] + d14[LL + i] - d14[LZ + i] }
@@ -344,11 +341,7 @@ extension TunOl {
     //             * (d14[KI + i] - equiv_harmonious_min_perc[j])))
     //       / Overall_harmonious_range * (d14[KZ + i] - Overall_harmonious_min_perc))
     // }
-    // /// heat cons for harm op during harm op period
-    // MU=MIN(El_boiler_cap_ud*El_boiler_eff,MAX(0,NI3-NJ3))
-    for i in 0..<365 { d14[MU + i] = min(El_boiler_cap_ud * El_boiler_eff, max(0, d14[NI + i] - d14[NJ + i])) }
-    // MM=MU3/El_boiler_eff
-    for i in 0..<365 { d14[MM + i] = d14[MU + i] / El_boiler_eff }
+
     // heat cons for night prep during harm op period
     // MV=IF(KI3<0,0,$AB3+($AC3-$AB3)*KI3)
     for i in 0..<365 { d14[MV + i] = iff(d14[KI + i] < 0, 0, d14[AB + i] + (d14[AC + i] - d14[AB + i]) * d14[KI + i]) }
@@ -464,13 +457,7 @@ extension TunOl {
         iff(d14[KI + i] < 0, d14[GG + i], d14[GG + i] + (d14[IC + i] - d14[GG + i]) * d14[KI + i]),
         max(0, d14[NB + i] - d14[NC + i] - d14[ND + i] - d14[NH + i] * BESS_chrg_eff))
     }
-    /// Balance of electricity outside of harm op period
-    // NG=NC6+ND6+NF6+NH6*BESS_chrg_eff-MAX(0,NH6-NE6)-NB6-MM6
-    for i in 0..<365 {
-      d14[NG + i] =
-        d14[NC + i] + d14[ND + i] + d14[NF + i] + d14[NH + i] * BESS_chrg_eff
-        - max(Double.zero, d14[NH + i] - d14[NE + i]) - d14[NB + i] - d14[MM + i]
-    }
+
     // heat cons not covered outside harm op period
     // NI=IF(KI3<0,$I3+FN3,FN3+(HJ3-FN3)*KI3)
     for i in 0..<365 {
@@ -483,10 +470,21 @@ extension TunOl {
     for i in 0..<365 {
       d14[NJ + i] = iff(d14[KI + i] < 0, d14[FX + i], d14[FX + i] + (d14[HT + i] - d14[FX + i]) * d14[KI + i])
     }
+    // /// heat cons for harm op during harm op period
+    // MU=MIN(El_boiler_cap_ud*El_boiler_eff,MAX(0,NI3-NJ3))
+    for i in 0..<365 { d14[MU + i] = min(El_boiler_cap_ud * El_boiler_eff, max(0, d14[NI + i] - d14[NJ + i])) }
+    // MM=MU3/El_boiler_eff
+    for i in 0..<365 { d14[MM + i] = d14[MU + i] / El_boiler_eff }
     /// Balance of heat outside of harm op period
     // NK=NJ3+MU3-NI3
     for i in 0..<365 { d14[NK + i] = d14[NJ + i] + d14[MU + i] - d14[NI + i] }
-
+    /// Balance of electricity outside of harm op period
+    // NG=NC6+ND6+NF6+NH6*BESS_chrg_eff-MAX(0,NH6-NE6)-NB6-MM6
+    for i in 0..<365 {
+      d14[NG + i] =
+        d14[NC + i] + d14[ND + i] + d14[NF + i] + d14[NH + i] * BESS_chrg_eff
+        - max(Double.zero, d14[NH + i] - d14[NE + i]) - d14[NB + i] - d14[MM + i]
+    }
     // grid export
     // NM=MAX(0,MIN(MT3,IF(OR(KI3<0,KZ3<0),GC3,GB3+(HX3-GB3)*KI3+((GC3+(HY3-GC3)*KI3)-(GB3+(HX3-GB3)*KI3))*KZ3)))+MAX(0,MIN(NE3-NH3,IF(KI3<0,GD3,GD3+(HZ3-GD3)*KI3)))
     for i in 0..<365 {

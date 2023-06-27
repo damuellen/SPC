@@ -70,7 +70,7 @@ extension TunOl {
                 iff(
                   (h[max(DX + i - 5, DX)...(DX + i)]
                     .reduce(0) {
-                      if $1.isZero { return $0 + 1 }
+                      if  $1 < 0.000001 { return $0 + 1 }
                       return $0
                     }) < PB_warm_start_duration, PB_hot_start_heat_req, PB_warm_start_heat_req), Double.zero) - h0[BQ0 + i]) * TES_aux_cons_perc,1)))
     }
@@ -94,7 +94,7 @@ extension TunOl {
         iff(
           (h[max(EA + i - 5, EA)...(EA + i)]
             .reduce(0) {
-              if $1.isZero { return $0 + 1 }
+              if  $1 < 0.000001 { return $0 + 1 }
               return $0
             }) < PB_warm_start_duration, PB_hot_start_heat_req, PB_warm_start_heat_req), Double.zero)
     }
@@ -196,7 +196,7 @@ extension TunOl {
     /// Partitions of PV hour PV to be dedicated to TES chrg
     let EO: Int = 166440
     let AW0: Int = 359160
-    let EN_BOcountNonZero = h.count(hours: BOday, range: EN, predicate: { $0 > Double.zero })
+    let EN_BOcountNonZero = h.count(hours: BOday, range: EN, predicate: { $0 > 0.000001 })
     let ENsum: [Double] = h.sum(hours: BOday, condition: EN)
     // IF(OR(EN6=0,EM6=0),0,MAX((AW6-EN6)/(EM6/(1+1/Ratio_CSP_vs_Heater)/Heater_eff/COUNTIFS(BO5:BO8763,"="BO6,EN5:EN8763,">0")),(J6-EN6*Heater_eff/Ratio_CSP_vs_Heater)/(EM6/(1+Ratio_CSP_vs_Heater)/COUNTIFS(BO5:BO8763,"="BO6,EN5:EN8763,">0")))/SUMIF(BO5:BO8763,"="BO6,EN5:EN8763)*EN6)
     for i in 1..<8760 {
