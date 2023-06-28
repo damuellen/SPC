@@ -15,7 +15,6 @@
     "lldb.evaluationTimeout": 30,
     "lldb.consoleMode": "evaluate",
     "task.problemMatchers.neverPrompt": true,
-    "editor.fontFamily": "SF Mono, 'Cascadia Code', Menlo, Monaco, monospace",
     "editor.tabSize": 2,
     "editor.suggestSelection": "first",
     "editor.quickSuggestionsDelay": 50,
@@ -33,5 +32,6 @@
     "debug.onTaskErrors": "showErrors",
     "debug.showInStatusBar": "never",
     "debug.inlineValues": "on",
+    "editor.fontFamily": "SF Mono, 'Comic Mono',Consolas",
 }
  
