@@ -133,19 +133,13 @@ extension TunOl {
     let EF: Int = 87600
     let EG: Int = 96360
     let EH: Int = 105120
-    let BW0: Int = 586920
-    let BU0: Int = 569400
     // Effective PB net elec output
-    // EH=IF(EE6=0,0,BW6+(DY6-BW6)/(SUMIF($BO$5:$BO$8764,"="&$BO6,EB$5:EB$8764)+SUMIF($BO$5:$BO$8764,"="&$BO6,EC$5:EC$8764)+SUMIF($BO$5:$BO$8764,"="&$BO6,ED$5:ED$8764)-CC6)*(EE6-CC6)+BU6+(DW6-BU6)/(SUMIF($BO$5:$BO$8764,"="&$BO6,EB$5:EB$8764)+SUMIF($BO$5:$BO$8764,"="&$BO6,EC$5:EC$8764)+SUMIF($BO$5:$BO$8764,"="&$BO6,ED$5:ED$8764)-CC6)*(EE6-CC6))
+    // EH=IF(EE6=0,0,BX6+(DZ6-BX6)/(SUMIF($BO$5:$BO$8764,"="&$BO6,EB$5:EB$8764)+SUMIF($BO$5:$BO$8764,"="&$BO6,EC$5:EC$8764)+SUMIF($BO$5:$BO$8764,"="&$BO6,ED$5:ED$8764)-CC6)*(EE6-CC6))
     for i in 1..<8760 {
       h[EH + i] = iff(
         h[EE + i] == Double.zero, 0,
-        h0[BW0 + i] + (h[DY + i] - h0[BW0 + i])
-          / (EBsum[i - 1] + ECsum[i - 1]
-            + EDsum[i - 1] - h0[CC0 + i]) * (h[EE + i] - h0[CC0 + i]) + h0[BU0 + i]
-          + (h[DX + i] - h0[BU0 + i])
-          / (EBsum[i - 1] + ECsum[i - 1]
-            + EDsum[i - 1] - h0[CC0 + i]) * (h[EE + i] - h0[CC0 + i]))
+        h0[BX0 + i] + (h[DZ + i] - h0[BX0 + i])
+          / (EBsum[i - 1] + ECsum[i - 1] + EDsum[i - 1] - h0[CC0 + i]) * (h[EE + i] - h0[CC0 + i]))
     }
 
     // Effective PB gross elec output
