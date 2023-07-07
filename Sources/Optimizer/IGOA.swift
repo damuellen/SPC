@@ -84,8 +84,10 @@ public struct IGOA {
     }
 
     ClearScreen()
-    print("Population: \(grassHopperPositions.count) ".colored() + "Iterations: 0".leftpad(28).colored(),
-     pretty(values: targetFitness), pretty(values: targetPosition), separator: "\n")
+    print(
+      tunol, "Population: \(grassHopperPositions.count) ".colored() + "Iterations: 0".leftpad(28).colored(),
+      pretty(values: targetFitness), pretty(values: targetPosition), separator: "\n"
+    )
 
     let dims = bounds.count
     var r_ij_vec = Vector(dims), s_ij = Vector(dims)
@@ -152,10 +154,11 @@ public struct IGOA {
       }
       ClearScreen()
       print(
-        "Population: \(grassHopperPositions.count) ".colored() + "Iterations: \(iteration)".leftpad(28).colored(),
+        tunol, "Population: \(grassHopperPositions.count) ".colored() + "Iterations: \(iteration)".leftpad(28).colored(),
         pretty(values: targetFitness), pretty(values: targetPosition),
         String(format: "Calculations per Second: %.1f", calculationsPerSecond),
-        "Estimated time remaining: \(Int(remainingTime / 60)) min", separator: "\n")
+        "Estimated time remaining: \(Int(remainingTime / 60)) min", separator: "\n"
+      )
 
       let sort = targetFitness.indices.sorted(by:{ targetFitness[$0] < targetFitness[$1] })
       sort.dropFirst().forEach {

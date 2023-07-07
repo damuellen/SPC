@@ -472,7 +472,7 @@ extension TunOl {
     // GW=IF(GH3<0,0,ROUND(($ES3+($ET3-$ES3)*GH3)-$S3,5))
     for i in 0..<365 {
       d23[GW + i] = iff(
-        d23[GH + i] < Double.zero, Double.zero, round((d22[ES + i] + (d22[ET + i] - d22[ES + i]) * d23[GH + i]) - d23[S + i], 5))
+        d23[GH + i] < Double.zero, Double.zero, round((d22[ES + i] + (d22[ET + i] - d22[ES + i]) * d23[GH + i]) - d21[S + i], 5))
     }
 
     /// Surplus RawMeth prod cap after opt day harm and max night op prep
@@ -480,7 +480,7 @@ extension TunOl {
     // GX=IF(GH3<0,0,ROUND(($ES3+($ET3-$ES3)*GH3)-$T3,5))
     for i in 0..<365 {
       d23[GX + i] = iff(
-        d23[GH + i] < Double.zero, Double.zero, round((d22[ES + i] + (d22[ET + i] - d22[ES + i]) * d23[GH + i]) - d23[T + i], 5))
+        d23[GH + i] < Double.zero, Double.zero, round((d22[ES + i] + (d22[ET + i] - d22[ES + i]) * d23[GH + i]) - d21[T + i], 5))
     }
 
     /// Surplus CO2 prod cap after opt day harm and min night op prep
@@ -763,7 +763,7 @@ extension TunOl {
     // HT=IF(HE3<0,0,ROUND($ES3-($S3+($T3-$S3)*HE3),5))
     for i in 0..<365 {
       d23[HT + i] = iff(
-        d23[HE + i] < Double.zero, Double.zero, round(d22[ES + i] - (d23[S + i] + (d23[T + i] - d23[S + i]) * d23[HE + i]), 5))
+        d23[HE + i] < Double.zero, Double.zero, round(d22[ES + i] - (d21[S + i] + (d21[T + i] - d21[S + i]) * d23[HE + i]), 5))
     }
 
     /// Surplus RawMeth prod cap after max day harm and opt night op prep
@@ -771,7 +771,7 @@ extension TunOl {
     // HU=IF(HE3<0,0,ROUND($ET3-($S3+($T3-$S3)*HE3),5))
     for i in 0..<365 {
       d23[HU + i] = iff(
-        d23[HE + i] < Double.zero, Double.zero, round(d22[ET + i] - (d23[S + i] + (d23[T + i] - d23[S + i]) * d23[HE + i]), 5))
+        d23[HE + i] < Double.zero, Double.zero, round(d22[ET + i] - (d21[S + i] + (d21[T + i] - d21[S + i]) * d23[HE + i]), 5))
     }
 
     /// Surplus CO2 prod cap after min day harm and opt night op prep
@@ -1188,7 +1188,9 @@ extension TunOl {
     /// Balance of electricity during harm op period
     let JN = 40515
     // JN=JK3+JM3-JE3-JF3-JJ3
-    for i in 0..<365 { d23[JN + i] = d23[JK + i] + d23[JM + i] - d23[JE + i] - d23[JF + i] - d23[JJ + i] }
+    for i in 0..<365 { 
+      d23[JN + i] = d23[JK + i] + d23[JM + i] - d23[JE + i] - d23[JF + i] - d23[JJ + i] 
+    }
 
     /// Balance of heat during harm op period
     let JO = 40880
