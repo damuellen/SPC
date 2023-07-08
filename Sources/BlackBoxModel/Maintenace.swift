@@ -23,7 +23,7 @@ public enum Maintenance {
     // let end = calendar.date(byAdding: .day, value: 5, to: start)!
     ranges = [DateInterval(start: start, end: start + 1)]
   }
-
+  /// Is used to check if a given date falls within any of the maintenance schedules.
   @discardableResult
   static func checkSchedule(_ date: Date) -> Bool {
     return ranges.reduce(false) { $0 || $1.contains(date) }

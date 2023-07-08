@@ -25,7 +25,10 @@ public struct PV {
     public let windSpeed: Double
   }
 
-  /// Calculate net output of the pv system.
+  /// Calculates the net power output based on various input values. 
+  ///
+  /// It takes into account factors such as solar radiation, ambient temperature,
+  /// wind speed, and inverter specifications to determine the AC power output
   func callAsFunction(_ input: InputValues) -> Double {
     guard input.solar > 15 else { return transformer(ac: .zero) }
     var dc = array.mpp(

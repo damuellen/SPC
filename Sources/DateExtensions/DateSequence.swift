@@ -63,19 +63,24 @@ public final class DateSeries: Sequence, IteratorProtocol {
   var currentDate: Date
 
   public init(year: Int, interval: Frequence) {
-
+    // Check if the year is within the valid range and has the correct format
     precondition(
       year > 1950 && year < 2050,
       "year out of valid range or wrong format")
 
+    // Create a DateComponents object to store the date information
     var dateComponents = DateComponents()
     dateComponents.timeZone = Greenwich.timeZone
     dateComponents.year = year
     dateComponents.month = 1
 
+    // Set the start date using the Greenwich date and the provided year
     self.startDate = Greenwich.date(from: dateComponents)!
+    // Set the values per hour based on the provided interval
     self.valuesPerHour = interval.rawValue
+    // Set the current date to the start date
     self.currentDate = self.startDate
+    // Set the end date to the start date of the next year
     dateComponents.year = year + 1
     self.endDate = Greenwich.date(from: dateComponents)!
   }

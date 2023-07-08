@@ -31,10 +31,15 @@ public enum TextConfig {
     var urls = [URL]()
     let fm = FileManager.default
 
+    // Check if the given path is a directory
     if url.hasDirectoryPath {
+      // Get the list of files in the directory
       let fileList = try fm.contentsOfDirectory(atPath: path)
+      // Create an array of URLs for each file in the directory
       urls = fileList.map { file in url.appendingPathComponent(file) }
     } else if url.pathExtension.lowercased().contains("pdd") {
+      // If the path is a file with a .pdd extension
+      // Read the file and extract the paths
       let file = try TextConfigFile(url: url)
       let paths = file.lines.drop(while: \.isEmpty)
       let separated = paths.map { $0.split(separator: "\\").map(String.init) }
@@ -42,6 +47,7 @@ public enum TextConfig {
       var list = try fm.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil)
       list = list.filter(\.hasDirectoryPath)
       if list.isEmpty { list.append(folder) }
+      // Iterate through the directories and check if the paths match
       for dir in list {
         if urls.isEmpty == false { break }
         for components in separated {
@@ -49,7 +55,7 @@ public enum TextConfig {
           let search = fileURL.lastPathComponent
           if let pos = components.firstIndex(of: search) {
             for component in components.dropFirst(pos + 1) {
-              fileURL.appendPathComponent(component)  
+              fileURL.appendPathComponent(component)
             }
             urls.append(fileURL)
           }
@@ -61,12 +67,15 @@ public enum TextConfig {
     let mto = urls.first(where: { $0.pathExtension.lowercased() == "mto" })
     var identified = [FileExtension]()
 
+    // Iterate through the URLs and process each file
     for url in urls {
-      guard let fileExtension = FileExtension(url: url),
+    // Check if the file extension is identified and not already processed
+    guard let fileExtension = FileExtension(url: url),
         !identified.contains(fileExtension) else { continue }
-      identified.append(fileExtension)
-      let configFile = try TextConfigFile(url: url)
-      switch fileExtension {
+    identified.append(fileExtension)
+    let configFile = try TextConfigFile(url: url)
+    // Process the file based on its extension
+    switch fileExtension {
       case .FOS: break
       case .OPR: break
       case .DEM: GridDemand.current = try .init(file: configFile)

@@ -248,6 +248,9 @@ extension PV {
   }
 }
 
+/// Implementation of the Lambert W function, which is a special function that is the inverse of the function f(w) = w * exp(w). 
+/// 
+/// The Lambert W function is used in various mathematical and scientific applications, including solving equations involving exponential and logarithmic functions.
 func lambertW(_ z: Double) -> Double {
   var tmp: Double
   var c1: Double

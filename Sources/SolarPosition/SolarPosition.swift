@@ -74,24 +74,34 @@ public struct SolarPosition {
     coords: (Double, Double, Double), tz: Int,
     year: Int, frequence: DateSeries.Frequence
   ) {
+    // Set the estimatedDelta_T value based on the given year
     SolarPosition.estimatedDelta_T = SolarPosition.estimateDelta_T(year: year)
+    // Set the frequence value
     SolarPosition.frequence = frequence
+    // Create a Location object with the given coordinates and timezone
     let location = Location(coords, tz: tz)
 
+    // Set the year, frequence, and location properties
     self.year = year
     self.frequence = frequence
     self.location = location
 
+    // Calculate the sun hours period for the given location and year
     let sunHours = SolarPosition.sunHoursPeriod(
       location: location, year: year
     )
+    // Align the sun hours period to the specified frequence
     let sunHoursPeriod = sunHours.map {
       $0.aligned(to: SolarPosition.frequence)
     }
+    // Create a DateSeries for each sun hours period
     let dates = sunHoursPeriod.flatMap {
       DateSeries(range: $0, interval: SolarPosition.frequence)
     }
+    // Create a lookup dictionary with dates as keys and corresponding values as indices
     lookupDates = Dictionary(uniqueKeysWithValues: zip(dates, 0...))
+    
+    // Calculate the solar position for each date in parallel
     let offset = 0.0 //frequence.interval / 2
     calculatedValues = dates.concurrentMap { date in 
       SolarPosition.compute(date: date + offset, location: location)

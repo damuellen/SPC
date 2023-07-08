@@ -10,12 +10,22 @@
 import Foundation
 import SolarPosition
 
-/// Meteorological data
+/// A struct called MeteoData that represents meteorological data.
 public struct MeteoData: CustomStringConvertible {
-  public var temperature, dni, ghi, dhi, windSpeed: Double
+  /// The temperature in degrees Celsius.
+  public var temperature: Double
+  /// The direct normal irradiance in watts per square meter (W/m2).
+  public var dni: Double
+  /// The global horizontal irradiance in watts per square meter (W/m2).
+  public var ghi: Double
+  /// The diffuse horizontal irradiance in watts per square meter (W/m2).
+  public var dhi: Double
+  /// The wind speed in meters per second (m/s).
+  public var windSpeed: Double
   var wetBulbTemperature: Double? = nil
-
+  /// Returns an array containing the temperature and wind speed.
   var conditions: [Double] { [temperature, windSpeed] }
+  /// Returns an array containing the dni, ghi, and dhi.
   var insolation: [Double] { [dni, ghi, dhi] }
 
   public init(

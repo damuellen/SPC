@@ -21,6 +21,10 @@ protocol MeasurementsConvertible {
 }
 
 extension MeasurementsConvertible {
+  /// Iterates over the values array and convert each value to a formatted string. 
+  ///
+  /// If the magnitude of the value is less than 0.005, it is considered as 0.
+  /// The formatted strings are joined together with commas.
   var commaSeparatedValues: String {
     values.map { 
       if $0.magnitude < 0.005 { return "0" }
