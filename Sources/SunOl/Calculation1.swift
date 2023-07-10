@@ -472,7 +472,10 @@ extension TunOl {
     // BT=IF(OR($BR6*A_RawMeth_min_cons>RawMeth_storage_cap_ud,$BR6*A_CO2_min_cons>CO2_storage_cap_ud,$BR6*A_Hydrogen_min_cons>Hydrogen_storage_cap_ud,COUNTIFS($BO$5:$BO$8764,"="&$BO6,$BF$5:$BF$8764,">1E-10")=0),0,1)
     for i in 1..<8760 {
       h[BT + i] = iff(
-        or(BMcountZero[i - 1] * RawMeth_min_cons[j] > RawMeth_storage_cap_ud, BMcountZero[i - 1] * CO2_min_cons[j] > CO2_storage_cap_ud, BMcountZero[i - 1] * Hydrogen_min_cons[j] > Hydrogen_storage_cap_ud, BFcount[i - 1].isZero), Double.zero, 1.0)
+        or(BMcountZero[i - 1] * RawMeth_min_cons[j] > RawMeth_storage_cap_ud,
+         BMcountZero[i - 1] * CO2_min_cons[j] > CO2_storage_cap_ud,
+         BMcountZero[i - 1] * Hydrogen_min_cons[j] > Hydrogen_storage_cap_ud,
+         BFcount[i - 1].isZero), Double.zero, 1.0)
     }
     /// Min net elec demand outside harm op period
     let BU: Int = 569400

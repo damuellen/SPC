@@ -1014,7 +1014,7 @@ extension TunOl {
     // IV=MIN($DO3+$EJ3,MAX(0,-IT3*BESS_chrg_eff-IU3+IN3+IF(HC3<0,$E3,0)+IR3+IS3))
     for i in 0..<365 {
       d23[IV + i] = min(
-        d23[DO + i] + d22[EJ + i],
+        d22[DO + i] + d22[EJ + i],
         max(
           0,
           -d23[IT + i] * BESS_chrg_eff - d23[IU + i] + d23[IN + i] + iff(d23[HC + i] < 0, d21[E + i], Double.zero)
@@ -1265,7 +1265,7 @@ extension TunOl {
     // JX=MIN($DO3+$EJ3,MAX(0,-JV3*BESS_chrg_eff-JW3+JP3+IF(HE3<0,$E3,0)+JT3+JU3))
     for i in 0..<365 {
       d23[JX + i] = min(
-        d23[DO + i] + d22[EJ + i],
+        d22[DO + i] + d22[EJ + i],
         max(
           0,
           -d23[JV + i] * BESS_chrg_eff - d23[JW + i] + d23[JP + i] + iff(d23[HE + i] < 0, d21[E + i], Double.zero)
