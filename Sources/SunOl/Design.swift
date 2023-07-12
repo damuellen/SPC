@@ -567,7 +567,7 @@ public struct TunOl {
         PB_Ref_25p_gross_cap_max_aux_heat,
       ]
       let load_perc: [Double] = gross_cap.map { $0 / PB_Ref_nom_gross_cap }  // B
-      let PB_Ref_25p_max_aux_heat_prod: Double = (23.333 * 2775.4 - 15.167 * 167.6 - 8.167 * 649.6) / 1000
+      // let PB_Ref_25p_max_aux_heat_prod: Double = (23.333 * 2775.4 - 15.167 * 167.6 - 8.167 * 649.6) / 1000
       let heat_input: [Double] = load_perc.map { $0 * PB_nom_gross_cap_ud }  // D
       let factor: Double = 0.687976804366124 // seek(goal: 0) { (PB_Ref_25p_heat_cons - PB_Ref_25p_aux_heat_prod * $0) - (PB_Ref_25p_heat_cons_max_aux_heat - PB_Ref_25p_max_aux_heat_prod * $0) }  
 

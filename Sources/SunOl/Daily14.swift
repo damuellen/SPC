@@ -1,7 +1,7 @@
 extension TunOl {
   func d14(_ d14: inout [Double], case j: Int) {
     // d10
-    let (C, D, E, T, U, V, Z, AA, AB, AC, AM) = (0, 365, 730, 5840, 6205, 6570, 8030, 8395, 8760, 9125, 12775)
+    let (C, D, E, T, U, V, Z, AA, AB, AC) = (0, 365, 730, 5840, 6205, 6570, 8030, 8395, 8760, 9125)
     let (
       EY, EZ, FA, _, FC, FD, FE, _, _, _, _, _, FK, FL, FM, FN, _, _, _, _, FS, FT, FU, FV, FW, FX, FY, FZ, GA, GB, GC,
       GD, GE, GF, GG, GH, GI, _, _, _, _, _, _, _, _, _, _, GU, GV, GW, _, GY, GZ, HA, _, _, _, _, _, HG, HH, HI, HJ,
@@ -19,8 +19,6 @@ extension TunOl {
       57305, 57670, 58035, 58400, 58765, 59130, 59495, 59860, 60225, 60590, 60955, 61320, 61685, 62050, 62415, 62780,
       63145, 63510, 63875, 64240
     )
-    let (AMKG, AMKI) = (56940, 63875)
-    let dJP: Int = 70810  // LA
 
     let (
       KZ, LB, LC, LD, LE, _, LG, LH, LI, LJ, LK, LL, LM, LN, LO, LP, LQ, LR, LS, LT, LU, LV, LW, LX, LY, LZ, MA, MB,

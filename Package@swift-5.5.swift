@@ -3,7 +3,7 @@ import PackageDescription
 import class Foundation.ProcessInfo
 
 let c: [CSetting] = [.unsafeFlags(["-ffast-math", "-O3", "-fomit-frame-pointer", "-funroll-loops"])]
-var flags = ["-cross-module-optimization", "-Ounchecked", "-enforce-exclusivity=unchecked", "-remove-runtime-asserts"]
+var flags = ["-cross-module-optimization", "-Ounchecked", "-enforce-exclusivity=unchecked", "-remove-runtime-asserts", "-Xllvm", "-sil-cross-module-serialize-all"]
 
 #if os(Windows)
 //flags += ["-Xfrontend", "-entry-point-function-name", "-Xfrontend", "wWinMain"]
@@ -19,8 +19,7 @@ let swift: [SwiftSetting] = [
 var platformProducts: [Product] = [
   // .library(name: "BlackBoxModel", type: .dynamic, targets: ["BlackBoxModel"]),
   // .library(name: "SolarPosition", type: .dynamic, targets: ["SolarPosition"]),
-  // .library(name: "PinchPoint", type: .dynamic, targets: ["PinchPoint"]),
-  // .library(name: "SunOl", type: .dynamic, targets: ["SunOl"]),
+  // .library(name: "PinchPoint", type: .dynamic, targets: ["PinchPoint"]),ZZ
 ]
 #else
 var platformProducts: [Product] = []

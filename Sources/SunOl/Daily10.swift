@@ -131,7 +131,6 @@ extension TunOl {
 
     let FA: Int = 271560
     let EX_EZcountZero = hour4.countOf(days, condition: EX, predicate: { $0 <= Double.zero })
-    let FA_EZcountNonZero = hour4.countOf(days, condition: FA, predicate: notZero)
 
     let FA_EZ_countNonZero = hour4.countOf(days, condition: FA, predicate: { 
       $0 > 0 && $0 != Overall_stup_cons && $0 != Overall_stby_cons
