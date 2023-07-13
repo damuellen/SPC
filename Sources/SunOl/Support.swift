@@ -9,140 +9,70 @@ func POLY(_ value: Double, _ coeffs: [Double]) -> Double {
 }
 
 extension Array where Element == Double {
-  func sum(days: [[Int]], range: Int, predicate: (Double) -> Bool) -> [Double]
-  {
-    days.map { day in var sum = 0.0
-      day.forEach { d in let value = self[(d + range)]
-        if predicate(value) { sum += value }
-      }
-      return sum
+  func sumif(_ range: Int, days: [[Int]], into array: inout [Double], at: Int) {
+    for (i, day) in days.enumerated() {
+      array[i + at] = 0.0
+      day.forEach { d in array[i + at] += self[(d + range)] }
     }
   }
 
-  func sum(days: [[Int]], range: Int, into array: inout [Double], at: Int) {
-    for (i, day) in days.enumerated() {
-      array[i + at] = 0.0
-      day.forEach { d in let value = self[(d + range)]
-        array[i + at] += value
-      }
-    }
-  }
-
-  func sumOfRanges(
-    _ range: Int, days: [[Int]], into array: inout [Double], at: Int,
-    range1: [Double], condition: Int, predicate: (Double) -> Bool
-  ) {
-    for (i, day) in days.enumerated() {
-      array[i + at] = 0.0
-      day.forEach { d in
-        if predicate(range1[(d + condition)]) {
-          array[i + at] += self[(d + range)]
+  func sumifs(
+      _ range: Int, days: [[Int]], into array: inout [Double], at: Int,
+      range range1: Int, criteria: (Double) -> Bool
+    ) {
+      for (i, day) in days.enumerated() {
+        array[i + at] = 0.0
+        day.forEach { d in
+          if criteria(self[(d + range1)]) { array[i + at] += self[(d + range)] }
         }
       }
     }
-  }
-  @inlinable func sumOf(
+
+  func sumifs(
     _ range: Int, days: [[Int]], into array: inout [Double], at: Int,
-    condition: Int, predicate: (Double) -> Bool
+    range1: Int, criteria1: (Double) -> Bool, range2: Int,
+    criteria2: (Double) -> Bool
   ) {
     for (i, day) in days.enumerated() {
       array[i + at] = 0.0
       day.forEach { d in
-        if predicate(self[(d + condition)]) {
+        if criteria1(self[(d + range1)]), criteria2(self[(d + range2)]) {
           array[i + at] += self[(d + range)]
         }
       }
     }
   }
 
-  @inlinable func sumOf(
-    _ range: Int, days: [[Int]], into array: inout [Double], at: Int,
-    condition1: Int, predicate1: (Double) -> Bool, condition2: Int,
-    predicate2: (Double) -> Bool
-  ) {
-    for (i, day) in days.enumerated() {
-      array[i + at] = 0.0
-      day.forEach { d in
-        if predicate1(self[(d + condition1)])
-          && predicate2(self[(d + condition2)])
-        {
-          array[i + at] += self[(d + range)]
-        }
-      }
-    }
-  }
-
-  func sum(
-    _ range: Int, hours: [[Int]], condition: Int, predicate: (Double) -> Bool
-  ) -> [Double] {
-    Array(
-      hours.map { day -> [Double] in var sum = 0.0
-        day.forEach { d in let value = self[(d + condition)]
-          if predicate(value) { sum += self[(d + range)] }
-        }
-        return [Double](repeating: sum, count: day.count)
-      }
-      .joined())
-  }
-
-  func sum(
-    _ range: Int, hours: [[Int]], range2: [Double], condition: Int,
-    predicate: (Double) -> Bool
-  ) -> [Double] {
-    Array(
-      hours.map { day -> [Double] in var sum = 0.0
-        day.forEach { d in let value = range2[(d + condition)]
-          if predicate(value) { sum += self[(d + range)] }
-        }
-        return [Double](repeating: sum, count: day.count)
-      }
-      .joined())
-  }
-
-  func sum(hours: [[Int]], condition: Int, predicate: (Double) -> Bool)
+  func sumif(_ range: Int, criteria: (Double) -> Bool = {_ in true}, hours: [[Int]])
     -> [Double]
   {
     Array(
       hours.map { day -> [Double] in var sum = 0.0
-        day.forEach { d in let value = self[(d + condition)]
-          if predicate(value) { sum += value }
+        day.forEach { d in let value = self[(d + range)]
+          if criteria(value) { sum += value }
         }
         return [Double](repeating: sum, count: day.count)
       }
       .joined())
   }
 
-  func sum(hours: [[Int]], condition: Int) -> [Double] {
-    Array(
-      hours.map { day -> [Double] in var sum = 0.0
-        day.forEach { d in let value = self[(d + condition)]
-          sum += value
-        }
-        return [Double](repeating: sum, count: day.count)
-      }
-      .joined())
-  }
-
-  func countOf(_ days: [[Int]], condition: Int, predicate: (Double) -> Bool)
+  func countif(_ range: Int, criteria: (Double) -> Bool, days: [[Int]])
     -> [Double]
   {
     days.map { day in var count = 0
-      day.forEach { d in let value = self[(d + condition)]
-        if predicate(value) { count += 1 }
+      day.forEach { 
+        if criteria(self[($0 + range)]) { count += 1 }
       }
       return Double(count)
     }
   }
 
-  func countOf(
-    _ days: [[Int]], condition1: Int, predicate1: (Double) -> Bool,
-    condition2: Int, predicate2: (Double) -> Bool
+  func countif(range1: Int, criteria1: (Double) -> Bool,
+    range2: Int, criteria2: (Double) -> Bool, days: [[Int]]
   ) -> [Double] {
     days.map { day in var count = 0
-      day.forEach { d in
-        if predicate1(self[(d + condition1)]),
-          predicate2(self[(d + condition2)])
-        {
+      day.forEach { 
+        if criteria1(self[($0 + range1)]), criteria2(self[($0 + range2)]) {
           count += 1
         }
       }
@@ -150,13 +80,13 @@ extension Array where Element == Double {
     }
   }
 
-  func count(hours: [[Int]], range: Int, predicate: (Double) -> Bool)
+  func countif(_ range: Int, criteria: (Double) -> Bool, hours: [[Int]])
     -> [Double]
   {
     Array(
       hours.map { day -> [Double] in var count = 0
-        day.forEach { d in let value = self[(d + range)]
-          if predicate(value) { count += 1 }
+        day.forEach { 
+          if criteria(self[($0 + range)]) { count += 1 }
         }
         return [Double](repeating: Double(count), count: day.count)
       }

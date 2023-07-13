@@ -5,12 +5,12 @@ extension TunOl {
     let CT  = 788400
     let days: [[Int]] = hour[CS + 1..<(CS + 8760)].indices.chunked(by: { hour[$0] == hour[$1] }).map { $0.map { $0 - CS } }
     let notZero: (Double) -> Bool = { $0 > 0.00001 }
-    let CQ_CScountZero = hour.countOf(days, condition: CQ, predicate: { $0 <= 0 })
-    let CQ_CScountNonZero = hour.countOf(days, condition: CQ, predicate: notZero)
+    let CQ_CScountZero = hour.countif(CQ, criteria: { $0 <= 0 }, days: days)
+    let CQ_CScountNonZero = hour.countif(CQ, criteria: notZero, days: days)
 
-    let CT_CS_countNonZero = hour.countOf(days, condition: CT, predicate: { 
+    let CT_CS_countNonZero = hour.countif(CT, criteria: { 
       $0 > 0 && $0 != Overall_stup_cons && $0 != Overall_stby_cons
-    })
+    }, days: days)
     /// Nr of outside harm op period op hours after min outside harm op period prep
     let C: Int = 0
     // C=MIN(COUNTIFS(Calculation!$CS$5:$CS$8764,"="&$A3,Calculation!$CT$5:$CT$8764,">0",Calculation!$CT$5:$CT$8764,"<>"&INDEX(Overall_stup_cons,1),Calculation!$CT$5:$CT$8764,"<>"&INDEX(Overall_stby_cons,1)),COUNTIFS(Calculation!$CS$5:$CS$8764,"="&$A3,Calculation!$CQ$5:$CQ$8764,"<=0"))
@@ -25,7 +25,7 @@ extension TunOl {
 
     /// Nr of PB op hours after min night prep
     let E: Int = 730
-    let opHours = hour.countOf(days, condition1: BX, predicate1: notZero, condition2: CC, predicate2: notZero)
+    let opHours = hour.countif(range1: BX, criteria1: notZero, range2: CC, criteria2: notZero, days: days)
     // COUNTIFS(CalculationCS5:CS8763,"="A6,CalculationBX5:BX8763,">0",CalculationCC5:CC8763,">0")
     for i in 0..<365 { d10[E + i] = opHours[i] }
 
@@ -130,11 +130,11 @@ extension TunOl {
       .map { $0.map { $0 - 262800 } }
 
     let FA: Int = 271560
-    let EX_EZcountZero = hour4.countOf(days, condition: EX, predicate: { $0 <= Double.zero })
+    let EX_EZcountZero = hour4.countif(EX, criteria: { $0 <= Double.zero }, days: days)
 
-    let FA_EZ_countNonZero = hour4.countOf(days, condition: FA, predicate: { 
+    let FA_EZ_countNonZero = hour4.countif(FA, criteria: { 
       $0 > 0 && $0 != Overall_stup_cons && $0 != Overall_stby_cons
-    })
+    }, days: days)
     /// Nr of hours outside of harm op period after max night prep
     let T: Int = 5840
     // Nr of outside harm op period op hours after max outside harm op period prep
@@ -143,12 +143,12 @@ extension TunOl {
       d10[T + i] = min(FA_EZ_countNonZero[i], EX_EZcountZero[i])
     }
 
-    let EX_EZcountNonZero = hour4.countOf(days, condition: EX, predicate: notZero)
+    let EX_EZcountNonZero = hour4.countif(EX, criteria: notZero, days: days)
     /// Nr of harm op period hours after max night prep
     let U: Int = 6205
     // COUNTIFS(CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,">0")
     for i in 0..<365 { d10[U + i] = EX_EZcountNonZero[i] }
-    let EH_EZcountNonZero = hour4.countOf(days, condition: EH, predicate: notZero)
+    let EH_EZcountNonZero = hour4.countif(EH, criteria: notZero, days: days)
     /// Nr of PB op hours after max night prep
     let V: Int = 6570
     // COUNTIFS(CalculationEZ5:EZ8763,"="A6,CalculationEH5:EH8763,">0")
@@ -157,7 +157,7 @@ extension TunOl {
     let I: Int = 2190
     /// Electricity consumption outside harm op period in case no op outside harm op period. After column V
     let G: Int = 1460
-    let EX_EZbelowZero = hour4.countOf(days, condition: EX, predicate: { $0 <= 0 })
+    let EX_EZbelowZero = hour4.countif(EX, criteria: { $0 <= 0 }, days: days)
     for i in 0..<365 {
       // G=(A_overall_var_min_cons+A_overall_fix_stby_cons)*IF(T3>0,T3,COUNTIFS(Calculation!$EZ$5:$EZ$8764,"="&$A3,Calculation!$EX$5:$EX$8764,"<=0"))+A_overall_stup_cons
       d10[G + i] = (overall_var_min_cons[j] + overall_fix_stby_cons[j]) * iff(d10[T + i] > Double.zero,d10[T + i], EX_EZbelowZero[i]) + overall_stup_cons[j]
@@ -369,167 +369,167 @@ extension TunOl {
 
     let CO: Int = 744600
     // SUMIFS(Calculation!CO5:CO8764,Calculation!CS$5:CS8764,"="&$A6,Calculation!CQ5:CQ8764,">0")
-    hour.sumOf(CO, days: days, into: &d11, at: EY, condition: CQ, predicate: notZero)
+    hour.sumifs(CO, days: days, into: &d11, at: EY, range: CQ, criteria: notZero)
     let DU: Int = 1_024_920
     // SUMIFS(Calculation!DU5:DU8764,Calculation!CS5:CS8764,"="&$A6,Calculation!DH5:DH8764,">0")
-    hour.sumOf(DU, days: days, into: &d11, at: EZ, condition: DH, predicate: notZero)
+    hour.sumifs(DU, days: days, into: &d11, at: EZ, range: DH, criteria: notZero)
     /// Grid import for min/max harm and stby outside harm op
     // SUMIF(Calculation!$CS$5:$CS$8764,"="&$A6,Calculation!$CO$5:$CO$8764)-EY6
-    hour.sum(days: days, range: CO, into: &d11, at: FA)
+    hour.sumif(CO, days: days, into: &d11, at: FA)
     for i in 0..<365 { d11[FA + i] -= d11[EY + i] }
     /// El cons considering min harm op during harm op period including grid import
-    hour.sum(days: days, range: CQ, into: &d11, at: FB)
-    hour.sumOf(CT, days: days, into: &d11, at: FC, condition: CQ, predicate: notZero)
+    hour.sumif(CQ, days: days, into: &d11, at: FB)
+    hour.sumifs(CT, days: days, into: &d11, at: FC, range: CQ, criteria: notZero)
     // SUMIF(CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763)+SUMIFS(CalculationCT5:CT8763,CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,">0")
     for i in 0..<365 { d11[FC + i] += d11[FB + i] }
     /// El cons considering max harm op during harm op period including grid import
-    hour.sum(days: days, range: DH, into: &d11, at: FB)
+    hour.sumif(DH, days: days, into: &d11, at: FB)
 
-    hour.sumOf(CT, days: days, into: &d11, at: FD, condition: DH, predicate: notZero)
+    hour.sumifs(CT, days: days, into: &d11, at: FD, range: DH, criteria: notZero)
     for i in 0..<365 { d11[FD + i] += d11[FB + i] }
     for i in 0..<365 { d11[FB + i] = 0 }
     // SUMIF(CalculationCS5:CS8763,"="A6,CalculationDH5:DH8763)+SUMIFS(CalculationCT5:CT8763,CalculationCS5:CS8763,    for i in 0..<365 { d11[FD + i] += d11[FB + i]; d11[FB + i] = 0 }
     /// El cons considering min/max harm op outside  harm op period including grid import (if any)
     let CC: Int = 639480
-    hour.sumOf(CT, days: days, into: &d11, at: FE, condition1: CQ, predicate1: { $0.isZero }, condition2: CC, predicate2: notZero)
+    hour.sumifs(CT, days: days, into: &d11, at: FE, range1: CQ, criteria1: { $0.isZero }, range2: CC, criteria2: notZero)
     // FE=MAX(0,SUMIFS(Calculation!$CT$5:$CT$8764,Calculation!$CS$5:$CS$8764,"="&$A3,Calculation!$CQ$5:$CQ$8764,"=0",Calculation!$CC$5:$CC$8764,">0")-A_overall_stup_cons)
     for i in 0..<365 { d11[FE + i] = max(Double.zero, d11[FE + i] - overall_stup_cons[j]) }
     /// Harm heat cons considering min harm op during harm op period
-    // hour.sum(days: days, range: CR, into: &d11, at: FB)
-    // hour.sumOf(CU, days: days, into: &d11, at: FF, condition: CQ, predicate: notZero)
+    // hour.sumif(CR, days: days, into: &d11, at: FB)
+    // hour.sumifs(CU, days: days, into: &d11, at: FF, range: CQ, criteria: notZero)
     // SUMIF(CalculationCS5:CS8763,"="A6,CalculationCR5:CR8763)+SUMIFS(CalculationCU5:CU8763,CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,">0")
     // for i in 0..<365 { d11[FF + i] += d11[FB + i]; d11[FB + i] = 0 }
     /// Harm heat cons considering max harm op during harm op period
     // SUMIF(CalculationCS5:CS8763,"="A6,CalculationDI5:DI8763)+SUMIFS(CalculationCU5:CU8763,CalculationCS5:CS8763,"="A6,CalculationDH5:DH8763,">0")
-    // hour.sum(days: days, range: DI, into: &d11, at: FB)
-    // hour.sumOf(CU, days: days, into: &d11, at: FG, condition: DH, predicate: notZero)
+    // hour.sumif(DI, days: days, into: &d11, at: FB)
+    // hour.sumifs(CU, days: days, into: &d11, at: FG, range: DH, criteria: notZero)
     // for i in 0..<365 { d11[FG + i] += d11[FB + i]; d11[FB + i] = 0 }
     /// Harm heat cons outside of harm op period
     // SUMIFS(CalculationCU5:CU8763,CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,"=0")
-    // hour.sumOf(CU, days: days, into: &d11, at: FH, condition: CQ, predicate: { $0.isZero })
+    // hour.sumifs(CU, days: days, into: &d11, at: FH, range: CQ, criteria: { $0.isZero })
     /// Electr demand not covered after min harm and stby during harm op period
     // SUMIFS(CalculationCX5:CX8763,CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,">0")
-    // hour.sumOf(CX, days: days, into: &d11, at: FI, condition: CQ, predicate: notZero)
+    // hour.sumifs(CX, days: days, into: &d11, at: FI, range: CQ, criteria: notZero)
     /// Electr demand not covered after max harm and stby during harm op period
     // SUMIFS(CalculationDL5:DL8763,CalculationCS5:CS8763,"="A6,CalculationDH5:DH8763,">0")
-    // hour.sumOf(DL, days: days, into: &d11, at: FJ, condition: DH, predicate: notZero)
+    // hour.sumifs(DL, days: days, into: &d11, at: FJ, range: DH, criteria: notZero)
     /// Electr demand not covered after min/max harm and stby outside harm op period
     // =SUMIFS(Calculation!$CX$5:$CX$8764,Calculation!$CS$5:$CS$8764,"="&$A3,Calculation!$CQ$5:$CQ$8764,"=0")
-    hour.sumOf(CX, days: days, into: &d11, at: FK, condition: CQ, predicate: { $0.isZero })
+    hour.sumifs(CX, days: days, into: &d11, at: FK, range: CQ, criteria: { $0.isZero })
     /// El boiler op considering min harm op during harm op period
     // // FL=SUMIFS(Calculation!$TH$5:$TH$8764,Calculation!$CS$5:$CS$8764,"="&$A3,Calculation!$CQ$5:$CQ$8764,">0")
-    hour.sumOf(TH, days: days, into: &d11, at: FL, condition: CQ, predicate: notZero)
+    hour.sumifs(TH, days: days, into: &d11, at: FL, range: CQ, criteria: notZero)
     /// El boiler op considering max harm op during harm op period
     // FM=SUMIFS(Calculation!$TI$5:$TI$8764,Calculation!$CS$5:$CS$8764,"="&$A3,Calculation!$DH$5:$DH$8764,">0")
-    hour.sumOf(TI, days: days, into: &d11, at: FM, condition: DH, predicate: notZero)
+    hour.sumifs(TI, days: days, into: &d11, at: FM, range: DH, criteria: notZero)
     /// El boiler op outside harm op period
     // FN=SUMIFS(Calculation!$TH$5:$TH$8764,Calculation!$CS$5:$CS$8764,"="&$A3,Calculation!$CQ$5:$CQ$8764,"=0")
-    hour.sumOf(TH, days: days, into: &d11, at: FL, condition: CQ, predicate: { $0.isZero })
+    hour.sumifs(TH, days: days, into: &d11, at: FL, range: CQ, criteria: \.isZero)
     /// Total aux cons during harm op period
     // SUMIFS(CalculationCM5:CM8763,CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,">0")
-    // hour.sumOfRanges(CM, days: days, into: &d11, at: FO, range1: hour, condition: CQ, predicate: notZero)
+    // hour.sumOfRanges(CM, days: days, into: &d11, at: FO, range1: hour, range: CQ, criteria: notZero)
     /// Total aux cons outside of harm op period
     // SUMIF(CalculationCS5:CS8763,"="A6,CalculationCM5:CM8763)-FO6
-    // hour.sum(days: days, range: CM, into: &d11, at: FP)
+    // hour.sumif(CM, days: days, into: &d11, at: FP)
     // for i in 0..<365 { d11[FP + i] -= d11[FO + i] }
     /// El cons not covered during harm op period
     // SUMIFS(CalculationCN5:CN8763,CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,">0")
-    // hour.sumOfRanges(CN, days: days, into: &d11, at: FQ, range1: hour, condition: CQ, predicate: notZero)
+    // hour.sumOfRanges(CN, days: days, into: &d11, at: FQ, range1: hour, range: CQ, criteria: notZero)
     /// El cons not covered outside of harm op period
     // SUMIF(CalculationCS5:CS8763,"="A6,CalculationCN5:CN8763)-FQ6
-    // hour.sum(days: days, range: CN, into: &d11, at: FR)
+    // hour.sumif(CN, days: days, into: &d11, at: FR)
     // for i in 0..<365 { d11[FR + i] -= d11[FQ + i] }
     /// Remaining PV el after TES chrg&min harm&aux during harm op period
     // SUMIFS(CalculationCV5:CV8763,CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,">0")
-    hour.sumOf(CV, days: days, into: &d11, at: FS, condition: CQ, predicate: notZero)
+    hour.sumifs(CV, days: days, into: &d11, at: FS, range: CQ, criteria: notZero)
     /// Remaining PV el after TES chrg&max harm&aux op during harm op period
     // SUMIFS(CalculationDJ5:DJ8763,CalculationCS5:CS8763,"="A6,CalculationDH5:DH8763,">0")
-    hour.sumOf(DJ, days: days, into: &d11, at: FT, condition: DH, predicate: notZero)
+    hour.sumifs(DJ, days: days, into: &d11, at: FT, range: DH, criteria: notZero)
     /// Remaining PV el outside of harm op period
     // SUMIF(CalculationCS5:CS8763,"="A6,CalculationCV5:CV8763)-FS6
-    hour.sum(days: days, range: CV, into: &d11, at: FU)
+    hour.sumif(CV, days: days, into: &d11, at: FU)
     for i in 0..<365 { d11[FU + i] -= d11[FS + i] }
     /// Remaining CSP heat after min harm during harm op period
     // SUMIFS(CalculationCW5:CW8763,CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,">0")
-    hour.sumOf(CW, days: days, into: &d11, at: FV, condition: CQ, predicate: notZero)
+    hour.sumifs(CW, days: days, into: &d11, at: FV, range: CQ, criteria: notZero)
     /// Remaining CSP heat after max harm op during harm op period
     // SUMIFS(CalculationDK5:DK8763,CalculationCS5:CS8763,"="A6,CalculationDH5:DH8763,">0")
-    hour.sumOf(DK, days: days, into: &d11, at: FW, condition: DH, predicate: notZero)
+    hour.sumifs(DK, days: days, into: &d11, at: FW, range: DH, criteria: notZero)
     /// Remaining CSP heat outside of harm op period
     // SUMIF(CalculationCS5:CS8763,"="A6,CalculationCW5:CW8763)-FV6
-    hour.sum(days: days, range: CW, into: &d11, at: FX)
+    hour.sumif(CW, days: days, into: &d11, at: FX)
     for i in 0..<365 { d11[FX + i] -= d11[FV + i] }
     /// Max BESS night prep after min harm cons during harm op period
-    hour.sumOf(DE, days: days, into: &d11, at: FY, condition: CQ, predicate: notZero)
+    hour.sumifs(DE, days: days, into: &d11, at: FY, range: CQ, criteria: notZero)
     // MIN(SUMIFS(CalculationDE5:DE8763,CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,">0"),BESS_cap_ud/BESS_chrg_eff)
     for i in 0..<365 { d11[FY + i] = min(d11[FY + i], BESS_cap_ud / BESS_chrg_eff) }
     /// Max BESS night prep after max harm cons during harm op period
-    hour.sumOf(DS, days: days, into: &d11, at: FZ, condition: DH, predicate: notZero)
+    hour.sumifs(DS, days: days, into: &d11, at: FZ, range: DH, criteria: notZero)
     // MIN(SUMIFS(CalculationDS5:DS8763,CalculationCS5:CS8763,"="A6,CalculationDH5:DH8763,">0"),BESS_cap_ud/BESS_chrg_eff)
     for i in 0..<365 { d11[FZ + i] = min(d11[FZ + i], BESS_cap_ud / BESS_chrg_eff) }
     /// Max BESS night prep outside of harm op period
     // =MIN(SUMIFS(Calculation!$DE$5:$DE$8764,Calculation!$CS$5:$CS$8764,"="&$A6,Calculation!$CQ$5:$CQ$8764,"=0"),BESS_cap_ud/BESS_chrg_eff)
-    hour.sumOf(DE, days: days, into: &d11, at: GA, condition: CQ, predicate: { $0.isZero })
+    hour.sumifs(DE, days: days, into: &d11, at: GA, range: CQ, criteria: { $0.isZero })
     for i in 0..<365 { d11[GA + i] = min(d11[GA + i], BESS_cap_ud / BESS_chrg_eff) }
     /// Max grid export after min harm cons during harm op period
     // SUMIFS(CalculationDF5:DF8763,CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,">0")
-    hour.sumOf(DF, days: days, into: &d11, at: GB, condition: CQ, predicate: notZero)
+    hour.sumifs(DF, days: days, into: &d11, at: GB, range: CQ, criteria: notZero)
     /// Max grid export after max harm cons during harm op period
     // SUMIFS(CalculationDT5:DT8763,CalculationCS5:CS8763,"="A6,CalculationDH5:DH8763,">0")
-    hour.sumOf(DT, days: days, into: &d11, at: GC, condition: DH, predicate: notZero)
+    hour.sumifs(DT, days: days, into: &d11, at: GC, range: DH, criteria: notZero)
     /// Max grid export outside of harm op period
     // SUMIF(CalculationCS5:CS8763,"="A6,CalculationDF5:DF8763)-GB6
-    hour.sum(days: days, range: DF, into: &d11, at: GD)
+    hour.sumif(DF, days: days, into: &d11, at: GD)
     for i in 0..<365 { d11[GD + i] -= d11[GB + i] }
     /// Remaining grid import during harm op period after min harm
     // SUMIFS(CalculationCY5:CY8763,CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,">0")
-    hour.sumOf(CY, days: days, into: &d11, at: GE, condition: CQ, predicate: notZero)
+    hour.sumifs(CY, days: days, into: &d11, at: GE, range: CQ, criteria: notZero)
     /// Remaining grid import during harm op period after max harm
     // SUMIFS(CalculationDM5:DM8763,CalculationCS5:CS8763,"="A6,CalculationDH5:DH8763,">0")
-    hour.sumOf(DM, days: days, into: &d11, at: GF, condition: DH, predicate: notZero)
+    hour.sumifs(DM, days: days, into: &d11, at: GF, range: DH, criteria: notZero)
     /// Remaining grid import outside of harm op period
     // SUMIF(CalculationCS5:CS8763,"="A6,CalculationCY5:CY8763)-GE6
-    hour.sum(days: days, range: CY, into: &d11, at: GG)
+    hour.sumif(CY, days: days, into: &d11, at: GG)
     for i in 0..<365 { d11[GG + i] -= d11[GE + i] }
     /// Remaining El boiler cap during harm op period after min harm
     // SUMIFS(CalculationDA5:DA8763,CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,">0")
-    hour.sumOf(DA, days: days, into: &d11, at: GH, condition: CQ, predicate: notZero)
+    hour.sumifs(DA, days: days, into: &d11, at: GH, range: CQ, criteria: notZero)
     /// Remaining El boiler cap during harm op period after max harm
     // SUMIFS(CalculationDO5:DO8763,CalculationCS5:CS8763,"="A6,CalculationDH5:DH8763,">0")
-    hour.sumOf(DO, days: days, into: &d11, at: GI, condition: DH, predicate: notZero)
+    hour.sumifs(DO, days: days, into: &d11, at: GI, range: DH, criteria: notZero)
     /// Remaining El boiler cap outside of harm op period
     // SUMIF(CalculationCS5:CS8763,"="A6,CalculationDA5:DA8763)-GH6
-    //  hour.sum(days: days, range: DA, into: &d11, at: GJ)
+    //  hour.sumif(DA, days: days, into: &d11, at: GJ)
     // for i in 0..<365 { d11[GJ + i] -= d11[GH + i] }
     /// Remaining MethSynt cap during harm op after min harm op
     // SUMIFS(CalculationDB5:DB8763,CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,">0")
-    hour.sumOf(DB, days: days, into: &d11, at: GK, condition: CQ, predicate: notZero)
+    hour.sumifs(DB, days: days, into: &d11, at: GK, range: CQ, criteria: notZero)
     /// Remaining MethSynt cap during harm op period after max harm op
     // SUMIFS(CalculationDP5:DP8763,CalculationCS5:CS8763,"="A6,CalculationDH5:DH8763,">0")
-    hour.sumOf(DP, days: days, into: &d11, at: GL, condition: DH, predicate: notZero)
+    hour.sumifs(DP, days: days, into: &d11, at: GL, range: DH, criteria: notZero)
     /// Remaining MethSynt cap outside of harm op period
     // SUMIF(CalculationCS5:CS8763,"="A6,CalculationDB5:DB8763)-GK6
-    // hour.sum(days: days, range: DB, into: &d11, at: GM)
+    // hour.sumif(DB, days: days, into: &d11, at: GM)
     // for i in 0..<365 { d11[GM + i] -= d11[GK + i] }
     /// Remaining CCU cap during harm op after min harm
     // SUMIFS(CalculationDC5:DC8763,CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,">0")
-    hour.sumOf(DC, days: days, into: &d11, at: GN, condition: CQ, predicate: notZero)
+    hour.sumifs(DC, days: days, into: &d11, at: GN, range: CQ, criteria: notZero)
     /// Remaining CCU cap during harm op after max harm
     // SUMIFS(CalculationDQ5:DQ8763,CalculationCS5:CS8763,"="A6,CalculationDH5:DH8763,">0")
-    hour.sumOf(DQ, days: days, into: &d11, at: GO, condition: DH, predicate: notZero)
+    hour.sumifs(DQ, days: days, into: &d11, at: GO, range: DH, criteria: notZero)
     /// Remaining CCU cap outside of harm op after min harm
     // SUMIF(CalculationCS5:CS8763,"="A6,CalculationDC5:DC8763)-GN6
-    // hour.sum(days: days, range: DC, into: &d11, at: GP)
+    // hour.sumif(DC, days: days, into: &d11, at: GP)
     // for i in 0..<365 { d11[GP + i] -= d11[GN + i] }
     /// Remaining EY cap during harm op after min harm
     // SUMIFS(CalculationDD5:DD8763,CalculationCS5:CS8763,"="A6,CalculationCQ5:CQ8763,">0")
-    hour.sumOf(DD, days: days, into: &d11, at: GQ, condition: CQ, predicate: notZero)
+    hour.sumifs(DD, days: days, into: &d11, at: GQ, range: CQ, criteria: notZero)
     /// Remaining EY cap during harm op period after max harm
     // SUMIFS(CalculationDR5:DR8763,CalculationCS5:CS8763,"="A6,CalculationDH5:DH8763,">0")
-    hour.sumOf(DR, days: days, into: &d11, at: GR, condition: DH, predicate: notZero)
+    hour.sumifs(DR, days: days, into: &d11, at: GR, range: DH, criteria: notZero)
     /// Remaining EY cap outside of harm op period
     // SUMIF(CalculationCS5:CS8763,"="A6,CalculationDD5:DD8763)-GQ6
-    // hour.sum(days: days, range: DD, into: &d11, at: GS)
+    // hour.sumif(DD, days: days, into: &d11, at: GS)
     // for i in 0..<365 { d11[GS + i] -= d11[GQ + i] }
   }
 
@@ -550,168 +550,168 @@ extension TunOl {
     let TB: Int = 508080
     /// Available elec after TES chrg during harm op period
     // SUMIFS(Calculation!$TB$5:$TB$8764,Calculation!$EZ$5:$EZ$8764,"="A6,Calculation!$EX$5:$EX$8764,">0")
-    hourFinal.sumOf(TB, days: daysEZ, into: &d12, at: GU, condition: EX, predicate: notZero)
+    hourFinal.sumifs(TB, days: daysEZ, into: &d12, at: GU, range: EX, criteria: notZero)
     let TC: Int = 499320
     // SUMIFS(Calculation!$TC$5:$TC$8764,Calculation!$EZ$5:$EZ$8764,"="A6,Calculation!$FO$5:$FO$8764,">0")
-    hourFinal.sumOf(TC, days: daysEZ, into: &d12, at: GV, condition: FO, predicate: notZero)
+    hourFinal.sumifs(TC, days: daysEZ, into: &d12, at: GV, range: FO, criteria: notZero)
     /// Available heat after TES chrg during harm op period
     // SUMIF(Calculation!$EZ$5:$EZ$8764,"="A6,Calculation!$TB$5:$TB$8764)-GU6
-    hourFinal.sum(days: daysEZ, range: TB, into: &d12, at: GW)
+    hourFinal.sumif(TB, days: daysEZ, into: &d12, at: GW)
     // SUMIFS(CalculationJ5:J8763,CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,"=0")+SUMIFS(CalculationEI5:EI8763,CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,"=0")/PB_Ratio_Heat_input_vs_output-SUMIFS(CalculationEQ5:EQ8763,CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,"=0")
     // for i in 0..<365 { d12[GX + i] = EZ_EX_Jsum[i - 1] + EZ_EX_EIsum[i - 1] / PB_Ratio_Heat_input_vs_output - EZ_EX_EQsum[i - 1] }
     /// Harm el cons considering min harm op during harm op period
-    hourFinal.sumOf(FA, days: daysEZ, into: &d12, at: GY, condition: EX, predicate: notZero)
+    hourFinal.sumifs(FA, days: daysEZ, into: &d12, at: GY, range: EX, criteria: notZero)
     // SUMIF(Calculation!EZ$5:EZ8764,"="A6,Calculation!$EX$5:$EX$8764)+SUMIFS(Calculation!FA5:FA8764,Calculation!$EZ$5:$EZ$8764,"="A6,Calculation!$EX$5:$EX$8764,">0")
-    hourFinal.sum(days: daysEZ, range: EX, into: &d12, at: GY)
+    hourFinal.sumif(EX, days: daysEZ, into: &d12, at: GY)
     /// Harm el cons considering max harm op during harm op period
-    hourFinal.sum(days: daysEZ, range: FO, into: &d12, at: GX)
-    hourFinal.sumOf(FA, days: daysEZ, into: &d12, at: GZ, condition: FO, predicate: notZero)
+    hourFinal.sumif(FO, days: daysEZ, into: &d12, at: GX)
+    hourFinal.sumifs(FA, days: daysEZ, into: &d12, at: GZ, range: FO, criteria: notZero)
     // SUMIF(Calculation!$EZ$5:$EZ$8764,"="A6,Calculation!$FO$5:$FO$8764)+SUMIFS(Calculation!$FA$5:$FA$8764,Calculation!$EZ$5:$EZ$8764,"="A6,Calculation!$FO$5:$FO$8764,">0")
     for i in 0..<365 { d12[GZ + i] += d12[GX + i] }
     /// Harm el cons outside of harm op period
     let EJ: Int = 122640
-    hourFinal.sumOf(FA, days: daysEZ, into: &d12, at: HA, condition1: EX, predicate1: { $0.isZero }, condition2: EJ, predicate2: notZero)
+    hourFinal.sumifs(FA, days: daysEZ, into: &d12, at: HA, range1: EX, criteria1: { $0.isZero }, range2: EJ, criteria2: notZero)
     // HA=MAX(0,SUMIFS(Calculation!$FA$5:$FA$8764,Calculation!$EZ$5:$EZ$8764,"="&$A3,Calculation!$EX$5:$EX$8764,"=0",Calculation!$EJ$5:$EJ$8764,">0")-A_overall_stup_cons)
     for i in 0..<365 { d12[HA + i] = max(Double.zero, d12[HA + i] - overall_stup_cons[j]) }
     /// Harm heat cons considering min harm op during harm op period
-    hourFinal.sum(days: daysEZ, range: EY, into: &d12, at: GX)
-    // hourFinal.sumOf(FB, days: daysEZ, into: &d12, at: HB, condition: EX, predicate: notZero)
+    hourFinal.sumif(EY, days: daysEZ, into: &d12, at: GX)
+    // hourFinal.sumifs(FB, days: daysEZ, into: &d12, at: HB, range: EX, criteria: notZero)
     // SUMIF(CalculationEZ5:EZ8763,"="A6,CalculationEY5:EY8763)+SUMIFS(CalculationFB5:FB8763,CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,">0")
 
     /// Harm heat cons considering max harm op during harm op period
-    // hourFinal.sum(days: daysEZ, range: FP, into: &d12, at: GX)
-    // hourFinal.sumOf(FB, days: daysEZ, into: &d12, at: HC, condition: FO, predicate: notZero)
+    // hourFinal.sumif(FP, days: daysEZ, into: &d12, at: GX)
+    // hourFinal.sumifs(FB, days: daysEZ, into: &d12, at: HC, range: FO, criteria: notZero)
     // SUMIF(CalculationEZ5:EZ8763,"="A6,CalculationFP5:FP8763)+SUMIFS(CalculationFB5:FB8763,CalculationEZ5:EZ8763,"="A6,CalculationFO5:FO8763,">0")
     // for i in 0..<365 { d12[HC + i] += d12[GX + i] }
 
     for i in 0..<365 { d12[GX + i] = 0 }
     /// Harm heat cons outside of harm op period
     // SUMIFS(CalculationFB5:FB8763,CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,"=0")
-    hourFinal.sumOf(FB, days: daysEZ, into: &d12, at: HD, condition: EX, predicate: { $0.isZero })
+    hourFinal.sumifs(FB, days: daysEZ, into: &d12, at: HD, range: EX, criteria: { $0.isZero })
     /// Grid import considering min harm op during harm op period
     // SUMIFS(Calculation!$FE$5:$FE$8764,Calculation!$EZ$5:$EZ$8764,"="A6,Calculation!$EX$5:$EX$8764,">0")
-    // hourFinal.sumOf(FE, days: daysEZ, into: &d12, at: HE, condition: EX, predicate: notZero)
+    // hourFinal.sumifs(FE, days: daysEZ, into: &d12, at: HE, range: EX, criteria: notZero)
     /// Grid import considering max harm op during harm op period
     // SUMIFS(Calculation!$FS$5:$FS$8764,Calculation!$EZ$5:$EZ$8764,"="A6,Calculation!$FO$5:$FO$8764,">0")
-    // hourFinal.sumOf(FS, days: daysEZ, into: &d12, at: HF, condition: FO, predicate: notZero)
+    // hourFinal.sumifs(FS, days: daysEZ, into: &d12, at: HF, range: FO, criteria: notZero)
     /// Grid import  outside of harm op period
     // SUMIF(Calculation!$EZ$5:$EZ$8764,"="A6,Calculation!$FE$5:$FE$8764)-HE6
-    hourFinal.sum(days: daysEZ, range: FE, into: &d12, at: HG)
+    hourFinal.sumif(FE, days: daysEZ, into: &d12, at: HG)
     for i in 0..<365 { d12[HG + i] -= d12[HE + i] }
     /// El boiler op considering min harm op during harm op period
     // HH=SUMIFS(Calculation!$TJ$5:$TJ$8764,Calculation!$EZ$5:$EZ$8764,"="&$A3,Calculation!$EX$5:$EX$8764,">0")
-    hourFinal.sumOf(TJ, days: daysEZ, into: &d12, at: HH, condition: EX, predicate: notZero)
+    hourFinal.sumifs(TJ, days: daysEZ, into: &d12, at: HH, range: EX, criteria: notZero)
     /// El boiler op considering max harm op during harm op period
     // HI=SUMIFS(Calculation!$TK$5:$TK$8764,Calculation!$EZ$5:$EZ$8764,"="&$A3,Calculation!$FO$5:$FO$8764,">0")
-    hourFinal.sumOf(TK, days: daysEZ, into: &d12, at: HI, condition: FO, predicate: notZero)
+    hourFinal.sumifs(TK, days: daysEZ, into: &d12, at: HI, range: FO, criteria: notZero)
     /// El boiler op outside harm op period
     // HJ=SUMIFS(Calculation!$TJ$5:$TJ$8764,Calculation!$EZ$5:$EZ$8764,"="&$A3,Calculation!$EX$5:$EX$8764,"=0")
-    hourFinal.sumOf(TJ, days: daysEZ, into: &d12, at: HJ, condition: EX, predicate: { $0.isZero })
+    hourFinal.sumifs(TJ, days: daysEZ, into: &d12, at: HJ, range: EX, criteria: { $0.isZero })
     /// Total aux cons during harm op period
     // SUMIFS(CalculationET5:ET8763,CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,">0")
-    // hourFinal.sumOf(ET, days: daysEZ, into: &d12, at: HK, condition: EX, predicate: notZero)
+    // hourFinal.sumifs(ET, days: daysEZ, into: &d12, at: HK, range: EX, criteria: notZero)
     /// Total aux cons outside of harm op period
     // SUMIF(CalculationEZ5:EZ8763,"="A6,CalculationET5:ET8763)-HK6
-    // hourFinal.sum(days: daysEZ, range: ET, into: &d12, at: HL)
+    // hourFinal.sumif(ET, days: daysEZ, into: &d12, at: HL)
     // for i in 0..<365 { d12[HL + i] -= d12[HK + i] }
     /// El cons not covered during harm op period
     // SUMIFS(CalculationEU5:EU8763,CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,">0")
-    // hourFinal.sumOf(EU, days: daysEZ, into: &d12, at: HM, condition: EX, predicate: notZero)
+    // hourFinal.sumifs(EU, days: daysEZ, into: &d12, at: HM, range: EX, criteria: notZero)
     /// El cons not covered outside of harm op period
     // SUMIF(CalculationEZ5:EZ8763,"="A6,CalculationEU5:EU8763)-HM6
-    // hourFinal.sum(days: daysEZ, range: EU, into: &d12, at: HN)
+    // hourFinal.sumif(EU, days: daysEZ, into: &d12, at: HN)
     // for i in 0..<365 { d12[HN + i] -= d12[HM + i] }
     /// Remaining PV el after TES chrg& min harm&aux during harm op period
     // SUMIFS(CalculationFC5:FC8763,CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,">0")
-    hourFinal.sumOf(FC, days: daysEZ, into: &d12, at: HO, condition: EX, predicate: notZero)
+    hourFinal.sumifs(FC, days: daysEZ, into: &d12, at: HO, range: EX, criteria: notZero)
     /// Remaining PV el after TES chrg& max harm&aux during harm op period
     // SUMIFS(CalculationFQ5:FQ8763,CalculationEZ5:EZ8763,"="A6,CalculationFO5:FO8763,">0")
-    hourFinal.sumOf(FQ, days: daysEZ, into: &d12, at: HP, condition: FO, predicate: notZero)
+    hourFinal.sumifs(FQ, days: daysEZ, into: &d12, at: HP, range: FO, criteria: notZero)
     /// Remaining PV el outside of harm op period
     // SUMIF(CalculationEZ5:EZ8763,"="A6,CalculationFC5:FC8763)-HO6
-    hourFinal.sum(days: daysEZ, range: FC, into: &d12, at: HQ)
+    hourFinal.sumif(FC, days: daysEZ, into: &d12, at: HQ)
     for i in 0..<365 { d12[HQ + i] -= d12[HO + i] }
     /// Remaining CSP heat after min harm during harm op period
     // SUMIFS(CalculationFD5:FD8763,CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,">0")
-    hourFinal.sumOf(FD, days: daysEZ, into: &d12, at: HR, condition: EX, predicate: notZero)
+    hourFinal.sumifs(FD, days: daysEZ, into: &d12, at: HR, range: EX, criteria: notZero)
     /// Remaining CSP heat after max harm op during harm op period
     // SUMIFS(CalculationFR5:FR8763,CalculationEZ5:EZ8763,"="A6,CalculationFO5:FO8763,">0")
-    hourFinal.sumOf(FR, days: daysEZ, into: &d12, at: HS, condition: FO, predicate: notZero)
+    hourFinal.sumifs(FR, days: daysEZ, into: &d12, at: HS, range: FO, criteria: notZero)
     /// Remaining CSP heat outside of harm op period
     // SUMIF(CalculationEZ5:EZ8763,"="A6,CalculationFD5:FD8763)-HR6
-    hourFinal.sum(days: daysEZ, range: FD, into: &d12, at: HT)
+    hourFinal.sumif(FD, days: daysEZ, into: &d12, at: HT)
     for i in 0..<365 { d12[HT + i] -= d12[HR + i] }
     /// Max elec to BESS for night prep after min harm op during harm op period
     // MIN(SUMIFS(CalculationFL5:FL8763,CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,">0"),BESS_cap_ud/BESS_chrg_eff)
-    hourFinal.sumOf(FL, days: daysEZ, into: &d12, at: HU, condition: EX, predicate: notZero)
+    hourFinal.sumifs(FL, days: daysEZ, into: &d12, at: HU, range: EX, criteria: notZero)
     for i in 0..<365 { d12[HU + i] = min(d12[HU + i], BESS_cap_ud / BESS_chrg_eff) }
     /// Max elec to BESS for night prep after max harm op during harm op period
     // MIN(SUMIFS(CalculationFZ5:FZ8763,CalculationEZ5:EZ8763,"="A6,CalculationFO5:FO8763,">0"),BESS_cap_ud/BESS_chrg_eff)
-    hourFinal.sumOf(FZ, days: daysEZ, into: &d12, at: HV, condition: FO, predicate: notZero)
+    hourFinal.sumifs(FZ, days: daysEZ, into: &d12, at: HV, range: FO, criteria: notZero)
     for i in 0..<365 { d12[HV + i] = min(d12[HV + i], BESS_cap_ud / BESS_chrg_eff) }
     /// Max elec to BESS for night prep outside of harm op period
-    hourFinal.sumOf(FL, days: daysEZ, into: &d12, at: HW, condition: EX, predicate: { $0.isZero })
+    hourFinal.sumifs(FL, days: daysEZ, into: &d12, at: HW, range: EX, criteria: { $0.isZero })
     // MIN(SUMIFS(CalculationFL5:FL8763,CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,"=0"),BESS_cap_ud/BESS_chrg_eff)
     for i in 0..<365 { d12[HW + i] = min(d12[HW + i], BESS_cap_ud / BESS_chrg_eff) }
     /// Max grid export after min harm cons during harm op period
     // SUMIFS(CalculationFM5:FM8763,CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,">0")
-    hourFinal.sumOf(FM, days: daysEZ, into: &d12, at: HX, condition: EX, predicate: notZero)
+    hourFinal.sumifs(FM, days: daysEZ, into: &d12, at: HX, range: EX, criteria: notZero)
     /// Max grid export after max harm cons during harm op period
     // SUMIFS(CalculationGA5:GA8763,CalculationEZ5:EZ8763,"="A6,CalculationFO5:FO8763,">0")
-    hourFinal.sumOf(GA, days: daysEZ, into: &d12, at: HY, condition: FO, predicate: notZero)
+    hourFinal.sumifs(GA, days: daysEZ, into: &d12, at: HY, range: FO, criteria: notZero)
     /// Max grid export outside of harm op period
     // SUMIF(CalculationEZ5:EZ8763,"="A6,CalculationFM5:FM8763)-HX6
-    hourFinal.sum(days: daysEZ, range: FM, into: &d12, at: HZ)
+    hourFinal.sumif(FM, days: daysEZ, into: &d12, at: HZ)
     for i in 0..<365 { d12[HZ + i] -= d12[HX + i] }
     /// Remaining grid import during harm op period after min harm
     // SUMIFS(CalculationFF5:FF8763,CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,">0")
-    hourFinal.sumOf(FF, days: daysEZ, into: &d12, at: IA, condition: EX, predicate: notZero)
+    hourFinal.sumifs(FF, days: daysEZ, into: &d12, at: IA, range: EX, criteria: notZero)
     /// Remaining grid import during harm op period after max harm
     // SUMIFS(CalculationFT5:FT8763,CalculationEZ5:EZ8763,"="A6,CalculationFO5:FO8763,">0")
-    hourFinal.sumOf(FT, days: daysEZ, into: &d12, at: IB, condition: FO, predicate: notZero)
+    hourFinal.sumifs(FT, days: daysEZ, into: &d12, at: IB, range: FO, criteria: notZero)
     /// Remaining grid import outside of harm op period
     // SUMIF(CalculationEZ5:EZ8763,"="A6,CalculationFF5:FF8763)-IA6
-    hourFinal.sum(days: daysEZ, range: FF, into: &d12, at: IC)
+    hourFinal.sumif(FF, days: daysEZ, into: &d12, at: IC)
     for i in 0..<365 { d12[IC + i] -= d12[IA + i] }
     /// Remaining El boiler cap during harm op period after min harm
     // SUMIFS(CalculationFH5:FH8763,CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,">0")
-    hourFinal.sumOf(FH, days: daysEZ, into: &d12, at: ID, condition: EX, predicate: notZero)
+    hourFinal.sumifs(FH, days: daysEZ, into: &d12, at: ID, range: EX, criteria: notZero)
     /// Remaining El boiler cap during harm op period after max harm
     // SUMIFS(CalculationFV5:FV8763,CalculationEZ5:EZ8763,"="A6,CalculationFO5:FO8763,">0")
-    hourFinal.sumOf(FV, days: daysEZ, into: &d12, at: IE, condition: FO, predicate: notZero)
+    hourFinal.sumifs(FV, days: daysEZ, into: &d12, at: IE, range: FO, criteria: notZero)
     /// Remaining El boiler cap outside of harm op period
     // SUMIF(CalculationEZ5:EZ8763,"="A6,CalculationFH5:FH8763)-ID6
-    // hourFinal.sum(days: daysEZ, range: FH, into: &d12, at: IF)
+    // hourFinal.sumif(FH, days: daysEZ, into: &d12, at: IF)
     // for i in 0..<365 { d12[IF + i] -= d12[ID + i] }
     /// Remaining MethSynt cap during harm op after min harm op
     // SUMIFS(CalculationFI5:FI8763,CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,">0")
-    hourFinal.sumOf(FI, days: daysEZ, into: &d12, at: IG, condition: EX, predicate: notZero)
+    hourFinal.sumifs(FI, days: daysEZ, into: &d12, at: IG, range: EX, criteria: notZero)
     /// Remaining MethSynt cap during harm op period after max harm op
     // SUMIFS(CalculationFW5:FW8763,CalculationEZ5:EZ8763,"="A6,CalculationFO5:FO8763,">0")
-    hourFinal.sumOf(FW, days: daysEZ, into: &d12, at: IH, condition: FO, predicate: notZero)
+    hourFinal.sumifs(FW, days: daysEZ, into: &d12, at: IH, range: FO, criteria: notZero)
     /// Remaining MethSynt cap outside of harm op period
     // SUMIF(CalculationEZ5:EZ8763,"="A6,CalculationFI5:FI8763)-IG6
-    // hourFinal.sum(days: daysEZ, range: FI, into: &d12, at: II)
+    // hourFinal.sumif(FI, days: daysEZ, into: &d12, at: II)
     // for i in 0..<365 { d12[II + i] -= d12[IG + i] }
     /// Remaining CCU cap during harm op after min harm
     // SUMIFS(CalculationFJ5:FJ8763,CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,">0")
-    hourFinal.sumOf(FJ, days: daysEZ, into: &d12, at: IJ, condition: EX, predicate: notZero)
+    hourFinal.sumifs(FJ, days: daysEZ, into: &d12, at: IJ, range: EX, criteria: notZero)
     /// Remaining CCU cap during harm op after max harm
     // SUMIFS(CalculationFX5:FX8763,CalculationEZ5:EZ8763,"="A6,CalculationFO5:FO8763,">0")
-    hourFinal.sumOf(FX, days: daysEZ, into: &d12, at: IK, condition: FO, predicate: notZero)
+    hourFinal.sumifs(FX, days: daysEZ, into: &d12, at: IK, range: FO, criteria: notZero)
     /// Remaining CCU cap outside of harm op after min harm
     // SUMIF(CalculationEZ5:EZ8763,"="A6,CalculationFJ5:FJ8763)-IJ6
-    // hourFinal.sum(days: daysEZ, range: FJ, into: &d12, at: IL)
+    // hourFinal.sumif(FJ, days: daysEZ, into: &d12, at: IL)
     // for i in 0..<365 { d12[IL + i] -= d12[IJ + i] }
     /// Remaining EY cap during harm op after min harm
     // SUMIFS(CalculationFK5:FK8763,CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,">0")
-    hourFinal.sumOf(FK, days: daysEZ, into: &d12, at: IM, condition: EX, predicate: notZero)
+    hourFinal.sumifs(FK, days: daysEZ, into: &d12, at: IM, range: EX, criteria: notZero)
     /// Remaining EY cap during harm op period after max harm
     // SUMIFS(CalculationFY5:FY8763,CalculationEZ5:EZ8763,"="A6,CalculationFO5:FO8763,">0")
-    hourFinal.sumOf(FY, days: daysEZ, into: &d12, at: IN, condition: FO, predicate: notZero)
+    hourFinal.sumifs(FY, days: daysEZ, into: &d12, at: IN, range: FO, criteria: notZero)
     /// Remaining EY cap outside of harm op period
     // SUMIF(CalculationEZ5:EZ8763,"="A6,CalculationFK5:FK8763)-IM6
-    // hourFinal.sum(days: daysEZ, range: FK, into: &d12, at: IO)
+    // hourFinal.sumif(FK, days: daysEZ, into: &d12, at: IO)
     // for i in 0..<365 { d12[IO + i] -= d12[IM + i] }
   }
 }
