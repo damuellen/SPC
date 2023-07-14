@@ -31,7 +31,7 @@ class SunOlTests: XCTestCase {
       var correct = true, counter = 1
       for i in 1..<8700 {
 
-        if abs(abs(ref[i - 1]) - abs(column[i])) > max(abs(ref[i - 1]) * 0.01, 0.01) {
+        if abs(abs(ref[i - 1]) - abs(column[i])) > max(abs(ref[i - 1]) * 0.001, 0.01) {
           counter += 1; correct = false
           if counter == 2 { print("Calculation \(letter)\(i + 4) proper value: \(String(format: "%.3f", ref[i - 1])) is \(String(format: "%.3", column[i])) [\(index + i)] \(i) div: \(String(format: "%.3f", abs(ref[i - 1]) - abs(column[i])))") }
         }
@@ -44,7 +44,7 @@ class SunOlTests: XCTestCase {
       var correct = true, counter = 1
       for i in 0..<364 {
 
-        if abs(abs(ref[i]) - abs(array[index + i])) > max(abs(ref[i]) * 0.01, 0.01) {
+        if abs(abs(ref[i]) - abs(array[index + i])) > max(abs(ref[i]) * 0.001, 0.01) {
           counter += 1; correct = false
           if counter == 2 { print("Daily1 \(letter)\(i + 3) proper value: \(String(format: "%.3f", ref[i])) is \(String(format: "%.3f", array[index + i])) [\(index + i)] \(i) div: \(ref[i] - array[index + i])") }
         }
@@ -56,7 +56,7 @@ class SunOlTests: XCTestCase {
       let index = index, ref = csv_ref3[letter]
       var correct = true, counter = 1
       for i in 0..<364 {
-        if abs(abs(ref[i]) - abs(array[index + i])) > max(abs(ref[i]) * 0.01, 0.01)  {
+        if abs(abs(ref[i]) - abs(array[index + i])) > max(abs(ref[i]) * 0.001, 0.01)  {
           counter += 1; correct = false
           if counter == 2 { print("Daily2 \(letter)\(i + 3) proper value: \(String(format: "%.3f", ref[i])) is \(String(format: "%.3f", array[index + i])) [\(index + i)] \(i) div: \(ref[i] - array[index + i])") }
         }
@@ -75,17 +75,15 @@ class SunOlTests: XCTestCase {
       return (key, num)
     }
 
-    let values = [
-      123.79, 5032.58, 203.6, 497.95, 773.8, 180, 0, 358.26, 1000, 10000, 100000, 17.14, 108.11, 0, 0, 0,
-    ]
+    let values = [120.00,5000.00,120.00,500.00,700.00,280.00,0.00,300.00,10000.00,10000.00,100000.00,30.00,68.60,0.00,0.00,0.00]
 
     guard let model = TunOl(values) else {
       print("Invalid config")
       return
     }
 
-    var hourPre = [Double](repeating: 0.0, count: 1_086_240)
-    var hourFinal = [Double](repeating: 0.0, count: 516_840)
+    var hourPre = [Double](repeating: 0.0, count: 1103760)
+    var hourFinal = [Double](repeating: 0.0, count: 534360)
     var d10 = [Double](repeating: 0.0, count: 97_090)
     var d23 = [Double](repeating: 0.0, count: 48_545)
     var d21 = [Double](repeating: 0.0, count: 9_855)

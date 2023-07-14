@@ -317,26 +317,33 @@ extension TunOl {
     let CT0: Int = 788400
     let FA: Int = 271560
     let BV0: Int = 578160
-    // FA=IF(OR(EX6>0,EE6=0,MAX(0,IF(EX6>0,Grid_import_yes_no_PB_strategy,Grid_import_yes_no_PB_strategy_outsideharmop)*Grid_import_max_ud-EU6)+EH6+ER6-ET6<A_overall_var_min_cons+A_overall_fix_stby_cons+IF(EX7=0,0,A_overall_stup_cons)),IF(EX6>0,0,IF(EX7=0,Overall_stby_cons,Overall_stup_cons)),MAX(CT6,A_overall_fix_stby_cons+IF(EX7=0,0,A_overall_stup_cons)+A_overall_var_min_cons+(A_overall_var_max_cons-A_overall_var_min_cons)*MIN(1,IFERROR((EH6-BX6+ER6-CK6+MAX(0,Grid_import_yes_no_PB_strategy_outsideharmop*Grid_import_max_ud-EU6)-MAX(0,Grid_import_yes_no_PB_strategy_outsideharmop*Grid_import_max_ud-CN6)-ET6+CM6-EX6+CQ6+(ES6-CL6+(EI6-CB6)/PB_Ratio_Heat_input_vs_output-(EY6-CR6))/El_boiler_eff)/(A_overall_var_max_cons-A_overall_var_min_cons+(A_overall_var_heat_max_cons-A_overall_var_heat_min_cons)/El_boiler_eff),1),IFERROR((EH6-BX6+ER6-CK6+MAX(0,Grid_import_yes_no_PB_strategy_outsideharmop*Grid_import_max_ud-EU6)-MAX(0,Grid_import_yes_no_PB_strategy_outsideharmop*Grid_import_max_ud-CN6)-ET6+CM6-EX6+CQ6)/(A_overall_var_max_cons-A_overall_var_min_cons),1),IFERROR((ES6-CL6+(EI6-CB6)/PB_Ratio_Heat_input_vs_output-EY6+CR6)/(A_overall_var_heat_max_cons-A_overall_var_heat_min_cons),1))))
+    // El cons due to stby & net op outside of harm op period
+    // FA=IF(OR(EX6>0,EE6=0,ROUNDUP(MAX(0,IF(EX6>0,Grid_import_yes_no_PB_strategy,Grid_import_yes_no_PB_strategy_outsideharmop)*Grid_import_max_ud-EU6)+EH6+ER6-ET6,5)<ROUNDDOWN(A_overall_var_min_cons+A_overall_fix_stby_cons+IF(EX7=0,0,A_overall_stup_cons),5)),IF(EX6>0,0,IF(EX7=0,Overall_stby_cons,Overall_stup_cons)),MAX(CT6,A_overall_fix_stby_cons+IF(EX7=0,0,A_overall_stup_cons)+A_overall_var_min_cons+(A_overall_var_max_cons-A_overall_var_min_cons)*MIN(1,IFERROR((EH6-BX6+ER6-CK6+MAX(0,Grid_import_yes_no_PB_strategy_outsideharmop*Grid_import_max_ud-EU6)-MAX(0,Grid_import_yes_no_PB_strategy_outsideharmop*Grid_import_max_ud-CN6)-ET6+CM6-EX6+CQ6+(ES6-CL6+(EI6-CB6)/PB_Ratio_Heat_input_vs_output-(EY6-CR6))/El_boiler_eff)/(A_overall_var_max_cons-A_overall_var_min_cons+(A_overall_var_heat_max_cons-A_overall_var_heat_min_cons)/El_boiler_eff),1),IFERROR((EH6-BX6+ER6-CK6+MAX(0,Grid_import_yes_no_PB_strategy_outsideharmop*Grid_import_max_ud-EU6)-MAX(0,Grid_import_yes_no_PB_strategy_outsideharmop*Grid_import_max_ud-CN6)-ET6+CM6-EX6+CQ6)/(A_overall_var_max_cons-A_overall_var_min_cons),1),IFERROR((ES6-CL6+(EI6-CB6)/PB_Ratio_Heat_input_vs_output-EY6+CR6)/(A_overall_var_heat_max_cons-A_overall_var_heat_min_cons),1))))
     for i in 1..<8760 {
       h[FA + i] = iff(
         or(
           h[EX + i] > Double.zero, h[EE + i] == Double.zero,
-          max(0, iff(h[EX + i] > Double.zero, Grid_import_yes_no_PB_strategy, Grid_import_yes_no_PB_strategy_outsideharmop) * Grid_import_max_ud - h[EU + i]) + h[EH + i] + h[ER + i] - h[ET + i] < overall_var_min_cons[j] + overall_fix_stby_cons[j]
-            + iff(h[EX + i + 1] == Double.zero, 0, overall_stup_cons[j])), iff(h[EX + i] > Double.zero, 0, iff(h[EX + i + 1] == Double.zero, Overall_stby_cons, Overall_stup_cons)),
+          roundUp(
+            max(0, iff(h[EX + i] > Double.zero, Grid_import_yes_no_PB_strategy, Grid_import_yes_no_PB_strategy_outsideharmop) * Grid_import_max_ud - h[EU + i]) + h[EH + i] + h[ER + i]
+              - h[ET + i], 5) < roundDown(overall_var_min_cons[j] + overall_fix_stby_cons[j] + iff(h[EX + i + 1] == Double.zero, 0, overall_stup_cons[j]), 5)),
+        iff(h[EX + i] > Double.zero, 0, iff(h[EX + i + 1] == Double.zero, Overall_stby_cons, Overall_stup_cons)),
         max(
           h0[CT0 + i],
           overall_fix_stby_cons[j] + iff(h[EX + i + 1] == Double.zero, 0, overall_stup_cons[j]) + overall_var_min_cons[j] + (overall_var_max_cons[j] - overall_var_min_cons[j])
             * min(
               1,
               ifFinite(
-                (h[EH + i] - h0[BX0 + i] + h[ER + i] - h0[CK0 + i] + max(0, Grid_import_yes_no_PB_strategy_outsideharmop * Grid_import_max_ud - h[EU + i]) - max(0, Grid_import_yes_no_PB_strategy_outsideharmop * Grid_import_max_ud - h0[CN0 + i])
-                  - h[ET + i] + h0[CM0 + i] - h[EX + i] + h0[CQ0 + i] + (h[ES + i] - h0[CL0 + i] + (h[EI + i] - h0[CB0 + i]) / PB_Ratio_Heat_input_vs_output - (h[EY + i] - h0[CR0 + i])) / El_boiler_eff)
+                (h[EH + i] - h0[BX0 + i] + h[ER + i] - h0[CK0 + i] + max(0, Grid_import_yes_no_PB_strategy_outsideharmop * Grid_import_max_ud - h[EU + i])
+                  - max(0, Grid_import_yes_no_PB_strategy_outsideharmop * Grid_import_max_ud - h0[CN0 + i]) - h[ET + i] + h0[CM0 + i] - h[EX + i] + h0[CQ0 + i]
+                  + (h[ES + i] - h0[CL0 + i] + (h[EI + i] - h0[CB0 + i]) / PB_Ratio_Heat_input_vs_output - (h[EY + i] - h0[CR0 + i])) / El_boiler_eff)
                   / (overall_var_max_cons[j] - overall_var_min_cons[j] + (overall_var_heat_max_cons[j] - overall_var_heat_min_cons[j]) / El_boiler_eff), 1),
               ifFinite(
-                (h[EH + i] - h0[BX0 + i] + h[ER + i] - h0[CK0 + i] + max(0, Grid_import_yes_no_PB_strategy_outsideharmop * Grid_import_max_ud - h[EU + i]) - max(0, Grid_import_yes_no_PB_strategy_outsideharmop * Grid_import_max_ud - h0[CN0 + i])
-                  - h[ET + i] + h0[CM0 + i] - h[EX + i] + h0[CQ0 + i]) / (overall_var_max_cons[j] - overall_var_min_cons[j]), 1),
-              ifFinite((h[ES + i] - h0[CL0 + i] + (h[EI + i] - h0[CB0 + i]) / PB_Ratio_Heat_input_vs_output - h[EY + i] + h0[CR0 + i]) / (overall_var_heat_max_cons[j] - overall_var_heat_min_cons[j]), 1))))
+                (h[EH + i] - h0[BX0 + i] + h[ER + i] - h0[CK0 + i] + max(0, Grid_import_yes_no_PB_strategy_outsideharmop * Grid_import_max_ud - h[EU + i])
+                  - max(0, Grid_import_yes_no_PB_strategy_outsideharmop * Grid_import_max_ud - h0[CN0 + i]) - h[ET + i] + h0[CM0 + i] - h[EX + i] + h0[CQ0 + i])
+                  / (overall_var_max_cons[j] - overall_var_min_cons[j]), 1),
+              ifFinite(
+                (h[ES + i] - h0[CL0 + i] + (h[EI + i] - h0[CB0 + i]) / PB_Ratio_Heat_input_vs_output - h[EY + i] + h0[CR0 + i])
+                  / (overall_var_heat_max_cons[j] - overall_var_heat_min_cons[j]), 1))))
     }
 
     /// TES energy to fulfil op case if above
@@ -364,28 +371,37 @@ extension TunOl {
     let CU0 = 797160
     /// heat cons due to op outside of harm op period
     let FB: Int = 280320
-    // FB=IF(OR(EX6>0,EE6=0,EI6/PB_Ratio_Heat_input_vs_output+ES6+MIN(El_boiler_cap_ud,MAX(0,IF(EX6>0,Grid_import_yes_no_PB_strategy,Grid_import_yes_no_PB_strategy_outsideharmop)*Grid_import_max_ud-EU6)+EH6+ER6-ET6-FA6)*El_boiler_eff<A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons+IF(EX7=0,0,A_overall_heat_stup_cons)),IF(EX6>0,0,IF(EX7=0,Overall_heat_stby_cons,Overall_heat_stup_cons)),MAX(CU6,A_overall_heat_fix_stby_cons+IF(EX7=0,0,A_overall_heat_stup_cons)+A_overall_var_heat_min_cons+(A_overall_var_heat_max_cons-A_overall_var_heat_min_cons)*MIN(1,IFERROR((EH6-BX6+ER6-CK6+MAX(0,Grid_import_yes_no_PB_strategy_outsideharmop*Grid_import_max_ud-EU6)-MAX(0,Grid_import_yes_no_PB_strategy_outsideharmop*Grid_import_max_ud-CN6)-ET6+CM6-EX6+CQ6+(ES6-CL6+(EI6-CB6)/PB_Ratio_Heat_input_vs_output-(EY6-CR6))/El_boiler_eff)/(A_overall_var_max_cons-A_overall_var_min_cons+(A_overall_var_heat_max_cons-A_overall_var_heat_min_cons)/El_boiler_eff),1),IFERROR((EH6-BX6+ER6-CK6+MAX(0,Grid_import_yes_no_PB_strategy_outsideharmop*Grid_import_max_ud-EU6)-MAX(0,Grid_import_yes_no_PB_strategy_outsideharmop*Grid_import_max_ud-CN6)-ET6+CM6-EX6+CQ6)/(A_overall_var_max_cons-A_overall_var_min_cons),1),IFERROR((ES6-CL6+(EI6-CB6)/PB_Ratio_Heat_input_vs_output-EY6+CR6)/(A_overall_var_heat_max_cons-A_overall_var_heat_min_cons),1))))
+    // heat cons due to stby & net op outside of harm op period
+    // FB=IF(OR(EX6>0,EE6=0,ROUNDUP(EI6/PB_Ratio_Heat_input_vs_output+ES6+MIN(El_boiler_cap_ud,MAX(0,IF(EX6>0,Grid_import_yes_no_PB_strategy,Grid_import_yes_no_PB_strategy_outsideharmop)*Grid_import_max_ud-EU6)+EH6+ER6-ET6-FA6)*El_boiler_eff,5)<ROUNDDOWN(A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons+IF(EX7=0,0,A_overall_heat_stup_cons),5)),IF(EX6>0,0,IF(EX7=0,Overall_heat_stby_cons,Overall_heat_stup_cons)),MAX(CU6,A_overall_heat_fix_stby_cons+IF(EX7=0,0,A_overall_heat_stup_cons)+A_overall_var_heat_min_cons+(A_overall_var_heat_max_cons-A_overall_var_heat_min_cons)*MIN(1,IFERROR((EH6-BX6+ER6-CK6+MAX(0,Grid_import_yes_no_PB_strategy_outsideharmop*Grid_import_max_ud-EU6)-MAX(0,Grid_import_yes_no_PB_strategy_outsideharmop*Grid_import_max_ud-CN6)-ET6+CM6-EX6+CQ6+(ES6-CL6+(EI6-CB6)/PB_Ratio_Heat_input_vs_output-(EY6-CR6))/El_boiler_eff)/(A_overall_var_max_cons-A_overall_var_min_cons+(A_overall_var_heat_max_cons-A_overall_var_heat_min_cons)/El_boiler_eff),1),IFERROR((EH6-BX6+ER6-CK6+MAX(0,Grid_import_yes_no_PB_strategy_outsideharmop*Grid_import_max_ud-EU6)-MAX(0,Grid_import_yes_no_PB_strategy_outsideharmop*Grid_import_max_ud-CN6)-ET6+CM6-EX6+CQ6)/(A_overall_var_max_cons-A_overall_var_min_cons),1),IFERROR((ES6-CL6+(EI6-CB6)/PB_Ratio_Heat_input_vs_output-EY6+CR6)/(A_overall_var_heat_max_cons-A_overall_var_heat_min_cons),1))))
     for i in 1..<8760 {
       h[FB + i] = iff(
         or(
           h[EX + i] > Double.zero, h[EE + i] == Double.zero,
-          h[EI + i] / PB_Ratio_Heat_input_vs_output + h[ES + i] + min(
-            El_boiler_cap_ud, max(0, iff(h[EX + i] > Double.zero, Grid_import_yes_no_PB_strategy, Grid_import_yes_no_PB_strategy_outsideharmop) * Grid_import_max_ud - h[EU + i]) + h[EH + i] + h[ER + i] - h[ET + i] - h[FA + i]) * El_boiler_eff
-            < overall_var_heat_min_cons[j] + overall_heat_fix_stby_cons[j] + iff(h[EX + i + 1] == Double.zero, 0, overall_heat_stup_cons[j])),
+          roundUp(
+            h[EI + i] / PB_Ratio_Heat_input_vs_output + h[ES + i] + min(
+              El_boiler_cap_ud,
+              max(0, iff(h[EX + i] > Double.zero, Grid_import_yes_no_PB_strategy, Grid_import_yes_no_PB_strategy_outsideharmop) * Grid_import_max_ud - h[EU + i]) + h[EH + i]
+                + h[ER + i] - h[ET + i] - h[FA + i]) * El_boiler_eff, 5)
+            < roundDown(overall_var_heat_min_cons[j] + overall_heat_fix_stby_cons[j] + iff(h[EX + i + 1] == Double.zero, 0, overall_heat_stup_cons[j]), 5)),
         iff(h[EX + i] > Double.zero, 0, iff(h[EX + i + 1] == Double.zero, Overall_heat_stby_cons, Overall_heat_stup_cons)),
         max(
           h0[CU0 + i],
-          overall_heat_fix_stby_cons[j] + iff(h[EX + i + 1] == Double.zero, 0, overall_heat_stup_cons[j]) + overall_var_heat_min_cons[j] + (overall_var_heat_max_cons[j] - overall_var_heat_min_cons[j])
+          overall_heat_fix_stby_cons[j] + iff(h[EX + i + 1] == Double.zero, 0, overall_heat_stup_cons[j]) + overall_var_heat_min_cons[j]
+            + (overall_var_heat_max_cons[j] - overall_var_heat_min_cons[j])
             * min(
               1,
               ifFinite(
-                (h[EH + i] - h0[BX0 + i] + h[ER + i] - h0[CK0 + i] + max(0, Grid_import_yes_no_PB_strategy_outsideharmop * Grid_import_max_ud - h[EU + i]) - max(0, Grid_import_yes_no_PB_strategy_outsideharmop * Grid_import_max_ud - h0[CN0 + i])
-                  - h[ET + i] + h0[CM0 + i] - h[EX + i] + h0[CQ0 + i] + (h[ES + i] - h0[CL0 + i] + (h[EI + i] - h0[CB0 + i]) / PB_Ratio_Heat_input_vs_output - (h[EY + i] - h0[CR0 + i])) / El_boiler_eff)
+                (h[EH + i] - h0[BX0 + i] + h[ER + i] - h0[CK0 + i] + max(0, Grid_import_yes_no_PB_strategy_outsideharmop * Grid_import_max_ud - h[EU + i])
+                  - max(0, Grid_import_yes_no_PB_strategy_outsideharmop * Grid_import_max_ud - h0[CN0 + i]) - h[ET + i] + h0[CM0 + i] - h[EX + i] + h0[CQ0 + i]
+                  + (h[ES + i] - h0[CL0 + i] + (h[EI + i] - h0[CB0 + i]) / PB_Ratio_Heat_input_vs_output - (h[EY + i] - h0[CR0 + i])) / El_boiler_eff)
                   / (overall_var_max_cons[j] - overall_var_min_cons[j] + (overall_var_heat_max_cons[j] - overall_var_heat_min_cons[j]) / El_boiler_eff), 1),
               ifFinite(
-                (h[EH + i] - h0[BX0 + i] + h[ER + i] - h0[CK0 + i] + max(0, Grid_import_yes_no_PB_strategy_outsideharmop * Grid_import_max_ud - h[EU + i]) - max(0, Grid_import_yes_no_PB_strategy_outsideharmop * Grid_import_max_ud - h0[CN0 + i])
-                  - h[ET + i] + h0[CM0 + i] - h[EX + i] + h0[CQ0 + i]) / (overall_var_max_cons[j] - overall_var_min_cons[j]), 1),
-              ifFinite((h[ES + i] - h0[CL0 + i] + (h[EI + i] - h0[CB0 + i]) / PB_Ratio_Heat_input_vs_output - h[EY + i] + h0[CR0 + i]) / (overall_var_heat_max_cons[j] - overall_var_heat_min_cons[j]), 1))))
+                (h[EH + i] - h0[BX0 + i] + h[ER + i] - h0[CK0 + i] + max(0, Grid_import_yes_no_PB_strategy_outsideharmop * Grid_import_max_ud - h[EU + i])
+                  - max(0, Grid_import_yes_no_PB_strategy_outsideharmop * Grid_import_max_ud - h0[CN0 + i]) - h[ET + i] + h0[CM0 + i] - h[EX + i] + h0[CQ0 + i])
+                  / (overall_var_max_cons[j] - overall_var_min_cons[j]), 1),
+              ifFinite(
+                (h[ES + i] - h0[CL0 + i] + (h[EI + i] - h0[CB0 + i]) / PB_Ratio_Heat_input_vs_output - h[EY + i] + h0[CR0 + i])
+                  / (overall_var_heat_max_cons[j] - overall_var_heat_min_cons[j]), 1))))
     }
 
     /// Remaining el after min harmonious
@@ -431,279 +447,119 @@ extension TunOl {
     // MAX(0,El_boiler_cap_ud-FG6)
     for i in 1..<8760 { h[FH + i] = max(Double.zero, El_boiler_cap_ud - h[FG + i]) }
 
+    let UH: Int = 516_840
+    // UH=IF(EJ6=0,0,MIN(IF((EJ6-A_equiv_harmonious_min_perc)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(A_daytime_cons_per_h_of_max_night_op-A_daytime_cons_per_h_of_min_night_op)+A_daytime_cons_per_h_of_min_night_op+((EJ6-A_equiv_harmonious_min_perc)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(A_daytime_heat_cons_per_h_of_max_night_op-A_daytime_heat_cons_per_h_of_min_night_op)+A_daytime_heat_cons_per_h_of_min_night_op)/El_boiler_eff<=0,9999,MAX(0,FC6+FF6+FD6/El_boiler_eff-IF(EX6=0,A_overall_fix_stby_cons+A_overall_heat_fix_stby_cons/El_boiler_eff))/((EJ6-A_equiv_harmonious_min_perc)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(A_daytime_cons_per_h_of_max_night_op-A_daytime_cons_per_h_of_min_night_op)+A_daytime_cons_per_h_of_min_night_op+((EJ6-A_equiv_harmonious_min_perc)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(A_daytime_heat_cons_per_h_of_max_night_op-A_daytime_heat_cons_per_h_of_min_night_op)+A_daytime_heat_cons_per_h_of_min_night_op)/El_boiler_eff)),IF((EJ6-A_equiv_harmonious_min_perc)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(A_daytime_heat_cons_per_h_of_max_night_op-A_daytime_heat_cons_per_h_of_min_night_op)+A_daytime_heat_cons_per_h_of_min_night_op<=0,9999,MAX(0,FD6+FH6*El_boiler_eff-IF(EX6=0,A_overall_heat_fix_stby_cons))/((EJ6-A_equiv_harmonious_min_perc)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(A_daytime_heat_cons_per_h_of_max_night_op-A_daytime_heat_cons_per_h_of_min_night_op)+A_daytime_heat_cons_per_h_of_min_night_op)),IF((EJ6-A_equiv_harmonious_min_perc)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(A_daytime_cons_per_h_of_max_night_op-A_daytime_cons_per_h_of_min_night_op)+A_daytime_cons_per_h_of_min_night_op<=0,9999,MAX(0,FC6+FF6-IF(EX6=0,A_overall_fix_stby_cons))/((EJ6-A_equiv_harmonious_min_perc)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(A_daytime_cons_per_h_of_max_night_op-A_daytime_cons_per_h_of_min_night_op)+A_daytime_cons_per_h_of_min_night_op))))
+    for i in 1..<8760 {
+      h[UH + i] = iff(
+        h[EJ + i] == Double.zero, 0,
+        min(
+          iff(
+            (h[EJ + i] - equiv_harmonious_min_perc[j]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j])
+              * (daytime_cons_per_h_of_max_night_op[j] - daytime_cons_per_h_of_min_night_op[j]) + daytime_cons_per_h_of_min_night_op[j]
+              + ((h[EJ + i] - equiv_harmonious_min_perc[j]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j])
+                * (daytime_heat_cons_per_h_of_max_night_op[j] - daytime_heat_cons_per_h_of_min_night_op[j]) + daytime_heat_cons_per_h_of_min_night_op[j]) / El_boiler_eff
+              <= Double.zero, 9999,
+            max(0, h[FC + i] + h[FF + i] + h[FD + i] / El_boiler_eff - iff(h[EX + i] == Double.zero, overall_fix_stby_cons[j] + overall_heat_fix_stby_cons[j] / El_boiler_eff))
+              / ((h[EJ + i] - equiv_harmonious_min_perc[j]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j])
+                * (daytime_cons_per_h_of_max_night_op[j] - daytime_cons_per_h_of_min_night_op[j]) + daytime_cons_per_h_of_min_night_op[j]
+                + ((h[EJ + i] - equiv_harmonious_min_perc[j]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j])
+                  * (daytime_heat_cons_per_h_of_max_night_op[j] - daytime_heat_cons_per_h_of_min_night_op[j]) + daytime_heat_cons_per_h_of_min_night_op[j]) / El_boiler_eff)
+          ),
+          iff(
+            (h[EJ + i] - equiv_harmonious_min_perc[j]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j])
+              * (daytime_heat_cons_per_h_of_max_night_op[j] - daytime_heat_cons_per_h_of_min_night_op[j]) + daytime_heat_cons_per_h_of_min_night_op[j] <= Double.zero, 9999,
+            max(0, h[FD + i] + h[FH + i] * El_boiler_eff - iff(h[EX + i] == Double.zero, overall_heat_fix_stby_cons[j]))
+              / ((h[EJ + i] - equiv_harmonious_min_perc[j]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j])
+                * (daytime_heat_cons_per_h_of_max_night_op[j] - daytime_heat_cons_per_h_of_min_night_op[j]) + daytime_heat_cons_per_h_of_min_night_op[j])),
+          iff(
+            (h[EJ + i] - equiv_harmonious_min_perc[j]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j])
+              * (daytime_cons_per_h_of_max_night_op[j] - daytime_cons_per_h_of_min_night_op[j]) + daytime_cons_per_h_of_min_night_op[j] <= Double.zero, 9999,
+            max(0, h[FC + i] + h[FF + i] - iff(h[EX + i] == Double.zero, overall_fix_stby_cons[j]))
+              / ((h[EJ + i] - equiv_harmonious_min_perc[j]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j])
+                * (daytime_cons_per_h_of_max_night_op[j] - daytime_cons_per_h_of_min_night_op[j]) + daytime_cons_per_h_of_min_night_op[j]))))
+    }
+    
     /// Remaining MethSynt cap after min harmonious cons
     let FI: Int = 341640
     /// Remaining CCU cap after min harmonious cons
     let FJ: Int = 350400
     /// Remaining EY cap after min harmonious cons
     let FK: Int = 359160
-    let noCons = (Hydrogen_max_cons[j] + RawMeth_max_cons[j]).isZero
-    let noCO2 = (CO2_max_cons[j] + RawMeth_max_cons[j]).isZero
-
     // Remaining MethSynt cap after meth prod & stby
-    // FI=MethSynt_RawMeth_nom_prod_ud*IF(AND(EX6=0,MIN(1,MAX(0,1-((MAX(0,EX6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(MethSynt_harmonious_max_perc-MethSynt_harmonious_min_perc)+MethSynt_harmonious_min_perc)),MAX(0,A_RawMeth_max_cons/MethSynt_RawMeth_nom_prod_ud*MIN(IF(A_daytime_cons_per_h_of_night_op+A_daytime_heat_cons_per_h_of_night_op/El_boiler_eff<=0,9999,MAX(0,FC6+FF6+FD6/El_boiler_eff-IF(EX6=0,IF(A_RawMeth_max_cons=0,0,MethSynt_fix_cons-MethSynt_heat_fix_prod/El_boiler_eff)+IF(A_CO2_max_cons+A_RawMeth_max_cons=0,0,CCU_fix_cons+CCU_heat_fix_cons/El_boiler_eff)+IF(A_Hydrogen_max_cons+A_RawMeth_max_cons=0,0,EY_fix_cons+EY_heat_fix_cons/El_boiler_eff)))/(A_daytime_cons_per_h_of_night_op+A_daytime_heat_cons_per_h_of_night_op/El_boiler_eff)),IF(A_daytime_heat_cons_per_h_of_night_op<=0,9999,MAX(0,FD6+FH6*El_boiler_eff-IF(EX6=0,IF(A_RawMeth_max_cons=0,0,-MethSynt_heat_fix_prod)+IF(A_CO2_max_cons+A_RawMeth_max_cons=0,0,CCU_heat_fix_cons)+IF(A_Hydrogen_max_cons+A_RawMeth_max_cons=0,0,EY_heat_fix_cons)))/A_daytime_heat_cons_per_h_of_night_op),IF(A_daytime_cons_per_h_of_night_op<=0,9999,MAX(0,FC6+FF6-IF(EX6=0,IF(A_RawMeth_max_cons=0,0,MethSynt_fix_cons)+IF(A_CO2_max_cons+A_RawMeth_max_cons=0,0,CCU_fix_cons)+IF(A_Hydrogen_max_cons+A_RawMeth_max_cons=0,0,EY_fix_cons)))/A_daytime_cons_per_h_of_night_op))))<MethSynt_cap_min_perc),0,MIN(1,MAX(0,1-((MAX(0,EX6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(MethSynt_harmonious_max_perc-MethSynt_harmonious_min_perc)+MethSynt_harmonious_min_perc)),MAX(0,A_RawMeth_max_cons/MethSynt_RawMeth_nom_prod_ud*MIN(IF(A_daytime_cons_per_h_of_night_op+A_daytime_heat_cons_per_h_of_night_op/El_boiler_eff<=0,9999,MAX(0,FC6+FF6+FD6/El_boiler_eff-IF(EX6=0,IF(A_RawMeth_max_cons=0,0,MethSynt_fix_cons-MethSynt_heat_fix_prod/El_boiler_eff)+IF(A_CO2_max_cons+A_RawMeth_max_cons=0,0,CCU_fix_cons+CCU_heat_fix_cons/El_boiler_eff)+IF(A_Hydrogen_max_cons+A_RawMeth_max_cons=0,0,EY_fix_cons+EY_heat_fix_cons/El_boiler_eff)))/(A_daytime_cons_per_h_of_night_op+A_daytime_heat_cons_per_h_of_night_op/El_boiler_eff)),IF(A_daytime_heat_cons_per_h_of_night_op<=0,9999,MAX(0,FD6+FH6*El_boiler_eff-IF(EX6=0,IF(A_RawMeth_max_cons=0,0,-MethSynt_heat_fix_prod)+IF(A_CO2_max_cons+A_RawMeth_max_cons=0,0,CCU_heat_fix_cons)+IF(A_Hydrogen_max_cons+A_RawMeth_max_cons=0,0,EY_heat_fix_cons)))/A_daytime_heat_cons_per_h_of_night_op),IF(A_daytime_cons_per_h_of_night_op<=0,9999,MAX(0,FC6+FF6-IF(EX6=0,IF(A_RawMeth_max_cons=0,0,MethSynt_fix_cons)+IF(A_CO2_max_cons+A_RawMeth_max_cons=0,0,CCU_fix_cons)+IF(A_Hydrogen_max_cons+A_RawMeth_max_cons=0,0,EY_fix_cons)))/A_daytime_cons_per_h_of_night_op)))))
+    // FI=MethSynt_RawMeth_nom_prod_ud*IF(OR(UH6 == 9999,AND(EX6=0,((EJ6-A_equiv_harmonious_min_perc)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(A_RawMeth_max_cons-A_RawMeth_min_cons)+A_RawMeth_min_cons)*UH6/MethSynt_RawMeth_nom_prod_ud<MethSynt_cap_min_perc)),0,MIN(1,MAX(0,1-(MAX(0,EX6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(MethSynt_harmonious_max_perc-MethSynt_harmonious_min_perc)+MethSynt_harmonious_min_perc),((EJ6-A_equiv_harmonious_min_perc)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(A_RawMeth_max_cons-A_RawMeth_min_cons)+A_RawMeth_min_cons)*UH6/MethSynt_RawMeth_nom_prod_ud))
     for i in 1..<8760 {
       h[FI + i] =
         MethSynt_RawMeth_nom_prod_ud
         * iff(
-          and(
-            h[EX + i] == Double.zero,
-            min(
-              1,
-              max(
-                0,
-                1
-                  - ((max(0, h[EX + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons) / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
-                    * (MethSynt_harmonious_max_perc - MethSynt_harmonious_min_perc) + MethSynt_harmonious_min_perc)),
-              max(
-                0,
-                RawMeth_max_cons[j] / MethSynt_RawMeth_nom_prod_ud
-                  * min(
-                    iff(
-                      daytime_cons_per_h_of_night_op[j] + daytime_heat_cons_per_h_of_night_op[j] / El_boiler_eff <= Double.zero, 9999,
-                      max(
-                        0,
-                        h[FC + i] + h[FF + i] + h[FD + i] / El_boiler_eff
-                          - iff(
-                            h[EX + i] == Double.zero,
-                            iff(RawMeth_max_cons[j] == Double.zero, 0, MethSynt_fix_cons - MethSynt_heat_fix_prod / El_boiler_eff)
-                              + iff(noCO2, 0, CCU_fix_cons + CCU_heat_fix_cons / El_boiler_eff) + iff(noCons, 0, EY_fix_cons + EY_heat_fix_cons / El_boiler_eff)))
-                        / (daytime_cons_per_h_of_night_op[j] + daytime_heat_cons_per_h_of_night_op[j] / El_boiler_eff)),
-                    iff(
-                      daytime_heat_cons_per_h_of_night_op[j] <= Double.zero, 9999,
-                      max(
-                        0,
-                        h[FD + i] + h[FH + i] * El_boiler_eff
-                          - iff(
-                            h[EX + i] == Double.zero,
-                            iff(RawMeth_max_cons[j] == Double.zero, 0, -MethSynt_heat_fix_prod) + iff(noCO2, 0, CCU_heat_fix_cons)
-                              + iff(noCons, 0, EY_heat_fix_cons))) / daytime_heat_cons_per_h_of_night_op[j]),
-                    iff(
-                      daytime_cons_per_h_of_night_op[j] <= Double.zero, 9999,
-                      max(
-                        0,
-                        h[FC + i] + h[FF + i]
-                          - iff(
-                            h[EX + i] == Double.zero,
-                            iff(RawMeth_max_cons[j] == Double.zero, 0, MethSynt_fix_cons) + iff(noCO2, 0, CCU_fix_cons) + iff(noCons, 0, EY_fix_cons)))
-                        / daytime_cons_per_h_of_night_op[j])))) < MethSynt_cap_min_perc), 0,
+          or(
+            h[UH + i] == 9999,
+            and(
+              h[EX + i] == Double.zero,
+              ((h[EJ + i] - equiv_harmonious_min_perc[j]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]) * (RawMeth_max_cons[j] - RawMeth_min_cons[j])
+                + RawMeth_min_cons[j]) * h[UH + i] / MethSynt_RawMeth_nom_prod_ud < MethSynt_cap_min_perc)), 0,
           min(
             1,
             max(
               0,
-              1
-                - ((max(0, h[EX + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons) / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
-                  * (MethSynt_harmonious_max_perc - MethSynt_harmonious_min_perc) + MethSynt_harmonious_min_perc)),
-            max(
-              0,
-              RawMeth_max_cons[j] / MethSynt_RawMeth_nom_prod_ud
-                * min(
-                  iff(
-                    daytime_cons_per_h_of_night_op[j] + daytime_heat_cons_per_h_of_night_op[j] / El_boiler_eff <= Double.zero, 9999,
-                    max(
-                      0,
-                      h[FC + i] + h[FF + i] + h[FD + i] / El_boiler_eff
-                        - iff(
-                          h[EX + i] == Double.zero,
-                          iff(RawMeth_max_cons[j] == Double.zero, 0, MethSynt_fix_cons - MethSynt_heat_fix_prod / El_boiler_eff)
-                            + iff(noCO2, 0, CCU_fix_cons + CCU_heat_fix_cons / El_boiler_eff) + iff(noCons, 0, EY_fix_cons + EY_heat_fix_cons / El_boiler_eff)))
-                      / (daytime_cons_per_h_of_night_op[j] + daytime_heat_cons_per_h_of_night_op[j] / El_boiler_eff)),
-                  iff(
-                    daytime_heat_cons_per_h_of_night_op[j] <= Double.zero, 9999,
-                    max(
-                      0,
-                      h[FD + i] + h[FH + i] * El_boiler_eff
-                        - iff(
-                          h[EX + i] == Double.zero,
-                          iff(RawMeth_max_cons[j] == Double.zero, 0, -MethSynt_heat_fix_prod) + iff(noCO2, 0, CCU_heat_fix_cons) + iff(noCons, 0, EY_heat_fix_cons)
-                        )) / daytime_heat_cons_per_h_of_night_op[j]),
-                  iff(
-                    daytime_cons_per_h_of_night_op[j] <= Double.zero, 9999,
-                    max(
-                      0,
-                      h[FC + i] + h[FF + i]
-                        - iff(
-                          h[EX + i] == Double.zero,
-                          iff(RawMeth_max_cons[j] == Double.zero, 0, MethSynt_fix_cons) + iff(noCO2, 0, CCU_fix_cons) + iff(noCons, 0, EY_fix_cons)))
-                      / daytime_cons_per_h_of_night_op[j])))))
+              1 - (max(0, h[EX + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons) / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
+                * (MethSynt_harmonious_max_perc - MethSynt_harmonious_min_perc) + MethSynt_harmonious_min_perc),
+            ((h[EJ + i] - equiv_harmonious_min_perc[j]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]) * (RawMeth_max_cons[j] - RawMeth_min_cons[j])
+              + RawMeth_min_cons[j]) * h[UH + i] / MethSynt_RawMeth_nom_prod_ud))
     }
 
     // Remaining CCU cap after meth prod & stby
-    // FJ=CCU_CO2_nom_prod_ud*IF(AND(EX6=0,MIN(1,MAX(0,1-((MAX(0,EX6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(CCU_harmonious_max_perc-CCU_harmonious_min_perc)+CCU_harmonious_min_perc)),MAX(0,A_CO2_max_cons/CCU_CO2_nom_prod_ud*MIN(IF(A_daytime_cons_per_h_of_night_op+A_daytime_heat_cons_per_h_of_night_op/El_boiler_eff<=0,9999,MAX(0,FC6+FF6+FD6/El_boiler_eff-IF(EX6=0,IF(A_RawMeth_max_cons=0,0,MethSynt_fix_cons-MethSynt_heat_fix_prod/El_boiler_eff)+IF(A_CO2_max_cons+A_RawMeth_max_cons=0,0,CCU_fix_cons+CCU_heat_fix_cons/El_boiler_eff)+IF(A_Hydrogen_max_cons+A_RawMeth_max_cons=0,0,EY_fix_cons+EY_heat_fix_cons/El_boiler_eff)))/(A_daytime_cons_per_h_of_night_op+A_daytime_heat_cons_per_h_of_night_op/El_boiler_eff)),IF(A_daytime_heat_cons_per_h_of_night_op<=0,9999,MAX(0,FD6+FH6*El_boiler_eff-IF(EX6=0,IF(A_RawMeth_max_cons=0,0,-MethSynt_heat_fix_prod)+IF(A_CO2_max_cons+A_RawMeth_max_cons=0,0,CCU_heat_fix_cons)+IF(A_Hydrogen_max_cons+A_RawMeth_max_cons=0,0,EY_heat_fix_cons)))/A_daytime_heat_cons_per_h_of_night_op),IF(A_daytime_cons_per_h_of_night_op<=0,9999,MAX(0,FC6+FF6-IF(EX6=0,IF(A_RawMeth_max_cons=0,0,MethSynt_fix_cons)+IF(A_CO2_max_cons+A_RawMeth_max_cons=0,0,CCU_fix_cons)+IF(A_Hydrogen_max_cons+A_RawMeth_max_cons=0,0,EY_fix_cons)))/A_daytime_cons_per_h_of_night_op))))<CCU_cap_min_perc),0,MIN(1,MAX(0,1-((MAX(0,EX6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(CCU_harmonious_max_perc-CCU_harmonious_min_perc)+CCU_harmonious_min_perc)),MAX(0,A_CO2_max_cons/CCU_CO2_nom_prod_ud*MIN(IF(A_daytime_cons_per_h_of_night_op+A_daytime_heat_cons_per_h_of_night_op/El_boiler_eff<=0,9999,MAX(0,FC6+FF6+FD6/El_boiler_eff-IF(EX6=0,IF(A_RawMeth_max_cons=0,0,MethSynt_fix_cons-MethSynt_heat_fix_prod/El_boiler_eff)+IF(A_CO2_max_cons+A_RawMeth_max_cons=0,0,CCU_fix_cons+CCU_heat_fix_cons/El_boiler_eff)+IF(A_Hydrogen_max_cons+A_RawMeth_max_cons=0,0,EY_fix_cons+EY_heat_fix_cons/El_boiler_eff)))/(A_daytime_cons_per_h_of_night_op+A_daytime_heat_cons_per_h_of_night_op/El_boiler_eff)),IF(A_daytime_heat_cons_per_h_of_night_op<=0,9999,MAX(0,FD6+FH6*El_boiler_eff-IF(EX6=0,IF(A_RawMeth_max_cons=0,0,-MethSynt_heat_fix_prod)+IF(A_CO2_max_cons+A_RawMeth_max_cons=0,0,CCU_heat_fix_cons)+IF(A_Hydrogen_max_cons+A_RawMeth_max_cons=0,0,EY_heat_fix_cons)))/A_daytime_heat_cons_per_h_of_night_op),IF(A_daytime_cons_per_h_of_night_op<=0,9999,MAX(0,FC6+FF6-IF(EX6=0,IF(A_RawMeth_max_cons=0,0,MethSynt_fix_cons)+IF(A_CO2_max_cons+A_RawMeth_max_cons=0,0,CCU_fix_cons)+IF(A_Hydrogen_max_cons+A_RawMeth_max_cons=0,0,EY_fix_cons)))/A_daytime_cons_per_h_of_night_op)))))
+    // FJ=CCU_CO2_nom_prod_ud*IF(OR(UH6 == 9999,AND(EX6=0,((EJ6-A_equiv_harmonious_min_perc)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(A_CO2_max_cons-A_CO2_min_cons)+A_CO2_min_cons+((EJ6-A_equiv_harmonious_min_perc)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(A_RawMeth_max_cons-A_RawMeth_min_cons)+A_RawMeth_min_cons)/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_CO2_nom_cons)*UH6/CCU_CO2_nom_prod_ud<CCU_cap_min_perc)),0,MIN(1,MAX(0,1-(MAX(0,EX6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(CCU_harmonious_max_perc-CCU_harmonious_min_perc)+CCU_harmonious_min_perc),((EJ6-A_equiv_harmonious_min_perc)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(A_CO2_max_cons-A_CO2_min_cons)+A_CO2_min_cons+((EJ6-A_equiv_harmonious_min_perc)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(A_RawMeth_max_cons-A_RawMeth_min_cons)+A_RawMeth_min_cons)/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_CO2_nom_cons)*UH6/CCU_CO2_nom_prod_ud))
     for i in 1..<8760 {
       h[FJ + i] =
         CCU_CO2_nom_prod_ud
         * iff(
-          and(
-            h[EX + i] == Double.zero,
-            min(
-              1,
-              max(
-                0,
-                1
-                  - ((max(0, h[EX + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons) / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
-                    * (CCU_harmonious_max_perc - CCU_harmonious_min_perc) + CCU_harmonious_min_perc)),
-              max(
-                0,
-                CO2_max_cons[j] / CCU_CO2_nom_prod_ud
-                  * min(
-                    iff(
-                      daytime_cons_per_h_of_night_op[j] + daytime_heat_cons_per_h_of_night_op[j] / El_boiler_eff <= Double.zero, 9999,
-                      max(
-                        0,
-                        h[FC + i] + h[FF + i] + h[FD + i] / El_boiler_eff
-                          - iff(
-                            h[EX + i] == Double.zero,
-                            iff(RawMeth_max_cons[j] == Double.zero, 0, MethSynt_fix_cons - MethSynt_heat_fix_prod / El_boiler_eff)
-                              + iff(noCO2, 0, CCU_fix_cons + CCU_heat_fix_cons / El_boiler_eff) + iff(noCons, 0, EY_fix_cons + EY_heat_fix_cons / El_boiler_eff)))
-                        / (daytime_cons_per_h_of_night_op[j] + daytime_heat_cons_per_h_of_night_op[j] / El_boiler_eff)),
-                    iff(
-                      daytime_heat_cons_per_h_of_night_op[j] <= Double.zero, 9999,
-                      max(
-                        0,
-                        h[FD + i] + h[FH + i] * El_boiler_eff
-                          - iff(
-                            h[EX + i] == Double.zero,
-                            iff(RawMeth_max_cons[j] == Double.zero, 0, -MethSynt_heat_fix_prod) + iff(noCO2, 0, CCU_heat_fix_cons)
-                              + iff(noCons, 0, EY_heat_fix_cons))) / daytime_heat_cons_per_h_of_night_op[j]),
-                    iff(
-                      daytime_cons_per_h_of_night_op[j] <= Double.zero, 9999,
-                      max(
-                        0,
-                        h[FC + i] + h[FF + i]
-                          - iff(
-                            h[EX + i] == Double.zero,
-                            iff(RawMeth_max_cons[j] == Double.zero, 0, MethSynt_fix_cons) + iff(noCO2, 0, CCU_fix_cons) + iff(noCons, 0, EY_fix_cons)))
-                        / daytime_cons_per_h_of_night_op[j])))) < CCU_cap_min_perc), 0,
+          or(
+            h[UH + i] == 9999,
+            and(
+              h[EX + i] == Double.zero,
+              ((h[EJ + i] - equiv_harmonious_min_perc[j]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]) * (CO2_max_cons[j] - CO2_min_cons[j]) + CO2_min_cons[j]
+                + ((h[EJ + i] - equiv_harmonious_min_perc[j]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]) * (RawMeth_max_cons[j] - RawMeth_min_cons[j])
+                  + RawMeth_min_cons[j]) / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_CO2_nom_cons)
+                * h[UH + i] / CCU_CO2_nom_prod_ud < CCU_cap_min_perc)), 0,
           min(
             1,
             max(
               0,
-              1
-                - ((max(0, h[EX + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons) / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
-                  * (CCU_harmonious_max_perc - CCU_harmonious_min_perc) + CCU_harmonious_min_perc)),
-            max(
-              0,
-              CO2_max_cons[j] / CCU_CO2_nom_prod_ud
-                * min(
-                  iff(
-                    daytime_cons_per_h_of_night_op[j] + daytime_heat_cons_per_h_of_night_op[j] / El_boiler_eff <= Double.zero, 9999,
-                    max(
-                      0,
-                      h[FC + i] + h[FF + i] + h[FD + i] / El_boiler_eff
-                        - iff(
-                          h[EX + i] == Double.zero,
-                          iff(RawMeth_max_cons[j] == Double.zero, 0, MethSynt_fix_cons - MethSynt_heat_fix_prod / El_boiler_eff)
-                            + iff(noCO2, 0, CCU_fix_cons + CCU_heat_fix_cons / El_boiler_eff) + iff(noCons, 0, EY_fix_cons + EY_heat_fix_cons / El_boiler_eff)))
-                      / (daytime_cons_per_h_of_night_op[j] + daytime_heat_cons_per_h_of_night_op[j] / El_boiler_eff)),
-                  iff(
-                    daytime_heat_cons_per_h_of_night_op[j] <= Double.zero, 9999,
-                    max(
-                      0,
-                      h[FD + i] + h[FH + i] * El_boiler_eff
-                        - iff(
-                          h[EX + i] == Double.zero,
-                          iff(RawMeth_max_cons[j] == Double.zero, 0, -MethSynt_heat_fix_prod) + iff(noCO2, 0, CCU_heat_fix_cons) + iff(noCons, 0, EY_heat_fix_cons)
-                        )) / daytime_heat_cons_per_h_of_night_op[j]),
-                  iff(
-                    daytime_cons_per_h_of_night_op[j] <= Double.zero, 9999,
-                    max(
-                      0,
-                      h[FC + i] + h[FF + i]
-                        - iff(
-                          h[EX + i] == Double.zero,
-                          iff(RawMeth_max_cons[j] == Double.zero, 0, MethSynt_fix_cons) + iff(noCO2, 0, CCU_fix_cons) + iff(noCons, 0, EY_fix_cons)))
-                      / daytime_cons_per_h_of_night_op[j])))))
+              1 - (max(0, h[EX + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons) / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
+                * (CCU_harmonious_max_perc - CCU_harmonious_min_perc) + CCU_harmonious_min_perc),
+            ((h[EJ + i] - equiv_harmonious_min_perc[j]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]) * (CO2_max_cons[j] - CO2_min_cons[j]) + CO2_min_cons[j]
+              + ((h[EJ + i] - equiv_harmonious_min_perc[j]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]) * (RawMeth_max_cons[j] - RawMeth_min_cons[j])
+                + RawMeth_min_cons[j]) / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_CO2_nom_cons)
+              * h[UH + i] / CCU_CO2_nom_prod_ud))
     }
 
     // Remaining EY cap after meth prod & stby
-    // FK=EY_Hydrogen_nom_prod*IF(AND(EX6=0,MIN(1,MAX(0,1-((MAX(0,EX6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(EY_harmonious_max_perc-EY_harmonious_min_perc)+EY_harmonious_min_perc)),MAX(0,A_Hydrogen_max_cons/EY_Hydrogen_nom_prod*MIN(IF(A_daytime_cons_per_h_of_night_op+A_daytime_heat_cons_per_h_of_night_op/El_boiler_eff<=0,9999,MAX(0,FC6+FF6+FD6/El_boiler_eff-IF(EX6=0,IF(A_RawMeth_max_cons=0,0,MethSynt_fix_cons-MethSynt_heat_fix_prod/El_boiler_eff)+IF(A_CO2_max_cons+A_RawMeth_max_cons=0,0,CCU_fix_cons+CCU_heat_fix_cons/El_boiler_eff)+IF(A_Hydrogen_max_cons+A_RawMeth_max_cons=0,0,EY_fix_cons+EY_heat_fix_cons/El_boiler_eff)))/(A_daytime_cons_per_h_of_night_op+A_daytime_heat_cons_per_h_of_night_op/El_boiler_eff)),IF(A_daytime_heat_cons_per_h_of_night_op<=0,9999,MAX(0,FD6+FH6*El_boiler_eff-IF(EX6=0,IF(A_RawMeth_max_cons=0,0,-MethSynt_heat_fix_prod)+IF(A_CO2_max_cons+A_RawMeth_max_cons=0,0,CCU_heat_fix_cons)+IF(A_Hydrogen_max_cons+A_RawMeth_max_cons=0,0,EY_heat_fix_cons)))/A_daytime_heat_cons_per_h_of_night_op),IF(A_daytime_cons_per_h_of_night_op<=0,9999,MAX(0,FC6+FF6-IF(EX6=0,IF(A_RawMeth_max_cons=0,0,MethSynt_fix_cons)+IF(A_CO2_max_cons+A_RawMeth_max_cons=0,0,CCU_fix_cons)+IF(A_Hydrogen_max_cons+A_RawMeth_max_cons=0,0,EY_fix_cons)))/A_daytime_cons_per_h_of_night_op))))<EY_cap_min_perc),0,MIN(1,MAX(0,1-((MAX(0,EX6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(EY_harmonious_max_perc-EY_harmonious_min_perc)+EY_harmonious_min_perc)),MAX(0,A_Hydrogen_max_cons/EY_Hydrogen_nom_prod*MIN(IF(A_daytime_cons_per_h_of_night_op+A_daytime_heat_cons_per_h_of_night_op/El_boiler_eff<=0,9999,MAX(0,FC6+FF6+FD6/El_boiler_eff-IF(EX6=0,IF(A_RawMeth_max_cons=0,0,MethSynt_fix_cons-MethSynt_heat_fix_prod/El_boiler_eff)+IF(A_CO2_max_cons+A_RawMeth_max_cons=0,0,CCU_fix_cons+CCU_heat_fix_cons/El_boiler_eff)+IF(A_Hydrogen_max_cons+A_RawMeth_max_cons=0,0,EY_fix_cons+EY_heat_fix_cons/El_boiler_eff)))/(A_daytime_cons_per_h_of_night_op+A_daytime_heat_cons_per_h_of_night_op/El_boiler_eff)),IF(A_daytime_heat_cons_per_h_of_night_op<=0,9999,MAX(0,FD6+FH6*El_boiler_eff-IF(EX6=0,IF(A_RawMeth_max_cons=0,0,-MethSynt_heat_fix_prod)+IF(A_CO2_max_cons+A_RawMeth_max_cons=0,0,CCU_heat_fix_cons)+IF(A_Hydrogen_max_cons+A_RawMeth_max_cons=0,0,EY_heat_fix_cons)))/A_daytime_heat_cons_per_h_of_night_op),IF(A_daytime_cons_per_h_of_night_op<=0,9999,MAX(0,FC6+FF6-IF(EX6=0,IF(A_RawMeth_max_cons=0,0,MethSynt_fix_cons)+IF(A_CO2_max_cons+A_RawMeth_max_cons=0,0,CCU_fix_cons)+IF(A_Hydrogen_max_cons+A_RawMeth_max_cons=0,0,EY_fix_cons)))/A_daytime_cons_per_h_of_night_op)))))
+    // FK=EY_Hydrogen_nom_prod*IF(OR(UH6 == 9999,AND(EX6=0,((EJ6-A_equiv_harmonious_min_perc)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(A_Hydrogen_max_cons-A_Hydrogen_min_cons)+A_Hydrogen_min_cons+((EJ6-A_equiv_harmonious_min_perc)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(A_RawMeth_max_cons-A_RawMeth_min_cons)+A_RawMeth_min_cons)/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_Hydrogen_nom_cons)*UH6/EY_Hydrogen_nom_prod<EY_cap_min_perc)),0,MIN(1,MAX(0,1-(MAX(0,EX6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(EY_harmonious_max_perc-EY_harmonious_min_perc)+EY_harmonious_min_perc),((EJ6-A_equiv_harmonious_min_perc)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(A_Hydrogen_max_cons-A_Hydrogen_min_cons)+A_Hydrogen_min_cons+((EJ6-A_equiv_harmonious_min_perc)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(A_RawMeth_max_cons-A_RawMeth_min_cons)+A_RawMeth_min_cons)/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_Hydrogen_nom_cons)*UH6/EY_Hydrogen_nom_prod))
     for i in 1..<8760 {
       h[FK + i] =
         EY_Hydrogen_nom_prod
         * iff(
-          and(
-            h[EX + i] == Double.zero,
-            min(
-              1,
-              max(
-                0,
-                1
-                  - ((max(0, h[EX + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons) / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
-                    * (EY_harmonious_max_perc - EY_harmonious_min_perc) + EY_harmonious_min_perc)),
-              max(
-                0,
-                Hydrogen_max_cons[j] / EY_Hydrogen_nom_prod
-                  * min(
-                    iff(
-                      daytime_cons_per_h_of_night_op[j] + daytime_heat_cons_per_h_of_night_op[j] / El_boiler_eff <= Double.zero, 9999,
-                      max(
-                        0,
-                        h[FC + i] + h[FF + i] + h[FD + i] / El_boiler_eff
-                          - iff(
-                            h[EX + i] == Double.zero,
-                            iff(RawMeth_max_cons[j] == Double.zero, 0, MethSynt_fix_cons - MethSynt_heat_fix_prod / El_boiler_eff)
-                              + iff(noCO2, 0, CCU_fix_cons + CCU_heat_fix_cons / El_boiler_eff) + iff(noCons, 0, EY_fix_cons + EY_heat_fix_cons / El_boiler_eff)))
-                        / (daytime_cons_per_h_of_night_op[j] + daytime_heat_cons_per_h_of_night_op[j] / El_boiler_eff)),
-                    iff(
-                      daytime_heat_cons_per_h_of_night_op[j] <= Double.zero, 9999,
-                      max(
-                        0,
-                        h[FD + i] + h[FH + i] * El_boiler_eff
-                          - iff(
-                            h[EX + i] == Double.zero,
-                            iff(RawMeth_max_cons[j] == Double.zero, 0, -MethSynt_heat_fix_prod) + iff(noCO2, 0, CCU_heat_fix_cons)
-                              + iff(noCons, 0, EY_heat_fix_cons))) / daytime_heat_cons_per_h_of_night_op[j]),
-                    iff(
-                      daytime_cons_per_h_of_night_op[j] <= Double.zero, 9999,
-                      max(
-                        0,
-                        h[FC + i] + h[FF + i]
-                          - iff(
-                            h[EX + i] == Double.zero,
-                            iff(RawMeth_max_cons[j] == Double.zero, 0, MethSynt_fix_cons) + iff(noCO2, 0, CCU_fix_cons) + iff(noCons, 0, EY_fix_cons)))
-                        / daytime_cons_per_h_of_night_op[j])))) < EY_cap_min_perc), 0,
+          or(
+            h[UH + i] == 9999,
+            and(
+              h[EX + i] == Double.zero,
+              ((h[EJ + i] - equiv_harmonious_min_perc[j]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]) * (Hydrogen_max_cons[j] - Hydrogen_min_cons[j])
+                + Hydrogen_min_cons[j]
+                + ((h[EJ + i] - equiv_harmonious_min_perc[j]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]) * (RawMeth_max_cons[j] - RawMeth_min_cons[j])
+                  + RawMeth_min_cons[j]) / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_Hydrogen_nom_cons)
+                * h[UH + i] / EY_Hydrogen_nom_prod < EY_cap_min_perc)), 0,
           min(
             1,
             max(
               0,
-              1
-                - ((max(0, h[EX + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons) / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
-                  * (EY_harmonious_max_perc - EY_harmonious_min_perc) + EY_harmonious_min_perc)),
-            max(
-              0,
-              Hydrogen_max_cons[j] / EY_Hydrogen_nom_prod
-                * min(
-                  iff(
-                    daytime_cons_per_h_of_night_op[j] + daytime_heat_cons_per_h_of_night_op[j] / El_boiler_eff <= Double.zero, 9999,
-                    max(
-                      0,
-                      h[FC + i] + h[FF + i] + h[FD + i] / El_boiler_eff
-                        - iff(
-                          h[EX + i] == Double.zero,
-                          iff(RawMeth_max_cons[j] == Double.zero, 0, MethSynt_fix_cons - MethSynt_heat_fix_prod / El_boiler_eff)
-                            + iff(noCO2, 0, CCU_fix_cons + CCU_heat_fix_cons / El_boiler_eff) + iff(noCons, 0, EY_fix_cons + EY_heat_fix_cons / El_boiler_eff)))
-                      / (daytime_cons_per_h_of_night_op[j] + daytime_heat_cons_per_h_of_night_op[j] / El_boiler_eff)),
-                  iff(
-                    daytime_heat_cons_per_h_of_night_op[j] <= Double.zero, 9999,
-                    max(
-                      0,
-                      h[FD + i] + h[FH + i] * El_boiler_eff
-                        - iff(
-                          h[EX + i] == Double.zero,
-                          iff(RawMeth_max_cons[j] == Double.zero, 0, -MethSynt_heat_fix_prod) + iff(noCO2, 0, CCU_heat_fix_cons) + iff(noCons, 0, EY_heat_fix_cons)
-                        )) / daytime_heat_cons_per_h_of_night_op[j]),
-                  iff(
-                    daytime_cons_per_h_of_night_op[j] <= Double.zero, 9999,
-                    max(
-                      0,
-                      h[FC + i] + h[FF + i]
-                        - iff(
-                          h[EX + i] == Double.zero,
-                          iff(RawMeth_max_cons[j] == Double.zero, 0, MethSynt_fix_cons) + iff(noCO2, 0, CCU_fix_cons) + iff(noCons, 0, EY_fix_cons)))
-                      / daytime_cons_per_h_of_night_op[j])))))
+              1 - (max(0, h[EX + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons) / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
+                * (EY_harmonious_max_perc - EY_harmonious_min_perc) + EY_harmonious_min_perc),
+            ((h[EJ + i] - equiv_harmonious_min_perc[j]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]) * (Hydrogen_max_cons[j] - Hydrogen_min_cons[j])
+              + Hydrogen_min_cons[j]
+              + ((h[EJ + i] - equiv_harmonious_min_perc[j]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]) * (RawMeth_max_cons[j] - RawMeth_min_cons[j])
+                + RawMeth_min_cons[j]) / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_Hydrogen_nom_cons)
+              * h[UH + i] / EY_Hydrogen_nom_prod))
     }
-
 
     /// Max BESS charging after min harmonious cons
     let FL: Int = 367920
@@ -814,281 +670,121 @@ extension TunOl {
     // MAX(0,El_boiler_cap_ud-FU6)
     for i in 1..<8760 { h[FV + i] = max(Double.zero, El_boiler_cap_ud - h[FU + i]) }
 
+    let UI: Int = 525_600
+    // UI=IF(EJ6=0,0,MIN(IF((EJ6-A_equiv_harmonious_min_perc)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(A_daytime_cons_per_h_of_max_night_op-A_daytime_cons_per_h_of_min_night_op)+A_daytime_cons_per_h_of_min_night_op+((EJ6-A_equiv_harmonious_min_perc)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(A_daytime_heat_cons_per_h_of_max_night_op-A_daytime_heat_cons_per_h_of_min_night_op)+A_daytime_heat_cons_per_h_of_min_night_op)/El_boiler_eff<=0,9999,MAX(0,FQ6+FT6+FR6/El_boiler_eff-IF(FO6=0,A_overall_fix_stby_cons+A_overall_heat_fix_stby_cons/El_boiler_eff))/((EJ6-A_equiv_harmonious_min_perc)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(A_daytime_cons_per_h_of_max_night_op-A_daytime_cons_per_h_of_min_night_op)+A_daytime_cons_per_h_of_min_night_op+((EJ6-A_equiv_harmonious_min_perc)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(A_daytime_heat_cons_per_h_of_max_night_op-A_daytime_heat_cons_per_h_of_min_night_op)+A_daytime_heat_cons_per_h_of_min_night_op)/El_boiler_eff)),IF(((EJ6-A_equiv_harmonious_min_perc)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(A_daytime_heat_cons_per_h_of_max_night_op-A_daytime_heat_cons_per_h_of_min_night_op)+A_daytime_heat_cons_per_h_of_min_night_op)/El_boiler_eff<=0,9999,MAX(0,FR6+FV6*El_boiler_eff-IF(FO6=0,A_overall_heat_fix_stby_cons))/(((EJ6-A_equiv_harmonious_min_perc)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(A_daytime_heat_cons_per_h_of_max_night_op-A_daytime_heat_cons_per_h_of_min_night_op)+A_daytime_heat_cons_per_h_of_min_night_op)/El_boiler_eff)),IF((EJ6-A_equiv_harmonious_min_perc)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(A_daytime_cons_per_h_of_max_night_op-A_daytime_cons_per_h_of_min_night_op)+A_daytime_cons_per_h_of_min_night_op<=0,9999,MAX(0,FQ6+FT6-IF(FO6=0,A_overall_fix_stby_cons))/((EJ6-A_equiv_harmonious_min_perc)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(A_daytime_cons_per_h_of_max_night_op-A_daytime_cons_per_h_of_min_night_op)+A_daytime_cons_per_h_of_min_night_op))))
+    for i in 1..<8760 {
+      h[UI + i] = iff(
+        h[EJ + i] == Double.zero, 0,
+        min(
+          iff(
+            (h[EJ + i] - equiv_harmonious_min_perc[j]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j])
+              * (daytime_cons_per_h_of_max_night_op[j] - daytime_cons_per_h_of_min_night_op[j]) + daytime_cons_per_h_of_min_night_op[j]
+              + ((h[EJ + i] - equiv_harmonious_min_perc[j]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j])
+                * (daytime_heat_cons_per_h_of_max_night_op[j] - daytime_heat_cons_per_h_of_min_night_op[j]) + daytime_heat_cons_per_h_of_min_night_op[j]) / El_boiler_eff
+              <= Double.zero, 9999,
+            max(0, h[FQ + i] + h[FT + i] + h[FR + i] / El_boiler_eff - iff(h[FO + i] == Double.zero, overall_fix_stby_cons[j] + overall_heat_fix_stby_cons[j] / El_boiler_eff))
+              / ((h[EJ + i] - equiv_harmonious_min_perc[j]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j])
+                * (daytime_cons_per_h_of_max_night_op[j] - daytime_cons_per_h_of_min_night_op[j]) + daytime_cons_per_h_of_min_night_op[j]
+                + ((h[EJ + i] - equiv_harmonious_min_perc[j]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j])
+                  * (daytime_heat_cons_per_h_of_max_night_op[j] - daytime_heat_cons_per_h_of_min_night_op[j]) + daytime_heat_cons_per_h_of_min_night_op[j]) / El_boiler_eff)
+          ),
+          iff(
+            ((h[EJ + i] - equiv_harmonious_min_perc[j]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j])
+              * (daytime_heat_cons_per_h_of_max_night_op[j] - daytime_heat_cons_per_h_of_min_night_op[j]) + daytime_heat_cons_per_h_of_min_night_op[j]) / El_boiler_eff <= Double.zero,
+            9999,
+            max(0, h[FR + i] + h[FV + i] * El_boiler_eff - iff(h[FO + i] == Double.zero, overall_heat_fix_stby_cons[j]))
+              / (((h[EJ + i] - equiv_harmonious_min_perc[j]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j])
+                * (daytime_heat_cons_per_h_of_max_night_op[j] - daytime_heat_cons_per_h_of_min_night_op[j]) + daytime_heat_cons_per_h_of_min_night_op[j]) / El_boiler_eff)),
+          iff(
+            (h[EJ + i] - equiv_harmonious_min_perc[j]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j])
+              * (daytime_cons_per_h_of_max_night_op[j] - daytime_cons_per_h_of_min_night_op[j]) + daytime_cons_per_h_of_min_night_op[j] <= Double.zero, 9999,
+            max(0, h[FQ + i] + h[FT + i] - iff(h[FO + i] == Double.zero, overall_fix_stby_cons[j]))
+              / ((h[EJ + i] - equiv_harmonious_min_perc[j]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j])
+                * (daytime_cons_per_h_of_max_night_op[j] - daytime_cons_per_h_of_min_night_op[j]) + daytime_cons_per_h_of_min_night_op[j]))))
+    }
+
     let TK: Int = FU
     // TK=MAX(0,-ROUND(ES5+EI5/PB_Ratio_Heat_input_vs_output+FU5*El_boiler_eff-FP5-FB5,5))
     for i in 1..<8760 { h[TK + i] = max(Double.zero, -(h[ES + i] + h[EI + i] / PB_Ratio_Heat_input_vs_output + h[FU + i] * El_boiler_eff - h[FP + i] - h[FB + i])) }
 
-    /// Remaining MethSynt cap after max harmonious cons
     let FW: Int = 464280
-    /// Remaining CCU cap after max harmonious cons
     let FX: Int = 473040
-    /// Remaining EY cap after max harmonious cons
     let FY: Int = 481800
- 
     // Remaining MethSynt cap after meth prod & stby
-    // FW=MethSynt_RawMeth_nom_prod_ud*IF(AND(FO6=0,MIN(1,MAX(0,1-((MAX(0,FO6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(MethSynt_harmonious_max_perc-MethSynt_harmonious_min_perc)+MethSynt_harmonious_min_perc)),MAX(0,A_RawMeth_max_cons/MethSynt_RawMeth_nom_prod_ud*MIN(IF(A_daytime_cons_per_h_of_night_op+A_daytime_heat_cons_per_h_of_night_op/El_boiler_eff<=0,9999,MAX(0,FQ6+FT6+FR6/El_boiler_eff-IF(FO6=0,IF(A_RawMeth_max_cons=0,0,MethSynt_fix_cons-MethSynt_heat_fix_prod/El_boiler_eff)+IF(A_CO2_max_cons+A_RawMeth_max_cons=0,0,CCU_fix_cons+CCU_heat_fix_cons/El_boiler_eff)+IF(A_Hydrogen_max_cons+A_RawMeth_max_cons=0,0,EY_fix_cons+EY_heat_fix_cons/El_boiler_eff)))/(A_daytime_cons_per_h_of_night_op+A_daytime_heat_cons_per_h_of_night_op/El_boiler_eff)),IF(A_daytime_heat_cons_per_h_of_night_op<=0,9999,MAX(0,FR6+FV6*El_boiler_eff-IF(FO6=0,IF(A_RawMeth_max_cons=0,0,-MethSynt_heat_fix_prod)+IF(A_CO2_max_cons+A_RawMeth_max_cons=0,0,CCU_heat_fix_cons)+IF(A_Hydrogen_max_cons+A_RawMeth_max_cons=0,0,EY_heat_fix_cons)))/A_daytime_heat_cons_per_h_of_night_op),IF(A_daytime_cons_per_h_of_night_op<=0,9999,MAX(0,FQ6+FT6-IF(FO6=0,IF(A_RawMeth_max_cons=0,0,MethSynt_fix_cons)+IF(A_CO2_max_cons+A_RawMeth_max_cons=0,0,CCU_fix_cons)+IF(A_Hydrogen_max_cons+A_RawMeth_max_cons=0,0,EY_fix_cons)))/A_daytime_cons_per_h_of_night_op))))<MethSynt_cap_min_perc),0,MIN(1,MAX(0,1-((MAX(0,FO6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(MethSynt_harmonious_max_perc-MethSynt_harmonious_min_perc)+MethSynt_harmonious_min_perc)),MAX(0,A_RawMeth_max_cons/MethSynt_RawMeth_nom_prod_ud*MIN(IF(A_daytime_cons_per_h_of_night_op+A_daytime_heat_cons_per_h_of_night_op/El_boiler_eff<=0,9999,MAX(0,FQ6+FT6+FR6/El_boiler_eff-IF(FO6=0,IF(A_RawMeth_max_cons=0,0,MethSynt_fix_cons-MethSynt_heat_fix_prod/El_boiler_eff)+IF(A_CO2_max_cons+A_RawMeth_max_cons=0,0,CCU_fix_cons+CCU_heat_fix_cons/El_boiler_eff)+IF(A_Hydrogen_max_cons+A_RawMeth_max_cons=0,0,EY_fix_cons+EY_heat_fix_cons/El_boiler_eff)))/(A_daytime_cons_per_h_of_night_op+A_daytime_heat_cons_per_h_of_night_op/El_boiler_eff)),IF(A_daytime_heat_cons_per_h_of_night_op<=0,9999,MAX(0,FR6+FV6*El_boiler_eff-IF(FO6=0,IF(A_RawMeth_max_cons=0,0,-MethSynt_heat_fix_prod)+IF(A_CO2_max_cons+A_RawMeth_max_cons=0,0,CCU_heat_fix_cons)+IF(A_Hydrogen_max_cons+A_RawMeth_max_cons=0,0,EY_heat_fix_cons)))/A_daytime_heat_cons_per_h_of_night_op),IF(A_daytime_cons_per_h_of_night_op<=0,9999,MAX(0,FQ6+FT6-IF(FO6=0,IF(A_RawMeth_max_cons=0,0,MethSynt_fix_cons)+IF(A_CO2_max_cons+A_RawMeth_max_cons=0,0,CCU_fix_cons)+IF(A_Hydrogen_max_cons+A_RawMeth_max_cons=0,0,EY_fix_cons)))/A_daytime_cons_per_h_of_night_op)))))
+    // FW=MethSynt_RawMeth_nom_prod_ud*IF(OR(UI6 == 9999,AND(FO6=0,((EJ6-A_equiv_harmonious_min_perc)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(A_RawMeth_max_cons-A_RawMeth_min_cons)+A_RawMeth_min_cons)*UI6/MethSynt_RawMeth_nom_prod_ud<MethSynt_cap_min_perc)),0,MIN(1,MAX(0,1-(MAX(0,FO6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(MethSynt_harmonious_max_perc-MethSynt_harmonious_min_perc)+MethSynt_harmonious_min_perc),((EJ6-A_equiv_harmonious_min_perc)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(A_RawMeth_max_cons-A_RawMeth_min_cons)+A_RawMeth_min_cons)*UI6/MethSynt_RawMeth_nom_prod_ud))
     for i in 1..<8760 {
       h[FW + i] =
         MethSynt_RawMeth_nom_prod_ud
         * iff(
-          and(
-            h[FO + i] == Double.zero,
-            min(
-              1,
-              max(
-                0,
-                1
-                  - ((max(0, h[FO + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons) / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
-                    * (MethSynt_harmonious_max_perc - MethSynt_harmonious_min_perc) + MethSynt_harmonious_min_perc)),
-              max(
-                0,
-                RawMeth_max_cons[j] / MethSynt_RawMeth_nom_prod_ud
-                  * min(
-                    iff(
-                      daytime_cons_per_h_of_night_op[j] + daytime_heat_cons_per_h_of_night_op[j] / El_boiler_eff <= Double.zero, 9999,
-                      max(
-                        0,
-                        h[FQ + i] + h[FT + i] + h[FR + i] / El_boiler_eff
-                          - iff(
-                            h[FO + i] == Double.zero,
-                            iff(RawMeth_max_cons[j] == Double.zero, 0, MethSynt_fix_cons - MethSynt_heat_fix_prod / El_boiler_eff)
-                              + iff(noCO2, 0, CCU_fix_cons + CCU_heat_fix_cons / El_boiler_eff) + iff(noCons, 0, EY_fix_cons + EY_heat_fix_cons / El_boiler_eff)))
-                        / (daytime_cons_per_h_of_night_op[j] + daytime_heat_cons_per_h_of_night_op[j] / El_boiler_eff)),
-                    iff(
-                      daytime_heat_cons_per_h_of_night_op[j] <= Double.zero, 9999,
-                      max(
-                        0,
-                        h[FR + i] + h[FV + i] * El_boiler_eff
-                          - iff(
-                            h[FO + i] == Double.zero,
-                            iff(RawMeth_max_cons[j] == Double.zero, 0, -MethSynt_heat_fix_prod) + iff(noCO2, 0, CCU_heat_fix_cons)
-                              + iff(noCons, 0, EY_heat_fix_cons))) / daytime_heat_cons_per_h_of_night_op[j]),
-                    iff(
-                      daytime_cons_per_h_of_night_op[j] <= Double.zero, 9999,
-                      max(
-                        0,
-                        h[FQ + i] + h[FT + i]
-                          - iff(
-                            h[FO + i] == Double.zero,
-                            iff(RawMeth_max_cons[j] == Double.zero, 0, MethSynt_fix_cons) + iff(noCO2, 0, CCU_fix_cons) + iff(noCons, 0, EY_fix_cons)))
-                        / daytime_cons_per_h_of_night_op[j])))) < MethSynt_cap_min_perc), 0,
+          or(
+            h[UI + i] == 9999,
+            and(
+              h[FO + i] == Double.zero,
+              ((h[EJ + i] - equiv_harmonious_min_perc[j]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]) * (RawMeth_max_cons[j] - RawMeth_min_cons[j])
+                + RawMeth_min_cons[j]) * h[UI + i] / MethSynt_RawMeth_nom_prod_ud < MethSynt_cap_min_perc)), 0,
           min(
             1,
             max(
               0,
-              1
-                - ((max(0, h[FO + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons) / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
-                  * (MethSynt_harmonious_max_perc - MethSynt_harmonious_min_perc) + MethSynt_harmonious_min_perc)),
-            max(
-              0,
-              RawMeth_max_cons[j] / MethSynt_RawMeth_nom_prod_ud
-                * min(
-                  iff(
-                    daytime_cons_per_h_of_night_op[j] + daytime_heat_cons_per_h_of_night_op[j] / El_boiler_eff <= Double.zero, 9999,
-                    max(
-                      0,
-                      h[FQ + i] + h[FT + i] + h[FR + i] / El_boiler_eff
-                        - iff(
-                          h[FO + i] == Double.zero,
-                          iff(RawMeth_max_cons[j] == Double.zero, 0, MethSynt_fix_cons - MethSynt_heat_fix_prod / El_boiler_eff)
-                            + iff(noCO2, 0, CCU_fix_cons + CCU_heat_fix_cons / El_boiler_eff) + iff(noCons, 0, EY_fix_cons + EY_heat_fix_cons / El_boiler_eff)))
-                      / (daytime_cons_per_h_of_night_op[j] + daytime_heat_cons_per_h_of_night_op[j] / El_boiler_eff)),
-                  iff(
-                    daytime_heat_cons_per_h_of_night_op[j] <= Double.zero, 9999,
-                    max(
-                      0,
-                      h[FR + i] + h[FV + i] * El_boiler_eff
-                        - iff(
-                          h[FO + i] == Double.zero,
-                          iff(RawMeth_max_cons[j] == Double.zero, 0, -MethSynt_heat_fix_prod) + iff(noCO2, 0, CCU_heat_fix_cons) + iff(noCons, 0, EY_heat_fix_cons)
-                        )) / daytime_heat_cons_per_h_of_night_op[j]),
-                  iff(
-                    daytime_cons_per_h_of_night_op[j] <= Double.zero, 9999,
-                    max(
-                      0,
-                      h[FQ + i] + h[FT + i]
-                        - iff(
-                          h[FO + i] == Double.zero,
-                          iff(RawMeth_max_cons[j] == Double.zero, 0, MethSynt_fix_cons) + iff(noCO2, 0, CCU_fix_cons) + iff(noCons, 0, EY_fix_cons)))
-                      / daytime_cons_per_h_of_night_op[j])))))
+              1 - (max(0, h[FO + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons) / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
+                * (MethSynt_harmonious_max_perc - MethSynt_harmonious_min_perc) + MethSynt_harmonious_min_perc),
+            ((h[EJ + i] - equiv_harmonious_min_perc[j]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]) * (RawMeth_max_cons[j] - RawMeth_min_cons[j])
+              + RawMeth_min_cons[j]) * h[UI + i] / MethSynt_RawMeth_nom_prod_ud))
     }
 
     // Remaining CCU cap after meth prod & stby
-    // FX=CCU_CO2_nom_prod_ud*IF(AND(FO6=0,MIN(1,MAX(0,1-((MAX(0,FO6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(CCU_harmonious_max_perc-CCU_harmonious_min_perc)+CCU_harmonious_min_perc)),MAX(0,A_CO2_max_cons/CCU_CO2_nom_prod_ud*MIN(IF(A_daytime_cons_per_h_of_night_op+A_daytime_heat_cons_per_h_of_night_op/El_boiler_eff<=0,9999,MAX(0,FQ6+FT6+FR6/El_boiler_eff-IF(FO6=0,IF(A_RawMeth_max_cons=0,0,MethSynt_fix_cons-MethSynt_heat_fix_prod/El_boiler_eff)+IF(A_CO2_max_cons+A_RawMeth_max_cons=0,0,CCU_fix_cons+CCU_heat_fix_cons/El_boiler_eff)+IF(A_Hydrogen_max_cons+A_RawMeth_max_cons=0,0,EY_fix_cons+EY_heat_fix_cons/El_boiler_eff)))/(A_daytime_cons_per_h_of_night_op+A_daytime_heat_cons_per_h_of_night_op/El_boiler_eff)),IF(A_daytime_heat_cons_per_h_of_night_op<=0,9999,MAX(0,FR6+FV6*El_boiler_eff-IF(FO6=0,IF(A_RawMeth_max_cons=0,0,-MethSynt_heat_fix_prod)+IF(A_CO2_max_cons+A_RawMeth_max_cons=0,0,CCU_heat_fix_cons)+IF(A_Hydrogen_max_cons+A_RawMeth_max_cons=0,0,EY_heat_fix_cons)))/A_daytime_heat_cons_per_h_of_night_op),IF(A_daytime_cons_per_h_of_night_op<=0,9999,MAX(0,FQ6+FT6-IF(FO6=0,IF(A_RawMeth_max_cons=0,0,MethSynt_fix_cons)+IF(A_CO2_max_cons+A_RawMeth_max_cons=0,0,CCU_fix_cons)+IF(A_Hydrogen_max_cons+A_RawMeth_max_cons=0,0,EY_fix_cons)))/A_daytime_cons_per_h_of_night_op))))<CCU_cap_min_perc),0,MIN(1,MAX(0,1-((MAX(0,FO6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(CCU_harmonious_max_perc-CCU_harmonious_min_perc)+CCU_harmonious_min_perc)),MAX(0,A_CO2_max_cons/CCU_CO2_nom_prod_ud*MIN(IF(A_daytime_cons_per_h_of_night_op+A_daytime_heat_cons_per_h_of_night_op/El_boiler_eff<=0,9999,MAX(0,FQ6+FT6+FR6/El_boiler_eff-IF(FO6=0,IF(A_RawMeth_max_cons=0,0,MethSynt_fix_cons-MethSynt_heat_fix_prod/El_boiler_eff)+IF(A_CO2_max_cons+A_RawMeth_max_cons=0,0,CCU_fix_cons+CCU_heat_fix_cons/El_boiler_eff)+IF(A_Hydrogen_max_cons+A_RawMeth_max_cons=0,0,EY_fix_cons+EY_heat_fix_cons/El_boiler_eff)))/(A_daytime_cons_per_h_of_night_op+A_daytime_heat_cons_per_h_of_night_op/El_boiler_eff)),IF(A_daytime_heat_cons_per_h_of_night_op<=0,9999,MAX(0,FR6+FV6*El_boiler_eff-IF(FO6=0,IF(A_RawMeth_max_cons=0,0,-MethSynt_heat_fix_prod)+IF(A_CO2_max_cons+A_RawMeth_max_cons=0,0,CCU_heat_fix_cons)+IF(A_Hydrogen_max_cons+A_RawMeth_max_cons=0,0,EY_heat_fix_cons)))/A_daytime_heat_cons_per_h_of_night_op),IF(A_daytime_cons_per_h_of_night_op<=0,9999,MAX(0,FQ6+FT6-IF(FO6=0,IF(A_RawMeth_max_cons=0,0,MethSynt_fix_cons)+IF(A_CO2_max_cons+A_RawMeth_max_cons=0,0,CCU_fix_cons)+IF(A_Hydrogen_max_cons+A_RawMeth_max_cons=0,0,EY_fix_cons)))/A_daytime_cons_per_h_of_night_op)))))
+    // FX=CCU_CO2_nom_prod_ud*IF(OR(UI6 == 9999,AND(FO6=0,((EJ6-A_equiv_harmonious_min_perc)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(A_CO2_max_cons-A_CO2_min_cons)+A_CO2_min_cons+((EJ6-A_equiv_harmonious_min_perc)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(A_RawMeth_max_cons-A_RawMeth_min_cons)+A_RawMeth_min_cons)/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_CO2_nom_cons)*UI6/CCU_CO2_nom_prod_ud<CCU_cap_min_perc)),0,MIN(1,MAX(0,1-(MAX(0,FO6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(CCU_harmonious_max_perc-CCU_harmonious_min_perc)+CCU_harmonious_min_perc),((EJ6-A_equiv_harmonious_min_perc)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(A_CO2_max_cons-A_CO2_min_cons)+A_CO2_min_cons+((EJ6-A_equiv_harmonious_min_perc)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(A_RawMeth_max_cons-A_RawMeth_min_cons)+A_RawMeth_min_cons)/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_CO2_nom_cons)*UI6/CCU_CO2_nom_prod_ud))
     for i in 1..<8760 {
       h[FX + i] =
         CCU_CO2_nom_prod_ud
         * iff(
-          and(
-            h[FO + i] == Double.zero,
-            min(
-              1,
-              max(
-                0,
-                1
-                  - ((max(0, h[FO + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons) / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
-                    * (CCU_harmonious_max_perc - CCU_harmonious_min_perc) + CCU_harmonious_min_perc)),
-              max(
-                0,
-                CO2_max_cons[j] / CCU_CO2_nom_prod_ud
-                  * min(
-                    iff(
-                      daytime_cons_per_h_of_night_op[j] + daytime_heat_cons_per_h_of_night_op[j] / El_boiler_eff <= Double.zero, 9999,
-                      max(
-                        0,
-                        h[FQ + i] + h[FT + i] + h[FR + i] / El_boiler_eff
-                          - iff(
-                            h[FO + i] == Double.zero,
-                            iff(RawMeth_max_cons[j] == Double.zero, 0, MethSynt_fix_cons - MethSynt_heat_fix_prod / El_boiler_eff)
-                              + iff(noCO2, 0, CCU_fix_cons + CCU_heat_fix_cons / El_boiler_eff) + iff(noCons, 0, EY_fix_cons + EY_heat_fix_cons / El_boiler_eff)))
-                        / (daytime_cons_per_h_of_night_op[j] + daytime_heat_cons_per_h_of_night_op[j] / El_boiler_eff)),
-                    iff(
-                      daytime_heat_cons_per_h_of_night_op[j] <= Double.zero, 9999,
-                      max(
-                        0,
-                        h[FR + i] + h[FV + i] * El_boiler_eff
-                          - iff(
-                            h[FO + i] == Double.zero,
-                            iff(RawMeth_max_cons[j] == Double.zero, 0, -MethSynt_heat_fix_prod) + iff(noCO2, 0, CCU_heat_fix_cons)
-                              + iff(noCons, 0, EY_heat_fix_cons))) / daytime_heat_cons_per_h_of_night_op[j]),
-                    iff(
-                      daytime_cons_per_h_of_night_op[j] <= Double.zero, 9999,
-                      max(
-                        0,
-                        h[FQ + i] + h[FT + i]
-                          - iff(
-                            h[FO + i] == Double.zero,
-                            iff(RawMeth_max_cons[j] == Double.zero, 0, MethSynt_fix_cons) + iff(noCO2, 0, CCU_fix_cons) + iff(noCons, 0, EY_fix_cons)))
-                        / daytime_cons_per_h_of_night_op[j])))) < CCU_cap_min_perc), 0,
+          or(
+            h[UI + i] == 9999,
+            and(
+              h[FO + i] == Double.zero,
+              ((h[EJ + i] - equiv_harmonious_min_perc[j]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]) * (CO2_max_cons[j] - CO2_min_cons[j]) + CO2_min_cons[j]
+                + ((h[EJ + i] - equiv_harmonious_min_perc[j]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]) * (RawMeth_max_cons[j] - RawMeth_min_cons[j])
+                  + RawMeth_min_cons[j]) / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_CO2_nom_cons)
+                * h[UI + i] / CCU_CO2_nom_prod_ud < CCU_cap_min_perc)), 0,
           min(
             1,
             max(
               0,
-              1
-                - ((max(0, h[FO + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons) / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
-                  * (CCU_harmonious_max_perc - CCU_harmonious_min_perc) + CCU_harmonious_min_perc)),
-            max(
-              0,
-              CO2_max_cons[j] / CCU_CO2_nom_prod_ud
-                * min(
-                  iff(
-                    daytime_cons_per_h_of_night_op[j] + daytime_heat_cons_per_h_of_night_op[j] / El_boiler_eff <= Double.zero, 9999,
-                    max(
-                      0,
-                      h[FQ + i] + h[FT + i] + h[FR + i] / El_boiler_eff
-                        - iff(
-                          h[FO + i] == Double.zero,
-                          iff(RawMeth_max_cons[j] == Double.zero, 0, MethSynt_fix_cons - MethSynt_heat_fix_prod / El_boiler_eff)
-                            + iff(noCO2, 0, CCU_fix_cons + CCU_heat_fix_cons / El_boiler_eff) + iff(noCons, 0, EY_fix_cons + EY_heat_fix_cons / El_boiler_eff)))
-                      / (daytime_cons_per_h_of_night_op[j] + daytime_heat_cons_per_h_of_night_op[j] / El_boiler_eff)),
-                  iff(
-                    daytime_heat_cons_per_h_of_night_op[j] <= Double.zero, 9999,
-                    max(
-                      0,
-                      h[FR + i] + h[FV + i] * El_boiler_eff
-                        - iff(
-                          h[FO + i] == Double.zero,
-                          iff(RawMeth_max_cons[j] == Double.zero, 0, -MethSynt_heat_fix_prod) + iff(noCO2, 0, CCU_heat_fix_cons) + iff(noCons, 0, EY_heat_fix_cons)
-                        )) / daytime_heat_cons_per_h_of_night_op[j]),
-                  iff(
-                    daytime_cons_per_h_of_night_op[j] <= Double.zero, 9999,
-                    max(
-                      0,
-                      h[FQ + i] + h[FT + i]
-                        - iff(
-                          h[FO + i] == Double.zero,
-                          iff(RawMeth_max_cons[j] == Double.zero, 0, MethSynt_fix_cons) + iff(noCO2, 0, CCU_fix_cons) + iff(noCons, 0, EY_fix_cons)))
-                      / daytime_cons_per_h_of_night_op[j])))))
+              1 - (max(0, h[FO + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons) / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
+                * (CCU_harmonious_max_perc - CCU_harmonious_min_perc) + CCU_harmonious_min_perc),
+            ((h[EJ + i] - equiv_harmonious_min_perc[j]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]) * (CO2_max_cons[j] - CO2_min_cons[j]) + CO2_min_cons[j]
+              + ((h[EJ + i] - equiv_harmonious_min_perc[j]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]) * (RawMeth_max_cons[j] - RawMeth_min_cons[j])
+                + RawMeth_min_cons[j]) / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_CO2_nom_cons)
+              * h[UI + i] / CCU_CO2_nom_prod_ud))
     }
 
     // Remaining EY cap after meth prod & stby
-    // FY=EY_Hydrogen_nom_prod*IF(AND(FO6=0,MIN(1,MAX(0,1-((MAX(0,FO6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(EY_harmonious_max_perc-EY_harmonious_min_perc)+EY_harmonious_min_perc)),MAX(0,A_Hydrogen_max_cons/EY_Hydrogen_nom_prod*MIN(IF(A_daytime_cons_per_h_of_night_op+A_daytime_heat_cons_per_h_of_night_op/El_boiler_eff<=0,9999,MAX(0,FQ6+FT6+FR6/El_boiler_eff-IF(FO6=0,IF(A_RawMeth_max_cons=0,0,MethSynt_fix_cons-MethSynt_heat_fix_prod/El_boiler_eff)+IF(A_CO2_max_cons+A_RawMeth_max_cons=0,0,CCU_fix_cons+CCU_heat_fix_cons/El_boiler_eff)+IF(A_Hydrogen_max_cons+A_RawMeth_max_cons=0,0,EY_fix_cons+EY_heat_fix_cons/El_boiler_eff)))/(A_daytime_cons_per_h_of_night_op+A_daytime_heat_cons_per_h_of_night_op/El_boiler_eff)),IF(A_daytime_heat_cons_per_h_of_night_op<=0,9999,MAX(0,FR6+FV6*El_boiler_eff-IF(FO6=0,IF(A_RawMeth_max_cons=0,0,-MethSynt_heat_fix_prod)+IF(A_CO2_max_cons+A_RawMeth_max_cons=0,0,CCU_heat_fix_cons)+IF(A_Hydrogen_max_cons+A_RawMeth_max_cons=0,0,EY_heat_fix_cons)))/A_daytime_heat_cons_per_h_of_night_op),IF(A_daytime_cons_per_h_of_night_op<=0,9999,MAX(0,FQ6+FT6-IF(FO6=0,IF(A_RawMeth_max_cons=0,0,MethSynt_fix_cons)+IF(A_CO2_max_cons+A_RawMeth_max_cons=0,0,CCU_fix_cons)+IF(A_Hydrogen_max_cons+A_RawMeth_max_cons=0,0,EY_fix_cons)))/A_daytime_cons_per_h_of_night_op))))<EY_cap_min_perc),0,MIN(1,MAX(0,1-((MAX(0,FO6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(EY_harmonious_max_perc-EY_harmonious_min_perc)+EY_harmonious_min_perc)),MAX(0,A_Hydrogen_max_cons/EY_Hydrogen_nom_prod*MIN(IF(A_daytime_cons_per_h_of_night_op+A_daytime_heat_cons_per_h_of_night_op/El_boiler_eff<=0,9999,MAX(0,FQ6+FT6+FR6/El_boiler_eff-IF(FO6=0,IF(A_RawMeth_max_cons=0,0,MethSynt_fix_cons-MethSynt_heat_fix_prod/El_boiler_eff)+IF(A_CO2_max_cons+A_RawMeth_max_cons=0,0,CCU_fix_cons+CCU_heat_fix_cons/El_boiler_eff)+IF(A_Hydrogen_max_cons+A_RawMeth_max_cons=0,0,EY_fix_cons+EY_heat_fix_cons/El_boiler_eff)))/(A_daytime_cons_per_h_of_night_op+A_daytime_heat_cons_per_h_of_night_op/El_boiler_eff)),IF(A_daytime_heat_cons_per_h_of_night_op<=0,9999,MAX(0,FR6+FV6*El_boiler_eff-IF(FO6=0,IF(A_RawMeth_max_cons=0,0,-MethSynt_heat_fix_prod)+IF(A_CO2_max_cons+A_RawMeth_max_cons=0,0,CCU_heat_fix_cons)+IF(A_Hydrogen_max_cons+A_RawMeth_max_cons=0,0,EY_heat_fix_cons)))/A_daytime_heat_cons_per_h_of_night_op),IF(A_daytime_cons_per_h_of_night_op<=0,9999,MAX(0,FQ6+FT6-IF(FO6=0,IF(A_RawMeth_max_cons=0,0,MethSynt_fix_cons)+IF(A_CO2_max_cons+A_RawMeth_max_cons=0,0,CCU_fix_cons)+IF(A_Hydrogen_max_cons+A_RawMeth_max_cons=0,0,EY_fix_cons)))/A_daytime_cons_per_h_of_night_op)))))
+    // FY=EY_Hydrogen_nom_prod*IF(OR(UI6 == 9999,AND(FO6=0,((EJ6-A_equiv_harmonious_min_perc)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(A_Hydrogen_max_cons-A_Hydrogen_min_cons)+A_Hydrogen_min_cons+((EJ6-A_equiv_harmonious_min_perc)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(A_RawMeth_max_cons-A_RawMeth_min_cons)+A_RawMeth_min_cons)/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_Hydrogen_nom_cons)*UI6/EY_Hydrogen_nom_prod<EY_cap_min_perc)),0,MIN(1,MAX(0,1-(MAX(0,FO6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(EY_harmonious_max_perc-EY_harmonious_min_perc)+EY_harmonious_min_perc),((EJ6-A_equiv_harmonious_min_perc)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(A_Hydrogen_max_cons-A_Hydrogen_min_cons)+A_Hydrogen_min_cons+((EJ6-A_equiv_harmonious_min_perc)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(A_RawMeth_max_cons-A_RawMeth_min_cons)+A_RawMeth_min_cons)/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_Hydrogen_nom_cons)*UI6/EY_Hydrogen_nom_prod))
     for i in 1..<8760 {
       h[FY + i] =
         EY_Hydrogen_nom_prod
         * iff(
-          and(
-            h[FO + i] == Double.zero,
-            min(
-              1,
-              max(
-                0,
-                1
-                  - ((max(0, h[FO + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons) / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
-                    * (EY_harmonious_max_perc - EY_harmonious_min_perc) + EY_harmonious_min_perc)),
-              max(
-                0,
-                Hydrogen_max_cons[j] / EY_Hydrogen_nom_prod
-                  * min(
-                    iff(
-                      daytime_cons_per_h_of_night_op[j] + daytime_heat_cons_per_h_of_night_op[j] / El_boiler_eff <= Double.zero, 9999,
-                      max(
-                        0,
-                        h[FQ + i] + h[FT + i] + h[FR + i] / El_boiler_eff
-                          - iff(
-                            h[FO + i] == Double.zero,
-                            iff(RawMeth_max_cons[j] == Double.zero, 0, MethSynt_fix_cons - MethSynt_heat_fix_prod / El_boiler_eff)
-                              + iff(noCO2, 0, CCU_fix_cons + CCU_heat_fix_cons / El_boiler_eff) + iff(noCons, 0, EY_fix_cons + EY_heat_fix_cons / El_boiler_eff)))
-                        / (daytime_cons_per_h_of_night_op[j] + daytime_heat_cons_per_h_of_night_op[j] / El_boiler_eff)),
-                    iff(
-                      daytime_heat_cons_per_h_of_night_op[j] <= Double.zero, 9999,
-                      max(
-                        0,
-                        h[FR + i] + h[FV + i] * El_boiler_eff
-                          - iff(
-                            h[FO + i] == Double.zero,
-                            iff(RawMeth_max_cons[j] == Double.zero, 0, -MethSynt_heat_fix_prod) + iff(noCO2, 0, CCU_heat_fix_cons)
-                              + iff(noCons, 0, EY_heat_fix_cons))) / daytime_heat_cons_per_h_of_night_op[j]),
-                    iff(
-                      daytime_cons_per_h_of_night_op[j] <= Double.zero, 9999,
-                      max(
-                        0,
-                        h[FQ + i] + h[FT + i]
-                          - iff(
-                            h[FO + i] == Double.zero,
-                            iff(RawMeth_max_cons[j] == Double.zero, 0, MethSynt_fix_cons) + iff(noCO2, 0, CCU_fix_cons) + iff(noCons, 0, EY_fix_cons)))
-                        / daytime_cons_per_h_of_night_op[j])))) < EY_cap_min_perc), 0,
+          or(
+            h[UI + i] == 9999,
+            and(
+              h[FO + i] == Double.zero,
+              ((h[EJ + i] - equiv_harmonious_min_perc[j]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]) * (Hydrogen_max_cons[j] - Hydrogen_min_cons[j])
+                + Hydrogen_min_cons[j]
+                + ((h[EJ + i] - equiv_harmonious_min_perc[j]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]) * (RawMeth_max_cons[j] - RawMeth_min_cons[j])
+                  + RawMeth_min_cons[j]) / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_Hydrogen_nom_cons)
+                * h[UI + i] / EY_Hydrogen_nom_prod < EY_cap_min_perc)), 0,
           min(
             1,
             max(
               0,
-              1
-                - ((max(0, h[FO + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons) / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
-                  * (EY_harmonious_max_perc - EY_harmonious_min_perc) + EY_harmonious_min_perc)),
-            max(
-              0,
-              Hydrogen_max_cons[j] / EY_Hydrogen_nom_prod
-                * min(
-                  iff(
-                    daytime_cons_per_h_of_night_op[j] + daytime_heat_cons_per_h_of_night_op[j] / El_boiler_eff <= Double.zero, 9999,
-                    max(
-                      0,
-                      h[FQ + i] + h[FT + i] + h[FR + i] / El_boiler_eff
-                        - iff(
-                          h[FO + i] == Double.zero,
-                          iff(RawMeth_max_cons[j] == Double.zero, 0, MethSynt_fix_cons - MethSynt_heat_fix_prod / El_boiler_eff)
-                            + iff(noCO2, 0, CCU_fix_cons + CCU_heat_fix_cons / El_boiler_eff) + iff(noCons, 0, EY_fix_cons + EY_heat_fix_cons / El_boiler_eff)))
-                      / (daytime_cons_per_h_of_night_op[j] + daytime_heat_cons_per_h_of_night_op[j] / El_boiler_eff)),
-                  iff(
-                    daytime_heat_cons_per_h_of_night_op[j] <= Double.zero, 9999,
-                    max(
-                      0,
-                      h[FR + i] + h[FV + i] * El_boiler_eff
-                        - iff(
-                          h[FO + i] == Double.zero,
-                          iff(RawMeth_max_cons[j] == Double.zero, 0, -MethSynt_heat_fix_prod) + iff(noCO2, 0, CCU_heat_fix_cons) + iff(noCons, 0, EY_heat_fix_cons)
-                        )) / daytime_heat_cons_per_h_of_night_op[j]),
-                  iff(
-                    daytime_cons_per_h_of_night_op[j] <= Double.zero, 9999,
-                    max(
-                      0,
-                      h[FQ + i] + h[FT + i]
-                        - iff(
-                          h[FO + i] == Double.zero,
-                          iff(RawMeth_max_cons[j] == Double.zero, 0, MethSynt_fix_cons) + iff(noCO2, 0, CCU_fix_cons) + iff(noCons, 0, EY_fix_cons)))
-                      / daytime_cons_per_h_of_night_op[j])))))
+              1 - (max(0, h[FO + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons) / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
+                * (EY_harmonious_max_perc - EY_harmonious_min_perc) + EY_harmonious_min_perc),
+            ((h[EJ + i] - equiv_harmonious_min_perc[j]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]) * (Hydrogen_max_cons[j] - Hydrogen_min_cons[j])
+              + Hydrogen_min_cons[j]
+              + ((h[EJ + i] - equiv_harmonious_min_perc[j]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]) * (RawMeth_max_cons[j] - RawMeth_min_cons[j])
+                + RawMeth_min_cons[j]) / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_Hydrogen_nom_cons)
+              * h[UI + i] / EY_Hydrogen_nom_prod))
     }
-
 
     /// Max BESS charging after max harmonious cons
     let FZ: Int = 490560

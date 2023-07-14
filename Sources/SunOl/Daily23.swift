@@ -1,6 +1,6 @@
 extension TunOl {
   func d23(_ d23: inout [Double], case j: Int, day0: [Double], d21: [Double], d22: [Double]) {
-    let (B, C, E, F, G, H, O, P, Q, R, S, T, U, V, W, X) = (
+    let (B0, C, E, F, G, H, O, P, Q, R, S, T, U, V, W, X) = (
       365, 730, 0, 365, 730, 1095, 3650, 4015, 4380, 4745, 5110, 5475, 5840, 6205, 6570, 6935
     )
     let AE = 9490
@@ -967,12 +967,11 @@ extension TunOl {
     // IP=IF(HC3<0,0,$EG3)
     for i in 0..<365 { d23[IP + i] = iff(d23[HC + i] < Double.zero, Double.zero, d22[EG + i]) }
 
-    /// heat from el boiler outside of harm op period
     let IQ = 32485
-    // IQ=MIN($ER3*El_boiler_eff,MAX(0,IO3+IF(HC3<0,$G3,0)-IP3))
+    // heat from el boiler outside of harm op period
+    // IQ=MIN($ER3*El_boiler_eff,MAX(0,IO3+IF(HC3<0,Overall_heat_stby_cons*$B3+Overall_heat_stup_cons,0)-IP3))
     for i in 0..<365 {
-      d23[IQ + i] = min(
-        d22[ER + i] * El_boiler_eff, max(Double.zero, d23[IO + i] + iff(d23[HC + i] < 0, d21[G + i], Double.zero) - d23[IP + i]))
+      d23[IQ + i] = min(d22[ER + i] * El_boiler_eff, max(0, d23[IO + i] + iff(d23[HC + i] < 0, Overall_heat_stby_cons * day0[B0 + i] + Overall_heat_stup_cons, 0) - d23[IP + i]))
     }
 
     /// el cons by el boiler outside of harm op period
@@ -1009,33 +1008,36 @@ extension TunOl {
           iff(d23[GH + i] < 0, d22[EO + i], d22[EN + i] + (d22[EO + i] - d22[EN + i]) * d23[GH + i])))
     }
 
-    /// max possible grid input outside of harm op period
+    // El to BESS charging outside harm op period
+    // IT=MIN(BESS_cap_ud/BESS_chrg_eff,MAX(0,IS3+IR3+IF(HC3<0,Overall_stby_cons*$B3+Overall_stup_cons,0)+IN3-IU3)/BESS_chrg_eff,IF(HC3>=0,$EM3,IF(GH3<0,$EO3,$EN3+($EO3-$EN3)*GH3)))
+    for i in 0..<365 {
+      d23[IT + i] = min(
+        BESS_cap_ud / BESS_chrg_eff,
+        max(0, d23[IS + i] + d23[IR + i] + iff(d23[HC + i] < 0, Overall_stby_cons * day0[B0 + i] + Overall_stup_cons, 0) + d23[IN + i] - d23[IU + i]) / BESS_chrg_eff,
+        iff(d23[HC + i] >= Double.zero, d22[EM + i], iff(d23[GH + i] < 0, d22[EO + i], d22[EN + i] + (d22[EO + i] - d22[EN + i]) * d23[GH + i])))
+    }
+
     let IV = 34310
-    // IV=MIN($DO3+$EJ3,MAX(0,-IT3*BESS_chrg_eff-IU3+IN3+IF(HC3<0,$E3,0)+IR3+IS3))
+    // max possible grid input outside of harm op period
+    // IV=MIN($DO3+$EJ3,MAX(0,-IT3*BESS_chrg_eff-IU3+IN3+IF(HC3<0,Overall_stby_cons*$B3+Overall_stup_cons,0)+IR3+IS3))
     for i in 0..<365 {
       d23[IV + i] = min(
         d22[DO + i] + d22[EJ + i],
-        max(
-          0,
-          -d23[IT + i] * BESS_chrg_eff - d23[IU + i] + d23[IN + i] + iff(d23[HC + i] < 0, d21[E + i], Double.zero)
-            + d23[IR + i] + d23[IS + i]))
+        max(0, -d23[IT + i] * BESS_chrg_eff - d23[IU + i] + d23[IN + i] + iff(d23[HC + i] < 0, Overall_stby_cons * day0[B0 + i] + Overall_stup_cons, 0) + d23[IR + i] + d23[IS + i]))
     }
-
-    /// Balance of electricity outside of harm op period
     let IW = 34675
-    // IW=IT3*BESS_chrg_eff+IU3+IV3-IN3-IF(HC3<0,$E3,0)-IR3-IS3
+
+    // Balance of electricity outside of harm op period
+    // IW=IT3*BESS_chrg_eff+IU3+IV3-IN3-IF(HC3<0,Overall_stby_cons*$B3+Overall_stup_cons,0)-IR3-IS3
     for i in 0..<365 {
-      d23[IW + i] =
-        d23[IT + i] * BESS_chrg_eff + d23[IU + i] + d23[IV + i] - d23[IN + i]
-        - iff(d23[HC + i] < 0, d21[E + i], Double.zero) - d23[IR + i] - d23[IS + i]
+      d23[IW + i] = d23[IT + i] * BESS_chrg_eff + d23[IU + i] + d23[IV + i] - d23[IN + i] - iff(d23[HC + i] < 0, Overall_stby_cons * day0[B0 + i] + Overall_stup_cons, 0) - d23[IR + i] - d23[IS + i]
     }
 
-    /// Balance of heat outside of harm op period
     let IX = 35040
-    // IX=IP3+IQ3-IF(HC3<0,$G3,0)-IO3
-    for i in 0..<365 {
-      d23[IX + i] = d23[IP + i] + d23[IQ + i] - iff(d23[HC + i] < 0, d21[G + i], Double.zero) - d23[IO + i]
-    }
+    // Balance of heat outside of harm op period
+    // IX=IP3+IQ3-IF(HC3<0,Overall_heat_stby_cons*$B3+Overall_heat_stup_cons,0)-IO3
+    for i in 0..<365 { d23[IX + i] = d23[IP + i] + d23[IQ + i] - iff(d23[HC + i] < 0, Overall_heat_stby_cons * day0[B0 + i] + Overall_heat_stup_cons, 0) - d23[IO + i] }
+
     /// Pure Methanol prod with min night prep and resp day op
     let IY = 35405
     // IY=(MAX(0,IB3-$C3*(Overall_fix_cons+Overall_harmonious_var_min_cons))/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(MethDist_harmonious_max_perc-MethDist_harmonious_min_perc)+$C3*MethDist_harmonious_min_perc+IF(IN3=0,0,IF(A_overall_var_max_cons=0,HC3/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc),MAX(0,IN3-$B3*(A_overall_fix_stby_cons+A_overall_var_min_cons))/(A_overall_var_max_cons-A_overall_var_min_cons))*(A_MethDist_max_perc-A_MethDist_Min_perc)+$B3*A_MethDist_Min_perc))*MethDist_Meth_nom_prod_ud
@@ -1050,9 +1052,9 @@ extension TunOl {
             iff(
               overall_var_max_cons[j].isZero,
               d23[HC + i] / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]),
-              max(Double.zero, d23[IN + i] - day0[B + i] * (overall_fix_stby_cons[j] + overall_var_min_cons[j]))
+              max(Double.zero, d23[IN + i] - day0[B0 + i] * (overall_fix_stby_cons[j] + overall_var_min_cons[j]))
                 / (overall_var_max_cons[j] - overall_var_min_cons[j]))
-              * (MethDist_max_perc[j] - MethDist_min_perc[j]) + day0[B + i] * MethDist_min_perc[j]))
+              * (MethDist_max_perc[j] - MethDist_min_perc[j]) + day0[B0 + i] * MethDist_min_perc[j]))
         * MethDist_Meth_nom_prod_ud
     }
     /// Missing heat
@@ -1300,9 +1302,8 @@ extension TunOl {
             d23[JP + i].isZero, 0,
             iff(
               overall_var_max_cons[j].isZero, d23[HE + i] / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]),
-              max(Double.zero, d23[JP + i] - day0[B + i] * (overall_fix_stby_cons[j] + overall_var_min_cons[j]))
-                / (overall_var_max_cons[j] - overall_var_min_cons[j])) * (MethDist_max_perc[j] - MethDist_min_perc[j]) + day0[
-                B + i] * MethDist_min_perc[j])) * MethDist_Meth_nom_prod_ud
+              max(Double.zero, d23[JP + i] - day0[B0 + i] * (overall_fix_stby_cons[j] + overall_var_min_cons[j]))
+                / (overall_var_max_cons[j] - overall_var_min_cons[j])) * (MethDist_max_perc[j] - MethDist_min_perc[j]) + day0[B0 + i] * MethDist_min_perc[j])) * MethDist_Meth_nom_prod_ud
     }
     /// Missing heat
     let KB = 46355

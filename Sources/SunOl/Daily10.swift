@@ -7,16 +7,13 @@ extension TunOl {
     let notZero: (Double) -> Bool = { $0 > 0.00001 }
     let CQ_CScountZero = hour.countif(CQ, criteria: { $0 <= 0 }, days: days)
     let CQ_CScountNonZero = hour.countif(CQ, criteria: notZero, days: days)
+    let CT_CC_Count = hour.countif(range1: CT, criteria1: { $0 > 0.00001 }, range2: CC, criteria2: { $0 > 0.00001 }, days: days)
 
-    let CT_CS_countNonZero = hour.countif(CT, criteria: { 
-      $0 > 0 && $0 != Overall_stup_cons && $0 != Overall_stby_cons
-    }, days: days)
     /// Nr of outside harm op period op hours after min outside harm op period prep
     let C: Int = 0
-    // C=MIN(COUNTIFS(Calculation!$CS$5:$CS$8764,"="&$A3,Calculation!$CT$5:$CT$8764,">0",Calculation!$CT$5:$CT$8764,"<>"&INDEX(Overall_stup_cons,1),Calculation!$CT$5:$CT$8764,"<>"&INDEX(Overall_stby_cons,1)),COUNTIFS(Calculation!$CS$5:$CS$8764,"="&$A3,Calculation!$CQ$5:$CQ$8764,"<=0"))
-    for i in 0..<365 {
-      d10[C + i] = min(CT_CS_countNonZero[i], CQ_CScountZero[i])
-    }
+    // // Nr of outside harm op period op hours after min outside harm op period prep
+    // // C=COUNTIFS(Calculation!$CS$5:$CS$8764,"="&$A3,Calculation!$CT$5:$CT$8764,">1E-10",Calculation!$CC$5:$CC$8764,">1E-10")
+    for i in 0..<365 { d10[C + i] = CT_CC_Count[i] }
 
     /// Nr of harm op period hours after min night prep
     let D: Int = 365
@@ -124,24 +121,19 @@ extension TunOl {
   }
   // 5840-11315
   func night(_ d10: inout [Double], hour4: [Double], case j: Int) {
-    let (F, H, J, L, N, P, EH, EX) = (1095, 1825, 2555, 3285, 4015, 4745, 105120, 245280)
+    let (F, H, J, L, N, P, EH, EX, FA) = (1095, 1825, 2555, 3285, 4015, 4745, 105120, 245280, 271560)
+    let EZ: Int = 262800
     let notZero: (Double) -> Bool = { $0 > 0.000001 }
-    let days: [[Int]] = hour4[262801..<(262800 + 8760)].indices.chunked(by: { hour4[$0] == hour4[$1] })
+    let days: [[Int]] = hour4[262801..<(EZ + 8760)].indices.chunked(by: { hour4[$0] == hour4[$1] })
       .map { $0.map { $0 - 262800 } }
+    let EE: Int = 78840
 
-    let FA: Int = 271560
-    let EX_EZcountZero = hour4.countif(EX, criteria: { $0 <= Double.zero }, days: days)
-
-    let FA_EZ_countNonZero = hour4.countif(FA, criteria: { 
-      $0 > 0 && $0 != Overall_stup_cons && $0 != Overall_stby_cons
-    }, days: days)
+    let FA_EE_Count = hour4.countif(range1: FA, criteria1: { $0 > 0.00001 }, range2: EE, criteria2: { $0 > 0.00001 }, days: days)
     /// Nr of hours outside of harm op period after max night prep
     let T: Int = 5840
     // Nr of outside harm op period op hours after max outside harm op period prep
-    // T=MIN(COUNTIFS(Calculation!$EZ$5:$EZ$8764,"="&$A3,Calculation!$FA$5:$FA$8764,">0",Calculation!$FA$5:$FA$8764,"<>"&INDEX(A_overall_stup_cons,1),Calculation!$FA$5:$FA$8764,"<>"&INDEX(A_overall_fix_stby_cons,1)),COUNTIFS(Calculation!$EZ$5:$EZ$8764,"="&$A3,Calculation!$EX$5:$EX$8764,"<=0"))
-    for i in 0..<365 {
-      d10[T + i] = min(FA_EZ_countNonZero[i], EX_EZcountZero[i])
-    }
+    // T=COUNTIFS(Calculation!$EZ$5:$EZ$8764,"="&$A3,Calculation!$FA$5:$FA$8764,">1E-10",Calculation!$EE$5:$EE$8764,">1E-10")
+    for i in 0..<365 { d10[T + i] = FA_EE_Count[i] }
 
     let EX_EZcountNonZero = hour4.countif(EX, criteria: notZero, days: days)
     /// Nr of harm op period hours after max night prep
@@ -157,13 +149,16 @@ extension TunOl {
     let I: Int = 2190
     /// Electricity consumption outside harm op period in case no op outside harm op period. After column V
     let G: Int = 1460
-    let EX_EZbelowZero = hour4.countif(EX, criteria: { $0 <= 0 }, days: days)
-    for i in 0..<365 {
-      // G=(A_overall_var_min_cons+A_overall_fix_stby_cons)*IF(T3>0,T3,COUNTIFS(Calculation!$EZ$5:$EZ$8764,"="&$A3,Calculation!$EX$5:$EX$8764,"<=0"))+A_overall_stup_cons
-      d10[G + i] = (overall_var_min_cons[j] + overall_fix_stby_cons[j]) * iff(d10[T + i] > Double.zero,d10[T + i], EX_EZbelowZero[i]) + overall_stup_cons[j]
-      // I=(A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons)*IF(T3>0,T3,COUNTIFS(Calculation!$EZ$5:$EZ$8764,"="&$A3,Calculation!$EX$5:$EX$8764,"<=0"))+A_overall_heat_stup_cons
-      d10[I + i] = (overall_var_heat_min_cons[j] + overall_heat_fix_stby_cons[j]) * iff(d10[T + i] > Double.zero,d10[T + i], EX_EZbelowZero[i]) + overall_heat_stup_cons[j]
-    }
+    let EX_EZbelowZero = hour4.countif(EX, criteria: { $0 <= 0.00001 }, days: days)
+
+    // Electricity consumption outside harm op period in case no op outside harm op period. After column V
+    // G=Overall_stby_cons*IF(T3>0,T3,COUNTIFS(Calculation!$EZ$5:$EZ$8764,"="&$A3,Calculation!$EX$5:$EX$8764,"<=1E-10"))+Overall_stup_cons
+    for i in 0..<365 { d10[G + i] = Overall_stby_cons * iff(d10[T + i] > Double.zero, d10[T + i], EX_EZbelowZero[i]) + Overall_stup_cons }
+
+    // Heat consumption outside harm op period in case no op outside harm op period. After column V
+    // I=Overall_heat_stby_cons*IF(T3>0,T3,COUNTIFS(Calculation!$EZ$5:$EZ$8764,"="&$A3,Calculation!$EX$5:$EX$8764,"<=1E-10"))+Overall_heat_stup_cons
+    for i in 0..<365 { d10[I + i] = Overall_heat_stby_cons * iff(d10[T + i] > Double.zero, d10[T + i], EX_EZbelowZero[i]) + Overall_heat_stup_cons }
+
     /// Max RawMeth cons during night
     let W: Int = 6935
     /// Max CO2 cons during night
@@ -245,30 +240,31 @@ extension TunOl {
     }
 
     // Max RawMeth cons during outside harm op period
-    // W=IF(AM3=0,0,((AM3-A_equiv_harmonious_min_perc)*(A_RawMeth_max_cons-A_RawMeth_min_cons)+A_RawMeth_min_cons)*T3)
+    // W=IF(AM3=0,0,((AM3-A_equiv_harmonious_min_perc)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(A_RawMeth_max_cons-A_RawMeth_min_cons)+A_RawMeth_min_cons)*T3)
     for i in 0..<365 {
       d10[W + i] = iff(
         d10[AM + i] == Double.zero, 0,
-        ((d10[AM + i] - equiv_harmonious_min_perc[j]) * (RawMeth_max_cons[j] - RawMeth_min_cons[j]) + RawMeth_min_cons[j])
+        ((d10[AM + i] - equiv_harmonious_min_perc[j]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]) * (RawMeth_max_cons[j] - RawMeth_min_cons[j]) + RawMeth_min_cons[j])
           * d10[T + i])
     }
 
     // Max CO2 cons during outside harm op period
-    // X=IF(AM3=0,0,((AM3-A_equiv_harmonious_min_perc)*(A_CO2_max_cons-A_CO2_min_cons)+A_CO2_min_cons)*T3)
+    // X=IF(AM3=0,0,((AM3-A_equiv_harmonious_min_perc)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(A_CO2_max_cons-A_CO2_min_cons)+A_CO2_min_cons)*T3)
     for i in 0..<365 {
       d10[X + i] = iff(
         d10[AM + i] == Double.zero, 0,
-        ((d10[AM + i] - equiv_harmonious_min_perc[j]) * (CO2_max_cons[j] - CO2_min_cons[j]) + CO2_min_cons[j]) * d10[T + i])
+        ((d10[AM + i] - equiv_harmonious_min_perc[j]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]) * (CO2_max_cons[j] - CO2_min_cons[j]) + CO2_min_cons[j]) * d10[T + i])
     }
 
     // Max H2 cons during outside harm op period
-    // Y=IF(AM3=0,0,((AM3-A_equiv_harmonious_min_perc)*(A_Hydrogen_max_cons-A_Hydrogen_min_cons)+A_Hydrogen_min_cons)*T3)
+    // Y=IF(AM3=0,0,((AM3-A_equiv_harmonious_min_perc)/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(A_Hydrogen_max_cons-A_Hydrogen_min_cons)+A_Hydrogen_min_cons)*T3)
     for i in 0..<365 {
       d10[Y + i] = iff(
         d10[AM + i] == Double.zero, 0,
-        ((d10[AM + i] - equiv_harmonious_min_perc[j]) * (Hydrogen_max_cons[j] - Hydrogen_min_cons[j]) + Hydrogen_min_cons[j])
-          * d10[T + i])
+        ((d10[AM + i] - equiv_harmonious_min_perc[j]) / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j]) * (Hydrogen_max_cons[j] - Hydrogen_min_cons[j])
+          + Hydrogen_min_cons[j]) * d10[T + i])
     }
+
 
     /// Min el cons during day for night op prep
     let Z: Int = 8030
@@ -587,7 +583,7 @@ extension TunOl {
     for i in 0..<365 { d12[GX + i] = 0 }
     /// Harm heat cons outside of harm op period
     // SUMIFS(CalculationFB5:FB8763,CalculationEZ5:EZ8763,"="A6,CalculationEX5:EX8763,"=0")
-    hourFinal.sumifs(FB, days: daysEZ, into: &d12, at: HD, range: EX, criteria: { $0.isZero })
+    // hourFinal.sumifs(FB, days: daysEZ, into: &d12, at: HD, range: EX, criteria: { $0.isZero })
     /// Grid import considering min harm op during harm op period
     // SUMIFS(Calculation!$FE$5:$FE$8764,Calculation!$EZ$5:$EZ$8764,"="A6,Calculation!$EX$5:$EX$8764,">0")
     // hourFinal.sumifs(FE, days: daysEZ, into: &d12, at: HE, range: EX, criteria: notZero)

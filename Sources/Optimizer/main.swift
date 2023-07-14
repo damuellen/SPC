@@ -97,16 +97,16 @@ struct Command: ParsableCommand {
     // try? InputParameter(ranges: ranges).storeToJSON(file: .init(fileURLWithPath: "Parameter.json"))
     var parameter = Parameter()
     var resultsA = Tables()
-    for EY in stride(from: 180, through: 180, by: 20) where !source.isCancelled {
+    for EY in stride(from: 100, through: 320, by: 20) where !source.isCancelled {
       var results = Table()
-      for _ in 1...1 where !source.isCancelled {
+      for _ in 1...10 where !source.isCancelled {
         parameter.ranges[5] = Double(EY)...Double(EY)
-        let worker = IGOA(n: n ?? 20, maxIterations: iterations ?? 100, bounds: parameter.ranges)
+        let worker = IGOA(n: n ?? 45, maxIterations: iterations ?? 270, bounds: parameter.ranges)
         let result = worker(SunOl.fitnessPenalized)
         results.append(contentsOf: result)
       }
       results = removingNearby(results.filter { $0[0].isFinite }.sorted { $0[0] < $1[0] })
-      resultsA[EY] = Array(results.prefix(1000))
+      resultsA[EY] = Array(results.prefix(2000))
     }
 
     writeExcel("SunOl_\(id).xlsx", results: resultsA)
