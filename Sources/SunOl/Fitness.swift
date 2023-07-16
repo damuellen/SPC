@@ -6,8 +6,8 @@ public func fitnessPenalized(values: [Double]) -> [Double] { fitness(values: val
 func fitness(values: [Double], penalized: Bool) -> [Double] {
   guard let model = TunOl(values) else { return [Double.infinity, 0, 0, 0, 0, 0, 0, 0] + values }
 
-  var hourPre = [Double](repeating: 0.0, count: 1_086_240)
-  var hourFinal = [Double](repeating: 0.0, count: 516_840)
+  var hourPre = [Double](repeating: 0.0, count: 1103760)
+  var hourFinal = [Double](repeating: 0.0, count: 534360)
   var d10 = [Double](repeating: 0.0, count: 97_090)
   var d23 = [Double](repeating: 0.0, count: 48_545)
   var d21 = [Double](repeating: 0.0, count: 9_855)

@@ -97,16 +97,16 @@ struct Command: ParsableCommand {
     // try? InputParameter(ranges: ranges).storeToJSON(file: .init(fileURLWithPath: "Parameter.json"))
     var parameter = Parameter()
     var resultsA = Tables()
-    for EY in stride(from: 100, through: 320, by: 20) where !source.isCancelled {
+    for EY in stride(from: 100, through: 300, by: 20).reversed() where !source.isCancelled {
       var results = Table()
-      for _ in 1...10 where !source.isCancelled {
+      for _ in 1...3 where !source.isCancelled {
         parameter.ranges[5] = Double(EY)...Double(EY)
-        let worker = IGOA(n: n ?? 45, maxIterations: iterations ?? 270, bounds: parameter.ranges)
+        let worker = IGOA(n: n ?? 45, maxIterations: iterations ?? 180, bounds: parameter.ranges)
         let result = worker(SunOl.fitnessPenalized)
         results.append(contentsOf: result)
       }
       results = removingNearby(results.filter { $0[0].isFinite }.sorted { $0[0] < $1[0] })
-      resultsA[EY] = Array(results.prefix(2000))
+      resultsA[EY] = Array(results.prefix(5000))
     }
 
     writeExcel("SunOl_\(id).xlsx", results: resultsA)
@@ -177,7 +177,7 @@ func writeCSV(result: ([Double], [Double], [Double], [Double])) {
 func removingNearby(_ results: Table) -> Table {
   var addedDict = [Int:Bool]()
   return results.filter {
-    addedDict.updateValue(true, forKey: Int($0[1] * 20)) == nil
+    addedDict.updateValue(true, forKey: Int($0[1] * 10)) == nil
   }
 } 
 
