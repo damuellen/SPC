@@ -61,7 +61,7 @@ struct Command: ParsableCommand {
     TunOl.Q_Sol_MW_thLoop = [0] + csv["csp"]
     TunOl.Reference_PV_plant_power_at_inverter_inlet_DC = [0] + csv["pv"]
     TunOl.Reference_PV_MV_power_at_transformer_outlet = [0] + csv["out"]
-    let repeats = min(repeats ?? 1, 1)
+    let repeats = max(repeats ?? 1, 1)
     let server = HTTP(handler: respond)
     if http {
       server.start()
