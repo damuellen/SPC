@@ -6,7 +6,6 @@ env:
   SPM: spm
 jobs:
   continuous-integration:
-    timeout-minutes: 5
     runs-on: [ubuntu-22.04]
 
     steps:
@@ -31,7 +30,7 @@ jobs:
       continue-on-error: true
 
     - name: Run Optimizer
-      run: swift run -c release Optimizer -i 99
+      run: swift run -c release Optimizer -n 15 -i 66 -r 1
 
     - name: Upload plots
       uses: actions/upload-artifact@v3

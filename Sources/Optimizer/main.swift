@@ -41,6 +41,8 @@ struct Command: ParsableCommand {
 
   @Option(name: .short, help: "Iterations") var iterations: Int?
 
+  @Option(name: .short, help: "Repeats") var repeats: Int?
+
   func run() throws {
     let path: String
     #if os(Windows)
@@ -59,7 +61,7 @@ struct Command: ParsableCommand {
     TunOl.Q_Sol_MW_thLoop = [0] + csv["csp"]
     TunOl.Reference_PV_plant_power_at_inverter_inlet_DC = [0] + csv["pv"]
     TunOl.Reference_PV_MV_power_at_transformer_outlet = [0] + csv["out"]
-
+    let repeats = min(repeats ?? 1, 1)
     let server = HTTP(handler: respond)
     if http {
       server.start()
@@ -99,7 +101,7 @@ struct Command: ParsableCommand {
     var resultsA = Tables()
     for EY in stride(from: 100, through: 300, by: 20).reversed() where !source.isCancelled {
       var results = Table()
-      for _ in 1...5 where !source.isCancelled {
+      for _ in 1...repeats where !source.isCancelled {
         parameter.ranges[5] = Double(EY)...Double(EY)
         let worker = IGOA(n: n ?? 45, maxIterations: iterations ?? 240, bounds: parameter.ranges)
         let result = worker(SunOl.fitnessPenalized)
