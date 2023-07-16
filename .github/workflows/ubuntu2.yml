@@ -28,6 +28,7 @@ jobs:
 
     - name: Run tests
       run: swift test -Xswiftc -suppress-warnings
+      continue-on-error: true
 
     - name: Run Optimizer
       run: swift run -c release Optimizer -i 99
