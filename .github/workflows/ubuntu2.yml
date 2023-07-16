@@ -30,7 +30,7 @@ jobs:
       run: swift test -Xswiftc -suppress-warnings
 
     - name: Run Optimizer
-      run: swift run -c release Optimizer
+      run: swift run -c release Optimizer -i 99
 
     - name: Upload plots
       uses: actions/upload-artifact@v3
