@@ -104,7 +104,7 @@ struct Command: ParsableCommand {
       for _ in 1...repeats where !source.isCancelled {
         parameter.ranges[5] = Double(EY)...Double(EY)
         let worker = IGOA(n: n ?? 45, maxIterations: iterations ?? 240, bounds: parameter.ranges)
-        let result = worker(SunOl.fitnessPenalized)
+        let result = worker(SunOl.fitness)
         results.append(contentsOf: result)
       }
       results = removingNearby(results.filter { $0[0].isFinite }.sorted { $0[0] < $1[0] })

@@ -801,7 +801,7 @@ extension TunOl {
     let DC: Int = 867240
     let DD: Int = 876000
     // Remaining MethSynt cap after min harm & min outside harm meth prod & stby
-    // DB=MethSynt_RawMeth_nom_prod_ud*IF(OR(UF6 == 9999,AND(CQ6=0,A_RawMeth_min_cons*UF6/MethSynt_RawMeth_nom_prod_ud<MethSynt_cap_min_perc)),0,MIN(1,MAX(0,1-(MAX(0,CQ6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(MethSynt_harmonious_max_perc-MethSynt_harmonious_min_perc)+MethSynt_harmonious_min_perc),A_RawMeth_min_cons*UF6/MethSynt_RawMeth_nom_prod_ud))
+    // DB=MethSynt_RawMeth_nom_prod_ud*IF(OR(UF6=9999,AND(CQ6=0,A_RawMeth_min_cons*UF6/MethSynt_RawMeth_nom_prod_ud<MethSynt_cap_min_perc)),0,MIN(1,MAX(0,1-((MAX(0,CQ6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(MethSynt_harmonious_max_perc-MethSynt_harmonious_min_perc)+MethSynt_harmonious_min_perc)),A_RawMeth_min_cons*UF6/MethSynt_RawMeth_nom_prod_ud))
     for i in 1..<8760 {
       h[DB + i] =
         MethSynt_RawMeth_nom_prod_ud
@@ -811,12 +811,13 @@ extension TunOl {
             1,
             max(
               0,
-              1 - (max(0, h[CQ + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons) / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
-                * (MethSynt_harmonious_max_perc - MethSynt_harmonious_min_perc) + MethSynt_harmonious_min_perc), RawMeth_min_cons[j] * h[UF + i] / MethSynt_RawMeth_nom_prod_ud))
+              1
+                - ((max(0, h[CQ + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons) / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
+                  * (MethSynt_harmonious_max_perc - MethSynt_harmonious_min_perc) + MethSynt_harmonious_min_perc)), RawMeth_min_cons[j] * h[UF + i] / MethSynt_RawMeth_nom_prod_ud))
     }
 
     // Remaining CCU cap after min harm & min outside harm meth prod & stby
-    // DC=CCU_CO2_nom_prod_ud*IF(OR(UF6 == 9999,AND(CQ6=0,(A_CO2_min_cons+A_RawMeth_min_cons/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_CO2_nom_cons)*UF6/CCU_CO2_nom_prod_ud)<CCU_cap_min_perc),0,MIN(1,MAX(0,1-(MAX(0,CQ6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(CCU_harmonious_max_perc-CCU_harmonious_min_perc)+CCU_harmonious_min_perc),(A_CO2_min_cons+A_RawMeth_min_cons/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_CO2_nom_cons)*UF6/CCU_CO2_nom_prod_ud))
+    // DC=CCU_CO2_nom_prod_ud*IF(OR(UF6=9999,AND(CQ6=0,(A_CO2_min_cons+A_RawMeth_min_cons/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_CO2_nom_cons)*UF6/CCU_CO2_nom_prod_ud<CCU_cap_min_perc)),0,MIN(1,MAX(0,1-((MAX(0,CQ6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(CCU_harmonious_max_perc-CCU_harmonious_min_perc)+CCU_harmonious_min_perc)),(A_CO2_min_cons+A_RawMeth_min_cons/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_CO2_nom_cons)*UF6/CCU_CO2_nom_prod_ud))
     for i in 1..<8760 {
       h[DC + i] =
         CCU_CO2_nom_prod_ud
@@ -826,18 +827,19 @@ extension TunOl {
             and(
               h[CQ + i] == Double.zero,
               (CO2_min_cons[j] + RawMeth_min_cons[j] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_CO2_nom_cons) * h[UF + i] / CCU_CO2_nom_prod_ud
-              < CCU_cap_min_perc)), 0,
+                < CCU_cap_min_perc)), 0,
           min(
             1,
             max(
               0,
-              1 - (max(0, h[CQ + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons) / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons) 
-              * (CCU_harmonious_max_perc - CCU_harmonious_min_perc) + CCU_harmonious_min_perc),
+              1
+                - ((max(0, h[CQ + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons) / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
+                  * (CCU_harmonious_max_perc - CCU_harmonious_min_perc) + CCU_harmonious_min_perc)),
             (CO2_min_cons[j] + RawMeth_min_cons[j] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_CO2_nom_cons) * h[UF + i] / CCU_CO2_nom_prod_ud))
     }
 
     // Remaining EY cap after min harm & min outside harm meth prod & stby
-    // DD=EY_Hydrogen_nom_prod*IF(OR(UF6 == 9999,AND(CQ6=0,(A_Hydrogen_min_cons+A_RawMeth_min_cons/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_Hydrogen_nom_cons)*UF6/EY_Hydrogen_nom_prod)<EY_cap_min_perc),0,MIN(1,MAX(0,1-(MAX(0,CQ6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(EY_harmonious_max_perc-EY_harmonious_min_perc)+EY_harmonious_min_perc),(A_Hydrogen_min_cons+A_RawMeth_min_cons/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_Hydrogen_nom_cons)*UF6/EY_Hydrogen_nom_prod))
+    // DD=EY_Hydrogen_nom_prod*IF(OR(UF6=9999,AND(CQ6=0,(A_Hydrogen_min_cons+A_RawMeth_min_cons/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_Hydrogen_nom_cons)*UF6/EY_Hydrogen_nom_prod<EY_cap_min_perc)),0,MIN(1,MAX(0,1-((MAX(0,CQ6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(EY_harmonious_max_perc-EY_harmonious_min_perc)+EY_harmonious_min_perc)),(A_Hydrogen_min_cons+A_RawMeth_min_cons/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_Hydrogen_nom_cons)*UF6/EY_Hydrogen_nom_prod))
     for i in 1..<8760 {
       h[DD + i] =
         EY_Hydrogen_nom_prod
@@ -847,13 +849,14 @@ extension TunOl {
             and(
               h[CQ + i] == Double.zero,
               (Hydrogen_min_cons[j] + RawMeth_min_cons[j] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_Hydrogen_nom_cons) * h[UF + i] / EY_Hydrogen_nom_prod
-              < EY_cap_min_perc)), 0,
+                < EY_cap_min_perc)), 0,
           min(
             1,
             max(
               0,
-              1 - (max(0, h[CQ + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons) / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
-                * (EY_harmonious_max_perc - EY_harmonious_min_perc) + EY_harmonious_min_perc),
+              1
+                - ((max(0, h[CQ + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons) / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
+                  * (EY_harmonious_max_perc - EY_harmonious_min_perc) + EY_harmonious_min_perc)),
             (Hydrogen_min_cons[j] + RawMeth_min_cons[j] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_Hydrogen_nom_cons) * h[UF + i] / EY_Hydrogen_nom_prod))
     }
 
@@ -1049,7 +1052,7 @@ extension TunOl {
     let DQ: Int = 989880
     let DR: Int = 998640
     // Remaining MethSynt cap after max harm & min outside harm meth prod & stby
-    // DP=MethSynt_RawMeth_nom_prod_ud*IF(OR(UG6 == 9999,AND(DH6=0,A_RawMeth_min_cons*UG6/MethSynt_RawMeth_nom_prod_ud<MethSynt_cap_min_perc)),0,MIN(1,MAX(0,1-(MAX(0,DH6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(MethSynt_harmonious_max_perc-MethSynt_harmonious_min_perc)+MethSynt_harmonious_min_perc),A_RawMeth_min_cons*UG6/MethSynt_RawMeth_nom_prod_ud))
+    // DP=MethSynt_RawMeth_nom_prod_ud*IF(OR(UG6=9999,AND(DH6=0,A_RawMeth_min_cons*UG6/MethSynt_RawMeth_nom_prod_ud<MethSynt_cap_min_perc)),0,MIN(1,MAX(0,1-((MAX(0,DH6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(MethSynt_harmonious_max_perc-MethSynt_harmonious_min_perc)+MethSynt_harmonious_min_perc)),A_RawMeth_min_cons*UG6/MethSynt_RawMeth_nom_prod_ud))
     for i in 1..<8760 {
       h[DP + i] =
         MethSynt_RawMeth_nom_prod_ud
@@ -1059,12 +1062,13 @@ extension TunOl {
             1,
             max(
               0,
-              1 - (max(0, h[DH + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons) / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
-                * (MethSynt_harmonious_max_perc - MethSynt_harmonious_min_perc) + MethSynt_harmonious_min_perc), RawMeth_min_cons[j] * h[UG + i] / MethSynt_RawMeth_nom_prod_ud))
+              1
+                - ((max(0, h[DH + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons) / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
+                  * (MethSynt_harmonious_max_perc - MethSynt_harmonious_min_perc) + MethSynt_harmonious_min_perc)), RawMeth_min_cons[j] * h[UG + i] / MethSynt_RawMeth_nom_prod_ud))
     }
 
     // Remaining CCU cap after max harm & min outside harm meth prod & stby
-    // DQ=CCU_CO2_nom_prod_ud*IF(OR(UG6 == 9999,AND(DH6=0,(A_CO2_min_cons+A_RawMeth_min_cons/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_CO2_nom_cons)*UG6/CCU_CO2_nom_prod_ud<CCU_cap_min_perc)),0,MIN(1,MAX(0,1-(MAX(0,DH6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(CCU_harmonious_max_perc-CCU_harmonious_min_perc)+CCU_harmonious_min_perc),(A_CO2_min_cons+A_RawMeth_min_cons/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_CO2_nom_cons)*UG6/CCU_CO2_nom_prod_ud))
+    // DQ=CCU_CO2_nom_prod_ud*IF(OR(UG6=9999,AND(DH6=0,(A_CO2_min_cons+A_RawMeth_min_cons/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_CO2_nom_cons)*UG6/CCU_CO2_nom_prod_ud<CCU_cap_min_perc)),0,MIN(1,MAX(0,1-((MAX(0,DH6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(CCU_harmonious_max_perc-CCU_harmonious_min_perc)+CCU_harmonious_min_perc)),(A_CO2_min_cons+A_RawMeth_min_cons/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_CO2_nom_cons)*UG6/CCU_CO2_nom_prod_ud))
     for i in 1..<8760 {
       h[DQ + i] =
         CCU_CO2_nom_prod_ud
@@ -1079,13 +1083,14 @@ extension TunOl {
             1,
             max(
               0,
-              1 - (max(0, h[DH + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons) / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
-                * (CCU_harmonious_max_perc - CCU_harmonious_min_perc) + CCU_harmonious_min_perc),
+              1
+                - ((max(0, h[DH + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons) / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
+                  * (CCU_harmonious_max_perc - CCU_harmonious_min_perc) + CCU_harmonious_min_perc)),
             (CO2_min_cons[j] + RawMeth_min_cons[j] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_CO2_nom_cons) * h[UG + i] / CCU_CO2_nom_prod_ud))
     }
 
     // Remaining EY cap after max harm & min outside harm meth prod & stby
-    // DR=EY_Hydrogen_nom_prod*IF(OR(UG6 == 9999,AND(DH6=0,(A_Hydrogen_min_cons+A_RawMeth_min_cons/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_Hydrogen_nom_cons)*UG6/EY_Hydrogen_nom_prod<EY_cap_min_perc)),0,MIN(1,MAX(0,1-(MAX(0,DH6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(EY_harmonious_max_perc-EY_harmonious_min_perc)+EY_harmonious_min_perc),(A_Hydrogen_min_cons+A_RawMeth_min_cons/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_Hydrogen_nom_cons)*UG6/EY_Hydrogen_nom_prod))
+    // DR=EY_Hydrogen_nom_prod*IF(OR(UG6=9999,AND(DH6=0,(A_Hydrogen_min_cons+A_RawMeth_min_cons/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_Hydrogen_nom_cons)*UG6/EY_Hydrogen_nom_prod<EY_cap_min_perc)),0,MIN(1,MAX(0,1-((MAX(0,DH6-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(EY_harmonious_max_perc-EY_harmonious_min_perc)+EY_harmonious_min_perc)),(A_Hydrogen_min_cons+A_RawMeth_min_cons/(MethSynt_CO2_nom_cons+MethSynt_Hydrogen_nom_cons)*MethSynt_Hydrogen_nom_cons)*UG6/EY_Hydrogen_nom_prod))
     for i in 1..<8760 {
       h[DR + i] =
         EY_Hydrogen_nom_prod
@@ -1100,10 +1105,12 @@ extension TunOl {
             1,
             max(
               0,
-              1 - (max(0, h[DH + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons) / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
-                * (EY_harmonious_max_perc - EY_harmonious_min_perc) + EY_harmonious_min_perc),
+              1
+                - ((max(0, h[DH + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons) / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
+                  * (EY_harmonious_max_perc - EY_harmonious_min_perc) + EY_harmonious_min_perc)),
             (Hydrogen_min_cons[j] + RawMeth_min_cons[j] / (MethSynt_CO2_nom_cons + MethSynt_Hydrogen_nom_cons) * MethSynt_Hydrogen_nom_cons) * h[UG + i] / EY_Hydrogen_nom_prod))
     }
+
 
     /// Max BESS charging after max harmonious cons
     let DS: Int = 1_007_400
