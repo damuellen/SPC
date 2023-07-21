@@ -1,6 +1,6 @@
 extension TunOl {
   func d23(_ d23: inout [Double], case j: Int, day0: [Double], d21: [Double], d22: [Double]) {
-    let (B0, C, E, F, G, H, O, P, Q, R, S, T, U, V, W, X) = (
+    let (B0, C0, E, F, G, H, O, P, Q, R, S, T, U, V, W, X) = (
       365, 730, 0, 365, 730, 1095, 3650, 4015, 4380, 4745, 5110, 5475, 5840, 6205, 6570, 6935
     )
     let AE = 9490
@@ -1040,18 +1040,17 @@ extension TunOl {
 
     let IY = 35405
     // Pure Methanol prod with min night prep and resp day op
-    // IY=IFERROR(((MAX(0,IB3/$C3-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(MethDist_harmonious_max_perc-MethDist_harmonious_min_perc)+MethDist_harmonious_min_perc)*$C3+IF(HC3<0,0,(IF(OR(A_overall_var_max_cons=0,A_overall_var_min_cons=0,A_overall_var_max_cons=A_overall_var_min_cons),HC3,(MAX(0,IN3/$B3-A_overall_fix_stby_cons)-A_overall_var_min_cons)/(A_overall_var_max_cons-A_overall_var_min_cons))*(A_MethDist_max_perc-A_MethDist_Min_perc)+A_MethDist_Min_perc)*$B3),0)*MethDist_Meth_nom_prod_ud
+    // IY=IFERROR(((MAX(0,IB3/$C3-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(MethDist_harmonious_max_perc-MethDist_harmonious_min_perc)+MethDist_harmonious_min_perc)*$C3+IF(HC3<0,0,$B3*(($AE3-A_equiv_harmonious_min_perc)*HC3/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(A_MethDist_max_perc-A_MethDist_min_perc)+A_MethDist_min_perc)),0)*MethDist_Meth_nom_prod_ud
     for i in 0..<365 {
       d23[IY + i] =
         ifFinite(
-          ((max(0, d23[IB + i] / day0[C + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons) / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
-            * (MethDist_harmonious_max_perc - MethDist_harmonious_min_perc) + MethDist_harmonious_min_perc) * day0[C + i]
+          ((max(0, d23[IB + i] / day0[C0 + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons) / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
+            * (MethDist_harmonious_max_perc - MethDist_harmonious_min_perc) + MethDist_harmonious_min_perc) * day0[C0 + i]
             + iff(
               d23[HC + i] < 0, 0,
-              (iff(
-                or(overall_var_max_cons[j] == Double.zero, overall_var_min_cons[j] == Double.zero, overall_var_max_cons[j] == overall_var_min_cons[j]), d23[HC + i],
-                (max(0, d23[IN + i] / day0[B0 + i] - overall_fix_stby_cons[j]) - overall_var_min_cons[j]) / (overall_var_max_cons[j] - overall_var_min_cons[j]))
-                * (MethDist_max_perc[j] - MethDist_min_perc[j]) + MethDist_min_perc[j]) * day0[B0 + i]), 0) * MethDist_Meth_nom_prod_ud
+              day0[B0 + i]
+                * ((d21[AE + i] - equiv_harmonious_min_perc[j]) * d23[HC + i] / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j])
+                  * (MethDist_max_perc[j] - MethDist_min_perc[j]) + MethDist_min_perc[j])), 0) * MethDist_Meth_nom_prod_ud
     }
     /// Missing heat
     let IZ = 36500
@@ -1286,20 +1285,19 @@ extension TunOl {
       d23[JZ + i] = d23[JR + i] + d23[JS + i] - d23[JQ + i] - iff(d23[HE + i] < 0, d21[G + i], Double.zero)
     }
 
-    /// Pure Methanol prod with min night prep and resp day op
     let KA = 45260
-    // IFERROR((MAX(0;JD3/$C3-Overall_fix_cons-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(MethDist_harmonious_max_perc-MethDist_harmonious_min_perc)+MethDist_harmonious_min_perc)*$C3+IF(HE3<0;0;(IF(A_overall_var_max_cons=0;HE3;MAX(0;JP3/$B3 -A_overall_fix_stby_cons-A_overall_var_min_cons)/(A_overall_var_max_cons-A_overall_var_min_cons))*(A_MethDist_max_perc-A_MethDist_Min_perc)+A_MethDist_Min_perc)*$B3);0)*MethDist_Meth_nom_prod_ud
+    // Pure Methanol prod with min night prep and resp day op
+    // KA=IFERROR(((MAX(0,JD3/$C3-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(MethDist_harmonious_max_perc-MethDist_harmonious_min_perc)+MethDist_harmonious_min_perc)*$C3+IF(HE3<0,0,$B3*(($AE3-A_equiv_harmonious_min_perc)*HE3/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(A_MethDist_max_perc-A_MethDist_min_perc)+A_MethDist_min_perc)),0)*MethDist_Meth_nom_prod_ud
     for i in 0..<365 {
       d23[KA + i] =
         ifFinite(
-          (max(0, d23[JD + i] / day0[C + i] - Overall_fix_cons - Overall_harmonious_var_min_cons) / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
-            * (MethDist_harmonious_max_perc - MethDist_harmonious_min_perc) + MethDist_harmonious_min_perc) * day0[C + i]
+          ((max(0, d23[JD + i] / day0[C0 + i] - Overall_fix_cons) - Overall_harmonious_var_min_cons) / (Overall_harmonious_var_max_cons - Overall_harmonious_var_min_cons)
+            * (MethDist_harmonious_max_perc - MethDist_harmonious_min_perc) + MethDist_harmonious_min_perc) * day0[C0 + i]
             + iff(
               d23[HE + i] < 0, 0,
-              (iff(
-                overall_var_max_cons[j] == Double.zero, d23[HE + i],
-                max(0, d23[JP + i] / day0[B0 + i] - overall_fix_stby_cons[j] - overall_var_min_cons[j]) / (overall_var_max_cons[j] - overall_var_min_cons[j]))
-                * (MethDist_max_perc[j] - MethDist_min_perc[j]) + MethDist_min_perc[j]) * day0[B0 + i]), 0) * MethDist_Meth_nom_prod_ud
+              day0[B0 + i]
+                * ((d21[AE + i] - equiv_harmonious_min_perc[j]) * d23[HE + i] / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j])
+                  * (MethDist_max_perc[j] - MethDist_min_perc[j]) + MethDist_min_perc[j])), 0) * MethDist_Meth_nom_prod_ud
     }
     /// Missing heat
     let KB = 46355

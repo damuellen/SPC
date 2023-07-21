@@ -506,9 +506,9 @@ public struct TunOl {
         + iff(EY_min_perc[j] > 0.0, EY_fix_cons, EY_stby_cons)
       self.overall_var_min_cons[j] = EY_min_perc[j] * (EY_var_net_nom_cons_ud + EY_var_aux_nom_cons) + MethSynt_min_perc[j] * MethSynt_var_nom_cons + MethDist_min_perc[j] * MethDist_var_nom_cons + CCU_min_perc[j] * CCU_var_nom_cons
       self.overall_var_heat_min_cons[j] = EY_var_heat_nom_cons * EY_min_perc[j] + MethDist_var_heat_nom_cons * MethDist_min_perc[j] - MethSynt_var_heat_nom_prod * MethSynt_min_perc[j] + CCU_var_heat_nom_cons * CCU_min_perc[j]
-      self.RawMeth_min_cons[j] = round(max(0.0, -MethSynt_min_perc[j] * MethSynt_RawMeth_nom_prod_ud + MethDist_min_perc[j] * MethDist_RawMeth_nom_cons), 5)
-      self.CO2_min_cons[j] = round(max(0.0, -CCU_min_perc[j] * CCU_CO2_nom_prod_ud + MethSynt_min_perc[j] * MethSynt_CO2_nom_cons), 5)
-      self.Hydrogen_min_cons[j] = round(max(0.0, -EY_min_perc[j] * EY_Hydrogen_nom_prod + MethSynt_min_perc[j] * MethSynt_Hydrogen_nom_cons), 5)
+      self.RawMeth_min_cons[j] = round(-MethSynt_min_perc[j] * MethSynt_RawMeth_nom_prod_ud + MethDist_min_perc[j] * MethDist_RawMeth_nom_cons, 5)
+      self.CO2_min_cons[j] = round(-CCU_min_perc[j] * CCU_CO2_nom_prod_ud + MethSynt_min_perc[j] * MethSynt_CO2_nom_cons, 5)
+      self.Hydrogen_min_cons[j] = round(-EY_min_perc[j] * EY_Hydrogen_nom_prod + MethSynt_min_perc[j] * MethSynt_Hydrogen_nom_cons, 5)
       self.overall_stup_cons[j] = iff(MethDist_min_perc[j] > 0.0, 0.0, MethDist_stup_cons) + iff(MethSynt_min_perc[j] > 0.0, 0.0, MethSynt_stup_cons) + iff(CCU_min_perc[j] > 0.0, 0.0, CCU_stup_cons) + iff(EY_min_perc[j] > 0.0, 0.0, EY_stup_cons)
       self.equiv_harmonious_max_perc[j] = max(
         0, ifFinite(Overall_harmonious_max_perc / MethDist_harmonious_max_perc * MethDist_max_perc[j], Double.zero), ifFinite(Overall_harmonious_max_perc / MethSynt_harmonious_max_perc * MethSynt_max_perc[j], Double.zero),
@@ -519,9 +519,9 @@ public struct TunOl {
         + iff(EY_max_perc[j] > 0.0, EY_heat_fix_cons, EY_heat_stby_cons)
       self.overall_var_max_cons[j] = EY_max_perc[j] * (EY_var_net_nom_cons_ud + EY_var_aux_nom_cons) + MethSynt_max_perc[j] * MethSynt_var_nom_cons + MethDist_max_perc[j] * MethDist_var_nom_cons + CCU_max_perc[j] * CCU_var_nom_cons
       self.overall_var_heat_max_cons[j] = EY_var_heat_nom_cons * EY_max_perc[j] + MethDist_var_heat_nom_cons * MethDist_max_perc[j] - MethSynt_var_heat_nom_prod * MethSynt_max_perc[j] + CCU_var_heat_nom_cons * CCU_max_perc[j]
-      self.RawMeth_max_cons[j] = round(max(0.0, -MethSynt_max_perc[j] * MethSynt_RawMeth_nom_prod_ud + MethDist_max_perc[j] * MethDist_RawMeth_nom_cons), 5)
-      self.CO2_max_cons[j] = round(max(0.0, -CCU_max_perc[j] * CCU_CO2_nom_prod_ud + MethSynt_max_perc[j] * MethSynt_CO2_nom_cons), 5)
-      self.Hydrogen_max_cons[j] = round(max(0.0, -EY_max_perc[j] * EY_Hydrogen_nom_prod + MethSynt_max_perc[j] * MethSynt_Hydrogen_nom_cons), 5)
+      self.RawMeth_max_cons[j] = round(-MethSynt_max_perc[j] * MethSynt_RawMeth_nom_prod_ud + MethDist_max_perc[j] * MethDist_RawMeth_nom_cons, 5)
+      self.CO2_max_cons[j] = round(-CCU_max_perc[j] * CCU_CO2_nom_prod_ud + MethSynt_max_perc[j] * MethSynt_CO2_nom_cons, 5)
+      self.Hydrogen_max_cons[j] = round(-EY_max_perc[j] * EY_Hydrogen_nom_prod + MethSynt_max_perc[j] * MethSynt_Hydrogen_nom_cons, 5)
       self.overall_heat_stup_cons[j] =
         iff(MethDist_min_perc[j] > 0.0, 0.0, MethDist_heat_stup_cons) + iff(MethSynt_min_perc[j] > 0.0, 0.0, MethSynt_heat_stup_cons) + iff(CCU_min_perc[j] > 0.0, 0.0, CCU_heat_stup_cons) + iff(EY_min_perc[j] > 0.0, 0.0, EY_heat_stup_cons)
       self.daytime_cons_per_h_of_max_night_op[j] = RawMeth_max_cons[j] / MethSynt_RawMeth_nom_prod_ud * MethSynt_var_nom_cons

@@ -524,8 +524,9 @@ extension TunOl {
       d14[NP + i] = iff(
         d14[MK + i] == Double.zero, 0, d14[D + i] + iff(d14[KI + i] < 0, 0, (d14[U + i] - d14[D + i]) * d14[KI + i]))
     }
+    let AM: Int = 12775
     // Pure Methanol prod with night priority and resp day op
-    // NL=IFERROR(((MAX(0,MK3/NP3-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(MethDist_harmonious_max_perc-MethDist_harmonious_min_perc)+MethDist_harmonious_min_perc)*NP3+IF(KI3<0,0,(IF(OR(A_overall_var_max_cons=0,A_overall_var_min_cons=0,A_overall_var_max_cons=A_overall_var_min_cons),KI3,(MAX(0,NA3/NO3-A_overall_fix_stby_cons)-A_overall_var_min_cons)/(A_overall_var_max_cons-A_overall_var_min_cons))*(A_MethDist_max_perc-A_MethDist_Min_perc)+A_MethDist_Min_perc)*NO3),0)*MethDist_Meth_nom_prod_ud
+    // NL=IFERROR(((MAX(0,MK3/NP3-Overall_fix_cons)-Overall_harmonious_var_min_cons)/(Overall_harmonious_var_max_cons-Overall_harmonious_var_min_cons)*(MethDist_harmonious_max_perc-MethDist_harmonious_min_perc)+MethDist_harmonious_min_perc)*NP3+IF(KI3<0,0,NO3*(($AM3-A_equiv_harmonious_min_perc)*KI3/(A_equiv_harmonious_max_perc-A_equiv_harmonious_min_perc)*(A_MethDist_max_perc-A_MethDist_min_perc)+A_MethDist_min_perc)),0)*MethDist_Meth_nom_prod_ud
     for i in 0..<365 {
       d14[NL + i] =
         ifFinite(
@@ -533,10 +534,9 @@ extension TunOl {
             * (MethDist_harmonious_max_perc - MethDist_harmonious_min_perc) + MethDist_harmonious_min_perc) * d14[NP + i]
             + iff(
               d14[KI + i] < 0, 0,
-              (iff(
-                or(overall_var_max_cons[j] == Double.zero, overall_var_min_cons[j] == Double.zero, overall_var_max_cons[j] == overall_var_min_cons[j]), d14[KI + i],
-                (max(0, d14[NA + i] / d14[NO + i] - overall_fix_stby_cons[j]) - overall_var_min_cons[j]) / (overall_var_max_cons[j] - overall_var_min_cons[j]))
-                * (MethDist_max_perc[j] - MethDist_min_perc[j]) + MethDist_min_perc[j]) * d14[NO + i]), 0) * MethDist_Meth_nom_prod_ud
+              d14[NO + i]
+                * ((d14[AM + i] - equiv_harmonious_min_perc[j]) * d14[KI + i] / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j])
+                  * (MethDist_max_perc[j] - MethDist_min_perc[j]) + MethDist_min_perc[j])), 0) * MethDist_Meth_nom_prod_ud
     }
     // PB operating hours
     // NQ=IF(KI3<0,0,$E3+($V3-$E3)*KI3)
