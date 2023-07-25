@@ -537,6 +537,7 @@ extension TunOl {
               d14[NO + i]
                 * ((d14[AM + i] - equiv_harmonious_min_perc[j]) * d14[KI + i] / (equiv_harmonious_max_perc[j] - equiv_harmonious_min_perc[j])
                   * (MethDist_max_perc[j] - MethDist_min_perc[j]) + MethDist_min_perc[j])), 0) * MethDist_Meth_nom_prod_ud
+      assert(d14[NL + i] >= 0)
     }
     // PB operating hours
     // NQ=IF(KI3<0,0,$E3+($V3-$E3)*KI3)

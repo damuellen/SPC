@@ -75,7 +75,7 @@ class SunOlTests: XCTestCase {
       return (key, num)
     }
 
-    let values = [120.00,5000.00,120.00,500.00,700.00,280.00,0.00,300.00,10000.00,10000.00,100000.00,30.00,68.60,0.00,0.00,0.00]
+    let values = [177.48,5500.00,150.00,486.23,899.72,300.00,0.00,400.00,1000.00,10000.00,100000.00,40.00,80.00,0.00,0.00,0.00,]
 
     guard let model = TunOl(values) else {
       print("Invalid config")
@@ -199,11 +199,12 @@ class SunOlTests: XCTestCase {
     var hours_sum = Double.zero
     let costs = Costs(model)
     var meth = [Double]()
-
+    var days = [Int]()
     for d in 0..<365 {
       let cases = day.indices.map { i in costs.LCOM(meth_produced_MTPH: day[i][d] * 365.0, elec_from_grid: day[i][d + 365 + 365] * 365.0, elec_to_grid: day[i][d + 365] * 365.0) }
       let best = cases.indices.sorted { cases[$0] < cases[$1] }.first
       if let best = best {
+        days.append(best)
         meth.append(day[best][d])
         meth_produced_MTPH_sum += day[best][d]
         let from_grid = day[best][d + 365 + 365]
