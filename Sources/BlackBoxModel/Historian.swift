@@ -168,7 +168,7 @@ public final class Historian {
   ) {
     self.status.append(status)
     self.performance.append(energy)
-    self.sun.append(Insolation(meteo: meteo))
+    self.sun.append(meteo.insolation)
     #if PRINT
     print(decorated(time.description), meteo, status, energy)
     ClearScreen()
@@ -190,7 +190,7 @@ public final class Historian {
     var buffer = [UInt8]()
       /// Sum of hourly values
     var accumulate = PlantPerformance()
-    var insolation = Insolation()
+    var insolation = Insolation.zero()
     if case .custom(let custom) = mode {
       let f = frequency.rawValue / custom.rawValue
       var date = startDate

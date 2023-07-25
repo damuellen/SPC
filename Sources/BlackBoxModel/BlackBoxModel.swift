@@ -88,10 +88,8 @@ public enum BlackBoxModel {
   /// - Parameter with: Creates the log and write results to file.
   /// - Attention: `configure()` must called before this.
   public static func runModel(with record: Historian) {
-    let insolation = meteoDataDiagnose()
-    guard let 🌞 = sun, insolation.direct else { 
-      print("Missing sunshine."); exit(1)
-    }
+    guard let 🌞 = sun, let insolation = meteoDataDiagnose(), insolation.direct 
+    else { print("Missing sunshine."); exit(1) }
 
     // Preparation of the plant parameters
     var plant = Plant.setup()
@@ -107,19 +105,19 @@ public enum BlackBoxModel {
 
       for (meteo, date) in simulationPeriod(.hour) {
         let (t, ws) = (Temperature(celsius: meteo.temperature), meteo.windSpeed)
-        let solar: Double
+        let gti: Double
         if let position = 🌞[date] {
           let panel = singleAxisTracker(
             apparentZenith: position.zenith, 
             apparentAzimuth: position.azimuth,
             maxAngle: 55, GCR: 0.444)
-          solar = Insolation(meteo: meteo).effective(
+          gti = meteo.insolation.effective(
             surfTilt: panel.surfTilt, incidence: panel.AOI,
             zenith: position.zenith, doy: DateTime(date).yearDay)
         } else {
-          solar = .zero
+          gti = .zero
         }
-        inputs.append(.init(solar: solar, ambient: t, windSpeed: ws))        
+        inputs.append(.init(gti: gti, ambient: t, windSpeed: ws))        
       }
       let count = Simulation.time.steps.rawValue
       photovoltaic = inputs.reversed().reduce(into: []) { result, input in
@@ -147,7 +145,7 @@ public enum BlackBoxModel {
         // Only when the sun is above the horizon.
         status.collector.tracking(sun: position)  // cosTheta
         status.collector.efficiency(ws: meteo.windSpeed)
-        status.collector.irradiation(dni: meteo.dni)
+        status.collector.irradiation(dni: meteo.insolation.direct)
       } else {
         status.collector = Collector.initialState
         DateTime.setNight()
@@ -213,11 +211,13 @@ public enum BlackBoxModel {
     }
   }
 
-  private static func meteoDataDiagnose() -> (direct: Bool, global: Bool) {
+  private static func meteoDataDiagnose() -> (direct: Bool, global: Bool)? {
     // Check the first 12 hours of the year for insolation
     let am = meteoData.prefix(meteoData.count / 730)
-    return (!am.isEmpty && !am.map(\.dni).max()!.isZero,
-     !am.isEmpty && !am.map(\.ghi).max()!.isZero && !am.map(\.dhi).max()!.isZero)
+    if am.isEmpty { return nil }
+    return (!am.map(\.insolation.direct).max()!.isZero,
+     !am.map(\.insolation.global).max()!.isZero 
+     && !am.map(\.insolation.diffuse).max()!.isZero)
   }
 
   private static func simulationPeriod(

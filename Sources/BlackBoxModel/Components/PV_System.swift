@@ -20,7 +20,7 @@ public struct PV {
   public var transformer = Transformer()
 
   public struct InputValues {
-    public let solar: Double
+    public let gti: Double
     public let ambient: Temperature
     public let windSpeed: Double
   }
@@ -30,21 +30,21 @@ public struct PV {
   /// It takes into account factors such as solar radiation, ambient temperature,
   /// wind speed, and inverter specifications to determine the AC power output
   func callAsFunction(_ input: InputValues) -> Double {
-    guard input.solar > 15 else { return transformer(ac: .zero) }
+    guard input.gti > 15 else { return transformer(ac: .zero) }
     var dc = array.mpp(
-      radiation: input.solar, ambient: input.ambient, windSpeed: input.windSpeed)
+      radiation: input.gti, ambient: input.ambient, windSpeed: input.windSpeed)
     if dc.power > inverter.dc_power[0] {
       var efficiency = inverter(power: dc.power, voltage: dc.voltage)
       if efficiency.isNaN {
         let cell_T = array.panel.temperature(
-          radiation: input.solar, ambient: input.ambient,
+          radiation: input.gti, ambient: input.ambient,
           windSpeed: input.windSpeed)
         var count = 0
         while efficiency.isNaN {
           count += 1
           dc = array(
             voltage: dc.voltage.clamped(to: inverter.voltageRange) - 1E-6,
-            radiation: input.solar, cell: cell_T)
+            radiation: input.gti, cell: cell_T)
           efficiency = inverter(
             power: min(inverter.maxPower, dc.power), voltage: dc.voltage)
         }

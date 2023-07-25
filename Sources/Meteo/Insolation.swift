@@ -13,40 +13,31 @@ import Libc
 import SolarPosition
 
 public struct Insolation {
+  /// The direct normal irradiance in watts per square meter (W/m2).
+  public var direct: Double
+  /// The global horizontal irradiance in watts per square meter (W/m2).
+  public var global: Double
+  /// The diffuse horizontal irradiance in watts per square meter (W/m2).
+  public var diffuse: Double
 
-  public var direct, global, diffuse: Double
-
-  public init() {
-    direct = 0.0
-    global = 0.0
-    diffuse = 0.0
-  }
-
-  public init(meteo: MeteoData) {
-    direct = Double(meteo.dni)
-    global = Double(meteo.ghi)
-    diffuse = Double(meteo.dhi)
-  }
-
-  public var values: [Double] { [direct, global, diffuse] }
+  public var values: [Double] { [direct / 1000, global / 1000, diffuse / 1000] }
 
   public static var measurements: [(name: String, unit: String)] {
     [
-      ("Solar|DNI", "Wh/m2"), ("Solar|GHI", "Wh/m2"),
-      ("Solar|DHI", "Wh/m2")
+      ("Solar|DNI", "kWh/m2"), ("Solar|GHI", "kWh/m2"),
+      ("Solar|DHI", "kWh/m2")
     ]
   }
-
-  public mutating func zero() {
-    direct = 0.0
-    global = 0.0
-    diffuse = 0.0
+  
+  public static func zero() -> Insolation {
+    Insolation(direct: 0, global: 0, diffuse: 0)
   }
 }
 
+
 extension RangeReplaceableCollection where Element==Insolation {
   public func hourly(fraction: Double) -> Insolation {
-    var result = Insolation()
+    var result = Insolation.zero()
     for radiation in self {
       result.direct += radiation.direct * fraction
       result.global += radiation.global * fraction
@@ -114,6 +105,7 @@ public enum Albedo: Double {
 }
 
 extension Insolation {
+  /// Calculates the global tilted irradiance in watts per square meter (W/m2).
   public func effective(
     surfTilt: Double, incidence: Double, zenith: Double, doy: Int
   ) -> Double {

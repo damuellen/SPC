@@ -17,9 +17,9 @@ extension Array where Element == MeteoData {
     if self.count < 2 { return self }
     let (temperature, dni, ghi, dhi, windSpeed) = (
       self.map(\.temperature).interpolate(steps: steps),
-      self.map(\.dni).interpolate(steps: steps),
-      self.map(\.ghi).interpolate(steps: steps),
-      self.map(\.dhi).interpolate(steps: steps),
+      self.map(\.insolation.direct).interpolate(steps: steps),
+      self.map(\.insolation.global).interpolate(steps: steps),
+      self.map(\.insolation.diffuse).interpolate(steps: steps),
       self.map(\.windSpeed).interpolate(steps: steps))
     return dni.indices.map { i -> MeteoData in
       MeteoData(dni: dni[i], ghi: ghi[i], dhi: dhi[i],
@@ -35,8 +35,8 @@ extension Array where Element == MeteoData {
     var max = 0.0
     let hourFraction = Double(self.count) / 8760
     for i in day.indices.dropFirst() {
-      let prev = self[i - 1].dni
-      let curr = self[i].dni
+      let prev = self[i - 1].insolation.direct
+      let curr = self[i].insolation.direct
       if curr > max { max = curr }
       if curr > 0 {
         hours += hourFraction
