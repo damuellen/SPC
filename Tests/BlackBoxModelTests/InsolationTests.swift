@@ -14,7 +14,7 @@ class InsolationTests: XCTestCase {
     let expected =  [0, 0, 487.1496, 88.6937]
 
     let tol = 0.1
-    var insolation = Insolation()
+    var insolation = Insolation.zero()
     for i in expected.indices {
       insolation.global = GHI[i]
       insolation.diffuse = DHI[i]
@@ -34,7 +34,7 @@ class InsolationTests: XCTestCase {
 
     let expected = [241.1, 0, 0, 128.2817, 51.3891, 128.4142, 118.4124]
     let tol = 0.1
-    var insolation = Insolation()
+    var insolation = Insolation.zero()
     for i in expected.indices {
       insolation.direct = DNI[i]
       insolation.diffuse = DHI[i]

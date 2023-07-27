@@ -94,7 +94,7 @@ class CollectorTests: XCTestCase {
     let dates = DateSeries(year: 2017, interval: .hour).map { $0 }
     for x in zip(zip(dates, meteo), values1.indices) { 
       let a = x.0.1
-      let dni = a.dni
+      let dni = a.insolation.direct
       print(DateTime(x.0.0).description, values12[x.1], values22[x.1], values1[x.1], values2[x.1], dni, dni * values1[x.1] * values2[x.1], to: &out)
     }
     try? out.write(toFile: "mto.csv", atomically: false, encoding: .utf8)

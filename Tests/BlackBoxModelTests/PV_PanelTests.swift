@@ -66,7 +66,7 @@ class PVPanelTests: XCTestCase {
     var conditions = [PV.InputValues]()
 
     for gti in stride(from: 10.0, to: 1300, by: 10) {
-      conditions.append(.init(solar: gti, ambient: Temperature(celsius: 20), windSpeed: 0))
+      conditions.append(.init(gti: gti, ambient: Temperature(celsius: 20), windSpeed: 0))
     }
     let photovoltaic = conditions.map { step -> Double in
       pv(step) / 10.0e6
