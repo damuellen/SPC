@@ -470,24 +470,23 @@ extension TunOl {
     /// Minimum night op possible considering tank sizes
     let BT: Int = 560640
     // Min outside harm op period op possible considering tank sizes and TES chrg hours
-    // BT=IF(OR($BR6*A_RawMeth_min_cons>RawMeth_storage_cap_ud,$BR6*A_CO2_min_cons>CO2_storage_cap_ud,$BR6*A_Hydrogen_min_cons>Hydrogen_storage_cap_ud,COUNTIFS($BO$5:$BO$8764,"="&$BO6,$BF$5:$BF$8764,">1E-10")=0,A_overall_fix_stby_cons+A_overall_var_min_cons+ROUNDUP($BK6+MAX(0,(MIN(PB_nom_net_cap,MAX(PB_net_min_cap,(1+TES_aux_cons_perc)*MAX(0,$BK6+A_overall_fix_stby_cons+A_overall_var_min_cons)))+PB_nom_net_cap*PB_nom_var_aux_cons_perc_net*POLY(MIN(PB_nom_net_cap,MAX(PB_net_min_cap,(1+TES_aux_cons_perc)*MAX(0,$BK6+A_overall_fix_stby_cons+A_overall_var_min_cons)))/PB_nom_net_cap,PB_n2g_var_aux_el_Coeff)+PB_fix_aux_el)/PB_gross_min_eff+(A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons+IF($BM7=0,0,A_overall_heat_stup_cons))*PB_Ratio_Heat_input_vs_output)*TES_aux_cons_perc,1)>PB_nom_net_cap),0,1)
+    // BT=IF(OR($BR6*A_RawMeth_min_cons>RawMeth_storage_cap_ud,$BR6*A_CO2_min_cons>CO2_storage_cap_ud,$BR6*A_Hydrogen_min_cons>Hydrogen_storage_cap_ud,COUNTIFS($BO$5:$BO$8764,"="&$BO6,$BF$5:$BF$8764,">1E-10")=0,$BR6*ROUNDUP($BK6+MAX(0,(MIN(PB_nom_net_cap,MAX(PB_net_min_cap,(1+TES_aux_cons_perc)*MAX(0,$BK6+A_overall_fix_stby_cons+A_overall_var_min_cons)))+PB_nom_net_cap*PB_nom_var_aux_cons_perc_net*POLY(MIN(PB_nom_net_cap,MAX(PB_net_min_cap,(1+TES_aux_cons_perc)*MAX(0,$BK6+A_overall_fix_stby_cons+A_overall_var_min_cons)))/PB_nom_net_cap,PB_n2g_var_aux_el_Coeff)+PB_fix_aux_el)/(MIN(PB_nom_net_cap,MAX(PB_net_min_cap,(1+TES_aux_cons_perc)*MAX(0,$BK6+A_overall_fix_stby_cons+A_overall_var_min_cons)))/PB_nom_net_cap*(PB_nom_gross_eff-PB_gross_min_eff)+PB_gross_min_eff)+(A_overall_var_heat_min_cons+A_overall_heat_fix_stby_cons+IF($BM7=0,0,A_overall_heat_stup_cons))*PB_Ratio_Heat_input_vs_output)*(1+TES_aux_cons_perc),1)>MIN(SUMIF($BO$5:$BO$8764,"="&$BO6,$AY$5:$AY$8764)*Heater_eff*(1+1/Ratio_CSP_vs_Heater),TES_thermal_cap_ud)),0,1)
 
     for i in 1..<8760 {
       h[BT + i] = iff(
         or(BMcountZero[i - 1] * RawMeth_min_cons[j] > RawMeth_storage_cap_ud,
          BMcountZero[i - 1] * CO2_min_cons[j] > CO2_storage_cap_ud,
          BMcountZero[i - 1] * Hydrogen_min_cons[j] > Hydrogen_storage_cap_ud,
-         BFcount[i - 1].isZero, overall_fix_stby_cons[j] + overall_var_min_cons[j]
-        + roundUp(
+         BFcount[i - 1].isZero, BMcountZero[i - 1] * roundUp(
           h[BK + i] + max(
             0,
             (min(PB_nom_net_cap, max(PB_net_min_cap, (1 + TES_aux_cons_perc) * max(0, h[BK + i] + overall_fix_stby_cons[j] + overall_var_min_cons[j]))) + PB_nom_net_cap
               * PB_nom_var_aux_cons_perc_net
               * POLY(
                 min(PB_nom_net_cap, max(PB_net_min_cap, (1 + TES_aux_cons_perc) * max(0, h[BK + i] + overall_fix_stby_cons[j] + overall_var_min_cons[j]))) / PB_nom_net_cap,
-                PB_n_g_var_aux_el_Coeff) + PB_fix_aux_el) / PB_gross_min_eff
+                PB_n_g_var_aux_el_Coeff) + PB_fix_aux_el) / (min(PB_nom_net_cap,max(PB_net_min_cap,(1 + TES_aux_cons_perc) * max(0, h[BK + i] + overall_fix_stby_cons[j] + overall_var_min_cons[j]))) / PB_nom_net_cap * (PB_nom_gross_eff - PB_gross_min_eff) + PB_gross_min_eff)
               + (overall_var_heat_min_cons[j] + overall_heat_fix_stby_cons[j] + iff(h[BM + i + 1] == Double.zero, 0, overall_heat_stup_cons[j])) * PB_Ratio_Heat_input_vs_output)
-            * TES_aux_cons_perc, 1) > PB_nom_net_cap), Double.zero, 1.0)
+            * (1 + TES_aux_cons_perc), 1) > min(AYsum[i - 1] * Heater_eff * (1 + 1 / Ratio_CSP_vs_Heater), TES_thermal_cap_ud)), Double.zero, 1.0)
     }
     /// Min net elec demand outside harm op period
     let BU: Int = 569400
