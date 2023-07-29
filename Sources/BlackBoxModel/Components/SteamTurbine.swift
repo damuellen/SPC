@@ -144,7 +144,7 @@ public struct SteamTurbine: Parameterizable {
     }
   }
 
-  static func minLoad(ambient: Temperature) -> Ratio {
+  static func minLoad(atTemperature ambient: Temperature) -> Ratio {
     let minLoad: Ratio
     if SteamTurbine.parameter.minPowerFromTemp.isInapplicable {
       minLoad = Ratio(
@@ -158,7 +158,7 @@ public struct SteamTurbine: Parameterizable {
     return minLoad
   }
 
-  static func minPower(ambient: Temperature) -> Double {
+  static func minPower(atTemperature ambient: Temperature) -> Double {
     var minPower: Double
     if SteamTurbine.parameter.minPowerFromTemp.isInapplicable {
       minPower =

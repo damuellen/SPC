@@ -156,25 +156,25 @@ extension HeatTransfer {
       "\(temperature) is below freezing point of the htf")
   }
 
-  mutating func massFlow(inlet other: HeatTransfer) {
+  mutating func massFlow(in other: HeatTransfer) {
     massFlow = other.massFlow
     temperature.inlet = other.temperature.inlet
   }
 
-  mutating func massFlow(outlet other: HeatTransfer) {
+  mutating func massFlow(from other: HeatTransfer) {
     massFlow = other.massFlow
     temperature.inlet = other.temperature.outlet
   }
 
-  mutating func inletTemperature(outlet other: HeatTransfer) {
+  mutating func inletTemperature(output other: HeatTransfer) {
     temperature.inlet = other.temperature.outlet
   }
 
-  mutating func inletTemperature(inlet other: HeatTransfer) {
+  mutating func inletTemperature(input other: HeatTransfer) {
     temperature.inlet = other.temperature.inlet
   }
 
-  mutating func outletTemperature(outlet other: HeatTransfer) {
+  mutating func outletTemperature(output other: HeatTransfer) {
     temperature.outlet = other.temperature.outlet
   }
 }

@@ -169,7 +169,7 @@ public struct SolarField: Parameterizable, HeatTransfer {
     switch storage.operationMode {
     case .freezeProtection:
       if Storage.parameter.temperatureCharge[1] > 0 {
-        inletTemperature(outlet: storage)
+        inletTemperature(output: storage)
       } else {
         temperature.inlet.kelvin = storage.antiFreezeTemperature
       }

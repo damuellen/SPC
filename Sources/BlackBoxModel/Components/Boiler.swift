@@ -62,7 +62,7 @@ public struct Boiler: Parameterizable {
   }
 
   mutating func callAsFunction(
-    demand: Double, Qsf_load: Double, fuelAvailable: Double)
+    demand: Double, Qsf_load: Double)
     -> Consumptions
   {
     let parameter = Boiler.parameter
@@ -83,7 +83,7 @@ public struct Boiler: Parameterizable {
         )
       }
 
-      let fuel = Boiler.noOperation(&self, fuelAvailable: fuelAvailable)
+      let fuel = noOperation()
       return Consumptions(
         heatFlow: thermalPower, electric: parasitics, fuel: fuel
       )
@@ -106,7 +106,7 @@ public struct Boiler: Parameterizable {
 
       operationMode = .scheduledMaintenance
 
-      let fuel = Boiler.noOperation(&self, fuelAvailable: fuelAvailable)
+      let fuel = noOperation()
 
       return Consumptions(
         heatFlow: thermalPower, electric: parasitics, fuel: fuel
@@ -114,14 +114,14 @@ public struct Boiler: Parameterizable {
     }
 
     if -demand / Design.layout.boiler < parameter.minLoad
-      || fuelAvailable == 0
+      || Availability.fuel == 0
     { // Check if underload
       debugPrint("""
         \(DateTime.current)
         Boiler operation requested but not performed because of underload.
         """)
 
-      let fuel = Boiler.noOperation(&self, fuelAvailable: fuelAvailable)
+      let fuel = noOperation()
 
       return Consumptions(
         heatFlow: thermalPower, electric: parasitics, fuel: fuel
@@ -182,14 +182,14 @@ public struct Boiler: Parameterizable {
       // FIXME	}
     }
 
-    if fuelAvailable < totalFuelNeed { // Check if sufficient fuel avail.
-      load(fuel: &fuel, fuelAvailable: fuelAvailable)
+    if Availability.fuel < totalFuelNeed { // Check if sufficient fuel avail.
+      fuelAvailable()
       if load.quotient < parameter.minLoad {
         debugPrint("""
           \(DateTime.current)
           BO operation requested but insufficient fuel.
           """)
-        let fuel = Boiler.noOperation(&self, fuelAvailable: fuelAvailable)
+        let fuel = noOperation()
 
         return Consumptions(
           heatFlow: thermalPower, electric: parasitics, fuel: fuel
@@ -202,7 +202,7 @@ public struct Boiler: Parameterizable {
     // FIXME: H2Ov.temperature.outlet  = Boiler.parameter.nomTout
     if OperationRestriction.fuelStrategy.isPredefined { // predefined fuel consumption in *.pfc-file
       // Fuel flow [MW] in this hour fraction
-      fuel = fuelAvailable / Simulation.time.steps.fraction
+      fuel = Availability.fuel / Simulation.time.steps.fraction
 
       thermalPower = fuel // FIXME Plant.fuelConsumption.boiler
         * Boiler.efficiency(at: load) // net thermal power [MW]
@@ -219,8 +219,7 @@ public struct Boiler: Parameterizable {
     )
   }
 
-  private mutating func load(fuel: inout Double, fuelAvailable: Double)
-  {
+  private mutating func fuelAvailable() {
     let parameter = Boiler.parameter
     switch (operationMode, isMaintained) {
     case (let .noOperation(hours), false):
@@ -231,7 +230,7 @@ public struct Boiler: Parameterizable {
     default:
       break
     }
-
+    var fuel = Availability.fuel
     // Calc. the fuel avail. for production only:
     switch operationMode {
     case let .noOperation(hours) where hours >= parameter.start.hours.cold:
@@ -239,7 +238,7 @@ public struct Boiler: Parameterizable {
     case let .noOperation(hours) where hours >= parameter.start.hours.warm:
       fuel -= parameter.start.energy.warm
     default:
-      fuel = fuelAvailable
+      var fuel = Availability.fuel
       if 0.5 * fuel < startEnergy {
 
         fuel = 0.5 * fuel
@@ -256,7 +255,7 @@ public struct Boiler: Parameterizable {
       }
     }
 
-    if fuel == 0 {
+    if Availability.fuel == 0 {
       startEnergy = -fuel
 
       load = 0.0
@@ -266,30 +265,27 @@ public struct Boiler: Parameterizable {
     }
 
     if OperationRestriction.fuelStrategy.isPredefined { // predefined fuel consumption in *.pfc-file
-      load = Ratio(fuel / (Design.layout.boiler * Simulation.time.steps.fraction))
+      load = Ratio(Availability.fuel / (Design.layout.boiler * Simulation.time.steps.fraction))
       return
     }
 
     // Iteration to get possible load with the fuel avail. for production:
     var newLoad = Ratio(0)
+
     repeat {
         newLoad = Ratio(fuel * Boiler.efficiency(at: load) / Design.layout.boiler)
         load = Ratio(fuel * Boiler.efficiency(at: newLoad) / Design.layout.boiler)
     } while abs(newLoad.quotient - load.quotient) < 0.01
   }
 
-  private static func noOperation(
-    _ boiler: inout Boiler, fuelAvailable: Double
-    ) -> Double
-  {
+  private mutating func noOperation() -> Double {
     var fuel = 0.0
-    if case .startUp = boiler.operationMode {
-      fuel = fuelAvailable
+    if case .startUp = operationMode {
+      fuel = Availability.fuel
     } else {
-      boiler.operationMode = .noOperation(hours: Simulation.time.steps.fraction)
+      operationMode = .noOperation(hours: Simulation.time.steps.fraction)
       fuel = 0
-      boiler.load = .zero
-      // FIXME: H2Ov.massFlow = 0
+      load = .zero
     }
     return fuel
   }

@@ -109,9 +109,7 @@ extension Storage {
       return status.temperature.inlet
   }
 
-  private mutating func massFlow(
-    solarField: SolarField)
-  {
+  private mutating func massFlow(solarField: SolarField) {
     let dischargeLoad = operationMode.dischargeLoad.quotient
     let eff = Storage.parameter.heatExchangerEfficiency
     switch solarField.operationMode {
@@ -128,7 +126,7 @@ extension Storage {
     heatFlow: inout ThermalEnergy)
     -> Power
   {
-    storage.massFlow(outlet: solarField)
+    storage.massFlow(from: solarField)
     storage.massFlow -= HeatExchanger.designMassFlow
 
     storage.massFlow.adjust(factor: parameter.heatExchangerEfficiency)
@@ -231,7 +229,7 @@ extension Storage {
     -> (Power, Power)
   {
     // used for parasitics
-    storage.inletTemperature(outlet: powerBlock)
+    storage.inletTemperature(output: powerBlock)
     storage.massFlow = HeatExchanger.designMassFlow - powerBlock.massFlow
     storage.massFlow.rate *= storage.operationMode.dischargeLoad.quotient
     storage.temperature.outlet = outletTemperature(storage)
@@ -304,7 +302,7 @@ extension Storage {
     _ outletTemperature: (Storage) -> Temperature)
     -> (Power, Power)
   {       
-    storage.massFlow(outlet: powerBlock)
+    storage.massFlow(from: powerBlock)
     storage.massFlow -= solarField.massFlow
     
     storage.temperature.outlet = outletTemperature(storage)
@@ -345,7 +343,7 @@ extension Storage {
     
     solarField.header.massFlow = antiFreezeFlow
 
-    storage.inletTemperature(outlet: powerBlock)
+    storage.inletTemperature(output: powerBlock)
     
     var fittedTemperature = 0.0
     if Storage.parameter.temperatureCharge[1] > 0 {

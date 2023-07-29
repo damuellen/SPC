@@ -64,9 +64,8 @@ public struct GasTurbine: Parameterizable {
     return maximumLoad
   }
 
-  static func perform(
-    _ gt: GasTurbine, demand: Double, fuelAvailable: Double
-  ) -> (neededLoad: Ratio, gasTurbineGross: Double) {
+  static func perform(_ gt: GasTurbine, demand: Double)
+    -> (neededLoad: Ratio, gasTurbineGross: Double) {
     // if status.isMaintained {
     /*
      gasTurbine.operationMode = .scheduledMaintenance
@@ -140,7 +139,7 @@ public struct GasTurbine: Parameterizable {
         //      Nothinng else
       } else {
         while true { // just to estimate amount of WHR
-          (_,supply) = GasTurbine.perform(gasTurbine, demand: demand, fuelAvailable: fuel)
+          (_,supply) = GasTurbine.perform(gasTurbine, demand: demand)
           steamTurbine.load = Ratio(
             (plant.electricity.demand - plant.electricity.gasTurbineGross)
               / SteamTurbine.parameter.power.max)
@@ -179,9 +178,7 @@ public struct GasTurbine: Parameterizable {
         // Ucase$(OpRCCmode(month, time.Tariff)) = "P" {
         // Pure CC is possible and desired: all heat can be used (Qsol!)
         while true { // just to estimate amount of WHR
-          (_,supply) = GasTurbine.perform(
-            gasTurbine, demand: demand, fuelAvailable: fuel
-          )
+          (_,supply) = GasTurbine.perform(gasTurbine, demand: demand)
 
           let load = Ratio(
             (plant.electricity.demand - plant.electricity.gasTurbineGross)
@@ -220,7 +217,7 @@ public struct GasTurbine: Parameterizable {
         // WasteHeatRecovery.parameter.Operation = "Intg" or gasTurbine.operationMode = "IC"
         if demand < Design.layout.gasTurbine {
           demand = Design.layout.gasTurbine
-          (_,supply) = GasTurbine.perform(gasTurbine, demand: demand, fuelAvailable: fuel) // GasTurbineLmax
+          (_,supply) = GasTurbine.perform(gasTurbine, demand: demand) // GasTurbineLmax
 
           steamTurbine.load = Ratio(
             (plant.electricity.demand - plant.electricity.gasTurbineGross)
@@ -268,7 +265,7 @@ public struct GasTurbine: Parameterizable {
           }
         } // WasteHeatRecovery.parameter.Operation
       }
-      (_,supply) = GasTurbine.perform(gasTurbine, demand: demand, fuelAvailable: fuel) // GasTurbineLmax
+      (_,supply) = GasTurbine.perform(gasTurbine, demand: demand) // GasTurbineLmax
       steamTurbine.load = Ratio((plant.electricity.demand - plant.electricity.gasTurbineGross)
         / SteamTurbine.parameter.power.max)
       steamTurbine.load.limited(to: Availability.current.value.powerBlock)

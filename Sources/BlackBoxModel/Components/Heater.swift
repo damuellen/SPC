@@ -79,7 +79,6 @@ public struct Heater: Parameterizable, HeatTransfer {
   mutating func callAsFunction(
     storage: MassFlow,
     mode: Storage.OperationMode,
-    fuelAvailable: Double,
     heatFlow: ThermalEnergy
   )
     -> Heater.Consumptions
@@ -96,7 +95,7 @@ public struct Heater: Parameterizable, HeatTransfer {
       // Fossil charge of storage
       if OperationRestriction.fuelStrategy.isPredefined {
         // fuel consumption is predefined
-        fuel = fuelAvailable / Simulation.time.steps.fraction / 2
+        fuel = Availability.fuel / Simulation.time.steps.fraction / 2
         // The fuelfl avl. [MW]
         thermalPower.megaWatt =
           fuel * parameter.efficiency.quotient
@@ -191,7 +190,7 @@ public struct Heater: Parameterizable, HeatTransfer {
         / Simulation.adjustmentFactor.efficiencyHeater
       // The fuelfl avl. [MW]
       fuel =
-        min(fuel * Simulation.time.steps.fraction, fuelAvailable)
+        min(fuel * Simulation.time.steps.fraction, Availability.fuel)
         / Simulation.time.steps.fraction
 
       /// net thermal power avail [MW]
