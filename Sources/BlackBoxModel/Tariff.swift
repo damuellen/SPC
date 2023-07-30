@@ -8,11 +8,13 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
-public struct Tariff: Codable {
+public struct TariffStructure: Codable {
   let name: String
   let abbreviation: String
-  let energyPayment, energieCost, capacityPaymentPercent, capacityPayment,
-    bonusPaymentPercent, bonusPayment, asAvailableCapacity: Double
+  let energyPayment, energieCost: Double
+  let capacityPaymentPercent, capacityPayment: Double
+  let bonusPaymentPercent, bonusPayment: Double
+  let asAvailableCapacity: Double
 }
 
 struct TariffSeason: Codable {
@@ -21,23 +23,23 @@ struct TariffSeason: Codable {
   let weekday, saturday, holyday: [Int]
 }
 
-extension Tariff: CustomStringConvertible {
+extension TariffStructure: CustomStringConvertible {
   public var description: String { name }
 }
 
-public struct Tariffs: Codable {
+public struct Tariff: Codable {
   let name: String
-  let tariff: [Tariff]
+  let tariff: [TariffStructure]
   let season: [TariffSeason]
 }
 
-extension Tariffs: TextConfigInitializable {
+extension Tariff: TextConfigInitializable {
   public init(file: TextConfigFile) throws {
     let ln1: (Int) throws -> Double = { try file.readDouble(lineNumber: $0) }
-    var tariffs = [Tariff]()
+    var tariffs = [TariffStructure]()
     for n in 0..<8 {
       let offset = 34 * n
-      try tariffs.append(Tariff(
+      try tariffs.append(TariffStructure(
         name: file.readString(lineNumber: 228), 
         abbreviation: file.readString(lineNumber: 231), 
         energyPayment: ln1(237 + offset),

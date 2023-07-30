@@ -95,7 +95,7 @@ public enum JSONConfig {
     case .OPR: break
     case .DEM: break
     case .TAR:
-      Simulation.tariff = try decoder.decode(Tariffs.self, from: data)
+      Simulation.tariff = try decoder.decode(Tariff.self, from: data)
     case .SIM:
       Simulation.parameter = try decoder.decode(
         Simulation.Parameter.self, from: data
