@@ -249,7 +249,7 @@ public struct SolarField: Parameterizable, HeatTransfer {
 
   mutating func isFreezeProtectionRequired() -> Bool {
     let freezingTemperature = SolarField.parameter.HTF.freezeTemperature
-      + Simulation.parameter.dfreezeTemperaturePump
+      + Simulation.parameter.deltaFreezeTemperaturePump
       + Simulation.parameter.tempTolerance
 
     let timeRemain = Simulation.time.steps.interval

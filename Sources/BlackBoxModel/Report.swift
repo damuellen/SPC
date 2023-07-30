@@ -118,9 +118,9 @@ extension Recording {
     }
     d += Simulation.initialValues.description
     d += "Delta T for Start-Up of Anti-Freeze Pumping:"
-      * Simulation.parameter.dfreezeTemperaturePump.description
+      * Simulation.parameter.deltaFreezeTemperaturePump.description
       + "Delta T for Start-Up of Anti-Freeze Heater:"
-      * Simulation.parameter.dfreezeTemperatureHeat.description
+      * Simulation.parameter.deltaFreezeTemperatureHeat.description
       + "Minimum Insolation for Start-Up [W/m²]:"
       * Simulation.parameter.minInsolation.description
       + "Fuel strategy:" * OperationRestriction.fuelStrategy.description

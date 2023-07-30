@@ -28,18 +28,7 @@ public struct Plant {
 
   mutating func perform(_ status: inout Status, ambient: Temperature) {
 
-    func demandStorageStrategy() -> Double {
-      switch Storage.parameter.strategy {
-      case .demand:
-        return SteamTurbine.parameter.power.max
-      case .shifter:
-        return SteamTurbine.parameter.power.max * GridDemand.current.ratio
-      case .always:
-        return electricity.demand
-      }
-    }
-
-    func constraintLoad(_ steamTurbine: inout SteamTurbine) -> Double? {
+    func loadCapacity(steamTurbine: inout SteamTurbine) -> Double? {
       guard steamTurbine.load < Availability.current.value.powerBlock
         else { return nil }
 
@@ -130,6 +119,13 @@ public struct Plant {
           powerBlock: &status.powerBlock,
           heatFlow: heatFlow
         )
+        integrate(
+          heater: &status.heater,
+          solarField: &status.solarField,
+          powerBlock: &status.powerBlock,
+          steamTurbine: &status.steamTurbine,
+          storage: &status.storage
+        )
       }
 
       // Check if heating is necessary
@@ -151,7 +147,7 @@ public struct Plant {
       /// Unavoidable losses in Power Block
       heatFlow.production.watt *= Simulation.adjustmentFactor.heatLossH2O
 
-      if Design.hasBoiler { update(boiler: &status.boiler) }
+      if Design.hasBoiler { integrate(boiler: &status.boiler) }
 
       status.steamTurbine.load = max(status.steamTurbine.load, minLoad)
 
@@ -225,7 +221,7 @@ public struct Plant {
     let freezeTemperature = SolarField.parameter.HTF.freezeTemperature
 
     if solarField.header.temperature.outlet < freezeTemperature
-      + Simulation.parameter.dfreezeTemperatureHeat,
+      + Simulation.parameter.deltaFreezeTemperatureHeat,
       storage.massFlow.isZero
     {  // No freeze protection heater use anymore if storage is in operation
       heater.massFlow(from: solarField)
@@ -242,7 +238,7 @@ public struct Plant {
     }
 
     if solarField.minTemperature > freezeTemperature.kelvin
-      + Simulation.parameter.dfreezeTemperatureHeat
+      + Simulation.parameter.deltaFreezeTemperatureHeat
     {
       heater.operationMode = .noOperation
 
@@ -301,7 +297,7 @@ public struct Plant {
       }
 
       if Design.hasHeater {
-        update(
+        integrate(
           heater: &status.heater,
           solarField: &status.solarField,
           powerBlock: &status.powerBlock,
@@ -346,10 +342,7 @@ public struct Plant {
       }
 
       if abs(status.powerBlock.outlet - status.heatExchanger.outlet)
-        < tolerance
-      {
-        break Iteration
-      }
+        < tolerance { break Iteration }
 
       status.powerBlock.outletTemperature(output: status.heatExchanger)
     }
@@ -357,12 +350,12 @@ public struct Plant {
 
   // MARK: - Heater
 
-  private mutating func update(
+  private mutating func integrate(
     heater: inout Heater,
     solarField: inout SolarField,
     powerBlock: inout PowerBlock,
-    gasTurbine: GasTurbine,
-    storage: inout Storage
+    storage: inout Storage,
+    gasTurbine: GasTurbine
   ) {
     if case .pure = gasTurbine.operationMode {
       // Plant updates in Pure CC Mode now again without RH!!
@@ -404,7 +397,7 @@ public struct Plant {
     }
   }
 
-  private mutating func update(
+  private mutating func integrate(
     heater: inout Heater,
     solarField: inout SolarField,
     powerBlock: inout PowerBlock,
@@ -523,7 +516,7 @@ public struct Plant {
     electricalParasitics.heater = boiler.electric
   }
 
-  private mutating func update(boiler: inout Boiler) {
+  private mutating func integrate(boiler: inout Boiler) {
     var Qsf_load: Double
 
     let adjustmentFactor = Simulation.adjustmentFactor
@@ -579,6 +572,17 @@ public struct Plant {
       heatFlow.production =
         (heatFlow.heatExchanger + heatFlow.wasteHeatRecovery)
         * adjustmentFactor.heatLossH2O + heatFlow.boiler
+    }
+  }
+
+  private func demandStorageStrategy() -> Double {
+    switch Storage.parameter.strategy {
+    case .demand:
+      return SteamTurbine.parameter.power.max
+    case .shifter:
+      return SteamTurbine.parameter.power.max * GridDemand.current.ratio
+    case .always:
+      return electricity.demand
     }
   }
 

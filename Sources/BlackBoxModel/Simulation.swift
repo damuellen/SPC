@@ -34,8 +34,8 @@ public enum Simulation {
   )
 
   public static var parameter = Simulation.Parameter(
-    dfreezeTemperaturePump: 151.0,
-    dfreezeTemperatureHeat: 40.0,
+    deltaFreezeTemperaturePump: 151.0,
+    deltaFreezeTemperatureHeat: 40.0,
     minTemperatureRaiseStartUp: 1.0,
     tempTolerance: 1.0,
     minInsolationRaiseStartUp: 1.0,

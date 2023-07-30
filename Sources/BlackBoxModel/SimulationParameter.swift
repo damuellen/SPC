@@ -12,7 +12,7 @@ import Utilities
 
 extension Simulation {
   public struct Parameter: Codable {
-    let dfreezeTemperaturePump, dfreezeTemperatureHeat,
+    let deltaFreezeTemperaturePump, deltaFreezeTemperatureHeat,
       minTemperatureRaiseStartUp, tempTolerance,
       minInsolationRaiseStartUp, heatTolerance, timeTolerance, massTolerance,
       minInsolation, maxToPowerBlock, minInsolationForBoiler,
@@ -41,9 +41,9 @@ extension Simulation.AdjustmentFactors: CustomStringConvertible {
 extension Simulation.Parameter: CustomStringConvertible {
   public var description: String {
     "Delta T for Start-Up of Anti-Freeze Pumping:"
-    * dfreezeTemperaturePump.description
+    * deltaFreezeTemperaturePump.description
     + "Delta T for Start-Up of Anti-Freeze Heating:"
-    * dfreezeTemperatureHeat.description
+    * deltaFreezeTemperatureHeat.description
     + "Minimum Raise of Temperature for Start-Up [K]:"
     * minTemperatureRaiseStartUp.description
     + "Minimum Raise of Insolation for Start-Up [W/m²]:"
@@ -83,8 +83,8 @@ extension Simulation.Parameter: TextConfigInitializable {
     )
 
     self = try Simulation.Parameter(
-      dfreezeTemperaturePump: ln(7),
-      dfreezeTemperatureHeat: ln(10),
+      deltaFreezeTemperaturePump: ln(7),
+      deltaFreezeTemperatureHeat: ln(10),
       minTemperatureRaiseStartUp: ln(13),
       tempTolerance: ln(22),
       minInsolationRaiseStartUp: ln(16),
