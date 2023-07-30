@@ -74,6 +74,15 @@ public struct TextConfigFile {
       throw ReadError.invalidValueInLine(lineNumber, self.url.path)
     }
   }
+
+  public func readIntegers(lineNumber: Int) throws -> [Int] {
+    let s = try readString(lineNumber: lineNumber)
+    let i = s.split(separator: ",").map(String.init).compactMap(Int.init)
+    if i.count != 24 {
+      throw ReadError.invalidValueInLine(lineNumber, self.url.path)
+    }
+    return i
+  }
 }
 
 extension TextConfigFile.ReadError: CustomStringConvertible {

@@ -24,17 +24,7 @@ public enum Simulation {
     massFlowInSolarField: 0.0
   )
 
-  static var tariff = Tariff(
-    name: "",
-    abbreviation: "",
-    energyPayment: 1.0,
-    energieCost: 1.0,
-    capacityPaymentPercent: 1.0,
-    capacityPayment: 1.0,
-    bonusPaymentPercent: 1.0,
-    bonusPayment: 1.0,
-    asAvailableCapacity: 1.0
-  )
+  static var tariff = Tariffs(name: "", tariff: [], season: [])
 
   public static var time = Period(
     isLeapYear: false,
