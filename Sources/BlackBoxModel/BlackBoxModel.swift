@@ -155,7 +155,7 @@ public enum BlackBoxModel {
       {()}
       if DateTime.isSunSet
       {()}
-      if DateTime.at(minute: 40, hour: 8, day: 1, month: 1)
+      if DateTime.is(minute: 40, hour: 8, day: 1, month: 1)
       {()}
 #endif
       // Used when calculating the heat losses and the efficiency
@@ -193,7 +193,7 @@ public enum BlackBoxModel {
       // Calculate power consumption of the pumps
       plant.electricalParasitics.solarField = status.solarField.parasitics()
 
-      // Calculate the performance data of the plant
+      // Calculate the operating sequence of the plant
       plant.perform(&status, ambient: temperature)
 
       if Design.hasStorage {

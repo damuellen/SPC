@@ -66,7 +66,7 @@ public struct DateTime: CustomStringConvertible {
 
   public typealias MonthDay = (day: Int, month: Int)
 
-  public static func at(minute: Int? = nil, hour: Int? = nil, day: Int? = nil, month: Int? = nil) -> Bool {
+  public static func `is`(minute: Int? = nil, hour: Int? = nil, day: Int? = nil, month: Int? = nil) -> Bool {
     guard current.minute == (minute ?? current.minute) else { return false }
     guard current.hour == (hour ?? current.hour) else { return false }
     guard current.day == (day ?? current.day) else { return false }
@@ -74,7 +74,7 @@ public struct DateTime: CustomStringConvertible {
     return true
   }
 
-  public static func at(minute: Int = 0, hour: Int? = nil, yearDay: Int? = nil) -> Bool {
+  public static func `is`(minute: Int = 0, hour: Int? = nil, yearDay: Int? = nil) -> Bool {
     guard current.minute == minute else { return false }
     guard current.hour == (hour ?? current.hour) else { return false }
     guard current.yearDay == (yearDay ?? current.day) else { return false }
