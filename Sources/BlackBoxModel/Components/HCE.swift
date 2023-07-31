@@ -12,7 +12,7 @@ import Meteo
 import Utilities
 
 /**
- Heat Collecting Element
+ Enum representing HCE (Heat Collector Element)
  
  - Mode 1:
  Calculate the right mass-flow to get maximum allowed HTF-outlet temp.
@@ -189,27 +189,33 @@ enum HCE {
     return losses * endLossFactor
   }
 
+  // Function to calculate heat losses through the HCE
   static func heatLosses(
     inlet: Temperature,
     outlet: Temperature = SolarField.parameter.HTF.maxTemperature,
     insolation: Double,
     ambient: Temperature
   ) -> Double {
+    // Check if the integral radial loss is being used
     let useIntegralRadialoss = Collector.parameter.useIntegralRadialoss
-
+    
+    // Define the temperatures based on whether integral radial loss is used or not
     let temperatures = useIntegralRadialoss
       ? (outlet, inlet, ambient)
       : (Temperature.average(outlet, inlet), ambient + 20.0, 0.0)
 
+    // Choose the appropriate radiation loss function based on the integral radial loss
     let radiaLoss = useIntegralRadialoss
-      ? HCE.radiationLossesNew : HCE.radiationLossesOld
+      ? HCE.radiationLossesNew
+      : HCE.radiationLossesOld
 
+    // Calculate heat losses using the selected radiation loss function
     var heatLossesHCE = radiaLoss(temperatures, insolation)
     heatLossesHCE *= Simulation.adjustmentFactor.heatLossHCE
     return heatLossesHCE
   }
 
-  /// HTF temperature dependent on constant mass flow
+  // Function to calculate temperatures of the HCE based on fluid properties and other parameters
   static func temperatures(
     _ solarField: inout SolarField,
     _ loop: SolarField.Loop,
@@ -218,42 +224,53 @@ enum HCE {
   ) -> Double {
     /// Fluid properties
     let htf = SolarField.parameter.HTF
-    /// Inner cross-sectional area of HCE
+    
+    // Calculate the cross-sectional areas of the HCE
     let areaInner = .pi * Collector.parameter.rabsInner ** 2
-    /// Outer cross-sectional area of HCE
     let areaOut = .pi * Collector.parameter.rabsOut ** 2
+    
     /// Aperture width of the collector
     let aperture = Collector.parameter.aperture
-    /// HCE specific heat per kg 
+    
+    /// HCE specific heat per kg
     let specificHeatHCE = 0.49
+    
     /// Specific mass of steel
     let densityHCE = 7870.0
-    /// HCE density per square metre 
+    
+    /// HCE density per square meter
     let areaDensityHCE = densityHCE * (areaOut - areaInner) / aperture
+    
     /// The predefined availability of the solar field
     let availability = Availability.current.value.solarField.quotient
 
+    /// Initialize time interval for the iteration
     var time = Simulation.time.steps.interval
 
+    // Retrieve the HCE for the specified loop from the solar field
     var hce = solarField.loops[loop.rawValue]
     defer { solarField.loops[loop.rawValue] = hce }
 
+    // Get the maximum temperature for the HTF (Heat Transfer Fluid)
     let maxTemp = htf.maxTemperature
     var goal = hce.temperature.outlet
 
+    // Get the focus quotient of the solar field
     var inFocus = solarField.inFocus.quotient
 
+    // Function to check the termination conditions for the iteration
     func checkConditions() -> Bool {
       if hce.temperature.outlet.kelvin > 0.997 * maxTemp.kelvin { return true }
       if inFocus.isZero || inFocus > 0.95 { return true }
       return false
     }
 
+    // Iteration loop for the temperature calculation
     Iteration: for _ in 1...10 {
-
+      // Calculate the heat input based on insolation, focus quotient, and solar field availability
       let heatInput = insolation * inFocus * availability
 
-      /// Heat losses of the HCE for current outlet temperature
+      // Calculate the heat losses of the HCE for the current outlet temperature
       solarField.heatLossesHCE = HCE.heatLosses(
         inlet: hce.temperature.inlet,
         outlet: hce.temperature.outlet,
@@ -261,33 +278,38 @@ enum HCE {
         ambient: ambient
       )
 
+      // Set the heat losses of the solar field to those of the HCE
       solarField.heatLosses = solarField.heatLossesHCE
 
+      // If there is mass flow in the HCE, consider additional heat loss through the pipe
       if hce.massFlow > .zero {
         solarField.heatLosses += SolarField.pipeHeatLoss(pipe: hce.average, ambient: ambient)
         solarField.heatLosses *= Simulation.adjustmentFactor.heatLossHTF
       }
 
+      // If there is heat input, apply adjustment factor to the solar field heat losses
       if heatInput > .zero {
         factorHeatLossHTF(solarField: &solarField, inFocus: inFocus)
       }
 
-      // Net deltaHeat (+)=in or (-)=out HCE
+      // Calculate the net deltaHeat (+ or -) in the HCE
       let deltaHeat = heatInput - solarField.heatLosses
 
-      /// Mass of HTF per square metre
+      // Calculate the mass of HTF per square meter
       let areaDensityHTF = htf.density(hce.average) * areaInner / aperture
 
+      // If there is mass flow in the HCE, calculate the time interval for the iteration
       if hce.massFlow > .zero {
         time = (areaDensityHTF * solarField.area) / hce.massFlow.rate
-      } 
+      }
 
-      /// Heat collected or lost during the flow through a whole loop [kJ/sqm]
+      // Calculate the heat collected or lost during the flow through a whole loop [kJ/sqm]
       let deltaHeatPerSqm = deltaHeat * time / 1_000
 
-      // Change kJ/sqm to kJ/kg:
+      // Change kJ/sqm to kJ/kg
       let deltaHeatPerKgHTF = deltaHeatPerSqm / areaDensityHTF
 
+      // If there is no mass flow in the HCE, perform calculations based on HCE properties
       if hce.massFlow.rate.isZero {
         let cp = specificHeatHCE
         let HCE = (cp * hce.average.kelvin) - (cp * ambient.kelvin)
@@ -300,25 +322,36 @@ enum HCE {
         hce.temperature.outlet = htf.temperature(
           deltaHeatPerKgHTF - deltaHeatPerKgHCE, hce.temperature.outlet
         )
+        // Exit the iteration loop for mass flow rate is zero
         break Iteration
       } else {
+        // If there is mass flow, calculate the outlet temperature of the HCE
         hce.temperature.outlet = htf.temperature(
           deltaHeatPerKgHTF, hce.temperature.inlet
         )
       }
 
+      // Limit the outlet temperature to the maximum temperature allowed
       hce.temperature.outlet.limit(to: maxTemp)
+
+      // Check if the current outlet temperature is within tolerance and termination conditions are met
       let inTolerance = abs(hce.temperature.outlet.kelvin - goal.kelvin) 
         < Simulation.parameter.tempTolerance
       if inTolerance, checkConditions() { break Iteration } 
+
+      // Update the goal temperature for the next iteration
       goal = hce.temperature.outlet
 
+      // If termination conditions are not met, adjust the focus quotient
       if !checkConditions() { inFocus = min(1, inFocus * 1.01) }
-      // Flow is to low, dumping required
+
+      // Optional dumping logic commented out for future reference
       // dumping = hce.temperature.outlet > maxTemp
       //  ? (hce.massFlow.rate / 3 * htf.heatContent(hce.temperature.outlet, maxTemp) * 1_000)
       //  : 0.0 // MWt
     }
+    
+    // Return the time interval for the iteration
     return time
   }
 

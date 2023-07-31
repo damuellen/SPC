@@ -22,12 +22,14 @@ public struct Plant {
 
   var electricalParasitics = Parasitics()
 
+  /// Initial state of the simulation
   public static let initialState = Status()
 
   var performance: PlantPerformance { .init(self) }
 
+  /// The main function to perform the simulation based on the provided status and ambient temperature.
   mutating func perform(_ status: inout Status, ambient: Temperature) {
-
+    /// A helper function to calculate load capacity for the steam turbine based on certain conditions.
     func loadCapacity(steamTurbine: inout SteamTurbine) -> Double? {
       guard steamTurbine.load < Availability.current.value.powerBlock
         else { return nil }
@@ -66,10 +68,13 @@ public struct Plant {
     let minLoad = SteamTurbine.minLoad(atTemperature: ambient)
     let minPower = SteamTurbine.minPower(atTemperature: ambient)
 
+    /// A variable to store the deviation during the iteration process
     var deviation: Double
+    /// Estimate of electrical parasitics
     var parasiticsAssumed = electricity.estimateDemand()
 
     if Design.hasStorage {
+      /// Setting electricity demand based on storage strategy
       electricity.demand = demandStorageStrategy()
     }
 
@@ -77,6 +82,7 @@ public struct Plant {
     var factor = 0.0
     // Iteration to account for correct parasitics
     Iteration: repeat {
+      // The simulation iteration process starts here.
       step += 1
       factor = Double(step / 10) + 1
 
@@ -575,6 +581,8 @@ public struct Plant {
     }
   }
 
+  /// A helper function to determine the electricity demand storage strategy.
+  /// Returns the calculated demand based on the strategy.
   private func demandStorageStrategy() -> Double {
     switch Storage.parameter.strategy {
     case .demand:
@@ -585,7 +593,8 @@ public struct Plant {
       return electricity.demand
     }
   }
-
+  /// A function to determine the storage mode based on certain conditions.
+  /// The function involves several condition checks and adjustments based on the status of the system.
   mutating func determineStorageMode(_ status: inout Status) {
     let parameter = Storage.parameter
     let summerMonths = Storage.parameter.exception

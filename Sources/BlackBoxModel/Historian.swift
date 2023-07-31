@@ -14,35 +14,41 @@ import Foundation
 import Meteo
 // import SQLite
 import xlsxwriter
-
-/// A class that creates a recording of the performance data.
+/// A class that records performance data.
 public final class Historian {
 
   #if DEBUG && !os(Windows)
-  /// Tracking the day
+  /// Tracking the day (only used in DEBUG mode and not on Windows)
   private var progress: Int = 0
   #endif
-  /// Number of values per hour
+
+  /// Number of values per hour (time steps per hour)
   private let frequency = Simulation.time.steps
-  /// Specifies what the output is
+
+  /// Specifies the output mode for the historian.
   let mode: Mode
 
+  /// Start date of the recording, based on the simulation date interval or a predefined year.
   var startDate: Date { 
     Simulation.time.dateInterval?.start 
     ?? Greenwich.date(from: .init(year: BlackBoxModel.simulatedYear))!
   }
 
+  /// Enumeration representing various output modes for the historian.
   public enum Mode {
     case database
     case inMemory
     case custom(interval: DateSeries.Frequence)
     case csv
     case excel
+    
+    /// Checks if the output mode supports file output.
     var hasFileOutput: Bool {
       if case .inMemory = self { return false }
       return true
     }
-
+    
+    /// Checks if the output mode supports historical data recording.
     var hasHistory: Bool {
       #if DEBUG && !os(Windows)
       return true
@@ -57,17 +63,33 @@ public final class Historian {
 
   /// sqlite file
   // private var db: Connection? = nil
-  private var fileStream: OutputStream?
-  private var xlsx: Workbook? = nil
+
+  /// Output file URL or directory path (depending on the output mode).
   private var url: URL
-  /// All past states of the plant
+  
+  /// OutputStream to write data to a file.
+  private var fileStream: OutputStream?
+
+  /// Workbook object for Excel output mode.
+  private var xlsx: Workbook? = nil
+  
+  /// All past states of the plant.
   private(set) var status: [Status] = []
+
+  /// All past performance data of the plant.
   private(set) var performance: [PlantPerformance] = []
+
+  /// All past insolation data.
   private(set) var sun: [Insolation] = []
 
-  /// Common prefix of output
+  /// Common prefix for output files.
   var name = "Run"
 
+  /// Initializes the Historian.
+  /// - Parameters:
+  ///   - name: Name for the output files (optional).
+  ///   - path: Directory path for the output files (optional).
+  ///   - mode: Output mode for the Historian.
   public init(name: String? = nil, path: String? = nil, mode: Mode) {
     // Reserve capacity for the status, performance, and sun arrays based on the frequency
     status.reserveCapacity(8760 * frequency.rawValue)
@@ -153,16 +175,24 @@ public final class Historian {
     print()
   }
 
+  /// Deinitializes the Historian.
   deinit {
     fileStream?.close()
   }
 
+  /// Clears all recorded performance data and status history.
   public func clearResults() {
     performance.removeAll(keepingCapacity: true)
     status.removeAll(keepingCapacity: true)
     sun.removeAll(keepingCapacity: true)
   }
 
+  /// Records performance data and status history.
+  /// - Parameters:
+  ///   - time: DateTime struct representing the current time.
+  ///   - meteo: MeteoData struct containing meteorological data.
+  ///   - status: Status struct representing the current state of the plant.
+  ///   - energy: PlantPerformance struct containing performance data.
   func callAsFunction(
     _ time: DateTime, meteo: MeteoData, status: Status, energy: PlantPerformance
   ) {
@@ -181,6 +211,8 @@ public final class Historian {
     #endif
   }
 
+  /// Finalizes the recording and returns a Recording containing the historical data.
+  /// - Parameter open: A boolean flag indicating whether to open the file after finalization (default is false).
   public func finish(open: Bool = false) -> Recording {
     #if DEBUG && !os(Windows)
     let clearLineString = "\u{001B}[2K"
@@ -252,6 +284,7 @@ public final class Historian {
     return String(format: "%02d", (last ?? 0) + 1)
   }
 
+  /// Writes data to an Excel file.
   private func writeExcel() {
     guard let wb = xlsx else { return }
     // Check if the xlsx object is not nil, otherwise return
@@ -339,7 +372,11 @@ public final class Historian {
     print("Excel file creation took \(Int(-now.timeIntervalSinceNow)) seconds.")
     // Print the time taken to create the Excel file
   }
-  // MARK: Output database
+
+
+  // This section contains code for writing data to a database (SQLite).
+  // However, it is commented out and not implemented in the current code.
+
   private func storeInDB() {
     // guard let db = db else { return }
 
@@ -371,8 +408,8 @@ public final class Historian {
     // }
   }
 
-
-  /// Returns the headers for the table
+  /// Returns the headers for the data table.
+  /// - Parameter minutes: A boolean flag indicating whether to include minutes in the header (default is false).
   private func headers(minutes: Bool = false) -> (name: String, unit: String, count: Int) {
     #if DEBUG
     let m = Insolation.measurements + PlantPerformance.measurements + Status.measurements
@@ -386,7 +423,10 @@ public final class Historian {
   }
 }
 
+// Extension to provide encoded string functionality.
 extension String { fileprivate var encoded: [UInt8] { [UInt8](self.utf8) } }
+
+// Define newline characters based on the operating system.
 #if os(Windows)
 fileprivate let newLine: [UInt8] = [UInt8(ascii: "\r"), UInt8(ascii: "\n")] 
 #else

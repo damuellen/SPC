@@ -12,9 +12,9 @@ extension Storage {
   
   private static var sumMinute = 0
   private static var oldMinute = 0
-  /// Calculates the parasitics of the TES
+   /// Calculates the parasitics of the TES (Thermal Energy Storage).
   static func parasitics(_ status: Storage) -> Power {
-    
+    // Initialize the parasitics variable to 0.0
     var parasitics = 0.0
     
     let solarField = SolarField.parameter
@@ -24,11 +24,12 @@ extension Storage {
     let time = DateTime.current
     
     if parameter.auxConsumptionCurve == false {
-      // old model:
+      // This section calculates parasitics for the old model.
+      // Ensure the temperature is above 50 degrees Celsius; otherwise, trigger an assertion.
       assert(status.average.celsius > 50, "Temperature too low.")
-
+      // Calculate density of the htf based on the average temperature of the TES.
       let rohMean = solarField.HTF.density(status.average)
-
+      // Calculate average temperature for the heat exchanger using the maximum inlet and outlet temperatures.
       let avgTempHX = Temperature.average(
         heatExchanger.temperature.htf.inlet.max,
         heatExchanger.temperature.htf.outlet.max
@@ -41,14 +42,15 @@ extension Storage {
       
       parasitics = pressureLoss * status.massFlow.rate / rohMean
         / parameter.pumpEfficiency / 10e6
-      
+
+      // Check the operation mode of the TES.
       if case .discharge = status.operationMode {
         // added as user input, by no input stoc.dischargeParasitcsFactor = 2
         parasitics = parasitics * parameter.dischargeParasitcsFactor
         sumMinute = 0
         
       } else if case .noOperation = status.operationMode {
-        
+        // Check if the minute has changed compared to the previous time.
         if time.minute != oldMinute { // formula changed
           if time.minute == 0 { // new hour
             sumMinute += 60 + time.minute - oldMinute
@@ -57,11 +59,11 @@ extension Storage {
             sumMinute += time.minute - oldMinute
           }
         }
-        
+        // Calculate parasitics based on heat tracing time and power for the given sumMinute.
         let ht = zip(parameter.heatTracingTime, parameter.heatTracingPower)
         for (time, power) in ht {
           if Double(sumMinute) > time * 60 {
-            parasitics += power / 1_000
+            parasitics += power / 1_000 // Divide power by 1000 to convert it to MW (MegaWatts).
           }
         }
       } else {
@@ -70,7 +72,8 @@ extension Storage {
       }
       oldMinute = time.minute
       return Power(megaWatt: parasitics)
-    } else { // new model
+    } else { 
+      // This section is for the new model.
       // all this shall be done only one time
       // definedBy internal parameters
       /// exponent for nth order decay of aux power consumption

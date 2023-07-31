@@ -22,8 +22,13 @@ public enum BlackBoxModel {
   /// Solar radiation and meteorological elements for a 1-year period.
   public private(set) static var meteoData: [MeteoData] = []
 
+  // MARK: - Configuration Functions
+  
+  /// Configure the simulation for a specific year.
   public static func configure(year: Int) {
     simulatedYear = year
+
+    // Update the simulation date interval if it exists.
     if let dateInterval = Simulation.time.dateInterval,
       let newStart = Greenwich.date(
         bySettingUnit: .year, value: year, of: dateInterval.start)
@@ -31,6 +36,8 @@ public enum BlackBoxModel {
       Simulation.time.dateInterval = DateInterval(
         start: newStart, duration: dateInterval.duration)
     }
+
+    // Recalculate solar positions if the year has changed.
     if let sun = BlackBoxModel.sun, simulatedYear != sun.year {
       BlackBoxModel.sun = SolarPosition(
         coords: sun.location.coordinates, tz: sun.location.timezone,
@@ -38,37 +45,45 @@ public enum BlackBoxModel {
     }
   }
 
+    /// Configure the simulation for a specific location.
   public static func configure(location: Location) {
+    // If the solar position has already been calculated for the same location, return early.
     if let sun = sun, sun.location == location { return }
-    // Calculate sun angles for location
+
+    // Calculate sun angles for the given location.
     sun = SolarPosition(
       coords: location.coordinates, tz: location.timezone,
       year: simulatedYear, frequence: Simulation.time.steps)
-
+    
+    // If meteoData is empty, generate meteoData using the calculated sun angles.
     if meteoData.isEmpty {
       meteoData = MeteoData.using(sun!, model: .special, clouds: false)
     }
   }
 
+  /// Configure the simulation using meteo data from a file.
   public static func configure(meteoFilePath: String? = nil) throws {
     let path = meteoFilePath ?? FileManager.default.currentDirectoryPath
-    // Search for the meteo data file
+    // Search for the meteo data file.
     let handler = try MeteoDataFileHandler(forReadingAtPath: path)
     handler.interpolation = false
-    // Read the content meteo data file
+    // Read the content of the meteo data file.
     meteoData = try handler.data(valuesPerHour: Simulation.time.steps.rawValue)
 
     let metadata = try handler.metadata()
 
-    // Check if the sun angles for the location have already been calculated
+    // Check if the sun angles for the location have already been calculated.
     if let sun = sun, metadata.location == sun.location { return }
 
-    // Calculate sun angles for location
+    // Calculate sun angles for the location.
     sun = SolarPosition(
-      coords: metadata.location.coordinates, tz: metadata.location.timezone,
-      year: metadata.year, frequence: Simulation.time.steps)
+      coords: metadata.location.coordinates,
+      tz: metadata.location.timezone,
+      year: metadata.year,
+      frequence: Simulation.time.steps)
   }
 
+  /// Load configuration from a JSON or text configuration file.
   public static func loadConfiguration(atPath path: String) throws -> String? {
     let url = URL(fileURLWithPath: path)
     if url.hasDirectoryPath {
@@ -85,8 +100,13 @@ public enum BlackBoxModel {
     return try TextConfig.loadConfiguration(atPath: path)?.path
   }
 
-  /// - Parameter with: Creates the log and write results to file.
-  /// - Attention: `configure()` must called before this.
+  // MARK: - Simulation Function
+  
+  /// Run the solar power plant simulation and record the results in a historian.
+  ///
+  /// - Parameters:
+  ///   - record: The historian object to record the simulation results.
+  /// - Attention: `configure()` must be called before this function.
   public static func runModel(with record: Historian) {
     guard let 🌞 = sun, let insolation = meteoDataDiagnose(), insolation.direct 
     else { print("Missing sunshine."); exit(1) }
@@ -98,14 +118,17 @@ public enum BlackBoxModel {
     var status = Plant.initialState
     var photovoltaic = [Double]()
 
-    if insolation.global { 
+    if insolation.global {
+      // If global insolation is available, calculate photovoltaic power.
       let pv = PV()
-
       var inputs = [PV.InputValues]()
-
+      
+      // Generate input values for each simulation time step.
       for (meteo, date) in simulationPeriod(.hour) {
         let (t, ws) = (Temperature(celsius: meteo.temperature), meteo.windSpeed)
         let gti: Double
+
+        // Calculate global tilt irradiation for the panel at the current time step.
         if let position = 🌞[date] {
           let panel = singleAxisTracker(
             apparentZenith: position.zenith, 
@@ -117,36 +140,42 @@ public enum BlackBoxModel {
         } else {
           gti = .zero
         }
-        inputs.append(.init(gti: gti, ambient: t, windSpeed: ws))        
+        inputs.append(.init(gti: gti, ambient: t, windSpeed: ws))
       }
       let count = Simulation.time.steps.rawValue
+      // Generate photovoltaic power values for each time step.
       photovoltaic = inputs.reversed().reduce(into: []) { result, input in
         result += repeatElement(pv(input) / 10.0e6, count: count)
       }
     }
 
-    for (meteo, date) in simulationPeriod() {
+  for (meteo, date) in simulationPeriod() {
       // Set the date for the calculation step
       DateTime.setCurrent(date: date)
       let dt = DateTime.current
-      /// Hourly PV result
+      
+      // Update hourly PV result if applicable
       if !photovoltaic.isEmpty {
         plant.electricity.photovoltaic = photovoltaic.removeLast()
       }
+      
+      // Check if maintenance schedule needs to be executed.
       if Maintenance.checkSchedule(date) {
-        // No operation is simulated
+        // No operation is simulated during maintenance.
         let status = Plant.initialState
         let energy = PlantPerformance()
         record(dt, meteo: meteo, status: status, energy: energy)
         continue
       }
-
+      
+      // Get sun angles for the current location and time.
       if let position = 🌞[date] {
-        // Only when the sun is above the horizon.
-        status.collector.tracking(sun: position)  // cosTheta
+        // Calculate collector tracking angle (cosTheta)
+        status.collector.tracking(sun: position) 
         status.collector.efficiency(ws: meteo.windSpeed)
         status.collector.irradiation(dni: meteo.insolation.direct)
       } else {
+        // If the sun is below the horizon, set the collector state accordingly.
         status.collector = Collector.initialState
         DateTime.setNight()
       }
@@ -158,7 +187,8 @@ public enum BlackBoxModel {
       if DateTime.is(minute: 40, hour: 8, day: 1, month: 1)
       {()}
 #endif
-      // Used when calculating the heat losses and the efficiency
+
+      // Temperature for heat loss and efficiency calculations
       let temperature = Temperature(celsius: meteo.temperature)
 
       // Setting the mass flow required by the power block in the solar field
@@ -179,9 +209,8 @@ public enum BlackBoxModel {
         status.solarField.inletTemperature(from: status.storage)
       }
 
-      // Calculate outlet temperature and mass flow
-      status.solarField.calculate(
-        collector: status.collector, ambient: temperature)
+      // Calculate outlet temperature and mass flow in the solar field
+      status.solarField.calculate(collector: status.collector, ambient: temperature)
 
       // Determine the current efficiency of the solar field
       status.solarField.eta(collector: status.collector)
@@ -197,7 +226,7 @@ public enum BlackBoxModel {
       plant.perform(&status, ambient: temperature)
 
       if Design.hasStorage {
-        // Calculate the operating state of the salt
+        // Calculate the operating state of the salt storage
         status.storage.calculate(
           output: &plant.heatFlow.storage,
           input: plant.heatFlow.toStorage,
@@ -206,11 +235,15 @@ public enum BlackBoxModel {
         status.storage.heatlosses(for: Simulation.time.steps.interval)
       }
 
+      // Calculate electricity consumption and record the results
       plant.electricity.consumption()
       record(dt, meteo: meteo, status: status, energy: plant.performance)
     }
   }
 
+  // MARK: - Helper Functions
+
+  /// Diagnose the availability of direct and global insolation in the meteoData.
   private static func meteoDataDiagnose() -> (direct: Bool, global: Bool)? {
     // Check the first 12 hours of the year for insolation
     let am = meteoData.prefix(meteoData.count / 730)

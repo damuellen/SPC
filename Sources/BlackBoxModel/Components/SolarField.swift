@@ -247,33 +247,52 @@ public struct SolarField: Parameterizable, HeatTransfer {
     header.temperature.outlet.kelvin = sum / (3.0 * header.flow)
   }
 
+  // Check if freeze protection is required for the solar field.
+  // - Returns: A boolean indicating whether freeze protection is required or not.
   mutating func isFreezeProtectionRequired() -> Bool {
+    // Calculate the freezing temperature considering the HTF freeze temperature,
+    // pump temperature tolerance, and simulation temperature tolerance.
     let freezingTemperature = SolarField.parameter.HTF.freezeTemperature
       + Simulation.parameter.deltaFreezeTemperaturePump
       + Simulation.parameter.tempTolerance
 
+    // Get the time interval for the current simulation step.
     let timeRemain = Simulation.time.steps.interval
 
+    // Check if the solar field is currently in the freeze protection mode and has remaining time.
     if case .freeze(let time) = operationMode, time > .zero {
+      // Reduce the remaining freeze time and update the operation mode.
       operationMode = .freeze(time - timeRemain)
       return true
     }
 
+    // Check if the minimum temperature of any loop's outlet is below the freezing temperature.
     if loops.dropFirst().min(by: <)!.minTemperature < freezingTemperature.kelvin {
+      // Set the inlet temperature of all loops to the current header inlet temperature.
       loops.indices.forEach {
         loops[$0].temperature.inlet = header.temperature.inlet
       }
 
+      // Calculate the remaining time for freeze protection based on flow dynamics.
       let loopWays = SolarField.parameter.loopWays
       let flowVelocity: Double = 2.7
       let maxMassFlow = SolarField.parameter.maxMassFlow.rate
       let remain = loopWays[0] / (flowVelocity * antiFreezeFlow.rate / maxMassFlow)
+
+      // Update the operation mode to freeze with the calculated remaining time.
       operationMode = .freeze(remain - timeRemain)
       return true
     }
+
+    // If freeze protection is not required, return false.
     return false
   }
 
+  /// Calculate heat losses from the header of the solar field.
+  /// - Parameters:
+  ///   - temperature: The current temperature of the header.
+  ///   - ambient: The ambient temperature surrounding the solar field.
+  /// - Returns: The new temperature after accounting for heat losses.
   mutating func heatLosses(header temperature: Temperature, ambient: Temperature) -> Temperature {
     let parameter = SolarField.parameter
     let numberOfSCAsInRow = SolarField.parameter.numberOfSCAsInRow
@@ -283,37 +302,51 @@ public struct SolarField: Parameterizable, HeatTransfer {
     let c = SolarField.parameter.heatLossHotHeader
     let htf = SolarField.parameter.HTF
 
+    // Calculate the total area of the solar field.
     let area = Design.layout.solarField * Double(numberOfSCAsInRow) * 2 * areaSCAnet
 
     var oldTemp: Temperature
     var newTemp: Temperature
 
+    // Set the initial temperature for the iterative calculation.
     newTemp = temperature
 
+    // Repeat the calculations until the temperature stabilizes within the heat loss tolerance.
     repeat {
-      oldTemp = newTemp
+        oldTemp = newTemp
 
-      heatLossesHotHeader = c[0] * (c[1] + c[2] * (newTemp.kelvin - ambient.kelvin)) // [MWt]
+        // Calculate heat losses from the header using predefined coefficients (c).
+        heatLossesHotHeader = c[0] * (c[1] + c[2] * (newTemp.kelvin - ambient.kelvin)) // [MWt]
 
-      if massFlow.rate > 0 {
-        let deltaHeatPerKg = heatLossesHotHeader * 1_000 / massFlow.rate // [kJ/kg]
-        newTemp = htf.temperature(-deltaHeatPerKg, temperature)
-      } else {
-        let avgT = Temperature.average(newTemp, temperature)
-        /// Calculate average Temp. and areaDensity
-        let areaDensity = htf.density(avgT) * .pi * rabsInner ** 2 / aperture  // kg/m2
-        let time = Simulation.time.steps.interval
-        let deltaHeatPerSqm = heatLossesHotHeader * 1_000 / area * time
-        /// Change kJ/sqm to kJ/kg:
-        let deltaHeatPerKg = deltaHeatPerSqm / areaDensity
+        // Check if there is a mass flow in the system to avoid division by zero.
+        if massFlow.rate > 0 {
+            // Calculate the change in heat per kilogram of the heat transfer fluid (HTF).
+            let deltaHeatPerKg = heatLossesHotHeader * 1_000 / massFlow.rate // [kJ/kg]
+            // Update the new temperature based on the change in heat per kilogram.
+            newTemp = htf.temperature(-deltaHeatPerKg, temperature)
+        } else {
+            // Calculate the average temperature between the new and ambient temperatures.
+            let avgT = Temperature.average(newTemp, temperature)
+            // Calculate the area density of the HTF using the average temperature.
+            let areaDensity = htf.density(avgT) * .pi * rabsInner ** 2 / aperture  // kg/m2
+            let time = Simulation.time.steps.interval
+            // Calculate the change in heat per square meter of the solar field.
+            let deltaHeatPerSqm = heatLossesHotHeader * 1_000 / area * time
+            // Convert the change in heat per square meter to change in heat per kilogram.
+            let deltaHeatPerKg = deltaHeatPerSqm / areaDensity
 
-        let heatPerKg = htf.heatContent(temperature, ambient)
-        newTemp = htf.temperature(heatPerKg - deltaHeatPerKg, ambient)
-      }
-      newTemp.limit(to: parameter.HTF.maxTemperature)
+            // Calculate the heat content of the HTF at the current and ambient temperatures.
+            let heatPerKg = htf.heatContent(temperature, ambient)
+            // Update the new temperature based on the change in heat content per kilogram.
+            newTemp = htf.temperature(heatPerKg - deltaHeatPerKg, ambient)
+        }
+        // Limit the new temperature to the maximum temperature of the HTF.
+        newTemp.limit(to: parameter.HTF.maxTemperature)
     } while abs(newTemp.kelvin - oldTemp.kelvin) > Simulation.parameter.heatlossTempTolerance
+
+    // Return the new temperature after accounting for heat losses.
     return newTemp
-  }
+}
 
   mutating func calculate(collector: Collector, ambient: Temperature) {
     let insolation = collector.insolationAbsorber < collector.lastInsolation
