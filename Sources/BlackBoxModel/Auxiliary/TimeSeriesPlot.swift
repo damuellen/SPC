@@ -16,26 +16,44 @@ public final class TimeSeriesPlot {
   #if !os(iOS)
   let gnuplot: Process
   #endif
+  /// Enumeration to specify the style of the time-series plot (steps or impulses).
   public enum Style: String { case steps, impulses }
 
+  /// Arrays to hold the data for primary (y1) and secondary (y2) Y-axes.
   let y1: [[Double]]
   let y2: [[Double]]
+  
+  /// The time range for the X-axis.
   let range: DateInterval
 
+  /// Arrays to hold the titles of Y1 and Y2 data series.
   public var y1Titles: [String]
   public var y2Titles: [String]
+  
+  /// Labels for Y1 and Y2 axes.
   public var y1Label: String = ""
   public var y2Label: String = ""
 
-  public init(y1: [[Double]], y2: [[Double]] = [], range: DateInterval, yRange: (Double,Double)? = nil, style: Style = .steps) {
+  /// Initializer to set up the TimeSeriesPlot with provided data and options.
+  ///
+  /// - Parameters:
+  ///   - y1: The data for primary Y-axis (mandatory).
+  ///   - y2: The data for secondary Y-axis (optional, default is empty array).
+  ///   - range: The time range for the X-axis.
+  ///   - yRange: Optional custom range for Y-axes (min, max) if not provided, auto-calculated.
+  ///   - style: The style of the time-series plot (steps or impulses, default is steps).
+  public init(y1: [[Double]], y2: [[Double]] = [], range: DateInterval, yRange: (Double, Double)? = nil, style: Style = .steps) {
     self.y1 = y1
     self.y2 = y2
     self.range = range
     self.y1Titles = Array(repeating: "", count: y1.count)
     self.y2Titles = Array(repeating: "", count: y2.count)
 
+    // Frequency of data points.
     self.freq = Simulation.time.steps.interval
+    // X-axis range (start and end timestamps).
     self.xr = (range.start.timeIntervalSince1970, range.end.timeIntervalSince1970)
+    // Y-axis range (optional custom range or auto-calculated).
     if let yRange = yRange {
       self.yr = yRange
     } else {
@@ -44,7 +62,10 @@ public final class TimeSeriesPlot {
         (y2.joined().max()! / 100).rounded(.up) * 100
       )
     }
+    // Style of the time-series plot (steps or impulses).
     self.style = style
+
+    // Determine the format for X-axis labels based on the duration of the range.
     let secondsPerDay: Double = 86400
     if range.duration > secondsPerDay * 7 {
       self.x = (secondsPerDay, "'%d.%d'", "Date")
@@ -62,26 +83,34 @@ public final class TimeSeriesPlot {
   func plot(code: String) throws {}
   #else
   func plot(code: String) throws {
+    // Check if the Gnuplot process is already running, and run it if not.
     if !gnuplot.isRunning { try gnuplot.run() }
     let stdin = gnuplot.standardInput as! Pipe
+    // Write the Gnuplot script to the standard input of the process
     stdin.fileHandleForWriting.write(code.data(using: .utf8)!)
     #if !os(Linux)
     stdin.fileHandleForWriting.closeFile()
     #endif
   }
   #endif
+  /// Main function to create the time-series chart and optionally save it to a file.
+  ///
+  /// - Parameter toFile: The file name to save the chart as a PNG image (optional).
   public func callAsFunction(toFile: String? = nil) throws {
     var code: String = ""
     if let file = toFile {
+      // If a file name is provided, set the terminal output to PNG.
       code = """
         set terminal png size 1573,960 font 'Sans,9';
         set output '\(file).png'\n;
         """
     }
+    // Concatenate Gnuplot settings, data block, plot function, and optional exit command.
     code += settings.concatenated + datablock + plot() + "\n"
     #if !os(Linux)
     code += "exit\n\n"
     #endif
+    // Call the plot function to generate the chart using the constructed Gnuplot script.
     try plot(code: code)
   }
 

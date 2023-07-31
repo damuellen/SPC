@@ -11,18 +11,22 @@
 import DateExtensions
 import Utilities
 
+// A struct representing availability data for a solar power plant, including various percentages for each month.
 struct Availability: Codable {
 
+  // A static instance of Availability representing the current availability data.
   static var current = Availability()
 
+  // A static variable representing the default fuel value for the power plant.
   static var fuel: Double = 5
 
+  // A private computed property to get the current month index.
   private var index: Int { DateTime.indexMonth + 1 }
 
+  // An array of Values struct representing the availability data for each month.
   private let data: [Values]
 
-  init(_ data: [Values]) { self.data = data }
-
+  // A nested struct representing the availability values for different components of the power plant.
   public struct Values: Codable {
     var solarField: Ratio = 0.993
     var breakHCE: Ratio = 0.001
@@ -34,13 +38,18 @@ struct Availability: Codable {
     var storage: Ratio = 1.0
   }
 
+  // Computed property to get the availability values for the current month.
   var value: Values { self.data[index] }
 
+  // Computed property to get the availability values for the entire year.
   var values: Values { self.data[0] }
 
+  init(_ data: [Values]) { self.data = data }
+  // Private initializer to create an Availability in∂stance with default availability values for each month.
   private init() { self.data = Array(repeating: Values(), count: 13) }
 }
 
+// An extension to provide an initializer to create an Availability instance from a TextConfigFile.
 extension Availability {
   public init(file: TextConfigFile) throws {
     let ln: (Int) throws -> Double = { try file.readDouble(lineNumber: $0) }
@@ -63,6 +72,8 @@ extension Availability {
     self.init(data)
   }
 }
+
+// An extension to provide a description for the Availability struct.
 extension Availability: CustomStringConvertible {
   public var description: String {
     let year = [
