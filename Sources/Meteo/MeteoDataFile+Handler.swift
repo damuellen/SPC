@@ -15,49 +15,75 @@ import Helpers
 /// Handles the import of files with meteorological data.
 public class MeteoDataFileHandler {
 
+  /// FileManager instance for file operations.
   let 💾 = FileManager.default
 
+  /// URL of the meteorological data file.
   public private(set) var url: URL
 
+  /// Flag indicating whether interpolation is enabled or not.
   public var interpolation = true
 
+  /// The meteorological data file being used.
   private let file: MeteoDataFile
 
+  /// Initializes the MeteoDataFileHandler for reading data from the file at the given path.
   public init(forReadingAtPath path: String) throws {
 
+    // Check if the file exists at the specified path.
     if !💾.fileExists(atPath: path) {
       throw MeteoDataFileError.fileNotFound(path)
     }
 
+    // Initialize the URL with the provided path.
     url = URL(fileURLWithPath: path)
 
+    // If the URL represents a directory, find the meteorological data file (either .mto or .TMY).
     if url.hasDirectoryPath {
       guard let fileName = try 💾.contentsOfDirectory(atPath: path).first(
         where: { $0.hasSuffix("mto") || $0.hasPrefix("TMY") }) else {
           throw MeteoDataFileError.fileNotFound(path)
       }
+      // Append the found file name to the URL to complete the file path.
       url.appendPathComponent(fileName)
     }
+    // Print the path of the meteorological data file being used.
     print("Meteo file in use:\n  \(url.path)\n")
+
+    // Create the appropriate MeteoDataFile instance based on the file extension.
     self.file = try url.pathExtension == "mto" ? MET(url) : TMY(url)
   }
 
+  // Retrieve metadata from the meteorological data file.
   public func metadata() throws -> (year: Int, location: Location)  { 
     try file.fetchInfo()
   }
 
+  /// Retrieve meteorological data values with the specified number of values per hour.
   public func data(valuesPerHour: Int) throws -> [MeteoData] {
+    // Fetch raw data from the meteorological data file.
     let data = try file.fetchData()
+
+    // Calculate the number of steps to interpolate the data based on valuesPerHour.
     var steps = data.count / 8760
     steps = valuesPerHour / steps
+
+    // If no interpolation is needed, return the raw data as is.
     if steps == 1 { return data }
+
+    // If interpolation is enabled, perform interpolation on the data.
     if interpolation {
+      // Calculate the half of the steps for interpolation.
       let half = steps / 2
       steps -= 1
+      // Wrap the data array to simplify the interpolation process.
       let wrapped = [data.last!] + data + [data.first!]
+      // Interpolate the data using the wrapped array and the calculated steps.
       let interpolated = wrapped.interpolate(steps: steps)
+      // Drop the first and last half of the interpolated data to remove unnecessary points.
       return interpolated.dropFirst(half).dropLast(half+1)
     } else {
+      // If interpolation is disabled, repeat each data point according to the calculated steps.
       return data.reduce(into: []) { $0 += repeatElement($1, count: steps) }
     }
   }

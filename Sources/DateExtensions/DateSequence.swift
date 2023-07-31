@@ -105,69 +105,86 @@ public final class DateSeries: Sequence, IteratorProtocol {
   }
 }
 
+// An extension on `DateInterval` to provide convenient initializers for intervals corresponding to different time periods.
 extension DateInterval {
+  /// Create a `DateInterval` representing the whole year for the given year.
   public init(ofYear: Int) {
+    // Create `DateComponents` with the first day of the year.
     var dateComponents = DateComponents()
     dateComponents.timeZone = Greenwich.timeZone
     dateComponents.day = 1
     dateComponents.month = 1
     dateComponents.year = ofYear
+    // Calculate the start date of the year.
     let start = Greenwich.date(from: dateComponents)!
+    // Increment the year and calculate the end date (last day) of the year.
     dateComponents.year! += 1
     let end = Greenwich.date(from: dateComponents)! - 1
     self = .init(start: start, end: end)
   }
 
+  /// Create a `DateInterval` representing the whole month for the given month and year.
   public init(ofMonth month: Int, in year: Int) {
+    // Create `DateComponents` with the first day of the given month and year.
     var dateComponents = DateComponents()
     dateComponents.timeZone = Greenwich.timeZone
     dateComponents.day = 1
     dateComponents.month = month
     dateComponents.year = year
+    // Calculate the start date of the month.
     let start = Greenwich.date(from: dateComponents)!
+    // Increment the month and calculate the end date (last day) of the month.
     dateComponents.month! += 1
     let end = Greenwich.date(from: dateComponents)! - 1
     self = .init(start: start, end: end)
   }
 
+  /// Create a `DateInterval` representing the whole week for the given week and year.
   public init(ofWeek week: Int, in year: Int) {
+    // Create `DateComponents` and set the week of the year.
     var dateComponents = DateComponents()
     dateComponents.timeZone = Greenwich.timeZone
-
     if week > 1 {
       dateComponents.weekOfYear = week
     }
-
     dateComponents.year = year
-    dateComponents.weekday = 2
+    dateComponents.weekday = 2 // Monday
+
+    // Calculate the start date of the week.
     let start = Greenwich.date(from: dateComponents)!
 
+    // Increment the week and calculate the end date (last day) of the week.
     if week < 53 {
       dateComponents.weekOfYear = week + 1
     } else {
       dateComponents.year = year + 1
       dateComponents.weekday = nil
     }
-
     let end = Greenwich.date(from: dateComponents)! - 1
     self = .init(start: start, end: end)
   }
 
+  /// Create a `DateInterval` representing a specific day for the given day and year.
   public init(ofDay day: Int, in year: Int) {
+    // Create `DateComponents` with the given day and year.
     var dateComponents = DateComponents()
     dateComponents.timeZone = Greenwich.timeZone
     dateComponents.day = day
     dateComponents.year = year
+    // Calculate the start date of the day.
     let start = Greenwich.date(from: dateComponents)!
+    // Increment the day and calculate the end date (last second of the day).
     dateComponents.day! += 1
     let end = Greenwich.date(from: dateComponents)! - 1
     self = .init(start: start, end: end)
   }
 }
 
-
+// An extension on `Date` to provide convenient initializers for specific months and days of the year.
 extension Date {
+  /// Create a `Date` object representing the first day of the given month and year.
   public init(ofMonth month: Int, in year: Int) {
+    // Create `DateComponents` with the first day of the given month and year.
     var dateComponents = DateComponents()
     dateComponents.timeZone = Greenwich.timeZone
     dateComponents.day = 1
@@ -176,7 +193,9 @@ extension Date {
     self = Greenwich.date(from: dateComponents)!
   }
 
+  /// Create a `Date` object representing the specific day and year.
   public init(ofDay day: Int, in year: Int) {
+    // Create `DateComponents` with the given day and year.
     var dateComponents = DateComponents()
     dateComponents.timeZone = Greenwich.timeZone
     dateComponents.day = day
@@ -185,7 +204,10 @@ extension Date {
   }
 }
 
+// An extension on `TimeInterval` to provide convenient properties to convert time intervals to minutes and hours.
 extension TimeInterval {
+  // Convert the time interval to minutes.
   var minutes: TimeInterval { self * 60.0 }
+  // Convert the time interval to hours.
   var hours: TimeInterval { self * 3600.0 }
 }

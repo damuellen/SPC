@@ -474,10 +474,9 @@ public enum Atmosphere {
    These calculations are only valid for air mass less than 5 atm and
    precipitable water less than 5 cm.
    - Parameters:
-   - airmassAbsolute: airmass, pressure corrected in atmospheres
-   - precipitableWater:
-   precipitable water or total column water vapor in centimeters
-   - aodBb: broadband AOD
+     - airmassAbsolute: airmass, pressure corrected in atmospheres
+     - precipitableWater: precipitable water or total column water vapor in centimeters
+     - aodBb: broadband AOD
 
    - Returns: Linke turbidity
 
@@ -547,10 +546,10 @@ public enum Atmosphere {
   /** Get AOD at specified wavelength using Angstrom turbidity model.
 
    - Parameters:
-   - aod0: aerosol optical depth (AOD) measured at known wavelength
-   - lambda0: wavelength in nanometers corresponding to `aod0`
-   - alpha: Angstrom α exponent corresponding to `aod0`
-   - lambda1: desired wavelength in nanometers
+     - aod0: aerosol optical depth (AOD) measured at known wavelength
+     - lambda0: wavelength in nanometers corresponding to `aod0`
+     - alpha: Angstrom α exponent corresponding to `aod0`
+     - lambda1: desired wavelength in nanometers
 
    - Returns: AOD at desired wavelength, `lambda1`
 
