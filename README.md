@@ -13,6 +13,8 @@ Key Features:
 - Customizable solar field configurations.
 - Consideration of HTF characteristics for optimal operation.
 - Startup mode management and night operation simulation.
+- Heat exchanger routine for precise steam production and thermal loss calculations.
+- Auxiliary consumption calculation for all electric consumers, accounting for DNI variations and SFI load.
 - Flexible output formats, including SQLite database, Excel, and CSV.
 
 The SPC is an indispensable tool for engineers, researchers, and operators to optimize solar power plant configurations and maximize clean energy generation.
