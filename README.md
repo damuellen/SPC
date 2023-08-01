@@ -23,13 +23,23 @@ The SPC is an indispensable tool for engineers, researchers, and operators to op
 
 ### Installation
 
-Clone the repository to your local machine:
+1. Clone the repository to your local machine.
 
 ```bash
 git clone https://github.com/damuellen/spc.git
 cd spc
-swift build -c release
-cp .build/release/spc /usr/local/bin/spc
+```
+
+2. Build the project.
+
+```bash
+swift build -c release 
+```
+
+3. Copy the binary to a location in your PATH.
+
+```bash
+cp .build/release/spc /usr/local/bin/
 ```
 
 ### Usage
