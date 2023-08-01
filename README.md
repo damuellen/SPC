@@ -1,99 +1,138 @@
-# Performance Model of Parabolic Trough Solar Power Plants
+# Solar Performance Calculator (SPC)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue)](https://opensource.org/licenses/Apache-2.0)
 
 ## Overview
 
-The performance model, SPM, is a computer program that simulates
-the performance of entire solar thermal power plants. Such a tool is
-indispensable when the daily, monthly and annual output of a
-certain solar power plant configuration is to be estimated, the output
-of an existing plant is to be recalculated, or the potential of
-improvements is to be assessed. The model accommodates normal
-quasi-steady state conditions, daily startup and shutdown operations,
-and changing weather conditions during operation. The performance model
-was developed on the basis of the experience gained from similar programs
-such as SOLERGY and the LUZ model for plants of the SEGS type.
-It has been significantly extended to include plant configurations with
-combustion turbine combined cycles, thermal energy storage and dry cooling.
+SPC is a command-line tool used to calculate the annual production of a solar thermal power plant, with a focus on parabolic trough solar power plants. It takes various input parameters through command-line options and generates simulation results for the solar power plant's performance.
 
-## Calculation Method
+The SPC considers solar angles, radiation, ambient temperature, solar field condition, HTF system availability, and thermal losses. It accommodates quasi-steady state conditions, daily startup/shutdown, and changing weather during operation.
 
-First, the meteorological record is read and the solar angles are
-calculated based on the time, the day of the year and the latitude and
-longitude of the site.
+Key Features:
+- Accurate calculation of solar angles and energy output.
+- Comprehensive collector model for precise representation.
+- Customizable solar field configurations.
+- Consideration of HTF characteristics for optimal operation.
+- Startup mode management and night operation simulation.
+- Flexible output formats, including SQLite database, Excel, and CSV.
 
-Then the energy output of the solar field is calculated, taking the
-following into account: radiation, ambient temperature, condition of the
-solar field (Mirror and HCE Cleanliness, Availability) , HTF system
-(availability), availability of main components, shadowing caused by
-other collector rows, cosine losses, end losses of collectors, shadowing
-by bellows, reflection losses, dirt and alignment losses, transmissivity
-of the glass tube, absorption of the selective layer on the absorber
-tube, incident angle effects on the above factors, degradation and, of
-course, the thermal losses by radiation, convection and conduction.
+The SPC is an indispensable tool for engineers, researchers, and operators to optimize solar power plant configurations and maximize clean energy generation.
 
-The collector model contains the following: net collector surface area,
-length, parabola aperture, average distance from focus, optical
-efficiency, absorber extension beyond collector, absorber tube outer
-radius, inner radius and coating emittance coefficient as a function of
-temperature, radius of glass cover tube, bellow shadowing, and optical
-efficiency as a function of incident angle (incident angle modifier).
+## Getting Started
 
-The solar field is specified by the total number of loops, number of
-collectors per loop, distance between collectors in a row, distance
-between rows, azimuth angle and elevation angle of solar field, heat
-losses in piping, maximum wind speed for tracking, nominal HTF flow,
-“freeze protection” HTF flow and minimal HTF flow, and parasitic power
-as a function of HTF flow.
+### Installation
 
-The Heat Transfer Fluid is characterized through maximum operating
-temperature, freeze temperature, specific heat capacity, viscosity,
-thermal conductivity and density as a function of temperature. The
-maximum operating temperature is one of the key parameters for the
-layout of the solar power plants because it dictates the maximum
-achievable steam parameters. In the simulating process this maximum
-allowable temperature of the HTF is the reason that parts of the solar
-field have to be defocused at high insolation.
+Clone the repository to your local machine:
 
-The thermal losses depend on the temperatures of the absorber tube and
-the heat transfer fluid (HTF) as well as the ambient temperature. The
-solar field inlet temperature is dependent on the HTF system outlet
-temperature (closed circuit), which may be different for different
-configurations, operation modes and subsystem loads. The mass flow of
-the HTF is limited by the pumps: at the upper limit, the mass flow
-cannot be further increased beyond the design point. In cases when the
-maximum mass flow is reached and HTF temperature higher than that of the
-design temperature, some collectors have to be defocused to prevent the
-HTF from overheating. This effect is called dumping. After the solar
-field is simulated its outlet temperature and the HTF mass flow through
-the solar field are known and are used to calculate the delivered solar
-thermal energy.
+```bash
+git clone https://github.com/damuellen/spc.git
+cd spc
+swift build -c release
+cp .build/release/spc /usr/local/bin/spc
+```
 
-The solar field goes into startup mode when a minimum specified level of
-insolation is reached. In addition to the level of insolation different
-conditions namely the availabilities of CCPP and SFI are checked for the
-release of startup. The effects of changes of the radiation level in
-large solar fields are incorporated in the model, where these loops may
-have different temperatures at the inlet and outlet, especially during
-transients. During the night, the cooling down of the solar field is
-monitored and, if necessary, HTF pumping or antifreeze HTF heating is
-simulated.
+### Usage
 
-After simulating the solar field, the solar field outlet temperature and
-the HTF mass flow through the solar field are known and are used to
-calculate the delivered solar thermal energy. Then the heat exchanger
-routine calculates the steam production, thermal losses and the
-temperatures of both fluids. Now the contribution of the solar system to
-the power block is known.
+1. Provide the necessary input data, such as meteorological records, solar field configuration, and HTF characteristics.
+2. Run the SPC program and obtain the performance simulation results.
+3. Analyze the output to gain insights into solar power plant performance and potential improvements.
 
-The HTF inlet and outlet temperatures and the water inlet and steam
-outlet temperatures at both the minimum operating point (minimum load)
-and the maximum operating point (nominal load) are described in the heat
-exchanger files.
+To use SPC, run the following command:
 
-The auxiliary consumption calculation of SPM considers all electric
-consumers. For an instantaneous auxiliary consumption calculation,
-the SPM considers electric consumer components that are in operation
-together with their mode of operation. As DNI value varies, so do also
-load of SFI and level of operation of each electric consumer. This effect
-on auxiliary consumption of each electric consumer will then be
-considered by the SPM to calculate an auxiliary consumption.
+```bash
+spc [OPTIONS]
+```
+
+### Options
+
+- `-m, --meteofilePath <path>`: The search path for the meteorological data file used in the simulation.
+
+- `-c, --configPath <path>`: The search path for configuration files related to the solar power plant. (Default: current directory)
+
+- `-r, --pathForResult <path>`: The destination path for the result files generated during the simulation. (Default: current directory)
+
+- `--resultName <name>`: Custom name for the result files. If not provided, they are numbered with two digits.
+
+- `-y, --year <year>`: The year of simulation. If not specified, it uses the current year.
+
+- `-z, --timezone <timezone>`: Timezone of the solar power plant location.
+
+- `--long <longitude>`: Longitude of the solar power plant location in decimal degrees (negative west of Greenwich meridian).
+
+- `--lat <latitude>`: Latitude of the solar power plant location in decimal degrees.
+
+- `--ele <elevation>`: Elevation of the solar power plant location in meters.
+
+- `--stepsCalculation <steps>`: The number of calculation steps per hour during the simulation.
+
+- `--outputValues <values>`: The number of values per hour in the output file.
+
+- `--database`: Output performance data as a SQLite database.
+
+- `--verbose`: Enable a detailed overview of the model parameters.
+
+- `--json`: Save the model parameters in JSON file format.
+
+- `--excel`: Output performance data as an Excel file.
+
+- `--open`: Automatically open the result file after calculation.
+
+- `--plot`: Use the result to create time series charts with gnuplot.
+
+### Examples
+
+1. Calculate performance for a specific year with default parameters:
+
+```bash
+spc -y 2023
+```
+
+2. Calculate performance with custom meteofile path, timezone, and output format:
+
+```bash
+spc -m data/meteo.csv -z 7 --excel
+```
+
+3. Calculate performance with custom location and elevation:
+
+```bash
+spc --long -115.1739 --lat 36.1146 --ele 550
+```
+
+4. Calculate performance with custom calculation steps and output values:
+
+```bash
+spc --stepsCalculation 4 --outputValues 4
+```
+
+5. Output performance data as an SQLite database:
+
+```bash
+spc --database
+```
+
+6. Save model parameters in JSON file format:
+
+```bash
+spc --json
+```
+
+7. Enable verbose mode for a detailed overview of the model parameters:
+
+```bash
+spc --verbose
+```
+
+8. Calculate performance and create time series charts with gnuplot:
+
+```bash
+spc --plot
+```
+
+## License
+
+This project is licensed under the [Apache License 2.0](LICENSE).
+
+## Acknowledgements
+
+The Solar Performance Calculator was inspired by and built upon the knowledge gained from similar programs such as PCTrough.
+We are grateful to the developers and researchers for their valuable contributions.
