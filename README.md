@@ -3,7 +3,7 @@
 
 ## Overview
 
-SPC is a command-line tool used to calculate the annual production of a solar thermal power plant, with a focus on parabolic trough solar power plants. It takes various input parameters through command-line options and generates simulation results for the solar power plant's performance.
+SPC is a high-performance command-line tool written in Swift, designed to calculate the annual production of solar thermal power plants, with a focus on parabolic trough solar power plants. It takes various input parameters through command-line options and generates simulation results for the solar power plant's performance.
 
 The SPC considers solar angles, radiation, ambient temperature, solar field condition, HTF system availability, and thermal losses. It accommodates quasi-steady state conditions, daily startup/shutdown, and changing weather during operation.
 
