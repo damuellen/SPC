@@ -12,33 +12,29 @@ import Meteo
 import Utilities
 
 /**
- Enum representing HCE (Heat Collector Element)
- 
- - Mode 1:
- Calculate the right mass-flow to get maximum allowed HTF-outlet temp.
- of the HCE-loop, and the time of HTF being in the HCE-loop. defocus
- automatically not to overheat HCEs.
- 
- - Mode 2:
- Mass-flow is fixed outside. Calculate the HTF-outlet temp. of the HCE-loop
- and the time of HTF being in the HCE-loop. If mass-flow is set to 0,
- calculate by heat losses the HTF-temp. in the HCE after Actime minutes.
- 
- ## Actime: [minutes]
- if Mode 1 then Actime has no meaning.
- if Mode 2 and massFlow == 0 SF calculates Actime the heat losses in the HCEs.
- if Actime > 0 then HCE calculates the time of HTF being in HCEs minus Actime
- 
- ## Actime: [sec]
- if massFlow > 0 then Actime is the time the HTF was in the HCEs.
- if Mode 2 and massFlow == 0 then Actime is the time the losses were
- calculated. Not necessary equal to Actime from input, cause calculation
- stops when temperature at outlet goes under
- freezeTemperature + Sim.deltaTemperaturefrzPump
- */
+  Modes of operation for the Heat Collector Element (HCE).
+  
+  - Mode 1: Calculates the right mass-flow to get the maximum allowed HTF (Heat Transfer Fluid) outlet temperature of the HCE-loop.
+    The time of HTF being in the HCE-loop is calculated, and defocus is automatically applied to prevent overheating HCEs.
+  
+  - Mode 2: Mass-flow is fixed externally. It calculates the HTF outlet temperature of the HCE-loop and the time of HTF being in the HCE-loop.
+    If mass-flow is set to 0, it calculates, by heat losses, the HTF temperature in the HCE after the specified Actime minutes.
+  
+  - Actime: The time duration for certain calculations.
+    - If Mode 1 is active, Actime has no meaning.
+    - If Mode 2 is active and massFlow == 0, SF (Solar Field) calculates Actime based on the heat losses in the HCEs.
+    - If Actime > 0 and Mode 2 is active, HCE calculates the time of HTF being in HCEs minus Actime.
+  */
 enum HCE {
-  // Radiation losses per m2 Aperture; now with the new losses that take into
-  // account the percentage of HCE that are broken, lost vacuum and fluorescent
+  /**
+   Calculates the radiation losses per square meter of Aperture considering the percentage of HCE that are broken, lost vacuum, and fluorescent.
+
+   - Parameters:
+     - temperatures: A tuple containing the temperatures (inlet, outlet, ambient) in Kelvin.
+     - insolation: The insolation in W/m2.
+
+   - Returns: The radiation losses per square meter of Aperture in W/m2.
+   */
   static func radiationLossesOld(
     _ temperatures: (Temperature, Temperature, Temperature), insolation: Double)
     -> Double // [W/m2]
@@ -116,8 +112,15 @@ enum HCE {
 
     return losses * endLossFactor
   }
-  // Radiation losses per m2 Aperture; now with the new losses that take into
-  // account the percentage of HCE that are broken, lost vacuum and fluorescent
+  /**
+   Calculates the radiation losses per square meter of Aperture considering the percentage of HCE that are broken, lost vacuum, and fluorescent.
+
+   - Parameters:
+     - temperatures: A tuple containing the temperatures (inlet, outlet, ambient) in Kelvin.
+     - insolation: The insolation in W/m2.
+
+   - Returns: The radiation losses per square meter of Aperture in W/m2.
+   */
   static func radiationLossesNew(
     _ temperatures: (Temperature, Temperature, Temperature), insolation: Double)
     -> Double // [W/m2]
@@ -189,7 +192,17 @@ enum HCE {
     return losses * endLossFactor
   }
 
-  // Function to calculate heat losses through the HCE
+  /**
+   Calculates the heat losses through the Heat Collector Element (HCE).
+
+   - Parameters:
+     - inlet: The inlet temperature of the HCE in Kelvin.
+     - outlet: The outlet temperature of the HCE in Kelvin (default value: maximum allowed HTF temperature).
+     - insolation: The insolation in W/m2.
+     - ambient: The ambient temperature in Kelvin.
+
+   - Returns: The heat losses through the HCE in W/m2.
+   */
   static func heatLosses(
     inlet: Temperature,
     outlet: Temperature = SolarField.parameter.HTF.maxTemperature,
@@ -215,7 +228,17 @@ enum HCE {
     return heatLossesHCE
   }
 
-  // Function to calculate temperatures of the HCE based on fluid properties and other parameters
+  /**
+   Calculates the temperatures of the Heat Collector Element (HCE) based on fluid properties and other parameters.
+
+   - Parameters:
+     - solarField: The solar field instance (inout) to be used for calculations.
+     - loop: The loop of the solar field.
+     - insolation: The insolation in W/m2.
+     - ambient: The ambient temperature in Kelvin.
+
+   - Returns: The time interval for the iteration.
+   */
   static func temperatures(
     _ solarField: inout SolarField,
     _ loop: SolarField.Loop,
@@ -355,6 +378,12 @@ enum HCE {
     return time
   }
 
+  
+  /// Applies the heat loss factor for the Heat Transfer Fluid (HTF) based on the focus quotient and other parameters.
+  ///
+  /// - Parameters:
+  ///   - solarField: The solar field instance (inout) to be used for calculations.
+  ///   - inFocus: The focus quotient.
   static func factorHeatLossHTF(solarField: inout SolarField, inFocus: Double) {
     let sof = SolarField.parameter
     let factorHeatLossHTF = Simulation.adjustmentFactor.heatLossHTF

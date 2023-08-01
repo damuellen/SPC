@@ -11,17 +11,44 @@
 import Utilities
 
 extension GasTurbine {
-  /// A struct with the assigned details of the gas turbine
-  public struct Parameter: Codable, Equatable {    
+/**
+ A struct representing the parameters of the gas turbine.
+
+ The gas turbine parameter set contains the following:
+   - Name
+   - Gross power
+   - ISO efficiency
+   - Minimum load
+   - Altitude
+   - Efficiency as a function of load (polynomial coefficients)
+   - Maximum power as a function of temperature (polynomial coefficients)
+   - Parasitics as a function of load (polynomial coefficients)
+   - Design temperature
+ */
+  public struct Parameter: Codable, Equatable {
+    /// The name of the gas turbine parameter set.
     let name: String
-    let powerGross, efficiencyISO, loadMin, altitude: Double
-    let efficiencyFromLoad, loadMaxFromTemperature,
-      parasiticsFromLoad: Polynomial
+    /// The gross power of the gas turbine.
+    let powerGross: Double
+    /// The ISO efficiency of the gas turbine.
+    let efficiencyISO: Double
+    /// The minimum load of the gas turbine.
+    let loadMin: Double
+    /// The altitude at which the gas turbine operates.
+    let altitude: Double
+    /// The coefficients for the efficiency function as a function of load.
+    let efficiencyFromLoad: Polynomial
+    /// The coefficients for the maximum power function as a function of temperature.
+    let loadMaxFromTemperature: Polynomial
+    /// The coefficients for the parasitics function as a function of load.
+    let parasiticsFromLoad: Polynomial
+    /// The design temperature for the gas turbine.
     let designTemperature: Double
   }
 }
 
 extension GasTurbine.Parameter: CustomStringConvertible {
+  /// A description of the `GasTurbine.Parameter` instance.
   public var description: String {
     "Description:" * name
   // d += "Gross Power [MW]: \t\(Pgross * 100 / Design.layout.gasTurbine)"
@@ -40,6 +67,8 @@ extension GasTurbine.Parameter: CustomStringConvertible {
 }
 
 extension GasTurbine.Parameter: TextConfigInitializable {
+  /// Creates a `GasTurbine.Parameter` instance using the data from a `TextConfigFile`.
+  /// - Parameter file: The `TextConfigFile` containing the data for the parameter.
   public init(file: TextConfigFile) throws {
     let ln: (Int) throws -> Double = { try file.readDouble(lineNumber: $0) }
     self = try .init(

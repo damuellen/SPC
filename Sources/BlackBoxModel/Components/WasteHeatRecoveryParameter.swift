@@ -11,23 +11,34 @@
 import Utilities
 
 extension WasteHeatRecovery {
+  /// A struct representing the parameters of the waste heat recovery.
   public struct Parameter: Codable {
+    /// The name of the waste heat recovery parameter set.
     let name: String
+    /// The operation mode of the waste heat recovery.
     let operation: OperationMode
-
+    /// The operation mode options for the waste heat recovery.
     public enum OperationMode: String, Codable {
-      case pure, integrated
+      /// Pure waste heat recovery operation mode.
+      case pure
+      /// Integrated waste heat recovery operation mode.
+      case integrated
     }
-
+    /// The nominal efficiency of the waste heat recovery in hybrid mode.
     let efficiencyNominal: Double
+    /// The efficiency of the waste heat recovery in combined cycle mode.
     let efficiencyPure: Double
+    /// The ratio of fossil/solar thermal contribution in the waste heat recovery.
     var ratioHTF: Double
+    /// The efficiency of the waste heat recovery with respect to solar load.
     let efficiencySolar: Polynomial
+    /// The efficiency of the waste heat recovery with respect to gas turbine load.
     let efficiencyGasTurbine: Polynomial
   }
 }
 
 extension WasteHeatRecovery.Parameter: CustomStringConvertible {
+  /// A description of the `WasteHeatRecovery.Parameter` instance.
   public var description: String {
     "Description:" * name
     + "Operation Mode:" * operation.rawValue
@@ -42,6 +53,7 @@ extension WasteHeatRecovery.Parameter: CustomStringConvertible {
 }
 
 extension WasteHeatRecovery.Parameter: TextConfigInitializable {
+  /// Initializes the `WasteHeatRecovery.Parameter` from a text configuration file.
   public init(file: TextConfigFile) throws {
     let ln: (Int) throws -> Double = { try file.readDouble(lineNumber: $0) }
     self = try .init(

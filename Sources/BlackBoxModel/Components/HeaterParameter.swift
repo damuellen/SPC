@@ -11,18 +11,44 @@
 import Utilities
 
 extension Heater {
-  /// A struct with the assigned details of the heater.
+  /**
+  A struct representing the parameters of the heater.
+
+  The heater parameter set contains the following:
+    - Name
+    - Efficiency
+    - Minimum load
+    - Maximum mass flow
+    - Nominal electrical parasitics
+    - Anti-freeze temperature
+    - Nominal outlet temperature
+    - Parasitics at full load
+    - Parasitic performance coefficients
+  */
   public struct Parameter: Codable, Equatable {
+    /// The name of the heater parameter set.
     let name: String
-    let efficiency, minLoad: Ratio
-    var maximumMassFlow, nominalElectricalParasitics: Double
-    let antiFreezeTemperature, nominalTemperatureOut: Temperature
+    /// The efficiency of the heater.
+    let efficiency: Ratio
+    /// The minimum load of the heater.
+    let minLoad: Ratio
+    /// The maximum mass flow of the heater.
+    var maximumMassFlow: Double
+    /// The nominal electrical parasitics of the heater.
+    let nominalElectricalParasitics: Double
+    /// The anti-freeze temperature of the heater.
+    let antiFreezeTemperature: Temperature
+    /// The nominal outlet temperature of the heater.
+    let nominalTemperatureOut: Temperature
+    /// The coefficients for the parasitics function as a function of load.
     let electricalParasitics: [Double]
+    /// A boolean indicating whether the heater should be used in parallel to the solar field.
     let onlyWithSolarField: Bool
   }
 }
 
 extension Heater.Parameter: CustomStringConvertible {
+  /// A description of the `Heater.Parameter` instance.
   public var description: String {
     "Description:" * name
     + "Capacity of HTF-Heater [MW]:" * Design.layout.heater.description
@@ -43,6 +69,8 @@ extension Heater.Parameter: CustomStringConvertible {
 }
 
 extension Heater.Parameter: TextConfigInitializable {
+  /// Creates a `Heater.Parameter` instance using the data from a `TextConfigFile`.
+  /// - Parameter file: The `TextConfigFile` containing the data for the parameter.
   public init(file: TextConfigFile) throws {
     let ln: (Int) throws -> Double = { try file.readDouble(lineNumber: $0) }
     self = try .init(

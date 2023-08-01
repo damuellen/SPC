@@ -16,29 +16,34 @@ extension HeatExchanger: CustomStringConvertible {
   }
 }
 
-/// This struct contains the state as well as the functions for mapping the heat exchanger
+/// A struct representing the state and functions for the heat exchanger.
 public struct HeatExchanger: Parameterizable, HeatTransfer {
-
+  /// The name of the heat exchanger.
   var name: String = HeatExchanger.parameter.name
 
+  /// The mass flow rate of the heat exchanger.
   public internal(set) var massFlow: MassFlow = .zero
 
+  /// The temperatures of the heat exchanger (inlet and outlet).
   public internal(set) var temperature: (inlet: Temperature, outlet: Temperature)
 
+  /// The amount of heat transferred out of the heat exchanger.
   var heatOut, heatToTES: Double
 
+  /// The fixed design mass flow rate of the heat exchanger.
   static let designMassFlow = MassFlow(parameter.heatFlowHTF * 1_000 / capacity)
   
+  /// The capacity of the heat exchanger.
   static let capacity = SolarField.parameter.HTF.heatContent(
     HeatExchanger.parameter.temperature.htf.inlet.max,
     HeatExchanger.parameter.temperature.htf.outlet.max)
 
-  /// Returns the fixed initial state.
+  /// Returns the fixed initial state of the heat exchanger.
   static let initialState = HeatExchanger(
     temperature: Simulation.startTemperature,
     heatOut: 0.0, heatToTES: 0.0
   )
-  /// Returns the static parameters.
+  /// The static parameters for the `HeatExchanger`.
   public static var parameter: Parameter = Parameters.hx
 
   /// power function based on MAN-Turbo and OHL data with pinch point tool

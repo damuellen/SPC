@@ -30,10 +30,10 @@ extension SteamTurbine.OperationMode: CustomStringConvertible {
   }
 }
 
-/// This struct contains the state as well as the functions for mapping the steam turbine
+/// A struct representing the state and functions for mapping the steam turbine
 public struct SteamTurbine: Parameterizable {
   
-  /// Returns the operating state
+  /// The current operating mode of the steam turbine
   public internal(set) var operationMode: OperationMode
   /// Returns the load applied
   public internal(set) var load: Ratio {

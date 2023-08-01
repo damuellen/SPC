@@ -19,7 +19,7 @@ extension GasTurbine: CustomStringConvertible {
   }
 }
 
-/// This struct contains the state as well as the functions for mapping the gas turbine
+/// A struct representing the state and functions for mapping the gas turbine
 public struct GasTurbine: Parameterizable {
 
   /// Returns the operating state
@@ -32,11 +32,11 @@ public struct GasTurbine: Parameterizable {
   public enum OperationMode: String {
     case free, load, integrated, pure, noOperation, scheduledMaintenance
   }
-  /// Returns the fixed initial state.
+  /// Creates a `GasTurbine` instance with the fixed initial state.
   static let initialState = GasTurbine(
     operationMode: .free, isMaintained: false, load: 0.0
   )
-  /// Returns the static parameters.
+  /// The static parameters for the `GasTurbine`.
   public static var parameter: Parameter = Parameters.gt
 
   /// Calculates the efficiency of the gas turbine which only depends on its own load.

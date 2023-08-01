@@ -11,25 +11,41 @@
 import Utilities
 
 extension Boiler {
+  /// A struct representing the parameters of the boiler.
   public struct Parameter: Codable, Equatable {
+    /// The name of the boiler parameter set.
     let name: String
-    let nominalTemperatureOut, minLoad, nominalElectricalParasitics: Double
-
+    /// The nominal outlet temperature of the boiler.
+    let nominalTemperatureOut: Double
+    /// The minimum load percentage of the boiler.
+    let minLoad: Double
+    /// The nominal electrical parasitics of the boiler.
+    let nominalElectricalParasitics: Double
+    /// A struct representing the start parameters of the boiler.
     public struct StartParameter: Codable, Equatable {
+      /// A struct representing the values for cold and warm start parameters.
       public struct Values: Codable, Equatable {
-        let cold, warm: Double
+        /// The value for cold start.
+        let cold: Double
+        /// The value for warm start.
+        let warm: Double
       }
+      /// The hours needed for cold and warm start.
       let hours: Values
+      /// The energy performance needed for cold and warm start.
       let energy: Values
     }
-
+    /// The start parameters of the boiler.
     let start: StartParameter
+    /// The electrical parasitics and efficiency of the boiler.
     let electricalParasitics, efficiency: Polynomial
+    /// Boolean indicating whether booster superheater is used.
     var booster = true
   }
 }
 
 extension Boiler.Parameter: CustomStringConvertible {
+  /// A description of the `Boiler.Parameter` instance.
   public var description: String {
     "Description:" * name 
     + "Nominal Outlet Temperature [°]:" * nominalTemperatureOut.description
@@ -52,6 +68,8 @@ extension Boiler.Parameter: CustomStringConvertible {
 }
 
 extension Boiler.Parameter: TextConfigInitializable {
+  /// Creates a `Boiler.Parameter` instance using the data from a `TextConfigFile`.
+  /// - Parameter file: The `TextConfigFile` containing the data for the parameter.
   public init(file: TextConfigFile) throws {
     let ln: (Int) throws -> Double = { try file.readDouble(lineNumber: $0) }
     self = try .init(

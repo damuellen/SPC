@@ -12,7 +12,7 @@ import Libc
 import Meteo
 import Utilities
 
-// Define a public enumeration named DryCooling
+// A enum representing the functions for mapping the DryCooling
 public enum DryCooling {
   
   // Define a static function named perform which takes steamTurbineLoad and temperature as input parameters

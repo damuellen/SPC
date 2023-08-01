@@ -13,31 +13,39 @@ import Libc
 import Helpers
 import Meteo
 import SolarPosition
-
-/// This struct contains the state as well as the functions for mapping the collector
+/// A struct representing the state and functions for mapping the collector of a solar power plant.
 public struct Collector: Parameterizable, CustomStringConvertible {
 
+  /// The parabolic elevation in degrees.
   public internal(set) var parabolicElevation, theta, cosTheta: Double
+
+  /// The efficiency of the parabolic trough.
   public internal(set) var efficiency: Double
-  /// Instantaneous irradiation on absorber tube
+
+  /// Instantaneous irradiation on the absorber tube in W/sqm.
   public internal(set) var insolationAbsorber: Double
+  
+  /// The last recorded value of irradiation on the absorber tube.
   var lastInsolation: Double = 0
 
+  /// A description of the `Collector` instance.
   public var description: String {
     formatting(
       [insolationAbsorber, parabolicElevation, cosTheta, efficiency * 100],
       ["Insolation absorber:", "PE:", "cos(Theta):", "Efficiency:"]
     )
   }
-  /// Returns the fixed initial state.
+
+  /// Creates a `Collector` instance with the fixed initial state.
   static let initialState = Collector(
     parabolicElevation: 0, theta: 0, cosTheta: 0,
     efficiency: 0.0, insolationAbsorber: 0
   )
-  /// Returns the static parameters.
+
+  /// The static parameters for the `Collector`.
   public static var parameter: Parameter = Parameters.NT_PRO
 
-  /// Calculate shading of the HCEs
+  /// Calculates the shading of the HCEs (Heat Collector Elements).
   static func shadingHCE(cosTheta: Double) -> Double {
     let shadingHCE = parameter.shadingHCE
     switch cosTheta {
@@ -56,13 +64,11 @@ public struct Collector: Parameterizable, CustomStringConvertible {
       return shadingHCE[3]
     }
   }
-
-  /// This function calculates the efficiency of the parabolic trough
-  /// which is depending on: incidence angle (theta), elevation angle,
-  /// edge factors of the solarfield and the optical efficiency
+ /// Calculates the efficiency of the parabolic trough, depending on various parameters.
   public mutating func efficiency(ws: Double) {
     let parameter = Collector.parameter
     guard case 1...179 = parabolicElevation else { return }
+
     /// Current availability values
     let value = Availability.current.value
     let breakHCE = value.breakHCE.quotient
@@ -127,27 +133,24 @@ public struct Collector: Parameterizable, CustomStringConvertible {
     }
 
     if direction > 180 { T_14 = -T_14 }
-    /// Effective wind speed
+    // Effective wind speed
     let v_wind_eff = ws * abs(sin(Double(direction) * .pi / 180))
     // Torsion due to bearing friction
-    let T_R = -(939_549e-10 * parameter.lengthSCA ** 2
-      + 939_549e-10 * parameter.lengthSCA)
-    /// Torsion due to wind and friction
+    let T_R = -(939_549e-10 * parameter.lengthSCA ** 2 + 939_549e-10 * parameter.lengthSCA)
+    // Torsion due to wind and friction
     let torsion = abs(T_14 * (v_wind_eff / 14) ** 2 + T_R)
-    /// Correction factor due to torsion
-    let k_torsion = max(0.2, (-0.0041 * torsion ** 3 - 0.0605
-        * torsion ** 2 - 0.0354 * torsion + 99.997) / 100)
+    // Correction factor due to torsion
+    let k_torsion = max(0.2, (-0.0041 * torsion ** 3 - 0.0605 * torsion ** 2 - 0.0354 * torsion + 99.997) / 100)
 
     let shadingHCE = Collector.shadingHCE(cosTheta: cosTheta)
 
     let wind = solarField.windCoefficients(ws)
 
-    let eff = shadingSCA * shadingHCE * IAM * edge * k_torsion * wind
-      * opticalEfficiency * Simulation.adjustmentFactor.efficiencySolarField
+    let eff = shadingSCA * shadingHCE * IAM * edge * k_torsion * wind * opticalEfficiency * Simulation.adjustmentFactor.efficiencySolarField
     efficiency = eff
   }
-  /// Elevation and incidence angle calculation
-  public mutating func tracking(sun: SolarPosition.Output)  {
+  /// Calculates the elevation and incidence angle for tracking the sun.
+  public mutating func tracking(sun: SolarPosition.Output) {
     guard sun.zenith < 90.0 else { return }
 
     parabolicElevation = 90 - (atan(tan(sun.zenith.toRadians)
@@ -165,8 +168,8 @@ public struct Collector: Parameterizable, CustomStringConvertible {
 
     cosTheta = cos(theta.toRadians)
   }
-  /// Irradiation on the absorber taking into account
-  /// the angle of incidence and optical efficiency
+
+  /// Calculates the irradiation on the absorber taking into account the angle of incidence and optical efficiency.
   public mutating func irradiation(dni: Double) {
     lastInsolation = insolationAbsorber
     insolationAbsorber = dni * cosTheta * efficiency
@@ -175,10 +178,12 @@ public struct Collector: Parameterizable, CustomStringConvertible {
 
 extension Collector: MeasurementsConvertible {
 
+  /// An array of `Collector` instance's values.
   var values: [Double] {
     [insolationAbsorber, cosTheta, efficiency, parabolicElevation]
   }
 
+  /// An array of tuples representing the measurements for `Collector`.
   static var measurements: [(name: String, unit: String)] {
     [("Insolation", "W/sqm"), ("Collector|cosTheta", "Ratio"),
      ("Collector|Eff", "%"), ("Collector|Position", "degree")]

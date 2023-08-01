@@ -13,13 +13,13 @@ import Units
 extension PV {
   /// Wraps low-level functions for solving the single diode equation.
   public struct Cell {
-    /// Radiation at Standard Test Conditions
+    /// Radiation at Standard Test Conditions (STC) in Watts per square meter.
     static let radiation_at_STC = 1000.0
-    /// Temperature at Standard Test Conditions
+    /// Temperature at Standard Test Conditions (STC) in degrees Celsius.
     static let temperature_at_STC = Temperature(celsius: 25.0)
-    /// Boltzman constant
+    /// Boltzmann constant in Joules per Kelvin.
     static let k = 1.3806488E-23
-    /// Electron charge in coulombs
+    /// Electron charge in Coulombs.
     static let q = 1.60217646E-19
     /// Short circuit current in Amperes
     let Isc: Double
@@ -248,9 +248,12 @@ extension PV {
   }
 }
 
-/// Implementation of the Lambert W function, which is a special function that is the inverse of the function f(w) = w * exp(w). 
-/// 
+/// Implementation of the Lambert W function, which is a special function that is the inverse of the function f(w) = w * exp(w).
+///
 /// The Lambert W function is used in various mathematical and scientific applications, including solving equations involving exponential and logarithmic functions.
+///
+/// - Parameter z: The input value for the Lambert W function.
+/// - Returns: The Lambert W function result.
 func lambertW(_ z: Double) -> Double {
   var tmp: Double
   var c1: Double

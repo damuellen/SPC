@@ -12,9 +12,9 @@ import Foundation
 import DateExtensions
 import Units
 
-/// This struct contains the state as well as the functions for mapping the boiler
+/// A struct representing the state and functions for mapping the boiler
 public struct Boiler: Parameterizable {
-  /// Returns the operating state
+  /// The current operating mode of the boiler
   public internal(set) var operationMode: OperationMode
 
   var isMaintained: Bool
@@ -34,7 +34,7 @@ public struct Boiler: Parameterizable {
 
   struct Consumptions { var heatFlow, electric, fuel: Double }
 
-  /// Returns the fixed initial state.
+  /// Creates a `Boiler` instance with the fixed initial state.
   static let initialState = Boiler(
     operationMode: .noOperation(hours: 0),
     isMaintained: false,
@@ -42,7 +42,7 @@ public struct Boiler: Parameterizable {
     startEnergy: 0.0
   )
   // startEnergyOld: 0.0)
-  /// Returns the static parameters
+  /// The static parameters for the `Boiler`.
   public static var parameter: Parameter = Parameters.bo
 
   /// Calculates the efficiency of the boiler which only depends on his current load

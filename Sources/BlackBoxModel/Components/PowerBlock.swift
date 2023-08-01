@@ -15,7 +15,7 @@ extension PowerBlock: CustomStringConvertible {
   public var description: String { cycle.description  }
 }
 
-/// This struct contains the state as well as the functions for mapping the power block
+/// A struct representing the state and functions for mapping the power block
 public struct PowerBlock: Parameterizable, HeatTransfer {
 
   var name: String = PowerBlock.parameter.name
@@ -27,11 +27,11 @@ public struct PowerBlock: Parameterizable, HeatTransfer {
   public enum OperationMode {
     case scheduledMaintenance
   }
-  /// Returns the fixed initial state.
+  /// Creates a `PowerBlock` instance with the fixed initial state.
   static let initialState = PowerBlock(
     temperature: Simulation.startTemperature
   )
-  /// Returns the static parameters
+  /// The static parameters for the `PowerBlock`.
   public static var parameter: Parameter = Parameters.pb
 
   mutating func temperatureOutlet(

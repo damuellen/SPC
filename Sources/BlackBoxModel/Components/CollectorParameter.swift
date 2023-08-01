@@ -11,43 +11,69 @@
 import Utilities
 
 extension Collector {
-  /**
-   A struct with the assigned details of the collector.
+/**
+ A struct representing the parameters of the collector.
 
-   The collector model contains the following:
-     - net collector surface area
-     - length
-     - parabola aperture
-     - average distance from focus
-     - optical efficiency
-     - absorber extension beyond collector
-     - absorber tube outer radius- inner radius
-     - coating emittance coefficient as a function of temperature
-     - radius of glass cover tube
-     - bellow shadowing
-     - optical efficiency as a function of incident angle (incident angle modifier).
-   */
+ The collector model contains the following:
+   - net collector surface area
+   - length
+   - parabola aperture
+   - average distance from focus
+   - optical efficiency
+   - absorber extension beyond collector
+   - absorber tube outer radius - inner radius
+   - coating emittance coefficient as a function of temperature
+   - radius of the glass cover tube
+   - bellow shadowing
+   - optical efficiency as a function of incident angle (incident angle modifier).
+ */
   public struct Parameter: Codable, Equatable {
+
+    /// The name of the collector parameter set.
     let name: String
+
+    /// The type of absorber material.
     public enum Absorber: String, Codable {
       case schott, rio
     }
-  //  let kind: Kind = .sklalet
+
+    /// A flag indicating whether the collector uses a new function.
     var newFunction: Bool = false
+    /// The type of absorber material for the collector.
     let absorber: Absorber
-    public let aperture, lengthSCA, areaSCAnet, extensionHCE, avgFocus,
-      rabsOut, rabsInner, rglas, glassEmission, opticalEfficiency: Double
-    public let emissionHCE, shadingHCE: [Double]
+    /// The aperture of the collector in meters.
+    public let aperture: Double
+    /// The length of the collector in meters.
+    public let lengthSCA: Double
+    /// The net collector surface area in square meters.
+    public let areaSCAnet: Double
+    /// The extension of HCE (Heat Collector Element) beyond the collector in meters.
+    public let extensionHCE: Double
+    /// The average distance from the parabola to the focus in meters.
+    public let avgFocus: Double
+    /// The outer radius of the absorber pipe in meters.
+    public let rabsOut: Double
+    /// The inner radius of the absorber pipe in meters.
+    public let rabsInner: Double
+    /// The radius of the glass cover tube in meters.
+    public let rglas: Double
+    /// The emittance coefficient of the coating as a function of temperature.
+    public let glassEmission: Double
+    /// The optical efficiency of the collector.
+    public let opticalEfficiency: Double
+    /// The emittance coefficients for the HCE as a function of temperature.
+    public let emissionHCE: [Double]
+    /// The shading coefficients for the HCE for different incident angles.
+    public let shadingHCE: [Double]
+    /// The incident angle modifier as a polynomial function.
     public let factorIAM: Polynomial
+    /// A flag indicating whether to use integral radial loss calculation.
     public let useIntegralRadialoss: Bool
   }
-/*
-  enum Kind: Int, Encodable {
-    case sklatet = 0, ls2, validation
-  }*/
 }
 
 extension Collector.Parameter: CustomStringConvertible {
+  /// A description of the `Collector.Parameter` instance.
   public var description: String {
     "Description:" * name
     + "Aperture [m]:" * aperture.description
@@ -57,9 +83,9 @@ extension Collector.Parameter: CustomStringConvertible {
     + "Average Distance Parabola to Focus [m]:" * avgFocus.description
     + "Absorber Pipe Outer Radius [m]:" * rabsOut.description
     + "Absorber Pipe Inner Radius [m]:" * rabsInner.description
-    + "Glas Tube Radius [m]:" * rglas.description
+    + "Glass Tube Radius [m]:" * rglas.description
     + "Optical Efficiency [%]:" * (opticalEfficiency * 100).description
-    + "Absorber emittance; Emittance(T) = c0 + c1*T\n"
+    + "Absorber Emittance; Emittance(T) = c0 + c1*T\n"
     + "c0:" * emissionHCE[0].description
     + "c1:" * emissionHCE[1].description
     + "Calc. Radialoss as Integral of dT:"
@@ -75,6 +101,8 @@ extension Collector.Parameter: CustomStringConvertible {
 }
 
 extension Collector.Parameter: TextConfigInitializable {
+  /// Creates a `Collector.Parameter` instance using the data from a `TextConfigFile`.
+  /// - Parameter file: The `TextConfigFile` containing the data for the parameter.
   public init(file: TextConfigFile) throws {
     let ln: (Int) throws -> Double = { try file.readDouble(lineNumber: $0) }
     name = file.name

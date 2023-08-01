@@ -11,6 +11,7 @@
 import Foundation
 import Utilities
 
+/// A struct representing the state and functions for mapping the BESS
 public struct BESS {
 
   /// Energy stored in the system in Wh

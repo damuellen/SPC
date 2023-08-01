@@ -38,7 +38,7 @@ extension SolarField.OperationMode: CustomStringConvertible {
   }
 }
 
-/// This struct contains the state as well as the functions for mapping the solar field
+/// A struct representing the state and functions for mapping the solar field
 public struct SolarField: Parameterizable, HeatTransfer {
 
   public let name = "Solar field"
@@ -50,7 +50,7 @@ public struct SolarField: Parameterizable, HeatTransfer {
     static var names: [String] { ["Design", "Near", "Average", "Far"] }
   }
 
-  /// Returns the operating state
+  /// The current operating mode of the solar field
   public internal(set) var operationMode: OperationMode
 
   public internal(set) var eta: Double = 0.0
@@ -69,12 +69,12 @@ public struct SolarField: Parameterizable, HeatTransfer {
       default: return 0.0
     }
   }
-
+  /// The temperature at the inlet and outlet of the solar field.
   public internal(set) var temperature: (inlet: Temperature, outlet: Temperature) {
     get { header.temperature }
     set { header.temperature = newValue }
   }
-
+  /// The mass flow rate of the solar field header.
   public internal(set) var massFlow: MassFlow {
     get { header.massFlow }
     set { header.massFlow = newValue }
@@ -108,13 +108,13 @@ public struct SolarField: Parameterizable, HeatTransfer {
       return false
     }
   }
-  /// Returns the fixed initial state.
+  /// Creates a `SolarField` instance with the fixed initial state.
   static let initialState = SolarField(
     operationMode: .stow,
     header: Cycle(name: "Header"),
     loops: Loop.names.map { name in Cycle(loop: name) }
   )
-  /// Returns the static parameters.
+  /// The static parameters for the `SolarField`.
   public static var parameter: Parameter = Parameters.sf
 
   mutating func requiredMassFlow(from storage: Storage) {

@@ -11,88 +11,133 @@
 import Utilities
 
 extension Storage {
+  /// An enumeration defining the different units for storage definitions.
   public enum Definition: String, Codable {
     case hours = "hrs", cap, ton
   }
 
+  /// An enumeration defining the operation types for storage.
   public enum TypeDir: String, Codable {
     case indirect, direct
   }
+
+  /**
+  A struct representing the parameters of the storage.
   
+  The storage parameter set contains various properties related to storage,
+  such as efficiency, heat loss, charging and discharging temperatures, etc.
+  */
   public struct Parameter: Codable {
+    /// The name of the storage parameter set.
     let name: String
-    let chargeTo, dischargeToTurbine, dischargeToHeater: Ratio
-    let stepSizeIteration, heatStoredrel: Double
-    var temperatureDischarge, temperatureDischarge2: Polynomial
-    var temperatureCharge, temperatureCharge2: Polynomial
-    var heatlossCst, heatlossC0to1: Polynomial
-    var pumpEfficiency, pressureLoss: Double
-    var massFlowShare: Ratio
-
-    let startTemperature: Sides<Temperature> // TurbTL(0) TurbTL(1)
-    let startLoad: Sides<Double> // TurbTL(2) TurbTL(3)
-
-    public enum Strategy: String, Codable {
-      case always, demand, shifter
-
-      init?(string: String) {
-        self.init(rawValue: string.lowercased())
-      }
-    }
-
+    /// The charge efficiency of the storage.
+    let chargeTo: Ratio
+    /// The discharge efficiency of the storage to the turbine.
+    let dischargeToTurbine: Ratio
+    /// The discharge efficiency of the storage to the heater.
+    let dischargeToHeater: Ratio
+    /// The step size iteration used to iterate Tmin for the turbine.
+    let stepSizeIteration: Double
+    /// The relative filling of storage at program start (only for Thermocline).
+    let heatStoredrel: Double
+    /// Outlet temperature of storage during discharging (hot end) for Load = 0.
+    let temperatureDischarge: Polynomial
+    /// Outlet temperature (for Thermocline) or deltaT (for 2-Tank) of storage during discharging (hot end) for Load > 0.
+    let temperatureDischarge2: Polynomial
+    /// Outlet temperature of storage during charging (cold end) for Load = 0.
+    let temperatureCharge: Polynomial
+    /// Outlet temperature (for Thermocline) or deltaT (for 2-Tank) of storage during charging (cold end) for Load > 0.
+    let temperatureCharge2: Polynomial
+    /// Heat loss constant coefficient for storage.
+    let heatlossCst: Polynomial
+    /// Heat loss coefficient for storage from 0 to 1.
+    let heatlossC0to1: Polynomial
+    /// Pump efficiency of the storage.
+    let pumpEfficiency: Double
+    /// Pressure loss at the design point for storage.
+    let pressureLoss: Double
+    /// Mass flow share of storage to power block at the design point.
+    let massFlowShare: Ratio
+    /// Start temperature of cold and hot tanks at program start.
+    let startTemperature: Sides<Temperature>
+    /// Start load of cold and hot tanks at program start.
+    let startLoad: Sides<Double>
     var type: TypeDir = .indirect
+    /// The charging and discharging strategy of the storage.
     let strategy: Strategy
+    /// The preferred charging efficiency of the storage to the turbine.
     let prefChargeToTurbine: Double
+    /// The exception for storage definition in terms of months.
     let exception: ClosedRange<Int>
+    /// The heat transfer fluid used in the storage.
     let HTF: StorageMedium
-    let freezeProtection, fossilCharging: Bool
+    /// Boolean indicating whether freeze protection is required for storage.
+    let freezeProtection: Bool
+    /// Boolean indicating whether fossil charging is allowed for storage.
+    let fossilCharging: Bool
+    /// Heat difference and dS rise for storage.
     let heatdiff, dSRise: Double
-    
+    /// The minimum and fixed discharge load for storage.
     let minDischargeLoad, fixedDischargeLoad: Ratio
-    
+    /// The time and power for heat tracing in storage.
     let heatTracingTime, heatTracingPower: [Double]
+    /// Discharge parasitics factor for storage.
     let dischargeParasitcsFactor: Double
-    
+    /// Boolean indicating whether storage is variable.
     var isVariable = true
+    /// Boolean indicating whether heat exchanger is restricted for storage.
     var heatExchangerRestrictedMin = false
+    /// Boolean indicating whether auxiliary consumption curve is used for storage.
     var auxConsumptionCurve = false
+    /// Boolean indicating whether heat exchanger is restricted for storage.
     var heatExchangerRestrictedMax = false
-
+    /// The definition used for storage.
     var definedBy: Definition = .cap
-
+    /// The design temperature for cold and hot storage tanks.
     let designTemperature: Sides<Temperature>
-    
+    /// The heat loss for cold and hot storage tanks.
     let heatLoss: Sides<Double>
-    
+    /// The fossil charging time in terms of day and month.
     let fossilChargingTime: [Int]
-    
-    let heatExchangerEfficiency: Double
-    let heatExchangerCapacity: Double // (oil to salt) in MWt
-    let heatExchangerMinCapacity: Double // HX minimum capacity in %
-    
-    // select if auxiliary consumption is to be calculated as quadratic polynom
-    let DesAuxIN: Double // nominal auxiliary electrical consumption
-    let DesAuxEX: Double // c0 coeff. for aux. consumption
-    // AuxCons1     : Double       //Dummy
-    // AuxCons2     : Double       //Dummy
+    /// The efficiency and capacity of the heat exchanger.
+    let heatExchangerEfficiency, heatExchangerCapacity: Double
+    /// The minimum capacity of the heat exchanger.
+    let heatExchangerMinCapacity: Double
+    /// The nominal auxiliary electrical consumption for storage.
+    let DesAuxIN: Double
+    /// The c0 coefficient for auxiliary consumption of storage.
+    let DesAuxEX: Double
+    /// The heat production load for storage.
+    var heatProductionLoad: Double
+    /// The mass flow to power block during charge in bad days winter.
+    let heatProductionLoadWinter: Ratio
+    /// The mass flow to power block during charge in bad days summer.
+    let heatProductionLoadSummer: Ratio
+    /// The time to begin TES discharge in winter and summer.
+    let dischargeWinter, dischargeSummer: Int
+    /// The DNI for bad days winter and summer.
+    let badDNIwinter, badDNIsummer: Double
+  }
+}
 
-    // variables added to calculate TES aux. consumption :
-
-    var heatProductionLoad: Double // added for shifter
-    /// Massflow to POB during Charge in Bad Days Winter 
-    let heatProductionLoadWinter: Ratio // added for shifter
-    /// Massflow to POB during Charge in Bad Days Summer 
-    let heatProductionLoadSummer: Ratio // added for shifter
-    let dischargeWinter: Int
-    let dischargeSummer: Int
-    /// DNI for Bad Days Winter
-    let badDNIwinter: Double
-    /// DNI for Bad Days Summer
-    let badDNIsummer: Double
+/**
+ A set of strategies for storage operation.
+ 
+ - always: Storage is always charged and discharged as required.
+ - demand: Storage is charged and discharged based on demand.
+ - shifter: Storage is used as a shifter.
+ */
+public enum Strategy: String, Codable {
+  case always, demand, shifter
+  
+  /// Initializes a Strategy enum from a string.
+  init?(string: String) {
+    self.init(rawValue: string.lowercased())
   }
 }
 
 extension Storage.Parameter: CustomStringConvertible {
+  /// A description of the `Storage.Parameter` instance.
   public var description: String {
     "Description:" * (name + " " + type.rawValue)
     + "Charge Storage up to Load:" * chargeTo.description
@@ -159,6 +204,8 @@ extension Storage.Parameter: CustomStringConvertible {
 }
 
 extension Storage.Parameter: TextConfigInitializable {
+  /// Creates a `Storage.Parameter` instance using the data from a `TextConfigFile`.
+  /// - Parameter file: The `TextConfigFile` containing the data for the parameter.
   public init(file: TextConfigFile) throws {
     typealias T = Temperature
     let ln: (Int) throws -> Double = { try file.readDouble(lineNumber: $0) }
@@ -235,12 +282,14 @@ extension Storage.Parameter: TextConfigInitializable {
   }  
 }
 
+/// An enumeration defining the different storage mediums.
 public enum StorageMedium: String, Codable {
   case hiXL = "HitecXL"
   case xlt600 = "XLT600"
   case th66 = "TH66"
   case solarSalt = "SolarSalt"
 
+  /// Heat transfer fluid properties for Solar Salt.
   static var ss = HeatTransferFluid(
     name: "Solar Salt",
     freezeTemperature: 240.0,
@@ -253,6 +302,7 @@ public enum StorageMedium: String, Codable {
     useEnthalpy: false
   )
 
+  /// Get the heat transfer fluid properties for a specific storage medium.
   public var properties: HeatTransferFluid {
     switch self {
     case .solarSalt:

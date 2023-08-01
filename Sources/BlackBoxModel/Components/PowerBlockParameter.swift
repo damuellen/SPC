@@ -10,21 +10,36 @@
 
 import Utilities
 
+/// The PowerBlock namespace contains structures and extensions related to power block parameters.
 extension PowerBlock {
-  /// A struct with the assigned details of the power block.
+  /// The Parameter struct represents the parameters of the power block and is Codable and Equatable for serialization and comparison.
   public struct Parameter: Codable, Equatable {
+    /// The name of the power block.
     let name: String
+    /// The fixed electrical parasitics for load > 0 [MW].
     let fixElectricalParasitics: Double
+    /// The nominal electrical parasitics for load = 1 [MW].
     let nominalElectricalParasitics: Double
+    /// The fixed electrical parasitics for load = 0 [MW].
     let fixElectricalParasitics0: Double
+    /// The parasitics during power block start-up [MW].
     let startUpElectricalParasitics: Double
+    /// The nominal electrical parasitics of the auxiliary condenser cooling (ACC) [MW].
     let nominalElectricalParasiticsACC: Double
-    let electricalParasiticsShared, electricalParasiticsStep,
-      electricalParasitics, electricalParasiticsACC,
-      electricalParasiticsACCTamb: Polynomial
+    /// The electrical parasitics of the shared facilities for load = 0 [MW] and load > 0 [MW].
+    let electricalParasiticsShared: Polynomial
+    /// The electrical parasitics of the cooling tower for load < 50% [MW].
+    let electricalParasiticsStep: Polynomial
+    /// The polynomial representing electrical parasitics for load = parasitics(100%) * (c0 + c1 * load).
+    let electricalParasitics: Polynomial
+    /// The polynomial representing ACC parasitics for load = parasiticsACC(100%) * (c0 + c1 * load + c2 * load^2 + ...).
+    let electricalParasiticsACC: Polynomial
+    /// The polynomial representing ACC parasitics for temperature Tamb = parasiticsACC(100%) * (c0 + c1 * Tamb + c2 * Tamb^2 + ...).
+    let electricalParasiticsACCTamb: Polynomial
   }
 }
 
+/// Custom description for PowerBlock.Parameter to provide a formatted string representation.
 extension PowerBlock.Parameter: CustomStringConvertible {
   public var description: String {
     "Description:" * name
@@ -57,7 +72,10 @@ extension PowerBlock.Parameter: CustomStringConvertible {
   }
 }
 
+/// TextConfigInitializable extension for PowerBlock.Parameter to create an instance using data from a TextConfigFile.
 extension PowerBlock.Parameter: TextConfigInitializable {
+  /// Creates a `PowerBlock.Parameter` instance using the data from a `TextConfigFile`.
+  /// - Parameter file: The `TextConfigFile` containing the data for the parameter.
   public init(file: TextConfigFile) throws {
     var line = 10
     func go(_ spacing: Int) throws -> Double {

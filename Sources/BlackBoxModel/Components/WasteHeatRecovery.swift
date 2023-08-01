@@ -11,13 +11,13 @@
 import Units
 
 public enum WasteHeatRecovery: Parameterizable {
-  /// This struct contains the state as well as the functions for mapping the waste heat recovery
+  /// A struct representing the heater component with state and functions for mapping the waste heat recovery
   public struct PerformanceData {
     var maintained: Bool
   }
-  /// Returns the fixed initial state.
+  /// Creates a `WasteHeatRecovery` instance with the fixed initial state.
   static let initialState = PerformanceData(maintained: true)
-  /// Returns the static parameters.
+  /// The static parameters for the `WasteHeatRecovery`.
   public static var parameter: Parameter = Parameters.whr
 
   /// Returns the efficiency of the waste heat recovery based on working conditions of the gas turbine

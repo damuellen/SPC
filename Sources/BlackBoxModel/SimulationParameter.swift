@@ -10,20 +10,60 @@
 
 import Utilities
 
+/// The Simulation namespace contains structures and extensions related to simulation parameters.
 extension Simulation {
+  /// The Parameter struct represents simulation parameters and is Codable for serialization.
   public struct Parameter: Codable {
-    let deltaFreezeTemperaturePump, deltaFreezeTemperatureHeat,
-      minTemperatureRaiseStartUp, tempTolerance,
-      minInsolationRaiseStartUp, heatTolerance, timeTolerance, massTolerance,
-      minInsolation, maxToPowerBlock, minInsolationForBoiler,
-      electricalTolerance, electricalParasitics, heatlossTempTolerance: Double
+    /// The temperature difference for start-up of anti-freeze pumping [K].
+    public let deltaFreezeTemperaturePump: Double
+    /// The temperature difference for start-up of anti-freeze heating [K].
+    public let deltaFreezeTemperatureHeat: Double
+    /// The minimum raise of temperature for start-up [K].
+    public let minTemperatureRaiseStartUp: Double
+    /// The tolerance for temperature iteration [K].
+    public let tempTolerance: Double
+    /// The minimum raise of insolation for start-up [W/m²].
+    public let minInsolationRaiseStartUp: Double
+    /// The iteration tolerance for electrical production meeting demand [MW].
+    public let heatTolerance: Double
+    /// The tolerance for time iteration [min].
+    public let timeTolerance: Double
+    /// The tolerance for mass iteration [kg].
+    public let massTolerance: Double
+    /// The minimum insolation for start-up [W/m²].
+    public let minInsolation: Double
+    /// The maximum heat input to power block during boiler operation.
+    public let maxToPowerBlock: Double
+    /// The minimal heat from the solar field required for boiler start-up.
+    public let minInsolationForBoiler: Double
+    /// The iteration tolerance for electrical production [MW].
+    public let electricalTolerance: Double
+    /// The iteration start value for parasitics [% of production].
+    public let electricalParasitics: Double
+    /// The tolerance for temperature drop in hot header iteration [K].
+    public let heatlossTempTolerance: Double
+    /// The adjustment factors for efficiency and heat losses.
     public var adjustmentFactor: AdjustmentFactors
   }
 
+  /// The AdjustmentFactors struct represents adjustment factors for efficiency and heat losses and is Codable for serialization.
   public struct AdjustmentFactors: Codable {
-    public var efficiencySolarField, efficiencyTurbine, efficiencyHeater,
-      efficiencyBoiler, heatLossHCE, heatLossHTF, heatLossH2O,
-      electricalParasitics: Double
+    /// The adjustment factor for solar field efficiency.
+    public var efficiencySolarField: Double
+    /// The adjustment factor for turbine efficiency.
+    public var efficiencyTurbine: Double
+    /// The adjustment factor for heater efficiency.
+    public var efficiencyHeater: Double
+    /// The adjustment factor for boiler efficiency.
+    public var efficiencyBoiler: Double
+    /// The adjustment factor for heat loss in HCE (Heat Collection Element).
+    public var heatLossHCE: Double
+    /// The adjustment factor for heat loss in HTF system.
+    public var heatLossHTF: Double
+    /// The adjustment factor for heat loss in the power block.
+    public var heatLossH2O: Double
+    /// The adjustment factor for parasitic power.
+    public var electricalParasitics: Double
   }
 }
 

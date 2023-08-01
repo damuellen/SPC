@@ -11,7 +11,7 @@
 import Utilities
 
 extension HeatExchanger {
-  /// A struct with the assigned details of the heat exchanger.
+  /// A struct representing the parameters of the heat exchanger.
   public struct Parameter: Equatable {
     public struct Temperatures {
       let htf: (inlet: (max: Temperature, min: Temperature),
@@ -105,6 +105,8 @@ extension HeatExchanger.Parameter: CustomStringConvertible {
 }
 
 extension HeatExchanger.Parameter: TextConfigInitializable {
+  /// Creates a `HeatExchanger.Parameter` instance using the data from a `TextConfigFile`.
+  /// - Parameter file: The `TextConfigFile` containing the data for the parameter.
   public init(file: TextConfigFile) throws {
     let ln: (Int) throws -> Double = { try file.readDouble(lineNumber: $0) }
     name = file.name

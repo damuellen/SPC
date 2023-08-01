@@ -11,63 +11,100 @@
 import Utilities
 
 extension SolarField {
-  enum Layout: String, Equatable, Codable { case I, H  }
+  /// The layout type for the solar field.
+  enum Layout: String, Equatable, Codable {
+    /// The layout type 'I'.
+    case I
+    /// The layout type 'H'.
+    case H
+  }
 
   /**
-   A struct with the assigned details of the solar field.
-   
-   The solar field is specified by:
-   - the total number of loops
-   - number of collectors per loop
-   - distance between collectors in a row
-   - distance between rows
-   - azimuth angle and elevation angle of solar field
-   - heat losses in piping
-   - maximum wind speed for tracking
-   - nominal HTF flow
-   - “freeze protection” HTF flow and minimal HTF flow
-   - parasitic power as a function of HTF flow
-   */
+  A struct representing the parameters of the solar field.
+  
+  The solar field is specified by:
+  - the total number of loops
+  - number of collectors per loop
+  - distance between collectors in a row
+  - distance between rows
+  - azimuth angle and elevation angle of solar field
+  - heat losses in piping
+  - maximum wind speed for tracking
+  - nominal HTF flow
+  - "freeze protection" HTF flow and minimal HTF flow
+  - parasitic power as a function of HTF flow
+  */
   public struct Parameter: Codable {
+    /// Whether to consider heat loss of ANY dump collectors.
     var heatlossDump = true
+    /// The layout type of the solar field.
     var layout = SolarField.Layout.H
+    /// Whether to consider the effect of wind speed on collector efficiency.
     var etaWind = false
-    /// Pipe heat losses in tested area [W/sqm]
+    /// Pipe heat losses in tested area [W/sqm].
     var SSFHL: Double = 0.0
+    /// Heat losses in the hot header.
     var heatLossHotHeader: [Double]
+    /// Whether to consider heat loss of dump collectors in the operating quadrant.
     var heatlossDumpQuad = true
+    /// Imbalance design parameters for HTF flow.
     var imbalanceDesign: [Double] = [1.0, 1.0, 1.0]
+    /// Minimum imbalance parameters for HTF flow.
     var imbalanceMin: [Double] = [1.03, 1.0, 0.97]
+    /// Coefficients for the collector efficiency vs. wind speed equation.
     var windCoefficients: Polynomial = [0.0]
+    /// Whether to use the reference ambient temperature from Solpipe.
     var useReferenceAmbientTemperature = true
+    /// The reference ambient temperature.
     var referenceAmbientTemperature: Double = 0.0
+    /// The design temperature at the inlet of the solar field.
     var designTemperatureInlet: Double = 0.0
+    /// The design temperature at the outlet of the solar field.
     var designTemperatureOutlet: Double = 0.0
-    /// Maximum windspeed for operation [m/sec]
+    /// Maximum wind speed for operation [m/sec].
     let maxWind: Float
+    /// Number of collectors in a row.
     let numberOfSCAsInRow: Int
-    public var rowDistance, distanceSCA, pipeHeatLosses: Double
+    /// Distance between rows [m].
+    public var rowDistance: Double
+    /// Distance between Collectors in a Row
+    public var distanceSCA: Double
+    /// Heat Losses in total HTF Piping
+    public var pipeHeatLosses: Double
+    /// Azimuth angle of solar field orientation [°].
     public var azimut, elevation: Double
+    /// Parasitic power for anti-freeze pump [MW].
     var antiFreezeParastics: Double
+    /// Parasitic power coefficients for pump power.
     var pumpParastics: Polynomial
+    /// Maximum mass flow rate in the solar field.
     var maxMassFlow: MassFlow
-    var minFlow: Ratio 
+    /// Minimum allowable HTF flow as a percentage.
+    var minFlow: Ratio
+    /// Parasitic power at full load for pump [MW].
     var pumpParasticsFullLoad: Double
+    /// Anti-freeze flow as a percentage.
     var antiFreezeFlow: Ratio
+    /// Total mass of HTF in the system [kg].
     var HTFmass: Double
+    /// The heat transfer fluid used in the solar field.
     var HTF: HeatTransferFluid
+    /// Edge factor for the solar field.
     var edgeFactor: [Double] = []
-
+    /// The ratio of the pipe length to the loop ways.
     var distRatio: Double = 0
+    /// The total pipe way length.
     var pipeWay: Double = 0
-    var loopWays: [Double] = [] 
-    var heatlosses: [Double] = [] 
+    /// The lengths of the loop ways.
+    var loopWays: [Double] = []
+    /// The heat losses in each loop.
+    var heatlosses: [Double] = []
   }
 }
 
 extension SolarField.Parameter {
-
-  mutating func wayLength() {
+  /// Calculates the way lengths for the solar field.
+  mutating func calculateWayLengths() {
     let multiplier = Double(numberOfSCAsInRow)
     let designWay = multiplier * (Collector.parameter.lengthSCA + distanceSCA) * 2.0 + rowDistance
 
@@ -76,7 +113,7 @@ extension SolarField.Parameter {
     var avgWay = Design.layout.solarField / 4 * rowDistance / 2
     var farWay: Double = (2 * (Design.layout.solarField / 4 * rowDistance / 2))
 
-    if layout ~= .I {
+    if layout == .I {
       avgWay = avgWay + 0.5 
     } else {
       nearWay = nearWay * 2 + rowDistance + 0.5
@@ -91,6 +128,7 @@ extension SolarField.Parameter {
 }
 
 extension SolarField.Parameter: CustomStringConvertible {
+  /// A description of the `SolarField.Parameter` instance.
   public var description: String {
     "Number of Loops:" * Design.layout.solarField.description
     + "Maximum allowable Wind Speed for Operation [m]:" * maxWind.description
@@ -107,7 +145,7 @@ extension SolarField.Parameter: CustomStringConvertible {
     + "Pumping Parasitics of Anti-Freeze Pump [MW]:"
     * String(format: "%G", antiFreezeParastics)
     + "Parasitic Energy Coefficients; \n"
-    + "Parasitics(Load) = Parasitcs(100%)*(c0+c1*load+c2*load^2)"
+    + "Parasitics(Load) = Parasitics(100%)*(c0+c1*load+c2*load^2)"
     + "\n\(pumpParastics)"
     + "Tilt of Collectors [°]:" * elevation.description
     + "Mass Flow in Solar Field at Full Load [kg/s]:"
@@ -147,6 +185,8 @@ extension SolarField.Parameter: CustomStringConvertible {
 }
 
 extension SolarField.Parameter: TextConfigInitializable {
+  /// Creates a `SolarField.Parameter` instance using the data from a `TextConfigFile`.
+  /// - Parameter file: The `TextConfigFile` containing the data for the parameter.
   public init(file: TextConfigFile) throws {
     let ln: (Int) throws -> Double = { try file.readDouble(lineNumber: $0) }
     maxWind = Float(try ln(10))
