@@ -8,8 +8,17 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
+/// A data structure representing the current status of the solar power plant.
+///
+/// The `Status` struct holds the current state of various components in the
+/// solar power plant. It includes properties representing the status of the
+/// collector, solar field, heat exchanger, power block, steam turbine, heater,
+/// boiler, gas turbine, and storage. This struct provides methods to convert
+/// the status to a human-readable description, extract the operating modes
+/// of different components, and obtain the numerical values of relevant
+/// measurements.
 public struct Status: CustomStringConvertible, MeasurementsConvertible {
-
+  // Properties representing the current status of each component in the solar power plant
   internal(set) public var collector = Collector.initialState
   internal(set) public var solarField = SolarField.initialState
   internal(set) public var heatExchanger = HeatExchanger.initialState
@@ -20,6 +29,14 @@ public struct Status: CustomStringConvertible, MeasurementsConvertible {
   internal(set) public var gasTurbine = GasTurbine.initialState
   internal(set) public var storage = Storage.initialState
 
+  /// A textual representation of the `Status` instance.
+  ///
+  /// This property provides a human-readable description of the current
+  /// status of each component in the solar power plant. It includes details
+  /// about the collector, solar field, heat exchanger, power block, steam
+  /// turbine, heater, boiler, gas turbine, and storage. Depending on the
+  /// design configuration, it may exclude certain components that are not
+  /// present in the current solar power plant setup.
   public var description: String {
     "\nCollector:\n\(collector)\n\n"
       + (Design.hasSolarField ? "Solar Field:\n\(solarField)\n\n" : "")
@@ -43,7 +60,19 @@ public struct Status: CustomStringConvertible, MeasurementsConvertible {
       heater.operationMode.rawValue
     ]
   }
-
+  
+  /// An array of numerical values for relevant measurements in the current status.
+  ///
+  /// The `values` property provides an array of numerical values representing
+  /// various measurements relevant to the current status of the solar power plant.
+  /// It includes values for mass flow rates, temperatures, and other relevant
+  /// data from the collector, solar field, storage, heater, power block,
+  /// heat exchanger, and other components in the solar power plant.
+  ///
+  /// The array is constructed by concatenating measurements from different components,
+  /// extracted using the `values` property of those components conforming to the
+  /// `MeasurementsConvertible` protocol. The mass flow rates for the solar field
+  /// and heater are obtained separately from their conforming protocols.
   var values: [Double] {
     let values = collector.values //+ storage.salt.values
      + (storage as MeasurementsConvertible).values
@@ -57,6 +86,18 @@ public struct Status: CustomStringConvertible, MeasurementsConvertible {
     return values + flows + loops
   }
 
+  /// An array of measurements names and units for the current status.
+  ///
+  /// The `measurements` property provides an array of tuples containing the names
+  /// and units of various measurements relevant to the current status of the solar
+  /// power plant. It includes measurements for mass flow rates, inlet temperatures,
+  /// and outlet temperatures for the collector, solar field, storage, heater, power block,
+  /// heat exchanger, and different loops in the solar field (design loop, near loop,
+  /// average loop, and far loop).
+  ///
+  /// The measurements are organized and grouped based on the component names and the
+  /// specific values being measured. The names and units for each measurement are
+  /// constructed by combining the component name and specific value being measured.
   static var measurements: [(name: String, unit: String)] {
     let values: [(name: String, unit: String)] =
       [("|Massflow", "kg/s"), ("|Tin", "degC"), ("|Tout", "degC")]

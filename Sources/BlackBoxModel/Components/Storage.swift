@@ -11,8 +11,6 @@
 import DateExtensions
 import Units
 
-
-
 /// A struct representing the state and functions for mapping the storage.
 public struct Storage: Parameterizable, HeatTransfer {
 

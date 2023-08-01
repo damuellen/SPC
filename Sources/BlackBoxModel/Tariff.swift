@@ -8,6 +8,26 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 //
 
+/// A data structure representing the tariff structure for an energy provider.
+///
+/// The `TariffStructure` struct defines the structure of tariffs offered by an
+/// energy provider. It includes various components such as energy payment,
+/// energy cost, capacity payment, bonus payment, and availability-based
+/// capacity. These components are used to calculate the cost and pricing for
+/// different energy plans.
+///
+/// The struct contains the following properties:
+/// - `name`: The name of the tariff structure.
+/// - `abbreviation`: An abbreviation or short code for the tariff structure.
+/// - `energyPayment`: The payment amount for energy consumption.
+/// - `energieCost`: The cost of energy per unit.
+/// - `capacityPaymentPercent`: The percentage of capacity payment based on the
+///   total capacity used.
+/// - `capacityPayment`: The payment amount for the capacity used.
+/// - `bonusPaymentPercent`: The percentage of bonus payment based on the total
+///   capacity used.
+/// - `bonusPayment`: The payment amount for the bonus, if applicable.
+/// - `asAvailableCapacity`: The payment amount based on the available capacity.
 public struct TariffStructure: Codable {
   let name: String
   let abbreviation: String
@@ -17,6 +37,23 @@ public struct TariffStructure: Codable {
   let asAvailableCapacity: Double
 }
 
+/// A data structure representing the tariff seasons for an energy provider.
+///
+/// The `TariffSeason` struct defines the seasons for which specific tariffs
+/// are applicable. It includes information about peak and off-peak periods on
+/// weekdays, Saturdays, and holidays. The struct is used to determine the
+/// pricing and rates for different time periods and days throughout the year.
+///
+/// The struct contains the following properties:
+/// - `name`: The name of the tariff season.
+/// - `v1PfD`, `v1PlD`, `v2PfD`, `v2PlD`: Integer values representing
+///   time periods for peak and off-peak rates for various tariffs.
+/// - `weekday`: An array of integers representing weekdays (Sunday to
+///   Saturday) when the tariff season is applicable.
+/// - `saturday`: An array of integers representing Saturdays when the tariff
+///   season is applicable.
+/// - `holyday`: An array of integers representing holidays when the tariff
+///   season is applicable.
 struct TariffSeason: Codable {
   let name: String
   let v1PfD, v1PlD, v2PfD, v2PlD: Int
@@ -27,6 +64,25 @@ extension TariffStructure: CustomStringConvertible {
   public var description: String { name }
 }
 
+/// A data structure representing an energy provider's tariff plan.
+///
+/// The `Tariff` struct defines an energy provider's tariff plan, which
+/// includes the different tariff structures and seasons offered to consumers.
+/// The tariff plan specifies various pricing and rates based on factors such
+/// as energy consumption, capacity usage, and time periods.
+///
+/// The struct contains the following properties:
+/// - `name`: The name of the tariff plan.
+/// - `tariff`: An array of `TariffStructure` instances representing the
+///   different tariff structures available in the plan.
+/// - `season`: An array of `TariffSeason` instances representing the different
+///   tariff seasons applicable in the plan.
+///
+/// The struct extends `TextConfigInitializable`, which means it
+/// can be initialized using data read from a text configuration file.
+/// The `init(file:)` initializer reads and parses the necessary data from the
+/// provided `TextConfigFile`, creating an instance of `Tariff` based on the
+/// file contents.
 public struct Tariff: Codable {
   let name: String
   let tariff: [TariffStructure]

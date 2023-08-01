@@ -19,8 +19,6 @@ Key Features:
 - Auxiliary consumption calculation for all electric consumers, accounting for DNI variations and SFI load.
 - Flexible output formats, including SQLite database, Excel, and CSV.
 
-The SPC is an indispensable tool for engineers, researchers, and operators to optimize solar power plant configurations and maximize clean energy generation.
-
 ## Getting Started
 
 ### Installation
@@ -167,6 +165,44 @@ Load configuration from a JSON or text configuration file.
 Run the solar power plant simulation and record the results in a historian.
 
 **Attention**: Before calling this function, you must call one of the `configure` functions to set up the simulation.
+
+# Historian
+
+### Mode Enumeration
+
+The `Mode` enumeration represents the output modes for the historian. It includes the following cases:
+
+- `.database`: Records data in an SQLite database.
+- `.inMemory`: Keeps data in-memory without saving it to a file.
+- `.custom(interval: DateSeries.Frequence)`: Allows custom data recording intervals.
+- `.csv`: Stores data in a comma-separated values (CSV) file.
+- `.excel`: Writes data to an Excel file.
+
+### Initialization
+
+The `Historian` class is initialized with various parameters, such as `name`, `path`, and `mode`. It reserves capacity for performance data arrays based on the provided frequency. The `path` parameter specifies the directory path for the output files, and the `name` parameter sets a custom name for the output files. If the mode does not support file output, there will be no output files.
+
+### Recording Data
+
+The `Historian` class records performance data and status history using its callAsFunction method. It appends data to the arrays `status`, `performance`, and `sun`, which store the past states of the plant, performance data, and insolation data, respectively.
+
+### Finalization
+
+The `finish` method finalizes the recording process and returns a `Recording` object containing historical data. It handles different output modes, such as custom CSV files, databases, and Excel files. The data is written to the respective files, and the file stream is closed.
+
+### Excel Output
+
+The class uses the `xlsxwriter` Swift package for writing data to an Excel file. It creates a workbook with two worksheets named "Status" and "Performance." The data is written to these worksheets, and the workbook is saved as an Excel file.
+
+### Database Output (Optional)
+
+The class includes commented-out code for writing data to an SQLite database. If needed, you can uncomment and implement this code to store data in a database.
+
+### Notes
+
+- The Solar Performance Calculator is designed for the simulation of solar thermal power plants. It is crucial to provide accurate meteorological data and configuration files for precise and reliable results.
+- The tool provides detailed information about the calculation process, including preparation time, computing time, and wall time, helping users assess the efficiency and resource requirements of the simulation.
+- Additionally, the Solar Performance Calculator includes a `plot` option, allowing users to create time series charts with Gnuplot. This visualization feature helps users gain insights into the calculated results and facilitates the interpretation of the simulation data.
 
 ## License
 

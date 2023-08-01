@@ -213,7 +213,46 @@ public struct SolarField: Parameterizable, HeatTransfer {
     }
   }
 
-  /// Calc. loop-outlet temp. gradient
+  /// Calculates the outlet temperature gradient in the solar collector loop.
+  ///
+  /// This private method is responsible for computing the outlet temperature
+  /// gradient across the solar collector loop based on various parameters and
+  /// conditions. The function uses the provided `last` cycle and the time since
+  /// the last calculation to determine the current temperature distribution in
+  /// the loop.
+  ///
+  /// - Parameters:
+  ///   - last: An array containing the temperature information from the last
+  ///   cycle for each loop in the solar collector system. The array holds the
+  ///   temperature data for the `Loop` instances.
+  ///   - time: The time since the last calculation in the simulation.
+  ///
+  /// The calculation process involves the following steps:
+  /// 1. Retrieve the relevant parameters from the `SolarField` instance,
+  /// including the maximum mass flow rate, pipe way length, and loop way lengths.
+  /// 2. Calculate the flow velocity of the Heat Transfer Fluid (HTF) in the
+  /// solar collector loop.
+  /// 3. Calculate the ratios for the time-based linear interpolation for the
+  /// outlet temperature using the provided time (`time`) and loop way length.
+  /// 4. Determine if the current time falls within the time range that allows
+  /// for linear interpolation of the outlet temperature. If yes, perform the
+  /// interpolation and update the outlet temperature for all loops accordingly.
+  /// 5. Calculate the linear inlet temperature gradient for each loop based on
+  /// the way ratio between adjacent loops and the pipe way length.
+  /// 6. Calculate the average inlet temperature for each loop using the linear
+  /// interpolation between the inlet temperature of the current cycle (`inlet`)
+  /// and the inlet temperature from the `last` cycle.
+  /// 7. Calculate the outlet temperature of the header using the average
+  /// temperatures and flow rates of all loops.
+  /// 8. Update the outlet temperature of the header and the inlet temperatures
+  /// of each loop in the `SolarField` instance (self) based on the calculated
+  /// temperature gradients and interpolation.
+  ///
+  /// The method modifies the state of the `SolarField` instance (self) by
+  /// updating the `header.temperature.outlet` and `loops.temperature.inlet`
+  /// properties with the calculated temperature values. It also relies on the
+  /// information from the previous cycle (`last`) to perform the interpolation
+  /// calculations.
   private mutating func outletTemperature(last: [Cycle], _ time: Double) {
     let maxMassFlow = SolarField.parameter.maxMassFlow.rate
     let pipeWay = SolarField.parameter.pipeWay
@@ -348,6 +387,51 @@ public struct SolarField: Parameterizable, HeatTransfer {
     return newTemp
 }
 
+  /// Calculates the parameters and behavior of a solar collector loop.
+  ///
+  /// This method is responsible for calculating and updating various parameters
+  /// and behaviors of a solar collector loop in the solar field. The calculation
+  /// is based on the characteristics of the collector, ambient temperature, and
+  /// other factors related to the solar field. The method adjusts the mass flow
+  /// rate, outlet temperature, and operation mode of the solar collector loop
+  /// based on the heat losses, insolation, and other constraints.
+  ///
+  /// - Parameters:
+  ///   - collector: The `Collector` instance representing the specific solar
+  ///   collector in the loop.
+  ///   - ambient: The `Temperature` object representing the ambient temperature
+  ///   in the solar field area.
+  ///
+  /// The calculation process involves the following steps:
+  /// 1. Calculate the insolation for the absorber in the collector and determine
+  /// whether it has changed since the last calculation.
+  /// 2. Get the elevation of the parabolic trough collector.
+  /// 3. Calculate the heat that can be absorbed by the Heat Transfer Fluid (HTF)
+  /// per unit mass.
+  /// 4. Calculate the heat losses of the Heat Collector Element (HCE) for the
+  /// maximum outlet temperature.
+  /// 5. Add heat losses of the connecting pipes and apply adjustment factors for
+  /// heat loss.
+  /// 6. Calculate the available heat (delta heat) per square meter of the
+  /// collector area after considering heat losses.
+  /// 7. Determine the appropriate mass flow rate of the HTF based on the
+  /// available heat.
+  /// 8. Check if the calculated mass flow rate falls within acceptable limits
+  /// for the loop operation.
+  /// 9. Depending on the calculated mass flow, update the operation mode of the
+  /// solar collector loop to track the sun, defocus, follow, start up, or
+  /// shutdown.
+  /// 10. Perform additional checks and adjustments related to elevation,
+  /// temperature, and operation mode.
+  /// 11. Update the mass flow rates of all loops (near, far, average) based on
+  /// the calculated header mass flow rate.
+  /// 12. Calculate the outlet temperature of the solar collector loop if the
+  /// mass flow rate is positive.
+  ///
+  /// The method modifies the state of the `SolarField` instance (self) by
+  /// updating the `header.massFlow`, `loops`, `operationMode`, and other
+  /// relevant properties to reflect the calculated values and behaviors of the
+  /// solar collector loop.
   mutating func calculate(collector: Collector, ambient: Temperature) {
     let insolation = collector.insolationAbsorber < collector.lastInsolation
       ? collector.lastInsolation : collector.insolationAbsorber
