@@ -73,27 +73,10 @@ let platformTargets: [Target] = [
     swiftSettings: swift
   ),
   .executableTarget(
-    name: "Optimizer",
-    dependencies: [
-      "Utilities", "SunOl",
-      .product(name: "ArgumentParser", package: "swift-argument-parser"),
-      .product(name: "xlsxwriter", package: "xlsxwriter.swift")
-    ],
-    swiftSettings: swift
-  ),
-  .executableTarget(
     name: "SolarPerformanceCalc",
     dependencies: [
       "BlackBoxModel", "Utilities",
       .product(name: "ArgumentParser", package: "swift-argument-parser"),
-      .product(name: "xlsxwriter", package: "xlsxwriter.swift"),
-    ],
-    swiftSettings: swift
-  ),
-  .target(
-    name: "SunOl",
-    dependencies: [
-      "Utilities", 
       .product(name: "xlsxwriter", package: "xlsxwriter.swift"),
     ],
     swiftSettings: swift
