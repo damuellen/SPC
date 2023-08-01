@@ -39,7 +39,7 @@ swift build -c release
 3. Copy the binary to a location in your PATH.
 
 ```bash
-cp .build/release/spc /usr/local/bin/
+cp .build/release/SPC /usr/local/bin/
 ```
 
 ### Usage
@@ -51,7 +51,7 @@ cp .build/release/spc /usr/local/bin/
 To use SPC, run the following command:
 
 ```bash
-spc [OPTIONS]
+SPC [OPTIONS]
 ```
 
 ### Options
@@ -95,49 +95,49 @@ spc [OPTIONS]
 1. Calculate performance for a specific year with default parameters:
 
 ```bash
-spc -y 2023
+SPC -y 2023
 ```
 
 2. Calculate performance with custom meteofile path, timezone, and output format:
 
 ```bash
-spc -m data/meteo.csv -z 7 --excel
+SPC -m data/meteo.csv -z 7 --excel
 ```
 
 3. Calculate performance with custom location and elevation:
 
 ```bash
-spc --long -115.1739 --lat 36.1146 --ele 550
+SPC --long -115.1739 --lat 36.1146 --ele 550
 ```
 
 4. Calculate performance with custom calculation steps and output values:
 
 ```bash
-spc --stepsCalculation 4 --outputValues 4
+SPC --stepsCalculation 4 --outputValues 4
 ```
 
 5. Output performance data as an SQLite database:
 
 ```bash
-spc --database
+SPC --database
 ```
 
 6. Save model parameters in JSON file format:
 
 ```bash
-spc --json
+SPC --json
 ```
 
 7. Enable verbose mode for a detailed overview of the model parameters:
 
 ```bash
-spc --verbose
+SPC --verbose
 ```
 
 8. Calculate performance and create time series charts with gnuplot:
 
 ```bash
-spc --plot
+SPC --plot
 ```
 
 ## License
