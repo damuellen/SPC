@@ -11,46 +11,62 @@
 import DateExtensions
 import Units
 
-/// A namespace for the main routines of the simulation.
+/**
+ A namespace for the main routines of the simulation.
+
+ The `Plant` struct contains the core functionalities for simulating the behavior of a power plant or energy system. It takes into consideration various factors such as thermal and electrical parasitics, available power, efficiency, and the behavior of different components. The simulation aims to achieve the desired electrical demand while operating within specific constraints.
+
+ The main function of the simulation is performed by the `perform` method. It takes the current status of the power plant or energy system and the ambient temperature as input parameters. The simulation iteratively calculates the behavior of the system until the electrical parasitics converge within a certain tolerance level. The number of iterations is limited to prevent excessive looping.
+
+ The simulation process involves the following steps:
+
+ 1. Calculates the load required to meet the electrical demand based on the provided ambient temperature and the available power of the steam turbine.
+ 2. Calculates the required thermal power to meet the electricity demand.
+ 3. If there is a solar field, calculates the heat supplied by the solar field and updates the power block's mass flow accordingly.
+ 4. Attempts to use the heat exchanger and calculates the outlet temperature of the power block.
+ 5. If there is a storage system, calculates the heat flow rate of the storage.
+ 6. Checks if heating is necessary and performs freeze protection if required.
+ 7. Determines the right temperature for the inlet and outlet of the power block.
+ 8. Calculates heat flows, thermal demands, and efficiency factors.
+ 9. Integrates the boiler if available.
+ 10. Adjusts the steam turbine load based on constraints and updates the efficiency accordingly.
+ 11. Calculates the gross electrical power of the steam turbine.
+ 12. Considers predefined operation restrictions on the fuel strategy if applicable.
+ 13. Calculates the total electrical parasitics of the power block and updates the electrical demand.
+
+ The simulation continues in an iterative manner until the electrical parasitics converge within a certain tolerance level. The tolerance level is influenced by the ambient temperature, and the number of iterations is limited to prevent excessive processing.
+
+ The simulation process is supported by helper functions such as `loadCapacity`, which calculates the load capacity for the steam turbine based on certain conditions, and `powerBlockElectricalParasitics`, which calculates the electrical parasitics of the power block.
+
+ The `determineStorageMode` function is used to determine the storage mode based on certain conditions and constraints. The electricity demand storage strategy is determined by the `demandStorageStrategy` function, which calculates the demand based on the storage strategy defined in the `Storage.parameter`.
+
+ The `integrate` functions are used to integrate various components such as the heater, solar field, power block, steam turbine, and storage system, depending on their operation modes and states. The integration process involves updating the energy flows and performing calculations based on the current status of the system.
+
+ This simulation is designed to efficiently evaluate the behavior of power plants or energy systems, considering various factors and constraints, to achieve the desired electrical demand while optimizing efficiency and minimizing parasitic losses.
+ */
 public struct Plant {
-
+  /// Represents the thermal energy flow in the system.
   var heatFlow = ThermalEnergy()
-
+  /// Represents the electrical power generation and consumption in the system.
   var electricity = ElectricPower()
-
+  /// Tracks the fuel consumption in the system.
   var fuelConsumption = FuelConsumption()
-
+  /// Represents the electrical parasitics in the system.
   var electricalParasitics = Parasitics()
 
   /// Initial state of the simulation
   public static let initialState = Status()
-
+  /// Provides access to the plant's performance
   var performance: PlantPerformance { .init(self) }
 
-  /// The main function to perform the simulation based on the provided status and ambient temperature.
-  ///
-  /// This function is the core of the power plant or energy system simulation. It iteratively simulates the behavior of the system to achieve the desired electrical demand while considering various factors such as thermal and electrical parasitics, available power, efficiency, and the behavior of different components.
+  /// This function is the core of the power plant simulation. It iteratively simulates
+  /// the behavior of the system to achieve the desired electrical demand while
+  /// considering various factors such as thermal and electrical parasitics,
+  /// efficiency, and the behavior of different components.
   ///
   /// - Parameters:
-  ///   - status: The current status of the power plant or energy system, which contains information about various components and their states.
+  ///   - status: The current status of the power plant, which contains information about various components and their states.
   ///   - ambient: The ambient temperature at which the simulation is being performed.
-  ///
-  /// The simulation process involves the following steps:
-  /// 1. Calculates the load required to meet the electrical demand based on the provided ambient temperature and the available power of the steam turbine.
-  /// 2. Calculates the required thermal power to meet the electricity demand.
-  /// 3. If there is a solar field, calculates the heat supplied by the solar field and updates the power block's mass flow accordingly.
-  /// 4. Attempts to use the heat exchanger and calculates the outlet temperature of the power block.
-  /// 5. If there is a storage system, calculates the heat flow rate of the storage.
-  /// 6. Checks if heating is necessary and performs freeze protection if required.
-  /// 7. Determines the right temperature for the inlet and outlet of the power block.
-  /// 8. Calculates heat flows, thermal demands, and efficiency factors.
-  /// 9. Integrates the boiler if available.
-  /// 10. Adjusts the steam turbine load based on constraints and updates the efficiency accordingly.
-  /// 11. Calculates the gross electrical power of the steam turbine.
-  /// 12. Considers predefined operation restrictions on the fuel strategy if applicable.
-  /// 13. Calculates the total electrical parasitics of the power block and updates the electrical demand.
-  ///
-  /// The simulation continues in an iterative manner until the electrical parasitics converge within a certain tolerance level. The number of iterations is limited to prevent excessive looping.
   mutating func perform(_ status: inout Status, ambient: Temperature) {
     /// A helper function to calculate load capacity for the steam turbine based on certain conditions.
     func loadCapacity(steamTurbine: inout SteamTurbine) -> Double? {

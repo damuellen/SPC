@@ -10,15 +10,38 @@
 
 import Helpers
 
+ /// A struct representing parameters related to a specific fuel used in an power plant.
 public struct FuelParameter: Codable {
+  /// The name of the fuel.
   let name: String
+  /// The measurement unit for the fuel's properties.
   let measurementUnit: String
-  let LHV, price, density, part, FERCeff, usedAmount, Qsol: Double
+  /// The lower heat value of the fuel in kilowatt-hours per kilogram (kWh/kg).
+  let LHV: Double
+  /// The price of the fuel in currency per unit.
+  let price: Double
+  /// The density of the fuel in kilograms per cubic meter (kg/m³).
+  let density: Double
+  /// The allowed fuel share (currently not used).
+  let part: Double
+  /// The fuel efficiency assumed by authorities as a percentage (currently not used).
+  let FERCeff: Double
+  /// The fuel amount already used in megawatt-hours (MWh) (currently not used).
+  let usedAmount: Double
+  /// The solar energy already produced in megawatt-hours (MWh) (currently not used).
+  let Qsol: Double
 }
 
 extension FuelParameter {
+  /// Initializes the `FuelParameter` instance from a text configuration file (`TextConfigFile`).
+  ///
+  /// - Parameter file: The `TextConfigFile` containing fuel parameter information.
+  /// - Throws: An error if there is an issue reading or parsing the fuel parameter data from the file.
   public init(file: TextConfigFile) throws {
+    // Helper function to read a double value from the specified line number in the file
     let ln: (Int) throws -> Double = { try file.readDouble(lineNumber: $0) }
+
+    // Read the fuel parameter values from specific lines in the file and assign them to the corresponding properties
     self.name = file.name
     self.measurementUnit = file.lines[9]
     self.LHV = try ln(13)
@@ -32,6 +55,7 @@ extension FuelParameter {
 }
 
 extension FuelParameter: CustomStringConvertible {
+  /// A string representation of the `FuelParameter` instance.
   public var description: String {
     "Name :" * name
     + "Unit :" * measurementUnit.description

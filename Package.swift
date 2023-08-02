@@ -13,7 +13,6 @@ let platformProducts: [Product] =  [
   .executable(name: "SPC", targets: ["SolarPerformanceCalc"]),
   .executable(name: "PinchPointTool", targets: ["PinchPointTool"]),
   .executable(name: "Playground", targets: ["Playground"]),
-  .executable(name: "Optimizer", targets: ["Optimizer"]),
 ]
 
 let dependencies: [Package.Dependency] = [
@@ -83,7 +82,6 @@ let platformTargets: [Target] = [
     name: "MeteoTests",
     dependencies: ["Utilities", "DateExtensions", "SolarPosition", "Meteo"]
   ),
-  .testTarget(name: "SunOlTests", dependencies: ["SunOl"]),
   .testTarget(name: "ThermalStorageTests", dependencies: ["ThermalStorage"]),
   .testTarget(name: "PinchPointTests", dependencies: ["PinchPoint"]),
   .testTarget(

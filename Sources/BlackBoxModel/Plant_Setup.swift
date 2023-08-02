@@ -11,20 +11,6 @@
 import Utilities
 
 extension Plant {
-  /// Returns a string containing descriptions of the fixed parameters for each component of the plant.
-  ///
-  /// - Returns: A string containing descriptions of fixed parameters for each component.
-  static var parameterDescriptions: String {
-    decorated("Fixed Parameter")
-    + "HEAT TRANSFER FLUID\n\n\(SolarField.parameter.HTF)\n\n"
-    + "HEATER\n\n\(Heater.parameter)\n"
-    + "HEAT EXCHANGER\n\n\(HeatExchanger.parameter)\n"
-    + "STEAM TURBINE\n\n\(SteamTurbine.parameter)\n"
-    + "STORAGE\n\n\(Storage.parameter)\n"
-    + "SOLAR FIELD\n\n\(SolarField.parameter)\n"
-    + "COLLECTOR\n\n\(Collector.parameter)\n"
-  }
-
   /// Sets up the parameters for the plant components.
   ///
   /// This function is responsible for initializing and configuring the parameters of various plant components in the power plant or energy system. It ensures that the components are set up properly with appropriate values for their maximum power, mass flow rates, and other relevant parameters. Once the setup is complete, it returns an instance of the `Plant` class, representing the power plant with all its configured components.
@@ -91,5 +77,19 @@ extension Plant {
       }
     }
     return Plant()
+  }
+
+  /// Returns a string containing descriptions of the fixed parameters for each component of the plant.
+  ///
+  /// - Returns: A string containing descriptions of fixed parameters for each component.
+  static var parameterDescriptions: String {
+    decorated("Fixed Parameter")
+    + "HEAT TRANSFER FLUID\n\n\(SolarField.parameter.HTF)\n\n"
+    + "HEATER\n\n\(Heater.parameter)\n"
+    + "HEAT EXCHANGER\n\n\(HeatExchanger.parameter)\n"
+    + "STEAM TURBINE\n\n\(SteamTurbine.parameter)\n"
+    + "STORAGE\n\n\(Storage.parameter)\n"
+    + "SOLAR FIELD\n\n\(SolarField.parameter)\n"
+    + "COLLECTOR\n\n\(Collector.parameter)\n"
   }
 }

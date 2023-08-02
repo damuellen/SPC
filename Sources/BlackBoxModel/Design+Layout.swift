@@ -10,61 +10,80 @@
 
 import Helpers
 
-/// Design of the plant
+/// The enum contains static properties that indicate whether the plant's design includes specific components.
+/// These properties are based on the `Layout` instance created in the enum.
+/// The properties represent the presence or absence of a solar field, heater, boiler, gas turbine, and thermal storage in the plant's design.
 public enum Design {
+  /// The layout of the plant.
   public static var layout: Layout = Layout()
-  /// The design has a solar field 
+
+  /// A boolean indicating whether the plant design includes a solar field.
   static let hasSolarField = layout.solarField > 0
-  /// The design has a heater
+
+  /// A boolean indicating whether the plant design includes a heater.
   static let hasHeater = layout.heater > 0
-  /// The design has a boiler
+
+  /// A boolean indicating whether the plant design includes a boiler.
   static let hasBoiler = layout.boiler > 0
-  /// The design has a gas turbine
+
+  /// A boolean indicating whether the plant design includes a gas turbine.
   static let hasGasTurbine = layout.gasTurbine > 0
-  /// The design has a thermal storage
+
+  /// A boolean indicating whether the plant design includes thermal storage.
   static let hasStorage = max(layout.storageHours, layout.storageCapacity, layout.storageTonnage) > 0
 }
 
 /// Layout of the plant
 public struct Layout: Codable, Equatable, Hashable, CustomStringConvertible {
-  /// Number of loops in solar field 
+  /// Number of loops in the solar field.
   public var solarField = 148.0
-  /// Thermal power of the heater
+
+  /// Thermal power of the heater.
   public var heater = 10.0
-  /// Thermal power of the heatexchanger
+
+  /// Thermal power of the heat exchanger.
   public var heatExchanger = 75.0
-  /// Thermal power of the boiler
+
+  /// Thermal power of the boiler.
   public var boiler = 0.0
-  /// Thermal power of the gas turbine
+
+  /// Thermal power of the gas turbine.
   public var gasTurbine = 0.0
-  /// Thermal power of the power block
+
+  /// Thermal power of the power block.
   public var powerBlock = 70.0
-  /// Storage capacity in hours
+
+  /// Storage capacity in hours.
   public var storageHours = 5.0
-  /// Storage capacity in energy
+
+  /// Storage capacity in energy.
   public var storageCapacity = 0.0
-  /// Storage capacity in mass
+
+  /// Storage capacity in mass.
   public var storageTonnage = 0.0
-  
+
+  /// A string representation of the `Layout` instance.
   public var description: String {
     "Layout|SolarField " * "\(Int(solarField)) loops"
     + "Layout|Heater " * "\(Int(-heater)) MW"
     + "Layout|HeatExchanger " * "\(Int(heatExchanger)) MW"
-//  + "Layout|Boiler " * "\(Int(boiler)) MW"
-//  + "Layout|GasTurbine " * "\(Int(gasTurbine)) MW"
     + "Layout|PowerBlock " * "\(Int(powerBlock)) MW"
     + "Layout|Storage " * "\(Int(storageHours)) h"
-//  + "Layout|Storage_cap " * "\(Int(storageCapacity)) MWh"
-//  + "Layout|Storage_ton " * "\(Int(storageTonnage)) t"
   }
 }
 
 extension Layout: TextConfigInitializable {
+  /// Initializes the `Layout` instance from a text configuration file (`TextConfigFile`).
+  ///
+  /// - Parameter file: The `TextConfigFile` containing layout information.
+  /// - Throws: An error if there is an issue reading or parsing the layout data from the file.
   public init(file: TextConfigFile) throws {
+    // Extract values from the file and store them in an array
     let values: [String] = file.lines.filter { !$0.isEmpty }.map { value in
       String(value.prefix(while: {!$0.isWhitespace})) 
     }
 
+    // Iterate through the values and assign them to the corresponding properties
     for (count, value) in zip(1..., values) {
       if count == 9, let definition = Storage.Definition(rawValue: value) {
         Storage.parameter.definedBy = definition
@@ -84,7 +103,7 @@ extension Layout: TextConfigInitializable {
       case 10: self.storageCapacity = value
       case 11: self.storageTonnage = value
       case 12: break // Through
-      default: throw TextConfigFile.ReadError.unexpectedEndOfFile(count,"")
+      default: throw TextConfigFile.ReadError.unexpectedEndOfFile(count, "")
       }
     }
   }
