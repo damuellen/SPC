@@ -18,6 +18,7 @@ import xlsxwriter
 //system("clear")
 PinchPointTool.main()
 
+/// Command-line tool for calculating pinchpoint.
 struct PinchPointTool: ParsableCommand {
 
   @Argument(help: "")

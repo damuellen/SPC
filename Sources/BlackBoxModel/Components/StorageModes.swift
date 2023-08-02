@@ -8,7 +8,7 @@
 import Units
 
 extension Storage {
-
+  /// The operation mode options for the storage systen
   public enum OperationMode {
     case noOperation, discharge(load: Ratio), charge(load: Ratio)
     case preheat, fossilCharge, freezeProtection

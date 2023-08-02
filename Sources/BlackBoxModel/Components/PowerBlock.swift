@@ -23,7 +23,7 @@ public struct PowerBlock: Parameterizable, HeatTransfer {
   public internal(set) var massFlow: MassFlow = .zero
 
   public internal(set) var temperature: (inlet: Temperature, outlet: Temperature)
-
+  /// The operation mode options for the power block
   public enum OperationMode {
     case scheduledMaintenance
   }

@@ -62,14 +62,14 @@ extension HeatTransferFluid {
   }
 }
 
-// Protocol for representing a heat transfer process with a name, mass flow, and temperature.
+/// Protocol for representing a heat transfer process with a name, mass flow, and temperature.
 protocol HeatTransfer: CustomStringConvertible {
   var name: String { get }
   var massFlow: MassFlow { get set }
   var temperature: (inlet: Temperature, outlet: Temperature) { get set }
 }
 
-// Struct representing a heat transfer cycle with mass flow and temperature properties.
+/// A struct representing a heat transfer cycle with mass flow and temperature properties.
 public struct Cycle: HeatTransfer {
   public var name: String
   public var massFlow: MassFlow

@@ -14,8 +14,10 @@ import Meteo
 import SolarPosition
 import Utilities
 
+/// A namespace representing a black box model for a solar power plant simulation.
 public enum BlackBoxModel {
 
+  /// The year for which the simulation is configured.
   public private(set) static var simulatedYear = 2001
   /// The apparent solar position based on date, time, and location.
   public private(set) static var sun: SolarPosition?
@@ -25,6 +27,8 @@ public enum BlackBoxModel {
   // MARK: - Configuration Functions
   
   /// Configure the simulation for a specific year.
+  ///
+  /// - Parameter year: The year for which the simulation should be configured.
   public static func configure(year: Int) {
     simulatedYear = year
 
@@ -45,7 +49,9 @@ public enum BlackBoxModel {
     }
   }
 
-    /// Configure the simulation for a specific location.
+  /// Configure the simulation for a specific location.
+  ///
+  /// - Parameter location: The `Location` object representing the location for the simulation.
   public static func configure(location: Location) {
     // If the solar position has already been calculated for the same location, return early.
     if let sun = sun, sun.location == location { return }
@@ -62,6 +68,9 @@ public enum BlackBoxModel {
   }
 
   /// Configure the simulation using meteo data from a file.
+  ///
+  /// - Parameter meteoFilePath: The file path for the meteo data file. If nil, it searches the current directory.
+  /// - Throws: An error if there's an issue with reading the meteo data file.
   public static func configure(meteoFilePath: String? = nil) throws {
     let path = meteoFilePath ?? FileManager.default.currentDirectoryPath
     // Search for the meteo data file.
@@ -84,6 +93,10 @@ public enum BlackBoxModel {
   }
 
   /// Load configuration from a JSON or text configuration file.
+  ///
+  /// - Parameter path: The path to the configuration file.
+  /// - Returns: The path to the meteo data file if available.
+  /// - Throws: An error if there's an issue with reading the configuration file.
   public static func loadConfiguration(atPath path: String) throws -> String? {
     let url = URL(fileURLWithPath: path)
     if url.hasDirectoryPath {
@@ -244,6 +257,8 @@ public enum BlackBoxModel {
   // MARK: - Helper Functions
 
   /// Diagnose the availability of direct and global insolation in the meteoData.
+  ///
+  /// - Returns: A tuple indicating if direct and global insolation are available.
   private static func meteoDataDiagnose() -> (direct: Bool, global: Bool)? {
     // Check the first 12 hours of the year for insolation
     let am = meteoData.prefix(meteoData.count / 730)

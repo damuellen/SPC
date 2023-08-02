@@ -10,17 +10,17 @@
 
 import Foundation
 
-// A protocol that allows types to be initialized from a TextConfigFile.
+/// A protocol that allows types to be initialized from a TextConfigFile.
 public protocol TextConfigInitializable {
   init(file: TextConfigFile) throws
 }
 
-// A struct representing a configuration file with lines of text and associated functionality.
+/// A struct representing a configuration file with lines of text and associated functionality.
 public struct TextConfigFile {
-  // The lines of text in the configuration file.
+  /// The lines of text in the configuration file.
   public var lines: [String]
 
-  // Computed property to get the name of the configuration file.
+  /// Computed property to get the name of the configuration file.
   public var name: String {
     if lines.count > 6, !lines[6].isEmpty {
       return lines[6]
@@ -31,13 +31,13 @@ public struct TextConfigFile {
   /// The URL of the configuration file.
   public let url: URL
   
-  // Initializes a TextConfigFile instance from the contents of a URL.
+  /// Initializes a TextConfigFile instance from the contents of a URL.
   public init(url: URL) throws {
     let content = try String(contentsOf: url, encoding: .windowsCP1252)
     self = .init(content: content, url: url)
   }
 
-  // Initializes a TextConfigFile instance from the given content and URL.
+  /// Initializes a TextConfigFile instance from the given content and URL.
   init(content: String, url: URL) {
     self.url = url
     // Determine the line separator used in the content (either "\r\n" or "\n").

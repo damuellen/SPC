@@ -586,9 +586,12 @@ public enum Atmosphere {
   ) -> Double { return -log(aod1 / aod2) / log(lambda1 / lambda2) }
 }
 
+/// A type representing an angle.
 typealias Angle = Double
 
 extension Angle {
+  /// Converts the angle from degrees to radians.
   public var toRadians: Double { self * .pi / 180 }
+  /// Converts the angle from radians to degrees.
   public var toDegrees: Double { self * (180 / .pi) }
 }

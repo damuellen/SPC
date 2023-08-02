@@ -28,6 +28,9 @@ public class MeteoDataFileHandler {
   private let file: MeteoDataFile
 
   /// Initializes the MeteoDataFileHandler for reading data from the file at the given path.
+  ///
+  /// - Parameter path: The file path to read meteorological data from.
+  /// - Throws: An error if the file is not found or there's an issue with reading it.
   public init(forReadingAtPath path: String) throws {
 
     // Check if the file exists at the specified path.
@@ -54,12 +57,19 @@ public class MeteoDataFileHandler {
     self.file = try url.pathExtension == "mto" ? MET(url) : TMY(url)
   }
 
-  // Retrieve metadata from the meteorological data file.
+  /// Retrieve metadata from the meteorological data file.
+  ///
+  /// - Returns: A tuple containing the year and location information.
+  /// - Throws: An error if there's an issue with fetching the metadata.
   public func metadata() throws -> (year: Int, location: Location)  { 
     try file.fetchInfo()
   }
 
   /// Retrieve meteorological data values with the specified number of values per hour.
+  ///
+  /// - Parameter valuesPerHour: The number of values required per hour for interpolation.
+  /// - Returns: An array of `MeteoData` containing the meteorological data.
+  /// - Throws: An error if there's an issue with fetching the data.
   public func data(valuesPerHour: Int) throws -> [MeteoData] {
     // Fetch raw data from the meteorological data file.
     let data = try file.fetchData()
@@ -95,9 +105,21 @@ public enum MeteoDataFileError: Error {
   case unexpectedRowCount, empty, unknownLocation, unknownDelimeter, missingHeaders
 }
 
+/// A protocol representing a meteorological data file.
 protocol MeteoDataFile {
+  /// The name of the meteorological data file.
   var name: String { get }
+  
+  /// Fetches metadata from the meteorological data file.
+  ///
+  /// - Returns: A tuple containing the year and location information.
+  /// - Throws: An error if there's an issue with fetching the metadata.
   func fetchInfo() throws -> (year: Int, location: Location)
+  
+  /// Fetches meteorological data from the file.
+  ///
+  /// - Returns: An array of `MeteoData` containing the meteorological data.
+  /// - Throws: An error if there's an issue with fetching the data.
   func fetchData() throws -> [MeteoData]
 }
 

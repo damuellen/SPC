@@ -40,7 +40,7 @@ extension SolarField.OperationMode: CustomStringConvertible {
 
 /// A struct representing the state and functions for mapping the solar field
 public struct SolarField: Parameterizable, HeatTransfer {
-
+  /// The name of the solar field.
   public let name = "Solar field"
 
   public enum Loop: Int {
@@ -92,7 +92,7 @@ public struct SolarField: Parameterizable, HeatTransfer {
   )
 
   var requiredMassFlow: MassFlow = .zero
-
+  /// The operation mode options for the solar field
   public enum OperationMode {
     case startUp
     case shutdown
@@ -102,7 +102,7 @@ public struct SolarField: Parameterizable, HeatTransfer {
     case stow
     case freeze(Double)
     case maintenance
-
+    /// A computed property that determines if the operation mode is freeze protection.
     var isFreezeProtection: Bool {
       if case .freeze = self { return true }
       return false
@@ -116,7 +116,13 @@ public struct SolarField: Parameterizable, HeatTransfer {
   )
   /// The static parameters for the `SolarField`.
   public static var parameter: Parameter = Parameters.sf
-
+  /// Calculates the required mass flow rate of the solar field based on the state of the storage.
+  ///
+  /// The required mass flow rate is determined based on the relative charge of the storage.
+  /// If the storage has a relative charge below the specified charge threshold, an additional
+  /// mass flow is added to the required mass flow to ensure proper charging.
+  ///
+  /// - Parameter storage: The `Storage` instance representing the energy storage system.
   mutating func requiredMassFlow(from storage: Storage) {
     if storage.relativeCharge < Storage.parameter.chargeTo {
       requiredMassFlow += MassFlow(
@@ -152,6 +158,7 @@ public struct SolarField: Parameterizable, HeatTransfer {
     }
   }
 
+  /// Calculates the efficiency (η) of the solar collector loop.
   mutating func eta(collector: Collector) {
     if collector.insolationAbsorber > .zero {
       loopEta = collector.efficiency - heatLossesHCE
@@ -179,6 +186,12 @@ public struct SolarField: Parameterizable, HeatTransfer {
     }
   }
 
+  /// Calculates the imbalance of mass flow rates in the solar collector loops.
+  ///
+  /// The imbalance is calculated based on the design parameters and minimum values provided in the `SolarField.parameter` struct.
+  ///
+  /// - Parameter massFlow: The current mass flow rate in the header of the solar field.
+  /// - Returns: An array of `MassFlow` representing the adjusted mass flow rates for each loop in the solar collector system.
   private func imbalanceLoops(massFlow: MassFlow) -> [MassFlow] {
     let maxMassFlow = SolarField.parameter.maxMassFlow
     let design = SolarField.parameter.imbalanceDesign
@@ -192,6 +205,11 @@ public struct SolarField: Parameterizable, HeatTransfer {
     }
   }
 
+  /// Calculates the time ratios for linear interpolation of the outlet temperature.
+  ///
+  /// The time ratios are calculated based on the time remaining in the simulation step and the loop way lengths.
+  ///
+  /// - Returns: An array of tuples containing the time ratios and their complementary ratios for each loop.
   private func ratios()  -> [(Double, Double)] {
     let timeRemain = Simulation.time.steps.interval
     let maxMassFlow = SolarField.parameter.maxMassFlow.rate
@@ -213,46 +231,27 @@ public struct SolarField: Parameterizable, HeatTransfer {
     }
   }
 
-  /// Calculates the outlet temperature gradient in the solar collector loop.
-  ///
-  /// This private method is responsible for computing the outlet temperature
-  /// gradient across the solar collector loop based on various parameters and
-  /// conditions. The function uses the provided `last` cycle and the time since
-  /// the last calculation to determine the current temperature distribution in
-  /// the loop.
-  ///
-  /// - Parameters:
-  ///   - last: An array containing the temperature information from the last
-  ///   cycle for each loop in the solar collector system. The array holds the
-  ///   temperature data for the `Loop` instances.
-  ///   - time: The time since the last calculation in the simulation.
-  ///
-  /// The calculation process involves the following steps:
-  /// 1. Retrieve the relevant parameters from the `SolarField` instance,
-  /// including the maximum mass flow rate, pipe way length, and loop way lengths.
-  /// 2. Calculate the flow velocity of the Heat Transfer Fluid (HTF) in the
-  /// solar collector loop.
-  /// 3. Calculate the ratios for the time-based linear interpolation for the
-  /// outlet temperature using the provided time (`time`) and loop way length.
-  /// 4. Determine if the current time falls within the time range that allows
-  /// for linear interpolation of the outlet temperature. If yes, perform the
-  /// interpolation and update the outlet temperature for all loops accordingly.
-  /// 5. Calculate the linear inlet temperature gradient for each loop based on
-  /// the way ratio between adjacent loops and the pipe way length.
-  /// 6. Calculate the average inlet temperature for each loop using the linear
-  /// interpolation between the inlet temperature of the current cycle (`inlet`)
-  /// and the inlet temperature from the `last` cycle.
-  /// 7. Calculate the outlet temperature of the header using the average
-  /// temperatures and flow rates of all loops.
-  /// 8. Update the outlet temperature of the header and the inlet temperatures
-  /// of each loop in the `SolarField` instance (self) based on the calculated
-  /// temperature gradients and interpolation.
-  ///
-  /// The method modifies the state of the `SolarField` instance (self) by
-  /// updating the `header.temperature.outlet` and `loops.temperature.inlet`
-  /// properties with the calculated temperature values. It also relies on the
-  /// information from the previous cycle (`last`) to perform the interpolation
-  /// calculations.
+  /**
+   Calculates the outlet temperature gradient in the solar collector loop.
+   
+   This private method is responsible for computing the outlet temperature gradient across the solar collector loop based on various parameters and conditions. The function uses the provided `last` cycle and the time since the last calculation to determine the current temperature distribution in the loop.
+   
+   - Parameters:
+     - last: An array containing the temperature information from the last cycle for each loop in the solar collector system. The array holds the temperature data for the `Loop` instances.
+     - time: The time since the last calculation in the simulation.
+   
+   The calculation process involves the following steps:
+   1. Retrieve the relevant parameters from the `SolarField` instance, including the maximum mass flow rate, pipe way length, and loop way lengths.
+   2. Calculate the flow velocity of the Heat Transfer Fluid (HTF) in the solar collector loop.
+   3. Calculate the ratios for the time-based linear interpolation for the outlet temperature using the provided time (`time`) and loop way length.
+   4. Determine if the current time falls within the time range that allows for linear interpolation of the outlet temperature. If yes, perform the interpolation and update the outlet temperature for all loops accordingly.
+   5. Calculate the linear inlet temperature gradient for each loop based on the way ratio between adjacent loops and the pipe way length.
+   6. Calculate the average inlet temperature for each loop using the linear interpolation between the inlet temperature of the current cycle (`inlet`) and the inlet temperature from the `last` cycle.
+   7. Calculate the outlet temperature of the header using the average temperatures and flow rates of all loops.
+   8. Update the outlet temperature of the header and the inlet temperatures of each loop in the `SolarField` instance (self) based on the calculated temperature gradients and interpolation.
+   
+   The method modifies the state of the `SolarField` instance (self) by updating the `header.temperature.outlet` and `loops.temperature.inlet` properties with the calculated temperature values. It also relies on the information from the previous cycle (`last`) to perform the interpolation calculations.
+   */
   private mutating func outletTemperature(last: [Cycle], _ time: Double) {
     let maxMassFlow = SolarField.parameter.maxMassFlow.rate
     let pipeWay = SolarField.parameter.pipeWay

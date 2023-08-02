@@ -23,7 +23,7 @@ public struct Boiler: Parameterizable {
 
   var startEnergy: Double
   // var startEnergyOld: Double
-
+  /// The operation mode options for the boiler
   public enum OperationMode {
 
     case noOperation(hours: Double)

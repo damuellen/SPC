@@ -10,6 +10,7 @@
 
 import Units
 
+/// A enum representing the functions for mapping the `WasteHeatRecovery`
 public enum WasteHeatRecovery: Parameterizable {
   /// A struct representing the heater component with state and functions for mapping the waste heat recovery
   public struct PerformanceData {

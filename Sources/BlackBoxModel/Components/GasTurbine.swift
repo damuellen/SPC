@@ -28,7 +28,7 @@ public struct GasTurbine: Parameterizable {
   var isMaintained: Bool
   /// Returns the load applied
   public internal(set) var load: Ratio
-
+  /// The operation mode options for the gas turbine
   public enum OperationMode: String {
     case free, load, integrated, pure, noOperation, scheduledMaintenance
   }

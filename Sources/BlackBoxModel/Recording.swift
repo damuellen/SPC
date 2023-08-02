@@ -12,54 +12,56 @@ import Foundation
 import Meteo
 import DateExtensions
 
+/// Represents the recording of solar power plant performance data.
 public struct Recording: CustomStringConvertible, Comparable {
-  // The design parameter used for the recording.
+  /// The design parameter used for the recording.
   let designParameter = Parameters()
 
-  // The overall performance of the solar power plant.
+  /// The overall performance of the solar power plant.
   let performance: PlantPerformance
 
-  // The irradiance data for the recording.
+  /// The irradiance data for the recording.
   let irradiance: Insolation
 
-  // The history of plant performance data.
+  /// The history of plant performance data.
   let performanceHistory: [PlantPerformance]
 
-  // The history of status data.
+  /// The history of status data.
   let statusHistory: [Status]
 
-  // The solar field layout defined by the design parameters.
+  /// The solar field layout defined by the design parameters.
   public var layout: Layout { designParameter.layout }
 
-  // The thermal energy data from the plant performance.
+  /// The thermal energy data from the plant performance.
   public var thermal: ThermalEnergy { performance.thermal }
 
-  // The electric power data from the plant performance.
+  /// The electric power data from the plant performance.
   public var electric: ElectricPower { performance.electric }
 
-  // The fitness value, representing the efficiency of the solar field layout.
+  /// The fitness value, representing the efficiency of the solar field layout.
   public var fitness: Double { layout.solarField / electric.net }
 
-  // Compare two `Recording` instances based on their fitness values.
+  /// Compare two `Recording` instances based on their fitness values.
   public static func < (lhs: Recording, rhs: Recording) -> Bool {
     lhs.fitness < rhs.fitness
   }
 
-  // Check if two `Recording` instances are equal based on their fitness values.
+  /// Check if two `Recording` instances are equal based on their fitness values.
   public static func == (lhs: Recording, rhs: Recording) -> Bool {
     lhs.fitness == rhs.fitness
   }
 
-  // A textual representation of the `Recording`.
+  /// A textual representation of the `Recording`.
   public var description: String { report() }
 
-  // The time interval for each recording step.
+  /// The time interval for each recording step.
   private let interval = Simulation.time.steps
 
-  // The start date of the recording.
+  /// The start date of the recording.
   private let startDate: Date
 
-  // Print the annual results for the recording.
+  /// Print the annual results for the recording.
+  /// - Parameter verbose: If true, print the design parameters.
   public func print(verbose: Bool) {
     // Print an empty line for spacing.
     Swift.print("")
@@ -73,7 +75,12 @@ public struct Recording: CustomStringConvertible, Comparable {
     if verbose { Swift.print(designParameter) }
   }
 
-  // Initialize the `Recording` instance with given parameters.
+  /// Initialize the `Recording` instance with given parameters.
+  /// - Parameters:
+  ///   - startDate: The start date of the recording.
+  ///   - irradiance: The irradiance data for the recording.
+  ///   - performanceHistory: The history of plant performance data.
+  ///   - statusHistory: The history of status data.
   init(
     startDate: Date,
     irradiance: Insolation,
@@ -101,6 +108,10 @@ public struct Recording: CustomStringConvertible, Comparable {
   }
 
   /// Access the performance data within a given date interval using a keypath.
+  /// - Parameters:
+  ///   - performance: The keypath to access performance data.
+  ///   - interval: The date interval for data extraction.
+  /// - Returns: An array of `Double` values representing the extracted data.
   subscript(
     performance keyPath: KeyPath<PlantPerformance, Double>, interval: DateInterval
   ) -> [Double] {
@@ -113,6 +124,10 @@ public struct Recording: CustomStringConvertible, Comparable {
   }
 
   /// Access the status data within a given date interval using a keypath.
+  /// - Parameters:
+  ///   - status: The keypath to access status data.
+  ///   - interval: The date interval for data extraction.
+  /// - Returns: An array of `Double` values representing the extracted data.
   subscript(
     status keyPath: KeyPath<Status, Double>, interval: DateInterval
   ) -> [Double] {

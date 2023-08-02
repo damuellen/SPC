@@ -48,7 +48,7 @@ public struct SteamTurbine: Parameterizable {
   }
 
   public internal(set) var efficiency: Ratio = .zero
-
+  /// The operation mode options for the steam turbine
   public enum OperationMode {
     case noOperation(time: Int)
     case startUp(time: Int, energy: Double)
@@ -62,7 +62,7 @@ public struct SteamTurbine: Parameterizable {
     default: return false
     }
   }
-
+  /// Creates a `SteamTurbine` instance with the fixed initial state.
   static let initialState = SteamTurbine(operationMode: .noOperation(time: 0))
 
   public static var parameter: Parameter = Parameters.tb

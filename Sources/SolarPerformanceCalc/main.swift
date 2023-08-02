@@ -49,6 +49,7 @@ struct LocationInfo: ParsableArguments {
   }
 }
 
+/// Command-line tool for calculating solar performance.
 struct SolarPerformanceCalculator: ParsableCommand {
 
 #if os(Windows)
@@ -85,6 +86,7 @@ struct SolarPerformanceCalculator: ParsableCommand {
   @Flag(help: "Use result to create time series charts with gnuplot.")
   var plot: Bool = false
 
+  /// Main function to run the solar performance calculator.
   func run() throws {
     let now = Date()
     let name = "Solar Performance Calculator"
@@ -166,6 +168,7 @@ struct SolarPerformanceCalculator: ParsableCommand {
     abstract: "Calculates the annual production of a solar thermal power plant."
   )
 
+  /// Function to plot time series charts using gnuplot.
   func plotter(_ result: Recording) {
     let interrupt = DispatchSource.interrupt()
     terminalHideCursor()
@@ -196,6 +199,7 @@ struct SolarPerformanceCalculator: ParsableCommand {
 }
 
 extension DispatchSource {
+  /// Create and configure a DispatchSource for handling SIGINT (interrupt signal).
   static func interrupt() -> DispatchSourceSignal {
     let sig = DispatchSource.makeSignalSource(signal: SIGINT, queue: .global())
     signal(SIGINT, SIG_IGN)

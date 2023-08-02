@@ -1129,6 +1129,25 @@ extension Double {
   static func **= (lhs: inout Double, rhs: Double) { lhs = lhs ** rhs }
 }
 
+/// Find the value within a given range that satisfies a goal using the bisection method.
+///
+/// - Parameters:
+///   - goal: The target value that the function output should satisfy.
+///   - range: The closed range within which to search for the value (default is 0...1).
+///   - tolerance: The acceptable tolerance level for the difference between the function
+///     value at the midpoint and the goal (default is 0.0001).
+///   - maxIterations: The maximum number of iterations allowed to find the solution
+///     (default is 100).
+///   - f: The function for which the goal is sought. It takes a `Double` argument and
+///     returns a `Double` result.
+/// - Returns: The value within the specified range that satisfies the given goal. If no
+///   such value is found within the provided range and tolerance, it returns `Double.nan`.
+///
+/// The `seek` function utilizes the bisection method to find the value within a specified
+/// range that satisfies the given goal. The method iteratively narrows down the range by
+/// halving it based on the function values at the endpoints and the midpoint. The goal is
+/// considered to be met when the function value at the midpoint is equal to the desired goal,
+/// or when the range has been narrowed down to the specified tolerance.
 func seek(
   goal: Double, _ range: ClosedRange<Double> = 0...1,
   tolerance: Double = 0.0001, maxIterations: Int = 100, _ f: (Double) -> Double
