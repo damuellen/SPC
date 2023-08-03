@@ -1,9 +1,7 @@
+// SPDX-License-Identifier: Apache-2.0
 //
-//  StorageModes.swift
-//  BlackBoxModel
-//
-//  Created by Daniel Müllenborn on 04.02.19.
-//
+// (C) Copyright 2016 - 2023
+// Daniel Müllenborn, TSK Flagsol Engineering
 
 import Units
 
