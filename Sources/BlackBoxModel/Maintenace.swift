@@ -6,9 +6,15 @@
 import DateExtensions
 import Foundation
 
+/// A public enum representing maintenance schedules for a solar power plant.
 public enum Maintenance {
+
+  /// An array of date intervals representing maintenance ranges.
   static var ranges: [DateInterval] = []
 
+  /// Sets the default maintenance schedule for a given year.
+  ///
+  /// - Parameter year: The year for which to set the maintenance schedule.
   public static func setDefaultSchedule(for year: Int) {
     let calendar = Calendar(identifier: .gregorian)
     let components = DateComponents(
@@ -18,9 +24,14 @@ public enum Maintenance {
     // let end = calendar.date(byAdding: .day, value: 5, to: start)!
     ranges = [DateInterval(start: start, end: start + 1)]
   }
-  /// Is used to check if a given date falls within any of the maintenance schedules.
+
+  /// Checks if a given date falls within any of the maintenance schedules.
+  ///
+  /// - Parameter date: The date to check for maintenance.
+  /// - Returns: A boolean value indicating if maintenance is scheduled for the given date.
   @discardableResult
   static func checkSchedule(_ date: Date) -> Bool {
     return ranges.reduce(false) { $0 || $1.contains(date) }
   }
 }
+

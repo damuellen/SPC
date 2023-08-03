@@ -6,6 +6,7 @@
 import Units
 import Utilities
 
+/// An extension providing default parameter values for different components of a solar power plant.
 extension Parameters {
 
   static let hx = HeatExchanger.Parameter(

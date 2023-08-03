@@ -23,13 +23,21 @@ struct Availability: Codable {
 
   /// A nested struct representing the availability values for different components of the power plant.
   struct Values: Codable {
+    /// Availability percentage for the solar field.
     var solarField: Ratio = 0.993
+    /// Availability percentage for the broken HCE (Heat Collection Element).
     var breakHCE: Ratio = 0.001
+    /// Availability percentage for the HCE with lost vacuum.
     var airHCE: Ratio = 0.0
+    /// Availability percentage for the fluorescent HCE.
     var fluorHCE: Ratio = 0.0
+    /// Availability percentage for the mirror reflectivity.
     var reflMirror: Ratio = 0.93
+    /// Availability percentage for the mirrors with missing or damaged glass.
     var missgMirror: Ratio = 0.0005
+    /// Availability percentage for the power block, including turbines and generators.
     var powerBlock: Ratio = 1.0
+    /// Availability percentage for the energy storage system.
     var storage: Ratio = 1.0
   }
 
