@@ -6,8 +6,12 @@
 import DateExtensions
 import Utilities
 
+/// Represents the performance report of a simulation.
 extension Recording {
-  func scientificForm(_ value: Double) -> String { String(format: "%G", value) }
+    
+  /// Generates a formatted performance report for the simulation.
+  ///
+  /// - Returns: The formatted performance report as a string.
   func report() -> String {
     let solarField = designParameter.solarField
     let gasTurbine = designParameter.gasTurbine
@@ -20,13 +24,13 @@ extension Recording {
       + "\nSOLAR FIELD\n"
       + "    No of Loops:" * layout.solarField.description
       + "    Collector Type:" * collector.name.description
-      + "    Aperture [m²]:" * scientificForm(aperture)
-      + "    Massflow [kg/s]:" * scientificForm(solarField.maxMassFlow.rate)
+      + "    Aperture [m²]:" * aperture.scientificFormatted
+      + "    Massflow [kg/s]:" * solarField.maxMassFlow.rate.scientificFormatted
       + "    Elevation [ø]:  " + "\(solarField.elevation)\t Azimut [ø]:  "
       + "\(solarField.azimut)\n"
       + "\nSTORAGE\n"
       + "    Capacity [MWH,th]:"
-      * scientificForm(layout.storageHours * steamTurbine.power.max / steamTurbine.efficiencyNominal)
+      * (layout.storageHours * steamTurbine.power.max / steamTurbine.efficiencyNominal).scientificFormatted
       + "\nSTEAM TURBINE\n"
       + "    Gross Output [MW]:" * steamTurbine.power.max.description
       + "    Efficiency [%] :" * (steamTurbine.efficiencyNominal * 100).description
@@ -51,18 +55,18 @@ extension Recording {
       + "\n\n"
     d += decorated("Annual Results")
       + "Gross electricty producution [MWh_el/a]:"
-      * scientificForm(performance.electric.gross)
+      * performance.electric.gross.scientificFormatted
     //  Format((YTarS(0).EgrsST + YTarS(0).EgrsGasTurbine) * (1 - Simulation.parameter.UnSchedMain) * (1 - Simulation.parameter.TransLoss), )"
-      + "Parasitic consumption [MWh_el/a]:" * scientificForm(performance.parasitics.shared)
+      + "Parasitic consumption [MWh_el/a]:" * performance.parasitics.shared.scientificFormatted
     // Format(YTarS(0).electricalParasitics * (1 - Simulation.parameter.UnSchedMain) * (1 - Simulation.parameter.TransLoss), )"
-      + "Net electricty producution [MWh_el/a]:" * scientificForm(performance.electric.net)
+      + "Net electricty producution [MWh_el/a]:" * performance.electric.net.scientificFormatted
     // Format(YTarS(0).Enet * (1 - Simulation.parameter.UnSchedMain) * (1 - Simulation.parameter.TransLoss), )"
       + "Gas consumption [MWh_el/a]:\n"  // Format(YTarS(0).heatfuel, )"
       + "Solar share [%]:\n"  // Format(SolShare * 100, )"
       + "Annual direct solar insolation [kWh/m²a]:"  //  Format(YTarS(0).NDI,)"
-      * scientificForm(irradiance.direct / 1_000)
+      * (irradiance.direct / 1_000).scientificFormatted
       + "Total heat from solar field [MWh_el/a]:"  // Format(YTarS(0).heatsol,)"
-      * scientificForm(performance.thermal.solar.megaWatt)
+      * performance.thermal.solar.megaWatt.scientificFormatted
     d += "\nAVAILABILITIES\n\n"
       + "Plant Availability [%]:\n"  // * Simulation.parameter.PlantAvail * 100, )"
       + "Plant Degradation [%]:\n"  // * Simulation.parameter.PlantDegrad,)"
@@ -133,4 +137,9 @@ extension Recording {
     d += Plant.parameterDescriptions
     return d
   }
+}
+
+extension Double {
+  /// Represents the value in scientific notation.
+  var scientificFormatted: String { String(format: "%G", self) }
 }

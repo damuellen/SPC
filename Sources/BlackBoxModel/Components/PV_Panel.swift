@@ -5,6 +5,7 @@
 import Libc
 import Units
 
+/// A namespace for Photovoltaic (PV) calculations.
 extension PV {
   /// Wraps low-level functions for solving the single diode equation.
   struct Cell {
@@ -50,24 +51,24 @@ extension PV {
       return (Iph, Rsh, Io)
     }
 
-    /// Returns the radiation equivalent current within the single diode model.
+    /// Computes photocurrent for given radiation and temperature.
     func photocurrent(radiation: Double, temperature: Temperature) -> Double {
       (radiation / Cell.radiation_at_STC)
         * (Isc - muIsc * (temperature - Cell.temperature_at_STC).kelvin)
     }
-    /// Returns the corrected saturation current of the diode within the single diode model.
+    /// Computes saturation current for given temperature.
     func saturationCurrent(temperature: Temperature) -> Double {
       Ioref * pow(temperature.kelvin / Cell.temperature_at_STC.kelvin, 3)
         * exp(
           Cell.q * Egap / (gamma * Cell.k)
             * ((1 / Cell.temperature_at_STC.kelvin) - (1 / temperature.kelvin)))
     }
-    /// Returns the corrected Rshunt of the single diode model.
+    /// Computes the corrected Rshunt for the single diode model.
     func Rshunt(radiation: Double, temperature: Temperature) -> Double {
       RshRef + (Rsh0 - RshRef) * exp(5.5 * radiation / Cell.radiation_at_STC)
     }
   }
-
+  /// A data structure for Photovoltaic PowerPoint
   struct PowerPoint: CustomStringConvertible {
     let current: Double
     let voltage: Double
@@ -88,6 +89,7 @@ extension PV {
     }
   }
 
+  /// Represents the Photovoltaic panel.
   struct Panel {
     let cell: Cell
     /// Nominal power in Watts
@@ -96,7 +98,8 @@ extension PV {
     let area: Double
     /// Number of cells of the panel
     let numberOfCells: Int
-
+    
+    /// Initializes a Panel with default parameter values.
     public init() {
       self.cell = Cell()
       self.nominalPower = 390
@@ -104,7 +107,7 @@ extension PV {
       self.numberOfCells = 76
     }
     
-    /// Returns the temperature of the panel.
+    /// Calculates the temperature of the panel.
     func temperature(
       radiation: Double, ambient: Temperature, windSpeed: Double) -> Temperature {
       /// Absorption coefficient of the module
@@ -117,7 +120,8 @@ extension PV {
       let U = Uc + Uv * windSpeed
       return ambient + ((1 / U) * alpha * radiation * (1 - efficiency))
     }
-    /// The voltage from a current point within the I-V curve using the single diode model
+
+    /// Calculates the voltage from a given current point within the I-V curve using the single diode model.
     func voltageFrom(current: Double, radiation: Double, cell_T: Temperature) -> Double {
       let nVth =
         cell.gamma * Double(numberOfCells) * Cell.k * cell_T.kelvin / Cell.q
@@ -141,7 +145,8 @@ extension PV {
       return Rsh
         * (-current * (cell.Rs / Rsh + 1.0) + I - nVth / Rsh * inputterm + I)
     }
-    /// The current from a voltage value within the I-V curve using the single diode model
+
+    /// Calculates the current from a given voltage value within the I-V curve using the single diode model.
     func currentFrom(voltage: Double, radiation: Double, cell_T: Temperature) -> Double {
       // The cells are connected in parallel, the voltage splits.
       let voltage = voltage / Double(numberOfCells)
@@ -158,6 +163,7 @@ extension PV {
         * (Iph + Isat) / (cell.Rs + Rsh)
     }
 
+    /// Computes the PowerPoint for given radiation, ambient temperature, and wind speed.
     func callAsFunction(
       radiation: Double, ambient: Temperature, windSpeed: Double
     ) -> PowerPoint {
