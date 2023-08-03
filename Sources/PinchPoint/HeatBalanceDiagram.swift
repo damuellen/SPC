@@ -7,34 +7,6 @@ import CPikchr
 import Libc
 import Utilities
 
-typealias Stream = HeatBalanceDiagram.Stream
-
-extension HeatExchanger {
-  var steamSide: (inlet: Stream, outlet: Stream) {
-    (
-      Stream(temperature.ws.inlet, pressure.ws.inlet, massFlow.ws.inlet, enthalpy.ws.inlet),
-      Stream(temperature.ws.outlet, pressure.ws.outlet, massFlow.ws.outlet, enthalpy.ws.outlet)
-    )
-  }
-
-  var htfSide: (inlet: Stream, outlet: Stream) {
-    (
-      Stream(temperature.htf.inlet, 0, massFlow.htf, enthalpy.htf.inlet),
-      Stream(temperature.htf.outlet, 0, massFlow.htf, enthalpy.htf.outlet)
-    )
-  }
-
-  var LMTD: String {
-    String(
-      format: "%.2f",
-      ((temperature.htf.outlet.kelvin - temperature.ws.inlet.kelvin)
-        - (temperature.htf.inlet.kelvin - temperature.ws.outlet.kelvin))
-        / (log(
-          (temperature.htf.outlet.kelvin - temperature.ws.inlet.kelvin)
-            / (temperature.htf.inlet.kelvin - temperature.ws.outlet.kelvin))))
-  }
-}
-
 /// Heat Balance Diagram
 ///
 /// Schematic representation of the whole steam cycle.

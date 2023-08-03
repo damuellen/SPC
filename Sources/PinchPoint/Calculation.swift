@@ -11,23 +11,33 @@ public struct Calculation: Codable {
   public init(parameter: HeatExchangerParameter) {
     self.parameter = parameter
   }
-
+  /// The heat transfer fluid for the system.
   public var HTF = HeatTransferFluid.VP1
 
+  /// The mass flow rate of the heat transfer fluid in the mixing point.
   public var mixHTFMassflow = 0.0
+
+  /// The absolute enthalpy of the heat transfer fluid in the mixing point.
   public var mixHTFAbsoluteEnthalpy = 0.0
+
+  /// The temperature of the heat transfer fluid in the mixing point.
   public var mixHTFTemperature: Temperature = 0.0
 
+  /// The upper temperature limit for the heat transfer fluid.
   public var upperHTFTemperature = Temperature(celsius: 393)
+
+  /// The feedwater temperature to the economizer.
   public var economizerFeedwaterTemperature = Temperature(celsius: 250.8)
 
+  /// The properties of the turbine (temperature, pressure, and mass flow).
   public var turbine = WaterSteam(
     temperature: .init(celsius: 380.0),
     pressure: 102.85,
     massFlow: 66.42
   )
 
-  public var blowDownOfInputMassFlow = 1.0  // %
+  /// The continuous blowdown of input mass flow in percentage (%).
+  public var blowDownOfInputMassFlow = 1.0 // %
 
   public var reheatInlet = WaterSteam(
     temperature: .init(celsius: 217.8),
@@ -40,18 +50,21 @@ public struct Calculation: Codable {
 
   let parameter: HeatExchangerParameter
 
+  // Heat exchanger instances
   var economizer = HeatExchanger()
   var superheater = HeatExchanger()
   var reheater = HeatExchanger()
   var steamGenerator = HeatExchanger()
 
+  /// The total power output of the power block.
   public var powerBlockPower: Double {
     economizer.power
       + steamGenerator.power
       + superheater.power
       + reheater.power
   }
-
+  
+  /// The temperature difference required for the reheater.
   var reheaterTemperatureDifference: Double {
     reheater(requiredLMTD: parameter.requiredLMTD)
   }
@@ -60,6 +73,7 @@ public struct Calculation: Codable {
     economizer.massFlow.ws.outlet - superheater.massFlow.ws.inlet
   }
 
+  /// Calculate the evaporation process in the steam generator.
   mutating func evaporation() -> (Double, Double, Double) {
     let pd = parameter.pressureDrop
     let pressureDropTotal =
@@ -95,6 +109,7 @@ public struct Calculation: Codable {
     return (enthalpyBeforeEvaporation, evaporationPower, superHeatingPower)
   }
 
+  /// Calculate the power for the steam generator.
   mutating func powerSteamGenerator() -> Double {
     steamGenerator.enthalpy.ws.inlet = WaterSteam.enthalpy(
       pressure: steamGenerator.pressure.ws.outlet,
@@ -113,6 +128,7 @@ public struct Calculation: Codable {
     return powerForWaterHeatingInsideSg
   }
 
+  /// Preheat the heat transfer fluid in the economizer.
   mutating func preheat() -> Double {
     economizer.enthalpy.ws.inlet = WaterSteam.enthalpy(
       pressure: economizer.pressure.ws.inlet,
@@ -140,6 +156,7 @@ public struct Calculation: Codable {
     return htfAbsoluteHeatFlowOutlet
   }
 
+  /// Reheat the heat transfer fluid in the reheater.
   mutating func reheat() -> Double {
     reheater.temperature.htf.outlet =
       reheater.temperature.ws.inlet + reheaterTemperatureDifference
@@ -154,7 +171,7 @@ public struct Calculation: Codable {
 
     return htfAbsoluteHeatFlowOutlet
   }
-
+  /// Calculate the required LMTD for reheater.
   func reheater(requiredLMTD: Double) -> Double {
     seek(goal: requiredLMTD, 1...50) {
       ((upperHTFTemperature.kelvin - turbine.temperature.kelvin) - $0)
@@ -162,6 +179,7 @@ public struct Calculation: Codable {
     }
   }
 
+  /// Perform the calculations for the heat exchanger system.
   public mutating func callAsFunction() {
     reheater.temperature.ws.outlet = turbine.temperature
     reheater.pressure.ws.outlet = reheatOutletSteamPressure
@@ -298,6 +316,7 @@ public struct Calculation: Codable {
     mixHTFTemperature = HTF.temperature(mixHTFAbsoluteEnthalpy)
   }
 
+  /// Get the temperatures in the heat exchanger system.
   public func temperatures() -> String {
     """
     "EC"
