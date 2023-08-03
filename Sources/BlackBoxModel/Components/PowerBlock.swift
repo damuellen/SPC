@@ -16,15 +16,15 @@ extension PowerBlock: CustomStringConvertible {
 }
 
 /// A struct representing the state and functions for mapping the power block
-public struct PowerBlock: Parameterizable, HeatTransfer {
+struct PowerBlock: Parameterizable, HeatTransfer {
 
-  var name: String = PowerBlock.parameter.name
+  private(set) var name: String = PowerBlock.parameter.name
 
-  public internal(set) var massFlow: MassFlow = .zero
+  var massFlow: MassFlow = .zero
 
-  public internal(set) var temperature: (inlet: Temperature, outlet: Temperature)
+  var temperature: (inlet: Temperature, outlet: Temperature)
   /// The operation mode options for the power block
-  public enum OperationMode {
+  enum OperationMode {
     case scheduledMaintenance
   }
   /// Creates a `PowerBlock` instance with the fixed initial state.

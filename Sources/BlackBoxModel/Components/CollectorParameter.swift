@@ -27,7 +27,7 @@ extension Collector {
    - bellow shadowing
    - optical efficiency as a function of incident angle (incident angle modifier).
  */
-  public struct Parameter: Codable, Equatable {
+  struct Parameter: Codable, Equatable {
 
     /// The name of the collector parameter set.
     let name: String
@@ -42,33 +42,33 @@ extension Collector {
     /// The type of absorber material for the collector.
     let absorber: Absorber
     /// The aperture of the collector in meters.
-    public let aperture: Double
+    let aperture: Double
     /// The length of the collector in meters.
-    public let lengthSCA: Double
+    let lengthSCA: Double
     /// The net collector surface area in square meters.
-    public let areaSCAnet: Double
+    let areaSCAnet: Double
     /// The extension of HCE (Heat Collector Element) beyond the collector in meters.
-    public let extensionHCE: Double
+    let extensionHCE: Double
     /// The average distance from the parabola to the focus in meters.
-    public let avgFocus: Double
+    let avgFocus: Double
     /// The outer radius of the absorber pipe in meters.
-    public let rabsOut: Double
+    let rabsOut: Double
     /// The inner radius of the absorber pipe in meters.
-    public let rabsInner: Double
+    let rabsInner: Double
     /// The radius of the glass cover tube in meters.
-    public let rglas: Double
+    let rglas: Double
     /// The emittance coefficient of the coating as a function of temperature.
-    public let glassEmission: Double
+    let glassEmission: Double
     /// The optical efficiency of the collector.
-    public let opticalEfficiency: Double
+    let opticalEfficiency: Double
     /// The emittance coefficients for the HCE as a function of temperature.
-    public let emissionHCE: [Double]
+    let emissionHCE: [Double]
     /// The shading coefficients for the HCE for different incident angles.
-    public let shadingHCE: [Double]
+    let shadingHCE: [Double]
     /// The incident angle modifier as a polynomial function.
-    public let factorIAM: Polynomial
+    let factorIAM: Polynomial
     /// A flag indicating whether to use integral radial loss calculation.
-    public let useIntegralRadialoss: Bool
+    let useIntegralRadialoss: Bool
   }
 }
 
@@ -103,7 +103,7 @@ extension Collector.Parameter: CustomStringConvertible {
 extension Collector.Parameter: TextConfigInitializable {
   /// Creates a `Collector.Parameter` instance using the data from a `TextConfigFile`.
   /// - Parameter file: The `TextConfigFile` containing the data for the parameter.
-  public init(file: TextConfigFile) throws {
+  init(file: TextConfigFile) throws {
     let ln: (Int) throws -> Double = { try file.readDouble(lineNumber: $0) }
     name = file.name
     aperture = try ln(10)

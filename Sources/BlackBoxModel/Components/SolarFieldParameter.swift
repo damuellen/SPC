@@ -34,7 +34,7 @@ extension SolarField {
   - "freeze protection" HTF flow and minimal HTF flow
   - parasitic power as a function of HTF flow
   */
-  public struct Parameter: Codable {
+  struct Parameter: Codable {
     /// Whether to consider heat loss of ANY dump collectors.
     var heatlossDump = true
     /// The layout type of the solar field.
@@ -66,13 +66,13 @@ extension SolarField {
     /// Number of collectors in a row.
     let numberOfSCAsInRow: Int
     /// Distance between rows [m].
-    public var rowDistance: Double
+    var rowDistance: Double
     /// Distance between Collectors in a Row
-    public var distanceSCA: Double
+    var distanceSCA: Double
     /// Heat Losses in total HTF Piping
-    public var pipeHeatLosses: Double
+    var pipeHeatLosses: Double
     /// Azimuth angle of solar field orientation [°].
-    public var azimut, elevation: Double
+    var azimut, elevation: Double
     /// Parasitic power for anti-freeze pump [MW].
     var antiFreezeParastics: Double
     /// Parasitic power coefficients for pump power.
@@ -187,7 +187,7 @@ extension SolarField.Parameter: CustomStringConvertible {
 extension SolarField.Parameter: TextConfigInitializable {
   /// Creates a `SolarField.Parameter` instance using the data from a `TextConfigFile`.
   /// - Parameter file: The `TextConfigFile` containing the data for the parameter.
-  public init(file: TextConfigFile) throws {
+  init(file: TextConfigFile) throws {
     let ln: (Int) throws -> Double = { try file.readDouble(lineNumber: $0) }
     maxWind = Float(try ln(10))
     numberOfSCAsInRow = Int(try ln(13))

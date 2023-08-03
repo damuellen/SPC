@@ -25,15 +25,10 @@ class CollectorTests: XCTestCase {
     let edgeFactor1 = SolarField.parameter.distanceSCA / 2 * (1 - 1 / numberOfSCAsInRow) / Collector.parameter.lengthSCA
     let edgeFactor2 = (1 + 1 / numberOfSCAsInRow) / Collector.parameter.lengthSCA / 2
     SolarField.parameter.edgeFactor = [edgeFactor1, edgeFactor2]
-    var collector = Plant.initialState.collector
-    collector.parabolicElevation = 63.96
-    collector.cosTheta = 0.87
-    collector.theta = 29.18
+    var collector = Collector(parabolicElevation: 63.96, theta: 29.18, cosTheta: 0.87, efficiency: 0, insolationAbsorber: 0)
     collector.efficiency(ws: 0)
     XCTAssertEqual(collector.efficiency, 0.72, accuracy: 0.1)
-    collector.parabolicElevation = 51.49
-    collector.cosTheta = 0.56
-    collector.theta = 55.53
+    collector = Collector(parabolicElevation: 51.49, theta: 55.53, cosTheta: 0.56, efficiency: 0, insolationAbsorber: 0)
     collector.efficiency(ws: 0)
     XCTAssertEqual(collector.efficiency, 0.6, accuracy: 0.1)
   }

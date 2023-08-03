@@ -9,21 +9,21 @@ class SteamTurbineTests: XCTestCase {
     _ = Plant()
     let ambientTemperature = Temperature(celsius: 20.0)
     let heatExchanger = Temperature(celsius: 350.0)
-    var (maxLoad, efficiency) = SteamTurbine.perform(load: Ratio(1),
+    status.steamTurbine.adjust(load: 1.0)
+    var efficiency = status.steamTurbine.perform(
       heatExchanger: heatExchanger, ambient: ambientTemperature
     )
-    XCTAssertEqual(maxLoad, 1, accuracy: 0.01, "maxLoad")
-    XCTAssertEqual(efficiency, 0.399, accuracy: 0.01, "efficiency")
-    (maxLoad, efficiency) = SteamTurbine.perform(load:Ratio(0),
+    XCTAssertEqual(efficiency.quotient, 0.4, accuracy: 0.01, "efficiency")
+    status.steamTurbine.adjust(load: 0.0)
+    efficiency = status.steamTurbine.perform(
       heatExchanger: heatExchanger, ambient: ambientTemperature
     )
-    XCTAssertEqual(maxLoad, 1, accuracy: 0.01, "maxLoad")
-    XCTAssertEqual(efficiency, 0.22, accuracy: 0.01, "efficiency")
-    status.boiler.operationMode = .operating
-    (maxLoad, efficiency) = SteamTurbine.perform(load:Ratio(0.5),
+    XCTAssertEqual(efficiency.quotient, 0.23, accuracy: 0.02, "efficiency")
+    status.boiler.change(mode: .operating)
+    status.steamTurbine.adjust(load: 0.5)
+    efficiency = status.steamTurbine.perform(
       heatExchanger: heatExchanger, ambient: ambientTemperature
     )
-    XCTAssertEqual(maxLoad, 1, accuracy: 0.01, "maxLoad")
-    XCTAssertEqual(efficiency, 0.383, accuracy: 0.01, "efficiency")
+    XCTAssertEqual(efficiency.quotient, 0.381, accuracy: 0.001, "efficiency")
   }
 }

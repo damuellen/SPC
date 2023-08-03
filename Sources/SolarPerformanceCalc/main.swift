@@ -106,7 +106,7 @@ struct SolarPerformanceCalculator: ParsableCommand {
  #endif
     }
 
-    if let s = stepsCalculation { Simulation.time.steps = Frequence[s] }
+    if let s = stepsCalculation { Simulation.steps(perHour: s) }
     
     do {
       if path == nil { path = meteofilePath ?? configPath }
@@ -171,8 +171,8 @@ struct SolarPerformanceCalculator: ParsableCommand {
   /// Function to plot time series charts using gnuplot.
   func plotter(_ result: Recording) {
     let interrupt = DispatchSource.interrupt()
-    terminalHideCursor()
-    defer { terminalShowCursor(clearLine: interrupt.isCancelled) }
+   // terminalHideCursor()
+   // defer { terminalShowCursor(clearLine: interrupt.isCancelled) }
     // let steamTurbine = result.annual(\.steamTurbine.load.quotient)
     // let parabolicElevation = result.annual(\.collector.parabolicElevation)
     // _ = try? Gnuplot(y1s: steamTurbine, y2s: parabolicElevation)(.pdf("parabolicElevation.pdf"))
@@ -184,7 +184,7 @@ struct SolarPerformanceCalculator: ParsableCommand {
       (result.power(range: year).joined().max()! / 100).rounded(.up) * 100)
     for i in 1...365 {
       if interrupt.isCancelled { break }
-      print("Plotting [\(i)/365]".background(.white), terminator: "\r")
+     // print("Plotting [\(i)/365]".background(.white), terminator: "\r")
       fflush(stdout)
       let day = DateInterval(ofDay: i, in: BlackBoxModel.simulatedYear)
       let y1 = result.massFlows(range: day)

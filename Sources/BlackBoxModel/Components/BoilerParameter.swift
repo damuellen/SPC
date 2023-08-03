@@ -12,7 +12,7 @@ import Utilities
 
 extension Boiler {
   /// A struct representing the parameters of the boiler.
-  public struct Parameter: Codable, Equatable {
+  struct Parameter: Codable, Equatable {
     /// The name of the boiler parameter set.
     let name: String
     /// The nominal outlet temperature of the boiler.
@@ -22,9 +22,9 @@ extension Boiler {
     /// The nominal electrical parasitics of the boiler.
     let nominalElectricalParasitics: Double
     /// A struct representing the start parameters of the boiler.
-    public struct StartParameter: Codable, Equatable {
+    struct StartParameter: Codable, Equatable {
       /// A struct representing the values for cold and warm start parameters.
-      public struct Values: Codable, Equatable {
+      struct Values: Codable, Equatable {
         /// The value for cold start.
         let cold: Double
         /// The value for warm start.
@@ -70,7 +70,7 @@ extension Boiler.Parameter: CustomStringConvertible {
 extension Boiler.Parameter: TextConfigInitializable {
   /// Creates a `Boiler.Parameter` instance using the data from a `TextConfigFile`.
   /// - Parameter file: The `TextConfigFile` containing the data for the parameter.
-  public init(file: TextConfigFile) throws {
+  init(file: TextConfigFile) throws {
     let ln: (Int) throws -> Double = { try file.readDouble(lineNumber: $0) }
     self = try .init(
       name: file.name,

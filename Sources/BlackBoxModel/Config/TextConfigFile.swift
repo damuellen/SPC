@@ -11,17 +11,17 @@
 import Foundation
 
 /// A protocol that allows types to be initialized from a TextConfigFile.
-public protocol TextConfigInitializable {
+protocol TextConfigInitializable {
   init(file: TextConfigFile) throws
 }
 
 /// A struct representing a configuration file with lines of text and associated functionality.
-public struct TextConfigFile {
+struct TextConfigFile {
   /// The lines of text in the configuration file.
-  public var lines: [String]
+  var lines: [String]
 
   /// Computed property to get the name of the configuration file.
-  public var name: String {
+  var name: String {
     if lines.count > 6, !lines[6].isEmpty {
       return lines[6]
     }
@@ -29,7 +29,7 @@ public struct TextConfigFile {
   }
 
   /// The URL of the configuration file.
-  public let url: URL
+  let url: URL
   
   /// Initializes a TextConfigFile instance from the contents of a URL.
   public init(url: URL) throws {

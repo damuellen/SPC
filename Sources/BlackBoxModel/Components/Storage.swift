@@ -12,35 +12,32 @@ import DateExtensions
 import Units
 
 /// A struct representing the state and functions for mapping the storage.
-public struct Storage: Parameterizable, HeatTransfer {
-
-  // Properties
-
+struct Storage: Parameterizable, HeatTransfer {
   let name = Storage.parameter.name
 
   /// The temperature of the storage system (inlet and outlet).
-  public internal(set) var temperature: (inlet: Temperature, outlet: Temperature)
+  var temperature: (inlet: Temperature, outlet: Temperature)
 
   /// The mass flow rate in the storage system.
-  public internal(set) var massFlow: MassFlow = .zero
+  var massFlow: MassFlow = .zero
 
   /// The current operation mode of the storage system.
-  public internal(set) var operationMode: OperationMode
+  var operationMode: OperationMode
 
   /// The temperature differences between HTF and salt (cold and hot).
-  public internal(set) var dT_HTFsalt: (cold: Double, hot: Double)
+  var dT_HTFsalt: (cold: Double, hot: Double)
 
   /// The temperatures of the hot and cold tanks in the storage system.
-  public internal(set) var temperatureTank: Temperatures
+  var temperatureTank: Temperatures
 
   /// The anti-freeze temperature used in freeze protection.
-  public internal(set) var antiFreezeTemperature: Double = 270.0
+  var antiFreezeTemperature: Double = 270.0
 
   /// The salt properties and masses in the storage system.
-  public internal(set) var salt = Salt()
+  var salt = Salt()
 
   /// The relative charge in the storage system.
-  public internal(set) var relativeCharge: Ratio
+  var relativeCharge: Ratio
 
   /// Returns the fixed initial state of the storage system.
   static let initialState = Storage(

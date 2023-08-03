@@ -11,7 +11,7 @@
 import Helpers
 
  /// A struct representing parameters related to a specific fuel used in an power plant.
-public struct FuelParameter: Codable {
+struct FuelParameter: Codable {
   /// The name of the fuel.
   let name: String
   /// The measurement unit for the fuel's properties.
@@ -37,7 +37,7 @@ extension FuelParameter {
   ///
   /// - Parameter file: The `TextConfigFile` containing fuel parameter information.
   /// - Throws: An error if there is an issue reading or parsing the fuel parameter data from the file.
-  public init(file: TextConfigFile) throws {
+  init(file: TextConfigFile) throws {
     // Helper function to read a double value from the specified line number in the file
     let ln: (Int) throws -> Double = { try file.readDouble(lineNumber: $0) }
 

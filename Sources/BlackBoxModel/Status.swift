@@ -19,15 +19,15 @@
 /// measurements.
 public struct Status: CustomStringConvertible, MeasurementsConvertible {
   // Properties representing the current status of each component in the solar power plant
-  internal(set) public var collector = Collector.initialState
-  internal(set) public var solarField = SolarField.initialState
-  internal(set) public var heatExchanger = HeatExchanger.initialState
-  internal(set) public var powerBlock = PowerBlock.initialState
-  internal(set) public var steamTurbine = SteamTurbine.initialState
-  internal(set) public var heater = Heater.initialState
-  internal(set) public var boiler = Boiler.initialState
-  internal(set) public var gasTurbine = GasTurbine.initialState
-  internal(set) public var storage = Storage.initialState
+  var collector = Collector.initialState
+  var solarField = SolarField.initialState
+  var heatExchanger = HeatExchanger.initialState
+  var powerBlock = PowerBlock.initialState
+  var steamTurbine = SteamTurbine.initialState
+  var heater = Heater.initialState
+  var boiler = Boiler.initialState
+  var gasTurbine = GasTurbine.initialState
+  var storage = Storage.initialState
 
   /// A textual representation of the `Status` instance.
   ///

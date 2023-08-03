@@ -27,7 +27,7 @@ extension Storage {
   The storage parameter set contains various properties related to storage,
   such as efficiency, heat loss, charging and discharging temperatures, etc.
   */
-  public struct Parameter: Codable {
+  struct Parameter: Codable {
     /// The name of the storage parameter set.
     let name: String
     /// The charge efficiency of the storage.
@@ -206,7 +206,7 @@ extension Storage.Parameter: CustomStringConvertible {
 extension Storage.Parameter: TextConfigInitializable {
   /// Creates a `Storage.Parameter` instance using the data from a `TextConfigFile`.
   /// - Parameter file: The `TextConfigFile` containing the data for the parameter.
-  public init(file: TextConfigFile) throws {
+  init(file: TextConfigFile) throws {
     typealias T = Temperature
     let ln: (Int) throws -> Double = { try file.readDouble(lineNumber: $0) }
     let l2: (Int) throws -> Int = { try file.readInteger(lineNumber: $0) }
@@ -303,7 +303,7 @@ public enum StorageMedium: String, Codable {
   )
 
   /// Get the heat transfer fluid properties for a specific storage medium.
-  public var properties: HeatTransferFluid {
+  var properties: HeatTransferFluid {
     switch self {
     case .solarSalt:
       return StorageMedium.ss

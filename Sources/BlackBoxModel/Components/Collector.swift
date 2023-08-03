@@ -14,19 +14,19 @@ import Helpers
 import Meteo
 import SolarPosition
 /// A struct representing the state and functions for mapping the collector of a solar power plant.
-public struct Collector: Parameterizable, CustomStringConvertible {
+struct Collector: Parameterizable, CustomStringConvertible {
 
   /// The parabolic elevation in degrees.
-  public internal(set) var parabolicElevation, theta, cosTheta: Double
+  private(set) var parabolicElevation, theta, cosTheta: Double
 
   /// The efficiency of the parabolic trough.
-  public internal(set) var efficiency: Double
+  private(set) var efficiency: Double
 
   /// Instantaneous irradiation on the absorber tube in W/sqm.
-  public internal(set) var insolationAbsorber: Double
+  private(set) var insolationAbsorber: Double
   
   /// The last recorded value of irradiation on the absorber tube.
-  var lastInsolation: Double = 0
+  private(set) var lastInsolation: Double = 0
 
   /// A description of the `Collector` instance.
   public var description: String {

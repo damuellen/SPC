@@ -14,12 +14,12 @@ import Foundation
 public typealias Frequence = DateSeries.Frequence
 
 extension Simulation {
-  public struct Period: Codable, CustomStringConvertible {
+  struct Period: Codable, CustomStringConvertible {
     var isLeapYear = false
     /// Simulated date interval
-    public var dateInterval: DateInterval?
-    public let holidays: [DateInterval]
-    public var steps: Frequence
+    var dateInterval: DateInterval?
+    let holidays: [DateInterval]
+    var steps: Frequence
 
     public var description: String {
       let dateFormatter = DateFormatter()
@@ -47,7 +47,7 @@ extension Simulation {
 }
 
 extension Simulation.Period: TextConfigInitializable {
-  public init(file: TextConfigFile) throws {
+  init(file: TextConfigFile) throws {
     let ln: (Int) throws -> Double = { try file.readDouble(lineNumber: $0) }
 
     let getDate: (String) -> Date? = { dateString in

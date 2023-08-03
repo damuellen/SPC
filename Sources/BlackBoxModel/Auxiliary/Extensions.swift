@@ -54,7 +54,7 @@ typealias Angle = Double
 
 extension Angle {
   /// Converts the angle from degrees to radians.
-  public var toRadians: Double { self * .pi / 180 }
+  var toRadians: Double { self * .pi / 180 }
   /// Converts the angle from radians to degrees.
-  public var toDegrees: Double { self * (180 / .pi) }
+  var toDegrees: Double { self * (180 / .pi) }
 }

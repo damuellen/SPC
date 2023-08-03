@@ -30,13 +30,13 @@ public struct Recording: CustomStringConvertible, Comparable {
   let statusHistory: [Status]
 
   /// The solar field layout defined by the design parameters.
-  public var layout: Layout { designParameter.layout }
+  var layout: Layout { designParameter.layout }
 
   /// The thermal energy data from the plant performance.
-  public var thermal: ThermalEnergy { performance.thermal }
+  var thermal: ThermalEnergy { performance.thermal }
 
   /// The electric power data from the plant performance.
-  public var electric: ElectricPower { performance.electric }
+  var electric: ElectricPower { performance.electric }
 
   /// The fitness value, representing the efficiency of the solar field layout.
   public var fitness: Double { layout.solarField / electric.net }
@@ -152,7 +152,7 @@ public struct Recording: CustomStringConvertible, Comparable {
   }
 
   /// Access multiple performance data keypaths within a given date interval.
-  public subscript(_ keyPaths: KeyPath<PlantPerformance, Double>...,
+  subscript(_ keyPaths: KeyPath<PlantPerformance, Double>...,
     range range: DateInterval
   ) -> [[Double]] {
     // Map each keypath to the corresponding performance data array using the subscript function.
@@ -160,7 +160,7 @@ public struct Recording: CustomStringConvertible, Comparable {
   }
 
   /// Access multiple status data keypaths within a given date interval.
-  public subscript(_ keyPaths: KeyPath<Status, Double>...,
+  subscript(_ keyPaths: KeyPath<Status, Double>...,
     range range: DateInterval
   ) -> [[Double]] {
     // Map each keypath to the corresponding status data array using the subscript function.
@@ -224,7 +224,7 @@ public struct Recording: CustomStringConvertible, Comparable {
   }
 
   /// Access the cycle data within a given date interval using a keypath.
-  public subscript(_ keyPath: KeyPath<Status, Cycle>,
+  subscript(_ keyPath: KeyPath<Status, Cycle>,
     range range: DateInterval
   ) -> ([[Double]], [[Double]]) {
     // Reduce the cycle data to separate arrays for mass, inlet, and outlet values.

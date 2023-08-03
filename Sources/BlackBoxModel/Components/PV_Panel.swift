@@ -12,7 +12,7 @@ import Units
 
 extension PV {
   /// Wraps low-level functions for solving the single diode equation.
-  public struct Cell {
+  struct Cell {
     /// Radiation at Standard Test Conditions (STC) in Watts per square meter.
     static let radiation_at_STC = 1000.0
     /// Temperature at Standard Test Conditions (STC) in degrees Celsius.
@@ -73,7 +73,7 @@ extension PV {
     }
   }
 
-  public struct PowerPoint: CustomStringConvertible {
+  struct PowerPoint: CustomStringConvertible {
     let current: Double
     let voltage: Double
     let power: Double
@@ -93,7 +93,7 @@ extension PV {
     }
   }
 
-  public struct Panel {
+  struct Panel {
     let cell: Cell
     /// Nominal power in Watts
     let nominalPower: Double

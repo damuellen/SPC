@@ -12,8 +12,9 @@ import Utilities
 
 extension HeatExchanger {
   /// A struct representing the parameters of the heat exchanger.
-  public struct Parameter: Equatable {
-    public struct Temperatures {
+  struct Parameter: Equatable {
+    /// A struct representing the temperatures in the heat exchanger.
+    struct Temperatures {
       let htf: (inlet: (max: Temperature, min: Temperature),
                 outlet: (max: Temperature, min: Temperature))
       var h2o: (inlet: (max: Temperature, min: Temperature),
@@ -42,17 +43,34 @@ extension HeatExchanger {
       }
     }
     
+    /// The name of the heat exchanger.
     let name: String
+    /// The efficiency of the heat exchanger.
     let efficiency: Double
+    /// The efficiency of the heat exchanger in the secondary cooling circuit (SCC).
     let sccEfficiency: Double
+    /// The temperatures in the heat exchanger.
     var temperature: Temperatures
+    /// The temperatures in the secondary cooling circuit (SCC).
     let scc: Temperatures
+    /// The mass flow rate of the heat transfer fluid (HTF).
     let massFlowHTF: MassFlow
+    /// The heat flow rate of the heat transfer fluid (HTF).
     var heatFlowHTF: Double
+    /// Polynomial expression to calculate outlet temperature as a function of HTF mass flow rate.
     var ToutMassFlow: Polynomial?
+    /// Polynomial expression to calculate outlet temperature as a function of HTF inlet temperature.
     var ToutTin: Polynomial?
+    /// Polynomial expression to calculate outlet temperature as an Andasol-3 function.
     var ToutTinMassFlow: Polynomial?
-    var useAndsolFunction, Tout_f_Mfl, Tout_f_Tin, Tout_exp_Tin_Mfl: Bool
+    /// Determines whether the outlet temperature is calculated as a function of HTF mass flow rate.
+    var useAndsolFunction: Bool
+    /// Determines whether the outlet temperature is calculated as a function of HTF mass flow rate.
+    var Tout_f_Mfl: Bool
+    /// Determines whether the outlet temperature is calculated as a function of HTF inlet temperature.
+    var Tout_f_Tin: Bool
+    /// Determines whether the outlet temperature is calculated as f(Tin, Mfl).
+    var Tout_exp_Tin_Mfl: Bool
   }
 }
 
@@ -107,7 +125,7 @@ extension HeatExchanger.Parameter: CustomStringConvertible {
 extension HeatExchanger.Parameter: TextConfigInitializable {
   /// Creates a `HeatExchanger.Parameter` instance using the data from a `TextConfigFile`.
   /// - Parameter file: The `TextConfigFile` containing the data for the parameter.
-  public init(file: TextConfigFile) throws {
+  init(file: TextConfigFile) throws {
     let ln: (Int) throws -> Double = { try file.readDouble(lineNumber: $0) }
     name = file.name
     efficiency = try ln(10) / 100
@@ -135,6 +153,8 @@ extension HeatExchanger.Parameter: TextConfigInitializable {
 }
 
 extension HeatExchanger.Parameter {
+  /// Calculates the heat flow of the heat exchanger.
+  /// - Returns: The calculated heat flow in megawatts.
   func heatFlow() -> Double {
     let st = SteamTurbine.parameter
     if Design.hasGasTurbine {
@@ -217,7 +237,7 @@ extension HeatExchanger.Parameter: Codable {
   }
 }
 
-public typealias HXTemps = HeatExchanger.Parameter.Temperatures
+typealias HXTemps = HeatExchanger.Parameter.Temperatures
 
 extension HXTemps: Equatable {
   public static func == (lhs: HXTemps, rhs: HXTemps) -> Bool {

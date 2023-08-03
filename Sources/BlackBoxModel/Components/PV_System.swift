@@ -14,15 +14,15 @@ import Units
 ///
 /// This simplifies the API by eliminating the need for a user to specify
 /// arguments such as module and inverter properties.
-public struct PV {
-  public var array = Array()
-  public var inverter = Inverter()
-  public var transformer = Transformer()
+struct PV {
+  var array = Array()
+  var inverter = Inverter()
+  var transformer = Transformer()
 
-  public struct InputValues {
-    public let gti: Double
-    public let ambient: Temperature
-    public let windSpeed: Double
+  struct InputValues {
+    let gti: Double
+    let ambient: Temperature
+    let windSpeed: Double
   }
 
   /// Calculates the net power output based on various input values. 
@@ -58,7 +58,7 @@ public struct PV {
   }
 
   /// Represents a group of modules with the same orientation and module type.
-  public struct Array {
+  struct Array {
     /// Number of panels per string
     let panelsPerString: Int
     /// Number of strings
@@ -105,7 +105,7 @@ public struct PV {
   }
 
   /// Represents a transformer with its losses.
-  public struct Transformer {
+  struct Transformer {
     let injectionLossFractionAtST: Double
     let resistiveLossAtSTC: Double
     let ironLoss: Double
@@ -129,9 +129,9 @@ public struct PV {
   /// Convert DC power and voltage to AC power
   ///
   /// Performance is described at three DC input voltage levels
-  public struct Inverter {
-    public let voltageRange: ClosedRange<Double>
-    public let maxPower: Double
+  struct Inverter {
+    let voltageRange: ClosedRange<Double>
+    let maxPower: Double
 
     let dc_power: [Double]
     let voltageLevels: [Double]

@@ -15,7 +15,7 @@ import Helpers
 /// The properties represent the presence or absence of a solar field, heater, boiler, gas turbine, and thermal storage in the plant's design.
 public enum Design {
   /// The layout of the plant.
-  public static var layout: Layout = Layout()
+  static var layout: Layout = Layout()
 
   /// A boolean indicating whether the plant design includes a solar field.
   static let hasSolarField = layout.solarField > 0
@@ -34,33 +34,33 @@ public enum Design {
 }
 
 /// Layout of the plant
-public struct Layout: Codable, Equatable, Hashable, CustomStringConvertible {
+struct Layout: Codable, Equatable, Hashable, CustomStringConvertible {
   /// Number of loops in the solar field.
-  public var solarField = 148.0
+  var solarField = 148.0
 
   /// Thermal power of the heater.
-  public var heater = 10.0
+  var heater = 10.0
 
   /// Thermal power of the heat exchanger.
-  public var heatExchanger = 75.0
+  var heatExchanger = 75.0
 
   /// Thermal power of the boiler.
-  public var boiler = 0.0
+  var boiler = 0.0
 
   /// Thermal power of the gas turbine.
-  public var gasTurbine = 0.0
+  var gasTurbine = 0.0
 
   /// Thermal power of the power block.
-  public var powerBlock = 70.0
+  var powerBlock = 70.0
 
   /// Storage capacity in hours.
-  public var storageHours = 5.0
+  var storageHours = 5.0
 
   /// Storage capacity in energy.
-  public var storageCapacity = 0.0
+  var storageCapacity = 0.0
 
   /// Storage capacity in mass.
-  public var storageTonnage = 0.0
+  var storageTonnage = 0.0
 
   /// A string representation of the `Layout` instance.
   public var description: String {
@@ -77,7 +77,7 @@ extension Layout: TextConfigInitializable {
   ///
   /// - Parameter file: The `TextConfigFile` containing layout information.
   /// - Throws: An error if there is an issue reading or parsing the layout data from the file.
-  public init(file: TextConfigFile) throws {
+  init(file: TextConfigFile) throws {
     // Extract values from the file and store them in an array
     let values: [String] = file.lines.filter { !$0.isEmpty }.map { value in
       String(value.prefix(while: {!$0.isWhitespace})) 

@@ -19,6 +19,19 @@ import Utilities
 /// simulation process. The enum is used as a container for these simulation
 /// settings to organize and manage them efficiently.
 public enum Simulation {
+  /// Sets the number of simulation steps per hour.
+  ///
+  /// The `steps` function allows you to configure the number of simulation steps
+  /// per hour, which defines the granularity of the simulation time intervals.
+  /// The more steps per hour, the finer the simulation resolution, but it may
+  /// also increase computational requirements. The step size influences the
+  /// precision of time-dependent calculations during the simulation.
+  ///
+  /// - Parameter perHour: An integer representing the number of simulation steps
+  ///                      to be performed in one hour.
+  public static func steps(perHour: Int) {
+    time.steps = .init(rawValue: perHour) ?? .hour
+  }
   /// A boolean flag indicating whether the simulation is starting or not.
   ///
   /// This property is used to track the start of the simulation and control
@@ -37,7 +50,7 @@ public enum Simulation {
    (Simulation.initialValues.temperatureOfHTFinPipes,
     Simulation.initialValues.temperatureOfHTFinPipes)
 
-  public static var initialValues = InitValues(
+  static var initialValues = InitValues(
     temperatureOfHTFinPipes: Temperature(celsius: 300.0),
     temperatureOfHTFinHCE: Temperature(celsius: 250.0),
     massFlowInSolarField: 0.0
@@ -56,7 +69,7 @@ public enum Simulation {
   /// The `time` property defines various time-related parameters used in the
   /// simulation. It includes information about leap years, date intervals,
   /// holidays, and time steps used to model the simulation over time.
-  public static var time = Period(
+  static var time = Period(
     isLeapYear: false,
     dateInterval: nil,
     holidays: [],
@@ -69,7 +82,7 @@ public enum Simulation {
   /// used during the simulation process. It includes values for parameters
   /// such as temperature, mass, insolation, and electrical tolerances,
   /// which are used to control and fine-tune the simulation behavior.
-  public static var parameter = Simulation.Parameter(
+  static var parameter = Simulation.Parameter(
     deltaFreezeTemperaturePump: 151.0,
     deltaFreezeTemperatureHeat: 40.0,
     minTemperatureRaiseStartUp: 1.0,
@@ -93,7 +106,7 @@ public enum Simulation {
   /// used to modify and fine-tune the simulation model. These factors
   /// influence the efficiency and heat loss parameters of the simulation
   /// components, allowing for realistic and adjustable simulation results.
-  public static var adjustmentFactor = Simulation.AdjustmentFactors(
+  static var adjustmentFactor = Simulation.AdjustmentFactors(
     efficiencySolarField: 1.0,
     efficiencyTurbine: 1.0,
     efficiencyHeater: 1.0,
@@ -110,7 +123,7 @@ public enum Simulation {
 /// the heat transfer fluid (HTF) in pipes, the temperature of the HTF in the
 /// heat collector element (HCE), and the initial mass flow rate in the solar
 /// field.
-public struct InitValues: Codable {
+struct InitValues: Codable {
   let temperatureOfHTFinPipes,
     temperatureOfHTFinHCE: Temperature
   let massFlowInSolarField: MassFlow
@@ -124,7 +137,7 @@ extension InitValues {
   ///   the `InitValues` instance.
   /// - Throws: An error if there is an issue reading or parsing the data
   ///   from the text configuration file.
-  public init(file: TextConfigFile) throws {
+  init(file: TextConfigFile) throws {
     let ln: (Int) throws -> Double = { try file.readDouble(lineNumber: $0) }
     self.temperatureOfHTFinPipes = try Temperature(celsius: ln(7))
     self.temperatureOfHTFinHCE = try Temperature(celsius: ln(10))

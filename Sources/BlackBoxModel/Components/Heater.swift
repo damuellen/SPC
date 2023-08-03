@@ -18,22 +18,22 @@ extension Heater: CustomStringConvertible {
 }
 
 /// A struct representing the heater component with state and functions for mapping the heater.
-public struct Heater: Parameterizable, HeatTransfer {
+struct Heater: Parameterizable, HeatTransfer {
 
   /// The name of the heater.
-  var name: String = Heater.parameter.name
+  private(set) var name: String = Heater.parameter.name
 
   /// The mass flow rate of the heater.
-  public internal(set) var massFlow: MassFlow = .zero
+  var massFlow: MassFlow = .zero
 
   /// The temperature at the inlet and outlet of the heater.
-  public internal(set) var temperature: (inlet: Temperature, outlet: Temperature)
+  var temperature: (inlet: Temperature, outlet: Temperature)
 
   /// The current operating mode of the heater.
-  public internal(set) var operationMode: OperationMode
+  private(set) var operationMode: OperationMode
 
   /// The possible operating modes of the heater.
-  public enum OperationMode {
+  enum OperationMode {
     case normal(Ratio)
     case charge(Ratio)
     case reheat
@@ -83,11 +83,15 @@ public struct Heater: Parameterizable, HeatTransfer {
         + parameter.electricalParasitics[1] * load.quotient)
   }
 
-  /// Updates the mass flow based on the heat transfer component.
+  public mutating func change(mode: OperationMode) {
+    operationMode = mode
+  }
+
+  /// Adjusts the mass flow rate based on the provided heat transfer component.
   ///
-  /// - Parameter c: The heat transfer component.
-  mutating func massFlow(from c: HeatTransfer) {
-     massFlow.rate = min(c.massFlow.rate, Heater.parameter.maximumMassFlow)
+  /// - Parameter heatTransfer: The heat transfer component used for updating the mass flow.
+  mutating func adjust(massFlow component: HeatTransfer) {
+    massFlow.rate = min(component.massFlow.rate, Heater.parameter.maximumMassFlow)
   }
 
   /// Calculates the thermal power and fuel consumption of the heater based on the given parameters.
@@ -260,7 +264,7 @@ extension Heater.OperationMode: RawRepresentable {
   public typealias RawValue = String
 
   /// Initializes an `Heater.OperationMode` based on its raw value.
-  public init?(rawValue: RawValue) {
+  init?(rawValue: RawValue) {
     switch rawValue {
     case "normal(Ratio)": self = .normal(.zero)
     case "charge(Ratio)": self = .normal(.zero)
@@ -274,7 +278,7 @@ extension Heater.OperationMode: RawRepresentable {
   }
 
   /// The raw value representation of the `Heater.OperationMode`.
-  public var rawValue: RawValue {
+  var rawValue: RawValue {
     switch self {
     case .normal(let load): return "Normal with load: \(load.percentage)"
     case .charge(let load): return "Charge with load: \(load.percentage)"

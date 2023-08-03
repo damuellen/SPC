@@ -25,7 +25,7 @@ extension Heater {
     - Parasitics at full load
     - Parasitic performance coefficients
   */
-  public struct Parameter: Codable, Equatable {
+  struct Parameter: Codable, Equatable {
     /// The name of the heater parameter set.
     let name: String
     /// The efficiency of the heater.
@@ -71,7 +71,7 @@ extension Heater.Parameter: CustomStringConvertible {
 extension Heater.Parameter: TextConfigInitializable {
   /// Creates a `Heater.Parameter` instance using the data from a `TextConfigFile`.
   /// - Parameter file: The `TextConfigFile` containing the data for the parameter.
-  public init(file: TextConfigFile) throws {
+  init(file: TextConfigFile) throws {
     let ln: (Int) throws -> Double = { try file.readDouble(lineNumber: $0) }
     self = try .init(
       name: file.name,

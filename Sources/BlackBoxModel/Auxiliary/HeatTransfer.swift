@@ -46,7 +46,7 @@ extension HeatTransferFluid {
   ///
   /// - Parameter file: The TextConfigFile containing the configuration data.
   /// - Throws: An error if there's an issue reading the configuration file.
-  public init(file: TextConfigFile) throws {
+  init(file: TextConfigFile) throws {
     // Helper function to read double values from the configuration file at the given line number.
     let ln: (Int) throws -> Double = { try file.readDouble(lineNumber: $0) }
     try self.init(
@@ -70,10 +70,10 @@ protocol HeatTransfer: CustomStringConvertible {
 }
 
 /// A struct representing a heat transfer cycle with mass flow and temperature properties.
-public struct Cycle: HeatTransfer {
-  public var name: String
-  public var massFlow: MassFlow
-  public var temperature: (inlet: Temperature, outlet: Temperature)
+struct Cycle: HeatTransfer {
+  var name: String
+  var massFlow: MassFlow
+  var temperature: (inlet: Temperature, outlet: Temperature)
 }
 
 // Extension of Cycle struct to provide additional initializers.
@@ -198,31 +198,14 @@ extension HeatTransfer {
            "\(temperature) is below the freezing point of the HTF")
   }
 
-  /// Set the mass flow and inlet temperature from another HeatTransfer instance.
-  mutating func massFlow(in other: HeatTransfer) {
-    massFlow = other.massFlow
-    temperature.inlet = other.temperature.inlet
-  }
-
-  /// Set the mass flow and inlet temperature from another outlet.
-  mutating func massFlow(from other: HeatTransfer) {
-    massFlow = other.massFlow
-    temperature.inlet = other.temperature.outlet
-  }
-
   /// Set the inlet temperature from another outlet.
-  mutating func inletTemperature(output other: HeatTransfer) {
+  mutating func inletTemperature(outlet other: HeatTransfer) {
     temperature.inlet = other.temperature.outlet
   }
 
   /// Set the inlet temperature from another inlet.
-  mutating func inletTemperature(input other: HeatTransfer) {
+  mutating func inletTemperature(inlet other: HeatTransfer) {
     temperature.inlet = other.temperature.inlet
-  }
-
-  /// Set the outlet temperature from another outlet.
-  mutating func outletTemperature(output other: HeatTransfer) {
-    temperature.outlet = other.temperature.outlet
   }
 }
 

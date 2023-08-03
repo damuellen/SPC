@@ -9,7 +9,7 @@ import Units
 
 extension Storage {
   /// The operation mode options for the storage systen
-  public enum OperationMode {
+  enum OperationMode {
     case noOperation, discharge(load: Ratio), charge(load: Ratio)
     case preheat, fossilCharge, freezeProtection
 
@@ -150,9 +150,9 @@ extension Storage {
     -> Power
   {
     // Calculate the mass flow in the storage system based on the solar field.
-    storage.massFlow(from: solarField)
+    storage.massFlow = solarField.massFlow
     storage.massFlow -= HeatExchanger.designMassFlow
-    
+    storage.inletTemperature(outlet: solarField)
     // Adjust the mass flow based on the heat exchanger efficiency.
     storage.massFlow.adjust(factor: parameter.heatExchangerEfficiency)
     
@@ -282,7 +282,7 @@ extension Storage {
     -> (Power, Power)
   {
     // Set the inlet temperature of the storage system from the power block output.
-    storage.inletTemperature(output: powerBlock)
+    storage.inletTemperature(outlet: powerBlock)
     
     // Calculate the mass flow in the storage system based on the design mass flow and power block mass flow.
     storage.massFlow = HeatExchanger.designMassFlow - powerBlock.massFlow
@@ -327,21 +327,18 @@ extension Storage {
       
       // Calculate the maximum load and efficiency of the steam turbine.
       let maxLoad: Double = 1
-    /*
-    (maxLoad, steamTurbine.efficiency) = SteamTurbine.perform(
-        steamTurbine.load,
-        Boiler.initialState,
-        GasTurbine.initialState,
-        status.heatExchanger,
-        ambientTemperature
+
+      let efficiency = steamTurbine.perform(
+        heatExchanger: solarField.temperature.outlet,
+        ambient: Temperature(celsius: 20)
       )
-*/
+
       // Calculate the ratio of heat supplied by the solar field and thermal power to the maximum power of the steam turbine.
       let ratio = (heatSolar + thermalPower.megaWatt)
-        / (SteamTurbine.parameter.power.max / steamTurbine.efficiency.quotient)
+        / (SteamTurbine.parameter.power.max / efficiency.quotient)
       
       // Adjust the steam turbine load based on the calculated ratio and the maximum load.
-      steamTurbine.load = Ratio(abs(ratio), cap: maxLoad)
+      steamTurbine.adjust(load: Ratio(abs(ratio), cap: maxLoad)) 
       
       // Calculate the outlet temperature of the mixing outlets of the solar field and storage system.
       let mixingOutlets = SolarField.parameter.HTF.mixingOutlets
@@ -391,7 +388,8 @@ extension Storage {
     -> (Power, Power)
   {       
     // Calculate the mass flow in the storage system from the power block output.
-    storage.massFlow(from: powerBlock)
+    storage.massFlow = powerBlock.massFlow
+    storage.inletTemperature(inlet: powerBlock)
     
     // Subtract the mass flow supplied by the solar field from the storage system's mass flow.
     storage.massFlow -= solarField.massFlow
@@ -452,7 +450,7 @@ extension Storage {
     storage.massFlow = antiFreezeFlow.adjusted(withFactor: splitfactor)
     solarField.header.massFlow = antiFreezeFlow
 
-    storage.inletTemperature(output: powerBlock)
+    storage.inletTemperature(inlet: powerBlock)
     
     var fittedTemperature = 0.0
     if Storage.parameter.temperatureCharge[1] > 0 {

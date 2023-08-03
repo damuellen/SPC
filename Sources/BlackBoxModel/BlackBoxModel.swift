@@ -207,7 +207,7 @@ public enum BlackBoxModel {
       // Setting the mass flow required by the power block in the solar field
       status.solarField.requiredMassFlow = HeatExchanger.designMassFlow
       if status.solarField.massFlow > .zero {
-        status.solarField.inletTemperature(output: status.powerBlock)
+        status.solarField.inletTemperature(outlet: status.powerBlock)
       } else {
         // Calculate the heat losses in the cold header
         status.solarField.temperature.inlet = status.solarField.heatLosses(

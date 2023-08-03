@@ -294,25 +294,21 @@ enum HCE {
       let heatInput = insolation * inFocus * availability
 
       // Calculate the heat losses of the HCE for the current outlet temperature
-      solarField.heatLossesHCE = HCE.heatLosses(
+      solarField.heatLosses(hce: HCE.heatLosses(
         inlet: hce.temperature.inlet,
         outlet: hce.temperature.outlet,
         insolation: insolation,
         ambient: ambient
-      )
-
-      // Set the heat losses of the solar field to those of the HCE
-      solarField.heatLosses = solarField.heatLossesHCE
+      ))
 
       // If there is mass flow in the HCE, consider additional heat loss through the pipe
       if hce.massFlow > .zero {
-        solarField.heatLosses += SolarField.pipeHeatLoss(pipe: hce.average, ambient: ambient)
-        solarField.heatLosses *= Simulation.adjustmentFactor.heatLossHTF
+        solarField.heatLoss(pipe: hce.average, ambient: ambient)
       }
 
       // If there is heat input, apply adjustment factor to the solar field heat losses
       if heatInput > .zero {
-        factorHeatLossHTF(solarField: &solarField, inFocus: inFocus)
+        solarField.factorHeatLossHTF(inFocus: inFocus)
       }
 
       // Calculate the net deltaHeat (+ or -) in the HCE
@@ -376,43 +372,5 @@ enum HCE {
     
     // Return the time interval for the iteration
     return time
-  }
-
-  
-  /// Applies the heat loss factor for the Heat Transfer Fluid (HTF) based on the focus quotient and other parameters.
-  ///
-  /// - Parameters:
-  ///   - solarField: The solar field instance (inout) to be used for calculations.
-  ///   - inFocus: The focus quotient.
-  static func factorHeatLossHTF(solarField: inout SolarField, inFocus: Double) {
-    let sof = SolarField.parameter
-    let factorHeatLossHTF = Simulation.adjustmentFactor.heatLossHTF
-    if sof.heatlossDump == false, sof.heatlossDumpQuad == false {
-      solarField.heatLosses *= factorHeatLossHTF * inFocus
-    } else {
-      if sof.heatlossDumpQuad == false {
-        solarField.heatLosses *= factorHeatLossHTF
-      } else if case .H = sof.layout {
-        if inFocus > 0.75 { // between 0% and 25% dumping
-          solarField.heatLosses *= factorHeatLossHTF
-        } else if inFocus > 0.5 { // between 25% and 50% dumping
-          solarField.heatLosses *= factorHeatLossHTF * 0.75
-          // 25% of the heat losses can be reduced -> 1 quadrant not in operation
-        } else if inFocus > 0.25 { // between 50% and 75% dumping
-          solarField.heatLosses *= factorHeatLossHTF * 0.5
-          // 50% of the heat losses can be reduced -> 1 quadrant not in operation
-        } else if inFocus > 0 { // between 75% and 100% dumping
-          solarField.heatLosses *= factorHeatLossHTF * 0.25
-          // 75% of the heat losses can be reduced -> 1 quadrant not in operation
-        }
-      } else if case .I = sof.layout {
-        if inFocus > 0.5 {  // between 0% and 50% dumping
-          solarField.heatLosses *= factorHeatLossHTF
-        } else if inFocus > 0 { // between 50% and 100% dumping
-          solarField.heatLosses *= factorHeatLossHTF * 0.5
-          // 50% of the heat losses can be reduced -> 1/2 SF not in operation
-        }
-      }
-    }
   }
 }

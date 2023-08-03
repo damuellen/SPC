@@ -12,25 +12,25 @@ import Foundation
 import Utilities
 
 /// A struct representing the state and functions for mapping the BESS
-public struct BESS {
+struct BESS {
 
   /// Energy stored in the system in Wh
-  public var energy: Double
+  private(set) var energy: Double
   /// Maxmimum energy that the system can store in Wh
-  public static var capacity: Double = .zero
+  static var capacity: Double = .zero
   /// Maximimum discharge charge power that you the system can handle in W
-  public static var maximumPower: Double = .zero
+  static var maximumPower: Double = .zero
   /// Efficiency of the system
-  public static var efficiency: Ratio = .zero
+  static var efficiency: Ratio = .zero
 
-  public init() {
+  init() {
     self.energy = 0
   }
 
   /// Stores energy in the battery
   /// - Parameter energy: Amount of energy in Wh
   /// - Returns: Dumped energy in Wh
-  public mutating func store(energy: Double) -> Double {
+  mutating func store(energy: Double) -> Double {
     var energyDumped = 0.0
     // Apply efficiency to the energy to be stored
     var energy = energy * BESS.efficiency.quotient
@@ -47,7 +47,7 @@ public struct BESS {
   /// - Parameter power: Power used in W
   /// - Parameter time: Time period over which the electrical power is applied
   /// - Returns: Dumped energy in Wh
-  public mutating func store(power: Double, span: TimeInterval) -> Double {
+  mutating func store(power: Double, span: TimeInterval) -> Double {
     let energy = power * (span / 3_600)
     return store(energy: energy)
   }
@@ -55,7 +55,7 @@ public struct BESS {
   /// Retrieve energy from the storage
   /// - Parameter energy: Energy to retrieve</param>
   /// - Returns: Retrieved energy in Wh
-  public mutating func retrieve(energy: Double) -> Double {
+  mutating func retrieve(energy: Double) -> Double {
     var energyRetrieved = energy
     // There is not that much energy available
     if energy > self.energy {
@@ -68,7 +68,7 @@ public struct BESS {
     return energyRetrieved
   }
 
-  public mutating func retrieve(power: Double, span: TimeInterval) -> Double {
+  mutating func retrieve(power: Double, span: TimeInterval) -> Double {
     let energyRequested = power * (span / 3_600)
     return retrieve(energy: energyRequested)
   }

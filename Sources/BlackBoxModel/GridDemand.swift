@@ -12,10 +12,10 @@ import DateExtensions
 import Units
 
 /// A struct that represents the demand ratio for electricity from the grid over different time intervals
-public struct GridDemand: Codable {
+struct GridDemand: Codable {
 
   /// A static instance of `GridDemand`, used as a singleton to access the current demand data.
-  static var current = GridDemand()
+  public static var current = GridDemand()
 
   /// An array of `Ratio` instances representing the demand ratio for electricity in different time intervals.
   /// Each element of the array corresponds to a specific hour-month combination in a year (12 months * 24 hours = 288 elements).
@@ -46,7 +46,7 @@ extension GridDemand {
   ///
   /// - Parameter file: The `TextConfigFile` containing demand ratio data.
   /// - Throws: An error if there is an issue reading or parsing the demand ratio data from the file.
-  public init(file: TextConfigFile) throws {
+  init(file: TextConfigFile) throws {
     // Extract demand ratio data from the file and store it in a 2D array
     let table = file.lines[5..<29].map { $0.split(separator: ",").map(\.trimmed) }
     var data = [Ratio]()
@@ -61,4 +61,4 @@ extension GridDemand {
 
 // MARK: - Other Unused Struct
 
-public struct Demand {}
+struct Demand {}

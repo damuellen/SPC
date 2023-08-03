@@ -14,7 +14,7 @@ import Utilities
 
 extension SteamTurbine: CustomStringConvertible {
   public var description: String {
-    "  Mode:".padding(20) + "\(operationMode)".padding(30) + "\(efficiency)"
+    "  Mode:".padding(20) + "\(operationMode)".padding(30)
   }
 }
 
@@ -31,32 +31,28 @@ extension SteamTurbine.OperationMode: CustomStringConvertible {
 }
 
 /// A struct representing the state and functions for mapping the steam turbine
-public struct SteamTurbine: Parameterizable {
+struct SteamTurbine: Parameterizable {
   
   /// The current operating mode of the steam turbine
-  public internal(set) var operationMode: OperationMode
+  private(set) var operationMode: OperationMode
   /// Returns the load applied
-  public internal(set) var load: Ratio {
+  private(set) var load: Ratio {
     get { 
       if case .operating(let load) = operationMode
         { return load } else { return .zero }
     }
-    set { 
-      if case .operating(_) = operationMode 
-        { operationMode = .operating(newValue) }
-    }
+    set { operationMode = .operating(newValue) }
   }
 
-  public internal(set) var efficiency: Ratio = .zero
   /// The operation mode options for the steam turbine
-  public enum OperationMode {
+  enum OperationMode {
     case noOperation(time: Int)
     case startUp(time: Int, energy: Double)
     case scheduledMaintenance
     case operating(Ratio)
   }
 
-  public var isOperating: Bool {
+  var isOperating: Bool {
     switch operationMode {
     case .operating: return true
     default: return false
@@ -68,9 +64,15 @@ public struct SteamTurbine: Parameterizable {
   public static var parameter: Parameter = Parameters.tb
 
   /// Used to sum time only when time step has changed
-  static private var oldMinute = 0
+  private static var oldMinute = 0
 
-  /// Calculates the Electric gross
+  /// Calculates the gross electric output of the steam turbine based on the given thermal energy flow, heater data, heat exchanger data, and ambient temperature.
+  /// - Parameters:
+  ///   - heatFlow: The thermal energy flow information, representing the heat exchanger's energy in MegaWatt (MW), as `ThermalEnergy`.
+  ///   - heater: The heater data used in the calculations, as `Heater`.
+  ///   - heatExchanger: The heat exchanger data, including temperature information, as `HeatExchanger`.
+  ///   - temperature: The ambient temperature in Celsius, as `Temperature`.
+  /// - Returns: The calculated gross electric output of the steam turbine in MegaWatt (MW) as a `Double`.
   mutating func callAsFunction(
     heatFlow: ThermalEnergy,
     heater: Heater,
@@ -115,16 +117,12 @@ public struct SteamTurbine: Parameterizable {
       }
 
       if isOperating {
-        let maxLoad: Double
-        (maxLoad, efficiency.quotient) = SteamTurbine.perform(
-          load: load,
+        let efficiency = perform(
           heatExchanger: heatExchanger.temperature.inlet,
           ambient: temperature
         )
-        
         let gross = heatFlow.heatExchanger.megaWatt * efficiency.quotient
-        let ratio = gross / parameter.power.max
-        load = Ratio(ratio, cap: maxLoad)
+        load.quotient = min(load.quotient, gross / parameter.power.max)
         return gross
       } else {  // Start Up sequence: Energy is lost / Dumped
         // Avoid summing up inside an iteration
@@ -144,6 +142,9 @@ public struct SteamTurbine: Parameterizable {
     }
   }
 
+  /// Calculates the minimum load that the steam turbine can operate at, based on the given ambient temperature.
+  /// - Parameter ambient: The ambient temperature in Celsius.
+  /// - Returns: The minimum load as a `Ratio`.
   static func minLoad(atTemperature ambient: Temperature) -> Ratio {
     let minLoad: Ratio
     if SteamTurbine.parameter.minPowerFromTemp.isInapplicable {
@@ -157,7 +158,9 @@ public struct SteamTurbine: Parameterizable {
     }
     return minLoad
   }
-
+  /// Calculates the minimum power output that the steam turbine can produce, based on the given ambient temperature.
+  /// - Parameter ambient: The ambient temperature in Celsius.
+  /// - Returns: The minimum power output in MegaWatt (MW) as a `Double`.
   static func minPower(atTemperature ambient: Temperature) -> Double {
     var minPower: Double
     if SteamTurbine.parameter.minPowerFromTemp.isInapplicable {
@@ -174,20 +177,28 @@ public struct SteamTurbine: Parameterizable {
     return minPower
   }
 
-  static func perform(
-    load: Ratio,
+  /// Adjusts the load applied to the steam turbine, ensuring that it does not exceed the available power block capacity.
+  /// - Parameter load: The desired load to be applied, represented as a `Ratio`.
+  mutating func adjust(load: Ratio) {
+    self.load = min(load, Availability.current.value.powerBlock)
+  }
+
+  /// Performs the efficiency calculation for the steam turbine.
+  /// - Parameters:
+  ///   - heatExchanger: The temperature of the heat exchanger inlet in Celsius.
+  ///   - ambient: The ambient temperature in Celsius.
+  /// - Returns: The efficiency of the steam turbine as a `Ratio`.
+  mutating func perform(
     heatExchanger: Temperature,
     ambient: Temperature
-  ) -> (maxLoad: Double, efficiency: Double) {
+  ) -> Ratio {
+    let parameter = SteamTurbine.parameter
     let maxEfficiency =
       parameter.efficiencyNominal
       * (parameter.efficiencyTempIn_A
         * heatExchanger.celsius ** parameter.efficiencyTempIn_B)
         * parameter.efficiencyTempIn_cf  
 
-    // Dependency of Heat Rate on Ambient Temperature
-
-    var maxLoad: Double = 1
     var dcFactor = 1.0
     
     if parameter.efficiencyTemperature[1] >= 1 {
@@ -197,13 +208,13 @@ public struct SteamTurbine: Parameterizable {
         temperature: ambient
       )
 
-      maxLoad = loadMax.quotient
+      load.quotient = min(load.quotient, loadMax.quotient)
       dcFactor = dc.quotient
     }
 
     var efficiency = parameter.efficiency(load)
 
-    if parameter.efficiencyTemperature.coefficients.isEmpty == false {
+    if !parameter.efficiencyTemperature.isInapplicable {
       efficiency *= parameter.efficiencyTemperature(ambient.celsius)
     }
 
@@ -235,8 +246,7 @@ public struct SteamTurbine: Parameterizable {
     } else {
       efficiency *= maxEfficiency * correctionWetBulbTemperature
     }
-
-    let adjustmentFactor = Simulation.adjustmentFactor.efficiencyTurbine
-    return (maxLoad, efficiency * adjustmentFactor)
+    efficiency *= Simulation.adjustmentFactor.efficiencyTurbine
+    return Ratio(efficiency)
   }
 }

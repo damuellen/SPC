@@ -13,7 +13,7 @@ import Utilities
 /// The PowerBlock namespace contains structures and extensions related to power block parameters.
 extension PowerBlock {
   /// The Parameter struct represents the parameters of the power block and is Codable and Equatable for serialization and comparison.
-  public struct Parameter: Codable, Equatable {
+  struct Parameter: Codable, Equatable {
     /// The name of the power block.
     let name: String
     /// The fixed electrical parasitics for load > 0 [MW].
@@ -76,7 +76,7 @@ extension PowerBlock.Parameter: CustomStringConvertible {
 extension PowerBlock.Parameter: TextConfigInitializable {
   /// Creates a `PowerBlock.Parameter` instance using the data from a `TextConfigFile`.
   /// - Parameter file: The `TextConfigFile` containing the data for the parameter.
-  public init(file: TextConfigFile) throws {
+  init(file: TextConfigFile) throws {
     var line = 10
     func go(_ spacing: Int) throws -> Double {
       defer { line += spacing }

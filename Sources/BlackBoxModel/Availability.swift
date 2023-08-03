@@ -27,7 +27,7 @@ struct Availability: Codable {
   private let data: [Values]
 
   /// A nested struct representing the availability values for different components of the power plant.
-  public struct Values: Codable {
+  struct Values: Codable {
     var solarField: Ratio = 0.993
     var breakHCE: Ratio = 0.001
     var airHCE: Ratio = 0.0
@@ -51,7 +51,7 @@ struct Availability: Codable {
 
 /// An extension to provide an initializer to create an Availability instance from a TextConfigFile.
 extension Availability {
-  public init(file: TextConfigFile) throws {
+  init(file: TextConfigFile) throws {
     let ln: (Int) throws -> Double = { try file.readDouble(lineNumber: $0) }
     var data = [Values()]
     for n in 0..<12 {

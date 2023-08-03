@@ -9,7 +9,7 @@
 //
 
 /// Structure representing all parameters used in a simulation.
-public struct Parameters: Codable {
+struct Parameters: Codable {
   /// Availability configuration used in the simulation.
   var availability = Availability.current
   /// Simulation configuration parameters.

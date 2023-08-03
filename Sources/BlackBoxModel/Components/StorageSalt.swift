@@ -27,17 +27,17 @@ extension Storage.Salt: MeasurementsConvertible {
 extension Storage {
 
   /// A struct representing the salt storage inside the main `Storage` struct.
-  public struct Salt { 
+  struct Salt { 
     /// The active mass of salt in the storage (being charged or discharged).
-    public internal(set) var active: Mass = .zero
+    var active: Mass = .zero
     /// The minimum mass of salt required for safe operation.
-    public internal(set) var minimum: Mass
+    var minimum: Mass
     /// The mass of cold salt in the storage.
-    public internal(set) var cold: Mass
+    var cold: Mass
     /// The mass of hot salt in the storage.
-    public internal(set) var hot: Mass
+    var hot: Mass
     /// The total mass of salt in the storage (cold + hot).
-    public internal(set) var total: Mass
+    var total: Mass
 
     /// Initializes a `Salt` struct with calculated salt masses.
     init() {

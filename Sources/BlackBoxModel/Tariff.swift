@@ -28,7 +28,7 @@
 ///   capacity used.
 /// - `bonusPayment`: The payment amount for the bonus, if applicable.
 /// - `asAvailableCapacity`: The payment amount based on the available capacity.
-public struct TariffStructure: Codable {
+struct TariffStructure: Codable {
   let name: String
   let abbreviation: String
   let energyPayment, energieCost: Double
@@ -83,14 +83,14 @@ extension TariffStructure: CustomStringConvertible {
 /// The `init(file:)` initializer reads and parses the necessary data from the
 /// provided `TextConfigFile`, creating an instance of `Tariff` based on the
 /// file contents.
-public struct Tariff: Codable {
+struct Tariff: Codable {
   let name: String
   let tariff: [TariffStructure]
   let season: [TariffSeason]
 }
 
 extension Tariff: TextConfigInitializable {
-  public init(file: TextConfigFile) throws {
+  init(file: TextConfigFile) throws {
     let ln1: (Int) throws -> Double = { try file.readDouble(lineNumber: $0) }
     var tariffs = [TariffStructure]()
     for n in 0..<8 {

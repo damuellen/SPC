@@ -9,7 +9,7 @@
 //
 
 // A struct representing a power range with minimum, nominal, and maximum values.
-public struct PowerRange {
+struct PowerRange {
 
   var range: ClosedRange<Double>
 
@@ -60,9 +60,9 @@ extension PowerRange: Codable {
 }
 
 // A generic struct representing sides with cold and hot properties, both Codable.
-public struct Sides<T>: Codable where T: Codable {
-  public var cold: T
-  public var hot: T
+struct Sides<T>: Codable where T: Codable {
+  var cold: T
+  var hot: T
 
   // Initializes a Sides instance with the given cold and hot values.
   public init(_ cold: T, _ hot: T) {

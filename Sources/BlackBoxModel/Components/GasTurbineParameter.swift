@@ -25,7 +25,7 @@ extension GasTurbine {
    - Parasitics as a function of load (polynomial coefficients)
    - Design temperature
  */
-  public struct Parameter: Codable, Equatable {
+  struct Parameter: Codable, Equatable {
     /// The name of the gas turbine parameter set.
     let name: String
     /// The gross power of the gas turbine.
@@ -69,7 +69,7 @@ extension GasTurbine.Parameter: CustomStringConvertible {
 extension GasTurbine.Parameter: TextConfigInitializable {
   /// Creates a `GasTurbine.Parameter` instance using the data from a `TextConfigFile`.
   /// - Parameter file: The `TextConfigFile` containing the data for the parameter.
-  public init(file: TextConfigFile) throws {
+  init(file: TextConfigFile) throws {
     let ln: (Int) throws -> Double = { try file.readDouble(lineNumber: $0) }
     self = try .init(
       name: file.name,

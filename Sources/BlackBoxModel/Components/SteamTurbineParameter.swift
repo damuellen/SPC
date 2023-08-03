@@ -12,7 +12,7 @@ import Utilities
 
 extension SteamTurbine {
   /// A struct representing the parameters of the steam turbine.
-  public struct Parameter: Codable {
+  struct Parameter: Codable {
     /// The name of the steam turbine parameter set.
     let name: String
     /// The power range of the steam turbine.
@@ -87,7 +87,7 @@ extension SteamTurbine.Parameter: CustomStringConvertible {
 extension SteamTurbine.Parameter: TextConfigInitializable {
   /// Creates a `SteamTurbine.Parameter` instance using the data from a `TextConfigFile`.
   /// - Parameter file: The `TextConfigFile` containing the data for the parameter.
-  public init(file: TextConfigFile) throws {
+  init(file: TextConfigFile) throws {
     let ln: (Int) throws -> Double = { try file.readDouble(lineNumber: $0) }
     name = file.name
     power = try .init(range: ln(13)...ln(10), nom: 0)

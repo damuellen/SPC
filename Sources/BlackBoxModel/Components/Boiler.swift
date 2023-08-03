@@ -13,18 +13,18 @@ import DateExtensions
 import Units
 
 /// A struct representing the state and functions for mapping the boiler
-public struct Boiler: Parameterizable {
+struct Boiler: Parameterizable {
   /// The current operating mode of the boiler
-  public internal(set) var operationMode: OperationMode
+  private(set) var operationMode: OperationMode
 
-  var isMaintained: Bool
+  private(set) var isMaintained: Bool
   /// Returns the load applied
-  public internal(set) var load: Ratio
+  private(set) var load: Ratio
 
-  var startEnergy: Double
+  private(set) var startEnergy: Double
   // var startEnergyOld: Double
   /// The operation mode options for the boiler
-  public enum OperationMode {
+  enum OperationMode {
 
     case noOperation(hours: Double)
 
@@ -59,6 +59,10 @@ public struct Boiler: Parameterizable {
       parameter.nominalElectricalParasitics *
       (parameter.electricalParasitics[0] +
         parameter.electricalParasitics[1] * load.quotient)
+  }
+
+  public mutating func change(mode: OperationMode) {
+    operationMode = mode
   }
 
   mutating func callAsFunction(
@@ -325,9 +329,9 @@ extension Boiler: CustomStringConvertible {
 }
 
 extension Boiler.OperationMode: RawRepresentable {
-  public typealias RawValue = String
+  typealias RawValue = String
 
-  public init?(rawValue: RawValue) {
+  init?(rawValue: RawValue) {
     switch rawValue {
     case "noOperation": self = .noOperation(hours: 0)
     case "SI": self = .SI
@@ -342,7 +346,7 @@ extension Boiler.OperationMode: RawRepresentable {
     }
   }
 
-  public var rawValue: RawValue {
+  var rawValue: RawValue {
     switch self {
     case let .noOperation(hours): return "No Operation for \(hours) hours"
     case .SI: return "SI"

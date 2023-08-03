@@ -17,15 +17,15 @@ extension HeatExchanger: CustomStringConvertible {
 }
 
 /// A struct representing the state and functions for the heat exchanger.
-public struct HeatExchanger: Parameterizable, HeatTransfer {
+struct HeatExchanger: Parameterizable, HeatTransfer {
   /// The name of the heat exchanger.
-  var name: String = HeatExchanger.parameter.name
+  private(set) var name: String = HeatExchanger.parameter.name
 
   /// The mass flow rate of the heat exchanger.
-  public internal(set) var massFlow: MassFlow = .zero
+  var massFlow: MassFlow = .zero
 
   /// The temperatures of the heat exchanger (inlet and outlet).
-  public internal(set) var temperature: (inlet: Temperature, outlet: Temperature)
+  var temperature: (inlet: Temperature, outlet: Temperature)
 
   /// The amount of heat transferred out of the heat exchanger.
   var heatOut, heatToTES: Double

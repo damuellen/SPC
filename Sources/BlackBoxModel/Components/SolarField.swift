@@ -39,9 +39,9 @@ extension SolarField.OperationMode: CustomStringConvertible {
 }
 
 /// A struct representing the state and functions for mapping the solar field
-public struct SolarField: Parameterizable, HeatTransfer {
+struct SolarField: Parameterizable, HeatTransfer {
   /// The name of the solar field.
-  public let name = "Solar field"
+  let name = "Solar field"
 
   public enum Loop: Int {
     case design = 0
@@ -51,18 +51,18 @@ public struct SolarField: Parameterizable, HeatTransfer {
   }
 
   /// The current operating mode of the solar field
-  public internal(set) var operationMode: OperationMode
+  private(set) var operationMode: OperationMode
 
-  public internal(set) var eta: Double = 0.0
-  public internal(set) var loopEta: Double = 0.0
-  public internal(set) var heatLosses: Double = 0.0
-  public internal(set) var heatLossesHotHeader: Double = 0.0
-  public internal(set) var heatLossesHCE: Double = 0.0
+  private(set) var eta: Double = 0.0
+  private(set) var loopEta: Double = 0.0
+  private(set) var heatLosses: Double = 0.0
+  private(set) var heatLossesHotHeader: Double = 0.0
+  private(set) var heatLossesHCE: Double = 0.0
 
   var header: HeatTransfer
-  public internal(set) var loops: [Cycle]
+  var loops: [Cycle]
 
-  public var inFocus: Ratio {
+  var inFocus: Ratio {
     switch operationMode {
       case .defocus(let ratio): return ratio
       case .startUp, .track: return 1.0
@@ -70,12 +70,12 @@ public struct SolarField: Parameterizable, HeatTransfer {
     }
   }
   /// The temperature at the inlet and outlet of the solar field.
-  public internal(set) var temperature: (inlet: Temperature, outlet: Temperature) {
+  var temperature: (inlet: Temperature, outlet: Temperature) {
     get { header.temperature }
     set { header.temperature = newValue }
   }
   /// The mass flow rate of the solar field header.
-  public internal(set) var massFlow: MassFlow {
+  var massFlow: MassFlow {
     get { header.massFlow }
     set { header.massFlow = newValue }
   }
@@ -91,9 +91,9 @@ public struct SolarField: Parameterizable, HeatTransfer {
       SolarField.parameter.antiFreezeFlow.quotient * SolarField.parameter.maxMassFlow.rate
   )
 
-  var requiredMassFlow: MassFlow = .zero
+  var requiredMassFlow: MassFlow = HeatExchanger.designMassFlow
   /// The operation mode options for the solar field
-  public enum OperationMode {
+  enum OperationMode {
     case startUp
     case shutdown
     case follow
@@ -138,8 +138,8 @@ public struct SolarField: Parameterizable, HeatTransfer {
     assert(requiredMassFlow <= SolarField.parameter.maxMassFlow)
   }
 
-  static func pipeHeatLoss(pipe: Temperature, ambient: Temperature) -> Double {
-    ((pipe.kelvin - ambient.kelvin) / 333) ** 1 * parameter.pipeHeatLosses
+  mutating func heatLoss(pipe: Temperature, ambient: Temperature) {
+    heatLosses += ((pipe.kelvin - ambient.kelvin) / 333) ** 1 * SolarField.parameter.pipeHeatLosses
   }
 
   /// Calculates the parasitics of pumps
@@ -176,7 +176,7 @@ public struct SolarField: Parameterizable, HeatTransfer {
     switch storage.operationMode {
     case .freezeProtection:
       if Storage.parameter.temperatureCharge[1] > 0 {
-        inletTemperature(output: storage)
+        inletTemperature(outlet: storage)
       } else {
         temperature.inlet.kelvin = storage.antiFreezeTemperature
       }
@@ -442,19 +442,19 @@ public struct SolarField: Parameterizable, HeatTransfer {
     )
 
     /// Heat losses of the HCE for maximum outlet temperature
-    let heatLossesHCE = HCE.heatLosses(
+    heatLossesHCE = HCE.heatLosses(
       inlet: header.temperature.inlet,
       insolation: insolation,
       ambient: ambient
     )
 
-    var heatLosses = heatLossesHCE
+    heatLosses = heatLossesHCE
 
     /// Average HTF temperature in loop
     let avgT = Temperature.average(medium.maxTemperature, header.temperature.inlet)
 
     /// Add heat losses of the connecting pipes
-    heatLosses += SolarField.pipeHeatLoss(pipe: avgT, ambient: ambient)
+    heatLoss(pipe: avgT, ambient: ambient)
     heatLosses *= Simulation.adjustmentFactor.heatLossHTF
 
     /// The predefined availability of the solar field
@@ -532,6 +532,47 @@ public struct SolarField: Parameterizable, HeatTransfer {
       { sum, loop in sum + loop.massFlow.rate } / 3.0
 
     if header.massFlow > .zero { outletTemperature(last: last, time) }
+  }
+
+  /// Applies the heat loss factor for the HCE.
+  mutating func heatLosses(hce: Double) {
+    heatLosses = hce
+    heatLossesHCE = hce
+  }
+  /// Applies the heat loss factor for the Heat Transfer Fluid (HTF) based on the focus quotient and other parameters.
+  ///
+  /// - Parameters:
+  ///   - inFocus: The focus quotient.
+  mutating func factorHeatLossHTF(inFocus: Double) {
+    let sof = SolarField.parameter
+    let factorHeatLossHTF = Simulation.adjustmentFactor.heatLossHTF
+    if sof.heatlossDump == false, sof.heatlossDumpQuad == false {
+      heatLosses *= factorHeatLossHTF * inFocus
+    } else {
+      if sof.heatlossDumpQuad == false {
+        heatLosses *= factorHeatLossHTF
+      } else if case .H = sof.layout {
+        if inFocus > 0.75 { // between 0% and 25% dumping
+          heatLosses *= factorHeatLossHTF
+        } else if inFocus > 0.5 { // between 25% and 50% dumping
+          heatLosses *= factorHeatLossHTF * 0.75
+          // 25% of the heat losses can be reduced -> 1 quadrant not in operation
+        } else if inFocus > 0.25 { // between 50% and 75% dumping
+          heatLosses *= factorHeatLossHTF * 0.5
+          // 50% of the heat losses can be reduced -> 1 quadrant not in operation
+        } else if inFocus > 0 { // between 75% and 100% dumping
+          heatLosses *= factorHeatLossHTF * 0.25
+          // 75% of the heat losses can be reduced -> 1 quadrant not in operation
+        }
+      } else if case .I = sof.layout {
+        if inFocus > 0.5 {  // between 0% and 50% dumping
+          heatLosses *= factorHeatLossHTF
+        } else if inFocus > 0 { // between 50% and 100% dumping
+          heatLosses *= factorHeatLossHTF * 0.5
+          // 50% of the heat losses can be reduced -> 1/2 SF not in operation
+        }
+      }
+    }
   }
 }
 
