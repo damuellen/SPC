@@ -102,7 +102,7 @@ let platformTargets: [Target] = [
 
 let package = Package(
   name: "SPC",
-  platforms: [.macOS(.v13)],
+  platforms: [.macOS(.v13), .iOS(.v16)],
   products: platformProducts,
   dependencies: dependencies,
   targets: platformTargets,
