@@ -14,11 +14,11 @@ import Helpers
 ///   - labels: An array of corresponding String labels for each value.
 /// - Returns: A formatted string with values and labels aligned.
 public func formatting(_ values: [Double], _ labels: [String]) -> String {
-  let pairs = zip(
-    labels.map { "  " + $0.padding(30) },
-    values.map { String(format: "%03.2f", $0) }
-  )
-  return pairs.map { $0.0 + $0.1 }.joined(separator: "\n")
+  let values = values.map { String(format: "%03.2f", $0) }
+  let strings = zip(values, labels).map { value, label in 
+    "  " + label.padding(35 - value.count) + value
+  }
+  return strings.joined(separator: "\n")
 }
 
 extension String {
