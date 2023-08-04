@@ -6,7 +6,8 @@
 import DateExtensions
 import Units
 
-extension Heater: CustomStringConvertible {  
+extension Heater: CustomStringConvertible {
+  /// A textual representation of the Heater instance.
   public var description: String {
     "  Mode:".padding(30) + "\(operationMode)\n" + "\(self.cycle)"
   }

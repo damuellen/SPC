@@ -8,6 +8,7 @@ import Libc
 import Helpers
 import Meteo
 import SolarPosition
+
 /// A struct representing the state and functions for mapping the collector of a solar power plant.
 struct Collector: Parameterizable, CustomStringConvertible {
 
@@ -59,7 +60,8 @@ struct Collector: Parameterizable, CustomStringConvertible {
       return shadingHCE[3]
     }
   }
- /// Calculates the efficiency of the parabolic trough, depending on various parameters.
+
+  /// Calculates the efficiency of the parabolic trough, depending on various parameters.
   public mutating func efficiency(ws: Double) {
     let parameter = Collector.parameter
     guard case 1...179 = parabolicElevation else { return }

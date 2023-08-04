@@ -14,18 +14,26 @@ typealias Algorithm = (SolarPosition.Input) -> SolarPosition.Output
 
 /// A struct for latitude, longitude, timezone, and altitude data associated with a particular geographic location.
 public struct Location: Equatable {
-
+  /// The longitude of the location.
   public var longitude: Double
+  /// The latitude of the location.
   public var latitude: Double
+  /// The elevation of the location.
   public var elevation: Double
+  /// The timezone of the location.
   public var timezone: Int
-
+  /// A tuple containing longitude, latitude, and elevation.
   public var coordinates: (longitude: Double, latitude: Double, elevation: Double) {
     return (longitude, latitude, elevation)
   }
 }
 
 extension Location {
+  /// Initialize a Location object with the given coordinates and timezone.
+  ///
+  /// - Parameters:
+  ///   - coords: A tuple containing longitude, latitude, and elevation.
+  ///   - tz: The timezone of the location.
   public init(_ coords: (longitude: Double, latitude: Double, elevation: Double), tz: Int) {
     self.longitude = coords.longitude
     self.latitude = coords.latitude
@@ -34,14 +42,16 @@ extension Location {
   }
 }
 
-/// A struct containing values where the sun is above the horizon.
+/// A struct containing solar position values where the sun is above the horizon.
 ///
-/// Look up values using date-based subscript. Otherwise returns nil.
+/// You can look up values using a date-based subscript, which returns the associated output for that date. If the date is not found, it returns nil.
 public struct SolarPosition {
-
+  /// The array of calculated solar position values.
   public private(set) var calculatedValues = [Output]()
+  /// A dictionary used for fast date-based lookups to find corresponding indices in calculatedValues array.
   internal var lookupDates = [Date: Int]()
 
+  /// A struct representing the input parameters for the solar position calculations.
   public struct Input {
     var year, month, day, hour, minute, second: Int
     var timezone: Double
@@ -53,6 +63,7 @@ public struct SolarPosition {
     var atmos_refract: Double
   }
 
+  // A struct representing the output values of the solar position calculations.
   public struct Output: Equatable {
     public var zenith, azimuth, elevation: Double
     public var hourAngle: Double
@@ -63,18 +74,20 @@ public struct SolarPosition {
     var sunset: FractionalTime
   }
   
+  /// The year for the solar position calculations.
   public var year: Int
+  /// The geographic location for the solar position calculations.
   public var location: Location
-
+  // The time interval for the solar position calculations.
   public var frequence: DateSeries.Frequence
 
-  /// Creates a struct with precalculated sun position
-  /// for the given location and year at the predetermined times.
+  /// Creates a struct with precalculated sun positions for the given location and year at the predetermined times.
   ///
-  /// - parameter location: longitude, latitude, elevation
-  /// - parameter year: 4-digit year
-  /// - parameter timezone: Time zone, east (west negative)
-  /// - parameter frequence: Time interval for the calculations
+  /// - Parameters:
+  ///   - coords: A tuple containing longitude, latitude, and elevation.
+  ///   - tz: The timezone of the location.
+  ///   - year: The 4-digit year.
+  ///   - frequence: The time interval for the calculations.
   public init(
     coords: (Double, Double, Double), tz: Int,
     year: Int, frequence: DateSeries.Frequence
@@ -114,11 +127,20 @@ public struct SolarPosition {
   }
 
   /// Accesses the values associated with the given date.
+  ///
+  /// - Parameter date: The date for which solar position values are retrieved.
   public subscript(date: Date) -> Output? {
     guard let i = lookupDates[date] else { return nil }
     return calculatedValues[i]
   }
 
+  /// Compute the solar position values for the given date and location.
+  ///
+  /// - Parameters:
+  ///   - date: The date for which solar position values are computed.
+  ///   - location: The geographic location for which solar position values are computed.
+  ///   - algorithm: The algorithm function used for solar position calculations (default is `SolarPosition.solpos`).
+  /// - Returns: The computed solar position values.
   private static func compute(
     date: Date, location: Location, with algorithm: Algorithm = SolarPosition.solpos
   ) -> Output {
@@ -136,6 +158,12 @@ public struct SolarPosition {
         slope: 0, azm_rotation: 0, atmos_refract: 0.5667))
   }
 
+  /// Compute the sun hours period for the given location and year.
+  ///
+  /// - Parameters:
+  ///   - location: The geographic location for which the sun hours period is calculated.
+  ///   - year: The year for which the sun hours period is calculated.
+  /// - Returns: An array of DateInterval representing the sun hours period for each day in the year.
   private static func sunHoursPeriod(
     location: Location, year: Int
   ) -> [DateInterval] {
@@ -166,16 +194,25 @@ public struct SolarPosition {
       fatalError("No sun hours. Day: \(day)")
     }
   }
-
+  
+  /// Estimate the value of ΔT (delta_t) for the given year.
+  ///
+  /// - Parameter year: The 4-digit year for which ΔT is estimated.
+  /// - Returns: The estimated value of ΔT for the given year.
   private static func estimateDelta_T(year: Int) -> Double {
     var ΔT = 62.92 + 0.32217 * (Double(year) - 2000)
     ΔT += 0.005589 * pow((Double(year) - 2000), 2)
     return ΔT
   }
-
+  /// The estimated value of ΔT (delta_t) used for solar position calculations.
   private static var estimatedDelta_T: Double = 0
+  /// The time interval used for solar position calculations.
   private static var frequence: DateSeries.Frequence = .hour
 
+  /// Compute solar position values using the SPA (Solar Position Algorithm) algorithm.
+  ///
+  /// - Parameter input: The input parameters for the solar position calculations.
+  /// - Returns: The computed solar position values.
   static func spa(input: Input) -> Output {
 
     enum Output: Int32 {
@@ -208,7 +245,10 @@ public struct SolarPosition {
       incidence: data.incidence, cosIncidence: cos(data.incidence * .pi / 180),
       sunrise: data.sunrise, sunset: data.sunset)
   }
-
+  /// Compute solar position values using the SOLPOS algorithm.
+  ///
+  /// - Parameter input: The input parameters for the solar position calculations.
+  /// - Returns: The computed solar position values.
   static func solpos(input: Input) -> Output {
 
     var data = posdata()
@@ -245,6 +285,7 @@ public struct SolarPosition {
 }
 
 extension SolarPosition.Output: CustomStringConvertible {
+  /// A textual representation of the `SolarPosition.Output`
   public var description: String {
     String(
       format: "%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.2f", 
@@ -260,6 +301,7 @@ extension SolarPosition.Output: CustomStringConvertible {
 }
 
 extension SolarPosition: CustomStringConvertible {
+  /// A textual representation of the `SolarPosition`
   public var description: String {
     var description = ""
     print(

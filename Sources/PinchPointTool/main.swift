@@ -10,7 +10,6 @@ import Web
 import PinchPoint
 import xlsxwriter
 
-//system("clear")
 PinchPointTool.main()
 
 /// Command-line tool for calculating pinchpoint.
@@ -40,6 +39,7 @@ struct PinchPointTool: ParsableCommand {
   @Flag(name: .customLong("excel", withSingleDash: true))
   var excel: Bool = false
 
+  /// The main function to run the pinch point calculator.
   func run() throws {
     var input = input
     let parameter: HeatExchangerParameter
@@ -95,6 +95,7 @@ struct PinchPointTool: ParsableCommand {
 
     pinchPoint()
 
+    // Output results in JSON format, if requested
     if json {
       _ = try? print(pinchPoint.encodeToJSON())
     } else {
@@ -105,6 +106,7 @@ struct PinchPointTool: ParsableCommand {
       )
     }
 
+    // Generate plots and diagrams if requested in PDF or HTML format
     guard pdf || html else { return }
     let plot = Gnuplot(data: pinchPoint.temperatures())
     plot.settings.merge(

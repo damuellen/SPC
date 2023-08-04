@@ -14,9 +14,7 @@ extension Storage.Salt: MeasurementsConvertible {
     ]
   }
 
-  var values: [Double] {
-    [cold.kg, hot.kg, active.kg]
-  }
+  var values: [Double] { [cold.kg, hot.kg, active.kg] }
 }
 
 extension Storage {

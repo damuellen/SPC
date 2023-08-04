@@ -9,6 +9,7 @@ import Utilities
 import Units
 
 extension SolarField: CustomStringConvertible {
+  /// A textual representation of the SolarField instance.
   public var description: String {
     "  Mode:".padding(30) + "\(operationMode)\n" + formatting(
       [heatLosses, heatLossesHotHeader, heatLossesHCE],
@@ -19,6 +20,7 @@ extension SolarField: CustomStringConvertible {
 }
 
 extension SolarField.OperationMode: CustomStringConvertible {
+  /// A textual representation of the OperationMode enum cases.
   public var description: String {
     switch self {      
     case .startUp: return "Start up"
@@ -64,11 +66,13 @@ struct SolarField: Parameterizable, HeatTransfer {
       default: return 0.0
     }
   }
+
   /// The temperature at the inlet and outlet of the solar field.
   var temperature: (inlet: Temperature, outlet: Temperature) {
     get { header.temperature }
     set { header.temperature = newValue }
   }
+  
   /// The mass flow rate of the solar field header.
   var massFlow: MassFlow {
     get { header.massFlow }
@@ -87,6 +91,7 @@ struct SolarField: Parameterizable, HeatTransfer {
   )
 
   var requiredMassFlow: MassFlow = HeatExchanger.designMassFlow
+
   /// The operation mode options for the solar field
   enum OperationMode {
     case startUp
@@ -109,8 +114,10 @@ struct SolarField: Parameterizable, HeatTransfer {
     header: Cycle(name: "Header"),
     loops: Loop.names.map { name in Cycle(loop: name) }
   )
+
   /// The static parameters for the `SolarField`.
   public static var parameter: Parameter = Parameters.sf
+
   /// Calculates the required mass flow rate of the solar field based on the state of the storage.
   ///
   /// The required mass flow rate is determined based on the relative charge of the storage.

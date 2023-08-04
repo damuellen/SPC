@@ -8,12 +8,14 @@ import Meteo
 import Utilities
 
 extension SteamTurbine: CustomStringConvertible {
+  /// A textual representation of the SteamTurbine instance.
   public var description: String {
     "  Mode:".padding(20) + "\(operationMode)".padding(30)
   }
 }
 
 extension SteamTurbine.OperationMode: CustomStringConvertible {
+  /// A textual representation of the OperationMode enum cases.
   public var description: String {
     switch self {
       case .noOperation(let minutes): return "No Operation \(minutes)min "
@@ -27,9 +29,10 @@ extension SteamTurbine.OperationMode: CustomStringConvertible {
 
 /// A struct representing the state and functions for mapping the steam turbine
 struct SteamTurbine: Parameterizable {
-  
+
   /// The current operating mode of the steam turbine
   private(set) var operationMode: OperationMode
+
   /// Returns the load applied
   private(set) var load: Ratio {
     get { 

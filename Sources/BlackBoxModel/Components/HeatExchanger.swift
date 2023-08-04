@@ -6,6 +6,7 @@
 import Utilities
 
 extension HeatExchanger: CustomStringConvertible {
+  /// A textual representation of the HeatExchanger instance.
   public var description: String {
     "\(self.cycle)"
   }

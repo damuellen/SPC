@@ -18,7 +18,7 @@ _ = SetConsoleOutputCP(UINT(CP_UTF8))
 #endif
 
 SolarPerformanceCalculator.main()
-
+/// Represents information about the location of plant.
 struct LocationInfo: ParsableArguments {
   @Option(name: [.customShort("z"), .long], help: "Time zone")
   var timezone: Int?
@@ -35,6 +35,7 @@ struct LocationInfo: ParsableArguments {
     help: "Elevation (meters)")
   var elevation: Double?
 
+  // Computed property to return the coordinates if all location information is available, otherwise nil.
   var coords: (longitude: Double, latitude: Double, elevation: Double)? {
     if let long = longitude, let lat = latitude, let ele = elevation {
       return (long, lat, ele)

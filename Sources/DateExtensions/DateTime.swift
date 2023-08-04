@@ -5,53 +5,75 @@
 
 import Foundation
 
-/// DateTime is used to easily make the calendar data
-/// of the current time step available during a run.
+/// DateTime is a struct used to represent calendar data for the current time step during a simulation.
 ///
-///  - Attention: Needed by `Availability` and `GridDemand` both use `current`,
-///  also used in `SteamTurbine` and `Storage` routines.
+/// - Note: This struct is utilized by several routines, including `Availability` and `GridDemand`, and also used in `SteamTurbine` and `Storage`.
 public struct DateTime: CustomStringConvertible {
-
-  private(set) public static var current = DateTime()
+  /// The current DateTime object representing the current time step.
+  private(set) public static var current = DateTime(
+    year: 0, month: 0, day: 0, hour: 0, minute: 0, yearDay: 0, second: 0
+  )
+  /// A boolean value indicating if it is currently nighttime.
   private(set) static var nightfall = false
-
+  /// A boolean value indicating if it is currently daytime.
   private(set) var isDaytime: Bool = false
+  /// A boolean value indicating if the sun has risen.
   private(set) var isSunRise: Bool = false
+  /// A boolean value indicating if the sun has set.
   private(set) var isSunSet: Bool = false
-
+  /// A boolean value indicating if it is currently nighttime (opposite of isDaytime).
   public var isNighttime: Bool { !isDaytime }
-  /// The meteorological data suitable for today are identified with this property. `MeteoDataProvider.currentDay`
+  /// The hour index in the current day for the meteorological data.
   public static var indexHour: Int { current.hour }
+  /// The day index in the current year for the meteorological data.
   public static var indexDay: Int { current.yearDay - 1 }
+  /// The month index in the current year for the meteorological data.
   public static var indexMonth: Int { current.month - 1 }
+  /// A boolean value indicating if it is currently daytime.
   public static var isDaytime: Bool { current.isDaytime }
+  /// A boolean value indicating if the sun has risen.
   public static var isSunRise: Bool { current.isSunRise }
+  /// A boolean value indicating if the sun has set.
   public static var isSunSet: Bool { current.isSunSet }
-
+  /// The year in the DateTime object.
   public let year: Int
+  /// The month in the DateTime object.
   public let month: Int
+  /// The day in the DateTime object.
   public let day: Int
+  /// The hour in the DateTime object.
   public let hour: Int
+  /// The minute in the DateTime object.
   public let minute: Int
+  /// The day of the year (yearDay) in the DateTime object.
   public let yearDay: Int
+ /// The second in the DateTime object.
   private let second: Int
 
+  /// A string representation of the DateTime object in the format "yyyy-MM-ddTHH:mm:ssZ".
   public var description: String {
     String(format: "%04d-%02d-%02dT%02d:%02d:%02dZ", year, month, day, hour, minute, second)
   }
 
+  /// A comma-separated string containing the month, day, and hour of the DateTime object.
   public var commaSeparatedValues: String { "\(month),\(day),\(hour)" }
 
+  /// A string representation of the date in the format "MM-dd".
   public var date: String { String(format: "%02d-%02d", month, day) }
 
+  /// A string representation of the time in the format "HH:mm".
   public var time: String { String(format: "%02d:%02d", hour, minute) }
 
+  /// Set the current DateTime object based on the given date.
+  ///
+  /// - Parameter date: The date to set as the current DateTime.
   public static func setCurrent(date: Date) {
     nightfall = current.isDaytime
     current = .init(date)
     if !nightfall { current.isSunRise = true }
   }
 
+  /// Set the current DateTime object to represent nighttime.
   public static func setNight() {
     current.isDaytime = false
     current.isSunRise = false
@@ -61,6 +83,14 @@ public struct DateTime: CustomStringConvertible {
 
   public typealias MonthDay = (day: Int, month: Int)
 
+  /// Check if the DateTime object matches the given minute, hour, day, and month values.
+  ///
+  /// - Parameters:
+  ///   - minute: The minute value to check (default is nil to match the current minute).
+  ///   - hour: The hour value to check (default is nil to match the current hour).
+  ///   - day: The day value to check (default is nil to match the current day).
+  ///   - month: The month value to check (default is nil to match the current month).
+  /// - Returns: A boolean value indicating if the DateTime object matches the given values.
   public static func `is`(minute: Int? = nil, hour: Int? = nil, day: Int? = nil, month: Int? = nil) -> Bool {
     guard current.minute == (minute ?? current.minute) else { return false }
     guard current.hour == (hour ?? current.hour) else { return false }
@@ -69,6 +99,13 @@ public struct DateTime: CustomStringConvertible {
     return true
   }
 
+  /// Check if the DateTime object matches the given minute, hour, and yearDay values.
+  ///
+  /// - Parameters:
+  ///   - minute: The minute value to check.
+  ///   - hour: The hour value to check (default is nil to match the current hour).
+  ///   - yearDay: The yearDay value to check (default is nil to match the current day).
+  /// - Returns: A boolean value indicating if the DateTime object matches the given values.
   public static func `is`(minute: Int = 0, hour: Int? = nil, yearDay: Int? = nil) -> Bool {
     guard current.minute == minute else { return false }
     guard current.hour == (hour ?? current.hour) else { return false }
@@ -76,6 +113,12 @@ public struct DateTime: CustomStringConvertible {
     return true
   }
 
+  /// Check if the DateTime object is within the given start and stop MonthDay values.
+  ///
+  /// - Parameters:
+  ///   - start: The start MonthDay value to check.
+  ///   - stop: The stop MonthDay value to check.
+  /// - Returns: A boolean value indicating if the DateTime object is within the given range.
   public func isWithin(start: MonthDay, stop: MonthDay) -> Bool {
     assert(start.month <= stop.month)
     var result = false
@@ -97,17 +140,9 @@ public struct DateTime: CustomStringConvertible {
 }
 
 extension DateTime {
-
-  init() {
-    self.year = 0
-    self.month = 0
-    self.day = 0
-    self.hour = 0
-    self.minute = 0
-    self.yearDay = 0
-    self.second = 0
-  }
-
+  /// Initialize a new DateTime object with the given Date.
+  ///
+  /// - Parameter date: The Date to use for creating the DateTime object.
   public init(_ date: Date) {
     let ref = date.timeIntervalSinceReferenceDate
     var absolute = Int(floor(ref / 86400.0))

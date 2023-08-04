@@ -6,11 +6,16 @@
 import Units
 
 extension Storage {
-  /// The operation mode options for the storage systen
+  /// The operation mode options for the storage system.
   enum OperationMode {
-    case noOperation, discharge(load: Ratio), charge(load: Ratio)
-    case preheat, fossilCharge, freezeProtection
+    case noOperation
+    case discharge(load: Ratio)
+    case charge(load: Ratio)
+    case preheat
+    case fossilCharge
+    case freezeProtection
 
+    /// The discharge load ratio associated with the operation mode. It returns zero if the mode is not `discharge`.
     var dischargeLoad: Ratio {
       get { if case .discharge(let load) = self { return load } else { return .zero } }
     }

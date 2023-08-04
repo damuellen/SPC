@@ -21,12 +21,14 @@ public final class TimeSeriesPlot {
   /// The time range for the X-axis.
   let range: DateInterval
 
-  /// Arrays to hold the titles of Y1 and Y2 data series.
+  /// Arrays to hold the titles of Y1 data series.
   public var y1Titles: [String]
+  /// Arrays to hold the titles of Y2 data series.
   public var y2Titles: [String]
   
-  /// Labels for Y1 and Y2 axes.
+  /// Labels for Y1 axes.
   public var y1Label: String = ""
+  /// Labels for Y2 axes.
   public var y2Label: String = ""
 
   /// Initializer to set up the TimeSeriesPlot with provided data and options.

@@ -7,6 +7,7 @@ import DateExtensions
 import Units
 
 extension GasTurbine: CustomStringConvertible {
+  /// A textual representation of the GasTurbine instance.
   public var description: String {
     "\(operationMode),\n"
       + "Maintenance: \(isMaintained ? "Yes" : "No"), "

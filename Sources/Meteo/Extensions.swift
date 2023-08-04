@@ -6,8 +6,11 @@
 import DateExtensions
 import Foundation
 
+/// An extension on an array of `MeteoData` to provide interpolation and analysis functions.
 extension Array where Element == MeteoData {
-  /// Interpolation function for meteo data
+  /// Interpolates the meteorological data with the specified number of steps.
+  /// - Parameter steps: The number of steps for interpolation.
+  /// - Returns: An array of `MeteoData` with interpolated values.
   internal func interpolate(steps: Int) -> [MeteoData] {
     if self.count < 2 { return self }
     let (temperature, dni, ghi, dhi, windSpeed) = (
@@ -22,6 +25,10 @@ extension Array where Element == MeteoData {
     }
   }
 
+  /// Analyzes the meteorological data for a given day and calculates statistics.
+  /// - Parameter day: An array of indices representing a day's data.
+  /// - Returns: A tuple of statistics containing the number of peaks, hours of direct normal irradiance,
+  ///            total irradiance sum, average irradiance, maximum irradiance, and average-to-max ratio.
   public func analyse(day: Array.Indices) -> MeteoData.Statistics {
     var isPeak = false
     var peaks = 0
@@ -55,6 +62,9 @@ extension Array where Element == MeteoData {
     return (0, 0, 0, 0, 0, 0)
   }
 
+  /// Returns the range of indices corresponding to a given date interval.
+  /// - Parameter dateInterval: The date interval to calculate the range for.
+  /// - Returns: The range of indices within the date interval.
   public func range(for dateInterval: DateInterval) -> Range<Int> {
     let start = dateInterval.start
     let end = dateInterval.end
@@ -76,6 +86,7 @@ extension Array where Element == MeteoData {
 }
 
 extension MeteoData {
+  /// A type alias for statistics calculated from meteorological data analysis.
   public typealias Statistics =
   (peaks: Int, hours: Double, sum: Double, avg: Double, max: Double, ratio: Double)
 }
