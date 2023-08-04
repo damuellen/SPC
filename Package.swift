@@ -11,24 +11,26 @@ let swiftSettings: [SwiftSetting] = [
   .define("DEBUG", .when(configuration: .debug)),
 ]
 
-#if os(Linux) || os(iOS)
-var platformProducts: [Product] = [
-  // .library(name: "BlackBoxModel", type: .dynamic, targets: ["BlackBoxModel"]),
-  // .library(name: "SolarPosition", type: .dynamic, targets: ["SolarPosition"]),
-  // .library(name: "PinchPoint", type: .dynamic, targets: ["PinchPoint"]),
+#if os(iOS)
+let platformProducts: [Product] = [
+  .library(name: "BlackBoxModel", type: .dynamic, targets: ["BlackBoxModel"]),
+  .library(name: "SolarPosition", type: .dynamic, targets: ["SolarPosition"]),
+  .library(name: "PinchPoint", type: .dynamic, targets: ["PinchPoint"]),
 ]
 #else
-var platformProducts: [Product] = []
-#endif
-#if !os(iOS)
-platformProducts.append(contentsOf: [
+let platformProducts: [Product] = [
   .executable(name: "SPC", targets: ["SolarPerformanceCalc"]),
   .executable(name: "PinchPointTool", targets: ["PinchPointTool"]),
   .executable(name: "Playground", targets: ["Playground"]),
-])
+]
 #endif
 
+#if os(iOS)
+let branch = "SPM"
+#else
 let branch = (ProcessInfo.processInfo.environment["SPM"] != nil) ? "SPM" : "main"
+#endif
+
 let dependencies: [Package.Dependency] = [
   .package(url: "https://github.com/damuellen/swift-argument-parser.git", branch: "main"),
   .package(url: "https://github.com/damuellen/Utilities.git", branch: "main"),
