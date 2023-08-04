@@ -14,7 +14,7 @@ extension Heater: CustomStringConvertible {
 }
 
 /// A struct representing the heater component with state and functions for mapping the heater.
-struct Heater: Parameterizable, HeatTransfer {
+struct Heater: Parameterizable, ThermalProcess {
 
   /// The name of the heater.
   private(set) var name: String = Heater.parameter.name
@@ -86,7 +86,7 @@ struct Heater: Parameterizable, HeatTransfer {
   /// Adjusts the mass flow rate based on the provided heat transfer component.
   ///
   /// - Parameter heatTransfer: The heat transfer component used for updating the mass flow.
-  mutating func adjust(massFlow component: HeatTransfer) {
+  mutating func adjust(massFlow component: ThermalProcess) {
     massFlow.rate = min(component.massFlow.rate, Heater.parameter.maximumMassFlow)
   }
 

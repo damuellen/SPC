@@ -344,7 +344,7 @@ extension Storage {
       steamTurbine.adjust(load: Ratio(abs(ratio), cap: maxLoad)) 
       
       // Calculate the outlet temperature of the mixing outlets of the solar field and storage system.
-      let mixingOutlets = SolarField.parameter.HTF.mixingOutlets
+      let mixingOutlets = SolarField.parameter.HTF.calculateMixedOutletTemperature
       let mixTemp = mixingOutlets(solarField, storage)
       
       // Define the minimum allowable outlet temperature.

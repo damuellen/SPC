@@ -11,7 +11,7 @@ extension PowerBlock: CustomStringConvertible {
 }
 
 /// A struct representing the state and functions for mapping the power block
-struct PowerBlock: Parameterizable, HeatTransfer {
+struct PowerBlock: Parameterizable, ThermalProcess {
 
   private(set) var name: String = PowerBlock.parameter.name
 
@@ -143,7 +143,7 @@ struct PowerBlock: Parameterizable, HeatTransfer {
     return (heatOut, heatToTES)
   }
 
-  mutating func temperatureLoss(for period: Double, wrt components: HeatTransfer...)
+  mutating func temperatureLoss(for period: Double, wrt components: ThermalProcess...)
   {
     if Design.hasGasTurbine {
       uniformTemperature()

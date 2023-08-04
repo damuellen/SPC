@@ -13,7 +13,7 @@ extension HeatExchanger: CustomStringConvertible {
 }
 
 /// A struct representing the state and functions for the heat exchanger.
-struct HeatExchanger: Parameterizable, HeatTransfer {
+struct HeatExchanger: Parameterizable, ThermalProcess {
   /// The name of the heat exchanger.
   private(set) var name: String = HeatExchanger.parameter.name
 
@@ -191,11 +191,11 @@ struct HeatExchanger: Parameterizable, HeatTransfer {
   static var temperatureOutlet = outletTemperatureFunction()
 
   private static func outletTemperatureFunction()
-    -> (PowerBlock, HeatTransfer) -> Temperature
+    -> (PowerBlock, ThermalProcess) -> Temperature
   {
     if parameter.useAndsolFunction {
       return {
-        (pb: PowerBlock, _: HeatTransfer) -> Temperature in
+        (pb: PowerBlock, _: ThermalProcess) -> Temperature in
         let load = pb.massFlow.share(of: designMassFlow)
         let factor = temperatureFactor(
           temperature: pb.temperature.inlet, load: load,
@@ -209,7 +209,7 @@ struct HeatExchanger: Parameterizable, HeatTransfer {
       let ToutMassFlow = parameter.ToutMassFlow
     {
       return {
-        (pb: PowerBlock, _: HeatTransfer) -> Temperature in
+        (pb: PowerBlock, _: ThermalProcess) -> Temperature in
         let massFlowLoad = pb.massFlow.share(of: designMassFlow)
 
         let factor = ToutMassFlow(massFlowLoad)
@@ -227,7 +227,7 @@ struct HeatExchanger: Parameterizable, HeatTransfer {
       let ToutTin = parameter.ToutTin
     {
       return {
-        (pb: PowerBlock, hx: HeatTransfer) -> Temperature in
+        (pb: PowerBlock, hx: ThermalProcess) -> Temperature in
         let load = pb.massFlow.share(of: designMassFlow)
         var factor = ToutMassFlow(load)
         factor *= ToutTin(hx.temperature.inlet)
@@ -238,7 +238,7 @@ struct HeatExchanger: Parameterizable, HeatTransfer {
       let c = parameter.ToutTinMassFlow
     {
       return {
-        (pb: PowerBlock, _: HeatTransfer) -> Temperature in
+        (pb: PowerBlock, _: ThermalProcess) -> Temperature in
         let share = pb.massFlow.share(of: designMassFlow).quotient
         let max = parameter.temperature.htf.inlet.max.kelvin
         var factor = ((c[0] * (pb.inlet / max) * 666 + c[1])
@@ -247,13 +247,13 @@ struct HeatExchanger: Parameterizable, HeatTransfer {
         return parameter.temperature.htf.outlet.max.adjusted(factor)
       }
     } else if let ToutTin = parameter.ToutTin {
-      return { (_: PowerBlock, hx: HeatTransfer) -> Temperature in
+      return { (_: PowerBlock, hx: ThermalProcess) -> Temperature in
         let factor = Ratio(ToutTin(hx.temperature.inlet))
         return parameter.temperature.htf.outlet.max.adjusted(factor)
       }
     }
     return {
-      (pb: PowerBlock, _: HeatTransfer) -> Temperature in
+      (pb: PowerBlock, _: ThermalProcess) -> Temperature in
       let temp = parameter.temperature
       return Temperature(
         temp.htf.outlet.min.kelvin + temp.range.outlet.kelvin

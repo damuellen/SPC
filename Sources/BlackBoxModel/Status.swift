@@ -72,7 +72,7 @@ public struct Status: CustomStringConvertible, MeasurementsConvertible {
     let values = collector.values //+ storage.salt.values
      + (storage as MeasurementsConvertible).values
      + (solarField as MeasurementsConvertible).values
-    let flows = (storage as HeatTransfer).values
+    let flows = (storage as ThermalProcess).values
      + heater.values
      + powerBlock.cycle.values 
      + heatExchanger.values

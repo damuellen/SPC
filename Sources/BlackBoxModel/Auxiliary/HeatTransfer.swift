@@ -7,25 +7,19 @@ import Utilities
 
 // Extension of the HeatTransferFluid enum to calculate the heat content of a cycle.
 extension HeatTransferFluid {
-  /// Calculates the heat content of a cycle using the outlet and inlet temperatures.
-  ///
-  /// - Parameter cycle: The HeatTransfer cycle.
-  /// - Returns: The calculated heat content.
-  func heatContent(_ cycle: HeatTransfer) -> Heat {
-    heatContent(cycle.temperature.outlet, cycle.temperature.inlet)
-  }
-
-  /// Calculates the outlet temperature when two heat transfers are mixed.
+  /// Calculates the outlet temperature when two thermal processes are mixed.
   ///
   /// - Parameters:
-  ///   - f1: First HeatTransfer object to be mixed.
-  ///   - f2: Second HeatTransfer object to be mixed.
+  ///   - tp1: The first thermal process object to be mixed.
+  ///   - tp2: The second thermal process object to be mixed.
   /// - Returns: The resulting outlet temperature after mixing.
-  func mixingOutlets(_ f1: HeatTransfer, _ f2: HeatTransfer) -> Temperature {
-    if f1.massFlow.rate == 0 { return f2.temperature.outlet }
-    if f2.massFlow.rate == 0 { return f1.temperature.outlet }
-    let (t1, t2) = (f1.outlet, f2.outlet)
-    let (mf1, mf2) = (f1.massFlow.rate, f2.massFlow.rate)
+  func calculateMixedOutletTemperature(
+    from tp1: ThermalProcess, and tp2: ThermalProcess) -> Temperature 
+  {
+    if tp1.massFlow.rate == 0 { return tp2.temperature.outlet }
+    if tp2.massFlow.rate == 0 { return tp1.temperature.outlet }
+    let (t1, t2) = (tp1.outlet, tp2.outlet)
+    let (mf1, mf2) = (tp1.massFlow.rate, tp2.massFlow.rate)
     guard mf1 + mf2 > 0 else { return Temperature((t1 + t2) / 2) }
     let cap1 = heatCapacity[0].addingProduct(heatCapacity[1], t1)
     let cap2 = heatCapacity[0].addingProduct(heatCapacity[1], t2)
@@ -58,21 +52,24 @@ extension HeatTransferFluid {
 }
 
 /// Protocol for representing a heat transfer process with a name, mass flow, and temperature.
-protocol HeatTransfer: CustomStringConvertible {
+protocol ThermalProcess: CustomStringConvertible {
   var name: String { get }
   var massFlow: MassFlow { get set }
   var temperature: (inlet: Temperature, outlet: Temperature) { get set }
 }
 
-/// A struct representing a heat transfer cycle with mass flow and temperature properties.
-struct Cycle: HeatTransfer {
-  var name: String
-  var massFlow: MassFlow
-  var temperature: (inlet: Temperature, outlet: Temperature)
+/// A struct representing a heat transfer cycle with properties related to thermal processes.
+struct HeatTransferCycle: ThermalProcess {
+    // The name of the heat transfer cycle.
+    var name: String
+    // The mass flow rate in the heat transfer cycle.
+    var massFlow: MassFlow
+    // The temperature of the heat transfer cycle, consisting of an inlet and outlet temperature.
+    var temperature: (inlet: Temperature, outlet: Temperature)
 }
 
 // Extension of Cycle struct to provide additional initializers.
-extension Cycle {
+extension HeatTransferCycle {
   /// Initializes a Cycle with a given loop name, setting mass flow and temperatures to zero.
   ///
   /// - Parameter loop: The name of the loop to create.
@@ -96,24 +93,24 @@ extension Cycle {
 }
 
 // Extension of Cycle struct to conform to Comparable, comparing cycles based on their minimum temperature.
-extension Cycle: Comparable {
-  public static func < (lhs: Cycle, rhs: Cycle) -> Bool {
+extension HeatTransferCycle: Comparable {
+  public static func < (lhs: HeatTransferCycle, rhs: HeatTransferCycle) -> Bool {
     lhs.minTemperature < rhs.minTemperature
   }
 
-  public static func == (lhs: Cycle, rhs: Cycle) -> Bool {
+  public static func == (lhs: HeatTransferCycle, rhs: HeatTransferCycle) -> Bool {
     lhs.minTemperature == rhs.minTemperature
   }
 }
 
-// Extension of the HeatTransfer protocol to provide computed properties and helper methods.
-extension HeatTransfer {
-  /// Computed property to create a Cycle from the current HeatTransfer instance.
-  var cycle: Cycle {
-    Cycle(name: name, massFlow: massFlow, temperature: temperature)
+// Extension of the ThermalProcess protocol to provide computed properties and helper methods.
+extension ThermalProcess {
+  /// Computed property to create a Cycle from the current ThermalProcess instance.
+  var cycle: HeatTransferCycle {
+    HeatTransferCycle(name: name, massFlow: massFlow, temperature: temperature)
   }
 
-  /// Computed property to calculate the average temperature of the HeatTransfer.
+  /// Computed property to calculate the average temperature of the ThermalProcess.
   var average: Temperature {
     Temperature.average(temperature.inlet, temperature.outlet)
   }
@@ -133,19 +130,19 @@ extension HeatTransfer {
   /// Computed property to get the HeatTransferFluid used for the heat transfer process.
   var medium: HeatTransferFluid { SolarField.parameter.HTF }
 
-  /// Computed property to get the heat content of the HeatTransfer.
+  /// Computed property to get the heat content of the ThermalProcess.
   var heat: Double {
     medium.heatContent(temperature.outlet, temperature.inlet)
   }
 
-  /// Custom description for HeatTransfer instances.
+  /// Custom description for ThermalProcess instances.
   public var description: String {
     "  Mass flow: \(massFlow.rate) kg/s".padding(28)
       + " T in: \(temperature.inlet.celsius) degC".padding(20)
       + " T out: \(temperature.outlet.celsius) degC".padding(20)
   }
 
-  /// Computed property to get the formatted values for the HeatTransfer instance.
+  /// Computed property to get the formatted values for the ThermalProcess instance.
   var formattedValues: [String] {
     [
       String(format: "%3.1f", massFlow.rate),
@@ -159,16 +156,16 @@ extension HeatTransfer {
     [massFlow.rate, temperature.inlet.celsius, temperature.outlet.celsius]
   }
 
-  /// Perform heat transfer from two HeatTransfer instances and set the inlet temperature accordingly.
-  mutating func heatTransfer(from c1: HeatTransfer, and c2: HeatTransfer) {
-    temperature.inlet = medium.mixingOutlets(c1, c2)
-    massFlow = c1.massFlow + c2.massFlow
+  /// Perform heat transfer from two ThermalProcess instances and set the inlet temperature accordingly.
+  mutating func heatTransfer(from tp1: ThermalProcess, and tp2: ThermalProcess) {
+    temperature.inlet = medium.calculateMixedOutletTemperature(from: tp1, and: tp2)
+    massFlow = tp1.massFlow + tp2.massFlow
   }
   
-  /// Perform heat transfer from another HeatTransfer instance and set the inlet temperature accordingly.
-  mutating func heatTransfer(from c1: HeatTransfer) {
-    temperature.inlet = medium.mixingOutlets(self, c1)
-    massFlow += c1.massFlow
+  /// Perform heat transfer from another ThermalProcess instance and set the inlet temperature accordingly.
+  mutating func heatTransfer(from process: ThermalProcess) {
+    temperature.inlet = medium.calculateMixedOutletTemperature(from: self, and: process)
+    massFlow += process.massFlow
   }
 
   /// Set the outlet temperature equal to the inlet temperature.
@@ -194,18 +191,18 @@ extension HeatTransfer {
   }
 
   /// Set the inlet temperature from another outlet.
-  mutating func inletTemperature(outlet other: HeatTransfer) {
+  mutating func inletTemperature(outlet other: ThermalProcess) {
     temperature.inlet = other.temperature.outlet
   }
 
   /// Set the inlet temperature from another inlet.
-  mutating func inletTemperature(inlet other: HeatTransfer) {
+  mutating func inletTemperature(inlet other: ThermalProcess) {
     temperature.inlet = other.temperature.inlet
   }
 }
 
-// Extension of the Collection protocol where Element is HeatTransfer, to get an array of formatted values.
-extension Collection where Element == HeatTransfer {
+// Extension of the Collection protocol where Element is ThermalProcess, to get an array of formatted values.
+extension Collection where Element == ThermalProcess {
   /// Computed property to get an array of formatted values (mass flow rate, inlet temperature, outlet temperature).
   var values: [String] {
     reduce(into: []) { $0.append(contentsOf: $1.formattedValues) }

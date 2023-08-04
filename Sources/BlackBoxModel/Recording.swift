@@ -136,7 +136,7 @@ public struct Recording: CustomStringConvertible, Comparable {
 
   /// Access the cycle data within a given date interval using a keypath.
   subscript(
-    cycle keyPath: KeyPath<Status, Cycle>, interval: DateInterval
+    cycle keyPath: KeyPath<Status, HeatTransferCycle>, interval: DateInterval
   ) -> [[Double]] {
     // If the status history is empty, return an empty array.
     if statusHistory.isEmpty { return [] }
@@ -164,7 +164,7 @@ public struct Recording: CustomStringConvertible, Comparable {
 
   /// Access the heat transfer data within a given date interval using a keypath.
   private subscript(
-    keyPath: KeyPath<Status, HeatTransfer>, interval: DateInterval
+    keyPath: KeyPath<Status, ThermalProcess>, interval: DateInterval
   ) -> [[Double]] {
     // If the status history is empty, return an empty array.
     if statusHistory.isEmpty { return [] }
@@ -219,7 +219,7 @@ public struct Recording: CustomStringConvertible, Comparable {
   }
 
   /// Access the cycle data within a given date interval using a keypath.
-  subscript(_ keyPath: KeyPath<Status, Cycle>,
+  subscript(_ keyPath: KeyPath<Status, HeatTransferCycle>,
     range range: DateInterval
   ) -> ([[Double]], [[Double]]) {
     // Reduce the cycle data to separate arrays for mass, inlet, and outlet values.

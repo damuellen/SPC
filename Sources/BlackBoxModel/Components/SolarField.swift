@@ -36,7 +36,7 @@ extension SolarField.OperationMode: CustomStringConvertible {
 }
 
 /// A struct representing the state and functions for mapping the solar field
-struct SolarField: Parameterizable, HeatTransfer {
+struct SolarField: Parameterizable, ThermalProcess {
   /// The name of the solar field.
   let name = "Solar field"
 
@@ -56,8 +56,8 @@ struct SolarField: Parameterizable, HeatTransfer {
   private(set) var heatLossesHotHeader: Double = 0.0
   private(set) var heatLossesHCE: Double = 0.0
 
-  var header: HeatTransfer
-  var loops: [Cycle]
+  var header: ThermalProcess
+  var loops: [HeatTransferCycle]
 
   var inFocus: Ratio {
     switch operationMode {
@@ -111,8 +111,8 @@ struct SolarField: Parameterizable, HeatTransfer {
   /// Creates a `SolarField` instance with the fixed initial state.
   static let initialState = SolarField(
     operationMode: .stow,
-    header: Cycle(name: "Header"),
-    loops: Loop.names.map { name in Cycle(loop: name) }
+    header: HeatTransferCycle(name: "Header"),
+    loops: Loop.names.map { name in HeatTransferCycle(loop: name) }
   )
 
   /// The static parameters for the `SolarField`.
@@ -254,7 +254,7 @@ struct SolarField: Parameterizable, HeatTransfer {
    
    The method modifies the state of the `SolarField` instance (self) by updating the `header.temperature.outlet` and `loops.temperature.inlet` properties with the calculated temperature values. It also relies on the information from the previous cycle (`last`) to perform the interpolation calculations.
    */
-  private mutating func outletTemperature(last: [Cycle], _ time: Double) {
+  private mutating func outletTemperature(last: [HeatTransferCycle], _ time: Double) {
     let maxMassFlow = SolarField.parameter.maxMassFlow.rate
     let pipeWay = SolarField.parameter.pipeWay
     let loopWays = SolarField.parameter.loopWays

@@ -7,7 +7,7 @@ import DateExtensions
 import Units
 
 /// A struct representing the state and functions for mapping the storage.
-struct Storage: Parameterizable, HeatTransfer {
+struct Storage: Parameterizable, ThermalProcess {
   let name = Storage.parameter.name
 
   /// The temperature of the storage system (inlet and outlet).
