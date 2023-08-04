@@ -204,6 +204,16 @@ The class includes commented-out code for writing data to an SQLite database. If
 - The tool provides detailed information about the calculation process, including preparation time, computing time, and wall time, helping users assess the efficiency and resource requirements of the simulation.
 - Additionally, the Solar Performance Calculator includes a `plot` option, allowing users to create time series charts with Gnuplot. This visualization feature helps users gain insights into the calculated results and facilitates the interpretation of the simulation data.
 
+#### Disclaimer: This Software is Unfinished and May Contain Bugs
+
+Please be aware that this software is still under development and is considered unfinished. As a single developer is currently working on this project, the development process may take longer, and the software might have limited resources for testing and debugging.
+
+As a result, it may contain bugs, errors, and incomplete features. We do not recommend using this software in a production environment or for critical applications at this time.
+
+While the developer is actively working to improve and enhance the software, there is no guarantee of its stability or reliability. It is important to exercise caution and use this software solely for testing and experimentation purposes.
+
+By using this software, you acknowledge and accept the risks associated with its unfinished state and the fact that it is developed by a single individual. The developer disclaims any liability for any direct or indirect damages that may arise from its usage.
+
 ## License
 
 This project is licensed under the [Apache License 2.0](LICENSE).
