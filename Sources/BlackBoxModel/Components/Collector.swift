@@ -146,6 +146,7 @@ struct Collector: Parameterizable, CustomStringConvertible {
     let eff = shadingSCA * shadingHCE * IAM * edge * k_torsion * wind * opticalEfficiency * Simulation.adjustmentFactor.efficiencySolarField
     efficiency = eff
   }
+  
   /// Calculates the elevation and incidence angle for tracking the sun.
   public mutating func tracking(sun: SolarPosition.Output) {
     guard sun.zenith < 90.0 else { return }

@@ -14,8 +14,9 @@ public final class TimeSeriesPlot {
   /// Enumeration to specify the style of the time-series plot (steps or impulses).
   public enum Style: String { case steps, impulses }
 
-  /// Arrays to hold the data for primary (y1) and secondary (y2) Y-axes.
+  /// Array to hold the data for primary (y1) Y-axes.
   let y1: [[Double]]
+  /// Array to hold the data for secondary (y2) Y-axes.
   let y2: [[Double]]
   
   /// The time range for the X-axis.
@@ -23,11 +24,13 @@ public final class TimeSeriesPlot {
 
   /// Arrays to hold the titles of Y1 data series.
   public var y1Titles: [String]
+
   /// Arrays to hold the titles of Y2 data series.
   public var y2Titles: [String]
   
   /// Labels for Y1 axes.
   public var y1Label: String = ""
+
   /// Labels for Y2 axes.
   public var y2Label: String = ""
 
@@ -90,6 +93,7 @@ public final class TimeSeriesPlot {
     #endif
   }
   #endif
+  
   /// Main function to create the time-series chart and optionally save it to a file.
   ///
   /// - Parameter toFile: The file name to save the chart as a PNG image (optional).

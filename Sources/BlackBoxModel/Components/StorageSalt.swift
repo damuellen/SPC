@@ -18,7 +18,6 @@ extension Storage.Salt: MeasurementsConvertible {
 }
 
 extension Storage {
-
   /// A struct representing the salt storage inside the main `Storage` struct.
   struct Salt { 
     /// The active mass of salt in the storage (being charged or discharged).
@@ -401,8 +400,6 @@ extension Storage {
     return Temperature(celsius: (-hcap[0] + (hcap[0] ** 2 - 4 * (hcap[1] * 0.5) * (-350.5536 - specificHeat)) ** 0.5) / (2 * hcap[1] * 0.5))
   }
 
-
-
   /// Calculate heat losses for the storage system over a period of time.
   ///
   /// This function calculates the temperature drop of the tanks due to heat losses.
@@ -435,5 +432,4 @@ extension Storage {
       temperatureTank.hot = tankTemperature(hot)
     }
   }
-
 }

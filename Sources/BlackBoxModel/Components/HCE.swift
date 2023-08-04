@@ -107,6 +107,7 @@ enum HCE {
 
     return losses * endLossFactor
   }
+  
   /**
    Calculates the radiation losses per square meter of Aperture considering the percentage of HCE that are broken, lost vacuum, and fluorescent.
 

@@ -12,12 +12,15 @@ extension PowerBlock: CustomStringConvertible {
 
 /// A struct representing the state and functions for mapping the power block
 struct PowerBlock: Parameterizable, ThermalProcess {
-
+  /// The name of the power block.
   private(set) var name: String = PowerBlock.parameter.name
 
+  /// The mass flow rate of the power block.
   var massFlow: MassFlow = .zero
 
+  /// The temperature at the inlet and outlet of the power block.
   var temperature: (inlet: Temperature, outlet: Temperature)
+
   /// The operation mode options for the power block
   enum OperationMode {
     case scheduledMaintenance
@@ -26,6 +29,7 @@ struct PowerBlock: Parameterizable, ThermalProcess {
   static let initialState = PowerBlock(
     temperature: Simulation.startTemperature
   )
+  
   /// The static parameters for the `PowerBlock`.
   public static var parameter: Parameter = Parameters.pb
 

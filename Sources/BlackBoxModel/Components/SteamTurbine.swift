@@ -56,6 +56,7 @@ struct SteamTurbine: Parameterizable {
     default: return false
     }
   }
+  
   /// Creates a `SteamTurbine` instance with the fixed initial state.
   static let initialState = SteamTurbine(operationMode: .noOperation(time: 0))
 

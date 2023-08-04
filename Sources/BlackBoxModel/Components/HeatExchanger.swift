@@ -39,6 +39,7 @@ struct HeatExchanger: Parameterizable, ThermalProcess {
     temperature: Simulation.startTemperature,
     heatOut: 0.0, heatToTES: 0.0
   )
+  
   /// The static parameters for the `HeatExchanger`.
   public static var parameter: Parameter = Parameters.hx
 

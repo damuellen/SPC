@@ -13,8 +13,10 @@ extension Insolation: MeasurementsConvertible {}
 protocol MeasurementsConvertible {
   /// A collection of tuples representing the name and unit of measurements.
   static var measurements: [(name: String, unit: String)] { get }
+
   /// The numerical values for the measurements.
   var values: [Double] { get }
+  
   /// A user-friendly and descriptive representation of the measurements.
   var prettyDescription: String { get }
 }

@@ -11,16 +11,17 @@ struct BESS {
 
   /// Energy stored in the system in Wh
   private(set) var energy: Double
+  
   /// Maxmimum energy that the system can store in Wh
   static var capacity: Double = .zero
+
   /// Maximimum discharge charge power that you the system can handle in W
   static var maximumPower: Double = .zero
+
   /// Efficiency of the system
   static var efficiency: Ratio = .zero
 
-  init() {
-    self.energy = 0
-  }
+  init() { self.energy = 0 }
 
   /// Stores energy in the battery
   /// - Parameter energy: Amount of energy in Wh

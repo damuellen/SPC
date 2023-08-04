@@ -18,6 +18,7 @@ struct Boiler: Parameterizable {
 
   private(set) var startEnergy: Double
   // var startEnergyOld: Double
+  
   /// The operation mode options for the boiler
   enum OperationMode {
 

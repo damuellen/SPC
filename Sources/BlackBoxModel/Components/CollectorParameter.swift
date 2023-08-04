@@ -23,7 +23,6 @@ extension Collector {
    - optical efficiency as a function of incident angle (incident angle modifier).
  */
   struct Parameter: Codable, Equatable {
-
     /// The name of the collector parameter set.
     let name: String
 

@@ -67,7 +67,8 @@ struct PV {
 
     let degradation: Double = 0
     let unavailability: Double = 0
-    /// Creates a pv array
+
+    /// Creates a pv array.
     public init() {
       self.panelsPerString = 26
       self.strings = 295
@@ -75,6 +76,7 @@ struct PV {
       self.panel = Panel()
       self.lossAtSTC = 0.43e-3
     }
+
     /// Calculate the maximum power point of the array.
     func mpp(radiation: Double, ambient: Temperature, windSpeed: Double)
       -> PowerPoint

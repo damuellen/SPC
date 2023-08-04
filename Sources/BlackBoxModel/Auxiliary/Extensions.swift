@@ -6,7 +6,6 @@
 import Foundation 
 import Helpers
 
-
 /// Formats the given values and labels into a single string.
 ///
 /// - Parameters:

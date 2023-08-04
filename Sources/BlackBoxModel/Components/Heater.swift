@@ -79,13 +79,17 @@ struct Heater: Parameterizable, ThermalProcess {
         + parameter.electricalParasitics[1] * load.quotient)
   }
 
+  /// Changes the operating mode of the heater component.
+  ///
+  /// - Parameter mode: The new operating mode to set.
   public mutating func change(mode: OperationMode) {
     operationMode = mode
   }
 
-  /// Adjusts the mass flow rate based on the provided heat transfer component.
+  /// Adjusts the mass flow rate of the heater component based on the provided thermal process component.
   ///
-  /// - Parameter heatTransfer: The heat transfer component used for updating the mass flow.
+  /// The function ensures that the mass flow rate of the heater remains within a safe operating range.
+  /// It prevents the heater from operating with a mass flow rate that exceeds the maximum allowable value defined in `Heater.parameter.maximumMassFlow`.
   mutating func adjust(massFlow component: ThermalProcess) {
     massFlow.rate = min(component.massFlow.rate, Heater.parameter.maximumMassFlow)
   }

@@ -172,8 +172,8 @@ struct SolarField: Parameterizable, ThermalProcess {
       eta = .zero
     }
   }
-  /// Determines the inlet temperature of the solar field
-  /// depending on the operating mode of the storage
+
+  /// Calculates the inlet temperature of the solar field depending on the operating mode of the storage
   mutating func inletTemperature(from storage: Storage) {
     switch storage.operationMode {
     case .freezeProtection:
