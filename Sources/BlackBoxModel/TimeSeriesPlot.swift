@@ -82,29 +82,34 @@ public final class TimeSeriesPlot {
   #if os(iOS)
   func plot(code: String) throws {}
   #else
-  func plot(code: String) throws {
+  func plot(code: String) throws -> Data? {
     // Check if the Gnuplot process is already running, and run it if not.
     if !gnuplot.isRunning { try gnuplot.run() }
     let stdin = gnuplot.standardInput as! Pipe
     // Write the Gnuplot script to the standard input of the process
     stdin.fileHandleForWriting.write(code.data(using: .utf8)!)
+    let stdout = gnuplot.standardOutput as! Pipe
     #if !os(Linux)
     stdin.fileHandleForWriting.closeFile()
     #endif
+    if #available(macOS 10.15.4, *) {
+      try stdin.fileHandleForWriting.close()
+      return try stdout.fileHandleForReading.readToEnd()
+    } else {
+      stdin.fileHandleForWriting.closeFile()
+      return stdout.fileHandleForReading.readDataToEndOfFile()
+    }
   }
   #endif
   
   /// Main function to create the time-series chart and optionally save it to a file.
   ///
   /// - Parameter toFile: The file name to save the chart as a PNG image (optional).
-  public func callAsFunction(toFile: String? = nil) throws {
-    var code: String = ""
+  public func callAsFunction(toFile: String? = nil) throws -> Data? {
+    var code: String = "set terminal png size 1573,960 font 'Sans,9';"
     if let file = toFile {
       // If a file name is provided, set the terminal output to PNG.
-      code = """
-        set terminal png size 1573,960 font 'Sans,9';
-        set output '\(file).png'\n;
-        """
+      code += "set output '\(file)'\n;"
     }
     // Concatenate Gnuplot settings, data block, plot function, and optional exit command.
     code += settings.concatenated + datablock + plot() + "\n"
@@ -112,7 +117,7 @@ public final class TimeSeriesPlot {
     code += "exit\n\n"
     #endif
     // Call the plot function to generate the chart using the constructed Gnuplot script.
-    try plot(code: code)
+    return try plot(code: code)
   }
 
   private let xr: (start: Double, end: Double)

@@ -11,10 +11,14 @@ import Dispatch
 import Foundation
 import Meteo
 import Helpers
+import Web
 
+let semaphore = DispatchSemaphore(value: 0)
+let source = DispatchSource.interrupt(semaphore: semaphore)
 #if os(Windows)
 import WinSDK
 _ = SetConsoleOutputCP(UINT(CP_UTF8))
+SetConsoleCtrlHandler({_ in source.cancel();semaphore.wait();return WindowsBool(true)}, true)
 #endif
 
 SolarPerformanceCalculator.main()
@@ -81,6 +85,8 @@ struct SolarPerformanceCalculator: ParsableCommand {
   var open: Bool = false
   @Flag(help: "Use result to create time series charts with gnuplot.")
   var plot: Bool = false
+  @Flag(name: .long, help: "Start web server for time series charts.")
+  var http = false
 
   /// Main function to run the solar performance calculator.
   func run() throws {
@@ -143,11 +149,11 @@ struct SolarPerformanceCalculator: ParsableCommand {
 
     let recording = Historian(name: resultName, path: pathForResult, mode: mode)
 
-    let start = Date()
+    let begin = Date()
 
     BlackBoxModel.runModel(with: recording)
 
-    let t = (start.timeIntervalSince(now), -start.timeIntervalSinceNow)
+    let t = (begin.timeIntervalSince(now), -begin.timeIntervalSinceNow)
 
     let result = recording.finish(open: open)
 
@@ -156,6 +162,15 @@ struct SolarPerformanceCalculator: ParsableCommand {
     print("Computing:", String(format: "%.2f seconds", t.1))
     print("Wall time:", String(format: "%.2f seconds", t2))
     result.print(verbose: verbose)
+
+    if http {
+      let server = HTTP(handler: result.respond)
+      server.start()
+      print("web server listening on port \(server.port). Press Crtl+C to shut down.")
+      start("http://127.0.0.1:\(server.port)")
+      semaphore.wait()
+      server.stop()
+    }
     if plot { plotter(result) }
   }
 
@@ -166,7 +181,7 @@ struct SolarPerformanceCalculator: ParsableCommand {
 
   /// Function to plot time series charts using gnuplot.
   func plotter(_ result: Recording) {
-    let interrupt = DispatchSource.interrupt()
+    let interrupt = DispatchSource.interrupt(semaphore: semaphore)
    // terminalHideCursor()
    // defer { terminalShowCursor(clearLine: interrupt.isCancelled) }
     // let steamTurbine = result.annual(\.steamTurbine.load.quotient)
@@ -187,20 +202,97 @@ struct SolarPerformanceCalculator: ParsableCommand {
       let y2 = result.power(range: day)
       let plot = TimeSeriesPlot(y1: y1, y2: y2, range: day, yRange: yRange, style: .impulses)
       plot.y1Titles = ["solarfield", "powerblock", "storage"]
-      plot.y2Titles = ["solar", "toStorage", "production", "storage", "gross", "net", "consum"]
+      plot.y2Titles = ["solar", "production", "toStorage", "fromStorage", "gross", "net", "consum"]
       try? FileManager.default.createDirectory(atPath: ".plots", withIntermediateDirectories: true)
-      try? plot(toFile: String(format: ".plots/day%03d", i))
+      _ = try? plot(toFile: String(format: ".plots/day%03d", i))
     }
   }
 }
 
 extension DispatchSource {
   /// Create and configure a DispatchSource for handling SIGINT (interrupt signal).
-  static func interrupt() -> DispatchSourceSignal {
+  static func interrupt(semaphore: DispatchSemaphore) -> DispatchSourceSignal {
     let sig = DispatchSource.makeSignalSource(signal: SIGINT, queue: .global())
     signal(SIGINT, SIG_IGN)
-    sig.setEventHandler { sig.cancel() }
+    sig.setEventHandler { sig.cancel(); semaphore.signal() }
     sig.resume()
     return sig
+  }
+}
+
+extension Recording {
+  /// Responds to an HTTP request and generates an HTTP response containing a dynamic plot based on the provided request URI.
+  ///
+  /// - Parameters:
+  ///   - request: The HTTP request received from the client, containing the request URI.
+  /// - Returns: An HTTP response containing a dynamic plot and associated data for the specified URI.
+  func respond(request: HTTP.Request) -> HTTP.Response {
+    // Extract the URI from the request
+    var uri = request.uri
+    uri.remove(at: uri.startIndex)
+    if uri.isEmpty { uri = "1" }
+
+    guard let day = Int(uri) else {
+      return HTTP.Response(response: .BAD_REQUEST)
+    }
+    
+    // Calculate y-axis ranges for the plot
+    let year = DateInterval(ofYear: BlackBoxModel.simulatedYear)
+    let yRange = (
+      (massFlows(range: year).joined().max()! / 100).rounded(.up) * 110,
+      (power(range: year).joined().max()! / 100).rounded(.up) * 110)
+    
+    // Extract the day from the URI and create a DateInterval for that day
+    let range = DateInterval(ofDay: day, in: BlackBoxModel.simulatedYear)
+    
+    // Retrieve mass flow and power data for the specified day
+    let y1 = massFlows(range: range)
+    let y2 = power(range: range)
+    
+    // Create a TimeSeriesPlot with the extracted data and specific plot configuration
+    let plot = TimeSeriesPlot(y1: y1, y2: y2, range: range, yRange: yRange, style: .impulses)
+    
+    // Set y-axis titles for the plot
+    plot.y1Titles = ["solarfield", "powerblock", "storage"]
+    let p = ["solar", "production", "toStorage", "fromStorage", "gross", "net", "consum"]
+    plot.y2Titles = p
+    
+    // Convert the plot to a base64-encoded image string
+    guard let base64Image = try? plot.callAsFunction(toFile: "")?.base64EncodedString()
+     else { return HTTP.Response(response: .SERVER_ERROR) }
+    
+    // Generate JavaScript code to handle left and right key presses for reloading the site
+    let script = """
+    <script>
+        let currentWebsiteIndex = \(day);
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'ArrowLeft') {
+                currentWebsiteIndex = (currentWebsiteIndex - 1 + 365) % 365;
+                reloadSite();
+            } else if (event.key === 'ArrowRight') {
+                currentWebsiteIndex = (currentWebsiteIndex + 1) % 365;
+                reloadSite();
+            }
+        });
+        function reloadSite() { window.location.href = currentWebsiteIndex; }
+    </script>
+    """
+    
+    // Calculate the time interval for the data and calculate sums for the y2 values
+    let s = Double(interval.rawValue)
+    let sums = y2.map { $0.map { $0 / s }.reduce(0,+) }.map(Int.init)
+    
+    // Create labeled data by combining sums and corresponding titles
+    let labeled = zip(sums.map(\.description), p).map { $0.1 + ": " + $0.0 }.joined(separator: " ")
+    
+    // Create the HTML body with dynamic content based on the data and plot
+    var body = #"<center><h1 style="color: white;">"#
+    body += DateTime(range.start).date
+    body += #"</h1><img alt="My Image" src="data:image/png;base64,"#
+    body += base64Image +  #""/><h1 style="color: white;">MWh "#
+    body += labeled + #"</h1></center>"#
+    
+    // Return an HTTP response containing the generated HTML body
+    return .init(html: .init(body: script + body, refresh: 0))
   }
 }

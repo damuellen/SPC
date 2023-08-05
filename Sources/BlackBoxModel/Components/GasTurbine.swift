@@ -22,16 +22,20 @@ struct GasTurbine: Parameterizable {
   private(set) var operationMode: OperationMode
 
   private(set) var isMaintained: Bool
+
   /// Returns the load applied
   private(set) var load: Ratio
+
   /// The operation mode options for the gas turbine
   enum OperationMode: String {
     case free, load, integrated, pure, noOperation, scheduledMaintenance
   }
+
   /// Creates a `GasTurbine` instance with the fixed initial state.
   static let initialState = GasTurbine(
     operationMode: .free, isMaintained: false, load: 0.0
   )
+  
   /// The static parameters for the `GasTurbine`.
   public static var parameter: Parameter = Parameters.gt
 

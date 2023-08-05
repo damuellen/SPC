@@ -50,10 +50,10 @@ public struct Recording: CustomStringConvertible, Comparable {
   public var description: String { report() }
 
   /// The time interval for each recording step.
-  private let interval = Simulation.time.steps
+  public let interval = Simulation.time.steps
 
   /// The start date of the recording.
-  private let startDate: Date
+  let startDate: Date
 
   /// Print the annual results for the recording.
   /// - Parameter verbose: If true, print the design parameters.
@@ -198,7 +198,7 @@ public struct Recording: CustomStringConvertible, Comparable {
     let s = self[performance: \.thermal.solar.megaWatt, range]
     let p = self[performance: \.thermal.production.megaWatt, range]
     let t1 = self[performance: \.thermal.toStorage.megaWatt, range]
-    let t2 = self[performance: \.thermal.storage.megaWatt, range]
+    let t2 = zip(self[performance: \.thermal.storage.megaWatt, range], t1).map(-)
     let g = self[performance: \.electric.steamTurbineGross, range]
     let n = self[performance: \.electric.net, range]
     let c = self[performance: \.electric.consum, range]
