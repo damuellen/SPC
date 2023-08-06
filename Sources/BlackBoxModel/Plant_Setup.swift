@@ -78,7 +78,7 @@ extension Plant {
   ///
   /// - Returns: A string containing descriptions of fixed parameters for each component.
   static var parameterDescriptions: String {
-    decorated("Fixed Parameter")
+    decorated("Fixed Parameter") + "\n"
     + "HEAT TRANSFER FLUID\n\n\(SolarField.parameter.HTF)\n\n"
     + "HEATER\n\n\(Heater.parameter)\n"
     + "HEAT EXCHANGER\n\n\(HeatExchanger.parameter)\n"

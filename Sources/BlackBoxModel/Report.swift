@@ -53,13 +53,13 @@ extension Recording {
       + "FOSSIL FUEL:\n"
       + "    LHV [kWH/kg]: Fuel.LHV\n"
       + "\n\n"
-    d += decorated("Annual Results")
-      + "Gross electricty producution [MWh_el/a]:"
+    d += decorated("Annual Results") + "\n"
+      + "Gross electricty production [MWh_el/a]:"
       * performance.electric.gross.scientificFormatted
     //  Format((YTarS(0).EgrsST + YTarS(0).EgrsGasTurbine) * (1 - Simulation.parameter.UnSchedMain) * (1 - Simulation.parameter.TransLoss), )"
       + "Parasitic consumption [MWh_el/a]:" * performance.parasitics.shared.scientificFormatted
     // Format(YTarS(0).electricalParasitics * (1 - Simulation.parameter.UnSchedMain) * (1 - Simulation.parameter.TransLoss), )"
-      + "Net electricty producution [MWh_el/a]:" * performance.electric.net.scientificFormatted
+      + "Net electricty production [MWh_el/a]:" * performance.electric.net.scientificFormatted
     // Format(YTarS(0).Enet * (1 - Simulation.parameter.UnSchedMain) * (1 - Simulation.parameter.TransLoss), )"
       + "Gas consumption [MWh_el/a]:\n"  // Format(YTarS(0).heatfuel, )"
       + "Solar share [%]:\n"  // Format(SolShare * 100, )"
@@ -70,7 +70,7 @@ extension Recording {
     d += "\nAVAILABILITIES\n\n"
       + "Plant Availability [%]:\n"  // * Simulation.parameter.PlantAvail * 100, )"
       + "Plant Degradation [%]:\n"  // * Simulation.parameter.PlantDegrad,)"
-      + decorated("Files and Parameter")
+      + decorated("Files and Parameter") + "\n"
       + "Meteodata of a leap year" * (Simulation.time.isLeapYear ? "YES" : "NO")
       + "Location:"
       * String(format: "longitude: %G, latitude: %G",
@@ -109,7 +109,7 @@ extension Recording {
     // }
     //      + "Power Block Availability [%]:" * Availability.current[0).powerBlock * 100)"
     //        + "Transmission Losses [%]:" * Simulation.parameter.TransLoss * 100)"
-    d += decorated("OPERATION")
+    d += decorated("OPERATION") + "\n"
     let s1 = "First Date of Operation:"
     if let firstDateOfOperation = Simulation.time.dateInterval?.start {
       d += s1 * DateTime(firstDateOfOperation).date
@@ -130,7 +130,7 @@ extension Recording {
       + "Minimum Insolation for Start-Up [W/m²]:"
       * Simulation.parameter.minInsolation.description
       + "Fuel strategy:" * OperationRestriction.fuelStrategy.description
-    d += decorated("AVAILABILITIES")
+    d += decorated("AVAILABILITIES") + "\n"
     d += Availability.current.description
       + "Periods for Scheduled Maintenance [MM.DD]:\n"  // Maintnc(1).Lowlim, ) to Format(Maintnc(1).Uplim, )"
       + "Unscheduled Maintenance [%]:\n"  // * Simulation.parameter.UnSchedMain * 100)"
