@@ -223,11 +223,7 @@ extension DispatchSource {
 }
 
 extension Recording {
-  /// Responds to an HTTP request and generates an HTTP response containing a dynamic plot based on the provided request URI.
-  ///
-  /// - Parameters:
-  ///   - request: The HTTP request received from the client, containing the request URI.
-  /// - Returns: An HTTP response containing a dynamic plot and associated data for the specified URI.
+  /// Processes an HTTP request and generates an HTTP response with a dynamic HTML body.
   func respond(request: HTTP.Request) -> HTTP.Response {
     // Extract the URI from the request
     var uri = request.uri
@@ -266,52 +262,6 @@ extension Recording {
     guard let base64Image = try? plot.callAsFunction(toFile: "")?.base64EncodedString()
      else { return HTTP.Response(response: .SERVER_ERROR) }
     
-    let icons = """
-    <svg version="1.1" class="right" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 256 256" enable-background="new 0 0 256 256" xml:space="preserve"><g><g><path d="M184.5,234.2c-32.9-34.9-65.9-69.9-98.8-104.8c32.7-35.9,65.3-71.7,98-107.6c5.9-6.5-3.7-16.2-9.7-9.7c-34.2,37.5-68.3,75-102.5,112.5c-2.8,3-2.1,6.7-0.1,9.2c0.3,0.6,0.7,1.1,1.2,1.6c34.1,36.1,68.2,72.3,102.2,108.4C180.9,250.3,190.5,240.6,184.5,234.2z"/></g></g></svg>
-    <svg version="1.1" class="left" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 256 256" enable-background="new 0 0 256 256" xml:space="preserve"><g><g><path d="M184.5,234.2c-32.9-34.9-65.9-69.9-98.8-104.8c32.7-35.9,65.3-71.7,98-107.6c5.9-6.5-3.7-16.2-9.7-9.7c-34.2,37.5-68.3,75-102.5,112.5c-2.8,3-2.1,6.7-0.1,9.2c0.3,0.6,0.7,1.1,1.2,1.6c34.1,36.1,68.2,72.3,102.2,108.4C180.9,250.3,190.5,240.6,184.5,234.2z"/></g></g></svg>
-    """
-
-    let script = """
-    <script type="text/javascript">
-        let currentWebsiteIndex = \(day);
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'ArrowLeft') {
-                currentWebsiteIndex = (currentWebsiteIndex - 1 + 365) % 365;
-                window.location.href = currentWebsiteIndex;
-            } else if (event.key === 'ArrowRight') {
-                currentWebsiteIndex = (currentWebsiteIndex + 1) % 365;
-                window.location.href = currentWebsiteIndex;
-            }
-        });
-        const left = document.getElementsByClassName("left")[0];
-        const right = document.getElementsByClassName("right")[0];
-        left.addEventListener("click", function(event) {
-            currentWebsiteIndex = (currentWebsiteIndex - 1 + 365) % 365;
-            window.location.href = currentWebsiteIndex;
-        });
-        right.addEventListener("click", function(event) {
-            currentWebsiteIndex = (currentWebsiteIndex + 1) % 365;
-            window.location.href = currentWebsiteIndex;
-        });
-    </script>
-    <style>
-    @media (prefers-color-scheme: dark) { table { color: white; } }
-    table {
-      font-family: monospace; 
-      border-collapse: collapse; width: 1573px; table-layout: fixed;
-    }
-    th { border: 2px solid white; text-align: right; padding: 5px; }
-    td { border: 2px solid white; text-align: left; padding: 5px; }
-    svg.right {
-      transform: scale(-1,1); width: 128px; position: absolute; top: 0; right: 0;
-    }
-    svg.left {
-     width: 128px; position: absolute; top: 0; left: 0; 
-    }
-    svg:hover { fill: white; }
-    </style>
-    """
-    
     // Calculate sums for the y2 values
     let s = Double(interval.rawValue)
     let sums = y2.map { $0.reduce(0,+) / s }.map(Int.init)
@@ -320,13 +270,11 @@ extension Recording {
     let table = zip(sums.map(\.description), p).map { "<th>" + $0.0 + "</th><td>" + $0.1 + "</td>" }.joined(separator: " ")
 
     // Create the HTML body with dynamic content based on the data and plot
-    var body = #"<center><h1 style="color: white;">"#
-    body += date
-    body += #"</h1><img src="data:image/png;base64,"#
-    body += base64Image + #""/><table><tr>"#
-    body += table + #"</tr></table></center>"#
+    var body = "<div>\n<h1>\(date)</h1>\n"
+    body += #"<img src="data:image/png;base64,"# + base64Image + #""/>"# + "\n"
+    body += #"<table><tr>"# + table + #"</tr></table></div>"#
  
     // Return an HTTP response containing the generated HTML body
-    return .init(html: .init(body: icons + script + body))
+    return .init(html: .init(body: icons() + script(day) + body))
   }
 }
