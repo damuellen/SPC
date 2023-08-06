@@ -41,9 +41,6 @@ func script(_ day: Int) -> String {
   }
   @media (prefers-color-scheme: dark) { 
     table { color: white; }
-    img {
-      filter: invert(0.92);
-    }
   }
   h1 {
     position: absolute; top: 0; left: 50%;

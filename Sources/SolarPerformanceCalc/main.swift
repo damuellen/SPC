@@ -259,7 +259,7 @@ extension Recording {
     plot.y2Titles = p
     
     // Convert the plot to a base64-encoded image string
-    guard let base64Image = try? plot.callAsFunction(toFile: "")?.base64EncodedString()
+    guard let base64PNG = try? plot.callAsFunction(toFile: "")?.base64EncodedString()
      else { return HTTP.Response(response: .SERVER_ERROR) }
     
     // Calculate sums for the y2 values
@@ -267,12 +267,14 @@ extension Recording {
     let sums = y2.map { $0.reduce(0,+) / s }.map(Int.init)
     
     // Create table data by combining sums and corresponding titles
-    let table = zip(sums.map(\.description), p).map { "<th>" + $0.0 + "</th><td>" + $0.1 + "</td>" }.joined(separator: " ")
+    let table = zip(sums.map(\.description), p).map {
+     "<th>" + $0.0 + "</th><td>" + $0.1 + "</td>" 
+    }.joined(separator: " ")
 
     // Create the HTML body with dynamic content based on the data and plot
     var body = "<div>\n<h1>\(date)</h1>\n"
     body += #"<img width="1573" height="900" src="data:image/png;base64,"#
-    body += base64Image + "\"/>\n<table><tr>" + table + "</tr></table></div>"
+    body += base64PNG + "\"/>\n<table><tr>" + table + "</tr></table></div>"
  
     // Return an HTTP response containing the generated HTML body
     return .init(html: .init(body: icons() + script(day) + body))
