@@ -271,8 +271,8 @@ extension Recording {
 
     // Create the HTML body with dynamic content based on the data and plot
     var body = "<div>\n<h1>\(date)</h1>\n"
-    body += #"<img src="data:image/png;base64,"# + base64Image + #""/>"# + "\n"
-    body += #"<table><tr>"# + table + #"</tr></table></div>"#
+    body += #"<img width="1573" height="900" src="data:image/png;base64,"#
+    body += base64Image + "\"/>\n<table><tr>" + table + "</tr></table></div>"
  
     // Return an HTTP response containing the generated HTML body
     return .init(html: .init(body: icons() + script(day) + body))
