@@ -11,7 +11,7 @@ protocol TextConfigInitializable {
 }
 
 /// A struct representing a configuration file with lines of text and associated functionality.
-struct TextConfigFile {
+public struct TextConfigFile {
   /// The lines of text in the configuration file.
   var lines: [String]
 
