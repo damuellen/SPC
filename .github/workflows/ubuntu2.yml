@@ -29,9 +29,6 @@ jobs:
       run: swift test -Xswiftc -suppress-warnings
       continue-on-error: true
 
-    - name: Run Optimizer
-      run: swift run -c release Optimizer -n 15 -i 66 -r 1
-
     - name: Upload plots
       uses: actions/upload-artifact@v3
       continue-on-error: true
