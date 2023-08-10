@@ -33,9 +33,7 @@ if CommandLine.argc > 2 {
   separator = "\t"
 }
 
-guard let data = try? Data(contentsOf: path) else {
-  fatalError("Read error.")
-}
+guard let data = try? Data(contentsOf: path) else { fatalError("Read error.") }
 let lines = data.split(
   separator: newLine, maxSplits: 13, omittingEmptySubsequences: false)
 guard let line = String(data: lines[0], encoding: .utf8) else {
@@ -81,8 +79,8 @@ if steps < 0 {
       if count == 2 {
         let c =
           column.dropLast()
-          .map({ Array(stride(from: $0, to: $0 + 1, by: increment)) })
-          .joined() + [column.last!]
+          .map({ Array(stride(from: $0, to: $0 + 1, by: increment)) }).joined()
+          + [column.last!]
         buffer.append(Array(c))
       } else if count < 2 {
         let c =

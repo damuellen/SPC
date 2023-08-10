@@ -37,33 +37,32 @@ extension PowerBlock {
 /// Custom description for PowerBlock.Parameter to provide a formatted string representation.
 extension PowerBlock.Parameter: CustomStringConvertible {
   public var description: String {
-    "Description:" * name
-    + "Fixed Parasitics for Load = 0 [MW]:"
-    * fixElectricalParasitics0.description
-    + "Parasitics during PB Start-Up [MW]:"
-    * startUpElectricalParasitics.description
-    + "Fixed Parasitics (Load > 0) [MW]:"
-    * fixElectricalParasitics.description
-    + "Nominal Parasitics (Load = 1)[MW]:"
-    * nominalElectricalParasiticsACC.description
-    + "Parasitic ; Parasitics(Load) = Parasitics(100%)*(c0+c1*load)\n"
-    + "c0:" * electricalParasitics[0].description
-    + "c1:" * electricalParasitics[1].description
-    // + "c2:" * electricalParasitics[2].description
-    + "Parasitics of Cooling Tower for load < 50% [MW]:"
-    * electricalParasiticsStep[0].description
-    + "Parasitics of Cooling Tower for load > 50% [MW]:"
-    * electricalParasiticsStep[1].description
-    + "Parasitics of Shared Facilities for load = 0 [MW]:"
-    * electricalParasiticsShared[0].description
-    + "Parasitics of Shared Facilities for load > 0 [MW]:"
-    * electricalParasiticsShared[1].description
-    + "Nominal Parasitics of ACC [MW]:"
-    * nominalElectricalParasiticsACC.description
-    + "ACC Parasitic f(Load) = ParasiticsACC(100%)*(c0+c1*load+c2*load^2+...)"
-    + "\n\(electricalParasiticsACC)"
-    + "ACC Parasitic f(Tamb) = ParasiticsACC(100%)*(c0+c1*Tamb+c2*Tamb^2+...)"
-    + "\n\(electricalParasiticsACCTamb)"
+    "Description:" * name + "Fixed Parasitics for Load = 0 [MW]:"
+      * fixElectricalParasitics0.description
+      + "Parasitics during PB Start-Up [MW]:"
+      * startUpElectricalParasitics.description
+      + "Fixed Parasitics (Load > 0) [MW]:"
+      * fixElectricalParasitics.description
+      + "Nominal Parasitics (Load = 1)[MW]:"
+      * nominalElectricalParasiticsACC.description
+      + "Parasitic ; Parasitics(Load) = Parasitics(100%)*(c0+c1*load)\n"
+      + "c0:" * electricalParasitics[0].description + "c1:"
+      * electricalParasitics[1].description
+      // + "c2:" * electricalParasitics[2].description
+      + "Parasitics of Cooling Tower for load < 50% [MW]:"
+      * electricalParasiticsStep[0].description
+      + "Parasitics of Cooling Tower for load > 50% [MW]:"
+      * electricalParasiticsStep[1].description
+      + "Parasitics of Shared Facilities for load = 0 [MW]:"
+      * electricalParasiticsShared[0].description
+      + "Parasitics of Shared Facilities for load > 0 [MW]:"
+      * electricalParasiticsShared[1].description
+      + "Nominal Parasitics of ACC [MW]:"
+      * nominalElectricalParasiticsACC.description
+      + "ACC Parasitic f(Load) = ParasiticsACC(100%)*(c0+c1*load+c2*load^2+...)"
+      + "\n\(electricalParasiticsACC)"
+      + "ACC Parasitic f(Tamb) = ParasiticsACC(100%)*(c0+c1*Tamb+c2*Tamb^2+...)"
+      + "\n\(electricalParasiticsACCTamb)"
   }
 }
 

@@ -7,12 +7,12 @@ import Foundation
 
 /// A calendar instance representing Greenwich Mean Time (GMT).
 public let Greenwich = { calendar -> NSCalendar in
-    calendar.timeZone = TimeZone(secondsFromGMT: 0)!
-    return calendar
+  calendar.timeZone = TimeZone(secondsFromGMT: 0)!
+  return calendar
 }(NSCalendar(identifier: .gregorian)!)
 
 /// A type that supplies a sequence of dates with a fixed interval.
-/// The `DateSeries` class provides a way to generate a sequence of dates with a fixed time interval between each date. 
+/// The `DateSeries` class provides a way to generate a sequence of dates with a fixed time interval between each date.
 /// It can be used to create a sequence of dates for a specific year or within a given date range, with various interval frequencies
 /// such as hourly, half-hourly, fifteen minutes, ten minutes, five minutes, or minute intervals.
 ///
@@ -45,11 +45,7 @@ public final class DateSeries: Sequence, IteratorProtocol {
     /// The denominators for the frequency, representing the multiples of the frequency.
     public var denominators: [Int] {
       var result = [Int]()
-      for i in 2...6 {
-        if rawValue % i == 0 {
-          result.append(i)
-        }
-      }
+      for i in 2...6 { if rawValue % i == 0 { result.append(i) } }
       return result
     }
 
@@ -82,7 +78,8 @@ public final class DateSeries: Sequence, IteratorProtocol {
   ///   - year: The year for which the date series is generated.
   ///   - interval: The interval (frequency) for the date series.
   public init(year: Int, interval: Frequence) {
-    precondition(year > 1950 && year < 2050, "Year out of valid range or wrong format")
+    precondition(
+      year > 1950 && year < 2050, "Year out of valid range or wrong format")
 
     var dateComponents = DateComponents()
     dateComponents.timeZone = Greenwich.timeZone
@@ -152,17 +149,15 @@ extension DateInterval {
   public init(ofWeek week: Int, in year: Int) {
     var dateComponents = DateComponents()
     dateComponents.timeZone = Greenwich.timeZone
-    if week > 1 {
-        dateComponents.weekOfYear = week
-    }
+    if week > 1 { dateComponents.weekOfYear = week }
     dateComponents.year = year
-    dateComponents.weekday = 2 // Monday
+    dateComponents.weekday = 2  // Monday
     let start = Greenwich.date(from: dateComponents)!
     if week < 53 {
-        dateComponents.weekOfYear = week + 1
+      dateComponents.weekOfYear = week + 1
     } else {
-        dateComponents.year = year + 1
-        dateComponents.weekday = nil
+      dateComponents.year = year + 1
+      dateComponents.weekday = nil
     }
     let end = Greenwich.date(from: dateComponents)! - 1
     self = .init(start: start, end: end)

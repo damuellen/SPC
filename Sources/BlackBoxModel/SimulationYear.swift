@@ -32,18 +32,18 @@ extension Simulation {
       let last = dateFormatter.string(from: dateInterval!.end)
 
       return """
-      Weekday of 1st January:                           \(weekday)
-      Number of Days in February:                       28
-      First Day of Operation [MM-DD]:                   \(first)
-      Last Day of Operation [MM-DD]:                    \(last)
-      Time Step for Report (H/D/M/Y) :                  \(steps.rawValue)
-      If hourly based; number of steps for detailed Report (TC) :
-                                                      12
-      First Day of Daylight Saving time [MM.DD] :       0
-      Last Day of Daylight Saving time [MM.DD] :        1.01
-      Holidays [MM-DD]:
-      \(holidays.map(\.start).map(DateTime.init(_:)).map(\.date).joined(separator: ", "))
-      """
+        Weekday of 1st January:                           \(weekday)
+        Number of Days in February:                       28
+        First Day of Operation [MM-DD]:                   \(first)
+        Last Day of Operation [MM-DD]:                    \(last)
+        Time Step for Report (H/D/M/Y) :                  \(steps.rawValue)
+        If hourly based; number of steps for detailed Report (TC) :
+                                                        12
+        First Day of Daylight Saving time [MM.DD] :       0
+        Last Day of Daylight Saving time [MM.DD] :        1.01
+        Holidays [MM-DD]:
+        \(holidays.map(\.start).map(DateTime.init(_:)).map(\.date).joined(separator: ", "))
+        """
     }
   }
 }
@@ -58,22 +58,27 @@ extension Simulation.Period: TextConfigInitializable {
       let dateFormatter = DateFormatter()
       dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
       dateFormatter.dateFormat = "MM.dd yyyy"
-      return dateFormatter.date(from: dateString + " \(BlackBoxModel.simulatedYear)")
+      return dateFormatter.date(
+        from: dateString + " \(BlackBoxModel.simulatedYear)")
     }
 
     if let firstDayOfOperation = getDate(file.lines[12]),
-      let lastDayOfOperation = getDate(file.lines[15]) {
+      let lastDayOfOperation = getDate(file.lines[15])
+    {
       let hoursFirst = try ln(14) * 3600
       let minutesFirst = try ln(15) * 60
       let timeIntervalFirst = hoursFirst + minutesFirst
-      let firstDateOfOperation = firstDayOfOperation.addingTimeInterval(timeIntervalFirst)
+      let firstDateOfOperation = firstDayOfOperation.addingTimeInterval(
+        timeIntervalFirst)
 
       let hoursLast = try ln(17) * 3600
       let minutesLast = try ln(18) * 60
       let timeIntervalLast = hoursLast + minutesLast
-      let lastDateOfOperation = lastDayOfOperation.addingTimeInterval(timeIntervalLast)
+      let lastDateOfOperation = lastDayOfOperation.addingTimeInterval(
+        timeIntervalLast)
 
-      self.dateInterval = DateInterval(start: firstDateOfOperation, end: lastDateOfOperation)
+      self.dateInterval = DateInterval(
+        start: firstDateOfOperation, end: lastDateOfOperation)
     }
 
     self.steps = try .init(rawValue: Int(ln(22))) ?? .fiveMinutes

@@ -1,7 +1,7 @@
+import Units
 import XCTest
 
 @testable import BlackBoxModel
-import Units
 
 class HCETests: XCTestCase {
   func testsRadiationLosses() {
@@ -12,15 +12,12 @@ class HCETests: XCTestCase {
     var previous = -Double.infinity
     for t in 50...400 {
       t1 = Temperature(celsius: Double(t))
-      
-      let current = HCE.radiationLossesNew(
-        (t1, t1, t2), insolation: 400
-      )
+      let current = HCE.radiationLossesNew((t1, t1, t2), insolation: 400)
       XCTAssertGreaterThan(current, previous)
       previous = current
     }
   }
-/*
+  /*
   func testsMode1() {
     var solarField = Plant.initialState.solarField
     var collector = Plant.initialState.collector

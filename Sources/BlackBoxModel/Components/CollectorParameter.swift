@@ -6,7 +6,7 @@
 import Utilities
 
 extension Collector {
-/**
+  /**
  A struct representing the parameters of the collector.
 
  The collector model contains the following:
@@ -27,9 +27,7 @@ extension Collector {
     let name: String
 
     /// The type of absorber material.
-    public enum Absorber: String, Codable {
-      case schott, rio
-    }
+    public enum Absorber: String, Codable { case schott, rio }
 
     /// A flag indicating whether the collector uses a new function.
     var newFunction: Bool = false
@@ -69,28 +67,24 @@ extension Collector {
 extension Collector.Parameter: CustomStringConvertible {
   /// A description of the `Collector.Parameter` instance.
   public var description: String {
-    "Description:" * name
-    + "Aperture [m]:" * aperture.description
-    + "Length [m]:" * lengthSCA.description
-    + "Aperture Area [m²]:" * areaSCAnet.description
-    + "Extension of HCE [m]:" * extensionHCE.description
-    + "Average Distance Parabola to Focus [m]:" * avgFocus.description
-    + "Absorber Pipe Outer Radius [m]:" * rabsOut.description
-    + "Absorber Pipe Inner Radius [m]:" * rabsInner.description
-    + "Glass Tube Radius [m]:" * rglas.description
-    + "Optical Efficiency [%]:" * (opticalEfficiency * 100).description
-    + "Absorber Emittance; Emittance(T) = c0 + c1*T\n"
-    + "c0:" * emissionHCE[0].description
-    + "c1:" * emissionHCE[1].description
-    + "Calc. Radialoss as Integral of dT:"
-    * (useIntegralRadialoss ? "YES" : "NO")
-    + "Bellow Shadowing Factors\n"
-    + "for incident angle 0 - 1.5°:" * shadingHCE[0].description
-    + "for incident angle 1.5 - 5°:" * shadingHCE[1].description
-    + "for incident angle 5 - 14°:" * shadingHCE[2].description
-    + "for incident angle >14°:" * shadingHCE[3].description
-    + "Incident Angle Modifier;\nIAM(theta) = c0+c1*theta+c2*theta^2+c3*theta^3+c4*theta^4"
-    + "\n\(factorIAM)"
+    "Description:" * name + "Aperture [m]:" * aperture.description
+      + "Length [m]:" * lengthSCA.description + "Aperture Area [m²]:"
+      * areaSCAnet.description + "Extension of HCE [m]:"
+      * extensionHCE.description + "Average Distance Parabola to Focus [m]:"
+      * avgFocus.description + "Absorber Pipe Outer Radius [m]:"
+      * rabsOut.description + "Absorber Pipe Inner Radius [m]:"
+      * rabsInner.description + "Glass Tube Radius [m]:" * rglas.description
+      + "Optical Efficiency [%]:" * (opticalEfficiency * 100).description
+      + "Absorber Emittance; Emittance(T) = c0 + c1*T\n" + "c0:"
+      * emissionHCE[0].description + "c1:" * emissionHCE[1].description
+      + "Calc. Radialoss as Integral of dT:"
+      * (useIntegralRadialoss ? "YES" : "NO") + "Bellow Shadowing Factors\n"
+      + "for incident angle 0 - 1.5°:" * shadingHCE[0].description
+      + "for incident angle 1.5 - 5°:" * shadingHCE[1].description
+      + "for incident angle 5 - 14°:" * shadingHCE[2].description
+      + "for incident angle >14°:" * shadingHCE[3].description
+      + "Incident Angle Modifier;\nIAM(theta) = c0+c1*theta+c2*theta^2+c3*theta^3+c4*theta^4"
+      + "\n\(factorIAM)"
   }
 }
 

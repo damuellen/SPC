@@ -11,8 +11,7 @@ import Foundation
 public struct DateTime: CustomStringConvertible {
   /// The current DateTime object representing the current time step.
   private(set) public static var current = DateTime(
-    year: 0, month: 0, day: 0, hour: 0, minute: 0, yearDay: 0, second: 0
-  )
+    year: 0, month: 0, day: 0, hour: 0, minute: 0, yearDay: 0, second: 0)
   /// A boolean value indicating if it is currently nighttime.
   private(set) static var nightfall = false
   /// A boolean value indicating if it is currently daytime.
@@ -47,12 +46,14 @@ public struct DateTime: CustomStringConvertible {
   public let minute: Int
   /// The day of the year (yearDay) in the DateTime object.
   public let yearDay: Int
- /// The second in the DateTime object.
+  /// The second in the DateTime object.
   private let second: Int
 
   /// A string representation of the DateTime object in the format "yyyy-MM-ddTHH:mm:ssZ".
   public var description: String {
-    String(format: "%04d-%02d-%02dT%02d:%02d:%02dZ", year, month, day, hour, minute, second)
+    String(
+      format: "%04d-%02d-%02dT%02d:%02d:%02dZ", year, month, day, hour, minute,
+      second)
   }
 
   /// A comma-separated string containing the month, day, and hour of the DateTime object.
@@ -91,7 +92,9 @@ public struct DateTime: CustomStringConvertible {
   ///   - day: The day value to check (default is nil to match the current day).
   ///   - month: The month value to check (default is nil to match the current month).
   /// - Returns: A boolean value indicating if the DateTime object matches the given values.
-  public static func `is`(minute: Int? = nil, hour: Int? = nil, day: Int? = nil, month: Int? = nil) -> Bool {
+  public static func `is`(
+    minute: Int? = nil, hour: Int? = nil, day: Int? = nil, month: Int? = nil
+  ) -> Bool {
     guard current.minute == (minute ?? current.minute) else { return false }
     guard current.hour == (hour ?? current.hour) else { return false }
     guard current.day == (day ?? current.day) else { return false }
@@ -106,7 +109,9 @@ public struct DateTime: CustomStringConvertible {
   ///   - hour: The hour value to check (default is nil to match the current hour).
   ///   - yearDay: The yearDay value to check (default is nil to match the current day).
   /// - Returns: A boolean value indicating if the DateTime object matches the given values.
-  public static func `is`(minute: Int = 0, hour: Int? = nil, yearDay: Int? = nil) -> Bool {
+  public static func `is`(
+    minute: Int = 0, hour: Int? = nil, yearDay: Int? = nil
+  ) -> Bool {
     guard current.minute == minute else { return false }
     guard current.hour == (hour ?? current.hour) else { return false }
     guard current.yearDay == (yearDay ?? current.day) else { return false }
@@ -148,18 +153,23 @@ extension DateTime {
     var absolute = Int(floor(ref / 86400.0))
 
     func daysAfterMonth(_ month: Int, _ year: Int, _ leap: Bool) -> Int {
-      let daysAfterMonth = [365, 334, 306, 275, 245, 214, 184, 153, 122, 92, 61, 31, 0, 0, 0, 0]
+      let daysAfterMonth = [
+        365, 334, 306, 275, 245, 214, 184, 153, 122, 92, 61, 31, 0, 0, 0, 0,
+      ]
       return daysAfterMonth[month] + ((month < 2 && leap) ? 1 : 0)
     }
 
     func daysBeforeMonth(_ month: Int, _ year: Int, _ leap: Bool) -> Int {
-      let daysBeforeMonth = [0, 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365, 0, 0]
+      let daysBeforeMonth = [
+        0, 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365, 0, 0,
+      ]
       return daysBeforeMonth[month] + ((month < 2 && leap) ? 1 : 0)
     }
 
     func isleap(_ year: Int) -> Bool {
       var y =
-        (year + 1) % 400 /* correct to nearest multiple-of-400 year, then find the remainder */
+        (year + 1)
+        % 400 /* correct to nearest multiple-of-400 year, then find the remainder */
       if y < 0 { y = -y }
       return (0 == (y & 3) && 100 != y && 200 != y && 300 != y)
     }
@@ -172,16 +182,15 @@ extension DateTime {
       y -= 1
       absolute += daysAfterMonth(0, y, isleap(y))
     }
-    /* Now absolute is non-negative days to add to year */
-    ydays = daysAfterMonth(0, y, isleap(y))
+    /* Now absolute is non-negative days to add to year */ydays =
+      daysAfterMonth(0, y, isleap(y))
     while ydays <= absolute {
       y += 1
       absolute -= ydays
       ydays = daysAfterMonth(0, y, isleap(y))
     }
 
-    /* Now we have year and days-into-year */
-    let year = y
+    /* Now we have year and days-into-year */let year = y
     var m = absolute / 33 + 1 /* search from the approximation */
     let leap = isleap(y)
     while daysBeforeMonth(m + 1, y, leap) <= absolute { m += 1 }

@@ -4,7 +4,7 @@ import XCTest
 
 class DryCoolingTests: XCTestCase {
   func testsDryCooling() {
-  /*  let (DCFactor, maxDCLoad) = DryCooling.perform(
+    /*  let (DCFactor, maxDCLoad) = DryCooling.perform(
       steamTurbineLoad: 1, temperature: Temperature(celsius: 30.0)
     )
     XCTAssertEqual(DCFactor.quotient, 0, accuracy: 0.01)

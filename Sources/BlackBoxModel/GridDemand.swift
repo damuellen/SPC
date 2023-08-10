@@ -43,11 +43,13 @@ extension GridDemand {
   /// - Throws: An error if there is an issue reading or parsing the demand ratio data from the file.
   init(file: TextConfigFile) throws {
     // Extract demand ratio data from the file and store it in a 2D array
-    let table = file.lines[5..<29].map { $0.split(separator: ",").map(\.trimmed) }
+    let table = file.lines[5..<29]
+      .map { $0.split(separator: ",").map(\.trimmed) }
     var data = [Ratio]()
     for row in table {
       // Convert strings to Double and create Ratio instances
-      data.append(contentsOf: row.compactMap(Double.init).map(Ratio.init(percent:)))
+      data.append(
+        contentsOf: row.compactMap(Double.init).map(Ratio.init(percent:)))
     }
     // Initialize the GridDemand instance with the extracted data
     self.init(data)

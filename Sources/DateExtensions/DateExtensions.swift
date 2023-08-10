@@ -12,7 +12,8 @@ extension Date {
   /// Gets the date components of the date instance.
   /// - Returns: A `DateComponents` object containing day, month, year, weekday, hour, minute, and second components.
   public func getComponents() -> DateComponents {
-    Greenwich.components([.day, .month, .year, .weekday, .hour, .minute, .second], from: self)
+    Greenwich.components(
+      [.day, .month, .year, .weekday, .hour, .minute, .second], from: self)
   }
 
   /// Sets the time of the date instance to the specified fractional time.
@@ -44,8 +45,10 @@ extension DateInterval {
 
     let interval = 60.0 / Double(valuesPerHour.rawValue)
     start.minute = (Int(Double(start.minute!) / interval)) * Int(interval)
-    end.minute = Int((Double(end.minute!) / interval).rounded(.up)) * Int(interval)
+    end.minute =
+      Int((Double(end.minute!) / interval).rounded(.up)) * Int(interval)
 
-    return DateInterval(start: Greenwich.date(from: start)!, end: Greenwich.date(from: end)!)
+    return DateInterval(
+      start: Greenwich.date(from: start)!, end: Greenwich.date(from: end)!)
   }
 }

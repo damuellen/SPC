@@ -5,7 +5,7 @@
 
 import Helpers
 
- /// A struct representing parameters related to a specific fuel used in an power plant.
+/// A struct representing parameters related to a specific fuel used in an power plant.
 struct FuelParameter: Codable {
   /// The name of the fuel.
   let name: String
@@ -52,14 +52,16 @@ extension FuelParameter {
 extension FuelParameter: CustomStringConvertible {
   /// A string representation of the `FuelParameter` instance.
   public var description: String {
-    "Name :" * name
-    + "Unit :" * measurementUnit.description
-    + "Lower Heat Value [kWh/kg] :" * LHV.description
-    + "Fuel Price [Currency/Unit] :" * price.description
-    + "Density [kg/m³] :" * density.description
-    + "Allowed Fuel share (currently not used) :" * part.description
-    + "Fuel Efficiency assumed by Authorities [%] (currently not used) :" * FERCeff.description
-    + "Fuel Amount already used [MWh] (currently not used) :" * usedAmount.description
-    + "Solar Energy already produced [MWh] (currently not used) :" * Qsol.description
+    "Name :" * name + "Unit :" * measurementUnit.description
+      + "Lower Heat Value [kWh/kg] :" * LHV.description
+      + "Fuel Price [Currency/Unit] :" * price.description
+      + "Density [kg/m³] :" * density.description
+      + "Allowed Fuel share (currently not used) :" * part.description
+      + "Fuel Efficiency assumed by Authorities [%] (currently not used) :"
+      * FERCeff.description
+      + "Fuel Amount already used [MWh] (currently not used) :"
+      * usedAmount.description
+      + "Solar Energy already produced [MWh] (currently not used) :"
+      * Qsol.description
   }
 }

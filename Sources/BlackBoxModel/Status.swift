@@ -44,18 +44,14 @@ public struct Status: CustomStringConvertible, MeasurementsConvertible {
       + (Design.hasStorage ? "Storage:\n\(storage)\n" : "")
   }
 
-  static var modes: [String] {
-    ["SolarField", "Storage", "Heater"]
-  }
+  static var modes: [String] { ["SolarField", "Storage", "Heater"] }
 
   var modes: [String] {
     [
-      solarField.operationMode.description,
-      storage.operationMode.description,
-      heater.operationMode.rawValue
+      solarField.operationMode.description, storage.operationMode.description,
+      heater.operationMode.rawValue,
     ]
   }
-  
   /// An array of numerical values for relevant measurements in the current status.
   ///
   /// The `values` property provides an array of numerical values representing
@@ -69,14 +65,14 @@ public struct Status: CustomStringConvertible, MeasurementsConvertible {
   /// `MeasurementsConvertible` protocol. The mass flow rates for the solar field
   /// and heater are obtained separately from their conforming protocols.
   var values: [Double] {
-    let values = collector.values //+ storage.salt.values
-     + (storage as MeasurementsConvertible).values
-     + (solarField as MeasurementsConvertible).values
-    let flows = (storage as ThermalProcess).values
-     + heater.values
-     + powerBlock.cycle.values 
-     + heatExchanger.values
-     + solarField.header.values 
+    let values =
+      collector.values  //+ storage.salt.values
+      + (storage as MeasurementsConvertible).values
+      + (solarField as MeasurementsConvertible).values
+    let flows =
+      (storage as ThermalProcess).values + heater.values
+      + powerBlock.cycle.values + heatExchanger.values
+      + solarField.header.values
     let loops = solarField.loops.flatMap(\.values)
     return values + flows + loops
   }
@@ -94,14 +90,17 @@ public struct Status: CustomStringConvertible, MeasurementsConvertible {
   /// specific values being measured. The names and units for each measurement are
   /// constructed by combining the component name and specific value being measured.
   static var measurements: [(name: String, unit: String)] {
-    let values: [(name: String, unit: String)] =
-      [("|Massflow", "kg/s"), ("|Tin", "degC"), ("|Tout", "degC")]
-    return Collector.measurements //+ Storage.Salt.measurements 
-      + Storage.measurements + SolarField.measurements + [
-      "Storage", "Heater", "PowerBlock", "HeatExchanger", "SolarField",
-      "DesignLoop", "NearLoop", "AvgLoop", "FarLoop",
-    ].flatMap { name in
-      values.map { value in (name + value.name, value.unit) }
-    }
+    let values: [(name: String, unit: String)] = [
+      ("|Massflow", "kg/s"), ("|Tin", "degC"), ("|Tout", "degC"),
+    ]
+    return Collector.measurements  //+ Storage.Salt.measurements
+      + Storage.measurements + SolarField.measurements
+      + [
+        "Storage", "Heater", "PowerBlock", "HeatExchanger", "SolarField",
+        "DesignLoop", "NearLoop", "AvgLoop", "FarLoop",
+      ]
+      .flatMap { name in
+        values.map { value in (name + value.name, value.unit) }
+      }
   }
 }

@@ -5,9 +5,9 @@
 
 import ArgumentParser
 import Foundation
+import PinchPoint
 import Utilities
 import Web
-import PinchPoint
 import xlsxwriter
 
 PinchPointTool.main()
@@ -15,8 +15,7 @@ PinchPointTool.main()
 /// Command-line tool for calculating pinchpoint.
 struct PinchPointTool: ParsableCommand {
 
-  @Argument(help: "")
-  var input: [Double] = []
+  @Argument(help: "") var input: [Double] = []
 
   @Option(name: .customLong("htf", withSingleDash: true), help: "")
   var htfFluid: String = "ThVP1"
@@ -27,17 +26,14 @@ struct PinchPointTool: ParsableCommand {
   @Flag(name: .customLong("hex", withSingleDash: true), help: "")
   var hexValues: Bool = false
 
-  @Flag(name: .customLong("pdf", withSingleDash: true))
-  var pdf: Bool = false
+  @Flag(name: .customLong("pdf", withSingleDash: true)) var pdf: Bool = false
 
-  @Flag(name: .customLong("json", withSingleDash: true))
-  var json: Bool = false
+  @Flag(name: .customLong("json", withSingleDash: true)) var json: Bool = false
 
-  @Flag(name: .customLong("html", withSingleDash: true))
-  var html: Bool = false
+  @Flag(name: .customLong("html", withSingleDash: true)) var html: Bool = false
 
-  @Flag(name: .customLong("excel", withSingleDash: true))
-  var excel: Bool = false
+  @Flag(name: .customLong("excel", withSingleDash: true)) var excel: Bool =
+    false
 
   /// The main function to run the pinch point calculator.
   func run() throws {
@@ -62,27 +58,21 @@ struct PinchPointTool: ParsableCommand {
 
     var pinchPoint = PinchPoint.Calculation(parameter: parameter)
 
-    if htfFluid == "Hel_XLP" {
-      pinchPoint.HTF = HeatTransferFluid.XLP
-    }
+    if htfFluid == "Hel_XLP" { pinchPoint.HTF = HeatTransferFluid.XLP }
 
     if input.count == 11, (input.min() ?? 0) > .zero {
-      pinchPoint.economizerFeedwaterTemperature = Temperature(celsius: input[0])
+      pinchPoint.economizerFeedwaterTemperature = Temperature(
+        celsius: input[0])
 
       pinchPoint.turbine = WaterSteam(
-        temperature: Temperature(celsius: input[2]),
-        pressure: input[3],
-        massFlow: input[1]
-      )
+        temperature: Temperature(celsius: input[2]), pressure: input[3],
+        massFlow: input[1])
 
       pinchPoint.blowDownOfInputMassFlow = input[4]
 
       pinchPoint.reheatInlet = WaterSteam(
-        temperature: Temperature(celsius: input[5]),
-        pressure: input[6],
-        massFlow: input[8],
-        enthalpy: input[7]
-      )
+        temperature: Temperature(celsius: input[5]), pressure: input[6],
+        massFlow: input[8], enthalpy: input[7])
 
       pinchPoint.reheatOutletSteamPressure = input[9]
 
@@ -102,19 +92,17 @@ struct PinchPointTool: ParsableCommand {
       print(
         "\nLower HTF temperature:", pinchPoint.mixHTFTemperature,
         "\nTotal HTF massflow to HEX:", pinchPoint.mixHTFMassflow,
-        "\nPower of PB:", pinchPoint.powerBlockPower
-      )
+        "\nPower of PB:", pinchPoint.powerBlockPower)
     }
 
     // Generate plots and diagrams if requested in PDF or HTML format
     guard pdf || html else { return }
     let plot = Gnuplot(data: pinchPoint.temperatures())
-    plot.settings.merge(
-      ["encoding": "utf8",
-      "xtics": "10", "ytics": "10",
+    plot.settings.merge([
+      "encoding": "utf8", "xtics": "10", "ytics": "10",
       "xlabel": "'Q̇ [MW]' textcolor rgb 'black'",
-      "ylabel": "'Temperatures [°C]' textcolor rgb 'black'"]
-    ) { (_, new) in new }
+      "ylabel": "'Temperatures [°C]' textcolor rgb 'black'",
+    ]) { (_, new) in new }
     plot.userPlot = """
       plot $data i 0 u 1:2 w lp ls 11 title columnheader(1), \
       $data i 1 u 1:2 w lp ls 12 title columnheader(1), \
@@ -161,15 +149,14 @@ struct PinchPointTool: ParsableCommand {
 
     if html {
       var html = HTML(body: style + dia.svg + svg)
-      if json {
-        html.json = try pinchPoint.encodeToJSON()
-      }
+      if json { html.json = try pinchPoint.encodeToJSON() }
       #if DEBUG || os(macOS)
-        let path = "temp.html"
+      let path = "temp.html"
       #else
-        let path = URL.temporaryFile().appendingPathExtension("html").path
+      let path = URL.temporaryFile().appendingPathExtension("html").path
       #endif
-      try html.description.write(toFile: path, atomically: false, encoding: .utf8)
+      try html.description.write(
+        toFile: path, atomically: false, encoding: .utf8)
       start(path)
     }
   }

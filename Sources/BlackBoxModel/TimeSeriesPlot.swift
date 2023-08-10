@@ -18,7 +18,6 @@ public final class TimeSeriesPlot {
   let y1: [[Double]]
   /// Array to hold the data for secondary (y2) Y-axes.
   let y2: [[Double]]
-  
   /// The time range for the X-axis.
   let range: DateInterval
 
@@ -27,7 +26,6 @@ public final class TimeSeriesPlot {
 
   /// Arrays to hold the titles of Y2 data series.
   public var y2Titles: [String]
-  
   /// Labels for Y1 axes.
   public var y1Label: String = ""
 
@@ -42,7 +40,10 @@ public final class TimeSeriesPlot {
   ///   - range: The time range for the X-axis.
   ///   - yRange: Optional custom range for Y-axes (min, max) if not provided, auto-calculated.
   ///   - style: The style of the time-series plot (steps or impulses, default is steps).
-  public init(y1: [[Double]], y2: [[Double]] = [], range: DateInterval, yRange: (Double, Double)? = nil, style: Style = .steps) {
+  public init(
+    y1: [[Double]], y2: [[Double]] = [], range: DateInterval,
+    yRange: (Double, Double)? = nil, style: Style = .steps
+  ) {
     self.y1 = y1
     self.y2 = y2
     self.range = range
@@ -52,7 +53,9 @@ public final class TimeSeriesPlot {
     // Frequency of data points.
     self.freq = Simulation.time.steps.interval
     // X-axis range (start and end timestamps).
-    self.xr = (range.start.timeIntervalSince1970, range.end.timeIntervalSince1970)
+    self.xr = (
+      range.start.timeIntervalSince1970, range.end.timeIntervalSince1970
+    )
     // Y-axis range (optional custom range or auto-calculated).
     if let yRange = yRange {
       self.yr = yRange
@@ -101,7 +104,6 @@ public final class TimeSeriesPlot {
     }
   }
   #endif
-  
   /// Main function to create the time-series chart and optionally save it to a file.
   ///
   /// - Parameter toFile: The file name to save the chart as a PNG image (optional).
@@ -126,55 +128,60 @@ public final class TimeSeriesPlot {
   private let freq: Double
   private let style: Style
 
-  var settings: [String] { [
-    "grid", "key above",
-    "ylabel '\(y1Label)'",
-    "y2label '\(y2Label)'",
-    "xlabel '\(x.label)'",
-    "object 1 rectangle from graph 0,0 to graph 1,1 behind fillcolor rgb '#EBEBEB' fillstyle solid noborder",
-    // "object 2 rectangle from graph \(5.25/24),0 to graph \(16.75/24),1 behind fillcolor rgb '#DBDBDB' fillstyle solid noborder",
-    "style textbox opaque margins 1.0, 1.0 fc bgnd border lt -1 lw 1.0",
-    "xdata time",
-    "timefmt '%s'",
-    "format x \(x.format)",
-    "xrange [\(xr.start):\(xr.end)]",
-    "yrange [0:\(Int(yr.0))]",
-    "y2range [0:\(Int(yr.1))]",
-    "xtics \(x.tics)",
-    "xtics rotate",
-    "ytics nomirror 10",
-    "ytics 100",
-    "y2tics 100",
-    "style line 1 lt 1 lw 2 lc rgb '#FC8D62'",
-    "style line 2 lt 1 lw 2 lc rgb '#8DA0CB'",
-    "style line 3 lt 1 lw 2 lc rgb '#FFD92F'",
-    "style line 4 lt 1 lw 2 lc rgb '#A6D854'",
-    "style line 5 lt 1 lw 2 lc rgb '#E78AC3'",
-    "style line 6 lt 1 lw 2 lc rgb '#E5C494'",
-    "style line 11 lt 1 lw 2 lc rgb '#E41A1C'",
-    "style line 12 lt 1 lw 2 lc rgb '#377EB8'",
-    "style line 13 lt 1 lw 2 lc rgb '#498744'",
-    "style line 14 lt 1 lw 2 lc rgb '#FF7F00'",
-    "style line 15 lt 1 lw 2 lc rgb '#984EA3'",
-    "style line 16 lt 1 lw 2 lc rgb '#784520'",
-    "style line 17 lt 1 lw 2 lc rgb '#F781BF'",
-  ] }
+  var settings: [String] {
+    [
+      "grid", "key above", "ylabel '\(y1Label)'", "y2label '\(y2Label)'",
+      "xlabel '\(x.label)'",
+      "object 1 rectangle from graph 0,0 to graph 1,1 behind fillcolor rgb '#EBEBEB' fillstyle solid noborder",
+      // "object 2 rectangle from graph \(5.25/24),0 to graph \(16.75/24),1 behind fillcolor rgb '#DBDBDB' fillstyle solid noborder",
+      "style textbox opaque margins 1.0, 1.0 fc bgnd border lt -1 lw 1.0",
+      "xdata time", "timefmt '%s'", "format x \(x.format)",
+      "xrange [\(xr.start):\(xr.end)]", "yrange [0:\(Int(yr.0))]",
+      "y2range [0:\(Int(yr.1))]", "xtics \(x.tics)", "xtics rotate",
+      "ytics nomirror 10", "ytics 100", "y2tics 100",
+      "style line 1 lt 1 lw 2 lc rgb '#FC8D62'",
+      "style line 2 lt 1 lw 2 lc rgb '#8DA0CB'",
+      "style line 3 lt 1 lw 2 lc rgb '#FFD92F'",
+      "style line 4 lt 1 lw 2 lc rgb '#A6D854'",
+      "style line 5 lt 1 lw 2 lc rgb '#E78AC3'",
+      "style line 6 lt 1 lw 2 lc rgb '#E5C494'",
+      "style line 11 lt 1 lw 2 lc rgb '#E41A1C'",
+      "style line 12 lt 1 lw 2 lc rgb '#377EB8'",
+      "style line 13 lt 1 lw 2 lc rgb '#498744'",
+      "style line 14 lt 1 lw 2 lc rgb '#FF7F00'",
+      "style line 15 lt 1 lw 2 lc rgb '#984EA3'",
+      "style line 16 lt 1 lw 2 lc rgb '#784520'",
+      "style line 17 lt 1 lw 2 lc rgb '#F781BF'",
+    ]
+  }
 
   func plot() -> String {
     switch style {
     case .impulses:
-      return "\nplot " + y1.indices.map { i in
-        "$data i 0 u ($0*\(freq)+\(xr.start)):\(i+1) t '\(y1Titles[i])' axes x1y1 with i ls \(i+1)"
-      }.joined(separator: ", ") + ", " + y2.indices.map { i in
-        "$data i 1 u ($0*\(freq)+\(xr.start)):\(i+1) t '\(y2Titles[i])' axes x1y2 with steps ls \(i+11)"
-      }.joined(separator: ", ")
+      return "\nplot "
+        + y1.indices
+        .map { i in
+          "$data i 0 u ($0*\(freq)+\(xr.start)):\(i+1) t '\(y1Titles[i])' axes x1y1 with i ls \(i+1)"
+        }
+        .joined(separator: ", ") + ", "
+        + y2.indices
+        .map { i in
+          "$data i 1 u ($0*\(freq)+\(xr.start)):\(i+1) t '\(y2Titles[i])' axes x1y2 with steps ls \(i+11)"
+        }
+        .joined(separator: ", ")
     case .steps:
-      return "\nplot " + y1.indices.map { i in
-        let x = (xr.start + (freq / Double(y1.count)) * Double(i))
-        return "$data i 0 u ($0*\(freq)+\(x)):\(i+1) t '\(y1Titles[i])' axes x1y2 with steps ls \(i+1)"
-      }.joined(separator: ", ") + ", " + y2.indices.map { i in
-        "$data i 1 u ($0*\(freq)+\(xr.start)):\(i+1) t '\(y2Titles[i])' axes x1y1 with steps ls \(i+1)"
-      }.joined(separator: ", ")
+      return "\nplot "
+        + y1.indices
+        .map { i in let x = (xr.start + (freq / Double(y1.count)) * Double(i))
+          return
+            "$data i 0 u ($0*\(freq)+\(x)):\(i+1) t '\(y1Titles[i])' axes x1y2 with steps ls \(i+1)"
+        }
+        .joined(separator: ", ") + ", "
+        + y2.indices
+        .map { i in
+          "$data i 1 u ($0*\(freq)+\(xr.start)):\(i+1) t '\(y2Titles[i])' axes x1y1 with steps ls \(i+1)"
+        }
+        .joined(separator: ", ")
     }
   }
 

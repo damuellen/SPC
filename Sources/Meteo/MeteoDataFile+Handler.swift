@@ -3,9 +3,9 @@
 // (C) Copyright 2016 - 2023
 // Daniel Müllenborn, TSK Flagsol Engineering
 
-import SolarPosition
 import Foundation
 import Helpers
+import SolarPosition
 
 /// Handles the import of files with meteorological data.
 public class MeteoDataFileHandler {
@@ -38,10 +38,10 @@ public class MeteoDataFileHandler {
 
     // If the URL represents a directory, find the meteorological data file (either .mto or .TMY).
     if url.hasDirectoryPath {
-      guard let fileName = try 💾.contentsOfDirectory(atPath: path).first(
-        where: { $0.hasSuffix("mto") || $0.hasPrefix("TMY") }) else {
-          throw MeteoDataFileError.fileNotFound(path)
-      }
+      guard
+        let fileName = try 💾.contentsOfDirectory(atPath: path)
+          .first(where: { $0.hasSuffix("mto") || $0.hasPrefix("TMY") })
+      else { throw MeteoDataFileError.fileNotFound(path) }
       // Append the found file name to the URL to complete the file path.
       url.appendPathComponent(fileName)
     }
@@ -56,7 +56,7 @@ public class MeteoDataFileHandler {
   ///
   /// - Returns: A tuple containing the year and location information.
   /// - Throws: An error if there's an issue with fetching the metadata.
-  public func metadata() throws -> (year: Int, location: Location)  { 
+  public func metadata() throws -> (year: Int, location: Location) {
     try file.fetchInfo()
   }
 
@@ -86,7 +86,7 @@ public class MeteoDataFileHandler {
       // Interpolate the data using the wrapped array and the calculated steps.
       let interpolated = wrapped.interpolate(steps: steps)
       // Drop the first and last half of the interpolated data to remove unnecessary points.
-      return interpolated.dropFirst(half).dropLast(half+1)
+      return interpolated.dropFirst(half).dropLast(half + 1)
     } else {
       // If interpolation is disabled, repeat each data point according to the calculated steps.
       return data.reduce(into: []) { $0 += repeatElement($1, count: steps) }
@@ -97,20 +97,19 @@ public class MeteoDataFileHandler {
 public enum MeteoDataFileError: Error {
   case fileNotFound(String)
   case missingValueInLine(Int)
-  case unexpectedRowCount, empty, unknownLocation, unknownDelimeter, missingHeaders
+  case unexpectedRowCount, empty, unknownLocation, unknownDelimeter,
+    missingHeaders
 }
 
 /// A protocol representing a meteorological data file.
 protocol MeteoDataFile {
   /// The name of the meteorological data file.
   var name: String { get }
-  
   /// Fetches metadata from the meteorological data file.
   ///
   /// - Returns: A tuple containing the year and location information.
   /// - Throws: An error if there's an issue with fetching the metadata.
   func fetchInfo() throws -> (year: Int, location: Location)
-  
   /// Fetches meteorological data from the file.
   ///
   /// - Returns: An array of `MeteoData` containing the meteorological data.
@@ -145,43 +144,42 @@ private struct MET: MeteoDataFile {
 
     let hasCR = data[data.index(before: firstNewLine)] == cr
 
-    let lines = data.split(separator: newLine, maxSplits: 10,
-                              omittingEmptySubsequences: false)
+    let lines = data.split(
+      separator: newLine, maxSplits: 10, omittingEmptySubsequences: false)
     guard lines.endIndex > 10 else { throw MeteoDataFileError.empty }
-    self.metadata = lines[0..<10].map { line in
-      let line = hasCR ? line.dropLast() : line
-      return String(decoding: line.filter { $0 > separator }, as: UTF8.self)
-    }
+    self.metadata = lines[0..<10]
+      .map { line in let line = hasCR ? line.dropLast() : line
+        return String(decoding: line.filter { $0 > separator }, as: UTF8.self)
+      }
     guard let header = String(data: lines[8], encoding: .utf8) else {
       throw MeteoDataFileError.missingHeaders
     }
 
     let lc = header.split(separator: ",").map { $0.lowercased() }
     self.order = [
-      lc.firstIndex { $0.contains("dni") || (!$0.contains("wind") && $0.contains("dir")) },
-      lc.firstIndex { $0.contains("temp") || $0.contains("tamb") },
-      lc.firstIndex { $0.contains("ws") || ($0.contains("wind") && !$0.contains("dir")) },
-      lc.firstIndex { $0.contains("ghi") || $0.contains("glo") },
+      lc.firstIndex {
+        $0.contains("dni") || (!$0.contains("wind") && $0.contains("dir"))
+      }, lc.firstIndex { $0.contains("temp") || $0.contains("tamb") },
+      lc.firstIndex {
+        $0.contains("ws") || ($0.contains("wind") && !$0.contains("dir"))
+      }, lc.firstIndex { $0.contains("ghi") || $0.contains("glo") },
       lc.firstIndex { $0.contains("dhi") || $0.contains("dif") },
     ]
-    guard let csv = CSVReader(data: lines[10], separator: ",")
-    else { throw MeteoDataFileError.empty }
+    guard let csv = CSVReader(data: lines[10], separator: ",") else {
+      throw MeteoDataFileError.empty
+    }
     self.csv = csv
   }
 
   func fetchInfo() throws -> (year: Int, location: Location) {
-    guard let year = Int(metadata[1])
-    else { throw MeteoDataFileError.empty }
+    guard let year = Int(metadata[1]) else { throw MeteoDataFileError.empty }
 
     guard let longitude = Double(metadata[2]),
-          let latitude = Double(metadata[3]),
-          let lat_tz = Int(metadata[4])
+      let latitude = Double(metadata[3]), let lat_tz = Int(metadata[4])
     else { throw MeteoDataFileError.unknownLocation }
 
     let timezone = -lat_tz / 15
-    let location = Location(
-      (-longitude, latitude, 0), tz: timezone
-    )
+    let location = Location((-longitude, latitude, 0), tz: timezone)
     return (year, location)
   }
 
@@ -191,12 +189,13 @@ private struct MET: MeteoDataFile {
     //  || dataRange.count.isMultiple(of: 8764)
     else { throw MeteoDataFileError.unexpectedRowCount }
     let lastIndex = order.reduce(0, { max($0, $1 ?? 0) })
-    return try zip(csv.dataRows, 11...).map { values, line in
-      guard values.endIndex > lastIndex else {
-        throw MeteoDataFileError.missingValueInLine(line)
+    return try zip(csv.dataRows, 11...)
+      .map { values, line in
+        guard values.endIndex > lastIndex else {
+          throw MeteoDataFileError.missingValueInLine(line)
+        }
+        return MeteoData(values, order: order)
       }
-      return MeteoData(values, order: order)
-    }
   }
 }
 
@@ -207,16 +206,11 @@ extension MeteoDataFileError: CustomStringConvertible {
       return "Meteo file does not have enough values for one year."
     case let .missingValueInLine(line):
       return "Meteo file error. Format in line \(line) is invalid."
-    case let .fileNotFound(path):
-      return "Meteo file not found at: \(path)"
-    case .unknownLocation:
-      return "Meteo file does not contain a location."
-    case .unknownDelimeter:
-      return "Meteo file unknown delimeter for values."
-    case .empty:
-      return "Meteo file does not contain data."
-    case .missingHeaders:
-      return "Meteo file does not contain headers."
+    case let .fileNotFound(path): return "Meteo file not found at: \(path)"
+    case .unknownLocation: return "Meteo file does not contain a location."
+    case .unknownDelimeter: return "Meteo file unknown delimeter for values."
+    case .empty: return "Meteo file does not contain data."
+    case .missingHeaders: return "Meteo file does not contain headers."
     }
   }
 }
@@ -246,8 +240,8 @@ private struct TMY: MeteoDataFile {
 
     let lines = data.split(separator: newLine, maxSplits: 1)
     guard lines.endIndex > 1,
-          let metadata = CSVReader(data: lines[0])?.dataRows[0],
-          let csv = CSVReader(data: lines[1])
+      let metadata = CSVReader(data: lines[0])?.dataRows[0],
+      let csv = CSVReader(data: lines[1])
     else { throw MeteoDataFileError.empty }
     self.metadata = metadata
     self.csv = csv
@@ -255,15 +249,12 @@ private struct TMY: MeteoDataFile {
 
   func fetchLocation() throws -> Location {
     let values = metadata
-    guard values.endIndex > 3
-    else { throw MeteoDataFileError.unknownLocation }
+    guard values.endIndex > 3 else { throw MeteoDataFileError.unknownLocation }
     let longitude = values[2]
     let latitude = values[1]
     let elevation = values[3]
     let tz = fetchTimeZone()
-    return Location(
-      (longitude,  latitude,  elevation), tz: tz
-    )
+    return Location((longitude, latitude, elevation), tz: tz)
   }
 
   func fetchTimeZone() -> Int {
@@ -299,11 +290,12 @@ private struct TMY: MeteoDataFile {
     }
 
     let last = Set(order).max()!
-    return try zip(csv.dataRows, 3...).map { data, line in
-      guard data.endIndex > last else {
-        throw MeteoDataFileError.missingValueInLine(line)
+    return try zip(csv.dataRows, 3...)
+      .map { data, line in
+        guard data.endIndex > last else {
+          throw MeteoDataFileError.missingValueInLine(line)
+        }
+        return MeteoData(data, order: order)
       }
-      return MeteoData(data, order: order)
-    }
   }
 }

@@ -7,7 +7,6 @@
 struct OperationRestriction {
   /// The fuel strategy used for the operation restriction.
   static var fuelStrategy: FuelStrategy = .predefined
-    
   /// The available fuel strategies for the operation restriction.
   enum FuelStrategy: CustomStringConvertible {
     /// A predefined fuel strategy.
@@ -16,15 +15,13 @@ struct OperationRestriction {
     case strategy
 
     /// Indicates whether the fuel strategy is predefined.
-    var isPredefined: Bool {
-      self ~= .predefined
-    }
+    var isPredefined: Bool { self ~= .predefined }
 
     /// A textual representation of the fuel strategy.
     public var description: String {
       switch self {
-        case .predefined: return "Predefined"
-        case .strategy: return "Strategy"
+      case .predefined: return "Predefined"
+      case .strategy: return "Strategy"
       }
     }
   }

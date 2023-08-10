@@ -31,8 +31,8 @@ public struct MeteoData: CustomStringConvertible {
   ///   - temperature: The temperature in degrees Celsius.
   ///   - windSpeed: The wind speed in meters per second (m/s).
   public init(
-    dni: Double = 0, ghi: Double = 0, dhi: Double = 0,
-    temperature: Double = 0, windSpeed: Double = 0
+    dni: Double = 0, ghi: Double = 0, dhi: Double = 0, temperature: Double = 0,
+    windSpeed: Double = 0
   ) {
     self.insolation = .init(direct: dni, global: ghi, diffuse: dhi)
     self.temperature = temperature
@@ -44,7 +44,8 @@ public struct MeteoData: CustomStringConvertible {
   ///   - insolation: An array containing direct, global, and diffuse irradiance values in watts per square meter (W/m2).
   ///   - conditions: An array containing temperature and wind speed values.
   public init(insolation: [Double], conditions: [Double]) {
-    self.insolation = .init(direct: insolation[0], global: insolation[1], diffuse: insolation[2])
+    self.insolation = .init(
+      direct: insolation[0], global: insolation[1], diffuse: insolation[2])
     self.temperature = conditions[0]
     self.windSpeed = conditions[1]
   }
@@ -54,10 +55,20 @@ public struct MeteoData: CustomStringConvertible {
   ///   - values: An array containing all values.
   ///   - order: An array specifying the order of dni, temperature, windSpeed, ghi, and dhi in the values array.
   public init(_ values: [Double], order: [Int?]) {
-    let dni, ghi, dhi: Double
+    let dni: Double
+    let ghi: Double
+    let dhi: Double
     if let i = order[0] { dni = values[i] } else { dni = .zero }
-    if let i = order[1] { self.temperature = values[i] } else { self.temperature = .zero }
-    if let i = order[2] { self.windSpeed = values[i] } else { self.windSpeed = .zero }
+    if let i = order[1] {
+      self.temperature = values[i]
+    } else {
+      self.temperature = .zero
+    }
+    if let i = order[2] {
+      self.windSpeed = values[i]
+    } else {
+      self.windSpeed = .zero
+    }
     if let i = order[3] { ghi = values[i] } else { ghi = .zero }
     if let i = order[4] { dhi = values[i] } else { dhi = .zero }
     self.insolation = .init(direct: dni, global: ghi, diffuse: dhi)

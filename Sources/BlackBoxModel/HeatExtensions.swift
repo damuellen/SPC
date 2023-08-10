@@ -14,8 +14,8 @@ extension HeatTransferFluid {
   ///   - tp2: The second thermal process object to be mixed.
   /// - Returns: The resulting outlet temperature after mixing.
   func calculateMixedOutletTemperature(
-    from tp1: ThermalProcess, and tp2: ThermalProcess) -> Temperature 
-  {
+    from tp1: ThermalProcess, and tp2: ThermalProcess
+  ) -> Temperature {
     if tp1.massFlow.rate == 0 { return tp2.temperature.outlet }
     if tp2.massFlow.rate == 0 { return tp1.temperature.outlet }
     let (t1, t2) = (tp1.outlet, tp2.outlet)
@@ -39,15 +39,10 @@ extension HeatTransferFluid {
     // Helper function to read double values from the configuration file at the given line number.
     let ln: (Int) throws -> Double = { try file.readDouble(lineNumber: $0) }
     try self.init(
-      name: file.name,
-      freezeTemperature: ln(10),
-      heatCapacity: [ln(13), ln(16)],
-      dens: [ln(19), ln(22), ln(25)],
-      visco: [ln(28), ln(31), ln(34)],
-      thermCon: [ln(37), ln(40), ln(43)],
-      maxTemperature: ln(46),
-      h_T: [], T_h: []
-    )
+      name: file.name, freezeTemperature: ln(10),
+      heatCapacity: [ln(13), ln(16)], dens: [ln(19), ln(22), ln(25)],
+      visco: [ln(28), ln(31), ln(34)], thermCon: [ln(37), ln(40), ln(43)],
+      maxTemperature: ln(46), h_T: [], T_h: [])
   }
 }
 
@@ -60,12 +55,12 @@ protocol ThermalProcess: CustomStringConvertible {
 
 /// A struct representing a heat transfer cycle with properties related to thermal processes.
 struct HeatTransferCycle: ThermalProcess {
-    // The name of the heat transfer cycle.
-    var name: String
-    // The mass flow rate in the heat transfer cycle.
-    var massFlow: MassFlow
-    // The temperature of the heat transfer cycle, consisting of an inlet and outlet temperature.
-    var temperature: (inlet: Temperature, outlet: Temperature)
+  // The name of the heat transfer cycle.
+  var name: String
+  // The mass flow rate in the heat transfer cycle.
+  var massFlow: MassFlow
+  // The temperature of the heat transfer cycle, consisting of an inlet and outlet temperature.
+  var temperature: (inlet: Temperature, outlet: Temperature)
 }
 
 // Extension of Cycle struct to provide additional initializers.
@@ -94,13 +89,12 @@ extension HeatTransferCycle {
 
 // Extension of Cycle struct to conform to Comparable, comparing cycles based on their minimum temperature.
 extension HeatTransferCycle: Comparable {
-  public static func < (lhs: HeatTransferCycle, rhs: HeatTransferCycle) -> Bool {
-    lhs.minTemperature < rhs.minTemperature
-  }
+  public static func < (lhs: HeatTransferCycle, rhs: HeatTransferCycle) -> Bool
+  { lhs.minTemperature < rhs.minTemperature }
 
-  public static func == (lhs: HeatTransferCycle, rhs: HeatTransferCycle) -> Bool {
-    lhs.minTemperature == rhs.minTemperature
-  }
+  public static func == (lhs: HeatTransferCycle, rhs: HeatTransferCycle)
+    -> Bool
+  { lhs.minTemperature == rhs.minTemperature }
 }
 
 // Extension of the ThermalProcess protocol to provide computed properties and helper methods.
@@ -157,21 +151,21 @@ extension ThermalProcess {
   }
 
   /// Perform heat transfer from two ThermalProcess instances and set the inlet temperature accordingly.
-  mutating func heatTransfer(from tp1: ThermalProcess, and tp2: ThermalProcess) {
-    temperature.inlet = medium.calculateMixedOutletTemperature(from: tp1, and: tp2)
+  mutating func heatTransfer(from tp1: ThermalProcess, and tp2: ThermalProcess)
+  {
+    temperature.inlet = medium.calculateMixedOutletTemperature(
+      from: tp1, and: tp2)
     massFlow = tp1.massFlow + tp2.massFlow
   }
-  
   /// Perform heat transfer from another ThermalProcess instance and set the inlet temperature accordingly.
   mutating func heatTransfer(from process: ThermalProcess) {
-    temperature.inlet = medium.calculateMixedOutletTemperature(from: self, and: process)
+    temperature.inlet = medium.calculateMixedOutletTemperature(
+      from: self, and: process)
     massFlow += process.massFlow
   }
 
   /// Set the outlet temperature equal to the inlet temperature.
-  mutating func uniformTemperature() {
-    temperature.outlet = temperature.inlet
-  }
+  mutating func uniformTemperature() { temperature.outlet = temperature.inlet }
 
   /// Set the inlet temperature to the given temperature.
   mutating func setTemperature(inlet: Temperature) {
@@ -186,8 +180,9 @@ extension ThermalProcess {
   /// Set the outlet temperature to the given value.
   mutating func outletTemperature(kelvin: Double) {
     temperature.outlet = Temperature(kelvin)
-    assert(temperature.outlet > medium.freezeTemperature,
-           "\(temperature) is below the freezing point of the HTF")
+    assert(
+      temperature.outlet > medium.freezeTemperature,
+      "\(temperature) is below the freezing point of the HTF")
   }
 
   /// Set the inlet temperature from another outlet.

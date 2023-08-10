@@ -6,9 +6,7 @@
 import Foundation
 
 /// A protocol that allows types to be initialized from a TextConfigFile.
-protocol TextConfigInitializable {
-  init(file: TextConfigFile) throws
-}
+protocol TextConfigInitializable { init(file: TextConfigFile) throws }
 
 /// A struct representing a configuration file with lines of text and associated functionality.
 public struct TextConfigFile {
@@ -17,15 +15,12 @@ public struct TextConfigFile {
 
   /// Computed property to get the name of the configuration file.
   var name: String {
-    if lines.count > 6, !lines[6].isEmpty {
-      return lines[6]
-    }
+    if lines.count > 6, !lines[6].isEmpty { return lines[6] }
     return url.lastPathComponent
   }
 
   /// The URL of the configuration file.
   let url: URL
-  
   /// Initializes a TextConfigFile instance from the contents of a URL.
   public init(url: URL) throws {
     let content = try String(contentsOf: url, encoding: .windowsCP1252)
@@ -38,9 +33,9 @@ public struct TextConfigFile {
     // Determine the line separator used in the content (either "\r\n" or "\n").
     let separator: Character = content.contains("\r\n") ? "\r\n" : "\n"
     // Split the content into lines and trim each line.
-    lines = content.split(
-      separator: separator, omittingEmptySubsequences: false
-    ).map(\.trimmed)
+    lines =
+      content.split(separator: separator, omittingEmptySubsequences: false)
+      .map(\.trimmed)
   }
 
   /// An enumeration representing read errors that may occur while processing the file.

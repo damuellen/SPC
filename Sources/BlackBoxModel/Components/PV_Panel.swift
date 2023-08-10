@@ -43,8 +43,9 @@ extension PV {
       self.Egap = 1.12
     }
 
-    func callAsFunction(
-      radiation: Double, temperature: Temperature) -> (Double, Double, Double) {
+    func callAsFunction(radiation: Double, temperature: Temperature) -> (
+      Double, Double, Double
+    ) {
       let Iph = photocurrent(radiation: radiation, temperature: temperature)
       let Rsh = Rshunt(radiation: radiation, temperature: temperature)
       let Io = saturationCurrent(temperature: temperature)
@@ -61,7 +62,8 @@ extension PV {
       Ioref * pow(temperature.kelvin / Cell.temperature_at_STC.kelvin, 3)
         * exp(
           Cell.q * Egap / (gamma * Cell.k)
-            * ((1 / Cell.temperature_at_STC.kelvin) - (1 / temperature.kelvin)))
+            * ((1 / Cell.temperature_at_STC.kelvin) - (1 / temperature.kelvin))
+        )
     }
     /// Computes the corrected Rshunt for the single diode model.
     func Rshunt(radiation: Double, temperature: Temperature) -> Double {
@@ -78,8 +80,8 @@ extension PV {
 
     public var description: String {
       String(format: "Vmp: %03.2f", voltage) + "\t"
-      + String(format: "Imp: %03.2f", current) + "\t"
-      + String(format: "Pmp: %03.2f", power)
+        + String(format: "Imp: %03.2f", current) + "\t"
+        + String(format: "Pmp: %03.2f", power)
     }
 
     init(current: Double, voltage: Double) {
@@ -98,7 +100,6 @@ extension PV {
     let area: Double
     /// Number of cells of the panel
     let numberOfCells: Int
-    
     /// Initializes a Panel with default parameter values.
     public init() {
       self.cell = Cell()
@@ -106,10 +107,10 @@ extension PV {
       self.area = 1.972
       self.numberOfCells = 76
     }
-    
     /// Calculates the temperature of the panel.
     func temperature(
-      radiation: Double, ambient: Temperature, windSpeed: Double) -> Temperature {
+      radiation: Double, ambient: Temperature, windSpeed: Double
+    ) -> Temperature {
       /// Absorption coefficient of the module
       let alpha = 0.9
       let efficiency = nominalPower / (area * Cell.radiation_at_STC)
@@ -122,7 +123,9 @@ extension PV {
     }
 
     /// Calculates the voltage from a given current point within the I-V curve using the single diode model.
-    func voltageFrom(current: Double, radiation: Double, cell_T: Temperature) -> Double {
+    func voltageFrom(current: Double, radiation: Double, cell_T: Temperature)
+      -> Double
+    {
       let nVth =
         cell.gamma * Double(numberOfCells) * Cell.k * cell_T.kelvin / Cell.q
 
@@ -147,7 +150,9 @@ extension PV {
     }
 
     /// Calculates the current from a given voltage value within the I-V curve using the single diode model.
-    func currentFrom(voltage: Double, radiation: Double, cell_T: Temperature) -> Double {
+    func currentFrom(voltage: Double, radiation: Double, cell_T: Temperature)
+      -> Double
+    {
       // The cells are connected in parallel, the voltage splits.
       let voltage = voltage / Double(numberOfCells)
       let nVth =
@@ -157,7 +162,8 @@ extension PV {
 
       let argW =
         cell.Rs * Isat
-        * exp(Rsh * (cell.Rs * (Iph + Isat) + voltage) / (nVth * (cell.Rs + Rsh)))
+        * exp(
+          Rsh * (cell.Rs * (Iph + Isat) + voltage) / (nVth * (cell.Rs + Rsh)))
       let inputterm = lambertW(argW)
       return -voltage / (cell.Rs + Rsh) - (nVth / cell.Rs) * inputterm + Rsh
         * (Iph + Isat) / (cell.Rs + Rsh)
@@ -177,9 +183,9 @@ extension PV {
       return Mpp_bisect(Iph: Iph, Io: Isat, a: nVth, Rsh: Rsh)
     }
 
-    private func Mpp_bisect(
-      Iph: Double, Io: Double, a: Double, Rsh: Double
-    ) -> PowerPoint {
+    private func Mpp_bisect(Iph: Double, Io: Double, a: Double, Rsh: Double)
+      -> PowerPoint
+    {
       let Imp = Imp_bisect(Iph: Iph, Io: Io, nVth: a, Rs: cell.Rs, Rsh: Rsh)
       let z = phi_exact(Imp: Imp, IL: Iph, Io: Io, a: a, Rsh: Rsh)
       let Vmp = (Iph + Io - Imp) * Rsh - Imp * cell.Rs - a * z

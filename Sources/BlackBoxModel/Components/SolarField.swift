@@ -5,16 +5,17 @@
 
 import Libc
 import Meteo
-import Utilities
 import Units
+import Utilities
 
 extension SolarField: CustomStringConvertible {
   /// A textual representation of the SolarField instance.
   public var description: String {
-    "  Mode:".padding(30) + "\(operationMode)\n" + formatting(
-      [heatLosses, heatLossesHotHeader, heatLossesHCE],
-      ["Heat losses:", "Heat losses header:", "Heat losses HCE:"]      
-    ) + "\n" + cycle.description 
+    "  Mode:".padding(30) + "\(operationMode)\n"
+      + formatting(
+        [heatLosses, heatLossesHotHeader, heatLossesHCE],
+        ["Heat losses:", "Heat losses header:", "Heat losses HCE:"]) + "\n"
+      + cycle.description
       + "\nDesign\n\(loops[0])\nNear\n\(loops[1])\nAverage\n\(loops[2])\nFar\n\(loops[3])"
   }
 }
@@ -22,9 +23,9 @@ extension SolarField: CustomStringConvertible {
 extension SolarField.OperationMode: CustomStringConvertible {
   /// A textual representation of the OperationMode enum cases.
   public var description: String {
-    switch self {      
+    switch self {
     case .startUp: return "Start up"
-    case .shutdown: return "Shut down"   
+    case .shutdown: return "Shut down"
     case .follow: return "Follow"
     case .track: return "Track"
     case .defocus(let r): return "Dumping \(Ratio(1-r.quotient).singleBar)"
@@ -43,7 +44,7 @@ struct SolarField: Parameterizable, ThermalProcess {
   public enum Loop: Int {
     case design = 0
     case near, average, far
-    static let indices: [Int] = [1,2,3]
+    static let indices: [Int] = [1, 2, 3]
     static var names: [String] { ["Design", "Near", "Average", "Far"] }
   }
 
@@ -61,9 +62,9 @@ struct SolarField: Parameterizable, ThermalProcess {
 
   var inFocus: Ratio {
     switch operationMode {
-      case .defocus(let ratio): return ratio
-      case .startUp, .track: return 1.0
-      default: return 0.0
+    case .defocus(let ratio): return ratio
+    case .startUp, .track: return 1.0
+    default: return 0.0
     }
   }
 
@@ -72,23 +73,23 @@ struct SolarField: Parameterizable, ThermalProcess {
     get { header.temperature }
     set { header.temperature = newValue }
   }
-  
   /// The mass flow rate of the solar field header.
   var massFlow: MassFlow {
     get { header.massFlow }
     set { header.massFlow = newValue }
   }
 
-  let area = Design.layout.solarField * Collector.parameter.areaSCAnet
-    * 2 * Double(SolarField.parameter.numberOfSCAsInRow)
+  let area =
+    Design.layout.solarField * Collector.parameter.areaSCAnet * 2
+    * Double(SolarField.parameter.numberOfSCAsInRow)
 
   let minMassFlow = MassFlow(
-    SolarField.parameter.minFlow.quotient * SolarField.parameter.maxMassFlow.rate
-  )
+    SolarField.parameter.minFlow.quotient
+      * SolarField.parameter.maxMassFlow.rate)
 
   let antiFreezeFlow = MassFlow(
-      SolarField.parameter.antiFreezeFlow.quotient * SolarField.parameter.maxMassFlow.rate
-  )
+    SolarField.parameter.antiFreezeFlow.quotient
+      * SolarField.parameter.maxMassFlow.rate)
 
   var requiredMassFlow: MassFlow = HeatExchanger.designMassFlow
 
@@ -110,10 +111,8 @@ struct SolarField: Parameterizable, ThermalProcess {
   }
   /// Creates a `SolarField` instance with the fixed initial state.
   static let initialState = SolarField(
-    operationMode: .stow,
-    header: HeatTransferCycle(name: "Header"),
-    loops: Loop.names.map { name in HeatTransferCycle(loop: name) }
-  )
+    operationMode: .stow, header: HeatTransferCycle(name: "Header"),
+    loops: Loop.names.map { name in HeatTransferCycle(loop: name) })
 
   /// The static parameters for the `SolarField`.
   public static var parameter: Parameter = Parameters.sf
@@ -128,20 +127,18 @@ struct SolarField: Parameterizable, ThermalProcess {
   mutating func requiredMassFlow(from storage: Storage) {
     if storage.relativeCharge < Storage.parameter.chargeTo {
       requiredMassFlow += MassFlow(
-      (1 - Storage.parameter.massFlowShare.quotient)
-        * SolarField.parameter.maxMassFlow.rate
-      )
+        (1 - Storage.parameter.massFlowShare.quotient)
+          * SolarField.parameter.maxMassFlow.rate)
     } else if Design.hasGasTurbine {
       requiredMassFlow = HeatExchanger.parameter.massFlowHTF
     }
-    if massFlow > requiredMassFlow {
-      massFlow = requiredMassFlow
-    }
+    if massFlow > requiredMassFlow { massFlow = requiredMassFlow }
     assert(requiredMassFlow <= SolarField.parameter.maxMassFlow)
   }
 
   mutating func heatLoss(pipe: Temperature, ambient: Temperature) {
-    heatLosses += ((pipe.kelvin - ambient.kelvin) / 333) ** 1 * SolarField.parameter.pipeHeatLosses
+    heatLosses += ((pipe.kelvin - ambient.kelvin) / 333) ** 1
+      * SolarField.parameter.pipeHeatLosses
   }
 
   /// Calculates the parasitics of pumps
@@ -163,10 +160,12 @@ struct SolarField: Parameterizable, ThermalProcess {
   /// Calculates the efficiency (η) of the solar collector loop.
   mutating func eta(collector: Collector) {
     if collector.insolationAbsorber > .zero {
-      loopEta = collector.efficiency - heatLossesHCE
-        / collector.insolationAbsorber / collector.efficiency
-      eta = collector.efficiency - heatLosses
-        / collector.insolationAbsorber / collector.efficiency
+      loopEta =
+        collector.efficiency - heatLossesHCE / collector.insolationAbsorber
+        / collector.efficiency
+      eta =
+        collector.efficiency - heatLosses / collector.insolationAbsorber
+        / collector.efficiency
     } else {
       loopEta = .zero
       eta = .zero
@@ -182,8 +181,7 @@ struct SolarField: Parameterizable, ThermalProcess {
       } else {
         temperature.inlet.kelvin = storage.antiFreezeTemperature
       }
-    case .preheat:
-      temperature.inlet = storage.temperatureTank.cold
+    case .preheat: temperature.inlet = storage.temperatureTank.cold
     default: break
     }
   }
@@ -202,9 +200,8 @@ struct SolarField: Parameterizable, ThermalProcess {
     let minFlow = MassFlow(minFlowRatio * maxMassFlow.rate)
     let m1 = (massFlow - minFlow).rate
     let m2 = (maxMassFlow - minFlow).rate
-    return zip(design, minimum).map { d, m in
-      MassFlow(massFlow.rate * (m1 * (d - m) / m2 + m))
-    }
+    return zip(design, minimum)
+      .map { d, m in MassFlow(massFlow.rate * (m1 * (d - m) / m2 + m)) }
   }
 
   /// Calculates the time ratios for linear interpolation of the outlet temperature.
@@ -212,14 +209,14 @@ struct SolarField: Parameterizable, ThermalProcess {
   /// The time ratios are calculated based on the time remaining in the simulation step and the loop way lengths.
   ///
   /// - Returns: An array of tuples containing the time ratios and their complementary ratios for each loop.
-  private func ratios()  -> [(Double, Double)] {
+  private func ratios() -> [(Double, Double)] {
     let timeRemain = Simulation.time.steps.interval
     let maxMassFlow = SolarField.parameter.maxMassFlow.rate
     let loopWays = SolarField.parameter.loopWays
     let flowVelocity: Double = 2.7
     return loopWays.indices.map { i -> (Double, Double) in
-      let time = (loopWays[i] / (flowVelocity
-        * loops[i].massFlow.rate / maxMassFlow))
+      let time =
+        (loopWays[i] / (flowVelocity * loops[i].massFlow.rate / maxMassFlow))
       var timeRatio = timeRemain / time
 
       let oneMinusTR: Double
@@ -235,13 +232,13 @@ struct SolarField: Parameterizable, ThermalProcess {
 
   /**
    Calculates the outlet temperature gradient in the solar collector loop.
-   
+
    This private method is responsible for computing the outlet temperature gradient across the solar collector loop based on various parameters and conditions. The function uses the provided `last` cycle and the time since the last calculation to determine the current temperature distribution in the loop.
-   
+
    - Parameters:
      - last: An array containing the temperature information from the last cycle for each loop in the solar collector system. The array holds the temperature data for the `Loop` instances.
      - time: The time since the last calculation in the simulation.
-   
+
    The calculation process involves the following steps:
    1. Retrieve the relevant parameters from the `SolarField` instance, including the maximum mass flow rate, pipe way length, and loop way lengths.
    2. Calculate the flow velocity of the Heat Transfer Fluid (HTF) in the solar collector loop.
@@ -251,17 +248,19 @@ struct SolarField: Parameterizable, ThermalProcess {
    6. Calculate the average inlet temperature for each loop using the linear interpolation between the inlet temperature of the current cycle (`inlet`) and the inlet temperature from the `last` cycle.
    7. Calculate the outlet temperature of the header using the average temperatures and flow rates of all loops.
    8. Update the outlet temperature of the header and the inlet temperatures of each loop in the `SolarField` instance (self) based on the calculated temperature gradients and interpolation.
-   
+
    The method modifies the state of the `SolarField` instance (self) by updating the `header.temperature.outlet` and `loops.temperature.inlet` properties with the calculated temperature values. It also relies on the information from the previous cycle (`last`) to perform the interpolation calculations.
    */
-  private mutating func outletTemperature(last: [HeatTransferCycle], _ time: Double) {
+  private mutating func outletTemperature(
+    last: [HeatTransferCycle], _ time: Double
+  ) {
     let maxMassFlow = SolarField.parameter.maxMassFlow.rate
     let pipeWay = SolarField.parameter.pipeWay
     let loopWays = SolarField.parameter.loopWays
 
     let flowVelocity: Double = 2.7
 
-    let timeRatios =  ratios()
+    let timeRatios = ratios()
     let remain = loopWays[0] / (flowVelocity * header.flow / maxMassFlow)
     if time < remain {
       for i in Loop.indices {
@@ -279,10 +278,11 @@ struct SolarField: Parameterizable, ThermalProcess {
       loops[3].inlet + 2 * wayRatio * (inlet - loops[3].inlet)
 
     var sum = 0.0
-    zip(Loop.indices, timeRatios).forEach { i, tr in
-      sum += (tr.0 * loops[i].outlet + tr.1 * last[i].outlet) * loops[i].flow
-      loops[i].temperature.inlet.kelvin = tr.0 * inlet + tr.1 * last[i].inlet
-    }
+    zip(Loop.indices, timeRatios)
+      .forEach { i, tr in
+        sum += (tr.0 * loops[i].outlet + tr.1 * last[i].outlet) * loops[i].flow
+        loops[i].temperature.inlet.kelvin = tr.0 * inlet + tr.1 * last[i].inlet
+      }
 
     header.temperature.outlet.kelvin = sum / (3.0 * header.flow)
   }
@@ -292,7 +292,8 @@ struct SolarField: Parameterizable, ThermalProcess {
   mutating func isFreezeProtectionRequired() -> Bool {
     // Calculate the freezing temperature considering the HTF freeze temperature,
     // pump temperature tolerance, and simulation temperature tolerance.
-    let freezingTemperature = SolarField.parameter.HTF.freezeTemperature
+    let freezingTemperature =
+      SolarField.parameter.HTF.freezeTemperature
       + Simulation.parameter.deltaFreezeTemperaturePump
       + Simulation.parameter.tempTolerance
 
@@ -307,7 +308,9 @@ struct SolarField: Parameterizable, ThermalProcess {
     }
 
     // Check if the minimum temperature of any loop's outlet is below the freezing temperature.
-    if loops.dropFirst().min(by: <)!.minTemperature < freezingTemperature.kelvin {
+    if loops.dropFirst().min(by: <)!.minTemperature
+      < freezingTemperature.kelvin
+    {
       // Set the inlet temperature of all loops to the current header inlet temperature.
       loops.indices.forEach {
         loops[$0].temperature.inlet = header.temperature.inlet
@@ -317,7 +320,8 @@ struct SolarField: Parameterizable, ThermalProcess {
       let loopWays = SolarField.parameter.loopWays
       let flowVelocity: Double = 2.7
       let maxMassFlow = SolarField.parameter.maxMassFlow.rate
-      let remain = loopWays[0] / (flowVelocity * antiFreezeFlow.rate / maxMassFlow)
+      let remain =
+        loopWays[0] / (flowVelocity * antiFreezeFlow.rate / maxMassFlow)
 
       // Update the operation mode to freeze with the calculated remaining time.
       operationMode = .freeze(remain - timeRemain)
@@ -333,7 +337,9 @@ struct SolarField: Parameterizable, ThermalProcess {
   ///   - temperature: The current temperature of the header.
   ///   - ambient: The ambient temperature surrounding the solar field.
   /// - Returns: The new temperature after accounting for heat losses.
-  mutating func heatLosses(header temperature: Temperature, ambient: Temperature) -> Temperature {
+  mutating func heatLosses(
+    header temperature: Temperature, ambient: Temperature
+  ) -> Temperature {
     let parameter = SolarField.parameter
     let numberOfSCAsInRow = SolarField.parameter.numberOfSCAsInRow
     let areaSCAnet = Collector.parameter.areaSCAnet
@@ -343,7 +349,8 @@ struct SolarField: Parameterizable, ThermalProcess {
     let htf = SolarField.parameter.HTF
 
     // Calculate the total area of the solar field.
-    let area = Design.layout.solarField * Double(numberOfSCAsInRow) * 2 * areaSCAnet
+    let area =
+      Design.layout.solarField * Double(numberOfSCAsInRow) * 2 * areaSCAnet
 
     var oldTemp: Temperature
     var newTemp: Temperature
@@ -353,40 +360,42 @@ struct SolarField: Parameterizable, ThermalProcess {
 
     // Repeat the calculations until the temperature stabilizes within the heat loss tolerance.
     repeat {
-        oldTemp = newTemp
+      oldTemp = newTemp
 
-        // Calculate heat losses from the header using predefined coefficients (c).
-        heatLossesHotHeader = c[0] * (c[1] + c[2] * (newTemp.kelvin - ambient.kelvin)) // [MWt]
+      // Calculate heat losses from the header using predefined coefficients (c).
+      heatLossesHotHeader =
+        c[0] * (c[1] + c[2] * (newTemp.kelvin - ambient.kelvin))  // [MWt]
 
-        // Check if there is a mass flow in the system to avoid division by zero.
-        if massFlow.rate > 0 {
-            // Calculate the change in heat per kilogram of the heat transfer fluid (HTF).
-            let deltaHeatPerKg = heatLossesHotHeader * 1_000 / massFlow.rate // [kJ/kg]
-            // Update the new temperature based on the change in heat per kilogram.
-            newTemp = htf.temperature(-deltaHeatPerKg, temperature)
-        } else {
-            // Calculate the average temperature between the new and ambient temperatures.
-            let avgT = Temperature.average(newTemp, temperature)
-            // Calculate the area density of the HTF using the average temperature.
-            let areaDensity = htf.density(avgT) * .pi * rabsInner ** 2 / aperture  // kg/m2
-            let time = Simulation.time.steps.interval
-            // Calculate the change in heat per square meter of the solar field.
-            let deltaHeatPerSqm = heatLossesHotHeader * 1_000 / area * time
-            // Convert the change in heat per square meter to change in heat per kilogram.
-            let deltaHeatPerKg = deltaHeatPerSqm / areaDensity
+      // Check if there is a mass flow in the system to avoid division by zero.
+      if massFlow.rate > 0 {
+        // Calculate the change in heat per kilogram of the heat transfer fluid (HTF).
+        let deltaHeatPerKg = heatLossesHotHeader * 1_000 / massFlow.rate  // [kJ/kg]
+        // Update the new temperature based on the change in heat per kilogram.
+        newTemp = htf.temperature(-deltaHeatPerKg, temperature)
+      } else {
+        // Calculate the average temperature between the new and ambient temperatures.
+        let avgT = Temperature.average(newTemp, temperature)
+        // Calculate the area density of the HTF using the average temperature.
+        let areaDensity = htf.density(avgT) * .pi * rabsInner ** 2 / aperture  // kg/m2
+        let time = Simulation.time.steps.interval
+        // Calculate the change in heat per square meter of the solar field.
+        let deltaHeatPerSqm = heatLossesHotHeader * 1_000 / area * time
+        // Convert the change in heat per square meter to change in heat per kilogram.
+        let deltaHeatPerKg = deltaHeatPerSqm / areaDensity
 
-            // Calculate the heat content of the HTF at the current and ambient temperatures.
-            let heatPerKg = htf.heatContent(temperature, ambient)
-            // Update the new temperature based on the change in heat content per kilogram.
-            newTemp = htf.temperature(heatPerKg - deltaHeatPerKg, ambient)
-        }
-        // Limit the new temperature to the maximum temperature of the HTF.
-        newTemp.limit(to: parameter.HTF.maxTemperature)
-    } while abs(newTemp.kelvin - oldTemp.kelvin) > Simulation.parameter.heatlossTempTolerance
+        // Calculate the heat content of the HTF at the current and ambient temperatures.
+        let heatPerKg = htf.heatContent(temperature, ambient)
+        // Update the new temperature based on the change in heat content per kilogram.
+        newTemp = htf.temperature(heatPerKg - deltaHeatPerKg, ambient)
+      }
+      // Limit the new temperature to the maximum temperature of the HTF.
+      newTemp.limit(to: parameter.HTF.maxTemperature)
+    } while abs(newTemp.kelvin - oldTemp.kelvin)
+      > Simulation.parameter.heatlossTempTolerance
 
     // Return the new temperature after accounting for heat losses.
     return newTemp
-}
+  }
 
   /// Calculates the parameters and behavior of a solar collector loop.
   ///
@@ -434,26 +443,25 @@ struct SolarField: Parameterizable, ThermalProcess {
   /// relevant properties to reflect the calculated values and behaviors of the
   /// solar collector loop.
   mutating func calculate(collector: Collector, ambient: Temperature) {
-    let insolation = collector.insolationAbsorber < collector.lastInsolation
+    let insolation =
+      collector.insolationAbsorber < collector.lastInsolation
       ? collector.lastInsolation : collector.insolationAbsorber
     let elevation = collector.parabolicElevation
 
     /// The heat that can be absorbed by the HTF
     let heatPerKgHTF = medium.heatContent(
-      medium.maxTemperature, header.temperature.inlet
-    )
+      medium.maxTemperature, header.temperature.inlet)
 
     /// Heat losses of the HCE for maximum outlet temperature
     heatLossesHCE = HCE.heatLosses(
-      inlet: header.temperature.inlet,
-      insolation: insolation,
-      ambient: ambient
+      inlet: header.temperature.inlet, insolation: insolation, ambient: ambient
     )
 
     heatLosses = heatLossesHCE
 
     /// Average HTF temperature in loop
-    let avgT = Temperature.average(medium.maxTemperature, header.temperature.inlet)
+    let avgT = Temperature.average(
+      medium.maxTemperature, header.temperature.inlet)
 
     /// Add heat losses of the connecting pipes
     heatLoss(pipe: avgT, ambient: ambient)
@@ -462,13 +470,13 @@ struct SolarField: Parameterizable, ThermalProcess {
     /// The predefined availability of the solar field
     let availability = Availability.current.value.solarField.quotient
     /// Watts per square metre after taking into account heat losses
-    let deltaHeat = insolation * availability - heatLosses // [W/m2]
+    let deltaHeat = insolation * availability - heatLosses  // [W/m2]
     /// Calculate appropriate mass flow [kg/(sec sqm)]
     let kgPerSqm = deltaHeat / 1_000 / heatPerKgHTF
 
     // Check if mass flow is within acceptable limits
     switch MassFlow(kgPerSqm * area) {
-    case let massFlow where massFlow.rate <= .zero: // HCE loses heat
+    case let massFlow where massFlow.rate <= .zero:  // HCE loses heat
       if isFreezeProtectionRequired() {
         header.massFlow = antiFreezeFlow
       } else {
@@ -483,7 +491,7 @@ struct SolarField: Parameterizable, ThermalProcess {
     case let massFlow where massFlow < minMassFlow:
       operationMode = .follow
       header.massFlow = minMassFlow
-    case let massFlow: // MassFlow is within acceptable limits
+    case let massFlow:  // MassFlow is within acceptable limits
       operationMode = .track
       header.massFlow = massFlow
     }
@@ -498,13 +506,15 @@ struct SolarField: Parameterizable, ThermalProcess {
     loops[0].massFlow = header.massFlow
     loops[0].temperature.inlet = header.temperature.inlet
     // Calculate design loop outlet temperature
-    let time = HCE.temperatures(&self, .design, collector.insolationAbsorber, ambient)
+    let time = HCE.temperatures(
+      &self, .design, collector.insolationAbsorber, ambient)
 
     // Check HCE and decide what to do
     if case .follow = operationMode {
       let minRaise = Simulation.parameter.minInsolationRaiseStartUp
       if elevation < 90, insolation > collector.lastInsolation + minRaise,
-        insolation > Simulation.parameter.minInsolation {
+        insolation > Simulation.parameter.minInsolation
+      {
         operationMode = .startUp
         header.massFlow = minMassFlow
       } else if loops[0].outlet < minTemp, elevation > 90 {
@@ -519,9 +529,8 @@ struct SolarField: Parameterizable, ThermalProcess {
 
     if header.massFlow > .zero {
       let massFlows = imbalanceLoops(massFlow: header.massFlow)
-      zip(Loop.indices, massFlows).forEach { i, massFlow in
-        loops[i].massFlow = massFlow
-      }
+      zip(Loop.indices, massFlows)
+        .forEach { i, massFlow in loops[i].massFlow = massFlow }
     } else {
       loops.indices.forEach { loops[$0].massFlow = .zero }
     }
@@ -530,8 +539,9 @@ struct SolarField: Parameterizable, ThermalProcess {
       _ = HCE.temperatures(&self, loop, collector.insolationAbsorber, ambient)
     }
 
-    header.massFlow.rate = loops.dropFirst().reduce(0.0)
-      { sum, loop in sum + loop.massFlow.rate } / 3.0
+    header.massFlow.rate =
+      loops.dropFirst().reduce(0.0) { sum, loop in sum + loop.massFlow.rate }
+      / 3.0
 
     if header.massFlow > .zero { outletTemperature(last: last, time) }
   }
@@ -554,22 +564,22 @@ struct SolarField: Parameterizable, ThermalProcess {
       if sof.heatlossDumpQuad == false {
         heatLosses *= factorHeatLossHTF
       } else if case .H = sof.layout {
-        if inFocus > 0.75 { // between 0% and 25% dumping
+        if inFocus > 0.75 {  // between 0% and 25% dumping
           heatLosses *= factorHeatLossHTF
-        } else if inFocus > 0.5 { // between 25% and 50% dumping
+        } else if inFocus > 0.5 {  // between 25% and 50% dumping
           heatLosses *= factorHeatLossHTF * 0.75
           // 25% of the heat losses can be reduced -> 1 quadrant not in operation
-        } else if inFocus > 0.25 { // between 50% and 75% dumping
+        } else if inFocus > 0.25 {  // between 50% and 75% dumping
           heatLosses *= factorHeatLossHTF * 0.5
           // 50% of the heat losses can be reduced -> 1 quadrant not in operation
-        } else if inFocus > 0 { // between 75% and 100% dumping
+        } else if inFocus > 0 {  // between 75% and 100% dumping
           heatLosses *= factorHeatLossHTF * 0.25
           // 75% of the heat losses can be reduced -> 1 quadrant not in operation
         }
       } else if case .I = sof.layout {
         if inFocus > 0.5 {  // between 0% and 50% dumping
           heatLosses *= factorHeatLossHTF
-        } else if inFocus > 0 { // between 50% and 100% dumping
+        } else if inFocus > 0 {  // between 50% and 100% dumping
           heatLosses *= factorHeatLossHTF * 0.5
           // 50% of the heat losses can be reduced -> 1/2 SF not in operation
         }
@@ -585,7 +595,9 @@ extension SolarField: MeasurementsConvertible {
   }
 
   static var measurements: [(name: String, unit: String)] {
-    [("SolarField|Header", "MW th"), ("SolarField|HCE", "MW th"),
-     ("SolarField|Focus", "Ratio")]
+    [
+      ("SolarField|Header", "MW th"), ("SolarField|HCE", "MW th"),
+      ("SolarField|Focus", "Ratio"),
+    ]
   }
 }

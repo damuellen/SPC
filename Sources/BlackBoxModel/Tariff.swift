@@ -90,17 +90,16 @@ extension Tariff: TextConfigInitializable {
     var tariffs = [TariffStructure]()
     for n in 0..<8 {
       let offset = 34 * n
-      try tariffs.append(TariffStructure(
-        name: file.readString(lineNumber: 228), 
-        abbreviation: file.readString(lineNumber: 231), 
-        energyPayment: ln1(237 + offset),
-        energieCost: ln1(240 + offset),
-        capacityPaymentPercent: ln1(243 + offset),
-        capacityPayment: ln1(246 + offset),
-        bonusPaymentPercent: ln1(249 + offset),
-        bonusPayment: ln1(252 + offset),
-        asAvailableCapacity: ln1(255 + offset))
-      )
+      try tariffs.append(
+        TariffStructure(
+          name: file.readString(lineNumber: 228),
+          abbreviation: file.readString(lineNumber: 231),
+          energyPayment: ln1(237 + offset), energieCost: ln1(240 + offset),
+          capacityPaymentPercent: ln1(243 + offset),
+          capacityPayment: ln1(246 + offset),
+          bonusPaymentPercent: ln1(249 + offset),
+          bonusPayment: ln1(252 + offset),
+          asAvailableCapacity: ln1(255 + offset)))
     }
 
     let ln: (Int) throws -> Int = { try file.readInteger(lineNumber: $0) }
@@ -110,12 +109,9 @@ extension Tariff: TextConfigInitializable {
       let o = 40 * n
       try seasons.append(
         TariffSeason(
-          name: file.readString(lineNumber: 68 + o),
-          v1PfD: ln(77 + o), v1PlD: ln(80 + o),
-          v2PfD: ln(83 + o), v2PlD: ln(86 + o),
-          weekday: ln2(95 + o), saturday: ln2(100 + o), holyday: ln2(101 + o)
-        )
-      )
+          name: file.readString(lineNumber: 68 + o), v1PfD: ln(77 + o),
+          v1PlD: ln(80 + o), v2PfD: ln(83 + o), v2PlD: ln(86 + o),
+          weekday: ln2(95 + o), saturday: ln2(100 + o), holyday: ln2(101 + o)))
     }
 
     self.name = try file.readString(lineNumber: 7)

@@ -18,8 +18,7 @@ public enum Maintenance {
   public static func setDefaultSchedule(for year: Int) {
     let calendar = Calendar(identifier: .gregorian)
     let components = DateComponents(
-      calendar: calendar, year: year, month: 1, day: 1, hour: 0, minute: 0
-    )
+      calendar: calendar, year: year, month: 1, day: 1, hour: 0, minute: 0)
     let start = components.date!
     // let end = calendar.date(byAdding: .day, value: 5, to: start)!
     ranges = [DateInterval(start: start, end: start + 1)]
@@ -29,9 +28,7 @@ public enum Maintenance {
   ///
   /// - Parameter date: The date to check for maintenance.
   /// - Returns: A boolean value indicating if maintenance is scheduled for the given date.
-  @discardableResult
-  static func checkSchedule(_ date: Date) -> Bool {
+  @discardableResult static func checkSchedule(_ date: Date) -> Bool {
     return ranges.reduce(false) { $0 || $1.contains(date) }
   }
 }
-

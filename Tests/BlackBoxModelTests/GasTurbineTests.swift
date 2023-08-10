@@ -1,7 +1,7 @@
+import Units
 import XCTest
 
 @testable import BlackBoxModel
-import Units
 
 class GasTurbineTests: XCTestCase {
   func testsParasitics() {

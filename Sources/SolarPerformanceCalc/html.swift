@@ -4,14 +4,14 @@
 // Daniel Müllenborn, TSK Flagsol Engineering
 
 /// Symbols left and right
-func icons() -> String { 
+func icons() -> String {
   """
   <svg version="1.1" class="right" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 256 256" enable-background="new 0 0 256 256" xml:space="preserve"><g><g><path d="M184.5,234.2c-32.9-34.9-65.9-69.9-98.8-104.8c32.7-35.9,65.3-71.7,98-107.6c5.9-6.5-3.7-16.2-9.7-9.7c-34.2,37.5-68.3,75-102.5,112.5c-2.8,3-2.1,6.7-0.1,9.2c0.3,0.6,0.7,1.1,1.2,1.6c34.1,36.1,68.2,72.3,102.2,108.4C180.9,250.3,190.5,240.6,184.5,234.2z"/></g></g></svg>
   <svg version="1.1" class="left" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 256 256" enable-background="new 0 0 256 256" xml:space="preserve"><g><g><path d="M184.5,234.2c-32.9-34.9-65.9-69.9-98.8-104.8c32.7-35.9,65.3-71.7,98-107.6c5.9-6.5-3.7-16.2-9.7-9.7c-34.2,37.5-68.3,75-102.5,112.5c-2.8,3-2.1,6.7-0.1,9.2c0.3,0.6,0.7,1.1,1.2,1.6c34.1,36.1,68.2,72.3,102.2,108.4C180.9,250.3,190.5,240.6,184.5,234.2z"/></g></g></svg>
   """
 }
 
-func script(_ day: Int) -> String { 
+func script(_ day: Int) -> String {
   """
   <script type="text/javascript">
       let currentWebsiteIndex = \(day);

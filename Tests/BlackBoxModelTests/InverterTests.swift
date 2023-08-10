@@ -54,7 +54,8 @@ class InverterTests: XCTestCase {
       plotter.set(ylabel: "Efficiency [%]")
       plotter.settings["yrange"] = "[97.6:98.8]"
       plotter.settings["ytics"] = "nomirror"
-      _ = try? FileManager.default.createDirectory(atPath: ".plots", withIntermediateDirectories: true)
+      _ = try? FileManager.default.createDirectory(
+        atPath: ".plots", withIntermediateDirectories: true)
       _ = try? plotter(.pngLarge(".plots/inverter.png"))
     }
     do {
@@ -71,7 +72,8 @@ class InverterTests: XCTestCase {
       plotter.set(ylabel: "Efficiency [%]")
       plotter.settings["yrange"] = "[97.4:98.7]"
       plotter.settings["ytics"] = "nomirror"
-      _ = try? FileManager.default.createDirectory(atPath: ".plots", withIntermediateDirectories: true)
+      _ = try? FileManager.default.createDirectory(
+        atPath: ".plots", withIntermediateDirectories: true)
       _ = try? plotter(.pngLarge(".plots/inverter2.png"))
     }
   }

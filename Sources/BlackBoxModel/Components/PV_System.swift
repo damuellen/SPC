@@ -20,7 +20,7 @@ struct PV {
     let windSpeed: Double
   }
 
-  /// Calculates the net power output based on various input values. 
+  /// Calculates the net power output based on various input values.
   ///
   /// It takes into account factors such as solar radiation, ambient temperature,
   /// wind speed, and inverter specifications to determine the AC power output
@@ -81,7 +81,8 @@ struct PV {
     func mpp(radiation: Double, ambient: Temperature, windSpeed: Double)
       -> PowerPoint
     {
-      let mpp = panel(radiation: radiation, ambient: ambient, windSpeed: windSpeed)
+      let mpp = panel(
+        radiation: radiation, ambient: ambient, windSpeed: windSpeed)
       /// Panel losses due to degradation, unavailability and losses in the copper
       let voltageDrop = (mpp.voltage / mpp.current * lossAtSTC) * mpp.current
       let losses = (1 - degradation) * (1 - unavailability)
@@ -94,10 +95,12 @@ struct PV {
       -> PowerPoint
     {
       let current = panel.currentFrom(
-        voltage: voltage / Double(panelsPerString), radiation: radiation, cell_T: cell)
+        voltage: voltage / Double(panelsPerString), radiation: radiation,
+        cell_T: cell)
 
       return PowerPoint(
-        current: current * Double(strings) * Double(inverters), voltage: voltage)
+        current: current * Double(strings) * Double(inverters),
+        voltage: voltage)
     }
   }
 
@@ -115,8 +118,8 @@ struct PV {
     /// Calculates power losses in transformer.
     func callAsFunction(ac power: Double) -> Double {
       if power > .zero {
-        return power * (1 - resistiveLossAtSTC) * (1 - injectionLossFractionAtST)
-          - ironLoss
+        return power * (1 - resistiveLossAtSTC)
+          * (1 - injectionLossFractionAtST) - ironLoss
       } else {
         return -ironLoss
       }
@@ -183,8 +186,8 @@ struct PV {
       }
 
       let efficiency = biInterpolate(
-        dc_power[p1], v1, dc_power[p2], v2, v11[p1], v21[p1], v11[p2], v21[p2], power,
-        voltage)
+        dc_power[p1], v1, dc_power[p2], v2, v11[p1], v21[p1], v11[p2], v21[p2],
+        power, voltage)
       return efficiency
     }
   }

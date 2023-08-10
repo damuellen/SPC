@@ -1,7 +1,7 @@
+import Units
 import XCTest
 
 @testable import BlackBoxModel
-import Units
 
 class PlantTests: XCTestCase {
   func testsPlant() {
@@ -9,16 +9,14 @@ class PlantTests: XCTestCase {
     df.timeZone = TimeZone(secondsFromGMT: 0)
     df.dateFormat = "dd.MM.yyyy"
     Simulation.time.dateInterval = .init(
-      start: df.date(from: "02.07.2005")!,
-      end: df.date(from: "03.07.2005")!
-    )
+      start: df.date(from: "02.07.2005")!, end: df.date(from: "03.07.2005")!)
 
     _ = Plant.setup()
 
     _ = Plant.initialState
     _ = Temperature(celsius: 20.0)
 
-  //  status.solarField.setInletTemperature(equalToOutlet: status.powerBlock)
+    //  status.solarField.setInletTemperature(equalToOutlet: status.powerBlock)
 
   }
 }

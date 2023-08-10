@@ -23,9 +23,9 @@ public struct Location: Equatable {
   /// The timezone of the location.
   public var timezone: Int
   /// A tuple containing longitude, latitude, and elevation.
-  public var coordinates: (longitude: Double, latitude: Double, elevation: Double) {
-    return (longitude, latitude, elevation)
-  }
+  public var coordinates:
+    (longitude: Double, latitude: Double, elevation: Double)
+  { return (longitude, latitude, elevation) }
 }
 
 extension Location {
@@ -34,7 +34,9 @@ extension Location {
   /// - Parameters:
   ///   - coords: A tuple containing longitude, latitude, and elevation.
   ///   - tz: The timezone of the location.
-  public init(_ coords: (longitude: Double, latitude: Double, elevation: Double), tz: Int) {
+  public init(
+    _ coords: (longitude: Double, latitude: Double, elevation: Double), tz: Int
+  ) {
     self.longitude = coords.longitude
     self.latitude = coords.latitude
     self.elevation = coords.elevation
@@ -73,7 +75,6 @@ public struct SolarPosition {
     var sunrise: FractionalTime
     var sunset: FractionalTime
   }
-  
   /// The year for the solar position calculations.
   public var year: Int
   /// The geographic location for the solar position calculations.
@@ -89,8 +90,8 @@ public struct SolarPosition {
   ///   - year: The 4-digit year.
   ///   - frequence: The time interval for the calculations.
   public init(
-    coords: (Double, Double, Double), tz: Int,
-    year: Int, frequence: DateSeries.Frequence
+    coords: (Double, Double, Double), tz: Int, year: Int,
+    frequence: DateSeries.Frequence
   ) {
     // Set the estimatedDelta_T value based on the given year
     SolarPosition.estimatedDelta_T = SolarPosition.estimateDelta_T(year: year)
@@ -105,9 +106,7 @@ public struct SolarPosition {
     self.location = location
 
     // Calculate the sun hours period for the given location and year
-    let sunHours = SolarPosition.sunHoursPeriod(
-      location: location, year: year
-    )
+    let sunHours = SolarPosition.sunHoursPeriod(location: location, year: year)
     // Align the sun hours period to the specified frequence
     let sunHoursPeriod = sunHours.map {
       $0.aligned(to: SolarPosition.frequence)
@@ -118,10 +117,9 @@ public struct SolarPosition {
     }
     // Create a lookup dictionary with dates as keys and corresponding values as indices
     lookupDates = Dictionary(uniqueKeysWithValues: zip(dates, 0...))
-    
     // Calculate the solar position for each date in parallel
-    let offset = 0.0 //frequence.interval / 2
-    calculatedValues = dates.concurrentMap { date in 
+    let offset = 0.0  //frequence.interval / 2
+    calculatedValues = dates.concurrentMap { date in
       SolarPosition.compute(date: date + offset, location: location)
     }
   }
@@ -142,7 +140,8 @@ public struct SolarPosition {
   ///   - algorithm: The algorithm function used for solar position calculations (default is `SolarPosition.solpos`).
   /// - Returns: The computed solar position values.
   private static func compute(
-    date: Date, location: Location, with algorithm: Algorithm = SolarPosition.solpos
+    date: Date, location: Location,
+    with algorithm: Algorithm = SolarPosition.solpos
   ) -> Output {
     let ΔT = SolarPosition.estimatedDelta_T
 
@@ -150,12 +149,12 @@ public struct SolarPosition {
 
     return algorithm(
       Input(
-        year: dt.year, month: dt.month, day: dt.day,
-        hour: dt.hour, minute: dt.minute, second: 0,
-        timezone: Double(location.timezone), delta_t: ΔT,
-        longitude: location.longitude, latitude: location.latitude,
-        elevation: location.elevation, pressure: 1023, temperature: 15,
-        slope: 0, azm_rotation: 0, atmos_refract: 0.5667))
+        year: dt.year, month: dt.month, day: dt.day, hour: dt.hour,
+        minute: dt.minute, second: 0, timezone: Double(location.timezone),
+        delta_t: ΔT, longitude: location.longitude,
+        latitude: location.latitude, elevation: location.elevation,
+        pressure: 1023, temperature: 15, slope: 0, azm_rotation: 0,
+        atmos_refract: 0.5667))
   }
 
   /// Compute the sun hours period for the given location and year.
@@ -164,9 +163,9 @@ public struct SolarPosition {
   ///   - location: The geographic location for which the sun hours period is calculated.
   ///   - year: The year for which the sun hours period is calculated.
   /// - Returns: An array of DateInterval representing the sun hours period for each day in the year.
-  private static func sunHoursPeriod(
-    location: Location, year: Int
-  ) -> [DateInterval] {
+  private static func sunHoursPeriod(location: Location, year: Int)
+    -> [DateInterval]
+  {
 
     var components = DateComponents()
     components.timeZone = Greenwich.timeZone
@@ -175,26 +174,25 @@ public struct SolarPosition {
 
     let isLeapYear = year % 4 == 0 && year % 100 != 0 || year % 400 == 0
 
-    return (1...(isLeapYear ? 366 : 365)).map { day in
+    return (1...(isLeapYear ? 366 : 365))
+      .map { day in
 
-      components.day = day
-      let date = Greenwich.date(from: components)!
-      let output = SolarPosition.compute(
-        date: date, location: location, with: SolarPosition.spa
-      )
-      assert(
-        output.sunrise < output.sunset,
-        "sunset before sunrise check location and time zone")
+        components.day = day
+        let date = Greenwich.date(from: components)!
+        let output = SolarPosition.compute(
+          date: date, location: location, with: SolarPosition.spa)
+        assert(
+          output.sunrise < output.sunset,
+          "sunset before sunrise check location and time zone")
 
-      if let sunrise = date.set(time: output.sunrise),
-        let sunset = date.set(time: output.sunset)
-      {
-        return DateInterval(start: sunrise, end: sunset)
+        if let sunrise = date.set(time: output.sunrise),
+          let sunset = date.set(time: output.sunset)
+        {
+          return DateInterval(start: sunrise, end: sunset)
+        }
+        fatalError("No sun hours. Day: \(day)")
       }
-      fatalError("No sun hours. Day: \(day)")
-    }
   }
-  
   /// Estimate the value of ΔT (delta_t) for the given year.
   ///
   /// - Parameter year: The 4-digit year for which ΔT is estimated.
@@ -215,9 +213,7 @@ public struct SolarPosition {
   /// - Returns: The computed solar position values.
   static func spa(input: Input) -> Output {
 
-    enum Output: Int32 {
-      case ZA, ZA_INC, ZA_RTS, ALL
-    }
+    enum Output: Int32 { case ZA, ZA_INC, ZA_RTS, ALL }
 
     var data = spa_data()
     data.year = Int32(input.year)
@@ -279,8 +275,8 @@ public struct SolarPosition {
       elevation: Double(data.elevref), hourAngle: Double(data.hrang),
       declination: Double(data.declin),
       incidence: acos(Double(data.cosinc)) * 180 / .pi,
-      cosIncidence: Double(data.cosinc),
-      sunrise: Double(data.sretr), sunset: Double(data.ssetr))
+      cosIncidence: Double(data.cosinc), sunrise: Double(data.sretr),
+      sunset: Double(data.ssetr))
   }
 }
 
@@ -288,15 +284,21 @@ extension SolarPosition.Output: CustomStringConvertible {
   /// A textual representation of the `SolarPosition.Output`
   public var description: String {
     String(
-      format: "%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.2f", 
-      zenith, azimuth, elevation, hourAngle, declination, incidence, cosIncidence
-    )
+      format: "%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.2f", zenith, azimuth, elevation,
+      hourAngle, declination, incidence, cosIncidence)
   }
   public var values: [Double] {
-    [zenith, azimuth, elevation, hourAngle, declination, incidence, cosIncidence]
+    [
+      zenith, azimuth, elevation, hourAngle, declination, incidence,
+      cosIncidence,
+    ]
   }
   public static var labels: String {
-    ["zenith", "azimuth", "elevation", "hourAngle", "declination", "incidence", "cosIncidence"].joined(separator: ",")
+    [
+      "zenith", "azimuth", "elevation", "hourAngle", "declination",
+      "incidence", "cosIncidence",
+    ]
+    .joined(separator: ",")
   }
 }
 
@@ -311,8 +313,8 @@ extension SolarPosition: CustomStringConvertible {
       let time = DateTime(date)
       if let pos = self[date] {
         print(
-          time.month, time.day, time.hour, time.minute, pos, 
-          separator: ",", to: &description)
+          time.month, time.day, time.hour, time.minute, pos, separator: ",",
+          to: &description)
       } else {
         print(
           time.month, time.day, time.hour, time.minute, 0, 0, 0, 0, 0, 0, 0,

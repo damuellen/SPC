@@ -11,7 +11,6 @@ struct BESS {
 
   /// Energy stored in the system in Wh
   private(set) var energy: Double
-  
   /// Maxmimum energy that the system can store in Wh
   static var capacity: Double = .zero
 
@@ -32,7 +31,8 @@ struct BESS {
     var energy = energy * BESS.efficiency.quotient
     // If the new energy will exceed the capacity
     if self.energy + energy >= BESS.capacity {
-      energyDumped = (energy / BESS.efficiency.quotient) - (BESS.capacity - self.energy)
+      energyDumped =
+        (energy / BESS.efficiency.quotient) - (BESS.capacity - self.energy)
       energy = BESS.capacity - self.energy
     }
     self.energy += energy

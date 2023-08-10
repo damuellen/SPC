@@ -17,16 +17,17 @@ public struct Insolation {
   public var diffuse: Double
 
   /// Computed property that returns the irradiance values converted from W/m2 to kWh/m2 for better representation.
-  public var values: [Double] { [direct / 1000, global / 1000, diffuse / 1000] }
+  public var values: [Double] {
+    [direct / 1000, global / 1000, diffuse / 1000]
+  }
 
   /// Static property providing an array of tuples representing the names and units of the insolation measurements.
   public static var measurements: [(name: String, unit: String)] {
     [
       ("Solar|DNI", "kWh/m2"), ("Solar|GHI", "kWh/m2"),
-      ("Solar|DHI", "kWh/m2")
+      ("Solar|DHI", "kWh/m2"),
     ]
   }
-  
   /// Static method that creates and returns an `Insolation` instance with all irradiance values set to zero.
   public static func zero() -> Insolation {
     Insolation(direct: 0, global: 0, diffuse: 0)
@@ -34,7 +35,7 @@ public struct Insolation {
 }
 
 /// Extension of `RangeReplaceableCollection` where Element is `Insolation`.
-extension RangeReplaceableCollection where Element==Insolation {
+extension RangeReplaceableCollection where Element == Insolation {
   /**
    Calculates the hourly insolation based on a given fraction value.
 
@@ -90,14 +91,30 @@ public struct PerezCoefficients {
 
   /// Static property providing an array of `PerezCoefficients` instances representing the different coefficient sets.
   static var coefficients: [PerezCoefficients] = [
-    .init(f11: -0.20243899, f12: 0.50790876, f13: 0.0652646, f21: 0.79045571, f22: -6.99209098, f23: -0.52584641),
-    .init(f11: 0.10269176, f12: 0.61222848, f13: -0.16136271, f21: -0.00416345, f22: 0.03055801, f23: -0.02112441),
-    .init(f11: 0.34058838, f12: 0.38396973, f13: -0.22165044, f21: 0.04439868, f22: -0.03696354, f23: -0.02151291),
-    .init(f11: 0.56885968, f12: 0.15584773, f13: -0.29598951, f21: 0.10813387, f22: -0.1268434, f23: -0.01281842),
-    .init(f11: 0.87828309, f12: -0.33247141, f13: -0.36673704, f21: 0.222606, f22: -0.38054449, f23: 0.00317743),
-    .init(f11: 1.14107187, f12: -1.04239894, f13: -0.42056735, f21: 0.28577048, f22: -0.691566, f23: 0.05845997),
-    .init(f11: 1.06485619, f12: -1.35585772, f13: -0.36283319, f21: 0.27149949, f22: -1.07256116, f23: 0.13011048),
-    .init(f11: 0.67017638, f12: -0.40277878, f13: -0.24185731, f21: 0.14280012, f22: -0.66867527, f23: 0.25427543)
+    .init(
+      f11: -0.20243899, f12: 0.50790876, f13: 0.0652646, f21: 0.79045571,
+      f22: -6.99209098, f23: -0.52584641),
+    .init(
+      f11: 0.10269176, f12: 0.61222848, f13: -0.16136271, f21: -0.00416345,
+      f22: 0.03055801, f23: -0.02112441),
+    .init(
+      f11: 0.34058838, f12: 0.38396973, f13: -0.22165044, f21: 0.04439868,
+      f22: -0.03696354, f23: -0.02151291),
+    .init(
+      f11: 0.56885968, f12: 0.15584773, f13: -0.29598951, f21: 0.10813387,
+      f22: -0.1268434, f23: -0.01281842),
+    .init(
+      f11: 0.87828309, f12: -0.33247141, f13: -0.36673704, f21: 0.222606,
+      f22: -0.38054449, f23: 0.00317743),
+    .init(
+      f11: 1.14107187, f12: -1.04239894, f13: -0.42056735, f21: 0.28577048,
+      f22: -0.691566, f23: 0.05845997),
+    .init(
+      f11: 1.06485619, f12: -1.35585772, f13: -0.36283319, f21: 0.27149949,
+      f22: -1.07256116, f23: 0.13011048),
+    .init(
+      f11: 0.67017638, f12: -0.40277878, f13: -0.24185731, f21: 0.14280012,
+      f22: -0.66867527, f23: 0.25427543),
   ]
 }
 
@@ -134,20 +151,20 @@ extension Insolation {
   ) -> Double {
     var radiation = self
     if incidence >= 90 || incidence <= 0 { if global < 10.0 { return 0 } }
-    if zenith < 90 {
-      radiation.direct = normal(zenith: zenith)
-    }
+    if zenith < 90 { radiation.direct = normal(zenith: zenith) }
 
     let hExtra = extra(doy: doy)
 
-    let AM = Atmosphere.relativeAirMass(zenith: zenith, model: .kastenyoung1989)
+    let AM = Atmosphere.relativeAirMass(
+      zenith: zenith, model: .kastenyoung1989)
 
     radiation.diffuse = radiation.perez(
-      surfaceTilt: surfTilt, incidence: incidence,
-      hExtra: hExtra, sunZenith: zenith, AM: AM)
+      surfaceTilt: surfTilt, incidence: incidence, hExtra: hExtra,
+      sunZenith: zenith, AM: AM)
 
     //var albedoInc = groundDiffuse(angles.SurfTilt, context.Albedo)
-    return radiation.beam(incidence: incidence, zenith: zenith) + radiation.diffuse
+    return radiation.beam(incidence: incidence, zenith: zenith)
+      + radiation.diffuse
   }
 
   /**
@@ -160,21 +177,28 @@ extension Insolation {
    - Parameter AM: Relative air mass.
    - Returns: The diffuse irradiance in watts per square meter (W/m2).
   */
-  func perez(surfaceTilt: Angle, incidence: Angle, hExtra: Double, sunZenith: Angle, AM: Double
+  func perez(
+    surfaceTilt: Angle, incidence: Angle, hExtra: Double, sunZenith: Angle,
+    AM: Double
   ) -> Double {
     let k = 5.535e-6
-    let e = diffuse > .zero
-      ? (((diffuse + direct) / diffuse) + (k * pow(sunZenith, 3))) / (1 + (k * pow(sunZenith, 3)))
-      : 0.0
+    let e =
+      diffuse > .zero
+      ? (((diffuse + direct) / diffuse) + (k * pow(sunZenith, 3)))
+        / (1 + (k * pow(sunZenith, 3))) : 0.0
 
     guard let filter = PerezCoefficients[e] else { return 0 }
 
     let delta = diffuse * AM / hExtra
 
-    let F1 = max(0.0,
-      filter.f11 + (filter.f12 * delta) + (.pi * sunZenith / 180.0 * filter.f13))
-    let F2 = max(0.0,
-      filter.f21 + (filter.f22 * delta) + (.pi * sunZenith / 180.0 * filter.f23))
+    let F1 = max(
+      0.0,
+      filter.f11 + (filter.f12 * delta)
+        + (.pi * sunZenith / 180.0 * filter.f13))
+    let F2 = max(
+      0.0,
+      filter.f21 + (filter.f22 * delta)
+        + (.pi * sunZenith / 180.0 * filter.f23))
 
     let a = max(0.0, cos(incidence.toRadians))
     let b = max(cos(85.0.toRadians), cos(sunZenith.toRadians))
@@ -216,10 +240,8 @@ extension Insolation {
   */
   func extra(doy: Int) -> Double {
     let B = 2.0 * .pi * Double(doy) / 365.0
-    let roverR0sqrd = 1.00011
-      + 0.034221 * cos(B)
-      + 0.00128 * sin(B)
-      + 0.000719 * cos(2 * B)
+    let roverR0sqrd =
+      1.00011 + 0.034221 * cos(B) + 0.00128 * sin(B) + 0.000719 * cos(2 * B)
       + 0.000077 * sin(2 * B)
 
     return 1367.0 * roverR0sqrd

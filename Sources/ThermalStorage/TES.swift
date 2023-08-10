@@ -248,8 +248,7 @@ struct TES {
 
     // tesHexsDesignValues(Total)
     let p_Th_MaxPerTesHexTrain = pThMaxPerTrainWTh
-    let maximumTrainQuantPerTwoTankSystem =
-      maximumTrainQuant_Per_2TankSystem
+    let maximumTrainQuantPerTwoTankSystem = maximumTrainQuant_Per_2TankSystem
     let requestedMinimumPossiblePartLoadCharge =
       requestedMinimumPossiblePartLoadCharge
     let maxTurnDownRatioPerHexTrain = maxTurnDownRatioPer_HEXTrain
@@ -499,8 +498,7 @@ struct TES {
     let freeBoardAllowance = freeBoardAllowance
     let pumpSuctionClearance =
       pumpSuctionClearance_DistanceSuctionInletToTankFloor
-    let tankRoofRadiusFactor =
-      tankRoofRadiusFactor_Radius_Factor_TankDiameter
+    let tankRoofRadiusFactor = tankRoofRadiusFactor_Radius_Factor_TankDiameter
     let horizontalDistancePumpTankWall = horizontalDistance_Pump_TankWall
     let distanceBetweenTankRoofAndPumpMountingPlate =
       vertDistanceTankRoofPumpMountingPlate
@@ -547,8 +545,7 @@ struct TES {
       pressureDropHotTankSpargerEductorSystem
     let pressureDropColdTankSpargerAtDesignDischargeMassFlow =
       pressureDropColdTankSpargerEductorSystem
-    let functionOfPressureDropVsMassFlow =
-      functionOfPressureDropVsMassFlow
+    let functionOfPressureDropVsMassFlow = functionOfPressureDropVsMassFlow
     let coldSaltDensity = salt.density(coldTankTemperature)  // [Kg / M³]
     let hotSaltDensity = salt.density(hotTankTemperature)
     let minimumTankLevelInColdTank = 0.0
@@ -812,8 +809,7 @@ struct TES {
 
       let tesHexHtfPressureDropAtDesignMassFlowOfDecisiveCase = 1.0  //'In - OutputSummary'!C30
       let htfPressureDropInPbHexAt100_SolarMode = 1.0  //'In - OutputSummary'!C31
-      let functionOfPressureDropVsMassFlow =
-        functionOfPressureDropVsMassFlow
+      let functionOfPressureDropVsMassFlow = functionOfPressureDropVsMassFlow
 
       let sfInletTemperatureAtSfToPbTesMode = sfInletTemperature
       let htfPbHexOutletTemperatureDischarging = Temperature()  // pbHexHtfOutletTemperatureDischarging
@@ -905,8 +901,7 @@ struct TES {
       let lambdaFoundationHotTank = lambdaFoundationHotTank  // [W / M * K]
       let thicknessFoundationHotTank = thicknessFoundationHotTank
 
-      let factorThermalBridgesRoofAndShell =
-        factorThermalBridgesRoofAndShell
+      let factorThermalBridgesRoofAndShell = factorThermalBridgesRoofAndShell
       let factorThermalBridgesBottom = factorThermalBridgesBottom
 
       let ambientTemperature = estimatedAverageAmbientTemperature.celsius
@@ -1120,8 +1115,8 @@ precedencegroup ExponentiationPrecedence {
   higherThan: MultiplicationPrecedence
 }
 
-infix operator **: ExponentiationPrecedence
-infix operator **=: AssignmentPrecedence
+infix operator ** : ExponentiationPrecedence
+infix operator **= : AssignmentPrecedence
 
 extension Double {
   static func ** (lhs: Double, rhs: Double) -> Double { pow(lhs, rhs) }

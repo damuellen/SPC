@@ -10,13 +10,10 @@ public struct PlantPerformance: MeasurementsConvertible {
 
   /// The thermal energy data of the solar power plant.
   internal(set) public var thermal: ThermalEnergy
-  
   /// The electric power data of the solar power plant.
   internal(set) public var electric: ElectricPower
-  
   /// The fuel consumption data of the solar power plant.
   internal(set) public var fuel: FuelConsumption
-  
   /// The parasitics data of the solar power plant.
   internal(set) public var parasitics: Parasitics
 
@@ -24,7 +21,10 @@ public struct PlantPerformance: MeasurementsConvertible {
   /// - Parameters:
   ///   - performance: A collection of `PlantPerformance` instances.
   ///   - fraction: The fraction by which the performance data should be added.
-  mutating func callAsFunction(_ performance: some RangeReplaceableCollection<PlantPerformance>, fraction: Double) {
+  mutating func callAsFunction(
+    _ performance: some RangeReplaceableCollection<PlantPerformance>,
+    fraction: Double
+  ) {
     self.thermal = performance.map(\.thermal).added(fraction: fraction)
     self.fuel = performance.map(\.fuel).added(fraction: fraction)
     self.parasitics = performance.map(\.parasitics).added(fraction: fraction)
@@ -61,7 +61,6 @@ extension PlantPerformance {
     self.parasitics = Parasitics()
   }
 }
-import Units
 
 /// A struct representing the electric power data of a solar power plant.
 public struct ElectricPower: Encodable, MeasurementsConvertible {
@@ -92,20 +91,19 @@ public struct ElectricPower: Encodable, MeasurementsConvertible {
 
   /// An array of electric power values.
   var values: [Double] {
-    [demand, steamTurbineGross, photovoltaic, storage, parasitics, shared, net, consum]
+    [
+      demand, steamTurbineGross, photovoltaic, storage, parasitics, shared,
+      net, consum,
+    ]
   }
 
   /// An array of tuples representing the measurements for `ElectricPower`.
   static var measurements: [(name: String, unit: String)] {
     [
-      ("Electric|Demand", "MWh e"),
-      ("Electric|SteamTurbineGross", "MWh e"),
-      ("Electric|Photovoltaic", "MWh e"),
-      ("Electric|Storage", "MWh e"),
-      ("Electric|Parasitics", "MWh e"),
-      ("Electric|Shared", "MWh e"),
-      ("Electric|Net", "MWh e"),
-      ("Electric|Consum", "MWh e"),
+      ("Electric|Demand", "MWh e"), ("Electric|SteamTurbineGross", "MWh e"),
+      ("Electric|Photovoltaic", "MWh e"), ("Electric|Storage", "MWh e"),
+      ("Electric|Parasitics", "MWh e"), ("Electric|Shared", "MWh e"),
+      ("Electric|Net", "MWh e"), ("Electric|Consum", "MWh e"),
     ]
   }
 
@@ -114,7 +112,9 @@ public struct ElectricPower: Encodable, MeasurementsConvertible {
   @discardableResult mutating func estimateDemand() -> Double {
     var estimate = 0.0
     if Design.hasGasTurbine {
-      demand = GridDemand.current.ratio * (Design.layout.powerBlock - Design.layout.gasTurbine)
+      demand =
+        GridDemand.current.ratio
+        * (Design.layout.powerBlock - Design.layout.gasTurbine)
       estimate = demand * Simulation.parameter.electricalParasitics
       // Iter. start val. for parasitics, 10% demand
       demand += estimate
@@ -138,7 +138,8 @@ public struct ElectricPower: Encodable, MeasurementsConvertible {
     powerBlock = parasitics.powerBlock
     shared = parasitics.shared
 
-    self.parasitics = solarField + gasTurbine + parasitics.powerBlock + parasitics.shared
+    self.parasitics =
+      solarField + gasTurbine + parasitics.powerBlock + parasitics.shared
     self.parasitics *= Simulation.adjustmentFactor.electricalParasitics
   }
 
@@ -157,7 +158,7 @@ public struct ElectricPower: Encodable, MeasurementsConvertible {
 }
 
 /// An extension to provide additional functionalities to `RangeReplaceableCollection` with `Element` of type `ElectricPower`.
-extension RangeReplaceableCollection where Element==ElectricPower {
+extension RangeReplaceableCollection where Element == ElectricPower {
 
   /// Calculates the sum of electric power values for the collection of `ElectricPower` instances multiplied by the given fraction.
   /// - Parameter fraction: The fraction by which the electric power values should be added.
@@ -222,7 +223,7 @@ extension RangeReplaceableCollection where Element == Parasitics {
       result.powerBlock += values.powerBlock * fraction
       result.storage += values.storage * fraction
       result.shared += values.shared * fraction
-    // parasiticsBackup += electricalParasitics
+      // parasiticsBackup += electricalParasitics
       result.gasTurbine += values.gasTurbine * fraction
     }
     return result
@@ -262,21 +263,20 @@ public struct ThermalEnergy: Encodable, MeasurementsConvertible {
   /// Array of thermal energy values.
   var values: [Double] {
     [
-      demand.megaWatt, solar.megaWatt, dumping.megaWatt,
-      toStorage.megaWatt, storage.megaWatt,
-      heater.megaWatt, heatExchanger.megaWatt,
-      startUp.megaWatt, production.megaWatt
+      demand.megaWatt, solar.megaWatt, dumping.megaWatt, toStorage.megaWatt,
+      storage.megaWatt, heater.megaWatt, heatExchanger.megaWatt,
+      startUp.megaWatt, production.megaWatt,
     ]
   }
 
   /// Array of thermal energy measurements.
   static var measurements: [(name: String, unit: String)] {
     [
-      ("Thermal|Demand", "MWh th"),
-      ("Thermal|Solar", "MWh th"), ("Thermal|Dumping", "MWh th"),
-      ("Thermal|ToStorage", "MWh th"), ("Thermal|Storage", "MWh th"),
-      ("Thermal|Heater", "MWh th"), ("Thermal|HeatExchanger", "MWh th"),
-      ("Thermal|Startup", "MWh th"), ("Thermal|Production", "MWh th")
+      ("Thermal|Demand", "MWh th"), ("Thermal|Solar", "MWh th"),
+      ("Thermal|Dumping", "MWh th"), ("Thermal|ToStorage", "MWh th"),
+      ("Thermal|Storage", "MWh th"), ("Thermal|Heater", "MWh th"),
+      ("Thermal|HeatExchanger", "MWh th"), ("Thermal|Startup", "MWh th"),
+      ("Thermal|Production", "MWh th"),
     ]
   }
 

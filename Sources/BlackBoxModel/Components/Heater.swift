@@ -49,22 +49,17 @@ struct Heater: Parameterizable, ThermalProcess {
       switch self {
       case let .normal(load), let .charge(load), let .freezeProtection(load):
         return load
-      default:
-        return .zero
+      default: return .zero
       }
     }
   }
 
   /// A structure to store heater consumptions.
-  struct Consumptions {
-    var heatFlow, electric, fuel: Double
-  }
+  struct Consumptions { var heatFlow, electric, fuel: Double }
 
   /// The initial state of the heater at startup.
   static let initialState = Heater(
-    temperature: Simulation.startTemperature,
-    operationMode: .noOperation
-  )
+    temperature: Simulation.startTemperature, operationMode: .noOperation)
 
   /// The parameter settings for the heater.
   public static var parameter: Parameter = Parameters.hr
@@ -75,23 +70,22 @@ struct Heater: Parameterizable, ThermalProcess {
   /// - Returns: The electric parasitics in MW.
   static func parasitics(estimateFrom load: Ratio) -> Double {
     parameter.nominalElectricalParasitics
-      * (parameter.electricalParasitics[0]
-        + parameter.electricalParasitics[1] * load.quotient)
+      * (parameter.electricalParasitics[0] + parameter.electricalParasitics[1]
+        * load.quotient)
   }
 
   /// Changes the operating mode of the heater component.
   ///
   /// - Parameter mode: The new operating mode to set.
-  public mutating func change(mode: OperationMode) {
-    operationMode = mode
-  }
+  public mutating func change(mode: OperationMode) { operationMode = mode }
 
   /// Adjusts the mass flow rate of the heater component based on the provided thermal process component.
   ///
   /// The function ensures that the mass flow rate of the heater remains within a safe operating range.
   /// It prevents the heater from operating with a mass flow rate that exceeds the maximum allowable value defined in `Heater.parameter.maximumMassFlow`.
   mutating func adjust(massFlow component: ThermalProcess) {
-    massFlow.rate = min(component.massFlow.rate, Heater.parameter.maximumMassFlow)
+    massFlow.rate = min(
+      component.massFlow.rate, Heater.parameter.maximumMassFlow)
   }
 
   /// Calculates the thermal power and fuel consumption of the heater based on the given parameters.
@@ -102,12 +96,8 @@ struct Heater: Parameterizable, ThermalProcess {
   ///   - heatFlow: The thermal energy data for the heater.
   /// - Returns: A `Heater.Consumptions` object containing the thermal power, electric parasitics, and fuel consumption.
   mutating func callAsFunction(
-    storage: MassFlow,
-    mode: Storage.OperationMode,
-    heatFlow: ThermalEnergy
-  )
-    -> Heater.Consumptions
-  {
+    storage: MassFlow, mode: Storage.OperationMode, heatFlow: ThermalEnergy
+  ) -> Heater.Consumptions {
     let htf = SolarField.parameter.HTF
     let parameter = Heater.parameter
     var fuel = 0.0
@@ -139,8 +129,7 @@ struct Heater: Parameterizable, ThermalProcess {
           massFlow = 0.0
           thermalPower = .zero
           let energy = Heater.Consumptions(
-            heatFlow: thermalPower.megaWatt, electric: parasitics, fuel: fuel
-          )
+            heatFlow: thermalPower.megaWatt, electric: parasitics, fuel: fuel)
           return energy
         }
         // Normal operation is possible
@@ -152,36 +141,34 @@ struct Heater: Parameterizable, ThermalProcess {
         if Design.hasStorage, case .preheat = mode {
           massFlow = storage
         } else {
-          massFlow.rate = thermalPower.kiloWatt
+          massFlow.rate =
+            thermalPower.kiloWatt
             / htf.heatContent(temperature.outlet, temperature.inlet)
         }
       } else {
         // Use default mass flow and fuel consumption based on heater design
-        massFlow.rate = Design.layout.heater
+        massFlow.rate =
+          Design.layout.heater
           / htf.heatContent(parameter.nominalTemperatureOut, temperature.inlet)
 
         fuel = Design.layout.heater / parameter.efficiency.quotient
         load = Ratio(1)
         operationMode = .charge(load)
         // Parasitic power [MW]
-        thermalPower.megaWatt = Design.layout.heater
-        // return
+        thermalPower.megaWatt = Design.layout.heater// return
       }
     } else if case .freezeProtection = operationMode {
       // Calculate thermal power based on mass flow and outlet temperature in freeze protection mode
       thermalPower.kiloWatt =
-        massFlow.rate * htf.heatContent(
-          parameter.antiFreezeTemperature, temperature.inlet
-        )
+        massFlow.rate
+        * htf.heatContent(parameter.antiFreezeTemperature, temperature.inlet)
 
       // Check if thermal power exceeds the heater design capacity
       if thermalPower.megaWatt > Design.layout.heater {
         thermalPower = Power(megaWatt: Design.layout.heater)
         if massFlow.rate > 0 {
           temperature.outlet = htf.temperature(
-            thermalPower.kiloWatt / massFlow.rate,
-            temperature.inlet
-          )
+            thermalPower.kiloWatt / massFlow.rate, temperature.inlet)
         }
       } else {
         temperature.outlet = parameter.antiFreezeTemperature
@@ -239,9 +226,7 @@ struct Heater: Parameterizable, ThermalProcess {
       }
 
       // Normal operation is possible
-      if case .reheat = operationMode {
-        operationMode = .normal(load)
-      }
+      if case .reheat = operationMode { operationMode = .normal(load) }
       // If Reheating, then do not change the displayed operating status/mode
       setTemperature(outlet: parameter.nominalTemperatureOut)
       // Calculate mass flow that can be achieved [kg/sec] = [MJ/sec] * 1000 / [kJ/kg]
@@ -254,8 +239,7 @@ struct Heater: Parameterizable, ThermalProcess {
     // Calculate parasitics based on the current load
     parasitics = load > .zero ? Heater.parasitics(estimateFrom: load) : 0
     let energy = Heater.Consumptions(
-      heatFlow: thermalPower.megaWatt, electric: parasitics, fuel: fuel
-    )
+      heatFlow: thermalPower.megaWatt, electric: parasitics, fuel: fuel)
     return energy
   }
 }
@@ -272,7 +256,7 @@ extension Heater.OperationMode: RawRepresentable {
     case "freezeProtection(Ratio)": self = .freezeProtection(.zero)
     case "No Operation": self = .noOperation
     case "Scheduled Maintenance": self = .maintenance
-    case "Unknown":  self = .unknown
+    case "Unknown": self = .unknown
     default: return nil
     }
   }
@@ -283,7 +267,8 @@ extension Heater.OperationMode: RawRepresentable {
     case .normal(let load): return "Normal with load: \(load.percentage)"
     case .charge(let load): return "Charge with load: \(load.percentage)"
     case .reheat: return "Reheat"
-    case .freezeProtection(let load): return "Freeze protection with load: \(load.percentage)"
+    case .freezeProtection(let load):
+      return "Freeze protection with load: \(load.percentage)"
     case .noOperation: return "No Operation"
     case .maintenance: return "Scheduled Maintenance"
     case .unknown: return "Unknown"

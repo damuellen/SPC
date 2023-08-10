@@ -4,11 +4,12 @@
 // Daniel Müllenborn, TSK Flagsol Engineering
 
 import DateExtensions
-import Utilities
 import Foundation
 import Meteo
+import Utilities
 // import SQLite
 import xlsxwriter
+
 /// A class that records performance data.
 public final class Historian {
 
@@ -24,9 +25,9 @@ public final class Historian {
   let mode: Mode
 
   /// Start date of the recording, based on the simulation date interval or a predefined year.
-  var startDate: Date { 
-    Simulation.time.dateInterval?.start 
-    ?? Greenwich.date(from: .init(year: BlackBoxModel.simulatedYear))!
+  var startDate: Date {
+    Simulation.time.dateInterval?.start ?? Greenwich.date(
+      from: .init(year: BlackBoxModel.simulatedYear))!
   }
 
   /// Enumeration representing various output modes for the historian.
@@ -36,13 +37,11 @@ public final class Historian {
     case custom(interval: DateSeries.Frequence)
     case csv
     case excel
-    
     /// Checks if the output mode supports file output.
     var hasFileOutput: Bool {
       if case .inMemory = self { return false }
       return true
     }
-    
     /// Checks if the output mode supports historical data recording.
     var hasHistory: Bool {
       #if DEBUG && !os(Windows)
@@ -61,13 +60,11 @@ public final class Historian {
 
   /// Output file URL or directory path (depending on the output mode).
   private var url: URL
-  
   /// OutputStream to write data to a file.
   private var fileStream: OutputStream?
 
   /// Workbook object for Excel output mode.
   private var xlsx: Workbook? = nil
-  
   /// All past states of the plant.
   private(set) var status: [Status] = []
 
@@ -102,7 +99,7 @@ public final class Historian {
     }
 
     // Set the name if provided
-    if let name = name { self.name = name } 
+    if let name = name { self.name = name }
 
     // Get the sequence number for the current path
     let no = sequenceNumber(atPath: url.path)
@@ -119,13 +116,14 @@ public final class Historian {
     //   self.db = try! Connection(url.path)
     //   urls = [url]
     // }
-    
+
     // Check if the mode is .csv
     if case .csv = mode {
       // Get the header information
       let header = headers()
       // Create a buffer with the encoded header name and unit
-      let buffer = header.name.encoded + newLine + header.unit.encoded + newLine
+      let buffer =
+        header.name.encoded + newLine + header.unit.encoded + newLine
       // Append the name, sequence number, and "hourly" to the URL
       url = url.appendingPathComponent("\(self.name)_\(no)_hourly.csv")
       // Create a new OutputStream instance with the updated URL
@@ -148,9 +146,10 @@ public final class Historian {
       let frequence = repeatElement(fraction, count: header.count + 4)
         .joined(separator: ",")
       // Create a buffer with the encoded header name, start time, frequency, and unit
-      let buffer = "wxDVFileHeaderVer.1".encoded + newLine 
-        + header.name.encoded + newLine + startTime.encoded + newLine
-        + frequence.encoded + newLine + header.unit.encoded + newLine
+      let buffer =
+        "wxDVFileHeaderVer.1".encoded + newLine + header.name.encoded + newLine
+        + startTime.encoded + newLine + frequence.encoded + newLine
+        + header.unit.encoded + newLine
 
       // Append the name, sequence number, and custom value to the URL
       url = url.appendingPathComponent("\(self.name)_\(no)_\(i).csv")
@@ -171,9 +170,7 @@ public final class Historian {
   }
 
   /// Deinitializes the Historian.
-  deinit {
-    fileStream?.close()
-  }
+  deinit { fileStream?.close() }
 
   /// Clears all recorded performance data and status history.
   public func clearResults() {
@@ -189,7 +186,8 @@ public final class Historian {
   ///   - status: Status struct representing the current state of the plant.
   ///   - energy: PlantPerformance struct containing performance data.
   func callAsFunction(
-    _ time: DateTime, meteo: MeteoData, status: Status, energy: PlantPerformance
+    _ time: DateTime, meteo: MeteoData, status: Status,
+    energy: PlantPerformance
   ) {
     self.status.append(status)
     self.performance.append(energy)
@@ -215,19 +213,19 @@ public final class Historian {
     fflush(stdout)
     #endif
     var buffer = [UInt8]()
-      /// Sum of hourly values
+    /// Sum of hourly values
     var accumulate = PlantPerformance()
     var insolation = Insolation.zero()
     if case .custom(let custom) = mode {
       let f = frequency.rawValue / custom.rawValue
       var date = startDate
       for i in stride(from: 0, to: performance.count, by: f) {
-        accumulate(performance[i..<i+f], fraction: 1 / Double(f))
-        insolation = sun[i..<i+f].hourly(fraction: 1 / Double(f))
+        accumulate(performance[i..<i + f], fraction: 1 / Double(f))
+        insolation = sun[i..<i + f].hourly(fraction: 1 / Double(f))
         let time = DateTime(date)
-        buffer = time.commaSeparatedValues.encoded + comma
-          + "\(time.minute)".encoded + comma
-          + insolation.commaSeparatedValues.encoded + comma
+        buffer =
+          time.commaSeparatedValues.encoded + comma + "\(time.minute)".encoded
+          + comma + insolation.commaSeparatedValues.encoded + comma
           + accumulate.commaSeparatedValues.encoded + newLine
         date.addTimeInterval(custom.interval)
         _ = fileStream?.write(buffer, maxLength: buffer.count)
@@ -239,9 +237,10 @@ public final class Historian {
       var date = startDate
       for i in stride(from: 0, to: performance.count, by: f) {
         let fraction = frequency.fraction
-        accumulate(performance[i..<i+f], fraction: fraction)
-        insolation = sun[i..<i+f].hourly(fraction: fraction)
-        buffer = DateTime(date).commaSeparatedValues.encoded + comma
+        accumulate(performance[i..<i + f], fraction: fraction)
+        insolation = sun[i..<i + f].hourly(fraction: fraction)
+        buffer =
+          DateTime(date).commaSeparatedValues.encoded + comma
           + insolation.commaSeparatedValues.encoded + comma
           + accumulate.commaSeparatedValues.encoded + newLine
         date.addTimeInterval(DateSeries.Frequence.hour.interval)
@@ -257,25 +256,25 @@ public final class Historian {
     fileStream?.close()
     fileStream = nil
     return Recording(
-      startDate: startDate, irradiance: irradiance, 
-      performanceHistory: performance,
-      statusHistory: status)
+      startDate: startDate, irradiance: irradiance,
+      performanceHistory: performance, statusHistory: status)
   }
 
   /// Determine the next sequence number for a file in a given directory.
   ///
-  /// It does this by finding all the files in the directory that have a prefix matching a specified name. 
-  /// It then extracts the sequence number from each file name and finds the maximum value. 
+  /// It does this by finding all the files in the directory that have a prefix matching a specified name.
+  /// It then extracts the sequence number from each file name and finds the maximum value.
   /// Finally, it increments the maximum value by 1 and returns it as a formatted string with leading zeros.
   private func sequenceNumber(atPath path: String) -> String {
     let 💾 = FileManager.default
     let contents = try? 💾.contentsOfDirectory(atPath: path)
     let results = contents?.filter { $0.hasPrefix(name) }
-    let last = results?.compactMap { filename in
-      let splited = filename.split(separator: "_")
-      let idx = min(1,splited.endIndex - 1)
-      return Int(splited[idx].filter(\.isWholeNumber))
-    }.max() 
+    let last = results?
+      .compactMap { filename in let splited = filename.split(separator: "_")
+        let idx = min(1, splited.endIndex - 1)
+        return Int(splited[idx].filter(\.isWholeNumber))
+      }
+      .max()
     return String(format: "%02d", (last ?? 0) + 1)
   }
 
@@ -311,23 +310,18 @@ public final class Historian {
     // Get the number of energy captions
 
     let ws1 = wb.addWorksheet(name: "Status")
-      .column("A:A", width: 13, format: f1)
-      .column("B:D", width: 6, format: f0)
-      .column("E:G", width: 17, format: f3)
-      .column("H:H", width: 6, format: f0)
-      .column("I:I", width: 6, format: f3)
-      .column("J:J", width: 11, format: f4)
+      .column("A:A", width: 13, format: f1).column("B:D", width: 6, format: f0)
+      .column("E:G", width: 17, format: f3).column("H:H", width: 6, format: f0)
+      .column("I:I", width: 6, format: f3).column("J:J", width: 11, format: f4)
       .column([10, statusCount], width: 15, format: f2)
-      .hide_columns(statusCount)
-      .write(statusCaptions, row: 0)
+      .hide_columns(statusCount).write(statusCaptions, row: 0)
     // Add a worksheet named "Status" to the Excel file and set the column widths and formats
     // Hide the columns with the status count
     // Write the status captions to the first row of the worksheet
 
     let ws2 = wb.addWorksheet(name: "Performance")
       .column("A:A", width: 13, format: f1)
-      .column([1, energyCount], width: 6, format: f2)
-      .hide_columns(energyCount)
+      .column([1, energyCount], width: 6, format: f2).hide_columns(energyCount)
       .write(energyCaptions, row: 0)
     // Add a worksheet named "Performance" to the Excel file and set the column widths and formats
     // Hide the columns with the energy count
@@ -338,8 +332,7 @@ public final class Historian {
     var date = startDate
     // Set the initial date to the start date of the simulation
 
-    status.indices.forEach { i in
-      ws1.write(.datetime(date), [i + 1, 0])
+    status.indices.forEach { i in ws1.write(.datetime(date), [i + 1, 0])
       // Write the date and time to the specified cell in the status worksheet
       ws1.write(sun[i].values, row: i + 1, col: 1)
       // Write the sun values to the specified row and column in the status worksheet
@@ -354,8 +347,7 @@ public final class Historian {
     date = startDate
     // Reset the date to the start date of the simulation
 
-    performance.indices.forEach { i in
-      ws2.write(.datetime(date), [i + 1, 0])
+    performance.indices.forEach { i in ws2.write(.datetime(date), [i + 1, 0])
       // Write the date and time to the specified cell in the performance worksheet
       ws2.write(performance[i].values, row: i + 1, col: 1)
       // Write the performance values to the specified row and column in the performance worksheet
@@ -364,10 +356,10 @@ public final class Historian {
     }
     wb.close()
     // Close the Excel file
-    print("Excel file creation took \(Int(-now.timeIntervalSinceNow)) seconds.")
+    print(
+      "Excel file creation took \(Int(-now.timeIntervalSinceNow)) seconds.")
     // Print the time taken to create the Excel file
   }
-
 
   // This section contains code for writing data to a database (SQLite).
   // However, it is commented out and not implemented in the current code.
@@ -405,15 +397,21 @@ public final class Historian {
 
   /// Returns the headers for the data table.
   /// - Parameter minutes: A boolean flag indicating whether to include minutes in the header (default is false).
-  private func headers(minutes: Bool = false) -> (name: String, unit: String, count: Int) {
+  private func headers(minutes: Bool = false) -> (
+    name: String, unit: String, count: Int
+  ) {
     #if DEBUG
-    let m = Insolation.measurements + PlantPerformance.measurements + Status.measurements
+    let m =
+      Insolation.measurements + PlantPerformance.measurements
+      + Status.measurements
     #else
     let m = Insolation.measurements + PlantPerformance.measurements
     #endif
     let name: String = m.map(\.name).joined(separator: ",")
     let unit: String = m.map(\.unit).joined(separator: ",")
-    if minutes { return ("Month,Day,Hour,Minute," + name, "_,_,_,_," + unit, m.count) }
+    if minutes {
+      return ("Month,Day,Hour,Minute," + name, "_,_,_,_," + unit, m.count)
+    }
     return ("Month,Day,Hour," + name, "_,_,_," + unit, m.count)
   }
 }
@@ -423,8 +421,8 @@ extension String { fileprivate var encoded: [UInt8] { [UInt8](self.utf8) } }
 
 // Define newline characters based on the operating system.
 #if os(Windows)
-fileprivate let newLine: [UInt8] = [UInt8(ascii: "\r"), UInt8(ascii: "\n")] 
+private let newLine: [UInt8] = [UInt8(ascii: "\r"), UInt8(ascii: "\n")]
 #else
-fileprivate let newLine: [UInt8] = [UInt8(ascii: "\n")] 
+private let newLine: [UInt8] = [UInt8(ascii: "\n")]
 #endif
-fileprivate let comma: [UInt8] = [UInt8(ascii: ",")] 
+private let comma: [UInt8] = [UInt8(ascii: ",")]

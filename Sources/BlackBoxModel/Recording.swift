@@ -3,9 +3,9 @@
 // (C) Copyright 2016 - 2023
 // Daniel Müllenborn, TSK Flagsol Engineering
 
+import DateExtensions
 import Foundation
 import Meteo
-import DateExtensions
 
 /// Represents the recording of solar power plant performance data.
 public struct Recording: CustomStringConvertible, Comparable {
@@ -77,10 +77,8 @@ public struct Recording: CustomStringConvertible, Comparable {
   ///   - performanceHistory: The history of plant performance data.
   ///   - statusHistory: The history of status data.
   init(
-    startDate: Date,
-    irradiance: Insolation,
-    performanceHistory: [PlantPerformance] = [],
-    statusHistory: [Status] = []
+    startDate: Date, irradiance: Insolation,
+    performanceHistory: [PlantPerformance] = [], statusHistory: [Status] = []
   ) {
     self.startDate = startDate
     // Calculate the annual performance based on the performance history and interval fraction.
@@ -94,7 +92,8 @@ public struct Recording: CustomStringConvertible, Comparable {
 
   /// Calculate the index range for a given date interval.
   private func range(of interval: DateInterval) -> Range<Int> {
-    var start = Greenwich.ordinality(of: .hour, in: .year, for: interval.start) - 1
+    var start =
+      Greenwich.ordinality(of: .hour, in: .year, for: interval.start) - 1
     var end = Greenwich.ordinality(of: .hour, in: .year, for: interval.end)
     let offset = Greenwich.ordinality(of: .hour, in: .year, for: startDate) - 1
     start = (start - offset) * self.interval.rawValue
@@ -108,7 +107,8 @@ public struct Recording: CustomStringConvertible, Comparable {
   ///   - interval: The date interval for data extraction.
   /// - Returns: An array of `Double` values representing the extracted data.
   subscript(
-    performance keyPath: KeyPath<PlantPerformance, Double>, interval: DateInterval
+    performance keyPath: KeyPath<PlantPerformance, Double>,
+    interval: DateInterval
   ) -> [Double] {
     // If the performance history is empty, return an empty array.
     if performanceHistory.isEmpty { return [] }
@@ -123,9 +123,9 @@ public struct Recording: CustomStringConvertible, Comparable {
   ///   - status: The keypath to access status data.
   ///   - interval: The date interval for data extraction.
   /// - Returns: An array of `Double` values representing the extracted data.
-  subscript(
-    status keyPath: KeyPath<Status, Double>, interval: DateInterval
-  ) -> [Double] {
+  subscript(status keyPath: KeyPath<Status, Double>, interval: DateInterval)
+    -> [Double]
+  {
     // If the status history is empty, return an empty array.
     if statusHistory.isEmpty { return [] }
     // Calculate the index range for the date interval and clamp it to the status history indices.
@@ -147,24 +147,24 @@ public struct Recording: CustomStringConvertible, Comparable {
   }
 
   /// Access multiple performance data keypaths within a given date interval.
-  subscript(_ keyPaths: KeyPath<PlantPerformance, Double>...,
-    range range: DateInterval
+  subscript(
+    _ keyPaths: KeyPath<PlantPerformance, Double>..., range range: DateInterval
   ) -> [[Double]] {
     // Map each keypath to the corresponding performance data array using the subscript function.
     keyPaths.map { kp in self[performance: kp, range] }
   }
 
   /// Access multiple status data keypaths within a given date interval.
-  subscript(_ keyPaths: KeyPath<Status, Double>...,
-    range range: DateInterval
-  ) -> [[Double]] {
+  subscript(_ keyPaths: KeyPath<Status, Double>..., range range: DateInterval)
+    -> [[Double]]
+  {
     // Map each keypath to the corresponding status data array using the subscript function.
     keyPaths.map { kp in self[status: kp, range] }
   }
 
   /// Access the heat transfer data within a given date interval using a keypath.
-  private subscript(
-    keyPath: KeyPath<Status, ThermalProcess>, interval: DateInterval
+  private subscript(keyPath: KeyPath<Status, ThermalProcess>,
+    interval: DateInterval
   ) -> [[Double]] {
     // If the status history is empty, return an empty array.
     if statusHistory.isEmpty { return [] }
@@ -175,13 +175,15 @@ public struct Recording: CustomStringConvertible, Comparable {
   }
 
   /// Access the solar field header data within a given date interval.
-  public func solarFieldHeader(range: DateInterval) -> ([[Double]], [[Double]]) {
+  public func solarFieldHeader(range: DateInterval) -> ([[Double]], [[Double]])
+  {
     // Reduce the solar field header data to separate arrays for mass, inlet, and outlet values.
-    let (m, i, o) = self[\.solarField.header, range].reduce(into: ([Double](), [Double](), [Double]())) {
-      $0.0.append($1[0])
-      $0.1.append($1[1])
-      $0.2.append($1[2])
-    }
+    let (m, i, o) = self[\.solarField.header, range]
+      .reduce(into: ([Double](), [Double](), [Double]())) {
+        $0.0.append($1[0])
+        $0.1.append($1[1])
+        $0.2.append($1[2])
+      }
     return ([m], [i, o])
   }
 
@@ -198,7 +200,8 @@ public struct Recording: CustomStringConvertible, Comparable {
     let s = self[performance: \.thermal.solar.megaWatt, range]
     let p = self[performance: \.thermal.production.megaWatt, range]
     let t1 = self[performance: \.thermal.toStorage.megaWatt, range]
-    let t2 = zip(self[performance: \.thermal.storage.megaWatt, range], t1).map(-)
+    let t2 = zip(self[performance: \.thermal.storage.megaWatt, range], t1)
+      .map(-)
     let g = self[performance: \.electric.steamTurbineGross, range]
     let n = self[performance: \.electric.net, range]
     let c = self[performance: \.electric.consum, range]
@@ -219,15 +222,16 @@ public struct Recording: CustomStringConvertible, Comparable {
   }
 
   /// Access the cycle data within a given date interval using a keypath.
-  subscript(_ keyPath: KeyPath<Status, HeatTransferCycle>,
-    range range: DateInterval
+  subscript(
+    _ keyPath: KeyPath<Status, HeatTransferCycle>, range range: DateInterval
   ) -> ([[Double]], [[Double]]) {
     // Reduce the cycle data to separate arrays for mass, inlet, and outlet values.
-    let (m, i, o) = self[cycle: keyPath, range].reduce(into: ([Double](), [Double](), [Double]())) {
-      $0.0.append($1[0])
-      $0.1.append($1[1])
-      $0.2.append($1[2])
-    }
+    let (m, i, o) = self[cycle: keyPath, range]
+      .reduce(into: ([Double](), [Double](), [Double]())) {
+        $0.0.append($1[0])
+        $0.1.append($1[1])
+        $0.2.append($1[2])
+      }
     return ([m], [i, o])
   }
 
@@ -247,15 +251,15 @@ public struct Recording: CustomStringConvertible, Comparable {
       // Append the data to the corresponding month in the result array.
       months[month].append(day)
       // Check if a new month is starting and update the month index.
-      if daysBeforeMonth.contains(d) {
-        month += 1
-      }
+      if daysBeforeMonth.contains(d) { month += 1 }
     }
     return months
   }
 
   /// Calculate the annual data for a specific plant performance keypath.
-  public func annual(_ keyPath: KeyPath<PlantPerformance, Double>) -> [[[Double]]] {
+  public func annual(_ keyPath: KeyPath<PlantPerformance, Double>)
+    -> [[[Double]]]
+  {
     // Extract the year from the start date.
     let year = startDate.getComponents().year!
     // Define the day numbers before each month.
@@ -270,9 +274,7 @@ public struct Recording: CustomStringConvertible, Comparable {
       // Append the data to the corresponding month in the result array.
       months[month].append(day)
       // Check if a new month is starting and update the month index.
-      if daysBeforeMonth.contains(d) {
-        month += 1
-      }
+      if daysBeforeMonth.contains(d) { month += 1 }
     }
     return months
   }

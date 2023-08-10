@@ -18,10 +18,12 @@ extension Array where Element == MeteoData {
       self.map(\.insolation.direct).interpolate(steps: steps),
       self.map(\.insolation.global).interpolate(steps: steps),
       self.map(\.insolation.diffuse).interpolate(steps: steps),
-      self.map(\.windSpeed).interpolate(steps: steps))
+      self.map(\.windSpeed).interpolate(steps: steps)
+    )
     return dni.indices.map { i -> MeteoData in
-      MeteoData(dni: dni[i], ghi: ghi[i], dhi: dhi[i],
-        temperature: temperature[i], windSpeed: windSpeed[i])
+      MeteoData(
+        dni: dni[i], ghi: ghi[i], dhi: dhi[i], temperature: temperature[i],
+        windSpeed: windSpeed[i])
     }
   }
 
@@ -69,24 +71,29 @@ extension Array where Element == MeteoData {
     let start = dateInterval.start
     let end = dateInterval.end
     let hourFraction = self.count / 8760
-    let fraction = 60 / hourFraction 
+    let fraction = 60 / hourFraction
     let startHour = Greenwich.ordinality(of: .hour, in: .year, for: start)
     let startMinute = Greenwich.ordinality(of: .minute, in: .hour, for: start)
     let lastIndex: Int
-    if Greenwich.compare(start, to: end, toUnitGranularity: .year) ~= .orderedSame {
+    if Greenwich.compare(start, to: end, toUnitGranularity: .year)
+      ~= .orderedSame
+    {
       let endHour = Greenwich.ordinality(of: .hour, in: .year, for: end)
       let endMinute = Greenwich.ordinality(of: .minute, in: .hour, for: end)
       lastIndex = ((endHour - 1) * hourFraction) + (endMinute / fraction) + 1
     } else {
       lastIndex = self.endIndex
     }
-    let startIndex = ((startHour - 1) * hourFraction) + (startMinute / fraction)
+    let startIndex =
+      ((startHour - 1) * hourFraction) + (startMinute / fraction)
     return startIndex..<lastIndex
   }
 }
 
 extension MeteoData {
   /// A type alias for statistics calculated from meteorological data analysis.
-  public typealias Statistics =
-  (peaks: Int, hours: Double, sum: Double, avg: Double, max: Double, ratio: Double)
+  public typealias Statistics = (
+    peaks: Int, hours: Double, sum: Double, avg: Double, max: Double,
+    ratio: Double
+  )
 }

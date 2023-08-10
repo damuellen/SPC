@@ -36,7 +36,7 @@ public enum JSONConfig {
     init?(url: URL) {
       let file = url.deletingPathExtension().lastPathComponent
       for name in Name.allCases {
-        if file.contains(name.rawValue) { 
+        if file.contains(name.rawValue) {
           self = name
           return
         }
@@ -45,13 +45,14 @@ public enum JSONConfig {
     }
 
     public static func detectFile(name: String) -> Bool {
-      allCases.reduce(false) { $0 || name.contains($1.rawValue) } 
+      allCases.reduce(false) { $0 || name.contains($1.rawValue) }
     }
   }
 
   public static func loadConfiguration(atPath path: String) throws -> URL? {
-    guard let pathUrl = URL(string: path)
-    else { preconditionFailure("Invalid path") }
+    guard let pathUrl = URL(string: path) else {
+      preconditionFailure("Invalid path")
+    }
     if pathUrl.hasDirectoryPath {
       let files = try FileManager.default.contentsOfDirectory(atPath: path)
       let urls = files.map { file in pathUrl.appendingPathComponent(file) }
@@ -66,7 +67,6 @@ public enum JSONConfig {
       return nil
     }
   }
-  
   static func loadConfiguration(_ url: URL) throws {
     let fileHandle = try FileHandle(forReadingFrom: url)
     if let data = try fileHandle.readToEnd() {
@@ -89,37 +89,32 @@ public enum JSONConfig {
     case .FOS: break
     case .OPR: break
     case .DEM: break
-    case .TAR:
-      Simulation.tariff = try decoder.decode(Tariff.self, from: data)
+    case .TAR: Simulation.tariff = try decoder.decode(Tariff.self, from: data)
     case .SIM:
       Simulation.parameter = try decoder.decode(
-        Simulation.Parameter.self, from: data
-      )
+        Simulation.Parameter.self, from: data)
     case .INI:
       Simulation.initialValues = try decoder.decode(
-        InitValues.self, from: data
-      )
+        InitValues.self, from: data)
     case .TIM: break
     //    Simulation.time = try decoder.decode(Time.self, from: data)
     case .DES: break
     case .AVL:
       Availability.current = try decoder.decode(Availability.self, from: data)
-    case .LAY:
-      Design.layout = try decoder.decode(Layout.self, from: data)
+    case .LAY: Design.layout = try decoder.decode(Layout.self, from: data)
     case .SF: SolarField.decode(data)
     case .COL: Collector.decode(data)
     case .STO: Storage.decode(data)
     case .HR: Heater.decode(data)
     case .HTF: break
-     // htf = try decoder.decode(HeatTransferFluid.self, from: data)
+    // htf = try decoder.decode(HeatTransferFluid.self, from: data)
     case .HX: HeatExchanger.decode(data)
     case .BO: Boiler.decode(data)
     case .WHR: WasteHeatRecovery.decode(data)
     case .GT: GasTurbine.decode(data)
     case .TB: SteamTurbine.decode(data)
     case .PB: PowerBlock.decode(data)
-    case .PFC:
-      break
+    case .PFC: break
     case .STF: break
     //  salt = try decoder.decode(HeatTransferFluid.self, from: data)
     }
@@ -130,8 +125,8 @@ public enum JSONConfig {
     if url.hasDirectoryPath {
       let now = Date().timeIntervalSinceReferenceDate
       let id = String(Int(now), radix: 36, uppercase: true).suffix(6)
-      url = URL(fileURLWithPath: "CFG_\(id).json",
-                isDirectory: false, relativeTo: url)
+      url = URL(
+        fileURLWithPath: "CFG_\(id).json", isDirectory: false, relativeTo: url)
     } else {
       url.deletePathExtension()
       url.appendPathExtension("json")
@@ -142,13 +137,16 @@ public enum JSONConfig {
 
   public static func saveConfigurations(toPath path: String) throws {
     var directoryURL = URL(fileURLWithPath: path)
-    if !directoryURL.hasDirectoryPath { directoryURL.deleteLastPathComponent() }
+    if !directoryURL.hasDirectoryPath {
+      directoryURL.deleteLastPathComponent()
+    }
     let cases = JSONConfig.Name.allCases
     let json = try cases.map(generate)
 
     for (key, value) in zip(cases, json) {
-      let url = URL(fileURLWithPath: key.rawValue + ".json",
-                    isDirectory: false, relativeTo: directoryURL)
+      let url = URL(
+        fileURLWithPath: key.rawValue + ".json", isDirectory: false,
+        relativeTo: directoryURL)
       try value.write(to: url)
     }
   }
@@ -190,7 +188,7 @@ public enum JSONConfig {
     case .TB: return try encoder.encode(SteamTurbine.parameter)
     case .PB: return try encoder.encode(PowerBlock.parameter)
     case .PFC: break
-    case .STF: break // try encoder.encode(salt).write(to: url)
+    case .STF: break  // try encoder.encode(salt).write(to: url)
     }
 
     return Data()

@@ -27,8 +27,7 @@ extension Plant {
     // Set maximum power of the steam turbine if not already set
     if steamTurbine.power.max == .zero {
       SteamTurbine.parameter.power.max =
-        Design.layout.powerBlock
-        + powerBlock.fixElectricalParasitics
+        Design.layout.powerBlock + powerBlock.fixElectricalParasitics
         + powerBlock.nominalElectricalParasitics
         + powerBlock.electricalParasiticsStep[1]
     }
@@ -49,26 +48,23 @@ extension Plant {
     // Set the maximum mass flow rate in the solar field
     let heatFlowRate = HeatExchanger.parameter.heatFlowHTF * 1_000
     SolarField.parameter.maxMassFlow = MassFlow(
-      heatFlowRate / HeatExchanger.capacity
-    )
+      heatFlowRate / HeatExchanger.capacity)
 
     // Calculate edge factors for the solar field
     if Design.hasSolarField {
       let numberOfSCAsInRow = Double(SolarField.parameter.numberOfSCAsInRow)
       let edgeFactor1 =
-        SolarField.parameter.distanceSCA / 2
-        * (1 - 1 / numberOfSCAsInRow)
+        SolarField.parameter.distanceSCA / 2 * (1 - 1 / numberOfSCAsInRow)
         / Collector.parameter.lengthSCA
       let edgeFactor2 =
-        (1 + 1 / numberOfSCAsInRow)
-        / Collector.parameter.lengthSCA / 2
+        (1 + 1 / numberOfSCAsInRow) / Collector.parameter.lengthSCA / 2
       SolarField.parameter.edgeFactor = [edgeFactor1, edgeFactor2]
 
       // Adjust the maximum mass flow rate in the solar field if storage is present
       if Design.hasStorage {
         SolarField.parameter.maxMassFlow = MassFlow(
-          SolarField.parameter.maxMassFlow.rate / Storage.parameter.massFlowShare.quotient
-        )
+          SolarField.parameter.maxMassFlow.rate
+            / Storage.parameter.massFlowShare.quotient)
       }
     }
     return Plant()
@@ -79,12 +75,12 @@ extension Plant {
   /// - Returns: A string containing descriptions of fixed parameters for each component.
   static var parameterDescriptions: String {
     decorated("Fixed Parameter") + "\n"
-    + "HEAT TRANSFER FLUID\n\n\(SolarField.parameter.HTF)\n\n"
-    + "HEATER\n\n\(Heater.parameter)\n"
-    + "HEAT EXCHANGER\n\n\(HeatExchanger.parameter)\n"
-    + "STEAM TURBINE\n\n\(SteamTurbine.parameter)\n"
-    + "STORAGE\n\n\(Storage.parameter)\n"
-    + "SOLAR FIELD\n\n\(SolarField.parameter)\n"
-    + "COLLECTOR\n\n\(Collector.parameter)\n"
+      + "HEAT TRANSFER FLUID\n\n\(SolarField.parameter.HTF)\n\n"
+      + "HEATER\n\n\(Heater.parameter)\n"
+      + "HEAT EXCHANGER\n\n\(HeatExchanger.parameter)\n"
+      + "STEAM TURBINE\n\n\(SteamTurbine.parameter)\n"
+      + "STORAGE\n\n\(Storage.parameter)\n"
+      + "SOLAR FIELD\n\n\(SolarField.parameter)\n"
+      + "COLLECTOR\n\n\(Collector.parameter)\n"
   }
 }

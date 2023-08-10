@@ -1,13 +1,14 @@
-import XCTest
 import Utilities
+import XCTest
+
 @testable import BlackBoxModel
 
 class BESSTests: XCTestCase {
 
   func testStoreAndRetrieveEnergy() {
     var bess = BESS()
-    BESS.capacity = 10000 // Set capacity to 10000 Wh
-    BESS.efficiency = Ratio(0.95) // Set efficiency to 95%
+    BESS.capacity = 10000  // Set capacity to 10000 Wh
+    BESS.efficiency = Ratio(0.95)  // Set efficiency to 95%
 
     // Test storing and retrieving energy
     let energyToStore: Double = 5000
@@ -30,7 +31,8 @@ class BESSTests: XCTestCase {
     // Try to retrieve more energy than available
     let excessiveEnergyToRetrieve: Double = 3000
     let energyStored = bess.energy
-    let excessiveRetrievedEnergy = bess.retrieve(energy: excessiveEnergyToRetrieve)
+    let excessiveRetrievedEnergy = bess.retrieve(
+      energy: excessiveEnergyToRetrieve)
 
     // Check that the retrieved energy is capped at the available energy
     XCTAssertEqual(0, bess.energy)
@@ -39,17 +41,16 @@ class BESSTests: XCTestCase {
     XCTAssertEqual(bess.energy, 0)
   }
 
-
   func testStoreEnergyWithPowerAndTime() {
     var bess = BESS()
-    BESS.capacity = 10000 // Set capacity to 10000 Wh
-    BESS.efficiency = Ratio(0.95) // Set efficiency to 95%
+    BESS.capacity = 10000  // Set capacity to 10000 Wh
+    BESS.efficiency = Ratio(0.95)  // Set efficiency to 95%
 
     // Test storing energy with power and time
-    let powerToStore: Double = 1000 // 1000 W
-    let timeSpan: TimeInterval = 3600 // 1 hour
+    let powerToStore: Double = 1000  // 1000 W
+    let timeSpan: TimeInterval = 3600  // 1 hour
 
-    let energyToStore = powerToStore * (timeSpan / 3600) // 1 hour is equivalent to 3600 seconds
+    let energyToStore = powerToStore * (timeSpan / 3600)  // 1 hour is equivalent to 3600 seconds
     let energyDumped = bess.store(power: powerToStore, span: timeSpan)
 
     // Check that energy is stored correctly

@@ -9,8 +9,8 @@ import Utilities
 public enum TextConfig {
   /// List of path extension for needed config files.
   public enum FileExtension: String, CaseIterable {
-    case FOS, OPR, DEM, TAR, SIM, INI, TIM, DES, AVL, LAY, SF,
-      COL, STO, HR, HTF, STF, HX, BO, WHR, GT, TB, PB, PFC
+    case FOS, OPR, DEM, TAR, SIM, INI, TIM, DES, AVL, LAY, SF, COL, STO, HR,
+      HTF, STF, HX, BO, WHR, GT, TB, PB, PFC
 
     init?(url: URL) {
       if let valid = FileExtension(rawValue: url.pathExtension.uppercased()) {
@@ -39,7 +39,8 @@ public enum TextConfig {
       let paths = file.lines.drop(while: \.isEmpty)
       let separated = paths.map { $0.split(separator: "\\").map(String.init) }
       let folder = url.deletingLastPathComponent()
-      var list = try fm.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil)
+      var list = try fm.contentsOfDirectory(
+        at: folder, includingPropertiesForKeys: nil)
       list = list.filter(\.hasDirectoryPath)
       if list.isEmpty { list.append(folder) }
       // Iterate through the directories and check if the paths match
@@ -57,20 +58,20 @@ public enum TextConfig {
         }
       }
     }
-    
     var htf: HeatTransferFluid?
     let mto = urls.first(where: { $0.pathExtension.lowercased() == "mto" })
     var identified = [FileExtension]()
 
     // Iterate through the URLs and process each file
     for url in urls {
-    // Check if the file extension is identified and not already processed
-    guard let fileExtension = FileExtension(url: url),
-        !identified.contains(fileExtension) else { continue }
-    identified.append(fileExtension)
-    let configFile = try TextConfigFile(url: url)
-    // Process the file based on its extension
-    switch fileExtension {
+      // Check if the file extension is identified and not already processed
+      guard let fileExtension = FileExtension(url: url),
+        !identified.contains(fileExtension)
+      else { continue }
+      identified.append(fileExtension)
+      let configFile = try TextConfigFile(url: url)
+      // Process the file based on its extension
+      switch fileExtension {
       case .FOS: break
       case .OPR: break
       case .DEM: GridDemand.current = try .init(file: configFile)

@@ -3,7 +3,7 @@
 // (C) Copyright 2016 - 2023
 // Daniel Müllenborn, TSK Flagsol Engineering
 
-import Foundation 
+import Foundation
 import Helpers
 
 /// Formats the given values and labels into a single string.
@@ -14,9 +14,8 @@ import Helpers
 /// - Returns: A formatted string with values and labels aligned.
 public func formatting(_ values: [Double], _ labels: [String]) -> String {
   let values = values.map { String(format: "%03.2f", $0) }
-  let strings = zip(values, labels).map { value, label in 
-    "  " + label.padding(35 - value.count) + value
-  }
+  let strings = zip(values, labels)
+    .map { value, label in "  " + label.padding(35 - value.count) + value }
   return strings.joined(separator: "\n")
 }
 
@@ -36,7 +35,8 @@ extension String {
 ///   - title: The title to be displayed.
 ///   - width: The width of the terminal or the desired width for the title (default is 80).
 /// - Returns: A string with the title surrounded by a border.
-public func decorated(_ title: String, width: Int = terminalWidth()) -> String {
+public func decorated(_ title: String, width: Int = terminalWidth()) -> String
+{
   let width = median(80, width, 110)
   let half = (width - title.count - 8) / 2
   let line = String(repeating: "─", count: half)

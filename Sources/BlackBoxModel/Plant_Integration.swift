@@ -6,39 +6,37 @@
 import DateExtensions
 import Units
 
-/**
- A namespace for the main routines of the simulation.
-
- The `Plant` struct contains the core functionalities for simulating the behavior of a power plant or energy system. It takes into consideration various factors such as thermal and electrical parasitics, available power, efficiency, and the behavior of different components. The simulation aims to achieve the desired electrical demand while operating within specific constraints.
-
- The main function of the simulation is performed by the `perform` method. It takes the current status of the power plant or energy system and the ambient temperature as input parameters. The simulation iteratively calculates the behavior of the system until the electrical parasitics converge within a certain tolerance level. The number of iterations is limited to prevent excessive looping.
-
- The simulation process involves the following steps:
-
- 1. Calculates the load required to meet the electrical demand based on the provided ambient temperature and the available power of the steam turbine.
- 2. Calculates the required thermal power to meet the electricity demand.
- 3. If there is a solar field, calculates the heat supplied by the solar field and updates the power block's mass flow accordingly.
- 4. Attempts to use the heat exchanger and calculates the outlet temperature of the power block.
- 5. If there is a storage system, calculates the heat flow rate of the storage.
- 6. Checks if heating is necessary and performs freeze protection if required.
- 7. Determines the right temperature for the inlet and outlet of the power block.
- 8. Calculates heat flows, thermal demands, and efficiency factors.
- 9. Integrates the boiler if available.
- 10. Adjusts the steam turbine load based on constraints and updates the efficiency accordingly.
- 11. Calculates the gross electrical power of the steam turbine.
- 12. Considers predefined operation restrictions on the fuel strategy if applicable.
- 13. Calculates the total electrical parasitics of the power block and updates the electrical demand.
-
- The simulation continues in an iterative manner until the electrical parasitics converge within a certain tolerance level. The tolerance level is influenced by the ambient temperature, and the number of iterations is limited to prevent excessive processing.
-
- The simulation process is supported by helper functions such as `powerBlockElectricalParasitics`, which calculates the electrical parasitics of the power block.
-
- The `determineStorageMode` function is used to determine the storage mode based on certain conditions and constraints. The electricity demand storage strategy is determined by the `demandStorageStrategy` function, which calculates the demand based on the storage strategy defined in the `Storage.parameter`.
-
- The `integrate` functions are used to integrate various components such as the heater, solar field, power block, steam turbine, and storage system, depending on their operation modes and states. The integration process involves updating the energy flows and performing calculations based on the current status of the system.
-
- This simulation is designed to efficiently evaluate the behavior of power plants or energy systems, considering various factors and constraints, to achieve the desired electrical demand while optimizing efficiency and minimizing parasitic losses.
- */
+/// A namespace for the main routines of the simulation.
+///
+/// The `Plant` struct contains the core functionalities for simulating the behavior of a power plant or energy system. It takes into consideration various factors such as thermal and electrical parasitics, available power, efficiency, and the behavior of different components. The simulation aims to achieve the desired electrical demand while operating within specific constraints.
+///
+/// The main function of the simulation is performed by the `perform` method. It takes the current status of the power plant or energy system and the ambient temperature as input parameters. The simulation iteratively calculates the behavior of the system until the electrical parasitics converge within a certain tolerance level. The number of iterations is limited to prevent excessive looping.
+///
+/// The simulation process involves the following steps:
+///
+/// 1. Calculates the load required to meet the electrical demand based on the provided ambient temperature and the available power of the steam turbine.
+/// 2. Calculates the required thermal power to meet the electricity demand.
+/// 3. If there is a solar field, calculates the heat supplied by the solar field and updates the power block's mass flow accordingly.
+/// 4. Attempts to use the heat exchanger and calculates the outlet temperature of the power block.
+/// 5. If there is a storage system, calculates the heat flow rate of the storage.
+/// 6. Checks if heating is necessary and performs freeze protection if required.
+/// 7. Determines the right temperature for the inlet and outlet of the power block.
+/// 8. Calculates heat flows, thermal demands, and efficiency factors.
+/// 9. Integrates the boiler if available.
+/// 10. Adjusts the steam turbine load based on constraints and updates the efficiency accordingly.
+/// 11. Calculates the gross electrical power of the steam turbine.
+/// 12. Considers predefined operation restrictions on the fuel strategy if applicable.
+/// 13. Calculates the total electrical parasitics of the power block and updates the electrical demand.
+///
+/// The simulation continues in an iterative manner until the electrical parasitics converge within a certain tolerance level. The tolerance level is influenced by the ambient temperature, and the number of iterations is limited to prevent excessive processing.
+///
+/// The simulation process is supported by helper functions such as `powerBlockElectricalParasitics`, which calculates the electrical parasitics of the power block.
+///
+/// The `determineStorageMode` function is used to determine the storage mode based on certain conditions and constraints. The electricity demand storage strategy is determined by the `demandStorageStrategy` function, which calculates the demand based on the storage strategy defined in the `Storage.parameter`.
+///
+/// The `integrate` functions are used to integrate various components such as the heater, solar field, power block, steam turbine, and storage system, depending on their operation modes and states. The integration process involves updating the energy flows and performing calculations based on the current status of the system.
+///
+/// This simulation is designed to efficiently evaluate the behavior of power plants or energy systems, considering various factors and constraints, to achieve the desired electrical demand while optimizing efficiency and minimizing parasitic losses.
 struct Plant {
   /// Represents the thermal energy flow in the system.
   var heatFlow = ThermalEnergy()
@@ -65,30 +63,32 @@ struct Plant {
   mutating func perform(_ status: inout Status, ambient: Temperature) {
     /// A helper function to calculate load capacity for the steam turbine based on certain conditions.
     func loadCapacity(steamTurbine: inout SteamTurbine) -> Double? {
-      guard steamTurbine.load < Availability.current.value.powerBlock
-        else { return nil }
+      guard steamTurbine.load < Availability.current.value.powerBlock else {
+        return nil
+      }
 
       status.steamTurbine.adjust(load: Availability.current.value.powerBlock)
       // The turbine load has changed recalculation of efficiency
-      let eff = steamTurbine.perform(
-        heatExchanger: status.heatExchanger.temperature.inlet,
-        ambient: ambient
-      ).quotient
+      let eff =
+        steamTurbine.perform(
+          heatExchanger: status.heatExchanger.temperature.inlet,
+          ambient: ambient
+        )
+        .quotient
 
       return min(
         SteamTurbine.parameter.power.max * steamTurbine.load.quotient / eff,
         HeatExchanger.parameter.heatFlowHTF)
     }
-    func powerBlockElectricalParasitics(_ efficiency: Ratio)
-      -> (powerBlock: Double, shared: Double)
-    {
+    func powerBlockElectricalParasitics(_ efficiency: Ratio) -> (
+      powerBlock: Double, shared: Double
+    ) {
       let energy =
         heatFlow.production.megaWatt - SteamTurbine.parameter.power.max
         / efficiency.quotient
 
       let powerBlock = PowerBlock.parasitics(
-        heat: energy, steamTurbine: status.steamTurbine, temperature: ambient
-      )
+        heat: energy, steamTurbine: status.steamTurbine, temperature: ambient)
       let parasitics = PowerBlock.parameter.electricalParasiticsShared
       if heatFlow.production.watt == 0 {  // added to separate shared facilities parasitics
         return (powerBlock, parasitics[0])
@@ -118,22 +118,20 @@ struct Plant {
       step += 1
       factor = Double(step / 10) + 1
 
-      let loadForDemand =
-        Ratio((electricity.demand - Design.layout.gasTurbine)
-        / SteamTurbine.parameter.power.max)
+      let loadForDemand = Ratio(
+        (electricity.demand - Design.layout.gasTurbine)
+          / SteamTurbine.parameter.power.max)
 
       status.steamTurbine.adjust(load: loadForDemand)
       // The turbine load has changed recalculation of efficiency
       var efficiency = status.steamTurbine.perform(
-        heatExchanger: status.heatExchanger.temperature.inlet,
-        ambient: ambient
+        heatExchanger: status.heatExchanger.temperature.inlet, ambient: ambient
       )
 
       // The required thermal power to meet the electricity demand
       heatFlow.demand.megaWatt = min(
         (electricity.demand / efficiency.quotient),
         HeatExchanger.parameter.heatFlowHTF)
-    
       /*  heatFlow.demand.megaWatt =
         (constraintLoad(&steamTurbine) ?? heatFlow.demand.megaWatt
         / Simulation.adjustmentFactor.heatLossH2O)
@@ -149,30 +147,22 @@ struct Plant {
       // Attempt to use the heat exchanger
       status.powerBlock.temperatureOutlet(
         heatExchanger: &status.heatExchanger,
-        mode: status.storage.operationMode
-      )
+        mode: status.storage.operationMode)
 
       if Design.hasStorage {
         // Heat flow rate of storage
         heatFlow = status.storage.demandStrategy(
-          powerBlock: &status.powerBlock,
-          heatFlow: heatFlow
-        )
+          powerBlock: &status.powerBlock, heatFlow: heatFlow)
         integrate(
-          heater: &status.heater,
-          solarField: &status.solarField,
-          powerBlock: &status.powerBlock,
-          steamTurbine: &status.steamTurbine,
-          storage: &status.storage
-        )
+          heater: &status.heater, solarField: &status.solarField,
+          powerBlock: &status.powerBlock, steamTurbine: &status.steamTurbine,
+          storage: &status.storage)
       }
 
       // Check if heating is necessary
       checkForFreezeProtection(
-        heater: &status.heater,
-        storage: status.storage,
-        solarField: status.solarField
-      )
+        heater: &status.heater, storage: status.storage,
+        solarField: status.solarField)
 
       if case .freezeProtection = status.heater.operationMode {
         status.powerBlock.temperature.outlet = status.heater.temperature.outlet
@@ -191,8 +181,7 @@ struct Plant {
       status.steamTurbine.adjust(load: max(status.steamTurbine.load, minLoad))
 
       efficiency = status.steamTurbine.perform(
-        heatExchanger: status.heatExchanger.temperature.inlet,
-        ambient: ambient
+        heatExchanger: status.heatExchanger.temperature.inlet, ambient: ambient
       )
 
       if heatFlow.production.megaWatt < minPower / efficiency.quotient {
@@ -204,11 +193,8 @@ struct Plant {
       }
       // Electrical gross power of steam turbine
       electricity.steamTurbineGross = status.steamTurbine(
-        heatFlow: heatFlow,
-        heater: status.heater,
-        heatExchanger: status.heatExchanger,
-        temperature: ambient
-      )
+        heatFlow: heatFlow, heater: status.heater,
+        heatExchanger: status.heatExchanger, temperature: ambient)
 
       if case .startUp = status.steamTurbine.operationMode {
         heatFlow.startUp = heatFlow.heatExchanger
@@ -219,8 +205,7 @@ struct Plant {
       if OperationRestriction.fuelStrategy.isPredefined {
         let steamTurbine = SteamTurbine.parameter.power.max
         if fuelConsumption.combined > 0
-          && electricity.steamTurbineGross
-            > steamTurbine + 1
+          && electricity.steamTurbineGross > steamTurbine + 1
         {
           electricity.steamTurbineGross = steamTurbine + 1
         }
@@ -267,10 +252,8 @@ struct Plant {
       heater.change(mode: .freezeProtection(1.0))
 
       let consumptions = heater(
-        storage: storage.massFlow,
-        mode: storage.operationMode,
-        heatFlow: heatFlow
-      )
+        storage: storage.massFlow, mode: storage.operationMode,
+        heatFlow: heatFlow)
 
       account(heater: consumptions)
     }
@@ -281,17 +264,15 @@ struct Plant {
       heater.change(mode: .noOperation)
 
       let consumptions = heater(
-        storage: storage.massFlow,
-        mode: storage.operationMode,
-        heatFlow: heatFlow
-      )
+        storage: storage.massFlow, mode: storage.operationMode,
+        heatFlow: heatFlow)
 
       account(heater: consumptions)
     }
   }
 
   private mutating func powerBlockTemperature(
-   _ status: inout Status, ambient: Temperature
+    _ status: inout Status, ambient: Temperature
   ) {
     if Design.hasStorage {
       // Demand for operation of the storage
@@ -301,12 +282,9 @@ struct Plant {
 
       let parasitics: Power
       (heatFlow.storage, parasitics) = Storage.perform(
-        storage: &status.storage,
-        solarField: &status.solarField,
-        steamTurbine: &status.steamTurbine,
-        powerBlock: &status.powerBlock,
-        heatFlow: &heatFlow
-      )
+        storage: &status.storage, solarField: &status.solarField,
+        steamTurbine: &status.steamTurbine, powerBlock: &status.powerBlock,
+        heatFlow: &heatFlow)
 
       electricalParasitics.storage = parasitics.megaWatt
 
@@ -314,43 +292,39 @@ struct Plant {
       let storage = status.storage.operationMode
       // Adjustment of the powerblock mass flow
       switch (solarField, storage) {
-        case (.track, .discharge), (.defocus(_), .discharge):
-          status.powerBlock.heatTransfer(from: status.solarField, and: status.storage)
-        case (_, .discharge):
-          status.powerBlock.massFlow = status.storage.massFlow
-          status.powerBlock.inletTemperature(outlet: status.storage)
-        case (_, .charge):
-          status.powerBlock.massFlow =
-            status.solarField.massFlow - status.storage.massFlow
-        case (_, _): break
+      case (.track, .discharge), (.defocus(_), .discharge):
+        status.powerBlock.heatTransfer(
+          from: status.solarField, and: status.storage)
+      case (_, .discharge):
+        status.powerBlock.massFlow = status.storage.massFlow
+        status.powerBlock.inletTemperature(outlet: status.storage)
+      case (_, .charge):
+        status.powerBlock.massFlow =
+          status.solarField.massFlow - status.storage.massFlow
+      case (_, _): break
       }
 
-      status.powerBlock.massFlow.adjust(factor:
-        Storage.parameter.heatExchangerEfficiency
-      )
+      status.powerBlock.massFlow.adjust(
+        factor: Storage.parameter.heatExchangerEfficiency)
       // recalculate thermal power given by TES
       status.storage.recalculate(&heatFlow.storage)
     }
 
     if Design.hasHeater {
       integrate(
-        heater: &status.heater,
-        solarField: &status.solarField,
-        powerBlock: &status.powerBlock,
-        steamTurbine: &status.steamTurbine,
-        storage: &status.storage
-      )
+        heater: &status.heater, solarField: &status.solarField,
+        powerBlock: &status.powerBlock, steamTurbine: &status.steamTurbine,
+        storage: &status.storage)
     }
 
     if status.powerBlock.temperature.inlet
       < HeatExchanger.parameter.temperature.htf.inlet.min
-      || status.powerBlock.massFlow == .zero // status.storage.operationMode.isFreezeProtection
+      || status.powerBlock.massFlow == .zero  // status.storage.operationMode.isFreezeProtection
     {
       if status.heater.operationMode.isFreezeProtection == false {
         status.powerBlock.temperatureLoss(
-          for: Simulation.time.steps.interval,
-          wrt: status.solarField, status.storage
-        )
+          for: Simulation.time.steps.interval, wrt: status.solarField,
+          status.storage)
       }
       heatFlow.production = .zero
       heatFlow.heatExchanger = .zero
@@ -363,16 +337,14 @@ struct Plant {
     status.heatExchanger.inletTemperature(inlet: status.powerBlock)
 
     heatFlow.heatExchanger.megaWatt = status.heatExchanger(
-      load: status.steamTurbine.load,
-      storage: status.storage
-    )
+      load: status.steamTurbine.load, storage: status.storage)
     status.powerBlock.temperature = status.heatExchanger.temperature
 
     if Design.hasGasTurbine, Design.hasStorage,
       heatFlow.heatExchanger.megaWatt > HeatExchanger.parameter.heatFlowHTF
     {
-      heatFlow.dumping.megaWatt += heatFlow.heatExchanger.megaWatt
-        - HeatExchanger.parameter.heatFlowHTF
+      heatFlow.dumping.megaWatt +=
+        heatFlow.heatExchanger.megaWatt - HeatExchanger.parameter.heatFlowHTF
 
       heatFlow.heatExchanger.megaWatt = HeatExchanger.parameter.heatFlowHTF
     }
@@ -381,10 +353,8 @@ struct Plant {
   // MARK: - Heater
 
   private mutating func integrate(
-    heater: inout Heater,
-    solarField: inout SolarField,
-    powerBlock: inout PowerBlock,
-    storage: inout Storage,
+    heater: inout Heater, solarField: inout SolarField,
+    powerBlock: inout PowerBlock, storage: inout Storage,
     gasTurbine: GasTurbine
   ) {
     if case .pure = gasTurbine.operationMode {
@@ -404,10 +374,8 @@ struct Plant {
 
       heater.inletTemperature(outlet: powerBlock)
       let consumptions = heater(
-        storage: storage.massFlow,
-        mode: storage.operationMode,
-        heatFlow: heatFlow
-      )
+        storage: storage.massFlow, mode: storage.operationMode,
+        heatFlow: heatFlow)
 
       account(heater: consumptions)
 
@@ -416,10 +384,8 @@ struct Plant {
       // GasTurbine does not update at all (Load<Min?)
       heater.inletTemperature(outlet: solarField)
       let consumptions = heater(
-        storage: storage.massFlow,
-        mode: storage.operationMode,
-        heatFlow: heatFlow
-      )
+        storage: storage.massFlow, mode: storage.operationMode,
+        heatFlow: heatFlow)
 
       account(heater: consumptions)
 
@@ -428,10 +394,8 @@ struct Plant {
   }
 
   private mutating func integrate(
-    heater: inout Heater,
-    solarField: inout SolarField,
-    powerBlock: inout PowerBlock,
-    steamTurbine: inout SteamTurbine,
+    heater: inout Heater, solarField: inout SolarField,
+    powerBlock: inout PowerBlock, steamTurbine: inout SteamTurbine,
     storage: inout Storage
   ) {
     if Design.hasStorage {
@@ -446,12 +410,9 @@ struct Plant {
           storage.operationMode = .preheat
 
           (heatFlow.storage, parasitics) = Storage.perform(
-            storage: &storage,
-            solarField: &solarField,
-            steamTurbine: &steamTurbine,
-            powerBlock: &powerBlock,
-            heatFlow: &heatFlow
-          )
+            storage: &storage, solarField: &solarField,
+            steamTurbine: &steamTurbine, powerBlock: &powerBlock,
+            heatFlow: &heatFlow)
 
           heater.inletTemperature(outlet: storage)
 
@@ -460,22 +421,17 @@ struct Plant {
           //let heatDiff = heatFlow.production.megaWatt + heatFlow.storage.megaWatt - heatFlow.demand.megaWatt
 
           let consumptions = heater(
-            storage: storage.massFlow,
-            mode: storage.operationMode,
-            heatFlow: heatFlow
-          )
+            storage: storage.massFlow, mode: storage.operationMode,
+            heatFlow: heatFlow)
 
           account(heater: consumptions)
         } else {  // No Fuel Available -> Discharge directly with reduced TB load
           storage.operationMode = .discharge(load: steamTurbine.load)
 
           (heatFlow.storage, parasitics) = Storage.perform(
-            storage: &storage,
-            solarField: &solarField,
-            steamTurbine: &steamTurbine,
-            powerBlock: &powerBlock,
-            heatFlow: &heatFlow
-          )
+            storage: &storage, solarField: &solarField,
+            steamTurbine: &steamTurbine, powerBlock: &powerBlock,
+            heatFlow: &heatFlow)
 
           powerBlock.heatTransfer(from: solarField, and: storage)
         }  // STORAGE: dischargeToHeater < Qrel < dischargeToTurbine; Fuel/NoFuel
@@ -485,25 +441,23 @@ struct Plant {
       } else if heatFlow.balance < .zero,  //heater.operationMode != .freezeProtection,
         storage.relativeCharge < Storage.parameter.dischargeToHeater
       {
-      //  heatDiff =
-       //   (heatFlow.production + heatFlow.wasteHeatRecovery).megaWatt
-      //    / HeatExchanger.parameter.efficiency
-      //    - GridDemand.current.ratio * heatFlow.demand.megaWatt
+        //  heatDiff =
+        //   (heatFlow.production + heatFlow.wasteHeatRecovery).megaWatt
+        //    / HeatExchanger.parameter.efficiency
+        //    - GridDemand.current.ratio * heatFlow.demand.megaWatt
         // added to avoid heater use is storage is selected and checkbox marked:
         if heatFlow.production.isZero, Heater.parameter.onlyWithSolarField {
           // use heater only in parallel with solar field and not as stand alone.
           // heatdiff = 0
           // commented to use gas not only in parallel to SF (for AH1)
-        //  heatDiff = 0
+          //  heatDiff = 0
         }
 
         heater.inletTemperature(outlet: solarField)
 
         let consumptions = heater(
-          storage: storage.massFlow,
-          mode: storage.operationMode,
-          heatFlow: heatFlow
-        )
+          storage: storage.massFlow, mode: storage.operationMode,
+          heatFlow: heatFlow)
 
         account(heater: consumptions)
 
@@ -511,22 +465,20 @@ struct Plant {
       }
 
     } else {
-   //   heatDiff =
-     //   (heatFlow.production + heatFlow.wasteHeatRecovery).megaWatt
-     //   / HeatExchanger.parameter.efficiency - heatFlow.demand.megaWatt
+      //   heatDiff =
+      //   (heatFlow.production + heatFlow.wasteHeatRecovery).megaWatt
+      //   / HeatExchanger.parameter.efficiency - heatFlow.demand.megaWatt
 
       if heatFlow.production.watt == 0 {
         // use heater only in parallel with solar field and not as stand alone.
-      //  if Heater.parameter.onlyWithSolarField { heatDiff = 0 }
+        //  if Heater.parameter.onlyWithSolarField { heatDiff = 0 }
       }
 
       heater.inletTemperature(outlet: solarField)
 
       let consumptions = heater(
-        storage: storage.massFlow,
-        mode: storage.operationMode,
-        heatFlow: heatFlow
-      )
+        storage: storage.massFlow, mode: storage.operationMode,
+        heatFlow: heatFlow)
 
       account(heater: consumptions)
 
@@ -572,8 +524,7 @@ struct Plant {
               heatFlow.production.megaWatt
               / (Design.layout.heatExchanger / efficiency)
           }
-        }
-        // H2OinBO.temperature.inlet = H2OinPB.temperature.outlet
+        }// H2OinBO.temperature.inlet = H2OinPB.temperature.outlet
       } else {
         boiler.change(mode: .noOperation(hours: 0))
       }
@@ -582,14 +533,13 @@ struct Plant {
     if heatFlow.heater.megaWatt == Design.layout.heater {
       Qsf_load = 0.769
     } else {
-      Qsf_load = heatFlow.production.megaWatt
-      / (Design.layout.heatExchanger / efficiency)
+      Qsf_load =
+        heatFlow.production.megaWatt
+        / (Design.layout.heatExchanger / efficiency)
     }
 
     let consumptions = boiler(
-      demand: heatFlow.balance.megaWatt,
-      Qsf_load: Qsf_load
-    )
+      demand: heatFlow.balance.megaWatt, Qsf_load: Qsf_load)
 
     account(boiler: consumptions)
 
@@ -609,12 +559,10 @@ struct Plant {
   /// Returns the calculated demand based on the strategy.
   private func demandStorageStrategy() -> Double {
     switch Storage.parameter.strategy {
-    case .demand:
-      return SteamTurbine.parameter.power.max
+    case .demand: return SteamTurbine.parameter.power.max
     case .shifter:
       return SteamTurbine.parameter.power.max * GridDemand.current.ratio
-    case .always:
-      return electricity.demand
+    case .always: return electricity.demand
     }
   }
   /// A function to determine the storage mode based on certain conditions.
@@ -624,26 +572,23 @@ struct Plant {
     let summerMonths = Storage.parameter.exception
     let time = DateTime.current
     // energy can only be provided with heater on
-    if (parameter.fossilCharging && DateTime.current.isNighttime
+    if parameter.fossilCharging && DateTime.current.isNighttime
       && status.storage.relativeCharge < parameter.chargeTo
       && status.powerBlock.inlet > 665
       && Storage.isFossilChargingAllowed(at: time)
-      && OperationRestriction.fuelStrategy.isPredefined == false)
-   // ||(OperationRestriction.fuelStrategy.isPredefined && fuelAvailable > 0)
+      && OperationRestriction.fuelStrategy.isPredefined == false// ||(OperationRestriction.fuelStrategy.isPredefined && fuelAvailable > 0)
     {
       //#warning("Check this")
       status.heater.change(mode: .freezeProtection(1.0))
 
       if OperationRestriction.fuelStrategy.isPredefined == false {
-      //  fuelAvailable = .infinity
+        //  fuelAvailable = .infinity
       }
       status.heater.inletTemperature(inlet: status.powerBlock)
 
       let consumptions = status.heater(
-        storage: status.storage.massFlow,
-        mode: status.storage.operationMode,
-        heatFlow: heatFlow
-      )
+        storage: status.storage.massFlow, mode: status.storage.operationMode,
+        heatFlow: heatFlow)
 
       account(heater: consumptions)
 
@@ -665,7 +610,8 @@ struct Plant {
     }
 
     if case .discharge = status.storage.operationMode,
-      -heatFlow.storage.megaWatt < 1 * parameter.heatdiff * heatFlow.demand.megaWatt
+      -heatFlow.storage.megaWatt < 1 * parameter.heatdiff
+        * heatFlow.demand.megaWatt
     {
       status.storage.operationMode = .noOperation
     }
@@ -675,13 +621,13 @@ struct Plant {
       if case .shifter = parameter.strategy {
         if (summerMonths.contains(time.month)
           && time.hour < parameter.dischargeSummer)
-          || time.hour < parameter.dischargeWinter {
+          || time.hour < parameter.dischargeWinter
+        {
           status.storage.operationMode = .noOperation
         }
       }
-    }
-    // check why to circulate HTF in SF
+    }// check why to circulate HTF in SF
     //#warning("Storage.parasitics")
-  // FIXME  plant.electricalParasitics.solarField = SolarField.parameter.antiFreezeParastics
+    // FIXME  plant.electricalParasitics.solarField = SolarField.parameter.antiFreezeParastics
   }
 }

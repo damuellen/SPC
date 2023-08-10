@@ -25,7 +25,9 @@ struct Parameters: Codable {
   var layout = Design.layout
 
   /// Heat transfer fluid configurations used in the simulation.
-  var heatTransferFluid = [SolarField.parameter.HTF, Storage.parameter.HTF.properties]
+  var heatTransferFluid = [
+    SolarField.parameter.HTF, Storage.parameter.HTF.properties,
+  ]
 
   /// Solar field configuration used in the simulation.
   var solarField = SolarField.parameter
@@ -53,15 +55,13 @@ struct Parameters: Codable {
 
   /// Power block configuration used in the simulation.
   var powerBlock = PowerBlock.parameter
-  
   /// Storage configuration used in the simulation.
   var storage = Storage.parameter
 
   /// Default initializer that creates a new `Parameters` instance with default values.
   public init() {}
-  
   /// Function call to update the simulation parameters with the values from this `Parameters` instance.
-  /// 
+  ///
   /// This function assigns the current property values to their corresponding global simulation parameters.
   func callAsFunction() {
     Availability.current = availability

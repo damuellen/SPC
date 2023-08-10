@@ -41,15 +41,15 @@ public enum Simulation {
   /// temperature of the heat transfer fluid (HTF) in pipes, the temperature
   /// of the HTF in the heat collector element (HCE), and the initial mass
   /// flow rate in the solar field.
-  static var startTemperature =
-   (Simulation.initialValues.temperatureOfHTFinPipes,
-    Simulation.initialValues.temperatureOfHTFinPipes)
+  static var startTemperature = (
+    Simulation.initialValues.temperatureOfHTFinPipes,
+    Simulation.initialValues.temperatureOfHTFinPipes
+  )
 
   static var initialValues = InitValues(
     temperatureOfHTFinPipes: Temperature(celsius: 300.0),
     temperatureOfHTFinHCE: Temperature(celsius: 250.0),
-    massFlowInSolarField: 0.0
-  )
+    massFlowInSolarField: 0.0)
 
   /// The tariff plan for energy pricing during the simulation.
   ///
@@ -65,11 +65,7 @@ public enum Simulation {
   /// simulation. It includes information about leap years, date intervals,
   /// holidays, and time steps used to model the simulation over time.
   static var time = Period(
-    isLeapYear: false,
-    dateInterval: nil,
-    holidays: [],
-    steps: .fiveMinutes
-  )
+    isLeapYear: false, dateInterval: nil, holidays: [], steps: .fiveMinutes)
 
   /// Parameters and tolerances used in the simulation.
   ///
@@ -78,22 +74,13 @@ public enum Simulation {
   /// such as temperature, mass, insolation, and electrical tolerances,
   /// which are used to control and fine-tune the simulation behavior.
   static var parameter = Simulation.Parameter(
-    deltaFreezeTemperaturePump: 151.0,
-    deltaFreezeTemperatureHeat: 40.0,
-    minTemperatureRaiseStartUp: 1.0,
-    tempTolerance: 1.0,
-    minInsolationRaiseStartUp: 1.0,
-    heatTolerance: 4,
-    timeTolerance: 1.0,
-    massTolerance: 0.5,
-    minInsolation: 150,
-    maxToPowerBlock: 0,
-    minInsolationForBoiler: 0,
-    electricalTolerance: 0.5,
-    electricalParasitics: 8.5 / 100,
-    heatlossTempTolerance: 0.5,
-    adjustmentFactor: adjustmentFactor
-  )
+    deltaFreezeTemperaturePump: 151.0, deltaFreezeTemperatureHeat: 40.0,
+    minTemperatureRaiseStartUp: 1.0, tempTolerance: 1.0,
+    minInsolationRaiseStartUp: 1.0, heatTolerance: 4, timeTolerance: 1.0,
+    massTolerance: 0.5, minInsolation: 150, maxToPowerBlock: 0,
+    minInsolationForBoiler: 0, electricalTolerance: 0.5,
+    electricalParasitics: 8.5 / 100, heatlossTempTolerance: 0.5,
+    adjustmentFactor: adjustmentFactor)
 
   /// Adjustment factors used in the simulation.
   ///
@@ -102,13 +89,9 @@ public enum Simulation {
   /// influence the efficiency and heat loss parameters of the simulation
   /// components, allowing for realistic and adjustable simulation results.
   static var adjustmentFactor = Simulation.AdjustmentFactors(
-    efficiencySolarField: 1.0,
-    efficiencyTurbine: 1.0,
-    efficiencyHeater: 1.0,
-    efficiencyBoiler: 1.0,
-    heatLossHCE: 1.0, heatLossHTF: 1.0, heatLossH2O: 1.0,
-    electricalParasitics: 1.0
-  )
+    efficiencySolarField: 1.0, efficiencyTurbine: 1.0, efficiencyHeater: 1.0,
+    efficiencyBoiler: 1.0, heatLossHCE: 1.0, heatLossHTF: 1.0,
+    heatLossH2O: 1.0, electricalParasitics: 1.0)
 }
 
 /// A data structure representing initial values used in the simulation.
@@ -119,10 +102,8 @@ public enum Simulation {
 /// heat collector element (HCE), and the initial mass flow rate in the solar
 /// field.
 struct InitValues: Codable {
-  let temperatureOfHTFinPipes,
-    temperatureOfHTFinHCE: Temperature
+  let temperatureOfHTFinPipes, temperatureOfHTFinHCE: Temperature
   let massFlowInSolarField: MassFlow
-   
 }
 
 extension InitValues {
@@ -148,10 +129,10 @@ extension InitValues: CustomStringConvertible {
   /// flow rate as a formatted string with their respective descriptions.
   public var description: String {
     "HTF Temperature in Header [°C]:"
-    * String(format: "%.1f", temperatureOfHTFinPipes.celsius)
-    + "HTF Temperature in Collector [°C]:"
-    * String(format: "%.1f", temperatureOfHTFinHCE.celsius)
-    + "Mass Flow in Solar Field [kg/s]:"
-    * String(format: "%.1f", massFlowInSolarField.rate)
+      * String(format: "%.1f", temperatureOfHTFinPipes.celsius)
+      + "HTF Temperature in Collector [°C]:"
+      * String(format: "%.1f", temperatureOfHTFinHCE.celsius)
+      + "Mass Flow in Solar Field [kg/s]:"
+      * String(format: "%.1f", massFlowInSolarField.rate)
   }
 }

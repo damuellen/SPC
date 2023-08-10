@@ -35,15 +35,14 @@ extension WasteHeatRecovery {
 extension WasteHeatRecovery.Parameter: CustomStringConvertible {
   /// A description of the `WasteHeatRecovery.Parameter` instance.
   public var description: String {
-    "Description:" * name
-    + "Operation Mode:" * operation.rawValue
-    + "Efficiency in Hybrid Mode:" * (efficiencyNominal * 100).description
-    + "Efficiency in CC Mode:" * (efficiencyPure * 100).description
-    + "Ratio Fossil/Solar Thermal Contribution :" * ratioHTF.description
-    + "Efficiency(Solar-Load) = c0+c1*load+c2*load^2+c3*load^3+c4*load^4)"
-    + "\n\(efficiencySolar)"
-    + "Efficiency(GT-Load) = c0+c1*load+c2*load^2+c3*load^3+c4*load^4)"
-    + "\n\(efficiencyGasTurbine)"
+    "Description:" * name + "Operation Mode:" * operation.rawValue
+      + "Efficiency in Hybrid Mode:" * (efficiencyNominal * 100).description
+      + "Efficiency in CC Mode:" * (efficiencyPure * 100).description
+      + "Ratio Fossil/Solar Thermal Contribution :" * ratioHTF.description
+      + "Efficiency(Solar-Load) = c0+c1*load+c2*load^2+c3*load^3+c4*load^4)"
+      + "\n\(efficiencySolar)"
+      + "Efficiency(GT-Load) = c0+c1*load+c2*load^2+c3*load^3+c4*load^4)"
+      + "\n\(efficiencyGasTurbine)"
   }
 }
 
@@ -52,13 +51,9 @@ extension WasteHeatRecovery.Parameter: TextConfigInitializable {
   init(file: TextConfigFile) throws {
     let ln: (Int) throws -> Double = { try file.readDouble(lineNumber: $0) }
     self = try .init(
-      name: file.name,
-      operation: .integrated,
-      efficiencyNominal: ln(13),
-      efficiencyPure: ln(16),
-      ratioHTF: ln(19),
+      name: file.name, operation: .integrated, efficiencyNominal: ln(13),
+      efficiencyPure: ln(16), ratioHTF: ln(19),
       efficiencySolar: [ln(32), ln(35), ln(38), ln(41), ln(44)],
-      efficiencyGasTurbine: [ln(47), ln(50), ln(53), ln(56), ln(59)]
-    )
+      efficiencyGasTurbine: [ln(47), ln(50), ln(53), ln(56), ln(59)])
   }
 }

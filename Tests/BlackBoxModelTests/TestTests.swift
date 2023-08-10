@@ -1,8 +1,7 @@
+import Units
 import XCTest
 
 @testable import BlackBoxModel
-import Units
-
 
 class TestTests: XCTestCase {
 
