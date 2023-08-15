@@ -235,8 +235,11 @@ extension Recording {
     if imageRequested { uri.removeLast(4) }
     
     // Extract the day from the URI
-    guard let day = Int(uri) else {
+    guard var day = Int(uri) else {
       return HTTP.Response(response: .BAD_REQUEST)
+    }
+    if case 0..<365 = day { day += 1 } else {
+      return HTTP.Response(response: .METHOD_NOT_ALLOWED)
     }
     let year = BlackBoxModel.simulatedYear
     // Calculate y-axis ranges for the plot
