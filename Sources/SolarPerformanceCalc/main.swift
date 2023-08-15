@@ -231,20 +231,20 @@ extension Recording {
     if uri.isEmpty { 
       return .init(html: HTML(body: "<pre>\(description)</pre>")) 
     }
+    let imageRequested: Bool = uri.hasSuffix("png")
+    if imageRequested { uri.removeLast(4) }
+    
     // Extract the day from the URI
     guard let day = Int(uri) else {
       return HTTP.Response(response: .BAD_REQUEST)
     }
-    
+    let year = BlackBoxModel.simulatedYear
     // Calculate y-axis ranges for the plot
-    let year = DateInterval(ofYear: BlackBoxModel.simulatedYear)
-    let yRange = (
-      (maxMassFlow / 100).rounded(.up) * 110,
-      (maxHeatFlow / 100).rounded(.up) * 110)
-    let d = Date()
-    let range = DateInterval(ofDay: day, in: BlackBoxModel.simulatedYear)
-    let date = DateTime(range.start).date
-    Swift.print("\rGET request \(date)", terminator: "\u{001B}[?25l")
+    let yRange = ((maxMassFlow / 100).rounded(.up) * 110, (maxHeatFlow / 100).rounded(.up) * 110)
+
+    let range = DateInterval(ofDay: day, in: year)
+    let dateTime = DateTime(range.start)
+    Swift.print("\rGET request \(dateTime.date)", terminator: "\u{001B}[?25l")
     fflush(stdout)
     // Retrieve mass flow and power data for the specified day
     let y1 = massFlows(range: range)
@@ -259,14 +259,15 @@ extension Recording {
     plot.y2Titles = p
     
     // Convert the plot to a base64-encoded image string
-    guard let base64PNG = try? plot.callAsFunction(toFile: "")?.base64EncodedString()
-     else { return HTTP.Response(response: .SERVER_ERROR) }
+    guard let data = try? plot.callAsFunction(toFile: "") else { return .init(response: .SERVER_ERROR) }
+    if imageRequested { return HTTP.Response(bodyData: data) }
+    let base64PNG = data.base64EncodedString()
     // Create the HTML body with dynamic content based on the data and plot
-    var body = "<div>\n\(icon("left"))<h1>\(date)</h1>\n"
-    body += #"<img width="1573" height="900" src="data:image/png;base64,"#
+    var body = "<div>\n\(icon("left"))<h1>\(dateTime.month)/\(dateTime.day)/\(dateTime.year)</h1>\n"
+    body += #"<img id="image" alt="" width="1573" height="900" src="data:image/png;base64,"#
     body += base64PNG + "\"/>\n\(icon("right"))\n</div>"
 
     // Return an HTTP response containing the generated HTML body
-    return .init(html: .init(body: body + stylesheets() + script(day), overflow: true))
+    return .init(html: .init(body: body + stylesheets() + script(day, year: year)))
   }
 }
