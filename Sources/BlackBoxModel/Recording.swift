@@ -46,6 +46,10 @@ public struct Recording: CustomStringConvertible, Comparable {
     lhs.fitness == rhs.fitness
   }
 
+  public var maxMassFlow: Double { designParameter.solarField.maxMassFlow.rate }
+
+  public var maxHeatFlow: Double { designParameter.heatExchanger.heatFlowHTF / designParameter.storage.massFlowShare.quotient }
+
   /// A textual representation of the `Recording`.
   public var description: String { report() }
 
@@ -239,7 +243,7 @@ public struct Recording: CustomStringConvertible, Comparable {
     let daysBeforeMonth = [31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334]
     var month = 0
     var months = [[[Double]]](repeating: [[Double]](), count: 12)
-    for d in 1...364 {
+    for d in 1...365 {
       // Create a date interval for each day within the year.
       let range = DateInterval(ofDay: d, in: year)
       // Extract the data for the specified status keypath within the date interval.
@@ -262,7 +266,7 @@ public struct Recording: CustomStringConvertible, Comparable {
     let daysBeforeMonth = [31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334]
     var month = 0
     var months = [[[Double]]](repeating: [[Double]](), count: 12)
-    for d in 1...364 {
+    for d in 1...365 {
       // Create a date interval for each day within the year.
       let range = DateInterval(ofDay: d, in: year)
       // Extract the data for the specified plant performance keypath within the date interval.
