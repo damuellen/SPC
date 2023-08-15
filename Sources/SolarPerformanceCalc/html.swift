@@ -22,32 +22,55 @@ func script(_ index: Int, year: Int) -> String {
       };
       function dateFromDay(year, day) {
         var date = new Date(year, 0);
-        return new Date(date.setDate(day)).toLocaleDateString();
+        return new Date(date.setDate(day));
+      }
+      function getDayOfYear(date) {
+        var start = new Date(date.getFullYear(), 0, 0);
+        var diff = (date - start) + ((start.getTimezoneOffset() - date.getTimezoneOffset()) * 60 * 1000);
+        var oneDay = 1000 * 60 * 60 * 24;
+        var dayOfYear = Math.floor(diff / oneDay);
+        return dayOfYear;
+      }
+      function getDayOfYearForFirstDayOfMonth(year, month) {
+        var firstDayOfMonth = new Date(year, month, 1);
+        return getDayOfYear(firstDayOfMonth);
       }
       const date = document.getElementsByTagName('h1')[0];
       let currentWebsiteIndex = \(index);
+      let day = dateFromDay(\(year), \(index))
+      let month = day.getMonth();
       document.addEventListener('keydown', function(event) {
-          if (event.key === 'ArrowLeft') {
-              currentWebsiteIndex = (currentWebsiteIndex - 1 + 365) % 365;
-              debounce(updateimage, 100)
-              date.textContent = dateFromDay(\(year), currentWebsiteIndex);
-          } else if (event.key === 'ArrowRight') {
-              currentWebsiteIndex = (currentWebsiteIndex + 1) % 365;
-              debounce(updateimage, 100)
-              date.textContent = dateFromDay(\(year), currentWebsiteIndex);
-          }
+        if (event.key === 'ArrowLeft') {
+          currentWebsiteIndex = (currentWebsiteIndex - 1 + 365) % 365;
+          debounce(updateimage, 100)
+          date.textContent = dateFromDay(\(year), currentWebsiteIndex).toLocaleDateString();
+        } else if (event.key === 'ArrowRight') {
+          currentWebsiteIndex = (currentWebsiteIndex + 1) % 365;
+          debounce(updateimage, 100)
+          date.textContent = dateFromDay(\(year), currentWebsiteIndex).toLocaleDateString();
+        } else if (event.key === 'ArrowUp') {
+          month = (month + 1) % 12;
+          currentWebsiteIndex = getDayOfYearForFirstDayOfMonth(\(year), month)
+          debounce(updateimage, 100)
+          date.textContent = dateFromDay(\(year), currentWebsiteIndex).toLocaleDateString();
+        } else if (event.key === 'ArrowDown') {
+          month = (month - 1 + 12) % 12;
+          currentWebsiteIndex = getDayOfYearForFirstDayOfMonth(\(year), month)
+          debounce(updateimage, 100)
+          date.textContent = dateFromDay(\(year), currentWebsiteIndex).toLocaleDateString();
+        }
       });
       const left = document.getElementsByClassName("left")[0];
       const right = document.getElementsByClassName("right")[0];
       left.addEventListener("click", function(event) {
-          currentWebsiteIndex = (currentWebsiteIndex - 1 + 365) % 365;
-          image.src =  currentWebsiteIndex + ".png";
-          date.textContent = dateFromDay(\(year), currentWebsiteIndex);
+        currentWebsiteIndex = (currentWebsiteIndex - 1 + 365) % 365;
+        image.src =  currentWebsiteIndex + ".png";
+        date.textContent = dateFromDay(\(year), currentWebsiteIndex).toLocaleDateString();
       });
       right.addEventListener("click", function(event) {
-          currentWebsiteIndex = (currentWebsiteIndex + 1) % 365;
-          image.src =  currentWebsiteIndex + ".png";
-          date.textContent = dateFromDay(\(year), currentWebsiteIndex);
+        currentWebsiteIndex = (currentWebsiteIndex + 1) % 365;
+        image.src =  currentWebsiteIndex + ".png";
+        date.textContent = dateFromDay(\(year), currentWebsiteIndex).toLocaleDateString();
       });
   </script>
   """
@@ -57,21 +80,17 @@ func stylesheets() -> String {
   """
   <style>
   body {
-    max-width: max-content; margin: auto; overflow: hidden;
+    height: 100%; max-width: max-content; margin: auto; overflow: hidden;
   }
   h1 {
     position: absolute; top: 0; left: 50%;
     transform: translate(-50%, 0);
-    font-size: 55px;
   }
   div { 
     display: flex;
-    position: absolute;
-    top: 50px;
-    left: 0;
-    right: 0;
-    margin: auto;
-    user-select: none;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
   }
   svg.right { transform: scale(-1,1); width: 128px; }
   svg.left { width: 128px; }
