@@ -37,39 +37,37 @@ func script(_ index: Int, year: Int) -> String {
       }
       const date = document.getElementsByTagName('h1')[0];
       let currentWebsiteIndex = \(index);
-      let day = dateFromDay(\(year), \(index))
-      let month = day.getMonth();
+      let month = dateFromDay(\(year), currentWebsiteIndex).getMonth();
+      date.textContent = dateFromDay(\(year), currentWebsiteIndex).toLocaleDateString();
       document.addEventListener('keydown', function(event) {
         if (event.key === 'ArrowLeft') {
           currentWebsiteIndex = (currentWebsiteIndex - 1 + 365) % 365;
-          debounce(updateimage, 100)
-          date.textContent = dateFromDay(\(year), currentWebsiteIndex).toLocaleDateString();
+          month = dateFromDay(\(year), currentWebsiteIndex).getMonth();
         } else if (event.key === 'ArrowRight') {
           currentWebsiteIndex = (currentWebsiteIndex + 1) % 365;
-          debounce(updateimage, 100)
-          date.textContent = dateFromDay(\(year), currentWebsiteIndex).toLocaleDateString();
+          month = dateFromDay(\(year), currentWebsiteIndex).getMonth();
         } else if (event.key === 'ArrowUp') {
           month = (month + 1) % 12;
           currentWebsiteIndex = getDayOfYearForFirstDayOfMonth(\(year), month)
-          debounce(updateimage, 100)
-          date.textContent = dateFromDay(\(year), currentWebsiteIndex).toLocaleDateString();
         } else if (event.key === 'ArrowDown') {
           month = (month - 1 + 12) % 12;
           currentWebsiteIndex = getDayOfYearForFirstDayOfMonth(\(year), month)
-          debounce(updateimage, 100)
-          date.textContent = dateFromDay(\(year), currentWebsiteIndex).toLocaleDateString();
         }
+        debounce(updateimage, 100)
+        date.textContent = dateFromDay(\(year), currentWebsiteIndex).toLocaleDateString();
       });
       const left = document.getElementsByClassName("left")[0];
       const right = document.getElementsByClassName("right")[0];
       left.addEventListener("click", function(event) {
         currentWebsiteIndex = (currentWebsiteIndex - 1 + 365) % 365;
-        image.src =  currentWebsiteIndex + ".png";
+        month = dateFromDay(\(year), currentWebsiteIndex).getMonth();
+        image.src = currentWebsiteIndex + ".png";
         date.textContent = dateFromDay(\(year), currentWebsiteIndex).toLocaleDateString();
       });
       right.addEventListener("click", function(event) {
         currentWebsiteIndex = (currentWebsiteIndex + 1) % 365;
-        image.src =  currentWebsiteIndex + ".png";
+        month = dateFromDay(\(year), currentWebsiteIndex).getMonth();
+        image.src = currentWebsiteIndex + ".png";
         date.textContent = dateFromDay(\(year), currentWebsiteIndex).toLocaleDateString();
       });
   </script>

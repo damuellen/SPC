@@ -246,8 +246,8 @@ extension Recording {
     let yRange = ((maxMassFlow / 100).rounded(.up) * 110, (maxHeatFlow / 100).rounded(.up) * 110)
 
     let range = DateInterval(ofDay: day, in: year)
-    let dateTime = DateTime(range.start)
-    Swift.print("\rGET request \(dateTime.date)", terminator: "\u{001B}[?25l")
+    let date = DateTime(range.start).date
+    Swift.print("\rGET request \(date)", terminator: "\u{001B}[?25l")
     fflush(stdout)
     // Retrieve mass flow and power data for the specified day
     let y1 = massFlows(range: range)
@@ -266,7 +266,7 @@ extension Recording {
     if imageRequested { return HTTP.Response(bodyData: data) }
     let base64PNG = data.base64EncodedString()
     // Create the HTML body with dynamic content based on the data and plot
-    var body = "<div>\n\(icon("left"))<h1>\(dateTime.month)/\(dateTime.day)/\(dateTime.year)</h1>\n"
+    var body = "<div>\n\(icon("left"))<h1></h1>\n"
     body += #"<img id="image" alt="" width="1573" height="900" src="data:image/png;base64,"#
     body += base64PNG + "\"/>\n\(icon("right"))\n</div>"
 
