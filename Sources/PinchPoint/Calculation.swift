@@ -319,6 +319,7 @@ public struct Calculation: Codable {
   /// Get the temperatures in the heat exchanger system.
   public func temperatures() -> String {
     """
+    $data <<EOD
     "EC"
     \(0) \(economizer.temperature.ws.inlet.celsius)
     \(economizer.power) \(economizer.temperature.ws.outlet.celsius)
@@ -350,6 +351,9 @@ public struct Calculation: Codable {
     "HTF RH"
     \(powerBlockPower - reheater.power) \(reheater.temperature.htf.outlet.celsius)
     \(powerBlockPower) \(reheater.temperature.htf.inlet.celsius)
+
+
+    EOD
     """
   }
 }

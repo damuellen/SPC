@@ -20,7 +20,7 @@ func script(_ index: Int, year: Int) -> String {
         window.clearTimeout(debounceTimer);
         debounceTimer = window.setTimeout(callback, time);
       };
-      function dateFromDay(year, day){
+      function dateFromDay(year, day) {
         var date = new Date(year, 0);
         return new Date(date.setDate(day)).toLocaleDateString();
       }
@@ -29,11 +29,11 @@ func script(_ index: Int, year: Int) -> String {
       document.addEventListener('keydown', function(event) {
           if (event.key === 'ArrowLeft') {
               currentWebsiteIndex = (currentWebsiteIndex - 1 + 365) % 365;
-              debounce(updateimage, 1000)
+              debounce(updateimage, 100)
               date.textContent = dateFromDay(\(year), currentWebsiteIndex);
           } else if (event.key === 'ArrowRight') {
               currentWebsiteIndex = (currentWebsiteIndex + 1) % 365;
-              debounce(updateimage, 1000)
+              debounce(updateimage, 100)
               date.textContent = dateFromDay(\(year), currentWebsiteIndex);
           }
       });
@@ -71,6 +71,7 @@ func stylesheets() -> String {
     left: 0;
     right: 0;
     margin: auto;
+    user-select: none;
   }
   svg.right { transform: scale(-1,1); width: 128px; }
   svg.left { width: 128px; }

@@ -108,14 +108,14 @@ struct PinchPointTool: ParsableCommand {
 
     // Generate plots and diagrams if requested in PDF or HTML format
     guard pdf || html else { return }
-    let plot = Gnuplot(data: pinchPoint.temperatures())
+    let plot = Gnuplot(plotCommand: pinchPoint.temperatures())
     plot.settings.merge(
       ["encoding": "utf8",
       "xtics": "10", "ytics": "10",
       "xlabel": "'Q̇ [MW]' textcolor rgb 'black'",
       "ylabel": "'Temperatures [°C]' textcolor rgb 'black'"]
     ) { (_, new) in new }
-    plot.userPlot = """
+    plot.plotCommands.append("""
       plot $data i 0 u 1:2 w lp ls 11 title columnheader(1), \
       $data i 1 u 1:2 w lp ls 12 title columnheader(1), \
       $data i 2 u 1:2 w lp ls 13 title columnheader(1), \
@@ -127,8 +127,9 @@ struct PinchPointTool: ParsableCommand {
       $data i 3 u 1:2:(sprintf("%d°C", $2)) with labels tc ls 18 offset char 3,0 notitle, \
       $data i 4 u 1:2:(sprintf("%d°C", $2)) with labels tc ls 18 offset char 3,0 notitle, \
       $data i 5 u 1:2:(sprintf("%d°C", $2)) with labels tc ls 18 offset char 3,0 notitle
-      """
-    let svg = plot.svg(width: 1440, height: 900)!
+      """)
+
+    let svg = plot.svg(size: (1440, 900))!
 
     let dia = HeatBalanceDiagram(values: pinchPoint)
 
@@ -146,6 +147,7 @@ struct PinchPointTool: ParsableCommand {
       }
       </style>
       <style type="text/css">
+      body { overflow: hidden; }
       svg.c {
         font-family: sans-serif; font-size: 17px;
         user-select: none; display: block;
