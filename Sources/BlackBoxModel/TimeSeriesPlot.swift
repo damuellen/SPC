@@ -106,10 +106,15 @@ public final class TimeSeriesPlot {
   ///
   /// - Parameter toFile: The file name to save the chart as a PNG image (optional).
   public func callAsFunction(toFile: String? = nil) throws -> Data? {
-    var code: String = "set terminal png size 1573,900 font 'Sans,9';"
+    #if os(Windows)
+    var code: String = "set terminal png size 1556,900 font 9;\n"
+    let settings = settings.dropLast()
+    #else
+    var code: String = "set terminal png size 1573,900 font 'Sans,9';\n"
+    #endif
     if let file = toFile {
       // If a file name is provided, set the terminal output to PNG.
-      code += "set output '\(file)'\n;"
+      code += "set output '\(file)';\n"
     }
     // Concatenate Gnuplot settings, data block, plot function, and optional exit command.
     code += settings.concatenated + datablock + plot() + "\n"
@@ -141,7 +146,6 @@ public final class TimeSeriesPlot {
     "yrange [0:\(Int(yr.0))]",
     "y2range [0:\(Int(yr.1))]",
     "xtics \(x.tics)",
-    "xtics rotate",
     "ytics nomirror 10",
     "ytics 100",
     "y2tics 100",
@@ -158,6 +162,7 @@ public final class TimeSeriesPlot {
     "style line 15 lt 1 lw 2 lc rgb '#984EA3'",
     "style line 16 lt 1 lw 2 lc rgb '#784520'",
     "style line 17 lt 1 lw 2 lc rgb '#F781BF'",
+    "xtics rotate"
   ] }
 
   func plot() -> String {
