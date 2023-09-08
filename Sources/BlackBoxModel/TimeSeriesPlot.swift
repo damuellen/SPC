@@ -117,7 +117,9 @@ public final class TimeSeriesPlot {
       code += "set output '\(file)';\n"
     }
     // Concatenate Gnuplot settings, data block, plot function, and optional exit command.
-    code += settings.concatenated + datablock + plot() + "\n"
+    code += "set "
+    code += settings.joined(separator: ";\nset ")
+    code += datablock + plot() + "\n"
     #if !os(Linux)
     code += "exit\n\n"
     #endif
@@ -185,7 +187,7 @@ public final class TimeSeriesPlot {
 
   var datablock: String {
     guard let y1s = y1.first?.indices else { return "" }
-    var data = "\n$data <<EOD\nHeader\n"
+    var data = "\n\n$data <<EOD\nHeader\n"
     for y in y1s {
       data.append(y1.map { String($0[y]) }.joined(separator: ", ") + "\n")
     }
@@ -198,8 +200,4 @@ public final class TimeSeriesPlot {
     data.append("EOD\n")
     return data
   }
-}
-
-extension Array where Element == String {
-  var concatenated: String { self.map { "set " + $0 + "\n" }.joined() }
 }
