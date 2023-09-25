@@ -67,7 +67,7 @@ public enum TextConfig {
     // Check if the file extension is identified and not already processed
     guard let fileExtension = FileExtension(url: url),
         !identified.contains(fileExtension),
-        url.lastPathComponent.lowercased() != "desktop"
+        url.lastPathComponent.lowercased() != "desktop.ini"
         else { continue }
     
     identified.append(fileExtension)
