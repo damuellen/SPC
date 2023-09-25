@@ -107,10 +107,10 @@ public final class TimeSeriesPlot {
   /// - Parameter toFile: The file name to save the chart as a PNG image (optional).
   public func callAsFunction(toFile: String? = nil) throws -> Data? {
     #if os(Windows)
-    var code: String = "set terminal png size 1556,900 font 9;\n"
+    var code: String = "set terminal png size 1556,800 font 9;\n"
     let settings = settings.dropLast()
     #else
-    var code: String = "set terminal png size 1573,900 font 'Sans,9';\n"
+    var code: String = "set terminal png size 1573,800 font 'Sans,9';\n"
     #endif
     if let file = toFile {
       // If a file name is provided, set the terminal output to PNG.

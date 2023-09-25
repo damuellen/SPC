@@ -66,7 +66,10 @@ public enum TextConfig {
     for url in urls {
     // Check if the file extension is identified and not already processed
     guard let fileExtension = FileExtension(url: url),
-        !identified.contains(fileExtension) else { continue }
+        !identified.contains(fileExtension),
+        url.lastPathComponent.lowercased() != "desktop"
+        else { continue }
+    
     identified.append(fileExtension)
     let configFile = try TextConfigFile(url: url)
     // Process the file based on its extension

@@ -267,7 +267,7 @@ extension Recording {
     let base64PNG = data.base64EncodedString()
     // Create the HTML body with dynamic content based on the data and plot
     var body = "<div>\n\(icon("left"))<h1></h1>\n"
-    body += #"<img id="image" alt="" width="1573" height="900" src="data:image/png;base64,"#
+    body += #"<img id="image" alt="" width="1573" height="800" src="data:image/png;base64,"#
     body += base64PNG + "\"/>\n\(icon("right"))\n</div>"
 
     // Return an HTTP response containing the generated HTML body
