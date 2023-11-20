@@ -95,19 +95,29 @@ struct PinchPointTool: ParsableCommand {
 
     pinchPoint()
 
-    // Output results in JSON format, if requested
-    if json {
-      _ = try? print(pinchPoint.encodeToJSON())
-    } else {
-      print(
-        "\nLower HTF temperature:", pinchPoint.mixHTFTemperature,
-        "\nTotal HTF massflow to HEX:", pinchPoint.mixHTFMassflow,
-        "\nPower of PB:", pinchPoint.powerBlockPower
-      )
+    if excel {
+      let path = URL.temporaryFile().appendingPathExtension("xlsx").path
+      let wb = Workbook(name: path)
+      defer { wb.close() }
+      let _ = wb.addWorksheet()
+      print(path)
+      start(path)
     }
 
     // Generate plots and diagrams if requested in PDF or HTML format
-    guard pdf || html else { return }
+    guard pdf || html else { 
+      // Output results in JSON format, if requested
+      if json {
+        _ = try? print(pinchPoint.encodeToJSON())
+      } else {
+        print(
+          "\nLower HTF temperature:", pinchPoint.mixHTFTemperature,
+          "\nTotal HTF massflow to HEX:", pinchPoint.mixHTFMassflow,
+          "\nPower of PB:", pinchPoint.powerBlockPower
+        )
+      }
+      return 
+    }
     let plot = Gnuplot(plotCommand: pinchPoint.temperatures())
     plot.settings.merge(
       ["encoding": "utf8",
@@ -133,13 +143,6 @@ struct PinchPointTool: ParsableCommand {
 
     let dia = HeatBalanceDiagram(values: pinchPoint)
 
-    if excel {
-      let wb = Workbook(name: "pinchpoint.xlsx")
-      defer { wb.close() }
-      let _ = wb.addWorksheet()
-      start("pinchpoint.xlsx")
-    }
-
     let style = """
       <style media="print">
       svg.c {
@@ -156,9 +159,13 @@ struct PinchPointTool: ParsableCommand {
       """
 
     if pdf {
-      try plot(.pdf("plot.pdf"))
+      let tempID = URL.temporaryFile().path
+      let chart = tempID + "_chart.pdf"
+      let diagram = tempID + "_diagram.pdf"
+      try plot(.pdf(chart))
       let html = HTML(body: style + dia.svg)
-      try html.pdf(toFile: "diagram.pdf")
+      try html.pdf(toFile: diagram)
+      if !json { print(chart, diagram)}
     }
 
     if html {
@@ -171,6 +178,7 @@ struct PinchPointTool: ParsableCommand {
       #else
         let path = URL.temporaryFile().appendingPathExtension("html").path
       #endif
+      print(path)
       try html.description.write(toFile: path, atomically: false, encoding: .utf8)
       start(path)
     }
