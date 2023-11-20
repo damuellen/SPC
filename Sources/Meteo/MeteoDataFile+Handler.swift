@@ -49,7 +49,8 @@ public class MeteoDataFileHandler {
     print("Meteo file in use:\n  \(url.path)\n")
 
     // Create the appropriate MeteoDataFile instance based on the file extension.
-    self.file = try url.pathExtension == "mto" ? MET(url) : TMY(url)
+    self.file = try url.pathExtension.lowercased() == "mto" ? MET(url) : TMY(url)
+    try file.checkForConsistence()
   }
 
   /// Retrieve metadata from the meteorological data file.
@@ -70,8 +71,11 @@ public class MeteoDataFileHandler {
     let data = try file.fetchData()
 
     // Calculate the number of steps to interpolate the data based on valuesPerHour.
-    var steps = data.count / 8760
-    steps = valuesPerHour / steps
+    var hours = data.count.quotientAndRemainder(dividingBy: 8760)
+    if hours.remainder > 0 {
+      hours = data.count.quotientAndRemainder(dividingBy: 8760 + hours.remainder)
+    }
+    var steps = valuesPerHour / hours.quotient
 
     // If no interpolation is needed, return the raw data as is.
     if steps == 1 { return data }
@@ -116,6 +120,15 @@ protocol MeteoDataFile {
   /// - Returns: An array of `MeteoData` containing the meteorological data.
   /// - Throws: An error if there's an issue with fetching the data.
   func fetchData() throws -> [MeteoData]
+}
+
+extension MeteoDataFile {
+  func checkForConsistence() throws {
+    let y = try fetchInfo().year
+    let isLeapYear = (y >= 1582 && y % 4 == 0 && y % 100 != 0 || y % 400 == 0);
+    let hasLeapDay = try fetchData().count.quotientAndRemainder(dividingBy: 365).remainder > 0
+    if isLeapYear != hasLeapDay { throw MeteoDataFileError.unexpectedRowCount }
+  }
 }
 
 private struct MET: MeteoDataFile {
@@ -187,9 +200,9 @@ private struct MET: MeteoDataFile {
 
   func fetchData() throws -> [MeteoData] {
     // Check whether the dataRange matches one year of values.
-    guard csv.dataRows.count.isMultiple(of: 24)
-    //  || dataRange.count.isMultiple(of: 8764)
-    else { throw MeteoDataFileError.unexpectedRowCount }
+    let div = csv.dataRows.count.quotientAndRemainder(dividingBy: 24)
+    guard div.remainder == 0, case 365...366 = div.quotient
+      else { throw MeteoDataFileError.unexpectedRowCount }
     let lastIndex = order.reduce(0, { max($0, $1 ?? 0) })
     return try zip(csv.dataRows, 11...).map { values, line in
       guard values.endIndex > lastIndex else {
@@ -282,8 +295,8 @@ private struct TMY: MeteoDataFile {
   func fetchData() throws -> [MeteoData] {
     let dataRange = csv.dataRows
     // Check whether the dataRange matches one year of values.
-    guard dataRange.count.isMultiple(of: 8760)
-    //  || dataRange.count.isMultiple(of: 8764)
+    let div = dataRange.count.quotientAndRemainder(dividingBy: 24)
+    guard div.remainder == 0, case 365...366 = div.quotient
     else { throw MeteoDataFileError.unexpectedRowCount }
 
     var order = [Int](repeating: 0, count: 5)
