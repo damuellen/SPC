@@ -6,7 +6,6 @@
 import Foundation
 import Helpers
 import SolarPosition
-import WinSDK
 
 /// Handles the import of files with meteorological data.
 public class MeteoDataFileHandler {
