@@ -108,9 +108,17 @@ public enum MeteoFileError: Error {
 
 /// A protocol representing a meteorological data file.
 protocol MeteoDataFile {
+  /// The year of the meteorological data.
   var year: Int { get }
+  
+  /// The location associated with the meteorological data.
   var location: Location { get }
+  
+  /// The array of `MeteoData` containing meteorological data values.
   var data: [MeteoData] { get }
+
+  /// Checks the consistency of the meteorological data, throwing an error if inconsistencies are found.
+  func checkForConsistence() throws
 }
 
 extension MeteoDataFile {
