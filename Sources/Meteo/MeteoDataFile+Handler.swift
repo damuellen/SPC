@@ -53,10 +53,10 @@ public class MeteoDataFileHandler {
     try file.checkForConsistence()
   }
 
-  /// Retrieve metadata from the meteorological data file.
+  /// Retrieve information from the meteorological data file.
   ///
   /// - Returns: A tuple containing the year and location information.
-  public func metadata() -> (year: Int, location: Location) {
+  public func info() -> (year: Int, location: Location) {
     (file.year, file.location)
   }
 

@@ -72,18 +72,18 @@ public enum BlackBoxModel {
     let handler = try MeteoDataFileHandler(forReadingAtPath: path)
     handler.interpolation = false
     // Read the content of the meteo data file.
-    meteoData = try handler.data(valuesPerHour: Simulation.time.steps.rawValue)
+    meteoData = handler.data(valuesPerHour: Simulation.time.steps.rawValue)
 
-    let metadata = try handler.metadata()
+    let info = handler.info()
 
     // Check if the sun angles for the location have already been calculated.
-    if let sun = sun, metadata.location == sun.location { return }
+    if let sun = sun, info.location == sun.location { return }
 
     // Calculate sun angles for the location.
     sun = SolarPosition(
-      coords: metadata.location.coordinates,
-      tz: metadata.location.timezone,
-      year: metadata.year,
+      coords: info.location.coordinates,
+      tz: info.location.timezone,
+      year: info.year,
       frequence: Simulation.time.steps)
   }
 
