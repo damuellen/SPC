@@ -13,12 +13,12 @@ import Meteo
 import Helpers
 import Web
 
-let semaphore = DispatchSemaphore(value: 0)
-let source = DispatchSource.interrupt(semaphore: semaphore)
 #if os(Windows)
 import WinSDK
 _ = SetConsoleOutputCP(UINT(CP_UTF8))
-SetConsoleCtrlHandler({_ in source.cancel();semaphore.wait();return WindowsBool(true)}, true)
+#else
+let semaphore = DispatchSemaphore(value: 0)
+let source = DispatchSource.interrupt(semaphore: semaphore)
 #endif
 
 SolarPerformanceCalculator.main()
@@ -112,20 +112,26 @@ struct SolarPerformanceCalculator: ParsableCommand {
     
     do {
       if path == nil { path = meteofilePath ?? configPath }
+
       try BlackBoxModel.configure(meteoFilePath: path) } catch {
 #if os(Windows)
-      if case MeteoDataFileError.fileNotFound = error {
+      if case MeteoFileError.fileNotFound = error {
         guard let path = FileDialog() else { return }
         do { try BlackBoxModel.configure(meteoFilePath: path) } catch {
-          MessageBox(text: (error as! MeteoDataFileError).description, caption: name)
+          MessageBox(text: (error as! MeteoFileError).description, caption: name)
           return
         }
       } else {
-        MessageBox(text: (error as! MeteoDataFileError).description, caption: name)
+        if let err = (error as? MeteoFileError) {
+          MessageBox(text: err.description, caption: name)
+        } else {
+          let err = error as! NSError
+          MessageBox(text: err.description, caption: name)
+        }        
         return
       }
 #else
-      fatalError((error as! MeteoDataFileError).description)
+      fatalError((error as! MeteoFileError).description)
 #endif
     }
 
@@ -166,9 +172,13 @@ struct SolarPerformanceCalculator: ParsableCommand {
     if http {
       let server = HTTP(handler: result.respond)
       server.start()
-      print("web server listening on port \(server.port). Press Crtl+C to shut down.")
+#if os(Windows)
       start("http://127.0.0.1:\(server.port)")
+      MessageBox(text: "Calculation completed. Check results.", caption: name)
+#else
+      print("web server listening on port \(server.port). Press Crtl+C to shut down.")
       semaphore.wait()
+#endif
       server.stop()
       print("\u{001B}[?25h\u{001B}[2K", terminator: "\r")
       fflush(stdout)
@@ -183,7 +193,9 @@ struct SolarPerformanceCalculator: ParsableCommand {
 
   /// Function to plot time series charts using gnuplot.
   func plotter(_ result: Recording) {
+    #if !os(Windows)
     let interrupt = DispatchSource.interrupt(semaphore: semaphore)
+    #endif
    // terminalHideCursor()
    // defer { terminalShowCursor(clearLine: interrupt.isCancelled) }
     // let steamTurbine = result.annual(\.steamTurbine.load.quotient)
@@ -196,7 +208,9 @@ struct SolarPerformanceCalculator: ParsableCommand {
       (result.massFlows(range: year).joined().max()! / 100).rounded(.up) * 100,
       (result.power(range: year).joined().max()! / 100).rounded(.up) * 100)
     for i in 1...365 {
+      #if !os(Windows)
       if interrupt.isCancelled { break }
+      #endif
      // print("Plotting [\(i)/365]".background(.white), terminator: "\r")
       fflush(stdout)
       let day = DateInterval(ofDay: i, in: BlackBoxModel.simulatedYear)
@@ -267,7 +281,7 @@ extension Recording {
     let base64PNG = data.base64EncodedString()
     // Create the HTML body with dynamic content based on the data and plot
     var body = "<div>\n\(icon("left"))<h1></h1>\n"
-    body += #"<img id="image" alt="" width="1573" height="900" src="data:image/png;base64,"#
+    body += #"<img id="image" alt="" width="1573" height="800" src="data:image/png;base64,"#
     body += base64PNG + "\"/>\n\(icon("right"))\n</div>"
 
     // Return an HTTP response containing the generated HTML body

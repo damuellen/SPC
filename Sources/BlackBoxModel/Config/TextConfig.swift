@@ -28,6 +28,7 @@ public enum TextConfig {
 
     // Check if the given path is a directory
     if url.hasDirectoryPath {
+      print("Searching for config files at:", path)
       // Get the list of files in the directory
       let fileList = try fm.contentsOfDirectory(atPath: path)
       // Create an array of URLs for each file in the directory
@@ -64,9 +65,13 @@ public enum TextConfig {
 
     // Iterate through the URLs and process each file
     for url in urls {
+#if os(Windows)    
+    if let hidden = try? fm.attributesOfItem(atPath: url.path)[FileAttributeKey(rawValue: "org.swift.Foundation.FileAttributeKey._hidden")]! as! Bool, hidden { continue } 
+#endif
     // Check if the file extension is identified and not already processed
     guard let fileExtension = FileExtension(url: url),
         !identified.contains(fileExtension) else { continue }
+    
     identified.append(fileExtension)
     let configFile = try TextConfigFile(url: url)
     // Process the file based on its extension
