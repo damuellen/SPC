@@ -112,20 +112,26 @@ struct SolarPerformanceCalculator: ParsableCommand {
     
     do {
       if path == nil { path = meteofilePath ?? configPath }
+
       try BlackBoxModel.configure(meteoFilePath: path) } catch {
 #if os(Windows)
-      if case MeteoDataFileError.fileNotFound = error {
+      if case MeteoFileError.fileNotFound = error {
         guard let path = FileDialog() else { return }
         do { try BlackBoxModel.configure(meteoFilePath: path) } catch {
-          MessageBox(text: (error as! MeteoDataFileError).description, caption: name)
+          MessageBox(text: (error as! MeteoFileError).description, caption: name)
           return
         }
       } else {
-        MessageBox(text: (error as! MeteoDataFileError).description, caption: name)
+        if let err = (error as? MeteoFileError) {
+          MessageBox(text: err.description, caption: name)
+        } else {
+          let err = error as! NSError
+          MessageBox(text: err.description, caption: name)
+        }        
         return
       }
 #else
-      fatalError((error as! MeteoDataFileError).description)
+      fatalError((error as! MeteoFileError).description)
 #endif
     }
 
