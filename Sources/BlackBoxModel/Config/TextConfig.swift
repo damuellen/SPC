@@ -57,8 +57,8 @@ public enum TextConfig {
     // Iterate through the URLs and process each file
     for url in urls {
       #if os(Windows)
-      if let hidden = try? fm.attributesOfItem(atPath: url.path)[.extensionHidden]!
-        as! Bool, hidden
+      if let hidden = try? FileManager.default.attributesOfItem(
+        atPath: url.path)[.extensionHidden]! as! Bool, hidden
       {
         continue
       }
