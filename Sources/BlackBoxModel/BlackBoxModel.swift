@@ -66,16 +66,14 @@ public enum BlackBoxModel {
   ///
   /// - Parameter meteoFilePath: The file path for the meteo data file. If nil, it searches the current directory.
   /// - Throws: An error if there's an issue with reading the meteo data file.
-  public static func configure(meteoFilePath: String? = nil) throws {
-    let path = meteoFilePath ?? FileManager.default.currentDirectoryPath
+  public static func configure(meteoFilePath: String) throws {
     // Search for the meteo data file.
-    let handler = try MeteoDataFileHandler(forReadingAtPath: path)
+    let handler = try MeteoDataFileHandler(forReadingAtPath: meteoFilePath)
     handler.interpolation = false
     // Read the content of the meteo data file.
-    meteoData = handler.data(valuesPerHour: Simulation.time.steps.rawValue)
-
     let info = handler.info()
-
+    meteoData = handler.data(valuesPerHour: Simulation.time.steps.rawValue)
+    simulatedYear = info.year
     // Check if the sun angles for the location have already been calculated.
     if let sun = sun, info.location == sun.location { return }
 
@@ -83,7 +81,7 @@ public enum BlackBoxModel {
     sun = SolarPosition(
       coords: info.location.coordinates,
       tz: info.location.timezone,
-      year: info.year,
+      year: simulatedYear,
       frequence: Simulation.time.steps)
   }
 
@@ -92,20 +90,28 @@ public enum BlackBoxModel {
   /// - Parameter path: The path to the configuration file.
   /// - Returns: The path to the meteo data file if available.
   /// - Throws: An error if there's an issue with reading the configuration file.
-  public static func loadConfiguration(atPath path: String) throws -> String? {
+  public static func loadConfiguration(atPath path: String) throws -> URL? {
     let url = URL(fileURLWithPath: path)
     if url.hasDirectoryPath {
-      let files = try FileManager.default.contentsOfDirectory(atPath: path)
-      let json = files.filter { $0.hasSuffix("json") }
-      let check = JSONConfig.Name.detectFile(name:)
-      if let file = json.drop(while: { file in check(file) }).first {
-        _ = try JSONConfig.loadConfiguration(atPath: path + "/" + file)
-        return files.first(where: { $0.hasSuffix("mto") })
+      print("Search for config files in directory:\n  \(path)\n")
+      let fileNames = try FileManager.default.contentsOfDirectory(atPath: path)
+      let urls = fileNames.map { filename in 
+        URL(fileURLWithPath: filename, relativeTo: url)
+      } 
+      if let config = urls.first(where: { $0.lastPathComponent.hasPrefix("CFG_") }) {
+        try JSONConfig.read(urls: [config])
+      } else if urls.contains(where: { $0.pathExtension == "json" }) {
+        try JSONConfig.read(urls: urls)
+      } else {
+        return try TextConfig.read(urls: urls)
       }
-    } else if url.pathExtension.contains("json") {
-      return try JSONConfig.loadConfiguration(atPath: path)?.path
+    } else if url.pathExtension.lowercased().contains("json") {
+      try JSONConfig.read(urls: [url])
+    } else if url.pathExtension.lowercased().contains("pdd") {
+      print("Parse file paths from pdd file:", path)
+      return try TextConfig.read(urls: [url])
     }
-    return try TextConfig.loadConfiguration(atPath: path)?.path
+    return nil
   }
 
   // MARK: - Simulation Function

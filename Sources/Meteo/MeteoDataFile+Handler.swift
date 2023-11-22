@@ -36,6 +36,7 @@ public class MeteoDataFileHandler {
 
     // If the URL represents a directory, find the meteorological data file (either .mto or .TMY).
     if url.hasDirectoryPath {
+      print("Search for meteo file in directory:\n  \(path)\n")
       guard let fileName = try 💾.contentsOfDirectory(atPath: path).first(where: {
             $0.lowercased().hasSuffix("mto") || $0.hasPrefix("TMY")
           })
@@ -43,14 +44,13 @@ public class MeteoDataFileHandler {
       // Append the found file name to the URL to complete the file path.
       url.appendPathComponent(fileName)
     }
-    // Print the path of the meteorological data file being used.
-    print("Meteo file in use:\n  \(url.path)\n")
-
     // Create the appropriate MeteoDataFile instance based on the file extension.
     let data = try? Data(contentsOf: url, options: [.mappedIfSafe])
     guard let data = data else { throw MeteoFileError.empty }
     self.file = try url.pathExtension.lowercased() == "mto" ? MET(data) : TMY(data)
     try file.checkForConsistence()
+    // Print the path of the meteorological data file being used.
+    print("Meteo file in use:\n  \(url.path)\n")
   }
 
   /// Retrieve information from the meteorological data file.

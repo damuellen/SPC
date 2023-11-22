@@ -49,40 +49,25 @@ public enum JSONConfig {
     }
   }
 
-  public static func loadConfiguration(atPath path: String) throws -> URL? {
-    guard let pathUrl = URL(string: path)
-    else { preconditionFailure("Invalid path") }
-    if pathUrl.hasDirectoryPath {
-      let files = try FileManager.default.contentsOfDirectory(atPath: path)
-      let urls = files.map { file in pathUrl.appendingPathComponent(file) }
+  public static func read(urls: [URL]) throws {
+    if urls.count == 1 { try decodeConfiguration(urls[0]) } else {
       for url in urls {
         if let type = JSONConfig.Name(url: url) {
-          try loadConfiguration(of: type, url)
+          try decodeConfiguration(of: type, url)
         }
       }
-      return urls.first(where: { $0.pathExtension.lowercased() == "mto" })
-    } else {
-      try loadConfiguration(pathUrl)
-      return nil
     }
   }
   
-  static func loadConfiguration(_ url: URL) throws {
-    let fileHandle = try FileHandle(forReadingFrom: url)
-    if let data = try fileHandle.readToEnd() {
-      let decoder = JSONDecoder()
-      decoder.dateDecodingStrategy = .iso8601
-      let setParameters = try decoder.decode(Parameters.self, from: data)
-      setParameters()
-    }
-    try fileHandle.close()
+  static func decodeConfiguration(_ url: URL) throws {
+    let data = try Data(contentsOf: url)
+    let decoder = JSONDecoder()
+    decoder.dateDecodingStrategy = .iso8601
+    try decoder.decode(Parameters.self, from: data)()
   }
 
-  static func loadConfiguration(of type: JSONConfig.Name, _ url: URL) throws {
-    let fileHandle = try FileHandle(forReadingFrom: url)
-    let data = try fileHandle.readToEnd()
-    try fileHandle.close()
-    guard let data = data else { return }
+  static func decodeConfiguration(of type: JSONConfig.Name, _ url: URL) throws {
+    let data = try Data(contentsOf: url)
     let decoder = JSONDecoder()
     decoder.dateDecodingStrategy = .iso8601
     switch type {
@@ -125,7 +110,12 @@ public enum JSONConfig {
     }
   }
 
-  public static func saveConfiguration(toPath path: String) throws {
+  public static func write(toPath path: String, split: Bool) throws {
+    if split { try saveConfigurations(toPath: path) }
+    else { try saveConfiguration(toPath: path) }
+  }
+
+  static func saveConfiguration(toPath path: String) throws {
     var url = URL(fileURLWithPath: path)
     if url.hasDirectoryPath {
       let now = Date().timeIntervalSinceReferenceDate
@@ -136,15 +126,14 @@ public enum JSONConfig {
       url.deletePathExtension()
       url.appendPathExtension("json")
     }
-    let json = try generateJSON()
-    try json.write(to: url)
+    try encode().write(to: url)
   }
 
-  public static func saveConfigurations(toPath path: String) throws {
+  static func saveConfigurations(toPath path: String) throws {
     var directoryURL = URL(fileURLWithPath: path)
     if !directoryURL.hasDirectoryPath { directoryURL.deleteLastPathComponent() }
     let cases = JSONConfig.Name.allCases
-    let json = try cases.map(generate)
+    let json = try cases.map(encode)
 
     for (key, value) in zip(cases, json) {
       let url = URL(fileURLWithPath: key.rawValue + ".json",
@@ -153,7 +142,7 @@ public enum JSONConfig {
     }
   }
 
-  public static func generateJSON() throws -> Data {
+  public static func encode() throws -> Data {
     let encoder = JSONEncoder()
     encoder.outputFormatting = [.sortedKeys, .prettyPrinted]
     encoder.dateEncodingStrategy = .iso8601
@@ -161,7 +150,7 @@ public enum JSONConfig {
     return try encoder.encode(Parameters())
   }
 
-  public static func generate(type: JSONConfig.Name) throws -> Data {
+  public static func encode(type: JSONConfig.Name) throws -> Data {
     let encoder = JSONEncoder()
     encoder.outputFormatting = [.sortedKeys, .prettyPrinted]
     encoder.dateEncodingStrategy = .iso8601

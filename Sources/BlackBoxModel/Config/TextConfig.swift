@@ -9,8 +9,8 @@ import Utilities
 public enum TextConfig {
   /// List of path extension for needed config files.
   public enum FileExtension: String, CaseIterable {
-    case FOS, OPR, DEM, TAR, SIM, INI, TIM, DES, AVL, LAY, SF,
-      COL, STO, HR, HTF, STF, HX, BO, WHR, GT, TB, PB, PFC
+    case FOS, OPR, DEM, TAR, SIM, INI, TIM, DES, AVL, LAY, SF, COL, STO, HR,
+      HTF, STF, HX, BO, WHR, GT, TB, PB, PFC
 
     init?(url: URL) {
       if let valid = FileExtension(rawValue: url.pathExtension.uppercased()) {
@@ -21,28 +21,20 @@ public enum TextConfig {
     }
   }
 
-  static func loadConfiguration(atPath path: String) throws -> URL? {
-    let url = URL(fileURLWithPath: path)
-    var urls = [URL]()
-    let fm = FileManager.default
-
-    // Check if the given path is a directory
-    if url.hasDirectoryPath {
-      print("Searching for config files at:", path)
-      // Get the list of files in the directory
-      let fileList = try fm.contentsOfDirectory(atPath: path)
-      // Create an array of URLs for each file in the directory
-      urls = fileList.map { file in url.appendingPathComponent(file) }
-    } else if url.pathExtension.lowercased().contains("pdd") {
+  static func read(urls: [URL]) throws -> URL? {
+    var urls = urls
+    if let pdd = urls.first(where: {
+      $0.pathExtension.lowercased().contains("pdd")
+    }) {
       // If the path is a file with a .pdd extension
       // Read the file and extract the paths
-      let file = try TextConfigFile(url: url)
+      let file = try TextConfigFile(url: pdd)
       let paths = file.lines.drop(while: \.isEmpty)
       let separated = paths.map { $0.split(separator: "\\").map(String.init) }
-      let folder = url.deletingLastPathComponent()
-      var list = try fm.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil)
-      list = list.filter(\.hasDirectoryPath)
-      if list.isEmpty { list.append(folder) }
+      var list = try FileManager.default.contentsOfDirectory(
+        at: pdd.deletingLastPathComponent(), includingPropertiesForKeys: nil,
+        options: [.skipsHiddenFiles]).filter(\.hasDirectoryPath)
+      if list.isEmpty { list.append(pdd.deletingLastPathComponent()) }
       // Iterate through the directories and check if the paths match
       for dir in list {
         if urls.isEmpty == false { break }
@@ -58,24 +50,27 @@ public enum TextConfig {
         }
       }
     }
-    
     var htf: HeatTransferFluid?
     let mto = urls.first(where: { $0.pathExtension.lowercased() == "mto" })
     var identified = [FileExtension]()
 
     // Iterate through the URLs and process each file
     for url in urls {
-#if os(Windows)    
-    if let hidden = try? fm.attributesOfItem(atPath: url.path)[FileAttributeKey(rawValue: "org.swift.Foundation.FileAttributeKey._hidden")]! as! Bool, hidden { continue } 
-#endif
-    // Check if the file extension is identified and not already processed
-    guard let fileExtension = FileExtension(url: url),
-        !identified.contains(fileExtension) else { continue }
-    
-    identified.append(fileExtension)
-    let configFile = try TextConfigFile(url: url)
-    // Process the file based on its extension
-    switch fileExtension {
+      #if os(Windows)
+      if let hidden = try? fm.attributesOfItem(atPath: url.path)[.extensionHidden]!
+        as! Bool, hidden
+      {
+        continue
+      }
+      #endif
+      // Check if the file extension is identified and not already processed
+      guard let fileExtension = FileExtension(url: url),
+        !identified.contains(fileExtension)
+      else { continue }
+      identified.append(fileExtension)
+      let configFile = try TextConfigFile(url: url)
+      // Process the file based on its extension
+      switch fileExtension {
       case .FOS: break
       case .OPR: break
       case .DEM: GridDemand.current = try .init(file: configFile)

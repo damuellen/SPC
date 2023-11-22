@@ -6,7 +6,6 @@
 import ArgumentParser
 import SolarPosition
 import BlackBoxModel
-import DateExtensions
 import Dispatch
 import Foundation
 import Meteo
@@ -60,11 +59,11 @@ struct SolarPerformanceCalculator: ParsableCommand {
   @Option(name: .shortAndLong, help: "The search path for meteofile.")
   var meteofilePath: String?
   @Option(name: .shortAndLong, help: "The search path for config files.")
-  var configPath: String = cwd
+  var configPath: String?
   @Option(name: .shortAndLong, help: "Destination path for result files.")
-  var pathForResult: String = cwd
+  var resultPath: String = cwd
   @Option(name: .shortAndLong, help: "Custom name, otherwise they are numbered with 2 digits.")
-  var resultName: String?
+  var nameResult: String?
   @Option(name: .shortAndLong, help: "Year of simulation.")
   var year: Int?
   @OptionGroup()
@@ -77,8 +76,10 @@ struct SolarPerformanceCalculator: ParsableCommand {
   var database: Bool = false
   @Flag(name: .shortAndLong, help: "Detail overview of the model parameter.")
   var verbose: Bool = false
-  @Flag(help: "Save the model parameter in json file format.")
-  var json: Bool = false
+  @Option(help: "Save the model parameter in json file format.")
+  var jsonPath: String?
+  @Flag(help: "Save the model parameter in individual files.")
+  var split: Bool = false
   @Flag(help: "Output performance data as excel file.")
   var excel: Bool = false
   @Flag(help: "Open result file after calculation.")
@@ -93,10 +94,16 @@ struct SolarPerformanceCalculator: ParsableCommand {
     let now = Date()
     let name = "Solar Performance Calculator"
     print(decorated(name), "")
-    var path: String! = nil
-    do {
-      path = try BlackBoxModel.loadConfiguration(atPath: configPath)
-      if json { try JSONConfig.saveConfiguration(toPath: configPath); return }
+
+    var meteoFile: URL?
+    do {      
+      if let path = configPath {
+        meteoFile = try BlackBoxModel.loadConfiguration(atPath: path)
+      }
+      if let path = meteofilePath { meteoFile = URL(fileURLWithPath: path) }
+      if let path = jsonPath {
+        try JSONConfig.write(toPath: path, split: split)
+      }
     } catch {
  #if os(Windows)
       if let message = (error as? TextConfigFile.ReadError)?.description {
@@ -111,8 +118,9 @@ struct SolarPerformanceCalculator: ParsableCommand {
     if let s = stepsCalculation { Simulation.steps(perHour: s) }
     
     do {
-      if path == nil { path = meteofilePath ?? configPath }
-
+      guard let path = meteoFile?.path else {
+        throw MeteoFileError.fileNotFound("Missing file name!")
+      }
       try BlackBoxModel.configure(meteoFilePath: path) } catch {
 #if os(Windows)
       if case MeteoFileError.fileNotFound = error {
@@ -134,11 +142,9 @@ struct SolarPerformanceCalculator: ParsableCommand {
       fatalError((error as! MeteoFileError).description)
 #endif
     }
-
-    BlackBoxModel.configure(year: year ?? BlackBoxModel.sun!.year)
+    if let year = year { BlackBoxModel.configure(year: year) }    
     
-    if let coords = location.coords,
-     let tz = location.timezone {
+    if let coords = location.coords, let tz = location.timezone {
       let location = Location(coords, tz: tz)
       BlackBoxModel.configure(location: location)
     }
@@ -153,7 +159,7 @@ struct SolarPerformanceCalculator: ParsableCommand {
     else if excel { mode = .excel }
     else { mode = .csv }
 
-    let recording = Historian(name: resultName, path: pathForResult, mode: mode)
+    let recording = Historian(name: nameResult, path: resultPath, mode: mode)
 
     let begin = Date()
 
@@ -236,55 +242,4 @@ extension DispatchSource {
   }
 }
 
-extension Recording {
-  /// Processes an HTTP request and generates an HTTP response with a dynamic HTML body.
-  func respond(request: HTTP.Request) -> HTTP.Response {
-    // Extract the URI from the request
-    var uri = request.uri
-    uri.remove(at: uri.startIndex)
-    if uri.isEmpty { 
-      return .init(html: HTML(body: "<pre>\(description)</pre>")) 
-    }
-    let imageRequested: Bool = uri.hasSuffix("png")
-    if imageRequested { uri.removeLast(4) }
-    
-    // Extract the day from the URI
-    guard var day = Int(uri) else {
-      return HTTP.Response(response: .BAD_REQUEST)
-    }
-    if case 0..<365 = day { day += 1 } else {
-      return HTTP.Response(response: .METHOD_NOT_ALLOWED)
-    }
-    let year = BlackBoxModel.simulatedYear
-    // Calculate y-axis ranges for the plot
-    let yRange = ((maxMassFlow / 100).rounded(.up) * 110, (maxHeatFlow / 100).rounded(.up) * 110)
 
-    let range = DateInterval(ofDay: day, in: year)
-    let date = DateTime(range.start).date
-    Swift.print("\rGET request \(date)", terminator: "\u{001B}[?25l")
-    fflush(stdout)
-    // Retrieve mass flow and power data for the specified day
-    let y1 = massFlows(range: range)
-    let y2 = power(range: range)
-    
-    // Create a TimeSeriesPlot with the extracted data and specific plot configuration
-    let plot = TimeSeriesPlot(y1: y1, y2: y2, range: range, yRange: yRange, style: .impulses)
-    
-    // Set y-axis titles for the plot
-    plot.y1Titles = ["solarfield", "powerblock", "storage"]
-    let p = ["solar", "production", "toStorage", "fromStorage", "gross", "net", "consum"]
-    plot.y2Titles = p
-    
-    // Convert the plot to a base64-encoded image string
-    guard let data = try? plot.callAsFunction(toFile: "") else { return .init(response: .SERVER_ERROR) }
-    if imageRequested { return HTTP.Response(bodyData: data) }
-    let base64PNG = data.base64EncodedString()
-    // Create the HTML body with dynamic content based on the data and plot
-    var body = "<div>\n\(icon("left"))<h1></h1>\n"
-    body += #"<img id="image" alt="" width="1573" height="800" src="data:image/png;base64,"#
-    body += base64PNG + "\"/>\n\(icon("right"))\n</div>"
-
-    // Return an HTTP response containing the generated HTML body
-    return .init(html: .init(body: body + stylesheets() + script(day, year: year)))
-  }
-}
