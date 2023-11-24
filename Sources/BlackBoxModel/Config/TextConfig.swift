@@ -26,6 +26,7 @@ public enum TextConfig {
     if let pdd = urls.first(where: {
       $0.pathExtension.lowercased().contains("pdd")
     }) {
+      print("Project file was found, from which the file paths are read.\n")
       // If the path is a file with a .pdd extension
       // Read the file and extract the paths
       let file = try TextConfigFile(url: pdd)
@@ -97,6 +98,11 @@ public enum TextConfig {
       //  salt = try HeatTransferFluid(file: configFile)
       }
     }
+    print(
+      "The following files were imported:\n",
+      identified.map { $0.rawValue }.sorted().joined(separator: " "),
+      "\n"
+    )
     if let _ = htf {}  // { SolarField.parameter.HTF = htf }
     return mto
   }
