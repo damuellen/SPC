@@ -47,10 +47,10 @@ public class MeteoDataFileHandler {
     // Create the appropriate MeteoDataFile instance based on the file extension.
     let data = try? Data(contentsOf: url, options: [.mappedIfSafe])
     guard let data = data else { throw MeteoFileError.empty }
+    print("Meteo file in use:\n  \(url.path)\n")
     self.file = try url.pathExtension.lowercased() == "mto" ? MET(data) : TMY(data)
     try file.checkForConsistence()
     // Print the path of the meteorological data file being used.
-    print("Meteo file in use:\n  \(url.path)\n")
   }
 
   /// Retrieve information from the meteorological data file.
@@ -190,9 +190,7 @@ private struct MET: MeteoDataFile {
 
     // Check whether the dataRange matches one year of values.
     let div = csv.dataRows.count.quotientAndRemainder(dividingBy: 24)
-    guard div.remainder == 0, case 365...366 = div.quotient else {
-      throw MeteoFileError.unexpectedRowCount
-    }
+    guard div.remainder == 0 else { throw MeteoFileError.unexpectedRowCount }
     let lastIndex = order.reduce(0, { max($0, $1 ?? 0) })
     self.data = try zip(csv.dataRows, 11...)
       .map { values, line in
@@ -254,9 +252,7 @@ private struct TMY: MeteoDataFile {
 
     // Check whether the dataRange matches one year of values.
     let div = values.dataRows.count.quotientAndRemainder(dividingBy: 24)
-    guard div.remainder == 0, case 365...366 = div.quotient else {
-      throw MeteoFileError.unexpectedRowCount
-    }
+    guard div.remainder == 0 else { throw MeteoFileError.unexpectedRowCount }
 
     var order = [Int](repeating: 0, count: 5)
     for (name, pos) in zip(values.headerRow!, 0...) {

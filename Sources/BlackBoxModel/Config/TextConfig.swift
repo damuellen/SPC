@@ -58,9 +58,11 @@ public enum TextConfig {
     // Iterate through the URLs and process each file
     for url in urls {
       #if os(Windows)
-      if let hidden = try? FileManager.default.attributesOfItem(
-        atPath: url.path)[.extensionHidden]! as! Bool, hidden
+      let hiddenKey = FileAttributeKey(rawValue: "org.swift.Foundation.FileAttributeKey._hidden")
+      if let isHidden = try? FileManager.default.attributesOfItem(
+        atPath: url.path)[hiddenKey]! as? Bool, isHidden
       {
+        print("Skip hidden file.", url)
         continue
       }
       #endif
