@@ -96,7 +96,12 @@ struct PinchPointTool: ParsableCommand {
     pinchPoint()
 
     if excel {
+      #if os(macOS)
+      let cacheURL = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!
+      let path = cacheURL.appendingPathExtension("html").path
+      #else
       let path = URL.temporaryFile().appendingPathExtension("xlsx").path
+      #endif
       let wb = Workbook(name: path)
       defer { wb.close() }
       let _ = wb.addWorksheet()
@@ -159,9 +164,14 @@ struct PinchPointTool: ParsableCommand {
       """
 
     if pdf {
-      let tempID = URL.temporaryFile().path
-      let chart = tempID + "_chart.pdf"
-      let diagram = tempID + "_diagram.pdf"
+      #if os(macOS)
+      let cacheURL = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!
+      let path = cacheURL.appendingPathExtension("html").path
+      #else
+      let path = URL.temporaryFile().appendingPathExtension("html").path
+      #endif
+      let chart = path + "_chart.pdf"
+      let diagram = path + "_diagram.pdf"
       try plot(.pdf(chart))
       let html = HTML(body: style + dia.svg)
       try html.pdf(toFile: diagram)
