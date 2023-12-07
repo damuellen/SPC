@@ -100,8 +100,10 @@ public enum BlackBoxModel {
       } 
       if let config = urls.first(where: { $0.lastPathComponent.hasPrefix("CFG_") }) {
         try JSONConfig.read(urls: [config])
+        return URL(fileURLWithPath: path)
       } else if urls.contains(where: { $0.pathExtension == "json" }) {
         try JSONConfig.read(urls: urls)
+        return URL(fileURLWithPath: path)
       } else {
         return try TextConfig.read(urls: urls)
       }
