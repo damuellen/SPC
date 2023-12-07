@@ -168,30 +168,24 @@ public struct SolarPosition {
     location: Location, year: Int
   ) -> [DateInterval] {
 
-    var components = DateComponents()
-    components.timeZone = Greenwich.timeZone
-    components.year = year
-    components.hour = 12 + location.timezone
+    var dt = DateTime(Date(timeIntervalSince1970: 0))
+    dt.year = year
+    
 
-    let isLeapYear = year % 4 == 0 && year % 100 != 0 || year % 400 == 0
+    return (Int(1)...(dt.isLeapYear ? 366 : 365)).map { day in
 
-    return (1...(isLeapYear ? 366 : 365)).map { day in
-
-      components.day = day
-      let date = Greenwich.date(from: components)!
+      dt.day = day
       let output = SolarPosition.compute(
-        date: date, location: location, with: SolarPosition.spa
+        date: dt.date, location: location, with: SolarPosition.spa
       )
       assert(
         output.sunrise < output.sunset,
         "sunset before sunrise check location and time zone")
 
-      if let sunrise = date.set(time: output.sunrise),
-        let sunset = date.set(time: output.sunset)
-      {
-        return DateInterval(start: sunrise, end: sunset)
-      }
-      fatalError("No sun hours. Day: \(day)")
+      let sunrise = dt.date(time: output.sunrise)
+      let sunset = dt.date(time: output.sunset)
+
+      return DateInterval(start: sunrise, end: sunset)
     }
   }
   

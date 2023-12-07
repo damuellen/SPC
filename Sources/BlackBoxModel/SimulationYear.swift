@@ -42,7 +42,7 @@ extension Simulation {
       First Day of Daylight Saving time [MM.DD] :       0
       Last Day of Daylight Saving time [MM.DD] :        1.01
       Holidays [MM-DD]:
-      \(holidays.map(\.start).map(DateTime.init(_:)).map(\.date).joined(separator: ", "))
+      \(holidays.map(\.start).map(DateTime.init(_:)).map(\.calendarDay).joined(separator: ", "))
       """
     }
   }

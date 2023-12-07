@@ -134,7 +134,7 @@ public enum BlackBoxModel {
     var status = Plant.initialState
     var photovoltaic = [Double]()
 
-    if insolation.global {
+    if false, insolation.global {
       // If global insolation is available, calculate photovoltaic power.
       let pv = PV()
       var inputs = [PV.InputValues]()

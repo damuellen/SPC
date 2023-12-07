@@ -238,14 +238,14 @@ public struct Recording: CustomStringConvertible, Comparable {
   /// Calculate the annual data for a specific status keypath.
   public func annual(_ keyPath: KeyPath<Status, Double>) -> [[[Double]]] {
     // Extract the year from the start date.
-    let year = startDate.getComponents().year!
+    let dt = DateTime(startDate)
     // Define the day numbers before each month.
     let daysBeforeMonth = [31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334]
     var month = 0
     var months = [[[Double]]](repeating: [[Double]](), count: 12)
-    for d in 1...365 {
+    for d in 1...(dt.isLeapYear ? 366 : 365) {
       // Create a date interval for each day within the year.
-      let range = DateInterval(ofDay: d, in: year)
+      let range = DateInterval(ofDay: d, in: dt.year)
       // Extract the data for the specified status keypath within the date interval.
       let day = self[status: keyPath, range]
       // Append the data to the corresponding month in the result array.
@@ -261,14 +261,15 @@ public struct Recording: CustomStringConvertible, Comparable {
   /// Calculate the annual data for a specific plant performance keypath.
   public func annual(_ keyPath: KeyPath<PlantPerformance, Double>) -> [[[Double]]] {
     // Extract the year from the start date.
-    let year = startDate.getComponents().year!
+    let dt = DateTime(startDate)
     // Define the day numbers before each month.
     let daysBeforeMonth = [31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334]
     var month = 0
+    
     var months = [[[Double]]](repeating: [[Double]](), count: 12)
-    for d in 1...365 {
+    for d in 1...(dt.isLeapYear ? 366 : 365) {
       // Create a date interval for each day within the year.
-      let range = DateInterval(ofDay: d, in: year)
+      let range = DateInterval(ofDay: d, in: dt.year)
       // Extract the data for the specified plant performance keypath within the date interval.
       let day = self[performance: keyPath, range]
       // Append the data to the corresponding month in the result array.

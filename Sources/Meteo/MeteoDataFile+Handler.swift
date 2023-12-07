@@ -126,7 +126,9 @@ extension MeteoDataFile {
     let isLeapYear = (y >= 1582 && y % 4 == 0 && y % 100 != 0 || y % 400 == 0)
     let hasLeapDay =
       data.count.quotientAndRemainder(dividingBy: 365).remainder > 0
-    if isLeapYear != hasLeapDay { throw MeteoFileError.unexpectedRowCount }
+    if isLeapYear != hasLeapDay { 
+      throw MeteoFileError.unexpectedRowCount
+    }
   }
 }
 
@@ -166,8 +168,8 @@ private struct MET: MeteoDataFile {
       let latitude = Double(metadata[3]), let lat_tz = Int(metadata[4])
     else { throw MeteoFileError.unknownLocation }
 
-    let timezone = -lat_tz / 15
-    self.location = Location((-longitude, latitude, 0), tz: timezone)
+    let timezone = lat_tz / 15
+    self.location = Location((longitude, latitude, 0), tz: timezone)
 
     guard let header = String(data: lines[8], encoding: .utf8) else {
       throw MeteoFileError.missingHeaders

@@ -112,13 +112,13 @@ extension Recording {
     d += decorated("OPERATION") + "\n"
     let s1 = "First Date of Operation:"
     if let firstDateOfOperation = Simulation.time.dateInterval?.start {
-      d += s1 * DateTime(firstDateOfOperation).date
+      d += s1 * DateTime(firstDateOfOperation).calendarDay
     } else {
       d += s1 * "New Year"
     }
     let s2 = "Last Date of Operation:"
     if let lastDateOfOperation = Simulation.time.dateInterval?.end {
-      d += s2 * DateTime(lastDateOfOperation).date
+      d += s2 * DateTime(lastDateOfOperation).calendarDay
     } else {
       d += s2 * "New Year"
     }

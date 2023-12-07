@@ -94,6 +94,10 @@ let platformTargets: [Target] = [
     name: "MeteoTests",
     dependencies: ["Utilities", "DateExtensions", "SolarPosition", "Meteo"]
   ),
+  .testTarget(
+    name: "DateExtensionsTests",
+    dependencies: ["Utilities", "DateExtensions", "SolarPosition", "Meteo"]
+  ),
 //.testTarget(name: "ThermalStorageTests", dependencies: ["ThermalStorage"]),
   .testTarget(name: "PinchPointTests", dependencies: ["PinchPoint"]),
   .testTarget(
