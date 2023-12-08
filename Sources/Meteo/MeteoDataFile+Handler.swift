@@ -170,7 +170,12 @@ private struct MET: MeteoDataFile {
 
     let timezone = lat_tz / 15
     self.location = Location((longitude, latitude, 0), tz: timezone)
-
+    let tz = Int((TimeZone(location)?.secondsFromGMT() ?? 0) / 3600)
+    if tz != timezone {
+      print("Meteo file time zone offset adjusted to: \(tz)h")
+      self.location.timezone = tz
+    }
+    
     guard let header = String(data: lines[8], encoding: .utf8) else {
       throw MeteoFileError.missingHeaders
     }

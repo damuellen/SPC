@@ -154,8 +154,8 @@ extension DateTime {
     var time = time_t(date.timeIntervalSince1970)
     gmtime_s(&timeInfo, &time)
     #else
-    var ts = timespec(tv_sec: Int(date.timeIntervalSince1970), tv_nsec: 0)
-    let timeInfo = gmtime(&ts.tv_sec).pointee
+    var ts = Int(date.timeIntervalSince1970)
+    let timeInfo = gmtime(&ts).pointee
     #endif
 
     self.isDaytime = true
