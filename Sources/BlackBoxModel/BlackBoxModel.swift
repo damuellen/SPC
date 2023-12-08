@@ -125,7 +125,7 @@ public enum BlackBoxModel {
   /// - Attention: `configure()` must be called before this function.
   public static func runModel(with record: Historian) {
     guard let 🌞 = sun, let insolation = meteoDataDiagnose(), insolation.direct 
-    else { print("Missing sunshine."); exit(1) }
+    else { print("Missing sunshine. Please check the file content."); exit(1) }
 
     // Preparation of the plant parameters
     var plant = Plant.setup()

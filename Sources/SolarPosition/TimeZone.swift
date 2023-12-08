@@ -121,12 +121,12 @@ public extension TimeZone {
                         if lat < 45.502335 {
                           if lng < 7.181056 {
                             if lat < 45.286988 {
-                              if poly[0].contains(testy: lat, testx: lng) { return 297 } else { return 271 }
+                              if polygons[0].contains(testy: lat, testx: lng) { return 297 } else { return 271 }
                             } else {
                               if lat < 45.409389 {
-                                if poly[1].contains(testy: lat, testx: lng) { return 297 } else { return 271 }
+                                if polygons[1].contains(testy: lat, testx: lng) { return 297 } else { return 271 }
                               } else {
-                                if poly[2].contains(testy: lat, testx: lng) { return 297 } else { return 271 }
+                                if polygons[2].contains(testy: lat, testx: lng) { return 297 } else { return 271 }
                               }
                             }
                           } else {
@@ -136,48 +136,48 @@ public extension TimeZone {
                           if lng < 10.491472 {
                             if lng < 8.721278 {
                               if lat < 46.464279 {
-                                if poly[3].contains(testy: lat, testx: lng) { return 172 } else { return 271 }
+                                if polygons[3].contains(testy: lat, testx: lng) { return 172 } else { return 271 }
                               } else {
                                 if lat < 49.182751 {
                                   if lat < 47.805332 {
                                     if lng < 7.922375 {
-                                      if poly[4].contains(testy: lat, testx: lng) { return 6 }
-                                      if poly[5].contains(testy: lat, testx: lng) { return 297 } else { return 172 }
+                                      if polygons[4].contains(testy: lat, testx: lng) { return 6 }
+                                      if polygons[5].contains(testy: lat, testx: lng) { return 297 } else { return 172 }
                                     } else {
-                                      if poly[6].contains(testy: lat, testx: lng) { return 6 }
-                                      if poly[7].contains(testy: lat, testx: lng) { return 6 } else { return 172 }
+                                      if polygons[6].contains(testy: lat, testx: lng) { return 6 }
+                                      if polygons[7].contains(testy: lat, testx: lng) { return 6 } else { return 172 }
                                     }
                                   } else {
-                                    if poly[8].contains(testy: lat, testx: lng) { return 297 } else { return 6 }
+                                    if polygons[8].contains(testy: lat, testx: lng) { return 297 } else { return 6 }
                                   }
                                 } else {
-                                  if poly[9].contains(testy: lat, testx: lng) { return 385 } else { return 6 }
+                                  if polygons[9].contains(testy: lat, testx: lng) { return 385 } else { return 6 }
                                 }
                               }
                             } else {
                               if lat < 46.939667 {
                                 if lng < 9.606375 {
-                                  if poly[10].contains(testy: lat, testx: lng) { return 271 } else { return 172 }
+                                  if polygons[10].contains(testy: lat, testx: lng) { return 271 } else { return 172 }
                                 } else {
-                                  if poly[11].contains(testy: lat, testx: lng) { return 271 }
-                                  if poly[12].contains(testy: lat, testx: lng) { return 276 }
-                                  if poly[13].contains(testy: lat, testx: lng) { return 276 } else { return 172 }
+                                  if polygons[11].contains(testy: lat, testx: lng) { return 271 }
+                                  if polygons[12].contains(testy: lat, testx: lng) { return 276 }
+                                  if polygons[13].contains(testy: lat, testx: lng) { return 276 } else { return 172 }
                                 }
                               } else {
                                 if lat < 50.099766 {
                                   if lat < 48.519716 {
                                     if lng < 9.606375 {
-                                      if poly[14].contains(testy: lat, testx: lng) { return 6 }
-                                      if poly[15].contains(testy: lat, testx: lng) { return 78 }
-                                      if poly[16].contains(testy: lat, testx: lng) { return 276 }
-                                      if poly[17].contains(testy: lat, testx: lng) { return 276 }
-                                      if poly[18].contains(testy: lat, testx: lng) { return 276 } else { return 172 }
+                                      if polygons[14].contains(testy: lat, testx: lng) { return 6 }
+                                      if polygons[15].contains(testy: lat, testx: lng) { return 78 }
+                                      if polygons[16].contains(testy: lat, testx: lng) { return 276 }
+                                      if polygons[17].contains(testy: lat, testx: lng) { return 276 }
+                                      if polygons[18].contains(testy: lat, testx: lng) { return 276 } else { return 172 }
                                     } else {
-                                      if poly[19].contains(testy: lat, testx: lng) { return 6 }
-                                      if poly[20].contains(testy: lat, testx: lng) { return 78 }
-                                      if poly[21].contains(testy: lat, testx: lng) { return 172 }
-                                      if poly[22].contains(testy: lat, testx: lng) { return 172 }
-                                      if poly[23].contains(testy: lat, testx: lng) { return 172 } else { return 276 }
+                                      if polygons[19].contains(testy: lat, testx: lng) { return 6 }
+                                      if polygons[20].contains(testy: lat, testx: lng) { return 78 }
+                                      if polygons[21].contains(testy: lat, testx: lng) { return 172 }
+                                      if polygons[22].contains(testy: lat, testx: lng) { return 172 }
+                                      if polygons[23].contains(testy: lat, testx: lng) { return 172 } else { return 276 }
                                     }
                                   } else {
                                     return 6
@@ -193,17 +193,17 @@ public extension TimeZone {
                             } else {
                               if lat < 47.794126 {
                                 if lat < 47.095196 {
-                                  if poly[24].contains(testy: lat, testx: lng) { return 276 }
-                                  if poly[25].contains(testy: lat, testx: lng) { return 276 } else { return 271 }
+                                  if polygons[24].contains(testy: lat, testx: lng) { return 276 }
+                                  if polygons[25].contains(testy: lat, testx: lng) { return 276 } else { return 271 }
                                 } else {
-                                  if poly[26].contains(testy: lat, testx: lng) { return 276 }
-                                  if poly[27].contains(testy: lat, testx: lng) { return 276 } else { return 6 }
+                                  if polygons[26].contains(testy: lat, testx: lng) { return 276 }
+                                  if polygons[27].contains(testy: lat, testx: lng) { return 276 } else { return 6 }
                                 }
                               } else {
                                 if lat < 48.216392 {
-                                  if poly[28].contains(testy: lat, testx: lng) { return 276 } else { return 6 }
+                                  if polygons[28].contains(testy: lat, testx: lng) { return 276 } else { return 6 }
                                 } else {
-                                  if poly[29].contains(testy: lat, testx: lng) { return 220 } else { return 6 }
+                                  if polygons[29].contains(testy: lat, testx: lng) { return 220 } else { return 6 }
                                 }
                               }
                             }
@@ -224,13 +224,13 @@ public extension TimeZone {
                               if lat < 54.913971 {
                                 if lng < 9.604082 {
                                   if lng < 8.817778 {
-                                    if poly[30].contains(testy: lat, testx: lng) { return 319 } else { return 6 }
+                                    if polygons[30].contains(testy: lat, testx: lng) { return 319 } else { return 6 }
                                   } else {
-                                    if poly[31].contains(testy: lat, testx: lng) { return 319 } else { return 6 }
+                                    if polygons[31].contains(testy: lat, testx: lng) { return 319 } else { return 6 }
                                   }
                                 } else {
                                   if lng < 9.782444 {
-                                    if poly[32].contains(testy: lat, testx: lng) { return 6 } else { return 319 }
+                                    if polygons[32].contains(testy: lat, testx: lng) { return 6 } else { return 319 }
                                   } else {
                                     if lat < 54.802927 { return 6 } else { return 319 }
                                   }
@@ -262,7 +262,7 @@ public extension TimeZone {
                                   return 319
                                 } else {
                                   if lng < 12.635111 {
-                                    if poly[33].contains(testy: lat, testx: lng) { return 375 } else { return 319 }
+                                    if polygons[33].contains(testy: lat, testx: lng) { return 375 } else { return 319 }
                                   } else {
                                     return 375
                                   }
@@ -309,10 +309,10 @@ public extension TimeZone {
                             if lng < 33.609680 {
                               if lng < 28.814993 {
                                 if lng < 26.417649 {
-                                  if poly[34].contains(testy: lat, testx: lng) { return 332 } else { return 49 }
+                                  if polygons[34].contains(testy: lat, testx: lng) { return 332 } else { return 49 }
                                 } else {
-                                  if poly[35].contains(testy: lat, testx: lng) { return 49 }
-                                  if poly[36].contains(testy: lat, testx: lng) { return 332 } else { return 183 }
+                                  if polygons[35].contains(testy: lat, testx: lng) { return 49 }
+                                  if polygons[36].contains(testy: lat, testx: lng) { return 332 } else { return 183 }
                                 }
                               } else {
                                 return 183
@@ -351,20 +351,20 @@ public extension TimeZone {
               if lat < -36.383263 {
                 if lat < -39.927078 {
                   if lat < -41.698986 {
-                    if poly[37].contains(testy: lat, testx: lng) { return 88 }
-                    if poly[38].contains(testy: lat, testx: lng) { return 127 } else { return 31 }
+                    if polygons[37].contains(testy: lat, testx: lng) { return 88 }
+                    if polygons[38].contains(testy: lat, testx: lng) { return 127 } else { return 31 }
                   } else {
-                    if poly[39].contains(testy: lat, testx: lng) { return 127 } else { return 31 }
+                    if polygons[39].contains(testy: lat, testx: lng) { return 127 } else { return 31 }
                   }
                 } else {
                   if lat < -38.155170 {
-                    if poly[40].contains(testy: lat, testx: lng) { return 31 } else { return 127 }
+                    if polygons[40].contains(testy: lat, testx: lng) { return 31 } else { return 127 }
                   } else {
-                    if poly[41].contains(testy: lat, testx: lng) { return 127 } else { return 31 }
+                    if polygons[41].contains(testy: lat, testx: lng) { return 127 } else { return 31 }
                   }
                 }
               } else {
-                if poly[42].contains(testy: lat, testx: lng) { return 127 } else { return 31 }
+                if polygons[42].contains(testy: lat, testx: lng) { return 127 } else { return 31 }
               }
             }
           } else {
@@ -380,12 +380,12 @@ public extension TimeZone {
                   return 88
                 } else {
                   if lng < -65.033895 {
-                    if poly[43].contains(testy: lat, testx: lng) { return 88 } else { return 127 }
+                    if polygons[43].contains(testy: lat, testx: lng) { return 88 } else { return 127 }
                   } else {
                     if lng < -65.004135 {
                       return 127
                     } else {
-                      if poly[44].contains(testy: lat, testx: lng) { return 226 } else { return 127 }
+                      if polygons[44].contains(testy: lat, testx: lng) { return 226 } else { return 127 }
                     }
                   }
                 }
@@ -397,38 +397,38 @@ public extension TimeZone {
             if lat < -31.954723 {
               if lng < -69.174179 {
                 if lat < -36.096098 {
-                  if poly[45].contains(testy: lat, testx: lng) { return 14 }
-                  if poly[46].contains(testy: lat, testx: lng) { return 31 }
-                  if poly[47].contains(testy: lat, testx: lng) { return 31 } else { return 127 }
+                  if polygons[45].contains(testy: lat, testx: lng) { return 14 }
+                  if polygons[46].contains(testy: lat, testx: lng) { return 31 }
+                  if polygons[47].contains(testy: lat, testx: lng) { return 31 } else { return 127 }
                 } else {
                   if lat < -34.025411 {
-                    if poly[48].contains(testy: lat, testx: lng) { return 31 } else { return 14 }
+                    if polygons[48].contains(testy: lat, testx: lng) { return 31 } else { return 14 }
                   } else {
                     if lat < -32.990067 {
-                      if poly[49].contains(testy: lat, testx: lng) { return 31 } else { return 14 }
+                      if polygons[49].contains(testy: lat, testx: lng) { return 31 } else { return 14 }
                     } else {
-                      if poly[50].contains(testy: lat, testx: lng) { return 31 }
-                      if poly[51].contains(testy: lat, testx: lng) { return 346 } else { return 14 }
+                      if polygons[50].contains(testy: lat, testx: lng) { return 31 }
+                      if polygons[51].contains(testy: lat, testx: lng) { return 346 } else { return 14 }
                     }
                   }
                 }
               } else {
                 if lng < -66.501678 {
                   if lat < -36.096098 {
-                    if poly[52].contains(testy: lat, testx: lng) { return 14 } else { return 127 }
+                    if polygons[52].contains(testy: lat, testx: lng) { return 14 } else { return 127 }
                   } else {
                     if lat < -34.025411 {
-                      if poly[53].contains(testy: lat, testx: lng) { return 127 }
-                      if poly[54].contains(testy: lat, testx: lng) { return 314 } else { return 14 }
+                      if polygons[53].contains(testy: lat, testx: lng) { return 127 }
+                      if polygons[54].contains(testy: lat, testx: lng) { return 314 } else { return 14 }
                     } else {
-                      if poly[55].contains(testy: lat, testx: lng) { return 314 }
-                      if poly[56].contains(testy: lat, testx: lng) { return 346 } else { return 14 }
+                      if polygons[55].contains(testy: lat, testx: lng) { return 314 }
+                      if polygons[56].contains(testy: lat, testx: lng) { return 346 } else { return 14 }
                     }
                   }
                 } else {
-                  if poly[57].contains(testy: lat, testx: lng) { return 127 }
-                  if poly[58].contains(testy: lat, testx: lng) { return 226 }
-                  if poly[59].contains(testy: lat, testx: lng) { return 314 } else { return 278 }
+                  if polygons[57].contains(testy: lat, testx: lng) { return 127 }
+                  if polygons[58].contains(testy: lat, testx: lng) { return 226 }
+                  if polygons[59].contains(testy: lat, testx: lng) { return 314 } else { return 278 }
                 }
               }
             } else {
@@ -436,54 +436,54 @@ public extension TimeZone {
                 if lat < -28.555717 {
                   if lng < -68.601897 {
                     if lat < -30.255220 {
-                      if poly[60].contains(testy: lat, testx: lng) { return 346 } else { return 31 }
+                      if polygons[60].contains(testy: lat, testx: lng) { return 346 } else { return 31 }
                     } else {
-                      if poly[61].contains(testy: lat, testx: lng) { return 31 }
-                      if poly[62].contains(testy: lat, testx: lng) { return 249 } else { return 346 }
+                      if polygons[61].contains(testy: lat, testx: lng) { return 31 }
+                      if polygons[62].contains(testy: lat, testx: lng) { return 249 } else { return 346 }
                     }
                   } else {
-                    if poly[63].contains(testy: lat, testx: lng) { return 249 }
-                    if poly[64].contains(testy: lat, testx: lng) { return 314 } else { return 346 }
+                    if polygons[63].contains(testy: lat, testx: lng) { return 249 }
+                    if polygons[64].contains(testy: lat, testx: lng) { return 314 } else { return 346 }
                   }
                 } else {
                   if lng < -68.601897 {
-                    if poly[65].contains(testy: lat, testx: lng) { return 88 }
-                    if poly[66].contains(testy: lat, testx: lng) { return 249 }
-                    if poly[67].contains(testy: lat, testx: lng) { return 346 } else { return 31 }
+                    if polygons[65].contains(testy: lat, testx: lng) { return 88 }
+                    if polygons[66].contains(testy: lat, testx: lng) { return 249 }
+                    if polygons[67].contains(testy: lat, testx: lng) { return 346 } else { return 31 }
                   } else {
                     if lat < -26.856215 {
-                      if poly[68].contains(testy: lat, testx: lng) { return 31 }
-                      if poly[69].contains(testy: lat, testx: lng) { return 249 } else { return 88 }
+                      if polygons[68].contains(testy: lat, testx: lng) { return 31 }
+                      if polygons[69].contains(testy: lat, testx: lng) { return 249 } else { return 88 }
                     } else {
-                      if poly[70].contains(testy: lat, testx: lng) { return 31 }
-                      if poly[71].contains(testy: lat, testx: lng) { return 127 }
-                      if poly[72].contains(testy: lat, testx: lng) { return 127 } else { return 88 }
+                      if polygons[70].contains(testy: lat, testx: lng) { return 31 }
+                      if polygons[71].contains(testy: lat, testx: lng) { return 127 }
+                      if polygons[72].contains(testy: lat, testx: lng) { return 127 } else { return 88 }
                     }
                   }
                 }
               } else {
                 if lat < -28.555717 {
-                  if poly[73].contains(testy: lat, testx: lng) { return 249 }
-                  if poly[74].contains(testy: lat, testx: lng) { return 278 }
-                  if poly[75].contains(testy: lat, testx: lng) { return 314 } else { return 88 }
+                  if polygons[73].contains(testy: lat, testx: lng) { return 249 }
+                  if polygons[74].contains(testy: lat, testx: lng) { return 278 }
+                  if polygons[75].contains(testy: lat, testx: lng) { return 314 } else { return 88 }
                 } else {
                   if lng < -64.444562 {
                     if lat < -26.856215 {
                       if lng < -65.483896 {
-                        if poly[76].contains(testy: lat, testx: lng) { return 129 }
-                        if poly[77].contains(testy: lat, testx: lng) { return 249 } else { return 88 }
+                        if polygons[76].contains(testy: lat, testx: lng) { return 129 }
+                        if polygons[77].contains(testy: lat, testx: lng) { return 249 } else { return 88 }
                       } else {
-                        if poly[78].contains(testy: lat, testx: lng) { return 88 }
-                        if poly[79].contains(testy: lat, testx: lng) { return 129 } else { return 278 }
+                        if polygons[78].contains(testy: lat, testx: lng) { return 88 }
+                        if polygons[79].contains(testy: lat, testx: lng) { return 129 } else { return 278 }
                       }
                     } else {
-                      if poly[80].contains(testy: lat, testx: lng) { return 88 }
-                      if poly[81].contains(testy: lat, testx: lng) { return 88 }
-                      if poly[82].contains(testy: lat, testx: lng) { return 127 }
-                      if poly[83].contains(testy: lat, testx: lng) { return 278 } else { return 129 }
+                      if polygons[80].contains(testy: lat, testx: lng) { return 88 }
+                      if polygons[81].contains(testy: lat, testx: lng) { return 88 }
+                      if polygons[82].contains(testy: lat, testx: lng) { return 127 }
+                      if polygons[83].contains(testy: lat, testx: lng) { return 278 } else { return 129 }
                     }
                   } else {
-                    if poly[84].contains(testy: lat, testx: lng) { return 127 } else { return 278 }
+                    if polygons[84].contains(testy: lat, testx: lng) { return 127 } else { return 278 }
                   }
                 }
               }
@@ -494,7 +494,7 @@ public extension TimeZone {
         if lat < -38.766533 {
           return 226
         } else {
-          if poly[85].contains(testy: lat, testx: lng) { return 278 } else { return 226 }
+          if polygons[85].contains(testy: lat, testx: lng) { return 278 } else { return 226 }
         }
       }
     } else {
@@ -505,7 +505,7 @@ public extension TimeZone {
               return 226
             } else {
               if lng < -58.432247 {
-                if poly[86].contains(testy: lat, testx: lng) { return 278 } else { return 226 }
+                if polygons[86].contains(testy: lat, testx: lng) { return 278 } else { return 226 }
               } else {
                 if lat < -34.015757 { return 226 } else { return 245 }
               }
@@ -513,7 +513,7 @@ public extension TimeZone {
           } else {
             if lng < -56.669033 {
               if lat < -34.604405 {
-                if poly[87].contains(testy: lat, testx: lng) { return 245 } else { return 226 }
+                if polygons[87].contains(testy: lat, testx: lng) { return 245 } else { return 226 }
               } else {
                 if lng < -58.238857 { if lat < -34.121304 { return 226 } else { return 245 } } else { return 245 }
               }
@@ -526,12 +526,12 @@ public extension TimeZone {
             if lng < -58.113934 {
               if lng < -58.179478 {
                 if lat < -33.112217 {
-                  if poly[88].contains(testy: lat, testx: lng) { return 278 } else { return 245 }
+                  if polygons[88].contains(testy: lat, testx: lng) { return 278 } else { return 245 }
                 } else {
                   if lng < -58.244583 {
                     return 278
                   } else {
-                    if poly[89].contains(testy: lat, testx: lng) { return 245 } else { return 278 }
+                    if polygons[89].contains(testy: lat, testx: lng) { return 245 } else { return 278 }
                   }
                 }
               } else {
@@ -539,12 +539,12 @@ public extension TimeZone {
                   return 245
                 } else {
                   if lng < -58.151073 {
-                    if poly[90].contains(testy: lat, testx: lng) { return 245 } else { return 278 }
+                    if polygons[90].contains(testy: lat, testx: lng) { return 245 } else { return 278 }
                   } else {
                     if lat < -33.051277 {
                       return 245
                     } else {
-                      if poly[91].contains(testy: lat, testx: lng) { return 278 } else { return 245 }
+                      if polygons[91].contains(testy: lat, testx: lng) { return 278 } else { return 245 }
                     }
                   }
                 }
@@ -553,41 +553,41 @@ public extension TimeZone {
               if lng < -58.083050 {
                 return 245
               } else {
-                if poly[92].contains(testy: lat, testx: lng) { return 329 } else { return 245 }
+                if polygons[92].contains(testy: lat, testx: lng) { return 329 } else { return 245 }
               }
             }
           } else {
             if lat < -28.951517 {
               if lng < -55.864777 {
                 if lat < -30.848920 {
-                  if poly[93].contains(testy: lat, testx: lng) { return 278 }
-                  if poly[94].contains(testy: lat, testx: lng) { return 329 } else { return 245 }
+                  if polygons[93].contains(testy: lat, testx: lng) { return 278 }
+                  if polygons[94].contains(testy: lat, testx: lng) { return 329 } else { return 245 }
                 } else {
                   if lng < -57.260199 {
-                    if poly[95].contains(testy: lat, testx: lng) { return 278 }
-                    if poly[96].contains(testy: lat, testx: lng) { return 329 } else { return 245 }
+                    if polygons[95].contains(testy: lat, testx: lng) { return 278 }
+                    if polygons[96].contains(testy: lat, testx: lng) { return 329 } else { return 245 }
                   } else {
                     if lat < -29.900218 {
-                      if poly[97].contains(testy: lat, testx: lng) { return 329 } else { return 245 }
+                      if polygons[97].contains(testy: lat, testx: lng) { return 329 } else { return 245 }
                     } else {
-                      if poly[98].contains(testy: lat, testx: lng) { return 278 } else { return 329 }
+                      if polygons[98].contains(testy: lat, testx: lng) { return 278 } else { return 329 }
                     }
                   }
                 }
               } else {
-                if poly[99].contains(testy: lat, testx: lng) { return 329 } else { return 245 }
+                if polygons[99].contains(testy: lat, testx: lng) { return 329 } else { return 245 }
               }
             } else {
               if lng < -55.864777 {
                 if lat < -27.054114 {
-                  if poly[100].contains(testy: lat, testx: lng) { return 219 }
-                  if poly[101].contains(testy: lat, testx: lng) { return 329 } else { return 278 }
+                  if polygons[100].contains(testy: lat, testx: lng) { return 219 }
+                  if polygons[101].contains(testy: lat, testx: lng) { return 329 } else { return 278 }
                 } else {
                   if lng < -57.260199 {
                     if lat < -26.105413 {
-                      if poly[102].contains(testy: lat, testx: lng) { return 278 } else { return 219 }
+                      if polygons[102].contains(testy: lat, testx: lng) { return 278 } else { return 219 }
                     } else {
-                      if poly[103].contains(testy: lat, testx: lng) { return 278 } else { return 219 }
+                      if polygons[103].contains(testy: lat, testx: lng) { return 278 } else { return 219 }
                     }
                   } else {
                     return 219
@@ -597,28 +597,28 @@ public extension TimeZone {
                 if lat < -27.054114 {
                   if lng < -54.469355 {
                     if lat < -28.002816 {
-                      if poly[104].contains(testy: lat, testx: lng) { return 278 } else { return 329 }
+                      if polygons[104].contains(testy: lat, testx: lng) { return 278 } else { return 329 }
                     } else {
-                      if poly[105].contains(testy: lat, testx: lng) { return 219 }
-                      if poly[106].contains(testy: lat, testx: lng) { return 329 }
-                      if poly[107].contains(testy: lat, testx: lng) { return 329 } else { return 278 }
+                      if polygons[105].contains(testy: lat, testx: lng) { return 219 }
+                      if polygons[106].contains(testy: lat, testx: lng) { return 329 }
+                      if polygons[107].contains(testy: lat, testx: lng) { return 329 } else { return 278 }
                     }
                   } else {
-                    if poly[108].contains(testy: lat, testx: lng) { return 278 }
-                    if poly[109].contains(testy: lat, testx: lng) { return 278 }
-                    if poly[110].contains(testy: lat, testx: lng) { return 278 } else { return 329 }
+                    if polygons[108].contains(testy: lat, testx: lng) { return 278 }
+                    if polygons[109].contains(testy: lat, testx: lng) { return 278 }
+                    if polygons[110].contains(testy: lat, testx: lng) { return 278 } else { return 329 }
                   }
                 } else {
                   if lng < -54.469355 {
-                    if poly[111].contains(testy: lat, testx: lng) { return 278 }
-                    if poly[112].contains(testy: lat, testx: lng) { return 329 } else { return 219 }
+                    if polygons[111].contains(testy: lat, testx: lng) { return 278 }
+                    if polygons[112].contains(testy: lat, testx: lng) { return 329 } else { return 219 }
                   } else {
                     if lat < -26.105413 {
-                      if poly[113].contains(testy: lat, testx: lng) { return 329 }
-                      if poly[114].contains(testy: lat, testx: lng) { return 329 } else { return 278 }
+                      if polygons[113].contains(testy: lat, testx: lng) { return 329 }
+                      if polygons[114].contains(testy: lat, testx: lng) { return 329 } else { return 278 }
                     } else {
-                      if poly[115].contains(testy: lat, testx: lng) { return 219 }
-                      if poly[116].contains(testy: lat, testx: lng) { return 278 } else { return 329 }
+                      if polygons[115].contains(testy: lat, testx: lng) { return 219 }
+                      if polygons[116].contains(testy: lat, testx: lng) { return 278 } else { return 329 }
                     }
                   }
                 }
@@ -654,7 +654,7 @@ public extension TimeZone {
                 if lng < -83.620537 {
                   return 396
                 } else {
-                  if poly[117].contains(testy: lat, testx: lng) { return 22 } else { return 396 }
+                  if polygons[117].contains(testy: lat, testx: lng) { return 22 } else { return 396 }
                 }
               }
             } else {
@@ -662,7 +662,7 @@ public extension TimeZone {
                 if lng < -83.621902 {
                   return 396
                 } else {
-                  if poly[118].contains(testy: lat, testx: lng) { return 22 } else { return 396 }
+                  if polygons[118].contains(testy: lat, testx: lng) { return 22 } else { return 396 }
                 }
               } else {
                 if lat < 10.119060 {
@@ -672,7 +672,7 @@ public extension TimeZone {
                     if lat < 10.124827 {
                       return 396
                     } else {
-                      if poly[119].contains(testy: lat, testx: lng) { return 259 } else { return 396 }
+                      if polygons[119].contains(testy: lat, testx: lng) { return 259 } else { return 396 }
                     }
                   } else {
                     return 259
@@ -689,12 +689,12 @@ public extension TimeZone {
                   if lng < -90.279968 {
                     return 392
                   } else {
-                    if poly[120].contains(testy: lat, testx: lng) { return 392 } else { return 258 }
+                    if polygons[120].contains(testy: lat, testx: lng) { return 392 } else { return 258 }
                   }
                 } else {
-                  if poly[121].contains(testy: lat, testx: lng) { return 258 }
-                  if poly[122].contains(testy: lat, testx: lng) { return 258 }
-                  if poly[123].contains(testy: lat, testx: lng) { return 258 } else { return 145 }
+                  if polygons[121].contains(testy: lat, testx: lng) { return 258 }
+                  if polygons[122].contains(testy: lat, testx: lng) { return 258 }
+                  if polygons[123].contains(testy: lat, testx: lng) { return 258 } else { return 145 }
                 }
               }
             } else {
@@ -707,16 +707,16 @@ public extension TimeZone {
                   } else {
                     if lat < 14.293488 {
                       if lat < 13.315682 {
-                        if poly[124].contains(testy: lat, testx: lng) { return 259 } else { return 145 }
+                        if polygons[124].contains(testy: lat, testx: lng) { return 259 } else { return 145 }
                       } else {
                         if lng < -87.386246 {
                           return 145
                         } else {
-                          if poly[125].contains(testy: lat, testx: lng) { return 259 } else { return 145 }
+                          if polygons[125].contains(testy: lat, testx: lng) { return 259 } else { return 145 }
                         }
                       }
                     } else {
-                      if poly[126].contains(testy: lat, testx: lng) { return 259 } else { return 145 }
+                      if polygons[126].contains(testy: lat, testx: lng) { return 259 } else { return 145 }
                     }
                   }
                 }
@@ -735,24 +735,24 @@ public extension TimeZone {
               } else {
                 if lng < -90.371544 {
                   if lat < 16.131234 {
-                    if poly[127].contains(testy: lat, testx: lng) { return 192 } else { return 392 }
+                    if polygons[127].contains(testy: lat, testx: lng) { return 192 } else { return 392 }
                   } else {
                     if lng < -91.654282 {
                       return 192
                     } else {
                       if lat < 16.974317 {
-                        if poly[128].contains(testy: lat, testx: lng) { return 392 } else { return 192 }
+                        if polygons[128].contains(testy: lat, testx: lng) { return 392 } else { return 192 }
                       } else {
-                        if poly[129].contains(testy: lat, testx: lng) { return 392 } else { return 192 }
+                        if polygons[129].contains(testy: lat, testx: lng) { return 392 } else { return 192 }
                       }
                     }
                   }
                 } else {
                   if lat < 15.718479 {
-                    if poly[130].contains(testy: lat, testx: lng) { return 145 } else { return 392 }
+                    if polygons[130].contains(testy: lat, testx: lng) { return 145 } else { return 392 }
                   } else {
                     if lng < -88.627838 {
-                      if poly[131].contains(testy: lat, testx: lng) { return 392 } else { return 41 }
+                      if polygons[131].contains(testy: lat, testx: lng) { return 392 } else { return 41 }
                     } else {
                       if lat < 16.102887 { return 41 } else { return 392 }
                     }
@@ -768,9 +768,9 @@ public extension TimeZone {
                 return 145
               } else {
                 if lng < -84.498272 {
-                  if poly[132].contains(testy: lat, testx: lng) { return 259 } else { return 145 }
+                  if polygons[132].contains(testy: lat, testx: lng) { return 259 } else { return 145 }
                 } else {
-                  if poly[133].contains(testy: lat, testx: lng) { return 145 } else { return 259 }
+                  if polygons[133].contains(testy: lat, testx: lng) { return 145 } else { return 259 }
                 }
               }
             } else {
@@ -787,11 +787,11 @@ public extension TimeZone {
                   return 192
                 } else {
                   if lng < -91.509560 {
-                    if poly[134].contains(testy: lat, testx: lng) { return 32 }
-                    if poly[135].contains(testy: lat, testx: lng) { return 32 } else { return 192 }
+                    if polygons[134].contains(testy: lat, testx: lng) { return 32 }
+                    if polygons[135].contains(testy: lat, testx: lng) { return 32 } else { return 192 }
                   } else {
                     if lat < 18.103054 {
-                      if poly[136].contains(testy: lat, testx: lng) { return 192 } else { return 32 }
+                      if polygons[136].contains(testy: lat, testx: lng) { return 192 } else { return 32 }
                     } else {
                       return 32
                     }
@@ -801,8 +801,8 @@ public extension TimeZone {
             } else {
               if lng < -88.067238 {
                 if lng < -88.080856 {
-                  if poly[137].contains(testy: lat, testx: lng) { return 32 }
-                  if poly[138].contains(testy: lat, testx: lng) { return 41 } else { return 401 }
+                  if polygons[137].contains(testy: lat, testx: lng) { return 32 }
+                  if polygons[138].contains(testy: lat, testx: lng) { return 41 } else { return 401 }
                 } else {
                   return 401
                 }
@@ -826,26 +826,26 @@ public extension TimeZone {
                 if lng < -80.230945 {
                   if lat < -3.453752 {
                     if lat < -3.949543 {
-                      if poly[139].contains(testy: lat, testx: lng) { return 381 } else { return 164 }
+                      if polygons[139].contains(testy: lat, testx: lng) { return 381 } else { return 164 }
                     } else {
-                      if poly[140].contains(testy: lat, testx: lng) { return 381 } else { return 164 }
+                      if polygons[140].contains(testy: lat, testx: lng) { return 381 } else { return 164 }
                     }
                   } else {
-                    if poly[141].contains(testy: lat, testx: lng) { return 164 } else { return 381 }
+                    if polygons[141].contains(testy: lat, testx: lng) { return 164 } else { return 381 }
                   }
                 } else {
                   if lat < -3.437323 {
                     if lat < -4.285207 {
                       if lng < -80.136307 {
-                        if poly[142].contains(testy: lat, testx: lng) { return 381 } else { return 164 }
+                        if polygons[142].contains(testy: lat, testx: lng) { return 381 } else { return 164 }
                       } else {
-                        if poly[143].contains(testy: lat, testx: lng) { return 381 } else { return 164 }
+                        if polygons[143].contains(testy: lat, testx: lng) { return 381 } else { return 164 }
                       }
                     } else {
                       if lat < -3.478404 {
-                        if poly[144].contains(testy: lat, testx: lng) { return 164 } else { return 381 }
+                        if polygons[144].contains(testy: lat, testx: lng) { return 164 } else { return 381 }
                       } else {
-                        if poly[145].contains(testy: lat, testx: lng) { return 164 } else { return 381 }
+                        if polygons[145].contains(testy: lat, testx: lng) { return 164 } else { return 381 }
                       }
                     }
                   } else {
@@ -863,30 +863,30 @@ public extension TimeZone {
               if lat < 1.439020 {
                 if lng < -79.723465 {
                   if lat < -4.393893 {
-                    if poly[146].contains(testy: lat, testx: lng) { return 381 } else { return 164 }
+                    if polygons[146].contains(testy: lat, testx: lng) { return 381 } else { return 164 }
                   } else {
                     return 381
                   }
                 } else {
                   if lat < -3.789106 {
-                    if poly[147].contains(testy: lat, testx: lng) { return 381 } else { return 164 }
+                    if polygons[147].contains(testy: lat, testx: lng) { return 381 } else { return 164 }
                   } else {
                     if lng < -77.101025 {
-                      if poly[148].contains(testy: lat, testx: lng) { return 164 }
-                      if poly[149].contains(testy: lat, testx: lng) { return 390 } else { return 381 }
+                      if polygons[148].contains(testy: lat, testx: lng) { return 164 }
+                      if polygons[149].contains(testy: lat, testx: lng) { return 390 } else { return 381 }
                     } else {
                       if lat < -1.175043 {
-                        if poly[150].contains(testy: lat, testx: lng) { return 381 } else { return 164 }
+                        if polygons[150].contains(testy: lat, testx: lng) { return 381 } else { return 164 }
                       } else {
                         if lng < -75.789804 {
-                          if poly[151].contains(testy: lat, testx: lng) { return 390 } else { return 381 }
+                          if polygons[151].contains(testy: lat, testx: lng) { return 390 } else { return 381 }
                         } else {
                           if lat < 0.131988 {
                             if lng < -75.134194 {
-                              if poly[152].contains(testy: lat, testx: lng) { return 164 }
-                              if poly[153].contains(testy: lat, testx: lng) { return 390 } else { return 381 }
+                              if polygons[152].contains(testy: lat, testx: lng) { return 164 }
+                              if polygons[153].contains(testy: lat, testx: lng) { return 390 } else { return 381 }
                             } else {
-                              if poly[154].contains(testy: lat, testx: lng) { return 390 } else { return 164 }
+                              if polygons[154].contains(testy: lat, testx: lng) { return 390 } else { return 164 }
                             }
                           } else {
                             return 390
@@ -910,12 +910,12 @@ public extension TimeZone {
             } else {
               if lng < -77.718857 {
                 if lat < 7.508337 {
-                  if poly[155].contains(testy: lat, testx: lng) { return 390 } else { return 22 }
+                  if polygons[155].contains(testy: lat, testx: lng) { return 390 } else { return 22 }
                 } else {
-                  if poly[156].contains(testy: lat, testx: lng) { return 390 } else { return 22 }
+                  if polygons[156].contains(testy: lat, testx: lng) { return 390 } else { return 22 }
                 }
               } else {
-                if poly[157].contains(testy: lat, testx: lng) { return 22 } else { return 390 }
+                if polygons[157].contains(testy: lat, testx: lng) { return 22 } else { return 390 }
               }
             }
           }
@@ -929,9 +929,9 @@ public extension TimeZone {
               if lng < -82.555992 {
                 if lat < 9.648608 {
                   if lat < 8.973391 {
-                    if poly[158].contains(testy: lat, testx: lng) { return 396 } else { return 22 }
+                    if polygons[158].contains(testy: lat, testx: lng) { return 396 } else { return 22 }
                   } else {
-                    if poly[159].contains(testy: lat, testx: lng) { return 396 } else { return 22 }
+                    if polygons[159].contains(testy: lat, testx: lng) { return 396 } else { return 22 }
                   }
                 } else {
                   return 259
@@ -954,9 +954,9 @@ public extension TimeZone {
                 } else {
                   if lat < 8.686544 {
                     if lng < -77.659527 {
-                      if poly[160].contains(testy: lat, testx: lng) { return 390 } else { return 22 }
+                      if polygons[160].contains(testy: lat, testx: lng) { return 390 } else { return 22 }
                     } else {
-                      if poly[161].contains(testy: lat, testx: lng) { return 22 } else { return 390 }
+                      if polygons[161].contains(testy: lat, testx: lng) { return 22 } else { return 390 }
                     }
                   } else {
                     return 22
@@ -972,8 +972,8 @@ public extension TimeZone {
                 if lng < -77.162140 {
                   return 376
                 } else {
-                  if poly[162].contains(testy: lat, testx: lng) { return 165 }
-                  if poly[163].contains(testy: lat, testx: lng) { return 165 } else { return 376 }
+                  if polygons[162].contains(testy: lat, testx: lng) { return 165 }
+                  if polygons[163].contains(testy: lat, testx: lng) { return 165 } else { return 376 }
                 }
               }
             }
@@ -991,14 +991,14 @@ public extension TimeZone {
             return 164
           } else {
             if lat < -12.734070 {
-              if poly[164].contains(testy: lat, testx: lng) { return 190 } else { return 164 }
+              if polygons[164].contains(testy: lat, testx: lng) { return 190 } else { return 164 }
             } else {
               if lng < -69.287953 {
-                if poly[165].contains(testy: lat, testx: lng) { return 164 }
-                if poly[166].contains(testy: lat, testx: lng) { return 190 } else { return 180 }
+                if polygons[165].contains(testy: lat, testx: lng) { return 164 }
+                if polygons[166].contains(testy: lat, testx: lng) { return 190 } else { return 180 }
               } else {
-                if poly[167].contains(testy: lat, testx: lng) { return 164 }
-                if poly[168].contains(testy: lat, testx: lng) { return 180 } else { return 190 }
+                if polygons[167].contains(testy: lat, testx: lng) { return 164 }
+                if polygons[168].contains(testy: lat, testx: lng) { return 180 } else { return 190 }
               }
             }
           }
@@ -1007,44 +1007,44 @@ public extension TimeZone {
             if lat < -7.314267 {
               if lng < -72.748374 {
                 if lat < -8.909953 {
-                  if poly[169].contains(testy: lat, testx: lng) { return 180 } else { return 164 }
+                  if polygons[169].contains(testy: lat, testx: lng) { return 180 } else { return 164 }
                 } else {
                   if lng < -73.613479 {
-                    if poly[170].contains(testy: lat, testx: lng) { return 180 } else { return 164 }
+                    if polygons[170].contains(testy: lat, testx: lng) { return 180 } else { return 164 }
                   } else {
-                    if poly[171].contains(testy: lat, testx: lng) { return 164 }
-                    if poly[172].contains(testy: lat, testx: lng) { return 241 } else { return 180 }
+                    if polygons[171].contains(testy: lat, testx: lng) { return 164 }
+                    if polygons[172].contains(testy: lat, testx: lng) { return 241 } else { return 180 }
                   }
                 }
               } else {
-                if poly[173].contains(testy: lat, testx: lng) { return 164 }
-                if poly[174].contains(testy: lat, testx: lng) { return 241 } else { return 180 }
+                if polygons[173].contains(testy: lat, testx: lng) { return 164 }
+                if polygons[174].contains(testy: lat, testx: lng) { return 241 } else { return 180 }
               }
             } else {
               if lng < -72.748374 {
                 if lat < -5.718581 {
-                  if poly[175].contains(testy: lat, testx: lng) { return 180 }
-                  if poly[176].contains(testy: lat, testx: lng) { return 241 } else { return 164 }
+                  if polygons[175].contains(testy: lat, testx: lng) { return 180 }
+                  if polygons[176].contains(testy: lat, testx: lng) { return 241 } else { return 164 }
                 } else {
-                  if poly[177].contains(testy: lat, testx: lng) { return 241 } else { return 164 }
+                  if polygons[177].contains(testy: lat, testx: lng) { return 241 } else { return 164 }
                 }
               } else {
                 if lat < -5.718581 {
                   return 241
                 } else {
                   if lng < -71.883269 {
-                    if poly[178].contains(testy: lat, testx: lng) { return 241 } else { return 164 }
+                    if polygons[178].contains(testy: lat, testx: lng) { return 241 } else { return 164 }
                   } else {
-                    if poly[179].contains(testy: lat, testx: lng) { return 241 } else { return 164 }
+                    if polygons[179].contains(testy: lat, testx: lng) { return 241 } else { return 164 }
                   }
                 }
               }
             }
           } else {
             if lat < -7.314267 {
-              if poly[180].contains(testy: lat, testx: lng) { return 7 }
-              if poly[181].contains(testy: lat, testx: lng) { return 164 }
-              if poly[182].contains(testy: lat, testx: lng) { return 241 } else { return 180 }
+              if polygons[180].contains(testy: lat, testx: lng) { return 7 }
+              if polygons[181].contains(testy: lat, testx: lng) { return 164 }
+              if polygons[182].contains(testy: lat, testx: lng) { return 241 } else { return 180 }
             } else {
               if lng < -69.287953 {
                 if lat < -5.718581 {
@@ -1055,21 +1055,21 @@ public extension TimeZone {
                       return 241
                     } else {
                       if lng < -70.585611 {
-                        if poly[183].contains(testy: lat, testx: lng) { return 164 } else { return 241 }
+                        if polygons[183].contains(testy: lat, testx: lng) { return 164 } else { return 241 }
                       } else {
-                        if poly[184].contains(testy: lat, testx: lng) { return 241 }
-                        if poly[185].contains(testy: lat, testx: lng) { return 241 } else { return 164 }
+                        if polygons[184].contains(testy: lat, testx: lng) { return 241 }
+                        if polygons[185].contains(testy: lat, testx: lng) { return 241 } else { return 164 }
                       }
                     }
                   } else {
-                    if poly[186].contains(testy: lat, testx: lng) { return 7 }
-                    if poly[187].contains(testy: lat, testx: lng) { return 164 }
-                    if poly[188].contains(testy: lat, testx: lng) { return 164 }
-                    if poly[189].contains(testy: lat, testx: lng) { return 390 } else { return 241 }
+                    if polygons[186].contains(testy: lat, testx: lng) { return 7 }
+                    if polygons[187].contains(testy: lat, testx: lng) { return 164 }
+                    if polygons[188].contains(testy: lat, testx: lng) { return 164 }
+                    if polygons[189].contains(testy: lat, testx: lng) { return 390 } else { return 241 }
                   }
                 }
               } else {
-                if poly[190].contains(testy: lat, testx: lng) { return 241 } else { return 7 }
+                if polygons[190].contains(testy: lat, testx: lng) { return 241 } else { return 7 }
               }
             }
           }
@@ -1079,63 +1079,63 @@ public extension TimeZone {
           if lat < -9.542698 {
             if lng < -63.688177 {
               if lat < -12.252600 {
-                if poly[191].contains(testy: lat, testx: lng) { return 341 } else { return 190 }
+                if polygons[191].contains(testy: lat, testx: lng) { return 341 } else { return 190 }
               } else {
                 if lng < -65.622960 {
                   if lat < -10.897649 {
                     return 190
                   } else {
                     if lng < -66.590351 {
-                      if poly[192].contains(testy: lat, testx: lng) { return 7 }
-                      if poly[193].contains(testy: lat, testx: lng) { return 180 }
-                      if poly[194].contains(testy: lat, testx: lng) { return 341 } else { return 190 }
+                      if polygons[192].contains(testy: lat, testx: lng) { return 7 }
+                      if polygons[193].contains(testy: lat, testx: lng) { return 180 }
+                      if polygons[194].contains(testy: lat, testx: lng) { return 341 } else { return 190 }
                     } else {
-                      if poly[195].contains(testy: lat, testx: lng) { return 7 }
-                      if poly[196].contains(testy: lat, testx: lng) { return 7 }
-                      if poly[197].contains(testy: lat, testx: lng) { return 190 } else { return 341 }
+                      if polygons[195].contains(testy: lat, testx: lng) { return 7 }
+                      if polygons[196].contains(testy: lat, testx: lng) { return 7 }
+                      if polygons[197].contains(testy: lat, testx: lng) { return 190 } else { return 341 }
                     }
                   }
                 } else {
                   if lat < -10.897649 {
-                    if poly[198].contains(testy: lat, testx: lng) { return 341 } else { return 190 }
+                    if polygons[198].contains(testy: lat, testx: lng) { return 341 } else { return 190 }
                   } else {
-                    if poly[199].contains(testy: lat, testx: lng) { return 190 } else { return 341 }
+                    if polygons[199].contains(testy: lat, testx: lng) { return 190 } else { return 341 }
                   }
                 }
               }
             } else {
               if lat < -12.252600 {
                 if lng < -61.753394 {
-                  if poly[200].contains(testy: lat, testx: lng) { return 341 } else { return 190 }
+                  if polygons[200].contains(testy: lat, testx: lng) { return 341 } else { return 190 }
                 } else {
                   if lat < -13.607551 {
-                    if poly[201].contains(testy: lat, testx: lng) { return 341 }
-                    if poly[202].contains(testy: lat, testx: lng) { return 363 } else { return 190 }
+                    if polygons[201].contains(testy: lat, testx: lng) { return 341 }
+                    if polygons[202].contains(testy: lat, testx: lng) { return 363 } else { return 190 }
                   } else {
-                    if poly[203].contains(testy: lat, testx: lng) { return 190 }
-                    if poly[204].contains(testy: lat, testx: lng) { return 363 } else { return 341 }
+                    if polygons[203].contains(testy: lat, testx: lng) { return 190 }
+                    if polygons[204].contains(testy: lat, testx: lng) { return 363 } else { return 341 }
                   }
                 }
               } else {
-                if poly[205].contains(testy: lat, testx: lng) { return 341 } else { return 363 }
+                if polygons[205].contains(testy: lat, testx: lng) { return 341 } else { return 363 }
               }
             }
           } else {
             if lng < -63.688177 {
               if lat < -6.832796 {
                 if lng < -65.622960 {
-                  if poly[206].contains(testy: lat, testx: lng) { return 180 }
-                  if poly[207].contains(testy: lat, testx: lng) { return 341 }
-                  if poly[208].contains(testy: lat, testx: lng) { return 341 } else { return 7 }
+                  if polygons[206].contains(testy: lat, testx: lng) { return 180 }
+                  if polygons[207].contains(testy: lat, testx: lng) { return 341 }
+                  if polygons[208].contains(testy: lat, testx: lng) { return 341 } else { return 7 }
                 } else {
-                  if poly[209].contains(testy: lat, testx: lng) { return 341 } else { return 7 }
+                  if polygons[209].contains(testy: lat, testx: lng) { return 341 } else { return 7 }
                 }
               } else {
                 return 7
               }
             } else {
-              if poly[210].contains(testy: lat, testx: lng) { return 7 }
-              if poly[211].contains(testy: lat, testx: lng) { return 363 } else { return 341 }
+              if polygons[210].contains(testy: lat, testx: lng) { return 7 }
+              if polygons[211].contains(testy: lat, testx: lng) { return 363 } else { return 341 }
             }
           }
         } else {
@@ -1144,13 +1144,13 @@ public extension TimeZone {
           } else {
             if lat < -6.832796 {
               if lng < -58.062149 {
-                if poly[212].contains(testy: lat, testx: lng) { return 310 }
-                if poly[213].contains(testy: lat, testx: lng) { return 363 } else { return 7 }
+                if polygons[212].contains(testy: lat, testx: lng) { return 310 }
+                if polygons[213].contains(testy: lat, testx: lng) { return 363 } else { return 7 }
               } else {
-                if poly[214].contains(testy: lat, testx: lng) { return 363 } else { return 310 }
+                if polygons[214].contains(testy: lat, testx: lng) { return 363 } else { return 310 }
               }
             } else {
-              if poly[215].contains(testy: lat, testx: lng) { return 310 } else { return 7 }
+              if polygons[215].contains(testy: lat, testx: lng) { return 310 } else { return 7 }
             }
           }
         }
@@ -1161,24 +1161,24 @@ public extension TimeZone {
           if lng < -70.674210 {
             if lat < -1.591035 {
               if lng < -72.576397 {
-                if poly[216].contains(testy: lat, testx: lng) { return 390 } else { return 164 }
+                if polygons[216].contains(testy: lat, testx: lng) { return 390 } else { return 164 }
               } else {
                 if lat < -2.856965 {
-                  if poly[217].contains(testy: lat, testx: lng) { return 390 } else { return 164 }
+                  if polygons[217].contains(testy: lat, testx: lng) { return 390 } else { return 164 }
                 } else {
-                  if poly[218].contains(testy: lat, testx: lng) { return 164 } else { return 390 }
+                  if polygons[218].contains(testy: lat, testx: lng) { return 164 } else { return 390 }
                 }
               }
             } else {
-              if poly[219].contains(testy: lat, testx: lng) { return 164 } else { return 390 }
+              if polygons[219].contains(testy: lat, testx: lng) { return 164 } else { return 390 }
             }
           } else {
             if lat < -1.591035 {
-              if poly[220].contains(testy: lat, testx: lng) { return 7 }
-              if poly[221].contains(testy: lat, testx: lng) { return 164 }
-              if poly[222].contains(testy: lat, testx: lng) { return 164 } else { return 390 }
+              if polygons[220].contains(testy: lat, testx: lng) { return 7 }
+              if polygons[221].contains(testy: lat, testx: lng) { return 164 }
+              if polygons[222].contains(testy: lat, testx: lng) { return 164 } else { return 390 }
             } else {
-              if poly[223].contains(testy: lat, testx: lng) { return 390 } else { return 7 }
+              if polygons[223].contains(testy: lat, testx: lng) { return 390 } else { return 7 }
             }
           }
         } else {
@@ -1187,62 +1187,62 @@ public extension TimeZone {
           } else {
             if lat < 3.472686 {
               if lng < -68.772022 {
-                if poly[224].contains(testy: lat, testx: lng) { return 7 } else { return 390 }
+                if polygons[224].contains(testy: lat, testx: lng) { return 7 } else { return 390 }
               } else {
                 if lat < 2.206756 {
-                  if poly[225].contains(testy: lat, testx: lng) { return 7 }
-                  if poly[226].contains(testy: lat, testx: lng) { return 397 } else { return 390 }
+                  if polygons[225].contains(testy: lat, testx: lng) { return 7 }
+                  if polygons[226].contains(testy: lat, testx: lng) { return 397 } else { return 390 }
                 } else {
-                  if poly[227].contains(testy: lat, testx: lng) { return 397 } else { return 390 }
+                  if polygons[227].contains(testy: lat, testx: lng) { return 397 } else { return 390 }
                 }
               }
             } else {
-              if poly[228].contains(testy: lat, testx: lng) { return 397 } else { return 390 }
+              if polygons[228].contains(testy: lat, testx: lng) { return 397 } else { return 390 }
             }
           }
         }
       } else {
         if lat < -2.231925 {
-          if poly[229].contains(testy: lat, testx: lng) { return 7 } else { return 310 }
+          if polygons[229].contains(testy: lat, testx: lng) { return 7 } else { return 310 }
         } else {
           if lng < -61.587761 {
             if lat < 1.886310 {
               if lng < -64.228798 {
-                if poly[230].contains(testy: lat, testx: lng) { return 397 } else { return 7 }
+                if polygons[230].contains(testy: lat, testx: lng) { return 397 } else { return 7 }
               } else {
                 if lat < -0.172808 {
-                  if poly[231].contains(testy: lat, testx: lng) { return 349 } else { return 7 }
+                  if polygons[231].contains(testy: lat, testx: lng) { return 349 } else { return 7 }
                 } else {
-                  if poly[232].contains(testy: lat, testx: lng) { return 349 }
-                  if poly[233].contains(testy: lat, testx: lng) { return 397 } else { return 7 }
+                  if polygons[232].contains(testy: lat, testx: lng) { return 349 }
+                  if polygons[233].contains(testy: lat, testx: lng) { return 397 } else { return 7 }
                 }
               }
             } else {
               if lng < -64.228798 {
-                if poly[234].contains(testy: lat, testx: lng) { return 349 }
-                if poly[235].contains(testy: lat, testx: lng) { return 349 } else { return 397 }
+                if polygons[234].contains(testy: lat, testx: lng) { return 349 }
+                if polygons[235].contains(testy: lat, testx: lng) { return 349 } else { return 397 }
               } else {
                 if lat < 3.945428 {
                   if lng < -62.908279 {
                     if lat < 2.915869 {
-                      if poly[236].contains(testy: lat, testx: lng) { return 7 }
-                      if poly[237].contains(testy: lat, testx: lng) { return 349 } else { return 397 }
+                      if polygons[236].contains(testy: lat, testx: lng) { return 7 }
+                      if polygons[237].contains(testy: lat, testx: lng) { return 349 } else { return 397 }
                     } else {
-                      if poly[238].contains(testy: lat, testx: lng) { return 397 }
-                      if poly[239].contains(testy: lat, testx: lng) { return 397 }
-                      if poly[240].contains(testy: lat, testx: lng) { return 397 }
-                      if poly[241].contains(testy: lat, testx: lng) { return 397 }
-                      if poly[242].contains(testy: lat, testx: lng) { return 397 } else { return 349 }
+                      if polygons[238].contains(testy: lat, testx: lng) { return 397 }
+                      if polygons[239].contains(testy: lat, testx: lng) { return 397 }
+                      if polygons[240].contains(testy: lat, testx: lng) { return 397 }
+                      if polygons[241].contains(testy: lat, testx: lng) { return 397 }
+                      if polygons[242].contains(testy: lat, testx: lng) { return 397 } else { return 349 }
                     }
                   } else {
-                    if poly[243].contains(testy: lat, testx: lng) { return 7 }
-                    if poly[244].contains(testy: lat, testx: lng) { return 397 } else { return 349 }
+                    if polygons[243].contains(testy: lat, testx: lng) { return 7 }
+                    if polygons[244].contains(testy: lat, testx: lng) { return 397 } else { return 349 }
                   }
                 } else {
-                  if poly[245].contains(testy: lat, testx: lng) { return 349 }
-                  if poly[246].contains(testy: lat, testx: lng) { return 349 }
-                  if poly[247].contains(testy: lat, testx: lng) { return 349 }
-                  if poly[248].contains(testy: lat, testx: lng) { return 349 } else { return 397 }
+                  if polygons[245].contains(testy: lat, testx: lng) { return 349 }
+                  if polygons[246].contains(testy: lat, testx: lng) { return 349 }
+                  if polygons[247].contains(testy: lat, testx: lng) { return 349 }
+                  if polygons[248].contains(testy: lat, testx: lng) { return 349 } else { return 397 }
                 }
               }
             }
@@ -1250,49 +1250,49 @@ public extension TimeZone {
             if lat < 1.886310 {
               if lng < -58.946724 {
                 if lat < -0.172808 {
-                  if poly[249].contains(testy: lat, testx: lng) { return 349 } else { return 7 }
+                  if polygons[249].contains(testy: lat, testx: lng) { return 349 } else { return 7 }
                 } else {
-                  if poly[250].contains(testy: lat, testx: lng) { return 7 }
-                  if poly[251].contains(testy: lat, testx: lng) { return 298 }
-                  if poly[252].contains(testy: lat, testx: lng) { return 310 } else { return 349 }
+                  if polygons[250].contains(testy: lat, testx: lng) { return 7 }
+                  if polygons[251].contains(testy: lat, testx: lng) { return 298 }
+                  if polygons[252].contains(testy: lat, testx: lng) { return 310 } else { return 349 }
                 }
               } else {
                 if lat < -0.172808 {
-                  if poly[253].contains(testy: lat, testx: lng) { return 310 } else { return 7 }
+                  if polygons[253].contains(testy: lat, testx: lng) { return 310 } else { return 7 }
                 } else {
-                  if poly[254].contains(testy: lat, testx: lng) { return 7 }
-                  if poly[255].contains(testy: lat, testx: lng) { return 298 }
-                  if poly[256].contains(testy: lat, testx: lng) { return 298 }
-                  if poly[257].contains(testy: lat, testx: lng) { return 349 } else { return 310 }
+                  if polygons[254].contains(testy: lat, testx: lng) { return 7 }
+                  if polygons[255].contains(testy: lat, testx: lng) { return 298 }
+                  if polygons[256].contains(testy: lat, testx: lng) { return 298 }
+                  if polygons[257].contains(testy: lat, testx: lng) { return 349 } else { return 310 }
                 }
               }
             } else {
               if lng < -58.946724 {
                 if lat < 3.945428 {
-                  if poly[258].contains(testy: lat, testx: lng) { return 349 } else { return 298 }
+                  if polygons[258].contains(testy: lat, testx: lng) { return 349 } else { return 298 }
                 } else {
                   if lng < -60.267242 {
-                    if poly[259].contains(testy: lat, testx: lng) { return 298 }
-                    if poly[260].contains(testy: lat, testx: lng) { return 397 } else { return 349 }
+                    if polygons[259].contains(testy: lat, testx: lng) { return 298 }
+                    if polygons[260].contains(testy: lat, testx: lng) { return 397 } else { return 349 }
                   } else {
-                    if poly[261].contains(testy: lat, testx: lng) { return 349 } else { return 298 }
+                    if polygons[261].contains(testy: lat, testx: lng) { return 349 } else { return 298 }
                   }
                 }
               } else {
                 if lat < 3.945428 {
                   if lng < -57.626205 {
-                    if poly[262].contains(testy: lat, testx: lng) { return 200 } else { return 298 }
+                    if polygons[262].contains(testy: lat, testx: lng) { return 200 } else { return 298 }
                   } else {
                     if lat < 2.915869 {
-                      if poly[263].contains(testy: lat, testx: lng) { return 200 }
-                      if poly[264].contains(testy: lat, testx: lng) { return 310 }
-                      if poly[265].contains(testy: lat, testx: lng) { return 310 } else { return 298 }
+                      if polygons[263].contains(testy: lat, testx: lng) { return 200 }
+                      if polygons[264].contains(testy: lat, testx: lng) { return 310 }
+                      if polygons[265].contains(testy: lat, testx: lng) { return 310 } else { return 298 }
                     } else {
-                      if poly[266].contains(testy: lat, testx: lng) { return 298 } else { return 200 }
+                      if polygons[266].contains(testy: lat, testx: lng) { return 298 } else { return 200 }
                     }
                   }
                 } else {
-                  if poly[267].contains(testy: lat, testx: lng) { return 298 } else { return 200 }
+                  if polygons[267].contains(testy: lat, testx: lng) { return 298 } else { return 200 }
                 }
               }
             }
@@ -1317,46 +1317,46 @@ public extension TimeZone {
                   return 164
                 } else {
                   if lat < -18.110334 {
-                    if poly[268].contains(testy: lat, testx: lng) { return 164 }
-                    if poly[269].contains(testy: lat, testx: lng) { return 190 } else { return 31 }
+                    if polygons[268].contains(testy: lat, testx: lng) { return 164 }
+                    if polygons[269].contains(testy: lat, testx: lng) { return 190 } else { return 31 }
                   } else {
-                    if poly[270].contains(testy: lat, testx: lng) { return 31 }
-                    if poly[271].contains(testy: lat, testx: lng) { return 190 } else { return 164 }
+                    if polygons[270].contains(testy: lat, testx: lng) { return 31 }
+                    if polygons[271].contains(testy: lat, testx: lng) { return 190 } else { return 164 }
                   }
                 }
               }
             } else {
-              if poly[272].contains(testy: lat, testx: lng) { return 190 } else { return 164 }
+              if polygons[272].contains(testy: lat, testx: lng) { return 190 } else { return 164 }
             }
           }
         } else {
           if lat < -20.059607 {
             if lat < -22.608159 {
               if lng < -66.486111 {
-                if poly[273].contains(testy: lat, testx: lng) { return 31 }
-                if poly[274].contains(testy: lat, testx: lng) { return 159 }
-                if poly[275].contains(testy: lat, testx: lng) { return 190 } else { return 127 }
+                if polygons[273].contains(testy: lat, testx: lng) { return 31 }
+                if polygons[274].contains(testy: lat, testx: lng) { return 159 }
+                if polygons[275].contains(testy: lat, testx: lng) { return 190 } else { return 127 }
               } else {
                 if lat < -23.882435 {
-                  if poly[276].contains(testy: lat, testx: lng) { return 159 }
-                  if poly[277].contains(testy: lat, testx: lng) { return 159 } else { return 127 }
+                  if polygons[276].contains(testy: lat, testx: lng) { return 159 }
+                  if polygons[277].contains(testy: lat, testx: lng) { return 159 } else { return 127 }
                 } else {
-                  if poly[278].contains(testy: lat, testx: lng) { return 159 }
-                  if poly[279].contains(testy: lat, testx: lng) { return 190 } else { return 127 }
+                  if polygons[278].contains(testy: lat, testx: lng) { return 159 }
+                  if polygons[279].contains(testy: lat, testx: lng) { return 190 } else { return 127 }
                 }
               }
             } else {
               if lng < -66.486111 {
-                if poly[280].contains(testy: lat, testx: lng) { return 31 }
-                if poly[281].contains(testy: lat, testx: lng) { return 159 } else { return 190 }
+                if polygons[280].contains(testy: lat, testx: lng) { return 31 }
+                if polygons[281].contains(testy: lat, testx: lng) { return 159 } else { return 190 }
               } else {
-                if poly[282].contains(testy: lat, testx: lng) { return 127 }
-                if poly[283].contains(testy: lat, testx: lng) { return 127 }
-                if poly[284].contains(testy: lat, testx: lng) { return 159 } else { return 190 }
+                if polygons[282].contains(testy: lat, testx: lng) { return 127 }
+                if polygons[283].contains(testy: lat, testx: lng) { return 127 }
+                if polygons[284].contains(testy: lat, testx: lng) { return 159 } else { return 190 }
               }
             }
           } else {
-            if poly[285].contains(testy: lat, testx: lng) { return 31 } else { return 190 }
+            if polygons[285].contains(testy: lat, testx: lng) { return 31 } else { return 190 }
           }
         }
       } else {
@@ -1364,63 +1364,63 @@ public extension TimeZone {
           if lng < -59.983578 {
             if lat < -22.225376 {
               if lng < -62.070822 {
-                if poly[286].contains(testy: lat, testx: lng) { return 127 }
-                if poly[287].contains(testy: lat, testx: lng) { return 190 }
-                if poly[288].contains(testy: lat, testx: lng) { return 190 }
-                if poly[289].contains(testy: lat, testx: lng) { return 278 } else { return 219 }
+                if polygons[286].contains(testy: lat, testx: lng) { return 127 }
+                if polygons[287].contains(testy: lat, testx: lng) { return 190 }
+                if polygons[288].contains(testy: lat, testx: lng) { return 190 }
+                if polygons[289].contains(testy: lat, testx: lng) { return 278 } else { return 219 }
               } else {
-                if poly[290].contains(testy: lat, testx: lng) { return 278 } else { return 219 }
+                if polygons[290].contains(testy: lat, testx: lng) { return 278 } else { return 219 }
               }
             } else {
-              if poly[291].contains(testy: lat, testx: lng) { return 127 }
-              if poly[292].contains(testy: lat, testx: lng) { return 219 } else { return 190 }
+              if polygons[291].contains(testy: lat, testx: lng) { return 127 }
+              if polygons[292].contains(testy: lat, testx: lng) { return 219 } else { return 190 }
             }
           } else {
             if lng < -55.612143 {
               if lat < -22.225376 {
                 if lng < -57.797860 {
-                  if poly[293].contains(testy: lat, testx: lng) { return 278 } else { return 219 }
+                  if polygons[293].contains(testy: lat, testx: lng) { return 278 } else { return 219 }
                 } else {
-                  if poly[294].contains(testy: lat, testx: lng) { return 278 }
-                  if poly[295].contains(testy: lat, testx: lng) { return 317 }
-                  if poly[296].contains(testy: lat, testx: lng) { return 317 }
-                  if poly[297].contains(testy: lat, testx: lng) { return 317 }
-                  if poly[298].contains(testy: lat, testx: lng) { return 317 }
-                  if poly[299].contains(testy: lat, testx: lng) { return 317 }
-                  if poly[300].contains(testy: lat, testx: lng) { return 317 } else { return 219 }
+                  if polygons[294].contains(testy: lat, testx: lng) { return 278 }
+                  if polygons[295].contains(testy: lat, testx: lng) { return 317 }
+                  if polygons[296].contains(testy: lat, testx: lng) { return 317 }
+                  if polygons[297].contains(testy: lat, testx: lng) { return 317 }
+                  if polygons[298].contains(testy: lat, testx: lng) { return 317 }
+                  if polygons[299].contains(testy: lat, testx: lng) { return 317 }
+                  if polygons[300].contains(testy: lat, testx: lng) { return 317 } else { return 219 }
                 }
               } else {
                 if lng < -57.797860 {
                   if lat < -20.759708 {
-                    if poly[301].contains(testy: lat, testx: lng) { return 317 } else { return 219 }
+                    if polygons[301].contains(testy: lat, testx: lng) { return 317 } else { return 219 }
                   } else {
-                    if poly[302].contains(testy: lat, testx: lng) { return 190 }
-                    if poly[303].contains(testy: lat, testx: lng) { return 219 } else { return 317 }
+                    if polygons[302].contains(testy: lat, testx: lng) { return 190 }
+                    if polygons[303].contains(testy: lat, testx: lng) { return 219 } else { return 317 }
                   }
                 } else {
-                  if poly[304].contains(testy: lat, testx: lng) { return 219 }
-                  if poly[305].contains(testy: lat, testx: lng) { return 219 }
-                  if poly[306].contains(testy: lat, testx: lng) { return 219 }
-                  if poly[307].contains(testy: lat, testx: lng) { return 219 }
-                  if poly[308].contains(testy: lat, testx: lng) { return 219 }
-                  if poly[309].contains(testy: lat, testx: lng) { return 219 } else { return 317 }
+                  if polygons[304].contains(testy: lat, testx: lng) { return 219 }
+                  if polygons[305].contains(testy: lat, testx: lng) { return 219 }
+                  if polygons[306].contains(testy: lat, testx: lng) { return 219 }
+                  if polygons[307].contains(testy: lat, testx: lng) { return 219 }
+                  if polygons[308].contains(testy: lat, testx: lng) { return 219 }
+                  if polygons[309].contains(testy: lat, testx: lng) { return 219 } else { return 317 }
                 }
               }
             } else {
               if lat < -22.225376 {
                 if lng < -53.426425 {
                   if lat < -23.691044 {
-                    if poly[310].contains(testy: lat, testx: lng) { return 317 }
-                    if poly[311].contains(testy: lat, testx: lng) { return 329 } else { return 219 }
+                    if polygons[310].contains(testy: lat, testx: lng) { return 317 }
+                    if polygons[311].contains(testy: lat, testx: lng) { return 329 } else { return 219 }
                   } else {
-                    if poly[312].contains(testy: lat, testx: lng) { return 219 }
-                    if poly[313].contains(testy: lat, testx: lng) { return 329 } else { return 317 }
+                    if polygons[312].contains(testy: lat, testx: lng) { return 219 }
+                    if polygons[313].contains(testy: lat, testx: lng) { return 329 } else { return 317 }
                   }
                 } else {
-                  if poly[314].contains(testy: lat, testx: lng) { return 317 } else { return 329 }
+                  if polygons[314].contains(testy: lat, testx: lng) { return 317 } else { return 329 }
                 }
               } else {
-                if poly[315].contains(testy: lat, testx: lng) { return 329 } else { return 317 }
+                if polygons[315].contains(testy: lat, testx: lng) { return 329 } else { return 317 }
               }
             }
           }
@@ -1430,30 +1430,30 @@ public extension TimeZone {
               return 190
             } else {
               if lat < -17.128271 {
-                if poly[316].contains(testy: lat, testx: lng) { return 317 }
-                if poly[317].contains(testy: lat, testx: lng) { return 317 }
-                if poly[318].contains(testy: lat, testx: lng) { return 317 }
-                if poly[319].contains(testy: lat, testx: lng) { return 363 } else { return 190 }
+                if polygons[316].contains(testy: lat, testx: lng) { return 317 }
+                if polygons[317].contains(testy: lat, testx: lng) { return 317 }
+                if polygons[318].contains(testy: lat, testx: lng) { return 317 }
+                if polygons[319].contains(testy: lat, testx: lng) { return 363 } else { return 190 }
               } else {
-                if poly[320].contains(testy: lat, testx: lng) { return 363 } else { return 190 }
+                if polygons[320].contains(testy: lat, testx: lng) { return 363 } else { return 190 }
               }
             }
           } else {
             if lng < -54.470047 {
-              if poly[321].contains(testy: lat, testx: lng) { return 190 }
-              if poly[322].contains(testy: lat, testx: lng) { return 190 }
-              if poly[323].contains(testy: lat, testx: lng) { return 363 } else { return 317 }
+              if polygons[321].contains(testy: lat, testx: lng) { return 190 }
+              if polygons[322].contains(testy: lat, testx: lng) { return 190 }
+              if polygons[323].contains(testy: lat, testx: lng) { return 363 } else { return 317 }
             } else {
               if lat < -17.128271 {
                 if lng < -52.855377 {
-                  if poly[324].contains(testy: lat, testx: lng) { return 329 }
-                  if poly[325].contains(testy: lat, testx: lng) { return 329 }
-                  if poly[326].contains(testy: lat, testx: lng) { return 363 } else { return 317 }
+                  if polygons[324].contains(testy: lat, testx: lng) { return 329 }
+                  if polygons[325].contains(testy: lat, testx: lng) { return 329 }
+                  if polygons[326].contains(testy: lat, testx: lng) { return 363 } else { return 317 }
                 } else {
-                  if poly[327].contains(testy: lat, testx: lng) { return 329 } else { return 317 }
+                  if polygons[327].contains(testy: lat, testx: lng) { return 329 } else { return 317 }
                 }
               } else {
-                if poly[328].contains(testy: lat, testx: lng) { return 329 } else { return 363 }
+                if polygons[328].contains(testy: lat, testx: lng) { return 329 } else { return 363 }
               }
             }
           }
@@ -1465,8 +1465,8 @@ public extension TimeZone {
       } else {
         if lng < -51.613949 {
           if lat < -9.477882 {
-            if poly[329].contains(testy: lat, testx: lng) { return 310 }
-            if poly[330].contains(testy: lat, testx: lng) { return 363 } else { return 400 }
+            if polygons[329].contains(testy: lat, testx: lng) { return 310 }
+            if polygons[330].contains(testy: lat, testx: lng) { return 363 } else { return 400 }
           } else {
             if lat < -1.736668 {
               if lat < -5.607275 {
@@ -1474,58 +1474,58 @@ public extension TimeZone {
                   return 310
                 } else {
                   if lat < -7.542579 {
-                    if poly[331].contains(testy: lat, testx: lng) { return 400 } else { return 310 }
+                    if polygons[331].contains(testy: lat, testx: lng) { return 400 } else { return 310 }
                   } else {
-                    if poly[332].contains(testy: lat, testx: lng) { return 400 } else { return 310 }
+                    if polygons[332].contains(testy: lat, testx: lng) { return 400 } else { return 310 }
                   }
                 }
               } else {
-                if poly[333].contains(testy: lat, testx: lng) { return 400 } else { return 310 }
+                if polygons[333].contains(testy: lat, testx: lng) { return 400 } else { return 310 }
               }
             } else {
               if lat < 2.133939 {
                 if lng < -53.959818 {
-                  if poly[334].contains(testy: lat, testx: lng) { return 200 }
-                  if poly[335].contains(testy: lat, testx: lng) { return 362 }
-                  if poly[336].contains(testy: lat, testx: lng) { return 400 } else { return 310 }
+                  if polygons[334].contains(testy: lat, testx: lng) { return 200 }
+                  if polygons[335].contains(testy: lat, testx: lng) { return 362 }
+                  if polygons[336].contains(testy: lat, testx: lng) { return 400 } else { return 310 }
                 } else {
                   if lat < 0.198636 {
-                    if poly[337].contains(testy: lat, testx: lng) { return 400 } else { return 310 }
+                    if polygons[337].contains(testy: lat, testx: lng) { return 400 } else { return 310 }
                   } else {
-                    if poly[338].contains(testy: lat, testx: lng) { return 310 } else { return 400 }
+                    if polygons[338].contains(testy: lat, testx: lng) { return 310 } else { return 400 }
                   }
                 }
               } else {
                 if lng < -53.959818 {
                   if lat < 4.069243 {
                     if lng < -55.132752 {
-                      if poly[339].contains(testy: lat, testx: lng) { return 310 } else { return 200 }
+                      if polygons[339].contains(testy: lat, testx: lng) { return 310 } else { return 200 }
                     } else {
                       if lat < 3.101591 {
                         if lng < -54.546285 {
-                          if poly[340].contains(testy: lat, testx: lng) { return 310 }
-                          if poly[341].contains(testy: lat, testx: lng) { return 400 } else { return 200 }
+                          if polygons[340].contains(testy: lat, testx: lng) { return 310 }
+                          if polygons[341].contains(testy: lat, testx: lng) { return 400 } else { return 200 }
                         } else {
-                          if poly[342].contains(testy: lat, testx: lng) { return 200 }
-                          if poly[343].contains(testy: lat, testx: lng) { return 400 }
-                          if poly[344].contains(testy: lat, testx: lng) { return 400 } else { return 362 }
+                          if polygons[342].contains(testy: lat, testx: lng) { return 200 }
+                          if polygons[343].contains(testy: lat, testx: lng) { return 400 }
+                          if polygons[344].contains(testy: lat, testx: lng) { return 400 } else { return 362 }
                         }
                       } else {
-                        if poly[345].contains(testy: lat, testx: lng) { return 362 } else { return 200 }
+                        if polygons[345].contains(testy: lat, testx: lng) { return 362 } else { return 200 }
                       }
                     }
                   } else {
-                    if poly[346].contains(testy: lat, testx: lng) { return 362 } else { return 200 }
+                    if polygons[346].contains(testy: lat, testx: lng) { return 362 } else { return 200 }
                   }
                 } else {
-                  if poly[347].contains(testy: lat, testx: lng) { return 400 } else { return 362 }
+                  if polygons[347].contains(testy: lat, testx: lng) { return 400 } else { return 362 }
                 }
               }
             }
           }
         } else {
           if lat < -9.768946 {
-            if poly[348].contains(testy: lat, testx: lng) { return 400 } else { return 363 }
+            if polygons[348].contains(testy: lat, testx: lng) { return 400 } else { return 363 }
           } else {
             return 400
           }
@@ -1542,28 +1542,28 @@ public extension TimeZone {
             if lat < 7.561782 {
               return 68
             } else {
-              if poly[349].contains(testy: lat, testx: lng) { return 184 } else { return 68 }
+              if polygons[349].contains(testy: lat, testx: lng) { return 184 } else { return 68 }
             }
           } else {
             if lat < 5.327682 {
-              if poly[350].contains(testy: lat, testx: lng) { return 300 } else { return 356 }
+              if polygons[350].contains(testy: lat, testx: lng) { return 300 } else { return 356 }
             } else {
               if lat < 7.663841 {
                 if lng < -9.430896 {
-                  if poly[351].contains(testy: lat, testx: lng) { return 68 }
-                  if poly[352].contains(testy: lat, testx: lng) { return 184 } else { return 356 }
+                  if polygons[351].contains(testy: lat, testx: lng) { return 68 }
+                  if polygons[352].contains(testy: lat, testx: lng) { return 184 } else { return 356 }
                 } else {
                   if lat < 6.495762 {
-                    if poly[353].contains(testy: lat, testx: lng) { return 300 } else { return 356 }
+                    if polygons[353].contains(testy: lat, testx: lng) { return 300 } else { return 356 }
                   } else {
                     if lng < -8.398005 {
-                      if poly[354].contains(testy: lat, testx: lng) { return 184 }
-                      if poly[355].contains(testy: lat, testx: lng) { return 184 }
-                      if poly[356].contains(testy: lat, testx: lng) { return 300 }
-                      if poly[357].contains(testy: lat, testx: lng) { return 300 } else { return 356 }
+                      if polygons[354].contains(testy: lat, testx: lng) { return 184 }
+                      if polygons[355].contains(testy: lat, testx: lng) { return 184 }
+                      if polygons[356].contains(testy: lat, testx: lng) { return 300 }
+                      if polygons[357].contains(testy: lat, testx: lng) { return 300 } else { return 356 }
                     } else {
-                      if poly[358].contains(testy: lat, testx: lng) { return 184 }
-                      if poly[359].contains(testy: lat, testx: lng) { return 356 } else { return 300 }
+                      if polygons[358].contains(testy: lat, testx: lng) { return 184 }
+                      if polygons[359].contains(testy: lat, testx: lng) { return 356 } else { return 300 }
                     }
                   }
                 }
@@ -1571,27 +1571,27 @@ public extension TimeZone {
                 if lng < -9.430896 {
                   if lat < 8.831921 {
                     if lng < -10.463788 {
-                      if poly[360].contains(testy: lat, testx: lng) { return 184 }
-                      if poly[361].contains(testy: lat, testx: lng) { return 356 } else { return 68 }
+                      if polygons[360].contains(testy: lat, testx: lng) { return 184 }
+                      if polygons[361].contains(testy: lat, testx: lng) { return 356 } else { return 68 }
                     } else {
-                      if poly[362].contains(testy: lat, testx: lng) { return 68 }
-                      if poly[363].contains(testy: lat, testx: lng) { return 184 }
-                      if poly[364].contains(testy: lat, testx: lng) { return 184 } else { return 356 }
+                      if polygons[362].contains(testy: lat, testx: lng) { return 68 }
+                      if polygons[363].contains(testy: lat, testx: lng) { return 184 }
+                      if polygons[364].contains(testy: lat, testx: lng) { return 184 } else { return 356 }
                     }
                   } else {
-                    if poly[365].contains(testy: lat, testx: lng) { return 68 } else { return 184 }
+                    if polygons[365].contains(testy: lat, testx: lng) { return 68 } else { return 184 }
                   }
                 } else {
                   if lat < 8.831921 {
                     if lng < -8.398005 {
-                      if poly[366].contains(testy: lat, testx: lng) { return 356 }
-                      if poly[367].contains(testy: lat, testx: lng) { return 356 }
-                      if poly[368].contains(testy: lat, testx: lng) { return 356 } else { return 184 }
+                      if polygons[366].contains(testy: lat, testx: lng) { return 356 }
+                      if polygons[367].contains(testy: lat, testx: lng) { return 356 }
+                      if polygons[368].contains(testy: lat, testx: lng) { return 356 } else { return 184 }
                     } else {
-                      if poly[369].contains(testy: lat, testx: lng) { return 184 } else { return 300 }
+                      if polygons[369].contains(testy: lat, testx: lng) { return 184 } else { return 300 }
                     }
                   } else {
-                    if poly[370].contains(testy: lat, testx: lng) { return 300 } else { return 184 }
+                    if polygons[370].contains(testy: lat, testx: lng) { return 300 } else { return 184 }
                   }
                 }
               }
@@ -1607,26 +1607,26 @@ public extension TimeZone {
           } else {
             if lng < -7.108967 {
               if lat < 10.921246 {
-                if poly[371].contains(testy: lat, testx: lng) { return 184 }
-                if poly[372].contains(testy: lat, testx: lng) { return 300 } else { return 181 }
+                if polygons[371].contains(testy: lat, testx: lng) { return 184 }
+                if polygons[372].contains(testy: lat, testx: lng) { return 300 } else { return 181 }
               } else {
-                if poly[373].contains(testy: lat, testx: lng) { return 184 } else { return 181 }
+                if polygons[373].contains(testy: lat, testx: lng) { return 184 } else { return 181 }
               }
             } else {
               if lat < 10.921246 {
                 if lng < -6.218041 {
-                  if poly[374].contains(testy: lat, testx: lng) { return 181 }
-                  if poly[375].contains(testy: lat, testx: lng) { return 181 }
-                  if poly[376].contains(testy: lat, testx: lng) { return 181 }
-                  if poly[377].contains(testy: lat, testx: lng) { return 181 }
-                  if poly[378].contains(testy: lat, testx: lng) { return 181 } else { return 300 }
+                  if polygons[374].contains(testy: lat, testx: lng) { return 181 }
+                  if polygons[375].contains(testy: lat, testx: lng) { return 181 }
+                  if polygons[376].contains(testy: lat, testx: lng) { return 181 }
+                  if polygons[377].contains(testy: lat, testx: lng) { return 181 }
+                  if polygons[378].contains(testy: lat, testx: lng) { return 181 } else { return 300 }
                 } else {
-                  if poly[379].contains(testy: lat, testx: lng) { return 181 }
-                  if poly[380].contains(testy: lat, testx: lng) { return 262 } else { return 300 }
+                  if polygons[379].contains(testy: lat, testx: lng) { return 181 }
+                  if polygons[380].contains(testy: lat, testx: lng) { return 262 } else { return 300 }
                 }
               } else {
-                if poly[381].contains(testy: lat, testx: lng) { return 262 }
-                if poly[382].contains(testy: lat, testx: lng) { return 262 } else { return 181 }
+                if polygons[381].contains(testy: lat, testx: lng) { return 262 }
+                if polygons[382].contains(testy: lat, testx: lng) { return 262 } else { return 181 }
               }
             }
           }
@@ -1637,41 +1637,41 @@ public extension TimeZone {
                 if lng < -10.672671 {
                   if lat < 12.965153 {
                     if lng < -11.563597 {
-                      if poly[383].contains(testy: lat, testx: lng) { return 225 } else { return 184 }
+                      if polygons[383].contains(testy: lat, testx: lng) { return 225 } else { return 184 }
                     } else {
                       if lat < 12.403823 {
-                        if poly[384].contains(testy: lat, testx: lng) { return 181 } else { return 184 }
+                        if polygons[384].contains(testy: lat, testx: lng) { return 181 } else { return 184 }
                       } else {
-                        if poly[385].contains(testy: lat, testx: lng) { return 184 }
-                        if poly[386].contains(testy: lat, testx: lng) { return 225 } else { return 181 }
+                        if polygons[385].contains(testy: lat, testx: lng) { return 184 }
+                        if polygons[386].contains(testy: lat, testx: lng) { return 225 } else { return 181 }
                       }
                     }
                   } else {
-                    if poly[387].contains(testy: lat, testx: lng) { return 225 }
-                    if poly[388].contains(testy: lat, testx: lng) { return 225 } else { return 181 }
+                    if polygons[387].contains(testy: lat, testx: lng) { return 225 }
+                    if polygons[388].contains(testy: lat, testx: lng) { return 225 } else { return 181 }
                   }
                 } else {
-                  if poly[389].contains(testy: lat, testx: lng) { return 184 } else { return 181 }
+                  if polygons[389].contains(testy: lat, testx: lng) { return 184 } else { return 181 }
                 }
               } else {
                 if lng < -10.672671 {
                   if lat < 15.210476 {
-                    if poly[390].contains(testy: lat, testx: lng) { return 33 }
-                    if poly[391].contains(testy: lat, testx: lng) { return 33 }
-                    if poly[392].contains(testy: lat, testx: lng) { return 225 } else { return 181 }
+                    if polygons[390].contains(testy: lat, testx: lng) { return 33 }
+                    if polygons[391].contains(testy: lat, testx: lng) { return 33 }
+                    if polygons[392].contains(testy: lat, testx: lng) { return 225 } else { return 181 }
                   } else {
-                    if poly[393].contains(testy: lat, testx: lng) { return 33 } else { return 181 }
+                    if polygons[393].contains(testy: lat, testx: lng) { return 33 } else { return 181 }
                   }
                 } else {
-                  if poly[394].contains(testy: lat, testx: lng) { return 181 } else { return 33 }
+                  if polygons[394].contains(testy: lat, testx: lng) { return 181 } else { return 33 }
                 }
               }
             } else {
-              if poly[395].contains(testy: lat, testx: lng) { return 33 }
-              if poly[396].contains(testy: lat, testx: lng) { return 184 } else { return 181 }
+              if polygons[395].contains(testy: lat, testx: lng) { return 33 }
+              if polygons[396].contains(testy: lat, testx: lng) { return 184 } else { return 181 }
             }
           } else {
-            if poly[397].contains(testy: lat, testx: lng) { return 181 } else { return 33 }
+            if polygons[397].contains(testy: lat, testx: lng) { return 181 } else { return 33 }
           }
         }
       }
@@ -1682,34 +1682,34 @@ public extension TimeZone {
         if lat < 11.173301 {
           if lng < -0.273275 {
             if lat < 7.955012 {
-              if poly[398].contains(testy: lat, testx: lng) { return 300 } else { return 70 }
+              if polygons[398].contains(testy: lat, testx: lng) { return 300 } else { return 70 }
             } else {
               if lng < -2.800195 {
                 if lat < 9.564156 {
-                  if poly[399].contains(testy: lat, testx: lng) { return 262 } else { return 300 }
+                  if polygons[399].contains(testy: lat, testx: lng) { return 262 } else { return 300 }
                 } else {
                   if lng < -4.063655 {
                     if lat < 10.368729 {
                       if lng < -4.695385 {
-                        if poly[400].contains(testy: lat, testx: lng) { return 300 } else { return 262 }
+                        if polygons[400].contains(testy: lat, testx: lng) { return 300 } else { return 262 }
                       } else {
-                        if poly[401].contains(testy: lat, testx: lng) { return 300 } else { return 262 }
+                        if polygons[401].contains(testy: lat, testx: lng) { return 300 } else { return 262 }
                       }
                     } else {
                       return 262
                     }
                   } else {
-                    if poly[402].contains(testy: lat, testx: lng) { return 70 }
-                    if poly[403].contains(testy: lat, testx: lng) { return 70 }
-                    if poly[404].contains(testy: lat, testx: lng) { return 300 } else { return 262 }
+                    if polygons[402].contains(testy: lat, testx: lng) { return 70 }
+                    if polygons[403].contains(testy: lat, testx: lng) { return 70 }
+                    if polygons[404].contains(testy: lat, testx: lng) { return 300 } else { return 262 }
                   }
                 }
               } else {
                 if lat < 9.564156 {
-                  if poly[405].contains(testy: lat, testx: lng) { return 70 }
-                  if poly[406].contains(testy: lat, testx: lng) { return 262 } else { return 300 }
+                  if polygons[405].contains(testy: lat, testx: lng) { return 70 }
+                  if polygons[406].contains(testy: lat, testx: lng) { return 262 } else { return 300 }
                 } else {
-                  if poly[407].contains(testy: lat, testx: lng) { return 70 } else { return 262 }
+                  if polygons[407].contains(testy: lat, testx: lng) { return 70 } else { return 262 }
                 }
               }
             }
@@ -1718,39 +1718,39 @@ public extension TimeZone {
               if lat < 8.347418 {
                 if lat < 6.934477 {
                   if lng < 0.766709 {
-                    if poly[408].contains(testy: lat, testx: lng) { return 272 } else { return 70 }
+                    if polygons[408].contains(testy: lat, testx: lng) { return 272 } else { return 70 }
                   } else {
-                    if poly[409].contains(testy: lat, testx: lng) { return 70 }
-                    if poly[410].contains(testy: lat, testx: lng) { return 84 }
-                    if poly[411].contains(testy: lat, testx: lng) { return 84 } else { return 272 }
+                    if polygons[409].contains(testy: lat, testx: lng) { return 70 }
+                    if polygons[410].contains(testy: lat, testx: lng) { return 84 }
+                    if polygons[411].contains(testy: lat, testx: lng) { return 84 } else { return 272 }
                   }
                 } else {
-                  if poly[412].contains(testy: lat, testx: lng) { return 70 }
-                  if poly[413].contains(testy: lat, testx: lng) { return 84 } else { return 272 }
+                  if polygons[412].contains(testy: lat, testx: lng) { return 70 }
+                  if polygons[413].contains(testy: lat, testx: lng) { return 84 } else { return 272 }
                 }
               } else {
                 if lat < 9.760359 {
-                  if poly[414].contains(testy: lat, testx: lng) { return 70 }
-                  if poly[415].contains(testy: lat, testx: lng) { return 84 } else { return 272 }
+                  if polygons[414].contains(testy: lat, testx: lng) { return 70 }
+                  if polygons[415].contains(testy: lat, testx: lng) { return 84 } else { return 272 }
                 } else {
                   if lng < 0.766709 {
-                    if poly[416].contains(testy: lat, testx: lng) { return 70 }
-                    if poly[417].contains(testy: lat, testx: lng) { return 262 } else { return 272 }
+                    if polygons[416].contains(testy: lat, testx: lng) { return 70 }
+                    if polygons[417].contains(testy: lat, testx: lng) { return 262 } else { return 272 }
                   } else {
-                    if poly[418].contains(testy: lat, testx: lng) { return 262 }
-                    if poly[419].contains(testy: lat, testx: lng) { return 272 } else { return 84 }
+                    if polygons[418].contains(testy: lat, testx: lng) { return 262 }
+                    if polygons[419].contains(testy: lat, testx: lng) { return 272 } else { return 84 }
                   }
                 }
               }
             } else {
               if lat < 7.841293 {
-                if poly[420].contains(testy: lat, testx: lng) { return 84 } else { return 96 }
+                if polygons[420].contains(testy: lat, testx: lng) { return 84 } else { return 96 }
               } else {
                 if lng < 4.465083 {
                   if lat < 9.507297 {
-                    if poly[421].contains(testy: lat, testx: lng) { return 96 } else { return 84 }
+                    if polygons[421].contains(testy: lat, testx: lng) { return 96 } else { return 84 }
                   } else {
-                    if poly[422].contains(testy: lat, testx: lng) { return 96 } else { return 84 }
+                    if polygons[422].contains(testy: lat, testx: lng) { return 96 } else { return 84 }
                   }
                 } else {
                   return 96
@@ -1761,12 +1761,12 @@ public extension TimeZone {
         } else {
           if lng < -5.199527 {
             if lat < 11.432508 {
-              if poly[423].contains(testy: lat, testx: lng) { return 181 } else { return 262 }
+              if polygons[423].contains(testy: lat, testx: lng) { return 181 } else { return 262 }
             } else {
               if lat < 11.788111 {
-                if poly[424].contains(testy: lat, testx: lng) { return 262 } else { return 181 }
+                if polygons[424].contains(testy: lat, testx: lng) { return 262 } else { return 181 }
               } else {
-                if poly[425].contains(testy: lat, testx: lng) { return 181 } else { return 262 }
+                if polygons[425].contains(testy: lat, testx: lng) { return 181 } else { return 262 }
               }
             }
           } else {
@@ -1774,36 +1774,36 @@ public extension TimeZone {
               if lng < -0.462076 {
                 if lng < -2.830801 {
                   if lat < 13.127947 {
-                    if poly[426].contains(testy: lat, testx: lng) { return 181 } else { return 262 }
+                    if polygons[426].contains(testy: lat, testx: lng) { return 181 } else { return 262 }
                   } else {
-                    if poly[427].contains(testy: lat, testx: lng) { return 262 } else { return 181 }
+                    if polygons[427].contains(testy: lat, testx: lng) { return 262 } else { return 181 }
                   }
                 } else {
-                  if poly[428].contains(testy: lat, testx: lng) { return 181 } else { return 262 }
+                  if polygons[428].contains(testy: lat, testx: lng) { return 181 } else { return 262 }
                 }
               } else {
                 if lng < 3.330698 {
                   if lat < 13.127947 {
                     if lng < 1.434311 {
-                      if poly[429].contains(testy: lat, testx: lng) { return 84 }
-                      if poly[430].contains(testy: lat, testx: lng) { return 260 } else { return 262 }
+                      if polygons[429].contains(testy: lat, testx: lng) { return 84 }
+                      if polygons[430].contains(testy: lat, testx: lng) { return 260 } else { return 262 }
                     } else {
                       if lat < 12.150624 {
-                        if poly[431].contains(testy: lat, testx: lng) { return 260 }
-                        if poly[432].contains(testy: lat, testx: lng) { return 260 }
-                        if poly[433].contains(testy: lat, testx: lng) { return 262 } else { return 84 }
+                        if polygons[431].contains(testy: lat, testx: lng) { return 260 }
+                        if polygons[432].contains(testy: lat, testx: lng) { return 260 }
+                        if polygons[433].contains(testy: lat, testx: lng) { return 262 } else { return 84 }
                       } else {
-                        if poly[434].contains(testy: lat, testx: lng) { return 84 }
-                        if poly[435].contains(testy: lat, testx: lng) { return 262 } else { return 260 }
+                        if polygons[434].contains(testy: lat, testx: lng) { return 84 }
+                        if polygons[435].contains(testy: lat, testx: lng) { return 262 } else { return 260 }
                       }
                     }
                   } else {
-                    if poly[436].contains(testy: lat, testx: lng) { return 181 }
-                    if poly[437].contains(testy: lat, testx: lng) { return 262 } else { return 260 }
+                    if polygons[436].contains(testy: lat, testx: lng) { return 181 }
+                    if polygons[437].contains(testy: lat, testx: lng) { return 262 } else { return 260 }
                   }
                 } else {
-                  if poly[438].contains(testy: lat, testx: lng) { return 84 }
-                  if poly[439].contains(testy: lat, testx: lng) { return 96 } else { return 260 }
+                  if polygons[438].contains(testy: lat, testx: lng) { return 84 }
+                  if polygons[439].contains(testy: lat, testx: lng) { return 96 } else { return 260 }
                 }
               }
             } else {
@@ -1811,11 +1811,11 @@ public extension TimeZone {
                 return 181
               } else {
                 if lng < 4.042722 {
-                  if poly[440].contains(testy: lat, testx: lng) { return 260 }
-                  if poly[441].contains(testy: lat, testx: lng) { return 380 } else { return 181 }
+                  if polygons[440].contains(testy: lat, testx: lng) { return 260 }
+                  if polygons[441].contains(testy: lat, testx: lng) { return 380 } else { return 181 }
                 } else {
-                  if poly[442].contains(testy: lat, testx: lng) { return 181 }
-                  if poly[443].contains(testy: lat, testx: lng) { return 380 } else { return 260 }
+                  if polygons[442].contains(testy: lat, testx: lng) { return 181 }
+                  if polygons[443].contains(testy: lat, testx: lng) { return 380 } else { return 260 }
                 }
               }
             }
@@ -1841,24 +1841,24 @@ public extension TimeZone {
                         return 329
                       } else {
                         if lng < -46.815085 {
-                          if poly[444].contains(testy: lat, testx: lng) { return 329 } else { return 61 }
+                          if polygons[444].contains(testy: lat, testx: lng) { return 329 } else { return 61 }
                         } else {
                           if lat < -14.817534 {
-                            if poly[445].contains(testy: lat, testx: lng) { return 171 } else { return 329 }
+                            if polygons[445].contains(testy: lat, testx: lng) { return 171 } else { return 329 }
                           } else {
-                            if poly[446].contains(testy: lat, testx: lng) { return 61 }
-                            if poly[447].contains(testy: lat, testx: lng) { return 171 } else { return 329 }
+                            if polygons[446].contains(testy: lat, testx: lng) { return 61 }
+                            if polygons[447].contains(testy: lat, testx: lng) { return 171 } else { return 329 }
                           }
                         }
                       }
                     } else {
                       if lat < -17.078349 {
-                        if poly[448].contains(testy: lat, testx: lng) { return 171 } else { return 329 }
+                        if polygons[448].contains(testy: lat, testx: lng) { return 171 } else { return 329 }
                       } else {
                         if lng < -42.042890 {
-                          if poly[449].contains(testy: lat, testx: lng) { return 329 } else { return 171 }
+                          if polygons[449].contains(testy: lat, testx: lng) { return 329 } else { return 171 }
                         } else {
-                          if poly[450].contains(testy: lat, testx: lng) { return 329 } else { return 171 }
+                          if polygons[450].contains(testy: lat, testx: lng) { return 329 } else { return 171 }
                         }
                       }
                     }
@@ -1868,9 +1868,9 @@ public extension TimeZone {
                 } else {
                   if lng < -49.154449 {
                     if lat < -7.791389 {
-                      if poly[451].contains(testy: lat, testx: lng) { return 400 } else { return 61 }
+                      if polygons[451].contains(testy: lat, testx: lng) { return 400 } else { return 61 }
                     } else {
-                      if poly[452].contains(testy: lat, testx: lng) { return 400 } else { return 61 }
+                      if polygons[452].contains(testy: lat, testx: lng) { return 400 } else { return 61 }
                     }
                   } else {
                     if lng < -44.198925 {
@@ -1879,35 +1879,35 @@ public extension TimeZone {
                           return 61
                         } else {
                           if lat < -11.256151 {
-                            if poly[453].contains(testy: lat, testx: lng) { return 171 } else { return 61 }
+                            if polygons[453].contains(testy: lat, testx: lng) { return 171 } else { return 61 }
                           } else {
-                            if poly[454].contains(testy: lat, testx: lng) { return 61 }
-                            if poly[455].contains(testy: lat, testx: lng) { return 143 } else { return 171 }
+                            if polygons[454].contains(testy: lat, testx: lng) { return 61 }
+                            if polygons[455].contains(testy: lat, testx: lng) { return 143 } else { return 171 }
                           }
                         }
                       } else {
                         if lng < -46.676687 {
-                          if poly[456].contains(testy: lat, testx: lng) { return 143 }
-                          if poly[457].contains(testy: lat, testx: lng) { return 143 } else { return 61 }
+                          if polygons[456].contains(testy: lat, testx: lng) { return 143 }
+                          if polygons[457].contains(testy: lat, testx: lng) { return 143 } else { return 61 }
                         } else {
-                          if poly[458].contains(testy: lat, testx: lng) { return 61 }
-                          if poly[459].contains(testy: lat, testx: lng) { return 61 } else { return 143 }
+                          if polygons[458].contains(testy: lat, testx: lng) { return 61 }
+                          if polygons[459].contains(testy: lat, testx: lng) { return 61 } else { return 143 }
                         }
                       }
                     } else {
                       if lat < -9.955582 {
-                        if poly[460].contains(testy: lat, testx: lng) { return 143 } else { return 171 }
+                        if polygons[460].contains(testy: lat, testx: lng) { return 143 } else { return 171 }
                       } else {
                         if lng < -41.721163 {
-                          if poly[461].contains(testy: lat, testx: lng) { return 171 } else { return 143 }
+                          if polygons[461].contains(testy: lat, testx: lng) { return 171 } else { return 143 }
                         } else {
                           if lat < -8.655013 {
-                            if poly[462].contains(testy: lat, testx: lng) { return 143 }
-                            if poly[463].contains(testy: lat, testx: lng) { return 191 } else { return 171 }
+                            if polygons[462].contains(testy: lat, testx: lng) { return 143 }
+                            if polygons[463].contains(testy: lat, testx: lng) { return 191 } else { return 171 }
                           } else {
-                            if poly[464].contains(testy: lat, testx: lng) { return 143 }
-                            if poly[465].contains(testy: lat, testx: lng) { return 143 }
-                            if poly[466].contains(testy: lat, testx: lng) { return 171 } else { return 191 }
+                            if polygons[464].contains(testy: lat, testx: lng) { return 143 }
+                            if polygons[465].contains(testy: lat, testx: lng) { return 143 }
+                            if polygons[466].contains(testy: lat, testx: lng) { return 171 } else { return 191 }
                           }
                         }
                       }
@@ -1919,20 +1919,20 @@ public extension TimeZone {
                   if lat < -3.180000 {
                     if lat < -5.267222 {
                       if lng < -47.958925 {
-                        if poly[467].contains(testy: lat, testx: lng) { return 143 }
-                        if poly[468].contains(testy: lat, testx: lng) { return 143 }
-                        if poly[469].contains(testy: lat, testx: lng) { return 400 }
-                        if poly[470].contains(testy: lat, testx: lng) { return 400 } else { return 61 }
+                        if polygons[467].contains(testy: lat, testx: lng) { return 143 }
+                        if polygons[468].contains(testy: lat, testx: lng) { return 143 }
+                        if polygons[469].contains(testy: lat, testx: lng) { return 400 }
+                        if polygons[470].contains(testy: lat, testx: lng) { return 400 } else { return 61 }
                       } else {
-                        if poly[471].contains(testy: lat, testx: lng) { return 143 } else { return 61 }
+                        if polygons[471].contains(testy: lat, testx: lng) { return 143 } else { return 61 }
                       }
                     } else {
-                      if poly[472].contains(testy: lat, testx: lng) { return 61 }
-                      if poly[473].contains(testy: lat, testx: lng) { return 61 }
-                      if poly[474].contains(testy: lat, testx: lng) { return 400 } else { return 143 }
+                      if polygons[472].contains(testy: lat, testx: lng) { return 61 }
+                      if polygons[473].contains(testy: lat, testx: lng) { return 61 }
+                      if polygons[474].contains(testy: lat, testx: lng) { return 400 } else { return 143 }
                     }
                   } else {
-                    if poly[475].contains(testy: lat, testx: lng) { return 143 } else { return 400 }
+                    if polygons[475].contains(testy: lat, testx: lng) { return 143 } else { return 400 }
                   }
                 } else {
                   return 143
@@ -1941,9 +1941,9 @@ public extension TimeZone {
             } else {
               if lng < -46.568893 {
                 if lng < -46.698047 {
-                  if poly[476].contains(testy: lat, testx: lng) { return 143 } else { return 400 }
+                  if polygons[476].contains(testy: lat, testx: lng) { return 143 } else { return 400 }
                 } else {
-                  if poly[477].contains(testy: lat, testx: lng) { return 400 } else { return 143 }
+                  if polygons[477].contains(testy: lat, testx: lng) { return 400 } else { return 143 }
                 }
               } else {
                 return 143
@@ -1955,7 +1955,7 @@ public extension TimeZone {
             if lng < -49.192532 {
               return 400
             } else {
-              if poly[478].contains(testy: lat, testx: lng) { return 143 } else { return 400 }
+              if polygons[478].contains(testy: lat, testx: lng) { return 143 } else { return 400 }
             }
           } else {
             return 143
@@ -1968,9 +1968,9 @@ public extension TimeZone {
           if lng < -46.049419 {
             if lat < -1.159195 {
               if lat < -1.745833 {
-                if poly[479].contains(testy: lat, testx: lng) { return 400 } else { return 143 }
+                if polygons[479].contains(testy: lat, testx: lng) { return 400 } else { return 143 }
               } else {
-                if poly[480].contains(testy: lat, testx: lng) { return 143 } else { return 400 }
+                if polygons[480].contains(testy: lat, testx: lng) { return 143 } else { return 400 }
               }
             } else {
               return 400
@@ -1991,34 +1991,34 @@ public extension TimeZone {
                 if lat < -8.632456 {
                   if lng < -37.151226 {
                     if lat < -10.641456 {
-                      if poly[481].contains(testy: lat, testx: lng) { return 325 } else { return 171 }
+                      if polygons[481].contains(testy: lat, testx: lng) { return 325 } else { return 171 }
                     } else {
                       if lng < -38.197313 {
-                        if poly[482].contains(testy: lat, testx: lng) { return 191 }
-                        if poly[483].contains(testy: lat, testx: lng) { return 325 } else { return 171 }
+                        if polygons[482].contains(testy: lat, testx: lng) { return 191 }
+                        if polygons[483].contains(testy: lat, testx: lng) { return 325 } else { return 171 }
                       } else {
-                        if poly[484].contains(testy: lat, testx: lng) { return 171 }
-                        if poly[485].contains(testy: lat, testx: lng) { return 191 } else { return 325 }
+                        if polygons[484].contains(testy: lat, testx: lng) { return 171 }
+                        if polygons[485].contains(testy: lat, testx: lng) { return 191 } else { return 325 }
                       }
                     }
                   } else {
-                    if poly[486].contains(testy: lat, testx: lng) { return 191 } else { return 325 }
+                    if polygons[486].contains(testy: lat, testx: lng) { return 191 } else { return 325 }
                   }
                 } else {
                   if lat < -5.932234 {
                     if lng < -37.016762 {
                       if lat < -7.282345 {
                         if lng < -38.130081 {
-                          if poly[487].contains(testy: lat, testx: lng) { return 191 } else { return 143 }
+                          if polygons[487].contains(testy: lat, testx: lng) { return 191 } else { return 143 }
                         } else {
-                          if poly[488].contains(testy: lat, testx: lng) { return 191 } else { return 143 }
+                          if polygons[488].contains(testy: lat, testx: lng) { return 191 } else { return 143 }
                         }
                       } else {
-                        if poly[489].contains(testy: lat, testx: lng) { return 191 } else { return 143 }
+                        if polygons[489].contains(testy: lat, testx: lng) { return 191 } else { return 143 }
                       }
                     } else {
                       if lat < -7.282345 {
-                        if poly[490].contains(testy: lat, testx: lng) { return 143 } else { return 191 }
+                        if polygons[490].contains(testy: lat, testx: lng) { return 143 } else { return 191 }
                       } else {
                         return 143
                       }
@@ -2044,18 +2044,18 @@ public extension TimeZone {
                   if lat < 13.159023 {
                     if lat < 12.469320 {
                       if lng < -16.062716 {
-                        if poly[491].contains(testy: lat, testx: lng) { return 225 } else { return 38 }
+                        if polygons[491].contains(testy: lat, testx: lng) { return 225 } else { return 38 }
                       } else {
-                        if poly[492].contains(testy: lat, testx: lng) { return 225 } else { return 38 }
+                        if polygons[492].contains(testy: lat, testx: lng) { return 225 } else { return 38 }
                       }
                     } else {
-                      if poly[493].contains(testy: lat, testx: lng) { return 252 } else { return 225 }
+                      if polygons[493].contains(testy: lat, testx: lng) { return 252 } else { return 225 }
                     }
                   } else {
                     if lat < 13.488581 {
                       return 252
                     } else {
-                      if poly[494].contains(testy: lat, testx: lng) { return 225 } else { return 252 }
+                      if polygons[494].contains(testy: lat, testx: lng) { return 225 } else { return 252 }
                     }
                   }
                 } else {
@@ -2068,7 +2068,7 @@ public extension TimeZone {
                   if lng < -16.604567 {
                     return 225
                   } else {
-                    if poly[495].contains(testy: lat, testx: lng) { return 33 } else { return 225 }
+                    if polygons[495].contains(testy: lat, testx: lng) { return 33 } else { return 225 }
                   }
                 }
               }
@@ -2090,9 +2090,9 @@ public extension TimeZone {
                       return 184
                     } else {
                       if lat < 11.046461 {
-                        if poly[496].contains(testy: lat, testx: lng) { return 38 } else { return 184 }
+                        if polygons[496].contains(testy: lat, testx: lng) { return 38 } else { return 184 }
                       } else {
-                        if poly[497].contains(testy: lat, testx: lng) { return 184 } else { return 38 }
+                        if polygons[497].contains(testy: lat, testx: lng) { return 184 } else { return 38 }
                       }
                     }
                   } else {
@@ -2110,7 +2110,7 @@ public extension TimeZone {
               if lng < -15.225043 {
                 return 38
               } else {
-                if poly[498].contains(testy: lat, testx: lng) { return 184 } else { return 38 }
+                if polygons[498].contains(testy: lat, testx: lng) { return 184 } else { return 38 }
               }
             } else {
               if lat < 12.680789 {
@@ -2118,25 +2118,25 @@ public extension TimeZone {
                   if lat < 11.882746 {
                     return 38
                   } else {
-                    if poly[499].contains(testy: lat, testx: lng) { return 225 } else { return 38 }
+                    if polygons[499].contains(testy: lat, testx: lng) { return 225 } else { return 38 }
                   }
                 } else {
-                  if poly[500].contains(testy: lat, testx: lng) { return 184 }
-                  if poly[501].contains(testy: lat, testx: lng) { return 225 } else { return 38 }
+                  if polygons[500].contains(testy: lat, testx: lng) { return 184 }
+                  if polygons[501].contains(testy: lat, testx: lng) { return 225 } else { return 38 }
                 }
               } else {
                 if lat < 13.826571 {
-                  if poly[502].contains(testy: lat, testx: lng) { return 225 }
-                  if poly[503].contains(testy: lat, testx: lng) { return 225 } else { return 252 }
+                  if polygons[502].contains(testy: lat, testx: lng) { return 225 }
+                  if polygons[503].contains(testy: lat, testx: lng) { return 225 } else { return 252 }
                 } else {
                   if lat < 17.100223 {
                     if lat < 15.463397 {
                       return 225
                     } else {
                       if lng < -14.636089 {
-                        if poly[504].contains(testy: lat, testx: lng) { return 225 } else { return 33 }
+                        if polygons[504].contains(testy: lat, testx: lng) { return 225 } else { return 33 }
                       } else {
-                        if poly[505].contains(testy: lat, testx: lng) { return 225 } else { return 33 }
+                        if polygons[505].contains(testy: lat, testx: lng) { return 225 } else { return 33 }
                       }
                     }
                   } else {
@@ -2155,13 +2155,13 @@ public extension TimeZone {
                 if lng < -13.420199 {
                   return 184
                 } else {
-                  if poly[506].contains(testy: lat, testx: lng) { return 68 } else { return 184 }
+                  if polygons[506].contains(testy: lat, testx: lng) { return 68 } else { return 184 }
                 }
               } else {
                 if lat < 12.661082 {
-                  if poly[507].contains(testy: lat, testx: lng) { return 184 } else { return 225 }
+                  if polygons[507].contains(testy: lat, testx: lng) { return 184 } else { return 225 }
                 } else {
-                  if poly[508].contains(testy: lat, testx: lng) { return 33 } else { return 225 }
+                  if polygons[508].contains(testy: lat, testx: lng) { return 33 } else { return 225 }
                 }
               }
             }
@@ -2255,9 +2255,9 @@ public extension TimeZone {
                 if lng < -59.803780 {
                   if lng < -67.422675 {
                     if lng < -70.950629 {
-                      if poly[509].contains(testy: lat, testx: lng) { return 397 } else { return 390 }
+                      if polygons[509].contains(testy: lat, testx: lng) { return 397 } else { return 390 }
                     } else {
-                      if poly[510].contains(testy: lat, testx: lng) { return 390 } else { return 397 }
+                      if polygons[510].contains(testy: lat, testx: lng) { return 390 } else { return 397 }
                     }
                   } else {
                     if lat < 8.557567 {
@@ -2268,9 +2268,9 @@ public extension TimeZone {
                           return 397
                         } else {
                           if lat < 7.281056 {
-                            if poly[511].contains(testy: lat, testx: lng) { return 397 } else { return 298 }
+                            if polygons[511].contains(testy: lat, testx: lng) { return 397 } else { return 298 }
                           } else {
-                            if poly[512].contains(testy: lat, testx: lng) { return 298 } else { return 397 }
+                            if polygons[512].contains(testy: lat, testx: lng) { return 298 } else { return 397 }
                           }
                         }
                       }
@@ -2284,7 +2284,7 @@ public extension TimeZone {
               }
             } else {
               if lng < -72.626933 {
-                if poly[513].contains(testy: lat, testx: lng) { return 397 } else { return 390 }
+                if polygons[513].contains(testy: lat, testx: lng) { return 397 } else { return 390 }
               } else {
                 return 397
               }
@@ -2293,34 +2293,34 @@ public extension TimeZone {
             if lat < -2.030330 {
               if lat < -8.062619 {
                 if lat < -19.269809 {
-                  if poly[514].contains(testy: lat, testx: lng) { return 317 } else { return 329 }
+                  if polygons[514].contains(testy: lat, testx: lng) { return 317 } else { return 329 }
                 } else {
                   if lat < -13.666214 {
-                    if poly[515].contains(testy: lat, testx: lng) { return 363 } else { return 329 }
+                    if polygons[515].contains(testy: lat, testx: lng) { return 363 } else { return 329 }
                   } else {
                     if lat < -10.864416 {
                       if lat < -12.265315 {
                         if lng < -50.220945 {
-                          if poly[516].contains(testy: lat, testx: lng) { return 61 }
-                          if poly[517].contains(testy: lat, testx: lng) { return 329 } else { return 363 }
+                          if polygons[516].contains(testy: lat, testx: lng) { return 61 }
+                          if polygons[517].contains(testy: lat, testx: lng) { return 329 } else { return 363 }
                         } else {
-                          if poly[518].contains(testy: lat, testx: lng) { return 329 } else { return 61 }
+                          if polygons[518].contains(testy: lat, testx: lng) { return 329 } else { return 61 }
                         }
                       } else {
-                        if poly[519].contains(testy: lat, testx: lng) { return 363 } else { return 61 }
+                        if polygons[519].contains(testy: lat, testx: lng) { return 363 } else { return 61 }
                       }
                     } else {
-                      if poly[520].contains(testy: lat, testx: lng) { return 363 }
-                      if poly[521].contains(testy: lat, testx: lng) { return 400 } else { return 61 }
+                      if polygons[520].contains(testy: lat, testx: lng) { return 363 }
+                      if polygons[521].contains(testy: lat, testx: lng) { return 400 } else { return 61 }
                     }
                   }
                 }
               } else {
                 if lat < -6.923692 {
                   if lat < -7.274446 {
-                    if poly[522].contains(testy: lat, testx: lng) { return 61 } else { return 400 }
+                    if polygons[522].contains(testy: lat, testx: lng) { return 61 } else { return 400 }
                   } else {
-                    if poly[523].contains(testy: lat, testx: lng) { return 61 } else { return 400 }
+                    if polygons[523].contains(testy: lat, testx: lng) { return 61 } else { return 400 }
                   }
                 } else {
                   return 400
@@ -2337,16 +2337,16 @@ public extension TimeZone {
                 if lng < -71.116249 {
                   if lng < -71.624382 {
                     if lat < 10.721931 {
-                      if poly[524].contains(testy: lat, testx: lng) { return 390 } else { return 397 }
+                      if polygons[524].contains(testy: lat, testx: lng) { return 390 } else { return 397 }
                     } else {
-                      if poly[525].contains(testy: lat, testx: lng) { return 397 }
-                      if poly[526].contains(testy: lat, testx: lng) { return 397 } else { return 390 }
+                      if polygons[525].contains(testy: lat, testx: lng) { return 397 }
+                      if polygons[526].contains(testy: lat, testx: lng) { return 397 } else { return 390 }
                     }
                   } else {
                     if lat < 11.051531 {
                       return 397
                     } else {
-                      if poly[527].contains(testy: lat, testx: lng) { return 397 } else { return 390 }
+                      if polygons[527].contains(testy: lat, testx: lng) { return 397 } else { return 390 }
                     }
                   }
                 } else {
@@ -2355,7 +2355,7 @@ public extension TimeZone {
                   } else {
                     if lng < -68.733948 {
                       if lat < 12.385672 {
-                        if poly[528].contains(testy: lat, testx: lng) { return 91 } else { return 397 }
+                        if polygons[528].contains(testy: lat, testx: lng) { return 91 } else { return 397 }
                       } else {
                         return 234
                       }
@@ -2394,9 +2394,9 @@ public extension TimeZone {
                         return 229
                       } else {
                         if lat < 19.201639 {
-                          if poly[529].contains(testy: lat, testx: lng) { return 229 } else { return 19 }
+                          if polygons[529].contains(testy: lat, testx: lng) { return 229 } else { return 19 }
                         } else {
-                          if poly[530].contains(testy: lat, testx: lng) { return 229 } else { return 19 }
+                          if polygons[530].contains(testy: lat, testx: lng) { return 229 } else { return 19 }
                         }
                       }
                     } else {
@@ -2428,7 +2428,7 @@ public extension TimeZone {
                         return 138
                       } else {
                         if lng < -63.012993 {
-                          if poly[531].contains(testy: lat, testx: lng) { return 354 } else { return 394 }
+                          if polygons[531].contains(testy: lat, testx: lng) { return 354 } else { return 394 }
                         } else {
                           return 277
                         }
@@ -2482,9 +2482,9 @@ public extension TimeZone {
             return 402
           } else {
             if lat < 31.330078 {
-              if poly[532].contains(testy: lat, testx: lng) { return 9 } else { return 402 }
+              if polygons[532].contains(testy: lat, testx: lng) { return 9 } else { return 402 }
             } else {
-              if poly[533].contains(testy: lat, testx: lng) { return 273 } else { return 9 }
+              if polygons[533].contains(testy: lat, testx: lng) { return 273 } else { return 9 }
             }
           }
         }
@@ -2493,62 +2493,62 @@ public extension TimeZone {
           if lng < -108.804733 {
             return 407
           } else {
-            if poly[534].contains(testy: lat, testx: lng) { return 384 } else { return 407 }
+            if polygons[534].contains(testy: lat, testx: lng) { return 384 } else { return 407 }
           }
         } else {
           if lat < 27.061386 {
             if lng < -106.335702 {
               if lng < -107.979935 {
-                if poly[535].contains(testy: lat, testx: lng) { return 185 }
-                if poly[536].contains(testy: lat, testx: lng) { return 402 } else { return 407 }
+                if polygons[535].contains(testy: lat, testx: lng) { return 185 }
+                if polygons[536].contains(testy: lat, testx: lng) { return 402 } else { return 407 }
               } else {
-                if poly[537].contains(testy: lat, testx: lng) { return 384 }
-                if poly[538].contains(testy: lat, testx: lng) { return 407 } else { return 185 }
+                if polygons[537].contains(testy: lat, testx: lng) { return 384 }
+                if polygons[538].contains(testy: lat, testx: lng) { return 407 } else { return 185 }
               }
             } else {
-              if poly[539].contains(testy: lat, testx: lng) { return 185 } else { return 384 }
+              if polygons[539].contains(testy: lat, testx: lng) { return 185 } else { return 384 }
             }
           } else {
             if lng < -108.558060 {
               if lat < 31.330776 {
                 if lat < 29.992775 {
-                  if poly[540].contains(testy: lat, testx: lng) { return 185 } else { return 402 }
+                  if polygons[540].contains(testy: lat, testx: lng) { return 185 } else { return 402 }
                 } else {
-                  if poly[541].contains(testy: lat, testx: lng) { return 185 }
-                  if poly[542].contains(testy: lat, testx: lng) { return 402 } else { return 133 }
+                  if polygons[541].contains(testy: lat, testx: lng) { return 185 }
+                  if polygons[542].contains(testy: lat, testx: lng) { return 402 } else { return 133 }
                 }
               } else {
-                if poly[543].contains(testy: lat, testx: lng) { return 9 } else { return 273 }
+                if polygons[543].contains(testy: lat, testx: lng) { return 9 } else { return 273 }
               }
             } else {
               if lat < 31.159515 {
                 if lng < -105.802648 {
-                  if poly[544].contains(testy: lat, testx: lng) { return 185 } else { return 133 }
+                  if polygons[544].contains(testy: lat, testx: lng) { return 185 } else { return 133 }
                 } else {
                   if lat < 29.110451 {
                     if lng < -104.424942 {
                       return 185
                     } else {
                       if lat < 28.085918 {
-                        if poly[545].contains(testy: lat, testx: lng) { return 384 } else { return 185 }
+                        if polygons[545].contains(testy: lat, testx: lng) { return 384 } else { return 185 }
                       } else {
                         if lng < -103.736089 {
-                          if poly[546].contains(testy: lat, testx: lng) { return 133 }
-                          if poly[547].contains(testy: lat, testx: lng) { return 133 }
-                          if poly[548].contains(testy: lat, testx: lng) { return 384 } else { return 185 }
+                          if polygons[546].contains(testy: lat, testx: lng) { return 133 }
+                          if polygons[547].contains(testy: lat, testx: lng) { return 133 }
+                          if polygons[548].contains(testy: lat, testx: lng) { return 384 } else { return 185 }
                         } else {
                           if lat < 28.598185 {
-                            if poly[549].contains(testy: lat, testx: lng) { return 185 } else { return 384 }
+                            if polygons[549].contains(testy: lat, testx: lng) { return 185 } else { return 384 }
                           } else {
                             if lng < -103.391663 {
-                              if poly[550].contains(testy: lat, testx: lng) { return 160 }
-                              if poly[551].contains(testy: lat, testx: lng) { return 185 }
-                              if poly[552].contains(testy: lat, testx: lng) { return 374 }
-                              if poly[553].contains(testy: lat, testx: lng) { return 384 } else { return 133 }
+                              if polygons[550].contains(testy: lat, testx: lng) { return 160 }
+                              if polygons[551].contains(testy: lat, testx: lng) { return 185 }
+                              if polygons[552].contains(testy: lat, testx: lng) { return 374 }
+                              if polygons[553].contains(testy: lat, testx: lng) { return 384 } else { return 133 }
                             } else {
-                              if poly[554].contains(testy: lat, testx: lng) { return 133 }
-                              if poly[555].contains(testy: lat, testx: lng) { return 160 }
-                              if poly[556].contains(testy: lat, testx: lng) { return 384 } else { return 374 }
+                              if polygons[554].contains(testy: lat, testx: lng) { return 133 }
+                              if polygons[555].contains(testy: lat, testx: lng) { return 160 }
+                              if polygons[556].contains(testy: lat, testx: lng) { return 384 } else { return 374 }
                             }
                           }
                         }
@@ -2557,33 +2557,33 @@ public extension TimeZone {
                   } else {
                     if lng < -104.424942 {
                       if lat < 30.134983 {
-                        if poly[557].contains(testy: lat, testx: lng) { return 160 }
-                        if poly[558].contains(testy: lat, testx: lng) { return 185 } else { return 133 }
+                        if polygons[557].contains(testy: lat, testx: lng) { return 160 }
+                        if polygons[558].contains(testy: lat, testx: lng) { return 185 } else { return 133 }
                       } else {
                         if lng < -105.113795 {
-                          if poly[559].contains(testy: lat, testx: lng) { return 185 }
-                          if poly[560].contains(testy: lat, testx: lng) { return 273 } else { return 133 }
+                          if polygons[559].contains(testy: lat, testx: lng) { return 185 }
+                          if polygons[560].contains(testy: lat, testx: lng) { return 273 } else { return 133 }
                         } else {
-                          if poly[561].contains(testy: lat, testx: lng) { return 160 }
-                          if poly[562].contains(testy: lat, testx: lng) { return 185 }
-                          if poly[563].contains(testy: lat, testx: lng) { return 185 }
-                          if poly[564].contains(testy: lat, testx: lng) { return 273 } else { return 133 }
+                          if polygons[561].contains(testy: lat, testx: lng) { return 160 }
+                          if polygons[562].contains(testy: lat, testx: lng) { return 185 }
+                          if polygons[563].contains(testy: lat, testx: lng) { return 185 }
+                          if polygons[564].contains(testy: lat, testx: lng) { return 273 } else { return 133 }
                         }
                       }
                     } else {
-                      if poly[565].contains(testy: lat, testx: lng) { return 160 }
-                      if poly[566].contains(testy: lat, testx: lng) { return 185 } else { return 133 }
+                      if polygons[565].contains(testy: lat, testx: lng) { return 160 }
+                      if polygons[566].contains(testy: lat, testx: lng) { return 185 } else { return 133 }
                     }
                   }
                 }
               } else {
                 if lng < -105.802648 {
-                  if poly[567].contains(testy: lat, testx: lng) { return 185 }
-                  if poly[568].contains(testy: lat, testx: lng) { return 185 }
-                  if poly[569].contains(testy: lat, testx: lng) { return 273 } else { return 133 }
+                  if polygons[567].contains(testy: lat, testx: lng) { return 185 }
+                  if polygons[568].contains(testy: lat, testx: lng) { return 185 }
+                  if polygons[569].contains(testy: lat, testx: lng) { return 273 } else { return 133 }
                 } else {
-                  if poly[570].contains(testy: lat, testx: lng) { return 133 }
-                  if poly[571].contains(testy: lat, testx: lng) { return 160 } else { return 273 }
+                  if polygons[570].contains(testy: lat, testx: lng) { return 133 }
+                  if polygons[571].contains(testy: lat, testx: lng) { return 160 } else { return 273 }
                 }
               }
             }
@@ -2597,21 +2597,21 @@ public extension TimeZone {
             return 384
           } else {
             if lng < -98.868361 {
-              if poly[572].contains(testy: lat, testx: lng) { return 160 }
-              if poly[573].contains(testy: lat, testx: lng) { return 384 } else { return 374 }
+              if polygons[572].contains(testy: lat, testx: lng) { return 160 }
+              if polygons[573].contains(testy: lat, testx: lng) { return 384 } else { return 374 }
             } else {
               if lat < 26.155322 {
                 if lng < -98.171882 {
-                  if poly[574].contains(testy: lat, testx: lng) { return 160 }
-                  if poly[575].contains(testy: lat, testx: lng) { return 160 }
-                  if poly[576].contains(testy: lat, testx: lng) { return 384 } else { return 374 }
+                  if polygons[574].contains(testy: lat, testx: lng) { return 160 }
+                  if polygons[575].contains(testy: lat, testx: lng) { return 160 }
+                  if polygons[576].contains(testy: lat, testx: lng) { return 384 } else { return 374 }
                 } else {
-                  if poly[577].contains(testy: lat, testx: lng) { return 160 }
-                  if poly[578].contains(testy: lat, testx: lng) { return 384 } else { return 374 }
+                  if polygons[577].contains(testy: lat, testx: lng) { return 160 }
+                  if polygons[578].contains(testy: lat, testx: lng) { return 384 } else { return 374 }
                 }
               } else {
-                if poly[579].contains(testy: lat, testx: lng) { return 374 }
-                if poly[580].contains(testy: lat, testx: lng) { return 374 } else { return 160 }
+                if polygons[579].contains(testy: lat, testx: lng) { return 374 }
+                if polygons[580].contains(testy: lat, testx: lng) { return 374 } else { return 160 }
               }
             }
           }
@@ -2620,23 +2620,23 @@ public extension TimeZone {
             if lat < 31.057385 {
               if lat < 28.957256 {
                 if lng < -101.166562 {
-                  if poly[581].contains(testy: lat, testx: lng) { return 374 } else { return 384 }
+                  if polygons[581].contains(testy: lat, testx: lng) { return 374 } else { return 384 }
                 } else {
                   if lat < 27.907191 {
                     if lng < -100.226225 {
-                      if poly[582].contains(testy: lat, testx: lng) { return 374 } else { return 384 }
+                      if polygons[582].contains(testy: lat, testx: lng) { return 374 } else { return 384 }
                     } else {
                       if lat < 27.382159 {
-                        if poly[583].contains(testy: lat, testx: lng) { return 160 }
-                        if poly[584].contains(testy: lat, testx: lng) { return 384 } else { return 374 }
+                        if polygons[583].contains(testy: lat, testx: lng) { return 160 }
+                        if polygons[584].contains(testy: lat, testx: lng) { return 384 } else { return 374 }
                       } else {
-                        if poly[585].contains(testy: lat, testx: lng) { return 160 }
-                        if poly[586].contains(testy: lat, testx: lng) { return 384 } else { return 374 }
+                        if polygons[585].contains(testy: lat, testx: lng) { return 160 }
+                        if polygons[586].contains(testy: lat, testx: lng) { return 384 } else { return 374 }
                       }
                     }
                   } else {
-                    if poly[587].contains(testy: lat, testx: lng) { return 160 }
-                    if poly[588].contains(testy: lat, testx: lng) { return 384 } else { return 374 }
+                    if polygons[587].contains(testy: lat, testx: lng) { return 160 }
+                    if polygons[588].contains(testy: lat, testx: lng) { return 384 } else { return 374 }
                   }
                 }
               } else {
@@ -2644,30 +2644,30 @@ public extension TimeZone {
                   if lat < 30.007321 {
                     if lng < -102.106899 {
                       if lat < 29.482288 {
-                        if poly[589].contains(testy: lat, testx: lng) { return 160 }
-                        if poly[590].contains(testy: lat, testx: lng) { return 384 } else { return 374 }
+                        if polygons[589].contains(testy: lat, testx: lng) { return 160 }
+                        if polygons[590].contains(testy: lat, testx: lng) { return 384 } else { return 374 }
                       } else {
-                        if poly[591].contains(testy: lat, testx: lng) { return 160 }
-                        if poly[592].contains(testy: lat, testx: lng) { return 384 } else { return 374 }
+                        if polygons[591].contains(testy: lat, testx: lng) { return 160 }
+                        if polygons[592].contains(testy: lat, testx: lng) { return 384 } else { return 374 }
                       }
                     } else {
                       if lat < 29.482288 {
-                        if poly[593].contains(testy: lat, testx: lng) { return 160 }
-                        if poly[594].contains(testy: lat, testx: lng) { return 384 } else { return 374 }
+                        if polygons[593].contains(testy: lat, testx: lng) { return 160 }
+                        if polygons[594].contains(testy: lat, testx: lng) { return 384 } else { return 374 }
                       } else {
-                        if poly[595].contains(testy: lat, testx: lng) { return 160 }
-                        if poly[596].contains(testy: lat, testx: lng) { return 384 }
-                        if poly[597].contains(testy: lat, testx: lng) { return 384 }
-                        if poly[598].contains(testy: lat, testx: lng) { return 384 }
-                        if poly[599].contains(testy: lat, testx: lng) { return 384 } else { return 374 }
+                        if polygons[595].contains(testy: lat, testx: lng) { return 160 }
+                        if polygons[596].contains(testy: lat, testx: lng) { return 384 }
+                        if polygons[597].contains(testy: lat, testx: lng) { return 384 }
+                        if polygons[598].contains(testy: lat, testx: lng) { return 384 }
+                        if polygons[599].contains(testy: lat, testx: lng) { return 384 } else { return 374 }
                       }
                     }
                   } else {
                     return 160
                   }
                 } else {
-                  if poly[600].contains(testy: lat, testx: lng) { return 160 }
-                  if poly[601].contains(testy: lat, testx: lng) { return 384 } else { return 374 }
+                  if polygons[600].contains(testy: lat, testx: lng) { return 160 }
+                  if polygons[601].contains(testy: lat, testx: lng) { return 384 } else { return 374 }
                 }
               }
             } else {
@@ -2681,12 +2681,12 @@ public extension TimeZone {
         if lat < 25.878584 {
           if lat < 25.603125 {
             if lng < -97.450340 {
-              if poly[602].contains(testy: lat, testx: lng) { return 374 } else { return 384 }
+              if polygons[602].contains(testy: lat, testx: lng) { return 374 } else { return 384 }
             } else {
-              if poly[603].contains(testy: lat, testx: lng) { return 374 } else { return 384 }
+              if polygons[603].contains(testy: lat, testx: lng) { return 374 } else { return 384 }
             }
           } else {
-            if poly[604].contains(testy: lat, testx: lng) { return 160 } else { return 374 }
+            if polygons[604].contains(testy: lat, testx: lng) { return 160 } else { return 374 }
           }
         } else {
           return 160
@@ -2711,7 +2711,7 @@ public extension TimeZone {
                 if lat < 48.820377 {
                   if lng < -123.040512 { return 45 } else { return 39 }
                 } else {
-                  if poly[605].contains(testy: lat, testx: lng) { return 45 } else { return 39 }
+                  if polygons[605].contains(testy: lat, testx: lng) { return 45 } else { return 39 }
                 }
               }
             }
@@ -2719,7 +2719,7 @@ public extension TimeZone {
             if lat < 48.744881 {
               return 39
             } else {
-              if poly[606].contains(testy: lat, testx: lng) { return 45 } else { return 39 }
+              if polygons[606].contains(testy: lat, testx: lng) { return 45 } else { return 39 }
             }
           }
         } else {
@@ -2739,7 +2739,7 @@ public extension TimeZone {
                 if lat < 27.946997 {
                   return 407
                 } else {
-                  if poly[607].contains(testy: lat, testx: lng) { return 367 } else { return 407 }
+                  if polygons[607].contains(testy: lat, testx: lng) { return 367 } else { return 407 }
                 }
               } else {
                 return 367
@@ -2757,7 +2757,7 @@ public extension TimeZone {
                 if lat < 32.419422 {
                   return 194
                 } else {
-                  if poly[608].contains(testy: lat, testx: lng) { return 194 } else { return 39 }
+                  if polygons[608].contains(testy: lat, testx: lng) { return 194 } else { return 39 }
                 }
               } else {
                 if lat < 30.494665 {
@@ -2765,16 +2765,16 @@ public extension TimeZone {
                 } else {
                   if lng < -113.899330 {
                     if lat < 31.986613 {
-                      if poly[609].contains(testy: lat, testx: lng) { return 194 }
-                      if poly[610].contains(testy: lat, testx: lng) { return 402 } else { return 367 }
+                      if polygons[609].contains(testy: lat, testx: lng) { return 194 }
+                      if polygons[610].contains(testy: lat, testx: lng) { return 402 } else { return 367 }
                     } else {
-                      if poly[611].contains(testy: lat, testx: lng) { return 39 }
-                      if poly[612].contains(testy: lat, testx: lng) { return 194 }
-                      if poly[613].contains(testy: lat, testx: lng) { return 367 }
-                      if poly[614].contains(testy: lat, testx: lng) { return 402 } else { return 9 }
+                      if polygons[611].contains(testy: lat, testx: lng) { return 39 }
+                      if polygons[612].contains(testy: lat, testx: lng) { return 194 }
+                      if polygons[613].contains(testy: lat, testx: lng) { return 367 }
+                      if polygons[614].contains(testy: lat, testx: lng) { return 402 } else { return 9 }
                     }
                   } else {
-                    if poly[615].contains(testy: lat, testx: lng) { return 9 } else { return 402 }
+                    if polygons[615].contains(testy: lat, testx: lng) { return 9 } else { return 402 }
                   }
                 }
               }
@@ -2787,63 +2787,63 @@ public extension TimeZone {
                     return 39
                   } else {
                     if lat < 35.241411 {
-                      if poly[616].contains(testy: lat, testx: lng) { return 9 } else { return 39 }
+                      if polygons[616].contains(testy: lat, testx: lng) { return 9 } else { return 39 }
                     } else {
-                      if poly[617].contains(testy: lat, testx: lng) { return 9 } else { return 39 }
+                      if polygons[617].contains(testy: lat, testx: lng) { return 9 } else { return 39 }
                     }
                   }
                 } else {
                   if lat < 35.241411 {
-                    if poly[618].contains(testy: lat, testx: lng) { return 273 } else { return 9 }
+                    if polygons[618].contains(testy: lat, testx: lng) { return 273 } else { return 9 }
                   } else {
                     if lng < -112.523972 {
                       return 9
                     } else {
                       if lat < 36.122836 {
-                        if poly[619].contains(testy: lat, testx: lng) { return 9 }
-                        if poly[620].contains(testy: lat, testx: lng) { return 9 } else { return 273 }
+                        if polygons[619].contains(testy: lat, testx: lng) { return 9 }
+                        if polygons[620].contains(testy: lat, testx: lng) { return 9 } else { return 273 }
                       } else {
-                        if poly[621].contains(testy: lat, testx: lng) { return 9 }
-                        if poly[622].contains(testy: lat, testx: lng) { return 9 }
-                        if poly[623].contains(testy: lat, testx: lng) { return 9 }
-                        if poly[624].contains(testy: lat, testx: lng) { return 9 } else { return 273 }
+                        if polygons[621].contains(testy: lat, testx: lng) { return 9 }
+                        if polygons[622].contains(testy: lat, testx: lng) { return 9 }
+                        if polygons[623].contains(testy: lat, testx: lng) { return 9 }
+                        if polygons[624].contains(testy: lat, testx: lng) { return 9 } else { return 273 }
                       }
                     }
                   }
                 }
               } else {
                 if lat < 41.521236 {
-                  if poly[625].contains(testy: lat, testx: lng) { return 39 } else { return 273 }
+                  if polygons[625].contains(testy: lat, testx: lng) { return 39 } else { return 273 }
                 } else {
                   if lng < -114.839451 {
                     if lat < 43.779724 {
-                      if poly[626].contains(testy: lat, testx: lng) { return 27 } else { return 39 }
+                      if polygons[626].contains(testy: lat, testx: lng) { return 27 } else { return 39 }
                     } else {
                       if lng < -116.758825 {
-                        if poly[627].contains(testy: lat, testx: lng) { return 27 }
-                        if poly[628].contains(testy: lat, testx: lng) { return 27 } else { return 39 }
+                        if polygons[627].contains(testy: lat, testx: lng) { return 27 }
+                        if polygons[628].contains(testy: lat, testx: lng) { return 27 } else { return 39 }
                       } else {
-                        if poly[629].contains(testy: lat, testx: lng) { return 27 } else { return 39 }
+                        if polygons[629].contains(testy: lat, testx: lng) { return 27 } else { return 39 }
                       }
                     }
                   } else {
                     if lat < 43.779724 {
-                      if poly[630].contains(testy: lat, testx: lng) { return 27 }
-                      if poly[631].contains(testy: lat, testx: lng) { return 39 } else { return 273 }
+                      if polygons[630].contains(testy: lat, testx: lng) { return 27 }
+                      if polygons[631].contains(testy: lat, testx: lng) { return 39 } else { return 273 }
                     } else {
                       if lng < -112.920076 {
                         if lat < 44.908968 {
-                          if poly[632].contains(testy: lat, testx: lng) { return 273 } else { return 27 }
+                          if polygons[632].contains(testy: lat, testx: lng) { return 273 } else { return 27 }
                         } else {
                           if lng < -113.879764 {
-                            if poly[633].contains(testy: lat, testx: lng) { return 27 }
-                            if poly[634].contains(testy: lat, testx: lng) { return 39 } else { return 273 }
+                            if polygons[633].contains(testy: lat, testx: lng) { return 27 }
+                            if polygons[634].contains(testy: lat, testx: lng) { return 39 } else { return 273 }
                           } else {
-                            if poly[635].contains(testy: lat, testx: lng) { return 27 } else { return 273 }
+                            if polygons[635].contains(testy: lat, testx: lng) { return 27 } else { return 273 }
                           }
                         }
                       } else {
-                        if poly[636].contains(testy: lat, testx: lng) { return 27 } else { return 273 }
+                        if polygons[636].contains(testy: lat, testx: lng) { return 27 } else { return 273 }
                       }
                     }
                   }
@@ -2853,42 +2853,42 @@ public extension TimeZone {
               if lat < 52.150300 {
                 if lng < -114.839451 {
                   if lat < 49.094256 {
-                    if poly[637].contains(testy: lat, testx: lng) { return 45 }
-                    if poly[638].contains(testy: lat, testx: lng) { return 227 }
-                    if poly[639].contains(testy: lat, testx: lng) { return 253 }
-                    if poly[640].contains(testy: lat, testx: lng) { return 273 } else { return 39 }
+                    if polygons[637].contains(testy: lat, testx: lng) { return 45 }
+                    if polygons[638].contains(testy: lat, testx: lng) { return 227 }
+                    if polygons[639].contains(testy: lat, testx: lng) { return 253 }
+                    if polygons[640].contains(testy: lat, testx: lng) { return 273 } else { return 39 }
                   } else {
                     if lng < -116.758825 {
                       if lat < 50.622278 {
-                        if poly[641].contains(testy: lat, testx: lng) { return 253 }
-                        if poly[642].contains(testy: lat, testx: lng) { return 253 } else { return 45 }
+                        if polygons[641].contains(testy: lat, testx: lng) { return 253 }
+                        if polygons[642].contains(testy: lat, testx: lng) { return 253 } else { return 45 }
                       } else {
-                        if poly[643].contains(testy: lat, testx: lng) { return 227 } else { return 45 }
+                        if polygons[643].contains(testy: lat, testx: lng) { return 227 } else { return 45 }
                       }
                     } else {
                       if lat < 50.622278 {
                         if lng < -115.799138 {
                           if lat < 49.858267 {
-                            if poly[644].contains(testy: lat, testx: lng) { return 45 }
-                            if poly[645].contains(testy: lat, testx: lng) { return 45 }
-                            if poly[646].contains(testy: lat, testx: lng) { return 227 } else { return 253 }
+                            if polygons[644].contains(testy: lat, testx: lng) { return 45 }
+                            if polygons[645].contains(testy: lat, testx: lng) { return 45 }
+                            if polygons[646].contains(testy: lat, testx: lng) { return 227 } else { return 253 }
                           } else {
-                            if poly[647].contains(testy: lat, testx: lng) { return 227 } else { return 45 }
+                            if polygons[647].contains(testy: lat, testx: lng) { return 227 } else { return 45 }
                           }
                         } else {
                           return 227
                         }
                       } else {
-                        if poly[648].contains(testy: lat, testx: lng) { return 45 } else { return 227 }
+                        if polygons[648].contains(testy: lat, testx: lng) { return 45 } else { return 227 }
                       }
                     }
                   }
                 } else {
-                  if poly[649].contains(testy: lat, testx: lng) { return 39 }
-                  if poly[650].contains(testy: lat, testx: lng) { return 227 } else { return 273 }
+                  if polygons[649].contains(testy: lat, testx: lng) { return 39 }
+                  if polygons[650].contains(testy: lat, testx: lng) { return 227 } else { return 273 }
                 }
               } else {
-                if poly[651].contains(testy: lat, testx: lng) { return 45 } else { return 227 }
+                if polygons[651].contains(testy: lat, testx: lng) { return 45 } else { return 227 }
               }
             }
           }
@@ -2908,30 +2908,30 @@ public extension TimeZone {
               if lat < 21.819218 {
                 return 407
               } else {
-                if poly[652].contains(testy: lat, testx: lng) { return 384 } else { return 407 }
+                if polygons[652].contains(testy: lat, testx: lng) { return 384 } else { return 407 }
               }
             } else {
               if lng < -102.505865 {
                 if lat < 22.582341 {
                   if lng < -104.208678 {
-                    if poly[653].contains(testy: lat, testx: lng) { return 34 }
-                    if poly[654].contains(testy: lat, testx: lng) { return 192 }
-                    if poly[655].contains(testy: lat, testx: lng) { return 192 }
-                    if poly[656].contains(testy: lat, testx: lng) { return 384 }
-                    if poly[657].contains(testy: lat, testx: lng) { return 384 } else { return 407 }
+                    if polygons[653].contains(testy: lat, testx: lng) { return 34 }
+                    if polygons[654].contains(testy: lat, testx: lng) { return 192 }
+                    if polygons[655].contains(testy: lat, testx: lng) { return 192 }
+                    if polygons[656].contains(testy: lat, testx: lng) { return 384 }
+                    if polygons[657].contains(testy: lat, testx: lng) { return 384 } else { return 407 }
                   } else {
-                    if poly[658].contains(testy: lat, testx: lng) { return 407 } else { return 192 }
+                    if polygons[658].contains(testy: lat, testx: lng) { return 407 } else { return 192 }
                   }
                 } else {
-                  if poly[659].contains(testy: lat, testx: lng) { return 192 }
-                  if poly[660].contains(testy: lat, testx: lng) { return 407 }
-                  if poly[661].contains(testy: lat, testx: lng) { return 407 } else { return 384 }
+                  if polygons[659].contains(testy: lat, testx: lng) { return 192 }
+                  if polygons[660].contains(testy: lat, testx: lng) { return 407 }
+                  if polygons[661].contains(testy: lat, testx: lng) { return 407 } else { return 384 }
                 }
               } else {
                 if lng < -101.403413 {
-                  if poly[662].contains(testy: lat, testx: lng) { return 384 } else { return 192 }
+                  if polygons[662].contains(testy: lat, testx: lng) { return 384 } else { return 192 }
                 } else {
-                  if poly[663].contains(testy: lat, testx: lng) { return 384 } else { return 192 }
+                  if polygons[663].contains(testy: lat, testx: lng) { return 384 } else { return 192 }
                 }
               }
             }
@@ -2940,16 +2940,16 @@ public extension TimeZone {
               if lat < 24.653814 {
                 if lng < -97.731384 {
                   if lat < 22.513844 {
-                    if poly[664].contains(testy: lat, testx: lng) { return 384 } else { return 192 }
+                    if polygons[664].contains(testy: lat, testx: lng) { return 384 } else { return 192 }
                   } else {
-                    if poly[665].contains(testy: lat, testx: lng) { return 192 } else { return 384 }
+                    if polygons[665].contains(testy: lat, testx: lng) { return 192 } else { return 384 }
                   }
                 } else {
                   if lat < 22.034286 { return 192 } else { return 384 }
                 }
               } else {
                 if lng < -101.085294 {
-                  if poly[666].contains(testy: lat, testx: lng) { return 384 } else { return 192 }
+                  if polygons[666].contains(testy: lat, testx: lng) { return 384 } else { return 192 }
                 } else {
                   return 384
                 }
@@ -2965,15 +2965,15 @@ public extension TimeZone {
             } else {
               if lng < -101.585564 {
                 if lng < -106.892400 {
-                  if poly[667].contains(testy: lat, testx: lng) { return 384 } else { return 407 }
+                  if polygons[667].contains(testy: lat, testx: lng) { return 384 } else { return 407 }
                 } else {
-                  if poly[668].contains(testy: lat, testx: lng) { return 192 } else { return 384 }
+                  if polygons[668].contains(testy: lat, testx: lng) { return 192 } else { return 384 }
                 }
               } else {
                 if lng < -101.332363 {
-                  if poly[669].contains(testy: lat, testx: lng) { return 192 } else { return 384 }
+                  if polygons[669].contains(testy: lat, testx: lng) { return 192 } else { return 384 }
                 } else {
-                  if poly[670].contains(testy: lat, testx: lng) { return 192 } else { return 384 }
+                  if polygons[670].contains(testy: lat, testx: lng) { return 192 } else { return 384 }
                 }
               }
             }
@@ -2992,65 +2992,65 @@ public extension TimeZone {
               if lng < -109.941851 {
                 if lat < 36.299260 {
                   if lng < -110.471276 {
-                    if poly[671].contains(testy: lat, testx: lng) { return 9 }
-                    if poly[672].contains(testy: lat, testx: lng) { return 9 } else { return 273 }
+                    if polygons[671].contains(testy: lat, testx: lng) { return 9 }
+                    if polygons[672].contains(testy: lat, testx: lng) { return 9 } else { return 273 }
                   } else {
-                    if poly[673].contains(testy: lat, testx: lng) { return 9 }
-                    if poly[674].contains(testy: lat, testx: lng) { return 9 }
-                    if poly[675].contains(testy: lat, testx: lng) { return 9 } else { return 273 }
+                    if polygons[673].contains(testy: lat, testx: lng) { return 9 }
+                    if polygons[674].contains(testy: lat, testx: lng) { return 9 }
+                    if polygons[675].contains(testy: lat, testx: lng) { return 9 } else { return 273 }
                   }
                 } else {
-                  if poly[676].contains(testy: lat, testx: lng) { return 9 }
-                  if poly[677].contains(testy: lat, testx: lng) { return 9 } else { return 273 }
+                  if polygons[676].contains(testy: lat, testx: lng) { return 9 }
+                  if polygons[677].contains(testy: lat, testx: lng) { return 9 } else { return 273 }
                 }
               } else {
                 return 273
               }
             } else {
-              if poly[678].contains(testy: lat, testx: lng) { return 227 }
-              if poly[679].contains(testy: lat, testx: lng) { return 227 }
-              if poly[680].contains(testy: lat, testx: lng) { return 273 } else { return 308 }
+              if polygons[678].contains(testy: lat, testx: lng) { return 227 }
+              if polygons[679].contains(testy: lat, testx: lng) { return 227 }
+              if polygons[680].contains(testy: lat, testx: lng) { return 273 } else { return 308 }
             }
           } else {
             if lat < 47.575298 {
               if lng < -103.093439 {
                 if lng < -103.434273 {
-                  if poly[681].contains(testy: lat, testx: lng) { return 160 } else { return 273 }
+                  if polygons[681].contains(testy: lat, testx: lng) { return 160 } else { return 273 }
                 } else {
-                  if poly[682].contains(testy: lat, testx: lng) { return 160 } else { return 273 }
+                  if polygons[682].contains(testy: lat, testx: lng) { return 160 } else { return 273 }
                 }
               } else {
                 if lng < -102.432684 {
                   if lat < 36.998989 {
-                    if poly[683].contains(testy: lat, testx: lng) { return 160 } else { return 273 }
+                    if polygons[683].contains(testy: lat, testx: lng) { return 160 } else { return 273 }
                   } else {
-                    if poly[684].contains(testy: lat, testx: lng) { return 160 } else { return 273 }
+                    if polygons[684].contains(testy: lat, testx: lng) { return 160 } else { return 273 }
                   }
                 } else {
                   if lat < 41.416471 {
-                    if poly[685].contains(testy: lat, testx: lng) { return 273 } else { return 160 }
+                    if polygons[685].contains(testy: lat, testx: lng) { return 273 } else { return 160 }
                   } else {
                     if lat < 44.495885 {
-                      if poly[686].contains(testy: lat, testx: lng) { return 273 } else { return 160 }
+                      if polygons[686].contains(testy: lat, testx: lng) { return 273 } else { return 160 }
                     } else {
                       if lng < -99.919829 {
                         if lat < 46.035592 {
-                          if poly[687].contains(testy: lat, testx: lng) { return 160 } else { return 273 }
+                          if polygons[687].contains(testy: lat, testx: lng) { return 160 } else { return 273 }
                         } else {
                           if lng < -101.176257 {
                             if lat < 46.805445 {
-                              if poly[688].contains(testy: lat, testx: lng) { return 52 }
-                              if poly[689].contains(testy: lat, testx: lng) { return 160 } else { return 273 }
+                              if polygons[688].contains(testy: lat, testx: lng) { return 52 }
+                              if polygons[689].contains(testy: lat, testx: lng) { return 160 } else { return 273 }
                             } else {
-                              if poly[690].contains(testy: lat, testx: lng) { return 52 }
-                              if poly[691].contains(testy: lat, testx: lng) { return 105 }
-                              if poly[692].contains(testy: lat, testx: lng) { return 160 }
-                              if poly[693].contains(testy: lat, testx: lng) { return 273 } else { return 71 }
+                              if polygons[690].contains(testy: lat, testx: lng) { return 52 }
+                              if polygons[691].contains(testy: lat, testx: lng) { return 105 }
+                              if polygons[692].contains(testy: lat, testx: lng) { return 160 }
+                              if polygons[693].contains(testy: lat, testx: lng) { return 273 } else { return 71 }
                             }
                           } else {
-                            if poly[694].contains(testy: lat, testx: lng) { return 52 }
-                            if poly[695].contains(testy: lat, testx: lng) { return 105 }
-                            if poly[696].contains(testy: lat, testx: lng) { return 273 } else { return 160 }
+                            if polygons[694].contains(testy: lat, testx: lng) { return 52 }
+                            if polygons[695].contains(testy: lat, testx: lng) { return 105 }
+                            if polygons[696].contains(testy: lat, testx: lng) { return 273 } else { return 160 }
                           }
                         }
                       } else {
@@ -3063,23 +3063,23 @@ public extension TimeZone {
             } else {
               if lng < -103.610133 {
                 if lat < 48.997666 {
-                  if poly[697].contains(testy: lat, testx: lng) { return 160 }
-                  if poly[698].contains(testy: lat, testx: lng) { return 308 } else { return 273 }
+                  if polygons[697].contains(testy: lat, testx: lng) { return 160 }
+                  if polygons[698].contains(testy: lat, testx: lng) { return 308 } else { return 273 }
                 } else {
-                  if poly[699].contains(testy: lat, testx: lng) { return 74 } else { return 308 }
+                  if polygons[699].contains(testy: lat, testx: lng) { return 74 } else { return 308 }
                 }
               } else {
                 if lat < 47.674011 {
                   if lng < -102.711964 {
-                    if poly[700].contains(testy: lat, testx: lng) { return 273 } else { return 160 }
+                    if polygons[700].contains(testy: lat, testx: lng) { return 273 } else { return 160 }
                   } else {
-                    if poly[701].contains(testy: lat, testx: lng) { return 273 } else { return 160 }
+                    if polygons[701].contains(testy: lat, testx: lng) { return 273 } else { return 160 }
                   }
                 } else {
                   if lat < 48.994424 {
-                    if poly[702].contains(testy: lat, testx: lng) { return 308 } else { return 160 }
+                    if polygons[702].contains(testy: lat, testx: lng) { return 308 } else { return 160 }
                   } else {
-                    if poly[703].contains(testy: lat, testx: lng) { return 308 } else { return 284 }
+                    if polygons[703].contains(testy: lat, testx: lng) { return 308 } else { return 284 }
                   }
                 }
               }
@@ -3090,9 +3090,9 @@ public extension TimeZone {
         if lat < 27.880161 {
           if lat < 25.959148 {
             if lat < 25.643694 {
-              if poly[704].contains(testy: lat, testx: lng) { return 374 } else { return 384 }
+              if polygons[704].contains(testy: lat, testx: lng) { return 374 } else { return 384 }
             } else {
-              if poly[705].contains(testy: lat, testx: lng) { return 160 } else { return 374 }
+              if polygons[705].contains(testy: lat, testx: lng) { return 160 } else { return 374 }
             }
           } else {
             return 160
@@ -3101,8 +3101,8 @@ public extension TimeZone {
           if lat < 29.841980 {
             return 160
           } else {
-            if poly[706].contains(testy: lat, testx: lng) { return 284 }
-            if poly[707].contains(testy: lat, testx: lng) { return 378 } else { return 160 }
+            if polygons[706].contains(testy: lat, testx: lng) { return 284 }
+            if polygons[707].contains(testy: lat, testx: lng) { return 378 } else { return 160 }
           }
         }
       }
@@ -3124,9 +3124,9 @@ public extension TimeZone {
               } else {
                 if lng < -84.981323 {
                   if lat < 30.444105 {
-                    if poly[708].contains(testy: lat, testx: lng) { return 165 } else { return 160 }
+                    if polygons[708].contains(testy: lat, testx: lng) { return 165 } else { return 160 }
                   } else {
-                    if poly[709].contains(testy: lat, testx: lng) { return 165 } else { return 160 }
+                    if polygons[709].contains(testy: lat, testx: lng) { return 165 } else { return 160 }
                   }
                 } else {
                   return 165
@@ -3137,22 +3137,22 @@ public extension TimeZone {
             if lat < 38.929596 {
               if lat < 36.997822 {
                 if lat < 33.736012 {
-                  if poly[710].contains(testy: lat, testx: lng) { return 165 } else { return 160 }
+                  if polygons[710].contains(testy: lat, testx: lng) { return 165 } else { return 160 }
                 } else {
                   if lng < -86.248566 {
                     return 160
                   } else {
                     if lat < 35.366917 {
-                      if poly[711].contains(testy: lat, testx: lng) { return 165 } else { return 160 }
+                      if polygons[711].contains(testy: lat, testx: lng) { return 165 } else { return 160 }
                     } else {
                       if lng < -85.412205 {
                         return 160
                       } else {
                         if lat < 36.182369 {
-                          if poly[712].contains(testy: lat, testx: lng) { return 165 } else { return 160 }
+                          if polygons[712].contains(testy: lat, testx: lng) { return 165 } else { return 160 }
                         } else {
-                          if poly[713].contains(testy: lat, testx: lng) { return 110 }
-                          if poly[714].contains(testy: lat, testx: lng) { return 160 } else { return 165 }
+                          if polygons[713].contains(testy: lat, testx: lng) { return 110 }
+                          if polygons[714].contains(testy: lat, testx: lng) { return 160 } else { return 165 }
                         }
                       }
                     }
@@ -3164,49 +3164,49 @@ public extension TimeZone {
                     return 160
                   } else {
                     if lat < 38.446652 {
-                      if poly[715].contains(testy: lat, testx: lng) { return 54 }
-                      if poly[716].contains(testy: lat, testx: lng) { return 309 } else { return 160 }
+                      if polygons[715].contains(testy: lat, testx: lng) { return 54 }
+                      if polygons[716].contains(testy: lat, testx: lng) { return 309 } else { return 160 }
                     } else {
-                      if poly[717].contains(testy: lat, testx: lng) { return 54 }
-                      if poly[718].contains(testy: lat, testx: lng) { return 89 }
-                      if poly[719].contains(testy: lat, testx: lng) { return 160 }
-                      if poly[720].contains(testy: lat, testx: lng) { return 160 } else { return 309 }
+                      if polygons[717].contains(testy: lat, testx: lng) { return 54 }
+                      if polygons[718].contains(testy: lat, testx: lng) { return 89 }
+                      if polygons[719].contains(testy: lat, testx: lng) { return 160 }
+                      if polygons[720].contains(testy: lat, testx: lng) { return 160 } else { return 309 }
                     }
                   }
                 } else {
                   if lng < -85.824051 {
                     if lat < 37.963688 {
-                      if poly[721].contains(testy: lat, testx: lng) { return 90 }
-                      if poly[722].contains(testy: lat, testx: lng) { return 130 }
-                      if poly[723].contains(testy: lat, testx: lng) { return 165 } else { return 160 }
+                      if polygons[721].contains(testy: lat, testx: lng) { return 90 }
+                      if polygons[722].contains(testy: lat, testx: lng) { return 130 }
+                      if polygons[723].contains(testy: lat, testx: lng) { return 165 } else { return 160 }
                     } else {
                       if lng < -86.448154 {
-                        if poly[724].contains(testy: lat, testx: lng) { return 89 }
-                        if poly[725].contains(testy: lat, testx: lng) { return 160 }
-                        if poly[726].contains(testy: lat, testx: lng) { return 160 }
-                        if poly[727].contains(testy: lat, testx: lng) { return 165 }
-                        if poly[728].contains(testy: lat, testx: lng) { return 165 }
-                        if poly[729].contains(testy: lat, testx: lng) { return 309 }
-                        if poly[730].contains(testy: lat, testx: lng) { return 388 } else { return 90 }
+                        if polygons[724].contains(testy: lat, testx: lng) { return 89 }
+                        if polygons[725].contains(testy: lat, testx: lng) { return 160 }
+                        if polygons[726].contains(testy: lat, testx: lng) { return 160 }
+                        if polygons[727].contains(testy: lat, testx: lng) { return 165 }
+                        if polygons[728].contains(testy: lat, testx: lng) { return 165 }
+                        if polygons[729].contains(testy: lat, testx: lng) { return 309 }
+                        if polygons[730].contains(testy: lat, testx: lng) { return 388 } else { return 90 }
                       } else {
                         if lat < 38.446592 {
-                          if poly[731].contains(testy: lat, testx: lng) { return 89 }
-                          if poly[732].contains(testy: lat, testx: lng) { return 90 }
-                          if poly[733].contains(testy: lat, testx: lng) { return 130 }
-                          if poly[734].contains(testy: lat, testx: lng) { return 160 }
-                          if poly[735].contains(testy: lat, testx: lng) { return 388 } else { return 165 }
+                          if polygons[731].contains(testy: lat, testx: lng) { return 89 }
+                          if polygons[732].contains(testy: lat, testx: lng) { return 90 }
+                          if polygons[733].contains(testy: lat, testx: lng) { return 130 }
+                          if polygons[734].contains(testy: lat, testx: lng) { return 160 }
+                          if polygons[735].contains(testy: lat, testx: lng) { return 388 } else { return 165 }
                         } else {
-                          if poly[736].contains(testy: lat, testx: lng) { return 130 } else { return 89 }
+                          if polygons[736].contains(testy: lat, testx: lng) { return 130 } else { return 89 }
                         }
                       }
                     }
                   } else {
                     if lat < 37.963709 {
-                      if poly[737].contains(testy: lat, testx: lng) { return 160 } else { return 165 }
+                      if polygons[737].contains(testy: lat, testx: lng) { return 160 } else { return 165 }
                     } else {
-                      if poly[738].contains(testy: lat, testx: lng) { return 89 }
-                      if poly[739].contains(testy: lat, testx: lng) { return 130 }
-                      if poly[740].contains(testy: lat, testx: lng) { return 391 } else { return 165 }
+                      if polygons[738].contains(testy: lat, testx: lng) { return 89 }
+                      if polygons[739].contains(testy: lat, testx: lng) { return 130 }
+                      if polygons[740].contains(testy: lat, testx: lng) { return 391 } else { return 165 }
                     }
                   }
                 }
@@ -3214,15 +3214,15 @@ public extension TimeZone {
             } else {
               if lng < -86.466347 {
                 if lat < 41.760455 {
-                  if poly[741].contains(testy: lat, testx: lng) { return 89 }
-                  if poly[742].contains(testy: lat, testx: lng) { return 248 }
-                  if poly[743].contains(testy: lat, testx: lng) { return 257 } else { return 160 }
+                  if polygons[741].contains(testy: lat, testx: lng) { return 89 }
+                  if polygons[742].contains(testy: lat, testx: lng) { return 248 }
+                  if polygons[743].contains(testy: lat, testx: lng) { return 257 } else { return 160 }
                 } else {
                   if lng < -87.550373 { return 160 } else { return 93 }
                 }
               } else {
-                if poly[744].contains(testy: lat, testx: lng) { return 89 }
-                if poly[745].contains(testy: lat, testx: lng) { return 165 } else { return 93 }
+                if polygons[744].contains(testy: lat, testx: lng) { return 89 }
+                if polygons[745].contains(testy: lat, testx: lng) { return 165 } else { return 93 }
               }
             }
           }
@@ -3233,7 +3233,7 @@ public extension TimeZone {
             if lng < -83.173058 {
               if lat < 41.733951 {
                 if lng < -83.446740 {
-                  if poly[746].contains(testy: lat, testx: lng) { return 165 } else { return 93 }
+                  if polygons[746].contains(testy: lat, testx: lng) { return 165 } else { return 93 }
                 } else {
                   return 165
                 }
@@ -3245,7 +3245,7 @@ public extension TimeZone {
                 if lat < 41.829945 {
                   if lng < -82.742973 { return 165 } else { return 238 }
                 } else {
-                  if poly[747].contains(testy: lat, testx: lng) { return 238 } else { return 93 }
+                  if polygons[747].contains(testy: lat, testx: lng) { return 238 } else { return 93 }
                 }
               } else {
                 if lat < 42.303441 { if lng < -81.847701 { return 238 } else { return 165 } } else { return 238 }
@@ -3264,21 +3264,21 @@ public extension TimeZone {
               if lng < -87.351521 {
                 if lng < -87.652123 {
                   if lat < 45.240341 {
-                    if poly[748].contains(testy: lat, testx: lng) { return 94 }
-                    if poly[749].contains(testy: lat, testx: lng) { return 94 }
-                    if poly[750].contains(testy: lat, testx: lng) { return 94 } else { return 160 }
+                    if polygons[748].contains(testy: lat, testx: lng) { return 94 }
+                    if polygons[749].contains(testy: lat, testx: lng) { return 94 }
+                    if polygons[750].contains(testy: lat, testx: lng) { return 94 } else { return 160 }
                   } else {
-                    if poly[751].contains(testy: lat, testx: lng) { return 160 } else { return 94 }
+                    if polygons[751].contains(testy: lat, testx: lng) { return 160 } else { return 94 }
                   }
                 } else {
                   if lat < 44.970303 {
                     return 160
                   } else {
                     if lng < -87.580826 {
-                      if poly[752].contains(testy: lat, testx: lng) { return 160 }
-                      if poly[753].contains(testy: lat, testx: lng) { return 160 } else { return 94 }
+                      if polygons[752].contains(testy: lat, testx: lng) { return 160 }
+                      if polygons[753].contains(testy: lat, testx: lng) { return 160 } else { return 94 }
                     } else {
-                      if poly[754].contains(testy: lat, testx: lng) { return 160 } else { return 94 }
+                      if polygons[754].contains(testy: lat, testx: lng) { return 160 } else { return 94 }
                     }
                   }
                 }
@@ -3289,16 +3289,16 @@ public extension TimeZone {
               if lng < -87.267632 {
                 if lat < 46.767605 {
                   if lng < -88.852905 {
-                    if poly[755].contains(testy: lat, testx: lng) { return 93 }
-                    if poly[756].contains(testy: lat, testx: lng) { return 160 } else { return 94 }
+                    if polygons[755].contains(testy: lat, testx: lng) { return 93 }
+                    if polygons[756].contains(testy: lat, testx: lng) { return 160 } else { return 94 }
                   } else {
                     if lng < -88.060268 {
-                      if poly[757].contains(testy: lat, testx: lng) { return 93 }
-                      if poly[758].contains(testy: lat, testx: lng) { return 160 } else { return 94 }
+                      if polygons[757].contains(testy: lat, testx: lng) { return 93 }
+                      if polygons[758].contains(testy: lat, testx: lng) { return 160 } else { return 94 }
                     } else {
-                      if poly[759].contains(testy: lat, testx: lng) { return 93 }
-                      if poly[760].contains(testy: lat, testx: lng) { return 93 }
-                      if poly[761].contains(testy: lat, testx: lng) { return 160 } else { return 94 }
+                      if polygons[759].contains(testy: lat, testx: lng) { return 93 }
+                      if polygons[760].contains(testy: lat, testx: lng) { return 93 }
+                      if polygons[761].contains(testy: lat, testx: lng) { return 160 } else { return 94 }
                     }
                   }
                 } else {
@@ -3316,10 +3316,10 @@ public extension TimeZone {
                 if lng < -89.307442 {
                   if lng < -89.505821 {
                     if lng < -91.087389 {
-                      if poly[762].contains(testy: lat, testx: lng) { return 223 } else { return 160 }
+                      if polygons[762].contains(testy: lat, testx: lng) { return 223 } else { return 160 }
                     } else {
-                      if poly[763].contains(testy: lat, testx: lng) { return 223 }
-                      if poly[764].contains(testy: lat, testx: lng) { return 238 } else { return 160 }
+                      if polygons[763].contains(testy: lat, testx: lng) { return 223 }
+                      if polygons[764].contains(testy: lat, testx: lng) { return 238 } else { return 160 }
                     }
                   } else {
                     return 238
@@ -3331,17 +3331,17 @@ public extension TimeZone {
                 if lng < -89.998705 {
                   if lng < -91.732543 {
                     if lat < 48.464100 {
-                      if poly[765].contains(testy: lat, testx: lng) { return 160 }
-                      if poly[766].contains(testy: lat, testx: lng) { return 284 } else { return 223 }
+                      if polygons[765].contains(testy: lat, testx: lng) { return 160 }
+                      if polygons[766].contains(testy: lat, testx: lng) { return 284 } else { return 223 }
                     } else {
-                      if poly[767].contains(testy: lat, testx: lng) { return 223 } else { return 284 }
+                      if polygons[767].contains(testy: lat, testx: lng) { return 223 } else { return 284 }
                     }
                   } else {
                     if lat < 49.000000 {
-                      if poly[768].contains(testy: lat, testx: lng) { return 160 }
-                      if poly[769].contains(testy: lat, testx: lng) { return 238 } else { return 223 }
+                      if polygons[768].contains(testy: lat, testx: lng) { return 160 }
+                      if polygons[769].contains(testy: lat, testx: lng) { return 238 } else { return 223 }
                     } else {
-                      if poly[770].contains(testy: lat, testx: lng) { return 284 } else { return 238 }
+                      if polygons[770].contains(testy: lat, testx: lng) { return 284 } else { return 238 }
                     }
                   }
                 } else {
@@ -3349,7 +3349,7 @@ public extension TimeZone {
                     return 238
                   } else {
                     if lat < 52.750000 {
-                      if poly[771].contains(testy: lat, testx: lng) { return 238 } else { return 358 }
+                      if polygons[771].contains(testy: lat, testx: lng) { return 238 } else { return 358 }
                     } else {
                       return 284
                     }
@@ -3366,7 +3366,7 @@ public extension TimeZone {
                   if lat < 48.556038 {
                     return 238
                   } else {
-                    if poly[772].contains(testy: lat, testx: lng) { return 335 } else { return 238 }
+                    if polygons[772].contains(testy: lat, testx: lng) { return 335 } else { return 238 }
                   }
                 }
               }
@@ -3384,7 +3384,7 @@ public extension TimeZone {
               if lat < 46.770527 {
                 if lng < -84.597824 {
                   if lng < -84.706245 {
-                    if poly[773].contains(testy: lat, testx: lng) { return 238 } else { return 93 }
+                    if polygons[773].contains(testy: lat, testx: lng) { return 238 } else { return 93 }
                   } else {
                     return 93
                   }
@@ -3396,10 +3396,10 @@ public extension TimeZone {
                       if lat < 45.987839 {
                         return 93
                       } else {
-                        if poly[774].contains(testy: lat, testx: lng) { return 238 } else { return 93 }
+                        if polygons[774].contains(testy: lat, testx: lng) { return 238 } else { return 93 }
                       }
                     } else {
-                      if poly[775].contains(testy: lat, testx: lng) { return 238 } else { return 93 }
+                      if polygons[775].contains(testy: lat, testx: lng) { return 238 } else { return 93 }
                     }
                   }
                 }
@@ -3428,7 +3428,7 @@ public extension TimeZone {
               } else {
                 if lat < 24.286565 {
                   if lat < 21.330532 {
-                    if poly[776].contains(testy: lat, testx: lng) { return 29 } else { return 33 }
+                    if polygons[776].contains(testy: lat, testx: lng) { return 29 } else { return 33 }
                   } else {
                     return 29
                   }
@@ -3442,39 +3442,39 @@ public extension TimeZone {
           } else {
             if lng < -13.417682 {
               if lat < 27.131824 {
-                if poly[777].contains(testy: lat, testx: lng) { return 33 } else { return 29 }
+                if polygons[777].contains(testy: lat, testx: lng) { return 33 } else { return 29 }
               } else {
                 return 264
               }
             } else {
               if lat < 27.298073 {
                 if lng < 1.713168 {
-                  if poly[778].contains(testy: lat, testx: lng) { return 29 }
-                  if poly[779].contains(testy: lat, testx: lng) { return 33 }
-                  if poly[780].contains(testy: lat, testx: lng) { return 380 } else { return 181 }
+                  if polygons[778].contains(testy: lat, testx: lng) { return 29 }
+                  if polygons[779].contains(testy: lat, testx: lng) { return 33 }
+                  if polygons[780].contains(testy: lat, testx: lng) { return 380 } else { return 181 }
                 } else {
-                  if poly[781].contains(testy: lat, testx: lng) { return 260 } else { return 380 }
+                  if polygons[781].contains(testy: lat, testx: lng) { return 260 } else { return 380 }
                 }
               } else {
                 if lng < -5.275472 {
                   if lat < 29.949635 {
-                    if poly[782].contains(testy: lat, testx: lng) { return 29 }
-                    if poly[783].contains(testy: lat, testx: lng) { return 380 } else { return 343 }
+                    if polygons[782].contains(testy: lat, testx: lng) { return 29 }
+                    if polygons[783].contains(testy: lat, testx: lng) { return 380 } else { return 343 }
                   } else {
-                    if poly[784].contains(testy: lat, testx: lng) { return 315 } else { return 343 }
+                    if polygons[784].contains(testy: lat, testx: lng) { return 315 } else { return 343 }
                   }
                 } else {
                   if lat < 35.690445 {
                     if lng < 0.924000 {
                       if lat < 31.494259 {
-                        if poly[785].contains(testy: lat, testx: lng) { return 343 } else { return 380 }
+                        if polygons[785].contains(testy: lat, testx: lng) { return 343 } else { return 380 }
                       } else {
                         if lng < -2.175736 {
-                          if poly[786].contains(testy: lat, testx: lng) { return 315 }
-                          if poly[787].contains(testy: lat, testx: lng) { return 380 }
-                          if poly[788].contains(testy: lat, testx: lng) { return 380 } else { return 343 }
+                          if polygons[786].contains(testy: lat, testx: lng) { return 315 }
+                          if polygons[787].contains(testy: lat, testx: lng) { return 380 }
+                          if polygons[788].contains(testy: lat, testx: lng) { return 380 } else { return 343 }
                         } else {
-                          if poly[789].contains(testy: lat, testx: lng) { return 343 } else { return 380 }
+                          if polygons[789].contains(testy: lat, testx: lng) { return 343 } else { return 380 }
                         }
                       }
                     } else {
@@ -3494,12 +3494,12 @@ public extension TimeZone {
             if lng < -0.467861 {
               if lng < -5.339639 {
                 if lng < -6.933861 {
-                  if poly[790].contains(testy: lat, testx: lng) { return 57 } else { return 334 }
+                  if polygons[790].contains(testy: lat, testx: lng) { return 57 } else { return 334 }
                 } else {
                   if lng < -6.877555 {
                     return 334
                   } else {
-                    if poly[791].contains(testy: lat, testx: lng) { return 405 } else { return 334 }
+                    if polygons[791].contains(testy: lat, testx: lng) { return 405 } else { return 334 }
                   }
                 }
               } else {
@@ -3516,12 +3516,12 @@ public extension TimeZone {
             if lng < -6.182694 {
               if lat < 42.145638 {
                 if lng < -7.794903 {
-                  if poly[792].contains(testy: lat, testx: lng) { return 334 } else { return 57 }
+                  if polygons[792].contains(testy: lat, testx: lng) { return 334 } else { return 57 }
                 } else {
                   if lat < 40.661583 {
-                    if poly[793].contains(testy: lat, testx: lng) { return 334 } else { return 57 }
+                    if polygons[793].contains(testy: lat, testx: lng) { return 334 } else { return 57 }
                   } else {
-                    if poly[794].contains(testy: lat, testx: lng) { return 57 } else { return 334 }
+                    if polygons[794].contains(testy: lat, testx: lng) { return 57 } else { return 334 }
                   }
                 }
               } else {
@@ -3540,16 +3540,16 @@ public extension TimeZone {
                     return 334
                   } else {
                     if lng < -0.876549 {
-                      if poly[795].contains(testy: lat, testx: lng) { return 297 } else { return 334 }
+                      if polygons[795].contains(testy: lat, testx: lng) { return 297 } else { return 334 }
                     } else {
-                      if poly[796].contains(testy: lat, testx: lng) { return 136 }
-                      if poly[797].contains(testy: lat, testx: lng) { return 297 }
-                      if poly[798].contains(testy: lat, testx: lng) { return 297 } else { return 334 }
+                      if polygons[796].contains(testy: lat, testx: lng) { return 136 }
+                      if polygons[797].contains(testy: lat, testx: lng) { return 297 }
+                      if polygons[798].contains(testy: lat, testx: lng) { return 297 } else { return 334 }
                     }
                   }
                 } else {
-                  if poly[799].contains(testy: lat, testx: lng) { return 334 }
-                  if poly[800].contains(testy: lat, testx: lng) { return 334 } else { return 297 }
+                  if polygons[799].contains(testy: lat, testx: lng) { return 334 }
+                  if polygons[800].contains(testy: lat, testx: lng) { return 334 } else { return 297 }
                 }
               }
             } else {
@@ -3562,9 +3562,9 @@ public extension TimeZone {
           } else {
             if lat < 45.349019 {
               if lat < 45.262008 {
-                if poly[801].contains(testy: lat, testx: lng) { return 271 } else { return 297 }
+                if polygons[801].contains(testy: lat, testx: lng) { return 271 } else { return 297 }
               } else {
-                if poly[802].contains(testy: lat, testx: lng) { return 271 } else { return 297 }
+                if polygons[802].contains(testy: lat, testx: lng) { return 271 } else { return 297 }
               }
             } else {
               if lng < 3.262819 {
@@ -3574,13 +3574,13 @@ public extension TimeZone {
                   return 297
                 } else {
                   if lat < 46.454760 {
-                    if poly[803].contains(testy: lat, testx: lng) { return 172 }
-                    if poly[804].contains(testy: lat, testx: lng) { return 172 }
-                    if poly[805].contains(testy: lat, testx: lng) { return 172 }
-                    if poly[806].contains(testy: lat, testx: lng) { return 271 } else { return 297 }
+                    if polygons[803].contains(testy: lat, testx: lng) { return 172 }
+                    if polygons[804].contains(testy: lat, testx: lng) { return 172 }
+                    if polygons[805].contains(testy: lat, testx: lng) { return 172 }
+                    if polygons[806].contains(testy: lat, testx: lng) { return 271 } else { return 297 }
                   } else {
-                    if poly[807].contains(testy: lat, testx: lng) { return 297 }
-                    if poly[808].contains(testy: lat, testx: lng) { return 297 } else { return 172 }
+                    if polygons[807].contains(testy: lat, testx: lng) { return 297 }
+                    if polygons[808].contains(testy: lat, testx: lng) { return 297 } else { return 172 }
                   }
                 }
               }
@@ -3612,7 +3612,7 @@ public extension TimeZone {
                   if lat < 49.044780 { return 296 } else { return 297 }
                 } else {
                   if lat < 49.265057 {
-                    if poly[809].contains(testy: lat, testx: lng) { return 139 } else { return 297 }
+                    if polygons[809].contains(testy: lat, testx: lng) { return 139 } else { return 297 }
                   } else {
                     if lng < -2.055792 { return 296 } else { return 297 }
                   }
@@ -3625,8 +3625,8 @@ public extension TimeZone {
         } else {
           if lng < 1.759000 {
             if lat < 50.950080 {
-              if poly[810].contains(testy: lat, testx: lng) { return 303 }
-              if poly[811].contains(testy: lat, testx: lng) { return 303 } else { return 297 }
+              if polygons[810].contains(testy: lat, testx: lng) { return 303 }
+              if polygons[811].contains(testy: lat, testx: lng) { return 303 } else { return 297 }
             } else {
               return 303
             }
@@ -3638,54 +3638,54 @@ public extension TimeZone {
                     return 297
                   } else {
                     if lng < 3.100118 {
-                      if poly[812].contains(testy: lat, testx: lng) { return 254 } else { return 297 }
+                      if polygons[812].contains(testy: lat, testx: lng) { return 254 } else { return 297 }
                     } else {
                       if lat < 50.519208 {
-                        if poly[813].contains(testy: lat, testx: lng) { return 254 }
-                        if poly[814].contains(testy: lat, testx: lng) { return 254 } else { return 297 }
+                        if polygons[813].contains(testy: lat, testx: lng) { return 254 }
+                        if polygons[814].contains(testy: lat, testx: lng) { return 254 } else { return 297 }
                       } else {
-                        if poly[815].contains(testy: lat, testx: lng) { return 254 }
-                        if poly[816].contains(testy: lat, testx: lng) { return 297 }
-                        if poly[817].contains(testy: lat, testx: lng) { return 297 } else { return 385 }
+                        if polygons[815].contains(testy: lat, testx: lng) { return 254 }
+                        if polygons[816].contains(testy: lat, testx: lng) { return 297 }
+                        if polygons[817].contains(testy: lat, testx: lng) { return 297 } else { return 385 }
                       }
                     }
                   }
                 } else {
                   if lat < 49.532972 {
-                    if poly[818].contains(testy: lat, testx: lng) { return 6 }
-                    if poly[819].contains(testy: lat, testx: lng) { return 211 }
-                    if poly[820].contains(testy: lat, testx: lng) { return 254 } else { return 297 }
+                    if polygons[818].contains(testy: lat, testx: lng) { return 6 }
+                    if polygons[819].contains(testy: lat, testx: lng) { return 211 }
+                    if polygons[820].contains(testy: lat, testx: lng) { return 254 } else { return 297 }
                   } else {
                     if lng < 5.782354 {
                       if lat < 50.519208 {
-                        if poly[821].contains(testy: lat, testx: lng) { return 211 }
-                        if poly[822].contains(testy: lat, testx: lng) { return 211 }
-                        if poly[823].contains(testy: lat, testx: lng) { return 297 }
-                        if poly[824].contains(testy: lat, testx: lng) { return 297 } else { return 254 }
+                        if polygons[821].contains(testy: lat, testx: lng) { return 211 }
+                        if polygons[822].contains(testy: lat, testx: lng) { return 211 }
+                        if polygons[823].contains(testy: lat, testx: lng) { return 297 }
+                        if polygons[824].contains(testy: lat, testx: lng) { return 297 } else { return 254 }
                       } else {
-                        if poly[825].contains(testy: lat, testx: lng) { return 254 } else { return 385 }
+                        if polygons[825].contains(testy: lat, testx: lng) { return 254 } else { return 385 }
                       }
                     } else {
                       if lat < 50.519208 {
                         if lng < 6.452913 {
                           if lat < 50.026090 {
-                            if poly[826].contains(testy: lat, testx: lng) { return 6 }
-                            if poly[827].contains(testy: lat, testx: lng) { return 6 }
-                            if poly[828].contains(testy: lat, testx: lng) { return 254 }
-                            if poly[829].contains(testy: lat, testx: lng) { return 254 }
-                            if poly[830].contains(testy: lat, testx: lng) { return 254 }
-                            if poly[831].contains(testy: lat, testx: lng) { return 297 } else { return 211 }
+                            if polygons[826].contains(testy: lat, testx: lng) { return 6 }
+                            if polygons[827].contains(testy: lat, testx: lng) { return 6 }
+                            if polygons[828].contains(testy: lat, testx: lng) { return 254 }
+                            if polygons[829].contains(testy: lat, testx: lng) { return 254 }
+                            if polygons[830].contains(testy: lat, testx: lng) { return 254 }
+                            if polygons[831].contains(testy: lat, testx: lng) { return 297 } else { return 211 }
                           } else {
-                            if poly[832].contains(testy: lat, testx: lng) { return 6 }
-                            if poly[833].contains(testy: lat, testx: lng) { return 211 } else { return 254 }
+                            if polygons[832].contains(testy: lat, testx: lng) { return 6 }
+                            if polygons[833].contains(testy: lat, testx: lng) { return 211 } else { return 254 }
                           }
                         } else {
-                          if poly[834].contains(testy: lat, testx: lng) { return 211 } else { return 6 }
+                          if polygons[834].contains(testy: lat, testx: lng) { return 211 } else { return 6 }
                         }
                       } else {
-                        if poly[835].contains(testy: lat, testx: lng) { return 254 }
-                        if poly[836].contains(testy: lat, testx: lng) { return 254 }
-                        if poly[837].contains(testy: lat, testx: lng) { return 385 } else { return 6 }
+                        if polygons[835].contains(testy: lat, testx: lng) { return 254 }
+                        if polygons[836].contains(testy: lat, testx: lng) { return 254 }
+                        if polygons[837].contains(testy: lat, testx: lng) { return 385 } else { return 6 }
                       }
                     }
                   }
@@ -3694,14 +3694,14 @@ public extension TimeZone {
                 if lng < 4.356167 {
                   return 385
                 } else {
-                  if poly[838].contains(testy: lat, testx: lng) { return 6 } else { return 385 }
+                  if polygons[838].contains(testy: lat, testx: lng) { return 6 } else { return 385 }
                 }
               }
             } else {
               if lng < 5.862928 {
                 return 385
               } else {
-                if poly[839].contains(testy: lat, testx: lng) { return 6 } else { return 385 }
+                if polygons[839].contains(testy: lat, testx: lng) { return 6 } else { return 385 }
               }
             }
           }
@@ -3718,7 +3718,7 @@ public extension TimeZone {
         } else {
           if lng < -67.827522 {
             if lng < -69.624689 {
-              if poly[840].contains(testy: lat, testx: lng) { return 20 } else { return 165 }
+              if polygons[840].contains(testy: lat, testx: lng) { return 20 } else { return 165 }
             } else {
               return 165
             }
@@ -3728,11 +3728,11 @@ public extension TimeZone {
                 return 165
               } else {
                 if lat < 45.028847 {
-                  if poly[841].contains(testy: lat, testx: lng) { return 77 }
-                  if poly[842].contains(testy: lat, testx: lng) { return 77 } else { return 165 }
+                  if polygons[841].contains(testy: lat, testx: lng) { return 77 }
+                  if polygons[842].contains(testy: lat, testx: lng) { return 77 } else { return 165 }
                 } else {
                   if lng < -67.090355 {
-                    if poly[843].contains(testy: lat, testx: lng) { return 77 } else { return 165 }
+                    if polygons[843].contains(testy: lat, testx: lng) { return 77 } else { return 165 }
                   } else {
                     return 77
                   }
@@ -3755,13 +3755,13 @@ public extension TimeZone {
                     if lat < 45.085256 {
                       return 118
                     } else {
-                      if poly[844].contains(testy: lat, testx: lng) { return 118 } else { return 77 }
+                      if polygons[844].contains(testy: lat, testx: lng) { return 118 } else { return 77 }
                     }
                   } else {
                     if lat < 45.387333 {
                       return 118
                     } else {
-                      if poly[845].contains(testy: lat, testx: lng) { return 77 } else { return 118 }
+                      if polygons[845].contains(testy: lat, testx: lng) { return 77 } else { return 118 }
                     }
                   }
                 } else {
@@ -3781,12 +3781,12 @@ public extension TimeZone {
                 if lng < -60.766365 {
                   return 118
                 } else {
-                  if poly[846].contains(testy: lat, testx: lng) { return 81 } else { return 118 }
+                  if polygons[846].contains(testy: lat, testx: lng) { return 81 } else { return 118 }
                 }
               } else {
                 if lng < -60.311749 {
-                  if poly[847].contains(testy: lat, testx: lng) { return 81 }
-                  if poly[848].contains(testy: lat, testx: lng) { return 81 } else { return 118 }
+                  if polygons[847].contains(testy: lat, testx: lng) { return 81 }
+                  if polygons[848].contains(testy: lat, testx: lng) { return 81 } else { return 118 }
                 } else {
                   return 81
                 }
@@ -3801,8 +3801,8 @@ public extension TimeZone {
           if lat < 47.639160 {
             if lng < -64.803614 {
               if lng < -67.786521 {
-                if poly[849].contains(testy: lat, testx: lng) { return 20 }
-                if poly[850].contains(testy: lat, testx: lng) { return 165 } else { return 77 }
+                if polygons[849].contains(testy: lat, testx: lng) { return 20 }
+                if polygons[850].contains(testy: lat, testx: lng) { return 165 } else { return 77 }
               } else {
                 return 77
               }
@@ -3816,12 +3816,12 @@ public extension TimeZone {
                   if lng < -69.406061 {
                     return 20
                   } else {
-                    if poly[851].contains(testy: lat, testx: lng) { return 77 }
-                    if poly[852].contains(testy: lat, testx: lng) { return 77 } else { return 20 }
+                    if polygons[851].contains(testy: lat, testx: lng) { return 77 }
+                    if polygons[852].contains(testy: lat, testx: lng) { return 77 } else { return 20 }
                   }
                 } else {
                   if lng < -66.291616 {
-                    if poly[853].contains(testy: lat, testx: lng) { return 20 } else { return 77 }
+                    if polygons[853].contains(testy: lat, testx: lng) { return 20 } else { return 77 }
                   } else {
                     return 77
                   }
@@ -3843,23 +3843,23 @@ public extension TimeZone {
               return 20
             } else {
               if lng < -66.638208 {
-                if poly[854].contains(testy: lat, testx: lng) { return 182 } else { return 20 }
+                if polygons[854].contains(testy: lat, testx: lng) { return 182 } else { return 20 }
               } else {
                 if lng < -64.843909 {
                   if lat < 51.732883 {
-                    if poly[855].contains(testy: lat, testx: lng) { return 182 } else { return 20 }
+                    if polygons[855].contains(testy: lat, testx: lng) { return 182 } else { return 20 }
                   } else {
                     if lng < -65.741058 {
-                      if poly[856].contains(testy: lat, testx: lng) { return 182 } else { return 20 }
+                      if polygons[856].contains(testy: lat, testx: lng) { return 182 } else { return 20 }
                     } else {
-                      if poly[857].contains(testy: lat, testx: lng) { return 182 } else { return 20 }
+                      if polygons[857].contains(testy: lat, testx: lng) { return 182 } else { return 20 }
                     }
                   }
                 } else {
                   if lat < 51.732883 {
-                    if poly[858].contains(testy: lat, testx: lng) { return 182 } else { return 20 }
+                    if polygons[858].contains(testy: lat, testx: lng) { return 182 } else { return 20 }
                   } else {
-                    if poly[859].contains(testy: lat, testx: lng) { return 182 } else { return 20 }
+                    if polygons[859].contains(testy: lat, testx: lng) { return 182 } else { return 20 }
                   }
                 }
               }
@@ -3870,8 +3870,8 @@ public extension TimeZone {
                 if lng < -62.098534 {
                   return 20
                 } else {
-                  if poly[860].contains(testy: lat, testx: lng) { return 243 }
-                  if poly[861].contains(testy: lat, testx: lng) { return 243 } else { return 20 }
+                  if polygons[860].contains(testy: lat, testx: lng) { return 243 }
+                  if polygons[861].contains(testy: lat, testx: lng) { return 243 } else { return 20 }
                 }
               } else {
                 return 243
@@ -3883,19 +3883,19 @@ public extension TimeZone {
                     if lng < -62.354403 {
                       return 20
                     } else {
-                      if poly[862].contains(testy: lat, testx: lng) { return 243 } else { return 20 }
+                      if polygons[862].contains(testy: lat, testx: lng) { return 243 } else { return 20 }
                     }
                   } else {
-                    if poly[863].contains(testy: lat, testx: lng) { return 243 } else { return 20 }
+                    if polygons[863].contains(testy: lat, testx: lng) { return 243 } else { return 20 }
                   }
                 } else {
                   return 243
                 }
               } else {
                 if lat < 50.675139 {
-                  if poly[864].contains(testy: lat, testx: lng) { return 20 } else { return 243 }
+                  if polygons[864].contains(testy: lat, testx: lng) { return 20 } else { return 243 }
                 } else {
-                  if poly[865].contains(testy: lat, testx: lng) { return 182 } else { return 20 }
+                  if polygons[865].contains(testy: lat, testx: lng) { return 182 } else { return 20 }
                 }
               }
             }
@@ -3908,7 +3908,7 @@ public extension TimeZone {
               if lat < 48.753311 { return 290 } else { return 243 }
             } else {
               if lng < -59.432320 {
-                if poly[866].contains(testy: lat, testx: lng) { return 243 } else { return 20 }
+                if polygons[866].contains(testy: lat, testx: lng) { return 243 } else { return 20 }
               } else {
                 return 243
               }
@@ -3920,7 +3920,7 @@ public extension TimeZone {
           if lng < -58.273293 {
             if lat < 51.162445 {
               if lng < -59.102900 {
-                if poly[867].contains(testy: lat, testx: lng) { return 20 } else { return 243 }
+                if polygons[867].contains(testy: lat, testx: lng) { return 20 } else { return 243 }
               } else {
                 return 243
               }
@@ -3928,29 +3928,29 @@ public extension TimeZone {
               if lng < -58.370186 {
                 if lat < 51.204712 {
                   if lng < -58.864370 {
-                    if poly[868].contains(testy: lat, testx: lng) { return 243 } else { return 20 }
+                    if polygons[868].contains(testy: lat, testx: lng) { return 243 } else { return 20 }
                   } else {
                     return 243
                   }
                 } else {
                   if lat < 51.457100 {
                     if lng < -58.647963 {
-                      if poly[869].contains(testy: lat, testx: lng) { return 243 }
-                      if poly[870].contains(testy: lat, testx: lng) { return 243 }
-                      if poly[871].contains(testy: lat, testx: lng) { return 243 } else { return 20 }
+                      if polygons[869].contains(testy: lat, testx: lng) { return 243 }
+                      if polygons[870].contains(testy: lat, testx: lng) { return 243 }
+                      if polygons[871].contains(testy: lat, testx: lng) { return 243 } else { return 20 }
                     } else {
                       if lat < 51.296436 {
                         return 243
                       } else {
                         if lng < -58.432500 {
-                          if poly[872].contains(testy: lat, testx: lng) { return 20 } else { return 243 }
+                          if polygons[872].contains(testy: lat, testx: lng) { return 20 } else { return 243 }
                         } else {
-                          if poly[873].contains(testy: lat, testx: lng) { return 20 } else { return 243 }
+                          if polygons[873].contains(testy: lat, testx: lng) { return 20 } else { return 243 }
                         }
                       }
                     }
                   } else {
-                    if poly[874].contains(testy: lat, testx: lng) { return 182 } else { return 20 }
+                    if polygons[874].contains(testy: lat, testx: lng) { return 182 } else { return 20 }
                   }
                 }
               } else {
@@ -3958,9 +3958,9 @@ public extension TimeZone {
                   return 243
                 } else {
                   if lat < 51.456603 {
-                    if poly[875].contains(testy: lat, testx: lng) { return 20 } else { return 243 }
+                    if polygons[875].contains(testy: lat, testx: lng) { return 20 } else { return 243 }
                   } else {
-                    if poly[876].contains(testy: lat, testx: lng) { return 182 } else { return 20 }
+                    if polygons[876].contains(testy: lat, testx: lng) { return 182 } else { return 20 }
                   }
                 }
               }
@@ -3977,9 +3977,9 @@ public extension TimeZone {
                     return 243
                   } else {
                     if lat < 51.588950 {
-                      if poly[877].contains(testy: lat, testx: lng) { return 20 } else { return 243 }
+                      if polygons[877].contains(testy: lat, testx: lng) { return 20 } else { return 243 }
                     } else {
-                      if poly[878].contains(testy: lat, testx: lng) { return 182 } else { return 20 }
+                      if polygons[878].contains(testy: lat, testx: lng) { return 182 } else { return 20 }
                     }
                   }
                 } else {
@@ -3988,15 +3988,15 @@ public extension TimeZone {
                       return 243
                     } else {
                       if lng < -57.096817 {
-                        if poly[879].contains(testy: lat, testx: lng) { return 290 } else { return 243 }
+                        if polygons[879].contains(testy: lat, testx: lng) { return 290 } else { return 243 }
                       } else {
                         return 290
                       }
                     }
                   } else {
-                    if poly[880].contains(testy: lat, testx: lng) { return 20 }
-                    if poly[881].contains(testy: lat, testx: lng) { return 182 }
-                    if poly[882].contains(testy: lat, testx: lng) { return 290 } else { return 243 }
+                    if polygons[880].contains(testy: lat, testx: lng) { return 20 }
+                    if polygons[881].contains(testy: lat, testx: lng) { return 182 }
+                    if polygons[882].contains(testy: lat, testx: lng) { return 290 } else { return 243 }
                   }
                 }
               }
@@ -4023,7 +4023,7 @@ public extension TimeZone {
                     return 39
                   } else {
                     if lat < 48.394943 {
-                      if poly[883].contains(testy: lat, testx: lng) { return 45 } else { return 39 }
+                      if polygons[883].contains(testy: lat, testx: lng) { return 45 } else { return 39 }
                     } else {
                       return 45
                     }
@@ -4052,7 +4052,7 @@ public extension TimeZone {
                   if lng < -89.633240 {
                     return 32
                   } else {
-                    if poly[884].contains(testy: lat, testx: lng) { return 401 } else { return 32 }
+                    if polygons[884].contains(testy: lat, testx: lng) { return 401 } else { return 32 }
                   }
                 } else {
                   return 401
@@ -4101,7 +4101,7 @@ public extension TimeZone {
                 if lat < 44.056385 {
                   if lng < -76.605095 {
                     if lat < 43.433300 {
-                      if poly[885].contains(testy: lat, testx: lng) { return 238 } else { return 165 }
+                      if polygons[885].contains(testy: lat, testx: lng) { return 238 } else { return 165 }
                     } else {
                       return 238
                     }
@@ -4115,7 +4115,7 @@ public extension TimeZone {
                     } else {
                       if lat < 44.198559 {
                         if lng < -76.328499 {
-                          if poly[886].contains(testy: lat, testx: lng) { return 165 } else { return 238 }
+                          if polygons[886].contains(testy: lat, testx: lng) { return 165 } else { return 238 }
                         } else {
                           return 165
                         }
@@ -4130,8 +4130,8 @@ public extension TimeZone {
                           if lat < 44.310806 {
                             return 165
                           } else {
-                            if poly[887].contains(testy: lat, testx: lng) { return 238 }
-                            if poly[888].contains(testy: lat, testx: lng) { return 238 } else { return 165 }
+                            if polygons[887].contains(testy: lat, testx: lng) { return 238 }
+                            if polygons[888].contains(testy: lat, testx: lng) { return 238 } else { return 165 }
                           }
                         }
                       }
@@ -4154,26 +4154,26 @@ public extension TimeZone {
                         }
                       } else {
                         if lat < 45.189449 {
-                          if poly[889].contains(testy: lat, testx: lng) { return 20 }
-                          if poly[890].contains(testy: lat, testx: lng) { return 238 } else { return 165 }
+                          if polygons[889].contains(testy: lat, testx: lng) { return 20 }
+                          if polygons[890].contains(testy: lat, testx: lng) { return 238 } else { return 165 }
                         } else {
-                          if poly[891].contains(testy: lat, testx: lng) { return 20 } else { return 238 }
+                          if polygons[891].contains(testy: lat, testx: lng) { return 20 } else { return 238 }
                         }
                       }
                     } else {
                       if lng < -70.717628 {
                         if lat < 45.422798 {
                           if lng < -70.752113 {
-                            if poly[892].contains(testy: lat, testx: lng) { return 20 } else { return 165 }
+                            if polygons[892].contains(testy: lat, testx: lng) { return 20 } else { return 165 }
                           } else {
-                            if poly[893].contains(testy: lat, testx: lng) { return 20 } else { return 165 }
+                            if polygons[893].contains(testy: lat, testx: lng) { return 20 } else { return 165 }
                           }
                         } else {
                           return 20
                         }
                       } else {
                         if lat < 47.033193 {
-                          if poly[894].contains(testy: lat, testx: lng) { return 165 } else { return 20 }
+                          if polygons[894].contains(testy: lat, testx: lng) { return 165 } else { return 20 }
                         } else {
                           return 20
                         }
@@ -4190,15 +4190,15 @@ public extension TimeZone {
                           if lng < -79.509407 {
                             if lat < 51.471649 {
                               if lat < 47.537216 {
-                                if poly[895].contains(testy: lat, testx: lng) { return 20 } else { return 238 }
+                                if polygons[895].contains(testy: lat, testx: lng) { return 20 } else { return 238 }
                               } else {
-                                if poly[896].contains(testy: lat, testx: lng) { return 20 } else { return 238 }
+                                if polygons[896].contains(testy: lat, testx: lng) { return 20 } else { return 238 }
                               }
                             } else {
                               return 20
                             }
                           } else {
-                            if poly[897].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
+                            if polygons[897].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
                           }
                         } else {
                           return 137
@@ -4221,7 +4221,7 @@ public extension TimeZone {
                         return 137
                       } else {
                         if lat < 52.395023 {
-                          if poly[898].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
+                          if polygons[898].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
                         } else {
                           if lng < -78.558243 { return 20 } else { return 137 }
                         }
@@ -4235,7 +4235,7 @@ public extension TimeZone {
                             if lng < -78.855316 {
                               if lat < 52.752114 { return 20 } else { return 137 }
                             } else {
-                              if poly[899].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
+                              if polygons[899].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
                             }
                           } else {
                             return 20
@@ -4247,13 +4247,13 @@ public extension TimeZone {
                             if lat < 52.558494 {
                               return 20
                             } else {
-                              if poly[900].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
+                              if polygons[900].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
                             }
                           } else {
                             return 20
                           }
                         } else {
-                          if poly[901].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
+                          if polygons[901].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
                         }
                       }
                     }
@@ -4308,7 +4308,7 @@ public extension TimeZone {
               if lng < -132.799744 {
                 return 23
               } else {
-                if poly[902].contains(testy: lat, testx: lng) { return 45 } else { return 23 }
+                if polygons[902].contains(testy: lat, testx: lng) { return 45 } else { return 23 }
               }
             }
           } else {
@@ -4316,8 +4316,8 @@ public extension TimeZone {
               if lng < -133.791367 {
                 return 359
               } else {
-                if poly[903].contains(testy: lat, testx: lng) { return 23 }
-                if poly[904].contains(testy: lat, testx: lng) { return 45 } else { return 359 }
+                if polygons[903].contains(testy: lat, testx: lng) { return 23 }
+                if polygons[904].contains(testy: lat, testx: lng) { return 45 } else { return 359 }
               }
             } else {
               if lat < 57.895130 {
@@ -4327,7 +4327,7 @@ public extension TimeZone {
                   if lng < -133.143158 {
                     return 359
                   } else {
-                    if poly[905].contains(testy: lat, testx: lng) { return 45 } else { return 359 }
+                    if polygons[905].contains(testy: lat, testx: lng) { return 45 } else { return 359 }
                   }
                 }
               } else {
@@ -4336,10 +4336,10 @@ public extension TimeZone {
                     if lat < 58.412121 {
                       return 359
                     } else {
-                      if poly[906].contains(testy: lat, testx: lng) { return 45 } else { return 359 }
+                      if polygons[906].contains(testy: lat, testx: lng) { return 45 } else { return 359 }
                     }
                   } else {
-                    if poly[907].contains(testy: lat, testx: lng) { return 45 } else { return 359 }
+                    if polygons[907].contains(testy: lat, testx: lng) { return 45 } else { return 359 }
                   }
                 } else {
                   return 324
@@ -4355,14 +4355,14 @@ public extension TimeZone {
           return 45
         } else {
           if lng < -118.607060 {
-            if poly[908].contains(testy: lat, testx: lng) { return 116 }
-            if poly[909].contains(testy: lat, testx: lng) { return 227 } else { return 45 }
+            if polygons[908].contains(testy: lat, testx: lng) { return 116 }
+            if polygons[909].contains(testy: lat, testx: lng) { return 227 } else { return 45 }
           } else {
             if lng < -118.465407 {
-              if poly[910].contains(testy: lat, testx: lng) { return 45 } else { return 227 }
+              if polygons[910].contains(testy: lat, testx: lng) { return 45 } else { return 227 }
             } else {
-              if poly[911].contains(testy: lat, testx: lng) { return 308 }
-              if poly[912].contains(testy: lat, testx: lng) { return 308 } else { return 227 }
+              if polygons[911].contains(testy: lat, testx: lng) { return 308 }
+              if polygons[912].contains(testy: lat, testx: lng) { return 308 } else { return 227 }
             }
           }
         }
@@ -4375,7 +4375,7 @@ public extension TimeZone {
                   if lat < 54.977901 {
                     return 23
                   } else {
-                    if poly[913].contains(testy: lat, testx: lng) { return 23 } else { return 195 }
+                    if polygons[913].contains(testy: lat, testx: lng) { return 23 } else { return 195 }
                   }
                 } else {
                   return 23
@@ -4389,7 +4389,7 @@ public extension TimeZone {
                       if lat < 55.190212 {
                         return 195
                       } else {
-                        if poly[914].contains(testy: lat, testx: lng) { return 195 } else { return 23 }
+                        if polygons[914].contains(testy: lat, testx: lng) { return 195 } else { return 23 }
                       }
                     } else {
                       return 23
@@ -4407,7 +4407,7 @@ public extension TimeZone {
               return 23
             } else {
               if lat < 60.000000 {
-                if poly[915].contains(testy: lat, testx: lng) { return 45 } else { return 23 }
+                if polygons[915].contains(testy: lat, testx: lng) { return 45 } else { return 23 }
               } else {
                 return 324
               }
@@ -4425,7 +4425,7 @@ public extension TimeZone {
                   } else {
                     if lng < -130.429123 {
                       if lat < 54.759205 {
-                        if poly[916].contains(testy: lat, testx: lng) { return 23 } else { return 45 }
+                        if polygons[916].contains(testy: lat, testx: lng) { return 23 } else { return 45 }
                       } else {
                         if lng < -130.630005 {
                           return 23
@@ -4433,8 +4433,8 @@ public extension TimeZone {
                           if lat < 54.770226 {
                             return 45
                           } else {
-                            if poly[917].contains(testy: lat, testx: lng) { return 45 }
-                            if poly[918].contains(testy: lat, testx: lng) { return 45 } else { return 23 }
+                            if polygons[917].contains(testy: lat, testx: lng) { return 45 }
+                            if polygons[918].contains(testy: lat, testx: lng) { return 45 } else { return 23 }
                           }
                         }
                       }
@@ -4442,7 +4442,7 @@ public extension TimeZone {
                       if lat < 54.778793 {
                         return 45
                       } else {
-                        if poly[919].contains(testy: lat, testx: lng) { return 23 } else { return 45 }
+                        if polygons[919].contains(testy: lat, testx: lng) { return 23 } else { return 45 }
                       }
                     }
                   }
@@ -4454,7 +4454,7 @@ public extension TimeZone {
                   if lat < 55.116245 {
                     if lng < -130.180752 { return 23 } else { return 45 }
                   } else {
-                    if poly[920].contains(testy: lat, testx: lng) { return 45 } else { return 23 }
+                    if polygons[920].contains(testy: lat, testx: lng) { return 45 } else { return 23 }
                   }
                 } else {
                   return 324
@@ -4469,16 +4469,16 @@ public extension TimeZone {
                 if lat < 55.692310 {
                   if lng < -129.989868 {
                     if lat < 55.250920 {
-                      if poly[921].contains(testy: lat, testx: lng) { return 23 } else { return 45 }
+                      if polygons[921].contains(testy: lat, testx: lng) { return 23 } else { return 45 }
                     } else {
-                      if poly[922].contains(testy: lat, testx: lng) { return 23 } else { return 45 }
+                      if polygons[922].contains(testy: lat, testx: lng) { return 23 } else { return 45 }
                     }
                   } else {
                     return 45
                   }
                 } else {
                   if lat < 60.000000 {
-                    if poly[923].contains(testy: lat, testx: lng) { return 23 } else { return 45 }
+                    if polygons[923].contains(testy: lat, testx: lng) { return 23 } else { return 45 }
                   } else {
                     return 324
                   }
@@ -4497,21 +4497,21 @@ public extension TimeZone {
                         if lat < 57.095724 {
                           if lng < -122.313301 {
                             if lat < 55.643586 {
-                              if poly[924].contains(testy: lat, testx: lng) { return 116 } else { return 45 }
+                              if polygons[924].contains(testy: lat, testx: lng) { return 116 } else { return 45 }
                             } else {
-                              if poly[925].contains(testy: lat, testx: lng) { return 116 } else { return 45 }
+                              if polygons[925].contains(testy: lat, testx: lng) { return 116 } else { return 45 }
                             }
                           } else {
                             if lat < 55.643586 {
-                              if poly[926].contains(testy: lat, testx: lng) { return 45 } else { return 116 }
+                              if polygons[926].contains(testy: lat, testx: lng) { return 45 } else { return 116 }
                             } else {
-                              if poly[927].contains(testy: lat, testx: lng) { return 45 } else { return 116 }
+                              if polygons[927].contains(testy: lat, testx: lng) { return 45 } else { return 116 }
                             }
                           }
                         } else {
-                          if poly[928].contains(testy: lat, testx: lng) { return 116 }
-                          if poly[929].contains(testy: lat, testx: lng) { return 116 }
-                          if poly[930].contains(testy: lat, testx: lng) { return 116 } else { return 45 }
+                          if polygons[928].contains(testy: lat, testx: lng) { return 116 }
+                          if polygons[929].contains(testy: lat, testx: lng) { return 116 }
+                          if polygons[930].contains(testy: lat, testx: lng) { return 116 } else { return 45 }
                         }
                       }
                     } else {
@@ -4522,7 +4522,7 @@ public extension TimeZone {
                   }
                 }
               } else {
-                if poly[931].contains(testy: lat, testx: lng) { return 324 } else { return 142 }
+                if polygons[931].contains(testy: lat, testx: lng) { return 324 } else { return 142 }
               }
             }
           }
@@ -4558,12 +4558,12 @@ public extension TimeZone {
               if lat < 68.963966 {
                 if lng < -136.526718 {
                   if lng < -139.361644 {
-                    if poly[932].contains(testy: lat, testx: lng) { return 330 } else { return 324 }
+                    if polygons[932].contains(testy: lat, testx: lng) { return 330 } else { return 324 }
                   } else {
                     return 324
                   }
                 } else {
-                  if poly[933].contains(testy: lat, testx: lng) { return 324 } else { return 142 }
+                  if polygons[933].contains(testy: lat, testx: lng) { return 324 } else { return 142 }
                 }
               } else {
                 if lng < -137.210114 { return 324 } else { return 142 }
@@ -4576,38 +4576,38 @@ public extension TimeZone {
               if lat < 67.004977 {
                 if lng < -129.496223 {
                   if lat < 63.808471 {
-                    if poly[934].contains(testy: lat, testx: lng) { return 142 }
-                    if poly[935].contains(testy: lat, testx: lng) { return 142 } else { return 324 }
+                    if polygons[934].contains(testy: lat, testx: lng) { return 142 }
+                    if polygons[935].contains(testy: lat, testx: lng) { return 142 } else { return 324 }
                   } else {
                     if lng < -132.348454 {
                       if lat < 65.406724 {
-                        if poly[936].contains(testy: lat, testx: lng) { return 142 }
-                        if poly[937].contains(testy: lat, testx: lng) { return 142 } else { return 324 }
+                        if polygons[936].contains(testy: lat, testx: lng) { return 142 }
+                        if polygons[937].contains(testy: lat, testx: lng) { return 142 } else { return 324 }
                       } else {
-                        if poly[938].contains(testy: lat, testx: lng) { return 324 } else { return 142 }
+                        if polygons[938].contains(testy: lat, testx: lng) { return 324 } else { return 142 }
                       }
                     } else {
-                      if poly[939].contains(testy: lat, testx: lng) { return 324 }
-                      if poly[940].contains(testy: lat, testx: lng) { return 324 }
-                      if poly[941].contains(testy: lat, testx: lng) { return 324 }
-                      if poly[942].contains(testy: lat, testx: lng) { return 324 } else { return 142 }
+                      if polygons[939].contains(testy: lat, testx: lng) { return 324 }
+                      if polygons[940].contains(testy: lat, testx: lng) { return 324 }
+                      if polygons[941].contains(testy: lat, testx: lng) { return 324 }
+                      if polygons[942].contains(testy: lat, testx: lng) { return 324 } else { return 142 }
                     }
                   }
                 } else {
                   if lat < 63.808471 {
                     if lng < -126.643993 {
-                      if poly[943].contains(testy: lat, testx: lng) { return 324 }
-                      if poly[944].contains(testy: lat, testx: lng) { return 324 } else { return 142 }
+                      if polygons[943].contains(testy: lat, testx: lng) { return 324 }
+                      if polygons[944].contains(testy: lat, testx: lng) { return 324 } else { return 142 }
                     } else {
-                      if poly[945].contains(testy: lat, testx: lng) { return 324 } else { return 142 }
+                      if polygons[945].contains(testy: lat, testx: lng) { return 324 } else { return 142 }
                     }
                   } else {
                     return 142
                   }
                 }
               } else {
-                if poly[946].contains(testy: lat, testx: lng) { return 142 }
-                if poly[947].contains(testy: lat, testx: lng) { return 142 } else { return 56 }
+                if polygons[946].contains(testy: lat, testx: lng) { return 142 }
+                if polygons[947].contains(testy: lat, testx: lng) { return 142 } else { return 56 }
               }
             } else {
               return 142
@@ -4625,38 +4625,38 @@ public extension TimeZone {
               if lng < -114.526794 {
                 if lng < -114.826683 {
                   if lng < -114.954285 {
-                    if poly[948].contains(testy: lat, testx: lng) { return 142 } else { return 108 }
+                    if polygons[948].contains(testy: lat, testx: lng) { return 142 } else { return 108 }
                   } else {
                     if lat < 66.009722 {
-                      if poly[949].contains(testy: lat, testx: lng) { return 108 } else { return 142 }
+                      if polygons[949].contains(testy: lat, testx: lng) { return 108 } else { return 142 }
                     } else {
                       return 108
                     }
                   }
                 } else {
                   if lat < 65.964136 {
-                    if poly[950].contains(testy: lat, testx: lng) { return 108 } else { return 142 }
+                    if polygons[950].contains(testy: lat, testx: lng) { return 108 } else { return 142 }
                   } else {
                     return 108
                   }
                 }
               } else {
                 if lat < 65.857001 {
-                  if poly[951].contains(testy: lat, testx: lng) { return 108 } else { return 142 }
+                  if polygons[951].contains(testy: lat, testx: lng) { return 108 } else { return 142 }
                 } else {
                   return 108
                 }
               }
             } else {
               if lat < 65.703211 {
-                if poly[952].contains(testy: lat, testx: lng) { return 108 } else { return 142 }
+                if polygons[952].contains(testy: lat, testx: lng) { return 108 } else { return 142 }
               } else {
                 return 108
               }
             }
           } else {
             if lat < 65.481310 {
-              if poly[953].contains(testy: lat, testx: lng) { return 108 } else { return 142 }
+              if polygons[953].contains(testy: lat, testx: lng) { return 108 } else { return 142 }
             } else {
               return 108
             }
@@ -4664,7 +4664,7 @@ public extension TimeZone {
         } else {
           if lat < 66.829147 {
             if lat < 64.649325 {
-              if poly[954].contains(testy: lat, testx: lng) { return 108 } else { return 142 }
+              if polygons[954].contains(testy: lat, testx: lng) { return 108 } else { return 142 }
             } else {
               return 108
             }
@@ -4679,14 +4679,14 @@ public extension TimeZone {
               if lng < -113.989479 {
                 if lat < 68.929214 {
                   if lng < -121.789716 {
-                    if poly[955].contains(testy: lat, testx: lng) { return 108 } else { return 142 }
+                    if polygons[955].contains(testy: lat, testx: lng) { return 108 } else { return 142 }
                   } else {
                     return 108
                   }
                 } else {
                   if lng < -117.239929 {
                     if lat < 69.666817 {
-                      if poly[956].contains(testy: lat, testx: lng) { return 108 } else { return 142 }
+                      if polygons[956].contains(testy: lat, testx: lng) { return 108 } else { return 142 }
                     } else {
                       return 142
                     }
@@ -4694,7 +4694,7 @@ public extension TimeZone {
                     if lat < 69.653069 {
                       return 108
                     } else {
-                      if poly[957].contains(testy: lat, testx: lng) { return 108 } else { return 142 }
+                      if polygons[957].contains(testy: lat, testx: lng) { return 108 } else { return 142 }
                     }
                   }
                 }
@@ -4702,7 +4702,7 @@ public extension TimeZone {
                 if lat < 69.212112 {
                   return 108
                 } else {
-                  if poly[958].contains(testy: lat, testx: lng) { return 142 } else { return 108 }
+                  if polygons[958].contains(testy: lat, testx: lng) { return 142 } else { return 108 }
                 }
               }
             } else {
@@ -4711,19 +4711,19 @@ public extension TimeZone {
               } else {
                 if lng < -112.620987 {
                   if lat < 70.034142 {
-                    if poly[959].contains(testy: lat, testx: lng) { return 142 } else { return 108 }
+                    if polygons[959].contains(testy: lat, testx: lng) { return 142 } else { return 108 }
                   } else {
                     return 142
                   }
                 } else {
                   if lng < -112.567856 {
                     if lat < 69.785159 {
-                      if poly[960].contains(testy: lat, testx: lng) { return 142 } else { return 108 }
+                      if polygons[960].contains(testy: lat, testx: lng) { return 142 } else { return 108 }
                     } else {
                       return 142
                     }
                   } else {
-                    if poly[961].contains(testy: lat, testx: lng) { return 108 } else { return 142 }
+                    if polygons[961].contains(testy: lat, testx: lng) { return 108 } else { return 142 }
                   }
                 }
               }
@@ -4760,7 +4760,7 @@ public extension TimeZone {
                     if lng < -78.911201 {
                       if lat < 52.978027 { if lat < 52.914364 { return 20 } else { return 137 } } else { return 20 }
                     } else {
-                      if poly[962].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
+                      if polygons[962].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
                     }
                   }
                 }
@@ -4770,7 +4770,7 @@ public extension TimeZone {
                     if lat < 53.361423 {
                       return 137
                     } else {
-                      if poly[963].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
+                      if polygons[963].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
                     }
                   } else {
                     if lng < -78.996750 {
@@ -4779,7 +4779,7 @@ public extension TimeZone {
                       if lng < -78.969765 {
                         if lat < 53.309853 { return 137 } else { return 20 }
                       } else {
-                        if poly[964].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
+                        if polygons[964].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
                       }
                     }
                   }
@@ -4790,7 +4790,7 @@ public extension TimeZone {
                     if lat < 53.434547 {
                       if lng < -79.082458 { return 137 } else { return 20 }
                     } else {
-                      if poly[965].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
+                      if polygons[965].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
                     }
                   }
                 }
@@ -4808,7 +4808,7 @@ public extension TimeZone {
                     if lat < 53.552872 {
                       return 20
                     } else {
-                      if poly[966].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
+                      if polygons[966].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
                     }
                   }
                 } else {
@@ -4818,7 +4818,7 @@ public extension TimeZone {
                     if lat < 53.874668 {
                       if lng < -79.087925 { return 20 } else { return 137 }
                     } else {
-                      if poly[967].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
+                      if polygons[967].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
                     }
                   }
                 }
@@ -4830,12 +4830,12 @@ public extension TimeZone {
                 } else {
                   if lng < -79.237053 {
                     if lat < 54.174984 {
-                      if poly[968].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
+                      if polygons[968].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
                     } else {
                       return 20
                     }
                   } else {
-                    if poly[969].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
+                    if polygons[969].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
                   }
                 }
               } else {
@@ -4843,7 +4843,7 @@ public extension TimeZone {
                   if lng < -79.520157 {
                     return 137
                   } else {
-                    if poly[970].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
+                    if polygons[970].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
                   }
                 } else {
                   if lat < 54.467125 {
@@ -4852,7 +4852,7 @@ public extension TimeZone {
                     if lng < -79.566742 {
                       if lat < 54.554594 { return 20 } else { if lat < 54.600740 { return 20 } else { return 137 } }
                     } else {
-                      if poly[971].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
+                      if polygons[971].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
                     }
                   }
                 }
@@ -4867,13 +4867,13 @@ public extension TimeZone {
               } else {
                 if lng < -79.557785 {
                   if lat < 54.722511 {
-                    if poly[972].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
+                    if polygons[972].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
                   } else {
                     return 137
                   }
                 } else {
                   if lat < 54.768631 {
-                    if poly[973].contains(testy: lat, testx: lng) { return 20 } else { return 137 }
+                    if polygons[973].contains(testy: lat, testx: lng) { return 20 } else { return 137 }
                   } else {
                     if lng < -79.384746 { return 20 } else { return 137 }
                   }
@@ -4885,7 +4885,7 @@ public extension TimeZone {
               } else {
                 if lng < -77.706451 {
                   if lat < 55.322748 {
-                    if poly[974].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
+                    if polygons[974].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
                   } else {
                     return 137
                   }
@@ -4893,7 +4893,7 @@ public extension TimeZone {
                   if lng < -77.671234 {
                     if lat < 55.371513 { return 20 } else { return 137 }
                   } else {
-                    if poly[975].contains(testy: lat, testx: lng) { return 20 } else { return 137 }
+                    if polygons[975].contains(testy: lat, testx: lng) { return 20 } else { return 137 }
                   }
                 }
               }
@@ -4902,7 +4902,7 @@ public extension TimeZone {
             if lng < -78.680573 {
               return 137
             } else {
-              if poly[976].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
+              if polygons[976].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
             }
           }
         }
@@ -4916,7 +4916,7 @@ public extension TimeZone {
             } else {
               if lat < 56.383667 {
                 if lat < 56.352753 {
-                  if poly[977].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
+                  if polygons[977].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
                 } else {
                   if lng < -76.608892 { return 20 } else { return 137 }
                 }
@@ -4934,7 +4934,7 @@ public extension TimeZone {
                 if lng < -76.866554 {
                   if lat < 57.600049 { return 20 } else { return 137 }
                 } else {
-                  if poly[978].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
+                  if polygons[978].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
                 }
               }
             }
@@ -4953,16 +4953,16 @@ public extension TimeZone {
                   return 137
                 } else {
                   if lng < -77.527397 {
-                    if poly[979].contains(testy: lat, testx: lng) { return 20 } else { return 137 }
+                    if polygons[979].contains(testy: lat, testx: lng) { return 20 } else { return 137 }
                   } else {
                     if lng < -77.205544 {
                       if lat < 58.004467 {
                         return 20
                       } else {
-                        if poly[980].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
+                        if polygons[980].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
                       }
                     } else {
-                      if poly[981].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
+                      if polygons[981].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
                     }
                   }
                 }
@@ -4971,11 +4971,11 @@ public extension TimeZone {
                   if lat < 58.276955 {
                     return 137
                   } else {
-                    if poly[982].contains(testy: lat, testx: lng) { return 20 } else { return 137 }
+                    if polygons[982].contains(testy: lat, testx: lng) { return 20 } else { return 137 }
                   }
                 } else {
-                  if poly[983].contains(testy: lat, testx: lng) { return 137 }
-                  if poly[984].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
+                  if polygons[983].contains(testy: lat, testx: lng) { return 137 }
+                  if polygons[984].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
                 }
               }
             } else {
@@ -4986,7 +4986,7 @@ public extension TimeZone {
                   if lat < 58.579838 {
                     return 137
                   } else {
-                    if poly[985].contains(testy: lat, testx: lng) { return 20 } else { return 137 }
+                    if polygons[985].contains(testy: lat, testx: lng) { return 20 } else { return 137 }
                   }
                 }
               } else {
@@ -4994,12 +4994,12 @@ public extension TimeZone {
                   if lat < 58.508587 { return 137 } else { return 20 }
                 } else {
                   if lat < 58.369335 {
-                    if poly[986].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
+                    if polygons[986].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
                   } else {
                     if lat < 58.411152 {
                       if lng < -78.077976 { return 20 } else { return 137 }
                     } else {
-                      if poly[987].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
+                      if polygons[987].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
                     }
                   }
                 }
@@ -5016,13 +5016,13 @@ public extension TimeZone {
                       return 137
                     } else {
                       if lat < 58.795967 {
-                        if poly[988].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
+                        if polygons[988].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
                       } else {
                         return 137
                       }
                     }
                   } else {
-                    if poly[989].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
+                    if polygons[989].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
                   }
                 }
               } else {
@@ -5032,20 +5032,20 @@ public extension TimeZone {
                       if lat < 58.697453 {
                         return 20
                       } else {
-                        if poly[990].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
+                        if polygons[990].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
                       }
                     } else {
                       return 20
                     }
                   } else {
-                    if poly[991].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
+                    if polygons[991].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
                   }
                 } else {
                   if lng < -78.187141 {
                     if lng < -78.310013 {
                       if lat < 58.976772 { return 20 } else { if lat < 59.015853 { return 20 } else { return 137 } }
                     } else {
-                      if poly[992].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
+                      if polygons[992].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
                     }
                   } else {
                     return 20
@@ -5055,10 +5055,10 @@ public extension TimeZone {
             } else {
               if lng < -77.730873 {
                 if lat < 59.389897 {
-                  if poly[993].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
+                  if polygons[993].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
                 } else {
                   if lat < 59.555698 {
-                    if poly[994].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
+                    if polygons[994].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
                   } else {
                     if lat < 59.722752 { return 20 } else { return 137 }
                   }
@@ -5072,16 +5072,16 @@ public extension TimeZone {
                       if lat < 59.706220 {
                         return 20
                       } else {
-                        if poly[995].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
+                        if polygons[995].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
                       }
                     } else {
                       return 20
                     }
                   } else {
                     if lat < 59.880760 {
-                      if poly[996].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
+                      if polygons[996].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
                     } else {
-                      if poly[997].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
+                      if polygons[997].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
                     }
                   }
                 }
@@ -5102,7 +5102,7 @@ public extension TimeZone {
                       return 137
                     } else {
                       if lng < -78.080475 {
-                        if poly[998].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
+                        if polygons[998].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
                       } else {
                         return 20
                       }
@@ -5123,13 +5123,13 @@ public extension TimeZone {
                     if lat < 61.259742 {
                       return 20
                     } else {
-                      if poly[999].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
+                      if polygons[999].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
                     }
                   } else {
                     if lat < 60.274155 {
                       if lng < -77.606060 { return 20 } else { return 137 }
                     } else {
-                      if poly[1000].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
+                      if polygons[1000].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
                     }
                   }
                 }
@@ -5157,7 +5157,7 @@ public extension TimeZone {
                     if lng < -77.859993 {
                       if lat < 62.488289 { return 20 } else { return 137 }
                     } else {
-                      if poly[1001].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
+                      if polygons[1001].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
                     }
                   }
                 }
@@ -5185,39 +5185,39 @@ public extension TimeZone {
                 if lat < 60.000000 {
                   if lng < -93.769402 {
                     if lng < -101.665837 {
-                      if poly[1002].contains(testy: lat, testx: lng) { return 308 } else { return 284 }
+                      if polygons[1002].contains(testy: lat, testx: lng) { return 308 } else { return 284 }
                     } else {
                       if lat < 59.072639 {
                         if lng < -94.795906 {
-                          if poly[1003].contains(testy: lat, testx: lng) { return 307 } else { return 284 }
+                          if polygons[1003].contains(testy: lat, testx: lng) { return 307 } else { return 284 }
                         } else {
-                          if poly[1004].contains(testy: lat, testx: lng) { return 307 } else { return 284 }
+                          if polygons[1004].contains(testy: lat, testx: lng) { return 307 } else { return 284 }
                         }
                       } else {
                         if lat < 59.348492 {
                           if lng < -94.781494 {
-                            if poly[1005].contains(testy: lat, testx: lng) { return 307 } else { return 284 }
+                            if polygons[1005].contains(testy: lat, testx: lng) { return 307 } else { return 284 }
                           } else {
                             return 284
                           }
                         } else {
-                          if poly[1006].contains(testy: lat, testx: lng) { return 307 } else { return 284 }
+                          if polygons[1006].contains(testy: lat, testx: lng) { return 307 } else { return 284 }
                         }
                       }
                     }
                   } else {
                     if lng < -93.572128 {
                       if lng < -93.629883 {
-                        if poly[1007].contains(testy: lat, testx: lng) { return 307 } else { return 284 }
+                        if polygons[1007].contains(testy: lat, testx: lng) { return 307 } else { return 284 }
                       } else {
                         if lat < 58.785896 { return 284 } else { return 307 }
                       }
                     } else {
                       if lng < -92.852669 {
                         if lng < -93.029205 {
-                          if poly[1008].contains(testy: lat, testx: lng) { return 307 } else { return 284 }
+                          if polygons[1008].contains(testy: lat, testx: lng) { return 307 } else { return 284 }
                         } else {
-                          if poly[1009].contains(testy: lat, testx: lng) { return 307 } else { return 284 }
+                          if polygons[1009].contains(testy: lat, testx: lng) { return 307 } else { return 284 }
                         }
                       } else {
                         return 284
@@ -5237,19 +5237,19 @@ public extension TimeZone {
                 } else {
                   if lng < -93.469185 {
                     if lng < -102.008194 {
-                      if poly[1010].contains(testy: lat, testx: lng) { return 142 } else { return 108 }
+                      if polygons[1010].contains(testy: lat, testx: lng) { return 142 } else { return 108 }
                     } else {
                       if lat < 63.965088 {
                         return 307
                       } else {
-                        if poly[1011].contains(testy: lat, testx: lng) { return 108 } else { return 307 }
+                        if polygons[1011].contains(testy: lat, testx: lng) { return 108 } else { return 307 }
                       }
                     }
                   } else {
                     if lat < 63.971210 {
                       return 307
                     } else {
-                      if poly[1012].contains(testy: lat, testx: lng) { return 108 } else { return 307 }
+                      if polygons[1012].contains(testy: lat, testx: lng) { return 108 } else { return 307 }
                     }
                   }
                 }
@@ -5257,7 +5257,7 @@ public extension TimeZone {
                 if lat < 63.815735 {
                   return 307
                 } else {
-                  if poly[1013].contains(testy: lat, testx: lng) { return 108 } else { return 307 }
+                  if polygons[1013].contains(testy: lat, testx: lng) { return 108 } else { return 307 }
                 }
               }
             }
@@ -5269,9 +5269,9 @@ public extension TimeZone {
             if lng < -89.957558 {
               if lat < 57.251442 {
                 if lng < -90.639900 {
-                  if poly[1014].contains(testy: lat, testx: lng) { return 307 } else { return 284 }
+                  if polygons[1014].contains(testy: lat, testx: lng) { return 307 } else { return 284 }
                 } else {
-                  if poly[1015].contains(testy: lat, testx: lng) { return 238 } else { return 284 }
+                  if polygons[1015].contains(testy: lat, testx: lng) { return 238 } else { return 284 }
                 }
               } else {
                 return 307
@@ -5280,12 +5280,12 @@ public extension TimeZone {
               if lng < -88.378349 {
                 if lat < 56.984006 {
                   if lat < 54.000000 {
-                    if poly[1016].contains(testy: lat, testx: lng) { return 284 } else { return 238 }
+                    if polygons[1016].contains(testy: lat, testx: lng) { return 284 } else { return 238 }
                   } else {
                     if lng < -88.990593 {
-                      if poly[1017].contains(testy: lat, testx: lng) { return 284 } else { return 238 }
+                      if polygons[1017].contains(testy: lat, testx: lng) { return 284 } else { return 238 }
                     } else {
-                      if poly[1018].contains(testy: lat, testx: lng) { return 307 } else { return 238 }
+                      if polygons[1018].contains(testy: lat, testx: lng) { return 307 } else { return 238 }
                     }
                   }
                 } else {
@@ -5296,7 +5296,7 @@ public extension TimeZone {
                   if lat < 55.199287 {
                     if lng < -82.117599 {
                       if lng < -82.722824 {
-                        if poly[1019].contains(testy: lat, testx: lng) { return 137 } else { return 238 }
+                        if polygons[1019].contains(testy: lat, testx: lng) { return 137 } else { return 238 }
                       } else {
                         return 238
                       }
@@ -5324,7 +5324,7 @@ public extension TimeZone {
                   } else {
                     if lat < 66.086807 {
                       if lng < -85.977935 {
-                        if poly[1020].contains(testy: lat, testx: lng) { return 64 } else { return 307 }
+                        if polygons[1020].contains(testy: lat, testx: lng) { return 64 } else { return 307 }
                       } else {
                         return 64
                       }
@@ -5343,7 +5343,7 @@ public extension TimeZone {
                 if lng < -85.000000 {
                   if lng < -89.000000 {
                     if lat < 67.000000 {
-                      if poly[1021].contains(testy: lat, testx: lng) { return 108 } else { return 307 }
+                      if polygons[1021].contains(testy: lat, testx: lng) { return 108 } else { return 307 }
                     } else {
                       return 108
                     }
@@ -5386,16 +5386,16 @@ public extension TimeZone {
                       if lat < 72.802119 {
                         return 108
                       } else {
-                        if poly[1022].contains(testy: lat, testx: lng) { return 307 }
-                        if poly[1023].contains(testy: lat, testx: lng) { return 307 } else { return 108 }
+                        if polygons[1022].contains(testy: lat, testx: lng) { return 307 }
+                        if polygons[1023].contains(testy: lat, testx: lng) { return 307 } else { return 108 }
                       }
                     } else {
                       if lat < 72.869066 {
                         if lng < -96.998177 {
-                          if poly[1024].contains(testy: lat, testx: lng) { return 307 } else { return 108 }
+                          if polygons[1024].contains(testy: lat, testx: lng) { return 307 } else { return 108 }
                         } else {
                           if lat < 72.679507 {
-                            if poly[1025].contains(testy: lat, testx: lng) { return 307 } else { return 108 }
+                            if polygons[1025].contains(testy: lat, testx: lng) { return 307 } else { return 108 }
                           } else {
                             return 307
                           }
@@ -5423,7 +5423,7 @@ public extension TimeZone {
                       if lng < -95.335034 {
                         return 307
                       } else {
-                        if poly[1026].contains(testy: lat, testx: lng) { return 108 } else { return 307 }
+                        if polygons[1026].contains(testy: lat, testx: lng) { return 108 } else { return 307 }
                       }
                     }
                   } else {
@@ -5461,8 +5461,8 @@ public extension TimeZone {
                       if lat < 74.843742 {
                         if lng < -96.103386 { return 153 } else { return 307 }
                       } else {
-                        if poly[1027].contains(testy: lat, testx: lng) { return 307 }
-                        if poly[1028].contains(testy: lat, testx: lng) { return 307 } else { return 153 }
+                        if polygons[1027].contains(testy: lat, testx: lng) { return 307 }
+                        if polygons[1028].contains(testy: lat, testx: lng) { return 307 } else { return 153 }
                       }
                     }
                   } else {
@@ -5496,30 +5496,30 @@ public extension TimeZone {
               if lng < -66.231915 {
                 if lat < 54.544703 {
                   if lng < -67.686823 {
-                    if poly[1029].contains(testy: lat, testx: lng) { return 182 }
-                    if poly[1030].contains(testy: lat, testx: lng) { return 182 } else { return 20 }
+                    if polygons[1029].contains(testy: lat, testx: lng) { return 182 }
+                    if polygons[1030].contains(testy: lat, testx: lng) { return 182 } else { return 20 }
                   } else {
                     if lat < 53.721595 {
-                      if poly[1031].contains(testy: lat, testx: lng) { return 182 }
-                      if poly[1032].contains(testy: lat, testx: lng) { return 182 } else { return 20 }
+                      if polygons[1031].contains(testy: lat, testx: lng) { return 182 }
+                      if polygons[1032].contains(testy: lat, testx: lng) { return 182 } else { return 20 }
                     } else {
-                      if poly[1033].contains(testy: lat, testx: lng) { return 182 } else { return 20 }
+                      if polygons[1033].contains(testy: lat, testx: lng) { return 182 } else { return 20 }
                     }
                   }
                 } else {
-                  if poly[1034].contains(testy: lat, testx: lng) { return 182 } else { return 20 }
+                  if polygons[1034].contains(testy: lat, testx: lng) { return 182 } else { return 20 }
                 }
               } else {
                 if lat < 54.544703 {
                   return 182
                 } else {
                   if lng < -64.777006 {
-                    if poly[1035].contains(testy: lat, testx: lng) { return 182 } else { return 20 }
+                    if polygons[1035].contains(testy: lat, testx: lng) { return 182 } else { return 20 }
                   } else {
                     if lat < 55.367810 {
-                      if poly[1036].contains(testy: lat, testx: lng) { return 20 } else { return 182 }
+                      if polygons[1036].contains(testy: lat, testx: lng) { return 20 } else { return 182 }
                     } else {
-                      if poly[1037].contains(testy: lat, testx: lng) { return 182 } else { return 20 }
+                      if polygons[1037].contains(testy: lat, testx: lng) { return 182 } else { return 20 }
                     }
                   }
                 }
@@ -5536,9 +5536,9 @@ public extension TimeZone {
           if lng < -56.276463 {
             if lat < 53.630226 {
               if lng < -57.271252 {
-                if poly[1038].contains(testy: lat, testx: lng) { return 290 } else { return 182 }
+                if polygons[1038].contains(testy: lat, testx: lng) { return 290 } else { return 182 }
               } else {
-                if poly[1039].contains(testy: lat, testx: lng) { return 182 } else { return 290 }
+                if polygons[1039].contains(testy: lat, testx: lng) { return 182 } else { return 290 }
               }
             } else {
               return 182
@@ -5572,7 +5572,7 @@ public extension TimeZone {
                   if lng < -69.700226 {
                     if lat < 58.928741 { return 20 } else { return 137 }
                   } else {
-                    if poly[1040].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
+                    if polygons[1040].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
                   }
                 }
               }
@@ -5581,7 +5581,7 @@ public extension TimeZone {
                 if lng < -69.454346 {
                   return 20
                 } else {
-                  if poly[1041].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
+                  if polygons[1041].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
                 }
               } else {
                 if lat < 58.986942 {
@@ -5603,16 +5603,16 @@ public extension TimeZone {
             if lat < 58.919376 {
               if lng < -68.975906 {
                 if lng < -69.177109 {
-                  if poly[1042].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
+                  if polygons[1042].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
                 } else {
                   return 20
                 }
               } else {
                 if lng < -68.692970 {
                   if lat < 57.985935 {
-                    if poly[1043].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
+                    if polygons[1043].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
                   } else {
-                    if poly[1044].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
+                    if polygons[1044].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
                   }
                 } else {
                   return 20
@@ -5626,7 +5626,7 @@ public extension TimeZone {
                   if lat < 58.967100 {
                     if lng < -69.160118 { return 20 } else { return 137 }
                   } else {
-                    if poly[1045].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
+                    if polygons[1045].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
                   }
                 }
               } else {
@@ -5641,12 +5641,12 @@ public extension TimeZone {
                 if lng < -67.852905 {
                   return 20
                 } else {
-                  if poly[1046].contains(testy: lat, testx: lng) { return 166 }
-                  if poly[1047].contains(testy: lat, testx: lng) { return 166 } else { return 20 }
+                  if polygons[1046].contains(testy: lat, testx: lng) { return 166 }
+                  if polygons[1047].contains(testy: lat, testx: lng) { return 166 } else { return 20 }
                 }
               } else {
                 if lat < 58.717937 {
-                  if poly[1048].contains(testy: lat, testx: lng) { return 166 } else { return 20 }
+                  if polygons[1048].contains(testy: lat, testx: lng) { return 166 } else { return 20 }
                 } else {
                   return 166
                 }
@@ -5654,12 +5654,12 @@ public extension TimeZone {
             } else {
               if lat < 58.867237 {
                 if lng < -66.127945 {
-                  if poly[1049].contains(testy: lat, testx: lng) { return 166 } else { return 20 }
+                  if polygons[1049].contains(testy: lat, testx: lng) { return 166 } else { return 20 }
                 } else {
                   if lat < 58.730328 {
                     return 20
                   } else {
-                    if poly[1050].contains(testy: lat, testx: lng) { return 166 } else { return 20 }
+                    if polygons[1050].contains(testy: lat, testx: lng) { return 166 } else { return 20 }
                   }
                 }
               } else {
@@ -5672,7 +5672,7 @@ public extension TimeZone {
                 if lat < 58.848312 {
                   return 20
                 } else {
-                  if poly[1051].contains(testy: lat, testx: lng) { return 166 } else { return 20 }
+                  if polygons[1051].contains(testy: lat, testx: lng) { return 166 } else { return 20 }
                 }
               } else {
                 return 166
@@ -5686,7 +5686,7 @@ public extension TimeZone {
                     if lng < -65.815163 {
                       return 166
                     } else {
-                      if poly[1052].contains(testy: lat, testx: lng) { return 166 } else { return 20 }
+                      if polygons[1052].contains(testy: lat, testx: lng) { return 166 } else { return 20 }
                     }
                   }
                 } else {
@@ -5694,7 +5694,7 @@ public extension TimeZone {
                     return 166
                   } else {
                     if lat < 59.146431 {
-                      if poly[1053].contains(testy: lat, testx: lng) { return 20 } else { return 166 }
+                      if polygons[1053].contains(testy: lat, testx: lng) { return 20 } else { return 166 }
                     } else {
                       return 20
                     }
@@ -5704,19 +5704,19 @@ public extension TimeZone {
                 if lng < -63.468971 {
                   if lng < -65.599258 {
                     if lat < 59.055573 {
-                      if poly[1054].contains(testy: lat, testx: lng) { return 166 } else { return 20 }
+                      if polygons[1054].contains(testy: lat, testx: lng) { return 166 } else { return 20 }
                     } else {
                       return 20
                     }
                   } else {
                     if lat < 57.734932 {
-                      if poly[1055].contains(testy: lat, testx: lng) { return 182 } else { return 20 }
+                      if polygons[1055].contains(testy: lat, testx: lng) { return 182 } else { return 20 }
                     } else {
                       if lng < -64.534115 {
-                        if poly[1056].contains(testy: lat, testx: lng) { return 182 } else { return 20 }
+                        if polygons[1056].contains(testy: lat, testx: lng) { return 182 } else { return 20 }
                       } else {
-                        if poly[1057].contains(testy: lat, testx: lng) { return 20 }
-                        if poly[1058].contains(testy: lat, testx: lng) { return 20 } else { return 182 }
+                        if polygons[1057].contains(testy: lat, testx: lng) { return 20 }
+                        if polygons[1058].contains(testy: lat, testx: lng) { return 20 } else { return 182 }
                       }
                     }
                   }
@@ -5749,18 +5749,18 @@ public extension TimeZone {
                     if lat < 60.850647 {
                       if lat < 59.984997 {
                         if lng < -69.924110 {
-                          if poly[1059].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
+                          if polygons[1059].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
                         } else {
                           if lng < -69.638916 {
-                            if poly[1060].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
+                            if polygons[1060].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
                           } else {
                             if lat < 59.391781 {
                               return 20
                             } else {
                               if lat < 59.699116 {
-                                if poly[1061].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
+                                if polygons[1061].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
                               } else {
-                                if poly[1062].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
+                                if polygons[1062].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
                               }
                             }
                           }
@@ -5773,7 +5773,7 @@ public extension TimeZone {
                             if lat < 60.083309 {
                               if lng < -69.607597 { return 20 } else { return 137 }
                             } else {
-                              if poly[1063].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
+                              if polygons[1063].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
                             }
                           } else {
                             return 137
@@ -5786,7 +5786,7 @@ public extension TimeZone {
                           if lat < 60.881176 {
                             return 20
                           } else {
-                            if poly[1064].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
+                            if polygons[1064].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
                           }
                         } else {
                           if lat < 61.035766 { return 20 } else { return 137 }
@@ -5795,7 +5795,7 @@ public extension TimeZone {
                         if lng < -69.893997 {
                           if lat < 60.913162 { return 137 } else { return 20 }
                         } else {
-                          if poly[1065].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
+                          if polygons[1065].contains(testy: lat, testx: lng) { return 137 } else { return 20 }
                         }
                       }
                     }
@@ -5820,13 +5820,13 @@ public extension TimeZone {
                       } else {
                         if lng < -65.506706 {
                           if lat < 59.385551 {
-                            if poly[1066].contains(testy: lat, testx: lng) { return 166 } else { return 20 }
+                            if polygons[1066].contains(testy: lat, testx: lng) { return 166 } else { return 20 }
                           } else {
                             return 166
                           }
                         } else {
                           if lat < 59.336494 {
-                            if poly[1067].contains(testy: lat, testx: lng) { return 166 } else { return 20 }
+                            if polygons[1067].contains(testy: lat, testx: lng) { return 166 } else { return 20 }
                           } else {
                             return 20
                           }
@@ -5853,13 +5853,13 @@ public extension TimeZone {
                     } else {
                       if lat < 60.227196 {
                         if lat < 59.753071 {
-                          if poly[1068].contains(testy: lat, testx: lng) { return 20 } else { return 182 }
+                          if polygons[1068].contains(testy: lat, testx: lng) { return 20 } else { return 182 }
                         } else {
-                          if poly[1069].contains(testy: lat, testx: lng) { return 182 } else { return 20 }
+                          if polygons[1069].contains(testy: lat, testx: lng) { return 182 } else { return 20 }
                         }
                       } else {
-                        if poly[1070].contains(testy: lat, testx: lng) { return 182 }
-                        if poly[1071].contains(testy: lat, testx: lng) { return 182 } else { return 20 }
+                        if polygons[1070].contains(testy: lat, testx: lng) { return 182 }
+                        if polygons[1071].contains(testy: lat, testx: lng) { return 182 } else { return 20 }
                       }
                     }
                   }
@@ -5901,7 +5901,7 @@ public extension TimeZone {
                       if lng < -66.141296 {
                         return 306
                       } else {
-                        if poly[1072].contains(testy: lat, testx: lng) { return 16 } else { return 306 }
+                        if polygons[1072].contains(testy: lat, testx: lng) { return 16 } else { return 306 }
                       }
                     }
                   } else {
@@ -5917,10 +5917,10 @@ public extension TimeZone {
                           if lng < -66.168510 {
                             return 306
                           } else {
-                            if poly[1073].contains(testy: lat, testx: lng) { return 16 } else { return 306 }
+                            if polygons[1073].contains(testy: lat, testx: lng) { return 16 } else { return 306 }
                           }
                         } else {
-                          if poly[1074].contains(testy: lat, testx: lng) { return 306 } else { return 16 }
+                          if polygons[1074].contains(testy: lat, testx: lng) { return 306 } else { return 16 }
                         }
                       }
                     } else {
@@ -5936,7 +5936,7 @@ public extension TimeZone {
                         if lng < -64.431755 {
                           return 166
                         } else {
-                          if poly[1075].contains(testy: lat, testx: lng) { return 16 } else { return 166 }
+                          if polygons[1075].contains(testy: lat, testx: lng) { return 16 } else { return 166 }
                         }
                       }
                     }
@@ -5967,13 +5967,13 @@ public extension TimeZone {
                       if lat < 55.253502 {
                         if lng < -7.098750 {
                           if lat < 54.376654 {
-                            if poly[1076].contains(testy: lat, testx: lng) { return 303 } else { return 285 }
+                            if polygons[1076].contains(testy: lat, testx: lng) { return 303 } else { return 285 }
                           } else {
-                            if poly[1077].contains(testy: lat, testx: lng) { return 303 }
-                            if poly[1078].contains(testy: lat, testx: lng) { return 303 } else { return 285 }
+                            if polygons[1077].contains(testy: lat, testx: lng) { return 303 }
+                            if polygons[1078].contains(testy: lat, testx: lng) { return 303 } else { return 285 }
                           }
                         } else {
-                          if poly[1079].contains(testy: lat, testx: lng) { return 303 } else { return 285 }
+                          if polygons[1079].contains(testy: lat, testx: lng) { return 303 } else { return 285 }
                         }
                       } else {
                         if lng < -6.953667 { return 285 } else { return 303 }
@@ -6004,7 +6004,7 @@ public extension TimeZone {
                       return 385
                     } else {
                       if lat < 53.470085 {
-                        if poly[1080].contains(testy: lat, testx: lng) { return 6 } else { return 385 }
+                        if polygons[1080].contains(testy: lat, testx: lng) { return 6 } else { return 385 }
                       } else {
                         return 6
                       }
@@ -6036,9 +6036,9 @@ public extension TimeZone {
                       } else {
                         if lat < 72.348299 {
                           if lng < -24.400325 {
-                            if poly[1081].contains(testy: lat, testx: lng) { return 73 } else { return 16 }
+                            if polygons[1081].contains(testy: lat, testx: lng) { return 73 } else { return 16 }
                           } else {
-                            if poly[1082].contains(testy: lat, testx: lng) { return 16 } else { return 73 }
+                            if polygons[1082].contains(testy: lat, testx: lng) { return 16 } else { return 73 }
                           }
                         } else {
                           return 16
@@ -6065,12 +6065,12 @@ public extension TimeZone {
                     if lng < -20.440577 {
                       if lng < -21.152466 {
                         if lat < 76.295341 {
-                          if poly[1083].contains(testy: lat, testx: lng) { return 25 }
-                          if poly[1084].contains(testy: lat, testx: lng) { return 25 }
-                          if poly[1085].contains(testy: lat, testx: lng) { return 25 } else { return 16 }
+                          if polygons[1083].contains(testy: lat, testx: lng) { return 25 }
+                          if polygons[1084].contains(testy: lat, testx: lng) { return 25 }
+                          if polygons[1085].contains(testy: lat, testx: lng) { return 25 } else { return 16 }
                         } else {
                           if lng < -22.890951 {
-                            if poly[1086].contains(testy: lat, testx: lng) { return 25 } else { return 16 }
+                            if polygons[1086].contains(testy: lat, testx: lng) { return 25 } else { return 16 }
                           } else {
                             return 25
                           }
@@ -6080,7 +6080,7 @@ public extension TimeZone {
                           if lat < 75.325089 {
                             return 16
                           } else {
-                            if poly[1087].contains(testy: lat, testx: lng) { return 25 } else { return 16 }
+                            if polygons[1087].contains(testy: lat, testx: lng) { return 25 } else { return 16 }
                           }
                         } else {
                           return 25
@@ -6089,7 +6089,7 @@ public extension TimeZone {
                     } else {
                       if lat < 75.798696 {
                         if lng < -19.495006 {
-                          if poly[1088].contains(testy: lat, testx: lng) { return 25 } else { return 16 }
+                          if polygons[1088].contains(testy: lat, testx: lng) { return 25 } else { return 16 }
                         } else {
                           return 16
                         }
@@ -6099,14 +6099,14 @@ public extension TimeZone {
                     }
                   } else {
                     if lng < -22.880474 {
-                      if poly[1089].contains(testy: lat, testx: lng) { return 25 } else { return 16 }
+                      if polygons[1089].contains(testy: lat, testx: lng) { return 25 } else { return 16 }
                     } else {
                       return 25
                     }
                   }
                 } else {
                   if lng < -22.825729 {
-                    if poly[1090].contains(testy: lat, testx: lng) { return 25 } else { return 16 }
+                    if polygons[1090].contains(testy: lat, testx: lng) { return 25 } else { return 16 }
                   } else {
                     return 25
                   }
@@ -6116,7 +6116,7 @@ public extension TimeZone {
               if lat < 78.385384 {
                 if lng < -21.049835 {
                   if lng < -22.757199 {
-                    if poly[1091].contains(testy: lat, testx: lng) { return 25 } else { return 16 }
+                    if polygons[1091].contains(testy: lat, testx: lng) { return 25 } else { return 16 }
                   } else {
                     return 25
                   }
@@ -6128,18 +6128,18 @@ public extension TimeZone {
                   if lng < -19.217758 {
                     if lat < 78.890169 {
                       if lng < -22.723715 {
-                        if poly[1092].contains(testy: lat, testx: lng) { return 25 } else { return 16 }
+                        if polygons[1092].contains(testy: lat, testx: lng) { return 25 } else { return 16 }
                       } else {
                         return 25
                       }
                     } else {
                       if lng < -22.673079 {
-                        if poly[1093].contains(testy: lat, testx: lng) { return 25 } else { return 16 }
+                        if polygons[1093].contains(testy: lat, testx: lng) { return 25 } else { return 16 }
                       } else {
                         if lat < 79.360726 {
                           return 25
                         } else {
-                          if poly[1094].contains(testy: lat, testx: lng) { return 16 } else { return 25 }
+                          if polygons[1094].contains(testy: lat, testx: lng) { return 16 } else { return 25 }
                         }
                       }
                     }
@@ -6164,9 +6164,9 @@ public extension TimeZone {
       } else {
         if lng < 19.539615 {
           if lng < 16.478859 {
-            if poly[1095].contains(testy: lat, testx: lng) { return 189 } else { return 169 }
+            if polygons[1095].contains(testy: lat, testx: lng) { return 189 } else { return 169 }
           } else {
-            if poly[1096].contains(testy: lat, testx: lng) { return 189 } else { return 169 }
+            if polygons[1096].contains(testy: lat, testx: lng) { return 189 } else { return 169 }
           }
         } else {
           if lng < 25.950998 {
@@ -6177,18 +6177,18 @@ public extension TimeZone {
                 return 169
               } else {
                 if lng < 27.553844 {
-                  if poly[1097].contains(testy: lat, testx: lng) { return 339 } else { return 169 }
+                  if polygons[1097].contains(testy: lat, testx: lng) { return 339 } else { return 169 }
                 } else {
                   if lat < -29.781190 {
-                    if poly[1098].contains(testy: lat, testx: lng) { return 339 } else { return 169 }
+                    if polygons[1098].contains(testy: lat, testx: lng) { return 339 } else { return 169 }
                   } else {
-                    if poly[1099].contains(testy: lat, testx: lng) { return 339 } else { return 169 }
+                    if polygons[1099].contains(testy: lat, testx: lng) { return 339 } else { return 169 }
                   }
                 }
               }
             } else {
-              if poly[1100].contains(testy: lat, testx: lng) { return 339 }
-              if poly[1101].contains(testy: lat, testx: lng) { return 339 } else { return 169 }
+              if polygons[1100].contains(testy: lat, testx: lng) { return 339 }
+              if polygons[1101].contains(testy: lat, testx: lng) { return 339 } else { return 169 }
             }
           }
         }
@@ -6198,12 +6198,12 @@ public extension TimeZone {
         if lng < 17.403767 {
           if lat < -28.037775 {
             if lng < 17.083324 {
-              if poly[1102].contains(testy: lat, testx: lng) { return 169 } else { return 189 }
+              if polygons[1102].contains(testy: lat, testx: lng) { return 169 } else { return 189 }
             } else {
               if lat < -28.411060 {
-                if poly[1103].contains(testy: lat, testx: lng) { return 189 } else { return 169 }
+                if polygons[1103].contains(testy: lat, testx: lng) { return 189 } else { return 169 }
               } else {
-                if poly[1104].contains(testy: lat, testx: lng) { return 189 } else { return 169 }
+                if polygons[1104].contains(testy: lat, testx: lng) { return 189 } else { return 169 }
               }
             }
           } else {
@@ -6212,9 +6212,9 @@ public extension TimeZone {
             } else {
               if lat < -16.959894 {
                 if lng < 13.142432 {
-                  if poly[1105].contains(testy: lat, testx: lng) { return 299 } else { return 189 }
+                  if polygons[1105].contains(testy: lat, testx: lng) { return 299 } else { return 189 }
                 } else {
-                  if poly[1106].contains(testy: lat, testx: lng) { return 299 } else { return 189 }
+                  if polygons[1106].contains(testy: lat, testx: lng) { return 299 } else { return 189 }
                 }
               } else {
                 return 299
@@ -6226,39 +6226,39 @@ public extension TimeZone {
             if lng < 23.382274 {
               if lat < -25.331252 {
                 if lng < 20.393020 {
-                  if poly[1107].contains(testy: lat, testx: lng) { return 169 } else { return 189 }
+                  if polygons[1107].contains(testy: lat, testx: lng) { return 169 } else { return 189 }
                 } else {
                   if lat < -26.951655 {
                     return 169
                   } else {
                     if lng < 21.887647 {
-                      if poly[1108].contains(testy: lat, testx: lng) { return 12 } else { return 169 }
+                      if polygons[1108].contains(testy: lat, testx: lng) { return 12 } else { return 169 }
                     } else {
-                      if poly[1109].contains(testy: lat, testx: lng) { return 12 } else { return 169 }
+                      if polygons[1109].contains(testy: lat, testx: lng) { return 12 } else { return 169 }
                     }
                   }
                 }
               } else {
-                if poly[1110].contains(testy: lat, testx: lng) { return 169 }
-                if poly[1111].contains(testy: lat, testx: lng) { return 169 }
-                if poly[1112].contains(testy: lat, testx: lng) { return 189 } else { return 12 }
+                if polygons[1110].contains(testy: lat, testx: lng) { return 169 }
+                if polygons[1111].contains(testy: lat, testx: lng) { return 169 }
+                if polygons[1112].contains(testy: lat, testx: lng) { return 189 } else { return 12 }
               }
             } else {
               if lat < -25.331252 {
-                if poly[1113].contains(testy: lat, testx: lng) { return 12 } else { return 169 }
+                if polygons[1113].contains(testy: lat, testx: lng) { return 12 } else { return 169 }
               } else {
                 if lng < 26.371527 {
-                  if poly[1114].contains(testy: lat, testx: lng) { return 169 }
-                  if poly[1115].contains(testy: lat, testx: lng) { return 169 } else { return 12 }
+                  if polygons[1114].contains(testy: lat, testx: lng) { return 169 }
+                  if polygons[1115].contains(testy: lat, testx: lng) { return 169 } else { return 12 }
                 } else {
                   if lat < -23.710849 {
-                    if poly[1116].contains(testy: lat, testx: lng) { return 169 } else { return 12 }
+                    if polygons[1116].contains(testy: lat, testx: lng) { return 169 } else { return 12 }
                   } else {
                     if lng < 27.866154 {
-                      if poly[1117].contains(testy: lat, testx: lng) { return 169 } else { return 12 }
+                      if polygons[1117].contains(testy: lat, testx: lng) { return 169 } else { return 12 }
                     } else {
-                      if poly[1118].contains(testy: lat, testx: lng) { return 12 }
-                      if poly[1119].contains(testy: lat, testx: lng) { return 269 } else { return 169 }
+                      if polygons[1118].contains(testy: lat, testx: lng) { return 12 }
+                      if polygons[1119].contains(testy: lat, testx: lng) { return 269 } else { return 169 }
                     }
                   }
                 }
@@ -6267,29 +6267,29 @@ public extension TimeZone {
           } else {
             if lng < 23.382274 {
               if lat < -18.849641 {
-                if poly[1120].contains(testy: lat, testx: lng) { return 189 } else { return 12 }
+                if polygons[1120].contains(testy: lat, testx: lng) { return 189 } else { return 12 }
               } else {
                 if lng < 20.393020 {
-                  if poly[1121].contains(testy: lat, testx: lng) { return 299 } else { return 189 }
+                  if polygons[1121].contains(testy: lat, testx: lng) { return 299 } else { return 189 }
                 } else {
                   if lat < -17.229238 {
-                    if poly[1122].contains(testy: lat, testx: lng) { return 12 }
-                    if poly[1123].contains(testy: lat, testx: lng) { return 267 }
-                    if poly[1124].contains(testy: lat, testx: lng) { return 299 } else { return 189 }
+                    if polygons[1122].contains(testy: lat, testx: lng) { return 12 }
+                    if polygons[1123].contains(testy: lat, testx: lng) { return 267 }
+                    if polygons[1124].contains(testy: lat, testx: lng) { return 299 } else { return 189 }
                   } else {
-                    if poly[1125].contains(testy: lat, testx: lng) { return 299 } else { return 267 }
+                    if polygons[1125].contains(testy: lat, testx: lng) { return 299 } else { return 267 }
                   }
                 }
               }
             } else {
               if lat < -18.849641 {
                 if lng < 26.371527 {
-                  if poly[1126].contains(testy: lat, testx: lng) { return 269 } else { return 12 }
+                  if polygons[1126].contains(testy: lat, testx: lng) { return 269 } else { return 12 }
                 } else {
                   if lat < -20.470044 {
-                    if poly[1127].contains(testy: lat, testx: lng) { return 269 } else { return 12 }
+                    if polygons[1127].contains(testy: lat, testx: lng) { return 269 } else { return 12 }
                   } else {
-                    if poly[1128].contains(testy: lat, testx: lng) { return 12 } else { return 269 }
+                    if polygons[1128].contains(testy: lat, testx: lng) { return 12 } else { return 269 }
                   }
                 }
               } else {
@@ -6297,24 +6297,24 @@ public extension TimeZone {
                   if lat < -17.229238 {
                     if lng < 24.876900 {
                       if lat < -18.039439 {
-                        if poly[1129].contains(testy: lat, testx: lng) { return 189 }
-                        if poly[1130].contains(testy: lat, testx: lng) { return 189 } else { return 12 }
+                        if polygons[1129].contains(testy: lat, testx: lng) { return 189 }
+                        if polygons[1130].contains(testy: lat, testx: lng) { return 189 } else { return 12 }
                       } else {
-                        if poly[1131].contains(testy: lat, testx: lng) { return 12 }
-                        if poly[1132].contains(testy: lat, testx: lng) { return 12 }
-                        if poly[1133].contains(testy: lat, testx: lng) { return 267 }
-                        if poly[1134].contains(testy: lat, testx: lng) { return 299 } else { return 189 }
+                        if polygons[1131].contains(testy: lat, testx: lng) { return 12 }
+                        if polygons[1132].contains(testy: lat, testx: lng) { return 12 }
+                        if polygons[1133].contains(testy: lat, testx: lng) { return 267 }
+                        if polygons[1134].contains(testy: lat, testx: lng) { return 299 } else { return 189 }
                       }
                     } else {
                       if lat < -18.039439 {
-                        if poly[1135].contains(testy: lat, testx: lng) { return 12 } else { return 269 }
+                        if polygons[1135].contains(testy: lat, testx: lng) { return 12 } else { return 269 }
                       } else {
                         if lng < 25.624214 {
-                          if poly[1136].contains(testy: lat, testx: lng) { return 12 }
-                          if poly[1137].contains(testy: lat, testx: lng) { return 189 }
-                          if poly[1138].contains(testy: lat, testx: lng) { return 269 } else { return 267 }
+                          if polygons[1136].contains(testy: lat, testx: lng) { return 12 }
+                          if polygons[1137].contains(testy: lat, testx: lng) { return 189 }
+                          if polygons[1138].contains(testy: lat, testx: lng) { return 269 } else { return 267 }
                         } else {
-                          if poly[1139].contains(testy: lat, testx: lng) { return 267 } else { return 269 }
+                          if polygons[1139].contains(testy: lat, testx: lng) { return 267 } else { return 269 }
                         }
                       }
                     }
@@ -6322,7 +6322,7 @@ public extension TimeZone {
                     return 267
                   }
                 } else {
-                  if poly[1140].contains(testy: lat, testx: lng) { return 269 } else { return 267 }
+                  if polygons[1140].contains(testy: lat, testx: lng) { return 269 } else { return 267 }
                 }
               }
             }
@@ -6332,12 +6332,12 @@ public extension TimeZone {
         if lat < -25.719648 {
           if lng < 32.895973 {
             if lng < 32.137260 {
-              if poly[1141].contains(testy: lat, testx: lng) { return 169 }
-              if poly[1142].contains(testy: lat, testx: lng) { return 169 }
-              if poly[1143].contains(testy: lat, testx: lng) { return 364 } else { return 117 }
+              if polygons[1141].contains(testy: lat, testx: lng) { return 169 }
+              if polygons[1142].contains(testy: lat, testx: lng) { return 169 }
+              if polygons[1143].contains(testy: lat, testx: lng) { return 364 } else { return 117 }
             } else {
               if lat < -26.830089 {
-                if poly[1144].contains(testy: lat, testx: lng) { return 364 } else { return 169 }
+                if polygons[1144].contains(testy: lat, testx: lng) { return 364 } else { return 169 }
               } else {
                 return 364
               }
@@ -6348,20 +6348,20 @@ public extension TimeZone {
         } else {
           if lat < -20.664242 {
             if lat < -23.191945 {
-              if poly[1145].contains(testy: lat, testx: lng) { return 169 } else { return 364 }
+              if polygons[1145].contains(testy: lat, testx: lng) { return 169 } else { return 364 }
             } else {
-              if poly[1146].contains(testy: lat, testx: lng) { return 169 }
-              if poly[1147].contains(testy: lat, testx: lng) { return 364 } else { return 269 }
+              if polygons[1146].contains(testy: lat, testx: lng) { return 169 }
+              if polygons[1147].contains(testy: lat, testx: lng) { return 364 } else { return 269 }
             }
           } else {
             if lat < -18.136539 {
-              if poly[1148].contains(testy: lat, testx: lng) { return 364 } else { return 269 }
+              if polygons[1148].contains(testy: lat, testx: lng) { return 364 } else { return 269 }
             } else {
               if lng < 31.533242 {
-                if poly[1149].contains(testy: lat, testx: lng) { return 267 }
-                if poly[1150].contains(testy: lat, testx: lng) { return 364 } else { return 269 }
+                if polygons[1149].contains(testy: lat, testx: lng) { return 267 }
+                if polygons[1150].contains(testy: lat, testx: lng) { return 364 } else { return 269 }
               } else {
-                if poly[1151].contains(testy: lat, testx: lng) { return 269 } else { return 364 }
+                if polygons[1151].contains(testy: lat, testx: lng) { return 269 } else { return 364 }
               }
             }
           }
@@ -6395,17 +6395,17 @@ public extension TimeZone {
                   return 299
                 } else {
                   if lng < 17.248119 {
-                    if poly[1152].contains(testy: lat, testx: lng) { return 331 } else { return 299 }
+                    if polygons[1152].contains(testy: lat, testx: lng) { return 331 } else { return 299 }
                   } else {
-                    if poly[1153].contains(testy: lat, testx: lng) { return 299 } else { return 331 }
+                    if polygons[1153].contains(testy: lat, testx: lng) { return 299 } else { return 331 }
                   }
                 }
               } else {
                 if lng < 21.552087 {
-                  if poly[1154].contains(testy: lat, testx: lng) { return 299 }
-                  if poly[1155].contains(testy: lat, testx: lng) { return 352 } else { return 331 }
+                  if polygons[1154].contains(testy: lat, testx: lng) { return 299 }
+                  if polygons[1155].contains(testy: lat, testx: lng) { return 352 } else { return 331 }
                 } else {
-                  if poly[1156].contains(testy: lat, testx: lng) { return 299 } else { return 352 }
+                  if polygons[1156].contains(testy: lat, testx: lng) { return 299 } else { return 352 }
                 }
               }
             }
@@ -6419,69 +6419,69 @@ public extension TimeZone {
             if lat < -5.841628 {
               if lng < 12.922298 {
                 if lng < 12.876115 {
-                  if poly[1157].contains(testy: lat, testx: lng) { return 299 } else { return 331 }
+                  if polygons[1157].contains(testy: lat, testx: lng) { return 299 } else { return 331 }
                 } else {
                   return 331
                 }
               } else {
                 if lng < 13.986273 {
-                  if poly[1158].contains(testy: lat, testx: lng) { return 331 } else { return 299 }
+                  if polygons[1158].contains(testy: lat, testx: lng) { return 331 } else { return 299 }
                 } else {
-                  if poly[1159].contains(testy: lat, testx: lng) { return 299 } else { return 331 }
+                  if polygons[1159].contains(testy: lat, testx: lng) { return 299 } else { return 331 }
                 }
               }
             } else {
               if lng < 13.893478 {
                 if lat < -2.791343 {
                   if lng < 11.956557 {
-                    if poly[1160].contains(testy: lat, testx: lng) { return 155 } else { return 154 }
+                    if polygons[1160].contains(testy: lat, testx: lng) { return 155 } else { return 154 }
                   } else {
                     if lat < -4.316486 {
                       if lng < 12.925017 {
-                        if poly[1161].contains(testy: lat, testx: lng) { return 154 }
-                        if poly[1162].contains(testy: lat, testx: lng) { return 331 } else { return 299 }
+                        if polygons[1161].contains(testy: lat, testx: lng) { return 154 }
+                        if polygons[1162].contains(testy: lat, testx: lng) { return 331 } else { return 299 }
                       } else {
-                        if poly[1163].contains(testy: lat, testx: lng) { return 299 }
-                        if poly[1164].contains(testy: lat, testx: lng) { return 331 } else { return 154 }
+                        if polygons[1163].contains(testy: lat, testx: lng) { return 299 }
+                        if polygons[1164].contains(testy: lat, testx: lng) { return 331 } else { return 154 }
                       }
                     } else {
-                      if poly[1165].contains(testy: lat, testx: lng) { return 155 }
-                      if poly[1166].contains(testy: lat, testx: lng) { return 155 } else { return 154 }
+                      if polygons[1165].contains(testy: lat, testx: lng) { return 155 }
+                      if polygons[1166].contains(testy: lat, testx: lng) { return 155 } else { return 154 }
                     }
                   }
                 } else {
                   if lng < 11.907562 {
-                    if poly[1167].contains(testy: lat, testx: lng) { return 154 } else { return 155 }
+                    if polygons[1167].contains(testy: lat, testx: lng) { return 154 } else { return 155 }
                   } else {
-                    if poly[1168].contains(testy: lat, testx: lng) { return 154 }
-                    if poly[1169].contains(testy: lat, testx: lng) { return 154 }
-                    if poly[1170].contains(testy: lat, testx: lng) { return 154 } else { return 155 }
+                    if polygons[1168].contains(testy: lat, testx: lng) { return 154 }
+                    if polygons[1169].contains(testy: lat, testx: lng) { return 154 }
+                    if polygons[1170].contains(testy: lat, testx: lng) { return 154 } else { return 155 }
                   }
                 }
               } else {
                 if lat < -2.791343 {
-                  if poly[1171].contains(testy: lat, testx: lng) { return 154 } else { return 331 }
+                  if polygons[1171].contains(testy: lat, testx: lng) { return 154 } else { return 331 }
                 } else {
                   if lng < 15.879394 {
-                    if poly[1172].contains(testy: lat, testx: lng) { return 154 }
-                    if poly[1173].contains(testy: lat, testx: lng) { return 154 } else { return 155 }
+                    if polygons[1172].contains(testy: lat, testx: lng) { return 154 }
+                    if polygons[1173].contains(testy: lat, testx: lng) { return 154 } else { return 155 }
                   } else {
-                    if poly[1174].contains(testy: lat, testx: lng) { return 331 } else { return 154 }
+                    if polygons[1174].contains(testy: lat, testx: lng) { return 331 } else { return 154 }
                   }
                 }
               }
             }
           } else {
             if lng < 21.143354 {
-              if poly[1175].contains(testy: lat, testx: lng) { return 352 } else { return 331 }
+              if polygons[1175].contains(testy: lat, testx: lng) { return 352 } else { return 331 }
             } else {
               if lat < -2.834147 {
                 return 352
               } else {
                 if lng < 22.782376 {
-                  if poly[1176].contains(testy: lat, testx: lng) { return 352 } else { return 331 }
+                  if polygons[1176].contains(testy: lat, testx: lng) { return 352 } else { return 331 }
                 } else {
-                  if poly[1177].contains(testy: lat, testx: lng) { return 331 } else { return 352 }
+                  if polygons[1177].contains(testy: lat, testx: lng) { return 331 } else { return 352 }
                 }
               }
             }
@@ -6491,7 +6491,7 @@ public extension TimeZone {
     } else {
       if lat < -5.718678 {
         if lng < 30.744639 {
-          if poly[1178].contains(testy: lat, testx: lng) { return 17 } else { return 352 }
+          if polygons[1178].contains(testy: lat, testx: lng) { return 17 } else { return 352 }
         } else {
           return 17
         }
@@ -6503,21 +6503,21 @@ public extension TimeZone {
                 return 352
               } else {
                 if lat < -3.898617 {
-                  if poly[1179].contains(testy: lat, testx: lng) { return 83 }
-                  if poly[1180].contains(testy: lat, testx: lng) { return 352 } else { return 17 }
+                  if polygons[1179].contains(testy: lat, testx: lng) { return 83 }
+                  if polygons[1180].contains(testy: lat, testx: lng) { return 352 } else { return 17 }
                 } else {
                   if lng < 29.277318 {
-                    if poly[1181].contains(testy: lat, testx: lng) { return 83 }
-                    if poly[1182].contains(testy: lat, testx: lng) { return 293 } else { return 352 }
+                    if polygons[1181].contains(testy: lat, testx: lng) { return 83 }
+                    if polygons[1182].contains(testy: lat, testx: lng) { return 293 } else { return 352 }
                   } else {
                     if lat < -2.988586 {
-                      if poly[1183].contains(testy: lat, testx: lng) { return 83 } else { return 17 }
+                      if polygons[1183].contains(testy: lat, testx: lng) { return 83 } else { return 17 }
                     } else {
                       if lng < 30.086638 {
-                        if poly[1184].contains(testy: lat, testx: lng) { return 293 } else { return 83 }
+                        if polygons[1184].contains(testy: lat, testx: lng) { return 293 } else { return 83 }
                       } else {
-                        if poly[1185].contains(testy: lat, testx: lng) { return 17 }
-                        if poly[1186].contains(testy: lat, testx: lng) { return 293 } else { return 83 }
+                        if polygons[1185].contains(testy: lat, testx: lng) { return 17 }
+                        if polygons[1186].contains(testy: lat, testx: lng) { return 293 } else { return 83 }
                       }
                     }
                   }
@@ -6528,18 +6528,18 @@ public extension TimeZone {
                 return 352
               } else {
                 if lng < 29.277318 {
-                  if poly[1187].contains(testy: lat, testx: lng) { return 293 } else { return 352 }
+                  if polygons[1187].contains(testy: lat, testx: lng) { return 293 } else { return 352 }
                 } else {
                   if lat < -0.909808 {
                     if lng < 30.086638 {
-                      if poly[1188].contains(testy: lat, testx: lng) { return 293 }
-                      if poly[1189].contains(testy: lat, testx: lng) { return 352 } else { return 179 }
+                      if polygons[1188].contains(testy: lat, testx: lng) { return 293 }
+                      if polygons[1189].contains(testy: lat, testx: lng) { return 352 } else { return 179 }
                     } else {
-                      if poly[1190].contains(testy: lat, testx: lng) { return 17 }
-                      if poly[1191].contains(testy: lat, testx: lng) { return 179 } else { return 293 }
+                      if polygons[1190].contains(testy: lat, testx: lng) { return 17 }
+                      if polygons[1191].contains(testy: lat, testx: lng) { return 179 } else { return 293 }
                     }
                   } else {
-                    if poly[1192].contains(testy: lat, testx: lng) { return 352 } else { return 179 }
+                    if polygons[1192].contains(testy: lat, testx: lng) { return 352 } else { return 179 }
                   }
                 }
               }
@@ -6548,8 +6548,8 @@ public extension TimeZone {
             if lat < -5.085639 {
               return 17
             } else {
-              if poly[1193].contains(testy: lat, testx: lng) { return 122 }
-              if poly[1194].contains(testy: lat, testx: lng) { return 179 } else { return 17 }
+              if polygons[1193].contains(testy: lat, testx: lng) { return 122 }
+              if polygons[1194].contains(testy: lat, testx: lng) { return 179 } else { return 17 }
             }
           }
         } else {
@@ -6564,16 +6564,16 @@ public extension TimeZone {
       if lat < 5.386098 {
         if lng < 23.651386 {
           if lat < 2.822519 {
-            if poly[1195].contains(testy: lat, testx: lng) { return 331 } else { return 352 }
+            if polygons[1195].contains(testy: lat, testx: lng) { return 331 } else { return 352 }
           } else {
             if lng < 21.150613 {
-              if poly[1196].contains(testy: lat, testx: lng) { return 331 } else { return 214 }
+              if polygons[1196].contains(testy: lat, testx: lng) { return 331 } else { return 214 }
             } else {
               if lat < 4.104309 {
-                if poly[1197].contains(testy: lat, testx: lng) { return 331 } else { return 352 }
+                if polygons[1197].contains(testy: lat, testx: lng) { return 331 } else { return 352 }
               } else {
-                if poly[1198].contains(testy: lat, testx: lng) { return 331 }
-                if poly[1199].contains(testy: lat, testx: lng) { return 352 } else { return 214 }
+                if polygons[1198].contains(testy: lat, testx: lng) { return 331 }
+                if polygons[1199].contains(testy: lat, testx: lng) { return 352 } else { return 214 }
               }
             }
           }
@@ -6587,9 +6587,9 @@ public extension TimeZone {
                   return 352
                 } else {
                   if lng < 24.608202 {
-                    if poly[1200].contains(testy: lat, testx: lng) { return 352 } else { return 214 }
+                    if polygons[1200].contains(testy: lat, testx: lng) { return 352 } else { return 214 }
                   } else {
-                    if poly[1201].contains(testy: lat, testx: lng) { return 352 } else { return 214 }
+                    if polygons[1201].contains(testy: lat, testx: lng) { return 352 } else { return 214 }
                   }
                 }
               } else {
@@ -6597,26 +6597,26 @@ public extension TimeZone {
                   return 352
                 } else {
                   if lng < 26.521833 {
-                    if poly[1202].contains(testy: lat, testx: lng) { return 214 } else { return 352 }
+                    if polygons[1202].contains(testy: lat, testx: lng) { return 214 } else { return 352 }
                   } else {
-                    if poly[1203].contains(testy: lat, testx: lng) { return 352 }
-                    if poly[1204].contains(testy: lat, testx: lng) { return 395 } else { return 214 }
+                    if polygons[1203].contains(testy: lat, testx: lng) { return 352 }
+                    if polygons[1204].contains(testy: lat, testx: lng) { return 395 } else { return 214 }
                   }
                 }
               }
             }
           } else {
             if lat < 2.822519 {
-              if poly[1205].contains(testy: lat, testx: lng) { return 352 } else { return 179 }
+              if polygons[1205].contains(testy: lat, testx: lng) { return 352 } else { return 179 }
             } else {
               if lng < 29.392281 {
-                if poly[1206].contains(testy: lat, testx: lng) { return 352 } else { return 395 }
+                if polygons[1206].contains(testy: lat, testx: lng) { return 352 } else { return 395 }
               } else {
                 if lat < 4.104309 {
-                  if poly[1207].contains(testy: lat, testx: lng) { return 179 }
-                  if poly[1208].contains(testy: lat, testx: lng) { return 395 } else { return 352 }
+                  if polygons[1207].contains(testy: lat, testx: lng) { return 179 }
+                  if polygons[1208].contains(testy: lat, testx: lng) { return 395 } else { return 352 }
                 } else {
-                  if poly[1209].contains(testy: lat, testx: lng) { return 352 } else { return 395 }
+                  if polygons[1209].contains(testy: lat, testx: lng) { return 352 } else { return 395 }
                 }
               }
             }
@@ -6630,38 +6630,38 @@ public extension TimeZone {
                 return 214
               } else {
                 if lng < 20.231848 {
-                  if poly[1210].contains(testy: lat, testx: lng) { return 214 } else { return 202 }
+                  if polygons[1210].contains(testy: lat, testx: lng) { return 214 } else { return 202 }
                 } else {
                   if lat < 9.498395 {
-                    if poly[1211].contains(testy: lat, testx: lng) { return 202 } else { return 214 }
+                    if polygons[1211].contains(testy: lat, testx: lng) { return 202 } else { return 214 }
                   } else {
-                    if poly[1212].contains(testy: lat, testx: lng) { return 214 } else { return 202 }
+                    if polygons[1212].contains(testy: lat, testx: lng) { return 214 } else { return 202 }
                   }
                 }
               }
             } else {
               if lat < 8.127629 {
-                if poly[1213].contains(testy: lat, testx: lng) { return 395 } else { return 214 }
+                if polygons[1213].contains(testy: lat, testx: lng) { return 395 } else { return 214 }
               } else {
                 if lng < 23.395867 {
-                  if poly[1214].contains(testy: lat, testx: lng) { return 202 }
-                  if poly[1215].contains(testy: lat, testx: lng) { return 202 }
-                  if poly[1216].contains(testy: lat, testx: lng) { return 202 }
-                  if poly[1217].contains(testy: lat, testx: lng) { return 322 } else { return 214 }
+                  if polygons[1214].contains(testy: lat, testx: lng) { return 202 }
+                  if polygons[1215].contains(testy: lat, testx: lng) { return 202 }
+                  if polygons[1216].contains(testy: lat, testx: lng) { return 202 }
+                  if polygons[1217].contains(testy: lat, testx: lng) { return 322 } else { return 214 }
                 } else {
                   if lat < 9.498395 {
                     if lng < 24.186871 {
-                      if poly[1218].contains(testy: lat, testx: lng) { return 322 }
-                      if poly[1219].contains(testy: lat, testx: lng) { return 395 }
-                      if poly[1220].contains(testy: lat, testx: lng) { return 395 } else { return 214 }
+                      if polygons[1218].contains(testy: lat, testx: lng) { return 322 }
+                      if polygons[1219].contains(testy: lat, testx: lng) { return 395 }
+                      if polygons[1220].contains(testy: lat, testx: lng) { return 395 } else { return 214 }
                     } else {
-                      if poly[1221].contains(testy: lat, testx: lng) { return 214 }
-                      if poly[1222].contains(testy: lat, testx: lng) { return 214 }
-                      if poly[1223].contains(testy: lat, testx: lng) { return 322 } else { return 395 }
+                      if polygons[1221].contains(testy: lat, testx: lng) { return 214 }
+                      if polygons[1222].contains(testy: lat, testx: lng) { return 214 }
+                      if polygons[1223].contains(testy: lat, testx: lng) { return 322 } else { return 395 }
                     }
                   } else {
-                    if poly[1224].contains(testy: lat, testx: lng) { return 214 }
-                    if poly[1225].contains(testy: lat, testx: lng) { return 395 } else { return 322 }
+                    if polygons[1224].contains(testy: lat, testx: lng) { return 214 }
+                    if polygons[1225].contains(testy: lat, testx: lng) { return 395 } else { return 322 }
                   }
                 }
               }
@@ -6671,10 +6671,10 @@ public extension TimeZone {
               return 202
             } else {
               if lat < 13.610691 {
-                if poly[1226].contains(testy: lat, testx: lng) { return 214 }
-                if poly[1227].contains(testy: lat, testx: lng) { return 322 } else { return 202 }
+                if polygons[1226].contains(testy: lat, testx: lng) { return 214 }
+                if polygons[1227].contains(testy: lat, testx: lng) { return 322 } else { return 202 }
               } else {
-                if poly[1228].contains(testy: lat, testx: lng) { return 322 } else { return 202 }
+                if polygons[1228].contains(testy: lat, testx: lng) { return 322 } else { return 202 }
               }
             }
           }
@@ -6684,18 +6684,18 @@ public extension TimeZone {
               if lat < 8.127629 {
                 if lng < 26.559885 {
                   if lat < 6.756863 {
-                    if poly[1229].contains(testy: lat, testx: lng) { return 395 } else { return 214 }
+                    if polygons[1229].contains(testy: lat, testx: lng) { return 395 } else { return 214 }
                   } else {
-                    if poly[1230].contains(testy: lat, testx: lng) { return 214 } else { return 395 }
+                    if polygons[1230].contains(testy: lat, testx: lng) { return 214 } else { return 395 }
                   }
                 } else {
-                  if poly[1231].contains(testy: lat, testx: lng) { return 214 } else { return 395 }
+                  if polygons[1231].contains(testy: lat, testx: lng) { return 214 } else { return 395 }
                 }
               } else {
-                if poly[1232].contains(testy: lat, testx: lng) { return 322 } else { return 395 }
+                if polygons[1232].contains(testy: lat, testx: lng) { return 322 } else { return 395 }
               }
             } else {
-              if poly[1233].contains(testy: lat, testx: lng) { return 395 } else { return 322 }
+              if polygons[1233].contains(testy: lat, testx: lng) { return 395 } else { return 322 }
             }
           } else {
             return 322
@@ -6707,70 +6707,70 @@ public extension TimeZone {
         if lat < 4.629333 {
           if lng < 35.947697 {
             if lng < 33.626804 {
-              if poly[1234].contains(testy: lat, testx: lng) { return 395 } else { return 179 }
+              if polygons[1234].contains(testy: lat, testx: lng) { return 395 } else { return 179 }
             } else {
               if lat < 2.444137 {
-                if poly[1235].contains(testy: lat, testx: lng) { return 179 } else { return 122 }
+                if polygons[1235].contains(testy: lat, testx: lng) { return 179 } else { return 122 }
               } else {
-                if poly[1236].contains(testy: lat, testx: lng) { return 179 }
-                if poly[1237].contains(testy: lat, testx: lng) { return 395 } else { return 122 }
+                if polygons[1236].contains(testy: lat, testx: lng) { return 179 }
+                if polygons[1237].contains(testy: lat, testx: lng) { return 395 } else { return 122 }
               }
             }
           } else {
-            if poly[1238].contains(testy: lat, testx: lng) { return 350 } else { return 122 }
+            if polygons[1238].contains(testy: lat, testx: lng) { return 350 } else { return 122 }
           }
         } else {
           if lng < 35.437428 {
             if lat < 8.424241 {
               if lng < 33.371670 {
-                if poly[1239].contains(testy: lat, testx: lng) { return 350 } else { return 395 }
+                if polygons[1239].contains(testy: lat, testx: lng) { return 350 } else { return 395 }
               } else {
                 if lat < 6.526787 {
-                  if poly[1240].contains(testy: lat, testx: lng) { return 350 } else { return 395 }
+                  if polygons[1240].contains(testy: lat, testx: lng) { return 350 } else { return 395 }
                 } else {
-                  if poly[1241].contains(testy: lat, testx: lng) { return 395 }
-                  if poly[1242].contains(testy: lat, testx: lng) { return 395 }
-                  if poly[1243].contains(testy: lat, testx: lng) { return 395 } else { return 350 }
+                  if polygons[1241].contains(testy: lat, testx: lng) { return 395 }
+                  if polygons[1242].contains(testy: lat, testx: lng) { return 395 }
+                  if polygons[1243].contains(testy: lat, testx: lng) { return 395 } else { return 350 }
                 }
               }
             } else {
               if lng < 33.371670 {
-                if poly[1244].contains(testy: lat, testx: lng) { return 322 }
-                if poly[1245].contains(testy: lat, testx: lng) { return 322 }
-                if poly[1246].contains(testy: lat, testx: lng) { return 350 }
-                if poly[1247].contains(testy: lat, testx: lng) { return 350 } else { return 395 }
+                if polygons[1244].contains(testy: lat, testx: lng) { return 322 }
+                if polygons[1245].contains(testy: lat, testx: lng) { return 322 }
+                if polygons[1246].contains(testy: lat, testx: lng) { return 350 }
+                if polygons[1247].contains(testy: lat, testx: lng) { return 350 } else { return 395 }
               } else {
                 if lat < 10.321695 {
-                  if poly[1248].contains(testy: lat, testx: lng) { return 322 }
-                  if poly[1249].contains(testy: lat, testx: lng) { return 350 }
-                  if poly[1250].contains(testy: lat, testx: lng) { return 350 }
-                  if poly[1251].contains(testy: lat, testx: lng) { return 350 } else { return 395 }
+                  if polygons[1248].contains(testy: lat, testx: lng) { return 322 }
+                  if polygons[1249].contains(testy: lat, testx: lng) { return 350 }
+                  if polygons[1250].contains(testy: lat, testx: lng) { return 350 }
+                  if polygons[1251].contains(testy: lat, testx: lng) { return 350 } else { return 395 }
                 } else {
-                  if poly[1252].contains(testy: lat, testx: lng) { return 350 }
-                  if poly[1253].contains(testy: lat, testx: lng) { return 350 }
-                  if poly[1254].contains(testy: lat, testx: lng) { return 395 } else { return 322 }
+                  if polygons[1252].contains(testy: lat, testx: lng) { return 350 }
+                  if polygons[1253].contains(testy: lat, testx: lng) { return 350 }
+                  if polygons[1254].contains(testy: lat, testx: lng) { return 395 } else { return 322 }
                 }
               }
             }
           } else {
-            if poly[1255].contains(testy: lat, testx: lng) { return 322 }
-            if poly[1256].contains(testy: lat, testx: lng) { return 395 } else { return 350 }
+            if polygons[1255].contains(testy: lat, testx: lng) { return 322 }
+            if polygons[1256].contains(testy: lat, testx: lng) { return 395 } else { return 350 }
           }
         }
       } else {
         if lng < 35.437428 {
-          if poly[1257].contains(testy: lat, testx: lng) { return 350 } else { return 322 }
+          if polygons[1257].contains(testy: lat, testx: lng) { return 350 } else { return 322 }
         } else {
           if lat < 14.285686 {
-            if poly[1258].contains(testy: lat, testx: lng) { return 149 }
-            if poly[1259].contains(testy: lat, testx: lng) { return 149 }
-            if poly[1260].contains(testy: lat, testx: lng) { return 149 }
-            if poly[1261].contains(testy: lat, testx: lng) { return 322 } else { return 350 }
+            if polygons[1258].contains(testy: lat, testx: lng) { return 149 }
+            if polygons[1259].contains(testy: lat, testx: lng) { return 149 }
+            if polygons[1260].contains(testy: lat, testx: lng) { return 149 }
+            if polygons[1261].contains(testy: lat, testx: lng) { return 322 } else { return 350 }
           } else {
-            if poly[1262].contains(testy: lat, testx: lng) { return 322 }
-            if poly[1263].contains(testy: lat, testx: lng) { return 350 }
-            if poly[1264].contains(testy: lat, testx: lng) { return 350 }
-            if poly[1265].contains(testy: lat, testx: lng) { return 350 } else { return 149 }
+            if polygons[1262].contains(testy: lat, testx: lng) { return 322 }
+            if polygons[1263].contains(testy: lat, testx: lng) { return 350 }
+            if polygons[1264].contains(testy: lat, testx: lng) { return 350 }
+            if polygons[1265].contains(testy: lat, testx: lng) { return 350 } else { return 149 }
           }
         }
       }
@@ -6796,8 +6796,8 @@ public extension TimeZone {
                   return 155
                 } else {
                   if lat < 2.346989 {
-                    if poly[1266].contains(testy: lat, testx: lng) { return 155 }
-                    if poly[1267].contains(testy: lat, testx: lng) { return 326 } else { return 201 }
+                    if polygons[1266].contains(testy: lat, testx: lng) { return 155 }
+                    if polygons[1267].contains(testy: lat, testx: lng) { return 326 } else { return 201 }
                   } else {
                     return 326
                   }
@@ -6806,44 +6806,44 @@ public extension TimeZone {
                 if lng < 14.992782 {
                   if lat < 2.116439 {
                     if lng < 13.164253 {
-                      if poly[1268].contains(testy: lat, testx: lng) { return 154 }
-                      if poly[1269].contains(testy: lat, testx: lng) { return 154 }
-                      if poly[1270].contains(testy: lat, testx: lng) { return 154 } else { return 155 }
+                      if polygons[1268].contains(testy: lat, testx: lng) { return 154 }
+                      if polygons[1269].contains(testy: lat, testx: lng) { return 154 }
+                      if polygons[1270].contains(testy: lat, testx: lng) { return 154 } else { return 155 }
                     } else {
                       if lat < 1.187690 {
-                        if poly[1271].contains(testy: lat, testx: lng) { return 155 } else { return 154 }
+                        if polygons[1271].contains(testy: lat, testx: lng) { return 155 } else { return 154 }
                       } else {
                         if lng < 14.078517 {
-                          if poly[1272].contains(testy: lat, testx: lng) { return 154 } else { return 155 }
+                          if polygons[1272].contains(testy: lat, testx: lng) { return 154 } else { return 155 }
                         } else {
-                          if poly[1273].contains(testy: lat, testx: lng) { return 155 }
-                          if poly[1274].contains(testy: lat, testx: lng) { return 326 }
-                          if poly[1275].contains(testy: lat, testx: lng) { return 326 } else { return 154 }
+                          if polygons[1273].contains(testy: lat, testx: lng) { return 155 }
+                          if polygons[1274].contains(testy: lat, testx: lng) { return 326 }
+                          if polygons[1275].contains(testy: lat, testx: lng) { return 326 } else { return 154 }
                         }
                       }
                     }
                   } else {
-                    if poly[1276].contains(testy: lat, testx: lng) { return 154 }
-                    if poly[1277].contains(testy: lat, testx: lng) { return 154 }
-                    if poly[1278].contains(testy: lat, testx: lng) { return 155 } else { return 326 }
+                    if polygons[1276].contains(testy: lat, testx: lng) { return 154 }
+                    if polygons[1277].contains(testy: lat, testx: lng) { return 154 }
+                    if polygons[1278].contains(testy: lat, testx: lng) { return 155 } else { return 326 }
                   }
                 } else {
                   if lat < 2.116439 {
                     if lng < 16.821311 {
-                      if poly[1279].contains(testy: lat, testx: lng) { return 326 } else { return 154 }
+                      if polygons[1279].contains(testy: lat, testx: lng) { return 326 } else { return 154 }
                     } else {
-                      if poly[1280].contains(testy: lat, testx: lng) { return 331 } else { return 154 }
+                      if polygons[1280].contains(testy: lat, testx: lng) { return 331 } else { return 154 }
                     }
                   } else {
                     if lng < 16.821311 {
-                      if poly[1281].contains(testy: lat, testx: lng) { return 154 }
-                      if poly[1282].contains(testy: lat, testx: lng) { return 326 } else { return 214 }
+                      if polygons[1281].contains(testy: lat, testx: lng) { return 154 }
+                      if polygons[1282].contains(testy: lat, testx: lng) { return 326 } else { return 214 }
                     } else {
                       if lat < 3.045189 {
-                        if poly[1283].contains(testy: lat, testx: lng) { return 331 } else { return 154 }
+                        if polygons[1283].contains(testy: lat, testx: lng) { return 331 } else { return 154 }
                       } else {
-                        if poly[1284].contains(testy: lat, testx: lng) { return 214 }
-                        if poly[1285].contains(testy: lat, testx: lng) { return 331 } else { return 154 }
+                        if polygons[1284].contains(testy: lat, testx: lng) { return 214 }
+                        if polygons[1285].contains(testy: lat, testx: lng) { return 331 } else { return 154 }
                       }
                     }
                   }
@@ -6856,7 +6856,7 @@ public extension TimeZone {
             if lat < 4.832398 {
               return 96
             } else {
-              if poly[1286].contains(testy: lat, testx: lng) { return 260 } else { return 96 }
+              if polygons[1286].contains(testy: lat, testx: lng) { return 260 } else { return 96 }
             }
           } else {
             if lat < 4.686236 {
@@ -6868,13 +6868,13 @@ public extension TimeZone {
                     if lng < 9.648236 {
                       return 326
                     } else {
-                      if poly[1287].contains(testy: lat, testx: lng) { return 214 } else { return 326 }
+                      if polygons[1287].contains(testy: lat, testx: lng) { return 214 } else { return 326 }
                     }
                   } else {
-                    if poly[1288].contains(testy: lat, testx: lng) { return 214 } else { return 326 }
+                    if polygons[1288].contains(testy: lat, testx: lng) { return 214 } else { return 326 }
                   }
                 } else {
-                  if poly[1289].contains(testy: lat, testx: lng) { return 331 } else { return 214 }
+                  if polygons[1289].contains(testy: lat, testx: lng) { return 331 } else { return 214 }
                 }
               }
             } else {
@@ -6883,72 +6883,72 @@ public extension TimeZone {
                   if lat < 7.602733 {
                     if lng < 10.918682 {
                       if lat < 6.144484 {
-                        if poly[1290].contains(testy: lat, testx: lng) { return 326 } else { return 96 }
+                        if polygons[1290].contains(testy: lat, testx: lng) { return 326 } else { return 96 }
                       } else {
-                        if poly[1291].contains(testy: lat, testx: lng) { return 326 } else { return 96 }
+                        if polygons[1291].contains(testy: lat, testx: lng) { return 326 } else { return 96 }
                       }
                     } else {
-                      if poly[1292].contains(testy: lat, testx: lng) { return 96 } else { return 326 }
+                      if polygons[1292].contains(testy: lat, testx: lng) { return 96 } else { return 326 }
                     }
                   } else {
-                    if poly[1293].contains(testy: lat, testx: lng) { return 326 } else { return 96 }
+                    if polygons[1293].contains(testy: lat, testx: lng) { return 326 } else { return 96 }
                   }
                 } else {
                   if lat < 7.602733 {
                     if lng < 16.072787 {
                       if lat < 6.144484 {
-                        if poly[1294].contains(testy: lat, testx: lng) { return 326 } else { return 214 }
+                        if polygons[1294].contains(testy: lat, testx: lng) { return 326 } else { return 214 }
                       } else {
-                        if poly[1295].contains(testy: lat, testx: lng) { return 202 }
-                        if poly[1296].contains(testy: lat, testx: lng) { return 326 } else { return 214 }
+                        if polygons[1295].contains(testy: lat, testx: lng) { return 202 }
+                        if polygons[1296].contains(testy: lat, testx: lng) { return 326 } else { return 214 }
                       }
                     } else {
-                      if poly[1297].contains(testy: lat, testx: lng) { return 202 }
-                      if poly[1298].contains(testy: lat, testx: lng) { return 202 } else { return 214 }
+                      if polygons[1297].contains(testy: lat, testx: lng) { return 202 }
+                      if polygons[1298].contains(testy: lat, testx: lng) { return 202 } else { return 214 }
                     }
                   } else {
                     if lng < 16.072787 {
                       if lat < 9.060981 {
-                        if poly[1299].contains(testy: lat, testx: lng) { return 326 } else { return 202 }
+                        if polygons[1299].contains(testy: lat, testx: lng) { return 326 } else { return 202 }
                       } else {
-                        if poly[1300].contains(testy: lat, testx: lng) { return 96 }
-                        if poly[1301].contains(testy: lat, testx: lng) { return 202 } else { return 326 }
+                        if polygons[1300].contains(testy: lat, testx: lng) { return 96 }
+                        if polygons[1301].contains(testy: lat, testx: lng) { return 202 } else { return 326 }
                       }
                     } else {
-                      if poly[1302].contains(testy: lat, testx: lng) { return 214 }
-                      if poly[1303].contains(testy: lat, testx: lng) { return 214 } else { return 202 }
+                      if polygons[1302].contains(testy: lat, testx: lng) { return 214 }
+                      if polygons[1303].contains(testy: lat, testx: lng) { return 214 } else { return 202 }
                     }
                   }
                 }
               } else {
                 if lng < 13.495735 {
                   if lat < 13.435726 {
-                    if poly[1304].contains(testy: lat, testx: lng) { return 260 } else { return 96 }
+                    if polygons[1304].contains(testy: lat, testx: lng) { return 260 } else { return 96 }
                   } else {
-                    if poly[1305].contains(testy: lat, testx: lng) { return 96 }
-                    if poly[1306].contains(testy: lat, testx: lng) { return 202 } else { return 260 }
+                    if polygons[1305].contains(testy: lat, testx: lng) { return 96 }
+                    if polygons[1306].contains(testy: lat, testx: lng) { return 202 } else { return 260 }
                   }
                 } else {
                   if lat < 13.435726 {
                     if lng < 16.072787 {
                       if lat < 11.977477 {
-                        if poly[1307].contains(testy: lat, testx: lng) { return 96 }
-                        if poly[1308].contains(testy: lat, testx: lng) { return 202 } else { return 326 }
+                        if polygons[1307].contains(testy: lat, testx: lng) { return 96 }
+                        if polygons[1308].contains(testy: lat, testx: lng) { return 202 } else { return 326 }
                       } else {
                         if lng < 14.784261 {
-                          if poly[1309].contains(testy: lat, testx: lng) { return 96 }
-                          if poly[1310].contains(testy: lat, testx: lng) { return 202 } else { return 326 }
+                          if polygons[1309].contains(testy: lat, testx: lng) { return 96 }
+                          if polygons[1310].contains(testy: lat, testx: lng) { return 202 } else { return 326 }
                         } else {
-                          if poly[1311].contains(testy: lat, testx: lng) { return 326 } else { return 202 }
+                          if polygons[1311].contains(testy: lat, testx: lng) { return 326 } else { return 202 }
                         }
                       }
                     } else {
                       return 202
                     }
                   } else {
-                    if poly[1312].contains(testy: lat, testx: lng) { return 96 }
-                    if poly[1313].contains(testy: lat, testx: lng) { return 260 }
-                    if poly[1314].contains(testy: lat, testx: lng) { return 260 } else { return 202 }
+                    if polygons[1312].contains(testy: lat, testx: lng) { return 96 }
+                    if polygons[1313].contains(testy: lat, testx: lng) { return 260 }
+                    if polygons[1314].contains(testy: lat, testx: lng) { return 260 } else { return 202 }
                   }
                 }
               }
@@ -6961,9 +6961,9 @@ public extension TimeZone {
         } else {
           if lat < 14.553577 {
             if lat < 3.903177 {
-              if poly[1315].contains(testy: lat, testx: lng) { return 350 } else { return 122 }
+              if polygons[1315].contains(testy: lat, testx: lng) { return 350 } else { return 122 }
             } else {
-              if poly[1316].contains(testy: lat, testx: lng) { return 149 } else { return 350 }
+              if polygons[1316].contains(testy: lat, testx: lng) { return 149 } else { return 350 }
             }
           } else {
             return 149
@@ -6973,12 +6973,12 @@ public extension TimeZone {
     } else {
       if lat < 14.457556 {
         if lat < 4.141098 {
-          if poly[1317].contains(testy: lat, testx: lng) { return 350 } else { return 122 }
+          if polygons[1317].contains(testy: lat, testx: lng) { return 350 } else { return 122 }
         } else {
           if lng < 40.114882 {
-            if poly[1318].contains(testy: lat, testx: lng) { return 149 } else { return 350 }
+            if polygons[1318].contains(testy: lat, testx: lng) { return 149 } else { return 350 }
           } else {
-            if poly[1319].contains(testy: lat, testx: lng) { return 149 } else { return 350 }
+            if polygons[1319].contains(testy: lat, testx: lng) { return 149 } else { return 350 }
           }
         }
       } else {
@@ -7000,7 +7000,7 @@ public extension TimeZone {
               } else {
                 if lng < 24.082119 {
                   if lat < -11.397731 {
-                    if poly[1320].contains(testy: lat, testx: lng) { return 267 } else { return 299 }
+                    if polygons[1320].contains(testy: lat, testx: lng) { return 267 } else { return 299 }
                   } else {
                     if lng < 18.673162 {
                       return 299
@@ -7009,71 +7009,71 @@ public extension TimeZone {
                         return 299
                       } else {
                         if lat < -9.763398 {
-                          if poly[1321].contains(testy: lat, testx: lng) { return 267 }
-                          if poly[1322].contains(testy: lat, testx: lng) { return 352 } else { return 299 }
+                          if polygons[1321].contains(testy: lat, testx: lng) { return 267 }
+                          if polygons[1322].contains(testy: lat, testx: lng) { return 352 } else { return 299 }
                         } else {
-                          if poly[1323].contains(testy: lat, testx: lng) { return 352 } else { return 299 }
+                          if polygons[1323].contains(testy: lat, testx: lng) { return 352 } else { return 299 }
                         }
                       }
                     }
                   }
                 } else {
                   if lat < -13.998108 {
-                    if poly[1324].contains(testy: lat, testx: lng) { return 206 }
-                    if poly[1325].contains(testy: lat, testx: lng) { return 206 }
-                    if poly[1326].contains(testy: lat, testx: lng) { return 267 } else { return 364 }
+                    if polygons[1324].contains(testy: lat, testx: lng) { return 206 }
+                    if polygons[1325].contains(testy: lat, testx: lng) { return 206 }
+                    if polygons[1326].contains(testy: lat, testx: lng) { return 267 } else { return 364 }
                   } else {
                     if lng < 30.774246 {
                       if lat < -8.224360 {
                         if lng < 27.428183 {
                           if lat < -11.111234 {
                             if lng < 25.755151 {
-                              if poly[1327].contains(testy: lat, testx: lng) { return 352 } else { return 267 }
+                              if polygons[1327].contains(testy: lat, testx: lng) { return 352 } else { return 267 }
                             } else {
-                              if poly[1328].contains(testy: lat, testx: lng) { return 352 } else { return 267 }
+                              if polygons[1328].contains(testy: lat, testx: lng) { return 352 } else { return 267 }
                             }
                           } else {
-                            if poly[1329].contains(testy: lat, testx: lng) { return 267 } else { return 352 }
+                            if polygons[1329].contains(testy: lat, testx: lng) { return 267 } else { return 352 }
                           }
                         } else {
                           if lat < -11.111234 {
                             if lng < 29.101214 {
                               if lat < -12.554671 {
-                                if poly[1330].contains(testy: lat, testx: lng) { return 352 } else { return 267 }
+                                if polygons[1330].contains(testy: lat, testx: lng) { return 352 } else { return 267 }
                               } else {
-                                if poly[1331].contains(testy: lat, testx: lng) { return 352 } else { return 267 }
+                                if polygons[1331].contains(testy: lat, testx: lng) { return 352 } else { return 267 }
                               }
                             } else {
-                              if poly[1332].contains(testy: lat, testx: lng) { return 352 } else { return 267 }
+                              if polygons[1332].contains(testy: lat, testx: lng) { return 352 } else { return 267 }
                             }
                           } else {
-                            if poly[1333].contains(testy: lat, testx: lng) { return 267 } else { return 352 }
+                            if polygons[1333].contains(testy: lat, testx: lng) { return 267 } else { return 352 }
                           }
                         }
                       } else {
-                        if poly[1334].contains(testy: lat, testx: lng) { return 17 } else { return 352 }
+                        if polygons[1334].contains(testy: lat, testx: lng) { return 17 } else { return 352 }
                       }
                     } else {
                       if lat < -11.063586 {
                         if lat < -12.530847 {
-                          if poly[1335].contains(testy: lat, testx: lng) { return 267 }
-                          if poly[1336].contains(testy: lat, testx: lng) { return 267 }
-                          if poly[1337].contains(testy: lat, testx: lng) { return 267 } else { return 206 }
+                          if polygons[1335].contains(testy: lat, testx: lng) { return 267 }
+                          if polygons[1336].contains(testy: lat, testx: lng) { return 267 }
+                          if polygons[1337].contains(testy: lat, testx: lng) { return 267 } else { return 206 }
                         } else {
-                          if poly[1338].contains(testy: lat, testx: lng) { return 267 } else { return 206 }
+                          if polygons[1338].contains(testy: lat, testx: lng) { return 267 } else { return 206 }
                         }
                       } else {
                         if lat < -9.596325 {
-                          if poly[1339].contains(testy: lat, testx: lng) { return 17 }
-                          if poly[1340].contains(testy: lat, testx: lng) { return 17 }
-                          if poly[1341].contains(testy: lat, testx: lng) { return 267 } else { return 206 }
+                          if polygons[1339].contains(testy: lat, testx: lng) { return 17 }
+                          if polygons[1340].contains(testy: lat, testx: lng) { return 17 }
+                          if polygons[1341].contains(testy: lat, testx: lng) { return 267 } else { return 206 }
                         } else {
                           if lng < 32.239975 {
-                            if poly[1342].contains(testy: lat, testx: lng) { return 17 } else { return 267 }
+                            if polygons[1342].contains(testy: lat, testx: lng) { return 17 } else { return 267 }
                           } else {
-                            if poly[1343].contains(testy: lat, testx: lng) { return 206 }
-                            if poly[1344].contains(testy: lat, testx: lng) { return 206 }
-                            if poly[1345].contains(testy: lat, testx: lng) { return 267 } else { return 17 }
+                            if polygons[1343].contains(testy: lat, testx: lng) { return 206 }
+                            if polygons[1344].contains(testy: lat, testx: lng) { return 206 }
+                            if polygons[1345].contains(testy: lat, testx: lng) { return 267 } else { return 17 }
                           }
                         }
                       }
@@ -7088,21 +7088,21 @@ public extension TimeZone {
             } else {
               if lat < -13.609850 {
                 if lat < -16.350243 {
-                  if poly[1346].contains(testy: lat, testx: lng) { return 206 } else { return 364 }
+                  if polygons[1346].contains(testy: lat, testx: lng) { return 206 } else { return 364 }
                 } else {
                   if lat < -14.980046 {
-                    if poly[1347].contains(testy: lat, testx: lng) { return 206 } else { return 364 }
+                    if polygons[1347].contains(testy: lat, testx: lng) { return 206 } else { return 364 }
                   } else {
-                    if poly[1348].contains(testy: lat, testx: lng) { return 206 }
-                    if poly[1349].contains(testy: lat, testx: lng) { return 206 } else { return 364 }
+                    if polygons[1348].contains(testy: lat, testx: lng) { return 206 }
+                    if polygons[1349].contains(testy: lat, testx: lng) { return 206 } else { return 364 }
                   }
                 }
               } else {
                 if lat < -10.869457 {
-                  if poly[1350].contains(testy: lat, testx: lng) { return 206 }
-                  if poly[1351].contains(testy: lat, testx: lng) { return 364 } else { return 17 }
+                  if polygons[1350].contains(testy: lat, testx: lng) { return 206 }
+                  if polygons[1351].contains(testy: lat, testx: lng) { return 364 } else { return 17 }
                 } else {
-                  if poly[1352].contains(testy: lat, testx: lng) { return 206 } else { return 17 }
+                  if polygons[1352].contains(testy: lat, testx: lng) { return 206 } else { return 17 }
                 }
               }
             }
@@ -7116,7 +7116,7 @@ public extension TimeZone {
                 if lat < -12.512221 {
                   return 364
                 } else {
-                  if poly[1353].contains(testy: lat, testx: lng) { return 17 } else { return 364 }
+                  if polygons[1353].contains(testy: lat, testx: lng) { return 17 } else { return 364 }
                 }
               } else {
                 return 17
@@ -7137,7 +7137,7 @@ public extension TimeZone {
               return 122
             } else {
               if lng < 41.567944 {
-                if poly[1354].contains(testy: lat, testx: lng) { return 250 } else { return 122 }
+                if polygons[1354].contains(testy: lat, testx: lng) { return 250 } else { return 122 }
               } else {
                 return 250
               }
@@ -7153,20 +7153,20 @@ public extension TimeZone {
           if lat < 13.170722 {
             if lat < 12.845361 {
               if lat < 4.667434 {
-                if poly[1355].contains(testy: lat, testx: lng) { return 122 }
-                if poly[1356].contains(testy: lat, testx: lng) { return 250 } else { return 350 }
+                if polygons[1355].contains(testy: lat, testx: lng) { return 122 }
+                if polygons[1356].contains(testy: lat, testx: lng) { return 250 } else { return 350 }
               } else {
                 if lat < 11.730194 {
-                  if poly[1357].contains(testy: lat, testx: lng) { return 250 }
-                  if poly[1358].contains(testy: lat, testx: lng) { return 350 } else { return 311 }
+                  if polygons[1357].contains(testy: lat, testx: lng) { return 250 }
+                  if polygons[1358].contains(testy: lat, testx: lng) { return 350 } else { return 311 }
                 } else {
-                  if poly[1359].contains(testy: lat, testx: lng) { return 311 }
-                  if poly[1360].contains(testy: lat, testx: lng) { return 350 } else { return 149 }
+                  if polygons[1359].contains(testy: lat, testx: lng) { return 311 }
+                  if polygons[1360].contains(testy: lat, testx: lng) { return 350 } else { return 149 }
                 }
               }
             } else {
               if lng < 42.010485 {
-                if poly[1361].contains(testy: lat, testx: lng) { return 149 } else { return 350 }
+                if polygons[1361].contains(testy: lat, testx: lng) { return 149 } else { return 350 }
               } else {
                 return 149
               }
@@ -7175,7 +7175,7 @@ public extension TimeZone {
             if lng < 42.562199 {
               if lng < 41.809405 {
                 if lat < 14.277273 {
-                  if poly[1362].contains(testy: lat, testx: lng) { return 350 } else { return 149 }
+                  if polygons[1362].contains(testy: lat, testx: lng) { return 350 } else { return 149 }
                 } else {
                   return 149
                 }
@@ -7206,25 +7206,25 @@ public extension TimeZone {
               if lng < 35.183971 {
                 if lng < 24.002261 {
                   if lng < 15.562867 {
-                    if poly[1363].contains(testy: lat, testx: lng) { return 202 }
-                    if poly[1364].contains(testy: lat, testx: lng) { return 202 }
-                    if poly[1365].contains(testy: lat, testx: lng) { return 202 }
-                    if poly[1366].contains(testy: lat, testx: lng) { return 333 }
-                    if poly[1367].contains(testy: lat, testx: lng) { return 380 } else { return 260 }
+                    if polygons[1363].contains(testy: lat, testx: lng) { return 202 }
+                    if polygons[1364].contains(testy: lat, testx: lng) { return 202 }
+                    if polygons[1365].contains(testy: lat, testx: lng) { return 202 }
+                    if polygons[1366].contains(testy: lat, testx: lng) { return 333 }
+                    if polygons[1367].contains(testy: lat, testx: lng) { return 380 } else { return 260 }
                   } else {
-                    if poly[1368].contains(testy: lat, testx: lng) { return 260 }
-                    if poly[1369].contains(testy: lat, testx: lng) { return 260 }
-                    if poly[1370].contains(testy: lat, testx: lng) { return 322 }
-                    if poly[1371].contains(testy: lat, testx: lng) { return 333 } else { return 202 }
+                    if polygons[1368].contains(testy: lat, testx: lng) { return 260 }
+                    if polygons[1369].contains(testy: lat, testx: lng) { return 260 }
+                    if polygons[1370].contains(testy: lat, testx: lng) { return 322 }
+                    if polygons[1371].contains(testy: lat, testx: lng) { return 333 } else { return 202 }
                   }
                 } else {
-                  if poly[1372].contains(testy: lat, testx: lng) { return 322 }
-                  if poly[1373].contains(testy: lat, testx: lng) { return 333 } else { return 112 }
+                  if polygons[1372].contains(testy: lat, testx: lng) { return 322 }
+                  if polygons[1373].contains(testy: lat, testx: lng) { return 333 } else { return 112 }
                 }
               } else {
                 if lat < 23.146889 {
                   if lng < 35.623360 {
-                    if poly[1374].contains(testy: lat, testx: lng) { return 112 } else { return 322 }
+                    if polygons[1374].contains(testy: lat, testx: lng) { return 112 } else { return 322 }
                   } else {
                     return 322
                   }
@@ -7241,7 +7241,7 @@ public extension TimeZone {
         } else {
           if lat < 22.173639 {
             if lat < 17.632252 {
-              if poly[1375].contains(testy: lat, testx: lng) { return 149 } else { return 322 }
+              if polygons[1375].contains(testy: lat, testx: lng) { return 149 } else { return 322 }
             } else {
               return 322
             }
@@ -7255,7 +7255,7 @@ public extension TimeZone {
             if lng < 40.183971 {
               if lat < 18.003084 {
                 if lng < 38.562808 {
-                  if poly[1376].contains(testy: lat, testx: lng) { return 322 } else { return 149 }
+                  if polygons[1376].contains(testy: lat, testx: lng) { return 322 } else { return 149 }
                 } else {
                   return 149
                 }
@@ -7270,9 +7270,9 @@ public extension TimeZone {
               return 163
             } else {
               if lat < 16.674110 {
-                if poly[1377].contains(testy: lat, testx: lng) { return 215 } else { return 163 }
+                if polygons[1377].contains(testy: lat, testx: lng) { return 215 } else { return 163 }
               } else {
-                if poly[1378].contains(testy: lat, testx: lng) { return 215 } else { return 163 }
+                if polygons[1378].contains(testy: lat, testx: lng) { return 215 } else { return 163 }
               }
             }
           }
@@ -7288,17 +7288,17 @@ public extension TimeZone {
               if lat < 33.904083 {
                 if lng < 11.071555 {
                   if lat < 29.895458 {
-                    if poly[1379].contains(testy: lat, testx: lng) { return 380 } else { return 333 }
+                    if polygons[1379].contains(testy: lat, testx: lng) { return 380 } else { return 333 }
                   } else {
-                    if poly[1380].contains(testy: lat, testx: lng) { return 333 }
-                    if poly[1381].contains(testy: lat, testx: lng) { return 380 } else { return 318 }
+                    if polygons[1380].contains(testy: lat, testx: lng) { return 333 }
+                    if polygons[1381].contains(testy: lat, testx: lng) { return 380 } else { return 318 }
                   }
                 } else {
                   if lat < 33.168999 {
                     if lat < 32.523556 {
-                      if poly[1382].contains(testy: lat, testx: lng) { return 318 } else { return 333 }
+                      if polygons[1382].contains(testy: lat, testx: lng) { return 318 } else { return 333 }
                     } else {
-                      if poly[1383].contains(testy: lat, testx: lng) { return 333 } else { return 318 }
+                      if polygons[1383].contains(testy: lat, testx: lng) { return 333 } else { return 318 }
                     }
                   } else {
                     return 318
@@ -7307,9 +7307,9 @@ public extension TimeZone {
               } else {
                 if lng < 8.473444 {
                   if lat < 35.242054 {
-                    if poly[1384].contains(testy: lat, testx: lng) { return 380 } else { return 318 }
+                    if polygons[1384].contains(testy: lat, testx: lng) { return 380 } else { return 318 }
                   } else {
-                    if poly[1385].contains(testy: lat, testx: lng) { return 318 } else { return 380 }
+                    if polygons[1385].contains(testy: lat, testx: lng) { return 318 } else { return 380 }
                   }
                 } else {
                   return 318
@@ -7335,7 +7335,7 @@ public extension TimeZone {
               if lng < 23.294111 {
                 return 333
               } else {
-                if poly[1386].contains(testy: lat, testx: lng) { return 112 } else { return 333 }
+                if polygons[1386].contains(testy: lat, testx: lng) { return 112 } else { return 333 }
               }
             } else {
               return 152
@@ -7358,7 +7358,7 @@ public extension TimeZone {
                     if lng < 29.513166 {
                       if lat < 36.188656 { return 152 } else { return 205 }
                     } else {
-                      if poly[1387].contains(testy: lat, testx: lng) { return 152 } else { return 205 }
+                      if polygons[1387].contains(testy: lat, testx: lng) { return 152 } else { return 205 }
                     }
                   }
                 }
@@ -7381,24 +7381,24 @@ public extension TimeZone {
               if lat < 34.684856 {
                 if lng < 34.546276 {
                   if lat < 30.429844 {
-                    if poly[1388].contains(testy: lat, testx: lng) { return 8 } else { return 112 }
+                    if polygons[1388].contains(testy: lat, testx: lng) { return 8 } else { return 112 }
                   } else {
                     if lat < 31.523390 {
-                      if poly[1389].contains(testy: lat, testx: lng) { return 112 }
-                      if poly[1390].contains(testy: lat, testx: lng) { return 255 } else { return 8 }
+                      if polygons[1389].contains(testy: lat, testx: lng) { return 112 }
+                      if polygons[1390].contains(testy: lat, testx: lng) { return 255 } else { return 8 }
                     } else {
-                      if poly[1391].contains(testy: lat, testx: lng) { return 255 } else { return 8 }
+                      if polygons[1391].contains(testy: lat, testx: lng) { return 255 } else { return 8 }
                     }
                   }
                 } else {
                   if lng < 34.557480 {
                     if lat < 30.410903 {
-                      if poly[1392].contains(testy: lat, testx: lng) { return 8 } else { return 112 }
+                      if polygons[1392].contains(testy: lat, testx: lng) { return 8 } else { return 112 }
                     } else {
                       if lat < 30.494701 {
-                        if poly[1393].contains(testy: lat, testx: lng) { return 112 } else { return 8 }
+                        if polygons[1393].contains(testy: lat, testx: lng) { return 112 } else { return 8 }
                       } else {
-                        if poly[1394].contains(testy: lat, testx: lng) { return 112 } else { return 8 }
+                        if polygons[1394].contains(testy: lat, testx: lng) { return 112 } else { return 8 }
                       }
                     }
                   } else {
@@ -7406,54 +7406,54 @@ public extension TimeZone {
                       if lat < 31.384845 {
                         if lng < 36.717874 {
                           if lat < 29.734839 {
-                            if poly[1395].contains(testy: lat, testx: lng) { return 8 }
-                            if poly[1396].contains(testy: lat, testx: lng) { return 112 }
-                            if poly[1397].contains(testy: lat, testx: lng) { return 193 } else { return 163 }
+                            if polygons[1395].contains(testy: lat, testx: lng) { return 8 }
+                            if polygons[1396].contains(testy: lat, testx: lng) { return 112 }
+                            if polygons[1397].contains(testy: lat, testx: lng) { return 193 } else { return 163 }
                           } else {
-                            if poly[1398].contains(testy: lat, testx: lng) { return 112 }
-                            if poly[1399].contains(testy: lat, testx: lng) { return 163 }
-                            if poly[1400].contains(testy: lat, testx: lng) { return 193 }
-                            if poly[1401].contains(testy: lat, testx: lng) { return 344 } else { return 8 }
+                            if polygons[1398].contains(testy: lat, testx: lng) { return 112 }
+                            if polygons[1399].contains(testy: lat, testx: lng) { return 163 }
+                            if polygons[1400].contains(testy: lat, testx: lng) { return 193 }
+                            if polygons[1401].contains(testy: lat, testx: lng) { return 344 } else { return 8 }
                           }
                         } else {
-                          if poly[1402].contains(testy: lat, testx: lng) { return 193 } else { return 163 }
+                          if polygons[1402].contains(testy: lat, testx: lng) { return 193 } else { return 163 }
                         }
                       } else {
                         if lng < 36.717874 {
                           if lat < 33.034851 {
                             if lng < 35.637677 {
                               if lat < 32.209848 {
-                                if poly[1403].contains(testy: lat, testx: lng) { return 193 }
-                                if poly[1404].contains(testy: lat, testx: lng) { return 344 } else { return 8 }
+                                if polygons[1403].contains(testy: lat, testx: lng) { return 193 }
+                                if polygons[1404].contains(testy: lat, testx: lng) { return 344 } else { return 8 }
                               } else {
-                                if poly[1405].contains(testy: lat, testx: lng) { return 193 }
-                                if poly[1406].contains(testy: lat, testx: lng) { return 344 }
-                                if poly[1407].contains(testy: lat, testx: lng) { return 368 }
-                                if poly[1408].contains(testy: lat, testx: lng) { return 368 } else { return 8 }
+                                if polygons[1405].contains(testy: lat, testx: lng) { return 193 }
+                                if polygons[1406].contains(testy: lat, testx: lng) { return 344 }
+                                if polygons[1407].contains(testy: lat, testx: lng) { return 368 }
+                                if polygons[1408].contains(testy: lat, testx: lng) { return 368 } else { return 8 }
                               }
                             } else {
-                              if poly[1409].contains(testy: lat, testx: lng) { return 8 }
-                              if poly[1410].contains(testy: lat, testx: lng) { return 8 }
-                              if poly[1411].contains(testy: lat, testx: lng) { return 193 } else { return 368 }
+                              if polygons[1409].contains(testy: lat, testx: lng) { return 8 }
+                              if polygons[1410].contains(testy: lat, testx: lng) { return 8 }
+                              if polygons[1411].contains(testy: lat, testx: lng) { return 193 } else { return 368 }
                             }
                           } else {
                             if lat < 33.859854 {
-                              if poly[1412].contains(testy: lat, testx: lng) { return 8 }
-                              if poly[1413].contains(testy: lat, testx: lng) { return 368 } else { return 404 }
+                              if polygons[1412].contains(testy: lat, testx: lng) { return 8 }
+                              if polygons[1413].contains(testy: lat, testx: lng) { return 368 } else { return 404 }
                             } else {
-                              if poly[1414].contains(testy: lat, testx: lng) { return 368 } else { return 404 }
+                              if polygons[1414].contains(testy: lat, testx: lng) { return 368 } else { return 404 }
                             }
                           }
                         } else {
-                          if poly[1415].contains(testy: lat, testx: lng) { return 28 }
-                          if poly[1416].contains(testy: lat, testx: lng) { return 163 }
-                          if poly[1417].contains(testy: lat, testx: lng) { return 368 } else { return 193 }
+                          if polygons[1415].contains(testy: lat, testx: lng) { return 28 }
+                          if polygons[1416].contains(testy: lat, testx: lng) { return 163 }
+                          if polygons[1417].contains(testy: lat, testx: lng) { return 368 } else { return 193 }
                         }
                       }
                     } else {
-                      if poly[1418].contains(testy: lat, testx: lng) { return 163 }
-                      if poly[1419].contains(testy: lat, testx: lng) { return 193 }
-                      if poly[1420].contains(testy: lat, testx: lng) { return 368 } else { return 28 }
+                      if polygons[1418].contains(testy: lat, testx: lng) { return 163 }
+                      if polygons[1419].contains(testy: lat, testx: lng) { return 193 }
+                      if polygons[1420].contains(testy: lat, testx: lng) { return 368 } else { return 28 }
                     }
                   }
                 }
@@ -7462,9 +7462,9 @@ public extension TimeZone {
                   if lat < 35.956875 { return 174 } else { return 205 }
                 } else {
                   if lng < 36.704777 {
-                    if poly[1421].contains(testy: lat, testx: lng) { return 205 } else { return 368 }
+                    if polygons[1421].contains(testy: lat, testx: lng) { return 205 } else { return 368 }
                   } else {
-                    if poly[1422].contains(testy: lat, testx: lng) { return 368 } else { return 28 }
+                    if polygons[1422].contains(testy: lat, testx: lng) { return 368 } else { return 28 }
                   }
                 }
               }
@@ -7480,62 +7480,62 @@ public extension TimeZone {
       if lat < 46.538750 {
         if lng < 18.806608 {
           if lat < 45.239193 {
-            if poly[1423].contains(testy: lat, testx: lng) { return 348 } else { return 30 }
+            if polygons[1423].contains(testy: lat, testx: lng) { return 348 } else { return 30 }
           } else {
             if lng < 16.881983 {
-              if poly[1424].contains(testy: lat, testx: lng) { return 177 }
-              if poly[1425].contains(testy: lat, testx: lng) { return 198 } else { return 30 }
+              if polygons[1424].contains(testy: lat, testx: lng) { return 177 }
+              if polygons[1425].contains(testy: lat, testx: lng) { return 198 } else { return 30 }
             } else {
-              if poly[1426].contains(testy: lat, testx: lng) { return 30 } else { return 198 }
+              if polygons[1426].contains(testy: lat, testx: lng) { return 30 } else { return 198 }
             }
           }
         } else {
           if lat < 45.712029 {
-            if poly[1427].contains(testy: lat, testx: lng) { return 30 }
-            if poly[1428].contains(testy: lat, testx: lng) { return 348 } else { return 209 }
+            if polygons[1427].contains(testy: lat, testx: lng) { return 30 }
+            if polygons[1428].contains(testy: lat, testx: lng) { return 348 } else { return 209 }
           } else {
-            if poly[1429].contains(testy: lat, testx: lng) { return 30 }
-            if poly[1430].contains(testy: lat, testx: lng) { return 30 }
-            if poly[1431].contains(testy: lat, testx: lng) { return 198 } else { return 209 }
+            if polygons[1429].contains(testy: lat, testx: lng) { return 30 }
+            if polygons[1430].contains(testy: lat, testx: lng) { return 30 }
+            if polygons[1431].contains(testy: lat, testx: lng) { return 198 } else { return 209 }
           }
         }
       } else {
         if lat < 48.102692 {
           if lng < 17.203238 {
             if lng < 16.080298 {
-              if poly[1432].contains(testy: lat, testx: lng) { return 177 } else { return 276 }
+              if polygons[1432].contains(testy: lat, testx: lng) { return 177 } else { return 276 }
             } else {
               if lat < 47.320721 {
-                if poly[1433].contains(testy: lat, testx: lng) { return 177 }
-                if poly[1434].contains(testy: lat, testx: lng) { return 276 } else { return 198 }
+                if polygons[1433].contains(testy: lat, testx: lng) { return 177 }
+                if polygons[1434].contains(testy: lat, testx: lng) { return 276 } else { return 198 }
               } else {
-                if poly[1435].contains(testy: lat, testx: lng) { return 162 }
-                if poly[1436].contains(testy: lat, testx: lng) { return 198 } else { return 276 }
+                if polygons[1435].contains(testy: lat, testx: lng) { return 162 }
+                if polygons[1436].contains(testy: lat, testx: lng) { return 198 } else { return 276 }
               }
             }
           } else {
-            if poly[1437].contains(testy: lat, testx: lng) { return 198 } else { return 162 }
+            if polygons[1437].contains(testy: lat, testx: lng) { return 198 } else { return 162 }
           }
         } else {
           if lng < 17.203238 {
             if lat < 49.580790 {
-              if poly[1438].contains(testy: lat, testx: lng) { return 162 }
-              if poly[1439].contains(testy: lat, testx: lng) { return 220 }
-              if poly[1440].contains(testy: lat, testx: lng) { return 220 } else { return 276 }
+              if polygons[1438].contains(testy: lat, testx: lng) { return 162 }
+              if polygons[1439].contains(testy: lat, testx: lng) { return 220 }
+              if polygons[1440].contains(testy: lat, testx: lng) { return 220 } else { return 276 }
             } else {
               if lng < 16.080298 {
-                if poly[1441].contains(testy: lat, testx: lng) { return 220 } else { return 186 }
+                if polygons[1441].contains(testy: lat, testx: lng) { return 220 } else { return 186 }
               } else {
-                if poly[1442].contains(testy: lat, testx: lng) { return 220 } else { return 186 }
+                if polygons[1442].contains(testy: lat, testx: lng) { return 220 } else { return 186 }
               }
             }
           } else {
             if lat < 49.580790 {
-              if poly[1443].contains(testy: lat, testx: lng) { return 186 }
-              if poly[1444].contains(testy: lat, testx: lng) { return 220 } else { return 162 }
+              if polygons[1443].contains(testy: lat, testx: lng) { return 186 }
+              if polygons[1444].contains(testy: lat, testx: lng) { return 220 } else { return 162 }
             } else {
-              if poly[1445].contains(testy: lat, testx: lng) { return 162 }
-              if poly[1446].contains(testy: lat, testx: lng) { return 220 } else { return 186 }
+              if polygons[1445].contains(testy: lat, testx: lng) { return 162 }
+              if polygons[1446].contains(testy: lat, testx: lng) { return 220 } else { return 186 }
             }
           }
         }
@@ -7545,11 +7545,11 @@ public extension TimeZone {
         if lat < 46.189445 {
           if lng < 22.047057 {
             if lng < 20.748087 {
-              if poly[1447].contains(testy: lat, testx: lng) { return 198 }
-              if poly[1448].contains(testy: lat, testx: lng) { return 198 }
-              if poly[1449].contains(testy: lat, testx: lng) { return 266 } else { return 209 }
+              if polygons[1447].contains(testy: lat, testx: lng) { return 198 }
+              if polygons[1448].contains(testy: lat, testx: lng) { return 198 }
+              if polygons[1449].contains(testy: lat, testx: lng) { return 266 } else { return 209 }
             } else {
-              if poly[1450].contains(testy: lat, testx: lng) { return 209 } else { return 266 }
+              if polygons[1450].contains(testy: lat, testx: lng) { return 209 } else { return 266 }
             }
           } else {
             return 266
@@ -7557,30 +7557,30 @@ public extension TimeZone {
         } else {
           if lat < 46.192638 {
             if lng < 20.503389 {
-              if poly[1451].contains(testy: lat, testx: lng) { return 266 } else { return 198 }
+              if polygons[1451].contains(testy: lat, testx: lng) { return 266 } else { return 198 }
             } else {
               if lng < 20.511267 {
-                if poly[1452].contains(testy: lat, testx: lng) { return 266 } else { return 198 }
+                if polygons[1452].contains(testy: lat, testx: lng) { return 266 } else { return 198 }
               } else {
-                if poly[1453].contains(testy: lat, testx: lng) { return 266 } else { return 198 }
+                if polygons[1453].contains(testy: lat, testx: lng) { return 266 } else { return 198 }
               }
             }
           } else {
             if lng < 22.047057 {
               if lat < 48.625763 {
                 if lng < 20.748087 {
-                  if poly[1454].contains(testy: lat, testx: lng) { return 198 }
-                  if poly[1455].contains(testy: lat, testx: lng) { return 266 } else { return 162 }
+                  if polygons[1454].contains(testy: lat, testx: lng) { return 198 }
+                  if polygons[1455].contains(testy: lat, testx: lng) { return 266 } else { return 162 }
                 } else {
                   if lat < 47.409201 {
-                    if poly[1456].contains(testy: lat, testx: lng) { return 198 } else { return 266 }
+                    if polygons[1456].contains(testy: lat, testx: lng) { return 198 } else { return 266 }
                   } else {
-                    if poly[1457].contains(testy: lat, testx: lng) { return 162 }
-                    if poly[1458].contains(testy: lat, testx: lng) { return 266 } else { return 198 }
+                    if polygons[1457].contains(testy: lat, testx: lng) { return 162 }
+                    if polygons[1458].contains(testy: lat, testx: lng) { return 266 } else { return 198 }
                   }
                 }
               } else {
-                if poly[1459].contains(testy: lat, testx: lng) { return 162 } else { return 186 }
+                if polygons[1459].contains(testy: lat, testx: lng) { return 162 } else { return 186 }
               }
             } else {
               if lat < 48.625763 {
@@ -7589,37 +7589,37 @@ public extension TimeZone {
                     return 266
                   } else {
                     if lng < 22.696542 {
-                      if poly[1460].contains(testy: lat, testx: lng) { return 162 }
-                      if poly[1461].contains(testy: lat, testx: lng) { return 266 }
-                      if poly[1462].contains(testy: lat, testx: lng) { return 387 } else { return 198 }
+                      if polygons[1460].contains(testy: lat, testx: lng) { return 162 }
+                      if polygons[1461].contains(testy: lat, testx: lng) { return 266 }
+                      if polygons[1462].contains(testy: lat, testx: lng) { return 387 } else { return 198 }
                     } else {
-                      if poly[1463].contains(testy: lat, testx: lng) { return 198 }
-                      if poly[1464].contains(testy: lat, testx: lng) { return 266 } else { return 387 }
+                      if polygons[1463].contains(testy: lat, testx: lng) { return 198 }
+                      if polygons[1464].contains(testy: lat, testx: lng) { return 266 } else { return 387 }
                     }
                   }
                 } else {
-                  if poly[1465].contains(testy: lat, testx: lng) { return 266 }
-                  if poly[1466].contains(testy: lat, testx: lng) { return 275 }
-                  if poly[1467].contains(testy: lat, testx: lng) { return 275 } else { return 387 }
+                  if polygons[1465].contains(testy: lat, testx: lng) { return 266 }
+                  if polygons[1466].contains(testy: lat, testx: lng) { return 275 }
+                  if polygons[1467].contains(testy: lat, testx: lng) { return 275 } else { return 387 }
                 }
               } else {
                 if lng < 23.346027 {
                   if lat < 49.842325 {
                     if lng < 22.696542 {
-                      if poly[1468].contains(testy: lat, testx: lng) { return 162 }
-                      if poly[1469].contains(testy: lat, testx: lng) { return 275 }
-                      if poly[1470].contains(testy: lat, testx: lng) { return 387 } else { return 186 }
+                      if polygons[1468].contains(testy: lat, testx: lng) { return 162 }
+                      if polygons[1469].contains(testy: lat, testx: lng) { return 275 }
+                      if polygons[1470].contains(testy: lat, testx: lng) { return 387 } else { return 186 }
                     } else {
-                      if poly[1471].contains(testy: lat, testx: lng) { return 186 }
-                      if poly[1472].contains(testy: lat, testx: lng) { return 186 }
-                      if poly[1473].contains(testy: lat, testx: lng) { return 387 } else { return 275 }
+                      if polygons[1471].contains(testy: lat, testx: lng) { return 186 }
+                      if polygons[1472].contains(testy: lat, testx: lng) { return 186 }
+                      if polygons[1473].contains(testy: lat, testx: lng) { return 387 } else { return 275 }
                     }
                   } else {
-                    if poly[1474].contains(testy: lat, testx: lng) { return 275 } else { return 186 }
+                    if polygons[1474].contains(testy: lat, testx: lng) { return 275 } else { return 186 }
                   }
                 } else {
-                  if poly[1475].contains(testy: lat, testx: lng) { return 186 }
-                  if poly[1476].contains(testy: lat, testx: lng) { return 387 } else { return 275 }
+                  if polygons[1475].contains(testy: lat, testx: lng) { return 186 }
+                  if polygons[1476].contains(testy: lat, testx: lng) { return 387 } else { return 275 }
                 }
               }
             }
@@ -7628,34 +7628,34 @@ public extension TimeZone {
       } else {
         if lat < 47.972097 {
           if lng < 27.390221 {
-            if poly[1477].contains(testy: lat, testx: lng) { return 275 }
-            if poly[1478].contains(testy: lat, testx: lng) { return 294 } else { return 266 }
+            if polygons[1477].contains(testy: lat, testx: lng) { return 275 }
+            if polygons[1478].contains(testy: lat, testx: lng) { return 294 } else { return 266 }
           } else {
             if lat < 46.428702 {
               if lng < 28.762833 {
-                if poly[1479].contains(testy: lat, testx: lng) { return 266 }
-                if poly[1480].contains(testy: lat, testx: lng) { return 275 } else { return 294 }
+                if polygons[1479].contains(testy: lat, testx: lng) { return 266 }
+                if polygons[1480].contains(testy: lat, testx: lng) { return 275 } else { return 294 }
               } else {
-                if poly[1481].contains(testy: lat, testx: lng) { return 266 }
-                if poly[1482].contains(testy: lat, testx: lng) { return 294 }
-                if poly[1483].contains(testy: lat, testx: lng) { return 294 }
-                if poly[1484].contains(testy: lat, testx: lng) { return 294 }
-                if poly[1485].contains(testy: lat, testx: lng) { return 294 }
-                if poly[1486].contains(testy: lat, testx: lng) { return 294 } else { return 275 }
+                if polygons[1481].contains(testy: lat, testx: lng) { return 266 }
+                if polygons[1482].contains(testy: lat, testx: lng) { return 294 }
+                if polygons[1483].contains(testy: lat, testx: lng) { return 294 }
+                if polygons[1484].contains(testy: lat, testx: lng) { return 294 }
+                if polygons[1485].contains(testy: lat, testx: lng) { return 294 }
+                if polygons[1486].contains(testy: lat, testx: lng) { return 294 } else { return 275 }
               }
             } else {
               if lng < 28.762833 {
-                if poly[1487].contains(testy: lat, testx: lng) { return 266 } else { return 294 }
+                if polygons[1487].contains(testy: lat, testx: lng) { return 266 } else { return 294 }
               } else {
                 if lat < 47.200400 {
                   if lng < 29.449139 {
-                    if poly[1488].contains(testy: lat, testx: lng) { return 275 }
-                    if poly[1489].contains(testy: lat, testx: lng) { return 275 } else { return 294 }
+                    if polygons[1488].contains(testy: lat, testx: lng) { return 275 }
+                    if polygons[1489].contains(testy: lat, testx: lng) { return 275 } else { return 294 }
                   } else {
-                    if poly[1490].contains(testy: lat, testx: lng) { return 294 } else { return 275 }
+                    if polygons[1490].contains(testy: lat, testx: lng) { return 294 } else { return 275 }
                   }
                 } else {
-                  if poly[1491].contains(testy: lat, testx: lng) { return 294 } else { return 275 }
+                  if polygons[1491].contains(testy: lat, testx: lng) { return 294 } else { return 275 }
                 }
               }
             }
@@ -7664,15 +7664,15 @@ public extension TimeZone {
           if lng < 27.390221 {
             if lat < 49.515492 {
               if lng < 26.017609 {
-                if poly[1492].contains(testy: lat, testx: lng) { return 266 } else { return 275 }
+                if polygons[1492].contains(testy: lat, testx: lng) { return 266 } else { return 275 }
               } else {
                 if lat < 48.743795 {
                   if lng < 26.703915 {
-                    if poly[1493].contains(testy: lat, testx: lng) { return 266 }
-                    if poly[1494].contains(testy: lat, testx: lng) { return 294 } else { return 275 }
+                    if polygons[1493].contains(testy: lat, testx: lng) { return 266 }
+                    if polygons[1494].contains(testy: lat, testx: lng) { return 294 } else { return 275 }
                   } else {
-                    if poly[1495].contains(testy: lat, testx: lng) { return 266 }
-                    if poly[1496].contains(testy: lat, testx: lng) { return 275 } else { return 294 }
+                    if polygons[1495].contains(testy: lat, testx: lng) { return 266 }
+                    if polygons[1496].contains(testy: lat, testx: lng) { return 275 } else { return 294 }
                   }
                 } else {
                   return 275
@@ -7682,8 +7682,8 @@ public extension TimeZone {
               return 275
             }
           } else {
-            if poly[1497].contains(testy: lat, testx: lng) { return 294 }
-            if poly[1498].contains(testy: lat, testx: lng) { return 294 } else { return 275 }
+            if polygons[1497].contains(testy: lat, testx: lng) { return 294 }
+            if polygons[1498].contains(testy: lat, testx: lng) { return 294 } else { return 275 }
           }
         }
       }
@@ -7702,7 +7702,7 @@ public extension TimeZone {
                 if lat < 45.721138 {
                   return 271
                 } else {
-                  if poly[1499].contains(testy: lat, testx: lng) { return 276 } else { return 271 }
+                  if polygons[1499].contains(testy: lat, testx: lng) { return 276 } else { return 271 }
                 }
               } else {
                 if lat < 45.749973 {
@@ -7712,38 +7712,38 @@ public extension TimeZone {
                     if lng < 13.552361 {
                       if lat < 45.506027 { return 30 } else { return 271 }
                     } else {
-                      if poly[1500].contains(testy: lat, testx: lng) { return 177 }
-                      if poly[1501].contains(testy: lat, testx: lng) { return 271 } else { return 30 }
+                      if polygons[1500].contains(testy: lat, testx: lng) { return 177 }
+                      if polygons[1501].contains(testy: lat, testx: lng) { return 271 } else { return 30 }
                     }
                   }
                 } else {
                   if lng < 14.955778 {
-                    if poly[1502].contains(testy: lat, testx: lng) { return 271 }
-                    if poly[1503].contains(testy: lat, testx: lng) { return 276 } else { return 177 }
+                    if polygons[1502].contains(testy: lat, testx: lng) { return 271 }
+                    if polygons[1503].contains(testy: lat, testx: lng) { return 276 } else { return 177 }
                   } else {
-                    if poly[1504].contains(testy: lat, testx: lng) { return 276 } else { return 177 }
+                    if polygons[1504].contains(testy: lat, testx: lng) { return 276 } else { return 177 }
                   }
                 }
               }
             } else {
               if lat < 47.915885 {
                 if lat < 47.721027 {
-                  if poly[1505].contains(testy: lat, testx: lng) { return 6 } else { return 276 }
+                  if polygons[1505].contains(testy: lat, testx: lng) { return 6 } else { return 276 }
                 } else {
-                  if poly[1506].contains(testy: lat, testx: lng) { return 6 } else { return 276 }
+                  if polygons[1506].contains(testy: lat, testx: lng) { return 6 } else { return 276 }
                 }
               } else {
                 if lat < 49.336078 {
                   if lng < 13.960470 {
-                    if poly[1507].contains(testy: lat, testx: lng) { return 220 }
-                    if poly[1508].contains(testy: lat, testx: lng) { return 276 } else { return 6 }
+                    if polygons[1507].contains(testy: lat, testx: lng) { return 220 }
+                    if polygons[1508].contains(testy: lat, testx: lng) { return 276 } else { return 6 }
                   } else {
-                    if poly[1509].contains(testy: lat, testx: lng) { return 276 }
-                    if poly[1510].contains(testy: lat, testx: lng) { return 276 } else { return 220 }
+                    if polygons[1509].contains(testy: lat, testx: lng) { return 276 }
+                    if polygons[1510].contains(testy: lat, testx: lng) { return 276 } else { return 220 }
                   }
                 } else {
-                  if poly[1511].contains(testy: lat, testx: lng) { return 6 }
-                  if poly[1512].contains(testy: lat, testx: lng) { return 186 } else { return 220 }
+                  if polygons[1511].contains(testy: lat, testx: lng) { return 6 }
+                  if polygons[1512].contains(testy: lat, testx: lng) { return 186 } else { return 220 }
                 }
               }
             }
@@ -7761,9 +7761,9 @@ public extension TimeZone {
             if lng < 37.223877 {
               if lat < 45.442917 {
                 if lng < 36.583805 {
-                  if poly[1513].contains(testy: lat, testx: lng) { return 183 } else { return 197 }
+                  if polygons[1513].contains(testy: lat, testx: lng) { return 183 } else { return 197 }
                 } else {
-                  if poly[1514].contains(testy: lat, testx: lng) { return 197 } else { return 183 }
+                  if polygons[1514].contains(testy: lat, testx: lng) { return 197 } else { return 183 }
                 }
               } else {
                 if lat < 45.476776 {
@@ -7773,35 +7773,35 @@ public extension TimeZone {
                     if lng < 35.246422 {
                       if lat < 46.282494 {
                         if lng < 34.253489 {
-                          if poly[1515].contains(testy: lat, testx: lng) { return 197 } else { return 275 }
+                          if polygons[1515].contains(testy: lat, testx: lng) { return 197 } else { return 275 }
                         } else {
-                          if poly[1516].contains(testy: lat, testx: lng) { return 146 }
-                          if poly[1517].contains(testy: lat, testx: lng) { return 197 } else { return 275 }
+                          if polygons[1516].contains(testy: lat, testx: lng) { return 146 }
+                          if polygons[1517].contains(testy: lat, testx: lng) { return 197 } else { return 275 }
                         }
                       } else {
                         if lng < 34.253489 {
-                          if poly[1518].contains(testy: lat, testx: lng) { return 146 } else { return 275 }
+                          if polygons[1518].contains(testy: lat, testx: lng) { return 146 } else { return 275 }
                         } else {
                           if lat < 47.206711 {
-                            if poly[1519].contains(testy: lat, testx: lng) { return 275 } else { return 146 }
+                            if polygons[1519].contains(testy: lat, testx: lng) { return 275 } else { return 146 }
                           } else {
-                            if poly[1520].contains(testy: lat, testx: lng) { return 146 } else { return 275 }
+                            if polygons[1520].contains(testy: lat, testx: lng) { return 146 } else { return 275 }
                           }
                         }
                       }
                     } else {
                       if lng < 36.235149 {
-                        if poly[1521].contains(testy: lat, testx: lng) { return 275 } else { return 146 }
+                        if polygons[1521].contains(testy: lat, testx: lng) { return 275 } else { return 146 }
                       } else {
-                        if poly[1522].contains(testy: lat, testx: lng) { return 275 }
-                        if poly[1523].contains(testy: lat, testx: lng) { return 275 } else { return 146 }
+                        if polygons[1522].contains(testy: lat, testx: lng) { return 275 }
+                        if polygons[1523].contains(testy: lat, testx: lng) { return 275 } else { return 146 }
                       }
                     }
                   } else {
                     if lng < 35.303777 {
-                      if poly[1524].contains(testy: lat, testx: lng) { return 183 } else { return 275 }
+                      if polygons[1524].contains(testy: lat, testx: lng) { return 183 } else { return 275 }
                     } else {
-                      if poly[1525].contains(testy: lat, testx: lng) { return 183 } else { return 275 }
+                      if polygons[1525].contains(testy: lat, testx: lng) { return 183 } else { return 275 }
                     }
                   }
                 }
@@ -7813,19 +7813,19 @@ public extension TimeZone {
                 if lng < 40.207390 {
                   if lat < 48.914749 {
                     if lng < 38.715633 {
-                      if poly[1526].contains(testy: lat, testx: lng) { return 183 }
-                      if poly[1527].contains(testy: lat, testx: lng) { return 183 } else { return 275 }
+                      if polygons[1526].contains(testy: lat, testx: lng) { return 183 }
+                      if polygons[1527].contains(testy: lat, testx: lng) { return 183 } else { return 275 }
                     } else {
-                      if poly[1528].contains(testy: lat, testx: lng) { return 275 } else { return 183 }
+                      if polygons[1528].contains(testy: lat, testx: lng) { return 275 } else { return 183 }
                     }
                   } else {
-                    if poly[1529].contains(testy: lat, testx: lng) { return 275 } else { return 183 }
+                    if polygons[1529].contains(testy: lat, testx: lng) { return 275 } else { return 183 }
                   }
                 } else {
                   if lat < 48.914749 {
-                    if poly[1530].contains(testy: lat, testx: lng) { return 99 } else { return 183 }
+                    if polygons[1530].contains(testy: lat, testx: lng) { return 99 } else { return 183 }
                   } else {
-                    if poly[1531].contains(testy: lat, testx: lng) { return 183 } else { return 99 }
+                    if polygons[1531].contains(testy: lat, testx: lng) { return 183 } else { return 99 }
                   }
                 }
               }
@@ -7845,9 +7845,9 @@ public extension TimeZone {
               if lng < 14.358836 {
                 if lat < 53.741001 {
                   if lat < 53.088120 {
-                    if poly[1532].contains(testy: lat, testx: lng) { return 186 } else { return 6 }
+                    if polygons[1532].contains(testy: lat, testx: lng) { return 186 } else { return 6 }
                   } else {
-                    if poly[1533].contains(testy: lat, testx: lng) { return 186 } else { return 6 }
+                    if polygons[1533].contains(testy: lat, testx: lng) { return 186 } else { return 6 }
                   }
                 } else {
                   if lng < 14.092113 {
@@ -7857,7 +7857,7 @@ public extension TimeZone {
                       return 6
                     } else {
                       if lng < 14.224361 {
-                        if poly[1534].contains(testy: lat, testx: lng) { return 186 } else { return 6 }
+                        if polygons[1534].contains(testy: lat, testx: lng) { return 186 } else { return 6 }
                       } else {
                         return 186
                       }
@@ -7867,9 +7867,9 @@ public extension TimeZone {
               } else {
                 if lat < 53.467436 {
                   if lat < 52.747607 {
-                    if poly[1535].contains(testy: lat, testx: lng) { return 6 } else { return 186 }
+                    if polygons[1535].contains(testy: lat, testx: lng) { return 6 } else { return 186 }
                   } else {
-                    if poly[1536].contains(testy: lat, testx: lng) { return 6 } else { return 186 }
+                    if polygons[1536].contains(testy: lat, testx: lng) { return 6 } else { return 186 }
                   }
                 } else {
                   return 186
@@ -7888,19 +7888,19 @@ public extension TimeZone {
             if lng < 22.892805 {
               if lat < 55.724445 {
                 if lat < 54.813721 {
-                  if poly[1537].contains(testy: lat, testx: lng) { return 53 }
-                  if poly[1538].contains(testy: lat, testx: lng) { return 175 }
-                  if poly[1539].contains(testy: lat, testx: lng) { return 175 } else { return 186 }
+                  if polygons[1537].contains(testy: lat, testx: lng) { return 53 }
+                  if polygons[1538].contains(testy: lat, testx: lng) { return 175 }
+                  if polygons[1539].contains(testy: lat, testx: lng) { return 175 } else { return 186 }
                 } else {
                   if lng < 18.363342 {
                     return 186
                   } else {
-                    if poly[1540].contains(testy: lat, testx: lng) { return 53 }
-                    if poly[1541].contains(testy: lat, testx: lng) { return 53 } else { return 175 }
+                    if polygons[1540].contains(testy: lat, testx: lng) { return 53 }
+                    if polygons[1541].contains(testy: lat, testx: lng) { return 53 } else { return 175 }
                   }
                 }
               } else {
-                if poly[1542].contains(testy: lat, testx: lng) { return 53 } else { return 332 }
+                if polygons[1542].contains(testy: lat, testx: lng) { return 53 } else { return 332 }
               }
             } else {
               if lng < 29.047875 {
@@ -7909,53 +7909,53 @@ public extension TimeZone {
                     if lng < 24.431573 {
                       if lat < 52.519242 {
                         if lng < 23.662189 {
-                          if poly[1543].contains(testy: lat, testx: lng) { return 275 }
-                          if poly[1544].contains(testy: lat, testx: lng) { return 275 }
-                          if poly[1545].contains(testy: lat, testx: lng) { return 275 }
-                          if poly[1546].contains(testy: lat, testx: lng) { return 275 }
-                          if poly[1547].contains(testy: lat, testx: lng) { return 399 }
-                          if poly[1548].contains(testy: lat, testx: lng) { return 399 } else { return 186 }
+                          if polygons[1543].contains(testy: lat, testx: lng) { return 275 }
+                          if polygons[1544].contains(testy: lat, testx: lng) { return 275 }
+                          if polygons[1545].contains(testy: lat, testx: lng) { return 275 }
+                          if polygons[1546].contains(testy: lat, testx: lng) { return 275 }
+                          if polygons[1547].contains(testy: lat, testx: lng) { return 399 }
+                          if polygons[1548].contains(testy: lat, testx: lng) { return 399 } else { return 186 }
                         } else {
-                          if poly[1549].contains(testy: lat, testx: lng) { return 186 }
-                          if poly[1550].contains(testy: lat, testx: lng) { return 186 }
-                          if poly[1551].contains(testy: lat, testx: lng) { return 186 }
-                          if poly[1552].contains(testy: lat, testx: lng) { return 186 }
-                          if poly[1553].contains(testy: lat, testx: lng) { return 399 }
-                          if poly[1554].contains(testy: lat, testx: lng) { return 399 } else { return 275 }
+                          if polygons[1549].contains(testy: lat, testx: lng) { return 186 }
+                          if polygons[1550].contains(testy: lat, testx: lng) { return 186 }
+                          if polygons[1551].contains(testy: lat, testx: lng) { return 186 }
+                          if polygons[1552].contains(testy: lat, testx: lng) { return 186 }
+                          if polygons[1553].contains(testy: lat, testx: lng) { return 399 }
+                          if polygons[1554].contains(testy: lat, testx: lng) { return 399 } else { return 275 }
                         }
                       } else {
-                        if poly[1555].contains(testy: lat, testx: lng) { return 53 }
-                        if poly[1556].contains(testy: lat, testx: lng) { return 186 } else { return 399 }
+                        if polygons[1555].contains(testy: lat, testx: lng) { return 53 }
+                        if polygons[1556].contains(testy: lat, testx: lng) { return 186 } else { return 399 }
                       }
                     } else {
-                      if poly[1557].contains(testy: lat, testx: lng) { return 53 }
-                      if poly[1558].contains(testy: lat, testx: lng) { return 53 }
-                      if poly[1559].contains(testy: lat, testx: lng) { return 275 } else { return 399 }
+                      if polygons[1557].contains(testy: lat, testx: lng) { return 53 }
+                      if polygons[1558].contains(testy: lat, testx: lng) { return 53 }
+                      if polygons[1559].contains(testy: lat, testx: lng) { return 275 } else { return 399 }
                     }
                   } else {
                     if lng < 24.431573 {
-                      if poly[1560].contains(testy: lat, testx: lng) { return 186 }
-                      if poly[1561].contains(testy: lat, testx: lng) { return 332 } else { return 53 }
+                      if polygons[1560].contains(testy: lat, testx: lng) { return 186 }
+                      if polygons[1561].contains(testy: lat, testx: lng) { return 332 } else { return 53 }
                     } else {
-                      if poly[1562].contains(testy: lat, testx: lng) { return 332 }
-                      if poly[1563].contains(testy: lat, testx: lng) { return 399 }
-                      if poly[1564].contains(testy: lat, testx: lng) { return 399 } else { return 53 }
+                      if polygons[1562].contains(testy: lat, testx: lng) { return 332 }
+                      if polygons[1563].contains(testy: lat, testx: lng) { return 399 }
+                      if polygons[1564].contains(testy: lat, testx: lng) { return 399 } else { return 53 }
                     }
                   }
                 } else {
                   if lat < 53.979597 {
-                    if poly[1565].contains(testy: lat, testx: lng) { return 399 } else { return 275 }
+                    if polygons[1565].contains(testy: lat, testx: lng) { return 399 } else { return 275 }
                   } else {
                     if lng < 27.509107 {
                       if lat < 55.439952 {
-                        if poly[1566].contains(testy: lat, testx: lng) { return 53 } else { return 399 }
+                        if polygons[1566].contains(testy: lat, testx: lng) { return 53 } else { return 399 }
                       } else {
-                        if poly[1567].contains(testy: lat, testx: lng) { return 53 }
-                        if poly[1568].contains(testy: lat, testx: lng) { return 399 } else { return 332 }
+                        if polygons[1567].contains(testy: lat, testx: lng) { return 53 }
+                        if polygons[1568].contains(testy: lat, testx: lng) { return 399 } else { return 332 }
                       }
                     } else {
-                      if poly[1569].contains(testy: lat, testx: lng) { return 332 }
-                      if poly[1570].contains(testy: lat, testx: lng) { return 399 } else { return 183 }
+                      if polygons[1569].contains(testy: lat, testx: lng) { return 332 }
+                      if polygons[1570].contains(testy: lat, testx: lng) { return 399 } else { return 183 }
                     }
                   }
                 }
@@ -7963,32 +7963,32 @@ public extension TimeZone {
                 if lng < 32.125410 {
                   if lat < 53.979597 {
                     if lng < 30.586642 {
-                      if poly[1571].contains(testy: lat, testx: lng) { return 275 }
-                      if poly[1572].contains(testy: lat, testx: lng) { return 275 }
-                      if poly[1573].contains(testy: lat, testx: lng) { return 275 }
-                      if poly[1574].contains(testy: lat, testx: lng) { return 275 } else { return 399 }
+                      if polygons[1571].contains(testy: lat, testx: lng) { return 275 }
+                      if polygons[1572].contains(testy: lat, testx: lng) { return 275 }
+                      if polygons[1573].contains(testy: lat, testx: lng) { return 275 }
+                      if polygons[1574].contains(testy: lat, testx: lng) { return 275 } else { return 399 }
                     } else {
                       if lat < 52.519242 {
-                        if poly[1575].contains(testy: lat, testx: lng) { return 183 }
-                        if poly[1576].contains(testy: lat, testx: lng) { return 275 } else { return 399 }
+                        if polygons[1575].contains(testy: lat, testx: lng) { return 183 }
+                        if polygons[1576].contains(testy: lat, testx: lng) { return 275 } else { return 399 }
                       } else {
-                        if poly[1577].contains(testy: lat, testx: lng) { return 399 } else { return 183 }
+                        if polygons[1577].contains(testy: lat, testx: lng) { return 399 } else { return 183 }
                       }
                     }
                   } else {
                     if lng < 30.586642 {
-                      if poly[1578].contains(testy: lat, testx: lng) { return 399 } else { return 183 }
+                      if polygons[1578].contains(testy: lat, testx: lng) { return 399 } else { return 183 }
                     } else {
-                      if poly[1579].contains(testy: lat, testx: lng) { return 399 } else { return 183 }
+                      if polygons[1579].contains(testy: lat, testx: lng) { return 399 } else { return 183 }
                     }
                   }
                 } else {
                   if lat < 53.979597 {
                     if lng < 33.664177 {
-                      if poly[1580].contains(testy: lat, testx: lng) { return 275 }
-                      if poly[1581].contains(testy: lat, testx: lng) { return 399 } else { return 183 }
+                      if polygons[1580].contains(testy: lat, testx: lng) { return 275 }
+                      if polygons[1581].contains(testy: lat, testx: lng) { return 399 } else { return 183 }
                     } else {
-                      if poly[1582].contains(testy: lat, testx: lng) { return 275 } else { return 183 }
+                      if polygons[1582].contains(testy: lat, testx: lng) { return 275 } else { return 183 }
                     }
                   } else {
                     return 183
@@ -7998,9 +7998,9 @@ public extension TimeZone {
             }
           } else {
             if lng < 35.416372 {
-              if poly[1583].contains(testy: lat, testx: lng) { return 275 } else { return 183 }
+              if polygons[1583].contains(testy: lat, testx: lng) { return 275 } else { return 183 }
             } else {
-              if poly[1584].contains(testy: lat, testx: lng) { return 99 } else { return 183 }
+              if polygons[1584].contains(testy: lat, testx: lng) { return 99 } else { return 183 }
             }
           }
         }
@@ -8016,9 +8016,9 @@ public extension TimeZone {
             if lng < 11.135750 {
               if lng < 8.672028 {
                 if lat < 36.824917 {
-                  if poly[1585].contains(testy: lat, testx: lng) { return 318 } else { return 380 }
+                  if polygons[1585].contains(testy: lat, testx: lng) { return 318 } else { return 380 }
                 } else {
-                  if poly[1586].contains(testy: lat, testx: lng) { return 318 } else { return 380 }
+                  if polygons[1586].contains(testy: lat, testx: lng) { return 318 } else { return 380 }
                 }
               } else {
                 return 318
@@ -8043,10 +8043,10 @@ public extension TimeZone {
                   if lat < 40.038214 { return 75 } else { return 152 }
                 } else {
                   if lat < 40.311375 {
-                    if poly[1587].contains(testy: lat, testx: lng) { return 75 } else { return 152 }
+                    if polygons[1587].contains(testy: lat, testx: lng) { return 75 } else { return 152 }
                   } else {
-                    if poly[1588].contains(testy: lat, testx: lng) { return 152 }
-                    if poly[1589].contains(testy: lat, testx: lng) { return 337 } else { return 75 }
+                    if polygons[1588].contains(testy: lat, testx: lng) { return 152 }
+                    if polygons[1589].contains(testy: lat, testx: lng) { return 337 } else { return 75 }
                   }
                 }
               }
@@ -8060,9 +8060,9 @@ public extension TimeZone {
               if lng < 9.561556 {
                 if lng < 8.461638 {
                   if lat < 43.769527 {
-                    if poly[1590].contains(testy: lat, testx: lng) { return 261 } else { return 297 }
+                    if polygons[1590].contains(testy: lat, testx: lng) { return 261 } else { return 297 }
                   } else {
-                    if poly[1591].contains(testy: lat, testx: lng) { return 297 } else { return 271 }
+                    if polygons[1591].contains(testy: lat, testx: lng) { return 297 } else { return 271 }
                   }
                 } else {
                   if lat < 43.606562 { return 271 } else { return 297 }
@@ -8074,11 +8074,11 @@ public extension TimeZone {
               if lat < 43.999805 {
                 if lng < 15.228278 {
                   if lng < 12.515555 {
-                    if poly[1592].contains(testy: lat, testx: lng) { return 313 } else { return 271 }
+                    if polygons[1592].contains(testy: lat, testx: lng) { return 313 } else { return 271 }
                   } else {
-                    if poly[1593].contains(testy: lat, testx: lng) { return 30 }
-                    if poly[1594].contains(testy: lat, testx: lng) { return 30 }
-                    if poly[1595].contains(testy: lat, testx: lng) { return 30 } else { return 271 }
+                    if polygons[1593].contains(testy: lat, testx: lng) { return 30 }
+                    if polygons[1594].contains(testy: lat, testx: lng) { return 30 }
+                    if polygons[1595].contains(testy: lat, testx: lng) { return 30 } else { return 271 }
                   }
                 } else {
                   if lat < 41.926615 { return 271 } else { return 30 }
@@ -8098,7 +8098,7 @@ public extension TimeZone {
               if lat < 43.866528 {
                 return 30
               } else {
-                if poly[1596].contains(testy: lat, testx: lng) { return 348 } else { return 30 }
+                if polygons[1596].contains(testy: lat, testx: lng) { return 348 } else { return 30 }
               }
             }
           } else {
@@ -8110,17 +8110,17 @@ public extension TimeZone {
                   if lng < 17.201416 {
                     return 30
                   } else {
-                    if poly[1597].contains(testy: lat, testx: lng) { return 348 } else { return 30 }
+                    if polygons[1597].contains(testy: lat, testx: lng) { return 348 } else { return 30 }
                   }
                 } else {
                   if lat < 43.236000 {
                     if lng < 17.194445 {
                       return 30
                     } else {
-                      if poly[1598].contains(testy: lat, testx: lng) { return 348 } else { return 30 }
+                      if polygons[1598].contains(testy: lat, testx: lng) { return 348 } else { return 30 }
                     }
                   } else {
-                    if poly[1599].contains(testy: lat, testx: lng) { return 348 } else { return 30 }
+                    if polygons[1599].contains(testy: lat, testx: lng) { return 348 } else { return 30 }
                   }
                 }
               }
@@ -8129,7 +8129,7 @@ public extension TimeZone {
                 if lat < 42.755833 {
                   return 30
                 } else {
-                  if poly[1600].contains(testy: lat, testx: lng) { return 348 } else { return 30 }
+                  if polygons[1600].contains(testy: lat, testx: lng) { return 348 } else { return 30 }
                 }
               } else {
                 if lng < 19.088497 {
@@ -8138,44 +8138,44 @@ public extension TimeZone {
                       return 212
                     } else {
                       if lat < 42.833974 {
-                        if poly[1601].contains(testy: lat, testx: lng) { return 30 }
-                        if poly[1602].contains(testy: lat, testx: lng) { return 348 } else { return 212 }
+                        if polygons[1601].contains(testy: lat, testx: lng) { return 30 }
+                        if polygons[1602].contains(testy: lat, testx: lng) { return 348 } else { return 212 }
                       } else {
-                        if poly[1603].contains(testy: lat, testx: lng) { return 212 } else { return 348 }
+                        if polygons[1603].contains(testy: lat, testx: lng) { return 212 } else { return 348 }
                       }
                     }
                   } else {
-                    if poly[1604].contains(testy: lat, testx: lng) { return 30 }
-                    if poly[1605].contains(testy: lat, testx: lng) { return 209 } else { return 348 }
+                    if polygons[1604].contains(testy: lat, testx: lng) { return 30 }
+                    if polygons[1605].contains(testy: lat, testx: lng) { return 209 } else { return 348 }
                   }
                 } else {
                   if lat < 43.128445 {
                     if lng < 20.171428 {
                       if lat < 42.250013 {
-                        if poly[1606].contains(testy: lat, testx: lng) { return 212 } else { return 75 }
+                        if polygons[1606].contains(testy: lat, testx: lng) { return 212 } else { return 75 }
                       } else {
-                        if poly[1607].contains(testy: lat, testx: lng) { return 75 }
-                        if poly[1608].contains(testy: lat, testx: lng) { return 209 }
-                        if poly[1609].contains(testy: lat, testx: lng) { return 209 } else { return 212 }
+                        if polygons[1607].contains(testy: lat, testx: lng) { return 75 }
+                        if polygons[1608].contains(testy: lat, testx: lng) { return 209 }
+                        if polygons[1609].contains(testy: lat, testx: lng) { return 209 } else { return 212 }
                       }
                     } else {
                       if lat < 42.250013 {
-                        if poly[1610].contains(testy: lat, testx: lng) { return 75 }
-                        if poly[1611].contains(testy: lat, testx: lng) { return 209 } else { return 337 }
+                        if polygons[1610].contains(testy: lat, testx: lng) { return 75 }
+                        if polygons[1611].contains(testy: lat, testx: lng) { return 209 } else { return 337 }
                       } else {
-                        if poly[1612].contains(testy: lat, testx: lng) { return 75 }
-                        if poly[1613].contains(testy: lat, testx: lng) { return 212 } else { return 209 }
+                        if polygons[1612].contains(testy: lat, testx: lng) { return 75 }
+                        if polygons[1613].contains(testy: lat, testx: lng) { return 212 } else { return 209 }
                       }
                     }
                   } else {
                     if lng < 20.171428 {
                       if lat < 44.006876 {
-                        if poly[1614].contains(testy: lat, testx: lng) { return 212 }
-                        if poly[1615].contains(testy: lat, testx: lng) { return 348 }
-                        if poly[1616].contains(testy: lat, testx: lng) { return 348 } else { return 209 }
+                        if polygons[1614].contains(testy: lat, testx: lng) { return 212 }
+                        if polygons[1615].contains(testy: lat, testx: lng) { return 348 }
+                        if polygons[1616].contains(testy: lat, testx: lng) { return 348 } else { return 209 }
                       } else {
-                        if poly[1617].contains(testy: lat, testx: lng) { return 209 }
-                        if poly[1618].contains(testy: lat, testx: lng) { return 209 } else { return 348 }
+                        if polygons[1617].contains(testy: lat, testx: lng) { return 209 }
+                        if polygons[1618].contains(testy: lat, testx: lng) { return 209 } else { return 348 }
                       }
                     } else {
                       return 209
@@ -8200,38 +8200,38 @@ public extension TimeZone {
             } else {
               if lat < 41.580002 {
                 if lng < 23.499180 {
-                  if poly[1619].contains(testy: lat, testx: lng) { return 337 }
-                  if poly[1620].contains(testy: lat, testx: lng) { return 340 } else { return 152 }
+                  if polygons[1619].contains(testy: lat, testx: lng) { return 337 }
+                  if polygons[1620].contains(testy: lat, testx: lng) { return 340 } else { return 152 }
                 } else {
-                  if poly[1621].contains(testy: lat, testx: lng) { return 340 } else { return 152 }
+                  if polygons[1621].contains(testy: lat, testx: lng) { return 340 } else { return 152 }
                 }
               } else {
                 if lng < 23.499180 {
                   if lat < 43.232655 {
                     if lng < 22.376770 {
-                      if poly[1622].contains(testy: lat, testx: lng) { return 337 }
-                      if poly[1623].contains(testy: lat, testx: lng) { return 340 } else { return 209 }
+                      if polygons[1622].contains(testy: lat, testx: lng) { return 337 }
+                      if polygons[1623].contains(testy: lat, testx: lng) { return 340 } else { return 209 }
                     } else {
-                      if poly[1624].contains(testy: lat, testx: lng) { return 209 }
-                      if poly[1625].contains(testy: lat, testx: lng) { return 337 } else { return 340 }
+                      if polygons[1624].contains(testy: lat, testx: lng) { return 209 }
+                      if polygons[1625].contains(testy: lat, testx: lng) { return 337 } else { return 340 }
                     }
                   } else {
                     if lng < 22.376770 {
-                      if poly[1626].contains(testy: lat, testx: lng) { return 266 }
-                      if poly[1627].contains(testy: lat, testx: lng) { return 340 } else { return 209 }
+                      if polygons[1626].contains(testy: lat, testx: lng) { return 266 }
+                      if polygons[1627].contains(testy: lat, testx: lng) { return 340 } else { return 209 }
                     } else {
                       if lat < 44.058981 {
-                        if poly[1628].contains(testy: lat, testx: lng) { return 209 }
-                        if poly[1629].contains(testy: lat, testx: lng) { return 209 }
-                        if poly[1630].contains(testy: lat, testx: lng) { return 266 } else { return 340 }
+                        if polygons[1628].contains(testy: lat, testx: lng) { return 209 }
+                        if polygons[1629].contains(testy: lat, testx: lng) { return 209 }
+                        if polygons[1630].contains(testy: lat, testx: lng) { return 266 } else { return 340 }
                       } else {
-                        if poly[1631].contains(testy: lat, testx: lng) { return 209 }
-                        if poly[1632].contains(testy: lat, testx: lng) { return 340 } else { return 266 }
+                        if polygons[1631].contains(testy: lat, testx: lng) { return 209 }
+                        if polygons[1632].contains(testy: lat, testx: lng) { return 340 } else { return 266 }
                       }
                     }
                   }
                 } else {
-                  if poly[1633].contains(testy: lat, testx: lng) { return 340 } else { return 266 }
+                  if polygons[1633].contains(testy: lat, testx: lng) { return 340 } else { return 266 }
                 }
               }
             }
@@ -8260,10 +8260,10 @@ public extension TimeZone {
                   return 205
                 } else {
                   if lng < 39.460653 {
-                    if poly[1634].contains(testy: lat, testx: lng) { return 368 } else { return 205 }
+                    if polygons[1634].contains(testy: lat, testx: lng) { return 368 } else { return 205 }
                   } else {
-                    if poly[1635].contains(testy: lat, testx: lng) { return 28 }
-                    if poly[1636].contains(testy: lat, testx: lng) { return 368 } else { return 205 }
+                    if polygons[1635].contains(testy: lat, testx: lng) { return 28 }
+                    if polygons[1636].contains(testy: lat, testx: lng) { return 368 } else { return 205 }
                   }
                 }
               }
@@ -8279,7 +8279,7 @@ public extension TimeZone {
                   if lat < 37.476891 {
                     return 152
                   } else {
-                    if poly[1637].contains(testy: lat, testx: lng) { return 205 } else { return 152 }
+                    if polygons[1637].contains(testy: lat, testx: lng) { return 205 } else { return 152 }
                   }
                 } else {
                   return 205
@@ -8299,7 +8299,7 @@ public extension TimeZone {
                       return 152
                     } else {
                       if lat < 39.307919 {
-                        if poly[1638].contains(testy: lat, testx: lng) { return 205 } else { return 152 }
+                        if polygons[1638].contains(testy: lat, testx: lng) { return 205 } else { return 152 }
                       } else {
                         if lng < 26.500569 { return 152 } else { return 205 }
                       }
@@ -8321,21 +8321,21 @@ public extension TimeZone {
                   if lng < 28.043638 {
                     if lng < 26.893819 {
                       if lat < 41.392389 {
-                        if poly[1639].contains(testy: lat, testx: lng) { return 205 }
-                        if poly[1640].contains(testy: lat, testx: lng) { return 340 } else { return 152 }
+                        if polygons[1639].contains(testy: lat, testx: lng) { return 205 }
+                        if polygons[1640].contains(testy: lat, testx: lng) { return 340 } else { return 152 }
                       } else {
-                        if poly[1641].contains(testy: lat, testx: lng) { return 152 }
-                        if poly[1642].contains(testy: lat, testx: lng) { return 205 } else { return 340 }
+                        if polygons[1641].contains(testy: lat, testx: lng) { return 152 }
+                        if polygons[1642].contains(testy: lat, testx: lng) { return 205 } else { return 340 }
                       }
                     } else {
-                      if poly[1643].contains(testy: lat, testx: lng) { return 340 } else { return 205 }
+                      if polygons[1643].contains(testy: lat, testx: lng) { return 340 } else { return 205 }
                     }
                   } else {
                     return 205
                   }
                 } else {
                   if lng < 28.612167 {
-                    if poly[1644].contains(testy: lat, testx: lng) { return 266 } else { return 340 }
+                    if polygons[1644].contains(testy: lat, testx: lng) { return 266 } else { return 340 }
                   } else {
                     return 266
                   }
@@ -8348,12 +8348,12 @@ public extension TimeZone {
                     return 205
                   } else {
                     if lat < 41.763479 {
-                      if poly[1645].contains(testy: lat, testx: lng) { return 47 } else { return 205 }
+                      if polygons[1645].contains(testy: lat, testx: lng) { return 47 } else { return 205 }
                     } else {
                       if lng < 40.250756 {
-                        if poly[1646].contains(testy: lat, testx: lng) { return 47 } else { return 183 }
+                        if polygons[1646].contains(testy: lat, testx: lng) { return 47 } else { return 183 }
                       } else {
-                        if poly[1647].contains(testy: lat, testx: lng) { return 183 } else { return 47 }
+                        if polygons[1647].contains(testy: lat, testx: lng) { return 183 } else { return 47 }
                       }
                     }
                   }
@@ -8386,7 +8386,7 @@ public extension TimeZone {
                         if lng < 11.183945 {
                           return 375
                         } else {
-                          if poly[1648].contains(testy: lat, testx: lng) { return 355 } else { return 375 }
+                          if polygons[1648].contains(testy: lat, testx: lng) { return 355 } else { return 375 }
                         }
                       } else {
                         if lng < 11.471500 {
@@ -8394,13 +8394,13 @@ public extension TimeZone {
                             if lng < 11.169000 {
                               return 375
                             } else {
-                              if poly[1649].contains(testy: lat, testx: lng) { return 355 } else { return 375 }
+                              if polygons[1649].contains(testy: lat, testx: lng) { return 355 } else { return 375 }
                             }
                           } else {
-                            if poly[1650].contains(testy: lat, testx: lng) { return 375 } else { return 355 }
+                            if polygons[1650].contains(testy: lat, testx: lng) { return 375 } else { return 355 }
                           }
                         } else {
-                          if poly[1651].contains(testy: lat, testx: lng) { return 375 } else { return 355 }
+                          if polygons[1651].contains(testy: lat, testx: lng) { return 375 } else { return 355 }
                         }
                       }
                     } else {
@@ -8423,9 +8423,9 @@ public extension TimeZone {
               } else {
                 if lng < 12.874028 {
                   if lat < 61.360279 {
-                    if poly[1652].contains(testy: lat, testx: lng) { return 375 } else { return 355 }
+                    if polygons[1652].contains(testy: lat, testx: lng) { return 375 } else { return 355 }
                   } else {
-                    if poly[1653].contains(testy: lat, testx: lng) { return 375 } else { return 355 }
+                    if polygons[1653].contains(testy: lat, testx: lng) { return 375 } else { return 355 }
                   }
                 } else {
                   return 375
@@ -8454,7 +8454,7 @@ public extension TimeZone {
                 if lng < 28.407444 {
                   if lat < 60.044083 {
                     if lat < 59.470806 {
-                      if poly[1654].contains(testy: lat, testx: lng) { return 183 } else { return 49 }
+                      if polygons[1654].contains(testy: lat, testx: lng) { return 183 } else { return 49 }
                     } else {
                       return 183
                     }
@@ -8466,13 +8466,13 @@ public extension TimeZone {
                         if lat < 60.525665 {
                           if lng < 27.745832 { return 323 } else { return 183 }
                         } else {
-                          if poly[1655].contains(testy: lat, testx: lng) { return 183 } else { return 323 }
+                          if polygons[1655].contains(testy: lat, testx: lng) { return 183 } else { return 323 }
                         }
                       } else {
                         if lat < 60.485054 {
                           return 183
                         } else {
-                          if poly[1656].contains(testy: lat, testx: lng) { return 323 } else { return 183 }
+                          if polygons[1656].contains(testy: lat, testx: lng) { return 323 } else { return 183 }
                         }
                       }
                     }
@@ -8481,7 +8481,7 @@ public extension TimeZone {
                   if lat < 60.750500 {
                     return 183
                   } else {
-                    if poly[1657].contains(testy: lat, testx: lng) { return 323 } else { return 183 }
+                    if polygons[1657].contains(testy: lat, testx: lng) { return 323 } else { return 183 }
                   }
                 }
               }
@@ -8500,18 +8500,18 @@ public extension TimeZone {
                 if lng < 14.575282 {
                   if lng < 12.227278 {
                     if lat < 63.632717 {
-                      if poly[1658].contains(testy: lat, testx: lng) { return 375 } else { return 355 }
+                      if polygons[1658].contains(testy: lat, testx: lng) { return 375 } else { return 355 }
                     } else {
                       return 355
                     }
                   } else {
                     if lat < 65.221085 {
-                      if poly[1659].contains(testy: lat, testx: lng) { return 375 } else { return 355 }
+                      if polygons[1659].contains(testy: lat, testx: lng) { return 375 } else { return 355 }
                     } else {
                       if lng < 12.453417 {
                         return 355
                       } else {
-                        if poly[1660].contains(testy: lat, testx: lng) { return 375 } else { return 355 }
+                        if polygons[1660].contains(testy: lat, testx: lng) { return 375 } else { return 355 }
                       }
                     }
                   }
@@ -8525,7 +8525,7 @@ public extension TimeZone {
               if lng < 13.186111 {
                 return 355
               } else {
-                if poly[1661].contains(testy: lat, testx: lng) { return 375 } else { return 355 }
+                if polygons[1661].contains(testy: lat, testx: lng) { return 375 } else { return 355 }
               }
             }
           }
@@ -8547,7 +8547,7 @@ public extension TimeZone {
                       if lat < 65.759140 {
                         if lng < 23.981722 { return 323 } else { return 375 }
                       } else {
-                        if poly[1662].contains(testy: lat, testx: lng) { return 323 } else { return 375 }
+                        if polygons[1662].contains(testy: lat, testx: lng) { return 323 } else { return 375 }
                       }
                     }
                   }
@@ -8556,7 +8556,7 @@ public extension TimeZone {
                 if lng < 25.360001 {
                   return 323
                 } else {
-                  if poly[1663].contains(testy: lat, testx: lng) { return 183 } else { return 323 }
+                  if polygons[1663].contains(testy: lat, testx: lng) { return 183 } else { return 323 }
                 }
               }
             }
@@ -8572,14 +8572,14 @@ public extension TimeZone {
             if lng < 32.329250 {
               if lng < 16.755695 {
                 if lat < 67.925449 {
-                  if poly[1664].contains(testy: lat, testx: lng) { return 375 } else { return 355 }
+                  if polygons[1664].contains(testy: lat, testx: lng) { return 375 } else { return 355 }
                 } else {
                   return 355
                 }
               } else {
                 if lng < 18.256083 {
                   if lat < 68.558932 {
-                    if poly[1665].contains(testy: lat, testx: lng) { return 375 } else { return 355 }
+                    if polygons[1665].contains(testy: lat, testx: lng) { return 375 } else { return 355 }
                   } else {
                     return 355
                   }
@@ -8588,9 +8588,9 @@ public extension TimeZone {
                     if lng < 19.024416 {
                       if lat < 68.584389 {
                         if lng < 18.417805 {
-                          if poly[1666].contains(testy: lat, testx: lng) { return 355 } else { return 375 }
+                          if polygons[1666].contains(testy: lat, testx: lng) { return 355 } else { return 375 }
                         } else {
-                          if poly[1667].contains(testy: lat, testx: lng) { return 355 } else { return 375 }
+                          if polygons[1667].contains(testy: lat, testx: lng) { return 355 } else { return 375 }
                         }
                       } else {
                         return 355
@@ -8598,35 +8598,35 @@ public extension TimeZone {
                     } else {
                       if lng < 22.597712 {
                         if lng < 20.811064 {
-                          if poly[1668].contains(testy: lat, testx: lng) { return 323 }
-                          if poly[1669].contains(testy: lat, testx: lng) { return 375 } else { return 355 }
+                          if polygons[1668].contains(testy: lat, testx: lng) { return 323 }
+                          if polygons[1669].contains(testy: lat, testx: lng) { return 375 } else { return 355 }
                         } else {
-                          if poly[1670].contains(testy: lat, testx: lng) { return 355 }
-                          if poly[1671].contains(testy: lat, testx: lng) { return 375 } else { return 323 }
+                          if polygons[1670].contains(testy: lat, testx: lng) { return 355 }
+                          if polygons[1671].contains(testy: lat, testx: lng) { return 375 } else { return 323 }
                         }
                       } else {
                         if lng < 24.384360 {
-                          if poly[1672].contains(testy: lat, testx: lng) { return 355 }
-                          if poly[1673].contains(testy: lat, testx: lng) { return 375 } else { return 323 }
+                          if polygons[1672].contains(testy: lat, testx: lng) { return 355 }
+                          if polygons[1673].contains(testy: lat, testx: lng) { return 375 } else { return 323 }
                         } else {
-                          if poly[1674].contains(testy: lat, testx: lng) { return 355 } else { return 323 }
+                          if polygons[1674].contains(testy: lat, testx: lng) { return 355 } else { return 323 }
                         }
                       }
                     }
                   } else {
                     if lng < 30.945389 {
                       if lng < 28.558198 {
-                        if poly[1675].contains(testy: lat, testx: lng) { return 183 }
-                        if poly[1676].contains(testy: lat, testx: lng) { return 183 } else { return 323 }
+                        if polygons[1675].contains(testy: lat, testx: lng) { return 183 }
+                        if polygons[1676].contains(testy: lat, testx: lng) { return 183 } else { return 323 }
                       } else {
                         if lat < 68.125431 {
-                          if poly[1677].contains(testy: lat, testx: lng) { return 323 } else { return 183 }
+                          if polygons[1677].contains(testy: lat, testx: lng) { return 323 } else { return 183 }
                         } else {
-                          if poly[1678].contains(testy: lat, testx: lng) { return 183 }
-                          if poly[1679].contains(testy: lat, testx: lng) { return 183 }
-                          if poly[1680].contains(testy: lat, testx: lng) { return 323 }
-                          if poly[1681].contains(testy: lat, testx: lng) { return 323 }
-                          if poly[1682].contains(testy: lat, testx: lng) { return 323 } else { return 355 }
+                          if polygons[1678].contains(testy: lat, testx: lng) { return 183 }
+                          if polygons[1679].contains(testy: lat, testx: lng) { return 183 }
+                          if polygons[1680].contains(testy: lat, testx: lng) { return 323 }
+                          if polygons[1681].contains(testy: lat, testx: lng) { return 323 }
+                          if polygons[1682].contains(testy: lat, testx: lng) { return 323 } else { return 355 }
                         }
                       }
                     } else {
@@ -8650,7 +8650,7 @@ public extension TimeZone {
                     if lng < 22.034249 {
                       return 355
                     } else {
-                      if poly[1683].contains(testy: lat, testx: lng) { return 323 } else { return 355 }
+                      if polygons[1683].contains(testy: lat, testx: lng) { return 323 } else { return 355 }
                     }
                   } else {
                     return 355
@@ -8660,7 +8660,7 @@ public extension TimeZone {
                     return 355
                   } else {
                     if lng < 30.856945 {
-                      if poly[1684].contains(testy: lat, testx: lng) { return 183 } else { return 355 }
+                      if polygons[1684].contains(testy: lat, testx: lng) { return 183 } else { return 355 }
                     } else {
                       return 183
                     }
@@ -8703,7 +8703,7 @@ public extension TimeZone {
                   if lng < 98.551109 {
                     return 40
                   } else {
-                    if poly[1685].contains(testy: lat, testx: lng) { return 40 } else { return 270 }
+                    if polygons[1685].contains(testy: lat, testx: lng) { return 40 } else { return 270 }
                   }
                 }
               } else {
@@ -8713,13 +8713,13 @@ public extension TimeZone {
               if lng < 99.519447 {
                 if lng < 99.223419 {
                   if lat < 10.941639 {
-                    if poly[1686].contains(testy: lat, testx: lng) { return 40 }
-                    if poly[1687].contains(testy: lat, testx: lng) { return 40 } else { return 270 }
+                    if polygons[1686].contains(testy: lat, testx: lng) { return 40 }
+                    if polygons[1687].contains(testy: lat, testx: lng) { return 40 } else { return 270 }
                   } else {
                     if lng < 98.707916 {
                       return 40
                     } else {
-                      if poly[1688].contains(testy: lat, testx: lng) { return 270 } else { return 40 }
+                      if polygons[1688].contains(testy: lat, testx: lng) { return 270 } else { return 40 }
                     }
                   }
                 } else {
@@ -8742,7 +8742,7 @@ public extension TimeZone {
                   if lng < 104.334137 {
                     return 251
                   } else {
-                    if poly[1689].contains(testy: lat, testx: lng) { return 251 } else { return 24 }
+                    if polygons[1689].contains(testy: lat, testx: lng) { return 251 } else { return 24 }
                   }
                 }
               }
@@ -8760,13 +8760,13 @@ public extension TimeZone {
               if lng < 98.690804 {
                 return 40
               } else {
-                if poly[1690].contains(testy: lat, testx: lng) { return 270 } else { return 40 }
+                if polygons[1690].contains(testy: lat, testx: lng) { return 270 } else { return 40 }
               }
             } else {
               if lng < 102.610809 {
                 return 270
               } else {
-                if poly[1691].contains(testy: lat, testx: lng) { return 251 } else { return 270 }
+                if polygons[1691].contains(testy: lat, testx: lng) { return 251 } else { return 270 }
               }
             }
           } else {
@@ -8780,7 +8780,7 @@ public extension TimeZone {
           } else {
             if lng < 100.972930 {
               if lng < 99.497317 {
-                if poly[1692].contains(testy: lat, testx: lng) { return 270 } else { return 40 }
+                if polygons[1692].contains(testy: lat, testx: lng) { return 270 } else { return 40 }
               } else {
                 return 270
               }
@@ -8788,7 +8788,7 @@ public extension TimeZone {
               if lng < 102.244331 {
                 return 270
               } else {
-                if poly[1693].contains(testy: lat, testx: lng) { return 251 } else { return 270 }
+                if polygons[1693].contains(testy: lat, testx: lng) { return 251 } else { return 270 }
               }
             }
           }
@@ -8802,9 +8802,9 @@ public extension TimeZone {
                   return 40
                 } else {
                   if lat < 15.008137 {
-                    if poly[1694].contains(testy: lat, testx: lng) { return 270 } else { return 40 }
+                    if polygons[1694].contains(testy: lat, testx: lng) { return 270 } else { return 40 }
                   } else {
-                    if poly[1695].contains(testy: lat, testx: lng) { return 270 } else { return 40 }
+                    if polygons[1695].contains(testy: lat, testx: lng) { return 270 } else { return 40 }
                   }
                 }
               } else {
@@ -8812,16 +8812,16 @@ public extension TimeZone {
                   if lat < 16.375928 {
                     return 40
                   } else {
-                    if poly[1696].contains(testy: lat, testx: lng) { return 270 } else { return 40 }
+                    if polygons[1696].contains(testy: lat, testx: lng) { return 270 } else { return 40 }
                   }
                 } else {
                   if lat < 18.056516 {
-                    if poly[1697].contains(testy: lat, testx: lng) { return 40 } else { return 270 }
+                    if polygons[1697].contains(testy: lat, testx: lng) { return 40 } else { return 270 }
                   } else {
                     if lat < 18.916257 {
-                      if poly[1698].contains(testy: lat, testx: lng) { return 40 } else { return 270 }
+                      if polygons[1698].contains(testy: lat, testx: lng) { return 40 } else { return 270 }
                     } else {
-                      if poly[1699].contains(testy: lat, testx: lng) { return 270 } else { return 40 }
+                      if polygons[1699].contains(testy: lat, testx: lng) { return 270 } else { return 40 }
                     }
                   }
                 }
@@ -8833,7 +8833,7 @@ public extension TimeZone {
                 if lng < 98.699638 {
                   return 40
                 } else {
-                  if poly[1700].contains(testy: lat, testx: lng) { return 270 } else { return 40 }
+                  if polygons[1700].contains(testy: lat, testx: lng) { return 270 } else { return 40 }
                 }
               } else {
                 if lat < 14.976789 {
@@ -8841,31 +8841,31 @@ public extension TimeZone {
                     if lat < 13.213333 {
                       return 40
                     } else {
-                      if poly[1701].contains(testy: lat, testx: lng) { return 270 } else { return 40 }
+                      if polygons[1701].contains(testy: lat, testx: lng) { return 270 } else { return 40 }
                     }
                   } else {
                     if lat < 12.936528 {
                       if lng < 98.556503 {
                         return 40
                       } else {
-                        if poly[1702].contains(testy: lat, testx: lng) { return 270 } else { return 40 }
+                        if polygons[1702].contains(testy: lat, testx: lng) { return 270 } else { return 40 }
                       }
                     } else {
-                      if poly[1703].contains(testy: lat, testx: lng) { return 270 } else { return 40 }
+                      if polygons[1703].contains(testy: lat, testx: lng) { return 270 } else { return 40 }
                     }
                   }
                 } else {
                   if lat < 15.059563 {
-                    if poly[1704].contains(testy: lat, testx: lng) { return 40 } else { return 270 }
+                    if polygons[1704].contains(testy: lat, testx: lng) { return 40 } else { return 270 }
                   } else {
                     if lat < 17.224167 {
                       if lat < 16.141865 {
-                        if poly[1705].contains(testy: lat, testx: lng) { return 40 } else { return 270 }
+                        if polygons[1705].contains(testy: lat, testx: lng) { return 40 } else { return 270 }
                       } else {
-                        if poly[1706].contains(testy: lat, testx: lng) { return 40 } else { return 270 }
+                        if polygons[1706].contains(testy: lat, testx: lng) { return 40 } else { return 270 }
                       }
                     } else {
-                      if poly[1707].contains(testy: lat, testx: lng) { return 40 } else { return 270 }
+                      if polygons[1707].contains(testy: lat, testx: lng) { return 40 } else { return 270 }
                     }
                   }
                 }
@@ -8876,15 +8876,15 @@ public extension TimeZone {
                   return 270
                 } else {
                   if lng < 103.662552 {
-                    if poly[1708].contains(testy: lat, testx: lng) { return 251 } else { return 270 }
+                    if polygons[1708].contains(testy: lat, testx: lng) { return 251 } else { return 270 }
                   } else {
-                    if poly[1709].contains(testy: lat, testx: lng) { return 270 } else { return 251 }
+                    if polygons[1709].contains(testy: lat, testx: lng) { return 270 } else { return 251 }
                   }
                 }
               } else {
                 if lat < 17.542611 {
-                  if poly[1710].contains(testy: lat, testx: lng) { return 265 }
-                  if poly[1711].contains(testy: lat, testx: lng) { return 265 } else { return 270 }
+                  if polygons[1710].contains(testy: lat, testx: lng) { return 265 }
+                  if polygons[1711].contains(testy: lat, testx: lng) { return 265 } else { return 270 }
                 } else {
                   if lng < 102.249394 {
                     if lat < 19.094166 {
@@ -8892,35 +8892,35 @@ public extension TimeZone {
                         return 270
                       } else {
                         if lat < 18.318388 {
-                          if poly[1712].contains(testy: lat, testx: lng) { return 265 } else { return 270 }
+                          if polygons[1712].contains(testy: lat, testx: lng) { return 265 } else { return 270 }
                         } else {
-                          if poly[1713].contains(testy: lat, testx: lng) { return 270 } else { return 265 }
+                          if polygons[1713].contains(testy: lat, testx: lng) { return 270 } else { return 265 }
                         }
                       }
                     } else {
                       if lng < 100.821773 {
-                        if poly[1714].contains(testy: lat, testx: lng) { return 40 }
-                        if poly[1715].contains(testy: lat, testx: lng) { return 265 } else { return 270 }
+                        if polygons[1714].contains(testy: lat, testx: lng) { return 40 }
+                        if polygons[1715].contains(testy: lat, testx: lng) { return 265 } else { return 270 }
                       } else {
-                        if poly[1716].contains(testy: lat, testx: lng) { return 270 } else { return 265 }
+                        if polygons[1716].contains(testy: lat, testx: lng) { return 270 } else { return 265 }
                       }
                     }
                   } else {
                     if lat < 19.094166 {
                       if lng < 103.677016 {
-                        if poly[1717].contains(testy: lat, testx: lng) { return 270 } else { return 265 }
+                        if polygons[1717].contains(testy: lat, testx: lng) { return 270 } else { return 265 }
                       } else {
-                        if poly[1718].contains(testy: lat, testx: lng) { return 24 }
-                        if poly[1719].contains(testy: lat, testx: lng) { return 270 } else { return 265 }
+                        if polygons[1718].contains(testy: lat, testx: lng) { return 24 }
+                        if polygons[1719].contains(testy: lat, testx: lng) { return 270 } else { return 265 }
                       }
                     } else {
                       if lng < 103.677016 {
                         return 265
                       } else {
                         if lat < 19.869944 {
-                          if poly[1720].contains(testy: lat, testx: lng) { return 265 } else { return 24 }
+                          if polygons[1720].contains(testy: lat, testx: lng) { return 265 } else { return 24 }
                         } else {
-                          if poly[1721].contains(testy: lat, testx: lng) { return 265 } else { return 24 }
+                          if polygons[1721].contains(testy: lat, testx: lng) { return 265 } else { return 24 }
                         }
                       }
                     }
@@ -8939,18 +8939,18 @@ public extension TimeZone {
       if lng < 55.123322 {
         if lat < 50.932056 {
           if lat < 47.893608 {
-            if poly[1722].contains(testy: lat, testx: lng) { return 240 } else { return 120 }
+            if polygons[1722].contains(testy: lat, testx: lng) { return 240 } else { return 120 }
           } else {
             if lng < 52.374453 {
-              if poly[1723].contains(testy: lat, testx: lng) { return 120 } else { return 115 }
+              if polygons[1723].contains(testy: lat, testx: lng) { return 120 } else { return 115 }
             } else {
               if lat < 49.412832 {
-                if poly[1724].contains(testy: lat, testx: lng) { return 115 }
-                if poly[1725].contains(testy: lat, testx: lng) { return 240 } else { return 120 }
+                if polygons[1724].contains(testy: lat, testx: lng) { return 115 }
+                if polygons[1725].contains(testy: lat, testx: lng) { return 240 } else { return 120 }
               } else {
-                if poly[1726].contains(testy: lat, testx: lng) { return 115 }
-                if poly[1727].contains(testy: lat, testx: lng) { return 178 }
-                if poly[1728].contains(testy: lat, testx: lng) { return 178 } else { return 240 }
+                if polygons[1726].contains(testy: lat, testx: lng) { return 115 }
+                if polygons[1727].contains(testy: lat, testx: lng) { return 178 }
+                if polygons[1728].contains(testy: lat, testx: lng) { return 178 } else { return 240 }
               }
             }
           }
@@ -8959,34 +8959,34 @@ public extension TimeZone {
             if lng < 52.374453 {
               if lng < 51.000018 {
                 if lat < 51.619549 {
-                  if poly[1729].contains(testy: lat, testx: lng) { return 99 }
-                  if poly[1730].contains(testy: lat, testx: lng) { return 99 } else { return 115 }
+                  if polygons[1729].contains(testy: lat, testx: lng) { return 99 }
+                  if polygons[1730].contains(testy: lat, testx: lng) { return 99 } else { return 115 }
                 } else {
-                  if poly[1731].contains(testy: lat, testx: lng) { return 115 }
-                  if poly[1732].contains(testy: lat, testx: lng) { return 115 }
-                  if poly[1733].contains(testy: lat, testx: lng) { return 157 }
-                  if poly[1734].contains(testy: lat, testx: lng) { return 178 } else { return 99 }
+                  if polygons[1731].contains(testy: lat, testx: lng) { return 115 }
+                  if polygons[1732].contains(testy: lat, testx: lng) { return 115 }
+                  if polygons[1733].contains(testy: lat, testx: lng) { return 157 }
+                  if polygons[1734].contains(testy: lat, testx: lng) { return 178 } else { return 99 }
                 }
               } else {
-                if poly[1735].contains(testy: lat, testx: lng) { return 115 }
-                if poly[1736].contains(testy: lat, testx: lng) { return 157 } else { return 178 }
+                if polygons[1735].contains(testy: lat, testx: lng) { return 115 }
+                if polygons[1736].contains(testy: lat, testx: lng) { return 157 } else { return 178 }
               }
             } else {
-              if poly[1737].contains(testy: lat, testx: lng) { return 178 } else { return 115 }
+              if polygons[1737].contains(testy: lat, testx: lng) { return 178 } else { return 115 }
             }
           } else {
             if lng < 52.374453 {
               if lat < 53.749836 {
-                if poly[1738].contains(testy: lat, testx: lng) { return 99 }
-                if poly[1739].contains(testy: lat, testx: lng) { return 178 } else { return 157 }
+                if polygons[1738].contains(testy: lat, testx: lng) { return 99 }
+                if polygons[1739].contains(testy: lat, testx: lng) { return 178 } else { return 157 }
               } else {
                 if lng < 51.000018 {
-                  if poly[1740].contains(testy: lat, testx: lng) { return 183 } else { return 157 }
+                  if polygons[1740].contains(testy: lat, testx: lng) { return 183 } else { return 157 }
                 } else {
-                  if poly[1741].contains(testy: lat, testx: lng) { return 178 }
-                  if poly[1742].contains(testy: lat, testx: lng) { return 178 }
-                  if poly[1743].contains(testy: lat, testx: lng) { return 178 }
-                  if poly[1744].contains(testy: lat, testx: lng) { return 183 } else { return 157 }
+                  if polygons[1741].contains(testy: lat, testx: lng) { return 178 }
+                  if polygons[1742].contains(testy: lat, testx: lng) { return 178 }
+                  if polygons[1743].contains(testy: lat, testx: lng) { return 178 }
+                  if polygons[1744].contains(testy: lat, testx: lng) { return 183 } else { return 157 }
                 }
               }
             } else {
@@ -8996,18 +8996,18 @@ public extension TimeZone {
                 if lng < 53.748887 {
                   if lat < 54.471233 {
                     if lng < 53.061670 {
-                      if poly[1745].contains(testy: lat, testx: lng) { return 157 }
-                      if poly[1746].contains(testy: lat, testx: lng) { return 157 }
-                      if poly[1747].contains(testy: lat, testx: lng) { return 157 }
-                      if poly[1748].contains(testy: lat, testx: lng) { return 183 }
-                      if poly[1749].contains(testy: lat, testx: lng) { return 183 }
-                      if poly[1750].contains(testy: lat, testx: lng) { return 183 } else { return 178 }
+                      if polygons[1745].contains(testy: lat, testx: lng) { return 157 }
+                      if polygons[1746].contains(testy: lat, testx: lng) { return 157 }
+                      if polygons[1747].contains(testy: lat, testx: lng) { return 157 }
+                      if polygons[1748].contains(testy: lat, testx: lng) { return 183 }
+                      if polygons[1749].contains(testy: lat, testx: lng) { return 183 }
+                      if polygons[1750].contains(testy: lat, testx: lng) { return 183 } else { return 178 }
                     } else {
-                      if poly[1751].contains(testy: lat, testx: lng) { return 183 } else { return 178 }
+                      if polygons[1751].contains(testy: lat, testx: lng) { return 183 } else { return 178 }
                     }
                   } else {
-                    if poly[1752].contains(testy: lat, testx: lng) { return 157 }
-                    if poly[1753].contains(testy: lat, testx: lng) { return 178 } else { return 183 }
+                    if polygons[1752].contains(testy: lat, testx: lng) { return 157 }
+                    if polygons[1753].contains(testy: lat, testx: lng) { return 178 } else { return 183 }
                   }
                 } else {
                   return 178
@@ -9020,20 +9020,20 @@ public extension TimeZone {
         if lng < 61.844131 {
           if lat < 51.509230 {
             if lng < 58.483727 {
-              if poly[1754].contains(testy: lat, testx: lng) { return 240 } else { return 178 }
+              if polygons[1754].contains(testy: lat, testx: lng) { return 240 } else { return 178 }
             } else {
-              if poly[1755].contains(testy: lat, testx: lng) { return 239 }
-              if poly[1756].contains(testy: lat, testx: lng) { return 240 } else { return 178 }
+              if polygons[1755].contains(testy: lat, testx: lng) { return 239 }
+              if polygons[1756].contains(testy: lat, testx: lng) { return 240 } else { return 178 }
             }
           } else {
             if lng < 58.483727 {
               return 178
             } else {
               if lat < 53.350930 {
-                if poly[1757].contains(testy: lat, testx: lng) { return 239 }
-                if poly[1758].contains(testy: lat, testx: lng) { return 239 } else { return 178 }
+                if polygons[1757].contains(testy: lat, testx: lng) { return 239 }
+                if polygons[1758].contains(testy: lat, testx: lng) { return 239 } else { return 178 }
               } else {
-                if poly[1759].contains(testy: lat, testx: lng) { return 239 } else { return 178 }
+                if polygons[1759].contains(testy: lat, testx: lng) { return 239 } else { return 178 }
               }
             }
           }
@@ -9041,32 +9041,32 @@ public extension TimeZone {
           if lat < 51.509230 {
             if lng < 65.204536 {
               if lat < 49.667529 {
-                if poly[1760].contains(testy: lat, testx: lng) { return 240 }
-                if poly[1761].contains(testy: lat, testx: lng) { return 347 } else { return 239 }
+                if polygons[1760].contains(testy: lat, testx: lng) { return 240 }
+                if polygons[1761].contains(testy: lat, testx: lng) { return 347 } else { return 239 }
               } else {
-                if poly[1762].contains(testy: lat, testx: lng) { return 240 } else { return 239 }
+                if polygons[1762].contains(testy: lat, testx: lng) { return 240 } else { return 239 }
               }
             } else {
-              if poly[1763].contains(testy: lat, testx: lng) { return 239 } else { return 347 }
+              if polygons[1763].contains(testy: lat, testx: lng) { return 239 } else { return 347 }
             }
           } else {
             if lng < 65.204536 {
               if lat < 53.350930 {
-                if poly[1764].contains(testy: lat, testx: lng) { return 178 } else { return 239 }
+                if polygons[1764].contains(testy: lat, testx: lng) { return 178 } else { return 239 }
               } else {
-                if poly[1765].contains(testy: lat, testx: lng) { return 239 }
-                if poly[1766].contains(testy: lat, testx: lng) { return 239 } else { return 178 }
+                if polygons[1765].contains(testy: lat, testx: lng) { return 239 }
+                if polygons[1766].contains(testy: lat, testx: lng) { return 239 } else { return 178 }
               }
             } else {
               if lat < 53.350930 {
-                if poly[1767].contains(testy: lat, testx: lng) { return 347 } else { return 239 }
+                if polygons[1767].contains(testy: lat, testx: lng) { return 347 } else { return 239 }
               } else {
                 if lng < 66.884739 {
-                  if poly[1768].contains(testy: lat, testx: lng) { return 178 }
-                  if poly[1769].contains(testy: lat, testx: lng) { return 178 }
-                  if poly[1770].contains(testy: lat, testx: lng) { return 347 } else { return 239 }
+                  if polygons[1768].contains(testy: lat, testx: lng) { return 178 }
+                  if polygons[1769].contains(testy: lat, testx: lng) { return 178 }
+                  if polygons[1770].contains(testy: lat, testx: lng) { return 347 } else { return 239 }
                 } else {
-                  if poly[1771].contains(testy: lat, testx: lng) { return 178 } else { return 347 }
+                  if polygons[1771].contains(testy: lat, testx: lng) { return 178 } else { return 347 }
                 }
               }
             }
@@ -9081,30 +9081,30 @@ public extension TimeZone {
               if lng < 51.993003 {
                 if lat < 56.577187 {
                   if lng < 50.809294 {
-                    if poly[1772].contains(testy: lat, testx: lng) { return 99 } else { return 183 }
+                    if polygons[1772].contains(testy: lat, testx: lng) { return 99 } else { return 183 }
                   } else {
                     if lat < 55.884909 {
-                      if poly[1773].contains(testy: lat, testx: lng) { return 157 } else { return 183 }
+                      if polygons[1773].contains(testy: lat, testx: lng) { return 157 } else { return 183 }
                     } else {
                       if lng < 51.401148 {
-                        if poly[1774].contains(testy: lat, testx: lng) { return 157 }
-                        if poly[1775].contains(testy: lat, testx: lng) { return 157 }
-                        if poly[1776].contains(testy: lat, testx: lng) { return 157 }
-                        if poly[1777].contains(testy: lat, testx: lng) { return 183 } else { return 99 }
+                        if polygons[1774].contains(testy: lat, testx: lng) { return 157 }
+                        if polygons[1775].contains(testy: lat, testx: lng) { return 157 }
+                        if polygons[1776].contains(testy: lat, testx: lng) { return 157 }
+                        if polygons[1777].contains(testy: lat, testx: lng) { return 183 } else { return 99 }
                       } else {
-                        if poly[1778].contains(testy: lat, testx: lng) { return 99 }
-                        if poly[1779].contains(testy: lat, testx: lng) { return 99 }
-                        if poly[1780].contains(testy: lat, testx: lng) { return 183 }
-                        if poly[1781].contains(testy: lat, testx: lng) { return 183 }
-                        if poly[1782].contains(testy: lat, testx: lng) { return 183 } else { return 157 }
+                        if polygons[1778].contains(testy: lat, testx: lng) { return 99 }
+                        if polygons[1779].contains(testy: lat, testx: lng) { return 99 }
+                        if polygons[1780].contains(testy: lat, testx: lng) { return 183 }
+                        if polygons[1781].contains(testy: lat, testx: lng) { return 183 }
+                        if polygons[1782].contains(testy: lat, testx: lng) { return 183 } else { return 157 }
                       }
                     }
                   }
                 } else {
                   if lng < 50.809294 {
-                    if poly[1783].contains(testy: lat, testx: lng) { return 183 } else { return 99 }
+                    if polygons[1783].contains(testy: lat, testx: lng) { return 183 } else { return 99 }
                   } else {
-                    if poly[1784].contains(testy: lat, testx: lng) { return 157 } else { return 99 }
+                    if polygons[1784].contains(testy: lat, testx: lng) { return 157 } else { return 99 }
                   }
                 }
               } else {
@@ -9114,48 +9114,48 @@ public extension TimeZone {
                       return 183
                     } else {
                       if lng < 52.584858 {
-                        if poly[1785].contains(testy: lat, testx: lng) { return 157 } else { return 183 }
+                        if polygons[1785].contains(testy: lat, testx: lng) { return 157 } else { return 183 }
                       } else {
-                        if poly[1786].contains(testy: lat, testx: lng) { return 183 } else { return 157 }
+                        if polygons[1786].contains(testy: lat, testx: lng) { return 183 } else { return 157 }
                       }
                     }
                   } else {
                     if lat < 55.884909 {
-                      if poly[1787].contains(testy: lat, testx: lng) { return 157 }
-                      if poly[1788].contains(testy: lat, testx: lng) { return 178 } else { return 183 }
+                      if polygons[1787].contains(testy: lat, testx: lng) { return 157 }
+                      if polygons[1788].contains(testy: lat, testx: lng) { return 178 } else { return 183 }
                     } else {
-                      if poly[1789].contains(testy: lat, testx: lng) { return 178 }
-                      if poly[1790].contains(testy: lat, testx: lng) { return 178 }
-                      if poly[1791].contains(testy: lat, testx: lng) { return 183 }
-                      if poly[1792].contains(testy: lat, testx: lng) { return 183 } else { return 157 }
+                      if polygons[1789].contains(testy: lat, testx: lng) { return 178 }
+                      if polygons[1790].contains(testy: lat, testx: lng) { return 178 }
+                      if polygons[1791].contains(testy: lat, testx: lng) { return 183 }
+                      if polygons[1792].contains(testy: lat, testx: lng) { return 183 } else { return 157 }
                     }
                   }
                 } else {
-                  if poly[1793].contains(testy: lat, testx: lng) { return 178 }
-                  if poly[1794].contains(testy: lat, testx: lng) { return 178 } else { return 157 }
+                  if polygons[1793].contains(testy: lat, testx: lng) { return 178 }
+                  if polygons[1794].contains(testy: lat, testx: lng) { return 178 } else { return 157 }
                 }
               }
             } else {
               if lng < 51.993003 {
-                if poly[1795].contains(testy: lat, testx: lng) { return 157 }
-                if poly[1796].contains(testy: lat, testx: lng) { return 178 }
-                if poly[1797].contains(testy: lat, testx: lng) { return 183 } else { return 99 }
+                if polygons[1795].contains(testy: lat, testx: lng) { return 157 }
+                if polygons[1796].contains(testy: lat, testx: lng) { return 178 }
+                if polygons[1797].contains(testy: lat, testx: lng) { return 183 } else { return 99 }
               } else {
                 if lat < 59.346300 {
-                  if poly[1798].contains(testy: lat, testx: lng) { return 157 }
-                  if poly[1799].contains(testy: lat, testx: lng) { return 178 } else { return 99 }
+                  if polygons[1798].contains(testy: lat, testx: lng) { return 157 }
+                  if polygons[1799].contains(testy: lat, testx: lng) { return 178 } else { return 99 }
                 } else {
-                  if poly[1800].contains(testy: lat, testx: lng) { return 99 }
-                  if poly[1801].contains(testy: lat, testx: lng) { return 183 } else { return 178 }
+                  if polygons[1800].contains(testy: lat, testx: lng) { return 99 }
+                  if polygons[1801].contains(testy: lat, testx: lng) { return 183 } else { return 178 }
                 }
               }
             }
           } else {
-            if poly[1802].contains(testy: lat, testx: lng) { return 157 }
-            if poly[1803].contains(testy: lat, testx: lng) { return 157 } else { return 178 }
+            if polygons[1802].contains(testy: lat, testx: lng) { return 157 }
+            if polygons[1803].contains(testy: lat, testx: lng) { return 157 } else { return 178 }
           }
         } else {
-          if poly[1804].contains(testy: lat, testx: lng) { return 178 } else { return 183 }
+          if polygons[1804].contains(testy: lat, testx: lng) { return 178 } else { return 183 }
         }
       } else {
         if lat < 60.730856 {
@@ -9163,9 +9163,9 @@ public extension TimeZone {
         } else {
           if lng < 63.830102 {
             if lat < 63.499969 {
-              if poly[1805].contains(testy: lat, testx: lng) { return 183 } else { return 178 }
+              if polygons[1805].contains(testy: lat, testx: lng) { return 183 } else { return 178 }
             } else {
-              if poly[1806].contains(testy: lat, testx: lng) { return 183 } else { return 178 }
+              if polygons[1806].contains(testy: lat, testx: lng) { return 183 } else { return 178 }
             }
           } else {
             return 178
@@ -9182,37 +9182,37 @@ public extension TimeZone {
           if lng < 46.362106 {
             if lng < 44.780580 {
               if lat < 41.802489 {
-                if poly[1807].contains(testy: lat, testx: lng) { return 47 }
-                if poly[1808].contains(testy: lat, testx: lng) { return 205 } else { return 48 }
+                if polygons[1807].contains(testy: lat, testx: lng) { return 47 }
+                if polygons[1808].contains(testy: lat, testx: lng) { return 205 } else { return 48 }
               } else {
-                if poly[1809].contains(testy: lat, testx: lng) { return 183 } else { return 47 }
+                if polygons[1809].contains(testy: lat, testx: lng) { return 183 } else { return 47 }
               }
             } else {
               if lat < 41.802489 {
                 if lng < 45.571343 {
-                  if poly[1810].contains(testy: lat, testx: lng) { return 47 }
-                  if poly[1811].contains(testy: lat, testx: lng) { return 48 } else { return 51 }
+                  if polygons[1810].contains(testy: lat, testx: lng) { return 47 }
+                  if polygons[1811].contains(testy: lat, testx: lng) { return 48 } else { return 51 }
                 } else {
-                  if poly[1812].contains(testy: lat, testx: lng) { return 47 }
-                  if poly[1813].contains(testy: lat, testx: lng) { return 48 } else { return 51 }
+                  if polygons[1812].contains(testy: lat, testx: lng) { return 47 }
+                  if polygons[1813].contains(testy: lat, testx: lng) { return 48 } else { return 51 }
                 }
               } else {
-                if poly[1814].contains(testy: lat, testx: lng) { return 51 }
-                if poly[1815].contains(testy: lat, testx: lng) { return 183 } else { return 47 }
+                if polygons[1814].contains(testy: lat, testx: lng) { return 51 }
+                if polygons[1815].contains(testy: lat, testx: lng) { return 183 } else { return 47 }
               }
             }
           } else {
             if lng < 47.943632 {
               if lat < 41.802489 {
-                if poly[1816].contains(testy: lat, testx: lng) { return 47 }
-                if poly[1817].contains(testy: lat, testx: lng) { return 47 }
-                if poly[1818].contains(testy: lat, testx: lng) { return 183 } else { return 51 }
+                if polygons[1816].contains(testy: lat, testx: lng) { return 47 }
+                if polygons[1817].contains(testy: lat, testx: lng) { return 47 }
+                if polygons[1818].contains(testy: lat, testx: lng) { return 183 } else { return 51 }
               } else {
-                if poly[1819].contains(testy: lat, testx: lng) { return 47 }
-                if poly[1820].contains(testy: lat, testx: lng) { return 51 } else { return 183 }
+                if polygons[1819].contains(testy: lat, testx: lng) { return 47 }
+                if polygons[1820].contains(testy: lat, testx: lng) { return 51 } else { return 183 }
               }
             } else {
-              if poly[1821].contains(testy: lat, testx: lng) { return 183 } else { return 51 }
+              if polygons[1821].contains(testy: lat, testx: lng) { return 183 } else { return 51 }
             }
           }
         } else {
@@ -9223,7 +9223,7 @@ public extension TimeZone {
           if lat < 45.179359 {
             return 183
           } else {
-            if poly[1822].contains(testy: lat, testx: lng) { return 99 } else { return 183 }
+            if polygons[1822].contains(testy: lat, testx: lng) { return 99 } else { return 183 }
           }
         } else {
           return 99
@@ -9233,7 +9233,7 @@ public extension TimeZone {
       if lat < 46.203140 {
         if lng < 49.029415 {
           if lng < 47.174988 {
-            if poly[1823].contains(testy: lat, testx: lng) { return 183 } else { return 99 }
+            if polygons[1823].contains(testy: lat, testx: lng) { return 183 } else { return 99 }
           } else {
             return 99
           }
@@ -9247,9 +9247,9 @@ public extension TimeZone {
               if lng < 49.135693 {
                 if lng < 46.866653 {
                   if lat < 46.248047 {
-                    if poly[1824].contains(testy: lat, testx: lng) { return 99 } else { return 183 }
+                    if polygons[1824].contains(testy: lat, testx: lng) { return 99 } else { return 183 }
                   } else {
-                    if poly[1825].contains(testy: lat, testx: lng) { return 99 } else { return 183 }
+                    if polygons[1825].contains(testy: lat, testx: lng) { return 99 } else { return 183 }
                   }
                 } else {
                   return 99
@@ -9260,20 +9260,20 @@ public extension TimeZone {
             } else {
               if lng < 49.216098 {
                 if lng < 46.207577 {
-                  if poly[1826].contains(testy: lat, testx: lng) { return 99 } else { return 183 }
+                  if polygons[1826].contains(testy: lat, testx: lng) { return 99 } else { return 183 }
                 } else {
                   if lat < 48.698402 {
                     if lng < 47.711837 {
-                      if poly[1827].contains(testy: lat, testx: lng) { return 115 }
-                      if poly[1828].contains(testy: lat, testx: lng) { return 120 }
-                      if poly[1829].contains(testy: lat, testx: lng) { return 183 } else { return 99 }
+                      if polygons[1827].contains(testy: lat, testx: lng) { return 115 }
+                      if polygons[1828].contains(testy: lat, testx: lng) { return 120 }
+                      if polygons[1829].contains(testy: lat, testx: lng) { return 183 } else { return 99 }
                     } else {
-                      if poly[1830].contains(testy: lat, testx: lng) { return 99 }
-                      if poly[1831].contains(testy: lat, testx: lng) { return 99 }
-                      if poly[1832].contains(testy: lat, testx: lng) { return 115 } else { return 120 }
+                      if polygons[1830].contains(testy: lat, testx: lng) { return 99 }
+                      if polygons[1831].contains(testy: lat, testx: lng) { return 99 }
+                      if polygons[1832].contains(testy: lat, testx: lng) { return 115 } else { return 120 }
                     }
                   } else {
-                    if poly[1833].contains(testy: lat, testx: lng) { return 99 } else { return 115 }
+                    if polygons[1833].contains(testy: lat, testx: lng) { return 99 } else { return 115 }
                   }
                 }
               } else {
@@ -9281,9 +9281,9 @@ public extension TimeZone {
                   if lat < 46.298000 { if lng < 49.220917 { return 99 } else { return 120 } } else { return 120 }
                 } else {
                   if lat < 48.018226 {
-                    if poly[1834].contains(testy: lat, testx: lng) { return 115 } else { return 120 }
+                    if polygons[1834].contains(testy: lat, testx: lng) { return 115 } else { return 120 }
                   } else {
-                    if poly[1835].contains(testy: lat, testx: lng) { return 115 } else { return 99 }
+                    if polygons[1835].contains(testy: lat, testx: lng) { return 115 } else { return 99 }
                   }
                 }
               }
@@ -9293,39 +9293,39 @@ public extension TimeZone {
               return 120
             } else {
               if lat < 48.059217 {
-                if poly[1836].contains(testy: lat, testx: lng) { return 115 } else { return 120 }
+                if polygons[1836].contains(testy: lat, testx: lng) { return 115 } else { return 120 }
               } else {
-                if poly[1837].contains(testy: lat, testx: lng) { return 99 } else { return 115 }
+                if polygons[1837].contains(testy: lat, testx: lng) { return 99 } else { return 115 }
               }
             }
           }
         } else {
           if lat < 53.870827 {
             if lng < 46.412319 {
-              if poly[1838].contains(testy: lat, testx: lng) { return 183 } else { return 99 }
+              if polygons[1838].contains(testy: lat, testx: lng) { return 183 } else { return 99 }
             } else {
               if lng < 48.018951 {
-                if poly[1839].contains(testy: lat, testx: lng) { return 99 }
-                if poly[1840].contains(testy: lat, testx: lng) { return 99 }
-                if poly[1841].contains(testy: lat, testx: lng) { return 157 } else { return 183 }
+                if polygons[1839].contains(testy: lat, testx: lng) { return 99 }
+                if polygons[1840].contains(testy: lat, testx: lng) { return 99 }
+                if polygons[1841].contains(testy: lat, testx: lng) { return 157 } else { return 183 }
               } else {
                 if lat < 52.500204 {
-                  if poly[1842].contains(testy: lat, testx: lng) { return 157 }
-                  if poly[1843].contains(testy: lat, testx: lng) { return 157 }
-                  if poly[1844].contains(testy: lat, testx: lng) { return 157 } else { return 99 }
+                  if polygons[1842].contains(testy: lat, testx: lng) { return 157 }
+                  if polygons[1843].contains(testy: lat, testx: lng) { return 157 }
+                  if polygons[1844].contains(testy: lat, testx: lng) { return 157 } else { return 99 }
                 } else {
                   if lng < 48.822268 {
                     if lat < 53.185186 {
-                      if poly[1845].contains(testy: lat, testx: lng) { return 99 }
-                      if poly[1846].contains(testy: lat, testx: lng) { return 157 } else { return 183 }
+                      if polygons[1845].contains(testy: lat, testx: lng) { return 99 }
+                      if polygons[1846].contains(testy: lat, testx: lng) { return 157 } else { return 183 }
                     } else {
-                      if poly[1847].contains(testy: lat, testx: lng) { return 157 } else { return 183 }
+                      if polygons[1847].contains(testy: lat, testx: lng) { return 157 } else { return 183 }
                     }
                   } else {
-                    if poly[1848].contains(testy: lat, testx: lng) { return 99 }
-                    if poly[1849].contains(testy: lat, testx: lng) { return 99 }
-                    if poly[1850].contains(testy: lat, testx: lng) { return 183 }
-                    if poly[1851].contains(testy: lat, testx: lng) { return 183 } else { return 157 }
+                    if polygons[1848].contains(testy: lat, testx: lng) { return 99 }
+                    if polygons[1849].contains(testy: lat, testx: lng) { return 99 }
+                    if polygons[1850].contains(testy: lat, testx: lng) { return 183 }
+                    if polygons[1851].contains(testy: lat, testx: lng) { return 183 } else { return 157 }
                   }
                 }
               }
@@ -9333,30 +9333,30 @@ public extension TimeZone {
           } else {
             if lat < 60.069954 {
               if lng < 46.412319 {
-                if poly[1852].contains(testy: lat, testx: lng) { return 99 } else { return 183 }
+                if polygons[1852].contains(testy: lat, testx: lng) { return 99 } else { return 183 }
               } else {
                 if lat < 56.970390 {
-                  if poly[1853].contains(testy: lat, testx: lng) { return 99 } else { return 183 }
+                  if polygons[1853].contains(testy: lat, testx: lng) { return 99 } else { return 183 }
                 } else {
                   if lng < 48.018951 {
                     if lat < 58.520172 {
                       if lng < 47.215635 {
-                        if poly[1854].contains(testy: lat, testx: lng) { return 99 }
-                        if poly[1855].contains(testy: lat, testx: lng) { return 99 } else { return 183 }
+                        if polygons[1854].contains(testy: lat, testx: lng) { return 99 }
+                        if polygons[1855].contains(testy: lat, testx: lng) { return 99 } else { return 183 }
                       } else {
-                        if poly[1856].contains(testy: lat, testx: lng) { return 183 }
-                        if poly[1857].contains(testy: lat, testx: lng) { return 183 } else { return 99 }
+                        if polygons[1856].contains(testy: lat, testx: lng) { return 183 }
+                        if polygons[1857].contains(testy: lat, testx: lng) { return 183 } else { return 99 }
                       }
                     } else {
-                      if poly[1858].contains(testy: lat, testx: lng) { return 183 } else { return 99 }
+                      if polygons[1858].contains(testy: lat, testx: lng) { return 183 } else { return 99 }
                     }
                   } else {
-                    if poly[1859].contains(testy: lat, testx: lng) { return 99 } else { return 183 }
+                    if polygons[1859].contains(testy: lat, testx: lng) { return 99 } else { return 183 }
                   }
                 }
               }
             } else {
-              if poly[1860].contains(testy: lat, testx: lng) { return 99 } else { return 183 }
+              if polygons[1860].contains(testy: lat, testx: lng) { return 99 } else { return 183 }
             }
           }
         }
@@ -9369,13 +9369,13 @@ public extension TimeZone {
       if lat < 30.415028 {
         if lng < 48.575916 {
           if lng < 47.971863 {
-            if poly[1861].contains(testy: lat, testx: lng) { return 28 }
-            if poly[1862].contains(testy: lat, testx: lng) { return 28 }
-            if poly[1863].contains(testy: lat, testx: lng) { return 163 } else { return 231 }
+            if polygons[1861].contains(testy: lat, testx: lng) { return 28 }
+            if polygons[1862].contains(testy: lat, testx: lng) { return 28 }
+            if polygons[1863].contains(testy: lat, testx: lng) { return 163 } else { return 231 }
           } else {
             if lat < 29.472639 {
               if lat < 28.535639 {
-                if poly[1864].contains(testy: lat, testx: lng) { return 231 } else { return 163 }
+                if polygons[1864].contains(testy: lat, testx: lng) { return 231 } else { return 163 }
               } else {
                 return 231
               }
@@ -9386,8 +9386,8 @@ public extension TimeZone {
                 if lng < 48.015431 {
                   if lat < 29.993876 { return 28 } else { return 231 }
                 } else {
-                  if poly[1865].contains(testy: lat, testx: lng) { return 28 }
-                  if poly[1866].contains(testy: lat, testx: lng) { return 55 } else { return 231 }
+                  if polygons[1865].contains(testy: lat, testx: lng) { return 28 }
+                  if polygons[1866].contains(testy: lat, testx: lng) { return 55 } else { return 231 }
                 }
               }
             }
@@ -9401,37 +9401,37 @@ public extension TimeZone {
             if lng < 48.168983 {
               if lat < 33.882585 {
                 if lng < 45.684019 {
-                  if poly[1867].contains(testy: lat, testx: lng) { return 55 } else { return 28 }
+                  if polygons[1867].contains(testy: lat, testx: lng) { return 55 } else { return 28 }
                 } else {
                   if lat < 32.148806 {
-                    if poly[1868].contains(testy: lat, testx: lng) { return 55 } else { return 28 }
+                    if polygons[1868].contains(testy: lat, testx: lng) { return 55 } else { return 28 }
                   } else {
-                    if poly[1869].contains(testy: lat, testx: lng) { return 28 } else { return 55 }
+                    if polygons[1869].contains(testy: lat, testx: lng) { return 28 } else { return 55 }
                   }
                 }
               } else {
                 if lng < 45.684019 {
                   if lat < 35.616364 {
-                    if poly[1870].contains(testy: lat, testx: lng) { return 55 }
-                    if poly[1871].contains(testy: lat, testx: lng) { return 55 } else { return 28 }
+                    if polygons[1870].contains(testy: lat, testx: lng) { return 55 }
+                    if polygons[1871].contains(testy: lat, testx: lng) { return 55 } else { return 28 }
                   } else {
                     if lng < 44.441537 {
-                      if poly[1872].contains(testy: lat, testx: lng) { return 205 } else { return 28 }
+                      if polygons[1872].contains(testy: lat, testx: lng) { return 205 } else { return 28 }
                     } else {
                       if lat < 36.483253 {
-                        if poly[1873].contains(testy: lat, testx: lng) { return 55 } else { return 28 }
+                        if polygons[1873].contains(testy: lat, testx: lng) { return 55 } else { return 28 }
                       } else {
-                        if poly[1874].contains(testy: lat, testx: lng) { return 55 }
-                        if poly[1875].contains(testy: lat, testx: lng) { return 205 } else { return 28 }
+                        if polygons[1874].contains(testy: lat, testx: lng) { return 55 }
+                        if polygons[1875].contains(testy: lat, testx: lng) { return 205 } else { return 28 }
                       }
                     }
                   }
                 } else {
                   if lat < 35.616364 {
-                    if poly[1876].contains(testy: lat, testx: lng) { return 28 }
-                    if poly[1877].contains(testy: lat, testx: lng) { return 28 } else { return 55 }
+                    if polygons[1876].contains(testy: lat, testx: lng) { return 28 }
+                    if polygons[1877].contains(testy: lat, testx: lng) { return 28 } else { return 55 }
                   } else {
-                    if poly[1878].contains(testy: lat, testx: lng) { return 28 } else { return 55 }
+                    if polygons[1878].contains(testy: lat, testx: lng) { return 28 } else { return 55 }
                   }
                 }
               }
@@ -9442,38 +9442,38 @@ public extension TimeZone {
             if lng < 46.103514 {
               if lat < 39.011363 {
                 if lng < 44.651284 {
-                  if poly[1879].contains(testy: lat, testx: lng) { return 55 } else { return 205 }
+                  if polygons[1879].contains(testy: lat, testx: lng) { return 55 } else { return 205 }
                 } else {
-                  if poly[1880].contains(testy: lat, testx: lng) { return 51 }
-                  if poly[1881].contains(testy: lat, testx: lng) { return 205 } else { return 55 }
+                  if polygons[1880].contains(testy: lat, testx: lng) { return 51 }
+                  if polygons[1881].contains(testy: lat, testx: lng) { return 205 } else { return 55 }
                 }
               } else {
                 if lng < 44.651284 {
-                  if poly[1882].contains(testy: lat, testx: lng) { return 48 }
-                  if poly[1883].contains(testy: lat, testx: lng) { return 55 } else { return 205 }
+                  if polygons[1882].contains(testy: lat, testx: lng) { return 48 }
+                  if polygons[1883].contains(testy: lat, testx: lng) { return 55 } else { return 205 }
                 } else {
                   if lat < 39.841974 {
-                    if poly[1884].contains(testy: lat, testx: lng) { return 48 }
-                    if poly[1885].contains(testy: lat, testx: lng) { return 55 }
-                    if poly[1886].contains(testy: lat, testx: lng) { return 205 } else { return 51 }
+                    if polygons[1884].contains(testy: lat, testx: lng) { return 48 }
+                    if polygons[1885].contains(testy: lat, testx: lng) { return 55 }
+                    if polygons[1886].contains(testy: lat, testx: lng) { return 205 } else { return 51 }
                   } else {
-                    if poly[1887].contains(testy: lat, testx: lng) { return 51 }
-                    if poly[1888].contains(testy: lat, testx: lng) { return 51 } else { return 48 }
+                    if polygons[1887].contains(testy: lat, testx: lng) { return 51 }
+                    if polygons[1888].contains(testy: lat, testx: lng) { return 51 } else { return 48 }
                   }
                 }
               }
             } else {
               if lat < 39.011363 {
-                if poly[1889].contains(testy: lat, testx: lng) { return 48 }
-                if poly[1890].contains(testy: lat, testx: lng) { return 51 }
-                if poly[1891].contains(testy: lat, testx: lng) { return 51 }
-                if poly[1892].contains(testy: lat, testx: lng) { return 51 } else { return 55 }
+                if polygons[1889].contains(testy: lat, testx: lng) { return 48 }
+                if polygons[1890].contains(testy: lat, testx: lng) { return 51 }
+                if polygons[1891].contains(testy: lat, testx: lng) { return 51 }
+                if polygons[1892].contains(testy: lat, testx: lng) { return 51 } else { return 55 }
               } else {
                 if lng < 47.555743 {
-                  if poly[1893].contains(testy: lat, testx: lng) { return 48 }
-                  if poly[1894].contains(testy: lat, testx: lng) { return 55 } else { return 51 }
+                  if polygons[1893].contains(testy: lat, testx: lng) { return 48 }
+                  if polygons[1894].contains(testy: lat, testx: lng) { return 55 } else { return 51 }
                 } else {
-                  if poly[1895].contains(testy: lat, testx: lng) { return 55 } else { return 51 }
+                  if polygons[1895].contains(testy: lat, testx: lng) { return 55 } else { return 51 }
                 }
               }
             }
@@ -9496,24 +9496,24 @@ public extension TimeZone {
               if lat < 36.947498 {
                 return 55
               } else {
-                if poly[1896].contains(testy: lat, testx: lng) { return 55 } else { return 76 }
+                if polygons[1896].contains(testy: lat, testx: lng) { return 55 } else { return 76 }
               }
             } else {
               if lat < 31.834249 {
                 if lng < 68.168892 {
                   if lng < 62.387335 {
-                    if poly[1897].contains(testy: lat, testx: lng) { return 210 }
-                    if poly[1898].contains(testy: lat, testx: lng) { return 366 } else { return 55 }
+                    if polygons[1897].contains(testy: lat, testx: lng) { return 210 }
+                    if polygons[1898].contains(testy: lat, testx: lng) { return 366 } else { return 55 }
                   } else {
                     if lng < 65.278113 {
-                      if poly[1899].contains(testy: lat, testx: lng) { return 55 }
-                      if poly[1900].contains(testy: lat, testx: lng) { return 366 } else { return 210 }
+                      if polygons[1899].contains(testy: lat, testx: lng) { return 55 }
+                      if polygons[1900].contains(testy: lat, testx: lng) { return 366 } else { return 210 }
                     } else {
-                      if poly[1901].contains(testy: lat, testx: lng) { return 366 } else { return 210 }
+                      if polygons[1901].contains(testy: lat, testx: lng) { return 366 } else { return 210 }
                     }
                   }
                 } else {
-                  if poly[1902].contains(testy: lat, testx: lng) { return 366 } else { return 210 }
+                  if polygons[1902].contains(testy: lat, testx: lng) { return 366 } else { return 210 }
                 }
               } else {
                 if lng < 61.278584 {
@@ -9522,55 +9522,55 @@ public extension TimeZone {
                       return 55
                     } else {
                       if lat < 34.043833 {
-                        if poly[1903].contains(testy: lat, testx: lng) { return 366 } else { return 55 }
+                        if polygons[1903].contains(testy: lat, testx: lng) { return 366 } else { return 55 }
                       } else {
-                        if poly[1904].contains(testy: lat, testx: lng) { return 76 }
-                        if poly[1905].contains(testy: lat, testx: lng) { return 366 } else { return 55 }
+                        if polygons[1904].contains(testy: lat, testx: lng) { return 76 }
+                        if polygons[1905].contains(testy: lat, testx: lng) { return 366 } else { return 55 }
                       }
                     }
                   } else {
                     if lng < 58.942181 {
-                      if poly[1906].contains(testy: lat, testx: lng) { return 76 } else { return 55 }
+                      if polygons[1906].contains(testy: lat, testx: lng) { return 76 } else { return 55 }
                     } else {
-                      if poly[1907].contains(testy: lat, testx: lng) { return 55 } else { return 76 }
+                      if polygons[1907].contains(testy: lat, testx: lng) { return 55 } else { return 76 }
                     }
                   }
                 } else {
                   if lat < 36.253417 {
-                    if poly[1908].contains(testy: lat, testx: lng) { return 76 } else { return 366 }
+                    if polygons[1908].contains(testy: lat, testx: lng) { return 76 } else { return 366 }
                   } else {
                     if lng < 64.921762 {
-                      if poly[1909].contains(testy: lat, testx: lng) { return 167 }
-                      if poly[1910].contains(testy: lat, testx: lng) { return 366 } else { return 76 }
+                      if polygons[1909].contains(testy: lat, testx: lng) { return 167 }
+                      if polygons[1910].contains(testy: lat, testx: lng) { return 366 } else { return 76 }
                     } else {
                       if lat < 38.463001 {
                         if lng < 66.743352 {
-                          if poly[1911].contains(testy: lat, testx: lng) { return 167 }
-                          if poly[1912].contains(testy: lat, testx: lng) { return 366 } else { return 76 }
+                          if polygons[1911].contains(testy: lat, testx: lng) { return 167 }
+                          if polygons[1912].contains(testy: lat, testx: lng) { return 366 } else { return 76 }
                         } else {
                           if lat < 37.358209 {
-                            if poly[1913].contains(testy: lat, testx: lng) { return 167 }
-                            if poly[1914].contains(testy: lat, testx: lng) { return 167 }
-                            if poly[1915].contains(testy: lat, testx: lng) { return 208 } else { return 366 }
+                            if polygons[1913].contains(testy: lat, testx: lng) { return 167 }
+                            if polygons[1914].contains(testy: lat, testx: lng) { return 167 }
+                            if polygons[1915].contains(testy: lat, testx: lng) { return 208 } else { return 366 }
                           } else {
-                            if poly[1916].contains(testy: lat, testx: lng) { return 208 }
-                            if poly[1917].contains(testy: lat, testx: lng) { return 366 } else { return 167 }
+                            if polygons[1916].contains(testy: lat, testx: lng) { return 208 }
+                            if polygons[1917].contains(testy: lat, testx: lng) { return 366 } else { return 167 }
                           }
                         }
                       } else {
                         if lng < 66.743352 {
-                          if poly[1918].contains(testy: lat, testx: lng) { return 76 }
-                          if poly[1919].contains(testy: lat, testx: lng) { return 246 } else { return 167 }
+                          if polygons[1918].contains(testy: lat, testx: lng) { return 76 }
+                          if polygons[1919].contains(testy: lat, testx: lng) { return 246 } else { return 167 }
                         } else {
                           if lat < 39.567793 {
-                            if poly[1920].contains(testy: lat, testx: lng) { return 167 }
-                            if poly[1921].contains(testy: lat, testx: lng) { return 246 }
-                            if poly[1922].contains(testy: lat, testx: lng) { return 246 } else { return 208 }
+                            if polygons[1920].contains(testy: lat, testx: lng) { return 167 }
+                            if polygons[1921].contains(testy: lat, testx: lng) { return 246 }
+                            if polygons[1922].contains(testy: lat, testx: lng) { return 246 } else { return 208 }
                           } else {
-                            if poly[1923].contains(testy: lat, testx: lng) { return 167 }
-                            if poly[1924].contains(testy: lat, testx: lng) { return 208 }
-                            if poly[1925].contains(testy: lat, testx: lng) { return 208 }
-                            if poly[1926].contains(testy: lat, testx: lng) { return 208 } else { return 246 }
+                            if polygons[1923].contains(testy: lat, testx: lng) { return 167 }
+                            if polygons[1924].contains(testy: lat, testx: lng) { return 208 }
+                            if polygons[1925].contains(testy: lat, testx: lng) { return 208 }
+                            if polygons[1926].contains(testy: lat, testx: lng) { return 208 } else { return 246 }
                           }
                         }
                       }
@@ -9595,32 +9595,32 @@ public extension TimeZone {
             if lat < 27.529126 {
               if lng < 70.883936 {
                 if lat < 25.703410 {
-                  if poly[1927].contains(testy: lat, testx: lng) { return 210 } else { return 371 }
+                  if polygons[1927].contains(testy: lat, testx: lng) { return 210 } else { return 371 }
                 } else {
-                  if poly[1928].contains(testy: lat, testx: lng) { return 371 } else { return 210 }
+                  if polygons[1928].contains(testy: lat, testx: lng) { return 371 } else { return 210 }
                 }
               } else {
-                if poly[1929].contains(testy: lat, testx: lng) { return 210 }
-                if poly[1930].contains(testy: lat, testx: lng) { return 210 } else { return 371 }
+                if polygons[1929].contains(testy: lat, testx: lng) { return 210 }
+                if polygons[1930].contains(testy: lat, testx: lng) { return 210 } else { return 371 }
               }
             } else {
-              if poly[1931].contains(testy: lat, testx: lng) { return 371 } else { return 210 }
+              if polygons[1931].contains(testy: lat, testx: lng) { return 371 } else { return 210 }
             }
           } else {
-            if poly[1932].contains(testy: lat, testx: lng) { return 210 } else { return 371 }
+            if polygons[1932].contains(testy: lat, testx: lng) { return 210 } else { return 371 }
           }
         } else {
           if lng < 73.202930 {
             if lat < 34.831987 {
               if lng < 70.883936 {
                 if lat < 33.006272 {
-                  if poly[1933].contains(testy: lat, testx: lng) { return 366 }
-                  if poly[1934].contains(testy: lat, testx: lng) { return 366 } else { return 210 }
+                  if polygons[1933].contains(testy: lat, testx: lng) { return 366 }
+                  if polygons[1934].contains(testy: lat, testx: lng) { return 366 } else { return 210 }
                 } else {
-                  if poly[1935].contains(testy: lat, testx: lng) { return 210 } else { return 366 }
+                  if polygons[1935].contains(testy: lat, testx: lng) { return 210 } else { return 366 }
                 }
               } else {
-                if poly[1936].contains(testy: lat, testx: lng) { return 366 } else { return 210 }
+                if polygons[1936].contains(testy: lat, testx: lng) { return 366 } else { return 210 }
               }
             } else {
               if lng < 70.883936 {
@@ -9628,20 +9628,20 @@ public extension TimeZone {
                   return 366
                 } else {
                   if lng < 69.724439 {
-                    if poly[1937].contains(testy: lat, testx: lng) { return 366 } else { return 208 }
+                    if polygons[1937].contains(testy: lat, testx: lng) { return 366 } else { return 208 }
                   } else {
-                    if poly[1938].contains(testy: lat, testx: lng) { return 366 } else { return 208 }
+                    if polygons[1938].contains(testy: lat, testx: lng) { return 366 } else { return 208 }
                   }
                 }
               } else {
                 if lat < 36.657702 {
-                  if poly[1939].contains(testy: lat, testx: lng) { return 366 } else { return 210 }
+                  if polygons[1939].contains(testy: lat, testx: lng) { return 366 } else { return 210 }
                 } else {
                   if lng < 72.043433 {
-                    if poly[1940].contains(testy: lat, testx: lng) { return 366 } else { return 208 }
+                    if polygons[1940].contains(testy: lat, testx: lng) { return 366 } else { return 208 }
                   } else {
-                    if poly[1941].contains(testy: lat, testx: lng) { return 208 }
-                    if poly[1942].contains(testy: lat, testx: lng) { return 210 } else { return 366 }
+                    if polygons[1941].contains(testy: lat, testx: lng) { return 208 }
+                    if polygons[1942].contains(testy: lat, testx: lng) { return 210 } else { return 366 }
                   }
                 }
               }
@@ -9650,12 +9650,12 @@ public extension TimeZone {
             if lat < 34.831987 {
               if lng < 75.521925 {
                 if lat < 33.006272 {
-                  if poly[1943].contains(testy: lat, testx: lng) { return 371 } else { return 210 }
+                  if polygons[1943].contains(testy: lat, testx: lng) { return 371 } else { return 210 }
                 } else {
-                  if poly[1944].contains(testy: lat, testx: lng) { return 371 } else { return 210 }
+                  if polygons[1944].contains(testy: lat, testx: lng) { return 371 } else { return 210 }
                 }
               } else {
-                if poly[1945].contains(testy: lat, testx: lng) { return 210 } else { return 371 }
+                if polygons[1945].contains(testy: lat, testx: lng) { return 210 } else { return 371 }
               }
             } else {
               if lng < 75.521925 {
@@ -9663,33 +9663,33 @@ public extension TimeZone {
                   return 210
                 } else {
                   if lng < 74.362428 {
-                    if poly[1946].contains(testy: lat, testx: lng) { return 208 }
-                    if poly[1947].contains(testy: lat, testx: lng) { return 210 } else { return 366 }
+                    if polygons[1946].contains(testy: lat, testx: lng) { return 208 }
+                    if polygons[1947].contains(testy: lat, testx: lng) { return 210 } else { return 366 }
                   } else {
                     if lat < 37.570560 {
                       if lng < 74.942176 {
                         if lat < 37.114131 {
-                          if poly[1948].contains(testy: lat, testx: lng) { return 4 }
-                          if poly[1949].contains(testy: lat, testx: lng) { return 366 } else { return 210 }
+                          if polygons[1948].contains(testy: lat, testx: lng) { return 4 }
+                          if polygons[1949].contains(testy: lat, testx: lng) { return 366 } else { return 210 }
                         } else {
-                          if poly[1950].contains(testy: lat, testx: lng) { return 208 }
-                          if poly[1951].contains(testy: lat, testx: lng) { return 366 } else { return 4 }
+                          if polygons[1950].contains(testy: lat, testx: lng) { return 208 }
+                          if polygons[1951].contains(testy: lat, testx: lng) { return 366 } else { return 4 }
                         }
                       } else {
-                        if poly[1952].contains(testy: lat, testx: lng) { return 208 }
-                        if poly[1953].contains(testy: lat, testx: lng) { return 210 } else { return 4 }
+                        if polygons[1952].contains(testy: lat, testx: lng) { return 208 }
+                        if polygons[1953].contains(testy: lat, testx: lng) { return 210 } else { return 4 }
                       }
                     } else {
-                      if poly[1954].contains(testy: lat, testx: lng) { return 208 } else { return 4 }
+                      if polygons[1954].contains(testy: lat, testx: lng) { return 208 } else { return 4 }
                     }
                   }
                 }
               } else {
                 if lat < 36.657702 {
-                  if poly[1955].contains(testy: lat, testx: lng) { return 4 }
-                  if poly[1956].contains(testy: lat, testx: lng) { return 371 } else { return 210 }
+                  if polygons[1955].contains(testy: lat, testx: lng) { return 4 }
+                  if polygons[1956].contains(testy: lat, testx: lng) { return 371 } else { return 210 }
                 } else {
-                  if poly[1957].contains(testy: lat, testx: lng) { return 210 } else { return 4 }
+                  if polygons[1957].contains(testy: lat, testx: lng) { return 210 } else { return 4 }
                 }
               }
             }
@@ -9700,45 +9700,45 @@ public extension TimeZone {
       if lat < 25.213472 {
         if lat < 23.874722 {
           if lng < 88.620415 {
-            if poly[1958].contains(testy: lat, testx: lng) { return 150 } else { return 371 }
+            if polygons[1958].contains(testy: lat, testx: lng) { return 150 } else { return 371 }
           } else {
-            if poly[1959].contains(testy: lat, testx: lng) { return 371 } else { return 150 }
+            if polygons[1959].contains(testy: lat, testx: lng) { return 371 } else { return 150 }
           }
         } else {
-          if poly[1960].contains(testy: lat, testx: lng) { return 150 } else { return 371 }
+          if polygons[1960].contains(testy: lat, testx: lng) { return 150 } else { return 371 }
         }
       } else {
         if lat < 31.848445 {
           if lng < 83.240298 {
             if lat < 28.530959 {
-              if poly[1961].contains(testy: lat, testx: lng) { return 268 } else { return 371 }
+              if polygons[1961].contains(testy: lat, testx: lng) { return 268 } else { return 371 }
             } else {
               if lng < 80.540609 {
                 if lat < 30.189702 {
-                  if poly[1962].contains(testy: lat, testx: lng) { return 268 } else { return 371 }
+                  if polygons[1962].contains(testy: lat, testx: lng) { return 268 } else { return 371 }
                 } else {
-                  if poly[1963].contains(testy: lat, testx: lng) { return 4 } else { return 371 }
+                  if polygons[1963].contains(testy: lat, testx: lng) { return 4 } else { return 371 }
                 }
               } else {
                 if lat < 30.189702 {
-                  if poly[1964].contains(testy: lat, testx: lng) { return 4 }
-                  if poly[1965].contains(testy: lat, testx: lng) { return 371 }
-                  if poly[1966].contains(testy: lat, testx: lng) { return 371 }
-                  if poly[1967].contains(testy: lat, testx: lng) { return 371 }
-                  if poly[1968].contains(testy: lat, testx: lng) { return 406 } else { return 268 }
+                  if polygons[1964].contains(testy: lat, testx: lng) { return 4 }
+                  if polygons[1965].contains(testy: lat, testx: lng) { return 371 }
+                  if polygons[1966].contains(testy: lat, testx: lng) { return 371 }
+                  if polygons[1967].contains(testy: lat, testx: lng) { return 371 }
+                  if polygons[1968].contains(testy: lat, testx: lng) { return 406 } else { return 268 }
                 } else {
                   if lng < 81.890454 {
-                    if poly[1969].contains(testy: lat, testx: lng) { return 268 }
-                    if poly[1970].contains(testy: lat, testx: lng) { return 268 }
-                    if poly[1971].contains(testy: lat, testx: lng) { return 268 }
-                    if poly[1972].contains(testy: lat, testx: lng) { return 371 } else { return 4 }
+                    if polygons[1969].contains(testy: lat, testx: lng) { return 268 }
+                    if polygons[1970].contains(testy: lat, testx: lng) { return 268 }
+                    if polygons[1971].contains(testy: lat, testx: lng) { return 268 }
+                    if polygons[1972].contains(testy: lat, testx: lng) { return 371 } else { return 4 }
                   } else {
                     if lat < 31.019073 {
-                      if poly[1973].contains(testy: lat, testx: lng) { return 4 }
-                      if poly[1974].contains(testy: lat, testx: lng) { return 268 } else { return 406 }
+                      if polygons[1973].contains(testy: lat, testx: lng) { return 4 }
+                      if polygons[1974].contains(testy: lat, testx: lng) { return 268 } else { return 406 }
                     } else {
-                      if poly[1975].contains(testy: lat, testx: lng) { return 406 }
-                      if poly[1976].contains(testy: lat, testx: lng) { return 406 } else { return 4 }
+                      if polygons[1975].contains(testy: lat, testx: lng) { return 406 }
+                      if polygons[1976].contains(testy: lat, testx: lng) { return 406 } else { return 4 }
                     }
                   }
                 }
@@ -9748,45 +9748,45 @@ public extension TimeZone {
             if lat < 28.530959 {
               if lng < 85.939988 {
                 if lat < 26.872216 {
-                  if poly[1977].contains(testy: lat, testx: lng) { return 371 } else { return 268 }
+                  if polygons[1977].contains(testy: lat, testx: lng) { return 371 } else { return 268 }
                 } else {
                   if lng < 84.590143 {
-                    if poly[1978].contains(testy: lat, testx: lng) { return 371 } else { return 268 }
+                    if polygons[1978].contains(testy: lat, testx: lng) { return 371 } else { return 268 }
                   } else {
-                    if poly[1979].contains(testy: lat, testx: lng) { return 371 }
-                    if poly[1980].contains(testy: lat, testx: lng) { return 371 }
-                    if poly[1981].contains(testy: lat, testx: lng) { return 371 }
-                    if poly[1982].contains(testy: lat, testx: lng) { return 406 } else { return 268 }
+                    if polygons[1979].contains(testy: lat, testx: lng) { return 371 }
+                    if polygons[1980].contains(testy: lat, testx: lng) { return 371 }
+                    if polygons[1981].contains(testy: lat, testx: lng) { return 371 }
+                    if polygons[1982].contains(testy: lat, testx: lng) { return 406 } else { return 268 }
                   }
                 }
               } else {
                 if lat < 26.872216 {
                   if lng < 87.289832 {
-                    if poly[1983].contains(testy: lat, testx: lng) { return 371 } else { return 268 }
+                    if polygons[1983].contains(testy: lat, testx: lng) { return 371 } else { return 268 }
                   } else {
                     if lat < 26.042844 {
-                      if poly[1984].contains(testy: lat, testx: lng) { return 150 } else { return 371 }
+                      if polygons[1984].contains(testy: lat, testx: lng) { return 150 } else { return 371 }
                     } else {
-                      if poly[1985].contains(testy: lat, testx: lng) { return 150 }
-                      if poly[1986].contains(testy: lat, testx: lng) { return 268 } else { return 371 }
+                      if polygons[1985].contains(testy: lat, testx: lng) { return 150 }
+                      if polygons[1986].contains(testy: lat, testx: lng) { return 268 } else { return 371 }
                     }
                   }
                 } else {
                   if lng < 87.289832 {
-                    if poly[1987].contains(testy: lat, testx: lng) { return 268 } else { return 406 }
+                    if polygons[1987].contains(testy: lat, testx: lng) { return 268 } else { return 406 }
                   } else {
                     if lat < 27.701587 {
-                      if poly[1988].contains(testy: lat, testx: lng) { return 371 } else { return 268 }
+                      if polygons[1988].contains(testy: lat, testx: lng) { return 371 } else { return 268 }
                     } else {
-                      if poly[1989].contains(testy: lat, testx: lng) { return 268 }
-                      if poly[1990].contains(testy: lat, testx: lng) { return 371 } else { return 406 }
+                      if polygons[1989].contains(testy: lat, testx: lng) { return 268 }
+                      if polygons[1990].contains(testy: lat, testx: lng) { return 371 } else { return 406 }
                     }
                   }
                 }
               }
             } else {
-              if poly[1991].contains(testy: lat, testx: lng) { return 4 }
-              if poly[1992].contains(testy: lat, testx: lng) { return 268 } else { return 406 }
+              if polygons[1991].contains(testy: lat, testx: lng) { return 4 }
+              if polygons[1992].contains(testy: lat, testx: lng) { return 268 } else { return 406 }
             }
           }
         } else {
@@ -9794,17 +9794,17 @@ public extension TimeZone {
             if lat < 35.165931 {
               if lng < 80.540609 {
                 if lat < 33.507188 {
-                  if poly[1993].contains(testy: lat, testx: lng) { return 371 } else { return 4 }
+                  if polygons[1993].contains(testy: lat, testx: lng) { return 371 } else { return 4 }
                 } else {
-                  if poly[1994].contains(testy: lat, testx: lng) { return 371 } else { return 4 }
+                  if polygons[1994].contains(testy: lat, testx: lng) { return 371 } else { return 4 }
                 }
               } else {
-                if poly[1995].contains(testy: lat, testx: lng) { return 406 }
-                if poly[1996].contains(testy: lat, testx: lng) { return 406 } else { return 4 }
+                if polygons[1995].contains(testy: lat, testx: lng) { return 406 }
+                if polygons[1996].contains(testy: lat, testx: lng) { return 406 } else { return 4 }
               }
             } else {
-              if poly[1997].contains(testy: lat, testx: lng) { return 371 }
-              if poly[1998].contains(testy: lat, testx: lng) { return 406 } else { return 4 }
+              if polygons[1997].contains(testy: lat, testx: lng) { return 371 }
+              if polygons[1998].contains(testy: lat, testx: lng) { return 406 } else { return 4 }
             }
           } else {
             return 406
@@ -9820,9 +9820,9 @@ public extension TimeZone {
         if lng < 89.429982 {
           if lng < 88.775749 {
             if lat < 23.983778 {
-              if poly[1999].contains(testy: lat, testx: lng) { return 150 } else { return 371 }
+              if polygons[1999].contains(testy: lat, testx: lng) { return 150 } else { return 371 }
             } else {
-              if poly[2000].contains(testy: lat, testx: lng) { return 371 } else { return 150 }
+              if polygons[2000].contains(testy: lat, testx: lng) { return 371 } else { return 150 }
             }
           } else {
             return 150
@@ -9831,7 +9831,7 @@ public extension TimeZone {
           if lng < 90.062531 {
             return 150
           } else {
-            if poly[2001].contains(testy: lat, testx: lng) { return 371 } else { return 150 }
+            if polygons[2001].contains(testy: lat, testx: lng) { return 371 } else { return 150 }
           }
         }
       } else {
@@ -9839,23 +9839,23 @@ public extension TimeZone {
           if lng < 90.563018 {
             if lng < 89.601347 {
               if lat < 25.664958 {
-                if poly[2002].contains(testy: lat, testx: lng) { return 371 } else { return 150 }
+                if polygons[2002].contains(testy: lat, testx: lng) { return 371 } else { return 150 }
               } else {
                 if lng < 89.120512 {
-                  if poly[2003].contains(testy: lat, testx: lng) { return 371 }
-                  if poly[2004].contains(testy: lat, testx: lng) { return 371 }
-                  if poly[2005].contains(testy: lat, testx: lng) { return 371 } else { return 150 }
+                  if polygons[2003].contains(testy: lat, testx: lng) { return 371 }
+                  if polygons[2004].contains(testy: lat, testx: lng) { return 371 }
+                  if polygons[2005].contains(testy: lat, testx: lng) { return 371 } else { return 150 }
                 } else {
-                  if poly[2006].contains(testy: lat, testx: lng) { return 371 } else { return 150 }
+                  if polygons[2006].contains(testy: lat, testx: lng) { return 371 } else { return 150 }
                 }
               }
             } else {
-              if poly[2007].contains(testy: lat, testx: lng) { return 371 }
-              if poly[2008].contains(testy: lat, testx: lng) { return 371 }
-              if poly[2009].contains(testy: lat, testx: lng) { return 371 } else { return 150 }
+              if polygons[2007].contains(testy: lat, testx: lng) { return 371 }
+              if polygons[2008].contains(testy: lat, testx: lng) { return 371 }
+              if polygons[2009].contains(testy: lat, testx: lng) { return 371 } else { return 150 }
             }
           } else {
-            if poly[2010].contains(testy: lat, testx: lng) { return 371 } else { return 150 }
+            if polygons[2010].contains(testy: lat, testx: lng) { return 371 } else { return 150 }
           }
         } else {
           if lat < 32.472694 {
@@ -9863,29 +9863,29 @@ public extension TimeZone {
               if lng < 90.563018 {
                 if lat < 27.964652 {
                   if lng < 89.601347 {
-                    if poly[2011].contains(testy: lat, testx: lng) { return 371 }
-                    if poly[2012].contains(testy: lat, testx: lng) { return 406 } else { return 62 }
+                    if polygons[2011].contains(testy: lat, testx: lng) { return 371 }
+                    if polygons[2012].contains(testy: lat, testx: lng) { return 406 } else { return 62 }
                   } else {
-                    if poly[2013].contains(testy: lat, testx: lng) { return 371 } else { return 62 }
+                    if polygons[2013].contains(testy: lat, testx: lng) { return 371 } else { return 62 }
                   }
                 } else {
-                  if poly[2014].contains(testy: lat, testx: lng) { return 62 }
-                  if poly[2015].contains(testy: lat, testx: lng) { return 371 } else { return 406 }
+                  if polygons[2014].contains(testy: lat, testx: lng) { return 62 }
+                  if polygons[2015].contains(testy: lat, testx: lng) { return 371 } else { return 406 }
                 }
               } else {
                 if lat < 27.964652 {
                   if lng < 91.524688 {
-                    if poly[2016].contains(testy: lat, testx: lng) { return 371 } else { return 62 }
+                    if polygons[2016].contains(testy: lat, testx: lng) { return 371 } else { return 62 }
                   } else {
                     if lat < 27.213312 {
-                      if poly[2017].contains(testy: lat, testx: lng) { return 62 } else { return 371 }
+                      if polygons[2017].contains(testy: lat, testx: lng) { return 62 } else { return 371 }
                     } else {
-                      if poly[2018].contains(testy: lat, testx: lng) { return 62 }
-                      if poly[2019].contains(testy: lat, testx: lng) { return 406 } else { return 371 }
+                      if polygons[2018].contains(testy: lat, testx: lng) { return 62 }
+                      if polygons[2019].contains(testy: lat, testx: lng) { return 406 } else { return 371 }
                     }
                   }
                 } else {
-                  if poly[2020].contains(testy: lat, testx: lng) { return 62 } else { return 406 }
+                  if polygons[2020].contains(testy: lat, testx: lng) { return 62 } else { return 406 }
                 }
               }
             } else {
@@ -9899,9 +9899,9 @@ public extension TimeZone {
     } else {
       if lng < 94.108883 {
         if lat < 24.079779 {
-          if poly[2021].contains(testy: lat, testx: lng) { return 40 } else { return 371 }
+          if polygons[2021].contains(testy: lat, testx: lng) { return 40 } else { return 371 }
         } else {
-          if poly[2022].contains(testy: lat, testx: lng) { return 406 } else { return 371 }
+          if polygons[2022].contains(testy: lat, testx: lng) { return 406 } else { return 371 }
         }
       } else {
         if lat < 31.176903 {
@@ -9909,61 +9909,61 @@ public extension TimeZone {
             if lat < 27.523645 {
               if lng < 96.857821 {
                 if lat < 25.697017 {
-                  if poly[2023].contains(testy: lat, testx: lng) { return 371 } else { return 40 }
+                  if polygons[2023].contains(testy: lat, testx: lng) { return 371 } else { return 40 }
                 } else {
-                  if poly[2024].contains(testy: lat, testx: lng) { return 40 } else { return 371 }
+                  if polygons[2024].contains(testy: lat, testx: lng) { return 40 } else { return 371 }
                 }
               } else {
                 if lat < 25.697017 {
                   if lng < 98.232291 {
-                    if poly[2025].contains(testy: lat, testx: lng) { return 403 } else { return 40 }
+                    if polygons[2025].contains(testy: lat, testx: lng) { return 403 } else { return 40 }
                   } else {
-                    if poly[2026].contains(testy: lat, testx: lng) { return 403 } else { return 40 }
+                    if polygons[2026].contains(testy: lat, testx: lng) { return 403 } else { return 40 }
                   }
                 } else {
-                  if poly[2027].contains(testy: lat, testx: lng) { return 371 }
-                  if poly[2028].contains(testy: lat, testx: lng) { return 403 } else { return 40 }
+                  if polygons[2027].contains(testy: lat, testx: lng) { return 371 }
+                  if polygons[2028].contains(testy: lat, testx: lng) { return 403 } else { return 40 }
                 }
               }
             } else {
               if lng < 96.857821 {
                 if lat < 29.350274 {
                   if lng < 95.483352 {
-                    if poly[2029].contains(testy: lat, testx: lng) { return 406 } else { return 371 }
+                    if polygons[2029].contains(testy: lat, testx: lng) { return 406 } else { return 371 }
                   } else {
                     if lat < 28.436960 {
-                      if poly[2030].contains(testy: lat, testx: lng) { return 406 }
-                      if poly[2031].contains(testy: lat, testx: lng) { return 406 } else { return 371 }
+                      if polygons[2030].contains(testy: lat, testx: lng) { return 406 }
+                      if polygons[2031].contains(testy: lat, testx: lng) { return 406 } else { return 371 }
                     } else {
-                      if poly[2032].contains(testy: lat, testx: lng) { return 371 }
-                      if poly[2033].contains(testy: lat, testx: lng) { return 371 } else { return 406 }
+                      if polygons[2032].contains(testy: lat, testx: lng) { return 371 }
+                      if polygons[2033].contains(testy: lat, testx: lng) { return 371 } else { return 406 }
                     }
                   }
                 } else {
-                  if poly[2034].contains(testy: lat, testx: lng) { return 371 } else { return 406 }
+                  if polygons[2034].contains(testy: lat, testx: lng) { return 371 } else { return 406 }
                 }
               } else {
                 if lat < 29.350274 {
                   if lng < 98.232291 {
                     if lat < 28.436960 {
                       if lng < 97.545056 {
-                        if poly[2035].contains(testy: lat, testx: lng) { return 371 }
-                        if poly[2036].contains(testy: lat, testx: lng) { return 406 } else { return 40 }
+                        if polygons[2035].contains(testy: lat, testx: lng) { return 371 }
+                        if polygons[2036].contains(testy: lat, testx: lng) { return 406 } else { return 40 }
                       } else {
-                        if poly[2037].contains(testy: lat, testx: lng) { return 403 }
-                        if poly[2038].contains(testy: lat, testx: lng) { return 403 }
-                        if poly[2039].contains(testy: lat, testx: lng) { return 406 } else { return 40 }
+                        if polygons[2037].contains(testy: lat, testx: lng) { return 403 }
+                        if polygons[2038].contains(testy: lat, testx: lng) { return 403 }
+                        if polygons[2039].contains(testy: lat, testx: lng) { return 406 } else { return 40 }
                       }
                     } else {
-                      if poly[2040].contains(testy: lat, testx: lng) { return 40 } else { return 406 }
+                      if polygons[2040].contains(testy: lat, testx: lng) { return 40 } else { return 406 }
                     }
                   } else {
-                    if poly[2041].contains(testy: lat, testx: lng) { return 40 }
-                    if poly[2042].contains(testy: lat, testx: lng) { return 406 }
-                    if poly[2043].contains(testy: lat, testx: lng) { return 406 } else { return 403 }
+                    if polygons[2041].contains(testy: lat, testx: lng) { return 40 }
+                    if polygons[2042].contains(testy: lat, testx: lng) { return 406 }
+                    if polygons[2043].contains(testy: lat, testx: lng) { return 406 } else { return 403 }
                   }
                 } else {
-                  if poly[2044].contains(testy: lat, testx: lng) { return 406 } else { return 403 }
+                  if polygons[2044].contains(testy: lat, testx: lng) { return 406 } else { return 403 }
                 }
               }
             }
@@ -9977,12 +9977,12 @@ public extension TimeZone {
                 return 406
               } else {
                 if lat < 33.003531 {
-                  if poly[2045].contains(testy: lat, testx: lng) { return 406 } else { return 403 }
+                  if polygons[2045].contains(testy: lat, testx: lng) { return 406 } else { return 403 }
                 } else {
                   if lng < 98.232291 {
-                    if poly[2046].contains(testy: lat, testx: lng) { return 403 } else { return 406 }
+                    if polygons[2046].contains(testy: lat, testx: lng) { return 403 } else { return 406 }
                   } else {
-                    if poly[2047].contains(testy: lat, testx: lng) { return 406 } else { return 403 }
+                    if polygons[2047].contains(testy: lat, testx: lng) { return 406 } else { return 403 }
                   }
                 }
               }
@@ -9991,15 +9991,15 @@ public extension TimeZone {
                 return 406
               } else {
                 if lat < 36.656789 {
-                  if poly[2048].contains(testy: lat, testx: lng) { return 406 } else { return 403 }
+                  if polygons[2048].contains(testy: lat, testx: lng) { return 406 } else { return 403 }
                 } else {
-                  if poly[2049].contains(testy: lat, testx: lng) { return 406 } else { return 403 }
+                  if polygons[2049].contains(testy: lat, testx: lng) { return 406 } else { return 403 }
                 }
               }
             }
           } else {
-            if poly[2050].contains(testy: lat, testx: lng) { return 406 }
-            if poly[2051].contains(testy: lat, testx: lng) { return 406 } else { return 403 }
+            if polygons[2050].contains(testy: lat, testx: lng) { return 406 }
+            if polygons[2051].contains(testy: lat, testx: lng) { return 406 } else { return 403 }
           }
         }
       }
@@ -10015,14 +10015,14 @@ public extension TimeZone {
               return 347
             } else {
               if lng < 70.433002 {
-                if poly[2052].contains(testy: lat, testx: lng) { return 178 }
-                if poly[2053].contains(testy: lat, testx: lng) { return 379 } else { return 347 }
+                if polygons[2052].contains(testy: lat, testx: lng) { return 178 }
+                if polygons[2053].contains(testy: lat, testx: lng) { return 379 } else { return 347 }
               } else {
                 if lat < 54.448383 {
-                  if poly[2054].contains(testy: lat, testx: lng) { return 379 } else { return 347 }
+                  if polygons[2054].contains(testy: lat, testx: lng) { return 379 } else { return 347 }
                 } else {
-                  if poly[2055].contains(testy: lat, testx: lng) { return 178 }
-                  if poly[2056].contains(testy: lat, testx: lng) { return 347 } else { return 379 }
+                  if polygons[2055].contains(testy: lat, testx: lng) { return 178 }
+                  if polygons[2056].contains(testy: lat, testx: lng) { return 347 } else { return 379 }
                 }
               }
             }
@@ -10033,20 +10033,20 @@ public extension TimeZone {
               if lng < 74.169125 {
                 if lat < 54.448383 {
                   if lng < 73.235094 {
-                    if poly[2057].contains(testy: lat, testx: lng) { return 379 } else { return 347 }
+                    if polygons[2057].contains(testy: lat, testx: lng) { return 379 } else { return 347 }
                   } else {
-                    if poly[2058].contains(testy: lat, testx: lng) { return 379 } else { return 347 }
+                    if polygons[2058].contains(testy: lat, testx: lng) { return 379 } else { return 347 }
                   }
                 } else {
                   return 379
                 }
               } else {
                 if lat < 54.448383 {
-                  if poly[2059].contains(testy: lat, testx: lng) { return 95 }
-                  if poly[2060].contains(testy: lat, testx: lng) { return 379 } else { return 347 }
+                  if polygons[2059].contains(testy: lat, testx: lng) { return 95 }
+                  if polygons[2060].contains(testy: lat, testx: lng) { return 379 } else { return 347 }
                 } else {
-                  if poly[2061].contains(testy: lat, testx: lng) { return 379 }
-                  if poly[2062].contains(testy: lat, testx: lng) { return 379 } else { return 95 }
+                  if polygons[2061].contains(testy: lat, testx: lng) { return 379 }
+                  if polygons[2062].contains(testy: lat, testx: lng) { return 379 } else { return 95 }
                 }
               }
             }
@@ -10055,29 +10055,29 @@ public extension TimeZone {
           if lng < 72.301064 {
             if lat < 58.408852 {
               if lng < 70.433002 {
-                if poly[2063].contains(testy: lat, testx: lng) { return 379 }
-                if poly[2064].contains(testy: lat, testx: lng) { return 379 }
-                if poly[2065].contains(testy: lat, testx: lng) { return 379 } else { return 178 }
+                if polygons[2063].contains(testy: lat, testx: lng) { return 379 }
+                if polygons[2064].contains(testy: lat, testx: lng) { return 379 }
+                if polygons[2065].contains(testy: lat, testx: lng) { return 379 } else { return 178 }
               } else {
                 if lat < 57.088696 {
-                  if poly[2066].contains(testy: lat, testx: lng) { return 379 } else { return 178 }
+                  if polygons[2066].contains(testy: lat, testx: lng) { return 379 } else { return 178 }
                 } else {
-                  if poly[2067].contains(testy: lat, testx: lng) { return 379 } else { return 178 }
+                  if polygons[2067].contains(testy: lat, testx: lng) { return 379 } else { return 178 }
                 }
               }
             } else {
-              if poly[2068].contains(testy: lat, testx: lng) { return 379 } else { return 178 }
+              if polygons[2068].contains(testy: lat, testx: lng) { return 379 } else { return 178 }
             }
           } else {
             if lat < 58.408852 {
-              if poly[2069].contains(testy: lat, testx: lng) { return 95 }
-              if poly[2070].contains(testy: lat, testx: lng) { return 95 }
-              if poly[2071].contains(testy: lat, testx: lng) { return 95 }
-              if poly[2072].contains(testy: lat, testx: lng) { return 95 }
-              if poly[2073].contains(testy: lat, testx: lng) { return 178 } else { return 379 }
+              if polygons[2069].contains(testy: lat, testx: lng) { return 95 }
+              if polygons[2070].contains(testy: lat, testx: lng) { return 95 }
+              if polygons[2071].contains(testy: lat, testx: lng) { return 95 }
+              if polygons[2072].contains(testy: lat, testx: lng) { return 95 }
+              if polygons[2073].contains(testy: lat, testx: lng) { return 178 } else { return 379 }
             } else {
-              if poly[2074].contains(testy: lat, testx: lng) { return 95 }
-              if poly[2075].contains(testy: lat, testx: lng) { return 379 } else { return 178 }
+              if polygons[2074].contains(testy: lat, testx: lng) { return 95 }
+              if polygons[2075].contains(testy: lat, testx: lng) { return 379 } else { return 178 }
             }
           }
         }
@@ -10085,41 +10085,41 @@ public extension TimeZone {
         if lat < 55.768539 {
           if lng < 79.773308 {
             if lat < 53.128227 {
-              if poly[2076].contains(testy: lat, testx: lng) { return 379 } else { return 347 }
+              if polygons[2076].contains(testy: lat, testx: lng) { return 379 } else { return 347 }
             } else {
               if lng < 77.905247 {
-                if poly[2077].contains(testy: lat, testx: lng) { return 347 }
-                if poly[2078].contains(testy: lat, testx: lng) { return 379 } else { return 95 }
+                if polygons[2077].contains(testy: lat, testx: lng) { return 347 }
+                if polygons[2078].contains(testy: lat, testx: lng) { return 379 } else { return 95 }
               } else {
-                if poly[2079].contains(testy: lat, testx: lng) { return 95 }
-                if poly[2080].contains(testy: lat, testx: lng) { return 347 } else { return 379 }
+                if polygons[2079].contains(testy: lat, testx: lng) { return 95 }
+                if polygons[2080].contains(testy: lat, testx: lng) { return 347 } else { return 379 }
               }
             }
           } else {
             if lat < 53.128227 {
               if lng < 81.641369 {
-                if poly[2081].contains(testy: lat, testx: lng) { return 379 } else { return 347 }
+                if polygons[2081].contains(testy: lat, testx: lng) { return 379 } else { return 347 }
               } else {
-                if poly[2082].contains(testy: lat, testx: lng) { return 379 } else { return 347 }
+                if polygons[2082].contains(testy: lat, testx: lng) { return 379 } else { return 347 }
               }
             } else {
               if lng < 81.641369 {
-                if poly[2083].contains(testy: lat, testx: lng) { return 379 } else { return 95 }
+                if polygons[2083].contains(testy: lat, testx: lng) { return 379 } else { return 95 }
               } else {
-                if poly[2084].contains(testy: lat, testx: lng) { return 379 } else { return 95 }
+                if polygons[2084].contains(testy: lat, testx: lng) { return 379 } else { return 95 }
               }
             }
           }
         } else {
           if lng < 79.773308 {
             if lat < 58.408852 {
-              if poly[2085].contains(testy: lat, testx: lng) { return 379 }
-              if poly[2086].contains(testy: lat, testx: lng) { return 379 } else { return 95 }
+              if polygons[2085].contains(testy: lat, testx: lng) { return 379 }
+              if polygons[2086].contains(testy: lat, testx: lng) { return 379 } else { return 95 }
             } else {
-              if poly[2087].contains(testy: lat, testx: lng) { return 178 } else { return 95 }
+              if polygons[2087].contains(testy: lat, testx: lng) { return 178 } else { return 95 }
             }
           } else {
-            if poly[2088].contains(testy: lat, testx: lng) { return 178 } else { return 95 }
+            if polygons[2088].contains(testy: lat, testx: lng) { return 178 } else { return 95 }
           }
         }
       }
@@ -10127,87 +10127,87 @@ public extension TimeZone {
       if lat < 50.955069 {
         if lng < 84.233223 {
           if lat < 50.515362 {
-            if poly[2089].contains(testy: lat, testx: lng) { return 379 } else { return 347 }
+            if polygons[2089].contains(testy: lat, testx: lng) { return 379 } else { return 347 }
           } else {
-            if poly[2090].contains(testy: lat, testx: lng) { return 379 } else { return 347 }
+            if polygons[2090].contains(testy: lat, testx: lng) { return 379 } else { return 347 }
           }
         } else {
-          if poly[2091].contains(testy: lat, testx: lng) { return 379 } else { return 289 }
+          if polygons[2091].contains(testy: lat, testx: lng) { return 379 } else { return 289 }
         }
       } else {
         if lat < 56.002116 {
           if lng < 87.293533 {
             if lat < 53.478593 {
-              if poly[2092].contains(testy: lat, testx: lng) { return 87 }
-              if poly[2093].contains(testy: lat, testx: lng) { return 87 } else { return 379 }
+              if polygons[2092].contains(testy: lat, testx: lng) { return 87 }
+              if polygons[2093].contains(testy: lat, testx: lng) { return 87 } else { return 379 }
             } else {
               if lng < 85.401482 {
                 if lat < 54.740354 {
-                  if poly[2094].contains(testy: lat, testx: lng) { return 87 }
-                  if poly[2095].contains(testy: lat, testx: lng) { return 379 } else { return 95 }
+                  if polygons[2094].contains(testy: lat, testx: lng) { return 87 }
+                  if polygons[2095].contains(testy: lat, testx: lng) { return 379 } else { return 95 }
                 } else {
-                  if poly[2096].contains(testy: lat, testx: lng) { return 95 } else { return 87 }
+                  if polygons[2096].contains(testy: lat, testx: lng) { return 95 } else { return 87 }
                 }
               } else {
-                if poly[2097].contains(testy: lat, testx: lng) { return 379 }
-                if poly[2098].contains(testy: lat, testx: lng) { return 379 } else { return 87 }
+                if polygons[2097].contains(testy: lat, testx: lng) { return 379 }
+                if polygons[2098].contains(testy: lat, testx: lng) { return 379 } else { return 87 }
               }
             }
           } else {
             if lat < 53.478593 {
               if lng < 89.185585 {
                 if lat < 52.216831 {
-                  if poly[2099].contains(testy: lat, testx: lng) { return 87 }
-                  if poly[2100].contains(testy: lat, testx: lng) { return 289 } else { return 379 }
+                  if polygons[2099].contains(testy: lat, testx: lng) { return 87 }
+                  if polygons[2100].contains(testy: lat, testx: lng) { return 289 } else { return 379 }
                 } else {
-                  if poly[2101].contains(testy: lat, testx: lng) { return 289 }
-                  if poly[2102].contains(testy: lat, testx: lng) { return 289 }
-                  if poly[2103].contains(testy: lat, testx: lng) { return 379 } else { return 87 }
+                  if polygons[2101].contains(testy: lat, testx: lng) { return 289 }
+                  if polygons[2102].contains(testy: lat, testx: lng) { return 289 }
+                  if polygons[2103].contains(testy: lat, testx: lng) { return 379 } else { return 87 }
                 }
               } else {
-                if poly[2104].contains(testy: lat, testx: lng) { return 87 }
-                if poly[2105].contains(testy: lat, testx: lng) { return 379 } else { return 289 }
+                if polygons[2104].contains(testy: lat, testx: lng) { return 87 }
+                if polygons[2105].contains(testy: lat, testx: lng) { return 379 } else { return 289 }
               }
             } else {
               if lng < 89.185585 {
                 if lat < 54.740354 {
-                  if poly[2106].contains(testy: lat, testx: lng) { return 87 } else { return 289 }
+                  if polygons[2106].contains(testy: lat, testx: lng) { return 87 } else { return 289 }
                 } else {
-                  if poly[2107].contains(testy: lat, testx: lng) { return 289 } else { return 87 }
+                  if polygons[2107].contains(testy: lat, testx: lng) { return 289 } else { return 87 }
                 }
               } else {
-                if poly[2108].contains(testy: lat, testx: lng) { return 87 }
-                if poly[2109].contains(testy: lat, testx: lng) { return 87 }
-                if poly[2110].contains(testy: lat, testx: lng) { return 87 }
-                if poly[2111].contains(testy: lat, testx: lng) { return 87 }
-                if poly[2112].contains(testy: lat, testx: lng) { return 87 } else { return 289 }
+                if polygons[2108].contains(testy: lat, testx: lng) { return 87 }
+                if polygons[2109].contains(testy: lat, testx: lng) { return 87 }
+                if polygons[2110].contains(testy: lat, testx: lng) { return 87 }
+                if polygons[2111].contains(testy: lat, testx: lng) { return 87 }
+                if polygons[2112].contains(testy: lat, testx: lng) { return 87 } else { return 289 }
               }
             }
           }
         } else {
           if lng < 87.293533 {
             if lat < 58.525640 {
-              if poly[2113].contains(testy: lat, testx: lng) { return 87 } else { return 95 }
+              if polygons[2113].contains(testy: lat, testx: lng) { return 87 } else { return 95 }
             } else {
-              if poly[2114].contains(testy: lat, testx: lng) { return 178 }
-              if poly[2115].contains(testy: lat, testx: lng) { return 289 } else { return 95 }
+              if polygons[2114].contains(testy: lat, testx: lng) { return 178 }
+              if polygons[2115].contains(testy: lat, testx: lng) { return 289 } else { return 95 }
             }
           } else {
             if lat < 58.525640 {
               if lng < 89.185585 {
                 if lat < 57.263878 {
-                  if poly[2116].contains(testy: lat, testx: lng) { return 95 }
-                  if poly[2117].contains(testy: lat, testx: lng) { return 289 } else { return 87 }
+                  if polygons[2116].contains(testy: lat, testx: lng) { return 95 }
+                  if polygons[2117].contains(testy: lat, testx: lng) { return 289 } else { return 87 }
                 } else {
-                  if poly[2118].contains(testy: lat, testx: lng) { return 289 }
-                  if poly[2119].contains(testy: lat, testx: lng) { return 289 } else { return 95 }
+                  if polygons[2118].contains(testy: lat, testx: lng) { return 289 }
+                  if polygons[2119].contains(testy: lat, testx: lng) { return 289 } else { return 95 }
                 }
               } else {
-                if poly[2120].contains(testy: lat, testx: lng) { return 87 }
-                if poly[2121].contains(testy: lat, testx: lng) { return 95 } else { return 289 }
+                if polygons[2120].contains(testy: lat, testx: lng) { return 87 }
+                if polygons[2121].contains(testy: lat, testx: lng) { return 95 } else { return 289 }
               }
             } else {
-              if poly[2122].contains(testy: lat, testx: lng) { return 95 } else { return 289 }
+              if polygons[2122].contains(testy: lat, testx: lng) { return 95 } else { return 289 }
             }
           }
         }
@@ -10219,12 +10219,12 @@ public extension TimeZone {
     if lng < 81.689583 {
       if lng < 69.014221 {
         if lat < 40.080223 {
-          if poly[2123].contains(testy: lat, testx: lng) { return 246 } else { return 208 }
+          if polygons[2123].contains(testy: lat, testx: lng) { return 246 } else { return 208 }
         } else {
           if lat < 40.220528 {
-            if poly[2124].contains(testy: lat, testx: lng) { return 208 } else { return 246 }
+            if polygons[2124].contains(testy: lat, testx: lng) { return 208 } else { return 246 }
           } else {
-            if poly[2125].contains(testy: lat, testx: lng) { return 347 } else { return 246 }
+            if polygons[2125].contains(testy: lat, testx: lng) { return 347 } else { return 246 }
           }
         }
       } else {
@@ -10232,41 +10232,41 @@ public extension TimeZone {
           if lat < 41.042252 {
             if lng < 70.738670 {
               if lat < 39.902557 {
-                if poly[2126].contains(testy: lat, testx: lng) { return 230 }
-                if poly[2127].contains(testy: lat, testx: lng) { return 230 } else { return 208 }
+                if polygons[2126].contains(testy: lat, testx: lng) { return 230 }
+                if polygons[2127].contains(testy: lat, testx: lng) { return 230 } else { return 208 }
               } else {
                 if lng < 69.876446 {
-                  if poly[2128].contains(testy: lat, testx: lng) { return 230 }
-                  if poly[2129].contains(testy: lat, testx: lng) { return 230 }
-                  if poly[2130].contains(testy: lat, testx: lng) { return 246 } else { return 208 }
+                  if polygons[2128].contains(testy: lat, testx: lng) { return 230 }
+                  if polygons[2129].contains(testy: lat, testx: lng) { return 230 }
+                  if polygons[2130].contains(testy: lat, testx: lng) { return 246 } else { return 208 }
                 } else {
-                  if poly[2131].contains(testy: lat, testx: lng) { return 230 }
-                  if poly[2132].contains(testy: lat, testx: lng) { return 246 }
-                  if poly[2133].contains(testy: lat, testx: lng) { return 246 } else { return 208 }
+                  if polygons[2131].contains(testy: lat, testx: lng) { return 230 }
+                  if polygons[2132].contains(testy: lat, testx: lng) { return 246 }
+                  if polygons[2133].contains(testy: lat, testx: lng) { return 246 } else { return 208 }
                 }
               }
             } else {
               if lat < 40.228500 {
                 if lng < 70.971222 {
                   if lat < 39.492379 {
-                    if poly[2134].contains(testy: lat, testx: lng) { return 230 } else { return 208 }
+                    if polygons[2134].contains(testy: lat, testx: lng) { return 230 } else { return 208 }
                   } else {
-                    if poly[2135].contains(testy: lat, testx: lng) { return 208 }
-                    if poly[2136].contains(testy: lat, testx: lng) { return 246 } else { return 230 }
+                    if polygons[2135].contains(testy: lat, testx: lng) { return 208 }
+                    if polygons[2136].contains(testy: lat, testx: lng) { return 246 } else { return 230 }
                   }
                 } else {
                   if lat < 39.613609 {
                     if lng < 71.498947 {
-                      if poly[2137].contains(testy: lat, testx: lng) { return 230 } else { return 208 }
+                      if polygons[2137].contains(testy: lat, testx: lng) { return 230 } else { return 208 }
                     } else {
-                      if poly[2138].contains(testy: lat, testx: lng) { return 230 } else { return 208 }
+                      if polygons[2138].contains(testy: lat, testx: lng) { return 230 } else { return 208 }
                     }
                   } else {
                     if lng < 71.229332 {
-                      if poly[2139].contains(testy: lat, testx: lng) { return 246 } else { return 230 }
+                      if polygons[2139].contains(testy: lat, testx: lng) { return 246 } else { return 230 }
                     } else {
-                      if poly[2140].contains(testy: lat, testx: lng) { return 246 }
-                      if poly[2141].contains(testy: lat, testx: lng) { return 246 } else { return 230 }
+                      if polygons[2140].contains(testy: lat, testx: lng) { return 246 }
+                      if polygons[2141].contains(testy: lat, testx: lng) { return 246 } else { return 230 }
                     }
                   }
                 }
@@ -10274,19 +10274,19 @@ public extension TimeZone {
                 if lng < 71.664379 {
                   if lng < 70.789665 {
                     if lat < 40.725140 {
-                      if poly[2142].contains(testy: lat, testx: lng) { return 208 } else { return 246 }
+                      if polygons[2142].contains(testy: lat, testx: lng) { return 208 } else { return 246 }
                     } else {
-                      if poly[2143].contains(testy: lat, testx: lng) { return 208 } else { return 246 }
+                      if polygons[2143].contains(testy: lat, testx: lng) { return 208 } else { return 246 }
                     }
                   } else {
                     if lng < 71.491906 {
-                      if poly[2144].contains(testy: lat, testx: lng) { return 230 } else { return 246 }
+                      if polygons[2144].contains(testy: lat, testx: lng) { return 230 } else { return 246 }
                     } else {
-                      if poly[2145].contains(testy: lat, testx: lng) { return 230 } else { return 246 }
+                      if polygons[2145].contains(testy: lat, testx: lng) { return 230 } else { return 246 }
                     }
                   }
                 } else {
-                  if poly[2146].contains(testy: lat, testx: lng) { return 246 } else { return 230 }
+                  if polygons[2146].contains(testy: lat, testx: lng) { return 246 } else { return 230 }
                 }
               }
             }
@@ -10295,25 +10295,25 @@ public extension TimeZone {
               if lng < 71.073250 {
                 if lat < 42.123348 {
                   if lng < 70.043736 {
-                    if poly[2147].contains(testy: lat, testx: lng) { return 246 } else { return 347 }
+                    if polygons[2147].contains(testy: lat, testx: lng) { return 246 } else { return 347 }
                   } else {
-                    if poly[2148].contains(testy: lat, testx: lng) { return 230 }
-                    if poly[2149].contains(testy: lat, testx: lng) { return 347 }
-                    if poly[2150].contains(testy: lat, testx: lng) { return 347 } else { return 246 }
+                    if polygons[2148].contains(testy: lat, testx: lng) { return 230 }
+                    if polygons[2149].contains(testy: lat, testx: lng) { return 347 }
+                    if polygons[2150].contains(testy: lat, testx: lng) { return 347 } else { return 246 }
                   }
                 } else {
-                  if poly[2151].contains(testy: lat, testx: lng) { return 230 }
-                  if poly[2152].contains(testy: lat, testx: lng) { return 230 }
-                  if poly[2153].contains(testy: lat, testx: lng) { return 246 }
-                  if poly[2154].contains(testy: lat, testx: lng) { return 246 } else { return 347 }
+                  if polygons[2151].contains(testy: lat, testx: lng) { return 230 }
+                  if polygons[2152].contains(testy: lat, testx: lng) { return 230 }
+                  if polygons[2153].contains(testy: lat, testx: lng) { return 246 }
+                  if polygons[2154].contains(testy: lat, testx: lng) { return 246 } else { return 347 }
                 }
               } else {
                 if lat < 42.123348 {
-                  if poly[2155].contains(testy: lat, testx: lng) { return 230 } else { return 246 }
+                  if polygons[2155].contains(testy: lat, testx: lng) { return 230 } else { return 246 }
                 } else {
-                  if poly[2156].contains(testy: lat, testx: lng) { return 246 }
-                  if poly[2157].contains(testy: lat, testx: lng) { return 347 }
-                  if poly[2158].contains(testy: lat, testx: lng) { return 347 } else { return 230 }
+                  if polygons[2156].contains(testy: lat, testx: lng) { return 246 }
+                  if polygons[2157].contains(testy: lat, testx: lng) { return 347 }
+                  if polygons[2158].contains(testy: lat, testx: lng) { return 347 } else { return 230 }
                 }
               }
             } else {
@@ -10326,37 +10326,37 @@ public extension TimeZone {
               if lng < 75.271605 {
                 if lat < 40.204223 {
                   if lng < 74.201941 {
-                    if poly[2159].contains(testy: lat, testx: lng) { return 208 }
-                    if poly[2160].contains(testy: lat, testx: lng) { return 230 } else { return 4 }
+                    if polygons[2159].contains(testy: lat, testx: lng) { return 208 }
+                    if polygons[2160].contains(testy: lat, testx: lng) { return 230 } else { return 4 }
                   } else {
-                    if poly[2161].contains(testy: lat, testx: lng) { return 208 }
-                    if poly[2162].contains(testy: lat, testx: lng) { return 230 } else { return 4 }
+                    if polygons[2161].contains(testy: lat, testx: lng) { return 208 }
+                    if polygons[2162].contains(testy: lat, testx: lng) { return 230 } else { return 4 }
                   }
                 } else {
-                  if poly[2163].contains(testy: lat, testx: lng) { return 4 } else { return 230 }
+                  if polygons[2163].contains(testy: lat, testx: lng) { return 4 } else { return 230 }
                 }
               } else {
-                if poly[2164].contains(testy: lat, testx: lng) { return 230 } else { return 4 }
+                if polygons[2164].contains(testy: lat, testx: lng) { return 230 } else { return 4 }
               }
             } else {
-              if poly[2165].contains(testy: lat, testx: lng) { return 347 } else { return 230 }
+              if polygons[2165].contains(testy: lat, testx: lng) { return 347 } else { return 230 }
             }
           } else {
             if lat < 41.925028 {
-              if poly[2166].contains(testy: lat, testx: lng) { return 230 } else { return 4 }
+              if polygons[2166].contains(testy: lat, testx: lng) { return 230 } else { return 4 }
             } else {
               if lng < 79.550257 {
-                if poly[2167].contains(testy: lat, testx: lng) { return 347 } else { return 230 }
+                if polygons[2167].contains(testy: lat, testx: lng) { return 347 } else { return 230 }
               } else {
                 if lat < 43.645833 {
                   if lng < 80.619920 {
-                    if poly[2168].contains(testy: lat, testx: lng) { return 4 }
-                    if poly[2169].contains(testy: lat, testx: lng) { return 230 } else { return 347 }
+                    if polygons[2168].contains(testy: lat, testx: lng) { return 4 }
+                    if polygons[2169].contains(testy: lat, testx: lng) { return 230 } else { return 347 }
                   } else {
-                    if poly[2170].contains(testy: lat, testx: lng) { return 347 } else { return 4 }
+                    if polygons[2170].contains(testy: lat, testx: lng) { return 347 } else { return 4 }
                   }
                 } else {
-                  if poly[2171].contains(testy: lat, testx: lng) { return 4 } else { return 347 }
+                  if polygons[2171].contains(testy: lat, testx: lng) { return 4 } else { return 347 }
                 }
               }
             }
@@ -10366,41 +10366,41 @@ public extension TimeZone {
     } else {
       if lng < 84.960781 {
         if lat < 41.925028 {
-          if poly[2172].contains(testy: lat, testx: lng) { return 406 } else { return 4 }
+          if polygons[2172].contains(testy: lat, testx: lng) { return 406 } else { return 4 }
         } else {
           if lat < 43.645833 {
             if lng < 83.325182 {
-              if poly[2173].contains(testy: lat, testx: lng) { return 406 }
-              if poly[2174].contains(testy: lat, testx: lng) { return 406 } else { return 4 }
+              if polygons[2173].contains(testy: lat, testx: lng) { return 406 }
+              if polygons[2174].contains(testy: lat, testx: lng) { return 406 } else { return 4 }
             } else {
-              if poly[2175].contains(testy: lat, testx: lng) { return 4 }
-              if poly[2176].contains(testy: lat, testx: lng) { return 4 } else { return 406 }
+              if polygons[2175].contains(testy: lat, testx: lng) { return 4 }
+              if polygons[2176].contains(testy: lat, testx: lng) { return 4 } else { return 406 }
             }
           } else {
             if lng < 83.325182 {
-              if poly[2177].contains(testy: lat, testx: lng) { return 347 }
-              if poly[2178].contains(testy: lat, testx: lng) { return 406 }
-              if poly[2179].contains(testy: lat, testx: lng) { return 406 }
-              if poly[2180].contains(testy: lat, testx: lng) { return 406 } else { return 4 }
+              if polygons[2177].contains(testy: lat, testx: lng) { return 347 }
+              if polygons[2178].contains(testy: lat, testx: lng) { return 406 }
+              if polygons[2179].contains(testy: lat, testx: lng) { return 406 }
+              if polygons[2180].contains(testy: lat, testx: lng) { return 406 } else { return 4 }
             } else {
-              if poly[2181].contains(testy: lat, testx: lng) { return 4 } else { return 406 }
+              if polygons[2181].contains(testy: lat, testx: lng) { return 4 } else { return 406 }
             }
           }
         }
       } else {
         if lng < 95.032709 {
-          if poly[2182].contains(testy: lat, testx: lng) { return 121 } else { return 406 }
+          if polygons[2182].contains(testy: lat, testx: lng) { return 121 } else { return 406 }
         } else {
           if lng < 100.068673 {
             if lat < 41.925028 {
-              if poly[2183].contains(testy: lat, testx: lng) { return 406 } else { return 403 }
+              if polygons[2183].contains(testy: lat, testx: lng) { return 406 } else { return 403 }
             } else {
-              if poly[2184].contains(testy: lat, testx: lng) { return 123 }
-              if poly[2185].contains(testy: lat, testx: lng) { return 403 }
-              if poly[2186].contains(testy: lat, testx: lng) { return 406 } else { return 121 }
+              if polygons[2184].contains(testy: lat, testx: lng) { return 123 }
+              if polygons[2185].contains(testy: lat, testx: lng) { return 403 }
+              if polygons[2186].contains(testy: lat, testx: lng) { return 406 } else { return 121 }
             }
           } else {
-            if poly[2187].contains(testy: lat, testx: lng) { return 403 } else { return 123 }
+            if polygons[2187].contains(testy: lat, testx: lng) { return 403 } else { return 123 }
           }
         }
       }
@@ -10414,8 +10414,8 @@ public extension TimeZone {
           if lng < 68.778862 {
             return 371
           } else {
-            if poly[2188].contains(testy: lat, testx: lng) { return 371 }
-            if poly[2189].contains(testy: lat, testx: lng) { return 371 } else { return 150 }
+            if polygons[2188].contains(testy: lat, testx: lng) { return 371 }
+            if polygons[2189].contains(testy: lat, testx: lng) { return 371 } else { return 150 }
           }
         } else {
           return 150
@@ -10427,25 +10427,25 @@ public extension TimeZone {
           if lng < 93.437553 {
             if lng < 92.333679 {
               if lng < 91.259092 {
-                if poly[2190].contains(testy: lat, testx: lng) { return 371 } else { return 150 }
+                if polygons[2190].contains(testy: lat, testx: lng) { return 371 } else { return 150 }
               } else {
-                if poly[2191].contains(testy: lat, testx: lng) { return 150 } else { return 371 }
+                if polygons[2191].contains(testy: lat, testx: lng) { return 150 } else { return 371 }
               }
             } else {
               if lat < 23.680471 {
-                if poly[2192].contains(testy: lat, testx: lng) { return 40 } else { return 371 }
+                if polygons[2192].contains(testy: lat, testx: lng) { return 40 } else { return 371 }
               } else {
-                if poly[2193].contains(testy: lat, testx: lng) { return 40 } else { return 371 }
+                if polygons[2193].contains(testy: lat, testx: lng) { return 40 } else { return 371 }
               }
             }
           } else {
             if lng < 94.162030 {
-              if poly[2194].contains(testy: lat, testx: lng) { return 371 } else { return 40 }
+              if polygons[2194].contains(testy: lat, testx: lng) { return 371 } else { return 40 }
             } else {
               if lng < 97.683406 {
-                if poly[2195].contains(testy: lat, testx: lng) { return 403 } else { return 40 }
+                if polygons[2195].contains(testy: lat, testx: lng) { return 403 } else { return 40 }
               } else {
-                if poly[2196].contains(testy: lat, testx: lng) { return 403 } else { return 40 }
+                if polygons[2196].contains(testy: lat, testx: lng) { return 403 } else { return 40 }
               }
             }
           }
@@ -10465,19 +10465,19 @@ public extension TimeZone {
                   return 347
                 } else {
                   if lng < 82.625736 {
-                    if poly[2197].contains(testy: lat, testx: lng) { return 406 } else { return 347 }
+                    if polygons[2197].contains(testy: lat, testx: lng) { return 406 } else { return 347 }
                   } else {
                     if lat < 47.927277 {
-                      if poly[2198].contains(testy: lat, testx: lng) { return 406 } else { return 347 }
+                      if polygons[2198].contains(testy: lat, testx: lng) { return 406 } else { return 347 }
                     } else {
                       if lng < 84.969202 {
-                        if poly[2199].contains(testy: lat, testx: lng) { return 379 } else { return 347 }
+                        if polygons[2199].contains(testy: lat, testx: lng) { return 379 } else { return 347 }
                       } else {
                         if lat < 49.207596 {
-                          if poly[2200].contains(testy: lat, testx: lng) { return 379 }
-                          if poly[2201].contains(testy: lat, testx: lng) { return 406 } else { return 347 }
+                          if polygons[2200].contains(testy: lat, testx: lng) { return 379 }
+                          if polygons[2201].contains(testy: lat, testx: lng) { return 406 } else { return 347 }
                         } else {
-                          if poly[2202].contains(testy: lat, testx: lng) { return 347 } else { return 379 }
+                          if polygons[2202].contains(testy: lat, testx: lng) { return 347 } else { return 379 }
                         }
                       }
                     }
@@ -10485,39 +10485,39 @@ public extension TimeZone {
                 }
               } else {
                 if lat < 46.563946 {
-                  if poly[2203].contains(testy: lat, testx: lng) { return 121 } else { return 406 }
+                  if polygons[2203].contains(testy: lat, testx: lng) { return 121 } else { return 406 }
                 } else {
                   if lat < 48.525930 {
-                    if poly[2204].contains(testy: lat, testx: lng) { return 406 } else { return 121 }
+                    if polygons[2204].contains(testy: lat, testx: lng) { return 406 } else { return 121 }
                   } else {
                     if lng < 89.195152 {
                       if lat < 49.506923 {
                         if lng < 88.253910 {
-                          if poly[2205].contains(testy: lat, testx: lng) { return 379 }
-                          if poly[2206].contains(testy: lat, testx: lng) { return 406 }
-                          if poly[2207].contains(testy: lat, testx: lng) { return 406 } else { return 121 }
+                          if polygons[2205].contains(testy: lat, testx: lng) { return 379 }
+                          if polygons[2206].contains(testy: lat, testx: lng) { return 406 }
+                          if polygons[2207].contains(testy: lat, testx: lng) { return 406 } else { return 121 }
                         } else {
-                          if poly[2208].contains(testy: lat, testx: lng) { return 379 }
-                          if poly[2209].contains(testy: lat, testx: lng) { return 379 }
-                          if poly[2210].contains(testy: lat, testx: lng) { return 379 }
-                          if poly[2211].contains(testy: lat, testx: lng) { return 379 } else { return 121 }
+                          if polygons[2208].contains(testy: lat, testx: lng) { return 379 }
+                          if polygons[2209].contains(testy: lat, testx: lng) { return 379 }
+                          if polygons[2210].contains(testy: lat, testx: lng) { return 379 }
+                          if polygons[2211].contains(testy: lat, testx: lng) { return 379 } else { return 121 }
                         }
                       } else {
-                        if poly[2212].contains(testy: lat, testx: lng) { return 121 }
-                        if poly[2213].contains(testy: lat, testx: lng) { return 121 }
-                        if poly[2214].contains(testy: lat, testx: lng) { return 121 }
-                        if poly[2215].contains(testy: lat, testx: lng) { return 121 }
-                        if poly[2216].contains(testy: lat, testx: lng) { return 121 } else { return 379 }
+                        if polygons[2212].contains(testy: lat, testx: lng) { return 121 }
+                        if polygons[2213].contains(testy: lat, testx: lng) { return 121 }
+                        if polygons[2214].contains(testy: lat, testx: lng) { return 121 }
+                        if polygons[2215].contains(testy: lat, testx: lng) { return 121 }
+                        if polygons[2216].contains(testy: lat, testx: lng) { return 121 } else { return 379 }
                       }
                     } else {
                       if lat < 49.506923 {
                         return 121
                       } else {
                         if lng < 90.136395 {
-                          if poly[2217].contains(testy: lat, testx: lng) { return 121 }
-                          if poly[2218].contains(testy: lat, testx: lng) { return 289 } else { return 379 }
+                          if polygons[2217].contains(testy: lat, testx: lng) { return 121 }
+                          if polygons[2218].contains(testy: lat, testx: lng) { return 289 } else { return 379 }
                         } else {
-                          if poly[2219].contains(testy: lat, testx: lng) { return 121 } else { return 289 }
+                          if polygons[2219].contains(testy: lat, testx: lng) { return 121 } else { return 289 }
                         }
                       }
                     }
@@ -10540,16 +10540,16 @@ public extension TimeZone {
                           return 178
                         } else {
                           if lat < 62.354143 {
-                            if poly[2220].contains(testy: lat, testx: lng) { return 289 } else { return 178 }
+                            if polygons[2220].contains(testy: lat, testx: lng) { return 289 } else { return 178 }
                           } else {
-                            if poly[2221].contains(testy: lat, testx: lng) { return 289 } else { return 178 }
+                            if polygons[2221].contains(testy: lat, testx: lng) { return 289 } else { return 178 }
                           }
                         }
                       } else {
                         if lng < 84.017585 {
-                          if poly[2222].contains(testy: lat, testx: lng) { return 289 } else { return 178 }
+                          if polygons[2222].contains(testy: lat, testx: lng) { return 289 } else { return 178 }
                         } else {
-                          if poly[2223].contains(testy: lat, testx: lng) { return 178 } else { return 289 }
+                          if polygons[2223].contains(testy: lat, testx: lng) { return 178 } else { return 289 }
                         }
                       }
                     } else {
@@ -10564,18 +10564,18 @@ public extension TimeZone {
               if lng < 98.091137 {
                 if lat < 52.343735 {
                   if lng < 94.584387 {
-                    if poly[2224].contains(testy: lat, testx: lng) { return 289 } else { return 121 }
+                    if polygons[2224].contains(testy: lat, testx: lng) { return 289 } else { return 121 }
                   } else {
                     if lat < 48.855186 {
-                      if poly[2225].contains(testy: lat, testx: lng) { return 123 }
-                      if poly[2226].contains(testy: lat, testx: lng) { return 123 } else { return 121 }
+                      if polygons[2225].contains(testy: lat, testx: lng) { return 123 }
+                      if polygons[2226].contains(testy: lat, testx: lng) { return 123 } else { return 121 }
                     } else {
                       if lng < 96.337762 {
-                        if poly[2227].contains(testy: lat, testx: lng) { return 121 } else { return 289 }
+                        if polygons[2227].contains(testy: lat, testx: lng) { return 121 } else { return 289 }
                       } else {
-                        if poly[2228].contains(testy: lat, testx: lng) { return 121 }
-                        if poly[2229].contains(testy: lat, testx: lng) { return 123 }
-                        if poly[2230].contains(testy: lat, testx: lng) { return 123 } else { return 289 }
+                        if polygons[2228].contains(testy: lat, testx: lng) { return 121 }
+                        if polygons[2229].contains(testy: lat, testx: lng) { return 123 }
+                        if polygons[2230].contains(testy: lat, testx: lng) { return 123 } else { return 289 }
                       }
                     }
                   }
@@ -10585,12 +10585,12 @@ public extension TimeZone {
                   } else {
                     if lat < 55.832283 {
                       if lng < 96.337762 {
-                        if poly[2231].contains(testy: lat, testx: lng) { return 144 } else { return 289 }
+                        if polygons[2231].contains(testy: lat, testx: lng) { return 144 } else { return 289 }
                       } else {
-                        if poly[2232].contains(testy: lat, testx: lng) { return 144 } else { return 289 }
+                        if polygons[2232].contains(testy: lat, testx: lng) { return 144 } else { return 289 }
                       }
                     } else {
-                      if poly[2233].contains(testy: lat, testx: lng) { return 144 } else { return 289 }
+                      if polygons[2233].contains(testy: lat, testx: lng) { return 144 } else { return 289 }
                     }
                   }
                 }
@@ -10598,36 +10598,36 @@ public extension TimeZone {
                 if lat < 52.343735 {
                   if lng < 101.597887 {
                     if lat < 48.855186 {
-                      if poly[2234].contains(testy: lat, testx: lng) { return 123 } else { return 121 }
+                      if polygons[2234].contains(testy: lat, testx: lng) { return 123 } else { return 121 }
                     } else {
                       if lng < 99.844512 {
-                        if poly[2235].contains(testy: lat, testx: lng) { return 121 }
-                        if poly[2236].contains(testy: lat, testx: lng) { return 144 }
-                        if poly[2237].contains(testy: lat, testx: lng) { return 289 }
-                        if poly[2238].contains(testy: lat, testx: lng) { return 289 } else { return 123 }
+                        if polygons[2235].contains(testy: lat, testx: lng) { return 121 }
+                        if polygons[2236].contains(testy: lat, testx: lng) { return 144 }
+                        if polygons[2237].contains(testy: lat, testx: lng) { return 289 }
+                        if polygons[2238].contains(testy: lat, testx: lng) { return 289 } else { return 123 }
                       } else {
-                        if poly[2239].contains(testy: lat, testx: lng) { return 123 } else { return 144 }
+                        if polygons[2239].contains(testy: lat, testx: lng) { return 123 } else { return 144 }
                       }
                     }
                   } else {
-                    if poly[2240].contains(testy: lat, testx: lng) { return 144 } else { return 123 }
+                    if polygons[2240].contains(testy: lat, testx: lng) { return 144 } else { return 123 }
                   }
                 } else {
                   if lng < 101.597887 {
                     if lat < 55.832283 {
-                      if poly[2241].contains(testy: lat, testx: lng) { return 289 } else { return 144 }
+                      if polygons[2241].contains(testy: lat, testx: lng) { return 289 } else { return 144 }
                     } else {
-                      if poly[2242].contains(testy: lat, testx: lng) { return 289 } else { return 144 }
+                      if polygons[2242].contains(testy: lat, testx: lng) { return 289 } else { return 144 }
                     }
                   } else {
                     if lat < 55.832283 {
                       return 144
                     } else {
                       if lng < 103.351262 {
-                        if poly[2243].contains(testy: lat, testx: lng) { return 289 }
-                        if poly[2244].contains(testy: lat, testx: lng) { return 289 } else { return 144 }
+                        if polygons[2243].contains(testy: lat, testx: lng) { return 289 }
+                        if polygons[2244].contains(testy: lat, testx: lng) { return 289 } else { return 144 }
                       } else {
-                        if poly[2245].contains(testy: lat, testx: lng) { return 144 } else { return 289 }
+                        if polygons[2245].contains(testy: lat, testx: lng) { return 144 } else { return 289 }
                       }
                     }
                   }
@@ -10635,9 +10635,9 @@ public extension TimeZone {
               }
             } else {
               if lat < 59.849081 {
-                if poly[2246].contains(testy: lat, testx: lng) { return 144 } else { return 289 }
+                if polygons[2246].contains(testy: lat, testx: lng) { return 144 } else { return 289 }
               } else {
-                if poly[2247].contains(testy: lat, testx: lng) { return 144 } else { return 289 }
+                if polygons[2247].contains(testy: lat, testx: lng) { return 144 } else { return 289 }
               }
             }
           }
@@ -10658,13 +10658,13 @@ public extension TimeZone {
                 if lat < 25.615926 {
                   if lat < 25.523945 {
                     if lat < 24.963544 {
-                      if poly[2248].contains(testy: lat, testx: lng) { return 100 } else { return 163 }
+                      if polygons[2248].contains(testy: lat, testx: lng) { return 100 } else { return 163 }
                     } else {
                       return 100
                     }
                   } else {
                     if lng < 50.817749 {
-                      if poly[2249].contains(testy: lat, testx: lng) { return 100 } else { return 109 }
+                      if polygons[2249].contains(testy: lat, testx: lng) { return 100 } else { return 109 }
                     } else {
                       return 100
                     }
@@ -10677,13 +10677,13 @@ public extension TimeZone {
               if lat < 24.743839 {
                 if lng < 51.580971 {
                   if lng < 51.478639 {
-                    if poly[2250].contains(testy: lat, testx: lng) { return 100 } else { return 163 }
+                    if polygons[2250].contains(testy: lat, testx: lng) { return 100 } else { return 163 }
                   } else {
                     if lng < 51.511971 { return 163 } else { if lat < 24.283293 { return 163 } else { return 321 } }
                   }
                 } else {
                   if lat < 24.239900 {
-                    if poly[2251].contains(testy: lat, testx: lng) { return 163 } else { return 321 }
+                    if polygons[2251].contains(testy: lat, testx: lng) { return 163 } else { return 321 }
                   } else {
                     return 321
                   }
@@ -10695,7 +10695,7 @@ public extension TimeZone {
           } else {
             if lat < 24.356861 {
               if lat < 23.924778 {
-                if poly[2252].contains(testy: lat, testx: lng) { return 321 } else { return 163 }
+                if polygons[2252].contains(testy: lat, testx: lng) { return 321 } else { return 163 }
               } else {
                 return 321
               }
@@ -10706,7 +10706,7 @@ public extension TimeZone {
         } else {
           if lat < 24.475027 {
             if lat < 22.826911 {
-              if poly[2253].contains(testy: lat, testx: lng) { return 321 } else { return 163 }
+              if polygons[2253].contains(testy: lat, testx: lng) { return 321 } else { return 163 }
             } else {
               return 321
             }
@@ -10724,9 +10724,9 @@ public extension TimeZone {
             if lat < 26.387972 {
               if lat < 25.553473 {
                 if lat < 24.983110 {
-                  if poly[2254].contains(testy: lat, testx: lng) { return 163 }
-                  if poly[2255].contains(testy: lat, testx: lng) { return 321 }
-                  if poly[2256].contains(testy: lat, testx: lng) { return 321 } else { return 357 }
+                  if polygons[2254].contains(testy: lat, testx: lng) { return 163 }
+                  if polygons[2255].contains(testy: lat, testx: lng) { return 321 }
+                  if polygons[2256].contains(testy: lat, testx: lng) { return 321 } else { return 357 }
                 } else {
                   return 321
                 }
@@ -10738,7 +10738,7 @@ public extension TimeZone {
                     if lng < 55.973804 {
                       return 321
                     } else {
-                      if poly[2257].contains(testy: lat, testx: lng) { return 321 } else { return 357 }
+                      if polygons[2257].contains(testy: lat, testx: lng) { return 321 } else { return 357 }
                     }
                   }
                 } else {
@@ -10761,12 +10761,12 @@ public extension TimeZone {
                   } else {
                     if lat < 26.874584 {
                       if lng < 61.623222 {
-                        if poly[2258].contains(testy: lat, testx: lng) { return 210 } else { return 55 }
+                        if polygons[2258].contains(testy: lat, testx: lng) { return 210 } else { return 55 }
                       } else {
-                        if poly[2259].contains(testy: lat, testx: lng) { return 55 } else { return 210 }
+                        if polygons[2259].contains(testy: lat, testx: lng) { return 55 } else { return 210 }
                       }
                     } else {
-                      if poly[2260].contains(testy: lat, testx: lng) { return 210 } else { return 55 }
+                      if polygons[2260].contains(testy: lat, testx: lng) { return 210 } else { return 55 }
                     }
                   }
                 } else {
@@ -10786,15 +10786,15 @@ public extension TimeZone {
                 if lat < 23.653912 {
                   return 371
                 } else {
-                  if poly[2261].contains(testy: lat, testx: lng) { return 371 }
-                  if poly[2262].contains(testy: lat, testx: lng) { return 371 }
-                  if poly[2263].contains(testy: lat, testx: lng) { return 371 } else { return 210 }
+                  if polygons[2261].contains(testy: lat, testx: lng) { return 371 }
+                  if polygons[2262].contains(testy: lat, testx: lng) { return 371 }
+                  if polygons[2263].contains(testy: lat, testx: lng) { return 371 } else { return 210 }
                 }
               } else {
                 if lat < 23.734138 {
                   return 371
                 } else {
-                  if poly[2264].contains(testy: lat, testx: lng) { return 210 } else { return 371 }
+                  if polygons[2264].contains(testy: lat, testx: lng) { return 210 } else { return 371 }
                 }
               }
             }
@@ -10814,7 +10814,7 @@ public extension TimeZone {
                 if lat < 40.823005 {
                   return 76
                 } else {
-                  if poly[2265].contains(testy: lat, testx: lng) { return 120 } else { return 76 }
+                  if polygons[2265].contains(testy: lat, testx: lng) { return 120 } else { return 76 }
                 }
               } else {
                 return 120
@@ -10824,46 +10824,46 @@ public extension TimeZone {
                 if lat < 44.892151 {
                   if lat < 44.271465 {
                     if lng < 56.269808 {
-                      if poly[2266].contains(testy: lat, testx: lng) { return 120 }
-                      if poly[2267].contains(testy: lat, testx: lng) { return 167 } else { return 76 }
+                      if polygons[2266].contains(testy: lat, testx: lng) { return 120 }
+                      if polygons[2267].contains(testy: lat, testx: lng) { return 167 } else { return 76 }
                     } else {
                       if lat < 42.472025 {
-                        if poly[2268].contains(testy: lat, testx: lng) { return 167 }
-                        if poly[2269].contains(testy: lat, testx: lng) { return 167 }
-                        if poly[2270].contains(testy: lat, testx: lng) { return 167 } else { return 76 }
+                        if polygons[2268].contains(testy: lat, testx: lng) { return 167 }
+                        if polygons[2269].contains(testy: lat, testx: lng) { return 167 }
+                        if polygons[2270].contains(testy: lat, testx: lng) { return 167 } else { return 76 }
                       } else {
-                        if poly[2271].contains(testy: lat, testx: lng) { return 76 }
-                        if poly[2272].contains(testy: lat, testx: lng) { return 76 } else { return 167 }
+                        if polygons[2271].contains(testy: lat, testx: lng) { return 76 }
+                        if polygons[2272].contains(testy: lat, testx: lng) { return 76 } else { return 167 }
                       }
                     }
                   } else {
                     if lng < 55.998606 {
-                      if poly[2273].contains(testy: lat, testx: lng) { return 167 } else { return 120 }
+                      if polygons[2273].contains(testy: lat, testx: lng) { return 167 } else { return 120 }
                     } else {
                       return 167
                     }
                   }
                 } else {
                   if lng < 58.607960 {
-                    if poly[2274].contains(testy: lat, testx: lng) { return 167 }
-                    if poly[2275].contains(testy: lat, testx: lng) { return 239 }
-                    if poly[2276].contains(testy: lat, testx: lng) { return 240 } else { return 120 }
+                    if polygons[2274].contains(testy: lat, testx: lng) { return 167 }
+                    if polygons[2275].contains(testy: lat, testx: lng) { return 239 }
+                    if polygons[2276].contains(testy: lat, testx: lng) { return 240 } else { return 120 }
                   } else {
                     if lat < 45.436764 {
                       if lng < 59.239082 {
                         if lat < 44.974435 {
                           return 167
                         } else {
-                          if poly[2277].contains(testy: lat, testx: lng) { return 239 } else { return 167 }
+                          if polygons[2277].contains(testy: lat, testx: lng) { return 239 } else { return 167 }
                         }
                       } else {
-                        if poly[2278].contains(testy: lat, testx: lng) { return 239 } else { return 167 }
+                        if polygons[2278].contains(testy: lat, testx: lng) { return 239 } else { return 167 }
                       }
                     } else {
                       if lat < 45.622234 {
                         return 239
                       } else {
-                        if poly[2279].contains(testy: lat, testx: lng) { return 240 } else { return 239 }
+                        if polygons[2279].contains(testy: lat, testx: lng) { return 240 } else { return 239 }
                       }
                     }
                   }
@@ -10873,32 +10873,32 @@ public extension TimeZone {
                   if lat < 44.584438 {
                     if lat < 42.306305 {
                       if lng < 59.827972 {
-                        if poly[2280].contains(testy: lat, testx: lng) { return 167 } else { return 76 }
+                        if polygons[2280].contains(testy: lat, testx: lng) { return 167 } else { return 76 }
                       } else {
-                        if poly[2281].contains(testy: lat, testx: lng) { return 167 } else { return 76 }
+                        if polygons[2281].contains(testy: lat, testx: lng) { return 167 } else { return 76 }
                       }
                     } else {
-                      if poly[2282].contains(testy: lat, testx: lng) { return 239 } else { return 167 }
+                      if polygons[2282].contains(testy: lat, testx: lng) { return 239 } else { return 167 }
                     }
                   } else {
                     return 239
                   }
                 } else {
                   if lng < 65.319747 {
-                    if poly[2283].contains(testy: lat, testx: lng) { return 239 } else { return 167 }
+                    if polygons[2283].contains(testy: lat, testx: lng) { return 239 } else { return 167 }
                   } else {
                     if lat < 43.362654 {
                       if lng < 66.942344 {
-                        if poly[2284].contains(testy: lat, testx: lng) { return 239 }
-                        if poly[2285].contains(testy: lat, testx: lng) { return 246 }
-                        if poly[2286].contains(testy: lat, testx: lng) { return 347 } else { return 167 }
+                        if polygons[2284].contains(testy: lat, testx: lng) { return 239 }
+                        if polygons[2285].contains(testy: lat, testx: lng) { return 246 }
+                        if polygons[2286].contains(testy: lat, testx: lng) { return 347 } else { return 167 }
                       } else {
-                        if poly[2287].contains(testy: lat, testx: lng) { return 239 }
-                        if poly[2288].contains(testy: lat, testx: lng) { return 246 } else { return 347 }
+                        if polygons[2287].contains(testy: lat, testx: lng) { return 239 }
+                        if polygons[2288].contains(testy: lat, testx: lng) { return 246 } else { return 347 }
                       }
                     } else {
-                      if poly[2289].contains(testy: lat, testx: lng) { return 167 }
-                      if poly[2290].contains(testy: lat, testx: lng) { return 347 } else { return 239 }
+                      if polygons[2289].contains(testy: lat, testx: lng) { return 167 }
+                      if polygons[2290].contains(testy: lat, testx: lng) { return 347 } else { return 239 }
                     }
                   }
                 }
@@ -10911,13 +10911,13 @@ public extension TimeZone {
               } else {
                 if lng < 61.927216 {
                   if lng < 56.525335 {
-                    if poly[2291].contains(testy: lat, testx: lng) { return 240 } else { return 120 }
+                    if polygons[2291].contains(testy: lat, testx: lng) { return 240 } else { return 120 }
                   } else {
-                    if poly[2292].contains(testy: lat, testx: lng) { return 240 } else { return 239 }
+                    if polygons[2292].contains(testy: lat, testx: lng) { return 240 } else { return 239 }
                   }
                 } else {
-                  if poly[2293].contains(testy: lat, testx: lng) { return 240 }
-                  if poly[2294].contains(testy: lat, testx: lng) { return 347 } else { return 239 }
+                  if polygons[2293].contains(testy: lat, testx: lng) { return 240 }
+                  if polygons[2294].contains(testy: lat, testx: lng) { return 347 } else { return 239 }
                 }
               }
             } else {
@@ -10967,7 +10967,7 @@ public extension TimeZone {
             if lng < 73.069031 {
               if lng < 55.880646 {
                 if lng < 49.355780 {
-                  if poly[2295].contains(testy: lat, testx: lng) { return 350 } else { return 250 }
+                  if polygons[2295].contains(testy: lat, testx: lng) { return 350 } else { return 250 }
                 } else {
                   return 66
                 }
@@ -11007,12 +11007,12 @@ public extension TimeZone {
                 } else {
                   if lng < 104.009645 {
                     if lng < 103.785408 {
-                      if poly[2296].contains(testy: lat, testx: lng) { return 327 } else { return 316 }
+                      if polygons[2296].contains(testy: lat, testx: lng) { return 327 } else { return 316 }
                     } else {
                       if lat < 1.425806 { return 316 } else { if lng < 103.865644 { return 316 } else { return 327 } }
                     }
                   } else {
-                    if poly[2297].contains(testy: lat, testx: lng) { return 316 } else { return 327 }
+                    if polygons[2297].contains(testy: lat, testx: lng) { return 316 } else { return 327 }
                   }
                 }
               } else {
@@ -11032,12 +11032,12 @@ public extension TimeZone {
                   } else {
                     if lat < 6.714139 {
                       if lng < 100.203247 {
-                        if poly[2298].contains(testy: lat, testx: lng) { return 327 } else { return 270 }
+                        if polygons[2298].contains(testy: lat, testx: lng) { return 327 } else { return 270 }
                       } else {
                         if lng < 101.147694 {
-                          if poly[2299].contains(testy: lat, testx: lng) { return 270 } else { return 327 }
+                          if polygons[2299].contains(testy: lat, testx: lng) { return 270 } else { return 327 }
                         } else {
-                          if poly[2300].contains(testy: lat, testx: lng) { return 327 } else { return 270 }
+                          if polygons[2300].contains(testy: lat, testx: lng) { return 327 } else { return 270 }
                         }
                       }
                     } else {
@@ -11062,10 +11062,10 @@ public extension TimeZone {
                   if lng < 51.413029 {
                     if lat < 11.523074 {
                       if lat < 9.873331 {
-                        if poly[2301].contains(testy: lat, testx: lng) { return 350 } else { return 250 }
+                        if polygons[2301].contains(testy: lat, testx: lng) { return 350 } else { return 250 }
                       } else {
                         if lng < 43.254696 {
-                          if poly[2302].contains(testy: lat, testx: lng) { return 311 } else { return 250 }
+                          if polygons[2302].contains(testy: lat, testx: lng) { return 311 } else { return 250 }
                         } else {
                           return 250
                         }
@@ -11082,11 +11082,11 @@ public extension TimeZone {
                   } else {
                     if lng < 55.215251 {
                       if lng < 49.207153 {
-                        if poly[2303].contains(testy: lat, testx: lng) { return 163 }
-                        if poly[2304].contains(testy: lat, testx: lng) { return 163 } else { return 215 }
+                        if polygons[2303].contains(testy: lat, testx: lng) { return 163 }
+                        if polygons[2304].contains(testy: lat, testx: lng) { return 163 } else { return 215 }
                       } else {
-                        if poly[2305].contains(testy: lat, testx: lng) { return 163 }
-                        if poly[2306].contains(testy: lat, testx: lng) { return 357 } else { return 215 }
+                        if polygons[2305].contains(testy: lat, testx: lng) { return 163 }
+                        if polygons[2306].contains(testy: lat, testx: lng) { return 357 } else { return 215 }
                       }
                     } else {
                       return 357
@@ -11125,12 +11125,12 @@ public extension TimeZone {
                     return 40
                   } else {
                     if lat < 17.923909 {
-                      if poly[2307].contains(testy: lat, testx: lng) { return 270 } else { return 40 }
+                      if polygons[2307].contains(testy: lat, testx: lng) { return 270 } else { return 40 }
                     } else {
                       if lat < 18.595112 {
-                        if poly[2308].contains(testy: lat, testx: lng) { return 270 } else { return 40 }
+                        if polygons[2308].contains(testy: lat, testx: lng) { return 270 } else { return 40 }
                       } else {
-                        if poly[2309].contains(testy: lat, testx: lng) { return 270 } else { return 40 }
+                        if polygons[2309].contains(testy: lat, testx: lng) { return 270 } else { return 40 }
                       }
                     }
                   }
@@ -11159,9 +11159,9 @@ public extension TimeZone {
             if lng < 90.701530 {
               if lng < 89.295280 {
                 if lng < 89.106918 {
-                  if poly[2310].contains(testy: lat, testx: lng) { return 150 }
-                  if poly[2311].contains(testy: lat, testx: lng) { return 150 }
-                  if poly[2312].contains(testy: lat, testx: lng) { return 150 } else { return 371 }
+                  if polygons[2310].contains(testy: lat, testx: lng) { return 150 }
+                  if polygons[2311].contains(testy: lat, testx: lng) { return 150 }
+                  if polygons[2312].contains(testy: lat, testx: lng) { return 150 } else { return 371 }
                 } else {
                   return 150
                 }
@@ -11178,17 +11178,17 @@ public extension TimeZone {
                       return 150
                     } else {
                       if lat < 20.864358 {
-                        if poly[2313].contains(testy: lat, testx: lng) { return 150 } else { return 40 }
+                        if polygons[2313].contains(testy: lat, testx: lng) { return 150 } else { return 40 }
                       } else {
-                        if poly[2314].contains(testy: lat, testx: lng) { return 150 } else { return 40 }
+                        if polygons[2314].contains(testy: lat, testx: lng) { return 150 } else { return 40 }
                       }
                     }
                   } else {
                     if lat < 20.758194 {
                       return 40
                     } else {
-                      if poly[2315].contains(testy: lat, testx: lng) { return 150 }
-                      if poly[2316].contains(testy: lat, testx: lng) { return 371 } else { return 40 }
+                      if polygons[2315].contains(testy: lat, testx: lng) { return 150 }
+                      if polygons[2316].contains(testy: lat, testx: lng) { return 371 } else { return 40 }
                     }
                   }
                 } else {
@@ -11197,18 +11197,18 @@ public extension TimeZone {
                       return 40
                     } else {
                       if lng < 100.032866 {
-                        if poly[2317].contains(testy: lat, testx: lng) { return 403 } else { return 40 }
+                        if polygons[2317].contains(testy: lat, testx: lng) { return 403 } else { return 40 }
                       } else {
                         if lng < 101.171885 {
-                          if poly[2318].contains(testy: lat, testx: lng) { return 265 }
-                          if poly[2319].contains(testy: lat, testx: lng) { return 403 } else { return 40 }
+                          if polygons[2318].contains(testy: lat, testx: lng) { return 265 }
+                          if polygons[2319].contains(testy: lat, testx: lng) { return 403 } else { return 40 }
                         } else {
                           if lat < 21.589333 {
-                            if poly[2320].contains(testy: lat, testx: lng) { return 403 } else { return 265 }
+                            if polygons[2320].contains(testy: lat, testx: lng) { return 403 } else { return 265 }
                           } else {
-                            if poly[2321].contains(testy: lat, testx: lng) { return 24 }
-                            if poly[2322].contains(testy: lat, testx: lng) { return 40 }
-                            if poly[2323].contains(testy: lat, testx: lng) { return 403 } else { return 265 }
+                            if polygons[2321].contains(testy: lat, testx: lng) { return 24 }
+                            if polygons[2322].contains(testy: lat, testx: lng) { return 40 }
+                            if polygons[2323].contains(testy: lat, testx: lng) { return 403 } else { return 265 }
                           }
                         }
                       }
@@ -11216,15 +11216,15 @@ public extension TimeZone {
                   } else {
                     if lat < 22.204487 {
                       if lng < 103.707771 {
-                        if poly[2324].contains(testy: lat, testx: lng) { return 24 } else { return 265 }
+                        if polygons[2324].contains(testy: lat, testx: lng) { return 24 } else { return 265 }
                       } else {
-                        if poly[2325].contains(testy: lat, testx: lng) { return 265 } else { return 24 }
+                        if polygons[2325].contains(testy: lat, testx: lng) { return 265 } else { return 24 }
                       }
                     } else {
                       if lng < 103.136834 {
-                        if poly[2326].contains(testy: lat, testx: lng) { return 403 } else { return 24 }
+                        if polygons[2326].contains(testy: lat, testx: lng) { return 403 } else { return 24 }
                       } else {
-                        if poly[2327].contains(testy: lat, testx: lng) { return 403 } else { return 24 }
+                        if polygons[2327].contains(testy: lat, testx: lng) { return 403 } else { return 24 }
                       }
                     }
                   }
@@ -11240,9 +11240,9 @@ public extension TimeZone {
                   return 371
                 } else {
                   if lat < 23.199751 {
-                    if poly[2328].contains(testy: lat, testx: lng) { return 150 } else { return 371 }
+                    if polygons[2328].contains(testy: lat, testx: lng) { return 150 } else { return 371 }
                   } else {
-                    if poly[2329].contains(testy: lat, testx: lng) { return 150 } else { return 371 }
+                    if polygons[2329].contains(testy: lat, testx: lng) { return 150 } else { return 371 }
                   }
                 }
               } else {
@@ -11256,32 +11256,32 @@ public extension TimeZone {
                   if lat < 22.756250 {
                     return 150
                   } else {
-                    if poly[2330].contains(testy: lat, testx: lng) { return 371 } else { return 150 }
+                    if polygons[2330].contains(testy: lat, testx: lng) { return 371 } else { return 150 }
                   }
                 } else {
                   if lng < 99.563530 {
                     if lng < 93.402527 {
                       if lng < 92.529763 {
-                        if poly[2331].contains(testy: lat, testx: lng) { return 371 } else { return 150 }
+                        if polygons[2331].contains(testy: lat, testx: lng) { return 371 } else { return 150 }
                       } else {
                         if lat < 23.386499 {
-                          if poly[2332].contains(testy: lat, testx: lng) { return 40 } else { return 371 }
+                          if polygons[2332].contains(testy: lat, testx: lng) { return 40 } else { return 371 }
                         } else {
-                          if poly[2333].contains(testy: lat, testx: lng) { return 40 } else { return 371 }
+                          if polygons[2333].contains(testy: lat, testx: lng) { return 40 } else { return 371 }
                         }
                       }
                     } else {
-                      if poly[2334].contains(testy: lat, testx: lng) { return 403 }
-                      if poly[2335].contains(testy: lat, testx: lng) { return 403 } else { return 40 }
+                      if polygons[2334].contains(testy: lat, testx: lng) { return 403 }
+                      if polygons[2335].contains(testy: lat, testx: lng) { return 403 } else { return 40 }
                     }
                   } else {
                     if lng < 102.907940 {
-                      if poly[2336].contains(testy: lat, testx: lng) { return 24 } else { return 403 }
+                      if polygons[2336].contains(testy: lat, testx: lng) { return 24 } else { return 403 }
                     } else {
                       if lng < 103.916794 {
-                        if poly[2337].contains(testy: lat, testx: lng) { return 24 } else { return 403 }
+                        if polygons[2337].contains(testy: lat, testx: lng) { return 24 } else { return 403 }
                       } else {
-                        if poly[2338].contains(testy: lat, testx: lng) { return 24 } else { return 403 }
+                        if polygons[2338].contains(testy: lat, testx: lng) { return 24 } else { return 403 }
                       }
                     }
                   }
@@ -11304,12 +11304,12 @@ public extension TimeZone {
                 if lat < 69.667392 {
                   if lng < 66.210541 {
                     if lat < 66.326385 {
-                      if poly[2339].contains(testy: lat, testx: lng) { return 183 } else { return 178 }
+                      if polygons[2339].contains(testy: lat, testx: lng) { return 183 } else { return 178 }
                     } else {
                       if lat < 67.696091 {
-                        if poly[2340].contains(testy: lat, testx: lng) { return 183 } else { return 178 }
+                        if polygons[2340].contains(testy: lat, testx: lng) { return 183 } else { return 178 }
                       } else {
-                        if poly[2341].contains(testy: lat, testx: lng) { return 183 } else { return 178 }
+                        if polygons[2341].contains(testy: lat, testx: lng) { return 183 } else { return 178 }
                       }
                     }
                   } else {
@@ -11334,12 +11334,12 @@ public extension TimeZone {
                     } else {
                       if lat < 71.623577 {
                         if lat < 70.303423 {
-                          if poly[2342].contains(testy: lat, testx: lng) { return 289 } else { return 178 }
+                          if polygons[2342].contains(testy: lat, testx: lng) { return 289 } else { return 178 }
                         } else {
-                          if poly[2343].contains(testy: lat, testx: lng) { return 289 } else { return 178 }
+                          if polygons[2343].contains(testy: lat, testx: lng) { return 289 } else { return 178 }
                         }
                       } else {
-                        if poly[2344].contains(testy: lat, testx: lng) { return 289 } else { return 178 }
+                        if polygons[2344].contains(testy: lat, testx: lng) { return 289 } else { return 178 }
                       }
                     }
                   } else {
@@ -11356,15 +11356,15 @@ public extension TimeZone {
                     if lat < 69.447754 {
                       if lat < 68.630057 {
                         if lat < 68.286874 {
-                          if poly[2345].contains(testy: lat, testx: lng) { return 289 } else { return 178 }
+                          if polygons[2345].contains(testy: lat, testx: lng) { return 289 } else { return 178 }
                         } else {
-                          if poly[2346].contains(testy: lat, testx: lng) { return 289 } else { return 178 }
+                          if polygons[2346].contains(testy: lat, testx: lng) { return 289 } else { return 178 }
                         }
                       } else {
                         if lng < 81.683594 {
-                          if poly[2347].contains(testy: lat, testx: lng) { return 289 } else { return 178 }
+                          if polygons[2347].contains(testy: lat, testx: lng) { return 289 } else { return 178 }
                         } else {
-                          if poly[2348].contains(testy: lat, testx: lng) { return 289 } else { return 178 }
+                          if polygons[2348].contains(testy: lat, testx: lng) { return 289 } else { return 178 }
                         }
                       }
                     } else {
@@ -11372,8 +11372,8 @@ public extension TimeZone {
                     }
                   } else {
                     if lng < 80.798584 {
-                      if poly[2349].contains(testy: lat, testx: lng) { return 289 }
-                      if poly[2350].contains(testy: lat, testx: lng) { return 289 } else { return 178 }
+                      if polygons[2349].contains(testy: lat, testx: lng) { return 289 }
+                      if polygons[2350].contains(testy: lat, testx: lng) { return 289 } else { return 178 }
                     } else {
                       return 289
                     }
@@ -11382,12 +11382,12 @@ public extension TimeZone {
                   if lat < 68.798813 {
                     if lat < 68.466825 {
                       if lat < 67.026181 {
-                        if poly[2351].contains(testy: lat, testx: lng) { return 289 } else { return 178 }
+                        if polygons[2351].contains(testy: lat, testx: lng) { return 289 } else { return 178 }
                       } else {
-                        if poly[2352].contains(testy: lat, testx: lng) { return 178 } else { return 289 }
+                        if polygons[2352].contains(testy: lat, testx: lng) { return 178 } else { return 289 }
                       }
                     } else {
-                      if poly[2353].contains(testy: lat, testx: lng) { return 178 } else { return 289 }
+                      if polygons[2353].contains(testy: lat, testx: lng) { return 178 } else { return 289 }
                     }
                   } else {
                     return 289
@@ -11396,12 +11396,12 @@ public extension TimeZone {
               } else {
                 if lng < 80.759369 {
                   if lat < 70.654465 {
-                    if poly[2354].contains(testy: lat, testx: lng) { return 289 } else { return 178 }
+                    if polygons[2354].contains(testy: lat, testx: lng) { return 289 } else { return 178 }
                   } else {
                     if lat < 71.133958 {
-                      if poly[2355].contains(testy: lat, testx: lng) { return 289 } else { return 178 }
+                      if polygons[2355].contains(testy: lat, testx: lng) { return 289 } else { return 178 }
                     } else {
-                      if poly[2356].contains(testy: lat, testx: lng) { return 178 } else { return 289 }
+                      if polygons[2356].contains(testy: lat, testx: lng) { return 178 } else { return 289 }
                     }
                   }
                 } else {
@@ -11442,7 +11442,7 @@ public extension TimeZone {
                   if lng < 149.977966 {
                     if lat < -37.546555 {
                       if lng < 140.969055 {
-                        if poly[2357].contains(testy: lat, testx: lng) { return 126 } else { return 67 }
+                        if polygons[2357].contains(testy: lat, testx: lng) { return 126 } else { return 67 }
                       } else {
                         return 126
                       }
@@ -11451,44 +11451,44 @@ public extension TimeZone {
                         if lat < -33.051056 {
                           if lng < 142.283268 {
                             if lat < -35.298805 {
-                              if poly[2358].contains(testy: lat, testx: lng) { return 126 } else { return 67 }
+                              if polygons[2358].contains(testy: lat, testx: lng) { return 126 } else { return 67 }
                             } else {
-                              if poly[2359].contains(testy: lat, testx: lng) { return 67 }
-                              if poly[2360].contains(testy: lat, testx: lng) { return 207 } else { return 126 }
+                              if polygons[2359].contains(testy: lat, testx: lng) { return 67 }
+                              if polygons[2360].contains(testy: lat, testx: lng) { return 207 } else { return 126 }
                             }
                           } else {
                             if lat < -35.298805 {
-                              if poly[2361].contains(testy: lat, testx: lng) { return 207 } else { return 126 }
+                              if polygons[2361].contains(testy: lat, testx: lng) { return 207 } else { return 126 }
                             } else {
                               if lng < 143.565718 {
                                 if lat < -34.174931 {
                                   if lng < 142.924493 {
-                                    if poly[2362].contains(testy: lat, testx: lng) { return 207 } else { return 126 }
+                                    if polygons[2362].contains(testy: lat, testx: lng) { return 207 } else { return 126 }
                                   } else {
-                                    if poly[2363].contains(testy: lat, testx: lng) { return 207 } else { return 126 }
+                                    if polygons[2363].contains(testy: lat, testx: lng) { return 207 } else { return 126 }
                                   }
                                 } else {
                                   return 207
                                 }
                               } else {
-                                if poly[2364].contains(testy: lat, testx: lng) { return 126 } else { return 207 }
+                                if polygons[2364].contains(testy: lat, testx: lng) { return 126 } else { return 207 }
                               }
                             }
                           }
                         } else {
-                          if poly[2365].contains(testy: lat, testx: lng) { return 67 }
-                          if poly[2366].contains(testy: lat, testx: lng) { return 128 }
-                          if poly[2367].contains(testy: lat, testx: lng) { return 235 } else { return 207 }
+                          if polygons[2365].contains(testy: lat, testx: lng) { return 67 }
+                          if polygons[2366].contains(testy: lat, testx: lng) { return 128 }
+                          if polygons[2367].contains(testy: lat, testx: lng) { return 235 } else { return 207 }
                         }
                       } else {
                         if lat < -33.051056 {
                           if lng < 147.413067 {
-                            if poly[2368].contains(testy: lat, testx: lng) { return 207 } else { return 126 }
+                            if polygons[2368].contains(testy: lat, testx: lng) { return 207 } else { return 126 }
                           } else {
-                            if poly[2369].contains(testy: lat, testx: lng) { return 126 } else { return 207 }
+                            if polygons[2369].contains(testy: lat, testx: lng) { return 126 } else { return 207 }
                           }
                         } else {
-                          if poly[2370].contains(testy: lat, testx: lng) { return 235 } else { return 207 }
+                          if polygons[2370].contains(testy: lat, testx: lng) { return 235 } else { return 207 }
                         }
                       }
                     }
@@ -11496,14 +11496,14 @@ public extension TimeZone {
                     if lat < -35.620555 {
                       return 207
                     } else {
-                      if poly[2371].contains(testy: lat, testx: lng) { return 235 } else { return 207 }
+                      if polygons[2371].contains(testy: lat, testx: lng) { return 235 } else { return 207 }
                     }
                   }
                 }
               } else {
                 if lng < 141.004157 {
-                  if poly[2372].contains(testy: lat, testx: lng) { return 67 }
-                  if poly[2373].contains(testy: lat, testx: lng) { return 235 } else { return 10 }
+                  if polygons[2372].contains(testy: lat, testx: lng) { return 67 }
+                  if polygons[2373].contains(testy: lat, testx: lng) { return 235 } else { return 10 }
                 } else {
                   return 235
                 }
@@ -11514,12 +11514,12 @@ public extension TimeZone {
                   return 207
                 } else {
                   if lng < 152.468948 {
-                    if poly[2374].contains(testy: lat, testx: lng) { return 235 } else { return 207 }
+                    if polygons[2374].contains(testy: lat, testx: lng) { return 235 } else { return 207 }
                   } else {
                     if lat < -32.180173 {
                       return 207
                     } else {
-                      if poly[2375].contains(testy: lat, testx: lng) { return 235 } else { return 207 }
+                      if polygons[2375].contains(testy: lat, testx: lng) { return 235 } else { return 207 }
                     }
                   }
                 }
@@ -11537,7 +11537,7 @@ public extension TimeZone {
                 if lng < 137.104355 {
                   return 10
                 } else {
-                  if poly[2376].contains(testy: lat, testx: lng) { return 235 } else { return 10 }
+                  if polygons[2376].contains(testy: lat, testx: lng) { return 235 } else { return 10 }
                 }
               } else {
                 return 235
@@ -11580,7 +11580,7 @@ public extension TimeZone {
                   if lat < -29.370111 {
                     return 207
                   } else {
-                    if poly[2377].contains(testy: lat, testx: lng) { return 235 } else { return 207 }
+                    if polygons[2377].contains(testy: lat, testx: lng) { return 235 } else { return 207 }
                   }
                 } else {
                   if lng < 153.639252 {
@@ -11588,7 +11588,7 @@ public extension TimeZone {
                       return 207
                     } else {
                       if lng < 153.518413 {
-                        if poly[2378].contains(testy: lat, testx: lng) { return 235 } else { return 207 }
+                        if polygons[2378].contains(testy: lat, testx: lng) { return 235 } else { return 207 }
                       } else {
                         return 207
                       }
@@ -11650,7 +11650,7 @@ public extension TimeZone {
                       if lat < -9.260387 {
                         return 235
                       } else {
-                        if poly[2379].contains(testy: lat, testx: lng) { return 235 } else { return 170 }
+                        if polygons[2379].contains(testy: lat, testx: lng) { return 235 } else { return 170 }
                       }
                     }
                   }
@@ -11659,7 +11659,7 @@ public extension TimeZone {
                     if lng < 140.487747 {
                       return 131
                     } else {
-                      if poly[2380].contains(testy: lat, testx: lng) { return 170 } else { return 131 }
+                      if polygons[2380].contains(testy: lat, testx: lng) { return 170 } else { return 131 }
                     }
                   } else {
                     return 170
@@ -11714,30 +11714,30 @@ public extension TimeZone {
           if lat < 20.199528 {
             if lat < 18.710368 {
               if lat < 12.303858 {
-                if poly[2381].contains(testy: lat, testx: lng) { return 24 } else { return 251 }
+                if polygons[2381].contains(testy: lat, testx: lng) { return 24 } else { return 251 }
               } else {
                 if lat < 16.095304 {
                   if lat < 14.199581 {
-                    if poly[2382].contains(testy: lat, testx: lng) { return 265 } else { return 251 }
+                    if polygons[2382].contains(testy: lat, testx: lng) { return 265 } else { return 251 }
                   } else {
                     if lng < 106.189095 {
                       if lat < 15.147442 {
-                        if poly[2383].contains(testy: lat, testx: lng) { return 251 }
-                        if poly[2384].contains(testy: lat, testx: lng) { return 251 }
-                        if poly[2385].contains(testy: lat, testx: lng) { return 270 } else { return 265 }
+                        if polygons[2383].contains(testy: lat, testx: lng) { return 251 }
+                        if polygons[2384].contains(testy: lat, testx: lng) { return 251 }
+                        if polygons[2385].contains(testy: lat, testx: lng) { return 270 } else { return 265 }
                       } else {
-                        if poly[2386].contains(testy: lat, testx: lng) { return 270 } else { return 265 }
+                        if polygons[2386].contains(testy: lat, testx: lng) { return 270 } else { return 265 }
                       }
                     } else {
-                      if poly[2387].contains(testy: lat, testx: lng) { return 24 }
-                      if poly[2388].contains(testy: lat, testx: lng) { return 251 } else { return 265 }
+                      if polygons[2387].contains(testy: lat, testx: lng) { return 24 }
+                      if polygons[2388].contains(testy: lat, testx: lng) { return 251 } else { return 265 }
                     }
                   }
                 } else {
                   if lat < 17.402836 {
-                    if poly[2389].contains(testy: lat, testx: lng) { return 265 } else { return 24 }
+                    if polygons[2389].contains(testy: lat, testx: lng) { return 265 } else { return 24 }
                   } else {
-                    if poly[2390].contains(testy: lat, testx: lng) { return 265 } else { return 24 }
+                    if polygons[2390].contains(testy: lat, testx: lng) { return 265 } else { return 24 }
                   }
                 }
               }
@@ -11750,12 +11750,12 @@ public extension TimeZone {
             } else {
               if lat < 23.203362 {
                 if lat < 22.113626 {
-                  if poly[2391].contains(testy: lat, testx: lng) { return 403 } else { return 24 }
+                  if polygons[2391].contains(testy: lat, testx: lng) { return 403 } else { return 24 }
                 } else {
-                  if poly[2392].contains(testy: lat, testx: lng) { return 403 } else { return 24 }
+                  if polygons[2392].contains(testy: lat, testx: lng) { return 403 } else { return 24 }
                 }
               } else {
-                if poly[2393].contains(testy: lat, testx: lng) { return 24 } else { return 403 }
+                if polygons[2393].contains(testy: lat, testx: lng) { return 24 } else { return 403 }
               }
             }
           }
@@ -11764,18 +11764,18 @@ public extension TimeZone {
             if lat < 16.122683 {
               if lat < 15.680320 {
                 if lat < 13.628118 {
-                  if poly[2394].contains(testy: lat, testx: lng) { return 251 } else { return 24 }
+                  if polygons[2394].contains(testy: lat, testx: lng) { return 251 } else { return 24 }
                 } else {
                   if lat < 14.654219 {
-                    if poly[2395].contains(testy: lat, testx: lng) { return 24 }
-                    if poly[2396].contains(testy: lat, testx: lng) { return 265 } else { return 251 }
+                    if polygons[2395].contains(testy: lat, testx: lng) { return 24 }
+                    if polygons[2396].contains(testy: lat, testx: lng) { return 265 } else { return 251 }
                   } else {
-                    if poly[2397].contains(testy: lat, testx: lng) { return 251 }
-                    if poly[2398].contains(testy: lat, testx: lng) { return 265 } else { return 24 }
+                    if polygons[2397].contains(testy: lat, testx: lng) { return 251 }
+                    if polygons[2398].contains(testy: lat, testx: lng) { return 265 } else { return 24 }
                   }
                 }
               } else {
-                if poly[2399].contains(testy: lat, testx: lng) { return 265 } else { return 24 }
+                if polygons[2399].contains(testy: lat, testx: lng) { return 265 } else { return 24 }
               }
             } else {
               return 24
@@ -11785,7 +11785,7 @@ public extension TimeZone {
               return 24
             } else {
               if lng < 108.035889 {
-                if poly[2400].contains(testy: lat, testx: lng) { return 403 } else { return 24 }
+                if polygons[2400].contains(testy: lat, testx: lng) { return 403 } else { return 24 }
               } else {
                 return 403
               }
@@ -11805,15 +11805,15 @@ public extension TimeZone {
                   if lng < 111.681794 {
                     if lng < 111.101901 {
                       if lng < 110.087091 {
-                        if poly[2401].contains(testy: lat, testx: lng) { return 406 } else { return 403 }
+                        if polygons[2401].contains(testy: lat, testx: lng) { return 406 } else { return 403 }
                       } else {
-                        if poly[2402].contains(testy: lat, testx: lng) { return 403 } else { return 406 }
+                        if polygons[2402].contains(testy: lat, testx: lng) { return 403 } else { return 406 }
                       }
                     } else {
                       if lat < 21.392139 {
                         return 406
                       } else {
-                        if poly[2403].contains(testy: lat, testx: lng) { return 406 } else { return 403 }
+                        if polygons[2403].contains(testy: lat, testx: lng) { return 406 } else { return 403 }
                       }
                     }
                   } else {
@@ -11821,17 +11821,17 @@ public extension TimeZone {
                   }
                 } else {
                   if lat < 23.139450 {
-                    if poly[2404].contains(testy: lat, testx: lng) { return 291 } else { return 403 }
+                    if polygons[2404].contains(testy: lat, testx: lng) { return 291 } else { return 403 }
                   } else {
                     if lng < 110.635597 {
                       return 403
                     } else {
                       if lat < 24.261142 {
-                        if poly[2405].contains(testy: lat, testx: lng) { return 291 }
-                        if poly[2406].contains(testy: lat, testx: lng) { return 291 }
-                        if poly[2407].contains(testy: lat, testx: lng) { return 291 } else { return 403 }
+                        if polygons[2405].contains(testy: lat, testx: lng) { return 291 }
+                        if polygons[2406].contains(testy: lat, testx: lng) { return 291 }
+                        if polygons[2407].contains(testy: lat, testx: lng) { return 291 } else { return 403 }
                       } else {
-                        if poly[2408].contains(testy: lat, testx: lng) { return 403 } else { return 291 }
+                        if polygons[2408].contains(testy: lat, testx: lng) { return 403 } else { return 291 }
                       }
                     }
                   }
@@ -11842,16 +11842,16 @@ public extension TimeZone {
                 return 403
               } else {
                 if lat < 23.123449 {
-                  if poly[2409].contains(testy: lat, testx: lng) { return 291 }
-                  if poly[2410].contains(testy: lat, testx: lng) { return 291 } else { return 403 }
+                  if polygons[2409].contains(testy: lat, testx: lng) { return 291 }
+                  if polygons[2410].contains(testy: lat, testx: lng) { return 291 } else { return 403 }
                 } else {
                   if lat < 23.211371 {
-                    if poly[2411].contains(testy: lat, testx: lng) { return 403 } else { return 291 }
+                    if polygons[2411].contains(testy: lat, testx: lng) { return 403 } else { return 291 }
                   } else {
                     if lat < 23.385080 {
-                      if poly[2412].contains(testy: lat, testx: lng) { return 403 } else { return 291 }
+                      if polygons[2412].contains(testy: lat, testx: lng) { return 403 } else { return 291 }
                     } else {
-                      if poly[2413].contains(testy: lat, testx: lng) { return 403 } else { return 291 }
+                      if polygons[2413].contains(testy: lat, testx: lng) { return 403 } else { return 291 }
                     }
                   }
                 }
@@ -11874,12 +11874,12 @@ public extension TimeZone {
                   return 291
                 } else {
                   if lat < 22.137777 {
-                    if poly[2414].contains(testy: lat, testx: lng) { return 291 } else { return 132 }
+                    if polygons[2414].contains(testy: lat, testx: lng) { return 291 } else { return 132 }
                   } else {
                     if lat < 22.163389 {
                       if lng < 113.541180 { return 132 } else { return 291 }
                     } else {
-                      if poly[2415].contains(testy: lat, testx: lng) { return 291 } else { return 132 }
+                      if polygons[2415].contains(testy: lat, testx: lng) { return 291 } else { return 132 }
                     }
                   }
                 }
@@ -11899,7 +11899,7 @@ public extension TimeZone {
                 if lat < 22.481138 {
                   if lng < 113.913659 { if lat < 22.442740 { return 15 } else { return 291 } } else { return 15 }
                 } else {
-                  if poly[2416].contains(testy: lat, testx: lng) { return 291 } else { return 15 }
+                  if polygons[2416].contains(testy: lat, testx: lng) { return 291 } else { return 15 }
                 }
               }
             }
@@ -11932,17 +11932,17 @@ public extension TimeZone {
       if lat < 43.386189 {
         if lng < 114.824286 {
           if lng < 109.964462 {
-            if poly[2417].contains(testy: lat, testx: lng) { return 403 } else { return 123 }
+            if polygons[2417].contains(testy: lat, testx: lng) { return 403 } else { return 123 }
           } else {
             if lng < 112.394374 {
-              if poly[2418].contains(testy: lat, testx: lng) { return 123 }
-              if poly[2419].contains(testy: lat, testx: lng) { return 291 }
-              if poly[2420].contains(testy: lat, testx: lng) { return 291 } else { return 403 }
+              if polygons[2418].contains(testy: lat, testx: lng) { return 123 }
+              if polygons[2419].contains(testy: lat, testx: lng) { return 291 }
+              if polygons[2420].contains(testy: lat, testx: lng) { return 291 } else { return 403 }
             } else {
               if lat < 41.384137 {
-                if poly[2421].contains(testy: lat, testx: lng) { return 403 } else { return 291 }
+                if polygons[2421].contains(testy: lat, testx: lng) { return 403 } else { return 291 }
               } else {
-                if poly[2422].contains(testy: lat, testx: lng) { return 403 } else { return 291 }
+                if polygons[2422].contains(testy: lat, testx: lng) { return 403 } else { return 291 }
               }
             }
           }
@@ -11957,71 +11957,71 @@ public extension TimeZone {
                 return 123
               } else {
                 if lat < 45.856918 {
-                  if poly[2423].contains(testy: lat, testx: lng) { return 123 }
-                  if poly[2424].contains(testy: lat, testx: lng) { return 203 } else { return 291 }
+                  if polygons[2423].contains(testy: lat, testx: lng) { return 123 }
+                  if polygons[2424].contains(testy: lat, testx: lng) { return 203 } else { return 291 }
                 } else {
-                  if poly[2425].contains(testy: lat, testx: lng) { return 203 } else { return 123 }
+                  if polygons[2425].contains(testy: lat, testx: lng) { return 203 } else { return 123 }
                 }
               }
             } else {
               if lng < 109.035402 {
                 if lat < 50.798375 {
                   if lng < 107.070020 {
-                    if poly[2426].contains(testy: lat, testx: lng) { return 123 } else { return 144 }
+                    if polygons[2426].contains(testy: lat, testx: lng) { return 123 } else { return 144 }
                   } else {
                     if lat < 49.563011 {
-                      if poly[2427].contains(testy: lat, testx: lng) { return 141 } else { return 123 }
+                      if polygons[2427].contains(testy: lat, testx: lng) { return 141 } else { return 123 }
                     } else {
-                      if poly[2428].contains(testy: lat, testx: lng) { return 123 }
-                      if poly[2429].contains(testy: lat, testx: lng) { return 144 } else { return 141 }
+                      if polygons[2428].contains(testy: lat, testx: lng) { return 123 }
+                      if polygons[2429].contains(testy: lat, testx: lng) { return 144 } else { return 141 }
                     }
                   }
                 } else {
-                  if poly[2430].contains(testy: lat, testx: lng) { return 141 } else { return 144 }
+                  if polygons[2430].contains(testy: lat, testx: lng) { return 141 } else { return 144 }
                 }
               } else {
                 if lat < 50.798375 {
-                  if poly[2431].contains(testy: lat, testx: lng) { return 141 }
-                  if poly[2432].contains(testy: lat, testx: lng) { return 203 } else { return 123 }
+                  if polygons[2431].contains(testy: lat, testx: lng) { return 141 }
+                  if polygons[2432].contains(testy: lat, testx: lng) { return 203 } else { return 123 }
                 } else {
-                  if poly[2433].contains(testy: lat, testx: lng) { return 144 } else { return 141 }
+                  if polygons[2433].contains(testy: lat, testx: lng) { return 144 } else { return 141 }
                 }
               }
             }
           } else {
             if lat < 48.327646 {
               if lng < 116.896933 {
-                if poly[2434].contains(testy: lat, testx: lng) { return 203 } else { return 291 }
+                if polygons[2434].contains(testy: lat, testx: lng) { return 203 } else { return 291 }
               } else {
                 if lat < 45.856918 {
                   return 291
                 } else {
                   if lng < 118.862315 {
-                    if poly[2435].contains(testy: lat, testx: lng) { return 203 } else { return 291 }
+                    if polygons[2435].contains(testy: lat, testx: lng) { return 203 } else { return 291 }
                   } else {
-                    if poly[2436].contains(testy: lat, testx: lng) { return 203 } else { return 291 }
+                    if polygons[2436].contains(testy: lat, testx: lng) { return 203 } else { return 291 }
                   }
                 }
               }
             } else {
               if lng < 116.896933 {
                 if lat < 50.798375 {
-                  if poly[2437].contains(testy: lat, testx: lng) { return 141 }
-                  if poly[2438].contains(testy: lat, testx: lng) { return 291 } else { return 203 }
+                  if polygons[2437].contains(testy: lat, testx: lng) { return 141 }
+                  if polygons[2438].contains(testy: lat, testx: lng) { return 291 } else { return 203 }
                 } else {
-                  if poly[2439].contains(testy: lat, testx: lng) { return 144 } else { return 141 }
+                  if polygons[2439].contains(testy: lat, testx: lng) { return 144 } else { return 141 }
                 }
               } else {
                 if lat < 50.798375 {
-                  if poly[2440].contains(testy: lat, testx: lng) { return 141 } else { return 291 }
+                  if polygons[2440].contains(testy: lat, testx: lng) { return 141 } else { return 291 }
                 } else {
                   if lng < 118.862315 {
                     return 141
                   } else {
                     if lat < 52.033739 {
-                      if poly[2441].contains(testy: lat, testx: lng) { return 291 } else { return 141 }
+                      if polygons[2441].contains(testy: lat, testx: lng) { return 291 } else { return 141 }
                     } else {
-                      if poly[2442].contains(testy: lat, testx: lng) { return 291 } else { return 141 }
+                      if polygons[2442].contains(testy: lat, testx: lng) { return 291 } else { return 141 }
                     }
                   }
                 }
@@ -12031,23 +12031,23 @@ public extension TimeZone {
         } else {
           if lng < 105.495247 {
             if lat < 59.469437 {
-              if poly[2443].contains(testy: lat, testx: lng) { return 289 } else { return 144 }
+              if polygons[2443].contains(testy: lat, testx: lng) { return 289 } else { return 144 }
             } else {
-              if poly[2444].contains(testy: lat, testx: lng) { return 289 } else { return 144 }
+              if polygons[2444].contains(testy: lat, testx: lng) { return 289 } else { return 144 }
             }
           } else {
             if lng < 113.161472 {
               if lng < 109.328360 {
-                if poly[2445].contains(testy: lat, testx: lng) { return 141 }
-                if poly[2446].contains(testy: lat, testx: lng) { return 141 } else { return 144 }
+                if polygons[2445].contains(testy: lat, testx: lng) { return 141 }
+                if polygons[2446].contains(testy: lat, testx: lng) { return 141 } else { return 144 }
               } else {
                 if lat < 56.783855 {
                   return 144
                 } else {
                   if lng < 111.244916 {
-                    if poly[2447].contains(testy: lat, testx: lng) { return 141 } else { return 144 }
+                    if polygons[2447].contains(testy: lat, testx: lng) { return 141 } else { return 144 }
                   } else {
-                    if poly[2448].contains(testy: lat, testx: lng) { return 144 } else { return 141 }
+                    if polygons[2448].contains(testy: lat, testx: lng) { return 144 } else { return 141 }
                   }
                 }
               }
@@ -12055,33 +12055,33 @@ public extension TimeZone {
               if lng < 116.994585 {
                 if lat < 56.783855 {
                   if lng < 115.078029 {
-                    if poly[2449].contains(testy: lat, testx: lng) { return 141 } else { return 144 }
+                    if polygons[2449].contains(testy: lat, testx: lng) { return 141 } else { return 144 }
                   } else {
                     if lat < 55.026479 {
-                      if poly[2450].contains(testy: lat, testx: lng) { return 144 } else { return 141 }
+                      if polygons[2450].contains(testy: lat, testx: lng) { return 144 } else { return 141 }
                     } else {
-                      if poly[2451].contains(testy: lat, testx: lng) { return 141 } else { return 144 }
+                      if polygons[2451].contains(testy: lat, testx: lng) { return 141 } else { return 144 }
                     }
                   }
                 } else {
-                  if poly[2452].contains(testy: lat, testx: lng) { return 144 } else { return 141 }
+                  if polygons[2452].contains(testy: lat, testx: lng) { return 144 } else { return 141 }
                 }
               } else {
                 if lat < 56.783855 {
-                  if poly[2453].contains(testy: lat, testx: lng) { return 144 } else { return 141 }
+                  if polygons[2453].contains(testy: lat, testx: lng) { return 144 } else { return 141 }
                 } else {
                   if lng < 118.911141 {
                     if lat < 58.541231 {
                       if lng < 117.952863 {
-                        if poly[2454].contains(testy: lat, testx: lng) { return 141 } else { return 144 }
+                        if polygons[2454].contains(testy: lat, testx: lng) { return 141 } else { return 144 }
                       } else {
-                        if poly[2455].contains(testy: lat, testx: lng) { return 144 } else { return 141 }
+                        if polygons[2455].contains(testy: lat, testx: lng) { return 144 } else { return 141 }
                       }
                     } else {
-                      if poly[2456].contains(testy: lat, testx: lng) { return 144 } else { return 141 }
+                      if polygons[2456].contains(testy: lat, testx: lng) { return 144 } else { return 141 }
                     }
                   } else {
-                    if poly[2457].contains(testy: lat, testx: lng) { return 144 } else { return 141 }
+                    if polygons[2457].contains(testy: lat, testx: lng) { return 144 } else { return 141 }
                   }
                 }
               }
@@ -12095,19 +12095,19 @@ public extension TimeZone {
       } else {
         if lat < 48.188303 {
           if lat < 44.566012 {
-            if poly[2458].contains(testy: lat, testx: lng) { return 42 } else { return 291 }
+            if polygons[2458].contains(testy: lat, testx: lng) { return 42 } else { return 291 }
           } else {
             if lat < 46.377158 {
-              if poly[2459].contains(testy: lat, testx: lng) { return 291 } else { return 42 }
+              if polygons[2459].contains(testy: lat, testx: lng) { return 291 } else { return 42 }
             } else {
-              if poly[2460].contains(testy: lat, testx: lng) { return 42 } else { return 291 }
+              if polygons[2460].contains(testy: lat, testx: lng) { return 42 } else { return 291 }
             }
           }
         } else {
           if lat < 52.939128 {
-            if poly[2461].contains(testy: lat, testx: lng) { return 42 } else { return 291 }
+            if polygons[2461].contains(testy: lat, testx: lng) { return 42 } else { return 291 }
           } else {
-            if poly[2462].contains(testy: lat, testx: lng) { return 291 } else { return 141 }
+            if polygons[2462].contains(testy: lat, testx: lng) { return 291 } else { return 141 }
           }
         }
       }
@@ -12121,9 +12121,9 @@ public extension TimeZone {
           if lng < 122.704277 {
             if lng < 110.802727 {
               if lat < 37.663533 {
-                if poly[2463].contains(testy: lat, testx: lng) { return 291 } else { return 403 }
+                if polygons[2463].contains(testy: lat, testx: lng) { return 291 } else { return 403 }
               } else {
-                if poly[2464].contains(testy: lat, testx: lng) { return 291 } else { return 403 }
+                if polygons[2464].contains(testy: lat, testx: lng) { return 291 } else { return 403 }
               }
             } else {
               return 291
@@ -12154,18 +12154,18 @@ public extension TimeZone {
                     if lat < 37.823339 { return 11 } else { return 151 }
                   } else {
                     if lng < 126.516444 {
-                      if poly[2465].contains(testy: lat, testx: lng) { return 11 } else { return 151 }
+                      if polygons[2465].contains(testy: lat, testx: lng) { return 11 } else { return 151 }
                     } else {
-                      if poly[2466].contains(testy: lat, testx: lng) { return 11 } else { return 151 }
+                      if polygons[2466].contains(testy: lat, testx: lng) { return 11 } else { return 151 }
                     }
                   }
                 }
               }
             } else {
               if lng < 127.382829 {
-                if poly[2467].contains(testy: lat, testx: lng) { return 151 } else { return 11 }
+                if polygons[2467].contains(testy: lat, testx: lng) { return 151 } else { return 11 }
               } else {
-                if poly[2468].contains(testy: lat, testx: lng) { return 151 } else { return 11 }
+                if polygons[2468].contains(testy: lat, testx: lng) { return 151 } else { return 11 }
               }
             }
           }
@@ -12175,9 +12175,9 @@ public extension TimeZone {
           if lng < 121.710999 {
             if lng < 111.212129 {
               if lat < 39.289394 {
-                if poly[2469].contains(testy: lat, testx: lng) { return 291 } else { return 403 }
+                if polygons[2469].contains(testy: lat, testx: lng) { return 291 } else { return 403 }
               } else {
-                if poly[2470].contains(testy: lat, testx: lng) { return 291 } else { return 403 }
+                if polygons[2470].contains(testy: lat, testx: lng) { return 291 } else { return 403 }
               }
             } else {
               return 291
@@ -12194,36 +12194,36 @@ public extension TimeZone {
             } else {
               if lat < 39.931973 {
                 if lng < 124.255466 {
-                  if poly[2471].contains(testy: lat, testx: lng) { return 151 } else { return 291 }
+                  if polygons[2471].contains(testy: lat, testx: lng) { return 151 } else { return 291 }
                 } else {
                   return 151
                 }
               } else {
                 if lat < 43.487705 {
                   if lng < 123.811134 {
-                    if poly[2472].contains(testy: lat, testx: lng) { return 42 } else { return 291 }
+                    if polygons[2472].contains(testy: lat, testx: lng) { return 42 } else { return 291 }
                   } else {
                     if lng < 125.610680 {
                       if lat < 41.709839 {
-                        if poly[2473].contains(testy: lat, testx: lng) { return 42 }
-                        if poly[2474].contains(testy: lat, testx: lng) { return 42 }
-                        if poly[2475].contains(testy: lat, testx: lng) { return 291 } else { return 151 }
+                        if polygons[2473].contains(testy: lat, testx: lng) { return 42 }
+                        if polygons[2474].contains(testy: lat, testx: lng) { return 42 }
+                        if polygons[2475].contains(testy: lat, testx: lng) { return 291 } else { return 151 }
                       } else {
-                        if poly[2476].contains(testy: lat, testx: lng) { return 291 } else { return 42 }
+                        if polygons[2476].contains(testy: lat, testx: lng) { return 291 } else { return 42 }
                       }
                     } else {
                       if lat < 41.709839 {
                         if lng < 126.510452 {
-                          if poly[2477].contains(testy: lat, testx: lng) { return 151 }
-                          if poly[2478].contains(testy: lat, testx: lng) { return 151 }
-                          if poly[2479].contains(testy: lat, testx: lng) { return 291 }
-                          if poly[2480].contains(testy: lat, testx: lng) { return 291 } else { return 42 }
+                          if polygons[2477].contains(testy: lat, testx: lng) { return 151 }
+                          if polygons[2478].contains(testy: lat, testx: lng) { return 151 }
+                          if polygons[2479].contains(testy: lat, testx: lng) { return 291 }
+                          if polygons[2480].contains(testy: lat, testx: lng) { return 291 } else { return 42 }
                         } else {
-                          if poly[2481].contains(testy: lat, testx: lng) { return 151 } else { return 42 }
+                          if polygons[2481].contains(testy: lat, testx: lng) { return 151 } else { return 42 }
                         }
                       } else {
-                        if poly[2482].contains(testy: lat, testx: lng) { return 151 }
-                        if poly[2483].contains(testy: lat, testx: lng) { return 151 } else { return 42 }
+                        if polygons[2482].contains(testy: lat, testx: lng) { return 151 }
+                        if polygons[2483].contains(testy: lat, testx: lng) { return 151 } else { return 42 }
                       }
                     }
                   }
@@ -12233,13 +12233,13 @@ public extension TimeZone {
                       return 42
                     } else {
                       if lat < 49.791793 {
-                        if poly[2484].contains(testy: lat, testx: lng) { return 291 } else { return 42 }
+                        if polygons[2484].contains(testy: lat, testx: lng) { return 291 } else { return 42 }
                       } else {
                         if lng < 125.583347 {
-                          if poly[2485].contains(testy: lat, testx: lng) { return 291 } else { return 42 }
+                          if polygons[2485].contains(testy: lat, testx: lng) { return 291 } else { return 42 }
                         } else {
-                          if poly[2486].contains(testy: lat, testx: lng) { return 141 }
-                          if poly[2487].contains(testy: lat, testx: lng) { return 291 } else { return 42 }
+                          if polygons[2486].contains(testy: lat, testx: lng) { return 141 }
+                          if polygons[2487].contains(testy: lat, testx: lng) { return 291 } else { return 42 }
                         }
                       }
                     }
@@ -12247,10 +12247,10 @@ public extension TimeZone {
                     if lat < 56.095881 {
                       if lat < 53.994519 {
                         if lng < 125.583347 {
-                          if poly[2488].contains(testy: lat, testx: lng) { return 141 }
-                          if poly[2489].contains(testy: lat, testx: lng) { return 291 } else { return 42 }
+                          if polygons[2488].contains(testy: lat, testx: lng) { return 141 }
+                          if polygons[2489].contains(testy: lat, testx: lng) { return 291 } else { return 42 }
                         } else {
-                          if poly[2490].contains(testy: lat, testx: lng) { return 42 } else { return 141 }
+                          if polygons[2490].contains(testy: lat, testx: lng) { return 42 } else { return 141 }
                         }
                       } else {
                         return 141
@@ -12274,23 +12274,23 @@ public extension TimeZone {
                 if lat < 66.572899 {
                   if lng < 108.915218 {
                     if lat < 63.435753 {
-                      if poly[2491].contains(testy: lat, testx: lng) { return 289 } else { return 144 }
+                      if polygons[2491].contains(testy: lat, testx: lng) { return 289 } else { return 144 }
                     } else {
                       if lng < 107.009928 {
                         if lat < 65.004326 {
-                          if poly[2492].contains(testy: lat, testx: lng) { return 141 }
-                          if poly[2493].contains(testy: lat, testx: lng) { return 144 } else { return 289 }
+                          if polygons[2492].contains(testy: lat, testx: lng) { return 141 }
+                          if polygons[2493].contains(testy: lat, testx: lng) { return 144 } else { return 289 }
                         } else {
-                          if poly[2494].contains(testy: lat, testx: lng) { return 289 } else { return 141 }
+                          if polygons[2494].contains(testy: lat, testx: lng) { return 289 } else { return 141 }
                         }
                       } else {
                         if lat < 65.004326 {
                           if lng < 107.962573 {
-                            if poly[2495].contains(testy: lat, testx: lng) { return 141 }
-                            if poly[2496].contains(testy: lat, testx: lng) { return 144 } else { return 289 }
+                            if polygons[2495].contains(testy: lat, testx: lng) { return 141 }
+                            if polygons[2496].contains(testy: lat, testx: lng) { return 144 } else { return 289 }
                           } else {
-                            if poly[2497].contains(testy: lat, testx: lng) { return 141 }
-                            if poly[2498].contains(testy: lat, testx: lng) { return 289 } else { return 144 }
+                            if polygons[2497].contains(testy: lat, testx: lng) { return 141 }
+                            if polygons[2498].contains(testy: lat, testx: lng) { return 289 } else { return 144 }
                           }
                         } else {
                           return 141
@@ -12301,40 +12301,40 @@ public extension TimeZone {
                     if lat < 63.435753 {
                       if lng < 110.820509 {
                         if lat < 61.867180 {
-                          if poly[2499].contains(testy: lat, testx: lng) { return 144 } else { return 141 }
+                          if polygons[2499].contains(testy: lat, testx: lng) { return 144 } else { return 141 }
                         } else {
-                          if poly[2500].contains(testy: lat, testx: lng) { return 144 } else { return 141 }
+                          if polygons[2500].contains(testy: lat, testx: lng) { return 144 } else { return 141 }
                         }
                       } else {
                         return 141
                       }
                     } else {
-                      if poly[2501].contains(testy: lat, testx: lng) { return 144 } else { return 141 }
+                      if polygons[2501].contains(testy: lat, testx: lng) { return 144 } else { return 141 }
                     }
                   }
                 } else {
                   if lng < 108.915218 {
-                    if poly[2502].contains(testy: lat, testx: lng) { return 141 } else { return 289 }
+                    if polygons[2502].contains(testy: lat, testx: lng) { return 141 } else { return 289 }
                   } else {
                     if lat < 69.710045 {
                       return 141
                     } else {
                       if lng < 110.820509 {
-                        if poly[2503].contains(testy: lat, testx: lng) { return 289 } else { return 141 }
+                        if polygons[2503].contains(testy: lat, testx: lng) { return 289 } else { return 141 }
                       } else {
-                        if poly[2504].contains(testy: lat, testx: lng) { return 289 } else { return 141 }
+                        if polygons[2504].contains(testy: lat, testx: lng) { return 289 } else { return 141 }
                       }
                     }
                   }
                 }
               } else {
-                if poly[2505].contains(testy: lat, testx: lng) { return 144 } else { return 141 }
+                if polygons[2505].contains(testy: lat, testx: lng) { return 144 } else { return 141 }
               }
             } else {
               if lng < 108.341057 {
                 return 289
               } else {
-                if poly[2506].contains(testy: lat, testx: lng) { return 141 } else { return 289 }
+                if polygons[2506].contains(testy: lat, testx: lng) { return 141 } else { return 289 }
               }
             }
           } else {
@@ -12344,18 +12344,18 @@ public extension TimeZone {
               } else {
                 if lat < 74.049721 {
                   if lng < 111.589165 {
-                    if poly[2507].contains(testy: lat, testx: lng) { return 141 } else { return 289 }
+                    if polygons[2507].contains(testy: lat, testx: lng) { return 141 } else { return 289 }
                   } else {
                     return 141
                   }
                 } else {
                   if lng < 111.209999 {
-                    if poly[2508].contains(testy: lat, testx: lng) { return 141 } else { return 289 }
+                    if polygons[2508].contains(testy: lat, testx: lng) { return 141 } else { return 289 }
                   } else {
                     if lat < 74.551941 {
                       return 141
                     } else {
-                      if poly[2509].contains(testy: lat, testx: lng) { return 141 } else { return 289 }
+                      if polygons[2509].contains(testy: lat, testx: lng) { return 141 } else { return 289 }
                     }
                   }
                 }
@@ -12379,18 +12379,18 @@ public extension TimeZone {
         if lng < 134.959961 {
           if lng < 132.286469 {
             if lat < 52.739679 {
-              if poly[2510].contains(testy: lat, testx: lng) { return 37 } else { return 141 }
+              if polygons[2510].contains(testy: lat, testx: lng) { return 37 } else { return 141 }
             } else {
-              if poly[2511].contains(testy: lat, testx: lng) { return 37 } else { return 141 }
+              if polygons[2511].contains(testy: lat, testx: lng) { return 37 } else { return 141 }
             }
           } else {
             if lat < 52.739679 {
-              if poly[2512].contains(testy: lat, testx: lng) { return 141 } else { return 37 }
+              if polygons[2512].contains(testy: lat, testx: lng) { return 141 } else { return 37 }
             } else {
               if lng < 133.623215 {
-                if poly[2513].contains(testy: lat, testx: lng) { return 141 } else { return 37 }
+                if polygons[2513].contains(testy: lat, testx: lng) { return 141 } else { return 37 }
               } else {
-                if poly[2514].contains(testy: lat, testx: lng) { return 141 } else { return 37 }
+                if polygons[2514].contains(testy: lat, testx: lng) { return 141 } else { return 37 }
               }
             }
           }
@@ -12403,7 +12403,7 @@ public extension TimeZone {
     } else {
       if lat < 55.194805 {
         if lng < 132.413686 {
-          if poly[2515].contains(testy: lat, testx: lng) { return 37 } else { return 141 }
+          if polygons[2515].contains(testy: lat, testx: lng) { return 37 } else { return 141 }
         } else {
           return 37
         }
@@ -12419,55 +12419,55 @@ public extension TimeZone {
                         return 141
                       } else {
                         if lat < 56.198904 {
-                          if poly[2516].contains(testy: lat, testx: lng) { return 37 } else { return 141 }
+                          if polygons[2516].contains(testy: lat, testx: lng) { return 37 } else { return 141 }
                         } else {
-                          if poly[2517].contains(testy: lat, testx: lng) { return 141 } else { return 37 }
+                          if polygons[2517].contains(testy: lat, testx: lng) { return 141 } else { return 37 }
                         }
                       }
                     } else {
-                      if poly[2518].contains(testy: lat, testx: lng) { return 37 }
-                      if poly[2519].contains(testy: lat, testx: lng) { return 37 }
-                      if poly[2520].contains(testy: lat, testx: lng) { return 37 }
-                      if poly[2521].contains(testy: lat, testx: lng) { return 104 } else { return 141 }
+                      if polygons[2518].contains(testy: lat, testx: lng) { return 37 }
+                      if polygons[2519].contains(testy: lat, testx: lng) { return 37 }
+                      if polygons[2520].contains(testy: lat, testx: lng) { return 37 }
+                      if polygons[2521].contains(testy: lat, testx: lng) { return 104 } else { return 141 }
                     }
                   } else {
                     if lat < 57.203003 {
-                      if poly[2522].contains(testy: lat, testx: lng) { return 141 } else { return 37 }
+                      if polygons[2522].contains(testy: lat, testx: lng) { return 141 } else { return 37 }
                     } else {
                       if lng < 133.149747 {
-                        if poly[2523].contains(testy: lat, testx: lng) { return 104 }
-                        if poly[2524].contains(testy: lat, testx: lng) { return 141 }
-                        if poly[2525].contains(testy: lat, testx: lng) { return 141 }
-                        if poly[2526].contains(testy: lat, testx: lng) { return 141 } else { return 37 }
+                        if polygons[2523].contains(testy: lat, testx: lng) { return 104 }
+                        if polygons[2524].contains(testy: lat, testx: lng) { return 141 }
+                        if polygons[2525].contains(testy: lat, testx: lng) { return 141 }
+                        if polygons[2526].contains(testy: lat, testx: lng) { return 141 } else { return 37 }
                       } else {
-                        if poly[2527].contains(testy: lat, testx: lng) { return 104 }
-                        if poly[2528].contains(testy: lat, testx: lng) { return 104 } else { return 37 }
+                        if polygons[2527].contains(testy: lat, testx: lng) { return 104 }
+                        if polygons[2528].contains(testy: lat, testx: lng) { return 104 } else { return 37 }
                       }
                     }
                   }
                 } else {
-                  if poly[2529].contains(testy: lat, testx: lng) { return 37 }
-                  if poly[2530].contains(testy: lat, testx: lng) { return 141 } else { return 104 }
+                  if polygons[2529].contains(testy: lat, testx: lng) { return 37 }
+                  if polygons[2530].contains(testy: lat, testx: lng) { return 141 } else { return 104 }
                 }
               } else {
                 if lat < 59.211202 {
-                  if poly[2531].contains(testy: lat, testx: lng) { return 104 }
-                  if poly[2532].contains(testy: lat, testx: lng) { return 104 } else { return 37 }
+                  if polygons[2531].contains(testy: lat, testx: lng) { return 104 }
+                  if polygons[2532].contains(testy: lat, testx: lng) { return 104 } else { return 37 }
                 } else {
                   if lng < 136.686518 {
-                    if poly[2533].contains(testy: lat, testx: lng) { return 37 }
-                    if poly[2534].contains(testy: lat, testx: lng) { return 37 }
-                    if poly[2535].contains(testy: lat, testx: lng) { return 141 } else { return 104 }
+                    if polygons[2533].contains(testy: lat, testx: lng) { return 37 }
+                    if polygons[2534].contains(testy: lat, testx: lng) { return 37 }
+                    if polygons[2535].contains(testy: lat, testx: lng) { return 141 } else { return 104 }
                   } else {
                     if lat < 61.219400 {
                       if lng < 137.865441 {
-                        if poly[2536].contains(testy: lat, testx: lng) { return 104 } else { return 37 }
+                        if polygons[2536].contains(testy: lat, testx: lng) { return 104 } else { return 37 }
                       } else {
-                        if poly[2537].contains(testy: lat, testx: lng) { return 104 } else { return 37 }
+                        if polygons[2537].contains(testy: lat, testx: lng) { return 104 } else { return 37 }
                       }
                     } else {
-                      if poly[2538].contains(testy: lat, testx: lng) { return 37 }
-                      if poly[2539].contains(testy: lat, testx: lng) { return 37 } else { return 104 }
+                      if polygons[2538].contains(testy: lat, testx: lng) { return 37 }
+                      if polygons[2539].contains(testy: lat, testx: lng) { return 37 } else { return 104 }
                     }
                   }
                 }
@@ -12476,18 +12476,18 @@ public extension TimeZone {
               if lng < 134.328671 {
                 if lat < 67.243995 {
                   if lng < 131.970823 {
-                    if poly[2540].contains(testy: lat, testx: lng) { return 37 } else { return 141 }
+                    if polygons[2540].contains(testy: lat, testx: lng) { return 37 } else { return 141 }
                   } else {
-                    if poly[2541].contains(testy: lat, testx: lng) { return 37 }
-                    if poly[2542].contains(testy: lat, testx: lng) { return 141 }
-                    if poly[2543].contains(testy: lat, testx: lng) { return 141 } else { return 104 }
+                    if polygons[2541].contains(testy: lat, testx: lng) { return 37 }
+                    if polygons[2542].contains(testy: lat, testx: lng) { return 141 }
+                    if polygons[2543].contains(testy: lat, testx: lng) { return 141 } else { return 104 }
                   }
                 } else {
-                  if poly[2544].contains(testy: lat, testx: lng) { return 37 } else { return 141 }
+                  if polygons[2544].contains(testy: lat, testx: lng) { return 37 } else { return 141 }
                 }
               } else {
-                if poly[2545].contains(testy: lat, testx: lng) { return 46 }
-                if poly[2546].contains(testy: lat, testx: lng) { return 104 } else { return 37 }
+                if polygons[2545].contains(testy: lat, testx: lng) { return 46 }
+                if polygons[2546].contains(testy: lat, testx: lng) { return 104 } else { return 37 }
               }
             }
           } else {
@@ -12498,45 +12498,45 @@ public extension TimeZone {
                 } else {
                   if lng < 141.402212 {
                     if lat < 62.457058 {
-                      if poly[2547].contains(testy: lat, testx: lng) { return 104 }
-                      if poly[2548].contains(testy: lat, testx: lng) { return 104 }
-                      if poly[2549].contains(testy: lat, testx: lng) { return 140 }
-                      if poly[2550].contains(testy: lat, testx: lng) { return 140 } else { return 37 }
+                      if polygons[2547].contains(testy: lat, testx: lng) { return 104 }
+                      if polygons[2548].contains(testy: lat, testx: lng) { return 104 }
+                      if polygons[2549].contains(testy: lat, testx: lng) { return 140 }
+                      if polygons[2550].contains(testy: lat, testx: lng) { return 140 } else { return 37 }
                     } else {
-                      if poly[2551].contains(testy: lat, testx: lng) { return 37 }
-                      if poly[2552].contains(testy: lat, testx: lng) { return 104 } else { return 140 }
+                      if polygons[2551].contains(testy: lat, testx: lng) { return 37 }
+                      if polygons[2552].contains(testy: lat, testx: lng) { return 104 } else { return 140 }
                     }
                   } else {
-                    if poly[2553].contains(testy: lat, testx: lng) { return 140 } else { return 37 }
+                    if polygons[2553].contains(testy: lat, testx: lng) { return 140 } else { return 37 }
                   }
                 }
               } else {
                 if lat < 61.679001 {
                   if lng < 146.117907 {
-                    if poly[2554].contains(testy: lat, testx: lng) { return 46 } else { return 37 }
+                    if polygons[2554].contains(testy: lat, testx: lng) { return 46 } else { return 37 }
                   } else {
                     if lat < 60.425264 {
-                      if poly[2555].contains(testy: lat, testx: lng) { return 37 } else { return 46 }
+                      if polygons[2555].contains(testy: lat, testx: lng) { return 37 } else { return 46 }
                     } else {
-                      if poly[2556].contains(testy: lat, testx: lng) { return 37 } else { return 46 }
+                      if polygons[2556].contains(testy: lat, testx: lng) { return 37 } else { return 46 }
                     }
                   }
                 } else {
                   if lng < 146.117907 {
                     if lat < 62.948363 {
                       if lng < 144.938983 {
-                        if poly[2557].contains(testy: lat, testx: lng) { return 46 }
-                        if poly[2558].contains(testy: lat, testx: lng) { return 140 } else { return 37 }
+                        if polygons[2557].contains(testy: lat, testx: lng) { return 46 }
+                        if polygons[2558].contains(testy: lat, testx: lng) { return 140 } else { return 37 }
                       } else {
-                        if poly[2559].contains(testy: lat, testx: lng) { return 37 }
-                        if poly[2560].contains(testy: lat, testx: lng) { return 140 } else { return 46 }
+                        if polygons[2559].contains(testy: lat, testx: lng) { return 37 }
+                        if polygons[2560].contains(testy: lat, testx: lng) { return 140 } else { return 46 }
                       }
                     } else {
-                      if poly[2561].contains(testy: lat, testx: lng) { return 46 } else { return 140 }
+                      if polygons[2561].contains(testy: lat, testx: lng) { return 46 } else { return 140 }
                     }
                   } else {
-                    if poly[2562].contains(testy: lat, testx: lng) { return 37 }
-                    if poly[2563].contains(testy: lat, testx: lng) { return 140 } else { return 46 }
+                    if polygons[2562].contains(testy: lat, testx: lng) { return 37 }
+                    if polygons[2563].contains(testy: lat, testx: lng) { return 140 } else { return 46 }
                   }
                 }
               }
@@ -12545,20 +12545,20 @@ public extension TimeZone {
                 if lat < 67.739058 {
                   if lng < 141.402212 {
                     if lat < 65.978391 {
-                      if poly[2564].contains(testy: lat, testx: lng) { return 37 }
-                      if poly[2565].contains(testy: lat, testx: lng) { return 46 }
-                      if poly[2566].contains(testy: lat, testx: lng) { return 140 } else { return 104 }
+                      if polygons[2564].contains(testy: lat, testx: lng) { return 37 }
+                      if polygons[2565].contains(testy: lat, testx: lng) { return 46 }
+                      if polygons[2566].contains(testy: lat, testx: lng) { return 140 } else { return 104 }
                     } else {
-                      if poly[2567].contains(testy: lat, testx: lng) { return 46 } else { return 37 }
+                      if polygons[2567].contains(testy: lat, testx: lng) { return 46 } else { return 37 }
                     }
                   } else {
-                    if poly[2568].contains(testy: lat, testx: lng) { return 140 } else { return 46 }
+                    if polygons[2568].contains(testy: lat, testx: lng) { return 140 } else { return 46 }
                   }
                 } else {
-                  if poly[2569].contains(testy: lat, testx: lng) { return 46 } else { return 37 }
+                  if polygons[2569].contains(testy: lat, testx: lng) { return 46 } else { return 37 }
                 }
               } else {
-                if poly[2570].contains(testy: lat, testx: lng) { return 140 } else { return 46 }
+                if polygons[2570].contains(testy: lat, testx: lng) { return 140 } else { return 46 }
               }
             }
           }
@@ -12566,7 +12566,7 @@ public extension TimeZone {
           if lng < 138.020813 {
             return 37
           } else {
-            if poly[2571].contains(testy: lat, testx: lng) { return 46 } else { return 37 }
+            if polygons[2571].contains(testy: lat, testx: lng) { return 46 } else { return 37 }
           }
         }
       }
@@ -12587,7 +12587,7 @@ public extension TimeZone {
             if lng < 130.923218 {
               if lng < 128.363785 {
                 if lat < 38.612446 {
-                  if poly[2572].contains(testy: lat, testx: lng) { return 151 } else { return 11 }
+                  if polygons[2572].contains(testy: lat, testx: lng) { return 151 } else { return 11 }
                 } else {
                   return 151
                 }
@@ -12607,46 +12607,46 @@ public extension TimeZone {
                     if lng < 130.674866 {
                       if lat < 42.511056 {
                         if lng < 129.042545 {
-                          if poly[2573].contains(testy: lat, testx: lng) { return 42 } else { return 151 }
+                          if polygons[2573].contains(testy: lat, testx: lng) { return 42 } else { return 151 }
                         } else {
-                          if poly[2574].contains(testy: lat, testx: lng) { return 37 }
-                          if poly[2575].contains(testy: lat, testx: lng) { return 42 }
-                          if poly[2576].contains(testy: lat, testx: lng) { return 42 } else { return 151 }
+                          if polygons[2574].contains(testy: lat, testx: lng) { return 37 }
+                          if polygons[2575].contains(testy: lat, testx: lng) { return 42 }
+                          if polygons[2576].contains(testy: lat, testx: lng) { return 42 } else { return 151 }
                         }
                       } else {
-                        if poly[2577].contains(testy: lat, testx: lng) { return 37 }
-                        if poly[2578].contains(testy: lat, testx: lng) { return 151 } else { return 42 }
+                        if polygons[2577].contains(testy: lat, testx: lng) { return 37 }
+                        if polygons[2578].contains(testy: lat, testx: lng) { return 151 } else { return 42 }
                       }
                     } else {
                       if lat < 42.642555 {
                         return 37
                       } else {
-                        if poly[2579].contains(testy: lat, testx: lng) { return 42 } else { return 37 }
+                        if polygons[2579].contains(testy: lat, testx: lng) { return 42 } else { return 37 }
                       }
                     }
                   } else {
                     if lat < 42.833363 {
                       return 37
                     } else {
-                      if poly[2580].contains(testy: lat, testx: lng) { return 42 } else { return 37 }
+                      if polygons[2580].contains(testy: lat, testx: lng) { return 42 } else { return 37 }
                     }
                   }
                 } else {
                   if lat < 47.970250 {
-                    if poly[2581].contains(testy: lat, testx: lng) { return 37 } else { return 42 }
+                    if polygons[2581].contains(testy: lat, testx: lng) { return 37 } else { return 42 }
                   } else {
                     if lng < 129.463665 {
-                      if poly[2582].contains(testy: lat, testx: lng) { return 42 } else { return 141 }
+                      if polygons[2582].contains(testy: lat, testx: lng) { return 42 } else { return 141 }
                     } else {
                       if lat < 49.447138 {
                         if lng < 130.490385 {
-                          if poly[2583].contains(testy: lat, testx: lng) { return 141 } else { return 42 }
+                          if polygons[2583].contains(testy: lat, testx: lng) { return 141 } else { return 42 }
                         } else {
-                          if poly[2584].contains(testy: lat, testx: lng) { return 42 }
-                          if poly[2585].contains(testy: lat, testx: lng) { return 141 } else { return 37 }
+                          if polygons[2584].contains(testy: lat, testx: lng) { return 42 }
+                          if polygons[2585].contains(testy: lat, testx: lng) { return 141 } else { return 37 }
                         }
                       } else {
-                        if poly[2586].contains(testy: lat, testx: lng) { return 141 } else { return 37 }
+                        if polygons[2586].contains(testy: lat, testx: lng) { return 141 } else { return 37 }
                       }
                     }
                   }
@@ -12662,12 +12662,12 @@ public extension TimeZone {
                   } else {
                     if lat < 45.336029 {
                       if lng < 131.891479 {
-                        if poly[2587].contains(testy: lat, testx: lng) { return 42 } else { return 37 }
+                        if polygons[2587].contains(testy: lat, testx: lng) { return 42 } else { return 37 }
                       } else {
-                        if poly[2588].contains(testy: lat, testx: lng) { return 42 } else { return 37 }
+                        if polygons[2588].contains(testy: lat, testx: lng) { return 42 } else { return 37 }
                       }
                     } else {
-                      if poly[2589].contains(testy: lat, testx: lng) { return 42 } else { return 37 }
+                      if polygons[2589].contains(testy: lat, testx: lng) { return 42 } else { return 37 }
                     }
                   }
                 } else {
@@ -12676,13 +12676,13 @@ public extension TimeZone {
                       return 37
                     } else {
                       if lat < 46.912027 {
-                        if poly[2590].contains(testy: lat, testx: lng) { return 42 } else { return 37 }
+                        if polygons[2590].contains(testy: lat, testx: lng) { return 42 } else { return 37 }
                       } else {
                         if lat < 48.918027 {
                           if lng < 133.356674 {
-                            if poly[2591].contains(testy: lat, testx: lng) { return 42 } else { return 37 }
+                            if polygons[2591].contains(testy: lat, testx: lng) { return 42 } else { return 37 }
                           } else {
-                            if poly[2592].contains(testy: lat, testx: lng) { return 42 } else { return 37 }
+                            if polygons[2592].contains(testy: lat, testx: lng) { return 42 } else { return 37 }
                           }
                         } else {
                           return 37
@@ -12690,7 +12690,7 @@ public extension TimeZone {
                       }
                     }
                   } else {
-                    if poly[2593].contains(testy: lat, testx: lng) { return 280 } else { return 37 }
+                    if polygons[2593].contains(testy: lat, testx: lng) { return 280 } else { return 37 }
                   }
                 }
               }
@@ -12727,7 +12727,7 @@ public extension TimeZone {
                 if lng < 138.896896 {
                   return 37
                 } else {
-                  if poly[2594].contains(testy: lat, testx: lng) { return 46 } else { return 37 }
+                  if polygons[2594].contains(testy: lat, testx: lng) { return 46 } else { return 37 }
                 }
               }
             } else {
@@ -12755,9 +12755,9 @@ public extension TimeZone {
                         return 46
                       } else {
                         if lng < 158.342163 {
-                          if poly[2595].contains(testy: lat, testx: lng) { return 365 } else { return 46 }
+                          if polygons[2595].contains(testy: lat, testx: lng) { return 365 } else { return 46 }
                         } else {
-                          if poly[2596].contains(testy: lat, testx: lng) { return 365 } else { return 46 }
+                          if polygons[2596].contains(testy: lat, testx: lng) { return 365 } else { return 46 }
                         }
                       }
                     }
@@ -12784,14 +12784,14 @@ public extension TimeZone {
                       if lng < 162.566748 { return 46 } else { return 373 }
                     } else {
                       if lat < 62.926285 {
-                        if poly[2597].contains(testy: lat, testx: lng) { return 46 } else { return 373 }
+                        if polygons[2597].contains(testy: lat, testx: lng) { return 46 } else { return 373 }
                       } else {
-                        if poly[2598].contains(testy: lat, testx: lng) { return 46 } else { return 373 }
+                        if polygons[2598].contains(testy: lat, testx: lng) { return 46 } else { return 373 }
                       }
                     }
                   } else {
-                    if poly[2599].contains(testy: lat, testx: lng) { return 365 }
-                    if poly[2600].contains(testy: lat, testx: lng) { return 373 } else { return 46 }
+                    if polygons[2599].contains(testy: lat, testx: lng) { return 365 }
+                    if polygons[2600].contains(testy: lat, testx: lng) { return 373 } else { return 46 }
                   }
                 } else {
                   if lng < 174.513611 {
@@ -12800,19 +12800,19 @@ public extension TimeZone {
                     } else {
                       if lng < 168.989838 {
                         if lng < 166.227951 {
-                          if poly[2601].contains(testy: lat, testx: lng) { return 365 } else { return 373 }
+                          if polygons[2601].contains(testy: lat, testx: lng) { return 365 } else { return 373 }
                         } else {
-                          if poly[2602].contains(testy: lat, testx: lng) { return 373 } else { return 365 }
+                          if polygons[2602].contains(testy: lat, testx: lng) { return 373 } else { return 365 }
                         }
                       } else {
                         if lng < 171.751724 {
                           if lat < 63.133138 {
-                            if poly[2603].contains(testy: lat, testx: lng) { return 373 } else { return 365 }
+                            if polygons[2603].contains(testy: lat, testx: lng) { return 373 } else { return 365 }
                           } else {
-                            if poly[2604].contains(testy: lat, testx: lng) { return 373 } else { return 365 }
+                            if polygons[2604].contains(testy: lat, testx: lng) { return 373 } else { return 365 }
                           }
                         } else {
-                          if poly[2605].contains(testy: lat, testx: lng) { return 365 } else { return 373 }
+                          if polygons[2605].contains(testy: lat, testx: lng) { return 365 } else { return 373 }
                         }
                       }
                     }
@@ -12828,9 +12828,9 @@ public extension TimeZone {
                 if lng < 161.655670 {
                   if lat < 68.411377 {
                     if lng < 161.365784 {
-                      if poly[2606].contains(testy: lat, testx: lng) { return 46 } else { return 365 }
+                      if polygons[2606].contains(testy: lat, testx: lng) { return 46 } else { return 365 }
                     } else {
-                      if poly[2607].contains(testy: lat, testx: lng) { return 46 } else { return 365 }
+                      if polygons[2607].contains(testy: lat, testx: lng) { return 46 } else { return 365 }
                     }
                   } else {
                     return 46
@@ -12838,18 +12838,18 @@ public extension TimeZone {
                 } else {
                   if lng < 161.891998 {
                     if lat < 68.378539 {
-                      if poly[2608].contains(testy: lat, testx: lng) { return 46 } else { return 365 }
+                      if polygons[2608].contains(testy: lat, testx: lng) { return 46 } else { return 365 }
                     } else {
                       return 46
                     }
                   } else {
                     if lat < 68.869705 {
-                      if poly[2609].contains(testy: lat, testx: lng) { return 46 } else { return 365 }
+                      if polygons[2609].contains(testy: lat, testx: lng) { return 46 } else { return 365 }
                     } else {
                       if lng < 162.089188 {
                         return 46
                       } else {
-                        if poly[2610].contains(testy: lat, testx: lng) { return 365 } else { return 46 }
+                        if polygons[2610].contains(testy: lat, testx: lng) { return 365 } else { return 46 }
                       }
                     }
                   }
@@ -12881,24 +12881,24 @@ public extension TimeZone {
                   if lng < 115.507401 {
                     if lng < 111.416031 {
                       if lat < 2.083333 {
-                        if poly[2611].contains(testy: lat, testx: lng) { return 320 } else { return 286 }
+                        if polygons[2611].contains(testy: lat, testx: lng) { return 320 } else { return 286 }
                       } else {
                         return 286
                       }
                     } else {
                       if lng < 113.461716 {
-                        if poly[2612].contains(testy: lat, testx: lng) { return 320 } else { return 286 }
+                        if polygons[2612].contains(testy: lat, testx: lng) { return 320 } else { return 286 }
                       } else {
                         if lat < 1.841722 {
                           if lng < 114.484558 {
-                            if poly[2613].contains(testy: lat, testx: lng) { return 286 }
-                            if poly[2614].contains(testy: lat, testx: lng) { return 383 } else { return 320 }
+                            if polygons[2613].contains(testy: lat, testx: lng) { return 286 }
+                            if polygons[2614].contains(testy: lat, testx: lng) { return 383 } else { return 320 }
                           } else {
-                            if poly[2615].contains(testy: lat, testx: lng) { return 286 }
-                            if poly[2616].contains(testy: lat, testx: lng) { return 320 } else { return 383 }
+                            if polygons[2615].contains(testy: lat, testx: lng) { return 286 }
+                            if polygons[2616].contains(testy: lat, testx: lng) { return 320 } else { return 383 }
                           }
                         } else {
-                          if poly[2617].contains(testy: lat, testx: lng) { return 383 } else { return 286 }
+                          if polygons[2617].contains(testy: lat, testx: lng) { return 383 } else { return 286 }
                         }
                       }
                     }
@@ -12910,8 +12910,8 @@ public extension TimeZone {
                 if lng < 117.507942 {
                   if lat < 3.454611 {
                     if lng < 115.648697 {
-                      if poly[2618].contains(testy: lat, testx: lng) { return 383 }
-                      if poly[2619].contains(testy: lat, testx: lng) { return 383 } else { return 286 }
+                      if polygons[2618].contains(testy: lat, testx: lng) { return 383 }
+                      if polygons[2619].contains(testy: lat, testx: lng) { return 383 } else { return 286 }
                     } else {
                       return 383
                     }
@@ -12919,32 +12919,32 @@ public extension TimeZone {
                     if lng < 117.061142 {
                       if lng < 115.359444 {
                         if lng < 114.294377 {
-                          if poly[2620].contains(testy: lat, testx: lng) { return 217 } else { return 286 }
+                          if polygons[2620].contains(testy: lat, testx: lng) { return 217 } else { return 286 }
                         } else {
                           if lat < 4.250889 {
-                            if poly[2621].contains(testy: lat, testx: lng) { return 217 }
-                            if poly[2622].contains(testy: lat, testx: lng) { return 217 } else { return 286 }
+                            if polygons[2621].contains(testy: lat, testx: lng) { return 217 }
+                            if polygons[2622].contains(testy: lat, testx: lng) { return 217 } else { return 286 }
                           } else {
                             if lng < 114.826910 {
-                              if poly[2623].contains(testy: lat, testx: lng) { return 286 }
-                              if poly[2624].contains(testy: lat, testx: lng) { return 286 }
-                              if poly[2625].contains(testy: lat, testx: lng) { return 286 }
-                              if poly[2626].contains(testy: lat, testx: lng) { return 286 } else { return 217 }
+                              if polygons[2623].contains(testy: lat, testx: lng) { return 286 }
+                              if polygons[2624].contains(testy: lat, testx: lng) { return 286 }
+                              if polygons[2625].contains(testy: lat, testx: lng) { return 286 }
+                              if polygons[2626].contains(testy: lat, testx: lng) { return 286 } else { return 217 }
                             } else {
-                              if poly[2627].contains(testy: lat, testx: lng) { return 286 }
-                              if poly[2628].contains(testy: lat, testx: lng) { return 286 } else { return 217 }
+                              if polygons[2627].contains(testy: lat, testx: lng) { return 286 }
+                              if polygons[2628].contains(testy: lat, testx: lng) { return 286 } else { return 217 }
                             }
                           }
                         }
                       } else {
-                        if poly[2629].contains(testy: lat, testx: lng) { return 383 }
-                        if poly[2630].contains(testy: lat, testx: lng) { return 383 } else { return 286 }
+                        if polygons[2629].contains(testy: lat, testx: lng) { return 383 }
+                        if polygons[2630].contains(testy: lat, testx: lng) { return 383 } else { return 286 }
                       }
                     } else {
                       if lat < 3.628139 {
                         return 383
                       } else {
-                        if poly[2631].contains(testy: lat, testx: lng) { return 286 } else { return 383 }
+                        if polygons[2631].contains(testy: lat, testx: lng) { return 286 } else { return 383 }
                       }
                     }
                   }
@@ -12953,9 +12953,9 @@ public extension TimeZone {
                     return 383
                   } else {
                     if lng < 117.585808 {
-                      if poly[2632].contains(testy: lat, testx: lng) { return 383 } else { return 286 }
+                      if polygons[2632].contains(testy: lat, testx: lng) { return 383 } else { return 286 }
                     } else {
-                      if poly[2633].contains(testy: lat, testx: lng) { return 383 } else { return 286 }
+                      if polygons[2633].contains(testy: lat, testx: lng) { return 383 } else { return 286 }
                     }
                   }
                 }
@@ -12979,7 +12979,7 @@ public extension TimeZone {
                 } else {
                   if lng < 109.135417 {
                     if lng < 106.207001 {
-                      if poly[2634].contains(testy: lat, testx: lng) { return 251 } else { return 24 }
+                      if polygons[2634].contains(testy: lat, testx: lng) { return 251 } else { return 24 }
                     } else {
                       return 24
                     }
@@ -13093,8 +13093,8 @@ public extension TimeZone {
                         if lng < 113.425163 {
                           return 26
                         } else {
-                          if poly[2635].contains(testy: lat, testx: lng) { return 383 }
-                          if poly[2636].contains(testy: lat, testx: lng) { return 383 } else { return 26 }
+                          if polygons[2635].contains(testy: lat, testx: lng) { return 383 }
+                          if polygons[2636].contains(testy: lat, testx: lng) { return 383 } else { return 26 }
                         }
                       }
                     } else {
@@ -13121,13 +13121,13 @@ public extension TimeZone {
                           return 383
                         } else {
                           if lng < 114.026596 {
-                            if poly[2637].contains(testy: lat, testx: lng) { return 383 } else { return 320 }
+                            if polygons[2637].contains(testy: lat, testx: lng) { return 383 } else { return 320 }
                           } else {
                             if lat < -1.783340 {
-                              if poly[2638].contains(testy: lat, testx: lng) { return 320 } else { return 383 }
+                              if polygons[2638].contains(testy: lat, testx: lng) { return 320 } else { return 383 }
                             } else {
-                              if poly[2639].contains(testy: lat, testx: lng) { return 383 }
-                              if poly[2640].contains(testy: lat, testx: lng) { return 383 } else { return 320 }
+                              if polygons[2639].contains(testy: lat, testx: lng) { return 383 }
+                              if polygons[2640].contains(testy: lat, testx: lng) { return 383 } else { return 320 }
                             }
                           }
                         }
@@ -13147,7 +13147,7 @@ public extension TimeZone {
                     if lat < -14.858306 {
                       return 35
                     } else {
-                      if poly[2641].contains(testy: lat, testx: lng) { return 345 } else { return 383 }
+                      if polygons[2641].contains(testy: lat, testx: lng) { return 345 } else { return 383 }
                     }
                   } else {
                     return 383
@@ -13175,7 +13175,7 @@ public extension TimeZone {
             if lng < 128.731216 {
               if lat < -14.416805 {
                 if lat < -31.300000 {
-                  if poly[2642].contains(testy: lat, testx: lng) { return 35 } else { return 79 }
+                  if polygons[2642].contains(testy: lat, testx: lng) { return 35 } else { return 79 }
                 } else {
                   return 35
                 }
@@ -13188,9 +13188,9 @@ public extension TimeZone {
                       if lat < -8.630452 {
                         if lat < -8.964142 {
                           if lat < -9.109211 {
-                            if poly[2643].contains(testy: lat, testx: lng) { return 345 } else { return 383 }
+                            if polygons[2643].contains(testy: lat, testx: lng) { return 345 } else { return 383 }
                           } else {
-                            if poly[2644].contains(testy: lat, testx: lng) { return 383 } else { return 345 }
+                            if polygons[2644].contains(testy: lat, testx: lng) { return 383 } else { return 345 }
                           }
                         } else {
                           return 345
@@ -13214,14 +13214,14 @@ public extension TimeZone {
                   } else {
                     if lng < 129.259827 {
                       if lat < -31.300000 {
-                        if poly[2645].contains(testy: lat, testx: lng) { return 79 } else { return 67 }
+                        if polygons[2645].contains(testy: lat, testx: lng) { return 79 } else { return 67 }
                       } else {
-                        if poly[2646].contains(testy: lat, testx: lng) { return 35 }
-                        if poly[2647].contains(testy: lat, testx: lng) { return 67 } else { return 10 }
+                        if polygons[2646].contains(testy: lat, testx: lng) { return 35 }
+                        if polygons[2647].contains(testy: lat, testx: lng) { return 67 } else { return 10 }
                       }
                     } else {
                       if lat < -25.998917 {
-                        if poly[2648].contains(testy: lat, testx: lng) { return 10 } else { return 67 }
+                        if polygons[2648].contains(testy: lat, testx: lng) { return 10 } else { return 67 }
                       } else {
                         return 10
                       }
@@ -13258,19 +13258,19 @@ public extension TimeZone {
                         if lat < 27.862792 {
                           if lng < 109.889385 {
                             if lat < 26.622813 {
-                              if poly[2649].contains(testy: lat, testx: lng) { return 403 } else { return 291 }
+                              if polygons[2649].contains(testy: lat, testx: lng) { return 403 } else { return 291 }
                             } else {
-                              if poly[2650].contains(testy: lat, testx: lng) { return 403 } else { return 291 }
+                              if polygons[2650].contains(testy: lat, testx: lng) { return 403 } else { return 291 }
                             }
                           } else {
-                            if poly[2651].contains(testy: lat, testx: lng) { return 403 } else { return 291 }
+                            if polygons[2651].contains(testy: lat, testx: lng) { return 403 } else { return 291 }
                           }
                         } else {
                           if lng < 109.889385 {
                             if lat < 29.102771 {
-                              if poly[2652].contains(testy: lat, testx: lng) { return 403 } else { return 291 }
+                              if polygons[2652].contains(testy: lat, testx: lng) { return 403 } else { return 291 }
                             } else {
-                              if poly[2653].contains(testy: lat, testx: lng) { return 403 } else { return 291 }
+                              if polygons[2653].contains(testy: lat, testx: lng) { return 403 } else { return 291 }
                             }
                           } else {
                             return 291
@@ -13302,23 +13302,23 @@ public extension TimeZone {
                         return 403
                       } else {
                         if lat < 31.915317 {
-                          if poly[2654].contains(testy: lat, testx: lng) { return 403 } else { return 291 }
+                          if polygons[2654].contains(testy: lat, testx: lng) { return 403 } else { return 291 }
                         } else {
                           if lng < 109.544000 {
-                            if poly[2655].contains(testy: lat, testx: lng) { return 291 }
-                            if poly[2656].contains(testy: lat, testx: lng) { return 291 } else { return 403 }
+                            if polygons[2655].contains(testy: lat, testx: lng) { return 291 }
+                            if polygons[2656].contains(testy: lat, testx: lng) { return 291 } else { return 403 }
                           } else {
                             if lat < 32.701600 {
-                              if poly[2657].contains(testy: lat, testx: lng) { return 403 }
-                              if poly[2658].contains(testy: lat, testx: lng) { return 403 } else { return 291 }
+                              if polygons[2657].contains(testy: lat, testx: lng) { return 403 }
+                              if polygons[2658].contains(testy: lat, testx: lng) { return 403 } else { return 291 }
                             } else {
-                              if poly[2659].contains(testy: lat, testx: lng) { return 291 } else { return 403 }
+                              if polygons[2659].contains(testy: lat, testx: lng) { return 291 } else { return 403 }
                             }
                           }
                         }
                       }
                     } else {
-                      if poly[2660].contains(testy: lat, testx: lng) { return 291 } else { return 403 }
+                      if polygons[2660].contains(testy: lat, testx: lng) { return 291 } else { return 403 }
                     }
                   } else {
                     return 291
@@ -13375,7 +13375,7 @@ public extension TimeZone {
                               return 31
                             } else {
                               if lng < -68.609608 {
-                                if poly[2661].contains(testy: lat, testx: lng) { return 287 } else { return 31 }
+                                if polygons[2661].contains(testy: lat, testx: lng) { return 287 } else { return 31 }
                               } else {
                                 return 287
                               }
@@ -13405,9 +13405,9 @@ public extension TimeZone {
                       return 31
                     } else {
                       if lat < -51.569118 {
-                        if poly[2662].contains(testy: lat, testx: lng) { return 85 } else { return 31 }
+                        if polygons[2662].contains(testy: lat, testx: lng) { return 85 } else { return 31 }
                       } else {
-                        if poly[2663].contains(testy: lat, testx: lng) { return 31 } else { return 85 }
+                        if polygons[2663].contains(testy: lat, testx: lng) { return 31 } else { return 85 }
                       }
                     }
                   } else {
@@ -13415,25 +13415,25 @@ public extension TimeZone {
                       if lat < -52.638439 {
                         return 31
                       } else {
-                        if poly[2664].contains(testy: lat, testx: lng) { return 85 } else { return 31 }
+                        if polygons[2664].contains(testy: lat, testx: lng) { return 85 } else { return 31 }
                       }
                     } else {
                       if lat < -53.978534 {
                         if lng < -69.057579 {
                           return 31
                         } else {
-                          if poly[2665].contains(testy: lat, testx: lng) { return 31 } else { return 287 }
+                          if polygons[2665].contains(testy: lat, testx: lng) { return 31 } else { return 287 }
                         }
                       } else {
                         if lat < -52.456120 {
                           if lng < -69.544449 {
                             return 31
                           } else {
-                            if poly[2666].contains(testy: lat, testx: lng) { return 31 } else { return 287 }
+                            if polygons[2666].contains(testy: lat, testx: lng) { return 31 } else { return 287 }
                           }
                         } else {
                           if lng < -68.368202 {
-                            if poly[2667].contains(testy: lat, testx: lng) { return 31 } else { return 85 }
+                            if polygons[2667].contains(testy: lat, testx: lng) { return 31 } else { return 85 }
                           } else {
                             return 82
                           }
@@ -13462,15 +13462,15 @@ public extension TimeZone {
                         } else {
                           if lat < -50.072808 {
                             if lat < -50.156428 {
-                              if poly[2668].contains(testy: lat, testx: lng) { return 85 } else { return 31 }
+                              if polygons[2668].contains(testy: lat, testx: lng) { return 85 } else { return 31 }
                             } else {
-                              if poly[2669].contains(testy: lat, testx: lng) { return 85 } else { return 31 }
+                              if polygons[2669].contains(testy: lat, testx: lng) { return 85 } else { return 31 }
                             }
                           } else {
                             if lat < -49.912819 {
-                              if poly[2670].contains(testy: lat, testx: lng) { return 85 } else { return 31 }
+                              if polygons[2670].contains(testy: lat, testx: lng) { return 85 } else { return 31 }
                             } else {
-                              if poly[2671].contains(testy: lat, testx: lng) { return 85 } else { return 31 }
+                              if polygons[2671].contains(testy: lat, testx: lng) { return 85 } else { return 31 }
                             }
                           }
                         }
@@ -13482,12 +13482,12 @@ public extension TimeZone {
                         if lat < -50.092410 {
                           if lng < -72.230858 {
                             if lat < -50.855255 {
-                              if poly[2672].contains(testy: lat, testx: lng) { return 85 } else { return 31 }
+                              if polygons[2672].contains(testy: lat, testx: lng) { return 85 } else { return 31 }
                             } else {
                               if lat < -50.312183 {
-                                if poly[2673].contains(testy: lat, testx: lng) { return 85 } else { return 31 }
+                                if polygons[2673].contains(testy: lat, testx: lng) { return 85 } else { return 31 }
                               } else {
-                                if poly[2674].contains(testy: lat, testx: lng) { return 31 } else { return 85 }
+                                if polygons[2674].contains(testy: lat, testx: lng) { return 31 } else { return 85 }
                               }
                             }
                           } else {
@@ -13497,35 +13497,35 @@ public extension TimeZone {
                           if lat < -49.953084 {
                             if lng < -73.497192 {
                               if lat < -50.047192 {
-                                if poly[2675].contains(testy: lat, testx: lng) { return 31 } else { return 85 }
+                                if polygons[2675].contains(testy: lat, testx: lng) { return 31 } else { return 85 }
                               } else {
-                                if poly[2676].contains(testy: lat, testx: lng) { return 85 } else { return 31 }
+                                if polygons[2676].contains(testy: lat, testx: lng) { return 85 } else { return 31 }
                               }
                             } else {
                               return 85
                             }
                           } else {
-                            if poly[2677].contains(testy: lat, testx: lng) { return 31 } else { return 85 }
+                            if polygons[2677].contains(testy: lat, testx: lng) { return 31 } else { return 85 }
                           }
                         }
                       } else {
                         if lng < -67.100245 {
                           if lng < -72.887050 {
                             if lat < -48.943169 {
-                              if poly[2678].contains(testy: lat, testx: lng) { return 31 } else { return 85 }
+                              if polygons[2678].contains(testy: lat, testx: lng) { return 31 } else { return 85 }
                             } else {
                               return 31
                             }
                           } else {
                             if lng < -69.993648 {
                               if lat < -47.491948 {
-                                if poly[2679].contains(testy: lat, testx: lng) { return 31 } else { return 85 }
+                                if polygons[2679].contains(testy: lat, testx: lng) { return 31 } else { return 85 }
                               } else {
-                                if poly[2680].contains(testy: lat, testx: lng) { return 85 }
-                                if poly[2681].contains(testy: lat, testx: lng) { return 88 } else { return 31 }
+                                if polygons[2680].contains(testy: lat, testx: lng) { return 85 }
+                                if polygons[2681].contains(testy: lat, testx: lng) { return 88 } else { return 31 }
                               }
                             } else {
-                              if poly[2682].contains(testy: lat, testx: lng) { return 88 } else { return 85 }
+                              if polygons[2682].contains(testy: lat, testx: lng) { return 88 } else { return 85 }
                             }
                           }
                         } else {
@@ -13539,7 +13539,7 @@ public extension TimeZone {
                     return 31
                   } else {
                     if lng < -71.297264 {
-                      if poly[2683].contains(testy: lat, testx: lng) { return 88 } else { return 31 }
+                      if polygons[2683].contains(testy: lat, testx: lng) { return 88 } else { return 31 }
                     } else {
                       return 88
                     }
@@ -13559,9 +13559,9 @@ public extension TimeZone {
                     } else {
                       if lng < -71.110161 {
                         if lat < -44.523029 {
-                          if poly[2684].contains(testy: lat, testx: lng) { return 88 } else { return 31 }
+                          if polygons[2684].contains(testy: lat, testx: lng) { return 88 } else { return 31 }
                         } else {
-                          if poly[2685].contains(testy: lat, testx: lng) { return 88 } else { return 31 }
+                          if polygons[2685].contains(testy: lat, testx: lng) { return 88 } else { return 31 }
                         }
                       } else {
                         return 88
@@ -13620,10 +13620,10 @@ public extension TimeZone {
                           return 23
                         } else {
                           if lng < -135.902527 {
-                            if poly[2686].contains(testy: lat, testx: lng) { return 359 }
-                            if poly[2687].contains(testy: lat, testx: lng) { return 359 } else { return 23 }
+                            if polygons[2686].contains(testy: lat, testx: lng) { return 359 }
+                            if polygons[2687].contains(testy: lat, testx: lng) { return 359 } else { return 23 }
                           } else {
-                            if poly[2688].contains(testy: lat, testx: lng) { return 23 } else { return 359 }
+                            if polygons[2688].contains(testy: lat, testx: lng) { return 23 } else { return 359 }
                           }
                         }
                       } else {
@@ -13637,13 +13637,13 @@ public extension TimeZone {
                           if lat < 59.995773 {
                             return 98
                           } else {
-                            if poly[2689].contains(testy: lat, testx: lng) { return 324 } else { return 98 }
+                            if polygons[2689].contains(testy: lat, testx: lng) { return 324 } else { return 98 }
                           }
                         } else {
                           if lng < -136.475357 {
                             if lat < 58.897247 {
                               if lng < -137.563436 {
-                                if poly[2690].contains(testy: lat, testx: lng) { return 98 } else { return 359 }
+                                if polygons[2690].contains(testy: lat, testx: lng) { return 98 } else { return 359 }
                               } else {
                                 return 359
                               }
@@ -13651,20 +13651,20 @@ public extension TimeZone {
                               if lat < 60.000000 {
                                 if lng < -137.492722 {
                                   if lat < 58.990978 {
-                                    if poly[2691].contains(testy: lat, testx: lng) { return 45 }
-                                    if poly[2692].contains(testy: lat, testx: lng) { return 359 } else { return 98 }
+                                    if polygons[2691].contains(testy: lat, testx: lng) { return 45 }
+                                    if polygons[2692].contains(testy: lat, testx: lng) { return 359 } else { return 98 }
                                   } else {
-                                    if poly[2693].contains(testy: lat, testx: lng) { return 45 } else { return 98 }
+                                    if polygons[2693].contains(testy: lat, testx: lng) { return 45 } else { return 98 }
                                   }
                                 } else {
                                   if lat < 58.904221 {
                                     return 359
                                   } else {
-                                    if poly[2694].contains(testy: lat, testx: lng) { return 45 } else { return 359 }
+                                    if polygons[2694].contains(testy: lat, testx: lng) { return 45 } else { return 359 }
                                   }
                                 }
                               } else {
-                                if poly[2695].contains(testy: lat, testx: lng) { return 98 } else { return 324 }
+                                if polygons[2695].contains(testy: lat, testx: lng) { return 98 } else { return 324 }
                               }
                             }
                           } else {
@@ -13672,7 +13672,7 @@ public extension TimeZone {
                               return 359
                             } else {
                               if lat < 60.000000 {
-                                if poly[2696].contains(testy: lat, testx: lng) { return 45 } else { return 359 }
+                                if polygons[2696].contains(testy: lat, testx: lng) { return 45 } else { return 359 }
                               } else {
                                 return 324
                               }
@@ -30634,7 +30634,7 @@ public extension TimeZone {
   }
 
   private static func initPolyArray() {
-    poly = [Polygon]()
+    polygons = [Polygon]()
     init1()
     init2()
     init3()

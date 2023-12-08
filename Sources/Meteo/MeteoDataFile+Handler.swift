@@ -170,10 +170,10 @@ private struct MET: MeteoDataFile {
 
     let timezone = lat_tz / 15
     self.location = Location((longitude, latitude, 0), tz: timezone)
-    let tz = Int((TimeZone(location)?.secondsFromGMT() ?? 0) / 3600)
-    if tz != timezone {
-      print("Meteo file time zone offset adjusted to: \(tz)h")
-      self.location.timezone = tz
+    if let tz = TimeZone(location), 
+      Int(tz.secondsFromGMT() / 3600) != timezone {
+      print("Meteo file time zone adjusted to: \(tz)")
+      self.location.timezone = Int(tz.secondsFromGMT() / 3600)
     }
     
     guard let header = String(data: lines[8], encoding: .utf8) else {
@@ -181,7 +181,7 @@ private struct MET: MeteoDataFile {
     }
 
     let lc = header.split(separator: ",").map { $0.lowercased() }
-    let order = [
+    var order = [
       lc.firstIndex {
         $0.contains("dni") || (!$0.contains("wind") && $0.contains("dir"))
       }, lc.firstIndex { $0.contains("temp") || $0.contains("tamb") },
@@ -190,7 +190,10 @@ private struct MET: MeteoDataFile {
       }, lc.firstIndex { $0.contains("ghi") || $0.contains("glo") },
       lc.firstIndex { $0.contains("dhi") || $0.contains("dif") },
     ]
-
+    if order[0] == nil {
+      print("Meteo file without header row. Use default order.")
+      order = [3,4,5,nil,nil]
+    }
     guard let csv = CSVReader(data: lines[10], separator: ",") else {
       throw MeteoFileError.empty
     }
