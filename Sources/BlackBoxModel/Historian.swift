@@ -165,9 +165,7 @@ public final class Historian {
     // Check if the mode does not have file output
     if !mode.hasFileOutput { return }
     // Print the file output information
-    print("File output to: \(url.deletingLastPathComponent().path)")
-    print("  \(url.lastPathComponent)")
-    print()
+    print("File output to:\n\(url.path)")
   }
 
   /// Deinitializes the Historian.

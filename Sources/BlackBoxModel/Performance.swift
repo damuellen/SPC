@@ -98,14 +98,14 @@ public struct ElectricPower: Encodable, MeasurementsConvertible {
   /// An array of tuples representing the measurements for `ElectricPower`.
   static var measurements: [(name: String, unit: String)] {
     [
-      ("Electric|Demand", "MWh e"),
-      ("Electric|SteamTurbineGross", "MWh e"),
-      ("Electric|Photovoltaic", "MWh e"),
-      ("Electric|Storage", "MWh e"),
-      ("Electric|Parasitics", "MWh e"),
-      ("Electric|Shared", "MWh e"),
-      ("Electric|Net", "MWh e"),
-      ("Electric|Consum", "MWh e"),
+      ("Electric|Demand", "MWh e "),
+      ("Electric|SteamTurbineGross", "MWh e "),
+      ("Electric|Photovoltaic", "MWh e "),
+      ("Electric|Storage", "MWh e "),
+      ("Electric|Parasitics", "MWh e "),
+      ("Electric|Shared", "MWh e "),
+      ("Electric|Net", "MWh e "),
+      ("Electric|Consum", "MWh e "),
     ]
   }
 
@@ -205,9 +205,9 @@ public struct Parasitics: Encodable, MeasurementsConvertible {
   /// Array of parasitics measurements.
   static var measurements: [(name: String, unit: String)] {
     [
-      ("Parasitics|SolarField", "MWh e"), ("Parasitics|PowerBlock", "MWh e"),
-      ("Parasitics|Storage", "MWh e"), ("Parasitics|Shared", "MWh e"),
-      ("Parasitics|Backup", "MWh e"), ("Parasitics|GasTurbine", "MWh e"),
+      ("Parasitics|SolarField", "MWh e "), ("Parasitics|PowerBlock", "MWh e "),
+      ("Parasitics|Storage", "MWh e "), ("Parasitics|Shared", "MWh e "),
+      ("Parasitics|Backup", "MWh e "), ("Parasitics|GasTurbine", "MWh e "),
     ]
   }
 }

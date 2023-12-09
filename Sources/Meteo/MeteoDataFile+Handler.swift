@@ -47,7 +47,7 @@ public class MeteoDataFileHandler {
     // Create the appropriate MeteoDataFile instance based on the file extension.
     let data = try? Data(contentsOf: url, options: [.mappedIfSafe])
     guard let data = data else { throw MeteoFileError.empty }
-    print("Meteo file in use:\n  \(url.path)\n")
+    print("Meteo file in use:\n\(url.path)")
     self.file = try url.pathExtension.lowercased() == "mto" ? MET(data) : TMY(data)
     try file.checkForConsistence()
     // Print the path of the meteorological data file being used.
@@ -125,10 +125,8 @@ extension MeteoDataFile {
     let y = year
     let isLeapYear = (y >= 1582 && y % 4 == 0 && y % 100 != 0 || y % 400 == 0)
     let hasLeapDay =
-      data.count.quotientAndRemainder(dividingBy: 365).remainder > 0
-    if isLeapYear != hasLeapDay { 
-      throw MeteoFileError.unexpectedRowCount
-    }
+      data.count.quotientAndRemainder(dividingBy: 366).remainder == 0
+    if isLeapYear, !hasLeapDay { throw MeteoFileError.unexpectedRowCount }
   }
 }
 
@@ -162,18 +160,23 @@ private struct MET: MeteoDataFile {
       }
 
     guard let year = Int(metadata[1]) else { throw MeteoFileError.empty }
+    print("Description:", metadata[0])
     self.year = year
-
+    print("Year: \(year)")
     guard let longitude = Double(metadata[2]),
       let latitude = Double(metadata[3]), let lat_tz = Int(metadata[4])
     else { throw MeteoFileError.unknownLocation }
 
     let timezone = lat_tz / 15
     self.location = Location((longitude, latitude, 0), tz: timezone)
-    if let tz = TimeZone(location), 
-      Int(tz.secondsFromGMT() / 3600) != timezone {
-      print("Meteo file time zone adjusted to: \(tz)")
-      self.location.timezone = Int(tz.secondsFromGMT() / 3600)
+    print("Location longitude: \(longitude) latitude: \(latitude)")
+    if let tz = TimeZone(location) {
+      let offset = Int(tz.secondsFromGMT() / 3600)
+      print("Offset meteo file: GMT\(timezone > -1 ? "+" : "")\(timezone)")
+      if offset != timezone {
+        print("Time zone set: GMT+\(offset) \(tz)")
+        self.location.timezone = Int(offset)
+      }
     }
     
     guard let header = String(data: lines[8], encoding: .utf8) else {
@@ -190,10 +193,6 @@ private struct MET: MeteoDataFile {
       }, lc.firstIndex { $0.contains("ghi") || $0.contains("glo") },
       lc.firstIndex { $0.contains("dhi") || $0.contains("dif") },
     ]
-    if order[0] == nil {
-      print("Meteo file without header row. Use default order.")
-      order = [3,4,5,nil,nil]
-    }
     guard let csv = CSVReader(data: lines[10], separator: ",") else {
       throw MeteoFileError.empty
     }
@@ -201,6 +200,17 @@ private struct MET: MeteoDataFile {
     // Check whether the dataRange matches one year of values.
     let div = csv.dataRows.count.quotientAndRemainder(dividingBy: 24)
     guard div.remainder == 0 else { throw MeteoFileError.unexpectedRowCount }
+    if div.quotient % 366 == 0 {
+      let x = div.quotient / 366
+      print("Meteo data read for leap year. \(x>1 ? "\(x) values":"One value") per hour.") 
+    } else {
+      let x = div.quotient / 365
+      print("Meteo data read for year. \(x>1 ? "\(x) values":"One value") per hour.")
+    }
+    if order[0] == nil {
+      print("Meteo file without header row. Use default order.")
+      order = [3,4,5,nil,nil]
+    }
     let lastIndex = order.reduce(0, { max($0, $1 ?? 0) })
     self.data = try zip(csv.dataRows, 11...)
       .map { values, line in
