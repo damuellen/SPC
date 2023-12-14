@@ -173,10 +173,10 @@ private struct MET: MeteoDataFile {
     print("https://www.osmap.uk/#7/\(latitude)/\(longitude)")
 
     if let tz = TimeZone(location) {
-      let offset = Int(tz.secondsFromGMT() / 3600)
+      let offset = Int(-tz.secondsFromGMT() / 3600)
       print("Offset meteo file: GMT\(timezone > -1 ? "+" : "")\(timezone)")
       if offset != timezone {
-        print("Time zone set: GMT+\(offset) \(tz)")
+        print("Time zone set: GMT\(offset > -1 ? "+" : "")\(offset) \(tz)")
         self.location.timezone = Int(offset)
       }
     }
