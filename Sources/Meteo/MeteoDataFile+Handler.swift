@@ -163,13 +163,15 @@ private struct MET: MeteoDataFile {
     print("Description:", metadata[0])
     self.year = year
     print("Year: \(year)")
-    guard let longitude = Double(metadata[2]),
+    guard var longitude = Double(metadata[2]),
       let latitude = Double(metadata[3]), let lat_tz = Int(metadata[4])
     else { throw MeteoFileError.unknownLocation }
-
-    let timezone = lat_tz / 15
+    longitude *= -1 // The sign of the longitude must be swapped
+    let timezone = -lat_tz / 15
     self.location = Location((longitude, latitude, 0), tz: timezone)
     print("Location longitude: \(longitude) latitude: \(latitude)")
+    print("https://www.osmap.uk/#7/\(latitude)/\(longitude)")
+
     if let tz = TimeZone(location) {
       let offset = Int(tz.secondsFromGMT() / 3600)
       print("Offset meteo file: GMT\(timezone > -1 ? "+" : "")\(timezone)")
