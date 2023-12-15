@@ -179,8 +179,9 @@ struct SolarPerformanceCalculator: ParsableCommand {
       let server = HTTP(handler: result.respond)
       server.start()
 #if os(Windows)
-      start("http://127.0.0.1:\(server.port)")
-      MessageBox(text: "Calculation completed. Check results.", caption: name)
+      if open { start("http://127.0.0.1:\(server.port)/0") }
+      MessageBox(text: "Calculation completed. Check results in browser.", caption: name)
+      server.stop()
 #else
       print("web server listening on port \(server.port). Press Crtl+C to shut down.")
       semaphore.wait()
@@ -241,5 +242,3 @@ extension DispatchSource {
     return sig
   }
 }
-
-
