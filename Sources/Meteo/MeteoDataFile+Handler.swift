@@ -3,6 +3,7 @@
 // (C) Copyright 2016 - 2023
 // Daniel Müllenborn, TSK Flagsol Engineering
 
+import DateExtensions
 import Foundation
 import Helpers
 import SolarPosition
@@ -173,7 +174,7 @@ private struct MET: MeteoDataFile {
     print("https://www.osmap.uk/#7/\(latitude)/\(longitude)")
 
     if let tz = TimeZone(location) {
-      let offset = Int(-tz.secondsFromGMT() / 3600)
+      let offset = Int(tz.secondsFromGMT(for: DateInterval(ofYear: year).start) / 3600)
       print("Offset meteo file: GMT\(timezone > -1 ? "+" : "")\(timezone)")
       if offset != timezone {
         print("Time zone set: GMT\(offset > -1 ? "+" : "")\(offset) \(tz)")
