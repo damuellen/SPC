@@ -65,7 +65,7 @@ let platformTargets: [Target] = [
   .executableTarget(
     name: "Playground",
     dependencies: [
-      "Utilities", "DateExtensions",
+      "CPikchr", "Utilities", "DateExtensions",
       .product(name: "xlsxwriter", package: "xlsxwriter.swift")
     ],
     exclude: ["README.md"],

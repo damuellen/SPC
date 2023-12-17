@@ -179,7 +179,7 @@ struct SolarPerformanceCalculator: ParsableCommand {
       let server = HTTP(handler: result.respond)
       server.start()
 #if os(Windows)
-      if open { start("http://127.0.0.1:\(server.port)/0") }
+      if open { start("http://127.0.0.1:\(server.port)/?day=1") }
       MessageBox(text: "Calculation completed. Check results in browser.", caption: name)
       server.stop()
 #else

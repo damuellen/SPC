@@ -1,6 +1,29 @@
 import Foundation
 import Utilities
+import Web
+import CPikchr
+var diagram = """
+define seq {box $1 with.w at $2.e;down;arrow ht 2 color lightgray behind CP; box $1}
+CP: dot invis;P1:seq("Col1",CP);P2:seq("Col2",P1);P3:seq("Col3",P2);P4:seq("Col4",P3)
+arrow "test 1" above dashed from 3/10 <1st box,2nd box> to 3/10 <5th box,6th box>
+arrow "test 2" above dotted from 5/10 <1st box,2nd box> to 5/10 <3th box,4th box>
+arrow "test 3" above solid from 7/10 <7th box,8th box> to 7/10 <3rd box,4th box>
+"""
 
+let svg = diagram.withCString { String(cString: pikchr($0, "c", 0, nil, nil)) }
+let semaphore = DispatchSemaphore(value: 0)
+let page = HTML(body: svg)
+let server = HTTP() { request in
+  defer {
+    if request.uri.hasSuffix("stop") { semaphore.signal() }
+  }
+  dump(request)
+  return HTTP.Response(html: page)
+}
+server.start()
+semaphore.wait()
+server.stop()
+/*
 let newLine = UInt8(ascii: "\n")
 let cr = UInt8(ascii: "\r")
 let comma = UInt8(ascii: ",")
@@ -117,3 +140,4 @@ if steps < 0 {
   } catch { print(error) }
   #endif
 }
+*/

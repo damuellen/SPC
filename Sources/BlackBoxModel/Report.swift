@@ -120,7 +120,7 @@ extension Recording {
     if let lastDateOfOperation = Simulation.time.dateInterval?.end {
       d += s2 * DateTime(lastDateOfOperation).calendarDay
     } else {
-      d += s2 * "New Year"
+      d += s2 * "Silvester"
     }
     d += Simulation.initialValues.description
     d += "Delta T for Start-Up of Anti-Freeze Pumping:"
