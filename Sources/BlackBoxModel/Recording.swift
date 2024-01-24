@@ -13,16 +13,16 @@ public struct Recording: CustomStringConvertible, Comparable {
   let designParameter = Parameters()
 
   /// The overall performance of the solar power plant.
-  let performance: PlantPerformance
+  public let performance: PlantPerformance
 
   /// The irradiance data for the recording.
-  let irradiance: Insolation
+  public let irradiance: Insolation
 
   /// The history of plant performance data.
-  let performanceHistory: [PlantPerformance]
+  public let performanceHistory: [PlantPerformance]
 
   /// The history of status data.
-  let statusHistory: [Status]
+  public let statusHistory: [Status]
 
   /// The solar field layout defined by the design parameters.
   var layout: Layout { designParameter.layout }

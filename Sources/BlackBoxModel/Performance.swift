@@ -6,7 +6,7 @@
 import Units
 
 /// A struct representing the performance data of a solar power plant.
-public struct PlantPerformance: MeasurementsConvertible {
+public struct PlantPerformance: MeasurementsConvertible, Encodable {
 
   /// The thermal energy data of the solar power plant.
   internal(set) public var thermal: ThermalEnergy
