@@ -83,16 +83,14 @@ public final class DateSeries: Sequence, IteratorProtocol {
   ///   - interval: The interval (frequency) for the date series.
   public init(year: Int, interval: Frequence) {
     precondition(year > 1950 && year < 2050, "Year out of valid range or wrong format")
-
-    var dateComponents = DateComponents()
-    dateComponents.timeZone = Greenwich.timeZone
-    dateComponents.year = year
-    dateComponents.month = 1
-    self.startDate = Greenwich.date(from: dateComponents)!
+    guard let date1 = Greenwich.date(era: 1, year: year, month: 1, day: 1, hour: 0, minute: 0, second: 0, nanosecond: 0)
+    else { preconditionFailure() } 
+    self.startDate = date1
     self.valuesPerHour = interval.rawValue
     self.currentDate = self.startDate
-    dateComponents.year = year + 1
-    self.endDate = Greenwich.date(from: dateComponents)!
+    guard let date2 = Greenwich.date(era: 1, year: year + 1, month: 1, day: 1, hour: 0, minute: 0, second: 0, nanosecond: 0)
+    else { preconditionFailure() } 
+    self.endDate = date2
   }
 
   /// Initializes a DateSeries instance within the specified date range and interval frequency.
@@ -118,15 +116,11 @@ extension DateInterval {
   /// Creates a `DateInterval` representing the whole year for the given year.
   /// - Parameter ofYear: The year for which the `DateInterval` is created.
   public init(ofYear: Int) {
-    var dateComponents = DateComponents()
-    dateComponents.timeZone = Greenwich.timeZone
-    dateComponents.day = 1
-    dateComponents.month = 1
-    dateComponents.year = ofYear
-    let start = Greenwich.date(from: dateComponents)!
-    dateComponents.year! += 1
-    let end = Greenwich.date(from: dateComponents)! - 1
-    self = .init(start: start, end: end)
+    guard let start = Greenwich.date(era: 1, year: ofYear, month: 1, day: 1, hour: 0, minute: 0, second: 0, nanosecond: 0)
+    else { preconditionFailure() } 
+    guard let end = Greenwich.date(era: 1, year: ofYear + 1, month: 1, day: 1, hour: 0, minute: 0, second: 0, nanosecond: 0)
+    else { preconditionFailure() } 
+    self = .init(start: start, end: end - 1)
   }
 
   /// Creates a `DateInterval` representing the whole month for the given month and year.
@@ -134,15 +128,11 @@ extension DateInterval {
   ///   - ofMonth: The month for which the `DateInterval` is created.
   ///   - in: The year for which the `DateInterval` is created.
   public init(ofMonth month: Int, in year: Int) {
-    var dateComponents = DateComponents()
-    dateComponents.timeZone = Greenwich.timeZone
-    dateComponents.day = 1
-    dateComponents.month = month
-    dateComponents.year = year
-    let start = Greenwich.date(from: dateComponents)!
-    dateComponents.month! += 1
-    let end = Greenwich.date(from: dateComponents)! - 1
-    self = .init(start: start, end: end)
+    guard let start = Greenwich.date(era: 1, year: year, month: month, day: 1, hour: 0, minute: 0, second: 0, nanosecond: 0)
+    else { preconditionFailure() } 
+    guard let end = Greenwich.date(era: 1, year: year, month: month + 1 , day: 1, hour: 0, minute: 0, second: 0, nanosecond: 0)
+    else { preconditionFailure() } 
+    self = .init(start: start, end: end - 1)
   }
 
   /// Creates a `DateInterval` representing the whole week for the given week and year.
