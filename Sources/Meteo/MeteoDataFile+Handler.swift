@@ -174,7 +174,11 @@ private struct MET: MeteoDataFile {
     print("https://www.osmap.uk/#7/\(latitude)/\(longitude)")
 
     if let tz = TimeZone(location) {
-      let offset = Int(tz.secondsFromGMT(for: DateInterval(ofYear: year).start) / 3600)
+      #if os(Windows)
+        let offset = Int(-tz.secondsFromGMT(for: DateInterval(ofYear: year).start) / 3600)
+      #else
+        let offset = Int(tz.secondsFromGMT(for: DateInterval(ofYear: year).start) / 3600)
+      #endif
       print("Offset meteo file: GMT\(timezone > -1 ? "+" : "")\(timezone)")
       if offset != timezone {
         print("Time zone set: GMT\(offset > -1 ? "+" : "")\(offset) \(tz)")
