@@ -20,6 +20,7 @@ let platformProducts: [Product] = [
 #else
 let platformProducts: [Product] = [
   .executable(name: "SPC", targets: ["SolarPerformanceCalc"]),
+  .executable(name: "SPO", targets: ["SolarPerformanceOptimizer"]),
   .executable(name: "PinchPointTool", targets: ["PinchPointTool"]),
   .executable(name: "Playground", targets: ["Playground"]),
 ]
@@ -75,6 +76,14 @@ let platformTargets: [Target] = [
     name: "SolarPerformanceCalc",
     dependencies: [
       "BlackBoxModel", "Utilities",
+      .product(name: "ArgumentParser", package: "swift-argument-parser"),
+      .product(name: "xlsxwriter", package: "xlsxwriter.swift"),
+    ],
+    swiftSettings: swiftSettings
+  ),
+  .executableTarget(
+    name: "SolarPerformanceOptimizer",
+    dependencies: ["BlackBoxModel", "Utilities",
       .product(name: "ArgumentParser", package: "swift-argument-parser"),
       .product(name: "xlsxwriter", package: "xlsxwriter.swift"),
     ],

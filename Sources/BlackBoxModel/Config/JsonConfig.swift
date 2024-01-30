@@ -50,11 +50,11 @@ public enum JSONConfig {
   }
 
   public static func read(urls: [URL]) throws {
-    if urls.count == 1 { try decodeConfiguration(urls[0]) } else {
-      for url in urls {
-        if let type = JSONConfig.Name(url: url) {
-          try decodeConfiguration(of: type, url)
-        }
+    for url in urls {
+      if let type = JSONConfig.Name(url: url) {
+        try decodeConfiguration(of: type, url)
+      } else {
+        do { try decodeConfiguration(url) } catch { }
       }
     }
   }

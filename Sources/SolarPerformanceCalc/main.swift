@@ -100,7 +100,9 @@ struct SolarPerformanceCalculator: ParsableCommand {
       if let path = configPath {
         meteoFile = try BlackBoxModel.loadConfiguration(atPath: path)
       }
-      if let path = meteofilePath { meteoFile = URL(fileURLWithPath: path) }
+      if let path = meteofilePath { 
+        meteoFile = URL(fileURLWithPath: path)
+      }
       if let path = jsonPath {
         try JSONConfig.write(toPath: path, split: split)
       }
@@ -112,6 +114,8 @@ struct SolarPerformanceCalculator: ParsableCommand {
         MessageBox(text: error.localizedDescription, caption: name)
       }
       return
+       #else
+      print(error.localizedDescription)
  #endif
     }
 
@@ -175,6 +179,10 @@ struct SolarPerformanceCalculator: ParsableCommand {
     print("Wall time:", String(format: "%.2f seconds", t2))
     result.print(verbose: verbose)
 
+    if let nameResult = nameResult {
+      try! result.performance.storeToJSON(file: URL(fileURLWithPath: nameResult))
+    }
+    
     if http {
       let server = HTTP(handler: result.respond)
       server.start()
