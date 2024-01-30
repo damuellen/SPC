@@ -29,33 +29,33 @@ public enum Design {
 }
 
 /// Layout of the plant
-struct Layout: Codable, Equatable, Hashable, CustomStringConvertible {
+public struct Layout: Codable, Equatable, Hashable, CustomStringConvertible {
   /// Number of loops in the solar field.
-  var solarField = 148.0
+  public var solarField = 148.0
 
   /// Thermal power of the heater.
-  var heater = 10.0
+  public var heater = 10.0
 
   /// Thermal power of the heat exchanger.
-  var heatExchanger = 75.0
+  public var heatExchanger = 75.0
 
   /// Thermal power of the boiler.
-  var boiler = 0.0
+  public var boiler = 0.0
 
   /// Thermal power of the gas turbine.
-  var gasTurbine = 0.0
+  public var gasTurbine = 0.0
 
   /// Thermal power of the power block.
-  var powerBlock = 70.0
+  public var powerBlock = 70.0
 
   /// Storage capacity in hours.
-  var storageHours = 5.0
+  public var storageHours = 5.0
 
   /// Storage capacity in energy.
-  var storageCapacity = 0.0
+  public var storageCapacity = 0.0
 
   /// Storage capacity in mass.
-  var storageTonnage = 0.0
+  public var storageTonnage = 0.0
 
   /// A string representation of the `Layout` instance.
   public var description: String {
@@ -64,6 +64,18 @@ struct Layout: Codable, Equatable, Hashable, CustomStringConvertible {
     + "Layout|HeatExchanger " * "\(Int(heatExchanger)) MW"
     + "Layout|PowerBlock " * "\(Int(powerBlock)) MW"
     + "Layout|Storage " * "\(Int(storageHours)) h"
+  }
+}
+
+public extension Layout {
+  init(_ values: [Double]) {
+    self.solarField = values[0]
+    self.heater = values[1]
+    self.heatExchanger = values[2]
+    self.boiler = values[3]
+    self.gasTurbine = values[4]
+    self.powerBlock = values[5]
+    self.storageHours = values[6]
   }
 }
 
