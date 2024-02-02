@@ -12,8 +12,8 @@ class MeteoTests: XCTestCase {
       let clearSky = MeteoData.using(sun, model: .special)
       let dni = Array(clearSky.map(\.insolation.direct).prefix(24 * 12 * 4))
       _ = try? FileManager.default.createDirectory(atPath: ".plots", withIntermediateDirectories: true)
-      _ = try? Gnuplot(xs: dni)(.pngLarge(".plots/dni.png"))
-    }
+      _ = try? Gnuplot().data(xs: dni)(.pngLarge(".plots/dni.png"))
+    } 
 
     let hourly: [(dni: Double, temp: Double, ws: Double)] = [
       (0, 19.2, 3.9), (0, 18.4, 5.3), (0, 17.5, 6.2), (0, 16.9, 6), (0, 16.4, 4.6), (54, 16.7, 3.8), (309, 18.8, 3.2), (533, 22.4, 2.2), (699, 26, 2), (789, 28.7, 2.4), (845, 30.8, 3.2), (868, 32.4, 4), (874, 33.5, 4.9), (842, 34, 5.8), (794, 33.7, 6.3), (738, 33, 7),

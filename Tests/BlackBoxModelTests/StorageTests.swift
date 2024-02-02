@@ -45,8 +45,7 @@ class StorageTests: XCTestCase {
     )
 
     storage.operationMode = .charge(load: 1.0)
-    _ = storage.massFlow.rate
-      * SolarField.parameter.HTF.heatContent(storage) / 1_000
+
   //  storage.calculate(thermal: &plant.heatFlow, powerBlock)
   }
 }

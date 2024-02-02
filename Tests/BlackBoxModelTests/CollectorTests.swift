@@ -35,10 +35,10 @@ class CollectorTests: XCTestCase {
 
   func testMean() {
     guard 
-      let file = try? MeteoDataFileHandler(forReadingAtPath: "/Users/daniel/spc/COM/Tunol.mto"),
-      let meteo = try? file.data(valuesPerHour: 12),
-      let location = try? file.metadata().location
-    else { return }
+      let file = try? MeteoDataFileHandler(forReadingAtPath: "/Users/daniel/spc/COM/Tunol.mto") else { return }
+
+    let meteo = file.data(valuesPerHour: 12)
+    let location = file.info().location    
     
     let sun = SolarPosition(coords: location.coordinates, tz: -1, year: 2017, frequence: .fiveMinutes)
     

@@ -30,49 +30,39 @@ class InverterTests: XCTestCase {
     XCTAssert(inverter(power: 26e5, voltage: 900).isNaN)
     XCTAssert(inverter(power: 26e5, voltage: 950).isNaN)
     XCTAssert(inverter(power: 26e5, voltage: 1210).isNaN)
-    let max = Array(
-      zip(inverter.dc_power[2...], inverter.maxVoltage[2...]).map { [$0, $1] })
-    let nom = Array(
-      zip(inverter.dc_power[2...], inverter.nomVoltage[2...]).map { [$0, $1] })
-    let min = Array(
-      zip(inverter.dc_power[2...], inverter.minVoltage[2...]).map { [$0, $1] })
-    let l = inverter.voltageLevels
+
     let r = inverter.dc_power[2]...inverter.dc_power.last!
     let iter = (r / 100).iteration
 
     do {
       let v1 = 925.0
-      let xy1 = iter.map { [$0, inverter(power: $0, voltage: v1)] }
+      let xy1 = iter.map { inverter(power: $0, voltage: v1) }
       let v2 = 980.0
-      let xy2 = iter.map { [$0, inverter(power: $0, voltage: v2)] }
+      let xy2 = iter.map { inverter(power: $0, voltage: v2) }
       let v3 = 950.0
-      let xy3 = iter.map { [$0, inverter(power: $0, voltage: v3)] }
-      let plotter = Gnuplot(
-        xy1s: nom, min, xy1, xy2, xy3, titles: "\(l[1])", "\(l[2])", "\(v1)",
-        "\(v2)", "\(v3)")
-      plotter.set(xlabel: "Power [W]")
-      plotter.set(ylabel: "Efficiency [%]")
+      let xy3 = iter.map { inverter(power: $0, voltage: v3) }
+      let plotter = Gnuplot()
+      plotter.data(xs: iter, xy1, xy2, xy3, titles: "", "\(v1)", "\(v2)", "\(v3)")
+      plotter.plot( x: 1, y: 2,3,4)
+      .set(xlabel: "Power [W]")
+      .set(ylabel: "Efficiency [%]")
       plotter.settings["yrange"] = "[97.6:98.8]"
       plotter.settings["ytics"] = "nomirror"
-      _ = try? FileManager.default.createDirectory(atPath: ".plots", withIntermediateDirectories: true)
-      _ = try? plotter(.pngLarge(".plots/inverter.png"))
-    }
+      _ = try FileManager.default.createDirectory(atPath: ".plots", withIntermediateDirectories: true)
+      _ = try plotter(.pngLarge(".plots/inverter.png"))
+    } catch { XCTFail(error.localizedDescription) }
     do {
       let v1 = 1010.0
-      let xy1 = iter.map { [$0, inverter(power: $0, voltage: v1)] }
+      let xy1 = iter.map { inverter(power: $0, voltage: v1) }
       let v2 = 1180.0
-      let xy2 = iter.map { [$0, inverter(power: $0, voltage: v2)] }
+      let xy2 = iter.map { inverter(power: $0, voltage: v2) }
       let v3 = 1095.0
-      let xy3 = iter.map { [$0, inverter(power: $0, voltage: v3)] }
-      let plotter = Gnuplot(
-        xy1s: max, nom, xy1, xy2, xy3, titles: "\(l[0])", "\(l[1])", "\(v1)",
+      let xy3 = iter.map { inverter(power: $0, voltage: v3) }
+      let plotter = Gnuplot()
+      plotter.data(xs: iter, xy1, xy2, xy3, titles: "", "\(v1)",
         "\(v2)", "\(v3)")
-      plotter.set(xlabel: "Power [W]")
-      plotter.set(ylabel: "Efficiency [%]")
-      plotter.settings["yrange"] = "[97.4:98.7]"
-      plotter.settings["ytics"] = "nomirror"
-      _ = try? FileManager.default.createDirectory(atPath: ".plots", withIntermediateDirectories: true)
-      _ = try? plotter(.pngLarge(".plots/inverter2.png"))
-    }
+     try FileManager.default.createDirectory(atPath: ".plots", withIntermediateDirectories: true)
+     try plotter.callAsFunction(.pngLarge(".plots/inverter2.png"))
+    } catch { XCTFail(error.localizedDescription) }
   }
 }
