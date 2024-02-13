@@ -1,7 +1,7 @@
-// SPDX-License-Identifier: Apache-2.0
-//
-// (C) Copyright 2016 - 2024
-// Daniel Müllenborn, TSK Flagsol Engineering
+/* Lambert W function. 
+   Was ~/C/LambertW.c written K M Briggs Keith dot Briggs at bt dot com 97 May 21.  
+   Revised KMB 97 Nov 20; 98 Feb 11, Nov 24, Dec 28; 99 Jan 13; 00 Feb 23; 01 Apr 09
+*/
 
 #include "LambertW.h"
 
