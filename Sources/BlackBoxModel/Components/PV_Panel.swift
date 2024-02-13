@@ -2,6 +2,7 @@
 //
 // (C) Copyright 2016 - 2023
 // Daniel Müllenborn, TSK Flagsol Engineering
+import CLambertW
 import Libc
 import Units
 
@@ -130,7 +131,7 @@ extension PV {
       let Rsh = cell.Rshunt(radiation: radiation, temperature: cell_T)
 
       let argW = (I * Rsh / nVth) * exp(Rsh * (-current + I + I) / nVth)
-      var inputterm = lambertW(argW)
+      var inputterm = LambertW(argW)
 
       if inputterm.isNaN {
         let logargW =
@@ -158,7 +159,7 @@ extension PV {
       let argW =
         cell.Rs * Isat
         * exp(Rsh * (cell.Rs * (Iph + Isat) + voltage) / (nVth * (cell.Rs + Rsh)))
-      let inputterm = lambertW(argW)
+      let inputterm = LambertW(argW)
       return -voltage / (cell.Rs + Rsh) - (nVth / cell.Rs) * inputterm + Rsh
         * (Iph + Isat) / (cell.Rs + Rsh)
     }
@@ -235,7 +236,7 @@ extension PV {
       let argw = Rsh * Io / a * exp(Rsh * (IL + Io - Imp) / a)
 
       guard argw > .zero else { return .nan }
-      var tmp = lambertW(argw)
+      var tmp = LambertW(argw)
       // Only re-compute LambertW if it overflowed
       if tmp.isNaN {
         let logargW = log(Rsh) + log(Io) - log(a) + Rsh * (IL + Io - Imp) / a
@@ -247,38 +248,4 @@ extension PV {
       return tmp
     }
   }
-}
-
-/// Implementation of the Lambert W function, which is a special function that is the inverse of the function f(w) = w * exp(w).
-///
-/// The Lambert W function is used in various mathematical and scientific applications, including solving equations involving exponential and logarithmic functions.
-///
-/// - Parameter z: The input value for the Lambert W function.
-/// - Returns: The Lambert W function result.
-func lambertW(_ z: Double) -> Double {
-  var tmp: Double
-  var c1: Double
-  var c2: Double
-  var w1: Double
-  var dw: Double
-  var z = z
-  var w = z
-
-  if abs(z + 0.367879441171442) <= 1.5 {
-    w = sqrt(5.43656365691809 * w + 2) - 1
-  } else {
-    if z == 0 { z = 1 }
-    tmp = log(z)
-    w = tmp - log(tmp)
-  }
-  w1 = w
-  for _ in 1...36 {
-    c1 = exp(w)
-    c2 = w * c1 - z
-    if w != -1 { w1 = w + 1 }
-    dw = c2 / (c1 * w1 - ((w + 2) * c2 / (2 * w1)))
-    w = w - dw
-    if abs(dw) < 7e-17 * (2 + abs(w1)) { break }
-  }
-  return w
 }

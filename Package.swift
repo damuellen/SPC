@@ -41,6 +41,7 @@ let dependencies: [Package.Dependency] = [
 let platformTargets: [Target] = [
   .target(name: "DateExtensions", swiftSettings: swiftSettings), .target(name: "CPikchr", cSettings: cSettings),
   .target(name: "CSPA", cSettings: cSettings), .target(name: "CSOLPOS", cSettings: cSettings),
+  .target(name: "CLambertW", cSettings: cSettings),
   .target(
     name: "SolarPosition",
     dependencies: ["Utilities", "DateExtensions", "CSOLPOS", "CSPA"],
@@ -57,7 +58,7 @@ let platformTargets: [Target] = [
   .target(
     name: "BlackBoxModel",
     dependencies: [
-      "Meteo", "SolarPosition", "Utilities",
+      "Meteo", "SolarPosition", "Utilities", "CLambertW",
     //.product(name: "SQLite", package: "SQLite.swift"),
       .product(name: "xlsxwriter", package: "xlsxwriter.swift"),
     ],

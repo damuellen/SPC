@@ -1,6 +1,6 @@
 import Utilities
 import XCTest
-
+import CLambertW
 @testable import BlackBoxModel
 
 class PVPanelTests: XCTestCase {
