@@ -189,8 +189,10 @@ struct Heater: Parameterizable, ThermalProcess {
       thermalPower.watt /= parameter.efficiency.quotient
 
       // Set the load to the thermal power as a percentage of the heater design capacity
-      load = Ratio(min(thermalPower.megaWatt / Design.layout.heater, 1.0))
-      operationMode = .freezeProtection(load)
+      if Design.hasHeater {
+        load = Ratio(min(thermalPower.megaWatt / Design.layout.heater, 1.0))
+        operationMode = .freezeProtection(load)
+      }
       // No operation requested or thermal power exceeds the demand
     } else if case .noOperation = operationMode {
       massFlow = .zero
