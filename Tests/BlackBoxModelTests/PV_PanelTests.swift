@@ -34,8 +34,8 @@ class PVPanelTests: XCTestCase {
       do {
         let plot = Gnuplot()
         let xs = ((0...20) / 150).iteration
-        plot.data(xs: xs, xs.map { x in lambertW(x) }, titles: "x", "lambertW")
-        _ = try plot.plot(x: 1, y: 2, 3, 4, 5, 6, 7, 8)(.pngSmall(".plots/lambertW.png"))
+        plot.data(xs: xs, xs.map { x in LambertW(x) }, titles: "x", "LambertW")
+        _ = try plot.plot(x: 1, y: 2, 3, 4, 5, 6, 7, 8)(.pngSmall(".plots/LambertW.png"))
       } catch { XCTFail(error.localizedDescription) }
     }
     let i = ((0...1000) / 100).iteration.map { x in panel.currentFrom(voltage: x, radiation: 50, cell_T: .init(celsius: 30)) }

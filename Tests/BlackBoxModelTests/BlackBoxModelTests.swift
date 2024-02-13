@@ -42,7 +42,7 @@ class BlackBoxModelTests: XCTestCase {
       let plot = TimeSeriesPlot(y1: y1, y2: y2, range: interval, style: .impulses)
       plot.y1Titles = ["solarfield", "powerblock", "storage"]
       plot.y2Titles = ["solar", "toStorage", "production", "storage", "gross", "net", "consum"]
-      _ = try? plot(toFile: ".plots/Day_\(day)_Summer")
+      _ = try? plot(toFile: ".plots/Day_\(day)_Summer.png")
     }
   }
 
@@ -76,7 +76,7 @@ class BlackBoxModelTests: XCTestCase {
       let plot = TimeSeriesPlot(y1: y1, y2: y2, range: interval, style: .impulses)
       plot.y1Titles = ["solarfield", "powerblock", "storage"]
       plot.y2Titles = ["solar", "toStorage", "production", "storage", "gross", "net", "consum"]
-      _ = try? plot(toFile: ".plots/Day_\(day)_Winter")
+      _ = try? plot(toFile: ".plots/Day_\(day)_Winter.png")
     }
   }
 }
