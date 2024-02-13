@@ -11,7 +11,7 @@ double LambertW(const double z) {
   double p,e,t,w;
 
   if (z<-em1 || isinf(z) || isnan(z)) {
-    return 0;
+    return NAN;
   }
   if (0.0==z) return 0.0;
   if (z<-em1+1e-4) { // series near -em1 in sqrt(q)
