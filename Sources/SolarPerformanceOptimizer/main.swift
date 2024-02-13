@@ -69,9 +69,13 @@ struct Command: ParsableCommand {
     //let id = String(Int(past.timeIntervalSince1970), radix: 36, uppercase: true).suffix(4)
     let file = file ?? "/home/daniel/spc/COM/Midelt.mto"
     let bounds = [10.0...200.0,0.0...0.0,20.0...100.0,0.0...0.0,0.0...0.0,10.0...100.0,3.0...12.0]
-    let optimizer = IGOA(n: n ?? 21, maxIterations: iterations ?? 100, bounds: bounds)
+    let optimizer = IGOA(n: n ?? 30, maxIterations: iterations ?? 100, bounds: bounds)
     let results = optimizer(file)
-    print(results)
+      
+    for result in results {
+      print(result)
+    }
+
     print("Elapsed seconds:", -past.timeIntervalSinceNow)
   }
   
@@ -98,6 +102,7 @@ func respond(request: HTTP.Request) -> HTTP.Response {
     let m = curves.map(\.last!).map { $0[1] }.min()
     let i = curves.firstIndex(where: { $0.last![1] == m })!
     let plot = Gnuplot()
+    plot.settings["xtics"] = "1"
     plot.data(ys: curves[0]).plot(multi: true, index: 0)
     .data(ys: curves[1]).plot(multi: true, index: 1)
     .data(ys: curves[2]).plot(multi: true, index: 2)

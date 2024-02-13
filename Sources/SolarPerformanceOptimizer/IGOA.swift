@@ -55,12 +55,12 @@ public struct IGOA {
     var targetPosition = Matrix(3, bounds.count)
     var targetFitness = Vector(3, .infinity)
     let EPSILON = 1E-14
-
+    
     // Initialize the population of grasshoppers
     var grassHopperPositions = scattered(count: n, bounds: bounds)
     var grassHopperFitness = Vector(n, .infinity)
     let groups = grassHopperFitness.indices.split(in: 3)
-
+    print("Population: \(grassHopperPositions.count) " + "Iterations: 0".leftpad(28))
     // Calculate the fitness of initial grasshoppers
     var workers = [Process]()    
     for i in 0 ..< grassHopperPositions.count {
@@ -76,9 +76,9 @@ public struct IGOA {
 
     for i in workers.indices {
       if source.isCancelled { break }
-      let (sol, net) = try! pick(process: workers[i])
+      let (sol, net, demand) = try! pick(process: workers[i])
       targetResults[i] += [net]
-      grassHopperFitness[i] = sol / net
+      grassHopperFitness[i] = demand - net
     }
     
     // Find the best grasshopper per group (target) in the first population
@@ -156,9 +156,9 @@ public struct IGOA {
       
       for i in workers.indices {
         if source.isCancelled { break }
-        let (sol, net) = try! pick(process: workers[i])
+        let (sol, net, demand) = try! pick(process: workers[i])
         targetResults[cursor + i] += [net]
-        grassHopperFitness[i] = sol / net
+        grassHopperFitness[i] = demand - net
       }
 
       let calculationsPerSecond = 1 / (-timer.timeIntervalSinceNow / Double(grassHopperPositions.count))
@@ -224,15 +224,16 @@ func worker() throws -> Process {
   return worker
 }
 
-func pick(process: Process) throws -> (Double, Double) {
+func pick(process: Process) throws -> (Double, Double, Double) {
   process.waitUntilExit()
   let url = process.currentDirectoryURL!.appendingPathComponent("plantperformance")
   let data = try Data(contentsOf: url)
   try url.deletingLastPathComponent().removeItem()
   let dict = try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [String:AnyObject]
-  let sol = (dict!["thermal"] as! [String:Double])["solar"]!
+  let sol = (dict!["thermal"] as! [String:Double])["dumping"]!
   let net = (dict!["electric"] as! [String:Double])["net"]!
-  return (sol, net)
+  let demand = (dict!["electric"] as! [String:Double])["demand"]!
+  return (sol, net, demand)
 }
 
 func eratosthenesSieve(to n: Int) -> [Int] {
