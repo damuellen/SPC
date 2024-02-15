@@ -78,8 +78,8 @@ public struct SolarPosition {
   public var year: Int
   /// The geographic location for the solar position calculations.
   public var location: Location
-  // The time interval for the solar position calculations.
-  public var frequence: DateSeries.Frequence
+  // The frequence for the solar position calculations.
+  public var frequence: Steps
 
   /// Creates a struct with precalculated sun positions for the given location and year at the predetermined times.
   ///
@@ -90,7 +90,7 @@ public struct SolarPosition {
   ///   - frequence: The time interval for the calculations.
   public init(
     coords: (Double, Double, Double), tz: Int,
-    year: Int, frequence: DateSeries.Frequence
+    year: Int, frequence: Steps
   ) {
     // Set the estimatedDelta_T value based on the given year
     SolarPosition.estimatedDelta_T = SolarPosition.estimateDelta_T(year: year)
@@ -201,7 +201,7 @@ public struct SolarPosition {
   /// The estimated value of ΔT (delta_t) used for solar position calculations.
   private static var estimatedDelta_T: Double = 0
   /// The time interval used for solar position calculations.
-  private static var frequence: DateSeries.Frequence = .hour
+  private static var frequence: Steps = .hour
 
   /// Compute solar position values using the SPA (Solar Position Algorithm) algorithm.
   ///

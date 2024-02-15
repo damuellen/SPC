@@ -208,3 +208,5 @@ extension TimeInterval {
   // Convert the time interval to hours.
   var hours: TimeInterval { self * 3600.0 }
 }
+/// An enumeration representing different frequencies (intervals) for date series
+public typealias Steps = DateSeries.Frequence

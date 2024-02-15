@@ -4,6 +4,7 @@
 // Daniel Müllenborn, TSK Flagsol Engineering
 
 import ArgumentParser
+import DateExtensions
 import SolarPosition
 import BlackBoxModel
 import Dispatch
@@ -157,7 +158,7 @@ struct SolarPerformanceCalculator: ParsableCommand {
 
     let mode: Historian.Mode
     if let steps = outputValues {
-      mode = steps == 0 ? .inMemory : .custom(interval: Frequence[steps])
+      mode = steps == 0 ? .inMemory : .custom(valuesPerHour: Steps[steps])
     }
     else if database { mode = .database } 
     else if excel { mode = .excel }

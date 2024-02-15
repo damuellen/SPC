@@ -6,9 +6,6 @@
 import DateExtensions
 import Foundation
 
-/// Represents a frequency for simulation steps.
-public typealias Frequence = DateSeries.Frequence
-
 extension Simulation {
   /// Represents a simulation period.
   struct Period: Codable, CustomStringConvertible {
@@ -19,7 +16,7 @@ extension Simulation {
     /// Holidays during the simulation period.
     let holidays: [DateInterval]
     /// Frequency of simulation steps.
-    var steps: Frequence
+    var steps: Steps
 
     /// A textual representation of the simulation period.
     public var description: String {

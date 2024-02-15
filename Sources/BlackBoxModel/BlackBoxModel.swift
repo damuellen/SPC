@@ -253,9 +253,7 @@ public enum BlackBoxModel {
     }
   }
 
-  private static func valuesForSimulationPeriod(
-    _ valuesPerHour: DateSeries.Frequence? = nil
-  ) -> (DateSeries.Frequence, Zip2Sequence<ArraySlice<MeteoData>, DateSeries>) {
+  private static func valuesForSimulationPeriod(_ valuesPerHour: Steps? = nil) -> (Steps, DataSet) {
     let times: DateSeries
     guard let meteo else { fatalError() }
     let meteoData = meteo.data(valuesPerHour: valuesPerHour?.rawValue)    
@@ -271,3 +269,5 @@ public enum BlackBoxModel {
     }
   }
 }
+
+typealias DataSet = Zip2Sequence<ArraySlice<MeteoData>, DateSeries>

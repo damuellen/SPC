@@ -20,7 +20,7 @@ public class MeteoDataFileHandler {
   /// Flag indicating whether interpolation is enabled or not.
   public var interpolation = true
 
-  public let interval: DateSeries.Frequence
+  public let interval: Steps
 
   /// The meteorological data file being used.
   private let file: MeteoDataFile
@@ -55,7 +55,7 @@ public class MeteoDataFileHandler {
     _ = try file.hasDataForLeapYear()
     let insolation = file.diagnose()
     if !insolation!.direct { throw MeteoFileError.empty }
-    guard let frequence = DateSeries.Frequence(rawValue: file.valuesPerHour) else {
+    guard let frequence = Steps(rawValue: file.valuesPerHour) else {
       throw MeteoFileError.unexpectedRowCount 
     }
     self.interval = frequence

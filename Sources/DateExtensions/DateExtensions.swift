@@ -51,7 +51,7 @@ extension DateInterval {
   /// Aligns the date interval to the specified frequency in values per hour.
   /// - Parameter valuesPerHour: The frequency of values per hour for alignment.
   /// - Returns: A new date interval aligned to the specified frequency.
-  public func aligned(to valuesPerHour: DateSeries.Frequence) -> DateInterval {
+  public func aligned(to valuesPerHour: Steps) -> DateInterval {
     var start = DateTime(self.start)
     var end = DateTime(self.end)
 

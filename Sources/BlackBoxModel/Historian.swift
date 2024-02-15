@@ -33,7 +33,7 @@ public final class Historian {
   public enum Mode {
     case database
     case inMemory
-    case custom(interval: DateSeries.Frequence)
+    case custom(valuesPerHour: Steps)
     case csv
     case excel
     
@@ -242,7 +242,7 @@ public final class Historian {
         buffer = DateTime(date).commaSeparatedValues.encoded + comma
           + insolation.commaSeparatedValues.encoded + comma
           + accumulate.commaSeparatedValues.encoded + newLine
-        date.addTimeInterval(DateSeries.Frequence.hour.interval)
+        date.addTimeInterval(Steps.hour.interval)
         _ = fileStream?.write(buffer, maxLength: buffer.count)
       }
     }
