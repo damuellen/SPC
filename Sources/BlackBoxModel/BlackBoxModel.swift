@@ -16,8 +16,8 @@ public enum BlackBoxModel {
   public private(set) static var simulatedYear = 2001
   /// The apparent solar position based on date, time, and location.
   public private(set) static var sun: SolarPosition?
-  /// Solar radiation and meteorological elements for a 1-year period.
-  public private(set) static var meteoData: [MeteoData] = []
+  /// Handle for meteorological file
+  public private(set) static var meteo: MeteoDataFileHandler!
 
   // MARK: - Configuration Functions
   
@@ -55,11 +55,6 @@ public enum BlackBoxModel {
     sun = SolarPosition(
       coords: location.coordinates, tz: location.timezone,
       year: simulatedYear, frequence: Simulation.time.steps)
-    
-    // If meteoData is empty, generate meteoData using the calculated sun angles.
-    if meteoData.isEmpty {
-      meteoData = MeteoData.using(sun!, model: .special, clouds: false)
-    }
   }
 
   /// Configure the simulation using meteo data from a file.
@@ -68,11 +63,11 @@ public enum BlackBoxModel {
   /// - Throws: An error if there's an issue with reading the meteo data file.
   public static func configure(meteoFilePath: String) throws {
     // Search for the meteo data file.
-    let handler = try MeteoDataFileHandler(forReadingAtPath: meteoFilePath)
-    handler.interpolation = false
+    meteo = try MeteoDataFileHandler(forReadingAtPath: meteoFilePath)
+    meteo.interpolation = false
     // Read the content of the meteo data file.
-    let info = handler.info()
-    meteoData = handler.data(valuesPerHour: Simulation.time.steps.rawValue)
+    let info = meteo.info()
+
     simulatedYear = info.year
     // Check if the sun angles for the location have already been calculated.
     if let sun = sun, info.location == sun.location { return }
@@ -124,7 +119,7 @@ public enum BlackBoxModel {
   ///   - record: The historian object to record the simulation results.
   /// - Attention: `configure()` must be called before this function.
   public static func runModel(with record: Historian) {
-    guard let 🌞 = sun, let insolation = meteoDataDiagnose(), insolation.direct 
+    guard let 🌞 = sun, let insolation = meteo.diagnose(), insolation.direct 
     else { print("Missing sunshine. Please check the file content."); exit(1) }
 
     // Preparation of the plant parameters
@@ -140,7 +135,8 @@ public enum BlackBoxModel {
       var inputs = [PV.InputValues]()
       
       // Generate input values for each simulation time step.
-      for (meteo, date) in simulationPeriod(.hour) {
+      let (frequence, sequence) = valuesForSimulationPeriod()
+      for (meteo, date) in sequence {
         let (t, ws) = (Temperature(celsius: meteo.temperature), meteo.windSpeed)
         let gti: Double
 
@@ -158,14 +154,14 @@ public enum BlackBoxModel {
         }
         inputs.append(.init(gti: gti, ambient: t, windSpeed: ws))
       }
-      let count = Simulation.time.steps.rawValue
+      let count = Simulation.time.steps.rawValue / frequence.rawValue
       // Generate photovoltaic power values for each time step.
       photovoltaic = inputs.reversed().reduce(into: []) { result, input in
         result += repeatElement(pv(input) / 10.0e6, count: count)
       }
     }
 
-  for (meteo, date) in simulationPeriod() {
+  for (meteo, date) in valuesForSimulationPeriod(Simulation.time.steps).1 {
       // Set the date for the calculation step
       DateTime.setCurrent(date: date)
       let dt = DateTime.current
@@ -257,45 +253,21 @@ public enum BlackBoxModel {
     }
   }
 
-  // MARK: - Helper Functions
-
-  /// Diagnose the availability of direct and global insolation in the meteoData.
-  ///
-  /// - Returns: A tuple indicating if direct and global insolation are available.
-  private static func meteoDataDiagnose() -> (direct: Bool, global: Bool)? {
-    // Check the first 12 hours of the year for insolation
-    let am = meteoData.prefix(meteoData.count / 730)
-    if am.isEmpty { return nil }
-    return (!am.map(\.insolation.direct).max()!.isZero,
-     !am.map(\.insolation.global).max()!.isZero 
-     && !am.map(\.insolation.diffuse).max()!.isZero)
-  }
-
-  private static func simulationPeriod(
+  private static func valuesForSimulationPeriod(
     _ valuesPerHour: DateSeries.Frequence? = nil
-  ) -> Zip2Sequence<ArraySlice<MeteoData>, DateSeries> {
+  ) -> (DateSeries.Frequence, Zip2Sequence<ArraySlice<MeteoData>, DateSeries>) {
     let times: DateSeries
-    var meteo: ArraySlice<MeteoData>
-    let interval = Simulation.time.steps
+    guard let meteo else { fatalError() }
+    let meteoData = meteo.data(valuesPerHour: valuesPerHour?.rawValue)    
+    let interval = valuesPerHour ?? meteo.interval  
     if let dateInterval = Simulation.time.dateInterval {
       let range = dateInterval.aligned(to: interval)
-      let values: [MeteoData]
-      if let steps = valuesPerHour, interval.rawValue > steps.rawValue {
-        times = DateSeries(range: range, interval: steps)
-        values = stride(
-          from: meteoData.startIndex, to: meteoData.endIndex,
-          by: interval.rawValue
-        ).map { meteoData[$0] }
-      } else {
-        times = DateSeries(range: range, interval: interval)
-        values = meteoData
-      }
-      let indices = values.range(for: range)
-      meteo = values[indices]
+      times = DateSeries(range: range, interval: interval)
+      let indices = meteoData.range(for: range)
+      return (interval, zip(meteoData[indices], times))
     } else {
       times = DateSeries(year: simulatedYear, interval: interval)
-      meteo = meteoData[...]
+      return (interval, zip(meteoData[...], times))
     }
-    return zip(meteo, times)
   }
 }

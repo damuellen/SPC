@@ -20,6 +20,8 @@ public class MeteoDataFileHandler {
   /// Flag indicating whether interpolation is enabled or not.
   public var interpolation = true
 
+  public let interval: DateSeries.Frequence
+
   /// The meteorological data file being used.
   private let file: MeteoDataFile
 
@@ -50,7 +52,13 @@ public class MeteoDataFileHandler {
     guard let data = data else { throw MeteoFileError.empty }
     print("Meteo file in use:\n\(url.path)")
     self.file = try url.pathExtension.lowercased() == "mto" ? MET(data) : TMY(data)
-    try file.checkForConsistence()
+    _ = try file.hasDataForLeapYear()
+    let insolation = file.diagnose()
+    if !insolation!.direct { throw MeteoFileError.empty }
+    guard let frequence = DateSeries.Frequence(rawValue: file.valuesPerHour) else {
+      throw MeteoFileError.unexpectedRowCount 
+    }
+    self.interval = frequence
     // Print the path of the meteorological data file being used.
   }
 
@@ -61,22 +69,19 @@ public class MeteoDataFileHandler {
     (file.year, file.location)
   }
 
+  public func diagnose() -> (direct: Bool, global: Bool)? { file.diagnose() }
+
   /// Retrieve meteorological data values with the specified number of values per hour.
   ///
   /// - Parameter valuesPerHour: The number of values required per hour for interpolation.
   /// - Returns: An array of `MeteoData` containing the meteorological data.
   /// - Throws: An error if there's an issue with fetching the data.
-  public func data(valuesPerHour: Int) -> [MeteoData] {
+  public func data(valuesPerHour: Int? = nil) -> [MeteoData] {
     // Fetch raw data from the meteorological data file.
     let data = file.data
-
+    let valuesPerHour = valuesPerHour ?? file.valuesPerHour
     // Calculate the number of steps to interpolate the data based on valuesPerHour.
-    var hours = data.count.quotientAndRemainder(dividingBy: 8760)
-    if hours.remainder > 0 {
-      hours = data.count.quotientAndRemainder(
-        dividingBy: 8760 + hours.remainder)
-    }
-    var steps = valuesPerHour / hours.quotient
+    var steps = valuesPerHour / file.valuesPerHour
 
     // If no interpolation is needed, return the raw data as is.
     if steps == 1 { return data }
@@ -117,17 +122,29 @@ protocol MeteoDataFile {
   /// The array of `MeteoData` containing meteorological data values.
   var data: [MeteoData] { get }
 
-  /// Checks the consistency of the meteorological data, throwing an error if inconsistencies are found.
-  func checkForConsistence() throws
+  var valuesPerHour: Int { get }
 }
 
 extension MeteoDataFile {
-  func checkForConsistence() throws {
+  func hasDataForLeapYear() throws -> Bool {
     let y = year
     let isLeapYear = (y >= 1582 && y % 4 == 0 && y % 100 != 0 || y % 400 == 0)
     let hasLeapDay =
       data.count.quotientAndRemainder(dividingBy: 366).remainder == 0
     if isLeapYear, !hasLeapDay { throw MeteoFileError.unexpectedRowCount }
+    return hasLeapDay
+  }
+
+  /// Diagnose the availability of direct and global insolation in the meteoData.
+  ///
+  /// - Returns: A tuple indicating if direct and global insolation are available.
+  func diagnose() -> (direct: Bool, global: Bool)? {
+    // Check the first 12 hours of the year for insolation
+    let am = data.prefix(data.count / 730)
+    if am.isEmpty { return nil }
+    return (!am.map(\.insolation.direct).max()!.isZero,
+     !am.map(\.insolation.global).max()!.isZero 
+     && !am.map(\.insolation.diffuse).max()!.isZero)
   }
 }
 
@@ -135,6 +152,7 @@ private struct MET: MeteoDataFile {
   var year: Int
   var location: Location
   var data: [MeteoData]
+  var valuesPerHour: Int
 
   init(_ data: Data) throws {
     let newLine = UInt8(ascii: "\n")
@@ -208,11 +226,11 @@ private struct MET: MeteoDataFile {
     let div = csv.dataRows.count.quotientAndRemainder(dividingBy: 24)
     guard div.remainder == 0 else { throw MeteoFileError.unexpectedRowCount }
     if div.quotient % 366 == 0 {
-      let x = div.quotient / 366
-      print("Meteo data read for leap year. \(x>1 ? "\(x) values":"One value") per hour.") 
+      self.valuesPerHour = div.quotient / 366      
+      print("Meteo data read for leap year. \(valuesPerHour>1 ? "\(valuesPerHour) values":"One value") per hour.") 
     } else {
-      let x = div.quotient / 365
-      print("Meteo data read for year. \(x>1 ? "\(x) values":"One value") per hour.")
+      self.valuesPerHour = div.quotient / 365
+      print("Meteo data read for year. \(valuesPerHour>1 ? "\(valuesPerHour) values":"One value") per hour.")
     }
     if order[0] == nil {
       print("Meteo file without header row. Use default order.")
@@ -249,6 +267,7 @@ private struct TMY: MeteoDataFile {
   var year: Int
   var location: Location
   var data: [MeteoData]
+  var valuesPerHour: Int
 
   init(_ data: Data) throws {
     let newLine = UInt8(ascii: "\n")
@@ -280,7 +299,13 @@ private struct TMY: MeteoDataFile {
     // Check whether the dataRange matches one year of values.
     let div = values.dataRows.count.quotientAndRemainder(dividingBy: 24)
     guard div.remainder == 0 else { throw MeteoFileError.unexpectedRowCount }
-
+    if div.quotient % 366 == 0 {
+      self.valuesPerHour = div.quotient / 366      
+      print("Meteo data read for leap year. \(valuesPerHour>1 ? "\(valuesPerHour) values":"One value") per hour.") 
+    } else {
+      self.valuesPerHour = div.quotient / 365
+      print("Meteo data read for year. \(valuesPerHour>1 ? "\(valuesPerHour) values":"One value") per hour.")
+    }
     var order = [Int](repeating: 0, count: 5)
     for (name, pos) in zip(values.headerRow!, 0...) {
       switch name {
