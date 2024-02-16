@@ -46,7 +46,7 @@ class SolarFieldTests: XCTestCase {
     for i in solarField.loops.indices {
       solarField.loops[i].temperature = solarField.temperature
     }
-    collector.irradiation(dni: 700.0)
+    collector.irradiance(dni: 700.0)
     solarField.calculate(collector: collector, ambient: Temperature(celsius: 25.0))
 
     XCTAssertEqual(solarField.flow, maxFlow.rate, accuracy: 0.1)
@@ -56,7 +56,7 @@ class SolarFieldTests: XCTestCase {
     for i in solarField.loops.indices {
       solarField.loops[i].temperature = solarField.temperature
     }
-    collector.irradiation(dni: 600.0)
+    collector.irradiance(dni: 600.0)
     solarField.calculate(collector: collector, ambient: Temperature(celsius: 25.0))
 
     XCTAssertEqual(solarField.flow, maxFlow.rate, accuracy: 0.5)
@@ -66,14 +66,14 @@ class SolarFieldTests: XCTestCase {
     for i in solarField.loops.indices {
       solarField.loops[i].temperature = solarField.temperature
     }
-    collector.irradiation(dni: 500.0)
+    collector.irradiance(dni: 500.0)
     solarField.calculate(collector: collector, ambient: Temperature(celsius: 25.0))
     XCTAssertEqual(solarField.flow, 1058.6, accuracy: 0.1)
     XCTAssertEqual(solarField.outlet, 649.8, accuracy: 0.5)
     for i in solarField.loops.indices {
       solarField.loops[i].temperature = solarField.temperature
     }
-    collector.irradiation(dni: 400.0)
+    collector.irradiance(dni: 400.0)
     solarField.calculate(collector: collector, ambient: Temperature(celsius: 25.0))
 
     XCTAssertEqual(solarField.outlet, 646.1, accuracy: 0.5)
@@ -86,7 +86,7 @@ class SolarFieldTests: XCTestCase {
     for i in solarField.loops.indices {
       solarField.loops[i].temperature = solarField.temperature
     }
-    collector.irradiation(dni: 300.0)
+    collector.irradiance(dni: 300.0)
     solarField.calculate(collector: collector, ambient: Temperature(celsius: 25.0))
     XCTAssertEqual(solarField.flow, maxFlow.rate / 2, accuracy: 1.0)
     XCTAssertEqual(solarField.outlet, 644.4, accuracy: 0.5)

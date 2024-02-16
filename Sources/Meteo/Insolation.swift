@@ -21,10 +21,7 @@ public struct Insolation {
 
   /// Static property providing an array of tuples representing the names and units of the insolation measurements.
   public static var measurements: [(name: String, unit: String)] {
-    [
-      ("Solar|DNI", "kWh/m2"), ("Solar|GHI", "kWh/m2"),
-      ("Solar|DHI", "kWh/m2")
-    ]
+    [("Solar|DNI", "kWh/m2"), ("Solar|GHI", "kWh/m2"), ("Solar|DHI", "kWh/m2")]
   }
   
   /// Static method that creates and returns an `Insolation` instance with all irradiance values set to zero.
@@ -43,10 +40,10 @@ extension RangeReplaceableCollection where Element==Insolation {
   */
   public func hourly(fraction: Double) -> Insolation {
     var result = Insolation.zero()
-    for radiation in self {
-      result.direct += radiation.direct * fraction
-      result.global += radiation.global * fraction
-      result.diffuse += radiation.diffuse * fraction
+    for irradiance in self {
+      result.direct += irradiance.direct * fraction
+      result.global += irradiance.global * fraction
+      result.diffuse += irradiance.diffuse * fraction
     }
     return result
   }
@@ -117,7 +114,7 @@ public enum Albedo: Double {
   case very_dirty_galvanised_site = 0.08
 }
 
-/// Extension of `Insolation` with methods for calculating effective irradiance and related solar parameters.
+/// Extension of `Insolation` with methods for calculating total irradiance and related solar parameters.
 extension Insolation {
   /**
    Calculates the global tilted irradiance in watts per square meter (W/m2) on a surface
@@ -129,25 +126,25 @@ extension Insolation {
    - Parameter doy: Day of the year.
    - Returns: The effective irradiance in watts per square meter (W/m2).
   */
-  public func effective(
+  public func total(
     surfTilt: Double, incidence: Double, zenith: Double, doy: Int
   ) -> Double {
-    var radiation = self
+    var irradiance = self
     if incidence >= 90 || incidence <= 0 { if global < 10.0 { return 0 } }
     if zenith < 90 {
-      radiation.direct = normal(zenith: zenith)
+      irradiance.direct = normal(zenith: zenith)
     }
 
     let hExtra = extra(doy: doy)
 
     let AM = Atmosphere.relativeAirMass(zenith: zenith, model: .kastenyoung1989)
 
-    radiation.diffuse = radiation.perez(
+    irradiance.diffuse = irradiance.perez(
       surfaceTilt: surfTilt, incidence: incidence,
       hExtra: hExtra, sunZenith: zenith, AM: AM)
 
     //var albedoInc = groundDiffuse(angles.SurfTilt, context.Albedo)
-    return radiation.beam(incidence: incidence, zenith: zenith) + radiation.diffuse
+    return irradiance.beam(incidence: incidence, zenith: zenith) + irradiance.diffuse
   }
 
   /**
@@ -209,10 +206,10 @@ extension Insolation {
   }
 
   /**
-   Calculates the extraterrestrial radiation in watts per square meter (W/m2) based on the day of the year (doy).
+   Calculates the extraterrestrial irradiance in watts per square meter (W/m2) based on the day of the year (doy).
 
    - Parameter doy: Day of the year.
-   - Returns: The extraterrestrial radiation in watts per square meter (W/m2).
+   - Returns: The extraterrestrial irradiance in watts per square meter (W/m2).
   */
   func extra(doy: Int) -> Double {
     let B = 2.0 * .pi * Double(doy) / 365.0
@@ -229,7 +226,7 @@ extension Insolation {
    Calculates the ground diffuse irradiance in watts per square meter (W/m2) on a tilted surface based on the tilt angle and albedo.
 
    - Parameter surfTilt: Surface tilt angle in degrees.
-   - Parameter albedo: Albedo value representing the reflectivity of solar radiation on the surface.
+   - Parameter albedo: Albedo value representing the reflectivity of solar irradiance on the surface.
    - Returns: The ground diffuse irradiance in watts per square meter (W/m2).
   */
   func groundDiffuse(surfTilt: Double, albedo: Double) -> Double {

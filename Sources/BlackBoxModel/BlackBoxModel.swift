@@ -138,7 +138,7 @@ public enum BlackBoxModel {
       let (frequence, sequence) = valuesForSimulationPeriod()
       for (meteo, date) in sequence {
         let (t, ws) = (Temperature(celsius: meteo.temperature), meteo.windSpeed)
-        let gti: Double
+        let irradiance: Double
 
         // Calculate global tilt irradiation for the panel at the current time step.
         if let position = 🌞[date] {
@@ -146,13 +146,13 @@ public enum BlackBoxModel {
             apparentZenith: position.zenith, 
             apparentAzimuth: position.azimuth,
             maxAngle: 55, GCR: 0.444)
-          gti = meteo.insolation.effective(
+          irradiance = meteo.insolation.total(
             surfTilt: panel.surfTilt, incidence: panel.AOI,
             zenith: position.zenith, doy: DateTime(date).yearDay)
         } else {
-          gti = .zero
+          irradiance = .zero
         }
-        inputs.append(.init(gti: gti, ambient: t, windSpeed: ws))
+        inputs.append(.init(irradiance: irradiance, ambient: t, windSpeed: ws))
       }
       let count = Simulation.time.steps.rawValue / frequence.rawValue
       // Generate photovoltaic power values for each time step.
@@ -185,7 +185,7 @@ public enum BlackBoxModel {
         // Calculate collector tracking angle (cosTheta)
         status.collector.tracking(sun: position) 
         status.collector.efficiency(ws: meteo.windSpeed)
-        status.collector.irradiation(dni: meteo.insolation.direct)
+        status.collector.irradiance(dni: meteo.insolation.direct)
       } else {
         // If the sun is below the horizon, set the collector state accordingly.
         status.collector = Collector.initialState

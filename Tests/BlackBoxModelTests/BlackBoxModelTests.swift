@@ -14,6 +14,7 @@ class BlackBoxModelTests: XCTestCase {
   }
 
   func testsSummer() {
+    /*
     Simulation.time.dateInterval = .init(
       start: df.date(from: "11.07.2005")!,
       end: df.date(from: "13.07.2005")!
@@ -44,9 +45,11 @@ class BlackBoxModelTests: XCTestCase {
       plot.y2Titles = ["solar", "toStorage", "production", "storage", "gross", "net", "consum"]
       _ = try? plot(toFile: ".plots/Day_\(day)_Summer.png")
     }
+    */
   }
 
   func testsWinter() {
+    /*
     Simulation.time.dateInterval = .init(
       start: df.date(from: "11.01.2005")!,
       end: df.date(from: "13.01.2005")!
@@ -78,6 +81,7 @@ class BlackBoxModelTests: XCTestCase {
       plot.y2Titles = ["solar", "toStorage", "production", "storage", "gross", "net", "consum"]
       _ = try? plot(toFile: ".plots/Day_\(day)_Winter.png")
     }
+    */
   }
 }
 

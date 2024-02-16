@@ -15,7 +15,7 @@ struct PV {
   var transformer = Transformer()
 
   struct InputValues {
-    let gti: Double
+    let irradiance: Double
     let ambient: Temperature
     let windSpeed: Double
   }
@@ -25,27 +25,19 @@ struct PV {
   /// It takes into account factors such as solar radiation, ambient temperature,
   /// wind speed, and inverter specifications to determine the AC power output
   func callAsFunction(_ input: InputValues) -> Double {
-    guard input.gti > 15 else { return transformer(ac: .zero) }
-    var dc = array.mpp(
-      radiation: input.gti, ambient: input.ambient, windSpeed: input.windSpeed)
+    guard input.irradiance > 15 else { return transformer(ac: .zero) }
+    var dc = array.mpp(input)
     if dc.power > inverter.dc_power[0] {
       var efficiency = inverter(power: dc.power, voltage: dc.voltage)
       if efficiency.isNaN {
         let cell_T = array.panel.temperature(
-          radiation: input.gti, ambient: input.ambient,
+          irradiance: input.irradiance, ambient: input.ambient,
           windSpeed: input.windSpeed)
-        var count = 0
-        while efficiency.isNaN, count < 100 {
-          count += 1
-          dc = array(
-            voltage: dc.voltage.clamped(to: inverter.voltageRange) - 1E-6,
-            radiation: input.gti, cell: cell_T)
-          efficiency = inverter(
-            power: min(inverter.maxPower, dc.power), voltage: dc.voltage)
-        }
-      }
-      if efficiency.isNaN {
-        efficiency = 0
+        dc = array(
+          voltage: dc.voltage.clamped(to: inverter.voltageRange) - 1E-6,
+          irradiance: input.irradiance, cell: cell_T)
+        efficiency = inverter(power: min(inverter.maxPower, dc.power), voltage: dc.voltage)
+        if efficiency.isNaN { efficiency = 0 }        
       }
       let power = min(inverter.maxPower, dc.power) * (efficiency / 100)
       return transformer(ac: power)
@@ -80,10 +72,8 @@ struct PV {
     }
 
     /// Calculate the maximum power point of the array.
-    func mpp(radiation: Double, ambient: Temperature, windSpeed: Double)
-      -> PowerPoint
-    {
-      let mpp = panel(radiation: radiation, ambient: ambient, windSpeed: windSpeed)
+    func mpp(_ values: InputValues)-> PowerPoint {
+      let mpp = panel(mpp: values)
       /// Panel losses due to degradation, unavailability and losses in the copper
       let voltageDrop = (mpp.voltage / mpp.current * lossAtSTC) * mpp.current
       let losses = (1 - degradation) * (1 - unavailability)
@@ -92,11 +82,11 @@ struct PV {
         voltage: (mpp.voltage - voltageDrop) * Double(panelsPerString))
     }
     /// Find new point within the I-V curve using the single diode model.
-    func callAsFunction(voltage: Double, radiation: Double, cell: Temperature)
+    func callAsFunction(voltage: Double, irradiance: Double, cell: Temperature)
       -> PowerPoint
     {
       let current = panel.currentFrom(
-        voltage: voltage / Double(panelsPerString), radiation: radiation, cell_T: cell)
+        voltage: voltage / Double(panelsPerString), irradiance: irradiance, cell_T: cell)
 
       return PowerPoint(
         current: current * Double(strings) * Double(inverters), voltage: voltage)

@@ -7,8 +7,7 @@ class PVPanelTests: XCTestCase {
   func testsPanel() {
     let panel = PV.Panel()
     let iter = ((50...1050) / 100).iteration
-
-    let P = { panel(radiation: $0, ambient: .init(celsius: $1), windSpeed: 0) }
+    let P = { panel(mpp: .init(irradiance: $0, ambient: Temperature(celsius: $1), windSpeed: 0)) }
 
     let I = { t in iter.map { x in P(x, t).current } }
     let V = { t in iter.map { x in P(x, t).voltage * 26 } }
@@ -38,8 +37,8 @@ class PVPanelTests: XCTestCase {
         _ = try plot.plot(x: 1, y: 2, 3, 4, 5, 6, 7, 8)(.pngSmall(".plots/LambertW.png"))
       } catch { XCTFail(error.localizedDescription) }
     }
-    let i = ((0...1000) / 100).iteration.map { x in panel.currentFrom(voltage: x, radiation: 50, cell_T: .init(celsius: 30)) }
-    let v = ((0.8...1.1) / 100).iteration.map { x in panel.voltageFrom(current: x, radiation: 50, cell_T: .init(celsius: 30)) }
+    let i = ((0...1000) / 100).iteration.map { x in panel.currentFrom(voltage: x, irradiance: 50, cell_T: .init(celsius: 30)) }
+    let v = ((0.8...1.1) / 100).iteration.map { x in panel.voltageFrom(current: x, irradiance: 50, cell_T: .init(celsius: 30)) }
     if plotting {
       do {
         let plot = Gnuplot()
@@ -60,8 +59,8 @@ class PVPanelTests: XCTestCase {
 
     var conditions = [PV.InputValues]()
 
-    for gti in stride(from: 10.0, to: 1300, by: 10) {
-      conditions.append(.init(gti: gti, ambient: Temperature(celsius: 20), windSpeed: 0))
+    for irradiance in stride(from: 10.0, to: 1300, by: 10) {
+      conditions.append(.init(irradiance: irradiance, ambient: Temperature(celsius: 20), windSpeed: 0))
     }
     let photovoltaic = conditions.map { step -> Double in pv(step) / 10.0e6 }
     do {

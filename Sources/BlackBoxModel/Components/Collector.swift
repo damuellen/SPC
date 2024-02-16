@@ -168,7 +168,7 @@ struct Collector: Parameterizable, CustomStringConvertible {
   }
 
   /// Calculates the irradiation on the absorber taking into account the angle of incidence and optical efficiency.
-  public mutating func irradiation(dni: Double) {
+  public mutating func irradiance(dni: Double) {
     lastInsolation = insolationAbsorber
     insolationAbsorber = dni * cosTheta * efficiency
   }

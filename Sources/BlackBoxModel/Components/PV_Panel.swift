@@ -11,7 +11,7 @@ extension PV {
   /// Wraps low-level functions for solving the single diode equation.
   struct Cell {
     /// Radiation at Standard Test Conditions (STC) in Watts per square meter.
-    static let radiation_at_STC = 1000.0
+    static let irradiance_at_STC = 1000.0
     /// Temperature at Standard Test Conditions (STC) in degrees Celsius.
     static let temperature_at_STC = Temperature(celsius: 25.0)
     /// Boltzmann constant in Joules per Kelvin.
@@ -45,16 +45,16 @@ extension PV {
     }
 
     func callAsFunction(
-      radiation: Double, temperature: Temperature) -> (Double, Double, Double) {
-      let Iph = photocurrent(radiation: radiation, temperature: temperature)
-      let Rsh = Rshunt(radiation: radiation, temperature: temperature)
+      irradiance: Double, temperature: Temperature) -> (Double, Double, Double) {
+      let Iph = photocurrent(irradiance: irradiance, temperature: temperature)
+      let Rsh = Rshunt(irradiance: irradiance, temperature: temperature)
       let Io = saturationCurrent(temperature: temperature)
       return (Iph, Rsh, Io)
     }
 
-    /// Computes photocurrent for given radiation and temperature.
-    func photocurrent(radiation: Double, temperature: Temperature) -> Double {
-      (radiation / Cell.radiation_at_STC)
+    /// Computes photocurrent for given irradiance and temperature.
+    func photocurrent(irradiance: Double, temperature: Temperature) -> Double {
+      (irradiance / Cell.irradiance_at_STC)
         * (Isc - muIsc * (temperature - Cell.temperature_at_STC).kelvin)
     }
     /// Computes saturation current for given temperature.
@@ -65,8 +65,8 @@ extension PV {
             * ((1 / Cell.temperature_at_STC.kelvin) - (1 / temperature.kelvin)))
     }
     /// Computes the corrected Rshunt for the single diode model.
-    func Rshunt(radiation: Double, temperature: Temperature) -> Double {
-      RshRef + (Rsh0 - RshRef) * exp(5.5 * radiation / Cell.radiation_at_STC)
+    func Rshunt(irradiance: Double, temperature: Temperature) -> Double {
+      RshRef + (Rsh0 - RshRef) * exp(5.5 * irradiance / Cell.irradiance_at_STC)
     }
   }
   /// A data structure for Photovoltaic PowerPoint
@@ -78,9 +78,9 @@ extension PV {
     static var zero: PowerPoint = .init(current: 0, voltage: 0)
 
     public var description: String {
-      String(format: "Vmp: %03.2f", voltage) + "\t"
-      + String(format: "Imp: %03.2f", current) + "\t"
-      + String(format: "Pmp: %03.2f", power)
+      String(format: "Voltage: %3.1f V  ", voltage)
+      + String(format: "Current: %3.1f A  ", current)
+      + String(format: "Power: %3.1f W", power)
     }
 
     init(current: Double, voltage: Double) {
@@ -110,25 +110,25 @@ extension PV {
     
     /// Calculates the temperature of the panel.
     func temperature(
-      radiation: Double, ambient: Temperature, windSpeed: Double) -> Temperature {
+      irradiance: Double, ambient: Temperature, windSpeed: Double) -> Temperature {
       /// Absorption coefficient of the module
       let alpha = 0.9
-      let efficiency = nominalPower / (area * Cell.radiation_at_STC)
+      let efficiency = nominalPower / (area * Cell.irradiance_at_STC)
       /// Constant heat transfer component
       let Uc = 20.0
       /// Convective heat transfer component
       let Uv = 0.0
       let U = Uc + Uv * windSpeed
-      return ambient + ((1 / U) * alpha * radiation * (1 - efficiency))
+      return ambient + ((1 / U) * alpha * irradiance * (1 - efficiency))
     }
 
     /// Calculates the voltage from a given current point within the I-V curve using the single diode model.
-    func voltageFrom(current: Double, radiation: Double, cell_T: Temperature) -> Double {
+    func voltageFrom(current: Double, irradiance: Double, cell_T: Temperature) -> Double {
       let nVth =
         cell.gamma * Double(numberOfCells) * Cell.k * cell_T.kelvin / Cell.q
 
-      let I = cell.photocurrent(radiation: radiation, temperature: cell_T)
-      let Rsh = cell.Rshunt(radiation: radiation, temperature: cell_T)
+      let I = cell.photocurrent(irradiance: irradiance, temperature: cell_T)
+      let Rsh = cell.Rshunt(irradiance: irradiance, temperature: cell_T)
 
       let argW = (I * Rsh / nVth) * exp(Rsh * (-current + I + I) / nVth)
       var inputterm = LambertW(argW)
@@ -148,13 +148,13 @@ extension PV {
     }
 
     /// Calculates the current from a given voltage value within the I-V curve using the single diode model.
-    func currentFrom(voltage: Double, radiation: Double, cell_T: Temperature) -> Double {
+    func currentFrom(voltage: Double, irradiance: Double, cell_T: Temperature) -> Double {
       // The cells are connected in parallel, the voltage splits.
       let voltage = voltage / Double(numberOfCells)
       let nVth =
         cell.gamma * Double(numberOfCells) * Cell.k * cell_T.kelvin / Cell.q
 
-      let (Iph, Rsh, Isat) = cell(radiation: radiation, temperature: cell_T)
+      let (Iph, Rsh, Isat) = cell(irradiance: irradiance, temperature: cell_T)
 
       let argW =
         cell.Rs * Isat
@@ -164,22 +164,19 @@ extension PV {
         * (Iph + Isat) / (cell.Rs + Rsh)
     }
 
-    /// Computes the PowerPoint for given radiation, ambient temperature, and wind speed.
-    func callAsFunction(
-      radiation: Double, ambient: Temperature, windSpeed: Double
-    ) -> PowerPoint {
+    /// Computes the PowerPoint for given irradiance, ambient temperature, and wind speed.
+    func callAsFunction(mpp input: InputValues) -> PowerPoint {
       let cell_T = temperature(
-        radiation: radiation, ambient: ambient, windSpeed: windSpeed)
+        irradiance: input.irradiance, ambient: input.ambient, windSpeed: input.windSpeed)
       let nVth =
         cell.gamma * Double(numberOfCells) * Cell.k * cell_T.kelvin / Cell.q
 
-      let (Iph, Rsh, Isat) = cell(radiation: radiation, temperature: cell_T)
+      let (Iph, Rsh, Isat) = cell(irradiance: input.irradiance, temperature: cell_T)
       /// Returns Imp, Vmp, Pmp for the IV curve described by input parameters.
       return Mpp_bisect(Iph: Iph, Io: Isat, a: nVth, Rsh: Rsh)
     }
 
-    private func Mpp_bisect(
-      Iph: Double, Io: Double, a: Double, Rsh: Double
+    private func Mpp_bisect(Iph: Double, Io: Double, a: Double, Rsh: Double
     ) -> PowerPoint {
       let Imp = Imp_bisect(Iph: Iph, Io: Io, nVth: a, Rs: cell.Rs, Rsh: Rsh)
       let z = phi_exact(Imp: Imp, IL: Iph, Io: Io, a: a, Rsh: Rsh)
