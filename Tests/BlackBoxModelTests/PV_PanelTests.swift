@@ -13,6 +13,34 @@ class PVPanelTests: XCTestCase {
     let V = { t in iter.map { x in P(x, t).voltage * 26 } }
     let p = { t in iter.map { x in P(x, t).power } }
 
+    func lambertW(_ z: Double) -> Double {
+      var tmp: Double
+      var c1: Double
+      var c2: Double
+      var w1: Double
+      var dw: Double
+      var z = z
+      var w = z
+
+      if abs(z + 0.367879441171442) <= 1.5 {
+        w = sqrt(5.43656365691809 * w + 2) - 1
+      } else {
+        if z == 0 { z = 1 }
+        tmp = log(z)
+        w = tmp - log(tmp)
+      }
+      w1 = w
+      for _ in 1...36 {
+        c1 = exp(w)
+        c2 = w * c1 - z
+        if w != -1 { w1 = w + 1 }
+        dw = c2 / (c1 * w1 - ((w + 2) * c2 / (2 * w1)))
+        w = w - dw
+        if abs(dw) < 7e-17 * (2 + abs(w1)) { break }
+      }
+      return w
+    }
+
     let plotting = true
     if plotting {
       _ = try? FileManager.default.createDirectory(atPath: ".plots", withIntermediateDirectories: true)
@@ -33,7 +61,10 @@ class PVPanelTests: XCTestCase {
       do {
         let plot = Gnuplot()
         let xs = ((0...20) / 150).iteration
-        plot.data(xs: xs, xs.map { x in LambertW(x) }, titles: "x", "LambertW")
+        let ref = xs.map { x in lambertW(x) }
+        let y = xs.map { x in LambertW(x) }
+        for pair in zip(ref, y) { XCTAssertEqual(pair.0, pair.1, accuracy: 10E-15) }
+        plot.data(xs: xs, y, titles: "x", "LambertW")
         _ = try plot.plot(x: 1, y: 2, 3, 4, 5, 6, 7, 8)(.pngSmall(".plots/LambertW.png"))
       } catch { XCTFail(error.localizedDescription) }
     }
