@@ -55,6 +55,8 @@ public enum BlackBoxModel {
     sun = SolarPosition(
       coords: location.coordinates, tz: location.timezone,
       year: simulatedYear, frequence: Simulation.time.steps)
+
+    meteo = MeteoDataFileHandler(sun: sun!)
   }
 
   /// Configure the simulation using meteo data from a file.

@@ -62,6 +62,13 @@ public class MeteoDataFileHandler {
     // Print the path of the meteorological data file being used.
   }
 
+  public init(sun: SolarPosition) {
+    self.url = URL(fileURLWithPath: "")
+    self.file = ClearSky(sun: sun)
+    self.interval = sun.frequence
+    self.interpolation = false
+  }
+
   /// Retrieve information from the meteorological data file.
   ///
   /// - Returns: A tuple containing the year and location information.
@@ -123,6 +130,20 @@ protocol MeteoDataFile {
   var data: [MeteoData] { get }
 
   var valuesPerHour: Int { get }
+}
+
+public struct ClearSky: MeteoDataFile {
+  var year: Int
+  var location: Location
+  var data: [MeteoData]
+  var valuesPerHour: Int
+
+  public init(sun: SolarPosition) {   
+    self.year = sun.year
+    self.location =  sun.location
+    self.valuesPerHour = sun.frequence.rawValue
+    self.data = MeteoData.using(sun, model: .special)
+  }
 }
 
 extension MeteoDataFile {
