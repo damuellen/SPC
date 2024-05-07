@@ -68,15 +68,15 @@ struct Plant {
       guard steamTurbine.load < Availability.current.value.powerBlock
         else { return nil }
 
-      status.steamTurbine.adjust(load: Availability.current.value.powerBlock)
       // The turbine load has changed recalculation of efficiency
-      let eff = steamTurbine.perform(
+      steamTurbine.efficiency(
         heatExchanger: status.heatExchanger.temperature.inlet,
         ambient: ambient
-      ).quotient
+      )
 
       return min(
-        SteamTurbine.parameter.power.max * steamTurbine.load.quotient / eff,
+        SteamTurbine.parameter.power.max 
+          * steamTurbine.load.quotient / steamTurbine.efficiency.quotient,
         HeatExchanger.parameter.heatFlowHTF)
     }
     func powerBlockElectricalParasitics(_ efficiency: Ratio)
@@ -117,28 +117,23 @@ struct Plant {
       // The simulation iteration process starts here.
       step += 1
       factor = Double(step / 10) + 1
+      if heatFlow.heatExchanger.isZero == false {
+        let loadForDemand = max(minLoad,
+          Ratio((electricity.demand - Design.layout.gasTurbine)
+          / SteamTurbine.parameter.power.max))
 
-      let loadForDemand =
-        Ratio((electricity.demand - Design.layout.gasTurbine)
-        / SteamTurbine.parameter.power.max)
-
-      status.steamTurbine.adjust(load: loadForDemand)
-      // The turbine load has changed recalculation of efficiency
-      var efficiency = status.steamTurbine.perform(
-        heatExchanger: status.heatExchanger.temperature.inlet,
-        ambient: ambient
-      )
-
+        status.steamTurbine.load = min(loadForDemand, Availability.current.value.powerBlock)
+        // The turbine load has changed recalculation of efficiency
+        status.steamTurbine.efficiency(
+          heatExchanger: status.heatExchanger.temperature.inlet,
+          ambient: ambient
+        )
+      }
       // The required thermal power to meet the electricity demand
       heatFlow.demand.megaWatt = min(
-        (electricity.demand / efficiency.quotient),
+        (electricity.demand / status.steamTurbine.efficiency.quotient),
         HeatExchanger.parameter.heatFlowHTF)
     
-      /*  heatFlow.demand.megaWatt =
-        (constraintLoad(&steamTurbine) ?? heatFlow.demand.megaWatt
-        / Simulation.adjustmentFactor.heatLossH2O)
-        / HeatExchanger.parameter.efficiency*/
-
       if Design.hasSolarField {
         // Calculation of the heat supplied by the solar field
         heatFlow.solarProduction(status.solarField)
@@ -188,20 +183,13 @@ struct Plant {
 
       if Design.hasBoiler { integrate(boiler: &status.boiler) }
 
-      status.steamTurbine.adjust(load: max(status.steamTurbine.load, minLoad))
-
-      efficiency = status.steamTurbine.perform(
-        heatExchanger: status.heatExchanger.temperature.inlet,
-        ambient: ambient
-      )
-
-      if heatFlow.production.megaWatt < minPower / efficiency.quotient {
+      if heatFlow.production.megaWatt < minPower / status.steamTurbine.efficiency.quotient {
         heatFlow.production = 0.0
         /*  debugPrint("""
          \(DateTime.current)
          "Damping (SteamTurbine underload): \(heatFlow.production.megaWatt) MWH,th.
          """)*/
-      }
+      } 
       // Electrical gross power of steam turbine
       electricity.steamTurbineGross = status.steamTurbine(
         heatFlow: heatFlow,
@@ -234,7 +222,7 @@ struct Plant {
       electricity.gross = electricity.steamTurbineGross
       electricity.gross += electricity.gasTurbineGross
 
-      let (powerBlock, shared) = powerBlockElectricalParasitics(efficiency)
+      let (powerBlock, shared) = powerBlockElectricalParasitics(status.steamTurbine.efficiency)
       electricalParasitics.powerBlock = powerBlock
       electricalParasitics.shared = shared
       electricity.totalize(parasitics: electricalParasitics)

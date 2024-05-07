@@ -63,9 +63,9 @@ extension Parameters {
     antiFreezeParastics: 0.5,
     pumpParastics: [0.15, -0.293, 1.257],
     maxMassFlow: 1800.0,
-    minFlow: 0.3,
+    minFlowRatio: 0.3,
     pumpParasticsFullLoad: 3.607,
-    antiFreezeFlow: 0.12,
+    antiFreezeFlowRatio: 0.12,
     HTFmass: 396_359.0,
     HTF: HeatTransferFluid.VP1,
     edgeFactor: []

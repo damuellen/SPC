@@ -123,7 +123,8 @@ public enum BlackBoxModel {
   public static func runModel(with record: Historian) {
     guard let 🌞 = sun, let insolation = meteo.diagnose(), insolation.direct 
     else { print("Missing sunshine. Please check the file content."); exit(1) }
-
+    // let sunHours = 🌞.sunHoursPerMonth
+    // GridDemand.current = GridDemand(sunHours: sunHours, demand: (1.0, 0.5))
     // Preparation of the plant parameters
     var plant = Plant.setup()
 
@@ -198,7 +199,7 @@ public enum BlackBoxModel {
       {()}
       if DateTime.isSunSet
       {()}
-      if DateTime.is(minute: 40, hour: 8, day: 1, month: 1)
+      if DateTime.is(minute: 00, hour: 16, day: 1, month: 1)
       {()}
 #endif
 
@@ -233,6 +234,7 @@ public enum BlackBoxModel {
       status.solarField.temperature.outlet = status.solarField.heatLosses(
         header: status.solarField.header.temperature.outlet,
         ambient: temperature)
+
       // Calculate power consumption of the pumps
       plant.electricalParasitics.solarField = status.solarField.parasitics()
 

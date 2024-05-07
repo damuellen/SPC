@@ -25,6 +25,20 @@ struct GridDemand: Codable {
   /// Initializes a default `GridDemand` instance with a demand ratio of 1 (i.e., no variation in demand).
   private init() { data = Array(repeatElement(Ratio(1), count: 12 * 24)) }
 
+  public init(sunHours: [(h: Int, c: Int)], demand: (day: Ratio, night: Ratio)) {
+    var data = [Ratio]()
+    for hour in 0..<24 {
+      for time in sunHours {
+        if hour > time.h, hour < time.h + time.c - 2 {
+          data.append(demand.day)
+        } else {
+          data.append(demand.night)
+        }
+      }
+    }
+    self.data = data
+  }
+
   /// A computed property that calculates and returns the demand ratio for the current time interval.
   /// The current time interval is determined based on the index of the current hour and month in the `DateTime` module.
   /// The `ratio` is obtained from the `data` array using the calculated index.
@@ -47,7 +61,7 @@ extension GridDemand {
     var data = [Ratio]()
     for row in table {
       // Convert strings to Double and create Ratio instances
-      data.append(contentsOf: row.compactMap(Double.init).map(Ratio.init(percent:)))
+      data.append(contentsOf: row.map(\.sanitized).compactMap(Double.init).map(Ratio.init(percent:)))
     }
     // Initialize the GridDemand instance with the extracted data
     self.init(data)

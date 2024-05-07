@@ -198,7 +198,7 @@ public final class Historian {
     #elseif DEBUG && !os(Windows)
     if progress != time.yearDay {
       progress = time.yearDay
-      print(" [\(progress)/\(365)] recording month…", terminator: "\r")
+      print(" [\(progress)/\(365)] recording day…", terminator: "\r")
       fflush(stdout)
     }
     #endif

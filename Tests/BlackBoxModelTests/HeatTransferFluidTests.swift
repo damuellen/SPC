@@ -22,4 +22,23 @@ class HeatTransferFluidTests: XCTestCase {
     XCTAssertEqual(HeatTransferFluid.XLP.density(666.15), 456, accuracy: accuracy, "XLP density @393degC")
     XCTAssertEqual(HeatTransferFluid.XLP.density(688.15), 399, accuracy: accuracy, "XLP density @415degC")
   }
+
+  func testsHelisolEnthalpy() {
+    let accuracy = 0.1
+    do {
+      let enthalpy = HeatTransferFluid.XLP.enthalpy(666.15)
+      let temp = HeatTransferFluid.XLP.temperature(enthalpy)
+      XCTAssertEqual(temp.kelvin, 666.15, accuracy: accuracy)
+    }
+    do {
+      let enthalpy = HeatTransferFluid.XLP.enthalpy(523.15)
+      let temp = HeatTransferFluid.XLP.temperature(enthalpy)
+      XCTAssertEqual(temp.kelvin, 523.15, accuracy: accuracy)
+    }
+    do {
+      let enthalpy = HeatTransferFluid.XLP.enthalpy(566.15)
+      let temp = HeatTransferFluid.XLP.temperature(enthalpy)
+      XCTAssertEqual(temp.kelvin, 566.15, accuracy: accuracy)
+    }
+  }
 }

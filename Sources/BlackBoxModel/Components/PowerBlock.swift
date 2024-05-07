@@ -23,7 +23,7 @@ struct PowerBlock: Parameterizable, ThermalProcess {
 
   /// The operation mode options for the power block
   enum OperationMode {
-    case scheduledMaintenance
+    case scheduledMaintenance, normal
   }
   /// Creates a `PowerBlock` instance with the fixed initial state.
   static let initialState = PowerBlock(
@@ -37,17 +37,12 @@ struct PowerBlock: Parameterizable, ThermalProcess {
     heatExchanger: inout HeatExchanger, mode: Storage.OperationMode
   ) {
     if massFlow > .zero,
-      temperature.inlet
-        >= HeatExchanger.parameter.temperature.htf.inlet.min
+      temperature.inlet >= HeatExchanger.parameter.temperature.htf.inlet.min
     {
+      temperature.outlet = HeatExchanger.temperatureOutlet(self, heatExchanger)
 
-      temperature.outlet = HeatExchanger
-        .temperatureOutlet(self, heatExchanger)
-
-      if case .discharge = mode,
-        temperature.outlet.isLower(than: 534.0)
-      {
-        let result = heatExchangerBypass()
+      if case .discharge = mode, temperature.outlet.isLower(than: 534.0) {
+        let result = bypassHeatExchanger()
         heatExchanger.heatOut = result.heatOut
         heatExchanger.heatToTES = result.heatToTES
       }
@@ -117,7 +112,7 @@ struct PowerBlock: Parameterizable, ThermalProcess {
     // * steamTurbine.load + parameter.electricalParasitics[2] * steamTurbine.load ** 2)
   }
 
-  mutating func heatExchangerBypass() -> (heatOut: Double, heatToTES: Double)
+  mutating func bypassHeatExchanger() -> (heatOut: Double, heatToTES: Double)
   {
     let htf = SolarField.parameter.HTF
 

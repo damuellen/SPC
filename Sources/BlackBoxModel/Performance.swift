@@ -308,6 +308,7 @@ extension RangeReplaceableCollection where Element == ThermalEnergy {
   func added(fraction: Double) -> ThermalEnergy {
     var result = ThermalEnergy()
     for values in self {
+      result.demand += values.demand * fraction
       result.solar += values.solar * fraction
       result.toStorage += values.toStorage * fraction
       result.storage += values.storage * fraction

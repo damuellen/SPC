@@ -291,7 +291,7 @@ extension Storage {
   private mutating func freezeProtection(powerBlock: PowerBlock) {
     let splitfactor = Storage.parameter.HTF == .hiXL ? 0.4 : 1
 
-    let antiFreeze = SolarField.parameter.antiFreezeFlow.quotient
+    let antiFreeze = SolarField.parameter.antiFreezeFlowRatio.quotient
     let maxMassFlow = SolarField.parameter.maxMassFlow.rate
     let antiFreezeFlow = antiFreeze * maxMassFlow
 

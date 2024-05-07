@@ -140,13 +140,13 @@ struct GasTurbine: Parameterizable {
       } else {
         while true { // just to estimate amount of WHR
           (_,supply) = GasTurbine.perform(gasTurbine, demand: demand)
-          steamTurbine.adjust(load: Ratio(
+          steamTurbine.load = Ratio(
             (plant.electricity.demand - plant.electricity.gasTurbineGross)
-              / SteamTurbine.parameter.power.max))
+              / SteamTurbine.parameter.power.max)
 
         //  if status.steamTurbine.load.quotient != load {
             // The turbine load has changed recalculation of efficiency
-        let efficiency = steamTurbine.perform(
+        steamTurbine.efficiency(
           heatExchanger: heatExchanger.temperature.inlet,
           ambient: temperature
         )
@@ -154,7 +154,7 @@ struct GasTurbine: Parameterizable {
 
 
           if GasTurbine.efficiency(at: gasTurbine.load) > 0 {
-            demand /= 1 + efficiency.quotient * WasteHeatRecovery.parameter.efficiencyPure
+            demand /= 1 + steamTurbine.efficiency.quotient * WasteHeatRecovery.parameter.efficiencyPure
               * (1 / GasTurbine.efficiency(at: gasTurbine.load) - 1) // 1.135 *
             if abs(plant.electricity.gasTurbineGross - demand)
               < Simulation.parameter.heatTolerance {
@@ -186,9 +186,9 @@ struct GasTurbine: Parameterizable {
           if GasTurbine.efficiency(at: gasTurbine.load) > 0 {
 
           //  if status.steamTurbine.load.quotient != load {
-              steamTurbine.adjust(load: load)
+              steamTurbine.load = load
               // The turbine load has changed recalculation of efficiency
-              let efficiency = steamTurbine.perform(
+              steamTurbine.efficiency(
                 heatExchanger: heatExchanger.temperature.inlet,
                 ambient: temperature
               )
@@ -196,7 +196,7 @@ struct GasTurbine: Parameterizable {
           //  }
 
 
-            demand /= 1 + efficiency.quotient * WasteHeatRecovery.parameter.efficiencyPure
+            demand /= 1 + steamTurbine.efficiency.quotient * WasteHeatRecovery.parameter.efficiencyPure
               * (1 / GasTurbine.efficiency(at: gasTurbine.load) - 1) // 1.135 *
             // for RH !!
             // Change of iteration procedure
@@ -218,9 +218,9 @@ struct GasTurbine: Parameterizable {
           demand = Design.layout.gasTurbine
           (_,supply) = GasTurbine.perform(gasTurbine, demand: demand) // GasTurbineLmax
 
-          steamTurbine.adjust(load: Ratio(
+          steamTurbine.load = Ratio(
             (plant.electricity.demand - plant.electricity.gasTurbineGross)
-              / SteamTurbine.parameter.power.max))
+              / SteamTurbine.parameter.power.max)
 
           // to correctDC
           let htfShare = demand * (1 / parameter.efficiencyISO - 1)
@@ -265,20 +265,20 @@ struct GasTurbine: Parameterizable {
         } // WasteHeatRecovery.parameter.Operation
       }
       (_,supply) = GasTurbine.perform(gasTurbine, demand: demand) // GasTurbineLmax
-      steamTurbine.adjust(load: Ratio((plant.electricity.demand - plant.electricity.gasTurbineGross)
+      steamTurbine.load = Ratio((plant.electricity.demand - plant.electricity.gasTurbineGross
         / SteamTurbine.parameter.power.max))
 
 
     //  if status.steamTurbine.load.quotient != load {
         // The turbine load has changed recalculation of efficiency
-        let efficiency = steamTurbine.perform(
+        steamTurbine.efficiency(
           heatExchanger: heatExchanger.temperature.inlet,
           ambient: temperature
         )
     //  }
 
       plant.heatFlow.demand.megaWatt = steamTurbine.load.quotient
-        * SteamTurbine.parameter.power.max / efficiency.quotient
+        * SteamTurbine.parameter.power.max / steamTurbine.efficiency.quotient
       // FIXME: thermal.wasteHeatRecovery = WasteHeatRecovery(electricPerformance.gasTurbineGross, hourFraction)
 
       if plant.heatFlow.wasteHeatRecovery.watt < 0 {

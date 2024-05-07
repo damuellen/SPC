@@ -7,9 +7,7 @@ import Utilities
 
 extension HeatExchanger: CustomStringConvertible {
   /// A textual representation of the HeatExchanger instance.
-  public var description: String {
-    "\(self.cycle)"
-  }
+  public var description: String { "\(self.cycle)" }
 }
 
 /// A struct representing the state and functions for the heat exchanger.
@@ -184,6 +182,8 @@ struct HeatExchanger: Parameterizable, ThermalProcess {
           / (bypassMassFlow + massFlow).rate
       }
       temperature.outlet = htf.temperature(heatToTES)
+    } else {
+      heatOut = htf.enthalpy(temperature.outlet)
     }
     let heatFlowRate = massFlow.rate * heat / 1_000
     return -heatFlowRate * parameter.efficiency

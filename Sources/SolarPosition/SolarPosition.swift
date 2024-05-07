@@ -51,6 +51,31 @@ public struct SolarPosition {
   /// A dictionary used for fast date-based lookups to find corresponding indices in calculatedValues array.
   internal var lookupDates = [Date: Int]()
 
+  public var sunHoursPerMonth: [(Int,Int)] {
+    let sunHours = SolarPosition.sunHoursPeriod(
+      location: location, year: year
+    )
+    var buckets = Array(repeating: [DateInterval](), count: 12)
+    var currentBucket = 0 
+    buckets[currentBucket].append(sunHours[0])
+    
+    for i in sunHours.indices.dropFirst() {
+      let date = DateTime(sunHours[i].start)
+      if date.month != DateTime(sunHours[i-1].start).month {
+        currentBucket += 1
+      }
+      buckets[currentBucket].append(sunHours[i])
+    }
+    
+    var sunHoursPerMonth = [(Int,Int)]()
+    for month in buckets {
+      let hour = month.reduce(0, { $0 + (DateTime($1.start).hour) }) / month.count
+      let duration = month.reduce(0, { $0 + ($1.duration / 3600) })
+      let hours = Int((duration / Double(month.count)).rounded())
+      sunHoursPerMonth.append((hour,hours))
+    }
+    return sunHoursPerMonth
+  }
   /// A struct representing the input parameters for the solar position calculations.
   public struct Input {
     var year, month, day, hour, minute, second: Int

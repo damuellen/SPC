@@ -329,19 +329,19 @@ extension Storage {
       }
       
       // Calculate the maximum load and efficiency of the steam turbine.
-      let maxLoad: Double = 1
+      let maxLoad: Double = Availability.current.value.powerBlock.quotient
 
-      let efficiency = steamTurbine.perform(
+      steamTurbine.efficiency(
         heatExchanger: solarField.temperature.outlet,
         ambient: Temperature(celsius: 20)
       )
 
       // Calculate the ratio of heat supplied by the solar field and thermal power to the maximum power of the steam turbine.
       let ratio = (heatSolar + thermalPower.megaWatt)
-        / (SteamTurbine.parameter.power.max / efficiency.quotient)
+        / (SteamTurbine.parameter.power.max / steamTurbine.efficiency.quotient)
       
       // Adjust the steam turbine load based on the calculated ratio and the maximum load.
-      steamTurbine.adjust(load: Ratio(abs(ratio), cap: maxLoad)) 
+      steamTurbine.load = Ratio(abs(ratio), cap: maxLoad)
       
       // Calculate the outlet temperature of the mixing outlets of the solar field and storage system.
       let mixingOutlets = SolarField.parameter.HTF.calculateMixedOutletTemperature
@@ -444,9 +444,9 @@ extension Storage {
     powerBlock: PowerBlock)
   {
     // Calculate the anti-freeze flow based on the specified quotient and the maximum mass flow rate.
-    let antiFreeze = SolarField.parameter.antiFreezeFlow.quotient
     let maxMassFlow = SolarField.parameter.maxMassFlow.rate
-    let antiFreezeFlow = MassFlow(antiFreeze * maxMassFlow)
+    let ratio = SolarField.parameter.antiFreezeFlowRatio.quotient
+    let antiFreezeFlow = MassFlow(maxMassFlow * ratio)
     let splitfactor: Ratio = 0.4
     
     // Set the mass flow in the storage system and solar field header to the anti-freeze flow.

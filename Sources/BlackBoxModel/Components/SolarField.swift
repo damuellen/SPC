@@ -83,11 +83,11 @@ struct SolarField: Parameterizable, ThermalProcess {
     * 2 * Double(SolarField.parameter.numberOfSCAsInRow)
 
   let minMassFlow = MassFlow(
-    SolarField.parameter.minFlow.quotient * SolarField.parameter.maxMassFlow.rate
+    SolarField.parameter.minFlowRatio.quotient * SolarField.parameter.maxMassFlow.rate
   )
 
-  let antiFreezeFlow = MassFlow(
-      SolarField.parameter.antiFreezeFlow.quotient * SolarField.parameter.maxMassFlow.rate
+  let antiFreezeMassFlow = MassFlow(
+      SolarField.parameter.antiFreezeFlowRatio.quotient * SolarField.parameter.maxMassFlow.rate
   )
 
   var requiredMassFlow: MassFlow = HeatExchanger.designMassFlow
@@ -198,10 +198,8 @@ struct SolarField: Parameterizable, ThermalProcess {
     let maxMassFlow = SolarField.parameter.maxMassFlow
     let design = SolarField.parameter.imbalanceDesign
     let minimum = SolarField.parameter.imbalanceMin
-    let minFlowRatio = SolarField.parameter.minFlow.quotient
-    let minFlow = MassFlow(minFlowRatio * maxMassFlow.rate)
-    let m1 = (massFlow - minFlow).rate
-    let m2 = (maxMassFlow - minFlow).rate
+    let m1 = (massFlow - minMassFlow).rate
+    let m2 = (maxMassFlow - minMassFlow).rate
     return zip(design, minimum).map { d, m in
       MassFlow(massFlow.rate * (m1 * (d - m) / m2 + m))
     }
@@ -317,7 +315,7 @@ struct SolarField: Parameterizable, ThermalProcess {
       let loopWays = SolarField.parameter.loopWays
       let flowVelocity: Double = 2.7
       let maxMassFlow = SolarField.parameter.maxMassFlow.rate
-      let remain = loopWays[0] / (flowVelocity * antiFreezeFlow.rate / maxMassFlow)
+      let remain = loopWays[0] / (flowVelocity * antiFreezeMassFlow.rate / maxMassFlow)
 
       // Update the operation mode to freeze with the calculated remaining time.
       operationMode = .freeze(remain - timeRemain)
@@ -470,7 +468,7 @@ struct SolarField: Parameterizable, ThermalProcess {
     switch MassFlow(kgPerSqm * area) {
     case let massFlow where massFlow.rate <= .zero: // HCE loses heat
       if isFreezeProtectionRequired() {
-        header.massFlow = antiFreezeFlow
+        header.massFlow = antiFreezeMassFlow
       } else {
         operationMode = elevation.isZero ? .stow : .follow
         header.massFlow = .zero

@@ -75,11 +75,11 @@ extension SolarField {
     /// Maximum mass flow rate in the solar field.
     var maxMassFlow: MassFlow
     /// Minimum allowable HTF flow as a percentage.
-    var minFlow: Ratio
+    var minFlowRatio: Ratio
     /// Parasitic power at full load for pump [MW].
     var pumpParasticsFullLoad: Double
     /// Anti-freeze flow as a percentage.
-    var antiFreezeFlow: Ratio
+    var antiFreezeFlowRatio: Ratio
     /// Total mass of HTF in the system [kg].
     var HTFmass: Double
     /// The heat transfer fluid used in the solar field.
@@ -145,8 +145,8 @@ extension SolarField.Parameter: CustomStringConvertible {
     + "Tilt of Collectors [°]:" * elevation.description
     + "Mass Flow in Solar Field at Full Load [kg/s]:"
     * String(format: "%.1f", maxMassFlow.rate)
-    + "Minimum allowable Mass Flow [%]:" * minFlow.percentage.description
-    + "Anti-Freeze Mass Flow [%]:" * antiFreezeFlow.percentage.description
+    + "Minimum allowable Mass Flow [%]:" * minFlowRatio.percentage.description
+    + "Anti-Freeze Mass Flow [%]:" * antiFreezeFlowRatio.percentage.description
     + "Total Mass of HTF in System [kg]:"
     * String(format: "%.1f", HTFmass)
     + "Consider HL of ANY Dump. Collectors:" * (heatlossDump ? "YES" : "NO ")
@@ -195,8 +195,8 @@ extension SolarField.Parameter: TextConfigInitializable {
     antiFreezeParastics = try ln(37)
     pumpParastics = try [ln(40), ln(43), ln(46)]
     maxMassFlow = try MassFlow(ln(49))
-    minFlow = try Ratio(ln(52) / 100)
-    antiFreezeFlow = try Ratio(ln(55) / 100)
+    minFlowRatio = try Ratio(ln(52) / 100)
+    antiFreezeFlowRatio = try Ratio(ln(55) / 100)
     HTFmass = try ln(58)
     HTF = HeatTransferFluid.VP1
     heatLossHotHeader = try [ln(66), ln(67), ln(68)]

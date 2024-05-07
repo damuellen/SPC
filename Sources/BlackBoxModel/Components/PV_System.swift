@@ -37,7 +37,9 @@ struct PV {
           voltage: dc.voltage.clamped(to: inverter.voltageRange) - 1E-6,
           irradiance: input.irradiance, cell: cell_T)
         efficiency = inverter(power: min(inverter.maxPower, dc.power), voltage: dc.voltage)
-        if efficiency.isNaN { efficiency = 0 }        
+        if efficiency.isNaN {
+          efficiency = 0
+        }        
       }
       let power = min(inverter.maxPower, dc.power) * (efficiency / 100)
       return transformer(ac: power)

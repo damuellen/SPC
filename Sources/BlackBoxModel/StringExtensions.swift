@@ -28,6 +28,8 @@ extension String {
   func padding(_ length: Int) -> String {
     padding(toLength: length, withPad: " ", startingAt: 0)
   }
+
+  var sanitized: String { filter { $0.isWholeNumber || $0 == "." } }
 }
 
 /// Generates a title with a border around it.
