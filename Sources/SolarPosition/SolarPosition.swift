@@ -146,7 +146,7 @@ public struct SolarPosition {
     
     // Calculate the solar position for each date in parallel
     let offset = 0.0 //frequence.interval / 2
-    calculatedValues = dates.concurrentMap { date in 
+    calculatedValues = dates.map { date in 
       SolarPosition.compute(date: date + offset, location: location)
     }
   }
