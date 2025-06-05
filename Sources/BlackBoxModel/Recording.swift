@@ -89,7 +89,7 @@ public struct Recording: CustomStringConvertible, Comparable {
     self.startDate = startDate
     // Calculate the annual performance based on the performance history and interval fraction.
     var annualPerformance = PlantPerformance()
-    annualPerformance(performanceHistory, fraction: interval.fraction)
+    annualPerformance(performanceHistory, timeProportion: interval.fraction)
     self.performance = annualPerformance
     self.irradiance = irradiance
     self.performanceHistory = performanceHistory

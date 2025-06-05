@@ -24,11 +24,11 @@ public struct PlantPerformance: MeasurementsConvertible, Encodable {
   /// - Parameters:
   ///   - performance: A collection of `PlantPerformance` instances.
   ///   - fraction: The fraction by which the performance data should be added.
-  mutating func callAsFunction(_ performance: some RangeReplaceableCollection<PlantPerformance>, fraction: Double) {
-    self.thermal = performance.map(\.thermal).added(fraction: fraction)
-    self.fuel = performance.map(\.fuel).added(fraction: fraction)
-    self.parasitics = performance.map(\.parasitics).added(fraction: fraction)
-    self.electric = performance.map(\.electric).added(fraction: fraction)
+  mutating func callAsFunction(_ performance: some RangeReplaceableCollection<PlantPerformance>, timeProportion: Double) {
+    self.thermal = performance.map(\.thermal).accumulate(timeProportion: timeProportion)
+    self.fuel = performance.map(\.fuel).accumulate(timeProportion: timeProportion)
+    self.parasitics = performance.map(\.parasitics).accumulate(timeProportion: timeProportion)
+    self.electric = performance.map(\.electric).accumulate(timeProportion: timeProportion)
   }
 
   /// Returns an array of the performance values of the `PlantPerformance`.
@@ -162,19 +162,19 @@ extension RangeReplaceableCollection where Element==ElectricPower {
   /// Calculates the sum of electric power values for the collection of `ElectricPower` instances multiplied by the given fraction.
   /// - Parameter fraction: The fraction by which the electric power values should be added.
   /// - Returns: An `ElectricPower` instance containing the summed electric power values.
-  func added(fraction: Double) -> ElectricPower {
+  func accumulate(timeProportion: Double) -> ElectricPower {
     var result = ElectricPower()
     for values in self {
-      result.demand += values.demand * fraction
-      result.gross += values.gross * fraction
-      result.steamTurbineGross += values.steamTurbineGross * fraction
+      result.demand += values.demand * timeProportion
+      result.gross += values.gross * timeProportion
+      result.steamTurbineGross += values.steamTurbineGross * timeProportion
       // self.gasTurbineGross += values.gasTurbineGross * fraction
-      result.photovoltaic += values.photovoltaic * fraction
-      result.shared += values.shared * fraction
-      result.parasitics += values.parasitics * fraction
-      result.storage += values.storage * fraction
-      result.net += values.net * fraction
-      result.consum += values.consum * fraction
+      result.photovoltaic += values.photovoltaic * timeProportion
+      result.shared += values.shared * timeProportion
+      result.parasitics += values.parasitics * timeProportion
+      result.storage += values.storage * timeProportion
+      result.net += values.net * timeProportion
+      result.consum += values.consum * timeProportion
     }
     return result
   }
@@ -215,15 +215,15 @@ public struct Parasitics: Encodable, MeasurementsConvertible {
 /// Extension for RangeReplaceableCollection of Parasitics.
 extension RangeReplaceableCollection where Element == Parasitics {
   /// Returns the sum of parasitics values with the given fraction.
-  func added(fraction: Double) -> Parasitics {
+  func accumulate(timeProportion: Double) -> Parasitics {
     var result = Parasitics()
     for values in self {
-      result.solarField += values.solarField * fraction
-      result.powerBlock += values.powerBlock * fraction
-      result.storage += values.storage * fraction
-      result.shared += values.shared * fraction
+      result.solarField += values.solarField * timeProportion
+      result.powerBlock += values.powerBlock * timeProportion
+      result.storage += values.storage * timeProportion
+      result.shared += values.shared * timeProportion
     // parasiticsBackup += electricalParasitics
-      result.gasTurbine += values.gasTurbine * fraction
+      result.gasTurbine += values.gasTurbine * timeProportion
     }
     return result
   }
@@ -305,20 +305,20 @@ public struct ThermalEnergy: Encodable, MeasurementsConvertible {
 /// Extension for RangeReplaceableCollection of ThermalEnergy.
 extension RangeReplaceableCollection where Element == ThermalEnergy {
   /// Returns the sum of thermal energy values with the given fraction.
-  func added(fraction: Double) -> ThermalEnergy {
+  func accumulate(timeProportion: Double) -> ThermalEnergy {
     var result = ThermalEnergy()
     for values in self {
-      result.demand += values.demand * fraction
-      result.solar += values.solar * fraction
-      result.toStorage += values.toStorage * fraction
-      result.storage += values.storage * fraction
-      result.heater += values.heater * fraction
-      result.heatExchanger += values.heatExchanger * fraction
-      result.startUp += values.startUp * fraction
-      result.wasteHeatRecovery += values.wasteHeatRecovery * fraction
-      result.boiler += values.boiler * fraction
-      result.dumping += values.dumping * fraction
-      result.production += values.production * fraction
+      result.demand += values.demand * timeProportion
+      result.solar += values.solar * timeProportion
+      result.toStorage += values.toStorage * timeProportion
+      result.storage += values.storage * timeProportion
+      result.heater += values.heater * timeProportion
+      result.heatExchanger += values.heatExchanger * timeProportion
+      result.startUp += values.startUp * timeProportion
+      result.wasteHeatRecovery += values.wasteHeatRecovery * timeProportion
+      result.boiler += values.boiler * timeProportion
+      result.dumping += values.dumping * timeProportion
+      result.production += values.production * timeProportion
     }
     return result
   }
@@ -357,13 +357,13 @@ public struct FuelConsumption: Encodable, MeasurementsConvertible {
 /// Extension for RangeReplaceableCollection of FuelConsumption.
 extension RangeReplaceableCollection where Element == FuelConsumption {
   /// Returns the sum of fuel consumption values with the given fraction.
-  func added(fraction: Double) -> FuelConsumption {
+  func accumulate(timeProportion: Double) -> FuelConsumption {
     var result = FuelConsumption()
     for fuel in self {
-      result.backup += fuel.backup * fraction
-      result.boiler += fuel.boiler * fraction
-      result.heater += fuel.heater * fraction
-      result.gasTurbine += fuel.gasTurbine * fraction
+      result.backup += fuel.backup * timeProportion
+      result.boiler += fuel.boiler * timeProportion
+      result.heater += fuel.heater * timeProportion
+      result.gasTurbine += fuel.gasTurbine * timeProportion
     }
     return result
   }

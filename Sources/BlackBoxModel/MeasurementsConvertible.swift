@@ -26,7 +26,7 @@ extension MeasurementsConvertible {
   ///
   /// If the magnitude of the value is less than 0.005, it is considered as 0.
   /// The formatted strings are joined together with commas.
-  var commaSeparatedValues: String {
+  var precisionTwoCommaSeparatedValues: String {
     values.map { 
       if $0.magnitude < 0.005 { return "0" }
       let (q, r) = Int($0 * 100 + 0.5).quotientAndRemainder(dividingBy: 100)

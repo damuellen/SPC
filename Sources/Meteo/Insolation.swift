@@ -23,10 +23,11 @@ public struct Insolation {
   public static var measurements: [(name: String, unit: String)] {
     [("Solar|DNI", "kWh/m2"), ("Solar|GHI", "kWh/m2"), ("Solar|DHI", "kWh/m2")]
   }
-  
-  /// Static method that creates and returns an `Insolation` instance with all irradiance values set to zero.
-  public static func zero() -> Insolation {
-    Insolation(direct: 0, global: 0, diffuse: 0)
+}
+
+extension Insolation {
+  public init() {
+    self = Insolation(direct: 0, global: 0, diffuse: 0)
   }
 }
 
@@ -38,12 +39,12 @@ extension RangeReplaceableCollection where Element==Insolation {
    - Parameter fraction: Fractional value used to compute the hourly insolation.
    - Returns: `Insolation` representing the hourly irradiance.
   */
-  public func hourly(fraction: Double) -> Insolation {
-    var result = Insolation.zero()
+  public func weightedAverage(timeProportion: Double) -> Insolation {
+    var result = Insolation()
     for irradiance in self {
-      result.direct += irradiance.direct * fraction
-      result.global += irradiance.global * fraction
-      result.diffuse += irradiance.diffuse * fraction
+      result.direct += irradiance.direct * timeProportion
+      result.global += irradiance.global * timeProportion
+      result.diffuse += irradiance.diffuse * timeProportion
     }
     return result
   }

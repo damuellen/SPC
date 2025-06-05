@@ -125,7 +125,7 @@ public final class Historian {
       // Get the header information
       let header = headers()
       // Create a buffer with the encoded header name and unit
-      let buffer = header.name.encoded + newLine + header.unit.encoded + newLine
+      let buffer = separatedLines(header.name.bytes, header.unit.bytes)
       // Append the name, sequence number, and "hourly" to the URL
       url = url.appendingPathComponent("\(self.name)_\(no)_hourly.csv")
       // Create a new OutputStream instance with the updated URL
@@ -148,9 +148,9 @@ public final class Historian {
       let frequence = repeatElement(fraction, count: header.count + 4)
         .joined(separator: ",")
       // Create a buffer with the encoded header name, start time, frequency, and unit
-      let buffer = "wxDVFileHeaderVer.1".encoded + newLine 
-        + header.name.encoded + newLine + startTime.encoded + newLine
-        + frequence.encoded + newLine + header.unit.encoded + newLine
+      let buffer = separatedLines(
+        "wxDVFileHeaderVer.1".bytes, header.name.bytes,
+        startTime.bytes, frequence.bytes, header.unit.bytes)
 
       // Append the name, sequence number, and custom value to the URL
       url = url.appendingPathComponent("\(self.name)_\(no)_\(i).csv")
@@ -212,21 +212,21 @@ public final class Historian {
     print(clearLineString, terminator: "\r")
     fflush(stdout)
     #endif
-    var buffer = [UInt8]()
       /// Sum of hourly values
     var accumulate = PlantPerformance()
-    var insolation = Insolation.zero()
+    var insolation = Insolation()
     if case .custom(let custom) = mode {
       let f = frequency.rawValue / custom.rawValue
       var date = startDate
       for i in stride(from: 0, to: performance.count, by: f) {
-        accumulate(performance[i..<i+f], fraction: 1 / Double(f))
-        insolation = sun[i..<i+f].hourly(fraction: 1 / Double(f))
+        accumulate(performance[i..<i+f], timeProportion: 1 / Double(f))
+        insolation = sun[i..<i+f].weightedAverage(timeProportion: 1 / Double(f))
         let time = DateTime(date)
-        buffer = time.commaSeparatedValues.encoded + comma
-          + "\(time.minute)".encoded + comma
-          + insolation.commaSeparatedValues.encoded + comma
-          + accumulate.commaSeparatedValues.encoded + newLine
+        let buffer = commaSeparatedLine(
+          time.commaSeparatedValues.bytes,
+          "\(time.minute)".bytes,
+          insolation.precisionTwoCommaSeparatedValues.bytes,
+          accumulate.precisionTwoCommaSeparatedValues.bytes)
         date.addTimeInterval(custom.interval)
         _ = fileStream?.write(buffer, maxLength: buffer.count)
       }
@@ -237,11 +237,12 @@ public final class Historian {
       var date = startDate
       for i in stride(from: 0, to: performance.count, by: f) {
         let fraction = frequency.fraction
-        accumulate(performance[i..<i+f], fraction: fraction)
-        insolation = sun[i..<i+f].hourly(fraction: fraction)
-        buffer = DateTime(date).commaSeparatedValues.encoded + comma
-          + insolation.commaSeparatedValues.encoded + comma
-          + accumulate.commaSeparatedValues.encoded + newLine
+        accumulate(performance[i..<i+f], timeProportion: fraction)
+        insolation = sun[i..<i+f].weightedAverage(timeProportion: fraction)
+        let buffer = commaSeparatedLine(
+          DateTime(date).commaSeparatedValues.bytes,
+          insolation.precisionTwoCommaSeparatedValues.bytes,
+          accumulate.precisionTwoCommaSeparatedValues.bytes)
         date.addTimeInterval(Steps.hour.interval)
         _ = fileStream?.write(buffer, maxLength: buffer.count)
       }
@@ -250,7 +251,7 @@ public final class Historian {
     if case .database = mode { storeInDB() }
     if case .excel = mode { writeExcel() }
 
-    let irradiance = sun.hourly(fraction: frequency.fraction)
+    let irradiance = sun.weightedAverage(timeProportion: frequency.fraction)
     if mode.hasFileOutput, open { start(url.path) }
     fileStream?.close()
     fileStream = nil
@@ -417,12 +418,24 @@ public final class Historian {
 }
 
 // Extension to provide encoded string functionality.
-extension String { fileprivate var encoded: [UInt8] { [UInt8](self.utf8) } }
+extension String { fileprivate var bytes: [UInt8] { [UInt8](self.utf8) } }
 
 // Define newline characters based on the operating system.
 #if os(Windows)
-fileprivate let newLine: [UInt8] = [UInt8(ascii: "\r"), UInt8(ascii: "\n")] 
+fileprivate let newLineBytes: [UInt8] = [UInt8(ascii: "\r"), UInt8(ascii: "\n")] 
 #else
-fileprivate let newLine: [UInt8] = [UInt8(ascii: "\n")] 
+fileprivate let newLineBytes: [UInt8] = [UInt8(ascii: "\n")] 
 #endif
-fileprivate let comma: [UInt8] = [UInt8(ascii: ",")] 
+fileprivate let commaBytes: [UInt8] = [UInt8(ascii: ",")] 
+
+/// Converts an array of `UInt8` arrays into a comma-separated line,
+/// suitable for CSV format. Adds commas between the arrays and a newline at the end.
+fileprivate func commaSeparatedLine(_ bytes: [UInt8]...) -> [UInt8] {
+  return bytes.dropLast().flatMap { $0 + commaBytes } + bytes.last! + newLineBytes
+}
+
+/// Converts an array of `UInt8` arrays into lines,
+/// suitable for CSV format. Adds newline between the arrays and a newline at the end.
+fileprivate func separatedLines(_ bytes: [UInt8]...) -> [UInt8] {
+  return bytes.flatMap { $0 + newLineBytes }
+}
