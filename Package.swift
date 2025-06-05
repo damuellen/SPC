@@ -2,8 +2,8 @@
 import PackageDescription
 import class Foundation.ProcessInfo
 
-let cSettings = [CSetting.unsafeFlags(["-ffast-math", "-O3", "-fomit-frame-pointer", "-funroll-loops"])]
-let flags = ["-cross-module-optimization", "-Ounchecked", "-enforce-exclusivity=unchecked", "-remove-runtime-asserts", "-Xllvm", "-sil-cross-module-serialize-all"]
+let cSettings = [CSetting.unsafeFlags(["-O3", "-fomit-frame-pointer", "-funroll-loops"])]
+let flags = ["-cross-module-optimization", "-Ounchecked", "-enforce-exclusivity=unchecked", "-remove-runtime-asserts"]
 
 let swiftSettings: [SwiftSetting] = [
   .unsafeFlags(flags, .when(configuration: .release)),
@@ -26,11 +26,15 @@ let platformProducts: [Product] = [
 ]
 #endif
 
-let dependencies: [Package.Dependency] = [
+var dependencies: [Package.Dependency] = [
   .package(url: "https://github.com/damuellen/swift-argument-parser.git", branch: "main"),
   .package(url: "https://github.com/damuellen/Utilities.git", branch: "main"),
-  .package(url: "https://github.com/damuellen/xlsxwriter.swift.git", exact: "1.1.0"),
 ]
+#if os(windows)
+  dependencies += [.package(url: "https://github.com/damuellen/xlsxwriter.swift.git", exact: "1.1.0")]
+#else
+  dependencies += [.package(url: "https://github.com/damuellen/xlsxwriter.swift.git", branch: "main")]
+#endif
 
 let platformTargets: [Target] = [
   .target(name: "DateExtensions", swiftSettings: swiftSettings), .target(name: "CPikchr", cSettings: cSettings),

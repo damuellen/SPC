@@ -76,7 +76,7 @@ public struct IGOA {
 
     for i in workers.indices {
       if source.isCancelled { break }
-      let (sol, net, demand) = try! pick(process: workers[i])
+      let (_, net, demand) = try! pick(process: workers[i])
       targetResults[i] += [net]
       grassHopperFitness[i] = demand - net
     }
@@ -156,7 +156,7 @@ public struct IGOA {
       
       for i in workers.indices {
         if source.isCancelled { break }
-        let (sol, net, demand) = try! pick(process: workers[i])
+        let (_, net, demand) = try! pick(process: workers[i])
         targetResults[cursor + i] += [net]
         grassHopperFitness[i] = demand - net
       }
@@ -228,7 +228,7 @@ func pick(process: Process) throws -> (Double, Double, Double) {
   process.waitUntilExit()
   let url = process.currentDirectoryURL!.appendingPathComponent("plantperformance")
   let data = try Data(contentsOf: url)
-  try url.deletingLastPathComponent().removeItem()
+  try FileManager.default.removeItem(at: url.deletingLastPathComponent())
   let dict = try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [String:AnyObject]
   let sol = (dict!["thermal"] as! [String:Double])["dumping"]!
   let net = (dict!["electric"] as! [String:Double])["net"]!
