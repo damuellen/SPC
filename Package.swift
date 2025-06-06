@@ -30,7 +30,7 @@ var dependencies: [Package.Dependency] = [
   .package(url: "https://github.com/damuellen/swift-argument-parser.git", branch: "main"),
   .package(url: "https://github.com/damuellen/Utilities.git", branch: "main"),
 ]
-#if os(windows)
+#if os(Windows)
   dependencies += [.package(url: "https://github.com/damuellen/xlsxwriter.swift.git", exact: "1.1.0")]
 #else
   dependencies += [.package(url: "https://github.com/damuellen/xlsxwriter.swift.git", branch: "main")]

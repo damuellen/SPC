@@ -138,7 +138,7 @@ struct SolarPerformanceCalculator: ParsableCommand {
         if let err = (error as? MeteoFileError) {
           MessageBox(text: err.description, caption: name)
         } else {
-          let err = error as! NSError
+          let err = error as NSError
           MessageBox(text: err.description, caption: name)
         }        
         return
